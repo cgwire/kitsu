@@ -495,6 +495,7 @@
       ref="addAttachmentModalRef"
       :active="modals.addAttachment"
       :title="$t('comments.add_attachment_to_reply')"
+      :name-prefix="attachmentNamePrefix"
       @cancel="modals.addAttachment = false"
       @confirm="addAttachmentToReply"
       v-if="modals.addAttachment"
@@ -649,6 +650,13 @@ const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
 const personMap = computed(() => store.getters.personMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 const user = computed(() => store.getters.user)
+
+const attachmentNamePrefix = computed(() =>
+  stringHelpers.attachmentNamePrefix(
+    props.task?.entity_name,
+    taskTypeMap.value.get(props.task?.task_type_id)?.name
+  )
+)
 
 const isConcept = computed(() => {
   return route.path.includes('concept')

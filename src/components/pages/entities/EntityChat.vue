@@ -92,6 +92,7 @@
       :is-loading="loading.addAttachment"
       :is-error="errors.addAttachment"
       :title="name"
+      :name-prefix="attachmentNamePrefix"
       @cancel="closeAttachmentModal"
       @confirm="addAttachment"
     />
@@ -189,6 +190,10 @@ export default {
 
   computed: {
     ...mapGetters(['mainConfig', 'personMap', 'user']),
+
+    attachmentNamePrefix() {
+      return stringHelpers.attachmentNamePrefix(this.name)
+    },
 
     isInChat() {
       return this.participants.includes(this.user.id)

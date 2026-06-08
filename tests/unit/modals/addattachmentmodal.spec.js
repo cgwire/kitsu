@@ -44,4 +44,14 @@ describe('modals/AddAttachmentModal', () => {
     await wrapper.vm.$nextTick()
     expect(wrapper.find('audio').exists()).toBe(true)
   })
+
+  it('prefixes the recorded file name with namePrefix', async () => {
+    const wrapper = mountModal({ namePrefix: 'ep01-sh03-compositing' })
+    await wrapper.find('.record-audio').trigger('click')
+    const panel = wrapper.findComponent('.panel-stub')
+    const file = new File(['x'], 'audio-note-1.wav', { type: 'audio/wav' })
+    panel.vm.$emit('recorded', file)
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('ep01-sh03-compositing-audio-note-1.wav')
+  })
 })

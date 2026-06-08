@@ -58,6 +58,31 @@ export default {
     return filename.replace(/\.[^/.]+$/, '')
   },
 
+  /*
+   * Lowercase, accent-free, dash-separated form of a single string.
+   */
+  toKebabCase(value) {
+    return (value || '')
+      .toString()
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+  },
+
+  /*
+   * Build a dash-separated prefix from the given parts (e.g. an entity full
+   * name and a task-type name) to name attachments created from a comment,
+   * e.g. "ep-01-sq01-sh03-compositing".
+   */
+  attachmentNamePrefix(...parts) {
+    return parts
+      .map(part => this.toKebabCase(part))
+      .filter(Boolean)
+      .join('-')
+  },
+
   insertInTextArea(textarea, text) {
     if (!textarea) return
 

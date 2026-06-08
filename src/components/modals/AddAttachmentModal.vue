@@ -152,6 +152,7 @@ const props = defineProps({
   isLoading: { type: Boolean, default: false },
   isMovie: { type: Boolean, default: false },
   isPicture: { type: Boolean, default: false },
+  namePrefix: { type: String, default: '' },
   title: { type: String, default: '' }
 })
 
@@ -181,8 +182,10 @@ const startRecording = mode => {
 }
 
 const onRecorded = file => {
+  // Recorded files get an entity/task-type prefix so they are identifiable.
+  const name = props.namePrefix ? `${props.namePrefix}-${file.name}` : file.name
   const formData = new FormData()
-  formData.append('file', file, file.name)
+  formData.append('file', file, name)
   forms.value.push(formData)
   recordingMode.value = null
 }
