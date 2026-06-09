@@ -1783,7 +1783,10 @@
       },
       "entity_types": {
         "asset": "Asset",
-        "shot": "Plan"
+        "shot": "Plan",
+        "sequence": "Séquence",
+        "episode": "Épisode",
+        "edit": "Edit"
       },
       "field_types": {
         "status": "Statut",

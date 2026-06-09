@@ -1783,7 +1783,10 @@
       },
       "entity_types": {
         "asset": "Ativo",
-        "shot": "Tiro"
+        "shot": "Tiro",
+        "sequence": "Sequência",
+        "episode": "Episódio",
+        "edit": "Editar"
       },
       "field_types": {
         "status": "Status",

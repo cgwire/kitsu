@@ -1783,7 +1783,10 @@
       },
       "entity_types": {
         "asset": "アセット",
-        "shot": "ショット"
+        "shot": "ショット",
+        "sequence": "シーケンス",
+        "episode": "エピソード",
+        "edit": "編集"
       },
       "field_types": {
         "status": "ステータス",

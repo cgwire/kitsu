@@ -1783,7 +1783,10 @@
       },
       "entity_types": {
         "asset": "Ассет",
-        "shot": "Шот"
+        "shot": "Шот",
+        "sequence": "Последовательность",
+        "episode": "Эпизод",
+        "edit": "Редактировать"
       },
       "field_types": {
         "status": "Статус",

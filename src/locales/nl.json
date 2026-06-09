@@ -1783,7 +1783,10 @@
       },
       "entity_types": {
         "asset": "Asset",
-        "shot": "Shot"
+        "shot": "Shot",
+        "sequence": "Volgorde",
+        "episode": "Aflevering",
+        "edit": "Bewerk"
       },
       "field_types": {
         "status": "Status",

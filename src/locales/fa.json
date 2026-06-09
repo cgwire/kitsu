@@ -1783,7 +1783,10 @@
       },
       "entity_types": {
         "asset": "منبع",
-        "shot": "شات"
+        "shot": "شات",
+        "sequence": "توالی",
+        "episode": "قسمت",
+        "edit": "ویرایش"
       },
       "field_types": {
         "status": "وضعیت",

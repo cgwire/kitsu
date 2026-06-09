@@ -24,7 +24,9 @@ export default {
 
   status_automations: {
     entity_types: {
-      shot: 'Map'
+      shot: 'Map',
+      sequence: 'Level',
+      episode: 'Chapter'
     }
   },
 
