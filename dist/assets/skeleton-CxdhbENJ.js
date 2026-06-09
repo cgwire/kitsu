@@ -1,2 +1,0 @@
-import{B as e,U as t,_ as n,mt as r,t as i}from"./vue.esm-bundler-CqULMgs1.js";i();var a=150,o=400,s=300,c=350,l=150,u=i=>{let u=n(()=>(i.value-1)*a+o+s),d=n(()=>u.value+c+l),f=r(0),p=null;return t(()=>{p=setInterval(()=>{f.value++},d.value)}),e(()=>{p&&clearInterval(p)}),{cycle:f,fadeoutDelayMs:u}};export{u as t};
-//# sourceMappingURL=skeleton-CxdhbENJ.js.map
