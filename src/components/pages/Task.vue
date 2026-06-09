@@ -1180,7 +1180,6 @@ export default {
       this.taskComments = this.getCurrentTaskComments()
       this.taskPreviews = this.getCurrentTaskPreviews()
       this.task = this.getCurrentTask()
-      this.resetDraft()
       setTimeout(() => {
         if (this.$route.params.preview_id) {
           this.selectedPreviewId = this.$route.params.preview_id

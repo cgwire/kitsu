@@ -1,5 +1,3 @@
-import drafts from '@/lib/drafts'
-
 /*
  * Helpers to display task information
  */
@@ -60,15 +58,6 @@ export const taskMixin = {
       }
       if (this.$refs['add-comment-image-modal']) {
         this.$refs['add-comment-image-modal'].reset()
-      }
-    },
-
-    resetDraft() {
-      const task = this.getTask()
-      if (task && this.$refs['add-comment']) {
-        const draft = drafts.getTaskDraft(task.id)
-        this.$refs['add-comment'].text = draft?.text || ''
-        this.$refs['add-comment'].checklistItems = draft?.checklist || []
       }
     },
 

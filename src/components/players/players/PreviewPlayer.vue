@@ -594,6 +594,7 @@ const revisionPreviews = useTemplateRef('revision-previews')
 let lastIndex = 1
 let scrubbing = false
 let scrubStartX = 0
+let containerResizeObserver = null
 
 // — Reactive
 
@@ -2132,19 +2133,15 @@ watch(isComparisonOverlay, () => {
 // Drive the comparison viewer's underlying panzoom from the main one so
 // both stay visually synced. The annotation canvases pick up the
 // transform directly via their panzoom-transform prop.
-watch(
-  panzoomTransform,
-  transform => {
-    if (isComparing.value) {
-      comparisonViewer.value?.setPanZoom(
-        transform.x,
-        transform.y,
-        transform.scale
-      )
-    }
-  },
-  { deep: true }
-)
+watch(panzoomTransform, transform => {
+  if (isComparing.value) {
+    comparisonViewer.value?.setPanZoom(
+      transform.x,
+      transform.y,
+      transform.scale
+    )
+  }
+})
 
 watch(speed, () => {
   const rates = [0.25, 0.5, 1, 1.5, 2]
@@ -2189,10 +2186,11 @@ onMounted(() => {
   // viewer's transform through the panzoom-changed sync.
   previewViewer.value?.resumeZoom()
 
-  new ResizeObserver(() => {
+  containerResizeObserver = new ResizeObserver(() => {
     resetPlayerPositions()
     if (isPicture.value || isMovie.value) loadAnnotation()
-  }).observe(container.value)
+  })
+  containerResizeObserver.observe(container.value)
 
   window.addEventListener('resize', onWindowResize)
   // Capture phase so Shift+Tab is intercepted before the textarea's
@@ -2216,6 +2214,8 @@ onBeforeUnmount(() => {
   )
   document.removeEventListener('mousemove', onScrubMove)
   document.removeEventListener('mouseup', onScrubEnd)
+  containerResizeObserver?.disconnect()
+  containerResizeObserver = null
 })
 
 // Player API (passed to TaskInfo via :player prop)

@@ -19,7 +19,7 @@ export const sanitize = (html, options) => {
     allowedImageTag: true,
     ...options
   }
-  let allowedTags = sanitizeHTML.defaults.allowedTags
+  let allowedTags = [...sanitizeHTML.defaults.allowedTags]
   if (!options.allowedLinkTag) {
     allowedTags = allowedTags.filter(tag => tag !== 'a')
   }

@@ -369,7 +369,7 @@ watch(
     })
     membersForAts.value['#'] = taskTypeOptions
   },
-  { deep: true, immediate: true }
+  { immediate: true }
 )
 
 watch(
@@ -399,7 +399,7 @@ watch(
     teamOptions.push({ isTime: true, full_name: 'frame' })
     membersForAts.value['@'] = teamOptions
   },
-  { deep: true, immediate: true }
+  { immediate: true }
 )
 </script>
 

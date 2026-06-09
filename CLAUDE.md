@@ -71,6 +71,14 @@ useHead({ title: computed(() => `${t('studios.title')} - Kitsu`) })
 </script>
 ```
 
+#### `defineExpose` when a parent drives the component via a ref
+
+A `<script setup>` component exposes nothing through a template ref (≠ Options API):
+
+- Parent calls `this.$refs.child.method()` / `childRef.value.method()` → method throws `TypeError`, **property write is a silent no-op**.
+- Fix: grep both ref styles and add the members to `defineExpose`.
+- If the parent only *wrote* state, prefer a watcher on the child's props and delete the ref access.
+
 ### Script setup organization
 
 Group code by role with section comments, in this order:

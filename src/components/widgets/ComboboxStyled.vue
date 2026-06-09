@@ -190,7 +190,7 @@ watch(
       selectedOption.value = option || props.options[0]
     }
   },
-  { deep: true, immediate: true }
+  { immediate: true }
 )
 
 watch(showList, () => {

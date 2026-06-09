@@ -2760,11 +2760,13 @@ const saveAnnotations = () => {
   }
   if (currentPreviewIndex.value > 0) {
     const index = currentPreviewIndex.value - 1
-    const previewFile = currentEntity.value.preview_file_previews[index]
-    preview = {
-      id: previewFile.id,
-      task_id: entity.preview_file_task_id,
-      annotations: previewFile.annotations || []
+    const previewFile = currentEntity.value?.preview_file_previews?.[index]
+    if (previewFile) {
+      preview = {
+        id: previewFile.id,
+        task_id: entity.preview_file_task_id,
+        annotations: previewFile.annotations || []
+      }
     }
   }
 
@@ -4186,13 +4188,9 @@ watch(comparisonMode, () => {
 // its panzoom-transform prop. setComparisonPanZoom runs in silent mode
 // inside MultiVideoViewer, so the resulting panzoom-changed event is
 // suppressed and we don't get a feedback loop.
-watch(
-  panzoomTransform,
-  ({ x, y, scale }) => {
-    if (isComparing.value) setComparisonPanZoom(x, y, scale)
-  },
-  { deep: true }
-)
+watch(panzoomTransform, ({ x, y, scale }) => {
+  if (isComparing.value) setComparisonPanZoom(x, y, scale)
+})
 
 // Preserve the current entity across an entities rebuild. A task-type
 // change rebuilds the list with the same entities (the parent does it via
@@ -4375,6 +4373,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   endAnnotationSaving()
+  _stopPlaylistProgressUpdateLoop()
   window.removeEventListener('keydown', onKeyDown)
   window.removeEventListener('resize', onWindowResize)
   window.removeEventListener('beforeunload', onWindowsClosed)

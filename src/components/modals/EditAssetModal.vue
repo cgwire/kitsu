@@ -156,13 +156,17 @@ const episodeOptions = computed(() => {
   return options
 })
 
+const focusName = () => {
+  nameField.value?.focus()
+}
+
 const validateForm = () => {
   if (isTVShow.value && !episodeField.value?.isValid) {
     episodeField.value?.focus()
     return false
   }
   if (!form.value.name) {
-    nameField.value?.focus()
+    focusName()
     return false
   }
   return true
@@ -243,7 +247,7 @@ watch(
     resetForm()
     if (active) {
       setTimeout(() => {
-        nameField.value?.focus()
+        focusName()
       }, 100)
     }
   }
@@ -258,6 +262,8 @@ onMounted(() => {
   resetForm()
   assetSuccessText.value = ''
 })
+
+defineExpose({ focusName })
 </script>
 
 <style lang="scss" scoped>
