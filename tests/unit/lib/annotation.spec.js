@@ -1,4 +1,4 @@
-import { FabricObject } from 'fabric'
+import { FabricObject, Rect } from 'fabric'
 import {
   PENCIL_WIDTHS,
   addSerialization,
@@ -553,6 +553,15 @@ describe('lib/annotation', () => {
       expect(hasOpaqueFill(null)).toBe(false)
       expect(hasOpaqueFill('')).toBe(false)
       expect(hasOpaqueFill('rgba(0, 0, 0, 0)')).toBe(false)
+    })
+  })
+
+  describe('fabric v7 origin default', () => {
+    it('keeps left/top as the default origin for shapes', () => {
+      // Importing the annotation lib runs its module-init side effects.
+      const r = new Rect({ left: 10, top: 20, width: 30, height: 40 })
+      expect(r.originX).toBe('left')
+      expect(r.originY).toBe('top')
     })
   })
 })

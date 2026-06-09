@@ -16,6 +16,7 @@ import {
   Canvas,
   Circle,
   Ellipse,
+  FabricObject,
   Group,
   Line,
   Path,
@@ -34,6 +35,11 @@ import { installEraserObjectSupport, reviveObjectEraser } from './eraserbrush'
 registerArrowFabricShape()
 // Patch FabricObject.prototype with eraser-mask support (idempotent).
 installEraserObjectSupport()
+// fabric v7 defaults originX/originY to 'center'. Kitsu positions and serialises
+// every shape by its top-left corner, so restore the v6 default globally to keep
+// new drawings and previously-saved annotations aligned.
+FabricObject.ownDefaults.originX = 'left'
+FabricObject.ownDefaults.originY = 'top'
 
 /* -------------------------------------------------------------------------
  * PSBrush prototype patches (idempotent — safe to import from many places)
