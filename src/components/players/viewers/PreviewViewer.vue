@@ -265,7 +265,7 @@ const status = computed(() =>
   props.preview && props.preview.status ? props.preview.status : 'ready'
 )
 
-const isBroken = computed(() => status.value === 'broken')
+const isBroken = computed(() => ['broken', 'missing'].includes(status.value))
 const isProcessing = computed(() => status.value === 'processing')
 const isReady = computed(() => status.value === 'ready')
 const isDiff = computed(() => isReady.value && isDiffPreview(extension.value))

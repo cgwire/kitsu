@@ -168,7 +168,7 @@ const frameDuration = computed(
 const isAvailable = computed(() => {
   const s =
     props.preview && props.preview.status ? props.preview.status : 'ready'
-  return !['broken', 'processing'].includes(s)
+  return !['broken', 'missing', 'processing'].includes(s)
 })
 
 const isMovie = computed(() => extension.value === 'mp4')
