@@ -31,16 +31,31 @@
     </form>
 
     <modal-footer
+      v-if="!isSuccess"
       :error-text="$t('playlists.edit_error')"
       :is-error="isError"
       :is-loading="isLoading"
       @confirm="runConfirmation"
       @cancel="$emit('cancel')"
     />
+    <div class="success-footer flexrow mt1" v-else>
+      <span class="success flexrow-item">
+        <check-icon :size="18" />
+        {{ successText || $t('playlists.created') }}
+      </span>
+      <div class="filler"></div>
+      <a class="button is-primary flexrow-item" @click="$emit('view')">
+        {{ $t('playlists.view_created') }}
+      </a>
+      <button class="button is-link flexrow-item" @click="$emit('cancel')">
+        {{ $t('main.close') }}
+      </button>
+    </div>
   </base-modal>
 </template>
 
 <script setup>
+import { CheckIcon } from 'lucide-vue-next'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
@@ -60,12 +75,14 @@ const props = defineProps({
   active: { type: Boolean, default: false },
   isError: { type: Boolean, default: false },
   isLoading: { type: Boolean, default: false },
+  isSuccess: { type: Boolean, default: false },
   playlistToEdit: { type: Object, default: () => ({}) },
+  successText: { type: String, default: '' },
   taskTypeId: { type: String, default: '' },
   typeDisabled: { type: Boolean, default: false }
 })
 
-const emit = defineEmits(['cancel', 'confirm'])
+const emit = defineEmits(['cancel', 'confirm', 'view'])
 
 const form = ref({
   name: props.playlistToEdit.name,
@@ -179,3 +196,21 @@ watch(
   }
 )
 </script>
+
+<style lang="scss" scoped>
+.button {
+  border-radius: 5px;
+}
+
+.success-footer {
+  align-items: center;
+  margin-top: 3em;
+}
+
+.success {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  color: $green;
+}
+</style>

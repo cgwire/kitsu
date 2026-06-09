@@ -150,6 +150,7 @@
           :is-error="false"
           :is-movie="false"
           :title="entity?.name || ''"
+          :name-prefix="attachmentNamePrefix"
           @cancel="modals.attachment = false"
           @confirm="onAttachmentsConfirmed"
         />
@@ -188,6 +189,7 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
 import { replaceTimeWithTimecode } from '@/lib/render'
+import stringHelpers from '@/lib/string'
 import playlistsApi from '@/store/api/playlists'
 import { LOAD_PEOPLE_END } from '@/store/mutation-types'
 
@@ -218,6 +220,13 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['status-changed', 'time-code-clicked'])
+
+const attachmentNamePrefix = computed(() =>
+  stringHelpers.attachmentNamePrefix(
+    props.entity?.name,
+    props.entity?.preview_file_task_type?.name
+  )
+)
 
 // State
 

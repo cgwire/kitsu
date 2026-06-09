@@ -36,4 +36,23 @@ describe('lib/string', () => {
     expect(stringHelpers.filenameWithoutExtension('test.jpeg')).toEqual('test')
     expect(stringHelpers.filenameWithoutExtension('test.test.jpg')).toEqual('test.test')
   })
+
+  it('toKebabCase', () => {
+    expect(stringHelpers.toKebabCase('EP 01 / SQ01 / SH03')).toEqual(
+      'ep-01-sq01-sh03'
+    )
+    expect(stringHelpers.toKebabCase('Été')).toEqual('ete')
+    expect(stringHelpers.toKebabCase('')).toEqual('')
+    expect(stringHelpers.toKebabCase(null)).toEqual('')
+  })
+
+  it('attachmentNamePrefix', () => {
+    expect(
+      stringHelpers.attachmentNamePrefix('EP 01 / SQ01 / SH03', 'Compositing')
+    ).toEqual('ep-01-sq01-sh03-compositing')
+    expect(stringHelpers.attachmentNamePrefix('Asset / Robot', '')).toEqual(
+      'asset-robot'
+    )
+    expect(stringHelpers.attachmentNamePrefix('', null)).toEqual('')
+  })
 })

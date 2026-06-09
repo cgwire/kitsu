@@ -343,6 +343,7 @@
       :title="`${task.entity_name} / ${
         taskTypeMap.get(task.task_type_id).name
       }`"
+      :name-prefix="attachmentNamePrefix"
       @cancel="onCloseCommentAttachment"
       @confirm="addCommentAttachment"
       @add-snapshots="$emit('annotation-snapshots-requested')"
@@ -518,6 +519,13 @@ const taskStatusForCurrentUser = computed(
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 const uploadProgress = computed(() => store.getters.uploadProgress)
+
+const attachmentNamePrefix = computed(() =>
+  strings.attachmentNamePrefix(
+    props.task?.entity_name,
+    taskTypeMap.value.get(props.task?.task_type_id)?.name
+  )
+)
 
 const attachments = computed({
   get: () => draftComment.attachments,

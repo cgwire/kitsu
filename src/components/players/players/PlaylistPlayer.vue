@@ -261,6 +261,7 @@
           :panzoom="true"
           @entity-change="onPlayerPlayingEntityChange"
           @frame-update="onRawPlayerFrameUpdate"
+          @time-update="onRawPlayerTimeUpdate"
           @max-duration-update="onMaxDurationUpdate"
           @metadata-loaded="onMetadataLoaded"
           @panzoom-changed="onPanZoomChanged"
@@ -396,7 +397,6 @@
             :panzoom-transform="panzoomTransform"
             :interactive="isOverlayInteractive"
             :wheel-target="mainMediaElement"
-            @click="onCanvasClicked"
             @resized="onMainCanvasResized"
             v-show="
               !isCurrentPreviewFile &&
@@ -927,6 +927,7 @@ import { useOnionSkin } from '@/composables/players/onionSkin'
 import { usePlaylistComparison } from '@/composables/players/playlistComparison'
 import { usePreviewShortcuts } from '@/composables/players/previewShortcuts'
 import { usePreviewRoom } from '@/composables/previewRoom'
+import { scrubFrame } from '@/lib/players/scrub'
 import preferences from '@/lib/preferences'
 import {
   buildAnnotationSnapshotFilename,
@@ -1070,8 +1071,9 @@ const comparisonContentAnchor = useTemplateRef('comparison-content-anchor')
 
 // — Non-reactive (instance state)
 let isMounted = false
-let scrubbing = false
 let scrubStartX = 0
+let scrubStartFrame = 0
+let scrubWidth = 0
 let isRoomSilent = false
 let silentMode = false
 let isWaveformSeekingSilent = false
@@ -1559,8 +1561,12 @@ const annotation = useAnnotation({
   getCurrentTime: () => getCurrentTime(),
   getCurrentFrame: () => getCurrentFrame(),
   saveAnnotationsCb: () => saveAnnotations(),
-  onCanvasMouseMovedCb: event => onCanvasMouseMoved(event),
-  onCanvasReleasedCb: event => onCanvasReleased(event),
+  // The fabric-canvas mouse:move / mouse:up scrub path was retired in
+  // favour of the document-level Shift+drag scrub (onShiftScrubMove /
+  // onShiftScrubEnd). These Cbs stay as no-ops only because useAnnotation
+  // binds them to fabric unconditionally.
+  onCanvasMouseMovedCb: () => {},
+  onCanvasReleasedCb: () => {},
   isLaserModeOn,
   postAnnotationAddition,
   postAnnotationDeletion,
@@ -1722,23 +1728,43 @@ const {
 } = previewRoom
 
 // Keyboard shortcuts (common subset; PlaylistPlayer-specific keys are
-// handled below in onKeyDown).
+// handled below in onKeyDown). Letter-based shortcuts must go through
+// this composable: it matches on event.key (the typed character) so they
+// work on non-QWERTY layouts. The onKeyDown below matches on event.code
+// (physical position) and is reserved for keys where that's correct
+// (arrows, Home/End, Delete) plus the playlist-specific entity logic.
 
 const { isAltHeld } = usePreviewShortcuts({
   onDelete: () => deleteSelection(),
   onPlayPause: () => togglePlayPause(),
   onPrevAnnotation: () => onPreviousDrawingClicked(),
   onNextAnnotation: () => onNextDrawingClicked(),
+  onAnnotate: () => onAnnotateClicked(),
+  onErase: () => onEraseClicked(),
+  onUndo: () => undoLastAction(),
+  onRedo: () => redoLastAction(),
+  onPrevPreview: () => onPlayPreviousEntityClicked(),
+  onNextPreview: () => onPlayNextEntityClicked(),
   onCopy: () => copyAnnotations(),
   onPaste: () => pasteAnnotations(),
   onToggleOverlay: () => toggleFullOverlayComparison()
 })
 
+// True while a Shift+drag scrub is in progress. Used to make the
+// annotation overlay non-interactive so fabric (v6, mouse events on its
+// upper-canvas) never sees the gesture — otherwise its per-move hover
+// re-render fights the video seek (jerky scrub) and a stray click lands
+// on the canvas.
+const isScrubbing = ref(false)
+
 // Holding Alt makes the overlay transparent to pointer events so the
 // user can pan/drag the underlying media (panzoom captures the events
-// directly). Shift stays free for fabric's straight-line constraint,
+// directly). The overlay is also made transparent while scrubbing (see
+// isScrubbing). Shift stays free for fabric's straight-line constraint,
 // and wheel always reaches the media via wheel-target.
-const isOverlayInteractive = computed(() => !isAltHeld.value)
+const isOverlayInteractive = computed(
+  () => !isAltHeld.value && !isScrubbing.value
+)
 
 const { cursor: annotationCursor } = useAnnotationCursor({
   isAltHeld,
@@ -1755,11 +1781,6 @@ const { cursor: annotationCursor } = useAnnotationCursor({
 const clearFocus = () => {
   document.activeElement?.blur()
 }
-
-const getClientX = event =>
-  event.touches?.[0]?.clientX ??
-  event.changedTouches?.[0]?.clientX ??
-  event.clientX
 
 // Helpers
 
@@ -1982,21 +2003,25 @@ const _setCurrentTimeOnHandleIn = () => {
 }
 
 const _runPlaylistProgressUpdateLoop = () => {
-  clearInterval(playLoop)
-  playLoop = setInterval(() => {
-    setPlaylistProgress(fullPlaylistPlayer.value.currentTime)
+  cancelAnimationFrame(playLoop)
+  // Sample the real player time each animation frame so the progress bar stays
+  // smooth, instead of a coarse setInterval(1000 / fps) tick.
+  const update = () => {
+    const player = fullPlaylistPlayer.value
+    if (!player) return
+    setPlaylistProgress(player.currentTime)
     if (currentEntity.value) {
-      const entityTime =
-        fullPlaylistPlayer.value.currentTime -
-        currentEntity.value.start_duration
+      const entityTime = player.currentTime - currentEntity.value.start_duration
       const frame = entityTime * fps.value
-      progress.value.updateProgressBar(frame)
+      progress.value?.updateProgressBar(frame)
     }
-  }, 1000 / fps.value)
+    playLoop = requestAnimationFrame(update)
+  }
+  playLoop = requestAnimationFrame(update)
 }
 
 const _stopPlaylistProgressUpdateLoop = () => {
-  clearInterval(playLoop)
+  cancelAnimationFrame(playLoop)
 }
 
 const pause = () => {
@@ -2867,54 +2892,36 @@ const resetPictureCanvas = async () => {
   }
 }
 
-// Scrubbing
-const onCanvasMouseMoved = event => {
-  if (isCurrentPreviewMovie.value && scrubbing) {
-    const x = getClientX(event.e)
-    if (x - scrubStartX < 0) goPreviousFrame()
-    else goNextFrame()
-    scrubStartX = x
-  }
-}
-
-const onCanvasClicked = event => {
-  if (event.button > 1 && isCurrentPreviewMovie.value) {
-    scrubbing = true
-    scrubStartX = getClientX(event)
-  }
-  return false
-}
-
-const onCanvasReleased = () => {
-  if (isCurrentPreviewMovie.value && scrubbing) scrubbing = false
-  return false
-}
-
-// Shift+drag scrub. Mousedown is captured on the video-container so
-// fabric / panzoom never see the gesture (no stray marquee / pan).
-// Move / up listen on the document so the drag survives a cursor
-// that leaves the player area. Advances 1 frame per pixel of
-// horizontal movement (per-event, not per goNextFrame call) so fast
-// drags scrub proportionally instead of crawling at one frame per
-// mouse event.
+// Shift+drag scrub. We listen on *pointer* events, not mouse events:
+// fabric runs with enablePointerEvents (for stylus pressure), so it
+// reacts to pointerdown — which the browser dispatches before mousedown.
+// Intercepting pointerdown in the capture phase on the video-container
+// lets stopPropagation actually reach fabric before it starts a marquee
+// / selection. Move / up listen on the document so the drag survives a
+// cursor that leaves the player area. Positional-relative mapping: the
+// full video width spans the whole clip, anchored on the frame where the
+// drag started (see scrubFrame), so the gesture means the same thing on
+// a 24-frame and a 2000-frame clip — no more "too fast / too slow".
 const onShiftScrubMove = event => {
-  if (!scrubbing) return
-  const x = event.clientX
-  const delta = x - scrubStartX
-  if (delta === 0) return
-  const cur = parseInt(currentFrame.value)
-  const newFrame = Math.max(0, Math.min(nbFrames.value - 1, cur + delta))
-  if (newFrame !== cur) rawPlayer.value?.setCurrentFrame(newFrame)
-  scrubStartX = x
+  if (!isScrubbing.value) return
+  const newFrame = scrubFrame({
+    startFrame: scrubStartFrame,
+    deltaPx: event.clientX - scrubStartX,
+    width: scrubWidth,
+    frameCount: nbFrames.value
+  })
+  if (newFrame !== parseInt(currentFrame.value)) {
+    rawPlayer.value?.setCurrentFrame(newFrame)
+  }
 }
 
 const onShiftScrubEnd = () => {
-  scrubbing = false
-  document.removeEventListener('mousemove', onShiftScrubMove)
-  document.removeEventListener('mouseup', onShiftScrubEnd)
+  isScrubbing.value = false
+  document.removeEventListener('pointermove', onShiftScrubMove)
+  document.removeEventListener('pointerup', onShiftScrubEnd)
 }
 
-const onContainerMouseDown = event => {
+const onContainerPointerDown = event => {
   // A click anywhere in the player area pulls focus to the root
   // (tabindex=-1). Canvas / video aren't focusable by default, so
   // without this nudge the activeElement stays on the previously
@@ -2933,10 +2940,12 @@ const onContainerMouseDown = event => {
   }
   event.preventDefault()
   event.stopPropagation()
-  scrubbing = true
+  isScrubbing.value = true
   scrubStartX = event.clientX
-  document.addEventListener('mousemove', onShiftScrubMove)
-  document.addEventListener('mouseup', onShiftScrubEnd)
+  scrubStartFrame = parseInt(currentFrame.value) || 0
+  scrubWidth = videoContainer.value?.clientWidth || 0
+  document.addEventListener('pointermove', onShiftScrubMove)
+  document.addEventListener('pointerup', onShiftScrubEnd)
 }
 
 // Shift+Tab toggles focus between the player area and the comment
@@ -3152,10 +3161,9 @@ const getFileFromCanvas = (canvas, filename) => {
 const updateProgressBar = f => {
   const frame = f !== undefined ? f : frameNumber.value
   if (progress.value) progress.value.updateProgressBar(frame + 1)
-  if (playlistDuration.value && !isFullMode.value && currentEntity.value) {
-    playlistProgress.value =
-      currentEntity.value.start_duration + frame / fps.value
-  }
+  // The playlist playhead position is driven by the continuous time-update
+  // channel (onRawPlayerTimeUpdate) so it stays smooth, not by the rounded
+  // frame here.
 }
 
 // Player previews navigation
@@ -3720,6 +3728,13 @@ const onRawPlayerFrameUpdate = frame => {
   if (!isFullMode.value) onFrameUpdate(frame)
 }
 
+// Continuous player time → smooth playlist playhead (the frame channel above
+// keeps driving frame-quantised logic: counter, annotations, end detection).
+const onRawPlayerTimeUpdate = time => {
+  if (isFullMode.value || !currentEntity.value) return
+  playlistProgress.value = currentEntity.value.start_duration + time
+}
+
 const onEntityDragStart = (event, entity) => {
   event.dataTransfer.setData('entityId', entity.id)
   event.dataTransfer.setData('previewFileId', entity.preview_file_id)
@@ -3952,21 +3967,6 @@ const onKeyDown = event => {
     } else {
       onNextFrameClicked()
     }
-  } else if (event.altKey && event.code === 'KeyJ') {
-    event.preventDefault()
-    event.stopPropagation()
-    onPlayPreviousEntityClicked()
-  } else if (event.altKey && event.code === 'KeyK') {
-    event.preventDefault()
-    event.stopPropagation()
-    onPlayNextEntityClicked()
-  } else if (event.code === 'KeyD') {
-    onAnnotateClicked()
-  } else if ((event.ctrlKey || event.metaKey) && event.code === 'KeyZ') {
-    event.preventDefault()
-    undoLastAction()
-  } else if (event.altKey && event.code === 'KeyR') {
-    redoLastAction()
   } else if (event.code === 'Home') {
     rawPlayer.value?.setCurrentFrame(0)
   } else if (event.code === 'End') {
@@ -4327,7 +4327,7 @@ watch(speed, () => {
 
 onMounted(() => {
   if (isMounted) return
-  scrubbing = false
+  isScrubbing.value = false
   if (isCurrentUserClient.value) isCommentsHidden.value = false
   isHd.value = Boolean(organisation.value?.hd_by_default)
   entityList.value = props.entities ? props.entities : []
@@ -4347,9 +4347,13 @@ onMounted(() => {
     configureWaveForm()
     configureFullPlayer()
     resumePanZoom()
-    videoContainer.value?.addEventListener('mousedown', onContainerMouseDown, {
-      capture: true
-    })
+    videoContainer.value?.addEventListener(
+      'pointerdown',
+      onContainerPointerDown,
+      {
+        capture: true
+      }
+    )
     // Capture phase so Shift+Tab is intercepted before the textarea's
     // own keydown handlers can stop propagation and swallow it.
     document.addEventListener('keydown', onFocusToggle, true)
@@ -4378,11 +4382,15 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', onWindowResize)
   window.removeEventListener('beforeunload', onWindowsClosed)
   if (container.value) container.value.onmousemove = null
-  videoContainer.value?.removeEventListener('mousedown', onContainerMouseDown, {
-    capture: true
-  })
-  document.removeEventListener('mousemove', onShiftScrubMove)
-  document.removeEventListener('mouseup', onShiftScrubEnd)
+  videoContainer.value?.removeEventListener(
+    'pointerdown',
+    onContainerPointerDown,
+    {
+      capture: true
+    }
+  )
+  document.removeEventListener('pointermove', onShiftScrubMove)
+  document.removeEventListener('pointerup', onShiftScrubEnd)
   document.removeEventListener('keydown', onFocusToggle, true)
   leaveRoom()
   $socket.off('preview-file:annotation-update', onPreviewFileAnnotationUpdate)
@@ -4643,44 +4651,58 @@ const playerProxy = {
   width: max-content;
 }
 
+// Menu items styled like the drawing-option docks' entries (see
+// ShapePicker .shape-option): transparent, borderless, subtle white
+// hover. They stretch to the flex column width of .build-options.
 .dl-button {
-  background: $dark-grey;
-  border: 1px solid $dark-grey;
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
   color: $white;
-  display: inline-block;
-  width: 190px;
-  padding: 8px;
   cursor: pointer;
+  padding: 0.4rem 0.5rem;
+  text-decoration: none;
+  transition: background-color 0.15s ease;
 
-  &:hover {
-    background: $dark-grey-light;
+  &:not(.disabled):hover {
+    background-color: rgba(255, 255, 255, 0.12);
   }
 }
 
+// Same look as the drawing-option docks (PencilPicker/ColorPicker/…
+// .*-palette): $dark-grey-light fill, soft 5px radius, no border, padded,
+// stacked with a small gap, and above the annotation overlay
+// (.annotation-clip, z-index 500).
 .build-options {
-  border-top-left-radius: 6px;
-  border-top-right-radius: 6px;
-  background: $dark-grey;
-  border: 1px solid $dark-grey-light;
+  background-color: $dark-grey-light;
+  border-top-right-radius: 10px;
+  border-top-left-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.5rem;
   position: absolute;
   width: 200px;
-  left: -120px;
+  left: -135px;
   top: -280px;
   height: 160px;
-  z-index: 300;
+  z-index: 900;
 }
 
 .build-list {
   background: $dark-grey-stronger;
   border: 1px solid $dark-grey-light;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
   position: absolute;
   width: 200px;
-  left: -120px;
+  left: -135px;
   top: -121px;
   height: 120px;
   overflow-y: auto;
   padding: 8px;
-  z-index: 300;
+  // Above the annotation overlay (.annotation-clip, z-index 500).
+  z-index: 900;
 }
 
 .build-title {

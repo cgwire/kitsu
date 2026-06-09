@@ -16,26 +16,19 @@
 
 <script setup>
 import { computed } from 'vue'
-import { useStore } from 'vuex'
 
-const store = useStore()
+import { useTaskStatusStyle } from '@/composables/taskStatus'
+
+const { backgroundColor, color: statusColor } = useTaskStatusStyle()
 
 const props = defineProps({
   disable: { type: Boolean, default: false },
   entry: { type: Object, default: () => ({}) }
 })
 
-const isDarkTheme = computed(() => store.getters.isDarkTheme)
+const color = computed(() => backgroundColor(props.entry))
 
-const color = computed(() =>
-  props.entry.name === 'Todo' && isDarkTheme.value
-    ? '#5F626A'
-    : props.entry.color
-)
-
-const textColor = computed(() =>
-  props.entry.name === 'Todo' && !isDarkTheme.value ? '#333' : 'white'
-)
+const textColor = computed(() => statusColor(props.entry))
 </script>
 
 <style lang="scss" scoped>

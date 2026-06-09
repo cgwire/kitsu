@@ -140,6 +140,20 @@
                   :src="getDownloadAttachmentPath(attachment)"
                 />
               </a>
+              <attachment-audio-player
+                v-for="attachment in audioAttachments"
+                :key="attachment.id"
+                :src="getDownloadAttachmentPath(attachment)"
+                :name="attachment.name"
+                :download-href="getDownloadAttachmentPath(attachment)"
+              />
+              <attachment-video-player
+                v-for="attachment in videoAttachments"
+                :key="attachment.id"
+                :src="getDownloadAttachmentPath(attachment)"
+                :name="attachment.name"
+                :download-href="getDownloadAttachmentPath(attachment)"
+              />
               <a
                 :href="getDownloadAttachmentPath(attachment)"
                 :key="attachment.id"
@@ -221,6 +235,22 @@
                       :src="getDownloadAttachmentPath(attachment)"
                     />
                   </a>
+                  <attachment-audio-player
+                    v-for="attachment in replyAttachmentMap.get(replyComment.id)
+                      ?.audio"
+                    :key="attachment.id"
+                    :src="getDownloadAttachmentPath(attachment)"
+                    :name="attachment.name"
+                    :download-href="getDownloadAttachmentPath(attachment)"
+                  />
+                  <attachment-video-player
+                    v-for="attachment in replyAttachmentMap.get(replyComment.id)
+                      ?.video"
+                    :key="attachment.id"
+                    :src="getDownloadAttachmentPath(attachment)"
+                    :name="attachment.name"
+                    :download-href="getDownloadAttachmentPath(attachment)"
+                  />
                   <a
                     :href="getDownloadAttachmentPath(attachment)"
                     :key="attachment.id"
@@ -465,6 +495,7 @@
       ref="addAttachmentModalRef"
       :active="modals.addAttachment"
       :title="$t('comments.add_attachment_to_reply')"
+      :name-prefix="attachmentNamePrefix"
       @cancel="modals.addAttachment = false"
       @confirm="addAttachmentToReply"
       v-if="modals.addAttachment"
@@ -506,6 +537,8 @@ import { useAtMentionsMembers } from '@/composables/atMentions'
 import { domMixin } from '@/components/mixins/dom'
 
 import AddAttachmentModal from '@/components/modals/AddAttachmentModal.vue'
+import AttachmentAudioPlayer from '@/components/players/viewers/AttachmentAudioPlayer.vue'
+import AttachmentVideoPlayer from '@/components/players/viewers/AttachmentVideoPlayer.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import CommentMenu from '@/components/widgets/CommentMenu.vue'
 import Checklist from '@/components/widgets/Checklist.vue'
@@ -618,6 +651,13 @@ const personMap = computed(() => store.getters.personMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 const user = computed(() => store.getters.user)
 
+const attachmentNamePrefix = computed(() =>
+  stringHelpers.attachmentNamePrefix(
+    props.task?.entity_name,
+    taskTypeMap.value.get(props.task?.task_type_id)?.name
+  )
+)
+
 const isConcept = computed(() => {
   return route.path.includes('concept')
 })
@@ -697,9 +737,24 @@ const pictureAttachments = computed(() => {
     )
 })
 
+const audioAttachments = computed(() => {
+  return commentAttachments.value.filter(attachment =>
+    files.AUDIO_EXTENSIONS.includes(attachment.extension)
+  )
+})
+
+const videoAttachments = computed(() => {
+  return commentAttachments.value.filter(attachment =>
+    files.VIDEO_EXTENSIONS.includes(attachment.extension)
+  )
+})
+
 const fileAttachments = computed(() => {
   return commentAttachments.value.filter(
-    attachment => !files.IMG_EXTENSIONS.includes(attachment.extension)
+    attachment =>
+      !files.IMG_EXTENSIONS.includes(attachment.extension) &&
+      !files.AUDIO_EXTENSIONS.includes(attachment.extension) &&
+      !files.VIDEO_EXTENSIONS.includes(attachment.extension)
   )
 })
 
@@ -710,13 +765,20 @@ const replyAttachmentMap = computed(() => {
       if (!map.has(attachment.reply_id)) {
         map.set(attachment.reply_id, {
           pictures: [],
+          audio: [],
+          video: [],
           files: []
         })
       }
+      const bucket = map.get(attachment.reply_id)
       if (files.IMG_EXTENSIONS.includes(attachment.extension)) {
-        map.get(attachment.reply_id).pictures.push(attachment)
+        bucket.pictures.push(attachment)
+      } else if (files.AUDIO_EXTENSIONS.includes(attachment.extension)) {
+        bucket.audio.push(attachment)
+      } else if (files.VIDEO_EXTENSIONS.includes(attachment.extension)) {
+        bucket.video.push(attachment)
       } else {
-        map.get(attachment.reply_id).files.push(attachment)
+        bucket.files.push(attachment)
       }
     }
   })

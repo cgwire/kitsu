@@ -153,6 +153,18 @@ describe('composables/previewShortcuts', () => {
       wrapper.unmount()
     })
 
+    it('matches on the typed character, not the physical key, so `d`/`e` work on non-QWERTY layouts', () => {
+      // On BÉPO/Dvorak the key that types `e` reports event.code `KeyF`
+      // (and `d` reports something other than `KeyD`). Matching on
+      // event.code would break draw/eraser there; we match on event.key.
+      const { handlers, wrapper } = mountShortcuts()
+      dispatchKeydown({ key: 'd', code: 'KeyH' })
+      dispatchKeydown({ key: 'e', code: 'KeyF' })
+      expect(handlers.onAnnotate).toHaveBeenCalledTimes(1)
+      expect(handlers.onErase).toHaveBeenCalledTimes(1)
+      wrapper.unmount()
+    })
+
     it('ignores auto-repeat keydowns so a held key does not double-toggle', () => {
       const { handlers, wrapper } = mountShortcuts()
       dispatchKeydown({ key: 'e', repeat: true })
