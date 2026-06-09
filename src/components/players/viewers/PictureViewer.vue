@@ -106,7 +106,7 @@ const status = computed(() =>
 )
 
 const isAvailable = computed(
-  () => !['broken', 'processing'].includes(status.value)
+  () => !['broken', 'missing', 'processing'].includes(status.value)
 )
 
 const extension = computed(() => (props.preview ? props.preview.extension : ''))

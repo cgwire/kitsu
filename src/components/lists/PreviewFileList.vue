@@ -171,7 +171,8 @@ td.status {
   font-weight: 500;
   text-transform: uppercase;
 
-  &[data-status='broken'] {
+  &[data-status='broken'],
+  &[data-status='missing'] {
     color: red;
   }
 }
