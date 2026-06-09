@@ -28,7 +28,9 @@
             v-model="form.entityType"
             v-if="!isEditing"
           />
-          <span class="entity-type-name" v-else> {{ form.entityType }} </span>
+          <span class="entity-type-name" v-else>
+            {{ $t(`status_automations.entity_types.${form.entityType}`) }}
+          </span>
 
           <h2 class="subtitle">{{ $t('status_automations.in_title') }}</h2>
 
@@ -36,9 +38,7 @@
             <combobox-task-type
               class="flexrow-item"
               :label="$t('status_automations.fields.in_task_type')"
-              :task-type-list="
-                form.inEntityTaskTypes.filter(({ archived }) => !archived)
-              "
+              :task-type-list="inTaskTypeList"
               v-model="form.inTaskTypeId"
               @enter="confirmClicked"
             />
@@ -74,9 +74,7 @@
             <combobox-task-type
               class="flexrow-item"
               :label="$t('status_automations.fields.out_task_type')"
-              :task-type-list="
-                form.outEntityTaskTypes.filter(({ archived }) => !archived)
-              "
+              :task-type-list="outTaskTypeList"
               :open-top="true"
               @enter="confirmClicked"
               v-model="form.outTaskTypeId"
@@ -182,37 +180,38 @@ const episodeTaskTypes = computed(() => store.getters.episodeTaskTypes)
 const editTaskTypes = computed(() => store.getters.editTaskTypes)
 const taskStatuses = computed(() => store.getters.taskStatuses)
 
+const taskTypesByEntityType = computed(() => ({
+  asset: assetTaskTypes.value,
+  shot: shotTaskTypes.value,
+  sequence: sequenceTaskTypes.value,
+  episode: episodeTaskTypes.value,
+  edit: editTaskTypes.value
+}))
+
 const taskStatusList = computed(() =>
   taskStatuses.value.filter(status => !status.for_concept)
+)
+
+const inTaskTypeList = computed(() =>
+  form.inEntityTaskTypes.filter(({ archived }) => !archived)
+)
+const outTaskTypeList = computed(() =>
+  form.outEntityTaskTypes.filter(({ archived }) => !archived)
 )
 
 const isEditing = computed(() => props.statusAutomationToEdit?.id)
 
 // Functions
 
-const setTaskTypes = fieldType => {
-  if (fieldType === 'asset') {
-    form.inEntityTaskTypes = assetTaskTypes.value
-    form.outEntityTaskTypes =
-      form.outFieldType === 'status'
-        ? assetTaskTypes.value
-        : shotTaskTypes.value
-  } else if (fieldType === 'shot') {
-    form.inEntityTaskTypes = shotTaskTypes.value
-    form.outFieldType = 'status'
+const setTaskTypes = entityType => {
+  const entityTaskTypes = taskTypesByEntityType.value[entityType]
+  form.inEntityTaskTypes = entityTaskTypes
+  // Only assets support a "ready_for" output, which targets shot task types.
+  if (entityType === 'asset' && form.outFieldType === 'ready_for') {
     form.outEntityTaskTypes = shotTaskTypes.value
-  } else if (fieldType === 'sequence') {
-    form.inEntityTaskTypes = sequenceTaskTypes.value
+  } else {
     form.outFieldType = 'status'
-    form.outEntityTaskTypes = sequenceTaskTypes.value
-  } else if (fieldType === 'episode') {
-    form.inEntityTaskTypes = episodeTaskTypes.value
-    form.outFieldType = 'status'
-    form.outEntityTaskTypes = episodeTaskTypes.value
-  } else if (fieldType === 'edit') {
-    form.inEntityTaskTypes = editTaskTypes.value
-    form.outFieldType = 'status'
-    form.outEntityTaskTypes = editTaskTypes.value
+    form.outEntityTaskTypes = entityTaskTypes
   }
 }
 
@@ -229,16 +228,8 @@ watch(
     const entityType = isEditing.value
       ? props.statusAutomationToEdit.entity_type
       : 'asset'
-    let entityTaskTypes = assetTaskTypes.value
-    if (entityType === 'shot') {
-      entityTaskTypes = shotTaskTypes.value
-    } else if (entityType === 'sequence') {
-      entityTaskTypes = sequenceTaskTypes.value
-    } else if (entityType === 'episode') {
-      entityTaskTypes = episodeTaskTypes.value
-    } else if (entityType === 'edit') {
-      entityTaskTypes = editTaskTypes.value
-    }
+    const entityTaskTypes =
+      taskTypesByEntityType.value[entityType] ?? assetTaskTypes.value
     Object.assign(form, {
       entityType,
       inEntityTaskTypes: entityTaskTypes,
