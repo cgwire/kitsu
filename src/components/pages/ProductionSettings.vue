@@ -200,7 +200,7 @@ const taskStatus = computed(() => store.getters.taskStatus)
 const remainingTaskStatuses = computed(() =>
   taskStatus.value.filter(
     status =>
-      !currentProduction.value?.task_statuses.includes(status.id) &&
+      !currentProduction.value?.task_statuses?.includes(status.id) &&
       !status.for_concept
   )
 )
