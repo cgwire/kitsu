@@ -28,7 +28,9 @@
             v-model="form.entityType"
             v-if="!isEditing"
           />
-          <span class="entity-type-name" v-else> {{ form.entityType }} </span>
+          <span class="entity-type-name" v-else>
+            {{ $t(`status_automations.entity_types.${form.entityType}`) }}
+          </span>
 
           <h2 class="subtitle">{{ $t('status_automations.in_title') }}</h2>
 
@@ -36,9 +38,7 @@
             <combobox-task-type
               class="flexrow-item"
               :label="$t('status_automations.fields.in_task_type')"
-              :task-type-list="
-                form.inEntityTaskTypes.filter(({ archived }) => !archived)
-              "
+              :task-type-list="inTaskTypeList"
               v-model="form.inTaskTypeId"
               @enter="confirmClicked"
             />
@@ -74,9 +74,7 @@
             <combobox-task-type
               class="flexrow-item"
               :label="$t('status_automations.fields.out_task_type')"
-              :task-type-list="
-                form.outEntityTaskTypes.filter(({ archived }) => !archived)
-              "
+              :task-type-list="outTaskTypeList"
               :open-top="true"
               @enter="confirmClicked"
               v-model="form.outTaskTypeId"
@@ -148,7 +146,10 @@ useModal(toRef(props, 'active'), emit)
 
 const entityTypeOptions = [
   { label: 'asset', value: 'asset' },
-  { label: 'shot', value: 'shot' }
+  { label: 'shot', value: 'shot' },
+  { label: 'sequence', value: 'sequence' },
+  { label: 'episode', value: 'episode' },
+  { label: 'edit', value: 'edit' }
 ]
 const fieldTypeOptions = [
   { label: 'status', value: 'status' },
@@ -174,27 +175,43 @@ const form = reactive({
 
 const assetTaskTypes = computed(() => store.getters.assetTaskTypes)
 const shotTaskTypes = computed(() => store.getters.shotTaskTypes)
+const sequenceTaskTypes = computed(() => store.getters.sequenceTaskTypes)
+const episodeTaskTypes = computed(() => store.getters.episodeTaskTypes)
+const editTaskTypes = computed(() => store.getters.editTaskTypes)
 const taskStatuses = computed(() => store.getters.taskStatuses)
+
+const taskTypesByEntityType = computed(() => ({
+  asset: assetTaskTypes.value,
+  shot: shotTaskTypes.value,
+  sequence: sequenceTaskTypes.value,
+  episode: episodeTaskTypes.value,
+  edit: editTaskTypes.value
+}))
 
 const taskStatusList = computed(() =>
   taskStatuses.value.filter(status => !status.for_concept)
+)
+
+const inTaskTypeList = computed(() =>
+  form.inEntityTaskTypes.filter(({ archived }) => !archived)
+)
+const outTaskTypeList = computed(() =>
+  form.outEntityTaskTypes.filter(({ archived }) => !archived)
 )
 
 const isEditing = computed(() => props.statusAutomationToEdit?.id)
 
 // Functions
 
-const setTaskTypes = fieldType => {
-  if (fieldType === 'asset') {
-    form.inEntityTaskTypes = assetTaskTypes.value
-    form.outEntityTaskTypes =
-      form.outFieldType === 'status'
-        ? assetTaskTypes.value
-        : shotTaskTypes.value
-  } else if (fieldType === 'shot') {
-    form.inEntityTaskTypes = shotTaskTypes.value
-    form.outFieldType = 'status'
+const setTaskTypes = entityType => {
+  const entityTaskTypes = taskTypesByEntityType.value[entityType]
+  form.inEntityTaskTypes = entityTaskTypes
+  // Only assets support a "ready_for" output, which targets shot task types.
+  if (entityType === 'asset' && form.outFieldType === 'ready_for') {
     form.outEntityTaskTypes = shotTaskTypes.value
+  } else {
+    form.outFieldType = 'status'
+    form.outEntityTaskTypes = entityTaskTypes
   }
 }
 
@@ -212,7 +229,7 @@ watch(
       ? props.statusAutomationToEdit.entity_type
       : 'asset'
     const entityTaskTypes =
-      entityType === 'shot' ? shotTaskTypes.value : assetTaskTypes.value
+      taskTypesByEntityType.value[entityType] ?? assetTaskTypes.value
     Object.assign(form, {
       entityType,
       inEntityTaskTypes: entityTaskTypes,

@@ -361,7 +361,10 @@ export default {
     },
     entity_types: {
       asset: 'Asset',
-      shot: 'Shot'
+      shot: 'Shot',
+      sequence: 'Sequence',
+      episode: 'Episode',
+      edit: 'Edit'
     },
     field_types: {
       status: 'Status',

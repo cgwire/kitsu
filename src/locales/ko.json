@@ -1783,7 +1783,10 @@
       },
       "entity_types": {
         "asset": "에셋",
-        "shot": "장면"
+        "shot": "장면",
+        "sequence": "시퀀스",
+        "episode": "에피소드",
+        "edit": "편집"
       },
       "field_types": {
         "status": "상태",

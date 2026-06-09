@@ -1783,7 +1783,10 @@
       },
       "entity_types": {
         "asset": "Asset",
-        "shot": "Aufnahme"
+        "shot": "Aufnahme",
+        "sequence": "Sequenz",
+        "episode": "Folge",
+        "edit": "bearbeiten"
       },
       "field_types": {
         "status": "Status",

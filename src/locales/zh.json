@@ -1783,7 +1783,10 @@
       },
       "entity_types": {
         "asset": "资产",
-        "shot": "镜头"
+        "shot": "镜头",
+        "sequence": "序列",
+        "episode": "插曲",
+        "edit": "编辑"
       },
       "field_types": {
         "status": "状态",

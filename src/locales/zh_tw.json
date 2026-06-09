@@ -1783,7 +1783,10 @@
       },
       "entity_types": {
         "asset": "資產",
-        "shot": "拍攝"
+        "shot": "拍攝",
+        "sequence": "順序",
+        "episode": "小插曲",
+        "edit": "編輯"
       },
       "field_types": {
         "status": "狀態",

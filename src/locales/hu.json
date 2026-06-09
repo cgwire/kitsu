@@ -2074,7 +2074,10 @@
       "entity_title": "A trigger által érintett elem típusa",
       "entity_types": {
         "asset": "Asset",
-        "shot": "Shot"
+        "shot": "Shot",
+        "sequence": "Szekvencia",
+        "episode": "Epizód",
+        "edit": "Szerkesztés"
       },
       "field_types": {
         "ready_for": "Kész ennek",
