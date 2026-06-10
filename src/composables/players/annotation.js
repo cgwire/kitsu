@@ -179,6 +179,7 @@ export const useAnnotation = ({
   // Bumped on every comparison-canvas clear so an in-flight async load can tell
   // it was superseded and stop repopulating a canvas meant to be cleared.
   let comparisonLoadToken = 0
+  let mainLoadToken = 0
   let onionLoadToken = 0
   let annotatedPreview = null
   let annotationToSave = null
@@ -472,22 +473,33 @@ export const useAnnotation = ({
     })
 
     if (annotation) {
-      annotation.drawing = {
-        objects: fabricCanvas.value._objects.map(obj => {
-          const result = obj.serialize()
-          if (obj.group) {
-            const group = obj.group
-            result.left = group.left + Math.round(group.width / 2) + obj.left
-            result.top = group.top + Math.round(group.height / 2) + obj.top
-            result.group = null
-          }
-          return result
-        })
-      }
+      const canvasObjects = fabricCanvas.value._objects.map(obj => {
+        const result = obj.serialize()
+        if (obj.group) {
+          const group = obj.group
+          result.left = group.left + Math.round(group.width / 2) + obj.left
+          result.top = group.top + Math.round(group.height / 2) + obj.top
+          result.group = null
+        }
+        return result
+      })
+      // Fast navigation can run a save while this frame's previously-saved
+      // objects are still being revived asynchronously onto the canvas.
+      // Replacing the drawing with the canvas content would silently drop
+      // them, so merge instead: the canvas version wins per object id, and
+      // existing objects stay unless explicitly queued for deletion.
+      const canvasIds = new Set(canvasObjects.map(o => o.id))
+      const deletedIds = new Set(
+        findAnnotation(deletions.value, currentTime)?.objects || []
+      )
+      const keptObjects = (annotation.drawing?.objects || []).filter(
+        o => !canvasIds.has(o.id) && !deletedIds.has(o.id)
+      )
+      annotation.drawing = { objects: [...keptObjects, ...canvasObjects] }
       annotation.time = currentTime
-      if (annotation.drawing && annotation.drawing.objects.length < 1) {
-        const index = annotations.value.findIndex(a => a.time === currentTime)
-        annotations.value.splice(index, 1)
+      if (annotation.drawing.objects.length < 1) {
+        const index = annotations.value.indexOf(annotation)
+        if (index >= 0) annotations.value.splice(index, 1)
       }
     } else {
       if (!annotations.value || !annotations.value.push) annotations.value = []
@@ -521,10 +533,21 @@ export const useAnnotation = ({
 
   // Loading
 
-  const loadSingleAnnotation = (annotation, canvas = null) => {
-    annotation.drawing.objects.forEach(obj => {
-      addObjectToCanvas(annotation, obj, canvas)
-    })
+  const loadSingleAnnotation = async (annotation, canvas = null) => {
+    // Adding PSStrokes is async, so load sequentially and bail if a clear
+    // (fast navigation) superseded us — late adds otherwise repopulate a
+    // canvas that was just cleared and get saved into the wrong frame. An
+    // object whose async build was already in flight when the clear hit is
+    // removed right after it lands.
+    const token = mainLoadToken
+    for (const obj of annotation.drawing.objects) {
+      if (token !== mainLoadToken) return
+      const built = await addObjectToCanvas(annotation, obj, canvas)
+      if (token !== mainLoadToken) {
+        if (built) (canvas || fabricCanvas.value).remove(built)
+        return
+      }
+    }
   }
 
   const loadSingleAnnotationComparison = async annotation => {
@@ -1274,6 +1297,9 @@ export const useAnnotation = ({
 
   const clearCanvas = () => {
     endAnnotationSaving()
+    // Cancel any in-flight annotation load so its remaining async adds
+    // don't land after this clear.
+    mainLoadToken++
     if (isFabricReady(fabricCanvas.value)) {
       fabricCanvas.value.clear()
     }

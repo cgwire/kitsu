@@ -303,7 +303,14 @@ const getMouseFrame = (event, annotation) => {
   if (duration > vd) {
     duration = vd - change
   }
-  const frameNumber = Math.floor(duration / props.frameDuration)
+  // Annotation times sit exactly on the frame grid (N * frameDuration), but
+  // the float quotient can land just below N — floor() would drop to the
+  // previous frame. round() matches getAnnotationPosition, so the click lands
+  // on the frame the marker is drawn on. Bar clicks keep floor(): their
+  // duration is a continuous position, not a grid value.
+  const frameNumber = annotation
+    ? Math.round(annotation.time / props.frameDuration)
+    : Math.floor(duration / props.frameDuration)
   return { frameNumber, position }
 }
 

@@ -16,6 +16,7 @@ import {
   Canvas,
   Circle,
   Ellipse,
+  FabricObject,
   Group,
   Line,
   Path,
@@ -26,6 +27,8 @@ import {
 import { PSBrush, PSStroke } from 'fabricjs-psbrush'
 import { v4 as uuidv4 } from 'uuid'
 
+import { roundToFrame } from '@/lib/video'
+
 import { normalizeSerializedType, normalizeType } from './annotationTypes'
 import { Arrow, registerArrowFabricShape } from './arrowshape'
 import { installEraserObjectSupport, reviveObjectEraser } from './eraserbrush'
@@ -34,6 +37,11 @@ import { installEraserObjectSupport, reviveObjectEraser } from './eraserbrush'
 registerArrowFabricShape()
 // Patch FabricObject.prototype with eraser-mask support (idempotent).
 installEraserObjectSupport()
+// fabric v7 defaults originX/originY to 'center'. Kitsu positions and serialises
+// every shape by its top-left corner, so restore the v6 default globally to keep
+// new drawings and previously-saved annotations aligned.
+FabricObject.ownDefaults.originX = 'left'
+FabricObject.ownDefaults.originY = 'top'
 
 /* -------------------------------------------------------------------------
  * PSBrush prototype patches (idempotent — safe to import from many places)
@@ -537,6 +545,42 @@ export const findAnnotationAtTime = (
   return (
     annotations.find(a => Math.abs((a.time || 0) - time) < halfFrame) || null
   )
+}
+
+/**
+ * Collapse annotation entries that land on the same frame into one.
+ *
+ * Older Kitsu versions stored unrounded times (e.g. 0.616) while the
+ * current code snaps them to the frame grid (0.6 at 25fps), so the same
+ * logical frame can exist several times in a preview's annotation list.
+ * The players only ever load the first match for a frame, which makes the
+ * other entries' drawings invisible. Merging at load time makes them all
+ * visible again; objects are deduplicated by id and entries from distinct
+ * frames are left untouched. The input entries are not mutated.
+ */
+export const mergeAnnotationsByFrame = (annotations, fps) => {
+  if (!Array.isArray(annotations)) return []
+  if (!fps) return annotations
+  const byFrameTime = new Map()
+  const result = []
+  annotations.forEach(annotation => {
+    const frameTime = roundToFrame(annotation.time || 0, fps)
+    const objects = annotation.drawing?.objects || []
+    const existing = byFrameTime.get(frameTime)
+    if (!existing) {
+      const entry = {
+        ...annotation,
+        time: frameTime,
+        drawing: { ...annotation.drawing, objects: [...objects] }
+      }
+      byFrameTime.set(frameTime, entry)
+      result.push(entry)
+    } else {
+      const seenIds = new Set(existing.drawing.objects.map(o => o.id))
+      existing.drawing.objects.push(...objects.filter(o => !seenIds.has(o.id)))
+    }
+  })
+  return result
 }
 
 /* -------------------------------------------------------------------------

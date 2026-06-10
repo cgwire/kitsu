@@ -6,7 +6,8 @@
     }"
   >
     <div class="diff-wrapper" v-show="!isLoading">
-      <div class="diff-content" v-html="renderedHtml"></div>
+      <div v-if="isParsed" class="diff-content" v-html="renderedHtml"></div>
+      <pre v-else class="diff-raw">{{ rawContent }}</pre>
     </div>
     <div class="overlay" v-if="isLoading">
       <spinner is-white class="spinner" />
@@ -61,6 +62,11 @@ const renderedHtml = computed(() => {
   })
 })
 
+// diff2html silently yields an empty render when the content is not a valid
+// unified diff. Detect that and fall back to readable raw text instead of a
+// blank screen.
+const isParsed = computed(() => renderedHtml.value.includes('d2h-file-diff'))
+
 // Functions
 
 const loadContent = async () => {
@@ -86,10 +92,62 @@ watch(() => props.preview?.id, loadContent, { immediate: true })
 </script>
 
 <style lang="scss" scoped>
+/*
+ * The whole widget is re-themed through diff2html's own `--d2h-*` design
+ * tokens (the library reads them everywhere), so we never fight it
+ * class-by-class. One token set for light, one under `.dark`.
+ *
+ * Readability rule (GitHub-style): tint the ROW background and the
+ * word-level highlight, but keep the code text high-contrast neutral —
+ * green/red text on a green/red row is what made the old version unreadable.
+ */
 .diff-viewer {
   position: relative;
   overflow: hidden;
   width: 100%;
+
+  // Code text color — strong, not the muted UI grey.
+  --diff-code-color: #1f2328;
+  --diff-gutter-color: #59636e;
+
+  --d2h-bg-color: var(--background);
+  --d2h-border-color: var(--border);
+  --d2h-dim-color: var(--diff-gutter-color);
+  --d2h-line-border-color: var(--border);
+  --d2h-file-header-bg-color: var(--background-alt);
+  --d2h-file-header-border-color: var(--border);
+  --d2h-ins-bg-color: #e6ffec;
+  --d2h-ins-border-color: #a0e6b0;
+  --d2h-ins-highlight-bg-color: #abf2bc;
+  --d2h-ins-label-color: #1a7f37;
+  --d2h-del-bg-color: #ffebe9;
+  --d2h-del-border-color: #f5b9b6;
+  --d2h-del-highlight-bg-color: #ffc1bd;
+  --d2h-del-label-color: #cf222e;
+  --d2h-change-ins-color: #e6ffec;
+  --d2h-change-del-color: #ffebe9;
+  --d2h-info-bg-color: var(--background-alt);
+  --d2h-info-border-color: var(--border);
+  --d2h-selected-color: #c8e1ff;
+  --d2h-moved-label-color: #6639ba;
+}
+
+.dark .diff-viewer {
+  --diff-code-color: #e6edf3;
+  --diff-gutter-color: #8b949e;
+
+  --d2h-bg-color: var(--background);
+  --d2h-ins-bg-color: rgba(63, 185, 80, 0.15);
+  --d2h-ins-border-color: rgba(63, 185, 80, 0.4);
+  --d2h-ins-highlight-bg-color: rgba(63, 185, 80, 0.4);
+  --d2h-ins-label-color: #3fb950;
+  --d2h-del-bg-color: rgba(248, 81, 73, 0.15);
+  --d2h-del-border-color: rgba(248, 81, 73, 0.4);
+  --d2h-del-highlight-bg-color: rgba(248, 81, 73, 0.4);
+  --d2h-del-label-color: #f85149;
+  --d2h-change-ins-color: rgba(63, 185, 80, 0.15);
+  --d2h-change-del-color: rgba(248, 81, 73, 0.15);
+  --d2h-moved-label-color: #a371f7;
 }
 
 .diff-wrapper {
@@ -97,69 +155,91 @@ watch(() => props.preview?.id, loadContent, { immediate: true })
   inset: 0;
   overflow: auto;
   padding: 1em;
+  background: var(--background-page);
+}
+
+// Fallback when diff2html can't parse the content as a unified diff.
+.diff-raw {
+  margin: 0;
+  padding: 1em 1.2em;
   background: var(--background);
-  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px var(--box-shadow);
+  color: var(--diff-code-color, var(--text));
+  font-family:
+    'SF Mono', 'JetBrains Mono', 'Fira Code', Menlo, Consolas,
+    'Liberation Mono', monospace;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .diff-content {
-  :deep(.d2h-wrapper) {
-    font-size: 0.85em;
-  }
-
-  :deep(.d2h-file-header) {
-    background: var(--background-alt);
-    border-bottom: 1px solid var(--border);
-    padding: 0.5em 1em;
-    font-weight: 600;
-  }
-
-  :deep(.d2h-file-list-wrapper) {
-    background: var(--background);
+  // File card — rounded, framed, with a little depth.
+  :deep(.d2h-file-wrapper) {
     border: 1px solid var(--border);
-    border-radius: 5px;
+    border-radius: 8px;
+    overflow: hidden;
     margin-bottom: 1em;
+    box-shadow: 0 1px 3px var(--box-shadow);
+  }
+
+  // Sticky file header with filename + stats badges.
+  :deep(.d2h-file-header) {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    height: auto;
+    padding: 0.55em 0.9em;
+    align-items: center;
+  }
+
+  :deep(.d2h-file-name) {
+    font-family: inherit;
+    font-size: 0.9em;
+    font-weight: 600;
+    color: var(--text-strong);
+  }
+
+  // Monospace, comfortable line-height for the code body.
+  :deep(.d2h-diff-table) {
+    font-family:
+      'SF Mono', 'JetBrains Mono', 'Fira Code', Menlo, Consolas,
+      'Liberation Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.55;
+  }
+
+  :deep(.d2h-code-line-ctn),
+  :deep(.d2h-code-line-prefix) {
+    color: var(--diff-code-color);
+  }
+
+  // Line-number gutter: muted, quiet separator, sticky on horizontal scroll.
+  :deep(.d2h-code-linenumber) {
+    background: var(--background-alt);
+    border-color: var(--border);
+    color: var(--diff-gutter-color);
+  }
+
+  // File-list summary card at the top.
+  :deep(.d2h-file-list-wrapper) {
+    background: var(--background-alt);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.4em 0;
+    margin-bottom: 1em;
+  }
+
+  :deep(.d2h-file-list-title) {
+    padding: 0 0.9em;
+    color: var(--text-strong);
   }
 
   :deep(.d2h-file-list-line) {
     color: var(--text);
-  }
-
-  :deep(.d2h-code-line-ctn) {
-    font-family: 'Courier New', monospace;
-    white-space: pre;
-    color: var(--text);
-  }
-
-  :deep(.d2h-ins),
-  :deep(.d2h-ins .d2h-code-line-ctn) {
-    background: transparent;
-    color: $green;
-  }
-
-  :deep(.d2h-del),
-  :deep(.d2h-del .d2h-code-line-ctn) {
-    background: transparent;
-    color: $red;
-  }
-
-  :deep(.d2h-info),
-  :deep(.d2h-info .d2h-code-line-ctn) {
-    background: transparent;
-    color: var(--text-alt);
-  }
-
-  :deep(.d2h-code-linenumber) {
-    color: var(--text-alt);
-    border-right: 1px solid var(--border);
-    user-select: none;
-    position: sticky;
-    left: 0;
-    background: var(--background);
-    z-index: 1;
-  }
-
-  :deep(.d2h-code-line-prefix) {
-    color: inherit;
   }
 
   :deep(.d2h-file-diff) {
@@ -180,24 +260,4 @@ watch(() => props.preview?.id, loadContent, { immediate: true })
 
 <style>
 @import 'diff2html/bundles/css/diff2html.min.css';
-
-.diff-viewer .d2h-ins,
-.diff-viewer .d2h-ins .d2h-code-line-ctn,
-.diff-viewer .d2h-del,
-.diff-viewer .d2h-del .d2h-code-line-ctn,
-.diff-viewer .d2h-info,
-.diff-viewer .d2h-info .d2h-code-line-ctn,
-.diff-viewer .d2h-cntx,
-.diff-viewer .d2h-cntx .d2h-code-line-ctn,
-.diff-viewer .d2h-code-linenumber,
-.diff-viewer .d2h-file-diff .d2h-del.d2h-change,
-.diff-viewer .d2h-file-diff .d2h-del.d2h-change .d2h-code-line-ctn,
-.diff-viewer .d2h-file-diff .d2h-ins.d2h-change,
-.diff-viewer .d2h-file-diff .d2h-ins.d2h-change .d2h-code-line-ctn,
-.diff-viewer .d2h-file-diff .d2h-ins.d2h-change del,
-.diff-viewer .d2h-file-diff .d2h-del.d2h-change ins,
-.diff-viewer .d2h-code-line del,
-.diff-viewer .d2h-code-line ins {
-  background-color: transparent;
-}
 </style>

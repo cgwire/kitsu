@@ -2912,6 +2912,7 @@ const onShiftScrubMove = event => {
   })
   if (newFrame !== parseInt(currentFrame.value)) {
     rawPlayer.value?.setCurrentFrame(newFrame)
+    if (isComparing.value) syncComparisonPlayer()
   }
 }
 

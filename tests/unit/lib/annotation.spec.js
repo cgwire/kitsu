@@ -1,4 +1,4 @@
-import { FabricObject } from 'fabric'
+import { FabricObject, Rect } from 'fabric'
 import {
   PENCIL_WIDTHS,
   addSerialization,
@@ -7,6 +7,7 @@ import {
   buildReadOnlyShape,
   findAnnotationAtTime,
   hasOpaqueFill,
+  mergeAnnotationsByFrame,
   pushAddition,
   removeAddition,
   setObjectData
@@ -553,6 +554,73 @@ describe('lib/annotation', () => {
       expect(hasOpaqueFill(null)).toBe(false)
       expect(hasOpaqueFill('')).toBe(false)
       expect(hasOpaqueFill('rgba(0, 0, 0, 0)')).toBe(false)
+    })
+  })
+
+  describe('mergeAnnotationsByFrame', () => {
+    it('merges legacy and grid entries that land on the same frame', () => {
+      // Same logical frame stored twice: a legacy entry with an unrounded
+      // time and a current entry on the roundToFrame grid (25fps → 0.04).
+      const annotations = [
+        { time: 0.6, frame: 16, drawing: { objects: [{ id: 'new-1' }] } },
+        {
+          time: 0.616,
+          frame: '017',
+          drawing: { objects: [{ id: 'old-1' }, { id: 'old-2' }] }
+        }
+      ]
+      const merged = mergeAnnotationsByFrame(annotations, 25)
+      expect(merged).toHaveLength(1)
+      expect(merged[0].time).toBe(0.6)
+      expect(merged[0].drawing.objects.map(o => o.id)).toEqual([
+        'new-1',
+        'old-1',
+        'old-2'
+      ])
+    })
+
+    it('deduplicates objects sharing the same id across entries', () => {
+      const annotations = [
+        { time: 0.6, drawing: { objects: [{ id: 'a' }] } },
+        { time: 0.616, drawing: { objects: [{ id: 'a' }, { id: 'b' }] } }
+      ]
+      const merged = mergeAnnotationsByFrame(annotations, 25)
+      expect(merged[0].drawing.objects.map(o => o.id)).toEqual(['a', 'b'])
+    })
+
+    it('keeps entries from distinct frames separate', () => {
+      const annotations = [
+        { time: 0.6, drawing: { objects: [{ id: 'a' }] } },
+        { time: 0.88, drawing: { objects: [{ id: 'b' }] } }
+      ]
+      const merged = mergeAnnotationsByFrame(annotations, 25)
+      expect(merged).toHaveLength(2)
+    })
+
+    it('does not mutate the input entries', () => {
+      const annotations = [
+        { time: 0.6, drawing: { objects: [{ id: 'a' }] } },
+        { time: 0.616, drawing: { objects: [{ id: 'b' }] } }
+      ]
+      mergeAnnotationsByFrame(annotations, 25)
+      expect(annotations[0].drawing.objects).toHaveLength(1)
+      expect(annotations[1].time).toBe(0.616)
+    })
+
+    it('tolerates entries without drawings and falsy fps', () => {
+      const annotations = [{ time: 0.6 }, { time: 0.616, drawing: {} }]
+      expect(mergeAnnotationsByFrame(annotations, 25)).toHaveLength(1)
+      expect(mergeAnnotationsByFrame(annotations, 0)).toEqual(annotations)
+      expect(mergeAnnotationsByFrame(null, 25)).toEqual([])
+    })
+  })
+
+  describe('fabric v7 origin default', () => {
+    it('keeps left/top as the default origin for shapes', () => {
+      // Importing the annotation lib runs its module-init side effects.
+      const r = new Rect({ left: 10, top: 20, width: 30, height: 40 })
+      expect(r.originX).toBe('left')
+      expect(r.originY).toBe('top')
     })
   })
 })
