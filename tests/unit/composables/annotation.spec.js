@@ -1135,4 +1135,149 @@ describe('composables/annotation', () => {
       wrapper.unmount()
     })
   })
+
+  describe('getNewAnnotations — fast-navigation safety', () => {
+    it('keeps existing annotation objects that are not on the canvas yet', () => {
+      // Fast scrolling runs a save while the frame's previously-saved
+      // strokes are still being revived asynchronously: the canvas only
+      // holds the freshly-drawn object. The save must not drop the rest.
+      const canvas = createFakeCanvas()
+      const { api, annotations, wrapper } = mountAnnotation({ canvas })
+      const annotation = {
+        time: 1.0,
+        frame: 24,
+        drawing: {
+          objects: [
+            { id: 'old-1', type: 'path' },
+            { id: 'old-2', type: 'path' }
+          ]
+        }
+      }
+      annotations.value = [
+        annotation,
+        { time: 2.0, frame: 48, drawing: { objects: [{ id: 'other-1' }] } }
+      ]
+      canvas._objects.push(createSerializableObject({ id: 'new-1' }))
+      const result = api.getNewAnnotations(1.0, 24, annotation)
+      const entry = result.find(a => a.time === 1.0)
+      expect(entry.drawing.objects.map(o => o.id).sort()).toEqual([
+        'new-1',
+        'old-1',
+        'old-2'
+      ])
+      wrapper.unmount()
+    })
+
+    it('lets the canvas version win for objects present on the canvas', () => {
+      const canvas = createFakeCanvas()
+      const { api, annotations, wrapper } = mountAnnotation({ canvas })
+      const annotation = {
+        time: 1.0,
+        frame: 24,
+        drawing: { objects: [{ id: 'obj-1', type: 'path', stroke: '#000000' }] }
+      }
+      annotations.value = [annotation]
+      canvas._objects.push(
+        createSerializableObject({ id: 'obj-1', stroke: '#ff0000' })
+      )
+      const result = api.getNewAnnotations(1.0, 24, annotation)
+      const objects = result.find(a => a.time === 1.0).drawing.objects
+      expect(objects).toHaveLength(1)
+      expect(objects[0].stroke).toBe('#ff0000')
+      wrapper.unmount()
+    })
+
+    it('does not resurrect objects queued for deletion', () => {
+      const canvas = createFakeCanvas()
+      const { api, annotations, wrapper } = mountAnnotation({ canvas })
+      const deleted = createSerializableObject({ id: 'old-1' })
+      const annotation = {
+        time: 1.0,
+        frame: 24,
+        drawing: {
+          objects: [
+            { id: 'old-1', type: 'path' },
+            { id: 'old-2', type: 'path' }
+          ]
+        }
+      }
+      annotations.value = [annotation]
+      api.addToDeletions(deleted)
+      const result = api.getNewAnnotations(1.0, 24, annotation)
+      const entry = result.find(a => a.time === 1.0)
+      expect(entry.drawing.objects.map(o => o.id)).toEqual(['old-2'])
+      wrapper.unmount()
+    })
+
+    it('removes only the targeted annotation when it ends up empty', () => {
+      const canvas = createFakeCanvas()
+      const { api, annotations, wrapper } = mountAnnotation({ canvas })
+      const deleted = createSerializableObject({ id: 'only-1' })
+      const annotation = {
+        time: 1.0,
+        frame: 24,
+        drawing: { objects: [{ id: 'only-1', type: 'path' }] }
+      }
+      annotations.value = [
+        annotation,
+        { time: 2.0, frame: 48, drawing: { objects: [{ id: 'other-1' }] } }
+      ]
+      api.addToDeletions(deleted)
+      const result = api.getNewAnnotations(1.0, 24, annotation)
+      expect(result.map(a => a.time)).toEqual([2.0])
+      wrapper.unmount()
+    })
+  })
+
+  describe('loadSingleAnnotation — cancellation on clear', () => {
+    it('drops in-flight object loads when the canvas is cleared', async () => {
+      // Fast navigation: frame A's strokes are still deserializing when the
+      // user reaches frame B. clearCanvas() must cancel the pending adds so
+      // they don't land on (and later get saved into) the wrong frame.
+      const canvas = createFakeCanvas()
+      const { api, wrapper } = mountAnnotation({ canvas })
+      let release
+      const gate = new Promise(resolve => {
+        release = resolve
+      })
+      const makeFakeStroke = id => ({
+        id,
+        set(key, value) {
+          this[key] = value
+        },
+        setControlsVisibility: () => {},
+        toJSON: () => ({ id })
+      })
+      const spy = vi.spyOn(PSStroke, 'fromObject').mockImplementation(
+        async obj => {
+          await gate
+          return makeFakeStroke(obj.id)
+        }
+      )
+      const psObj = id => ({
+        id,
+        type: 'PSStroke',
+        left: 0,
+        top: 0,
+        scaleX: 1,
+        scaleY: 1,
+        canvasWidth: 800,
+        canvasHeight: 600
+      })
+      const annotation = {
+        time: 1.0,
+        width: 800,
+        height: 600,
+        drawing: { objects: [psObj('ps-1'), psObj('ps-2')] }
+      }
+      const loading = api.loadSingleAnnotation(annotation)
+      api.clearCanvas()
+      release()
+      await loading
+      await new Promise(resolve => setTimeout(resolve))
+      expect(canvas._objects).toHaveLength(0)
+      spy.mockRestore()
+      wrapper.unmount()
+    })
+  })
 })

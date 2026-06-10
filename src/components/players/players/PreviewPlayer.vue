@@ -450,6 +450,7 @@ import { useComparison } from '@/composables/players/comparison'
 import { useOnionSkin } from '@/composables/players/onionSkin'
 import { usePreviewShortcuts } from '@/composables/players/previewShortcuts'
 import { getEntityPath } from '@/lib/path'
+import { mergeAnnotationsByFrame } from '@/lib/players/annotation'
 import localPreferences from '@/lib/preferences'
 import {
   buildAnnotationSnapshotFilename,
@@ -1522,7 +1523,11 @@ const reloadAnnotations = () => {
         }
       })
     }
-    annotations.value = anns.sort((a, b) => a.time - b.time) || []
+    // Legacy entries store unrounded times, so the same frame can exist
+    // several times in the saved list; merge them or only one displays.
+    annotations.value = mergeAnnotationsByFrame(anns, fps.value).sort(
+      (a, b) => a.time - b.time
+    )
   } else {
     annotations.value = []
   }
