@@ -2299,6 +2299,7 @@ defineExpose({
   width: 100%;
   text-align: center;
   background: #36393f;
+  border-radius: 0;
 }
 
 .buttons {
@@ -2417,7 +2418,7 @@ defineExpose({
   .preview {
     position: relative;
     align-items: flex-start;
-    background: black;
+    background: transparent;
     display: flex;
     justify-content: center;
 
