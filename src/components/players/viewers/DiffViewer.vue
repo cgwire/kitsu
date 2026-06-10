@@ -6,7 +6,8 @@
     }"
   >
     <div class="diff-wrapper" v-show="!isLoading">
-      <div class="diff-content" v-html="renderedHtml"></div>
+      <div v-if="isParsed" class="diff-content" v-html="renderedHtml"></div>
+      <pre v-else class="diff-raw">{{ rawContent }}</pre>
     </div>
     <div class="overlay" v-if="isLoading">
       <spinner is-white class="spinner" />
@@ -60,6 +61,11 @@ const renderedHtml = computed(() => {
     matching: 'lines'
   })
 })
+
+// diff2html silently yields an empty render when the content is not a valid
+// unified diff. Detect that and fall back to readable raw text instead of a
+// blank screen.
+const isParsed = computed(() => renderedHtml.value.includes('d2h-file-diff'))
 
 // Functions
 
@@ -150,6 +156,24 @@ watch(() => props.preview?.id, loadContent, { immediate: true })
   overflow: auto;
   padding: 1em;
   background: var(--background-page);
+}
+
+// Fallback when diff2html can't parse the content as a unified diff.
+.diff-raw {
+  margin: 0;
+  padding: 1em 1.2em;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px var(--box-shadow);
+  color: var(--diff-code-color, var(--text));
+  font-family:
+    'SF Mono', 'JetBrains Mono', 'Fira Code', Menlo, Consolas,
+    'Liberation Mono', monospace;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .diff-content {
