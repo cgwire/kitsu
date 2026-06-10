@@ -800,7 +800,12 @@ defineExpose({
 
 canvas.annotation-movie {
   // Same sizing behavior as the old <video>: resetSize() drives the CSS
-  // height, the intrinsic bitmap ratio drives the width.
-  object-fit: inherit;
+  // height, the intrinsic bitmap ratio drives the width. Bulma's reset
+  // (img, video, … { max-width: 100% }) clamped the old <video> when a
+  // comparison slot got narrower than the computed width, but canvas is
+  // not covered by it — re-apply the clamp, and letterbox the bitmap
+  // instead of stretching it when the clamp kicks in.
+  max-width: 100%;
+  object-fit: contain;
 }
 </style>
