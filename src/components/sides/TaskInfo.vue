@@ -141,6 +141,7 @@
                     :entity-preview-files="taskEntityPreviews"
                     :entity-type="entityType"
                     :extra-wide="isExtraWide"
+                    :fps="currentFps"
                     :is-assigned="isAssigned"
                     :last-preview-files="taskPreviews"
                     :light="!isWide"
@@ -810,10 +811,6 @@ export default {
           visible: !this.withActions && !this.isCurrentUserClient
         }
       ].filter(action => action.visible !== false)
-    },
-
-    currentFps() {
-      return parseInt(this.productionMap.get(this.task.project_id)?.fps) || 25
     },
 
     currentRevision() {
