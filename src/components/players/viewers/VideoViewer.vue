@@ -358,8 +358,12 @@ const emitFrameSignals = playerTime => {
 }
 
 // One continuous loop, play AND pause: a paused seek still presents a
-// new frame, and that presentation is exactly when to repaint and
-// announce the frame.
+// new frame, and that presentation is exactly when to repaint. EMITTING
+// stays playback-only though — paused frame context is owned by the
+// parent (pause / goNextFrame / progress clicks emit the prop-frame
+// convention), and the loop's getFrameFromPlayer numbers use the
+// playback convention; feeding those to setVideoFrameContext during a
+// paused seek shifts the UI off the clicked frame.
 const startRenderLoop = () => {
   stopRenderLoop()
   if (supportsVideoFrameCallback()) {
@@ -370,7 +374,9 @@ const startRenderLoop = () => {
       lastMediaTime = metadata.mediaTime
       currentTimeRaw.value = metadata.mediaTime
       renderer?.drawFrame()
-      emitFrameSignals(playerTimeFromMediaTime(metadata.mediaTime))
+      if (!video.value.paused) {
+        emitFrameSignals(playerTimeFromMediaTime(metadata.mediaTime))
+      }
       renderLoopHandle = video.value.requestVideoFrameCallback(tick)
     }
     renderLoopHandle = video.value.requestVideoFrameCallback(tick)
@@ -385,7 +391,9 @@ const startRenderLoop = () => {
         lastDrawnTime = video.value.currentTime
         currentTimeRaw.value = lastDrawnTime
         renderer?.drawFrame()
-        emitFrameSignals(lastDrawnTime)
+        if (!video.value.paused) {
+          emitFrameSignals(lastDrawnTime)
+        }
       }
       renderLoopHandle = requestAnimationFrame(tick)
     }
