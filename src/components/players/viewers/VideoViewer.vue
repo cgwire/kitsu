@@ -272,6 +272,10 @@ const runSetCurrentTime = () => {
 }
 
 const setCurrentTime = currentTime => {
+  // Scrubbing queues a seek per mousemove; only the latest target
+  // matters, and every landed seek now costs a decode + a canvas paint.
+  // Drop the stale backlog instead of replaying the whole trail.
+  currentTimeCalls.length = 0
   currentTimeCalls.push(currentTime)
   runSetCurrentTime()
 }

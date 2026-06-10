@@ -20,10 +20,13 @@ const createFakeVideo = () => ({ videoWidth: 1920, videoHeight: 1080 })
 
 describe('lib/players/frameRenderer', () => {
   describe('Canvas2DFrameRenderer', () => {
-    it('acquires an opaque 2d context on construction', () => {
+    it('acquires an opaque desynchronized 2d context on construction', () => {
       const { canvas } = createFakeCanvas()
       new Canvas2DFrameRenderer(canvas, createFakeVideo())
-      expect(canvas.getContext).toHaveBeenCalledWith('2d', { alpha: false })
+      expect(canvas.getContext).toHaveBeenCalledWith('2d', {
+        alpha: false,
+        desynchronized: true
+      })
     })
 
     it('resize sets the internal bitmap resolution', () => {
