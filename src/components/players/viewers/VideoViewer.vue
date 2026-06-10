@@ -571,6 +571,9 @@ watch(
   () => {
     hasPaintedVideoFrame = false
     lastMediaTime = 0
+    // Allow the first frame-update of the new preview even when it lands
+    // on the same frame number the previous clip stopped at.
+    lastEmittedFrame = null
     paintPosterFallback()
     resetPanZoom()
     pause()
