@@ -217,11 +217,22 @@ const onProductionPictureSelected = formData => {
   store.dispatch('storeProductionPicture', formData)
 }
 
-const onProjectMetadataChanged = ({ entry, descriptor, value }) =>
-  store.dispatch('editProduction', {
-    id: entry.id,
-    data: { [descriptor.field_name]: value }
-  })
+const onProjectMetadataChanged = async ({ entry, descriptor, value }) => {
+  try {
+    // Productions created after the column was added don't own their copy of
+    // the descriptor row yet (Zou stores one per project): create it first.
+    await store.dispatch('ensureProjectMetadataDescriptor', {
+      production: entry,
+      descriptor
+    })
+    await store.dispatch('editProduction', {
+      id: entry.id,
+      data: { [descriptor.field_name]: value }
+    })
+  } catch (err) {
+    console.error(err)
+  }
+}
 
 const onAddProjectMetadata = () => {
   descriptorToEdit.value = null

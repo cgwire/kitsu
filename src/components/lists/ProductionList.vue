@@ -128,19 +128,16 @@
                 :key="entry.id + '-pm-' + d.field_name"
                 v-for="d in visibleProjectMetadataDescriptors"
               >
-                <template
-                  v-if="getProjectDescriptorForField(entry, d.field_name)"
-                >
-                  <metadata-input
-                    :entity="entry"
-                    :descriptor="
-                      getProjectDescriptorForField(entry, d.field_name)
-                    "
-                    :indexes="{ i: 0, j: 0, k: 0 }"
-                    @metadata-changed="onProjectMetadataInCell"
-                  />
-                </template>
-                <span class="empty-metadata" v-else>—</span>
+                <!-- Fall back to the merged column descriptor when the
+                     production has no own copy yet: first edit creates it. -->
+                <metadata-input
+                  :entity="entry"
+                  :descriptor="
+                    getProjectDescriptorForField(entry, d.field_name) || d
+                  "
+                  :indexes="{ i: 0, j: 0, k: 0 }"
+                  @metadata-changed="onProjectMetadataInCell"
+                />
               </td>
               <row-actions-cell
                 @edit-clicked="$emit('edit-clicked', entry)"
@@ -215,19 +212,14 @@
               :key="entry.id + '-pm-closed-' + d.field_name"
               v-for="d in visibleProjectMetadataDescriptors"
             >
-              <template
-                v-if="getProjectDescriptorForField(entry, d.field_name)"
-              >
-                <metadata-input
-                  :entity="entry"
-                  :descriptor="
-                    getProjectDescriptorForField(entry, d.field_name)
-                  "
-                  :indexes="{ i: 0, j: 0, k: 0 }"
-                  @metadata-changed="onProjectMetadataInCell"
-                />
-              </template>
-              <span class="empty-metadata" v-else>—</span>
+              <metadata-input
+                :entity="entry"
+                :descriptor="
+                  getProjectDescriptorForField(entry, d.field_name) || d
+                "
+                :indexes="{ i: 0, j: 0, k: 0 }"
+                @metadata-changed="onProjectMetadataInCell"
+              />
             </td>
             <row-actions-cell
               @edit-clicked="$emit('edit-clicked', entry)"
@@ -426,9 +418,5 @@ const onProjectMetadataInCell = ({ entry, descriptor, value }) => {
   min-width: 110px;
   padding: 10px;
   text-align: right;
-}
-
-.empty-metadata {
-  color: var(--text-alt);
 }
 </style>
