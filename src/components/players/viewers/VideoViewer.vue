@@ -373,6 +373,8 @@ const goNextFrame = () => {
 const onVideoEnd = () => {
   isPlaying = false
   cancelAnimationFrame(playLoop)
+  // a queued 'ended' event can fire after unmount, once the ref is nulled
+  if (!video.value) return
   if (props.isRepeating) {
     emit('video-end')
     video.value.currentTime = 0
@@ -602,6 +604,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  if (video.value) video.value.onended = null
   pause()
   window.removeEventListener('resize', onWindowResize)
   panzoomInstance?.dispose()
