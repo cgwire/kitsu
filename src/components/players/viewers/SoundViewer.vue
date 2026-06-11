@@ -54,6 +54,16 @@ const pause = () => {
   wavesurfer.pause()
 }
 
+// destroy() aborts the in-flight fetch on teardown, rejecting load() with an
+// expected AbortError; ignore it and surface only real load failures.
+const onLoadError = err => {
+  if (err?.name === 'AbortError') {
+    return
+  }
+  isLoading.value = false
+  console.error('Error loading sound preview:', err)
+}
+
 onMounted(() => {
   isLoading.value = true
   wavesurfer = WaveSurfer.create({
@@ -70,7 +80,7 @@ onMounted(() => {
   })
   if (props.previewUrl) {
     isLoading.value = true
-    wavesurfer.load(props.previewUrl)
+    wavesurfer.load(props.previewUrl).catch(onLoadError)
   }
 })
 
@@ -79,7 +89,7 @@ watch(
   () => {
     if (props.previewUrl && props.previewUrl.length > 0) {
       isLoading.value = true
-      wavesurfer.load(props.previewUrl)
+      wavesurfer.load(props.previewUrl).catch(onLoadError)
     }
   }
 )
