@@ -37,27 +37,21 @@
       "
       v-show="entityList.length > 1 && playlistDuration > 0"
     >
+      <!-- Hover visibility is owned by the wrapper: per-child enter/leave
+           handlers flicker the thumbnail when the cursor crosses segment
+           boundaries while still inside the bar. -->
       <div
         class="entity-status"
-        :class="{ current: isCurrentEntity(entity) }"
-        :key="`progress-entity-${entity.id}`"
+        :class="{ current: index === currentEntityIndex }"
+        :key="`progress-entity-${entity.id}-${entity.preview_file_id}`"
         :style="{
           left: getEntityPosition(entity) + '%',
           width: getEntityWidth(entity) + '%',
           'background-color': getEntityColor(entity)
         }"
-        @mouseenter="isFrameNumberVisible = true"
-        @mouseleave="isFrameNumberVisible = false"
-        @touchend="isFrameNumberVisible = false"
-        @touchcancel="isFrameNumberVisible = false"
         @mousedown="startPlaylistProgressDrag"
-        @touchstart="
-          () => {
-            startPlaylistProgressDrag()
-            isFrameNumberVisible = true
-          }
-        "
-        v-for="entity in entityList"
+        @touchstart="startPlaylistProgressDrag"
+        v-for="(entity, index) in entityList"
       >
         <span>
           {{ getFullEntityName(entity) }}
@@ -76,11 +70,6 @@
           left:
             'calc(' + (100 * playlistProgress) / playlistDuration + '% - 1px)'
         }"
-        @mouseenter="isFrameNumberVisible = true"
-        @mouseleave="isFrameNumberVisible = false"
-        @touchstart="isFrameNumberVisible = true"
-        @touchend="isFrameNumberVisible = false"
-        @touchcancel="isFrameNumberVisible = false"
       >
       </span>
     </div>
@@ -89,6 +78,13 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
+
+import {
+  getTileCellIndex,
+  getTileGeometry,
+  TILE_CELL_HEIGHT,
+  TILE_COLUMNS
+} from '@/lib/players/tiles'
 
 import Spinner from '@/components/widgets/Spinner.vue'
 
@@ -152,7 +148,6 @@ const emit = defineEmits([
 const frameNumberLeftPosition = ref(0)
 const hoverFrame = ref(0)
 const isFrameNumberVisible = ref(false)
-const isTileLoading = ref(false)
 const playlistProgressDragging = ref(false)
 const playlistProgressWidget = ref(null)
 const progressDragging = ref(false)
@@ -165,20 +160,16 @@ const getClientX = event =>
   event.changedTouches?.[0]?.clientX ??
   event.clientX
 
-const tilePath = computed(
-  () =>
-    `${props.urlPrefix || '/api'}/movies/tiles/preview-files/${props.previewId}.png`
-)
-
 const frameNumberStyle = computed(() => {
-  const frameHeight = 100
+  const frameHeight = TILE_CELL_HEIGHT
   const height = frameHeight + 30
   let frameWidth = 150
   const preview = props.playlistShotPosition[hoverFrame.value]
   if (!preview) return {}
   if (preview.extension === 'mp4') {
-    const ratio = preview.width / preview.height
-    frameWidth = Math.ceil(frameHeight * ratio)
+    frameWidth =
+      tileGeometries.value.get(preview.id)?.cellWidth ??
+      Math.ceil(frameHeight * (preview.width / preview.height))
   } else if (preview.extension === 'png') {
     frameWidth = 150
   }
@@ -245,6 +236,16 @@ const doProgressDrag = event => {
   ) {
     const { frameNumber } = getPlaylistMouseFrame(event)
     hoverFrame.value = frameNumber + 1
+    // Kick the sprite load for the hovered preview even while the
+    // spinner is shown (the tile span itself is v-if'd out then).
+    const preview = props.playlistShotPosition[hoverFrame.value]
+    if (preview?.extension === 'mp4') {
+      const base = props.urlPrefix || '/api'
+      ensureTileGeometry(
+        preview.id,
+        `${base}/movies/tiles/preview-files/${preview.id}.png`
+      )
+    }
     const allDuration = Math.round(props.playlistDuration * props.fps)
     frameNumberLeftPosition.value = (width.value / allDuration) * frameNumber
     if (playlistProgressDragging.value) {
@@ -258,6 +259,31 @@ const onPlaylistProgressClicked = event => {
   emit('progress-playlist-changed', frameNumber)
 }
 
+// Measured sprite geometries per preview id — recomputing the cell width
+// from stored dimensions drifts from the file the sprite was built from
+// (source ratio ≠ production ratio, renormalisations).
+const tileGeometries = ref(new Map())
+
+const ensureTileGeometry = (id, tilePathUrl) => {
+  if (tileGeometries.value.has(id)) return tileGeometries.value.get(id)
+  tileGeometries.value.set(id, null)
+  getTileGeometry(tilePathUrl).then(geometry => {
+    if (!geometry) return
+    const next = new Map(tileGeometries.value)
+    next.set(id, geometry)
+    tileGeometries.value = next
+  })
+  return null
+}
+
+// The hovered preview's sprite is still loading/measuring: show the
+// spinner instead of a black not-yet-loaded background.
+const isTileLoading = computed(() => {
+  const preview = props.playlistShotPosition[hoverFrame.value]
+  if (!preview || preview.extension !== 'mp4') return false
+  return !tileGeometries.value.get(preview.id)
+})
+
 const getFrameBackgroundStyle = frame => {
   if (!frame || !props.playlistShotPosition[frame]) return {}
   const {
@@ -268,12 +294,6 @@ const getFrameBackgroundStyle = frame => {
   } = props.playlistShotPosition[frame]
 
   frame = frame - props.playlistShotPosition[frame].start * props.fps
-  if (props.nbFrames >= 3840) {
-    frame = Math.ceil(frame / Math.ceil(props.nbFrames / 3840))
-  }
-  const frameX = frame % 8
-  const frameY = Math.floor(frame / 8)
-  const frameHeight = 100
   const base = props.urlPrefix || '/api'
 
   if (extension === 'png') {
@@ -284,13 +304,18 @@ const getFrameBackgroundStyle = frame => {
       width: '150px'
     }
   } else if (extension === 'mp4') {
-    const ratio = pw / ph
-    const frameWidth = Math.ceil(frameHeight * ratio)
     const tp = `${base}/movies/tiles/preview-files/${id}.png`
+    const geometry = ensureTileGeometry(id, tp)
+    const frameWidth =
+      geometry?.cellWidth ?? Math.ceil(TILE_CELL_HEIGHT * (pw / ph))
+    const cellCount = geometry?.cellCount ?? 3840
+    const cell = getTileCellIndex(frame, props.nbFrames, cellCount)
+    const frameX = cell % TILE_COLUMNS
+    const frameY = Math.floor(cell / TILE_COLUMNS)
     return {
       background: `url(${tp})`,
       'background-position': `-${frameX * frameWidth}px -${
-        frameY * frameHeight
+        frameY * TILE_CELL_HEIGHT
       }px`,
       width: `${frameWidth}px`
     }
@@ -336,9 +361,6 @@ const currentEntityIndex = computed(() => {
   })
 })
 
-const isCurrentEntity = entity =>
-  props.entityList[currentEntityIndex.value]?.id === entity.id
-
 const domEvents = [
   ['mousemove', doProgressDrag],
   ['touchmove', doProgressDrag],
@@ -351,24 +373,6 @@ const domEvents = [
   ['touchend', stopPlaylistProgressDrag],
   ['touchcancel', stopPlaylistProgressDrag]
 ]
-
-watch(
-  () => props.previewId,
-  () => {
-    if (props.previewId) {
-      const preview = props.playlistShotPosition[hoverFrame.value]
-      if (preview?.extension === 'mp4') {
-        isTileLoading.value = true
-        const img = new Image()
-        img.src = tilePath.value
-        img.onload = () => {
-          isTileLoading.value = false
-        }
-      }
-    }
-  },
-  { immediate: true }
-)
 
 watch(
   () => props.entityList,
@@ -398,6 +402,10 @@ onBeforeUnmount(() => {
   background: $black;
   border-radius: 5px;
   color: $white;
+  // The thumbnail can overlap the bar (top: 16px when not fullscreen);
+  // without this the cursor "enters" it, fires the bar's mouseleave and
+  // the thumbnail flickers in a show/hide loop.
+  pointer-events: none;
   position: absolute;
   padding: 0.3em;
   text-align: center;
@@ -447,9 +455,12 @@ onBeforeUnmount(() => {
 .playlist-progress-position {
   background: $white;
   box-shadow: 0 0 3px rgba(0, 0, 0, 0.7);
-  height: 24px;
+  // Flush with the bar bottom: overflowing below made the hover
+  // thumbnail flicker on the bar's last pixel row.
+  height: 22px;
+  pointer-events: none;
   position: absolute;
-  top: -3px;
+  top: -4px;
   width: 2px;
   z-index: 4;
 

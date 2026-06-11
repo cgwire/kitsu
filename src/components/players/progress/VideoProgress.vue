@@ -104,6 +104,13 @@
 <script setup>
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 
+import {
+  getTileCellIndex,
+  getTileGeometry,
+  TILE_CELL_HEIGHT,
+  TILE_COLUMNS
+} from '@/lib/players/tiles'
+
 const props = defineProps({
   annotations: {
     default: () => [],
@@ -174,6 +181,7 @@ const hoverFrame = ref(0)
 const isFrameNumberVisible = ref(false)
 const progress = ref(null)
 const progressDragging = ref(false)
+const tileGeometry = ref(null)
 const width = ref(0)
 
 // Mouse scratch state; not reactive — written from event handlers, never read by template
@@ -207,9 +215,10 @@ const handleInWidth = computed(
 )
 
 const frameNumberStyle = computed(() => {
-  const frameHeight = 100
+  const frameHeight = TILE_CELL_HEIGHT
   const height = frameHeight + 30
-  const frameWidth = Math.ceil(frameHeight * videoRatio.value)
+  const frameWidth =
+    tileGeometry.value?.cellWidth ?? Math.ceil(frameHeight * videoRatio.value)
   const w = frameWidth + 10
   const left = Math.min(
     Math.max(frameNumberLeftPosition.value - frameWidth / 2, 0),
@@ -230,6 +239,23 @@ const onWindowResize = () => {
     width.value = coords.width
   }
 }
+
+watch(
+  () => props.previewId,
+  () => {
+    tileGeometry.value = null
+    if (!props.previewId) return
+    const previewId = props.previewId
+    const base = props.urlPrefix || '/api'
+    getTileGeometry(`${base}/movies/tiles/preview-files/${previewId}.png`).then(
+      geometry => {
+        // Guard against a preview switch racing the load.
+        if (props.previewId === previewId) tileGeometry.value = geometry
+      }
+    )
+  },
+  { immediate: true }
+)
 
 const getAnnotationPosition = annotation => {
   if (props.nbFrames === 0) return 0
@@ -350,20 +376,22 @@ const emitProgressEvent = (event, annotation) => {
 const getFrameBackgroundStyle = frame => {
   if (!frame) return {}
   const previewId = props.previewId
-  frame = frame - 1
-  if (props.nbFrames >= 3840) {
-    frame = Math.ceil(frame / Math.ceil(props.nbFrames / 3840))
-  }
-  const frameX = frame % 8
-  const frameY = Math.floor(frame / 8)
-  const frameHeight = 100
-  const frameWidth = Math.ceil(frameHeight * videoRatio.value)
   const base = props.urlPrefix || '/api'
   const tilePath = `${base}/movies/tiles/preview-files/${previewId}.png`
+  // Measured sprite geometry beats recomputing the cell width from the
+  // preview's stored dimensions, which drift from the file the sprite
+  // was built from (source ratio ≠ production ratio, renormalisations).
+  const geometry = tileGeometry.value
+  const frameWidth =
+    geometry?.cellWidth ?? Math.ceil(TILE_CELL_HEIGHT * videoRatio.value)
+  const cellCount = geometry?.cellCount ?? 3840
+  const cell = getTileCellIndex(frame - 1, props.nbFrames, cellCount)
+  const frameX = cell % TILE_COLUMNS
+  const frameY = Math.floor(cell / TILE_COLUMNS)
   return {
     background: `url(${tilePath})`,
     'background-position': `-${frameX * frameWidth}px -${
-      frameY * frameHeight
+      frameY * TILE_CELL_HEIGHT
     }px`,
     width: `${frameWidth}px`
   }
