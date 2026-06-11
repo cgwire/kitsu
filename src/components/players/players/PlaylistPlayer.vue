@@ -1404,7 +1404,8 @@ const mainContentAnchorEl = computed(() => mainContentAnchor.value || null)
 // active picture switches (entity change, revision change, …).
 const mainMediaElement = computed(() => {
   if (isCurrentPreviewMovie.value) {
-    return rawPlayer.value?.currentPlayer || null
+    // Use the visible canvas surface so wheel events reach the painted element.
+    return rawPlayer.value?.getDisplaySurface?.() || null
   }
   if (isCurrentPreviewPicture.value) {
     currentPreview.value // dependency trigger
@@ -2127,7 +2128,8 @@ const updateComparisonAnchor = () => {
   const anchor = comparisonContentAnchor.value
   const container = videoContainer.value
   if (!player || !anchor || !container) return
-  const playerEl = player.$el
+  // The display canvas is already aspect-fitted, so the ratio math mostly no-ops.
+  const playerEl = player.getDisplaySurface?.() || player.$el
   const ratio = player.getVideoRatio()
   const fullWidth = playerEl.offsetWidth
   const fullHeight = playerEl.offsetHeight
