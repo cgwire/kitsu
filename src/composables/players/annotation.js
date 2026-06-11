@@ -1407,13 +1407,19 @@ export const useAnnotation = ({
 
   const fadeObject = obj => {
     if (!obj) return
-    obj.animate('opacity', '0', {
-      duration: 1500,
-      onChange: fabricCanvas.value.renderAll.bind(fabricCanvas.value),
-      onComplete: () => {
-        fabricCanvas.value.remove(obj)
+    // fabric v6+ animate() only accepts the object form — the legacy
+    // ('opacity', '0', options) signature silently does nothing, which
+    // left laser strokes on the canvas forever.
+    obj.animate(
+      { opacity: 0 },
+      {
+        duration: 1500,
+        onChange: fabricCanvas.value.renderAll.bind(fabricCanvas.value),
+        onComplete: () => {
+          fabricCanvas.value.remove(obj)
+        }
       }
-    })
+    )
   }
 
   // Saving
