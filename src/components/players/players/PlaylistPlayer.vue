@@ -3606,10 +3606,12 @@ const onEntitiesWheel = event => {
 }
 
 const onProgressPlaylistChanged = frameNumberValue => {
+  // The strip playhead is only driven by time-update while playing;
+  // reflect paused clicks/drags immediately in every mode.
+  const time = frameNumberValue / fps.value
+  playlistProgress.value = time
   if (isFullMode.value) {
-    const time = frameNumberValue / fps.value
     fullPlaylistPlayer.value.currentTime = time
-    playlistProgress.value = time
   }
   const pos = playlistShotPosition.value[frameNumberValue]
   if (!pos) return

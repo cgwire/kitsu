@@ -39,6 +39,7 @@
     >
       <div
         class="entity-status"
+        :class="{ current: isCurrentEntity(entity) }"
         :key="`progress-entity-${entity.id}`"
         :style="{
           left: getEntityPosition(entity) + '%',
@@ -63,10 +64,17 @@
         </span>
       </div>
       <span
+        class="playlist-progress-elapsed"
+        :style="{
+          width: (100 * playlistProgress) / playlistDuration + '%'
+        }"
+      >
+      </span>
+      <span
         class="playlist-progress-position"
         :style="{
           left:
-            'calc(' + (100 * playlistProgress) / playlistDuration + '% - 3px)'
+            'calc(' + (100 * playlistProgress) / playlistDuration + '% - 1px)'
         }"
         @mouseenter="isFrameNumberVisible = true"
         @mouseleave="isFrameNumberVisible = false"
@@ -318,6 +326,19 @@ const getFullEntityName = entity => {
   return `${entity.parent_name} / ${entity.name}`.replaceAll(' ', ' ')
 }
 
+const currentEntityIndex = computed(() => {
+  const time = props.playlistProgress
+  return props.entityList.findIndex((entity, index) => {
+    const start = entity.start_duration - props.frameDuration
+    const next = props.entityList[index + 1]
+    const end = next ? next.start_duration - props.frameDuration : Infinity
+    return time >= start && time < end
+  })
+})
+
+const isCurrentEntity = entity =>
+  props.entityList[currentEntityIndex.value]?.id === entity.id
+
 const domEvents = [
   ['mousemove', doProgressDrag],
   ['touchmove', doProgressDrag],
@@ -411,13 +432,38 @@ onBeforeUnmount(() => {
   touch-action: pan-y;
 }
 
-.playlist-progress-position {
-  border-left: 5px solid $green;
+// Translucent veil over the already-played part of the strip, so the
+// position reads at a glance without hiding the status colors.
+.playlist-progress-elapsed {
+  background: rgba(255, 255, 255, 0.16);
+  height: 100%;
+  left: 0;
+  pointer-events: none;
   position: absolute;
-  height: 6px;
-  border-radius: 50%;
+  top: 0;
   z-index: 3;
-  top: -2px;
+}
+
+.playlist-progress-position {
+  background: $white;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.7);
+  height: 24px;
+  position: absolute;
+  top: -3px;
+  width: 2px;
+  z-index: 4;
+
+  // Small grab handle on top of the playhead line.
+  &::before {
+    background: $white;
+    border-radius: 2px;
+    content: '';
+    height: 5px;
+    left: -2px;
+    position: absolute;
+    top: 0;
+    width: 6px;
+  }
 }
 
 .frame-number-rail {
@@ -436,22 +482,35 @@ onBeforeUnmount(() => {
 
 .entity-status {
   border-left: 0;
-  border-right: 3px solid $dark-grey;
+  border-right: 2px solid $dark-grey;
   position: absolute;
   bottom: 0;
-  transition: height 0.3s ease-in-out;
-  height: 16px;
+  transition:
+    height 0.3s ease-in-out,
+    opacity 0.2s ease-in-out;
+  height: 14px;
   z-index: 2;
-  opacity: 0.4;
+  opacity: 0.55;
 
   span {
     background: $dark-grey;
     border-radius: 5px;
+    // The segment constrains the tooltip's width: without nowrap a long
+    // name wraps inside a narrow segment and spills over the timeline.
+    white-space: nowrap;
+    bottom: calc(100% + 6px);
     color: $white;
     display: none;
     padding: 0.2em 0.5em;
     position: absolute;
-    top: -30px;
+    z-index: 5;
+  }
+
+  // The currently-playing entity stands out: full status color, full
+  // strip height.
+  &.current {
+    height: 18px;
+    opacity: 1;
   }
 
   &:hover {
