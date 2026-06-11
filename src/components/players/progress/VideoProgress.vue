@@ -2,12 +2,14 @@
   <div class="unselectable">
     <div
       class="progress-wrapper"
-      :style="{
-        'background-size': backgroundSize,
-        ...(backgroundUrl
-          ? { 'background-image': `url(${backgroundUrl})` }
-          : {})
-      }"
+      :style="
+        backgroundUrl
+          ? {
+              'background-size': backgroundSize,
+              'background-image': `url(${backgroundUrl})`
+            }
+          : { 'background-image': frameTicksGradient }
+      "
       @mouseenter="isFrameNumberVisible = true"
       @mouseleave="isFrameNumberVisible = false"
       @touchstart="isFrameNumberVisible = true"
@@ -16,19 +18,20 @@
     >
       <span
         class="handle-in"
-        :style="{
-          width: handleInWidth,
-          'padding-right': handleIn > 1 ? '5px' : 0
-        }"
+        :class="{ dragging: handleInDragging }"
+        :style="{ width: handleInWidth }"
         @mousedown="startHandleInDrag"
         @touchstart="startHandleInDrag"
         v-if="handleIn >= 0 && !isFullMode && !empty"
       >
-        {{ handleIn !== 0 ? handleIn + 1 : '' }}
+        <span class="handle-frame" v-if="handleIn !== 0">
+          {{ handleIn + 1 }}
+        </span>
       </span>
 
       <span
         class="handle-out"
+        :class="{ dragging: handleOutDragging }"
         :style="{
           width: frameSize * (nbFrames - handleOut) + 'px'
         }"
@@ -36,7 +39,9 @@
         @touchstart="startHandleOutDrag"
         v-if="handleOut >= 0 && !isFullMode && !empty"
       >
-        {{ handleOut + 1 }}
+        <span class="handle-frame">
+          {{ handleOut + 1 }}
+        </span>
       </span>
 
       <progress
@@ -200,6 +205,20 @@ const backgroundSize = computed(() => {
   } else {
     return '300%'
   }
+})
+
+// Alternating frame stripes generated at the exact frame size, using the
+// two colors sampled from the legacy player-timeslider.png — the
+// stretched texture blurred as soon as the clip had few frames. Stripes
+// are dropped when frames get too dense to read.
+const frameTicksGradient = computed(() => {
+  const size = frameSize.value
+  if (!size || size < 3) return 'none'
+  return (
+    'repeating-linear-gradient(to right, ' +
+    `rgb(54, 57, 63) 0, rgb(54, 57, 63) ${size}px, ` +
+    `rgb(84, 89, 98) ${size}px, rgb(84, 89, 98) ${2 * size}px)`
+  )
 })
 
 const frameSize = computed(() => width.value / props.nbFrames)
@@ -464,7 +483,6 @@ defineExpose({ updateProgressBar })
 
 .progress-wrapper {
   background: $grey;
-  background-image: url('../../../assets/background/player-timeslider.png');
   background-repeat: repeat-x;
   border: 0;
   cursor: pointer;
@@ -539,56 +557,93 @@ progress {
   }
 }
 
-.handle-in {
-  background: $black;
-  color: $grey;
+// Trim handles, NLE-bracket style: a thick vertical bar with top and
+// bottom lips marking the in/out bounds, the excluded zones lightly
+// veiled so the timeline stays readable, frame numbers always visible.
+.handle-in,
+.handle-out {
+  background: rgba(0, 0, 0, 0.45);
   display: inline-block;
   height: 28px;
-  left: 0;
-  opacity: 0.9;
-  padding-top: 3px;
   position: absolute;
   z-index: 100;
-  text-align: right;
+
+  // Same number presentation as the legacy handles: vertically centered
+  // in the veiled zone, next to the bracket.
+  .handle-frame {
+    color: $grey;
+    font-variant-numeric: tabular-nums;
+    line-height: 28px;
+    position: absolute;
+    top: 0;
+    z-index: 130;
+  }
+
+  // The bracket: vertical bar + top/bottom lips pointing inward,
+  // drawn as solid blocks (borders got visually truncated).
+  &::after {
+    background: $dark-purple;
+    content: ' ';
+    cursor: ew-resize;
+    bottom: 0;
+    position: absolute;
+    top: 0;
+    transition: width 0.1s ease-in-out;
+    width: 4px;
+    z-index: 120;
+  }
+
+  &::before {
+    background:
+      linear-gradient($dark-purple, $dark-purple) top / 100% 4px no-repeat,
+      linear-gradient($dark-purple, $dark-purple) bottom / 100% 4px no-repeat;
+    bottom: 0;
+    content: ' ';
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    width: 9px;
+    z-index: 120;
+  }
+
+  &:hover,
+  &.dragging {
+    &::after {
+      width: 6px;
+    }
+  }
 }
 
-.handle-in::after {
-  bottom: 0;
-  background: $dark-purple;
-  content: ' ';
-  cursor: pointer;
-  height: 34px;
-  position: absolute;
-  right: -5px;
-  top: -2px;
-  width: 5px;
-  z-index: 120;
+.handle-in {
+  left: 0;
+
+  .handle-frame {
+    right: 8px;
+  }
+
+  &::after {
+    right: -4px;
+  }
+
+  &::before {
+    right: -9px;
+  }
 }
 
 .handle-out {
-  background: $black;
-  color: $grey;
-  display: inline-block;
-  height: 28px;
-  overflow: hidden;
-  padding-left: 10px;
-  padding-top: 3px;
-  position: absolute;
-  opacity: 0.9;
+  overflow: visible;
   right: 0;
-  z-index: 100;
-}
 
-.handle-out::before {
-  bottom: 0;
-  background: $dark-purple;
-  content: ' ';
-  cursor: pointer;
-  height: 34px;
-  left: 0;
-  position: absolute;
-  top: -2px;
-  width: 5px;
-  z-index: 120;
+  .handle-frame {
+    left: 8px;
+  }
+
+  &::after {
+    left: -4px;
+  }
+
+  &::before {
+    left: -9px;
+  }
 }
 </style>
