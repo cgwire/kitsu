@@ -12,6 +12,7 @@ import {
   removeModelFromList,
   updateModelFromList
 } from '@/lib/models'
+import stringHelpers from '@/lib/string'
 import {
   LOAD_PRODUCTIONS_START,
   LOAD_PRODUCTIONS_ERROR,
@@ -636,10 +637,16 @@ const actions = {
     // Drop projectId — this action fans out to every loaded project.
     // eslint-disable-next-line no-unused-vars
     const { projectId, ...toSend } = descriptor
+    // Cell rendering and the update/delete fan-outs key on field_name (Zou
+    // slugifies it from the name), so dedupe on it too; the name check stays
+    // as a guard for slugs that diverge from Zou's.
+    const fieldName = stringHelpers.slugify(toSend.name)
     const targets = (state.productions || []).filter(
       production =>
         !(production.descriptors || []).some(
-          d => d.entity_type === 'Project' && d.name === toSend.name
+          d =>
+            d.entity_type === 'Project' &&
+            (d.field_name === fieldName || d.name === toSend.name)
         )
     )
     await Promise.all(

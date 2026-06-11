@@ -352,6 +352,43 @@ describe('Productions store', () => {
       }
     })
 
+    test('addProjectMetadataDescriptorToAllProductions skips productions owning the field_name', async () => {
+      const mockCommit = vi.fn()
+      const state = {
+        productions: [
+          {
+            id: 'production-1',
+            descriptors: [
+              {
+                id: 'descriptor-1',
+                entity_type: 'Project',
+                name: 'studio location',
+                field_name: 'studio_location'
+              }
+            ]
+          },
+          { id: 'production-2', descriptors: [] }
+        ],
+        productionMap: new Map()
+      }
+      productionApi.addMetadataDescriptor = vi.fn((productionId, descriptor) =>
+        Promise.resolve({
+          ...descriptor,
+          id: 'descriptor-2',
+          project_id: productionId
+        })
+      )
+      await store.actions.addProjectMetadataDescriptorToAllProductions(
+        { commit: mockCommit, state },
+        { name: 'Studio Location', data_type: 'string' }
+      )
+      expect(productionApi.addMetadataDescriptor).toBeCalledTimes(1)
+      expect(productionApi.addMetadataDescriptor).toHaveBeenCalledWith(
+        'production-2',
+        { name: 'Studio Location', data_type: 'string' }
+      )
+    })
+
     describe('editProduction', () => {
       let updateProduction
 
