@@ -2558,7 +2558,9 @@ const onFrameUpdate = frame => {
 }
 
 const onMaxDurationUpdate = duration => {
-  if (duration) {
+  // Chromium reports Infinity for duration-less/fragmented mp4s; treat a
+  // non-finite duration as unknown so it can't reach the seek path.
+  if (Number.isFinite(duration) && duration > 0) {
     duration = floorToFrame(duration, fps.value)
     maxDurationRaw.value = duration
     maxDuration.value = formatTime(duration, fps.value)
