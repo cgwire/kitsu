@@ -197,6 +197,20 @@ const findProductionInState = (state, id) => {
   )
 }
 
+/** Convert a stored Project descriptor to the form shape the metadata API expects. */
+const projectDescriptorToForm = descriptor => ({
+  name: descriptor.name,
+  data_type: descriptor.data_type,
+  values: descriptor.choices,
+  for_client: descriptor.for_client,
+  departments: descriptor.departments,
+  entity_type: 'Project'
+})
+
+// In-flight Project descriptor creations keyed by production + field, so the
+// per-keystroke metadata-changed events can't create duplicate descriptors.
+const pendingProjectDescriptorCreations = new Map()
+
 const getters = {
   productions: state => state.productions,
   productionMap: state => state.productionMap,
@@ -345,7 +359,10 @@ const getters = {
       ;(p.descriptors || [])
         .filter(d => d.entity_type === 'Project')
         .forEach(d => {
-          if (!byField.has(d.field_name)) {
+          // Prefer a positioned copy: backfilled copies have position=null
+          // and must not shadow the ones carrying the saved column order.
+          const existing = byField.get(d.field_name)
+          if (!existing || (existing.position == null && d.position != null)) {
             byField.set(d.field_name, { ...d })
           }
         })
@@ -453,11 +470,26 @@ const actions = {
     })
   },
 
-  newProduction({ commit, state }, data) {
-    return productionsApi.newProduction(data).then(production => {
-      commit(ADD_PRODUCTION, production)
-      return production
-    })
+  async newProduction({ commit, dispatch, getters }, data) {
+    const production = await productionsApi.newProduction(data)
+    commit(ADD_PRODUCTION, production)
+    // The all-projects metadata columns are one descriptor row per project in
+    // Zou: copy them onto the new production so its cells stay editable.
+    try {
+      await Promise.all(
+        getters.mergedProjectMetadataDescriptors.map(descriptor =>
+          dispatch('ensureProjectMetadataDescriptor', {
+            production,
+            descriptor
+          })
+        )
+      )
+    } catch (err) {
+      // The production itself is created and a missing descriptor is
+      // recreated on first cell edit, so don't fail the creation flow.
+      console.error(err)
+    }
+    return production
   },
 
   editProduction({ commit, state }, data) {
@@ -621,6 +653,7 @@ const actions = {
               descriptor: created
             })
           }
+          return created
         })
     }
   },
@@ -709,6 +742,41 @@ const actions = {
         commit(DELETE_METADATA_DESCRIPTOR_END, { id: descriptor.id })
       })
     )
+  },
+
+  /**
+   * Make sure the production owns its copy of the given Project descriptor,
+   * creating it when missing (e.g. production created after the column was).
+   */
+  ensureProjectMetadataDescriptor({ dispatch }, { production, descriptor }) {
+    const owned = (production.descriptors || []).find(
+      d => d.entity_type === 'Project' && d.field_name === descriptor.field_name
+    )
+    if (owned) {
+      return Promise.resolve(owned)
+    }
+    const key = `${production.id}-${descriptor.field_name}`
+    if (!pendingProjectDescriptorCreations.has(key)) {
+      pendingProjectDescriptorCreations.set(
+        key,
+        dispatch('addMetadataDescriptor', {
+          ...projectDescriptorToForm(descriptor),
+          projectId: production.id
+        })
+          .catch(err => {
+            // 400 means the production already owns the row server-side
+            // (project template, backfill from another client) without it
+            // being loaded locally: the value edit can proceed and the
+            // local copy heals on the next productions load.
+            if (err?.response?.status !== 400) {
+              throw err
+            }
+            return null
+          })
+          .finally(() => pendingProjectDescriptorCreations.delete(key))
+      )
+    }
+    return pendingProjectDescriptorCreations.get(key)
   },
 
   deleteMetadataDescriptor({ commit, state }, descriptorId) {

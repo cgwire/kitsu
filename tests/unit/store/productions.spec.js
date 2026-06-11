@@ -335,21 +335,111 @@ describe('Productions store', () => {
     })
 
     test('newProduction', async () => {
+      const descriptor = {
+        id: 'descriptor-1',
+        entity_type: 'Project',
+        name: 'Studio Location',
+        field_name: 'studio_location'
+      }
       let mockCommit = vi.fn()
+      const mockDispatch = vi.fn(() => Promise.resolve())
+      const getters = { mergedProjectMetadataDescriptors: [descriptor] }
       productionApi.newProduction = vi.fn(() => Promise.resolve({ id: '1' }))
-      await store.actions.newProduction({ commit: mockCommit, state: null }, 'production-id')
+      await store.actions.newProduction(
+        { commit: mockCommit, dispatch: mockDispatch, getters },
+        'production-id'
+      )
       expect(productionApi.newProduction).toBeCalledTimes(1)
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(1, ADD_PRODUCTION, { id: '1' })
+      expect(mockDispatch).toHaveBeenCalledWith(
+        'ensureProjectMetadataDescriptor',
+        { production: { id: '1' }, descriptor }
+      )
 
       mockCommit = vi.fn()
       productionApi.newProduction = vi.fn(() => Promise.reject(new Error('error')))
       try {
-        await store.actions.newProduction({ commit: mockCommit, state: null }, 'production-id')
+        await store.actions.newProduction(
+          { commit: mockCommit, dispatch: mockDispatch, getters },
+          'production-id'
+        )
       } catch {
         expect(productionApi.newProduction).toBeCalledTimes(1)
         expect(mockCommit).toBeCalledTimes(0)
       }
+    })
+
+    test('ensureProjectMetadataDescriptor', async () => {
+      const descriptor = {
+        id: 'descriptor-1',
+        entity_type: 'Project',
+        name: 'Studio Location',
+        field_name: 'studio_location',
+        data_type: 'string',
+        choices: [],
+        for_client: false,
+        departments: []
+      }
+
+      // Owned: resolves with the production's own copy, no creation.
+      let mockDispatch = vi.fn()
+      const owned = { ...descriptor, id: 'descriptor-2' }
+      const result = await store.actions.ensureProjectMetadataDescriptor(
+        { dispatch: mockDispatch },
+        {
+          production: { id: 'production-1', descriptors: [owned] },
+          descriptor
+        }
+      )
+      expect(result).toBe(owned)
+      expect(mockDispatch).not.toHaveBeenCalled()
+
+      // Missing: creates the descriptor once, even for concurrent calls.
+      mockDispatch = vi.fn(() => Promise.resolve())
+      const production = { id: 'production-2', descriptors: [] }
+      await Promise.all([
+        store.actions.ensureProjectMetadataDescriptor(
+          { dispatch: mockDispatch },
+          { production, descriptor }
+        ),
+        store.actions.ensureProjectMetadataDescriptor(
+          { dispatch: mockDispatch },
+          { production, descriptor }
+        )
+      ])
+      expect(mockDispatch).toBeCalledTimes(1)
+      expect(mockDispatch).toHaveBeenCalledWith('addMetadataDescriptor', {
+        name: 'Studio Location',
+        data_type: 'string',
+        values: [],
+        for_client: false,
+        departments: [],
+        entity_type: 'Project',
+        projectId: 'production-2'
+      })
+
+      // Already owned server-side (e.g. project template): 400 is not a
+      // failure, other errors still reject.
+      mockDispatch = vi.fn(() =>
+        Promise.reject({ response: { status: 400 } })
+      )
+      await expect(
+        store.actions.ensureProjectMetadataDescriptor(
+          { dispatch: mockDispatch },
+          { production: { id: 'production-3', descriptors: [] }, descriptor }
+        )
+      ).resolves.toBeNull()
+
+      mockDispatch = vi.fn(() =>
+        Promise.reject({ response: { status: 500 } })
+      )
+      await expect(
+        store.actions.ensureProjectMetadataDescriptor(
+          { dispatch: mockDispatch },
+          { production: { id: 'production-4', descriptors: [] }, descriptor }
+        )
+      ).rejects.toEqual({ response: { status: 500 } })
     })
 
     test('addProjectMetadataDescriptorToAllProductions skips productions owning the field_name', async () => {
