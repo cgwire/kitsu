@@ -5,16 +5,21 @@
     </div>
     <video
       ref="player1"
+      class="playlist-movie-decoder"
       preload="auto"
+      playsinline
       :muted="muted"
       @ended="$emit('play-next')"
     />
     <video
       ref="player2"
+      class="playlist-movie-decoder"
       preload="auto"
+      playsinline
       :muted="muted"
       @ended="$emit('play-next')"
     />
+    <canvas ref="displayCanvas" class="playlist-movie" />
   </div>
 </template>
 
@@ -45,6 +50,10 @@ import {
 import { useStore } from 'vuex'
 
 import { floorToFrame, roundToFrame } from '@/lib/video'
+import {
+  createFrameRenderer,
+  supportsVideoFrameCallback
+} from '@/lib/players/frameRenderer'
 
 import Spinner from '@/components/widgets/Spinner.vue'
 
@@ -120,9 +129,10 @@ const emit = defineEmits([
 const containerRef = useTemplateRef('container')
 const player1Ref = useTemplateRef('player1')
 const player2Ref = useTemplateRef('player2')
+const displayCanvasRef = useTemplateRef('displayCanvas')
 
 const currentIndex = ref(0)
-const currentPlayer = shallowRef(undefined)
+const currentPlayer = shallowRef(null)
 const isLoading = ref(true)
 const isPlaying = ref(false)
 const nextPlayer = shallowRef(undefined)
@@ -133,10 +143,13 @@ let currentTimeRaw = 0
 let isSeeking = false
 let firstPanZoom = null
 let panzoomInstances = []
-let playLoop = null
+let renderer = null
+let renderLoopHandle = null
+let renderLoopIsRvfc = false
+let renderLoopPlayer = null
+let renderLoopGeneration = 0
 let lastEmittedFrame = null
 let rate = 1
-let secondPanZoom = null
 let silent = false
 let showLoadingTimer = null
 // Track whether the panzoom should be active across instance
@@ -165,68 +178,91 @@ const frameDuration = computed(
 
 const PANZOOM_EVENTS = ['zoom', 'pan', 'panend', 'transform']
 
-// Setup is deferred until each video's metadata loads, since panzoom's
-// bounds clamp computed against a 0×0 target leaves the media off-
-// centre as soon as the parent applies a transform — most visibly the
-// comparison viewer drifting when the user first opens the panel.
-const setupPlayer1PanZoom = () => {
-  if (!props.panzoom || !player1Ref.value) return
+// Setup is deferred until the canvas has metadata so the bounds
+// clamp doesn't compute against a 0×0 target.
+const setupPanZoom = () => {
+  if (!props.panzoom || !displayCanvasRef.value) return
   firstPanZoom?.dispose()
-  // panzoom listens on the target's parentElement, which stretches
-  // with the surrounding flex layout and leaves gutters on the sides
-  // of the video. Skip events whose target isn't the video itself so
-  // clicks / wheel in the gutter don't trigger pan or zoom.
-  firstPanZoom = createPanzoom(player1Ref.value, {
+  firstPanZoom = createPanzoom(displayCanvasRef.value, {
     bounds: true,
     boundsPadding: 0.2,
     maxZoom: 5,
     minZoom: 0.5,
-    beforeMouseDown: e => e.target !== player1Ref.value,
-    beforeWheel: e => e.target !== player1Ref.value,
-    // panzoom otherwise puts tabindex=0 on the owner and steals arrow
-    // keys / +/- — those shortcuts belong to the playlist player
-    // (next/previous entity, frame stepping).
+    beforeMouseDown: e => e.target !== displayCanvasRef.value,
+    beforeWheel: e => e.target !== displayCanvasRef.value,
     disableKeyboardInteraction: true
   })
   PANZOOM_EVENTS.forEach(name => {
-    firstPanZoom.on(name, () => {
-      if (currentPlayer.value !== player1Ref.value) return
-      emitPanZoomChanged(firstPanZoom)
-    })
+    firstPanZoom.on(name, () => emitPanZoomChanged(firstPanZoom))
   })
   if (!panzoomActive) firstPanZoom.pause()
-  refreshPanzoomInstances()
-  // Tell the parent that a fresh instance exists, so it can re-push
-  // the comparison sync transform that arrived earlier (while the
-  // panzoom didn't exist yet and the setPanZoom call was a no-op).
-  emit('panzoom-ready')
-}
-
-const setupPlayer2PanZoom = () => {
-  if (!props.panzoom || !player2Ref.value) return
-  secondPanZoom?.dispose()
-  secondPanZoom = createPanzoom(player2Ref.value, {
-    bounds: true,
-    boundsPadding: 0.2,
-    maxZoom: 3,
-    minZoom: 0.5,
-    beforeMouseDown: e => e.target !== player2Ref.value,
-    beforeWheel: e => e.target !== player2Ref.value,
-    disableKeyboardInteraction: true
-  })
-  PANZOOM_EVENTS.forEach(name => {
-    secondPanZoom.on(name, () => {
-      if (currentPlayer.value !== player2Ref.value) return
-      emitPanZoomChanged(secondPanZoom)
-    })
-  })
-  if (!panzoomActive) secondPanZoom.pause()
   refreshPanzoomInstances()
   emit('panzoom-ready')
 }
 
 const refreshPanzoomInstances = () => {
-  panzoomInstances = [firstPanZoom, secondPanZoom].filter(Boolean)
+  panzoomInstances = [firstPanZoom].filter(Boolean)
+}
+
+const getDisplaySurface = () => displayCanvasRef.value
+
+const resizeRenderer = () => {
+  if (!renderer || !currentPlayer.value) return
+  // Keep the renderer's default source on the active decoder so a
+  // no-argument drawFrame() can never paint the inactive player.
+  renderer.video = currentPlayer.value
+  renderer.resize(
+    currentPlayer.value.videoWidth,
+    currentPlayer.value.videoHeight
+  )
+  renderer.drawFrame(currentPlayer.value)
+}
+
+const startRenderLoop = () => {
+  stopRenderLoop()
+  const player = currentPlayer.value
+  if (!player) return
+  renderLoopPlayer = player
+  renderLoopGeneration++
+  const generation = renderLoopGeneration
+  if (supportsVideoFrameCallback()) {
+    renderLoopIsRvfc = true
+    const tick = () => {
+      if (renderLoopGeneration !== generation) return
+      renderer?.drawFrame(player)
+      if (isPlaying.value && props.name === 'main') {
+        updateTime(player.currentTime)
+      }
+      renderLoopHandle = player.requestVideoFrameCallback(tick)
+    }
+    renderLoopHandle = player.requestVideoFrameCallback(tick)
+  } else {
+    renderLoopIsRvfc = false
+    let lastDrawnTime = -1
+    const tick = () => {
+      if (renderLoopGeneration !== generation) return
+      if (player.currentTime !== lastDrawnTime) {
+        lastDrawnTime = player.currentTime
+        renderer?.drawFrame(player)
+        if (isPlaying.value && props.name === 'main') {
+          updateTime(player.currentTime)
+        }
+      }
+      renderLoopHandle = requestAnimationFrame(tick)
+    }
+    renderLoopHandle = requestAnimationFrame(tick)
+  }
+}
+
+const stopRenderLoop = () => {
+  if (renderLoopHandle === null) return
+  if (renderLoopIsRvfc) {
+    renderLoopPlayer?.cancelVideoFrameCallback?.(renderLoopHandle)
+  } else {
+    cancelAnimationFrame(renderLoopHandle)
+  }
+  renderLoopHandle = null
+  renderLoopPlayer = null
 }
 
 const emitPanZoomChanged = panzoomInstance => {
@@ -301,12 +337,12 @@ const clear = () => {
 
 const resetHeight = () => {
   nextTick(() => {
-    if (currentPlayer.value) currentPlayer.value.style.height = '0px'
-    if (nextPlayer.value) nextPlayer.value.style.height = '0px'
+    if (displayCanvasRef.value) displayCanvasRef.value.style.height = '0px'
     if (containerRef.value) {
       const height = containerRef.value.offsetHeight
-      if (currentPlayer.value) currentPlayer.value.style.height = `${height}px`
-      if (nextPlayer.value) nextPlayer.value.style.height = `${height}px`
+      if (displayCanvasRef.value) {
+        displayCanvasRef.value.style.height = `${height}px`
+      }
     }
   })
 }
@@ -385,11 +421,16 @@ const loadEntity = (index = 0, currentTime = 0, silentLoad = false) => {
     } else if (nextPlayer.value) {
       nextPlayer.value.src = ''
     }
-    currentPlayer.value.style.display = 'block'
-    nextPlayer.value.style.display = 'none'
     resetHeight()
 
     setSpeed(rate)
+    if (!renderer && displayCanvasRef.value) {
+      renderer = createFrameRenderer(
+        displayCanvasRef.value,
+        currentPlayer.value
+      )
+    }
+    startRenderLoop()
     _setCurrentTime(currentTime)
     if (!silentLoad) {
       emit('entity-change', currentIndex.value)
@@ -411,7 +452,6 @@ const pause = () => {
       currentPlayer.value.currentTime / frameDuration.value
     )
     emit('frame-update', frameNumber)
-    cancelAnimationFrame(playLoop)
   }
   isPlaying.value = false
 }
@@ -423,26 +463,11 @@ const play = () => {
     entity = props.entities[currentIndex.value]
     if (entity.preview_file_id) {
       if (currentPlayer.value) {
-        if (props.name === 'main') {
-          runEmitTimeUpdateLoop()
-        }
         currentPlayer.value.play()
       }
       isPlaying.value = true
     }
   }
-}
-
-const runEmitTimeUpdateLoop = () => {
-  cancelAnimationFrame(playLoop)
-  lastEmittedFrame = null
-  // requestAnimationFrame (not setInterval) so the emitted time is smooth and
-  // tab-throttle friendly; frame-update is deduplicated to the frame value.
-  const update = () => {
-    if (currentPlayer.value) updateTime(currentPlayer.value.currentTime)
-    playLoop = requestAnimationFrame(update)
-  }
-  playLoop = requestAnimationFrame(update)
 }
 
 const playNext = handleIn => {
@@ -459,12 +484,10 @@ const playNext = handleIn => {
     currentIndex.value = nextIndex
     emit('entity-change', currentIndex.value)
 
-    if (currentPlayer.value) currentPlayer.value.style.display = 'none'
     if (nextPlayer.value) {
       nextPlayer.value.currentTime = handleIn
         ? handleIn * frameDuration.value
         : 0
-      nextPlayer.value.style.display = 'block'
       nextPlayer.value.play()
     }
 
@@ -553,6 +576,8 @@ const switchPlayers = () => {
   }
   resetHeight()
   setSpeed(rate)
+  resizeRenderer()
+  startRenderLoop()
 }
 
 const updateTime = time => {
@@ -569,8 +594,10 @@ const updateTime = time => {
 
 const updateMaxDuration = () => {
   if (currentPlayer.value) {
+    resizeRenderer()
     emit('max-duration-update', currentPlayer.value.duration)
     emit('video-loaded')
+    if (renderLoopHandle === null) startRenderLoop()
   }
 }
 
@@ -694,10 +721,9 @@ watch(
 onMounted(() => {
   resetHeight()
   player1Ref.value.addEventListener('loadedmetadata', emitLoadedEvent)
-  // Defer panzoom binding until each video has metadata so the bounds
+  // Defer panzoom binding until metadata loads so the bounds
   // clamp doesn't compute against a 0×0 target.
-  player1Ref.value.addEventListener('loadedmetadata', setupPlayer1PanZoom)
-  player2Ref.value.addEventListener('loadedmetadata', setupPlayer2PanZoom)
+  player1Ref.value.addEventListener('loadedmetadata', setupPanZoom)
   window.addEventListener('resize', resetHeight)
   if (typeof ResizeObserver !== 'undefined' && containerRef.value) {
     containerResizeObserver = new ResizeObserver(() => {
@@ -711,23 +737,22 @@ onMounted(() => {
 
   // Cached-video case: metadata may already be present, in which case
   // the load events above won't fire.
-  if (player1Ref.value.readyState >= 1) setupPlayer1PanZoom()
-  if (player2Ref.value.readyState >= 1) setupPlayer2PanZoom()
+  if (player1Ref.value.readyState >= 1) setupPanZoom()
 })
 
 onBeforeUnmount(() => {
-  cancelAnimationFrame(playLoop)
+  stopRenderLoop()
+  renderer?.dispose()
+  renderer = null
   window.removeEventListener('resize', resetHeight)
   containerResizeObserver?.disconnect()
   player1Ref.value?.removeEventListener('loadedmetadata', emitLoadedEvent)
-  player1Ref.value?.removeEventListener('loadedmetadata', setupPlayer1PanZoom)
-  player2Ref.value?.removeEventListener('loadedmetadata', setupPlayer2PanZoom)
+  player1Ref.value?.removeEventListener('loadedmetadata', setupPanZoom)
 
   unbindLoadingHandlers(player1Ref.value)
   unbindLoadingHandlers(player2Ref.value)
 
   firstPanZoom?.dispose()
-  secondPanZoom?.dispose()
 })
 
 // Expose public surface for parent components ($refs['raw-player'])
@@ -766,7 +791,8 @@ defineExpose({
   pausePanZoom,
   resetPanZoom,
   resumePanZoom,
-  setPanZoom
+  setPanZoom,
+  getDisplaySurface
 })
 </script>
 
@@ -776,8 +802,17 @@ defineExpose({
   position: relative;
   overflow: hidden;
 
-  video {
+  .playlist-movie-decoder {
+    // Not display:none — some browsers suspend decoding entirely.
+    position: absolute;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  canvas.playlist-movie {
     margin: auto;
+    max-width: 100%;
+    object-fit: contain;
   }
 }
 
@@ -787,7 +822,7 @@ defineExpose({
     display: flex;
     justify-content: center;
 
-    video {
+    canvas.playlist-movie {
       margin: 0 auto;
     }
   }
