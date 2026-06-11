@@ -643,6 +643,7 @@ const actions = {
   setLastTaskPreview({ commit, state }, taskId) {
     const taskMap = state.taskMap
     return tasksApi.setLastTaskPreviewAsEntityThumbnail(taskId).then(entity => {
+      if (!entity) return
       commit(SET_PREVIEW, {
         taskId,
         entityId: entity.id,
