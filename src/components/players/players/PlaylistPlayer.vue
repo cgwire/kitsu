@@ -3680,17 +3680,32 @@ const loadWaveForm = () => {
   }
 }
 
-const resetHandles = entity => {
-  if (!['shot', 'edit', 'episode'].includes(props.playlist?.for_entity)) return
-  entity = entity || currentEntity.value
+// Handles straight from the entity's source data — the handleIn /
+// handleOut refs and the global nbFrames may still reflect the previous
+// entity right after a switch.
+const getEntityHandles = entity => {
+  if (!['shot', 'edit', 'episode'].includes(props.playlist?.for_entity)) {
+    return { handleIn: 0, handleOut: 0 }
+  }
   const entityMapByType = {
     edit: editMap.value,
     episode: episodeMap.value,
     shot: shotMap.value
   }
   const source = entityMapByType[props.playlist.for_entity]?.get(entity?.id)
-  handleIn.value = source?.data?.handle_in || 0
-  handleOut.value = source?.data?.handle_out || nbFrames.value
+  return {
+    handleIn: source?.data?.handle_in || 0,
+    handleOut: source?.data?.handle_out || 0
+  }
+}
+
+const resetHandles = entity => {
+  if (!['shot', 'edit', 'episode'].includes(props.playlist?.for_entity)) return
+  entity = entity || currentEntity.value
+  const { handleIn: entityHandleIn, handleOut: entityHandleOut } =
+    getEntityHandles(entity)
+  handleIn.value = entityHandleIn
+  handleOut.value = entityHandleOut || nbFrames.value
 }
 
 const resetPlaylistFrameData = () => {
@@ -3942,7 +3957,24 @@ const onKeyDown = event => {
     } else if (event.altKey) {
       onPlayPreviousEntityClicked()
       nextTick(() => {
-        rawPlayer.value?.setCurrentFrame(nbFrames.value - 1)
+        // Land on the last playable frame of the entity we just switched
+        // to, computed from its own data: the global nbFrames still
+        // reflects the previous entity at this tick (metadata not loaded
+        // yet), and the entity's handle-out bounds the playable range.
+        const entity = currentEntity.value
+        const entityFps = parseFloat(entity?.fps) || fps.value
+        let lastFrame =
+          Math.round((entity?.preview_file_duration || 0) * entityFps) - 1
+        const handleOutFrame = getEntityHandles(entity).handleOut
+        if (handleOutFrame > 0 && handleOutFrame < lastFrame) {
+          lastFrame = handleOutFrame
+        }
+        lastFrame = Math.max(lastFrame, 0)
+        rawPlayer.value?.setCurrentFrame(lastFrame)
+        // The strip indicator is only driven by time-update while
+        // playing; reposition it on this paused jump.
+        playlistProgress.value =
+          (entity?.start_duration || 0) + lastFrame / entityFps
         if (isFullMode.value && currentEntity.value) {
           const time =
             currentEntity.value.start_duration +
@@ -3967,7 +3999,14 @@ const onKeyDown = event => {
     } else if (event.altKey) {
       onPlayNextEntityClicked()
       nextTick(() => {
-        rawPlayer.value?.setCurrentFrame(0)
+        // Mirror of Alt+Left: land on the entity's handle-in (or frame
+        // 0) and reposition the paused strip indicator.
+        const entity = currentEntity.value
+        const entityFps = parseFloat(entity?.fps) || fps.value
+        const firstFrame = Math.max(getEntityHandles(entity).handleIn, 0)
+        rawPlayer.value?.setCurrentFrame(firstFrame)
+        playlistProgress.value =
+          (entity?.start_duration || 0) + firstFrame / entityFps
       })
     } else {
       onNextFrameClicked()

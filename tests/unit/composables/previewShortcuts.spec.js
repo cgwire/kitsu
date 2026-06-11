@@ -109,6 +109,20 @@ describe('composables/previewShortcuts', () => {
       wrapper.unmount()
     })
 
+    it('ignores modified arrows — Alt/Ctrl combos belong to surface handlers', () => {
+      // PlaylistPlayer binds Alt+Arrow (entity navigation) and
+      // Ctrl+Shift+Arrow (entity reorder) on the same window target;
+      // stepping a frame on top of those overwrote their seek.
+      const { handlers, wrapper } = mountShortcuts()
+      dispatchKeydown({ key: 'ArrowLeft', altKey: true })
+      dispatchKeydown({ key: 'ArrowRight', altKey: true })
+      dispatchKeydown({ key: 'ArrowLeft', ctrlKey: true, shiftKey: true })
+      dispatchKeydown({ key: 'ArrowRight', metaKey: true })
+      expect(handlers.onPrevFrame).not.toHaveBeenCalled()
+      expect(handlers.onNextFrame).not.toHaveBeenCalled()
+      wrapper.unmount()
+    })
+
     it('keeps stepping frames on auto-repeat so holding an arrow scrubs the video', () => {
       const { handlers, wrapper } = mountShortcuts()
       dispatchKeydown({ key: 'ArrowRight', repeat: true })
