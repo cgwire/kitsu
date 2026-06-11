@@ -839,6 +839,13 @@ export const useAnnotation = ({
     if (silentAnnotation) return
     let o = obj.target ? obj.target : obj.targets[0]
     o = setObjectData(o)
+    // The finalized stroke can lose the brush's round caps under
+    // fabric 7 (the live brush preview had them). Force them like the
+    // reload path (addObjectToCanvas) already does.
+    if (o.set && (o.type === 'PSStroke' || o.type === 'path')) {
+      o.set('strokeLineCap', 'round')
+      o.set('strokeLineJoin', 'round')
+    }
     if (isLaserModeOn.value) {
       // Laser strokes fade out locally and are broadcast as ephemeral
       // events; they are intentionally not added to the additions stack.
