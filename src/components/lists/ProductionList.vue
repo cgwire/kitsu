@@ -408,7 +408,6 @@ const onProjectMetadataInCell = ({ entry, descriptor, value }) => {
 .actions {
   min-width: 120px;
   padding: 0.4em;
-  position: relative;
 }
 
 .fps,
