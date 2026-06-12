@@ -1,5 +1,5 @@
 <template>
-  <div ref="container" class="picture-player">
+  <div ref="container" class="picture-player" @wheel="swallowBrowserZoom">
     <div
       ref="pictureWrapper"
       class="picture-wrapper"
@@ -31,6 +31,7 @@
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import createPanzoom from 'panzoom'
 
+import { swallowBrowserZoom } from '@/lib/players/wheel'
 import { isPicturePreview } from '@/lib/preview'
 
 import Spinner from '@/components/widgets/Spinner.vue'
@@ -322,7 +323,9 @@ const setupPanZoom = () => {
     minZoom: 1,
     smoothScroll: false,
     beforeMouseDown: e => e.target !== target,
-    beforeWheel: e => e.target !== target,
+    // Zoom is a Ctrl+wheel gesture: a plain wheel keeps scrolling the
+    // surrounding widgets/page.
+    beforeWheel: e => !e.ctrlKey || e.target !== target,
     // panzoom otherwise puts tabindex=0 on the owner and steals arrow
     // keys / +/- to pan and zoom — those shortcuts are owned by the
     // player (frame stepping, annotation navigation), so disable them.
