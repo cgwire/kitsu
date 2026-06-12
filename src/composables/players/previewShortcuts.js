@@ -77,10 +77,14 @@ export const usePreviewShortcuts = handlers => {
         handlers.onDelete?.()
         break
       case 'ArrowLeft':
-        handlers.onPrevFrame?.()
+        // Modified arrows belong to surface-specific handlers bound on
+        // the same window target (playlist entity navigation on Alt,
+        // entity reorder on Ctrl+Shift) — stepping a frame on top of
+        // them overwrote their seek.
+        if (!alt && !mod) handlers.onPrevFrame?.()
         break
       case 'ArrowRight':
-        handlers.onNextFrame?.()
+        if (!alt && !mod) handlers.onNextFrame?.()
         break
       case 'Home':
         pauseEvent(event)

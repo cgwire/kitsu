@@ -648,6 +648,7 @@ export default {
       currentSort: 'updated_at',
       currentEntitiesMap: {},
       currentEntitiesList: [],
+      entitiesAddedWhilePanelOpen: false,
       entityLoading: {},
       isAddingEntity: false,
       isListToggled: false,
@@ -1228,6 +1229,7 @@ export default {
 
     addEntityToPlaylist(entity) {
       this.setSilent()
+      this.entitiesAddedWhilePanelOpen = true
       const playlist = this.currentPlaylist
       this.addEntity(entity, playlist).then(() => {
         this.clearSilent()
@@ -1386,6 +1388,7 @@ export default {
         playlist = this.currentPlaylist
       }
       if (entities && entities.length > 0) {
+        this.entitiesAddedWhilePanelOpen = true
         const entity = entities.pop()
         this.addEntity(entity, playlist).then(() => {
           this.addEntities(entities, callback, playlist)
@@ -1560,7 +1563,10 @@ export default {
 
     toggleAddEntities() {
       if (this.isAddingEntity) {
-        this.resetPlaylist()
+        // Only rebuild the playlist when entities were actually added —
+        // closing an untouched panel otherwise reloads the whole player.
+        if (this.entitiesAddedWhilePanelOpen) this.resetPlaylist()
+        this.entitiesAddedWhilePanelOpen = false
       }
       this.isAddingEntity = !this.isAddingEntity
     },

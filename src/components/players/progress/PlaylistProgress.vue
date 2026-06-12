@@ -37,42 +37,39 @@
       "
       v-show="entityList.length > 1 && playlistDuration > 0"
     >
+      <!-- Hover visibility is owned by the wrapper: per-child enter/leave
+           handlers flicker the thumbnail when the cursor crosses segment
+           boundaries while still inside the bar. -->
       <div
         class="entity-status"
-        :key="`progress-entity-${entity.id}`"
+        :class="{ current: index === currentEntityIndex }"
+        :key="`progress-entity-${entity.id}-${entity.preview_file_id}`"
         :style="{
           left: getEntityPosition(entity) + '%',
           width: getEntityWidth(entity) + '%',
           'background-color': getEntityColor(entity)
         }"
-        @mouseenter="isFrameNumberVisible = true"
-        @mouseleave="isFrameNumberVisible = false"
-        @touchend="isFrameNumberVisible = false"
-        @touchcancel="isFrameNumberVisible = false"
         @mousedown="startPlaylistProgressDrag"
-        @touchstart="
-          () => {
-            startPlaylistProgressDrag()
-            isFrameNumberVisible = true
-          }
-        "
-        v-for="entity in entityList"
+        @touchstart="startPlaylistProgressDrag"
+        v-for="(entity, index) in entityList"
       >
         <span>
           {{ getFullEntityName(entity) }}
         </span>
       </div>
       <span
+        class="playlist-progress-elapsed"
+        :style="{
+          width: (100 * playlistProgress) / playlistDuration + '%'
+        }"
+      >
+      </span>
+      <span
         class="playlist-progress-position"
         :style="{
           left:
-            'calc(' + (100 * playlistProgress) / playlistDuration + '% - 3px)'
+            'calc(' + (100 * playlistProgress) / playlistDuration + '% - 1px)'
         }"
-        @mouseenter="isFrameNumberVisible = true"
-        @mouseleave="isFrameNumberVisible = false"
-        @touchstart="isFrameNumberVisible = true"
-        @touchend="isFrameNumberVisible = false"
-        @touchcancel="isFrameNumberVisible = false"
       >
       </span>
     </div>
@@ -81,6 +78,13 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
+
+import {
+  getTileCellIndex,
+  getTileGeometry,
+  TILE_CELL_HEIGHT,
+  TILE_COLUMNS
+} from '@/lib/players/tiles'
 
 import Spinner from '@/components/widgets/Spinner.vue'
 
@@ -144,7 +148,6 @@ const emit = defineEmits([
 const frameNumberLeftPosition = ref(0)
 const hoverFrame = ref(0)
 const isFrameNumberVisible = ref(false)
-const isTileLoading = ref(false)
 const playlistProgressDragging = ref(false)
 const playlistProgressWidget = ref(null)
 const progressDragging = ref(false)
@@ -157,20 +160,16 @@ const getClientX = event =>
   event.changedTouches?.[0]?.clientX ??
   event.clientX
 
-const tilePath = computed(
-  () =>
-    `${props.urlPrefix || '/api'}/movies/tiles/preview-files/${props.previewId}.png`
-)
-
 const frameNumberStyle = computed(() => {
-  const frameHeight = 100
+  const frameHeight = TILE_CELL_HEIGHT
   const height = frameHeight + 30
   let frameWidth = 150
   const preview = props.playlistShotPosition[hoverFrame.value]
   if (!preview) return {}
   if (preview.extension === 'mp4') {
-    const ratio = preview.width / preview.height
-    frameWidth = Math.ceil(frameHeight * ratio)
+    frameWidth =
+      tileGeometries.value.get(preview.id)?.cellWidth ??
+      Math.ceil(frameHeight * (preview.width / preview.height))
   } else if (preview.extension === 'png') {
     frameWidth = 150
   }
@@ -237,6 +236,16 @@ const doProgressDrag = event => {
   ) {
     const { frameNumber } = getPlaylistMouseFrame(event)
     hoverFrame.value = frameNumber + 1
+    // Kick the sprite load for the hovered preview even while the
+    // spinner is shown (the tile span itself is v-if'd out then).
+    const preview = props.playlistShotPosition[hoverFrame.value]
+    if (preview?.extension === 'mp4') {
+      const base = props.urlPrefix || '/api'
+      ensureTileGeometry(
+        preview.id,
+        `${base}/movies/tiles/preview-files/${preview.id}.png`
+      )
+    }
     const allDuration = Math.round(props.playlistDuration * props.fps)
     frameNumberLeftPosition.value = (width.value / allDuration) * frameNumber
     if (playlistProgressDragging.value) {
@@ -250,6 +259,31 @@ const onPlaylistProgressClicked = event => {
   emit('progress-playlist-changed', frameNumber)
 }
 
+// Measured sprite geometries per preview id — recomputing the cell width
+// from stored dimensions drifts from the file the sprite was built from
+// (source ratio ≠ production ratio, renormalisations).
+const tileGeometries = ref(new Map())
+
+const ensureTileGeometry = (id, tilePathUrl) => {
+  if (tileGeometries.value.has(id)) return tileGeometries.value.get(id)
+  tileGeometries.value.set(id, null)
+  getTileGeometry(tilePathUrl).then(geometry => {
+    if (!geometry) return
+    const next = new Map(tileGeometries.value)
+    next.set(id, geometry)
+    tileGeometries.value = next
+  })
+  return null
+}
+
+// The hovered preview's sprite is still loading/measuring: show the
+// spinner instead of a black not-yet-loaded background.
+const isTileLoading = computed(() => {
+  const preview = props.playlistShotPosition[hoverFrame.value]
+  if (!preview || preview.extension !== 'mp4') return false
+  return !tileGeometries.value.get(preview.id)
+})
+
 const getFrameBackgroundStyle = frame => {
   if (!frame || !props.playlistShotPosition[frame]) return {}
   const {
@@ -260,12 +294,6 @@ const getFrameBackgroundStyle = frame => {
   } = props.playlistShotPosition[frame]
 
   frame = frame - props.playlistShotPosition[frame].start * props.fps
-  if (props.nbFrames >= 3840) {
-    frame = Math.ceil(frame / Math.ceil(props.nbFrames / 3840))
-  }
-  const frameX = frame % 8
-  const frameY = Math.floor(frame / 8)
-  const frameHeight = 100
   const base = props.urlPrefix || '/api'
 
   if (extension === 'png') {
@@ -276,13 +304,18 @@ const getFrameBackgroundStyle = frame => {
       width: '150px'
     }
   } else if (extension === 'mp4') {
-    const ratio = pw / ph
-    const frameWidth = Math.ceil(frameHeight * ratio)
     const tp = `${base}/movies/tiles/preview-files/${id}.png`
+    const geometry = ensureTileGeometry(id, tp)
+    const frameWidth =
+      geometry?.cellWidth ?? Math.ceil(TILE_CELL_HEIGHT * (pw / ph))
+    const cellCount = geometry?.cellCount ?? 3840
+    const cell = getTileCellIndex(frame, props.nbFrames, cellCount)
+    const frameX = cell % TILE_COLUMNS
+    const frameY = Math.floor(cell / TILE_COLUMNS)
     return {
       background: `url(${tp})`,
       'background-position': `-${frameX * frameWidth}px -${
-        frameY * frameHeight
+        frameY * TILE_CELL_HEIGHT
       }px`,
       width: `${frameWidth}px`
     }
@@ -318,6 +351,16 @@ const getFullEntityName = entity => {
   return `${entity.parent_name} / ${entity.name}`.replaceAll(' ', ' ')
 }
 
+const currentEntityIndex = computed(() => {
+  const time = props.playlistProgress
+  return props.entityList.findIndex((entity, index) => {
+    const start = entity.start_duration - props.frameDuration
+    const next = props.entityList[index + 1]
+    const end = next ? next.start_duration - props.frameDuration : Infinity
+    return time >= start && time < end
+  })
+})
+
 const domEvents = [
   ['mousemove', doProgressDrag],
   ['touchmove', doProgressDrag],
@@ -330,24 +373,6 @@ const domEvents = [
   ['touchend', stopPlaylistProgressDrag],
   ['touchcancel', stopPlaylistProgressDrag]
 ]
-
-watch(
-  () => props.previewId,
-  () => {
-    if (props.previewId) {
-      const preview = props.playlistShotPosition[hoverFrame.value]
-      if (preview?.extension === 'mp4') {
-        isTileLoading.value = true
-        const img = new Image()
-        img.src = tilePath.value
-        img.onload = () => {
-          isTileLoading.value = false
-        }
-      }
-    }
-  },
-  { immediate: true }
-)
 
 watch(
   () => props.entityList,
@@ -377,6 +402,10 @@ onBeforeUnmount(() => {
   background: $black;
   border-radius: 5px;
   color: $white;
+  // The thumbnail can overlap the bar (top: 16px when not fullscreen);
+  // without this the cursor "enters" it, fires the bar's mouseleave and
+  // the thumbnail flickers in a show/hide loop.
+  pointer-events: none;
   position: absolute;
   padding: 0.3em;
   text-align: center;
@@ -411,13 +440,41 @@ onBeforeUnmount(() => {
   touch-action: pan-y;
 }
 
-.playlist-progress-position {
-  border-left: 5px solid $green;
+// Translucent veil over the already-played part of the strip, so the
+// position reads at a glance without hiding the status colors.
+.playlist-progress-elapsed {
+  background: rgba(255, 255, 255, 0.16);
+  height: 100%;
+  left: 0;
+  pointer-events: none;
   position: absolute;
-  height: 6px;
-  border-radius: 50%;
+  top: 0;
   z-index: 3;
-  top: -2px;
+}
+
+.playlist-progress-position {
+  background: $white;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.7);
+  // Flush with the bar bottom: overflowing below made the hover
+  // thumbnail flicker on the bar's last pixel row.
+  height: 22px;
+  pointer-events: none;
+  position: absolute;
+  top: -4px;
+  width: 2px;
+  z-index: 4;
+
+  // Small grab handle on top of the playhead line.
+  &::before {
+    background: $white;
+    border-radius: 2px;
+    content: '';
+    height: 5px;
+    left: -2px;
+    position: absolute;
+    top: 0;
+    width: 6px;
+  }
 }
 
 .frame-number-rail {
@@ -436,22 +493,35 @@ onBeforeUnmount(() => {
 
 .entity-status {
   border-left: 0;
-  border-right: 3px solid $dark-grey;
+  border-right: 2px solid $dark-grey;
   position: absolute;
   bottom: 0;
-  transition: height 0.3s ease-in-out;
-  height: 16px;
+  transition:
+    height 0.3s ease-in-out,
+    opacity 0.2s ease-in-out;
+  height: 14px;
   z-index: 2;
-  opacity: 0.4;
+  opacity: 0.55;
 
   span {
     background: $dark-grey;
     border-radius: 5px;
+    // The segment constrains the tooltip's width: without nowrap a long
+    // name wraps inside a narrow segment and spills over the timeline.
+    white-space: nowrap;
+    bottom: calc(100% + 6px);
     color: $white;
     display: none;
     padding: 0.2em 0.5em;
     position: absolute;
-    top: -30px;
+    z-index: 5;
+  }
+
+  // The currently-playing entity stands out: full status color, full
+  // strip height.
+  &.current {
+    height: 18px;
+    opacity: 1;
   }
 
   &:hover {

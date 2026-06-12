@@ -1,13 +1,30 @@
 <template>
   <div class="unselectable">
+    <!-- Zoom mini-map: the full clip, with the visible window. -->
+    <div
+      class="timeline-minimap"
+      v-if="zoomLevel > 1"
+      @mousedown="startMinimapDrag"
+    >
+      <span
+        class="minimap-window"
+        :style="{
+          left: (100 * viewStartFrame) / nbFrames + '%',
+          width: 100 / zoomLevel + '%'
+        }"
+      ></span>
+    </div>
     <div
       class="progress-wrapper"
-      :style="{
-        'background-size': backgroundSize,
-        ...(backgroundUrl
-          ? { 'background-image': `url(${backgroundUrl})` }
-          : {})
-      }"
+      :style="
+        backgroundUrl
+          ? {
+              'background-size': backgroundSize,
+              'background-image': `url(${backgroundUrl})`
+            }
+          : { 'background-image': frameTicksGradient }
+      "
+      @wheel.prevent="onWheelZoom"
       @mouseenter="isFrameNumberVisible = true"
       @mouseleave="isFrameNumberVisible = false"
       @touchstart="isFrameNumberVisible = true"
@@ -16,27 +33,28 @@
     >
       <span
         class="handle-in"
-        :style="{
-          width: handleInWidth,
-          'padding-right': handleIn > 1 ? '5px' : 0
-        }"
+        :class="{ dragging: handleInDragging }"
+        :style="{ width: handleInWidth }"
         @mousedown="startHandleInDrag"
         @touchstart="startHandleInDrag"
         v-if="handleIn >= 0 && !isFullMode && !empty"
       >
-        {{ handleIn !== 0 ? handleIn + 1 : '' }}
+        <span class="handle-frame" v-if="handleIn !== 0">
+          {{ handleIn + 1 }}
+        </span>
       </span>
 
       <span
         class="handle-out"
-        :style="{
-          width: frameSize * (nbFrames - handleOut) + 'px'
-        }"
+        :class="{ dragging: handleOutDragging }"
+        :style="{ width: handleOutWidth }"
         @mousedown="startHandleOutDrag"
         @touchstart="startHandleOutDrag"
         v-if="handleOut >= 0 && !isFullMode && !empty"
       >
-        {{ handleOut + 1 }}
+        <span class="handle-frame">
+          {{ handleOut + 1 }}
+        </span>
       </span>
 
       <progress
@@ -53,7 +71,7 @@
         class="annotation-mark"
         :style="{
           left: getAnnotationPosition(annotation) + 'px',
-          width: Math.max(frameSize - 1, 5) + 'px'
+          width: Math.max(effectiveFrameSize - 1, 5) + 'px'
         }"
         @mouseenter="isFrameNumberVisible = true"
         @mouseleave="isFrameNumberVisible = false"
@@ -70,7 +88,7 @@
         class="annotation-mark comparison-mark"
         :style="{
           left: getAnnotationPosition(annotation) + 'px',
-          width: Math.max(frameSize - 1, 5) + 'px'
+          width: Math.max(effectiveFrameSize - 1, 5) + 'px'
         }"
         @mouseenter="isFrameNumberVisible = true"
         @mouseleave="isFrameNumberVisible = false"
@@ -103,6 +121,13 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
+
+import {
+  getTileCellIndex,
+  getTileGeometry,
+  TILE_CELL_HEIGHT,
+  TILE_COLUMNS
+} from '@/lib/players/tiles'
 
 const props = defineProps({
   annotations: {
@@ -174,6 +199,7 @@ const hoverFrame = ref(0)
 const isFrameNumberVisible = ref(false)
 const progress = ref(null)
 const progressDragging = ref(false)
+const tileGeometry = ref(null)
 const width = ref(0)
 
 // Mouse scratch state; not reactive — written from event handlers, never read by template
@@ -194,7 +220,92 @@ const backgroundSize = computed(() => {
   }
 })
 
-const frameSize = computed(() => width.value / props.nbFrames)
+// Alternating frame stripes generated at the exact frame size, using the
+// two colors sampled from the legacy player-timeslider.png — the
+// stretched texture blurred as soon as the clip had few frames. Stripes
+// are dropped when frames get too dense to read.
+const frameTicksGradient = computed(() => {
+  const size = effectiveFrameSize.value
+  if (!size || size < 3) return 'none'
+  // Anchor the stripe phase on the view window so frames keep their
+  // shade while panning/zooming.
+  const phase = -(viewStartFrame.value % 2) * size
+  return (
+    `repeating-linear-gradient(to right, ` +
+    `rgb(54, 57, 63) ${phase}px, rgb(54, 57, 63) ${phase + size}px, ` +
+    `rgb(84, 89, 98) ${phase + size}px, rgb(84, 89, 98) ${phase + 2 * size}px)`
+  )
+})
+
+// — Timeline zoom: the bar shows a [viewStartFrame, viewStartFrame +
+// nbFrames / zoomLevel] window of the clip. Every on-screen position
+// goes through frameToX / xToFrame so marks, handles, fill, clicks and
+// stripes share one mapping. zoomLevel 1 = the whole clip (status quo).
+const zoomLevel = ref(1)
+const viewStartFrame = ref(0)
+
+const visibleFrames = computed(() => props.nbFrames / zoomLevel.value)
+const effectiveFrameSize = computed(() => width.value / visibleFrames.value)
+
+const frameToX = frame =>
+  (frame - viewStartFrame.value) * effectiveFrameSize.value
+const xToFrame = x => viewStartFrame.value + x / effectiveFrameSize.value
+
+const clampViewStart = start =>
+  Math.min(Math.max(start, 0), props.nbFrames - visibleFrames.value)
+
+const onWheelZoom = event => {
+  if (props.empty || !props.nbFrames) return
+  const anchorFrame = xToFrame(getClientX(event) - getProgressLeft())
+  const factor = event.deltaY < 0 ? 1.25 : 1 / 1.25
+  // Never zoom past ~8 visible frames, never below the full clip.
+  const maxZoom = Math.max(props.nbFrames / 8, 1)
+  zoomLevel.value = Math.min(Math.max(zoomLevel.value * factor, 1), maxZoom)
+  if (zoomLevel.value === 1) {
+    viewStartFrame.value = 0
+    return
+  }
+  // Keep the frame under the cursor stationary while zooming.
+  const cursorX = getClientX(event) - getProgressLeft()
+  viewStartFrame.value = clampViewStart(
+    anchorFrame - cursorX / effectiveFrameSize.value
+  )
+}
+
+let minimapDragging = false
+
+const startMinimapDrag = event => {
+  minimapDragging = true
+  panMinimap(event)
+  const move = e => panMinimap(e)
+  const up = () => {
+    minimapDragging = false
+    document.removeEventListener('mousemove', move)
+    document.removeEventListener('mouseup', up)
+  }
+  document.addEventListener('mousemove', move)
+  document.addEventListener('mouseup', up)
+}
+
+const panMinimap = event => {
+  if (!minimapDragging || !width.value) return
+  const x = getClientX(event) - getProgressLeft()
+  const centerFrame = (x / width.value) * props.nbFrames
+  viewStartFrame.value = clampViewStart(centerFrame - visibleFrames.value / 2)
+}
+
+const getProgressLeft = () => {
+  if (!progress.value) return 0
+  const left = progress.value.getBoundingClientRect().left
+  if (
+    left === 0 &&
+    !props.isFullScreen &&
+    progress.value.parentElement.offsetParent
+  ) {
+    return progress.value.parentElement.offsetParent.offsetLeft
+  }
+  return left
+}
 
 const videoRatio = computed(() =>
   props.movieDimensions.width
@@ -203,13 +314,22 @@ const videoRatio = computed(() =>
 )
 
 const handleInWidth = computed(
-  () => Math.max(frameSize.value * props.handleIn, 0) + 'px'
+  () => Math.min(Math.max(frameToX(props.handleIn), 0), width.value || 0) + 'px'
+)
+
+const handleOutWidth = computed(
+  () =>
+    Math.min(
+      Math.max((width.value || 0) - frameToX(props.handleOut), 0),
+      width.value || 0
+    ) + 'px'
 )
 
 const frameNumberStyle = computed(() => {
-  const frameHeight = 100
+  const frameHeight = TILE_CELL_HEIGHT
   const height = frameHeight + 30
-  const frameWidth = Math.ceil(frameHeight * videoRatio.value)
+  const frameWidth =
+    tileGeometry.value?.cellWidth ?? Math.ceil(frameHeight * videoRatio.value)
   const w = frameWidth + 10
   const left = Math.min(
     Math.max(frameNumberLeftPosition.value - frameWidth / 2, 0),
@@ -231,16 +351,39 @@ const onWindowResize = () => {
   }
 }
 
+watch(
+  () => props.previewId,
+  () => {
+    tileGeometry.value = null
+    if (!props.previewId) return
+    const previewId = props.previewId
+    const base = props.urlPrefix || '/api'
+    getTileGeometry(`${base}/movies/tiles/preview-files/${previewId}.png`).then(
+      geometry => {
+        // Guard against a preview switch racing the load.
+        if (props.previewId === previewId) tileGeometry.value = geometry
+      }
+    )
+  },
+  { immediate: true }
+)
+
 const getAnnotationPosition = annotation => {
   if (props.nbFrames === 0) return 0
   const frameNumber = Math.round(annotation.time / props.frameDuration)
-  return frameNumber * frameSize.value
+  return frameToX(frameNumber)
 }
 
+// Remember the last frame pushed by the parent so the fill can be
+// recomputed when the zoom window moves.
+let lastProgressFrame = 0
+
 const updateProgressBar = frameNumber => {
+  lastProgressFrame = frameNumber
+  const relative = frameNumber - viewStartFrame.value
   progress.value.value = props.empty
-    ? frameNumber * props.frameDuration
-    : (frameNumber + 1) * props.frameDuration
+    ? relative * props.frameDuration
+    : (relative + 1) * props.frameDuration
 }
 
 const startProgressDrag = () => {
@@ -289,12 +432,13 @@ const getMouseFrame = (event, annotation) => {
   }
   let position = getClientX(event) - left
   if (position > width.value) position = width.value - 1
-  const ratio = position / width.value
   // Clicking an annotation marker must land on that annotation's exact
   // frame so the annotation loads — not the pixel the cursor hit, which can
   // be a frame off and make the annotation lookup miss. Bar clicks (no
-  // annotation) still map to the click position.
-  let duration = annotation ? annotation.time : videoDuration.value * ratio
+  // annotation) map the click position through the zoom window.
+  let duration = annotation
+    ? annotation.time
+    : xToFrame(position) * props.frameDuration
   if (duration < 0) duration = 0
 
   const isChromium = !!window.chrome
@@ -324,7 +468,7 @@ const doProgressDrag = event => {
     currentMouseFrame = getMouseFrame(event)
     const { frameNumber } = currentMouseFrame
     hoverFrame.value = frameNumber + 1
-    frameNumberLeftPosition.value = (width.value / props.nbFrames) * frameNumber
+    frameNumberLeftPosition.value = frameToX(frameNumber)
     if (progressDragging.value) {
       emit('progress-changed', frameNumber)
     } else if (handleInDragging.value) {
@@ -350,20 +494,22 @@ const emitProgressEvent = (event, annotation) => {
 const getFrameBackgroundStyle = frame => {
   if (!frame) return {}
   const previewId = props.previewId
-  frame = frame - 1
-  if (props.nbFrames >= 3840) {
-    frame = Math.ceil(frame / Math.ceil(props.nbFrames / 3840))
-  }
-  const frameX = frame % 8
-  const frameY = Math.floor(frame / 8)
-  const frameHeight = 100
-  const frameWidth = Math.ceil(frameHeight * videoRatio.value)
   const base = props.urlPrefix || '/api'
   const tilePath = `${base}/movies/tiles/preview-files/${previewId}.png`
+  // Measured sprite geometry beats recomputing the cell width from the
+  // preview's stored dimensions, which drift from the file the sprite
+  // was built from (source ratio ≠ production ratio, renormalisations).
+  const geometry = tileGeometry.value
+  const frameWidth =
+    geometry?.cellWidth ?? Math.ceil(TILE_CELL_HEIGHT * videoRatio.value)
+  const cellCount = geometry?.cellCount ?? 3840
+  const cell = getTileCellIndex(frame - 1, props.nbFrames, cellCount)
+  const frameX = cell % TILE_COLUMNS
+  const frameY = Math.floor(cell / TILE_COLUMNS)
   return {
     background: `url(${tilePath})`,
     'background-position': `-${frameX * frameWidth}px -${
-      frameY * frameHeight
+      frameY * TILE_CELL_HEIGHT
     }px`,
     width: `${frameWidth}px`
   }
@@ -409,6 +555,24 @@ watch(videoDuration, () => {
   updateProgressBar(0)
 })
 
+// Keep the fill consistent when the zoom window changes: the bar's max
+// becomes the visible duration and the fill is recomputed against the
+// last frame the parent pushed.
+watch([zoomLevel, viewStartFrame], () => {
+  if (!progress.value) return
+  progress.value.setAttribute('max', visibleFrames.value * props.frameDuration)
+  updateProgressBar(lastProgressFrame)
+})
+
+// A new preview means a new timeline: drop the zoom.
+watch(
+  () => props.previewId,
+  () => {
+    zoomLevel.value = 1
+    viewStartFrame.value = 0
+  }
+)
+
 onBeforeUnmount(() => {
   domEvents.forEach(([type, listener]) =>
     document.removeEventListener(type, listener)
@@ -434,10 +598,27 @@ defineExpose({ updateProgressBar })
   }
 }
 
+.timeline-minimap {
+  background: rgb(40, 42, 47);
+  cursor: grab;
+  height: 6px;
+  position: relative;
+  width: 100%;
+
+  .minimap-window {
+    background: rgba(255, 255, 255, 0.35);
+    border-radius: 2px;
+    height: 100%;
+    position: absolute;
+    top: 0;
+  }
+}
+
 .progress-wrapper {
   background: $grey;
-  background-image: url('../../../assets/background/player-timeslider.png');
   background-repeat: repeat-x;
+  // Zoomed views position marks/handles outside the window: clip them.
+  overflow: hidden;
   border: 0;
   cursor: pointer;
   flex-shrink: 0;
@@ -511,56 +692,93 @@ progress {
   }
 }
 
-.handle-in {
-  background: $black;
-  color: $grey;
+// Trim handles, NLE-bracket style: a thick vertical bar with top and
+// bottom lips marking the in/out bounds, the excluded zones lightly
+// veiled so the timeline stays readable, frame numbers always visible.
+.handle-in,
+.handle-out {
+  background: rgba(0, 0, 0, 0.45);
   display: inline-block;
   height: 28px;
-  left: 0;
-  opacity: 0.9;
-  padding-top: 3px;
   position: absolute;
   z-index: 100;
-  text-align: right;
+
+  // Same number presentation as the legacy handles: vertically centered
+  // in the veiled zone, next to the bracket.
+  .handle-frame {
+    color: $grey;
+    font-variant-numeric: tabular-nums;
+    line-height: 28px;
+    position: absolute;
+    top: 0;
+    z-index: 130;
+  }
+
+  // The bracket: vertical bar + top/bottom lips pointing inward,
+  // drawn as solid blocks (borders got visually truncated).
+  &::after {
+    background: $dark-purple;
+    content: ' ';
+    cursor: ew-resize;
+    bottom: 0;
+    position: absolute;
+    top: 0;
+    transition: width 0.1s ease-in-out;
+    width: 4px;
+    z-index: 120;
+  }
+
+  &::before {
+    background:
+      linear-gradient($dark-purple, $dark-purple) top / 100% 4px no-repeat,
+      linear-gradient($dark-purple, $dark-purple) bottom / 100% 4px no-repeat;
+    bottom: 0;
+    content: ' ';
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    width: 9px;
+    z-index: 120;
+  }
+
+  &:hover,
+  &.dragging {
+    &::after {
+      width: 6px;
+    }
+  }
 }
 
-.handle-in::after {
-  bottom: 0;
-  background: $dark-purple;
-  content: ' ';
-  cursor: pointer;
-  height: 34px;
-  position: absolute;
-  right: -5px;
-  top: -2px;
-  width: 5px;
-  z-index: 120;
+.handle-in {
+  left: 0;
+
+  .handle-frame {
+    right: 8px;
+  }
+
+  &::after {
+    right: -4px;
+  }
+
+  &::before {
+    right: -9px;
+  }
 }
 
 .handle-out {
-  background: $black;
-  color: $grey;
-  display: inline-block;
-  height: 28px;
-  overflow: hidden;
-  padding-left: 10px;
-  padding-top: 3px;
-  position: absolute;
-  opacity: 0.9;
+  overflow: visible;
   right: 0;
-  z-index: 100;
-}
 
-.handle-out::before {
-  bottom: 0;
-  background: $dark-purple;
-  content: ' ';
-  cursor: pointer;
-  height: 34px;
-  left: 0;
-  position: absolute;
-  top: -2px;
-  width: 5px;
-  z-index: 120;
+  .handle-frame {
+    left: 8px;
+  }
+
+  &::after {
+    left: -4px;
+  }
+
+  &::before {
+    left: -9px;
+  }
 }
 </style>

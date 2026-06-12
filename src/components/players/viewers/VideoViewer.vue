@@ -20,13 +20,18 @@
       </div>
       <video
         ref="movie"
-        class="annotation-movie"
+        class="annotation-movie-decoder"
         :src="moviePath"
         :poster="posterPath"
         preload="auto"
         type="video/mp4"
-        v-show="!isLoading"
+        playsinline
       ></video>
+      <canvas
+        ref="displayCanvas"
+        class="annotation-movie"
+        v-show="!isLoading"
+      ></canvas>
     </div>
   </div>
 </template>
@@ -36,6 +41,10 @@ import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import createPanzoom from 'panzoom'
 import { useStore } from 'vuex'
 
+import {
+  createFrameRenderer,
+  supportsVideoFrameCallback
+} from '@/lib/players/frameRenderer'
 import { formatFrame } from '@/lib/video'
 
 import Spinner from '@/components/widgets/Spinner.vue'
@@ -132,6 +141,7 @@ const store = useStore()
 
 const container = ref(null)
 const currentTimeRaw = ref(0)
+const displayCanvas = ref(null)
 const isLoading = ref(false)
 const movie = ref(null)
 const videoDuration = ref(0)
@@ -146,10 +156,20 @@ let panzoomSilent = false
 // finally exists.
 let panzoomActive = false
 let currentTimeCalls = []
-let playLoop = null
 let lastEmittedFrame = null
 let isPlaying = false
 let previousDimensions = null
+
+let renderer = null
+let renderLoopHandle = null
+let renderLoopIsRvfc = false
+// mediaTime of the last frame the browser actually presented. The
+// source of truth for emitted times/frames (currentTime lies during
+// decode latency, which is the whole point of this pipeline).
+let lastMediaTime = 0
+// iOS Safari may not decode any frame before a user gesture: paint the
+// poster so the canvas isn't black until the first rVFC tick.
+let hasPaintedVideoFrame = false
 
 const currentProduction = computed(() => store.getters.currentProduction)
 
@@ -252,6 +272,10 @@ const runSetCurrentTime = () => {
 }
 
 const setCurrentTime = currentTime => {
+  // Scrubbing queues a seek per mousemove; only the latest target
+  // matters, and every landed seek now costs a decode + a canvas paint.
+  // Drop the stale backlog instead of replaying the whole trail.
+  currentTimeCalls.length = 0
   currentTimeCalls.push(currentTime)
   runSetCurrentTime()
 }
@@ -260,8 +284,8 @@ const resetSize = () => {
   const { height: initialHeight } = getDimensions()
   if (initialHeight > 0) {
     container.value.style.height = props.defaultHeight + 'px'
-    video.value.style.height = initialHeight + 'px'
-    const videoPosition = video.value.getBoundingClientRect()
+    displayCanvas.value.style.height = initialHeight + 'px'
+    const videoPosition = displayCanvas.value.getBoundingClientRect()
     const containerPosition = container.value.getBoundingClientRect()
     const top = videoPosition.top - containerPosition.top
     const left = videoPosition.left - containerPosition.left
@@ -289,6 +313,12 @@ const mountVideo = () => {
   videoDuration.value = video.value.duration
   isLoading.value = false
   emit('duration-changed', videoDuration.value)
+  if (!renderer && displayCanvas.value) {
+    renderer = createFrameRenderer(displayCanvas.value, video.value)
+  }
+  resizeRenderer()
+  if (renderLoopHandle === null) startRenderLoop()
+  paintPosterFallback()
   resetSize()
   setTimeout(() => {
     resetSize()
@@ -302,8 +332,19 @@ const configureVideo = () => {
   }
 }
 
+// rVFC mediaTime is the frame's PRESENTATION time (its start boundary),
+// while every consumer is calibrated on the mid-frame currentTime that
+// frameToTime() seeks produce. Re-center so all emitted values stay
+// bit-identical to the old pipeline.
+const playerTimeFromMediaTime = mediaTime => mediaTime + frameDuration.value / 2
+
 const getFrameFromPlayer = () => {
-  const raw = video.value ? video.value.currentTime : 0
+  const raw =
+    lastMediaTime > 0
+      ? playerTimeFromMediaTime(lastMediaTime)
+      : video.value
+        ? video.value.currentTime
+        : 0
   if (raw === 0) return 0
   let frame = Math.ceil(raw / frameDuration.value) + 1
   frame = Number(frame.toPrecision(4))
@@ -311,22 +352,84 @@ const getFrameFromPlayer = () => {
   return frame
 }
 
-const runEmitTimeUpdateLoop = () => {
-  cancelAnimationFrame(playLoop)
-  lastEmittedFrame = null
-  // requestAnimationFrame for a smooth time signal; frame-update is deduped.
-  const update = () => {
-    if (video.value) {
-      emit('time-update', video.value.currentTime)
-      const frame = getFrameFromPlayer()
-      if (frame !== lastEmittedFrame) {
-        lastEmittedFrame = frame
-        emit('frame-update', frame)
-      }
-    }
-    playLoop = requestAnimationFrame(update)
+const emitFrameSignals = playerTime => {
+  emit('time-update', playerTime)
+  const frame = getFrameFromPlayer()
+  if (frame !== lastEmittedFrame) {
+    lastEmittedFrame = frame
+    emit('frame-update', frame)
   }
-  playLoop = requestAnimationFrame(update)
+}
+
+// One continuous loop, play AND pause: a paused seek still presents a
+// new frame, and that presentation is exactly when to repaint. EMITTING
+// stays playback-only though — paused frame context is owned by the
+// parent (pause / goNextFrame / progress clicks emit the prop-frame
+// convention), and the loop's getFrameFromPlayer numbers use the
+// playback convention; feeding those to setVideoFrameContext during a
+// paused seek shifts the UI off the clicked frame.
+const startRenderLoop = () => {
+  stopRenderLoop()
+  if (supportsVideoFrameCallback()) {
+    renderLoopIsRvfc = true
+    const tick = (now, metadata) => {
+      if (!video.value) return
+      hasPaintedVideoFrame = true
+      lastMediaTime = metadata.mediaTime
+      currentTimeRaw.value = metadata.mediaTime
+      renderer?.drawFrame()
+      if (!video.value.paused) {
+        emitFrameSignals(playerTimeFromMediaTime(metadata.mediaTime))
+      }
+      renderLoopHandle = video.value.requestVideoFrameCallback(tick)
+    }
+    renderLoopHandle = video.value.requestVideoFrameCallback(tick)
+  } else {
+    // Fallback (no rVFC): poll currentTime at rAF cadence. Same
+    // accuracy as the old pipeline — no worse, just not better.
+    renderLoopIsRvfc = false
+    let lastDrawnTime = -1
+    const tick = () => {
+      if (video.value && video.value.currentTime !== lastDrawnTime) {
+        hasPaintedVideoFrame = true
+        lastDrawnTime = video.value.currentTime
+        currentTimeRaw.value = lastDrawnTime
+        renderer?.drawFrame()
+        if (!video.value.paused) {
+          emitFrameSignals(lastDrawnTime)
+        }
+      }
+      renderLoopHandle = requestAnimationFrame(tick)
+    }
+    renderLoopHandle = requestAnimationFrame(tick)
+  }
+}
+
+const stopRenderLoop = () => {
+  if (renderLoopHandle === null) return
+  if (renderLoopIsRvfc) {
+    video.value?.cancelVideoFrameCallback?.(renderLoopHandle)
+  } else {
+    cancelAnimationFrame(renderLoopHandle)
+  }
+  renderLoopHandle = null
+}
+
+const getDisplaySurface = () => displayCanvas.value
+
+const resizeRenderer = () => {
+  if (!renderer || !video.value) return
+  renderer.resize(video.value.videoWidth, video.value.videoHeight)
+  renderer.drawFrame()
+}
+
+const paintPosterFallback = () => {
+  if (hasPaintedVideoFrame || !renderer || !posterPath.value) return
+  const poster = new Image()
+  poster.onload = () => {
+    if (!hasPaintedVideoFrame) renderer?.drawFrame(poster)
+  }
+  poster.src = posterPath.value
 }
 
 const play = () => {
@@ -338,14 +441,10 @@ const play = () => {
     setCurrentTime(0)
   }
   video.value.play()
-  if (props.name.indexOf('comparison') < 0) {
-    runEmitTimeUpdateLoop()
-  }
 }
 
 const pause = () => {
   video.value.pause()
-  cancelAnimationFrame(playLoop)
   video.value.currentTime = frameToTime(props.currentFrame)
   emit('frame-update', props.currentFrame)
 }
@@ -372,7 +471,6 @@ const goNextFrame = () => {
 
 const onVideoEnd = () => {
   isPlaying = false
-  cancelAnimationFrame(playLoop)
   // a queued 'ended' event can fire after unmount, once the ref is nulled
   if (!video.value) return
   if (props.isRepeating) {
@@ -417,34 +515,34 @@ const emitPanZoom = () => {
   emit('panzoom-changed', { x, y, scale, source: 'movie' })
 }
 
-// Bind panzoom to the <video> rather than the wrapping container: the
-// video is flex-centered inside the wrapper, so scaling the wrapper
-// multiplies the centering offset and the video drifts relative to the
+// Bind panzoom to the canvas rather than the wrapping container: the
+// canvas is flex-centered inside the wrapper, so scaling the wrapper
+// multiplies the centering offset and the canvas drifts relative to the
 // AnnotationCanvas overlay (which applies the same transform from its
 // own top-left origin). Setup is deferred until metadata is loaded so
 // panzoom's bounds clamp doesn't compute against a 0×0 target — that
-// raced the load on slow connections and left the video off-centre.
+// raced the load on slow connections and left the canvas off-centre.
 const setupPanZoom = () => {
-  if (!props.panzoom || !movie.value) return
+  if (!props.panzoom || !displayCanvas.value) return
   if (panzoomInstance) {
     panzoomInstance.dispose()
     panzoomInstance = null
   }
-  // panzoom listens on `movie.parentElement` (.video-wrapper), which
+  // panzoom listens on `displayCanvas.parentElement` (.video-wrapper), which
   // is forced to 100% of the viewer and leaves gutters on the sides
-  // of the video. Without these guards a click / wheel in the gutter
+  // of the canvas. Without these guards a click / wheel in the gutter
   // would still trigger pan or zoom. Ignore any event whose target
-  // isn't the video itself. The AnnotationCanvas wheel forwarder
-  // dispatches on movie.value directly, so wheel-from-overlay (zoom
+  // isn't the canvas itself. The AnnotationCanvas wheel forwarder
+  // dispatches on displayCanvas.value directly, so wheel-from-overlay (zoom
   // while drawing) keeps working.
-  panzoomInstance = createPanzoom(movie.value, {
+  panzoomInstance = createPanzoom(displayCanvas.value, {
     bounds: true,
     boundsPadding: 0.2,
     maxZoom: 5,
     minZoom: 1,
     smoothScroll: false,
-    beforeMouseDown: e => e.target !== movie.value,
-    beforeWheel: e => e.target !== movie.value,
+    beforeMouseDown: e => e.target !== displayCanvas.value,
+    beforeWheel: e => e.target !== displayCanvas.value,
     // panzoom otherwise puts tabindex=0 on the owner and steals arrow
     // keys / +/- to pan and zoom — those shortcuts are owned by the
     // player (frame stepping, annotation navigation), so disable them.
@@ -483,6 +581,12 @@ const setVolume = volume => {
 watch(
   () => props.preview,
   () => {
+    hasPaintedVideoFrame = false
+    lastMediaTime = 0
+    // Allow the first frame-update of the new preview even when it lands
+    // on the same frame number the previous clip stopped at.
+    lastEmittedFrame = null
+    paintPosterFallback()
     resetPanZoom()
     pause()
     nextTick(() => {
@@ -556,7 +660,10 @@ onMounted(() => {
         setupPanZoom()
       }
       video.value.addEventListener('focus', e => e.target.blur())
-      video.value.addEventListener('resize', resetSize)
+      video.value.addEventListener('resize', () => {
+        resizeRenderer()
+        resetSize()
+      })
 
       video.value.addEventListener('loadedmetadata', () => {
         if (!video.value) return
@@ -606,6 +713,9 @@ onMounted(() => {
 onBeforeUnmount(() => {
   if (video.value) video.value.onended = null
   pause()
+  stopRenderLoop()
+  renderer?.dispose()
+  renderer = null
   window.removeEventListener('resize', onWindowResize)
   panzoomInstance?.dispose()
 })
@@ -634,7 +744,8 @@ defineExpose({
   resumePanZoom,
   setSpeed,
   setVolume,
-  resetSize
+  resetSize,
+  getDisplaySurface
 })
 </script>
 
@@ -680,7 +791,21 @@ defineExpose({
   position: relative;
 }
 
-video {
-  object-fit: inherit;
+.annotation-movie-decoder {
+  // Not display:none — some browsers suspend decoding entirely.
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+canvas.annotation-movie {
+  // Same sizing behavior as the old <video>: resetSize() drives the CSS
+  // height, the intrinsic bitmap ratio drives the width. Bulma's reset
+  // (img, video, … { max-width: 100% }) clamped the old <video> when a
+  // comparison slot got narrower than the computed width, but canvas is
+  // not covered by it — re-apply the clamp, and letterbox the bitmap
+  // instead of stretching it when the clamp kicks in.
+  max-width: 100%;
+  object-fit: contain;
 }
 </style>

@@ -188,6 +188,13 @@ const convertEntityToPlaylistFormat = entityInfo => {
     name: entity.name,
     nb_frames:
       entityInfo.nb_frames || entity.nb_frames || DEFAULT_NB_FRAMES_PICTURE,
+    // Per-entity fps: an entity can override the production fps via
+    // data.fps. Carried here so the player uses the right rate (same
+    // enrichment as the Playlist page).
+    fps:
+      parseFloat(entity.data?.fps) ||
+      parseFloat(currentProduction.value?.fps) ||
+      25,
     parent_name:
       entity.sequence_name || entity.episode_name || entity.asset_type_name,
     preview_files: entityInfo.preview_files,

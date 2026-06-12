@@ -381,7 +381,10 @@ const resize = () => {
 }
 
 const currentMediaElement = computed(() => {
-  if (isMovie.value) return videoViewer.value?.video || null
+  // The visible surface: AnnotationCanvas aligns its bounds (and the
+  // wheel forwarder dispatches) on it. The hidden decoder <video> has
+  // no reliable bbox under visibility:hidden.
+  if (isMovie.value) return videoViewer.value?.getDisplaySurface() || null
   if (isPicture.value) return pictureViewer.value?.visibleImage || null
   return null
 })

@@ -1229,6 +1229,29 @@ describe('composables/annotation', () => {
     })
   })
 
+  describe('fadeObject — laser stroke fade-out', () => {
+    it('uses the fabric v6+ object-form animate signature', () => {
+      // The legacy ('opacity', '0', options) form silently no-ops on
+      // fabric 6/7, leaving laser strokes on the canvas forever.
+      const canvas = createFakeCanvas()
+      const { api, wrapper } = mountAnnotation({ canvas })
+      const obj = { animate: vi.fn() }
+      api.fadeObject(obj)
+      expect(obj.animate).toHaveBeenCalledWith(
+        { opacity: 0 },
+        expect.objectContaining({
+          duration: expect.any(Number),
+          onChange: expect.any(Function),
+          onComplete: expect.any(Function)
+        })
+      )
+      // The completion callback removes the faded stroke from the canvas.
+      obj.animate.mock.calls[0][1].onComplete()
+      expect(canvas.remove).toHaveBeenCalledWith(obj)
+      wrapper.unmount()
+    })
+  })
+
   describe('loadSingleAnnotation — cancellation on clear', () => {
     it('drops in-flight object loads when the canvas is cleared', async () => {
       // Fast navigation: frame A's strokes are still deserializing when the
