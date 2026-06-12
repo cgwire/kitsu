@@ -152,7 +152,7 @@ export const usePreviewRoom = options => {
     setRawPlayerFrame = noop,
     setCurrentTimeRaw = noop,
     exists = v => v !== undefined && v !== null,
-    frameDuration = ref(1 / 24),
+    frameDuration = ref(1 / 25),
     taskMap = ref(new Map()),
     isCurrentPreviewPicture = ref(false),
     framesSeenOfPicture = ref(0),

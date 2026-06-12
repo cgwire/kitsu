@@ -138,6 +138,8 @@ const reset = () => {
 // Watchers
 
 watch(() => props.active, reset)
+
+defineExpose({ reset })
 </script>
 
 <style lang="scss" scoped>

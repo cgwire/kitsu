@@ -1034,7 +1034,10 @@ const configureVideo = () => {
 }
 
 const changeMaxDuration = duration => {
-  if (duration) {
+  // Chromium reports Infinity for duration-less/fragmented mp4s; a
+  // non-finite duration would poison nbFrames and every seek down to
+  // video.currentTime, whose setter throws on non-finite values.
+  if (Number.isFinite(duration) && duration > 0) {
     const isChromium = !!window.chrome
     if (isChromium) {
       duration += 0.001
