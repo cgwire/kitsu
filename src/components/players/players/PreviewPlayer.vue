@@ -1183,8 +1183,26 @@ const realignComparisonCanvas = () => {
 // no chance to sync the fresh instance back to the main viewer.
 const onComparisonPanzoomReady = () => {
   if (!isComparing.value) return
-  const { x, y, scale } = panzoomTransform.value
-  comparisonViewer.value?.setPanZoom(x, y, scale)
+  const pushTransform = () => {
+    if (!isComparing.value) return
+    const { x, y, scale } = panzoomTransform.value
+    comparisonViewer.value?.setPanZoom(x, y, scale)
+  }
+  // The comparison geometry is only final once the 0.3s side-by-side
+  // layout transition settles (same constraint as realignComparisonCanvas
+  // below): a push clamped against mid-transition bounds sticks — the
+  // transform watcher only fires on changes. Track the transition frame
+  // by frame so the comparison follows the geometry instead of jumping
+  // once at the end.
+  const startedAt = performance.now()
+  const track = () => {
+    if (!isComparing.value) return
+    pushTransform()
+    if (performance.now() - startedAt < RESIZE_DELAY + 100) {
+      requestAnimationFrame(track)
+    }
+  }
+  track()
 }
 
 const onComparisonVideoLoaded = () => {
