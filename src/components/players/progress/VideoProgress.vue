@@ -24,7 +24,7 @@
             }
           : { 'background-image': frameTicksGradient }
       "
-      @wheel.prevent="onWheelZoom"
+      @wheel="onWheelZoom"
       @mouseenter="isFrameNumberVisible = true"
       @mouseleave="isFrameNumberVisible = false"
       @touchstart="isFrameNumberVisible = true"
@@ -255,6 +255,10 @@ const clampViewStart = start =>
   Math.min(Math.max(start, 0), props.nbFrames - visibleFrames.value)
 
 const onWheelZoom = event => {
+  // Zoom is a Ctrl+wheel gesture (map-style): a plain wheel keeps
+  // scrolling the surrounding widgets/page.
+  if (!event.ctrlKey) return
+  event.preventDefault()
   if (props.empty || !props.nbFrames) return
   const anchorFrame = xToFrame(getClientX(event) - getProgressLeft())
   const factor = event.deltaY < 0 ? 1.25 : 1 / 1.25
