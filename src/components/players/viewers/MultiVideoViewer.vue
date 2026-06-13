@@ -1,5 +1,9 @@
 <template>
-  <div ref="container" class="video-wrapper filler flexrow-item">
+  <div
+    ref="container"
+    class="video-wrapper filler flexrow-item"
+    @wheel="swallowBrowserZoom"
+  >
     <div class="video-loader" v-show="isLoading">
       <spinner class="mt2" style="color: white" />
     </div>
@@ -49,6 +53,7 @@ import {
 } from 'vue'
 import { useStore } from 'vuex'
 
+import { swallowBrowserZoom } from '@/lib/players/wheel'
 import { floorToFrame, roundToFrame } from '@/lib/video'
 import {
   createFrameRenderer,
@@ -189,7 +194,9 @@ const setupPanZoom = () => {
     maxZoom: 5,
     minZoom: 0.5,
     beforeMouseDown: e => e.target !== displayCanvasRef.value,
-    beforeWheel: e => e.target !== displayCanvasRef.value,
+    // Zoom is a Ctrl+wheel gesture: a plain wheel keeps scrolling the
+    // surrounding widgets/page.
+    beforeWheel: e => !e.ctrlKey || e.target !== displayCanvasRef.value,
     disableKeyboardInteraction: true
   })
   PANZOOM_EVENTS.forEach(name => {

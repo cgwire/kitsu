@@ -7,6 +7,7 @@
       'border-top-right-radius': isRoundedTopBorder ? '10px' : ''
     }"
     @click="$emit('click')"
+    @wheel="swallowBrowserZoom"
   >
     <div
       class="video-wrapper"
@@ -45,6 +46,7 @@ import {
   createFrameRenderer,
   supportsVideoFrameCallback
 } from '@/lib/players/frameRenderer'
+import { swallowBrowserZoom } from '@/lib/players/wheel'
 import { formatFrame } from '@/lib/video'
 
 import Spinner from '@/components/widgets/Spinner.vue'
@@ -542,7 +544,9 @@ const setupPanZoom = () => {
     minZoom: 1,
     smoothScroll: false,
     beforeMouseDown: e => e.target !== displayCanvas.value,
-    beforeWheel: e => e.target !== displayCanvas.value,
+    // Zoom is a Ctrl+wheel gesture: a plain wheel keeps scrolling the
+    // surrounding widgets/page.
+    beforeWheel: e => !e.ctrlKey || e.target !== displayCanvas.value,
     // panzoom otherwise puts tabindex=0 on the owner and steals arrow
     // keys / +/- to pan and zoom — those shortcuts are owned by the
     // player (frame stepping, annotation navigation), so disable them.

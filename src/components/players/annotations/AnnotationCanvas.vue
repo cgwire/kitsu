@@ -153,6 +153,9 @@ const createFabric = () => {
 // zoom-by-wheel. preventDefault stops the page from scrolling.
 const onWheel = event => {
   if (!props.wheelTarget) return
+  // Zoom is a Ctrl+wheel gesture: let plain wheels bubble so the
+  // surrounding widgets/page keep scrolling.
+  if (!event.ctrlKey) return
   event.preventDefault()
   const forwarded = new WheelEvent('wheel', {
     bubbles: true,
