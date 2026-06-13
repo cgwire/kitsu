@@ -377,6 +377,8 @@
       "login_server_failed": "ログイン中にサーバーエラーが発生しました。",
       "login_with_saml": "{saml_idp_name} で SSO ログイン",
       "login_saml": "SSO ログイン",
+      "login_with_oidc": "SSO login with {oidc_idp_name}",
+      "login_oidc": "SSO login",
       "reset_password_inactive": "パスワードのリセットに失敗しました。この電子メールを持つユーザーはアクティブではありません。",
       "set_password_title": "キツへようこそ！",
       "set_password": "パスワードの設定",

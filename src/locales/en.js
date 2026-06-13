@@ -714,6 +714,8 @@ export default {
     },
     login_with_saml: 'SSO login with {saml_idp_name}',
     login_saml: 'SSO login',
+    login_with_oidc: 'SSO login with {oidc_idp_name}',
+    login_oidc: 'SSO login',
   },
 
   logs: {
