@@ -26,6 +26,19 @@
               </a>
             </p>
           </div>
+          <div class="field" v-if="mainConfig?.oidc_enabled">
+            <p class="control">
+              <a
+                class="button is-fullwidth"
+                :class="{
+                  'is-loading': isLoginLoading
+                }"
+                href="/api/auth/oidc/login"
+              >
+                {{ loginOIDCButtonInfo }}
+              </a>
+            </p>
+          </div>
           <div class="field mt2">
             <p class="control has-icon">
               <input
@@ -155,6 +168,16 @@ export default {
         })
       } else {
         return this.$t('login.saml')
+      }
+    },
+
+    loginOIDCButtonInfo() {
+      if (this.mainConfig?.oidc_idp_name) {
+        return this.$t('login.login_with_oidc', {
+          oidc_idp_name: this.mainConfig.oidc_idp_name
+        })
+      } else {
+        return this.$t('login.login_oidc')
       }
     }
   },

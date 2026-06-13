@@ -377,6 +377,8 @@
       "login_server_failed": "登入時發生伺服器錯誤。",
       "login_with_saml": "使用 {saml_idp_name} 進行 SSO 登入",
       "login_saml": "SSO 登入",
+      "login_with_oidc": "SSO login with {oidc_idp_name}",
+      "login_oidc": "SSO login",
       "reset_password_inactive": "重設密碼失敗。使用此電子郵件的使用者已停止活動。",
       "set_password_title": "歡迎來到 Kitsu！",
       "set_password": "設定您的密碼",

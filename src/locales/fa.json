@@ -377,6 +377,8 @@
       "login_server_failed": "هنگام ورود به سیستم یک خطای سرور رخ داد.",
       "login_with_saml": "ورود SSO با {saml_idp_name}",
       "login_saml": "ورود به سیستم SSO",
+      "login_with_oidc": "SSO login with {oidc_idp_name}",
+      "login_oidc": "SSO login",
       "reset_password_inactive": "بازنشانی رمز عبور ناموفق بود. کاربری با این ایمیل غیرفعال است.",
       "set_password_title": "به کیتسو خوش آمدید!",
       "set_password": "رمز عبور خود را تنظیم کنید",
