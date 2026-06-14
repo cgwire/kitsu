@@ -377,6 +377,8 @@
       "login_server_failed": "Ocorreu um erro no servidor ao fazer o login.",
       "login_with_saml": "Login SSO com {saml_idp_name}",
       "login_saml": "Login SSO",
+      "login_with_oidc": "SSO login with {oidc_idp_name}",
+      "login_oidc": "SSO login",
       "reset_password_inactive": "A redefinição de sua senha falhou. O usuário com esse e-mail está inativo.",
       "set_password_title": "Bem-vindo à Kitsu!",
       "set_password": "Defina sua senha",

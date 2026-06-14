@@ -377,6 +377,8 @@
       "login_server_failed": "Der opstod en serverfejl under login.",
       "login_with_saml": "SSO-login med {saml_idp_name}.",
       "login_saml": "SSO-login",
+      "login_with_oidc": "SSO login with {oidc_idp_name}",
+      "login_oidc": "SSO login",
       "reset_password_inactive": "Nulstilling af din adgangskode mislykkedes. Brugeren med denne e-mail er inaktiv.",
       "set_password_title": "Velkommen til Kitsu!",
       "set_password": "Indstil din adgangskode",
