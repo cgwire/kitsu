@@ -30,9 +30,14 @@ import {
   SET_CURRENT_PRODUCTION,
   SET_PLAYLIST_ENTRY_MAP,
   UPDATE_PREVIEW_ANNOTATION,
+  SET_PREVIEW_FILE_ANNOTATIONS,
   UPDATE_PREVIEW_VALIDATION_STATUS,
   RESET_ALL
 } from '@/store/mutation-types'
+
+// In-flight annotation requests, keyed by preview file id, to dedupe the
+// concurrent fetches triggered by the player's sliding-window prefetch.
+const annotationRequests = new Map()
 
 const helpers = {
   getEntityPreviewFile(entity, previewFileList, taskTypeId) {
@@ -143,6 +148,29 @@ const actions = {
 
   loadEntityPreviewFiles({ commit }, entity) {
     return playlistsApi.getEntityPreviewFiles(entity)
+  },
+
+  // Annotations are no longer embedded in the playlist payload (too heavy):
+  // they are fetched on demand for the current preview and its neighbours.
+  loadPreviewFileAnnotations({ state, commit }, previewFileId) {
+    if (!previewFileId) return Promise.resolve([])
+    const cached = state.previewFileMap.get(previewFileId)
+    if (cached && cached.annotations !== undefined) {
+      return Promise.resolve(cached.annotations)
+    }
+    if (annotationRequests.has(previewFileId)) {
+      return annotationRequests.get(previewFileId)
+    }
+    const request = playlistsApi
+      .getPreviewFile(previewFileId)
+      .then(previewFile => {
+        const annotations = previewFile.annotations || []
+        commit(SET_PREVIEW_FILE_ANNOTATIONS, { previewFileId, annotations })
+        return annotations
+      })
+      .finally(() => annotationRequests.delete(previewFileId))
+    annotationRequests.set(previewFileId, request)
+    return request
   },
 
   async newPlaylist({ commit }, data) {
@@ -341,6 +369,17 @@ const mutations = {
     if (previewFile) {
       previewFile.annotations = annotations
     }
+    if (entity) {
+      entity.preview_file_annotations = annotations
+    }
+  },
+
+  [SET_PREVIEW_FILE_ANNOTATIONS](state, { previewFileId, annotations }) {
+    const previewFile = state.previewFileMap.get(previewFileId)
+    if (previewFile) {
+      previewFile.annotations = annotations
+    }
+    const entity = state.previewFileEntityMap.get(previewFileId)
     if (entity) {
       entity.preview_file_annotations = annotations
     }

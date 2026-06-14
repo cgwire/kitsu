@@ -224,9 +224,15 @@ const backgroundSize = computed(() => {
 // two colors sampled from the legacy player-timeslider.png — the
 // stretched texture blurred as soon as the clip had few frames. Stripes
 // are dropped when frames get too dense to read.
+// Below this per-frame width the alternating stripes are too dense to read
+// and just shimmer, so we drop them. The clip is then painted a solid dark
+// grey rather than exposing the light base background, which on long clips
+// looked like a rendering bug.
+const DENSE_FRAME_FALLBACK = 'linear-gradient(rgb(54, 57, 63), rgb(54, 57, 63))'
+
 const frameTicksGradient = computed(() => {
   const size = effectiveFrameSize.value
-  if (!size || size < 3) return 'none'
+  if (!size || size < 3) return DENSE_FRAME_FALLBACK
   // Anchor the stripe phase on the view window so frames keep their
   // shade while panning/zooming.
   const phase = -(viewStartFrame.value % 2) * size
