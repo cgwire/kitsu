@@ -834,7 +834,7 @@
         <div
           class="flexrow-item has-text-centered playlisted-wrapper"
           :key="entity.id"
-          v-for="(entity, index) in entityList"
+          v-for="(entity, index) in renderedEntities"
         >
           <playlisted-entity
             :ref="'entity-' + index"
@@ -1087,6 +1087,10 @@ let wavesurfer = null
 // — Reactive
 const annotations = ref([])
 const entityList = ref([])
+// Progressive mounting of the entity strip: only `renderedEntityCount`
+// PlaylistedEntity components are mounted at once, the rest are added on idle
+// frames so opening a large playlist no longer freezes the main thread.
+const renderedEntityCount = ref(0)
 const framesPerImage = ref([])
 const framesSeenOfPicture = ref(1)
 
@@ -1223,6 +1227,12 @@ const isCurrentPreviewFile = computed(
 // Computed — entity & preview state
 
 const currentEntity = computed(() => entityList.value[playingEntityIndex.value])
+
+// Slice mounted in the strip template. Sliced from 0 so indices stay aligned
+// with entityList (refs, :index, playingEntityIndex comparisons).
+const renderedEntities = computed(() =>
+  entityList.value.slice(0, renderedEntityCount.value)
+)
 
 // Derived from currentEntity + the store's taskMap so the right panel
 // fills in as soon as both are available, no matter the order in
@@ -1906,7 +1916,57 @@ const findEntityIndex = entityInfo => {
   )
 }
 
-const scrollToEntity = index => {
+// — Progressive mounting of the entity strip
+const RENDER_BATCH_SIZE = 40
+let renderHandle = null
+let renderHandleIsIdle = false
+
+const cancelProgressiveRender = () => {
+  if (renderHandle === null) return
+  if (renderHandleIsIdle && window.cancelIdleCallback) {
+    window.cancelIdleCallback(renderHandle)
+  } else {
+    clearTimeout(renderHandle)
+  }
+  renderHandle = null
+}
+
+const scheduleRenderStep = step => {
+  if (window.requestIdleCallback) {
+    renderHandleIsIdle = true
+    renderHandle = window.requestIdleCallback(step, { timeout: 200 })
+  } else {
+    renderHandleIsIdle = false
+    renderHandle = setTimeout(step, 0)
+  }
+}
+
+const startProgressiveRender = () => {
+  cancelProgressiveRender()
+  const total = entityList.value.length
+  renderedEntityCount.value = Math.min(RENDER_BATCH_SIZE, total)
+  const step = () => {
+    renderHandle = null
+    const total = entityList.value.length
+    if (renderedEntityCount.value >= total) return
+    renderedEntityCount.value = Math.min(
+      renderedEntityCount.value + RENDER_BATCH_SIZE,
+      total
+    )
+    if (renderedEntityCount.value < total) scheduleRenderStep(step)
+  }
+  if (renderedEntityCount.value < total) scheduleRenderStep(step)
+}
+
+// Make sure a given entity is mounted before we try to scroll to or play it,
+// even if the progressive filler has not reached it yet (e.g. jump ahead).
+const ensureEntityRendered = index => {
+  if (index < 0) return
+  const target = Math.min(index + RENDER_BATCH_SIZE, entityList.value.length)
+  if (target > renderedEntityCount.value) renderedEntityCount.value = target
+}
+
+const scrollToEntity = (index, retry = true) => {
   // Template uses `:ref="'entity-' + index"` inside a v-for; Vue 3
   // registers each on the parent's refs object. We have to reach into
   // the instance because `<script setup>` has no implicit `$refs`.
@@ -1914,7 +1974,15 @@ const scrollToEntity = index => {
   const entry = refs?.[`entity-${index}`]
   const entityRef = Array.isArray(entry) ? entry[0] : entry
   const playlistEl = playlistedEntities.value
-  if (!entityRef || !playlistEl) return
+  if (!entityRef) {
+    // Not mounted yet (progressive render): mount it then scroll once.
+    if (retry && index >= 0 && index < entityList.value.length) {
+      ensureEntityRendered(index)
+      nextTick(() => scrollToEntity(index, false))
+    }
+    return
+  }
+  if (!playlistEl) return
   const entityWidget = entityRef.$el
   const entity = entityList.value[index]
   annotations.value = entity?.preview_file_annotations || []
@@ -2055,6 +2123,7 @@ const pause = () => {
 }
 
 const playEntity = (entityIndex, updateFullPlaylist = true, frame = -1) => {
+  ensureEntityRendered(entityIndex)
   const entity = entityList.value[entityIndex]
   const wasDrawing = isDrawing.value === true
   clearCanvas()
@@ -2767,6 +2836,43 @@ const loadComparisonAnnotation = time => {
 const onComparisonCanvasResized = () => {
   if (isComparing.value && !isComparisonOverlay.value) {
     loadComparisonAnnotation(currentTimeRaw.value)
+  }
+}
+
+// — Lazy annotation loading
+// Annotations are no longer shipped in the playlist payload; they are fetched
+// for the current preview and a small sliding window around it.
+const ANNOTATION_PREFETCH_RADIUS = 2
+
+const ensureEntityAnnotationsLoaded = entity => {
+  if (!entity || !entity.preview_file_id) return Promise.resolve([])
+  if (entity.preview_file_annotations !== undefined) {
+    return Promise.resolve(entity.preview_file_annotations)
+  }
+  return store
+    .dispatch('loadPreviewFileAnnotations', entity.preview_file_id)
+    .then(loaded => {
+      if (entity.preview_file_annotations === undefined) {
+        entity.preview_file_annotations = loaded || []
+      }
+      return entity.preview_file_annotations
+    })
+    .catch(() => {
+      if (entity.preview_file_annotations === undefined) {
+        entity.preview_file_annotations = []
+      }
+      return entity.preview_file_annotations
+    })
+}
+
+const prefetchAnnotationsAround = index => {
+  const start = Math.max(0, index - ANNOTATION_PREFETCH_RADIUS)
+  const end = Math.min(
+    entityList.value.length - 1,
+    index + ANNOTATION_PREFETCH_RADIUS
+  )
+  for (let i = start; i <= end; i++) {
+    ensureEntityAnnotationsLoaded(entityList.value[i])
   }
 }
 
@@ -4272,6 +4378,43 @@ watch(
   }
 )
 
+// Restart the progressive mounting whenever the entity list is replaced
+// (playlist load, add / remove / reorder).
+watch(
+  () => entityList.value,
+  () => startProgressiveRender()
+)
+
+// Lazy-load annotations for the current preview at every transition (entity
+// change, version switch, sub-preview change), then apply and redraw. A token
+// guards against a slower fetch landing after the user has moved on.
+let annotationLoadToken = 0
+watch(
+  () => currentPreview.value?.id,
+  previewFileId => {
+    prefetchAnnotationsAround(playingEntityIndex.value)
+    if (!previewFileId) return
+    const entity = currentEntity.value
+    if (!entity || entity.preview_file_annotations !== undefined) return
+    const token = ++annotationLoadToken
+    ensureEntityAnnotationsLoaded(entity).then(loaded => {
+      if (token !== annotationLoadToken) return
+      if (currentPreview.value?.id !== previewFileId) return
+      annotations.value = loaded || []
+      if (!isPlaying.value) {
+        // Draw the annotation at the current position WITHOUT seeking:
+        // loadAnnotation() would call setCurrentFrame/updateProgressBar and,
+        // running async after the fetch, race the first preview's own initial
+        // positioning (intermittent timeline jump).
+        const ann = getAnnotation(
+          isCurrentPreviewPicture.value ? 0 : currentTimeRaw.value
+        )
+        if (ann) loadSingleAnnotation(ann)
+      }
+    })
+  }
+)
+
 watch(
   () => props.playlist,
   (newPlaylist, oldPlaylist) => {
@@ -4377,6 +4520,7 @@ onMounted(() => {
   if (isCurrentUserClient.value) isCommentsHidden.value = false
   isHd.value = Boolean(organisation.value?.hd_by_default)
   entityList.value = props.entities ? props.entities : []
+  startProgressiveRender()
   resetPlaylistFrameData()
   room.value.id = props.playlist?.id
   room.value.localId = uuidv4()
@@ -4423,6 +4567,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   endAnnotationSaving()
+  cancelProgressiveRender()
   _stopPlaylistProgressUpdateLoop()
   window.removeEventListener('keydown', onKeyDown)
   window.removeEventListener('resize', onWindowResize)

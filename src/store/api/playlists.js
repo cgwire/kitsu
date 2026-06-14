@@ -24,6 +24,10 @@ export default {
     return client.pget(path)
   },
 
+  getPreviewFile(previewFileId) {
+    return client.pget(`/api/data/preview-files/${previewFileId}`)
+  },
+
   getRunningPreviewFiles(limit, lastPreviewFileId = null) {
     let path = `/api/data/playlists/preview-files/running?limit=${limit}`
     if (lastPreviewFileId) {
