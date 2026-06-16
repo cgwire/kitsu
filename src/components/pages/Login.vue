@@ -15,26 +15,14 @@
         <form v-if="!(isMissingOTP || isWrongOTP)">
           <div class="field" v-if="mainConfig?.saml_enabled">
             <p class="control">
-              <a
-                class="button is-fullwidth"
-                :class="{
-                  'is-loading': isLoginLoading
-                }"
-                href="/api/auth/saml/login"
-              >
+              <a class="button is-fullwidth" href="/api/auth/saml/login">
                 {{ loginSAMLButtonInfo }}
               </a>
             </p>
           </div>
           <div class="field" v-if="mainConfig?.oidc_enabled">
             <p class="control">
-              <a
-                class="button is-fullwidth"
-                :class="{
-                  'is-loading': isLoginLoading
-                }"
-                href="/api/auth/oidc/login"
-              >
+              <a class="button is-fullwidth" href="/api/auth/oidc/login">
                 {{ loginOIDCButtonInfo }}
               </a>
             </p>
@@ -177,7 +165,7 @@ export default {
           oidc_idp_name: this.mainConfig.oidc_idp_name
         })
       } else {
-        return this.$t('login.login_oidc')
+        return this.$t('login.oidc')
       }
     }
   },
