@@ -244,6 +244,7 @@ import { useStore } from 'vuex'
 
 import darkTimesliderUrl from '@/assets/background/video-timeslider-dark.png'
 import { usePanzoomSync } from '@/composables/panzoom'
+import { isAltLetter } from '@/composables/players/previewShortcuts'
 import {
   isDiffPreview,
   isMarkdownPreview,
@@ -712,6 +713,20 @@ const onKeyDown = event => {
     event.stopPropagation()
   }
 
+  // Entity navigation reuses isAltLetter (shared with usePreviewShortcuts)
+  // so Alt+J/K match identically here. Arrows below stay event.code-only —
+  // no letter glyph to worry about.
+  if (isAltLetter(event, 'KeyJ', 'j')) {
+    stop()
+    previousEntity()
+    return
+  }
+  if (isAltLetter(event, 'KeyK', 'k')) {
+    stop()
+    nextEntity()
+    return
+  }
+
   switch (event.code) {
     case 'Space':
       stop()
@@ -726,18 +741,6 @@ const onKeyDown = event => {
       stop()
       if (event.altKey) nextEntity()
       else goNextFrame()
-      break
-    case 'KeyJ':
-      if (event.altKey) {
-        stop()
-        previousEntity()
-      }
-      break
-    case 'KeyK':
-      if (event.altKey) {
-        stop()
-        nextEntity()
-      }
       break
     case 'Home':
       rawPlayer.value?.setCurrentFrame(0)
