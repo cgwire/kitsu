@@ -9,6 +9,7 @@
  */
 import { ref, shallowRef } from 'vue'
 
+import { CURSOR_PENCIL } from '@/composables/players/annotationCursor'
 import {
   DEFAULT_PENCIL_COLOR,
   DEFAULT_PENCIL_WIDTH,
@@ -100,6 +101,16 @@ export const useSharedAnnotationCanvas = () => {
     const penActive = isDrawing.value && currentTool.value === 'pen'
     fabricCanvas.isDrawingMode = penActive
     fabricCanvas.skipTargetFind = !isDrawing.value
+    // Cursor parity with the studio annotation tool: pencil while drawing,
+    // crosshair for the shape tools, default otherwise.
+    const cursor = !isDrawing.value
+      ? 'default'
+      : currentTool.value === 'pen'
+        ? CURSOR_PENCIL
+        : 'crosshair'
+    fabricCanvas.freeDrawingCursor = cursor
+    fabricCanvas.defaultCursor = cursor
+    fabricCanvas.hoverCursor = cursor
   }
 
   const setDrawingMode = enabled => {

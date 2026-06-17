@@ -9,6 +9,7 @@
     </div>
     <form class="identity-form" @submit.prevent="onSubmit">
       <text-field
+        ref="nameField"
         :label="$t('share.your_name')"
         :placeholder="$t('share.name_placeholder')"
         v-model.trim="guestName"
@@ -27,12 +28,16 @@
 </template>
 
 <script setup>
+import { onMounted, useTemplateRef } from 'vue'
+
 import TextField from '@/components/widgets/TextField.vue'
 
 defineProps({
   errorMessage: { type: String, default: '' },
   playlistName: { type: String, required: true }
 })
+
+const nameField = useTemplateRef('nameField')
 
 const guestName = defineModel('guestName', {
   type: String,
@@ -45,6 +50,8 @@ const onSubmit = () => {
   if (!guestName.value) return
   emit('submit')
 }
+
+onMounted(() => nameField.value?.focus())
 </script>
 
 <style lang="scss" scoped>
