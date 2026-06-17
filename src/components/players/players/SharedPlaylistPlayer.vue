@@ -795,6 +795,18 @@ watch(isEntitiesHidden, hidden => {
 
 watch(playingEntityIndex, () => nextTick(scrollPlayingEntityIntoView))
 
+// Reset pan/zoom whenever the displayed preview changes (entity or
+// sub-preview) so annotations stay aligned with the freshly-reset media.
+watch(
+  () => currentPreview.value?.id,
+  () =>
+    nextTick(() => {
+      const target = isMovie.value ? rawPlayer.value : picturePlayer.value
+      target?.resetPanZoom?.()
+      resetPanzoomTransform()
+    })
+)
+
 // Lifecycle
 
 onMounted(() => {
