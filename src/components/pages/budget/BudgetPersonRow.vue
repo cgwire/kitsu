@@ -36,6 +36,7 @@
       <td
         :key="personEntry.id + '-' + month"
         class="costs"
+        :class="{ negative: isOverEstimate(month) }"
         v-for="month in monthsBetweenStartAndNow"
       >
         {{ personExpense?.[month.format('YYYY-MM')]?.toLocaleString() }}
@@ -64,21 +65,37 @@
         ? monthsBetweenNowAndEnd
         : monthsBetweenProductionDates"
     >
-      <input
-        class="input-editor"
-        type="number"
-        min="0"
-        step="1"
-        :value="getMonthCost(personEntry, month)"
-        @change="
-          $emit('add-person-exception', {
-            personEntry,
-            month,
-            value: $event.target.value
-          })
-        "
+      <div
+        class="cell-editor"
         v-if="personEntry.monthCosts[month.format('YYYY-MM')]"
-      />
+      >
+        <button
+          class="clear-exception"
+          type="button"
+          :title="$t('budget.clear_exception')"
+          @click="
+            $emit('add-person-exception', { personEntry, month, value: null })
+          "
+          v-if="hasException(personEntry, month)"
+        >
+          <x-icon :size="12" />
+        </button>
+        <input
+          class="input-editor"
+          :class="{ 'has-exception': hasException(personEntry, month) }"
+          type="number"
+          min="0"
+          step="1"
+          :value="getMonthCost(personEntry, month)"
+          @change="
+            $emit('add-person-exception', {
+              personEntry,
+              month,
+              value: $event.target.value
+            })
+          "
+        />
+      </div>
       <span v-else>&nbsp;</span>
     </td>
     <td class="total-cost remaining-previsional" v-if="isShowingExpenses">
@@ -108,6 +125,7 @@
 </template>
 
 <script setup>
+import { XIcon } from 'lucide-vue-next'
 import { computed, defineProps } from 'vue'
 
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
@@ -205,6 +223,24 @@ const getMonthCost = (personEntry, month) => {
     parseInt(personEntry.monthCosts[monthKey]) ||
     0
   )
+}
+
+/* It tells whether the person has an explicit salary override for the given
+ * month, as opposed to the salary computed from the daily rate.
+ */
+const hasException = (personEntry, month) => {
+  const monthKey = typeof month === 'string' ? month : month.format('YYYY-MM')
+  return personEntry.exceptions?.[monthKey] != null
+}
+
+/* It tells whether the real cost spent for the given month went over the
+ * estimated cost, so the cell can be flagged when showing real costs.
+ */
+const isOverEstimate = month => {
+  const monthKey = typeof month === 'string' ? month : month.format('YYYY-MM')
+  const realCost = personExpense.value?.[monthKey]
+  if (realCost == null) return false
+  return realCost > getMonthCost(props.personEntry, monthKey)
 }
 </script>
 

@@ -1,12 +1,11 @@
 @use '@/variables.scss';
 
-$green: #00B242;
-$dark-grey-light: #3D4048;
-$dark-grey-2: #36393F;
-$light-grey: #CCC;
-$light-grey-light: #DDD;
-$red: #FF3860;
-
+$green: #00b242;
+$dark-grey-light: #3d4048;
+$dark-grey-2: #36393f;
+$light-grey: #ccc;
+$light-grey-light: #ddd;
+$red: #ff3860;
 
 th.month {
   text-align: center;
@@ -91,9 +90,35 @@ td.datatable-row-header.name {
   }
 }
 
+.cell-editor {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
 .input-editor {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   text-align: right;
+
+  &.has-exception {
+    font-weight: bold;
+  }
+}
+
+.clear-exception {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+
+  &:hover {
+    color: $red;
+  }
 }
 
 .cost-column {
@@ -106,7 +131,7 @@ td.datatable-row-header.name {
 }
 
 .negative {
-    color: $red;
+  color: $red;
 }
 
 input[type='number']::-webkit-outer-spin-button,
