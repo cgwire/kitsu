@@ -826,11 +826,9 @@ const marginBottom = computed(() => {
 // physical pixels and ignores zoom, so a 75 % zoomed-out fullscreen
 // player used to leave a black bar at the bottom — see issue #1541.
 const windowHeight = ref(window.innerHeight)
-const windowWidth = ref(window.innerWidth)
 
 const onWindowResize = () => {
   windowHeight.value = window.innerHeight
-  windowWidth.value = window.innerWidth
 }
 
 const defaultHeight = computed(() => {
@@ -839,9 +837,7 @@ const defaultHeight = computed(() => {
   }
   let bigHeight = windowHeight.value > 800 ? 470 : 300
   if (isMovie.value) bigHeight = windowHeight.value > 800 ? 442 : 272
-  return windowWidth.value > 1300 && (!props.light || props.big)
-    ? bigHeight
-    : 200
+  return !props.light || props.big ? bigHeight : 200
 })
 
 const fps = computed(
