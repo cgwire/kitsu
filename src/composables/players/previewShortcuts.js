@@ -21,6 +21,41 @@ const pauseEvent = e => {
 const isTypingTarget = target => ['INPUT', 'TEXTAREA'].includes(target?.tagName)
 
 /**
+ * Match an Alt+letter shortcut across keyboard layouts and OSes.
+ *
+ * If event.key is a plain a-z letter we match on it and ignore physical
+ * position: this keeps the shortcut on the user's key-cap letter on every
+ * Latin Windows/Linux layout (AZERTY/BÉPO/Dvorak, commit 9572c64) and stops
+ * a neighbour being hijacked by position. We fall back to event.code only
+ * when event.key is NOT a plain a-z letter: the OS rewrote it (macOS Option,
+ * Option+R → '®'; a dead key) OR the layout is non-Latin (Cyrillic/Greek/…),
+ * where event.key is a non-ASCII letter. On those layouts the shortcut then
+ * keys off physical QWERTY position — the same fallback as macOS — which is
+ * the only usable behaviour since the Latin letter can't be typed at all.
+ *
+ * Known limitation — macOS + non-QWERTY: macOS Option rewrites event.key on
+ * EVERY layout, so we always hit the event.code (physical QWERTY) branch
+ * there. On BÉPO/Dvorak the shortcut then keys off physical position, not
+ * the printed cap, so Alt+letter can be dead or fire a neighbour (BÉPO 'J'
+ * cap is physical KeyP → Option+J hits Alt+P). Unrecoverable without
+ * navigator.keyboard.getLayoutMap(), absent in Safari/Firefox.
+ *
+ * Ctrl/Cmd are excluded (Windows AltGr, macOS Cmd+Option). Exported so
+ * players with their own keydown handler (SharedPlaylistPlayer) match alike.
+ *
+ * @param {KeyboardEvent} event
+ * @param {string} code physical key, e.g. 'KeyR'
+ * @param {string} key lowercase typed letter, e.g. 'r'
+ */
+export const isAltLetter = (event, code, key) => {
+  if (!event.altKey || event.ctrlKey || event.metaKey) return false
+  const typed = event.key?.length === 1 ? event.key.toLowerCase() : null
+  return typed && typed >= 'a' && typed <= 'z'
+    ? typed === key
+    : event.code === code
+}
+
+/**
  * @param {Object} handlers
  * @param {Function} [handlers.onDelete]
  * @param {Function} [handlers.onPrevFrame]
@@ -51,11 +86,11 @@ export const usePreviewShortcuts = handlers => {
 
   const onKeyDown = event => {
     if (event.repeat && !REPEATABLE_KEYS.includes(event.key)) return
-    // Alt+P plays/pauses even when an <input> / <textarea> has focus,
-    // so users can pause / resume while typing a comment without
-    // leaving the field. All other shortcuts stay blocked inside text
-    // inputs to avoid accidental triggers.
-    if (event.altKey && (event.key === 'p' || event.key === 'P')) {
+    // Alt+P plays/pauses even when an <input> / <textarea> has focus, so
+    // users can pause / resume while typing a comment without leaving the
+    // field (it runs before the typing-target guard below). All other
+    // shortcuts stay blocked inside text inputs to avoid accidental triggers.
+    if (isAltLetter(event, 'KeyP', 'p')) {
       pauseEvent(event)
       handlers.onPlayPause?.()
       return
@@ -68,9 +103,27 @@ export const usePreviewShortcuts = handlers => {
       pauseEvent(event)
       return
     }
+    // Alt + letter shortcuts — matching rules live in isAltLetter.
+    if (isAltLetter(event, 'KeyR', 'r')) {
+      handlers.onRedo?.()
+      return
+    }
+    if (isAltLetter(event, 'KeyJ', 'j')) {
+      handlers.onPrevPreview?.()
+      return
+    }
+    if (isAltLetter(event, 'KeyK', 'k')) {
+      handlers.onNextPreview?.()
+      return
+    }
+    if (isAltLetter(event, 'KeyO', 'o')) {
+      pauseEvent(event)
+      handlers.onToggleOverlay?.()
+      return
+    }
+
     const mod = event.ctrlKey || event.metaKey
     const alt = event.altKey
-
     switch (event.key) {
       case 'Delete':
       case 'Backspace':
@@ -115,26 +168,11 @@ export const usePreviewShortcuts = handlers => {
       case 'z':
         if (mod) handlers.onUndo?.()
         break
-      case 'r':
-        if (alt) handlers.onRedo?.()
-        break
-      case 'j':
-        if (alt) handlers.onPrevPreview?.()
-        break
-      case 'k':
-        if (alt) handlers.onNextPreview?.()
-        break
       case 'c':
         if (mod) handlers.onCopy?.()
         break
       case 'v':
         if (mod) handlers.onPaste?.()
-        break
-      case 'o':
-        if (alt) {
-          pauseEvent(event)
-          handlers.onToggleOverlay?.()
-        }
         break
     }
   }

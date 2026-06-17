@@ -1738,12 +1738,10 @@ const {
   postComparisonPanZoomChanged
 } = previewRoom
 
-// Keyboard shortcuts (common subset; PlaylistPlayer-specific keys are
-// handled below in onKeyDown). Letter-based shortcuts must go through
-// this composable: it matches on event.key (the typed character) so they
-// work on non-QWERTY layouts. The onKeyDown below matches on event.code
-// (physical position) and is reserved for keys where that's correct
-// (arrows, Home/End, Delete) plus the playlist-specific entity logic.
+// Keyboard shortcuts: the common subset goes through this composable;
+// PlaylistPlayer-specific keys are handled below in onKeyDown (event.code:
+// arrows, Home/End, Delete, plus the playlist entity logic). See
+// usePreviewShortcuts / isAltLetter for how letter shortcuts are matched.
 
 const { isAltHeld } = usePreviewShortcuts({
   onDelete: () => deleteSelection(),
