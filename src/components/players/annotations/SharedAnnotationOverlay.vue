@@ -1,6 +1,8 @@
 <template>
-  <div class="annotation-overlay" ref="wrapper" :style="overlayStyle">
-    <canvas :id="canvasId" />
+  <div class="annotation-overlay" ref="wrapper" :style="wrapperStyle">
+    <div class="annotation-surface" :style="surfaceStyle">
+      <canvas :id="canvasId" />
+    </div>
     <div class="annotation-toolbar" v-if="isEditable">
       <button
         type="button"
@@ -9,7 +11,7 @@
         :title="$t('playlists.actions.annotation_draw')"
         @click="annotation.setTool('pen')"
       >
-        <pen-tool-icon :size="14" />
+        <pencil-icon :size="14" />
       </button>
       <button
         type="button"
@@ -75,12 +77,12 @@ import {
   ArrowUpRightIcon,
   CircleIcon,
   CornerLeftDownIcon,
-  PenToolIcon,
+  PencilIcon,
   RectangleHorizontalIcon,
   SaveIcon,
   Trash2Icon
 } from 'lucide-vue-next'
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useStore } from 'vuex'
 
 import { useSharedAnnotationCanvas } from '@/composables/players/sharedAnnotation'
@@ -134,6 +136,39 @@ const videoBounds = computed(() => {
   if (!mw || !mh) {
     return { width: cw, height: ch, left: 0, top: 0 }
   }
+
+  // Pictures: mirror the studio player's sizing — the image is centered and
+  // never upscaled beyond its natural size, so the overlay box matches the
+  // actually displayed <img>. A plain contain-fit (used for movies) would
+  // upscale small images and misalign the annotations on top of them.
+  if (props.isPicture) {
+    const ratio = mw / mh
+    let width = ratio ? ch * ratio : cw
+    let height = ratio ? Math.round(cw / ratio) : ch
+    let left = 0
+    let top = 0
+    if (cw > mw) {
+      left = Math.round((cw - mw) / 2)
+      width = mw
+    } else if (cw > width) {
+      left = Math.round((cw - width) / 2)
+    } else {
+      width = cw
+    }
+    if (ch > mh) {
+      top = Math.round((ch - mh) / 2)
+      height = mh
+    } else if (ch > height) {
+      top = Math.round((ch - height) / 2)
+    } else {
+      height = ch
+      width = Math.round(height * ratio)
+      left = Math.round((cw - width) / 2)
+    }
+    return { width, height, left, top }
+  }
+
+  // Movies: contain-fit — matches the canvas, which fills the container.
   const containerRatio = cw / ch
   const movieRatio = mw / mh
   let displayedW
@@ -153,7 +188,8 @@ const videoBounds = computed(() => {
   }
 })
 
-const overlayStyle = computed(() => {
+// The wrapper is pinned (un-transformed) to the displayed media box.
+const wrapperStyle = computed(() => {
   const bounds = videoBounds.value
   if (!bounds.width || !bounds.height) {
     return { display: 'none' }
@@ -161,9 +197,21 @@ const overlayStyle = computed(() => {
   return {
     height: `${bounds.height}px`,
     left: `${bounds.left}px`,
-    pointerEvents: props.isEditable ? 'auto' : 'none',
     top: `${bounds.top}px`,
     width: `${bounds.width}px`
+  }
+})
+
+// Panzoom is applied here as a CSS transform (mirrors the studio
+// AnnotationCanvas) instead of fabric's setViewportTransform: a CSS
+// transform scales with the page under browser zoom and stays aligned
+// with the media, whereas fabric's retina-scaled viewport drifts when
+// devicePixelRatio changes.
+const surfaceStyle = computed(() => {
+  const { x = 0, y = 0, scale = 1 } = props.panzoomTransform || {}
+  return {
+    pointerEvents: props.isEditable ? 'auto' : 'none',
+    transform: `translate(${x}px, ${y}px) scale(${scale})`
   }
 })
 
@@ -214,15 +262,31 @@ const fitCanvasToBounds = () => {
   const bounds = videoBounds.value
   if (bounds.width <= 0 || bounds.height <= 0) return
   annotation.setCanvasSize(bounds.width, bounds.height)
+  // Refresh fabric's cached canvas offset so freshly drawn strokes land
+  // under the cursor (a stale offset shifts pointer coordinates).
+  annotation.getCanvas()?.calcOffset()
   render()
 }
 
-const applyPanzoomTransform = () => {
-  const fabricCanvas = annotation.getCanvas()
-  if (!fabricCanvas) return
-  const { x = 0, y = 0, scale = 1 } = props.panzoomTransform || {}
-  fabricCanvas.setViewportTransform([scale, 0, 0, scale, x, y])
-  fabricCanvas.requestRenderAll()
+const refreshLayout = () => {
+  measureContainer()
+  fitCanvasToBounds()
+}
+
+// Browser zoom (a devicePixelRatio change) and dev-console docking move
+// the media without resizing the observed elements, so the ResizeObserver
+// stays silent. window / visualViewport resize do fire, so recompute on
+// them — immediately and once more after the layout settles.
+const onViewportResize = () => {
+  refreshLayout()
+  setTimeout(refreshLayout, 250)
+}
+
+// The panzoom transform is now applied via CSS (surfaceStyle); we only
+// refresh fabric's cached offset so pointer coordinates stay accurate
+// while drawing on a zoomed/panned view.
+const refreshCanvasOffset = () => {
+  nextTick(() => annotation.getCanvas()?.calcOffset())
 }
 
 const save = async () => {
@@ -249,8 +313,9 @@ const save = async () => {
       }
     })
     emit('saved', updated.annotations || [])
-  } catch {
-    // Silent failure for now; toolbar stays so the user can retry.
+  } catch (error) {
+    // Keep the toolbar so the user can retry; surface the failure for logs.
+    console.error('Failed to save shared playlist annotations', error)
   }
   isSaving.value = false
 }
@@ -282,8 +347,8 @@ watch(
   render
 )
 
-watch(() => props.movieDimensions, fitCanvasToBounds)
-watch(() => props.panzoomTransform, applyPanzoomTransform)
+watch(() => props.movieDimensions, refreshLayout)
+watch(() => props.panzoomTransform, refreshCanvasOffset)
 
 // Lifecycle
 
@@ -293,20 +358,19 @@ onMounted(() => {
   annotation.setUserId(props.guestId)
   annotation.setTime(currentTime.value, props.currentFrame)
   annotation.setDrawingMode(!!props.isEditable)
-  measureContainer()
-  fitCanvasToBounds()
-  applyPanzoomTransform()
+  refreshLayout()
+  window.addEventListener('resize', onViewportResize)
+  window.visualViewport?.addEventListener('resize', onViewportResize)
   const target = wrapper.value?.parentElement
   if (typeof ResizeObserver !== 'undefined' && target) {
-    resizeObserver = new ResizeObserver(() => {
-      measureContainer()
-      fitCanvasToBounds()
-    })
+    resizeObserver = new ResizeObserver(refreshLayout)
     resizeObserver.observe(target)
   }
 })
 
 onBeforeUnmount(() => {
+  window.removeEventListener('resize', onViewportResize)
+  window.visualViewport?.removeEventListener('resize', onViewportResize)
   resizeObserver?.disconnect()
   resizeObserver = null
   annotation.dispose()
@@ -323,7 +387,23 @@ defineExpose({
 <style lang="scss" scoped>
 .annotation-overlay {
   position: absolute;
-  z-index: 5;
+  // Above the media viewers (PictureViewer / MultiVideoViewer are z-index
+  // 300); mirrors the non-shared AnnotationCanvas. The wrapper itself never
+  // captures pointer events — the surface re-enables them while editing and
+  // the toolbar is always interactive — so clicks pass through to the media.
+  pointer-events: none;
+  z-index: 500;
+}
+
+.annotation-surface {
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  // Panzoom is applied here as a CSS transform (see surfaceStyle) so it
+  // scales with the page under browser zoom and stays aligned with media.
+  transform-origin: 0 0;
+  width: 100%;
 
   canvas {
     display: block;

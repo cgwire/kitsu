@@ -145,6 +145,7 @@ export default {
     analytics: 'Budget Analytics',
     cash_evolution: 'Expense evolution',
     cash_repartition: 'Expense repartition',
+    clear_exception: "Clear this month's salary override",
     cost: 'Cost',
     costs: 'Real Costs',
     departments: 'Departments',

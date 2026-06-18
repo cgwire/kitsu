@@ -1,6 +1,6 @@
 <template>
   <div class="playlist-footer flexrow">
-    <div class="flexrow flexrow-item" v-if="isMovie || isSound">
+    <div class="flexrow flexrow-item" v-if="isMovie || isSound || isPicture">
       <button-simple
         class="playlist-button flexrow-item"
         icon="play"
@@ -14,6 +14,29 @@
         :title="$t('playlists.actions.pause')"
         @click="$emit('pause')"
         v-else
+      />
+    </div>
+
+    <div
+      class="flexrow flexrow-item sub-preview-nav"
+      v-if="entityPreviewLength > 1"
+    >
+      <button-simple
+        class="playlist-button flexrow-item"
+        icon="left"
+        :title="$t('playlists.actions.files_previous')"
+        :disabled="isPlaying"
+        @click="$emit('previous-preview')"
+      />
+      <span class="flexrow-item nowrap sub-preview-position">
+        {{ currentPreviewIndex + 1 }} / {{ entityPreviewLength }}
+      </span>
+      <button-simple
+        class="playlist-button flexrow-item"
+        icon="right"
+        :title="$t('playlists.actions.files_next')"
+        :disabled="isPlaying"
+        @click="$emit('next-preview')"
       />
     </div>
 
@@ -81,10 +104,9 @@
     />
     <button-simple
       class="playlist-button flexrow-item"
-      :active="isZoomEnabled"
       icon="loupe"
       :title="$t('playlists.actions.annotation_zoom_pan')"
-      @click="isZoomEnabled = !isZoomEnabled"
+      @click="$emit('reset-zoom')"
       v-if="isMovie || isPicture"
     />
     <button-simple
@@ -111,7 +133,9 @@ import ButtonSound from '@/components/widgets/ButtonSound.vue'
 defineProps({
   canComment: { type: Boolean, default: false },
   currentFrameDisplay: { type: String, default: '' },
+  currentPreviewIndex: { type: Number, default: 0 },
   currentTimeFormatted: { type: String, default: '' },
+  entityPreviewLength: { type: Number, default: 0 },
   guestId: { type: String, default: '' },
   isFullScreen: { type: Boolean, default: false },
   isMovie: { type: Boolean, default: false },
@@ -123,7 +147,15 @@ defineProps({
   token: { type: String, default: '' }
 })
 
-defineEmits(['pause', 'play', 'toggle-full-screen', 'toggle-sound'])
+defineEmits([
+  'next-preview',
+  'pause',
+  'play',
+  'previous-preview',
+  'reset-zoom',
+  'toggle-full-screen',
+  'toggle-sound'
+])
 
 const isAnnotating = defineModel('isAnnotating', {
   type: Boolean,
@@ -140,10 +172,6 @@ const isEntitiesHidden = defineModel('isEntitiesHidden', {
 const isHd = defineModel('isHd', { type: Boolean, default: true })
 const isMuted = defineModel('isMuted', { type: Boolean, default: false })
 const isRepeating = defineModel('isRepeating', {
-  type: Boolean,
-  default: false
-})
-const isZoomEnabled = defineModel('isZoomEnabled', {
   type: Boolean,
   default: false
 })
@@ -191,6 +219,12 @@ const volume = defineModel('volume', { type: Number, default: 100 })
   color: rgba(244, 245, 250, 0.6);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.02em;
+}
+
+.sub-preview-position {
+  color: rgba(244, 245, 250, 0.6);
+  font-variant-numeric: tabular-nums;
+  padding: 0 0.3em;
 }
 
 @media screen and (max-width: 768px) {

@@ -217,15 +217,18 @@ export default {
     ...mapGetters(['currentProduction', 'departmentMap', 'personMap']),
 
     monthsBetweenStartAndNow() {
+      // Split the timeline on calendar months, not on the day of the month:
+      // the current month always belongs to the real costs section, whatever
+      // the production start day is.
       return this.getMonthsBetweenDates(
         this.currentProduction.start_date,
-        moment().format('YYYY-MM-DD')
+        moment().endOf('month').format('YYYY-MM-DD')
       )
     },
 
     monthsBetweenNowAndEnd() {
       return this.getMonthsBetweenDates(
-        moment().add(1, 'month').format('YYYY-MM-DD'),
+        moment().add(1, 'month').startOf('month').format('YYYY-MM-DD'),
         this.currentProduction.end_date
       )
     },

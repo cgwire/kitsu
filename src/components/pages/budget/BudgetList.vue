@@ -543,11 +543,21 @@ export default {
       preferences.setObjectPreference(key, this.collapsedDepartments)
     },
 
-    /* It sets an salary exception for a person, for a given month. */
+    /* It sets a salary exception for a person, for a given month. An empty,
+     * zero or negative value clears the override instead: the month falls
+     * back to the computed salary rather than storing a 0 exception (which
+     * the backend would drop anyway).
+     */
     addPersonException({ personEntry, month, value }) {
-      value = parseInt(value)
+      const monthKey = month.format('YYYY-MM')
       const exceptions = personEntry.exceptions || {}
-      exceptions[month.format('YYYY-MM')] = value
+      const amount = parseInt(value)
+      if (value == null || value === '' || isNaN(amount) || amount <= 0) {
+        delete exceptions[monthKey]
+      } else {
+        exceptions[monthKey] = amount
+      }
+      personEntry.exceptions = exceptions
       const budgetEntry = {
         id: personEntry.budget_entry_id,
         ...personEntry,
