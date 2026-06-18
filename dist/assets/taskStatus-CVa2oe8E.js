@@ -1,2 +1,0 @@
-import{t as e,v as t}from"./vue.esm-bundler-Ci5yCN81.js";import{i as n}from"./vuex.esm-bundler-C3lKJ9kl.js";import{zt as r}from"./index-D9uAtEP_.js";e();var i=()=>{let e=n(),i=t(()=>e.getters.isDarkTheme);return{backgroundColor:e=>(!e||e.name===`Todo`)&&!i.value?`#ECECEC`:(!e||e.name===`Todo`)&&i.value?`#5F626A`:i.value?r.darkenColor(e.color):e.color,color:e=>!e||e.name!==`Todo`||i.value?`white`:`#333`,isDarkTheme:i}};export{i as t};
-//# sourceMappingURL=taskStatus-CVa2oe8E.js.map
