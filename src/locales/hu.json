@@ -1693,6 +1693,11 @@
         "production": "Produkció",
         "revision": "Revízió",
         "status": "Állapot",
+        "statuses": {
+          "broken": "A szerveroldali feldolgozás sikertelen",
+          "missing": "A file feltöltése sikertelen",
+          "processing": "Szerveroldali feldolgozás folyamatban"
+        },
         "task_type_id": "Feladat típus",
         "title": "Előnézet file",
         "explanation": "Ez az oldal az összes köztes állapotban lévő előnézet file-t listázza: feldolgozás alattiakat vagy hibásakat. Mutatja, hány előnézet file van feldolgozás alatt, és melyek nem készültek el.",

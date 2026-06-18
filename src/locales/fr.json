@@ -1693,6 +1693,11 @@
         "production": "Production",
         "revision": "Révision",
         "status": "Statut",
+        "statuses": {
+          "broken": "Échec du traitement serveur",
+          "missing": "Échec de l'envoi du fichier",
+          "processing": "Traitement serveur en cours"
+        },
         "task_type_id": "Type de tâche",
         "title": "Previews",
         "mark_broken": "Marquer comme cassé",

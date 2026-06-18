@@ -1693,6 +1693,11 @@
         "production": "Produktion",
         "revision": "Revision",
         "status": "Status",
+        "statuses": {
+          "broken": "Serverbehandling mislykkedes",
+          "missing": "Upload af fil mislykkedes",
+          "processing": "Serverbehandling i gang"
+        },
         "task_type_id": "Opgavetype",
         "title": "Preview-filer",
         "mark_broken": "Markér som ødelagt",

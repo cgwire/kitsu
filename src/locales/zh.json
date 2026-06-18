@@ -1693,6 +1693,11 @@
         "production": "生产",
         "revision": "修订",
         "status": "状态",
+        "statuses": {
+          "broken": "服务器处理失败",
+          "missing": "文件上传失败",
+          "processing": "服务器处理中"
+        },
         "task_type_id": "任务类型",
         "title": "预览文件",
         "mark_broken": "标记为已损坏",

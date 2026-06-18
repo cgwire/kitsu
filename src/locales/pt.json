@@ -1693,6 +1693,11 @@
         "production": "Produção",
         "revision": "Revisão",
         "status": "Status",
+        "statuses": {
+          "broken": "Falha no processamento do servidor",
+          "missing": "Falha no envio do arquivo",
+          "processing": "Processamento do servidor em andamento"
+        },
         "task_type_id": "Tipo de tarefa",
         "title": "Visualizar arquivos",
         "mark_broken": "Marcar como quebrado",

@@ -741,6 +741,11 @@ export default {
       production: 'Production',
       revision: 'Revision',
       status: 'Status',
+      statuses: {
+        broken: 'Server processing failed',
+        missing: 'File upload failed',
+        processing: 'Server processing in progress'
+      },
       task_type_id: 'Task type',
       title: 'Preview files'
     }

@@ -1693,6 +1693,11 @@
         "production": "作品",
         "revision": "リビジョン",
         "status": "ステータス",
+        "statuses": {
+          "broken": "サーバー処理に失敗しました",
+          "missing": "ファイルのアップロードに失敗しました",
+          "processing": "サーバー処理中"
+        },
         "task_type_id": "タスクタイプ",
         "title": "プレビューファイル",
         "mark_broken": "破損としてマーク",

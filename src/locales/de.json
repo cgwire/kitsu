@@ -1693,6 +1693,11 @@
         "production": "Produktion",
         "revision": "Überarbeitung",
         "status": "Status",
+        "statuses": {
+          "broken": "Serverseitige Verarbeitung fehlgeschlagen",
+          "missing": "Hochladen der Datei fehlgeschlagen",
+          "processing": "Serverseitige Verarbeitung läuft"
+        },
         "task_type_id": "Aufgabentyp",
         "title": "Vorschaudateien",
         "mark_broken": "Als defekt markieren",

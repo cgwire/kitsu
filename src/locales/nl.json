@@ -1693,6 +1693,11 @@
         "production": "Productie",
         "revision": "Revisie",
         "status": "Status",
+        "statuses": {
+          "broken": "Serververwerking mislukt",
+          "missing": "Uploaden van bestand mislukt",
+          "processing": "Serververwerking loopt"
+        },
         "task_type_id": "Taaktype",
         "title": "Previewbestanden",
         "mark_broken": "Markeer als kapot",
