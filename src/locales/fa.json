@@ -234,7 +234,7 @@
       },
       "nb_selected_assets": "منبع {nbSelectedAssets} انتخاب شده | منابع {nbSelectedAssets} انتخاب شده",
       "nb_selected_shots": "شات {nbSelectedShots} انتخاب شده | {nbSelectedShots} شات های انتخاب شده",
-      "nb_selected_edits": "{nbSelectedEdits} تدوین انتخاب شده | {nbSelectedEdits} تدوین‌ها انتخاب شده",
+      "nb_selected_edits": "{nbSelectedEdits} تدوین انتخاب شده | {nbSelectedEdits} تدوین انتخاب شده",
       "output_files": {
         "extension": "اکستنشن",
         "name": "نام",
@@ -1759,7 +1759,7 @@
       "edit_success": "تغییرات با موفقیت ذخیره شدند.",
       "restore_text": "آیا مطمئن هستید که می‌خواهید {name} را از بایگانی خود بازیابی کنید؟",
       "delete_for_selection_error": "هنگام حذف تدوین‌های انتخاب‌شده خطایی روی داد.",
-      "delete_for_selection_hard_text": "آیا مطمئن هستید که می‌خواهید تدوین‌های انتخاب‌شده را به‌طور دائم حذف کنید؟ تمام وظایف، نظرات و پیش‌نمایش‌های مرتبط نیز حذف خواهند شد. لطفاً با تایپ کردن «DELETE» در زیر، تأیید کنید.",
+      "delete_for_selection_hard_text": "آیا مطمئن هستید که می‌خواهید تدوین‌های انتخاب‌شده را به‌طور دائم حذف کنید؟ تمام وظایف، نظرات و پیش‌نمایش‌های مرتبط نیز حذف خواهند شد. لطفاً با تایپ کردن «حذف» در زیر، تأیید کنید.",
       "delete_for_selection_hard_lock_text": "حذف",
       "multiple_delete_error": "هنگام حذف تدوین خطایی رخ داد. ممکن است داده‌های موجود در حال حاضر به آن پیوند داده شده باشند. آیا مطمئن هستید که هیچ وظیفه‌ای به تدوین انتخاب‌شده پیوند داده نشده است؟"
     },

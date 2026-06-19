@@ -1242,7 +1242,7 @@
         "is_artist_allowed": "允许艺术家",
         "is_client_allowed": "允许客户",
         "is_done": "已完成",
-        "is_retake": "有 retake 值",
+        "is_retake": "有返修值",
         "name": "名称",
         "short_name": "简称",
         "is_feedback_request": "反馈请求",

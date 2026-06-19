@@ -1432,7 +1432,7 @@
         "production": "Prod",
         "sequence": "Sequence",
         "time_spent": "Tid",
-        "person": "Modifikator",
+        "person": "Ændret af",
         "max_retakes": "Maks Rtks",
         "resolution": "Opløsning",
         "placeholder": "SH01",
@@ -1750,7 +1750,7 @@
         "name": "Navn",
         "episode": "Ep.",
         "description": "Beskrivelse",
-        "person": "Modifikator"
+        "person": "Ændret af"
       },
       "tasks": "Opgaver",
       "cancel_text": "Er du sikker på, at du vil arkivere {name}?",

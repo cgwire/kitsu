@@ -1759,7 +1759,7 @@
       "edit_success": "수정 사항이 성공적으로 저장되었습니다.",
       "restore_text": "아카이브에서 {name}을 복원하시겠습니까?",
       "delete_for_selection_error": "선택한 편집본을 삭제하는 동안 오류가 발생했습니다.",
-      "delete_for_selection_hard_text": "선택한 편집본을 영구적으로 제거하시겠습니까? 관련 작업, 댓글, 미리보기도 모두 삭제됩니다. 아래에 'DELETE'를 입력하여 확인하시기 바랍니다.",
+      "delete_for_selection_hard_text": "선택한 편집본을 영구적으로 제거하시겠습니까? 관련 작업, 댓글, 미리보기도 모두 삭제됩니다. 아래에 '삭제'를 입력하여 확인하시기 바랍니다.",
       "delete_for_selection_hard_lock_text": "삭제",
       "multiple_delete_error": "편집본을 삭제하는 동안 오류가 발생했습니다. 현재 연결된 기존 데이터가 있을 수 있습니다. 선택한 편집본에 연결된 작업이 없는 것이 확실합니까?"
     },

@@ -12,7 +12,7 @@
       "new_asset": "Criar um asset",
       "new_assets": "Adicionar assets",
       "new_success": "Asset {name} criado com sucesso.",
-      "no_cast_in": "Este asset não está distribuído em nenhum plano.",
+      "no_cast_in": "Este asset não está distribuído em nenhum shot.",
       "number": "asset | assets",
       "restore_text": "Tem certeza de que deseja restaurar {name} de seu arquivo?",
       "restore_error": "Ocorreu um erro ao restaurar este asset.",
@@ -35,7 +35,7 @@
       "only_current_episode": "Somente o episódio atual",
       "linked": "Vinculado",
       "no_concept": "Não há conceitos vinculados a esse ativo",
-      "casted_in_shots": "Distribuído em {nbShots} planos",
+      "casted_in_shots": "Distribuído em {nbShots} shots",
       "delete_for_selection_hard_text": "Tem certeza de que deseja remover permanentemente os ativos selecionados? Todas as tarefas, comentários e visualizações relacionadas também serão excluídos. Confirme digitando \"EXCLUIR\" abaixo.",
       "delete_for_selection_hard_lock_text": "EXCLUIR",
       "show_linked": "Exibir ativos de decomposição"
