@@ -168,7 +168,7 @@
         "shot": "Toma",
         "asset": "Recurso",
         "sequence": "Secuencia",
-        "edit": "Editar",
+        "edit": "Montaje",
         "episode": "Episodio"
       }
     },
@@ -494,7 +494,7 @@
       "stick": "Enganchar",
       "timeSpent": "Tiempo empleado",
       "unstick": "Desenganchar",
-      "all_edits": "Todas las ediciones",
+      "all_edits": "Todos los montajes",
       "attach_snapshots": "Adjuntar instantáneas de las anotaciones",
       "reply": "Responder",
       "select_file": "Seleccione un archivo desde su disco duro",
@@ -606,7 +606,7 @@
       "set_estimations": "Fijar estimaciones",
       "delete_assets": "Borrar recursos",
       "delete_shots": "Borrar tomas",
-      "delete_edits": "Elimine las ediciones",
+      "delete_edits": "Eliminar los montajes",
       "generate_playlist": "Generar una lista de reproducción",
       "set_thumbnails": "Establecer miniaturas de la última vista previa",
       "subscribe": "Suscribirse a las notificaciones",
@@ -1734,18 +1734,18 @@
       "software_used_by_artists": "Programas informáticos utilizados por los artistas"
     },
     "edits": {
-      "all_edits": "Todas las ediciones",
-      "creation_explaination": "Subir un archivo de edición para crear una nueva edición",
-      "edit_error": "Se ha producido un error al guardar esta edición. ¿Está seguro de que no hay etra modificación con un nombre similar?",
+      "all_edits": "Todos los montajes",
+      "creation_explaination": "Subir un archivo de montaje para crear un nuevo montaje",
+      "edit_error": "Se ha producido un error al guardar este montaje. ¿Está seguro de que no hay otro montaje con un nombre similar?",
       "delete_text": "¿Está seguro que quiere eliminar {name} de su base de datos?",
-      "delete_error": "Se ha producido un error al eliminar esta edición. Es probable que que haya datos asociados.",
-      "delete_for_selection": "Eliminar la modificación seleccionada | Eliminar las {nbSelectedEdits} modificaciones seleccionadas",
-      "edit_title": "Cambiar la edición",
-      "empty_list": "No hay modificaciones en la producción. ¿Qué tal si crea algunas?",
-      "empty_list_client": "No hay modificaciones en esta producción",
-      "new_edit": "Nueva modificación",
-      "number": "modificación | modificaciones",
-      "title": "Modificaciones",
+      "delete_error": "Se ha producido un error al eliminar este montaje. Es probable que haya datos asociados.",
+      "delete_for_selection": "Eliminar el montaje seleccionado | Eliminar los {nbSelectedEdits} montajes seleccionados",
+      "edit_title": "Cambiar el montaje",
+      "empty_list": "No hay montajes en la producción. ¿Qué tal si crea algunos?",
+      "empty_list_client": "No hay montajes en esta producción",
+      "new_edit": "Nuevo montaje",
+      "number": "montaje | montajes",
+      "title": "Montajes",
       "fields": {
         "name": "nombre",
         "episode": "Ep.",
@@ -1754,14 +1754,14 @@
       },
       "tasks": "Tareas",
       "cancel_text": "¿Estás seguro de que quieres archivar {name}?",
-      "history": "Editar historial de valores",
-      "restore_error": "Se ha producido un error al restaurar esta edición.",
+      "history": "Historial de valores del montaje",
+      "restore_error": "Se ha producido un error al restaurar este montaje.",
       "edit_success": "Las modificaciones se han guardado correctamente.",
       "restore_text": "¿Estás seguro de que quieres restaurar {name} de tu archivo?",
-      "delete_for_selection_error": "Se ha producido un error al borrar las ediciones seleccionadas.",
-      "delete_for_selection_hard_text": "¿Está seguro de que desea eliminar permanentemente las ediciones seleccionadas? También se eliminarán todas las tareas, comentarios y vistas previas relacionadas. Confírmelo escribiendo \"BORRAR\" a continuación.",
+      "delete_for_selection_error": "Se ha producido un error al borrar los montajes seleccionados.",
+      "delete_for_selection_hard_text": "¿Está seguro de que desea eliminar permanentemente los montajes seleccionados? También se eliminarán todas las tareas, comentarios y vistas previas relacionadas. Confírmelo escribiendo \"BORRAR\" a continuación.",
       "delete_for_selection_hard_lock_text": "BORRAR",
-      "multiple_delete_error": "Se ha producido un error al borrar una edición. Es posible que existan datos vinculados a ella. ¿Está seguro de que no hay tareas vinculadas a la edición seleccionada?"
+      "multiple_delete_error": "Se ha producido un error al borrar un montaje. Es posible que existan datos vinculados a él. ¿Está seguro de que no hay tareas vinculadas al montaje seleccionado?"
     },
     "status_automations": {
       "change_ready_for": "cambios \"listos para\" para",
@@ -1793,7 +1793,7 @@
         "shot": "Toma",
         "sequence": "Secuencia",
         "episode": "Episodio",
-        "edit": "Editar"
+        "edit": "Montaje"
       },
       "field_types": {
         "status": "Estado",

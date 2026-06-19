@@ -168,7 +168,7 @@
         "shot": "镜头",
         "asset": "资产",
         "sequence": "序列",
-        "edit": "编辑",
+        "edit": "剪辑",
         "episode": "剧集"
       }
     },
@@ -494,7 +494,7 @@
       "stick": "固定",
       "timeSpent": "所花费的时间",
       "unstick": "取消固定",
-      "all_edits": "所有编辑",
+      "all_edits": "所有剪辑",
       "attach_snapshots": "附加注解中的快照",
       "reply": "回复",
       "select_file": "选择文件",
@@ -606,7 +606,7 @@
       "set_estimations": "设定预算",
       "delete_assets": "删除资产",
       "delete_shots": "删除镜头",
-      "delete_edits": "删除编辑",
+      "delete_edits": "删除剪辑",
       "generate_playlist": "生成播放列表",
       "set_thumbnails": "设定最后一次预览为缩略图",
       "subscribe": "订阅通知",
@@ -1735,16 +1735,16 @@
     },
     "edits": {
       "all_edits": "所有剪辑",
-      "creation_explaination": "上传一个 edit 文件以创建新的 edit",
-      "edit_error": "保存此 edit 时发生错误。您确定没有名称相似的 edit 吗？",
+      "creation_explaination": "上传一个剪辑文件以创建新的剪辑",
+      "edit_error": "保存此剪辑时发生错误。您确定没有名称相似的剪辑吗？",
       "delete_text": "您确定要从您的数据库移除{name}吗?",
-      "delete_error": "删除此 edit 时发生错误。当前可能有与之关联的现有数据。",
-      "delete_for_selection": "删除所选的 edit | 删除 {nbSelectedEdits} 个所选的 edit",
-      "edit_title": "更改编辑",
-      "empty_list": "此制作中没有任何 edit。要创建一些吗？",
-      "empty_list_client": "此制作中没有任何 edit。",
-      "new_edit": "新编辑",
-      "number": "edit | edits",
+      "delete_error": "删除此剪辑时发生错误。当前可能有与之关联的现有数据。",
+      "delete_for_selection": "删除所选的剪辑 | 删除 {nbSelectedEdits} 个所选的剪辑",
+      "edit_title": "更改剪辑",
+      "empty_list": "此制作中没有任何剪辑。要创建一些吗？",
+      "empty_list_client": "此制作中没有任何剪辑。",
+      "new_edit": "新建剪辑",
+      "number": "剪辑 | 剪辑",
       "title": "剪辑",
       "fields": {
         "name": "名字",
@@ -1754,14 +1754,14 @@
       },
       "tasks": "任务",
       "cancel_text": "您确定要将 {name} 存档吗？",
-      "history": "编辑数值历史",
-      "restore_error": "恢复此编辑时发生错误。",
+      "history": "剪辑数值历史",
+      "restore_error": "恢复此剪辑时发生错误。",
       "edit_success": "修改已成功保存。",
       "restore_text": "您确定要从存档中恢复 {name} 吗？",
-      "delete_for_selection_error": "删除所选编辑时发生错误。",
-      "delete_for_selection_hard_text": "您确定要永久删除所选编辑吗？所有相关任务、评论和预览也将被删除。请在下面输入 \"删除 \"确认。",
+      "delete_for_selection_error": "删除所选剪辑时发生错误。",
+      "delete_for_selection_hard_text": "您确定要永久删除所选剪辑吗？所有相关任务、评论和预览也将被删除。请在下面输入 \"DELETE\" 确认。",
       "delete_for_selection_hard_lock_text": "删除",
-      "multiple_delete_error": "删除编辑时发生错误。当前可能有与之关联的现有数据。您确定没有任务链接到所选编辑吗？"
+      "multiple_delete_error": "删除剪辑时发生错误。当前可能有与之关联的现有数据。您确定没有任务链接到所选剪辑吗？"
     },
     "status_automations": {
       "change_ready_for": "将“准备就绪”更改为",
@@ -1793,7 +1793,7 @@
         "shot": "镜头",
         "sequence": "序列",
         "episode": "剧集",
-        "edit": "编辑"
+        "edit": "剪辑"
       },
       "field_types": {
         "status": "状态",

@@ -168,7 +168,7 @@
         "shot": "Shot",
         "asset": "Asset",
         "sequence": "Sequência",
-        "edit": "Editar",
+        "edit": "Montagem",
         "episode": "Episódio"
       }
     },
@@ -494,7 +494,7 @@
       "stick": "Fixar",
       "timeSpent": "Tempo gasto",
       "unstick": "Descolar",
-      "all_edits": "Todas as edições",
+      "all_edits": "Todas as montagens",
       "attach_snapshots": "Anexe instantâneos de sua anotação",
       "reply": "Responder",
       "select_file": "Selecione arquivos de seu disco rígido",
@@ -606,7 +606,7 @@
       "set_estimations": "Definir estimativas",
       "delete_assets": "Excluir ativos",
       "delete_shots": "Deletar shots",
-      "delete_edits": "Excluir edições",
+      "delete_edits": "Excluir montagens",
       "generate_playlist": "Gerar uma lista de reprodução",
       "set_thumbnails": "Definir miniaturas da última visualização",
       "subscribe": "Assine as notificações",
@@ -1734,18 +1734,18 @@
       "software_used_by_artists": "Software usado por artistas"
     },
     "edits": {
-      "all_edits": "Todas as edições",
-      "creation_explaination": "Faça upload de um arquivo de edição para criar uma nova edição",
-      "edit_error": "Ocorreu um erro ao salvar esta edição. Tem certeza de que não há nenhuma edição com um nome semelhante?",
+      "all_edits": "Todas as montagens",
+      "creation_explaination": "Faça upload de um arquivo de montagem para criar uma nova montagem",
+      "edit_error": "Ocorreu um erro ao salvar esta montagem. Tem certeza de que não há nenhuma montagem com um nome semelhante?",
       "delete_text": "Tem certeza de que deseja remover {name} do seu banco de dados?",
-      "delete_error": "Ocorreu um erro ao excluir esta edição. Pode haver dados existentes atualmente vinculados a ela.",
-      "delete_for_selection": "Excluir a edição selecionada | Excluir as edições selecionadas {nbSelectedEdits}",
-      "edit_title": "Alterar edição",
-      "empty_list": "Não há edições na produção. Que tal criar algumas?",
-      "empty_list_client": "Não há edições nessa produção.",
-      "new_edit": "Nova edição",
-      "number": "edit | edits",
-      "title": "Edições",
+      "delete_error": "Ocorreu um erro ao excluir esta montagem. Pode haver dados existentes atualmente vinculados a ela.",
+      "delete_for_selection": "Excluir a montagem selecionada | Excluir as {nbSelectedEdits} montagens selecionadas",
+      "edit_title": "Alterar montagem",
+      "empty_list": "Não há montagens na produção. Que tal criar algumas?",
+      "empty_list_client": "Não há montagens nessa produção.",
+      "new_edit": "Nova montagem",
+      "number": "montagem | montagens",
+      "title": "Montagens",
       "fields": {
         "name": "Nome",
         "episode": "Ep.",
@@ -1754,14 +1754,14 @@
       },
       "tasks": "Tarefas",
       "cancel_text": "Tem certeza de que deseja arquivar {name}?",
-      "history": "Editar histórico de valores",
-      "restore_error": "Ocorreu um erro ao restaurar essa edição.",
+      "history": "Histórico de valores da montagem",
+      "restore_error": "Ocorreu um erro ao restaurar essa montagem.",
       "edit_success": "As modificações foram salvas com sucesso.",
       "restore_text": "Tem certeza de que deseja restaurar {name} do seu arquivo?",
-      "delete_for_selection_error": "Ocorreu um erro ao excluir as edições selecionadas.",
-      "delete_for_selection_hard_text": "Tem certeza de que deseja remover permanentemente as edições selecionadas? Todas as tarefas, comentários e visualizações relacionadas também serão excluídos. Confirme digitando \"EXCLUIR\" abaixo.",
+      "delete_for_selection_error": "Ocorreu um erro ao excluir as montagens selecionadas.",
+      "delete_for_selection_hard_text": "Tem certeza de que deseja remover permanentemente as montagens selecionadas? Todas as tarefas, comentários e visualizações relacionadas também serão excluídos. Confirme digitando \"EXCLUIR\" abaixo.",
       "delete_for_selection_hard_lock_text": "EXCLUIR",
-      "multiple_delete_error": "Ocorreu um erro ao excluir uma edição. Pode haver dados existentes atualmente vinculados a ela. Tem certeza de que não há tarefas vinculadas a uma edição selecionada?"
+      "multiple_delete_error": "Ocorreu um erro ao excluir uma montagem. Pode haver dados existentes atualmente vinculados a ela. Tem certeza de que não há tarefas vinculadas a uma montagem selecionada?"
     },
     "status_automations": {
       "change_ready_for": "altera \"ready for\" para",
@@ -1793,7 +1793,7 @@
         "shot": "Shot",
         "sequence": "Sequência",
         "episode": "Episódio",
-        "edit": "Editar"
+        "edit": "Montagem"
       },
       "field_types": {
         "status": "Status",

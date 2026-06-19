@@ -168,7 +168,7 @@
         "shot": "샷",
         "asset": "어셋",
         "sequence": "시퀀스",
-        "edit": "편집",
+        "edit": "편집본",
         "episode": "에피소드"
       }
     },
@@ -494,7 +494,7 @@
       "stick": "고정",
       "timeSpent": "소요된 시간",
       "unstick": "고정 해제",
-      "all_edits": "모든 편집",
+      "all_edits": "모든 편집본",
       "attach_snapshots": "주석의 스냅사진 첨부",
       "reply": "답장",
       "select_file": "하드 드라이브에서 파일을 선택하세요",
@@ -606,7 +606,7 @@
       "set_estimations": "추정치 설정",
       "delete_assets": "어셋 삭제",
       "delete_shots": "샷 삭제",
-      "delete_edits": "편집 삭제",
+      "delete_edits": "편집본 삭제",
       "generate_playlist": "재생 목록 생성",
       "set_thumbnails": "마지막 미리보기에서 섬네일 설정",
       "subscribe": "알림에 구독",
@@ -1734,18 +1734,18 @@
       "software_used_by_artists": "아티스트가 사용하는 소프트웨어"
     },
     "edits": {
-      "all_edits": "모든 편집",
-      "creation_explaination": "새 편집을 생성하려면 편집 파일을 업로드하세요",
-      "edit_error": "이 편집을 저장하던 중 오류가 발생했습니다. 정말 비슷한 이름을 가진 편집이 없습니까?",
+      "all_edits": "모든 편집본",
+      "creation_explaination": "새 편집본을 생성하려면 편집본 파일을 업로드하세요",
+      "edit_error": "이 편집본을 저장하던 중 오류가 발생했습니다. 정말 비슷한 이름을 가진 편집본이 없습니까?",
       "delete_text": "정말 데이터베이스에서 {name}을(를) 제거하시겠습니까?",
-      "delete_error": "이 편집을 삭제하던 중 오류가 발생했습니다. 데이터가 연결되었을 수 있습니다.",
-      "delete_for_selection": "{nbSelectedEdits}개의 선택된 편집 삭제:",
-      "edit_title": "편집 변경",
-      "empty_list": "이 제작에 편집이 없습니다. 편집을 생성해 보시겠습니까?",
-      "empty_list_client": "이 제작에 편집이 없습니다.",
-      "new_edit": "새 편집",
-      "number": "편집 | 편집",
-      "title": "편집",
+      "delete_error": "이 편집본을 삭제하던 중 오류가 발생했습니다. 데이터가 연결되었을 수 있습니다.",
+      "delete_for_selection": "{nbSelectedEdits}개의 선택된 편집본 삭제:",
+      "edit_title": "편집본 변경",
+      "empty_list": "이 제작에 편집본이 없습니다. 편집본을 생성해 보시겠습니까?",
+      "empty_list_client": "이 제작에 편집본이 없습니다.",
+      "new_edit": "새 편집본",
+      "number": "편집본 | 편집본",
+      "title": "편집본",
       "fields": {
         "name": "이름",
         "episode": "에피소드.",
@@ -1754,14 +1754,14 @@
       },
       "tasks": "작업",
       "cancel_text": "정말 {name}을(를) 보관하시겠습니까?",
-      "history": "값 기록 편집",
-      "restore_error": "이 편집 내용을 복원하는 동안 오류가 발생했습니다.",
+      "history": "편집본 값 기록",
+      "restore_error": "이 편집본을 복원하는 동안 오류가 발생했습니다.",
       "edit_success": "수정 사항이 성공적으로 저장되었습니다.",
       "restore_text": "아카이브에서 {name}을 복원하시겠습니까?",
-      "delete_for_selection_error": "선택한 편집 내용을 삭제하는 동안 오류가 발생했습니다.",
-      "delete_for_selection_hard_text": "선택한 편집 내용을 영구적으로 제거하시겠습니까? 관련 작업, 댓글, 미리보기도 모두 삭제됩니다. 아래에 '삭제'를 입력하여 확인하시기 바랍니다.",
+      "delete_for_selection_error": "선택한 편집본을 삭제하는 동안 오류가 발생했습니다.",
+      "delete_for_selection_hard_text": "선택한 편집본을 영구적으로 제거하시겠습니까? 관련 작업, 댓글, 미리보기도 모두 삭제됩니다. 아래에 'DELETE'를 입력하여 확인하시기 바랍니다.",
       "delete_for_selection_hard_lock_text": "삭제",
-      "multiple_delete_error": "편집 내용을 삭제하는 동안 오류가 발생했습니다. 현재 연결된 기존 데이터가 있을 수 있습니다. 선택한 편집에 연결된 작업이 없는 것이 확실합니까?"
+      "multiple_delete_error": "편집본을 삭제하는 동안 오류가 발생했습니다. 현재 연결된 기존 데이터가 있을 수 있습니다. 선택한 편집본에 연결된 작업이 없는 것이 확실합니까?"
     },
     "status_automations": {
       "change_ready_for": "\"준비 완료\" 상태를 다음으로 변경합니다",
@@ -1793,7 +1793,7 @@
         "shot": "샷",
         "sequence": "시퀀스",
         "episode": "에피소드",
-        "edit": "편집"
+        "edit": "편집본"
       },
       "field_types": {
         "status": "상태",

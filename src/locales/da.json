@@ -168,7 +168,7 @@
         "shot": "Shot",
         "asset": "Asset",
         "sequence": "Sekvens",
-        "edit": "Rediger",
+        "edit": "Montage",
         "episode": "Episode"
       }
     },
@@ -494,7 +494,7 @@
       "stick": "Fastgør",
       "timeSpent": "Tid Brugt",
       "unstick": "Frigør",
-      "all_edits": "Alle edits",
+      "all_edits": "Alle montager",
       "attach_snapshots": "Vedhæft snapshots fra din annotering",
       "reply": "Svar",
       "select_file": "Vælg filer fra din harddisk",
@@ -606,7 +606,7 @@
       "set_estimations": "Angiv estimater",
       "delete_assets": "Slet assets",
       "delete_shots": "Slet shots",
-      "delete_edits": "Slet edits",
+      "delete_edits": "Slet montager",
       "generate_playlist": "Generer en playliste",
       "set_thumbnails": "Angiv thumbnails fra sidste preview",
       "subscribe": "Tilmeld notifikationer",
@@ -1734,18 +1734,18 @@
       "software_used_by_artists": "Software brugt af kunstnere"
     },
     "edits": {
-      "all_edits": "Alle edits",
-      "creation_explaination": "Upload en edit-fil for at oprette et nyt edit",
-      "edit_error": "Der opstod en fejl under gemning af dette edit. Er du sikker på, at der ikke allerede findes et edit med et lignende navn?",
+      "all_edits": "Alle montager",
+      "creation_explaination": "Upload en montagefil for at oprette en ny montage",
+      "edit_error": "Der opstod en fejl under gemning af denne montage. Er du sikker på, at der ikke allerede findes en montage med et lignende navn?",
       "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database?",
-      "delete_error": "Der opstod en fejl under sletning af dette edit. Der kan være eksisterende data knyttet til det.",
-      "delete_for_selection": "Slet det valgte edit | Slet de {nbSelectedEdits} valgte edits",
-      "edit_title": "Skift edit",
-      "empty_list": "Der er ingen redigeringer i produktionen. Hvad med at oprette nogle?",
-      "empty_list_client": "Der er ingen edits i denne produktion.",
-      "new_edit": "Nyt edit",
-      "number": "edit | edits",
-      "title": "Edits",
+      "delete_error": "Der opstod en fejl under sletning af denne montage. Der kan være eksisterende data knyttet til den.",
+      "delete_for_selection": "Slet den valgte montage | Slet de {nbSelectedEdits} valgte montager",
+      "edit_title": "Skift montage",
+      "empty_list": "Der er ingen montager i produktionen. Hvad med at oprette nogle?",
+      "empty_list_client": "Der er ingen montager i denne produktion.",
+      "new_edit": "Ny montage",
+      "number": "montage | montager",
+      "title": "Montager",
       "fields": {
         "name": "Navn",
         "episode": "Ep.",
@@ -1754,14 +1754,14 @@
       },
       "tasks": "Opgaver",
       "cancel_text": "Er du sikker på, at du vil arkivere {name}?",
-      "history": "Edit-værdiers historik",
-      "restore_error": "Der opstod en fejl under gendannelse af denne redigering.",
+      "history": "Montageværdiers historik",
+      "restore_error": "Der opstod en fejl under gendannelse af denne montage.",
       "edit_success": "Ændringerne blev gemt med succes.",
       "restore_text": "Er du sikker på, at du vil gendanne {name} fra dit arkiv?",
-      "delete_for_selection_error": "Der opstod en fejl under sletning af de valgte redigeringer.",
-      "delete_for_selection_hard_text": "Er du sikker på, at du vil fjerne de valgte redigeringer permanent? Alle relaterede opgaver, kommentarer og forhåndsvisninger vil også blive slettet. Bekræft venligst ved at skrive 'SLET' nedenfor.",
+      "delete_for_selection_error": "Der opstod en fejl under sletning af de valgte montager.",
+      "delete_for_selection_hard_text": "Er du sikker på, at du vil fjerne de valgte montager permanent? Alle relaterede opgaver, kommentarer og forhåndsvisninger vil også blive slettet. Bekræft venligst ved at skrive 'SLET' nedenfor.",
       "delete_for_selection_hard_lock_text": "SLET",
-      "multiple_delete_error": "Der opstod en fejl under sletning af en redigering. Der kan være eksisterende data knyttet til den. Er du sikker på, at der ikke er nogen opgaver knyttet til en valgt redigering?"
+      "multiple_delete_error": "Der opstod en fejl under sletning af en montage. Der kan være eksisterende data knyttet til den. Er du sikker på, at der ikke er nogen opgaver knyttet til en valgt montage?"
     },
     "status_automations": {
       "change_ready_for": "skift \"klar til\" til",
@@ -1793,7 +1793,7 @@
         "shot": "Shot",
         "sequence": "Sekvens",
         "episode": "Episode",
-        "edit": "Rediger"
+        "edit": "Montage"
       },
       "field_types": {
         "status": "Status",

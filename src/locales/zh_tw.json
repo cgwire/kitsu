@@ -168,7 +168,7 @@
         "shot": "鏡頭",
         "asset": "Asset",
         "sequence": "序列",
-        "edit": "編輯",
+        "edit": "剪輯",
         "episode": "集數"
       }
     },
@@ -494,7 +494,7 @@
       "stick": "固定",
       "timeSpent": "花費的時間",
       "unstick": "取消固定",
-      "all_edits": "所有編輯",
+      "all_edits": "所有剪輯",
       "attach_snapshots": "附加註解的快照",
       "reply": "答覆",
       "select_file": "從硬碟機選取檔案",
@@ -606,7 +606,7 @@
       "set_estimations": "設定預算",
       "delete_assets": "刪除資產",
       "delete_shots": "刪除鏡頭",
-      "delete_edits": "刪除編輯",
+      "delete_edits": "刪除剪輯",
       "generate_playlist": "產生播放清單",
       "set_thumbnails": "從上次預覽設定縮圖",
       "subscribe": "訂閱通知",
@@ -1734,18 +1734,18 @@
       "software_used_by_artists": "藝術家使用的軟體"
     },
     "edits": {
-      "all_edits": "所有編輯",
-      "creation_explaination": "上傳編輯檔案以建立新編輯",
-      "edit_error": "儲存此編輯時發生錯誤。您確定沒有名稱相似的編輯嗎？",
+      "all_edits": "所有剪輯",
+      "creation_explaination": "上傳剪輯檔案以建立新剪輯",
+      "edit_error": "儲存此剪輯時發生錯誤。您確定沒有名稱相似的剪輯嗎？",
       "delete_text": "您確定要將 {name} 從資料庫中移除嗎？",
-      "delete_error": "刪除此編輯時發生錯誤。目前可能有現有資料與它連結。",
-      "delete_for_selection": "刪除選取的編輯 | 刪除 {nbSelectedEdits} 選取的編輯",
-      "edit_title": "變更編輯",
-      "empty_list": "製作中沒有編輯。創造一些如何？",
+      "delete_error": "刪除此剪輯時發生錯誤。目前可能有現有資料與它連結。",
+      "delete_for_selection": "刪除選取的剪輯 | 刪除選取的 {nbSelectedEdits} 個剪輯",
+      "edit_title": "變更剪輯",
+      "empty_list": "製作中沒有剪輯。建立一些如何？",
       "empty_list_client": "本製作沒有任何剪輯。",
-      "new_edit": "新編輯",
-      "number": "編輯 | 編輯",
-      "title": "編輯",
+      "new_edit": "新剪輯",
+      "number": "剪輯 | 剪輯",
+      "title": "剪輯",
       "fields": {
         "name": "名稱",
         "episode": "Ep.",
@@ -1754,14 +1754,14 @@
       },
       "tasks": "任務",
       "cancel_text": "您確定要將 {name} 存檔嗎？",
-      "history": "編輯數值歷史",
-      "restore_error": "還原此編輯時發生錯誤。",
+      "history": "剪輯數值歷史",
+      "restore_error": "還原此剪輯時發生錯誤。",
       "edit_success": "修改已成功儲存。",
       "restore_text": "您確定要從存檔還原 {name} 嗎？",
-      "delete_for_selection_error": "刪除選取的編輯時發生錯誤。",
-      "delete_for_selection_hard_text": "您確定要永久刪除選取的編輯嗎？所有相關的工作、註解和預覽也會被刪除。請在下方輸入「刪除」確認。",
+      "delete_for_selection_error": "刪除選取的剪輯時發生錯誤。",
+      "delete_for_selection_hard_text": "您確定要永久刪除選取的剪輯嗎？所有相關的工作、註解和預覽也會被刪除。請在下方輸入「刪除」確認。",
       "delete_for_selection_hard_lock_text": "刪除",
-      "multiple_delete_error": "刪除編輯時發生錯誤。目前可能有現有資料連結至該編輯。您確定沒有任務連結到選取的編輯嗎？"
+      "multiple_delete_error": "刪除剪輯時發生錯誤。目前可能有現有資料連結至該剪輯。您確定沒有任務連結到選取的剪輯嗎？"
     },
     "status_automations": {
       "change_ready_for": "將「準備」改為",
@@ -1793,7 +1793,7 @@
         "shot": "鏡頭",
         "sequence": "序列",
         "episode": "集數",
-        "edit": "編輯"
+        "edit": "剪輯"
       },
       "field_types": {
         "status": "狀態",

@@ -168,7 +168,7 @@
         "shot": "Plan",
         "asset": "Asset",
         "sequence": "Séquence",
-        "edit": "Edit",
+        "edit": "Montage",
         "episode": "Épisode"
       }
     },
@@ -497,7 +497,7 @@
       "timeSpent": "Temps passé",
       "unstick": "Décoller",
       "unknown": "Inconnu",
-      "all_edits": "Tous les edits",
+      "all_edits": "Tous les montages",
       "attach_snapshots": "Attacher les snapshots de vos annotations",
       "reply": "Répondre",
       "select_file": "Sélectionner un fichier",
@@ -606,7 +606,7 @@
       "set_estimations": "Définir estimations",
       "delete_assets": "Supprimer les assets",
       "delete_shots": "Supprimer les plans",
-      "delete_edits": "Supprimer les edits",
+      "delete_edits": "Supprimer les montages",
       "generate_playlist": "Générer une playlist",
       "set_thumbnails": "Positionner les vignettes du dernier preview",
       "subscribe": "S'inscrire aux notifications",
@@ -1734,18 +1734,18 @@
       "software_used_by_artists": "Logiciels utilisés par les artistes"
     },
     "edits": {
-      "all_edits": "Tous les edits",
-      "creation_explaination": "Envoyer un fichier d'edit pour en créer un nouveau edit",
-      "edit_error": "Une erreur est survenue en sauvegardant cet edit. Êtes-vous sûr qu'il n'y a aucun edit avec un nom similaire ?",
+      "all_edits": "Tous les montages",
+      "creation_explaination": "Envoyer un fichier de montage pour créer un nouveau montage",
+      "edit_error": "Une erreur est survenue en sauvegardant ce montage. Êtes-vous sûr qu'il n'y a aucun montage avec un nom similaire ?",
       "delete_text": "Êtes-vous sûr de vouloir supprimer {name} de la base de données ?",
-      "delete_error": "Une erreur s'est produite lors de la suppression de cet edit. Il se peut que des données existantes y soient actuellement liées.",
-      "delete_for_selection": "Supprimer l'edit sélectionné | Supprimer les {nbSelectedEdits} edits sélectionnés",
-      "edit_title": "Modifier l'edit",
-      "empty_list": "Il n'y a pas d'edit dans la production. Pourquoi ne pas en créer ?",
-      "empty_list_client": "Il n'y a aucun edit dans cette production.",
-      "new_edit": "Nouveau edit",
-      "number": "edit | edits",
-      "title": "Edits",
+      "delete_error": "Une erreur s'est produite lors de la suppression de ce montage. Il se peut que des données existantes y soient actuellement liées.",
+      "delete_for_selection": "Supprimer le montage sélectionné | Supprimer les {nbSelectedEdits} montages sélectionnés",
+      "edit_title": "Modifier le montage",
+      "empty_list": "Il n'y a pas de montage dans la production. Pourquoi ne pas en créer ?",
+      "empty_list_client": "Il n'y a aucun montage dans cette production.",
+      "new_edit": "Nouveau montage",
+      "number": "montage | montages",
+      "title": "Montages",
       "fields": {
         "name": "Nom",
         "episode": "Épisode",
@@ -1754,14 +1754,14 @@
       },
       "tasks": "Tâches",
       "cancel_text": "Êtes-vous sûr que vous voulez archiver {name} ?",
-      "history": "Historique des valeurs de l'edit",
-      "restore_error": "Une erreur s'est produite lors de la restauration de cet edit.",
+      "history": "Historique des valeurs du montage",
+      "restore_error": "Une erreur s'est produite lors de la restauration de ce montage.",
       "edit_success": "Les modifications ont été enregistrées avec succès.",
       "restore_text": "Êtes-vous sûr de vouloir restaurer {name} à partir de votre archive ?",
-      "delete_for_selection_error": "Une erreur s'est produite lors de la suppression des edits sélectionnés.",
-      "delete_for_selection_hard_text": "Êtes-vous sûr de vouloir supprimer définitivement les edits sélectionnés ? Toutes les tâches, tous les commentaires et tous les aperçus associés seront également supprimés. Veuillez confirmer en tapant \"SUPPRIMER\" ci-dessous.",
+      "delete_for_selection_error": "Une erreur s'est produite lors de la suppression des montages sélectionnés.",
+      "delete_for_selection_hard_text": "Êtes-vous sûr de vouloir supprimer définitivement les montages sélectionnés ? Toutes les tâches, tous les commentaires et tous les aperçus associés seront également supprimés. Veuillez confirmer en tapant \"SUPPRIMER\" ci-dessous.",
       "delete_for_selection_hard_lock_text": "SUPPRIMER",
-      "multiple_delete_error": "Une erreur s'est produite lors de la suppression d'un edit. Il se peut que des données existantes y soient actuellement liées. Êtes-vous sûr qu'il n'y a pas de tâches liées à l'edit sélectionné ?"
+      "multiple_delete_error": "Une erreur s'est produite lors de la suppression d'un montage. Il se peut que des données existantes y soient actuellement liées. Êtes-vous sûr qu'il n'y a pas de tâches liées au montage sélectionné ?"
     },
     "status_automations": {
       "change_ready_for": "Change \"Prêt pour\" pour ",
@@ -1793,7 +1793,7 @@
         "shot": "Plan",
         "sequence": "Séquence",
         "episode": "Épisode",
-        "edit": "Edit"
+        "edit": "Montage"
       },
       "field_types": {
         "status": "Statut",

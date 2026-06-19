@@ -167,7 +167,7 @@
         "all": "Mind",
         "shot": "Shot",
         "asset": "Asset",
-        "edit": "Szerkesztés",
+        "edit": "Vágás",
         "episode": "Epizód",
         "sequence": "Szekvencia"
       }
@@ -496,7 +496,7 @@
       "unstick": "Rögzítés feloldása",
       "active": "Aktív",
       "activity": "Tevékenység",
-      "all_edits": "Minden edit",
+      "all_edits": "Minden vágás",
       "all_shots": "Minden shot",
       "annotations": {
         "download_pdf": "Megjegyzések letöltése PDF-ként",
@@ -607,7 +607,7 @@
       "delete_assets": "Asset-ek törlése",
       "delete_shots": "Shot-ok törlése",
       "delete_concepts": "Koncepciók törlése",
-      "delete_edits": "Edit-ek törlése",
+      "delete_edits": "Vágások törlése",
       "edit_concepts": "Koncepció hivatkozások szerkesztése",
       "generate_playlist": "Lejátszási lista generálása",
       "set_thumbnails": "Nézőképek beállítása az utolsó előnézetből",
@@ -1835,34 +1835,34 @@
       "title": "Ellenőrzendő feladat | Ellenőrzendő feladatok"
     },
     "edits": {
-      "all_edits": "Minden edit",
+      "all_edits": "Minden vágás",
       "cancel_text": "Biztosan archiválod a(z) {name}-t?",
-      "creation_explaination": "Tölts fel egy edit file-t új edit létrehozásához",
-      "delete_error": "Hiba történt az edit törlésekor. Valószínűleg adat hivatkozik rá.",
-      "delete_for_selection": "Kijelölt edit törlése | {nbSelectedEdits} kijelölt edit törlése",
-      "delete_for_selection_error": "Hiba történt a kijelölt edit-ek törlésekor.",
+      "creation_explaination": "Tölts fel egy vágásfájlt új vágás létrehozásához",
+      "delete_error": "Hiba történt a vágás törlésekor. Valószínűleg adat hivatkozik rá.",
+      "delete_for_selection": "Kijelölt vágás törlése | {nbSelectedEdits} kijelölt vágás törlése",
+      "delete_for_selection_error": "Hiba történt a kijelölt vágások törlésekor.",
       "delete_for_selection_hard_lock_text": "TÖRLÉS",
-      "delete_for_selection_hard_text": "Biztosan véglegesen eltávolítod a kijelölt edit-eket? Minden hozzá tartozó feladat, hozzászólás és előnézet is törlésre kerül. Kérlek erősítsd meg a 'TÖRLÉS' begépelésével.",
+      "delete_for_selection_hard_text": "Biztosan véglegesen eltávolítod a kijelölt vágásokat? Minden hozzá tartozó feladat, hozzászólás és előnézet is törlésre kerül. Kérlek erősítsd meg a 'TÖRLÉS' begépelésével.",
       "delete_text": "Biztosan eltávolítod a(z) {name}-t az adatbázisodból?",
-      "edit_error": "Hiba történt az edit mentésekor. Biztosan nincs hasonló nevű edit?",
+      "edit_error": "Hiba történt a vágás mentésekor. Biztosan nincs hasonló nevű vágás?",
       "edit_success": "A módosítások sikeresen mentve.",
-      "edit_title": "Edit módosítása",
-      "empty_list": "Nincs edit a produkcióban. Hozz létre egyet!",
-      "empty_list_client": "Nincs edit ebben a produkcióban.",
+      "edit_title": "Vágás módosítása",
+      "empty_list": "Nincs vágás a produkcióban. Hozz létre egyet!",
+      "empty_list_client": "Nincs vágás ebben a produkcióban.",
       "fields": {
         "description": "Leírás",
         "episode": "Ep.",
         "name": "Név",
         "person": "Módosító"
       },
-      "history": "Edit érték napló",
-      "multiple_delete_error": "Hiba történt egy edit törlésekor. Valószínűleg adat hivatkozik rá. Biztosan nincs feladat rendelve a kijelölt edit-hez?",
-      "new_edit": "Új edit",
-      "number": "edit | edit",
-      "restore_error": "Hiba történt az edit visszaállításakor.",
+      "history": "Vágás értéknapló",
+      "multiple_delete_error": "Hiba történt egy vágás törlésekor. Valószínűleg adat hivatkozik rá. Biztosan nincs feladat rendelve a kijelölt vágáshoz?",
+      "new_edit": "Új vágás",
+      "number": "vágás | vágás",
+      "restore_error": "Hiba történt a vágás visszaállításakor.",
       "restore_text": "Biztosan visszaállítod a(z) {name}-t az archívumodból?",
       "tasks": "Feladatok",
-      "title": "Edit-ek"
+      "title": "Vágások"
     },
     "library": {
       "asset_library": "Asset könyvtár",
@@ -2084,7 +2084,7 @@
         "shot": "Shot",
         "sequence": "Szekvencia",
         "episode": "Epizód",
-        "edit": "Szerkesztés"
+        "edit": "Vágás"
       },
       "field_types": {
         "ready_for": "Kész ennek",

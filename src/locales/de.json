@@ -168,7 +168,7 @@
         "shot": "Shot",
         "asset": "Asset",
         "sequence": "Sequenz",
-        "edit": "bearbeiten",
+        "edit": "Montage",
         "episode": "Folge"
       }
     },
@@ -494,7 +494,7 @@
       "stick": "Anheften",
       "timeSpent": "Zeitaufwand",
       "unstick": "Lösen",
-      "all_edits": "Alle Bearbeitungen",
+      "all_edits": "Alle Montagen",
       "attach_snapshots": "Hängen Sie Schnappschüsse aus Ihrer Anmerkung an",
       "reply": "Antworten",
       "select_file": "Wählen Sie Dateien von Ihrer Festplatte aus",
@@ -606,7 +606,7 @@
       "set_estimations": "Schätzungen festlegen",
       "delete_assets": "Assets löschen",
       "delete_shots": "Aufnahmen löschen",
-      "delete_edits": "Bearbeitungen löschen",
+      "delete_edits": "Montagen löschen",
       "generate_playlist": "Eine Wiedergabeliste generieren",
       "set_thumbnails": "Miniaturbilder von der letzten Vorschau einstellen",
       "subscribe": "Benachrichtigungen abonnieren",
@@ -1734,18 +1734,18 @@
       "software_used_by_artists": "Von Künstlern verwendete Software"
     },
     "edits": {
-      "all_edits": "Alle Bearbeitungen",
-      "creation_explaination": "Laden Sie eine Bearbeitungsdatei hoch, um eine neue Bearbeitung zu erstellen",
-      "edit_error": "Beim Speichern dieser Bearbeitung ist ein Fehler aufgetreten. Sind Sie sicher, dass es keine Bearbeitung mit einem ähnlichen Namen gibt?",
+      "all_edits": "Alle Montagen",
+      "creation_explaination": "Laden Sie eine Montagedatei hoch, um eine neue Montage zu erstellen",
+      "edit_error": "Beim Speichern dieser Montage ist ein Fehler aufgetreten. Sind Sie sicher, dass es keine Montage mit einem ähnlichen Namen gibt?",
       "delete_text": "Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?",
-      "delete_error": "Beim Löschen dieser Bearbeitung ist ein Fehler aufgetreten. Wahrscheinlich sind Daten damit verknüpft.",
-      "delete_for_selection": "Die ausgewählte Bearbeitung löschen | Die {nbSelectedEdits} ausgewählten Bearbeitungen löschen",
-      "edit_title": "Bearbeitung ändern",
-      "empty_list": "Die Produktion enthält keine Bearbeitungen. Was halten Sie davon, einige zu erstellen?",
-      "empty_list_client": "Diese Produktion enthält keine Bearbeitungen.",
-      "new_edit": "Neue Bearbeitung",
-      "number": "Bearbeitung | Bearbeitungen",
-      "title": "Bearbeitungen",
+      "delete_error": "Beim Löschen dieser Montage ist ein Fehler aufgetreten. Wahrscheinlich sind Daten damit verknüpft.",
+      "delete_for_selection": "Die ausgewählte Montage löschen | Die {nbSelectedEdits} ausgewählten Montagen löschen",
+      "edit_title": "Montage ändern",
+      "empty_list": "Die Produktion enthält keine Montagen. Was halten Sie davon, einige zu erstellen?",
+      "empty_list_client": "Diese Produktion enthält keine Montagen.",
+      "new_edit": "Neue Montage",
+      "number": "Montage | Montagen",
+      "title": "Montagen",
       "fields": {
         "name": "Name",
         "episode": "Ep.",
@@ -1754,14 +1754,14 @@
       },
       "tasks": "Aufgaben",
       "cancel_text": "Sind Sie sicher, dass Sie {name} archivieren möchten?",
-      "history": "Werteverlauf bearbeiten",
-      "restore_error": "Beim Wiederherstellen dieser Bearbeitung ist ein Fehler aufgetreten.",
+      "history": "Werteverlauf der Montage",
+      "restore_error": "Beim Wiederherstellen dieser Montage ist ein Fehler aufgetreten.",
       "edit_success": "Die Änderungen wurden erfolgreich gespeichert.",
       "restore_text": "Sind Sie sicher, dass Sie {name} aus Ihrem Archiv wiederherstellen möchten?",
-      "delete_for_selection_error": "Beim Löschen der ausgewählten Bearbeitungen ist ein Fehler aufgetreten.",
-      "delete_for_selection_hard_text": "Sind Sie sicher, dass Sie die ausgewählten Bearbeitungen dauerhaft entfernen möchten? Alle zugehörigen Aufgaben, Kommentare und Vorschauen werden ebenfalls gelöscht. Bitte bestätigen Sie, indem Sie unten \"LÖSCHEN\" eingeben.",
+      "delete_for_selection_error": "Beim Löschen der ausgewählten Montagen ist ein Fehler aufgetreten.",
+      "delete_for_selection_hard_text": "Sind Sie sicher, dass Sie die ausgewählten Montagen dauerhaft entfernen möchten? Alle zugehörigen Aufgaben, Kommentare und Vorschauen werden ebenfalls gelöscht. Bitte bestätigen Sie, indem Sie unten \"LÖSCHEN\" eingeben.",
       "delete_for_selection_hard_lock_text": "LÖSCHEN",
-      "multiple_delete_error": "Beim Löschen einer Bearbeitung ist ein Fehler aufgetreten. Möglicherweise sind bereits Daten mit diesem Vorgang verknüpft. Sind Sie sicher, dass keine Aufgaben mit der ausgewählten Bearbeitung verknüpft sind?"
+      "multiple_delete_error": "Beim Löschen einer Montage ist ein Fehler aufgetreten. Möglicherweise sind bereits Daten mit dieser Montage verknüpft. Sind Sie sicher, dass keine Aufgaben mit der ausgewählten Montage verknüpft sind?"
     },
     "status_automations": {
       "change_ready_for": "ändert „bereit für“ in",
@@ -1793,7 +1793,7 @@
         "shot": "Aufnahme",
         "sequence": "Sequenz",
         "episode": "Folge",
-        "edit": "bearbeiten"
+        "edit": "Montage"
       },
       "field_types": {
         "status": "Status",

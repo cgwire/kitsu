@@ -168,7 +168,7 @@
         "shot": "Shot",
         "asset": "Asset",
         "sequence": "Sequentie",
-        "edit": "Bewerk",
+        "edit": "Montage",
         "episode": "Aflevering"
       }
     },
@@ -494,7 +494,7 @@
       "stick": "Vastmaken",
       "timeSpent": "Tijd besteed",
       "unstick": "Losmaken",
-      "all_edits": "Alle bewerkingen",
+      "all_edits": "Alle montages",
       "attach_snapshots": "Snapshots toevoegen vanuit je annotatie",
       "reply": "Reactie",
       "select_file": "Selecteer een bestand van de harde schijf",
@@ -606,7 +606,7 @@
       "set_estimations": "Stel schatting in",
       "delete_assets": "Verwijder Assets",
       "delete_shots": "Verwijder opnames",
-      "delete_edits": "Verwijder bewerkingen",
+      "delete_edits": "Verwijder montages",
       "generate_playlist": "Een playlist genereren",
       "set_thumbnails": "Thumbnails van laatste preview instellen",
       "subscribe": "Aanmelden voor meldingen",
@@ -1734,18 +1734,18 @@
       "software_used_by_artists": "Software gebruikt door kunstenaars"
     },
     "edits": {
-      "all_edits": "Alle bewerkingen",
-      "creation_explaination": "Upload een editfile om een nieuwe edit te creëeren",
-      "edit_error": "Er is een fout opgetreden bij het opslaan van deze edit. Weet je zeker dat er geen edit met een soortgelijke naam is?",
+      "all_edits": "Alle montages",
+      "creation_explaination": "Upload een montagebestand om een nieuwe montage te creëren",
+      "edit_error": "Er is een fout opgetreden bij het opslaan van deze montage. Weet je zeker dat er geen montage met een soortgelijke naam is?",
       "delete_text": "Weet je zeker dat je {name} wilt verwijderen van de database?",
-      "delete_error": "Er is een fout opgetreden bij het verwijderen van deze edit. Er zijn waarschijnlijk gegevens aan gekoppeld.",
-      "delete_for_selection": "Verwijder {nbSelectedEdits} geselecteerde bewerkingen",
-      "edit_title": "Verander bewerking",
-      "empty_list": "De productie bevat geen edits. Wat dacht je ervan er een paar te maken?",
-      "empty_list_client": "Deze productie bevat geen edits.",
-      "new_edit": "Nieuwe bewerking",
-      "number": "bewerking | bewerkingen",
-      "title": "Bewerkingen",
+      "delete_error": "Er is een fout opgetreden bij het verwijderen van deze montage. Er zijn waarschijnlijk gegevens aan gekoppeld.",
+      "delete_for_selection": "Verwijder {nbSelectedEdits} geselecteerde montages",
+      "edit_title": "Montage wijzigen",
+      "empty_list": "De productie bevat geen montages. Wat dacht je ervan er een paar te maken?",
+      "empty_list_client": "Deze productie bevat geen montages.",
+      "new_edit": "Nieuwe montage",
+      "number": "montage | montages",
+      "title": "Montages",
       "fields": {
         "name": "naam",
         "episode": "Ep.",
@@ -1754,14 +1754,14 @@
       },
       "tasks": "Taken",
       "cancel_text": "Weet u zeker dat u {name} wilt archiveren?",
-      "history": "Geschiedenis waarden bewerken",
-      "restore_error": "Er is een fout opgetreden tijdens het herstellen van deze bewerking.",
+      "history": "Geschiedenis van montagewaarden",
+      "restore_error": "Er is een fout opgetreden tijdens het herstellen van deze montage.",
       "edit_success": "Wijzigingen zijn succesvol opgeslagen.",
       "restore_text": "Weet je zeker dat je {name} uit je archief wilt herstellen?",
-      "delete_for_selection_error": "Er is een fout opgetreden tijdens het verwijderen van de geselecteerde bewerkingen.",
+      "delete_for_selection_error": "Er is een fout opgetreden tijdens het verwijderen van de geselecteerde montages.",
       "delete_for_selection_hard_text": "Weet je zeker dat je de geselecteerde bewerkingen permanent wilt verwijderen? Alle gerelateerde taken, opmerkingen en voorvertoningen worden ook verwijderd. Bevestig dit door hieronder 'WISSEN' te typen.",
       "delete_for_selection_hard_lock_text": "WISSEN",
-      "multiple_delete_error": "Er is een fout opgetreden tijdens het verwijderen van een bewerking. Er kunnen bestaande gegevens aan gekoppeld zijn. Weet je zeker dat er geen taken zijn gekoppeld aan een geselecteerde bewerking?"
+      "multiple_delete_error": "Er is een fout opgetreden tijdens het verwijderen van een montage. Er kunnen bestaande gegevens aan gekoppeld zijn. Weet je zeker dat er geen taken zijn gekoppeld aan een geselecteerde montage?"
     },
     "status_automations": {
       "change_ready_for": "verander 'klaar voor' in",
@@ -1793,7 +1793,7 @@
         "shot": "Shot",
         "sequence": "Sequentie",
         "episode": "Aflevering",
-        "edit": "Bewerk"
+        "edit": "Montage"
       },
       "field_types": {
         "status": "Status",
