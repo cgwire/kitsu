@@ -530,7 +530,7 @@
       "archived": "存檔",
       "avatar": {
         "open_page": "開啟 {personName} 頁面",
-        "unassign": "取消指定 {personName｝"
+        "unassign": "取消指定 {personName}"
       },
       "color": "顏色",
       "copy": "複製",
@@ -1693,6 +1693,11 @@
         "production": "生產",
         "revision": "修訂",
         "status": "狀態",
+        "statuses": {
+          "broken": "伺服器處理失敗",
+          "missing": "檔案上傳失敗",
+          "processing": "伺服器處理中"
+        },
         "task_type_id": "任務類型",
         "title": "預覽檔案",
         "mark_broken": "標記為已損壞",

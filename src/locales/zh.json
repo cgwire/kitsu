@@ -130,7 +130,7 @@
       "confirm_publish_button": "发表评论而不发布文件",
       "add_link": "添加 URL 链接",
       "pinned_revision": "被钉住的修订",
-      "edited_by": "编辑：{name｝",
+      "edited_by": "编辑：{name}",
       "add_attachment_to_reply": "在回复中添加附件",
       "add_frame_to_comment": "将当前帧添加到注释中",
       "add_emoji": "添加表情符号",
@@ -1693,6 +1693,11 @@
         "production": "生产",
         "revision": "修订",
         "status": "状态",
+        "statuses": {
+          "broken": "服务器处理失败",
+          "missing": "文件上传失败",
+          "processing": "服务器处理中"
+        },
         "task_type_id": "任务类型",
         "title": "预览文件",
         "mark_broken": "标记为已损坏",

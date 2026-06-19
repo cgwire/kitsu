@@ -1693,6 +1693,11 @@
         "production": "프로덕션",
         "revision": "검토",
         "status": "상태",
+        "statuses": {
+          "broken": "서버 처리 실패",
+          "missing": "파일 업로드 실패",
+          "processing": "서버 처리 중"
+        },
         "task_type_id": "작업 유형",
         "title": "미리 보기 파일",
         "mark_broken": "고장난 것으로 표시",

@@ -63,7 +63,7 @@
               {{ previewFile.revision }}
             </td>
             <td class="status" :data-status="previewFile.status">
-              {{ previewFile.status }}
+              {{ $t(`logs.preview_files.statuses.${previewFile.status}`) }}
             </td>
             <td class="end-cell has-text-right">
               <button-simple
@@ -169,11 +169,14 @@ const redirectToTask = async previewFile => {
 
 td.status {
   font-weight: 500;
-  text-transform: uppercase;
+
+  &[data-status='processing'] {
+    color: $orange-carrot;
+  }
 
   &[data-status='broken'],
   &[data-status='missing'] {
-    color: red;
+    color: $red;
   }
 }
 

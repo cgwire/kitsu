@@ -1693,6 +1693,11 @@
         "production": "Producción",
         "revision": "Revisión",
         "status": "Estado",
+        "statuses": {
+          "broken": "Error en el procesamiento del servidor",
+          "missing": "Error al subir el archivo",
+          "processing": "Procesamiento del servidor en curso"
+        },
         "task_type_id": "Tipo de tarea",
         "title": "Archivos de vista previa",
         "mark_broken": "Marcar como roto",
