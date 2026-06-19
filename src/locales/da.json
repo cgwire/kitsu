@@ -352,7 +352,7 @@
       "too_many_failed_login_attemps": "For mange mislykkede loginforsøg, vent venligst et minut.",
       "verify": "Bekræft",
       "wrong_totp": "TOTP-verifikation mislykkedes.",
-      "wrong_email_otp": "OTP-verifikation mislykkedes.",
+      "wrong_email_otp": "Verifikation af OTP via e-mail mislykkedes.",
       "wrong_recovery_code": "Verifikation af gendannelseskode mislykkedes.",
       "information_totp": "Åbn tofaktor-godkendelsesappen (TOTP) på din mobile enhed for at se din godkendelseskode.",
       "information_email_otp": "Tjek dine e-mails for at se din godkendelseskode.",
@@ -1750,7 +1750,7 @@
         "name": "Navn",
         "episode": "Ep.",
         "description": "Beskrivelse",
-        "person": "Person"
+        "person": "Modifikator"
       },
       "tasks": "Opgaver",
       "cancel_text": "Er du sikker på, at du vil arkivere {name}?",

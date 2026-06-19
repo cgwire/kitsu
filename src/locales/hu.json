@@ -1479,7 +1479,7 @@
       "change_preview": "Előnézet cseréje",
       "change_priority": "A kijelölt feladat prioritásának módosítása | A {nbSelectedTasks} kijelölt feladat prioritásának módosítása",
       "clear_assignations": "feladatkiosztás tisztítása",
-      "comment_image": "Kép csatolása a hozzászóláshoz",
+      "comment_image": "Fájlok csatolása",
       "create_for_selection": "Feladat létrehozása minden üres cellához:",
       "create_tasks": "Feladatok hozzáadása",
       "create_tasks_shot": "Feladatok hozzáadása a kiválasztott shot-hoz",

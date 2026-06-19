@@ -56,7 +56,7 @@
         "short_name": "Nom court",
         "description": "Description"
       },
-      "include_all": "Inclure tous les types d'asset",
+      "include_all": "Inclut tous les types de tâches d'asset",
       "add_asset_type_to_library": "Ajouter un type d'asset à la bibliothèque",
       "library_title": "Bibliothèque des types d'assets",
       "add_asset_type_placeholder": "+ Ajouter un type d'asset"
@@ -1742,7 +1742,7 @@
       "delete_for_selection": "Supprimer l'edit sélectionné | Supprimer les {nbSelectedEdits} edits sélectionnés",
       "edit_title": "Modifier l'edit",
       "empty_list": "Il n'y a pas d'edit dans la production. Pourquoi ne pas en créer ?",
-      "empty_list_client": "Vide",
+      "empty_list_client": "Il n'y a aucun edit dans cette production.",
       "new_edit": "Nouveau edit",
       "number": "edit | edits",
       "title": "Edits",
@@ -1752,7 +1752,7 @@
         "description": "Description",
         "person": "Modificateur"
       },
-      "tasks": "Tâche",
+      "tasks": "Tâches",
       "cancel_text": "Êtes-vous sûr que vous voulez archiver {name} ?",
       "history": "Modifier l'historique des valeurs",
       "restore_error": "Une erreur s'est produite lors de la restauration de cette édition.",

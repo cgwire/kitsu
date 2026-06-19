@@ -30,7 +30,7 @@
         "shared": "Gedeeld in de activabibliotheek"
       },
       "cancel_text": "Weet je zeker dat je {name} wilt archiveren?",
-      "delete_for_selection": "Verwijder {nbSelectedAssets} geselecteerde assets",
+      "delete_for_selection": "Verwijder het geselecteerde asset | Verwijder de {nbSelectedAssets} geselecteerde assets",
       "multiple_delete_error": "Er is een fout opgetreden bij het verwijderen van een item. Er zijn waarschijnlijk gegevens aan een asset gekoppeld. Weet je zeker dat er geen taak is gekoppeld aan een geselecteerde asset?",
       "only_current_episode": "Alleen huidige aflevering",
       "linked": "Gekoppeld",
@@ -90,7 +90,7 @@
       "add_attachment": "Bijlage toevoegen",
       "add_checklist": "Checklist toevoegen",
       "add_comment": "Comment toevoegen...",
-      "add_preview": "Preview toevoegen",
+      "add_preview": "Previewrevisies toevoegen om te publiceren",
       "change_preview": "Preview wijzigen",
       "comment_from_client": "Commentaar van klant",
       "edit_title": "Commentaar aanpassen",
@@ -453,7 +453,7 @@
         "preview_episode_name": "Aflevering naam",
         "preview_title": "Preview van de geimporteerde data",
         "preview_description": "Upload een .csv bestand om uw \"board\" te vullen met posts.",
-        "preview_required": "NB: Headers moeten inbegrepen zijn als eerste rij.",
+        "preview_required": "Headers worden gebruikt om kolommen te koppelen aan de in te stellen data. Ze moeten als eerste rij worden opgenomen.",
         "preview_reupload": "Herupload .CSV bestand",
         "required_fields": "CSV vereist de volgende kolommen",
         "select_file": "Selecteer een bestand uit een folder",
@@ -502,7 +502,7 @@
       "frame_out": "Frame Uit",
       "type": "Type",
       "search": {
-        "type": "Type",
+        "type": "Typ minstens 3 tekens om de zoekopdracht uit te voeren",
         "no_result": "Er zijn geen resultaten voor deze zoekopdracht",
         "no_filter": "Selecteer ten minste één filter om de zoekopdracht uit te voeren"
       },
@@ -800,7 +800,7 @@
       "available_build": "Beschikbare builds",
       "build_daily": "Daily in afwachting",
       "build_weekly": "Alles in afwachting",
-      "build_mp4": "Maak .mp4 (beta)",
+      "build_mp4": "Maak .mp4",
       "building": "Maken...",
       "client_playlist": "Klant Playlist",
       "create_for_selection": "Genereer een playlist voor shot selectie",
@@ -1207,7 +1207,7 @@
         "timesheets_locked": "Timesheets van artists ouder dan 1 week vergrendelen",
         "mattermost_webhook": "Mattermost Webhook (Optioneel)",
         "discord_token": "Discord Token (Optioneel)",
-        "show_hd_default": "Afbeelding standaard in HD-kwaliteit weergeven",
+        "show_hd_default": "Films standaard in HD-kwaliteit weergeven (langzamer)",
         "format_duration_in_hours": "Duur en schatting in uren weergeven",
         "dark_theme_by_default": "Standaard donker thema gebruiken"
       },
@@ -1386,7 +1386,7 @@
       "frames": "Frames",
       "month": "Maand",
       "seconds": "Seconden",
-      "weighted": "Gewogen",
+      "weighted": "Gewogen (Feedback)",
       "week": "Week",
       "explanation_feedback": "De opname wordt als compleet beschouwd bij de eerste feedbackaanvraag. Het aantal frames wordt toegevoegd aan de quota voor die dag.",
       "done_date": "Goedkeuringsdatum",
@@ -1470,7 +1470,7 @@
       "drawings": "Tekeningen"
     },
     "tasks": {
-      "add_preview": "Preview toevoegen",
+      "add_preview": "Bestanden toevoegen voor een nieuwe previewrevisie",
       "add_preview_error": "Een fout is opgetreden tijdens het toevoegen van een preview.",
       "assign": "Wijs één taak toe aan: | Wijs {nbSelectedTasks} taken toe aan:",
       "back_to_list": "terug naar lijst",
@@ -1478,7 +1478,7 @@
       "change_status_to": "Wijzig taakstatus in:",
       "change_preview": "Wijzig preview",
       "change_priority": "Wijzig prioriteit van de geselecteerde taak | Wijzig prioriteit van de {nbSelectedTasks} geselecteerde taken",
-      "clear_assignations": "Toewijzingen legen",
+      "clear_assignations": "toewijzingen verwijderen uit selectie",
       "comment_image": "Voeg een afbeelding toe aan je reactie",
       "create_for_selection": "Taak maken voor elke lege cel:",
       "create_tasks": "Taken toevoegen",
@@ -1599,7 +1599,7 @@
       "all": "Alle taken",
       "assign_explaination": "Selecteer een persoon om toe te wijzen...",
       "change_priority_to": "Nieuwe prioriteit:",
-      "change_task_status": "Wijzig status van de geselecteerde taak | Wijzig status van de {nbSelectedTasks} geselecteerde",
+      "change_task_status": "Wijzig status van de geselecteerde taak | Wijzig status van de {nbSelectedTasks} geselecteerde taken",
       "due_date": "Status einddatum",
       "due_after_today": "Einddatum na vandaag",
       "due_before_today": "Einddatum voor vandaag",
@@ -1949,7 +1949,7 @@
       "error_days_off": "Er is een fout opgetreden tijdens het bijwerken van de vrije dagen."
     },
     "library": {
-      "asset_library": "Bibliotheek",
+      "asset_library": "Asset-bibliotheek",
       "from_library": "Uit de bibliotheek met bedrijfsmiddelen",
       "import_from_asset_type": "Importeer alle activa van het geselecteerde type en de geselecteerde productie",
       "import_from_assets": "Activa importeren uit de geselecteerde productie en het geselecteerde type activa",

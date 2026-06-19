@@ -30,7 +30,7 @@
         "shared": "Compartido en la biblioteca de activos"
       },
       "cancel_text": "¿Está seguro de que desea archivar {name}?",
-      "delete_for_selection": "Eliminar {nbSelectedAssets} los recursos seleccionados:",
+      "delete_for_selection": "Eliminar el recurso seleccionado | Eliminar los {nbSelectedAssets} recursos seleccionados",
       "multiple_delete_error": "Se ha producido un error al eliminar un recurso. Es probable que haya algunos datos vinculados a un recurso. ¿Está seguro de que no hay ninguna tarea vinculada a algún recurso seleccionado?",
       "only_current_episode": "Solamente el episodio actual",
       "linked": "Enlace",
@@ -56,7 +56,7 @@
         "short_name": "Nombre corto",
         "description": "Descripción"
       },
-      "include_all": "Incluir todos los tipos de recurso",
+      "include_all": "Incluye todos los tipos de tarea de recurso",
       "add_asset_type_to_library": "Añadir un tipo de activo a la biblioteca",
       "library_title": "Biblioteca de tipos de activos",
       "add_asset_type_placeholder": "+ Añadir tipo de activo"
@@ -84,7 +84,7 @@
       "episode_casting": "Reparto de episodios",
       "save_error": "Se ha producido un error al guardar el reparto",
       "hide_library": "Ocultar biblioteca",
-      "show_library": "Biblioteca"
+      "show_library": "Mostrar biblioteca"
     },
     "comments": {
       "add_attachment": "Adjuntar archivo...",
@@ -123,7 +123,7 @@
       "attachments": "Archivos adjuntos",
       "attachments_to_add": "Archivos adjuntos para añadir",
       "max_retakes_error": "Ya no puede retomar esta tarea.",
-      "previews": "vistas previas",
+      "previews": "Archivos de vista previa para publicar como nueva revisión",
       "selected_files": "Archivos seleccionados",
       "no_attachments": "No hay archivos adjuntos para este comentario.",
       "confirm_publish": "No se han establecido archivos de vista previa para la publicación. ¿Estás seguro de que quieres publicar el comentario?",
@@ -453,7 +453,7 @@
         "preview_episode_name": "Nombre del episodio",
         "preview_title": "Vista previa de sus datos importados",
         "preview_description": "Sube un archivo .csv para llenar tu pizarra con posts",
-        "preview_required": "NB: Los encabezados deben ser incluidos como primera fila.",
+        "preview_required": "Los encabezados se usan para hacer coincidir las columnas con los datos a establecer. Deben incluirse como primera fila.",
         "preview_reupload": "Subir de nuevo el archivo .CSV",
         "required_fields": "Su CSV requiere las siguientes columnas:",
         "select_file": "Por favor, seleccione un archivo de una de sus carpetas:",
@@ -466,7 +466,7 @@
           "update": "Actualizar los datos existentes"
         },
         "optional_fields": "Columnas opcionales:",
-        "generic_fields": "Columnas genéricas:",
+        "generic_fields": "Columnas de metadatos y de tareas (opcional):",
         "export_current_view": "Exportar vista actual",
         "legend_line_ok": "Línea que se creará",
         "legend_missing_optional": "Columna opcional que no se ha encontrado"
@@ -502,7 +502,7 @@
       "frame_out": "Encuadrar fuera",
       "type": "Tipo",
       "search": {
-        "type": "Tipo",
+        "type": "Escribe al menos 3 caracteres para realizar la búsqueda",
         "no_result": "No hay resultados para esta búsqueda.",
         "no_filter": "Selecciona al menos un filtro para hacer la búsqueda"
       },
@@ -635,9 +635,9 @@
     },
     "notifications": {
       "and_change_status": "y ha cambiado el status a",
-      "assigned_you": "te asignó a",
+      "assigned_you": "te asignó a esta tarea",
       "commented_on": "comentado",
-      "mention_you_on": "te mencioné en",
+      "mention_you_on": "te mencionó en un comentario",
       "no_notifications": "Actualmente no hay ninguna notificación para usted para sus proyectos actuales.",
       "unread_notifications": "notificación no leída | notificaciones no leídas",
       "title": "Notificaciones",
@@ -690,7 +690,7 @@
       "active_persons": "usuario activo | usuarios activos",
       "add_member_to_team": "Añada un miembro al equipo:",
       "create_invite": "Crear y enviar invitación",
-      "create_error": "Se ha producido un error al crear o actualizar este usuario. Puede que se haya alcanzado el límite de usuarios. Por favor, contacte con el equipo de soporte técnico para mas información.",
+      "create_error": "Se ha producido un error en el servidor al crear o actualizar este usuario. Por favor, contacte con nuestro equipo de soporte técnico para más información.",
       "delete_error": "Se ha producido un error al eliminar este usuario. Es probable que haya datos asociados. ¿Está seguro de que este usuario no tiene ninguna tarea asignada o escribió algún comentario?",
       "delete_text": "¿Está seguro de que desea eliminar {personName} de su base de datos? Cada comentario y vista previa relacionados se eliminarán. Confirme escribiendo el nombre entero del usuario a continuación.",
       "edit_title": "Modificar usuario",
@@ -794,8 +794,8 @@
       "add_selection": "Añade la selección",
       "add_shots": "Añadir tomas",
       "add_sequence": "Añadir secuencia completa",
-      "add_episode": "Añadir episodio completa",
-      "add_movie": "Añadir film completa",
+      "add_episode": "Añadir episodio completo",
+      "add_movie": "Añadir película completa",
       "apply_task_type_change": "Esto posicionará la última revisión para el tipo de tarea dada en todos los tomas.",
       "available_build": "Construcciones disponibles",
       "build_daily": "Diario pendiente",
@@ -820,7 +820,7 @@
       "new_playlist": "Añadir una lista de reproducción",
       "no_build": "Sin construcción",
       "no_playlist": "Actualmente no hay ninguna lista de reproducción para este proyecto.",
-      "no_preview": "No hay vista previa de esta toma",
+      "no_preview": "No hay vista previa",
       "no_selection": "Por favor, seleccione una lista de reproducción a la izquierda.",
       "no_sequence_for_episode": "No hay secuencia para este episodio",
       "no_shot_for_production": "No hay ninguna toma para esta producción.",
@@ -1197,7 +1197,7 @@
       "integrations": "Integraciones",
       "logo": "Estudio de logotipos",
       "no_logo": "No hay conjunto de logotipos.",
-      "set_logo": "Logotipo de estudio",
+      "set_logo": "Establecer logotipo del estudio",
       "title": "Ajustes",
       "fields": {
         "name": "Nombre del estudio",
@@ -1385,7 +1385,7 @@
       "feedback_date": "Fecha del comentario",
       "frames": "Fotogramas",
       "month": "Mes",
-      "seconds": "Segundo",
+      "seconds": "Segundos",
       "weighted": "Ponderada",
       "week": "Semana",
       "explanation_feedback": "La toma se considera completa en la primera solicitud de respuesta. Su número de fotogramas se añade a las cuotas de ese día.",
@@ -1401,7 +1401,7 @@
       "delete_text": "¿Está seguro de que desea eliminar {name} de su base de datos?",
       "delete_error": "Se ha producido un error al eliminar esta toma. Es probable que haya datos asociados. ¿Está seguro de que esta toma no tiene ninguna tarea asociada?",
       "edit_success": "Toma {name} modificada exitosamente.",
-      "edit_fail": "La creación o modificación falló, se produjo un error. Asegúrese de que no está renombrando la toma con el nombre de la secuencia dada.",
+      "edit_fail": "La creación o modificación falló, se produjo un error. Asegúrese de que no está renombrando la toma con un nombre que ya existe en la secuencia dada.",
       "edit_title": "Modificar toma",
       "empty_list": "No hay ninguna toma en la producción. ¿Qué tal si creamos algunas?",
       "empty_list_client": "No hay ninguna toma en esta producción.",
@@ -1479,7 +1479,7 @@
       "change_preview": "Cambiar la vista previa",
       "change_priority": "Cambiar la prioridad de la tarea seleccionada | Cambiar la prioridad de las {nbSelectedTasks} tareas seleccionadas",
       "clear_assignations": "asignaciones claras",
-      "comment_image": "Adjunte una imagen al comentario",
+      "comment_image": "Adjuntar archivos",
       "create_for_selection": "Crear tarea para cada celda vacía:",
       "create_tasks": "Añadir tareas",
       "create_tasks_shot": "Añadir tareas para las tomas actuales",
@@ -1672,7 +1672,7 @@
       "unit": "Unidad",
       "confirm_day_offs": "Al establecer estos días como días libres, se borrará todo el tiempo registrado para los días afectados. ¿Está seguro de que desea continuar?",
       "confirm_unset_day_offs": "Los días libres se aplican actualmente de {start} a {end}. ¿Está seguro de que desea eliminar este periodo?",
-      "off": "Fuera de",
+      "off": "Libre",
       "day_off_no_logging": "No se puede registrar tiempo en un día libre"
     },
     "wrong_browser": {
