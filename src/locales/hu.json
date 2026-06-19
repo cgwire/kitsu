@@ -155,7 +155,7 @@
       "edit_title": "Saját művelet szerkesztése",
       "new_custom_action": "Saját művelet hozzáadása",
       "number": "saját művelet | saját művelet",
-      "run_for_selection": "Saját művelet futtatása a kijelölt feladatokon:",
+      "run_for_selection": "Saját művelet futtatása a kijelölt feladaton | Saját műveletek futtatása a {nbSelectedTasks} kijelölt feladaton",
       "title": "Saját műveletek",
       "fields": {
         "name": "Név",
