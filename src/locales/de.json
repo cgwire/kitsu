@@ -256,7 +256,7 @@
       "all_episodes": "Alle Episoden",
       "edit_error": "Beim speichern dieser Episode ist ein Fehler aufgetreten. Sind Sie sicher, dass keine Episode mit gleichem Namen vorhanden ist?",
       "delete_error": "Beim Löschen dieser Episode ist ein Fehler aufgetreten. Wahrscheinlich sind damit Daten verknüpft. Bist du sicher, dass diese Episode keine Sequenz hat, die mit ihr verbunden ist?",
-      "delete_text": "Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?",
+      "delete_text": "Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten? Alle zugehörigen Shots und Vorschauen werden ebenfalls gelöscht. Bitte bestätigen Sie, indem Sie unten den Episodennamen eingeben.",
       "edit_title": "Episode bearbeiten",
       "empty_list": "Es gibt keine Episode in der Produktion. Wie wäre es mit der Erstellung von solchen?",
       "empty_list_client": "Es gibt keine Episode in dieser Produktion.",
