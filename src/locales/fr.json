@@ -290,8 +290,8 @@
       "draw": "Démarre le mode dessin",
       "erase": "Démarre le mode gomme",
       "navigation": "Navigation",
-      "redo": "Redo",
-      "undo": "Undo",
+      "redo": "Rétablir",
+      "undo": "Annuler",
       "playlist_navigation": "Navigation dans une playlist",
       "remove_annotation": "Supprime l'annotation sélectionnée",
       "shortcuts": "Raccourcis claviers",
@@ -972,10 +972,10 @@
       },
       "fields": {
         "fps": "FPS",
-        "name": "Name",
+        "name": "Nom",
         "ratio": "Ratio",
-        "resolution": "Resolution",
-        "status": "Status",
+        "resolution": "Résolution",
+        "status": "Statut",
         "type": "Type",
         "start_date": "Date de début",
         "end_date": "Date de fin",
@@ -1315,7 +1315,7 @@
       "milestone": {
         "add_milestone": "Ajouter milestone",
         "edit_milestone": "Modifier milestone",
-        "name": "Name",
+        "name": "Nom",
         "error": "Une erreur est survenue en ajoutant ou modifiant cette milestone. Contactez notre support pour que nous puissions étudier le problème.",
         "delete_milestone": "Supprimer un jalon"
       },
@@ -1531,7 +1531,7 @@
         "assignees": "Assignés",
         "count": "Nombre",
         "due_date": "Pour le",
-        "duration": "Duration",
+        "duration": "Durée",
         "end_date": "Date de demande de validation",
         "entity": "Entité",
         "entity_name": "Nom",
@@ -1566,7 +1566,7 @@
       "colors": {
         "title": "Coloration",
         "neutral": "Neutre",
-        "status": "Couleur des status",
+        "status": "Couleur des statuts",
         "late": "En retard en rouge"
       },
       "priority": {

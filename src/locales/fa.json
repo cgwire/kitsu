@@ -38,7 +38,7 @@
       "casted_in_shots": "در نماهای {nbShots} اجرا شده است",
       "delete_for_selection_hard_text": "آیا مطمئن هستید که می‌خواهید دارایی‌های انتخاب‌شده را به‌طور دائم حذف کنید؟ تمام وظایف، نظرات و پیش‌نمایش‌های مرتبط نیز حذف خواهند شد. لطفاً با تایپ کردن «حذف» در زیر، تأیید کنید.",
       "delete_for_selection_hard_lock_text": "حذف",
-      "show_linked": ""
+      "show_linked": "نمایش منابع بریک‌داون"
     },
     "asset_types": {
       "all_asset_types": "انواع منابع",
@@ -179,7 +179,7 @@
         "assignation": "واگذاری",
         "assignation_exists_for": "واگذاری وجود دارد برای",
         "assigned_to": "واگذارشده به",
-        "descriptor": "Metadata",
+        "descriptor": "متادیتا",
         "equal": "برابر",
         "in": "در",
         "no_assignation_for": "واگذاری وجود ندارد برای",
@@ -382,7 +382,7 @@
       "reset_password_inactive": "بازنشانی رمز عبور ناموفق بود. کاربری با این ایمیل غیرفعال است.",
       "set_password_title": "به کیتسو خوش آمدید!",
       "set_password": "رمز عبور خود را تنظیم کنید",
-      "reset_change_password_token_failed": ""
+      "reset_change_password_token_failed": "پیوند بازنشانی رمز عبور نامعتبر است یا منقضی شده است. لطفاً روال را از ابتدا انجام دهید."
     },
     "main": {
       "about": "درباره",
@@ -781,7 +781,7 @@
         "mid": "میانه",
         "senior": "ارشد"
       },
-      "email_domain_error": "",
+      "email_domain_error": "این دامنه ایمیل مجاز نیست.",
       "archive_guest_confirm": "این مهمان بایگانی شود؟ نظرات او سر جای خود باقی می‌ماند، اما دیگر در لیست مهمانان فعال نمایش داده نمی‌شود.",
       "archive_guest_error": "این مهمان بایگانی نشد. لطفا دوباره امتحان کنید.",
       "archived_guests": "مهمانان بایگانی شده",
@@ -991,15 +991,15 @@
         "is_publish_default": "ویجت نظر را برای هنرمندان به طور پیش‌فرض در حالت انتشار تنظیم کنید"
       },
       "metadata": {
-        "add_explaination": "Add specific data required by this project.",
-        "add_failed": "An error occured while adding metadata to your project.",
-        "add_new_values": "There is currently no available values.",
-        "available_values": "Available values",
-        "choices": "List of values",
+        "add_explaination": "داده‌های خاص مورد نیاز این محصول را اضافه کنید.",
+        "add_failed": "هنگام افزودن متادیتا به محصول شما خطایی رخ داد.",
+        "add_new_values": "در حال حاضر هیچ مقدار موجودی وجود ندارد.",
+        "available_values": "مقادیر موجود",
+        "choices": "لیست مقادیر",
         "delete_text": "آیا مطمئن هستید که می‌خواهید این ستون و داده‌های مربوط به همه منابع این محصول را حذف کنید؟",
-        "delete_error": "An error occured while deleting this metadata column.",
-        "error": "An error occured while adding the metadata column. Make sure there is no column with similar name and that all fields are filled. If the problem is persists, please contact the support team.",
-        "title": "Add metadata column",
+        "delete_error": "هنگام حذف این ستون متادیتا خطایی رخ داد.",
+        "error": "هنگام افزودن ستون متادیتا خطایی رخ داد. مطمئن شوید که ستونی با نام مشابه وجود ندارد و همه فیلدها پر شده‌اند. اگر مشکل ادامه داشت، لطفا با تیم پشتیبانی تماس بگیرید.",
+        "title": "افزودن ستون متادیتا",
         "edit_title": "ستون متادیتا را ویرایش کنید",
         "checklist": "چک لیست",
         "boolean": "چک باکس",
@@ -1186,7 +1186,7 @@
         },
         "enabled": "احراز هویت دو مرحله‌ای فعال شد",
         "mandatory": "سازمان شما به احراز هویت دو مرحله‌ای نیاز دارد. لطفاً برای ادامه، حداقل یکی از روش‌ها را فعال کنید.",
-        "description": "",
+        "description": "احراز هویت دو مرحله‌ای (<abbr title=\"Two-Factor Authentication\">2FA</abbr>) یک لایه امنیتی اضافی به حساب شما اضافه می‌کند. وقتی فعال باشد، هر بار که وارد می‌شوید، علاوه بر رمز عبور، باید یک روش تأیید دوم نیز ارائه دهید. می‌توانید از یک برنامه احراز هویت (<abbr title=\"Time-based One-Time Password\">TOTP</abbr>)، تأیید ایمیلی (<abbr title=\"One-Time Password\">OTP</abbr>)، یا یک کلید امنیتی سخت‌افزاری (<abbr title=\"Fast IDentity Online\">FIDO</abbr>) به عنوان عامل دوم خود استفاده کنید.",
         "status_disabled": "غیرفعال",
         "status_enabled": "فعال"
       },
@@ -1406,7 +1406,7 @@
       "empty_list": "هیچ شاتی در این محصول وجود ندارد.آیا میلید یک شات ایجاد کنید؟",
       "empty_list_client": "هیچ شاتی در این محصول وجود ندارد.",
       "episodes": "قسمت ها",
-      "history": "Shot values history",
+      "history": "تاریخچه مقادیر شات",
       "new_shot": "اضافه کردن شات",
       "new_shots": "اضافه کردن شات ها",
       "new_sequences": "اضافه کردن سکانس ها",
@@ -1451,8 +1451,8 @@
       "show_timecode": "نمایش ورود و خروج به صورت کدهای زمانی"
     },
     "server_down": {
-      "text": "Please contact your vendor support, your system administrator or your IT department to understand what is going wrong.",
-      "title": "Kitsu encountered an error while reaching its data API."
+      "text": "لطفاً برای درک علت بروز مشکل با تیم پشتیبانی ما یا مدیر سیستم خود تماس بگیرید.",
+      "title": "کیتسو هنگام دسترسی به API داده‌های خود با خطا مواجه شد"
     },
     "statistics": {
       "count": "شمارش",
@@ -1500,7 +1500,7 @@
       "delete_preview_error": "خطایی هنگام حذف کردن پیش نمایش رخ داد.",
       "edit_comment": "اصلاح نظر",
       "done": "انجام شد",
-      "download_pdf_file": "Download .{extension} file",
+      "download_pdf_file": "دانلود فایل .{extension}",
       "feedback": "بازخورد",
       "full_screen": "نمایش در حالت تمام صفحه",
       "hide_assignations": "مخفی کردن وظایف محول شده",
@@ -1535,7 +1535,7 @@
         "end_date": "تاریخ تایید",
         "entity": "ماهیت",
         "entity_name": "نام",
-        "estimated_quota": "Avg. Quota",
+        "estimated_quota": "سهمیه",
         "estimation": "برآورد",
         "frames": "فریم.",
         "last_comment": "آخرین نظر",
@@ -1653,7 +1653,7 @@
       "delete_for_selection_hard_text": "آیا مطمئن هستید که می‌خواهید وظایف انتخاب شده را برای همیشه حذف کنید؟ تمام نظرات و پیش‌نمایش‌های مرتبط نیز حذف خواهند شد. لطفاً با تایپ کردن «حذف» در زیر، تأیید کنید.",
       "delete_for_selection_hard_lock_text": "حذف",
       "hookup_playlist": "یک لیست پخش برای آهنگ‌های عاشقانه ایجاد کنید",
-      "assignation_error": "",
+      "assignation_error": "هنگام محول کردن این فرد به وظایف انتخاب‌شده مشکلی پیش آمد. همه وظایف محول نشدند.",
       "retake_filter_none": "بدون برداشت مجدد",
       "retake_filter_with_retakes": "با برداشت مجدد"
     },

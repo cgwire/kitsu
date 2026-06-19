@@ -297,8 +297,8 @@
       "shortcuts": "Genvejstaster",
       "ctrldown": "Flyt metadata-cellemarkering ned",
       "ctrlleft": "Flyt metadata-cellemarkering til venstre",
-      "ctrlright": "Flyt metadata-cellemarkering til right",
-      "ctrlup": "Flyt metadata-cellemarkering up",
+      "ctrlright": "Flyt metadata-cellemarkering til højre",
+      "ctrlup": "Flyt metadata-cellemarkering op",
       "plhome": "Gå til første frame",
       "plend": "Gå til sidste frame",
       "plaltright": "Gå til den første frame af det næste shot",
@@ -530,7 +530,7 @@
       "archived": "Arkiveret",
       "avatar": {
         "open_page": "Åben {personName} side",
-        "unassign": "Unassign {personName}"
+        "unassign": "Fjern tildeling af {personName}"
       },
       "color": "Farve",
       "copy": "Kopi",
@@ -1440,7 +1440,7 @@
       },
       "cancel_text": "Er du sikker på, at du vil arkivere {name}?",
       "delete_for_selection": "Slet det valgte shot | Slet de {nbSelectedShots} valgte shots",
-      "multiple_delete_error": "An error occurred while deleting a shot. There may be existing data currently linked to the shot. Are you sure there is no task linked to a selected shot?",
+      "multiple_delete_error": "Der opstod en fejl under sletning af et shot. Der kan være eksisterende data knyttet til shottet. Er du sikker på, at der ikke er nogen opgave knyttet til et valgt shot?",
       "creation_explanation": "For at tilføje shots skal du først oprette en episode og en sequence. Indtast et episodenavn nederst i venstre kolonne, og klik derefter på \"Tilføj\" for at oprette en ny episode. Vælg denne episode, og gentag den samme proces for at oprette en sequence. Til sidst skal du vælge en sequence og indtaste et shot-navn i feltet nederst i højre kolonne. Klik på \"Tilføj\"-knappen nedenfor. Dit første shot er nu oprettet. Du kan tilføje mange flere! Hvis det ikke er en tv-serie, kan du oprette en sequence direkte.",
       "get_frames_from_previews": "Angiv frame-numre fra previews",
       "get_frames_from_previews_description": "Vælg en opgavetype for at udtrække frame-numre fra de senest publicerede film-previews.",
@@ -1738,7 +1738,7 @@
       "creation_explaination": "Upload en edit-fil for at oprette et nyt edit",
       "edit_error": "Der opstod en fejl under gemning af dette edit. Er du sikker på, at der ikke allerede findes et edit med et lignende navn?",
       "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database?",
-      "delete_error": "An error occurred while deleting this edit. There may be existing data currently linked to it.",
+      "delete_error": "Der opstod en fejl under sletning af dette edit. Der kan være eksisterende data knyttet til det.",
       "delete_for_selection": "Slet det valgte edit | Slet de {nbSelectedEdits} valgte edits",
       "edit_title": "Skift edit",
       "empty_list": "Der er ingen redigeringer i produktionen. Hvad med at oprette nogle?",
@@ -1900,7 +1900,7 @@
       "drop_new_concepts": "Læg nye konceptfiler her"
     },
     "intro": {
-      "main": "To make our project thrive, we need your support. Here are some simple ways you can help:",
+      "main": "For at vores projekt kan trives, har vi brug for din støtte. Her er nogle enkle måder, du kan hjælpe på:",
       "first": "Stjernemærk vores repository på ",
       "second": "Følg os på ",
       "third": "Deltag i vores",
