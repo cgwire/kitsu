@@ -773,8 +773,8 @@
       "email_exist_error": "Diese E-Mail wird bereits von einem anderen Benutzer verwendet.",
       "position": {
         "artist": "Künstler",
-        "supervisor": "Datenschutzbeauftragter",
-        "lead": "Blei"
+        "supervisor": "Supervisor",
+        "lead": "Lead"
       },
       "seniority": {
         "junior": "Junior",
@@ -2028,8 +2028,8 @@
       },
       "positions": {
         "artist": "Künstler",
-        "lead": "Blei",
-        "supervisor": "Datenschutzbeauftragter"
+        "lead": "Lead",
+        "supervisor": "Supervisor"
       },
       "seniorities": {
         "junior": "Junior",

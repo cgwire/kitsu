@@ -890,7 +890,7 @@
         "annotation_erase": "清除注释",
         "toggle_annotations": "播放时显示/隐藏注释",
         "toggle_laser": "启用/禁用绘制模式",
-        "annotation_zoom_pan": "启用缩放和平移",
+        "annotation_zoom_pan": "重置缩放",
         "default": "默认",
         "exit_play_full": "退出》完整版电影播放",
         "object_background": "为 3D 模型设置新的环境贴图",

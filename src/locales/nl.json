@@ -774,7 +774,7 @@
       "position": {
         "artist": "Kunstenaar",
         "supervisor": "Supervisor",
-        "lead": "Lood"
+        "lead": "Lead"
       },
       "seniority": {
         "junior": "Junior",
@@ -2028,7 +2028,7 @@
       },
       "positions": {
         "artist": "Kunstenaar",
-        "lead": "Lood",
+        "lead": "Lead",
         "supervisor": "Supervisor"
       },
       "seniorities": {

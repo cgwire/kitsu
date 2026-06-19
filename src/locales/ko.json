@@ -890,7 +890,7 @@
         "annotation_erase": "주석 지우기",
         "toggle_annotations": "영화가 일시정지되었을 때 주석 표시/숨기기",
         "toggle_laser": "드로잉 레이저 모드 활성화/비활성화",
-        "annotation_zoom_pan": "확대/축소 및 이동 활성화",
+        "annotation_zoom_pan": "확대/축소 초기화",
         "default": "기본값",
         "exit_play_full": "전체 동영상 재생 종료",
         "object_background": "3D 모델에 새 환경 맵을 설정합니다.",

@@ -774,7 +774,7 @@
       "position": {
         "artist": "Kunstner",
         "supervisor": "Tilsynsførende",
-        "lead": "Bly"
+        "lead": "Lead"
       },
       "seniority": {
         "junior": "Junior",
@@ -890,7 +890,7 @@
         "annotation_erase": "Fjern annotering",
         "toggle_annotations": "Vis/Skjul annoteringer, når filmen er sat på pause",
         "toggle_laser": "Aktiver/Deaktiver tegning med laserfunktion",
-        "annotation_zoom_pan": "Aktivér zoom og panorering",
+        "annotation_zoom_pan": "Nulstil zoom",
         "default": "standard",
         "exit_play_full": "Afslut fuld filmvisning",
         "object_background": "Indstil et nyt environment map til 3D-modellen",
@@ -2028,7 +2028,7 @@
       },
       "positions": {
         "artist": "Kunstner",
-        "lead": "Bly",
+        "lead": "Lead",
         "supervisor": "Tilsynsførende"
       },
       "seniorities": {

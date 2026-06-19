@@ -890,7 +890,7 @@
         "annotation_erase": "حاشیه نویسی را پاک کنید",
         "toggle_annotations": "نمایش/پنهان کردن حاشیه نویسی ها هنگام توقف فیلم",
         "toggle_laser": "فعال/غیرفعال کردن حالت لیزری",
-        "annotation_zoom_pan": "فعال کردن زوم و پن (zoom and pan)",
+        "annotation_zoom_pan": "بازنشانی زوم",
         "default": "پیش فرض",
         "exit_play_full": "از پخش کامل فیلم خارج شوید",
         "object_background": "یک محیط جدید را روی مدل سه بعدی تنظیم کنید",
@@ -2028,7 +2028,7 @@
       },
       "positions": {
         "artist": "هنرمند",
-        "lead": "سرب",
+        "lead": "سرپرست",
         "supervisor": "سرپرست"
       },
       "seniorities": {

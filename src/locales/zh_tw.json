@@ -774,7 +774,7 @@
       "position": {
         "artist": "藝術家",
         "supervisor": "主管",
-        "lead": "鉛"
+        "lead": "組長"
       },
       "seniority": {
         "junior": "初級",
@@ -890,7 +890,7 @@
         "annotation_erase": "刪除註釋",
         "toggle_annotations": "影片暫停時顯示/隱藏註解",
         "toggle_laser": "啟用/停用繪圖雷射模式",
-        "annotation_zoom_pan": "啟用縮放與平移",
+        "annotation_zoom_pan": "重設縮放",
         "default": "預設",
         "exit_play_full": "Exit 完整電影播放",
         "object_background": "為 3D 模型設定新的環境貼圖",
@@ -2028,7 +2028,7 @@
       },
       "positions": {
         "artist": "藝術家",
-        "lead": "鉛",
+        "lead": "組長",
         "supervisor": "主管"
       },
       "seniorities": {
