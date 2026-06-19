@@ -890,7 +890,7 @@
         "annotation_erase": "アノテーションを消去",
         "toggle_annotations": "動画が一時停止中にアノテーションを表示/非表示",
         "toggle_laser": "描画レーザーモードを有効/無効",
-        "annotation_zoom_pan": "ズームとパンを有効化",
+        "annotation_zoom_pan": "ズームをリセット",
         "default": "デフォルト",
         "exit_play_full": "フルムービー再生を終了",
         "object_background": "3D モデルに新しい環境マップを設定",

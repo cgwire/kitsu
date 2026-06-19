@@ -888,7 +888,7 @@
         "toggle_playing_annotations": "영화 재생 중 주석 표시/숨기기",
         "toggle_waveform": "영화 파형 표시/숨기기",
         "annotation_erase": "주석 지우기",
-        "toggle_annotations": "영화를 재생하는 동안 주석 표시/숨기기",
+        "toggle_annotations": "영화가 일시정지되었을 때 주석 표시/숨기기",
         "toggle_laser": "드로잉 레이저 모드 활성화/비활성화",
         "annotation_zoom_pan": "확대/축소 및 이동 활성화",
         "default": "기본값",
