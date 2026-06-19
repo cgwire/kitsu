@@ -34,8 +34,8 @@
       "multiple_delete_error": "Hiba történt az asset törlésekor. Valószínűleg hivatkozik rá adat. Biztosan nincs feladat rendelve a kiválasztott asset-hez?",
       "only_current_episode": "Csak a jelenlegi epizód",
       "casted_in_shots": "{nbShots} shot-ban szerepel",
-      "delete_for_selection_hard_lock_text": "DELETE",
-      "delete_for_selection_hard_text": "Biztosan véglegesen eltávolítod a kijelölt asset-eket? Minden hozzájuk tartozó feladat, hozzászólás és előnézet is törlésre kerül. Kérlek erősítsd meg a 'DELETE' begépelésével az alábbi mezőbe.",
+      "delete_for_selection_hard_lock_text": "TÖRLÉS",
+      "delete_for_selection_hard_text": "Biztosan véglegesen eltávolítod a kijelölt asset-eket? Minden hozzájuk tartozó feladat, hozzászólás és előnézet is törlésre kerül. Kérlek erősítsd meg a 'TÖRLÉS' begépelésével az alábbi mezőbe.",
       "linked": "Kapcsolt",
       "no_concept": "Nincs ehhez az asset-hez kapcsolt koncepció",
       "show_linked": "Breakdown asset-ek megjelenítése"
@@ -1442,8 +1442,8 @@
       "delete_for_selection": "{nbSelectedShots} kijelölt shot törlése: ",
       "multiple_delete_error": "Hiba történt a shot törlésekor. Valószínűleg adat hivatkozik rá. Biztosan nincs feladat hozzárendelve?",
       "creation_explanation": "Shot-ok hozzáadásához először egy epizódot és egy szekvenciát kell létrehoznod. Add meg az epizód nevét a bal oszlop alján, majd kattints a \"Hozzáadás\" gombra egy új epizód létrehozásához. Jelöld ki ezt az epizódot, és ismételd meg ugyanezt a műveletet a szekvenciánál. Végül válassz ki egy szekvenciát, és gépelj be egy shot-nevet a jobb oszlop alján lévő mezőbe. Kattints az alábbi \"Hozzáadás\" gombra. Elkészült az első shot-od. Még sokkal többet is hozzáadhatsz! Ha nem TV sorozatról van szó, közvetlenül létrehozhatsz egy szekvenciát.",
-      "delete_for_selection_hard_lock_text": "DELETE",
-      "delete_for_selection_hard_text": "Biztosan véglegesen el akarod távolítani a kijelölt shot-okat? Minden hozzájuk tartozó feladat, hozzászólás és előnézet szintén törlésre kerül. Kérlek erősítsd meg a 'DELETE' begépelésével.",
+      "delete_for_selection_hard_lock_text": "TÖRLÉS",
+      "delete_for_selection_hard_text": "Biztosan véglegesen el akarod távolítani a kijelölt shot-okat? Minden hozzájuk tartozó feladat, hozzászólás és előnézet szintén törlésre kerül. Kérlek erősítsd meg a 'TÖRLÉS' begépelésével.",
       "get_frames_from_previews": "Képkockaszámok beállítása az előnézetekből",
       "get_frames_from_previews_description": "Válassz egy feladat típust a képkockaszámok kinyeréséhez a legutóbb publikált videó-előnézetekből.",
       "get_frames_from_previews_error": "Hiba történt a képkockaszámok kinyerésekor a feladat típus előnézeteiből. Kérlek keresd fel a támogató csapatot.",
@@ -1612,8 +1612,8 @@
       "create_tasks_sequence_failed": "Szerver-hiba történt a létrehozás közben.",
       "data_display": "Adatok megjelenítése",
       "delete_for_selection_error": "Hiba történt a kijelölt feladatok törlésekor.",
-      "delete_for_selection_hard_lock_text": "DELETE",
-      "delete_for_selection_hard_text": "Biztos vagy benne, hogy véglegesen törlöd a kijelölt feladatokat? Minden kapcsolódó hozzászólás és előnézet is törlésre kerül. Kérlek erősítsd meg a 'DELETE' szó begépelésével.",
+      "delete_for_selection_hard_lock_text": "TÖRLÉS",
+      "delete_for_selection_hard_text": "Biztos vagy benne, hogy véglegesen törlöd a kijelölt feladatokat? Minden kapcsolódó hozzászólás és előnézet is törlésre kerül. Kérlek erősítsd meg a 'TÖRLÉS' szó begépelésével.",
       "difficulty": {
         "easy": "Könnyű",
         "hard": "Nehéz",
@@ -1743,8 +1743,8 @@
       "add_links": "Hivatkozások hozzáadása asset-ekhez",
       "add_new_concept": "Új koncepciók hozzáadása",
       "delete_for_selection": "A kijelölt koncepció törlése | A(z) {nbSelectedConcepts} kijelölt koncepció törlése",
-      "delete_for_selection_hard_lock_text": "DELETE",
-      "delete_for_selection_hard_text": "Biztosan véglegesen el akarod távolítani a kijelölt koncepciókat? Minden kapcsolódó feladat, hozzászólás és előnézet is törlésre kerül. Kérlek erősítsd meg a 'DELETE' begépelésével alább.",
+      "delete_for_selection_hard_lock_text": "TÖRLÉS",
+      "delete_for_selection_hard_text": "Biztosan véglegesen el akarod távolítani a kijelölt koncepciókat? Minden kapcsolódó feladat, hozzászólás és előnézet is törlésre kerül. Kérlek erősítsd meg a 'TÖRLÉS' begépelésével alább.",
       "drop_new_concepts": "Húzd ide az új koncepció file-okat",
       "empty": "Nincs koncepció ebben a produkcióban",
       "fields": {
@@ -1841,8 +1841,8 @@
       "delete_error": "Hiba történt az edit törlésekor. Valószínűleg adat hivatkozik rá.",
       "delete_for_selection": "Kijelölt edit törlése | {nbSelectedEdits} kijelölt edit törlése",
       "delete_for_selection_error": "Hiba történt a kijelölt edit-ek törlésekor.",
-      "delete_for_selection_hard_lock_text": "DELETE",
-      "delete_for_selection_hard_text": "Biztosan véglegesen eltávolítod a kijelölt edit-eket? Minden hozzá tartozó feladat, hozzászólás és előnézet is törlésre kerül. Kérlek erősítsd meg a 'DELETE' begépelésével.",
+      "delete_for_selection_hard_lock_text": "TÖRLÉS",
+      "delete_for_selection_hard_text": "Biztosan véglegesen eltávolítod a kijelölt edit-eket? Minden hozzá tartozó feladat, hozzászólás és előnézet is törlésre kerül. Kérlek erősítsd meg a 'TÖRLÉS' begépelésével.",
       "delete_text": "Biztosan eltávolítod a(z) {name}-t az adatbázisodból?",
       "edit_error": "Hiba történt az edit mentésekor. Biztosan nincs hasonló nevű edit?",
       "edit_success": "A módosítások sikeresen mentve.",
@@ -2000,8 +2000,8 @@
       "title": "Elem chatek"
     },
     "hard_delete": {
-      "delete_for_selection_hard_lock_text": "DELETE",
-      "delete_for_selection_hard_text": "Biztosan véglegesen eltávolítod a kijelölt elemeket? Kérlek erősítsd meg a 'DELETE' begépelésével az alábbi mezőbe."
+      "delete_for_selection_hard_lock_text": "TÖRLÉS",
+      "delete_for_selection_hard_text": "Biztosan véglegesen eltávolítod a kijelölt elemeket? Kérlek erősítsd meg a 'TÖRLÉS' begépelésével az alábbi mezőbe."
     },
     "budget": {
       "add_entry": "Tétel hozzáadása",

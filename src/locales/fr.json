@@ -36,8 +36,8 @@
       "linked": "Lié à",
       "no_concept": "Aucun concept n'est lié à cet asset",
       "casted_in_shots": "Casté dans {nbShots} plans",
-      "delete_for_selection_hard_text": "Êtes-vous sûr de vouloir supprimer définitivement les assets sélectionnés ? Toutes les tâches, tous les commentaires et tous les aperçus associés seront également supprimés. Veuillez confirmer en tapant \"DELETE\" ci-dessous.",
-      "delete_for_selection_hard_lock_text": "DELETE",
+      "delete_for_selection_hard_text": "Êtes-vous sûr de vouloir supprimer définitivement les assets sélectionnés ? Toutes les tâches, tous les commentaires et tous les aperçus associés seront également supprimés. Veuillez confirmer en tapant \"SUPPRIMER\" ci-dessous.",
+      "delete_for_selection_hard_lock_text": "SUPPRIMER",
       "show_linked": "Afficher les assets du casting"
     },
     "asset_types": {
@@ -1446,8 +1446,8 @@
       "get_frames_from_previews_description": "Sélectionnez un type de tâche pour extraire les durées en frames des derniers aperçus de films publiés.",
       "get_frames_from_previews_error": "Une erreur s'est produite lors de l'extraction des numéros d'image des aperçus des types de tâches. Veuillez contacter notre équipe de support.",
       "wrong_file_duration": "La durée d'un des fichiers vidéo téléchargés ne correspond pas à la durée prévue de la prise de vue actuelle.",
-      "delete_for_selection_hard_text": "Êtes-vous sûr de vouloir supprimer définitivement les photos sélectionnées ? Toutes les tâches, tous les commentaires et tous les aperçus associés seront également supprimés. Veuillez confirmer en tapant \"DELETE\" ci-dessous.",
-      "delete_for_selection_hard_lock_text": "DELETE",
+      "delete_for_selection_hard_text": "Êtes-vous sûr de vouloir supprimer définitivement les photos sélectionnées ? Toutes les tâches, tous les commentaires et tous les aperçus associés seront également supprimés. Veuillez confirmer en tapant \"SUPPRIMER\" ci-dessous.",
+      "delete_for_selection_hard_lock_text": "SUPPRIMER",
       "show_timecode": "Afficher les entrées et sorties sous forme de timecodes"
     },
     "server_down": {
@@ -1650,8 +1650,8 @@
       "create_tasks_disclaimer": "Si votre type de tâche est manquant, vérifiez qu'il figure dans la section Types de tâches des paramètres de production.",
       "data_display": "Affichage des données",
       "delete_for_selection_error": "Une erreur s'est produite lors de la suppression des tâches sélectionnées.",
-      "delete_for_selection_hard_text": "Êtes-vous sûr de vouloir supprimer définitivement les tâches sélectionnées ? Tous les commentaires et aperçus associés seront également supprimés. Veuillez confirmer en tapant \"DELETE\" ci-dessous.",
-      "delete_for_selection_hard_lock_text": "DELETE",
+      "delete_for_selection_hard_text": "Êtes-vous sûr de vouloir supprimer définitivement les tâches sélectionnées ? Tous les commentaires et aperçus associés seront également supprimés. Veuillez confirmer en tapant \"SUPPRIMER\" ci-dessous.",
+      "delete_for_selection_hard_lock_text": "SUPPRIMER",
       "hookup_playlist": "Créer une liste de lecture pour les rencontres",
       "assignation_error": "Il y a eu un problème d'assignation de cette personne aux tâches sélectionnées. Toutes les tâches n'ont pas été assignées.",
       "retake_filter_none": "Sans reprise",
@@ -1759,8 +1759,8 @@
       "edit_success": "Les modifications ont été enregistrées avec succès.",
       "restore_text": "Êtes-vous sûr de vouloir restaurer {name} à partir de votre archive ?",
       "delete_for_selection_error": "Une erreur s'est produite lors de la suppression des edits sélectionnés.",
-      "delete_for_selection_hard_text": "Êtes-vous sûr de vouloir supprimer définitivement les edits sélectionnés ? Toutes les tâches, tous les commentaires et tous les aperçus associés seront également supprimés. Veuillez confirmer en tapant \"DELETE\" ci-dessous.",
-      "delete_for_selection_hard_lock_text": "DELETE",
+      "delete_for_selection_hard_text": "Êtes-vous sûr de vouloir supprimer définitivement les edits sélectionnés ? Toutes les tâches, tous les commentaires et tous les aperçus associés seront également supprimés. Veuillez confirmer en tapant \"SUPPRIMER\" ci-dessous.",
+      "delete_for_selection_hard_lock_text": "SUPPRIMER",
       "multiple_delete_error": "Une erreur s'est produite lors de la suppression d'un edit. Il se peut que des données existantes y soient actuellement liées. Êtes-vous sûr qu'il n'y a pas de tâches liées à l'edit sélectionné ?"
     },
     "status_automations": {
@@ -1895,8 +1895,8 @@
         "title": "Liens vers les concepts",
         "empty": "Aucun lien"
       },
-      "delete_for_selection_hard_text": "Êtes-vous sûr de vouloir supprimer définitivement les concepts sélectionnés ? Toutes les tâches, commentaires et aperçus associés seront également supprimés. Veuillez confirmer en tapant \"DELETE\" ci-dessous.",
-      "delete_for_selection_hard_lock_text": "DELETE",
+      "delete_for_selection_hard_text": "Êtes-vous sûr de vouloir supprimer définitivement les concepts sélectionnés ? Toutes les tâches, commentaires et aperçus associés seront également supprimés. Veuillez confirmer en tapant \"SUPPRIMER\" ci-dessous.",
+      "delete_for_selection_hard_lock_text": "SUPPRIMER",
       "drop_new_concepts": "Déposez ici de nouveaux fichiers de concepts"
     },
     "intro": {
@@ -2038,8 +2038,8 @@
       }
     },
     "hard_delete": {
-      "delete_for_selection_hard_text": "Êtes-vous sûr de vouloir supprimer définitivement les éléments sélectionnés ? Veuillez confirmer en tapant \"DELETE\" ci-dessous.",
-      "delete_for_selection_hard_lock_text": "DELETE"
+      "delete_for_selection_hard_text": "Êtes-vous sûr de vouloir supprimer définitivement les éléments sélectionnés ? Veuillez confirmer en tapant \"SUPPRIMER\" ci-dessous.",
+      "delete_for_selection_hard_lock_text": "SUPPRIMER"
     },
     "hardware_items": {
       "create_error": "Une erreur s'est produite lors de l'enregistrement de l'élément matériel.",
