@@ -146,7 +146,15 @@
       },
       "move_to_task": "Déplacer vers",
       "title": "Commentaires",
-      "toggle_for_client": "Visibilité client"
+      "toggle_for_client": "Visibilité client",
+      "player": {
+        "play": "Lecture",
+        "pause": "Pause",
+        "mute": "Couper le son",
+        "unmute": "Rétablir le son",
+        "fullscreen": "Plein écran",
+        "download": "Télécharger"
+      }
     },
     "custom_actions": {
       "create_error": "Une erreur est survenue en sauvegardant cette action personnalisée. Êtes-vous sûr qu'aucune autre action a un nom similaire ?",
@@ -322,7 +330,9 @@
       "scrub_anywhere": "Faire défiler la timeline depuis n'importe où dans le lecteur",
       "focus_comment": "Basculer le focus entre le lecteur et la zone de commentaire",
       "first_frame": "Aller à la première image",
-      "last_frame": "Aller à la dernière image"
+      "last_frame": "Aller à la dernière image",
+      "straight_line": "Tracer une ligne droite",
+      "constant_width": "Tracer avec une épaisseur constante (sans pression)"
     },
     "login": {
       "back_to_login": "Revenir à la page de connexion",
@@ -594,7 +604,21 @@
         "download_zip": "Télécharger les annotations en ZIP"
       },
       "attach_snapshots_with_label": "Joindre les captures avec une étiquette incrustée",
-      "export": "Exporter"
+      "export": "Exporter",
+      "record_audio": "Enregistrer un audio",
+      "record_video": "Enregistrer une vidéo",
+      "recording": {
+        "webcam": "Webcam",
+        "screen": "Écran",
+        "microphone": "Microphone",
+        "start": "Démarrer",
+        "stop": "Arrêter",
+        "cancel": "Annuler",
+        "recording": "Enregistrement…",
+        "permission_denied": "Autorisation refusée. Autorisez l'accès au micro/à la caméra et réessayez.",
+        "no_device": "Aucun microphone ni caméra détecté.",
+        "not_supported": "L'enregistrement n'est pas pris en charge par ce navigateur."
+      }
     },
     "menu": {
       "assign_tasks": "Assigner des tâches",
@@ -900,7 +924,9 @@
         "open_link": "Ouvrir le lien",
         "annotation_huge": "Énorme",
         "annotation_shape": "Forme",
-        "annotation_tiny": "Minuscule"
+        "annotation_tiny": "Minuscule",
+        "onion_skin": "Pelure d'oignon",
+        "onion_skin_off": "Désactivée"
       },
       "download_csv": "Télécharger .csv",
       "filter_task_type": "Filtré par type de tâche",
@@ -950,7 +976,9 @@
       },
       "update_to_latest_version": "Mettre à jour vers la dernière version",
       "update_to_latest_version_help": "Utilise la dernière révision de chaque entité, en conservant son type de tâche actuel.",
-      "update_versions_title": "Mettre à jour les versions sélectionnées"
+      "update_versions_title": "Mettre à jour les versions sélectionnées",
+      "created": "Playlist « {name} » créée.",
+      "view_created": "Voir la playlist"
     },
     "productions": {
       "current": "Production sélectionnée ",
@@ -988,7 +1016,9 @@
         "is_set_preview_automated": "Définir automatiquement la nouvelle prévisualisation comme vignette de l'entité",
         "homepage": "Page d'accueil (première page affichée)",
         "code": "Nom court",
-        "is_publish_default": "Définir le widget de commentaires pour les artistes en mode publication par défaut"
+        "is_publish_default": "Définir le widget de commentaires pour les artistes en mode publication par défaut",
+        "is_single_preview_per_revision": "N'autoriser qu'un seul fichier de preview par révision",
+        "revision_padding": "Remplissage du numéro de révision (0 = aucun)"
       },
       "metadata": {
         "add_explaination": "Ajouter des données spécifiques au projet.",
@@ -2035,7 +2065,8 @@
         "junior": "Junior",
         "mid": "Mid",
         "senior": "Senior"
-      }
+      },
+      "clear_exception": "Effacer la modification de salaire de ce mois"
     },
     "hard_delete": {
       "delete_for_selection_hard_text": "Êtes-vous sûr de vouloir supprimer définitivement les éléments sélectionnés ? Veuillez confirmer en tapant \"SUPPRIMER\" ci-dessous.",

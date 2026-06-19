@@ -146,7 +146,15 @@
       },
       "move_to_task": "Mover a",
       "title": "Comentarios",
-      "toggle_for_client": "Visibilidad para el cliente"
+      "toggle_for_client": "Visibilidad para el cliente",
+      "player": {
+        "play": "Reproducir",
+        "pause": "Pausa",
+        "mute": "Silenciar",
+        "unmute": "Activar sonido",
+        "fullscreen": "Pantalla completa",
+        "download": "Descargar"
+      }
     },
     "custom_actions": {
       "create_error": "Se ha producido un error al guardar esta acción personalizada. ¿Está seguro de que no hay otra acción con el mismo nombre?",
@@ -322,7 +330,9 @@
       "scrub_anywhere": "Recorrer la línea de tiempo desde cualquier parte del reproductor",
       "focus_comment": "Alternar el foco entre el reproductor y el cuadro de comentarios",
       "first_frame": "Ir al primer fotograma",
-      "last_frame": "Ir al último fotograma"
+      "last_frame": "Ir al último fotograma",
+      "straight_line": "Dibujar una línea recta",
+      "constant_width": "Dibujar con un grosor constante (sin presión)"
     },
     "login": {
       "back_to_login": "Voler al login",
@@ -594,7 +604,21 @@
       "disable_desktop_notifications": "Desactivar notificaciones de escritorio",
       "enable_desktop_notifications": "Activar notificaciones de escritorio",
       "export": "Exportar",
-      "unknown": "Desconocido"
+      "unknown": "Desconocido",
+      "record_audio": "Grabar audio",
+      "record_video": "Grabar vídeo",
+      "recording": {
+        "webcam": "Webcam",
+        "screen": "Pantalla",
+        "microphone": "Micrófono",
+        "start": "Iniciar",
+        "stop": "Detener",
+        "cancel": "Cancelar",
+        "recording": "Grabando",
+        "permission_denied": "Permiso denegado. Permite el acceso al micrófono o la cámara e inténtalo de nuevo.",
+        "no_device": "No se ha encontrado ningún micrófono ni cámara.",
+        "not_supported": "La grabación no es compatible con este navegador."
+      }
     },
     "menu": {
       "assign_tasks": "Asignar tareas",
@@ -900,7 +924,9 @@
         "open_link": "Abrir enlace",
         "annotation_huge": "Enorme",
         "annotation_shape": "Forma",
-        "annotation_tiny": "Diminuta"
+        "annotation_tiny": "Diminuta",
+        "onion_skin": "Fotogramas en piel de cebolla",
+        "onion_skin_off": "Desactivado"
       },
       "download_csv": "Descargar .csv",
       "filter_task_type": "Filtrado por tipo de tarea",
@@ -950,7 +976,9 @@
       },
       "update_to_latest_version": "Actualizar a la última versión",
       "update_to_latest_version_help": "Establece la última revisión para cada entidad, manteniendo su tipo de tarea actual.",
-      "update_versions_title": "Actualizar versiones seleccionadas"
+      "update_versions_title": "Actualizar versiones seleccionadas",
+      "created": "Lista de reproducción «{name}» creada.",
+      "view_created": "Ver lista de reproducción"
     },
     "productions": {
       "current": "Producción seleccionada",
@@ -988,7 +1016,9 @@
         "is_set_preview_automated": "Establecer automáticamente la nueva vista previa como miniatura de la entidad",
         "homepage": "Página de inicio (primera página mostrada)",
         "code": "Nombre corto",
-        "is_publish_default": "Establecer widget de comentarios para los artistas en el modo de publicación por defecto"
+        "is_publish_default": "Establecer widget de comentarios para los artistas en el modo de publicación por defecto",
+        "is_single_preview_per_revision": "Permitir solo un archivo de vista previa por revisión",
+        "revision_padding": "Relleno del número de revisión (0 = sin relleno)"
       },
       "metadata": {
         "add_explaination": "Añada los datos específicos requeridos por este proyecto.",
@@ -2035,7 +2065,8 @@
         "junior": "Junior",
         "mid": "Medio",
         "senior": "Senior"
-      }
+      },
+      "clear_exception": "Borrar el ajuste salarial de este mes"
     },
     "hard_delete": {
       "delete_for_selection_hard_text": "¿Está seguro de que desea eliminar permanentemente los elementos seleccionados? Confírmelo escribiendo \"BORRAR\" a continuación.",

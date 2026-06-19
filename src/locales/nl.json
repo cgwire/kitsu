@@ -146,7 +146,15 @@
       },
       "move_to_task": "Verplaats naar",
       "title": "Opmerkingen",
-      "toggle_for_client": "Zichtbaarheid voor klant"
+      "toggle_for_client": "Zichtbaarheid voor klant",
+      "player": {
+        "play": "Afspelen",
+        "pause": "Pauzeren",
+        "mute": "Dempen",
+        "unmute": "Dempen opheffen",
+        "fullscreen": "Volledig scherm",
+        "download": "Downloaden"
+      }
     },
     "custom_actions": {
       "create_error": "Er is een fout opgetreden bij het opslaan van de zelfbepaalde actie. Weet je zeker dat er geen andere actie is met dezelfde naam?",
@@ -322,7 +330,9 @@
       "scrub_anywhere": "Scrub de tijdlijn vanaf elke plek in de speler",
       "focus_comment": "Wissel de focus tussen de speler en het commentaarvak",
       "first_frame": "Ga naar het eerste frame",
-      "last_frame": "Ga naar het laatste frame"
+      "last_frame": "Ga naar het laatste frame",
+      "straight_line": "Een rechte lijn tekenen",
+      "constant_width": "Tekenen met een vaste breedte (geen druk)"
     },
     "login": {
       "back_to_login": "Ga terug naar de log-in pagina",
@@ -594,7 +604,21 @@
       "disable_desktop_notifications": "Desktopmeldingen uitschakelen",
       "enable_desktop_notifications": "Desktopmeldingen inschakelen",
       "export": "Exporteren",
-      "unknown": "Onbekend"
+      "unknown": "Onbekend",
+      "record_audio": "Audio opnemen",
+      "record_video": "Video opnemen",
+      "recording": {
+        "webcam": "Webcam",
+        "screen": "Scherm",
+        "microphone": "Microfoon",
+        "start": "Starten",
+        "stop": "Stoppen",
+        "cancel": "Annuleren",
+        "recording": "Bezig met opnemen",
+        "permission_denied": "Toegang geweigerd. Sta toegang tot microfoon/camera toe en probeer het opnieuw.",
+        "no_device": "Geen microfoon of camera gevonden.",
+        "not_supported": "Opnemen wordt niet ondersteund in deze browser."
+      }
     },
     "menu": {
       "assign_tasks": "Taak toewijzen",
@@ -900,7 +924,9 @@
         "open_link": "Open link",
         "annotation_huge": "Enorm",
         "annotation_shape": "Vorm",
-        "annotation_tiny": "Heel klein"
+        "annotation_tiny": "Heel klein",
+        "onion_skin": "Onion skin-frames",
+        "onion_skin_off": "Uit"
       },
       "download_csv": "download .csv",
       "filter_task_type": "Gefilterd op taaktype",
@@ -950,7 +976,9 @@
       },
       "update_to_latest_version": "Bijwerken naar nieuwste versie",
       "update_to_latest_version_help": "Stel voor elke entiteit de nieuwste revisie in, met behoud van het huidige taaktype.",
-      "update_versions_title": "Geselecteerde versies bijwerken"
+      "update_versions_title": "Geselecteerde versies bijwerken",
+      "created": "Afspeellijst “{name}” aangemaakt.",
+      "view_created": "Afspeellijst bekijken"
     },
     "productions": {
       "current": "Geselecteerde productie",
@@ -988,7 +1016,9 @@
         "is_set_preview_automated": "Nieuwe preview automatisch instellen als entiteitminiatuurafbeelding",
         "homepage": "Homepage (eerste pagina weergegeven)",
         "code": "Korte naam",
-        "is_publish_default": "Stel commentaarwidget voor artiesten standaard in op publiceermodus"
+        "is_publish_default": "Stel commentaarwidget voor artiesten standaard in op publiceermodus",
+        "is_single_preview_per_revision": "Slechts één previewbestand per revisie toestaan",
+        "revision_padding": "Opvulling revisienummer (0 = geen opvulling)"
       },
       "metadata": {
         "add_explaination": "Voeg specifieke gegevens toe die nodig zijn voor dit project.",
@@ -2035,7 +2065,8 @@
         "junior": "Junior",
         "mid": "Midden",
         "senior": "Senior"
-      }
+      },
+      "clear_exception": "Salarisaanpassing van deze maand wissen"
     },
     "hard_delete": {
       "delete_for_selection_hard_text": "Weet je zeker dat je de geselecteerde items definitief wilt verwijderen? Bevestig dit door hieronder 'WISSEN' te typen.",

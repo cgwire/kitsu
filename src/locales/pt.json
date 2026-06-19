@@ -146,7 +146,15 @@
       },
       "move_to_task": "Mover para",
       "title": "Comentários",
-      "toggle_for_client": "Visibilidade para o cliente"
+      "toggle_for_client": "Visibilidade para o cliente",
+      "player": {
+        "play": "Reproduzir",
+        "pause": "Pausar",
+        "mute": "Mutar",
+        "unmute": "Desmutar",
+        "fullscreen": "Tela cheia",
+        "download": "Baixar"
+      }
     },
     "custom_actions": {
       "create_error": "Ocorreu um erro ao salvar esta ação personalizada. Tem certeza de que não há outra ação com o mesmo nome?",
@@ -322,7 +330,9 @@
       "scrub_anywhere": "Percorrer a linha do tempo de qualquer lugar do player",
       "focus_comment": "Alternar o foco entre o player e a caixa de comentários",
       "first_frame": "Ir para o primeiro frame",
-      "last_frame": "Ir para o último frame"
+      "last_frame": "Ir para o último frame",
+      "straight_line": "Desenhar uma linha reta",
+      "constant_width": "Desenhar com largura constante (sem pressão)"
     },
     "login": {
       "back_to_login": "Voltar para a página de login",
@@ -594,7 +604,21 @@
       "disable_desktop_notifications": "Desativar notificações na área de trabalho",
       "enable_desktop_notifications": "Ativar notificações na área de trabalho",
       "export": "Exportar",
-      "unknown": "Desconhecido"
+      "unknown": "Desconhecido",
+      "record_audio": "Gravar áudio",
+      "record_video": "Gravar vídeo",
+      "recording": {
+        "webcam": "Webcam",
+        "screen": "Tela",
+        "microphone": "Microfone",
+        "start": "Iniciar",
+        "stop": "Parar",
+        "cancel": "Cancelar",
+        "recording": "Gravando",
+        "permission_denied": "Permissão negada. Permita o acesso ao microfone/câmera e tente novamente.",
+        "no_device": "Nenhum microfone ou câmera encontrado.",
+        "not_supported": "A gravação não é suportada neste navegador."
+      }
     },
     "menu": {
       "assign_tasks": "Atribuir tarefas",
@@ -900,7 +924,9 @@
         "open_link": "Abrir link",
         "annotation_huge": "Enorme",
         "annotation_shape": "Forma",
-        "annotation_tiny": "Minúsculo"
+        "annotation_tiny": "Minúsculo",
+        "onion_skin": "Transparência (papel vegetal)",
+        "onion_skin_off": "Desativado"
       },
       "download_csv": "Baixar .csv",
       "filter_task_type": "Filtrado por tipo de tarefa",
@@ -950,7 +976,9 @@
       },
       "update_to_latest_version": "Atualizar para a versão mais recente",
       "update_to_latest_version_help": "Defina a revisão mais recente para cada entidade, mantendo seu tipo de tarefa atual.",
-      "update_versions_title": "Atualizar versões selecionadas"
+      "update_versions_title": "Atualizar versões selecionadas",
+      "created": "Playlist “{name}” criada.",
+      "view_created": "Ver playlist"
     },
     "productions": {
       "current": "Prodição selecionada",
@@ -988,7 +1016,9 @@
         "is_set_preview_automated": "Definir automaticamente a nova visualização como miniatura de entidade",
         "homepage": "Página inicial (primeira página exibida)",
         "code": "Nome curto",
-        "is_publish_default": "Definir o widget de comentários para artistas no modo de publicação por padrão"
+        "is_publish_default": "Definir o widget de comentários para artistas no modo de publicação por padrão",
+        "is_single_preview_per_revision": "Permitir apenas um arquivo de visualização por revisão",
+        "revision_padding": "Preenchimento do número de revisão (0 = sem preenchimento)"
       },
       "metadata": {
         "add_explaination": "Adicionar informação especifica pelo projeto.",
@@ -2035,7 +2065,8 @@
         "junior": "Júnior",
         "mid": "Médio",
         "senior": "Sênior"
-      }
+      },
+      "clear_exception": "Limpar a substituição salarial deste mês"
     },
     "hard_delete": {
       "delete_for_selection_hard_text": "Tem certeza de que deseja remover permanentemente os itens selecionados? Por favor, confirme digitando \"EXCLUIR\" abaixo.",

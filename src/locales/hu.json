@@ -146,7 +146,15 @@
       "previews": "Új revízióként közzéteendő előnézet file-ok",
       "selected_files": "Kijelölt file-ok",
       "title": "Hozzászólások",
-      "toggle_for_client": "Megrendelői láthatóság"
+      "toggle_for_client": "Megrendelői láthatóság",
+      "player": {
+        "play": "Lejátszás",
+        "pause": "Szünet",
+        "mute": "Némítás",
+        "unmute": "Némítás feloldása",
+        "fullscreen": "Teljes képernyő",
+        "download": "Letöltés"
+      }
     },
     "custom_actions": {
       "create_error": "Hiba történt a művelet mentésekor. Biztos hogy nincs azonos nevű művelet?",
@@ -322,7 +330,9 @@
       "scrub_anywhere": "Az idővonal görgetése a lejátszó bármely pontjáról",
       "focus_comment": "Fókusz váltása a lejátszó és a megjegyzés mező között",
       "first_frame": "Ugrás az első képkockára",
-      "last_frame": "Ugrás az utolsó képkockára"
+      "last_frame": "Ugrás az utolsó képkockára",
+      "straight_line": "Egyenes vonal rajzolása",
+      "constant_width": "Rajzolás állandó vastagsággal (nyomásérzékelés nélkül)"
     },
     "login": {
       "back_to_login": "Vissza a belépő oldalra",
@@ -594,7 +604,21 @@
       "unassigned": "Nincs kiosztva",
       "unknown": "Ismeretlen",
       "week": "Hét",
-      "year": "Év"
+      "year": "Év",
+      "record_audio": "Hang rögzítése",
+      "record_video": "Videó rögzítése",
+      "recording": {
+        "webcam": "Webkamera",
+        "screen": "Képernyő",
+        "microphone": "Mikrofon",
+        "start": "Indítás",
+        "stop": "Leállítás",
+        "cancel": "Mégsem",
+        "recording": "Rögzítés folyamatban",
+        "permission_denied": "Hozzáférés megtagadva. Engedélyezd a mikrofon/kamera elérését, és próbáld újra.",
+        "no_device": "Nem található mikrofon vagy kamera.",
+        "not_supported": "A rögzítést ez a böngésző nem támogatja."
+      }
     },
     "menu": {
       "assign_tasks": "Feladat kiosztása",
@@ -900,7 +924,9 @@
         "toggle_laser": "Lézeres rajzolási mód be-/kikapcsolása",
         "toggle_playing_annotations": "Megjegyzések mutatása/elrejtése film lejátszása közben",
         "toggle_waveform": "Film hullámformájának mutatása/elrejtése",
-        "toggle_wireframe": "Drótváz megjelenítés be-/kikapcsolása"
+        "toggle_wireframe": "Drótváz megjelenítés be-/kikapcsolása",
+        "onion_skin": "Hagymahéj képkockák",
+        "onion_skin_off": "Ki"
       },
       "download_csv": ".csv letöltése",
       "filter_task_type": "Feladat típusra szűrve",
@@ -950,7 +976,9 @@
       "update_to_latest_version": "Frissítés a legújabb verzióra",
       "update_to_latest_version_help": "Állítsd be a legújabb revíziót minden elemhez, megtartva a jelenlegi feladat típusát.",
       "update_versions_title": "Kiválasztott verziók frissítése",
-      "volume_level": "Hangerő: {level}%"
+      "volume_level": "Hangerő: {level}%",
+      "created": "A(z) „{name}” lejátszási lista létrehozva.",
+      "view_created": "Lejátszási lista megtekintése"
     },
     "productions": {
       "current": "Kiválasztott produkció",
@@ -988,7 +1016,9 @@
         "is_publish_default": "A hozzászólás widget alapból publikálás módban legyen a művészeknek",
         "is_set_preview_automated": "Az új előnézet automatikus beállítása az elem nézőképének",
         "max_retakes": "Újraforgatások maximális száma",
-        "style": "Stílus"
+        "style": "Stílus",
+        "is_single_preview_per_revision": "Revíziónként csak egy előnézet file engedélyezése",
+        "revision_padding": "Revíziószám kitöltése nullákkal (0 = nincs kitöltés)"
       },
       "metadata": {
         "add_explaination": "Projekt-specifikus adatok hozzáadása",
@@ -2068,7 +2098,8 @@
       },
       "show_expenses": "Valós költségek megjelenítése",
       "show_items": "Hardver és szoftver beszámítása",
-      "title": "Költségvetés"
+      "title": "Költségvetés",
+      "clear_exception": "E havi fizetésfelülírás törlése"
     },
     "status_automations": {
       "add_status_automation_placeholder": "+ Állapot-automatizálás hozzáadása",

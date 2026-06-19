@@ -146,7 +146,15 @@
       },
       "move_to_task": "移动到",
       "title": "评论",
-      "toggle_for_client": "客户可见性"
+      "toggle_for_client": "客户可见性",
+      "player": {
+        "play": "播放",
+        "pause": "暂停",
+        "mute": "静音",
+        "unmute": "取消静音",
+        "fullscreen": "全屏",
+        "download": "下载"
+      }
     },
     "custom_actions": {
       "create_error": "保存此自定义操作时发生错误. 您确定没有其他同名操作吗?",
@@ -322,7 +330,9 @@
       "scrub_anywhere": "在播放器任意位置拖动以浏览时间线",
       "focus_comment": "在播放器和评论框之间切换焦点",
       "first_frame": "跳到第一帧",
-      "last_frame": "跳到最后一帧"
+      "last_frame": "跳到最后一帧",
+      "straight_line": "绘制直线",
+      "constant_width": "以恒定线宽绘制（无压感）"
     },
     "login": {
       "back_to_login": "返回登录页面",
@@ -594,7 +604,21 @@
       "disable_desktop_notifications": "禁用桌面通知",
       "enable_desktop_notifications": "启用桌面通知",
       "export": "导出",
-      "unknown": "未知"
+      "unknown": "未知",
+      "record_audio": "录制音频",
+      "record_video": "录制视频",
+      "recording": {
+        "webcam": "摄像头",
+        "screen": "屏幕",
+        "microphone": "麦克风",
+        "start": "开始",
+        "stop": "停止",
+        "cancel": "取消",
+        "recording": "录制中",
+        "permission_denied": "权限被拒绝。请允许访问麦克风/摄像头后重试。",
+        "no_device": "未找到麦克风或摄像头。",
+        "not_supported": "此浏览器不支持录制。"
+      }
     },
     "menu": {
       "assign_tasks": "分配任务",
@@ -900,7 +924,9 @@
         "open_link": "打开链接",
         "annotation_huge": "超大",
         "annotation_shape": "形状",
-        "annotation_tiny": "极小"
+        "annotation_tiny": "极小",
+        "onion_skin": "洋葱皮",
+        "onion_skin_off": "关闭"
       },
       "download_csv": "下载 .csv",
       "filter_task_type": "按任务类型过滤",
@@ -950,7 +976,9 @@
       },
       "update_to_latest_version": "更新到最新版本",
       "update_to_latest_version_help": "为每个实体设置最新的修订版，并保持其当前的任务类型。",
-      "update_versions_title": "更新所选版本"
+      "update_versions_title": "更新所选版本",
+      "created": "播放列表“{name}”已创建。",
+      "view_created": "查看播放列表"
     },
     "productions": {
       "current": "所选制作",
@@ -988,7 +1016,9 @@
         "is_set_preview_automated": "自动将新预览设置为实体缩略图",
         "homepage": "主页（显示的第一页）",
         "code": "简称",
-        "is_publish_default": "在发布模式下默认设置艺术家评论小部件"
+        "is_publish_default": "在发布模式下默认设置艺术家评论小部件",
+        "is_single_preview_per_revision": "每个修订仅允许一个预览文件",
+        "revision_padding": "修订号补零位数（0 = 不补零）"
       },
       "metadata": {
         "add_explaination": "添加此项目需要的特定数据.",
@@ -2035,7 +2065,8 @@
         "junior": "初级",
         "mid": "中层",
         "senior": "高级"
-      }
+      },
+      "clear_exception": "清除本月工资覆盖值"
     },
     "hard_delete": {
       "delete_for_selection_hard_text": "您确定要永久删除所选项目吗？请在下面输入 \"删除 \"确认。",

@@ -146,7 +146,15 @@
       },
       "move_to_task": "Flyt til",
       "title": "Kommentarer",
-      "toggle_for_client": "Klientsynlighed"
+      "toggle_for_client": "Klientsynlighed",
+      "player": {
+        "play": "Play",
+        "pause": "Pause",
+        "mute": "Mute",
+        "unmute": "Unmute",
+        "fullscreen": "Fuld skærm",
+        "download": "Download"
+      }
     },
     "custom_actions": {
       "create_error": "Der opstod en fejl under gemning af denne brugerdefinerede handling. Er du sikker på, at der ikke findes en anden handling med samme navn?",
@@ -322,7 +330,9 @@
       "scrub_anywhere": "Scrub tidslinjen fra hvor som helst i afspilleren",
       "focus_comment": "Skift fokus mellem afspilleren og kommentarfeltet",
       "first_frame": "Gå til første frame",
-      "last_frame": "Gå til sidste frame"
+      "last_frame": "Gå til sidste frame",
+      "straight_line": "Tegn en lige linje",
+      "constant_width": "Tegn med konstant bredde (uden tryk)"
     },
     "login": {
       "back_to_login": "Gå tilbage til login side",
@@ -594,7 +604,21 @@
       "disable_desktop_notifications": "Deaktiver skrivebordsnotifikationer",
       "enable_desktop_notifications": "Aktivér skrivebordsnotifikationer",
       "export": "Eksporter",
-      "unknown": "Ukendt"
+      "unknown": "Ukendt",
+      "record_audio": "Optag lyd",
+      "record_video": "Optag video",
+      "recording": {
+        "webcam": "Webcam",
+        "screen": "Skærm",
+        "microphone": "Mikrofon",
+        "start": "Start",
+        "stop": "Stop",
+        "cancel": "Annuller",
+        "recording": "Optager",
+        "permission_denied": "Adgang nægtet. Tillad adgang til mikrofon/kamera, og prøv igen.",
+        "no_device": "Ingen mikrofon eller kamera fundet.",
+        "not_supported": "Optagelse understøttes ikke i denne browser."
+      }
     },
     "menu": {
       "assign_tasks": "Tildel opgaver",
@@ -900,7 +924,9 @@
         "open_link": "Åben link",
         "annotation_huge": "Kæmpe",
         "annotation_shape": "Form",
-        "annotation_tiny": "Bittelille"
+        "annotation_tiny": "Bittelille",
+        "onion_skin": "Onion skin-frames",
+        "onion_skin_off": "Fra"
       },
       "download_csv": "Download .csv",
       "filter_task_type": "Filtreret efter opgavetype",
@@ -950,7 +976,9 @@
       },
       "update_to_latest_version": "Opdater til seneste version",
       "update_to_latest_version_help": "Angiv den seneste revision for hver enhed, idet dens aktuelle opgavetype bevares.",
-      "update_versions_title": "Opdater valgte versioner"
+      "update_versions_title": "Opdater valgte versioner",
+      "created": "Playlisten “{name}” blev oprettet.",
+      "view_created": "Vis playlist"
     },
     "productions": {
       "current": "Valgt produktion",
@@ -988,7 +1016,9 @@
         "is_set_preview_automated": "Angiv automatisk ny preview som enheds-thumbnail",
         "homepage": "Startside (første side der vises)",
         "code": "Kort Navn",
-        "is_publish_default": "Indstil kommentarwidget til kunstnere i udgivelsestilstand som standard"
+        "is_publish_default": "Indstil kommentarwidget til kunstnere i udgivelsestilstand som standard",
+        "is_single_preview_per_revision": "Tillad kun én preview-fil pr. revision",
+        "revision_padding": "Nuller foran revisionsnummer (0 = ingen nuller)"
       },
       "metadata": {
         "add_explaination": "Tilføj specifikke data, der kræves af dette projekt.",
@@ -2035,7 +2065,8 @@
         "junior": "Junior",
         "mid": "Midt",
         "senior": "Senior"
-      }
+      },
+      "clear_exception": "Ryd lønjustering for denne måned"
     },
     "hard_delete": {
       "delete_for_selection_hard_text": "Er du sikker på, at du vil fjerne de valgte elementer permanent? Bekræft venligst ved at skrive 'SLET' nedenfor.",
