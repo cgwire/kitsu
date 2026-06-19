@@ -1390,9 +1390,9 @@
       "week": "Uge",
       "explanation_feedback": "Shotet betragtes som færdigt ved den første feedbackanmodning. Antallet af frames tilføjes til kvoterne for den dag.",
       "done_date": "Dato for godkendelse",
-      "explanation_done": "Optagelsen anses for at være færdig ved den sidste godkendelse. Antallet af billeder lægges til kvoterne for den pågældende dag.",
-      "explanation_weighted": "Billeder anses for at være færdige ved den første anmodning om feedback. Derefter vægtes kvoterne ud fra den tid, der er brugt på opgaven, som registreret i kunstnerens timeseddel.\n\n Hvis der ikke er registreret tid, antages det, at:\n* Opgaven startede ved den første statusændring til WIP.\n* Opgaven blev afsluttet den dag, hvor anmodningen om feedback blev fremsat.\n * De afsluttede frames er fordelt jævnt på alle arbejdsdage mellem start- og slutdatoen.",
-      "explanation_weighteddone": "Optagelserne anses for at være færdige efter den sidste godkendelse. Derefter vægtes kvoterne ud fra den tid, der er brugt på opgaven, som registreret i kunstnerens timeseddel.\n\n Hvis der ikke er registreret tid, antages det, at:\n* Opgaven startede ved den første statusændring til WIP.\n* Opgaven blev afsluttet den dag, den blev godkendt.\n * De afsluttede rammer er fordelt jævnt på alle arbejdsdage mellem start- og slutdatoen.",
+      "explanation_done": "Shottet betragtes som færdigt ved den sidste godkendelse. Antallet af frames tilføjes til kvoterne for den dag.",
+      "explanation_weighted": "Shots anses for at være færdige ved den første anmodning om feedback. Derefter vægtes kvoterne ud fra den tid, der er brugt på opgaven, som registreret i kunstnerens timeseddel.\n\n Hvis der ikke er registreret tid, antages det, at:\n* Opgaven startede ved den første statusændring til WIP.\n* Opgaven blev afsluttet den dag, hvor anmodningen om feedback blev fremsat.\n * De afsluttede frames er fordelt jævnt på alle arbejdsdage mellem start- og slutdatoen.",
+      "explanation_weighteddone": "Shots anses for at være færdige efter den sidste godkendelse. Derefter vægtes kvoterne ud fra den tid, der er brugt på opgaven, som registreret i kunstnerens timeseddel.\n\n Hvis der ikke er registreret tid, antages det, at:\n* Opgaven startede ved den første statusændring til WIP.\n* Opgaven blev afsluttet den dag, den blev godkendt.\n * De afsluttede frames er fordelt jævnt på alle arbejdsdage mellem start- og slutdatoen.",
       "weighted_done": "Vægtet (godkendelse)",
       "drawings": "Tegninger"
     },
@@ -1446,7 +1446,7 @@
       "get_frames_from_previews_description": "Vælg en opgavetype for at udtrække frame-numre fra de senest publicerede film-previews.",
       "get_frames_from_previews_error": "Der opstod en fejl under udtrækning af frame-numre fra opgavetypens previews. Kontakt venligst vores supportteam.",
       "wrong_file_duration": "Varigheden af en af de uploadede videofiler stemmer ikke overens med den forventede varighed af det aktuelle shot.",
-      "delete_for_selection_hard_text": "Er du sikker på, at du vil fjerne de valgte billeder permanent? Alle relaterede opgaver, kommentarer og forhåndsvisninger vil også blive slettet. Bekræft venligst ved at skrive 'SLET' nedenfor.",
+      "delete_for_selection_hard_text": "Er du sikker på, at du vil fjerne de valgte shots permanent? Alle relaterede opgaver, kommentarer og forhåndsvisninger vil også blive slettet. Bekræft venligst ved at skrive 'SLET' nedenfor.",
       "delete_for_selection_hard_lock_text": "SLET",
       "show_timecode": "Vis ind og ud som tidskoder"
     },

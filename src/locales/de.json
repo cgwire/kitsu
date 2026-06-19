@@ -1446,7 +1446,7 @@
       "get_frames_from_previews_description": "Wählen Sie einen Aufgabentyp, um die Bildnummern aus den zuletzt veröffentlichten Filmvorschauen zu extrahieren.",
       "get_frames_from_previews_error": "Es ist ein Fehler beim Extrahieren der Bildnummern aus der Aufgabenvorschau aufgetreten. Bitte kontaktieren Sie unser Support-Team.",
       "wrong_file_duration": "Die Dauer einer der hochgeladenen Videodateien stimmt nicht mit der erwarteten Dauer der aktuellen Aufnahme überein.",
-      "delete_for_selection_hard_text": "Sind Sie sicher, dass Sie die ausgewählten Schüsse dauerhaft entfernen möchten? Alle zugehörigen Aufgaben, Kommentare und Vorschauen werden ebenfalls gelöscht. Bitte bestätigen Sie dies, indem Sie unten \"LÖSCHEN\" eingeben.",
+      "delete_for_selection_hard_text": "Sind Sie sicher, dass Sie die ausgewählten Shots dauerhaft entfernen möchten? Alle zugehörigen Aufgaben, Kommentare und Vorschauen werden ebenfalls gelöscht. Bitte bestätigen Sie dies, indem Sie unten \"LÖSCHEN\" eingeben.",
       "delete_for_selection_hard_lock_text": "LÖSCHEN",
       "show_timecode": "Ein- und Ausgänge als Timecode anzeigen"
     },
