@@ -222,7 +222,7 @@
         "no_logs": "Nincs munkaidő-napló ehhez az elemhez."
       },
       "nb_selected_assets": "{nbSelectedAssets} kijelölt asset | {nbSelectedAssets} kijelölt asset",
-      "nb_selected_edits": "{nbSelectedEdits} kijelölt edit | {nbSelectedEdits} kijelölt edit",
+      "nb_selected_edits": "{nbSelectedEdits} kijelölt vágás | {nbSelectedEdits} kijelölt vágás",
       "nb_selected_shots": "{nbSelectedShots} kijelölt shot | {nbSelectedShots} kijelölt shot",
       "output_files": {
         "extension": "Kiterjesztés",
@@ -904,7 +904,7 @@
       },
       "download_csv": ".csv letöltése",
       "filter_task_type": "Feladat típusra szűrve",
-      "add_edits": "Edit-ek hozzáadása",
+      "add_edits": "Vágások hozzáadása",
       "add_episodes": "Epizódok hozzáadása",
       "add_sequences": "Szekvenciák hozzáadása",
       "clients_to_notify": "Értesítendő megrendelők",
@@ -1080,8 +1080,8 @@
         "choose_template": "Produkció-sablon alkalmazása (nem kötelező)",
         "choose_template_description": "Válassz egy sablont a feladat típusok, feladat állapotok, asset típusok, metaadatok és beállítások előzetes kitöltéséhez. Hagyd üresen, hogy a produkciót a nulláról állítsd be.",
         "no_template": "Nincs sablon",
-        "select_edit_task_type": "Válaszd ki az edit feladat típusait",
-        "select_edit_task_type_description": "Ezek a feladat típusok határozzák meg az edit-jeid gyártásának lépéseit."
+        "select_edit_task_type": "Válaszd ki a vágás feladattípusait",
+        "select_edit_task_type_description": "Ezek a feladattípusok határozzák meg a vágásaid gyártásának lépéseit."
       },
       "homepage": {
         "assets": "Asset-ek",
@@ -1602,7 +1602,7 @@
       "confirm_attachments": "File-ok hozzáadása csatolmányként",
       "create_tasks_disclaimer": "Ha a feladat típusod hiányzik, ellenőrizd, hogy fel van-e sorolva a produkció beállításainak Feladat típusok szekciójában.",
       "create_tasks_edit": "Feladatok hozzáadása a jelenlegi vágásokhoz",
-      "create_tasks_edit_explaination": "A jelenlegi produkció minden vágásához új feladatot fogsz létrehozni az adott feladat típushoz. Biztos folytatod?",
+      "create_tasks_edit_explaination": "A jelenlegi produkció minden vágásához új feladatot fogsz létrehozni az adott feladattípushoz. Biztos folytatod?",
       "create_tasks_edit_failed": "Szerver-hiba történt a létrehozás közben.",
       "create_tasks_episode": "Feladatok hozzáadása a jelenlegi epizódokhoz",
       "create_tasks_episode_explaination": "A jelenlegi produkció minden epizódjához új feladatot fogsz létrehozni az adott feladat típushoz. Biztos folytatod?",

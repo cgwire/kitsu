@@ -234,7 +234,7 @@
       },
       "nb_selected_assets": "{nbSelectedAssets} 选择的资源 | {nbSelectedAssets} 选择的资源\n",
       "nb_selected_shots": "{nbSelectedShots} 选择的镜头 | {nbSelectedShots} 选择的镜头",
-      "nb_selected_edits": "{nbSelectedEdits} 编辑选定项 | {nbSelectedEdits} 编辑选定项",
+      "nb_selected_edits": "已选定 {nbSelectedEdits} 个剪辑 | 已选定 {nbSelectedEdits} 个剪辑",
       "output_files": {
         "extension": "扩展",
         "name": "名称",
@@ -915,7 +915,7 @@
       "notify_clients_success": "通知已成功发送。",
       "unmute": "取消静音",
       "volume_level": "音量：{level}%",
-      "add_edits": "添加编辑",
+      "add_edits": "添加剪辑",
       "add_episodes": "添加剧集",
       "share": "共享",
       "share_modal": {
@@ -1077,8 +1077,8 @@
         "select_task_status_description": "选择您将在生产过程中使用的任务状态。",
         "start_and_end_dates": "开始和结束日期",
         "shots_to_import": "要导入的镜头",
-        "select_edit_task_type": "选择编辑任务类型",
-        "select_edit_task_type_description": "选择编辑任务类型描述",
+        "select_edit_task_type": "选择剪辑任务类型",
+        "select_edit_task_type_description": "这些任务类型定义了剪辑的构建步骤。",
         "choose_template": "应用制作模板（可选）",
         "choose_template_description": "选择一个模板以预填充任务类型、任务状态、资产类型、元数据和设置。留空则从头开始配置。",
         "no_template": "无模板"
