@@ -216,6 +216,7 @@ Shared toggle/select logic for custom combobox components.
 
 - Use `$t()` (or `t()` in `<script setup>`), never `$tc()` (deprecated in vue-i18n 9+).
 - Pluralization with pipe format: the locale key `"studio | studios"` works with `$t('key', count)` where the second argument is a number.
+- For animation/VFX domain terms (shot, frame, onion skin, edit/montage, …), align translations with Blender's official terminology (`blender/blender-translations` `po/<lang>.po`, or the translated manual at `docs.blender.org/manual/<lang>/`).
 
 ```js
 // In template
