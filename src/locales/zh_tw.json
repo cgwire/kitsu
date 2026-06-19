@@ -516,7 +516,7 @@
       "status": "狀態",
       "edl": {
         "import_file": "匯入 EDL",
-        "import_title": "從編輯判定清單匯入框架/匯入/匯出",
+        "import_title": "從編輯判定清單匯入幀/入幀/出幀",
         "select_file": "請從您的資料夾中選擇一個檔案：",
         "upload_file": "瀏覽本機檔案",
         "error_upload": "上傳您的 EDL 時發生錯誤。",
@@ -1383,7 +1383,7 @@
       "compute_mode": "計算模式",
       "day": "日",
       "feedback_date": "回饋日期",
-      "frames": "框架",
+      "frames": "幀數",
       "month": "月份",
       "seconds": "秒數",
       "weighted": "加權（反饋）",
