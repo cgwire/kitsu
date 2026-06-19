@@ -1896,7 +1896,7 @@
         "empty": "Sem links"
       },
       "delete_for_selection_hard_text": "Tem certeza de que deseja remover permanentemente os conceitos selecionados? Todas as tarefas, comentários e visualizações relacionadas também serão excluídos. Confirme digitando \"EXCLUIR\" abaixo.",
-      "delete_for_selection_hard_lock_text": "DELETE",
+      "delete_for_selection_hard_lock_text": "EXCLUIR",
       "drop_new_concepts": "Envie novos arquivos de conceito aqui"
     },
     "intro": {
