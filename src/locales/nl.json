@@ -34,11 +34,11 @@
       "multiple_delete_error": "Er is een fout opgetreden bij het verwijderen van een item. Er zijn waarschijnlijk gegevens aan een asset gekoppeld. Weet je zeker dat er geen taak is gekoppeld aan een geselecteerde asset?",
       "only_current_episode": "Alleen huidige aflevering",
       "linked": "Gekoppeld",
-      "no_concept": "Geen concepten gekoppeld aan dit actief",
-      "casted_in_shots": "Gegoten in {nbShots} shots",
+      "no_concept": "Geen concepten gekoppeld aan deze asset",
+      "casted_in_shots": "Gecast in {nbShots} shots",
       "delete_for_selection_hard_text": "Weet je zeker dat je de geselecteerde onderdelen permanent wilt verwijderen? Alle gerelateerde taken, opmerkingen en previews worden ook verwijderd. Bevestig door hieronder 'WISSEN' te typen.",
       "delete_for_selection_hard_lock_text": "WISSEN",
-      "show_linked": "Indeling Activa weergeven"
+      "show_linked": "Breakdown-assets weergeven"
     },
     "asset_types": {
       "all_asset_types": "Alle assettypes",
@@ -56,10 +56,10 @@
         "short_name": "Korte naam",
         "description": "Beschrijving"
       },
-      "include_all": "Omvat alle soorten elementtaken",
-      "add_asset_type_to_library": "Een type bedrijfsmiddel toevoegen aan de bibliotheek",
-      "library_title": "Bibliotheek met activatypes",
-      "add_asset_type_placeholder": "+ Type bedrijfsmiddel toevoegen"
+      "include_all": "Omvat alle asset-taaktypes",
+      "add_asset_type_to_library": "Een assettype toevoegen aan de bibliotheek",
+      "library_title": "Bibliotheek met assettypes",
+      "add_asset_type_placeholder": "+ Assettype toevoegen"
     },
     "breakdown": {
       "all_assets": "Alle beschikbare assets",
@@ -68,7 +68,7 @@
       "label": "Label",
       "picture_mode": "Wissel naar galerij modus",
       "text_mode": "Wissel naar tekst modus",
-      "title": "Analyze",
+      "title": "Breakdown",
       "options": {
         "fixed": "opgelost",
         "animate": "animeer"
@@ -167,7 +167,7 @@
         "all": "Allen",
         "shot": "Shot",
         "asset": "Asset",
-        "sequence": "Volgorde",
+        "sequence": "Sequentie",
         "edit": "Bewerk",
         "episode": "Aflevering"
       }
@@ -427,8 +427,8 @@
       "production": "Productie",
       "remove": "Verwijderen",
       "save": "Opslaan",
-      "sort_by": "Sorteren bij",
-      "sorted_by": "Gesorteerd bij",
+      "sort_by": "Sorteren op",
+      "sorted_by": "Gesorteerd op",
       "start_date": "Startdatum",
       "studio": "Studio",
       "tutorials": "Handleidingen",
@@ -558,7 +558,7 @@
       "day": "Dag",
       "hour": "Uur",
       "label": {
-        "casting": "Gieten",
+        "casting": "Casting",
         "chat": "Chat",
         "concepts": "Concepten",
         "info": "Info",
@@ -880,7 +880,7 @@
         "number_of_files": "Aantal bestanden voor deze revisie",
         "max_duration": "Video lengte",
         "see_original_file": "Open origineel bestand in nieuw tabblad",
-        "overlay": "Overlap",
+        "overlay": "Overlay",
         "side_by_side": "Zij aan zij",
         "switch_ld": "Overschakelen naar lage resolutie",
         "switch_hd": "Overschakelen naar hoge resolutie",
@@ -1020,7 +1020,7 @@
         "short": "Short",
         "featurefilm": "Feature Film",
         "tvshow": "TV Show",
-        "assets": "Alleen elementen",
+        "assets": "Alleen assets",
         "shots": "Alleen shots"
       },
       "edit_error": "Er is een fout opgetreden tijdens het bewerken van de productie. Neem contact op met ons ondersteuningsteam.",
@@ -1101,9 +1101,9 @@
         "2dpaper": "2D-animatie (Papier)"
       },
       "homepage": {
-        "assets": "Activa",
+        "assets": "Assets",
         "shots": "Schoten",
-        "sequences": "Opeenvolgingen"
+        "sequences": "Sequenties"
       },
       "load_stats": "Statistieken laden"
     },
@@ -1113,7 +1113,7 @@
       "language": "Taal",
       "notifications_enabled": "E-mail notificaties ingeschakeld",
       "notifications_slack_enabled": "Slack notificaties ingeschakeld",
-      "notifications_slack_user": "Slack gebruikersnaam",
+      "notifications_slack_user": "Slack lid-ID",
       "password_title": "Wachtwoord aanpassen",
       "timezone": "Tijdzone",
       "title": "Jouw profiel",
@@ -1331,7 +1331,7 @@
       "export": "Exportschema",
       "export_error": "Er is een fout opgetreden tijdens het exporteren van gegevens.",
       "reset_list": "Lijst resetten",
-      "no_entity": "Geen overdraagbare entiteit",
+      "no_entity": "Geen toewijsbare entiteit",
       "no_assignee": "Geen toewijsbare persoon",
       "select_task_type": "Selecteer een taaktype",
       "show_assigned": "Toegewezen entiteiten weergeven",
@@ -1345,8 +1345,8 @@
       "edit_version_error": "Er is een fout opgetreden tijdens het opslaan van de planningsversie. Probeer het opnieuw.",
       "edit_version_exist": "Er bestaat al een versie met een vergelijkbare naam.",
       "delete_version": "Versie schema verwijderen",
-      "delete_version_error": "Er is een fout opgetreden tijdens het verwijderen van deze agendaversie. Neem contact op met ons ondersteuningsteam.",
-      "delete_version_message": "Weet u zeker dat u de agendaversie {name} wilt verwijderen? Bevestig dit door de naam van de agendaversie hieronder in te voeren.",
+      "delete_version_error": "Er is een fout opgetreden tijdens het verwijderen van deze planningsversie. Neem contact op met ons ondersteuningsteam.",
+      "delete_version_message": "Weet u zeker dat u de planningsversie {name} wilt verwijderen? Bevestig dit door de naam van de planningsversie hieronder in te voeren.",
       "versions": {
         "reference": "Referentie voorspelling",
         "from": "van",
@@ -1397,7 +1397,7 @@
       "drawings": "Tekeningen"
     },
     "shots": {
-      "casting": "Opname verschijning",
+      "casting": "Shot casting",
       "delete_text": "Weet je zeker dat je {name} uit de database wilt verwijderen?",
       "delete_error": "Er is een fout opgetreden bij het verwijderen van deze opname. Waarschijnlijk zijn er gegevens aan gekoppeld. Weet je zeker dat er geen taak aan deze opname is gekoppeld?",
       "edit_success": "Opname {name} succesvol bewerkt.",
@@ -1411,7 +1411,7 @@
       "new_shots": "Opnamen toevoegen",
       "new_sequences": "Sequenties toevoegen",
       "new_episodes": "Afleveringen toevoegen",
-      "no_casting": "De opname verschijning is leeg",
+      "no_casting": "De shot casting is leeg.",
       "number": "opname | opnamen",
       "manage": "Maak opname",
       "new_success": "Opname {name} succesvol aangemaakt",
@@ -1532,7 +1532,7 @@
         "count": "Aantal",
         "due_date": "Opleveringsdatum",
         "duration": "Duur",
-        "end_date": "Validatie datum",
+        "end_date": "Feedbackdatum",
         "entity": "Item",
         "entity_name": "Naam",
         "estimated_quota": "Gem. Quotum",
@@ -1542,9 +1542,9 @@
         "last_comment_date": "Laatste opmerking",
         "priority": "Prioriteit",
         "production": "Prod",
-        "real_end_date": "Validatie datum",
+        "real_end_date": "Feedbackdatum",
         "real_start_date": "WIP datum",
-        "retake_count": "Heropnamen",
+        "retake_count": "Retakes",
         "seconds": "Seconden",
         "sequence": "Sequentie",
         "start_date": "Start datum",
@@ -1731,7 +1731,7 @@
       "linked_software": "Gekoppelde software",
       "no_items_linked": "Geen items gekoppeld aan deze afdeling.",
       "select_department": "Selecteer een afdeling om items te koppelen.",
-      "software_used_by_artists": "Software gebruikt door artiesten"
+      "software_used_by_artists": "Software gebruikt door kunstenaars"
     },
     "edits": {
       "all_edits": "Alle bewerkingen",
@@ -1791,7 +1791,7 @@
       "entity_types": {
         "asset": "Asset",
         "shot": "Shot",
-        "sequence": "Volgorde",
+        "sequence": "Sequentie",
         "episode": "Aflevering",
         "edit": "Bewerk"
       },
@@ -1950,17 +1950,17 @@
     },
     "library": {
       "asset_library": "Asset-bibliotheek",
-      "from_library": "Uit de bibliotheek met bedrijfsmiddelen",
-      "import_from_asset_type": "Importeer alle activa van het geselecteerde type en de geselecteerde productie",
+      "from_library": "Uit de asset-bibliotheek",
+      "import_from_asset_type": "Importeer alle assets van het geselecteerde type en de geselecteerde productie",
       "import_from_assets": "Activa importeren uit de geselecteerde productie en het geselecteerde type activa",
       "import_from_list": "Geselecteerde activa importeren uit de lijst",
-      "import_from_production": "Alle activa importeren uit de geselecteerde productie",
+      "import_from_production": "Alle assets importeren uit de geselecteerde productie",
       "manage": "Onderdelen toevoegen aan je bibliotheek",
       "no_entities": "Er zijn geen entiteiten beschikbaar",
       "no_open_productions": "Geen open producties",
       "no_shared_assets": "Er zijn geen gedeelde activa beschikbaar",
       "remove_selected_assets": "Verwijder het geselecteerde item uit de bibliotheek | Verwijder {nbSelectedAssets} geselecteerde assets uit de bibliotheek",
-      "select_asset_type": "Selecteer een type bedrijfsmiddel",
+      "select_asset_type": "Selecteer een asset-type",
       "select_production": "Selecteer een productie",
       "selected_assets": "Geselecteerde activa",
       "fields": {
