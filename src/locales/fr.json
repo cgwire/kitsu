@@ -42,7 +42,7 @@
     },
     "asset_types": {
       "all_asset_types": "Tous les types d'assets",
-      "create_error": "Une erreur est survenue en créant l'asset. Êtes-vous sûr qu'il n'y a pas un asset avec un nom similaire ?",
+      "create_error": "Une erreur est survenue en enregistrant ce type d'asset. Êtes-vous sûr qu'il n'existe pas un type d'asset avec un nom similaire ?",
       "delete_text": "Êtes-vous sûr de vouloir enlever {name} de la base de données ?",
       "delete_error": "Une erreur s'est produite lors de la suppression de ce type d'asset. Il se peut que des données existantes soient actuellement liées à ce type d'asset. Êtes-vous sûr que ce type d'asset n'est pas lié à un autre asset ?",
       "edit_title": "Modifier le type d'asset",
@@ -74,7 +74,7 @@
         "animate": "animé"
       },
       "remove": {
-        "confirm": "Enlever les assets de cet épisode",
+        "confirm": "Enlever l'asset de son épisode",
         "error": "Une erreur de serveur s'est produite lors de la suppression de l'asset. Veuillez réessayer. Si le problème persiste, veuillez contacter notre équipe d'assistance.",
         "text": "Si vous supprimez l'asset de cet épisode, cela va enlever les assets de tous les plans liés. Êtes-vous sûr de l'enlever ?"
       },
@@ -84,7 +84,7 @@
       "episode_casting": "Casting de l'épisode",
       "save_error": "Une erreur est survenue en sauvegardant le casting",
       "hide_library": "Cacher la bibliothèque",
-      "show_library": "Bibliothèque d'affichage"
+      "show_library": "Afficher la bibliothèque"
     },
     "comments": {
       "add_attachment": "Ajouter une pièce jointe",
@@ -273,7 +273,7 @@
       "tasks": "Tâches Épisodes",
       "stats_title": "Statistiques Épisodes",
       "status": {
-        "canceled": "Annuler",
+        "canceled": "Annulé",
         "complete": "Terminé",
         "standby": "En attente",
         "running": "En cours"
@@ -512,7 +512,7 @@
       "hide_support_chat": "Cacher le support",
       "move_action_bar": "Déplacer le panneau d'actions",
       "show_support_chat": "Montrer le support",
-      "empty_schedule": "Il n'y a pas de tâches où elles n'ont pas de dates de début.",
+      "empty_schedule": "Il n'y a pas de tâches ou elles n'ont pas de dates de début.",
       "all_shots": "Tous les plans",
       "department": "Département",
       "remaining": "Restant",
@@ -668,13 +668,13 @@
       "assignation": "Assignation",
       "comment": "Commentaire",
       "initial_comment": "Commentaire initial",
-      "mark_all_as_read": "Marquer tous les textes comme lus",
+      "mark_all_as_read": "Tout marquer comme lu",
       "mention": "Mention",
-      "only_non_watching": "Seulement la non-observation",
-      "only_read": "Lire seulement",
+      "only_non_watching": "Uniquement les non suivis",
+      "only_read": "Lues seulement",
       "only_unread": "Uniquement non lu",
-      "only_watching": "Ne faire que regarder",
-      "read": "lire",
+      "only_watching": "Uniquement les suivis",
+      "read": "lu",
       "to_status": "à",
       "reply": "Répondre",
       "publish": "Publier",
@@ -760,7 +760,7 @@
       "departments_empty": "Cet utilisateur n'est lié à aucun département.",
       "edit_avatar_error": "Une erreur s'est produite lors de la mise à jour de l'avatar de l'utilisateur.",
       "contract": {
-        "open-ended": "Ouvert à tous",
+        "open-ended": "Durée indéterminée",
         "fixed-term": "Durée déterminée",
         "short-term": "Court terme",
         "freelance": "Freelance",
@@ -798,8 +798,8 @@
       "add_movie": "Ajouter un film entier",
       "apply_task_type_change": "Cette opération définit la dernière révision pour le type de tâche donné dans toutes les entités.",
       "available_build": "Builds disponibles",
-      "build_daily": "Valid. quotidienne",
-      "build_weekly": "Valid. hebdomadaire",
+      "build_daily": "En attente (daily)",
+      "build_weekly": "Tous en attente",
       "build_mp4": "Construire .mp4",
       "building": "En cours...",
       "client_playlist": "Playlist Client",
@@ -1133,7 +1133,7 @@
         "button": "Changez de mot de passe",
         "error": "Une erreur s'est produite lors du changement de mot de passe. Veuillez vérifier votre mot de pass actuel.",
         "success": "Votre mot de passe a été changé avec succès !",
-        "unvalid": "Les nouveaux mots de passe sont différents ou votre mot de passe est trop court (7 caractères minimum)."
+        "unvalid": "Les nouveaux mots de passe sont différents ou votre mot de passe est trop court (8 caractères minimum)."
       },
       "save": {
         "button": "Sauvegardez vos changements",
@@ -1150,7 +1150,7 @@
         "status_enabled": "Activée",
         "status_disabled": "Désactivée",
         "scan_qrcode": "Scannez le code QR dans votre application TOTP.",
-        "otp_secret": "Secret OPT",
+        "otp_secret": "Secret OTP",
         "totp": {
           "name": "Application d'authentification",
           "description": "Utilisez une application TOTP comme Google Authenticator, Authy ou 1Password.",
@@ -1283,7 +1283,7 @@
       "add_task_type_placeholder": "+ Ajouter un type de tâche",
       "select_task_type": "Sélectionnez un type de tâche...",
       "add_task_type_to_library": "Ajouter un type de tâche à la bibliothèque",
-      "library_title": "Type de tâche Bibliothèque"
+      "library_title": "Bibliothèque de types de tâche"
     },
     "sequences": {
       "all_sequences": "Toutes les séquences",
@@ -1388,7 +1388,7 @@
       "seconds": "Secondes",
       "weighted": "Pondéré (retour d'information)",
       "week": "Semaine",
-      "explanation_feedback": "Le plan est considéré comme terminé à la première demande de retour d'information. Son nombre de vues est ajouté aux quotas de la journée.",
+      "explanation_feedback": "Le plan est considéré comme terminé à la première demande de retour. Son nombre d'images est ajouté aux quotas de la journée.",
       "done_date": "Date d'approbation",
       "explanation_done": "La prise de vue est considérée comme terminée lors de la dernière approbation. Son nombre d'images est ajouté aux quotas de la journée.",
       "explanation_weighted": "Les prises de vue sont considérées comme achevées dès la première demande de retour d'information. Ensuite, les quotas sont pondérés en fonction du temps passé sur la tâche, tel qu'il est enregistré dans la feuille de temps de l'artiste.\n\n Si aucun temps n'est enregistré, il est supposé que :\n* la tâche a commencé au premier changement de statut (WIP).\n* La tâche a été achevée le jour où la demande de retour d'information a été faite.\n * Les cadres terminés sont répartis uniformément entre tous les jours ouvrables compris entre les dates de début et de fin.",
@@ -1404,7 +1404,7 @@
       "edit_fail": "La création ou la modification a échoué, une erreur s'est produite. Assurez-vous que vous ne renommez pas le plan avec un nom déjà répertorié pour une séquence donnée.",
       "edit_title": "Modifier plan",
       "empty_list": "Il n'y a pas de plans dans la production. Pourquoi ne pas en créer ?",
-      "empty_list_client": "Il n'y a pas de coups de feu dans cette production.",
+      "empty_list_client": "Il n'y a pas de plans dans cette production.",
       "episodes": "Épisodes",
       "history": "historique",
       "new_shot": "Ajouter un plan",
@@ -1415,7 +1415,7 @@
       "number": "plan | plans",
       "manage": "Créer des plans",
       "new_success": "Plan {name} créé avec succès.",
-      "padding": "Distance",
+      "padding": "Remplissage des plans",
       "restore_text": "Êtes-vous sûr de vouloir restorer {name} depuis les archives ?",
       "restore_error": "Une erreur est survenue en restaurant le plan.",
       "sequences": "Séquences",
@@ -1428,7 +1428,7 @@
         "frame_in": "Image d'entrée",
         "frame_out": "Image de sortie",
         "fps": "FPS",
-        "name": "Plan",
+        "name": "Nom",
         "production": "Prod",
         "sequence": "Séquence",
         "time_spent": "Temps passé",
@@ -1754,7 +1754,7 @@
       },
       "tasks": "Tâches",
       "cancel_text": "Êtes-vous sûr que vous voulez archiver {name} ?",
-      "history": "Modifier l'historique des valeurs",
+      "history": "Historique des valeurs de l'edit",
       "restore_error": "Une erreur s'est produite lors de la restauration de cet edit.",
       "edit_success": "Les modifications ont été enregistrées avec succès.",
       "restore_text": "Êtes-vous sûr de vouloir restaurer {name} à partir de votre archive ?",
@@ -1812,7 +1812,7 @@
     },
     "search": {
       "limit": "Nombre maximum de résultats :",
-      "match_details": "Recherche trouvée dans {target}",
+      "match_details": "correspondance trouvée dans {target}",
       "placeholder": "Chercher une entité dans la base de données...",
       "title": "Recherche d'Entités"
     },
@@ -1889,7 +1889,7 @@
         "created_at": "Date de création",
         "updated_at": "Date de mise à jour",
         "last_comment_date": "Dernier commentaire",
-        "publisher": "Publier par"
+        "publisher": "Publié par"
       },
       "actions": {
         "title": "Liens vers les concepts",
@@ -1901,7 +1901,7 @@
     },
     "intro": {
       "main": "Pour que notre projet prospère, nous avons besoin de votre soutien. Voici quelques moyens simples de nous aider :",
-      "first": "Démarrez notre dépôt sur ",
+      "first": "Ajoutez une étoile à notre dépôt sur ",
       "second": "Suivez-nous sur ",
       "third": "Rejoignez notre",
       "four": "Proposer de nouvelles fonctionnalités sur ",

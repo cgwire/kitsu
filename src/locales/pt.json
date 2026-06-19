@@ -1,7 +1,7 @@
 {
   "default": {
     "assets": {
-      "cast_in": "Estreia em",
+      "cast_in": "Distribuído em",
       "delete_error": "Ocorreu um erro ao excluir este asset. Provavelmente há dados vinculados a ele. Tem certeza de que este tipo de asset não possui nenhuma tarefa vinculada a ele?",
       "delete_text": "Tem certeza de que deseja remover {name} de seu banco de dados?",
       "edit_fail": "Falha ao salvar, pode ser devido ao fato de que já existe um asset com um nome semelhante",
@@ -14,7 +14,7 @@
       "new_success": "Asset {name} criado com sucesso.",
       "no_cast_in": "Este asset não está distribuído em nenhum plano.",
       "number": "asset | assets",
-      "restore_text": "Tem certeza de que deseja restaurar {name} em seu banco de dados?",
+      "restore_text": "Tem certeza de que deseja restaurar {name} de seu arquivo?",
       "restore_error": "Ocorreu um erro ao restaurar este asset.",
       "tasks": "Tarefas do asset",
       "title": "Assets",
@@ -35,7 +35,7 @@
       "only_current_episode": "Somente o episódio atual",
       "linked": "Vinculado",
       "no_concept": "Não há conceitos vinculados a esse ativo",
-      "casted_in_shots": "Lançado em fotos {nbShots}",
+      "casted_in_shots": "Distribuído em {nbShots} planos",
       "delete_for_selection_hard_text": "Tem certeza de que deseja remover permanentemente os ativos selecionados? Todas as tarefas, comentários e visualizações relacionadas também serão excluídos. Confirme digitando \"EXCLUIR\" abaixo.",
       "delete_for_selection_hard_lock_text": "EXCLUIR",
       "show_linked": "Exibir ativos de decomposição"
@@ -49,7 +49,7 @@
       "new_asset_type": "Adicionar um tipo de asset",
       "number": "tipo de asset | tipo de assets",
       "title": "Tipos de Asset",
-      "production_title": "Status Tipos de Assets",
+      "production_title": "Estatísticas de Tipos de Assets",
       "fields": {
         "name": "Nome",
         "task_types": "Fluxo de trabalho",
@@ -70,7 +70,7 @@
       "text_mode": "Mudar para o modo de texto",
       "title": "Breakdown",
       "options": {
-        "fixed": "corrigido",
+        "fixed": "fixo",
         "animate": "animado"
       },
       "remove": {
@@ -82,9 +82,9 @@
         "standby": "STDB"
       },
       "episode_casting": "Elenco de episódios",
-      "save_error": "Erro ao salvar a fundição",
+      "save_error": "Erro ao salvar o casting",
       "hide_library": "Ocultar biblioteca",
-      "show_library": "Biblioteca de exibição"
+      "show_library": "Exibir biblioteca"
     },
     "comments": {
       "add_attachment": "Adicionar anexo",
@@ -262,7 +262,7 @@
       "empty_list_client": "Não há nenhum episódio nesta produção.",
       "new_episode": "Novo episódio",
       "number": "episódio | episódios",
-      "title": "Estatísticas do episódio",
+      "title": "Episódios",
       "fields": {
         "name": "nome",
         "description": "descrição",
@@ -275,14 +275,14 @@
       "status": {
         "canceled": "Cancelado",
         "complete": "Completo",
-        "standby": "Aguarde",
+        "standby": "Em espera",
         "running": "Em execução"
       }
     },
     "keyboard": {
       "altdown": "Mover a seleção de tarefa para baixo",
       "altj": "Selecione a visualização anterior",
-      "altk": "Selecionar nova preview",
+      "altk": "Selecionar a próxima visualização",
       "altleft": "Mover a seleção de tarefa para esquerda",
       "altright": "Mover a seleção de tarefa para direita",
       "altup": "Mover a seleção de tarefa para cima",
@@ -332,7 +332,7 @@
       "login_page": "Cancelar",
       "redirecting": "Redirecionando em {secondsLeft} segundos ...",
       "reset_change_password": "Mudar senha",
-      "reset_change_password_form_failed": "Há um problema com a senha que você forneceu. Por favor, verifique se ele tem pelo menos 7 caracteres e se as duas senhas correspondem.",
+      "reset_change_password_form_failed": "Há um problema com a senha que você forneceu. Por favor, verifique se ela tem pelo menos 8 caracteres e se as duas senhas correspondem.",
       "reset_change_password_failed": "Falha ao alterar a senha. Reinicie todo o procedimento novamente.",
       "reset_change_password_succeed": "Sua senha foi alterada com sucesso. Por favor, volte para a página de login para usá-lo.",
       "reset_change_password_title": "Insira uma nova senha",
@@ -452,7 +452,7 @@
         "preview": "Prévia",
         "preview_episode_name": "Nome do episódio",
         "preview_title": "Prévia dos dados importados",
-        "preview_description": "Faça upload de um arquivo .csv para preencher seu quadro com postagens.",
+        "preview_description": "Faça upload de um arquivo .csv para preencher sua tabela de entidades.",
         "preview_required": "Os cabeçalhos são usados para corresponder as colunas aos dados a serem definidos. Eles devem ser incluídos na primeira linha.",
         "preview_reupload": "Reenviar arquivo .CSV",
         "required_fields": "Seu CSV requer as seguintes colunas",
@@ -487,18 +487,18 @@
       "estimation": "Estimativa",
       "estimation_short": "Est.",
       "fps": "FPS",
-      "frames": "Molduras",
+      "frames": "Frames",
       "man_days": "pessoa dia | pessoa dias",
       "select_column": "Selecionar coluna",
       "show": "Mostrar",
-      "stick": "Bastão",
+      "stick": "Fixar",
       "timeSpent": "Tempo gasto",
       "unstick": "Descolar",
       "all_edits": "Todas as edições",
       "attach_snapshots": "Anexe instantâneos de sua anotação",
       "reply": "Responder",
       "select_file": "Selecione arquivos de seu disco rígido",
-      "frame_in": "Quadro em",
+      "frame_in": "Quadro de entrada",
       "frame_out": "Quadro de saída",
       "type": "Tipo",
       "search": {
@@ -516,7 +516,7 @@
       "status": "Status",
       "edl": {
         "import_file": "Importar EDL",
-        "import_title": "Importar quadros / entrar / sair da lista de decisões de edição",
+        "import_title": "Importar quadros / entrada / saída a partir da lista de decisões de edição (EDL)",
         "select_file": "Selecione um arquivo de uma de suas pastas:",
         "upload_file": "Procurar arquivos locais",
         "error_upload": "Ocorreu um erro ao fazer o upload de sua EDL.",
@@ -617,21 +617,21 @@
       "all": "Todos",
       "commented_on": "comentado em",
       "infos": "Infos",
-      "no_news": "Não há novidades para esta produção ou para este filtro.",
+      "no_news": "Não há novidades.",
       "only_comments": "Apenas comentários",
       "only_previews": "Apenas prévias",
       "set_preview_on": "definir a prévia em",
       "task_status": "Status da tarefa",
       "task_type": "Tipo de tarefa",
       "title": "Notícias",
-      "hide_stats": "Esconder status",
+      "hide_stats": "Esconder estatísticas",
       "news": "Novidades",
-      "show_stats": "Mostrar status",
+      "show_stats": "Mostrar estatísticas",
       "no_news_hint": "Tente ampliar os filtros ou volte mais tarde."
     },
     "not_found": {
       "text": "Havia algo errado com o link em que você clicou. Recomendamos que você volte à página inicial.",
-      "title": "Página não encontrada ... você está procurando algo que excluiu?"
+      "title": "Página não encontrada..."
     },
     "notifications": {
       "and_change_status": "e mudou o status para",
@@ -665,7 +665,7 @@
       "publish": "Publicar",
       "published": "publicou uma prévia",
       "show_comments": "Mostrar comentários",
-      "watching": "observação",
+      "watching": "assistindo",
       "only_playlists_ready": "Somente listas de reprodução prontas",
       "playlist_is_ready": "A lista de reprodução está pronta",
       "playlist_ready_text": "Uma nova lista de reprodução está pronta para ser revisada:",
@@ -803,7 +803,7 @@
       "build_mp4": "Exportar .mp4 (beta)",
       "building": "Exportando...",
       "client_playlist": "Playlist de Cliente",
-      "create_for_selection": "Gerar uma playlist para seleção de shot",
+      "create_for_selection": "Gerar uma playlist a partir das tarefas selecionadas",
       "create_title": "Criar playlist",
       "created_at": "Criado em:",
       "delete_text": "Você tem certeza que deseja remover {name} do seu banco de dados?",
@@ -826,7 +826,7 @@
       "no_shot_for_production": "Não há um shot para essa produção",
       "select_shot": "Por favor selecione um shot na coluna a direita",
       "select_playlist": "Por favor selecione uma playlist da coluna a esquerda",
-      "select_task_type": "Por favor altere o tipo de tarefa em todos os shots",
+      "select_task_type": "Alterar o tipo de tarefa para todas as entidades",
       "title": "Playlists",
       "updated_at": "Atualizado em:",
       "remove": "remover",
@@ -1113,7 +1113,7 @@
       "language": "Idioma",
       "notifications_enabled": "Notificações de email habilitadas",
       "notifications_slack_enabled": "Notificações do Slack habilitadas",
-      "notifications_slack_user": "Nome de usuário do Slack",
+      "notifications_slack_user": "ID de membro do Slack",
       "password_title": "Alterar senha",
       "timezone": "Timezone",
       "title": "Seu Perfil",
@@ -1132,7 +1132,7 @@
         "button": "Alterar senha",
         "error": "\nOcorreu um erro ao alterar a senha. Por favor, verifique sua senha atual.",
         "success": "Sua senha foi alterada com sucesso!",
-        "unvalid": "A confirmação de sua nova senha não corresponde ou sua senha é muito curta (7 caracteres, pelo menos, são esperados)."
+        "unvalid": "A confirmação de sua nova senha não corresponde ou sua senha é muito curta (8 caracteres, pelo menos, são esperados)."
       },
       "save": {
         "button": "Salvar alterações",
@@ -1140,7 +1140,7 @@
       },
       "notifications_mattermost_enabled": "Notificações do Mattermost ativadas",
       "notifications_mattermost_user": "Nome de usuário do Mattermost",
-      "webhook_error": "o assunto do webhook não corresponde a um gancho",
+      "webhook_error": "o webhook do Mattermost não corresponde a um hook",
       "notifications_discord_enabled": "Notificações do Discord ativadas",
       "notifications_discord_user": "Nome de usuário do Discord",
       "clear_avatar": "Remover avatar",
@@ -1244,7 +1244,7 @@
         "is_done": "Está feito",
         "is_retake": "Tem valor de retomada",
         "name": "Nome",
-        "short_name": "Nome do curta",
+        "short_name": "Nome curto",
         "is_feedback_request": "É uma solicitação de feedback",
         "is_default": "É padrão",
         "for_concept": "Para o conceito",
@@ -1255,7 +1255,7 @@
       "title_entities": "Status para entidades",
       "title_concepts": "Status para conceitos",
       "help": {
-        "entities": "Ativos, fotos, sequências, ..."
+        "entities": "Ativos, shots, sequências, ..."
       },
       "add_task_status_to_library": "Adicionar um status de tarefa à biblioteca",
       "library_title": "Biblioteca de status de tarefas",
@@ -1265,7 +1265,7 @@
       "delete_text": "Você tem certeza que deseja remover {name} do seu banco de dados?",
       "delete_error": "Ocorreu um erro ao excluir este tipo de tarefa. Provavelmente há dados vinculados a ele. Tem certeza de que este tipo de tarefa não possui nenhuma tarefa vinculada a ele?",
       "edit_title": "Editar tipo de tarefa",
-      "create_error": "Ocorreu um erro ao criar o tipo de tarefa. Por favor, verifique se não há tipo de tarefa com nome semelhante.\ncreate_error",
+      "create_error": "Ocorreu um erro ao criar o tipo de tarefa. Por favor, verifique se não há tipo de tarefa com nome semelhante.",
       "new_task_type": "Adicionar um tipo de tarefa",
       "number": "tipo de tarefa | tipos de tarefa",
       "title": "Tipos de Tarefa",
@@ -1295,7 +1295,7 @@
       "empty_list_client": "Não há sequência nesta produção.",
       "new_sequence": "Nova sequencia",
       "number": "sequencia | sequencias",
-      "title": "Status da Sequencia",
+      "title": "Sequências",
       "fields": {
         "name": "nome",
         "description": "descrição",
@@ -1368,7 +1368,7 @@
       "details_seconds": "Segundos",
       "details_frames": "Frames",
       "month_label": "Mês",
-      "no_quota": "Não há cota para este tipo de tarefa.",
+      "no_quota": "Não há cota para esta seleção.",
       "name": "Nome",
       "quota_day": "Quota por dia",
       "quota_week": "Quota por semana",
@@ -1383,7 +1383,7 @@
       "compute_mode": "Modo de computação",
       "day": "Dia",
       "feedback_date": "Data do feedback",
-      "frames": "Molduras",
+      "frames": "Frames",
       "month": "Mês",
       "seconds": "Segundos",
       "weighted": "Ponderado (feedback)",
@@ -1404,7 +1404,7 @@
       "edit_fail": "Falha na criação ou edição, ocorreu um erro. Certifique-se de que você não está renomeando a cena com um nome já listado para determinada sequência.",
       "edit_title": "Editar cena",
       "empty_list": "Não há cenas na produção. Que tal criar algumas?",
-      "empty_list_client": "Não há nenhum tiro nesta produção.",
+      "empty_list_client": "Não há shots nesta produção.",
       "episodes": "Episódios",
       "history": "Histórico de valores do shot",
       "new_shot": "Adicionar Cena",
@@ -1427,7 +1427,7 @@
         "episode": "Episódio",
         "frame_in": "Frame In",
         "frame_out": "Frame Out",
-        "fps": "Frame Out",
+        "fps": "FPS",
         "name": "Nome",
         "production": "Prod",
         "sequence": "Sequencia",
@@ -1451,7 +1451,7 @@
       "show_timecode": "Mostrar entrada e saída como códigos de tempo"
     },
     "server_down": {
-      "text": "Entre em contato com o suporte do seu fornecedor, administrador do sistema ou departamento de TI para entender o que está errado.",
+      "text": "Entre em contato com nossa equipe de suporte ou com o administrador do seu sistema para entender o que está errado.",
       "title": "Kitsu encontrou um erro ao acessar sua API de dados."
     },
     "statistics": {
@@ -1461,7 +1461,7 @@
       "frames": "Frames",
       "pie": "Gráficos de pizza",
       "shots": "Shots",
-      "data_mode": "Data",
+      "data_mode": "Dados",
       "retakes": "Retakes",
       "status": "Status",
       "all": "Todos",
@@ -1493,7 +1493,7 @@
       "delete_all_text": "Tem certeza de que deseja excluir todas as tarefas para determinado {name}? Por favor, confirme digitando o nome do tipo de tarefa das tarefas que você deseja excluir no campo de texto.",
       "delete_all_error": "Falha ao excluir todas as tarefas para determinado tipo de tarefa.",
       "delete_error": "Um erro ocorreu ao deletar tarefa.",
-      "delete_comment": "Tem certeza que quer apagar o último comentário?",
+      "delete_comment": "Tem certeza de que deseja apagar os comentários?",
       "delete_comment_error": "Um erro ocorreu ao deletar comentário.",
       "delete_for_selection": "Deletar a tarefa selecionada | Deletar as {nbSelectedTasks} tarefas selecionadas",
       "delete_preview": "Tem certeza de que deseja excluir este preview?",
@@ -1532,7 +1532,7 @@
         "count": "Contagem",
         "due_date": "Data de Vencimento",
         "duration": "Duração",
-        "end_date": "Data de validade",
+        "end_date": "Data de feedback",
         "entity": "Entidade",
         "entity_name": "Nome",
         "estimated_quota": "Cota",
@@ -1542,7 +1542,7 @@
         "last_comment_date": "Último comentário",
         "priority": "Prioridade",
         "production": "Prod",
-        "real_end_date": "Data de validade",
+        "real_end_date": "Data de feedback",
         "real_start_date": "Data WIP",
         "retake_count": "Retomadas",
         "seconds": "Segundos",
@@ -1624,7 +1624,7 @@
       "create_tasks_sequence_failed": "Ocorreu um erro de servidor ao prosseguir com as criações.",
       "auto_revision": "Restaurar o número de revisão automática",
       "empty_cells_selected": "célula vazia selecionada | células vazias selecionadas",
-      "my_checks": "Meus cheques",
+      "my_checks": "Minhas verificações",
       "new_revision_number": "Novo número de revisão",
       "post": "Postar",
       "publish_revision": "Publicar revisão",
@@ -1714,7 +1714,7 @@
       "create_error": "Ocorreu um erro ao salvar este departamento. Tem certeza de que não há nenhum departamento com um nome semelhante?",
       "delete_text": "Tem certeza de que deseja remover {name} do seu banco de dados?",
       "delete_error": "Ocorreu um erro ao excluir esse departamento.",
-      "edit_title": "Departamento de edição",
+      "edit_title": "Editar departamento",
       "new_departments": "Adicionar um departamento",
       "number": "departamento | departamentos",
       "title": "Departamentos",
@@ -1790,7 +1790,7 @@
       },
       "entity_types": {
         "asset": "Ativo",
-        "shot": "Tiro",
+        "shot": "Shot",
         "sequence": "Sequência",
         "episode": "Episódio",
         "edit": "Editar"
@@ -1833,10 +1833,10 @@
       "library_title": "Biblioteca de planos de fundo 3D"
     },
     "board": {
-      "title": "Diretoria",
+      "title": "Quadro",
       "empty": "Seu quadro Kanban está vazio no momento. Isso significa que nenhum status de tarefa está configurado para a função do usuário nas configurações de produção.",
       "settings": {
-        "title": "Status da diretoria",
+        "title": "Status do quadro",
         "visible": "Exibido no quadro kanban de...",
         "select_all": "Selecionar tudo",
         "unselect_all": "Desmarcar tudo"
@@ -1901,7 +1901,7 @@
     },
     "intro": {
       "main": "Para que nosso projeto seja bem-sucedido, precisamos de seu apoio. Aqui estão algumas maneiras simples de ajudar:",
-      "first": "Inicie nosso repositório em ",
+      "first": "Marque nosso repositório com uma estrela em ",
       "second": "Siga-nos em ",
       "third": "Participe de nossa",
       "four": "Sugerir novos recursos em ",

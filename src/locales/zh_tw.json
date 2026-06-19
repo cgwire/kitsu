@@ -22,7 +22,7 @@
         "description": "說明",
         "episode": "集數",
         "name": "名稱",
-        "production": "道具",
+        "production": "製作",
         "time_spent": "時間",
         "type": "類型",
         "hidden_from_client": "顯示到客戶",
@@ -35,7 +35,7 @@
       "only_current_episode": "僅目前一集",
       "linked": "連結",
       "no_concept": "沒有與此資產相關的概念",
-      "casted_in_shots": "以 {nbShots} 鏡頭投射",
+      "casted_in_shots": "已分配到 {nbShots} 個鏡頭",
       "delete_for_selection_hard_text": "您確定要永久移除選取的資產嗎？所有相關的任務、註解和預覽也會被刪除。請在下方輸入「刪除」確認。",
       "delete_for_selection_hard_lock_text": "刪除",
       "show_linked": "顯示細分資產"
@@ -64,7 +64,7 @@
     "breakdown": {
       "all_assets": "所有可用Asset",
       "edit_label": "更改Asset的標簽",
-      "empty": "空白標簽",
+      "empty": "角色分配為空",
       "label": "標簽",
       "picture_mode": "切換到圖片模式",
       "text_mode": "切換到文字模式",
@@ -84,7 +84,7 @@
       "episode_casting": "劇集角色分配",
       "save_error": "儲存角色分配時出錯",
       "hide_library": "隱藏圖書館",
-      "show_library": "顯示器圖書館"
+      "show_library": "顯示圖書館"
     },
     "comments": {
       "add_attachment": "新增附件",
@@ -177,12 +177,12 @@
         "asset_type": "Asset類別",
         "all_types": "所有Asset類別",
         "assignation": "分配",
-        "assignation_exists_for": "重新分配至",
+        "assignation_exists_for": "已分配給",
         "assigned_to": "分配至",
         "descriptor": "Metadata",
         "equal": "等於",
         "in": "屬於",
-        "no_assignation_for": "取消分配",
+        "no_assignation_for": "未分配給",
         "no_filter": "無篩選",
         "not_equal": "不等於",
         "not_assigned_to": "未分配",
@@ -233,7 +233,7 @@
         "uploaded_at": "上傳於"
       },
       "nb_selected_assets": "已選擇 {nbSelectedAssets} 資產 | 已選擇 {nbSelectedAssets} 資產",
-      "nb_selected_shots": "{nbSelectedShots}已選取的砲彈 | {nbSelectedShots}已選取的砲彈",
+      "nb_selected_shots": "已選取 {nbSelectedShots} 個鏡頭 | 已選取 {nbSelectedShots} 個鏡頭",
       "nb_selected_edits": "{nbSelectedEdits} 已選取編輯 | {nbSelectedEdits} 已選取編輯",
       "output_files": {
         "extension": "擴展",
@@ -262,7 +262,7 @@
       "empty_list_client": "此製作項目中沒有集數.",
       "new_episode": "新建集數",
       "number": "集數",
-      "title": "集數統計",
+      "title": "集數",
       "fields": {
         "name": "名稱",
         "description": "說明",
@@ -293,7 +293,7 @@
       "redo": "重做",
       "undo": "復原",
       "playlist_navigation": "播放清單導覽",
-      "remove_annotation": "移除播放列表",
+      "remove_annotation": "移除註解",
       "shortcuts": "捷徑",
       "ctrldown": "將元資料儲存格選擇下移",
       "ctrlleft": "將元資料儲存格選擇向左移動",
@@ -419,7 +419,7 @@
       "logout": "退出",
       "modify": "修改",
       "minimize": "最小化",
-      "main_pack": "主界面",
+      "main_pack": "主套件",
       "maximize": "最大化",
       "nb_frames": "幀",
       "person": "人員",
@@ -441,7 +441,7 @@
         "export_file": "導出",
         "import_file": "導入",
         "import_title": "從CSV檔案導入數據",
-        "legend": "傳說",
+        "legend": "圖例",
         "legend_ok": "可識別的數據",
         "legend_ignored": "可忽略的數據",
         "legend_missing": "缺失的數據",
@@ -452,7 +452,7 @@
         "preview": "預覽",
         "preview_episode_name": "集數名稱",
         "preview_title": "預覽導入的數據",
-        "preview_description": "上傳.csv檔案，在輸入框內貼上",
+        "preview_description": "上傳 .csv 檔案以填入您的實體表。",
         "preview_required": "標題用於將欄與要設定的資料進行配對。標題必須包含在第一行。",
         "preview_reupload": "重新上傳.CSV檔案",
         "required_fields": "您的CSV檔案需要有如下列項",
@@ -491,9 +491,9 @@
       "man_days": "人日 | 人日",
       "select_column": "選擇欄位",
       "show": "顯示",
-      "stick": "棍子",
+      "stick": "固定",
       "timeSpent": "花費的時間",
-      "unstick": "鬆開",
+      "unstick": "取消固定",
       "all_edits": "所有編輯",
       "attach_snapshots": "附加註解的快照",
       "reply": "答覆",
@@ -522,7 +522,7 @@
         "error_upload": "上傳您的 EDL 時發生錯誤。",
         "upload_edl": "上傳 EDL",
         "naming_convention": "命名慣例",
-        "match_case": "火柴盒",
+        "match_case": "區分大小寫",
         "explanation": "可以匯入一般 OpenTimeLineIO 支援的檔案 (otio、fcp_xml、fcpx_xml、edl)。鏡頭會以指定的幀範圍、幀入和幀出來建立或更新。幀進從 0 開始。"
       },
       "active": "活躍",
@@ -548,7 +548,7 @@
       "clear_sorting": "清除目前的排序",
       "days": "天數",
       "drop_files_here": "將檔案丟到這裡",
-      "import": "進口",
+      "import": "匯入",
       "is_shared": "與整個團隊分享",
       "no_results": "沒有結果",
       "link": "連結",
@@ -570,11 +570,11 @@
       "month": "月份",
       "nb_drawings": "繪圖 | 繪圖",
       "no_estimation": "無估算",
-      "people": "人類",
+      "people": "人員",
       "total": "總計",
       "unassigned": "未指定",
       "year": "年份",
-      "apply": "申請",
+      "apply": "套用",
       "back": "返回",
       "edit_mode_on": "切換編輯模式",
       "entities": "實體",
@@ -617,7 +617,7 @@
       "all": "全部",
       "commented_on": "評論",
       "infos": "資訊",
-      "no_news": "沒有關於此製作項目或符合當前篩選器的消息。",
+      "no_news": "沒有消息。",
       "only_comments": "僅評論",
       "only_previews": "僅預覽圖",
       "set_preview_on": "設置為預覽圖",
@@ -631,12 +631,12 @@
     },
     "not_found": {
       "text": "您所點擊的連接有問題，我們建議您返回首頁。",
-      "title": "找不到頁面...您要刪除的內容嗎？"
+      "title": "找不到頁面…"
     },
     "notifications": {
       "and_change_status": "將狀態更改為",
       "assigned_you": "分配給你",
-      "commented_on": "已給出針對性評論, 評論對象為",
+      "commented_on": "已評論",
       "mention_you_on": "在評論中提到你",
       "no_notifications": "目前沒有關於您當前項目的通知.",
       "unread_notifications": "未讀通知",
@@ -690,7 +690,7 @@
       "active_persons": "活躍用戶",
       "add_member_to_team": "向團隊新增成員",
       "create_invite": "創建和發送邀請",
-      "create_error": "創建或更新此用戶時發生錯誤。 您可能已達到用戶數限制。 請聯絡我們的技術人員以獲取更多資訊。",
+      "create_error": "建立或更新此使用者時發生伺服器錯誤。請聯絡我們的支援團隊以獲取更多資訊。",
       "delete_error": "刪除此人員時出現錯誤. 很可能存在有連接至其的數據. 您確定此人員沒有分配任務或是沒寫評論嗎?",
       "delete_text": "您確定要從您的資料庫移除{personName}嗎？所有相關的評論和預覽也將被刪除。請在下方輸入完整的使用者名稱以確認。",
       "edit_title": "編輯人員",
@@ -741,9 +741,9 @@
         "seniority": "年資"
       },
       "role": {
-        "admin": "公司管理層",
+        "admin": "工作室管理員",
         "client": "客戶",
-        "manager": "總監",
+        "manager": "製作經理",
         "user": "藝術家",
         "undefined": "未定義",
         "vendor": "外包",
@@ -778,7 +778,7 @@
       },
       "seniority": {
         "junior": "初級",
-        "mid": "中間",
+        "mid": "中級",
         "senior": "資深"
       },
       "email_domain_error": "不允許使用此電子郵件網域。",
@@ -796,11 +796,11 @@
       "add_sequence": "新增整個序列",
       "add_episode": "新增整集",
       "add_movie": "新增整部影片",
-      "apply_task_type_change": "這將為所有鏡頭設置定任務類型",
+      "apply_task_type_change": "這將為所有實體設定指定任務類型的最新修訂版。",
       "available_build": "可用的版本",
       "build_daily": "當日待處理",
       "build_weekly": "所有待處理",
-      "build_mp4": "產生 .mp4 (beta)",
+      "build_mp4": "產生 .mp4",
       "building": "創建中...",
       "client_playlist": "客戶播放清單",
       "create_for_selection": "從選取的任務生成播放列表",
@@ -841,8 +841,8 @@
         "annotation": "註解",
         "annotation_text": "雙擊預覽圖並新增說明",
         "annotation_delete": "刪除註解",
-        "annotation_redo": "再次註解",
-        "annotation_undo": "取消註解",
+        "annotation_redo": "重做註解",
+        "annotation_undo": "復原註解",
         "annotation_big": "大",
         "annotation_medium": "中",
         "annotation_small": "小",
@@ -864,7 +864,7 @@
         "split_screen": "與其他任務類型比較",
         "annotation_draw": "繪製註釋",
         "current_time": "在視訊中的位置",
-        "display_revision": "顯示器修訂",
+        "display_revision": "顯示修訂版",
         "download_file": "下載檔案",
         "entity_index": "播放清單中目前實體的索引",
         "entities_number": "播放清單中的實體數量",
@@ -906,7 +906,7 @@
       "filter_task_type": "依工作類型篩選",
       "comparing_missing_plan": "目前類型的實體遺失",
       "add_sequences": "新增序列",
-      "clients_to_notify": "通知客戶",
+      "clients_to_notify": "待通知的客戶",
       "mute": "靜音",
       "notify_clients": "通知客戶",
       "notify_clients_description": "通知所選工作室的客戶您的播放清單已準備就緒。此操作會為他們建立通知。",
@@ -967,7 +967,7 @@
         "empty": "您什麼製作項目也沒開啟. 要創建一個新的嗎?",
         "no_task": "還沒有任務分配給您. 您可以去向主管反應!",
         "no_prod_for_client": "您無權訪問任何製作項目. 請聯絡您的主管獲取訪問權限.",
-        "title": "執行多個製作項目",
+        "title": "我的製作項目",
         "welcome": "歡迎使用Kitsu"
       },
       "fields": {
@@ -979,10 +979,10 @@
         "type": "類型",
         "start_date": "開始日期",
         "end_date": "結束日期",
-        "nb_episodes": "集數數",
+        "nb_episodes": "集數",
         "episode_span": "劇集間距",
         "is_clients_isolated": "隔離客戶評論 (彼此不見)",
-        "max_retakes": "最多重考次數",
+        "max_retakes": "最多重做次數",
         "style": "風格",
         "is_preview_download_allowed": "允許藝術家下載預覽",
         "is_set_preview_automated": "自動設定新預覽為實體縮圖",
@@ -1003,7 +1003,7 @@
         "edit_title": "編輯元資料列",
         "checklist": "清單",
         "boolean": "複選框",
-        "number": "數量",
+        "number": "數字",
         "string": "正文",
         "tags": "標籤清單",
         "applies_to_all_projects": "此欄會新增至清單中的每個項目。每個項目可在清單檢視中擁有自己的值。",
@@ -1021,7 +1021,7 @@
         "featurefilm": "電影",
         "tvshow": "影集",
         "assets": "僅資產",
-        "shots": "僅拍攝"
+        "shots": "僅鏡頭"
       },
       "edit_error": "編輯製作時發生錯誤。請聯絡我們的支援團隊。",
       "brief": {
@@ -1057,7 +1057,7 @@
         "give_a_name": "為您的製作項目命名",
         "give_a_name_description": "首先為您的製作項目取一個有意義的名稱。",
         "import_assets_button": "匯入資產",
-        "import_shots_button": "進口鏡頭",
+        "import_shots_button": "匯入鏡頭",
         "new_project": "新專案",
         "placeholder_date_start": "從",
         "placeholder_date_end": "止於",
@@ -1071,7 +1071,7 @@
         "production_settings_description": "定義製作類型、視訊預覽格式，並排定製作時間。",
         "select_asset_task_type": "選擇資產任務類型",
         "select_asset_task_type_description": "這些任務類型定義了資產的建立步驟。",
-        "select_shot_task_type": "選擇噴射任務類型",
+        "select_shot_task_type": "選擇鏡頭任務類型",
         "select_shot_task_type_description": "這些任務類型定義了您鏡頭的建立步驟。",
         "select_task_status": "選擇任務狀態",
         "select_task_status_description": "選擇您要在生產過程中使用的任務狀態。",
@@ -1098,7 +1098,7 @@
         "video_game": "視訊遊戲",
         "vr": "虛擬實境",
         "immersive": "身歷其境的體驗",
-        "2dpaper": "二維動畫 (論文)"
+        "2dpaper": "二維動畫 (紙本)"
       },
       "homepage": {
         "assets": "資產",
@@ -1113,7 +1113,7 @@
       "language": "語種",
       "notifications_enabled": "電子郵件通知已啟用",
       "notifications_slack_enabled": "Slack通知已啟用",
-      "notifications_slack_user": "Slack 用戶名",
+      "notifications_slack_user": "Slack 成員 ID",
       "password_title": "更改密碼",
       "timezone": "時區",
       "title": "您的簡介",
@@ -1132,7 +1132,7 @@
         "button": "更改密碼",
         "error": "更改密碼時出現錯誤. 請核實您當前的密碼.",
         "success": "您的密碼已成功更改!",
-        "unvalid": "您的確認密碼與新密碼不相符或您的密碼長度太短(預期至少是7個字符)."
+        "unvalid": "您的確認密碼與新密碼不相符或您的密碼長度太短(預期至少是8個字符)."
       },
       "save": {
         "button": "儲存更改",
@@ -1242,7 +1242,7 @@
         "is_artist_allowed": "Artist允許",
         "is_client_allowed": "客戶允許",
         "is_done": "已完成",
-        "is_retake": "重新賦值",
+        "is_retake": "具有重拍值",
         "name": "名稱",
         "short_name": "簡稱",
         "is_feedback_request": "是否需要回饋",
@@ -1309,7 +1309,7 @@
     "schedule": {
       "title": "時間表",
       "title_main": "主時間表",
-      "overall_man_days": "月-日",
+      "overall_man_days": "人日",
       "md": "工作天",
       "zoom_level": "縮放等級",
       "milestone": {
@@ -1368,7 +1368,7 @@
       "details_seconds": "秒",
       "details_frames": "幀",
       "month_label": "月",
-      "no_quota": "此任務類型沒有配額。",
+      "no_quota": "此選擇沒有配額。",
       "name": "名稱",
       "quota_day": "每日配額",
       "quota_week": "每周配額",
@@ -1415,7 +1415,7 @@
       "number": "鏡頭 | 鏡頭(多個)",
       "manage": "創建多個鏡頭",
       "new_success": "已成功創建鏡頭{name}.",
-      "padding": "射擊襯墊",
+      "padding": "鏡頭編號補零",
       "restore_text": "您確定要將{name}恢復進您的資料庫嗎?",
       "restore_error": "恢復此鏡頭時出現錯誤.",
       "sequences": "序列(多個)",
@@ -1451,7 +1451,7 @@
       "show_timecode": "以時間碼顯示進出"
     },
     "server_down": {
-      "text": "伺服器掛了，請聯絡您的系統管理員或您的IT部門。",
+      "text": "請聯絡我們的支援團隊或您的系統管理員，以了解出了什麼問題。",
       "title": "Kitsu在訪問其數據API時出現錯誤."
     },
     "statistics": {
@@ -1461,7 +1461,7 @@
       "frames": "幀數",
       "pie": "圓餅圖",
       "shots": "鏡頭",
-      "data_mode": "日期",
+      "data_mode": "資料",
       "retakes": "重拍",
       "status": "狀態",
       "all": "全部",
@@ -1479,7 +1479,7 @@
       "change_preview": "更換預覽圖",
       "change_priority": "變更選取任務的優先級 | 變更 {nbSelectedTasks} 個選取任務的優先級",
       "clear_assignations": "清除多個任務分配",
-      "comment_image": "為你的評論新增圖片",
+      "comment_image": "附加檔案",
       "create_for_selection": "為每個空單元格都創建任務:",
       "create_tasks": "新增多個任務",
       "create_tasks_shot": "為當前的多個鏡頭新增多個任務",
@@ -1552,7 +1552,7 @@
         "task_status_short_name": "狀態",
         "task_type": "類型",
         "start_date_short": "開始日期",
-        "parent": "家長",
+        "parent": "上層項目",
         "difficulty": "難度",
         "done_date": "批准日期",
         "nb_frames": "影格",
@@ -1567,7 +1567,7 @@
         "title": "著色",
         "neutral": "中性",
         "status": "狀態顏色",
-        "late": "遲到的紅色"
+        "late": "逾期顯示為紅色"
       },
       "priority": {
         "emergency": "緊急",
@@ -1624,9 +1624,9 @@
       "create_tasks_sequence_failed": "進行創作時發生伺服器錯誤。",
       "auto_revision": "還原自動修訂編號",
       "empty_cells_selected": "選取空白儲存格 | 選取空白儲存格",
-      "my_checks": "我的支票",
+      "my_checks": "我的檢查",
       "new_revision_number": "新修訂編號",
-      "post": "職位",
+      "post": "發表",
       "publish_revision": "發表修訂",
       "revision_preview_file": "如果您選取的其中一個檔案在名稱中包含修訂版編號 (例如「preview-v3.png」)，則下一步會建議使用新的修訂版名稱 (例如「修訂版 3」)。",
       "selected_entities": "選定實體",
@@ -1652,7 +1652,7 @@
       "delete_for_selection_error": "刪除選取的任務時發生錯誤。",
       "delete_for_selection_hard_text": "您確定要永久移除選取的工作嗎？所有相關的註解和預覽也會被刪除。請在下方輸入「刪除」確認。",
       "delete_for_selection_hard_lock_text": "刪除",
-      "hookup_playlist": "產生勾搭播放清單",
+      "hookup_playlist": "產生銜接播放清單",
       "assignation_error": "指派此人執行所選任務時出現問題。並未指派所有任務。",
       "retake_filter_none": "無重拍",
       "retake_filter_with_retakes": "有重拍"
@@ -1833,10 +1833,10 @@
       "library_title": "3D 背景圖庫"
     },
     "board": {
-      "title": "董事會",
+      "title": "看板",
       "empty": "您的看板目前是空的。這表示在生產設定中沒有為您的使用者角色設定任務狀態。",
       "settings": {
-        "title": "董事會狀況",
+        "title": "看板狀態",
         "visible": "顯示在...",
         "select_all": "全部選取",
         "unselect_all": "全部取消選擇"
@@ -1862,7 +1862,7 @@
       "no_bot": "沒有機器人。您想創建一個嗎？",
       "confirm_edit": "儲存機器人變更",
       "create": "建立機器人",
-      "departments_empty": "這個殭屍沒有連結到任何部門。"
+      "departments_empty": "這個機器人沒有連結到任何部門。"
     },
     "chats": {
       "join": "加入聊天",
@@ -1889,7 +1889,7 @@
         "created_at": "建立日期",
         "updated_at": "更新日期",
         "last_comment_date": "最後評論",
-        "publisher": "發表方式"
+        "publisher": "發表者"
       },
       "actions": {
         "title": "概念連結",
@@ -1901,7 +1901,7 @@
     },
     "intro": {
       "main": "為了讓我們的專案茁壯成長，我們需要您的支持。以下是您可以幫忙的一些簡單方法：",
-      "first": "啟動我們在 ",
+      "first": "為我們的儲存庫加註星號於 ",
       "second": "關注我們 ",
       "third": "加入我們",
       "four": "建議新功能 ",
@@ -1993,7 +1993,7 @@
       "edit_budget": "編輯目前的預算版本",
       "edit_budget_entry": "編輯項目",
       "edit_budget_entry_error": "編輯此預算項目時發生錯誤。請聯絡我們的支援團隊。",
-      "entries": "參賽作品",
+      "entries": "條目",
       "gap": "縫隙",
       "hide_expenses": "隱藏真實成本",
       "months": "月數",
@@ -2050,10 +2050,10 @@
       "number": "硬體項目 | 硬體項目",
       "title": "硬體項目",
       "fields": {
-        "inventory_amount": "庫存金額",
+        "inventory_amount": "庫存數量",
         "monthly_cost": "每月成本",
         "name": "名稱",
-        "remaining_amount": "剩餘金額",
+        "remaining_amount": "剩餘數量",
         "short_name": "簡稱"
       }
     },

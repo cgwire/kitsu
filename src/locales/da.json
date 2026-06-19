@@ -35,10 +35,10 @@
       "only_current_episode": "Kun aktuelle episode",
       "linked": "Tilknyttet",
       "no_concept": "Ingen koncepter knyttet til denne asset",
-      "casted_in_shots": "Støbt i {nbShots} skud",
+      "casted_in_shots": "Castet i {nbShots} shots",
       "delete_for_selection_hard_text": "Er du sikker på, at du vil fjerne de valgte aktiver permanent? Alle relaterede opgaver, kommentarer og forhåndsvisninger vil også blive slettet. Bekræft venligst ved at skrive 'SLET' nedenfor.",
       "delete_for_selection_hard_lock_text": "SLET",
-      "show_linked": "Vis opdeling af aktiver"
+      "show_linked": "Vis Breakdown-assets"
     },
     "asset_types": {
       "all_asset_types": "Alle asset-typer",
@@ -255,7 +255,7 @@
     "episodes": {
       "all_episodes": "Alle",
       "edit_error": "Der er opstået en fejl under gemning af denne episode. Er du sikker på, at der ikke er en episode med et lignende navn?",
-      "delete_error": "Der er opstået en fejl under sletningen af denne episode. Der kan være eksisterende data, der er knyttet til den. Er du sikker på, at denne episode ikke har nogen asset knyttet til den?",
+      "delete_error": "Der er opstået en fejl under sletningen af denne episode. Der kan være eksisterende data, der er knyttet til den. Er du sikker på, at denne episode ikke har nogen sekvens knyttet til den?",
       "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database? Alle relaterede shots og previews vil blive slettet. Bekræft venligst ved at skrive episodens navn nedenfor.",
       "edit_title": "Rediger episode",
       "empty_list": "Der er ingen episoder i produktionen. Hvad med at oprette nogle?",
@@ -273,7 +273,7 @@
       "tasks": "Episodeopgave",
       "stats_title": "Episode-statistikker",
       "status": {
-        "canceled": "Annuller",
+        "canceled": "Annulleret",
         "complete": "Fuldført",
         "standby": "Stand By",
         "running": "Igangværende"
@@ -1328,7 +1328,7 @@
       "apply_to_prod_confirm": "Er du sikker på, at du vil anvende denne version af tidsplanen på den aktuelle produktion? Dette vil tilsidesætte de aktuelle opgaveværdier.",
       "apply_to_prod_error": "Der opstod en fejl under anvendelse af planlægningsversionen på den aktuelle produktion.",
       "assign": "Tildel til:",
-      "export": "Tidsplan for eksport",
+      "export": "Eksportér tidsplan",
       "export_error": "Der opstod en fejl under eksport af data.",
       "reset_list": "Nulstil listen",
       "no_entity": "Ingen overdragelig enhed",
@@ -1368,7 +1368,7 @@
       "details_seconds": "Sekunder",
       "details_frames": "Frames",
       "month_label": "Måned",
-      "no_quota": "Der er ingen kvote for denne opgavetype.",
+      "no_quota": "Der er ingen kvote for dette udvalg.",
       "name": "Navn",
       "quota_day": "Kvoter pr. dag",
       "quota_week": "Kvoter pr. uge",
@@ -1754,7 +1754,7 @@
       },
       "tasks": "Opgaver",
       "cancel_text": "Er du sikker på, at du vil arkivere {name}?",
-      "history": "Rediger værdiers historik",
+      "history": "Edit-værdiers historik",
       "restore_error": "Der opstod en fejl under gendannelse af denne redigering.",
       "edit_success": "Ændringerne blev gemt med succes.",
       "restore_text": "Er du sikker på, at du vil gendanne {name} fra dit arkiv?",
@@ -1994,7 +1994,7 @@
       "edit_budget_entry": "Rediger post",
       "edit_budget_entry_error": "Der opstod en fejl under redigering af denne budgetpost. Kontakt venligst vores supportteam.",
       "entries": "Poster",
-      "gap": "Mellemrum",
+      "gap": "Afvigelse",
       "hide_expenses": "Skjul de reelle omkostninger",
       "months": "Måneder",
       "new_hiring": "Nye ansættelser",

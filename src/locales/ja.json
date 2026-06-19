@@ -38,7 +38,7 @@
       "casted_in_shots": "{nbShots}ショットでキャスティング",
       "delete_for_selection_hard_text": "選択したアセットを永久に削除してもよろしいですか？関連するタスク、コメント、プレビューもすべて削除されます。下に「削除」と入力して確認してください。",
       "delete_for_selection_hard_lock_text": "削除",
-      "show_linked": "ディスプレイの内訳 資産"
+      "show_linked": "ブレイクダウンのアセットを表示"
     },
     "asset_types": {
       "all_asset_types": "すべてのアセットタイプ",
@@ -406,7 +406,7 @@
       "edit": "編集",
       "empty_comment": "コメントが空です",
       "end_date": "終了日",
-      "files_selected": "ファイルを選択",
+      "files_selected": "個のファイルを選択済み",
       "for": "対象",
       "go_productions": "プロダクションに戻る",
       "history": "履歴",
@@ -574,11 +574,11 @@
       "total": "合計",
       "unassigned": "未割り当て",
       "year": "年",
-      "apply": "応募する",
+      "apply": "適用する",
       "back": "バック",
       "edit_mode_on": "編集モードの切り替え",
       "entities": "エンティティ",
-      "expand_all": "すべてを拡大する",
+      "expand_all": "すべて展開",
       "hours": "時間",
       "remove_search_query": "本当に\"{name}\"という検索クエリを削除しますか？",
       "remove_search_filter_group": "検索フィルターグループ\"{name}\"を本当に削除しますか？",
@@ -634,7 +634,7 @@
       "title": "ページが見つかりません..."
     },
     "notifications": {
-      "and_change_status": "そして、タスクのステータスを変更した。",
+      "and_change_status": "、タスクのステータスを変更",
       "assigned_you": "このタスクにあなたをアサイン",
       "commented_on": "コメント",
       "mention_you_on": "コメントであなたにメンション",
@@ -663,7 +663,7 @@
       "read": "既読",
       "reply": "返信",
       "publish": "公開",
-      "published": "リビジョンを公開",
+      "published": "プレビューを公開",
       "show_comments": "コメントを表示",
       "watching": "ウォッチ中",
       "only_playlists_ready": "準備の整ったプレイリストのみ",
@@ -798,7 +798,7 @@
       "add_movie": "ムービー全体を追加",
       "apply_task_type_change": "これは、すべてのエンティティの指定されたタスクタイプの最終リビジョンを設定します。",
       "available_build": "利用可能なビルド",
-      "build_daily": "毎日保留中",
+      "build_daily": "デイリーの保留中",
       "build_weekly": "すべての保留",
       "build_mp4": "ビルド .mp4",
       "building": "ビルド中…",
@@ -1013,8 +1013,8 @@
       "status": {
         "closed": "クローズ",
         "open": "オープン",
-        "active": "アクティブ",
-        "archived": "アーカイブ"
+        "active": "オープン",
+        "archived": "クローズ"
       },
       "type": {
         "short": "短編",
@@ -1084,7 +1084,7 @@
         "no_template": "テンプレートなし"
       },
       "style": {
-        "2d": "アニメーション（デジタル工程）",
+        "2d": "2Dアニメーション",
         "3d": "アニメーション（3D）",
         "2d3d": "アニメーション（2D/3D）",
         "ar": "AR（拡張現実）",
@@ -1098,7 +1098,7 @@
         "video_game": "ゲーム",
         "vr": "VR（仮想現実）",
         "immersive": "イマーシブ体験",
-        "2dpaper": "アニメーション（アナログ工程）"
+        "2dpaper": "2Dアニメーション（紙）"
       },
       "homepage": {
         "assets": "アセット",
@@ -1328,17 +1328,17 @@
       "apply_to_prod_confirm": "このスケジュールバージョンを現在のプロダクションに適用してよろしいですか？これは現在のタスク値を上書きします。",
       "apply_to_prod_error": "現在のプロダクションへのスケジュールバージョンの適用中にエラーが発生しました。",
       "assign": "に割り当てる：",
-      "export": "輸出スケジュール",
+      "export": "スケジュールをエクスポート",
       "export_error": "データのエクスポート中にエラーが発生しました。",
       "reset_list": "リセットリスト",
-      "no_entity": "譲渡可能な事業体はない",
-      "no_assignee": "譲渡可能人物なし",
+      "no_entity": "割り当て可能なエンティティがありません",
+      "no_assignee": "割り当て可能なユーザーがいません",
       "select_task_type": "タスクタイプを選択する",
       "show_assigned": "割り当てられたエンティティの表示",
       "force_unassign": "以前の割り当てを上書きする",
       "forced_daily_quotas": "強制的な1日のノルマ：",
       "estimated_daily_quotas": "1日の割当量を自動的に見積もる：",
-      "edit_task": "編集作業",
+      "edit_task": "タスクを編集",
       "new_version": "新バージョン",
       "create_version": "スケジュール版の作成",
       "edit_version": "スケジュールバージョンの編集",
@@ -1552,7 +1552,7 @@
         "task_status_short_name": "ステータス",
         "task_type": "タイプ",
         "start_date_short": "開始日",
-        "parent": "種類",
+        "parent": "親",
         "difficulty": "難易度",
         "done_date": "承認日",
         "nb_frames": "フレーム",
@@ -2004,7 +2004,7 @@
       "no_analytics_to_show": "このプロダクションには表示する分析がありません。アナリティクスを見るには予算を作成し、エントリーを追加してください。",
       "remaining": "残り",
       "previsional_costs": "推定",
-      "remaining_and_costs": "レム+ 費用",
+      "remaining_and_costs": "残り + 費用",
       "salary_scale_title": "給与水準",
       "show_expenses": "実際のコストを表示する",
       "show_items": "ハードウェアとソフトウェアのカウント",
@@ -2050,10 +2050,10 @@
       "number": "ハードウェア・アイテム｜ハードウェア・アイテム",
       "title": "ハードウェア",
       "fields": {
-        "inventory_amount": "在庫金額",
+        "inventory_amount": "在庫数",
         "monthly_cost": "月額費用",
         "name": "名称",
-        "remaining_amount": "残額",
+        "remaining_amount": "残数",
         "short_name": "略称"
       }
     },
