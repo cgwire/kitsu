@@ -2032,6 +2032,7 @@ export default {
     full_screen: 'Display in full screen',
     for_selection: 'For current list and filters',
     for_project: 'For production',
+    full_task_type_names: 'Show full task type names',
     hide_assignations: 'Hide assignments',
     hide_infos: 'Hide additional information',
     hookup_playlist: 'Generate a hook-up playlist',

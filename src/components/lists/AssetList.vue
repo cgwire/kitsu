@@ -25,7 +25,10 @@
         @toggle-stick="metadataStickColumnClicked($event)"
       />
 
-      <table class="datatable multi-section">
+      <table
+        class="datatable multi-section"
+        :class="{ 'expand-task-types': displaySettings.fullTaskTypeNames }"
+      >
         <thead class="datatable-head" v-columns-resizable id="datatable-asset">
           <tr>
             <th
@@ -1192,6 +1195,18 @@ td.ready-for {
   max-width: 150px;
   width: 150px;
   margin-right: 1em;
+}
+
+.expand-task-types :deep(.validation-cell) {
+  width: auto;
+  min-width: 150px;
+  max-width: none;
+}
+
+.expand-task-types :deep(.task-type-name) {
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
 }
 
 .hidden-validation-cell {
