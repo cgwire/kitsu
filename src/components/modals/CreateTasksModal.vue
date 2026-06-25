@@ -46,6 +46,24 @@
               button: true,
               'flexrow-item': true,
               'is-primary': true,
+              'is-loading': isLoadingAll,
+              'is-disabled': missingTaskTypes.length === 0
+            }"
+            @click="confirmAllMissingClicked"
+          >
+            {{
+              missingTaskTypes.length > 0
+                ? $t('tasks.create_tasks_all_missing', {
+                    count: missingTaskTypes.length
+                  })
+                : $t('tasks.create_tasks_all_missing_empty')
+            }}
+          </a>
+          <a
+            :class="{
+              button: true,
+              'flexrow-item': true,
+              'is-primary': true,
               'is-loading': isLoadingStay
             }"
             @click="confirmAndStayClicked"
@@ -96,12 +114,18 @@ const props = defineProps({
   errorText: { type: String, default: '' },
   isError: { type: Boolean, default: false },
   isLoading: { type: Boolean, default: false },
+  isLoadingAll: { type: Boolean, default: false },
   isLoadingStay: { type: Boolean, default: false },
   text: { type: String, default: '' },
   title: { type: String, default: '' }
 })
 
-const emit = defineEmits(['cancel', 'confirm', 'confirm-and-stay'])
+const emit = defineEmits([
+  'cancel',
+  'confirm',
+  'confirm-all-missing',
+  'confirm-and-stay'
+])
 
 useModal(toRef(props, 'active'), emit)
 
@@ -125,6 +149,29 @@ const productionShotTaskTypes = computed(
   () => store.getters.productionShotTaskTypes
 )
 
+const assetValidationColumns = computed(
+  () => store.getters.assetValidationColumns
+)
+const editValidationColumns = computed(
+  () => store.getters.editValidationColumns
+)
+const episodeValidationColumns = computed(
+  () => store.getters.episodeValidationColumns
+)
+const sequenceValidationColumns = computed(
+  () => store.getters.sequenceValidationColumns
+)
+const shotValidationColumns = computed(
+  () => store.getters.shotValidationColumns
+)
+
+const missingTaskTypes = computed(() => {
+  const shownColumns = new Set(getApplicableValidationColumns())
+  return getApplicableTaskTypes().filter(
+    taskType => !shownColumns.has(taskType.id)
+  )
+})
+
 const selectionOptions = computed(() => [
   { label: t('tasks.for_selection'), value: 'true' },
   { label: t('tasks.for_project'), value: 'false' }
@@ -140,6 +187,16 @@ const getApplicableTaskTypes = () => {
   return []
 }
 
+const getApplicableValidationColumns = () => {
+  const path = route.path
+  if (path.includes('assets')) return assetValidationColumns.value
+  if (path.includes('shots')) return shotValidationColumns.value
+  if (path.includes('sequences')) return sequenceValidationColumns.value
+  if (path.includes('edits')) return editValidationColumns.value
+  if (path.includes('episodes')) return episodeValidationColumns.value
+  return []
+}
+
 const buildPayload = () => ({
   form: form.value,
   selectionOnly: selectionOnly.value === 'true'
@@ -151,6 +208,14 @@ const confirmClicked = () => {
 
 const confirmAndStayClicked = () => {
   emit('confirm-and-stay', buildPayload())
+}
+
+const confirmAllMissingClicked = () => {
+  if (missingTaskTypes.value.length === 0) return
+  emit('confirm-all-missing', {
+    missingTaskTypeIds: missingTaskTypes.value.map(taskType => taskType.id),
+    selectionOnly: selectionOnly.value === 'true'
+  })
 }
 
 onMounted(() => {

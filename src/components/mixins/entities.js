@@ -300,6 +300,30 @@ export const entitiesMixin = {
         })
     },
 
+    confirmCreateAllMissingTasks({ missingTaskTypeIds, selectionOnly }) {
+      this.errors.creatingTasks = false
+      this.loading.creatingAllTasks = true
+      const createForTaskType = taskTypeId =>
+        this.createTasks({
+          type: `${this.type}s`,
+          task_type_id: taskTypeId,
+          project_id: this.currentProduction.id,
+          selectionOnly
+        })
+      func
+        .runPromiseMapAsSeries(missingTaskTypeIds, createForTaskType)
+        .then(() => {
+          this.reset()
+          this.hideCreateTasksModal()
+          this.loading.creatingAllTasks = false
+        })
+        .catch(err => {
+          this.errors.creatingTasks = true
+          this.loading.creatingAllTasks = false
+          console.error(err)
+        })
+    },
+
     runTasksCreation(form, selectionOnly) {
       this.errors.creatingTasks = false
       return this.createTasks({
