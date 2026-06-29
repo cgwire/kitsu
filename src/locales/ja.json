@@ -38,7 +38,7 @@
       "casted_in_shots": "{nbShots}ショットでキャスティング",
       "delete_for_selection_hard_text": "選択したアセットを永久に削除してもよろしいですか？関連するタスク、コメント、プレビューもすべて削除されます。下に「削除」と入力して確認してください。",
       "delete_for_selection_hard_lock_text": "削除",
-      "show_linked": "ディスプレイの内訳 資産"
+      "show_linked": "ブレイクダウンのアセットを表示"
     },
     "asset_types": {
       "all_asset_types": "すべてのアセットタイプ",
@@ -146,7 +146,15 @@
       },
       "move_to_task": "移動先",
       "title": "コメント",
-      "toggle_for_client": "クライアントへの表示"
+      "toggle_for_client": "クライアントへの表示",
+      "player": {
+        "play": "再生",
+        "pause": "一時停止",
+        "mute": "ミュート",
+        "unmute": "ミュート解除",
+        "fullscreen": "フルスクリーン",
+        "download": "ダウンロード"
+      }
     },
     "custom_actions": {
       "create_error": "カスタムアクションの保存中にエラーが発生しました。同名のアクションが存在しないか確認してください。",
@@ -168,7 +176,7 @@
         "shot": "ショット",
         "asset": "アセット",
         "sequence": "シーケンス",
-        "edit": "編集",
+        "edit": "編集版",
         "episode": "エピソード"
       }
     },
@@ -234,7 +242,7 @@
       },
       "nb_selected_assets": "{nbSelectedAssets} 件のアセットを選択 | {nbSelectedAssets} 件のアセットを選択",
       "nb_selected_shots": "{nbSelectedShots} 件のショットを選択 | {nbSelectedShots} 件のショットを選択",
-      "nb_selected_edits": "{nbSelectedEdits} 件のエディットを選択 | {nbSelectedEdits} 件のエディットを選択",
+      "nb_selected_edits": "{nbSelectedEdits} 件の編集版を選択 | {nbSelectedEdits} 件の編集版を選択",
       "output_files": {
         "extension": "拡張子",
         "name": "名前",
@@ -322,7 +330,9 @@
       "scrub_anywhere": "プレイヤー上のどこからでもタイムラインをスクラブ",
       "focus_comment": "プレイヤーとコメント欄の間でフォーカスを切り替え",
       "first_frame": "最初のフレームへ移動",
-      "last_frame": "最後のフレームへ移動"
+      "last_frame": "最後のフレームへ移動",
+      "straight_line": "直線を描く",
+      "constant_width": "一定の太さで描く（筆圧なし）"
     },
     "login": {
       "back_to_login": "ログインページに戻る",
@@ -406,7 +416,7 @@
       "edit": "編集",
       "empty_comment": "コメントが空です",
       "end_date": "終了日",
-      "files_selected": "ファイルを選択",
+      "files_selected": "個のファイルを選択済み",
       "for": "対象",
       "go_productions": "プロダクションに戻る",
       "history": "履歴",
@@ -494,7 +504,7 @@
       "stick": "固定",
       "timeSpent": "作業時間",
       "unstick": "固定を解除",
-      "all_edits": "すべてのエディット",
+      "all_edits": "すべての編集版",
       "attach_snapshots": "アノテーションからスナップショットを添付",
       "reply": "返信",
       "select_file": "ハードディスクからファイルを選択",
@@ -574,11 +584,11 @@
       "total": "合計",
       "unassigned": "未割り当て",
       "year": "年",
-      "apply": "応募する",
+      "apply": "適用する",
       "back": "バック",
       "edit_mode_on": "編集モードの切り替え",
       "entities": "エンティティ",
-      "expand_all": "すべてを拡大する",
+      "expand_all": "すべて展開",
       "hours": "時間",
       "remove_search_query": "本当に\"{name}\"という検索クエリを削除しますか？",
       "remove_search_filter_group": "検索フィルターグループ\"{name}\"を本当に削除しますか？",
@@ -594,7 +604,21 @@
       "disable_desktop_notifications": "デスクトップ通知を無効化",
       "enable_desktop_notifications": "デスクトップ通知を有効化",
       "export": "エクスポート",
-      "unknown": "不明"
+      "unknown": "不明",
+      "record_audio": "音声を録音",
+      "record_video": "動画を録画",
+      "recording": {
+        "webcam": "ウェブカメラ",
+        "screen": "画面",
+        "microphone": "マイク",
+        "start": "開始",
+        "stop": "停止",
+        "cancel": "キャンセル",
+        "recording": "録画中",
+        "permission_denied": "アクセスが拒否されました。マイク／カメラへのアクセスを許可して再度お試しください。",
+        "no_device": "マイクまたはカメラが見つかりません。",
+        "not_supported": "このブラウザでは録画に対応していません。"
+      }
     },
     "menu": {
       "assign_tasks": "タスクにアサイン",
@@ -606,7 +630,7 @@
       "set_estimations": "予定工数を設定",
       "delete_assets": "アセットを削除",
       "delete_shots": "ショットを削除",
-      "delete_edits": "エディットを削除",
+      "delete_edits": "編集版を削除",
       "generate_playlist": "プレイリストを作成",
       "set_thumbnails": "最新のプレビューからサムネイルを設定",
       "subscribe": "通知を購読",
@@ -634,7 +658,7 @@
       "title": "ページが見つかりません..."
     },
     "notifications": {
-      "and_change_status": "そして、タスクのステータスを変更した。",
+      "and_change_status": "、タスクのステータスを変更",
       "assigned_you": "このタスクにあなたをアサイン",
       "commented_on": "コメント",
       "mention_you_on": "コメントであなたにメンション",
@@ -663,7 +687,7 @@
       "read": "既読",
       "reply": "返信",
       "publish": "公開",
-      "published": "リビジョンを公開",
+      "published": "プレビューを公開",
       "show_comments": "コメントを表示",
       "watching": "ウォッチ中",
       "only_playlists_ready": "準備の整ったプレイリストのみ",
@@ -795,10 +819,10 @@
       "add_shots": "ショットを追加",
       "add_sequence": "シーケンス全体を追加",
       "add_episode": "エピソード全体を追加",
-      "add_movie": "映画全体を追加する",
+      "add_movie": "ムービー全体を追加",
       "apply_task_type_change": "これは、すべてのエンティティの指定されたタスクタイプの最終リビジョンを設定します。",
       "available_build": "利用可能なビルド",
-      "build_daily": "毎日保留中",
+      "build_daily": "デイリーの保留中",
       "build_weekly": "すべての保留",
       "build_mp4": "ビルド .mp4",
       "building": "ビルド中…",
@@ -890,7 +914,7 @@
         "annotation_erase": "アノテーションを消去",
         "toggle_annotations": "動画が一時停止中にアノテーションを表示/非表示",
         "toggle_laser": "描画レーザーモードを有効/無効",
-        "annotation_zoom_pan": "ズームとパンを有効化",
+        "annotation_zoom_pan": "ズームをリセット",
         "default": "デフォルト",
         "exit_play_full": "フルムービー再生を終了",
         "object_background": "3D モデルに新しい環境マップを設定",
@@ -900,7 +924,9 @@
         "open_link": "リンクを開く",
         "annotation_huge": "特大",
         "annotation_shape": "シェイプ",
-        "annotation_tiny": "極小"
+        "annotation_tiny": "極小",
+        "onion_skin": "オニオンスキンフレーム",
+        "onion_skin_off": "オフ"
       },
       "download_csv": ".csv をダウンロード",
       "filter_task_type": "タスクタイプでフィルター",
@@ -908,14 +934,14 @@
       "add_sequences": "シーケンスを追加",
       "clients_to_notify": "通知するクライアント",
       "mute": "ミュート",
-      "notify_clients": "顧客への通知",
+      "notify_clients": "クライアントに通知",
       "notify_clients_description": "選択したスタジオのクライアントに、プレイリストの準備ができたことを知らせます。この操作は彼らへの通知を作成します。",
       "notify_clients_error": "クライアントへの通知中にエラーが発生しました。",
-      "no_clients_to_notify": "通知する顧客はいない。",
+      "no_clients_to_notify": "通知するクライアントはいません。",
       "notify_clients_success": "通知は正常に送信されました。",
       "unmute": "ミュート解除",
       "volume_level": "ボリューム{level}%。",
-      "add_edits": "エディットを追加",
+      "add_edits": "編集版を追加",
       "add_episodes": "エピソードを追加",
       "share": "共有",
       "share_modal": {
@@ -950,7 +976,9 @@
       },
       "update_to_latest_version": "最新バージョンに更新",
       "update_to_latest_version_help": "各エンティティの現在のタスクタイプを保ったまま、最新のリビジョンを設定します。",
-      "update_versions_title": "選択したバージョンを更新"
+      "update_versions_title": "選択したバージョンを更新",
+      "created": "プレイリスト「{name}」を作成しました。",
+      "view_created": "プレイリストを表示"
     },
     "productions": {
       "current": "選択されたプロダクション",
@@ -988,7 +1016,9 @@
         "is_set_preview_automated": "新しいプレビューを自動的にエンティティのサムネイルに設定",
         "homepage": "ホームページ（最初に表示されるページ）",
         "code": "略称",
-        "is_publish_default": "アーティストのコメントウィジェットをデフォルトで公開モードに設定"
+        "is_publish_default": "アーティストのコメントウィジェットをデフォルトで公開モードに設定",
+        "is_single_preview_per_revision": "リビジョンごとにプレビューファイルを1つのみ許可",
+        "revision_padding": "リビジョン番号のパディング（0 = パディングなし）"
       },
       "metadata": {
         "add_explaination": "このプロジェクトに必要な特定のデータを追加します。",
@@ -1013,8 +1043,8 @@
       "status": {
         "closed": "クローズ",
         "open": "オープン",
-        "active": "アクティブ",
-        "archived": "アーカイブ"
+        "active": "オープン",
+        "archived": "クローズ"
       },
       "type": {
         "short": "短編",
@@ -1077,14 +1107,14 @@
         "select_task_status_description": "エンティティに割り当てることが出来る「ステータス」の種類を定義します。",
         "start_and_end_dates": "開始日と終了日",
         "shots_to_import": "インポートするショット",
-        "select_edit_task_type": "タスクタイプの編集を選択する",
-        "select_edit_task_type_description": "エディットの制作工程を定義します。",
+        "select_edit_task_type": "編集版のタスクタイプを選択する",
+        "select_edit_task_type_description": "編集版の制作工程を定義します。",
         "choose_template": "プロダクションテンプレートを適用（任意）",
         "choose_template_description": "テンプレートを選択すると、タスクタイプ、タスクステータス、アセットタイプ、メタデータ、設定があらかじめ入力されます。最初から設定する場合は空のままにしてください。",
         "no_template": "テンプレートなし"
       },
       "style": {
-        "2d": "アニメーション（デジタル工程）",
+        "2d": "2Dアニメーション",
         "3d": "アニメーション（3D）",
         "2d3d": "アニメーション（2D/3D）",
         "ar": "AR（拡張現実）",
@@ -1098,7 +1128,7 @@
         "video_game": "ゲーム",
         "vr": "VR（仮想現実）",
         "immersive": "イマーシブ体験",
-        "2dpaper": "アニメーション（アナログ工程）"
+        "2dpaper": "2Dアニメーション（紙）"
       },
       "homepage": {
         "assets": "アセット",
@@ -1239,7 +1269,7 @@
       "title": "タスクステータス",
       "fields": {
         "color": "色",
-        "is_artist_allowed": "アーティストは許されるか",
+        "is_artist_allowed": "アーティストは許可されているか",
         "is_client_allowed": "クライアントは許可されているか",
         "is_done": "完了",
         "is_retake": "リテイク値を持つ",
@@ -1324,21 +1354,21 @@
       "mode_prev": "予想",
       "mode_real": "リアル",
       "version": "バージョン",
-      "apply_to_prod": "生産に適用する",
+      "apply_to_prod": "プロダクションに適用する",
       "apply_to_prod_confirm": "このスケジュールバージョンを現在のプロダクションに適用してよろしいですか？これは現在のタスク値を上書きします。",
       "apply_to_prod_error": "現在のプロダクションへのスケジュールバージョンの適用中にエラーが発生しました。",
       "assign": "に割り当てる：",
-      "export": "輸出スケジュール",
+      "export": "スケジュールをエクスポート",
       "export_error": "データのエクスポート中にエラーが発生しました。",
       "reset_list": "リセットリスト",
-      "no_entity": "譲渡可能な事業体はない",
-      "no_assignee": "譲渡可能人物なし",
+      "no_entity": "割り当て可能なエンティティがありません",
+      "no_assignee": "割り当て可能なユーザーがいません",
       "select_task_type": "タスクタイプを選択する",
       "show_assigned": "割り当てられたエンティティの表示",
       "force_unassign": "以前の割り当てを上書きする",
       "forced_daily_quotas": "強制的な1日のノルマ：",
       "estimated_daily_quotas": "1日の割当量を自動的に見積もる：",
-      "edit_task": "編集作業",
+      "edit_task": "タスクを編集",
       "new_version": "新バージョン",
       "create_version": "スケジュール版の作成",
       "edit_version": "スケジュールバージョンの編集",
@@ -1552,14 +1582,14 @@
         "task_status_short_name": "ステータス",
         "task_type": "タイプ",
         "start_date_short": "開始日",
-        "parent": "種類",
+        "parent": "親",
         "difficulty": "難易度",
         "done_date": "承認日",
         "nb_frames": "フレーム",
         "drawings": "枚数",
         "before_after_tasks": "ビフォー・アフター・タスク",
         "no_task_type": "タスクタイプなし",
-        "tasks_after": "その後の課題",
+        "tasks_after": "その後のタスク",
         "tasks_before": "前のタスク",
         "timesheets": "タイムシート"
       },
@@ -1582,8 +1612,8 @@
       "due_this_week": "今週の期限",
       "select_file": "コメントやメッセージに添付したいファイルをハードディスクから選択してください:",
       "big_thumbnails": "サムネイルを拡大表示",
-      "create_tasks_edit": "表示中のエディットにタスクを追加",
-      "create_tasks_edit_explaination": "現在のプロジェクトの各エディットに対して、指定されたタスクタイプの新しいタスクを作成しようとしています。続行しますか？",
+      "create_tasks_edit": "表示中の編集版にタスクを追加",
+      "create_tasks_edit_explaination": "現在のプロジェクトの各編集版に対して、指定されたタスクタイプの新しいタスクを作成しようとしています。続行しますか？",
       "create_tasks_edit_failed": "作成の処理中にサーバーエラーが発生しました。",
       "smaller": "タスクパネルを縮小",
       "small_thumbnails": "小さなサムネイルを表示",
@@ -1734,18 +1764,18 @@
       "software_used_by_artists": "アーティストが使用するソフトウェア"
     },
     "edits": {
-      "all_edits": "すべてのエディット",
-      "creation_explaination": "エディットファイルをアップロードして新しいエディットを作成",
-      "edit_error": "エディットの保存中にエラーが発生しました。類似の名前のエディットがないか確認してください。",
+      "all_edits": "すべての編集版",
+      "creation_explaination": "編集版ファイルをアップロードして新しい編集版を作成",
+      "edit_error": "編集版の保存中にエラーが発生しました。類似の名前の編集版がないか確認してください。",
       "delete_text": "{name} をデータベースから削除してもよろしいですか？",
-      "delete_error": "エディットの削除中にエラーが発生しました。関連データが存在する可能性があります。",
-      "delete_for_selection": "選択したエディットを削除 | {nbSelectedEdits} 件のエディットを削除",
-      "edit_title": "エディットを変更",
-      "empty_list": "このプロダクションにはエディットがありません。作成しますか？",
-      "empty_list_client": "このプロダクションにはエディットがありません。",
-      "new_edit": "エディットを作成",
-      "number": "エディット | エディット",
-      "title": "エディット",
+      "delete_error": "編集版の削除中にエラーが発生しました。関連データが存在する可能性があります。",
+      "delete_for_selection": "選択した編集版を削除 | {nbSelectedEdits} 件の編集版を削除",
+      "edit_title": "編集版を変更",
+      "empty_list": "このプロダクションには編集版がありません。作成しますか？",
+      "empty_list_client": "このプロダクションには編集版がありません。",
+      "new_edit": "編集版を作成",
+      "number": "編集版 | 編集版",
+      "title": "編集版",
       "fields": {
         "name": "名前",
         "episode": "エピソード",
@@ -1754,14 +1784,14 @@
       },
       "tasks": "タスク",
       "cancel_text": "{name} をアーカイブしてもよろしいですか？",
-      "history": "エディット値の履歴",
-      "restore_error": "このエディットの復元中にエラーが発生しました。",
+      "history": "編集版の値の履歴",
+      "restore_error": "この編集版の復元中にエラーが発生しました。",
       "edit_success": "変更が正常に保存されました。",
       "restore_text": "アーカイブから {name} を復元してもよろしいですか？",
-      "delete_for_selection_error": "選択した編集の削除中にエラーが発生しました。",
-      "delete_for_selection_hard_text": "選択した編集を永久に削除してもよろしいですか？関連するすべてのタスク、コメント、プレビューも削除されます。下に「削除」と入力して確認してください。",
+      "delete_for_selection_error": "選択した編集版の削除中にエラーが発生しました。",
+      "delete_for_selection_hard_text": "選択した編集版を永久に削除してもよろしいですか？関連するすべてのタスク、コメント、プレビューも削除されます。下に「削除」と入力して確認してください。",
       "delete_for_selection_hard_lock_text": "削除",
-      "multiple_delete_error": "編集の削除中にエラーが発生しました。現在リンクされている既存のデータがある可能性があります。選択した編集にリンクされているタスクがないことを確認していますか？"
+      "multiple_delete_error": "編集版の削除中にエラーが発生しました。現在リンクされている既存のデータがある可能性があります。選択した編集版にリンクされているタスクがないことを確認していますか？"
     },
     "status_automations": {
       "change_ready_for": "\"準備対象\"を変更",
@@ -1793,7 +1823,7 @@
         "shot": "ショット",
         "sequence": "シーケンス",
         "episode": "エピソード",
-        "edit": "編集"
+        "edit": "編集版"
       },
       "field_types": {
         "status": "ステータス",
@@ -1973,7 +2003,7 @@
     "budget": {
       "add_entry": "エントリーを追加する",
       "analytics": "予算分析",
-      "cash_evolution": "経費の進化",
+      "cash_evolution": "経費の推移",
       "cash_repartition": "経費の分割",
       "cost": "コスト",
       "costs": "実質コスト",
@@ -1989,13 +2019,13 @@
       "delete_budget_entry_message": "この予算項目を削除してもよろしいですか？",
       "delete_budget_error": "この予算の削除中にエラーが発生しました。サポートチームまでご連絡ください。",
       "delete_budget_message": "予算{name}を削除してもよろしいですか？下に予算名を入力して確認してください。",
-      "difference": "違い",
+      "difference": "差額",
       "edit_budget": "現在の予算バージョンを編集する",
       "edit_budget_entry": "エントリーを編集する",
       "edit_budget_entry_error": "この予算エントリーの編集中にエラーが発生しました。サポートチームまでご連絡ください。",
       "entries": "エントリー",
       "gap": "ギャップ",
-      "hide_expenses": "本当のコストを隠す",
+      "hide_expenses": "実費を非表示",
       "months": "ヶ月",
       "new_hiring": "新規採用",
       "new_version": "新バージョン",
@@ -2004,7 +2034,7 @@
       "no_analytics_to_show": "このプロダクションには表示する分析がありません。アナリティクスを見るには予算を作成し、エントリーを追加してください。",
       "remaining": "残り",
       "previsional_costs": "推定",
-      "remaining_and_costs": "レム+ 費用",
+      "remaining_and_costs": "残り + 費用",
       "salary_scale_title": "給与水準",
       "show_expenses": "実際のコストを表示する",
       "show_items": "ハードウェアとソフトウェアのカウント",
@@ -2035,7 +2065,8 @@
         "junior": "ジュニア",
         "mid": "ミッド",
         "senior": "シニア"
-      }
+      },
+      "clear_exception": "今月の給与の上書きをクリア"
     },
     "hard_delete": {
       "delete_for_selection_hard_text": "選択したアイテムを永久に削除してもよろしいですか？以下に「削除」と入力して確認してください。",
@@ -2050,10 +2081,10 @@
       "number": "ハードウェア・アイテム｜ハードウェア・アイテム",
       "title": "ハードウェア",
       "fields": {
-        "inventory_amount": "在庫金額",
+        "inventory_amount": "在庫数",
         "monthly_cost": "月額費用",
         "name": "名称",
-        "remaining_amount": "残額",
+        "remaining_amount": "残数",
         "short_name": "略称"
       }
     },
@@ -2080,7 +2111,7 @@
       "change_password": "パスワードの変更",
       "delete": "削除",
       "edit": "編集",
-      "history": "歴史",
+      "history": "履歴",
       "refresh": "リフレッシュ",
       "restore": "リストア",
       "archive": "アーカイブ"

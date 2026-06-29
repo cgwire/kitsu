@@ -30,15 +30,15 @@
         "shared": "Compartido en la biblioteca de activos"
       },
       "cancel_text": "¿Está seguro de que desea archivar {name}?",
-      "delete_for_selection": "Eliminar {nbSelectedAssets} los recursos seleccionados:",
+      "delete_for_selection": "Eliminar el recurso seleccionado | Eliminar los {nbSelectedAssets} recursos seleccionados",
       "multiple_delete_error": "Se ha producido un error al eliminar un recurso. Es probable que haya algunos datos vinculados a un recurso. ¿Está seguro de que no hay ninguna tarea vinculada a algún recurso seleccionado?",
       "only_current_episode": "Solamente el episodio actual",
       "linked": "Enlace",
       "no_concept": "No hay conceptos vinculados a este activo",
-      "casted_in_shots": "Lanzado en {nbShots} disparos",
+      "casted_in_shots": "Asignado en {nbShots} tomas",
       "delete_for_selection_hard_text": "¿Está seguro de que desea eliminar permanentemente los activos seleccionados? También se eliminarán todas las tareas, comentarios y vistas previas relacionadas. Confírmelo escribiendo \"BORRAR\" a continuación.",
       "delete_for_selection_hard_lock_text": "BORRAR",
-      "show_linked": "Desglose de la pantalla Activos"
+      "show_linked": "Mostrar recursos del desglose"
     },
     "asset_types": {
       "all_asset_types": "Todos los tipos de recurso",
@@ -49,14 +49,14 @@
       "new_asset_type": "Añadir un tipo de recurso",
       "number": "tipo de recurso | tipos de recursos",
       "title": "Tipos de recursos",
-      "production_title": "Estadísticas de Assets",
+      "production_title": "Estadísticas de tipos de recurso",
       "fields": {
         "name": "Nombre",
         "task_types": "Tipos de tarea",
         "short_name": "Nombre corto",
         "description": "Descripción"
       },
-      "include_all": "Incluir todos los tipos de recurso",
+      "include_all": "Incluye todos los tipos de tarea de recurso",
       "add_asset_type_to_library": "Añadir un tipo de activo a la biblioteca",
       "library_title": "Biblioteca de tipos de activos",
       "add_asset_type_placeholder": "+ Añadir tipo de activo"
@@ -66,7 +66,7 @@
       "edit_label": "Cambiar la etiqueta del recurso",
       "empty": "Casting vacío",
       "label": "Etiqueta",
-      "picture_mode": "Cambiar el a modo de imagen.",
+      "picture_mode": "Cambiar a modo de imagen",
       "text_mode": "Cambiar a modo de texto",
       "title": "Desglose",
       "options": {
@@ -84,7 +84,7 @@
       "episode_casting": "Reparto de episodios",
       "save_error": "Se ha producido un error al guardar el reparto",
       "hide_library": "Ocultar biblioteca",
-      "show_library": "Biblioteca"
+      "show_library": "Mostrar biblioteca"
     },
     "comments": {
       "add_attachment": "Adjuntar archivo...",
@@ -102,7 +102,7 @@
       "pinned": "Anclado",
       "post_status": "Publicar comentario",
       "retake": "Retoma",
-      "revision": "modificación",
+      "revision": "revisión",
       "set_status_to": "Fijar el estado en",
       "task_placeholder": "Nuevo articulo...",
       "text": "Texto",
@@ -122,9 +122,9 @@
       "checklist": "Lista de verificación",
       "attachments": "Archivos adjuntos",
       "attachments_to_add": "Archivos adjuntos para añadir",
-      "max_retakes_error": "Ya no puede retomar esta tarea.",
-      "previews": "vistas previas",
-      "selected_files": "recursos_seleccionados",
+      "max_retakes_error": "Ya no puede añadir más retomas en esta tarea.",
+      "previews": "Archivos de vista previa para publicar como nueva revisión",
+      "selected_files": "Archivos seleccionados",
       "no_attachments": "No hay archivos adjuntos para este comentario.",
       "confirm_publish": "No se han establecido archivos de vista previa para la publicación. ¿Estás seguro de que quieres publicar el comentario?",
       "confirm_publish_button": "Publicar comentario sin publicar archivos",
@@ -146,7 +146,15 @@
       },
       "move_to_task": "Mover a",
       "title": "Comentarios",
-      "toggle_for_client": "Visibilidad para el cliente"
+      "toggle_for_client": "Visibilidad para el cliente",
+      "player": {
+        "play": "Reproducir",
+        "pause": "Pausa",
+        "mute": "Silenciar",
+        "unmute": "Activar sonido",
+        "fullscreen": "Pantalla completa",
+        "download": "Descargar"
+      }
     },
     "custom_actions": {
       "create_error": "Se ha producido un error al guardar esta acción personalizada. ¿Está seguro de que no hay otra acción con el mismo nombre?",
@@ -155,7 +163,7 @@
       "edit_title": "Modificaracción personalizada",
       "new_custom_action": "Añadir acción personalizada",
       "number": "acción personalizada | acciones personalizadas",
-      "run_for_selection": "Ejecute una acción personalizada para las tareas seleccionadas:",
+      "run_for_selection": "Ejecutar la acción personalizada para la tarea seleccionada | Ejecutar las acciones personalizadas para las {nbSelectedTasks} tareas seleccionadas",
       "title": "Acciones personalizadas",
       "fields": {
         "name": "Nombre",
@@ -168,7 +176,7 @@
         "shot": "Toma",
         "asset": "Recurso",
         "sequence": "Secuencia",
-        "edit": "Editar",
+        "edit": "Montaje",
         "episode": "Episodio"
       }
     },
@@ -202,7 +210,7 @@
       },
       "thumbnails": {
         "error": "Se ha producido un error al subir las miniaturas",
-        "shots_pattern": "NombreDeSecuencia NombreDeDisparo, por ejemplo SQ01_SH01.",
+        "shots_pattern": "\"NombreDeSecuencia NombreDeToma\", por ejemplo SQ01_SH01.",
         "assets_pattern": "Nombre de asset del tipo de asset, por ejemplo, Environment_Forest.",
         "select_files": "Seleccion archivos",
         "selected_files": "Archivos seleccionados",
@@ -234,7 +242,7 @@
       },
       "nb_selected_assets": "{nbSelectedAssets} activo seleccionado | {nbSelectedAssets} activos seleccionados",
       "nb_selected_shots": "{nbSelectedShots} toma seleccionada | {nbSelectedShots} tomas seleccionadas",
-      "nb_selected_edits": "{nbSelectedEdits} edición seleccionada | {nbSelectedEdits} ediciones seleccionadas",
+      "nb_selected_edits": "{nbSelectedEdits} montaje seleccionado | {nbSelectedEdits} montajes seleccionados",
       "output_files": {
         "extension": "Extensión",
         "name": "Nombre",
@@ -262,13 +270,13 @@
       "empty_list_client": "No hay ningún episodio en esta producción.",
       "new_episode": "Nuevo episodio",
       "number": "episodio | episodios",
-      "title": "Estadísticas del episodio",
+      "title": "Episodios",
       "fields": {
-        "name": "denominación",
+        "name": "nombre",
         "description": "descripción",
         "placeholder": "E01"
       },
-      "no_casting": "La selección de episodios está vacía.",
+      "no_casting": "El reparto del episodio está vacío.",
       "restore_error": "Se ha producido un error al restaurar el episodio dado.",
       "tasks": "Tareas de los episodios",
       "stats_title": "Estadísticas de los episodios",
@@ -282,10 +290,10 @@
     "keyboard": {
       "altdown": "Mueve la selección de una tarea hacia abajo",
       "altj": "Seleccionar vista previa anterior",
-      "altk": "Seleccionar vista previa anterior",
-      "altleft": "Mover tarea seleccionada a la izquierda",
-      "altright": "Mover tarea seleccionada a la derecha\n",
-      "altup": "Mover tarea seleccionada arriba",
+      "altk": "Seleccionar vista previa siguiente",
+      "altleft": "Mover la selección de tarea a la izquierda",
+      "altright": "Mover la selección de tarea a la derecha",
+      "altup": "Mover la selección de tarea hacia arriba",
       "annotations": "Anotaciones",
       "draw": "Activar el modo de dibujo",
       "erase": "Activar el modo de borrador",
@@ -322,7 +330,9 @@
       "scrub_anywhere": "Recorrer la línea de tiempo desde cualquier parte del reproductor",
       "focus_comment": "Alternar el foco entre el reproductor y el cuadro de comentarios",
       "first_frame": "Ir al primer fotograma",
-      "last_frame": "Ir al último fotograma"
+      "last_frame": "Ir al último fotograma",
+      "straight_line": "Dibujar una línea recta",
+      "constant_width": "Dibujar con un grosor constante (sin presión)"
     },
     "login": {
       "back_to_login": "Voler al login",
@@ -422,7 +432,7 @@
       "main_pack": "Main Pack",
       "maximize": "Maximizar",
       "nb_frames": "fotograma | fotogramas",
-      "person": "person",
+      "person": "Persona",
       "profile": "Perfil",
       "production": "Producción",
       "remove": "Quitar",
@@ -452,8 +462,8 @@
         "preview": "vista previa\n",
         "preview_episode_name": "Nombre del episodio",
         "preview_title": "Vista previa de sus datos importados",
-        "preview_description": "Sube un archivo .csv para llenar tu pizarra con posts",
-        "preview_required": "NB: Los encabezados deben ser incluidos como primera fila.",
+        "preview_description": "Sube un archivo .csv para rellenar tu tabla de entidades.",
+        "preview_required": "Los encabezados se usan para hacer coincidir las columnas con los datos a establecer. Deben incluirse como primera fila.",
         "preview_reupload": "Subir de nuevo el archivo .CSV",
         "required_fields": "Su CSV requiere las siguientes columnas:",
         "select_file": "Por favor, seleccione un archivo de una de sus carpetas:",
@@ -466,7 +476,7 @@
           "update": "Actualizar los datos existentes"
         },
         "optional_fields": "Columnas opcionales:",
-        "generic_fields": "Columnas genéricas:",
+        "generic_fields": "Columnas de metadatos y de tareas (opcional):",
         "export_current_view": "Exportar vista actual",
         "legend_line_ok": "Línea que se creará",
         "legend_missing_optional": "Columna opcional que no se ha encontrado"
@@ -494,15 +504,15 @@
       "stick": "Enganchar",
       "timeSpent": "Tiempo empleado",
       "unstick": "Desenganchar",
-      "all_edits": "Todas las ediciones",
+      "all_edits": "Todos los montajes",
       "attach_snapshots": "Adjuntar instantáneas de las anotaciones",
       "reply": "Responder",
       "select_file": "Seleccione un archivo desde su disco duro",
-      "frame_in": "Encuadrar dentro\n",
-      "frame_out": "Encuadrar fuera",
+      "frame_in": "Fotograma de entrada",
+      "frame_out": "Fotograma de salida",
       "type": "Tipo",
       "search": {
-        "type": "Tipo",
+        "type": "Escribe al menos 3 caracteres para realizar la búsqueda",
         "no_result": "No hay resultados para esta búsqueda.",
         "no_filter": "Selecciona al menos un filtro para hacer la búsqueda"
       },
@@ -540,7 +550,7 @@
       "filter_group_edit": "Editar un grupo de filtros",
       "filter_group_empty": "Sin filtro",
       "filter_group_error": "Se ha producido un error al guardar este grupo de filtros.",
-      "load_more": "Más información",
+      "load_more": "Cargar más",
       "on": "En",
       "optional": "opcional",
       "tasks": "Tareas",
@@ -558,7 +568,7 @@
       "day": "Día",
       "hour": "Hora",
       "label": {
-        "casting": "Fundición",
+        "casting": "Casting",
         "chat": "Chat",
         "concepts": "Conceptos",
         "info": "Información",
@@ -574,7 +584,7 @@
       "total": "Total",
       "unassigned": "Sin asignar",
       "year": "Año",
-      "apply": "Solicitar",
+      "apply": "Aplicar",
       "back": "Volver",
       "edit_mode_on": "Conmutar el modo de edición",
       "entities": "Entidades",
@@ -583,7 +593,7 @@
       "remove_search_query": "¿Está seguro de que desea eliminar la consulta de búsqueda \"{name}\"?",
       "remove_search_filter_group": "¿Estás seguro de que quieres eliminar el grupo de filtros de búsqueda \"{name}\"?",
       "shared_by": "Compartido por {name}",
-      "continue": "Continúe en",
+      "continue": "Continuar",
       "developer_documentation": "Documentación para desarrolladores",
       "feedback": "Hoja de ruta / Comentarios",
       "annotations": {
@@ -594,19 +604,33 @@
       "disable_desktop_notifications": "Desactivar notificaciones de escritorio",
       "enable_desktop_notifications": "Activar notificaciones de escritorio",
       "export": "Exportar",
-      "unknown": "Desconocido"
+      "unknown": "Desconocido",
+      "record_audio": "Grabar audio",
+      "record_video": "Grabar vídeo",
+      "recording": {
+        "webcam": "Webcam",
+        "screen": "Pantalla",
+        "microphone": "Micrófono",
+        "start": "Iniciar",
+        "stop": "Detener",
+        "cancel": "Cancelar",
+        "recording": "Grabando",
+        "permission_denied": "Permiso denegado. Permite el acceso al micrófono o la cámara e inténtalo de nuevo.",
+        "no_device": "No se ha encontrado ningún micrófono ni cámara.",
+        "not_supported": "La grabación no es compatible con este navegador."
+      }
     },
     "menu": {
       "assign_tasks": "Asignar tareas",
       "change_priority": "Modificar prioridad",
       "change_status": "Cambiar status",
       "create_tasks": "Crear tareas",
-      "delete_tasks": "Borrar medidas",
+      "delete_tasks": "Borrar tareas",
       "run_custom_action": "Ejecutar una acción personalizada",
       "set_estimations": "Fijar estimaciones",
       "delete_assets": "Borrar recursos",
       "delete_shots": "Borrar tomas",
-      "delete_edits": "Elimine las ediciones",
+      "delete_edits": "Eliminar los montajes",
       "generate_playlist": "Generar una lista de reproducción",
       "set_thumbnails": "Establecer miniaturas de la última vista previa",
       "subscribe": "Suscribirse a las notificaciones",
@@ -617,7 +641,7 @@
       "all": "Todos",
       "commented_on": "comentado",
       "infos": "Información",
-      "no_news": "No hay noticias de esta producción o de este filtro.",
+      "no_news": "No hay novedades.",
       "only_comments": "Sólo comentarios",
       "only_previews": "Sólo previsualizaciones",
       "set_preview_on": "establecer vista previa en",
@@ -630,14 +654,14 @@
       "no_news_hint": "Prueba a ampliar los filtros o vuelve más tarde."
     },
     "not_found": {
-      "text": "Había algo mal en el enlace en el que hiciste clic, te animamos a que vuelvas a la página de inicio.",
-      "title": "Página no encontrada... ¿buscas algo que has borrado?"
+      "text": "El enlace en el que hiciste clic está roto o no se encontró el destino. Por favor, vuelve a la página de inicio.",
+      "title": "Página no encontrada..."
     },
     "notifications": {
       "and_change_status": "y ha cambiado el status a",
-      "assigned_you": "te asignó a",
+      "assigned_you": "te asignó a esta tarea",
       "commented_on": "comentado",
-      "mention_you_on": "te mencioné en",
+      "mention_you_on": "te mencionó en un comentario",
       "no_notifications": "Actualmente no hay ninguna notificación para usted para sus proyectos actuales.",
       "unread_notifications": "notificación no leída | notificaciones no leídas",
       "title": "Notificaciones",
@@ -663,7 +687,7 @@
       "read": "leer",
       "reply": "Respuesta",
       "publish": "Publique",
-      "published": "publicó un avance",
+      "published": "publicó una vista previa",
       "show_comments": "Mostrar comentarios",
       "watching": "ver",
       "only_playlists_ready": "Sólo listas de reproducción listas",
@@ -690,7 +714,7 @@
       "active_persons": "usuario activo | usuarios activos",
       "add_member_to_team": "Añada un miembro al equipo:",
       "create_invite": "Crear y enviar invitación",
-      "create_error": "Se ha producido un error al crear o actualizar este usuario. Puede que se haya alcanzado el límite de usuarios. Por favor, contacte con el equipo de soporte técnico para mas información.",
+      "create_error": "Se ha producido un error en el servidor al crear o actualizar este usuario. Por favor, contacte con nuestro equipo de soporte técnico para más información.",
       "delete_error": "Se ha producido un error al eliminar este usuario. Es probable que haya datos asociados. ¿Está seguro de que este usuario no tiene ninguna tarea asignada o escribió algún comentario?",
       "delete_text": "¿Está seguro de que desea eliminar {personName} de su base de datos? Cada comentario y vista previa relacionados se eliminarán. Confirme escribiendo el nombre entero del usuario a continuación.",
       "edit_title": "Modificar usuario",
@@ -699,7 +723,7 @@
       "invite_error": "Se ha producido un error al enviar la invitación",
       "invite_success": "La invitación fue enviada con éxito",
       "new_person": "Añadir un usuario nuevo",
-      "no_task_assigned": "No hay tareas de ejecución asignadas a usted",
+      "no_task_assigned": "No hay tareas en ejecución asignadas a usted",
       "persons": "usuario | usuarios",
       "running_tasks": "Tareas en ejecución",
       "select_person": "Seleccione un usuario...",
@@ -728,7 +752,7 @@
       "list": {
         "name": "Nombre",
         "email": "Correo electrónico",
-        "phone": "llamar",
+        "phone": "Teléfono",
         "role": "Papel",
         "active": "Activo",
         "departments": "Departamentos",
@@ -742,7 +766,7 @@
       },
       "role": {
         "admin": "Director del estudio",
-        "client": "Mandante",
+        "client": "Cliente",
         "manager": "Jefe de Producción",
         "user": "Artista CG",
         "undefined": "sin definir",
@@ -774,7 +798,7 @@
       "position": {
         "artist": "Artista",
         "supervisor": "Supervisor",
-        "lead": "Plomo"
+        "lead": "Responsable"
       },
       "seniority": {
         "junior": "Junior",
@@ -794,15 +818,15 @@
       "add_selection": "Añade la selección",
       "add_shots": "Añadir tomas",
       "add_sequence": "Añadir secuencia completa",
-      "add_episode": "Añadir episodio completa",
-      "add_movie": "Añadir film completa",
-      "apply_task_type_change": "Esto posicionará la última revisión para el tipo de tarea dada en todos los tomas.",
+      "add_episode": "Añadir episodio completo",
+      "add_movie": "Añadir película completa",
+      "apply_task_type_change": "Esto posicionará la última revisión para el tipo de tarea dado en todas las entidades.",
       "available_build": "Construcciones disponibles",
       "build_daily": "Diario pendiente",
       "build_weekly": "Todos Pendientes",
       "build_mp4": "Construir .mp4",
-      "building": "Edificio",
-      "client_playlist": "Playlist clave",
+      "building": "Construyendo...",
+      "client_playlist": "Playlist del cliente",
       "create_for_selection": "Crear una playlist para la selección",
       "create_title": "Crear playlist",
       "created_at": "Creado en:",
@@ -820,7 +844,7 @@
       "new_playlist": "Añadir una lista de reproducción",
       "no_build": "Sin construcción",
       "no_playlist": "Actualmente no hay ninguna lista de reproducción para este proyecto.",
-      "no_preview": "No hay vista previa de esta toma",
+      "no_preview": "No hay vista previa",
       "no_selection": "Por favor, seleccione una lista de reproducción a la izquierda.",
       "no_sequence_for_episode": "No hay secuencia para este episodio",
       "no_shot_for_production": "No hay ninguna toma para esta producción.",
@@ -835,16 +859,16 @@
         "created_at": "Creado en",
         "updated_at": "Actualizado en",
         "for_entity": "Para la entidad",
-        "for_client": "Par compartir con"
+        "for_client": "Para compartir con"
       },
       "actions": {
         "annotation": "Anotación",
         "annotation_text": "Doble clic en la vista previa para añadir algo de texto",
         "annotation_delete": "Borrar anotación",
-        "annotation_redo": "Redo anotación",
+        "annotation_redo": "Rehacer anotación",
         "annotation_undo": "Deshacer anotación",
         "annotation_big": "Grande",
-        "annotation_medium": "Medium",
+        "annotation_medium": "Mediana",
         "annotation_small": "Pequeña",
         "change_task_type": "Cambiar el tipo de tarea",
         "comments": "Mostrar/ocultar comentarios",
@@ -886,13 +910,13 @@
         "switch_hd": "Cambiar a alta definición",
         "frames_per_picture": "Fotogramas por imagen",
         "toggle_playing_annotations": "Mostrar/Ocultar las anotaciones durante la reproducción",
-        "toggle_waveform": "Mostrar/Ocultar las ondas de reproducción",
+        "toggle_waveform": "Mostrar/Ocultar la forma de onda de la película",
         "annotation_erase": "Borrar anotación",
-        "toggle_annotations": "Mostrar u ocultar anotaciones al reproducir películas",
+        "toggle_annotations": "Mostrar u ocultar anotaciones cuando la película está en pausa",
         "toggle_laser": "Activar o desactivar el modo láser de dibujo",
-        "annotation_zoom_pan": "Activar zoom y panorámica",
+        "annotation_zoom_pan": "Restablecer zoom",
         "default": "por defecto",
-        "exit_play_full": "Exit película completa",
+        "exit_play_full": "Salir de la reproducción de la película completa",
         "object_background": "Establecer un nuevo mapa de entorno en el modelo 3D",
         "select_background": "Seleccione un fondo",
         "toggle_environment_skybox": "Mostrar/ocultar el fondo de la caja celeste",
@@ -900,11 +924,13 @@
         "open_link": "Abrir enlace",
         "annotation_huge": "Enorme",
         "annotation_shape": "Forma",
-        "annotation_tiny": "Diminuta"
+        "annotation_tiny": "Diminuta",
+        "onion_skin": "Fotogramas en piel de cebolla",
+        "onion_skin_off": "Desactivado"
       },
       "download_csv": "Descargar .csv",
       "filter_task_type": "Filtrado por tipo de tarea",
-      "comparing_missing_plan": "Toma perdida para el tipo actual",
+      "comparing_missing_plan": "Entidad ausente para el tipo actual",
       "add_sequences": "Añadir secuencias",
       "clients_to_notify": "Clientes a notificar",
       "mute": "Silenciar",
@@ -913,9 +939,9 @@
       "notify_clients_error": "Se ha producido un error al notificar a los clientes.",
       "no_clients_to_notify": "No hay clientes a los que notificar.",
       "notify_clients_success": "La notificación se ha enviado correctamente.",
-      "unmute": "Desactivar",
+      "unmute": "Activar sonido",
       "volume_level": "Volumen: {level}%",
-      "add_edits": "Añadir modificaciones",
+      "add_edits": "Añadir montajes",
       "add_episodes": "Añadir episodios",
       "share": "Compartir",
       "share_modal": {
@@ -950,7 +976,9 @@
       },
       "update_to_latest_version": "Actualizar a la última versión",
       "update_to_latest_version_help": "Establece la última revisión para cada entidad, manteniendo su tipo de tarea actual.",
-      "update_versions_title": "Actualizar versiones seleccionadas"
+      "update_versions_title": "Actualizar versiones seleccionadas",
+      "created": "Lista de reproducción «{name}» creada.",
+      "view_created": "Ver lista de reproducción"
     },
     "productions": {
       "current": "Producción seleccionada",
@@ -988,7 +1016,9 @@
         "is_set_preview_automated": "Establecer automáticamente la nueva vista previa como miniatura de la entidad",
         "homepage": "Página de inicio (primera página mostrada)",
         "code": "Nombre corto",
-        "is_publish_default": "Establecer widget de comentarios para los artistas en el modo de publicación por defecto"
+        "is_publish_default": "Establecer widget de comentarios para los artistas en el modo de publicación por defecto",
+        "is_single_preview_per_revision": "Permitir solo un archivo de vista previa por revisión",
+        "revision_padding": "Relleno del número de revisión (0 = sin relleno)"
       },
       "metadata": {
         "add_explaination": "Añada los datos específicos requeridos por este proyecto.",
@@ -1077,8 +1107,8 @@
         "select_task_status_description": "Seleccione los estados de las tareas que usará durante la producción.",
         "start_and_end_dates": "Fechas de inicio y fin",
         "shots_to_import": "tomas a importar",
-        "select_edit_task_type": "Seleccione el tipo de tarea de edición",
-        "select_edit_task_type_description": "Estos tipos de tarea definen la construcción de las modificaciones.",
+        "select_edit_task_type": "Seleccione los tipos de tarea de montaje",
+        "select_edit_task_type_description": "Estos tipos de tarea definen los pasos de construcción de sus montajes.",
         "choose_template": "Aplicar una plantilla de producción (opcional)",
         "choose_template_description": "Elige una plantilla para rellenar previamente los tipos de tarea, los estados de tarea, los tipos de recurso, los metadatos y los ajustes. Déjalo vacío para configurarla desde cero.",
         "no_template": "Sin plantilla"
@@ -1101,8 +1131,8 @@
         "2dpaper": "Animación 2D (Papel)"
       },
       "homepage": {
-        "assets": "Activos",
-        "shots": "Disparos",
+        "assets": "Recursos",
+        "shots": "Tomas",
         "sequences": "Secuencias"
       },
       "load_stats": "Estadísticas de carga"
@@ -1132,7 +1162,7 @@
         "button": "Cambiar contraseña",
         "error": "Se ha producido un error al cambiar la contraseña. Por favor, verifique su contraseña actual.",
         "success": "Su contraseña ha sido cambiada con éxito!",
-        "unvalid": "La confirmación de su nueva contraseña no coincide o es demasiado corta (se esperan al menos 7 caracteres)."
+        "unvalid": "La confirmación de su nueva contraseña no coincide o es demasiado corta (se esperan al menos 8 caracteres)."
       },
       "save": {
         "button": "Guardar cambios",
@@ -1147,7 +1177,7 @@
       "two_factor_authentication": {
         "title": "Autenticación de dos factores",
         "scan_qrcode": "Escanea este código QR en la aplicación TOTP.",
-        "otp_secret": "OTP secreta",
+        "otp_secret": "Secreto OTP",
         "totp": {
           "button_enable": "Activar TOTP",
           "button_disable": "Desactivar TOTP",
@@ -1195,9 +1225,9 @@
     "settings": {
       "change_logo": "Cambiar logotipo",
       "integrations": "Integraciones",
-      "logo": "Estudio de logotipos",
-      "no_logo": "No hay conjunto de logotipos.",
-      "set_logo": "Logotipo de estudio",
+      "logo": "Logotipo del estudio",
+      "no_logo": "No se ha definido ningún logotipo.",
+      "set_logo": "Establecer logotipo del estudio",
       "title": "Ajustes",
       "fields": {
         "name": "Nombre del estudio",
@@ -1230,7 +1260,7 @@
       "preferences_title": "Preferencias"
     },
     "task_status": {
-      "create_error": "Se ha producido un error al guardar la secuencia. ¿Está seguro que no hay otro estado de tarea con un nombre similar?",
+      "create_error": "Se ha producido un error al guardar este estado de tarea. ¿Está seguro que no hay otro estado de tarea con un nombre similar?",
       "delete_text": "¿Está seguro de que desea eliminar {name} de su base de datos?",
       "delete_error": "Se ha producido un error al eliminar este estado de la tarea. Es probable que haya datos asociados. ¿Está seguro de que este status de tarea no tiene ninguna tarea asociada?",
       "edit_title": "Modificar el estado de la tarea",
@@ -1241,13 +1271,13 @@
         "color": "Color",
         "is_artist_allowed": "Se permite al artista",
         "is_client_allowed": "Se permite al cliente",
-        "is_done": "Se hace",
+        "is_done": "Está hecho",
         "is_retake": "Tiene valor de retoma",
         "name": "Nombre",
         "short_name": "Denominación breve",
         "is_feedback_request": "Es una solicitud de comentarios",
         "is_default": "Es por defecto",
-        "for_concept": "Por concepto",
+        "for_concept": "Para concepto",
         "description": "Descripción",
         "is_wip": "Es WIP"
       },
@@ -1264,8 +1294,8 @@
     "task_types": {
       "delete_text": "¿Está seguro de que desea eliminar {name} de su base de datos?",
       "delete_error": "Se ha producido un error al eliminar este tipo de tarea. Es probable que haya datos asociados. ¿Está seguro de que este tipo de tarea no tiene ninguna tarea asociada?",
-      "edit_title": "Tratar tipo de tarea",
-      "create_error": "Se ha producido un error al crear la tarea. Asegúrese que no haya otra tarea con un nombre similar.",
+      "edit_title": "Modificar tipo de tarea",
+      "create_error": "Se ha producido un error al crear el tipo de tarea. Asegúrese que no haya otro tipo de tarea con un nombre similar.",
       "new_task_type": "Añadir un tipo de tarea",
       "number": "tipo de tarea | tipos de tarea",
       "title": "Tipos de tareas",
@@ -1283,7 +1313,7 @@
       "add_task_type_placeholder": "+ Tipo de tarea",
       "select_task_type": "Seleccione un tipo de tarea...",
       "add_task_type_to_library": "Añadir un tipo de tarea a la biblioteca",
-      "library_title": "Tipo de tarea Biblioteca"
+      "library_title": "Biblioteca de tipos de tarea"
     },
     "sequences": {
       "all_sequences": "Todas las secuencias",
@@ -1295,14 +1325,14 @@
       "empty_list_client": "No hay secuencia en esta producción.",
       "new_sequence": "Nueva secuencia",
       "number": "secuencia | secuencias",
-      "title": "Estadísticas de secuencias",
+      "title": "Secuencias",
       "fields": {
-        "name": "denominar",
+        "name": "Nombre",
         "description": "descripción",
         "person": "Persona",
         "placeholder": "SQ01"
       },
-      "no_casting": "La selección de secuencias está vacía.",
+      "no_casting": "El casting de la secuencia está vacío.",
       "stats_title": "Estadísticas de secuencia",
       "tasks": "Tareas"
     },
@@ -1368,7 +1398,7 @@
       "details_seconds": "Segundos",
       "details_frames": "Frames",
       "month_label": "Mes",
-      "no_quota": "No hay cuota para este tipo de tarea",
+      "no_quota": "No hay cuota para esta selección.",
       "name": "Nombre",
       "quota_day": "Cuotas diarias",
       "quota_week": "Cuotas semanales",
@@ -1385,7 +1415,7 @@
       "feedback_date": "Fecha del comentario",
       "frames": "Fotogramas",
       "month": "Mes",
-      "seconds": "Segundo",
+      "seconds": "Segundos",
       "weighted": "Ponderada",
       "week": "Semana",
       "explanation_feedback": "La toma se considera completa en la primera solicitud de respuesta. Su número de fotogramas se añade a las cuotas de ese día.",
@@ -1401,33 +1431,33 @@
       "delete_text": "¿Está seguro de que desea eliminar {name} de su base de datos?",
       "delete_error": "Se ha producido un error al eliminar esta toma. Es probable que haya datos asociados. ¿Está seguro de que esta toma no tiene ninguna tarea asociada?",
       "edit_success": "Toma {name} modificada exitosamente.",
-      "edit_fail": "La creación o modificación falló, se produjo un error. Asegúrese de que no está renombrando la toma con el nombre de la secuencia dada.",
+      "edit_fail": "La creación o modificación falló, se produjo un error. Asegúrese de que no está renombrando la toma con un nombre que ya existe en la secuencia dada.",
       "edit_title": "Modificar toma",
       "empty_list": "No hay ninguna toma en la producción. ¿Qué tal si creamos algunas?",
       "empty_list_client": "No hay ninguna toma en esta producción.",
       "episodes": "Episodios",
-      "history": "Historial de valores plan",
-      "new_shot": "Agregar una foto",
+      "history": "Historial de valores de la toma",
+      "new_shot": "Agregar una toma",
       "new_shots": "Crear tomas",
       "new_sequences": "Añadir secuencias",
       "new_episodes": "Añadir episodios",
       "no_casting": "El casting de la toma está vacío.",
-      "number": "Plan | Disparos",
+      "number": "toma | tomas",
       "manage": "Crear tomas",
-      "new_success": "Plan {name} creado con éxito.",
-      "padding": "Separación entre tomas",
-      "restore_text": "¿Está seguro de que desea restaurar {name} de la base de datos?",
+      "new_success": "Toma {name} creada con éxito.",
+      "padding": "Relleno de numeración de tomas",
+      "restore_text": "¿Está seguro de que desea restaurar {name} de su archivo?",
       "restore_error": "Se ha producido un error al restaurar esta toma.",
       "sequences": "Secuencias",
       "tasks": "Tareas de las toma",
       "title": "Tomas",
       "fields": {
         "description": "Descripción",
-        "nb_frames": "Marcos",
+        "nb_frames": "Fotogramas",
         "episode": "Episodio",
         "frame_in": "En",
         "frame_out": "Fuera",
-        "fps": "SPD",
+        "fps": "FPS",
         "name": "Nombre",
         "production": "Prod",
         "sequence": "Secuencia",
@@ -1439,7 +1469,7 @@
         "nb_drawings": "Dibujos"
       },
       "cancel_text": "¿Está seguro de que desea archivar {name}?",
-      "delete_for_selection": "Eliminar {nbSelectedShots} las tomas seleccionadas:",
+      "delete_for_selection": "Eliminar la toma seleccionada | Eliminar las {nbSelectedShots} tomas seleccionadas",
       "multiple_delete_error": "Se ha producido un error al eliminar la toma. Es probable que haya datos vinculados a la toma. ¿Está seguro de que no hay ninguna tarea vinculada a la toma seleccionado?",
       "creation_explanation": "Para añadir tomas, primero tienes que crear un episodio y una secuencia. Escribe un nombre de episodio en la parte inferior de la columna de la izquierda y haz clic en \"Añadir\" para crear un nuevo episodio. Selecciona este episodio y repite la misma operación para la secuencia. Por último, seleccione una secuencia y escriba un nombre de plano en el campo situado en la parte inferior de la columna derecha. Haga clic en el botón \"Añadir\" situado debajo. Su primera toma ya está creada. ¡Puedes añadir muchas más! Si no es un programa de TV, puedes crear directamente una secuencia.",
       "get_frames_from_previews": "Establecer números de fotograma de las previsualizaciones",
@@ -1458,7 +1488,7 @@
       "count": "Conteos",
       "count_mode": "Conteo",
       "display_mode": "Visualización",
-      "frames": "Marcos",
+      "frames": "Fotogramas",
       "pie": "Gráficos circulares",
       "shots": "Tomas",
       "data_mode": "Datos",
@@ -1477,9 +1507,9 @@
       "bigger": "Ampliar el panel de tareas",
       "change_status_to": "Cambiar el estado de la tarea a:",
       "change_preview": "Cambiar la vista previa",
-      "change_priority": "Cambiar la prioridad a:",
-      "clear_assignations": "asignaciones claras",
-      "comment_image": "Adjunte una imagen al comentario",
+      "change_priority": "Cambiar la prioridad de la tarea seleccionada | Cambiar la prioridad de las {nbSelectedTasks} tareas seleccionadas",
+      "clear_assignations": "Desasignar de la selección",
+      "comment_image": "Adjuntar archivos",
       "create_for_selection": "Crear tarea para cada celda vacía:",
       "create_tasks": "Añadir tareas",
       "create_tasks_shot": "Añadir tareas para las tomas actuales",
@@ -1488,14 +1518,14 @@
       "create_tasks_asset": "Añadir tareas para los assets actuales",
       "create_tasks_asset_explaination": "Va a crear una nueva tarea para cada asset fijo de la lista actual para el tipo de tarea en cuestión. ¿Quieres continuar?",
       "create_tasks_asset_failed": "Se ha producido un error del servidor al continuar con las creaciones.",
-      "current": "Tarea a realizar",
+      "current": "Tareas",
       "current_status": "Situación actual",
       "delete_all_text": "¿Está seguro de que desea eliminar todas las tareas de {name}? Confirme escribiendo el nombre del tipo de tarea que desea eliminar a continuación.",
       "delete_all_error": "Ha fallado la eliminación de todas las tareas de un determinado tipo de tarea.",
       "delete_error": "Se ha producido un error al eliminar la tarea.",
       "delete_comment": "¿Está seguro de que quiere eliminar el comentario?",
       "delete_comment_error": "Se ha producido un error al eliminar el comentario.",
-      "delete_for_selection": "Eliminar tareas seleccionadas:",
+      "delete_for_selection": "Eliminar la tarea seleccionada | Eliminar las {nbSelectedTasks} tareas seleccionadas",
       "delete_preview": "¿Estás seguro de que quieres borrar esta vista previa?",
       "delete_preview_error": "Se ha producido un error al eliminar la vista previa.",
       "edit_comment": "Modificar comentario",
@@ -1537,7 +1567,7 @@
         "entity_name": "Nombre",
         "estimated_quota": "Cuota",
         "estimation": "Estimación",
-        "frames": "Marco.",
+        "frames": "Fotog.",
         "last_comment": "Último comentario",
         "last_comment_date": "Último comentario",
         "priority": "Prioridad",
@@ -1555,7 +1585,7 @@
         "parent": "Padres",
         "difficulty": "Dificultad",
         "done_date": "Fecha de aprobación",
-        "nb_frames": "Marcos",
+        "nb_frames": "Fotogramas",
         "drawings": "Dibujos",
         "before_after_tasks": "Tareas antes/después",
         "no_task_type": "Ningún tipo de tarea",
@@ -1582,8 +1612,8 @@
       "due_this_week": "Finalizan esta semana",
       "select_file": "Por favor, seleccione el archivo de su disco que quiere adjuntar al comentario:",
       "big_thumbnails": "Mostrar las miniaturas grandes",
-      "create_tasks_edit": "Añadir tareas a la modificación actual",
-      "create_tasks_edit_explaination": "Va a crear una nueva tarea para cada modificación del tipo de tarea especificado del proyecto actual. ¿Quiere continuar?",
+      "create_tasks_edit": "Añadir tareas a los montajes actuales",
+      "create_tasks_edit_explaination": "Va a crear una nueva tarea para cada montaje del tipo de tarea especificado del proyecto actual. ¿Quiere continuar?",
       "create_tasks_edit_failed": "Se ha producido un error del servidor al continuar con las creaciones.",
       "smaller": "Reducir el panel de tareas",
       "small_thumbnails": "Mostrar miniaturas pequeñas",
@@ -1593,7 +1623,7 @@
       },
       "add_revision_confirm": "Añadir archivos para publicar",
       "confirm_attachments": "Añadir archivos como adjuntos",
-      "change_status": "Cambiar estado",
+      "change_status": "Publicar comentario",
       "clear_own_assignations": "Borrar asignaciones propias",
       "publish": "Publicar",
       "all": "Todas las tareas",
@@ -1608,7 +1638,7 @@
       "due_previous_week": "Vencimiento para la semana anterior",
       "due_previous_month": "Vencimiento para el mes anterior",
       "due_this_month": "Vencimiento para este mes",
-      "estimation_over": "Estimación sobre la duración",
+      "estimation_over": "Duración por encima de la estimación",
       "estimation_approval_late": "La fecha de vencimiento es tardía (comentarios)",
       "estimation_done_late": "La fecha de vencimiento es tardía (hecho)",
       "late": "Estado tardío",
@@ -1652,7 +1682,7 @@
       "delete_for_selection_error": "Se ha producido un error al eliminar las tareas seleccionadas.",
       "delete_for_selection_hard_text": "¿Está seguro de que desea eliminar definitivamente las tareas seleccionadas? También se eliminarán todos los comentarios y previsualizaciones relacionados. Confírmelo escribiendo \"BORRAR\" a continuación.",
       "delete_for_selection_hard_lock_text": "BORRAR",
-      "hookup_playlist": "Generar una lista de reproducción para ligar",
+      "hookup_playlist": "Generar una lista de reproducción de continuidad",
       "assignation_error": "Hubo un problema al asignar esta persona a las tareas seleccionadas. No se han asignado todas las tareas.",
       "retake_filter_none": "Sin retomas",
       "retake_filter_with_retakes": "Con retomas"
@@ -1660,8 +1690,8 @@
     "timesheets": {
       "detail_level": "Nivel de detalle",
       "done_tasks": "Tareas realizadas",
-      "export_timesheet": "Hoja de horas de exportación",
-      "hours": "horario",
+      "export_timesheet": "Exportar hoja de horas",
+      "hours": "horas",
       "month": "Mes",
       "time_spents": "Tiempo empleado (horas)",
       "title": "Hojas de horas",
@@ -1672,7 +1702,7 @@
       "unit": "Unidad",
       "confirm_day_offs": "Al establecer estos días como días libres, se borrará todo el tiempo registrado para los días afectados. ¿Está seguro de que desea continuar?",
       "confirm_unset_day_offs": "Los días libres se aplican actualmente de {start} a {end}. ¿Está seguro de que desea eliminar este periodo?",
-      "off": "Fuera de",
+      "off": "Libre",
       "day_off_no_logging": "No se puede registrar tiempo en un día libre"
     },
     "wrong_browser": {
@@ -1711,7 +1741,7 @@
       }
     },
     "departments": {
-      "create_error": "Se ha producido un error al borrar este departamento. ¿Estás seguro de que no hay otro departamento con un nombre similar?",
+      "create_error": "Se ha producido un error al guardar este departamento. ¿Estás seguro de que no hay otro departamento con un nombre similar?",
       "delete_text": "¿Está seguro de que quiere borrar {name} de su base de datos?",
       "delete_error": "Se ha producido un error al eliminar este departamento.",
       "edit_title": "Modificar departamento",
@@ -1734,18 +1764,18 @@
       "software_used_by_artists": "Programas informáticos utilizados por los artistas"
     },
     "edits": {
-      "all_edits": "Todas las ediciones",
-      "creation_explaination": "Subir un archivo de edición para crear una nueva edición",
-      "edit_error": "Se ha producido un error al guardar esta edición. ¿Está seguro de que no hay etra modificación con un nombre similar?",
+      "all_edits": "Todos los montajes",
+      "creation_explaination": "Subir un archivo de montaje para crear un nuevo montaje",
+      "edit_error": "Se ha producido un error al guardar este montaje. ¿Está seguro de que no hay otro montaje con un nombre similar?",
       "delete_text": "¿Está seguro que quiere eliminar {name} de su base de datos?",
-      "delete_error": "Se ha producido un error al eliminar esta edición. Es probable que que haya datos asociados.",
-      "delete_for_selection": "Eliminar {nbSelectedEdits} las modificaciones seleccionadas:",
-      "edit_title": "Cambiar la edición",
-      "empty_list": "No hay modificaciones en la producción. ¿Qué tal si crea algunas?",
-      "empty_list_client": "No hay modificaciones en esta producción",
-      "new_edit": "Nueva modificación",
-      "number": "modificación | modificaciones",
-      "title": "Modificaciones",
+      "delete_error": "Se ha producido un error al eliminar este montaje. Es probable que haya datos asociados.",
+      "delete_for_selection": "Eliminar el montaje seleccionado | Eliminar los {nbSelectedEdits} montajes seleccionados",
+      "edit_title": "Cambiar el montaje",
+      "empty_list": "No hay montajes en la producción. ¿Qué tal si crea algunos?",
+      "empty_list_client": "No hay montajes en esta producción",
+      "new_edit": "Nuevo montaje",
+      "number": "montaje | montajes",
+      "title": "Montajes",
       "fields": {
         "name": "nombre",
         "episode": "Ep.",
@@ -1754,19 +1784,19 @@
       },
       "tasks": "Tareas",
       "cancel_text": "¿Estás seguro de que quieres archivar {name}?",
-      "history": "Editar historial de valores",
-      "restore_error": "Se ha producido un error al restaurar esta edición.",
+      "history": "Historial de valores del montaje",
+      "restore_error": "Se ha producido un error al restaurar este montaje.",
       "edit_success": "Las modificaciones se han guardado correctamente.",
       "restore_text": "¿Estás seguro de que quieres restaurar {name} de tu archivo?",
-      "delete_for_selection_error": "Se ha producido un error al borrar las ediciones seleccionadas.",
-      "delete_for_selection_hard_text": "¿Está seguro de que desea eliminar permanentemente las ediciones seleccionadas? También se eliminarán todas las tareas, comentarios y vistas previas relacionadas. Confírmelo escribiendo \"BORRAR\" a continuación.",
+      "delete_for_selection_error": "Se ha producido un error al borrar los montajes seleccionados.",
+      "delete_for_selection_hard_text": "¿Está seguro de que desea eliminar permanentemente los montajes seleccionados? También se eliminarán todas las tareas, comentarios y vistas previas relacionadas. Confírmelo escribiendo \"BORRAR\" a continuación.",
       "delete_for_selection_hard_lock_text": "BORRAR",
-      "multiple_delete_error": "Se ha producido un error al borrar una edición. Es posible que existan datos vinculados a ella. ¿Está seguro de que no hay tareas vinculadas a la edición seleccionada?"
+      "multiple_delete_error": "Se ha producido un error al borrar un montaje. Es posible que existan datos vinculados a él. ¿Está seguro de que no hay tareas vinculadas al montaje seleccionado?"
     },
     "status_automations": {
       "change_ready_for": "cambios \"listos para\" para",
       "change_status": "cambia el estado de la tarea a",
-      "create_error": "Se ha producido un error al guardar este estado de automatización. ¿Está seguro de que no hay otra acción con el mismo nombre?",
+      "create_error": "Se ha producido un error al guardar esta automatización de estado. ¿Está seguro de que no hay otra automatización con el mismo nombre?",
       "delete_text": "¿Está seguro que quiere eliminar el estado de automatización {name} de su base de datos?",
       "delete_error": "Se ha producido error al eliminar este estado de automatización. Es probable que esté vinculado al proyecto. En ese caso, no lo podrá eliminar . Primero deberá eliminarlo de cada proyecto.",
       "edit_title": "Modificar el estado de automatización",
@@ -1777,23 +1807,23 @@
       "new_status_automation": "Añadir estado de automatización",
       "run_for_selection": "Ejecutar el estado de automatización para las tareas seleccionadas:",
       "title": "Automatizaciones de Estado",
-      "wrong_automation": "Esta automatización se aplica a un tipo de tarea atrás. No está permitido por Kitsu (para prevenir ciclos). No tendrá efectos.",
+      "wrong_automation": "Esta automatización se aplica a un tipo de tarea anterior. No está permitido por Kitsu (para evitar ciclos infinitos). No tendrá efecto.",
       "fields": {
         "entity_type": "Tipo de Entidad",
         "in_field_type": "Tipo de Campo de Entrada",
         "in_task_type": "Tipo de Tarea",
-        "in_task_status": "Tipo de Estado",
-        "out_field_type": "Gatillos",
+        "in_task_status": "Estado de la tarea",
+        "out_field_type": "Activador",
         "out_task_type": "Tipo de Tarea Aplicado",
-        "out_task_status": "Tipo de Estado Aplicado",
+        "out_task_status": "Estado de tarea aplicado",
         "import_last_revision": "Importar última revisión"
       },
       "entity_types": {
         "asset": "Recurso",
-        "shot": "Plano",
+        "shot": "Toma",
         "sequence": "Secuencia",
         "episode": "Episodio",
-        "edit": "Editar"
+        "edit": "Montaje"
       },
       "field_types": {
         "status": "Estado",
@@ -1833,10 +1863,10 @@
       "library_title": "Biblioteca de fondos 3D"
     },
     "board": {
-      "title": "Junta",
+      "title": "Tablero",
       "empty": "Su tablero Kanban está actualmente vacío. Esto significa que no hay estados de tareas configurados para su rol de usuario en los ajustes de producción.",
       "settings": {
-        "title": "Estado del Consejo",
+        "title": "Estado del tablero",
         "visible": "Se muestra en el tablero Kanban de...",
         "select_all": "Seleccionar todo",
         "unselect_all": "Deseleccionar todo"
@@ -1853,11 +1883,11 @@
       "new_token_warning": "Si generas un nuevo token, el antiguo se desactivará.",
       "generate": "Generar un nuevo token",
       "copy_token_warning": "Asegúrate de copiar el token que aparece a continuación. No podrás volver a verlo.",
-      "token_copied": "Ficha copiada en el portapapeles.",
+      "token_copied": "Token copiado al portapapeles.",
       "fields": {
         "name": "Nombre",
         "expiration_date": "Fecha de expiración",
-        "token": "ficha"
+        "token": "token"
       },
       "no_bot": "No existe ningún bot. ¿Quieres crear uno?",
       "confirm_edit": "Guardar cambios del bot",
@@ -1901,7 +1931,7 @@
     },
     "intro": {
       "main": "Para que nuestro proyecto prospere, necesitamos su apoyo. Aquí tienes algunas formas sencillas de ayudarnos:",
-      "first": "Inicie nuestro repositorio en ",
+      "first": "Dale una estrella a nuestro repositorio en ",
       "second": "Síguenos en ",
       "third": "Únete a",
       "four": "Sugerir nuevas funciones en ",
@@ -2028,14 +2058,15 @@
       },
       "positions": {
         "artist": "Artista",
-        "lead": "Plomo",
+        "lead": "Líder",
         "supervisor": "Supervisor"
       },
       "seniorities": {
         "junior": "Junior",
         "mid": "Medio",
         "senior": "Senior"
-      }
+      },
+      "clear_exception": "Borrar el ajuste salarial de este mes"
     },
     "hard_delete": {
       "delete_for_selection_hard_text": "¿Está seguro de que desea eliminar permanentemente los elementos seleccionados? Confírmelo escribiendo \"BORRAR\" a continuación.",
@@ -2047,10 +2078,10 @@
       "delete_text": "¿Está seguro de que desea eliminar este elemento de hardware?",
       "edit_title": "Editar elemento de hardware",
       "new_hardware_item": "Nuevo elemento de hardware",
-      "number": "hardware item | hardware items",
-      "title": "Artículos de ferretería",
+      "number": "elemento de hardware | elementos de hardware",
+      "title": "Elementos de hardware",
       "fields": {
-        "inventory_amount": "Inventario Importe",
+        "inventory_amount": "Cantidad en inventario",
         "monthly_cost": "Coste mensual",
         "name": "Nombre",
         "remaining_amount": "Importe restante",

@@ -34,8 +34,8 @@
       "multiple_delete_error": "Hiba történt az asset törlésekor. Valószínűleg hivatkozik rá adat. Biztosan nincs feladat rendelve a kiválasztott asset-hez?",
       "only_current_episode": "Csak a jelenlegi epizód",
       "casted_in_shots": "{nbShots} shot-ban szerepel",
-      "delete_for_selection_hard_lock_text": "DELETE",
-      "delete_for_selection_hard_text": "Biztosan véglegesen eltávolítod a kijelölt asset-eket? Minden hozzájuk tartozó feladat, hozzászólás és előnézet is törlésre kerül. Kérlek erősítsd meg a 'DELETE' begépelésével az alábbi mezőbe.",
+      "delete_for_selection_hard_lock_text": "TÖRLÉS",
+      "delete_for_selection_hard_text": "Biztosan véglegesen eltávolítod a kijelölt asset-eket? Minden hozzájuk tartozó feladat, hozzászólás és előnézet is törlésre kerül. Kérlek erősítsd meg a 'TÖRLÉS' begépelésével az alábbi mezőbe.",
       "linked": "Kapcsolt",
       "no_concept": "Nincs ehhez az asset-hez kapcsolt koncepció",
       "show_linked": "Breakdown asset-ek megjelenítése"
@@ -92,7 +92,7 @@
       "add_comment": "Hozzászólás",
       "add_preview": "Előnézet csatolása",
       "change_preview": "Előnézet váltás",
-      "comment_from_client": "Hozzászólás a megrendelőnek",
+      "comment_from_client": "Hozzászólás a megrendelőtől",
       "edit_title": "Hozzászólás szerkesztése",
       "empty_text": "Ez a hozzászólás üres",
       "edit_error": "Hiba történt a hozzászólás szerkesztésekor. Kérjük keresd fel a támogató csapatot.",
@@ -146,7 +146,15 @@
       "previews": "Új revízióként közzéteendő előnézet file-ok",
       "selected_files": "Kijelölt file-ok",
       "title": "Hozzászólások",
-      "toggle_for_client": "Megrendelői láthatóság"
+      "toggle_for_client": "Megrendelői láthatóság",
+      "player": {
+        "play": "Lejátszás",
+        "pause": "Szünet",
+        "mute": "Némítás",
+        "unmute": "Némítás feloldása",
+        "fullscreen": "Teljes képernyő",
+        "download": "Letöltés"
+      }
     },
     "custom_actions": {
       "create_error": "Hiba történt a művelet mentésekor. Biztos hogy nincs azonos nevű művelet?",
@@ -155,7 +163,7 @@
       "edit_title": "Saját művelet szerkesztése",
       "new_custom_action": "Saját művelet hozzáadása",
       "number": "saját művelet | saját művelet",
-      "run_for_selection": "Saját művelet futtatása a kijelölt feladatokon:",
+      "run_for_selection": "Saját művelet futtatása a kijelölt feladaton | Saját műveletek futtatása a {nbSelectedTasks} kijelölt feladaton",
       "title": "Saját műveletek",
       "fields": {
         "name": "Név",
@@ -167,7 +175,7 @@
         "all": "Mind",
         "shot": "Shot",
         "asset": "Asset",
-        "edit": "Szerkesztés",
+        "edit": "Vágás",
         "episode": "Epizód",
         "sequence": "Szekvencia"
       }
@@ -190,7 +198,7 @@
         "thumbnail": "Nézőkép",
         "title": "Szűrés ezen...",
         "union_and": "Az alábbi szűrők használata",
-        "union_or": "Az alábbi szűrők körül egy ",
+        "union_or": "Az alábbi szűrők egyikére illeszkedjen",
         "with_thumbnail": "Van nézőkép",
         "without_thumbnail": "Nincs nézőkép",
         "department": "Osztály",
@@ -222,7 +230,7 @@
         "no_logs": "Nincs munkaidő-napló ehhez az elemhez."
       },
       "nb_selected_assets": "{nbSelectedAssets} kijelölt asset | {nbSelectedAssets} kijelölt asset",
-      "nb_selected_edits": "{nbSelectedEdits} kijelölt edit | {nbSelectedEdits} kijelölt edit",
+      "nb_selected_edits": "{nbSelectedEdits} kijelölt vágás | {nbSelectedEdits} kijelölt vágás",
       "nb_selected_shots": "{nbSelectedShots} kijelölt shot | {nbSelectedShots} kijelölt shot",
       "output_files": {
         "extension": "Kiterjesztés",
@@ -262,7 +270,7 @@
       "empty_list_client": "Nincs epizód a produkcióban.",
       "new_episode": "Új epizód",
       "number": "epizód | epizód",
-      "title": "Epizód statisztika",
+      "title": "Epizódok",
       "fields": {
         "name": "név",
         "description": "leírás",
@@ -290,8 +298,8 @@
       "draw": "Rajz mód bekapcsolása",
       "erase": "Radír mód bekapcsolása",
       "navigation": "Navigáció",
-      "redo": "Mégis",
-      "undo": "Mégsem",
+      "redo": "Újra",
+      "undo": "Visszavonás",
       "playlist_navigation": "Lejátszási lista navigáció",
       "remove_annotation": "Megjegyzés eltávolítása",
       "shortcuts": "Billentyűparancsok",
@@ -322,7 +330,9 @@
       "scrub_anywhere": "Az idővonal görgetése a lejátszó bármely pontjáról",
       "focus_comment": "Fókusz váltása a lejátszó és a megjegyzés mező között",
       "first_frame": "Ugrás az első képkockára",
-      "last_frame": "Ugrás az utolsó képkockára"
+      "last_frame": "Ugrás az utolsó képkockára",
+      "straight_line": "Egyenes vonal rajzolása",
+      "constant_width": "Rajzolás állandó vastagsággal (nyomásérzékelés nélkül)"
     },
     "login": {
       "back_to_login": "Vissza a belépő oldalra",
@@ -496,7 +506,7 @@
       "unstick": "Rögzítés feloldása",
       "active": "Aktív",
       "activity": "Tevékenység",
-      "all_edits": "Minden edit",
+      "all_edits": "Minden vágás",
       "all_shots": "Minden shot",
       "annotations": {
         "download_pdf": "Megjegyzések letöltése PDF-ként",
@@ -594,7 +604,21 @@
       "unassigned": "Nincs kiosztva",
       "unknown": "Ismeretlen",
       "week": "Hét",
-      "year": "Év"
+      "year": "Év",
+      "record_audio": "Hang rögzítése",
+      "record_video": "Videó rögzítése",
+      "recording": {
+        "webcam": "Webkamera",
+        "screen": "Képernyő",
+        "microphone": "Mikrofon",
+        "start": "Indítás",
+        "stop": "Leállítás",
+        "cancel": "Mégsem",
+        "recording": "Rögzítés folyamatban",
+        "permission_denied": "Hozzáférés megtagadva. Engedélyezd a mikrofon/kamera elérését, és próbáld újra.",
+        "no_device": "Nem található mikrofon vagy kamera.",
+        "not_supported": "A rögzítést ez a böngésző nem támogatja."
+      }
     },
     "menu": {
       "assign_tasks": "Feladat kiosztása",
@@ -607,7 +631,7 @@
       "delete_assets": "Asset-ek törlése",
       "delete_shots": "Shot-ok törlése",
       "delete_concepts": "Koncepciók törlése",
-      "delete_edits": "Edit-ek törlése",
+      "delete_edits": "Vágások törlése",
       "edit_concepts": "Koncepció hivatkozások szerkesztése",
       "generate_playlist": "Lejátszási lista generálása",
       "set_thumbnails": "Nézőképek beállítása az utolsó előnézetből",
@@ -690,7 +714,7 @@
       "active_persons": "aktív felhasználó | aktív felhasználó",
       "add_member_to_team": "Stábtag hozzáadása: ",
       "create_invite": "Meghívó készítése és küldése",
-      "create_error": "Hiba történt a felhasználó létrehozásakkor vagy frissítésekor. Lehet, hogy elérted a felhasználó-korlátodatt. További információért kérlek lépj kapcsolatba a támogató csapattal.",
+      "create_error": "Szerverhiba történt a felhasználó létrehozásakor vagy frissítésekor. További információért kérlek lépj kapcsolatba a támogató csapattal.",
       "delete_error": "Hiba történt a felhasználó törlésekor. Valószínűleg adat tartozik hozzá. Biztos vagy benne, hogy nincs számára feladat kiosztva, és nincs hozzászólása?",
       "delete_text": "Biztos vagy benne hogy törlöd {personName} felhasználót az adatbázisból? Minden hozzá tartozó megjegyzés és előnézet törlésre kerül. Kérlek erősítsd meg a teljes felhasználónév begépelésével.",
       "edit_title": "Felhasználó szerkesztése",
@@ -747,7 +771,7 @@
         "supervisor": "Supervisor",
         "user": "Művész",
         "undefined": "nincs megadva",
-        "vendor": "Kereskedő",
+        "vendor": "Beszállító",
         "all": "Minden szerep"
       },
       "archive_guest_confirm": "Archiválod ezt a vendéget? A hozzászólásai a helyükön maradnak, de többé nem jelenik meg az aktív vendégek listájában.",
@@ -796,14 +820,14 @@
       "add_sequence": "Teljes szekvencia hozzáadása",
       "add_episode": "Teljes epizód hozzáadása",
       "add_movie": "Teljes film hozzáadása",
-      "apply_task_type_change": "A művelet az összes shot kijelölt feladat típusát utolsó revízióját be fogja állítani.",
+      "apply_task_type_change": "A művelet az összes elemen beállítja az adott feladattípus utolsó revízióját.",
       "available_build": "Rendelkezésre álló build-ek",
       "build_daily": "Napi függőben lévő",
       "build_weekly": "Minden függőben lévő",
-      "build_mp4": ".mp4 építése (beta)",
+      "build_mp4": ".mp4 építése",
       "building": "Építés...",
       "client_playlist": "Megrendelő léjátszás lista",
-      "create_for_selection": "Lejátszási lista generálása a kiválasztott shot-okhoz",
+      "create_for_selection": "Lejátszási lista generálása a kiválasztott feladatokból",
       "create_title": "Lejátszási lista készítése",
       "created_at": "Készült itt:",
       "delete_text": "Biztos, hogy törölni akarod {name} az adatbázisból?",
@@ -826,7 +850,7 @@
       "no_shot_for_production": "Nincs shot ebben a produkcióban",
       "select_shot": "Kérlek válassz ki egy shot-ot a jobb oldali oszlopon",
       "select_playlist": "Kérlek válassz egy lejátszási listát a bal oldali oszlopon",
-      "select_task_type": "Minden shot feladattípusának megváltoztatása",
+      "select_task_type": "Minden elem feladattípusának megváltoztatása",
       "title": "Lejátszási listák",
       "updated_at": "Frissítve itt:",
       "remove": "eltávolítás",
@@ -900,11 +924,13 @@
         "toggle_laser": "Lézeres rajzolási mód be-/kikapcsolása",
         "toggle_playing_annotations": "Megjegyzések mutatása/elrejtése film lejátszása közben",
         "toggle_waveform": "Film hullámformájának mutatása/elrejtése",
-        "toggle_wireframe": "Drótváz megjelenítés be-/kikapcsolása"
+        "toggle_wireframe": "Drótváz megjelenítés be-/kikapcsolása",
+        "onion_skin": "Hagymahéj képkockák",
+        "onion_skin_off": "Ki"
       },
       "download_csv": ".csv letöltése",
       "filter_task_type": "Feladat típusra szűrve",
-      "add_edits": "Edit-ek hozzáadása",
+      "add_edits": "Vágások hozzáadása",
       "add_episodes": "Epizódok hozzáadása",
       "add_sequences": "Szekvenciák hozzáadása",
       "clients_to_notify": "Értesítendő megrendelők",
@@ -950,7 +976,9 @@
       "update_to_latest_version": "Frissítés a legújabb verzióra",
       "update_to_latest_version_help": "Állítsd be a legújabb revíziót minden elemhez, megtartva a jelenlegi feladat típusát.",
       "update_versions_title": "Kiválasztott verziók frissítése",
-      "volume_level": "Hangerő: {level}%"
+      "volume_level": "Hangerő: {level}%",
+      "created": "A(z) „{name}” lejátszási lista létrehozva.",
+      "view_created": "Lejátszási lista megtekintése"
     },
     "productions": {
       "current": "Kiválasztott produkció",
@@ -988,7 +1016,9 @@
         "is_publish_default": "A hozzászólás widget alapból publikálás módban legyen a művészeknek",
         "is_set_preview_automated": "Az új előnézet automatikus beállítása az elem nézőképének",
         "max_retakes": "Újraforgatások maximális száma",
-        "style": "Stílus"
+        "style": "Stílus",
+        "is_single_preview_per_revision": "Revíziónként csak egy előnézet file engedélyezése",
+        "revision_padding": "Revíziószám kitöltése nullákkal (0 = nincs kitöltés)"
       },
       "metadata": {
         "add_explaination": "Projekt-specifikus adatok hozzáadása",
@@ -1051,7 +1081,7 @@
         "error": "Hiba történt a produkció létrehozásakor",
         "errorImportingAssets": "Hiba történt az asset-ek importálásakor. A produkció mindenesetre létrejött!",
         "errorImportingShots": "Hiba történt a shot-ok importálásakor. A produkció mindenesetre létrejött!",
-        "explaination_date": "Ezeket a dátumokat az ütemtervben lehet beállítani.",
+        "explaination_date": "Ezekre a dátumokra az ütemterv beállításához van szükség.",
         "explaination_type": "Ha TV sorozatot választottál, a produkció epizódokra lesz osztva.",
         "explaination_video": "Ezek a beállítások a feltöltött video-k normalizálására vonatkoznak.",
         "give_a_name": "Adj nevet a produkciónak",
@@ -1080,8 +1110,8 @@
         "choose_template": "Produkció-sablon alkalmazása (nem kötelező)",
         "choose_template_description": "Válassz egy sablont a feladat típusok, feladat állapotok, asset típusok, metaadatok és beállítások előzetes kitöltéséhez. Hagyd üresen, hogy a produkciót a nulláról állítsd be.",
         "no_template": "Nincs sablon",
-        "select_edit_task_type": "Válaszd ki az edit feladat típusait",
-        "select_edit_task_type_description": "Ezek a feladat típusok határozzák meg az edit-jeid gyártásának lépéseit."
+        "select_edit_task_type": "Válaszd ki a vágás feladattípusait",
+        "select_edit_task_type_description": "Ezek a feladattípusok határozzák meg a vágásaid gyártásának lépéseit."
       },
       "homepage": {
         "assets": "Asset-ek",
@@ -1199,7 +1229,7 @@
       "no_logo": "Nincs logó beállítva",
       "set_logo": "Stúdió logó beállítása",
       "title": "Beállítások",
-      "webhook_error": "Une erreur est survenue en postant le webhook",
+      "webhook_error": "Hiba történt a webhook elküldésekor",
       "fields": {
         "name": "Stúdió név",
         "hours_by_day": "Napi munkaórák",
@@ -1295,7 +1325,7 @@
       "empty_list_client": "Nincs szekvencia a produkcióban.",
       "new_sequence": "Új szekvencia",
       "number": "szekvencia | szekvencia",
-      "title": "Szekvencia statisztika",
+      "title": "Szekvenciák",
       "fields": {
         "name": "név",
         "description": "leírás",
@@ -1368,7 +1398,7 @@
       "details_seconds": "Másodperc",
       "details_frames": "Képkocka",
       "month_label": "Hónap",
-      "no_quota": "Nincs kvóta ehhez a feladattípushoz",
+      "no_quota": "Nincs kvóta ehhez a kijelöléshez.",
       "name": "Név",
       "quota_day": "Napi kvóta",
       "quota_week": "Heti kvóta",
@@ -1442,8 +1472,8 @@
       "delete_for_selection": "{nbSelectedShots} kijelölt shot törlése: ",
       "multiple_delete_error": "Hiba történt a shot törlésekor. Valószínűleg adat hivatkozik rá. Biztosan nincs feladat hozzárendelve?",
       "creation_explanation": "Shot-ok hozzáadásához először egy epizódot és egy szekvenciát kell létrehoznod. Add meg az epizód nevét a bal oszlop alján, majd kattints a \"Hozzáadás\" gombra egy új epizód létrehozásához. Jelöld ki ezt az epizódot, és ismételd meg ugyanezt a műveletet a szekvenciánál. Végül válassz ki egy szekvenciát, és gépelj be egy shot-nevet a jobb oszlop alján lévő mezőbe. Kattints az alábbi \"Hozzáadás\" gombra. Elkészült az első shot-od. Még sokkal többet is hozzáadhatsz! Ha nem TV sorozatról van szó, közvetlenül létrehozhatsz egy szekvenciát.",
-      "delete_for_selection_hard_lock_text": "DELETE",
-      "delete_for_selection_hard_text": "Biztosan véglegesen el akarod távolítani a kijelölt shot-okat? Minden hozzájuk tartozó feladat, hozzászólás és előnézet szintén törlésre kerül. Kérlek erősítsd meg a 'DELETE' begépelésével.",
+      "delete_for_selection_hard_lock_text": "TÖRLÉS",
+      "delete_for_selection_hard_text": "Biztosan véglegesen el akarod távolítani a kijelölt shot-okat? Minden hozzájuk tartozó feladat, hozzászólás és előnézet szintén törlésre kerül. Kérlek erősítsd meg a 'TÖRLÉS' begépelésével.",
       "get_frames_from_previews": "Képkockaszámok beállítása az előnézetekből",
       "get_frames_from_previews_description": "Válassz egy feladat típust a képkockaszámok kinyeréséhez a legutóbb publikált videó-előnézetekből.",
       "get_frames_from_previews_error": "Hiba történt a képkockaszámok kinyerésekor a feladat típus előnézeteiből. Kérlek keresd fel a támogató csapatot.",
@@ -1451,7 +1481,7 @@
       "wrong_file_duration": "Az egyik feltöltött videófájl hossza nem egyezik a jelenlegi shot várt hosszával."
     },
     "server_down": {
-      "text": "Kérlek vedd fel a kapcsolatot a kereskedőd terméktámogatásával, a rendszergazdával, vagy az IT részleggel, hogy kiderüljön mi a probléma.",
+      "text": "Kérlek vedd fel a kapcsolatot a támogató csapatunkkal vagy a rendszergazdáddal, hogy kiderüljön, mi a probléma.",
       "title": "Kitsu hibába ütközött az adat API elérésekor."
     },
     "statistics": {
@@ -1474,19 +1504,19 @@
       "add_preview_error": "Hiba történt az előnézet hozzáadásakor.",
       "assign": "Feladat kiosztása: | {nbSelectedTasks} feladat kiosztása:",
       "back_to_list": "vissza a listához",
-      "bigger": "Széles feladat panel",
+      "bigger": "Feladat panel szélesítése",
       "change_status_to": "Feladat állapotának megváltoztatása: ",
       "change_preview": "Előnézet cseréje",
-      "change_priority": "Prioritás módosítása:",
+      "change_priority": "A kijelölt feladat prioritásának módosítása | A {nbSelectedTasks} kijelölt feladat prioritásának módosítása",
       "clear_assignations": "feladatkiosztás tisztítása",
-      "comment_image": "Kép csatolása a hozzászóláshoz",
+      "comment_image": "Fájlok csatolása",
       "create_for_selection": "Feladat létrehozása minden üres cellához:",
       "create_tasks": "Feladatok hozzáadása",
       "create_tasks_shot": "Feladatok hozzáadása a kiválasztott shot-hoz",
       "create_tasks_shot_explaination": "A jelenlegi projekt minden shot-jához fogsz új, kijelölt típusú feladatot hozzárendelni. Biztos folytatod?",
       "create_tasks_shot_failed": "Szerver-hiba történt a létrehozás közben.",
       "create_tasks_asset": "Feladatok hozzáadása a kiválaszott asset-ekhez",
-      "create_tasks_asset_explaination": "A jelenlegi projekt minden shot-jához fogsz új, kijelölt típusú feladatot hozzárendelni. Biztos folytatod?",
+      "create_tasks_asset_explaination": "A jelenlegi projekt minden asset-jéhez fogsz új, kijelölt típusú feladatot hozzárendelni. Biztos folytatod?",
       "create_tasks_asset_failed": "Szerver-hiba történt a létrehozás közben.",
       "current": "Elvégzendő feladatok",
       "current_status": "Jelenlegi állapot :",
@@ -1495,7 +1525,7 @@
       "delete_error": "Hiba történt a feladatok törlése közben.",
       "delete_comment": "Biztosan törölni akarod a hozzászólást?",
       "delete_comment_error": "Hiba történt a hozzászólás törlése közben.",
-      "delete_for_selection": "Kijelölt feladatok törlése:",
+      "delete_for_selection": "A kijelölt feladat törlése | A {nbSelectedTasks} kijelölt feladat törlése",
       "delete_preview": "Biztosan törölni akarod ezt az előnézetet?",
       "delete_preview_error": "Hiba történt az előnézet törlésekor.",
       "edit_comment": "Hozzászólás szerkesztése",
@@ -1532,17 +1562,17 @@
         "count": "Darab",
         "due_date": "Határidő",
         "duration": "Időtartam",
-        "end_date": "Megerősítés dátuma",
+        "end_date": "Visszajelzés dátuma",
         "entity": "Elem",
         "entity_name": "Név",
-        "estimated_quota": "Átlag kvóta",
+        "estimated_quota": "Kvóta",
         "estimation": "Becslés",
         "frames": "Kocka",
         "last_comment": "Utolsó hozzászólás",
         "last_comment_date": "Utolsó hozzászólás",
         "priority": "Prioritás",
         "production": "Prod",
-        "real_end_date": "Megerősítés dátuma",
+        "real_end_date": "Visszajelzés dátuma",
         "real_start_date": "Folyamatban dátuma",
         "retake_count": "Újraforgatás",
         "seconds": "Másodperc",
@@ -1602,7 +1632,7 @@
       "confirm_attachments": "File-ok hozzáadása csatolmányként",
       "create_tasks_disclaimer": "Ha a feladat típusod hiányzik, ellenőrizd, hogy fel van-e sorolva a produkció beállításainak Feladat típusok szekciójában.",
       "create_tasks_edit": "Feladatok hozzáadása a jelenlegi vágásokhoz",
-      "create_tasks_edit_explaination": "A jelenlegi produkció minden vágásához új feladatot fogsz létrehozni az adott feladat típushoz. Biztos folytatod?",
+      "create_tasks_edit_explaination": "A jelenlegi produkció minden vágásához új feladatot fogsz létrehozni az adott feladattípushoz. Biztos folytatod?",
       "create_tasks_edit_failed": "Szerver-hiba történt a létrehozás közben.",
       "create_tasks_episode": "Feladatok hozzáadása a jelenlegi epizódokhoz",
       "create_tasks_episode_explaination": "A jelenlegi produkció minden epizódjához új feladatot fogsz létrehozni az adott feladat típushoz. Biztos folytatod?",
@@ -1612,8 +1642,8 @@
       "create_tasks_sequence_failed": "Szerver-hiba történt a létrehozás közben.",
       "data_display": "Adatok megjelenítése",
       "delete_for_selection_error": "Hiba történt a kijelölt feladatok törlésekor.",
-      "delete_for_selection_hard_lock_text": "DELETE",
-      "delete_for_selection_hard_text": "Biztos vagy benne, hogy véglegesen törlöd a kijelölt feladatokat? Minden kapcsolódó hozzászólás és előnézet is törlésre kerül. Kérlek erősítsd meg a 'DELETE' szó begépelésével.",
+      "delete_for_selection_hard_lock_text": "TÖRLÉS",
+      "delete_for_selection_hard_text": "Biztos vagy benne, hogy véglegesen törlöd a kijelölt feladatokat? Minden kapcsolódó hozzászólás és előnézet is törlésre kerül. Kérlek erősítsd meg a 'TÖRLÉS' szó begépelésével.",
       "difficulty": {
         "easy": "Könnyű",
         "hard": "Nehéz",
@@ -1668,7 +1698,7 @@
       "year": "Év",
       "confirm_day_off": "A nap szabadnapra állítása kitöröl minden beírt munkaórát ezen a napon. Biztosan folytatod?",
       "day_off": "Szabadnap",
-      "export_timespents": "A jelenlegi projekten etöltött idő exportálása listaként",
+      "export_timespents": "A nyitott produkciókon eltöltött idő exportálása listaként",
       "confirm_day_offs": "Ha ezeket a napokat szabadnapként állítod be, az kitöröl minden, az érintett napokra rögzített időt. Biztos vagy benne, hogy folytatod?",
       "confirm_unset_day_offs": "A szabadnapok jelenleg {start} és {end} között érvényesek. Biztos vagy benne, hogy eltávolítod ezt az időszakot?",
       "day_off_no_logging": "Szabadnapon nincs időrögzítés",
@@ -1682,7 +1712,7 @@
     "logs": {
       "current_date_label": "Napló mutatása ehhez: ",
       "events": "mai nap eseményei",
-      "empty_list": "A kiválasztott dátumhoz nem tartozik dátum.",
+      "empty_list": "A kiválasztott dátumhoz nem tartozik napló.",
       "title": "Naplók",
       "preview_files": {
         "date": "Létrehozás dátuma",
@@ -1743,8 +1773,8 @@
       "add_links": "Hivatkozások hozzáadása asset-ekhez",
       "add_new_concept": "Új koncepciók hozzáadása",
       "delete_for_selection": "A kijelölt koncepció törlése | A(z) {nbSelectedConcepts} kijelölt koncepció törlése",
-      "delete_for_selection_hard_lock_text": "DELETE",
-      "delete_for_selection_hard_text": "Biztosan véglegesen el akarod távolítani a kijelölt koncepciókat? Minden kapcsolódó feladat, hozzászólás és előnézet is törlésre kerül. Kérlek erősítsd meg a 'DELETE' begépelésével alább.",
+      "delete_for_selection_hard_lock_text": "TÖRLÉS",
+      "delete_for_selection_hard_text": "Biztosan véglegesen el akarod távolítani a kijelölt koncepciókat? Minden kapcsolódó feladat, hozzászólás és előnézet is törlésre kerül. Kérlek erősítsd meg a 'TÖRLÉS' begépelésével alább.",
       "drop_new_concepts": "Húzd ide az új koncepció file-okat",
       "empty": "Nincs koncepció ebben a produkcióban",
       "fields": {
@@ -1835,34 +1865,34 @@
       "title": "Ellenőrzendő feladat | Ellenőrzendő feladatok"
     },
     "edits": {
-      "all_edits": "Minden edit",
+      "all_edits": "Minden vágás",
       "cancel_text": "Biztosan archiválod a(z) {name}-t?",
-      "creation_explaination": "Tölts fel egy edit file-t új edit létrehozásához",
-      "delete_error": "Hiba történt az edit törlésekor. Valószínűleg adat hivatkozik rá.",
-      "delete_for_selection": "Kijelölt edit törlése | {nbSelectedEdits} kijelölt edit törlése",
-      "delete_for_selection_error": "Hiba történt a kijelölt edit-ek törlésekor.",
-      "delete_for_selection_hard_lock_text": "DELETE",
-      "delete_for_selection_hard_text": "Biztosan véglegesen eltávolítod a kijelölt edit-eket? Minden hozzá tartozó feladat, hozzászólás és előnézet is törlésre kerül. Kérlek erősítsd meg a 'DELETE' begépelésével.",
+      "creation_explaination": "Tölts fel egy vágásfájlt új vágás létrehozásához",
+      "delete_error": "Hiba történt a vágás törlésekor. Valószínűleg adat hivatkozik rá.",
+      "delete_for_selection": "Kijelölt vágás törlése | {nbSelectedEdits} kijelölt vágás törlése",
+      "delete_for_selection_error": "Hiba történt a kijelölt vágások törlésekor.",
+      "delete_for_selection_hard_lock_text": "TÖRLÉS",
+      "delete_for_selection_hard_text": "Biztosan véglegesen eltávolítod a kijelölt vágásokat? Minden hozzá tartozó feladat, hozzászólás és előnézet is törlésre kerül. Kérlek erősítsd meg a 'TÖRLÉS' begépelésével.",
       "delete_text": "Biztosan eltávolítod a(z) {name}-t az adatbázisodból?",
-      "edit_error": "Hiba történt az edit mentésekor. Biztosan nincs hasonló nevű edit?",
+      "edit_error": "Hiba történt a vágás mentésekor. Biztosan nincs hasonló nevű vágás?",
       "edit_success": "A módosítások sikeresen mentve.",
-      "edit_title": "Edit módosítása",
-      "empty_list": "Nincs edit a produkcióban. Hozz létre egyet!",
-      "empty_list_client": "Nincs edit ebben a produkcióban.",
+      "edit_title": "Vágás módosítása",
+      "empty_list": "Nincs vágás a produkcióban. Hozz létre egyet!",
+      "empty_list_client": "Nincs vágás ebben a produkcióban.",
       "fields": {
         "description": "Leírás",
         "episode": "Ep.",
         "name": "Név",
         "person": "Módosító"
       },
-      "history": "Edit érték napló",
-      "multiple_delete_error": "Hiba történt egy edit törlésekor. Valószínűleg adat hivatkozik rá. Biztosan nincs feladat rendelve a kijelölt edit-hez?",
-      "new_edit": "Új edit",
-      "number": "edit | edit",
-      "restore_error": "Hiba történt az edit visszaállításakor.",
+      "history": "Vágás értéknapló",
+      "multiple_delete_error": "Hiba történt egy vágás törlésekor. Valószínűleg adat hivatkozik rá. Biztosan nincs feladat rendelve a kijelölt vágáshoz?",
+      "new_edit": "Új vágás",
+      "number": "vágás | vágás",
+      "restore_error": "Hiba történt a vágás visszaállításakor.",
       "restore_text": "Biztosan visszaállítod a(z) {name}-t az archívumodból?",
       "tasks": "Feladatok",
-      "title": "Edit-ek"
+      "title": "Vágások"
     },
     "library": {
       "asset_library": "Asset könyvtár",
@@ -2000,8 +2030,8 @@
       "title": "Elem chatek"
     },
     "hard_delete": {
-      "delete_for_selection_hard_lock_text": "DELETE",
-      "delete_for_selection_hard_text": "Biztosan véglegesen eltávolítod a kijelölt elemeket? Kérlek erősítsd meg a 'DELETE' begépelésével az alábbi mezőbe."
+      "delete_for_selection_hard_lock_text": "TÖRLÉS",
+      "delete_for_selection_hard_text": "Biztosan véglegesen eltávolítod a kijelölt elemeket? Kérlek erősítsd meg a 'TÖRLÉS' begépelésével az alábbi mezőbe."
     },
     "budget": {
       "add_entry": "Tétel hozzáadása",
@@ -2068,7 +2098,8 @@
       },
       "show_expenses": "Valós költségek megjelenítése",
       "show_items": "Hardver és szoftver beszámítása",
-      "title": "Költségvetés"
+      "title": "Költségvetés",
+      "clear_exception": "E havi fizetésfelülírás törlése"
     },
     "status_automations": {
       "add_status_automation_placeholder": "+ Állapot-automatizálás hozzáadása",
@@ -2084,7 +2115,7 @@
         "shot": "Shot",
         "sequence": "Szekvencia",
         "episode": "Epizód",
-        "edit": "Szerkesztés"
+        "edit": "Vágás"
       },
       "field_types": {
         "ready_for": "Kész ennek",

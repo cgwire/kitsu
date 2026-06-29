@@ -35,14 +35,14 @@
       "only_current_episode": "Kun aktuelle episode",
       "linked": "Tilknyttet",
       "no_concept": "Ingen koncepter knyttet til denne asset",
-      "casted_in_shots": "Støbt i {nbShots} skud",
+      "casted_in_shots": "Castet i {nbShots} shots",
       "delete_for_selection_hard_text": "Er du sikker på, at du vil fjerne de valgte aktiver permanent? Alle relaterede opgaver, kommentarer og forhåndsvisninger vil også blive slettet. Bekræft venligst ved at skrive 'SLET' nedenfor.",
       "delete_for_selection_hard_lock_text": "SLET",
-      "show_linked": "Vis opdeling af aktiver"
+      "show_linked": "Vis Breakdown-assets"
     },
     "asset_types": {
       "all_asset_types": "Alle asset-typer",
-      "create_error": "Der opstod en fejl under sletning af denne asset-type. Er du sikker på, at der ikke er en asset-type med et lignende navn?",
+      "create_error": "Der opstod en fejl under gemning af denne asset-type. Er du sikker på, at der ikke er en asset-type med et lignende navn?",
       "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database?",
       "delete_error": "Der opstod en fejl under sletningen af denne asset-type. Der kan være eksisterende data, der er knyttet til den. Er du sikker på, at denne asset-type ikke har nogen asset knyttet til den?",
       "edit_title": "Rediger asset-type",
@@ -132,7 +132,7 @@
       "pinned_revision": "Fastgjort revision",
       "edited_by": "Redigeret af {name}",
       "add_attachment_to_reply": "Tilføj vedhæftet fil til svar",
-      "add_frame_to_comment": "Føj den aktuelle ramme til kommentaren",
+      "add_frame_to_comment": "Føj den aktuelle frame til kommentaren",
       "add_emoji": "Tilføj en emoji",
       "for_client_badge": "Tekst synlig for klient",
       "for_client_off": "Tekst ikke synlig for klienter. Klik for at gøre teksten synlig for klienter",
@@ -146,7 +146,15 @@
       },
       "move_to_task": "Flyt til",
       "title": "Kommentarer",
-      "toggle_for_client": "Klientsynlighed"
+      "toggle_for_client": "Klientsynlighed",
+      "player": {
+        "play": "Play",
+        "pause": "Pause",
+        "mute": "Mute",
+        "unmute": "Unmute",
+        "fullscreen": "Fuld skærm",
+        "download": "Download"
+      }
     },
     "custom_actions": {
       "create_error": "Der opstod en fejl under gemning af denne brugerdefinerede handling. Er du sikker på, at der ikke findes en anden handling med samme navn?",
@@ -168,7 +176,7 @@
         "shot": "Shot",
         "asset": "Asset",
         "sequence": "Sekvens",
-        "edit": "Rediger",
+        "edit": "Montage",
         "episode": "Episode"
       }
     },
@@ -234,7 +242,7 @@
       },
       "nb_selected_assets": "{nbSelectedAssets} asset valgt | {nbSelectedAssets} assets valgt",
       "nb_selected_shots": "{nbSelectedShots} shot valgt | {nbSelectedShots} shots valgt",
-      "nb_selected_edits": "{nbSelectedEdits} edit valgt | {nbSelectedEdits} edits valgt",
+      "nb_selected_edits": "{nbSelectedEdits} montage valgt | {nbSelectedEdits} montager valgt",
       "output_files": {
         "extension": "Filtypenavn",
         "name": "Navn",
@@ -255,7 +263,7 @@
     "episodes": {
       "all_episodes": "Alle",
       "edit_error": "Der er opstået en fejl under gemning af denne episode. Er du sikker på, at der ikke er en episode med et lignende navn?",
-      "delete_error": "Der er opstået en fejl under sletningen af denne episode. Der kan være eksisterende data, der er knyttet til den. Er du sikker på, at denne episode ikke har nogen asset knyttet til den?",
+      "delete_error": "Der er opstået en fejl under sletningen af denne episode. Der kan være eksisterende data, der er knyttet til den. Er du sikker på, at denne episode ikke har nogen sekvens knyttet til den?",
       "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database? Alle relaterede shots og previews vil blive slettet. Bekræft venligst ved at skrive episodens navn nedenfor.",
       "edit_title": "Rediger episode",
       "empty_list": "Der er ingen episoder i produktionen. Hvad med at oprette nogle?",
@@ -273,7 +281,7 @@
       "tasks": "Episodeopgave",
       "stats_title": "Episode-statistikker",
       "status": {
-        "canceled": "Annuller",
+        "canceled": "Annulleret",
         "complete": "Fuldført",
         "standby": "Stand By",
         "running": "Igangværende"
@@ -297,8 +305,8 @@
       "shortcuts": "Genvejstaster",
       "ctrldown": "Flyt metadata-cellemarkering ned",
       "ctrlleft": "Flyt metadata-cellemarkering til venstre",
-      "ctrlright": "Flyt metadata-cellemarkering til right",
-      "ctrlup": "Flyt metadata-cellemarkering up",
+      "ctrlright": "Flyt metadata-cellemarkering til højre",
+      "ctrlup": "Flyt metadata-cellemarkering op",
       "plhome": "Gå til første frame",
       "plend": "Gå til sidste frame",
       "plaltright": "Gå til den første frame af det næste shot",
@@ -322,7 +330,9 @@
       "scrub_anywhere": "Scrub tidslinjen fra hvor som helst i afspilleren",
       "focus_comment": "Skift fokus mellem afspilleren og kommentarfeltet",
       "first_frame": "Gå til første frame",
-      "last_frame": "Gå til sidste frame"
+      "last_frame": "Gå til sidste frame",
+      "straight_line": "Tegn en lige linje",
+      "constant_width": "Tegn med konstant bredde (uden tryk)"
     },
     "login": {
       "back_to_login": "Gå tilbage til login side",
@@ -338,7 +348,7 @@
       "reset_change_password_title": "Indtast et nyt adgangskode",
       "reset_password": "Nulstil adgangskode",
       "reset_password_failed": "Nulstilling af dit adgangskode fejlede. Verificer venligst din email.",
-      "reset_password_succeed": "Nulstilling af din adgangskode mislykkedes. Kontrollér venligst din e-mail.",
+      "reset_password_succeed": "Nulstilling af din adgangskode lykkedes. Kontrollér venligst din indbakke.",
       "reset_password_title": "Indtast din e-mail for at nulstille din adgangskode",
       "title": "Log ind på Kitsu",
       "fields": {
@@ -352,7 +362,7 @@
       "too_many_failed_login_attemps": "For mange mislykkede loginforsøg, vent venligst et minut.",
       "verify": "Bekræft",
       "wrong_totp": "TOTP-verifikation mislykkedes.",
-      "wrong_email_otp": "OTP-verifikation mislykkedes.",
+      "wrong_email_otp": "Verifikation af OTP via e-mail mislykkedes.",
       "wrong_recovery_code": "Verifikation af gendannelseskode mislykkedes.",
       "information_totp": "Åbn tofaktor-godkendelsesappen (TOTP) på din mobile enhed for at se din godkendelseskode.",
       "information_email_otp": "Tjek dine e-mails for at se din godkendelseskode.",
@@ -494,7 +504,7 @@
       "stick": "Fastgør",
       "timeSpent": "Tid Brugt",
       "unstick": "Frigør",
-      "all_edits": "Alle edits",
+      "all_edits": "Alle montager",
       "attach_snapshots": "Vedhæft snapshots fra din annotering",
       "reply": "Svar",
       "select_file": "Vælg filer fra din harddisk",
@@ -530,7 +540,7 @@
       "archived": "Arkiveret",
       "avatar": {
         "open_page": "Åben {personName} side",
-        "unassign": "Unassign {personName}"
+        "unassign": "Fjern tildeling af {personName}"
       },
       "color": "Farve",
       "copy": "Kopi",
@@ -558,9 +568,9 @@
       "day": "Dag",
       "hour": "Time",
       "label": {
-        "casting": "Støbning",
+        "casting": "Casting",
         "chat": "Chat",
-        "concepts": "Begreber",
+        "concepts": "Koncepter",
         "info": "Info",
         "output_files": "Output-filer",
         "preview_files": "Forhåndsvisning af filer",
@@ -574,7 +584,7 @@
       "total": "I alt",
       "unassigned": "Ikke tildelt",
       "year": "År",
-      "apply": "Ansøg",
+      "apply": "Anvend",
       "back": "Tilbage",
       "edit_mode_on": "Skift redigeringstilstand",
       "entities": "Enheder",
@@ -594,7 +604,21 @@
       "disable_desktop_notifications": "Deaktiver skrivebordsnotifikationer",
       "enable_desktop_notifications": "Aktivér skrivebordsnotifikationer",
       "export": "Eksporter",
-      "unknown": "Ukendt"
+      "unknown": "Ukendt",
+      "record_audio": "Optag lyd",
+      "record_video": "Optag video",
+      "recording": {
+        "webcam": "Webcam",
+        "screen": "Skærm",
+        "microphone": "Mikrofon",
+        "start": "Start",
+        "stop": "Stop",
+        "cancel": "Annuller",
+        "recording": "Optager",
+        "permission_denied": "Adgang nægtet. Tillad adgang til mikrofon/kamera, og prøv igen.",
+        "no_device": "Ingen mikrofon eller kamera fundet.",
+        "not_supported": "Optagelse understøttes ikke i denne browser."
+      }
     },
     "menu": {
       "assign_tasks": "Tildel opgaver",
@@ -606,7 +630,7 @@
       "set_estimations": "Angiv estimater",
       "delete_assets": "Slet assets",
       "delete_shots": "Slet shots",
-      "delete_edits": "Slet edits",
+      "delete_edits": "Slet montager",
       "generate_playlist": "Generer en playliste",
       "set_thumbnails": "Angiv thumbnails fra sidste preview",
       "subscribe": "Tilmeld notifikationer",
@@ -774,7 +798,7 @@
       "position": {
         "artist": "Kunstner",
         "supervisor": "Tilsynsførende",
-        "lead": "Bly"
+        "lead": "Lead"
       },
       "seniority": {
         "junior": "Junior",
@@ -890,7 +914,7 @@
         "annotation_erase": "Fjern annotering",
         "toggle_annotations": "Vis/Skjul annoteringer, når filmen er sat på pause",
         "toggle_laser": "Aktiver/Deaktiver tegning med laserfunktion",
-        "annotation_zoom_pan": "Aktivér zoom og panorering",
+        "annotation_zoom_pan": "Nulstil zoom",
         "default": "standard",
         "exit_play_full": "Afslut fuld filmvisning",
         "object_background": "Indstil et nyt environment map til 3D-modellen",
@@ -900,11 +924,13 @@
         "open_link": "Åben link",
         "annotation_huge": "Kæmpe",
         "annotation_shape": "Form",
-        "annotation_tiny": "Bittelille"
+        "annotation_tiny": "Bittelille",
+        "onion_skin": "Onion skin-frames",
+        "onion_skin_off": "Fra"
       },
       "download_csv": "Download .csv",
       "filter_task_type": "Filtreret efter opgavetype",
-      "comparing_missing_plan": "Shot mangler for den aktuelle type",
+      "comparing_missing_plan": "Enhed mangler for den aktuelle type",
       "add_sequences": "Tilfj sequences",
       "clients_to_notify": "Kunder, der skal underrettes",
       "mute": "Dæmpet",
@@ -913,9 +939,9 @@
       "notify_clients_error": "Der opstod en fejl under underretning af klienter.",
       "no_clients_to_notify": "Der er ingen kunder at underrette.",
       "notify_clients_success": "Meddelelsen er blevet sendt med succes.",
-      "unmute": "Slå lyden fra",
+      "unmute": "Slå lyden til",
       "volume_level": "Volumen: {level}%.",
-      "add_edits": "Tilføj edits",
+      "add_edits": "Tilføj montager",
       "add_episodes": "Tilføj episoder",
       "share": "Del",
       "share_modal": {
@@ -950,7 +976,9 @@
       },
       "update_to_latest_version": "Opdater til seneste version",
       "update_to_latest_version_help": "Angiv den seneste revision for hver enhed, idet dens aktuelle opgavetype bevares.",
-      "update_versions_title": "Opdater valgte versioner"
+      "update_versions_title": "Opdater valgte versioner",
+      "created": "Playlisten “{name}” blev oprettet.",
+      "view_created": "Vis playlist"
     },
     "productions": {
       "current": "Valgt produktion",
@@ -988,7 +1016,9 @@
         "is_set_preview_automated": "Angiv automatisk ny preview som enheds-thumbnail",
         "homepage": "Startside (første side der vises)",
         "code": "Kort Navn",
-        "is_publish_default": "Indstil kommentarwidget til kunstnere i udgivelsestilstand som standard"
+        "is_publish_default": "Indstil kommentarwidget til kunstnere i udgivelsestilstand som standard",
+        "is_single_preview_per_revision": "Tillad kun én preview-fil pr. revision",
+        "revision_padding": "Nuller foran revisionsnummer (0 = ingen nuller)"
       },
       "metadata": {
         "add_explaination": "Tilføj specifikke data, der kræves af dette projekt.",
@@ -1077,8 +1107,8 @@
         "select_task_status_description": "Vælg de opgavestatusser, du vil bruge under produktionen.",
         "start_and_end_dates": "Start- og slutdatoer",
         "shots_to_import": "shots til import",
-        "select_edit_task_type": "Vælg edit-opgavetype",
-        "select_edit_task_type_description": "Disse opgavetyper definerer byggetrinene for dine edits.",
+        "select_edit_task_type": "Vælg montage-opgavetyper",
+        "select_edit_task_type_description": "Disse opgavetyper definerer byggetrinene for dine montager.",
         "choose_template": "Anvend en produktionsskabelon (valgfri)",
         "choose_template_description": "Vælg en skabelon til at forhåndsudfylde opgavetyper, opgavestatusser, asset-typer, metadata og indstillinger. Lad være tom for at konfigurere fra bunden.",
         "no_template": "Ingen skabelon"
@@ -1322,20 +1352,20 @@
       "today": "I dag",
       "mode": "Visningstilstand",
       "mode_prev": "Prognose",
-      "mode_real": "Ægte",
+      "mode_real": "Faktisk",
       "version": "Version",
       "apply_to_prod": "Anvend til produktion",
       "apply_to_prod_confirm": "Er du sikker på, at du vil anvende denne version af tidsplanen på den aktuelle produktion? Dette vil tilsidesætte de aktuelle opgaveværdier.",
       "apply_to_prod_error": "Der opstod en fejl under anvendelse af planlægningsversionen på den aktuelle produktion.",
       "assign": "Tildel til:",
-      "export": "Tidsplan for eksport",
+      "export": "Eksportér tidsplan",
       "export_error": "Der opstod en fejl under eksport af data.",
       "reset_list": "Nulstil listen",
       "no_entity": "Ingen overdragelig enhed",
       "no_assignee": "Ingen overdragelig person",
       "select_task_type": "Vælg en opgavetype",
       "show_assigned": "Vis tildelte enheder",
-      "force_unassign": "Tilsidesæt tidligere opgaver",
+      "force_unassign": "Tilsidesæt tidligere tildelinger",
       "forced_daily_quotas": "Tvungne daglige kvoter:",
       "estimated_daily_quotas": "Automatisk estimerede daglige kvoter:",
       "edit_task": "Rediger opgave",
@@ -1368,7 +1398,7 @@
       "details_seconds": "Sekunder",
       "details_frames": "Frames",
       "month_label": "Måned",
-      "no_quota": "Der er ingen kvote for denne opgavetype.",
+      "no_quota": "Der er ingen kvote for dette udvalg.",
       "name": "Navn",
       "quota_day": "Kvoter pr. dag",
       "quota_week": "Kvoter pr. uge",
@@ -1390,9 +1420,9 @@
       "week": "Uge",
       "explanation_feedback": "Shotet betragtes som færdigt ved den første feedbackanmodning. Antallet af frames tilføjes til kvoterne for den dag.",
       "done_date": "Dato for godkendelse",
-      "explanation_done": "Optagelsen anses for at være færdig ved den sidste godkendelse. Antallet af billeder lægges til kvoterne for den pågældende dag.",
-      "explanation_weighted": "Billeder anses for at være færdige ved den første anmodning om feedback. Derefter vægtes kvoterne ud fra den tid, der er brugt på opgaven, som registreret i kunstnerens timeseddel.\n\n Hvis der ikke er registreret tid, antages det, at:\n* Opgaven startede ved den første statusændring til WIP.\n* Opgaven blev afsluttet den dag, hvor anmodningen om feedback blev fremsat.\n * De afsluttede frames er fordelt jævnt på alle arbejdsdage mellem start- og slutdatoen.",
-      "explanation_weighteddone": "Optagelserne anses for at være færdige efter den sidste godkendelse. Derefter vægtes kvoterne ud fra den tid, der er brugt på opgaven, som registreret i kunstnerens timeseddel.\n\n Hvis der ikke er registreret tid, antages det, at:\n* Opgaven startede ved den første statusændring til WIP.\n* Opgaven blev afsluttet den dag, den blev godkendt.\n * De afsluttede rammer er fordelt jævnt på alle arbejdsdage mellem start- og slutdatoen.",
+      "explanation_done": "Shottet betragtes som færdigt ved den sidste godkendelse. Antallet af frames tilføjes til kvoterne for den dag.",
+      "explanation_weighted": "Shots anses for at være færdige ved den første anmodning om feedback. Derefter vægtes kvoterne ud fra den tid, der er brugt på opgaven, som registreret i kunstnerens timeseddel.\n\n Hvis der ikke er registreret tid, antages det, at:\n* Opgaven startede ved den første statusændring til WIP.\n* Opgaven blev afsluttet den dag, hvor anmodningen om feedback blev fremsat.\n * De afsluttede frames er fordelt jævnt på alle arbejdsdage mellem start- og slutdatoen.",
+      "explanation_weighteddone": "Shots anses for at være færdige efter den sidste godkendelse. Derefter vægtes kvoterne ud fra den tid, der er brugt på opgaven, som registreret i kunstnerens timeseddel.\n\n Hvis der ikke er registreret tid, antages det, at:\n* Opgaven startede ved den første statusændring til WIP.\n* Opgaven blev afsluttet den dag, den blev godkendt.\n * De afsluttede frames er fordelt jævnt på alle arbejdsdage mellem start- og slutdatoen.",
       "weighted_done": "Vægtet (godkendelse)",
       "drawings": "Tegninger"
     },
@@ -1432,7 +1462,7 @@
         "production": "Prod",
         "sequence": "Sequence",
         "time_spent": "Tid",
-        "person": "Modifikator",
+        "person": "Ændret af",
         "max_retakes": "Maks Rtks",
         "resolution": "Opløsning",
         "placeholder": "SH01",
@@ -1440,13 +1470,13 @@
       },
       "cancel_text": "Er du sikker på, at du vil arkivere {name}?",
       "delete_for_selection": "Slet det valgte shot | Slet de {nbSelectedShots} valgte shots",
-      "multiple_delete_error": "An error occurred while deleting a shot. There may be existing data currently linked to the shot. Are you sure there is no task linked to a selected shot?",
+      "multiple_delete_error": "Der opstod en fejl under sletning af et shot. Der kan være eksisterende data knyttet til shottet. Er du sikker på, at der ikke er nogen opgave knyttet til et valgt shot?",
       "creation_explanation": "For at tilføje shots skal du først oprette en episode og en sequence. Indtast et episodenavn nederst i venstre kolonne, og klik derefter på \"Tilføj\" for at oprette en ny episode. Vælg denne episode, og gentag den samme proces for at oprette en sequence. Til sidst skal du vælge en sequence og indtaste et shot-navn i feltet nederst i højre kolonne. Klik på \"Tilføj\"-knappen nedenfor. Dit første shot er nu oprettet. Du kan tilføje mange flere! Hvis det ikke er en tv-serie, kan du oprette en sequence direkte.",
       "get_frames_from_previews": "Angiv frame-numre fra previews",
       "get_frames_from_previews_description": "Vælg en opgavetype for at udtrække frame-numre fra de senest publicerede film-previews.",
       "get_frames_from_previews_error": "Der opstod en fejl under udtrækning af frame-numre fra opgavetypens previews. Kontakt venligst vores supportteam.",
       "wrong_file_duration": "Varigheden af en af de uploadede videofiler stemmer ikke overens med den forventede varighed af det aktuelle shot.",
-      "delete_for_selection_hard_text": "Er du sikker på, at du vil fjerne de valgte billeder permanent? Alle relaterede opgaver, kommentarer og forhåndsvisninger vil også blive slettet. Bekræft venligst ved at skrive 'SLET' nedenfor.",
+      "delete_for_selection_hard_text": "Er du sikker på, at du vil fjerne de valgte shots permanent? Alle relaterede opgaver, kommentarer og forhåndsvisninger vil også blive slettet. Bekræft venligst ved at skrive 'SLET' nedenfor.",
       "delete_for_selection_hard_lock_text": "SLET",
       "show_timecode": "Vis ind og ud som tidskoder"
     },
@@ -1552,10 +1582,10 @@
         "task_status_short_name": "Status",
         "task_type": "Type",
         "start_date_short": "Startdato",
-        "parent": "Forældre",
+        "parent": "Overordnet",
         "difficulty": "Sværhedsgrad",
         "done_date": "Dato for godkendelse",
-        "nb_frames": "Rammer",
+        "nb_frames": "Frames",
         "drawings": "Tegninger",
         "before_after_tasks": "Før/efter-opgaver",
         "no_task_type": "Ingen opgavetype",
@@ -1582,8 +1612,8 @@
       "due_this_week": "Forfalder denne uge",
       "select_file": "Vælg venligst filen fra din harddisk, som du ønsker at vedhæfte til din kommentar eller besked:",
       "big_thumbnails": "Vis store thumbnails",
-      "create_tasks_edit": "Tilføj opgaver til aktuelle edits",
-      "create_tasks_edit_explaination": "Du er ved at oprette en ny opgave for hver edit i det aktuelle projekt for den givne opgavetype. Vil du fortsætte?",
+      "create_tasks_edit": "Tilføj opgaver til aktuelle montager",
+      "create_tasks_edit_explaination": "Du er ved at oprette en ny opgave for hver montage i det aktuelle projekt for den givne opgavetype. Vil du fortsætte?",
       "create_tasks_edit_failed": "Der opstod en serverfejl under oprettelsesprocessen.",
       "smaller": "Mindsk opgavepanelet",
       "small_thumbnails": "Vis små thumbnails",
@@ -1611,7 +1641,7 @@
       "estimation_over": "Varighed overskrider estimat",
       "estimation_approval_late": "Forfaldsdatoen er overskredet (feedback)",
       "estimation_done_late": "Forfaldsdatoen er overskredet (færdig)",
-      "late": "Sidste status",
+      "late": "Forsinket status",
       "nb_selected_tasks": "{nbSelectedTasks} task valgt | {nbSelectedTasks} tasks valgt",
       "set_thumbnails_from_tasks": "Angiv den sidste preview fra den valgte opgave som thumbnail | Angiv de sidste previews fra de valgte opgaver som thumbnails",
       "to_myself": "Til mig selv",
@@ -1624,7 +1654,7 @@
       "create_tasks_sequence_failed": "Der opstod en serverfejl under oprettelsesprocessen.",
       "auto_revision": "Gendan automatisk revisionsnummer",
       "empty_cells_selected": "tom celle valgt | tomme celler valgt",
-      "my_checks": "Mine Godkendelser",
+      "my_checks": "Mine Kontroller",
       "new_revision_number": "Nyt revisionsnummer",
       "post": "Opslag",
       "publish_revision": "Publicér revision",
@@ -1672,7 +1702,7 @@
       "unit": "Enhed",
       "confirm_day_offs": "Hvis du markerer disse dage som fridage, vil al registreret tid for de berørte dage blive slettet. Er du sikker på, at du vil fortsætte?",
       "confirm_unset_day_offs": "Fridage er i øjeblikket anvendt fra {start} til {end}. Er du sikker på, at du vil fjerne denne periode?",
-      "off": "Slukket",
+      "off": "Fri",
       "day_off_no_logging": "Ingen tidsregistrering på en fridag"
     },
     "wrong_browser": {
@@ -1734,34 +1764,34 @@
       "software_used_by_artists": "Software brugt af kunstnere"
     },
     "edits": {
-      "all_edits": "Alle edits",
-      "creation_explaination": "Upload en edit-fil for at oprette et nyt edit",
-      "edit_error": "Der opstod en fejl under gemning af dette edit. Er du sikker på, at der ikke allerede findes et edit med et lignende navn?",
+      "all_edits": "Alle montager",
+      "creation_explaination": "Upload en montagefil for at oprette en ny montage",
+      "edit_error": "Der opstod en fejl under gemning af denne montage. Er du sikker på, at der ikke allerede findes en montage med et lignende navn?",
       "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database?",
-      "delete_error": "An error occurred while deleting this edit. There may be existing data currently linked to it.",
-      "delete_for_selection": "Slet det valgte edit | Slet de {nbSelectedEdits} valgte edits",
-      "edit_title": "Skift edit",
-      "empty_list": "Der er ingen redigeringer i produktionen. Hvad med at oprette nogle?",
-      "empty_list_client": "Der er ingen edits i denne produktion.",
-      "new_edit": "Nyt edit",
-      "number": "edit | edits",
-      "title": "Edits",
+      "delete_error": "Der opstod en fejl under sletning af denne montage. Der kan være eksisterende data knyttet til den.",
+      "delete_for_selection": "Slet den valgte montage | Slet de {nbSelectedEdits} valgte montager",
+      "edit_title": "Skift montage",
+      "empty_list": "Der er ingen montager i produktionen. Hvad med at oprette nogle?",
+      "empty_list_client": "Der er ingen montager i denne produktion.",
+      "new_edit": "Ny montage",
+      "number": "montage | montager",
+      "title": "Montager",
       "fields": {
         "name": "Navn",
         "episode": "Ep.",
         "description": "Beskrivelse",
-        "person": "Person"
+        "person": "Ændret af"
       },
       "tasks": "Opgaver",
       "cancel_text": "Er du sikker på, at du vil arkivere {name}?",
-      "history": "Rediger værdiers historik",
-      "restore_error": "Der opstod en fejl under gendannelse af denne redigering.",
+      "history": "Montageværdiers historik",
+      "restore_error": "Der opstod en fejl under gendannelse af denne montage.",
       "edit_success": "Ændringerne blev gemt med succes.",
       "restore_text": "Er du sikker på, at du vil gendanne {name} fra dit arkiv?",
-      "delete_for_selection_error": "Der opstod en fejl under sletning af de valgte redigeringer.",
-      "delete_for_selection_hard_text": "Er du sikker på, at du vil fjerne de valgte redigeringer permanent? Alle relaterede opgaver, kommentarer og forhåndsvisninger vil også blive slettet. Bekræft venligst ved at skrive 'SLET' nedenfor.",
+      "delete_for_selection_error": "Der opstod en fejl under sletning af de valgte montager.",
+      "delete_for_selection_hard_text": "Er du sikker på, at du vil fjerne de valgte montager permanent? Alle relaterede opgaver, kommentarer og forhåndsvisninger vil også blive slettet. Bekræft venligst ved at skrive 'SLET' nedenfor.",
       "delete_for_selection_hard_lock_text": "SLET",
-      "multiple_delete_error": "Der opstod en fejl under sletning af en redigering. Der kan være eksisterende data knyttet til den. Er du sikker på, at der ikke er nogen opgaver knyttet til en valgt redigering?"
+      "multiple_delete_error": "Der opstod en fejl under sletning af en montage. Der kan være eksisterende data knyttet til den. Er du sikker på, at der ikke er nogen opgaver knyttet til en valgt montage?"
     },
     "status_automations": {
       "change_ready_for": "skift \"klar til\" til",
@@ -1793,7 +1823,7 @@
         "shot": "Shot",
         "sequence": "Sekvens",
         "episode": "Episode",
-        "edit": "Rediger"
+        "edit": "Montage"
       },
       "field_types": {
         "status": "Status",
@@ -1900,7 +1930,7 @@
       "drop_new_concepts": "Læg nye konceptfiler her"
     },
     "intro": {
-      "main": "To make our project thrive, we need your support. Here are some simple ways you can help:",
+      "main": "For at vores projekt kan trives, har vi brug for din støtte. Her er nogle enkle måder, du kan hjælpe på:",
       "first": "Stjernemærk vores repository på ",
       "second": "Følg os på ",
       "third": "Deltag i vores",
@@ -1993,8 +2023,8 @@
       "edit_budget": "Rediger den aktuelle budgetversion",
       "edit_budget_entry": "Rediger post",
       "edit_budget_entry_error": "Der opstod en fejl under redigering af denne budgetpost. Kontakt venligst vores supportteam.",
-      "entries": "Indgange",
-      "gap": "Mellemrum",
+      "entries": "Poster",
+      "gap": "Afvigelse",
       "hide_expenses": "Skjul de reelle omkostninger",
       "months": "Måneder",
       "new_hiring": "Nye ansættelser",
@@ -2028,14 +2058,15 @@
       },
       "positions": {
         "artist": "Kunstner",
-        "lead": "Bly",
+        "lead": "Lead",
         "supervisor": "Tilsynsførende"
       },
       "seniorities": {
         "junior": "Junior",
         "mid": "Midt",
         "senior": "Senior"
-      }
+      },
+      "clear_exception": "Ryd lønjustering for denne måned"
     },
     "hard_delete": {
       "delete_for_selection_hard_text": "Er du sikker på, at du vil fjerne de valgte elementer permanent? Bekræft venligst ved at skrive 'SLET' nedenfor.",
