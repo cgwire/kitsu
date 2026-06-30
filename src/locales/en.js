@@ -1990,6 +1990,8 @@ export default {
     comment_image: 'Attach files',
     create_for_selection: 'Create a task for each empty cell',
     create_tasks: 'Add tasks',
+    create_tasks_all_missing: 'Add all missing ({count})',
+    create_tasks_all_missing_empty: 'Add all missing',
     create_tasks_disclaimer: 'If your task type is missing, verify it is listed in the Task Types section of the production settings.',
     create_tasks_shot: 'Add tasks for current shots',
     create_tasks_shot_explanation: 'You are about to create a new task for each shot of the current production for the given task type. Do you want to continue?',
