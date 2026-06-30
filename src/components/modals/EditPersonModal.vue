@@ -131,23 +131,31 @@
         v-model="form.active"
       />
 
-      <div class="flexrow">
-        <button
-          class="button flexrow-item"
-          :class="{
-            'is-loading': isInviteLoading
-          }"
-          :disabled="!isValidEmail"
-          type="button"
-          @click="emitForm('invite')"
-          v-if="isEditing && !isBot"
-        >
-          {{ $t('people.invite') }}
-        </button>
-        <div class="filler"></div>
+      <div class="field" v-if="isEditing && !isBot">
+        <label class="label">Invitation</label>
+        <div>
+          <button-simple
+            icon="send"
+            :text="$t('people.invite')"
+            :is-loading="isInviteLoading"
+            :disabled="!isValidEmail"
+            type="button"
+            @click="emitForm('invite')"
+          />
+          <button-simple
+            icon="link"
+            :text="$t('people.copy_invite_link')"
+            :is-loading="isInviteLinkLoading"
+            :disabled="!isValidEmail"
+            type="button"
+            @click="emitForm('copy-invite-link')"
+          />
+        </div>
+      </div>
 
+      <div class="has-text-right">
         <button
-          class="button is-primary flexrow-item"
+          class="button is-primary"
           :class="{
             'is-loading': isCreateInviteLoading
           }"
@@ -159,7 +167,7 @@
           {{ $t('people.create_invite') }}
         </button>
         <button
-          class="button is-primary flexrow-item"
+          class="button is-primary"
           :class="{
             'is-loading': isLoading
           }"
@@ -176,11 +184,7 @@
                 : $t('people.confirm_edit')
           }}
         </button>
-        <button
-          class="button is-link flexrow-item"
-          type="button"
-          @click="$emit('cancel')"
-        >
+        <button class="button is-link" type="button" @click="$emit('cancel')">
           {{ $t('main.cancel') }}
         </button>
       </div>
@@ -190,6 +194,12 @@
       </div>
       <div class="error has-text-right mt1" v-if="isInvitationError">
         {{ $t('people.invite_error') }}
+      </div>
+      <div class="success has-text-right mt1" v-if="isInviteLinkCopied">
+        {{ $t('people.invite_link_copied') }}
+      </div>
+      <div class="error has-text-right mt1" v-if="isInviteLinkError">
+        {{ $t('people.invite_link_error') }}
       </div>
       <div class="error has-text-right mt1" v-if="isUserLimitError">
         {{ $t('people.user_limit_error') }}
@@ -211,6 +221,7 @@ import { getCountryOptions } from '@/lib/countries'
 import { localeCode } from '@/lib/lang'
 
 import BaseModal from '@/components/modals/BaseModal.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import ComboboxStudio from '@/components/widgets/ComboboxStudio.vue'
@@ -231,6 +242,9 @@ const props = defineProps({
   isInvitationError: { type: Boolean, default: false },
   isInvitationSuccess: { type: Boolean, default: false },
   isInviteLoading: { type: Boolean, default: false },
+  isInviteLinkLoading: { type: Boolean, default: false },
+  isInviteLinkCopied: { type: Boolean, default: false },
+  isInviteLinkError: { type: Boolean, default: false },
   isLoading: { type: Boolean, default: false },
   isUserLimitError: { type: Boolean, default: false },
   personToEdit: { type: Object, default: () => ({}) }
@@ -243,6 +257,7 @@ const emit = defineEmits([
   'cancel',
   'confirm',
   'confirm-invite',
+  'copy-invite-link',
   'invite',
   'reset-error'
 ])

@@ -75,6 +75,10 @@ export default {
     return client.pget(`/api/actions/persons/${person.id}/invite`)
   },
 
+  getResetPasswordLink(person) {
+    return client.ppost(`/api/actions/persons/${person.id}/reset-password-link`)
+  },
+
   generateToken(person) {
     const data = {
       expiration_date: person.expiration_date?.toJSON().slice(0, 10) || null
