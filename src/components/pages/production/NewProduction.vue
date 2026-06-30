@@ -69,8 +69,8 @@
                 is-inline
               />
             </div>
-            <div class="mb1 explaination">
-              {{ $t('productions.creation.explaination_type') }}
+            <div class="mb1 explanation">
+              {{ $t('productions.creation.explanation_type') }}
             </div>
             <div class="flexrow">
               <text-field
@@ -134,8 +134,8 @@
                 thin
               />
             </div>
-            <div class="mb1 explaination">
-              {{ $t('productions.creation.explaination_video') }}
+            <div class="mb1 explanation">
+              {{ $t('productions.creation.explanation_video') }}
             </div>
             <div>
               <label class="label">
@@ -159,8 +159,8 @@
                 />
               </div>
             </div>
-            <div class="mb1 explaination">
-              {{ $t('productions.creation.explaination_date') }}
+            <div class="mb1 explanation">
+              {{ $t('productions.creation.explanation_date') }}
             </div>
           </timeline-item>
           <timeline-item
@@ -1194,7 +1194,7 @@ span.input-separator {
   align-items: center;
 }
 
-.explaination {
+.explanation {
   font-style: italic;
   margin-top: 0.2em;
 }

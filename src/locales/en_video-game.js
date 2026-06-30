@@ -119,7 +119,7 @@ export default {
       add_shots_button: 'Add maps',
       add_shots_description: 'Add or import the maps for your production.',
       errorImportingShots: 'An error occurred while importing your maps. The production has been created though!',
-      explaination_type: 'If you choose TV Show, the production will be split in chapters.',
+      explanation_type: 'If you choose TV Show, the production will be split in chapters.',
       import_shots_button: 'Import maps',
       select_shot_task_type: 'Select map task type',
       select_shot_task_type_description: 'These task types define the building steps of your maps.',
@@ -217,11 +217,11 @@ export default {
 
   tasks: {
     create_tasks_shot: 'Add tasks for current maps',
-    create_tasks_shot_explaination: 'You are going to create a new task for each map of the current project for the given task type. Do you want to continue?',
+    create_tasks_shot_explanation: 'You are going to create a new task for each map of the current project for the given task type. Do you want to continue?',
     create_tasks_episode: 'Add tasks for current chapters',
-    create_tasks_episode_explaination: 'You are going to create a new task for each chapter of the current project for the given task type. Do you want to continue?',
+    create_tasks_episode_explanation: 'You are going to create a new task for each chapter of the current project for the given task type. Do you want to continue?',
     create_tasks_sequence: 'Add tasks for current levels',
-    create_tasks_sequence_explaination: 'You are going to create a new task for each level of the current project for the given task type. Do you want to continue?',
+    create_tasks_sequence_explanation: 'You are going to create a new task for each level of the current project for the given task type. Do you want to continue?',
     fields: {
       sequence: 'Level'
     }

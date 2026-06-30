@@ -148,6 +148,6 @@ export default {
 
   tasks: {
     create_tasks_shot: 'Add tasks for current NFTs',
-    create_tasks_shot_explaination: 'You are going to create a new task for each NFT of the current project for the given task type. Do you want to continue?'
+    create_tasks_shot_explanation: 'You are going to create a new task for each NFT of the current project for the given task type. Do you want to continue?'
   }
 }

@@ -135,7 +135,7 @@
       :is-loading-stay="loading.creatingTasksStay"
       :is-error="errors.creatingTasks"
       :title="$t('tasks.create_tasks_episode')"
-      :text="$t('tasks.create_tasks_episode_explaination')"
+      :text="$t('tasks.create_tasks_episode_explanation')"
       :error-text="$t('tasks.create_tasks_episode_failed')"
       @cancel="hideCreateTasksModal"
       @confirm="confirmCreateTasks"

@@ -184,7 +184,7 @@
         v-else-if="playlists.length === 0"
       >
         <div v-if="!loading.playlists && !loading.playlistsInit">
-          <p class="empty-explaination">
+          <p class="empty-explanation">
             {{ $t('playlists.no_playlist') }}
           </p>
           <button
@@ -2103,7 +2103,7 @@ h2 {
     }
   }
 
-  .empty-explaination {
+  .empty-explanation {
     color: $white;
     margin-top: 4em;
     font-size: 1.5em;
