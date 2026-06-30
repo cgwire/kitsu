@@ -463,7 +463,7 @@
         "preview_episode_name": "نام قسمت",
         "preview_title": "پیش نمایش داده های که وارد شده",
         "preview_description": "یک فایل csv. برای پر کردن جدول مورد نیاز خود آپلود کنید.\n",
-        "preview_required": "NB: Headers must be included as first row.",
+        "preview_required": "سرستون‌ها برای تطبیق ستون‌ها با داده‌هایی که باید تنظیم شوند استفاده می‌شوند. آن‌ها باید به‌عنوان ردیف اول گنجانده شوند.",
         "preview_reupload": "بارگذاری مجدد فایل .CSV",
         "required_fields": "فایل CSV شما نیاز مند ستون های ذیل است.",
         "select_file": "لطفا فایل CSV را انتخاب کنید :",
@@ -801,7 +801,7 @@
       "position": {
         "artist": "هنرمند",
         "supervisor": "سرپرست",
-        "lead": "سرب"
+        "lead": "سرپرست"
       },
       "seniority": {
         "junior": "جونیور",

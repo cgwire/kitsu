@@ -249,7 +249,7 @@
         "no_output_files": "No hay ficheros de salida para esta entidad.",
         "person": "Propietario",
         "revision": "Revisión",
-        "size": "Talla",
+        "size": "Tamaño",
         "status": "Estado",
         "task_type": "Tipo de tarea",
         "type": "Tipo"
@@ -459,7 +459,7 @@
         "legend_overwrite": "Datos que serán actualizados",
         "paste": "Pegar",
         "paste_code": "Por favor, pegue aquí sus datos CSV:",
-        "preview": "vista previa\n",
+        "preview": "Vista previa",
         "preview_episode_name": "Nombre del episodio",
         "preview_title": "Vista previa de sus datos importados",
         "preview_description": "Sube un archivo .csv para rellenar tu tabla de entidades.",
@@ -666,7 +666,7 @@
       "unread_notifications": "notificación no leída | notificaciones no leídas",
       "title": "Notificaciones",
       "with_preview": "con una vista previa",
-      "replied_on": "respondió a un comentario en",
+      "replied_on": "respondió a un comentario",
       "all_types": "Todos los tipos de notificación",
       "new_revision": "Nueva revisión",
       "only_assignations": "Solo asignaciones",
@@ -1797,7 +1797,7 @@
       "multiple_delete_error": "Se ha producido un error al borrar un montaje. Es posible que existan datos vinculados a él. ¿Está seguro de que no hay tareas vinculadas al montaje seleccionado?"
     },
     "status_automations": {
-      "change_ready_for": "cambios \"listos para\" para",
+      "change_ready_for": "cambia \"listos para\" a",
       "change_status": "cambia el estado de la tarea a",
       "create_error": "Se ha producido un error al guardar esta automatización de estado. ¿Está seguro de que no hay otra automatización con el mismo nombre?",
       "delete_text": "¿Está seguro que quiere eliminar el estado de automatización {name} de su base de datos?",

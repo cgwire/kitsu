@@ -2033,7 +2033,7 @@
       "new_hiring": "Nye ansættelser",
       "new_version": "Ny version",
       "no_budget_found": "Der er ikke noget budget for denne produktion. Har du lyst til at skabe et?",
-      "no_budget_entries_found": "Der er ikke noget budget for denne produktion. Har du lyst til at oprette et?",
+      "no_budget_entries_found": "Der er ingen budgetpost for denne produktion. Har du lyst til at oprette en?",
       "no_analytics_to_show": "Der er ingen analyser at vise for denne produktion. Opret et budget og tilføj poster for at se analyserne.",
       "remaining": "Resterende",
       "previsional_costs": "Anslået",

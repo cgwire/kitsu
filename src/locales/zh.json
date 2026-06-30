@@ -660,13 +660,13 @@
     "notifications": {
       "and_change_status": "并更改了任务状态",
       "assigned_you": "分配给你",
-      "commented_on": "已给出针对性评论, 评论对象为",
+      "commented_on": "评论了",
       "mention_you_on": "提到你的",
       "no_notifications": "目前没有关于您当前项目的通知.",
       "unread_notifications": "未读通知",
       "title": "通知",
       "with_preview": "带有预览",
-      "replied_on": "回复通知",
+      "replied_on": "回复了评论",
       "all_types": "所有类型",
       "new_revision": "新版本发布",
       "only_assignations": "仅分配",
@@ -686,8 +686,8 @@
       "only_watching": "只看",
       "read": "阅读",
       "reply": "答复",
-      "publish": "出版",
-      "published": "出版预览",
+      "publish": "发布",
+      "published": "发布了预览",
       "show_comments": "显示评论",
       "watching": "观看",
       "only_playlists_ready": "只准备播放列表",
@@ -1427,7 +1427,7 @@
       "explanation_weighted": "第一次提出反馈要求后，镜头即视为完成。然后，根据艺术家工时表中记录的任务所用时间对配额进行加权。\n\n 如果没有时间记录，则假定\n* 任务从第一次状态变为 WIP 开始。\n* 任务在提出反馈请求当天完成。\n * 已完成的帧在开始日期和结束日期之间的所有工作日内平均分配。",
       "explanation_weighteddone": "最后一次批准后，镜头即视为完成。然后，根据艺术家工时表中记录的任务所用时间对配额进行加权。\n\n 如果没有时间记录，则假定\n* 任务从第一次状态变为 WIP 开始。\n* 任务在批准当天完成。\n * 已完成的帧在开始日期和结束日期之间的所有工作日内平均分配。",
       "weighted_done": "加权（批准）",
-      "drawings": "图纸"
+      "drawings": "画稿"
     },
     "shots": {
       "casting": "镜头的角色分配",
@@ -1469,7 +1469,7 @@
         "max_retakes": "最大返修数",
         "resolution": "分辨率",
         "placeholder": "SH01",
-        "nb_drawings": "图纸"
+        "nb_drawings": "画稿"
       },
       "cancel_text": "确定要归档 {name} 吗？",
       "delete_for_selection": "删除选定的镜头 | 删除 {nbSelectedShots} 个选定的镜头",
@@ -1500,7 +1500,7 @@
       "all": "全部",
       "only_running": "只运行",
       "episode_status": "剧集状态",
-      "drawings": "图纸"
+      "drawings": "画稿"
     },
     "tasks": {
       "add_preview": "为新预览修订版添加文件",

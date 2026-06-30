@@ -390,7 +390,7 @@
       "login_with_oidc": "{oidc_idp_name} で SSO ログイン",
       "oidc": "SSO ログイン",
       "reset_password_inactive": "パスワードのリセットに失敗しました。この電子メールを持つユーザーはアクティブではありません。",
-      "set_password_title": "キツへようこそ！",
+      "set_password_title": "Kitsu へようこそ！",
       "set_password": "パスワードの設定",
       "reset_change_password_token_failed": "パスワードリセットリンクが無効か、有効期限が切れています。手続きをやり直してください。"
     },

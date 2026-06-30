@@ -83,8 +83,8 @@
       },
       "episode_casting": "劇集角色分配",
       "save_error": "儲存角色分配時出錯",
-      "hide_library": "隱藏圖書館",
-      "show_library": "顯示圖書館"
+      "hide_library": "隱藏資產庫",
+      "show_library": "顯示資產庫"
     },
     "comments": {
       "add_attachment": "新增附件",
@@ -232,7 +232,7 @@
         "extension": "擴展",
         "no_preview_files": "此實體沒有預覽檔案。",
         "original_file_name": "原始檔案名稱",
-        "position": "職位",
+        "position": "位置",
         "revision": "修訂",
         "size": "尺寸",
         "status": "狀態",
@@ -247,7 +247,7 @@
         "extension": "擴展",
         "name": "名稱",
         "no_output_files": "此實體沒有輸出檔案。",
-        "person": "業主",
+        "person": "擁有者",
         "revision": "修訂",
         "size": "尺寸",
         "status": "狀態",
@@ -680,7 +680,7 @@
       "initial_comment": "初步評論",
       "mark_all_as_read": "全部標記為已讀",
       "mention": "提及",
-      "only_non_watching": "僅非觀賞",
+      "only_non_watching": "僅非觀看",
       "only_read": "僅讀取",
       "only_unread": "僅未讀取",
       "only_watching": "僅觀看",
@@ -1883,7 +1883,7 @@
       "edit_title": "編輯機器人",
       "edit_avatar_error": "更新機器人頭像時發生錯誤。",
       "new_token_title": "{name} 的新 API 令牌",
-      "new_token_warning": "如果您產生新的代用幣，舊的代用幣將會停用。",
+      "new_token_warning": "如果您產生新的令牌，舊的令牌將會停用。",
       "generate": "產生新的標記",
       "copy_token_warning": "請務必複製下面的令牌。您將無法再次看到它。",
       "token_copied": "令牌複製到剪貼簿！",
@@ -2027,7 +2027,7 @@
       "edit_budget_entry": "編輯項目",
       "edit_budget_entry_error": "編輯此預算項目時發生錯誤。請聯絡我們的支援團隊。",
       "entries": "條目",
-      "gap": "縫隙",
+      "gap": "差距",
       "hide_expenses": "隱藏真實成本",
       "months": "月數",
       "new_hiring": "新聘人員",
@@ -2066,7 +2066,7 @@
       },
       "seniorities": {
         "junior": "初級",
-        "mid": "中間",
+        "mid": "中級",
         "senior": "資深"
       },
       "clear_exception": "清除本月的薪資覆寫"

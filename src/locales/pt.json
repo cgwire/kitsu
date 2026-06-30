@@ -241,7 +241,7 @@
         "uploaded_at": "Carregado em"
       },
       "nb_selected_assets": "{nbSelectedAssets} ativo selecionado | {nbSelectedAssets} ativos selecionados",
-      "nb_selected_shots": "{nbSelectedShots} shot selected | {nbSelectedShots} shots selected",
+      "nb_selected_shots": "{nbSelectedShots} shot selecionado | {nbSelectedShots} shots selecionados",
       "nb_selected_edits": "{nbSelectedEdits} montagem selecionada | {nbSelectedEdits} montagens selecionadas",
       "output_files": {
         "extension": "Extensão",
@@ -1126,7 +1126,7 @@
         "catalog": "Catálogo",
         "motion_design": "Design de movimento",
         "nft": "Coleção NFT",
-        "stop_motion": "Parada de movimento",
+        "stop_motion": "Stop Motion",
         "vfx": "VFX",
         "video_game": "Vídeo game",
         "vr": "Realidade virtual",
