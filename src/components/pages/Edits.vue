@@ -205,7 +205,7 @@
       :is-loading-stay="loading.creatingTasksStay"
       :is-error="errors.creatingTasks"
       :title="$t('tasks.create_tasks_edit')"
-      :text="$t('tasks.create_tasks_edit_explaination')"
+      :text="$t('tasks.create_tasks_edit_explanation')"
       :error-text="$t('tasks.create_tasks_edit_failed')"
       @cancel="hideCreateTasksModal"
       @confirm="confirmCreateTasks"

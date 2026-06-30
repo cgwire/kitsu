@@ -132,12 +132,16 @@
       :is-invite-loading="loading.invite"
       :is-invitation-success="success.invite"
       :is-invitation-error="errors.invite"
+      :is-invite-link-loading="loading.inviteLink"
+      :is-invite-link-copied="success.inviteLinkCopied"
+      :is-invite-link-error="errors.inviteLink"
       :is-loading="loading.edit"
       :is-user-limit-error="errors.userLimit"
       :person-to-edit="personToEdit"
       @cancel="modals.edit = false"
       @confirm="confirmEditPeople"
       @confirm-invite="confirmCreateAndInvite"
+      @copy-invite-link="confirmCopyInviteLink"
       @invite="confirmInvite"
       @reset-error="resetError"
       v-if="modals.edit"
@@ -258,6 +262,7 @@ export default {
         del: false,
         edit: false,
         invite: false,
+        inviteLink: false,
         invalidEmailDomain: false,
         userLimit: false
       },
@@ -268,6 +273,7 @@ export default {
         deletingAvatar: false,
         edit: false,
         invite: false,
+        inviteLink: false,
         savingSearch: false,
         updatingAvatar: false
       },
@@ -288,7 +294,8 @@ export default {
       selectedDepartment: '',
       selectedStudio: '',
       success: {
-        invite: false
+        invite: false,
+        inviteLinkCopied: false
       }
     }
   },
@@ -475,6 +482,7 @@ export default {
       'clearPersonAvatar',
       'deletePeople',
       'editPerson',
+      'getResetPasswordLink',
       'invitePerson',
       'loadGuests',
       'loadPeople',
@@ -624,6 +632,7 @@ export default {
       form.id = this.personToEdit.id
       this.loading.invite = true
       this.success.invite = false
+      this.success.inviteLinkCopied = false
       this.errors.invite = false
       this.invitePerson(form)
         .then(() => {
@@ -638,6 +647,28 @@ export default {
         .finally(() => {
           this.loading.invite = false
         })
+    },
+
+    async confirmCopyInviteLink(form) {
+      form.id = this.personToEdit.id
+      this.loading.inviteLink = true
+      this.success.inviteLinkCopied = false
+      this.success.invite = false
+      this.errors.inviteLink = false
+      try {
+        const result = await this.getResetPasswordLink(form)
+        const link =
+          typeof result === 'string'
+            ? result
+            : (result.link ?? result.url ?? result.reset_password_link)
+        await navigator.clipboard.writeText(link)
+        this.success.inviteLinkCopied = true
+      } catch (err) {
+        console.error(err)
+        this.errors.inviteLink = true
+      } finally {
+        this.loading.inviteLink = false
+      }
     },
 
     confirmDeletePeople() {
@@ -780,11 +811,14 @@ export default {
         this.loading.createAndInvite = false
         this.errors.edit = false
         this.errors.invite = false
+        this.errors.inviteLink = false
         this.errors.invalidEmailDomain = false
         this.errors.userLimit = false
         this.loading.edit = false
         this.loading.invite = false
+        this.loading.inviteLink = false
         this.success.invite = false
+        this.success.inviteLinkCopied = false
       }
     },
 

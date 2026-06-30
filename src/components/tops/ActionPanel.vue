@@ -366,7 +366,7 @@
               class="is-wide assignation-field"
               ref="assignation-field"
               :people="currentTeam"
-              :placeholder="$t('tasks.assign_explaination')"
+              :placeholder="$t('tasks.assign_explanation')"
               wide
               v-model="person"
             />

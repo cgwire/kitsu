@@ -1,6 +1,27 @@
+/*
+ * Production-type terminology overlay for video-game productions.
+ *
+ * This is NOT a standalone locale: it is a PARTIAL override merged on top of
+ * en.js (the English source of truth). It must contain only the keys whose
+ * wording differs from en.js — never a key whose value is identical to the base.
+ *
+ * Vocabulary mapping vs en.js:
+ *   shot / Shot          ->  map / Map
+ *   sequence / Sequence  ->  level / Level
+ *   episode / Episode    ->  chapter / Chapter
+ *   (asset and edit are unchanged)
+ *
+ * Keep in sync with en.js:
+ *   - Mirror en.js key names exactly. If a key is renamed in en.js, rename it
+ *     here too — a stale key is a dead override and the new base key then leaks
+ *     untranslated vocabulary.
+ *   - When a key added to en.js has a value mentioning a remapped word
+ *     (shot / sequence / episode), add the matching override here.
+ */
 export default {
 
   assets: {
+    casted_in_shots: 'Casted in {nbShots} maps',
     only_current_episode: 'Only current chapter',
     no_cast_in: 'This asset is not cast in any map.',
     fields: {
@@ -18,7 +39,9 @@ export default {
 
   custom_actions: {
     entity_types: {
-      shot: 'Map'
+      shot: 'Map',
+      sequence: 'Level',
+      episode: 'Chapter'
     }
   },
 
@@ -41,7 +64,7 @@ export default {
   episodes: {
     edit_error: 'An error occurred while saving this chapter. Are you sure there is no chapter with similar name?',
     delete_error: 'An error occurred while deleting this chapter. There are probably data linked to it. Are you sure this chapter has no level linked to it?',
-    delete_text: 'Are you sure you want to remove {name} from your database? Every related maps and previews will be deleted. Please confirm by typing the chapter name below.',
+    delete_text: 'Are you sure you want to remove {name} from your database? All related maps and previews will be deleted. Please confirm by typing the chapter name below.',
     edit_title: 'Edit chapter',
     empty_list: 'There is no chapter in the production. What about creating some?',
     empty_list_client: 'There is no chapter in this production.',
@@ -57,10 +80,18 @@ export default {
     }
   },
 
+  keyboard: {
+    plaltleft: 'Go to the last frame of the previous map',
+    plaltright: 'Go to the first frame of the next map'
+  },
+
   main: {
     all_shots: 'All maps',
     csv: {
       preview_episode_name: 'Chapter name'
+    },
+    edl: {
+      explanation: 'It\'s possible to import common OpenTimeLineIO supported files (otio, fcp_xml, fcpx_xml, edl). Maps will be created or updated with the given frame range, frame in and frame out. Frame in starts at 0.'
     }
   },
 
@@ -71,6 +102,7 @@ export default {
 
   playlists: {
     add_sequences: 'Add levels',
+    add_episodes: 'Add chapters',
     add_shots: 'Add maps',
     add_sequence: 'Add the whole level',
     add_episode: 'Add the whole chapter',
@@ -87,7 +119,7 @@ export default {
       add_shots_button: 'Add maps',
       add_shots_description: 'Add or import the maps for your production.',
       errorImportingShots: 'An error occurred while importing your maps. The production has been created though!',
-      explaination_type: 'If you choose TV Show, the production will be splitted in chapters.',
+      explanation_type: 'If you choose TV Show, the production will be split in chapters.',
       import_shots_button: 'Import maps',
       select_shot_task_type: 'Select map task type',
       select_shot_task_type_description: 'These task types define the building steps of your maps.',
@@ -137,14 +169,17 @@ export default {
   },
 
   quota: {
-    explaination: 'Maps are considered ended on the first feedback request. Then, quotas are weighted following time spent on the task (when the artist filled his timesheet).\n If no time is filled, it considers that:\n * The task was started at the first status change to WIP \n* The task was done the day the feedback request was made.\n * It splits the done frames among all business days between the start and the end.',
-    explaination_feedback: 'The map is done on the first feedback request. Its number of frames is added to the quotas for this day.'
+    explanation_feedback: 'The map is considered complete on the first feedback request. Its number of frames is added to the quotas for that day.',
+    explanation_done: 'The map is considered complete on the last approval. Its number of frames is added to the quotas for that day.',
+    explanation_weighted: 'Maps are considered complete upon the first feedback request. Then, quotas are weighted based on the time spent on the task, as recorded in the artist\'s timesheet.\n\n If no time is recorded, it is assumed that:\n* The task started at the first status change to WIP.\n* The task was completed on the day the feedback request was made.\n * The completed frames are distributed evenly among all business days between the start and end dates.',
+    explanation_weighteddone: 'Maps are considered complete upon the last approval. Then, quotas are weighted based on the time spent on the task, as recorded in the artist\'s timesheet.\n\n If no time is recorded, it is assumed that:\n* The task started at the first status change to WIP.\n* The task was completed on the day it was approved.\n * The completed frames are distributed evenly among all business days between the start and end dates.'
   },
 
   shots: {
     casting: 'Map casting',
-    creation_explaination: 'To add maps you need first to create an chapter and a level. Type an chapter name in the bottom of the left column then click on add to create a new chapter. Select this chapter and repeat the same operation for level. Finally, select a level and type a map name in the field at the bottom of the right column. Click on the add button below. Your first map was created. You can now add many more! If it\'s not a TV Show, you have to directly create a level.',
+    creation_explanation: 'To add maps, you first need to create a chapter and a level. Type a chapter name at the bottom of the left column, then click "Add" to create a new chapter. Select this chapter and repeat the same operation for the level. Finally, select a level and type a map name in the field at the bottom of the right column. Click the "Add" button below. Your first map is now created. You can add many more! If it\'s not a TV show, you can directly create a level.',
     delete_for_selection: 'Delete the selected map | Delete the {nbSelectedShots} selected maps',
+    delete_for_selection_hard_text: 'Are you sure you want to permanently remove the selected maps? All related tasks, comments and previews will also be deleted. Please confirm by typing \'DELETE\' below.',
     delete_error: 'An error occurred while deleting this map. There are probably data linked to it. Are you sure this map has no task linked to it?',
     edit_success: 'Map {name} successfully edited.',
     edit_fail: 'Creation or edition failed, an error occurred. Make sure that you are not renaming the map with a name already listed for a given level.',
@@ -182,11 +217,11 @@ export default {
 
   tasks: {
     create_tasks_shot: 'Add tasks for current maps',
-    create_tasks_shot_explaination: 'You are going to create a new task for each map of the current project for the given task type. Do you want to continue?',
+    create_tasks_shot_explanation: 'You are going to create a new task for each map of the current project for the given task type. Do you want to continue?',
     create_tasks_episode: 'Add tasks for current chapters',
-    create_tasks_episode_explaination: 'You are going to create a new task for each chapter of the current project for the given task type. Do you want to continue?',
+    create_tasks_episode_explanation: 'You are going to create a new task for each chapter of the current project for the given task type. Do you want to continue?',
     create_tasks_sequence: 'Add tasks for current levels',
-    create_tasks_sequence_explaination: 'You are going to create a new task for each level of the current project for the given task type. Do you want to continue?',
+    create_tasks_sequence_explanation: 'You are going to create a new task for each level of the current project for the given task type. Do you want to continue?',
     fields: {
       sequence: 'Level'
     }

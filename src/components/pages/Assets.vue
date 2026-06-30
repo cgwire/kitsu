@@ -212,7 +212,7 @@
       :is-loading-stay="loading.creatingTasksStay"
       :is-error="errors.creatingTasks"
       :title="$t('tasks.create_tasks_asset')"
-      :text="$t('tasks.create_tasks_asset_explaination')"
+      :text="$t('tasks.create_tasks_asset_explanation')"
       :error-text="$t('tasks.create_tasks_asset_failed')"
       @confirm="confirmCreateTasks"
       @confirm-and-stay="confirmCreateTasksAndStay"

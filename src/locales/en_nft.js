@@ -1,6 +1,25 @@
+/*
+ * Production-type terminology overlay for NFT productions.
+ *
+ * This is NOT a standalone locale: it is a PARTIAL override merged on top of
+ * en.js (the English source of truth). It must contain only the keys whose
+ * wording differs from en.js — never a key whose value is identical to the base.
+ *
+ * Vocabulary mapping vs en.js:
+ *   shot / shots / Shot / Shots  ->  NFT / NFTs
+ *   (sequence, episode, asset and edit are unchanged)
+ *
+ * Keep in sync with en.js:
+ *   - Mirror en.js key names exactly. If a key is renamed in en.js, rename it
+ *     here too — a stale key is a dead override and the new base key then leaks
+ *     untranslated vocabulary.
+ *   - When a key added to en.js has a value mentioning a remapped word (shot),
+ *     add the matching override here.
+ */
 export default {
 
   assets: {
+    casted_in_shots: 'Casted in {nbShots} NFTs',
     no_cast_in: 'This asset is not cast in any NFT.'
   },
 
@@ -29,8 +48,20 @@ export default {
     }
   },
 
+  episodes: {
+    delete_text: 'Are you sure you want to remove {name} from your database? All related NFTs and previews will also be deleted. Please confirm by typing the episode name below.'
+  },
+
+  keyboard: {
+    plaltleft: 'Go to the last frame of the previous NFT',
+    plaltright: 'Go to the first frame of the next NFT'
+  },
+
   main: {
     all_shots: 'All NFTs',
+    edl: {
+      explanation: 'It\'s possible to import common OpenTimeLineIO supported files (otio, fcp_xml, fcpx_xml, edl). NFTs will be created or updated with the given frame range, frame in and frame out. Frame in starts at 0.'
+    }
   },
 
   menu: {
@@ -76,14 +107,17 @@ export default {
   },
 
   quota: {
-    explaination: 'NFTs are considered ended on the first feedback request. Then, quotas are weighted following time spent on the task (when the artist filled his timesheet).\n If no time is filled, it considers that:\n * The task was started at the first status change to WIP \n* The task was done the day the feedback request was made.\n * It splits the done frames among all business days between the start and the end.',
-    explaination_feedback: 'The NFT is done on the first feedback request. Its number of frames is added to the quotas for this day.'
+    explanation_feedback: 'The NFT is considered complete on the first feedback request. Its number of frames is added to the quotas for that day.',
+    explanation_done: 'The NFT is considered complete on the last approval. Its number of frames is added to the quotas for that day.',
+    explanation_weighted: 'NFTs are considered complete upon the first feedback request. Then, quotas are weighted based on the time spent on the task, as recorded in the artist\'s timesheet.\n\n If no time is recorded, it is assumed that:\n* The task started at the first status change to WIP.\n* The task was completed on the day the feedback request was made.\n * The completed frames are distributed evenly among all business days between the start and end dates.',
+    explanation_weighteddone: 'NFTs are considered complete upon the last approval. Then, quotas are weighted based on the time spent on the task, as recorded in the artist\'s timesheet.\n\n If no time is recorded, it is assumed that:\n* The task started at the first status change to WIP.\n* The task was completed on the day it was approved.\n * The completed frames are distributed evenly among all business days between the start and end dates.'
   },
 
   shots: {
     casting: 'NFT casting',
-    creation_explaination: 'To add NFTs you need first to create an episode and a sequence. Type an episode name in the bottom of the left column then click on add to create a new episode. Select this episode and repeat the same operation for sequence. Finally, select a sequence and type a NFT name in the field at the bottom of the right column. Click on the add button below. Your first NFT was created. You can now add many more! If it\'s not a TV Show, you have to directly create a sequence.',
+    creation_explanation: 'To add NFTs, you first need to create an episode and a sequence. Type an episode name at the bottom of the left column, then click "Add" to create a new episode. Select this episode and repeat the same operation for the sequence. Finally, select a sequence and type a NFT name in the field at the bottom of the right column. Click the "Add" button below. Your first NFT is now created. You can add many more! If it\'s not a TV show, you can directly create a sequence.',
     delete_for_selection: 'Delete the selected NFT | Delete the {nbSelectedShots} selected NFTs',
+    delete_for_selection_hard_text: 'Are you sure you want to permanently remove the selected NFTs? All related tasks, comments and previews will also be deleted. Please confirm by typing \'DELETE\' below.',
     delete_error: 'An error occurred while deleting this NFT. There are probably data linked to it. Are you sure this NFT has no task linked to it?',
     edit_success: 'NFT {name} successfully edited.',
     edit_fail: 'Creation or edition failed, an error occurred. Make sure that you are not renaming the NFT with a name already listed for a given sequence.',
@@ -114,6 +148,6 @@ export default {
 
   tasks: {
     create_tasks_shot: 'Add tasks for current NFTs',
-    create_tasks_shot_explaination: 'You are going to create a new task for each NFT of the current project for the given task type. Do you want to continue?'
+    create_tasks_shot_explanation: 'You are going to create a new task for each NFT of the current project for the given task type. Do you want to continue?'
   }
 }
