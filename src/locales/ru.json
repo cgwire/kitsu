@@ -1316,7 +1316,7 @@
       "add_task_type_placeholder": "+ Добавить тип задачи",
       "select_task_type": "Выберите тип задачи...",
       "add_task_type_to_library": "Добавьте тип задачи в библиотеку",
-      "library_title": "Тип задачи Библиотека"
+      "library_title": "Библиотека типов задач"
     },
     "sequences": {
       "all_sequences": "Все секвенции",

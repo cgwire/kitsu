@@ -1643,7 +1643,7 @@
       "due_this_month": "Tâches dues ce mois-ci",
       "estimation_over": "Durée supérieure à l'estimation",
       "estimation_approval_late": "La date de livraison est en retard (feedback)",
-      "estimation_done_late": "Date de livraison est en retard (done)",
+      "estimation_done_late": "La date de livraison est en retard (terminé)",
       "late": "Est en retard",
       "nb_selected_tasks": "{nbSelectedTasks} tâche sélectionnée | {nbSelectedTasks} tâches sélectionnées",
       "set_thumbnails_from_tasks": "Positionner le dernier preview de la tâche sélectionnée comme vignette | Positionner le dernier preview des tâches sélectionnées comme vignette",
@@ -1685,7 +1685,7 @@
       "delete_for_selection_error": "Une erreur s'est produite lors de la suppression des tâches sélectionnées.",
       "delete_for_selection_hard_text": "Êtes-vous sûr de vouloir supprimer définitivement les tâches sélectionnées ? Tous les commentaires et aperçus associés seront également supprimés. Veuillez confirmer en tapant \"SUPPRIMER\" ci-dessous.",
       "delete_for_selection_hard_lock_text": "SUPPRIMER",
-      "hookup_playlist": "Créer une liste de lecture pour les rencontres",
+      "hookup_playlist": "Générer une playlist de raccords",
       "assignation_error": "Il y a eu un problème d'assignation de cette personne aux tâches sélectionnées. Toutes les tâches n'ont pas été assignées.",
       "retake_filter_none": "Sans reprise",
       "retake_filter_with_retakes": "Avec reprises"

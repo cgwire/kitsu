@@ -1801,7 +1801,7 @@
       "change_status": "cambia el estado de la tarea a",
       "create_error": "Se ha producido un error al guardar esta automatización de estado. ¿Está seguro de que no hay otra automatización con el mismo nombre?",
       "delete_text": "¿Está seguro que quiere eliminar el estado de automatización {name} de su base de datos?",
-      "delete_error": "Se ha producido error al eliminar este estado de automatización. Es probable que esté vinculado al proyecto. En ese caso, no lo podrá eliminar . Primero deberá eliminarlo de cada proyecto.",
+      "delete_error": "Se ha producido un error al eliminar esta automatización de estado. Es probable que esté vinculada a una producción. En ese caso, primero deberá eliminarla de cada producción.",
       "edit_title": "Modificar el estado de automatización",
       "entity_title": "Tipo de entidad afectada por el gatillo",
       "number": "estado de automatización | estado de automatizaciones",

@@ -2033,7 +2033,7 @@
       "new_hiring": "Nieuwe aanwerving",
       "new_version": "Nieuwe versie",
       "no_budget_found": "Er is geen budget voor deze productie. Wil jij er een maken?",
-      "no_budget_entries_found": "Er is geen budget voor deze productie. Wil je er een maken?",
+      "no_budget_entries_found": "Er is geen budgetitem voor deze productie. Wil je er een maken?",
       "no_analytics_to_show": "Er zijn geen statistieken voor deze productie. Maak een budget aan en voeg items toe om de statistieken te bekijken.",
       "remaining": "Overige",
       "previsional_costs": "Geschat",

@@ -38,7 +38,7 @@
       "casted_in_shots": "In {nbShots} Shots gecastet",
       "delete_for_selection_hard_text": "Sind Sie sicher, dass Sie die ausgewählten Assets dauerhaft entfernen möchten? Alle zugehörigen Aufgaben, Kommentare und Vorschauen werden ebenfalls gelöscht. Bitte bestätigen Sie, indem Sie unten \"LÖSCHEN\" eingeben.",
       "delete_for_selection_hard_lock_text": "LÖSCHEN",
-      "show_linked": "Aufschlüsselung der Vermögenswerte anzeigen"
+      "show_linked": "Breakdown-Assets anzeigen"
     },
     "asset_types": {
       "all_asset_types": "Alle Assettypen",
