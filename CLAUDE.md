@@ -226,6 +226,31 @@ Shared toggle/select logic for custom combobox components.
 t('studios.title')
 ```
 
+### Production-type terminology overlays
+
+`en.js` is the English source of truth. Two **partial overlays** are merged on
+top of it for specific production types:
+
+- `en_nft.js` — NFT productions: remaps the *shot* concept to **NFT**
+  (`shot/shots/Shot/Shots → NFT/NFTs`). Sequence, episode, asset and edit are
+  unchanged.
+- `en_video-game.js` — video-game productions: `shot → map`,
+  `sequence → level`, `episode → chapter` (asset and edit unchanged).
+
+Rules:
+
+- These files contain **only** the keys whose wording differs from `en.js` —
+  never copy a key whose value is identical to the base.
+- Key names must **mirror `en.js` exactly**. When a key is renamed in `en.js`
+  (e.g. `creation_explaination → creation_explanation`), rename it in the
+  overlays too: a stale key becomes a dead override and the new base key then
+  leaks untranslated vocabulary (English "shot" showing in an NFT/map UI).
+- When a key is **added** to `en.js` whose value mentions a remapped word
+  (shot / sequence / episode), add the matching override to the relevant
+  overlay.
+- Only English has these overlays. The other locales (`fr.json`, …) translate
+  `en.js` and have no production-type variant.
+
 ## CSS / SCSS
 
 ### Scoped styles

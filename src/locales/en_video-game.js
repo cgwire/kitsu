@@ -1,3 +1,23 @@
+/*
+ * Production-type terminology overlay for video-game productions.
+ *
+ * This is NOT a standalone locale: it is a PARTIAL override merged on top of
+ * en.js (the English source of truth). It must contain only the keys whose
+ * wording differs from en.js — never a key whose value is identical to the base.
+ *
+ * Vocabulary mapping vs en.js:
+ *   shot / Shot          ->  map / Map
+ *   sequence / Sequence  ->  level / Level
+ *   episode / Episode    ->  chapter / Chapter
+ *   (asset and edit are unchanged)
+ *
+ * Keep in sync with en.js:
+ *   - Mirror en.js key names exactly. If a key is renamed in en.js, rename it
+ *     here too — a stale key is a dead override and the new base key then leaks
+ *     untranslated vocabulary.
+ *   - When a key added to en.js has a value mentioning a remapped word
+ *     (shot / sequence / episode), add the matching override here.
+ */
 export default {
 
   assets: {
