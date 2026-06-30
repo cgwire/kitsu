@@ -157,13 +157,15 @@ export default {
   },
 
   quota: {
-    explaination: 'Maps are considered ended on the first feedback request. Then, quotas are weighted following time spent on the task (when the artist filled his timesheet).\n If no time is filled, it considers that:\n * The task was started at the first status change to WIP \n* The task was done the day the feedback request was made.\n * It splits the done frames among all business days between the start and the end.',
-    explaination_feedback: 'The map is done on the first feedback request. Its number of frames is added to the quotas for this day.'
+    explanation_feedback: 'The map is considered complete on the first feedback request. Its number of frames is added to the quotas for that day.',
+    explanation_done: 'The map is considered complete on the last approval. Its number of frames is added to the quotas for that day.',
+    explanation_weighted: 'Maps are considered complete upon the first feedback request. Then, quotas are weighted based on the time spent on the task,as recorded in the artist\'s timesheet.\n\n If no time is recorded, it is assumed that:\n* The task started at the first status change to WIP.\n* The task was completed on the day the feedback request was made.\n * The completed frames are distributed evenly among all business days between the start and end dates.',
+    explanation_weighteddone: 'Maps are considered complete upon the last approval. Then, quotas are weighted based on the time spent on the task,as recorded in the artist\'s timesheet.\n\n If no time is recorded, it is assumed that:\n* The task started at the first status change to WIP.\n* The task was completed on the day it was approved.\n * The completed frames are distributed evenly among all business days between the start and end dates.'
   },
 
   shots: {
     casting: 'Map casting',
-    creation_explaination: 'To add maps you need first to create a chapter and a level. Type a chapter name in the bottom of the left column then click on add to create a new chapter. Select this chapter and repeat the same operation for level. Finally, select a level and type a map name in the field at the bottom of the right column. Click on the add button below. Your first map was created. You can now add many more! If it\'s not a TV Show, you have to directly create a level.',
+    creation_explanation: 'To add maps, you first need to create a chapter and a level. Type a chapter name at the bottom of the left column, then click "Add" to create a new chapter. Select this chapter and repeat the same operation for the level. Finally, select a level and type a map name in the field at the bottom of the right column. Click the "Add" button below. Your first map is now created. You can add many more! If it\'s not a TV show, you can directly create a level.',
     delete_for_selection: 'Delete the selected map | Delete the {nbSelectedShots} selected maps',
     delete_error: 'An error occurred while deleting this map. There are probably data linked to it. Are you sure this map has no task linked to it?',
     edit_success: 'Map {name} successfully edited.',
