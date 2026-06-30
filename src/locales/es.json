@@ -996,7 +996,7 @@
       "home": {
         "create_new": "Crear una nueva producción",
         "empty": "No tienes ninguna producción abierta. ¿Qué tal si creamos una nueva?",
-        "no_task": "No tiene ninguna tarea asignada. Consulte a su supervisor para ver qué puede hacer!",
+        "no_task": "No tiene ninguna tarea asignada. ¡Consulte a su supervisor para ver qué puede hacer!",
         "no_prod_for_client": "No tienes acceso a ninguna producción. Póngase en contacto con su contratista para obtener un acceso.",
         "title": "Producciones en marcha",
         "welcome": "Bienvenido a Kitsu"
@@ -1164,7 +1164,7 @@
       "change_password": {
         "button": "Cambiar contraseña",
         "error": "Se ha producido un error al cambiar la contraseña. Por favor, verifique su contraseña actual.",
-        "success": "Su contraseña ha sido cambiada con éxito!",
+        "success": "¡Su contraseña ha sido cambiada con éxito!",
         "unvalid": "La confirmación de su nueva contraseña no coincide o es demasiado corta (se esperan al menos 8 caracteres)."
       },
       "save": {
