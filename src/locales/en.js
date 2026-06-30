@@ -309,7 +309,7 @@ export default {
       created_at: 'Creation date',
       updated_at: 'Update date',
       last_comment_date: 'Last comment',
-      publisher: 'Publish by'
+      publisher: 'Published by'
     },
     actions: {
       title: 'Links to Concepts',
@@ -1862,8 +1862,8 @@ export default {
     feedback_date: 'Feedback date',
     explanation_feedback: 'The shot is considered complete on the first feedback request. Its number of frames is added to the quotas for that day.',
     explanation_done: 'The shot is considered complete on the last approval. Its number of frames is added to the quotas for that day.',
-    explanation_weighted: 'Shots are considered complete upon the first feedback request. Then, quotas are weighted based on the time spent on the task,as recorded in the artist\'s timesheet.\n\n If no time is recorded, it is assumed that:\n* The task started at the first status change to WIP.\n* The task was completed on the day the feedback request was made.\n * The completed frames are distributed evenly among all business days between the start and end dates.',
-    explanation_weighteddone: 'Shots are considered complete upon the last approval. Then, quotas are weighted based on the time spent on the task,as recorded in the artist\'s timesheet.\n\n If no time is recorded, it is assumed that:\n* The task started at the first status change to WIP.\n* The task was completed on the day it was approved.\n * The completed frames are distributed evenly among all business days between the start and end dates.',
+    explanation_weighted: 'Shots are considered complete upon the first feedback request. Then, quotas are weighted based on the time spent on the task, as recorded in the artist\'s timesheet.\n\n If no time is recorded, it is assumed that:\n* The task started at the first status change to WIP.\n* The task was completed on the day the feedback request was made.\n * The completed frames are distributed evenly among all business days between the start and end dates.',
+    explanation_weighteddone: 'Shots are considered complete upon the last approval. Then, quotas are weighted based on the time spent on the task, as recorded in the artist\'s timesheet.\n\n If no time is recorded, it is assumed that:\n* The task started at the first status change to WIP.\n* The task was completed on the day it was approved.\n * The completed frames are distributed evenly among all business days between the start and end dates.',
     export_quotas: 'Export quotas',
     frames: 'Frames',
     highlight_quotas: 'Highlight quotas below:',
