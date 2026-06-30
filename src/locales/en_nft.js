@@ -19,6 +19,7 @@
 export default {
 
   assets: {
+    casted_in_shots: 'Casted in {nbShots} NFTs',
     no_cast_in: 'This asset is not cast in any NFT.'
   },
 
@@ -47,8 +48,20 @@ export default {
     }
   },
 
+  episodes: {
+    delete_text: 'Are you sure you want to remove {name} from your database? All related NFTs and previews will also be deleted. Please confirm by typing the episode name below.'
+  },
+
+  keyboard: {
+    plaltleft: 'Go to the last frame of the previous NFT',
+    plaltright: 'Go to the first frame of the next NFT'
+  },
+
   main: {
     all_shots: 'All NFTs',
+    edl: {
+      explanation: 'It\'s possible to import common OpenTimeLineIO supported files (otio, fcp_xml, fcpx_xml, edl). NFTs will be created or updated with the given frame range, frame in and frame out. Frame in starts at 0.'
+    }
   },
 
   menu: {
@@ -104,6 +117,7 @@ export default {
     casting: 'NFT casting',
     creation_explanation: 'To add NFTs, you first need to create an episode and a sequence. Type an episode name at the bottom of the left column, then click "Add" to create a new episode. Select this episode and repeat the same operation for the sequence. Finally, select a sequence and type a NFT name in the field at the bottom of the right column. Click the "Add" button below. Your first NFT is now created. You can add many more! If it\'s not a TV show, you can directly create a sequence.',
     delete_for_selection: 'Delete the selected NFT | Delete the {nbSelectedShots} selected NFTs',
+    delete_for_selection_hard_text: 'Are you sure you want to permanently remove the selected NFTs? All related tasks, comments and previews will also be deleted. Please confirm by typing \'DELETE\' below.',
     delete_error: 'An error occurred while deleting this NFT. There are probably data linked to it. Are you sure this NFT has no task linked to it?',
     edit_success: 'NFT {name} successfully edited.',
     edit_fail: 'Creation or edition failed, an error occurred. Make sure that you are not renaming the NFT with a name already listed for a given sequence.',

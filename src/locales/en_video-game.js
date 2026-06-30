@@ -21,6 +21,7 @@
 export default {
 
   assets: {
+    casted_in_shots: 'Casted in {nbShots} maps',
     only_current_episode: 'Only current chapter',
     no_cast_in: 'This asset is not cast in any map.',
     fields: {
@@ -38,7 +39,9 @@ export default {
 
   custom_actions: {
     entity_types: {
-      shot: 'Map'
+      shot: 'Map',
+      sequence: 'Level',
+      episode: 'Chapter'
     }
   },
 
@@ -77,10 +80,18 @@ export default {
     }
   },
 
+  keyboard: {
+    plaltleft: 'Go to the last frame of the previous map',
+    plaltright: 'Go to the first frame of the next map'
+  },
+
   main: {
     all_shots: 'All maps',
     csv: {
       preview_episode_name: 'Chapter name'
+    },
+    edl: {
+      explanation: 'It\'s possible to import common OpenTimeLineIO supported files (otio, fcp_xml, fcpx_xml, edl). Maps will be created or updated with the given frame range, frame in and frame out. Frame in starts at 0.'
     }
   },
 
@@ -91,6 +102,7 @@ export default {
 
   playlists: {
     add_sequences: 'Add levels',
+    add_episodes: 'Add chapters',
     add_shots: 'Add maps',
     add_sequence: 'Add the whole level',
     add_episode: 'Add the whole chapter',
@@ -167,6 +179,7 @@ export default {
     casting: 'Map casting',
     creation_explanation: 'To add maps, you first need to create a chapter and a level. Type a chapter name at the bottom of the left column, then click "Add" to create a new chapter. Select this chapter and repeat the same operation for the level. Finally, select a level and type a map name in the field at the bottom of the right column. Click the "Add" button below. Your first map is now created. You can add many more! If it\'s not a TV show, you can directly create a level.',
     delete_for_selection: 'Delete the selected map | Delete the {nbSelectedShots} selected maps',
+    delete_for_selection_hard_text: 'Are you sure you want to permanently remove the selected maps? All related tasks, comments and previews will also be deleted. Please confirm by typing \'DELETE\' below.',
     delete_error: 'An error occurred while deleting this map. There are probably data linked to it. Are you sure this map has no task linked to it?',
     edit_success: 'Map {name} successfully edited.',
     edit_fail: 'Creation or edition failed, an error occurred. Make sure that you are not renaming the map with a name already listed for a given level.',
