@@ -159,7 +159,7 @@
     "custom_actions": {
       "create_error": "Ocorreu um erro ao salvar esta ação personalizada. Tem certeza de que não há outra ação com o mesmo nome?",
       "delete_text": "Tem certeza de que deseja remover a ação personalizada {name} de seu banco de dados?",
-      "delete_error": "Ocorreu um erro ao excluir esta ação personalizada personalizada.",
+      "delete_error": "Ocorreu um erro ao excluir esta ação personalizada.",
       "edit_title": "Editar uma ação personalizada",
       "new_custom_action": "Adicionar uma ação personalizada",
       "number": "ação personalizada | ações personalizadas",
@@ -439,7 +439,7 @@
       "save": "Salvar",
       "sort_by": "Ordenar por",
       "sorted_by": "Ordenado por",
-      "start_date": "Data de inicio",
+      "start_date": "Data de início",
       "studio": "Estúdio",
       "tutorials": "Tutoriais",
       "user": "Usuário",
@@ -841,8 +841,8 @@
       "for_client": "O cliente",
       "for_studio": "O Estúdio",
       "edit_title": "Editar playlist",
-      "last_creation": "Ultimas criações",
-      "last_modification": "Ultimas modificações",
+      "last_creation": "Últimas criações",
+      "last_modification": "Últimas modificações",
       "loading_error": "Ocorreu um erro no servidor. As playlist não foram carregadas.",
       "new_playlist": "Adicionar playlist.",
       "no_build": "Sem exportação",
@@ -984,7 +984,7 @@
       "view_created": "Ver playlist"
     },
     "productions": {
-      "current": "Prodição selecionada",
+      "current": "Produção selecionada",
       "delete_text": "Você tem certeza que deseja remover {name} do seu banco de dados? Por favor, confirme digitando o nome do projeto que você quer deletar no campo de texto.",
       "delete_error": "Ocorreu um erro ao excluir esta produção. Provavelmente há dados vinculados a ela. Tem certeza de que esta produção não tem nenhuma tarefa, shot ou asset vinculado a ela? Kitsu não permite a exclusão de produções. Se você não quiser mais ver a produção, pode fechá-la.",
       "edit_title": "Editar produção",
@@ -1010,7 +1010,7 @@
         "type": "Tipo",
         "start_date": "Data de início",
         "end_date": "Data final",
-        "nb_episodes": "Número de espisódios",
+        "nb_episodes": "Número de episódios",
         "episode_span": "Período entre os episódios",
         "is_clients_isolated": "Isolar os comentários dos clientes (não visíveis para os outros)",
         "max_retakes": "Número máximo de repetições",
@@ -1024,7 +1024,7 @@
         "revision_padding": "Preenchimento do número de revisão (0 = sem preenchimento)"
       },
       "metadata": {
-        "add_explaination": "Adicionar informação especifica pelo projeto.",
+        "add_explaination": "Adicionar informação específica pelo projeto.",
         "add_failed": "Um erro ocorreu ao adicionar metadados no seu projeto.",
         "add_new_values": "Não há valores disponíveis atualmente.",
         "available_values": "Valores disponíveis",
@@ -1443,7 +1443,7 @@
       "new_shot": "Adicionar Shot",
       "new_shots": "Adicionar shots",
       "new_sequences": "Adicionar sequencias",
-      "new_episodes": "Adicionar espisódios",
+      "new_episodes": "Adicionar episódios",
       "no_casting": "O elenco do shot está vazio.",
       "number": "shot | shots",
       "manage": "Criar shots",
@@ -1606,7 +1606,7 @@
         "emergency": "Emergência",
         "normal": "Normal",
         "high": "Alta",
-        "very_high": "Muito alto"
+        "very_high": "Muito alta"
       },
       "assignation_warning": "Atenção: você não verá o resultado porque está ocultando as atribuições",
       "for_selection": "Para obter a lista e os filtros atuais",

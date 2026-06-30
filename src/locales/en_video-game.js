@@ -41,7 +41,7 @@ export default {
   episodes: {
     edit_error: 'An error occurred while saving this chapter. Are you sure there is no chapter with similar name?',
     delete_error: 'An error occurred while deleting this chapter. There are probably data linked to it. Are you sure this chapter has no level linked to it?',
-    delete_text: 'Are you sure you want to remove {name} from your database? Every related maps and previews will be deleted. Please confirm by typing the chapter name below.',
+    delete_text: 'Are you sure you want to remove {name} from your database? All related maps and previews will be deleted. Please confirm by typing the chapter name below.',
     edit_title: 'Edit chapter',
     empty_list: 'There is no chapter in the production. What about creating some?',
     empty_list_client: 'There is no chapter in this production.',
@@ -87,7 +87,7 @@ export default {
       add_shots_button: 'Add maps',
       add_shots_description: 'Add or import the maps for your production.',
       errorImportingShots: 'An error occurred while importing your maps. The production has been created though!',
-      explaination_type: 'If you choose TV Show, the production will be splitted in chapters.',
+      explaination_type: 'If you choose TV Show, the production will be split in chapters.',
       import_shots_button: 'Import maps',
       select_shot_task_type: 'Select map task type',
       select_shot_task_type_description: 'These task types define the building steps of your maps.',
@@ -143,7 +143,7 @@ export default {
 
   shots: {
     casting: 'Map casting',
-    creation_explaination: 'To add maps you need first to create an chapter and a level. Type an chapter name in the bottom of the left column then click on add to create a new chapter. Select this chapter and repeat the same operation for level. Finally, select a level and type a map name in the field at the bottom of the right column. Click on the add button below. Your first map was created. You can now add many more! If it\'s not a TV Show, you have to directly create a level.',
+    creation_explaination: 'To add maps you need first to create a chapter and a level. Type a chapter name in the bottom of the left column then click on add to create a new chapter. Select this chapter and repeat the same operation for level. Finally, select a level and type a map name in the field at the bottom of the right column. Click on the add button below. Your first map was created. You can now add many more! If it\'s not a TV Show, you have to directly create a level.',
     delete_for_selection: 'Delete the selected map | Delete the {nbSelectedShots} selected maps',
     delete_error: 'An error occurred while deleting this map. There are probably data linked to it. Are you sure this map has no task linked to it?',
     edit_success: 'Map {name} successfully edited.',
