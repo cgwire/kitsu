@@ -1,7 +1,7 @@
 {
   "default": {
     "assets": {
-      "cast_in": "Casten in",
+      "cast_in": "Gecastet in",
       "delete_error": "Beim Löschen dieses Assets ist ein Fehler aufgetreten. Wahrscheinlich sind damit Daten verknüpft. Sind Sie sicher, dass dieser Asset-Typ keine Aufgabe hat, die mit ihm verbunden ist?",
       "delete_text": "Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?",
       "edit_fail": "Speichern fehlgeschlagen. Ein Asset mit einem ähnlichen Namen existiert möglicherweise bereits.",
@@ -661,7 +661,7 @@
       "and_change_status": "und änderte den Status auf",
       "assigned_you": "hat Sie dieser Aufgabe zugewiesen",
       "commented_on": "kommentiert",
-      "mention_you_on": "hat dich erwähnt",
+      "mention_you_on": "hat Sie in einem Kommentar erwähnt",
       "no_notifications": "Für Ihre aktuellen Projekte gibt es derzeit keine Benachrichtigung für Sie.",
       "unread_notifications": "ungelesene Benachrichtigung | ungelesene Benachrichtigungen",
       "title": "Benachrichtigungen",

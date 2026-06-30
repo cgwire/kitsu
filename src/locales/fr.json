@@ -1612,7 +1612,7 @@
       "for_selection": "Pour la liste et les filtres courants",
       "for_project": "Pour le projet",
       "all_tasks": "Toutes les tâches",
-      "due_this_week": "Dus cette semaine",
+      "due_this_week": "Tâches dues cette semaine",
       "select_file": "Veuillez sélectionner le fichier de votre disque dur que vous souhaitez joindre à votre commentaire ou message :",
       "big_thumbnails": "Afficher les vignettes en grand",
       "create_tasks_edit": "Ajouter des tâches pour les montages courants",
@@ -1706,7 +1706,7 @@
       "unit": "Unité",
       "confirm_day_offs": "Le fait de définir ces jours comme des jours de congé effacera toutes les heures enregistrées pour les jours concernés. Êtes-vous sûr de vouloir continuer ?",
       "confirm_unset_day_offs": "Les jours de congé sont actuellement appliqués de {start} à {end}. Êtes-vous sûr de vouloir supprimer cette période ?",
-      "off": "Arrêt"
+      "off": "Congé"
     },
     "wrong_browser": {
       "title": "Votre navigateur n'est pas supporté par Kitsu",
@@ -2046,7 +2046,7 @@
         "base_salary": "Salaire",
         "currency": "Monnaie",
         "daily_salary": "Salaire journalier",
-        "duration": "La durée",
+        "duration": "Durée",
         "department": "Département",
         "months_duration": "Mois Durée",
         "name": "Nom",

@@ -84,7 +84,7 @@
       "episode_casting": "에피소드 출연",
       "save_error": "출연 저장 중 오류",
       "hide_library": "라이브러리 숨기기",
-      "show_library": "디스플레이 라이브러리"
+      "show_library": "라이브러리 표시"
     },
     "comments": {
       "add_attachment": "첨부파일 추가",
@@ -1011,7 +1011,7 @@
         "start_date": "시작일",
         "end_date": "종료일",
         "nb_episodes": "에피소드 수",
-        "episode_span": "에피소드 공간",
+        "episode_span": "에피소드 간격",
         "is_clients_isolated": "고객 코멘트 구분(다른 고객에게 표시되지 않음)",
         "max_retakes": "최대 재시도 횟수",
         "style": "스타일",
@@ -2006,8 +2006,8 @@
     "budget": {
       "add_entry": "항목 추가",
       "analytics": "예산 분석",
-      "cash_evolution": "비용 진화",
-      "cash_repartition": "비용 재분배",
+      "cash_evolution": "비용 추이",
+      "cash_repartition": "비용 분포",
       "cost": "비용",
       "costs": "실제 비용",
       "departments": "부서",

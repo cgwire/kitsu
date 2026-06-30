@@ -33,7 +33,7 @@
       "delete_for_selection": "Eliminar el recurso seleccionado | Eliminar los {nbSelectedAssets} recursos seleccionados",
       "multiple_delete_error": "Se ha producido un error al eliminar un recurso. Es probable que haya algunos datos vinculados a un recurso. ¿Está seguro de que no hay ninguna tarea vinculada a algún recurso seleccionado?",
       "only_current_episode": "Solamente el episodio actual",
-      "linked": "Enlace",
+      "linked": "Vinculado",
       "no_concept": "No hay conceptos vinculados a este activo",
       "casted_in_shots": "Asignado en {nbShots} tomas",
       "delete_for_selection_hard_text": "¿Está seguro de que desea eliminar permanentemente los activos seleccionados? También se eliminarán todas las tareas, comentarios y vistas previas relacionadas. Confírmelo escribiendo \"BORRAR\" a continuación.",
@@ -419,7 +419,7 @@
       "files_selected": "archivos seleccionados",
       "for": "Para",
       "go_productions": "Volver A Producción",
-      "history": "trayectoria",
+      "history": "historial",
       "info": "Información",
       "or": "o",
       "no": "No",
@@ -846,14 +846,14 @@
       "loading_error": "Se ha producido un error en el servidor. Las listas de reproducción no se pueden cargar.",
       "new_playlist": "Añadir una lista de reproducción",
       "no_build": "Sin construcción",
-      "no_playlist": "Actualmente no hay ninguna lista de reproducción para este proyecto.",
+      "no_playlist": "Actualmente no hay ninguna lista de reproducción para esta producción o episodio.",
       "no_preview": "No hay vista previa",
       "no_selection": "Por favor, seleccione una lista de reproducción a la izquierda.",
       "no_sequence_for_episode": "No hay secuencia para este episodio",
       "no_shot_for_production": "No hay ninguna toma para esta producción.",
       "select_shot": "Por favor, seleccione una toma en la columna de la derecha",
       "select_playlist": "Por favor, seleccione una lista de reproducción en la columna de la izquierda",
-      "select_task_type": "Cambiar el tipo de tarea para todos los planes",
+      "select_task_type": "Cambiar el tipo de tarea para todas las entidades",
       "title": "Listas de reproducción",
       "updated_at": "Actualizado en:",
       "remove": "quitar",
@@ -1060,7 +1060,7 @@
       "brief": {
         "title": "Brief",
         "empty": "Todavía no hay un Brief. ¿Quieres crear uno?",
-        "edit_error": "Se ha producido un error al editar el informe."
+        "edit_error": "Se ha producido un error al editar el Brief."
       },
       "parameters": {
         "title": "Parámetros",
@@ -1240,7 +1240,7 @@
         "timesheets_locked": "Cerrar las hojas de horas de artistas con más de 1 semana de antigüedad",
         "mattermost_webhook": "Webhook de Mattermost (Opcional)",
         "discord_token": "Token de Discord (Opcional)",
-        "show_hd_default": "Mostrar imagen con calidad HD por defecto",
+        "show_hd_default": "Mostrar vídeos con calidad HD por defecto (más lento)",
         "format_duration_in_hours": "Mostrar duraciones y estimaciones en horas",
         "dark_theme_by_default": "Usar tema oscuro por defecto"
       },
@@ -1252,7 +1252,7 @@
         "empty_metadata": "Todavía no hay ningún descriptor de metadatos definido para este tipo de entidad."
       },
       "save": {
-        "button": "Grabar parametrizaciones",
+        "button": "Guardar ajustes",
         "error": "Se ha producido un error del servidor al guardar la configuración"
       },
       "webhook_error": "Se ha producido un error al publicar el webhook",
@@ -1585,7 +1585,7 @@
         "task_status_short_name": "Estado",
         "task_type": "Tipo",
         "start_date_short": "Fecha de comienzo",
-        "parent": "Padres",
+        "parent": "Padre",
         "difficulty": "Dificultad",
         "done_date": "Fecha de aprobación",
         "nb_frames": "Fotogramas",
@@ -1803,10 +1803,10 @@
       "delete_text": "¿Está seguro que quiere eliminar el estado de automatización {name} de su base de datos?",
       "delete_error": "Se ha producido un error al eliminar esta automatización de estado. Es probable que esté vinculada a una producción. En ese caso, primero deberá eliminarla de cada producción.",
       "edit_title": "Modificar el estado de automatización",
-      "entity_title": "Tipo de entidad afectada por el gatillo",
+      "entity_title": "Tipo de entidad afectada por el activador",
       "number": "estado de automatización | estado de automatizaciones",
       "in_title": "Estado provocando un cambio",
-      "out_title": "El cambio se aplicará al disparar el gatillo",
+      "out_title": "El cambio que se aplicará al activarse el activador",
       "new_status_automation": "Añadir estado de automatización",
       "run_for_selection": "Ejecutar el estado de automatización para las tareas seleccionadas:",
       "title": "Automatizaciones de Estado",
@@ -1922,7 +1922,7 @@
         "created_at": "Fecha de creación",
         "updated_at": "Fecha de actualización",
         "last_comment_date": "Último comentario",
-        "publisher": "Publicar por"
+        "publisher": "Publicado por"
       },
       "actions": {
         "title": "Enlaces a conceptos",
@@ -2103,7 +2103,7 @@
         "extension": "Extensión",
         "name": "Nombre",
         "monthly_cost": "Coste mensual",
-        "inventory_amount": "Inventario Importe",
+        "inventory_amount": "Cantidad en inventario",
         "short_name": "Nombre corto",
         "status": "Estado",
         "version": "Versión"

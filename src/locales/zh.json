@@ -1,7 +1,7 @@
 {
   "default": {
     "assets": {
-      "cast_in": "投入进",
+      "cast_in": "已分配到",
       "delete_error": "删除此资产时出现错误. 很可能存在有链接至此的数据. 您确定没有任务链接至此资产类型吗?",
       "delete_text": "您确定要从您的数据库移除{name}吗?",
       "edit_fail": "保存失败。可能已存在名称相似的资产。",
@@ -98,7 +98,7 @@
       "edit_error": "编辑评论时发生错误. 请联系我们的支持团队.",
       "error": "发布评论时出现错误",
       "no_file_attached": "未附加预览",
-      "pin": "钉",
+      "pin": "钉住",
       "pinned": "钉住",
       "post_status": "发表评论",
       "retake": "重新提交",
@@ -680,10 +680,10 @@
       "initial_comment": "初步意见",
       "mark_all_as_read": "标记全部已读",
       "mention": "提及",
-      "only_non_watching": "只有不观看",
-      "only_read": "只读",
+      "only_non_watching": "仅未关注",
+      "only_read": "仅已读",
       "only_unread": "只有未读",
-      "only_watching": "只看",
+      "only_watching": "仅关注中",
       "read": "阅读",
       "reply": "答复",
       "publish": "发布",
@@ -1600,7 +1600,7 @@
         "title": "颜色",
         "neutral": "中性",
         "status": "状态颜色",
-        "late": "迟到的红"
+        "late": "逾期标红"
       },
       "priority": {
         "emergency": "紧急",
@@ -2007,7 +2007,7 @@
       "add_entry": "添加条目",
       "analytics": "预算分析",
       "cash_evolution": "支出变化",
-      "cash_repartition": "支出重新分配",
+      "cash_repartition": "支出分布",
       "cost": "费用",
       "costs": "实际成本",
       "departments": "部门",

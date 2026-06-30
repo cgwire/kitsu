@@ -1521,7 +1521,7 @@
       "create_tasks_asset": "Adicionar tarefas para estes Assets",
       "create_tasks_asset_explaination": "Você vai criar uma nova tarefa para cada Asset do projeto atual para o tipo de tarefa fornecido. Você quer continuar?",
       "create_tasks_asset_failed": "Ocorreu um erro no servidor durante as criações.",
-      "current": "Tarefa a fazer",
+      "current": "Tarefas",
       "current_status": "Status atual:",
       "delete_all_text": "Tem certeza de que deseja excluir todas as tarefas para determinado {name}? Por favor, confirme digitando o nome do tipo de tarefa das tarefas que você deseja excluir no campo de texto.",
       "delete_all_error": "Falha ao excluir todas as tarefas para determinado tipo de tarefa.",

@@ -89,7 +89,7 @@
     "comments": {
       "add_attachment": "Csatolmány",
       "add_checklist": "Feladatlista",
-      "add_comment": "Hozzászólás",
+      "add_comment": "Hagyj egy hozzászólást...",
       "add_preview": "Előnézet csatolása",
       "change_preview": "Előnézet váltás",
       "comment_from_client": "Hozzászólás a megrendelőtől",
@@ -829,7 +829,7 @@
       "build_weekly": "Minden függőben lévő",
       "build_mp4": ".mp4 építése",
       "building": "Építés...",
-      "client_playlist": "Megrendelő lejátszás lista",
+      "client_playlist": "Megrendelői lejátszási lista",
       "create_for_selection": "Lejátszási lista generálása a kiválasztott feladatokból",
       "create_title": "Lejátszási lista készítése",
       "created_at": "Készült itt:",
@@ -997,7 +997,7 @@
         "create_new": "Új produkció létrehozása",
         "empty": "Nincs nyitott produkciód. Hozz létre egyet!",
         "no_task": "Nincs számodra kiosztott feladat. Kérj feladatot a supervisor-odtól!",
-        "no_prod_for_client": "Nincs hozzáférésed egy produkcióhoz sem. Lépj kapcsolatba a megbízóddal, hogy hozzáférést tudjon adni.",
+        "no_prod_for_client": "Nincs hozzáférésed egy produkcióhoz sem. Lépj kapcsolatba a stúdió adminisztrátorával a hozzáférés megszerzéséhez.",
         "title": "Futó produkciók",
         "welcome": "Üdvözlünk a Kitsu-n"
       },

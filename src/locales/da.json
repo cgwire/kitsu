@@ -681,10 +681,10 @@
       "mark_all_as_read": "Marker alle som læst",
       "mention": "Omtale",
       "only_non_watching": "Kun ikke-seende",
-      "only_read": "Læs kun",
+      "only_read": "Kun læste",
       "only_unread": "Kun ulæst",
       "only_watching": "Ser kun på",
-      "read": "læse",
+      "read": "læst",
       "reply": "Svar",
       "publish": "Udgiv",
       "published": "udgav en forhåndsvisning",
@@ -805,7 +805,7 @@
       },
       "seniority": {
         "junior": "Junior",
-        "mid": "Midt",
+        "mid": "Mellem",
         "senior": "Senior"
       },
       "email_domain_error": "Dette e-mail-domæne er ikke tilladt.",
@@ -1419,7 +1419,7 @@
       "frames": "Frames",
       "month": "Måned",
       "seconds": "Sekunder",
-      "weighted": "Vægtet",
+      "weighted": "Vægtet (feedback)",
       "week": "Uge",
       "explanation_feedback": "Shotet betragtes som færdigt ved den første feedbackanmodning. Antallet af frames tilføjes til kvoterne for den dag.",
       "done_date": "Dato for godkendelse",
@@ -2066,7 +2066,7 @@
       },
       "seniorities": {
         "junior": "Junior",
-        "mid": "Midt",
+        "mid": "Mellem",
         "senior": "Senior"
       },
       "clear_exception": "Ryd lønjustering for denne måned"

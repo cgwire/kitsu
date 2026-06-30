@@ -1376,14 +1376,14 @@
       "create_version": "スケジュール版の作成",
       "edit_version": "スケジュールバージョンの編集",
       "edit_version_error": "スケジュールバージョンの保存中にエラーが発生しました。もう一度やり直してください。",
-      "edit_version_exist": "似た名前のバージョンはすでに存在する。",
+      "edit_version_exist": "似た名前のバージョンがすでに存在します。",
       "delete_version": "スケジュールバージョンの削除",
       "delete_version_error": "このスケジュールバージョンの削除中にエラーが発生しました。サポートチームまでご連絡ください。",
       "delete_version_message": "本当にスケジュールバージョン{name}を削除しますか？以下にスケジュールバージョン名を入力して確認してください。",
       "versions": {
         "reference": "参考予想",
         "from": "より",
-        "locked": "鍵付き",
+        "locked": "ロック済み",
         "canceled": "キャンセル"
       },
       "fields": {
@@ -1465,7 +1465,7 @@
         "production": "作品",
         "sequence": "シーケンス",
         "time_spent": "作業時間",
-        "person": "モディファイア",
+        "person": "修正者",
         "max_retakes": "最大リテイク",
         "resolution": "解像度",
         "placeholder": "SH01",
@@ -1679,7 +1679,7 @@
         "hard": "難しい",
         "very_hard": "非常に難しい"
       },
-      "assignation_disclaimer": "リストから人が消えている場合は、チームにリストアップされていないことを意味する。",
+      "assignation_disclaimer": "リストに表示されない人がいる場合は、その人がチームに登録されていないことを意味します。",
       "create_tasks_disclaimer": "タスク・タイプが見つからない場合は、本番設定のタスク・タイプ・セクションにリストされていることを確認してください。",
       "data_display": "データ表示",
       "delete_for_selection_error": "選択したタスクの削除中にエラーが発生しました。",
@@ -1810,7 +1810,7 @@
       "new_status_automation": "ステータス自動化を作成",
       "run_for_selection": "選択したタスクにステータス自動化を実行:",
       "title": "自動化",
-      "wrong_automation": "この自動化は上流のタスクタイプに適用される。Kitsuでは許可されていません（無限サイクルを避けるため）。効果はありません。",
+      "wrong_automation": "この自動化は上流のタスクタイプに適用されます。Kitsuでは許可されていません（無限サイクルを避けるため）。効果はありません。",
       "fields": {
         "entity_type": "エンティティタイプ",
         "in_field_type": "入力フィールドタイプ",
@@ -1895,7 +1895,7 @@
       "no_bot": "ボットがありません。作成しますか？",
       "confirm_edit": "ボットの変更を保存する",
       "create": "ボット作成",
-      "departments_empty": "このボットはどの部署ともリンクしていない。"
+      "departments_empty": "このボットはどの部門にもリンクされていません。"
     },
     "chats": {
       "join": "チャットに参加",
@@ -2029,11 +2029,11 @@
       "entries": "エントリー",
       "gap": "ギャップ",
       "hide_expenses": "実費を非表示",
-      "months": "ヶ月",
+      "months": "月数",
       "new_hiring": "新規採用",
       "new_version": "新バージョン",
-      "no_budget_found": "このプロダクションには予算がない。作りたいですか？",
-      "no_budget_entries_found": "このプロダクションの予算エントリーはありません。作りたいですか？",
+      "no_budget_found": "このプロダクションには予算がありません。作成しますか？",
+      "no_budget_entries_found": "このプロダクションの予算エントリーはありません。作成しますか？",
       "no_analytics_to_show": "このプロダクションには表示する分析がありません。アナリティクスを見るには予算を作成し、エントリーを追加してください。",
       "remaining": "残り",
       "previsional_costs": "推定",

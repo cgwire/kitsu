@@ -35,7 +35,7 @@
       "only_current_episode": "فقط قسمت فعلی",
       "linked": "پیوند داده شده است",
       "no_concept": "هیچ کانسپتی به این منبع مرتبط نیست",
-      "casted_in_shots": "در نماهای {nbShots} اجرا شده است",
+      "casted_in_shots": "در {nbShots} شات کست شده است",
       "delete_for_selection_hard_text": "آیا مطمئن هستید که می‌خواهید دارایی‌های انتخاب‌شده را به‌طور دائم حذف کنید؟ تمام وظایف، نظرات و پیش‌نمایش‌های مرتبط نیز حذف خواهند شد. لطفاً با تایپ کردن «حذف» در زیر، تأیید کنید.",
       "delete_for_selection_hard_lock_text": "حذف",
       "show_linked": "نمایش منابع بریک‌داون"
@@ -115,7 +115,7 @@
         "task_status": "وضعیت وظیفه",
         "person": "نام شخص",
         "checklist": "چک لیست",
-        "acknowledgements": "قدردانی",
+        "acknowledgements": "تأییدها",
         "revision": "",
         "attachments": ""
       },
@@ -2006,8 +2006,8 @@
     "budget": {
       "add_entry": "اضافه کردن ورودی",
       "analytics": "تجزیه و تحلیل بودجه",
-      "cash_evolution": "تکامل هزینه",
-      "cash_repartition": "تقسیم مجدد هزینه‌ها",
+      "cash_evolution": "روند هزینه‌ها",
+      "cash_repartition": "توزیع هزینه‌ها",
       "cost": "هزینه",
       "costs": "هزینه‌های واقعی",
       "departments": "بخش‌ها",

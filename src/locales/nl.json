@@ -1513,7 +1513,7 @@
       "change_priority": "Wijzig prioriteit van de geselecteerde taak | Wijzig prioriteit van de {nbSelectedTasks} geselecteerde taken",
       "clear_assignations": "toewijzingen verwijderen uit selectie",
       "comment_image": "Bestanden bijvoegen",
-      "create_for_selection": "Taak maken voor elke lege cel:",
+      "create_for_selection": "Taak maken voor elke lege cel",
       "create_tasks": "Taken toevoegen",
       "create_tasks_shot": "Taken toevoegen voor huidige opnames",
       "create_tasks_shot_explaination": "Je gaat een nieuwe taak maken voor elke opname van het huidige project voor het gegeven taaktype. Wil je doorgaan?",
@@ -1908,7 +1908,7 @@
       "search_entity": "Zoeken naar entiteit"
     },
     "concepts": {
-      "add_links": "Koppelingen naar bedrijfsmiddelen toevoegen",
+      "add_links": "Koppelingen naar assets toevoegen",
       "add_new_concept": "Nieuwe concepten toevoegen",
       "add_concept": "Bestanden toevoegen voor nieuwe concepten",
       "add_concept_error": "Er is een fout opgetreden tijdens het toevoegen van concepten.",
@@ -2035,7 +2035,7 @@
       "no_budget_found": "Er is geen budget voor deze productie. Wil jij er een maken?",
       "no_budget_entries_found": "Er is geen budgetitem voor deze productie. Wil je er een maken?",
       "no_analytics_to_show": "Er zijn geen statistieken voor deze productie. Maak een budget aan en voeg items toe om de statistieken te bekijken.",
-      "remaining": "Overige",
+      "remaining": "Resterend",
       "previsional_costs": "Geschat",
       "remaining_and_costs": "Rem. + Kosten",
       "salary_scale_title": "Salarisschaal",
