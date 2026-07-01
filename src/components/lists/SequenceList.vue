@@ -23,7 +23,10 @@
         @toggle-stick="metadataStickColumnClicked($event)"
       />
 
-      <table class="datatable">
+      <table
+        class="datatable"
+        :class="{ 'expand-task-types': displaySettings.fullTaskTypeNames }"
+      >
         <thead
           class="datatable-head"
           id="datatable-sequence"
@@ -761,6 +764,18 @@ thead .name.sequence-name {
   min-width: 150px;
   max-width: 150px;
   width: 150px;
+}
+
+.expand-task-types :deep(.validation-cell) {
+  width: auto;
+  min-width: 150px;
+  max-width: none;
+}
+
+.expand-task-types :deep(.task-type-name) {
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
 }
 
 .estimation,

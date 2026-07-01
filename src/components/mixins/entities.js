@@ -13,6 +13,7 @@ export const entitiesMixin = {
       displaySettings: {
         bigThumbnails: false,
         contactSheetMode: false,
+        fullTaskTypeNames: false,
         showAssignations: true,
         showInfos: true
       },

@@ -53,6 +53,11 @@ const options = computed(() => {
       value: 'contactSheetMode'
     },
     {
+      label: t('tasks.full_task_type_names'),
+      value: 'fullTaskTypeNames',
+      when: !isTaskType
+    },
+    {
       label: t('shots.show_timecode'),
       value: 'inOutTimecode',
       when: props.type === 'shot'

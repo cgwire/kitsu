@@ -25,7 +25,10 @@
         @toggle-stick="metadataStickColumnClicked($event)"
       />
 
-      <table class="datatable multi-section">
+      <table
+        class="datatable multi-section"
+        :class="{ 'expand-task-types': displaySettings.fullTaskTypeNames }"
+      >
         <thead class="datatable-head" id="datatable-shot" v-columns-resizable>
           <tr>
             <th
@@ -1315,6 +1318,18 @@ thead .name.shot-name {
   min-width: 150px;
   max-width: 150px;
   width: 150px;
+}
+
+.expand-task-types :deep(.validation-cell) {
+  width: auto;
+  min-width: 150px;
+  max-width: none;
+}
+
+.expand-task-types :deep(.task-type-name) {
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
 }
 
 .frames {
