@@ -18,6 +18,22 @@ export default {
     }
   },
 
+  generateBulkShotNames(startName, count, step) {
+    const matches = startName.match(/\d+$/)
+    if (!matches) return []
+    const numStr = matches[0]
+    const prefix = startName.slice(0, startName.length - numStr.length)
+    const padLen = numStr.length
+    const startNum = parseInt(numStr, 10)
+    const cappedCount = Math.min(count, 500)
+    const names = []
+    for (let i = 0; i < cappedCount; i++) {
+      const n = startNum + i * step
+      names.push(prefix + String(n).padStart(padLen, '0'))
+    }
+    return names
+  },
+
   shortenText(text, maxLength) {
     let result = text || ''
     if (text?.length > maxLength) {

@@ -143,6 +143,7 @@
       @add-episode="addEpisode"
       @add-sequence="addSequence"
       @add-shot="addShot"
+      @add-shots-bulk="addShotsBulk"
       @cancel="hideManageShots"
     />
 
@@ -578,6 +579,7 @@ export default {
   methods: {
     ...mapActions([
       'addMetadataDescriptor',
+      'bulkCreateShots',
       'createTasks',
       'changeShotSort',
       'clearSelectedShots',
@@ -649,6 +651,18 @@ export default {
 
     addShot(shot, callback) {
       this.newShot(shot).then(callback).catch(console.error)
+    },
+
+    addShotsBulk(payload, callback) {
+      this.bulkCreateShots(payload)
+        .then(() => this.loadShots())
+        .then(() => {
+          if (callback) callback()
+        })
+        .catch(err => {
+          console.error(err)
+          if (callback) callback()
+        })
     },
 
     onDeleteClicked(shot) {
