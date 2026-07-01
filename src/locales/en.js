@@ -1785,6 +1785,8 @@ export default {
     md: 'md',
     today: 'Today',
     zoom_level: 'Zoom level',
+    confirm_move_children:
+      'Moving this bar will clip or snap {count} sub-item(s) to fit the new bounds. Continue?',
     milestone: {
       add_milestone: 'Add milestone for',
       delete_milestone: 'Delete milestone',
