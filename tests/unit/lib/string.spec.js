@@ -19,6 +19,15 @@ describe('lib/string', () => {
     expect(stringHelpers.generateNextName('SH001', 2)).toEqual('SH003')
   })
 
+  it('generateBulkShotNames', () => {
+    expect(stringHelpers.generateBulkShotNames('SH010', 3, 10)).toEqual(['SH010', 'SH020', 'SH030'])
+    expect(stringHelpers.generateBulkShotNames('SH001', 3, 1)).toEqual(['SH001', 'SH002', 'SH003'])
+    expect(stringHelpers.generateBulkShotNames('SC0010', 3, 10)).toEqual(['SC0010', 'SC0020', 'SC0030'])
+    expect(stringHelpers.generateBulkShotNames('SH090', 2, 10)).toEqual(['SH090', 'SH100'])
+    expect(stringHelpers.generateBulkShotNames('MAIN', 3, 10)).toEqual([])
+    expect(stringHelpers.generateBulkShotNames('SH010', 501, 1)).toHaveLength(500)
+  })
+
   it('shortenText', () => {
     expect(stringHelpers.shortenText('long text', 0)).toEqual('...')
     expect(stringHelpers.shortenText('short text', 10)).toEqual('short text')

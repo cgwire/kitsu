@@ -18,6 +18,7 @@
               :options="shotPaddingOptions"
               class="shot-padding flexrow-item"
               v-model="shotPadding"
+              v-show="shotMode === 'single'"
             />
           </div>
         </div>
@@ -104,39 +105,127 @@
           </div>
 
           <div class="shot-column">
-            <h2 class="subtitle">{{ $t('shots.title') }}</h2>
-            <div class="list">
-              <div
-                class="entity-line"
-                :key="shot.id"
-                v-for="shot in displayedShots"
-              >
-                {{ shot.name }}
-              </div>
-            </div>
-            <div class="field">
-              <input
-                class="input"
-                :placeholder="$t('shots.fields.placeholder')"
-                ref="addShotInput"
-                type="text"
-                @keyup.enter="addShot"
-                v-model="names.shot"
-              />
-            </div>
-            <div class="field">
+            <div class="shot-tabs">
               <button
-                :class="{
-                  button: true,
-                  'is-success': true,
-                  'is-loading': loading.addShot
-                }"
-                :disabled="!isAddShotAllowed || loading.addShot"
-                @click="addShot"
+                :class="['tab-button', { active: shotMode === 'single' }]"
+                @click="shotMode = 'single'"
               >
-                {{ $t('main.add') }}
+                {{ $t('shots.single_tab') }}
+              </button>
+              <button
+                :class="['tab-button', { active: shotMode === 'bulk' }]"
+                @click="shotMode = 'bulk'"
+              >
+                {{ $t('shots.bulk_tab') }}
               </button>
             </div>
+
+            <h2 class="subtitle">{{ $t('shots.title') }}</h2>
+
+            <div class="list">
+              <template v-if="shotMode === 'single'">
+                <div
+                  class="entity-line"
+                  :key="shot.id"
+                  v-for="shot in displayedShots"
+                >
+                  {{ shot.name }}
+                </div>
+              </template>
+              <template v-else>
+                <div
+                  v-for="name in bulkPreviewNames"
+                  :key="name"
+                  :class="[
+                    'entity-line',
+                    { collision: isBulkNameCollision(name) }
+                  ]"
+                >
+                  {{ name }}
+                </div>
+              </template>
+            </div>
+
+            <template v-if="shotMode === 'single'">
+              <div class="field">
+                <input
+                  class="input"
+                  :placeholder="$t('shots.fields.placeholder')"
+                  ref="addShotInput"
+                  type="text"
+                  @keyup.enter="addShot"
+                  v-model="names.shot"
+                />
+              </div>
+              <div class="field">
+                <button
+                  :class="{
+                    button: true,
+                    'is-success': true,
+                    'is-loading': loading.addShot
+                  }"
+                  :disabled="!isAddShotAllowed || loading.addShot"
+                  @click="addShot"
+                >
+                  {{ $t('main.add') }}
+                </button>
+              </div>
+            </template>
+
+            <template v-else>
+              <div class="field bulk-fields">
+                <div class="bulk-field">
+                  <label class="label is-small">{{
+                    $t('shots.fields.start')
+                  }}</label>
+                  <input
+                    class="input"
+                    type="text"
+                    :placeholder="$t('shots.fields.placeholder')"
+                    v-model="bulk.start"
+                  />
+                </div>
+                <div class="bulk-field">
+                  <label class="label is-small">{{
+                    $t('shots.fields.count')
+                  }}</label>
+                  <input
+                    class="input"
+                    type="number"
+                    min="1"
+                    max="500"
+                    v-model.number="bulk.count"
+                  />
+                </div>
+                <div class="bulk-field">
+                  <label class="label is-small">{{
+                    $t('shots.fields.step')
+                  }}</label>
+                  <input
+                    class="input"
+                    type="number"
+                    min="1"
+                    v-model.number="bulk.step"
+                  />
+                </div>
+              </div>
+              <p v-if="bulkStartError" class="help is-danger">
+                {{ $t('shots.bulk_invalid_start') }}
+              </p>
+              <div class="field">
+                <button
+                  :class="{
+                    button: true,
+                    'is-success': true,
+                    'is-loading': loading.bulkGenerate
+                  }"
+                  :disabled="!isBulkGenerateAllowed"
+                  @click="generateShots"
+                >
+                  {{ $t('shots.bulk_generate') }}
+                </button>
+              </div>
+            </template>
           </div>
         </div>
 
@@ -170,7 +259,13 @@ const props = defineProps({
   active: { type: Boolean, default: true }
 })
 
-const emit = defineEmits(['add-episode', 'add-sequence', 'add-shot', 'cancel'])
+const emit = defineEmits([
+  'add-episode',
+  'add-sequence',
+  'add-shot',
+  'add-shots-bulk',
+  'cancel'
+])
 
 useModal(toRef(props, 'active'), emit)
 
@@ -188,13 +283,16 @@ const names = reactive({ episode: '', sequence: '', shot: '' })
 const loading = reactive({
   addEpisode: false,
   addSequence: false,
-  addShot: false
+  addShot: false,
+  bulkGenerate: false
 })
 const sequences = ref([])
 const displayedShots = ref([])
 const selectedEpisodeId = ref(null)
 const selectedSequenceId = ref(null)
 const shotPadding = ref('1')
+const shotMode = ref('single')
+const bulk = reactive({ start: '', count: 20, step: 10 })
 
 const currentProduction = computed(() => store.getters.currentProduction)
 const displayedEpisodes = computed(() => store.getters.displayedEpisodes)
@@ -217,6 +315,26 @@ const isAddSequenceAllowed = computed(() => {
   )
   return !exists && (selectedEpisodeId.value || !isTVShow.value)
 })
+
+const bulkStartError = computed(
+  () => bulk.start.length > 0 && !/\d+$/.test(bulk.start)
+)
+
+const bulkPreviewNames = computed(() => {
+  if (!bulk.start || bulkStartError.value || !bulk.count || !bulk.step) {
+    return []
+  }
+  return stringHelpers.generateBulkShotNames(bulk.start, bulk.count, bulk.step)
+})
+
+const isBulkGenerateAllowed = computed(
+  () =>
+    !bulkStartError.value &&
+    bulkPreviewNames.value.length > 0 &&
+    !!selectedSequenceId.value &&
+    !bulkPreviewNames.value.some(name => isBulkNameCollision(name)) &&
+    !loading.bulkGenerate
+)
 
 const isAddShotAllowed = computed(() => {
   if (!names.shot) return false
@@ -252,6 +370,33 @@ const selectEpisode = episodeId => {
       }
     })
   }
+}
+
+const isBulkNameCollision = name =>
+  !!displayedShots.value.find(shot => shot.name === name)
+
+const generateShots = () => {
+  if (!isBulkGenerateAllowed.value) return
+  loading.bulkGenerate = true
+  const sequence = displayedSequences.value.find(
+    s => s.id === selectedSequenceId.value
+  )
+  const episode = isTVShow.value
+    ? displayedEpisodes.value.find(e => e.id === selectedEpisodeId.value)
+    : null
+  emit(
+    'add-shots-bulk',
+    {
+      shotNames: bulkPreviewNames.value,
+      sequenceName: sequence?.name,
+      episodeName: episode?.name ?? null
+    },
+    () => {
+      loading.bulkGenerate = false
+      selectSequence(selectedSequenceId.value)
+      bulk.start = ''
+    }
+  )
 }
 
 const addEpisode = () => {
@@ -412,5 +557,48 @@ input::placeholder {
 
 .shot-padding {
   margin-right: 1em;
+}
+
+.shot-tabs {
+  display: flex;
+  margin-bottom: 4px;
+}
+
+.tab-button {
+  flex: 1;
+  border: 1px solid $light-grey;
+  background: transparent;
+  cursor: pointer;
+  padding: 4px 0;
+
+  &.active {
+    background: var(--background-selected);
+  }
+
+  &:first-child {
+    border-radius: 4px 0 0 4px;
+  }
+
+  &:last-child {
+    border-radius: 0 4px 4px 0;
+    border-left: 0;
+  }
+}
+
+.bulk-fields {
+  display: flex;
+  gap: 4px;
+  margin-right: 10px;
+  margin-bottom: 0;
+}
+
+.bulk-field {
+  flex: 1;
+  min-width: 0;
+}
+
+.entity-line.collision {
+  color: $red;
+  text-decoration: line-through;
 }
 </style>

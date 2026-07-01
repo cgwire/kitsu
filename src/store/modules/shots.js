@@ -566,6 +566,27 @@ const actions = {
       })
   },
 
+  bulkCreateShots(
+    { commit, dispatch, rootGetters },
+    { shotNames, sequenceName, episodeName }
+  ) {
+    const isTVShow = rootGetters.isTVShow
+    const q = v => `"${String(v ?? '').replace(/"/g, '""')}"`
+    const header = isTVShow ? 'Episode,Sequence,Name' : 'Sequence,Name'
+    const rows = shotNames.map(name =>
+      isTVShow
+        ? `${q(episodeName)},${q(sequenceName)},${q(name)}`
+        : `${q(sequenceName)},${q(name)}`
+    )
+    const csv = [header, ...rows].join('\n')
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const file = new File([blob], 'shots.csv', { type: 'text/csv' })
+    const formData = new FormData()
+    formData.append('file', file)
+    commit(SHOT_CSV_FILE_SELECTED, formData)
+    return dispatch('uploadShotFile', false)
+  },
+
   uploadEdlFile({ rootGetters }, { edl_file, namingConvention, matchCase }) {
     const production = rootGetters.currentProduction
     const episode = rootGetters.isTVShow ? rootGetters.currentEpisode : null
