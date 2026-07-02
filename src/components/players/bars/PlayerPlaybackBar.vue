@@ -45,7 +45,7 @@
     </span>
 
     <div
-      class="flexrow-item time-indicator mr1"
+      class="flexrow-item time-indicator mr1 nowrap"
       :title="$t('playlists.actions.frame_number')"
     >
       <span> ({{ currentFrameLabel }}</span
