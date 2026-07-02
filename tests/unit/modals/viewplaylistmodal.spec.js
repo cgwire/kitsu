@@ -6,11 +6,17 @@ import { createStore } from 'vuex'
 // transitively imports the assets/shots/sequences store modules.
 import '@/lib/auth'
 
-const routeState = vi.hoisted(() => ({ path: '/shots' }))
+const routeState = vi.hoisted(() => ({
+  path: '/shots',
+  params: { production_id: 'production-1' }
+}))
 vi.mock('vue-router', () => ({
   useRoute: () => ({
     get path() {
       return routeState.path
+    },
+    get params() {
+      return routeState.params
     }
   }),
   useRouter: () => ({ push: () => {} })
@@ -19,7 +25,7 @@ vi.mock('vue-router', () => ({
 // PlaylistPlayer is a very heavy component and is only rendered, never used in
 // the save flow we exercise here, so stub it away.
 vi.mock('@/components/players/players/PlaylistPlayer.vue', () => ({
-  default: { name: 'PlaylistPlayer', render: () => null }
+  default: { name: 'PlaylistPlayer', props: ['canSave'], render: () => null }
 }))
 
 import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal.vue'
@@ -34,6 +40,7 @@ describe('ViewPlaylistModal', () => {
 
   beforeEach(() => {
     routeState.path = '/shots'
+    routeState.params = { production_id: 'production-1' }
     editPlaylistPayload = null
     tempEntities = []
     store = createStore({
@@ -175,5 +182,23 @@ describe('ViewPlaylistModal', () => {
 
     const editModal = localWrapper.findComponent(EditPlaylistModal)
     expect(editModal.props('playlistToEdit').for_entity).toBe(expected)
+  })
+
+  it('disallows saving outside a production context (e.g. My Checks)', async () => {
+    // Saving attaches the playlist to currentProduction: from a
+    // cross-production view the tasks may span several productions.
+    expect(
+      wrapper.findComponent({ name: 'PlaylistPlayer' }).props('canSave')
+    ).toBe(true)
+
+    routeState.path = '/my-checks'
+    routeState.params = {}
+    const localWrapper = shallowMount(ViewPlaylistModal, {
+      global: { plugins: [store, i18n] },
+      props: { active: false }
+    })
+    expect(
+      localWrapper.findComponent({ name: 'PlaylistPlayer' }).props('canSave')
+    ).toBe(false)
   })
 })

@@ -16,6 +16,7 @@
           :entities="currentEntities"
           :is-loading="isLoading"
           :temp-mode="true"
+          :can-save="isSaveAllowed"
           :current-entity-type="currentEntityType"
           @save-clicked="onSaveClicked"
           @annotation-changed="onAnnotationChanged"
@@ -107,6 +108,11 @@ const currentTaskIds = computed(
 )
 
 const isPlaylistPage = computed(() => route.path.indexOf('playlist') > 0)
+
+// Saving turns the temporary playlist into a playlist of currentProduction,
+// so it requires a production context in the route. Cross-production views
+// like My Checks can mix tasks from several productions: no save there.
+const isSaveAllowed = computed(() => Boolean(route.params.production_id))
 
 const successText = computed(() =>
   createdPlaylist.value

@@ -627,7 +627,11 @@
       <span class="filler"></span>
 
       <template
-        v-if="(isCurrentUserManager || isCurrentUserSupervisor) && tempMode"
+        v-if="
+          (isCurrentUserManager || isCurrentUserSupervisor) &&
+          tempMode &&
+          canSave
+        "
       >
         <div class="separator"></div>
         <button-simple
@@ -992,6 +996,10 @@ const $socket = instance.appContext.config.globalProperties.$socket
 // Props
 
 const props = defineProps({
+  canSave: {
+    type: Boolean,
+    default: true
+  },
   currentEntityType: {
     type: String,
     default: 'shot'
