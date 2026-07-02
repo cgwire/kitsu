@@ -57,7 +57,7 @@
 </template>
 
 <script setup>
-import { computed, defineEmits, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 
 import DepartmentName from '@/components/widgets/DepartmentName.vue'

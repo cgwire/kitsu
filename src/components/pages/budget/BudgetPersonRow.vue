@@ -126,7 +126,7 @@
 
 <script setup>
 import { XIcon } from 'lucide-vue-next'
-import { computed, defineProps } from 'vue'
+import { computed } from 'vue'
 
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
