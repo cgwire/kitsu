@@ -2204,8 +2204,10 @@ onMounted(() => {
   if (isMuted.value) {
     previewViewer.value.setVolume(0)
   } else {
-    volume.value =
-      localPreferences.getPreference('player:volume') || volume.value
+    volume.value = localPreferences.getIntPreference(
+      'player:volume',
+      volume.value
+    )
     previewViewer.value.setVolume(volume.value)
   }
 

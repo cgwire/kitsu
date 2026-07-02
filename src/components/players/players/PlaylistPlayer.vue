@@ -4589,7 +4589,7 @@ onMounted(() => {
 
   resetPencilConfiguration()
 
-  volume.value = preferences.getPreference('player:volume') || volume.value
+  volume.value = preferences.getIntPreference('player:volume', volume.value)
   nextTick(() => {
     rawPlayer.value?.setVolume(volume.value)
   })
