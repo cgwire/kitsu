@@ -323,6 +323,7 @@ import { descriptorMixin } from '@/components/mixins/descriptors'
 import { formatListMixin } from '@/components/mixins/format'
 import { selectionListMixin } from '@/components/mixins/selection'
 
+import { getTaskEntityPath } from '@/lib/path'
 import { sortPeople } from '@/lib/sorting'
 import {
   daysToMinutes,
@@ -571,36 +572,17 @@ export default {
     },
 
     entityPath(entity) {
-      const entityType = entity.sequence_name ? 'shot' : 'asset'
-      const route = {
-        name: entityType,
-        params: {
-          production_id: entity.project_id
-        }
-      }
-
-      if (entityType === 'asset') {
-        route.params.asset_id = entity.entity_id
-      } else {
-        route.params.shot_id = entity.entity_id
-      }
-
+      const entityType = entity.entity_type_name
       const production = this.productionMap.get(entity.project_id)
       let episodeId = entity.episode_id
       if (production && production.production_type === 'tvshow' && !episodeId) {
-        if (entityType === 'shot') {
+        if (entityType === 'Shot') {
           episodeId = production.first_episode_id
-        } else {
+        } else if (!['Edit', 'Episode', 'Sequence'].includes(entityType)) {
           episodeId = 'main'
         }
       }
-
-      if (episodeId) {
-        route.name = `episode-${entityType}`
-        route.params.episode_id = episodeId
-      }
-
-      return route
+      return getTaskEntityPath(entity, episodeId)
     },
 
     onKeyDown(event) {

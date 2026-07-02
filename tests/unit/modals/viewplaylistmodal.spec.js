@@ -6,15 +6,26 @@ import { createStore } from 'vuex'
 // transitively imports the assets/shots/sequences store modules.
 import '@/lib/auth'
 
+const routeState = vi.hoisted(() => ({
+  path: '/shots',
+  params: { production_id: 'production-1' }
+}))
 vi.mock('vue-router', () => ({
-  useRoute: () => ({ path: '/shots' }),
+  useRoute: () => ({
+    get path() {
+      return routeState.path
+    },
+    get params() {
+      return routeState.params
+    }
+  }),
   useRouter: () => ({ push: () => {} })
 }))
 
 // PlaylistPlayer is a very heavy component and is only rendered, never used in
 // the save flow we exercise here, so stub it away.
 vi.mock('@/components/players/players/PlaylistPlayer.vue', () => ({
-  default: { name: 'PlaylistPlayer', render: () => null }
+  default: { name: 'PlaylistPlayer', props: ['canSave'], render: () => null }
 }))
 
 import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal.vue'
@@ -23,10 +34,13 @@ import EditPlaylistModal from '@/components/modals/EditPlaylistModal.vue'
 describe('ViewPlaylistModal', () => {
   let store
   let wrapper
+  let i18n
   let editPlaylistPayload
   let tempEntities
 
   beforeEach(() => {
+    routeState.path = '/shots'
+    routeState.params = { production_id: 'production-1' }
     editPlaylistPayload = null
     tempEntities = []
     store = createStore({
@@ -57,7 +71,7 @@ describe('ViewPlaylistModal', () => {
       }
     })
 
-    const i18n = createI18n({
+    i18n = createI18n({
       legacy: false,
       locale: 'en',
       messages: {
@@ -145,5 +159,46 @@ describe('ViewPlaylistModal', () => {
     expect(editPlaylistPayload.data.shots).toEqual([
       { entity_id: 'shot-1', preview_file_id: 'pf-compo' }
     ])
+  })
+
+  it.each([
+    // A shots page under an episode contains "episodes" in the URL but is a
+    // shot view: it must save a shot playlist, not an empty episode one.
+    ['/productions/production-1/episodes/episode-1/shots', 'shot'],
+    // The bare episodes list still infers "episode" (dormant episode-playlist
+    // support kept in place on purpose).
+    ['/productions/production-1/episodes', 'episode']
+  ])('infers for_entity "%s" → "%s" when saving from a selection', async (path, expected) => {
+    routeState.path = path
+    const localWrapper = shallowMount(ViewPlaylistModal, {
+      global: { plugins: [store, i18n] },
+      props: { active: false }
+    })
+
+    localWrapper
+      .findComponent({ name: 'PlaylistPlayer' })
+      .vm.$emit('save-clicked')
+    await localWrapper.vm.$nextTick()
+
+    const editModal = localWrapper.findComponent(EditPlaylistModal)
+    expect(editModal.props('playlistToEdit').for_entity).toBe(expected)
+  })
+
+  it('disallows saving outside a production context (e.g. My Checks)', async () => {
+    // Saving attaches the playlist to currentProduction: from a
+    // cross-production view the tasks may span several productions.
+    expect(
+      wrapper.findComponent({ name: 'PlaylistPlayer' }).props('canSave')
+    ).toBe(true)
+
+    routeState.path = '/my-checks'
+    routeState.params = {}
+    const localWrapper = shallowMount(ViewPlaylistModal, {
+      global: { plugins: [store, i18n] },
+      props: { active: false }
+    })
+    expect(
+      localWrapper.findComponent({ name: 'PlaylistPlayer' }).props('canSave')
+    ).toBe(false)
   })
 })

@@ -5,17 +5,11 @@
   >
     <button-simple
       class="flexrow-item"
-      :title="$t('playlists.actions.play')"
-      icon="play"
+      :title="
+        $t(isPlaying ? 'playlists.actions.pause' : 'playlists.actions.play')
+      "
+      :icon="isPlaying ? 'pause' : 'play'"
       @click="$emit('play-pause-clicked')"
-      v-if="!isPlaying"
-    />
-    <button-simple
-      class="flexrow-item"
-      :title="$t('playlists.actions.pause')"
-      icon="pause"
-      @click="$emit('play-pause-clicked')"
-      v-else
     />
 
     <combobox-styled
@@ -45,15 +39,10 @@
     </span>
 
     <div
-      class="flexrow-item time-indicator mr1"
+      class="flexrow-item time-indicator mr1 nowrap"
       :title="$t('playlists.actions.frame_number')"
     >
-      <span> ({{ currentFrameLabel }}</span
-      ><span v-if="!light || fullScreen"> / </span
-      ><span v-if="!light || fullScreen">{{
-        (nbFrames + '').padStart(3, '0')
-      }}</span
-      >)
+      {{ frameIndicator }}
     </div>
 
     <div class="separator"></div>
@@ -67,13 +56,15 @@
     />
     <button-simple
       class="flexrow-item"
-      :title="$t('playlists.actions.' + (isHd ? 'switch_ld' : 'switch_hd'))"
+      :title="
+        $t(isHd ? 'playlists.actions.switch_ld' : 'playlists.actions.switch_hd')
+      "
       :text="isHd ? 'HD' : 'LD'"
       @click="isHd = !isHd"
-      v-if="(!light || fullScreen) && isMovie"
+      v-if="!light || fullScreen"
     />
 
-    <speed-button class="flexrow-item" v-model="speed" v-if="isMovie" />
+    <speed-button class="flexrow-item" v-model="speed" />
 
     <button-simple
       class="flexrow-item"
@@ -107,12 +98,15 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
+
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ButtonSound from '@/components/widgets/ButtonSound.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import SpeedButton from '@/components/widgets/SpeedButton.vue'
 
-defineProps({
+// Props / Emits
+const props = defineProps({
   available3DAnimations: {
     type: Array,
     default: () => []
@@ -177,9 +171,12 @@ defineProps({
 
 defineEmits(['play-pause-clicked', 'repeat-clicked', 'toggle-sound-clicked'])
 
-const current3DAnimation = defineModel('current3DAnimation')
-const isHd = defineModel('isHd', { default: false })
-const isMuted = defineModel('isMuted', { default: false })
+const current3DAnimation = defineModel('current3DAnimation', {
+  type: String,
+  default: null
+})
+const isHd = defineModel('isHd', { type: Boolean, default: false })
+const isMuted = defineModel('isMuted', { type: Boolean, default: false })
 const isShowAnnotationsWhilePlaying = defineModel(
   'isShowAnnotationsWhilePlaying',
   { default: undefined }
@@ -187,8 +184,17 @@ const isShowAnnotationsWhilePlaying = defineModel(
 const isWaveformDisplayed = defineModel('isWaveformDisplayed', {
   default: undefined
 })
-const speed = defineModel('speed', { default: 3 })
-const volume = defineModel('volume', { default: 50 })
+const speed = defineModel('speed', { type: Number, default: 3 })
+const volume = defineModel('volume', { type: Number, default: 50 })
+
+// Computed
+const frameIndicator = computed(() => {
+  if (props.light && !props.fullScreen) {
+    return `(${props.currentFrameLabel})`
+  }
+  const nbFrames = String(props.nbFrames).padStart(3, '0')
+  return `(${props.currentFrameLabel} / ${nbFrames})`
+})
 </script>
 
 <style lang="scss" scoped>

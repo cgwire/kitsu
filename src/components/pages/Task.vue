@@ -160,10 +160,11 @@
                 </span>
               </div>
               <view-playlist-modal
-                :active="modals.hookupPlaylist"
-                :task-ids="hookupPlaylistTaskIds"
+                active
                 sort
+                :task-ids="hookupPlaylistTaskIds"
                 @cancel="hideHookupPlaylistModal"
+                v-if="modals.hookupPlaylist"
               />
             </div>
 

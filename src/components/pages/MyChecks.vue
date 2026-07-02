@@ -86,9 +86,10 @@
     </div>
 
     <view-playlist-modal
-      :active="isPlaylist"
+      active
       :task-ids="sortedTasks.map(t => t.id)"
       @cancel="isPlaylist = false"
+      v-if="isPlaylist"
     />
   </div>
 </template>
