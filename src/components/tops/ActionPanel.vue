@@ -831,10 +831,11 @@
     />
 
     <view-playlist-modal
-      :active="modals.playlist"
-      :task-ids="selectedTaskIds"
+      active
       sort
+      :task-ids="selectedTaskIds"
       @cancel="hidePlaylistModal"
+      v-if="modals.playlist"
     />
   </div>
 </template>

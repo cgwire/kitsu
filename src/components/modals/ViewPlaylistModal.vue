@@ -350,7 +350,8 @@ watch(
       playlistPlayer.value?.clearCanvas()
       currentEntities.value = []
     }
-  }
+  },
+  { immediate: true }
 )
 </script>
 
