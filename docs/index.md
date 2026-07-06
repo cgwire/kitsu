@@ -87,21 +87,11 @@ As a producer, mastering the ability to zoom out from specifics to a holistic vi
 
 As a developer, explore some of the possibilities for extending and integrating Kitsu within your studio's pipeline.
 
-* [Custom Actions](./custom-actions/index.md): A custom action is a simple HTTP request that sends information from your current Kitsu selection to a custom end.
-* [Bots](./bots/index.md): The main use is for scripting with gazu (Kitsu's Python Client), and anything else that can use our API.
-* [Kitsu Publisher](./publisher/index.md): A web application used to share the progress of your productions and validate your deliveries.
-* [Chat Integration](./chat-integration/index.md): Get Kitsu notifications sent directly to popular messaging apps like Discord, Slack or Mattermost.
-* [Open Source Setup](./installation/index.md): Learn about how you can self-deploy a host a local version of Kitsu within your studio's environment.
-
-
-
-
 ### Tutorials
 
 Access comprehensive video tutorials on YouTube, highlighting crucial functionalities of Kitsu. Click the link below to view.
 
 [Kitsu Tutorials Channel](https://www.youtube.com/playlist?list=PLp_1gB5ZBHXqnQgZ4TCrAt7smxesaDo29)
-
 
 ### About the Authors
 

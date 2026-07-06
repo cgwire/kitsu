@@ -110,17 +110,6 @@ export default {
             items: [{ text: "Artist", link: "/ja/artist/" }],
           },
           {
-            text: "開発者向けワークフロー",
-            collapsed: true,
-            items: [
-              { text: "Custom Actions", link: "/ja/custom-actions/" },
-              { text: "Bots", link: "/ja/bots/" },
-              { text: "Publisher", link: "/ja/publisher/" },
-              { text: "Chat Integration", link: "/ja/chat-integration/" },
-              { text: "Installation", link: "/ja/installation/" },
-            ],
-          },
-          {
             text: "よくある質問",
             collapsed: true,
             items: [{ text: "FAQ", link: "/ja/faq/" }],
@@ -136,99 +125,154 @@ export default {
     },
     sidebar: [
       {
-        text: "Introduction to Kitsu",
+        text: "Start Here",
         collapsed: false,
         items: [
-          { text: "Introduction", link: "/" },
-          { text: "Configure Kitsu", link: "/configure-kitsu/" },
-          { text: "Team", link: "/team/" },
+          { text: "Getting Started", link: "/start-here/getting-started" },
+          { text: "Main Concepts", link: "/start-here/main-concepts" },
+          { text: "Self-Hosting", link: "https://dev.kitsu.cloud/self-hosting/vs-cloud-hosting" },
         ],
       },
       {
-        text: "Create Your Production",
-        collapsed: true,
+        text: "Workflows",
+        collapsed: false,
         items: [
-          { text: "TV Show", link: "/tvshow/" },
-          { text: "Feature", link: "/feature/" },
-          { text: "Short", link: "/short/" },
+          {
+            text: "For Supervisors",
+            link: "/workflows/for-supervisors",
+          },
+          {
+            text: "For Producers",
+            link: "/workflows/for-producers",
+          },
+          {
+            text: "For Artists",
+            link: "/workflows/for-artists",
+          },
+          {
+            text: "For Developers",
+            collapsed: true,
+            link: "https://dev.kitsu.cloud/",
+          },
+          {
+            text: "For Clients",
+            link: "/workflows/for-clients",
+          },
+        ]
+      },
+      {
+        text: "Guides",
+        collapsed: false,
+        items: [
+          {
+            text: "Team Management",
+            collapsed: true,
+            items: [
+              { text: "Preparing Your Team", link: "/guides/team-management/team-preparation" },
+              { text: "Managing Departments", link: "/guides/team-management/managing-departments" },
+              { text: "Managing Teams", link: "/guides/team-management/managing-teams" },
+              { text: "Team Roles", link: "/guides/team-management/team-roles" },
+            ],
+          },
+          {
+            text: "Pre-Production",
+            collapsed: true,
+            items: [
+              { text: "Creating A New Production", link: "/", items: [
+              { text: "Meta Column", link: "/meta-column/" },
+              { text: "Filter", link: "/filter/" },
+              { text: "Configure Production", link: "/configure-prod/" },
+            ] },
+              { text: "Production Structure", link: "/" },
+              { text: "Managing Asset Types", link: "/" },
+              { text: "Managing Task Types", link: "/" },
+              { text: "Managing Task Statuses", link: "/" },
+              { text: "Importing CSV Data", link: "/" },
+              { text: "Breakdown & Casting", link: "/" },
+              { text: "Concepts", link: "/" },
+            ],
+          },
+          {
+            text: "Scheduling",
+            collapsed: true,
+            items: [
+              { text: "Managing Tasks", link: "/assignation/" },
+              { text: "Schedules", link: "/schedules/" },
+              { text: "Estimates", link: "/estimation/" },
+            ],
+          },
+          {
+            text: "Review & Publishing",
+            collapsed: true,
+            items: [
+              { text: "Status", link: "/status/" },
+              { text: "Publish", link: "/publish/" },
+              { text: "Thumbnails", link: "/thumbnails/" },
+              { text: "Review", link: "/review/" },
+              { text: "Weekly Review", link: "/review-weekly/" },
+              { text: "Client Playlist", link: "/playlist-client/" },
+            ],
+          },
+          {
+            text: "Tracking & Reporting",
+            collapsed: true,
+            items: [
+                { text: "Advanced Search", link: "/" },
+                { text: "Timesheets", link: "/" },
+                { text: "News Feed", link: "/" },
+                { text: "Stats", link: "/" },
+                { text: "Budget", link: "/" },
+            ],
+          },
+          {
+            text: "File Management",
+            collapsed: true,
+            items: [
+                { text: "File Storage", link: "/" },
+                { text: "Asset Library", link: "/" },
+            ],
+          },
+          {
+            text: "Privacy & Security",
+            collapsed: true,
+            items: [
+                { text: "IP Protection", link: "/" },
+                { text: "Authentication", link: "/" },
+                { text: "Authorization", link: "/" },
+            ],
+          },
+        ]
+      },
+      {
+        text: "Recipes",
+        collapsed: false,
+        items: [
+          { text: "For TV Shows", link: "/tvshow/" },
+          { text: "For Feature Films", link: "/feature/" },
+          { text: "For Shorts", link: "/short/" },
           { text: "Short Shot", link: "/short-shot/" },
           { text: "Short Asset", link: "/short-asset/" },
-          { text: "Video Game", link: "/videogame/" },
-          { text: "NFT", link: "/nft/" },
+          { text: "For Video Games", link: "/videogame/" },
+          { text: "For NFTs", link: "/nft/" },
+          { text: "Shots-Only Productions", link: "/nft/" },
+          { text: "Assets-Only Productions", link: "/nft/" },
         ],
       },
       {
-        text: "Meta Columns, Filters and Production Settings",
-        collapsed: true,
+        text: "Resources",
+        collapsed: false,
         items: [
-          { text: "Meta Column", link: "/meta-column/" },
-          { text: "Filter", link: "/filter/" },
-          { text: "Configure Production", link: "/configure-prod/" },
+          {
+            text: "Frequently Asked Questions",
+            collapsed: true,
+            items: [{ text: "FAQ", link: "/faq/" }],
+          },
+          {
+            text: "Changelog",
+            collapsed: true,
+            "link": "https://cgwire.canny.io/changelog"
+          }
         ],
-      },
-      {
-        text: "Assignments, Estimates and Scheduling",
-        collapsed: true,
-        items: [
-          { text: "Assignation", link: "/assignation/" },
-          { text: "Estimation", link: "/estimation/" },
-          { text: "Schedules", link: "/schedules/" },
-        ],
-      },
-      {
-        text: "Statuses, Publishes, and Thumbnails",
-        collapsed: true,
-        items: [
-          { text: "Status", link: "/status/" },
-          { text: "Publish", link: "/publish/" },
-          { text: "Thumbnails", link: "/thumbnails/" },
-        ],
-      },
-      {
-        text: "Internal Review and Client Playlists",
-        collapsed: true,
-        items: [
-          { text: "Review", link: "/review/" },
-          { text: "Weekly Review", link: "/review-weekly/" },
-          { text: "Client Playlist", link: "/playlist-client/" },
-        ],
-      },
-      {
-        text: "Supervisor Workflows",
-        collapsed: true,
-        items: [
-          { text: "Supervisor Team", link: "/supervisor-team/" },
-          { text: "Supervisor Tasks", link: "/supervisor-tasks/" },
-        ],
-      },
-      {
-        text: "Producer Workflows",
-        collapsed: true,
-        items: [
-          { text: "Production Report", link: "/production-report/" },
-          { text: "Studio Report", link: "/studio-report/" },
-        ],
-      },
-      {
-        text: "Artist Workflows",
-        collapsed: true,
-        items: [{ text: "Artist", link: "/artist/" }],
-      },
-      {
-        text: "Developer Workflows",
-        collapsed: true,
-        items: [
-          { text: "Custom Actions", link: "/custom-actions/" },
-          { text: "Bots", link: "/bots/" },
-          { text: "Publisher", link: "/publisher/" },
-          { text: "Chat Integration", link: "/chat-integration/" },
-          { text: "Installation", link: "/installation/" },
-        ],
-      },
-      {
-        text: "Frequently Asked Questions",
-        collapsed: true,
-        items: [{ text: "FAQ", link: "/faq/" }],
       },
     ],
   },
