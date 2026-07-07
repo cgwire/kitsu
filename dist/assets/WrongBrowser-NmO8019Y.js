@@ -1,1 +1,2 @@
 import{A as e,D as t,Pt as n,d as r,tt as i}from"./vue-vendor-CSWFhL74.js";import{t as a}from"./_plugin-vue_export-helper-BDNMzG2s.js";r();var o={name:`wrong-browser`},s={class:`server-down page`},c={class:`title`};function l(r,a,o,l,u,d){return i(),e(`div`,s,[t(`h1`,c,n(r.$t(`wrong_browser.title`)),1),t(`p`,null,n(r.$t(`wrong_browser.text`)),1)])}var u=a(o,[[`render`,l]]);export{u as default};
+//# sourceMappingURL=WrongBrowser-NmO8019Y.js.map

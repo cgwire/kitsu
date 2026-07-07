@@ -1,1 +1,2 @@
 import{$ as e,Ct as t,E as n,X as r,d as i}from"./vue-vendor-CSWFhL74.js";i();var a=150,o=400,s=300,c=350,l=150,u=i=>{let u=n(()=>(i.value-1)*a+o+s),d=n(()=>u.value+c+l),f=t(0),p=null;return e(()=>{p=setInterval(()=>{f.value++},d.value)}),r(()=>{p&&clearInterval(p)}),{cycle:f,fadeoutDelayMs:u}};export{u as t};
+//# sourceMappingURL=skeleton-w8LPHH1N.js.map
