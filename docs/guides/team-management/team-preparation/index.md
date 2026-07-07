@@ -19,15 +19,15 @@ As with other aspects in Kitsu, there are two libraries for users:
 
 
 Go to the **Main Menu** ![Main
-menu](../img/getting-started/main_button.png), and under the **STUDIO**
+menu](../../../img/getting-started/main_button.png), and under the **STUDIO**
 section, choose **People** page.
 
-![People Menu](../img/getting-started/main_menu_people.png)
+![People Menu](../../../img/getting-started/main_menu_people.png)
 
-Then, click on the ![Add a new user](../img/getting-started/add_employee.png) button.
+Then, click on the ![Add a new user](../../../img/getting-started/add_employee.png) button.
 
 
-![Create a new user](../img/getting-started/create_employee.png)
+![Create a new user](../../../img/getting-started/create_employee.png)
 
 You will then be prompted to enter the following information: (please note from of the fields are required in order to create the user)
 - 1) First Name (**MANDATORY**) 
@@ -50,7 +50,7 @@ Once a user is linked to a department, various options will become available to 
 
 The department supervisor will be able to comment on all tasks within their department and assign tasks only to people from the same department(s).
 
-![Department filtered view](../img/getting-started/department_filtered_view.png)
+![Department filtered view](../../../img/getting-started/department_filtered_view.png)
 :::
 
 - 6) Role: This is where you will define the permission role of the user (this will be explained below).
@@ -75,9 +75,9 @@ To add users to a team:
 
 1. On a production, use the **navigation** dropdown menu at the top of the page and select the **TEAM** page.
 
-   ![Drop down menu team](../img/getting-started/drop_down_menu_team.png)
+   ![Drop down menu team](../../../img/getting-started/drop_down_menu_team.png)
 
 2. On the **Team** page, you can see all the assignees for a specific project. Switch to the top of the page if you want to check another project team.
 
-   ![Team page](../img/getting-started/team_page.png)
+   ![Team page](../../../img/getting-started/team_page.png)
 

@@ -23,7 +23,7 @@ Once you have created your **Task Types**  on your **Global Library**, add them
 **Production Library**, you will see the **Edit** displayed on the navigation drop-down menu.
 
 
-![Navigation Edit](../img/getting-started/drop_down_menu_edit.png)
+![Navigation Edit](../../../img/getting-started/drop_down_menu_edit.png)
 
 
 This new page behaves like the asset and shot global page. You can add your edits with the **+ New edit** button.

@@ -12,13 +12,13 @@ Additionally, you can create **Status Automations** that update the **Asset Stat
 You can also ask Kitsu to **copy the latest preview** with the Automation.
 :::
 
-Go to the main menu ![Main menu](../img/getting-started/main_button.png)  and select **Automation**.
+Go to the main menu ![Main menu](../../img/getting-started/main_button.png)  and select **Automation**.
 
-![Main menu Status Automation](../img/getting-started/main_menu_status_automation.png)
+![Main menu Status Automation](../../img/getting-started/main_menu_status_automation.png)
 
 From this page, you can create **Status Automations** by clicking the **+Add status automation** button.
 
-![create Status Automation](../img/getting-started/status_automation_empy.png)
+![create Status Automation](../../img/getting-started/status_automation_empy.png)
 
 You have the option to create **Status Automation** for either the **asset** or the **shot**.
 
@@ -26,13 +26,13 @@ Next, you can select the **task type** and the **status** that will trigger the 
 
 You can specify which **Task Type** will respond to the Automation and select the **Status** that will be changed.
 
-![detail create status automation](../img/getting-started/add_status_automation.png)
+![detail create status automation](../../img/getting-started/add_status_automation.png)
 
 You need to change the trigger from "Status" to **Ready For** in order to initiate the change in **Ready For** status.
 
 You will notice the **Applied Task Type** will now display **Shot task type**.
 
-![detail create status automation Ready For](../img/getting-started/add_status_automation_readyfor.png)
+![detail create status automation Ready For](../../img/getting-started/add_status_automation_readyfor.png)
 
 To create a **Status Automation** for shots, you must change the **Entity Type** to shots.
 
@@ -52,12 +52,12 @@ At any point during the production, you can return here and create more **Status
 
 On the **Navigation Menu**, choose on the dropdown menu the **Setting**.
 
-![Drop Down menu Setting](../img/getting-started/drop_down_menu_setting.png)
+![Drop Down menu Setting](../../img/getting-started/drop_down_menu_setting.png)
 
 Per default, Kitsu will load no **status automation** of your 
 status automation **Global Library** into your **Production Library**.
 
-![Setting Task Type new](../img/getting-started/setting_auto_new.png)
+![Setting Task Type new](../../img/getting-started/setting_auto_new.png)
 
 But you can use only specific **Status Automation**, depending on your production type.
 
@@ -66,4 +66,4 @@ On the **Status Automation** tab, you can choose which automation you want to us
 validate your choice with the **add** button.
 
 
-![Setting Add Task Type](../img/getting-started/setting_auto_add.png)
+![Setting Add Task Type](../../img/getting-started/setting_auto_add.png)

@@ -1,12 +1,10 @@
 ## Introduction to the Kitsu Global Page
 
-
-
 Welcome to Kitsu's global asset page.
 
 Let's take a look around.
 
-![Presentation of the global page](../img/getting-started/presentation_global.png)
+![Presentation of the global page](../../img/getting-started/presentation_global.png)
 
 On the top part (1), you have the **global navigation**, which is always visible throughout all the production pages.
 
@@ -15,7 +13,7 @@ On the top part (1), you have the **global navigation**, which is always visible
 
 ### Main Menu
 
-You will open the main menu by clicking on the top left button, Kitsu![Main menu button](../img/getting-started/main_button.png) (or your Studio logo).
+You will open the main menu by clicking on the top left button, Kitsu![Main menu button](../../img/getting-started/main_button.png) (or your Studio logo).
 
 You will find direct access to your assigned tasks, productions, global and team schedules, the workflow customization page, and the Kitsu settings on the main menu.
 
@@ -58,7 +56,7 @@ Artist (and above) can also see their own **Timesheets**, and have access to the
 
 You will see the navigation dropdown menu on the right of the main menu icon.
 
-![Presentation of the global page](../img/getting-started/presentation_global_header.png)
+![Presentation of the global page](../../img/getting-started/presentation_global_header.png)
 
 
 You can choose between production. The name of the actual production and actual page are always displayed.
@@ -107,20 +105,20 @@ If, on the contrary, you realize you don't need the **assets** or the **shots**,
 You have the global search on the right of the navigation dropdown menu. It's a quick access search that will display the four first results. If you need more results and filtering options, see the **Entity Search** page.
 
 
-The next icon ![News](../img/getting-started/canny.png) is a direct link to our news and feedback page.
+The next icon ![News](../../img/getting-started/canny.png) is a direct link to our news and feedback page.
 
 You can see all the new features with an animated gif and also add suggestions about the next feature you want to see in Kitsu.
 
-Next, the bell icon ![Notification](../img/getting-started/notification_icon_on.png) displays your notifications (assignments, comments, tags). The number of unread notifications will be shown on the bell icon. There are various filters to help you stay on top of updates and revisit important ones when needed. You can easily mark notifications as read or unread or quickly filter by watching/non-watching to focus on what matters most and declutter your feed.
+Next, the bell icon ![Notification](../../img/getting-started/notification_icon_on.png) displays your notifications (assignments, comments, tags). The number of unread notifications will be shown on the bell icon. There are various filters to help you stay on top of updates and revisit important ones when needed. You can easily mark notifications as read or unread or quickly filter by watching/non-watching to focus on what matters most and declutter your feed.
 
 The last icon before your avatar is the documentation button.
-![documentation button](../img/getting-started/documentation_button.png), that you are reading right now!
+![documentation button](../../img/getting-started/documentation_button.png), that you are reading right now!
 
 
 ### Personal Settings
 You can click on your avatar to open your menu (setting, documentation, etc.).
 
-![Profile enlarged](../img/getting-started/profil_enlarge.png).
+![Profile enlarged](../../img/getting-started/profil_enlarge.png).
 
 ## The Tasks Spreadsheet
 
@@ -142,28 +140,28 @@ The first element on the left is the filter box. You can type anything you want 
 
 If you need more advanced filtering, please use the filter builder button.
 
-![Filter Builder](../img/getting-started/filter_builder.png)
+![Filter Builder](../../img/getting-started/filter_builder.png)
 
 You can then save all the filters and use them as your pages.
 
 ### Simplify the display
 
 On the right part of the screen, there are some buttons (from left to right) to hide or display the assignation, hide or display the extra column, enlarge or reduce the thumbnail,
-![display and Hide option](../img/getting-started/display_hide_option.png)
+![display and Hide option](../../img/getting-started/display_hide_option.png)
 
 
 ### Import / Export
-batch import thumbnail ![batch import thumbnail](../img/getting-started/add_thumbnails.png), and finally import ![Import button](../img/getting-started/import.png) or export ![export button](../img/getting-started/export.png) data.
+batch import thumbnail ![batch import thumbnail](../../img/getting-started/add_thumbnails.png), and finally import ![Import button](../../img/getting-started/import.png) or export ![export button](../../img/getting-started/export.png) data.
 
 
 
 ### Metadata column
-Below, you have the name of the column. the (+) next to **Name** ![Add metadata column](../img/getting-started/add_column_custom.png) is here to create a new metadata column. Then, you have the name of the task type column.
+Below, you have the name of the column. the (+) next to **Name** ![Add metadata column](../../img/getting-started/add_column_custom.png) is here to create a new metadata column. Then, you have the name of the task type column.
 
 ### Customize the view
 On the far right of the screen, next to the scroll bar, is the option to hide and display a text column
 
-![Display/hide text column](../img/getting-started/visible_column_detail.png).
+![Display/hide text column](../../img/getting-started/visible_column_detail.png).
 
 
 ### Sum-up of your view

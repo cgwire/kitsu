@@ -6,7 +6,7 @@ The Asset Library serves as a centralized repository for all assets used within 
 
 ### How to Use the Asset Library
 
-![Asset Library Overview](../img/getting-started/asset_library_overview.png)
+![Asset Library Overview](../../../img/getting-started/asset_library_overview.png)
 
 - You can access the Asset Library from the **Studio** section of the main Kitsu menu.
 - The main Asset Library window displays all assets currently available in the library (1). Use the search (2) and filter (3) options to quickly find specific assets within the library.
@@ -14,7 +14,7 @@ The Asset Library serves as a centralized repository for all assets used within 
 
 ### Adding Assets to the Library
 
-![Asset Library Add](../img/getting-started/asset_library_add.png)
+![Asset Library Add](../../../img/getting-started/asset_library_add.png)
 
 The right-hand pane is where you can add existing assets from other productions into the library. This action does not create a copy but simply references the original asset, allowing it to be used in other productions.
 

@@ -4,17 +4,17 @@
 
 The first step in preparing a review with your client is to create a playlist of the content you wish to share and review. The process is similar to creating a regular playlist but Kitsu includes some nice features to aid with collaborate from parties outside your studio.
 
-To get started, you'll need to create your playlist and add the items you want to review. [See this section here for a reminder on how to do this](../review/index.md#create-a-playlist).
+To get started, you'll need to create your playlist and add the items you want to review. [See this section here for a reminder on how to do this](../../../review/index.md#create-a-playlist).
 
 The main difference is to ensure under **To Be Shared With** you select **The Client**. This will ensure the proper permissions and only provide the client access to this specific playlist.
 
-![Playlist Global](../img/getting-started/client_playlist_create.png)
+![Playlist Global](../../../img/getting-started/client_playlist_create.png)
 
 ## Reviewing Client Playlists
 
 Once you have created a playlist, you can notify your client that it is ready for review.
 
-![Playlist Global](../img/getting-started/playlist_global_client.png)
+![Playlist Global](../../../img/getting-started/playlist_global_client.png)
 
 ::: warning
 Your client will only have access to the production if they are part of the team, and they will only see the **client playlist**. Please note there is currently no way to segregate clients within the same production,
@@ -29,7 +29,7 @@ The client has several options to control the playlist.
 - Clients can only see and use statuses with the **Is client Allowed** tag.
 :::
 
-![Playlist Review client](../img/getting-started/playlist_review_client.png)
+![Playlist Review client](../../../img/getting-started/playlist_review_client.png)
 
 Clients can (from left to right):
 * Play or Pause the video.
@@ -60,12 +60,12 @@ The client can also:
 
 For each playlisted shot/asset, the client can choose the **task** and the **version** they want to see.
 
-![Playlist task selection](../img/getting-started/playlist_task_selection.png)
-![Playlist version selection](../img/getting-started/playlist_version_selection.png)
+![Playlist task selection](../../../img/getting-started/playlist_task_selection.png)
+![Playlist version selection](../../../img/getting-started/playlist_version_selection.png)
 
-They can also play two tasks of a shot side by side by clicking on the **Compare** button ![Compare button](../img/getting-started/compare_button.png) and choosing the second task type.
+They can also play two tasks of a shot side by side by clicking on the **Compare** button ![Compare button](../../../img/getting-started/compare_button.png) and choosing the second task type.
 
-![Playlist side by side](../img/getting-started/playlist_side_by_side.png)
+![Playlist side by side](../../../img/getting-started/playlist_side_by_side.png)
 
 ::: tip
 The primary purpose of the playlist is to help the client review the shots and assets. They can comment on the shots directly from the preview.
@@ -73,13 +73,13 @@ The primary purpose of the playlist is to help the client review the shots and a
 
 To comment, they need to click on the **comment** button.
 
-![Playlist comment](../img/getting-started/playlist_comment_button_client.png)
+![Playlist comment](../../../img/getting-started/playlist_comment_button_client.png)
 
 This will open the right panel, showing their comments and status history, but without access to internal comments and statuses.
 
-They can draw or type on the video with the **draw** button ![draw button](../img/getting-started/draw.png) and write a comment at the same time.
+They can draw or type on the video with the **draw** button ![draw button](../../../img/getting-started/draw.png) and write a comment at the same time.
 
-![Playlist comment](../img/getting-started/playlist_comment_client.png)
+![Playlist comment](../../../img/getting-started/playlist_comment_client.png)
 
 You can see the drawing comments on the video (indicated by the red dot below the timeline).
 
@@ -88,7 +88,7 @@ Only the supervisor and production manager can see the client's comments. Artist
 
 The supervisor and production manager can copy the client's comments, modify them if necessary, and publish them for the team.
 
-![Playlist client comment](../img/getting-started/client_comment.png)
+![Playlist client comment](../../../img/getting-started/client_comment.png)
 :::
 
 ## Review Room
@@ -101,4 +101,4 @@ Everyone in the review room will see the play, pause, shot, and frame selections
 
 Additionally, the Review Room supports synchronized drawing annotations. This feature allows participants to draw directly on the frames being reviewed, with all annotations visible to everyone in the session. This capability enhances communication and clarity, making it easier to point out specific details, suggest changes, and highlight important aspects of the work.
 
-![Playlist review room](../img/getting-started/playlist_review_room.png)
+![Playlist review room](../../../img/getting-started/playlist_review_room.png)

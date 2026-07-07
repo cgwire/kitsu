@@ -51,9 +51,9 @@ Once your **Global Library** is populated, you can fill out the **Production Lib
 Several global settings can be configured that apply to your studio, such as replacing the default Kitsu logo with your studio's logo.
 
 To do this, click on the main menu button
-![Main Menu Button](../img/getting-started/main_button.png), then under the **Admin** section, click on the **Settings**.
+![Main Menu Button](../../img/getting-started/main_button.png), then under the **Admin** section, click on the **Settings**.
 
-![Main Menu Settings](../img/getting-started/menu_settings.png)
+![Main Menu Settings](../../img/getting-started/menu_settings.png)
 
 ### Studio Settings
 
@@ -67,7 +67,7 @@ The remaining settings on this page are global settings that affect every produc
 - Display images in HD quality by default. Use this option only if you have a very fast internet connection.
 - Regarding the timesheet, you can also restrict artists from modifying timesheets older than one week.
 
-![Kitsu Settings](../img/getting-started/kitsu_setting.png)
+![Kitsu Settings](../../img/getting-started/kitsu_setting.png)
 
 Finally, you will also find settings relating to various chat integrations. Please refer to [Chat Integration](../chat-integration/index.md) section for more information on how to configure this.
 

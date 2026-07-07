@@ -6,22 +6,22 @@ For your dailies or weeklies, you can create a **Playlist**
 
 You can find the **Playlists** page on the drop-down menu.
 
-![Playlist main menu](../img/getting-started/drop_down_menu_playlist.png)
+![Playlist main menu](../../../img/getting-started/drop_down_menu_playlist.png)
 
 The **playlist** page is separated into two parts:
 
 - (1) The playlist list where you can **create** a playlist or load an existing one.
 - (2) The last created playlists and the last modified playlists
 
-![Playlist page](../img/getting-started/playlist_page.png)
+![Playlist page](../../../img/getting-started/playlist_page.png)
 
 Start by creating a **Playlist**
-![Playlist add button](../img/getting-started/playlist_add_button.png). Your default name
+![Playlist add button](../../../img/getting-started/playlist_add_button.png). Your default name
 is the date and the hour. You can change it immediately. You can choose if the playlist
 will be shared with the **studio** or the **client** and if it's a **shot** or **asset** playlist.
 You can also add a **Task Type** tag to the playlist.
 
-![Playlist add page](../img/getting-started/playlist_add_page.png)
+![Playlist add page](../../../img/getting-started/playlist_add_page.png)
 
 Once the playlist is created, via the search/filter bar, you can select which shots to add
 to your playlist.
@@ -40,7 +40,7 @@ Kitsu will select the shots with the **WFA** status at the **Animation** stage. 
 The shots appear on the top part of the screen. Every change are
 automatically saved.
 
-![Playlist page](../img/getting-started/playlist_example.png)
+![Playlist page](../../../img/getting-started/playlist_example.png)
 
 
 ## Review and Validations
@@ -48,7 +48,7 @@ automatically saved.
 Once you have created a playlist, you have several options:
 
 
-![Playlist Global](../img/getting-started/playlist_global.png)
+![Playlist Global](../../../img/getting-started/playlist_global.png)
 
 * Play or Pause
 * Navigate from element to element
@@ -80,14 +80,14 @@ Once you have created a playlist, you have several options:
 For each playlisted shot/asset, you can choose the **task** and the
 **version** you want to see.
 
-![Playlist task selection](../img/getting-started/playlist_task_selection.png)
-![Playlist version selection](../img/getting-started/playlist_version_selection.png)
+![Playlist task selection](../../../img/getting-started/playlist_task_selection.png)
+![Playlist version selection](../../../img/getting-started/playlist_version_selection.png)
 
 You can also play two tasks of a shot side by side.
 
-Click on the **Compare** button ![Compare button](../img/getting-started/compare_button.png) and choose the second task type.
+Click on the **Compare** button ![Compare button](../../../img/getting-started/compare_button.png) and choose the second task type.
 
-![Playlist side by side](../img/getting-started/playlist_side_by_side.png)
+![Playlist side by side](../../../img/getting-started/playlist_side_by_side.png)
 
 
 
@@ -97,15 +97,15 @@ You can comment on the shots directly from the preview.
 
 Click on the **comment** button.
 
-![Playlist comment](../img/getting-started/playlist_comment_button.png)
+![Playlist comment](../../../img/getting-started/playlist_comment_button.png)
 
 You now have access to the right panel, which has a history of the comments and their status.
 
 You can see the drawing comment on the video (the red dot below the timeline).
 
-![Playlist comment](../img/getting-started/playlist_comment.png)
+![Playlist comment](../../../img/getting-started/playlist_comment.png)
 
-You can draw or type on the video with the **draw** button ![draw button](../img/getting-started/draw.png)
+You can draw or type on the video with the **draw** button ![draw button](../../../img/getting-started/draw.png)
 
 
 ## Playlists
@@ -114,18 +114,18 @@ You can draw or type on the video with the **draw** button ![draw button](../img
 
 A playlist is list of curated versions / previews compiled for review and approval. You can find the **Playlists** page in the drop-down menu.
 
-![Playlist main menu](../img/getting-started/drop_down_menu_playlist.png)
+![Playlist main menu](../../../img/getting-started/drop_down_menu_playlist.png)
 
 The **Playlist** page is separated into two parts:
 
 - (1) A list of your playlists where you can **create** a news ones or load an existing one.
 - (2) The last created playlists and the last modified playlists.
 
-![Playlist page](../img/getting-started/playlist_page.png)
+![Playlist page](../../../img/getting-started/playlist_page.png)
 
-Start by creating a **Playlist** using the ![Playlist add button](../img/getting-started/playlist_add_button.png) button. The playlist name defaults to the current date & time, but you can change this. You can choose if the playlist will be shared with the **studio** or the **client** and if it's a **shot** or **asset** playlist. You can also add a **Task Type** tag to the playlist.
+Start by creating a **Playlist** using the ![Playlist add button](../../../img/getting-started/playlist_add_button.png) button. The playlist name defaults to the current date & time, but you can change this. You can choose if the playlist will be shared with the **studio** or the **client** and if it's a **shot** or **asset** playlist. You can also add a **Task Type** tag to the playlist.
 
-![Playlist add page](../img/getting-started/playlist_add_page.png)
+![Playlist add page](../../../img/getting-started/playlist_add_page.png)
 
 ### Populating a Playlist
 
@@ -139,13 +139,13 @@ You can use the same **filters** as the global shot/asset page. For example, you
 
 The shots appear in the top part of the screen. Every change is automatically saved.
 
-![Playlist page](../img/getting-started/playlist_example.png)
+![Playlist page](../../../img/getting-started/playlist_example.png)
 
 ## Review Controls
 
 Once you have created a playlist, you have several options:
 
-![Playlist Global](../img/getting-started/playlist_global.png)
+![Playlist Global](../../../img/getting-started/playlist_global.png)
 
 * Play or Pause
 * Jump between elements in your playlist
@@ -172,14 +172,14 @@ Once you have created a playlist, you have several options:
 
 For each shot/asset in the playlist, you can choose the **task** and the **version** you want to see.
 
-![Playlist task selection](../img/getting-started/playlist_task_selection.png)
-![Playlist version selection](../img/getting-started/playlist_version_selection.png)
+![Playlist task selection](../../../img/getting-started/playlist_task_selection.png)
+![Playlist version selection](../../../img/getting-started/playlist_version_selection.png)
 
 You can also play two tasks of a shot side by side.
 
-Click on the **Compare** button ![Compare button](../img/getting-started/compare_button.png) and choose the second task type.
+Click on the **Compare** button ![Compare button](../../../img/getting-started/compare_button.png) and choose the second task type.
 
-![Playlist side by side](../img/getting-started/playlist_side_by_side.png)
+![Playlist side by side](../../../img/getting-started/playlist_side_by_side.png)
 
 You can comment on the shots directly from the preview.
 
@@ -187,21 +187,21 @@ Click on the **comment** button.
 
 
 
-![Playlist comment](../img/getting-started/playlist_comment_button.png)
+![Playlist comment](../../../img/getting-started/playlist_comment_button.png)
 
 You now have access to the right panel, which shows a history of the comments and their statuses.
 
 You can see the drawing comment on the video (the red dot below the timeline).
 
-![Playlist comment](../img/getting-started/playlist_comment.png)
+![Playlist comment](../../../img/getting-started/playlist_comment.png)
 
-You can draw or type on the video (similar to [Perform a review](../status-publish-review/index.md#perform-a-review)) using the **draw** button ![draw button](../img/getting-started/draw.png).
+You can draw or type on the video (similar to [Perform a review](../../../status-publish-review/index.md#perform-a-review)) using the **draw** button ![draw button](../../../img/getting-started/draw.png).
 
 ## Review Room
 
 The Review Room is a collaborative space designed for efficient and synchronized dailies review sessions. It ensures that all participants are viewing the same content simultaneously, facilitating real-time feedback and discussion.
 
-To learn more about the Review Room, [visit this section here](../playlist-client/index.md#review-room).
+To learn more about the Review Room, [visit this section here](../../../playlist-client/index.md#review-room).
 
 
 ## See your Playlists
@@ -209,13 +209,13 @@ To learn more about the Review Room, [visit this section here](../playlist-clien
 The central part for you, on **Kitsu**, is the **Playlist** page.
 You can access it by clicking on the production avatar.
 
-![Client Landing page](../img/getting-started/client_landing.png)
+![Client Landing page](../../../img/getting-started/client_landing.png)
 
 Once you have clicked on the production avatar, you will go to the **Playlist** page.
 
 The playlists will gather all the assets and shots you have to comment on.
 
-![Client playlist global page](../img/getting-started/client_playlist_global.png)
+![Client playlist global page](../../../img/getting-started/client_playlist_global.png)
 
 On the left part, you can sort the playlist per **Task Type**, **date**, or per **name** (1), then the list of the playlists created for you (2). On the center part, you have fast access to the recent playlist (3).
 
@@ -223,15 +223,15 @@ On the left part, you can sort the playlist per **Task Type**, **date**, or per 
 
 On the left part, you keep access to the different playlists. In the center part, you see the different elements of the selected playlist. It can be assets or shots. On the right part, you have access to the comment section.
 
-![Client playlist global page](../img/getting-started/client_playlist_detaill.png)
+![Client playlist global page](../../../img/getting-started/client_playlist_detaill.png)
 
 With the comment panel, you will be able to write a comment to approve the preview.
 
-![Client playlist global page](../img/getting-started/client_playlist_detail_comment.png)
+![Client playlist global page](../../../img/getting-started/client_playlist_detail_comment.png)
 
 On top of the elements (assets or shots), you have access to different options:
 
-![Client playlist option](../img/getting-started/client_playlist_option.png)
+![Client playlist option](../../../img/getting-started/client_playlist_option.png)
 
 * (1) Previous shot / asset
 *(2) Next shot / asset
@@ -259,18 +259,18 @@ On top of the elements (assets or shots), you have access to different options:
 
 ## Share your Comments
 
-First open the comment section. ![Comment button](../img/getting-started/comment_button.png)
+First open the comment section. ![Comment button](../../../img/getting-started/comment_button.png)
 
 
-From there, you can change the status to ![Retake](../img/getting-started/retake_icon.png) if you want that the Artist
+From there, you can change the status to ![Retake](../../../img/getting-started/retake_icon.png) if you want that the Artist
 performs some changes.
 
 You can add a **checklist** to your comments.
 
 You need to click on the **Add checklist** button, and the first item of the checklist appears.
 
-![client add checklist](../img/getting-started/client_checklist_retake.png)
+![client add checklist](../../../img/getting-started/client_checklist_retake.png)
 
 Type your comments, and hit **Enter** key to add another line to your checklist, or click again on **Add Checklist** button.
 
-![checklist](../img/getting-started/checklist_detailed.png)
+![checklist](../../../img/getting-started/checklist_detailed.png)

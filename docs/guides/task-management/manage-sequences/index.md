@@ -6,7 +6,7 @@ you have macro tasks to track, like Story and color Board, Color Grading, etc.
 
 Use the navigation menu to go to the **Sequences** page.
 
-![Navigation Sequences](../img/getting-started/drop_down_menu_sequence_page.png)
+![Navigation Sequences](../../../img/getting-started/drop_down_menu_sequence_page.png)
 
 ::: warning
 This new page behaves like the asset and shot global page.
@@ -43,7 +43,7 @@ You can **Rename** and **Delete** the Sequence entity on this page, as for the a
 
 If you click on the name of a sequence, you will see the detail page of this sequence.
 
-![Sequence detailed page](../img/getting-started/sequence_detail_page.png)
+![Sequence detailed page](../../../img/getting-started/sequence_detail_page.png)
 
 On the detailed page, you have access to the sequence casting.
 You can see all the assets used in the whole sequence.

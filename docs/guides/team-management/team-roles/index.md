@@ -24,7 +24,7 @@ Artists can only access the productions they are part of. They can comment on ta
 
 When an artist logs in to Kitsu, the first page they will see is their **My Tasks** page.
 
-![my task](../img/getting-started/my_task_page.png)
+![my task](../../../img/getting-started/my_task_page.png)
 :::
 
 - **Supervisor**

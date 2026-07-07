@@ -14,23 +14,23 @@ Defining your studio's Departments is typically the first step in setup, as mult
 
 
 
-On the main menu ![Main menu](../img/getting-started/main_button.png) select the
+On the main menu ![Main menu](../../../img/getting-started/main_button.png) select the
 **Department** page under the **Admin** section.
 
-![Task Type](../img/getting-started/deparment_menu.png)
+![Task Type](../../../img/getting-started/deparment_menu.png)
 
 
-If you need to create more departments, you can click on the ![create department button](../img/getting-started/create_department_button.png) button.
+If you need to create more departments, you can click on the ![create department button](../../../img/getting-started/create_department_button.png) button.
 
 When adding a department, you need to define:
 
 - The name of the department
 - A color (it will be displayed as a small round circle next to a column task type or a custom column)
 
-![Create department](../img/getting-started/create_department_detail.png)
+![Create department](../../../img/getting-started/create_department_detail.png)
 
 Click on **Confirm** to save your changes.
 
 Once you finish creating the department, your page should look like this. Whereby each department has a unique name and corresponding color.
 
-![Customized department](../img/getting-started/customized_department.png)
+![Customized department](../../../img/getting-started/customized_department.png)

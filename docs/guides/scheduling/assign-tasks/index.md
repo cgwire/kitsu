@@ -15,7 +15,7 @@ Assigning a task to a user offers several benefits:
 
 ## Add Users to the Team
 
-In the [section on preparing your team](../team/index.md), we cover how to add people to Kitsu, set their permission levels, and link them to a department.
+In the [section on preparing your team](../../../team/index.md), we cover how to add people to Kitsu, set their permission levels, and link them to a department.
 
 ::: tip
 In order for a user to be assigned to a task, they must first be added to a production. Please note that you cannot assign tasks to users outside of the production.
@@ -23,11 +23,11 @@ In order for a user to be assigned to a task, they must first be added to a prod
 
 First, lets add some users to our production. Within your project, from the dropdown menu at the top of the page, select the **Team** page.
 
-![Drop down menu team](../img/getting-started/drop_down_menu_team.png)
+![Drop down menu team](../../../img/getting-started/drop_down_menu_team.png)
 
 On the this page, you can see all the users who have been assigned to this project. If you've just created a brand new project, this page will be empty. for a specific project. You can also quickly navigate to the team page for a different project, by selecting the project name in the drop down menu.
 
-![Team page](../img/getting-started/team_page.png)
+![Team page](../../../img/getting-started/team_page.png)
 
 ::: warning
 Permissions and departments are set at the **Studio Level**. You can't adjust these at the production level.
@@ -44,17 +44,17 @@ Once you've added all your users to the production, it's now time to assign your
 In Kitsu, tasks from each task type are visually represented by the Status of the task cell, as shown below.
 :::
 
-![Assigned a task](../img/getting-started/task_assigned.png)
+![Assigned a task](../../../img/getting-started/task_assigned.png)
 
 Click the status on the task that you want to assign.
 
 You'll then see the **comment panel** appear on the right side of the screen, containing various options for configuring that task.
 
-![Blue menu](../img/getting-started/blue_menu.png)
+![Blue menu](../../../img/getting-started/blue_menu.png)
 
 Then, click on the assignee button to open the assignment dialogue
 
-![Selected people](../img/getting-started/select_people.png)
+![Selected people](../../../img/getting-started/select_people.png)
 
 This is where you can assign users to the task. Click into the box to reveal a popup with available users. Alternatively you can start typing the users name to quickly narrow a specific user. Select the user you want to assign, and click on the **assign to selected task** button to complete the assignment.
 
@@ -64,15 +64,15 @@ You can assign more than 1 user to a single task
 
 You can also assign a user to multiple tasks simultaneously. First, you'll need to select the tasks you want to assign. You can do this by holding **Ctrl / Cmd** on your keyboard and clicking on the tasks you want to select. Alternatively, you can use the **Shift** key to select a range of tasks. You'll notice that the selected tasks are highlighted in blue.
 
-![Assigned multiple people](../img/getting-started/assigned_multiple.png)
+![Assigned multiple people](../../../img/getting-started/assigned_multiple.png)
 
 Once you have your tasks highlighted, select a user to assign and confirm your selection by clicking the **Confirm** button. Similarly, you can use the **unassign from selection** option to remove these assignments.
 
 Now, you can see the artist's avatar next to each of the task's status.
 
-![Assigned people](../img/getting-started/assignation.png)
+![Assigned people](../../../img/getting-started/assignation.png)
 
-You can toggle the visibility of task assignments on or off by using the **Show/Hide Assignments** button located at the top of the spreadsheet ![Hide assignations](../img/getting-started/hide_assignation.png).
+You can toggle the visibility of task assignments on or off by using the **Show/Hide Assignments** button located at the top of the spreadsheet ![Hide assignations](../../../img/getting-started/hide_assignation.png).
 
 Keep in mind that task assignments can determine what a user sees, depending on their role (for instance, vendors need to be assigned to a task before they can view anything).
 
@@ -88,10 +88,10 @@ Next simply click on a status to open the comment panel. From there, you'll have
 
 From the global shots / asset page, your view is automatically filtered by **My Department**. This shows you tasks from your departments **Task Type** and the **Custom Columns** linked to your department.
 
-![Supervisor Global Page](../img/getting-started/supervisor_global_page.png)
+![Supervisor Global Page](../../../img/getting-started/supervisor_global_page.png)
 
 When you assign one or several tasks to someone, you will notice that you only have access to people from your department. This makes it faster to find the right artist for the task.
 
-![Supervisor Assign Team](../img/getting-started/supervisor_assign_team.png)
+![Supervisor Assign Team](../../../img/getting-started/supervisor_assign_team.png)
 
 Now that you have assigned tasks to all your artists, it's time to fill in the **Estimates** for each task.

@@ -7,7 +7,7 @@ Metadata columns alow you to track additional information related to your produc
 
 To add a new custom metadata column, click on the **+** icon next to the Name column.
 
-![Metadata Column](../img/getting-started/add_column_custom.png)
+![Metadata Column](../../../img/getting-started/add_column_custom.png)
 
 First, choose the name you prefer for your field. Then, select the appropriate **Type** based on your needs:
 
@@ -29,14 +29,14 @@ First, choose the name you prefer for your field. Then, select the appropriate *
 - **Checklist**:
   - This type presents a list of options, each accompanied by its own checkbox. It's useful for tracking minor sub-tasks associated with a shot or asset, which don't warrant their own task in the production pipeline.
 
-![Metadata Column detail](../img/getting-started/custom_column_detail.png)
+![Metadata Column detail](../../../img/getting-started/custom_column_detail.png)
 
 :::warning
 When creating **Text** and **Number** metadata types, a default value is not required upon creation.
 
 However, when using the **List of value**, **List of tags**, and **Checklist**, you have to specify which values you want to include at the point of creation.
 
-![Metadata Column list](../img/getting-started/custom_column_list.png)
+![Metadata Column list](../../../img/getting-started/custom_column_list.png)
 
 Type the list elements below **Available values**, and confirm them by clicking on **Add value**.
 :::
@@ -45,45 +45,45 @@ Type the list elements below **Available values**, and confirm them by clicking 
 
 You can also link the **metadata column** to one or several **departments**. The artists/supervisors will see it on their to-do page and in the department-filtered view.
 
-To create more departments, see [Create Departments](../configure-kitsu/index.md#create-departments).
+To create more departments, see [Create Departments](../../../configure-kitsu/index.md#create-departments).
 
 You can link the metadata column to one or more departments. Click on the department from the list and then click on **add** to confirm.
 
 Here, the VFX column is linked to two departments.
 
-![Department metadata column filtered view](../img/getting-started/department_filtered_view_column.png)
+![Department metadata column filtered view](../../../img/getting-started/department_filtered_view_column.png)
 
 
 
 ::: details How to edit your metadata column
 On the global page of the asset or the shot, click on the arrow on the direct right of your metadata column and click on **Edit**.
 
-![Metadata column Edit](../img/getting-started/custom_column_edit.png)
+![Metadata column Edit](../../../img/getting-started/custom_column_edit.png)
 :::
 
 
 Congratulations, your newly created metadata column should now be available from your global page.
 
-![Metadata Column detail](../img/getting-started/custom_column_list_edit.png)
+![Metadata Column detail](../../../img/getting-started/custom_column_list_edit.png)
 
 ::: tip Batch Updates
 If you want update multiple items with the same values, first check the items you want to include as shown below, and then update the value. The value you entered will then be updated across all items.
 
-![Metadata Column detail](../img/getting-started/batch_edit_custom_column.png)
+![Metadata Column detail](../../../img/getting-started/batch_edit_custom_column.png)
 
-![Metadata Column detail](../img/getting-started/batch_edit_custom_column2.png)
+![Metadata Column detail](../../../img/getting-started/batch_edit_custom_column2.png)
 
 :::
 
 ::: details Editing Entities
-While you can make updates to entities in the spreadsheet directly, you can also use the edit button ![Edit button](../img/getting-started/edit_button.png) to update multiple metadata columns.
+While you can make updates to entities in the spreadsheet directly, you can also use the edit button ![Edit button](../../../img/getting-started/edit_button.png) to update multiple metadata columns.
 
 Once selected, you can fill out or adjust values for all metadata columns for that specific entity. Remember to press the **Confirm** button when you are done.
 
-![Metadata Column detail](../img/getting-started/edit_asset_custom.png)
+![Metadata Column detail](../../../img/getting-started/edit_asset_custom.png)
 :::
 
-If you need to edit or delete the metadata column from the general spreadsheet page next to the name of your metadata column, click on the arrow ![Metadata Column detail](../img/getting-started/arrow.png).
+If you need to edit or delete the metadata column from the general spreadsheet page next to the name of your metadata column, click on the arrow ![Metadata Column detail](../../../img/getting-started/arrow.png).
 
 ::: tip
 In additional to editing or deleting metadata columns, from here you can also **sort** your global page with this new column by clicking on **Sort By**.
@@ -99,15 +99,15 @@ To keep your global spreadsheet tidy, you can choose to hide any non-essential c
 
 
 To do this, click on the **Hide Additional Information**
-![minimize button](../img/getting-started/maximize.png) button on the top right of the page.
+![minimize button](../../../img/getting-started/maximize.png) button on the top right of the page.
 
-![All Information Displayed](../img/getting-started/hide_extra_information1.png)
+![All Information Displayed](../../../img/getting-started/hide_extra_information1.png)
 
 
 To make the information reappear, click on the same button,
-![maximize button](../img/getting-started/minimize.png) it won't be highlighted in grey.
+![maximize button](../../../img/getting-started/minimize.png) it won't be highlighted in grey.
 
-![All Information Displayed](../img/getting-started/hide_extra_information2.png)
+![All Information Displayed](../../../img/getting-started/hide_extra_information2.png)
 
 ### Display or Hide a single Metadata Column
 
@@ -115,7 +115,7 @@ You may need to hide or display a specific **Metadata Column** on a global page.
 
 To hide your metadata column, click on the arrow on the right border of the global page.
 
-![Visible column](../img/getting-started/visible_column.png)
+![Visible column](../../../img/getting-started/visible_column.png)
 
 You can choose which column you want to **hide** or **display**.
 
@@ -125,9 +125,9 @@ If a piece of information is frequently referred to, you can **Stick** this colu
 
 Click on the arrow to the right of the column to open the column menu, then choose **Stick**.
 
-![Sticky Option](../img/getting-started/sticky.png)
+![Sticky Option](../../../img/getting-started/sticky.png)
 
-![Sticky Option](../img/getting-started/sticky_example.png)
+![Sticky Option](../../../img/getting-started/sticky_example.png)
 
 ## Create Custom Metadata Columns
 
@@ -138,7 +138,7 @@ You may have extra information to add to your pages, such as the **level of diff
 
 Click on the **+** near the Name column.
 
-![Metadata Column](../img/getting-started/add_column_custom.png)
+![Metadata Column](../../../img/getting-started/add_column_custom.png)
 
 
 
@@ -150,14 +150,14 @@ With the **Type** option, you can choose how you want to store your information:
 - a **List of tags**,
 - a **Checklist**.
 
-![Metadata Column detail](../img/getting-started/custom_column_detail.png)
+![Metadata Column detail](../../../img/getting-started/custom_column_detail.png)
 
 ::: warning
 The **Text**, **Number**, and **Checkbox** allow you to add different information for each entity. You don't have to plan it first.
 
 The **List of value**, **List of tags**, and **Checklist** give you the same choice for each entity. Moreover, it has to be filled now.
 
-![Metadata Column list](../img/getting-started/custom_column_list.png)
+![Metadata Column list](../../../img/getting-started/custom_column_list.png)
 
 Type the list elements below **Available values**, and confirm them by clicking on **Add value**.
 :::
@@ -171,39 +171,39 @@ You can link the metadata column to one or more departments. Click on the depart
 
 Here, the VFX column is linked to two departments.
 
-![Department metadata column filtered view](../img/getting-started/department_filtered_view_column.png)
+![Department metadata column filtered view](../../../img/getting-started/department_filtered_view_column.png)
 
 :::
 
 ::: details Edit meta column
 On the global page of the asset or the shot, click on the arrow on the direct right of your metadata column and click on **Edit**.
 
-![Metadata column Edit](../img/getting-started/custom_column_edit.png)
+![Metadata column Edit](../../../img/getting-started/custom_column_edit.png)
 :::
 
 
 You can fill in this information directly on the global spreadsheets page.
 The cases are editable.
 
-![Metadata Column detail](../img/getting-started/custom_column_list_edit.png)
+![Metadata Column detail](../../../img/getting-started/custom_column_list_edit.png)
 
 ::: tip
 You can batch-modify the metadata column by selecting several entities on the left and then modifying your metadata column.
 :::
 
 ::: details Edit by hand
-You can also modify the information with the edit button ![Edit button](../img/getting-started/edit_button.png).
+You can also modify the information with the edit button ![Edit button](../../../img/getting-started/edit_button.png).
 
 You now see a new line on the edit pop-up. You can select the information from the list,
 alternatively, enter the free text or number, check a box, or use the checklist, depending on your previous choice.
 
 Remember to press the **Confirm** button when you are done.
 
-![Metadata Column detail](../img/getting-started/edit_asset_custom.png)
+![Metadata Column detail](../../../img/getting-started/edit_asset_custom.png)
 :::
 
 Go to the general spreadsheet page if you need to edit or delete the metadata column.
-Nearby the name of your metadata column, click on the arrow ![Metadata Column detail](../img/getting-started/arrow.png).
+Nearby the name of your metadata column, click on the arrow ![Metadata Column detail](../../../img/getting-started/arrow.png).
 
 ::: tip
 You can **sort** your global page with this new column. Click the arrow on the right of the column name to open his menu. Then click on **Sort By**.

@@ -653,3 +653,78 @@
 - Youtube
 - Blog
 - Github
+
+## after refactoring
+
+- Start Here
+  - Getting Started
+  - Main Concepts
+  - Self-Hosting
+- Workflows
+  - For Supervisors
+  - For Producers
+  - For Artists
+  - For Developers
+  - For Clients
+- Guides
+  - Team Management
+    - Manage Departments
+    - Manage Teams
+    - Profile Settings
+    - Preparing Your Team
+    - Team Roles
+    - Import Team
+  - Task Management
+    - Manage Episodes
+    - Manage Sequences
+    - Manage Shots
+    - Manage Asset Types
+    - Manage Task Types
+    - Manage Task Statuses
+  - Pre-Production
+    - Breakdown
+    - Casting
+    - Manage Concepts
+    - Meta-Columns
+    - Production Settings
+  - Scheduling
+    - Assign Tasks
+    - Estimates
+    - Manage Edits
+    - Find Asignments
+    - Quotas
+    - Schedules
+  - Review & Publishing
+    - Playlist
+    - Client Playlist
+    - Publish
+    - Request a Review
+    - Review
+    - Share Concepts
+    - Update Task Progress
+  - Tracking & Reporting
+    - Durations vs Estimates
+    - Ensure Tasks Are On-Time
+    - Advanced Search & Filtering
+    - Production Overview
+    - Studio Occupancy
+    - Studio Overview
+    - Thumbnails
+    - Timesheets
+    - Understand Why a Task Is Late
+    - Main Schedule
+  - File Management
+    - Asset Library
+  - Privacy & Security
+    - Authentication
+- Recipes
+  - For TV Shows
+  - For Feature Films
+  - For Shorts
+  - For Video Games
+  - For NFTs
+  - Shots-Only Productions
+  - Assets-Only Productions
+- Resources
+  - Frequently Asked Questions
+  - Changelog
