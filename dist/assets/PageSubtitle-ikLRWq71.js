@@ -1,0 +1,1 @@
+import{A as e,Pt as t,d as n,tt as r}from"./vue-vendor-CSWFhL74.js";import{t as i}from"./_plugin-vue_export-helper-BDNMzG2s.js";n();var a={class:`subtitle`},o=i({__name:`PageSubtitle`,props:{text:{default:``,type:String}},setup(n){return(i,o)=>(r(),e(`h2`,a,t(n.text),1))}},[[`__scopeId`,`data-v-85eea490`]]);export{o as t};
