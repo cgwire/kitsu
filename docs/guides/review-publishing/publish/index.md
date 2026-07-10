@@ -1,4 +1,4 @@
-# Publishes
+# Publishing
 
 ## Publishing a Concept
 
@@ -24,40 +24,6 @@ With the comment panel open, you have two options:
 It is good practice to only have one version per **Concept**. If the concept is not approved and requires additional changes, then it's better to version-up that concept.
 
 ![Concept options](../../../img/getting-started/concept_options.png)
-
-## Linking a Concept to an Asset
-
-Once concepts are uploaded, you can link them to assets.
-
-The name of the linked asset is displayed below the thumbnail of the concept, and above the status. If no asset is linked, this area will be blank.
-
-Click on the status of the concept to open the comment panel on the right.
-
-![Concept Comment Panel](../../../img/getting-started/concept_comment_panel.png)
-
-From here you can adjust what the concept is linked to, or delete it. In our example below, the concept is not currently linked to an asset.
-
-To link an asset, click on the **Link** ![Link button](../../../img/getting-started/link_icon.png) button.
-
-Kitsu will display all the **Assets** available to link with the uploaded concept.
-
-![Concept link](../../../img/getting-started/concept_link.png)
-
-Select the assets from the list that you want to link to. The linked asset names will then appear at the top of the screen and will also display under the concept's thumbnail.
-
-![Concept asset linked](../../../img/getting-started/concept_asset_linked.png)
-
-Once a concept is linked to an asset, it can be seen and referenced from the asset's detail page. Return to the asset page and click on the asset which you just linked to your concept.
-
-![Detail asset page](../../../img/getting-started/asset_detail_page.png)
-
-By default, the casting detail is displayed on the second part of the screen. Use the dropdown menu to choose the concept.
-
-![Asset detail concept](../../../img/getting-started/asset_detail_concept.png)
-
-Once in the concept section, you will see all the concepts created for this asset. You can filter them by status.
-
-![Asset detail concept list](../../../img/getting-started/asset_detail_concep_listt.png)
 
 ## Publish a Preview as a Version
 

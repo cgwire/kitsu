@@ -1,4 +1,4 @@
-# Filters
+# Advanced Search & Filters
 
 Filtering involves selectively retrieving data based on specific criteria or conditions. It enables users to easily hone in information they want to focus on, or extract relevant subsets of data for analysis.
 
@@ -97,7 +97,7 @@ You can do a mix of all the filters:
 
 ## Creating Filters
 
-### Utilising the Filter Builder
+### Using the Filter Builder
 
 The easiest way to achieve more advanced filtering is to use the filter builder. Click on the **Filter Builder** icon show below to get started.
 
@@ -122,7 +122,6 @@ The second option, **Match one of the following filters**, will skip the unavail
 
 
 ### Task Status Filtering
-
 
 **Task Status** helps you filter a task type by status.
 
@@ -208,7 +207,6 @@ You can only filter priority on **ONE** Task type for **ONE** level of priority.
 You can not add several priority filters.
 :::
 
-
 ### Using the "Ready For" status
 
 Depending on whether you are filtering on the asset or shot global page, you can filter on the **Ready For** status.
@@ -222,7 +220,6 @@ You can only filter **Ready for**** on **ONE** Task type
 
 You can not add several **Ready For** filters.
 :::
-
 
 ## Managing Saved Filters
 
@@ -245,12 +242,9 @@ It allows you to Create a Filter Group. This way, you can keep your saved filter
 
 The buttons are there every time you return to this page. They help you run common queries faster.
 
-
-
 Once you have created your filter and saved it, it will appear as a button under the search bar.
 
 You can rename the filter with a more explicit choice of words.
-
 
 The saved filter is quite long and hard to read. Hover your mouse over the saved filter. You will see two icons, one to edit and the other to delete.
 
@@ -264,7 +258,6 @@ You can choose if you want to keep your saved queries in or out of a **Filtered 
 
 ![Filtered Group Example](../../../img/getting-started/filter_group_example.png)
 
-
 ### Deleting a Filter
 
 If you have created a **filter button** by mistake, click on the cross next to
@@ -273,7 +266,6 @@ it ![Filter delete](../../../img/getting-started/filter_delete.png).
 The result of the filter is displayed, but the button is not. Just
 cancel your research by deleting the text or use the cross next to the Search
 bar ![Search delete](../../../img/getting-started/filter_cross_delete.png)
-
 
 ### Pre-built Filters
 

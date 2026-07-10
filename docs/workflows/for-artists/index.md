@@ -1,10 +1,6 @@
 ---
-prev:
-  text: 'Markdown'
-  link: '/guide/markdown'
-next:
-  text: 'Markdown'
-  link: '/guide/markdown'
+prev: false
+next: false
 ---
 
 # Getting Started as an Artist

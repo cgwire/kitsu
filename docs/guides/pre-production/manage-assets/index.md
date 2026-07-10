@@ -1,3 +1,14 @@
+---
+prev:
+  text: 'Main UI Concepts'
+  link: '/start-here/main-ui-concepts'
+next:
+  text: 'Manage Concepts'
+  link: '/guides/pre-production/manage-concepts'
+---
+
+# Managing Assets
+
 ## Create an Asset
 
 ### Create your first asset

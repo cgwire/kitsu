@@ -1,4 +1,4 @@
-## Team Timesheets
+# Team Timesheets
 
 ::: warning
 All of the previous chapters are based on the fact that **Estimation** and **Duration** are filled for each task.

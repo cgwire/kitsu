@@ -1,6 +1,6 @@
-## Permission Roles
+# Permission Roles
 
-### Understanding Permission Roles
+## Understanding Permission Roles
 
 ::: warning Definition
 A permission role defines a set of access rights and privileges granted to a user within a system or application, dictating what actions they can perform and what resources they can access.
@@ -80,11 +80,11 @@ assets, shots, tasks, assignments, statistics, breakdowns, and playlists.
 ::: details Studio Manager / Administrator Permissions
 A Studio Manager acts in the same way as an Administrator, having read and write access to all productions and settings within Kitsu. Some of their privileges include:
 
-#### Create and edit a production
+### Create and edit a production
 
 The Studio Manager can create a new production, define its type, FPS, ratio, and resolution, and add a cover picture. They can also edit and delete any production.
 
-#### Manage the studio
+### Manage the studio
 
 The Studio Manager has access to everything in the studio, including:
 
@@ -102,7 +102,7 @@ They can also:
 * Customize high-level studio information, such as customizing the studio name adding the company logo, and defining the number of hours per day of work etc.
 * Choose to use the original filename for downloading media.
 
-#### Manage productions
+### Manage productions
 
 They have full access to all productions on your Kitsu site. Additionally:
 

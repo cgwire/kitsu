@@ -1,4 +1,4 @@
-## Updating Task Progress
+# Updating Task Progress
 
 Once you've made progress on your task, you'll want to update your team on its status.
 
@@ -13,7 +13,7 @@ Once you've made progress on your task, you'll want to update your team on its s
 
 You can edit your most recent comment by clicking the **History** button and selecting **Edit**. ![Edit button](../../../img/getting-started/edit_button.png)
 
-# Statuses and Feedback
+## Statuses and Feedback
 
 In Kitsu, statuses serve as indicators reflecting the current state or progress of a task. You can easily see the current status at a glance and add comments to update team members when a status changes.
 

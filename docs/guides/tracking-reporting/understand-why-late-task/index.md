@@ -1,4 +1,4 @@
-## Understanding Why a Task is Late
+# Understanding Why a Task is Late
 
 Now that you know which tasks are late or will be late, you need to understand **why**. There are several reasons why a task might be late:
 

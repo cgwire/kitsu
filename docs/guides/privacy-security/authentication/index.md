@@ -1,3 +1,5 @@
+# Authentication
+
 ## Two-Factor Authentication
 
 ### Add Additional Security to Your Studio

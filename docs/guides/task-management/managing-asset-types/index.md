@@ -1,6 +1,6 @@
-## Asset Types
+# Managing Asset Types
 
-### Define Your Asset Workflow
+## Define Your Asset Workflow
 
 Once you have created your global Workflow, you can then define your **Asset Types**
 
@@ -42,7 +42,7 @@ Your new **Asset Type** is now created in your **Global Library**. It will be av
 At any point during production, you can revisit this section to create additional **Asset Types** as necessary and add them into your workflow.
 :::
 
-### Enabling Specific Asset Types for a Production
+## Enabling Specific Asset Types for a Production
 
 On the **Navigation Menu**, choose on the dropdown menu the **Setting**.
 

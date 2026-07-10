@@ -1,6 +1,11 @@
-## Automation
+---
+prev: false
+next: false
+---
 
-### Create a New Status Automation
+# Status Automation
+
+## Create a New Status Automation
 
 A **Status Automation** defines rules or conditions that automatically trigger changes in the status of tasks based on predefined criteria. You can set up **Status Automation** for both asset and shot tasks.
 
@@ -48,7 +53,7 @@ You must add status automations to your **Production Library** once you have cre
 At any point during the production, you can return here and create more **Status Automations** if needed, and then add them to your production.
 :::
 
-### Configuring Status Automation for a Production
+## Configuring Status Automation for a Production
 
 On the **Navigation Menu**, choose on the dropdown menu the **Setting**.
 

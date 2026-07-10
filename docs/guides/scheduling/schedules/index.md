@@ -11,6 +11,7 @@ In the drop-down menu, choose **SCHEDULE**.
 ![Menu Schedule](../../../img/getting-started/menu_schedule.png)
 
 ### The Production Schedule Gantt Chart
+
 At the top of the schedule, you can see the project's start date (1) and the end date (2), which was defined when creating the production. You can modify these dates by clicking on the box to open the calendar and pick a date.
 
 ![Production Schedule](../../../img/getting-started/production_schedule.png)
@@ -42,6 +43,7 @@ You can do the same for the shot task types and determine the start and end date
 ![Production Schedule task type sequence](../../../img/getting-started/production_schedule_task_type_detail_sequence.png)
 
 ### Milestones
+
 A milestone is a significant point in a project that marks the completion of a major phase or task and serves as a checkpoint to assess progress. When hovering over a date in the schedule, you'll see ![Production Schedule add a milestone logo](../../../img/getting-started/production_schedule_add_milestone_plus.png) appears.
 
 ![Production Schedule add a milestone](../../../img/getting-started/production_schedule_add_milestone.png)
@@ -63,9 +65,6 @@ To edit a milestone, click on the ![Edit button](../../../img/getting-started/ed
 Everyone assigned to the production can access the global schedule page, but only the **Studio Manager** can modify it.
 
 To view specific tasks in more detail, click on the task type's name. This will lead you to the **Schedule** tab of the task type page.
-
-
-
 
 ## Task Type Schedule
 
@@ -123,7 +122,6 @@ Additionally, you can view the **Due date** and **Estimation** days on the **Tod
 
 Access to this page is visible to everyone, but only the **Studio Manager** can modify it.
 
-
 ## Asset and Shot Schedule
 
 On the detail page of an asset or a shot, you can access the **Schedule** tab.
@@ -153,7 +151,6 @@ When you click on a production name, you can expand the view to see full details
 It's important to note that you cannot modify your production schedules directly from this page. To make adjustments, you'll need to navigate back to the specific production schedule page you wish to modify.
 
 Access to this page is restricted to the **Studio Manager**.
-
 
 ## Team Schedule
 

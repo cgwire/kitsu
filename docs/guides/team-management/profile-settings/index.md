@@ -1,3 +1,5 @@
+# User Profile Settings
+
 On your first connection, we encourage you to fill in your contact information
 into your profile.
 Click on your name on the top right of the screen (1), then on **Profile** (2).

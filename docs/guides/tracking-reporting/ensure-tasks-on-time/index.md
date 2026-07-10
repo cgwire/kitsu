@@ -1,4 +1,4 @@
-## Ensure Tasks are On Time
+# Ensure Tasks are On Time
 
 To know if a task is on time, you need two things:
 - The **Task Type** of the task
@@ -8,7 +8,7 @@ Once this information is entered, you can **compare estimation to reality** on t
 
 ![Task Type Filled](../../../img/getting-started/task_type_schedule_due_date.png)
 
-### Methods to Compare Estimations and Actuals
+## Methods to Compare Estimations and Actuals
 
 There are two main ways to do this:
 1. **Filtering by Due Date Status**
@@ -18,7 +18,7 @@ There are two main ways to do this:
 Kitsu automatically grabs the date and status of **WIP** (Work in Progress) and **WFA** (Waiting for Approval). You can compare your **estimated start date** versus **when the Artist really starts**, and compare the **estimated due date** to **when the Artist asks for approval**.
 :::
 
-### Filtering by Due Date Status
+## Filtering by Due Date Status
 
 On the **Tasks** tab, the first filter you see is **Due Date Status**. Set it to **Due before today** to display all tasks with a **Due date** set **Due Before Today**.
 
@@ -30,7 +30,7 @@ This will show you all the late tasks with the two filters applied, meaning they
 
 You can export this page as a `CSV` file and open it with spreadsheet software.
 
-### Using the Late Status Filter
+## Using the Late Status Filter
 
 The **Late Status** filter built into the page helps you immediately see which tasks took more time than estimated (**Estimation over Duration**).
 
@@ -44,7 +44,7 @@ Depending on your studio's calculation method, Kitsu will provide the answer.
 
 ![Task Type Late Feedback](../../../img/getting-started/task_type_late_feedback.png)
 
-### Using the Gantt Diagram
+## Using the Gantt Diagram
 
 On the **Task Type Page**, go to the **Schedule** tab. The **Start** and **End** dates of this task type, as set on the production schedule, are visible at the top of the screen.
 

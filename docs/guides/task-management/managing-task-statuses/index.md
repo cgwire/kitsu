@@ -1,6 +1,6 @@
-## Task Statuses
+# Managing Task Statuses
 
-### Define Your Approval Workflow
+## Define Your Approval Workflow
 
 Next, let's create the statuses we intend to use during our **Approval Workflow**.
 
@@ -29,9 +29,6 @@ For example, the **Ready** ![Ready status](../../../img/getting-started/ready_ic
 
 These **statuses** are just examples of what is achievable in Kitsu. You are free to create your own as needed.
 
-
-
-
 To do this, from the main page, click on the ![Add Task Status](../../../img/getting-started/add_task_status.png) button.
 
 You'll then need to define some details about you **Task Status**, including:
@@ -48,8 +45,6 @@ You'll then need to define some details about you **Task Status**, including:
 - **IS FEEDBACK REQUEST**, if this status is used to request a review (helpful for quota tracking if you don't use a timesheet, it will appear in the Pending tab of the to-do list, and all these statuses will be grouped on the **My Check** page. Kitsu will prompt you to **publish a preview** each time you use this status).
 - Finally, choose a background **color** you prefer for this status.
 
-
-
 Click on **Confirm** to save your changes.
 
 Your **Status** is now created in your **Global Library** and will be available to use in your production.
@@ -63,7 +58,7 @@ and then add them to your production.
 You'll notice a few tasks statuses listed under the category of *Concept Status*. These are used by the system and while you can modify them here, you cannot create new ones.
 :::
 
-### Configuring Specific Task Statuses for a Production
+## Configuring Specific Task Statuses for a Production
 
 On the **Navigation Menu**, choose on the dropdown menu the **Setting**. 
 
@@ -77,6 +72,5 @@ However, you can add or remove specific statuses during production if they are c
 
 On the **Task Status** tab, you can choose which **status** you want to add or remove on this production, 
 validate your choice with the **add** button.
-
 
 ![Setting Add Status](../../../img/getting-started/setting_status_add.png)

@@ -1,10 +1,11 @@
-## Quotas
+# Quotas
 
 ### Using Quotas to Understand Your Teams Speed
 
 Kitsu has two ways to calculate quotas per **task type**.
 
 ### Quotas Based on Timesheets
+
 The first method is linked to the timesheet:
 Shots are considered complete when the first feedback request is made. Quotas are then weighted according to the time spent on the task, as recorded in the timesheet by the artist.
 
@@ -15,6 +16,7 @@ In this example, Kitsu weights the daily quota based on the timesheet entries.
 ![Quotas stat page day weighted detail](../../../img/getting-started/quotas_day_weighted_detail.png)
 
 ### Quotas Based on Status Changes
+
 If no timesheet is filled out, Kitsu uses status changes to estimate the duration:
 - The task is considered started when the first status change to WIP occurs.
 - The task is considered completed on the day the feedback request is made.

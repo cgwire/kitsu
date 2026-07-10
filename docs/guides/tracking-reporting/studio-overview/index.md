@@ -1,4 +1,4 @@
-## Studio Resource Overview
+# Studio Resource Overview
 
 As a Producer, you need to know everything.
 

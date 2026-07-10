@@ -1,4 +1,4 @@
-# Estimates & Team Quotas
+# Estimates
 
 Estimating the time for each task can feel overwhelming, but the benefits far outweigh the effort. By filling out task estimations, you can:
 
@@ -34,6 +34,7 @@ The **Due date** is automatically calculated based on **Estimate** and **Start D
 ![start date](../../../img/getting-started/set_estimation.png)
 
 ### Detailed Task Type View Features:
+
 Here is a summary of the cases and features you can leverage from the detailed task type view.
 
 - See and change the status of tasks

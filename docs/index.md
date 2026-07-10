@@ -1,3 +1,12 @@
+---
+prev:
+  text: ''
+  link: ''
+next:
+  text: 'Getting Started'
+  link: '/start-here/getting-started'
+---
+
 <style>
 img {
   border: 1px solid #EEE;

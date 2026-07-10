@@ -1,0 +1,15 @@
+- Quickstart pages
+  - Minimum viable steps?
+  - Step Integration: include whole markdown document vs quick overview
+  - Type-agnostic production tutorial using code groups
+  - Onboarding guides
+- Removing redundant parts
+- Missing feature pages
+  - Budget Forecasting
+    - Labor, Hardware, Software
+  - Production template
+  - Share link
+  - OpenID auth
+  - Onion skinning
+  - Eraser + shape annotations
+  - Logs

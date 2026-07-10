@@ -1,4 +1,4 @@
-## Utilize the Main Schedule
+# Using the Main Schedule
 
 With the **Main Schedule**, you can access all the **Production Schedules** at once.
 

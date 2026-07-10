@@ -1,8 +1,41 @@
-# Daily & Weekly review
+# Playlists
+
+## Create a Playlist
+
+A playlist is list of curated versions / previews compiled for review and approval. You can find the **Playlists** page in the drop-down menu.
+
+![Playlist main menu](../../../img/getting-started/drop_down_menu_playlist.png)
+
+The **Playlist** page is separated into two parts:
+
+- (1) A list of your playlists where you can **create** a news ones or load an existing one.
+- (2) The last created playlists and the last modified playlists.
+
+![Playlist page](../../../img/getting-started/playlist_page.png)
+
+Start by creating a **Playlist** using the ![Playlist add button](../../../img/getting-started/playlist_add_button.png) button. The playlist name defaults to the current date & time, but you can change this. You can choose if the playlist will be shared with the **studio** or the **client** and if it's a **shot** or **asset** playlist. You can also add a **Task Type** tag to the playlist.
+
+![Playlist add page](../../../img/getting-started/playlist_add_page.png)
+
+## Populating a Playlist
+
+Once the playlist is created, use the search/filter bar to select which shots to add to your playlist.
+
+You will also see options for adding the an **entire episode** / **entire sequence** if you want to add large chunks of the project at once.
+
+You can select **Daily pending**, which will add all the **WFA** tasks of the day.
+
+You can use the same **filters** as the global shot/asset page. For example, you can select all the **WFA** (short for "work for animation") tasks at the **Animation** stage by typing **animation=wfa** in the search bar. Validate your selection with the **Add selection** button. Kitsu will select the shots with the **WFA** status at the **Animation** stage and automatically load the **latest uploaded version**.
+
+The shots appear in the top part of the screen. Every change is automatically saved.
+
+![Playlist page](../../../img/getting-started/playlist_example.png)
+
+## Daily & Weekly review
 
 For your dailies or weeklies, you can create a **Playlist**
 
-## Create a Playlist for your internal review
+### Create a Playlist for your internal review
 
 You can find the **Playlists** page on the drop-down menu.
 
@@ -89,8 +122,6 @@ Click on the **Compare** button ![Compare button](../../../img/getting-started/c
 
 ![Playlist side by side](../../../img/getting-started/playlist_side_by_side.png)
 
-
-
 The primary purpose of the playlist is to help you review the shots and assets.
 
 You can comment on the shots directly from the preview.
@@ -106,40 +137,6 @@ You can see the drawing comment on the video (the red dot below the timeline).
 ![Playlist comment](../../../img/getting-started/playlist_comment.png)
 
 You can draw or type on the video with the **draw** button ![draw button](../../../img/getting-started/draw.png)
-
-
-## Playlists
-
-### Create a Playlist
-
-A playlist is list of curated versions / previews compiled for review and approval. You can find the **Playlists** page in the drop-down menu.
-
-![Playlist main menu](../../../img/getting-started/drop_down_menu_playlist.png)
-
-The **Playlist** page is separated into two parts:
-
-- (1) A list of your playlists where you can **create** a news ones or load an existing one.
-- (2) The last created playlists and the last modified playlists.
-
-![Playlist page](../../../img/getting-started/playlist_page.png)
-
-Start by creating a **Playlist** using the ![Playlist add button](../../../img/getting-started/playlist_add_button.png) button. The playlist name defaults to the current date & time, but you can change this. You can choose if the playlist will be shared with the **studio** or the **client** and if it's a **shot** or **asset** playlist. You can also add a **Task Type** tag to the playlist.
-
-![Playlist add page](../../../img/getting-started/playlist_add_page.png)
-
-### Populating a Playlist
-
-Once the playlist is created, use the search/filter bar to select which shots to add to your playlist.
-
-You will also see options for adding the an **entire episode** / **entire sequence** if you want to add large chunks of the project at once.
-
-You can select **Daily pending**, which will add all the **WFA** tasks of the day.
-
-You can use the same **filters** as the global shot/asset page. For example, you can select all the **WFA** (short for "work for animation") tasks at the **Animation** stage by typing **animation=wfa** in the search bar. Validate your selection with the **Add selection** button. Kitsu will select the shots with the **WFA** status at the **Animation** stage and automatically load the **latest uploaded version**.
-
-The shots appear in the top part of the screen. Every change is automatically saved.
-
-![Playlist page](../../../img/getting-started/playlist_example.png)
 
 ## Review Controls
 
@@ -254,8 +251,6 @@ On top of the elements (assets or shots), you have access to different options:
 * (19) Hide the list of the elements
 * (20) Download the playlist
 * (21) Fullscreen
-
-
 
 ## Share your Comments
 

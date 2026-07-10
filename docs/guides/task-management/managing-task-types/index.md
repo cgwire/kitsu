@@ -1,6 +1,6 @@
-## Task Types
+# Managing Task Types
 
-### Creating a New Task Type
+## Creating a New Task Type
 
 Next, let's create all the **Task Types** needed to manage and track our production. Task types could be associated with multiple entities such as assets, shots, sequences, episodes, or edits.
 
@@ -31,8 +31,6 @@ Next, you will need to supply some information about your task type, including:
 
 ![Create task](../../../img/getting-started/create_task.png)
 
-
-
 You'll notice that the **Departments** we created previously are available as an option to link task types to. Connecting a department to a specific task type can help your team stay organized.
 
 ![Create task department](../../../img/getting-started/create_task_department.png)
@@ -44,7 +42,6 @@ Newly created task types will appear at the bottom of the list
 :::
 
 To adjust the order, simply click on the **Task Type** and drag it to its appropriate position in the list.
-
 
 ![Create task top list](../../../img/getting-started/created_task_top.png)
 
@@ -58,7 +55,7 @@ Once you have created your production, you need to add the **Sequence**, **Episo
 At any point during production, you can revisit this section to create additional **Task Types** as necessary and add them into your workflow.
 :::
 
-### Enabling Specific Task Types for a Production
+## Enabling Specific Task Types for a Production
 
 On the **Navigation Menu**, choose on the dropdown menu the **Setting**.
 

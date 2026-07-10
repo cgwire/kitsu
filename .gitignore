@@ -42,3 +42,4 @@ docs/.DS_Store
 docs/ja/.DS_Store
 docs/.vitepress/dist
 docs/.vitepress/cache
+.wrangler

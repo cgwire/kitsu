@@ -1,4 +1,4 @@
-## Departments
+# Managing Departments
 
 ### Creating Departments
 

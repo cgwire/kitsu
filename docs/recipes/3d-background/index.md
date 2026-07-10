@@ -1,6 +1,11 @@
-## 3D Backgrounds
+---
+prev: false
+next: false
+---
 
-### Create a Global Library of HDR Files
+# 3D Backgrounds
+
+## Create a Global Library of HDR Files
 
 The 3D Backgrounds feature enhances your review of 3D files (`.GLB`) by incorporating an `.HDR` background to make things easier to review.
 
@@ -41,7 +46,7 @@ Your new **3D Background** is now created in your **Global Library**.
 You must add them to your **Production Library** once you have created your production.
 :::
 
-### Select Specific Preview Background for a Production
+## Select Specific Preview Background for a Production
 
 On the **Navigation Menu**, choose on the dropdown menu the **Setting**.
 
@@ -50,8 +55,6 @@ On the **Navigation Menu**, choose on the dropdown menu the **Setting**.
 On the **Preview Backgrounds** tab, you can choose which HDR file you want to add or remove on this production,
 
 ![Setting Status automation new](../../img/getting-started/preview_background_setting.png)
-
-
 
 Validate your choice with the **add** button.
 

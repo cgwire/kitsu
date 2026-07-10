@@ -1,3 +1,5 @@
+# Managing Sequences
+
 ## Create a Sequence
 
 In Kitsu, you can also track tasks at the **Sequence** Level.

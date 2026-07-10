@@ -1,3 +1,14 @@
+---
+prev:
+    text: 'Manage Assets'
+    link: '/guides/pre-production/manage-assets'
+next:
+    text: 'Manage Shots'
+    link: '/guides/task-management/manage-shots'
+---
+
+# Managing Concepts
+
 ## Create a Concept
 
 ### Upload a concept
@@ -30,6 +41,13 @@ One concept is one task.
 
 ![Concept options](../../../img/getting-started/concept_options.png)
 
+## Uploading Concepts:
+
+1. From the **Todo Page**, click **Return to Production** to access the dashboard.
+2. Navigate to the **Concepts** page via the main menu.
+3. Click **Add a new reference to concepts** and upload your files.
+
+![Upload concepts](../../../img/getting-started/concept_empty.png)
 
 ### Link a Concept to an Asset
 
@@ -54,7 +72,6 @@ Kitsu will list the linked assets at the top of the comment panel. For now, ther
 
 To link an asset, click on it. The names of the linked assets will appear at the top of the screen under the preview of the concept.
 
-
 ![Concept asset linked](../../../img/getting-started/concept_asset_linked.png)
 
 Once a concept is linked to an asset, it can be seen on the asset's detail page.
@@ -72,4 +89,11 @@ Once in the concept section, you will see all the concepts created for this asse
 
 ![asset detail concept list](../../../img/getting-started/asset_detail_concep_listt.png)
 
+## Linking Concepts to Assets:
 
+Once a concept has been uploaded, you'll want to link it to an asset to ensure it is associated with the correct production element, making it easier for your team to reference and provide feedback within the proper context.
+
+1. Open the concept’s comment panel and click **Link**.
+2. Select the assets you want to associate with the concept.
+
+![Link assets](../../../img/getting-started/concept_link.png)

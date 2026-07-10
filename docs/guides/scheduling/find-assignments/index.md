@@ -1,8 +1,9 @@
-## Managing Your Assignments
+# Managing Your Assignments
 
 Your **My Tasks** page is your main hub for assignments and opens automatically upon login. Here you can see a list of tasks you are assigned along with some key information.
 
 ### Key Information Available:
+
 - **Production**: The project your task is associated with.
 - **Entity**: The specific asset or shot assigned to you.
 - **Estimates & Duration**: Time-related information for your tasks.

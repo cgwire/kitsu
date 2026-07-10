@@ -1,9 +1,10 @@
+# Managing Edits
+
 ## Create an Edit
 
 You can track tasks at the **Edit** Level in Kitsu.
 
-It's especially useful when
-You have several edits to track through several validation steps. For example, you can track your whole movie, several trailers, and the First Edit, Fine Edit, Mix, etc.
+It's especially useful when you have several edits to track through several validation steps. For example, you can track your whole movie, several trailers, and the First Edit, Fine Edit, Mix, etc.
 
 ::: warning
 Per default, the **Edit** page will not be displayed until you have task types for it on your **production library** (setting page)

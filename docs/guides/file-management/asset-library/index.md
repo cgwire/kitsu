@@ -1,10 +1,10 @@
-## Asset Library
+# Asset Library
 
-### What is the Asset Library?
+## What is the Asset Library?
 
 The Asset Library serves as a centralized repository for all assets used within Kitsu. Teams can import assets from any project into a shared library, making them accessible for future productions. With this functionality, assets like character models, props, environments, and more can be managed in one place and repurposed seamlessly in new projects.
 
-### How to Use the Asset Library
+## How to Use the Asset Library
 
 ![Asset Library Overview](../../../img/getting-started/asset_library_overview.png)
 
@@ -12,7 +12,7 @@ The Asset Library serves as a centralized repository for all assets used within 
 - The main Asset Library window displays all assets currently available in the library (1). Use the search (2) and filter (3) options to quickly find specific assets within the library.
 - On the right-hand pane (4), you’ll find the import option for bringing in assets from other productions into the Asset Library.
 
-### Adding Assets to the Library
+## Adding Assets to the Library
 
 ![Asset Library Add](../../../img/getting-started/asset_library_add.png)
 

@@ -1,10 +1,10 @@
-## Production Overview
+# Production Overview
 
 As a Producer, having a comprehensive overview of the entire production process is essential. 
 
 Kitsu offers various tools to help you stay informed and manage production efficiently without getting overwhelmed by notifications or losing focus.
 
-### News Feed Features
+## News Feed Features
 
 The news feed section show real-time updates relating to your production, including:
 
@@ -15,13 +15,13 @@ The news feed section show real-time updates relating to your production, includ
 
 ![Newsfeed Page](../../../img/getting-started/newsfeed_comment_all.png)
 
-#### Using Filters
+### Using Filters
 
 You can customize the time frame for displaying information using the **Filters Builder** button. This is useful for focusing on specific supervisors or time periods.
 
 ![Newsfeed Page Detail](../../../img/getting-started/newsfeed_details.png)
 
-#### Example
+### Example
 
 If you want to focus on a supervisor for a specific month, select their name and pick a date in the **From** box.
 
@@ -69,6 +69,7 @@ By leveraging these tools, you can stay on top of the production process, ensuri
 You can access an extra information level on a TV show through the **Episodes Stats Page**.
 
 ### Retakes Display
+
 The default setting for the **Episodes Stats** page is **Retakes**. This display lets you see the number of retakes (back and forth) for each episode on each task type. Only three colors are displayed:
 - **Validated as Green**
 - **Retakes as Red**

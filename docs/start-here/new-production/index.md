@@ -1,4 +1,13 @@
-# Create a Short Production (assets and shots)
+---
+prev:
+  text: 'Getting Started'
+  link: '/start-here/getting-started'
+next:
+  text: 'Main UI Concepts'
+  link: '/start-here/main-ui-concepts'
+---
+
+# Create a New Production
 
 Now that you have designed your workflow in Kitsu and invited more people, it's time to create your production.
 
@@ -7,7 +16,34 @@ production** button.
 
 ![Create a production](../../img/getting-started/create_production.png)
 
-Enter your production name, choose **short** as the **type**, and select your production style (2D, 3D).
+Enter your production name, choose a **type**, and select your production style (2D, 3D).
+
+::: code-group
+```text [TV Shows]
+Pick the type "TV Show"
+```
+```text [Feature Films]
+Pick the type "Feature Film"
+```
+```text [Shorts]
+Pick the type "Short"
+```
+```text [Shots-Only]
+Pick the type "Only Shots"
+```
+```text [Assets-Only]
+Pick the type "Only Assets"
+```
+```text [Assets-Only]
+Pick the type "Only Assets"
+```
+```text [Video Games]
+Pick the type "Short"
+```
+```text [NFTs]
+Pick the type "Short"
+```
+:::
 
 Then, you must fill in technical information, such as the number of FPS, the Ration, and the Resolution.
 

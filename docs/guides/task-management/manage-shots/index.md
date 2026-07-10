@@ -1,3 +1,14 @@
+---
+prev:
+  text: 'Main UI Concepts'
+  link: '/start-here/main-ui-concepts'
+next:
+  text: 'Manage Concepts'
+  link: '/guides/pre-production/manage-concepts'
+---
+
+# Managing Shots
+
 ## Create a Shot
 
 ### Create your first shot

@@ -1,3 +1,12 @@
+---
+prev:
+  text: 'About The Documentation'
+  link: '/'
+next:
+  text: 'Create a New Production'
+  link: '/start-here/new-production'
+---
+
 # Getting Started With Kitsu
 
 With Kitsu, users can track various production projects, encompassing 2D and 3D production, VFX, video games, and other related endeavors.
@@ -20,7 +29,6 @@ For example, within a CGI production, tasks such as modeling, rigging, and shadi
 - Processes such as modeling, shading, etc., are referred to as a **Task Type**.
 - An individual objects such as asset, shot, etc., are called **Entities**.
 - A **task** can be defined as a specific action or activity that needs to be done. Tasks can be attributed to **entities** and will usually be categorized with a **task type**.
-
 :::
 
 Entities with corresponding tasks form foundation of your asset workflow. Each task will then be assigned to an artist. Once you have determined your assets workflow, you will do the same for the shots, sequences, etc.
