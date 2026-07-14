@@ -216,14 +216,13 @@ const helpers = {
     result = sortEditResult(result, sorting, taskTypeMap, taskMap)
     cache.result = result
 
-    const limit =
-      state.displayedEdits.length > PAGE_SIZE
-        ? state.displayedEdits.length
-        : PAGE_SIZE
-    const displayedEdits = result.slice(0, limit)
-
-    state.displayedEdits = displayedEdits
-    state.editFilledColumns = getFilledColumns(displayedEdits)
+    // PERF-1: the whole filtered result is displayed at once. EditList
+    // virtualizes its rows, so the old PAGE_SIZE slice (which existed to
+    // keep the rendered DOM small) only capped the scrollbar and forced
+    // display-more hitches every page. Still a copy: the cache arrays are
+    // mutated in place elsewhere and rely on displayedEdits being distinct.
+    state.displayedEdits = result.slice()
+    state.editFilledColumns = getFilledColumns(result)
     helpers.setListStats(state, result)
     state.editSearchText = editSearch
     state.editSelectionGrid = buildSelectionGrid()
@@ -750,7 +749,9 @@ const mutations = {
     cache.result = edits
     cache.editIndex = buildEditIndex(edits)
 
-    const displayedEdits = edits.slice(0, PAGE_SIZE)
+    // PERF-1: full list displayed at once (as a copy, the cache arrays are
+    // mutated in place elsewhere), EditList virtualizes its rows.
+    const displayedEdits = edits.slice()
     const filledColumns = getFilledColumns(displayedEdits)
 
     state.editValidationColumns = helpers.sortValidationColumns(
@@ -880,7 +881,7 @@ const mutations = {
 
     cache.edits.push(edit)
     cache.edits = sortEdits(cache.edits)
-    state.displayedEdits = cache.edits.slice(0, PAGE_SIZE)
+    state.displayedEdits = cache.edits.slice()
     helpers.setListStats(state, cache.edits)
     state.editFilledColumns = getFilledColumns(state.displayedEdits)
     cache.editMap.set(edit.id, edit)
@@ -908,6 +909,9 @@ const mutations = {
     })
   },
 
+  // PERF-1: no-op since displayedEdits always holds the full result now
+  // (the guard below never passes); kept for symmetry with the other
+  // entity modules until the progressive-display machinery is removed.
   [DISPLAY_MORE_EDITS](
     state,
     { taskTypeMap, taskStatusMap, taskMap, production }

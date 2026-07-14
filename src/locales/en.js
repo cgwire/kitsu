@@ -1903,6 +1903,7 @@ export default {
   shots: {
     casting: 'Shot casting',
     cancel_text: 'Are you sure you want to archive {name}?',
+    collapse_sequence: 'Collapse sequence',
     creation_explanation: 'To add shots, you first need to create an episode and a sequence. Type an episode name at the bottom of the left column, then click "Add" to create a new episode. Select this episode and repeat the same operation for the sequence. Finally, select a sequence and type a shot name in the field at the bottom of the right column. Click the "Add" button below. Your first shot is now created. You can add many more! If it\'s not a TV show, you can directly create a sequence.',
     delete_for_selection: 'Delete the selected shot | Delete the {nbSelectedShots} selected shots',
     delete_text: 'Are you sure you want to remove {name} from your database?',
@@ -1915,6 +1916,7 @@ export default {
     empty_list: 'There are no shots in the production. How about creating some?',
     empty_list_client: 'There are no shots in this production.',
     episodes: 'Episodes',
+    expand_sequence: 'Expand sequence',
     get_frames_from_previews: 'Set frame numbers from previews',
     get_frames_from_previews_description: 'Select a task type to extract the frame numbers from the latest published movie previews.',
     get_frames_from_previews_error: 'There was an error while extracting the frame numbers from the task type previews. Please contact our support team.',

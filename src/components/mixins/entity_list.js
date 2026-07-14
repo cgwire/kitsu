@@ -100,6 +100,15 @@ export const entityListMixin = {
       )
     },
 
+    // Sticked + non-sticked validation columns in the same order as the x/y
+    // grid coordinates used by the selection grids and onTaskSelected().
+    allDisplayedValidationColumns() {
+      return [
+        ...this.stickedDisplayedValidationColumns,
+        ...this.nonStickedDisplayedValidationColumns
+      ]
+    },
+
     isEmptyTask() {
       return (
         !this.isEmptyList &&
@@ -203,6 +212,13 @@ export const entityListMixin = {
       }
     },
 
+    // PERF-1: with rows virtualized, cells outside the rendered window have
+    // no $refs entry, so the historical "read every validation-x-y ref in
+    // the rectangle" strategy silently dropped off-screen cells from a
+    // shift-click range. The rectangle is now resolved from data instead:
+    // each grid provides entityForRow() (global row index -> entity, in the
+    // exact coordinates its cells advertise as row-x) and may override
+    // isCellSelectable() when its template restricts cell selectability.
     onTaskSelected(validationInfo, sticked) {
       const columnOffset = this.stickedDisplayedValidationColumns.length
       const selection = []
@@ -230,20 +246,24 @@ export const entityListMixin = {
           }
 
           for (let i = startX; i <= endX; i++) {
-            for (let j = startY; j <= endY; j++) {
-              const validationCell = this.$refs[`validation-${i}-${j}`]?.[0]
-              const isSelectedCell = grid?.has(`${i}-${j}`)
-              if (validationCell?.selectable && !isSelectedCell) {
-                let y = validationCell.columnY
-                if (!sticked) y += columnOffset
-
-                selection.push({
-                  entity: validationCell.entity,
-                  column: validationCell.column,
-                  task: validationCell.task,
-                  x: validationCell.rowX,
-                  y
-                })
+            const entity = this.entityForRow(i)
+            if (entity) {
+              for (let j = startY; j <= endY; j++) {
+                const columnId = this.allDisplayedValidationColumns[j]
+                const isSelectedCell = grid?.has(`${i}-${j}`)
+                if (
+                  columnId &&
+                  this.isCellSelectable(entity, columnId, j) &&
+                  !isSelectedCell
+                ) {
+                  selection.push({
+                    entity,
+                    column: this.taskTypeMap.get(columnId),
+                    task: this.taskMap.get(entity.validations?.get(columnId)),
+                    x: i,
+                    y: j
+                  })
+                }
               }
             }
           }
@@ -274,6 +294,21 @@ export const entityListMixin = {
       this.$nextTick(() => {
         this.$emit('keep-task-panel-open', false)
       })
+    },
+
+    // Hook for onTaskSelected(): maps a global row index (the coordinate
+    // system the list's cells advertise as row-x) to its entity. Every
+    // entity grid provides its own; the default keeps shift-ranges empty
+    // for entityListMixin consumers that never wire cell selection.
+    entityForRow() {
+      return undefined
+    },
+
+    // Hook for onTaskSelected(): whether the (entity, column) cell may be
+    // range-selected. Default matches ValidationCell's `selectable` default;
+    // grids that bind :selectable in their template override this.
+    isCellSelectable() {
+      return true
     },
 
     onTaskUnselected(validationInfo, sticked) {

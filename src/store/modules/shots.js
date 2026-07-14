@@ -246,11 +246,12 @@ const helpers = {
     result = sortShotResult(result, sorting, taskTypeMap, taskMap)
     cache.result = result
 
-    const limit =
-      state.displayedShots.length > PAGE_SIZE
-        ? state.displayedShots.length
-        : PAGE_SIZE
-    const displayedShots = result.slice(0, limit)
+    // PERF-1: the whole filtered result is displayed at once. ShotList
+    // virtualizes its rows, so the old PAGE_SIZE slice (which existed to
+    // keep the rendered DOM small) only capped the scrollbar and forced
+    // display-more hitches every page. Still a copy: the cache arrays are
+    // mutated in place elsewhere and rely on displayedShots being distinct.
+    const displayedShots = result.slice()
 
     helpers.setListStats(state, result)
     Object.assign(state, {
@@ -959,7 +960,9 @@ const mutations = {
     cache.result = shots
     cache.shotIndex = buildShotIndex(shots)
 
-    const displayedShots = shots.slice(0, PAGE_SIZE)
+    // PERF-1: full list displayed at once (as a copy, the cache arrays are
+    // mutated in place elsewhere), ShotList virtualizes its rows.
+    const displayedShots = shots.slice()
     const filledColumns = getFilledColumns(displayedShots)
 
     state.shotValidationColumns = helpers.sortValidationColumns(
@@ -1127,7 +1130,7 @@ const mutations = {
     shot.data = {}
 
     insertSortedShot(cache.shots, shot)
-    state.displayedShots = cache.shots.slice(0, PAGE_SIZE)
+    state.displayedShots = cache.shots.slice()
     helpers.setListStats(state, cache.shots)
     state.shotFilledColumns = getFilledColumns(state.displayedShots)
     cache.shotMap.set(shot.id, shot)
@@ -1162,6 +1165,9 @@ const mutations = {
     })
   },
 
+  // PERF-1: no-op since displayedShots always holds the full result now;
+  // kept because Playlist still dispatches it from its own scroll wiring
+  // (the guard below makes those calls harmless).
   [DISPLAY_MORE_SHOTS](
     state,
     { taskTypeMap, taskStatusMap, taskMap, production }

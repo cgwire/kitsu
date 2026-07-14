@@ -177,6 +177,7 @@ export default {
 
   shots: {
     casting: 'Map casting',
+    collapse_sequence: 'Collapse level',
     creation_explanation: 'To add maps, you first need to create a chapter and a level. Type a chapter name at the bottom of the left column, then click "Add" to create a new chapter. Select this chapter and repeat the same operation for the level. Finally, select a level and type a map name in the field at the bottom of the right column. Click the "Add" button below. Your first map is now created. You can add many more! If it\'s not a TV show, you can directly create a level.',
     delete_for_selection: 'Delete the selected map | Delete the {nbSelectedShots} selected maps',
     delete_for_selection_hard_text: 'Are you sure you want to permanently remove the selected maps? All related tasks, comments and previews will also be deleted. Please confirm by typing \'DELETE\' below.',
@@ -187,6 +188,7 @@ export default {
     empty_list: 'There is no map in the production. What about creating some?',
     empty_list_client: 'There is no map in this production.',
     episodes: 'Chapters',
+    expand_sequence: 'Expand level',
     history: 'Map values history',
     multiple_delete_error: 'An error occurred while deleting a map. There is probably some data linked to a map. Are you sure there is no task linked to a selected map?',
     new_shot: 'Add a map',

@@ -225,12 +225,29 @@
           @touchstart="startBrowsing"
         >
           <template v-if="!isLoading && isListVisible">
+            <!--
+              PERF-1: virtualized rows (@tanstack/vue-virtual). Only the rows
+              near the viewport render below, between two spacer rows sized
+              to the off-screen rows' total height.
+            -->
+            <tr class="virtual-spacer-row" v-if="topSpacerHeight > 0">
+              <td
+                :colspan="totalColumnsCount"
+                :style="{ height: `${topSpacerHeight}px` }"
+              ></td>
+            </tr>
             <tr
               class="datatable-row"
               scope="row"
               :key="sequence.id"
-              :class="{ canceled: sequence.canceled }"
-              v-for="(sequence, i) in displayedSequences"
+              :ref="el => rowVirtualizer.measureElement(el)"
+              :data-index="i"
+              :class="{
+                canceled: sequence.canceled,
+                'stripe-even': i % 2 === 0,
+                'stripe-odd': i % 2 === 1
+              }"
+              v-for="{ sequence, i } in visibleRows"
             >
               <th
                 :class="{
@@ -308,6 +325,7 @@
                       ? `${offsets['validation-' + j]}px`
                       : '0'
                   "
+                  :max-assignees="maxAssigneesPerCell"
                   :minimized="hiddenColumns[columnId]"
                   :row-x="i"
                   :selected="isSelected(i, j)"
@@ -438,6 +456,7 @@
                         : null
                     )
                   "
+                  :max-assignees="maxAssigneesPerCell"
                   :minimized="hiddenColumns[columnId]"
                   :selected="
                     isSelected(i, j + stickedDisplayedValidationColumns.length)
@@ -457,6 +476,12 @@
                 v-if="isCurrentUserManager"
               />
               <td class="actions" v-else></td>
+            </tr>
+            <tr class="virtual-spacer-row" v-if="bottomSpacerHeight > 0">
+              <td
+                :colspan="totalColumnsCount"
+                :style="{ height: `${bottomSpacerHeight}px` }"
+              ></td>
             </tr>
           </template>
         </tbody>
@@ -513,6 +538,8 @@
 </template>
 
 <script>
+import { useVirtualizer } from '@tanstack/vue-virtual'
+import { computed, ref } from 'vue'
 import { mapGetters, mapActions } from 'vuex'
 
 import { getEntityPath } from '@/lib/path'
@@ -535,6 +562,16 @@ import TableHeaderMenu from '@/components/widgets/TableHeaderMenu.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 import ValidationCell from '@/components/cells/ValidationCell.vue'
 import ValidationHeader from '@/components/cells/ValidationHeader.vue'
+
+// PERF-1: row-height estimates per display mode (same technique as the
+// other virtualized entity grids); measureElement corrects the rest.
+const ROW_HEIGHT_ESTIMATE = 52
+const ROW_HEIGHT_ESTIMATE_BIG_THUMBNAILS = 116
+const ROW_HEIGHT_ESTIMATE_CONTACT_SHEET = 102
+
+// Cap on assignee avatars per validation cell (rest collapses into "+N"),
+// keeping row heights constant whatever the assignation count.
+const MAX_ASSIGNEES_PER_CELL = 3
 
 export default {
   name: 'sequence-list',
@@ -575,6 +612,33 @@ export default {
   },
 
   emits: ['create-tasks', 'delete-clicked', 'edit-clicked', 'metadata-changed'],
+
+  // PERF-1: virtualized rows, same recipe as the other entity grids. The
+  // list is flat (no group headers), so the virtualizer windows directly
+  // over displayedSequences. `body` doubles as `this.$refs.body` for the
+  // mixin methods and as the virtualizer's scroll element.
+  setup(props) {
+    const body = ref(null)
+    const rowVirtualizer = useVirtualizer(
+      computed(() => ({
+        count: props.displayedSequences.length,
+        getScrollElement: () => body.value,
+        estimateSize: () => {
+          if (props.displaySettings.bigThumbnails) {
+            return ROW_HEIGHT_ESTIMATE_BIG_THUMBNAILS
+          }
+          if (props.displaySettings.contactSheetMode) {
+            return ROW_HEIGHT_ESTIMATE_CONTACT_SHEET
+          }
+          return ROW_HEIGHT_ESTIMATE
+        },
+        getItemKey: index => props.displayedSequences[index]?.id ?? index,
+        overscan: 10
+      }))
+    )
+
+    return { body, rowVirtualizer }
+  },
 
   data() {
     return {
@@ -684,6 +748,86 @@ export default {
 
     localStorageStickKey() {
       return `stick-sequences-${this.currentProduction?.id}`
+    },
+
+    // PERF-1: virtualization plumbing (see the EditList pilot).
+    virtualRows() {
+      return this.rowVirtualizer.getVirtualItems()
+    },
+
+    totalRowsSize() {
+      return this.rowVirtualizer.getTotalSize()
+    },
+
+    topSpacerHeight() {
+      return this.virtualRows.length > 0 ? this.virtualRows[0].start : 0
+    },
+
+    bottomSpacerHeight() {
+      if (this.virtualRows.length === 0) return 0
+      const lastRow = this.virtualRows[this.virtualRows.length - 1]
+      return this.totalRowsSize - lastRow.end
+    },
+
+    // { sequence, i } pairs for the rows tanstack currently renders, `i`
+    // being the row's real index in displayedSequences so every i-based
+    // computation (isSelected, refs, z-index) stays correct unchanged.
+    visibleRows() {
+      return this.virtualRows
+        .filter(
+          virtualRow => this.displayedSequences[virtualRow.index] !== undefined
+        )
+        .map(virtualRow => ({
+          sequence: this.displayedSequences[virtualRow.index],
+          i: virtualRow.index
+        }))
+    },
+
+    maxAssigneesPerCell() {
+      return MAX_ASSIGNEES_PER_CELL
+    },
+
+    // Spans the spacer rows across every column currently in the header,
+    // so they don't leave a jagged one-column-wide row in the table.
+    totalColumnsCount() {
+      const showInfos = this.displaySettings.showInfos
+      let count = 1 // sequence name column, always present
+      if (showInfos) {
+        count += this.stickedVisibleMetadataDescriptors.length
+        count += this.nonStickedVisibleMetadataDescriptors.length
+      }
+      count += this.stickedDisplayedValidationColumns.length
+      if (!this.isLoading) {
+        count += this.nonStickedDisplayedValidationColumns.length
+      }
+      if (
+        !this.isCurrentUserClient &&
+        showInfos &&
+        this.isSequenceDescription
+      ) {
+        count++
+      }
+      if (this.isSequenceResolution && showInfos) {
+        count++
+      }
+      if (
+        !this.isCurrentUserClient &&
+        showInfos &&
+        this.isSequenceTime &&
+        this.metadataDisplayHeaders.timeSpent
+      ) {
+        count++
+      }
+      if (
+        !this.isCurrentUserClient &&
+        showInfos &&
+        this.isSequenceEstimation &&
+        this.metadataDisplayHeaders.estimation
+      ) {
+        count++
+      }
+      count++ // actions column, always present
+      return count
     }
   },
 
@@ -692,6 +836,11 @@ export default {
 
     isSelected(lineIndex, columnIndex) {
       return this.sequenceSelectionGrid.has(`${lineIndex}-${columnIndex}`)
+    },
+
+    // Hook for entity_list.js's data-driven shift-rectangle selection.
+    entityForRow(lineIndex) {
+      return this.displayedSequences[lineIndex]
     },
 
     sequencePath(sequenceId) {
@@ -747,6 +896,41 @@ export default {
 
 .datatable-wrapper {
   min-height: 40px;
+  // Firefox scroll anchoring fights windowed updates: when the top spacer
+  // row resizes it re-anchors the scroll position and produces micro-jumps
+  // (standard TanStack Virtual mitigation). Scoped: only this virtualized
+  // wrapper opts out, other datatables keep the default.
+  overflow-anchor: none;
+}
+
+// PERF-1: spacer rows standing in for the off-screen virtualized rows
+// above/below the rendered window. Qualified with .datatable-body so it
+// outranks shared.scss's `.data-list .datatable-body td` padding by
+// specificity, not by stylesheet injection order.
+.datatable-body .virtual-spacer-row td {
+  padding: 0;
+  border: none;
+}
+
+// With virtualization the DOM only holds a window of rows, so the global
+// `.datatable-row:nth-child(even)` zebra rules (App.vue) re-anchor on
+// whatever row happens to be rendered first and every stripe flips each
+// time the window shifts by one row. Stripe from the data index instead
+// (stripe-even/stripe-odd bound in the row's :class). Hover is redeclared
+// after the stripes so it keeps winning over them.
+tr.datatable-row.stripe-even,
+tr.datatable-row.stripe-even .datatable-row-header {
+  background-color: var(--background);
+}
+
+tr.datatable-row.stripe-odd,
+tr.datatable-row.stripe-odd .datatable-row-header {
+  background-color: var(--background-alt);
+}
+
+tr.datatable-row:hover,
+tr.datatable-row:hover .datatable-row-header {
+  background-color: var(--background-hover);
 }
 
 .actions {
@@ -803,6 +987,10 @@ thead .name.sequence-name {
   width: 70px;
 }
 
+// Anchored on the th too: with rows virtualized, table auto-layout only
+// sees the rendered window, so a td-only min-width stops binding when no
+// row is rendered; the thead always is.
+th.resolution,
 td.resolution {
   min-width: 110px;
   max-width: 110px;

@@ -190,6 +190,51 @@ const computeTaskResult = (
   }
 }
 
+// Summarize a group of entities (e.g. the shots of a sequence): totals for
+// time spent, estimation, frames and drawings, plus, for each task type, the
+// number of entities per task status (sorted by descending count).
+export const computeGroupSummary = (entities, taskMap, taskStatusMap) => {
+  const summary = {
+    timeSpent: 0,
+    estimation: 0,
+    frames: 0,
+    drawings: 0,
+    statusCounts: {}
+  }
+  entities
+    .filter(entity => !entity.canceled)
+    .forEach(entity => {
+      summary.timeSpent += entity.timeSpent || 0
+      summary.estimation += entity.estimation || 0
+      summary.frames += entity.nb_frames || 0
+      summary.drawings += entity.nb_drawings || 0
+      ;(entity.tasks || []).forEach(taskId => {
+        const task = taskMap.get(taskId)
+        const taskStatus = task ? taskStatusMap.get(task.task_status_id) : null
+        if (taskStatus) {
+          if (!summary.statusCounts[task.task_type_id]) {
+            summary.statusCounts[task.task_type_id] = {}
+          }
+          const columnCounts = summary.statusCounts[task.task_type_id]
+          if (!columnCounts[taskStatus.id]) {
+            columnCounts[taskStatus.id] = { taskStatus, count: 0 }
+          }
+          columnCounts[taskStatus.id].count++
+        }
+      })
+    })
+  Object.keys(summary.statusCounts).forEach(taskTypeId => {
+    summary.statusCounts[taskTypeId] = Object.values(
+      summary.statusCounts[taskTypeId]
+    ).sort(
+      (a, b) =>
+        b.count - a.count ||
+        a.taskStatus.short_name.localeCompare(b.taskStatus.short_name)
+    )
+  })
+  return summary
+}
+
 // Aggregate the per-entry stats of the given entries into a single bucket
 // shaped like an entry (used for the "all" row when entries are filtered).
 export const aggregateStats = (mainStats, entryIds) => {

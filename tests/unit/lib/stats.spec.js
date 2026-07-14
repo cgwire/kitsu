@@ -1,6 +1,7 @@
 import {
   aggregateRetakeStats,
   aggregateStats,
+  computeGroupSummary,
   computeStats,
   getChartData,
   getChartColors,
@@ -159,6 +160,72 @@ describe('lib/stats', () => {
     ]
     const stats = computeStats(shots, 'sequence_id', taskStatusMap, taskMap)
     expect(stats).toEqual(expectedStatResult)
+  })
+
+  it('computeGroupSummary - empty group', () => {
+    const summary = computeGroupSummary([], taskMap, taskStatusMap)
+    expect(summary).toEqual({
+      timeSpent: 0,
+      estimation: 0,
+      frames: 0,
+      drawings: 0,
+      statusCounts: {}
+    })
+  })
+
+  it('computeGroupSummary - totals and status counts', () => {
+    const shots = [
+      {
+        id: 'shot-1',
+        tasks: ['task-1', 'task-2'],
+        timeSpent: 60,
+        estimation: 120,
+        nb_frames: 10,
+        nb_drawings: 3
+      },
+      {
+        id: 'shot-2',
+        tasks: ['task-3', 'task-4'],
+        timeSpent: 30,
+        nb_frames: 5
+      },
+      {
+        id: 'shot-3',
+        tasks: ['task-5', 'task-6'],
+        canceled: true,
+        timeSpent: 999,
+        nb_frames: 999
+      },
+      {
+        id: 'shot-4'
+      }
+    ]
+    const summary = computeGroupSummary(shots, taskMap, taskStatusMap)
+    expect(summary.timeSpent).toEqual(90)
+    expect(summary.estimation).toEqual(120)
+    expect(summary.frames).toEqual(15)
+    expect(summary.drawings).toEqual(3)
+    expect(summary.statusCounts['task-type-1']).toEqual([
+      { taskStatus: taskStatusMap.get('task-status-2'), count: 1 },
+      { taskStatus: taskStatusMap.get('task-status-1'), count: 1 }
+    ])
+    expect(summary.statusCounts['task-type-2']).toEqual([
+      { taskStatus: taskStatusMap.get('task-status-1'), count: 2 }
+    ])
+  })
+
+  it('computeGroupSummary - skips unknown tasks and sorts by count', () => {
+    const shots = [
+      { id: 'shot-1', tasks: ['task-1', 'unknown-task'] },
+      { id: 'shot-2', tasks: ['task-3'] },
+      { id: 'shot-3', tasks: ['task-5'] }
+    ]
+    const summary = computeGroupSummary(shots, taskMap, taskStatusMap)
+    expect(summary.statusCounts['task-type-1']).toEqual([
+      { taskStatus: taskStatusMap.get('task-status-1'), count: 2 },
+      { taskStatus: taskStatusMap.get('task-status-2'), count: 1 }
+    ])
+    expect(summary.statusCounts['task-type-2']).toBeUndefined()
   })
 
   it('getChartData', () => {

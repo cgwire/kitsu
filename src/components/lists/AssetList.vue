@@ -274,15 +274,45 @@
           </tr>
         </thead>
 
-        <template v-if="!isLoading && isListVisible">
-          <tbody
-            class="datatable-body"
-            :key="'group-' + getGroupKey(group, k, 'asset_type_id')"
-            @mousedown="startBrowsing"
-            @touchstart="startBrowsing"
-            v-for="(group, k) in filteredDisplayedAssets"
+        <!--
+          PERF-1: virtualized rows (@tanstack/vue-virtual), ported from the
+          EditList pilot. The per-asset-type tbodys are linearized into one
+          flat list mixing type-header items and asset items (flattenedItems,
+          built in setup); only the items near the viewport render below,
+          between two spacer rows sized to the off-screen items' total
+          height. Type-header rows keep the exact markup/classes they had
+          when each group owned its tbody.
+        -->
+        <tbody
+          class="datatable-body"
+          @mousedown="startBrowsing"
+          @touchstart="startBrowsing"
+          v-if="!isLoading && isListVisible"
+        >
+          <tr class="virtual-spacer-row" v-if="topSpacerHeight > 0">
+            <td
+              :colspan="totalColumnsCount"
+              :style="{ height: `${topSpacerHeight}px` }"
+            ></td>
+          </tr>
+          <template
+            :key="key"
+            v-for="{
+              isHeader,
+              group,
+              asset,
+              i,
+              k,
+              flatIndex,
+              key
+            } in visibleItems"
           >
-            <tr class="datatable-type-header" v-if="group[0]">
+            <tr
+              class="datatable-type-header"
+              :ref="el => rowVirtualizer.measureElement(el)"
+              :data-index="flatIndex"
+              v-if="isHeader"
+            >
               <th scope="rowgroup">
                 <span
                   class="datatable-row-header pointer"
@@ -302,12 +332,15 @@
               class="datatable-row"
               :class="{
                 canceled: asset.canceled,
-                shared: asset.shared
+                shared: asset.shared,
+                'stripe-even': i % 2 === 0,
+                'stripe-odd': i % 2 === 1
               }"
               scope="row"
-              :key="`row${asset.id}`"
+              :ref="el => rowVirtualizer.measureElement(el)"
+              :data-index="flatIndex"
               :title="asset.shared ? $t('library.from_library') : undefined"
-              v-for="(asset, i) in group"
+              v-else
             >
               <th
                 :class="{
@@ -400,6 +433,7 @@
                   :selected="isSelected(i, k, j)"
                   :row-x="getIndex(i, k)"
                   :column-y="j"
+                  :max-assignees="maxAssigneesPerCell"
                   :minimized="hiddenColumns[columnId]"
                   :is-static="true"
                   :is-assignees="displaySettings.showAssignations"
@@ -554,6 +588,7 @@
                   "
                   :row-x="getIndex(i, k)"
                   :column-y="j"
+                  :max-assignees="maxAssigneesPerCell"
                   :minimized="hiddenColumns[columnId]"
                   :is-static="true"
                   :is-assignees="displaySettings.showAssignations"
@@ -575,8 +610,14 @@
 
               <td class="actions" v-else></td>
             </tr>
-          </tbody>
-        </template>
+          </template>
+          <tr class="virtual-spacer-row" v-if="bottomSpacerHeight > 0">
+            <td
+              :colspan="totalColumnsCount"
+              :style="{ height: `${bottomSpacerHeight}px` }"
+            ></td>
+          </tr>
+        </tbody>
       </table>
 
       <div
@@ -614,7 +655,9 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { useVirtualizer } from '@tanstack/vue-virtual'
+import { computed, ref } from 'vue'
+import { mapGetters, mapActions, useStore } from 'vuex'
 
 import { descriptorMixin } from '@/components/mixins/descriptors'
 import { domMixin } from '@/components/mixins/dom'
@@ -646,6 +689,22 @@ import assetStore from '@/store/modules/assets'
 import assetTypeStore from '@/store/modules/assettypes'
 import episodeStore from '@/store/modules/episodes'
 import taskTypeStore from '@/store/modules/tasktypes'
+
+// PERF-1: row-height estimates per display mode (same technique as
+// EditList.vue). Heights are fixed within a mode — the assignee-avatar
+// stack is capped via maxAssignees below so it can never wrap a row
+// taller; rowVirtualizer.measureElement stays as a safety net for
+// anything still content-driven.
+const ROW_HEIGHT_ESTIMATE = 52
+const ROW_HEIGHT_ESTIMATE_BIG_THUMBNAILS = 116
+const ROW_HEIGHT_ESTIMATE_CONTACT_SHEET = 102
+// Asset-type header row: 1.5rem/0.5rem paddings + one line of 1.1em text.
+const TYPE_HEADER_HEIGHT_ESTIMATE = 56
+
+// Cap on assignee avatars per validation cell (rest collapses into "+N"):
+// 3 avatars + status tag fit the 150px cell on one line, keeping row
+// heights constant for the virtualizer whatever the assignation count.
+const MAX_ASSIGNEES_PER_CELL = 3
 
 export default {
   name: 'asset-list',
@@ -715,9 +774,98 @@ export default {
     'edit-clicked',
     'metadata-changed',
     'new-clicked',
-    'restore-clicked',
-    'scroll'
+    'restore-clicked'
+    // 'scroll' and 'keep-task-panel-open' come from entityListMixin
   ],
+
+  // PERF-1: virtualized rows, ported from the EditList pilot. useVirtualizer
+  // is a composable so it needs a setup() hook even though this component is
+  // otherwise Options API. `body` is returned so it doubles as
+  // `this.$refs.body` for the existing mixin methods (setScrollPosition,
+  // onBodyScroll's scrollHeight check, drag-to-pan) and as the virtualizer's
+  // scroll element.
+  setup(props) {
+    const store = useStore()
+    const body = ref(null)
+
+    // Moved from the Options computed block (setup() cannot read Options
+    // computeds and the virtualizer's item list derives from it): filters
+    // the displayed assets by the display settings.
+    const filteredDisplayedAssets = computed(() => {
+      if (
+        props.displaySettings.showSharedAssets &&
+        props.displaySettings.showLinkedAssets
+      ) {
+        return props.displayedAssets
+      }
+      const episodeId = store.getters.currentEpisode?.id
+
+      return props.displayedAssets.map(typeList =>
+        typeList.filter(asset => {
+          if (!props.displaySettings.showSharedAssets && asset.shared) {
+            return false
+          }
+          if (
+            store.getters.isTVShow &&
+            !props.displaySettings.showLinkedAssets &&
+            !['all', asset.episode_id || 'main'].includes(episodeId)
+          ) {
+            return false
+          }
+          return true
+        })
+      )
+    })
+
+    // The grouped per-asset-type tbodys, linearized into one flat list of
+    // type-header items and asset items (display order preserved) so a
+    // single virtualizer can window over the whole grid. `i` and `k` keep
+    // their historical meaning (index inside the filtered group / group
+    // index), so every getIndex(i, k)-based selection coordinate is
+    // unchanged.
+    const flattenedItems = computed(() => {
+      const items = []
+      filteredDisplayedAssets.value.forEach((group, k) => {
+        if (group[0]) {
+          items.push({
+            isHeader: true,
+            group,
+            k,
+            key: `header-${group[0].asset_type_id}`
+          })
+          group.forEach((asset, i) => {
+            items.push({ isHeader: false, asset, i, k, key: asset.id })
+          })
+        }
+      })
+      return items
+    })
+
+    const rowVirtualizer = useVirtualizer(
+      computed(() => ({
+        count: flattenedItems.value.length,
+        getScrollElement: () => body.value,
+        // bigThumbnails first: combined with contact sheet, the name
+        // column's 100px thumbnail + cell padding is the taller of the two.
+        estimateSize: index => {
+          if (flattenedItems.value[index]?.isHeader) {
+            return TYPE_HEADER_HEIGHT_ESTIMATE
+          }
+          if (props.displaySettings.bigThumbnails) {
+            return ROW_HEIGHT_ESTIMATE_BIG_THUMBNAILS
+          }
+          if (props.displaySettings.contactSheetMode) {
+            return ROW_HEIGHT_ESTIMATE_CONTACT_SHEET
+          }
+          return ROW_HEIGHT_ESTIMATE
+        },
+        getItemKey: index => flattenedItems.value[index]?.key ?? index,
+        overscan: 10
+      }))
+    )
+
+    return { body, filteredDisplayedAssets, flattenedItems, rowVirtualizer }
+  },
 
   data() {
     return {
@@ -912,36 +1060,116 @@ export default {
       return this.isTVShow && this.displaySettings.showInfos
     },
 
-    /** Filter the displayed assets by the display settings */
-    filteredDisplayedAssets() {
-      if (
-        this.displaySettings.showSharedAssets &&
-        this.displaySettings.showLinkedAssets
-      ) {
-        return this.displayedAssets
-      }
-      const episodeId = this.currentEpisode?.id
+    // PERF-1: virtualization plumbing (see the EditList pilot). Everything
+    // below reasons in data terms (flattenedItems / getIndex coordinates),
+    // never DOM order, so filtering, sorting and real-time updates keep
+    // working exactly as before virtualization.
+    virtualRows() {
+      return this.rowVirtualizer.getVirtualItems()
+    },
 
-      return this.displayedAssets.map(typeList =>
-        typeList.filter(asset => {
-          if (!this.displaySettings.showSharedAssets && asset.shared) {
-            return false
-          }
-          if (
-            this.isTVShow &&
-            !this.displaySettings.showLinkedAssets &&
-            !['all', asset.episode_id || 'main'].includes(episodeId)
-          ) {
-            return false
-          }
-          return true
+    totalRowsSize() {
+      return this.rowVirtualizer.getTotalSize()
+    },
+
+    topSpacerHeight() {
+      return this.virtualRows.length > 0 ? this.virtualRows[0].start : 0
+    },
+
+    bottomSpacerHeight() {
+      if (this.virtualRows.length === 0) return 0
+      const lastRow = this.virtualRows[this.virtualRows.length - 1]
+      return this.totalRowsSize - lastRow.end
+    },
+
+    // The flattened items tanstack currently renders, `flatIndex` being the
+    // index in flattenedItems (used only for data-index / measurement, not
+    // for selection coordinates, which stay getIndex(i, k)-based).
+    visibleItems() {
+      return this.virtualRows
+        .filter(virtualRow => this.flattenedItems[virtualRow.index])
+        .map(virtualRow => ({
+          ...this.flattenedItems[virtualRow.index],
+          flatIndex: virtualRow.index
+        }))
+    },
+
+    // Maps a row's global selection index back to its asset, in the exact
+    // coordinate system the rendered cells advertise: getIndex(i, k) offsets
+    // come from the unfiltered displayedAssets groups while i indexes the
+    // filtered group, mirroring the template's v-for + :row-x combination.
+    rowIndexToAsset() {
+      const map = new Map()
+      this.filteredDisplayedAssets.forEach((group, k) => {
+        group.forEach((asset, i) => {
+          map.set(this.getIndex(i, k), asset)
         })
-      )
+      })
+      return map
+    },
+
+    maxAssigneesPerCell() {
+      return MAX_ASSIGNEES_PER_CELL
+    },
+
+    // Spans the spacer rows across every column currently in the header,
+    // so they don't leave a jagged one-column-wide row in the table.
+    totalColumnsCount() {
+      let count = 1 // asset name column, always present
+      if (this.hasStickyEpisode) count++
+      count += this.stickedVisibleMetadataDescriptors.length
+      if (!this.isLoading) {
+        count += this.stickedDisplayedValidationColumns.length
+        count += this.nonStickedDisplayedValidationColumns.length
+      }
+      if (
+        this.isCurrentUserManager &&
+        this.displaySettings.showInfos &&
+        !this.isAssetsOnly &&
+        this.metadataDisplayHeaders.readyFor
+      ) {
+        count++
+      }
+      if (
+        !this.isCurrentUserClient &&
+        this.displaySettings.showInfos &&
+        this.isAssetDescription
+      ) {
+        count++
+      }
+      if (
+        !this.isCurrentUserClient &&
+        this.displaySettings.showInfos &&
+        this.isAssetTime &&
+        this.metadataDisplayHeaders.timeSpent
+      ) {
+        count++
+      }
+      if (
+        !this.isCurrentUserClient &&
+        this.displaySettings.showInfos &&
+        this.isAssetEstimation &&
+        this.metadataDisplayHeaders.estimation
+      ) {
+        count++
+      }
+      if (
+        this.isAssetResolution &&
+        this.displaySettings.showInfos &&
+        this.metadataDisplayHeaders.resolution
+      ) {
+        count++
+      }
+      if (this.displaySettings.showInfos) {
+        count += this.nonStickedVisibleMetadataDescriptors.length
+      }
+      count++ // actions column, always present
+      return count
     }
   },
 
   methods: {
-    ...mapActions(['displayMoreAssets', 'editAsset', 'setAssetSelection']),
+    ...mapActions(['editAsset', 'setAssetSelection']),
 
     assetEpisodes(asset, full) {
       if (!this.episodeMap) return ''
@@ -989,6 +1217,24 @@ export default {
       return this.assetSelectionGrid.has(`${lineIndex}-${columnIndex}`)
     },
 
+    // Hook for entity_list.js's data-driven shift-rectangle selection:
+    // getIndex(i, k) offsets come from the unfiltered displayedAssets
+    // groups while i indexes the filtered group, mirroring the template's
+    // v-for + :row-x combination (see rowIndexToAsset).
+    entityForRow(lineIndex) {
+      return this.rowIndexToAsset.get(lineIndex)
+    },
+
+    // Selectability mirrors the template exactly: sticked cells never bind
+    // :selectable (always selectable), non-sticked cells use isSelectable()
+    // (workflow + shared-asset checks).
+    isCellSelectable(asset, columnId, columnIndex) {
+      return (
+        columnIndex < this.stickedDisplayedValidationColumns.length ||
+        this.isSelectable(asset, columnId)
+      )
+    },
+
     toggleLine(asset, event) {
       const selected = event.target.checked
       const assetsToSelect = [asset]
@@ -1017,16 +1263,10 @@ export default {
       })
     },
 
-    onBodyScroll(event) {
-      if (!this.$refs.body) return
-      const position = event.target
-      this.$emit('scroll', position.scrollTop)
-      const maxHeight =
-        this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
-      if (maxHeight < position.scrollTop + 100) {
-        this.loadMoreAssets()
-      }
-    },
+    // PERF-1: no local onBodyScroll anymore. The store now displays the
+    // full result at once (rows are virtualized), so the old
+    // scroll-to-bottom -> displayMoreAssets wiring is gone and the mixin's
+    // onBodyScroll (scroll-position emit only) takes over.
 
     onReadyForChanged(asset, taskTypeId) {
       if (this.selectedAssets.has(asset.id)) {
@@ -1038,10 +1278,6 @@ export default {
         const data = { id: asset.id, ready_for: taskTypeId }
         this.$emit('asset-changed', data)
       }
-    },
-
-    loadMoreAssets() {
-      this.displayMoreAssets()
     },
 
     getIndex(i, k) {
@@ -1162,6 +1398,38 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+// PERF-1: spacer rows standing in for the off-screen virtualized items
+// above/below the rendered window (see the datatable-body template).
+// Qualified with .datatable-body so it outranks shared.scss's
+// `.data-list .datatable-body td` padding by specificity, not by
+// stylesheet injection order.
+.datatable-body .virtual-spacer-row td {
+  padding: 0;
+  border: none;
+}
+
+// With virtualization the DOM only holds a window of rows, so the global
+// `.multi-section .datatable-row:nth-child(odd/even)` zebra rules
+// (App.vue) re-anchor on whatever row happens to be rendered first and
+// every stripe flips each time the window shifts by one row. Stripe from
+// the group-local data index instead (stripe-even/stripe-odd bound in the
+// row's :class, matching the per-tbody parity the nth-child rules
+// produced). Hover is redeclared after the stripes so it keeps winning.
+tr.datatable-row.stripe-even,
+tr.datatable-row.stripe-even .datatable-row-header {
+  background-color: var(--background);
+}
+
+tr.datatable-row.stripe-odd,
+tr.datatable-row.stripe-odd .datatable-row-header {
+  background-color: var(--background-alt);
+}
+
+tr.datatable-row:hover,
+tr.datatable-row:hover .datatable-row-header {
+  background-color: var(--background-hover);
+}
+
 .dark thead tr a {
   color: $light-grey;
 
@@ -1199,6 +1467,10 @@ td.estimation {
   width: 60px;
 }
 
+// Anchored on the th too: with rows virtualized, table auto-layout only
+// sees the rendered window, so a td-only min-width stops binding when no
+// row is rendered; the thead always is.
+th.resolution,
 td.resolution {
   min-width: 110px;
   max-width: 110px;
@@ -1207,6 +1479,10 @@ td.resolution {
 
 th.ready-for,
 td.ready-for {
+  // min-width is the only binding constraint in table auto-layout: with
+  // rows virtualized, widths are computed from the rendered window only
+  // and `width` alone let the column collapse to 81px.
+  min-width: 180px;
   max-width: 180px;
   width: 180px;
   padding: 1px 5px;
@@ -1256,6 +1532,11 @@ td.ready-for {
 .datatable-wrapper {
   min-height: 200px;
   flex: 1;
+  // Firefox scroll anchoring fights windowed updates: when the top spacer
+  // row resizes it re-anchors the scroll position and produces micro-jumps
+  // (standard TanStack Virtual mitigation). Scoped: only this virtualized
+  // wrapper opts out, other datatables keep the default.
+  overflow-anchor: none;
 }
 
 .datatable-row.shared {

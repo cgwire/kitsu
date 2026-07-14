@@ -29,6 +29,7 @@
     "@fullcalendar/vue3": "6.1.21",
     "@google/model-viewer": "4.3.1",
     "@sentry/vue": "10.63.0",
+    "@tanstack/vue-virtual": "^3.13.31",
     "@unhead/vue": "3.1.7",
     "@vuepic/vue-datepicker": "14.0.0",
     "bowser": "2.14.1",
