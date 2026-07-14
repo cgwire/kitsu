@@ -295,15 +295,45 @@
           </tr>
         </thead>
 
-        <template v-if="!isLoading && isListVisible">
-          <tbody
-            class="datatable-body"
-            :key="getGroupKey(group, k, 'sequence_id')"
-            @mousedown="startBrowsing"
-            @touchstart="startBrowsing"
-            v-for="(group, k) in displayedShots"
+        <!--
+          PERF-1: virtualized rows (@tanstack/vue-virtual), same recipe as
+          EditList/AssetList. The per-sequence tbodys are linearized into
+          one flat list mixing sequence-header items and shot items
+          (flattenedItems, built in setup); only the items near the
+          viewport render below, between two spacer rows sized to the
+          off-screen items' total height. Sequence-header rows keep the
+          exact markup/classes they had when each group owned its tbody.
+        -->
+        <tbody
+          class="datatable-body"
+          @mousedown="startBrowsing"
+          @touchstart="startBrowsing"
+          v-if="!isLoading && isListVisible"
+        >
+          <tr class="virtual-spacer-row" v-if="topSpacerHeight > 0">
+            <td
+              :colspan="totalColumnsCount"
+              :style="{ height: `${topSpacerHeight}px` }"
+            ></td>
+          </tr>
+          <template
+            :key="key"
+            v-for="{
+              isHeader,
+              group,
+              shot,
+              i,
+              k,
+              flatIndex,
+              key
+            } in visibleItems"
           >
-            <tr class="datatable-type-header">
+            <tr
+              class="datatable-type-header"
+              :ref="el => rowVirtualizer.measureElement(el)"
+              :data-index="flatIndex"
+              v-if="isHeader"
+            >
               <th scope="rowgroup">
                 <div
                   class="datatable-row-header pointer"
@@ -320,9 +350,14 @@
             </tr>
             <tr
               class="datatable-row"
-              :key="shot.id"
-              :class="{ canceled: shot.canceled }"
-              v-for="(shot, i) in group"
+              :class="{
+                canceled: shot.canceled,
+                'stripe-even': i % 2 === 0,
+                'stripe-odd': i % 2 === 1
+              }"
+              :ref="el => rowVirtualizer.measureElement(el)"
+              :data-index="flatIndex"
+              v-else
             >
               <th
                 scope="row"
@@ -410,6 +445,7 @@
                       ? `${offsets['validation-' + j]}px`
                       : '0'
                   "
+                  :max-assignees="maxAssigneesPerCell"
                   :minimized="hiddenColumns[columnId]"
                   :row-x="getIndex(i, k)"
                   :selected="isSelected(i, k, j)"
@@ -738,6 +774,7 @@
                       shot.validations ? shot.validations.get(columnId) : null
                     )
                   "
+                  :max-assignees="maxAssigneesPerCell"
                   :minimized="hiddenColumns[columnId]"
                   :selected="
                     isSelected(
@@ -767,8 +804,14 @@
               />
               <td class="actions" v-else></td>
             </tr>
-          </tbody>
-        </template>
+          </template>
+          <tr class="virtual-spacer-row" v-if="bottomSpacerHeight > 0">
+            <td
+              :colspan="totalColumnsCount"
+              :style="{ height: `${bottomSpacerHeight}px` }"
+            ></td>
+          </tr>
+        </tbody>
       </table>
     </div>
     <table-info :is-loading="isLoading" :is-error="isError" big-cells />
@@ -840,6 +883,8 @@
 </template>
 
 <script>
+import { useVirtualizer } from '@tanstack/vue-virtual'
+import { computed, ref } from 'vue'
 import { mapGetters, mapActions } from 'vuex'
 
 import preferences from '@/lib/preferences'
@@ -865,6 +910,22 @@ import TableHeaderMenu from '@/components/widgets/TableHeaderMenu.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 import ValidationCell from '@/components/cells/ValidationCell.vue'
 import ValidationHeader from '@/components/cells/ValidationHeader.vue'
+
+// PERF-1: row-height estimates per display mode (same technique as
+// EditList/AssetList). Heights are fixed within a mode — the
+// assignee-avatar stack is capped via maxAssignees below so it can never
+// wrap a row taller; rowVirtualizer.measureElement stays as a safety net
+// for anything still content-driven.
+const ROW_HEIGHT_ESTIMATE = 52
+const ROW_HEIGHT_ESTIMATE_BIG_THUMBNAILS = 116
+const ROW_HEIGHT_ESTIMATE_CONTACT_SHEET = 102
+// Sequence header row: 1.5rem/0.5rem paddings + one line of 1.1em text.
+const TYPE_HEADER_HEIGHT_ESTIMATE = 56
+
+// Cap on assignee avatars per validation cell (rest collapses into "+N"):
+// 3 avatars + status tag fit the 150px cell on one line, keeping row
+// heights constant for the virtualizer whatever the assignation count.
+const MAX_ASSIGNEES_PER_CELL = 3
 
 export default {
   name: 'shot-list',
@@ -928,10 +989,69 @@ export default {
     'field-changed',
     'metadata-changed',
     'restore-clicked',
-    'scroll',
     'sequence-clicked',
     'shot-history'
+    // 'scroll' and 'keep-task-panel-open' come from entityListMixin
   ],
+
+  // PERF-1: virtualized rows, same recipe as EditList/AssetList.
+  // useVirtualizer is a composable so it needs a setup() hook even though
+  // this component is otherwise Options API. `body` doubles as
+  // `this.$refs.body` for the existing mixin methods and as the
+  // virtualizer's scroll element. The flattening derives from the
+  // displayedShots prop, so episode scoping (handled upstream in the shots
+  // store for TV shows) is transparent here.
+  setup(props) {
+    const body = ref(null)
+
+    // The per-sequence tbodys, linearized into one flat list of
+    // sequence-header items and shot items (display order preserved) so a
+    // single virtualizer can window over the whole grid. `i` and `k` keep
+    // their historical meaning (index inside the group / group index), so
+    // every getIndex(i, k)-based selection coordinate is unchanged.
+    const flattenedItems = computed(() => {
+      const items = []
+      props.displayedShots.forEach((group, k) => {
+        if (group[0]) {
+          items.push({
+            isHeader: true,
+            group,
+            k,
+            key: `header-${group[0].sequence_id}`
+          })
+          group.forEach((shot, i) => {
+            items.push({ isHeader: false, shot, i, k, key: shot.id })
+          })
+        }
+      })
+      return items
+    })
+
+    const rowVirtualizer = useVirtualizer(
+      computed(() => ({
+        count: flattenedItems.value.length,
+        getScrollElement: () => body.value,
+        // bigThumbnails first: combined with contact sheet, the name
+        // column's 100px thumbnail + cell padding is the taller of the two.
+        estimateSize: index => {
+          if (flattenedItems.value[index]?.isHeader) {
+            return TYPE_HEADER_HEIGHT_ESTIMATE
+          }
+          if (props.displaySettings.bigThumbnails) {
+            return ROW_HEIGHT_ESTIMATE_BIG_THUMBNAILS
+          }
+          if (props.displaySettings.contactSheetMode) {
+            return ROW_HEIGHT_ESTIMATE_CONTACT_SHEET
+          }
+          return ROW_HEIGHT_ESTIMATE
+        },
+        getItemKey: index => flattenedItems.value[index]?.key ?? index,
+        overscan: 10
+      }))
+    )
+
+    return { body, flattenedItems, rowVirtualizer }
+  },
 
   data() {
     return {
@@ -1055,17 +1175,150 @@ export default {
 
     localStorageStickKey() {
       return `stick-shots-${this.currentProduction?.id}`
+    },
+
+    // PERF-1: virtualization plumbing (see the EditList pilot). Everything
+    // below reasons in data terms (flattenedItems / getIndex coordinates),
+    // never DOM order, so filtering, sorting and real-time updates keep
+    // working exactly as before virtualization.
+    virtualRows() {
+      return this.rowVirtualizer.getVirtualItems()
+    },
+
+    totalRowsSize() {
+      return this.rowVirtualizer.getTotalSize()
+    },
+
+    topSpacerHeight() {
+      return this.virtualRows.length > 0 ? this.virtualRows[0].start : 0
+    },
+
+    bottomSpacerHeight() {
+      if (this.virtualRows.length === 0) return 0
+      const lastRow = this.virtualRows[this.virtualRows.length - 1]
+      return this.totalRowsSize - lastRow.end
+    },
+
+    // The flattened items tanstack currently renders, `flatIndex` being the
+    // index in flattenedItems (used only for data-index / measurement, not
+    // for selection coordinates, which stay getIndex(i, k)-based).
+    visibleItems() {
+      return this.virtualRows
+        .filter(virtualRow => this.flattenedItems[virtualRow.index])
+        .map(virtualRow => ({
+          ...this.flattenedItems[virtualRow.index],
+          flatIndex: virtualRow.index
+        }))
+    },
+
+    // Maps a row's global selection index (getIndex coordinates) back to
+    // its shot, for the data-driven shift selection below.
+    rowIndexToShot() {
+      const map = new Map()
+      this.displayedShots.forEach((group, k) => {
+        group.forEach((shot, i) => {
+          map.set(this.getIndex(i, k), shot)
+        })
+      })
+      return map
+    },
+
+    maxAssigneesPerCell() {
+      return MAX_ASSIGNEES_PER_CELL
+    },
+
+    // Spans the spacer rows across every column currently in the header,
+    // so they don't leave a jagged one-column-wide row in the table.
+    totalColumnsCount() {
+      const showInfos = this.displaySettings.showInfos
+      let count = 1 // shot name column, always present
+      count += this.stickedVisibleMetadataDescriptors.length
+      if (!this.isLoading) {
+        count += this.stickedDisplayedValidationColumns.length
+        count += this.nonStickedDisplayedValidationColumns.length
+      }
+      if (!this.isCurrentUserClient && showInfos && this.isShotDescription) {
+        count++
+      }
+      if (
+        !this.isCurrentUserClient &&
+        showInfos &&
+        this.isShotTime &&
+        this.metadataDisplayHeaders.timeSpent
+      ) {
+        count++
+      }
+      if (
+        !this.isCurrentUserClient &&
+        showInfos &&
+        this.isShotEstimation &&
+        this.metadataDisplayHeaders.estimation
+      ) {
+        count++
+      }
+      if (
+        showInfos &&
+        this.isPaperProduction &&
+        this.metadataDisplayHeaders.drawings
+      ) {
+        count++
+      }
+      if (
+        this.isFrames &&
+        showInfos &&
+        !this.isPaperProduction &&
+        this.metadataDisplayHeaders.frames
+      ) {
+        count++
+      }
+      if (this.isFrameIn && showInfos && this.metadataDisplayHeaders.frameIn) {
+        count++
+      }
+      if (
+        this.isFrameOut &&
+        showInfos &&
+        this.metadataDisplayHeaders.frameOut
+      ) {
+        count++
+      }
+      if (this.isFps && showInfos && this.metadataDisplayHeaders.fps) {
+        count++
+      }
+      if (
+        this.isMaxRetakes &&
+        showInfos &&
+        this.metadataDisplayHeaders.maxRetakes
+      ) {
+        count++
+      }
+      if (
+        this.isResolution &&
+        showInfos &&
+        this.metadataDisplayHeaders.resolution
+      ) {
+        count++
+      }
+      if (showInfos) {
+        count += this.nonStickedVisibleMetadataDescriptors.length
+      }
+      count++ // actions column, always present
+      return count
     }
   },
 
   methods: {
-    ...mapActions(['displayMoreShots', 'setShotSelection']),
+    ...mapActions(['setShotSelection']),
 
     formatToTimecode,
 
     isSelected(indexInGroup, groupIndex, columnIndex) {
       const lineIndex = this.getIndex(indexInGroup, groupIndex)
       return this.shotSelectionGrid.has(`${lineIndex}-${columnIndex}`)
+    },
+
+    // Hook for entity_list.js's data-driven shift-rectangle selection.
+    entityForRow(lineIndex) {
+      return this.rowIndexToShot.get(lineIndex)
     },
 
     isCastingReady(shot, columnId) {
@@ -1118,20 +1371,10 @@ export default {
       })
     },
 
-    onBodyScroll(event) {
-      if (!this.$refs.body) return
-      const position = event.target
-      this.$emit('scroll', position.scrollTop)
-      const maxHeight =
-        this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
-      if (maxHeight < position.scrollTop + 100) {
-        this.loadMoreShots()
-      }
-    },
-
-    loadMoreShots() {
-      this.displayMoreShots()
-    },
+    // PERF-1: no local onBodyScroll anymore. The store now displays the
+    // full result at once (rows are virtualized), so the old
+    // scroll-to-bottom -> displayMoreShots wiring is gone and the mixin's
+    // onBodyScroll (scroll-position emit only) takes over.
 
     shotPath(shotId) {
       return this.getPath('shot', shotId)
@@ -1263,6 +1506,43 @@ export default {
 <style lang="scss" scoped>
 .datatable-wrapper {
   min-height: 40px;
+  // Firefox scroll anchoring fights windowed updates: when the top spacer
+  // row resizes it re-anchors the scroll position and produces micro-jumps
+  // (standard TanStack Virtual mitigation). Scoped: only this virtualized
+  // wrapper opts out, other datatables keep the default.
+  overflow-anchor: none;
+}
+
+// PERF-1: spacer rows standing in for the off-screen virtualized items
+// above/below the rendered window (see the datatable-body template).
+// Qualified with .datatable-body so it outranks shared.scss's
+// `.data-list .datatable-body td` padding by specificity, not by
+// stylesheet injection order.
+.datatable-body .virtual-spacer-row td {
+  padding: 0;
+  border: none;
+}
+
+// With virtualization the DOM only holds a window of rows, so the global
+// `.multi-section .datatable-row:nth-child(odd/even)` zebra rules
+// (App.vue) re-anchor on whatever row happens to be rendered first and
+// every stripe flips each time the window shifts by one row. Stripe from
+// the group-local data index instead (stripe-even/stripe-odd bound in the
+// row's :class, matching the per-tbody parity the nth-child rules
+// produced). Hover is redeclared after the stripes so it keeps winning.
+tr.datatable-row.stripe-even,
+tr.datatable-row.stripe-even .datatable-row-header {
+  background-color: var(--background);
+}
+
+tr.datatable-row.stripe-odd,
+tr.datatable-row.stripe-odd .datatable-row-header {
+  background-color: var(--background-alt);
+}
+
+tr.datatable-row:hover,
+tr.datatable-row:hover .datatable-row-header {
+  background-color: var(--background-hover);
 }
 
 .actions {

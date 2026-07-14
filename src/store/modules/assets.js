@@ -257,13 +257,14 @@ const helpers = {
     )
     cache.result = result
 
-    const limit =
-      state.displayedAssets.length > PAGE_SIZE
-        ? state.displayedAssets.length
-        : PAGE_SIZE
-    const displayedAssets = result.slice(0, limit)
-    state.displayedAssets = displayedAssets
-    state.assetFilledColumns = getFilledColumns(displayedAssets)
+    // PERF-1: the whole filtered result is displayed at once. AssetList
+    // virtualizes its rows, so the old PAGE_SIZE slice (which existed to
+    // keep the rendered DOM small) only capped the scrollbar and forced
+    // display-more hitches every page. Still a copy: mutations like
+    // NEW_ASSET_END push into both cache.result and displayedAssets and
+    // rely on them being distinct arrays.
+    state.displayedAssets = result.slice()
+    state.assetFilledColumns = getFilledColumns(result)
     helpers.setListStats(state, result)
     state.assetSearchText = query
     state.assetSelectionGrid = buildSelectionGrid()
@@ -991,7 +992,9 @@ const mutations = {
 
     const assetTypes = Array.from(assetTypeMap.values())
     cache.assetTypeIndex = buildNameIndex(assetTypes)
-    const displayedAssets = cache.assets.slice(0, PAGE_SIZE)
+    // PERF-1: full list displayed at once (as a copy, the cache arrays are
+    // mutated in place elsewhere), AssetList virtualizes its rows.
+    const displayedAssets = cache.assets.slice()
     const filledColumns = getFilledColumns(displayedAssets)
 
     state.assetValidationColumns = helpers.sortValidationColumns(
@@ -1327,6 +1330,9 @@ const mutations = {
     }
   },
 
+  // PERF-1: no-op since displayedAssets always holds the full result now;
+  // kept because Breakdown and Playlist still dispatch it from their own
+  // scroll wiring (the guard below makes those calls harmless).
   [DISPLAY_MORE_ASSETS](state) {
     const assets = cache.result
     const newLength = state.displayedAssets.length + PAGE_SIZE

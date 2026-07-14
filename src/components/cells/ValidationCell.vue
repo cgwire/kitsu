@@ -16,6 +16,7 @@
       <div class="filler" v-if="contactSheet"></div>
       <div
         class="wrapper status-wrapper"
+        :class="{ 'single-line': maxAssignees > 0 }"
         :style="statusWrapperStyle"
         v-if="!minimized"
       >
@@ -64,7 +65,7 @@
               'font-weight': isDarkTheme ? 'bold' : 'normal'
             }"
             :key="`avatar-${person.id}`"
-            v-for="person in assignees"
+            v-for="person in visibleAssignees"
           >
             <img
               loading="lazy"
@@ -73,6 +74,13 @@
               v-if="person.has_avatar"
             />
             <template v-else>{{ person.initials }}</template>
+          </span>
+          <span
+            class="avatar has-text-centered more-assignees"
+            :title="extraAssigneesTitle"
+            v-if="extraAssigneesCount > 0"
+          >
+            +{{ extraAssigneesCount }}
           </span>
         </template>
         <span class="subscribed" v-if="task?.is_subscribed">
@@ -111,6 +119,12 @@ const props = defineProps({
   isBorder: { type: Boolean, default: true },
   isCastingReady: { type: Boolean, default: false },
   left: { type: String, default: '0px' },
+  // Opt-in (0 = no cap, keeps the historical wrapping behavior): show at
+  // most this many assignee avatars and collapse the rest into a "+N"
+  // count on a single non-wrapping line. Virtualized lists (EditList) use
+  // it so a heavily-assigned task can never wrap the avatar stack and
+  // change the row height.
+  maxAssignees: { type: Number, default: 0 },
   minimized: { type: Boolean, default: false },
   rowX: { type: Number, default: 0 },
   selectable: { type: Boolean, default: true },
@@ -149,6 +163,23 @@ const assignees = computed(() =>
       .map(personId => personMap.value.get(personId))
       .filter(Boolean) ?? []
   )
+)
+
+const visibleAssignees = computed(() =>
+  props.maxAssignees > 0
+    ? assignees.value.slice(0, props.maxAssignees)
+    : assignees.value
+)
+
+const extraAssigneesCount = computed(
+  () => assignees.value.length - visibleAssignees.value.length
+)
+
+const extraAssigneesTitle = computed(() =>
+  assignees.value
+    .slice(props.maxAssignees)
+    .map(person => person.full_name)
+    .join('\n')
 )
 
 const priority = computed(() => formatPrioritySymbol(task.value.priority))
@@ -274,6 +305,25 @@ defineExpose({
   flex-wrap: wrap;
   position: relative;
   width: 100%;
+}
+
+// Opt-in via the maxAssignees prop: the cell content stays on one line and
+// clips instead of wrapping, so the cell height is constant whatever the
+// status name length or assignee count.
+.status-wrapper.single-line {
+  flex-wrap: nowrap;
+  overflow: hidden;
+
+  > * {
+    flex-shrink: 0;
+  }
+}
+
+.avatar.more-assignees {
+  background: var(--background-alt);
+  color: var(--text);
+  font-size: 9px;
+  font-weight: bold;
 }
 
 .full-wrapper {
