@@ -1,2 +1,0 @@
-import{o as e}from"./rolldown-runtime-DAXXjFlN.js";import{E as t,d as n,u as r}from"./vue-vendor-CSWFhL74.js";import{g as i}from"./date-vendor-CyjnSgkx.js";import{$ as a}from"./index-DQ1p3ojF.js";n();var o=e(i(),1);function s(){let e=r(),n=t(()=>e.getters.user?.timezone||o.default.tz.guess()),i=t(()=>(0,o.default)().toDate()),s=t(()=>(0,o.default)().add(1,`day`).toDate());function c(e){return a(e,n.value)}return{timezone:n,today:i,tomorrow:s,formatDate:c}}export{s as t};
-//# sourceMappingURL=time-Dv10XU0b.js.map
