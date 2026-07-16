@@ -1,0 +1,2 @@
+import{t as e}from"./createLucideIcon-BkM6EKF4.js";var t=e(`circle`,[[`circle`,{cx:`12`,cy:`12`,r:`10`,key:`1mglay`}]]),n=e(`rectangle-horizontal`,[[`rect`,{width:`20`,height:`12`,x:`2`,y:`6`,rx:`2`,key:`9lu3g6`}]]);export{t as n,n as t};
+//# sourceMappingURL=rectangle-horizontal-DHRSsNT0.js.map

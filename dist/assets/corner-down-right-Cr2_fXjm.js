@@ -1,0 +1,2 @@
+import{t as e}from"./createLucideIcon-BkM6EKF4.js";var t=e(`corner-down-right`,[[`path`,{d:`m15 10 5 5-5 5`,key:`qqa56n`}],[`path`,{d:`M4 4v7a4 4 0 0 0 4 4h12`,key:`z08zvw`}]]);export{t};
+//# sourceMappingURL=corner-down-right-Cr2_fXjm.js.map

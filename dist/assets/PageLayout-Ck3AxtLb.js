@@ -1,2 +1,0 @@
-import{A as e,D as t,d as n,it as r,k as i,tt as a}from"./vue-vendor-CSWFhL74.js";n();var o={class:`columns fixed-page`},s={class:`column main-column`},c={key:0,class:`column side-column`},l={__name:`PageLayout`,props:{side:{type:Boolean,default:!0}},setup(n){return(l,u)=>(a(),e(`div`,o,[t(`div`,s,[r(l.$slots,`main`)]),n.side?(a(),e(`div`,c,[r(l.$slots,`side`)])):i(``,!0)]))}};export{l as t};
-//# sourceMappingURL=PageLayout-Ck3AxtLb.js.map
