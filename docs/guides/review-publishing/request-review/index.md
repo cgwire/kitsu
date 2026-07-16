@@ -6,8 +6,8 @@ Once your task has been completed, you can submit it for review. To do this:
 2. Attach a preview file by dragging it into the upload area or clicking **Attach Preview**.
 3. Click **Post** to finalize your submission.
 
-![Request review](../../../img/getting-started/add_preview.png)
+![Request review](/img/getting-started/add_preview.png)
 
 Previous revisions are saved and remain accessible for reference.
 
-![Revision history](../../../img/getting-started/previewv2.png)
+![Revision history](/img/getting-started/previewv2.png)

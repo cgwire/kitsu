@@ -2,37 +2,45 @@
 
 ## Reviewing Tasks
 
-When an artist needs someone to **review** their work, they can change the status of their task to ![wfa](../../../img/getting-started/wfa_icon.png).
+When an artist needs someone to **review** their work, they can change the status of their task to ![wfa](/img/getting-started/wfa_icon.png).
 
 Click on the status to open the right hand panel and start the review.
 
-You can watch the version from the right panel, enlarge it by grabbing the side of the panel, or even enter fullscreen by clicking this icon ![Fullscreen](../../../img/getting-started/fullscreen.png).
+You can watch the version from the right panel, enlarge it by grabbing the side of the panel, or even enter fullscreen by clicking this icon ![Fullscreen](/img/getting-started/fullscreen.png).
 
-![review on global page](../../../img/getting-started/review_global.png)
+![review on global page](/img/getting-started/review_global.png)
 
 In the same way, you can also review 3D files (`.glb` file) as a wireframe or add a `.HDR` file to check the lighting.
 
 You can move around the 3D file by dragging and dropping your cursor and zooming in or out with the scroll wheel.
 
-![review 3d wireframe](../../../img/getting-started/review_wireframe.png)
+![review 3d wireframe](/img/getting-started/review_wireframe.png)
 
-![Preview background example](../../../img/getting-started/preview_background_example.png)
+![Preview background example](/img/getting-started/preview_background_example.png)
 
 See the **Customization** section for more details.
 [Pipeline Customization](../../../configure-kitsu/index.md#3d-backgrounds)
 
-You can select a color to use and then draw directly on the preview with the **Pencil** tool ![Pencil](../../../img/getting-started/draw.png).
+You can select a color to use and then draw directly on the preview with the **Pencil** tool ![Pencil](/img/getting-started/draw.png).
 
-![review drawing](../../../img/getting-started/review_comment.png)
+![review drawing](/img/getting-started/review_comment.png)
 
 ### Drawing Annotations
 
 You can also annotate the frame with **text**.
 
-![review drawing text](../../../img/getting-started/review_comment_text.png)
+![review drawing text](/img/getting-started/review_comment_text.png)
 
 If you'd like to temporarily **hide annotations**, click the **Fountain Pen** button.
-![Hide Annotation](../../../img/getting-started/hide_annotation.png)
+![Hide Annotation](/img/getting-started/hide_annotation.png)
+
+### Shape Annotations
+
+TODO
+
+Reviewers can now draw squares, circles, and arrows directly on shots while reviewing playlists, instead of being limited to freehand sketching alone.
+Shape annotations can communicate feedback faster and more precisely than rough drawings: pointing an arrow at a specific element, circling an area that needs attention, or boxing off a region for a compositing fix takes a fraction of the time it would to freehand the same note, and the result reads more clearly to the artist on the receiving end.
+For supervisors giving notes across dozens of shots in a single session, that speed and clarity adds up quickly and it keeps the review process moving without sacrificing precision.
 
 ### Tagging Frames
 
@@ -40,7 +48,7 @@ If you would like to refer back to a specific frame in your comments, you can ea
 
 This will then add a timestamp of the current frame to this comment, and clicking on that timestamp will jump to said frame.
 
-![Tag a frame](../../../img/getting-started/tag_frame.png)
+![Tag a frame](/img/getting-started/tag_frame.png)
 
 ### Exporting Annotations
 
@@ -48,33 +56,51 @@ You can also export your drawings on each frame by attaching the **screenshots a
 
 Click on the **Add attachment** button.
 
-![attachment](../../../img/getting-started/attachment_retake.png)
+![attachment](/img/getting-started/attachment_retake.png)
 
 You can also choose to **Attach snapshots from your annotation** in the attachment options. This lets you take annotated frames and add them as attachments of the comment, which can be useful if you want to highlight specific annotations in your feedback.
 
-![Attachment snapshot](../../../img/getting-started/screenshot_attachment.png)
+![Attachment snapshot](/img/getting-started/screenshot_attachment.png)
 
 Once you click the button, Kitsu will grab all the frames with annotations and display the result. You can publish them with **Confirm**.
 
-![Attachment snapshot detail](../../../img/getting-started/attachment_snapshot_detail.png)
+![Attachment snapshot detail](/img/getting-started/attachment_snapshot_detail.png)
 
-### Deleting Annotations
+### Deleting Annotations & Eraser
 
-If you need to delete a line, click the pencil icon again. The cursor changes to a multi-directional cross ![Pencil](../../../img/getting-started/direction_arrow.png), and you can then select your line and move it around.
+If you need to delete a line, click the pencil icon again. The cursor changes to a multi-directional cross ![Pencil](/img/getting-started/direction_arrow.png), and you can then select your line and move it around.
 
-![review drawing](../../../img/getting-started/review_edit.png)
+![review drawing](/img/getting-started/review_edit.png)
 
-Select the line with the directional cross, then press the **delete** icon ![Delete line](../../../img/getting-started/delete_line.png).
+Select the line with the directional cross, then press the **delete** icon ![Delete line](/img/getting-started/delete_line.png).
+
+TODO: mention eraser
+
+Kitsu's playlist annotations just got a useful upgrade: an eraser tool.
+Until now, if you drew an annotation on a playlist clip and wanted to fix a small part of it, your only option was undoing the whole stroke or starting over. That's fine for quick notes, but it gets tedious when you're giving detailed feedback and you only need to clean up one corner of the drawing.
+With the eraser, you can now selectively remove parts of your annotation's color without touching the rest.
+Tighter, cleaner notes for your team, fewer redo-from-scratch moments, and a review workflow that feels a bit more like a real drawing tool.
+Small addition, but you'll use it often if you spend a lot of time annotating playlists for feedback.
 
 ### Comparing Images
 
-By entering **Full-Screen**, you can compare two task types or versions side by side by clicking on the **Compare** button ![compare button](../../../img/getting-started/compare_button.png).
+By entering **Full-Screen**, you can compare two task types or versions side by side by clicking on the **Compare** button ![compare button](/img/getting-started/compare_button.png).
 
-![compare button](../../../img/getting-started/compare_version.png)
+![compare button](/img/getting-started/compare_version.png)
 
-From here, you can change the status to ![Retake](../../../img/getting-started/retake_icon.png) if you want the artist to make changes.
+From here, you can change the status to ![Retake](/img/getting-started/retake_icon.png) if you want the artist to make changes.
 
-Alternatively, you can change it to ![Done](../../../img/getting-started/done_icon.png) to notify the artist that their work is approved.
+Alternatively, you can change it to ![Done](/img/getting-started/done_icon.png) to notify the artist that their work is approved.
+
+### Onion Skinning
+
+TODO
+
+If you've ever needed to check frame-to-frame consistency while reviewing animation in Kitsu, there's now a much faster way to do it: onion skinning for annotations is available directly in video playlist reviews!
+Onion skinning overlays nearby annotation frames (up to 5 frames before and/or after the current frame) so you can see motion, spacing, and timing issues in one go without scrubbing back and forth.
+It's a staple feature in animation software, and now it's available right inside the review process!
+Review playlists are often the first place inconsistent spacing, jittery arcs, or volume loss become visible to someone other than the animator.
+Before, catching these issues meant either trusting your eye on a single frame or jumping into the original animation file to compare frames manually. You can now spot these problems directly in context without breaking your review flow or switching tools.
 
 ## Reviewing Previews
 
@@ -82,18 +108,18 @@ Now that everyone in your team knows what to do, you need to review their work. 
 
 Click the **My Checks** button at the top of the screen to see a list of all your department's **WFA** tasks.
 
-![Supervisor My Check Page](../../../img/getting-started/supervisor_mycheck.png)
+![Supervisor My Check Page](/img/getting-started/supervisor_mycheck.png)
 
 This list covers all relevant **Productions**, **Task Types**, and **Task Statuses**. As with other pages in Kitsu, you can click on a **Status** to open the **Comment Panel** on the right and review tasks one by one.
 
 Alternatively, you can use the **Build playlist from list** button to create a playlist with all the tasks on the list. This playlist has the same options as other views, allowing you to open the comment panel, compare versions and task types, and add annotations.
 
-![Supervisor My Check Playlist](../../../img/getting-started/supervisor_mycheck_playlist.png)
-![Supervisor My Check Playlist Option](../../../img/getting-started/supervisor_mycheck_playlist_option.png)
+![Supervisor My Check Playlist](/img/getting-started/supervisor_mycheck_playlist.png)
+![Supervisor My Check Playlist Option](/img/getting-started/supervisor_mycheck_playlist_option.png)
 
 Another option is to go to the **Task Type Page** and change the **Display as contact sheet**. For example, you can filter by **Due Date Status** and select **Due this week**.
 
-![Supervisor Contact Sheet](../../../img/getting-started/supervisor_contactsheet.png)
+![Supervisor Contact Sheet](/img/getting-started/supervisor_contactsheet.png)
 
 From here, you can click on the contact sheet to open the comment panel or select several tasks to create a playlist.
 
@@ -103,19 +129,19 @@ If you're a **Concept Artist**, you can upload and share concepts for review.
 
 When your artists upload a concept, you can review it through the navigation menu at the top of the screen by selecting the **Concepts** page.
 
-![Menu concept](../../../img/getting-started/menu_concept.png)
+![Menu concept](/img/getting-started/menu_concept.png)
 
 On this page, you can see all uploaded concepts along with their status, assignment, and linked assets.
 
-![Concept filled status](../../../img/getting-started/concept_empty_prod_linked.png)
+![Concept filled status](/img/getting-started/concept_empty_prod_linked.png)
 
 To review a concept, click on its status to open the comment panel. You can enlarge the comment panel or enter fullscreen. You can then write a comment, set the status as **Approved** or **Rejected**, and confirm your changes with the **Post** button.
 
-![Concept status comment](../../../img/getting-started/concept_status_comment.png)
+![Concept status comment](/img/getting-started/concept_status_comment.png)
 
 You can narrow down the page using the **Status** filter to display all concepts with a **Neutral** status.
 
-![Concept status filter](../../../img/getting-started/concept_status_filter.png)
+![Concept status filter](/img/getting-started/concept_status_filter.png)
 
 Additionally, you can filter by artist and change the sort order to better hone in on the data you need to review.
 
@@ -125,18 +151,18 @@ Once your artists upload a concept, you can review it with the supervisor or the
 
 To review the concept, use the navigation menu at the top of the screen and select the concept page.
 
-![Menu concept](../../../img/getting-started/menu_concept.png)
+![Menu concept](/img/getting-started/menu_concept.png)
 
 You can see all the uploaded concepts, their statuses, assignments, and linked assets.
 
-![Concept filled status](../../../img/getting-started/concept_empty_prod_linked.png)
+![Concept filled status](/img/getting-started/concept_empty_prod_linked.png)
 
 To review a concept, click on the status to open the comment panel. You can enlarge the comment panel or go fullscreen.
 
 Then, proceed to write a comment, select the status **Approved** or **Rejected**, and confirm with the **Post** button.
 
-![Concept status comment](../../../img/getting-started/concept_status_comment.png)
+![Concept status comment](/img/getting-started/concept_status_comment.png)
 
 You can filter the page with the **Status** filter to display all the concepts with a **Neutral** status. You can also filter by artist and change the sort order.
 
-![Concept status filter](../../../img/getting-started/concept_status_filter.png)
+![Concept status filter](/img/getting-started/concept_status_filter.png)

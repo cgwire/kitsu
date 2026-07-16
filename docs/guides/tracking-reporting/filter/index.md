@@ -11,10 +11,10 @@ In **Kitsu**, filters are set through the **search bar**. It allows you to
 **save** your search query. Once done, you can rerun your query with a
 simple click.
 
-![Search bar](../../../img/getting-started/filter_search_bar.png)
+![Search bar](/img/getting-started/filter_search_bar.png)
 
 You can find the **Search Bar**, **Filter Builder** and the **Save** option ![Search
-bar](../../../img/getting-started/filter_save_button.png) in the following pages:
+bar](/img/getting-started/filter_save_button.png) in the following pages:
 
 * Assets
 * Shots
@@ -51,14 +51,14 @@ Kitsu expects to have thousands of elements, so to speed up the process, you mus
 For example, on the assets page, type the letter `Ot`, and you get the
 result of all the assets starting with an `Ot`.
 
-![Search bar result](../../../img/getting-started/filter_autocompletion.png)
+![Search bar result](/img/getting-started/filter_autocompletion.png)
 
 You can also search for some specific **type of asset**: `Props`, `Character`,
 `Environment`, `Fx` ... The result displays all the assets of this type.
 
 For example, let's search all the **FX** assets.
 
-![Search asset type](../../../img/getting-started/filter_asset_type.png)
+![Search asset type](/img/getting-started/filter_asset_type.png)
 
 Another example gets **shots page** of a specific **sequence**.
 For example, you can only see the shots of the second sequence of the first episode.
@@ -66,7 +66,7 @@ For example, you can only see the shots of the second sequence of the first epis
 Select the first episode on the dropdown menu, then search `sq002`; the result
  gets all the shots of all the episodes from sequence SQ002.
 
-![Search bar sequence episode](../../../img/getting-started/filter_ep_seq.png)
+![Search bar sequence episode](/img/getting-started/filter_ep_seq.png)
 
 In the same way, you can search **specific status** link to the task.
 
@@ -101,11 +101,11 @@ You can do a mix of all the filters:
 
 The easiest way to achieve more advanced filtering is to use the filter builder. Click on the **Filter Builder** icon show below to get started.
 
-![Filter build button](../../../img/getting-started/filter_builder.png)
+![Filter build button](/img/getting-started/filter_builder.png)
 
 You can then use the interactive filter builder dialogue to create your desired filter criteria.
 
-![Filter build button](../../../img/getting-started/filter_builder_example04.png)
+![Filter build button](/img/getting-started/filter_builder_example04.png)
 
 ::: warning
 The first option, **Match all the following filters**, will use all the options you select on the filter builder for the filtering:
@@ -134,13 +134,13 @@ You can use the **-** button to remove one of the statuses selected.
 
 You can use the **+** below the status to add more status.
 
-![Filter build example 01](../../../img/getting-started/filter_builder_double_status.png)
+![Filter build example 01](/img/getting-started/filter_builder_double_status.png)
 
 
 ::: tip
 If you want to filter the status of several task types, click on the **+** below the task status option on the left part of the screen.
 
-![Filter build example 01](../../../img/getting-started/filter_builder_double_status01.png)
+![Filter build example 01](/img/getting-started/filter_builder_double_status01.png)
 
 :::
 
@@ -152,13 +152,13 @@ The **Metadata** filter allows you to filter your page based on the information 
 - **Not Equal** will report all the task **except** this information
 - **In** report all the tasks with all the information you've selected
 
-![Filter build MEtadata](../../../img/getting-started/filter_builder_metadata.png)
+![Filter build MEtadata](/img/getting-started/filter_builder_metadata.png)
 
 
 ::: tip
 If you want to filter elements on several Metadata, you can click on the **+** below the Metadata option on the left part of the screen.
 
-![Filter build example 01](../../../img/getting-started/filter_builder_metadata2.png)
+![Filter build example 01](/img/getting-started/filter_builder_metadata2.png)
 
 :::
 
@@ -225,18 +225,18 @@ You can not add several **Ready For** filters.
 
 Kitsu allows you to save any filter queries to be re-used later. You can save them by pressing the
 **Enter**, or click on the **Save** button
-![Save button](../../../img/getting-started/filter_save_button.png).
+![Save button](/img/getting-started/filter_save_button.png).
 
 Now, under the **search bar**, you can see your saved queries as buttons.
 
-![Search saved](../../../img/getting-started/filter_saved.png)
+![Search saved](/img/getting-started/filter_saved.png)
 
 ::: tip
 Notice the first icon on the left and the colored buttons.
 
 It allows you to Create a Filter Group. This way, you can keep your saved filters organized under a colored Group.
 
-![Add A Filter Group](../../../img/getting-started/filter_group_new.png)
+![Add A Filter Group](/img/getting-started/filter_group_new.png)
 
 :::
 
@@ -248,24 +248,24 @@ You can rename the filter with a more explicit choice of words.
 
 The saved filter is quite long and hard to read. Hover your mouse over the saved filter. You will see two icons, one to edit and the other to delete.
 
-![Search saved example edit](../../../img/getting-started/filter_edit.png)
+![Search saved example edit](/img/getting-started/filter_edit.png)
 
 You can now change the name displayed in the **Name** section in the pop-up window.
 
-![Edit filtered name](../../../img/getting-started/filter_edit_name.png)
+![Edit filtered name](/img/getting-started/filter_edit_name.png)
 
 You can choose if you want to keep your saved queries in or out of a **Filtered Group**
 
-![Filtered Group Example](../../../img/getting-started/filter_group_example.png)
+![Filtered Group Example](/img/getting-started/filter_group_example.png)
 
 ### Deleting a Filter
 
 If you have created a **filter button** by mistake, click on the cross next to
-it ![Filter delete](../../../img/getting-started/filter_delete.png).
+it ![Filter delete](/img/getting-started/filter_delete.png).
 
 The result of the filter is displayed, but the button is not. Just
 cancel your research by deleting the text or use the cross next to the Search
-bar ![Search delete](../../../img/getting-started/filter_cross_delete.png)
+bar ![Search delete](/img/getting-started/filter_cross_delete.png)
 
 ### Pre-built Filters
 

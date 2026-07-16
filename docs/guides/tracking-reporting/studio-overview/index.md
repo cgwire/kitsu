@@ -8,7 +8,7 @@ The perfect solution is to have all the production stats on one page, always up-
 
 Welcome to the **All Tasks** page.
 
-![Newsfeed Studio Page](../../../img/getting-started/all_tasks_stat.png)
+![Newsfeed Studio Page](/img/getting-started/all_tasks_stat.png)
 
 Here, you can see the status of all productions at once. You can filter the list by **Production**, **Task Status**, **Task Type**, and **Person**. Clicking on a line opens the comment panel on the right, providing all the information you need.
 
@@ -16,18 +16,18 @@ If you need more detailed information, especially about a specific timeframe, yo
 
 With the **Filters Builder** button, you can define a specific time frame.
 
-![Newsfeed Studio detailed Page](../../../img/getting-started/newsfeed_studio_detail.png)
+![Newsfeed Studio detailed Page](/img/getting-started/newsfeed_studio_detail.png)
 
 For example, if you want to focus on the workload a supervisor for a specific month, select their name and then pick a date in the **From** box.
 
 
-## Current State of All Productions 
+## Current State of All Productions
 
 To ensure your studio functions smoothly, you need to stay on top of all ongoing productions. This is where the **Productions** section can help. Access it from the global menu under the **Studio** section.
 
 From there, click on the **Load stats** button to see the current state of your productions.
 
-![Productions Stats](../../../img/getting-started/production_stat.png)
+![Productions Stats](/img/getting-started/production_stat.png)
 
 For more detailed information, visit the **Sequence Stats** and **Asset Types Stats** pages of all the productions.
 
@@ -37,21 +37,20 @@ The **Sequence Stats** page provides pie charts of the entire production on a si
 
 The first line is **all sequences**, representing the whole production, and the first column, **All**, includes all the tasks simultaneously.
 
-![Sequence Stat Page](../../../img/getting-started/global_view_sequence.png)
+![Sequence Stat Page](/img/getting-started/global_view_sequence.png)
 
 By focusing on this first pie chart, you can see the exact state of your production. For more details, look at the rest of the line for a global view of each task type's state.
 
 The **Asset Types Stats** page provides the same level of detail for assets.
 
-![Asset Type Stat Page](../../../img/getting-started/global_view_asset.png)
+![Asset Type Stat Page](/img/getting-started/global_view_asset.png)
 
 You can also display data as **Counts**, showing the exact number of shots/frames with the percentage per status.
 
-![Asset count Stat Page](../../../img/getting-started/global_view_asset_detail.png)
+![Asset count Stat Page](/img/getting-started/global_view_asset_detail.png)
 
 You can also export this page as a `.csv` text file to import it into spreadsheet software.
 
 Navigate from production to production using the **Navigation** menu at the top of the screen. You will stay on the same page, allowing you to check all the production stats by selecting each production.
 
-![Sequence Stat Navigation](../../../img/getting-started/global_sequence_navigation.png)
-
+![Sequence Stat Navigation](/img/getting-started/global_sequence_navigation.png)

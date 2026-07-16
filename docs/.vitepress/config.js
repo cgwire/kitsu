@@ -119,10 +119,31 @@ export default {
       },
     },
   },
+  markdown: {
+    config(md) {
+      md.core.ruler.push('strip_embed_card_headings', (state) => {
+        let depth = 0
+        for (const token of state.tokens) {
+          if (token.type === 'html_block') {
+            const t = token.content.trim()
+            if (/^<EmbedCard\b/.test(t)) depth++
+            else if (/^<\/EmbedCard>/.test(t)) depth = Math.max(0, depth - 1)
+          }
+          if (depth > 0 && (token.type === 'heading_open' || token.type === 'heading_close')) {
+            const level = Number(token.tag.slice(1))
+            token.tag = 'h' + Math.min(level + 4, 6)
+          }
+        }
+      })
+    }
+  },
   themeConfig: {
     logo: "/kitsu.png",
     search: {
       provider: "local",
+    },
+    outline: {
+      level: [2, 3]
     },
     sidebar: [
       {
@@ -130,10 +151,6 @@ export default {
         collapsed: false,
         items: [
           { text: "Getting Started", link: "/start-here/getting-started/",},
-          { text: "Create a New Production", link: "/start-here/new-production/"},
-          { text: "Main UI Concepts", link: "/start-here/main-ui-concepts/" },
-          { text: "Preparing Your Team", link: "/start-here/team-preparation/" },
-          { text: "Self-Hosting", link: "https://dev.kitsu.cloud/self-hosting/vs-cloud-hosting/" },
         ],
       },
       {
@@ -153,13 +170,13 @@ export default {
             link: "/workflows/for-artists/",
           },
           {
+            text: "For Clients",
+            link: "/workflows/for-clients/",
+          },
+          {
             text: "For Developers",
             collapsed: true,
             link: "https://dev.kitsu.cloud/",
-          },
-          {
-            text: "For Clients",
-            link: "/workflows/for-clients/",
           },
         ]
       },
@@ -173,7 +190,7 @@ export default {
             items: [
               { text: "Managing Departments", link: "/guides/team-management/managing-departments/" },
               { text: "Managing Teams", link: "/guides/team-management/managing-teams/" },
-              { text: "Team Roles", link: "/guides/team-management/team-roles/" },
+              { text: "User Permission Roles", link: "/guides/team-management/team-roles/" },
               { text: "Import Team", link: "/guides/team-management/import-team/" },
               { text: "User Profile Settings", link: "/guides/team-management/profile-settings/" },
             ],
@@ -256,6 +273,7 @@ export default {
             collapsed: false,
             items: [
               { text: "Authentication", link: "/guides/privacy-security/authentication/" },
+              { text: "Logs", link: "/guides/privacy-security/logs/" },
                 // { text: "IP Protection", link: "/" },
                 // { text: "Authorization", link: "/" },
             ],
