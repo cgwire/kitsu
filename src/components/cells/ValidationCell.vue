@@ -285,8 +285,6 @@ defineExpose({
 <style lang="scss" scoped>
 .validation {
   cursor: pointer;
-  // Lets the normal-flow link resolve 100% against the final table-row height.
-  height: 1px;
   margin-bottom: 3px;
   padding: 0;
 
@@ -309,10 +307,10 @@ defineExpose({
 
 .task-link {
   color: inherit;
-  display: flex;
-  height: 100%;
+  display: block;
+  margin-block: -0.275rem;
+  padding-block: 0.275rem;
   text-decoration: none;
-  width: 100%;
 }
 
 .wrapper {
