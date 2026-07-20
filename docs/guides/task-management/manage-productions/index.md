@@ -73,20 +73,17 @@ Validate everything with the ![All done](/img/getting-started/all_done_go.png) b
 
 ### Using Production Templates
 
-TODO
-
 Getting a new production set up often means repeating the same configuration steps over and over like choosing task types for shots and assets, defining task statuses, and adjusting project-wide settings to match your team's workflow.
 
-With Project Templates, you can start from a predefined setup in one click. 
+With Project Templates, you can start from a predefined setup in one click:
+
+![](/guides/task-management/manage-productions/images/prodtemplate.png)
 
 When creating a new production, simply pick a template and Kitsu will automatically apply your preferred settings.
 
-Key benefits:
+In the example above, the template comes bundled with pre-configured asset types, task types, task statuses, etc. we don't need to pick manually from the Global Library:
 
-Skip repetitive configuration work and get productions running sooner
-Ensure every project follows the same standards and structure
-Reduce the risk of missing or misconfiguring important settings
-Create new projects with confidence as your team and client portfolios grow
+![](/guides/task-management/manage-productions/images/2.png)
 
 ## Configure Production-Specific Settings
 

@@ -272,18 +272,33 @@ Type your comments, and hit **Enter** key to add another line to your checklist,
 
 ## Share Playlist
 
-TODO
+There are two ways to share playlists depending on if the reviewer has access to your Kitsu instance (internal review) or not (guest review).
 
-- mention inviting users to review a playlist
-- mention link sharing
+### 1. Invite Internal Reviewers
 
-Getting feedback from temporary clients, supervisors, or external partners shouldn't require creating accounts or extra steps.
-With Kitsu's new public playlist sharing, you can send a playlist with a single link and let reviewers jump straight into work.
-Guests don't need a Kitsu account to participate. They get access to a dedicated review player where they can leave comments, make annotations, update statuses, and manage checklists on their own feedback.
-Inviting reviewers is also simpler: the new email picker suggests existing client contacts, supports entering any email address, and lets you include an optional message with the invitation.
-Key benefits:
-Remove friction for external reviewers by eliminating account creation
-Collect clearer, more actionable feedback with annotations and drawing tools
-Keep review conversations and status updates in one place
-Speed up approval cycles with a simple link-based workflow
-Make collaboration easier across clients, vendors, supervisors, and other stakeholders
+WIP
+
+### 2. Guest Review Experience
+
+Getting feedback from temporary clients or external partners shouldn't require creating accounts. With Kitsu's public link sharing, you can send a playlist with a single link and let guests access a dedicated review player where they can:
+
+* Leave comments
+* Make drawing annotations
+* Update statuses
+* Manage checklists on their own feedback
+
+1. In your playlist, click the `Share` button in the top right corner:
+
+![](/guides/review-publishing/playlist/images/0.png)
+
+2. Click `Add a new link`:
+
+![](/guides/review-publishing/playlist/images/1.png)
+
+3. Select if you want to allow guest comments and optionally pick an expiration date for the link:
+
+![](/guides/review-publishing/playlist/images/2.png)
+
+4. Share the public link with your guests. Anyone with the link can view the playlist, so careful to not leak outside your safe space.
+
+![](/guides/review-publishing/playlist/images/3.png)

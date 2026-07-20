@@ -11,5 +11,8 @@ const { Layout } = DefaultTheme
     <template #nav-bar-content-after>
       <NavbarSignupButton/>
     </template>
+    <template #doc-before>
+      <CopyMarkdownButton />
+    </template>
   </Layout>
 </template>

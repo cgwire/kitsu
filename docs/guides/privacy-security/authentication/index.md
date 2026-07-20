@@ -18,10 +18,10 @@ At the bottom of the page, they will find various **Two-Factor Authentication** 
 
 ## OpenID auth
 
-TODO
+Kitsu supports OpenID Connect (OIDC).
 
-Kitsu now supports OpenID Connect (OIDC), giving studios a way to let their teams log in using an existing identity provider instead of managing separate Kitsu credentials.
-Once OIDC is enabled in the backend configuration, the login page automatically displays a "Login with [provider]" button alongside the standard login form.
-Studios that already rely on a centralized identity system, whether that's Google Workspace, Okta, Azure AD, or another OIDC-compatible provider, can now login faster! Rather than creating and maintaining a separate password for Kitsu, team members can sign in with the same credentials they already use for everything else.
-Centralizing authentication through an identity provider means IT and pipeline admins can manage access from one place: onboarding, offboarding, and permission changes all flow through the existing system instead of requiring manual updates inside Kitsu itself.
-It also reduces password fatigue for artists and production staff, and shrinks the attack surface that comes with juggling multiple credential sets across different tools.
+Rather than creating and maintaining a separate password for Kitsu, team members can sign in with the same credentials they already use for everything else if the studio already relies on a centralized identity system like Google Workspace, Okta, Azure AD, or another OIDC-compatible provider.
+
+Once OIDC is enabled in your backend configuration, the login page automatically displays a "Login with [provider]" button alongside the standard login for:
+
+![OpenID auth](/img/openid.webp)

@@ -36,11 +36,9 @@ If you'd like to temporarily **hide annotations**, click the **Fountain Pen** bu
 
 ### Shape Annotations
 
-TODO
+Reviewers can draw squares, circles, and arrows instead of being limited to freehand sketching alone.
 
-Reviewers can now draw squares, circles, and arrows directly on shots while reviewing playlists, instead of being limited to freehand sketching alone.
-Shape annotations can communicate feedback faster and more precisely than rough drawings: pointing an arrow at a specific element, circling an area that needs attention, or boxing off a region for a compositing fix takes a fraction of the time it would to freehand the same note, and the result reads more clearly to the artist on the receiving end.
-For supervisors giving notes across dozens of shots in a single session, that speed and clarity adds up quickly and it keeps the review process moving without sacrificing precision.
+![](/guides/review-publishing/review/images/0.png)
 
 ### Tagging Frames
 
@@ -68,19 +66,9 @@ Once you click the button, Kitsu will grab all the frames with annotations and d
 
 ### Deleting Annotations & Eraser
 
-If you need to delete a line, click the pencil icon again. The cursor changes to a multi-directional cross ![Pencil](/img/getting-started/direction_arrow.png), and you can then select your line and move it around.
+If you need to delete an annotation, click the `Eraser` icon:
 
-![review drawing](/img/getting-started/review_edit.png)
-
-Select the line with the directional cross, then press the **delete** icon ![Delete line](/img/getting-started/delete_line.png).
-
-TODO: mention eraser
-
-Kitsu's playlist annotations just got a useful upgrade: an eraser tool.
-Until now, if you drew an annotation on a playlist clip and wanted to fix a small part of it, your only option was undoing the whole stroke or starting over. That's fine for quick notes, but it gets tedious when you're giving detailed feedback and you only need to clean up one corner of the drawing.
-With the eraser, you can now selectively remove parts of your annotation's color without touching the rest.
-Tighter, cleaner notes for your team, fewer redo-from-scratch moments, and a review workflow that feels a bit more like a real drawing tool.
-Small addition, but you'll use it often if you spend a lot of time annotating playlists for feedback.
+![](/guides/review-publishing/review/images/1.png)
 
 ### Comparing Images
 
@@ -94,13 +82,17 @@ Alternatively, you can change it to ![Done](/img/getting-started/done_icon.png) 
 
 ### Onion Skinning
 
-TODO
+If you need to check frame-to-frame consistency while reviewing animation in Kitsu, you can use onion skinning for annotations.
 
-If you've ever needed to check frame-to-frame consistency while reviewing animation in Kitsu, there's now a much faster way to do it: onion skinning for annotations is available directly in video playlist reviews!
 Onion skinning overlays nearby annotation frames (up to 5 frames before and/or after the current frame) so you can see motion, spacing, and timing issues in one go without scrubbing back and forth.
-It's a staple feature in animation software, and now it's available right inside the review process!
-Review playlists are often the first place inconsistent spacing, jittery arcs, or volume loss become visible to someone other than the animator.
-Before, catching these issues meant either trusting your eye on a single frame or jumping into the original animation file to compare frames manually. You can now spot these problems directly in context without breaking your review flow or switching tools.
+
+Here is the annotated frame N:
+
+![](/guides/review-publishing/review/images/2.png)
+
+And here is how the overlay looks in frame N + 4: 
+
+![](/guides/review-publishing/review/images/3.png)
 
 ## Reviewing Previews
 

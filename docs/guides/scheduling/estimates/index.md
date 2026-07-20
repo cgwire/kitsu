@@ -1,5 +1,7 @@
 # Estimates
 
+<!-- #region body -->
+
 Estimating the time for each task can feel overwhelming, but the benefits far outweigh the effort. By filling out task estimations, you can:
 
 - Clearly see the estimated days for any task in your production.
@@ -121,3 +123,5 @@ You can now fill the **Estimation** column on the left and see the result on the
 ![Supervisor Estimation Filled](/img/getting-started/supervisor_estimation_filled.png)
 
 This allows you to ensure the distribution of tasks among your team members is equal and helps to understand their estimated quotas for production. You should consider artist's experience and the difficulty of each task when doing this.
+
+<!-- #endregion body -->

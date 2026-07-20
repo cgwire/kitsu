@@ -11,6 +11,8 @@ next:
 
 ## Create an Asset
 
+<!-- #region create-an-asset -->
+
 ### Create your first asset
 
 So, now that we have created our production and have a general grasp of the Kitsu interface, it's time to create our first asset.
@@ -152,6 +154,8 @@ the **Preview Files** uploaded at various task types,
 And the **Timelog** if people have filled out their timesheet on the tasks of this asset.
 
 ![Asset detail casting](/img/getting-started/asset_detail_page_timelog.png)
+
+<!-- #endregion create-an-asset -->
 
 ## Add more tasks after creating the assets
 

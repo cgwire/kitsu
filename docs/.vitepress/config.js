@@ -1,3 +1,107 @@
+import fs from 'node:fs'
+import path from 'node:path'
+
+const INCLUDE_RE = /<!--\s*@include:\s*(.+?)\s*-->/g
+const RANGE_RE = /\{(\d*),(\d*)\}$/
+const REGION_RE = /#([\w-]+)$/
+
+// matches region markers across common comment styles:
+// // #region foo | # region foo | <!-- #region foo --> | /* #region foo */ etc.
+function regionMarker(name, tag) {
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  return new RegExp(
+    `^\\s*(?:\\/\\/|#|<!--|\\/\\*|;;|%)\\s*#${tag}\\s+${escaped}\\b`
+  )
+}
+
+function parseIncludePath(raw) {
+  let src = raw
+  let range = null
+  let region = null
+
+  const rangeMatch = src.match(RANGE_RE)
+  if (rangeMatch) {
+    range = { start: rangeMatch[1] ? +rangeMatch[1] : 1, end: rangeMatch[2] ? +rangeMatch[2] : Infinity }
+    src = src.slice(0, -rangeMatch[0].length)
+  }
+
+  const regionMatch = src.match(REGION_RE)
+  if (regionMatch) {
+    region = regionMatch[1]
+    src = src.slice(0, -regionMatch[0].length)
+  }
+
+  return { filepath: src.trim(), region, range }
+}
+
+function extractRegion(lines, region) {
+  const startRE = regionMarker(region, 'region')
+  const endRE = regionMarker(region, 'endregion')
+
+  const startIdx = lines.findIndex((l) => startRE.test(l))
+  if (startIdx === -1) return lines // region not found: fall back to whole file
+
+  const endIdx = lines.findIndex((l, i) => i > startIdx && endRE.test(l))
+  const sliceEnd = endIdx === -1 ? lines.length : endIdx
+
+  return lines.slice(startIdx + 1, sliceEnd)
+}
+
+function applyRange(lines, range) {
+  if (!range) return lines
+  const start = Math.max(range.start - 1, 0)
+  const end = range.end === Infinity ? lines.length : range.end
+  return lines.slice(start, end)
+}
+
+function resolveIncludes(content, baseDir, seen = new Set()) {
+  return content.replace(INCLUDE_RE, (_, rawPath) => {
+    const { filepath, region, range } = parseIncludePath(rawPath)
+    const fullPath = path.resolve(baseDir, filepath)
+
+    if (seen.has(fullPath) || !fs.existsSync(fullPath)) return ''
+    seen.add(fullPath)
+
+    let lines = fs.readFileSync(fullPath, 'utf-8').split(/\r?\n/)
+    if (region) lines = extractRegion(lines, region)
+    lines = applyRange(lines, range)
+
+    const included = lines.join('\n')
+    // includes can themselves include other files (recurse before returning)
+    return resolveIncludes(included, path.dirname(fullPath), new Set(seen))
+  })
+}
+
+function stripRegionMarkers(content) {
+  // removes #region / #endregion marker lines across common comment styles:
+  // // #region foo | # region foo | <!-- #region foo --> | /* #region foo */ etc.
+  return content
+    .split(/\r?\n/)
+    .filter((line) => !/^\s*(?:\/\/|#|<!--|\/\*|;;|%)\s*#(?:end)?region\b/.test(line))
+    .join('\n')
+}
+
+function stripScripts(content) {
+  // removes <script>...</script> and <script setup>...</script> blocks entirely
+  return content.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
+}
+
+function stripComponents(content) {
+  // self-closing custom components, e.g. <SomeWidget foo="bar" />
+  content = content.replace(/<([A-Z][\w-]*)\b[^>]*\/>/g, '')
+
+  // paired custom components, e.g. <EmbedCard ...>...</EmbedCard>
+  // unwrap them (keep inner markdown, drop the tags themselves)
+  const pairedRE = /<([A-Z][\w-]*)\b[^>]*>([\s\S]*?)<\/\1>/g
+  let prev
+  do {
+    prev = content
+    content = content.replace(pairedRE, (_, _tag, inner) => inner)
+  } while (content !== prev) // repeat to catch components nested inside components
+
+  return content
+}
+
 export default {
   lang: "en-US",
   title: "Kitsu Documentation",
@@ -312,4 +416,19 @@ export default {
       },
     ],
   },
+  transformPageData(pageData, { siteConfig }) {
+    if (pageData.filePath) {
+      const fullPath = path.join(siteConfig.srcDir, pageData.filePath)
+      if (fs.existsSync(fullPath)) {
+        const raw = fs.readFileSync(fullPath, 'utf-8')
+        let content = resolveIncludes(raw, path.dirname(fullPath))
+        content = stripRegionMarkers(content)
+        content = stripScripts(content)
+        content = stripComponents(content)
+        content = content.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, '')
+        
+        pageData.rawContent = content
+      }
+    }
+  }
 };
