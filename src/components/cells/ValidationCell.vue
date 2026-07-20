@@ -242,7 +242,9 @@ const onClick = event => {
 const onTaskLinkClick = event => {
   if (!props.taskHref) return
   if (
+    // Preserve native non-left-click behavior.
     event.button !== 0 ||
+    // Preserve native modifier-click behavior.
     event.ctrlKey ||
     event.metaKey ||
     event.shiftKey ||
