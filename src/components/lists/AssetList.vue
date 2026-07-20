@@ -397,6 +397,9 @@
                   :column="taskTypeMap.get(columnId)"
                   :entity="asset"
                   :task-test="taskMap.get(asset.validations.get(columnId))"
+                  :task-path="
+                    taskPath(taskMap.get(asset.validations.get(columnId)))
+                  "
                   :selected="isSelected(i, k, j)"
                   :row-x="getIndex(i, k)"
                   :column-y="j"
@@ -545,6 +548,9 @@
                   :contact-sheet="displaySettings.contactSheetMode"
                   :entity="asset"
                   :task-test="taskMap.get(asset.validations.get(columnId))"
+                  :task-path="
+                    taskPath(taskMap.get(asset.validations.get(columnId)))
+                  "
                   :selected="
                     isSelected(
                       i,
@@ -623,6 +629,7 @@ import { formatListMixin } from '@/components/mixins/format'
 import { selectionListMixin } from '@/components/mixins/selection'
 
 import preferences from '@/lib/preferences'
+import { getTaskPath } from '@/lib/path'
 import { sortTaskTypes } from '@/lib/sorting'
 import { range } from '@/lib/time'
 
@@ -1046,6 +1053,18 @@ export default {
 
     getIndex(i, k) {
       return this.getEntityLineNumber(this.displayedAssets, i, k)
+    },
+
+    taskPath(task) {
+      return task
+        ? getTaskPath(
+            task,
+            this.currentProduction,
+            this.isTVShow,
+            this.currentEpisode,
+            this.taskTypeMap
+          )
+        : null
     },
 
     assetPath(assetId) {
