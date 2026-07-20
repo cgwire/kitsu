@@ -397,9 +397,7 @@
                   :column="taskTypeMap.get(columnId)"
                   :entity="asset"
                   :task-test="taskMap.get(asset.validations.get(columnId))"
-                  :task-path="
-                    taskPath(taskMap.get(asset.validations.get(columnId)))
-                  "
+                  :task-href="taskHref(asset.validations.get(columnId))"
                   :selected="isSelected(i, k, j)"
                   :row-x="getIndex(i, k)"
                   :column-y="j"
@@ -548,9 +546,7 @@
                   :contact-sheet="displaySettings.contactSheetMode"
                   :entity="asset"
                   :task-test="taskMap.get(asset.validations.get(columnId))"
-                  :task-path="
-                    taskPath(taskMap.get(asset.validations.get(columnId)))
-                  "
+                  :task-href="taskHref(asset.validations.get(columnId))"
                   :selected="
                     isSelected(
                       i,
@@ -1055,16 +1051,19 @@ export default {
       return this.getEntityLineNumber(this.displayedAssets, i, k)
     },
 
-    taskPath(task) {
+    taskHref(taskId) {
+      const task = this.taskMap.get(taskId)
       return task
-        ? getTaskPath(
-            task,
-            this.currentProduction,
-            this.isTVShow,
-            this.currentEpisode,
-            this.taskTypeMap
-          )
-        : null
+        ? this.$router.resolve(
+            getTaskPath(
+              task,
+              this.currentProduction,
+              this.isTVShow,
+              this.currentEpisode,
+              this.taskTypeMap
+            )
+          ).href
+        : ''
     },
 
     assetPath(assetId) {

@@ -7,14 +7,14 @@
       validation: selectable
     }"
     :style="cellStyle"
-    :role="taskPath ? undefined : 'button'"
-    :tabindex="taskPath ? undefined : 0"
+    :role="taskHref ? undefined : 'button'"
+    :tabindex="taskHref ? undefined : 0"
     @click="onClick"
-    @keydown.enter="onCellKeydown"
+    @keydown.enter.self.prevent="onClick"
   >
     <component
-      :is="taskPath ? 'a' : 'div'"
-      class="task-link"
+      :is="taskHref ? 'a' : 'div'"
+      :class="{ 'task-link': taskHref }"
       :href="taskHref"
       :aria-label="`${column?.name || ''} - ${entity?.name || ''}`"
       @click="onTaskLinkClick"
@@ -97,7 +97,6 @@
 <script setup>
 import { EyeIcon } from 'lucide-vue-next'
 import { computed, onMounted, ref, toRef, watch } from 'vue'
-import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { useFormat } from '@/composables/format'
@@ -105,7 +104,6 @@ import colors from '@/lib/colors'
 import { sortPeople } from '@/lib/sorting'
 
 const store = useStore()
-const router = useRouter()
 const { formatPriority, formatPrioritySymbol } = useFormat()
 
 const props = defineProps({
@@ -126,7 +124,7 @@ const props = defineProps({
   selectable: { type: Boolean, default: true },
   selected: { type: Boolean, default: false },
   sticked: { type: Boolean, default: false },
-  taskPath: { type: [Object, String], default: null },
+  taskHref: { type: String, default: '' },
   taskTest: { type: Object, default: null }
 })
 
@@ -137,9 +135,6 @@ const isDarkTheme = computed(() => store.getters.isDarkTheme)
 const personMap = computed(() => store.getters.personMap)
 const taskMap = computed(() => store.getters.taskMap)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
-const taskHref = computed(() =>
-  props.taskPath ? router.resolve(props.taskPath).href : undefined
-)
 
 const task = ref(null)
 
@@ -244,16 +239,9 @@ const onClick = event => {
   if (props.clickable) select(event)
 }
 
-const onCellKeydown = event => {
-  if (!props.taskPath) {
-    event.preventDefault()
-    onClick(event)
-  }
-}
-
 const onTaskLinkClick = event => {
+  if (!props.taskHref) return
   if (
-    !props.taskPath ||
     event.button !== 0 ||
     event.ctrlKey ||
     event.metaKey ||
@@ -261,9 +249,9 @@ const onTaskLinkClick = event => {
     event.altKey
   ) {
     event.stopPropagation()
-    return
+  } else {
+    event.preventDefault()
   }
-  event.preventDefault()
 }
 
 watch(() => props.taskTest, resolveTask)
