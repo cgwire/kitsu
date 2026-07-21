@@ -141,6 +141,7 @@ const onDoubleClick = () => {
 }
 
 span.description-shorten-text {
+  contain: inline-size;
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
