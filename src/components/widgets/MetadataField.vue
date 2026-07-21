@@ -60,6 +60,22 @@
     @update:model-value="updateValue"
     v-else-if="descriptor.data_type === 'taglist'"
   />
+  <!-- textarea field -->
+  <textarea-field
+    :label="label ?? descriptor.name"
+    :model-value="modelValue"
+    @update:model-value="updateValue"
+    v-else-if="descriptor.data_type === 'textarea'"
+  />
+  <!-- person field -->
+  <people-field
+    :label="label ?? descriptor.name"
+    wide
+    :people="teamPeople"
+    :model-value="personMap.get(modelValue) || null"
+    @update:model-value="person => updateValue(person?.id ?? '')"
+    v-else-if="descriptor.data_type === 'person'"
+  />
   <!-- number or text field-->
   <text-field
     :label="label ?? descriptor.name"
@@ -76,12 +92,15 @@
 import { computed } from 'vue'
 import { useStore } from 'vuex'
 
+import { sortPeople } from '@/lib/sorting'
 import { descriptorMixin } from '@/components/mixins/descriptors'
 
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
 import ComboboxTag from '@/components/widgets/ComboboxTag.vue'
+import PeopleField from '@/components/widgets/PeopleField.vue'
 import TextField from '@/components/widgets/TextField.vue'
+import TextareaField from '@/components/widgets/TextareaField.vue'
 
 const store = useStore()
 const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
@@ -89,6 +108,16 @@ const isCurrentUserSupervisor = computed(
   () => store.getters.isCurrentUserSupervisor
 )
 const user = computed(() => store.getters.user)
+const currentProduction = computed(() => store.getters.currentProduction)
+const personMap = computed(() => store.getters.personMap)
+
+const teamPeople = computed(() =>
+  sortPeople(
+    (currentProduction.value?.team || [])
+      .map(personId => personMap.value.get(personId))
+      .filter(Boolean)
+  )
+)
 
 const props = defineProps({
   descriptor: {

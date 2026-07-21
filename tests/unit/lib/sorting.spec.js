@@ -1,5 +1,6 @@
 import {
   sortAssets,
+  sortByMetadata,
   sortByName,
   sortByDate,
   sortPeople,
@@ -21,6 +22,27 @@ const taskTypeMap = new Map(Object.entries({
 
 describe('lib/sorting', () => {
   beforeEach(() => {
+  })
+
+  it('sortByMetadata', () => {
+    const entries = [
+      { id: 1, data: { render_layer: 'fg' } },
+      { id: 2, data: {} },
+      { id: 3, data: { render_layer: 'bg' } }
+    ]
+    let results = [...entries].sort(
+      sortByMetadata({ column: 'render_layer', data_type: 'string' })
+    )
+    expect(results.map(entry => entry.id)).toEqual([3, 1, 2])
+
+    const numberEntries = [
+      { id: 1, data: { weight: '10' } },
+      { id: 2, data: { weight: '2' } }
+    ]
+    results = [...numberEntries].sort(
+      sortByMetadata({ column: 'weight', data_type: 'number' })
+    )
+    expect(results.map(entry => entry.id)).toEqual([2, 1])
   })
 
   it('sortByName', () => {

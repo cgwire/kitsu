@@ -114,34 +114,29 @@ const auth = {
   },
 
   // Needed for router to know if a redirection to login page is required or
-  // not.
-  requireAuth(to, from, next) {
-    const finalize = () => {
-      if (!store.state.user.isAuthenticated) {
-        store.commit(DATA_LOADING_END)
-        next({
-          name: 'login',
-          query: { redirect: to.fullPath }
-        })
-      } else {
-        next()
-      }
-    }
-
+  // not. Resolves to a route location to redirect to, or undefined to let the
+  // navigation proceed.
+  async requireAuth(to, from) {
     store.commit(DATA_LOADING_START)
 
     if (store.state.user.user === null) {
-      auth
-        .isServerLoggedIn()
-        .then(finalize)
-        .catch(() => {
-          next({
-            name: 'server-down',
-            query: { redirect: to.fullPath }
-          })
-        })
-    } else {
-      finalize()
+      try {
+        await auth.isServerLoggedIn()
+      } catch {
+        store.commit(DATA_LOADING_END)
+        return {
+          name: 'server-down',
+          query: { redirect: to.fullPath }
+        }
+      }
+    }
+
+    if (!store.state.user.isAuthenticated) {
+      store.commit(DATA_LOADING_END)
+      return {
+        name: 'login',
+        query: { redirect: to.fullPath }
+      }
     }
   },
 

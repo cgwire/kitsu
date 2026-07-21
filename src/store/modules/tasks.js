@@ -1378,7 +1378,13 @@ const mutations = {
   [EDIT_TASK_DATES](state, { taskId, data }) {
     const task = state.taskMap.get(taskId)
     if (task) {
-      Object.assign(task, data)
+      const { data: metadata, ...taskFields } = data
+      Object.assign(task, taskFields)
+      // Mirror the server-side merge of the metadata bag instead of
+      // replacing it wholesale.
+      if (metadata) {
+        task.data = { ...(task.data || {}), ...metadata }
+      }
     }
   },
 
@@ -1603,7 +1609,9 @@ const mutations = {
   },
 
   [SET_TASK_EXTRA_DATA](state, { task, data }) {
-    task.data = data
+    // Linked entity metadata lands in entity_data: task.data holds the
+    // task's own metadata and must not be shadowed by the entity's.
+    task.entity_data = data
   },
 
   [RESET_ALL](state) {

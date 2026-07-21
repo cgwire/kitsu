@@ -1,3 +1,8 @@
-> 1%
-last 2 versions
-not dead
+# Keep in sync with the Bowser support matrix in src/router/routes.js
+# (unsupported browsers are redirected to the wrong-browser page).
+chrome >= 87
+edge >= 91
+firefox >= 79
+opera >= 73
+safari >= 14
+ios_saf >= 14

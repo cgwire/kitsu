@@ -435,6 +435,8 @@ import {
   XCircleIcon
 } from 'lucide-vue-next'
 
+import { downloadBlob } from '@/lib/download'
+
 import TextField from '@/components/widgets/TextField.vue'
 import TwoFactorAuthentication from '@/components/widgets/TwoFactorAuthentication.vue'
 
@@ -770,11 +772,7 @@ const saveRecoveryCodesToFile = () => {
   const blob = new Blob([twoFA.OTPRecoveryCodes.join('\n')], {
     type: 'text/plain;charset=utf-8'
   })
-  const link = document.createElement('a')
-  link.setAttribute('href', URL.createObjectURL(blob))
-  link.setAttribute('download', 'kitsu-recovery-codes.txt')
-  document.body.appendChild(link)
-  link.click()
+  downloadBlob(blob, 'kitsu-recovery-codes.txt')
 }
 
 const changedTwoFA = () => {

@@ -1038,6 +1038,7 @@
         "add_new_values": "Il n'y a pour le moment aucune valeur enregistrée.",
         "available_values": "Valeurs disponibles",
         "choices": "Liste de valeurs",
+        "delete_task_text": "Êtes-vous sûr de vouloir supprimer cette colonne et les données associées pour toutes les tâches de ce type de tâche ?",
         "delete_text": "Êtes-vous sûr de vouloir supprimer cette colonne et toutes les données liées ?",
         "delete_list_column_text": "Cela retirera la colonne « {name} » de tous les projets, y compris les valeurs enregistrées. Continuer ?",
         "delete_error": "Une erreur est survenue en supprimant une colonne de métadonnées.",
@@ -1048,6 +1049,10 @@
         "boolean": "Choix vrai/faux",
         "number": "Nombre",
         "string": "Texte",
+        "date": "Date",
+        "url": "Lien",
+        "textarea": "Texte long",
+        "person": "Personne",
         "tags": "Liste des étiquettes",
         "applies_to_all_projects": "Cette colonne est ajoutée à tous les projets de la liste. Chaque projet peut avoir sa propre valeur dans la vue en liste.",
         "target_project": "Projet"

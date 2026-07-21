@@ -161,8 +161,8 @@
                       :production="task.production"
                       :with-avatar="false"
                     />
-                    <div class="ellipsis strong entity-name">
-                      {{ task.full_name.split(' / ').slice(0, -1).join(' / ') }}
+                    <div class="entity-name strong">
+                      {{ task.full_entity_name }}
                     </div>
                     <div class="flexrow">
                       <em v-if="task.man_days">
@@ -475,7 +475,14 @@ export default {
           // populate tasks with extra data
           data.map(task => ({
             ...task,
-            full_name: `${task.entity_type_name} / ${task.entity_name} / ${task.type_name}`,
+            full_entity_name: [
+              task.entity_type_name,
+              task.episode_name,
+              task.sequence_name,
+              task.entity_name
+            ]
+              .filter(Boolean)
+              .join(' / '),
             man_days: minutesToDays(this.organisation, task.estimation),
             department: this.departmentMap.get(
               this.taskTypeMap.get(task.task_type_id)?.department_id

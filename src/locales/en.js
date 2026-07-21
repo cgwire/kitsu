@@ -1473,15 +1473,21 @@ export default {
       boolean: 'Checkbox',
       checklist: 'Checklist',
       choices: 'List of values',
+      date: 'Date',
       delete_list_column_text:
         'This will remove the column “{name}” from all projects, including stored values. Continue?',
+      delete_task_text:
+        'Are you sure you want to delete this column and related data for all tasks of this task type?',
       delete_text: 'Are you sure you want to delete this column and related data for all assets of this production?',
       delete_error: 'An error occurred while deleting this metadata column.',
       edit_title: 'Edit metadata column',
       error: 'An error occurred while adding the metadata column. Make sure there is no column with a similar name and that all fields are filled. If the problem persists, please contact the support team.',
       number: 'Number',
+      person: 'Person',
       string: 'Text',
+      textarea: 'Long text',
       tags: 'List of tags',
+      url: 'Link',
       target_project: 'Project',
       title: 'Add metadata column'
     },
