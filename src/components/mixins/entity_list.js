@@ -304,10 +304,19 @@ export const entityListMixin = {
         .forEach(refName => this.hideHeaderMenu(refName))
     },
 
-    showHeaderMenuAt(refName, event, getHeaderElement, offset = {}) {
+    showHeaderMenuAt(
+      refName,
+      event,
+      getHeaderElement,
+      offset = {},
+      isSameColumn = false
+    ) {
       const headerMenuEl = this.$refs[refName]?.$el
       if (!headerMenuEl) return
-      if (!event || !headerMenuEl.classList.contains('hidden')) {
+      if (
+        !event ||
+        (!headerMenuEl.classList.contains('hidden') && isSameColumn)
+      ) {
         headerMenuEl.classList.add('hidden')
         return
       }
@@ -326,13 +335,19 @@ export const entityListMixin = {
     },
 
     showHeaderMenu(columnId, columnIndexInGrid, event) {
-      this.showHeaderMenuAt('headerMenu', event, event => {
-        let headerElement = event.srcElement.parentNode.parentNode
-        if (headerElement.tagName !== 'TH') {
-          headerElement = headerElement.parentNode
-        }
-        return headerElement
-      })
+      this.showHeaderMenuAt(
+        'headerMenu',
+        event,
+        event => {
+          let headerElement = event.srcElement.parentNode.parentNode
+          if (headerElement.tagName !== 'TH') {
+            headerElement = headerElement.parentNode
+          }
+          return headerElement
+        },
+        {},
+        this.lastHeaderMenuDisplayed === columnId
+      )
       this.lastHeaderMenuDisplayed = columnId
       this.lastHeaderMenuDisplayedIndexInGrid = columnIndexInGrid
     },
@@ -342,7 +357,8 @@ export const entityListMixin = {
         'headerFieldMenu',
         event,
         event => event.currentTarget.closest('th'),
-        { left: -3, top: 11 }
+        { left: -3, top: 11 },
+        this.lastFieldHeaderMenuDisplayed === fieldName
       )
       this.lastFieldHeaderMenuDisplayed = fieldName
       if (label !== undefined) this.lastFieldHeaderMenuLabel = label
