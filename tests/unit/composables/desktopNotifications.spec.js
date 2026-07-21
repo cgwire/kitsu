@@ -242,7 +242,7 @@ describe('composables/desktopNotifications', () => {
 
     it('swallows Notification constructor errors', async () => {
       const NotificationMock = setupNotification('granted')
-      NotificationMock.mockImplementationOnce(() => {
+      NotificationMock.mockImplementationOnce(function () {
         throw new Error('boom')
       })
       localStorage.setItem('desktop-notifications:enabled', 'true')
