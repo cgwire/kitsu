@@ -62,3 +62,11 @@ On the **Asset Types** tab, you can choose which **Asset Types** you want to add
 validate your choice with the **add** button.
 
 ![Setting Add Asset](/img/getting-started/setting_asset_add.png)
+
+## Update an Asset Type
+
+TODO
+
+## Remove an Asset Type*
+
+TODO

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useData } from 'vitepress'
+import { Copy } from '@lucide/vue';
 
 const { page } = useData()
 const copied = ref(false)
@@ -19,7 +20,8 @@ async function copyMarkdown() {
 
 <template>
   <button class="copy-md-btn" @click="copyMarkdown">
-    {{ copied ? 'Copied!' : 'Copy page as Markdown' }}
+    <span v-if="copied">Copied!</span>
+    <Copy v-else />
   </button>
 </template>
 
@@ -31,6 +33,12 @@ async function copyMarkdown() {
   border: 1px solid var(--vp-c-divider);
   background: var(--vp-c-bg-soft);
   cursor: pointer;
+  margin-bottom: 2rem;
+  margin-top: 2rem;
+  width: 4rem;
+  text-align: center;
+  display: flex;
+  justify-content: center;
 }
 .copy-md-btn:hover {
   border-color: var(--vp-c-brand-1);

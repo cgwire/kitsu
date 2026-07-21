@@ -1,4 +1,6 @@
-# Add Employees from a CSV Spreadsheet File
+# Import Your Team
+
+## Add Employees from a CSV Spreadsheet File
 
 You may already have your employee list ready in a spreadsheet file. With Kitsu, you have two ways to import them: importing a `.csv` file directly or copy-pasting your data directly into Kitsu.
 

@@ -48,5 +48,3 @@ This section also provides quick links to **Documentation**, **Tutorials**, our 
 For security purposes, it’s highly recommended to replace the default password with a strong and unique one.
 
 ![Change password](/img/getting-started/user_password.png)
-
----

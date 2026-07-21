@@ -4,39 +4,59 @@ next: false
 ---
 
 <script setup>
-import EmbedCard from '../../.vitepress/theme/EmbedCard.vue'
+import EmbedDocument from '../../.vitepress/theme/EmbedDocument.vue'
 </script>
 
 # Getting Started As A Supervisor / Lead
 
-<EmbedCard title="1. Manage Your Department">
+A supervisor's role is to oversee the creative and technical aspects of visual effects production, ensuring that the final output meets the project's artistic vision, quality standards, and deadlines. 
+
+A key aspect of this is to ensure your team knows what they are working on.
+
+## 1. Manage Your Department
+
+<EmbedDocument>
 <!--@include: ../../guides/team-management/managing-departments/index.md#body-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="2. Assign Tasks">
+## 2. Assign Tasks
+
+<EmbedDocument>
 <!--@include: ../../guides/scheduling/assign-tasks/index.md#body-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="3. Bid Estimates">
+## 3. Bid Estimates
+
+<EmbedDocument>
 <!--@include: ../../guides/scheduling/estimates/index.md#body-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="4. Daily Supervision Tasks">
+## 4. Daily Supervision Tasks
+
+<EmbedDocument>
 <!--@include: ../../guides/scheduling/find-assignments/index.md#body-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="5. Team Schedule">
+## 5. Team Schedule
+
+<EmbedDocument>
 <!--@include: ../../guides/scheduling/schedules/index.md#body-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="6. Timesheets">
+## 6. Timesheets
+
+<EmbedDocument>
 <!--@include: ../../guides/tracking-reporting/timesheets/index.md#body-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="7. Review Previews">
+## 7. Review Previews
+
+<EmbedDocument>
 <!--@include: ../../guides/review-publishing/review/index.md#body-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="8. Review Concepts">
+## 8. Review Concepts
+
+<EmbedDocument>
 <!--@include: ../../guides/review-publishing/publish/index.md#body-->
-</EmbedCard>
+</EmbedDocument>

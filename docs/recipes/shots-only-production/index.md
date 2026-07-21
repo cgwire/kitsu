@@ -4,46 +4,61 @@ next: false
 ---
 
 <script setup>
-import EmbedCard from '../../.vitepress/theme/EmbedCard.vue'
+import EmbedDocument from '../../.vitepress/theme/EmbedDocument.vue'
 </script>
 
 # Quickstart for Shots-Only Productions
 
-<EmbedCard title="1. Create a new production">
+## 1. Create a new production
+
+<EmbedDocument >
 <!--@include: ../../guides/task-management/manage-productions/index.md#create-a-new-production-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="2. Create a Shot">
+## 2. Create a Shot
+
+<EmbedDocument >
 <!--@include: ../../guides/task-management/manage-shots/index.md#create-a-shot-->
-</EmbedCard>
+</EmbedDocument>
 
+## 3. Create Shots from an EDL File
 
-<EmbedCard title="3. Create Shots from an EDL File">
+<EmbedDocument >
 <!--@include: ../../guides/task-management/manage-shots/index.md#create-shots-from-an-edl-file-->
-</EmbedCard>
+</EmbedDocument>
 
+## 4. Update your shots
 
-<EmbedCard title="4. Update your shots">
+<EmbedDocument >
 <!--@include: ../../guides/task-management/manage-shots/index.md#update-your-shots-->
-</EmbedCard>
+</EmbedDocument>
 
+## 5. Add more tasks after creating the shots
 
-<EmbedCard title="5. Add more tasks after creating the shots">
+<EmbedDocument >
 <!--@include: ../../guides/task-management/manage-shots/index.md#add-more-tasks-after-creating-the-shots-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="6. Adding Frame Numbers and Ranges to Shots">
+## 6. Adding Frame Numbers and Ranges to Shots
+
+<EmbedDocument >
 <!--@include: ../../guides/task-management/manage-shots/index.md#add-the-number-of-frames-and-frame-ranges-to-the-shots-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="7. Creating Custom Metadata Columns">
+## 7. Creating Custom Metadata Columns
+
+<EmbedDocument >
 <!--@include: ../../guides/pre-production/meta-column/index.md#create-metadata-columns-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="8. Create a Sequence">
+## 8. Create a Sequence
+
+<EmbedDocument >
 <!--@include: ../../guides/task-management/manage-sequences/index.md#create-a-sequence-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="9. Create an Edit">
+## 9. Create an Edit
+
+<EmbedDocument >
 <!--@include: ../../guides/scheduling/manage-edits/index.md#create-an-edit-->
-</EmbedCard>
+</EmbedDocument>

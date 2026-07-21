@@ -4,31 +4,45 @@ next: false
 ---
 
 <script setup>
-import EmbedCard from '../../.vitepress/theme/EmbedCard.vue'
+import EmbedDocument from '../../.vitepress/theme/EmbedDocument.vue'
 </script>
 
 # Getting Started As A Client
 
-<EmbedCard title="1. Initial Profile Setup & Customization">
+This guide will help you get started and understand the Kitsu's key features as a client.
+
+## 1. Initial Profile Setup & Customization
+
+<EmbedDocument>
 <!--@include: ../../guides/team-management/profile-settings/index.md#body-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="2. See your Playlists">
+## 2. See your Playlists
+
+<EmbedDocument >
 <!--@include: ../../guides/review-publishing/playlist/index.md#body-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="3. Share your Comments">
+## 3. Share your Comments
+
+<EmbedDocument >
 <!--@include: ../../guides/review-publishing/playlist/index.md#body-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="4. Global View of the Assets">
+## 4. Global View of the Assets
+
+<EmbedDocument >
 <!--@include: ../../guides/pre-production/manage-assets/index.md#body-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="5. Global View of the Shots">
+## 5. Global View of the Shots
+
+<EmbedDocument >
 <!--@include: ../../guides/task-management/manage-shots/index.md#body-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="6. Production Report">
+## 6. Production Report
+
+<EmbedDocument >
 <!--@include: ../../guides/tracking-reporting/production-overview/index.md#body-->
-</EmbedCard>
+</EmbedDocument>

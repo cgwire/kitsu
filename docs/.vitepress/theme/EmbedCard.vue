@@ -21,14 +21,18 @@
 <script setup>
 import { ref } from 'vue'
 
-defineProps({
+const props = defineProps({
   title: {
     type: String,
     required: true,
   },
+  isOpen: {
+    type: Boolean,
+    default: false,
+  },
 })
 
-const isOpen = ref(false)
+const isOpen = ref(props.isOpen)
 
 function toggle() {
   isOpen.value = !isOpen.value
@@ -42,7 +46,8 @@ function toggle() {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   font-family: inherit;
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
+  margin-top: 2rem;
 }
 
 .detail-card__header {

@@ -11,8 +11,32 @@ const { Layout } = DefaultTheme
     <template #nav-bar-content-after>
       <NavbarSignupButton/>
     </template>
+
     <template #doc-before>
-      <CopyMarkdownButton />
+      <div class="btn-container">
+        <div class="btn-group"></div>
+        <div class="btn-group"></div>
+        <div class="btn-group">
+          <CopyMarkdownButton />
+        </div>
+      </div>
+    </template>
+
+    <template #doc-after>
+      <div class="btn-container">
+        <div class="btn-group"></div>
+        <div class="btn-group"></div>
+        <div class="btn-group">
+          <CopyMarkdownButton />
+        </div>
+      </div>
     </template>
   </Layout>
 </template>
+
+<style scoped>
+.btn-container {
+  display: flex;
+  justify-content: space-between;
+}
+</style>

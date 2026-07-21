@@ -113,6 +113,28 @@ You can also specify the **Maximum Number of Retakes** for this production.
 You can also change the avatar of the production on the **Parameters** tab.
 :::
 
+## Delete a Production
+
+Deleting a production requires you close it first.
+
+First, click on the Edit button for the target production in the `Main Menu > Studio > Productions` page:
+
+![production edit button](/guides/task-management/manage-productions/images/0.png)
+
+In the dialog, select `Closed` for the production status and click `Confirm`:
+
+![close production](/guides/task-management/manage-productions/images/1.png)
+
+Your production is now listed as `Closed`.
+
+Simply click the `Delete` button in the corresponding closed production list item and your production will be removed from your instance:
+
+![delete production](/guides/task-management/manage-productions/images/4.png)
+
+## Archive a Production
+
+TODO
+
 ## Artist Board
 
 ### Artist Board Status Configuration

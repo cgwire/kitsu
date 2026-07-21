@@ -51,3 +51,15 @@ On the detailed page, you have access to the sequence casting.
 You can see all the assets used in the whole sequence.
 
 You can also access the schedule, Preview Files, Activity, and Timelog of the sequence **tasks**.
+
+## Update a Sequence
+
+Hover over the sequence row you wish to edit in the list and click the `Edit` icon:  
+
+![edit sequence button](/guides/task-management/manage-sequences/images/0.png)
+
+## Delete a Sequence
+
+Hover over the sequence row you wish to remove in the list and click the `Delete` icon:  
+
+![delete sequence button](/guides/task-management/manage-sequences/images/1.png)

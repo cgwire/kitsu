@@ -230,8 +230,8 @@ export default {
         for (const token of state.tokens) {
           if (token.type === 'html_block') {
             const t = token.content.trim()
-            if (/^<EmbedCard\b/.test(t)) depth++
-            else if (/^<\/EmbedCard>/.test(t)) depth = Math.max(0, depth - 1)
+            if (/^<(EmbedCard|EmbedDocument)\b/.test(t)) depth++
+            else if (/^<\/(EmbedCard|EmbedDocument)>/.test(t)) depth = Math.max(0, depth - 1)
           }
           if (depth > 0 && (token.type === 'heading_open' || token.type === 'heading_close')) {
             const level = Number(token.tag.slice(1))
@@ -291,6 +291,7 @@ export default {
           {
             text: "Team Management",
             collapsed: false,
+            link: "/guides/team-management/",
             items: [
               { text: "Managing Departments", link: "/guides/team-management/managing-departments/" },
               { text: "Managing Teams", link: "/guides/team-management/managing-teams/" },
@@ -302,6 +303,7 @@ export default {
           {
             text: "Task Management",
             collapsed: false,
+            link: "/guides/task-management/",
             items: [
               { text: "Manage Studios", link: "/guides/task-management/manage-studios/" },
               { text: "Manage Productions", link: "/guides/task-management/manage-productions/" },
@@ -316,6 +318,7 @@ export default {
           {
             text: "Pre-Production",
             collapsed: false,
+            link: "/guides/pre-production/",
             items: [
               { text: "Manage Concepts", link: "/guides/pre-production/manage-concepts/" },
               { text: "Manage Assets", link: "/guides/pre-production/manage-assets/" },
@@ -326,6 +329,7 @@ export default {
           {
             text: "Scheduling",
             collapsed: false,
+            link: "/guides/scheduling/",
             items: [
               { text: "Assign Tasks", link: "/guides/scheduling/assign-tasks/" },
               { text: "Find Assignments", link: "/guides/scheduling/find-assignments/" },
@@ -338,18 +342,19 @@ export default {
           {
             text: "Review & Publishing",
             collapsed: false,
+            link: "/guides/review-publishing/",
             items: [
               { text: "Update Task Progress", link: "/guides/review-publishing/update-task-progress/" },
               { text: "Publish", link: "/guides/review-publishing/publish/" },
               { text: "Request Review", link: "/guides/review-publishing/request-review/" },
               { text: "Review", link: "/guides/review-publishing/review/" },
-              { text: "Playlist", link: "/guides/review-publishing/playlist/" },
-              { text: "Client Playlist", link: "/guides/review-publishing/client-playlist/" },
+              { text: "Playlist", link: "/guides/review-publishing/playlist/" }
             ],
           },
           {
             text: "Tracking & Reporting",
             collapsed: false,
+            link: "/guides/tracking-reporting/",
             items: [
                 { text: "Ensure Tasks are On-Time", link: "/guides/tracking-reporting/ensure-tasks-on-time/" },
                 { text: "Understand Why a Task Is Late", link: "/guides/tracking-reporting/understand-why-late-task/" },
@@ -365,16 +370,9 @@ export default {
             ],
           },
           {
-            text: "File Management",
-            collapsed: false,
-            items: [
-                { text: "File Storage", link: "/guides/file-management/file-storage/" },
-                { text: "Asset Library", link: "/guides/file-management/asset-library/" },
-            ],
-          },
-          {
             text: "Privacy & Security",
             collapsed: false,
+            link: "/guides/privacy-security/",
             items: [
               { text: "Authentication", link: "/guides/privacy-security/authentication/" },
               { text: "Logs", link: "/guides/privacy-security/logs/" },
@@ -395,7 +393,6 @@ export default {
           { text: "Quickstart for NFTs", link: "/recipes/for-nfts/" },
           { text: "Quickstart for Shots-Only Productions", link: "/recipes/shots-only-production/" },
           { text: "Quickstart for Assets-Only Productions", link: "/recipes/assets-only-production/" },
-          { text: "Status Automation", link: "/recipes/status-automation/" },
           { text: "3D Background", link: "/recipes/3d-background/" },
         ],
       },

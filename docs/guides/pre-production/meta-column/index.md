@@ -94,6 +94,7 @@ Additionally you can also **Stick** the metadata column, meaning that it will st
 
 
 ## Organizing Metadata Columns
+
 ### Display or Hide All Metadata Columns
 
 To keep your global spreadsheet tidy, you can choose to hide any non-essential columns. Note that this action does not delete the column; it simply hides it from view but retains it in other areas where it is used.
@@ -211,3 +212,15 @@ You can **sort** your global page with this new column. Click the arrow on the r
 
 You can also **Stick** the metadata column to the left.
 :::
+
+## Update Meta Columns
+
+Hover over your meta column and click on the menu dropdown icon, then select `Edit`. A modal dialog will appear to update your meta-column properties:
+
+![](/guides/pre-production/meta-column/images/1.png)
+
+## Remove Meta Columns
+
+Hover over your meta column and click on the menu dropdown icon, then select `Delete`:
+
+![](/guides/pre-production/meta-column/images/0.png)

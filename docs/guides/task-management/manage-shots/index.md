@@ -323,3 +323,7 @@ As a client, you can go to the global page of the shots with the drop-down menu 
 On the global page, you will be able to see all the statuses of the different steps of the shots.
 
 ![Client global page Shot](/img/getting-started/client_global_shot.png)
+
+## Remove Shots
+
+Hover over the shot row you wish to remove in the list and click the `Delete` icon.

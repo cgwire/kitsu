@@ -4,43 +4,65 @@ next: false
 ---
 
 <script setup>
-import EmbedCard from '../../.vitepress/theme/EmbedCard.vue'
+import EmbedDocument from '../../.vitepress/theme/EmbedDocument.vue'
 </script>
 
 # Getting Started As A Producer / Production Manager
 
-<EmbedCard title="1. Production Overview">
+A Producer needs a comprehensive overview of the entire production process.
+
+Kitsu offers various tools to help you stay informed and manage production efficiently without getting overwhelmed by notifications or losing focus.
+
+## 1. Production Overview
+
+<EmbedDocument>
 <!--@include: ../../guides/tracking-reporting/production-overview/index.md#body-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="2. Ensure Tasks are On Time">
+## 2. Ensure Tasks are On Time
+
+<EmbedDocument>
 <!--@include: ../../guides/tracking-reporting/ensure-tasks-on-time/index.md#body-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="3. Understanding Why a Task is Late">
+## 3. Understanding Why a Task is Late
+
+<EmbedDocument>
 <!--@include: ../../guides/tracking-reporting/understand-why-late-task/index.md#body-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="4. Durations over Estimates">
+## 4. Durations over Estimates
+
+<EmbedDocument>
 <!--@include: ../../guides/tracking-reporting/durations-vs-estimates/index.md#body-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="5. Checking Quotas">
+## 5. Checking Quotas
+
+<EmbedDocument>
 <!--@include: ../../guides/scheduling/quotas/index.md#body-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="6. Team Timesheets">
+## 6. Team Timesheets
+
+<EmbedDocument>
 <!--@include: ../../guides/tracking-reporting/timesheets/index.md#body-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="7. Studio Resource Overview">
+## 7. Studio Resource Overview
+
+<EmbedDocument>
 <!--@include: ../../guides/tracking-reporting/studio-overview/index.md#body-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="8. Studio Occupancy Rate">
+## 8. Studio Occupancy Rate
+
+<EmbedDocument>
 <!--@include: ../../guides/tracking-reporting/studio-occupancy/index.md#body-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="9. Main Schedule">
+## 9. Main Schedule
+
+<EmbedDocument>
 <!--@include: ../../guides/tracking-reporting/main-schedule/index.md#body-->
-</EmbedCard>
+</EmbedDocument>

@@ -78,3 +78,11 @@ To add users to a team:
    ![Team page](/img/getting-started/team_page.png)
 
 <!-- #endregion setup -->
+
+## Removing Users From A Team
+
+TODO
+
+## Delete Users
+
+TODO

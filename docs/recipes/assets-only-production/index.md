@@ -4,43 +4,61 @@ next: false
 ---
 
 <script setup>
-import EmbedCard from '../../.vitepress/theme/EmbedCard.vue'
+import EmbedDocument from '../../.vitepress/theme/EmbedDocument.vue'
 </script>
 
 # Quickstart for Assets-Only Productions
 
-<EmbedCard title="1. Create a new production">
+## 1. Create a new production
+
+<EmbedDocument >
 <!--@include: ../../guides/task-management/manage-productions/index.md#create-a-new-production-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="2. Create an Asset">
+## 2. Create an Asset
+
+<EmbedDocument>
 <!--@include: ../../guides/pre-production/manage-assets/index.md#create-an-asset-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="3. Update Your Assets">
+## 3. Update Your Assets
+
+<EmbedDocument >
 <!--@include: ../../guides/pre-production/manage-assets/index.md#update-your-assets-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="4. Add More Tasks After Creating the Assets">
+## 4. Add More Tasks After Creating the Assets
+
+<EmbedDocument >
 <!--@include: ../../guides/pre-production/manage-assets/index.md#add-more-tasks-after-creating-the-assets-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="5. Create a Concept">
+## 5. Create a Concept
+
+<EmbedDocument >
 <!--@include: ../../guides/pre-production/manage-concepts/index.md#create-a-concept-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="6. Creating Custom Metadata Columns">
+## 6. Creating Custom Metadata Columns
+
+<EmbedDocument >
 <!--@include: ../../guides/pre-production/meta-column/index.md#create-metadata-columns-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="7. Create an Edit">
+## 7. Create an Edit
+
+<EmbedDocument >
 <!--@include: ../../guides/scheduling/manage-edits/index.md#create-an-edit-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="8. Create a Breakdown List">
+## 8. Create a Breakdown List
+
+<EmbedDocument >
 <!--@include: ../../guides/pre-production/breakdown-casting/index.md#create-a-breakdown-list-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="9. Casting from the Asset Library">
+## 9. Casting from the Asset Library
+
+<EmbedDocument >
 <!--@include: ../../guides/pre-production/breakdown-casting/index.md#casting-from-the-asset-library-->
-</EmbedCard>
+</EmbedDocument>

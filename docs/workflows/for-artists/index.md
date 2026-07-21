@@ -4,33 +4,45 @@ next: false
 ---
 
 <script setup>
-import EmbedCard from '../../.vitepress/theme/EmbedCard.vue'
+import EmbedDocument from '../../.vitepress/theme/EmbedDocument.vue'
 </script>
 
 # Getting Started as an Artist
 
 This guide will help you get started and understand the Kitsu's key features as an artist.
 
-<EmbedCard title="1. Initial Profile Setup & Customization">
+## 1. Initial Profile Setup & Customization"
+
+<EmbedDocument >
 <!--@include: ../../guides/team-management/profile-settings/index.md#body-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="2. Managing Your Assignments">
+## 2. Managing Your Assignments"
+
+<EmbedDocument >
 <!--@include: ../../guides/scheduling/find-assignments/index.md#body-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="3. Updating Task Progress">
+## 3. Updating Task Progress"
+
+<EmbedDocument >
 <!--@include: ../../guides/review-publishing/update-task-progress/index.md#body-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="4. Publish a Concept">
+## 4. Publish a Concept"
+
+<EmbedDocument >
 <!--@include: ../../guides/review-publishing/publish/index.md#publishing-a-concept-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="5. Request a Review">
+## 5. Request a Review"
+
+<EmbedDocument >
 <!--@include: ../../guides/review-publishing/request-review/index.md#body-->
-</EmbedCard>
+</EmbedDocument>
 
-<EmbedCard title="6. Complete Your Timesheet">
+## 6. Complete Your Timesheet"
+
+<EmbedDocument >
 <!--@include: ../../guides/tracking-reporting/timesheets/index.md#body-->
-</EmbedCard>
+</EmbedDocument>

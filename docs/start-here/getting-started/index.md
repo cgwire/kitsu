@@ -62,7 +62,7 @@ Your **Global Library** is where you can create and modify departments, task typ
 </EmbedCard>
 
 <EmbedCard title="5. Status Automation Setup">
-<!--@include: ../../recipes/status-automation/index.md#setup-->
+<!--@include: ../../guides/task-management/managing-task-statuses/index.md#statusautomationsetup-->
 </EmbedCard>
 
 Once your **Global Library** is populated, you can fill out the **Production Library** with the newly created elements from the **Global Library**.

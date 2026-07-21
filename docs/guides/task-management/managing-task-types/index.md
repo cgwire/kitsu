@@ -95,3 +95,11 @@ Validate with **Confirm**.
 
 ![Add Task Type example](/img/getting-started/add_task_example.png)
 :::
+
+## Update a Task Type
+
+TODO
+
+## Remove a Task Type
+
+TODO

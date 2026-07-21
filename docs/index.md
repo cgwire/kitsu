@@ -27,82 +27,109 @@ img[src$='#logo-kitsu'] {
 
 [Kitsu](https://cg-wire.com/kitsu) is a collaboration platform for animation and VFX productions. Through its clean UI and shared database, it connects all relevant stakeholders throughout the production process, including artists, production managers, supervisors, vendors, and clients.
 
-### Introduction to Kitsu
+## Start Here
 
-Here are some links to familiarize yourself with the basic concepts in Kitsu you'll need to be successful with your production.
+Here are some links to familiarize yourself with the basic concepts in Kitsu you'll need to be successful with your production:
 
-* [Getting Started With Kitsu](./configure-kitsu/index.md): learn key principles and common vocabulary terms used within Kitsu to better plan your production workflow.
-* [Preparing Your Team](./team/index.md): Prepare your team members and define their departments and permissions.
+- [Getting Started](/start-here/getting-started/) - Learn key principles and common vocabulary terms used within Kitsu to better plan your production workflow.
 
-### Create Your Production
+- [Quickstart for TV Shows](/recipes/for-tvshows/) - Create a TV show production with assets, shots, sequences, episodes and edits.
+- [Quickstart for Feature Films](/recipes/for-feature-films/) - Create a feature film production (approximately 1 000 entities) with assets, shots, sequences and edit.
+- [Quickstart for Shorts](/recipes/for-shorts/) - Create a short production (approximately 500 assets and shots) with assets, shots, sequences and edit.
+- [Quickstart for Video Games](/recipes/for-videogames/) - Create a Video game production with Assets, Maps, Level and Chapters.
+- [Quickstart for NFTs](/recipes/for-nfts/) - Create a NFT Collection with Assets and NFT Collections.
+- [Quickstart for Shots-Only Productions](/recipes/shots-only-production/) - Create a short production (about 500 shots) with only shots, sequences and edit.
+- [Quickstart for Assets-Only Productions](/recipes/assets-only-production/) - Create a short production (about 500 assets) with only assets.
 
-Below you can find guides tailored to the specific type of production you are looking to create.
+## Workflows
 
-  * [Create a TV Show Production](./tvshow/index.md) Create a TV show production with assets, shots, sequences, episodes and edits
-  * [Create a Feature Film Production](./feature/index.md) Create a feature film production (approximately 1 000 entities) with assets, shots, sequences and edit.
-  * [Create a SHORT Production](./short/index.md): Create a short production (approximately 500 assets and shots) with assets, shots, sequences and edit.
-  * [Create a SHOTS Only Production](./short-shot/index.md) Create a short production (about 500 shots) with only shots, sequences and edit
-  * [Create an ASSET Only Production](./short-asset/index.md) Create a short production (about 500 assets) with only assets.
-  * [Create a Video Game Production](./videogame/index.md) Create a Video game production with assets, Maps, Level and Chapters (as tv show).
-  * [Create a NFT Collection](./nft/index.md) Create a NFT Collection with assets, and NFT Collection.
+- [For Supervisors](/workflows/for-supervisors/) - 
+- [For Producers](/workflows/for-producers/) - 
+- [For Artists](/workflows/for-artists/) - 
+- [For Clients](/workflows/for-clients/) - 
+- [For Developers](https://dev.kitsu.cloud/) - 
 
-### Meta Columns, Filters & Production Settings
+## Guides
 
-* [Meta Columns](./meta-column/index.md): Learn how to create and organize metadata from your production.
-* [Filters](./filter/index.md): Hone in on key information with powerful search functionality
-* [Production Specific Workflow Settings](./configure-prod/index.md): Tweak your specific production to your liking with various powerful settings.
+### Team Management
 
-### Assignments, Estimates and Scheduling
+- [Managing Departments](/guides/team-management/managing-departments/) - Discover methods for effectively managing and overseeing your team.
+- [Managing Teams](/guides/team-management/managing-teams/) - 
+- [User Permission Roles](/guides/team-management/team-roles/) - 
+- [Import Team](/guides/team-management/import-team/) - 
+- [User Profile Settings](/guides/team-management/profile-settings/) - 
 
-In this section, we will explain some of Kitsu's main use cases:
+### Task Management
 
-* [Task Assignments](./assignation/index.md): Learn how to add someone to a team and assign them to a task.
-* [Estimates & Team Quotas](./estimation/index.md): Learn how to calculate the number of days estimated to do a task (bids) and check your team's efficiency.
-* [Schedules](./schedules/index.md): Discover the different scheduling capabilities in Kitsu, from the studio level to the task level.
+- [Manage Studios](/guides/task-management/manage-studios/) - 
+- [Manage Productions](/guides/task-management/manage-productions/) - 
+- [Manage Episodes](/guides/task-management/manage-episodes/) - 
+- [Manage Sequences](/guides/task-management/manage-sequences/) - 
+- [Manage Shots](/guides/task-management/manage-shots/) - 
+- [Manage Asset Types](/guides/task-management/managing-asset-types/) - 
+- [Manage Task Types](/guides/task-management/managing-task-types/) - 
+- [Manage Task Statuses](/guides/task-management/managing-task-statuses/) - 
 
-### Statuses, Publishes and Thumbnails
+### Pre-Production
 
-How keep your work organized, and your team updated on it's progress
+- [Manage Concepts](/guides/pre-production/manage-concepts/) - 
+- [Manage Assets](/guides/pre-production/manage-assets/) - 
+- [Breakdown & Casting](/guides/pre-production/breakdown-casting/) - 
+- [Meta-Columns](/guides/pre-production/meta-column/) - Learn how to create and organize metadata from your production.
 
-* [Statuses & Feedback](/status/index.md): How to change statuses and keep your team updated on the progress of work.
-* [Publishes](/publish/index.md): How to publish and share work with your team.
-* [Thumbnails](/thumbnails/index.md): How to apply thumbnails to assets and shots.
+### Scheduling
 
-### Internal Review and Client Playlists
+- [Assign Tasks](/guides/scheduling/assign-tasks/) - Learn how to assign people to a task.
+- [Find Assignments](/guides/scheduling/find-assignments/) - Learn how to stay on top of task assignments.
+- [Schedules](/guides/scheduling/schedules/) - Discover the different scheduling capabilities in Kitsu, from the studio level to the task level.
+- [Estimates](/guides/scheduling/estimates/) - Learn how to calculate the number of days estimated to do a task (bids).
+- [Quotas](/guides/scheduling/quotas/) - Learn how to check your team efficiency.
+- [Manage Edits](/guides/scheduling/manage-edits/) - 
 
-How to organize internal and external reviews:
+### Review & Publishing
 
-* [Reviews](./review/index.md): Learn how to review all feedback on a task.
-* [Daily & Weekly Review](./review-weekly/index.md): Quickly gather video versions and stay focused during the review.
-* [Client Playlists](./playlist-client/index.md): Collect and share your work with your client in a managed environment.
+- [Update Task Progress](/guides/review-publishing/update-task-progress/) - How to change statuses and keep your team updated on the progress of work.
+- [Publish](/guides/review-publishing/publish/) - How to publish and share work with your team.
+- [Request Review](/guides/review-publishing/request-review/) - 
+- [Review](/guides/review-publishing/review/) - Learn how to review all feedback on a task.
+- [Playlist](/guides/review-publishing/playlist/) - Quickly gather video versions and stay focused during the review.
+- [Client Playlist](/guides/review-publishing/client-playlist/) - Collect and share your work with your client in a managed environment.
 
+### Tracking & Reporting
 
-### Supervisor Workflows
+- [Ensure Tasks are On-Time](/guides/tracking-reporting/ensure-tasks-on-time/) - 
+- [Understand Why a Task Is Late](/guides/tracking-reporting/understand-why-late-task/) - 
+- [Studio Overview](/guides/tracking-reporting/studio-overview/) -  Ensure you're ahead of the game with your studio's productions.
+- [Studio Occupancy](/guides/tracking-reporting/studio-occupancy/) - 
+- [Production Overview](/guides/tracking-reporting/production-overview/) - 
+- [Timesheets](/guides/tracking-reporting/timesheets/) - 
+- [Durations vs Estimates](/guides/tracking-reporting/durations-vs-estimates/) - 
+- [Advanced Search & Filters](/guides/tracking-reporting/filter/) - Hone in on key information with powerful search functionality.
+- [Main Schedule](/guides/tracking-reporting/main-schedule/) - 
+- [Budget](/guides/tracking-reporting/budget/) - 
+- [Thumbnails](/guides/tracking-reporting/thumbnails/) - How to apply thumbnails to assets and shots.
 
-As a supervisor, your uses cases when using Kitsu may differ than your production team.
+### Privacy & Security
 
-* [Managing Your Department](./supervisor-team/index.md): Discover methods for effectively managing and overseeing your team.
-* [Task Supervision](./supervisor-tasks/index.md): Learn how to stay on top of task assignments.
+- [Authentication](/guides/privacy-security/authentication/) - 
+- [Logs](/guides/privacy-security/logs/) - 
+  
+## Recipes
+  
+- [3D Background](/recipes/3d-background/) - 
 
-### Producer Workflows
+## Resources
 
-As a producer, mastering the ability to zoom out from specifics to a holistic view is essential.
+- [Frequently Asked Questions](/resources/faq/) - 
+- [Changelog](https://cgwire.canny.io/changelog) - 
 
-* [Building Production Reports](./production-report/index.md): Learn everything you need to know to create your production reports.
-* [Building Studio Reports](./studio-report/index.md): Ensure you're ahead of the game with your studio's productions.
-
-
-### Developer Workflows
-
-As a developer, explore some of the possibilities for extending and integrating Kitsu within your studio's pipeline.
-
-### Tutorials
+## Tutorials
 
 Access comprehensive video tutorials on YouTube, highlighting crucial functionalities of Kitsu. Click the link below to view.
 
 [Kitsu Tutorials Channel](https://www.youtube.com/playlist?list=PLp_1gB5ZBHXqnQgZ4TCrAt7smxesaDo29)
 
-### About the Authors
+## About the Authors
 
 Kitsu is written by CG Wire, a company based in France. We help animation studios to manage their productions and build efficient pipelines.
 
