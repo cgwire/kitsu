@@ -36,6 +36,7 @@
             {{ shortDate }}
           </span>
           <div
+            ref="menuWrapper"
             class="flexrow-item menu-wrapper"
             v-if="
               isPinnable || isEditable || canToggleForClient || canMoveComment
@@ -486,7 +487,11 @@
         <span class="flexrow-item date" :title="fullDate">
           {{ shortDate }}
         </span>
-        <div class="flexrow-item menu-wrapper" v-if="isPinnable || isEditable">
+        <div
+          ref="menuWrapper"
+          class="flexrow-item menu-wrapper"
+          v-if="isPinnable || isEditable"
+        >
           <button
             type="button"
             class="menu-icon-button"
@@ -660,6 +665,7 @@ const props = defineProps({
 
 const replyRef = ref(null)
 const addAttachmentModalRef = ref(null)
+const menuWrapper = ref(null)
 
 const { membersForAts, atOptionsFilter } = useAtMentionsMembers(
   () => props.team,
@@ -875,6 +881,12 @@ const toggleCommentMenu = () => {
   menuVisible.value = !menuVisible.value
 }
 
+const onDocumentClick = event => {
+  if (!menuWrapper.value?.contains(event.target)) {
+    menuVisible.value = false
+  }
+}
+
 const removeTask = entry => {
   checklistItems.value = remove(checklistItems.value, entry)
 }
@@ -1037,6 +1049,7 @@ onBeforeUnmount(() => {
     }
   )
   window.removeEventListener('paste', onPaste, false)
+  document.removeEventListener('click', onDocumentClick)
 })
 
 watch(
@@ -1054,6 +1067,11 @@ watch(checklistItems, () => {
   if (!silent) {
     onChecklistChanged()
   }
+})
+
+watch(menuVisible, visible => {
+  const method = visible ? 'addEventListener' : 'removeEventListener'
+  document[method]('click', onDocumentClick)
 })
 </script>
 
