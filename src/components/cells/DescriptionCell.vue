@@ -147,6 +147,7 @@ span.description-shorten-text {
   text-overflow: ellipsis;
   white-space: nowrap;
 
+  // Flatten Markdown for single-line truncation.
   :deep(*) {
     display: inline;
   }
