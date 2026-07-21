@@ -253,6 +253,52 @@
                     </td>
                     <td>{{ formatDisplayDate(task.done_date) }}</td>
                   </tr>
+                  <tr
+                    class="datatable-row"
+                    :key="descriptor.id"
+                    v-for="descriptor in taskMetadata"
+                  >
+                    <td class="field-label">{{ descriptor.name }}</td>
+                    <td
+                      :class="{
+                        'pre-wrap': descriptor.data_type === 'textarea'
+                      }"
+                    >
+                      <a
+                        :href="task.data[descriptor.field_name]"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        v-if="
+                          descriptor.data_type === 'url' &&
+                          task.data &&
+                          task.data[descriptor.field_name]
+                        "
+                      >
+                        {{ task.data[descriptor.field_name] }}
+                      </a>
+                      <span
+                        class="flexrow"
+                        v-else-if="
+                          descriptor.data_type === 'person' &&
+                          personForDescriptor(descriptor)
+                        "
+                      >
+                        <people-avatar
+                          class="flexrow-item"
+                          :person="personForDescriptor(descriptor)"
+                          :size="22"
+                          :font-size="11"
+                          :is-link="false"
+                        />
+                        <span class="flexrow-item">
+                          {{ personForDescriptor(descriptor).name }}
+                        </span>
+                      </span>
+                      <template v-else>
+                        {{ getTaskMetadataValue(descriptor) }}
+                      </template>
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -590,9 +636,17 @@ export default {
       'taskStatus',
       'taskStatusForCurrentUser',
       'taskMap',
+      'taskMetadataDescriptors',
       'taskTypeMap',
       'user'
     ]),
+
+    taskMetadata() {
+      if (!this.task) return []
+      return this.taskMetadataDescriptors.filter(
+        descriptor => descriptor.task_type_id === this.task.task_type_id
+      )
+    },
 
     assetList() {
       return assetsStore.cache.assets
@@ -973,6 +1027,27 @@ export default {
   },
 
   methods: {
+    getTaskMetadataValue(descriptor) {
+      const value = this.task?.data?.[descriptor.field_name]
+      if (value == null || value === '') return ''
+      if (descriptor.data_type === 'date') {
+        return this.formatDisplayDate(value)
+      }
+      if (descriptor.data_type === 'boolean') {
+        return value === 'true' ? this.$t('main.yes') : this.$t('main.no')
+      }
+      if (descriptor.data_type === 'person') {
+        return this.personMap.get(value)?.name || ''
+      }
+      return value
+    },
+
+    personForDescriptor(descriptor) {
+      return (
+        this.personMap.get(this.task?.data?.[descriptor.field_name]) || null
+      )
+    },
+
     ...mapActions([
       'addAttachmentToComment',
       'ackComment',
@@ -1941,6 +2016,10 @@ video {
 .field-label {
   width: 130px;
   max-width: 130px;
+}
+
+.pre-wrap {
+  white-space: pre-wrap;
 }
 
 .title {

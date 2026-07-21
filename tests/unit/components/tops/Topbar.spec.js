@@ -13,7 +13,7 @@ import '@/lib/auth'
 import { useDesktopNotifications } from '@/composables/desktopNotifications'
 import Topbar from '@/components/tops/Topbar.vue'
 
-const makeStore = () => {
+const makeStore = (getterOverrides = {}) => {
   const actions = {
     loadNotification: vi.fn(notificationId =>
       Promise.resolve({
@@ -70,7 +70,8 @@ const makeStore = () => {
       projectPlugins: () => [],
       taskTypeMap: () =>
         new Map([['task-type-1', { for_entity: 'Shot', name: 'Animation' }]]),
-      user: () => ({ id: 'user-1' })
+      user: () => ({ id: 'user-1' }),
+      ...getterOverrides
     },
     actions
   })
@@ -245,6 +246,90 @@ describe('Topbar.vue', () => {
         expect.anything()
       )
       expect(showNotificationMock).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('schedule episode selector', () => {
+    // The schedule offers 'all' (production-wide planning) and 'main' (main
+    // pack) on top of the real episodes, and coerces neither.
+    const mountForSchedule = (episodeId, episodes = []) => {
+      const production = { id: 'production-1', production_type: 'tvshow' }
+      const { store: scheduleStore } = makeStore({
+        currentProduction: () => production,
+        episodes: () => episodes,
+        isTVShow: () => true,
+        productionEditTaskTypes: () => [],
+        productionMap: () => new Map([[production.id, production]])
+      })
+      const router = createRouter({
+        history: createWebHashHistory(),
+        routes: [
+          {
+            path: '/',
+            name: 'open-productions',
+            component: { template: '<div />' }
+          },
+          {
+            path: '/productions/:production_id/episodes/:episode_id/schedule',
+            name: 'episode-schedule',
+            component: { template: '<div />' }
+          }
+        ]
+      })
+      return shallowMount(Topbar, {
+        global: {
+          plugins: [scheduleStore, router],
+          mocks: {
+            $t: key => key,
+            $route: {
+              path: `/productions/production-1/episodes/${episodeId}/schedule`,
+              name: 'episode-schedule',
+              params: { production_id: 'production-1', episode_id: episodeId },
+              query: {},
+              fullPath: '/'
+            }
+          },
+          stubs: {
+            TopbarProductionList: true,
+            TopbarSectionList: true,
+            TopbarEpisodeList: true,
+            GlobalSearchField: true,
+            NotificationBell: true,
+            PeopleAvatar: true,
+            ShortcutModal: true
+          }
+        }
+      })
+    }
+
+    it('offers an all option and the main pack', async () => {
+      const scheduleWrapper = mountForSchedule('all')
+      scheduleWrapper.vm.currentProjectSection = 'schedule'
+      await nextTick()
+      expect(scheduleWrapper.vm.currentEpisodeOptionGroups).toEqual([
+        {
+          name: '',
+          episodeList: [
+            { label: 'episodes.all_episodes', value: 'all' },
+            { label: 'main.main_pack', value: 'main' }
+          ]
+        }
+      ])
+      scheduleWrapper.unmount()
+    })
+
+    it('keeps the all pseudo-episode instead of coercing it to the first one', () => {
+      const scheduleWrapper = mountForSchedule('all', [{ id: 'episode-1' }])
+      scheduleWrapper.vm.updateCombosFromRoute()
+      expect(scheduleWrapper.vm.currentEpisodeId).toBe('all')
+      scheduleWrapper.unmount()
+    })
+
+    it('keeps the main pack instead of coercing it to the first one', () => {
+      const scheduleWrapper = mountForSchedule('main', [{ id: 'episode-1' }])
+      scheduleWrapper.vm.updateCombosFromRoute()
+      expect(scheduleWrapper.vm.currentEpisodeId).toBe('main')
+      scheduleWrapper.unmount()
     })
   })
 

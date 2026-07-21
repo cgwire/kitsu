@@ -104,6 +104,7 @@
             icon="list"
             :text="$t('menu.assign_tasks')"
             @click="toggleSidePanel"
+            v-if="!isAllEpisodes"
           />
         </div>
       </div>
@@ -119,9 +120,10 @@
         clip-children
         is-estimation-linked
         hide-man-days
+        :multiline="isAllEpisodes"
         :reassignable="!isLockedSchedule"
         show-expand-all
-        subchildren
+        :subchildren="!isAllEpisodes"
         :type="mode"
         @expand-all="onScheduleExpandAll"
         @item-assign="onScheduleItemAssigned"
@@ -136,7 +138,10 @@
       />
     </div>
 
-    <div class="column side-column" v-if="isSidePanelOpen && !isLockedSchedule">
+    <div
+      class="column side-column"
+      v-if="isSidePanelOpen && !isLockedSchedule && !isAllEpisodes"
+    >
       <div class="side">
         <a
           class="close-button"
@@ -538,6 +543,7 @@ import { firstBy } from 'thenby'
 import { mapGetters, mapActions } from 'vuex'
 
 import colors from '@/lib/colors'
+import { downloadBlob } from '@/lib/download'
 import { getTaskTypeSchedulePath } from '@/lib/path'
 import {
   sortByName,
@@ -749,6 +755,26 @@ export default {
       return this.isTVShow && id && !['all', 'main'].includes(id) ? id : null
     },
 
+    // The 'all' pseudo-episode displays the production-wide planning: one row
+    // per episode with its own dates, instead of the per-episode entity /
+    // assignee / task tree.
+    isAllEpisodes() {
+      return this.isTVShow && this.currentEpisode?.id === 'all'
+    },
+
+    // The 'main' pseudo-episode scopes the planning to the main pack: the
+    // assets attached to no episode.
+    isMainPack() {
+      return this.isTVShow && this.currentEpisode?.id === 'main'
+    },
+
+    // Episode id the drill-down links point at. The main pack is a valid route
+    // scope, unlike the schedule-items endpoints which only accept a real
+    // episode.
+    linkedEpisodeId() {
+      return this.isMainPack ? 'main' : this.currentEpisodeId
+    },
+
     taskTypeMap() {
       return taskTypeStore.cache.taskTypeMap
     },
@@ -791,9 +817,17 @@ export default {
       return [referenceVersion, ...options]
     },
 
+    // Task type rows in scope. The main pack only holds assets: the other
+    // entities (shots, sequences, episodes, edits) all belong to an episode.
+    scopedScheduleItems() {
+      return this.isMainPack
+        ? this.scheduleItems.filter(item => item.for_entity === 'Asset')
+        : this.scheduleItems
+    },
+
     availableEntityTypes() {
       const types = new Set()
-      this.scheduleItems.forEach(item => {
+      this.scopedScheduleItems.forEach(item => {
         const taskType = this.taskTypeMap.get(item.task_type_id)
         if (taskType?.for_entity) {
           types.add(taskType.for_entity)
@@ -812,9 +846,9 @@ export default {
 
     filteredScheduleItems() {
       if (!this.entityType) {
-        return this.scheduleItems
+        return this.scopedScheduleItems
       }
-      return this.scheduleItems.filter(item => {
+      return this.scopedScheduleItems.filter(item => {
         const taskType = this.taskTypeMap.get(item.task_type_id)
         return taskType && taskType.for_entity === this.entityType
       })
@@ -910,7 +944,7 @@ export default {
             const path = getTaskTypeSchedulePath(
               taskType.id,
               this.currentProduction.id,
-              this.currentEpisodeId,
+              this.linkedEpisodeId,
               taskType.for_entity
             )
 
@@ -935,7 +969,7 @@ export default {
             this.taskTypeMap
           )
 
-          this.availableTaskTypes = this.scheduleItems.map(item => ({
+          this.availableTaskTypes = this.scopedScheduleItems.map(item => ({
             ...this.taskTypeMap.get(item.task_type_id),
             name: item.name
           }))
@@ -1043,7 +1077,82 @@ export default {
       return filters
     },
 
-    async expandTaskTypeElement(
+    // The plain /assets endpoint rejects episode_id=main (only its with-tasks
+    // variant maps it to source_id IS NULL), so the main pack loads every asset
+    // with no episode filter and keeps the right ones client-side. A real
+    // episode is scoped server-side, so nothing to load wide.
+    loadScopedAssets() {
+      return this.loadAssets({
+        all: this.isMainPack,
+        withShared: false,
+        withTasks: false
+      })
+    },
+
+    // Whether an asset falls in the current scope: for the main pack, only the
+    // assets attached to no episode (source_id null); otherwise the assetMap is
+    // already scoped and every asset it holds belongs.
+    assetInScope(asset) {
+      return !this.isMainPack || !asset.source_id
+    },
+
+    expandTaskTypeElement(
+      taskTypeElement,
+      refreshScheduleCallBack = null,
+      expanded = false,
+      resetAssignments = true
+    ) {
+      return this.isAllEpisodes
+        ? this.expandEpisodeRows(
+            taskTypeElement,
+            refreshScheduleCallBack,
+            expanded
+          )
+        : this.expandTaskTypeDrillDown(
+            taskTypeElement,
+            refreshScheduleCallBack,
+            expanded,
+            resetAssignments
+          )
+    },
+
+    // The production-wide planning stops at the episode level: one row per
+    // episode, with no entity, assignee or task row to load below it.
+    async expandEpisodeRows(
+      taskTypeElement,
+      refreshScheduleCallBack = null,
+      expanded = false
+    ) {
+      taskTypeElement.expanded = expanded || !taskTypeElement.expanded
+
+      if (taskTypeElement.expanded) {
+        try {
+          taskTypeElement.loading = true
+          taskTypeElement.children = []
+
+          // The episodes endpoint aggregates a task type schedule per episode,
+          // whatever the entity it applies to.
+          const scheduleItems = await this.loadEpisodeScheduleItems({
+            production: this.currentProduction,
+            taskType: this.taskTypeMap.get(taskTypeElement.task_type_id)
+          })
+          taskTypeElement.children = sortByName(
+            this.convertScheduleItems(taskTypeElement, scheduleItems)
+          )
+        } catch (err) {
+          console.error(err)
+          taskTypeElement.children = []
+        } finally {
+          taskTypeElement.loading = false
+        }
+
+        if (refreshScheduleCallBack) {
+          refreshScheduleCallBack(taskTypeElement)
+        }
+      }
+    },
+
+    async expandTaskTypeDrillDown(
       taskTypeElement,
       refreshScheduleCallBack = null,
       expanded = false,
@@ -1092,7 +1201,7 @@ export default {
           // load entities (scoped to the current episode for TV shows) that
           // back the row grouping, the entity name and the episode filter
           if (taskTypeElement.for_entity === 'Asset') {
-            await this.loadAssets({ withShared: false, withTasks: false })
+            await this.loadScopedAssets()
           } else if (taskTypeElement.for_entity === 'Shot') {
             await this.loadShots()
           } else if (taskTypeElement.for_entity === 'Sequence') {
@@ -1169,7 +1278,7 @@ export default {
             // under their own entity id.
             if (taskTypeElement.for_entity === 'Asset') {
               task.entity = assetMap.get(task.entity_id)
-              if (!task.entity) return
+              if (!task.entity || !this.assetInScope(task.entity)) return
               task.entity_type_id = task.entity.asset_type_id
             } else if (taskTypeElement.for_entity === 'Shot') {
               task.entity = shotMap.get(task.entity_id)
@@ -1285,13 +1394,25 @@ export default {
           })
 
           if (taskTypeElement.for_entity === 'Asset') {
+            // drop the asset type rows with no asset in the current scope (the
+            // main pack keeps only the asset types with an episode-less asset)
+            const scopedAssetTypeIds = this.isMainPack
+              ? new Set(
+                  [...assetMap.values()]
+                    .filter(asset => this.assetInScope(asset))
+                    .map(asset => asset.asset_type_id)
+                )
+              : null
             // filtering following custom asset types workflow
             children = children.filter(item => {
               const assetType = this.assetTypeMap.get(item.object_id)
               return (
                 assetType &&
                 (!assetType.task_types.length ||
-                  assetType.task_types.includes(taskTypeElement.task_type_id))
+                  assetType.task_types.includes(
+                    taskTypeElement.task_type_id
+                  )) &&
+                (!scopedAssetTypeIds || scopedAssetTypeIds.has(item.object_id))
               )
             })
           } else if (
@@ -1614,6 +1735,11 @@ export default {
       selectedEntityType = undefined,
       resetAssignments = true
     ) {
+      // No assignment panel on the production-wide planning.
+      if (this.isAllEpisodes) {
+        return
+      }
+
       this.selectedTaskType = taskType
 
       if (resetAssignments) {
@@ -1629,7 +1755,7 @@ export default {
 
       // load entity types
       if (taskType.for_entity === 'Asset') {
-        await this.loadAssets({ withShared: false, withTasks: false })
+        await this.loadScopedAssets()
 
         this.assignments.entityTypes = this.productionAssetTypes
           .filter(assetType => {
@@ -1652,6 +1778,7 @@ export default {
                     asset.asset_type_id === assetType.id &&
                     !asset.canceled &&
                     !asset.shared &&
+                    this.assetInScope(asset) &&
                     tasks.some(task => task.entity_id === asset.id)
                 )
                 .map(asset => ({
@@ -2143,7 +2270,11 @@ export default {
     },
 
     refreshSchedule() {
-      this.scheduleItems.forEach(item => {
+      // scopedScheduleItems, not scheduleItems: under the main pack only the
+      // Asset rows are in scope, and drilling an Edit / Shot / Sequence /
+      // Episode row would forward episode_id=main to an endpoint that rejects
+      // it. Same array reference in every other mode.
+      this.scopedScheduleItems.forEach(item => {
         if (!item.expanded) {
           return
         }
@@ -2213,8 +2344,11 @@ export default {
     },
 
     async expandAllScheduleItems() {
+      // scopedScheduleItems keeps the main pack to its in-scope Asset rows:
+      // drilling an out-of-scope row would forward episode_id=main to an
+      // endpoint that rejects it. Same array reference in every other mode.
       // run sequentially to avoid overloading the server
-      for (const element of this.scheduleItems) {
+      for (const element of this.scopedScheduleItems) {
         if (!element.expanded) {
           await this.expandTaskTypeElement(
             element,
@@ -2467,8 +2601,7 @@ export default {
           ({ value }) => value === this.version
         )?.label
         const release = this.isVersioned ? `${mode} - ${version}` : mode
-        const FileSaver = await import('file-saver')
-        FileSaver.saveAs(new Blob([buffer]), `${filename} (${release}).xlsx`)
+        downloadBlob(new Blob([buffer]), `${filename} (${release}).xlsx`)
       } catch (err) {
         console.error(err)
         alert(this.$t('schedule.export_error'))
@@ -2513,7 +2646,7 @@ export default {
     },
 
     currentEpisode(value) {
-      if (!value || ['all', 'main'].includes(value.id)) return
+      if (!value) return
       if (this.isTVShow) this.reset()
     }
   },

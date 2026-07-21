@@ -9,7 +9,7 @@ const h = vi.hoisted(() => ({
 // Stub everything the route guards touch so importing the route table does
 // not drag the real store, auth flow or page components into jsdom.
 vi.mock('@/lib/auth', () => ({
-  default: { requireAuth: (to, from, callback) => callback(null) }
+  default: { requireAuth: () => Promise.resolve() }
 }))
 vi.mock('@/lib/init', () => ({ default: vi.fn() }))
 vi.mock('@/lib/lang', () => ({ default: { setLocale: vi.fn() } }))
@@ -105,63 +105,73 @@ describe('router/routes', () => {
   })
 
   describe('main guard', () => {
-    const runGuard = to => {
-      const next = vi.fn()
-      mainRoute.beforeEnter(to, {}, next)
-      return next
-    }
+    const runGuard = to => mainRoute.beforeEnter(to, {})
 
-    test('redirects a non-admin to not-found on an admin route', () => {
-      const next = runGuard({ matched: [{ meta: { requiresAdmin: true } }] })
-      expect(next).toHaveBeenCalledWith({ name: 'not-found' })
+    test('redirects a non-admin to not-found on an admin route', async () => {
+      const result = await runGuard({
+        matched: [{ meta: { requiresAdmin: true } }]
+      })
+      expect(result).toEqual({ name: 'not-found' })
     })
 
-    test('lets an admin through on an admin route', () => {
+    test('lets an admin through on an admin route', async () => {
       h.isAdmin = true
-      const next = runGuard({ matched: [{ meta: { requiresAdmin: true } }] })
-      expect(next).toHaveBeenCalledWith()
+      const result = await runGuard({
+        matched: [{ meta: { requiresAdmin: true } }]
+      })
+      expect(result).toBeUndefined()
     })
 
-    test('lets a non-admin through on a regular route', () => {
-      const next = runGuard({ matched: [{ meta: {} }] })
-      expect(next).toHaveBeenCalledWith()
+    test('lets a non-admin through on a regular route', async () => {
+      const result = await runGuard({ matched: [{ meta: {} }] })
+      expect(result).toBeUndefined()
     })
 
     test.each([
       ['production manager', 'isManager'],
       ['supervisor', 'isSupervisor'],
       ['admin', 'isAdmin']
-    ])('lets a %s through on a supervisor-or-manager route', (role, flag) => {
-      h[flag] = true
-      const next = runGuard({
-        matched: [{ meta: { requiresSupervisorOrManager: true } }]
-      })
-      expect(next).toHaveBeenCalledWith()
-    })
+    ])(
+      'lets a %s through on a supervisor-or-manager route',
+      async (role, flag) => {
+        h[flag] = true
+        const result = await runGuard({
+          matched: [{ meta: { requiresSupervisorOrManager: true } }]
+        })
+        expect(result).toBeUndefined()
+      }
+    )
 
-    test('redirects an artist to not-found on a supervisor-or-manager route', () => {
-      const next = runGuard({
+    test('redirects an artist to not-found on a supervisor-or-manager route', async () => {
+      const result = await runGuard({
         matched: [{ meta: { requiresSupervisorOrManager: true } }]
       })
-      expect(next).toHaveBeenCalledWith({ name: 'not-found' })
+      expect(result).toEqual({ name: 'not-found' })
     })
 
     test('still blocks admin routes when data loads first', async () => {
       taskTypeStore.state.taskTypes = []
       init.mockResolvedValue(true)
-      const next = runGuard({ matched: [{ meta: { requiresAdmin: true } }] })
-      await vi.waitFor(() =>
-        expect(next).toHaveBeenCalledWith({ name: 'not-found' })
-      )
+      const result = await runGuard({
+        matched: [{ meta: { requiresAdmin: true } }]
+      })
+      expect(result).toEqual({ name: 'not-found' })
     })
 
     test('redirects to server-down when the initial load fails', async () => {
       taskTypeStore.state.taskTypes = []
       init.mockRejectedValue(new Error('api down'))
-      const next = runGuard({ matched: [{ meta: {} }] })
-      await vi.waitFor(() =>
-        expect(next).toHaveBeenCalledWith({ name: 'server-down' })
-      )
+      const result = await runGuard({ matched: [{ meta: {} }] })
+      expect(result).toEqual({ name: 'server-down' })
+    })
+
+    test('aborts the navigation when the initial load ends on the 2FA redirect', async () => {
+      // init() resolves false after pushing login-2fa itself: the guard must
+      // abort the superseded navigation, not proceed nor redirect.
+      taskTypeStore.state.taskTypes = []
+      init.mockResolvedValue(false)
+      const result = await runGuard({ matched: [{ meta: {} }] })
+      expect(result).toBe(false)
     })
   })
 })

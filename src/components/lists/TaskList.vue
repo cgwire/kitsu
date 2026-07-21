@@ -1,5 +1,13 @@
 <template>
   <div class="data-list">
+    <table-metadata-header-menu
+      ref="header-metadata-menu"
+      :is-edit-allowed="isMetadataMenuEditAllowed"
+      :show-stick="false"
+      @edit-clicked="onEditMetadataClicked"
+      @delete-clicked="onDeleteMetadataClicked"
+      @sort-by-clicked="onSortByMetadataClicked"
+    />
     <div
       ref="body"
       class="datatable-wrapper"
@@ -31,7 +39,10 @@
             <th class="assignees">
               {{ $t('tasks.fields.assignees') }}
             </th>
-            <th class="frames number-cell" v-if="isShots && !isPaperProduction">
+            <th
+              class="frames number-cell"
+              v-if="isShots && !isPaperProduction && isColumnVisible('frames')"
+            >
               {{ $t('tasks.fields.frames') }}
             </th>
             <th
@@ -40,37 +51,90 @@
             >
               {{ $t('tasks.fields.drawings') }}
             </th>
-            <th class="difficulty number-cell">
+            <th
+              class="difficulty number-cell"
+              v-if="isColumnVisible('difficulty')"
+            >
               {{ $t('tasks.fields.difficulty') }}
             </th>
-            <th class="estimation number-cell" :title="$t('main.estimation')">
+            <th
+              class="estimation number-cell"
+              :title="$t('main.estimation')"
+              v-if="isColumnVisible('estimation')"
+            >
               {{ $t('tasks.fields.estimation').substring(0, 3) }}.
             </th>
-            <th class="duration number-cell">
+            <th class="duration number-cell" v-if="isColumnVisible('duration')">
               {{ $t('tasks.fields.duration').substring(0, 3) }}.
             </th>
-            <th class="retake-count number-cell">
+            <th
+              class="retake-count number-cell"
+              v-if="isColumnVisible('retakeCount')"
+            >
               {{ $t('tasks.fields.retake_count') }}
             </th>
-            <th class="start-date" v-if="!withSchedule">
+            <metadata-header
+              :key="descriptor.id"
+              :descriptor="descriptor"
+              resizable
+              :width="metadataColumnWidths[descriptor.id]"
+              @resize="width => onMetadataColumnResize(descriptor.id, width)"
+              @resize-end="persistMetadataColumnWidths"
+              @show-metadata-header-menu="
+                event => showMetadataHeaderMenu(descriptor.id, event)
+              "
+              v-for="descriptor in visibleMetadataDescriptors"
+            />
+            <th
+              class="start-date"
+              v-if="!withSchedule && isColumnVisible('startDate')"
+            >
               {{ $t('tasks.fields.start_date') }}
             </th>
-            <th class="due-date" v-if="!withSchedule">
+            <th
+              class="due-date"
+              v-if="!withSchedule && isColumnVisible('dueDate')"
+            >
               {{ $t('tasks.fields.due_date') }}
             </th>
-            <th class="real-start-date" v-if="!withSchedule">
+            <th
+              class="real-start-date"
+              v-if="!withSchedule && isColumnVisible('realStartDate')"
+            >
               {{ $t('tasks.fields.real_start_date') }}
             </th>
-            <th class="real-end-date" v-if="!withSchedule">
+            <th
+              class="real-end-date"
+              v-if="!withSchedule && isColumnVisible('realEndDate')"
+            >
               {{ $t('tasks.fields.real_end_date') }}
             </th>
-            <th class="done-date" v-if="!withSchedule">
+            <th
+              class="done-date"
+              v-if="!withSchedule && isColumnVisible('doneDate')"
+            >
               {{ $t('tasks.fields.done_date') }}
             </th>
-            <th class="last-comment-date" v-if="!withSchedule">
+            <th
+              class="last-comment-date"
+              v-if="!withSchedule && isColumnVisible('lastCommentDate')"
+            >
               {{ $t('tasks.fields.last_comment_date') }}
             </th>
-            <th class="empty" v-if="!withSchedule">&nbsp;</th>
+            <th class="column-selector">
+              <button-simple
+                class="is-small"
+                icon="down"
+                @click="toggleColumnSelector"
+              />
+              <table-metadata-selector-menu
+                :descriptors="metadataDescriptors"
+                :exclude="{ frames: !isShots }"
+                namespace="task-type"
+                v-model="metadataDisplayHeaders"
+                v-model:is-open="columnSelectorDisplayed"
+              />
+            </th>
           </tr>
         </thead>
 
@@ -142,7 +206,10 @@
                 />
               </div>
             </td>
-            <td class="frames number-cell" v-if="isShots && !isPaperProduction">
+            <td
+              class="frames number-cell"
+              v-if="isShots && !isPaperProduction && isColumnVisible('frames')"
+            >
               {{ getEntity(task.entity.id).nb_frames }}
             </td>
             <td
@@ -162,7 +229,10 @@
                 {{ task.nb_drawings || 0 }}
               </template>
             </td>
-            <td class="difficulty number-cell">
+            <td
+              class="difficulty number-cell"
+              v-if="isColumnVisible('difficulty')"
+            >
               <combobox
                 class="difficulty-combobox"
                 :options="difficultyOptions"
@@ -181,7 +251,10 @@
                 </span>
               </template>
             </td>
-            <td class="estimation number-cell">
+            <td
+              class="estimation number-cell"
+              v-if="isColumnVisible('estimation')"
+            >
               <input
                 class="input"
                 min="0"
@@ -201,15 +274,42 @@
                 'number-cell': true,
                 error: isEstimationBurned(task)
               }"
+              v-if="isColumnVisible('duration')"
             >
               {{ formatDuration(task.duration) }}
             </td>
-            <td class="retake-count number-cell">
+            <td
+              class="retake-count number-cell"
+              v-if="isColumnVisible('retakeCount')"
+            >
               <template v-for="index in task.retake_count" :key="index">
                 &bull;
               </template>
             </td>
-            <td class="start-date" v-if="!withSchedule">
+            <td
+              class="metadata-descriptor"
+              :key="`${task.id}-${descriptor.id}`"
+              :style="
+                metadataColumnWidths[descriptor.id]
+                  ? {
+                      width: `${metadataColumnWidths[descriptor.id]}px`,
+                      minWidth: `${metadataColumnWidths[descriptor.id]}px`
+                    }
+                  : undefined
+              "
+              v-for="descriptor in visibleMetadataDescriptors"
+            >
+              <metadata-input
+                :entity="task"
+                :descriptor="descriptor"
+                :selected="Boolean(selectionGrid[task.id])"
+                @metadata-changed="onMetadataChanged"
+              />
+            </td>
+            <td
+              class="start-date"
+              v-if="!withSchedule && isColumnVisible('startDate')"
+            >
               <date-field
                 class="flexrow-item"
                 :with-margin="false"
@@ -222,7 +322,10 @@
                 {{ formatDisplayDate(task.start_date) }}
               </template>
             </td>
-            <td class="due-date" v-if="!withSchedule">
+            <td
+              class="due-date"
+              v-if="!withSchedule && isColumnVisible('dueDate')"
+            >
               <date-field
                 class="flexrow-item"
                 :with-margin="false"
@@ -235,19 +338,31 @@
                 {{ formatDisplayDate(task.due_date) }}
               </template>
             </td>
-            <td class="real-start-date" v-if="!withSchedule">
+            <td
+              class="real-start-date"
+              v-if="!withSchedule && isColumnVisible('realStartDate')"
+            >
               {{ formatDisplayDate(task.real_start_date) }}
             </td>
-            <td class="real-end-date" v-if="!withSchedule">
+            <td
+              class="real-end-date"
+              v-if="!withSchedule && isColumnVisible('realEndDate')"
+            >
               {{ formatDisplayDate(task.end_date) }}
             </td>
-            <td class="done-date" v-if="!withSchedule">
+            <td
+              class="done-date"
+              v-if="!withSchedule && isColumnVisible('doneDate')"
+            >
               {{ formatDisplayDate(task.done_date) }}
             </td>
-            <td class="last-comment-date" v-if="!withSchedule">
+            <td
+              class="last-comment-date"
+              v-if="!withSchedule && isColumnVisible('lastCommentDate')"
+            >
               {{ formatDisplayDate(task.last_comment_date) }}
             </td>
-            <td v-if="!withSchedule"></td>
+            <td class="column-selector"></td>
           </tr>
         </tbody>
       </table>
@@ -331,7 +446,10 @@ import { pauseEvent } from '@/composables/dom'
 import { getEntityMap } from '@/composables/entity'
 import { useFormat } from '@/composables/format'
 import { useGrabList } from '@/composables/grabList'
-import { isSupervisorInDepartments } from '@/lib/descriptors'
+import {
+  getMetadataFieldValue,
+  isSupervisorInDepartments
+} from '@/lib/descriptors'
 import {
   daysToMinutes,
   formatSimpleDate,
@@ -342,13 +460,18 @@ import {
   range
 } from '@/lib/time'
 
+import MetadataHeader from '@/components/cells/MetadataHeader.vue'
+import MetadataInput from '@/components/cells/MetadataInput.vue'
 import ValidationCell from '@/components/cells/ValidationCell.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import DateField from '@/components/widgets/DateField.vue'
 import EntityPreview from '@/components/widgets/EntityPreview.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import PeopleAvatarWithMenu from '@/components/widgets/PeopleAvatarWithMenu.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
+import TableMetadataHeaderMenu from '@/components/widgets/TableMetadataHeaderMenu.vue'
+import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu.vue'
 import TaskListNumbers from '@/components/widgets/TaskListNumbers.vue'
 import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
@@ -384,6 +507,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  metadataDescriptors: {
+    type: Array,
+    default: () => []
+  },
   tasks: {
     type: Array,
     default: () => []
@@ -394,7 +521,13 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['scroll', 'task-selected'])
+const emit = defineEmits([
+  'delete-metadata',
+  'edit-metadata',
+  'scroll',
+  'sort-metadata',
+  'task-selected'
+])
 
 // State
 const difficultyOptions = [
@@ -409,7 +542,65 @@ const lastSelection = ref(null)
 const page = ref(1)
 const selectionGrid = ref({})
 
+// Column show/hide, mirroring the assets/shots lists' selector menu. Keys
+// are the fixed task columns; metadata columns are keyed by field_name and
+// merged in by TableMetadataSelectorMenu (localStorage-backed).
+const columnSelectorDisplayed = ref(false)
+const metadataDisplayHeaders = ref({
+  difficulty: true,
+  estimation: true,
+  duration: true,
+  retakeCount: true,
+  frames: true,
+  startDate: true,
+  dueDate: true,
+  realStartDate: true,
+  realEndDate: true,
+  doneDate: true,
+  lastCommentDate: true
+})
+
+const visibleMetadataDescriptors = computed(() =>
+  props.metadataDescriptors.filter(descriptor => {
+    const header = metadataDisplayHeaders.value[descriptor.field_name]
+    return header === undefined || header
+  })
+)
+
+const isColumnVisible = name => metadataDisplayHeaders.value[name] !== false
+
+const toggleColumnSelector = () => {
+  columnSelectorDisplayed.value = !columnSelectorDisplayed.value
+}
+
+// Metadata column widths (keyed by descriptor id), drag-resized and persisted.
+const METADATA_WIDTHS_KEY = 'metadataColumnWidths:task-type'
+const readMetadataColumnWidths = () => {
+  try {
+    return JSON.parse(localStorage.getItem(METADATA_WIDTHS_KEY)) || {}
+  } catch {
+    return {}
+  }
+}
+const metadataColumnWidths = ref(readMetadataColumnWidths())
+
+const onMetadataColumnResize = (descriptorId, width) => {
+  metadataColumnWidths.value = {
+    ...metadataColumnWidths.value,
+    [descriptorId]: width
+  }
+}
+
+const persistMetadataColumnWidths = () => {
+  localStorage.setItem(
+    METADATA_WIDTHS_KEY,
+    JSON.stringify(metadataColumnWidths.value)
+  )
+}
+
 const bodyRef = useTemplateRef('body')
+const headerMetadataMenuRef = useTemplateRef('header-metadata-menu')
+const lastMetadataHeaderMenuDisplayed = ref(null)
 // Row elements for scrollToLine, no reactivity needed
 const taskRows = new Map()
 
@@ -654,7 +845,7 @@ const selectTask = (event, index, task) => {
     event &&
     event.target &&
     // Dirty hack needed to make date picker and inputs work properly
-    (['INPUT'].includes(event.target.nodeName) ||
+    (['INPUT', 'LABEL', 'SELECT', 'TEXTAREA'].includes(event.target.nodeName) ||
       // Combo box should not trigger selection
       event.target.className.indexOf('selected-line') >= 0 ||
       event.target.className.indexOf('down-icon') >= 0 ||
@@ -746,6 +937,76 @@ const isInDepartment = task =>
     taskTypeMap.value.get(task.task_type_id)?.department_id
   )
 
+const isMetadataMenuEditAllowed = computed(() => {
+  const descriptor = props.metadataDescriptors.find(
+    d => d.id === lastMetadataHeaderMenuDisplayed.value
+  )
+  return (
+    isCurrentUserManager.value ||
+    isSupervisorInDepartments(
+      user.value,
+      isCurrentUserSupervisor.value,
+      descriptor?.departments
+    )
+  )
+})
+
+const showMetadataHeaderMenu = (descriptorId, event) => {
+  const menuEl = headerMetadataMenuRef.value?.$el
+  if (!menuEl) return
+  const isHidden = menuEl.classList.contains('hidden')
+  if (
+    !event ||
+    (!isHidden && descriptorId === lastMetadataHeaderMenuDisplayed.value)
+  ) {
+    menuEl.classList.add('hidden')
+    return
+  }
+  menuEl.classList.remove('hidden')
+  let headerElement = event.srcElement.parentNode.parentNode
+  if (headerElement.tagName !== 'TH') {
+    headerElement = headerElement.parentNode
+  }
+  const headerBox = headerElement.getBoundingClientRect()
+  menuEl.style.left = `${headerBox.left - 3}px`
+  menuEl.style.top = `${headerBox.bottom + 4}px`
+  menuEl.style.width = `${Math.max(100, headerBox.width - 1)}px`
+  lastMetadataHeaderMenuDisplayed.value = descriptorId
+}
+
+const onEditMetadataClicked = () => {
+  emit('edit-metadata', lastMetadataHeaderMenuDisplayed.value)
+  showMetadataHeaderMenu()
+}
+
+const onDeleteMetadataClicked = () => {
+  emit('delete-metadata', lastMetadataHeaderMenuDisplayed.value)
+  showMetadataHeaderMenu()
+}
+
+const onSortByMetadataClicked = () => {
+  emit('sort-metadata', lastMetadataHeaderMenuDisplayed.value)
+  showMetadataHeaderMenu()
+}
+
+const onClickOutsideMenu = event => {
+  const menuEl = headerMetadataMenuRef.value?.$el
+  if (!menuEl || menuEl.classList.contains('hidden')) return
+  // The chevron buttons drive the menu themselves (toggle or reposition).
+  if (menuEl.contains(event.target)) return
+  if (event.target.closest?.('.metadata-menu-button')) return
+  menuEl.classList.add('hidden')
+}
+
+const onMetadataChanged = ({ entry, descriptor, value }) => {
+  store
+    .dispatch('updateTask', {
+      taskId: entry.id,
+      data: { data: { [descriptor.field_name]: value } }
+    })
+    .catch(console.error)
+}
+
 const resetSelection = () => {
   selectionGrid.value = {}
   lastSelection.value = null
@@ -761,6 +1022,7 @@ const getTableData = () => {
     t('tasks.fields.estimation'),
     t('tasks.fields.duration'),
     t('tasks.fields.retake_count'),
+    ...props.metadataDescriptors.map(descriptor => descriptor.name),
     t('tasks.fields.start_date'),
     t('tasks.fields.due_date'),
     t('tasks.fields.real_start_date'),
@@ -791,6 +1053,9 @@ const getTableData = () => {
       formatDuration(task.estimation, false),
       formatDuration(task.duration, false),
       task.retake_count,
+      ...props.metadataDescriptors.map(descriptor =>
+        getMetadataFieldValue(descriptor, task)
+      ),
       formatSimpleDate(task.start_date),
       formatSimpleDate(task.due_date),
       formatSimpleDate(task.real_start_date),
@@ -825,10 +1090,12 @@ watch(nbSelectedTasks, () => {
 // Lifecycle
 onMounted(() => {
   window.addEventListener('keydown', onKeyDown, false)
+  window.addEventListener('mousedown', onClickOutsideMenu)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKeyDown)
+  window.removeEventListener('mousedown', onClickOutsideMenu)
 })
 
 defineExpose({
@@ -914,6 +1181,11 @@ td.due-date {
   width: 90px;
 }
 
+td.metadata-descriptor {
+  height: 3.1rem;
+  padding: 0;
+}
+
 td.retake-count {
   line-height: 0.5em;
   color: $red;
@@ -923,7 +1195,8 @@ td.retake-count {
   white-space: nowrap;
 }
 
-.empty {
+.column-selector {
+  text-align: right;
   width: 100%;
 }
 

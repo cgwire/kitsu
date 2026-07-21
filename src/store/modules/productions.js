@@ -349,6 +349,7 @@ const getters = {
   sequenceMetadataDescriptors: entityMetadataDescriptors('Sequence'),
   episodeMetadataDescriptors: entityMetadataDescriptors('Episode'),
   editMetadataDescriptors: entityMetadataDescriptors('Edit'),
+  taskMetadataDescriptors: entityMetadataDescriptors('Task'),
 
   /**
    * Union of all Project-entity metadata descriptors (field definitions) that

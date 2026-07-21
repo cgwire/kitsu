@@ -163,6 +163,9 @@ export default {
       entity_type: descriptor.entity_type,
       departments: descriptor.departments
     }
+    if (descriptor.task_type_id) {
+      data.task_type_id = descriptor.task_type_id
+    }
     return client.ppost(
       `/api/data/projects/${productionId}/metadata-descriptors`,
       data

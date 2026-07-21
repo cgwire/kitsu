@@ -22,7 +22,12 @@ export const getMetadataFieldValue = (descriptor, entity) => {
   ) {
     return entity.data[descriptor.field_name]
   }
+  // Task descriptors live only in the task's own `data`. Never fall back to
+  // the linked entity's metadata (entity_data), or a same-named entity column
+  // (e.g. a "reviewer" on both Shot and the task type) would leak its value
+  // into the task column.
   if (
+    descriptor.entity_type !== 'Task' &&
     entity.entity_data &&
     descriptor.field_name in entity.entity_data &&
     entity.entity_data[descriptor.field_name] != null

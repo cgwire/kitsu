@@ -2,8 +2,8 @@
   <th
     scope="col"
     class="metadata-descriptor"
-    :class="{ 'datatable-row-header': isStick }"
-    :style="{ left }"
+    :class="{ 'datatable-row-header': isStick, resizable }"
+    :style="thStyle"
   >
     <div class="flexrow metadata-wrapper-header">
       <department-name
@@ -32,6 +32,11 @@
         <chevron-down-icon :size="14" />
       </span>
     </div>
+    <span
+      class="resize-handle"
+      @mousedown.stop.prevent="startResize"
+      v-if="resizable"
+    ></span>
   </th>
 </template>
 
@@ -46,10 +51,12 @@ const props = defineProps({
   descriptor: { type: Object, required: true },
   isStick: { type: Boolean, default: false },
   left: { type: String, default: '0px' },
-  noMenu: { type: Boolean, default: false }
+  noMenu: { type: Boolean, default: false },
+  resizable: { type: Boolean, default: false },
+  width: { type: Number, default: null }
 })
 
-defineEmits(['show-metadata-header-menu'])
+const emit = defineEmits(['resize', 'resize-end', 'show-metadata-header-menu'])
 
 const store = useStore()
 const departmentMap = computed(() => store.getters.departmentMap)
@@ -57,6 +64,39 @@ const departmentMap = computed(() => store.getters.departmentMap)
 const currentDepartments = computed(() =>
   (props.descriptor.departments || []).map(id => departmentMap.value.get(id))
 )
+
+const thStyle = computed(() => {
+  const style = { left: props.left }
+  // min-width is the lever the auto table-layout actually honours; width
+  // overrides the fixed 120px base so the column can shrink too.
+  if (props.width) {
+    style.width = `${props.width}px`
+    style.minWidth = `${props.width}px`
+  }
+  return style
+})
+
+// Column resize: drag the right-edge handle, report the new width upward so
+// the parent owns and persists it (and applies it to the body cells).
+let startX = 0
+let startWidth = 0
+
+const onResizeMove = event => {
+  emit('resize', Math.max(60, startWidth + event.clientX - startX))
+}
+
+const onResizeUp = () => {
+  window.removeEventListener('mousemove', onResizeMove)
+  window.removeEventListener('mouseup', onResizeUp)
+  emit('resize-end')
+}
+
+const startResize = event => {
+  startX = event.clientX
+  startWidth = event.currentTarget.parentElement.offsetWidth
+  window.addEventListener('mousemove', onResizeMove)
+  window.addEventListener('mouseup', onResizeUp)
+}
 </script>
 
 <style lang="scss" scoped>
@@ -70,6 +110,25 @@ th.metadata-descriptor {
   &.datatable-row-header {
     z-index: 1001; // above sticky cells
   }
+
+  &.resizable {
+    min-width: 60px;
+    position: relative;
+  }
+}
+
+.resize-handle {
+  bottom: 0;
+  cursor: col-resize;
+  position: absolute;
+  right: 0;
+  top: 0;
+  user-select: none;
+  width: 6px;
+}
+
+th.metadata-descriptor.resizable:hover .resize-handle {
+  background: var(--border);
 }
 
 .metadata-wrapper-header {

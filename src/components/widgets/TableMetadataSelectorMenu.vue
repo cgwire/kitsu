@@ -117,14 +117,23 @@ const sortedMetadataDescriptors = ref([])
 // Computed
 
 const FIELD_TO_NAME = computed(() => ({
+  difficulty: t('tasks.fields.difficulty'),
+  doneDate: t('tasks.fields.done_date'),
+  dueDate: t('tasks.fields.due_date'),
+  duration: t('tasks.fields.duration'),
   estimation: t('main.estimation'),
   fps: t('main.fps'),
   frameIn: t('main.frame_in'),
   frameOut: t('main.frame_out'),
   frames: t('main.frames'),
+  lastCommentDate: t('tasks.fields.last_comment_date'),
   maxRetakes: t('shots.fields.max_retakes'),
   readyFor: t('assets.fields.ready_for'),
+  realEndDate: t('tasks.fields.real_end_date'),
+  realStartDate: t('tasks.fields.real_start_date'),
   resolution: t('shots.fields.resolution'),
+  retakeCount: t('tasks.fields.retake_count'),
+  startDate: t('tasks.fields.start_date'),
   stdby: t('breakdown.fields.standby'),
   timeSpent: t('main.timeSpent')
 }))
