@@ -1098,7 +1098,6 @@ let scrubStartFrame = 0
 let scrubWidth = 0
 let isRoomSilent = false
 let silentMode = false
-let isWaveformSeekingSilent = false
 let fullPlayingPath = ''
 let playLoop = null
 let lastResizeCall = 0
@@ -3909,19 +3908,12 @@ const configureWaveForm = () => {
     wavesurfer.on('error', error => {
       console.error('Error loading audio:', error)
     })
-    wavesurfer.on('seeking', onWaveformSeeking)
+    // 'interaction' fires only on a user click or drag, never on the
+    // seekTo() that keeps the waveform in sync with the video, so it needs
+    // no re-entrancy guard and works while playing.
+    wavesurfer.on('interaction', time => setCurrentTimeRaw(time))
   } catch (err) {
     console.error(err)
-  }
-}
-
-const onWaveformSeeking = position => {
-  if (!isWaveformSeekingSilent && !isPlaying.value) {
-    isWaveformSeekingSilent = true
-    setCurrentTimeRaw(position)
-    setTimeout(() => {
-      isWaveformSeekingSilent = false
-    }, 500)
   }
 }
 
@@ -3932,7 +3924,10 @@ const loadWaveForm = () => {
         if (wavesurfer) wavesurfer.destroy()
         configureWaveForm()
         setTimeout(() => {
-          wavesurfer.load(rawPlayer.value.currentPlayer.src)
+          // destroy() aborts the in-flight fetch, rejecting load() with an
+          // expected AbortError; real failures already reach the 'error'
+          // handler, which load() fires before rejecting.
+          wavesurfer.load(rawPlayer.value.currentPlayer.src).catch(() => {})
         }, 100)
       } catch (err) {
         console.error('Error loading waveform:', err)

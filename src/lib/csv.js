@@ -1,5 +1,6 @@
 import Papa from 'papaparse'
 
+import { downloadBlob } from '@/lib/download'
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import { getPercentage } from '@/lib/stats'
 import stringHelpers from '@/lib/string'
@@ -228,12 +229,10 @@ const csv = {
 
   buildCsvFile(name, entries) {
     const csvContent = csv.turnEntriesToCsvString(entries)
-    const result = `data:text/csv;charset=utf-8,${encodeURIComponent(csvContent)}`
-    const link = document.createElement('a')
-    link.setAttribute('href', result)
-    link.setAttribute('download', `${name}.csv`)
-    document.body.appendChild(link)
-    link.click()
+    downloadBlob(
+      new Blob([csvContent], { type: 'text/csv;charset=utf-8' }),
+      `${name}.csv`
+    )
     return csvContent
   },
 

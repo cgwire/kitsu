@@ -10,6 +10,7 @@
       :formats="{ input: format }"
       :input-attrs="{ clearable: canDelete, hideInputIcon: true }"
       :locale="dateFnsLocale"
+      :model-type="modelType"
       :min-date="minDate"
       :max-date="maxDate"
       :placeholder="placeholder"
@@ -101,6 +102,12 @@ const props = defineProps({
   maxDate: {
     default: null,
     type: [Date, String]
+  },
+  // Null keeps vue-date-picker's default Date model. Set to a format string
+  // (e.g. "yyyy-MM-dd") to make v-model that formatted string instead.
+  modelType: {
+    default: null,
+    type: String
   },
   modelValue: {
     default: () => new Date(),

@@ -95,52 +95,42 @@ export const routes = [
     name: 'home',
     component: Main,
 
-    beforeEnter: (to, from, next) => {
+    beforeEnter: async (to, from) => {
       const browser = Bowser.getParser(window.navigator.userAgent)
       const isValidBrowser = browser.satisfies({
         // see https://vitejs.dev/guide/build.html#browser-compatibility + ES2020 support
         chrome: '>=87',
         firefox: '>=79',
-        edge: '>90',
+        edge: '>=91',
         vivaldi: '>=3.5',
         opera: '>=73',
         safari: '>=14'
       })
       if (!isValidBrowser) {
-        return next({ name: 'wrong-browser' })
+        return { name: 'wrong-browser' }
       }
 
-      auth.requireAuth(to, from, nextPath => {
-        if (nextPath) {
-          next(nextPath)
-        } else {
-          timezone.setTimezone()
-          lang.setLocale(userStore.state.user.locale)
-          sentry.setContext(
-            peopleStore.state.organisation,
-            userStore.state.user
-          )
-          if (store.state.productions.openProductions.length === 0) {
-            init()
-              .then(ready => {
-                if (!ready) return
-                if (!userStore.getters.isCurrentUserArtist(userStore.state)) {
-                  next({ name: 'open-productions' })
-                } else {
-                  next({ name: 'todos' })
-                }
-              })
-              .catch(() => next({ name: 'server-down' }))
-          } else {
-            store.commit('DATA_LOADING_END')
-            if (!userStore.getters.isCurrentUserArtist(userStore.state)) {
-              next({ name: 'open-productions' })
-            } else {
-              next({ name: 'todos' })
-            }
-          }
+      const redirect = await auth.requireAuth(to, from)
+      if (redirect) return redirect
+
+      timezone.setTimezone()
+      lang.setLocale(userStore.state.user.locale)
+      sentry.setContext(peopleStore.state.organisation, userStore.state.user)
+
+      if (store.state.productions.openProductions.length === 0) {
+        try {
+          const ready = await init()
+          if (!ready) return false
+        } catch {
+          return { name: 'server-down' }
         }
-      })
+      } else {
+        store.commit('DATA_LOADING_END')
+      }
+
+      return userStore.getters.isCurrentUserArtist(userStore.state)
+        ? { name: 'todos' }
+        : { name: 'open-productions' }
     }
   },
 
@@ -148,52 +138,37 @@ export const routes = [
     path: '/',
     component: Main,
 
-    beforeEnter: (to, from, next) => {
-      auth.requireAuth(to, from, nextPath => {
-        if (nextPath) {
-          next(nextPath)
-        } else {
-          timezone.setTimezone()
-          lang.setLocale(userStore.state.user.locale)
-          sentry.setContext(
-            peopleStore.state.organisation,
-            userStore.state.user
-          )
-          const isSupervisorOrManager =
-            userStore.getters.isCurrentUserManager(userStore.state) ||
-            userStore.getters.isCurrentUserSupervisor(userStore.state)
-          const isProhibited =
-            (!userStore.getters.isCurrentUserAdmin(userStore.state) &&
-              to?.matched.some(record => record.meta.requiresAdmin)) ||
-            (!isSupervisorOrManager &&
-              to?.matched.some(
-                record => record.meta.requiresSupervisorOrManager
-              ))
-          if (taskTypeStore.state.taskTypes.length === 0) {
-            init()
-              .then(ready => {
-                store.commit('DATA_LOADING_END')
-                if (!ready) return
-                if (isProhibited) {
-                  next({ name: 'not-found' })
-                } else {
-                  next()
-                }
-              })
-              .catch(() => {
-                store.commit('DATA_LOADING_END')
-                next({ name: 'server-down' })
-              })
-          } else {
-            store.commit('DATA_LOADING_END')
-            if (isProhibited) {
-              next({ name: 'not-found' })
-            } else {
-              next()
-            }
-          }
+    beforeEnter: async (to, from) => {
+      const redirect = await auth.requireAuth(to, from)
+      if (redirect) return redirect
+
+      timezone.setTimezone()
+      lang.setLocale(userStore.state.user.locale)
+      sentry.setContext(peopleStore.state.organisation, userStore.state.user)
+
+      const isSupervisorOrManager =
+        userStore.getters.isCurrentUserManager(userStore.state) ||
+        userStore.getters.isCurrentUserSupervisor(userStore.state)
+      const isProhibited =
+        (!userStore.getters.isCurrentUserAdmin(userStore.state) &&
+          to?.matched.some(record => record.meta.requiresAdmin)) ||
+        (!isSupervisorOrManager &&
+          to?.matched.some(record => record.meta.requiresSupervisorOrManager))
+
+      if (taskTypeStore.state.taskTypes.length === 0) {
+        try {
+          const ready = await init()
+          store.commit('DATA_LOADING_END')
+          if (!ready) return false
+        } catch {
+          store.commit('DATA_LOADING_END')
+          return { name: 'server-down' }
         }
-      })
+      } else {
+        store.commit('DATA_LOADING_END')
+      }
+
+      if (isProhibited) return { name: 'not-found' }
     },
 
     children: [

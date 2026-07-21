@@ -153,8 +153,8 @@ export const descriptorMixin = {
       this.showHeaderMenuAt(
         'headerMetadataMenu',
         event,
-        event => event.srcElement.parentNode.parentNode,
-        { left: -3, top: 11 }
+        event => event.target.closest('th'),
+        { left: -3, top: 4 }
       )
       this.lastMetadataHeaderMenuDisplayed = columnId
     },

@@ -326,13 +326,12 @@ export const entityListMixin = {
     },
 
     showHeaderMenu(columnId, columnIndexInGrid, event) {
-      this.showHeaderMenuAt('headerMenu', event, event => {
-        let headerElement = event.srcElement.parentNode.parentNode
-        if (headerElement.tagName !== 'TH') {
-          headerElement = headerElement.parentNode
-        }
-        return headerElement
-      })
+      this.showHeaderMenuAt(
+        'headerMenu',
+        event,
+        event => event.target.closest('th'),
+        { left: -3, top: 4 }
+      )
       this.lastHeaderMenuDisplayed = columnId
       this.lastHeaderMenuDisplayedIndexInGrid = columnIndexInGrid
     },
@@ -341,8 +340,8 @@ export const entityListMixin = {
       this.showHeaderMenuAt(
         'headerFieldMenu',
         event,
-        event => event.currentTarget.closest('th'),
-        { left: -3, top: 11 }
+        event => event.target.closest('th'),
+        { left: -3, top: 4 }
       )
       this.lastFieldHeaderMenuDisplayed = fieldName
       if (label !== undefined) this.lastFieldHeaderMenuLabel = label

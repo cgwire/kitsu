@@ -437,7 +437,7 @@ const getMetadataValues = (sortInfo, a, b, defaultValue = '') => {
   return { dataA, dataB }
 }
 
-const sortByMetadata = sortInfo => {
+export const sortByMetadata = sortInfo => {
   if (sortInfo.data_type === 'number') {
     return (a, b) => {
       const { dataA, dataB } = getMetadataValues(sortInfo, a, b)

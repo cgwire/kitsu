@@ -38,6 +38,13 @@
           @enter="confirm"
         />
 
+        <combobox-task-type
+          :label="$t('tasks.fields.task_type')"
+          :task-type-list="taskTypes"
+          v-model="form.task_type_id"
+          v-if="entityType === 'Task' && taskTypes.length"
+        />
+
         <div v-if="['list', 'taglist'].includes(form.data_type)">
           <p class="strong">
             {{ $t('productions.metadata.available_values') }}
@@ -169,11 +176,20 @@ import Checklist from '@/components/widgets/Checklist.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
-const SIMPLE_TYPES = ['string', 'number', 'boolean']
+const SIMPLE_TYPES = [
+  'string',
+  'textarea',
+  'number',
+  'boolean',
+  'date',
+  'url',
+  'person'
+]
 const VALUE_LIST_TYPES = ['list', 'taglist']
 
 const props = defineProps({
@@ -181,7 +197,10 @@ const props = defineProps({
   descriptorToEdit: { type: Object, default: () => ({}) },
   entityType: { type: String, default: 'Asset' },
   isError: { type: Boolean, default: false },
-  isLoading: { type: Boolean, default: false }
+  isLoading: { type: Boolean, default: false },
+  // Task descriptors only: when provided, the user picks the task type
+  // the column is scoped to. Left empty when the caller sets it itself.
+  taskTypes: { type: Array, default: () => [] }
 })
 
 const emit = defineEmits(['cancel', 'confirm'])
@@ -211,8 +230,12 @@ const selectedDepartment = ref(null)
 
 const typeOptions = computed(() => [
   { label: t('productions.metadata.string'), value: 'string' },
+  { label: t('productions.metadata.textarea'), value: 'textarea' },
   { label: t('productions.metadata.number'), value: 'number' },
   { label: t('productions.metadata.boolean'), value: 'boolean' },
+  { label: t('productions.metadata.date'), value: 'date' },
+  { label: t('productions.metadata.url'), value: 'url' },
+  { label: t('productions.metadata.person'), value: 'person' },
   { label: t('productions.metadata.choices'), value: 'list' },
   { label: t('productions.metadata.tags'), value: 'taglist' },
   { label: t('productions.metadata.checklist'), value: 'checklist' }
@@ -263,7 +286,11 @@ const isFormFilled = computed(() => {
     !user.value.departments.length ||
     form.value.departments.length ||
     (props.entityType === 'Project' && selectableDepartments.value.length === 0)
-  return form.value.name.length && dataTypeOk && supervisorDeptOk
+  const taskTypeOk =
+    props.entityType !== 'Task' ||
+    !props.taskTypes.length ||
+    Boolean(form.value.task_type_id)
+  return form.value.name.length && dataTypeOk && supervisorDeptOk && taskTypeOk
 })
 
 // Functions
@@ -274,6 +301,7 @@ const reset = () => {
       id: props.descriptorToEdit.id,
       name: props.descriptorToEdit.name,
       data_type: props.descriptorToEdit.data_type,
+      task_type_id: props.descriptorToEdit.task_type_id ?? null,
       for_client: props.descriptorToEdit.for_client ? 'true' : 'false',
       values: [...props.descriptorToEdit.choices],
       departments: [...props.descriptorToEdit.departments]
@@ -286,6 +314,7 @@ const reset = () => {
     form.value = {
       name: '',
       data_type: 'string',
+      task_type_id: props.taskTypes[0]?.id ?? null,
       for_client: 'false',
       values: [],
       departments: []
