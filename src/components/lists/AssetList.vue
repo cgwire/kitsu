@@ -1223,7 +1223,6 @@ td.ready-for {
 
 .description {
   min-width: 200px;
-  max-width: 200px;
   width: 200px;
 }
 
