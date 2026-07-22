@@ -1,0 +1,2 @@
+var e=(e,t)=>{let n=URL.createObjectURL(e),r=document.createElement(`a`);r.href=n,r.download=t,document.body.appendChild(r),r.click(),r.remove(),URL.revokeObjectURL(n)};export{e as t};
+//# sourceMappingURL=download-DN9VbfYw.js.map
