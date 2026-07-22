@@ -1047,7 +1047,12 @@
         "tags": "Lista de tags",
         "applies_to_all_projects": "Esta coluna é adicionada a todos os projetos da lista. Cada projeto pode ter seu próprio valor na visualização em lista.",
         "delete_list_column_text": "Isso removerá a coluna “{name}” de todos os projetos, incluindo os valores armazenados. Continuar?",
-        "target_project": "Projeto"
+        "target_project": "Projeto",
+        "date": "Data",
+        "url": "Link",
+        "textarea": "Texto longo",
+        "person": "Pessoa",
+        "delete_task_text": "Você tem certeza que deseja deletar essa coluna e seus dados relacionados de todas as tarefas desse tipo de tarefa?"
       },
       "status": {
         "closed": "Fechar",

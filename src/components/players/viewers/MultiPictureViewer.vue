@@ -12,11 +12,11 @@
       :margin-bottom="marginBottom"
       :panzoom="panzoom"
       :preview="preview"
-      @loaded="() => $emit('loaded')"
+      @loaded="onViewerLoaded(preview)"
       @panzoom-changed="$event => $emit('panzoom-changed', $event)"
       @panzoom-ready="() => $emit('panzoom-ready')"
       @size-changed="() => $emit('size-changed')"
-      v-for="preview in validPreviews"
+      v-for="preview in mountedPreviews"
       v-show="
         preview.id === currentPreview.id &&
         preview.position === currentPreview.position
@@ -69,7 +69,12 @@ const props = defineProps({
   }
 })
 
-defineEmits(['loaded', 'panzoom-changed', 'panzoom-ready', 'size-changed'])
+const emit = defineEmits([
+  'loaded',
+  'panzoom-changed',
+  'panzoom-ready',
+  'size-changed'
+])
 
 const container = ref(null)
 const pictureRefs = reactive({})
@@ -78,12 +83,40 @@ const pictureRefs = reactive({})
 
 const validPreviews = computed(() => props.previews.filter(p => p?.id))
 
+// Only mount the displayed picture and its immediate neighbours: the
+// strip used to mount (and download) every picture of the playlist up
+// front, saturating the network the moment a playlist opened. The +/-1
+// window keeps prev/next navigation and continuous playback preloaded.
+const mountedPreviews = computed(() => {
+  const list = validPreviews.value
+  const index = list.findIndex(
+    p =>
+      p.id === props.currentPreview?.id &&
+      p.position === props.currentPreview?.position
+  )
+  if (index === -1) return list.slice(0, 2)
+  return list.filter((p, i) => Math.abs(i - index) <= 1)
+})
+
 const setPictureRef = (preview, el) => {
   const key = `${preview.id}-${preview.position}`
   if (el) {
     pictureRefs[key] = el
   } else {
     delete pictureRefs[key]
+  }
+}
+
+// Every PictureViewer in the strip loads eagerly (v-show): only the
+// displayed one may notify the parent, or each background image finishing
+// its download resets the live annotation canvas (wiping in-progress
+// strokes) for seconds after opening a picture-heavy playlist.
+const onViewerLoaded = preview => {
+  if (
+    preview.id === props.currentPreview?.id &&
+    preview.position === props.currentPreview?.position
+  ) {
+    emit('loaded')
   }
 }
 

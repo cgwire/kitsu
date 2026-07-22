@@ -32,6 +32,7 @@ import {
   reviveObjectEraser
 } from '@/lib/players/eraserbrush'
 import clipboard from '@/lib/clipboard'
+import func from '@/lib/func'
 import { formatFullDate } from '@/lib/time'
 import localPreferences from '@/lib/preferences'
 
@@ -226,17 +227,30 @@ export const useAnnotation = ({
     return object
   }
 
+  // add() fires object:added whose handler stacks the action already;
+  // drop that entry (and only that one — the laser branch stacks
+  // nothing) so addObject's explicit push stays the single one.
+  const popOwnAddEntry = obj => {
+    const top = doneActionStack[doneActionStack.length - 1]
+    if (top?.type === 'add' && top.obj === obj) doneActionStack.pop()
+  }
+
   const addObject = (activeObject, persist = true) => {
     if (activeObject._objects) {
       activeObject._objects.forEach(obj => {
         fabricCanvas.value.add(obj)
-        doneActionStack.pop()
+        popOwnAddEntry(obj)
       })
     } else {
       fabricCanvas.value.add(activeObject)
+      popOwnAddEntry(activeObject)
     }
     if (persist) {
-      doneActionStack.push({ type: 'add', obj: activeObject })
+      doneActionStack.push({
+        type: 'add',
+        obj: activeObject,
+        time: getCurrentTime()
+      })
       saveAnnotationsCb()
     }
   }
@@ -311,13 +325,18 @@ export const useAnnotation = ({
       children.forEach(obj => {
         fabricCanvas.value.remove(obj)
         addToDeletions(obj)
-        doneActionStack.push({ type: 'remove', obj })
+        doneActionStack.push({ type: 'remove', obj, time: getCurrentTime() })
       })
     } else if (activeObject) {
       fabricCanvas.value.remove(activeObject)
       addToDeletions(activeObject)
-      doneActionStack.push({ type: 'remove', obj: activeObject })
+      doneActionStack.push({
+        type: 'remove',
+        obj: activeObject,
+        time: getCurrentTime()
+      })
     }
+    if (activeObject) clearUndoneOnUserAction()
     saveAnnotationsCb()
   }
 
@@ -448,6 +467,40 @@ export const useAnnotation = ({
 
   // Annotations
 
+  // Serialize a selection child with its ABSOLUTE transform: serialize()
+  // reads the group-relative state, and the previous manual compensations
+  // wrote live-canvas pixels over the normalized result (wrong reference
+  // frame whenever the canvas differs from the authored size) while
+  // ignoring the group's scale and rotation entirely.
+  const GROUP_TRANSFORM_KEYS = [
+    'left',
+    'top',
+    'angle',
+    'scaleX',
+    'scaleY',
+    'skewX',
+    'skewY',
+    'flipX',
+    'flipY'
+  ]
+
+  const serializeAbsolute = obj => {
+    const group = obj.group
+    if (!group) return obj.serialize()
+    const saved = {}
+    GROUP_TRANSFORM_KEYS.forEach(key => {
+      saved[key] = obj[key]
+    })
+    const matrix = obj.calcTransformMatrix()
+    obj.group = undefined
+    util.applyTransformToObject(obj, matrix)
+    const result = obj.serialize()
+    obj.group = group
+    obj.set(saved)
+    obj.setCoords()
+    return result
+  }
+
   const getNewAnnotations = (currentTime, currentFrame, annotation) => {
     fabricCanvas.value.getObjects().forEach(obj => {
       setObjectData(obj)
@@ -470,13 +523,8 @@ export const useAnnotation = ({
 
     if (annotation) {
       const canvasObjects = fabricCanvas.value._objects.map(obj => {
-        const result = obj.serialize()
-        if (obj.group) {
-          const group = obj.group
-          result.left = group.left + Math.round(group.width / 2) + obj.left
-          result.top = group.top + Math.round(group.height / 2) + obj.top
-          result.group = null
-        }
+        const result = serializeAbsolute(obj)
+        if (obj.group) result.group = null
         return result
       })
       // Fast navigation can run a save while this frame's previously-saved
@@ -555,10 +603,16 @@ export const useAnnotation = ({
     // Adding PSStrokes / shapes is async, so load sequentially and bail if a
     // clear (or newer load) superseded us — otherwise late adds repopulate a
     // canvas that was just cleared, leaving an incomplete/garbled overlay.
+    // Like the main-canvas path, an object whose async build was already in
+    // flight when the clear hit is removed right after it lands.
     const token = comparisonLoadToken
     for (const obj of annotation.drawing.objects) {
       if (token !== comparisonLoadToken) return
-      await addObjectToCanvas(annotation, obj, canvas)
+      const built = await addObjectToCanvas(annotation, obj, canvas)
+      if (token !== comparisonLoadToken) {
+        if (built) canvas.remove(built)
+        return
+      }
     }
   }
 
@@ -745,12 +799,14 @@ export const useAnnotation = ({
     }
     if (isLaserModeOn.value) {
       // Laser strokes fade out locally and are broadcast as ephemeral
-      // events; they are intentionally not added to the additions stack.
+      // events (flagged so receivers fade them too); they are
+      // intentionally not added to the additions stack.
       fadeObject(o)
-      postAnnotationAddition(getCurrentTime(), o.serialize())
+      postAnnotationAddition(getCurrentTime(), o.serialize(), { laser: true })
     } else {
       addToAdditions(o)
       stackAddAction(obj)
+      clearUndoneOnUserAction()
     }
   }
 
@@ -781,7 +837,8 @@ export const useAnnotation = ({
       type: 'erase',
       targets: affected,
       removedTargets,
-      path
+      path,
+      time: getCurrentTime()
     })
     clearUndoneStack()
     saveAnnotationsCb()
@@ -796,24 +853,23 @@ export const useAnnotation = ({
     } else {
       const group = movedObject
       group._objects.forEach(groupObj => {
-        const canvasObj = getObjectById(groupObj.id)
+        const canvasObj = getObjectById(groupObj.id) ?? groupObj
         setObjectData(canvasObj)
-        const targetObj = canvasObj.serialize()
-        const point = new Point(groupObj.left, groupObj.top)
-        const transformedPoint = util.transformPoint(
-          point,
-          group.calcTransformMatrix()
-        )
-        targetObj.left = transformedPoint.x
-        targetObj.top = transformedPoint.y
-        targetObj.angle += group.angle
-        targetObj.scaleX *= group.scaleX
-        targetObj.scaleY *= group.scaleY
-        addToUpdatesSerializedObject(targetObj)
+        addToUpdatesSerializedObject(serializeAbsolute(canvasObj))
       })
       saveAnnotationsCb()
     }
   }
+
+  // text:changed fires per keystroke and onObjectModified serializes the
+  // whole canvas and dispatches the store each time (plus one socket emit
+  // per keystroke in review rooms): batch it trailing-edge. The final
+  // state is never lost — exiting text editing fires object:modified
+  // directly. The canvas guard drops a pending call whose object was
+  // cleared away (preview or frame switch) while the debounce ran.
+  const onTextChangedDebounced = func.debounce(event => {
+    if (event.target?.canvas === fabricCanvas.value) onObjectModified(event)
+  }, 400)
 
   const onWindowsClosed = event => {
     if (notSaved.value) {
@@ -826,7 +882,22 @@ export const useAnnotation = ({
   // Undo / Redo
 
   const stackAddAction = ({ target }) => {
-    doneActionStack.push({ type: 'add', obj: target })
+    doneActionStack.push({ type: 'add', obj: target, time: getCurrentTime() })
+  }
+
+  // History entries belong to the frame they were made on: replayed after
+  // a seek, they would graft objects onto the wrong frame's annotation
+  // entry (deltas are keyed on the CURRENT time). Stale history is
+  // dropped instead of replayed.
+  const isStaleAction = action =>
+    action?.time !== undefined && action.time !== getCurrentTime()
+
+  // Any NEW user action invalidates the redo stack (a kept one would
+  // replay stale history on top of the new state) — but not the re-adds
+  // and re-deletes performed by undo/redo themselves.
+  let replayingHistory = false
+  const clearUndoneOnUserAction = () => {
+    if (!replayingHistory) clearUndoneStack()
   }
 
   // After a canvas reload (e.g. Esc-exit fullscreen) the stack entry
@@ -895,51 +966,73 @@ export const useAnnotation = ({
   }
 
   const undoLastAction = () => {
-    if (doneActionStack[doneActionStack.length - 1]?.type === 'erase') {
-      const action = doneActionStack.pop()
-      undoEraseAction(action)
-      undoneActionStack.push(action)
+    const lastAction = doneActionStack[doneActionStack.length - 1]
+    if (!lastAction) return
+    if (isStaleAction(lastAction)) {
+      resetUndoStacks()
       return
     }
-    const action = doneActionStack.pop()
-    if (!action?.obj) return
-    const obj = resolveActionObject(action)
-    // Snapshot length so the side-effect pushes addObject / deleteObject
-    // make (object:added → stackAddAction for re-adds, per-child remove
-    // for groups) are dropped before we move the action to the undone
-    // stack — otherwise undo grows the done stack instead of shrinking it.
-    const stackLengthBefore = doneActionStack.length
-    if (action.type === 'add') {
-      deleteObject(obj)
-      removeFromAdditions(obj)
-    } else if (action.type === 'remove') {
-      // addObject's 'object:added' already fires addToAdditions; no
-      // explicit call needed (it would double-record the addition).
-      addObject(obj)
-      removeFromDeletions(obj)
+    replayingHistory = true
+    try {
+      if (lastAction.type === 'erase') {
+        const action = doneActionStack.pop()
+        undoEraseAction(action)
+        undoneActionStack.push(action)
+        return
+      }
+      const action = doneActionStack.pop()
+      if (!action?.obj) return
+      const obj = resolveActionObject(action)
+      // Snapshot length so the side-effect pushes addObject / deleteObject
+      // make (object:added → stackAddAction for re-adds, per-child remove
+      // for groups) are dropped before we move the action to the undone
+      // stack — otherwise undo grows the done stack instead of shrinking it.
+      const stackLengthBefore = doneActionStack.length
+      if (action.type === 'add') {
+        deleteObject(obj)
+        removeFromAdditions(obj)
+      } else if (action.type === 'remove') {
+        // addObject's 'object:added' already fires addToAdditions; no
+        // explicit call needed (it would double-record the addition).
+        addObject(obj)
+        removeFromDeletions(obj)
+      }
+      doneActionStack.length = stackLengthBefore
+      undoneActionStack.push(action)
+    } finally {
+      replayingHistory = false
     }
-    doneActionStack.length = stackLengthBefore
-    undoneActionStack.push(action)
   }
 
   const redoLastAction = () => {
-    if (undoneActionStack[undoneActionStack.length - 1]?.type === 'erase') {
-      const action = undoneActionStack.pop()
-      redoEraseAction(action)
-      doneActionStack.push(action)
+    const lastUndone = undoneActionStack[undoneActionStack.length - 1]
+    if (!lastUndone) return
+    if (isStaleAction(lastUndone)) {
+      resetUndoStacks()
       return
     }
-    const action = undoneActionStack.pop()
-    if (!action?.obj) return
-    const obj = resolveActionObject(action)
-    const stackLengthBefore = doneActionStack.length
-    if (action.type === 'add') {
-      addObject(obj)
-    } else if (action.type === 'remove') {
-      deleteObject(obj)
+    replayingHistory = true
+    try {
+      if (lastUndone.type === 'erase') {
+        const action = undoneActionStack.pop()
+        redoEraseAction(action)
+        doneActionStack.push(action)
+        return
+      }
+      const action = undoneActionStack.pop()
+      if (!action?.obj) return
+      const obj = resolveActionObject(action)
+      const stackLengthBefore = doneActionStack.length
+      if (action.type === 'add') {
+        addObject(obj)
+      } else if (action.type === 'remove') {
+        deleteObject(obj)
+      }
+      doneActionStack.length = stackLengthBefore
+      doneActionStack.push(action)
+    } finally {
+      replayingHistory = false
     }
-    doneActionStack.length = stackLengthBefore
-    doneActionStack.push(action)
   }
 
   const clearUndoneStack = () => {
@@ -999,7 +1092,7 @@ export const useAnnotation = ({
     fabricCanvas.value.off('mouse:up', onCanvasReleasedCb)
     fabricCanvas.value.on('object:moved', onObjectModified)
     fabricCanvas.value.on('object:modified', onObjectModified)
-    fabricCanvas.value.on('text:changed', onObjectModified)
+    fabricCanvas.value.on('text:changed', onTextChangedDebounced)
     fabricCanvas.value.on('object:added', onObjectAdded)
     fabricCanvas.value.on('erasing:end', onErasingEnd)
     fabricCanvas.value.on('mouse:down', initializeMouseDrawing)
@@ -1045,6 +1138,7 @@ export const useAnnotation = ({
         })
         addToAdditions(shape)
         stackAddAction({ target: shape })
+        clearUndoneOnUserAction()
         // Push the shape into annotations.value (and trigger the
         // backend save). The pencil flow gets this from `endDrawing`
         // via the canvas's mouse:up handler, but `endDrawing` only
@@ -1224,10 +1318,17 @@ export const useAnnotation = ({
 
   // Add one ghost annotation's objects at the given opacity. Sequential
   // because object creation is async and addObjectToCanvas mutates shared
-  // state (so it can't run in parallel).
-  const renderOnionGhost = async (canvas, { annotation, opacity }) => {
+  // state (so it can't run in parallel). Token-checked around every await
+  // so a clear or a fresher load mid-ghost can't leave a partial ghost
+  // painted on the cleared canvas.
+  const renderOnionGhost = async (canvas, { annotation, opacity }, token) => {
     for (const obj of annotation.drawing.objects) {
+      if (token !== onionLoadToken) return
       const built = await addObjectToCanvas(annotation, obj, canvas)
+      if (token !== onionLoadToken) {
+        if (built) canvas.remove(built)
+        return
+      }
       built?.set('opacity', opacity)
     }
   }
@@ -1244,7 +1345,7 @@ export const useAnnotation = ({
     canvas.clear()
     for (const ghost of ghosts) {
       if (token !== onionLoadToken) return
-      await renderOnionGhost(canvas, ghost)
+      await renderOnionGhost(canvas, ghost, token)
     }
     if (token === onionLoadToken && isFabricReady(canvas)) {
       canvas.requestRenderAll()
@@ -1264,29 +1365,40 @@ export const useAnnotation = ({
       })
     } else {
       clipboard.copyAnnotations({
-        mainObject: Object.create(activeObject),
+        mainObject: activeObject,
         subObjects: []
       })
     }
     return activeObject
   }
 
-  const pasteAnnotations = () => {
+  // Pasting must produce REAL copies. Re-adding the source instances (or
+  // an Object.create wrapper inheriting the original's id) made every
+  // later move post an update under the ORIGINAL's id (server and remote
+  // viewers moved the original, the local duplicate vanished on reload)
+  // and stacked duplicate entries of one instance in fabric's _objects.
+  const PASTE_OFFSET = 10
+
+  const pasteAnnotations = async () => {
     if (!fabricCanvas.value) return
+    // Restores absolute coordinates on selection children before cloning.
     fabricCanvas.value.discardActiveObject()
     const { mainObject, subObjects } = clipboard.pasteAnnotations()
-    if (subObjects?.length > 0) {
-      subObjects.forEach(obj => {
-        obj = applyGroupChanges(mainObject, obj)
-        obj.group = null
-        addObject(obj)
-      })
-      fabricCanvas.value.requestRenderAll()
-    } else if (mainObject) {
-      addObject(mainObject)
-      fabricCanvas.value.setActiveObject(mainObject)
-      fabricCanvas.value.requestRenderAll()
+    const sources =
+      subObjects?.length > 0 ? subObjects : mainObject ? [mainObject] : []
+    let lastClone = null
+    for (const source of sources) {
+      const clone = await source.clone()
+      clone.set('id', uuidv4())
+      clone.set('left', clone.left + PASTE_OFFSET)
+      clone.set('top', clone.top + PASTE_OFFSET)
+      addObject(clone)
+      lastClone = clone
     }
+    if (lastClone && sources.length === 1) {
+      fabricCanvas.value.setActiveObject(lastClone)
+    }
+    fabricCanvas.value.requestRenderAll()
   }
 
   const applyGroupChanges = (group, obj) => {

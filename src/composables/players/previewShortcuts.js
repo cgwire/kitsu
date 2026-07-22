@@ -57,6 +57,9 @@ export const isAltLetter = (event, code, key) => {
 
 /**
  * @param {Object} handlers
+ * @param {Function} [handlers.isActive] - return false to ignore shortcuts
+ *   while another player owns them (two players can be mounted at once:
+ *   the playlist modal above a task page's preview player)
  * @param {Function} [handlers.onDelete]
  * @param {Function} [handlers.onPrevFrame]
  * @param {Function} [handlers.onNextFrame]
@@ -85,6 +88,9 @@ export const usePreviewShortcuts = handlers => {
   const isAltHeld = ref(false)
 
   const onKeyDown = event => {
+    // Both players register on window; without this, Ctrl+Z or d/e on
+    // the visible player also mutated the hidden one's canvas.
+    if (handlers.isActive && !handlers.isActive()) return
     if (event.repeat && !REPEATABLE_KEYS.includes(event.key)) return
     // Alt+P plays/pauses even when an <input> / <textarea> has focus, so
     // users can pause / resume while typing a comment without leaving the
@@ -158,12 +164,18 @@ export const usePreviewShortcuts = handlers => {
         handlers.onNextAnnotation?.()
         break
       case 'd':
-        pauseEvent(event)
-        handlers.onAnnotate?.()
+        // Bare-key tool toggles: leave Ctrl+D (bookmark) / Ctrl+E and
+        // the Alt combos to the browser and other handlers.
+        if (!alt && !mod) {
+          pauseEvent(event)
+          handlers.onAnnotate?.()
+        }
         break
       case 'e':
-        pauseEvent(event)
-        handlers.onErase?.()
+        if (!alt && !mod) {
+          pauseEvent(event)
+          handlers.onErase?.()
+        }
         break
       case 'z':
         if (mod) handlers.onUndo?.()
@@ -184,14 +196,22 @@ export const usePreviewShortcuts = handlers => {
     }
   }
 
+  // Alt+Tab away swallows the keyup: without this reset the overlay
+  // stays pointer-transparent after coming back until Alt is tapped.
+  const onWindowBlur = () => {
+    isAltHeld.value = false
+  }
+
   onMounted(() => {
     window.addEventListener('keydown', onKeyDown, false)
     window.addEventListener('keyup', onKeyUp, false)
+    window.addEventListener('blur', onWindowBlur)
   })
 
   onBeforeUnmount(() => {
     window.removeEventListener('keydown', onKeyDown)
     window.removeEventListener('keyup', onKeyUp)
+    window.removeEventListener('blur', onWindowBlur)
   })
 
   return { isAltHeld }

@@ -1047,7 +1047,12 @@
         "tags": "Lijst met tags",
         "applies_to_all_projects": "Deze kolom wordt toegevoegd aan elk project in de lijst. Elk project kan zijn eigen waarde hebben in de lijstweergave.",
         "delete_list_column_text": "Hiermee wordt de kolom “{name}” uit alle projecten verwijderd, inclusief opgeslagen waarden. Doorgaan?",
-        "target_project": "Project"
+        "target_project": "Project",
+        "date": "Datum",
+        "url": "Link",
+        "textarea": "Lange tekst",
+        "person": "Persoon",
+        "delete_task_text": "Weet je zeker dat je deze kolom en gerelateerde gegevens voor alle taken van dit taaktype wilt verwijderen?"
       },
       "status": {
         "closed": "Gesloten",

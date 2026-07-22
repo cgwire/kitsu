@@ -227,6 +227,8 @@
               :is-estimation-linked="true"
               :hide-root="true"
               :with-milestones="false"
+              @item-changed="saveTaskScheduleItem"
+              @estimation-changed="event => saveTaskScheduleItem(event.item)"
             />
           </div>
         </div>

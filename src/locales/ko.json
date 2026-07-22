@@ -1053,7 +1053,12 @@
         "tags": "태그 목록",
         "applies_to_all_projects": "이 열은 목록의 모든 프로젝트에 추가됩니다. 각 프로젝트는 목록 보기에서 고유한 값을 가질 수 있습니다.",
         "delete_list_column_text": "이 작업은 저장된 값을 포함하여 모든 프로젝트에서 “{name}” 열을 제거합니다. 계속하시겠습니까?",
-        "target_project": "프로젝트"
+        "target_project": "프로젝트",
+        "date": "날짜",
+        "url": "링크",
+        "textarea": "긴 텍스트",
+        "person": "사람",
+        "delete_task_text": "이 태스크 유형의 모든 태스크에 대한 열과 관련 데이터를 삭제하시겠습니까?"
       },
       "status": {
         "closed": "닫힘",

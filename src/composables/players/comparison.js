@@ -180,6 +180,12 @@ export const useComparison = ({
   // comparison viewer mount and lay out before opacity kicks in.
   const toggleFullOverlay = async () => {
     if (!isComparing.value) {
+      // Alt+O can fire before any comparison target was picked: default
+      // the task type and revision like the compare button does, or the
+      // overlay activates with nothing to show (the playlist player then
+      // fades its main viewer over an empty pane).
+      if (!taskTypeId.value) setDefaultComparisonTaskType()
+      else if (!previewToCompareId.value) setDefaultComparisonPreview()
       isComparing.value = true
       await nextTick()
       await nextTick()

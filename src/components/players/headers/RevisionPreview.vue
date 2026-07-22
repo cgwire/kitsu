@@ -82,10 +82,16 @@ const onDragover = event => {
 }
 
 const onDropped = event => {
+  // Cancel the drop (onDragover made us a valid target for ANY drag,
+  // including OS files, whose default action replaces the page) and
+  // ignore payloads that don't come from the reorder strip.
+  event.preventDefault()
   dropArea.value.style.background = 'transparent'
   dropArea.value.style.width = '15px'
+  const previousIndex = event.dataTransfer.getData('previewIndex')
+  if (previousIndex === '') return
   emit('preview-dropped', {
-    previousIndex: event.dataTransfer.getData('previewIndex'),
+    previousIndex,
     newIndex: props.index
   })
 }

@@ -9,6 +9,7 @@ export const PREVIEW_ROOM_EVENTS = {
   roomUpdated: 'preview-room:room-updated',
   roomPeopleUpdated: 'preview-room:room-people-updated',
   addAnnotation: 'preview-room:add-annotation',
+  updateAnnotation: 'preview-room:update-annotation',
   removeAnnotation: 'preview-room:remove-annotation',
   panzoomChanged: 'preview-room:panzoom-changed',
   comparisonPanzoomChanged: 'preview-room:comparison-panzoom-changed'

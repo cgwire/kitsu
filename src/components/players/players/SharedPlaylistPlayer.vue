@@ -738,7 +738,10 @@ const onProgressPlaylistChanged = frameNumber => {
   const position = playlistShotPosition.value[frameNumber]
   if (!position) return
   const { index, start } = position
-  const localFrame = Math.round(frameNumber - start * fps.value)
+  // start carries the strip's +1 slot convention ((firstGlobalFrame + 1)
+  // / fps): compensate like the studio player, or every strip click
+  // seeks one frame early.
+  const localFrame = Math.round(frameNumber - start * fps.value) + 1
   if (index !== playingEntityIndex.value) {
     selectEntity(index)
     nextTick(() => rawPlayer.value?.setCurrentFrame(Math.max(localFrame, 0)))
@@ -749,6 +752,12 @@ const onProgressPlaylistChanged = frameNumber => {
 
 const onPlayNext = () => {
   if (!isPlaying.value) return
+  // Repeat loops the current movie like the studio player; without this
+  // the toggle did nothing (the viewer's own trim loop is inactive here).
+  if (isRepeating.value && isMovie.value) {
+    rawPlayer.value?.playNext()
+    return
+  }
   // Step through sub-previews first, then the next entity (handles images
   // too, which MultiVideoViewer's own playNext would skip).
   advancePlaylist()

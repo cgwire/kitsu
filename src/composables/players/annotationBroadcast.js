@@ -29,7 +29,7 @@ import { isValidRoomId, PREVIEW_ROOM_EVENTS } from '@/lib/players/events'
  * @param {Object} options.socket - the socket.io client instance.
  */
 export const useAnnotationBroadcast = ({ room, userId, socket }) => {
-  const emitAnnotationEvent = (eventName, time, serializedObj) => {
+  const emitAnnotationEvent = (eventName, time, serializedObj, extra = {}) => {
     const currentRoom = unref(room)
     if (!isValidRoomId(currentRoom)) return
     socket.emit(eventName, {
@@ -38,17 +38,18 @@ export const useAnnotationBroadcast = ({ room, userId, socket }) => {
         local_id: currentRoom.localId,
         user_id: unref(userId),
         time,
-        obj: serializedObj
+        obj: serializedObj,
+        ...extra
       }
     })
   }
 
   return {
-    postAnnotationAddition: (time, obj) =>
-      emitAnnotationEvent(PREVIEW_ROOM_EVENTS.addAnnotation, time, obj),
+    postAnnotationAddition: (time, obj, extra) =>
+      emitAnnotationEvent(PREVIEW_ROOM_EVENTS.addAnnotation, time, obj, extra),
     postAnnotationDeletion: (time, obj) =>
       emitAnnotationEvent(PREVIEW_ROOM_EVENTS.removeAnnotation, time, obj),
     postAnnotationUpdate: (time, obj) =>
-      emitAnnotationEvent('preview-update-annotation', time, obj)
+      emitAnnotationEvent(PREVIEW_ROOM_EVENTS.updateAnnotation, time, obj)
   }
 }

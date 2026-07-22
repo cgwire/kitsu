@@ -1047,7 +1047,12 @@
         "tags": "Lista de etiquetas",
         "applies_to_all_projects": "Esta columna se añade a todos los proyectos de la lista. Cada proyecto puede tener su propio valor en la vista de lista.",
         "delete_list_column_text": "Esto eliminará la columna «{name}» de todos los proyectos, incluidos los valores almacenados. ¿Continuar?",
-        "target_project": "Proyecto"
+        "target_project": "Proyecto",
+        "date": "Fecha",
+        "url": "Enlace",
+        "textarea": "Texto largo",
+        "person": "Persona",
+        "delete_task_text": "¿Está seguro de que desea borrar esta columna y los datos relacionados para todas las tareas de este tipo de tarea?"
       },
       "status": {
         "closed": "Cerrado",

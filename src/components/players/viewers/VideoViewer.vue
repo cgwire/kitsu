@@ -354,7 +354,6 @@ const getFrameFromPlayer = () => {
         : 0
   if (raw === 0) return 0
   let frame = Math.ceil(raw / frameDuration.value) + 1
-  frame = Number(frame.toPrecision(4))
   frame = Math.min(frame, props.nbFrames)
   return frame
 }
@@ -462,6 +461,14 @@ const play = () => {
     props.name.indexOf('comparison') < 0
   ) {
     setCurrentTime(0)
+  }
+  // a replay seek is issued while the video is still paused, so
+  // setCurrentTimeRaw could not arm the seek guard: once playback starts,
+  // stale pre-seek frames still coming out of the decoder would emit
+  // end-range frame numbers and re-trigger the trim stop, parking the
+  // player a few frames in, paused
+  if (video.value.seeking) {
+    seekGuardTarget = video.value.currentTime
   }
   video.value.play()?.catch(() => {})
 }

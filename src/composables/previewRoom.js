@@ -607,10 +607,13 @@ export const usePreviewRoom = options => {
     const r = unref(room)
     if (!isValidRoomId(r) || !joinedRoom.value) return
     if (r.localId === eventData.data?.local_id) return
-    const annotation = getAnnotation(eventData.time)
+    const annotation = getAnnotation(eventData.data.time)
     const obj = eventData.data.obj
     if (getObjectById(obj.id)) return
-    if (unref(isLaserModeOn)) {
+    // Fade on the SENDER's laser flag: keying off the receiver's own
+    // toggle made presenter laser gestures permanent on every other
+    // screen, and faded real notes for a laser-holding viewer.
+    if (eventData.data.laser) {
       const result = addObjectToCanvas(annotation, obj)
       if (result && typeof result.then === 'function') {
         result.then(o => fadeObject(o))
@@ -633,7 +636,7 @@ export const usePreviewRoom = options => {
     const r = unref(room)
     if (!isValidRoomId(r) || !joinedRoom.value) return
     if (r.localId === eventData.data?.local_id) return
-    const annotation = getAnnotation(eventData.time)
+    const annotation = getAnnotation(eventData.data.time)
     const obj = eventData.data.obj
     updateObjectInCanvas(annotation, obj)
   }
@@ -647,7 +650,7 @@ export const usePreviewRoom = options => {
     [PREVIEW_ROOM_EVENTS.comparisonPanzoomChanged, onComparisonPanzoomChanged],
     [PREVIEW_ROOM_EVENTS.addAnnotation, onAddAnnotation],
     [PREVIEW_ROOM_EVENTS.removeAnnotation, onRemoveAnnotation],
-    ['preview-update-annotation', onUpdateAnnotation]
+    [PREVIEW_ROOM_EVENTS.updateAnnotation, onUpdateAnnotation]
   ]
 
   onMounted(() => {

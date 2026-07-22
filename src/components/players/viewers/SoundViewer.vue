@@ -90,6 +90,10 @@ watch(
     if (props.previewUrl && props.previewUrl.length > 0) {
       isLoading.value = true
       wavesurfer.load(props.previewUrl).catch(onLoadError)
+    } else {
+      // The parent blanks the URL when another preview kind takes over:
+      // stop playback instead of letting the loaded audio run on.
+      wavesurfer.pause()
     }
   }
 )

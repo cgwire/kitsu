@@ -44,7 +44,12 @@ export const entityMixin = {
   },
 
   computed: {
-    ...mapGetters(['organisation']),
+    ...mapGetters([
+      'isCurrentUserManager',
+      'isCurrentUserSupervisor',
+      'organisation',
+      'user'
+    ]),
 
     assetList() {
       return assetsStore.cache.assets
@@ -242,14 +247,18 @@ export const entityMixin = {
           } else if (task.end_date) {
             endDate = parseSimpleDate(task.end_date)
           } else if (task.estimation) {
-            endDate = startDate.clone().add(estimation, 'days')
+            endDate = addBusinessDays(
+              startDate,
+              Math.ceil(minutesToDays(this.organisation, estimation)) - 1
+            )
           }
 
           if (!endDate || endDate.isBefore(startDate)) {
             endDate = startDate.clone().add(1, 'days')
           }
-          if (estimation) manDays += task.estimation
           const taskType = this.taskTypeMap.get(task.task_type_id)
+          if (!taskType) return null
+          if (estimation) manDays += task.estimation
 
           return {
             ...task,
@@ -259,7 +268,7 @@ export const entityMixin = {
             expanded: false,
             loading: false,
             man_days: estimation,
-            editable: true,
+            editable: this.canEditTaskDates(taskType),
             unresizable: false,
             parentElement: rootElement,
             color: taskType.color,
@@ -267,6 +276,19 @@ export const entityMixin = {
           }
         })
         .filter(c => c !== null)
+
+      // any task mutation in the store retriggers this build: skip the
+      // replacement (and the widget re-render) when nothing visible changed
+      const signature = children
+        .map(
+          child =>
+            `${child.id}:${child.startDate.valueOf()}:` +
+            `${child.endDate.valueOf()}:${child.man_days || 0}`
+        )
+        .join('|')
+      if (signature === this.scheduleItemsSignature) return
+      this.scheduleItemsSignature = signature
+
       let rootStartDate = moment()
       let rootEndDate = moment().add(1, 'days')
       if (children.length > 0) {
@@ -280,6 +302,15 @@ export const entityMixin = {
         man_days: manDays
       })
       this.scheduleItems = [rootElement]
+    },
+
+    canEditTaskDates(taskType) {
+      const departments = this.user.departments || []
+      return (
+        this.isCurrentUserManager ||
+        (this.isCurrentUserSupervisor &&
+          (!departments.length || departments.includes(taskType.department_id)))
+      )
     },
 
     saveTaskScheduleItem(item) {
@@ -300,7 +331,7 @@ export const entityMixin = {
             start_date: item.startDate.format('YYYY-MM-DD'),
             due_date: item.endDate.format('YYYY-MM-DD')
           }
-        })
+        }).catch(console.error)
       }
     }
   },

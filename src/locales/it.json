@@ -1047,7 +1047,12 @@
         "string": "Testo",
         "tags": "Elenco di tag",
         "applies_to_all_projects": "Questa colonna viene aggiunta a tutti i progetti dell'elenco. Ogni progetto può avere il proprio valore nella vista a elenco.",
-        "target_project": "Progetto"
+        "target_project": "Progetto",
+        "date": "Data",
+        "url": "Link",
+        "textarea": "Testo lungo",
+        "person": "Persona",
+        "delete_task_text": "Sei sicuro di voler eliminare questa colonna e i dati associati per tutti i task di questo tipo di task?"
       },
       "status": {
         "closed": "Chiusa",

@@ -13,13 +13,19 @@
         <div v-show="isGif">
           <img ref="pictureGif" :src="pictureGifPath" />
         </div>
+        <!-- Bind only the displayed variant's src: with both bound, every
+             viewer downloaded the preview AND the original at once. -->
         <div v-show="!isGif">
           <img
             ref="pictureBig"
-            :src="pictureDlPath"
+            :src="fullScreen || big ? pictureDlPath : null"
             v-show="fullScreen || big"
           />
-          <img ref="picture" :src="picturePath" v-show="!fullScreen && !big" />
+          <img
+            ref="picture"
+            :src="!fullScreen && !big ? picturePath : null"
+            v-show="!fullScreen && !big"
+          />
         </div>
       </div>
       <spinner v-if="isLoading" />
@@ -134,18 +140,12 @@ const isVisibleImageReady = () => {
 }
 
 const getNaturalDimensions = () => {
-  let pic = { naturalWidth: 0, naturalHeight: 0 }
-  if (!props.fullScreen && picture.value.naturalWidth && !isGif.value) {
-    pic = picture.value
-  } else if (
-    props.fullScreen &&
-    pictureBig.value.naturalWidth &&
-    !isGif.value
-  ) {
-    pic = pictureBig.value
-  } else if (pictureGif.value.naturalWidth && isGif.value) {
-    pic = pictureGif.value
-  }
+  // Measure the variant actually displayed: `big` consumers show the
+  // original through pictureBig, and measuring the hidden preview-sized
+  // sibling returned downscaled dimensions (low-resolution annotation
+  // snapshots, display capped at the small variant's width).
+  const pic = visibleImage.value
+  if (!pic?.naturalWidth) return { height: 0, width: 0 }
   return { height: pic.naturalHeight, width: pic.naturalWidth }
 }
 
@@ -193,11 +193,8 @@ const resetPicture = () => {
   }
 
   if (isPicture.value) {
-    const pictureElement = isGif.value
-      ? pictureGif.value
-      : props.fullScreen
-        ? pictureBig.value
-        : picture.value
+    const pictureElement = visibleImage.value
+    if (!pictureElement) return
     const picturePosition = pictureElement.getBoundingClientRect()
     const containerPosition = container.value.getBoundingClientRect()
     const top = picturePosition.top - containerPosition.top
@@ -264,15 +261,13 @@ const setPicturePath = () => {
 
 const endLoading = () => {
   // Refs can be null while the component is being torn down / rebuilt
-  // by a parent v-for (previews change). The optional chain keeps the
-  // listener safe in that window instead of throwing and aborting the
-  // post-mount setup (which is what was leaving panzoom paused).
-  if (
-    props.fullScreen &&
-    (pictureBig.value?.complete || pictureGif.value?.complete)
-  ) {
-    isLoading.value = false
-  } else if (!props.fullScreen && picture.value?.complete) {
+  // by a parent v-for (previews change) — isVisibleImageReady tolerates
+  // that window. Clearing the spinner keys off the image actually
+  // displayed: the fullScreen-only branches used to clear it when the
+  // hidden sibling finished (blank viewer in big mode on slow links),
+  // and pictureGif.complete is true for every non-gif preview (an <img>
+  // without src reports complete).
+  if (isVisibleImageReady()) {
     isLoading.value = false
   }
   emit('loaded')

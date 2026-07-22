@@ -10,7 +10,7 @@ const SOCKET_EVENTS = [
   'preview-room:comparison-panzoom-changed',
   'preview-room:add-annotation',
   'preview-room:remove-annotation',
-  'preview-update-annotation'
+  'preview-room:update-annotation'
 ]
 
 const makeSocket = () => ({
@@ -591,7 +591,7 @@ describe('composables/previewRoom', () => {
       wrapper.unmount()
     })
 
-    it("'preview-update-annotation' calls updateObjectInCanvas for remote events", () => {
+    it("'preview-room:update-annotation' calls updateObjectInCanvas for remote events", () => {
       const socket = makeSocket()
       const updateObjectInCanvas = vi.fn()
       const getAnnotation = vi.fn(() => ({ id: 'a' }))
@@ -602,11 +602,11 @@ describe('composables/previewRoom', () => {
         updateObjectInCanvas,
         getAnnotation
       })
-      const handler = handlerFor(socket, 'preview-update-annotation')
+      const handler = handlerFor(socket, 'preview-room:update-annotation')
       handler({
-        time: 1,
-        data: { local_id: 'other', obj: { id: 'x' } }
+        data: { local_id: 'other', obj: { id: 'x' }, time: 1 }
       })
+      expect(getAnnotation).toHaveBeenCalledWith(1)
       expect(updateObjectInCanvas).toHaveBeenCalledWith(
         { id: 'a' },
         { id: 'x' }

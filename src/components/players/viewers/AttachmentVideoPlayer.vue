@@ -127,7 +127,10 @@ const onSeek = event => {
 const toggleFullscreen = () => {
   const el = wrapperEl.value
   if (!el) return
-  if (document.fullscreenElement) {
+  // Compare against OUR element: with the player itself in fullscreen
+  // (the comments column lives inside it), a truthy-only check exited
+  // the app fullscreen instead of fullscreening the attachment.
+  if (document.fullscreenElement === el) {
     document.exitFullscreen?.()
   } else {
     el.requestFullscreen?.()

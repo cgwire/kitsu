@@ -1047,7 +1047,12 @@
         "tags": "标签列表",
         "applies_to_all_projects": "此列将添加到列表中的每个项目。每个项目在列表视图中都可以有自己的值。",
         "delete_list_column_text": "这将从所有项目中移除列“{name}”，包括已存储的值。是否继续？",
-        "target_project": "项目"
+        "target_project": "项目",
+        "date": "日期",
+        "url": "链接",
+        "textarea": "长文本",
+        "person": "人员",
+        "delete_task_text": "您确定要删除此列以及此任务类型的所有任务方面的相关数据吗?"
       },
       "status": {
         "closed": "已关闭",

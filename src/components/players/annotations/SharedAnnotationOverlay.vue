@@ -139,33 +139,20 @@ const videoBounds = computed(() => {
 
   // Pictures: mirror the studio player's sizing — the image is centered and
   // never upscaled beyond its natural size, so the overlay box matches the
-  // actually displayed <img>. A plain contain-fit (used for movies) would
-  // upscale small images and misalign the annotations on top of them.
+  // actually displayed <img>. One uniform scale: independent width/height
+  // clamps produced a wrong-aspect box when the container was narrower but
+  // taller than the image, and strokes then SAVED with those dimensions
+  // misalign everywhere else.
   if (props.isPicture) {
-    const ratio = mw / mh
-    let width = ratio ? ch * ratio : cw
-    let height = ratio ? Math.round(cw / ratio) : ch
-    let left = 0
-    let top = 0
-    if (cw > mw) {
-      left = Math.round((cw - mw) / 2)
-      width = mw
-    } else if (cw > width) {
-      left = Math.round((cw - width) / 2)
-    } else {
-      width = cw
+    const scale = Math.min(cw / mw, ch / mh, 1)
+    const width = Math.round(mw * scale)
+    const height = Math.round(mh * scale)
+    return {
+      width,
+      height,
+      left: Math.round((cw - width) / 2),
+      top: Math.round((ch - height) / 2)
     }
-    if (ch > mh) {
-      top = Math.round((ch - mh) / 2)
-      height = mh
-    } else if (ch > height) {
-      top = Math.round((ch - height) / 2)
-    } else {
-      height = ch
-      width = Math.round(height * ratio)
-      left = Math.round((cw - width) / 2)
-    }
-    return { width, height, left, top }
   }
 
   // Movies: contain-fit — matches the canvas, which fills the container.
@@ -226,9 +213,22 @@ const render = async () => {
   const fabricCanvas = annotation.getCanvas()
   if (!fabricCanvas) return
   const token = ++renderToken
+  // Unsaved guest strokes must survive re-renders (resize, comments-panel
+  // toggle, frame stepping): capture the pending diff before the reset
+  // wipes it. This is an explicit-save UX, a silent wipe loses work.
+  const pendingAdditions = annotation.hasChanges()
+    ? annotation.getDiff().additions
+    : []
   fabricCanvas.clear()
   annotation.reset()
-  if (props.isPlaying) return
+  if (props.isPlaying) {
+    // Keep the pending data armed (save button, reappearance on pause)
+    // even though nothing is painted during playback.
+    if (pendingAdditions.length) {
+      annotation.restoreUnsaved(pendingAdditions, [])
+    }
+    return
+  }
   const current = findAnnotationAtTime(
     props.annotations,
     currentTime.value,
@@ -239,8 +239,7 @@ const render = async () => {
     current?.width || props.movieDimensions?.width || fabricCanvas.width,
     current?.height || props.movieDimensions?.height || fabricCanvas.height
   )
-  if (!current) return
-  const objects = current.drawing?.objects || []
+  const objects = current ? current.drawing?.objects || [] : []
   const shapes = await Promise.all(
     objects.map(obj => buildReadOnlyShape(current, obj, fabricCanvas))
   )
@@ -248,6 +247,24 @@ const render = async () => {
   shapes.forEach(shape => {
     if (shape) fabricCanvas.add(shape)
   })
+  if (pendingAdditions.length) {
+    // Repaint the unsaved strokes of the displayed frame; entries drawn
+    // on other frames stay data-only until their frame shows again.
+    const rebuilt = []
+    for (const entry of pendingAdditions) {
+      if (entry.time === currentTime.value) {
+        for (const obj of entry.drawing.objects) {
+          const shape = await buildReadOnlyShape(entry, obj, fabricCanvas)
+          if (token !== renderToken) return
+          if (shape) {
+            fabricCanvas.add(shape)
+            rebuilt.push(shape)
+          }
+        }
+      }
+    }
+    annotation.restoreUnsaved(pendingAdditions, rebuilt)
+  }
   fabricCanvas.requestRenderAll()
 }
 
@@ -312,6 +329,10 @@ const save = async () => {
         deletions: diff.deletions
       }
     })
+    // Drop the local copies now that they are persisted: render() keeps
+    // unsaved work across resets, so a stale diff would repaint the just
+    // saved strokes as pending duplicates.
+    annotation.clearLocal()
     emit('saved', updated.annotations || [])
   } catch (error) {
     // Keep the toolbar so the user can retry; surface the failure for logs.

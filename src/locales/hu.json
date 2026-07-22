@@ -1047,7 +1047,12 @@
         "number": "Szám",
         "string": "Szöveg",
         "tags": "Címkék listája",
-        "target_project": "Projekt"
+        "target_project": "Projekt",
+        "date": "Dátum",
+        "url": "Hivatkozás",
+        "textarea": "Hosszú szöveg",
+        "person": "Személy",
+        "delete_task_text": "Biztosan törlöd az oszlopot és minden hozzá tartozó adatot ennek a feladattípusnak az összes feladatától?"
       },
       "status": {
         "closed": "Lezárva",

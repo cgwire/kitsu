@@ -54,7 +54,7 @@ describe('composables/annotationBroadcast', () => {
   })
 
   describe('postAnnotationUpdate', () => {
-    it("emits 'preview-update-annotation'", () => {
+    it("emits 'preview-room:update-annotation'", () => {
       const socket = makeSocket()
       const { postAnnotationUpdate } = useAnnotationBroadcast({
         room: makeRoom(),
@@ -63,7 +63,7 @@ describe('composables/annotationBroadcast', () => {
       })
       postAnnotationUpdate(0, fakeAnnotation)
       expect(socket.emit).toHaveBeenCalledWith(
-        'preview-update-annotation',
+        'preview-room:update-annotation',
         expect.objectContaining({ playlist_id: 'playlist-1' })
       )
     })

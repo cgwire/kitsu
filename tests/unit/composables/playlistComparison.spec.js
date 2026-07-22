@@ -516,10 +516,10 @@ describe('composables/playlistComparison', () => {
       expect(c.overlayOpacity.value).toBe(1)
     })
 
-    it('returns 0.25 for overlay25', () => {
+    it('returns 0.75 for overlay25 (main mostly visible)', () => {
       const c = setup()
       c.comparisonMode.value = 'overlay25'
-      expect(c.overlayOpacity.value).toBe(0.25)
+      expect(c.overlayOpacity.value).toBe(0.75)
     })
 
     it('returns 0.5 for overlay50', () => {
@@ -528,10 +528,10 @@ describe('composables/playlistComparison', () => {
       expect(c.overlayOpacity.value).toBe(0.5)
     })
 
-    it('returns 0.75 for overlay75', () => {
+    it('returns 0.25 for overlay75 (main mostly hidden)', () => {
       const c = setup()
       c.comparisonMode.value = 'overlay75'
-      expect(c.overlayOpacity.value).toBe(0.75)
+      expect(c.overlayOpacity.value).toBe(0.25)
     })
 
     it('returns 0 for overlay100 (main fully hidden)', () => {

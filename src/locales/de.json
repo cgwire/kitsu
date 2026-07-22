@@ -1047,7 +1047,12 @@
         "tags": "Liste der Tags",
         "applies_to_all_projects": "Diese Spalte wird jedem Projekt in der Liste hinzugefügt. Jedes Projekt kann in der Listenansicht seinen eigenen Wert haben.",
         "delete_list_column_text": "Dadurch wird die Spalte „{name}“ aus allen Projekten entfernt, einschließlich der gespeicherten Werte. Fortfahren?",
-        "target_project": "Projekt"
+        "target_project": "Projekt",
+        "date": "Datum",
+        "url": "Link",
+        "textarea": "Langer Text",
+        "person": "Person",
+        "delete_task_text": "Sind Sie sicher, dass Sie diese Spalte und die zugehörigen Daten für alle Aufgaben dieses Aufgabentyps löschen möchten?"
       },
       "status": {
         "closed": "Geschlossen",

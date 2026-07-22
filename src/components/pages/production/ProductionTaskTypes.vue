@@ -251,9 +251,10 @@ const updateTaskTypeIdFromRemaining = () => {
 
 const addTaskType = async taskType => {
   const id = taskType && taskType.id ? taskType.id : taskTypeId.value
+  const entityType = taskTypeMap.value.get(id).for_entity
   await store.dispatch('addTaskTypeToProduction', {
     taskTypeId: id,
-    priority: assetTaskTypes.value.length
+    priority: groupByType[entityType].ref.value.list.length + 1
   })
   try {
     await store.dispatch('createScheduleItem', {

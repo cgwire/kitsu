@@ -62,9 +62,14 @@ const previewFileId = ref(props.entity.preview_file_id)
 
 const taskTypeOptions = computed(() => {
   const entity = editStore.cache.editMap.get(props.entity.id)
+  // A concurrently deleted task leaves a stale id here (the edits store
+  // only prunes displayed edits): filter instead of crashing the header.
+  if (!entity) return []
   return entity.tasks
     .map(taskId => taskMap.value.get(taskId))
+    .filter(Boolean)
     .map(task => taskTypeMap.value.get(task.task_type_id))
+    .filter(Boolean)
     .sort(firstBy('priority', 1).thenBy('name'))
     .map(taskType => ({
       label: taskType.name,

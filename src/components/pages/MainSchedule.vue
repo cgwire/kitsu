@@ -6,13 +6,21 @@
           <label class="label">
             {{ $t('main.start_date') }}
           </label>
-          <date-field week-days-disabled v-model="selectedStartDate" />
+          <date-field
+            week-days-disabled
+            v-model="selectedStartDate"
+            @update:model-value="onUpdateSelectedStartDate"
+          />
         </div>
         <div class="flexrow-item field">
           <label class="label">
             {{ $t('main.end_date') }}
           </label>
-          <date-field week-days-disabled v-model="selectedEndDate" />
+          <date-field
+            week-days-disabled
+            v-model="selectedEndDate"
+            @update:model-value="onUpdateSelectedEndDate"
+          />
         </div>
         <combobox-number
           class="flexrow-item zoom-level"
@@ -51,7 +59,8 @@ import {
   getFirstStartDate,
   getLastEndDate,
   getStartDateFromString,
-  getEndDateFromString
+  getEndDateFromString,
+  parseSimpleDate
 } from '@/lib/time'
 import colors from '@/lib/colors'
 
@@ -137,37 +146,54 @@ export default {
     },
 
     convertTaskTypeScheduleItems(scheduleItems) {
-      return scheduleItems.map(item => {
-        const startDate = getStartDateFromString(item.start_date)
-        const endDate = getEndDateFromString(startDate, item.end_date)
-        const taskType = this.taskTypeMap.get(item.task_type_id)
+      return scheduleItems
+        .filter(item => this.taskTypeMap.get(item.task_type_id))
+        .map(item => {
+          const startDate = getStartDateFromString(item.start_date)
+          const endDate = getEndDateFromString(startDate, item.end_date)
+          const taskType = this.taskTypeMap.get(item.task_type_id)
 
-        return {
-          ...item,
-          name: taskType.name,
-          color: taskType.color,
-          startDate: startDate,
-          endDate: endDate,
-          expanded: false,
-          loading: false,
-          editable: true,
-          children: []
-        }
-      })
+          return {
+            ...item,
+            name: taskType.name,
+            color: taskType.color,
+            startDate: startDate,
+            endDate: endDate,
+            expanded: false,
+            loading: false,
+            editable: true,
+            children: []
+          }
+        })
     },
 
     expandProductionElement(productionElement) {
       if (!productionElement.expanded) {
         productionElement.loading = true
         productionElement.expanded = true
-        this.loadScheduleItems(productionElement).then(scheduleItems => {
-          scheduleItems = this.convertTaskTypeScheduleItems(scheduleItems)
-          productionElement.children = scheduleItems
-          productionElement.loading = false
-        })
+        this.loadScheduleItems(productionElement)
+          .then(scheduleItems => {
+            scheduleItems = this.convertTaskTypeScheduleItems(scheduleItems)
+            productionElement.children = scheduleItems
+          })
+          .catch(err => {
+            console.error(err)
+            productionElement.expanded = false
+          })
+          .finally(() => {
+            productionElement.loading = false
+          })
       } else {
         productionElement.expanded = false
       }
+    },
+
+    onUpdateSelectedStartDate(date) {
+      this.startDate = parseSimpleDate(date)
+    },
+
+    onUpdateSelectedEndDate(date) {
+      this.endDate = parseSimpleDate(date)
     },
 
     onScheduleItemChanged(item) {

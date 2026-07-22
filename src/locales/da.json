@@ -1047,7 +1047,12 @@
         "tags": "Liste over tags",
         "applies_to_all_projects": "Denne kolonne føjes til alle projekter på listen. Hvert projekt kan have sin egen værdi i listevisningen.",
         "delete_list_column_text": "Dette vil fjerne kolonnen “{name}” fra alle projekter, inklusive gemte værdier. Fortsæt?",
-        "target_project": "Projekt"
+        "target_project": "Projekt",
+        "date": "Dato",
+        "url": "Link",
+        "textarea": "Lang tekst",
+        "person": "Person",
+        "delete_task_text": "Er du sikker på, at du vil slette denne kolonne og relaterede data for alle opgaver af denne opgavetype?"
       },
       "status": {
         "closed": "Lukket",

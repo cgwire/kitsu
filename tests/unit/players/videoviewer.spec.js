@@ -49,6 +49,10 @@ describe('players/VideoViewer (canvas pipeline)', () => {
     vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(
       fakeContext
     )
+    // jsdom implements neither play() nor pause() on media elements; without
+    // these it logs "Not implemented" on every unmount (pause) and play.
+    vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
+    vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {})
     fakeContext.drawImage.mockClear()
     installRvfcMock()
   })

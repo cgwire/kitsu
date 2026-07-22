@@ -1047,7 +1047,12 @@
         "tags": "標籤清單",
         "applies_to_all_projects": "此欄會新增至清單中的每個項目。每個項目可在清單檢視中擁有自己的值。",
         "delete_list_column_text": "這將從所有項目中移除「{name}」欄，包括已儲存的值。要繼續嗎？",
-        "target_project": "項目"
+        "target_project": "項目",
+        "date": "日期",
+        "url": "連結",
+        "textarea": "長文字",
+        "person": "人員",
+        "delete_task_text": "您確定要刪除此列以及此任務類型的所有任務方面的相關數據嗎?"
       },
       "status": {
         "closed": "已關閉",

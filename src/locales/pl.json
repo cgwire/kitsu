@@ -1429,7 +1429,12 @@
         "string": "Tekst",
         "tags": "Lista tagów",
         "target_project": "Projekt",
-        "title": "Dodaj kolumnę metadanych"
+        "title": "Dodaj kolumnę metadanych",
+        "date": "Data",
+        "url": "Link",
+        "textarea": "Długi tekst",
+        "person": "Osoba",
+        "delete_task_text": "Czy na pewno chcesz usunąć tę kolumnę i powiązane dane dla wszystkich zadań tego typu zadania?"
       },
       "brief": {
         "edit_error": "Wystąpił błąd podczas edycji briefu.",

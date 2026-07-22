@@ -15,7 +15,10 @@ export default {
         const metaThs = Array.from(
           el.getElementsByClassName('metadata-descriptor')
         )
-        const ths = nameThs.concat(metaThs)
+        const descriptionThs = Array.from(
+          el.getElementsByClassName('description')
+        )
+        const ths = nameThs.concat(metaThs, descriptionThs)
 
         const setListeners = (item, div) => {
           let pageX, curCol, curColWidth

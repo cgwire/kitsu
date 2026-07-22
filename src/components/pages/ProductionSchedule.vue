@@ -635,9 +635,11 @@ export default {
       },
       availableTaskTypes: [],
       daysOffByPerson: {},
+      daysOffRangeKey: null,
       draggedEntities: [],
       endDate: moment().add(6, 'months').endOf('day'),
       entityType: null,
+      expandAll: false,
       isSidePanelOpen: false,
       resetTimeout: null,
       scheduleItems: [],
@@ -661,6 +663,7 @@ export default {
       version: DEFAULT_VERSION,
       loading: {
         schedule: false,
+        delete: false,
         editScheduleVersion: false,
         applyScheduleVersion: false,
         expandSchedule: false,
@@ -908,75 +911,78 @@ export default {
 
     async loadData() {
       this.loading.schedule = true
+      this.errors.schedule = false
       this.availableTaskTypes = []
 
-      await this.loadScheduleVersions(this.currentProduction)
+      try {
+        await this.loadScheduleVersions(this.currentProduction)
 
-      return this.loadScheduleItems(this.currentProduction)
-        .then(scheduleItems => {
-          const scheduleStartDate = parseDate(this.selectedStartDate)
-          const scheduleEndDate = parseDate(this.selectedEndDate)
-          scheduleItems = scheduleItems.map(item => {
-            const taskType = this.taskTypeMap.get(item.task_type_id)
-            let startDate, endDate
-            if (item.start_date) {
-              startDate = parseDate(item.start_date)
-            } else {
-              startDate = moment()
-            }
-            if (startDate.isSameOrAfter(scheduleEndDate)) {
-              startDate = scheduleEndDate.clone().add(-1, 'days')
-            }
+        const items = await this.loadScheduleItems(this.currentProduction)
+        const scheduleStartDate = parseDate(this.selectedStartDate)
+        const scheduleEndDate = parseDate(this.selectedEndDate)
+        const scheduleItems = items.map(item => {
+          const taskType = this.taskTypeMap.get(item.task_type_id)
+          let startDate, endDate
+          if (item.start_date) {
+            startDate = parseDate(item.start_date)
+          } else {
+            startDate = moment()
+          }
+          if (startDate.isSameOrAfter(scheduleEndDate)) {
+            startDate = scheduleEndDate.clone().add(-1, 'days')
+          }
 
-            if (startDate.isBefore(scheduleStartDate)) {
-              startDate = scheduleStartDate.clone()
-            }
+          if (startDate.isBefore(scheduleStartDate)) {
+            startDate = scheduleStartDate.clone()
+          }
 
-            if (item.end_date) {
-              endDate = parseDate(item.end_date)
-            } else {
-              endDate = startDate.clone().add(1, 'days')
-            }
-            if (endDate.isSameOrAfter(scheduleEndDate)) {
-              endDate = scheduleEndDate.clone()
-            }
+          if (item.end_date) {
+            endDate = parseDate(item.end_date)
+          } else {
+            endDate = startDate.clone().add(1, 'days')
+          }
+          if (endDate.isSameOrAfter(scheduleEndDate)) {
+            endDate = scheduleEndDate.clone()
+          }
 
-            const path = getTaskTypeSchedulePath(
-              taskType.id,
-              this.currentProduction.id,
-              this.linkedEpisodeId,
-              taskType.for_entity
-            )
-
-            return {
-              ...item,
-              color: taskType.color,
-              for_entity: taskType.for_entity,
-              name: `${taskType.for_entity} / ${taskType.name}`,
-              priority: taskType.priority,
-              startDate,
-              endDate,
-              editable: this.isInDepartment(taskType) && !this.isLockedSchedule,
-              expanded: false,
-              loading: false,
-              route: path,
-              children: []
-            }
-          })
-          this.scheduleItems = sortTaskTypeScheduleItems(
-            scheduleItems,
-            this.currentProduction,
-            this.taskTypeMap
+          const path = getTaskTypeSchedulePath(
+            taskType.id,
+            this.currentProduction.id,
+            this.linkedEpisodeId,
+            taskType.for_entity
           )
 
-          this.availableTaskTypes = this.scopedScheduleItems.map(item => ({
-            ...this.taskTypeMap.get(item.task_type_id),
-            name: item.name
-          }))
+          return {
+            ...item,
+            color: taskType.color,
+            for_entity: taskType.for_entity,
+            name: `${taskType.for_entity} / ${taskType.name}`,
+            priority: taskType.priority,
+            startDate,
+            endDate,
+            editable: this.isInDepartment(taskType) && !this.isLockedSchedule,
+            expanded: false,
+            loading: false,
+            route: path,
+            children: []
+          }
         })
-        .finally(() => {
-          this.loading.schedule = false
-        })
+        this.scheduleItems = sortTaskTypeScheduleItems(
+          scheduleItems,
+          this.currentProduction,
+          this.taskTypeMap
+        )
+
+        this.availableTaskTypes = this.scopedScheduleItems.map(item => ({
+          ...this.taskTypeMap.get(item.task_type_id),
+          name: item.name
+        }))
+      } catch (err) {
+        console.error(err)
+        this.errors.schedule = true
+      } finally {
+        this.loading.schedule = false
+      }
     },
 
     reset() {
@@ -1019,6 +1025,17 @@ export default {
       this.zoomLevel = this.zoomOptions.map(o => o.value).includes(zoom)
         ? zoom
         : DEFAULT_ZOOM
+
+      // loadData computed the editable flags with the default mode/version,
+      // before the query params were applied
+      this.refreshScheduleItemsEditable()
+    },
+
+    refreshScheduleItemsEditable() {
+      this.scheduleItems.forEach(item => {
+        const taskType = this.taskTypeMap.get(item.task_type_id)
+        item.editable = this.isInDepartment(taskType) && !this.isLockedSchedule
+      })
     },
 
     convertScheduleItems(taskTypeElement, scheduleItems) {
@@ -1161,6 +1178,8 @@ export default {
       taskTypeElement.expanded = expanded || !taskTypeElement.expanded
 
       if (taskTypeElement.expanded) {
+        // unversioned task list shared with the side panel to avoid a reload
+        let rawTasks = null
         try {
           taskTypeElement.loading = true
 
@@ -1215,6 +1234,7 @@ export default {
           let tasks = await this.loadTasks(
             this.buildTaskFilters(taskTypeElement)
           )
+          rawTasks = tasks
 
           // Update tasks for versioned schedules
           if (this.isVersioned) {
@@ -1247,12 +1267,18 @@ export default {
               .filter(Boolean)
           }
 
-          this.daysOffByPerson = await this.loadProductionDaysOff({
-            startDate: this.startDate.format('YYYY-MM-DD'),
-            endDate: this.endDate.format('YYYY-MM-DD')
-          }).catch(
-            () => ({}) // fallback if not allowed to fetch days off
-          )
+          // days off only depend on the production and the date range:
+          // reuse them across expands
+          const daysOffKey = `${this.currentProduction.id}_${this.startDate.format('YYYY-MM-DD')}_${this.endDate.format('YYYY-MM-DD')}`
+          if (this.daysOffRangeKey !== daysOffKey) {
+            this.daysOffByPerson = await this.loadProductionDaysOff({
+              startDate: this.startDate.format('YYYY-MM-DD'),
+              endDate: this.endDate.format('YYYY-MM-DD')
+            }).catch(
+              () => ({}) // fallback if not allowed to fetch days off
+            )
+            this.daysOffRangeKey = daysOffKey
+          }
 
           // Read the entity maps fresh from the store cache. They are plain,
           // non-reactive Maps replaced on each episode-scoped load, so a cached
@@ -1354,10 +1380,6 @@ export default {
                 )
               }
               if (!endDate || endDate.isBefore(startDate)) {
-                const nbDays = startDate.isoWeekday() === 5 ? 3 : 1
-                endDate = startDate.clone().add(nbDays, 'days')
-              }
-              if (!endDate.isSameOrAfter(startDate)) {
                 const nbDays = startDate.isoWeekday() === 5 ? 3 : 1
                 endDate = startDate.clone().add(nbDays, 'days')
               }
@@ -1484,7 +1506,12 @@ export default {
           refreshScheduleCallBack(taskTypeElement)
         }
 
-        this.selectTaskTypeElement(taskTypeElement, null, resetAssignments)
+        this.selectTaskTypeElement(
+          taskTypeElement,
+          null,
+          resetAssignments,
+          rawTasks
+        )
       }
     },
 
@@ -1733,7 +1760,8 @@ export default {
     async selectTaskTypeElement(
       taskType,
       selectedEntityType = undefined,
-      resetAssignments = true
+      resetAssignments = true,
+      preloadedTasks = null
     ) {
       // No assignment panel on the production-wide planning.
       if (this.isAllEpisodes) {
@@ -1748,14 +1776,18 @@ export default {
 
       this.assignments.loading = true
 
-      // load tasks
-      const tasks = await this.loadTasks(
-        this.buildTaskFilters(this.selectedTaskType)
-      )
+      // when called from expandTaskTypeElement, the tasks and entities were
+      // just loaded: reuse them instead of refetching everything
+      const tasks =
+        preloadedTasks ??
+        (await this.loadTasks(this.buildTaskFilters(this.selectedTaskType)))
+      const taskEntityIds = new Set(tasks.map(task => task.entity_id))
 
       // load entity types
       if (taskType.for_entity === 'Asset') {
-        await this.loadScopedAssets()
+        if (!preloadedTasks) {
+          await this.loadScopedAssets()
+        }
 
         this.assignments.entityTypes = this.productionAssetTypes
           .filter(assetType => {
@@ -1779,7 +1811,7 @@ export default {
                     !asset.canceled &&
                     !asset.shared &&
                     this.assetInScope(asset) &&
-                    tasks.some(task => task.entity_id === asset.id)
+                    taskEntityIds.has(asset.id)
                 )
                 .map(asset => ({
                   ...asset,
@@ -1790,10 +1822,12 @@ export default {
             }
           })
       } else if (taskType.for_entity === 'Shot') {
-        await this.loadShots()
+        if (!preloadedTasks) {
+          await this.loadShots()
+        }
 
         const shotsBySequence = shotStore.cache.shots
-          .filter(shot => tasks.some(task => task.entity_id === shot.id))
+          .filter(shot => taskEntityIds.has(shot.id))
           .reduce((acc, shot) => {
             if (!acc[shot.parent_id]) {
               acc[shot.parent_id] = []
@@ -1818,7 +1852,9 @@ export default {
           }
         )
       } else if (taskType.for_entity === 'Sequence') {
-        await this.loadSequences()
+        if (!preloadedTasks) {
+          await this.loadSequences()
+        }
 
         // sequences are the assignable entities, grouped by episode
         const sequencesByEpisode = [...sequenceStore.cache.sequenceMap.values()]
@@ -1827,7 +1863,7 @@ export default {
               !sequence.canceled &&
               (!this.currentEpisodeId ||
                 sequence.episode_id === this.currentEpisodeId) &&
-              tasks.some(task => task.entity_id === sequence.id)
+              taskEntityIds.has(sequence.id)
           )
           .reduce((acc, sequence) => {
             const groupId = sequence.episode_id || taskType.for_entity
@@ -1854,7 +1890,9 @@ export default {
           }
         )
       } else if (taskType.for_entity === 'Episode') {
-        await this.loadEpisodes()
+        if (!preloadedTasks) {
+          await this.loadEpisodes()
+        }
 
         // episodes are the assignable entities, under a single production group
         const episodes = [...episodeStore.cache.episodeMap.values()]
@@ -1864,7 +1902,7 @@ export default {
               !['all', 'main'].includes(episode.id) &&
               (!this.currentEpisodeId ||
                 episode.id === this.currentEpisodeId) &&
-              tasks.some(task => task.entity_id === episode.id)
+              taskEntityIds.has(episode.id)
           )
           .map(episode => ({
             ...episode,
@@ -1883,7 +1921,9 @@ export default {
           }
         ]
       } else if (taskType.for_entity === 'Edit') {
-        await this.loadEdits()
+        if (!preloadedTasks) {
+          await this.loadEdits()
+        }
 
         // edits are the assignable entities, grouped by episode
         const editsByEpisode = [...editStore.cache.editMap.values()]
@@ -1892,7 +1932,7 @@ export default {
               !edit.canceled &&
               (!this.currentEpisodeId ||
                 edit.episode_id === this.currentEpisodeId) &&
-              tasks.some(task => task.entity_id === edit.id)
+              taskEntityIds.has(edit.id)
           )
           .reduce((acc, edit) => {
             const groupId = edit.episode_id || taskType.for_entity
@@ -1965,8 +2005,11 @@ export default {
       this.assignments.startDate = item.start_date || today
       this.assignments.endDate = item.end_date || today
 
-      item.children = this.filteredAssignments(item.children)
-      this.draggedEntities = [item]
+      // copy: filtering item.children in place permanently dropped the
+      // assigned entities from the side panel list
+      this.draggedEntities = [
+        { ...item, children: this.filteredAssignments(item.children) }
+      ]
     },
 
     onAssignmentItemDragStart(event, item, type) {
@@ -1977,8 +2020,9 @@ export default {
       event.dataTransfer.setData('taskTypeId', type.task_type_id)
       event.dataTransfer.setData('entityId', item.id)
 
-      item.children = this.filteredAssignments(item.children)
-      this.draggedEntities = [item]
+      this.draggedEntities = [
+        { ...item, children: this.filteredAssignments(item.children) }
+      ]
     },
 
     onScheduleItemDropped(event, item) {
@@ -2010,10 +2054,40 @@ export default {
       const tasks = await this.loadTasks(
         this.buildTaskFilters(this.selectedTaskType)
       )
+      // first task per entity, preserving the find() first-match behavior
+      const taskByEntityId = new Map()
+      tasks.forEach(task => {
+        if (!taskByEntityId.has(task.entity_id)) {
+          taskByEntityId.set(task.entity_id, task)
+        }
+      })
 
+      // a zero or empty quota would make taskEstimation infinite and hang
+      // the distribution loop in addBusinessDays
       const dailyQuota =
-        this.assignments.forcedDailyQuota ?? this.estimatedDailyQuota
+        parseFloat(this.assignments.forcedDailyQuota) ||
+        this.estimatedDailyQuota
+      if (dailyQuota <= 0) {
+        this.assignments.saving = false
+        return
+      }
       const taskEstimation = 1 / dailyQuota
+
+      // versioned tasks all belong to the selected task type: load them once
+      // instead of once per entity
+      let versionedTaskByTaskId = null
+      if (this.isVersioned) {
+        const versionedTasks = await this.loadTasksFromScheduleVersion({
+          version: { id: this.version },
+          taskType: { id: this.selectedTaskType.task_type_id }
+        })
+        versionedTaskByTaskId = new Map(
+          versionedTasks.map(versionedTask => [
+            versionedTask.task_id,
+            versionedTask
+          ])
+        )
+      }
 
       // assign each selected entity to each selected assignee
       for (const taskType of this.draggedEntities) {
@@ -2024,6 +2098,7 @@ export default {
         // clear-assignation request plus one assign request per assignee
         const taskIdsToUnassign = []
         const taskIdsByAssignee = new Map()
+        const taskUpdates = []
 
         let cumulatedTasks = 0
         let nextAssigneeIndex = 0
@@ -2031,18 +2106,14 @@ export default {
 
         // distribute the task assignments according to the daily quotas, the task type duration and people's availability.
         for (const entity of taskType.children) {
-          const task = tasks.find(task => task.entity_id === entity.id)
+          const task = taskByEntityId.get(entity.id)
           if (!task) {
             continue // no task found for this entity
           }
 
           let versionedTask
           if (this.isVersioned) {
-            const versionedTasks = await this.loadTasksFromScheduleVersion({
-              version: { id: this.version },
-              taskType: { id: task.task_type_id }
-            })
-            versionedTask = versionedTasks.find(t => t.task_id === task.id) ?? {
+            versionedTask = versionedTaskByTaskId.get(task.id) ?? {
               taskId: task.id,
               version: this.version,
               assignees: []
@@ -2108,8 +2179,8 @@ export default {
                   taskIdsByAssignee.set(taskAssignee.id, [])
                 }
                 taskIdsByAssignee.get(taskAssignee.id).push(task.id)
-                // save task dates & estimation
-                await this.updateTask({
+                // task dates & estimation are flushed in batches after the loop
+                taskUpdates.push({
                   taskId: task.id,
                   data: {
                     estimation: daysToMinutes(
@@ -2130,6 +2201,14 @@ export default {
               break // jump to next task
             }
           }
+        }
+
+        // ponytail: chunks of 5 keep the server load reasonable, a bulk
+        // endpoint in zou would replace this
+        for (let i = 0; i < taskUpdates.length; i += 5) {
+          await Promise.all(
+            taskUpdates.slice(i, i + 5).map(update => this.updateTask(update))
+          )
         }
 
         // unassign first so batched assignations are not cleared right after
@@ -2241,7 +2320,8 @@ export default {
           id: task.versionedTaskId,
           assignees: task.assignees
         })
-      } else {
+      } else if (personId !== 'unassigned') {
+        // 'unassigned' is a local placeholder, not a person known to the API
         await this.unassignPersonFromTask({
           person: { id: personId },
           task
@@ -2259,12 +2339,14 @@ export default {
 
     onModeChanged(mode) {
       this.updateRoute({ mode })
+      this.refreshScheduleItemsEditable()
       this.closeSidePanel()
       this.refreshSchedule()
     },
 
     onVersionChanged(version) {
       this.updateRoute({ version })
+      this.refreshScheduleItemsEditable()
       this.closeSidePanel()
       this.refreshSchedule()
     },
@@ -2303,28 +2385,46 @@ export default {
     },
 
     async editVersion(version) {
-      this.modals.editScheduleVersion = false
-      if (!version.id) {
-        const newVersion = await this.createScheduleVersion({
-          production: this.currentProduction,
-          version
-        })
-        this.version = newVersion.id
-        this.onVersionChanged(this.version)
-      } else {
-        await this.updateScheduleVersion(version)
+      this.loading.editScheduleVersion = true
+      this.errors.editScheduleVersion = false
+      try {
+        if (!version.id) {
+          const newVersion = await this.createScheduleVersion({
+            production: this.currentProduction,
+            version
+          })
+          this.version = newVersion.id
+          this.onVersionChanged(this.version)
+        } else {
+          await this.updateScheduleVersion(version)
+        }
+        this.modals.editScheduleVersion = false
+        this.scheduleVersionToEdit = {}
+      } catch (err) {
+        console.error(err)
+        this.errors.editScheduleVersion = true
+      } finally {
+        this.loading.editScheduleVersion = false
       }
-      this.scheduleVersionToEdit = {}
     },
 
     async deleteVersion(version) {
-      this.modals.deleteScheduleVersion = false
-      await this.deleteScheduleVersion(version)
-      if (this.version === version.id) {
-        this.version = DEFAULT_VERSION
-        this.onVersionChanged(this.version)
+      this.loading.delete = true
+      this.errors.deleteScheduleVersion = false
+      try {
+        await this.deleteScheduleVersion(version)
+        if (this.version === version.id) {
+          this.version = DEFAULT_VERSION
+          this.onVersionChanged(this.version)
+        }
+        this.modals.deleteScheduleVersion = false
+        this.scheduleVersionToEdit = {}
+      } catch (err) {
+        console.error(err)
+        this.errors.deleteScheduleVersion = true
+      } finally {
+        this.loading.delete = false
       }
-      this.scheduleVersionToEdit = {}
     },
 
     async applyToProduction() {
@@ -2406,11 +2506,17 @@ export default {
         data.hierarchy.forEach(item => {
           endRowLevel1 = startRowLevel1
 
+          // ExcelJS expects 8-digit ARGB values, 6-digit hex shifts the
+          // channels and renders wrong colors
+          const lightened = colors.lightenColor(item.color, 0.2).hex()
+          const color = `FF${item.color.slice(1)}`.toUpperCase()
+          const color2 = `FF${lightened.slice(1)}`.toUpperCase()
+
           const row = sheet.addRow([null, item.name])
           row.getCell(1).fill = {
             type: 'pattern',
             pattern: 'solid',
-            fgColor: { argb: item.color.slice(1) }
+            fgColor: { argb: color }
           }
           row.getCell(2).alignment = { vertical: 'top' }
           row.getCell(2).note =
@@ -2420,8 +2526,6 @@ export default {
           // fill timebar
           const start = dates.indexOf(item.start_date)
           const end = dates.indexOf(item.end_date)
-          const color = item.color.slice(1)
-          const color2 = colors.lightenColor(item.color, 0.2).hex().slice(1)
           for (let i = start; i > -1 && i <= end; i++) {
             const cell = row.getCell(5 + i)
             cell.fill = {

@@ -184,6 +184,14 @@ export const useSharedAnnotationCanvas = () => {
     additionsRef.value = []
   }
 
+  // Re-adopt unsaved additions captured before a reset (resize, frame
+  // step): the serialized entries are canvas-size independent, only the
+  // live object list needs the rebuilt instances so undo keeps working.
+  const restoreUnsaved = (entries, objects) => {
+    additionsRef.value = entries
+    localStack.value = objects
+  }
+
   const dispose = () => {
     if (fabricCanvas && onPathCreated) {
       fabricCanvas.off('path:created', onPathCreated)
@@ -213,6 +221,7 @@ export const useSharedAnnotationCanvas = () => {
     pencilColor,
     pencilWidth,
     reset,
+    restoreUnsaved,
     setAnnotationDimensions,
     setCanvasSize,
     setColor,

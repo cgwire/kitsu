@@ -36,6 +36,7 @@
             {{ shortDate }}
           </span>
           <div
+            ref="menuWrapper"
             class="flexrow-item menu-wrapper"
             v-if="
               isPinnable || isEditable || canToggleForClient || canMoveComment
@@ -142,25 +143,25 @@
               <attachment-image
                 v-for="attachment in pictureAttachments"
                 :key="attachment.id"
-                :src="getDownloadAttachmentPath(attachment)"
+                :src="attachmentPath(attachment)"
                 :name="attachment.name"
               />
               <attachment-audio-player
                 v-for="attachment in audioAttachments"
                 :key="attachment.id"
-                :src="getDownloadAttachmentPath(attachment)"
+                :src="attachmentPath(attachment)"
                 :name="attachment.name"
-                :download-href="getDownloadAttachmentPath(attachment)"
+                :download-href="attachmentPath(attachment)"
               />
               <attachment-video-player
                 v-for="attachment in videoAttachments"
                 :key="attachment.id"
-                :src="getDownloadAttachmentPath(attachment)"
+                :src="attachmentPath(attachment)"
                 :name="attachment.name"
-                :download-href="getDownloadAttachmentPath(attachment)"
+                :download-href="attachmentPath(attachment)"
               />
               <a
-                :href="getDownloadAttachmentPath(attachment)"
+                :href="attachmentPath(attachment)"
                 :key="attachment.id"
                 :title="attachment.name"
                 class="attachment-file-link"
@@ -234,27 +235,27 @@
                     v-for="attachment in replyAttachmentMap.get(replyComment.id)
                       ?.pictures"
                     :key="attachment.id"
-                    :src="getDownloadAttachmentPath(attachment)"
+                    :src="attachmentPath(attachment)"
                     :name="attachment.name"
                   />
                   <attachment-audio-player
                     v-for="attachment in replyAttachmentMap.get(replyComment.id)
                       ?.audio"
                     :key="attachment.id"
-                    :src="getDownloadAttachmentPath(attachment)"
+                    :src="attachmentPath(attachment)"
                     :name="attachment.name"
-                    :download-href="getDownloadAttachmentPath(attachment)"
+                    :download-href="attachmentPath(attachment)"
                   />
                   <attachment-video-player
                     v-for="attachment in replyAttachmentMap.get(replyComment.id)
                       ?.video"
                     :key="attachment.id"
-                    :src="getDownloadAttachmentPath(attachment)"
+                    :src="attachmentPath(attachment)"
                     :name="attachment.name"
-                    :download-href="getDownloadAttachmentPath(attachment)"
+                    :download-href="attachmentPath(attachment)"
                   />
                   <a
-                    :href="getDownloadAttachmentPath(attachment)"
+                    :href="attachmentPath(attachment)"
                     :key="attachment.id"
                     :title="attachment.name"
                     class="attachment-file-link"
@@ -486,7 +487,11 @@
         <span class="flexrow-item date" :title="fullDate">
           {{ shortDate }}
         </span>
-        <div class="flexrow-item menu-wrapper" v-if="isPinnable || isEditable">
+        <div
+          ref="menuWrapper"
+          class="flexrow-item menu-wrapper"
+          v-if="isPinnable || isEditable"
+        >
           <button
             type="button"
             class="menu-icon-button"
@@ -608,6 +613,10 @@ const props = defineProps({
     type: Object,
     default: () => {}
   },
+  urlPrefix: {
+    type: String,
+    default: ''
+  },
   frame: {
     type: Number,
     default: 0
@@ -660,6 +669,7 @@ const props = defineProps({
 
 const replyRef = ref(null)
 const addAttachmentModalRef = ref(null)
+const menuWrapper = ref(null)
 
 const { membersForAts, atOptionsFilter } = useAtMentionsMembers(
   () => props.team,
@@ -767,6 +777,13 @@ const commentAttachments = computed(() => {
   )
 })
 
+// Shared playlist guests have no JWT: the regular attachment route 401s
+// for them. When a urlPrefix is set, use its anonymous token route.
+const attachmentPath = attachment =>
+  props.urlPrefix
+    ? `${props.urlPrefix}/attachment-files/${attachment.id}/file/${attachment.name}`
+    : getDownloadAttachmentPath(attachment)
+
 const pictureAttachments = computed(() => {
   return commentAttachments.value
     .filter(attachment => files.IMG_EXTENSIONS.includes(attachment.extension))
@@ -873,6 +890,12 @@ const renderDate = date => {
 
 const toggleCommentMenu = () => {
   menuVisible.value = !menuVisible.value
+}
+
+const onDocumentClick = event => {
+  if (!menuWrapper.value?.contains(event.target)) {
+    menuVisible.value = false
+  }
 }
 
 const removeTask = entry => {
@@ -1037,6 +1060,7 @@ onBeforeUnmount(() => {
     }
   )
   window.removeEventListener('paste', onPaste, false)
+  document.removeEventListener('click', onDocumentClick)
 })
 
 watch(
@@ -1054,6 +1078,11 @@ watch(checklistItems, () => {
   if (!silent) {
     onChecklistChanged()
   }
+})
+
+watch(menuVisible, visible => {
+  const method = visible ? 'addEventListener' : 'removeEventListener'
+  document[method]('click', onDocumentClick)
 })
 </script>
 

@@ -258,6 +258,9 @@ const onDragover = event => {
 }
 
 const onDropped = event => {
+  // Cancel the drop so a foreign drag (OS file) can't trigger the
+  // browser's default open-file action over the app.
+  event.preventDefault()
   dropAreaRef.value.style.width = '15px'
   emit('entity-dropped', {
     before: {
