@@ -4,8 +4,7 @@ import "./custom.css";
 import mediumZoom from 'medium-zoom';
 import { onMounted, watch, nextTick } from 'vue'
 
-// import { useRoute } from 'vitepress'
-// import Mermaid from "./Mermaid.vue";
+import Mermaid from "./Mermaid.vue";
 import KitsuLayout from "./KitsuLayout.vue"
 import CopyMarkdownButton from './CopyMarkdownButton.vue'
 import {useMediumZoomProvider} from './useMediumZoom.js'
@@ -23,7 +22,7 @@ export default {
   },
   enhanceApp({ app, router }) {
     app.component('CopyMarkdownButton', CopyMarkdownButton)
-    // app.component("Mermaid", Mermaid);
+    app.component("Mermaid", Mermaid);
     useMediumZoomProvider(app, router)
   },
 };

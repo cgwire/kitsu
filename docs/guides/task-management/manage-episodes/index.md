@@ -1,5 +1,11 @@
 # Managing Episodes
 
+```mermaid
+flowchart TD
+    PRODUCTION -->|contains| EPISODE
+    EPISODE -->|contains| SEQUENCE
+```
+
 TV Show productions have access to Episode containers to organize sequences and shots.
 
 ## Episodes Overview

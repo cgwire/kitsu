@@ -12,7 +12,6 @@ Estimating the time for each task can feel overwhelming, but the benefits far ou
 
 Kitsu offers various features to help you easily track, review, and forecast task estimates. Let's look at some of the features that enable you to do this.
 
-
 ## Add an Estimate for a Task
 
 To get started, click on the name of a task type.
@@ -49,11 +48,9 @@ Here is a summary of the cases and features you can leverage from the detailed t
 - See the WIP and Feedback dates automatically filled in
 - Monitor the latest comment section to keep an eye on the latest activity for this task type
 
-## Forecasting Team Speed
+## Forecasting Team Speed and Bidding Estimates
 
-### Forecast Your Team's Speed Using Estimated Quotas
-
-To help you set accurate estimates, you can use the **Estimation** tab.
+Click on the name of a **Task Type** to open its dedicated page. On this page, you can access three tabs: **Tasks**, **Schedule**, and **Estimation**. To help you set accurate estimates and forecast your team's speed, we'll focus on the **Estimation** tab.
 
 ![Estimation tab](/img/getting-started/tasktype_estimation_tab.png)
 
@@ -67,15 +64,29 @@ You can see on average how many shots, frames, or seconds the artist needs to co
 
 The right half shows the entire department team (based on the assignments you made), the number of shots they need to complete, the number of frames and seconds, and the average quota. You will also see the **Remaining** line, which gives you the current status of your team.
 
-The last column is the **Estimation**. To modify the estimate, hover over the row with your mouse and click the editable area.
-
-You can also select multiple tasks simultaneously to edit them all at once.
+The last column is the **Estimation**. To modify the estimate, hover over the row with your mouse and click the editable area. You can also select multiple tasks simultaneously to edit them all at once.
 
 ![Estimation tab edit](/img/getting-started/tasktype_estimation_tab_edit.png)
 
-Every time you change the **Estimation** (in the number of days) on the right side, you will see that the **Average Quota** updates in real time.
+Every time you change the **Estimation** (in the number of days), you will see that the **Average Quota** updates in real time.
 
 For more information about the **Schedule** tab, refer to [Task Type Schedule](../../../schedules/index.md#Set-a-Task-Estimation).
+
+### Bidding Estimates by Artist
+
+The **Estimation** page can also be viewed from a per-artist perspective.
+
+![Supervisor Estimation](/img/getting-started/supervisor_estimation.png)
+
+On the left, you have all the tasks sorted by artist, along with their number of frames and seconds. On the right, you have a summary of your team, with one line per artist showing the total number of assigned tasks, total number of frames and seconds, and the updated total number of estimated days.
+
+With this information, Kitsu can calculate different estimated **Quotas**: **per Second**, **per Frame**, and **per Task**.
+
+You can now fill the **Estimation** column on the left and see the result on the right. As soon as you fill in an **Estimation** for a task, the artist's row will update on the right.
+
+![Supervisor Estimation Filled](/img/getting-started/supervisor_estimation_filled.png)
+
+This allows you to ensure the distribution of tasks among your team members is equal and helps to understand their estimated quotas for production. You should consider artist's experience and the difficulty of each task when doing this.
 
 ## Changing Priorities
 
@@ -107,21 +118,5 @@ You will now see exclamation marks next to the task status. The more exclamation
 * (4) is **Emergency**
 
 ![Priority level](/img/getting-started/priority_level.png)
-
-## Bidding Estimates
-
-Click on the name of a **Task Type** column to open its dedicated page. On this page, you can access three tabs: **Tasks**, **Schedule**, and **Estimation**. We will focus on the last one.
-
-![Supervisor Estimation](/img/getting-started/supervisor_estimation.png)
-
-The **Estimation** page is split into two parts. On the left, you have all the tasks sorted by artist, along with their number of frames and seconds. On the right, you have a summary of your team, with one line per artist showing the total number of assigned tasks, total number of frames and seconds, and the updated total number of estimated days.
-
-With this information, Kitsu can calculate different estimated **Quotas**: **per Second**, **per Frame**, and **per Task**.
-
-You can now fill the **Estimation** column on the left and see the result on the right. As soon as you fill in an **Estimation** for a task, the artist's row will update on the right.
-
-![Supervisor Estimation Filled](/img/getting-started/supervisor_estimation_filled.png)
-
-This allows you to ensure the distribution of tasks among your team members is equal and helps to understand their estimated quotas for production. You should consider artist's experience and the difficulty of each task when doing this.
 
 <!-- #endregion body -->

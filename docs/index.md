@@ -69,6 +69,7 @@ Here are some links to familiarize yourself with the basic concepts in Kitsu you
 - [Manage Asset Types](/guides/task-management/managing-asset-types/) - 
 - [Manage Task Types](/guides/task-management/managing-task-types/) - 
 - [Manage Task Statuses](/guides/task-management/managing-task-statuses/) - 
+- [Manage Edits](/guides/task-management/manage-edits/) - 
 
 ### Pre-Production
 
@@ -82,9 +83,7 @@ Here are some links to familiarize yourself with the basic concepts in Kitsu you
 - [Assign Tasks](/guides/scheduling/assign-tasks/) - Learn how to assign people to a task.
 - [Find Assignments](/guides/scheduling/find-assignments/) - Learn how to stay on top of task assignments.
 - [Schedules](/guides/scheduling/schedules/) - Discover the different scheduling capabilities in Kitsu, from the studio level to the task level.
-- [Estimates](/guides/scheduling/estimates/) - Learn how to calculate the number of days estimated to do a task (bids).
-- [Quotas](/guides/scheduling/quotas/) - Learn how to check your team efficiency.
-- [Manage Edits](/guides/scheduling/manage-edits/) - 
+- [Estimates](/guides/scheduling/estimates/) - Learn how to calculate the number of days estimated to do a task (bids). 
 
 ### Review & Publishing
 
@@ -99,6 +98,7 @@ Here are some links to familiarize yourself with the basic concepts in Kitsu you
 
 - [Ensure Tasks are On-Time](/guides/tracking-reporting/ensure-tasks-on-time/) - 
 - [Understand Why a Task Is Late](/guides/tracking-reporting/understand-why-late-task/) - 
+- [Quotas](/guides/tracking-reporting/quotas/) - Learn how to check your team efficiency.
 - [Studio Overview](/guides/tracking-reporting/studio-overview/) -  Ensure you're ahead of the game with your studio's productions.
 - [Studio Occupancy](/guides/tracking-reporting/studio-occupancy/) - 
 - [Production Overview](/guides/tracking-reporting/production-overview/) - 

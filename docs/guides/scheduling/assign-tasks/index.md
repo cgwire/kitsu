@@ -1,8 +1,9 @@
-# Tasks Assignments
+# Task Assignments
 
 In Kitsu, a task is a fundamental element used for planning, organizing, and tracking various aspects of your production.
 
 Assigning a task to a user offers several benefits:
+
 - You have a clear understanding of who is responsible for each task.
 - Users are aware of their assigned tasks.
 - Users can log time spent on each task.
@@ -12,31 +13,7 @@ Assigning a task to a user offers several benefits:
 - You can forecast team productivity.
 - You can track the actual performance of your team.
 
-
-## Add Users to the Team
-
-In the [section on preparing your team](../../../team/index.md), we cover how to add people to Kitsu, set their permission levels, and link them to a department.
-
-::: tip
-In order for a user to be assigned to a task, they must first be added to a production. Please note that you cannot assign tasks to users outside of the production.
-:::
-
-First, lets add some users to our production. Within your project, from the dropdown menu at the top of the page, select the **Team** page.
-
-![Drop down menu team](/img/getting-started/drop_down_menu_team.png)
-
-On the this page, you can see all the users who have been assigned to this project. If you've just created a brand new project, this page will be empty. for a specific project. You can also quickly navigate to the team page for a different project, by selecting the project name in the drop down menu.
-
-![Team page](/img/getting-started/team_page.png)
-
-::: warning
-Permissions and departments are set at the **Studio Level**. You can't adjust these at the production level.
-:::
-
-
-## How to Assign Tasks
-
-### Assign Tasks From the Global Page
+## Assign Tasks From the Global Page
 
 Once you've added all your users to the production, it's now time to assign your first task!
 
@@ -78,13 +55,13 @@ Keep in mind that task assignments can determine what a user sees, depending on 
 
 With your assignments completed, everyone knows their tasks and responsibilities!
 
-### Assign Tasks From the Detailed Task Type Page
+## Assign Tasks From the Detailed Task Type Page
 
 You also have the option to assign tasks from the detailed task type page. To access this, click on the column header of the task type.
 
 Next simply click on a status to open the comment panel. From there, you'll have the same options available as on the global page. You can select one or multiple tasks simultaneously to assign a user.
 
-## Assigning Tasks & Bidding Estimates
+## Assign Tasks as a Department Supervisor
 
 From the global shots / asset page, your view is automatically filtered by **My Department**. This shows you tasks from your departments **Task Type** and the **Custom Columns** linked to your department.
 
@@ -94,4 +71,7 @@ When you assign one or several tasks to someone, you will notice that you only h
 
 ![Supervisor Assign Team](/img/getting-started/supervisor_assign_team.png)
 
-Now that you have assigned tasks to all your artists, it's time to fill in the **Estimates** for each task.
+## Next Steps
+
+- [Find assignments to work on](/guides/scheduling/find-assignments/)
+- [Fill in the **Estimates** for each task](/guides/scheduling/estimates/)

@@ -40,7 +40,7 @@ Kitsu offers various tools to help you stay informed and manage production effic
 ## 5. Checking Quotas
 
 <EmbedDocument>
-<!--@include: ../../guides/scheduling/quotas/index.md#body-->
+<!--@include: ../../guides/tracking-reporting/quotas/index.md#body-->
 </EmbedDocument>
 
 ## 6. Team Timesheets

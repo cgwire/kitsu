@@ -158,3 +158,5 @@ Then, proceed to write a comment, select the status **Approved** or **Rejected**
 You can filter the page with the **Status** filter to display all the concepts with a **Neutral** status. You can also filter by artist and change the sort order.
 
 ![Concept status filter](/img/getting-started/concept_status_filter.png)
+
+## The "My Checks" Page

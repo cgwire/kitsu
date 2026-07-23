@@ -1,5 +1,15 @@
 # Managing Productions
 
+```mermaid
+flowchart TD
+    STUDIO -->|runs| PRODUCTION
+
+    PRODUCTION -->|contains| EPISODE
+    PRODUCTION -->|contains, non-episodic| SEQUENCE
+
+    PRODUCTION -->|contains| ASSET
+```
+
 ## Create a New Production
 
 Now that you have designed your workflow in Kitsu and invited more people, it's time to create your production.

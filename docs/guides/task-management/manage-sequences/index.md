@@ -1,5 +1,15 @@
 # Managing Sequences
 
+```mermaid
+flowchart TD
+    PRODUCTION -->|contains| EPISODE
+    PRODUCTION -->|contains, non-episodic| SEQUENCE
+    EPISODE -->|contains| SEQUENCE
+    SEQUENCE -->|contains| SHOT
+
+    SEQUENCE -->|tracked by| TASK
+```
+
 ## Create a Sequence
 
 In Kitsu, you can also track tasks at the **Sequence** Level.

@@ -1,5 +1,10 @@
 # Managing Asset Types
 
+```mermaid
+flowchart TD
+    ASSET_TYPE -->|categorizes| ASSET
+```
+
 ## Define Your Asset Workflow
 
 Once you have created your global Workflow, you can then define your **Asset Types**
@@ -65,8 +70,20 @@ validate your choice with the **add** button.
 
 ## Update an Asset Type
 
-TODO
+Go to `Main Menu > Asset Types`:
 
-## Remove an Asset Type*
+![update asset type page](/guides/task-management/managing-asset-types/images/0.png)
 
-TODO
+Hover over the asset type row you wish to select then click the `Edit` icon:
+
+![update asset type button](/guides/task-management/managing-asset-types/images/1.png)
+
+## Remove an Asset Type
+
+To remove an asset type from your studio's Global Library, go to `Main Menu > Asset Types` and hover over the asset type row you wish to select then click the `Delete` icon:
+
+![remove asset type global](/guides/task-management/managing-asset-types/images/2.png)
+
+To remove an asset type from your production library, go to `Production Menu > Settings > Asset Types` and click the `Remove` button to remove the asset type from the list:  
+
+![remove asset type production](/guides/task-management/managing-asset-types/images/3.png)

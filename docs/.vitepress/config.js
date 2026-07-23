@@ -1,5 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import MermaidExample from "./mermaid-markdown-all.js";
 
 const INCLUDE_RE = /<!--\s*@include:\s*(.+?)\s*-->/g
 const RANGE_RE = /\{(\d*),(\d*)\}$/
@@ -101,6 +102,17 @@ function stripComponents(content) {
 
   return content
 }
+
+const allMarkdownTransformers = {
+  theme: {
+    light: "github-light",
+    dark: "github-dark",
+  },
+
+  config: (md) => {
+    MermaidExample(md);
+  },
+};
 
 export default {
   lang: "en-US",
@@ -224,6 +236,10 @@ export default {
     },
   },
   markdown: {
+    theme: {
+      light: "github-light",
+      dark: "github-dark",
+    },
     config(md) {
       md.core.ruler.push('strip_embed_card_headings', (state) => {
         let depth = 0
@@ -239,6 +255,8 @@ export default {
           }
         }
       })
+
+      MermaidExample(md)
     }
   },
   themeConfig: {
@@ -313,6 +331,7 @@ export default {
               { text: "Manage Asset Types", link: "/guides/task-management/managing-asset-types/" },
               { text: "Manage Task Types", link: "/guides/task-management/managing-task-types/" },
               { text: "Manage Task Statuses", link: "/guides/task-management/managing-task-statuses/" },
+              { text: "Manage Edits", link: "/guides/task-management/manage-edits/" },
             ],
           },
           {
@@ -334,9 +353,7 @@ export default {
               { text: "Assign Tasks", link: "/guides/scheduling/assign-tasks/" },
               { text: "Find Assignments", link: "/guides/scheduling/find-assignments/" },
               { text: "Schedules", link: "/guides/scheduling/schedules/" },
-              { text: "Estimates", link: "/guides/scheduling/estimates/" },
-              { text: "Quotas", link: "/guides/scheduling/quotas/" },
-              { text: "Manage Edits", link: "/guides/scheduling/manage-edits/" },
+              { text: "Estimates", link: "/guides/scheduling/estimates/" }
             ],
           },
           {
@@ -358,6 +375,7 @@ export default {
             items: [
                 { text: "Ensure Tasks are On-Time", link: "/guides/tracking-reporting/ensure-tasks-on-time/" },
                 { text: "Understand Why a Task Is Late", link: "/guides/tracking-reporting/understand-why-late-task/" },
+                { text: "Quotas", link: "/guides/tracking-reporting/quotas/" },
                 { text: "Studio Overview", link: "/guides/tracking-reporting/studio-overview/" },
                 { text: "Studio Occupancy", link: "/guides/tracking-reporting/studio-occupancy/" },
                 { text: "Production Overview", link: "/guides/tracking-reporting/production-overview/" },

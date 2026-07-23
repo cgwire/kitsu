@@ -48,7 +48,7 @@ import EmbedDocument from '../../.vitepress/theme/EmbedDocument.vue'
 ## 7. Create an Edit
 
 <EmbedDocument >
-<!--@include: ../../guides/scheduling/manage-edits/index.md#create-an-edit-->
+<!--@include: ../../guides/task-management/manage-edits/index.md#create-an-edit-->
 </EmbedDocument>
 
 ## 8. Create a Breakdown List

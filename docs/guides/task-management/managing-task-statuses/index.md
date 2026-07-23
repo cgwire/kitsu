@@ -1,5 +1,15 @@
 # Managing Task Statuses
 
+```mermaid
+flowchart TD
+    SEQUENCE -->|tracked by| TASK
+    SHOT -->|tracked by| TASK
+    ASSET -->|tracked by| TASK
+    DEPARTMENT -->|groups| TASK_TYPE
+    TASK_TYPE -->|type of| TASK
+    TASK_STATUS -->|current state of| TASK
+```
+
 ## Define Your Approval Workflow
 
 <!-- #region setup -->
@@ -81,11 +91,23 @@ validate your choice with the **add** button.
 
 ## Update a Task Status
 
-TODO
+Go to `Main Menu > Task Status`:
+
+![update task status page](/guides/task-management/managing-task-statuses/images/0.png)
+
+Select the Entities or Concepts tab and hover over the task status row you wish to change then click the `Edit` icon:
+
+![update task status button](/guides/task-management/managing-task-statuses/images/1.png)
 
 ## Remove a task Status
 
-TODO
+To remove a task status from your studio's Global Library, go to `Main Menu > Task Status` and hover over the task status row you wish to select then click the `Delete` icon:
+
+![remove task status global](/guides/task-management/managing-task-statuses/images/2.png)
+
+To remove an task status from your production library, go to `Production Menu > Settings > Task Status` and click the `Remove` button to remove the task status from the list:  
+
+![remove task status production](/guides/task-management/managing-task-statuses/images/3.png)
 
 ## Status Automation
 

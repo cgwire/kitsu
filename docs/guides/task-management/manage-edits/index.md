@@ -1,5 +1,10 @@
 # Managing Edits
 
+TODO
+
+- what's an edit?
+- what's an edit used for?
+
 ## Create an Edit
 
 You can track tasks at the **Edit** Level in Kitsu.
@@ -44,3 +49,11 @@ As **Edit** focuses on a specific long video, the detail page looks more like th
 :::
 
 You can **Rename** and **Delete** the Edit entity on this page for the asset and shot entity.
+
+## Update Edits
+
+TODO
+
+## Delete Edits
+
+TODO

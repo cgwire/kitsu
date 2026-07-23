@@ -79,10 +79,34 @@ To add users to a team:
 
 <!-- #endregion setup -->
 
+## Add Users to the Team
+
+In the [section on preparing your team](../../../team/index.md), we cover how to add people to Kitsu, set their permission levels, and link them to a department.
+
+::: tip
+In order for a user to be assigned to a task, they must first be added to a production. Please note that you cannot assign tasks to users outside of the production.
+:::
+
+First, lets add some users to our production. Within your project, from the dropdown menu at the top of the page, select the **Team** page.
+
+![Drop down menu team](/img/getting-started/drop_down_menu_team.png)
+
+On the this page, you can see all the users who have been assigned to this project. If you've just created a brand new project, this page will be empty. for a specific project. You can also quickly navigate to the team page for a different project, by selecting the project name in the drop down menu.
+
+![Team page](/img/getting-started/team_page.png)
+
+::: warning
+Permissions and departments are set at the **Studio Level**. You can't adjust these at the production level.
+:::
+
 ## Removing Users From A Team
 
-TODO
+To remove a user from a production, go to `Production Menu > Team`, hover your cursor over the row of the corresponding user, and click the `Remove` button.
+
+Removing a user from a department happens in the `Main Menu > Studio > People` page. Just click on the `Edit` button for the target user and in the departments section click the department you wish to remove the person from.
 
 ## Delete Users
 
-TODO
+To delete a user you must first edit their status to `Inactive` in the Studio People page.
+
+Then, go to the `Inactive` tab, hover your cursor over the user you wish to select, and click the `Delete` icon.

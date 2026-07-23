@@ -9,6 +9,15 @@ next:
 
 # Managing Shots
 
+```mermaid
+flowchart TD
+    SEQUENCE -->|contains| SHOT
+
+    ASSET -->|cast in| SHOT
+
+    SHOT -->|tracked by| TASK
+```
+
 ## Create a Shot
 
 ### Create your first shot

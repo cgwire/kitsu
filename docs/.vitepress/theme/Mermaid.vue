@@ -99,6 +99,8 @@ const renderChart = async () => {
             primaryBorderColor: "green",
             primaryTextColor: "white",
             textColor: "black",
+            secondaryColor: "black",
+            tertiaryColor: "black",
         },
     });
 

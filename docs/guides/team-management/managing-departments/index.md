@@ -43,10 +43,10 @@ Once you finish creating the department, your page should look like this. Whereb
 
 ## Update Departments
 
-TODO
+To update a department simply stay in the `Departments` page and hover your cursor over the department row you wish to edit and click the `Edit` icon.
 
 ## Delete Departments
 
-TODO
+To remove a department, hover over the department row you wish to select and click the `Delete` icon.
 
 <!-- #endregion body -->

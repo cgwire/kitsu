@@ -1,5 +1,15 @@
 # Managing Task Types
 
+```mermaid
+flowchart TD
+    SEQUENCE -->|tracked by| TASK
+    SHOT -->|tracked by| TASK
+    ASSET -->|tracked by| TASK
+    DEPARTMENT -->|groups| TASK_TYPE
+    TASK_TYPE -->|type of| TASK
+    TASK_STATUS -->|current state of| TASK
+```
+
 ## Creating a New Task Type
 
 <!-- #region setup -->
@@ -98,8 +108,20 @@ Validate with **Confirm**.
 
 ## Update a Task Type
 
-TODO
+Go to `Main Menu > Task Types`:
+
+![update task type page](/guides/task-management/managing-task-types/images/0.png)
+
+Click the tab for the entity type you need (asset, shot, sequence, episode, or edit) and hover over the task type row you wish to select then click the `Edit` icon:
+
+![update task type button](/guides/task-management/managing-task-types/images/1.png)
 
 ## Remove a Task Type
 
-TODO
+To remove a task type from your studio's Global Library, go to `Main Menu > Task Types` and hover over the task type row you wish to select then click the `Delete` icon:
+
+![remove task type global](/guides/task-management/managing-task-types/images/2.png)
+
+To remove an task type from your production library, go to `Production Menu > Settings > Task Types` and click the `Remove` button to remove the task type from the list:  
+
+![remove task type production](/guides/task-management/managing-task-types/images/3.png)
