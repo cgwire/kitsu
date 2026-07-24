@@ -196,7 +196,6 @@ export default {
     this.isContributions =
       this.mainConfig.is_self_hosted &&
       preferences.getPreference('open-productions:contributions') !== 'false'
-    this.isContributions = true
   },
 
   computed: {
