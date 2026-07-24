@@ -620,9 +620,9 @@ const currentTeam = computed(() => {
 const currentTaskTypes = computed(() => {
   if (!props.task || !currentProduction.value) return []
 
-  const taskTypeEntity = taskTypeMap.value.get(
-    props.task.task_type_id
-  ).for_entity
+  const taskType = taskTypeMap.value.get(props.task.task_type_id)
+  if (!taskType) return []
+  const taskTypeEntity = taskType.for_entity
   const taskTypeEntitySlug = taskTypeEntity.toLowerCase() + 's'
 
   const entityTasks = {}
