@@ -141,7 +141,7 @@ const helpers = {
     ).toString()
     task.task_status_short_name = helpers.getTaskStatus(
       task.task_status_id
-    ).short_name
+    )?.short_name
 
     Object.assign(task, {
       project_id: asset.production_id,
@@ -193,12 +193,14 @@ const helpers = {
 
       if (task.assignees.length > 1) {
         task.assignees = task.assignees.sort((a, b) => {
-          return personMap.get(a).name.localeCompare(personMap.get(b).name)
+          return (personMap.get(a)?.name || '').localeCompare(
+            personMap.get(b)?.name || ''
+          )
         })
       }
 
       const taskType = taskTypeMap.get(task.task_type_id)
-      if (!validationColumns[taskType.name]) {
+      if (taskType && !validationColumns[taskType.name]) {
         validationColumns[taskType.name] = task.task_type_id
       }
 
@@ -779,7 +781,10 @@ const actions = {
         if (task) {
           assetLine.push(task.task_status_short_name)
           assetLine.push(
-            task.assignees.map(id => personMap.get(id).full_name).join(',')
+            task.assignees
+              .map(id => personMap.get(id)?.full_name)
+              .filter(Boolean)
+              .join(',')
           )
         } else {
           assetLine.push('') // Status
@@ -885,18 +890,20 @@ const actions = {
       let isPending = false
       asset.tasks.forEach(taskId => {
         const task = tasksStore.state.taskMap.get(taskId)
-        if (!isPending) {
+        if (task && !isPending) {
           const taskStatus = helpers.getTaskStatus(task.task_status_id)
-          if (daily) {
-            if (task.last_comment_date) {
-              const lastCommentDate = moment(task.last_comment_date)
-              const yesterday = moment().subtract(1, 'days')
-              isPending =
-                taskStatus.is_feedback_request &&
-                lastCommentDate.isAfter(yesterday)
+          if (taskStatus) {
+            if (daily) {
+              if (task.last_comment_date) {
+                const lastCommentDate = moment(task.last_comment_date)
+                const yesterday = moment().subtract(1, 'days')
+                isPending =
+                  taskStatus.is_feedback_request &&
+                  lastCommentDate.isAfter(yesterday)
+              }
+            } else {
+              isPending = taskStatus.is_feedback_request
             }
-          } else {
-            isPending = taskStatus.is_feedback_request
           }
         }
       })
