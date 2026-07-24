@@ -52,8 +52,8 @@
         <div class="group-header">
           <span
             class="dot"
-            :style="{ borderColor: getDepartment(group).color }"
-            :title="getDepartment(group).name"
+            :style="{ borderColor: getDepartment(group)?.color }"
+            :title="getDepartment(group)?.name"
             v-if="group.is_shared && group.department_id"
           ></span>
           <span>{{ group.name }}</span>
@@ -150,8 +150,8 @@
       >
         <span
           class="dot"
-          :style="{ borderColor: getDepartment(searchQuery).color }"
-          :title="getDepartment(searchQuery).name"
+          :style="{ borderColor: getDepartment(searchQuery)?.color }"
+          :title="getDepartment(searchQuery)?.name"
           v-if="searchQuery.is_shared && searchQuery.department_id"
         ></span>
         {{ searchQuery.name }}
