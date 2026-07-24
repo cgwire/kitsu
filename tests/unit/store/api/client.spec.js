@@ -197,7 +197,9 @@ describe('store/api/client', () => {
         {
           id: 'asset-1',
           name: 'Chair',
-          tasks: [{ id: 'task-1', task_status_id: 'status-open' }]
+          tasks: [
+            { id: 'task-1', task_status_id: 'status-open', assignees: [] }
+          ]
         },
         { id: 'asset-2', name: 'Table', tasks: [] }
       ])
