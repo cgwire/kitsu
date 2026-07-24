@@ -215,7 +215,7 @@ export default {
       const episodeMap = {}
       if (!this.productionId) return []
       const production = this.productionMap.get(this.productionId)
-      if (production.production_type !== 'tvshow') return []
+      if (!production || production.production_type !== 'tvshow') return []
       this.tasksToCheck
         .filter(t => t.project_id === this.productionId)
         .forEach(task => {
