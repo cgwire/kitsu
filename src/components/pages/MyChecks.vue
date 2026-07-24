@@ -192,7 +192,7 @@ export default {
 
     nbTasksToCheck() {
       return this.sortedTasks.filter(task => {
-        return this.taskStatusMap.get(task.task_status_id).is_feedback_request
+        return this.taskStatusMap.get(task.task_status_id)?.is_feedback_request
       }).length
     },
 

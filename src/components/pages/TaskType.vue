@@ -521,7 +521,7 @@ const filters = {
     return tasks.filter(
       t =>
         parseDate(t.due_date).isBefore(today) &&
-        !taskStatusMap.get(t.task_status_id).is_done
+        !taskStatusMap.get(t.task_status_id)?.is_done
     )
   }
 }
@@ -1708,12 +1708,12 @@ const buildPersonElement = (
 
 const getTaskElementColor = (task, endDate) => {
   if (schedule.currentColor === 'status') {
-    let color = taskStatusMap.value.get(task.task_status_id).color
+    let color = taskStatusMap.value.get(task.task_status_id)?.color
     if (color === '#f5f5f5') color = '#999'
     return color
   } else if (schedule.currentColor === 'late') {
     const isLate =
-      !taskStatusMap.value.get(task.task_status_id).is_done &&
+      !taskStatusMap.value.get(task.task_status_id)?.is_done &&
       endDate.isBefore(moment())
     return isLate ? '#FF3860' : '#999'
   }
