@@ -14,6 +14,7 @@ import { PAGE_SIZE } from '@/lib/pagination'
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import {
   sortByName,
+  sortByPersonName,
   sortEditResult,
   sortEdits,
   sortTasks,
@@ -748,11 +749,7 @@ const mutations = {
           validationColumns[taskType.name] = taskType.id
         }
         if (task.assignees.length > 1) {
-          task.assignees = task.assignees.sort((a, b) => {
-            return (personMap.get(a)?.name || '').localeCompare(
-              personMap.get(b)?.name || ''
-            )
-          })
+          task.assignees = sortByPersonName(task.assignees, personMap)
         }
       })
       edit.tasks = taskIds
@@ -1071,11 +1068,7 @@ const mutations = {
       taskIds.push(task.id)
 
       if (task.assignees.length > 1) {
-        task.assignees = task.assignees.sort((a, b) => {
-          return (personMap.get(a)?.name || '').localeCompare(
-            personMap.get(b)?.name || ''
-          )
-        })
+        task.assignees = sortByPersonName(task.assignees, personMap)
       }
     })
     edit.tasks = taskIds

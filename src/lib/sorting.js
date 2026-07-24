@@ -253,6 +253,14 @@ export const sortByName = entries => {
   )
 }
 
+// Sort a list of person ids alphabetically by the person's name. Ids missing
+// from a partially loaded personMap fall back to '' so the sort never throws.
+export const sortByPersonName = (personIds, personMap) => {
+  return personIds.sort((a, b) =>
+    (personMap.get(a)?.name || '').localeCompare(personMap.get(b)?.name || '')
+  )
+}
+
 export const sortByValue = entries => {
   return entries.sort((a, b) =>
     a.value.localeCompare(b.value, undefined, { numeric: true })

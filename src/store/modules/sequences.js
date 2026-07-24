@@ -6,6 +6,7 @@ import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import { buildSequenceIndex, indexSearch } from '@/lib/indexing'
 import {
   sortByName,
+  sortByPersonName,
   sortSequences,
   sortSequenceResult,
   sortValidationColumns
@@ -689,11 +690,7 @@ const mutations = {
           validationColumns[taskType.name] = taskType.id
         }
         if (task.assignees.length > 1) {
-          task.assignees = task.assignees.sort((a, b) => {
-            return (personMap.get(a)?.name || '').localeCompare(
-              personMap.get(b)?.name || ''
-            )
-          })
+          task.assignees = sortByPersonName(task.assignees, personMap)
         }
       })
       sequence.tasks = taskIds

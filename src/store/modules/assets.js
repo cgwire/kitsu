@@ -20,6 +20,7 @@ import {
   sortAssetResult,
   sortAssets,
   sortByName,
+  sortByPersonName,
   sortTasks,
   sortValidationColumns
 } from '@/lib/sorting'
@@ -192,11 +193,7 @@ const helpers = {
       helpers.populateTask(task, asset)
 
       if (task.assignees.length > 1) {
-        task.assignees = task.assignees.sort((a, b) => {
-          return (personMap.get(a)?.name || '').localeCompare(
-            personMap.get(b)?.name || ''
-          )
-        })
+        task.assignees = sortByPersonName(task.assignees, personMap)
       }
 
       const taskType = taskTypeMap.get(task.task_type_id)
