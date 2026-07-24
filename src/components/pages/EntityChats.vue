@@ -148,7 +148,7 @@ export default {
     },
 
     getChatProjectName(chat) {
-      return this.productionMap.get(chat.project_id).name
+      return this.productionMap.get(chat.project_id)?.name
     },
 
     getChatDate(chat) {
