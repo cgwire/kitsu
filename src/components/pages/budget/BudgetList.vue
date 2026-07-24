@@ -420,12 +420,12 @@ export default {
                 budget_entry_id: null,
                 department_id: departmentId,
                 monthCosts: {},
-                position: person.position,
-                seniority: person.seniority,
+                position: person?.position,
+                seniority: person?.seniority,
                 total: 0,
                 months_duration: 0,
                 monthly_salary: 0,
-                daily_salary: person.daily_salary,
+                daily_salary: person?.daily_salary,
                 start_date: null,
                 exceptions: {}
               })
