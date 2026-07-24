@@ -758,7 +758,7 @@ const previewRoute = computed(() => {
     r.params.episode_id = props.task.entity.episode_id
   }
   const taskType = taskTypeMap.value.get(props.task.task_type_id)
-  r.params.type = pluralizeEntityType(taskType.for_entity)
+  r.params.type = pluralizeEntityType(taskType?.for_entity)
   return r
 })
 

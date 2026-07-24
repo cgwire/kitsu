@@ -183,7 +183,7 @@ const taskPath = computed(() => {
   }
 
   const taskType = taskTypeMap.value.get(task.task_type_id)
-  route.params.type = pluralizeEntityType(taskType.for_entity)
+  route.params.type = pluralizeEntityType(taskType?.for_entity)
 
   return route
 })

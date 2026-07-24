@@ -18,12 +18,12 @@ export const getTaskPath = (
     route.params.episode_id = task.episode_id || episode.id
   }
   const taskType = taskTypeMap.get(task.task_type_id)
-  if (taskType.for_entity === 'Episode') {
+  if (taskType?.for_entity === 'Episode') {
     route.name = 'episode-episode-task'
     route.params.episode_id = task.entity_id
     delete route.params.type
   } else {
-    route.params.type = pluralizeEntityType(taskType.for_entity)
+    route.params.type = pluralizeEntityType(taskType?.for_entity)
   }
   return route
 }
