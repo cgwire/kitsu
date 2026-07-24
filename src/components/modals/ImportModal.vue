@@ -162,8 +162,12 @@ defineExpose({ reset })
   max-width: calc(100vw - 4rem);
 }
 
+:deep(.modal-content .box h2.title) {
+  margin-bottom: 0.5em;
+}
+
 .columns-info {
-  background: var(--background-alt);
+  background: $white-grey-light;
   border: 1px solid var(--border);
   border-radius: 10px;
   display: flex;
@@ -200,6 +204,10 @@ defineExpose({ reset })
 
 .tabs ul {
   margin-left: 0;
+}
+
+.dark .columns-info {
+  background: var(--background-alt);
 }
 
 .paste-area {
