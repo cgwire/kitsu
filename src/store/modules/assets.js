@@ -742,9 +742,7 @@ const actions = {
       }
       let assetLine = []
       if (rootGetters.isTVShow) {
-        assetLine.push(
-          asset.episode_id ? episodeMap.get(asset.episode_id).name : 'MP'
-        )
+        assetLine.push(episodeMap.get(asset.episode_id)?.name || 'MP')
       }
       assetLine = assetLine.concat([
         asset.asset_type_name,
