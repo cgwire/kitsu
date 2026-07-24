@@ -574,7 +574,9 @@ const applyAssetTypeChoice = query => {
     let operator = '=['
     if (assetTypeFilters.operator === '=-') operator = '=[-'
     const assetType = assetTypeMap.value.get(value)
-    query += ` type${operator}${assetType.name}]`
+    if (assetType) {
+      query += ` type${operator}${assetType.name}]`
+    }
   }
   return query
 }
@@ -584,14 +586,18 @@ const applyTaskTypeChoice = query => {
     let operator = '=['
     if (taskTypeFilter.operator === '=-') operator = '=[-'
     const value = taskTypeFilter.values
-      .map(statusId => taskStatusMap.value.get(statusId).short_name)
+      .map(statusId => taskStatusMap.value.get(statusId)?.short_name)
+      .filter(Boolean)
       .join(',')
     // Empty id means "all task types": emit the cross-task-type status= filter.
-    const field =
-      taskTypeFilter.id === ''
-        ? 'status'
-        : `[${taskTypeMap.value.get(taskTypeFilter.id).name}]`
-    query += ` ${field}${operator}${value}]`
+    const isAllTaskTypes = taskTypeFilter.id === ''
+    const taskType = isAllTaskTypes
+      ? null
+      : taskTypeMap.value.get(taskTypeFilter.id)
+    if (isAllTaskTypes || taskType) {
+      const field = isAllTaskTypes ? 'status' : `[${taskType.name}]`
+      query += ` ${field}${operator}${value}]`
+    }
   })
   return query
 }

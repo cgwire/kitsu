@@ -1390,29 +1390,41 @@ export default {
               nameData.splice(
                 5,
                 0,
-                this.assetTypeMap.get(this.assetTypeId).name
+                this.assetTypeMap.get(this.assetTypeId)?.name || ''
               )
             }
           } else {
             nameData.splice(4, 0, this.currentEpisode.name)
             if (this.sequenceId !== 'all' && this.castingType === 'shot') {
-              nameData.splice(5, 0, this.sequenceMap.get(this.sequenceId).name)
+              nameData.splice(
+                5,
+                0,
+                this.sequenceMap.get(this.sequenceId)?.name || ''
+              )
             }
             if (this.assetTypeId !== 'all' && this.castingType === 'asset') {
               nameData.splice(
                 5,
                 0,
-                this.assetTypeMap.get(this.assetTypeId).name
+                this.assetTypeMap.get(this.assetTypeId)?.name || ''
               )
             }
           }
         }
       } else {
         if (this.sequenceId !== 'all' && this.castingType === 'shot') {
-          nameData.splice(5, 0, this.sequenceMap.get(this.sequenceId).name)
+          nameData.splice(
+            5,
+            0,
+            this.sequenceMap.get(this.sequenceId)?.name || ''
+          )
         }
         if (this.assetTypeId !== 'all' && this.castingType === 'asset') {
-          nameData.splice(5, 0, this.assetTypeMap.get(this.assetTypeId).name)
+          nameData.splice(
+            5,
+            0,
+            this.assetTypeMap.get(this.assetTypeId)?.name || ''
+          )
         }
       }
       return stringHelpers.slugify(nameData.join('_'))
