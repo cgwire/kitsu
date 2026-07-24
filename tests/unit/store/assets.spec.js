@@ -7,6 +7,7 @@ vi.mock('@/store', () => ({ default: {} }))
 import assetsStore from '@/store/modules/assets'
 import assetsApi from '@/store/api/assets'
 import entitiesApi from '@/store/api/entities'
+import taskStatusStore from '@/store/modules/taskstatus'
 import { buildAssetIndex } from '@/lib/indexing'
 
 const baseRootGetters = () => ({
@@ -161,6 +162,90 @@ describe('Assets store', () => {
       expect(
         assetsStore.cache.assets.filter(a => a.id === 'a2')
       ).toHaveLength(1)
+    })
+  })
+
+  describe('LOAD_ASSETS_END', () => {
+    test('keeps the task own metadata (task descriptors) on reload', () => {
+      taskStatusStore.cache.taskStatusMap = new Map([
+        ['ts1', { id: 'ts1', short_name: 'wip' }]
+      ])
+      const task = {
+        id: 't1',
+        task_type_id: 'tt1',
+        task_status_id: 'ts1',
+        assignees: [],
+        duration: 0,
+        estimation: 0,
+        data: { revision_note: 'keep me' }
+      }
+      const asset = {
+        id: 'a1',
+        name: 'A1',
+        asset_type_id: 'type1',
+        asset_type_name: 'Char',
+        canceled: false,
+        data: { color: 'blue' },
+        tasks: [task]
+      }
+      const taskMap = new Map()
+
+      assetsStore.mutations.LOAD_ASSETS_END(
+        { assetSearchText: '' },
+        {
+          production: { id: 'p1' },
+          assets: [asset],
+          userFilters: {},
+          userFilterGroups: {},
+          personMap: new Map(),
+          taskMap,
+          taskTypeMap: new Map([
+            ['tt1', { id: 'tt1', name: 'Modeling', priority: 1 }]
+          ])
+        }
+      )
+
+      expect(taskMap.get('t1').data).toEqual({ revision_note: 'keep me' })
+    })
+  })
+
+  describe('getAssetsCsvLines', () => {
+    test('exports the full name for person descriptors, not the id', () => {
+      const asset = {
+        id: 'a1',
+        name: 'A1',
+        asset_type_name: 'Char',
+        description: '',
+        ready_for: 'None',
+        data: { reviewer: 'person-1' },
+        validations: new Map()
+      }
+      assetsStore.cache.assets = [asset]
+      assetsStore.cache.result = []
+      const rootGetters = baseRootGetters()
+      rootGetters.currentProduction = {
+        id: 'p1',
+        descriptors: [
+          {
+            name: 'Reviewer',
+            field_name: 'reviewer',
+            data_type: 'person',
+            entity_type: 'Asset'
+          }
+        ]
+      }
+      rootGetters.personMap = new Map([
+        ['person-1', { id: 'person-1', full_name: 'John Doe' }]
+      ])
+      const state = { assetValidationColumns: [] }
+
+      const lines = assetsStore.actions.getAssetsCsvLines({
+        state,
+        rootGetters
+      })
+
+      expect(lines[0]).toContain('John Doe')
+      expect(lines[0]).not.toContain('person-1')
     })
   })
 

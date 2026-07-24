@@ -719,6 +719,9 @@ const actions = {
           shotLine.push(
             shot.data[descriptor.field_name]?.toLowerCase() === 'true'
           )
+        } else if (descriptor.data_type === 'person') {
+          const person = personMap.get(shot.data[descriptor.field_name])
+          shotLine.push(person ? person.full_name : '')
         } else {
           shotLine.push(shot.data[descriptor.field_name])
         }

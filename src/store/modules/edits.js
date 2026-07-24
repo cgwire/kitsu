@@ -556,6 +556,9 @@ const actions = {
             editLine.push(
               edit.data[descriptor.field_name]?.toLowerCase() === 'true'
             )
+          } else if (descriptor.data_type === 'person') {
+            const person = personMap.get(edit.data[descriptor.field_name])
+            editLine.push(person ? person.full_name : '')
           } else {
             editLine.push(edit.data[descriptor.field_name])
           }
