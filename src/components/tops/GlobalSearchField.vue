@@ -201,7 +201,7 @@ export default {
 
     entityPath(entity, section) {
       const project = this.productionMap.get(entity.project_id)
-      const isTVShow = project.production_type === 'tvshow'
+      const isTVShow = project?.production_type === 'tvshow'
       let episodeId = null
       if (isTVShow) episodeId = entity.episode_id || 'main'
       return getEntityPath(entity.id, entity.project_id, section, episodeId)
