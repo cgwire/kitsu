@@ -121,7 +121,7 @@
       :form-data="addPreviewFormData"
       :title="
         modals.task
-          ? `${modals.task.entity_name} / ${taskTypeMap.get(modals.task.task_type_id).name}`
+          ? `${modals.task.entity_name} / ${taskTypeMap.get(modals.task.task_type_id)?.name || ''}`
           : ''
       "
       @cancel="closeAddPreviewModal"

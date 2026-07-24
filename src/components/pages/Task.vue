@@ -407,7 +407,7 @@
         :expected-frames="entityFrames"
         :title="
           task
-            ? `${task.entity_name} / ${taskTypeMap.get(task.task_type_id).name}`
+            ? `${task.entity_name} / ${taskTypeMap.get(task.task_type_id)?.name || ''}`
             : ''
         "
         @cancel="closeAddPreviewModal"
@@ -423,7 +423,7 @@
         message=""
         :title="
           task
-            ? `${task.entity_name} / ${taskTypeMap.get(task.task_type_id).name}`
+            ? `${task.entity_name} / ${taskTypeMap.get(task.task_type_id)?.name || ''}`
             : ''
         "
         @cancel="hideExtraPreviewModal"
@@ -1810,7 +1810,8 @@ export default {
   head() {
     let title = `${this.$t('main.loading')} - Kitsu`
     if (this.task) {
-      const taskTypeName = this.taskTypeMap.get(this.task.task_type_id).name
+      const taskTypeName =
+        this.taskTypeMap.get(this.task.task_type_id)?.name || ''
       title = `${this.title} / ${taskTypeName} - Kitsu`
     }
     return { title }
