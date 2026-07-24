@@ -222,19 +222,19 @@
                       :frame="displayedFrame"
                       :is-change="isStatusChange(index)"
                       :is-checkable="
-                        user.id === comment.person?.id ||
+                        user?.id === comment.person?.id ||
                         (isCurrentUserArtist && isAssigned) ||
                         isDepartmentSupervisor ||
                         isCurrentUserManager
                       "
                       :is-editable="
-                        user.id === comment.person?.id || isCurrentUserManager
+                        user?.id === comment.person?.id || isCurrentUserManager
                       "
                       :is-pinnable="
                         isDepartmentSupervisor || isCurrentUserManager
                       "
                       :is-replyable="
-                        user.id === comment.person?.id ||
+                        user?.id === comment.person?.id ||
                         isAssigned ||
                         isDepartmentSupervisor ||
                         isCurrentUserManager ||
@@ -649,7 +649,7 @@ const title = computed(() => {
 })
 
 const isAssigned = computed(
-  () => props.task?.assignees?.includes(user.value.id) ?? false
+  () => props.task?.assignees?.includes(user.value?.id) ?? false
 )
 
 const isCommentingAllowed = computed(
