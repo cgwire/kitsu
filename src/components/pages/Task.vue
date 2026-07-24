@@ -928,7 +928,7 @@ export default {
       if (this.task) {
         const taskType = this.taskTypeMap.get(this.task.task_type_id)
         return this.$t('main.delete_text', {
-          name: `${this.task.entity_name} / ${taskType.name}`
+          name: `${this.task.entity_name} / ${taskType?.name ?? ''}`
         })
       } else {
         return ''
@@ -992,6 +992,7 @@ export default {
 
       // get the current task entity type eg. 'Shot' or 'Asset'
       const current_task_type = this.taskTypeMap.get(this.task.task_type_id)
+      if (!current_task_type) return []
       const task_type_entity = current_task_type.for_entity
       const task_type_entity_slug = task_type_entity.toLowerCase() + 's'
 
@@ -1487,7 +1488,7 @@ export default {
       if (this.isTVShow) {
         const taskType = this.taskTypeMap.get(this.task.task_type_id)
         route.name = 'episode-task-preview'
-        if (taskType.for_entity === 'Episode') {
+        if (taskType?.for_entity === 'Episode') {
           route.name = 'episode-episode-task-preview'
         }
       }
