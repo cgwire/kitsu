@@ -707,7 +707,7 @@ export default {
           headers.push(this.$t('main.estimation_short'))
         }
         this.editValidationColumns.forEach(taskTypeId => {
-          headers.push(this.taskTypeMap.get(taskTypeId).name)
+          headers.push(this.taskTypeMap.get(taskTypeId)?.name || '')
           headers.push('Assignations')
         })
         csv.buildCsvFile(name, [headers].concat(editLines))
@@ -792,7 +792,7 @@ export default {
       }
     }
     return {
-      title: `${this.currentProduction.name} ${this.$t('edits.title')} - Kitsu`
+      title: `${this.currentProduction ? this.currentProduction.name : ''} ${this.$t('edits.title')} - Kitsu`
     }
   }
 }
