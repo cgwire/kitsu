@@ -112,7 +112,7 @@ const helpers = {
     ).toString()
     task.task_status_short_name = taskStatusMap.get(
       task.task_status_id
-    ).short_name
+    )?.short_name
 
     Object.assign(task, {
       project_id: sequence.production_id,
@@ -685,12 +685,14 @@ const mutations = {
         taskIds.push(task.id)
 
         const taskType = taskTypeMap.get(task.task_type_id)
-        if (!validationColumns[taskType.name]) {
+        if (taskType && !validationColumns[taskType.name]) {
           validationColumns[taskType.name] = taskType.id
         }
         if (task.assignees.length > 1) {
           task.assignees = task.assignees.sort((a, b) => {
-            return personMap.get(a).name.localeCompare(personMap.get(b))
+            return (personMap.get(a)?.name || '').localeCompare(
+              personMap.get(b)?.name || ''
+            )
           })
         }
       })
