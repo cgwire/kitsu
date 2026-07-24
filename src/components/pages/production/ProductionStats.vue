@@ -111,7 +111,7 @@
             class="stat"
             :style="{
               backgroundColor: taskStatusMap.get(statusStats.task_status_id)
-                .color,
+                ?.color,
               width: `${(statusStats.amount / taskTypeStatsMap[taskType.id].amount) * 100}%`
             }"
             :key="taskType.id + statusStats.task_status_id"
