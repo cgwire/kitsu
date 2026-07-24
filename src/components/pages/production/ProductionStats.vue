@@ -46,11 +46,11 @@
       <div
         class="stat"
         :style="{
-          backgroundColor: taskStatusMap.get(statusId).color,
+          backgroundColor: taskStatusMap.get(statusId)?.color,
           width: `${(statsByStatus[statusId] / stats.amount) * 100}%`
         }"
         :key="statusId"
-        :title="`${taskStatusMap.get(statusId).name} - ${statsByStatus[statusId]} tasks`"
+        :title="`${taskStatusMap.get(statusId)?.name} - ${statsByStatus[statusId]} tasks`"
         v-for="statusId in statusIds"
       ></div>
     </div>
@@ -115,7 +115,7 @@
               width: `${(statusStats.amount / taskTypeStatsMap[taskType.id].amount) * 100}%`
             }"
             :key="taskType.id + statusStats.task_status_id"
-            :title="`${taskStatusMap.get(statusStats.task_status_id).name} - ${statusStats.amount} tasks`"
+            :title="`${taskStatusMap.get(statusStats.task_status_id)?.name} - ${statusStats.amount} tasks`"
             v-for="statusStats in sortStatuses(
               taskTypeStatsMap[taskType.id].task_statuses
             )"
@@ -201,7 +201,8 @@ const statsByStatus = computed(() => {
 const statusIds = computed(() =>
   Object.keys(statsByStatus.value).sort(
     (a, b) =>
-      taskStatusMap.value.get(a).priority < taskStatusMap.value.get(b).priority
+      taskStatusMap.value.get(a)?.priority <
+      taskStatusMap.value.get(b)?.priority
   )
 )
 
@@ -227,8 +228,8 @@ const expandStats = () => {
 const sortStatuses = statuses =>
   statuses.sort(
     (a, b) =>
-      taskStatusMap.value.get(a.task_status_id).priority <
-      taskStatusMap.value.get(b.task_status_id).priority
+      taskStatusMap.value.get(a.task_status_id)?.priority <
+      taskStatusMap.value.get(b.task_status_id)?.priority
   )
 </script>
 

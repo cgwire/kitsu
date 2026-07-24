@@ -83,7 +83,7 @@
                 :key="columnId"
                 :hidden-columns="hiddenColumns"
                 :column-id="columnId"
-                :title="taskTypeMap.get(columnId).name"
+                :title="taskTypeMap.get(columnId)?.name"
                 :validation-style="getValidationStyle(columnId)"
                 :left="
                   offsets['validation-' + columnIndexInGrid]
