@@ -1302,7 +1302,7 @@ const onExportClick = () => {
     'kitsu',
     productionMap.value.get(props.task.project_id)?.name,
     props.task.entity_name.replaceAll(' / ', '_'),
-    taskTypeMap.value.get(props.task.task_type_id).name,
+    taskTypeMap.value.get(props.task.task_type_id)?.name,
     'comments'
   ]
   const name = stringHelpers.slugify(nameData.join('_'))
@@ -1337,7 +1337,8 @@ const onExportClick = () => {
         : '',
       comment.acknowledgements
         ? comment.acknowledgements
-            .map(personId => personMap.value.get(personId).name)
+            .map(personId => personMap.value.get(personId)?.name)
+            .filter(Boolean)
             .join(',')
         : '',
       comment.previews[0]?.revision,
@@ -1353,7 +1354,7 @@ const onExportClick = () => {
         commentLines.push([
           formatDate(reply.date),
           t('main.reply'),
-          personMap.value.get(reply.person_id).name,
+          personMap.value.get(reply.person_id)?.name || '',
           reply.text,
           null,
           null,
