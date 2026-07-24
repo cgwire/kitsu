@@ -645,7 +645,7 @@ const actions = {
       const previousDescriptorFieldName =
         state.currentProduction.descriptors.find(
           d => d.id === descriptor.id
-        ).field_name
+        )?.field_name
       return productionsApi
         .updateMetadataDescriptor(state.currentProduction.id, descriptor)
         .then(descriptor => {
