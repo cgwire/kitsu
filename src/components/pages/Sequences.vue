@@ -633,7 +633,7 @@ export default {
       }
     }
     return {
-      title: `${this.currentProduction.name} | ${this.$t('sequences.title')} - Kitsu`
+      title: `${this.currentProduction?.name || ''} | ${this.$t('sequences.title')} - Kitsu`
     }
   }
 }
