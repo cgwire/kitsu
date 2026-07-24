@@ -27,10 +27,18 @@ function decodeCompactRow(row, fields, taskFields) {
   fields.forEach((field, index) => {
     entity[field] =
       field === 'tasks'
-        ? row[index].map(task => decodeCompactRow(task, taskFields))
+        ? row[index].map(task => decodeCompactTask(task, taskFields))
         : row[index]
   })
   return entity
+}
+
+// Compact rows may omit the assignees relation; downstream code treats
+// task.assignees as an array, so default it here.
+function decodeCompactTask(row, taskFields) {
+  const task = decodeCompactRow(row, taskFields)
+  task.assignees ||= []
+  return task
 }
 
 async function handleNdjsonResponse(response) {

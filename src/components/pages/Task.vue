@@ -943,7 +943,7 @@ export default {
 
     isAssigned() {
       return (
-        this.task?.assignees.some(personId => personId === this.user.id) ??
+        this.task?.assignees?.some(personId => personId === this.user.id) ??
         false
       )
     },

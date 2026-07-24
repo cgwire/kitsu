@@ -649,7 +649,7 @@ const title = computed(() => {
 })
 
 const isAssigned = computed(
-  () => props.task?.assignees.includes(user.value.id) ?? false
+  () => props.task?.assignees?.includes(user.value.id) ?? false
 )
 
 const isCommentingAllowed = computed(
