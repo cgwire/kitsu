@@ -511,7 +511,7 @@ const filters = {
       const status = taskStatusMap.get(t.task_status_id)
       return (
         parseDate(t.due_date).isBefore(today) &&
-        !(status.is_feedback_request || status.is_done)
+        !(status?.is_feedback_request || status?.is_done)
       )
     })
   },
