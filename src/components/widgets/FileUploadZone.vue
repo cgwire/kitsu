@@ -82,9 +82,10 @@ defineExpose({
     cursor: pointer;
     font-weight: 500;
 
+    // Neutralize Bulma's button hover, the zone-level hover is enough feedback
     &:hover {
       background: transparent;
-      color: var(--background-selectable, $purple-strong);
+      color: var(--text);
     }
   }
 }
