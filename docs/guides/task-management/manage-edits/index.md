@@ -15,24 +15,16 @@ It's especially useful when you have several edits to track through several vali
 Per default, the **Edit** page will not be displayed until you have task types for it on your **production library** (setting page)
 :::
 
-
-
 To use this page, you need to first create a dedicated task type on your **Global Library**
  with the **Edit** attribute.
 
-See the **Creating a New Task Type** Section to create a new **Task Type**.
+See the [Creating a New Task Type](/guides/task-management/managing-task-types/#creating-a-new-task-type) section to create a new **Task Type**.
 
-[Creating a New Task Type](../configure-kitsu/index.html#task-types)
-
-
-Once you have created your **Task Types**  on your **Global Library**, add them to your
-**Production Library**, you will see the **Edit** displayed on the navigation drop-down menu.
-
+Once you have created your **Task Types**  on your **Global Library**, add them to your **Production Library**, you will see the **Edit** displayed on the navigation drop-down menu.
 
 ![Navigation Edit](/img/getting-started/drop_down_menu_edit.png)
 
-
-This new page behaves like the asset and shot global page. You can add your edits with the **+ New edit** button.
+This new page behaves like the asset and shot global page. You can add your edits with the `+ New edit` button.
 
 You can assign tasks, do the review, change status, etc.
 

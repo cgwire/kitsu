@@ -10,15 +10,15 @@ flowchart TD
     TASK_STATUS -->|current state of| TASK
 ```
 
+Task types can be associated with multiple entities such as assets, shots, sequences, episodes, or edits.
+
 ## Creating a New Task Type
 
 <!-- #region setup -->
 
-Next, let's create all the **Task Types** needed to manage and track our production. Task types could be associated with multiple entities such as assets, shots, sequences, episodes, or edits.
+First, let's create all the **Task Types** needed to manage and track our production.
 
-
-From the main menu ![Main menu](/img/getting-started/main_button.png) select
-the **Task Types** page under the **Admin** section.
+From the main menu, select the **Task Types** page under the **Admin** section:
 
 ![Task Type](/img/getting-started/menu_tasktype.png)
 
@@ -30,8 +30,9 @@ You will notice that these **Task Types** are already linked to a department.
 
 ![Task Type Empty](/img/getting-started/task_type_empty.png)
 
-You can click on the ![Add Task Type](/img/getting-started/add_tasktype.png)
-button to create new **Task Type**.
+You can click on the `Add Task Type` button to create new **Task Type**:
+
+![add task type button](/img/getting-started/add_tasktype.png)
 
 Next, you will need to supply some information about your task type, including:
 
@@ -69,7 +70,7 @@ At any point during production, you can revisit this section to create additiona
 
 <!-- #endregion setup -->
 
-## Enabling Specific Task Types for a Production
+## Adding Task Types in a Production
 
 On the **Navigation Menu**, choose on the dropdown menu the **Setting**.
 

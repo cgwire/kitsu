@@ -1,15 +1,37 @@
 # User Permission Roles
 
-## Understanding Permission Roles
+<!-- #region body -->
 
 ::: warning Definition
 A permission role defines a set of access rights and privileges granted to a user within a system or application, dictating what actions they can perform and what resources they can access.
 :::
 
-Roles are very important, so it's useful to understand what each of them does and which ones might be relevant to specific team members. Click into each of the sections below to learn more about each permission role.
+Roles are very important, so it's useful to understand what each of them does and which ones might be relevant to specific team members. 
 
-- **Artist**
-::: details Artist Permissions
+Here's the org hierarchy as a simple chart:
+
+```mermaid
+graph TD
+    A[Studio Manager] --> B[Production Manager]
+    B --> C[Supervisor]
+    C --> D[Artist]
+    D --> E[Vendor]
+    F[Client]
+```
+
+And a summary of the permissions per role:
+
+| Role | Access Scope | Can Do | Cannot Do |
+|---|---|---|---|
+| **Artist** | Only productions/tasks they're assigned to | <ul><li>Create personal filters (global & task type pages)</li><li>Edit own comments</li><li>Check checklists on assigned tasks</li><li>Create on-the-fly playlists (not savable)</li></ul> | <ul><li>See client comments</li><li>Access unassigned projects</li></ul> |
+| **Vendor** | Only specifically assigned tasks (narrower than Artist) | <ul><li>Similar to Artist, but everything not assigned is hidden</li></ul> | <ul><li>See/edit anything not explicitly assigned</li></ul> |
+| **Supervisor** | Their own department(s): assets, shots, tasks, assignments, stats, breakdown, playlists (inherits Artist permissions) | <ul><li>Assign tasks to their team artists</li><li>Comment on all tasks in their department(s)</li><li>Check/pin checklists & comments in their dept</li><li>Edit own comments</li><li>Add/edit studio or client playlists</li><li>See client comments & validations</li><li>See comments from other departments</li></ul> | <ul><li>Access studio team, main timesheets, production list</li><li>Define task types/statuses/asset types</li><li>Comment on or assign artists in other departments</li></ul> |
+| **Production Manager** | Productions they're assigned to: assets, shots, tasks, assignments, stats, breakdowns, playlists (inherits Supervisor permissions) | <ul><li>Create assets/shots (manually or CSV import)</li><li>Comment on any task in the production</li><li>Edit/pin/check any comment or checklist in the production</li><li>Add task columns</li><li>Delete/add tasks</li><li>Add/edit studio or client playlists</li><li>See client comments & validations</li></ul> | <ul><li>Access studio page, main timesheets, production list</li><li>Define task types/statuses/asset types</li></ul> |
+| **Studio Manager** | All productions and settings (admin-level, inherits Supervisor permissions) | <ul><li>Create/edit/delete productions</li><li>Full studio access (timesheets, people, schedule)</li><li>Set permission roles</li><li>Customize task types/statuses/asset types & studio branding</li><li>Add/delete task columns</li><li>Create custom metadata columns</li></ul> | — |
+| **Client** | Only their own production | <ul><li>Access global asset/shot pages</li><li>Access stats pages</li><li>Access client playlists with limited status visibility when commenting</li></ul> | <ul><li>See task assignments</li><li>See comments they didn't write</li><li>See Client retake/validation status (Supervisors & Studio Manager only)</li></ul> |
+
+## Artist
+
 Artists can only access the productions they are part of. They can comment on tasks, upload media, and change statuses only on tasks that have been assigned to them. Their access is limited to a predefined set of statuses as determined by the Studio Manager.
 
 **They can:**
@@ -25,10 +47,9 @@ Artists can only access the productions they are part of. They can comment on ta
 When an artist logs in to Kitsu, the first page they will see is their **My Tasks** page.
 
 ![my task](/img/getting-started/my_task_page.png)
-:::
 
-- **Supervisor**
-::: details Supervisor Permissions
+## Supervisor
+
 Department supervisors inherit Artist permissions.
 
 Department supervisors have read and write access to their department(s) they work on:
@@ -49,10 +70,9 @@ assets, shots, tasks, assignments, statistics, breakdown, and playlists.
 * Access the studio team, the main timesheets, and the production list
 * Define task types, task statuses, and asset types.
 * Comment on other departments than theirs; they can't assign artists from other departments.
-:::
 
-- **Production Manager**
-::: details Production Manager Permissions
+## Production Manager
+
 Production managers inherit Department supervisor permissions.
 
 Production managers have read and write access to the productions they are assigned to, including
@@ -74,10 +94,9 @@ assets, shots, tasks, assignments, statistics, breakdowns, and playlists.
 
 * Access the studio page, the main timesheets, and the production list.
 * Define task types, task statuses, and asset types.
-:::
 
-- **Studio Manager**
-::: details Studio Manager / Administrator Permissions
+## Studio Manager
+
 A Studio Manager acts in the same way as an Administrator, having read and write access to all productions and settings within Kitsu. Some of their privileges include:
 
 ### Create and edit a production
@@ -109,16 +128,18 @@ They have full access to all productions on your Kitsu site. Additionally:
 * They have the same permissions as the supervisor.
 * They can add / delete a task column.
 * They are allowed to create custom metadata columns.
-:::
 
 
-- **Vendor**
-::: details Vendor Permissions
-Vendors have similar permissions to artists. The main difference is that while an artist can still see tasks in their production (though they can only edit tasks assigned to them), a vendor can only see and edit tasks that they are specifically assigned to. Everything else that is not assigned is hidden.
-:::
+## Vendor
 
-- **Client**
-::: details Clients Permissions
+Vendors have similar permissions to artists. 
+
+The main difference is that while an artist can still see tasks in their production (though they can only edit tasks assigned to them), a vendor can only see and edit tasks that they are specifically assigned to. 
+
+Everything else that is not assigned is hidden.
+
+## Client
+
 The client can only see the production of which they are part of.
 
 **They can:**
@@ -135,4 +156,5 @@ The client can only see the production of which they are part of.
 
 * See task assignments
 * See comments that they didn't write
-:::
+
+<!-- #endregion body -->

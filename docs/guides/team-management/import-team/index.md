@@ -1,12 +1,19 @@
 # Import Your Team
 
-## Add Employees from a CSV Spreadsheet File
+Chances are you already have a list of your employees somewhere. 
 
-You may already have your employee list ready in a spreadsheet file. With Kitsu, you have two ways to import them: importing a `.csv` file directly or copy-pasting your data directly into Kitsu.
+You have three ways to import them in Kitsu: 
+
+1. Importing a `.csv` spreadsheet file directly 
+2. [Copy-pasting your data directly into Kitsu](/guides/team-management/managing-teams/)
+3. Using the [Developer API](https://dev.kitsu.cloud/guides/team-management.html#inviting-and-managing-users)
+
+## Add Employees from a CSV Spreadsheet File
 
 First, save your spreadsheet as a `.csv` file.
 
-Then, go back to the People page on Kitsu and click on the **Import** icon.
+Then, go back to the People page on Kitsu and click on the **Import** icon:
+
 ![Import Icon](/img/getting-started/import.png)
 
 A pop-up window **Import data from a CSV** will open. Click on **Browse** to pick your `.csv` file.

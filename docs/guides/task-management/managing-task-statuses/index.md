@@ -10,14 +10,9 @@ flowchart TD
     TASK_STATUS -->|current state of| TASK
 ```
 
-## Define Your Approval Workflow
+A status represents a specific stage or condition that a task must pass through as part of the review and approval process.
 
-<!-- #region setup -->
-
-Let's create the statuses we intend to use during our **Approval Workflow**.
-
-On the main menu ![Main menu](/img/getting-started/main_button.png) select the
-**Task Status** page under the **Admin** section.
+In the main menu, select the **Task Status** page under the **Admin** section:
 
 ![Task Status Menu](/img/getting-started/menu_status_type.png)
 
@@ -25,23 +20,31 @@ On the main menu ![Main menu](/img/getting-started/main_button.png) select the
 By default, Kitsu already provides some examples Statuses.
 :::
 
+You'll reach the `Task Status` page:
+
 ![Task Status Default](/img/getting-started/task_status_default.png)
 
-A status represents a specific stage or condition that a task or must pass through as part of the review and approval process.
+## Create a Task Status
 
-For example, the **Ready** ![Ready status](/img/getting-started/ready_icon.png) status indicates that the artists have everything they need to start working and should not begin their tasks without reaching this status.
+<!-- #region setup -->
 
-**WIP** ![WIP status](/img/getting-started/wip_icon.png): The **Work in Progress** status is used by artists to inform their team that they are actively working on the task, indicating that there is no need to assign it to someone else.
+Let's create the statuses we intend to use during our **Approval Workflow**.
 
-**WFA**![WFA status](/img/getting-started/wfa_icon.png): The **Waiting-For-Approval** status is used by artists to notify their supervisors that they have completed their work and are awaiting review. Supervisors can also use a similar status to inform directors that work is ready for review.
+For example: 
 
-**Done** ![DONE Status](/img/getting-started/done_icon.png): The **Done** status indicates that all work has been completed & approved. This indicates that the current task is complete and the next step in the process can commence.
+| Status | Icon | Description |
+|---|---|---|
+| **Ready** | ![Ready status](/img/getting-started/ready_icon.png) | Indicates that the artists have everything they need to start working and should not begin their tasks without reaching this status. |
+| **WIP** | ![WIP status](/img/getting-started/wip_icon.png) | Used by artists to inform their team that they are actively working on the task, indicating that there is no need to assign it to someone else. |
+| **WFA** | ![WFA status](/img/getting-started/wfa_icon.png) | Used by artists to notify their supervisors that they have completed their work and are awaiting review. Supervisors can also use a similar status to inform directors that work is ready for review. |
+| **Done** | ![DONE Status](/img/getting-started/done_icon.png) | Indicates that all work has been completed & approved. This indicates that the current task is complete and the next step in the process can commence. |
+| **Retake** | ![Retake status](/img/getting-started/retake_icon.png) | Indicates that a comment has been made, prompting the artists to continue working on their task and publish a new version until validation is achieved. |
 
-**Retake** ![Retake status](/img/getting-started/retake_icon.png): The **Retake** status indicates that a comment has been made, prompting the artists to continue working on their task and publish a new version until validation is achieved.
+These statuses are **just examples** of what is achievable in Kitsu! You are free to create your own as needed.
 
-These **statuses** are just examples of what is achievable in Kitsu. You are free to create your own as needed.
+To do this, from the main page, click on the `Add a task status` button:
 
-To do this, from the main page, click on the ![Add Task Status](/img/getting-started/add_task_status.png) button.
+![Add Task Status](/img/getting-started/add_task_status.png)
 
 You'll then need to define some details about you **Task Status**, including:
 
@@ -72,7 +75,7 @@ You'll notice a few tasks statuses listed under the category of *Concept Status*
 
 <!-- #endregion setup -->
 
-## Configuring Specific Task Statuses for a Production
+## Adding Task Statuses to a Production
 
 On the **Navigation Menu**, choose on the dropdown menu the **Setting**.
 
@@ -99,7 +102,7 @@ Select the Entities or Concepts tab and hover over the task status row you wish 
 
 ![update task status button](/guides/task-management/managing-task-statuses/images/1.png)
 
-## Remove a task Status
+## Remove a Task Status
 
 To remove a task status from your studio's Global Library, go to `Main Menu > Task Status` and hover over the task status row you wish to select then click the `Delete` icon:
 
@@ -125,11 +128,11 @@ Additionally, you can create **Status Automations** that update the **Asset Stat
 You can also ask Kitsu to **copy the latest preview** with the Automation.
 :::
 
-Go to the main menu ![Main menu](/img/getting-started/main_button.png)  and select **Automation**.
+Go to the main menu and select **Automations**:
 
 ![Main menu Status Automation](/img/getting-started/main_menu_status_automation.png)
 
-From this page, you can create **Status Automations** by clicking the **+Add status automation** button.
+From this page, you can create **Status Automations** by clicking the `+ Add status automation` button:
 
 ![create Status Automation](/img/getting-started/status_automation_empy.png)
 
@@ -161,7 +164,7 @@ At any point during the production, you can return here and create more **Status
 
 <!-- #endregion statusautomationsetup -->
 
-### Configuring Status Automation for a Production
+### Add a Status Automation to a Production
 
 On the **Navigation Menu**, choose on the dropdown menu the **Setting**.
 
@@ -174,9 +177,7 @@ status automation **Global Library** into your **Production Library**.
 
 But you can use only specific **Status Automation**, depending on your production type.
 
-
 On the **Status Automation** tab, you can choose which automation you want to use on this production,
 validate your choice with the **add** button.
-
 
 ![Setting Add Task Type](/img/getting-started/setting_auto_add.png)

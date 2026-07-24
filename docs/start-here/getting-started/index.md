@@ -285,6 +285,8 @@ You can see the number of elements (assets or shots), the total number of estima
 
 ## 5. Create a New Production
 
+Now that you have designed your global workflow and invited more people, it's time to create your production:
+
 - [Quickstart for TV Shows](/recipes/for-tvshows/)
 - [Quickstart for Feature Films](/recipes/for-feature-films/)
 - [Quickstart for Shorts](/recipes/for-shorts/)

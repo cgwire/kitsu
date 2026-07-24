@@ -7,7 +7,7 @@ flowchart TD
 
 ## Define Your Asset Workflow
 
-Once you have created your global Workflow, you can then define your **Asset Types**
+After creating your global Workflow, you can define your **Asset Types**.
 
 <!-- #region setup -->
 

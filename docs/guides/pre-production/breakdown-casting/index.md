@@ -1,7 +1,5 @@
 # Breakdown & Casting
 
-## Create a Breakdown List
-
 Filling out the breakdown helps you with the assembly of the shots. With the
 breakdown, you have all the details of the assets you need to add to create your
 shot, and we are sure to omit nothing.
@@ -10,17 +8,15 @@ On the dropdown menu, choose **BREAKDOWN**.
 
 ![drop down Menu breakdown](/img/getting-started/drop_down_menu_breakdown.png)
 
-On the left of the breakdown page is the episode/sequence/shot menu (1); you can choose between those you created. They are the right part of
-the screen; all the assets created are available for this production (main pack and episodes) (3). Moreover, in
-the middle section, it is your selection for the shot (2).
+## Create a Breakdown List
+
+On the left of the breakdown page is the episode/sequence/shot menu (1); you can choose between those you created. They are the right part of the screen; all the assets created are available for this production (main pack and episodes) (3). Moreover, in the middle section, it is your selection for the shot (2).
 
 ![Breakdown page](/img/getting-started/breakdown_general_empty.png)
 
 So now you have to select the shot you want to cast.
 
-You can display the assets as text if you don't have thumbnails yet or enlarge the
-thumbnails size.
-
+You can display the assets as text if you don't have thumbnails yet or enlarge the thumbnails size.
 
 ![Breakdown page text display](/img/getting-started/breakdown_text_display.png)
 
@@ -29,7 +25,6 @@ You may also realize an asset needs to be added to the list during your breakdow
 You can create a new asset directly from the breakdown page. Click the **+** on the right of the **All available assets**.
 
 ![Breakdown page create asset](/img/getting-started/breakdown_create_asset.png)
-
 
 You can also choose multiple shots at once. Click on the first shot, hold the **shift** key, and click on the last shot of your selection.
 
@@ -141,48 +136,6 @@ Now, all your assets have been imported into Kitsu.
 ![Import data copy paste data](/img/getting-started/breakdown_general_bulk_select_full.png)
 :::
 
-## Introduction to Asset State: Ready For
-
-Most of the time, you don't need to wait for an asset's tasks to be approved to use it on a shot task.
-
-For example, when an asset is approved at the **Concept** stage, it can be used for the **Storyboard** stage.
-Then, when it's approved at the **Modeling** stage, you can use it for the **Layout** stage and so on.
-
-That's exactly what the asset state **Ready For** is doing: it lets you know the state of an asset's tasks and compares its usability for the shot tasks.
-
-Now that we have filled out our breakdown, we know exactly which asset is used on every shot.
-
-First, we need to define an asset's state relative to its task status. You can modify the **Ready for** by clicking on a cell. You will see a dropdown menu with the shot task.
-
-![Asset Status](/img/getting-started/asset_status.png)
-
-::: tip
-You can use the **automations** to do the heavy lifting.
-
-You can set automation with the **ready for** trigger.
-:::
-
-We can see the result in the shot page now that we have changed some asset states **Ready for**.
-
-You can notice that some white boxes are now **Green**: all the assets cast in this shot are ready for this specific task.
-
-![Asset Status](/img/getting-started/asset_status_box.png)
-
-If you see the white box, Kitsu will display how many assets are ready for this task.
-
-![Asset Status](/img/getting-started/asset_status_empty.png)
-
-::: tip
-If you don't see any boxes, no assets are cast for this shot.
-:::
- 
-Then, you can click on the shot's name to go to its detail page.
-Then, you will see all the assets cast in this shot and their status.
-
-![Asset Status](/img/getting-started/asset_status_detail.png)
-
-It's the fastest way to know if you can start a shot for a specific task.
-
 ## Casting from the Asset Library
 
 It is also possible to cast assets from the global **Asset Library** into your production. This allows you to cast an already existing asset, without the need to re-create it for each production.
@@ -196,3 +149,5 @@ Assets from the global asset library will appear, and will be highlighted with a
 ![Asset Library View](/img/getting-started/asset_library_view.png)
 
 Back on your productions asset page, you can choose to display global assets that have been cast in your production by toggling the **Display Library** button (1). These assets will be highlighted in yellow, indicating that they originate from the global asset library, and not your current production. (2).
+
+To learn more about the Asset Library, [visit the dedicated section](/guides/pre-production/manage-assets/#asset-library).

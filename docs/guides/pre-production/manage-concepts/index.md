@@ -1,10 +1,10 @@
 # Managing Concepts
 
-## Create a Concept / Upload
-
-To create a **Concept**, go to the **Concept** page with the navigation menu.
+To manage your production's concepts, go to the **Concept** page in the production navigation menu:
 
 ![Concept Menu](/img/getting-started/menu_concept.png)
+
+## Create a Concept
 
 To upload a concept, click the **Add a new reference to concepts** button.
 
@@ -24,7 +24,9 @@ Alternatively, if you're coming from the **Todo Page**:
 
 ![Upload concepts](/img/getting-started/concept_empty.png)
 
-You can interact with the concept in two ways: click on the picture to see an enlarged view.
+## Edit a Concept
+
+You can interact with a concept in two ways from the `Concepts` page: click on the picture to see an enlarged view.
 The second is to click on the status part to open the **Comment Panel** on the right.
 
 On the comment panel, you have two options: link a concept to an existing asset or delete it.
@@ -48,7 +50,9 @@ Click on the status part of the concept; it will open the comment panel on the r
 
 At the top of the comment panel, you have two options: Link a concept to an asset and delete the concept.
 
-To link an asset, click on the **Link** ![Link button](/img/getting-started/link_icon.png) button.
+To link an asset, click on the **Link** button:
+
+![Link button](/img/getting-started/link_icon.png)
 
 Kitsu will display all the **Assets** available to link with the concept uploaded.
 

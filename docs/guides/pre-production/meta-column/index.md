@@ -12,23 +12,17 @@ To add a new custom metadata column, click on the **+** icon next to the Name co
 
 First, choose the name you prefer for your field. Then, select the appropriate **Type** based on your needs:
 
-- **Text**:
-  - This type accommodates text based input, including both letters and numbers. It offers flexibility in storing information such as descriptions, comments, or textual content.
+- **Text**: This type accommodates text based input, including both letters and numbers. It offers flexibility in storing information such as descriptions, comments, or textual content.
 
-- **Number**:
-  - Reserved solely for numerical data. It's recommended for tracking information exclusively comprised of numerical values, such as framerates, dates, or times.
+- **Number**: Reserved solely for numerical data. It's recommended for tracking information exclusively comprised of numerical values, such as framerates, dates, or times.
 
-- **Checkbox**:
-  - This option allows you to mark items as either on or off. It's suitable for tracking data with only two possible states, like indicating shots intended for a trailer cut.
+- **Checkbox**: This option allows you to mark items as either on or off. It's suitable for tracking data with only two possible states, like indicating shots intended for a trailer cut.
 
-- **List of values**:
-  - With this type, you define a list of options from which only one unique element can be selected. It's ideal when you need to track data with a limited number of choices. For instance, for tracking camera movements, options like "Static," "Pan," "Tilt," or "Zoom" could be included.
+- **List of values**: With this type, you define a list of options from which only one unique element can be selected. It's ideal when you need to track data with a limited number of choices. For instance, for tracking camera movements, options like "Static," "Pan," "Tilt," or "Zoom" could be included.
 
-- **List of tags**:
-  - Here, you can define multiple tags. Unlike a list of values, which allows selecting only one item, this type enables selecting multiple entries from the list.
+- **List of tags**: Here, you can define multiple tags. Unlike a list of values, which allows selecting only one item, this type enables selecting multiple entries from the list.
 
-- **Checklist**:
-  - This type presents a list of options, each accompanied by its own checkbox. It's useful for tracking minor sub-tasks associated with a shot or asset, which don't warrant their own task in the production pipeline.
+- **Checklist**: This type presents a list of options, each accompanied by its own checkbox. It's useful for tracking minor sub-tasks associated with a shot or asset, which don't warrant their own task in the production pipeline.
 
 ![Metadata Column detail](/img/getting-started/custom_column_detail.png)
 
@@ -42,11 +36,11 @@ However, when using the **List of value**, **List of tags**, and **Checklist**, 
 Type the list elements below **Available values**, and confirm them by clicking on **Add value**.
 :::
 
-### Linking Metadata Columns to Departments
+## Linking Metadata Columns to Departments
 
 You can also link the **metadata column** to one or several **departments**. The artists/supervisors will see it on their to-do page and in the department-filtered view.
 
-To create more departments, see [Create Departments](../../../configure-kitsu/index.md#create-departments).
+To create more departments, see [Create Departments](/guides/team-management/managing-departments/#creating-departments).
 
 You can link the metadata column to one or more departments. Click on the department from the list and then click on **add** to confirm.
 
@@ -54,14 +48,11 @@ Here, the VFX column is linked to two departments.
 
 ![Department metadata column filtered view](/img/getting-started/department_filtered_view_column.png)
 
-
-
 ::: details How to edit your metadata column
 On the global page of the asset or the shot, click on the arrow on the direct right of your metadata column and click on **Edit**.
 
 ![Metadata column Edit](/img/getting-started/custom_column_edit.png)
 :::
-
 
 Congratulations, your newly created metadata column should now be available from your global page.
 
@@ -92,19 +83,16 @@ In additional to editing or deleting metadata columns, from here you can also **
 Additionally you can also **Stick** the metadata column, meaning that it will stay locked to the left and remain visible while scrolling through a large dataset.
 :::
 
-
 ## Organizing Metadata Columns
 
 ### Display or Hide All Metadata Columns
 
 To keep your global spreadsheet tidy, you can choose to hide any non-essential columns. Note that this action does not delete the column; it simply hides it from view but retains it in other areas where it is used.
 
-
 To do this, click on the **Hide Additional Information**
 ![minimize button](/img/getting-started/maximize.png) button on the top right of the page.
 
 ![All Information Displayed](/img/getting-started/hide_extra_information1.png)
-
 
 To make the information reappear, click on the same button,
 ![maximize button](/img/getting-started/minimize.png) it won't be highlighted in grey.
@@ -130,88 +118,6 @@ Click on the arrow to the right of the column to open the column menu, then choo
 ![Sticky Option](/img/getting-started/sticky.png)
 
 ![Sticky Option](/img/getting-started/sticky_example.png)
-
-## Create Custom Metadata Columns
-
-To add more information on the general spreadsheet pages, you must create a custom **metadata column**.
-
-You may have extra information to add to your pages, such as the **level of difficulties**, **Weather**, **Tag**, etc. You can store all text (or number) information in the custom metadata column.
-
-
-Click on the **+** near the Name column.
-
-![Metadata Column](/img/getting-started/add_column_custom.png)
-
-
-
-With the **Type** option, you can choose how you want to store your information:
-- a free **Text**,
-- a **Number**,
-- a **Checkbox**,
-- a **List of value**,
-- a **List of tags**,
-- a **Checklist**.
-
-![Metadata Column detail](/img/getting-started/custom_column_detail.png)
-
-::: warning
-The **Text**, **Number**, and **Checkbox** allow you to add different information for each entity. You don't have to plan it first.
-
-The **List of value**, **List of tags**, and **Checklist** give you the same choice for each entity. Moreover, it has to be filled now.
-
-![Metadata Column list](/img/getting-started/custom_column_list.png)
-
-Type the list elements below **Available values**, and confirm them by clicking on **Add value**.
-:::
-
-You can also link the **metadata column** to one or several **departments**.
-
-::: tip
-Link a metadata column to a department. The artists/supervisors will see it on their to-do page and in the department-filtered view.
-
-You can link the metadata column to one or more departments. Click on the department from the list and then click on **add** to be effective.
-
-Here, the VFX column is linked to two departments.
-
-![Department metadata column filtered view](/img/getting-started/department_filtered_view_column.png)
-
-:::
-
-::: details Edit meta column
-On the global page of the asset or the shot, click on the arrow on the direct right of your metadata column and click on **Edit**.
-
-![Metadata column Edit](/img/getting-started/custom_column_edit.png)
-:::
-
-
-You can fill in this information directly on the global spreadsheets page.
-The cases are editable.
-
-![Metadata Column detail](/img/getting-started/custom_column_list_edit.png)
-
-::: tip
-You can batch-modify the metadata column by selecting several entities on the left and then modifying your metadata column.
-:::
-
-::: details Edit by hand
-You can also modify the information with the edit button ![Edit button](/img/getting-started/edit_button.png).
-
-You now see a new line on the edit pop-up. You can select the information from the list,
-alternatively, enter the free text or number, check a box, or use the checklist, depending on your previous choice.
-
-Remember to press the **Confirm** button when you are done.
-
-![Metadata Column detail](/img/getting-started/edit_asset_custom.png)
-:::
-
-Go to the general spreadsheet page if you need to edit or delete the metadata column.
-Nearby the name of your metadata column, click on the arrow ![Metadata Column detail](/img/getting-started/arrow.png).
-
-::: tip
-You can **sort** your global page with this new column. Click the arrow on the right of the column name to open his menu. Then click on **Sort By**.
-
-You can also **Stick** the metadata column to the left.
-:::
 
 ## Update Meta Columns
 

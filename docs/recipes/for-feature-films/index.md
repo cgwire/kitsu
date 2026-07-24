@@ -17,6 +17,8 @@ import EmbedDocument from '../../.vitepress/theme/EmbedDocument.vue'
 
 ## 2. Create an Asset
 
+So, now that we have created our production and have a general grasp of the Kitsu interface, it's time to create our first asset.
+
 <EmbedDocument>
 <!--@include: ../../guides/pre-production/manage-assets/index.md#create-an-asset-->
 </EmbedDocument>

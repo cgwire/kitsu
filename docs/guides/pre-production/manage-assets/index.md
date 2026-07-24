@@ -1,12 +1,16 @@
 # Managing Assets
 
+You can go to the `Assets` page using the dropdown menu on top of the screen:
+
+![Client dropdown menu Asset](/img/getting-started/client_dropdown_asset.png)
+
+On the global page, you will be able to see all the statuses of the different steps of the assets.
+
+![Client global page Asset](/img/getting-started/client_global_asset.png)
+
 ## Create an Asset
 
 <!-- #region create-an-asset -->
-
-### Create your first asset
-
-So, now that we have created our production and have a general grasp of the Kitsu interface, it's time to create our first asset.
 
 On the asset page, click on **Add assets**.
 
@@ -51,68 +55,53 @@ If you click on **Confirm and stay, ** realize you don't have more assets to add
 
 You will also see the tasks that are selected for your assets workflow are created at the same time.
 
-
 If you need to add more **Assets**, click the **+ Create assets** button.
 
-::: details Create Assets from a CSV Spreadsheet File
-You may already have your asset list ready in a spreadsheet file.
-With Kitsu, you have two ways to import them; the first is to import a `.csv` file and copy-paste your data directly into Kitsu.
+### Import Assets From a Spreadsheet
 
-First, save your spreadsheet as a `.csv` file.
+You may already have your asset list ready in a spreadsheet file. With Kitsu, you have two ways to import it: browsing to a `.csv` file, or copying and pasting your spreadsheet data directly into Kitsu.
 
-Then, go back to the asset page on Kitsu and click on the **Import** icon.
+Go to the asset page on Kitsu and click on the **Import** icon.
+
 ![Import Icon](/img/getting-started/import.png)
 
-A pop-up window **Import data from a CSV** opens. Click on **Browse** to pick your `.csv` file.
+A pop-up window **Import data from a CSV** opens. From here, choose one of the two methods below.
+
+#### Option 1: Import a CSV file
+
+First, save your spreadsheet as a `.csv` file. Then click on **Browse** to pick your `.csv` file.
 
 ![Import csv file](/img/getting-started/import_csv_asset.png)
 
-To see the result, click on the **Preview** button.
- 
-You can check and adjust the name of the columns by previewing your data.
- 
-NB: the **Episode** column is only mandatory for a **TV Show** production.
- 
-![Import data copy paste data](/img/getting-started/import_preview_data.png)
+#### Option 2: Copy / paste a spreadsheet file
 
-Once everything is good, click the **Confirm** button to import your data into Kitsu.
-
-You have imported all your assets into Kitsu and created the task according to your Settings.
-
-![Import data copy paste data](/img/getting-started/import_result_asset.png)
-:::
-
-::: details Create Assets by Copying / Pasting a Spreadsheet File
-
-Open your spreadsheet, select your data, and copy them.
+Open your spreadsheet, select your data, and copy it.
 
 ![Import copy data](/img/getting-started/import_copypas_asset.png)
 
-Then, go back to the asset page on Kitsu and click on the **Import** icon
-![Import Icon](/img/getting-started/import.png).
-
-A pop-up window **Import data from a CSV** opens; click on the **Paste a CSV data** tab.
+Back in the pop-up window, click on the **Paste a CSV data** tab.
 
 ![Import data copy paste tab](/img/getting-started/import_pastcsvdata_asset.png)
- 
-You can paste your previously selected data and see the result with the **Preview** button.
- 
+
+Paste your previously selected data.
+
 ![Import data copy paste data](/img/getting-started/import_pastcsvdata2_asset.png)
- 
-You can check and adjust the name of the columns by previewing your data.
- 
+
+#### Finishing the import
+
+To see the result, click on the **Preview** button. You can check and adjust the name of the columns by previewing your data.
+
 NB: the **Episode** column is only mandatory for a **TV Show** production.
- 
+
 ![Import data copy paste data](/img/getting-started/import_preview_data.png)
 
-Once everything is good, click the **Confirm** button to import your data into Kitsu.
+Once everything looks good, click the **Confirm** button to import your data into Kitsu.
 
-You have imported all your assets into Kitsu and created the task according to your Settings.
+You have imported all your assets into Kitsu and created the tasks according to your Settings.
 
 ![Import data copy paste data](/img/getting-started/import_result_asset.png)
-:::
 
-### See the Details of an Asset
+## See the Details of an Asset
 
 To see an asset's detail, click on its name.
 
@@ -150,11 +139,11 @@ And the **Timelog** if people have filled out their timesheet on the tasks of th
 
 ## Add more tasks after creating the assets
 
-If you realize **after** creating the assets that the task is missing, you can still add them.
+If you realize **after** creating the assets that a task type is missing, you can still add them.
 
-First, ensure the missing task type is added to the settings page under the task type tab.
+First, ensure the missing task type is added to the production's `Settings` page under the `Task Type` tab.
 
-Then go back to the asset page and click on **+ Add tasks**
+Then go back to your `Assets` page and click on the `+ Add tasks` button.
 
 ## Update your assets
 
@@ -210,16 +199,6 @@ You have imported all your assets into Kitsu and created the task according to y
 
 ![Import data copy paste data](/img/getting-started/import_result_asset.png)
 
-## Global View of the Assets
-
-As a client, you can go to the global page of the assets with the drop-down menu on top of the screen.
-
-![Client dropdown menu Asset](/img/getting-started/client_dropdown_asset.png)
-
-On the global page, you will be able to see all the statuses of the different steps of the assets.
-
-![Client global page Asset](/img/getting-started/client_global_asset.png)
-
 ## Asset Library
 
 ### What is the Asset Library?
@@ -264,3 +243,45 @@ There are specific rules around who can import assets into the asset library, de
 Hover over the asset you wish to remove in your production's asset list and click the `Delete` icon:  
 
 ![delete asset button](/guides/pre-production/manage-assets/images/0.png)
+
+## Using The "Ready For" Asset State
+
+Most of the time, you don't need to wait for an asset's tasks to be approved to use it on a shot task.
+
+For example, when an asset is approved at the **Concept** stage, it can be used for the **Storyboard** stage.
+Then, when it's approved at the **Modeling** stage, you can use it for the **Layout** stage and so on.
+
+That's exactly what the asset state **Ready For** is doing: it lets you know the state of an asset's tasks and compares its usability for the shot tasks.
+
+Now that we have filled out our breakdown, we know exactly which asset is used on every shot.
+
+First, we need to define an asset's state relative to its task status. You can modify the **Ready for** by clicking on a cell. You will see a dropdown menu with the shot task.
+
+![Asset Status](/img/getting-started/asset_status.png)
+
+::: tip
+You can use the **automations** to do the heavy lifting.
+
+You can set automation with the **ready for** trigger.
+:::
+
+We can see the result in the shot page now that we have changed some asset states **Ready for**.
+
+You can notice that some white boxes are now **Green**: all the assets cast in this shot are ready for this specific task.
+
+![Asset Status](/img/getting-started/asset_status_box.png)
+
+If you see the white box, Kitsu will display how many assets are ready for this task.
+
+![Asset Status](/img/getting-started/asset_status_empty.png)
+
+::: tip
+If you don't see any boxes, no assets are cast for this shot.
+:::
+ 
+Then, you can click on the shot's name to go to its detail page.
+Then, you will see all the assets cast in this shot and their status.
+
+![Asset Status](/img/getting-started/asset_status_detail.png)
+
+It's the fastest way to know if you can start a shot for a specific task.

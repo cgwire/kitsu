@@ -12,49 +12,21 @@ flowchart TD
 
 ## Create a New Production
 
-Now that you have designed your workflow in Kitsu and invited more people, it's time to create your production.
-
-Click on the **Create a new
-production** button.
+Click on the `Create a new production` button:
 
 ![Create a production](/img/getting-started/create_production.png)
 
-Enter your production name, choose a **type**, and select your production style (2D, 3D).
+A dialog appears:
 
-::: code-group
-```text [TV Shows]
-Pick the type "TV Show"
-```
-```text [Feature Films]
-Pick the type "Feature Film"
-```
-```text [Shorts]
-Pick the type "Short"
-```
-```text [Shots-Only]
-Pick the type "Only Shots"
-```
-```text [Assets-Only]
-Pick the type "Only Assets"
-```
-```text [Assets-Only]
-Pick the type "Only Assets"
-```
-```text [Video Games]
-Pick the type "Short"
-```
-```text [NFTs]
-Pick the type "Short"
-```
-:::
+![Add a production](/img/getting-started/add_production.png)
+
+Enter your production name, choose a **Production Type**, and select your production style (2D, 3D).
 
 Then, you must fill in technical information, such as the number of FPS, the Ration, and the Resolution.
 
 All these data will be used when Kitsu re-encodes the video previews uploaded.
 
 Then, you need to define your production's start and end dates.
-
-![Add a production](/img/getting-started/add_production.png)
 
 You can define your production workflow in the next part, 3 to 6.
 
@@ -73,13 +45,14 @@ See the [Studio Workflow](../../../configure-kitsu/index.html#studio-workflows) 
 
 Then, 7 and 8 are the option parts. If you already have a spreadsheet with your asset/shot.
 
-See the **import CSV** section for more details.
+See the **Import from CSV** sections of each entity page for more details:
 
-[Import asset](#create-an-asset)
+- [Import Asset from CSV](/guides/pre-production/manage-assets/)
+- [Import Shot from CSV](/guides/task-management/manage-shots/)
 
-[Import shot](#create-shots-from-an-edl-file)
+Validate everything with the `All done` button.
 
-Validate everything with the ![All done](/img/getting-started/all_done_go.png) button.
+![all done button](/img/getting-started/all_done_go.png) 
 
 ### Using Production Templates
 
@@ -95,6 +68,8 @@ In the example above, the template comes bundled with pre-configured asset types
 
 ![](/guides/task-management/manage-productions/images/2.png)
 
+Check out the section [Create Your Own Production Template](#create-your-own-production-template) below to add your own.
+
 ## Configure Production-Specific Settings
 
 From the **Navigation Menu**, choose on the dropdown menu the **Setting**. 
@@ -109,12 +84,10 @@ If you change the **FPS** or **Resolution** after uploading previews, the change
 
 ![Setting Parameters](/img/getting-started/setting_parameters.png)
 
-Here, you can enable specific options for the production as
+Here, you can enable specific options for the production like:
 
 - Isolate Client Comments (Not Visible To Each Other)
-
 - Allow Artists To Download Previews
-
 - Set New Preview As Entity Thumbnail Automatically
 
 You can also specify the **Maximum Number of Retakes** for this production.
@@ -123,35 +96,9 @@ You can also specify the **Maximum Number of Retakes** for this production.
 You can also change the avatar of the production on the **Parameters** tab.
 :::
 
-## Delete a Production
-
-Deleting a production requires you close it first.
-
-First, click on the Edit button for the target production in the `Main Menu > Studio > Productions` page:
-
-![production edit button](/guides/task-management/manage-productions/images/0.png)
-
-In the dialog, select `Closed` for the production status and click `Confirm`:
-
-![close production](/guides/task-management/manage-productions/images/1.png)
-
-Your production is now listed as `Closed`.
-
-Simply click the `Delete` button in the corresponding closed production list item and your production will be removed from your instance:
-
-![delete production](/guides/task-management/manage-productions/images/4.png)
-
-## Archive a Production
-
-TODO
-
-## Artist Board
-
 ### Artist Board Status Configuration
 
-On the **Navigation Menu**, choose on the dropdown menu the **Setting**.
-
-On the **Task Status** tab, you can reorder the status for the **Board** view.
+In the **Task Status** tab, you can reorder the statuses for the **Board** view.
 
 ![Setting status new](/img/getting-started/setting_status_new.png)
 
@@ -169,9 +116,42 @@ If you don't select the status properly, it can be overwhelming for the artists 
 
 Selecting the **Status** properly will make it easier for the artists.
 
-
 ![Setting board status order](/img/getting-started/setting_board_status_selection.png)
 
 
 ![Board status good example](/img/getting-started/setting_board_status_selection_artist.png)
 
+## Close a Production (Archive)
+
+It's good practice to archive a production once it's over, in case you need to reuse assets or other production elements in the next one.
+
+First, click on the Edit button for the target production in the `Main Menu > Studio > Productions` page:
+
+![production edit button](/guides/task-management/manage-productions/images/0.png)
+
+In the dialog, select `Closed` for the production status and click `Confirm`:
+
+![close production](/guides/task-management/manage-productions/images/1.png)
+
+Your production is now listed as `Closed`.
+
+## Delete a Production
+
+Deleting a production requires you close it first.
+
+Once this is done, simply click the `Delete` button in the corresponding closed production list item and your production will be removed from your instance:
+
+![delete production](/guides/task-management/manage-productions/images/4.png)
+
+## Create Your Own Production Template
+
+Go to `Main Menu > Admin > Templates` to manage your production templates.
+
+To create a new one, click the `Add a production template` button and fill in the form:
+
+- Name: your template name
+- Type: `Short`, `TV Show`, `Feature Film`, `Only Assets`, or `Only Shots`
+- Style: `2D Animation`, `2D Animation (Paper)`, `3D Animation`, `2D/3D Animation`, `VFX`, `Commercial`, `Virtual Reality`, `Motion Design`, `Archviz`, `Stop Motion`, `Catalog`, `NFT collection`, `Video Game`, `Immersive Experience`, or `Augmented Reality`
+- Description: a short description of your template
+
+Click `Confirm` to save your template for future usage.
