@@ -505,7 +505,7 @@ export default {
           headers.push(this.$t('main.estimation_short'))
         }
         this.sequenceValidationColumns.forEach(taskTypeId => {
-          headers.push(this.taskTypeMap.get(taskTypeId).name)
+          headers.push(this.taskTypeMap.get(taskTypeId)?.name || '')
           headers.push('Assignations')
         })
         csv.buildCsvFile(name, [headers].concat(sequenceLines))

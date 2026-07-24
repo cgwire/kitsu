@@ -791,7 +791,7 @@ export default {
           headers.push(this.$t('shots.fields.resolution'))
         }
         this.assetValidationColumns.forEach(taskTypeId => {
-          headers.push(this.taskTypeMap.get(taskTypeId).name)
+          headers.push(this.taskTypeMap.get(taskTypeId)?.name || '')
           headers.push('Assignations')
         })
         csv.buildCsvFile(name, [headers].concat(assetLines))
