@@ -12,7 +12,7 @@
             <th
               scope="col"
               class="validation validation-cell"
-              :key="taskTypeMap.get(columnId)?.id"
+              :key="columnId"
               v-for="columnId in validationColumns"
             >
               <div
