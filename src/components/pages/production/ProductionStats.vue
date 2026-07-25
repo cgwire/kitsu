@@ -199,16 +199,19 @@ const statsByStatus = computed(() => {
 })
 
 const statusIds = computed(() =>
-  Object.keys(statsByStatus.value).sort(
-    (a, b) =>
-      taskStatusMap.value.get(a)?.priority <
-      taskStatusMap.value.get(b)?.priority
-  )
+  Object.keys(statsByStatus.value)
+    .filter(statusId => taskStatusMap.value.has(statusId))
+    .sort(
+      (a, b) =>
+        taskStatusMap.value.get(a)?.priority <
+        taskStatusMap.value.get(b)?.priority
+    )
 )
 
 const taskTypes = computed(() =>
   Object.keys(taskTypeStatsMap.value)
     .map(taskTypeId => taskTypeMap.value.get(taskTypeId))
+    .filter(Boolean)
     .sort((a, b) => {
       if (a.for_entity !== b.for_entity) {
         return ENTITY_PRIORITY[a.for_entity] > ENTITY_PRIORITY[b.for_entity]
@@ -226,11 +229,13 @@ const expandStats = () => {
 }
 
 const sortStatuses = statuses =>
-  statuses.sort(
-    (a, b) =>
-      taskStatusMap.value.get(a.task_status_id)?.priority <
-      taskStatusMap.value.get(b.task_status_id)?.priority
-  )
+  statuses
+    .filter(status => taskStatusMap.value.has(status.task_status_id))
+    .sort(
+      (a, b) =>
+        taskStatusMap.value.get(a.task_status_id)?.priority <
+        taskStatusMap.value.get(b.task_status_id)?.priority
+    )
 </script>
 
 <style lang="scss" scoped>
