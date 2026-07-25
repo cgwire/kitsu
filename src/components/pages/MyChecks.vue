@@ -327,9 +327,10 @@ export default {
       const productionIds = {}
       const productionList = []
       tasks.forEach(task => {
-        if (!productionIds[task.project_id]) {
+        const production = this.productionMap.get(task.project_id)
+        if (production && !productionIds[task.project_id]) {
           productionIds[task.project_id] = true
-          productionList.push(this.productionMap.get(task.project_id))
+          productionList.push(production)
         }
       })
       this.productionList = [
@@ -344,9 +345,10 @@ export default {
       const taskTypeIds = {}
       const taskTypeList = []
       tasks.forEach(task => {
-        if (!taskTypeIds[task.task_type_id]) {
+        const taskType = this.taskTypeMap.get(task.task_type_id)
+        if (taskType && !taskTypeIds[task.task_type_id]) {
           taskTypeIds[task.task_type_id] = true
-          taskTypeList.push(this.taskTypeMap.get(task.task_type_id))
+          taskTypeList.push(taskType)
         }
       })
       this.taskTypeList = [
@@ -362,9 +364,10 @@ export default {
       const taskStatusIds = {}
       const taskStatusList = []
       tasks.forEach(task => {
-        if (!taskStatusIds[task.task_status_id]) {
+        const taskStatus = this.taskStatusMap.get(task.task_status_id)
+        if (taskStatus && !taskStatusIds[task.task_status_id]) {
           taskStatusIds[task.task_status_id] = true
-          taskStatusList.push(this.taskStatusMap.get(task.task_status_id))
+          taskStatusList.push(taskStatus)
         }
       })
       this.taskStatusList = [
