@@ -1320,8 +1320,8 @@ const onExportClick = () => {
   getCurrentTaskComments().forEach(comment => {
     commentLines.push([
       formatDate(comment.created_at),
-      comment.task_status.name,
-      comment.person.name,
+      comment.task_status?.name || '',
+      comment.person?.name || '',
       comment.text,
       comment.checklist
         ? comment.checklist
