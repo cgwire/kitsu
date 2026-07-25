@@ -714,7 +714,9 @@ const displayTaskType = computed(
 const taskTypeList = computed(() => {
   const validationColumns =
     store.getters[`${entityType.value.toLowerCase()}ValidationColumns`]
-  return validationColumns.map(taskTypeId => taskTypeMap.value.get(taskTypeId))
+  return validationColumns
+    .map(taskTypeId => taskTypeMap.value.get(taskTypeId))
+    .filter(Boolean)
 })
 
 const taskTypeListBeforeFilter = computed(() => {

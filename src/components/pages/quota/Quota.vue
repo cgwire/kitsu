@@ -326,7 +326,8 @@ export default {
         return sortTaskTypes(
           Object.keys(this.quotaMap)
             .filter(key => key !== 'total')
-            .map(taskTypeId => this.taskTypeMap.get(taskTypeId)),
+            .map(taskTypeId => this.taskTypeMap.get(taskTypeId))
+            .filter(Boolean),
           this.currentProduction
         )
           .map(taskType => taskType.id)
