@@ -196,10 +196,12 @@ export default {
       const taskTypePreviewFiles = new Map()
       this.previewFiles.forEach(previewFile => {
         const taskType = this.getTaskType(previewFile)
-        if (!taskTypePreviewFiles.has(taskType.id)) {
-          taskTypePreviewFiles.set(taskType.id, [])
+        if (taskType) {
+          if (!taskTypePreviewFiles.has(taskType.id)) {
+            taskTypePreviewFiles.set(taskType.id, [])
+          }
+          taskTypePreviewFiles.get(taskType.id).push(previewFile)
         }
-        taskTypePreviewFiles.get(taskType.id).push(previewFile)
       })
       return Array.from(taskTypePreviewFiles.keys())
         .sort((a, b) => {
@@ -226,7 +228,7 @@ export default {
 
     getTaskType(previewFile) {
       const task = this.taskMap.get(previewFile.task_id)
-      return this.taskTypeMap.get(task.task_type_id)
+      return task && this.taskTypeMap.get(task.task_type_id)
     },
 
     getDownloadPath(previewFileId) {

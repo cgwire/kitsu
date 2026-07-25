@@ -922,6 +922,7 @@ export default {
         const scheduleEndDate = parseDate(this.selectedEndDate)
         const scheduleItems = items.map(item => {
           const taskType = this.taskTypeMap.get(item.task_type_id)
+          if (!taskType) return null
           let startDate, endDate
           if (item.start_date) {
             startDate = parseDate(item.start_date)
@@ -968,7 +969,7 @@ export default {
           }
         })
         this.scheduleItems = sortTaskTypeScheduleItems(
-          scheduleItems,
+          scheduleItems.filter(Boolean),
           this.currentProduction,
           this.taskTypeMap
         )

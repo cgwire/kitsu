@@ -717,6 +717,7 @@ export default {
     updateTasksEstimation({ estimation }) {
       Object.keys(this.selectionGrid).forEach(taskId => {
         const task = this.taskMap.get(taskId)
+        if (!task) return
         let data = { estimation }
         if (task.start_date) {
           const startDate = moment(task.start_date)
@@ -738,6 +739,7 @@ export default {
     updateStartDate(date) {
       Object.keys(this.selectionGrid).forEach(taskId => {
         const task = this.taskMap.get(taskId)
+        if (!task) return
         const dueDate = task.due_date ? parseSimpleDate(task.due_date) : null
         let data
         if (date) {
@@ -768,6 +770,7 @@ export default {
     updateDueDate(date) {
       Object.keys(this.selectionGrid).forEach(taskId => {
         const task = this.taskMap.get(taskId)
+        if (!task) return
         const startDate = task.start_date
           ? parseSimpleDate(task.start_date)
           : null

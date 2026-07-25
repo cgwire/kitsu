@@ -100,7 +100,7 @@ export default {
 
     getTaskType(log) {
       const task = this.taskMap.get(log.task_id)
-      return this.taskTypeMap.get(task.task_type_id)
+      return task && this.taskTypeMap.get(task.task_type_id)
     },
 
     reset() {

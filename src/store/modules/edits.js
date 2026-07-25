@@ -14,6 +14,7 @@ import { PAGE_SIZE } from '@/lib/pagination'
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import {
   sortByName,
+  sortByPersonName,
   sortEditResult,
   sortEdits,
   sortTasks,
@@ -107,7 +108,7 @@ const helpers = {
     ).toString()
     task.task_status_short_name = helpers.getTaskStatus(
       task.task_status_id
-    ).short_name
+    )?.short_name
 
     const editName = helpers.getEditName(edit)
     Object.assign(task, {
@@ -576,7 +577,10 @@ const actions = {
         if (task) {
           editLine.push(task.task_status_short_name)
           editLine.push(
-            task.assignees.map(id => personMap.get(id).full_name).join(',')
+            task.assignees
+              .map(id => personMap.get(id)?.full_name)
+              .filter(Boolean)
+              .join(',')
           )
         } else {
           editLine.push('') // Status
@@ -613,7 +617,7 @@ const actions = {
           const endDateString = helpers.getTaskEndDate(task, detailLevel)
           return (
             task &&
-            taskStatus.is_done &&
+            taskStatus?.is_done &&
             task.assignees.includes(personId) &&
             endDateString === dateString
           )
@@ -741,13 +745,11 @@ const mutations = {
         taskIds.push(task.id)
 
         const taskType = taskTypeMap.get(task.task_type_id)
-        if (!validationColumns[taskType.name]) {
+        if (taskType && !validationColumns[taskType.name]) {
           validationColumns[taskType.name] = taskType.id
         }
         if (task.assignees.length > 1) {
-          task.assignees = task.assignees.sort((a, b) => {
-            return personMap.get(a).name.localeCompare(personMap.get(b))
-          })
+          task.assignees = sortByPersonName(task.assignees, personMap)
         }
       })
       edit.tasks = taskIds
@@ -1066,9 +1068,7 @@ const mutations = {
       taskIds.push(task.id)
 
       if (task.assignees.length > 1) {
-        task.assignees = task.assignees.sort((a, b) => {
-          return personMap.get(a).name.localeCompare(personMap.get(b))
-        })
+        task.assignees = sortByPersonName(task.assignees, personMap)
       }
     })
     edit.tasks = taskIds

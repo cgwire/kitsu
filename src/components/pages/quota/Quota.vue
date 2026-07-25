@@ -48,13 +48,13 @@
             <th scope="row" class="name datatable-row-header">
               <div class="flexrow" v-if="taskTypeId && key !== 'total'">
                 <people-avatar :size="30" :person="personMap.get(key)" />
-                {{ personMap.get(key).full_name }}
+                {{ personMap.get(key)?.full_name }}
               </div>
               <div class="flexrow" v-else-if="taskTypeId && key === 'total'">
                 {{ $t('main.total') }}
               </div>
               <div class="flexrow" v-else-if="personId && key !== 'total'">
-                {{ taskTypeMap.get(key).name }}
+                {{ taskTypeMap.get(key)?.name }}
               </div>
               <div class="flexrow" v-else-if="personId && key === 'total'">
                 {{ $t('main.total') }}
@@ -326,7 +326,8 @@ export default {
         return sortTaskTypes(
           Object.keys(this.quotaMap)
             .filter(key => key !== 'total')
-            .map(taskTypeId => this.taskTypeMap.get(taskTypeId)),
+            .map(taskTypeId => this.taskTypeMap.get(taskTypeId))
+            .filter(Boolean),
           this.currentProduction
         )
           .map(taskType => taskType.id)
@@ -513,8 +514,8 @@ export default {
       this.personIndex = buildNameIndex(persons)
       this.personIds = personIds
         .sort((a, b) => {
-          const personAName = this.personMap.get(a).full_name
-          const personBName = this.personMap.get(b).full_name
+          const personAName = this.personMap.get(a)?.full_name || ''
+          const personBName = this.personMap.get(b)?.full_name || ''
           return personAName.localeCompare(personBName)
         })
         .concat(['total'])

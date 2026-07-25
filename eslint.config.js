@@ -42,11 +42,11 @@ export default defineConfig([
       reportUnusedDisableDirectives: 'off'
     },
     languageOptions: {
-      ecmaVersion: 2020,
+      ecmaVersion: 2021,
       sourceType: 'module',
       globals: {
         ...globals.browser,
-        ...globals.es2020
+        ...globals.es2021
       }
     },
     rules: {

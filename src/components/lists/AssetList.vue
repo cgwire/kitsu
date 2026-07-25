@@ -948,8 +948,8 @@ export default {
       const mainEpisode = this.episodeMap.get(asset.episode_id)
       const mainEpisodeName = mainEpisode ? mainEpisode.name : 'MP'
       const episodeNames = (asset.casting_episode_ids || [])
-        .map(eId => this.episodeMap.get(eId).name)
-        .filter(name => name !== mainEpisodeName)
+        .map(eId => this.episodeMap.get(eId)?.name)
+        .filter(name => name && name !== mainEpisodeName)
       let episodeNameString = ''
       if (episodeNames.length > 2) {
         if (full) {

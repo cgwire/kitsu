@@ -307,6 +307,90 @@ describe('path', () => {
       }
     })
   })
+  test('getTaskPath with a missing task type', () => {
+    // vue-router rejects an empty required param, so the :type segment must
+    // still resolve when the task type is absent from the map.
+    expect(
+      getTaskPath(
+        {
+          id: 1,
+          project_id: 2,
+          task_type_id: 'gone',
+          entity_type_name: 'Shot'
+        },
+        { id: 5 },
+        false,
+        null,
+        new Map()
+      )
+    ).toEqual({
+      name: 'task',
+      params: {
+        production_id: 2,
+        task_id: 1,
+        type: 'shots'
+      }
+    })
+
+    // an asset task type name is not an entity type, so it falls back to Asset
+    expect(
+      getTaskPath(
+        {
+          id: 1,
+          project_id: 2,
+          task_type_id: 'gone',
+          entity_type_name: 'Character'
+        },
+        { id: 5 },
+        false,
+        null,
+        new Map()
+      ).params.type
+    ).toEqual('assets')
+  })
+
+  test('getTaskPath with an incomplete task type', () => {
+    // a task type without for_entity must not produce an empty :type either
+    expect(
+      getTaskPath(
+        {
+          id: 1,
+          project_id: 2,
+          task_type_id: 3,
+          entity_type_name: 'Shot'
+        },
+        { id: 5 },
+        false,
+        null,
+        new Map([[3, { id: 3 }]])
+      ).params.type
+    ).toEqual('shots')
+
+    // an episode task without entity_id keeps the regular task route, since
+    // episode-episode-task would be missing its required episode_id
+    expect(
+      getTaskPath(
+        {
+          id: 1,
+          project_id: 2,
+          task_type_id: 3,
+          entity_type_name: 'Episode'
+        },
+        { id: 5 },
+        false,
+        null,
+        new Map()
+      )
+    ).toEqual({
+      name: 'task',
+      params: {
+        production_id: 2,
+        task_id: 1,
+        type: 'episodes'
+      }
+    })
+  })
+
   test('getProductionSchedulePath', () => {
     expect(getProductionSchedulePath(2)).toEqual({
       name: 'schedule',

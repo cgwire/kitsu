@@ -107,9 +107,13 @@ export const sortTaskNames = (tasks, taskTypeMap) => {
     firstBy((a, b) => {
       const taskTypeA = taskTypeMap.get(a.task_type_id)
       const taskTypeB = taskTypeMap.get(b.task_type_id)
-      return taskTypeA.name.localeCompare(taskTypeB.name, undefined, {
-        numeric: true
-      })
+      return (taskTypeA?.name || '').localeCompare(
+        taskTypeB?.name || '',
+        undefined,
+        {
+          numeric: true
+        }
+      )
     }).thenBy((a, b) => {
       if (a.full_entity_name) {
         return a.full_entity_name.localeCompare(b.full_entity_name, undefined, {
@@ -136,9 +140,13 @@ export const sortTasks = (tasks, taskTypeMap) => {
       .thenBy((a, b) => {
         const taskTypeA = taskTypeMap.get(a.task_type_id)
         const taskTypeB = taskTypeMap.get(b.task_type_id)
-        return taskTypeA.name.localeCompare(taskTypeB.name, undefined, {
-          numeric: true
-        })
+        return (taskTypeA?.name || '').localeCompare(
+          taskTypeB?.name || '',
+          undefined,
+          {
+            numeric: true
+          }
+        )
       })
       .thenBy((a, b) => {
         if (a.full_entity_name) {
@@ -245,6 +253,14 @@ export const sortByName = entries => {
   )
 }
 
+// Sort a list of person ids alphabetically by the person's name. Ids missing
+// from a partially loaded personMap fall back to '' so the sort never throws.
+export const sortByPersonName = (personIds, personMap) => {
+  return personIds.sort((a, b) =>
+    (personMap.get(a)?.name || '').localeCompare(personMap.get(b)?.name || '')
+  )
+}
+
 export const sortByValue = entries => {
   return entries.sort((a, b) =>
     a.value.localeCompare(b.value, undefined, { numeric: true })
@@ -275,9 +291,13 @@ export const sortValidationColumns = (
     if (taskTypeAPriority === taskTypeBPriority) {
       const taskTypeA = taskTypeMap.get(a)
       const taskTypeB = taskTypeMap.get(b)
-      return taskTypeA.name.localeCompare(taskTypeB.name, undefined, {
-        numeric: true
-      })
+      return (taskTypeA?.name || '').localeCompare(
+        taskTypeB?.name || '',
+        undefined,
+        {
+          numeric: true
+        }
+      )
     } else if (taskTypeAPriority > taskTypeBPriority) {
       return 1
     }

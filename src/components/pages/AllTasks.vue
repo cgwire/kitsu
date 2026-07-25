@@ -208,12 +208,14 @@ export default {
         .sort((a, b) => b.amount - a.amount)
         .map(stat => {
           const taskStatus = this.taskStatusMap.get(stat.task_status_id)
+          if (!taskStatus) return null
           return {
             name: taskStatus.short_name.toUpperCase(),
             color: taskStatus.color,
             value: stat.amount
           }
         })
+        .filter(Boolean)
     }
   },
 

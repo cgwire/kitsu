@@ -222,19 +222,19 @@
                       :frame="displayedFrame"
                       :is-change="isStatusChange(index)"
                       :is-checkable="
-                        user.id === comment.person?.id ||
+                        user?.id === comment.person?.id ||
                         (isCurrentUserArtist && isAssigned) ||
                         isDepartmentSupervisor ||
                         isCurrentUserManager
                       "
                       :is-editable="
-                        user.id === comment.person?.id || isCurrentUserManager
+                        user?.id === comment.person?.id || isCurrentUserManager
                       "
                       :is-pinnable="
                         isDepartmentSupervisor || isCurrentUserManager
                       "
                       :is-replyable="
-                        user.id === comment.person?.id ||
+                        user?.id === comment.person?.id ||
                         isAssigned ||
                         isDepartmentSupervisor ||
                         isCurrentUserManager ||
@@ -620,9 +620,9 @@ const currentTeam = computed(() => {
 const currentTaskTypes = computed(() => {
   if (!props.task || !currentProduction.value) return []
 
-  const taskTypeEntity = taskTypeMap.value.get(
-    props.task.task_type_id
-  ).for_entity
+  const taskType = taskTypeMap.value.get(props.task.task_type_id)
+  if (!taskType) return []
+  const taskTypeEntity = taskType.for_entity
   const taskTypeEntitySlug = taskTypeEntity.toLowerCase() + 's'
 
   const entityTasks = {}
@@ -649,7 +649,7 @@ const title = computed(() => {
 })
 
 const isAssigned = computed(
-  () => props.task?.assignees.includes(user.value.id) ?? false
+  () => props.task?.assignees?.includes(user.value?.id) ?? false
 )
 
 const isCommentingAllowed = computed(
@@ -1302,7 +1302,7 @@ const onExportClick = () => {
     'kitsu',
     productionMap.value.get(props.task.project_id)?.name,
     props.task.entity_name.replaceAll(' / ', '_'),
-    taskTypeMap.value.get(props.task.task_type_id).name,
+    taskTypeMap.value.get(props.task.task_type_id)?.name,
     'comments'
   ]
   const name = stringHelpers.slugify(nameData.join('_'))
@@ -1320,8 +1320,8 @@ const onExportClick = () => {
   getCurrentTaskComments().forEach(comment => {
     commentLines.push([
       formatDate(comment.created_at),
-      comment.task_status.name,
-      comment.person.name,
+      comment.task_status?.name || '',
+      comment.person?.name || '',
       comment.text,
       comment.checklist
         ? comment.checklist
@@ -1337,7 +1337,8 @@ const onExportClick = () => {
         : '',
       comment.acknowledgements
         ? comment.acknowledgements
-            .map(personId => personMap.value.get(personId).name)
+            .map(personId => personMap.value.get(personId)?.name)
+            .filter(Boolean)
             .join(',')
         : '',
       comment.previews[0]?.revision,
@@ -1353,7 +1354,7 @@ const onExportClick = () => {
         commentLines.push([
           formatDate(reply.date),
           t('main.reply'),
-          personMap.value.get(reply.person_id).name,
+          personMap.value.get(reply.person_id)?.name || '',
           reply.text,
           null,
           null,

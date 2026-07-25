@@ -399,15 +399,15 @@ watch(
       teamOptions = [...props.team]
     }
     teamOptions = teamOptions.concat(
-      productionDepartmentIds.value.map(departmentId => {
-        const department = departmentMap.value.get(departmentId)
-        return {
+      productionDepartmentIds.value
+        .map(departmentId => departmentMap.value.get(departmentId))
+        .filter(Boolean)
+        .map(department => ({
           isDepartment: true,
           full_name: department.name,
           color: department.color,
-          id: departmentId
-        }
-      })
+          id: department.id
+        }))
     )
     teamOptions.push({ isTime: true, full_name: 'frame' })
     membersForAts.value['@'] = teamOptions

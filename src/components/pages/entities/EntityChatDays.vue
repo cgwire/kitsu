@@ -20,7 +20,7 @@
         <div class="message-content">
           <div class="message-header-wrapper flexrow">
             <div class="message-sender mr05">
-              {{ personMap.get(chatMessage.data.person_id).name }}
+              {{ personMap.get(chatMessage.data.person_id)?.name }}
             </div>
             <div class="message-date">
               {{ renderDate(chatMessage.data.created_at) }}

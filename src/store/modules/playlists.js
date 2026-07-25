@@ -369,7 +369,8 @@ const mutations = {
   [LOAD_PLAYLIST_START](state) {},
 
   [LOAD_PLAYLIST_END](state, playlist) {
-    state.playlistMap.get(playlist.id).build_jobs = playlist.build_jobs
+    const cachedPlaylist = state.playlistMap.get(playlist.id)
+    if (cachedPlaylist) cachedPlaylist.build_jobs = playlist.build_jobs
     state.previewFileMap.clear()
     state.previewFileEntityMap.clear()
     state.playlistEntryMap.clear()

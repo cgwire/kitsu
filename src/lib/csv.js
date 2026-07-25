@@ -159,7 +159,7 @@ const csv = {
     budgetDepartments.forEach(departmentEntry => {
       const department = departmentMap.get(departmentEntry.id)
       entries.push([
-        department.name,
+        department?.name || '',
         '',
         '',
         departmentEntry.monthly_salary,
@@ -171,10 +171,14 @@ const csv = {
       ])
       departmentEntry.persons.forEach(personEntry => {
         entries.push([
-          `${t('budget.positions.' + personEntry.position)}`,
-          `${t('budget.seniorities.' + personEntry.seniority)}`,
+          personEntry.position
+            ? t('budget.positions.' + personEntry.position)
+            : '',
+          personEntry.seniority
+            ? t('budget.seniorities.' + personEntry.seniority)
+            : '',
           personEntry.person_id
-            ? personMap.get(personEntry.person_id).name
+            ? personMap.get(personEntry.person_id)?.name || ''
             : t('budget.new_hiring'),
           personEntry.monthly_salary,
           personEntry.months_duration,
@@ -267,7 +271,7 @@ const csv = {
     const initialHeaders = ['Name', '', 'All', '']
     return taskTypeIds.reduce((acc, taskTypeId) => {
       if (taskTypeId !== 'all') {
-        const taskTypeName = taskTypeMap.get(taskTypeId).name
+        const taskTypeName = taskTypeMap.get(taskTypeId)?.name || ''
         return acc.concat([taskTypeName, ''])
       } else {
         return acc
@@ -506,9 +510,13 @@ const getStatsTaskTypeIds = (mainStats, taskTypeMap, production) => {
       const taskTypeAPriority = getTaskTypePriorityOfProd(taskTypeA, production)
       const taskTypeBPriority = getTaskTypePriorityOfProd(taskTypeB, production)
       if (taskTypeAPriority === taskTypeBPriority) {
-        return taskTypeA.name.localeCompare(taskTypeB.name, undefined, {
-          numeric: true
-        })
+        return (taskTypeA?.name || '').localeCompare(
+          taskTypeB?.name || '',
+          undefined,
+          {
+            numeric: true
+          }
+        )
       }
       return taskTypeAPriority - taskTypeBPriority
     })

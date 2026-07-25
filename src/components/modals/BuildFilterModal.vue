@@ -505,9 +505,9 @@ const searchTextByEntity = {
 }
 
 const taskTypeList = computed(() =>
-  validationColumnsByEntity[props.entityType].value.map(taskTypeId =>
-    taskTypeMap.value.get(taskTypeId)
-  )
+  validationColumnsByEntity[props.entityType].value
+    .map(taskTypeId => taskTypeMap.value.get(taskTypeId))
+    .filter(Boolean)
 )
 
 const taskTypeListWithAll = computed(() => [
@@ -574,7 +574,9 @@ const applyAssetTypeChoice = query => {
     let operator = '=['
     if (assetTypeFilters.operator === '=-') operator = '=[-'
     const assetType = assetTypeMap.value.get(value)
-    query += ` type${operator}${assetType.name}]`
+    if (assetType) {
+      query += ` type${operator}${assetType.name}]`
+    }
   }
   return query
 }
@@ -584,14 +586,18 @@ const applyTaskTypeChoice = query => {
     let operator = '=['
     if (taskTypeFilter.operator === '=-') operator = '=[-'
     const value = taskTypeFilter.values
-      .map(statusId => taskStatusMap.value.get(statusId).short_name)
+      .map(statusId => taskStatusMap.value.get(statusId)?.short_name)
+      .filter(Boolean)
       .join(',')
     // Empty id means "all task types": emit the cross-task-type status= filter.
-    const field =
-      taskTypeFilter.id === ''
-        ? 'status'
-        : `[${taskTypeMap.value.get(taskTypeFilter.id).name}]`
-    query += ` ${field}${operator}${value}]`
+    const isAllTaskTypes = taskTypeFilter.id === ''
+    const taskType = isAllTaskTypes
+      ? null
+      : taskTypeMap.value.get(taskTypeFilter.id)
+    if (isAllTaskTypes || taskType) {
+      const field = isAllTaskTypes ? 'status' : `[${taskType.name}]`
+      query += ` ${field}${operator}${value}]`
+    }
   })
   return query
 }
@@ -636,7 +642,9 @@ const applyAssignationChoice = query => {
     } else if (assignation.taskTypeId) {
       const taskType = taskTypeMap.value.get(assignation.taskTypeId)
       const value = assignation.value === 'assigned' ? 'assigned' : 'unassigned'
-      query += ` [${taskType.name}]=${value}`
+      if (taskType) {
+        query += ` [${taskType.name}]=${value}`
+      }
     }
   }
   return query
@@ -652,7 +660,9 @@ const applyThumbnailChoice = query => {
 const applyPriorityChoice = query => {
   if (priority.taskTypeId !== '' && priority.value !== '-1') {
     const taskType = taskTypeMap.value.get(priority.taskTypeId)
-    query += ` priority-[${taskType.name.toLowerCase()}]=${priority.value}`
+    if (taskType) {
+      query += ` priority-[${taskType.name.toLowerCase()}]=${priority.value}`
+    }
   }
   return query
 }
@@ -660,7 +670,9 @@ const applyPriorityChoice = query => {
 const applyReadyForChoice = query => {
   if (readyFor.taskTypeId !== '') {
     const taskType = taskTypeMap.value.get(readyFor.taskTypeId)
-    query += ` readyfor=[${taskType.name.toLowerCase()}]`
+    if (taskType) {
+      query += ` readyfor=[${taskType.name.toLowerCase()}]`
+    }
   }
   return query
 }
@@ -668,11 +680,13 @@ const applyReadyForChoice = query => {
 const applyAssetsReadyChoice = query => {
   if (isAssetsReady.value !== 'nofilter') {
     if (isAssetsReady.taskTypeId.length === 0) {
-      isAssetsReady.taskTypeId = taskTypeList.value[0].id
+      isAssetsReady.taskTypeId = taskTypeList.value[0]?.id || ''
     }
     const taskType = taskTypeMap.value.get(isAssetsReady.taskTypeId)
     const operator = isAssetsReady.value === 'assetsready' ? '' : '-'
-    query += ` assetsready=[${operator}${taskType.name}]`
+    if (taskType) {
+      query += ` assetsready=[${operator}${taskType.name}]`
+    }
   }
   return query
 }
@@ -705,6 +719,7 @@ const applyFilter = () => {
 // Task types
 
 const addTaskTypeFilter = () => {
+  if (!taskTypeList.value.length || !taskStatuses.value.length) return
   const filter = {
     localId: uuidv4(),
     id: taskTypeList.value[0].id,

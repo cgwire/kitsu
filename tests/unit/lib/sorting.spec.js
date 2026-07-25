@@ -2,6 +2,7 @@ import {
   sortAssets,
   sortByMetadata,
   sortByName,
+  sortByPersonName,
   sortByDate,
   sortPeople,
   sortPlaylists,
@@ -763,5 +764,29 @@ describe('lib/sorting', () => {
     expect(resultsTaskTypes[3].id).toEqual(3)
     expect(resultsTaskTypes[4].id).toEqual(1)
     expect(resultsTaskTypes[5].id).toEqual(2)
+  })
+
+  it('sortByPersonName', () => {
+    const personMap = new Map(
+      Object.entries({
+        'person-1': { id: 'person-1', name: 'Charlie' },
+        'person-2': { id: 'person-2', name: 'Alice' },
+        'person-3': { id: 'person-3', name: 'Bob' }
+      })
+    )
+
+    // sorts the ids in place, alphabetically by the person's name
+    const assignees = ['person-1', 'person-2', 'person-3']
+    const sorted = sortByPersonName(assignees, personMap)
+    expect(sorted).toBe(assignees)
+    expect(sorted).toEqual(['person-2', 'person-3', 'person-1'])
+
+    // ids missing from the map fall back to '' and sort first, without throwing
+    const withMissing = ['person-1', 'missing', 'person-3']
+    expect(sortByPersonName(withMissing, personMap)).toEqual([
+      'missing',
+      'person-3',
+      'person-1'
+    ])
   })
 })

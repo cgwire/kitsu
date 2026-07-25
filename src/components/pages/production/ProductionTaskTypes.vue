@@ -251,7 +251,9 @@ const updateTaskTypeIdFromRemaining = () => {
 
 const addTaskType = async taskType => {
   const id = taskType && taskType.id ? taskType.id : taskTypeId.value
-  const entityType = taskTypeMap.value.get(id).for_entity
+  const taskTypeToAdd = taskTypeMap.value.get(id)
+  if (!taskTypeToAdd) return
+  const entityType = taskTypeToAdd.for_entity
   await store.dispatch('addTaskTypeToProduction', {
     taskTypeId: id,
     priority: groupByType[entityType].ref.value.list.length + 1

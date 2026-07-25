@@ -382,7 +382,7 @@
       :is-movie="isMovie"
       :is-picture="isPicture"
       :title="`${task.entity_name} / ${
-        taskTypeMap.get(task.task_type_id).name
+        taskTypeMap.get(task.task_type_id)?.name || ''
       }`"
       :name-prefix="attachmentNamePrefix"
       @cancel="onCloseCommentAttachment"

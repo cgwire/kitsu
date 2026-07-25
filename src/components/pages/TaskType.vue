@@ -511,7 +511,7 @@ const filters = {
       const status = taskStatusMap.get(t.task_status_id)
       return (
         parseDate(t.due_date).isBefore(today) &&
-        !(status.is_feedback_request || status.is_done)
+        !(status?.is_feedback_request || status?.is_done)
       )
     })
   },
@@ -521,7 +521,7 @@ const filters = {
     return tasks.filter(
       t =>
         parseDate(t.due_date).isBefore(today) &&
-        !taskStatusMap.get(t.task_status_id).is_done
+        !taskStatusMap.get(t.task_status_id)?.is_done
     )
   }
 }
@@ -714,7 +714,9 @@ const displayTaskType = computed(
 const taskTypeList = computed(() => {
   const validationColumns =
     store.getters[`${entityType.value.toLowerCase()}ValidationColumns`]
-  return validationColumns.map(taskTypeId => taskTypeMap.value.get(taskTypeId))
+  return validationColumns
+    .map(taskTypeId => taskTypeMap.value.get(taskTypeId))
+    .filter(Boolean)
 })
 
 const taskTypeListBeforeFilter = computed(() => {
@@ -1708,12 +1710,12 @@ const buildPersonElement = (
 
 const getTaskElementColor = (task, endDate) => {
   if (schedule.currentColor === 'status') {
-    let color = taskStatusMap.value.get(task.task_status_id).color
+    let color = taskStatusMap.value.get(task.task_status_id)?.color
     if (color === '#f5f5f5') color = '#999'
     return color
   } else if (schedule.currentColor === 'late') {
     const isLate =
-      !taskStatusMap.value.get(task.task_status_id).is_done &&
+      !taskStatusMap.value.get(task.task_status_id)?.is_done &&
       endDate.isBefore(moment())
     return isLate ? '#FF3860' : '#999'
   }

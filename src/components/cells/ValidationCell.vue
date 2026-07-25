@@ -154,13 +154,16 @@ const assignees = computed(() =>
 const priority = computed(() => formatPrioritySymbol(task.value.priority))
 
 const cellStyle = computed(() => {
+  // the column is null when its task type is no longer in the task type map
+  const columnColor = props.column?.color
   let backgroundColor
-  if (props.isBorder && !props.sticked) {
+  if (props.isBorder && !props.sticked && columnColor) {
     const opacity = isDarkTheme.value ? 0.15 : 0.08
-    backgroundColor = colors.hexToRGBa(props.column.color, opacity)
+    backgroundColor = colors.hexToRGBa(columnColor, opacity)
   }
   return {
-    borderLeft: props.isBorder ? `1px solid ${props.column.color}` : 'none',
+    borderLeft:
+      props.isBorder && columnColor ? `1px solid ${columnColor}` : 'none',
     backgroundColor,
     left: props.left
   }

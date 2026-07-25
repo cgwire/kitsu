@@ -12,7 +12,7 @@
             <th
               scope="col"
               class="validation validation-cell"
-              :key="taskTypeMap.get(columnId).id"
+              :key="columnId"
               v-for="columnId in validationColumns"
             >
               <div
@@ -21,18 +21,18 @@
               >
                 <router-link
                   class="flexrow-item ellipsis"
-                  :title="taskTypeMap.get(columnId).name"
+                  :title="taskTypeMap.get(columnId)?.name"
                   :to="taskTypePath(columnId)"
                   v-if="!isCurrentUserClient"
                 >
-                  {{ taskTypeMap.get(columnId).name }}
+                  {{ taskTypeMap.get(columnId)?.name }}
                 </router-link>
                 <span
                   class="flexrow-item ellipsis"
-                  :title="taskTypeMap.get(columnId).name"
+                  :title="taskTypeMap.get(columnId)?.name"
                   v-else
                 >
-                  {{ taskTypeMap.get(columnId).name }}
+                  {{ taskTypeMap.get(columnId)?.name }}
                 </span>
               </div>
             </th>

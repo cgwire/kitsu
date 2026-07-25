@@ -268,7 +268,8 @@
                         :task-type="taskTypeMap.get(asset.ready_for)"
                         :current-production-id="currentProduction.id"
                         :title="
-                          'Ready for: ' + taskTypeMap.get(asset.ready_for).name
+                          'Ready for: ' +
+                          (taskTypeMap.get(asset.ready_for)?.name || '')
                         "
                       />
                     </div>

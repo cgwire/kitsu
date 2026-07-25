@@ -18,7 +18,7 @@
         />
         <chevron-down-icon class="flexrow-item" v-else />
         <div class="flexrow-item">
-          {{ departmentMap.get(departmentEntry.id).name }}
+          {{ departmentMap.get(departmentEntry.id)?.name }}
         </div>
       </div>
     </td>
@@ -212,8 +212,9 @@ const departmentTotalGap = computed(() => {
 
 /* It sets the background with the color of the department. */
 const getDepartmentStyle = (departmentId, opacity) => {
+  const department = props.departmentMap.get(departmentId)
   return {
-    backgroundColor: props.departmentMap.get(departmentId).color + opacity
+    backgroundColor: department ? department.color + opacity : undefined
   }
 }
 

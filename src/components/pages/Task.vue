@@ -350,19 +350,19 @@
                     :frame="currentFrame"
                     :is-change="isStatusChange(index)"
                     :is-checkable="
-                      user.id === comment.person?.id ||
+                      user?.id === comment.person?.id ||
                       (isCurrentUserArtist && isAssigned) ||
                       isDepartmentSupervisor ||
                       isCurrentUserManager
                     "
                     :is-editable="
-                      user.id === comment.person?.id || isCurrentUserManager
+                      user?.id === comment.person?.id || isCurrentUserManager
                     "
                     :is-pinnable="
                       isDepartmentSupervisor || isCurrentUserManager
                     "
                     :is-replyable="
-                      user.id === comment.person?.id ||
+                      user?.id === comment.person?.id ||
                       isAssigned ||
                       isDepartmentSupervisor ||
                       isCurrentUserManager
@@ -407,7 +407,7 @@
         :expected-frames="entityFrames"
         :title="
           task
-            ? `${task.entity_name} / ${taskTypeMap.get(task.task_type_id).name}`
+            ? `${task.entity_name} / ${taskTypeMap.get(task.task_type_id)?.name || ''}`
             : ''
         "
         @cancel="closeAddPreviewModal"
@@ -423,7 +423,7 @@
         message=""
         :title="
           task
-            ? `${task.entity_name} / ${taskTypeMap.get(task.task_type_id).name}`
+            ? `${task.entity_name} / ${taskTypeMap.get(task.task_type_id)?.name || ''}`
             : ''
         "
         @cancel="hideExtraPreviewModal"
@@ -928,7 +928,7 @@ export default {
       if (this.task) {
         const taskType = this.taskTypeMap.get(this.task.task_type_id)
         return this.$t('main.delete_text', {
-          name: `${this.task.entity_name} / ${taskType.name}`
+          name: `${this.task.entity_name} / ${taskType?.name ?? ''}`
         })
       } else {
         return ''
@@ -943,7 +943,7 @@ export default {
 
     isAssigned() {
       return (
-        this.task?.assignees.some(personId => personId === this.user.id) ??
+        this.task?.assignees?.some(personId => personId === this.user?.id) ??
         false
       )
     },
@@ -992,6 +992,7 @@ export default {
 
       // get the current task entity type eg. 'Shot' or 'Asset'
       const current_task_type = this.taskTypeMap.get(this.task.task_type_id)
+      if (!current_task_type) return []
       const task_type_entity = current_task_type.for_entity
       const task_type_entity_slug = task_type_entity.toLowerCase() + 's'
 
@@ -1487,7 +1488,7 @@ export default {
       if (this.isTVShow) {
         const taskType = this.taskTypeMap.get(this.task.task_type_id)
         route.name = 'episode-task-preview'
-        if (taskType.for_entity === 'Episode') {
+        if (taskType?.for_entity === 'Episode') {
           route.name = 'episode-episode-task-preview'
         }
       }
@@ -1604,7 +1605,7 @@ export default {
         )
         const user = this.personMap.get(eventData.person_id)
         if (comment && user) {
-          if (this.user.id === user.id) {
+          if (this.user?.id === user.id) {
             if (
               (type === 'ack' && !comment.acknowledgements.includes(user.id)) ||
               (type === 'unack' && comment.acknowledgements.includes(user.id))
@@ -1810,7 +1811,8 @@ export default {
   head() {
     let title = `${this.$t('main.loading')} - Kitsu`
     if (this.task) {
-      const taskTypeName = this.taskTypeMap.get(this.task.task_type_id).name
+      const taskTypeName =
+        this.taskTypeMap.get(this.task.task_type_id)?.name || ''
       title = `${this.title} / ${taskTypeName} - Kitsu`
     }
     return { title }

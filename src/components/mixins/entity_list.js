@@ -405,7 +405,7 @@ export const entityListMixin = {
       this.$emit('change-sort', {
         type: 'status',
         column: taskTypeId,
-        name: this.taskTypeMap.get(taskTypeId).name
+        name: this.taskTypeMap.get(taskTypeId)?.name
       })
       this.showHeaderMenu()
     },
@@ -515,7 +515,7 @@ export const entityListMixin = {
         this.departmentFilter.length === 0 ||
         this.taskTypeMap.get(columnId)?.department_id === null ||
         this.departmentFilter.includes(
-          this.taskTypeMap.get(columnId).department_id
+          this.taskTypeMap.get(columnId)?.department_id
         )
       )
     },
