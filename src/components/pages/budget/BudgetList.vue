@@ -425,7 +425,7 @@ export default {
                 total: 0,
                 months_duration: 0,
                 monthly_salary: 0,
-                daily_salary: person?.daily_salary,
+                daily_salary: person?.daily_salary || 0,
                 start_date: null,
                 exceptions: {}
               })
