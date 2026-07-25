@@ -350,19 +350,19 @@
                     :frame="currentFrame"
                     :is-change="isStatusChange(index)"
                     :is-checkable="
-                      user.id === comment.person?.id ||
+                      user?.id === comment.person?.id ||
                       (isCurrentUserArtist && isAssigned) ||
                       isDepartmentSupervisor ||
                       isCurrentUserManager
                     "
                     :is-editable="
-                      user.id === comment.person?.id || isCurrentUserManager
+                      user?.id === comment.person?.id || isCurrentUserManager
                     "
                     :is-pinnable="
                       isDepartmentSupervisor || isCurrentUserManager
                     "
                     :is-replyable="
-                      user.id === comment.person?.id ||
+                      user?.id === comment.person?.id ||
                       isAssigned ||
                       isDepartmentSupervisor ||
                       isCurrentUserManager
@@ -943,7 +943,7 @@ export default {
 
     isAssigned() {
       return (
-        this.task?.assignees?.some(personId => personId === this.user.id) ??
+        this.task?.assignees?.some(personId => personId === this.user?.id) ??
         false
       )
     },
@@ -1605,7 +1605,7 @@ export default {
         )
         const user = this.personMap.get(eventData.person_id)
         if (comment && user) {
-          if (this.user.id === user.id) {
+          if (this.user?.id === user.id) {
             if (
               (type === 'ack' && !comment.acknowledgements.includes(user.id)) ||
               (type === 'unack' && comment.acknowledgements.includes(user.id))
