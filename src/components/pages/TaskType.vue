@@ -376,6 +376,7 @@
           :form-data="importCsvFormData"
           :columns="dataMatchers"
           :optional-columns="optionalColumns"
+          :generic-columns="genericColumns"
           @cancel="hideImportModal"
           @confirm="renderImport"
         />
@@ -573,6 +574,7 @@ const taskStatusIdFilter = ref(null)
 let taskIndex = null
 
 const dataMatchers = ['Parent', 'Entity']
+const genericColumns = ['Metadata column name (text value)']
 const difficultyOptions = [
   { label: 'all_tasks', value: '-1' },
   { label: 'difficulty.very_easy', value: '1' },

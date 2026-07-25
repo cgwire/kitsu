@@ -4,29 +4,23 @@
     :title="$t('main.csv.import_title')"
     @cancel="$emit('cancel')"
   >
-    <div v-if="columns.length > 0" class="mb1">
-      {{ $t('main.csv.required_fields') }}
-      <ul>
-        <li v-for="column in columns" :key="column">
-          {{ column }}
-        </li>
-      </ul>
-    </div>
-    <div v-if="optionalColumns.length > 0" class="mb1">
-      {{ $t('main.csv.optional_fields') }}
-      <ul>
-        <li v-for="optionalColumn in optionalColumns" :key="optionalColumn">
-          {{ optionalColumn }}
-        </li>
-      </ul>
-    </div>
-    <div v-if="genericColumns.length > 0" class="mb1">
-      {{ $t('main.csv.generic_fields') }}
-      <ul>
-        <li v-for="genericColumn in genericColumns" :key="genericColumn">
-          {{ genericColumn }}
-        </li>
-      </ul>
+    <div class="columns-info" v-if="columnGroups.length > 0">
+      <div
+        class="column-group"
+        :key="group.label"
+        v-for="group in columnGroups"
+      >
+        <span class="group-label">{{ group.label }}</span>
+        <div class="column-tags">
+          <span
+            :class="{ 'column-tag': true, required: group.required }"
+            :key="column"
+            v-for="column in group.columns"
+          >
+            {{ column }}
+          </span>
+        </div>
+      </div>
     </div>
 
     <div class="tabs">
@@ -49,16 +43,17 @@
     </div>
     <div v-show="activeTab === 'file'">
       <p>{{ $t('main.csv.select_file') }}</p>
-      <file-upload
+      <file-upload-zone
         ref="inputFile"
-        @fileselected="onFileSelected"
+        accept=".csv"
         :label="$t('main.csv.upload_file')"
+        @fileselected="onFileSelected"
       />
     </div>
     <div v-show="activeTab === 'text'">
       <p>{{ $t('main.csv.paste_code') }}</p>
       <textarea
-        class="paste-area"
+        class="paste-area input"
         :placeholder="pasteAreaPlaceholder"
         v-model.trim="pastedCode"
       ></textarea>
@@ -83,7 +78,7 @@ import { useI18n } from 'vue-i18n'
 import BaseModal from '@/components/modals/BaseModal.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
 // eslint-disable-next-line no-unused-vars
-import FileUpload from '@/components/widgets/FileUpload.vue'
+import FileUploadZone from '@/components/widgets/FileUploadZone.vue'
 
 const { t } = useI18n()
 
@@ -113,6 +108,18 @@ const tabs = computed(() => [
   { id: 'file', name: t('main.csv.tab_select_file') },
   { id: 'text', name: t('main.csv.tab_paste_code') }
 ])
+
+const columnGroups = computed(() =>
+  [
+    {
+      label: t('main.csv.required_fields'),
+      columns: props.columns,
+      required: true
+    },
+    { label: t('main.csv.optional_fields'), columns: props.optionalColumns },
+    { label: t('main.csv.generic_fields'), columns: props.genericColumns }
+  ].filter(group => group.columns.length > 0)
+)
 
 const isValid = computed(
   () =>
@@ -150,15 +157,69 @@ defineExpose({ reset })
 </script>
 
 <style lang="scss" scoped>
+:deep(.modal-content) {
+  width: 800px;
+  max-width: calc(100vw - 4rem);
+}
+
+:deep(.modal-content .box h2.title) {
+  margin-bottom: 0.5em;
+}
+
+.columns-info {
+  background: $white-grey-light;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  margin-bottom: 1.6em;
+  padding: 1.2em 1.4em;
+}
+
+.group-label {
+  color: var(--text-alt);
+  display: block;
+  font-size: 0.9em;
+  margin-bottom: 0.5em;
+}
+
+.column-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4em;
+}
+
+.column-tag {
+  background: var(--background-tag);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 0.9em;
+  padding: 0.2em 0.6em;
+
+  &.required {
+    font-weight: 600;
+  }
+}
+
 .tabs ul {
   margin-left: 0;
 }
 
+.dark .columns-info {
+  background: var(--background-alt);
+}
+
 .paste-area {
-  margin: 0 0 1rem;
-  width: 100%;
-  min-height: 10rem;
-  padding: 0.5rem;
+  font-family: monospace;
+  font-size: 0.95em;
+  height: auto;
+  line-height: 1.6;
+  margin: 1em 0;
+  min-height: 12rem;
+  padding: 0.8em 1em;
   resize: vertical;
+  white-space: pre;
+  width: 100%;
 }
 </style>
