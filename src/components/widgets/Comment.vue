@@ -564,7 +564,11 @@ import {
 
 import files from '@/lib/files'
 import { remove } from '@/lib/models'
-import { getDownloadAttachmentPath, pluralizeEntityType } from '@/lib/path'
+import {
+  getDownloadAttachmentPath,
+  getTaskRouteEntity,
+  pluralizeEntityType
+} from '@/lib/path'
 import { renderComment, replaceTimeWithTimecode, safeUrl } from '@/lib/render'
 import { sortByName } from '@/lib/sorting'
 import {
@@ -758,7 +762,7 @@ const previewRoute = computed(() => {
     r.params.episode_id = props.task.entity.episode_id
   }
   const taskType = taskTypeMap.value.get(props.task.task_type_id)
-  r.params.type = pluralizeEntityType(taskType?.for_entity)
+  r.params.type = pluralizeEntityType(getTaskRouteEntity(props.task, taskType))
   return r
 })
 

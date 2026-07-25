@@ -57,7 +57,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 import colors from '@/lib/colors'
-import { pluralizeEntityType } from '@/lib/path'
+import { getTaskRouteEntity, pluralizeEntityType } from '@/lib/path'
 import { useTaskStatusStyle } from '@/composables/taskStatus'
 
 const { t } = useI18n()
@@ -183,7 +183,7 @@ const taskPath = computed(() => {
   }
 
   const taskType = taskTypeMap.value.get(task.task_type_id)
-  route.params.type = pluralizeEntityType(taskType?.for_entity)
+  route.params.type = pluralizeEntityType(getTaskRouteEntity(task, taskType))
 
   return route
 })
