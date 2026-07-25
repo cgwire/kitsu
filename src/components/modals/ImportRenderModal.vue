@@ -173,6 +173,9 @@ const shotMetadataDescriptors = computed(
 const editMetadataDescriptors = computed(
   () => store.getters.editMetadataDescriptors
 )
+const taskMetadataDescriptors = computed(
+  () => store.getters.taskMetadataDescriptors
+)
 
 const columnsRequired = computed(() => {
   if (props.parsedCsv.length === 0) return []
@@ -192,6 +195,13 @@ const columnsOptional = computed(() => {
 
 const metadataDescriptors = computed(() => {
   const path = route.path
+  // The task type route also contains the entity type segment
+  // (/productions/:id/:type/task-types/:id), so check task-types first.
+  if (path.indexOf('task-types') > 0) {
+    return taskMetadataDescriptors.value.filter(
+      descriptor => descriptor.task_type_id === route.params.task_type_id
+    )
+  }
   if (path.indexOf('assets') > 0) return assetMetadataDescriptors.value
   if (path.indexOf('shots') > 0) return shotMetadataDescriptors.value
   if (path.indexOf('edits') > 0) return editMetadataDescriptors.value
