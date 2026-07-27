@@ -1354,7 +1354,7 @@ const onExportClick = () => {
         commentLines.push([
           formatDate(reply.date),
           t('main.reply'),
-          personMap.value.get(reply.person_id)?.name || '',
+          reply.person?.name || '',
           reply.text,
           null,
           null,
