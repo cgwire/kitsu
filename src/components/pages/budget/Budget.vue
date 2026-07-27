@@ -304,7 +304,7 @@ export default {
       budgetDepartments.sort((a, b) => {
         const departmentA = this.departmentMap.get(a.id)
         const departmentB = this.departmentMap.get(b.id)
-        return departmentA.name.localeCompare(departmentB.name)
+        return (departmentA?.name || '').localeCompare(departmentB?.name || '')
       })
       return budgetDepartments
     },
