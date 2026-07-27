@@ -391,6 +391,55 @@ describe('path', () => {
     })
   })
 
+  test('getTaskPath with an episode holding no id', () => {
+    // callers build the episode from an optional first_episode_id, so the
+    // object is truthy while its id is not: episode-task would then be
+    // missing its required episode_id
+    expect(
+      getTaskPath(
+        {
+          id: 1,
+          project_id: 2,
+          task_type_id: 3
+        },
+        { id: 5 },
+        true,
+        { id: undefined },
+        new Map([[3, { for_entity: 'Shot' }]])
+      )
+    ).toEqual({
+      name: 'task',
+      params: {
+        production_id: 2,
+        task_id: 1,
+        type: 'shots'
+      }
+    })
+
+    // a resolvable episode id still episodifies the route
+    expect(
+      getTaskPath(
+        {
+          id: 1,
+          project_id: 2,
+          task_type_id: 3
+        },
+        { id: 5 },
+        true,
+        { id: 6 },
+        new Map([[3, { for_entity: 'Shot' }]])
+      )
+    ).toEqual({
+      name: 'episode-task',
+      params: {
+        production_id: 2,
+        task_id: 1,
+        episode_id: 6,
+        type: 'shots'
+      }
+    })
+  })
+
   test('getProductionSchedulePath', () => {
     expect(getProductionSchedulePath(2)).toEqual({
       name: 'schedule',
