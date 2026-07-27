@@ -123,6 +123,7 @@
       "attachments": "Archivos adjuntos",
       "attachments_to_add": "Archivos adjuntos para añadir",
       "max_retakes_error": "Ya no puede añadir más retomas en esta tarea.",
+      "unknown_status_error": "El estado de tarea seleccionado ya no está disponible. Por favor, recarga la página e inténtalo de nuevo.",
       "previews": "Archivos de vista previa para publicar como nueva revisión",
       "selected_files": "Archivos seleccionados",
       "no_attachments": "No hay archivos adjuntos para este comentario.",

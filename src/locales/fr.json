@@ -123,6 +123,7 @@
       "attachments": "Pièces jointes",
       "attachments_to_add": "Fichier à attacher",
       "max_retakes_error": "Vous ne pouvez plus faire de retakes sur cette tâche.",
+      "unknown_status_error": "Le statut de tâche sélectionné n'est plus disponible. Veuillez recharger la page et réessayer.",
       "previews": "Fichiers à publier comme une nouvelle version",
       "selected_files": "Fichiers sélectionnés",
       "no_attachments": "Il n'y a pas de pièces jointes pour ce commentaire.",

@@ -123,6 +123,7 @@
       "attachments": "Anexos",
       "attachments_to_add": "Adicionar anexos",
       "max_retakes_error": "Você não pode mais adicionar repetições nessa tarefa.",
+      "unknown_status_error": "O estado de tarefa selecionado já não está disponível. Recarregue a página e tente novamente.",
       "previews": "Visualizar arquivos para publicar como uma nova revisão",
       "selected_files": "Arquivos selecionados",
       "no_attachments": "Não há anexos para este comentário.",

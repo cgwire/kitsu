@@ -123,6 +123,7 @@
       "attachments": "添付",
       "attachments_to_add": "追加する添付",
       "max_retakes_error": "このタスクにはこれ以上リテイクを追加できません。",
+      "unknown_status_error": "選択したタスクステータスは利用できなくなりました。ページを再読み込みしてもう一度お試しください。",
       "previews": "新しいリビジョンとしてプレビューファイル",
       "selected_files": "選択したファイル",
       "no_attachments": "このコメントの添付はありません。",

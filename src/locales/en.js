@@ -247,6 +247,8 @@ export default {
     edit_error: 'An error occurred while editing the comment. Please contact our support team.',
     error: 'An error occurred while posting comment',
     max_retakes_error: 'You cannot add retakes anymore on this task.',
+    unknown_status_error:
+      'The selected task status is not available anymore. Please reload the page and try again.',
     no_attachments: 'There are no attachments for this comment.',
     no_file_attached: 'No preview attached',
     pin: 'Pin',

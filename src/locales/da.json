@@ -123,6 +123,7 @@
       "attachments": "Vedhæftninger",
       "attachments_to_add": "Tilføj vedhæftninger",
       "max_retakes_error": "Du kan ikke tilføje flere retakes til denne opgave.",
+      "unknown_status_error": "Den valgte opgavestatus er ikke længere tilgængelig. Genindlæs venligst siden og prøv igen.",
       "previews": "Preview-filer til publicering som en ny revision",
       "selected_files": "Markerede filer",
       "no_attachments": "Der er ingen vedhæftninger til denne kommentar.",
