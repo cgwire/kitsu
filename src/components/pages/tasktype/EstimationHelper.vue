@@ -306,13 +306,14 @@ const assignees = computed(() => {
       assigneeSet.add(personId)
       addTaskToStats(allTasksStats, personId, task, entity)
       const status = taskStatusMap.value.get(task.task_status_id)
-      if (!status.is_done && !status.is_feedback_request) {
+      if (!status?.is_done && !status?.is_feedback_request) {
         addTaskToStats(remainingStats, personId, task, entity)
       }
     })
   })
   return [...assigneeSet]
     .map(personId => personMap.value.get(personId))
+    .filter(Boolean)
     .sort(firstBy('name'))
     .map(person => ({
       ...person,
@@ -336,7 +337,7 @@ const compareFirstAssignees = (a, b) => {
   if (a.assignees.length > 0 && b.assignees.length > 0) {
     const personA = personMap.value.get(a.assignees[0])
     const personB = personMap.value.get(b.assignees[0])
-    return personA.name.localeCompare(personB.name)
+    return (personA?.name || '').localeCompare(personB?.name || '')
   }
   return a.assignees.length > 0 || b.assignees.length === 0 ? -1 : 1
 }
