@@ -781,12 +781,30 @@ describe('lib/sorting', () => {
     expect(sorted).toBe(assignees)
     expect(sorted).toEqual(['person-2', 'person-3', 'person-1'])
 
-    // ids missing from the map fall back to '' and sort first, without throwing
+    // ids missing from the map sink to the end instead of throwing, so
+    // assignees[0] keeps naming a person who resolved
     const withMissing = ['person-1', 'missing', 'person-3']
     expect(sortByPersonName(withMissing, personMap)).toEqual([
-      'missing',
       'person-3',
-      'person-1'
+      'person-1',
+      'missing'
+    ])
+
+    // an id that resolves always wins the first slot over one that does not
+    expect(sortByPersonName(['missing', 'person-1'], personMap)).toEqual([
+      'person-1',
+      'missing'
+    ])
+
+    // several holes keep the resolved names ordered ahead of them
+    expect(
+      sortByPersonName(['gone', 'person-1', 'missing', 'person-2'], personMap)
+    ).toEqual(['person-2', 'person-1', 'gone', 'missing'])
+
+    // nothing resolves: no throw, the list is left as is
+    expect(sortByPersonName(['gone', 'missing'], personMap)).toEqual([
+      'gone',
+      'missing'
     ])
   })
 })

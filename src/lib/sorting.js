@@ -254,11 +254,17 @@ export const sortByName = entries => {
 }
 
 // Sort a list of person ids alphabetically by the person's name. Ids missing
-// from a partially loaded personMap fall back to '' so the sort never throws.
+// from a partially loaded personMap sink to the end rather than throwing:
+// callers read assignees[0] as "the" assignee, so a hole must never displace a
+// person who did resolve.
 export const sortByPersonName = (personIds, personMap) => {
-  return personIds.sort((a, b) =>
-    (personMap.get(a)?.name || '').localeCompare(personMap.get(b)?.name || '')
-  )
+  return personIds.sort((a, b) => {
+    const nameA = personMap.get(a)?.name
+    const nameB = personMap.get(b)?.name
+    if (!nameA) return nameB ? 1 : 0
+    if (!nameB) return -1
+    return nameA.localeCompare(nameB)
+  })
 }
 
 export const sortByValue = entries => {
