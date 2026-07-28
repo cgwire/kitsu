@@ -109,6 +109,10 @@
     "*.{js,vue}": "eslint --cache"
   },
   "allowScripts": {
-    "canvas@3.2.3": true
+    "@parcel/watcher": false,
+    "canvas@3.2.3": true,
+    "core-js": false,
+    "fsevents": false,
+    "vue-demi": false
   }
 }
