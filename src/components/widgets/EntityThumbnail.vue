@@ -56,7 +56,7 @@ const store = useStore()
 
 const props = defineProps({
   entity: {
-    default: () => {},
+    default: () => ({}),
     type: Object
   },
   square: {

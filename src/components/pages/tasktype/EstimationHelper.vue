@@ -71,16 +71,16 @@
                 />
               </td>
               <td class="asset-type" v-if="isAssets">
-                {{ getEntity(task.entity.id).asset_type_name }}
+                {{ getEntity(task.entity.id)?.asset_type_name }}
               </td>
               <td class="sequence" v-else-if="isShots">
-                {{ getEntity(task.entity.id).sequence_name }}
+                {{ getEntity(task.entity.id)?.sequence_name }}
               </td>
               <td class="name">
-                {{ getEntity(task.entity.id).name }}
+                {{ getEntity(task.entity.id)?.name }}
               </td>
               <td class="frames numeric-cell" v-if="isShots">
-                {{ getEntity(task.entity.id).nb_frames }}
+                {{ getEntity(task.entity.id)?.nb_frames }}
               </td>
               <td class="frames numeric-cell" v-if="isShots">
                 {{ getSeconds(task) }}
@@ -344,6 +344,7 @@ const compareFirstAssignees = (a, b) => {
 
 const getSeconds = task => {
   const shot = getEntity(task.entity_id)
+  if (!shot) return ''
   return frameToSeconds(shot.nb_frames, currentProduction.value, shot)
 }
 
@@ -451,7 +452,7 @@ const addTaskToStats = (statsMap, personId, task, entity) => {
   stats.count += 1
   stats.estimation += task.estimation
   if (!isAssets.value) {
-    const frames = entity.nb_frames || 0
+    const frames = entity?.nb_frames || 0
     stats.frames += frames
     stats.seconds += frameToSeconds(frames, currentProduction.value, entity)
   }
