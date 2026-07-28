@@ -107,5 +107,8 @@
   },
   "lint-staged": {
     "*.{js,vue}": "eslint --cache"
+  },
+  "allowScripts": {
+    "canvas@3.2.3": true
   }
 }
