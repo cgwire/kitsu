@@ -184,6 +184,11 @@ export const addSerialization = object => {
   return object
 }
 
+// fabric's toObject() does not emit the interaction flags, so a clone comes
+// back with the class defaults (selectable and evented both true) whatever the
+// source allowed. The artist read-only contract lives on those flags.
+const INTERACTION_KEYS = ['selectable', 'evented', 'editable']
+
 /**
  * Clones a fabric annotation object, eraser mask included.
  *
@@ -191,6 +196,9 @@ export const addSerialization = object => {
  * that bypass fabric's generic revival (psbrush's PSStroke, our Arrow) hand
  * back the mask as a plain object, or drop it. Rebuild a real Eraser from the
  * source so the copy renders its holes and round-trips like any other object.
+ *
+ * The interaction flags are carried over too: a copy must never be more
+ * permissive than the object it was copied from.
  */
 export const cloneAnnotationObject = async source => {
   const clone = await source.clone()
@@ -199,6 +207,9 @@ export const cloneAnnotationObject = async source => {
       eraser: serializeEraserMask(source.eraser)
     })
   }
+  INTERACTION_KEYS.forEach(key => {
+    if (source[key] !== undefined) clone.set(key, source[key])
+  })
   return clone
 }
 

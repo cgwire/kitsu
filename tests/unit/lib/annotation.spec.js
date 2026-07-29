@@ -695,6 +695,28 @@ describe('lib/annotation', () => {
       expect(clone.eraser).toBeInstanceOf(Eraser)
     })
 
+    // fabric's toObject() drops these, so a bare clone() came back selectable
+    // even when the source was locked for an artist.
+    it('carries the interaction flags over so a copy is never more permissive', async () => {
+      const source = makeStroke()
+      source.set('selectable', false)
+      source.set('evented', false)
+      source.set('editable', false)
+      const clone = await cloneAnnotationObject(source)
+      expect(clone.selectable).toBe(false)
+      expect(clone.evented).toBe(false)
+      expect(clone.editable).toBe(false)
+    })
+
+    it('leaves an unlocked source unlocked', async () => {
+      const source = makeStroke()
+      source.set('selectable', true)
+      source.set('evented', true)
+      const clone = await cloneAnnotationObject(source)
+      expect(clone.selectable).toBe(true)
+      expect(clone.evented).toBe(true)
+    })
+
     // The whole point: the pasted copy must survive a save.
     it('produces a clone that serializes without throwing', async () => {
       const source = makeStroke()
