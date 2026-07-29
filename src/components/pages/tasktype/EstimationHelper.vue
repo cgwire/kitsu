@@ -71,16 +71,16 @@
                 />
               </td>
               <td class="asset-type" v-if="isAssets">
-                {{ getEntity(task.entity.id).asset_type_name }}
+                {{ getEntity(task.entity.id)?.asset_type_name }}
               </td>
               <td class="sequence" v-else-if="isShots">
-                {{ getEntity(task.entity.id).sequence_name }}
+                {{ getEntity(task.entity.id)?.sequence_name }}
               </td>
               <td class="name">
-                {{ getEntity(task.entity.id).name }}
+                {{ getEntity(task.entity.id)?.name }}
               </td>
               <td class="frames numeric-cell" v-if="isShots">
-                {{ getEntity(task.entity.id).nb_frames }}
+                {{ getEntity(task.entity.id)?.nb_frames }}
               </td>
               <td class="frames numeric-cell" v-if="isShots">
                 {{ getSeconds(task) }}
@@ -306,13 +306,14 @@ const assignees = computed(() => {
       assigneeSet.add(personId)
       addTaskToStats(allTasksStats, personId, task, entity)
       const status = taskStatusMap.value.get(task.task_status_id)
-      if (!status.is_done && !status.is_feedback_request) {
+      if (!status?.is_done && !status?.is_feedback_request) {
         addTaskToStats(remainingStats, personId, task, entity)
       }
     })
   })
   return [...assigneeSet]
     .map(personId => personMap.value.get(personId))
+    .filter(Boolean)
     .sort(firstBy('name'))
     .map(person => ({
       ...person,
@@ -336,13 +337,14 @@ const compareFirstAssignees = (a, b) => {
   if (a.assignees.length > 0 && b.assignees.length > 0) {
     const personA = personMap.value.get(a.assignees[0])
     const personB = personMap.value.get(b.assignees[0])
-    return personA.name.localeCompare(personB.name)
+    return (personA?.name || '').localeCompare(personB?.name || '')
   }
   return a.assignees.length > 0 || b.assignees.length === 0 ? -1 : 1
 }
 
 const getSeconds = task => {
   const shot = getEntity(task.entity_id)
+  if (!shot) return ''
   return frameToSeconds(shot.nb_frames, currentProduction.value, shot)
 }
 
@@ -450,7 +452,7 @@ const addTaskToStats = (statsMap, personId, task, entity) => {
   stats.count += 1
   stats.estimation += task.estimation
   if (!isAssets.value) {
-    const frames = entity.nb_frames || 0
+    const frames = entity?.nb_frames || 0
     stats.frames += frames
     stats.seconds += frameToSeconds(frames, currentProduction.value, entity)
   }

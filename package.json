@@ -84,9 +84,9 @@
     "eslint-plugin-prettier": "5.5.6",
     "eslint-plugin-promise": "7.3.0",
     "eslint-plugin-vue": "10.10.0",
-    "globals": "17.7.0",
+    "globals": "17.8.0",
     "husky": "9.1.7",
-    "jsdom": "29.1.1",
+    "jsdom": "30.0.1",
     "lint-staged": "17.2.0",
     "localStorage": "1.0.4",
     "prettier": "3.9.6",
@@ -102,10 +102,17 @@
     }
   },
   "engines": {
-    "node": ">=22.22.1",
+    "node": ">=22.22.2",
     "npm": ">=10"
   },
   "lint-staged": {
     "*.{js,vue}": "eslint --cache"
+  },
+  "allowScripts": {
+    "@parcel/watcher": false,
+    "canvas@3.2.3": true,
+    "core-js": false,
+    "fsevents": false,
+    "vue-demi": false
   }
 }

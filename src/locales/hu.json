@@ -133,6 +133,7 @@
       "for_client_off": "A szöveg nem látható a megrendelők számára. Kattints, hogy láthatóvá tedd a megrendelők számára",
       "for_client_on": "A szöveg látható a megrendelők számára. Kattints, hogy elrejtsd a megrendelők elől",
       "max_retakes_error": "Nem adhatsz több ismétlést ehhez a feladathoz.",
+      "unknown_status_error": "A kiválasztott feladatstátusz már nem érhető el. Kérlek töltsd újra az oldalt és próbáld újra.",
       "move_modal": {
         "error": "Nem sikerült áthelyezni a hozzászólást. Kérlek keresd fel a támogató csapatunkat.",
         "intro": "Válassz egy ugyanahhoz az elemhez tartozó feladatot, ahova áthelyezed ezt a hozzászólást. A célfeladaton ugyanúgy elküldésre kerülnek az értesítések, mint egy új hozzászólásnál.",

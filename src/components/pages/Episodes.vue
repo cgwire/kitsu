@@ -342,7 +342,8 @@ export default {
     if (
       this.episodeMap.size < 1 ||
       this.episodeValidationColumns.length === 0 ||
-      this.episodeMap.values().next().project_id !== this.currentProduction.id
+      this.episodeMap.values().next().value?.project_id !==
+        this.currentProduction.id
     ) {
       this.loadEpisodesWithTasks()
         .then(() => {

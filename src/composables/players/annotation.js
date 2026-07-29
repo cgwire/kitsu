@@ -22,6 +22,7 @@ import {
   addSerialization,
   attachShapeDrawing,
   buildReadOnlyShape,
+  cloneAnnotationObject,
   deserializePSStroke,
   getAnnotationContainMapping
 } from '@/lib/players/annotation'
@@ -501,6 +502,26 @@ export const useAnnotation = ({
     return result
   }
 
+  // A single unserializable object must not cost the whole frame its save:
+  // these fan-outs rebuild every object on the canvas, so one throw used to
+  // discard everyone else's payload too. A skipped object keeps its last saved
+  // state, which the merge in getNewAnnotations restores from the drawing.
+  const serializeCanvasObjects = serializer =>
+    fabricCanvas.value._objects
+      .map(obj => {
+        try {
+          return serializer(obj)
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.error(
+            `[annotations] Object ${obj?.id} failed to serialize, skipped`,
+            err
+          )
+          return null
+        }
+      })
+      .filter(Boolean)
+
   const getNewAnnotations = (currentTime, currentFrame, annotation) => {
     fabricCanvas.value.getObjects().forEach(obj => {
       setObjectData(obj)
@@ -522,7 +543,7 @@ export const useAnnotation = ({
     })
 
     if (annotation) {
-      const canvasObjects = fabricCanvas.value._objects.map(obj => {
+      const canvasObjects = serializeCanvasObjects(obj => {
         const result = serializeAbsolute(obj)
         if (obj.group) result.group = null
         return result
@@ -553,7 +574,7 @@ export const useAnnotation = ({
           time: Math.max(currentTime, 0),
           frame: Math.max(currentFrame, 0),
           drawing: {
-            objects: fabricCanvas.value._objects.map(obj => obj.serialize())
+            objects: serializeCanvasObjects(obj => obj.serialize())
           }
         }
       })
@@ -586,7 +607,7 @@ export const useAnnotation = ({
     const token = mainLoadToken
     for (const obj of annotation.drawing.objects) {
       if (token !== mainLoadToken) return
-      const built = await addObjectToCanvas(annotation, obj, canvas)
+      const built = await buildObjectSafely(annotation, obj, canvas)
       if (token !== mainLoadToken) {
         if (built) (canvas || fabricCanvas.value).remove(built)
         return
@@ -608,11 +629,24 @@ export const useAnnotation = ({
     const token = comparisonLoadToken
     for (const obj of annotation.drawing.objects) {
       if (token !== comparisonLoadToken) return
-      const built = await addObjectToCanvas(annotation, obj, canvas)
+      const built = await buildObjectSafely(annotation, obj, canvas)
       if (token !== comparisonLoadToken) {
         if (built) canvas.remove(built)
         return
       }
+    }
+  }
+
+  // One corrupt object used to abort the rest of the frame: the load loops are
+  // un-awaited at every call site, so the throw was an invisible unhandled
+  // rejection and the remaining objects simply never appeared.
+  const buildObjectSafely = async (annotation, obj, canvas) => {
+    try {
+      return await addObjectToCanvas(annotation, obj, canvas)
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error(`[annotations] Object ${obj?.id} failed to load`, err)
+      return null
     }
   }
 
@@ -1388,7 +1422,7 @@ export const useAnnotation = ({
       subObjects?.length > 0 ? subObjects : mainObject ? [mainObject] : []
     let lastClone = null
     for (const source of sources) {
-      const clone = await source.clone()
+      const clone = await cloneAnnotationObject(source)
       clone.set('id', uuidv4())
       clone.set('left', clone.left + PASTE_OFFSET)
       clone.set('top', clone.top + PASTE_OFFSET)

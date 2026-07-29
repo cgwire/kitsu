@@ -350,19 +350,20 @@
                     :frame="currentFrame"
                     :is-change="isStatusChange(index)"
                     :is-checkable="
-                      user?.id === comment.person?.id ||
+                      (user && user.id === comment.person?.id) ||
                       (isCurrentUserArtist && isAssigned) ||
                       isDepartmentSupervisor ||
                       isCurrentUserManager
                     "
                     :is-editable="
-                      user?.id === comment.person?.id || isCurrentUserManager
+                      (user && user.id === comment.person?.id) ||
+                      isCurrentUserManager
                     "
                     :is-pinnable="
                       isDepartmentSupervisor || isCurrentUserManager
                     "
                     :is-replyable="
-                      user?.id === comment.person?.id ||
+                      (user && user.id === comment.person?.id) ||
                       isAssigned ||
                       isDepartmentSupervisor ||
                       isCurrentUserManager
@@ -937,7 +938,9 @@ export default {
 
     assignees() {
       return sortPeople(
-        this.task.assignees.map(personId => this.personMap.get(personId))
+        this.task.assignees
+          .map(personId => this.personMap.get(personId))
+          .filter(Boolean)
       )
     },
 

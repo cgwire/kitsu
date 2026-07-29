@@ -371,6 +371,9 @@
         <div class="error pull-right" v-if="isMaxRetakesError">
           <em>{{ $t('comments.max_retakes_error') }}</em>
         </div>
+        <div class="error pull-right" v-if="errors.unknownStatus">
+          <em>{{ $t('comments.unknown_status_error') }}</em>
+        </div>
       </div>
     </div>
 
@@ -539,7 +542,8 @@ const { membersForAts, atOptionsFilter } = useAtMentionsMembers(
 const isFrameAddition = ref(false)
 const isDragging = ref(false)
 const errors = reactive({
-  addCommentAttachment: false
+  addCommentAttachment: false,
+  unknownStatus: false
 })
 const loading = reactive({
   addCommentAttachment: false
@@ -714,7 +718,14 @@ const runAddComment = (
   if (!isValidForm.value) {
     return
   }
+  // A status id that no longer resolves usually means a stale cache, so tell
+  // the user to reload rather than posting a comment with no status.
   const taskStatus = taskStatusMap.value.get(task_status_id.value)
+  if (!taskStatus) {
+    errors.unknownStatus = true
+    return
+  }
+  errors.unknownStatus = false
   if (
     taskStatus.is_feedback_request &&
     props.previewForms.length === 0 &&
@@ -811,8 +822,8 @@ const onInsertChecklistItem = item => {
 const resetStatus = () => {
   const taskStatus = taskStatusMap.value.get(props.task.task_status_id)
   if (
-    (!isCurrentUserArtist.value || taskStatus.is_artist_allowed) &&
-    (!isCurrentUserClient.value || taskStatus.is_client_allowed)
+    (!isCurrentUserArtist.value || taskStatus?.is_artist_allowed) &&
+    (!isCurrentUserClient.value || taskStatus?.is_client_allowed)
   ) {
     task_status_id.value = props.task.task_status_id
   } else {

@@ -123,6 +123,7 @@
       "attachments": "Anhänge",
       "attachments_to_add": "Anhänge hinzufügen",
       "max_retakes_error": "Sie können bei dieser Aufgabe keine Neuaufnahmen mehr hinzufügen.",
+      "unknown_status_error": "Der ausgewählte Aufgabenstatus ist nicht mehr verfügbar. Bitte laden Sie die Seite neu und versuchen Sie es erneut.",
       "previews": "Als neue Version zu veröffentlichende Vorschaudateien",
       "selected_files": "Ausgewählte Dateien",
       "no_attachments": "Für diesen Kommentar gibt es keine Anhänge.",

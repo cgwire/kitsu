@@ -123,6 +123,7 @@
       "attachments": "附件",
       "attachments_to_add": "新增附件",
       "max_retakes_error": "您不能再在此任務上新增重拍。",
+      "unknown_status_error": "所選的任務狀態已無法使用。請重新載入頁面並再試一次。",
       "previews": "預覽要發佈為新修訂版的檔案",
       "selected_files": "選取的檔案",
       "no_attachments": "此意見無附件。",

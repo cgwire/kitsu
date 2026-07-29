@@ -405,7 +405,7 @@ export const entityListMixin = {
       this.$emit('change-sort', {
         type: 'status',
         column: taskTypeId,
-        name: this.taskTypeMap.get(taskTypeId)?.name
+        name: this.taskTypeMap.get(taskTypeId)?.name || ''
       })
       this.showHeaderMenu()
     },

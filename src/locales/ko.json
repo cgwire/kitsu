@@ -123,6 +123,7 @@
       "attachments": "첨부파일",
       "attachments_to_add": "추가할 첨부파일",
       "max_retakes_error": "이 작업에는 더 이상 재촬영을 추가할 수 없습니다.",
+      "unknown_status_error": "선택한 작업 상태를 더 이상 사용할 수 없습니다. 페이지를 새로 고치고 다시 시도해 주세요.",
       "previews": "새 수정본으로 게시할 미리 보기 파일",
       "selected_files": "선택한 파일",
       "no_attachments": "이 코멘트에 대한 첨부파일이 없습니다.",

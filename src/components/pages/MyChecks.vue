@@ -201,8 +201,9 @@ export default {
       const assigneesMap = {}
       this.tasksToCheck.forEach(task => {
         task.assignees.forEach(personId => {
-          if (!assigneesMap[personId]) {
-            assignees.push(this.personMap.get(personId))
+          const person = this.personMap.get(personId)
+          if (person && !assigneesMap[personId]) {
+            assignees.push(person)
             assigneesMap[personId] = true
           }
         })

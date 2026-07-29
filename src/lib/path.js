@@ -22,9 +22,13 @@ export const getTaskPath = (
       task_id: task.id
     }
   }
-  if (isTVShow && episode) {
+  // Callers may build the episode from an optional id, so the object is truthy
+  // while its id is not: test the resolved id too, an empty one would leave
+  // episode-task without its required :episode_id.
+  const episodeId = task.episode_id || episode?.id
+  if (isTVShow && episode && episodeId) {
     route.name = 'episode-task'
-    route.params.episode_id = task.episode_id || episode.id
+    route.params.episode_id = episodeId
   }
   const taskType = taskTypeMap.get(task.task_type_id)
   const forEntity = getTaskRouteEntity(task, taskType)

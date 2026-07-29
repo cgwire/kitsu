@@ -346,7 +346,8 @@ export default {
     if (
       this.sequenceMap.size < 1 ||
       this.sequenceValidationColumns.length === 0 ||
-      this.sequenceMap.values().next().project_id !== this.currentProduction.id
+      this.sequenceMap.values().next().value?.project_id !==
+        this.currentProduction.id
     ) {
       this.loadSequencesWithTasks()
         .then(() => {

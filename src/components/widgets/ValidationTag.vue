@@ -70,7 +70,7 @@ const {
 
 const props = defineProps({
   task: {
-    default: () => {},
+    default: () => ({}),
     type: Object
   },
   isStatic: {

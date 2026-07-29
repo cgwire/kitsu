@@ -80,7 +80,12 @@ export class Eraser extends Group {
   // Revival: the children are ALWAYS plain Paths (the eraser only ever adds
   // Paths), so we rebuild them directly. NoLayout keeps their stored coords.
   static fromObject(object) {
-    const children = (object.objects || []).map(p => {
+    // Nothing sanitizes a stored mask before it gets here, and a malformed one
+    // used to throw and leave the object carrying its unrevived mask for good.
+    const serialized = Array.isArray(object.objects)
+      ? object.objects.filter(Boolean)
+      : []
+    const children = serialized.map(p => {
       // Drop the serialized `type` ('path'): passing it to the Path ctor hits
       // v6's no-op type setter and logs a deprecation warning per child.
       const opts = { ...p }
@@ -116,6 +121,22 @@ export async function reviveObjectEraser(target, serialized) {
   }
   return target
 }
+
+// Serializes an object's eraser mask.
+//
+// A cloned or freshly deserialized object can carry the PLAIN serialized mask
+// instead of a revived Eraser: the `fromObject` overrides that bypass fabric's
+// generic revival (psbrush's PSStroke, our Arrow) spread the whole serialized
+// object onto the new instance, mask included. That form is already the
+// persisted shape, so emit it rather than crashing on the missing toObject().
+//
+// The copy is not optional: normalizeSerializedType() rewrites the emitted
+// subtree in place and the same payload is pushed into the additions/updates
+// stacks, so handing out the live object's own mask would let a save mutate it.
+export const serializeEraserMask = (eraser, propertiesToInclude) =>
+  typeof eraser.toObject === 'function'
+    ? eraser.toObject(propertiesToInclude)
+    : structuredClone(eraser)
 
 let eraserSupportInstalled = false
 
@@ -193,7 +214,7 @@ export function installEraserObjectSupport() {
         ['erasable'].concat(propertiesToInclude || [])
       )
       if (this.eraser && !this.eraser.excludeFromExport) {
-        object.eraser = this.eraser.toObject(propertiesToInclude)
+        object.eraser = serializeEraserMask(this.eraser, propertiesToInclude)
       }
       return object
     }
@@ -239,10 +260,15 @@ export class EraserBrush extends PencilBrush {
   // erased as a single unit, its mask lives on the group.)
   async _addPathToObjectEraser(obj, path, context) {
     let eraser = obj.eraser
-    if (!eraser) {
-      eraser = new Eraser()
-      obj.eraser = eraser
+    // The object may still carry the plain serialized mask rather than a
+    // revived Eraser (see serializeEraserMask); add() would throw on it, and
+    // the throw escapes onMouseUp's net because fabric does not await
+    // _finalizeAndAddPath, cancelling erasing:end for every other target.
+    if (eraser && typeof eraser.add !== 'function') {
+      eraser = await Eraser.fromObject(eraser)
     }
+    if (!eraser) eraser = new Eraser()
+    obj.eraser = eraser
     const clone = await path.clone()
     const desiredTransform = util.multiplyTransformMatrices(
       util.invertTransform(obj.calcTransformMatrix()),

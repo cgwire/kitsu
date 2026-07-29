@@ -123,6 +123,7 @@
       "attachments": "Bijlagen",
       "attachments_to_add": "Bijlagen toevoegen",
       "max_retakes_error": "Je kunt geen retakes meer toevoegen aan deze taak.",
+      "unknown_status_error": "De geselecteerde taakstatus is niet meer beschikbaar. Herlaad de pagina en probeer het opnieuw.",
       "previews": "Previewbestanden om te publiceren als een nieuwe revisie",
       "selected_files": "Geselecteerde files",
       "no_attachments": "Er zijn geen bijlagen voor deze opmerking.",

@@ -123,6 +123,7 @@
       "attachments": "附件",
       "attachments_to_add": "添加附件",
       "max_retakes_error": "您无法再为此任务添加重做。",
+      "unknown_status_error": "所选的任务状态已不可用。请重新加载页面并重试。",
       "previews": "预览要作为新版本发布的文件",
       "selected_files": "选定的文件",
       "no_attachments": "这条评论没有附件",

@@ -741,7 +741,13 @@ const actions = {
       }
       let assetLine = []
       if (rootGetters.isTVShow) {
-        assetLine.push(episodeMap.get(asset.episode_id)?.name || 'MP')
+        // 'MP' is how the importer spells "no episode", so an episode that
+        // fails to resolve must not borrow it: fall back to the raw id.
+        assetLine.push(
+          asset.episode_id
+            ? (episodeMap.get(asset.episode_id)?.name ?? asset.episode_id)
+            : 'MP'
+        )
       }
       assetLine = assetLine.concat([
         asset.asset_type_name,

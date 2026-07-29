@@ -222,19 +222,20 @@
                       :frame="displayedFrame"
                       :is-change="isStatusChange(index)"
                       :is-checkable="
-                        user?.id === comment.person?.id ||
+                        (user && user.id === comment.person?.id) ||
                         (isCurrentUserArtist && isAssigned) ||
                         isDepartmentSupervisor ||
                         isCurrentUserManager
                       "
                       :is-editable="
-                        user?.id === comment.person?.id || isCurrentUserManager
+                        (user && user.id === comment.person?.id) ||
+                        isCurrentUserManager
                       "
                       :is-pinnable="
                         isDepartmentSupervisor || isCurrentUserManager
                       "
                       :is-replyable="
-                        user?.id === comment.person?.id ||
+                        (user && user.id === comment.person?.id) ||
                         isAssigned ||
                         isDepartmentSupervisor ||
                         isCurrentUserManager ||
@@ -1354,7 +1355,7 @@ const onExportClick = () => {
         commentLines.push([
           formatDate(reply.date),
           t('main.reply'),
-          personMap.value.get(reply.person_id)?.name || '',
+          reply.person?.name || '',
           reply.text,
           null,
           null,
