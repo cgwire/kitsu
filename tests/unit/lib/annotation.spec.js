@@ -136,6 +136,23 @@ describe('lib/annotation', () => {
       })
     })
 
+    it('serializes an unrevived plain mask instead of throwing', () => {
+      const eraser = { type: 'eraser', objects: [{ path: 'M 0 0' }] }
+      const obj = {
+        id: 'stroke-2',
+        toJSON: () => ({ type: 'PSStroke' }),
+        eraser
+      }
+      addSerialization(obj)
+      const result = obj.serialize()
+      expect(result.eraser).toEqual(eraser)
+      // Deep copy: normalizeSerializedType rewrites the emitted subtree in
+      // place and the payload is stored, so it must not alias the live mask.
+      expect(result.eraser).not.toBe(eraser)
+      result.eraser.objects[0].path = 'mutated'
+      expect(eraser.objects[0].path).toBe('M 0 0')
+    })
+
     it('does not persist an eraser when the object has none', () => {
       const obj = {
         id: 'clean-1',

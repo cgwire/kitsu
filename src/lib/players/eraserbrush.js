@@ -117,6 +117,22 @@ export async function reviveObjectEraser(target, serialized) {
   return target
 }
 
+// Serializes an object's eraser mask.
+//
+// A cloned or freshly deserialized object can carry the PLAIN serialized mask
+// instead of a revived Eraser: the `fromObject` overrides that bypass fabric's
+// generic revival (psbrush's PSStroke, our Arrow) spread the whole serialized
+// object onto the new instance, mask included. That form is already the
+// persisted shape, so emit it rather than crashing on the missing toObject().
+//
+// The copy is not optional: normalizeSerializedType() rewrites the emitted
+// subtree in place and the same payload is pushed into the additions/updates
+// stacks, so handing out the live object's own mask would let a save mutate it.
+export const serializeEraserMask = (eraser, propertiesToInclude) =>
+  typeof eraser.toObject === 'function'
+    ? eraser.toObject(propertiesToInclude)
+    : structuredClone(eraser)
+
 let eraserSupportInstalled = false
 
 // Patches FabricObject.prototype to support the `eraser` mask.
@@ -193,7 +209,7 @@ export function installEraserObjectSupport() {
         ['erasable'].concat(propertiesToInclude || [])
       )
       if (this.eraser && !this.eraser.excludeFromExport) {
-        object.eraser = this.eraser.toObject(propertiesToInclude)
+        object.eraser = serializeEraserMask(this.eraser, propertiesToInclude)
       }
       return object
     }

@@ -31,7 +31,11 @@ import { roundToFrame } from '@/lib/video'
 
 import { normalizeSerializedType, normalizeType } from './annotationTypes'
 import { Arrow, registerArrowFabricShape } from './arrowshape'
-import { installEraserObjectSupport, reviveObjectEraser } from './eraserbrush'
+import {
+  installEraserObjectSupport,
+  reviveObjectEraser,
+  serializeEraserMask
+} from './eraserbrush'
 
 // Register Arrow in classRegistry (the deserialiser branches on `obj.type === 'arrow'`).
 registerArrowFabricShape()
@@ -160,13 +164,14 @@ export const addSerialization = object => {
     result.scale = this.scale
     result.createdBy = this.createdBy
     result.createdAt = this.createdAt
-    // Persist the eraser mask centrally: PSStroke's custom toObject() goes
-    // through the psbrush callSuper shim and doesn't reliably reach the patched
-    // fabric.Object.prototype.toObject, so relying on that alone loses the mask
-    // for freehand strokes. The mask is in the object's LOCAL coordinates;
-    // normalizeSerializedAnnotation only rescales left/top/scale, never eraser.
+    // Persist the eraser mask centrally: addSerialization is applied to plain
+    // objects too, whose toJSON() never reaches the patched
+    // fabric.Object.prototype.toObject, so the mask would be dropped (or a
+    // stale one kept) without this. The mask is in the object's LOCAL
+    // coordinates; normalizeSerializedAnnotation only rescales left/top/scale,
+    // never eraser.
     if (this.eraser && !this.eraser.excludeFromExport) {
-      result.eraser = this.eraser.toObject()
+      result.eraser = serializeEraserMask(this.eraser)
     } else {
       delete result.eraser
     }

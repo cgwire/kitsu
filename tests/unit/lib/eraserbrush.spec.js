@@ -363,6 +363,26 @@ describe('installEraserObjectSupport', () => {
     expect(o.toObject().eraser).toBeUndefined()
   })
 
+  // A cloned PSStroke/Arrow carries the plain serialized mask, not an Eraser.
+  it('toObject emits an unrevived plain mask instead of throwing', () => {
+    const o = Object.create(FabricObject.prototype)
+    o.eraser = { type: 'eraser', objects: [{ path: 'M 0 0' }] }
+    expect(() => o.toObject()).not.toThrow()
+    expect(o.toObject().eraser).toEqual({
+      type: 'eraser',
+      objects: [{ path: 'M 0 0' }]
+    })
+  })
+
+  it('toObject deep-copies an unrevived mask so callers cannot mutate it', () => {
+    const o = Object.create(FabricObject.prototype)
+    o.eraser = { type: 'eraser', objects: [{ path: 'M 0 0' }] }
+    const emitted = o.toObject().eraser
+    expect(emitted).not.toBe(o.eraser)
+    emitted.objects[0].path = 'mutated'
+    expect(o.eraser.objects[0].path).toBe('M 0 0')
+  })
+
   it('_drawClipPath syncs eraser dimensions and delegates to base _drawClipPath', () => {
     const o = Object.create(FabricObject.prototype)
     o._getNonTransformedDimensions = () => ({ x: 30, y: 40 })
