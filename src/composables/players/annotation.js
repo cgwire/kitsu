@@ -22,6 +22,7 @@ import {
   addSerialization,
   attachShapeDrawing,
   buildReadOnlyShape,
+  cloneAnnotationObject,
   deserializePSStroke,
   getAnnotationContainMapping
 } from '@/lib/players/annotation'
@@ -1388,7 +1389,7 @@ export const useAnnotation = ({
       subObjects?.length > 0 ? subObjects : mainObject ? [mainObject] : []
     let lastClone = null
     for (const source of sources) {
-      const clone = await source.clone()
+      const clone = await cloneAnnotationObject(source)
       clone.set('id', uuidv4())
       clone.set('left', clone.left + PASTE_OFFSET)
       clone.set('top', clone.top + PASTE_OFFSET)

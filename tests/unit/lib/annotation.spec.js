@@ -1,10 +1,12 @@
-import { FabricObject, Rect } from 'fabric'
+import { FabricObject, Path, Rect } from 'fabric'
+import { PSStroke } from 'fabricjs-psbrush'
 import {
   PENCIL_WIDTHS,
   addSerialization,
   applyPencilColor,
   applyPencilWidth,
   buildReadOnlyShape,
+  cloneAnnotationObject,
   findAnnotationAtTime,
   hasOpaqueFill,
   mergeAnnotationsByFrame,
@@ -12,6 +14,7 @@ import {
   removeAddition,
   setObjectData
 } from '@/lib/players/annotation'
+import { Arrow } from '@/lib/players/arrowshape'
 import { Eraser } from '@/lib/players/eraserbrush'
 
 const createCanvas = () => ({
@@ -638,6 +641,68 @@ describe('lib/annotation', () => {
       const r = new Rect({ left: 10, top: 20, width: 30, height: 40 })
       expect(r.originX).toBe('left')
       expect(r.originY).toBe('top')
+    })
+  })
+
+  describe('cloneAnnotationObject', () => {
+    const makeEraser = () =>
+      new Eraser([new Path('M 0 0 L 10 10', { left: 1, top: 2 })], {
+        width: 20,
+        height: 20
+      })
+
+    const makeStroke = () =>
+      new PSStroke(
+        [
+          { x: 0, y: 0, pressure: 0.5 },
+          { x: 5, y: 5, pressure: 0.5 }
+        ],
+        { left: 0, top: 0 }
+      )
+
+    // fabric's clone() is toObject() + fromObject(); PSStroke and Arrow both
+    // override fromObject and so miss fabric's generic re-enlivening.
+    it('gives a pasted stroke a real Eraser, not the serialized mask', async () => {
+      const source = makeStroke()
+      source.eraser = makeEraser()
+      const clone = await cloneAnnotationObject(source)
+      expect(clone.eraser).toBeInstanceOf(Eraser)
+      expect(clone.eraser.getObjects()).toHaveLength(1)
+      expect(clone.eraser).not.toBe(source.eraser)
+    })
+
+    it('gives a pasted arrow a real Eraser too', async () => {
+      const source = new Arrow([0, 0, 10, 10], {
+        stroke: '#f00',
+        strokeWidth: 4,
+        fill: 'transparent'
+      })
+      source.eraser = makeEraser()
+      const clone = await cloneAnnotationObject(source)
+      expect(clone.eraser).toBeInstanceOf(Eraser)
+      expect(clone.eraser.getObjects()).toHaveLength(1)
+    })
+
+    it('leaves a clone without a mask when the source has none', async () => {
+      const clone = await cloneAnnotationObject(makeStroke())
+      expect(clone.eraser).toBeUndefined()
+    })
+
+    it('heals a source that still carries an unrevived mask', async () => {
+      const source = makeStroke()
+      source.eraser = makeEraser().toObject()
+      const clone = await cloneAnnotationObject(source)
+      expect(clone.eraser).toBeInstanceOf(Eraser)
+    })
+
+    // The whole point: the pasted copy must survive a save.
+    it('produces a clone that serializes without throwing', async () => {
+      const source = makeStroke()
+      source.eraser = makeEraser()
+      const clone = await cloneAnnotationObject(source)
+      addSerialization(clone)
+      expect(() => clone.serialize()).not.toThrow()
+      expect(clone.serialize().eraser.objects).toHaveLength(1)
     })
   })
 })

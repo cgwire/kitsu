@@ -206,10 +206,17 @@ export class Arrow extends Line {
     ].join('')
   }
 
+  // Overriding fromObject bypasses fabric's generic _fromObject, which is what
+  // re-enlivens nested values (the `eraser` mask among them). Spreading the
+  // serialized mask onto the instance would leave a plain object where the rest
+  // of the stack expects a revived Eraser, so drop it here: the mask is
+  // restored by reviveObjectEraser on every path that builds an Arrow.
   static fromObject(object) {
+    const opts = { ...object }
+    delete opts.eraser
     return new Arrow(
       [object.x1 || 0, object.y1 || 0, object.x2 || 0, object.y2 || 0],
-      object
+      opts
     )
   }
 }

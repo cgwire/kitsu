@@ -185,6 +185,24 @@ export const addSerialization = object => {
 }
 
 /**
+ * Clones a fabric annotation object, eraser mask included.
+ *
+ * fabric's clone() is toObject() + fromObject(), and the fromObject overrides
+ * that bypass fabric's generic revival (psbrush's PSStroke, our Arrow) hand
+ * back the mask as a plain object, or drop it. Rebuild a real Eraser from the
+ * source so the copy renders its holes and round-trips like any other object.
+ */
+export const cloneAnnotationObject = async source => {
+  const clone = await source.clone()
+  if (source.eraser) {
+    await reviveObjectEraser(clone, {
+      eraser: serializeEraserMask(source.eraser)
+    })
+  }
+  return clone
+}
+
+/**
  * Stamps id / canvas dimensions / createdBy on a freshly created fabric
  * object so subsequent saves include the metadata that the backend uses to
  * apply diffs.
