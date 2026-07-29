@@ -80,7 +80,12 @@ export class Eraser extends Group {
   // Revival: the children are ALWAYS plain Paths (the eraser only ever adds
   // Paths), so we rebuild them directly. NoLayout keeps their stored coords.
   static fromObject(object) {
-    const children = (object.objects || []).map(p => {
+    // Nothing sanitizes a stored mask before it gets here, and a malformed one
+    // used to throw and leave the object carrying its unrevived mask for good.
+    const serialized = Array.isArray(object.objects)
+      ? object.objects.filter(Boolean)
+      : []
+    const children = serialized.map(p => {
       // Drop the serialized `type` ('path'): passing it to the Path ctor hits
       // v6's no-op type setter and logs a deprecation warning per child.
       const opts = { ...p }
@@ -255,10 +260,15 @@ export class EraserBrush extends PencilBrush {
   // erased as a single unit, its mask lives on the group.)
   async _addPathToObjectEraser(obj, path, context) {
     let eraser = obj.eraser
-    if (!eraser) {
-      eraser = new Eraser()
-      obj.eraser = eraser
+    // The object may still carry the plain serialized mask rather than a
+    // revived Eraser (see serializeEraserMask); add() would throw on it, and
+    // the throw escapes onMouseUp's net because fabric does not await
+    // _finalizeAndAddPath, cancelling erasing:end for every other target.
+    if (eraser && typeof eraser.add !== 'function') {
+      eraser = await Eraser.fromObject(eraser)
     }
+    if (!eraser) eraser = new Eraser()
+    obj.eraser = eraser
     const clone = await path.clone()
     const desiredTransform = util.multiplyTransformMatrices(
       util.invertTransform(obj.calcTransformMatrix()),

@@ -227,6 +227,24 @@ describe('EraserBrush._addPathToObjectEraser', () => {
     expect(obj.eraser.getObjects()).toHaveLength(2)
   })
 
+  // Erasing a pasted object again used to call add() on a plain object; the
+  // throw escaped onMouseUp and cancelled erasing:end for every other target.
+  it('rebuilds an unrevived mask instead of adding onto a plain object', async () => {
+    const brush = new EraserBrush({})
+    const obj = makeObj()
+    obj.eraser = { type: 'eraser', objects: [{ type: 'path', path: 'M 0 0 L 1 0' }] }
+    const path = brush.createPath('M 0 0 L 2 0')
+    const ctx = { targets: [], subTargets: [] }
+
+    await expect(
+      brush._addPathToObjectEraser(obj, path, ctx)
+    ).resolves.toBeDefined()
+
+    expect(obj.eraser).toBeInstanceOf(Eraser)
+    expect(obj.eraser.getObjects()).toHaveLength(2)
+    expect(ctx.targets).toContain(obj)
+  })
+
   it('appends to a revived eraser without shifting existing mask paths', async () => {
     const brush = new EraserBrush({})
     const obj = makeObj()

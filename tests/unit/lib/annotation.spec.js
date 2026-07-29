@@ -695,6 +695,22 @@ describe('lib/annotation', () => {
       expect(clone.eraser).toBeInstanceOf(Eraser)
     })
 
+    it('survives a malformed stored mask instead of leaving it unrevived', async () => {
+      const source = makeStroke()
+      source.eraser = { type: 'eraser', objects: [null, { path: 'M 0 0' }] }
+      const clone = await cloneAnnotationObject(source)
+      expect(clone.eraser).toBeInstanceOf(Eraser)
+      expect(clone.eraser.getObjects()).toHaveLength(1)
+    })
+
+    it('survives a mask whose objects is not an array', async () => {
+      const source = makeStroke()
+      source.eraser = { type: 'eraser', objects: 'nope' }
+      const clone = await cloneAnnotationObject(source)
+      expect(clone.eraser).toBeInstanceOf(Eraser)
+      expect(clone.eraser.getObjects()).toHaveLength(0)
+    })
+
     // fabric's toObject() drops these, so a bare clone() came back selectable
     // even when the source was locked for an artist.
     it('carries the interaction flags over so a copy is never more permissive', async () => {
