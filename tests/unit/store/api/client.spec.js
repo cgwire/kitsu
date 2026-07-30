@@ -47,7 +47,7 @@ vi.mock('@/lib/errors', () => ({
   default: { backToLogin: vi.fn() }
 }))
 
-import client from '@/store/api/client'
+import client, { buildQuery } from '@/store/api/client'
 import errors from '@/lib/errors'
 
 describe('store/api/client', () => {
@@ -129,8 +129,9 @@ describe('store/api/client', () => {
 
   test('getEvents appends the cursor only when provided', async () => {
     h.response = { body: [] }
-    await client.getEvents('2023-01-01', '2023-01-02', 100)
-    await client.getEvents('2023-01-01', '2023-01-02', 100, 'event-1')
+    const filters = { after: '2023-01-01', before: '2023-01-02', limit: 100 }
+    await client.getEvents(filters)
+    await client.getEvents({ ...filters, lastEventId: 'event-1' })
     expect(h.calls[0].path).toEqual(
       '/api/data/events/last?after=2023-01-01&before=2023-01-02&limit=100'
     )
@@ -234,6 +235,70 @@ describe('store/api/client', () => {
       ])
       expect(outcome).toBe('pending')
       expect(errors.backToLogin).toHaveBeenCalled()
+    })
+  })
+
+  describe('buildQuery', () => {
+    test('drops empty values so an unset filter never reaches the API', () => {
+      expect(
+        buildQuery({
+          limit: 100,
+          after: null,
+          before: undefined,
+          project_id: '',
+          person_ids: []
+        })
+      ).toBe('limit=100')
+    })
+
+    test('repeats the key once per array entry', () => {
+      expect(buildQuery({ person_ids: ['a', 'b'] })).toBe(
+        'person_ids=a&person_ids=b'
+      )
+    })
+
+    test('escapes values', () => {
+      expect(buildQuery({ name_prefixes: ['%'] })).toBe('name_prefixes=%25')
+    })
+  })
+
+  describe('log endpoints', () => {
+    test('getEvents maps the filters to query parameters', async () => {
+      h.response = { body: [] }
+      await client.getEvents({
+        limit: 1000,
+        after: '2026-07-01T00:00:00',
+        personIds: ['person-1', 'person-2'],
+        namePrefixes: ['task'],
+        nameSuffixes: ['update', 'new'],
+        onlyFiles: true,
+        projectId: 'project-1'
+      })
+      expect(h.calls[0].path).toBe(
+        '/api/data/events/last?after=2026-07-01T00%3A00%3A00&limit=1000' +
+          '&project_id=project-1&only_files=true' +
+          '&person_ids=person-1&person_ids=person-2' +
+          '&name_prefixes=task&name_suffixes=update&name_suffixes=new'
+      )
+    })
+
+    test('getEvents omits only_files when it is false', async () => {
+      h.response = { body: [] }
+      await client.getEvents({ limit: 10 })
+      expect(h.calls[0].path).toBe('/api/data/events/last?limit=10')
+    })
+
+    test('getLoginLogs passes the cursor and the person filter', async () => {
+      h.response = { body: [] }
+      await client.getLoginLogs({
+        limit: 100,
+        lastLoginLogId: 'log-1',
+        personIds: ['person-1']
+      })
+      expect(h.calls[0].path).toBe(
+        '/api/data/events/login-logs/last?limit=100' +
+          '&cursor_login_log_id=log-1&person_ids=person-1'
+      )
     })
   })
 })

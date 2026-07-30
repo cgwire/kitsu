@@ -20,6 +20,22 @@ function handleError(err) {
 // File uploads (ppostFile) stay unbounded — multi-GB movies are legit.
 const REQUEST_TIMEOUT = { response: 60000, deadline: 300000 }
 
+// Build a query string from a plain object. Empty values are dropped so an
+// unset filter never reaches the API, and array values become one repeated
+// key per entry, the form the backend reads with action="append".
+export function buildQuery(params) {
+  const query = new URLSearchParams()
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === null || value === undefined || value === '') return
+    if (Array.isArray(value)) {
+      value.forEach(entry => query.append(key, entry))
+    } else {
+      query.append(key, value)
+    }
+  })
+  return query.toString()
+}
+
 // Compact rows are positional arrays described by the field lists sent
 // in the NDJSON header: always map by name, never by position.
 function decodeCompactRow(row, fields, taskFields) {
@@ -167,20 +183,34 @@ const client = {
     return client.pget(path)
   },
 
-  getEvents(after, before, limit, lastEventId = null) {
-    let path = `/api/data/events/last?after=${after}&before=${before}&limit=${limit}`
-    if (lastEventId) {
-      path += `&cursor_event_id=${lastEventId}`
-    }
-    return client.pget(path)
+  getEvents(params = {}) {
+    const query = buildQuery({
+      after: params.after,
+      before: params.before,
+      limit: params.limit,
+      cursor_event_id: params.lastEventId,
+      project_id: params.projectId,
+      only_files: params.onlyFiles ? 'true' : null,
+      person_ids: params.personIds,
+      name_prefixes: params.namePrefixes,
+      name_suffixes: params.nameSuffixes
+    })
+    return client.pget(`/api/data/events/last?${query}`)
   },
 
-  getLoginLogs(after, before, limit, lastLoginLogId = null) {
-    let path = `/api/data/events/login-logs/last?limit=${limit}`
-    if (after) path += `&after=${after}`
-    if (before) path += `&before=${before}`
-    if (lastLoginLogId) path += `&cursor_login_log_id=${lastLoginLogId}`
-    return client.pget(path)
+  getEventNames() {
+    return client.pget('/api/data/events/names')
+  },
+
+  getLoginLogs(params = {}) {
+    const query = buildQuery({
+      after: params.after,
+      before: params.before,
+      limit: params.limit,
+      cursor_login_log_id: params.lastLoginLogId,
+      person_ids: params.personIds
+    })
+    return client.pget(`/api/data/events/login-logs/last?${query}`)
   },
 
   searchData(query, limit, offset, index_names, productionId) {

@@ -1,34 +1,81 @@
 <template>
   <div class="mt1">
-    <div class="flexrow">
-      <date-field
+    <div class="flexrow filters">
+      <date-range-field
         class="flexrow-item"
-        :can-delete="false"
-        :label="$t('logs.current_date_label')"
+        :label="$t('logs.date_range_label')"
         :max-date="today"
-        v-model="currentDate"
-        @change="onDateChange"
+        :placeholder="$t('logs.date_range_placeholder')"
+        v-model="dateRange"
+        @change="onDateRangeChange"
       />
       <people-field
         class="flexrow-item field"
-        :label="$t('main.user')"
+        multiple
+        search-email
+        :label="$t('logs.people_label')"
         :people="people"
-        v-model="selectedPerson"
-        @select="onPersonSelect"
+        :placeholder="$t('logs.people_placeholder')"
+        v-model="selectedPeople"
+        @select="onPeopleSelect"
       />
+      <combobox-production
+        class="flexrow-item"
+        :label="$t('main.production')"
+        :production-list="productionList"
+        v-model="selectedProductionId"
+        @update:model-value="onProductionChange"
+      />
+      <multiselect-field
+        class="flexrow-item"
+        :label="$t('logs.object_label')"
+        :options="objectOptions"
+        :placeholder="$t('logs.object_placeholder')"
+        v-model="selectedObjects"
+        @update:model-value="onObjectsChange"
+      />
+      <multiselect-field
+        class="flexrow-item"
+        :label="$t('logs.action_label')"
+        :options="actionOptions"
+        :placeholder="$t('logs.action_placeholder')"
+        v-model="selectedActions"
+        @update:model-value="onActionsChange"
+      />
+    </div>
+
+    <div class="flexrow filters mt1">
+      <label class="flexrow-item checkbox-label">
+        <input
+          type="checkbox"
+          v-model="onlyFiles"
+          @change="onOnlyFilesChange"
+        />
+        {{ $t('logs.only_files') }}
+      </label>
       <button-simple
         class="flexrow-item small"
         icon="refresh"
         :is-loading="loading.events"
         :title="$t('main.reload')"
-        @click="loadDayEvents(currentDate)"
+        @click="loadEvents"
       />
+      <button-simple
+        class="flexrow-item small"
+        :text="$t('logs.export_csv')"
+        :disabled="!events.length"
+        @click="exportCsv"
+      />
+      <span class="flexrow-item filler"></span>
+      <span class="flexrow-item event-count" v-if="events.length">
+        {{ events.length }} {{ $t('logs.events') }}
+      </span>
     </div>
 
     <div class="has-text-centered" v-if="loading.events">
       <spinner />
     </div>
-    <div class="mt2 empty" v-else-if="!filteredEvents.length">
+    <div class="mt2 empty" v-else-if="!events.length">
       {{ $t('logs.empty_list') }}
     </div>
     <div class="log-list" v-else>
@@ -39,17 +86,16 @@
         tabindex="0"
         @click="selectLine(event)"
         @keydown.enter.prevent="selectLine(event)"
-        v-for="event in filteredEvents"
+        v-for="event in events"
       >
         <span class="date tag mr1">{{ event.date }}</span>
-        <span
-          class="type tag"
-          :title="event.type"
-          :data-status="event.shortType"
-        >
-          {{ event.shortType }}
+        <span class="type tag" :data-status="event.shortType">
+          {{ event.type }}
         </span>
         <span class="name tag mr1">{{ event.name }}</span>
+        <span class="production tag mr1" v-if="event.production">
+          {{ event.production.name }}
+        </span>
         <ul v-if="selectedEvents[event.id]" @click.stop>
           <li class="flexrow">
             <span class="key">user</span>
@@ -72,7 +118,7 @@
             v-for="key in Object.keys(event.data).sort()"
           >
             <span class="key">{{ key }}</span>
-            <a :href="getLink(event, key)" v-if="isLink(key)">
+            <a :href="getLink(event, key)" v-if="isLink(event, key)">
               {{ event.data[key] }}
             </a>
             <template v-else>{{ event.data[key] }}</template>
@@ -83,7 +129,7 @@
         <button-simple
           :is-loading="loading.moreEvents"
           :text="$t('main.load_more')"
-          @click="loadMoreEvents(currentDate)"
+          @click="loadMoreEvents"
         />
       </div>
     </div>
@@ -93,7 +139,7 @@
 <script setup>
 import { useHead } from '@unhead/vue'
 import moment from 'moment'
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
@@ -106,64 +152,158 @@ import {
 } from '@/lib/time'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
-import DateField from '@/components/widgets/DateField.vue'
+import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
+import DateRangeField from '@/components/widgets/DateRangeField.vue'
+import MultiselectField from '@/components/widgets/MultiselectField.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 
 const PAGE_SIZE = 1000
-const LINK_KEYS = ['project_id', 'task_id']
+
+// Keys of the event data payload that point at an entity having a detail
+// route. The value is the production sub-path used to build the URL. Keys
+// without such a route (comment_id, preview_file_id, concept_id) are left
+// out on purpose: they would produce dead links.
+const ENTITY_LINK_KEYS = {
+  asset_id: 'assets',
+  shot_id: 'shots',
+  sequence_id: 'sequences',
+  episode_id: 'episodes',
+  edit_id: 'edits'
+}
 
 const { t } = useI18n()
-const { today, timezone, formatDate } = useTime()
+const { today, timezone, dateFormat, use12HourClock } = useTime()
 const route = useRoute()
 const router = useRouter()
 const store = useStore()
 
 // State
 
-const currentDate = ref(new Date())
+const dateRange = ref(null)
 const events = ref([])
+const eventNames = ref([])
 const hasMoreEvents = ref(false)
+const onlyFiles = ref(false)
+const selectedActions = ref([])
 const selectedEvents = ref({})
-const selectedPerson = ref(null)
+const selectedObjects = ref([])
+const selectedPeople = ref([])
+const selectedProductionId = ref('')
 const loading = reactive({ events: false, moreEvents: false })
+
+// Functions
+
+const asArray = value => {
+  if (value === undefined || value === null) return []
+  return Array.isArray(value) ? value : [value]
+}
 
 // Computed
 
 const people = computed(() => store.getters.people)
 const personMap = computed(() => store.getters.personMap)
+const productionMap = computed(() => store.getters.productionMap)
 
-const filteredEvents = computed(() => {
-  if (!selectedPerson.value) return events.value
-  return events.value.filter(event => event.user_id === selectedPerson.value.id)
+const productionList = computed(() => [
+  { id: '', color: '#999', name: t('main.all'), short_name: t('main.all') },
+  ...store.getters.productions
+])
+
+const objectOptions = computed(() => {
+  const objects = eventNames.value.map(name => name.split(':')[0])
+  return [...new Set(objects)].sort()
+})
+
+const actionOptions = computed(() => {
+  const actions = eventNames.value.map(name => name.split(':')[1])
+  return [...new Set(actions.filter(Boolean))].sort()
+})
+
+// Read from the route rather than from the widget models: the person map
+// may still be loading, and an unresolved id must not silently drop the
+// filter the URL asked for.
+const queryParams = computed(() => {
+  const params = {
+    limit: PAGE_SIZE,
+    personIds: asArray(route.query.person_ids),
+    namePrefixes: selectedObjects.value,
+    nameSuffixes: selectedActions.value,
+    onlyFiles: onlyFiles.value
+  }
+  if (selectedProductionId.value) {
+    params.projectId = selectedProductionId.value
+  }
+  if (dateRange.value) {
+    const [start, end] = dateRange.value
+    // The range is inclusive on both ends, so the upper bound is the day
+    // after the last selected day.
+    params.after = formatFullDateWithRevertedTimezone(
+      moment(start),
+      timezone.value
+    )
+    params.before = formatFullDateWithRevertedTimezone(
+      moment(end).add(1, 'days'),
+      timezone.value
+    )
+  }
+  return params
 })
 
 // Functions
 
-const onDateChange = value => {
-  const date = formatSimpleDate(value)
-  if (route.query.date !== date) {
-    router.push({ query: { ...route.query, date } })
-  }
+const pushQuery = changes => {
+  const query = { ...route.query, ...changes }
+  Object.keys(query).forEach(key => {
+    const value = query[key]
+    if (value === undefined || value === '' || value?.length === 0) {
+      delete query[key]
+    }
+  })
+  router.push({ query })
 }
 
-const onPersonSelect = person => {
-  const personId = person?.id
-  if (route.query.person_id !== personId) {
-    router.push({ query: { ...route.query, person_id: personId } })
-  }
+const onDateRangeChange = value => {
+  pushQuery({
+    after: value ? formatSimpleDate(value[0]) : undefined,
+    before: value ? formatSimpleDate(value[1]) : undefined
+  })
 }
 
-const getDateParams = date => {
-  if (!date) return {}
-  const after = moment(date)
-  const before = moment(date).add(1, 'days')
-  return {
-    after: formatFullDateWithRevertedTimezone(after, timezone.value),
-    before: formatFullDateWithRevertedTimezone(before, timezone.value)
-  }
+const onPeopleSelect = selection => {
+  pushQuery({ person_ids: (selection ?? []).map(person => person.id) })
+}
+
+const onProductionChange = productionId => {
+  pushQuery({ project_id: productionId })
+}
+
+const onObjectsChange = objects => {
+  pushQuery({ objects })
+}
+
+const onActionsChange = actions => {
+  pushQuery({ actions })
+}
+
+const onOnlyFilesChange = () => {
+  pushQuery({ only_files: onlyFiles.value ? 'true' : undefined })
+}
+
+const resolvePeopleFromQuery = () => {
+  selectedPeople.value = asArray(route.query.person_ids)
+    .map(personId => personMap.value.get(personId))
+    .filter(Boolean)
+}
+
+// Seconds matter here: correlating events logged within the same minute is
+// the whole point of an audit trail.
+const formatEventDate = date => {
+  const localDate = moment.tz(date, 'UTC').tz(timezone.value)
+  const timeFormat = use12HourClock.value ? 'h:mm:ss A' : 'HH:mm:ss'
+  return `${localDate.format(dateFormat.value)} ${localDate.format(timeFormat)}`
 }
 
 const formatEvents = rawEvents => {
@@ -171,26 +311,25 @@ const formatEvents = rawEvents => {
     const [name, type] = event.name.split(':')
     return {
       id: event.id,
-      date: formatDate(event.created_at),
-      data: event.data,
+      date: formatEventDate(event.created_at),
+      data: event.data ?? {},
       name,
       shortType: type.substring(0, 3),
       type,
       user_id: event.user_id,
-      person: personMap.value.get(event.user_id)
+      person: personMap.value.get(event.user_id),
+      project_id: event.project_id,
+      production: productionMap.value.get(event.project_id)
     }
   })
 }
 
-const loadDayEvents = async date => {
+const loadEvents = async () => {
   selectedEvents.value = {}
   events.value = []
   loading.events = true
   try {
-    const result = await store.dispatch('loadEvents', {
-      limit: PAGE_SIZE,
-      ...getDateParams(date)
-    })
+    const result = await store.dispatch('loadEvents', queryParams.value)
     events.value = formatEvents(result)
     hasMoreEvents.value = result.length >= PAGE_SIZE
   } catch (err) {
@@ -200,16 +339,15 @@ const loadDayEvents = async date => {
   }
 }
 
-const loadMoreEvents = async date => {
+const loadMoreEvents = async () => {
   if (!events.value.length) return
 
   loading.moreEvents = true
   const lastEventId = events.value[events.value.length - 1].id
   try {
     const result = await store.dispatch('loadEvents', {
-      lastEventId,
-      limit: PAGE_SIZE,
-      ...getDateParams(date)
+      ...queryParams.value,
+      lastEventId
     })
     events.value = [...events.value, ...formatEvents(result)]
     hasMoreEvents.value = result.length >= PAGE_SIZE
@@ -220,44 +358,98 @@ const loadMoreEvents = async date => {
   }
 }
 
+const loadEventNames = async () => {
+  try {
+    eventNames.value = await store.dispatch('loadEventNames')
+  } catch (err) {
+    console.error(err)
+  }
+}
+
 const selectLine = event => {
   selectedEvents.value[event.id] = !selectedEvents.value[event.id]
 }
 
-const isLink = key => LINK_KEYS.includes(key)
+const getProductionId = event => event.project_id ?? event.data.project_id
+
+const isLink = (event, key) => {
+  if (key === 'person_id') return true
+  if (!getProductionId(event)) return false
+  return (
+    key === 'project_id' || key === 'task_id' || Boolean(ENTITY_LINK_KEYS[key])
+  )
+}
 
 const getLink = (event, key) => {
-  const productionId = event.data.project_id
-  const entityType = key.substring(0, key.length - 3)
-  if (entityType === 'project') {
+  if (key === 'person_id') {
+    return `/people/${event.data[key]}`
+  }
+  const productionId = getProductionId(event)
+  if (key === 'project_id') {
     return `/productions/${productionId}/news-feed`
   }
   const entityId = event.data[key]
-  if (entityType === 'task') {
+  if (key === 'task_id') {
     return `/productions/${productionId}/entity/tasks/${entityId}`
   }
-  return `/productions/${productionId}/${entityType}s/${entityId}`
+  return `/productions/${productionId}/${ENTITY_LINK_KEYS[key]}/${entityId}`
+}
+
+const exportCsv = () => {
+  const headers = ['date', 'object', 'action', 'production', 'user', 'data']
+  const rows = events.value.map(event => [
+    event.date,
+    event.name,
+    event.type,
+    event.production?.name ?? '',
+    event.person?.full_name ?? '',
+    JSON.stringify(event.data)
+  ])
+  const escape = value => `"${String(value).replace(/"/g, '""')}"`
+  const csv = [headers, ...rows]
+    .map(row => row.map(escape).join(','))
+    .join('\n')
+  const link = document.createElement('a')
+  link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }))
+  link.download = `activity-logs-${formatSimpleDate(new Date())}.csv`
+  link.click()
+  URL.revokeObjectURL(link.href)
 }
 
 // Watchers
 
 watch(
-  () => route.query.date,
-  date => {
-    const parsedDate = parseSimpleDate(date)
-    currentDate.value = parsedDate.isValid() ? parsedDate.toDate() : new Date()
-    loadDayEvents(currentDate.value)
+  () => route.query,
+  () => {
+    const after = parseSimpleDate(route.query.after)
+    const before = parseSimpleDate(route.query.before)
+    dateRange.value =
+      after.isValid() && before.isValid()
+        ? [after.toDate(), before.toDate()]
+        : null
+    resolvePeopleFromQuery()
+    selectedProductionId.value = route.query.project_id || ''
+    selectedObjects.value = asArray(route.query.objects)
+    selectedActions.value = asArray(route.query.actions)
+    onlyFiles.value = route.query.only_files === 'true'
+    loadEvents()
   },
   { immediate: true }
 )
 
-watch(
-  () => route.query.person_id,
-  personId => {
-    selectedPerson.value = personMap.value.get(personId) || null
-  },
-  { immediate: true }
-)
+// The person map is filled asynchronously: names shown in the filter and in
+// the log lines have to be resolved again once it lands.
+watch(personMap, () => {
+  resolvePeopleFromQuery()
+  events.value = events.value.map(event => ({
+    ...event,
+    person: personMap.value.get(event.user_id)
+  }))
+})
+
+// Lifecycle
+
+onMounted(loadEventNames)
 
 // Head
 
@@ -271,6 +463,22 @@ useHead({ title: computed(() => `${t('logs.audit.title')} - Kitsu`) })
 }
 
 .empty {
+  color: var(--text);
+  font-style: italic;
+}
+
+.filters {
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.checkbox-label {
+  color: var(--text);
+  cursor: pointer;
+  padding-bottom: 0.5em;
+}
+
+.event-count {
   color: var(--text);
   font-style: italic;
 }

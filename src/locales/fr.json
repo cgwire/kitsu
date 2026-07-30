@@ -1732,9 +1732,19 @@
       "text": "Kitsu ne peut être utilisé qu'avec les navigateurs Firefox et Chrome."
     },
     "logs": {
+      "action_label": "Action",
+      "action_placeholder": "Toutes les actions",
       "current_date_label": "Montrer les journaux pour",
-      "events": "Événements listés pour le jour courant",
+      "date_range_label": "Plage de dates",
+      "date_range_placeholder": "Toutes les dates",
+      "events": "événements listés",
       "empty_list": "Il n'y a pas de journaux pour cette date",
+      "export_csv": "Exporter en CSV",
+      "object_label": "Objet",
+      "object_placeholder": "Tous les objets",
+      "only_files": "Seulement les événements de fichiers",
+      "people_label": "Utilisateurs",
+      "people_placeholder": "Tous les utilisateurs",
       "title": "Journaux",
       "preview_files": {
         "date": "Date de création",

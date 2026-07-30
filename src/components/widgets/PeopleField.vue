@@ -34,7 +34,7 @@
         @click="clear"
         @keydown.enter.prevent="clear"
         @keydown.space.prevent="clear"
-        v-if="item && clearable && !disabled"
+        v-if="hasSelection && clearable && !disabled"
       >
         <x-icon :size="12" />
       </span>
@@ -43,12 +43,12 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { computed, ref, watch, onMounted } from 'vue'
 import { XIcon } from 'lucide-vue-next'
 import Multiselect from 'vue-multiselect'
 import 'vue-multiselect/dist/vue-multiselect.min.css'
 
-import { buildNameIndex, indexSearch } from '@/lib/indexing'
+import { buildNameIndex, buildPeopleIndex, indexSearch } from '@/lib/indexing'
 
 import AssignationItem from '@/components/widgets/AssignationItem.vue'
 
@@ -66,7 +66,7 @@ const props = defineProps({
     default: null
   },
   modelValue: {
-    type: Object,
+    type: [Object, Array],
     default: () => {}
   },
   multiple: {
@@ -76,6 +76,11 @@ const props = defineProps({
   people: {
     type: Array,
     default: () => []
+  },
+  // Also match on the email address, not only on the name.
+  searchEmail: {
+    type: Boolean,
+    default: false
   },
   placeholder: {
     type: String,
@@ -99,8 +104,15 @@ const item = ref(null)
 const items = ref([])
 const search = ref('')
 
+const buildIndex = people =>
+  props.searchEmail ? buildPeopleIndex(people) : buildNameIndex(people)
+
+const hasSelection = computed(() =>
+  Array.isArray(item.value) ? item.value.length > 0 : Boolean(item.value)
+)
+
 items.value = props.people
-index.value = buildNameIndex(props.people)
+index.value = buildIndex(props.people)
 
 onMounted(() => {
   items.value = props.people
@@ -121,7 +133,7 @@ const onSelect = () => {
 }
 
 const clear = () => {
-  item.value = null
+  item.value = props.multiple ? [] : null
   onSelect()
 }
 
@@ -132,11 +144,14 @@ const focus = () => {
 watch(
   () => props.people,
   () => {
-    item.value = item.value
-      ? props.people.find(person => person.id === item.value.id)
-      : null
+    const findAgain = person => props.people.find(({ id }) => id === person.id)
+    if (Array.isArray(item.value)) {
+      item.value = item.value.map(findAgain).filter(Boolean)
+    } else {
+      item.value = item.value ? findAgain(item.value) : null
+    }
     items.value = props.people
-    index.value = buildNameIndex(props.people)
+    index.value = buildIndex(props.people)
   }
 )
 
