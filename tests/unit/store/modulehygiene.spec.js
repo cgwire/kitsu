@@ -4,6 +4,7 @@ import { vi } from 'vitest'
 // Vuex store is built.
 vi.mock('@/store', () => ({ default: {} }))
 
+import assetsStore from '@/store/modules/assets'
 import departmentsStore from '@/store/modules/departments'
 import editsStore from '@/store/modules/edits'
 import episodesStore from '@/store/modules/episodes'
@@ -16,6 +17,7 @@ import taskTypesStore from '@/store/modules/tasktypes'
 // at once, whatever the open page, so each entity module gets a payload built
 // for another one.
 const entityModules = [
+  ['assets', assetsStore, 'displayedAssets'],
   ['edits', editsStore, 'displayedEdits'],
   ['episodes', episodesStore, 'displayedEpisodes'],
   ['sequences', sequencesStore, 'displayedSequences'],
