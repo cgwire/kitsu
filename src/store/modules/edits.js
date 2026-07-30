@@ -946,13 +946,13 @@ const mutations = {
     state.editSearchText = ''
   },
 
-  [SET_PREVIEW](state, { entityId, taskId, previewId, taskMap }) {
+  [SET_PREVIEW](state, { entityId, previewId, taskMap }) {
     const edit = state.displayedEdits.find(edit => edit.id === entityId)
     if (edit) {
       edit.preview_file_id = previewId
-      edit.tasks.forEach(taskId => {
+      edit.tasks?.forEach(taskId => {
         const task = taskMap.get(taskId)
-        if (task) task.entity.preview_file_id = previewId
+        if (task?.entity) task.entity.preview_file_id = previewId
       })
     }
   },

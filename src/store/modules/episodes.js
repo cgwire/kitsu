@@ -960,13 +960,15 @@ const mutations = {
     }
   },
 
-  [SET_PREVIEW](state, { entityId, taskId, previewId, taskMap }) {
-    const episodes = state.displayedEpisodes.find(s => s.id === entityId)
-    if (episodes) {
-      episodes.preview_file_id = previewId
-      episodes.tasks.forEach(taskId => {
+  [SET_PREVIEW](state, { entityId, previewId, taskMap }) {
+    const episode = state.displayedEpisodes.find(e => e.id === entityId)
+    if (episode) {
+      episode.preview_file_id = previewId
+      // loadEpisodes fills displayedEpisodes without tasks, unlike
+      // loadEpisodesWithTasks.
+      episode.tasks?.forEach(taskId => {
         const task = taskMap.get(taskId)
-        if (task) task.entity.preview_file_id = previewId
+        if (task?.entity) task.entity.preview_file_id = previewId
       })
     }
   },

@@ -779,13 +779,15 @@ const mutations = {
     state.sequenceSearchQueries = sortByName(state.sequenceSearchQueries)
   },
 
-  [SET_PREVIEW](state, { entityId, taskId, previewId, taskMap }) {
-    const sequences = state.displayedSequences.find(s => s.id === entityId)
-    if (sequences) {
-      sequences.preview_file_id = previewId
-      sequences.tasks.forEach(taskId => {
+  [SET_PREVIEW](state, { entityId, previewId, taskMap }) {
+    const sequence = state.displayedSequences.find(s => s.id === entityId)
+    if (sequence) {
+      sequence.preview_file_id = previewId
+      // loadSequences fills displayedSequences without tasks, unlike
+      // loadSequencesWithTasks.
+      sequence.tasks?.forEach(taskId => {
         const task = taskMap.get(taskId)
-        if (task) task.entity.preview_file_id = previewId
+        if (task?.entity) task.entity.preview_file_id = previewId
       })
     }
   },
