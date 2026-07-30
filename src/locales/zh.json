@@ -1460,7 +1460,7 @@
       "number": "镜头 | 镜头组",
       "manage": "创建多个镜头",
       "new_success": "已成功创建镜头{name}.",
-      "padding": "镜头填充",
+      "numbering_step": "编号步长",
       "restore_text": "您确定要将{name}恢复进您的数据库吗?",
       "restore_error": "恢复此镜头时出现错误.",
       "sequences": "序列组",

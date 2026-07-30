@@ -1460,7 +1460,7 @@
       "number": "ショット | ショット",
       "manage": "ショットを作成",
       "new_success": "ショット {name} を正常に作成しました。",
-      "padding": "ショットパディング",
+      "numbering_step": "採番ステップ",
       "restore_text": "アーカイブから {name} を復元してもよろしいですか？",
       "restore_error": "このショットの復元中にエラーが発生しました。",
       "sequences": "シーケンス",

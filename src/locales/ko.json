@@ -1470,7 +1470,7 @@
       "number": "샷 | 샷",
       "manage": "샷 생성",
       "new_success": "{name} 샷 생성 성공.",
-      "padding": "샷 패딩",
+      "numbering_step": "번호 증가 단위",
       "restore_text": "정말 {name}을(를) 기록 보관소에서 복구하시겠습니까?",
       "restore_error": "샷 복구 도중 오류가 발생했습니다.",
       "sequences": "시퀀스",

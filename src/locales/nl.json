@@ -1460,7 +1460,7 @@
       "number": "opname | opnamen",
       "manage": "Maak opname",
       "new_success": "Opname {name} succesvol aangemaakt",
-      "padding": "Opname aanvulling",
+      "numbering_step": "Nummeringsstap",
       "restore_text": "Weet je zeker dat je {name} in de database wilt herstellen?",
       "restore_error": "Er is een fout opgetreden bij het herstellen van deze opname.",
       "sequences": "Sequenties",

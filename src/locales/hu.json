@@ -1460,7 +1460,7 @@
       "number": "shot | shot",
       "manage": "Shot-ok létrehozása",
       "new_success": "Shot {name} sikeresen létrehozva.",
-      "padding": "Shot sorszám számjegyek",
+      "numbering_step": "Számozási lépésköz",
       "restore_text": "Biztosan visszaállítod {name}-t az adatbázisba?",
       "restore_error": "Hiba történt a shot visszaállításakor.",
       "sequences": "Szekvenciák",

@@ -1460,7 +1460,7 @@
       "number": "shot | shot",
       "manage": "Crea shot",
       "new_success": "Shot {name} creato con successo.",
-      "padding": "Padding degli shot",
+      "numbering_step": "Passo di numerazione",
       "restore_text": "Sei sicuro di voler ripristinare {name} dall'archivio?",
       "restore_error": "Si è verificato un errore durante il ripristino di questo shot.",
       "sequences": "Sequenze",

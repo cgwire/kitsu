@@ -1460,7 +1460,7 @@
       "number": "Shot | Shots",
       "manage": "Shots erstellen",
       "new_success": "Shot {name} erfolgreich erstellt.",
-      "padding": "Aufnahme-Padding",
+      "numbering_step": "Nummerierungsschritt",
       "restore_text": "Sind Sie sicher, dass Sie {name} in Ihrer Datenbank wiederherstellen möchten?",
       "restore_error": "Bei der Wiederherstellung des Shots ist ein Fehler aufgetreten.",
       "sequences": "Sequenzen",

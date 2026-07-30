@@ -13,7 +13,7 @@ describe('lib/string', () => {
     expect(stringHelpers.generateNextName('12')).toEqual('13')
   })
 
-  it('generateNextName with padding', () => {
+  it('generateNextName with step', () => {
     expect(stringHelpers.generateNextName('SH001', 10)).toEqual('SH010')
     expect(stringHelpers.generateNextName('SH010', 10)).toEqual('SH020')
     expect(stringHelpers.generateNextName('SH001', 2)).toEqual('SH003')

@@ -1932,7 +1932,7 @@ export default {
     number: 'shot | shots',
     manage: 'Create shots',
     new_success: 'Shot {name} successfully created.',
-    padding: 'Shot Padding',
+    numbering_step: 'Numbering Step',
     single_tab: 'Single',
     bulk_tab: 'Bulk',
     bulk_error: 'The bulk creation failed. Please try again.',

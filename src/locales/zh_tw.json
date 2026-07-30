@@ -1460,7 +1460,7 @@
       "number": "鏡頭 | 鏡頭(多個)",
       "manage": "創建多個鏡頭",
       "new_success": "已成功創建鏡頭{name}.",
-      "padding": "鏡頭編號補零",
+      "numbering_step": "編號間隔",
       "restore_text": "您確定要將{name}恢復進您的資料庫嗎?",
       "restore_error": "恢復此鏡頭時出現錯誤.",
       "sequences": "序列(多個)",

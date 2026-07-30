@@ -4,14 +4,14 @@ export default {
    * increment. If there is no number, we consider that a new name
    * must be written.
    */
-  generateNextName(name, padding = 1) {
+  generateNextName(name, step = 1) {
     const matches = name.match(/\d+$/)
     if (matches) {
       const number = matches[0]
       const rootName = name.substring(0, name.length - number.length)
       let numberInt = parseInt(number)
-      if (numberInt === 1 && padding === 10) numberInt = 10
-      else numberInt += padding
+      if (numberInt === 1 && step === 10) numberInt = 10
+      else numberInt += step
       return rootName + String(numberInt).padStart(number.length, '0')
     } else {
       return ''

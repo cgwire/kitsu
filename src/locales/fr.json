@@ -1463,7 +1463,7 @@
       "number": "plan | plans",
       "manage": "Créer des plans",
       "new_success": "Plan {name} créé avec succès.",
-      "padding": "Remplissage des plans",
+      "numbering_step": "Incrément de numérotation",
       "restore_text": "Êtes-vous sûr de vouloir restaurer {name} depuis les archives ?",
       "restore_error": "Une erreur est survenue en restaurant le plan.",
       "sequences": "Séquences",

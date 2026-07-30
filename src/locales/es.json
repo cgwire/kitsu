@@ -1460,7 +1460,7 @@
       "number": "toma | tomas",
       "manage": "Crear tomas",
       "new_success": "Toma {name} creada con éxito.",
-      "padding": "Relleno de numeración de tomas",
+      "numbering_step": "Paso de numeración",
       "restore_text": "¿Está seguro de que desea restaurar {name} de su archivo?",
       "restore_error": "Se ha producido un error al restaurar esta toma.",
       "sequences": "Secuencias",

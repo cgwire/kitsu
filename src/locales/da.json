@@ -1460,7 +1460,7 @@
       "number": "shot | shots",
       "manage": "Opret shots",
       "new_success": "Shot {name} blev oprettet med succes.",
-      "padding": "Shot-padding",
+      "numbering_step": "Nummereringstrin",
       "restore_text": "Er du sikker på, at du vil gendanne {name} fra dit arkiv?",
       "restore_error": "Der opstod en fejl under gendannelse af dette shot.",
       "sequences": "Sequences",

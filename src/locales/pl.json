@@ -1852,7 +1852,7 @@
       "number": "ujęcie | ujęć",
       "manage": "Utwórz ujęcia",
       "new_success": "Ujęcie {name} zostało utworzone.",
-      "padding": "Dopełnienie numeru ujęcia",
+      "numbering_step": "Krok numeracji",
       "restore_text": "Czy na pewno chcesz przywrócić {name} z archiwum?",
       "restore_error": "Wystąpił błąd podczas przywracania tego ujęcia.",
       "sequences": "Sekwencje",

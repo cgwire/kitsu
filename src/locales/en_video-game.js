@@ -197,7 +197,6 @@ export default {
     number: 'map | maps',
     manage: 'Create Maps',
     new_success: 'Map {name} successfully created.',
-    padding: 'Map Padding',
     restore_error: 'An error occurred while restoring this map.',
     sequences: 'Levels',
     tasks: 'Map Tasks',
