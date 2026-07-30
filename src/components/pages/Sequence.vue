@@ -12,9 +12,9 @@
           <entity-thumbnail
             class="entity-thumbnail"
             :entity="currentSequence"
-            :empty-width="120"
-            :empty-height="50"
-            :width="120"
+            :empty-width="100"
+            :empty-height="60"
+            :width="100"
             v-if="currentSequence"
           />
         </span>
@@ -46,58 +46,20 @@
           :tabs="entityNavOptions"
         />
 
-        <div class="flexrow infos" v-show="currentSection === 'infos'">
-          <div class="flexrow-item flexcolumn entity-infos">
-            <page-subtitle :text="$t('main.tasks')" />
-            <entity-task-list
-              class="task-list"
-              :entries="currentTasks"
-              :is-loading="!currentSequence"
-              :is-error="false"
-              @task-selected="onTaskSelected"
-            />
-            <div class="flexrow">
-              <page-subtitle :text="$t('main.info')" />
-              <div class="filler"></div>
-              <div class="flexrow-item has-text-right">
-                <button-simple
-                  icon="edit"
-                  :title="$t('sequences.edit_title')"
-                  @click="modals.edit = true"
-                  v-if="isCurrentUserManager"
-                />
-              </div>
-            </div>
-
-            <div class="table-body">
-              <table class="datatable no-header" v-if="currentSequence">
-                <tbody class="table-body">
-                  <tr class="datatable-row">
-                    <td class="field-label">
-                      {{ $t('shots.fields.description') }}
-                    </td>
-                    <description-cell :entry="currentSequence" :full="true" />
-                  </tr>
-                  <tr
-                    :key="descriptor.id"
-                    class="datatable-row"
-                    v-for="descriptor in sequenceMetadataDescriptors"
-                  >
-                    <td class="field-label">{{ descriptor.name }}</td>
-                    <td>
-                      <metadata-value
-                        :descriptor="descriptor"
-                        :entity="currentSequence"
-                      />
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <div class="flexrow">
+        <div class="flexrow mt1">
+          <span v-show="currentSection === 'casting' && nbAssets > 0">
+            {{ nbAssets }} {{ $t('assets.number', nbAssets) }}
+          </span>
+          <span
+            class="tag tag-standby"
+            v-show="
+              currentSection === 'casting' &&
+              currentSequence &&
+              currentSequence.is_casting_standby
+            "
+          >
+            {{ $t('breakdown.fields.standby') }}
+          </span>
           <div class="filler"></div>
           <span
             class="flexrow-item mt05"
@@ -120,22 +82,56 @@
           />
         </div>
 
-        <div class="sequence-casting" v-show="currentSection === 'casting'">
-          <div class="casting-data mt1">
-            <span v-show="currentSection === 'casting' && nbAssets > 0">
-              {{ nbAssets }} {{ $t('assets.number', nbAssets) }}
-            </span>
-            <span
-              class="tag tag-standby"
-              v-show="
-                currentSection === 'casting' &&
-                currentSequence &&
-                currentSequence.is_casting_standby
-              "
-            >
-              {{ $t('breakdown.fields.standby') }}
-            </span>
+        <div class="flexcolumn infos" v-show="currentSection === 'infos'">
+          <page-subtitle :text="$t('main.tasks')" />
+          <entity-task-list
+            class="task-list"
+            :entries="currentTasks"
+            :is-loading="!currentSequence"
+            :is-error="false"
+            @task-selected="onTaskSelected"
+          />
+          <div class="flexrow">
+            <page-subtitle :text="$t('main.info')" />
+            <div class="filler"></div>
+            <div class="flexrow-item has-text-right">
+              <button-simple
+                icon="edit"
+                :title="$t('sequences.edit_title')"
+                @click="modals.edit = true"
+                v-if="isCurrentUserManager"
+              />
+            </div>
           </div>
+
+          <div class="table-body metadata-infos">
+            <table class="datatable no-header" v-if="currentSequence">
+              <tbody class="table-body">
+                <tr class="datatable-row">
+                  <td class="field-label">
+                    {{ $t('shots.fields.description') }}
+                  </td>
+                  <description-cell :entry="currentSequence" :full="true" />
+                </tr>
+                <tr
+                  :key="descriptor.id"
+                  class="datatable-row"
+                  v-for="descriptor in sequenceMetadataDescriptors"
+                >
+                  <td class="field-label">{{ descriptor.name }}</td>
+                  <td>
+                    <metadata-value
+                      :descriptor="descriptor"
+                      :entity="currentSequence"
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="sequence-casting" v-show="currentSection === 'casting'">
           <div v-if="currentSequence">
             <div
               v-if="
@@ -554,19 +550,6 @@ h2.subtitle {
   }
 }
 
-.infos {
-  height: 350px;
-  margin-bottom: 1em;
-  margin-left: 1em;
-  margin-right: 1em;
-
-  .flexrow-item {
-    align-self: flex-start;
-    height: 100%;
-    flex: 1;
-  }
-}
-
 .sequence-data {
   display: flex;
   flex: 1;
@@ -642,8 +625,9 @@ h2.subtitle {
 }
 
 .task-list {
-  width: 100%;
-  margin-bottom: 2em;
+  margin-bottom: 3em;
+  min-height: 150px;
+  min-width: 100%;
 }
 
 .datatable-row {
@@ -706,15 +690,16 @@ h2.subtitle {
 }
 
 .infos {
+  height: 100%;
   margin-top: 1em;
   margin-bottom: 1em;
-  height: 100%;
   max-height: 100%;
   overflow-y: auto;
 
-  .entity-infos {
-    align-self: flex-start;
-    flex: 1.5;
+  .metadata-infos {
+    flex: unset;
+    min-height: 100px;
+    overflow: auto;
   }
 }
 

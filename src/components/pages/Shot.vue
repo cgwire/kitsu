@@ -97,7 +97,7 @@
               />
             </div>
           </div>
-          <div class="table-body">
+          <div class="table-body metadata-infos">
             <table class="datatable no-header" v-if="currentShot">
               <tbody class="datatable-body">
                 <tr class="datatable-row">
@@ -749,6 +749,7 @@ h2.subtitle {
 .task-list {
   flex: 1;
   margin-bottom: 3em;
+  min-height: 150px;
   min-width: 100%;
   overflow: hidden;
 }
@@ -817,11 +818,6 @@ h2.subtitle {
   margin-bottom: 0;
 }
 
-.flexcolumn {
-  flex-direction: column;
-  overflow-y: auto;
-}
-
 .news-column {
   max-height: 85%;
 }
@@ -835,6 +831,7 @@ h2.subtitle {
 
   .metadata-infos {
     flex: unset;
+    min-height: 100px;
     overflow: auto;
   }
 }

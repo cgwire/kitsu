@@ -649,10 +649,6 @@ export default {
   margin-bottom: 1em;
 }
 
-.flexcolumn {
-  align-items: flex-start;
-}
-
 .sequences {
   display: flex;
   flex-direction: column;

@@ -621,10 +621,6 @@ export default {
   margin-bottom: 1em;
 }
 
-.flexcolumn {
-  align-items: flex-start;
-}
-
 .episodes {
   display: flex;
   flex-direction: column;

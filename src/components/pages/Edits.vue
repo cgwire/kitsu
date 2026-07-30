@@ -811,10 +811,6 @@ export default {
   align-items: flex-start;
 }
 
-.flexcolumn {
-  align-items: flex-start;
-}
-
 .edits {
   display: flex;
   flex-direction: column;

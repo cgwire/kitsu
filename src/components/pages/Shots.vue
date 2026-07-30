@@ -1056,10 +1056,6 @@ export default {
   align-items: flex-start;
 }
 
-.flexcolumn {
-  align-items: flex-start;
-}
-
 .shots {
   display: flex;
   flex-direction: column;
