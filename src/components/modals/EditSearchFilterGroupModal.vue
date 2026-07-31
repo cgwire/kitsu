@@ -122,7 +122,8 @@ watch(
       is_shared: is_shared ? 'true' : 'false',
       department_id
     }
-  }
+  },
+  { immediate: true }
 )
 
 watch(
@@ -133,6 +134,7 @@ watch(
         nameField.value?.focus()
       }, 100)
     }
-  }
+  },
+  { immediate: true }
 )
 </script>

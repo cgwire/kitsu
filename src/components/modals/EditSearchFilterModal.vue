@@ -154,7 +154,8 @@ watch(
         department_id: null
       }
     }
-  }
+  },
+  { immediate: true }
 )
 
 watch(
@@ -165,6 +166,7 @@ watch(
         nameField.value?.focus()
       }, 100)
     }
-  }
+  },
+  { immediate: true }
 )
 </script>

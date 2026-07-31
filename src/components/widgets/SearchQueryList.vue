@@ -173,17 +173,18 @@
     </span>
 
     <confirm-modal
-      :active="modals.remove"
+      active
       is-danger
       :is-loading="loading.remove"
       :is-error="errors.remove"
       :text="removeText"
       @cancel="modals.remove = false"
       @confirm="removeSearch"
+      v-if="modals.remove"
     />
 
     <edit-search-filter-modal
-      :active="modals.edit"
+      active
       :group-options="groupOptions"
       :is-loading="loading.edit"
       :is-error="errors.edit"
@@ -191,15 +192,17 @@
       :search-query-to-edit="searchQueryToEdit"
       @cancel="modals.edit = false"
       @confirm="confirmEditSearch"
+      v-if="modals.edit"
     />
 
     <edit-search-filter-group-modal
-      :active="modals.group"
+      active
       :is-loading="loading.group"
       :is-error="errors.group"
       :group-to-edit="groupToEdit"
       @cancel="modals.group = false"
       @confirm="confirmEditFilterGroup"
+      v-if="modals.group"
     />
   </div>
 </template>
