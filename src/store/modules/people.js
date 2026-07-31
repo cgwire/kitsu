@@ -653,7 +653,6 @@ const mutations = {
   [LOAD_PEOPLE_START](state) {
     state.isPeopleLoading = true
     state.isPeopleLoadingError = false
-    cache.personMap = new Map()
   },
 
   [LOAD_PEOPLE_ERROR](state) {
@@ -667,6 +666,7 @@ const mutations = {
     cache.people = sortPeople(people).map(person => {
       return helpers.addAdditionalInformation(person)
     })
+    cache.personMap.clear()
     cache.people.forEach(person => {
       cache.personMap.set(person.id, person)
     })

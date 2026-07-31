@@ -174,6 +174,7 @@ const cache = {
   sequences: [],
   result: [],
   sequenceIndex: {},
+  // Mutate sequenceMap in place, never reassign it (see tasktypes.js).
   sequenceMap: new Map()
 }
 
@@ -866,7 +867,7 @@ const mutations = {
     state,
     { sequences, episodeMap, production, userFilters }
   ) {
-    const sequenceMap = new Map()
+    cache.sequenceMap.clear()
     if (
       production &&
       userFilters.sequence &&
@@ -878,7 +879,7 @@ const mutations = {
     }
     if (!sequences) sequences = []
     sequences.forEach(sequence => {
-      sequenceMap.set(sequence.id, sequence)
+      cache.sequenceMap.set(sequence.id, sequence)
       if (sequence.parent_id) {
         const episode = episodeMap.get(sequence.parent_id)
         if (episode) {
@@ -889,7 +890,6 @@ const mutations = {
         }
       }
     })
-    cache.sequenceMap = sequenceMap
     cache.sequences = sortByName(sequences)
     state.sequenceIndex = buildSequenceIndex(cache.sequences)
     state.displayedSequences = cache.sequences

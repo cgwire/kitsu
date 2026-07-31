@@ -10,6 +10,7 @@ import {
   RESET_ALL
 } from '@/store/mutation-types'
 
+// Mutate backgroundMap in place, never reassign it (see tasktypes.js).
 const cache = {
   backgroundMap: new Map()
 }
@@ -75,12 +76,12 @@ const actions = {
 const mutations = {
   [LOAD_BACKGROUNDS_START](state) {
     state.backgrounds = []
-    cache.backgroundMap = new Map()
+    cache.backgroundMap.clear()
   },
 
   [LOAD_BACKGROUNDS_ERROR](state) {
     state.backgrounds = []
-    cache.backgroundMap = new Map()
+    cache.backgroundMap.clear()
   },
 
   [LOAD_BACKGROUNDS_END](state, backgrounds) {
@@ -90,9 +91,10 @@ const mutations = {
       background.thumbnail = `/api/pictures/thumbnails/preview-background-files/${background.id}.png`
     })
     state.backgrounds = sortByName(backgrounds)
-    cache.backgroundMap = new Map(
-      state.backgrounds.map(background => [background.id, background])
-    )
+    cache.backgroundMap.clear()
+    state.backgrounds.forEach(background => {
+      cache.backgroundMap.set(background.id, background)
+    })
   },
 
   [EDIT_BACKGROUND_END](state, newBackground) {

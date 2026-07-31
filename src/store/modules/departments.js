@@ -12,6 +12,7 @@ const initialState = {
 }
 
 const state = { ...initialState }
+// Mutate departmentMap in place, never reassign it (see tasktypes.js).
 const cache = {
   departmentMap: new Map()
 }
@@ -85,11 +86,10 @@ const actions = {
 const mutations = {
   [LOAD_DEPARTMENTS_END](state, departments) {
     state.departments = departments.sort((a, b) => a.name.localeCompare(b.name))
-    const departmentMap = new Map()
+    cache.departmentMap.clear()
     departments.forEach(department => {
-      departmentMap.set(department.id, department)
+      cache.departmentMap.set(department.id, department)
     })
-    cache.departmentMap = departmentMap
   },
 
   [EDIT_DEPARTMENTS_END](state, newDepartment) {

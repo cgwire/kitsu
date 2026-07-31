@@ -84,7 +84,7 @@ const actions = {
 const mutations = {
   [LOAD_SOFTWARE_LICENSES_END](state, softwareLicenses) {
     state.softwareLicenses = sortByName(softwareLicenses)
-    cache.softwareLicenseMap = new Map()
+    cache.softwareLicenseMap.clear()
     state.softwareLicenses.forEach(softwareLicense => {
       cache.softwareLicenseMap.set(softwareLicense.id, softwareLicense)
     })
