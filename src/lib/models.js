@@ -34,6 +34,7 @@ export const populateTask = task => {
 // The task centric lists (todos, kanban, timesheets) render the flat
 // entity_preview_file_id they got from the API, so a new main preview has to
 // be pushed onto every task of the entity for the thumbnail to follow.
+// Takes any task collection exposing forEach, list or map alike.
 export const setTasksEntityPreview = (tasks, entityId, previewId) => {
   if (!entityId) return
   tasks.forEach(task => {

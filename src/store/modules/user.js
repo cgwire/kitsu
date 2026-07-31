@@ -5,7 +5,7 @@ import auth from '@/lib/auth'
 import { sortTasks, sortByName } from '@/lib/sorting'
 import { indexSearch, buildTaskIndex } from '@/lib/indexing'
 import { getKeyWords } from '@/lib/filtering'
-import { populateTask, setTasksEntityPreview } from '@/lib/models'
+import { populateTask } from '@/lib/models'
 
 import {
   coercePublicKeyFromJSON,
@@ -72,7 +72,6 @@ import {
   LOAD_ASSET_TYPES_END,
   LOAD_PLUGINS_END,
   SET_NOTIFICATION_COUNT,
-  SET_PREVIEW,
   SET_USER_LIMIT,
   LOAD_OPEN_PRODUCTIONS_END,
   RESET_ALL,
@@ -588,15 +587,6 @@ const mutations = {
     cache.doneIndex = buildTaskIndex(tasks)
     cache.doneTasks = tasks
     state.displayedDoneTasks = tasks
-  },
-
-  // Root mutation shared with the entity modules: it fires both on a manual
-  // "set as thumbnail" and on the preview-file:set-main socket event.
-  // displayedTodos holds the very objects of state.todos, so refreshing the
-  // source lists is enough.
-  [SET_PREVIEW](state, { entityId, previewId }) {
-    setTasksEntityPreview(state.todos, entityId, previewId)
-    setTasksEntityPreview(state.displayedDoneTasks, entityId, previewId)
   },
 
   [USER_LOAD_TODOS_ERROR](state, tasks) {

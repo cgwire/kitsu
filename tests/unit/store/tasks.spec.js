@@ -324,4 +324,44 @@ describe('Tasks store', () => {
       })
     })
   })
+
+  describe('SET_PREVIEW', () => {
+    // The socket event carries no task id, and the my-checks page renders the
+    // very objects registered here, so the whole map has to be swept.
+    test('refreshes every registered task of the entity', () => {
+      const acting = {
+        id: 'task-1',
+        entity_id: 'entity-1',
+        entity_preview_file_id: 'old',
+        entity: { id: 'entity-1', preview_file_id: 'old' }
+      }
+      const sibling = {
+        id: 'task-2',
+        entity_id: 'entity-1',
+        entity_preview_file_id: 'old'
+      }
+      const other = {
+        id: 'task-3',
+        entity_id: 'entity-2',
+        entity_preview_file_id: 'old'
+      }
+      const state = {
+        taskMap: new Map([
+          ['task-1', acting],
+          ['task-2', sibling],
+          ['task-3', other]
+        ])
+      }
+
+      tasksStore.mutations.SET_PREVIEW(state, {
+        entityId: 'entity-1',
+        previewId: 'preview-1'
+      })
+
+      expect(acting.entity_preview_file_id).toEqual('preview-1')
+      expect(acting.entity.preview_file_id).toEqual('preview-1')
+      expect(sibling.entity_preview_file_id).toEqual('preview-1')
+      expect(other.entity_preview_file_id).toEqual('old')
+    })
+  })
 })

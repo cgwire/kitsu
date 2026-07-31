@@ -8,7 +8,12 @@ import {
   sortRevisionPreviewFiles,
   sortByName
 } from '@/lib/sorting'
-import { arrayMove, populateTask, removeModelFromList } from '@/lib/models'
+import {
+  arrayMove,
+  populateTask,
+  removeModelFromList,
+  setTasksEntityPreview
+} from '@/lib/models'
 import func from '@/lib/func'
 
 import assetStore from '@/store/modules/assets'
@@ -1413,10 +1418,11 @@ const mutations = {
     }
   },
 
-  [SET_PREVIEW](state, { taskId, previewId }) {
-    if (state.taskMap.get(taskId)?.entity) {
-      state.taskMap.get(taskId).entity.preview_file_id = previewId
-    }
+  // REGISTER_USER_TASKS registers the todo, done and to-check lists into the
+  // map as the very objects those pages render, so sweeping it refreshes them
+  // all, including the my-checks tasks held in component state.
+  [SET_PREVIEW](state, { entityId, previewId }) {
+    setTasksEntityPreview(state.taskMap, entityId, previewId)
   },
 
   [SET_IS_BIG_THUMBNAILS](state, isBigThumbnails) {
