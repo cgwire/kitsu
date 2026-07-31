@@ -980,7 +980,6 @@ const mutations = {
     } else {
       state.taskSearchQueries = []
     }
-    state.tasks = Array.from(state.taskMap.values())
   },
 
   [LOAD_SHOTS_END](state, { production, userFilters }) {
