@@ -22,8 +22,8 @@ import {
   REMOVE_ENTITY_FROM_PLAYLIST,
   LOAD_ENTITY_PREVIEW_FILES_END,
   LOAD_PRODUCTIONS_END,
-  LOAD_TASK_STATUSES_END,
-  LOAD_TASK_TYPES_END,
+  EDIT_TASK_STATUS_END,
+  EDIT_TASK_TYPE_END,
   ADD_NEW_JOB,
   MARK_JOB_AS_DONE,
   REMOVE_BUILD_JOB,
@@ -324,14 +324,29 @@ const actions = {
     return playlistsApi.loadSharedPlaylist(shareToken)
   },
 
-  async loadSharedPlaylistContext({ commit }, shareToken) {
+  async loadSharedPlaylistContext({ commit, rootGetters }, shareToken) {
     const data = await playlistsApi.loadSharedPlaylistContext(shareToken)
     if (data.project) {
       commit(LOAD_PRODUCTIONS_END, [data.project])
       commit(SET_CURRENT_PRODUCTION, data.project.id)
     }
-    commit(LOAD_TASK_TYPES_END, data.task_types || [])
-    commit(LOAD_TASK_STATUSES_END, data.task_statuses || [])
+    // Only add what is missing: a share link opened in a logged in tab would
+    // otherwise trim both sets down to this production, and overwrite the
+    // allowance flags the task status load normalises.
+    const taskTypeMap = rootGetters.taskTypeMap
+    const taskTypes = data.task_types || []
+    taskTypes.forEach(taskType => {
+      if (!taskTypeMap.has(taskType.id)) {
+        commit(EDIT_TASK_TYPE_END, taskType)
+      }
+    })
+    const taskStatusMap = rootGetters.taskStatusMap
+    const taskStatuses = data.task_statuses || []
+    taskStatuses.forEach(taskStatus => {
+      if (!taskStatusMap.has(taskStatus.id)) {
+        commit(EDIT_TASK_STATUS_END, taskStatus)
+      }
+    })
     return data
   },
 
