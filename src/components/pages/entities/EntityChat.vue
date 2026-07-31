@@ -105,6 +105,7 @@
 
     <confirm-modal
       :active="modals.deleteMessage"
+      is-danger
       :confirm-button-text="$t('chats.delete_message_confirm')"
       :text="$t('chats.delete_message')"
       :is-loading="loading.deleteMessage"

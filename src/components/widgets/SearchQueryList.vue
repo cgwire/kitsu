@@ -174,6 +174,7 @@
 
     <confirm-modal
       :active="modals.remove"
+      is-danger
       :is-loading="loading.remove"
       :is-error="errors.remove"
       :text="removeText"
