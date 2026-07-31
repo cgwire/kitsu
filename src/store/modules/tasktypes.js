@@ -4,7 +4,6 @@ import { sortTaskTypes } from '@/lib/sorting'
 
 import {
   LOAD_TASK_TYPES_START,
-  LOAD_TASK_TYPES_ERROR,
   LOAD_TASK_TYPES_END,
   EDIT_TASK_TYPE_START,
   EDIT_TASK_TYPE_ERROR,
@@ -246,11 +245,6 @@ const actions = {
 
 const mutations = {
   [LOAD_TASK_TYPES_START](state) {},
-
-  [LOAD_TASK_TYPES_ERROR](state) {
-    state.taskTypes = []
-    cache.taskTypeMap.clear()
-  },
 
   [LOAD_TASK_TYPES_END](state, taskTypes) {
     state.taskTypes = sortTaskTypes(taskTypes)

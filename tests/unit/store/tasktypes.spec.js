@@ -199,12 +199,6 @@ describe('Task types store', () => {
       expect(state.taskTypes).toEqual([])
     })
 
-    test('LOAD_TASK_TYPES_ERROR', () => {
-      store.mutations.LOAD_TASK_TYPES_ERROR(state)
-      expect(state.taskTypes).toEqual([])
-      expect(store.cache.taskTypeMap.size).toEqual(0)
-    })
-
     test('LOAD_TASK_TYPES_END', () => {
       store.mutations.RESET_ALL(state)
       store.mutations.LOAD_TASK_TYPES_END(state, taskTypes)
