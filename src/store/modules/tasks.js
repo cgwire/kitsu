@@ -1438,7 +1438,7 @@ const mutations = {
 
   [LOAD_PERSON_TASKS_END](state, { tasks }) {
     tasks.forEach(task => {
-      if (task.last_comment.person_id) {
+      if (task.last_comment?.person_id) {
         const person = helpers.getPerson(task.last_comment.person_id)
         task.last_comment.person = person
       }
@@ -1449,7 +1449,7 @@ const mutations = {
 
   [REGISTER_USER_TASKS](state, { tasks }) {
     tasks.forEach(task => {
-      if (task.last_comment.person_id) {
+      if (task.last_comment?.person_id) {
         const person = helpers.getPerson(task.last_comment.person_id)
         task.last_comment.person = person
       }
