@@ -1286,11 +1286,11 @@ export default {
         if (task) {
           const taskType = this.taskTypeMap.get(task.task_type_id)
           return (
-            taskType.department_id &&
+            taskType?.department_id &&
             this.user.departments.includes(taskType.department_id)
           )
         } else {
-          return true // We are in the artist todolist.
+          return true // The task is not loaded, don't block the action here.
         }
       })
     },
