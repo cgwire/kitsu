@@ -4,6 +4,8 @@
     <vue-date-picker
       auto-apply
       class="datepicker"
+      :class="{ range }"
+      :range="range"
       :dark="isDark || isDarkTheme"
       :disabled="disabled"
       :filters="{ weekDays: weekDaysDisabled ? [6, 0] : [] }"
@@ -109,13 +111,19 @@ const props = defineProps({
     default: null,
     type: String
   },
+  // A Date, or an array of two dates when range is set. An empty range is
+  // null.
   modelValue: {
     default: () => new Date(),
-    type: [Date, String]
+    type: [Date, String, Array]
   },
   placeholder: {
     default: null,
     type: String
+  },
+  range: {
+    default: false,
+    type: Boolean
   },
   utc: {
     default: false,
@@ -138,6 +146,18 @@ const localValue = computed({
     return props.modelValue
   },
   set(value) {
+    if (props.range) {
+      // The picker emits [start, null] while the user is still choosing the
+      // second date. Only a complete range is worth propagating, otherwise
+      // every first click would trigger a reload.
+      const dates = value?.filter(Boolean) ?? []
+      if (value?.length && dates.length !== 2) return
+      const range = dates.length === 2 ? dates : null
+      range?.forEach(date => date.setHours(0, 0, 0, 0))
+      emit('update:model-value', range)
+      emit('change', range)
+      return
+    }
     if (value?.setHours) {
       value.setHours(0, 0, 0, 0)
     }
@@ -151,5 +171,9 @@ const localValue = computed({
 .datepicker {
   display: inline-flex;
   max-width: 200px;
+
+  &.range {
+    max-width: 260px;
+  }
 }
 </style>

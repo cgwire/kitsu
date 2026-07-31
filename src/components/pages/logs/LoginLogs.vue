@@ -1,8 +1,9 @@
 <template>
   <div class="mt1">
     <div class="flexrow filters">
-      <date-range-field
+      <date-field
         class="flexrow-item"
+        range
         :label="$t('logs.date_range_label')"
         :max-date="today"
         :placeholder="$t('logs.date_range_placeholder')"
@@ -84,7 +85,7 @@ import {
 } from '@/lib/time'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
-import DateRangeField from '@/components/widgets/DateRangeField.vue'
+import DateField from '@/components/widgets/DateField.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'

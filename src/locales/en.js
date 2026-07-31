@@ -723,7 +723,6 @@ export default {
   logs: {
     action_label: 'Action',
     action_placeholder: 'All actions',
-    current_date_label: 'Show logs for',
     date_range_label: 'Date range',
     date_range_placeholder: 'All dates',
     empty_list: 'There are no logs for the selected date.',

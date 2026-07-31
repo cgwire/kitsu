@@ -1729,9 +1729,18 @@
       "text": "O Kitsu só pode ser usado com os navegadores Firefox e Chrome."
     },
     "logs": {
-      "current_date_label": "Mostrar histórico para",
-      "events": "eventos listados para o dia atual",
+      "action_label": "Ação",
+      "action_placeholder": "Todas as ações",
+      "date_range_label": "Intervalo de datas",
+      "date_range_placeholder": "Todas as datas",
       "empty_list": "Não há histórico para data selecionada.",
+      "events": "eventos listados",
+      "export_csv": "Exportar CSV",
+      "object_label": "Objeto",
+      "object_placeholder": "Todos os objetos",
+      "only_files": "Apenas eventos de arquivos",
+      "people_label": "Usuários",
+      "people_placeholder": "Todos os usuários",
       "title": "Históricos",
       "preview_files": {
         "date": "Data de criação",

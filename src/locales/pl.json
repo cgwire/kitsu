@@ -686,9 +686,18 @@
       "oidc": "Logowanie SSO"
     },
     "logs": {
-      "current_date_label": "Pokaż logi z dnia",
+      "action_label": "Akcja",
+      "action_placeholder": "Wszystkie akcje",
+      "date_range_label": "Zakres dat",
+      "date_range_placeholder": "Wszystkie daty",
       "empty_list": "Brak logów dla wybranej daty.",
-      "events": "zdarzeń z bieżącego dnia",
+      "events": "wyświetlonych zdarzeń",
+      "export_csv": "Eksportuj CSV",
+      "object_label": "Obiekt",
+      "object_placeholder": "Wszystkie obiekty",
+      "only_files": "Tylko zdarzenia plików",
+      "people_label": "Użytkownicy",
+      "people_placeholder": "Wszyscy użytkownicy",
       "title": "Logi",
       "audit": {
         "title": "Logi aktywności"

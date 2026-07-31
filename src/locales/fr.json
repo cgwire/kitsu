@@ -1734,11 +1734,10 @@
     "logs": {
       "action_label": "Action",
       "action_placeholder": "Toutes les actions",
-      "current_date_label": "Montrer les journaux pour",
       "date_range_label": "Plage de dates",
       "date_range_placeholder": "Toutes les dates",
-      "events": "événements listés",
       "empty_list": "Il n'y a pas de journaux pour cette date",
+      "events": "événements listés",
       "export_csv": "Exporter en CSV",
       "object_label": "Objet",
       "object_placeholder": "Tous les objets",

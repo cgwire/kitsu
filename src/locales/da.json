@@ -1729,9 +1729,18 @@
       "text": "Kitsu kan kun bruges med browserne Firefox og Chrome."
     },
     "logs": {
-      "current_date_label": "Vis logfiler for",
-      "events": "begivenheder opført for den aktuelle dag",
+      "action_label": "Handling",
+      "action_placeholder": "Alle handlinger",
+      "date_range_label": "Datointerval",
+      "date_range_placeholder": "Alle datoer",
       "empty_list": "Der er ingen logfiler for den valgte dato.",
+      "events": "hændelser vist",
+      "export_csv": "Eksportér CSV",
+      "object_label": "Objekt",
+      "object_placeholder": "Alle objekter",
+      "only_files": "Kun filhændelser",
+      "people_label": "Brugere",
+      "people_placeholder": "Alle brugere",
       "title": "Logfiler",
       "preview_files": {
         "date": "Oprettelsesdato",

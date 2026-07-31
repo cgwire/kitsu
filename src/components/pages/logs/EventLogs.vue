@@ -1,8 +1,9 @@
 <template>
   <div class="mt1">
     <div class="flexrow filters">
-      <date-range-field
+      <date-field
         class="flexrow-item"
+        range
         :label="$t('logs.date_range_label')"
         :max-date="today"
         :placeholder="$t('logs.date_range_placeholder')"
@@ -45,14 +46,12 @@
     </div>
 
     <div class="flexrow filters mt1">
-      <label class="flexrow-item checkbox-label">
-        <input
-          type="checkbox"
-          v-model="onlyFiles"
-          @change="onOnlyFilesChange"
-        />
-        {{ $t('logs.only_files') }}
-      </label>
+      <checkbox
+        class="flexrow-item"
+        :label="$t('logs.only_files')"
+        v-model="onlyFiles"
+        @change="onOnlyFilesChange"
+      />
       <button-simple
         class="flexrow-item small"
         icon="refresh"
@@ -145,6 +144,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { useTime } from '@/composables/time'
+import csv from '@/lib/csv'
 import {
   formatFullDateWithRevertedTimezone,
   formatSimpleDate,
@@ -152,8 +152,9 @@ import {
 } from '@/lib/time'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import Checkbox from '@/components/widgets/Checkbox.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
-import DateRangeField from '@/components/widgets/DateRangeField.vue'
+import DateField from '@/components/widgets/DateField.vue'
 import MultiselectField from '@/components/widgets/MultiselectField.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
@@ -175,7 +176,7 @@ const ENTITY_LINK_KEYS = {
 }
 
 const { t } = useI18n()
-const { today, timezone, dateFormat, use12HourClock } = useTime()
+const { today, timezone, formatDate } = useTime()
 const route = useRoute()
 const router = useRouter()
 const store = useStore()
@@ -298,20 +299,12 @@ const resolvePeopleFromQuery = () => {
     .filter(Boolean)
 }
 
-// Seconds matter here: correlating events logged within the same minute is
-// the whole point of an audit trail.
-const formatEventDate = date => {
-  const localDate = moment.tz(date, 'UTC').tz(timezone.value)
-  const timeFormat = use12HourClock.value ? 'h:mm:ss A' : 'HH:mm:ss'
-  return `${localDate.format(dateFormat.value)} ${localDate.format(timeFormat)}`
-}
-
 const formatEvents = rawEvents => {
   return rawEvents.map(event => {
     const [name, type] = event.name.split(':')
     return {
       id: event.id,
-      date: formatEventDate(event.created_at),
+      date: formatDate(event.created_at),
       data: event.data ?? {},
       name,
       shortType: type.substring(0, 3),
@@ -405,15 +398,8 @@ const exportCsv = () => {
     event.person?.full_name ?? '',
     JSON.stringify(event.data)
   ])
-  const escape = value => `"${String(value).replace(/"/g, '""')}"`
-  const csv = [headers, ...rows]
-    .map(row => row.map(escape).join(','))
-    .join('\n')
-  const link = document.createElement('a')
-  link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }))
-  link.download = `activity-logs-${formatSimpleDate(new Date())}.csv`
-  link.click()
-  URL.revokeObjectURL(link.href)
+  const name = `activity-logs-${formatSimpleDate(new Date())}`
+  csv.buildCsvFile(name, [headers, ...rows])
 }
 
 // Watchers
@@ -470,12 +456,6 @@ useHead({ title: computed(() => `${t('logs.audit.title')} - Kitsu`) })
 .filters {
   align-items: flex-end;
   flex-wrap: wrap;
-}
-
-.checkbox-label {
-  color: var(--text);
-  cursor: pointer;
-  padding-bottom: 0.5em;
 }
 
 .event-count {
