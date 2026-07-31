@@ -363,5 +363,28 @@ describe('Tasks store', () => {
       expect(sibling.entity_preview_file_id).toEqual('preview-1')
       expect(other.entity_preview_file_id).toEqual('old')
     })
+
+    // The people module only refreshes the done tasks: the todo ones of the
+    // person page rely on being registered here, so pin that registration.
+    test('reaches the person todo tasks registered by LOAD_PERSON_TASKS_END', () => {
+      const task = {
+        id: 'task-1',
+        entity_id: 'entity-1',
+        entity_type_name: 'Shot',
+        entity_name: 'SH01',
+        project_id: 'project-1',
+        entity_preview_file_id: 'old'
+      }
+      const state = { taskMap: new Map() }
+
+      tasksStore.mutations.LOAD_PERSON_TASKS_END(state, { tasks: [task] })
+      expect(state.taskMap.get('task-1')).toBe(task)
+
+      tasksStore.mutations.SET_PREVIEW(state, {
+        entityId: 'entity-1',
+        previewId: 'preview-1'
+      })
+      expect(task.entity_preview_file_id).toEqual('preview-1')
+    })
   })
 })
