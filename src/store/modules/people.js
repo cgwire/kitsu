@@ -835,10 +835,10 @@ const mutations = {
     cache.personDoneTasksIndex = buildTaskIndex(tasks)
   },
 
-  // Root mutation shared with the entity modules, see the user module.
-  // displayedPersonTasks holds the very objects of state.personTasks.
+  // Root mutation shared with the entity modules. Only the done tasks need
+  // it: the tasks module registers the todo ones in its map on
+  // LOAD_PERSON_TASKS_END, and its own handler sweeps them from there.
   [SET_PREVIEW](state, { entityId, previewId }) {
-    setTasksEntityPreview(state.personTasks, entityId, previewId)
     setTasksEntityPreview(state.displayedPersonDoneTasks, entityId, previewId)
   },
 

@@ -48,21 +48,18 @@ describe('People store', () => {
       expect(state.displayedPeople).toEqual(store.cache.people)
     })
 
-    // The person page renders its own task objects, absent from the tasks
-    // module taskMap: the entity modules cannot refresh them.
-    test('SET_PREVIEW refreshes the person todo and done lists', () => {
-      const todo = { id: 'task-1', entity_id: 'entity-1' }
-      const done = { id: 'task-2', entity_id: 'entity-1' }
-      const other = { id: 'task-3', entity_id: 'entity-2' }
-      state.personTasks = [todo, other]
-      state.displayedPersonDoneTasks = [done]
+    // The done tasks of the person page never reach the tasks module map,
+    // unlike the todo ones registered on LOAD_PERSON_TASKS_END.
+    test('SET_PREVIEW refreshes the person done list', () => {
+      const done = { id: 'task-1', entity_id: 'entity-1' }
+      const other = { id: 'task-2', entity_id: 'entity-2' }
+      state.displayedPersonDoneTasks = [done, other]
 
       store.mutations.SET_PREVIEW(state, {
         entityId: 'entity-1',
         previewId: 'preview-1'
       })
 
-      expect(todo.entity_preview_file_id).toEqual('preview-1')
       expect(done.entity_preview_file_id).toEqual('preview-1')
       expect(other.entity_preview_file_id).toBeUndefined()
     })
