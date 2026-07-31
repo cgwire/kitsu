@@ -341,6 +341,7 @@
       "forgot_password": "Esqueceu a senha?",
       "login": "Entrar",
       "login_failed": "Falha no login, verifique suas credenciais",
+      "login_inactive": "Falha no login, sua conta está inativa.",
       "login_page": "Cancelar",
       "redirecting": "Redirecionando em {secondsLeft} segundos ...",
       "reset_change_password": "Mudar senha",

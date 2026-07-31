@@ -341,6 +341,7 @@
       "forgot_password": "Elfelejtetted a jelszavad?",
       "login": "Belépés",
       "login_failed": "Belépés sikertelen, kérlek ellenőrizd a felhasználóneved és jelszavad",
+      "login_inactive": "A bejelentkezés sikertelen, a fiókod inaktív.",
       "login_page": "Mégsem",
       "redirecting": "Átirányítás {secondsLeft} mp múlva...",
       "reset_change_password": "Jelszó megváltoztatása",

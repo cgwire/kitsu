@@ -341,6 +341,7 @@
       "forgot_password": "Passwort vergessen?",
       "login": "Einloggen",
       "login_failed": "Die Anmeldung ist fehlgeschlagen, bitte überprüfen Sie Ihre Zugangsdaten.",
+      "login_inactive": "Die Anmeldung ist fehlgeschlagen, Ihr Konto ist inaktiv.",
       "login_page": "Abbrechen",
       "redirecting": "Weiterleitung in {secondsLeft} Sekunden...",
       "reset_change_password": "Passwort ändern",

@@ -341,6 +341,7 @@
       "forgot_password": "密码忘记了?",
       "login": "登录",
       "login_failed": "登录失败, 请核实您的凭据",
+      "login_inactive": "登录失败，您的账号处于非活动状态。",
       "login_page": "取消",
       "redirecting": "{secondsLeft} 秒内重定向",
       "reset_change_password": "更改密码",

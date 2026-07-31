@@ -341,6 +341,7 @@
       "forgot_password": "パスワードをお忘れですか？",
       "login": "ログイン",
       "login_failed": "ログインに失敗しました。認証情報を確認してください。",
+      "login_inactive": "ログインに失敗しました。アカウントが無効です。",
       "login_page": "キャンセル",
       "redirecting": "{secondsLeft} 秒後にリダイレクトします...",
       "reset_change_password": "パスワードを変更",

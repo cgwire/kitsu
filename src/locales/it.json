@@ -341,6 +341,7 @@
       "forgot_password": "Password dimenticata?",
       "login": "Accedi",
       "login_failed": "Accesso non riuscito, verifica le tue credenziali.",
+      "login_inactive": "Accesso non riuscito, il tuo account è inattivo.",
       "login_page": "Annulla",
       "redirecting": "Reindirizzamento tra {secondsLeft} secondi...",
       "reset_change_password": "Cambia password",

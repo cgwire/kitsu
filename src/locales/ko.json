@@ -344,6 +344,7 @@
       "forgot_password": "비밀번호를 잊으셨나요?",
       "login": "로그인",
       "login_failed": "로그인을 실패했습니다, 인증정보를 검증해 주시기 바랍니다",
+      "login_inactive": "로그인에 실패했습니다. 계정이 비활성 상태입니다.",
       "login_page": "취소",
       "redirecting": "{secondsLeft}초 후 리다이렉트됩니다...",
       "reset_change_password": "비밀번호 변경",

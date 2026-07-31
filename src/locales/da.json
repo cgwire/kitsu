@@ -341,6 +341,7 @@
       "forgot_password": "Glemt kodeord?",
       "login": "Log ind",
       "login_failed": "Login mislykkedes, venligst verificer dine legitimationsoplysninger.",
+      "login_inactive": "Login mislykkedes, din konto er inaktiv.",
       "login_page": "Annuller",
       "redirecting": "Omdirigerer om {secondsLeft} sekunder...",
       "reset_change_password": "Skift adgangskode",

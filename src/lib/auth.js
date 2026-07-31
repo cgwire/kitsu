@@ -39,6 +39,9 @@ const auth = {
           err.two_factor_authentication_enabled =
             body.two_factor_authentication_enabled
         }
+        if (body.unactive) {
+          err.unactive = true
+        }
       }
       if (!err.response || err.status >= 500) {
         err.server_error = true

@@ -643,6 +643,7 @@
       "information_recovery_code": "Jeśli nie możesz użyć żadnej innej metody uwierzytelniania dwuskładnikowego, wprowadź jeden z kodów odzyskiwania, aby potwierdzić swoją tożsamość.",
       "login": "Zaloguj się",
       "login_failed": "Logowanie nie powiodło się, sprawdź swoje dane logowania.",
+      "login_inactive": "Logowanie nie powiodło się, Twoje konto jest nieaktywne.",
       "login_server_failed": "Podczas logowania wystąpił błąd serwera.",
       "login_page": "Anuluj",
       "redirecting": "Przekierowanie za {secondsLeft} s...",

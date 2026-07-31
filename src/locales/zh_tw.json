@@ -341,6 +341,7 @@
       "forgot_password": "密碼忘記了?",
       "login": "登入",
       "login_failed": "登入失敗, 請核實您的憑據",
+      "login_inactive": "登入失敗，您的帳號已停止活動。",
       "login_page": "取消",
       "redirecting": "{secondsLeft} 秒內重新導向",
       "reset_change_password": "更改密碼",

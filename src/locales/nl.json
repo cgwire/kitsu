@@ -341,6 +341,7 @@
       "forgot_password": "Wachtwoord vergeten?",
       "login": "Log in",
       "login_failed": "Log in mislukt, controleer uw gegevens",
+      "login_inactive": "Inloggen mislukt, uw account is inactief.",
       "login_page": "Annuleren",
       "redirecting": "Redirect in {secondsLeft} seconde...",
       "reset_change_password": "Verander wachtwoord",

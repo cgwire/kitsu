@@ -341,6 +341,7 @@
       "forgot_password": "رمز ورود را فراموش کرده اید؟",
       "login": "ورود",
       "login_failed": "خطا در ورود، لطفا مشخصات خود را بررسی کنید.",
+      "login_inactive": "ورود ناموفق بود، حساب کاربری شما غیرفعال است.",
       "login_page": "لغو",
       "redirecting": "هدایت در {secondsLeft} ثانیه...",
       "reset_change_password": "تغییر رمز ورود",

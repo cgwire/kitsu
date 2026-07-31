@@ -341,6 +341,7 @@
       "forgot_password": "¿Olvidó su contraseña?",
       "login": "Iniciar sesión",
       "login_failed": "Error de inicio de sesión, por favor verifique sus credenciales",
+      "login_inactive": "El inicio de sesión ha fallado, su cuenta está inactiva.",
       "login_page": "Cancelar",
       "redirecting": "Redirigiendo en {secondsLeft} segundos",
       "reset_change_password": "Cambiar contraseña",

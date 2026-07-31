@@ -344,6 +344,7 @@
       "forgot_password": "Mot de passe oublié ?",
       "login": "Se connecter",
       "login_failed": "La connexion a échoué, vérifiez vos identifiants",
+      "login_inactive": "La connexion a échoué, votre compte est inactif.",
       "login_page": "Annuler",
       "redirecting": "Redirection dans {secondsLeft} secondes...",
       "reset_change_password": "Changer le mot de passe",
