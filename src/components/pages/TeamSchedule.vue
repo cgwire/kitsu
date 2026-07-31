@@ -790,6 +790,20 @@ export default {
     }
   },
 
+  socket: {
+    events: {
+      // The unassigned tasks are enriched copies, out of reach of the store
+      // mutations, so refresh their thumbnail here.
+      'preview-file:set-main'(eventData) {
+        this.unassignedTasks.forEach(task => {
+          if (task.entity_id === eventData.entity_id) {
+            task.entity_preview_file_id = eventData.preview_file_id
+          }
+        })
+      }
+    }
+  },
+
   watch: {
     selectedDepartment(value) {
       this.updateRoute({ department: value })
