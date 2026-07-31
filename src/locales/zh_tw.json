@@ -788,6 +788,7 @@
       "change_password_error": "變更密碼時發生錯誤。請驗證新的密碼。",
       "disable_2FA": "停用 2FA",
       "disable_2FA_error": "停用雙因素驗證時發生錯誤。",
+      "self_role_downgrade_confirm": "要將您自己的職責從 {currentRole} 降為 {newRole} 嗎？您會立即失去管理員權限：無法再建立製作項目或管理使用者，而且只有其他 {currentRole} 才能還原您的職責。",
       "departments_empty": "此使用者未與任何部門連結。",
       "edit_avatar_error": "更新使用者頭像時發生錯誤。",
       "contract": {

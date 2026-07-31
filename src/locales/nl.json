@@ -788,6 +788,7 @@
       "change_password_error": "Er is een fout opgetreden tijdens het wijzigen van het wachtwoord. Controleer het nieuwe wachtwoord.",
       "disable_2FA": "2FA uitschakelen",
       "disable_2FA_error": "Er is een fout opgetreden bij het uitschakelen van tweefactorauthenticatie.",
+      "self_role_downgrade_confirm": "Je eigen rol verlagen van {currentRole} naar {newRole}? Je verliest je beheerdersrechten meteen: producties aanmaken en gebruikers beheren kan dan niet meer, en alleen een andere {currentRole} kan je rol herstellen.",
       "departments_empty": "Deze gebruiker is niet gekoppeld aan een afdeling.",
       "edit_avatar_error": "Er is een fout opgetreden tijdens het bijwerken van de avatar van de gebruiker.",
       "contract": {

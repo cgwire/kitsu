@@ -788,6 +788,7 @@
       "change_password_error": "更改密码时出错，请验证新密码。",
       "disable_2FA": "禁用双身份验证",
       "disable_2FA_error": "禁用双身份验证出错",
+      "self_role_downgrade_confirm": "将您自己的职责从 {currentRole} 降为 {newRole}？您将立即失去管理员权限：无法再创建制作或管理用户，并且只有其他 {currentRole} 才能恢复您的职责。",
       "departments_empty": "该用户与任何部门都没有关联。",
       "edit_avatar_error": "更新用户头像时发生错误。",
       "contract": {

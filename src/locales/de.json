@@ -788,6 +788,7 @@
       "change_password_error": "Beim Ändern des Passworts ist ein Fehler aufgetreten. Bitte überprüfen Sie das neue Passwort.",
       "disable_2FA": "2FA deaktivieren",
       "disable_2FA_error": "Beim Deaktivieren der Zwei-Faktor-Authentifizierung ist ein Fehler aufgetreten.",
+      "self_role_downgrade_confirm": "Ihre eigene Rolle von {currentRole} auf {newRole} herabstufen? Sie verlieren Ihre Administratorrechte sofort: Produktionen anlegen und Benutzer verwalten ist dann nicht mehr möglich, und nur ein anderer {currentRole} kann Ihre Rolle wiederherstellen.",
       "departments_empty": "Dieser Benutzer ist nicht mit einer Abteilung verknüpft.",
       "edit_avatar_error": "Beim Aktualisieren des Avatars des Benutzers ist ein Fehler aufgetreten.",
       "contract": {

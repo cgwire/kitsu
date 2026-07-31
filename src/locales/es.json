@@ -788,6 +788,7 @@
       "change_password_error": "Se ha producido un error al cambiar la contraseña. Verifica la nueva contraseña.",
       "disable_2FA": "Desactivar 2FA",
       "disable_2FA_error": "Se ha producido un error al desactivar la autenticación de dos factores.",
+      "self_role_downgrade_confirm": "¿Bajar su propio papel de {currentRole} a {newRole}? Pierde sus derechos de administrador de inmediato: ya no podrá crear producciones ni gestionar usuarios, y solo otro {currentRole} podrá restaurar su papel.",
       "departments_empty": "Este usuario no está vinculado a ningún departamento.",
       "edit_avatar_error": "Se ha producido un error al actualizar el avatar del usuario.",
       "contract": {

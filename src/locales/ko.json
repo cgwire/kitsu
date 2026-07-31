@@ -793,6 +793,7 @@
       "change_password_error": "비밀번호 변경 중 오류가 발생했습니다. 새 비밀번호를 확인하십시오.",
       "disable_2FA": "2FA 비활성화하기",
       "disable_2FA_error": "2단계 인증을 비활성화하는 동안 오류가 발생했습니다.",
+      "self_role_downgrade_confirm": "본인의 역할을 {currentRole}에서 {newRole}(으)로 낮추시겠습니까? 관리자 권한이 즉시 사라져 프로덕션 생성과 사용자 관리를 더 이상 할 수 없으며, 다른 {currentRole}만 역할을 되돌릴 수 있습니다.",
       "departments_empty": "이 사용자는 어떤 부서에도 연결되어 있지 않습니다.",
       "edit_avatar_error": "사용자의 아바타를 업데이트하는 동안 오류가 발생했습니다.",
       "contract": {

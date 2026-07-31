@@ -788,6 +788,7 @@
       "change_password_error": "パスワードの変更中にエラーが発生しました。新しいパスワードを確認してください。",
       "disable_2FA": "2FA を無効化",
       "disable_2FA_error": "二要素認証の無効化中にエラーが発生しました。",
+      "self_role_downgrade_confirm": "自分のロールを {currentRole} から {newRole} に下げますか？管理者権限はすぐに失われ、プロダクションの作成やユーザー管理ができなくなります。ロールを戻せるのは他の {currentRole} だけです。",
       "departments_empty": "このユーザーはどの部門にもリンクされていません。",
       "edit_avatar_error": "ユーザーのアバター更新中にエラーが発生しました。",
       "contract": {

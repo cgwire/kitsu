@@ -788,6 +788,7 @@
       "change_password_error": "Si è verificato un errore durante il cambio della password. Verifica la nuova password.",
       "disable_2FA": "Disattiva la 2FA",
       "disable_2FA_error": "Si è verificato un errore durante la disattivazione dell'autenticazione a due fattori.",
+      "self_role_downgrade_confirm": "Vuoi abbassare il tuo ruolo da {currentRole} a {newRole}? Perdi subito i diritti di amministratore: non potrai più creare produzioni né gestire gli utenti, e solo un altro {currentRole} potrà ripristinare il tuo ruolo.",
       "departments_empty": "Questo utente non è collegato a nessun reparto.",
       "edit_avatar_error": "Si è verificato un errore durante l'aggiornamento dell'avatar dell'utente.",
       "contract": {

@@ -788,6 +788,7 @@
       "change_password_error": "Ocorreu um erro ao alterar a senha. Verifique a nova senha.",
       "disable_2FA": "Desativar a 2FA",
       "disable_2FA_error": "Ocorreu um erro ao desativar a autenticação de dois fatores.",
+      "self_role_downgrade_confirm": "Rebaixar o seu próprio cargo de {currentRole} para {newRole}? Você perde seus direitos de administrador imediatamente: criar produções e gerenciar usuários deixa de ser possível, e somente outro {currentRole} poderá restaurar seu cargo.",
       "departments_empty": "Esse usuário não está vinculado a nenhum departamento.",
       "edit_avatar_error": "Ocorreu um erro ao atualizar o avatar do usuário.",
       "contract": {

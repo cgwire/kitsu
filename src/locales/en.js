@@ -1124,6 +1124,7 @@ export default {
     change_password_error: 'An error occurred while changing password. Please verify the new password.',
     disable_2FA: 'Disable 2FA',
     disable_2FA_error: 'An error occurred while disabling two-factor authentication.',
+    self_role_downgrade_confirm: 'Lower your own role from {currentRole} to {newRole}? You lose your administrator rights right away: creating productions and managing users will no longer be possible, and only another {currentRole} will be able to restore your role.',
     fields: {
       active: 'Active',
       contract: 'Contract',

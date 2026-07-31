@@ -788,6 +788,7 @@
       "change_password_error": "Der opstod en fejl under ændring af adgangskoden. Kontrollér venligst den nye adgangskode.",
       "disable_2FA": "Deaktiver 2FA",
       "disable_2FA_error": "Der opstod en fejl under deaktivering af tofaktorgodkendelse.",
+      "self_role_downgrade_confirm": "Vil du sænke din egen rolle fra {currentRole} til {newRole}? Du mister dine administratorrettigheder med det samme: du kan ikke længere oprette produktioner eller administrere brugere, og kun en anden {currentRole} kan gendanne din rolle.",
       "departments_empty": "Denne bruger er ikke knyttet til nogen afdeling.",
       "edit_avatar_error": "Der opstod en fejl under opdatering af brugerens avatar.",
       "contract": {

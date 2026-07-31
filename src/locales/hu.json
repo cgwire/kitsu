@@ -799,6 +799,7 @@
       "departments_empty": "Ez a felhasználó nem kapcsolódik egyetlen osztályhoz sem.",
       "disable_2FA": "2FA kikapcsolása",
       "disable_2FA_error": "Hiba történt a kétlépcsős hitelesítés kikapcsolásakor.",
+      "self_role_downgrade_confirm": "Lefokozod a saját szerepedet erről: {currentRole}, erre: {newRole}? Azonnal elveszíted az adminisztrátori jogaidat: nem tudsz többé produkciót létrehozni és felhasználókat kezelni, és csak egy másik {currentRole} tudja visszaállítani a szerepedet.",
       "edit_avatar_error": "Hiba történt a felhasználó avatárjának frissítésekor.",
       "email_domain_error": "Ez az e-mail tartomány nem engedélyezett.",
       "email_exist_error": "Ezt az e-mail címet már használja egy másik felhasználó.",

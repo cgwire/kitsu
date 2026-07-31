@@ -791,6 +791,7 @@
       "change_password_error": "Une erreur est survenue en changeant de mot de passe. S'il vous plait vérifiez le nouveau mot de passe.",
       "disable_2FA": "Désactivez l'authentification double facteur",
       "disable_2FA_error": "Une erreur est survenue en désactivant l'authentification double facteur.",
+      "self_role_downgrade_confirm": "Abaisser votre propre rôle de {currentRole} vers {newRole} ? Vous perdez immédiatement vos droits d'administrateur : la création de productions et la gestion des utilisateurs ne seront plus possibles, et seul un autre {currentRole} pourra rétablir votre rôle.",
       "departments_empty": "Cet utilisateur n'est lié à aucun département.",
       "edit_avatar_error": "Une erreur s'est produite lors de la mise à jour de l'avatar de l'utilisateur.",
       "contract": {
