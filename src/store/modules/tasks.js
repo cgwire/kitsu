@@ -1532,6 +1532,11 @@ const mutations = {
       const localComment = state.taskComments[comment.object_id].find(
         c => c.id === comment.id
       )
+      if (!localComment) return
+      // Raw replies only carry person_id, so the author has to be resolved
+      // here too. Without it a reply arriving through the realtime event
+      // renders with a broken avatar until the page is reloaded.
+      helpers.enrichCommentAuthors(comment)
       localComment.replies = comment.replies
     }
   },
