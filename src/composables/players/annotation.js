@@ -921,8 +921,9 @@ export const useAnnotation = ({
 
   // History entries belong to the frame they were made on: replayed after
   // a seek, they would graft objects onto the wrong frame's annotation
-  // entry (deltas are keyed on the CURRENT time). Stale history is
-  // dropped instead of replayed.
+  // entry (deltas are keyed on the CURRENT time). Such an entry is skipped,
+  // not dropped: it becomes replayable again once the user is back on its
+  // frame.
   const isStaleAction = action =>
     action?.time !== undefined && action.time !== getCurrentTime()
 
@@ -1002,10 +1003,7 @@ export const useAnnotation = ({
   const undoLastAction = () => {
     const lastAction = doneActionStack[doneActionStack.length - 1]
     if (!lastAction) return
-    if (isStaleAction(lastAction)) {
-      resetUndoStacks()
-      return
-    }
+    if (isStaleAction(lastAction)) return
     replayingHistory = true
     try {
       if (lastAction.type === 'erase') {
@@ -1041,10 +1039,7 @@ export const useAnnotation = ({
   const redoLastAction = () => {
     const lastUndone = undoneActionStack[undoneActionStack.length - 1]
     if (!lastUndone) return
-    if (isStaleAction(lastUndone)) {
-      resetUndoStacks()
-      return
-    }
+    if (isStaleAction(lastUndone)) return
     replayingHistory = true
     try {
       if (lastUndone.type === 'erase') {

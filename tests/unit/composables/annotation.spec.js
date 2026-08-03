@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils'
-import { computed, defineComponent, ref } from 'vue'
+import { computed, defineComponent, ref, unref } from 'vue'
 
 import { Point, Text } from 'fabric'
 import { PSStroke, PSPoint } from 'fabricjs-psbrush'
@@ -116,7 +116,9 @@ const mountAnnotation = (options = {}) => {
     annotations = ref([]),
     isCurrentUserArtist = computed(() => false),
     userId = computed(() => 'user-1'),
-    currentTime = 1.0,
+    // A ref so a test can move the playhead between two calls; a plain
+    // number still works for the tests that never seek.
+    currentTime = ref(1.0),
     currentFrame = 24,
     isLaserModeOn = ref(false),
     isEraserModeOn = ref(false),
@@ -158,7 +160,7 @@ const mountAnnotation = (options = {}) => {
         userId,
         store,
         emit: emitSpy,
-        getCurrentTime: () => currentTime,
+        getCurrentTime: () => unref(currentTime),
         getCurrentFrame: () => currentFrame,
         saveAnnotationsCb,
         onCanvasMouseMovedCb,
@@ -1143,6 +1145,38 @@ describe('composables/annotation', () => {
       // share the same time bucket).
       const deletion = api.deletions.value[0]
       expect(deletion?.objects).toEqual([])
+      wrapper.unmount()
+    })
+
+    it('leaves an entry made on another frame alone', () => {
+      const obj = createSerializableObject({ id: 'a' })
+      const canvas = createFakeCanvas()
+      const currentTime = ref(10)
+      const { api, wrapper } = mountAnnotation({ canvas, currentTime })
+
+      api.addObject(obj)
+      currentTime.value = 11
+      api.undoLastAction()
+
+      expect(canvas.remove).not.toHaveBeenCalled()
+      wrapper.unmount()
+    })
+
+    // Skipping a foreign entry must not cost the history: the stroke is still
+    // there and still belongs to frame 10, so coming back must undo it.
+    it('undoes that entry again once the playhead is back on its frame', () => {
+      const obj = createSerializableObject({ id: 'a' })
+      const canvas = createFakeCanvas()
+      const currentTime = ref(10)
+      const { api, wrapper } = mountAnnotation({ canvas, currentTime })
+
+      api.addObject(obj)
+      currentTime.value = 11
+      api.undoLastAction()
+      currentTime.value = 10
+      api.undoLastAction()
+
+      expect(canvas.remove).toHaveBeenCalledWith(obj)
       wrapper.unmount()
     })
 
