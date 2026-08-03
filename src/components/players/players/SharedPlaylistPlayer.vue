@@ -99,6 +99,7 @@
           </div>
 
           <shared-annotation-overlay
+            ref="annotationOverlay"
             :annotations="currentAnnotations"
             :current-frame="currentFrameNumber"
             :frame-duration="frameDuration"
@@ -292,6 +293,7 @@ const emit = defineEmits(['logout'])
 const { panzoomTransform, onPanzoomChanged, resetPanzoomTransform } =
   usePanzoomSync()
 
+const annotationOverlay = ref(null)
 const container = ref(null)
 const videoContainer = ref(null)
 // Height available for the picture viewer: it must fill the same area the
@@ -847,6 +849,22 @@ const onKeyDown = event => {
   const stop = () => {
     event.preventDefault()
     event.stopPropagation()
+  }
+
+  // Left unconsumed, the browser's own undo rewinds the guest's comment draft:
+  // it is scoped to the frame, not to the focused element, so it fires long
+  // after the textarea lost focus. Swallow every variant whatever the state
+  // (Shift uppercases the key, Windows binds redo to Ctrl+Y, and this player
+  // has no redo); only the undo itself needs an annotating overlay. Matched on
+  // event.key rather than event.code, the Z cap being another physical key on
+  // AZERTY (see isAltLetter).
+  const letter = event.key?.toLowerCase()
+  if ((event.ctrlKey || event.metaKey) && (letter === 'z' || letter === 'y')) {
+    stop()
+    if (letter === 'z' && !event.shiftKey && isAnnotating.value) {
+      annotationOverlay.value?.undo()
+    }
+    return
   }
 
   // Entity navigation reuses isAltLetter (shared with usePreviewShortcuts)
