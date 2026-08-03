@@ -202,6 +202,12 @@ export const useAnnotation = ({
     return fabricCanvas.value.getObjects().find(obj => obj.id === objectId)
   }
 
+  // Canvas box a history entry's object had its coordinates projected onto.
+  const getCanvasProjection = () => ({
+    width: fabricCanvas.value?.width,
+    height: fabricCanvas.value?.height
+  })
+
   const setObjectData = object => {
     // canvasWidth / canvasHeight are the dimensions the object's left /
     // top were authored against — never refresh them, or a later save
@@ -250,7 +256,8 @@ export const useAnnotation = ({
       doneActionStack.push({
         type: 'add',
         obj: activeObject,
-        time: getCurrentTime()
+        time: getCurrentTime(),
+        projection: getCanvasProjection()
       })
       saveAnnotationsCb()
     }
@@ -326,7 +333,12 @@ export const useAnnotation = ({
       children.forEach(obj => {
         fabricCanvas.value.remove(obj)
         addToDeletions(obj)
-        doneActionStack.push({ type: 'remove', obj, time: getCurrentTime() })
+        doneActionStack.push({
+          type: 'remove',
+          obj,
+          time: getCurrentTime(),
+          projection: getCanvasProjection()
+        })
       })
     } else if (activeObject) {
       fabricCanvas.value.remove(activeObject)
@@ -334,7 +346,8 @@ export const useAnnotation = ({
       doneActionStack.push({
         type: 'remove',
         obj: activeObject,
-        time: getCurrentTime()
+        time: getCurrentTime(),
+        projection: getCanvasProjection()
       })
     }
     if (activeObject) clearUndoneOnUserAction()
@@ -916,7 +929,12 @@ export const useAnnotation = ({
   // Undo / Redo
 
   const stackAddAction = ({ target }) => {
-    doneActionStack.push({ type: 'add', obj: target, time: getCurrentTime() })
+    doneActionStack.push({
+      type: 'add',
+      obj: target,
+      time: getCurrentTime(),
+      projection: getCanvasProjection()
+    })
   }
 
   // History entries belong to the frame they were made on: replayed after
@@ -935,13 +953,56 @@ export const useAnnotation = ({
     if (!replayingHistory) clearUndoneStack()
   }
 
+  // An object sitting off the canvas (undone, waiting for its redo) keeps the
+  // coordinates it had for the box it was last projected onto: the reload that
+  // re-scales every live object can't reach it. Re-adding it as is after a
+  // resize would drop it at the old box's position, often outside the visible
+  // area. Map it from the box the entry recorded onto the live one, through its
+  // own canvasWidth reference frame.
+  const reprojectHistoryObject = (object, projection) => {
+    const canvas = fabricCanvas.value
+    if (!canvas || !projection?.width || !object?.canvasWidth) return object
+    if (
+      projection.width === canvas.width &&
+      projection.height === canvas.height
+    ) {
+      return object
+    }
+    const from = getAnnotationContainMapping(
+      projection,
+      object.canvasWidth,
+      object.canvasHeight
+    )
+    const to = getAnnotationContainMapping(
+      canvas,
+      object.canvasWidth,
+      object.canvasHeight
+    )
+    if (!from.scale || !to.scale) return object
+    const ratio = to.scale / from.scale
+    const values = {
+      left: (object.left - from.offsetX) * ratio + to.offsetX,
+      top: (object.top - from.offsetY) * ratio + to.offsetY,
+      scaleX: object.scaleX * ratio,
+      scaleY: object.scaleY * ratio
+    }
+    Object.entries(values).forEach(([key, value]) => {
+      if (object.set) object.set(key, value)
+      else object[key] = value
+    })
+    object.setCoords?.()
+    return object
+  }
+
   // After a canvas reload (e.g. Esc-exit fullscreen) the stack entry
   // holds a stale fabric.Object that's no longer on the live canvas;
   // look it up by id. Groups (_objects) aren't on the canvas as a
   // whole, fall back to the stored reference.
   const resolveActionObject = action => {
     if (action.obj?._objects) return action.obj
-    return getObjectById(action.obj.id) ?? action.obj
+    const live = getObjectById(action.obj.id)
+    if (live) return live
+    return reprojectHistoryObject(action.obj, action.projection)
   }
 
   // Undo an erase: pop the last path off each affected object's eraser mask,
@@ -1036,6 +1097,7 @@ export const useAnnotation = ({
       // this one up (it is off-canvas) and would re-inject the pre-reload
       // instance at its pre-reload position.
       action.obj = obj
+      action.projection = getCanvasProjection()
       undoneActionStack.push(action)
     } finally {
       replayingHistory = false
@@ -1065,6 +1127,7 @@ export const useAnnotation = ({
       }
       doneActionStack.length = stackLengthBefore
       action.obj = obj
+      action.projection = getCanvasProjection()
       doneActionStack.push(action)
     } finally {
       replayingHistory = false

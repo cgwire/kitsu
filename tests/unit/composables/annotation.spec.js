@@ -1245,6 +1245,46 @@ describe('composables/annotation', () => {
       expect(canvas._objects[0].left).toBe(200)
       wrapper.unmount()
     })
+
+    // Reported gesture: three strokes, fullscreen, two undos, back out of
+    // fullscreen, redo. The undone object sits off the canvas while the box
+    // shrinks back, so no reload can re-scale it; redo used to re-inject it at
+    // its fullscreen coordinates, far outside the reduced player.
+    it('redoes at the right place after a resize made while undone', async () => {
+      const canvas = createFakeCanvas()
+      const { api, wrapper } = mountAnnotation({ canvas })
+      const strokes = [
+        { ...STROKE_ON_800, id: 's1', left: 100 },
+        { ...STROKE_ON_800, id: 's2', left: 200 },
+        { ...STROKE_ON_800, id: 's3', left: 300 }
+      ]
+
+      const reload = async kept => {
+        api.clearCanvas()
+        for (const data of kept) await api.addObjectToCanvas(null, data, canvas)
+      }
+
+      for (const data of strokes) {
+        api.onObjectAdded({ target: await api.addObjectToCanvas(null, data, canvas) })
+      }
+
+      canvas.width = 1600
+      canvas.height = 1200
+      await reload(strokes)
+
+      api.undoLastAction()
+      api.undoLastAction()
+      expect(canvas._objects.map(o => o.id)).toEqual(['s1'])
+
+      canvas.width = 800
+      canvas.height = 600
+      await reload([strokes[0]])
+      api.redoLastAction()
+
+      expect(canvas._objects.map(o => o.id)).toEqual(['s1', 's2'])
+      expect(canvas._objects[1].left).toBe(200)
+      wrapper.unmount()
+    })
   })
 
   describe('redoLastAction', () => {
