@@ -8,7 +8,12 @@ import {
   sortRevisionPreviewFiles,
   sortByName
 } from '@/lib/sorting'
-import { arrayMove, populateTask, removeModelFromList } from '@/lib/models'
+import {
+  arrayMove,
+  populateTask,
+  removeModelFromList,
+  setTasksEntityPreview
+} from '@/lib/models'
 import func from '@/lib/func'
 
 import assetStore from '@/store/modules/assets'
@@ -975,7 +980,6 @@ const mutations = {
     } else {
       state.taskSearchQueries = []
     }
-    state.tasks = Array.from(state.taskMap.values())
   },
 
   [LOAD_SHOTS_END](state, { production, userFilters }) {
@@ -1413,10 +1417,11 @@ const mutations = {
     }
   },
 
-  [SET_PREVIEW](state, { taskId, previewId }) {
-    if (state.taskMap.get(taskId)?.entity) {
-      state.taskMap.get(taskId).entity.preview_file_id = previewId
-    }
+  // REGISTER_USER_TASKS registers the todo, done and to-check lists into the
+  // map as the very objects those pages render, so sweeping it refreshes them
+  // all, including the my-checks tasks held in component state.
+  [SET_PREVIEW](state, { entityId, previewId }) {
+    setTasksEntityPreview(state.taskMap, entityId, previewId)
   },
 
   [SET_IS_BIG_THUMBNAILS](state, isBigThumbnails) {
@@ -1433,7 +1438,7 @@ const mutations = {
 
   [LOAD_PERSON_TASKS_END](state, { tasks }) {
     tasks.forEach(task => {
-      if (task.last_comment.person_id) {
+      if (task.last_comment?.person_id) {
         const person = helpers.getPerson(task.last_comment.person_id)
         task.last_comment.person = person
       }
@@ -1444,7 +1449,7 @@ const mutations = {
 
   [REGISTER_USER_TASKS](state, { tasks }) {
     tasks.forEach(task => {
-      if (task.last_comment.person_id) {
+      if (task.last_comment?.person_id) {
         const person = helpers.getPerson(task.last_comment.person_id)
         task.last_comment.person = person
       }

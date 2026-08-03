@@ -10,19 +10,7 @@
     <div class="modal-content">
       <div class="box">
         <page-title class="title" :text="$t('shots.manage')" />
-        <div class="explanation">{{ $t('shots.creation_explanation') }}</div>
-        <div>
-          <div class="flexrow">
-            <combobox
-              :label="$t('shots.padding')"
-              :options="shotPaddingOptions"
-              class="shot-padding flexrow-item"
-              v-model="shotPadding"
-              v-show="shotMode === 'single'"
-            />
-          </div>
-        </div>
-
+        <div class="mt1 mb1">{{ $t('shots.creation_explanation') }}</div>
         <div class="shot-columns">
           <div class="shot-column" v-if="isTVShow">
             <h2 class="subtitle">{{ $t('shots.episodes') }}</h2>
@@ -113,7 +101,9 @@
           </div>
 
           <div class="shot-column">
-            <div class="shot-tabs">
+            <h2 class="subtitle">{{ $t('shots.title') }}</h2>
+
+            <div class="shot-tabs mb1">
               <button
                 :class="['tab-button', { active: shotMode === 'single' }]"
                 @click="shotMode = 'single'"
@@ -128,10 +118,16 @@
               </button>
             </div>
 
-            <h2 class="subtitle">{{ $t('shots.title') }}</h2>
-
-            <div class="list">
-              <template v-if="shotMode === 'single'">
+            <template v-if="shotMode === 'single'">
+              <combobox
+                class="shot-step mb1"
+                :label="$t('shots.numbering_step')"
+                is-inline
+                :options="shotStepOptions"
+                :with-margin="false"
+                v-model="shotStep"
+              />
+              <div class="list">
                 <div
                   class="entity-line"
                   :key="shot.id"
@@ -139,22 +135,8 @@
                 >
                   {{ shot.name }}
                 </div>
-              </template>
-              <template v-else>
-                <div
-                  v-for="name in bulkPreviewNames"
-                  :key="name"
-                  :class="[
-                    'entity-line',
-                    { collision: isBulkNameCollision(name) }
-                  ]"
-                >
-                  {{ name }}
-                </div>
-              </template>
-            </div>
+              </div>
 
-            <template v-if="shotMode === 'single'">
               <div class="field">
                 <input
                   class="input"
@@ -181,48 +163,48 @@
             </template>
 
             <template v-else>
-              <div class="field bulk-fields">
-                <div class="bulk-field">
-                  <label class="label is-small">{{
-                    $t('shots.fields.start')
-                  }}</label>
-                  <input
-                    class="input"
-                    type="text"
-                    :placeholder="$t('shots.fields.placeholder')"
-                    v-model="bulk.start"
-                  />
-                </div>
-                <div class="bulk-field">
-                  <label class="label is-small">{{
-                    $t('shots.fields.count')
-                  }}</label>
-                  <input
-                    class="input"
-                    type="number"
-                    min="1"
-                    max="500"
-                    v-model.number="bulk.count"
-                  />
-                </div>
-                <div class="bulk-field">
-                  <label class="label is-small">{{
-                    $t('shots.fields.step')
-                  }}</label>
-                  <input
-                    class="input"
-                    type="number"
-                    min="1"
-                    v-model.number="bulk.step"
-                  />
+              <div class="bulk-fields">
+                <text-field
+                  input-class=" is-small"
+                  :label="$t('shots.fields.start')"
+                  :placeholder="$t('shots.fields.placeholder')"
+                  :errored="bulkStartError"
+                  :error-text="$t('shots.bulk_invalid_start')"
+                  v-model="bulk.start"
+                />
+                <text-field
+                  input-class=" is-small"
+                  type="number"
+                  :label="$t('shots.fields.count')"
+                  :min="1"
+                  :max="500"
+                  :step="1"
+                  v-model="bulk.count"
+                />
+                <text-field
+                  input-class=" is-small"
+                  type="number"
+                  :label="$t('shots.fields.step')"
+                  :min="1"
+                  :step="1"
+                  v-model="bulk.step"
+                />
+                <p v-if="bulkError" class="error">
+                  {{ $t('shots.bulk_error') }}
+                </p>
+              </div>
+              <div class="list bulk-list">
+                <div
+                  v-for="name in bulkPreviewNames"
+                  :key="name"
+                  :class="[
+                    'entity-line',
+                    { collision: isBulkNameCollision(name) }
+                  ]"
+                >
+                  {{ name }}
                 </div>
               </div>
-              <p v-if="bulkStartError" class="help is-danger">
-                {{ $t('shots.bulk_invalid_start') }}
-              </p>
-              <p v-if="bulkError" class="help is-danger">
-                {{ $t('shots.bulk_error') }}
-              </p>
               <div class="field">
                 <button
                   :class="{
@@ -262,6 +244,7 @@ import shotStore from '@/store/modules/shots'
 
 import Combobox from '@/components/widgets/Combobox.vue'
 import PageTitle from '@/components/widgets/PageTitle.vue'
+import TextField from '@/components/widgets/TextField.vue'
 
 const router = useRouter()
 const store = useStore()
@@ -274,7 +257,7 @@ const emit = defineEmits(['add-episode', 'add-sequence', 'add-shot', 'cancel'])
 
 useModal(toRef(props, 'active'), emit)
 
-const shotPaddingOptions = [
+const shotStepOptions = [
   { label: '1', value: '1' },
   { label: '2', value: '2' },
   { label: '10', value: '10' }
@@ -295,7 +278,7 @@ const sequences = ref([])
 const displayedShots = ref([])
 const selectedEpisodeId = ref(null)
 const selectedSequenceId = ref(null)
-const shotPadding = ref('1')
+const shotStep = ref('1')
 const shotMode = ref('single')
 const bulk = reactive({ start: '', count: 20, step: 10 })
 const bulkError = ref(false)
@@ -330,8 +313,9 @@ const bulkPreviewNames = computed(() => {
   if (
     !bulk.start ||
     bulkStartError.value ||
-    !bulk.count ||
-    !bulk.step ||
+    !Number.isInteger(bulk.count) ||
+    !Number.isInteger(bulk.step) ||
+    bulk.count < 1 ||
     bulk.step < 1
   ) {
     return []
@@ -458,7 +442,7 @@ const addShot = () => {
     selectSequence(selectedSequenceId.value)
     names.shot = stringHelpers.generateNextName(
       created.name,
-      parseInt(shotPadding.value)
+      parseInt(shotStep.value)
     )
   })
 }
@@ -467,7 +451,7 @@ watch(
   () => props.active,
   active => {
     if (!active) return
-    shotPadding.value = '1'
+    shotStep.value = '1'
     sequences.value = displayedSequences.value
     if (isTVShow.value) {
       selectEpisode(displayedEpisodes.value[0].id)
@@ -503,7 +487,6 @@ defineExpose({ focusAddSequence, focusAddShot })
 
 .shot-columns {
   display: flex;
-  height: 300px;
 }
 
 .shot-column {
@@ -563,27 +546,25 @@ input::placeholder {
   color: #bbb;
 }
 
-.explanation {
-  margin-bottom: 1em;
-}
-
 .subtitle {
   margin-bottom: 0;
 }
 
-.shot-padding {
+.shot-step {
   margin-right: 1em;
 }
 
 .shot-tabs {
   display: flex;
-  margin-bottom: 4px;
+  margin-top: 4px;
+  margin-right: 10px;
 }
 
 .tab-button {
   flex: 1;
-  border: 1px solid $light-grey;
+  border: 1px solid var(--border);
   background: transparent;
+  color: var(--text);
   cursor: pointer;
   padding: 4px 0;
 
@@ -592,25 +573,24 @@ input::placeholder {
   }
 
   &:first-child {
-    border-radius: 4px 0 0 4px;
+    border-radius: 10px 0 0 10px;
   }
 
   &:last-child {
-    border-radius: 0 4px 4px 0;
+    border-radius: 0 10px 10px 0;
     border-left: 0;
   }
 }
 
 .bulk-fields {
   display: flex;
-  gap: 4px;
-  margin-right: 10px;
-  margin-bottom: 0;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.bulk-field {
-  flex: 1;
-  min-width: 0;
+.bulk-list.list {
+  margin-top: 1em;
+  max-height: 200px;
 }
 
 .entity-line.collision {

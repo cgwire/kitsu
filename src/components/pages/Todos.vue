@@ -294,13 +294,14 @@ export default {
 
     pendingTasks() {
       return this.sortedTasks.filter(
-        task => task.taskStatus.is_feedback_request
+        task => this.taskStatusMap.get(task.task_status_id)?.is_feedback_request
       )
     },
 
     notPendingTasks() {
       return this.sortedTasks.filter(
-        task => !task.taskStatus.is_feedback_request
+        task =>
+          !this.taskStatusMap.get(task.task_status_id)?.is_feedback_request
       )
     },
 

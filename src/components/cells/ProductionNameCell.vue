@@ -73,18 +73,23 @@ const productionRoute = computed(() =>
 )
 
 const productionInfo = computed(() => {
-  if (!props.isTooltip) return ''
   const infos = []
-  if (props.entry?.fps) {
-    infos.push(`${t('productions.fields.fps')}: ${props.entry.fps}`)
+  // the name is hidden in avatar-only mode, so it belongs to the tooltip
+  if (props.onlyAvatar && props.entry?.name) {
+    infos.push(props.entry.name)
   }
-  if (props.entry?.ratio) {
-    infos.push(`${t('productions.fields.ratio')}: ${props.entry.ratio}`)
-  }
-  if (props.entry?.resolution) {
-    infos.push(
-      `${t('productions.fields.resolution')}: ${props.entry.resolution}`
-    )
+  if (props.isTooltip) {
+    if (props.entry?.fps) {
+      infos.push(`${t('productions.fields.fps')}: ${props.entry.fps}`)
+    }
+    if (props.entry?.ratio) {
+      infos.push(`${t('productions.fields.ratio')}: ${props.entry.ratio}`)
+    }
+    if (props.entry?.resolution) {
+      infos.push(
+        `${t('productions.fields.resolution')}: ${props.entry.resolution}`
+      )
+    }
   }
   return infos.join(' - ')
 })

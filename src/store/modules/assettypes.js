@@ -71,7 +71,7 @@ const mutations = {
     state.isAssetTypesLoading = false
     state.isAssetTypesLoadingError = false
     state.assetTypes = sortByName(assetTypes)
-    cache.assetTypeMap = new Map()
+    cache.assetTypeMap.clear()
     state.assetTypes.forEach(assetType => {
       cache.assetTypeMap.set(assetType.id, assetType)
     })

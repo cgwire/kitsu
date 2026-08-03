@@ -30,7 +30,7 @@
         :placeholder="placeholder"
         :readonly="readonly"
         :required="required"
-        :step="step || type === 'number' ? 'any' : undefined"
+        :step="type === 'number' ? step || 'any' : undefined"
         :type="type"
         :value="modelValue"
         @input="updateValue()"

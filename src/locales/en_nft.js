@@ -132,7 +132,6 @@ export default {
     number: 'NFT | NFTs',
     manage: 'Create NFTs',
     new_success: 'NFT {name} successfully created.',
-    padding: 'NFT Padding',
     restore_error: 'An error occurred while restoring this NFT.',
     tasks: 'NFT Tasks',
     title: 'NFT Collection',

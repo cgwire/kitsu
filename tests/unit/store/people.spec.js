@@ -47,5 +47,21 @@ describe('People store', () => {
       expect(Array.isArray(state.displayedPeople)).toBe(true)
       expect(state.displayedPeople).toEqual(store.cache.people)
     })
+
+    // The done tasks of the person page never reach the tasks module map,
+    // unlike the todo ones registered on LOAD_PERSON_TASKS_END.
+    test('SET_PREVIEW refreshes the person done list', () => {
+      const done = { id: 'task-1', entity_id: 'entity-1' }
+      const other = { id: 'task-2', entity_id: 'entity-2' }
+      state.displayedPersonDoneTasks = [done, other]
+
+      store.mutations.SET_PREVIEW(state, {
+        entityId: 'entity-1',
+        previewId: 'preview-1'
+      })
+
+      expect(done.entity_preview_file_id).toEqual('preview-1')
+      expect(other.entity_preview_file_id).toBeUndefined()
+    })
   })
 })

@@ -5,7 +5,6 @@ import { vi } from 'vitest'
 vi.mock('@/store', () => ({ default: {} }))
 
 import episodesStore from '@/store/modules/episodes'
-import { LOAD_EPISODES_END } from '@/store/mutation-types'
 
 describe('Episodes store', () => {
   describe('LOAD_EPISODES_END with no episodes', () => {
@@ -13,7 +12,7 @@ describe('Episodes store', () => {
       'resolves the %s pseudo-episode from the route',
       routeEpisodeId => {
         const state = { episodes: [] }
-        episodesStore.mutations[LOAD_EPISODES_END](state, {
+        episodesStore.mutations.LOAD_EPISODES_END(state, {
           episodes: [],
           routeEpisodeId
         })
@@ -23,7 +22,7 @@ describe('Episodes store', () => {
 
     test('keeps currentEpisode null without a route episode', () => {
       const state = { episodes: [] }
-      episodesStore.mutations[LOAD_EPISODES_END](state, {
+      episodesStore.mutations.LOAD_EPISODES_END(state, {
         episodes: [],
         routeEpisodeId: undefined
       })

@@ -1212,13 +1212,13 @@ const mutations = {
     state.shotSearchText = ''
   },
 
-  [SET_PREVIEW](state, { entityId, taskId, previewId, taskMap }) {
+  [SET_PREVIEW](state, { entityId, previewId, taskMap }) {
     const shot = state.displayedShots.find(s => s.id === entityId)
     if (shot) {
       shot.preview_file_id = previewId
-      shot.tasks.forEach(taskId => {
+      shot.tasks?.forEach(taskId => {
         const task = taskMap.get(taskId)
-        if (task) task.entity.preview_file_id = previewId
+        if (task?.entity) task.entity.preview_file_id = previewId
       })
     }
   },

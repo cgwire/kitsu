@@ -168,13 +168,22 @@
     />
 
     <confirm-modal
-      :active="modals.archiveGuest"
+      active
+      :text="selfRoleDowngradeText"
+      @cancel="cancelSelfRoleDowngrade"
+      @confirm="confirmSelfRoleDowngrade"
+      v-if="modals.selfRoleDowngrade"
+    />
+
+    <confirm-modal
+      active
       :error-text="$t('people.archive_guest_error')"
       :is-error="errors.archiveGuest"
       :is-loading="loading.archiveGuest"
       :text="$t('people.archive_guest_confirm')"
       @cancel="modals.archiveGuest = false"
       @confirm="confirmArchiveGuest"
+      v-if="modals.archiveGuest"
     />
   </div>
 </template>
@@ -284,9 +293,11 @@ export default {
         del: false,
         edit: false,
         importModal: false,
-        isImportRenderDisplayed: false
+        isImportRenderDisplayed: false,
+        selfRoleDowngrade: false
       },
       parsedCSV: [],
+      pendingEditForm: null,
       personToArchive: null,
       personToDelete: {},
       personToEdit: { role: 'user' },
@@ -328,8 +339,17 @@ export default {
       'peopleSearchQueries',
       'personCsvFormData',
       'studioMap',
+      'user',
       'userLimit'
     ]),
+
+    selfRoleDowngradeText() {
+      if (!this.pendingEditForm) return ''
+      return this.$t('people.self_role_downgrade_confirm', {
+        currentRole: this.$t(`people.role.${this.personToEdit.role}`),
+        newRole: this.$t(`people.role.${this.pendingEditForm.role}`)
+      })
+    },
 
     seatsRemaining() {
       if (this.mainConfig.is_self_hosted) return null
@@ -574,6 +594,37 @@ export default {
     },
 
     confirmEditPeople(form) {
+      if (this.isSelfRoleDowngrade(form)) {
+        this.pendingEditForm = form
+        this.modals.selfRoleDowngrade = true
+      } else {
+        this.saveEditedPerson(form)
+      }
+    },
+
+    // Only studio managers can edit people, so lowering your own role locks
+    // you out of the people page: nobody but another admin can revert it.
+    isSelfRoleDowngrade(form) {
+      return (
+        this.personToEdit.id === this.user?.id &&
+        this.personToEdit.role === 'admin' &&
+        form.role !== 'admin'
+      )
+    },
+
+    confirmSelfRoleDowngrade() {
+      const form = this.pendingEditForm
+      this.modals.selfRoleDowngrade = false
+      this.pendingEditForm = null
+      this.saveEditedPerson(form)
+    },
+
+    cancelSelfRoleDowngrade() {
+      this.modals.selfRoleDowngrade = false
+      this.pendingEditForm = null
+    },
+
+    saveEditedPerson(form) {
       let action = 'editPerson'
       if (this.personToEdit.id === undefined) action = 'newPerson'
       else form.id = this.personToEdit.id
@@ -819,6 +870,9 @@ export default {
         this.loading.inviteLink = false
         this.success.invite = false
         this.success.inviteLinkCopied = false
+      } else {
+        this.modals.selfRoleDowngrade = false
+        this.pendingEditForm = null
       }
     },
 

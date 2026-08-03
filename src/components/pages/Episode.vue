@@ -12,9 +12,9 @@
           <entity-thumbnail
             class="entity-thumbnail"
             :entity="currentEpisode"
-            :empty-width="120"
-            :empty-height="50"
-            :width="120"
+            :empty-width="100"
+            :empty-height="60"
+            :width="100"
             v-if="currentEpisode"
           />
         </span>
@@ -46,82 +46,16 @@
           :tabs="entityNavOptions"
         />
 
-        <div class="flexrow infos" v-show="currentSection === 'infos'">
-          <div class="flexrow-item flexcolumn entity-infos">
-            <page-subtitle :text="$t('main.tasks')" />
-            <entity-task-list
-              class="task-list"
-              :entries="currentTasks"
-              :is-loading="!currentEpisode"
-              :is-error="false"
-              @task-selected="onTaskSelected"
-            />
-            <div class="flexrow">
-              <page-subtitle :text="$t('main.info')" />
-              <div class="filler"></div>
-              <div class="flexrow-item has-text-right">
-                <button-simple
-                  icon="edit"
-                  :title="$t('episodes.edit_title')"
-                  @click="modals.edit = true"
-                  v-if="isCurrentUserManager"
-                />
-              </div>
-            </div>
-
-            <div class="table-body">
-              <table class="datatable no-header" v-if="currentEpisode">
-                <tbody class="table-body">
-                  <tr class="datatable-row">
-                    <td class="field-label">
-                      {{ $t('shots.fields.description') }}
-                    </td>
-                    <description-cell :entry="currentEpisode" :full="true" />
-                  </tr>
-
-                  <tr
-                    class="datatable-row"
-                    v-if="
-                      currentEpisode &&
-                      currentEpisode.data &&
-                      currentEpisode.data.resolution
-                    "
-                  >
-                    <td class="field-label">
-                      {{ $t('shots.fields.resolution') }}
-                    </td>
-                    <td>
-                      {{ currentEpisode ? currentEpisode.data.resolution : '' }}
-                    </td>
-                  </tr>
-
-                  <tr
-                    :key="descriptor.id"
-                    class="datatable-row"
-                    v-for="descriptor in episodeMetadataDescriptors"
-                  >
-                    <td class="field-label">{{ descriptor.name }}</td>
-                    <td>
-                      <metadata-value
-                        :descriptor="descriptor"
-                        :entity="currentEpisode"
-                      />
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <div class="flexrow">
+        <div class="flexrow mt1">
           <span v-show="currentSection === 'casting'">
             {{ nbAssets }} {{ $t('assets.number', nbAssets) }}
           </span>
           <span
             class="tag tag-standby"
             v-show="
-              currentSection === 'casting' && currentEpisode.is_casting_standby
+              currentSection === 'casting' &&
+              currentEpisode &&
+              currentEpisode.is_casting_standby
             "
           >
             {{ $t('breakdown.fields.standby') }}
@@ -140,6 +74,72 @@
             v-model="zoomLevel"
             v-show="currentSection === 'schedule'"
           />
+        </div>
+
+        <div class="flexcolumn infos" v-show="currentSection === 'infos'">
+          <page-subtitle :text="$t('main.tasks')" />
+          <entity-task-list
+            class="task-list"
+            :entries="currentTasks"
+            :is-loading="!currentEpisode"
+            :is-error="false"
+            @task-selected="onTaskSelected"
+          />
+          <div class="flexrow">
+            <page-subtitle :text="$t('main.info')" />
+            <div class="filler"></div>
+            <div class="flexrow-item has-text-right">
+              <button-simple
+                icon="edit"
+                :title="$t('episodes.edit_title')"
+                @click="modals.edit = true"
+                v-if="isCurrentUserManager"
+              />
+            </div>
+          </div>
+
+          <div class="table-body metadata-infos">
+            <table class="datatable no-header" v-if="currentEpisode">
+              <tbody class="table-body">
+                <tr class="datatable-row">
+                  <td class="field-label">
+                    {{ $t('shots.fields.description') }}
+                  </td>
+                  <description-cell :entry="currentEpisode" :full="true" />
+                </tr>
+
+                <tr
+                  class="datatable-row"
+                  v-if="
+                    currentEpisode &&
+                    currentEpisode.data &&
+                    currentEpisode.data.resolution
+                  "
+                >
+                  <td class="field-label">
+                    {{ $t('shots.fields.resolution') }}
+                  </td>
+                  <td>
+                    {{ currentEpisode ? currentEpisode.data.resolution : '' }}
+                  </td>
+                </tr>
+
+                <tr
+                  :key="descriptor.id"
+                  class="datatable-row"
+                  v-for="descriptor in episodeMetadataDescriptors"
+                >
+                  <td class="field-label">{{ descriptor.name }}</td>
+                  <td>
+                    <metadata-value
+                      :descriptor="descriptor"
+                      :entity="currentEpisode"
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <div class="episode-casting" v-show="currentSection === 'casting'">
@@ -560,19 +560,6 @@ h2.subtitle {
   }
 }
 
-.infos {
-  height: 350px;
-  margin-bottom: 1em;
-  margin-left: 1em;
-  margin-right: 1em;
-
-  .flexrow-item {
-    align-self: flex-start;
-    height: 100%;
-    flex: 1;
-  }
-}
-
 .episode-data {
   display: flex;
   flex: 1;
@@ -643,7 +630,9 @@ h2.subtitle {
 }
 
 .task-list {
-  width: 100%;
+  margin-bottom: 3em;
+  min-height: 150px;
+  min-width: 100%;
 }
 
 .datatable-row {
@@ -671,18 +660,20 @@ h2.subtitle {
 
 .section-tabs {
   min-height: 36px;
-  margin-bottom: 1em;
+  margin-bottom: 0;
 }
 
 .infos {
+  height: 100%;
   margin-top: 1em;
   margin-bottom: 1em;
   max-height: 100%;
   overflow-y: auto;
 
-  .entity-infos {
-    align-self: flex-start;
-    flex: 1.5;
+  .metadata-infos {
+    flex: unset;
+    min-height: 100px;
+    overflow: auto;
   }
 }
 

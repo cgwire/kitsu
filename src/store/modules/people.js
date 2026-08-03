@@ -1,6 +1,6 @@
 import peopleApi from '@/store/api/people'
 import colors from '@/lib/colors'
-import { populateTask } from '@/lib/models'
+import { populateTask, setTasksEntityPreview } from '@/lib/models'
 import { sortTasks, sortPeople, sortByName } from '@/lib/sorting'
 import { indexSearch, buildTaskIndex, buildPeopleIndex } from '@/lib/indexing'
 import { applyFilters, getFilters, getKeyWords } from '@/lib/filtering'
@@ -39,6 +39,7 @@ import {
   PERSON_LOAD_TIME_SPENTS_END,
   SET_ORGANISATION,
   SET_PERSON_TASKS_SCROLL_POSITION,
+  SET_PREVIEW,
   SET_USER_LIMIT,
   PEOPLE_SET_DAY_OFFS,
   PEOPLE_SET_DAYS_OFF,
@@ -653,7 +654,6 @@ const mutations = {
   [LOAD_PEOPLE_START](state) {
     state.isPeopleLoading = true
     state.isPeopleLoadingError = false
-    cache.personMap = new Map()
   },
 
   [LOAD_PEOPLE_ERROR](state) {
@@ -667,6 +667,7 @@ const mutations = {
     cache.people = sortPeople(people).map(person => {
       return helpers.addAdditionalInformation(person)
     })
+    cache.personMap.clear()
     cache.people.forEach(person => {
       cache.personMap.set(person.id, person)
     })
@@ -832,6 +833,13 @@ const mutations = {
     state.displayedPersonDoneTasks = tasks
     cache.personDoneTasks = tasks
     cache.personDoneTasksIndex = buildTaskIndex(tasks)
+  },
+
+  // Root mutation shared with the entity modules. Only the done tasks need
+  // it: the tasks module registers the todo ones in its map on
+  // LOAD_PERSON_TASKS_END, and its own handler sweeps them from there.
+  [SET_PREVIEW](state, { entityId, previewId }) {
+    setTasksEntityPreview(state.displayedPersonDoneTasks, entityId, previewId)
   },
 
   [SET_PERSON_TASKS_SEARCH](state, searchText) {

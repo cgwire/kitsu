@@ -1,3 +1,5 @@
+import { createStore } from 'vuex'
+
 import store from '@/store/modules/tasktypes'
 import taskTypesApi from '@/store/api/tasktypes'
 
@@ -197,12 +199,6 @@ describe('Task types store', () => {
       expect(state.taskTypes).toEqual([])
     })
 
-    test('LOAD_TASK_TYPES_ERROR', () => {
-      store.mutations.LOAD_TASK_TYPES_ERROR(state)
-      expect(state.taskTypes).toEqual([])
-      expect(store.cache.taskTypeMap.size).toEqual(0)
-    })
-
     test('LOAD_TASK_TYPES_END', () => {
       store.mutations.RESET_ALL(state)
       store.mutations.LOAD_TASK_TYPES_END(state, taskTypes)
@@ -216,6 +212,32 @@ describe('Task types store', () => {
       store.mutations.DELETE_TASK_TYPE_END(state, { id: 'task-type-2' })
       expect(state.taskTypes).toHaveLength(3)
       expect(store.cache.taskTypeMap.size).toEqual(3)
+    })
+
+    // The taskTypeMap getter has no reactive dependency, so Vuex evaluates it
+    // once and pins the map object it returned. Rebuilding the cached map
+    // instead of mutating it left every consumer holding the map emptied by
+    // the logout, and each get() returned undefined for the whole session.
+    test('LOAD_TASK_TYPES_END keeps the getter live across a logout', () => {
+      const loadedTaskTypes = [
+        { name: 'Layout', id: 'task-type-5', for_entity: 'Shot' },
+        { name: 'Rigging', id: 'task-type-6', for_entity: 'Asset' }
+      ]
+      const vuexStore = createStore({
+        state: { ...store.state },
+        getters: store.getters,
+        mutations: store.mutations
+      })
+      vuexStore.commit('LOAD_TASK_TYPES_END', loadedTaskTypes)
+      expect(vuexStore.getters.taskTypeMap.size).toEqual(2)
+
+      vuexStore.commit('RESET_ALL')
+      expect(vuexStore.getters.taskTypeMap.size).toEqual(0)
+
+      vuexStore.commit('LOAD_TASK_TYPES_END', loadedTaskTypes)
+      expect(vuexStore.getters.taskTypeMap.get('task-type-6').name).toEqual(
+        'Rigging'
+      )
     })
   })
 })

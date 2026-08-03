@@ -10,6 +10,7 @@ import {
   RESET_ALL
 } from '@/store/mutation-types'
 
+// Mutate taskStatusMap in place, never reassign it (see tasktypes.js).
 const cache = {
   taskStatusMap: new Map()
 }
@@ -142,17 +143,17 @@ const actions = {
 const mutations = {
   [LOAD_TASK_STATUSES_START](state) {
     state.taskStatuses = []
-    cache.taskStatusMap = new Map()
+    cache.taskStatusMap.clear()
   },
 
   [LOAD_TASK_STATUSES_ERROR](state) {
     state.taskStatuses = []
-    cache.taskStatusMap = new Map()
+    cache.taskStatusMap.clear()
   },
 
   [LOAD_TASK_STATUSES_END](state, taskStatuses) {
     state.taskStatuses = sortByName(taskStatuses)
-    const taskStatusMap = new Map()
+    cache.taskStatusMap.clear()
     taskStatuses.forEach(taskStatus => {
       if (taskStatus.is_artist_allowed === null) {
         taskStatus.is_artist_allowed = true
@@ -160,9 +161,8 @@ const mutations = {
       if (taskStatus.is_client_allowed === null) {
         taskStatus.is_client_allowed = false
       }
-      taskStatusMap.set(taskStatus.id, taskStatus)
+      cache.taskStatusMap.set(taskStatus.id, taskStatus)
     })
-    cache.taskStatusMap = taskStatusMap
   },
 
   [EDIT_TASK_STATUS_END](state, newTaskStatus) {

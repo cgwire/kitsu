@@ -174,6 +174,7 @@ const cache = {
   sequences: [],
   result: [],
   sequenceIndex: {},
+  // Mutate sequenceMap in place, never reassign it (see tasktypes.js).
   sequenceMap: new Map()
 }
 
@@ -779,13 +780,15 @@ const mutations = {
     state.sequenceSearchQueries = sortByName(state.sequenceSearchQueries)
   },
 
-  [SET_PREVIEW](state, { entityId, taskId, previewId, taskMap }) {
-    const sequences = state.displayedSequences.find(s => s.id === entityId)
-    if (sequences) {
-      sequences.preview_file_id = previewId
-      sequences.tasks.forEach(taskId => {
+  [SET_PREVIEW](state, { entityId, previewId, taskMap }) {
+    const sequence = state.displayedSequences.find(s => s.id === entityId)
+    if (sequence) {
+      sequence.preview_file_id = previewId
+      // loadSequences fills displayedSequences without tasks, unlike
+      // loadSequencesWithTasks.
+      sequence.tasks?.forEach(taskId => {
         const task = taskMap.get(taskId)
-        if (task) task.entity.preview_file_id = previewId
+        if (task?.entity) task.entity.preview_file_id = previewId
       })
     }
   },
@@ -864,7 +867,7 @@ const mutations = {
     state,
     { sequences, episodeMap, production, userFilters }
   ) {
-    const sequenceMap = new Map()
+    cache.sequenceMap.clear()
     if (
       production &&
       userFilters.sequence &&
@@ -876,7 +879,7 @@ const mutations = {
     }
     if (!sequences) sequences = []
     sequences.forEach(sequence => {
-      sequenceMap.set(sequence.id, sequence)
+      cache.sequenceMap.set(sequence.id, sequence)
       if (sequence.parent_id) {
         const episode = episodeMap.get(sequence.parent_id)
         if (episode) {
@@ -887,7 +890,6 @@ const mutations = {
         }
       }
     })
-    cache.sequenceMap = sequenceMap
     cache.sequences = sortByName(sequences)
     state.sequenceIndex = buildSequenceIndex(cache.sequences)
     state.displayedSequences = cache.sequences

@@ -1686,7 +1686,7 @@ export default {
           return true
         } else {
           return (
-            taskType.department_id &&
+            taskType?.department_id &&
             this.user.departments.includes(taskType.department_id)
           )
         }

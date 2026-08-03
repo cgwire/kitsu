@@ -96,6 +96,9 @@
         <p class="control error" v-else-if="isTooMuchLoginFailedAttemps">
           {{ $t('login.too_many_failed_login_attemps') }}
         </p>
+        <p class="control error" v-else-if="isInactiveUserError">
+          {{ $t('login.login_inactive') }}
+        </p>
         <p
           class="control error"
           v-else-if="isLoginError && !isMissingOTP && !isWrongOTP"
@@ -132,6 +135,7 @@ export default {
     return {
       email: '',
       password: '',
+      isInactiveUserError: false,
       isTooMuchLoginFailedAttemps: false,
       isWrongOTP: false,
       isMissingOTP: false,
@@ -190,6 +194,7 @@ export default {
     },
 
     confirmLogIn(twoFactorPayload) {
+      this.isInactiveUserError = false
       this.isTooMuchLoginFailedAttemps = false
       this.isWrongOTP = false
       this.isMissingOTP = false
@@ -223,6 +228,8 @@ export default {
             this.$router.push({
               name: 'login-2fa'
             })
+          } else if (err.unactive) {
+            this.isInactiveUserError = true
           } else if (err.server_error) {
             this.isServerError = true
           } else {

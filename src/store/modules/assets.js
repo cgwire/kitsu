@@ -1357,8 +1357,10 @@ const mutations = {
     const asset = state.displayedAssets.find(a => a.id === entityId)
     if (asset) {
       asset.preview_file_id = previewId
-      const task = asset.tasks.find(taskId => taskMap.get(taskId))
-      if (task && task.entity) task.entity.preview_file_id = previewId
+      asset.tasks?.forEach(taskId => {
+        const task = taskMap.get(taskId)
+        if (task?.entity) task.entity.preview_file_id = previewId
+      })
     }
   },
 

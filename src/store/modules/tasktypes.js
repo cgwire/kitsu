@@ -4,7 +4,6 @@ import { sortTaskTypes } from '@/lib/sorting'
 
 import {
   LOAD_TASK_TYPES_START,
-  LOAD_TASK_TYPES_ERROR,
   LOAD_TASK_TYPES_END,
   EDIT_TASK_TYPE_START,
   EDIT_TASK_TYPE_ERROR,
@@ -15,6 +14,8 @@ import {
   RESET_ALL
 } from '@/store/mutation-types'
 
+// Never reassign this map: the getter exposing it has no reactive dependency,
+// so consumers keep forever the object they read first. Always mutate in place.
 const cache = {
   taskTypeMap: new Map()
 }
@@ -245,18 +246,12 @@ const actions = {
 const mutations = {
   [LOAD_TASK_TYPES_START](state) {},
 
-  [LOAD_TASK_TYPES_ERROR](state) {
-    state.taskTypes = []
-    cache.taskTypeMap = new Map()
-  },
-
   [LOAD_TASK_TYPES_END](state, taskTypes) {
     state.taskTypes = sortTaskTypes(taskTypes)
-    const map = new Map()
+    cache.taskTypeMap.clear()
     taskTypes.forEach(taskType => {
-      map.set(taskType.id, taskType)
+      cache.taskTypeMap.set(taskType.id, taskType)
     })
-    cache.taskTypeMap = map
   },
 
   [EDIT_TASK_TYPE_START](state, data) {},

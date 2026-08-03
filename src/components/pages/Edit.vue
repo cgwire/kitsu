@@ -541,6 +541,7 @@ useHead({
 }
 
 .edit-metadata {
+  min-height: 100px;
   width: 100%;
 }
 
@@ -574,6 +575,7 @@ useHead({
 .task-list {
   flex: 1;
   margin-bottom: 3em;
+  min-height: 150px;
   min-width: 100%;
 }
 

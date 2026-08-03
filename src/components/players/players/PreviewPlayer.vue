@@ -1021,6 +1021,10 @@ const getClientX = event =>
 // Methods
 
 const setVideoFrameContext = frame => {
+  // NaN survives both Math.min and the equality guard below (NaN !== NaN is
+  // always true), and reaches the progress bar and video.currentTime, whose
+  // setters throw on non-finite values.
+  if (!Number.isFinite(frame)) return
   frame = Math.min(frame, nbFrames.value - 1)
   if (currentFrame.value !== frame) {
     const time = frame * frameDuration.value
@@ -1074,6 +1078,7 @@ const onSubPreviewsWheel = event => {
 }
 
 const setCurrentFrame = frame => {
+  if (!Number.isFinite(frame)) return
   if (currentFrame.value !== frame) {
     setVideoFrameContext(frame)
     previewViewer.value.setCurrentFrame(frame)
