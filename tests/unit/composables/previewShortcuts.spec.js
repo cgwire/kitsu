@@ -211,14 +211,35 @@ describe('composables/previewShortcuts', () => {
       wrapper.unmount()
     })
 
+    // Browsers uppercase event.key when Shift is held, so the redo combo
+    // never reaches a bare `case 'z'`.
     it('Ctrl+Shift+Z undoes nothing but is still consumed', () => {
       const { handlers, wrapper } = mountShortcuts()
       const event = dispatchKeydown({
-        key: 'z',
+        key: 'Z',
         ctrlKey: true,
         shiftKey: true
       })
       expect(handlers.onUndo).not.toHaveBeenCalled()
+      expect(event.defaultPrevented).toBe(true)
+      wrapper.unmount()
+    })
+
+    it('Ctrl+Y, the Windows redo, undoes nothing but is consumed', () => {
+      const { handlers, wrapper } = mountShortcuts()
+      const bare = dispatchKeydown({ key: 'y' })
+      expect(bare.defaultPrevented).toBe(false)
+      const redo = dispatchKeydown({ key: 'y', ctrlKey: true })
+      expect(handlers.onUndo).not.toHaveBeenCalled()
+      expect(handlers.onRedo).not.toHaveBeenCalled()
+      expect(redo.defaultPrevented).toBe(true)
+      wrapper.unmount()
+    })
+
+    it('undoes on Ctrl+Z typed with caps lock on', () => {
+      const { handlers, wrapper } = mountShortcuts()
+      const event = dispatchKeydown({ key: 'Z', ctrlKey: true })
+      expect(handlers.onUndo).toHaveBeenCalledTimes(1)
       expect(event.defaultPrevented).toBe(true)
       wrapper.unmount()
     })

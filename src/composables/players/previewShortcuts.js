@@ -178,11 +178,18 @@ export const usePreviewShortcuts = handlers => {
         }
         break
       case 'z':
+      case 'Z':
+      case 'y':
+      case 'Y':
         // Unconsumed, the browser's own undo reverts the page's search field
-        // and closes the panel hosting the player. Shift is its redo.
+        // and closes the panel hosting the player. Shift uppercases the key
+        // and Windows binds redo to Ctrl+Y too, so every variant is swallowed;
+        // redo stays on Alt+R.
         if (mod) {
           pauseEvent(event)
-          if (!event.shiftKey) handlers.onUndo?.()
+          if (!event.shiftKey && event.key.toLowerCase() === 'z') {
+            handlers.onUndo?.()
+          }
         }
         break
       case 'c':
