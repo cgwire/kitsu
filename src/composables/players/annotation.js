@@ -1121,9 +1121,14 @@ export const useAnnotation = ({
       const obj = resolveActionObject(action)
       const stackLengthBefore = doneActionStack.length
       if (action.type === 'add') {
+        // Mirror undoLastAction: without dropping the pending deletion the
+        // batch carries the same id as an addition AND as a deletion, and zou
+        // applies deletions last, so the annotation ends up erased server side.
         addObject(obj)
+        removeFromDeletions(obj)
       } else if (action.type === 'remove') {
         deleteObject(obj)
+        removeFromAdditions(obj)
       }
       doneActionStack.length = stackLengthBefore
       action.obj = obj

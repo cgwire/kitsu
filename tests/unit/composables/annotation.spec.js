@@ -1288,6 +1288,26 @@ describe('composables/annotation', () => {
   })
 
   describe('redoLastAction', () => {
+    // Data loss: zou applies deletions after additions, so a batch carrying
+    // the same id on both sides erased the annotation server side. Undo queued
+    // the deletion, redo re-queued the addition without dropping it.
+    it('drops the pending deletion when it re-adds an object', () => {
+      const obj = createSerializableObject({ id: 'a' })
+      const canvas = createFakeCanvas()
+      const { api, wrapper } = mountAnnotation({ canvas })
+
+      api.addObject(obj)
+      api.undoLastAction()
+      expect(api.deletions.value[0]?.objects).toEqual(['a'])
+
+      api.redoLastAction()
+
+      expect(
+        api.deletions.value.some(entry => entry.objects.includes('a'))
+      ).toBe(false)
+      wrapper.unmount()
+    })
+
     it('no-ops on an empty undone stack', () => {
       const { api, wrapper, saveAnnotationsCb } = mountAnnotation()
       api.redoLastAction()
