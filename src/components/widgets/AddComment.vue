@@ -331,6 +331,7 @@
             :task-status-list="taskStatus"
             :production-id="task.project_id"
             v-model="task_status_id"
+            v-if="!isStatusLocked"
           />
           <button-simple
             class="post-button"
@@ -480,6 +481,13 @@ const props = defineProps({
   isLoading: {
     type: Boolean,
     default: null
+  },
+  // Set for someone who is in the conversation only because they were
+  // mentioned: they may answer, but the status stays where the assignees
+  // left it. The API enforces the same rule.
+  isStatusLocked: {
+    type: Boolean,
+    default: false
   },
   task: {
     type: Object,
@@ -718,6 +726,12 @@ const runAddComment = (
   if (!isValidForm.value) {
     return
   }
+  if (props.isStatusLocked) {
+    // The selector is hidden in this mode, so nothing could have moved the
+    // status. Re-read it from the task anyway: the API rejects a comment
+    // that carries any other one.
+    task_status_id.value = props.task.task_status_id
+  }
   // A status id that no longer resolves usually means a stale cache, so tell
   // the user to reload rather than posting a comment with no status.
   const taskStatus = taskStatusMap.value.get(task_status_id.value)
@@ -820,6 +834,10 @@ const onInsertChecklistItem = item => {
 }
 
 const resetStatus = () => {
+  if (props.isStatusLocked) {
+    task_status_id.value = props.task.task_status_id
+    return
+  }
   const taskStatus = taskStatusMap.value.get(props.task.task_status_id)
   if (
     (!isCurrentUserArtist.value || taskStatus?.is_artist_allowed) &&

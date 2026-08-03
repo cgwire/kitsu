@@ -193,6 +193,7 @@
                   :revision="currentRevision"
                   :is-movie="isMoviePreview"
                   :is-picture="isPicturePreview"
+                  :is-status-locked="isMentionedOnly"
                   @add-comment="postComment"
                   @add-preview="onAddPreviewClicked"
                   @file-drop="selectFile"
@@ -237,6 +238,7 @@
                       :is-replyable="
                         (user && user.id === comment.person?.id) ||
                         isAssigned ||
+                        isMentioned ||
                         isDepartmentSupervisor ||
                         isCurrentUserManager ||
                         isClientFromSameStudio(comment.person)
@@ -653,10 +655,38 @@ const isAssigned = computed(
   () => props.task?.assignees?.includes(user.value?.id) ?? false
 )
 
+const isMentioned = computed(() => {
+  const personId = user.value?.id
+  if (!personId) return false
+  const departmentIds = user.value.departments || []
+  // Replies carry their own mentions, and that is where people usually get
+  // named once a conversation is going.
+  const namesUser = entry =>
+    (entry.mentions || []).includes(personId) ||
+    (entry.department_mentions || []).some(departmentId =>
+      departmentIds.includes(departmentId)
+    )
+  return taskComments.value.some(
+    comment => namesUser(comment) || (comment.replies || []).some(namesUser)
+  )
+})
+
+// In the conversation only because someone named them: they may answer,
+// but the status stays where the assignees left it.
+const isMentionedOnly = computed(
+  () =>
+    isMentioned.value &&
+    !isAssigned.value &&
+    !isCurrentUserClient.value &&
+    !isDepartmentSupervisor.value &&
+    !isCurrentUserManager.value
+)
+
 const isCommentingAllowed = computed(
   () =>
     props.task &&
     (isAssigned.value ||
+      isMentioned.value ||
       isCurrentUserClient.value ||
       isDepartmentSupervisor.value ||
       isCurrentUserManager.value)
