@@ -1030,6 +1030,12 @@ export const useAnnotation = ({
         removeFromDeletions(obj)
       }
       doneActionStack.length = stackLengthBefore
+      // Re-pin the entry on the instance that was actually replayed. A canvas
+      // reload (fullscreen transition, frame change) swaps every object for a
+      // fresh one scaled to the new canvas; the next replay can no longer look
+      // this one up (it is off-canvas) and would re-inject the pre-reload
+      // instance at its pre-reload position.
+      action.obj = obj
       undoneActionStack.push(action)
     } finally {
       replayingHistory = false
@@ -1058,6 +1064,7 @@ export const useAnnotation = ({
         deleteObject(obj)
       }
       doneActionStack.length = stackLengthBefore
+      action.obj = obj
       doneActionStack.push(action)
     } finally {
       replayingHistory = false

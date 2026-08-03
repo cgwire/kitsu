@@ -105,6 +105,25 @@ const createSerializableObject = (props = {}) => {
   return obj
 }
 
+// Serialized form of a stroke authored on the default 800x600 canvas, so a
+// reload onto a 1600x1200 one doubles its coordinates.
+const STROKE_ON_800 = {
+  id: 'stroke-1',
+  type: 'path',
+  path: 'M 0 0 L 10 10',
+  left: 100,
+  top: 50,
+  width: 10,
+  height: 10,
+  scaleX: 1,
+  scaleY: 1,
+  angle: 0,
+  stroke: '#ff0000',
+  strokeWidth: 2,
+  canvasWidth: 800,
+  canvasHeight: 600
+}
+
 /**
  * Mount the composable inside a tiny host component so watchers and the
  * canvas mirroring run. Returns the wrapper, the captured composable API
@@ -1198,6 +1217,32 @@ describe('composables/annotation', () => {
 
       expect(canvas.remove).toHaveBeenCalledWith(live)
       expect(canvas.remove).not.toHaveBeenCalledWith(stale)
+      wrapper.unmount()
+    })
+
+    // Entering fullscreen resizes the canvas and reloads the annotation, so
+    // every live object is replaced by one rebuilt at the new scale. The
+    // history entry still pointed at the pre-resize instance, and redo, which
+    // can no longer look the object up on the canvas, re-injected it at its
+    // pre-resize position.
+    it('replays the instance rebuilt by a reload, not the pre-resize one', async () => {
+      const canvas = createFakeCanvas()
+      const { api, wrapper } = mountAnnotation({ canvas })
+
+      const drawn = await api.addObjectToCanvas(null, STROKE_ON_800, canvas)
+      api.onObjectAdded({ target: drawn })
+
+      canvas.width = 1600
+      canvas.height = 1200
+      api.clearCanvas()
+      const reloaded = await api.addObjectToCanvas(null, STROKE_ON_800, canvas)
+      expect(reloaded.left).toBe(200)
+
+      api.undoLastAction()
+      expect(canvas._objects).toHaveLength(0)
+      api.redoLastAction()
+
+      expect(canvas._objects[0].left).toBe(200)
       wrapper.unmount()
     })
   })
