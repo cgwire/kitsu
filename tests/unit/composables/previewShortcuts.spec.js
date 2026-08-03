@@ -202,6 +202,40 @@ describe('composables/previewShortcuts', () => {
       wrapper.unmount()
     })
 
+    it('Ctrl+Z is consumed so the browser undo does not run', () => {
+      const { wrapper } = mountShortcuts()
+      const bare = dispatchKeydown({ key: 'z' })
+      expect(bare.defaultPrevented).toBe(false)
+      const undo = dispatchKeydown({ key: 'z', ctrlKey: true })
+      expect(undo.defaultPrevented).toBe(true)
+      wrapper.unmount()
+    })
+
+    it('Ctrl+Shift+Z undoes nothing but is still consumed', () => {
+      const { handlers, wrapper } = mountShortcuts()
+      const event = dispatchKeydown({
+        key: 'z',
+        ctrlKey: true,
+        shiftKey: true
+      })
+      expect(handlers.onUndo).not.toHaveBeenCalled()
+      expect(event.defaultPrevented).toBe(true)
+      wrapper.unmount()
+    })
+
+    it('leaves Ctrl+Z to the browser inside a text field', () => {
+      const { handlers, wrapper } = mountShortcuts()
+      const textarea = document.createElement('textarea')
+      const event = dispatchKeydown({
+        key: 'z',
+        ctrlKey: true,
+        target: textarea
+      })
+      expect(handlers.onUndo).not.toHaveBeenCalled()
+      expect(event.defaultPrevented).toBe(false)
+      wrapper.unmount()
+    })
+
     it('Alt+R triggers onRedo, bare `r` does not', () => {
       const { handlers, wrapper } = mountShortcuts()
       dispatchKeydown({ key: 'r', code: 'KeyR' })

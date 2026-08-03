@@ -178,7 +178,12 @@ export const usePreviewShortcuts = handlers => {
         }
         break
       case 'z':
-        if (mod) handlers.onUndo?.()
+        // Unconsumed, the browser's own undo reverts the page's search field
+        // and closes the panel hosting the player. Shift is its redo.
+        if (mod) {
+          pauseEvent(event)
+          if (!event.shiftKey) handlers.onUndo?.()
+        }
         break
       case 'c':
         if (mod) handlers.onCopy?.()
