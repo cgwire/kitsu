@@ -806,6 +806,26 @@ describe('composables/annotation', () => {
       expect(saveAnnotationsCb).toHaveBeenCalled()
       wrapper.unmount()
     })
+
+    // A Delete press with nothing selected used to run the trailing save
+    // anyway, re-serializing the canvas and sending an empty batch.
+    it('neither saves nor touches history when nothing is selected', () => {
+      const { api, canvas, saveAnnotationsCb, wrapper } = mountAnnotation()
+      const obj = createSerializableObject({ id: 'a' })
+      api.addObject(obj)
+      api.undoLastAction()
+      saveAnnotationsCb.mockClear()
+      canvas.remove.mockClear()
+
+      api.deleteSelection()
+
+      expect(saveAnnotationsCb).not.toHaveBeenCalled()
+      expect(canvas.remove).not.toHaveBeenCalled()
+      // The undone stack survived: redo still replays the stroke.
+      api.redoLastAction()
+      expect(canvas._objects).toEqual([obj])
+      wrapper.unmount()
+    })
   })
 
   describe('addObjectToCanvas — eraser selectivity', () => {

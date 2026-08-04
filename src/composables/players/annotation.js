@@ -322,7 +322,11 @@ export const useAnnotation = ({
   }
 
   const deleteObject = activeObject => {
-    if (activeObject && activeObject._objects) {
+    // Delete pressed with nothing selected: bail out before the trailing
+    // save, which re-serialized the canvas, created a phantom empty
+    // annotation entry and sent an empty batch to the server.
+    if (!activeObject) return
+    if (activeObject._objects) {
       // ActiveSelection children carry coords relative to the
       // selection's center. discardActiveObject() restores them to
       // absolute first so undo can re-inject them at the right place,
@@ -340,7 +344,7 @@ export const useAnnotation = ({
           projection: getCanvasProjection()
         })
       })
-    } else if (activeObject) {
+    } else {
       fabricCanvas.value.remove(activeObject)
       addToDeletions(activeObject)
       doneActionStack.push({
@@ -350,7 +354,7 @@ export const useAnnotation = ({
         projection: getCanvasProjection()
       })
     }
-    if (activeObject) clearUndoneOnUserAction()
+    clearUndoneOnUserAction()
     saveAnnotationsCb()
   }
 
