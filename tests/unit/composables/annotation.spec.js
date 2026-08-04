@@ -1475,6 +1475,36 @@ describe('composables/annotation', () => {
       wrapper.unmount()
     })
 
+    // Confirmed gesture: fully erase a stroke, toggle fullscreen (resize),
+    // then undo. The removed object waits off the canvas with the old box's
+    // coordinates, so it came back misplaced and mis-scaled.
+    it('reprojects a fully erased object undone after a resize', () => {
+      const canvas = createFakeCanvas()
+      const { api, wrapper } = mountAnnotation({ canvas })
+      const obj = makeErasable('e1')
+      obj.toCanvasElement = () => ({
+        width: 1,
+        height: 1,
+        getContext: () => ({
+          getImageData: () => ({ data: new Uint8ClampedArray(4) })
+        })
+      })
+      canvas._objects.push(obj)
+
+      api.onErasingEnd({ targets: [obj], path: {} })
+      expect(canvas._objects).not.toContain(obj)
+
+      canvas.width = 1600
+      canvas.height = 1200
+      api.undoLastAction()
+
+      expect(canvas._objects).toContain(obj)
+      expect(obj.left).toBe(20)
+      expect(obj.top).toBe(40)
+      expect(obj.scaleX).toBe(2)
+      wrapper.unmount()
+    })
+
     it('redo targets the live object after a reload (fresh instance, same id)', () => {
       const canvas = createFakeCanvas()
       const { api, wrapper } = mountAnnotation({ canvas })

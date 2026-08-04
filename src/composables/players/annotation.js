@@ -889,7 +889,8 @@ export const useAnnotation = ({
       targets: affected,
       removedTargets,
       path,
-      time: getCurrentTime()
+      time: getCurrentTime(),
+      projection: getCanvasProjection()
     })
     clearUndoneStack()
     saveAnnotationsCb()
@@ -1014,7 +1015,11 @@ export const useAnnotation = ({
   const undoEraseAction = action => {
     action.removed = []
     action.targets.forEach(t => {
-      const obj = getObjectById(t.id) ?? t
+      // A fully erased target waits off the canvas, where no reload can
+      // re-scale it: map the stored instance onto the live box, like
+      // resolveActionObject does for add / remove entries.
+      const obj =
+        getObjectById(t.id) ?? reprojectHistoryObject(t, action.projection)
       const paths = obj.eraser?.getObjects?.() ?? []
       if (!paths.length) return
       // Stash the id too: redo must re-resolve the live object, because a
@@ -1045,9 +1050,14 @@ export const useAnnotation = ({
     fabricCanvas.value?.requestRenderAll()
     // Save like every other mutation path: the annotation entry is only
     // re-serialized from the canvas during a save, and reloads (fullscreen
-    // exit, frame step) rebuild the canvas from that entry — without this
+    // exit, frame step) rebuild the canvas from that entry; without this
     // the popped eraser path came back on the next reload.
-    if (action.removed.length) saveAnnotationsCb()
+    if (action.removed.length) {
+      // The replayed instances now sit on the current box; re-stamp like
+      // undoLastAction does so the next fallback reprojects from it.
+      action.projection = getCanvasProjection()
+      saveAnnotationsCb()
+    }
   }
 
   // Redo an erase: push the stashed paths back onto each object's eraser,
@@ -1068,6 +1078,9 @@ export const useAnnotation = ({
       }
     })
     fabricCanvas.value?.requestRenderAll()
+    // No projection re-stamp here: redo removes the LIVE instance and never
+    // moves the refs stashed in the action, whose coordinates still belong
+    // to the box the last undo left them on.
     if (action.removed?.length) saveAnnotationsCb()
   }
 
