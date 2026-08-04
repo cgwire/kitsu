@@ -82,6 +82,10 @@ A `<script setup>` component exposes nothing through a template ref (≠ Options
 - Fix: grep both ref styles and add the members to `defineExpose`.
 - If the parent only *wrote* state, prefer a watcher on the child's props and delete the ref access.
 
+#### `t()` from `useI18n` silently returns `''` during setup
+
+vue-i18n runs in legacy mode (`src/lib/i18n.js`): the `useI18n()` bridge only resolves in `onBeforeMount`, so a `t()` call at setup top level silently returns `''`. Always call `t()` inside a `computed` or a handler (template `$t()` is unaffected). The `$t` test mock hides the bug; to test real translations, see `tests/unit/pages/wrongbrowser.spec.js`.
+
 #### Known eslint gotcha
 
 The eslint config does not detect template usage of component imports in `<script setup>`. Wrap those imports in `eslint-disable no-unused-vars` / `eslint-enable` comments (see `AddMetadataModal.vue` for the pattern).
