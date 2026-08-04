@@ -199,7 +199,7 @@
       v-if="!isLoading && isEmptyList && !isCurrentUserClient"
     >
       <p class="info">
-        <img src="../../assets/illustrations/empty_shot.png" alt="" />
+        <img src="../../assets/illustrations/empty_list.png" alt="" />
       </p>
       <p class="info">{{ $t('episodes.empty_list') }}</p>
     </div>
@@ -208,7 +208,7 @@
       v-if="!isLoading && isEmptyList && isCurrentUserClient"
     >
       <p class="info">
-        <img src="../../assets/illustrations/empty_shot.png" alt="" />
+        <img src="../../assets/illustrations/empty_list.png" alt="" />
       </p>
       <p class="info">{{ $t('episodes.empty_list_client') }}</p>
     </div>

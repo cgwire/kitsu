@@ -129,7 +129,7 @@
 
     <div class="has-text-centered welcome" v-else>
       <p class="kitsu-logo info">
-        <img src="../../assets/illustrations/empty_production.png" alt="" />
+        <img src="../../assets/illustrations/empty_list.png" alt="" />
       </p>
       <div v-if="isCurrentUserAdmin">
         <p class="has-text-centered info">
