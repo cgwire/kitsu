@@ -940,7 +940,9 @@
         "options": {
           "title": "Opcje",
           "update": "Aktualizuj istniejące dane"
-        }
+        },
+        "new_entities_confirmation": "Potwierdzam, że chcę utworzyć ten nowy wpis | Potwierdzam, że chcę utworzyć te {count} nowe wpisy",
+        "new_entities_to_create": "{count} wiersz nie pasuje do żadnego istniejącego wpisu i zostanie utworzony jako nowy wpis: | {count} wierszy nie pasuje do żadnych istniejących wpisów i zostanie utworzonych jako nowe wpisy:"
       },
       "edl": {
         "import_file": "Importuj EDL",

@@ -485,7 +485,9 @@
         "generic_fields": "Colonne di metadati e task (facoltative):",
         "export_current_view": "Esporta la vista corrente",
         "legend_line_ok": "Riga che verrà creata",
-        "legend_missing_optional": "Colonna facoltativa non trovata"
+        "legend_missing_optional": "Colonna facoltativa non trovata",
+        "new_entities_confirmation": "Confermo di voler creare questa nuova voce | Confermo di voler creare queste {count} nuove voci",
+        "new_entities_to_create": "{count} riga non corrisponde a nessuna voce esistente e verrà creata come nuova voce: | {count} righe non corrispondono a nessuna voce esistente e verranno create come nuove voci:"
       },
       "after": "Dopo",
       "before": "Prima",

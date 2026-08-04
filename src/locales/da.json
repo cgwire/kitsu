@@ -483,7 +483,9 @@
         "generic_fields": "Metadata og opgave-kolonner (valgfrit):",
         "export_current_view": "Eksporter nuværende visning",
         "legend_line_ok": "Linje, der vil blive oprettet",
-        "legend_missing_optional": "Valgfri kolonne, der ikke blev fundet"
+        "legend_missing_optional": "Valgfri kolonne, der ikke blev fundet",
+        "new_entities_confirmation": "Jeg bekræfter, at jeg vil oprette denne nye post | Jeg bekræfter, at jeg vil oprette disse {count} nye poster",
+        "new_entities_to_create": "{count} linje matcher ingen eksisterende post og vil blive oprettet som en ny post: | {count} linjer matcher ingen eksisterende poster og vil blive oprettet som nye poster:"
       },
       "after": "Efter",
       "before": "Før",

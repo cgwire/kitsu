@@ -483,7 +483,9 @@
         "generic_fields": "メタデータとタスク列（任意）:",
         "export_current_view": "現在のビューをエクスポート",
         "legend_line_ok": "作成される行",
-        "legend_missing_optional": "見つからない任意列"
+        "legend_missing_optional": "見つからない任意列",
+        "new_entities_confirmation": "この新しいエントリーを作成することを確認します | {count} 件の新しいエントリーを作成することを確認します",
+        "new_entities_to_create": "{count} 行が既存のエントリーと一致しないため、新しいエントリーとして作成されます: | {count} 行が既存のエントリーと一致しないため、新しいエントリーとして作成されます:"
       },
       "after": "後",
       "before": "前",

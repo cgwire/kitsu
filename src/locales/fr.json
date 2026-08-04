@@ -461,9 +461,9 @@
         "import_file": "Importer",
         "import_title": "Importer depuis un .csv",
         "legend": "Légende",
-        "legend_ok": "Colonnes à importer",
+        "legend_ok": "Colonne qui sera importée",
         "legend_ignored": "Colonne non reconnue qui ne sera pas importée",
-        "legend_missing": "Colonnes attendues mais non trouvées",
+        "legend_missing": "Colonne attendue qui n'a pas été trouvée",
         "legend_disabled": "Ligne qui ne sera pas mise à jour ou créée",
         "legend_overwrite": "Ligne qui sera mise à jour",
         "paste": "Coller",
@@ -482,13 +482,15 @@
         "upload_file": "Parcourir les fichiers locaux",
         "options": {
           "title": "Options",
-          "update": "Mettre à jour les données"
+          "update": "Mettre à jour les données existantes"
         },
         "optional_fields": "Colonnes descriptives (optionnelles) :",
         "generic_fields": "Metadata et colonnes de tâches (optionnelles) :",
         "export_current_view": "Exporter la vue courante",
         "legend_line_ok": "Ligne qui sera créée",
-        "legend_missing_optional": "Colonne optionnelle non trouvée"
+        "legend_missing_optional": "Colonne optionnelle non trouvée",
+        "new_entities_confirmation": "Je confirme vouloir créer cette nouvelle entrée | Je confirme vouloir créer ces {count} nouvelles entrées",
+        "new_entities_to_create": "{count} ligne ne correspond à aucune entrée existante et sera créée comme nouvelle entrée : | {count} lignes ne correspondent à aucune entrée existante et seront créées comme nouvelles entrées :"
       },
       "after": "Après",
       "before": "avant",
