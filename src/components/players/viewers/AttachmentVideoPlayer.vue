@@ -96,6 +96,11 @@ import {
 } from 'lucide-vue-next'
 import { ref } from 'vue'
 
+import {
+  exitDocumentFullScreen,
+  getFullScreenElement,
+  requestFullScreen
+} from '@/composables/fullScreen'
 import { useMediaPlayer } from '@/composables/players/mediaPlayer'
 
 defineProps({
@@ -130,10 +135,10 @@ const toggleFullscreen = () => {
   // Compare against OUR element: with the player itself in fullscreen
   // (the comments column lives inside it), a truthy-only check exited
   // the app fullscreen instead of fullscreening the attachment.
-  if (document.fullscreenElement === el) {
-    document.exitFullscreen?.()
+  if (getFullScreenElement() === el) {
+    exitDocumentFullScreen()
   } else {
-    el.requestFullscreen?.()
+    requestFullScreen(el)
   }
 }
 
@@ -179,17 +184,35 @@ const onError = () => {
 
 // In fullscreen the wrapper fills the screen; let the video grow to fit it
 // (keeping aspect ratio) instead of staying capped at its inline size.
-.attachment-video:fullscreen {
+// Safari below 16.4 only knows the prefixed pseudo-class, and one unknown
+// selector drops the whole rule: the two variants stay in separate rules.
+@mixin fullscreen-wrapper {
   height: 100%;
   max-width: none;
   width: 100%;
 }
 
-.attachment-video:fullscreen .attachment-video-el {
+@mixin fullscreen-video {
   height: 100%;
   max-height: none;
   object-fit: contain;
   width: 100%;
+}
+
+.attachment-video:fullscreen {
+  @include fullscreen-wrapper;
+}
+
+.attachment-video:-webkit-full-screen {
+  @include fullscreen-wrapper;
+}
+
+.attachment-video:fullscreen .attachment-video-el {
+  @include fullscreen-video;
+}
+
+.attachment-video:-webkit-full-screen .attachment-video-el {
+  @include fullscreen-video;
 }
 
 // YouTube-style overlay: hidden while playing, revealed on hover and on pause.

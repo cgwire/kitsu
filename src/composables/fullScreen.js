@@ -25,14 +25,21 @@ const isDocumentFullScreen = () =>
     document.fullscreenElement
   )
 
-const requestFullScreen = element => {
+export const getFullScreenElement = () =>
+  document.fullscreenElement ||
+  document.webkitFullscreenElement ||
+  document.mozFullScreenElement ||
+  document.msFullscreenElement ||
+  null
+
+export const requestFullScreen = element => {
   if (element.requestFullscreen) return element.requestFullscreen()
   if (element.mozRequestFullScreen) return element.mozRequestFullScreen()
   if (element.webkitRequestFullScreen) return element.webkitRequestFullScreen()
   if (element.msRequestFullscreen) return element.msRequestFullscreen()
 }
 
-const exitDocumentFullScreen = () => {
+export const exitDocumentFullScreen = () => {
   if (document.exitFullscreen) return document.exitFullscreen()
   if (document.mozCancelFullScreen) return document.mozCancelFullScreen()
   if (document.webkitCancelFullScreen) return document.webkitCancelFullScreen()
