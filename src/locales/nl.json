@@ -1728,7 +1728,7 @@
     },
     "wrong_browser": {
       "title": "Je browser wordt niet ondersteund door Kitsu",
-      "text": "Kitsu kan alleen gebruikt worden met Firefox en Chrome browsers."
+      "outdated": "Je browser ({browser}) is te oud: werk hem bij naar de nieuwste versie of installeer een moderne, actuele browser (Chrome, Firefox, Safari, Edge of Opera)."
     },
     "logs": {
       "action_label": "Actie",

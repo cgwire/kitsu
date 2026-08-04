@@ -2284,7 +2284,8 @@ export default {
 
   wrong_browser: {
     title: 'Your Browser is Not Supported by Kitsu',
-    text: 'Kitsu can only be used with Firefox and Chrome browsers.'
+    outdated:
+      'Your browser ({browser}) is too old: please update it to its latest version, or install a modern, up-to-date browser (Chrome, Firefox, Safari, Edge or Opera).'
   },
 
   row_actions: {

@@ -1728,7 +1728,7 @@
     },
     "wrong_browser": {
       "title": "A böngésződet nem támogatja a Kitsu",
-      "text": "A Kitsu csak Firefox és Chrome böngészőkkel működik."
+      "outdated": "A böngésződ ({browser}) túl régi: frissítsd a legújabb verzióra, vagy telepíts egy modern, naprakész böngészőt (Chrome, Firefox, Safari, Edge vagy Opera)."
     },
     "logs": {
       "action_label": "Művelet",

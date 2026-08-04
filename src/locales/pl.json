@@ -2185,7 +2185,7 @@
     },
     "wrong_browser": {
       "title": "Twoja przeglądarka nie jest obsługiwana przez Kitsu",
-      "text": "Kitsu działa wyłącznie w przeglądarkach Firefox i Chrome."
+      "outdated": "Twoja przeglądarka ({browser}) jest zbyt stara: zaktualizuj ją do najnowszej wersji lub zainstaluj nowoczesną, aktualną przeglądarkę (Chrome, Firefox, Safari, Edge lub Opera)."
     },
     "row_actions": {
       "archive": "Archiwizuj",

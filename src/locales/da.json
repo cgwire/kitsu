@@ -1728,7 +1728,7 @@
     },
     "wrong_browser": {
       "title": "Din browser understøttes ikke af Kitsu",
-      "text": "Kitsu kan kun bruges med browserne Firefox og Chrome."
+      "outdated": "Din browser ({browser}) er for gammel: opdater den venligst til den nyeste version, eller installer en moderne, opdateret browser (Chrome, Firefox, Safari, Edge eller Opera)."
     },
     "logs": {
       "action_label": "Handling",

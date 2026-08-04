@@ -1728,7 +1728,7 @@
     },
     "wrong_browser": {
       "title": "Kitsu不支持您的瀏覽器",
-      "text": "Kitsu 只能在 Firefox 和 Chrome 瀏覽器上使用。"
+      "outdated": "您的瀏覽器 ({browser}) 版本過舊：請將其更新至最新版本，或安裝最新版的現代瀏覽器 (Chrome、Firefox、Safari、Edge 或 Opera)。"
     },
     "logs": {
       "action_label": "操作",

@@ -1728,7 +1728,7 @@
     },
     "wrong_browser": {
       "title": "お使いのブラウザはKitsuでサポートされていません",
-      "text": "Kitsu は Firefox と Chrome ブラウザでのみ使用できます。"
+      "outdated": "お使いのブラウザ（{browser}）は古すぎます。最新バージョンに更新するか、最新のモダンブラウザ（Chrome、Firefox、Safari、Edge、Opera）をインストールしてください。"
     },
     "logs": {
       "action_label": "アクション",

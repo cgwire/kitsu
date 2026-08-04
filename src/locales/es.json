@@ -1728,7 +1728,7 @@
     },
     "wrong_browser": {
       "title": "Tu navegador no es compatible con Kitsu",
-      "text": "Kitsu sólo puede ser usado con navegadores Firefox y Chrome."
+      "outdated": "Tu navegador ({browser}) es demasiado antiguo: actualízalo a su última versión o instala un navegador moderno y actualizado (Chrome, Firefox, Safari, Edge u Opera)."
     },
     "logs": {
       "action_label": "Acción",
