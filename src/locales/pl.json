@@ -843,6 +843,7 @@
       "or": "lub",
       "person": "Osoba",
       "people": "Osoby",
+      "preview_3d_not_supported": "Podglądy 3D nie są obsługiwane w tej przeglądarce (wymagany jest WebGL2). Zaktualizuj ją do najnowszej wersji.",
       "profile": "Profil",
       "production": "Produkcja",
       "record_audio": "Nagraj dźwięk",

@@ -441,6 +441,7 @@
       "maximize": "Maximiser",
       "nb_frames": "frames",
       "person": "Personne",
+      "preview_3d_not_supported": "Les aperçus 3D ne sont pas pris en charge par ce navigateur (WebGL2 est requis). Veuillez le mettre à jour vers sa dernière version.",
       "profile": "Profil",
       "production": "Production",
       "remove": "Enlever",

@@ -436,6 +436,7 @@
       "maximize": "Maximizar",
       "nb_frames": "frame | frames",
       "person": "Pessoa",
+      "preview_3d_not_supported": "As visualizações 3D não são suportadas neste navegador (WebGL2 é necessário). Por favor, atualize-o para a versão mais recente.",
       "profile": "Perfil",
       "production": "Produção",
       "remove": "Remover",

@@ -436,6 +436,7 @@
       "maximize": "Maksimer",
       "nb_frames": "frame | frames",
       "person": "Person",
+      "preview_3d_not_supported": "3D-previews understøttes ikke i denne browser (WebGL2 er påkrævet). Opdater den venligst til nyeste version.",
       "profile": "Profil",
       "production": "Produktion",
       "remove": "Fjern",

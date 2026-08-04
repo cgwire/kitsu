@@ -436,6 +436,7 @@
       "maximize": "最大化",
       "nb_frames": "フレーム | フレーム",
       "person": "ユーザー",
+      "preview_3d_not_supported": "このブラウザでは3Dプレビューに対応していません（WebGL2が必要です）。ブラウザを最新バージョンに更新してください。",
       "profile": "プロフィール",
       "production": "作品",
       "remove": "削除",

@@ -879,6 +879,8 @@ export default {
     or: 'or',
     person: 'Person',
     people: 'People',
+    preview_3d_not_supported:
+      '3D previews are not supported in this browser (WebGL2 is required). Please update it to its latest version.',
     profile: 'Profile',
     production: 'Production',
     record_audio: 'Record audio',

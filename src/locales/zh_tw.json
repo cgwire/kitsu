@@ -436,6 +436,7 @@
       "maximize": "最大化",
       "nb_frames": "幀",
       "person": "人員",
+      "preview_3d_not_supported": "此瀏覽器不支援 3D 預覽（需要 WebGL2）。請將瀏覽器更新至最新版本。",
       "profile": "簡介",
       "production": "製作項目",
       "remove": "移除",

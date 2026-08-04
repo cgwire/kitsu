@@ -10,7 +10,11 @@
       position: 'relative'
     }"
   >
+    <p v-if="viewerUnavailable" class="viewer-unavailable">
+      {{ $t('main.preview_3d_not_supported') }}
+    </p>
     <model-viewer
+      v-else
       ref="modelViewer"
       class="model-viewer"
       :style="{
@@ -93,7 +97,24 @@ const props = defineProps({
 
 const emit = defineEmits(['model-loaded'])
 
+// The model-viewer stack (three.js) requires WebGL2, absent from
+// Safari 14: probe before loading the chunk and show a message instead.
+// Browsers cap the number of live WebGL contexts and evict the oldest one,
+// so the probe context is released and the verdict computed only once.
+const supportsWebGL2 = () => {
+  try {
+    const context = document.createElement('canvas').getContext('webgl2')
+    context?.getExtension('WEBGL_lose_context')?.loseContext()
+    return !!context
+  } catch {
+    return false
+  }
+}
+
+const isWebGL2Supported = supportsWebGL2()
+
 const modelViewer = ref(null)
+const viewerUnavailable = ref(!isWebGL2Supported)
 const panningHDR = ref(false)
 const changingFocale = ref(false)
 const fieldOfView = ref(50)
@@ -148,16 +169,18 @@ const onModelLoaded = event => {
 }
 
 const getAnimations = () => {
-  return modelViewer.value.availableAnimations
+  return modelViewer.value?.availableAnimations || []
 }
 
 const play = animationName => {
-  modelViewer.value.animationName = animationName
-  modelViewer.value.play()
+  const mv = modelViewer.value
+  if (!mv) return
+  mv.animationName = animationName
+  mv.play()
 }
 
 const pause = () => {
-  modelViewer.value.pause()
+  modelViewer.value?.pause()
 }
 
 const startPanHDR = thisX => {
@@ -327,8 +350,14 @@ const removeEventListeners = () => {
 }
 
 onMounted(async () => {
+  if (viewerUnavailable.value) return
   if (!customElements.get('model-viewer')) {
-    await import('@google/model-viewer')
+    try {
+      await import('@google/model-viewer')
+    } catch {
+      viewerUnavailable.value = true
+      return
+    }
   }
   addEventListeners()
 })
@@ -346,5 +375,15 @@ defineExpose({ getAnimations, play, pause })
   width: 100%;
   background-color: #333;
   --progress-bar-color: #{$grey};
+}
+
+.viewer-unavailable {
+  align-items: center;
+  color: var(--text);
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  padding: 1em;
+  text-align: center;
 }
 </style>

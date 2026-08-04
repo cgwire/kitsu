@@ -436,6 +436,7 @@
       "maximize": "Maximieren",
       "nb_frames": "frame | frames",
       "person": "Person",
+      "preview_3d_not_supported": "3D-Vorschauen werden in diesem Browser nicht unterstützt (WebGL2 ist erforderlich). Bitte aktualisieren Sie ihn auf die neueste Version.",
       "profile": "Profil",
       "production": "Produktion",
       "remove": "Entfernen",

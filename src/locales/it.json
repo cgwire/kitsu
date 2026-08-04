@@ -438,6 +438,7 @@
       "maximize": "Ingrandisci",
       "nb_frames": "fotogramma | fotogrammi",
       "person": "Persona",
+      "preview_3d_not_supported": "Le anteprime 3D non sono supportate da questo browser (è richiesto WebGL2). Aggiornalo all'ultima versione.",
       "profile": "Profilo",
       "production": "Produzione",
       "remove": "Rimuovi",

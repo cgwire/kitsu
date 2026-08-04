@@ -439,6 +439,7 @@
       "maximize": "최대화",
       "nb_frames": "프레임 | 프레임",
       "person": "사람",
+      "preview_3d_not_supported": "이 브라우저에서는 3D 미리 보기를 지원하지 않습니다(WebGL2 필요). 브라우저를 최신 버전으로 업데이트하세요.",
       "profile": "프로필",
       "production": "프로덕션",
       "remove": "삭제",

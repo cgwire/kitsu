@@ -436,6 +436,7 @@
       "maximize": "Maximizar",
       "nb_frames": "fotograma | fotogramas",
       "person": "Persona",
+      "preview_3d_not_supported": "Las vistas previas 3D no son compatibles con este navegador (se requiere WebGL2). Por favor, actualízalo a su última versión.",
       "profile": "Perfil",
       "production": "Producción",
       "remove": "Quitar",

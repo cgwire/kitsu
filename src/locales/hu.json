@@ -436,6 +436,7 @@
       "maximize": "Nagyítás",
       "nb_frames": "kocka | kocka",
       "person": "Személy",
+      "preview_3d_not_supported": "A 3D előnézeteket ez a böngésző nem támogatja (WebGL2 szükséges). Kérlek frissítsd a böngészőt a legújabb verzióra.",
       "profile": "Profil",
       "production": "Produkció",
       "remove": "Eltávolítás",
