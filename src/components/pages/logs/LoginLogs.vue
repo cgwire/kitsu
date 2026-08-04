@@ -11,7 +11,7 @@
         @change="onDateRangeChange"
       />
       <people-field
-        class="flexrow-item field"
+        class="field flexrow-item"
         multiple
         search-email
         :label="$t('logs.people_label')"
@@ -20,13 +20,16 @@
         v-model="selectedPeople"
         @select="onPeopleSelect"
       />
-      <button-simple
-        class="flexrow-item small"
-        icon="refresh"
-        :is-loading="loading.logs"
-        :title="$t('main.reload')"
-        @click="loadLogs"
-      />
+      <div class="filler"></div>
+      <div class="field flexrow-item">
+        <button-simple
+          class="flexrow-item small"
+          icon="refresh"
+          :is-loading="loading.logs"
+          :title="$t('main.reload')"
+          @click="loadLogs"
+        />
+      </div>
     </div>
 
     <div class="has-text-centered" v-if="loading.logs">
@@ -254,12 +257,11 @@ useHead({ title: computed(() => `${t('logs.logins.title')} - Kitsu`) })
 }
 
 .empty {
-  color: var(--text);
   font-style: italic;
 }
 
 .filters {
-  align-items: flex-end;
+  align-items: flex-start;
   flex-wrap: wrap;
 }
 
@@ -290,7 +292,6 @@ useHead({ title: computed(() => `${t('logs.logins.title')} - Kitsu`) })
 }
 
 .log-list {
-  color: var(--text);
   width: auto;
 }
 </style>

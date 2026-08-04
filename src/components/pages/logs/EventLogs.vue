@@ -43,32 +43,28 @@
         v-model="selectedActions"
         @update:model-value="onActionsChange"
       />
-    </div>
-
-    <div class="flexrow filters mt1">
       <checkbox
-        class="flexrow-item"
+        class="flexrow-item mt2"
         :label="$t('logs.only_files')"
+        toggle
         v-model="onlyFiles"
         @change="onOnlyFilesChange"
       />
+      <span class="filler"></span>
       <button-simple
-        class="flexrow-item small"
+        class="flexrow-item small mt2"
         icon="refresh"
         :is-loading="loading.events"
         :title="$t('main.reload')"
         @click="loadEvents"
       />
       <button-simple
-        class="flexrow-item small"
-        :text="$t('logs.export_csv')"
+        class="flexrow-item small mt2"
         :disabled="!events.length"
+        icon="download"
+        :title="$t('main.csv.export_file')"
         @click="exportCsv"
       />
-      <span class="flexrow-item filler"></span>
-      <span class="flexrow-item event-count" v-if="events.length">
-        {{ events.length }} {{ $t('logs.events') }}
-      </span>
     </div>
 
     <div class="has-text-centered" v-if="loading.events">
@@ -78,6 +74,9 @@
       {{ $t('logs.empty_list') }}
     </div>
     <div class="log-list" v-else>
+      <div class="event-count">
+        {{ $t('logs.nb_events', { count: events.length }) }}
+      </div>
       <div
         class="event-line"
         :key="event.id"
@@ -88,7 +87,7 @@
         v-for="event in events"
       >
         <span class="date tag mr1">{{ event.date }}</span>
-        <span class="type tag" :data-status="event.shortType">
+        <span class="type tag mr1" :data-status="event.shortType">
           {{ event.type }}
         </span>
         <span class="name tag mr1">{{ event.name }}</span>
@@ -449,17 +448,16 @@ useHead({ title: computed(() => `${t('logs.audit.title')} - Kitsu`) })
 }
 
 .empty {
-  color: var(--text);
   font-style: italic;
 }
 
 .filters {
-  align-items: flex-end;
+  align-items: flex-start;
   flex-wrap: wrap;
 }
 
 .event-count {
-  color: var(--text);
+  padding: 1em;
   font-style: italic;
 }
 
@@ -515,7 +513,6 @@ useHead({ title: computed(() => `${t('logs.audit.title')} - Kitsu`) })
 
   ul {
     border-left: 3px solid $light-grey;
-    color: var(--text);
     cursor: default;
     list-style-type: none;
     margin: 1em 1em 2em 0.2em;
