@@ -9,6 +9,8 @@ Kitsu is a production tracking web application for animation studios, built by C
 | Stack | Vue 3.5, Vuex 4, Vue Router 5, vue-i18n 9, Vite 8, Vitest |
 | Node | >= 22.22.2 |
 | npm | >= 10 |
+| Browser floor | Chrome 87, Edge 91, Firefox 79, Opera 73, Safari/iOS 14. Declared in `.browserslistrc`, enforced at runtime by the Bowser gate in `src/router/routes.js` (keep both in sync). No Web APIs newer than this floor unless polyfilled in `src/polyfills.js`; core-js has no polyfill for DOM APIs like `AbortSignal.timeout()` (Safari 15.4+), so those stay off limits. |
+| ES level | Build ships ES2020 (Vite `build.target`); source syntax up to ES2021 (ESLint `ecmaVersion`). Bumping either is a coordinated change gated on the browser floor (ES2022 top-level await cannot be lowered to `es2020`, and static class blocks need Safari 16.4). |
 | Default branch | `main` |
 | Dev server | `npm run dev` |
 | Tests | `npm run test:unit` (vitest) |
