@@ -1149,10 +1149,6 @@ export const useAnnotation = ({
 
   // Canvas management
 
-  const deleteAllAnnotations = () => {
-    fabricCanvas.value._objects.forEach(deleteObject)
-  }
-
   const clearAnnotationSelection = () => {
     const canvas = fabricCanvas.value
     if (canvas.activeObject) {
@@ -1808,7 +1804,6 @@ export const useAnnotation = ({
     clearUndoneStack,
 
     // Canvas management
-    deleteAllAnnotations,
     clearAnnotationSelection,
     isAnnotationCanvas,
     setAnnotationCanvasDimensions,
