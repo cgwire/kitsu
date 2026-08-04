@@ -3,7 +3,8 @@ import { defineComponent } from 'vue'
 
 import {
   usePreviewShortcuts,
-  isAltLetter
+  isAltLetter,
+  undoRedoCommand
 } from '@/composables/players/previewShortcuts'
 
 /**
@@ -199,6 +200,71 @@ describe('composables/previewShortcuts', () => {
       expect(handlers.onUndo).not.toHaveBeenCalled()
       dispatchKeydown({ key: 'z', ctrlKey: true })
       expect(handlers.onUndo).toHaveBeenCalledTimes(1)
+      wrapper.unmount()
+    })
+
+    it('Ctrl+Z is consumed so the browser undo does not run', () => {
+      const { wrapper } = mountShortcuts()
+      const bare = dispatchKeydown({ key: 'z' })
+      expect(bare.defaultPrevented).toBe(false)
+      const undo = dispatchKeydown({ key: 'z', ctrlKey: true })
+      expect(undo.defaultPrevented).toBe(true)
+      wrapper.unmount()
+    })
+
+    // Browsers uppercase event.key when Shift is held, so the redo combo
+    // never reaches a bare `case 'z'`.
+    it('Ctrl+Shift+Z undoes nothing but is still consumed', () => {
+      const { handlers, wrapper } = mountShortcuts()
+      const event = dispatchKeydown({
+        key: 'Z',
+        ctrlKey: true,
+        shiftKey: true
+      })
+      expect(handlers.onUndo).not.toHaveBeenCalled()
+      expect(event.defaultPrevented).toBe(true)
+      wrapper.unmount()
+    })
+
+    it('Ctrl+Y, the Windows redo, undoes nothing but is consumed', () => {
+      const { handlers, wrapper } = mountShortcuts()
+      const bare = dispatchKeydown({ key: 'y' })
+      expect(bare.defaultPrevented).toBe(false)
+      const redo = dispatchKeydown({ key: 'y', ctrlKey: true })
+      expect(handlers.onUndo).not.toHaveBeenCalled()
+      expect(handlers.onRedo).not.toHaveBeenCalled()
+      expect(redo.defaultPrevented).toBe(true)
+      wrapper.unmount()
+    })
+
+    // event.key is an unusable glyph there, so the switch it used to sit in
+    // never matched and the press escaped to the browser.
+    it('undoes on Ctrl+Z from a non-Latin layout', () => {
+      const { handlers, wrapper } = mountShortcuts()
+      const event = dispatchKeydown({ key: 'я', code: 'KeyZ', ctrlKey: true })
+      expect(handlers.onUndo).toHaveBeenCalledTimes(1)
+      expect(event.defaultPrevented).toBe(true)
+      wrapper.unmount()
+    })
+
+    it('undoes on Ctrl+Z typed with caps lock on', () => {
+      const { handlers, wrapper } = mountShortcuts()
+      const event = dispatchKeydown({ key: 'Z', ctrlKey: true })
+      expect(handlers.onUndo).toHaveBeenCalledTimes(1)
+      expect(event.defaultPrevented).toBe(true)
+      wrapper.unmount()
+    })
+
+    it('leaves Ctrl+Z to the browser inside a text field', () => {
+      const { handlers, wrapper } = mountShortcuts()
+      const textarea = document.createElement('textarea')
+      const event = dispatchKeydown({
+        key: 'z',
+        ctrlKey: true,
+        target: textarea
+      })
+      expect(handlers.onUndo).not.toHaveBeenCalled()
+      expect(event.defaultPrevented).toBe(false)
       wrapper.unmount()
     })
 
@@ -427,6 +493,75 @@ describe('composables/previewShortcuts', () => {
       dispatchKeydown({ key: ' ' })
       expect(handlers.onPlayPause).not.toHaveBeenCalled()
     })
+  })
+})
+
+describe('undoRedoCommand', () => {
+  // Shared by usePreviewShortcuts and by SharedPlaylistPlayer's own keydown
+  // handler. Everything it reports must be swallowed: Chromium's undo stack
+  // belongs to the frame, so an unconsumed press replays the last edit of a
+  // page text field (a list search input, a comment draft).
+  const ev = overrides => ({
+    ctrlKey: false,
+    metaKey: false,
+    shiftKey: false,
+    ...overrides
+  })
+
+  it('reports undo on Ctrl+Z and Cmd+Z', () => {
+    expect(undoRedoCommand(ev({ ctrlKey: true, key: 'z', code: 'KeyZ' }))).toBe(
+      'undo'
+    )
+    expect(undoRedoCommand(ev({ metaKey: true, key: 'z', code: 'KeyZ' }))).toBe(
+      'undo'
+    )
+  })
+
+  it('reports undo with caps lock on, the key being uppercased', () => {
+    expect(undoRedoCommand(ev({ ctrlKey: true, key: 'Z', code: 'KeyZ' }))).toBe(
+      'undo'
+    )
+  })
+
+  it('reports redo on the combos the browser binds to it', () => {
+    // Shift uppercases event.key, which is why a bare `case 'z'` missed it.
+    expect(
+      undoRedoCommand(ev({ ctrlKey: true, shiftKey: true, key: 'Z' }))
+    ).toBe('redo')
+    expect(undoRedoCommand(ev({ ctrlKey: true, key: 'y' }))).toBe('redo')
+    expect(
+      undoRedoCommand(ev({ metaKey: true, shiftKey: true, key: 'Z' }))
+    ).toBe('redo')
+  })
+
+  it('leaves Cmd+Y alone, the macOS history shortcut being no redo', () => {
+    expect(undoRedoCommand(ev({ metaKey: true, key: 'y' }))).toBeNull()
+  })
+
+  it('follows the printed cap on Latin layouts', () => {
+    // QWERTZ: the Z cap is physically KeyY. The typed letter wins, so the
+    // user's cap is what counts, not the position.
+    expect(undoRedoCommand(ev({ ctrlKey: true, key: 'z', code: 'KeyY' }))).toBe(
+      'undo'
+    )
+    expect(undoRedoCommand(ev({ ctrlKey: true, key: 'y', code: 'KeyZ' }))).toBe(
+      'redo'
+    )
+  })
+
+  it('falls back to the physical key on a non-Latin layout', () => {
+    // Cyrillic: event.key is 'я', unusable, so the QWERTY position decides.
+    // Without this the press escapes and the browser undo fires.
+    expect(undoRedoCommand(ev({ ctrlKey: true, key: 'я', code: 'KeyZ' }))).toBe(
+      'undo'
+    )
+  })
+
+  it('ignores anything that is not a modified z or y', () => {
+    expect(undoRedoCommand(ev({ key: 'z', code: 'KeyZ' }))).toBeNull()
+    expect(undoRedoCommand(ev({ altKey: true, key: 'z', code: 'KeyZ' }))).toBeNull()
+    expect(undoRedoCommand(ev({ ctrlKey: true, key: 'c', code: 'KeyC' }))).toBeNull()
+    expect(undoRedoCommand(ev({ ctrlKey: true, key: 'Enter' }))).toBeNull()
   })
 })
 

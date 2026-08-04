@@ -1808,8 +1808,8 @@ const {
 
 // Keyboard shortcuts: the common subset goes through this composable;
 // PlaylistPlayer-specific keys are handled below in onKeyDown (event.code:
-// arrows, Home/End, Delete, plus the playlist entity logic). See
-// usePreviewShortcuts / isAltLetter for how letter shortcuts are matched.
+// arrows, Home/End, plus the playlist entity logic). See usePreviewShortcuts
+// / isAltLetter for how letter shortcuts are matched.
 
 const { isAltHeld } = usePreviewShortcuts({
   onDelete: () => deleteSelection(),
@@ -4277,12 +4277,7 @@ const onKeyDown = event => {
   displayBars()
   if (['INPUT', 'TEXTAREA'].includes(event.target?.tagName)) return
 
-  if (
-    (event.code === 'Delete' || event.code === 'Backspace') &&
-    fabricCanvas.value
-  ) {
-    deleteSelection()
-  } else if (event.code === 'ArrowLeft') {
+  if (event.code === 'ArrowLeft') {
     event.preventDefault()
     event.stopPropagation()
     if ((event.ctrlKey || event.metaKey) && event.shiftKey) {

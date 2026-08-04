@@ -895,8 +895,6 @@ describe('Productions store', () => {
       expect(state.productionStatus).toHaveLength(0)
     })
 
-    test.skip('LOAD_PRODUCTION_STATUS_ERROR', () => {})
-
     test('LOAD_PRODUCTION_STATUS_END', () => {
       store.mutations.LOAD_PRODUCTION_STATUS_END(state, [{ id: 1, status: 'status' }])
       expect(state.productionStatus).toEqual([{ id: 1, status: 'status' }])

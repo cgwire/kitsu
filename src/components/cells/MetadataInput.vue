@@ -290,6 +290,16 @@ const onMetadataFieldChanged = (entity, descriptor, event) => {
   let value
   if (typeof event === 'string') {
     value = event
+  } else if (
+    event.inputType === 'historyUndo' ||
+    event.inputType === 'historyRedo'
+  ) {
+    // The browser rewrote the field on its own: its undo stack belongs to the
+    // frame, not to the focused element, so Ctrl+Z anywhere on the page
+    // replays the last edited cell. Put the stored value back instead of
+    // pushing this one onto every selected entity.
+    event.target.value = getMetadataFieldValue(descriptor, entity)
+    return
   } else if (!event.target.validity.valid) {
     return
   } else if (descriptor.data_type === 'boolean') {

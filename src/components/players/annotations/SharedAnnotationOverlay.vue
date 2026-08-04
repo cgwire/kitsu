@@ -401,7 +401,9 @@ defineExpose({
   hasChanges: () => annotation.hasChanges(),
   getDiff: () => annotation.getDiff(),
   reset: () => annotation.reset(),
-  setDrawingMode: enabled => annotation.setDrawingMode(enabled)
+  setDrawingMode: enabled => annotation.setDrawingMode(enabled),
+  // The player binds Ctrl+Z to the same undo the toolbar button calls.
+  undo: () => annotation.undo()
 })
 </script>
 

@@ -99,6 +99,7 @@
           </div>
 
           <shared-annotation-overlay
+            ref="annotationOverlay"
             :annotations="currentAnnotations"
             :current-frame="currentFrameNumber"
             :frame-duration="frameDuration"
@@ -251,7 +252,10 @@ import { useStore } from 'vuex'
 import darkTimesliderUrl from '@/assets/background/video-timeslider-dark.png'
 import { usePanzoomSync } from '@/composables/panzoom'
 import { useMediaKind } from '@/composables/players/mediaKind'
-import { isAltLetter } from '@/composables/players/previewShortcuts'
+import {
+  isAltLetter,
+  undoRedoCommand
+} from '@/composables/players/previewShortcuts'
 import { usePlayerTransport } from '@/composables/players/transport'
 import { mergeAnnotationsByFrame } from '@/lib/players/annotation'
 import { DEFAULT_FPS, floorToFrame, formatTime } from '@/lib/video'
@@ -292,6 +296,7 @@ const emit = defineEmits(['logout'])
 const { panzoomTransform, onPanzoomChanged, resetPanzoomTransform } =
   usePanzoomSync()
 
+const annotationOverlay = ref(null)
 const container = ref(null)
 const videoContainer = ref(null)
 // Height available for the picture viewer: it must fill the same area the
@@ -847,6 +852,19 @@ const onKeyDown = event => {
   const stop = () => {
     event.preventDefault()
     event.stopPropagation()
+  }
+
+  // Left unconsumed, the browser's own undo rewinds the guest's comment draft
+  // instead of the last stroke. Swallow every variant whatever the state, this
+  // player having no redo; only the undo itself needs an annotating overlay.
+  // Matching rules live in undoRedoCommand.
+  const undoRedo = undoRedoCommand(event)
+  if (undoRedo) {
+    stop()
+    if (undoRedo === 'undo' && isAnnotating.value) {
+      annotationOverlay.value?.undo()
+    }
+    return
   }
 
   // Entity navigation reuses isAltLetter (shared with usePreviewShortcuts)

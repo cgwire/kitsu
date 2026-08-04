@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils'
-import { computed, defineComponent, ref } from 'vue'
+import { computed, defineComponent, ref, unref } from 'vue'
 
 import { Point, Text } from 'fabric'
 import { PSStroke, PSPoint } from 'fabricjs-psbrush'
@@ -105,6 +105,25 @@ const createSerializableObject = (props = {}) => {
   return obj
 }
 
+// Serialized form of a stroke authored on the default 800x600 canvas, so a
+// reload onto a 1600x1200 one doubles its coordinates.
+const STROKE_ON_800 = {
+  id: 'stroke-1',
+  type: 'path',
+  path: 'M 0 0 L 10 10',
+  left: 100,
+  top: 50,
+  width: 10,
+  height: 10,
+  scaleX: 1,
+  scaleY: 1,
+  angle: 0,
+  stroke: '#ff0000',
+  strokeWidth: 2,
+  canvasWidth: 800,
+  canvasHeight: 600
+}
+
 /**
  * Mount the composable inside a tiny host component so watchers and the
  * canvas mirroring run. Returns the wrapper, the captured composable API
@@ -116,7 +135,9 @@ const mountAnnotation = (options = {}) => {
     annotations = ref([]),
     isCurrentUserArtist = computed(() => false),
     userId = computed(() => 'user-1'),
-    currentTime = 1.0,
+    // A ref so a test can move the playhead between two calls; a plain
+    // number still works for the tests that never seek.
+    currentTime = ref(1.0),
     currentFrame = 24,
     isLaserModeOn = ref(false),
     isEraserModeOn = ref(false),
@@ -158,7 +179,7 @@ const mountAnnotation = (options = {}) => {
         userId,
         store,
         emit: emitSpy,
-        getCurrentTime: () => currentTime,
+        getCurrentTime: () => unref(currentTime),
         getCurrentFrame: () => currentFrame,
         saveAnnotationsCb,
         onCanvasMouseMovedCb,
@@ -785,6 +806,26 @@ describe('composables/annotation', () => {
       expect(saveAnnotationsCb).toHaveBeenCalled()
       wrapper.unmount()
     })
+
+    // A Delete press with nothing selected used to run the trailing save
+    // anyway, re-serializing the canvas and sending an empty batch.
+    it('neither saves nor touches history when nothing is selected', () => {
+      const { api, canvas, saveAnnotationsCb, wrapper } = mountAnnotation()
+      const obj = createSerializableObject({ id: 'a' })
+      api.addObject(obj)
+      api.undoLastAction()
+      saveAnnotationsCb.mockClear()
+      canvas.remove.mockClear()
+
+      api.deleteSelection()
+
+      expect(saveAnnotationsCb).not.toHaveBeenCalled()
+      expect(canvas.remove).not.toHaveBeenCalled()
+      // The undone stack survived: redo still replays the stroke.
+      api.redoLastAction()
+      expect(canvas._objects).toEqual([obj])
+      wrapper.unmount()
+    })
   })
 
   describe('addObjectToCanvas — eraser selectivity', () => {
@@ -1146,6 +1187,38 @@ describe('composables/annotation', () => {
       wrapper.unmount()
     })
 
+    it('leaves an entry made on another frame alone', () => {
+      const obj = createSerializableObject({ id: 'a' })
+      const canvas = createFakeCanvas()
+      const currentTime = ref(10)
+      const { api, wrapper } = mountAnnotation({ canvas, currentTime })
+
+      api.addObject(obj)
+      currentTime.value = 11
+      api.undoLastAction()
+
+      expect(canvas.remove).not.toHaveBeenCalled()
+      wrapper.unmount()
+    })
+
+    // Skipping a foreign entry must not cost the history: the stroke is still
+    // there and still belongs to frame 10, so coming back must undo it.
+    it('undoes that entry again once the playhead is back on its frame', () => {
+      const obj = createSerializableObject({ id: 'a' })
+      const canvas = createFakeCanvas()
+      const currentTime = ref(10)
+      const { api, wrapper } = mountAnnotation({ canvas, currentTime })
+
+      api.addObject(obj)
+      currentTime.value = 11
+      api.undoLastAction()
+      currentTime.value = 10
+      api.undoLastAction()
+
+      expect(canvas.remove).toHaveBeenCalledWith(obj)
+      wrapper.unmount()
+    })
+
     it('resolves the live canvas instance when the stack holds a stale ref', () => {
       // Esc-exit fullscreen and similar canvas reloads rebuild every
       // fabric.Object; the stack still holds the previous instance.
@@ -1166,9 +1239,95 @@ describe('composables/annotation', () => {
       expect(canvas.remove).not.toHaveBeenCalledWith(stale)
       wrapper.unmount()
     })
+
+    // Entering fullscreen resizes the canvas and reloads the annotation, so
+    // every live object is replaced by one rebuilt at the new scale. The
+    // history entry still pointed at the pre-resize instance, and redo, which
+    // can no longer look the object up on the canvas, re-injected it at its
+    // pre-resize position.
+    it('replays the instance rebuilt by a reload, not the pre-resize one', async () => {
+      const canvas = createFakeCanvas()
+      const { api, wrapper } = mountAnnotation({ canvas })
+
+      const drawn = await api.addObjectToCanvas(null, STROKE_ON_800, canvas)
+      api.onObjectAdded({ target: drawn })
+
+      canvas.width = 1600
+      canvas.height = 1200
+      api.clearCanvas()
+      const reloaded = await api.addObjectToCanvas(null, STROKE_ON_800, canvas)
+      expect(reloaded.left).toBe(200)
+
+      api.undoLastAction()
+      expect(canvas._objects).toHaveLength(0)
+      api.redoLastAction()
+
+      expect(canvas._objects[0].left).toBe(200)
+      wrapper.unmount()
+    })
+
+    // Reported gesture: three strokes, fullscreen, two undos, back out of
+    // fullscreen, redo. The undone object sits off the canvas while the box
+    // shrinks back, so no reload can re-scale it; redo used to re-inject it at
+    // its fullscreen coordinates, far outside the reduced player.
+    it('redoes at the right place after a resize made while undone', async () => {
+      const canvas = createFakeCanvas()
+      const { api, wrapper } = mountAnnotation({ canvas })
+      const strokes = [
+        { ...STROKE_ON_800, id: 's1', left: 100 },
+        { ...STROKE_ON_800, id: 's2', left: 200 },
+        { ...STROKE_ON_800, id: 's3', left: 300 }
+      ]
+
+      const reload = async kept => {
+        api.clearCanvas()
+        for (const data of kept) await api.addObjectToCanvas(null, data, canvas)
+      }
+
+      for (const data of strokes) {
+        api.onObjectAdded({ target: await api.addObjectToCanvas(null, data, canvas) })
+      }
+
+      canvas.width = 1600
+      canvas.height = 1200
+      await reload(strokes)
+
+      api.undoLastAction()
+      api.undoLastAction()
+      expect(canvas._objects.map(o => o.id)).toEqual(['s1'])
+
+      canvas.width = 800
+      canvas.height = 600
+      await reload([strokes[0]])
+      api.redoLastAction()
+
+      expect(canvas._objects.map(o => o.id)).toEqual(['s1', 's2'])
+      expect(canvas._objects[1].left).toBe(200)
+      wrapper.unmount()
+    })
   })
 
   describe('redoLastAction', () => {
+    // Data loss: zou applies deletions after additions, so a batch carrying
+    // the same id on both sides erased the annotation server side. Undo queued
+    // the deletion, redo re-queued the addition without dropping it.
+    it('drops the pending deletion when it re-adds an object', () => {
+      const obj = createSerializableObject({ id: 'a' })
+      const canvas = createFakeCanvas()
+      const { api, wrapper } = mountAnnotation({ canvas })
+
+      api.addObject(obj)
+      api.undoLastAction()
+      expect(api.deletions.value[0]?.objects).toEqual(['a'])
+
+      api.redoLastAction()
+
+      expect(
+        api.deletions.value.some(entry => entry.objects.includes('a'))
+      ).toBe(false)
+      wrapper.unmount()
+    })
+
     it('no-ops on an empty undone stack', () => {
       const { api, wrapper, saveAnnotationsCb } = mountAnnotation()
       api.redoLastAction()
@@ -1246,6 +1405,25 @@ describe('composables/annotation', () => {
       wrapper.unmount()
     })
 
+    // The annotation entry is only re-serialized from the canvas during a
+    // save, and reloads (fullscreen exit, frame step) rebuild the canvas
+    // from that entry: an unsaved erase undo/redo was revived by the next
+    // reload.
+    it('saves after undoing and after redoing an erase', () => {
+      const { api, saveAnnotationsCb, wrapper } = mountAnnotation()
+      const obj = makeErasable('e1')
+      api.onErasingEnd({ targets: [obj], path: {} })
+
+      saveAnnotationsCb.mockClear()
+      api.undoLastAction()
+      expect(saveAnnotationsCb).toHaveBeenCalledTimes(1)
+
+      saveAnnotationsCb.mockClear()
+      api.redoLastAction()
+      expect(saveAnnotationsCb).toHaveBeenCalledTimes(1)
+      wrapper.unmount()
+    })
+
     it('redo restores the removed eraser path exactly', () => {
       const { api, wrapper } = mountAnnotation()
       const obj = makeErasable('e1')
@@ -1294,6 +1472,36 @@ describe('composables/annotation', () => {
       expect(api.deletions.value[0].objects).toEqual(['e1'])
       // Redo purges the stale update so the batch nets out to a deletion.
       expect(api.updates.value[0].drawing.objects).toHaveLength(0)
+      wrapper.unmount()
+    })
+
+    // Confirmed gesture: fully erase a stroke, toggle fullscreen (resize),
+    // then undo. The removed object waits off the canvas with the old box's
+    // coordinates, so it came back misplaced and mis-scaled.
+    it('reprojects a fully erased object undone after a resize', () => {
+      const canvas = createFakeCanvas()
+      const { api, wrapper } = mountAnnotation({ canvas })
+      const obj = makeErasable('e1')
+      obj.toCanvasElement = () => ({
+        width: 1,
+        height: 1,
+        getContext: () => ({
+          getImageData: () => ({ data: new Uint8ClampedArray(4) })
+        })
+      })
+      canvas._objects.push(obj)
+
+      api.onErasingEnd({ targets: [obj], path: {} })
+      expect(canvas._objects).not.toContain(obj)
+
+      canvas.width = 1600
+      canvas.height = 1200
+      api.undoLastAction()
+
+      expect(canvas._objects).toContain(obj)
+      expect(obj.left).toBe(20)
+      expect(obj.top).toBe(40)
+      expect(obj.scaleX).toBe(2)
       wrapper.unmount()
     })
 
