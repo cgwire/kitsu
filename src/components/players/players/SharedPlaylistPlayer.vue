@@ -252,7 +252,10 @@ import { useStore } from 'vuex'
 import darkTimesliderUrl from '@/assets/background/video-timeslider-dark.png'
 import { usePanzoomSync } from '@/composables/panzoom'
 import { useMediaKind } from '@/composables/players/mediaKind'
-import { isAltLetter } from '@/composables/players/previewShortcuts'
+import {
+  isAltLetter,
+  undoRedoCommand
+} from '@/composables/players/previewShortcuts'
 import { usePlayerTransport } from '@/composables/players/transport'
 import { mergeAnnotationsByFrame } from '@/lib/players/annotation'
 import { DEFAULT_FPS, floorToFrame, formatTime } from '@/lib/video'
@@ -851,17 +854,14 @@ const onKeyDown = event => {
     event.stopPropagation()
   }
 
-  // Left unconsumed, the browser's own undo rewinds the guest's comment draft:
-  // it is scoped to the frame, not to the focused element, so it fires long
-  // after the textarea lost focus. Swallow every variant whatever the state
-  // (Shift uppercases the key, Windows binds redo to Ctrl+Y, and this player
-  // has no redo); only the undo itself needs an annotating overlay. Matched on
-  // event.key rather than event.code, the Z cap being another physical key on
-  // AZERTY (see isAltLetter).
-  const letter = event.key?.toLowerCase()
-  if ((event.ctrlKey || event.metaKey) && (letter === 'z' || letter === 'y')) {
+  // Left unconsumed, the browser's own undo rewinds the guest's comment draft
+  // instead of the last stroke. Swallow every variant whatever the state, this
+  // player having no redo; only the undo itself needs an annotating overlay.
+  // Matching rules live in undoRedoCommand.
+  const undoRedo = undoRedoCommand(event)
+  if (undoRedo) {
     stop()
-    if (letter === 'z' && !event.shiftKey && isAnnotating.value) {
+    if (undoRedo === 'undo' && isAnnotating.value) {
       annotationOverlay.value?.undo()
     }
     return
