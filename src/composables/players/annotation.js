@@ -1043,6 +1043,11 @@ export const useAnnotation = ({
       addToUpdates(obj)
     })
     fabricCanvas.value?.requestRenderAll()
+    // Save like every other mutation path: the annotation entry is only
+    // re-serialized from the canvas during a save, and reloads (fullscreen
+    // exit, frame step) rebuild the canvas from that entry — without this
+    // the popped eraser path came back on the next reload.
+    if (action.removed.length) saveAnnotationsCb()
   }
 
   // Redo an erase: push the stashed paths back onto each object's eraser,
@@ -1063,6 +1068,7 @@ export const useAnnotation = ({
       }
     })
     fabricCanvas.value?.requestRenderAll()
+    if (action.removed?.length) saveAnnotationsCb()
   }
 
   const undoLastAction = () => {

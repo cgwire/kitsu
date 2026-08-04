@@ -1405,6 +1405,25 @@ describe('composables/annotation', () => {
       wrapper.unmount()
     })
 
+    // The annotation entry is only re-serialized from the canvas during a
+    // save, and reloads (fullscreen exit, frame step) rebuild the canvas
+    // from that entry: an unsaved erase undo/redo was revived by the next
+    // reload.
+    it('saves after undoing and after redoing an erase', () => {
+      const { api, saveAnnotationsCb, wrapper } = mountAnnotation()
+      const obj = makeErasable('e1')
+      api.onErasingEnd({ targets: [obj], path: {} })
+
+      saveAnnotationsCb.mockClear()
+      api.undoLastAction()
+      expect(saveAnnotationsCb).toHaveBeenCalledTimes(1)
+
+      saveAnnotationsCb.mockClear()
+      api.redoLastAction()
+      expect(saveAnnotationsCb).toHaveBeenCalledTimes(1)
+      wrapper.unmount()
+    })
+
     it('redo restores the removed eraser path exactly', () => {
       const { api, wrapper } = mountAnnotation()
       const obj = makeErasable('e1')
