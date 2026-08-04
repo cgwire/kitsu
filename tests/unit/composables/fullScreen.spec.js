@@ -29,6 +29,22 @@ describe('composables/fullScreen helpers', () => {
     expect(el.webkitRequestFullScreen).toHaveBeenCalled()
   })
 
+  test('a denied fullscreen request is swallowed', async () => {
+    const el = {
+      requestFullscreen: vi.fn(() =>
+        Promise.reject(new TypeError('Fullscreen request denied'))
+      )
+    }
+    await expect(requestFullScreen(el)).resolves.toBeUndefined()
+  })
+
+  test('a rejected exitFullscreen is swallowed', async () => {
+    document.exitFullscreen = vi.fn(() =>
+      Promise.reject(new TypeError('Document not active'))
+    )
+    await expect(exitDocumentFullScreen()).resolves.toBeUndefined()
+  })
+
   test('exitDocumentFullScreen falls back to the webkit prefix', () => {
     document.exitFullscreen = undefined
     document.webkitCancelFullScreen = vi.fn()

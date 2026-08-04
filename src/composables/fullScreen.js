@@ -32,15 +32,20 @@ export const getFullScreenElement = () =>
   document.msFullscreenElement ||
   null
 
+// The unprefixed APIs return a promise that rejects when the browser
+// refuses (iframe without allowfullscreen, policy, no fullscreen element):
+// a denial is a no-op for the player, not an error worth reporting.
 export const requestFullScreen = element => {
-  if (element.requestFullscreen) return element.requestFullscreen()
+  if (element.requestFullscreen)
+    return Promise.resolve(element.requestFullscreen()).catch(() => {})
   if (element.mozRequestFullScreen) return element.mozRequestFullScreen()
   if (element.webkitRequestFullScreen) return element.webkitRequestFullScreen()
   if (element.msRequestFullscreen) return element.msRequestFullscreen()
 }
 
 export const exitDocumentFullScreen = () => {
-  if (document.exitFullscreen) return document.exitFullscreen()
+  if (document.exitFullscreen)
+    return Promise.resolve(document.exitFullscreen()).catch(() => {})
   if (document.mozCancelFullScreen) return document.mozCancelFullScreen()
   if (document.webkitCancelFullScreen) return document.webkitCancelFullScreen()
   if (document.msExitFullscreen) return document.msExitFullscreen()
