@@ -452,8 +452,8 @@
       "csv": {
         "choose": "انتخاب",
         "error_upload": "هنگام بارگذاری CSV خطایی رخ داد.",
-        "export_file": "صادر کردن",
-        "import_file": "وارد کردن",
+        "export_file": "صادر کردن داده‌ها به CSV",
+        "import_file": "وارد کردن داده‌ها از CSV",
         "import_title": "وارد کردن داده ها از CSV",
         "legend": "راهنما",
         "legend_ok": "ستونی که وارد خواهد شد",

@@ -130,7 +130,7 @@
       v-if="!isEmptyList && !isLoading"
     >
       {{ displayedAssetTypesLength }}
-      {{ $t('asset_types.number', displayedAssetTypesLength) }}
+      {{ $t('asset_types.number', { count: displayedAssetTypesLength }) }}
     </p>
   </div>
 </template>

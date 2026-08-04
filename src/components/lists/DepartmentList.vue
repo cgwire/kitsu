@@ -62,7 +62,8 @@
       :with-thumbnail="false"
     />
     <p class="has-text-centered nb-departments">
-      {{ entries.length }} {{ $t('departments.number', entries.length) }}
+      {{ entries.length }}
+      {{ $t('departments.number', { count: entries.length }) }}
     </p>
   </div>
 </template>

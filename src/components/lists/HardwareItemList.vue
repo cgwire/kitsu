@@ -69,7 +69,8 @@
     />
 
     <p class="has-text-centered nb-hardware-items">
-      {{ entries.length }} {{ $t('hardware_items.number', entries.length) }}
+      {{ entries.length }}
+      {{ $t('hardware_items.number', { count: entries.length }) }}
     </p>
   </div>
 </template>

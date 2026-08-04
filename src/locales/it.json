@@ -454,8 +454,8 @@
       "csv": {
         "choose": "Scegli",
         "error_upload": "Si è verificato un errore durante il caricamento del file CSV.",
-        "export_file": "Esporta",
-        "import_file": "Importa",
+        "export_file": "Esporta dati in CSV",
+        "import_file": "Importa dati da CSV",
         "import_title": "Importa dati da CSV",
         "legend": "Legenda",
         "legend_ok": "Colonna che verrà importata",

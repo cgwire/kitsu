@@ -452,8 +452,8 @@
       "csv": {
         "choose": "Kies",
         "error_upload": "Er is een fout opgetreden tijdens het uploaden van de CSV.",
-        "export_file": "Exporteren",
-        "import_file": "Importeren",
+        "export_file": "Data naar CSV exporteren",
+        "import_file": "Data uit CSV importeren",
         "import_title": "Importeer data vanuit CSV",
         "legend": "Legenda",
         "legend_ok": "Kolom die wordt geïmporteerd",

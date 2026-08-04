@@ -452,8 +452,8 @@
       "csv": {
         "choose": "選択",
         "error_upload": "CSV のアップロード中にエラーが発生しました。",
-        "export_file": "エクスポート",
-        "import_file": "インポート",
+        "export_file": "データを CSV にエクスポート",
+        "import_file": "データを CSV からインポート",
         "import_title": "CSV からデータをインポート",
         "legend": "凡例",
         "legend_ok": "インポートされる列",

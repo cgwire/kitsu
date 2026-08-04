@@ -37,7 +37,7 @@
     />
     <p class="has-text-centered nb-studios">
       {{ entries.length }}
-      {{ $t('studios.number', entries.length, { n: entries.length }) }}
+      {{ $t('studios.number', { count: entries.length }) }}
     </p>
   </div>
 </template>

@@ -481,31 +481,27 @@
 
     <p class="has-text-centered nb-edits" v-if="!isEmptyList && !isLoading">
       {{ displayedEditsLength }}
-      {{ $t('edits.number', displayedEditsLength) }}
+      {{ $t('edits.number', { count: displayedEditsLength }) }}
       <span v-if="displayedEditsTimeSpent > 0 || displayedEditsEstimation > 0">
         ({{ formatDuration(displayedEditsTimeSpent) }}
         {{
           isDurationInHours
-            ? $t(
-                'main.hours_spent',
-                formatDuration(displayedEditsTimeSpent, false)
-              )
-            : $t(
-                'main.days_spent',
-                formatDuration(displayedEditsTimeSpent, false)
-              )
+            ? $t('main.hours_spent', {
+                count: formatDuration(displayedEditsTimeSpent, false)
+              })
+            : $t('main.days_spent', {
+                count: formatDuration(displayedEditsTimeSpent, false)
+              })
         }},
         {{ formatDuration(displayedEditsEstimation) }}
         {{
           isDurationInHours
-            ? $t(
-                'main.hours_estimated',
-                formatDuration(displayedEditsEstimation, false)
-              )
-            : $t(
-                'main.man_days',
-                formatDuration(displayedEditsEstimation, false)
-              )
+            ? $t('main.hours_estimated', {
+                count: formatDuration(displayedEditsEstimation, false)
+              })
+            : $t('main.man_days', {
+                count: formatDuration(displayedEditsEstimation, false)
+              })
         }})
       </span>
     </p>

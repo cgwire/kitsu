@@ -9,7 +9,7 @@
       />
       <span
         class="number"
-        :title="`${notificationCount} ${$t('notifications.unread_notifications', notificationCount)}`"
+        :title="`${notificationCount} ${$t('notifications.unread_notifications', { count: notificationCount })}`"
         v-if="isNewNotification"
       >
         {{ notificationCount }}

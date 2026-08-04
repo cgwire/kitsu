@@ -65,7 +65,8 @@
     />
 
     <p class="has-text-centered nb-custom-actions">
-      {{ entries.length }} {{ $t('custom_actions.number', entries.length) }}
+      {{ entries.length }}
+      {{ $t('custom_actions.number', { count: entries.length }) }}
     </p>
   </div>
 </template>

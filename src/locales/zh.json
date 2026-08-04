@@ -452,8 +452,8 @@
       "csv": {
         "choose": "选择",
         "error_upload": "上传您的CSV文件时出现错误。",
-        "export_file": "导出",
-        "import_file": "导入",
+        "export_file": "导出数据到CSV文件",
+        "import_file": "从CSV文件导入数据",
         "import_title": "从CSV文件导入数据",
         "legend": "图例",
         "legend_ok": "将被导入的列",

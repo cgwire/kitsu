@@ -56,9 +56,7 @@
     />
     <p class="has-text-centered nb-templates">
       {{ entries.length }}
-      {{
-        $t('project_templates.number', entries.length, { n: entries.length })
-      }}
+      {{ $t('project_templates.number', { count: entries.length }) }}
     </p>
   </div>
 </template>

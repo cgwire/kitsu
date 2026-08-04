@@ -452,9 +452,9 @@
       "csv": {
         "choose": "Auswählen",
         "error_upload": "Beim Hochladen Ihrer CSV-Datei ist ein Fehler aufgetreten.",
-        "export_file": "Exportieren",
-        "import_file": "Importieren",
-        "import_title": "Daten aus einem CSV importieren",
+        "export_file": "Daten in eine CSV-Datei exportieren",
+        "import_file": "Daten aus einer CSV-Datei importieren",
+        "import_title": "Daten aus einer CSV-Datei importieren",
         "legend": "Legende",
         "legend_ok": "Spalte, die importiert wird",
         "legend_ignored": "Spalte, die nicht zugeordnet wurde und nicht importiert wird",

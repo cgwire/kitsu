@@ -100,13 +100,21 @@
 
     <div class="new-entities" v-if="updateData && newEntityNames.length > 0">
       <p class="new-entities-text">
-        {{ $t('main.csv.new_entities_to_create', newEntityNames.length) }}
+        {{
+          $t('main.csv.new_entities_to_create', {
+            count: newEntityNames.length
+          })
+        }}
       </p>
       <p class="new-entities-names">
         {{ newEntityNames.join(', ') }}
       </p>
       <checkbox
-        :label="$t('main.csv.new_entities_confirmation', newEntityNames.length)"
+        :label="
+          $t('main.csv.new_entities_confirmation', {
+            count: newEntityNames.length
+          })
+        "
         v-model="newEntitiesConfirmed"
       />
     </div>

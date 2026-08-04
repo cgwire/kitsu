@@ -452,8 +452,8 @@
       "csv": {
         "choose": "Kiválaszt",
         "error_upload": "Hiba történt a CSV feltöltésekor.",
-        "export_file": "Exportálás",
-        "import_file": "Importálás",
+        "export_file": "Adatok exportálása CSV-be",
+        "import_file": "Adatok importálása CSV-ből",
         "import_title": "Adatok importálása CSV-ből",
         "legend": "Jelmagyarázat",
         "legend_ok": "Importálandó oszlop",

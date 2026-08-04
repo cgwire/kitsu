@@ -70,7 +70,7 @@
 
     <p class="has-text-centered footer-info" v-if="!isLoading">
       {{ sortedDaysOff.length }}
-      {{ $t('days_off.nb_days_off', sortedDaysOff.length) }}
+      {{ $t('days_off.nb_days_off', { count: sortedDaysOff.length }) }}
     </p>
 
     <day-off-modal

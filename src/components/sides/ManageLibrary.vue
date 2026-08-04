@@ -8,7 +8,8 @@
           :is-loading="loading"
           :is-error="error"
           :text="
-            $t('library.remove_selected_assets', selectedEntities.length, {
+            $t('library.remove_selected_assets', {
+              count: selectedEntities.length,
               nbSelectedAssets: selectedEntities.length
             })
           "

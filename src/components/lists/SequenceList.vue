@@ -477,7 +477,7 @@
 
     <p class="has-text-centered nb-sequences" v-if="!isEmptyList && !isLoading">
       {{ displayedSequencesLength }}
-      {{ $t('sequences.number', displayedSequencesLength) }}
+      {{ $t('sequences.number', { count: displayedSequencesLength }) }}
       <span
         v-if="
           displayedSequencesTimeSpent > 0 || displayedSequencesEstimation > 0
@@ -486,26 +486,22 @@
         ({{ formatDuration(displayedSequencesTimeSpent) }}
         {{
           isDurationInHours
-            ? $t(
-                'main.hours_spent',
-                formatDuration(displayedSequencesTimeSpent, false)
-              )
-            : $t(
-                'main.days_spent',
-                formatDuration(displayedSequencesTimeSpent, false)
-              )
+            ? $t('main.hours_spent', {
+                count: formatDuration(displayedSequencesTimeSpent, false)
+              })
+            : $t('main.days_spent', {
+                count: formatDuration(displayedSequencesTimeSpent, false)
+              })
         }},
         {{ formatDuration(displayedSequencesEstimation) }}
         {{
           isDurationInHours
-            ? $t(
-                'main.hours_estimated',
-                formatDuration(displayedSequencesEstimation, false)
-              )
-            : $t(
-                'main.man_days',
-                formatDuration(displayedSequencesEstimation, false)
-              )
+            ? $t('main.hours_estimated', {
+                count: formatDuration(displayedSequencesEstimation, false)
+              })
+            : $t('main.man_days', {
+                count: formatDuration(displayedSequencesEstimation, false)
+              })
         }})
       </span>
     </p>

@@ -215,7 +215,7 @@
 
     <p class="has-text-centered nb-episodes" v-if="!isEmptyList">
       {{ displayedEpisodesLength }}
-      {{ $t('episodes.number', displayedEpisodesLength) }}
+      {{ $t('episodes.number', { count: displayedEpisodesLength }) }}
     </p>
   </div>
 </template>

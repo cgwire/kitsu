@@ -48,7 +48,7 @@
 
         <div class="flexrow mt1">
           <span v-show="currentSection === 'casting' && nbAssets > 0">
-            {{ nbAssets }} {{ $t('assets.number', nbAssets) }}
+            {{ nbAssets }} {{ $t('assets.number', { count: nbAssets }) }}
           </span>
           <span
             class="tag tag-standby"

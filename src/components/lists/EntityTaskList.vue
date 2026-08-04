@@ -115,7 +115,7 @@
             <td class="duedate">{{ entityDueDate }}</td>
             <td class="assignees">
               {{ entityAssignees.length }}
-              {{ $t('people.persons', entityAssignees.length) }}
+              {{ $t('people.persons', { count: entityAssignees.length }) }}
             </td>
             <td class="end-cell"></td>
           </tr>

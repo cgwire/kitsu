@@ -154,25 +154,27 @@
     </div>
     <p class="has-text-centered nb-tasks" v-if="!isLoading">
       {{ stats.total }}
-      {{ $t('tasks.number', stats.total) }}
+      {{ $t('tasks.number', { count: stats.total }) }}
       ({{ formatDuration(stats.total_duration) }}
       {{
         isDurationInHours
-          ? $t('main.hours_spent', formatDuration(stats.total_duration, false))
-          : $t('main.days_spent', formatDuration(stats.total_duration, false))
+          ? $t('main.hours_spent', {
+              count: formatDuration(stats.total_duration, false)
+            })
+          : $t('main.days_spent', {
+              count: formatDuration(stats.total_duration, false)
+            })
       }}
       /
       {{ formatDuration(stats.total_estimation) }}
       {{
         isDurationInHours
-          ? $t(
-              'main.hours_estimated',
-              formatDuration(stats.total_estimation, false)
-            )
-          : $t(
-              'main.days_estimated',
-              formatDuration(stats.total_estimatio, false)
-            )
+          ? $t('main.hours_estimated', {
+              count: formatDuration(stats.total_estimation, false)
+            })
+          : $t('main.days_estimated', {
+              count: formatDuration(stats.total_estimatio, false)
+            })
       }})
     </p>
   </div>

@@ -798,41 +798,38 @@
     </div>
 
     <p class="has-text-centered nb-shots" v-if="!isEmptyList && !isLoading">
-      {{ displayedShotsLength }} {{ $t('shots.number', displayedShotsLength) }}
+      {{ displayedShotsLength }}
+      {{ $t('shots.number', { count: displayedShotsLength }) }}
       <span v-if="displayedShotsFrames">
         -
         {{ displayedShotsFrames }}
-        {{ $t('main.nb_frames', displayedShotsFrames) }}
+        {{ $t('main.nb_frames', { count: displayedShotsFrames }) }}
       </span>
       <span v-if="isPaperProduction">
         -
         {{ displayedShotsDrawings }}
-        {{ $t('main.nb_drawings', displayedShotsDrawings) }}
+        {{ $t('main.nb_drawings', { count: displayedShotsDrawings }) }}
       </span>
       <span v-if="displayedShotsTimeSpent > 0 || displayedShotsEstimation > 0">
         ({{ formatDuration(displayedShotsTimeSpent) }}
         {{
           isDurationInHours
-            ? $t(
-                'main.hours_spent',
-                formatDuration(displayedShotsTimeSpent, false)
-              )
-            : $t(
-                'main.days_spent',
-                formatDuration(displayedShotsTimeSpent, false)
-              )
+            ? $t('main.hours_spent', {
+                count: formatDuration(displayedShotsTimeSpent, false)
+              })
+            : $t('main.days_spent', {
+                count: formatDuration(displayedShotsTimeSpent, false)
+              })
         }},
         {{ formatDuration(displayedShotsEstimation) }}
         {{
           isDurationInHours
-            ? $t(
-                'main.hours_estimated',
-                formatDuration(displayedShotsEstimation, false)
-              )
-            : $t(
-                'main.man_days',
-                formatDuration(displayedShotsEstimation, false)
-              )
+            ? $t('main.hours_estimated', {
+                count: formatDuration(displayedShotsEstimation, false)
+              })
+            : $t('main.man_days', {
+                count: formatDuration(displayedShotsEstimation, false)
+              })
         }})
       </span>
     </p>

@@ -407,7 +407,8 @@
               @click="confirmTaskStatusChange"
             >
               {{
-                $t('tasks.change_task_status', nbSelectedTasks, {
+                $t('tasks.change_task_status', {
+                  count: nbSelectedTasks,
                   nbSelectedTasks
                 })
               }}
@@ -444,7 +445,9 @@
               class="button confirm-button is-wide"
               @click="confirmAssign"
             >
-              {{ $t('tasks.assign', nbSelectedTasks, { nbSelectedTasks }) }}
+              {{
+                $t('tasks.assign', { count: nbSelectedTasks, nbSelectedTasks })
+              }}
             </button>
           </div>
           <div class="flexrow-item mb05 disclaimer">
@@ -528,7 +531,8 @@
               @click="confirmPriorityChange"
             >
               {{
-                $t('tasks.change_priority', nbSelectedTasks, {
+                $t('tasks.change_priority', {
+                  count: nbSelectedTasks,
                   nbSelectedTasks
                 })
               }}
@@ -559,7 +563,8 @@
             v-if="nbSelectedTasks > 1"
           >
             {{
-              $t('tasks.set_thumbnails_from_tasks', nbSelectedTasks, {
+              $t('tasks.set_thumbnails_from_tasks', {
+                count: nbSelectedTasks,
                 nbSelectedTasks
               })
             }}
@@ -596,7 +601,8 @@
               @click="confirmTasksSubscription"
             >
               {{
-                $t('tasks.subscribe_to_tasks', nbSelectedTasks, {
+                $t('tasks.subscribe_to_tasks', {
+                  count: nbSelectedTasks,
                   nbSelectedTasks
                 })
               }}
@@ -658,7 +664,8 @@
             "
             :hard-delete-text="$t('tasks.delete_for_selection_hard_text')"
             :text="
-              $t('tasks.delete_for_selection', nbSelectedTasks, {
+              $t('tasks.delete_for_selection', {
+                count: nbSelectedTasks,
                 nbSelectedTasks
               })
             "
@@ -725,7 +732,8 @@
                 />
                 <button class="button is-wide" type="submit">
                   {{
-                    $t('custom_actions.run_for_selection', nbSelectedTasks, {
+                    $t('custom_actions.run_for_selection', {
+                      count: nbSelectedTasks,
                       nbSelectedTasks
                     })
                   }}
@@ -735,7 +743,8 @@
             <div class="flexrow-item is-wide" v-else>
               <button class="button is-wide" @click="runCustomAction">
                 {{
-                  $t('custom_actions.run_for_selection', nbSelectedTasks, {
+                  $t('custom_actions.run_for_selection', {
+                    count: nbSelectedTasks,
                     nbSelectedTasks
                   })
                 }}
@@ -753,7 +762,8 @@
             :is-loading="loading.assetDeletion"
             :is-error="errors.assetDeletion"
             :text="
-              $t('assets.delete_for_selection', nbSelectedAssets, {
+              $t('assets.delete_for_selection', {
+                count: nbSelectedAssets,
                 nbSelectedAssets
               })
             "
@@ -772,7 +782,8 @@
             :is-loading="loading.shotDeletion"
             :is-error="errors.deleteShot"
             :text="
-              $t('shots.delete_for_selection', nbSelectedShots, {
+              $t('shots.delete_for_selection', {
+                count: nbSelectedShots,
                 nbSelectedShots
               })
             "
@@ -791,7 +802,8 @@
             :is-loading="loading.editDeletion"
             :is-error="errors.deleteEdit"
             :text="
-              $t('edits.delete_for_selection', nbSelectedEdits, {
+              $t('edits.delete_for_selection', {
+                count: nbSelectedEdits,
                 nbSelectedEdits
               })
             "
@@ -831,7 +843,8 @@
             :is-loading="loading.episodeDeletion"
             :is-error="errors.deleteEpisode"
             :text="
-              $t('concepts.delete_for_selection', nbSelectedConcepts, {
+              $t('concepts.delete_for_selection', {
+                count: nbSelectedConcepts,
                 nbSelectedConcepts
               })
             "

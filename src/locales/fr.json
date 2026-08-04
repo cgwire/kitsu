@@ -457,8 +457,8 @@
       "csv": {
         "choose": "Choisir",
         "error_upload": "Une erreur est survenue en téléversant votre fichier .csv.",
-        "export_file": "Exporter",
-        "import_file": "Importer",
+        "export_file": "Exporter vers un .csv",
+        "import_file": "Importer depuis un .csv",
         "import_title": "Importer depuis un .csv",
         "legend": "Légende",
         "legend_ok": "Colonne qui sera importée",

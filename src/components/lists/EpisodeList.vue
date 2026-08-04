@@ -512,33 +512,29 @@
 
     <p class="has-text-centered nb-episodes" v-if="!isEmptyList && !isLoading">
       {{ displayedEpisodesLength }}
-      {{ $t('episodes.number', displayedEpisodesLength) }}
+      {{ $t('episodes.number', { count: displayedEpisodesLength }) }}
       <span
         v-if="displayedEpisodesTimeSpent > 0 || displayedEpisodesEstimation > 0"
       >
         ({{ formatDuration(displayedEpisodesTimeSpent) }}
         {{
           isDurationInHours
-            ? $t(
-                'main.hours_spent',
-                formatDuration(displayedEpisodesTimeSpent, false)
-              )
-            : $t(
-                'main.days_spent',
-                formatDuration(displayedEpisodesTimeSpent, false)
-              )
+            ? $t('main.hours_spent', {
+                count: formatDuration(displayedEpisodesTimeSpent, false)
+              })
+            : $t('main.days_spent', {
+                count: formatDuration(displayedEpisodesTimeSpent, false)
+              })
         }},
         {{ formatDuration(displayedEpisodesEstimation) }}
         {{
           isDurationInHours
-            ? $t(
-                'main.hours_estimated',
-                formatDuration(displayedEpisodesEstimation, false)
-              )
-            : $t(
-                'main.man_days',
-                formatDuration(displayedEpisodesEstimation, false)
-              )
+            ? $t('main.hours_estimated', {
+                count: formatDuration(displayedEpisodesEstimation, false)
+              })
+            : $t('main.man_days', {
+                count: formatDuration(displayedEpisodesEstimation, false)
+              })
         }})
       </span>
     </p>

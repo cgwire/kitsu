@@ -452,8 +452,8 @@
       "csv": {
         "choose": "Vælg",
         "error_upload": "Der opstod en fejl under upload af din CSV-fil.",
-        "export_file": "Eksporter",
-        "import_file": "Importer",
+        "export_file": "Eksporter data til CSV",
+        "import_file": "Importer data fra CSV",
         "import_title": "Importer data fra CSV",
         "legend": "Forklaring",
         "legend_ok": "Kolonne, der vil blive importeret",

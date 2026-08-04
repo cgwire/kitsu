@@ -66,11 +66,7 @@
     </table>
     <p class="has-text-centered nb-backgrounds" v-if="linkedBackgrounds.length">
       {{ linkedBackgrounds.length }}
-      {{
-        $t('backgrounds.number', linkedBackgrounds.length, {
-          n: linkedBackgrounds.length
-        })
-      }}
+      {{ $t('backgrounds.number', { count: linkedBackgrounds.length }) }}
     </p>
   </div>
 </template>

@@ -303,15 +303,19 @@
       ({{ formatDuration(timeSpent) }}
       {{
         isDurationInHours
-          ? $t('main.hours_spent', formatDuration(timeSpent, false))
-          : $t('main.days_spent', formatDuration(timeSpent, false))
+          ? $t('main.hours_spent', { count: formatDuration(timeSpent, false) })
+          : $t('main.days_spent', { count: formatDuration(timeSpent, false) })
       }}
       /
       {{ formatDuration(timeEstimated) }}
       {{
         isDurationInHours
-          ? $t('main.hours_estimated', formatDuration(timeEstimated, false))
-          : $t('main.days_estimated', formatDuration(timeEstimated, false))
+          ? $t('main.hours_estimated', {
+              count: formatDuration(timeEstimated, false)
+            })
+          : $t('main.days_estimated', {
+              count: formatDuration(timeEstimated, false)
+            })
       }}
       )
     </p>
