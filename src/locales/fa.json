@@ -1731,9 +1731,18 @@
       "text": "Kitsu فقط با مرورگرهای فایرفاکس و کروم قابل استفاده است."
     },
     "logs": {
-      "current_date_label": "نمایش لاگ های مربوط به",
-      "events": "رویدادهای فهرست شده برای امروز",
+      "action_label": "اقدام",
+      "action_placeholder": "همه اقدام‌ها",
+      "date_range_label": "بازه زمانی",
+      "date_range_placeholder": "همه تاریخ‌ها",
       "empty_list": "هیچ گزارشی برای تاریخ انتخاب شده وجود ندارد.",
+      "events": "رویداد فهرست شده",
+      "export_csv": "خروجی CSV",
+      "object_label": "شیء",
+      "object_placeholder": "همه اشیاء",
+      "only_files": "فقط رویدادهای فایل",
+      "people_label": "کاربران",
+      "people_placeholder": "همه کاربران",
       "title": "لاگ ها",
       "preview_files": {
         "date": "تاریخ ایجاد",

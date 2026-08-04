@@ -1731,9 +1731,18 @@
       "text": "Kitsu kan alleen gebruikt worden met Firefox en Chrome browsers."
     },
     "logs": {
-      "current_date_label": "Toon logboeken van",
-      "events": "gebeurtenis lijst van de huidige dag",
+      "action_label": "Actie",
+      "action_placeholder": "Alle acties",
+      "date_range_label": "Datumbereik",
+      "date_range_placeholder": "Alle datums",
       "empty_list": "Er zijn geen logboeken voor de geselecteerde datum.",
+      "events": "gebeurtenissen weergegeven",
+      "export_csv": "CSV exporteren",
+      "object_label": "Object",
+      "object_placeholder": "Alle objecten",
+      "only_files": "Alleen bestandsgebeurtenissen",
+      "people_label": "Gebruikers",
+      "people_placeholder": "Alle gebruikers",
       "title": "Logboeken",
       "preview_files": {
         "date": "Aanmaak datum",

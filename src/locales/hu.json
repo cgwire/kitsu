@@ -1731,9 +1731,18 @@
       "text": "A Kitsu csak Firefox és Chrome böngészőkkel működik."
     },
     "logs": {
-      "current_date_label": "Napló mutatása ehhez: ",
-      "events": "mai nap eseményei",
+      "action_label": "Művelet",
+      "action_placeholder": "Minden művelet",
+      "date_range_label": "Dátumtartomány",
+      "date_range_placeholder": "Minden dátum",
       "empty_list": "A kiválasztott dátumhoz nem tartozik napló.",
+      "events": "esemény listázva",
+      "export_csv": "CSV exportálása",
+      "object_label": "Objektum",
+      "object_placeholder": "Minden objektum",
+      "only_files": "Csak fájlesemények",
+      "people_label": "Felhasználók",
+      "people_placeholder": "Minden felhasználó",
       "title": "Naplók",
       "preview_files": {
         "date": "Létrehozás dátuma",

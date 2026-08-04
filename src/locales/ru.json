@@ -1731,9 +1731,18 @@
       "text": "Kitsu можно использовать только с браузерами Firefox и Chrome."
     },
     "logs": {
-      "current_date_label": "Показать журнал для",
-      "events": "показаны события для текущего дня",
+      "action_label": "Действие",
+      "action_placeholder": "Все действия",
+      "date_range_label": "Диапазон дат",
+      "date_range_placeholder": "Все даты",
       "empty_list": "Для выбранной даты журнал пуст.",
+      "events": "событий показано",
+      "export_csv": "Экспорт в CSV",
+      "object_label": "Объект",
+      "object_placeholder": "Все объекты",
+      "only_files": "Только события файлов",
+      "people_label": "Пользователи",
+      "people_placeholder": "Все пользователи",
       "title": "Журнал событий",
       "preview_files": {
         "date": "Дата создания",

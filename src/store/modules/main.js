@@ -72,12 +72,16 @@ const actions = {
     commit(SET_LAST_PRODUCTION_SCREEN, lastProductionScreen)
   },
 
-  loadEvents(_, { after, before, limit, lastEventId = null }) {
-    return client.getEvents(after, before, limit, lastEventId)
+  loadEvents(_, params) {
+    return client.getEvents(params)
   },
 
-  loadLoginLogs(_, { after, before, limit, lastLoginLogId = null }) {
-    return client.getLoginLogs(after, before, limit, lastLoginLogId)
+  loadEventNames() {
+    return client.getEventNames()
+  },
+
+  loadLoginLogs(_, params) {
+    return client.getLoginLogs(params)
   },
 
   async setMainConfig({ commit }) {

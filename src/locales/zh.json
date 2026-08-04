@@ -1731,9 +1731,18 @@
       "text": "Kitsu 只能与 Firefox 和 Chrome 浏览器一起使用。"
     },
     "logs": {
-      "current_date_label": "显示日志",
-      "events": "列出当天的事件",
+      "action_label": "操作",
+      "action_placeholder": "所有操作",
+      "date_range_label": "日期范围",
+      "date_range_placeholder": "所有日期",
       "empty_list": "所选日期没有日志。",
+      "events": "条事件",
+      "export_csv": "导出 CSV",
+      "object_label": "对象",
+      "object_placeholder": "所有对象",
+      "only_files": "仅文件事件",
+      "people_label": "用户",
+      "people_placeholder": "所有用户",
       "title": "日志",
       "preview_files": {
         "date": "创建日期",

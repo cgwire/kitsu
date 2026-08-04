@@ -11,6 +11,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 
 import EventLogs from '@/components/pages/logs/EventLogs.vue'
 import LoginLogs from '@/components/pages/logs/LoginLogs.vue'
@@ -19,16 +20,28 @@ import RouteTabs from '@/components/widgets/RouteTabs.vue'
 
 const { t } = useI18n()
 const route = useRoute()
+const store = useStore()
 
 // Computed
 
-const activeTab = computed(() => route.query.tab || 'events')
+const isCurrentUserAdmin = computed(() => store.getters.isCurrentUserAdmin)
 
-const tabs = computed(() => [
-  { name: 'events', label: t('logs.audit.title') },
-  { name: 'logins', label: t('logs.logins.title') },
-  { name: 'preview_files', label: t('logs.preview_files.title') }
-])
+// Login logs expose everyone's IP address: the API restricts them to admins.
+const tabs = computed(() =>
+  [
+    { name: 'events', label: t('logs.audit.title') },
+    isCurrentUserAdmin.value
+      ? { name: 'logins', label: t('logs.logins.title') }
+      : null,
+    { name: 'preview_files', label: t('logs.preview_files.title') }
+  ].filter(Boolean)
+)
+
+// A bookmarked or shared ?tab=logins must not 403 a non-admin.
+const activeTab = computed(() => {
+  const tab = route.query.tab || 'events'
+  return tabs.value.some(({ name }) => name === tab) ? tab : 'events'
+})
 </script>
 
 <style lang="scss" scoped>

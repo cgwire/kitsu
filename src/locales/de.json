@@ -1731,9 +1731,18 @@
       "text": "Kitsu kann nur mit Firefox und Chrome-Browsern verwendet werden."
     },
     "logs": {
-      "current_date_label": "Protokolle anzeigen für",
-      "events": "Events für den aktuellen Tag aufgelistet",
+      "action_label": "Aktion",
+      "action_placeholder": "Alle Aktionen",
+      "date_range_label": "Zeitraum",
+      "date_range_placeholder": "Alle Daten",
       "empty_list": "Es gibt keine Protokolle für das ausgewählte Datum.",
+      "events": "Ereignisse aufgelistet",
+      "export_csv": "CSV exportieren",
+      "object_label": "Objekt",
+      "object_placeholder": "Alle Objekte",
+      "only_files": "Nur Dateiereignisse",
+      "people_label": "Benutzer",
+      "people_placeholder": "Alle Benutzer",
       "title": "Protokolle",
       "preview_files": {
         "date": "Erstellungsdatum",

@@ -722,9 +722,18 @@ export default {
   },
 
   logs: {
-    current_date_label: 'Show logs for',
+    action_label: 'Action',
+    action_placeholder: 'All actions',
+    date_range_label: 'Date range',
+    date_range_placeholder: 'All dates',
     empty_list: 'There are no logs for the selected date.',
-    events: 'events listed for the current day',
+    events: 'events listed',
+    export_csv: 'Export CSV',
+    object_label: 'Object',
+    object_placeholder: 'All objects',
+    only_files: 'Only file events',
+    people_label: 'Users',
+    people_placeholder: 'All users',
     title: 'Logs',
     audit: {
       title: 'Activity logs'
