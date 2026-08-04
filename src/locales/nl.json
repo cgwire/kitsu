@@ -1807,6 +1807,7 @@
       "empty_list": "De productie bevat geen montages. Wat dacht je ervan er een paar te maken?",
       "empty_list_client": "Deze productie bevat geen montages.",
       "new_edit": "Nieuwe montage",
+      "new_edits": "Montages toevoegen",
       "number": "montage | montages",
       "title": "Montages",
       "fields": {

@@ -1801,6 +1801,7 @@ export default {
     empty_list: 'There are no edits in the production. How about creating some?',
     empty_list_client: 'There are no edits in this production.',
     new_edit: 'New edit',
+    new_edits: 'Create edits',
     history: 'Edit values history',
     number: 'edit | edits',
     multiple_delete_error: 'An error occurred while deleting an edit. There may be existing data currently linked to it. Are you sure there are no tasks linked to a selected edit?',

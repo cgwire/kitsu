@@ -299,7 +299,7 @@
 
     <p class="has-text-centered footer-info" v-if="tasks.length && !isLoading">
       {{ tasks.length }}
-      {{ $t('tasks.tasks', tasks.length) }}
+      {{ $t('tasks.number', { count: tasks.length }) }}
       ({{ formatDuration(timeSpent) }}
       {{
         isDurationInHours

@@ -1810,6 +1810,7 @@
       "empty_list": "Il n'y a pas de montage dans la production. Pourquoi ne pas en créer ?",
       "empty_list_client": "Il n'y a aucun montage dans cette production.",
       "new_edit": "Nouveau montage",
+      "new_edits": "Ajouter des montages",
       "number": "montage | montages",
       "title": "Montages",
       "fields": {

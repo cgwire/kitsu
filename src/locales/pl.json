@@ -1729,6 +1729,7 @@
       "empty_list": "W produkcji nie ma jeszcze żadnych montaży. Może warto jakieś utworzyć?",
       "empty_list_client": "W tej produkcji nie ma żadnych montaży.",
       "new_edit": "Nowy montaż",
+      "new_edits": "Utwórz montaże",
       "history": "Historia wartości montażu",
       "number": "montaż | montaży",
       "multiple_delete_error": "Wystąpił błąd podczas usuwania montażu. Mogą istnieć dane, które są z nim obecnie powiązane. Czy na pewno żadne zadania nie są powiązane z wybranym montażem?",

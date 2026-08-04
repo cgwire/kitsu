@@ -12,7 +12,8 @@
       <span class="tag">
         {{ stats.amount_done || 0 }} {{ $t('tasks.done') }}
         /
-        {{ stats.amount || 0 }} {{ $t('tasks.tasks') }}
+        {{ stats.amount || 0 }}
+        {{ $t('tasks.number', { count: stats.amount || 0 }) }}
       </span>
       <span class="tag">
         {{ formatDuration(organisation, stats.total_duration) }}
@@ -74,7 +75,10 @@
         <div class="task-type-wrapper flexrow-item">
           {{ taskTypeStatsMap[taskType.id].amount_done }}
           /
-          {{ taskTypeStatsMap[taskType.id].amount }} {{ $t('tasks.tasks') }}
+          {{ taskTypeStatsMap[taskType.id].amount }}
+          {{
+            $t('tasks.number', { count: taskTypeStatsMap[taskType.id].amount })
+          }}
         </div>
         <div class="task-type-wrapper flexrow-item">
           {{

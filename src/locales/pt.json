@@ -1807,6 +1807,7 @@
       "empty_list": "Não há montagens na produção. Que tal criar algumas?",
       "empty_list_client": "Não há montagens nessa produção.",
       "new_edit": "Nova montagem",
+      "new_edits": "Adicionar montagens",
       "number": "montagem | montagens",
       "title": "Montagens",
       "fields": {

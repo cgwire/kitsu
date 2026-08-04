@@ -1807,6 +1807,7 @@
       "empty_list": "Der er ingen montager i produktionen. Hvad med at oprette nogle?",
       "empty_list_client": "Der er ingen montager i denne produktion.",
       "new_edit": "Ny montage",
+      "new_edits": "Opret montager",
       "number": "montage | montager",
       "title": "Montager",
       "fields": {

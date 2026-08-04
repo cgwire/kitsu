@@ -1823,6 +1823,7 @@
       "empty_list": "이 제작에 편집본이 없습니다. 편집본을 생성해 보시겠습니까?",
       "empty_list_client": "이 제작에 편집본이 없습니다.",
       "new_edit": "새 편집본",
+      "new_edits": "편집본 만들기",
       "number": "편집본 | 편집본",
       "title": "편집본",
       "fields": {

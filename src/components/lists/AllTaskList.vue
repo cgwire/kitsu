@@ -173,7 +173,7 @@
               count: formatDuration(stats.total_estimation, false)
             })
           : $t('main.days_estimated', {
-              count: formatDuration(stats.total_estimatio, false)
+              count: formatDuration(stats.total_estimation, false)
             })
       }})
     </p>

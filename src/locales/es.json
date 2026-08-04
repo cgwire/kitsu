@@ -1807,6 +1807,7 @@
       "empty_list": "No hay montajes en la producción. ¿Qué tal si crea algunos?",
       "empty_list_client": "No hay montajes en esta producción",
       "new_edit": "Nuevo montaje",
+      "new_edits": "Crear montajes",
       "number": "montaje | montajes",
       "title": "Montajes",
       "fields": {

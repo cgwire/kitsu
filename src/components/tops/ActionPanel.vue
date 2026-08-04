@@ -780,7 +780,7 @@
           <delete-entities
             :error-text="$t('shots.multiple_delete_error')"
             :is-loading="loading.shotDeletion"
-            :is-error="errors.deleteShot"
+            :is-error="errors.shotDeletion"
             :text="
               $t('shots.delete_for_selection', {
                 count: nbSelectedShots,
@@ -800,7 +800,7 @@
           <delete-entities
             :error-text="$t('edits.multiple_delete_error')"
             :is-loading="loading.editDeletion"
-            :is-error="errors.deleteEdit"
+            :is-error="errors.editDeletion"
             :text="
               $t('edits.delete_for_selection', {
                 count: nbSelectedEdits,
@@ -818,30 +818,12 @@
 
         <div
           class="flexrow-item is-wide"
-          v-if="selectedBar === 'delete-episodes'"
-        >
-          <delete-entities
-            :error-text="$t('episodes.multiple_delete_error')"
-            :is-loading="loading.episodeDeletion"
-            :is-error="errors.deleteEpisode"
-            :text="
-              $t('episodes.delete_for_selection', nbSelectedEpisodes, {
-                nbSelectedEpisodes
-              })
-            "
-            :require-hard-delete-confirmation="true"
-            @confirm="confirmEpisodeDeletion"
-          />
-        </div>
-
-        <div
-          class="flexrow-item is-wide"
           v-if="selectedBar === 'delete-concepts'"
         >
           <delete-entities
             :error-text="$t('concepts.multiple_delete_error')"
-            :is-loading="loading.episodeDeletion"
-            :is-error="errors.deleteEpisode"
+            :is-loading="loading.conceptDeletion"
+            :is-error="errors.conceptDeletion"
             :text="
               $t('concepts.delete_for_selection', {
                 count: nbSelectedConcepts,
@@ -877,8 +859,7 @@
             @click="modals.buildFilter = true"
           />
         </div>
-        <spinner v-if="loading.links" />
-        <div class="link-list" v-else>
+        <div class="link-list">
           <ul
             class="link-types"
             :key="`link-types-${index}`"
@@ -1031,12 +1012,10 @@ export default {
         changeStatus: false,
         conceptDeletion: false,
         editDeletion: false,
-        episodeDeletion: false,
         taskCreation: false,
         taskDeletion: false,
         setThumbnails: false,
         shotDeletion: false,
-        links: false,
         tasksSubscription: false
       },
       errors: {
@@ -1045,7 +1024,6 @@ export default {
         taskDeletion: false,
         conceptDeletion: false,
         editDeletion: false,
-        episodeDeletion: false,
         shotDeletion: false
       }
     }
@@ -1370,7 +1348,6 @@ export default {
       'deleteSelectedShots',
       'deleteSelectedTasks',
       'deleteSelectedEdits',
-      'deleteSelectedEpisodes',
       'deleteSelectedConcepts',
       'editConcept',
       'loadAssets',
@@ -1501,62 +1478,62 @@ export default {
     },
 
     confirmAssetDeletion() {
-      this.loading.deleteAsset = true
-      this.errors.deleteAsset = false
+      this.loading.assetDeletion = true
+      this.errors.assetDeletion = false
       this.deleteSelectedAssets()
         .then(() => {
-          this.loading.deleteAsset = false
+          this.loading.assetDeletion = false
           this.clearSelectedAssets()
         })
         .catch(err => {
           console.error(err)
-          this.loading.deleteAsset = false
-          this.errors.deleteAsset = true
+          this.loading.assetDeletion = false
+          this.errors.assetDeletion = true
         })
     },
 
     confirmShotDeletion() {
-      this.loading.deleteShot = true
-      this.errors.deleteShot = false
+      this.loading.shotDeletion = true
+      this.errors.shotDeletion = false
       this.deleteSelectedShots()
         .then(() => {
-          this.loading.deleteShot = false
+          this.loading.shotDeletion = false
           this.clearSelectedShots()
         })
         .catch(err => {
           console.error(err)
-          this.loading.deleteShot = false
-          this.errors.deleteShot = true
+          this.loading.shotDeletion = false
+          this.errors.shotDeletion = true
         })
     },
 
     confirmEditDeletion() {
-      this.loading.deleteEdit = true
-      this.errors.deleteEdit = false
+      this.loading.editDeletion = true
+      this.errors.editDeletion = false
       this.deleteSelectedEdits()
         .then(() => {
-          this.loading.deleteEdit = false
+          this.loading.editDeletion = false
           this.clearSelectedEdits()
         })
         .catch(err => {
           console.error(err)
-          this.loading.deleteEdit = false
-          this.errors.deleteEdit = true
+          this.loading.editDeletion = false
+          this.errors.editDeletion = true
         })
     },
 
     confirmConceptDeletion() {
-      this.loading.deleteConcept = true
-      this.errors.deleteConcept = false
+      this.loading.conceptDeletion = true
+      this.errors.conceptDeletion = false
       this.deleteSelectedConcepts()
         .then(() => {
-          this.loading.deleteConcept = false
+          this.loading.conceptDeletion = false
           this.clearSelectedConcepts()
         })
         .catch(err => {
           console.error(err)
-          this.loading.deleteConcept = false
-          this.errors.deleteConcept = true
+          this.loading.conceptDeletion = false
+          this.errors.conceptDeletion = true
         })
     },
 
@@ -1570,7 +1547,6 @@ export default {
       this.subscribeToTasks(Array.from(this.selectedTasks.keys()))
         .catch(err => {
           console.error(err)
-          this.errors.tasksSubscription = false
         })
         .finally(() => {
           this.loading.tasksSubscription = false
@@ -1582,7 +1558,6 @@ export default {
       this.unsubscribeFromTasks(Array.from(this.selectedTasks.keys()))
         .catch(err => {
           console.error(err)
-          this.errors.tasksSubscription = false
         })
         .finally(() => {
           this.loading.tasksSubscription = false

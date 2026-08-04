@@ -91,6 +91,6 @@ const nbFrames = computed(() => {
 })
 
 const nbDrawings = computed(() => {
-  return props.tasks.reduce((acc, task) => acc + task.nb_drawings, 0)
+  return props.tasks.reduce((acc, task) => acc + (task.nb_drawings || 0), 0)
 })
 </script>

@@ -1807,6 +1807,7 @@
       "empty_list": "此制作中没有任何剪辑。要创建一些吗？",
       "empty_list_client": "此制作中没有任何剪辑。",
       "new_edit": "新建剪辑",
+      "new_edits": "添加多个剪辑",
       "number": "剪辑 | 剪辑",
       "title": "剪辑",
       "fields": {

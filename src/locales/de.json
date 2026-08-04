@@ -1807,6 +1807,7 @@
       "empty_list": "Die Produktion enthält keine Montagen. Was halten Sie davon, einige zu erstellen?",
       "empty_list_client": "Diese Produktion enthält keine Montagen.",
       "new_edit": "Neue Montage",
+      "new_edits": "Montagen hinzufügen",
       "number": "Montage | Montagen",
       "title": "Montagen",
       "fields": {
