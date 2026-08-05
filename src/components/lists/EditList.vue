@@ -651,8 +651,7 @@ export default {
 
     isEmptyList() {
       return (
-        this.displayedEdits.length &&
-        this.displayedEdits[0].length === 0 &&
+        this.displayedEdits.length === 0 &&
         !this.isLoading &&
         !this.isError &&
         (!this.editSearchText || this.editSearchText.length === 0)

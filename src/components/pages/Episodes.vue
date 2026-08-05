@@ -66,6 +66,7 @@
           :is-error="isEpisodesLoadingError"
           :validation-columns="episodeValidationColumns"
           :department-filter="departmentFilter"
+          @add-episodes="showNewModal"
           @add-metadata="onAddMetadataClicked"
           @change-sort="onChangeSortClicked"
           @create-tasks="showCreateTasksModal"

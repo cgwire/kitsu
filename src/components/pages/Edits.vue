@@ -86,6 +86,7 @@
           :validation-columns="editValidationColumns"
           :department-filter="departmentFilter"
           :display-settings="displaySettings"
+          @add-edits="showNewModal"
           @add-metadata="onAddMetadataClicked"
           @change-sort="onChangeSortClicked"
           @create-tasks="showCreateTasksModal"

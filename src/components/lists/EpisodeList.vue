@@ -502,6 +502,20 @@
 
     <div
       class="has-text-centered"
+      v-if="isEmptyList && !isCurrentUserClient && !isLoading"
+    >
+      <p class="info">
+        <img src="../../assets/illustrations/empty_list.png" alt="" />
+      </p>
+      <p class="info">{{ $t('episodes.empty_list') }}</p>
+      <button-simple
+        class="level-item big-button"
+        :text="$t('episodes.new_episode')"
+        @click="$emit('add-episodes')"
+      />
+    </div>
+    <div
+      class="has-text-centered"
       v-if="isEmptyList && isCurrentUserClient && !isLoading"
     >
       <p class="info">
@@ -607,6 +621,7 @@ export default {
   },
 
   emits: [
+    'add-episodes',
     'create-tasks',
     'delete-clicked',
     'edit-clicked',
@@ -691,8 +706,7 @@ export default {
 
     isEmptyList() {
       return (
-        this.displayedEpisodes.length &&
-        this.displayedEpisodes[0].length === 0 &&
+        this.displayedEpisodes.length === 0 &&
         !this.isLoading &&
         !this.isError &&
         (!this.episodeSearchText || this.episodeSearchText.length === 0)
