@@ -1,0 +1,2 @@
+import{Ft as e,M as t,Mt as n,d as r,nt as i}from"./vue-vendor-CjkbP68o.js";import{t as a}from"./_plugin-vue_export-helper-BDNMzG2s.js";r();var o=a({__name:`PageTitle`,props:{text:{default:``,type:String},bold:{default:!1,type:Boolean}},setup(r){return(a,o)=>(i(),t(`h1`,{class:n({title:!0,"hide-small-screen":!0,bold:r.bold})},e(r.text),3))}},[[`__scopeId`,`data-v-e097dae2`]]);export{o as t};
+//# sourceMappingURL=PageTitle-RPCVCo9y.js.map
