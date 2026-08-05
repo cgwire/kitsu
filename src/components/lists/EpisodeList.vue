@@ -512,6 +512,7 @@
         class="level-item big-button"
         :text="$t('episodes.new_episode')"
         @click="$emit('add-episodes')"
+        v-if="isCurrentUserManager"
       />
     </div>
     <div

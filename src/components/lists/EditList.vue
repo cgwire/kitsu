@@ -467,6 +467,7 @@
         class="level-item big-button"
         :text="$t('edits.new_edits')"
         @click="$emit('add-edits')"
+        v-if="isCurrentUserManager"
       />
     </div>
     <div

@@ -591,6 +591,7 @@
           class="level-item big-button"
           :text="$t('assets.new_assets')"
           @click="$emit('new-clicked')"
+          v-if="isCurrentUserManager"
         />
       </div>
       <div

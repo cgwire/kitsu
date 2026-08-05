@@ -785,6 +785,7 @@
         class="level-item big-button"
         :text="$t('shots.new_shots')"
         @click="$emit('add-shots')"
+        v-if="isCurrentUserManager"
       />
     </div>
     <div
