@@ -1,23 +1,28 @@
 <template>
   <p class="has-text-centered nb-tasks">
-    {{ tasks.length }} {{ $t('tasks.number', tasks.length) }} ({{
+    {{ tasks.length }} {{ $t('tasks.number', { count: tasks.length }) }} ({{
       formatDuration(timeEstimated)
     }}
     {{
       isDurationInHours
-        ? $t('main.hours_estimated', formatDuration(timeEstimated, false))
-        : $t('main.days_estimated', formatDuration(timeEstimated, false))
+        ? $t('main.hours_estimated', {
+            count: formatDuration(timeEstimated, false)
+          })
+        : $t('main.days_estimated', {
+            count: formatDuration(timeEstimated, false)
+          })
     }},
     {{ formatDuration(timeSpent) }}
     {{
       isDurationInHours
-        ? $t('main.hours_spent', formatDuration(timeSpent, false))
-        : $t('main.days_spent', formatDuration(timeSpent, false))
+        ? $t('main.hours_spent', { count: formatDuration(timeSpent, false) })
+        : $t('main.days_spent', { count: formatDuration(timeSpent, false) })
     }}<span v-if="isShots && !isPaperProduction"
-      >, {{ nbFrames }} {{ $t('main.nb_frames', nbFrames) }}</span
+      >, {{ nbFrames }} {{ $t('main.nb_frames', { count: nbFrames }) }}</span
     >
     <span v-if="isShots && isPaperProduction"
-      >, {{ nbDrawings }} {{ $t('main.nb_drawings', nbDrawings) }}</span
+      >, {{ nbDrawings }}
+      {{ $t('main.nb_drawings', { count: nbDrawings }) }}</span
     >)
   </p>
 </template>
@@ -86,6 +91,6 @@ const nbFrames = computed(() => {
 })
 
 const nbDrawings = computed(() => {
-  return props.tasks.reduce((acc, task) => acc + task.nb_drawings, 0)
+  return props.tasks.reduce((acc, task) => acc + (task.nb_drawings || 0), 0)
 })
 </script>

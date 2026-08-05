@@ -455,57 +455,37 @@
 
     <table-info :is-loading="isLoading" :is-error="isError" big-cells />
 
-    <div
-      class="has-text-centered"
-      v-if="isEmptyList && !isCurrentUserClient && !isLoading"
-    >
-      <p class="info">
-        <img src="../../assets/illustrations/empty_edit.png" alt="" />
-      </p>
-      <p class="info">{{ $t('edits.empty_list') }}</p>
-      <button-simple
-        class="level-item big-button"
-        :text="$t('edits.new_edits')"
-        @click="$emit('add-edits')"
-      />
-    </div>
-    <div
-      class="has-text-centered"
-      v-if="isEmptyList && isCurrentUserClient && !isLoading"
-    >
-      <p class="info">
-        <img src="../../assets/illustrations/empty_edit.png" alt="" />
-      </p>
-      <p class="info">{{ $t('edits.empty_list_client') }}</p>
-    </div>
+    <empty-list
+      :text="$t('edits.empty_list')"
+      :read-only-text="$t('edits.empty_list_read_only')"
+      :button-text="$t('edits.new_edits')"
+      @create="$emit('add-edits')"
+      v-if="isEmptyList && !isLoading"
+    />
 
     <p class="has-text-centered nb-edits" v-if="!isEmptyList && !isLoading">
       {{ displayedEditsLength }}
-      {{ $t('edits.number', displayedEditsLength) }}
+      {{ $t('edits.number', { count: displayedEditsLength }) }}
       <span v-if="displayedEditsTimeSpent > 0 || displayedEditsEstimation > 0">
         ({{ formatDuration(displayedEditsTimeSpent) }}
         {{
           isDurationInHours
-            ? $t(
-                'main.hours_spent',
-                formatDuration(displayedEditsTimeSpent, false)
-              )
-            : $t(
-                'main.days_spent',
-                formatDuration(displayedEditsTimeSpent, false)
-              )
+            ? $t('main.hours_spent', {
+                count: formatDuration(displayedEditsTimeSpent, false)
+              })
+            : $t('main.days_spent', {
+                count: formatDuration(displayedEditsTimeSpent, false)
+              })
         }},
         {{ formatDuration(displayedEditsEstimation) }}
         {{
           isDurationInHours
-            ? $t(
-                'main.hours_estimated',
-                formatDuration(displayedEditsEstimation, false)
-              )
-            : $t(
-                'main.man_days',
-                formatDuration(displayedEditsEstimation, false)
-              )
+            ? $t('main.hours_estimated', {
+                count: formatDuration(displayedEditsEstimation, false)
+              })
+            : $t('main.man_days', {
+                count: formatDuration(displayedEditsEstimation, false)
+              })
         }})
       </span>
     </p>
@@ -526,6 +506,7 @@ import { selectionListMixin } from '@/components/mixins/selection'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import DescriptionCell from '@/components/cells/DescriptionCell.vue'
+import EmptyList from '@/components/widgets/EmptyList.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import MetadataHeader from '@/components/cells/MetadataHeader.vue'
 import MetadataInput from '@/components/cells/MetadataInput.vue'
@@ -607,6 +588,7 @@ export default {
   components: {
     ButtonSimple,
     DescriptionCell,
+    EmptyList,
     EntityThumbnail,
     MetadataHeader,
     MetadataInput,
@@ -655,8 +637,7 @@ export default {
 
     isEmptyList() {
       return (
-        this.displayedEdits.length &&
-        this.displayedEdits[0].length === 0 &&
+        this.displayedEdits.length === 0 &&
         !this.isLoading &&
         !this.isError &&
         (!this.editSearchText || this.editSearchText.length === 0)
@@ -938,10 +919,6 @@ span.thumbnail-empty {
 
 .info {
   margin-top: 2em;
-}
-
-.info img {
-  max-width: 80vh;
 }
 
 .datatable-row th.name {

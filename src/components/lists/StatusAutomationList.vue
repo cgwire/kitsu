@@ -105,7 +105,7 @@
 
     <p class="has-text-centered nb-status-automations">
       {{ entries.length }}
-      {{ $t('status_automations.number', entries.length) }}
+      {{ $t('status_automations.number', { count: entries.length }) }}
     </p>
   </div>
 </template>

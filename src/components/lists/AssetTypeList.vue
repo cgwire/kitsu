@@ -69,7 +69,8 @@
     />
 
     <p class="has-text-centered nb-asset-types">
-      {{ entries.length }} {{ $t('asset_types.number', entries.length) }}
+      {{ entries.length }}
+      {{ $t('asset_types.number', { count: entries.length }) }}
     </p>
   </div>
 </template>

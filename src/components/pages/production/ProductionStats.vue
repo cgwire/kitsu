@@ -12,33 +12,38 @@
       <span class="tag">
         {{ stats.amount_done || 0 }} {{ $t('tasks.done') }}
         /
-        {{ stats.amount || 0 }} {{ $t('tasks.tasks') }}
+        {{ stats.amount || 0 }}
+        {{ $t('tasks.number', { count: stats.amount || 0 }) }}
       </span>
       <span class="tag">
         {{ formatDuration(organisation, stats.total_duration) }}
         {{
           isDurationInHours
-            ? $t(
-                'main.hours_spent',
-                formatDuration(organisation, stats.total_duration, false)
-              )
-            : $t(
-                'main.days_spent',
-                formatDuration(organisation, stats.total_duration, false)
-              )
+            ? $t('main.hours_spent', {
+                count: formatDuration(organisation, stats.total_duration, false)
+              })
+            : $t('main.days_spent', {
+                count: formatDuration(organisation, stats.total_duration, false)
+              })
         }}
         /
         {{ formatDuration(organisation, stats.total_estimation) }}
         {{
           isDurationInHours
-            ? $t(
-                'main.hours_estimated',
-                formatDuration(organisation, stats.total_estimation, false)
-              )
-            : $t(
-                'main.days_estimated',
-                formatDuration(organisation, stats.total_estimation, false)
-              )
+            ? $t('main.hours_estimated', {
+                count: formatDuration(
+                  organisation,
+                  stats.total_estimation,
+                  false
+                )
+              })
+            : $t('main.days_estimated', {
+                count: formatDuration(
+                  organisation,
+                  stats.total_estimation,
+                  false
+                )
+              })
         }}
       </span>
     </div>
@@ -70,7 +75,10 @@
         <div class="task-type-wrapper flexrow-item">
           {{ taskTypeStatsMap[taskType.id].amount_done }}
           /
-          {{ taskTypeStatsMap[taskType.id].amount }} {{ $t('tasks.tasks') }}
+          {{ taskTypeStatsMap[taskType.id].amount }}
+          {{
+            $t('tasks.number', { count: taskTypeStatsMap[taskType.id].amount })
+          }}
         </div>
         <div class="task-type-wrapper flexrow-item">
           {{
@@ -88,22 +96,20 @@
           }}
           {{
             isDurationInHours
-              ? $t(
-                  'main.hours',
-                  formatDuration(
+              ? $t('main.hours', {
+                  count: formatDuration(
                     organisation,
                     taskTypeStatsMap[taskType.id].total_estimation,
                     false
                   )
-                )
-              : $t(
-                  'main.days',
-                  formatDuration(
+                })
+              : $t('main.days', {
+                  count: formatDuration(
                     organisation,
                     taskTypeStatsMap[taskType.id].total_estimation,
                     false
                   )
-                )
+                })
           }}
         </div>
         <div class="color-wrapper flexrow-item">

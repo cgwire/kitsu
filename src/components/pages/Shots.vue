@@ -73,7 +73,7 @@
               />
               <button-simple
                 class="flexrow-item"
-                :text="$t('shots.manage')"
+                :text="$t('shots.new_shots')"
                 icon="plus"
                 @click="showManageShots"
               />

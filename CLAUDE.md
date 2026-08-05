@@ -9,6 +9,8 @@ Kitsu is a production tracking web application for animation studios, built by C
 | Stack | Vue 3.5, Vuex 4, Vue Router 5, vue-i18n 9, Vite 8, Vitest |
 | Node | >= 22.22.2 |
 | npm | >= 10 |
+| Browser floor | Chrome 87, Edge 91, Firefox 79, Opera 73, Safari/iOS 14. Declared in `.browserslistrc`, enforced at runtime by the Bowser gate in `src/router/routes.js` (keep both in sync). No Web APIs newer than this floor unless polyfilled in `src/polyfills.js`; core-js has no polyfill for DOM APIs like `AbortSignal.timeout()` (Safari 15.4+), so those stay off limits. |
+| ES level | Build ships ES2020 (Vite `build.target`); source syntax up to ES2021 (ESLint `ecmaVersion`). Bumping either is a coordinated change gated on the browser floor (ES2022 top-level await cannot be lowered to `es2020`, and static class blocks need Safari 16.4). |
 | Default branch | `main` |
 | Dev server | `npm run dev` |
 | Tests | `npm run test:unit` (vitest) |
@@ -219,16 +221,31 @@ Shared toggle/select logic for custom combobox components.
 
 - `src/locales/en.js` is the **source of truth** — new keys go there first. The other locales are kept in sync with it. POEditor was dropped (2026-05): non-English locales are LLM-translated directly in the JSON files.
 - Use `$t()` (or `t()` in `<script setup>`), never `$tc()` (deprecated in vue-i18n 9+).
-- Pluralization with pipe format: the locale key `"studio | studios"` works with `$t('key', count)` where the second argument is a number. Every locale uses vue-i18n's DEFAULT plural resolver — keep the **same number of `|` segments as en.js**, don't add a language's extra grammatical plural forms.
+- Pluralization with pipe format (`"studio | studios"`): pass a **named object**, `$t('key', { count })`. Every locale uses vue-i18n's DEFAULT plural resolver, so keep the **same number of `|` segments as en.js** and don't add a language's extra grammatical plural forms.
 - For animation/VFX domain terms (shot, frame, onion skin, edit/montage, …), align translations with Blender's official terminology (`blender/blender-translations` `po/<lang>.po`, or the translated manual at `docs.blender.org/manual/<lang>/`).
 
 ```js
-// In template
-{{ $t('studios.number', entries.length) }}
+// In template. Plural takes an object, never a bare number
+{{ $t('studios.number', { count: entries.length }) }}
 
 // In script setup
 t('studios.title')
 ```
+
+### Two legacy-mode traps
+
+vue-i18n is configured in **legacy mode** (`src/lib/i18n.js`), which costs two silent failures. Both fail without a warning, so nothing surfaces until someone reads the rendered string.
+
+**`$t(key, <number>)` does not pluralize.** Legacy `$t()` has no plural overload, so a bare number is ignored: `$t('studios.number', 3)` returns the **first** segment and leaves any `{count}` unresolved. Legacy's plural call is `$tc(key, 3)`, but it is deprecated. Pass `{ count }` instead: that key drives both branch selection and `{count}` interpolation, so the object form is right whether or not the message embeds the number.
+
+```js
+$t('studios.number', { count: 5 }) // "studios", message has no {count}
+$t('logs.nb_events', { count: 5 }) // "5 events listed"
+```
+
+`count` must be a **number**: `{ count: '5' }` renders the singular. Note also that the default resolver splits on `count > 1`, so a fractional count below 1 stays singular while 0 goes plural.
+
+**`t()` from `useI18n` returns `''` during setup.** The `useI18n()` bridge only resolves in `onBeforeMount`, so a `t()` call at setup top level silently returns `''`. Always call `t()` inside a `computed` or a handler (template `$t()` is unaffected). The `$t` test mock hides the bug; to test real translations, see `tests/unit/pages/wrongbrowser.spec.js`.
 
 ### Production-type terminology overlays
 

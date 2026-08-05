@@ -119,28 +119,15 @@
       :with-actions="false"
     />
 
-    <div
-      class="has-text-centered"
-      v-if="isEmptyList && !isCurrentUserClient && !isLoading"
-    >
-      <p class="info">
-        <img src="../../assets/illustrations/empty_shot.png" alt="" />
-      </p>
-      <p class="info">{{ $t('sequences.empty_list') }}</p>
-    </div>
-    <div
-      class="has-text-centered"
-      v-if="isEmptyList && isCurrentUserClient && !isLoading"
-    >
-      <p class="info">
-        <img src="../../assets/illustrations/empty_shot.png" alt="" />
-      </p>
-      <p class="info">{{ $t('sequences.empty_list_client') }}</p>
-    </div>
+    <empty-list
+      :text="$t('sequences.empty_list')"
+      :read-only-text="$t('sequences.empty_list_read_only')"
+      v-if="isEmptyList && !isLoading"
+    />
 
     <p class="has-text-centered nb-sequences" v-if="!isEmptyList && !isLoading">
       {{ displayedSequencesLength }}
-      {{ $t('sequences.number', displayedSequencesLength) }}
+      {{ $t('sequences.number', { count: displayedSequencesLength }) }}
     </p>
   </div>
 </template>
@@ -152,6 +139,7 @@ import { getChartColors, getChartData } from '@/lib/stats'
 
 import { entityListMixin } from '@/components/mixins/entity_list'
 
+import EmptyList from '@/components/widgets/EmptyList.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 import StatsCell from '@/components/cells/StatsCell.vue'
 
@@ -161,6 +149,7 @@ export default {
   mixins: [entityListMixin],
 
   components: {
+    EmptyList,
     StatsCell,
     TableInfo
   },
@@ -341,10 +330,6 @@ td.name {
 
 th.actions {
   padding: 0.4em;
-}
-
-.info img {
-  max-width: 80vh;
 }
 
 .actions {

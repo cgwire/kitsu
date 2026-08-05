@@ -56,7 +56,7 @@
               />
               <button-simple
                 class="flexrow-item"
-                :text="$t('edits.new_edit')"
+                :text="$t('edits.new_edits')"
                 icon="plus"
                 @click="showNewModal"
               />
@@ -86,6 +86,7 @@
           :validation-columns="editValidationColumns"
           :department-filter="departmentFilter"
           :display-settings="displaySettings"
+          @add-edits="showNewModal"
           @add-metadata="onAddMetadataClicked"
           @change-sort="onChangeSortClicked"
           @create-tasks="showCreateTasksModal"

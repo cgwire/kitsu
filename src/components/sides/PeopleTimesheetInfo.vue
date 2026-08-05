@@ -24,7 +24,7 @@
 
     <div class="info-day-off" v-if="!isDayInfo">
       {{ dayOffCount }}
-      {{ $t('days_off.nb_days_off', dayOffCount) }}
+      {{ $t('days_off.nb_days_off', { count: dayOffCount }) }}
     </div>
 
     <div class="info-date" v-else-if="isDayInfo">

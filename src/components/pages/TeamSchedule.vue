@@ -167,7 +167,7 @@
                     <div class="flexrow">
                       <em v-if="task.man_days">
                         {{ task.man_days }}
-                        {{ $t('main.man_days', task.man_days) }}
+                        {{ $t('main.man_days', { count: task.man_days }) }}
                       </em>
                       <em v-else>
                         {{ $t('main.no_estimation') }}

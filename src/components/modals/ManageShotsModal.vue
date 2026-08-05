@@ -9,7 +9,7 @@
 
     <div class="modal-content">
       <div class="box">
-        <page-title class="title" :text="$t('shots.manage')" />
+        <page-title class="title" :text="$t('shots.new_shots')" />
         <div class="mt1 mb1">{{ $t('shots.creation_explanation') }}</div>
         <div class="shot-columns">
           <div class="shot-column" v-if="isTVShow">
@@ -454,7 +454,9 @@ watch(
     shotStep.value = '1'
     sequences.value = displayedSequences.value
     if (isTVShow.value) {
-      selectEpisode(displayedEpisodes.value[0].id)
+      if (displayedEpisodes.value.length > 0) {
+        selectEpisode(displayedEpisodes.value[0].id)
+      }
     } else if (sequences.value.length > 0) {
       selectSequence(sequences.value[0].id)
     }

@@ -169,7 +169,7 @@
     <table-info :is-loading="isLoading" :is-error="isError" variant="grid" />
 
     <p class="has-text-centered footer-info" v-if="!isLoading">
-      {{ people.length }} {{ $t('people.persons', people.length) }}
+      {{ people.length }} {{ $t('people.persons', { count: people.length }) }}
     </p>
   </div>
 </template>

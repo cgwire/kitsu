@@ -47,7 +47,7 @@
 
     <p class="has-text-centered">
       {{ entries.length }}
-      {{ $t('backgrounds.number', entries.length, { n: entries.length }) }}
+      {{ $t('backgrounds.number', { count: entries.length }) }}
     </p>
   </div>
 </template>

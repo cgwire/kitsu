@@ -299,19 +299,23 @@
 
     <p class="has-text-centered footer-info" v-if="tasks.length && !isLoading">
       {{ tasks.length }}
-      {{ $t('tasks.tasks', tasks.length) }}
+      {{ $t('tasks.number', { count: tasks.length }) }}
       ({{ formatDuration(timeSpent) }}
       {{
         isDurationInHours
-          ? $t('main.hours_spent', formatDuration(timeSpent, false))
-          : $t('main.days_spent', formatDuration(timeSpent, false))
+          ? $t('main.hours_spent', { count: formatDuration(timeSpent, false) })
+          : $t('main.days_spent', { count: formatDuration(timeSpent, false) })
       }}
       /
       {{ formatDuration(timeEstimated) }}
       {{
         isDurationInHours
-          ? $t('main.hours_estimated', formatDuration(timeEstimated, false))
-          : $t('main.days_estimated', formatDuration(timeEstimated, false))
+          ? $t('main.hours_estimated', {
+              count: formatDuration(timeEstimated, false)
+            })
+          : $t('main.days_estimated', {
+              count: formatDuration(timeEstimated, false)
+            })
       }}
       )
     </p>

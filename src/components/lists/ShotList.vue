@@ -773,66 +773,47 @@
     </div>
     <table-info :is-loading="isLoading" :is-error="isError" big-cells />
 
-    <div
-      class="has-text-centered"
-      v-if="isEmptyList && !isCurrentUserClient && !isLoading"
-    >
-      <p class="info">
-        <img src="../../assets/illustrations/empty_shot.png" alt="" />
-      </p>
-      <p class="info">{{ $t('shots.empty_list') }}</p>
-      <button-simple
-        class="level-item big-button"
-        :text="$t('shots.new_shots')"
-        @click="$emit('add-shots')"
-      />
-    </div>
-    <div
-      class="has-text-centered"
-      v-if="isEmptyList && isCurrentUserClient && !isLoading"
-    >
-      <p class="info">
-        <img src="../../assets/illustrations/empty_shot.png" alt="" />
-      </p>
-      <p class="info">{{ $t('shots.empty_list_client') }}</p>
-    </div>
+    <empty-list
+      :text="$t('shots.empty_list')"
+      :read-only-text="$t('shots.empty_list_read_only')"
+      :button-text="$t('shots.new_shots')"
+      @create="$emit('add-shots')"
+      v-if="isEmptyList && !isLoading"
+    />
 
     <p class="has-text-centered nb-shots" v-if="!isEmptyList && !isLoading">
-      {{ displayedShotsLength }} {{ $t('shots.number', displayedShotsLength) }}
+      {{ displayedShotsLength }}
+      {{ $t('shots.number', { count: displayedShotsLength }) }}
       <span v-if="displayedShotsFrames">
         -
         {{ displayedShotsFrames }}
-        {{ $t('main.nb_frames', displayedShotsFrames) }}
+        {{ $t('main.nb_frames', { count: displayedShotsFrames }) }}
       </span>
       <span v-if="isPaperProduction">
         -
         {{ displayedShotsDrawings }}
-        {{ $t('main.nb_drawings', displayedShotsDrawings) }}
+        {{ $t('main.nb_drawings', { count: displayedShotsDrawings }) }}
       </span>
       <span v-if="displayedShotsTimeSpent > 0 || displayedShotsEstimation > 0">
         ({{ formatDuration(displayedShotsTimeSpent) }}
         {{
           isDurationInHours
-            ? $t(
-                'main.hours_spent',
-                formatDuration(displayedShotsTimeSpent, false)
-              )
-            : $t(
-                'main.days_spent',
-                formatDuration(displayedShotsTimeSpent, false)
-              )
+            ? $t('main.hours_spent', {
+                count: formatDuration(displayedShotsTimeSpent, false)
+              })
+            : $t('main.days_spent', {
+                count: formatDuration(displayedShotsTimeSpent, false)
+              })
         }},
         {{ formatDuration(displayedShotsEstimation) }}
         {{
           isDurationInHours
-            ? $t(
-                'main.hours_estimated',
-                formatDuration(displayedShotsEstimation, false)
-              )
-            : $t(
-                'main.man_days',
-                formatDuration(displayedShotsEstimation, false)
-              )
+            ? $t('main.hours_estimated', {
+                count: formatDuration(displayedShotsEstimation, false)
+              })
+            : $t('main.man_days', {
+                count: formatDuration(displayedShotsEstimation, false)
+              })
         }})
       </span>
     </p>
@@ -854,6 +835,7 @@ import { selectionListMixin } from '@/components/mixins/selection'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import DescriptionCell from '@/components/cells/DescriptionCell.vue'
+import EmptyList from '@/components/widgets/EmptyList.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import MetadataHeader from '@/components/cells/MetadataHeader.vue'
 import MetadataInput from '@/components/cells/MetadataInput.vue'
@@ -880,6 +862,7 @@ export default {
   components: {
     ButtonSimple,
     DescriptionCell,
+    EmptyList,
     EntityThumbnail,
     MetadataHeader,
     MetadataInput,
@@ -1387,14 +1370,6 @@ span.thumbnail-empty {
   width: 50px;
   height: 30px;
   background: #f3f3f3;
-}
-
-.info {
-  margin-top: 2em;
-}
-
-.info img {
-  max-width: 80vh;
 }
 
 .datatable-row th.name {

@@ -62,7 +62,7 @@
         <div class="flexrow">
           <h1 class="title mt1 flexrow-item filler">
             {{ nbTasksToCheck }}
-            {{ $t('my_checks.title', nbTasksToCheck) }}
+            {{ $t('my_checks.title', { count: nbTasksToCheck }) }}
           </h1>
           <button-simple
             class="flexrow-item"

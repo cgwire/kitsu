@@ -87,7 +87,8 @@
     />
 
     <p class="has-text-centered nb-software-licenses">
-      {{ entries.length }} {{ $t('software_licenses.number', entries.length) }}
+      {{ entries.length }}
+      {{ $t('software_licenses.number', { count: entries.length }) }}
     </p>
   </div>
 </template>

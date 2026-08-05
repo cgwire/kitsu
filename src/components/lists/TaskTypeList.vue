@@ -90,7 +90,8 @@
     />
 
     <p class="has-text-centered nb-task-types" v-if="entries.length > 0">
-      {{ entries.length }} {{ $t('task_types.number', entries.length) }}
+      {{ entries.length }}
+      {{ $t('task_types.number', { count: entries.length }) }}
     </p>
   </div>
 </template>

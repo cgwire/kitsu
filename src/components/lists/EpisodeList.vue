@@ -500,45 +500,39 @@
 
     <table-info :is-loading="isLoading" :is-error="isError" big-cells />
 
-    <div
-      class="has-text-centered"
-      v-if="isEmptyList && isCurrentUserClient && !isLoading"
-    >
-      <p class="info">
-        <img src="../../assets/illustrations/empty_shot.png" alt="" />
-      </p>
-      <p class="info">{{ $t('episodes.empty_list_client') }}</p>
-    </div>
+    <empty-list
+      :text="$t('episodes.empty_list')"
+      :read-only-text="$t('episodes.empty_list_read_only')"
+      :button-text="$t('episodes.new_episodes')"
+      @create="$emit('add-episodes')"
+      v-if="isEmptyList && !isLoading"
+    />
 
     <p class="has-text-centered nb-episodes" v-if="!isEmptyList && !isLoading">
       {{ displayedEpisodesLength }}
-      {{ $t('episodes.number', displayedEpisodesLength) }}
+      {{ $t('episodes.number', { count: displayedEpisodesLength }) }}
       <span
         v-if="displayedEpisodesTimeSpent > 0 || displayedEpisodesEstimation > 0"
       >
         ({{ formatDuration(displayedEpisodesTimeSpent) }}
         {{
           isDurationInHours
-            ? $t(
-                'main.hours_spent',
-                formatDuration(displayedEpisodesTimeSpent, false)
-              )
-            : $t(
-                'main.days_spent',
-                formatDuration(displayedEpisodesTimeSpent, false)
-              )
+            ? $t('main.hours_spent', {
+                count: formatDuration(displayedEpisodesTimeSpent, false)
+              })
+            : $t('main.days_spent', {
+                count: formatDuration(displayedEpisodesTimeSpent, false)
+              })
         }},
         {{ formatDuration(displayedEpisodesEstimation) }}
         {{
           isDurationInHours
-            ? $t(
-                'main.hours_estimated',
-                formatDuration(displayedEpisodesEstimation, false)
-              )
-            : $t(
-                'main.man_days',
-                formatDuration(displayedEpisodesEstimation, false)
-              )
+            ? $t('main.hours_estimated', {
+                count: formatDuration(displayedEpisodesEstimation, false)
+              })
+            : $t('main.man_days', {
+                count: formatDuration(displayedEpisodesEstimation, false)
+              })
         }})
       </span>
     </p>
@@ -556,6 +550,7 @@ import { selectionListMixin } from '@/components/mixins/selection'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import DescriptionCell from '@/components/cells/DescriptionCell.vue'
+import EmptyList from '@/components/widgets/EmptyList.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import MetadataHeader from '@/components/cells/MetadataHeader.vue'
 import MetadataInput from '@/components/cells/MetadataInput.vue'
@@ -611,6 +606,7 @@ export default {
   },
 
   emits: [
+    'add-episodes',
     'create-tasks',
     'delete-clicked',
     'edit-clicked',
@@ -648,6 +644,7 @@ export default {
   components: {
     ButtonSimple,
     DescriptionCell,
+    EmptyList,
     EntityThumbnail,
     MetadataHeader,
     MetadataInput,
@@ -695,8 +692,7 @@ export default {
 
     isEmptyList() {
       return (
-        this.displayedEpisodes.length &&
-        this.displayedEpisodes[0].length === 0 &&
+        this.displayedEpisodes.length === 0 &&
         !this.isLoading &&
         !this.isError &&
         (!this.episodeSearchText || this.episodeSearchText.length === 0)
@@ -878,10 +874,6 @@ span.thumbnail-empty {
 
 .info {
   margin-top: 2em;
-}
-
-.info img {
-  max-width: 80vh;
 }
 
 .datatable-row th.name {

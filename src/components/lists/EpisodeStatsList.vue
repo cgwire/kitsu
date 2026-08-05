@@ -194,28 +194,15 @@
       :with-actions="false"
     />
 
-    <div
-      class="has-text-centered"
-      v-if="!isLoading && isEmptyList && !isCurrentUserClient"
-    >
-      <p class="info">
-        <img src="../../assets/illustrations/empty_shot.png" alt="" />
-      </p>
-      <p class="info">{{ $t('episodes.empty_list') }}</p>
-    </div>
-    <div
-      class="has-text-centered"
-      v-if="!isLoading && isEmptyList && isCurrentUserClient"
-    >
-      <p class="info">
-        <img src="../../assets/illustrations/empty_shot.png" alt="" />
-      </p>
-      <p class="info">{{ $t('episodes.empty_list_client') }}</p>
-    </div>
+    <empty-list
+      :text="$t('episodes.empty_list')"
+      :read-only-text="$t('episodes.empty_list_read_only')"
+      v-if="!isLoading && isEmptyList"
+    />
 
     <p class="has-text-centered nb-episodes" v-if="!isEmptyList">
       {{ displayedEpisodesLength }}
-      {{ $t('episodes.number', displayedEpisodesLength) }}
+      {{ $t('episodes.number', { count: displayedEpisodesLength }) }}
     </p>
   </div>
 </template>
@@ -234,6 +221,7 @@ import {
   getRetakeChartData
 } from '@/lib/stats'
 
+import EmptyList from '@/components/widgets/EmptyList.vue'
 import StatsCell from '@/components/cells/StatsCell.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
@@ -245,6 +233,7 @@ export default {
   components: {
     ChevronDownIcon,
     ChevronRightIcon,
+    EmptyList,
     StatsCell,
     TableInfo
   },
@@ -514,9 +503,5 @@ td.name {
 
 th.actions {
   padding: 0.4em;
-}
-
-.info img {
-  max-width: 80vh;
 }
 </style>

@@ -46,6 +46,7 @@ const activeTab = computed(() => {
 
 <style lang="scss" scoped>
 .fixed-page {
+  color: var(--text);
   margin-top: 60px;
   overflow: scroll;
   padding: 2em;

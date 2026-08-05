@@ -233,7 +233,8 @@
     <table-info :is-loading="isLoading" :is-error="isError"> </table-info>
 
     <p class="has-text-centered nb-productions">
-      {{ entries.length }} {{ $t('productions.number', entries.length) }}
+      {{ entries.length }}
+      {{ $t('productions.number', { count: entries.length }) }}
     </p>
   </div>
 </template>

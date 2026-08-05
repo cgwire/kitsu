@@ -253,7 +253,7 @@
       >
         <div class="flexrow-item mb05">
           {{ nbAssetsForType(assetType) }}
-          {{ $t('assets.number', nbAssetsForType(assetType)) }}
+          {{ $t('assets.number', { count: nbAssetsForType(assetType) }) }}
         </div>
         <div class="asset-type-items flexrow-item">
           <asset-block

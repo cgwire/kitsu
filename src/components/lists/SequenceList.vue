@@ -465,19 +465,17 @@
 
     <table-info :is-loading="isLoading" :is-error="isError" big-cells />
 
-    <div
-      class="has-text-centered"
-      v-if="isEmptyList && !isCurrentUserClient && !isLoading"
-    >
-      <p class="info">
-        <img src="../../assets/illustrations/empty_shot.png" alt="" />
-      </p>
-      <p class="info">{{ $t('sequences.empty_list_client') }}</p>
-    </div>
+    <empty-list
+      :text="$t('sequences.empty_list')"
+      :read-only-text="$t('sequences.empty_list_read_only')"
+      :button-text="$t('sequences.new_sequences')"
+      @create="$emit('add-sequences')"
+      v-if="isEmptyList && !isLoading"
+    />
 
     <p class="has-text-centered nb-sequences" v-if="!isEmptyList && !isLoading">
       {{ displayedSequencesLength }}
-      {{ $t('sequences.number', displayedSequencesLength) }}
+      {{ $t('sequences.number', { count: displayedSequencesLength }) }}
       <span
         v-if="
           displayedSequencesTimeSpent > 0 || displayedSequencesEstimation > 0
@@ -486,26 +484,22 @@
         ({{ formatDuration(displayedSequencesTimeSpent) }}
         {{
           isDurationInHours
-            ? $t(
-                'main.hours_spent',
-                formatDuration(displayedSequencesTimeSpent, false)
-              )
-            : $t(
-                'main.days_spent',
-                formatDuration(displayedSequencesTimeSpent, false)
-              )
+            ? $t('main.hours_spent', {
+                count: formatDuration(displayedSequencesTimeSpent, false)
+              })
+            : $t('main.days_spent', {
+                count: formatDuration(displayedSequencesTimeSpent, false)
+              })
         }},
         {{ formatDuration(displayedSequencesEstimation) }}
         {{
           isDurationInHours
-            ? $t(
-                'main.hours_estimated',
-                formatDuration(displayedSequencesEstimation, false)
-              )
-            : $t(
-                'main.man_days',
-                formatDuration(displayedSequencesEstimation, false)
-              )
+            ? $t('main.hours_estimated', {
+                count: formatDuration(displayedSequencesEstimation, false)
+              })
+            : $t('main.man_days', {
+                count: formatDuration(displayedSequencesEstimation, false)
+              })
         }})
       </span>
     </p>
@@ -524,6 +518,7 @@ import { selectionListMixin } from '@/components/mixins/selection'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import DescriptionCell from '@/components/cells/DescriptionCell.vue'
+import EmptyList from '@/components/widgets/EmptyList.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import MetadataHeader from '@/components/cells/MetadataHeader.vue'
 import MetadataInput from '@/components/cells/MetadataInput.vue'
@@ -574,7 +569,13 @@ export default {
     }
   },
 
-  emits: ['create-tasks', 'delete-clicked', 'edit-clicked', 'metadata-changed'],
+  emits: [
+    'add-sequences',
+    'create-tasks',
+    'delete-clicked',
+    'edit-clicked',
+    'metadata-changed'
+  ],
 
   data() {
     return {
@@ -608,6 +609,7 @@ export default {
   components: {
     ButtonSimple,
     DescriptionCell,
+    EmptyList,
     EntityThumbnail,
     MetadataHeader,
     MetadataInput,
@@ -822,10 +824,6 @@ span.thumbnail-empty {
 
 .info {
   margin-top: 2em;
-}
-
-.info img {
-  max-width: 80vh;
 }
 
 .datatable-row th.name {

@@ -115,26 +115,35 @@ const client = {
   pgetNdjson(path) {
     const separator = path.includes('?') ? '&' : '?'
     const streamPath = `${path}${separator}stream=true&compact=true`
+    // Not AbortSignal.timeout(): it needs Safari 15.4+ (above the browser
+    // floor) and would throw synchronously, skipping the fallbacks below.
+    const controller = new AbortController()
+    const deadlineTimer = setTimeout(
+      () => controller.abort(),
+      REQUEST_TIMEOUT.deadline
+    )
     return fetch(streamPath, {
       headers: { Accept: 'application/x-ndjson' },
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT.deadline)
-    }).then(
-      response => {
-        if (response.status === 401) {
-          errors.backToLogin()
-          // Freeze the chain until the redirect happens.
-          return new Promise(() => {})
-        }
-        const contentType = response.headers.get('Content-Type') || ''
-        if (!response.ok || !contentType.includes('ndjson')) {
-          // Real HTTP errors (403…) are re-raised by the legacy request
-          // with the error shape the stores already handle.
-          return client.pget(path)
-        }
-        return handleNdjsonResponse(response)
-      },
-      () => client.pget(path)
-    )
+      signal: controller.signal
+    })
+      .then(
+        response => {
+          if (response.status === 401) {
+            errors.backToLogin()
+            // Freeze the chain until the redirect happens.
+            return new Promise(() => {})
+          }
+          const contentType = response.headers.get('Content-Type') || ''
+          if (!response.ok || !contentType.includes('ndjson')) {
+            // Real HTTP errors (403…) are re-raised by the legacy request
+            // with the error shape the stores already handle.
+            return client.pget(path)
+          }
+          return handleNdjsonResponse(response)
+        },
+        () => client.pget(path)
+      )
+      .finally(() => clearTimeout(deadlineTimer))
   },
 
   ppost(path, data) {

@@ -407,7 +407,8 @@
               @click="confirmTaskStatusChange"
             >
               {{
-                $t('tasks.change_task_status', nbSelectedTasks, {
+                $t('tasks.change_task_status', {
+                  count: nbSelectedTasks,
                   nbSelectedTasks
                 })
               }}
@@ -444,7 +445,9 @@
               class="button confirm-button is-wide"
               @click="confirmAssign"
             >
-              {{ $t('tasks.assign', nbSelectedTasks, { nbSelectedTasks }) }}
+              {{
+                $t('tasks.assign', { count: nbSelectedTasks, nbSelectedTasks })
+              }}
             </button>
           </div>
           <div class="flexrow-item mb05 disclaimer">
@@ -528,7 +531,8 @@
               @click="confirmPriorityChange"
             >
               {{
-                $t('tasks.change_priority', nbSelectedTasks, {
+                $t('tasks.change_priority', {
+                  count: nbSelectedTasks,
                   nbSelectedTasks
                 })
               }}
@@ -559,7 +563,8 @@
             v-if="nbSelectedTasks > 1"
           >
             {{
-              $t('tasks.set_thumbnails_from_tasks', nbSelectedTasks, {
+              $t('tasks.set_thumbnails_from_tasks', {
+                count: nbSelectedTasks,
                 nbSelectedTasks
               })
             }}
@@ -596,7 +601,8 @@
               @click="confirmTasksSubscription"
             >
               {{
-                $t('tasks.subscribe_to_tasks', nbSelectedTasks, {
+                $t('tasks.subscribe_to_tasks', {
+                  count: nbSelectedTasks,
                   nbSelectedTasks
                 })
               }}
@@ -658,7 +664,8 @@
             "
             :hard-delete-text="$t('tasks.delete_for_selection_hard_text')"
             :text="
-              $t('tasks.delete_for_selection', nbSelectedTasks, {
+              $t('tasks.delete_for_selection', {
+                count: nbSelectedTasks,
                 nbSelectedTasks
               })
             "
@@ -725,7 +732,8 @@
                 />
                 <button class="button is-wide" type="submit">
                   {{
-                    $t('custom_actions.run_for_selection', nbSelectedTasks, {
+                    $t('custom_actions.run_for_selection', {
+                      count: nbSelectedTasks,
                       nbSelectedTasks
                     })
                   }}
@@ -735,7 +743,8 @@
             <div class="flexrow-item is-wide" v-else>
               <button class="button is-wide" @click="runCustomAction">
                 {{
-                  $t('custom_actions.run_for_selection', nbSelectedTasks, {
+                  $t('custom_actions.run_for_selection', {
+                    count: nbSelectedTasks,
                     nbSelectedTasks
                   })
                 }}
@@ -753,7 +762,8 @@
             :is-loading="loading.assetDeletion"
             :is-error="errors.assetDeletion"
             :text="
-              $t('assets.delete_for_selection', nbSelectedAssets, {
+              $t('assets.delete_for_selection', {
+                count: nbSelectedAssets,
                 nbSelectedAssets
               })
             "
@@ -770,9 +780,10 @@
           <delete-entities
             :error-text="$t('shots.multiple_delete_error')"
             :is-loading="loading.shotDeletion"
-            :is-error="errors.deleteShot"
+            :is-error="errors.shotDeletion"
             :text="
-              $t('shots.delete_for_selection', nbSelectedShots, {
+              $t('shots.delete_for_selection', {
+                count: nbSelectedShots,
                 nbSelectedShots
               })
             "
@@ -789,9 +800,10 @@
           <delete-entities
             :error-text="$t('edits.multiple_delete_error')"
             :is-loading="loading.editDeletion"
-            :is-error="errors.deleteEdit"
+            :is-error="errors.editDeletion"
             :text="
-              $t('edits.delete_for_selection', nbSelectedEdits, {
+              $t('edits.delete_for_selection', {
+                count: nbSelectedEdits,
                 nbSelectedEdits
               })
             "
@@ -806,32 +818,15 @@
 
         <div
           class="flexrow-item is-wide"
-          v-if="selectedBar === 'delete-episodes'"
-        >
-          <delete-entities
-            :error-text="$t('episodes.multiple_delete_error')"
-            :is-loading="loading.episodeDeletion"
-            :is-error="errors.deleteEpisode"
-            :text="
-              $t('episodes.delete_for_selection', nbSelectedEpisodes, {
-                nbSelectedEpisodes
-              })
-            "
-            :require-hard-delete-confirmation="true"
-            @confirm="confirmEpisodeDeletion"
-          />
-        </div>
-
-        <div
-          class="flexrow-item is-wide"
           v-if="selectedBar === 'delete-concepts'"
         >
           <delete-entities
             :error-text="$t('concepts.multiple_delete_error')"
-            :is-loading="loading.episodeDeletion"
-            :is-error="errors.deleteEpisode"
+            :is-loading="loading.conceptDeletion"
+            :is-error="errors.conceptDeletion"
             :text="
-              $t('concepts.delete_for_selection', nbSelectedConcepts, {
+              $t('concepts.delete_for_selection', {
+                count: nbSelectedConcepts,
                 nbSelectedConcepts
               })
             "
@@ -864,8 +859,7 @@
             @click="modals.buildFilter = true"
           />
         </div>
-        <spinner v-if="loading.links" />
-        <div class="link-list" v-else>
+        <div class="link-list">
           <ul
             class="link-types"
             :key="`link-types-${index}`"
@@ -1018,12 +1012,10 @@ export default {
         changeStatus: false,
         conceptDeletion: false,
         editDeletion: false,
-        episodeDeletion: false,
         taskCreation: false,
         taskDeletion: false,
         setThumbnails: false,
         shotDeletion: false,
-        links: false,
         tasksSubscription: false
       },
       errors: {
@@ -1032,7 +1024,6 @@ export default {
         taskDeletion: false,
         conceptDeletion: false,
         editDeletion: false,
-        episodeDeletion: false,
         shotDeletion: false
       }
     }
@@ -1357,7 +1348,6 @@ export default {
       'deleteSelectedShots',
       'deleteSelectedTasks',
       'deleteSelectedEdits',
-      'deleteSelectedEpisodes',
       'deleteSelectedConcepts',
       'editConcept',
       'loadAssets',
@@ -1488,62 +1478,62 @@ export default {
     },
 
     confirmAssetDeletion() {
-      this.loading.deleteAsset = true
-      this.errors.deleteAsset = false
+      this.loading.assetDeletion = true
+      this.errors.assetDeletion = false
       this.deleteSelectedAssets()
         .then(() => {
-          this.loading.deleteAsset = false
+          this.loading.assetDeletion = false
           this.clearSelectedAssets()
         })
         .catch(err => {
           console.error(err)
-          this.loading.deleteAsset = false
-          this.errors.deleteAsset = true
+          this.loading.assetDeletion = false
+          this.errors.assetDeletion = true
         })
     },
 
     confirmShotDeletion() {
-      this.loading.deleteShot = true
-      this.errors.deleteShot = false
+      this.loading.shotDeletion = true
+      this.errors.shotDeletion = false
       this.deleteSelectedShots()
         .then(() => {
-          this.loading.deleteShot = false
+          this.loading.shotDeletion = false
           this.clearSelectedShots()
         })
         .catch(err => {
           console.error(err)
-          this.loading.deleteShot = false
-          this.errors.deleteShot = true
+          this.loading.shotDeletion = false
+          this.errors.shotDeletion = true
         })
     },
 
     confirmEditDeletion() {
-      this.loading.deleteEdit = true
-      this.errors.deleteEdit = false
+      this.loading.editDeletion = true
+      this.errors.editDeletion = false
       this.deleteSelectedEdits()
         .then(() => {
-          this.loading.deleteEdit = false
+          this.loading.editDeletion = false
           this.clearSelectedEdits()
         })
         .catch(err => {
           console.error(err)
-          this.loading.deleteEdit = false
-          this.errors.deleteEdit = true
+          this.loading.editDeletion = false
+          this.errors.editDeletion = true
         })
     },
 
     confirmConceptDeletion() {
-      this.loading.deleteConcept = true
-      this.errors.deleteConcept = false
+      this.loading.conceptDeletion = true
+      this.errors.conceptDeletion = false
       this.deleteSelectedConcepts()
         .then(() => {
-          this.loading.deleteConcept = false
+          this.loading.conceptDeletion = false
           this.clearSelectedConcepts()
         })
         .catch(err => {
           console.error(err)
-          this.loading.deleteConcept = false
-          this.errors.deleteConcept = true
+          this.loading.conceptDeletion = false
+          this.errors.conceptDeletion = true
         })
     },
 
@@ -1557,7 +1547,6 @@ export default {
       this.subscribeToTasks(Array.from(this.selectedTasks.keys()))
         .catch(err => {
           console.error(err)
-          this.errors.tasksSubscription = false
         })
         .finally(() => {
           this.loading.tasksSubscription = false
@@ -1569,7 +1558,6 @@ export default {
       this.unsubscribeFromTasks(Array.from(this.selectedTasks.keys()))
         .catch(err => {
           console.error(err)
-          this.errors.tasksSubscription = false
         })
         .finally(() => {
           this.loading.tasksSubscription = false
