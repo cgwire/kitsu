@@ -187,14 +187,48 @@ describe('Shots store', () => {
       })
 
       expect(entitiesApi.deleteEntities).toHaveBeenCalledTimes(1)
-      expect(entitiesApi.deleteEntities).toHaveBeenCalledWith('p1', [
-        'shot-1',
-        'shot-2'
-      ])
+      expect(entitiesApi.deleteEntities).toHaveBeenCalledWith(
+        'p1',
+        ['shot-1', 'shot-2'],
+        false
+      )
       expect(commit).toHaveBeenCalledTimes(1)
       expect(commit).toHaveBeenCalledWith('REMOVE_SHOTS', {
         removedShots: [shotToRemove],
         canceledShots: [shotToCancel]
+      })
+    })
+
+    test('deleteSelectedShots forces the deletion of an already canceled selection', async () => {
+      const canceledShot = buildShot('shot-1', {
+        canceled: true,
+        tasks: ['task-1']
+      })
+      buildState([canceledShot])
+      const state = {
+        selectedShots: new Map([['shot-1', canceledShot]])
+      }
+      const rootGetters = { currentProduction: { id: 'p1' } }
+
+      vi.spyOn(entitiesApi, 'deleteEntities').mockResolvedValue()
+      const commit = vi.fn()
+
+      await shotsStore.actions.deleteSelectedShots({
+        state,
+        commit,
+        rootGetters
+      })
+
+      expect(entitiesApi.deleteEntities).toHaveBeenCalledWith(
+        'p1',
+        ['shot-1'],
+        true
+      )
+      // Really deleted server-side, so it leaves the list instead of staying
+      // struck through.
+      expect(commit).toHaveBeenCalledWith('REMOVE_SHOTS', {
+        removedShots: [canceledShot],
+        canceledShots: []
       })
     })
 

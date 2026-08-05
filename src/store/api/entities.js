@@ -5,11 +5,9 @@ export default {
     return client.pget(`/api/data/entities/${entityId}/news`)
   },
 
-  deleteEntities(projectId, entityIds) {
-    return client.ppost(
-      `/api/actions/projects/${projectId}/delete-entities`,
-      entityIds
-    )
+  deleteEntities(projectId, entityIds, force = false) {
+    const path = `/api/actions/projects/${projectId}/delete-entities`
+    return client.ppost(force ? `${path}?force=true` : path, entityIds)
   },
 
   getEntityPreviewFiles(entityId) {

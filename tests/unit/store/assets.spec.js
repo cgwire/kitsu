@@ -349,14 +349,48 @@ describe('Assets store', () => {
       })
 
       expect(entitiesApi.deleteEntities).toHaveBeenCalledTimes(1)
-      expect(entitiesApi.deleteEntities).toHaveBeenCalledWith('p1', [
-        'asset-1',
-        'asset-2'
-      ])
+      expect(entitiesApi.deleteEntities).toHaveBeenCalledWith(
+        'p1',
+        ['asset-1', 'asset-2'],
+        false
+      )
       expect(commit).toHaveBeenCalledTimes(1)
       expect(commit).toHaveBeenCalledWith('REMOVE_ASSETS', {
         removedAssets: [assetToRemove],
         canceledAssets: [assetToCancel]
+      })
+    })
+
+    test('deleteSelectedAssets forces the deletion of an already canceled selection', async () => {
+      const canceledAsset = buildAsset('asset-1', {
+        canceled: true,
+        tasks: ['task-1']
+      })
+      buildState([canceledAsset])
+      const state = {
+        selectedAssets: new Map([['asset-1', canceledAsset]])
+      }
+      const rootGetters = { currentProduction: { id: 'p1' } }
+
+      vi.spyOn(entitiesApi, 'deleteEntities').mockResolvedValue()
+      const commit = vi.fn()
+
+      await assetsStore.actions.deleteSelectedAssets({
+        state,
+        commit,
+        rootGetters
+      })
+
+      expect(entitiesApi.deleteEntities).toHaveBeenCalledWith(
+        'p1',
+        ['asset-1'],
+        true
+      )
+      // Really deleted server-side, so it leaves the list instead of staying
+      // struck through.
+      expect(commit).toHaveBeenCalledWith('REMOVE_ASSETS', {
+        removedAssets: [canceledAsset],
+        canceledAssets: []
       })
     })
   })

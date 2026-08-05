@@ -817,19 +817,23 @@ const actions = {
   },
 
   async deleteSelectedShots({ state, commit, rootGetters }) {
-    let selectedShotIds = [...state.selectedShots.values()]
-      .filter(shot => !shot.canceled)
-      .map(shot => shot.id)
-    if (selectedShotIds.length === 0) {
-      selectedShotIds = [...state.selectedShots.keys()]
-    }
+    const activeShots = [...state.selectedShots.values()].filter(
+      shot => !shot.canceled
+    )
+    // Nothing left to cancel: the selection is already canceled, so the gesture
+    // is the hard deletion the unitary path forces on a canceled shot.
+    const force = activeShots.length === 0
+    const selectedShotIds = force
+      ? [...state.selectedShots.keys()]
+      : activeShots.map(shot => shot.id)
     const shots = selectedShotIds
       .map(shotId => cache.shotMap.get(shotId))
       .filter(shot => shot)
     if (shots.length === 0) return
     await entitiesApi.deleteEntities(
       rootGetters.currentProduction.id,
-      shots.map(shot => shot.id)
+      shots.map(shot => shot.id),
+      force
     )
     // Store bookkeeping batched into a single mutation: a per-shot commit
     // costs a full list pass each.
