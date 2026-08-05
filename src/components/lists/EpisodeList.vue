@@ -500,29 +500,13 @@
 
     <table-info :is-loading="isLoading" :is-error="isError" big-cells />
 
-    <div
-      class="has-text-centered"
-      v-if="isEmptyList && isCurrentUserManager && !isLoading"
-    >
-      <p class="info">
-        <img src="../../assets/illustrations/empty_list.png" alt="" />
-      </p>
-      <p class="info">{{ $t('episodes.empty_list') }}</p>
-      <button-simple
-        class="level-item big-button"
-        :text="$t('episodes.new_episodes')"
-        @click="$emit('add-episodes')"
-      />
-    </div>
-    <div
-      class="has-text-centered"
-      v-if="isEmptyList && !isCurrentUserManager && !isLoading"
-    >
-      <p class="info">
-        <img src="../../assets/illustrations/empty_list.png" alt="" />
-      </p>
-      <p class="info">{{ $t('episodes.empty_list_read_only') }}</p>
-    </div>
+    <empty-list
+      :text="$t('episodes.empty_list')"
+      :read-only-text="$t('episodes.empty_list_read_only')"
+      :button-text="$t('episodes.new_episodes')"
+      @create="$emit('add-episodes')"
+      v-if="isEmptyList && !isLoading"
+    />
 
     <p class="has-text-centered nb-episodes" v-if="!isEmptyList && !isLoading">
       {{ displayedEpisodesLength }}
@@ -566,6 +550,7 @@ import { selectionListMixin } from '@/components/mixins/selection'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import DescriptionCell from '@/components/cells/DescriptionCell.vue'
+import EmptyList from '@/components/widgets/EmptyList.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import MetadataHeader from '@/components/cells/MetadataHeader.vue'
 import MetadataInput from '@/components/cells/MetadataInput.vue'
@@ -659,6 +644,7 @@ export default {
   components: {
     ButtonSimple,
     DescriptionCell,
+    EmptyList,
     EntityThumbnail,
     MetadataHeader,
     MetadataInput,
@@ -888,10 +874,6 @@ span.thumbnail-empty {
 
 .info {
   margin-top: 2em;
-}
-
-.info img {
-  max-width: 80vh;
 }
 
 .datatable-row th.name {

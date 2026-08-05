@@ -579,29 +579,14 @@
         </template>
       </table>
 
-      <div
-        class="has-text-centered"
-        v-if="isEmptyList && isCurrentUserManager && !isLoading"
-      >
-        <p class="info">
-          <img src="../../assets/illustrations/empty_asset.png" alt="" />
-        </p>
-        <p class="info">{{ $t('assets.empty_list') }}</p>
-        <button-simple
-          class="level-item big-button"
-          :text="$t('assets.new_assets')"
-          @click="$emit('new-clicked')"
-        />
-      </div>
-      <div
-        class="has-text-centered"
-        v-if="isEmptyList && !isCurrentUserManager && !isLoading"
-      >
-        <p class="info">
-          <img src="../../assets/illustrations/empty_asset.png" alt="" />
-        </p>
-        <p class="info">{{ $t('assets.empty_list_read_only') }}</p>
-      </div>
+      <empty-list
+        :text="$t('assets.empty_list')"
+        :read-only-text="$t('assets.empty_list_read_only')"
+        :button-text="$t('assets.new_assets')"
+        :illustration="emptyAssetIllustration"
+        @create="$emit('new-clicked')"
+        v-if="isEmptyList && !isLoading"
+      />
 
       <table-info :is-loading="isLoading" :is-error="isError" big-cells />
     </div>
@@ -622,6 +607,7 @@ import { entityListMixin } from '@/components/mixins/entity_list'
 import { formatListMixin } from '@/components/mixins/format'
 import { selectionListMixin } from '@/components/mixins/selection'
 
+import emptyAssetIllustration from '@/assets/illustrations/empty_asset.png'
 import preferences from '@/lib/preferences'
 import { sortTaskTypes } from '@/lib/sorting'
 import { range } from '@/lib/time'
@@ -635,6 +621,7 @@ import ValidationHeader from '@/components/cells/ValidationHeader.vue'
 import AssetListNumbers from '@/components/widgets/AssetListNumbers.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import EmptyList from '@/components/widgets/EmptyList.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import SortableFieldHeader from '@/components/widgets/SortableFieldHeader.vue'
 import TableHeaderMenu from '@/components/widgets/TableHeaderMenu.vue'
@@ -663,6 +650,7 @@ export default {
     ButtonSimple,
     ComboboxTaskType,
     DescriptionCell,
+    EmptyList,
     EntityThumbnail,
     MetadataInput,
     MetadataHeader,
@@ -723,6 +711,7 @@ export default {
     return {
       type: 'asset',
       columnSelectorDisplayed: false,
+      emptyAssetIllustration,
       hiddenColumns: {},
       lastSelection: null,
       lastFieldHeaderMenuDisplayed: null,
@@ -1287,10 +1276,6 @@ td.ready-for {
 
 .asset-name {
   color: inherit;
-}
-
-.info img {
-  max-width: 80vh;
 }
 
 input[type='number']::-webkit-outer-spin-button,

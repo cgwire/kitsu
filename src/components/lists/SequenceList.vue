@@ -465,29 +465,13 @@
 
     <table-info :is-loading="isLoading" :is-error="isError" big-cells />
 
-    <div
-      class="has-text-centered"
-      v-if="isEmptyList && isCurrentUserManager && !isLoading"
-    >
-      <p class="info">
-        <img src="../../assets/illustrations/empty_list.png" alt="" />
-      </p>
-      <p class="info">{{ $t('sequences.empty_list') }}</p>
-      <button-simple
-        class="level-item big-button"
-        :text="$t('sequences.new_sequences')"
-        @click="$emit('add-sequences')"
-      />
-    </div>
-    <div
-      class="has-text-centered"
-      v-if="isEmptyList && !isCurrentUserManager && !isLoading"
-    >
-      <p class="info">
-        <img src="../../assets/illustrations/empty_list.png" alt="" />
-      </p>
-      <p class="info">{{ $t('sequences.empty_list_read_only') }}</p>
-    </div>
+    <empty-list
+      :text="$t('sequences.empty_list')"
+      :read-only-text="$t('sequences.empty_list_read_only')"
+      :button-text="$t('sequences.new_sequences')"
+      @create="$emit('add-sequences')"
+      v-if="isEmptyList && !isLoading"
+    />
 
     <p class="has-text-centered nb-sequences" v-if="!isEmptyList && !isLoading">
       {{ displayedSequencesLength }}
@@ -534,6 +518,7 @@ import { selectionListMixin } from '@/components/mixins/selection'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import DescriptionCell from '@/components/cells/DescriptionCell.vue'
+import EmptyList from '@/components/widgets/EmptyList.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import MetadataHeader from '@/components/cells/MetadataHeader.vue'
 import MetadataInput from '@/components/cells/MetadataInput.vue'
@@ -624,6 +609,7 @@ export default {
   components: {
     ButtonSimple,
     DescriptionCell,
+    EmptyList,
     EntityThumbnail,
     MetadataHeader,
     MetadataInput,
@@ -838,10 +824,6 @@ span.thumbnail-empty {
 
 .info {
   margin-top: 2em;
-}
-
-.info img {
-  max-width: 80vh;
 }
 
 .datatable-row th.name {

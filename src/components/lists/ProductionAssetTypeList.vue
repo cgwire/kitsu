@@ -106,24 +106,12 @@
       :with-actions="false"
     />
 
-    <div
-      class="has-text-centered"
-      v-if="isEmptyList && isCurrentUserManager && !isLoading"
-    >
-      <p class="info">
-        <img src="../../assets/illustrations/empty_asset.png" alt="" />
-      </p>
-      <p class="info">{{ $t('assets.empty_list') }}</p>
-    </div>
-    <div
-      class="has-text-centered"
-      v-if="isEmptyList && !isCurrentUserManager && !isLoading"
-    >
-      <p class="info">
-        <img src="../../assets/illustrations/empty_asset.png" alt="" />
-      </p>
-      <p class="info">{{ $t('assets.empty_list_read_only') }}</p>
-    </div>
+    <empty-list
+      :text="$t('assets.empty_list')"
+      :read-only-text="$t('assets.empty_list_read_only')"
+      :illustration="emptyAssetIllustration"
+      v-if="isEmptyList && !isLoading"
+    />
 
     <p
       class="has-text-centered nb-asset-types"
@@ -138,10 +126,12 @@
 <script>
 import { mapGetters } from 'vuex'
 
+import emptyAssetIllustration from '@/assets/illustrations/empty_asset.png'
 import { getChartColors, getChartData } from '@/lib/stats'
 
 import { entityListMixin } from '@/components/mixins/entity_list'
 
+import EmptyList from '@/components/widgets/EmptyList.vue'
 import StatsCell from '@/components/cells/StatsCell.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
@@ -182,8 +172,15 @@ export default {
   },
 
   components: {
+    EmptyList,
     StatsCell,
     TableInfo
+  },
+
+  data() {
+    return {
+      emptyAssetIllustration
+    }
   },
 
   computed: {
@@ -193,7 +190,6 @@ export default {
       'currentProduction',
       'displayedAssetTypesLength',
       'isCurrentUserClient',
-      'isCurrentUserManager',
       'isTVShow',
       'taskTypeMap'
     ]),
@@ -281,9 +277,5 @@ td.name {
 
 th.actions {
   padding: 0.4em;
-}
-
-.info img {
-  max-width: 80vh;
 }
 </style>
