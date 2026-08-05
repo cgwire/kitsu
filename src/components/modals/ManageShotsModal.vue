@@ -9,7 +9,7 @@
 
     <div class="modal-content">
       <div class="box">
-        <page-title class="title" :text="$t('shots.manage')" />
+        <page-title class="title" :text="$t('shots.new_shots')" />
         <div class="mt1 mb1">{{ $t('shots.creation_explanation') }}</div>
         <div class="shot-columns">
           <div class="shot-column" v-if="isTVShow">
