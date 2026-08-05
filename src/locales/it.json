@@ -270,6 +270,7 @@
       "empty_list": "Non ci sono episodi nella produzione. Perché non crearne qualcuno?",
       "empty_list_client": "Non ci sono episodi in questa produzione.",
       "new_episode": "Nuovo episodio",
+      "new_episodes": "Crea episodi",
       "number": "episodio | episodi",
       "title": "Episodi",
       "fields": {
@@ -1344,6 +1345,7 @@
       "empty_list": "Non ci sono sequenze nella produzione. Perché non crearne qualcuna?",
       "empty_list_client": "Non ci sono sequenze in questa produzione.",
       "new_sequence": "Nuova sequenza",
+      "new_sequences": "Crea sequenze",
       "number": "sequenza | sequenze",
       "title": "Sequenze",
       "fields": {
@@ -1459,8 +1461,6 @@
       "history": "Cronologia dei valori dello shot",
       "new_shot": "Aggiungi uno shot",
       "new_shots": "Crea shot",
-      "new_sequences": "Aggiungi sequenze",
-      "new_episodes": "Aggiungi episodi",
       "no_casting": "Il casting dello shot è vuoto.",
       "number": "shot | shot",
       "manage": "Crea shot",

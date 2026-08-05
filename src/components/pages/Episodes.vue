@@ -36,7 +36,7 @@
             <div class="flexrow" v-if="isCurrentUserManager">
               <button-simple
                 class="flexrow-item"
-                :text="$t('episodes.new_episode')"
+                :text="$t('episodes.new_episodes')"
                 icon="plus"
                 @click="showNewModal"
               />

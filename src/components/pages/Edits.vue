@@ -56,7 +56,7 @@
               />
               <button-simple
                 class="flexrow-item"
-                :text="$t('edits.new_edit')"
+                :text="$t('edits.new_edits')"
                 icon="plus"
                 @click="showNewModal"
               />

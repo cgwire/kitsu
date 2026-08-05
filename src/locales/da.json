@@ -270,6 +270,7 @@
       "empty_list": "Der er ingen episoder i produktionen. Hvad med at oprette nogle?",
       "empty_list_client": "Der er ingen episoder i produktionen.",
       "new_episode": "Ny episode",
+      "new_episodes": "Opret episoder",
       "number": "episode | episoder",
       "title": "Episoder",
       "fields": {
@@ -1344,6 +1345,7 @@
       "empty_list": "Der er ingen sequences i produktionen. Hvad med at oprette nogle?",
       "empty_list_client": "Der er ingen sequences i produktionen.",
       "new_sequence": "Ny sequence",
+      "new_sequences": "Opret sequences",
       "number": "sequence | sequences",
       "title": "Sequences",
       "fields": {
@@ -1459,8 +1461,6 @@
       "history": "Shot-værdiers historik",
       "new_shot": "Tilføj et shot",
       "new_shots": "Opret shots",
-      "new_sequences": "Tilføj sequences",
-      "new_episodes": "Tilføj episoder",
       "no_casting": "Shot-castingen er tom.",
       "number": "shot | shots",
       "manage": "Opret shots",

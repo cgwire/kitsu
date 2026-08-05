@@ -472,6 +472,21 @@
       <p class="info">
         <img src="../../assets/illustrations/empty_list.png" alt="" />
       </p>
+      <p class="info">{{ $t('sequences.empty_list') }}</p>
+      <button-simple
+        class="level-item big-button"
+        :text="$t('sequences.new_sequences')"
+        @click="$emit('add-sequences')"
+        v-if="isCurrentUserManager"
+      />
+    </div>
+    <div
+      class="has-text-centered"
+      v-if="isEmptyList && isCurrentUserClient && !isLoading"
+    >
+      <p class="info">
+        <img src="../../assets/illustrations/empty_list.png" alt="" />
+      </p>
       <p class="info">{{ $t('sequences.empty_list_client') }}</p>
     </div>
 
@@ -570,7 +585,13 @@ export default {
     }
   },
 
-  emits: ['create-tasks', 'delete-clicked', 'edit-clicked', 'metadata-changed'],
+  emits: [
+    'add-sequences',
+    'create-tasks',
+    'delete-clicked',
+    'edit-clicked',
+    'metadata-changed'
+  ],
 
   data() {
     return {

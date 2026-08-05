@@ -270,6 +270,7 @@
       "empty_list": "No hay ningún episodio en la producción. ¿Qué tal si creamos algunos?",
       "empty_list_client": "No hay ningún episodio en esta producción.",
       "new_episode": "Nuevo episodio",
+      "new_episodes": "Crear episodios",
       "number": "episodio | episodios",
       "title": "Episodios",
       "fields": {
@@ -1344,6 +1345,7 @@
       "empty_list": "No hay ninguna secuencia en la producción. ¿Qué tal si creamos algunas?",
       "empty_list_client": "No hay secuencia en esta producción.",
       "new_sequence": "Nueva secuencia",
+      "new_sequences": "Crear secuencias",
       "number": "secuencia | secuencias",
       "title": "Secuencias",
       "fields": {
@@ -1459,8 +1461,6 @@
       "history": "Historial de valores de la toma",
       "new_shot": "Agregar una toma",
       "new_shots": "Crear tomas",
-      "new_sequences": "Añadir secuencias",
-      "new_episodes": "Añadir episodios",
       "no_casting": "El casting de la toma está vacío.",
       "number": "toma | tomas",
       "manage": "Crear tomas",

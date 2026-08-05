@@ -270,6 +270,7 @@
       "empty_list": "このプロダクションにはエピソードがありません。作成しますか？",
       "empty_list_client": "このプロダクションにはエピソードがありません。",
       "new_episode": "エピソードを作成",
+      "new_episodes": "エピソードを作成",
       "number": "エピソード | エピソード",
       "title": "エピソード",
       "fields": {
@@ -1344,6 +1345,7 @@
       "empty_list": "このプロダクションにはシーケンスがありません。作成しますか？",
       "empty_list_client": "このプロダクションにはシーケンスがありません。",
       "new_sequence": "シーケンスを作成",
+      "new_sequences": "シーケンスを作成",
       "number": "シーケンス | シーケンス",
       "title": "シーケンス",
       "fields": {
@@ -1459,8 +1461,6 @@
       "history": "ショット値の履歴",
       "new_shot": "ショットを追加",
       "new_shots": "ショットを作成",
-      "new_sequences": "シーケンスを追加",
-      "new_episodes": "エピソードを追加",
       "no_casting": "ショットの配役が空です。",
       "number": "ショット | ショット",
       "manage": "ショットを作成",

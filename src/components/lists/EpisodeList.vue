@@ -510,7 +510,7 @@
       <p class="info">{{ $t('episodes.empty_list') }}</p>
       <button-simple
         class="level-item big-button"
-        :text="$t('episodes.new_episode')"
+        :text="$t('episodes.new_episodes')"
         @click="$emit('add-episodes')"
         v-if="isCurrentUserManager"
       />

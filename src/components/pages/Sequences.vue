@@ -36,7 +36,7 @@
             <div class="flexrow" v-if="isCurrentUserManager">
               <button-simple
                 class="flexrow-item"
-                :text="$t('sequences.new_sequence')"
+                :text="$t('sequences.new_sequences')"
                 icon="plus"
                 @click="showNewModal"
               />
@@ -68,6 +68,7 @@
           :validation-columns="sequenceValidationColumns"
           :department-filter="departmentFilter"
           @add-metadata="onAddMetadataClicked"
+          @add-sequences="showNewModal"
           @change-sort="onChangeSortClicked"
           @create-tasks="showCreateTasksModal"
           @delete-all-tasks="onDeleteAllTasksClicked"

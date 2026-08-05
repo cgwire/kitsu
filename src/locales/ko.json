@@ -273,6 +273,7 @@
       "empty_list": "제작 중인 에피소드가 없습니다.  만드는 것은 어떻습니까?",
       "empty_list_client": "제작 중인 에피소드가 없습니다.",
       "new_episode": "새 에피소드",
+      "new_episodes": "에피소드 만들기",
       "number": "에피소드 | 에피소드",
       "title": "에피소드",
       "fields": {
@@ -1350,6 +1351,7 @@
       "empty_list": "프로덕션에 시퀀스가 없습니다. 시퀀스를 좀 만들어 보시겠습니까?",
       "empty_list_client": "이 프로덕션에 시퀀스가 없습니다",
       "new_sequence": "새 시퀀스",
+      "new_sequences": "시퀀스 만들기",
       "number": "시퀀스 | 시퀀스",
       "title": "시퀀스",
       "fields": {
@@ -1467,8 +1469,6 @@
       "history": "샷 값 내역",
       "new_shot": "샷 추가",
       "new_shots": "샷 만들기",
-      "new_sequences": "시퀀스 추가",
-      "new_episodes": "에피소드 추가",
       "no_casting": "샷 캐스팅이 비었습니다.",
       "number": "샷 | 샷",
       "manage": "샷 생성",
