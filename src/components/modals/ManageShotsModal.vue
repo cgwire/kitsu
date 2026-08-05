@@ -454,7 +454,9 @@ watch(
     shotStep.value = '1'
     sequences.value = displayedSequences.value
     if (isTVShow.value) {
-      selectEpisode(displayedEpisodes.value[0].id)
+      if (displayedEpisodes.value.length > 0) {
+        selectEpisode(displayedEpisodes.value[0].id)
+      }
     } else if (sequences.value.length > 0) {
       selectSequence(sequences.value[0].id)
     }
