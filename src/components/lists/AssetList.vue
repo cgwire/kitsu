@@ -581,7 +581,7 @@
 
       <div
         class="has-text-centered"
-        v-if="isEmptyList && !isCurrentUserClient && !isLoading"
+        v-if="isEmptyList && isCurrentUserManager && !isLoading"
       >
         <p class="info">
           <img src="../../assets/illustrations/empty_asset.png" alt="" />
@@ -591,17 +591,16 @@
           class="level-item big-button"
           :text="$t('assets.new_assets')"
           @click="$emit('new-clicked')"
-          v-if="isCurrentUserManager"
         />
       </div>
       <div
         class="has-text-centered"
-        v-if="isEmptyList && isCurrentUserClient && !isLoading"
+        v-if="isEmptyList && !isCurrentUserManager && !isLoading"
       >
         <p class="info">
           <img src="../../assets/illustrations/empty_asset.png" alt="" />
         </p>
-        <p class="info">{{ $t('assets.empty_list_client') }}</p>
+        <p class="info">{{ $t('assets.empty_list_read_only') }}</p>
       </div>
 
       <table-info :is-loading="isLoading" :is-error="isError" big-cells />

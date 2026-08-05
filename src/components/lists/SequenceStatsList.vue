@@ -121,7 +121,7 @@
 
     <div
       class="has-text-centered"
-      v-if="isEmptyList && !isCurrentUserClient && !isLoading"
+      v-if="isEmptyList && isCurrentUserManager && !isLoading"
     >
       <p class="info">
         <img src="../../assets/illustrations/empty_list.png" alt="" />
@@ -130,12 +130,12 @@
     </div>
     <div
       class="has-text-centered"
-      v-if="isEmptyList && isCurrentUserClient && !isLoading"
+      v-if="isEmptyList && !isCurrentUserManager && !isLoading"
     >
       <p class="info">
         <img src="../../assets/illustrations/empty_list.png" alt="" />
       </p>
-      <p class="info">{{ $t('sequences.empty_list_client') }}</p>
+      <p class="info">{{ $t('sequences.empty_list_read_only') }}</p>
     </div>
 
     <p class="has-text-centered nb-sequences" v-if="!isEmptyList && !isLoading">
@@ -206,6 +206,7 @@ export default {
       'currentEpisode',
       'displayedSequencesLength',
       'isCurrentUserClient',
+      'isCurrentUserManager',
       'isTVShow',
       'sequenceSearchText',
       'taskTypeMap'

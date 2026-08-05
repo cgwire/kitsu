@@ -123,7 +123,7 @@ export default {
     edit_fail: 'Creation or edition failed, an error occurred. Make sure that you are not renaming the NFT with a name already listed for a given sequence.',
     edit_title: 'Edit NFT',
     empty_list: 'There is no NFT in the production. What about creating some?',
-    empty_list_client: 'There is no NFT in this production.',
+    empty_list_read_only: 'There is no NFT in this production.',
     history: 'NFT values history',
     multiple_delete_error: 'An error occurred while deleting a NFT. There is probably some data linked to a NFT. Are you sure there is no task linked to a selected NFT?',
     new_shot: 'New NFT',

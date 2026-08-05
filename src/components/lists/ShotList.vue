@@ -775,7 +775,7 @@
 
     <div
       class="has-text-centered"
-      v-if="isEmptyList && !isCurrentUserClient && !isLoading"
+      v-if="isEmptyList && isCurrentUserManager && !isLoading"
     >
       <p class="info">
         <img src="../../assets/illustrations/empty_list.png" alt="" />
@@ -785,17 +785,16 @@
         class="level-item big-button"
         :text="$t('shots.new_shots')"
         @click="$emit('add-shots')"
-        v-if="isCurrentUserManager"
       />
     </div>
     <div
       class="has-text-centered"
-      v-if="isEmptyList && isCurrentUserClient && !isLoading"
+      v-if="isEmptyList && !isCurrentUserManager && !isLoading"
     >
       <p class="info">
         <img src="../../assets/illustrations/empty_list.png" alt="" />
       </p>
-      <p class="info">{{ $t('shots.empty_list_client') }}</p>
+      <p class="info">{{ $t('shots.empty_list_read_only') }}</p>
     </div>
 
     <p class="has-text-centered nb-shots" v-if="!isEmptyList && !isLoading">
