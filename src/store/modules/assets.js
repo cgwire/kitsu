@@ -835,19 +835,23 @@ const actions = {
   },
 
   async deleteSelectedAssets({ state, commit, rootGetters }) {
-    let selectedAssetIds = [...state.selectedAssets.values()]
-      .filter(asset => !asset.canceled)
-      .map(asset => asset.id)
-    if (selectedAssetIds.length === 0) {
-      selectedAssetIds = [...state.selectedAssets.keys()]
-    }
+    const activeAssets = [...state.selectedAssets.values()].filter(
+      asset => !asset.canceled
+    )
+    // Nothing left to cancel: the selection is already canceled, so the gesture
+    // is the hard deletion the unitary path forces on a canceled asset.
+    const force = activeAssets.length === 0
+    const selectedAssetIds = force
+      ? [...state.selectedAssets.keys()]
+      : activeAssets.map(asset => asset.id)
     const assets = selectedAssetIds
       .map(assetId => cache.assetMap.get(assetId))
       .filter(asset => asset)
     if (assets.length === 0) return
     await entitiesApi.deleteEntities(
       rootGetters.currentProduction.id,
-      assets.map(asset => asset.id)
+      assets.map(asset => asset.id),
+      force
     )
     // Store bookkeeping batched into a single mutation: a per-asset commit
     // costs a full list pass each.

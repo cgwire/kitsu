@@ -668,19 +668,23 @@ const actions = {
   },
 
   async deleteSelectedEdits({ state, commit, rootGetters }) {
-    let selectedEditIds = [...state.selectedEdits.values()]
-      .filter(edit => !edit.canceled)
-      .map(edit => edit.id)
-    if (selectedEditIds.length === 0) {
-      selectedEditIds = [...state.selectedEdits.keys()]
-    }
+    const activeEdits = [...state.selectedEdits.values()].filter(
+      edit => !edit.canceled
+    )
+    // Nothing left to cancel: the selection is already canceled, so the gesture
+    // is the hard deletion the unitary path forces on a canceled edit.
+    const force = activeEdits.length === 0
+    const selectedEditIds = force
+      ? [...state.selectedEdits.keys()]
+      : activeEdits.map(edit => edit.id)
     const edits = selectedEditIds
       .map(editId => cache.editMap.get(editId))
       .filter(edit => edit)
     if (edits.length === 0) return
     await entitiesApi.deleteEntities(
       rootGetters.currentProduction.id,
-      edits.map(edit => edit.id)
+      edits.map(edit => edit.id),
+      force
     )
     edits.forEach(edit => {
       if (edit.tasks.length > 0 && !edit.canceled) {

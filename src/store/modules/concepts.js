@@ -151,7 +151,10 @@ const actions = {
     if (concepts.length === 0) return
     await entitiesApi.deleteEntities(
       rootGetters.currentProduction.id,
-      concepts.map(concept => concept.id)
+      concepts.map(concept => concept.id),
+      // The unitary concept deletion always forces, so the selection does too:
+      // the store drops every concept below, canceled ones included.
+      true
     )
     concepts.forEach(concept => {
       commit(DELETE_CONCEPT_END, concept)
