@@ -2,6 +2,7 @@ import { vi } from 'vitest'
 
 const h = vi.hoisted(() => ({
   isAdmin: false,
+  isClient: false,
   isManager: false,
   isSupervisor: false
 }))
@@ -33,6 +34,7 @@ vi.mock('@/store/modules/user', () => ({
     getters: {
       isCurrentUserAdmin: () => h.isAdmin,
       isCurrentUserArtist: () => false,
+      isCurrentUserClient: () => h.isClient,
       isCurrentUserManager: () => h.isAdmin || h.isManager,
       isCurrentUserSupervisor: () => h.isSupervisor
     }
@@ -78,6 +80,7 @@ const SUPERVISOR_OR_MANAGER_ROUTES = ['team-schedule']
 describe('router/routes', () => {
   beforeEach(() => {
     h.isAdmin = false
+    h.isClient = false
     h.isManager = false
     h.isSupervisor = false
     taskTypeStore.state.taskTypes = [{ id: 'task-type-1' }]
@@ -147,6 +150,21 @@ describe('router/routes', () => {
         matched: [{ meta: { requiresSupervisorOrManager: true } }]
       })
       expect(result).toEqual({ name: 'not-found' })
+    })
+
+    test('redirects a client to not-found on a client-forbidden route', async () => {
+      h.isClient = true
+      const result = await runGuard({
+        matched: [{ meta: { forbiddenForClient: true } }]
+      })
+      expect(result).toEqual({ name: 'not-found' })
+    })
+
+    test('lets a non-client through on a client-forbidden route', async () => {
+      const result = await runGuard({
+        matched: [{ meta: { forbiddenForClient: true } }]
+      })
+      expect(result).toBeUndefined()
     })
 
     test('still blocks admin routes when data loads first', async () => {
