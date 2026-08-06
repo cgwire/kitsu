@@ -8,7 +8,10 @@
       <p class="description">
         {{ $t('playlists.share_modal.description') }}
       </p>
-      <p class="empty-links" v-if="shareLinks.length === 0">
+      <div class="has-text-centered" v-if="loading.links && !shareLinks.length">
+        <spinner />
+      </div>
+      <p class="empty-links" v-else-if="!shareLinks.length">
         {{ $t('playlists.share_modal.no_links') }}
       </p>
       <div v-else class="existing-links">
@@ -216,6 +219,7 @@ import BaseModal from '@/components/modals/BaseModal.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Checkbox from '@/components/widgets/Checkbox.vue'
 import DateField from '@/components/widgets/DateField.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
 
 const { t } = useI18n()
 const { tomorrow, dateFormat } = useTime()
@@ -231,7 +235,7 @@ const emit = defineEmits(['cancel', 'links-updated'])
 const shareLinks = ref([])
 const expirationDate = ref(null)
 const canComment = ref(true)
-const loading = reactive({ create: false })
+const loading = reactive({ links: false, create: false })
 const errors = reactive({ create: false })
 
 const openInviteToken = ref(null)
@@ -351,6 +355,7 @@ const buildShareUrl = token => {
 }
 
 const loadLinks = async () => {
+  loading.links = true
   try {
     const links = await store.dispatch(
       'loadPlaylistShareLinks',
@@ -361,6 +366,8 @@ const loadLinks = async () => {
     emit('links-updated', links.length)
   } catch (err) {
     console.error(err)
+  } finally {
+    loading.links = false
   }
 }
 
