@@ -318,20 +318,22 @@ const actions = {
     }
   },
 
+  // pget resolves null on a 2xx response that carries no JSON body (proxy
+  // maintenance page): default these lists so the mutations can iterate.
   async loadDoneTasks({ commit, state, rootGetters }) {
-    const doneTasks = await peopleApi.loadDone()
+    const doneTasks = (await peopleApi.loadDone()) || []
     commit(USER_LOAD_DONE_TASKS_END, doneTasks)
     commit(REGISTER_USER_TASKS, { tasks: doneTasks })
     return doneTasks
   },
 
   async loadUserTimeSpents({ commit }, { date }) {
-    const timeSpents = await peopleApi.loadTimeSpents(date)
+    const timeSpents = (await peopleApi.loadTimeSpents(date)) || []
     commit(USER_LOAD_TIME_SPENTS_END, timeSpents)
   },
 
   async loadTasksToCheck({ commit }) {
-    const tasks = await peopleApi.loadTasksToCheck()
+    const tasks = (await peopleApi.loadTasksToCheck()) || []
     commit(REGISTER_USER_TASKS, { tasks })
     return tasks
   },

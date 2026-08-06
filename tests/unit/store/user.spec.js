@@ -2,7 +2,15 @@ import { vi } from 'vitest'
 
 vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@/lib/auth', () => ({ default: { logIn: vi.fn(), logOut: vi.fn() } }))
+vi.mock('@/store/api/people', () => ({
+  default: {
+    loadDone: vi.fn(),
+    loadTasksToCheck: vi.fn(),
+    loadTimeSpents: vi.fn()
+  }
+}))
 
+import peopleApi from '@/store/api/people'
 import store from '@/store/modules/user'
 
 describe('User store', () => {
@@ -143,6 +151,69 @@ describe('User store', () => {
       }
       store.mutations.USER_LOGOUT(state)
       expect(state.projectRoles).toEqual({})
+    })
+  })
+
+  describe('Actions', () => {
+    afterEach(() => {
+      vi.clearAllMocks()
+    })
+
+    // A 2xx response without a JSON body (proxy maintenance page) makes pget
+    // resolve null; the actions must hand arrays to the forEach mutations.
+    describe('loadDoneTasks', () => {
+      test('commits an empty list when the API resolves null', async () => {
+        peopleApi.loadDone.mockResolvedValue(null)
+        const commit = vi.fn()
+
+        const doneTasks = await store.actions.loadDoneTasks({ commit })
+
+        expect(doneTasks).toEqual([])
+        expect(commit).toHaveBeenCalledWith('USER_LOAD_DONE_TASKS_END', [])
+        expect(commit).toHaveBeenCalledWith('REGISTER_USER_TASKS', {
+          tasks: []
+        })
+      })
+
+      test('passes the loaded tasks through', async () => {
+        const tasks = [{ id: 'task-1' }]
+        peopleApi.loadDone.mockResolvedValue(tasks)
+        const commit = vi.fn()
+
+        const doneTasks = await store.actions.loadDoneTasks({ commit })
+
+        expect(doneTasks).toEqual(tasks)
+        expect(commit).toHaveBeenCalledWith('USER_LOAD_DONE_TASKS_END', tasks)
+      })
+    })
+
+    describe('loadUserTimeSpents', () => {
+      test('commits an empty list when the API resolves null', async () => {
+        peopleApi.loadTimeSpents.mockResolvedValue(null)
+        const commit = vi.fn()
+
+        await store.actions.loadUserTimeSpents(
+          { commit },
+          { date: '2026-08-06' }
+        )
+
+        expect(peopleApi.loadTimeSpents).toHaveBeenCalledWith('2026-08-06')
+        expect(commit).toHaveBeenCalledWith('USER_LOAD_TIME_SPENTS_END', [])
+      })
+    })
+
+    describe('loadTasksToCheck', () => {
+      test('commits an empty list when the API resolves null', async () => {
+        peopleApi.loadTasksToCheck.mockResolvedValue(null)
+        const commit = vi.fn()
+
+        const tasks = await store.actions.loadTasksToCheck({ commit })
+
+        expect(tasks).toEqual([])
+        expect(commit).toHaveBeenCalledWith('REGISTER_USER_TASKS', {
+          tasks: []
+        })
+      })
     })
   })
 })
