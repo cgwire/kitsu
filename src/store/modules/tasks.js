@@ -1523,6 +1523,7 @@ const mutations = {
       const localComment = state.taskComments[comment.object_id].find(
         c => c.id === comment.id
       )
+      if (!localComment) return
       localComment.checklist = [...checklist]
     }
   },
