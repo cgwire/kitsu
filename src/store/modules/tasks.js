@@ -1556,14 +1556,16 @@ const mutations = {
   },
 
   [ADD_ATTACHMENT_TO_COMMENT](state, { comment, attachmentFiles }) {
-    const oldComment = state.taskComments[comment.object_id].find(
+    const oldComment = state.taskComments[comment.object_id]?.find(
       c => c.id === comment.id
     )
     if (!comment.attachment_files) {
       comment.attachment_files = []
     }
-    oldComment.attachment_files =
-      oldComment.attachment_files.concat(attachmentFiles)
+    if (!oldComment) return
+    oldComment.attachment_files = (oldComment.attachment_files ?? []).concat(
+      attachmentFiles
+    )
   },
 
   [REMOVE_ATTACHMENT_FROM_COMMENT](state, { comment, attachment }) {
