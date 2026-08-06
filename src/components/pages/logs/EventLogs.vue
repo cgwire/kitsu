@@ -3,10 +3,11 @@
     <div class="flexrow filters">
       <date-field
         class="flexrow-item"
-        range
+        :can-delete="false"
         :label="$t('logs.date_range_label')"
         :max-date="today"
         :placeholder="$t('logs.date_range_placeholder')"
+        range
         v-model="dateRange"
         @change="onDateRangeChange"
       />
@@ -358,6 +359,14 @@ const loadEventNames = async () => {
   }
 }
 
+const loadProductions = async () => {
+  try {
+    await store.dispatch('loadProductions')
+  } catch (err) {
+    console.error(err)
+  }
+}
+
 const selectLine = event => {
   selectedEvents.value[event.id] = !selectedEvents.value[event.id]
 }
@@ -434,7 +443,10 @@ watch(personMap, () => {
 
 // Lifecycle
 
-onMounted(loadEventNames)
+onMounted(() => {
+  loadEventNames()
+  loadProductions()
+})
 
 // Head
 
