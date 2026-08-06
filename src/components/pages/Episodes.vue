@@ -18,14 +18,14 @@
               @click="() => (modals.isBuildFilterDisplayed = true)"
             />
             <div class="filler"></div>
-            <div class="flexrow flexrow-item" v-if="!isCurrentUserClient">
+            <div class="flexrow flexrow-item">
               <combobox-department
                 class="combobox-department flexrow-item"
                 :selectable-departments="selectableDepartments('Episode')"
                 :display-all-and-my-departments="true"
                 rounded
                 v-model="selectedDepartment"
-                v-if="departments.length > 0"
+                v-if="departments.length > 0 && !isCurrentUserClient"
               />
               <combobox-display-options
                 class="flexrow-item"
