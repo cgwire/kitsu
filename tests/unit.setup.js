@@ -9,6 +9,17 @@ config.global.mocks = {
   $t: tKey => tKey // just return translation key
 }
 
+// v-focus only exists on the real app built by main.js, which the specs
+// never load: mirror it here so mounted components resolve it instead of
+// logging a warning.
+config.global.directives = {
+  focus: {
+    mounted(el, binding) {
+      el.focus(binding.value)
+    }
+  }
+}
+
 // Stub indexedDB for libraries (e.g. vue3-emoji-picker) that rely on it at import time
 const noop = () => {}
 class IDBRequestStub {
