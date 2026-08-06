@@ -153,7 +153,11 @@ export const routes = [
         (!userStore.getters.isCurrentUserAdmin(userStore.state) &&
           to?.matched.some(record => record.meta.requiresAdmin)) ||
         (!isSupervisorOrManager &&
-          to?.matched.some(record => record.meta.requiresSupervisorOrManager))
+          to?.matched.some(
+            record => record.meta.requiresSupervisorOrManager
+          )) ||
+        (userStore.getters.isCurrentUserClient(userStore.state) &&
+          to?.matched.some(record => record.meta.forbiddenForClient))
 
       if (taskTypeStore.state.taskTypes.length === 0) {
         try {
@@ -175,7 +179,8 @@ export const routes = [
       {
         path: 'asset-library',
         component: AssetLibrary,
-        name: 'asset-library'
+        name: 'asset-library',
+        meta: { forbiddenForClient: true }
       },
 
       {
@@ -250,12 +255,14 @@ export const routes = [
       {
         name: 'software-licenses',
         path: 'software-licenses',
+        meta: { requiresAdmin: true },
         component: SoftwareLicenses
       },
 
       {
         name: 'hardware-items',
         path: 'hardware-items',
+        meta: { requiresAdmin: true },
         component: HardwareItems
       },
 
@@ -268,7 +275,8 @@ export const routes = [
       {
         path: 'all-tasks',
         component: AllTasks,
-        name: 'all-tasks'
+        name: 'all-tasks',
+        meta: { forbiddenForClient: true }
       },
 
       {
@@ -280,19 +288,22 @@ export const routes = [
       {
         path: 'new-production',
         component: NewProduction,
-        name: 'new-production'
+        name: 'new-production',
+        meta: { forbiddenForClient: true }
       },
 
       {
         path: 'entity-search',
         component: EntitySearch,
-        name: 'entity-search'
+        name: 'entity-search',
+        meta: { forbiddenForClient: true }
       },
 
       {
         path: 'entity-chats',
         component: EntityChats,
-        name: 'entity-chats'
+        name: 'entity-chats',
+        meta: { forbiddenForClient: true }
       },
 
       {
@@ -305,7 +316,8 @@ export const routes = [
       {
         path: 'people/:person_id',
         component: Person,
-        name: 'person'
+        name: 'person',
+        meta: { forbiddenForClient: true }
       },
 
       {
@@ -326,6 +338,7 @@ export const routes = [
         path: '/timesheets',
         component: Timesheets,
         name: 'timesheets',
+        meta: { forbiddenForClient: true },
         children: [
           {
             path: 'year/:year',
@@ -386,7 +399,8 @@ export const routes = [
       {
         path: '/plugins/:plugin_id',
         component: Plugin,
-        name: 'plugin'
+        name: 'plugin',
+        meta: { forbiddenForClient: true }
       },
 
       {
@@ -412,13 +426,15 @@ export const routes = [
       {
         path: 'my-tasks',
         component: Todos,
-        name: 'todos'
+        name: 'todos',
+        meta: { forbiddenForClient: true }
       },
 
       {
         path: 'my-checks',
         component: MyChecks,
-        name: 'checks'
+        name: 'checks',
+        meta: { forbiddenForClient: true }
       },
 
       {
@@ -431,13 +447,15 @@ export const routes = [
       {
         path: 'productions/:production_id/team',
         component: Team,
-        name: 'team'
+        name: 'team',
+        meta: { forbiddenForClient: true }
       },
 
       {
         path: 'productions/:production_id/budget',
         component: Budget,
-        name: 'budget'
+        name: 'budget',
+        meta: { requiresAdmin: true }
       },
 
       {
@@ -450,49 +468,57 @@ export const routes = [
       {
         path: 'productions/:production_id/news-feed',
         component: ProductionNewsFeed,
-        name: 'news-feed'
+        name: 'news-feed',
+        meta: { forbiddenForClient: true }
       },
 
       {
         path: 'productions/:production_id/schedule',
         component: ProductionSchedule,
-        name: 'schedule'
+        name: 'schedule',
+        meta: { forbiddenForClient: true }
       },
 
       {
         path: 'productions/:production_id/episodes/:episode_id/schedule',
         component: ProductionSchedule,
-        name: 'episode-schedule'
+        name: 'episode-schedule',
+        meta: { forbiddenForClient: true }
       },
 
       {
         path: 'productions/:production_id/production-settings',
         component: ProductionSettings,
-        name: 'production-settings'
+        name: 'production-settings',
+        meta: { forbiddenForClient: true }
       },
 
       {
         path: 'productions/:production_id/brief',
         component: Brief,
-        name: 'brief'
+        name: 'brief',
+        meta: { forbiddenForClient: true }
       },
 
       {
         path: 'productions/:production_id/plugins/:plugin_id',
         component: Plugin,
-        name: 'production-plugin'
+        name: 'production-plugin',
+        meta: { forbiddenForClient: true }
       },
 
       {
         path: 'productions/:production_id/episodes/:episode_id/plugins/:plugin_id',
         component: Plugin,
-        name: 'episode-production-plugin'
+        name: 'episode-production-plugin',
+        meta: { forbiddenForClient: true }
       },
 
       {
         path: 'productions/:production_id/quota',
         component: ProductionQuota,
         name: 'quota',
+        meta: { forbiddenForClient: true },
         children: [
           {
             path: 'month/:year',
@@ -531,6 +557,7 @@ export const routes = [
         path: 'productions/:production_id/episodes/:episode_id/quota',
         component: ProductionQuota,
         name: 'episode-quota',
+        meta: { forbiddenForClient: true },
         children: [
           {
             path: 'month/:year',
@@ -582,6 +609,7 @@ export const routes = [
         path: 'productions/:production_id/breakdown',
         component: Breakdown,
         name: 'breakdown',
+        meta: { forbiddenForClient: true },
         children: [
           {
             path: 'sequences/:sequence_id',
@@ -599,7 +627,8 @@ export const routes = [
       {
         path: 'productions/:production_id/concepts',
         component: Concepts,
-        name: 'concepts'
+        name: 'concepts',
+        meta: { forbiddenForClient: true }
       },
 
       {
@@ -642,24 +671,28 @@ export const routes = [
         path: 'productions/:production_id/episodes',
         component: Episodes,
         name: 'episodes',
+        meta: { forbiddenForClient: true },
         children: []
       },
       {
         path: 'productions/:production_id/episodes/:episode_id',
         component: Episode,
-        name: 'episode'
+        name: 'episode',
+        meta: { forbiddenForClient: true }
       },
 
       {
         path: 'productions/:production_id/sequences/:sequence_id',
         component: Sequence,
-        name: 'sequence'
+        name: 'sequence',
+        meta: { forbiddenForClient: true }
       },
 
       {
         path: 'productions/:production_id/sequences',
         component: Sequences,
-        name: 'sequences'
+        name: 'sequences',
+        meta: { forbiddenForClient: true }
       },
 
       {
@@ -742,6 +775,7 @@ export const routes = [
         path: 'productions/:production_id/episodes/:episode_id/breakdown',
         component: Breakdown,
         name: 'episode-breakdown',
+        meta: { forbiddenForClient: true },
         children: [
           {
             path: 'sequences/:sequence_id',
@@ -802,13 +836,15 @@ export const routes = [
       {
         path: 'productions/:production_id/episodes/:episode_id/sequences',
         component: Sequences,
-        name: 'episode-sequences'
+        name: 'episode-sequences',
+        meta: { forbiddenForClient: true }
       },
 
       {
         path: 'productions/:production_id/episodes/:episode_id/sequences/:sequence_id',
         component: Sequence,
-        name: 'episode-sequence'
+        name: 'episode-sequence',
+        meta: { forbiddenForClient: true }
       },
 
       {
@@ -840,7 +876,8 @@ export const routes = [
         component: TaskType,
         name: 'episodes-task-type',
         meta: {
-          section: 'episodes'
+          section: 'episodes',
+          forbiddenForClient: true
         },
         children: [
           {

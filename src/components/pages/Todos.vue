@@ -413,9 +413,11 @@ export default {
         date: this.selectedDate,
         forced
       })
-      this.loadDoneTasks().then(() => {
-        this.loading.doneTasks = false
-      })
+      this.loadDoneTasks()
+        .catch(console.error)
+        .finally(() => {
+          this.loading.doneTasks = false
+        })
       this.$nextTick(() => {
         this.todoList?.setScrollPosition(this.todoListScrollPosition)
       })

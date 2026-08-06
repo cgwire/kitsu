@@ -19,16 +19,16 @@
               @click="() => (modals.isBuildFilterDisplayed = true)"
             />
             <div class="filler"></div>
-            <combobox-department
-              class="combobox-department flexrow-item"
-              :selectable-departments="selectableDepartments('Edit')"
-              :display-all-and-my-departments="true"
-              :width="230"
-              rounded
-              v-model="selectedDepartment"
-              v-if="departments.length > 0"
-            />
-            <div class="flexrow flexrow-item" v-if="!isCurrentUserClient">
+            <div class="flexrow flexrow-item">
+              <combobox-department
+                class="combobox-department flexrow-item"
+                :selectable-departments="selectableDepartments('Edit')"
+                :display-all-and-my-departments="true"
+                :width="230"
+                rounded
+                v-model="selectedDepartment"
+                v-if="departments.length > 0 && !isCurrentUserClient"
+              />
               <combobox-display-options
                 class="flexrow-item"
                 :type="type"

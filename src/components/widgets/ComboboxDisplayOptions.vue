@@ -9,6 +9,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 
 import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
 
@@ -28,6 +29,9 @@ const props = defineProps({
 })
 
 const { t } = useI18n()
+const store = useStore()
+
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 
 const options = computed(() => {
   const isTaskType = props.type.includes('tasktype-')
@@ -36,7 +40,7 @@ const options = computed(() => {
     {
       label: t('tasks.show_assignations'),
       value: 'showAssignations',
-      when: !isTaskType
+      when: !isTaskType && !isCurrentUserClient.value
     },
     {
       label: t('tasks.show_infos'),

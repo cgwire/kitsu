@@ -3,10 +3,11 @@
     <div class="flexrow filters">
       <date-field
         class="flexrow-item"
-        range
+        :can-delete="false"
         :label="$t('logs.date_range_label')"
         :max-date="today"
         :placeholder="$t('logs.date_range_placeholder')"
+        range
         v-model="dateRange"
         @change="onDateRangeChange"
       />

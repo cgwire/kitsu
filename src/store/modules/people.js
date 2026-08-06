@@ -806,7 +806,9 @@ const mutations = {
     state,
     { personId, tasks, userFilters, taskTypeMap }
   ) {
-    state.person = cache.personMap.get(personId)
+    // The unmount reset commits no personId: fall back to the initial {}
+    // so state.person never becomes undefined for later consumers.
+    state.person = cache.personMap.get(personId) || {}
 
     tasks.forEach(populateTask)
     tasks.forEach(task => {
@@ -909,7 +911,7 @@ const mutations = {
   },
 
   [SET_TIME_SPENT](state, timeSpent) {
-    if (state.person.id === timeSpent.person_id) {
+    if (state.person?.id === timeSpent.person_id) {
       state.personTimeSpentMap[timeSpent.task_id] = timeSpent
     }
     state.personTimeSpentTotal =

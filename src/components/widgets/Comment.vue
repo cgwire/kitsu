@@ -580,6 +580,7 @@ import {
 import stringHelpers from '@/lib/string'
 
 import { useAtMentionsMembers } from '@/composables/atMentions'
+import { useTime } from '@/composables/time'
 import { domMixin } from '@/components/mixins/dom'
 
 import AddAttachmentModal from '@/components/modals/AddAttachmentModal.vue'
@@ -599,6 +600,7 @@ const { pauseEvent } = domMixin.methods
 
 const store = useStore()
 const route = useRoute()
+const { timezone } = useTime()
 
 const emit = defineEmits([
   'ack-comment',
@@ -712,7 +714,6 @@ const isCurrentUserManager = computed(() =>
 const personMap = computed(() => store.getters.personMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 const use12HourClock = computed(() => store.getters.use12HourClock)
-const user = computed(() => store.getters.user)
 
 const attachmentNamePrefix = computed(() =>
   stringHelpers.attachmentNamePrefix(
@@ -860,7 +861,7 @@ const commentDate = computed(() => {
 })
 
 const fullDate = computed(() => {
-  const date = commentDate.value.tz(user.value.timezone)
+  const date = commentDate.value.tz(timezone.value)
   return `${formatDisplayDate(date, dateFormat.value)} ${formatTimeOfDay(date, use12HourClock.value)}`
 })
 
@@ -884,7 +885,7 @@ const shortenText = (text, length) => {
 }
 
 const replyFullDate = date => {
-  const d = moment(parseDate(date)).tz(user.value.timezone)
+  const d = moment(parseDate(date)).tz(timezone.value)
   return `${formatDisplayDate(d, dateFormat.value)} ${formatTimeOfDay(d, use12HourClock.value)}`
 }
 
@@ -895,9 +896,9 @@ const replyShortDate = date => {
 const renderDate = date => {
   date = moment(date)
   if (moment().isSame(date, 'd')) {
-    return formatTimeOfDay(date.tz(user.value.timezone), use12HourClock.value)
+    return formatTimeOfDay(date.tz(timezone.value), use12HourClock.value)
   } else {
-    return formatShortDate(date.tz(user.value.timezone), dateFormat.value)
+    return formatShortDate(date.tz(timezone.value), dateFormat.value)
   }
 }
 
