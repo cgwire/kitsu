@@ -612,7 +612,7 @@ import { selectionListMixin } from '@/components/mixins/selection'
 
 import emptyAssetIllustration from '@/assets/illustrations/empty_asset.png'
 import preferences from '@/lib/preferences'
-import { getTaskPath } from '@/lib/path'
+import { getTaskHref } from '@/lib/path'
 import { sortTaskTypes } from '@/lib/sorting'
 import { range } from '@/lib/time'
 
@@ -1047,26 +1047,14 @@ export default {
     },
 
     taskHref(taskId) {
-      const task = this.taskMap.get(taskId)
-      if (!task) return ''
-      // Called for every cell on every render: memoize the router.resolve,
-      // the result only changes with the production/episode context
-      // (watchers below reset the cache).
-      if (!this.taskHrefCache) this.taskHrefCache = new Map()
-      let href = this.taskHrefCache.get(taskId)
-      if (href === undefined) {
-        href = this.$router.resolve(
-          getTaskPath(
-            task,
-            this.currentProduction,
-            this.isTVShow,
-            this.currentEpisode,
-            this.taskTypeMap
-          )
-        ).href
-        this.taskHrefCache.set(taskId, href)
-      }
-      return href
+      return getTaskHref(
+        this.$router,
+        this.taskMap.get(taskId),
+        this.currentProduction,
+        this.isTVShow,
+        this.currentEpisode,
+        this.taskTypeMap
+      )
     },
 
     assetPath(assetId) {
@@ -1158,14 +1146,6 @@ export default {
   watch: {
     displayedAssets() {
       this.$options.lineIndex = {}
-    },
-
-    currentProduction() {
-      this.taskHrefCache = null
-    },
-
-    currentEpisode() {
-      this.taskHrefCache = null
     },
 
     validationColumns: {
