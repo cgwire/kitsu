@@ -313,6 +313,7 @@
                   :row-x="i"
                   :selected="isSelected(i, j)"
                   :sticked="true"
+                  :task-href="taskHref(sequence.validations.get(columnId))"
                   :task-test="taskMap.get(sequence.validations.get(columnId))"
                   @select="infos => onTaskSelected(infos, true)"
                   @unselect="infos => onTaskUnselected(infos, true)"
@@ -432,6 +433,7 @@
                   :key="`${columnId}-${sequence.id}`"
                   :column="taskTypeMap.get(columnId)"
                   :entity="sequence"
+                  :task-href="taskHref(sequence.validations?.get(columnId))"
                   :task-test="
                     taskMap.get(
                       sequence.validations
@@ -510,7 +512,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
-import { getEntityPath } from '@/lib/path'
+import { getEntityPath, getTaskHref } from '@/lib/path'
 import { descriptorMixin } from '@/components/mixins/descriptors'
 import { domMixin } from '@/components/mixins/dom'
 import { entityListMixin } from '@/components/mixins/entity_list'
@@ -636,6 +638,7 @@ export default {
       'isCurrentUserAdmin',
       'isCurrentUserClient',
       'isSingleSequence',
+      'isTVShow',
       'isSequenceDescription',
       'isSequenceEstimation',
       'isSequenceResolution',
@@ -700,6 +703,17 @@ export default {
 
     isSelected(lineIndex, columnIndex) {
       return this.sequenceSelectionGrid.has(`${lineIndex}-${columnIndex}`)
+    },
+
+    taskHref(taskId) {
+      return getTaskHref(
+        this.$router,
+        this.taskMap.get(taskId),
+        this.currentProduction,
+        this.isTVShow,
+        this.currentEpisode,
+        this.taskTypeMap
+      )
     },
 
     sequencePath(sequenceId) {

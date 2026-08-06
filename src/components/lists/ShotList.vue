@@ -415,6 +415,7 @@
                   :row-x="getIndex(i, k)"
                   :selected="isSelected(i, k, j)"
                   :sticked="true"
+                  :task-href="taskHref(shot.validations.get(columnId))"
                   :task-test="taskMap.get(shot.validations.get(columnId))"
                   @select="infos => onTaskSelected(infos, true)"
                   @unselect="infos => onTaskUnselected(infos, true)"
@@ -734,6 +735,7 @@
                   :column="taskTypeMap.get(columnId)"
                   :contact-sheet="displaySettings.contactSheetMode"
                   :entity="shot"
+                  :task-href="taskHref(shot.validations?.get(columnId))"
                   :task-test="
                     taskMap.get(
                       shot.validations ? shot.validations.get(columnId) : null
@@ -824,6 +826,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
+import { getTaskHref } from '@/lib/path'
 import preferences from '@/lib/preferences'
 import { range } from '@/lib/time'
 import { formatToTimecode } from '@/lib/video'
@@ -1120,6 +1123,17 @@ export default {
 
     loadMoreShots() {
       this.displayMoreShots()
+    },
+
+    taskHref(taskId) {
+      return getTaskHref(
+        this.$router,
+        this.taskMap.get(taskId),
+        this.currentProduction,
+        this.isTVShow,
+        this.currentEpisode,
+        this.taskTypeMap
+      )
     },
 
     shotPath(shotId) {

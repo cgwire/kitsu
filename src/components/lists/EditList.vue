@@ -344,6 +344,7 @@
                   :row-x="i"
                   :selected="isSelected(i, j)"
                   :sticked="true"
+                  :task-href="taskHref(edit.validations.get(columnId))"
                   :task-test="taskMap.get(edit.validations.get(columnId))"
                   @select="infos => onTaskSelected(infos, true)"
                   @unselect="infos => onTaskUnselected(infos, true)"
@@ -421,6 +422,7 @@
                   :key="`${columnId}-${edit.id}`"
                   :column="taskTypeMap.get(columnId)"
                   :entity="edit"
+                  :task-href="taskHref(edit.validations?.get(columnId))"
                   :task-test="
                     taskMap.get(
                       edit.validations ? edit.validations.get(columnId) : null
@@ -496,6 +498,7 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 
+import { getTaskHref } from '@/lib/path'
 import preferences from '@/lib/preferences'
 import { range } from '@/lib/time'
 
@@ -729,6 +732,17 @@ export default {
 
     loadMoreEdits() {
       this.displayMoreEdits()
+    },
+
+    taskHref(taskId) {
+      return getTaskHref(
+        this.$router,
+        this.taskMap.get(taskId),
+        this.currentProduction,
+        this.isTVShow,
+        this.currentEpisode,
+        this.taskTypeMap
+      )
     },
 
     editPath(editId) {

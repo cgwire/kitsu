@@ -326,6 +326,7 @@
                   :row-x="i"
                   :selected="isSelected(i, j)"
                   :sticked="true"
+                  :task-href="taskHref(episode.validations.get(columnId))"
                   :task-test="taskMap.get(episode.validations.get(columnId))"
                   @select="infos => onTaskSelected(infos, true)"
                   @unselect="infos => onTaskUnselected(infos, true)"
@@ -467,6 +468,7 @@
                   :contact-sheet="displaySettings.contactSheetMode"
                   :column="taskTypeMap.get(columnId)"
                   :entity="episode"
+                  :task-href="taskHref(episode.validations?.get(columnId))"
                   :task-test="
                     taskMap.get(
                       episode.validations
@@ -542,6 +544,8 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+
+import { getTaskHref } from '@/lib/path'
 
 import { descriptorMixin } from '@/components/mixins/descriptors'
 import { domMixin } from '@/components/mixins/dom'
@@ -676,6 +680,7 @@ export default {
       'isCurrentUserAdmin',
       'isCurrentUserClient',
       'isSingleEpisode',
+      'isTVShow',
       'isEpisodeDescription',
       'isEpisodeEstimation',
       'isEpisodeResolution',
@@ -734,6 +739,17 @@ export default {
 
     isSelected(lineIndex, columnIndex) {
       return this.episodeSelectionGrid.has(`${lineIndex}-${columnIndex}`)
+    },
+
+    taskHref(taskId) {
+      return getTaskHref(
+        this.$router,
+        this.taskMap.get(taskId),
+        this.currentProduction,
+        this.isTVShow,
+        this.currentEpisode,
+        this.taskTypeMap
+      )
     },
 
     episodePath(episodeId) {
