@@ -7,82 +7,90 @@
       validation: selectable
     }"
     :style="cellStyle"
-    role="button"
-    tabindex="0"
+    :role="taskHref ? undefined : 'button'"
+    :tabindex="taskHref ? undefined : 0"
     @click="onClick"
-    @keydown.enter.prevent="onClick"
+    @keydown.enter.self.prevent="onClick"
   >
-    <div class="wrapper full-wrapper" :style="wrapperStyle" v-if="!minimized">
-      <div class="filler" v-if="contactSheet"></div>
-      <div
-        class="wrapper status-wrapper"
-        :style="statusWrapperStyle"
-        v-if="!minimized"
-      >
-        <template v-if="task">
-          <span class="tag" :title="taskStatus.name" :style="tagStyle">
-            {{ taskStatus.short_name }}
+    <component
+      :is="taskHref ? 'a' : 'div'"
+      :class="{ 'task-link': taskHref }"
+      :href="taskHref"
+      :aria-label="`${column?.name || ''} - ${entity?.name || ''}`"
+      @click="onTaskLinkClick"
+    >
+      <div class="wrapper full-wrapper" :style="wrapperStyle" v-if="!minimized">
+        <div class="filler" v-if="contactSheet"></div>
+        <div
+          class="wrapper status-wrapper"
+          :style="statusWrapperStyle"
+          v-if="!minimized"
+        >
+          <template v-if="task">
+            <span class="tag" :title="taskStatus.name" :style="tagStyle">
+              {{ taskStatus.short_name }}
+            </span>
+            <span class="filler" v-if="contactSheet"></span>
+            <span
+              :class="{
+                priority: true,
+                high: task.priority === 1,
+                veryhigh: task.priority === 2,
+                emergency: task.priority === 3
+              }"
+              :title="formatPriority(task.priority)"
+              v-if="!isCurrentUserClient && !disabled && task.priority > 0"
+            >
+              {{ priority }}
+            </span>
+            <span
+              class="casting-status"
+              :class="{ 'casting-status-not-ready': !isCastingReady }"
+              :title="castingTitle"
+              v-if="!isCurrentUserClient && castingTitle"
+            >
+              <img
+                src="@/assets/icons/casting-ready.png"
+                :alt="castingTitle"
+                v-if="isCastingReady"
+              />
+              <img
+                src="@/assets/icons/casting-not-ready.png"
+                :alt="castingTitle"
+                v-else
+              />
+            </span>
+          </template>
+          <template v-if="isAssignees && !isCurrentUserClient && !disabled">
+            <span
+              class="avatar has-text-centered"
+              :title="person.full_name"
+              :style="{
+                backgroundColor: person.color,
+                color: isDarkTheme ? '#333' : '#FFF',
+                'font-weight': isDarkTheme ? 'bold' : 'normal'
+              }"
+              :key="`avatar-${person.id}`"
+              v-for="person in assignees"
+            >
+              <img
+                loading="lazy"
+                :alt="person.full_name"
+                :src="person.avatarPath"
+                v-if="person.has_avatar"
+              />
+              <template v-else>{{ person.initials }}</template>
+            </span>
+          </template>
+          <span class="subscribed" v-if="task?.is_subscribed">
+            <eye-icon :size="12" />
           </span>
-          <span class="filler" v-if="contactSheet"></span>
-          <span
-            :class="{
-              priority: true,
-              high: task.priority === 1,
-              veryhigh: task.priority === 2,
-              emergency: task.priority === 3
-            }"
-            :title="formatPriority(task.priority)"
-            v-if="!isCurrentUserClient && !disabled && task.priority > 0"
-          >
-            {{ priority }}
-          </span>
-          <span
-            class="casting-status"
-            :class="{ 'casting-status-not-ready': !isCastingReady }"
-            :title="castingTitle"
-            v-if="!isCurrentUserClient && castingTitle"
-          >
-            <img
-              src="@/assets/icons/casting-ready.png"
-              :alt="castingTitle"
-              v-if="isCastingReady"
-            />
-            <img
-              src="@/assets/icons/casting-not-ready.png"
-              :alt="castingTitle"
-              v-else
-            />
-          </span>
-        </template>
-        <template v-if="isAssignees && !isCurrentUserClient && !disabled">
-          <span
-            class="avatar has-text-centered"
-            :title="person.full_name"
-            :style="{
-              backgroundColor: person.color,
-              color: isDarkTheme ? '#333' : '#FFF',
-              'font-weight': isDarkTheme ? 'bold' : 'normal'
-            }"
-            :key="`avatar-${person.id}`"
-            v-for="person in assignees"
-          >
-            <img
-              loading="lazy"
-              :alt="person.full_name"
-              :src="person.avatarPath"
-              v-if="person.has_avatar"
-            />
-            <template v-else>{{ person.initials }}</template>
-          </span>
-        </template>
-        <span class="subscribed" v-if="task?.is_subscribed">
-          <eye-icon :size="12" />
-        </span>
+        </div>
       </div>
-    </div>
-    <div class="wrapper" v-else>
-      <span class="tag" :style="tagStyle"> &nbsp; </span>
-    </div>
+      <div class="wrapper" v-else>
+        <span class="tag" :style="tagStyle"> &nbsp; </span>
+      </div>
+    </component>
   </td>
 </template>
 
@@ -116,6 +124,7 @@ const props = defineProps({
   selectable: { type: Boolean, default: true },
   selected: { type: Boolean, default: false },
   sticked: { type: Boolean, default: false },
+  taskHref: { type: String, default: '' },
   taskTest: { type: Object, default: null }
 })
 
@@ -233,6 +242,23 @@ const onClick = event => {
   if (props.clickable) select(event)
 }
 
+const onTaskLinkClick = event => {
+  if (!props.taskHref) return
+  if (
+    // Preserve native non-left-click behavior.
+    event.button !== 0 ||
+    // Preserve native modifier-click behavior.
+    event.ctrlKey ||
+    event.metaKey ||
+    event.shiftKey ||
+    event.altKey
+  ) {
+    event.stopPropagation()
+  } else {
+    event.preventDefault()
+  }
+}
+
 watch(() => props.taskTest, resolveTask)
 
 onMounted(resolveTask)
@@ -270,6 +296,14 @@ defineExpose({
       background-color: #6e70ca !important;
     }
   }
+}
+
+.task-link {
+  color: inherit;
+  display: block;
+  margin-block: -0.275rem;
+  padding-block: 0.275rem;
+  text-decoration: none;
 }
 
 .wrapper {
