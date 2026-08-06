@@ -7,14 +7,13 @@
             <th scope="col" class="name datatable-row-header">
               {{ $t('people.list.name') }}
             </th>
-            <th scope="col" class="email" v-if="isCurrentUserProductionManager">
+            <!-- Email and contract stay on the global role: zou only serves
+                 these person fields to global managers, a per-project manager
+                 would get empty cells. -->
+            <th scope="col" class="email" v-if="isCurrentUserManager">
               {{ $t('people.list.email') }}
             </th>
-            <th
-              scope="col"
-              class="contract"
-              v-if="isCurrentUserProductionManager"
-            >
+            <th scope="col" class="contract" v-if="isCurrentUserManager">
               {{ $t('people.list.contract') }}
             </th>
             <th scope="col" class="role">
@@ -36,10 +35,10 @@
               class="name datatable-row-header"
               :person="person"
             />
-            <td class="email" v-if="isCurrentUserProductionManager">
+            <td class="email" v-if="isCurrentUserManager">
               {{ person.email }}
             </td>
-            <td class="contract" v-if="isCurrentUserProductionManager">
+            <td class="contract" v-if="isCurrentUserManager">
               {{ $t(`people.contract.${person.contract_type}`) }}
             </td>
             <td class="role">
@@ -118,6 +117,7 @@ const props = defineProps({
 const emit = defineEmits(['update-role'])
 
 // Computed
+const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
 const isCurrentUserProductionManager = computed(
   () => store.getters.isCurrentUserProductionManager
 )
