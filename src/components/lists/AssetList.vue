@@ -1048,17 +1048,25 @@ export default {
 
     taskHref(taskId) {
       const task = this.taskMap.get(taskId)
-      return task
-        ? this.$router.resolve(
-            getTaskPath(
-              task,
-              this.currentProduction,
-              this.isTVShow,
-              this.currentEpisode,
-              this.taskTypeMap
-            )
-          ).href
-        : ''
+      if (!task) return ''
+      // Called for every cell on every render: memoize the router.resolve,
+      // the result only changes with the production/episode context
+      // (watchers below reset the cache).
+      if (!this.taskHrefCache) this.taskHrefCache = new Map()
+      let href = this.taskHrefCache.get(taskId)
+      if (href === undefined) {
+        href = this.$router.resolve(
+          getTaskPath(
+            task,
+            this.currentProduction,
+            this.isTVShow,
+            this.currentEpisode,
+            this.taskTypeMap
+          )
+        ).href
+        this.taskHrefCache.set(taskId, href)
+      }
+      return href
     },
 
     assetPath(assetId) {
@@ -1150,6 +1158,14 @@ export default {
   watch: {
     displayedAssets() {
       this.$options.lineIndex = {}
+    },
+
+    currentProduction() {
+      this.taskHrefCache = null
+    },
+
+    currentEpisode() {
+      this.taskHrefCache = null
     },
 
     validationColumns: {
