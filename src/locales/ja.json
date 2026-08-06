@@ -2100,12 +2100,12 @@
       "delete_for_selection_hard_lock_text": "削除"
     },
     "hardware_items": {
-      "create_error": "ハードウェア項目の保存中にエラーが発生しました。",
-      "delete_error": "ハードウェア項目の削除中にエラーが発生しました。",
+      "create_error": "ハードウェアの保存中にエラーが発生しました。",
+      "delete_error": "ハードウェアの削除中にエラーが発生しました。",
       "delete_text": "本当にこのハードウェアを削除しますか？",
-      "edit_title": "ハードウェア項目の編集",
+      "edit_title": "ハードウェアの編集",
       "new_hardware_item": "新しいハードウェア",
-      "number": "ハードウェア・アイテム | ハードウェア・アイテム",
+      "number": "ハードウェア | ハードウェア",
       "title": "ハードウェア",
       "fields": {
         "inventory_amount": "在庫数",
@@ -2116,18 +2116,18 @@
       }
     },
     "software_licenses": {
-      "create_error": "ソフトウェアライセンスの保存中にエラーが発生しました。",
-      "delete_error": "ソフトウェアライセンスの削除中にエラーが発生しました。",
-      "delete_text": "このソフトウェアライセンスを削除してもよろしいですか？",
-      "edit_title": "ソフトウェアライセンスの編集",
-      "new_software_license": "新しいソフトウェア・ライセンス",
-      "number": "ソフトウェアライセンス | ソフトウェアライセンス",
-      "title": "ソフトウェア・ライセンス",
+      "create_error": "ソフトウェアの保存中にエラーが発生しました。",
+      "delete_error": "ソフトウェアの削除中にエラーが発生しました。",
+      "delete_text": "このソフトウェアを削除してもよろしいですか？",
+      "edit_title": "ソフトウェアの編集",
+      "new_software_license": "新しいソフトウェア",
+      "number": "ソフトウェア | ソフトウェア",
+      "title": "ソフトウェア",
       "fields": {
         "extension": "エクステンション",
         "name": "名称",
         "monthly_cost": "月額費用",
-        "inventory_amount": "在庫金額",
+        "inventory_amount": "在庫数",
         "short_name": "略称",
         "status": "ステータス",
         "version": "バージョン"
