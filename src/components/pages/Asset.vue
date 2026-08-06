@@ -455,7 +455,6 @@ export default {
       'currentProduction',
       'getTaskTypePriority',
       'isTVShow',
-      'isCurrentUserManager',
       'linkedConcepts',
       'route',
       'taskMap',
@@ -463,6 +462,9 @@ export default {
       'taskTypeMap',
       'shotId'
     ]),
+    ...mapGetters({
+      isCurrentUserManager: 'isCurrentUserProductionManager'
+    }),
 
     title() {
       if (this.currentAsset) {

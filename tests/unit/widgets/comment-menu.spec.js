@@ -55,6 +55,7 @@ const store = createStore({
     isCurrentUserArtist: () => false,
     isCurrentUserClient: () => false,
     isCurrentUserManager: () => false,
+    currentUserRoleForProduction: () => () => null,
     personMap: () => new Map([['person-1', { id: 'person-1' }]]),
     productionDepartmentIds: () => [],
     taskTypeMap: () =>

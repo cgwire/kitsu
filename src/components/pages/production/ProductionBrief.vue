@@ -59,14 +59,16 @@ const errors = reactive({ editBrief: false })
 const textarea = useTemplateRef('textarea')
 
 const currentProduction = computed(() => store.getters.currentProduction)
-const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
+const isCurrentUserProductionManager = computed(
+  () => store.getters.isCurrentUserProductionManager
+)
 
 onMounted(() => {
   brief.value = currentProduction.value?.description
 })
 
 const openEditing = () => {
-  if (!isCurrentUserManager.value) return
+  if (!isCurrentUserProductionManager.value) return
   isEditing.value = true
   nextTick(() => {
     textarea.value?.focus()

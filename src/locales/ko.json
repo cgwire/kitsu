@@ -730,6 +730,8 @@
       "delete_text": "데이터베이스에서 {personName}을(를) 제거하시겠습니까? 모든 관련 댓글 및 미리 보기가 삭제됩니다. 아래에 사용자 성명을 입력하여 확인하십시오.",
       "edit_title": "사용자 편집",
       "empty_team": "프로젝트팀에 등록된 사람이 없습니다.",
+      "global_role": "전역 역할: {role}",
+      "project_role": "프로젝트 역할",
       "invite": "초대장 보내기",
       "invite_error": "초대장을 보내는 도중 오류가 발생했습니다.",
       "invite_success": "초대장이 성공적으로 전송되었습니다.",

@@ -200,7 +200,7 @@
 
             <div
               class="flexrow-item"
-              v-if="isActiveTab('schedule') && isCurrentUserManager"
+              v-if="isActiveTab('schedule') && isCurrentUserProductionManager"
             >
               <date-field
                 class="flexrow-item"
@@ -216,7 +216,7 @@
             </div>
             <div
               class="flexrow-item"
-              v-if="isActiveTab('schedule') && isCurrentUserManager"
+              v-if="isActiveTab('schedule') && isCurrentUserProductionManager"
             >
               <date-field
                 class="flexrow-item"
@@ -263,6 +263,7 @@
           <search-query-list
             :queries="searchQueries"
             type="taskType"
+            :production-id="currentProduction?.id"
             @remove-search="removeSearchQuery"
           />
         </div>
@@ -676,9 +677,11 @@ const taskListRef = useTemplateRef('task-list')
 const currentEpisode = computed(() => store.getters.currentEpisode)
 const currentProduction = computed(() => store.getters.currentProduction)
 const currentTaskType = computed(() => store.getters.currentTaskType)
-const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
-const isCurrentUserSupervisor = computed(
-  () => store.getters.isCurrentUserSupervisor
+const isCurrentUserProductionManager = computed(
+  () => store.getters.isCurrentUserProductionManager
+)
+const isCurrentUserProductionSupervisor = computed(
+  () => store.getters.isCurrentUserProductionSupervisor
 )
 const isPaperProduction = computed(() => store.getters.isPaperProduction)
 const isTVShow = computed(() => store.getters.isTVShow)
@@ -759,10 +762,10 @@ const taskTypeEndDate = computed(() => moment(schedule.taskTypeEndDate).utc())
 
 const isSupervisorInDepartment = computed(
   () =>
-    isCurrentUserManager.value ||
+    isCurrentUserProductionManager.value ||
     isSupervisorInDepartments(
       user.value,
-      isCurrentUserSupervisor.value,
+      isCurrentUserProductionSupervisor.value,
       currentTaskType.value?.department_id
     )
 )

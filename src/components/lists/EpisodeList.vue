@@ -219,6 +219,7 @@
                   estimation: !isEpisodeEstimation
                 }"
                 namespace="episodes"
+                :production-id="currentProduction?.id"
                 v-model="metadataDisplayHeaders"
                 v-model:is-open="columnSelectorDisplayed"
                 v-if="displaySettings.showInfos"
@@ -673,8 +674,6 @@ export default {
       'displayedEpisodesTimeSpent',
       'displaySettings.bigThumbnails',
       'isCurrentUserAdmin',
-      'isCurrentUserManager',
-      'isCurrentUserSupervisor',
       'isCurrentUserClient',
       'isSingleEpisode',
       'isEpisodeDescription',
@@ -689,6 +688,13 @@ export default {
       'taskTypeMap',
       'user'
     ]),
+
+    // Production-scoped: effective role on the current production (global
+    // admins/managers still pass, but a per-project override wins).
+    ...mapGetters({
+      isCurrentUserManager: 'isCurrentUserProductionManager',
+      isCurrentUserSupervisor: 'isCurrentUserProductionSupervisor'
+    }),
 
     isEmptyList() {
       return (

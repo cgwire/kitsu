@@ -368,11 +368,13 @@ export default {
       'episodeMap',
       'episodeMetadataDescriptors',
       'episodeSearchText',
-      'isCurrentUserManager',
       'route',
       'taskMap',
       'taskTypeMap'
     ]),
+    ...mapGetters({
+      isCurrentUserManager: 'isCurrentUserProductionManager'
+    }),
 
     title() {
       if (this.currentEpisode) {

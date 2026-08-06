@@ -44,12 +44,11 @@ export const entityMixin = {
   },
 
   computed: {
-    ...mapGetters([
-      'isCurrentUserManager',
-      'isCurrentUserSupervisor',
-      'organisation',
-      'user'
-    ]),
+    ...mapGetters(['organisation', 'user']),
+    ...mapGetters({
+      isCurrentUserManager: 'isCurrentUserProductionManager',
+      isCurrentUserSupervisor: 'isCurrentUserProductionSupervisor'
+    }),
 
     assetList() {
       return assetsStore.cache.assets

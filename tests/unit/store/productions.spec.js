@@ -1038,8 +1038,32 @@ describe('Productions store', () => {
       state.currentProduction = {
         team: [123]
       }
+      state.currentTeamRoles = { 123: 'manager' }
       store.mutations.TEAM_REMOVE_PERSON(state, 123)
       expect(state.currentProduction.team).toHaveLength(0)
+      expect(state.currentTeamRoles[123]).toBeUndefined()
+    })
+
+    test('TEAM_ROLES_LOADED', () => {
+      store.mutations.TEAM_ROLES_LOADED(state, [
+        { id: 123, project_role: 'supervisor' },
+        { id: 456, project_role: null }
+      ])
+      expect(state.currentTeamRoles).toEqual({ 123: 'supervisor', 456: null })
+    })
+
+    test('TEAM_MEMBER_ROLE_UPDATED', () => {
+      state.currentTeamRoles = { 123: 'supervisor' }
+      store.mutations.TEAM_MEMBER_ROLE_UPDATED(state, {
+        person_id: 123,
+        role: 'manager'
+      })
+      expect(state.currentTeamRoles[123]).toEqual('manager')
+      store.mutations.TEAM_MEMBER_ROLE_UPDATED(state, {
+        person_id: 123,
+        role: null
+      })
+      expect(state.currentTeamRoles[123]).toBeNull()
     })
 
     test('PRODUCTION_ADD_ASSET_TYPE', () => {

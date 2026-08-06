@@ -86,6 +86,7 @@
               maxRetakes: true,
               timeSpent: true
             }"
+            :production-id="currentProduction?.id"
             v-model="metadataDisplayHeaders"
             v-model:is-open="columnSelectorDisplayed"
             v-if="isShowInfosBreakdown"
@@ -312,6 +313,7 @@
             :is-group-enabled="true"
             :queries="breakdownSearchQueries"
             type="breakdown"
+            :production-id="currentProduction?.id"
             @remove-search="removeSearchQuery"
           />
         </div>
@@ -575,7 +577,6 @@ export default {
       'episodeMap',
       'episodes',
       'isAssetsLoading',
-      'isCurrentUserManager',
       'isFrameIn',
       'isFrameOut',
       'isFrames',
@@ -586,6 +587,9 @@ export default {
       'shotMap',
       'shotMetadataDescriptors'
     ]),
+    ...mapGetters({
+      isCurrentUserManager: 'isCurrentUserProductionManager'
+    }),
 
     searchField() {
       return this.$refs['search-field']

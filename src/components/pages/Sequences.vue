@@ -47,6 +47,7 @@
             <search-query-list
               :queries="sequenceSearchQueries"
               type="sequence"
+              :production-id="currentProduction?.id"
               @remove-search="removeSearchQuery"
               v-if="!isSequencesLoading && !initialLoading"
             />
@@ -374,7 +375,6 @@ export default {
       'sequences',
       'sequenceSearchQueries',
       'isCurrentUserClient',
-      'isCurrentUserManager',
       'isSequenceDescription',
       'isSequenceEstimation',
       'isSequenceTime',
@@ -393,6 +393,9 @@ export default {
       'taskTypeMap',
       'user'
     ]),
+    ...mapGetters({
+      isCurrentUserManager: 'isCurrentUserProductionManager'
+    }),
 
     renderColumns() {
       const collection = [...this.dataMatchers, ...this.optionalColumns]

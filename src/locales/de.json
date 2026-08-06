@@ -727,6 +727,8 @@
       "delete_text": "Sind Sie sicher, dass Sie {personName} aus Ihrer Datenbank entfernen möchten? Alle zugehörigen Kommentare und Vorschauen werden ebenfalls gelöscht. Bitte bestätigen Sie, indem Sie unten den vollständigen Benutzernamen eingeben.",
       "edit_title": "Person bearbeiten",
       "empty_team": "Im Projektteam ist niemand gelistet.",
+      "global_role": "Globale Rolle: {role}",
+      "project_role": "Projektrolle",
       "invite": "Einladung senden",
       "invite_error": "Beim Senden der Einladung ist ein Fehler aufgetreten.",
       "invite_success": "Einladung wurde erfolgreich versendet",

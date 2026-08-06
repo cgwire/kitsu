@@ -69,6 +69,7 @@
               :is-group-enabled="true"
               :queries="productionAssetSearchQueries"
               type="asset"
+              :production-id="currentProduction?.id"
               @remove-search="removeSearchQuery"
             />
           </div>
@@ -461,7 +462,6 @@ export default {
       'isAssetsLoading',
       'isAssetsLoadingError',
       'isCurrentUserClient',
-      'isCurrentUserManager',
       'isTVShow',
       'isAssetResolution',
       'openProductions',
@@ -472,6 +472,9 @@ export default {
       'userFilters',
       'userFilterGroups'
     ]),
+    ...mapGetters({
+      isCurrentUserManager: 'isCurrentUserProductionManager'
+    }),
 
     productionAssetSearchQueries() {
       const productionId = this.currentProduction?.id

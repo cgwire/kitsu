@@ -2,9 +2,12 @@
   <page-layout>
     <template #main>
       <div class="people flexcolumn">
-        <div class="flexrow mt2 add-people" v-if="isCurrentUserManager">
+        <div
+          class="flexrow mt2 add-people"
+          v-if="isCurrentUserProductionManager"
+        >
           <people-field
-            ref="people-field"
+            ref="peopleFieldRef"
             class="flexrow-item add-people-field"
             :people="unlistedPeople"
             :placeholder="$t('people.add_member_to_team')"
@@ -18,10 +21,15 @@
             {{ $t('main.add') }}
           </button>
         </div>
-        <production-team-list :entries="teamPersons" @remove="removePerson" />
+        <production-team-list
+          :entries="teamPersons"
+          :project-roles="projectRoles"
+          @update-role="updateRole"
+          @remove="removePerson"
+        />
       </div>
     </template>
-    <template #side v-if="isCurrentUserManager">
+    <template #side v-if="isCurrentUserProductionManager">
       <div class="importers flexcolumn">
         <div
           class="project-import flexcolumn"
@@ -66,23 +74,23 @@
         </p>
         <div class="import-list">
           <div
-            :key="`unlisted-person-${person.id}`"
+            :key="`unlisted-person-${unlistedPerson.id}`"
             class="flexrow person-to-add mb05"
             role="button"
             tabindex="0"
-            @click="addPersonToTeam(person)"
-            @keydown.enter.prevent="addPersonToTeam(person)"
-            v-for="person in unlistedPeople"
+            @click="addPersonToTeam(unlistedPerson)"
+            @keydown.enter.prevent="addPersonToTeam(unlistedPerson)"
+            v-for="unlistedPerson in unlistedPeople"
           >
             <people-avatar
               class="flexrow-item"
               :font-size="14"
-              :key="person.id"
-              :person="person"
+              :key="unlistedPerson.id"
+              :person="unlistedPerson"
               :size="30"
               :is-link="false"
             />
-            <people-name class="flexrow-item" :person="person" />
+            <people-name class="flexrow-item" :person="unlistedPerson" />
           </div>
         </div>
       </div>
@@ -90,125 +98,133 @@
   </page-layout>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+// Imports
+import { useHead } from '@unhead/vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 
 import { sortPeople } from '@/lib/sorting'
 
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
-import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
-import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
+/* eslint-disable no-unused-vars */
 import PageLayout from '@/components/layouts/PageLayout.vue'
+import ProductionTeamList from '@/components/lists/ProductionTeamList.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
+import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
-import ProductionTeamList from '@/components/lists/ProductionTeamList.vue'
+/* eslint-enable no-unused-vars */
 
-export default {
-  name: 'team',
+// Composables
+const { t } = useI18n()
+const store = useStore()
 
-  components: {
-    ButtonSimple,
-    ComboboxDepartment,
-    ComboboxProduction,
-    PageLayout,
-    PeopleAvatar,
-    PeopleField,
-    PeopleName,
-    ProductionTeamList
-  },
+// State
+const importDepartmentId = ref(null)
+const importProductionId = ref(null)
+const peopleFieldRef = ref(null)
+const person = ref(null)
 
-  data() {
-    return {
-      importDepartmentId: null,
-      importProductionId: null,
-      person: null
-    }
-  },
+// Computed
+const activePeople = computed(() => store.getters.activePeople)
+const currentProduction = computed(() => store.getters.currentProduction)
+const departments = computed(() => store.getters.departments)
+const isCurrentUserProductionManager = computed(
+  () => store.getters.isCurrentUserProductionManager
+)
+const openProductions = computed(() => store.getters.openProductions)
+const personMap = computed(() => store.getters.personMap)
+const productionMap = computed(() => store.getters.productionMap)
+const projectRoles = computed(() => store.getters.productionTeamRoles)
 
-  mounted() {
-    if (this.availableProductions.length > 0) {
-      this.importProductionId = this.availableProductions[0]?.id
-      this.importDepartmentId = this.departments.sort((a, b) =>
-        a.name.localeCompare(b.name, undefined, {
-          numeric: true
-        })
-      )[0]?.id
-    }
-  },
+const availableProductions = computed(() =>
+  openProductions.value.filter(
+    production => production.id !== currentProduction.value.id
+  )
+)
 
-  computed: {
-    ...mapGetters([
-      'activePeople',
-      'currentProduction',
-      'departments',
-      'isCurrentUserManager',
-      'openProductions',
-      'personMap',
-      'productionMap'
-    ]),
+const teamPersons = computed(() =>
+  sortPeople(
+    currentProduction.value?.team
+      .map(personId => personMap.value.get(personId))
+      .filter(Boolean) ?? []
+  )
+)
 
-    availableProductions() {
-      return this.openProductions.filter(
-        production => production.id !== this.currentProduction.id
-      )
-    },
+const unlistedPeople = computed(() =>
+  activePeople.value.filter(
+    p => !currentProduction.value?.team.includes(p.id) && p.active
+  )
+)
 
-    teamPersons() {
-      return sortPeople(
-        this.currentProduction?.team
-          .map(personId => this.personMap.get(personId))
-          .filter(Boolean) ?? []
-      )
-    },
+// Functions
+const addPersonToTeam = personToAdd =>
+  store.dispatch('addPersonToTeam', personToAdd)
 
-    unlistedPeople() {
-      return this.activePeople.filter(
-        person =>
-          !this.currentProduction?.team.includes(person.id) && person.active
-      )
-    }
-  },
-
-  methods: {
-    ...mapActions(['addPersonToTeam']),
-
-    addPerson() {
-      if (this.person) {
-        this.addPersonToTeam(this.person)
-        this.$refs['people-field'].focus()
-      }
-    },
-
-    removePerson(person) {
-      this.removePersonFromTeam(person)
-    },
-
-    importTeamFromProduction() {
-      const production = this.productionMap.get(this.importProductionId)
-      production.team.forEach(personId => {
-        this.addPersonToTeam(this.personMap.get(personId))
-      })
-    },
-
-    importTeamFromDepartment() {
-      const departmentId = this.importDepartmentId
-      this.activePeople
-        .filter(person => person.departments.includes(departmentId))
-        .forEach(person => {
-          this.addPersonToTeam(person)
-        })
-    }
-  },
-
-  head() {
-    return {
-      title: `${this.currentProduction.name} | ${this.$t(
-        'people.team'
-      )} - Kitsu`
-    }
+const addPerson = () => {
+  if (person.value) {
+    addPersonToTeam(person.value)
+    peopleFieldRef.value.focus()
   }
 }
+
+const removePerson = personToRemove =>
+  store.dispatch('removePersonFromTeam', personToRemove)
+
+const importTeamFromProduction = () => {
+  const production = productionMap.value.get(importProductionId.value)
+  production.team.forEach(personId => {
+    addPersonToTeam(personMap.value.get(personId))
+  })
+}
+
+const importTeamFromDepartment = () => {
+  const departmentId = importDepartmentId.value
+  activePeople.value
+    .filter(p => p.departments.includes(departmentId))
+    .forEach(p => {
+      addPersonToTeam(p)
+    })
+}
+
+const loadTeamRoles = () => {
+  store.dispatch('loadProductionTeam').catch(console.error)
+}
+
+const updateRole = ({ person: member, role }) => {
+  store
+    .dispatch('setTeamMemberRole', { personId: member.id, role })
+    .catch(console.error)
+}
+
+// Watchers
+watch(
+  () => currentProduction.value?.id,
+  () => loadTeamRoles()
+)
+
+// Lifecycle
+onMounted(() => {
+  if (availableProductions.value.length > 0) {
+    importProductionId.value = availableProductions.value[0]?.id
+    importDepartmentId.value = departments.value.toSorted((a, b) =>
+      a.name.localeCompare(b.name, undefined, {
+        numeric: true
+      })
+    )[0]?.id
+  }
+  loadTeamRoles()
+})
+
+// Head
+useHead({
+  title: computed(
+    () => `${currentProduction.value.name} | ${t('people.team')} - Kitsu`
+  )
+})
 </script>
 
 <style lang="scss" scoped>

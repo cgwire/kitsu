@@ -243,8 +243,8 @@ const typeOptions = computed(() => [
 
 const currentProduction = computed(() => store.getters.currentProduction)
 const departmentMap = computed(() => store.getters.departmentMap)
-const isCurrentUserSupervisor = computed(
-  () => store.getters.isCurrentUserSupervisor
+const isCurrentUserProductionSupervisor = computed(
+  () => store.getters.isCurrentUserProductionSupervisor
 )
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 const user = computed(() => store.getters.user)
@@ -267,7 +267,10 @@ const selectableDepartments = computed(() => {
         self.indexOf(department) === index &&
         !form.value.departments.includes(department.id)
     )
-  if (isCurrentUserSupervisor.value && user.value.departments.length > 0) {
+  if (
+    isCurrentUserProductionSupervisor.value &&
+    user.value.departments.length > 0
+  ) {
     departments = departments.filter(department =>
       user.value.departments.includes(department.id)
     )
@@ -282,7 +285,7 @@ const isFormFilled = computed(() => {
       form.value.values.length) ||
     (form.value.data_type === 'checklist' && checklist.value?.[0]?.text)
   const supervisorDeptOk =
-    !isCurrentUserSupervisor.value ||
+    !isCurrentUserProductionSupervisor.value ||
     !user.value.departments.length ||
     form.value.departments.length ||
     (props.entityType === 'Project' && selectableDepartments.value.length === 0)

@@ -291,7 +291,8 @@
 
             <div
               :class="{
-                'with-milestones': withMilestones && isCurrentUserManager,
+                'with-milestones':
+                  withMilestones && isCurrentUserProductionManager,
                 'date-widget': true
               }"
             >
@@ -328,7 +329,7 @@
                 @keydown.space.prevent="
                   showEditMilestoneModal(day, currentMilestones[day.text])
                 "
-                v-if="withMilestones && isCurrentUserManager"
+                v-if="withMilestones && isCurrentUserProductionManager"
               >
                 <span class="button">
                   <edit-icon :size="10" v-if="currentMilestones[day.text]" />
@@ -989,7 +990,9 @@ const dateFormat = computed(() => store.getters.dateFormat)
 const departmentMap = computed(() => store.getters.departmentMap)
 
 const displayDate = date => formatDisplayDate(date, dateFormat.value)
-const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
+const isCurrentUserProductionManager = computed(
+  () => store.getters.isCurrentUserProductionManager
+)
 const isDarkTheme = computed(() => store.getters.isDarkTheme)
 const milestones = computed(() => store.getters.milestones)
 const openProductions = computed(() => store.getters.openProductions)
@@ -2324,7 +2327,7 @@ const childrenStyle = (
 // Milestones
 
 const showEditMilestoneModal = (day, milestone) => {
-  if (isCurrentUserManager.value) {
+  if (isCurrentUserProductionManager.value) {
     modals.edit = true
     if (milestone) {
       Object.assign(milestoneToEdit, {

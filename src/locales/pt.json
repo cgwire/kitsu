@@ -727,6 +727,8 @@
       "delete_text": "Tem certeza de que deseja remover {personName} de seu banco de dados? Todos os comentários e visualizações relacionados serão excluídos. Confirme digitando o nome completo da pessoa abaixo.",
       "edit_title": "Editar pessoa",
       "empty_team": "Não há ninguém listado na equipe do projeto.",
+      "global_role": "Papel global: {role}",
+      "project_role": "Papel do projeto",
       "invite": "Envie um convite",
       "invite_error": "Ocorreu um erro ao enviar o convite",
       "invite_success": "O convite foi enviado com sucesso",

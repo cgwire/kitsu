@@ -1062,6 +1062,8 @@
       "edit_avatar_error": "Wystąpił błąd podczas aktualizacji awatara użytkownika.",
       "edit_title": "Edytuj użytkownika",
       "empty_team": "Nikt nie został dodany do zespołu produkcji.",
+      "global_role": "Rola globalna: {role}",
+      "project_role": "Rola projektu",
       "import_from_production": "Importuj zespół z innej produkcji",
       "import_from_department": "Importuj cały dział",
       "import_from_unlisted": "Dodaj osoby spoza listy",

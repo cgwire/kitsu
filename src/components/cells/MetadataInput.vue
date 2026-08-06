@@ -195,6 +195,7 @@ const { dateFormat, formatDisplayDate } = useFormat()
 
 // Computed
 
+const isCurrentUserAdmin = computed(() => store.getters.isCurrentUserAdmin)
 const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
 const isCurrentUserSupervisor = computed(
   () => store.getters.isCurrentUserSupervisor
@@ -232,12 +233,32 @@ const editDepartments = computed(() =>
     : props.descriptor.departments
 )
 
+// Resolved against the edited row's own production when it carries project
+// context (Task/Asset/Shot/Edit/Sequence/Episode rows). ProductionList.vue
+// passes the production itself as entity (no project_id), so it falls back
+// to the global role there, matching current behavior.
+const entityProductionId = computed(() => props.entity?.project_id)
+const isEntityManager = computed(
+  () =>
+    isCurrentUserAdmin.value ||
+    (entityProductionId.value
+      ? store.getters.currentUserRoleForProduction(entityProductionId.value) ===
+        'manager'
+      : isCurrentUserManager.value)
+)
+const isEntitySupervisor = computed(() =>
+  entityProductionId.value
+    ? store.getters.currentUserRoleForProduction(entityProductionId.value) ===
+      'supervisor'
+    : isCurrentUserSupervisor.value
+)
+
 const isEditable = computed(
   () =>
-    isCurrentUserManager.value ||
+    isEntityManager.value ||
     isSupervisorInDepartments(
       user.value,
-      isCurrentUserSupervisor.value,
+      isEntitySupervisor.value,
       editDepartments.value
     )
 )

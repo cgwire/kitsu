@@ -625,8 +625,6 @@ export default {
       'getTaskComment',
       'isCurrentUserArtist',
       'isCurrentUserClient',
-      'isCurrentUserManager',
-      'isCurrentUserSupervisor',
       'isSingleEpisode',
       'isTVShow',
       'personMap',
@@ -641,6 +639,10 @@ export default {
       'taskTypeMap',
       'user'
     ]),
+    ...mapGetters({
+      isCurrentUserManager: 'isCurrentUserProductionManager',
+      isCurrentUserSupervisor: 'isCurrentUserProductionSupervisor'
+    }),
 
     taskMetadata() {
       if (!this.task) return []

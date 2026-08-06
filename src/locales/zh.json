@@ -727,6 +727,8 @@
       "delete_text": "您确定要从您的数据库移除{personName}吗？所有相关的评论和预览也将被删除。请在下方输入完整的用户名以确认。",
       "edit_title": "编辑人员",
       "empty_team": "项目团队里没有所列人员.",
+      "global_role": "全局角色: {role}",
+      "project_role": "项目角色",
       "invite": "发送邀请",
       "invite_error": "发送邀请时发生错误",
       "invite_success": "邀请已成功发送",

@@ -278,9 +278,11 @@ const estimationInputs = new Map()
 
 // Computed
 const currentProduction = computed(() => store.getters.currentProduction)
-const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
-const isCurrentUserSupervisor = computed(
-  () => store.getters.isCurrentUserSupervisor
+const isCurrentUserProductionManager = computed(
+  () => store.getters.isCurrentUserProductionManager
+)
+const isCurrentUserProductionSupervisor = computed(
+  () => store.getters.isCurrentUserProductionSupervisor
 )
 const personMap = computed(() => store.getters.personMap)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
@@ -437,10 +439,10 @@ const selectTaskRange = index => {
 }
 
 const isInDepartment = task =>
-  isCurrentUserManager.value ||
+  isCurrentUserProductionManager.value ||
   isSupervisorInDepartments(
     user.value,
-    isCurrentUserSupervisor.value,
+    isCurrentUserProductionSupervisor.value,
     taskTypeMap.value.get(task.task_type_id)?.department_id
   )
 

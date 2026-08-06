@@ -42,6 +42,7 @@
       <search-query-list
         :queries="sequenceSearchQueries"
         type="sequenceStat"
+        :production-id="currentProduction?.id"
         @remove-search="removeSearchQuery"
       />
     </div>

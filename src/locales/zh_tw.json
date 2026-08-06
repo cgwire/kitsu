@@ -727,6 +727,8 @@
       "delete_text": "您確定要從您的資料庫移除{personName}嗎？所有相關的評論和預覽也將被刪除。請在下方輸入完整的使用者名稱以確認。",
       "edit_title": "編輯人員",
       "empty_team": "項目團隊里沒有所列人員.",
+      "global_role": "全域角色: {role}",
+      "project_role": "專案角色",
       "invite": "發送邀請",
       "invite_error": "發送邀請時發生錯誤",
       "invite_success": "邀請已成功發送",

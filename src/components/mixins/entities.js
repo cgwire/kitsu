@@ -51,11 +51,13 @@ export const entitiesMixin = {
   computed: {
     ...mapGetters([
       'isCurrentUserClient',
-      'isCurrentUserManager',
       'nbSelectedTasks',
       'selectedTasks',
       'nbSelectedValidations'
     ]),
+    ...mapGetters({
+      isCurrentUserManager: 'isCurrentUserProductionManager'
+    }),
 
     searchField() {
       return this.$refs[`${this.type}-search-field`]

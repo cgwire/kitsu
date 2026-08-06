@@ -727,6 +727,8 @@
       "delete_text": "Weet je zeker dat je {personName} wilt verwijderen uit de database? Alle gerelateerde reacties en previews zullen worden verwijderd. Bevestig hieronder door de volledige naam van de persoon in te vullen.",
       "edit_title": "Persoon wijzigen",
       "empty_team": "Er is niemand in dit project team.",
+      "global_role": "Globale rol: {role}",
+      "project_role": "Projectrol",
       "invite": "Stuur een uitnodiging",
       "invite_error": "Er is een fout opgetreden tijdens het versturen van de uitnodiging",
       "invite_success": "Uitnodiging succesvol verzonden",

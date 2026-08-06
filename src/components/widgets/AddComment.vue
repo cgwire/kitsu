@@ -553,9 +553,19 @@ const modals = reactive({
   confirmFeedbackPublish: false
 })
 
+const isCurrentUserAdmin = computed(() => store.getters.isCurrentUserAdmin)
 const isCurrentUserArtist = computed(() => store.getters.isCurrentUserArtist)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
-const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
+// Resolved against the commented task, not currentProduction: this widget
+// is hosted by TaskInfo, which can be shown outside a matching production
+// route (Todos, MyChecks, ...).
+const isCurrentUserManager = computed(() =>
+  props.task?.project_id
+    ? isCurrentUserAdmin.value ||
+      store.getters.currentUserRoleForProduction(props.task.project_id) ===
+        'manager'
+    : store.getters.isCurrentUserManager
+)
 const forClient = ref(false)
 const productionMap = computed(() => store.getters.productionMap)
 const taskStatusForCurrentUser = computed(

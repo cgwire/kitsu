@@ -31,6 +31,9 @@ import {
   PRODUCTION_AVATAR_UPLOADED,
   TEAM_ADD_PERSON,
   TEAM_REMOVE_PERSON,
+  TEAM_ROLES_LOADED,
+  TEAM_MEMBER_ROLE_UPDATED,
+  SET_USER_PROJECT_ROLE,
   PRODUCTION_ADD_ASSET_TYPE,
   PRODUCTION_REMOVE_ASSET_TYPE,
   PRODUCTION_ADD_BACKGROUND,
@@ -62,6 +65,9 @@ const initialState = {
   productionStatus: [],
   productionStatusMap: new Map(),
   currentProduction: null,
+  // personId -> explicit project role, null or absent means the person
+  // inherits their global role
+  currentTeamRoles: {},
   productionAvatarFormData: null,
 
   isProductionsLoading: false,
@@ -216,6 +222,8 @@ const getters = {
   productionStatusMap: state => state.productionStatusMap,
   openProductions: state => state.openProductions,
   productionStatus: state => state.productionStatus,
+
+  productionTeamRoles: state => state.currentTeamRoles,
 
   productionAvatarFormData: state => state.productionAvatarFormData,
 
@@ -533,6 +541,29 @@ const actions = {
   addPersonToTeam({ commit, state }, person) {
     commit(TEAM_ADD_PERSON, person.id)
     return productionsApi.addPersonToTeam(state.currentProduction.id, person.id)
+  },
+
+  async loadProductionTeam({ commit, state }) {
+    const team = await productionsApi.getTeam(state.currentProduction.id)
+    commit(TEAM_ROLES_LOADED, team)
+    return team
+  },
+
+  async setTeamMemberRole({ commit, state, rootState }, { personId, role }) {
+    const link = await productionsApi.updateTeamMemberRole(
+      state.currentProduction.id,
+      personId,
+      role
+    )
+    commit(TEAM_MEMBER_ROLE_UPDATED, link)
+    // Managers changing their own role must see their gating follow.
+    if (personId === rootState.user.user?.id) {
+      commit(SET_USER_PROJECT_ROLE, {
+        projectId: state.currentProduction.id,
+        role: link.role
+      })
+    }
+    return link
   },
 
   removePersonFromTeam({ commit, state }, person) {
@@ -1029,6 +1060,7 @@ const mutations = {
   [SET_CURRENT_PRODUCTION](state, productionId) {
     const production = state.productionMap.get(productionId)
     state.currentProduction = production
+    state.currentTeamRoles = {}
   },
 
   [RESET_PRODUCTION_PATH](state, { productionId, episodeId }) {
@@ -1089,6 +1121,20 @@ const mutations = {
 
   [TEAM_REMOVE_PERSON](state, personId) {
     removeFromIdList(state.currentProduction, 'team', personId)
+    delete state.currentTeamRoles[personId]
+  },
+
+  [TEAM_ROLES_LOADED](state, team) {
+    state.currentTeamRoles = Object.fromEntries(
+      team.map(member => [member.id, member.project_role])
+    )
+  },
+
+  [TEAM_MEMBER_ROLE_UPDATED](state, link) {
+    state.currentTeamRoles = {
+      ...state.currentTeamRoles,
+      [link.person_id]: link.role
+    }
   },
 
   [PRODUCTION_ADD_ASSET_TYPE](state, assetTypeId) {

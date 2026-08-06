@@ -357,7 +357,6 @@ export default {
       'currentEpisode',
       'currentProduction',
       'getTaskTypePriority',
-      'isCurrentUserManager',
       'isTVShow',
       'sequenceMap',
       'sequenceMetadataDescriptors',
@@ -366,6 +365,9 @@ export default {
       'taskMap',
       'taskTypeMap'
     ]),
+    ...mapGetters({
+      isCurrentUserManager: 'isCurrentUserProductionManager'
+    }),
 
     title() {
       if (this.currentSequence) {

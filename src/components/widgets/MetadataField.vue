@@ -103,6 +103,7 @@ import TextField from '@/components/widgets/TextField.vue'
 import TextareaField from '@/components/widgets/TextareaField.vue'
 
 const store = useStore()
+const isCurrentUserAdmin = computed(() => store.getters.isCurrentUserAdmin)
 const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
 const isCurrentUserSupervisor = computed(
   () => store.getters.isCurrentUserSupervisor
@@ -158,12 +159,33 @@ const metadataChecklistValues = computed(() => {
   )
 })
 
+// Resolved against the edited entity's own production when it carries
+// project context (Edit*Modal.vue). BuildFilterModal.vue passes entity={}
+// (used from both production-scoped and cross-production ActionPanel
+// pages), so it falls back to the global role there, matching current
+// behavior.
+const entityProductionId = computed(() => props.entity?.project_id)
+const isEntityManager = computed(
+  () =>
+    isCurrentUserAdmin.value ||
+    (entityProductionId.value
+      ? store.getters.currentUserRoleForProduction(entityProductionId.value) ===
+        'manager'
+      : isCurrentUserManager.value)
+)
+const isEntitySupervisor = computed(() =>
+  entityProductionId.value
+    ? store.getters.currentUserRoleForProduction(entityProductionId.value) ===
+      'supervisor'
+    : isCurrentUserSupervisor.value
+)
+
 const isEditable = computed(() => {
   return Boolean(
-    isCurrentUserManager.value ||
+    isEntityManager.value ||
     isSupervisorInDepartments.call(
       {
-        isCurrentUserSupervisor: isCurrentUserSupervisor.value,
+        isCurrentUserSupervisor: isEntitySupervisor.value,
         user: user.value
       },
       props.descriptor.departments

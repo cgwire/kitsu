@@ -105,7 +105,7 @@
                 icon="edit"
                 :title="$t('edits.edit_title')"
                 @click="modals.edit = true"
-                v-if="isCurrentUserManager"
+                v-if="isCurrentUserProductionManager"
               />
             </div>
           </div>
@@ -278,7 +278,9 @@ const currentProduction = computed(() => store.getters.currentProduction)
 const editMetadataDescriptors = computed(
   () => store.getters.editMetadataDescriptors
 )
-const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
+const isCurrentUserProductionManager = computed(
+  () => store.getters.isCurrentUserProductionManager
+)
 const isTVShow = computed(() => store.getters.isTVShow)
 const taskMap = computed(() => store.getters.taskMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)

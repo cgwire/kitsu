@@ -239,7 +239,9 @@ const taskStatusId = ref('')
 
 const assetTypes = computed(() => store.getters.assetTypes)
 const currentProduction = computed(() => store.getters.currentProduction)
-const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
+const isCurrentUserProductionManager = computed(
+  () => store.getters.isCurrentUserProductionManager
+)
 // The asset-type tab edits the production's explicit restriction set, so it
 // shows the raw asset_types (empty = no restriction). productionAssetTypes
 // can't be used here: it expands an empty list to every asset type, which
@@ -333,7 +335,7 @@ useHead({
 })
 
 onMounted(() => {
-  if (!isCurrentUserManager.value) {
+  if (!isCurrentUserProductionManager.value) {
     router.push({ name: 'not-found' })
     return
   }

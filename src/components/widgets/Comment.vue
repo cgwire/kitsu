@@ -699,7 +699,16 @@ const departmentMap = computed(() => store.getters.departmentMap)
 const isCurrentUserAdmin = computed(() => store.getters.isCurrentUserAdmin)
 const isCurrentUserArtist = computed(() => store.getters.isCurrentUserArtist)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
-const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
+// Resolved against the comment's own task, not currentProduction: TaskInfo
+// (this widget's main host) can be shown outside a matching production
+// route (Todos, MyChecks, ...).
+const isCurrentUserManager = computed(() =>
+  props.task?.project_id
+    ? isCurrentUserAdmin.value ||
+      store.getters.currentUserRoleForProduction(props.task.project_id) ===
+        'manager'
+    : store.getters.isCurrentUserManager
+)
 const personMap = computed(() => store.getters.personMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 const use12HourClock = computed(() => store.getters.use12HourClock)

@@ -424,7 +424,7 @@
         :silent="isCommentsHidden"
         :task="task"
         :player="playerProxy"
-        :show-assignees="isCurrentUserManager || isCurrentUserSupervisor"
+        :show-assignees="isCurrentTaskManager || isCurrentTaskSupervisor"
         @comment-added="onCommentAdded"
         @time-code-clicked="onTimeCodeClicked"
         v-show="!isCommentsHidden"
@@ -1190,11 +1190,15 @@ const success = ref({
 const currentProduction = computed(() => store.getters.currentProduction)
 const editMap = computed(() => store.getters.editMap)
 const episodeMap = computed(() => store.getters.episodeMap)
+const isCurrentUserAdmin = computed(() => store.getters.isCurrentUserAdmin)
 const isCurrentUserArtist = computed(() => store.getters.isCurrentUserArtist)
 // Same intent as PreviewPlayer's readOnly prop: artists may watch
 // playlists but must not annotate or save.
 const readOnly = computed(() => isCurrentUserArtist.value)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+// Playlist-wide actions (share, notify clients, save, build) keep the
+// global role: playlists are read-only apart from comments/annotations,
+// and a temp playlist can mix entities from several productions.
 const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
 const isCurrentUserSupervisor = computed(
   () => store.getters.isCurrentUserSupervisor
@@ -1262,6 +1266,24 @@ const task = computed(() => {
   if (!entity) return null
   return taskMap.value.get(entity.preview_file_task_id) || null
 })
+
+// Assignee visibility on the embedded TaskInfo/comment panel must resolve
+// against the currently displayed entity's own task, not the store's
+// currentProduction: a temp playlist (ViewPlaylistModal) can mix entities
+// from several productions in one player instance.
+const isCurrentTaskManager = computed(() =>
+  task.value?.project_id
+    ? isCurrentUserAdmin.value ||
+      store.getters.currentUserRoleForProduction(task.value.project_id) ===
+        'manager'
+    : isCurrentUserManager.value
+)
+const isCurrentTaskSupervisor = computed(() =>
+  task.value?.project_id
+    ? store.getters.currentUserRoleForProduction(task.value.project_id) ===
+      'supervisor'
+    : isCurrentUserSupervisor.value
+)
 
 const currentPreview = computed(() => {
   const entity = currentEntity.value

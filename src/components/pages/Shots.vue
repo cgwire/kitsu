@@ -86,6 +86,7 @@
               :is-group-enabled="true"
               :queries="shotSearchQueries"
               type="shot"
+              :production-id="currentProduction?.id"
               @remove-search="removeSearchQuery"
               v-if="!isShotsLoading && !initialLoading"
             />
@@ -506,7 +507,6 @@ export default {
       'episodes',
       'departments',
       'isCurrentUserClient',
-      'isCurrentUserManager',
       'isFrames',
       'isFrameIn',
       'isFrameOut',
@@ -538,6 +538,9 @@ export default {
       'taskTypeMap',
       'user'
     ]),
+    ...mapGetters({
+      isCurrentUserManager: 'isCurrentUserProductionManager'
+    }),
 
     shotMap() {
       return shotStore.cache.shotMap

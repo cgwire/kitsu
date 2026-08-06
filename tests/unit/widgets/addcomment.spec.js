@@ -71,8 +71,11 @@ describe('AddComment', () => {
       strict: true,
       getters: {
         isDarkTheme: () => false,
+        isCurrentUserAdmin: () => false,
         isCurrentUserArtist: () => false,
         isCurrentUserClient: () => false,
+        isCurrentUserManager: () => false,
+        currentUserRoleForProduction: () => () => null,
         departmentMap: () => new Map(),
         productionDepartmentIds: () => [],
         productionMap: () =>

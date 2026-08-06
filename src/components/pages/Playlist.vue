@@ -734,8 +734,6 @@ export default {
       'displayedShots',
       'displayedShotsBySequence',
       'isAssetsLoading',
-      'isCurrentUserManager',
-      'isCurrentUserSupervisor',
       'isEditsLoading',
       'isEpisodesLoading',
       'isShotsLoading',
@@ -751,6 +749,10 @@ export default {
       'taskTypeMap',
       'use12HourClock'
     ]),
+    ...mapGetters({
+      isCurrentUserManager: 'isCurrentUserProductionManager',
+      isCurrentUserSupervisor: 'isCurrentUserProductionSupervisor'
+    }),
 
     isAdditionLoading() {
       return (

@@ -364,14 +364,16 @@ export default {
   computed: {
     ...mapGetters([
       'assetMap',
-      'isCurrentUserManager',
-      'isCurrentUserSupervisor',
       'isFrameIn',
       'isFrameOut',
       'isFrames',
       'isShowInfosBreakdown',
       'user'
     ]),
+    ...mapGetters({
+      isCurrentUserManager: 'isCurrentUserProductionManager',
+      isCurrentUserSupervisor: 'isCurrentUserProductionSupervisor'
+    }),
 
     chunks() {
       const chunks = this.name.split(' / ')

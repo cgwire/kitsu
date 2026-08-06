@@ -103,7 +103,11 @@ const props = defineProps({
   modelValue: { type: Object, required: true },
   namespace: { type: String, required: true },
   externalReorder: { type: Function, default: null },
-  isOpen: { type: Boolean, default: false }
+  isOpen: { type: Boolean, default: false },
+  // Production the displayed columns belong to. Left unset by
+  // cross-production consumers (ProductionList.vue), which keep the
+  // global role.
+  productionId: { type: String, default: null }
 })
 
 const emit = defineEmits(['update:model-value', 'update:is-open'])
@@ -138,7 +142,13 @@ const FIELD_TO_NAME = computed(() => ({
   timeSpent: t('main.timeSpent')
 }))
 
-const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
+const isCurrentUserManager = computed(() =>
+  props.productionId
+    ? store.getters.isCurrentUserAdmin ||
+      store.getters.currentUserRoleForProduction(props.productionId) ===
+        'manager'
+    : store.getters.isCurrentUserManager
+)
 
 const filteredFixedColumns = computed(() =>
   Object.keys(props.modelValue)

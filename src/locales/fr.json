@@ -730,6 +730,8 @@
       "delete_text": "Êtes-vous sûr de vouloir supprimer {personName} de votre base de données ? Tous les commentaires et aperçus associés seront également supprimés. Veuillez confirmer en tapant le nom d'utilisateur complet ci-dessous.",
       "edit_title": "Modifier les informations de",
       "empty_team": "Personne n'a été affecté à cette production.",
+      "global_role": "Rôle global : {role}",
+      "project_role": "Rôle projet",
       "invite": "Envoyer une invitation",
       "invite_error": "Une erreur est survenue en envoyant l'invitation.",
       "invite_success": "L'invitation a été envoyée avec succès.",

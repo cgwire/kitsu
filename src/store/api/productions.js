@@ -64,6 +64,16 @@ export default {
     return client.ppost(`/api/data/projects/${productionId}/team`, data)
   },
 
+  getTeam(productionId) {
+    return client.pget(`/api/data/projects/${productionId}/team`)
+  },
+
+  updateTeamMemberRole(productionId, personId, role) {
+    const data = { role }
+    const path = `/api/data/projects/${productionId}/team/${personId}`
+    return client.pput(path, data)
+  },
+
   removePersonFromTeam(productionId, personId) {
     return client.pdel(`/api/data/projects/${productionId}/team/${personId}`)
   },

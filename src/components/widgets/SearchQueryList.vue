@@ -249,6 +249,13 @@ const props = defineProps({
   type: {
     type: String,
     required: true
+  },
+  // Production the listed searches belong to. Left unset by
+  // cross-production consumers (Todos, People, Person), which keep the
+  // global role.
+  productionId: {
+    type: String,
+    default: null
   }
 })
 
@@ -280,7 +287,13 @@ const toggleGroupId = ref(null)
 const currentProduction = computed(() => store.getters.currentProduction)
 const departmentMap = computed(() => store.getters.departmentMap)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
-const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
+const isCurrentUserManager = computed(() =>
+  props.productionId
+    ? store.getters.isCurrentUserAdmin ||
+      store.getters.currentUserRoleForProduction(props.productionId) ===
+        'manager'
+    : store.getters.isCurrentUserManager
+)
 const personMap = computed(() => store.getters.personMap)
 
 const sortedFilters = computed(() => {

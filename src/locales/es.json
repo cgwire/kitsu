@@ -727,6 +727,8 @@
       "delete_text": "¿Está seguro de que desea eliminar {personName} de su base de datos? Cada comentario y vista previa relacionados se eliminarán. Confirme escribiendo el nombre entero del usuario a continuación.",
       "edit_title": "Modificar usuario",
       "empty_team": "No hay nadie en el equipo del proyecto.",
+      "global_role": "Rol global: {role}",
+      "project_role": "Rol de proyecto",
       "invite": "Enviar invitación",
       "invite_error": "Se ha producido un error al enviar la invitación",
       "invite_success": "La invitación fue enviada con éxito",

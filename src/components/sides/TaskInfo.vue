@@ -567,9 +567,19 @@ const currentEpisode = computed(() => store.getters.currentEpisode)
 const currentProduction = computed(() => store.getters.currentProduction)
 const isCurrentUserArtist = computed(() => store.getters.isCurrentUserArtist)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
-const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
+// Role gating follows the displayed task's production, not the globally
+// selected one: this panel also serves cross-production views (Todos,
+// All Tasks, checks, notifications).
+const currentUserProductionRole = computed(() =>
+  store.getters.currentUserRoleForProduction(currentProductionId.value)
+)
+const isCurrentUserManager = computed(
+  () =>
+    store.getters.isCurrentUserAdmin ||
+    currentUserProductionRole.value === 'manager'
+)
 const isCurrentUserSupervisor = computed(
-  () => store.getters.isCurrentUserSupervisor
+  () => currentUserProductionRole.value === 'supervisor'
 )
 const isTVShow = computed(() => store.getters.isTVShow)
 const nbSelectedTasks = computed(() => store.getters.nbSelectedTasks)

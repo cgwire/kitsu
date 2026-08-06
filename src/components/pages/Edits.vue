@@ -67,6 +67,7 @@
             <search-query-list
               :queries="editSearchQueries"
               type="edit"
+              :production-id="currentProduction?.id"
               @remove-search="removeSearchQuery"
               v-if="!isEditsLoading && !initialLoading"
             />
@@ -431,7 +432,6 @@ export default {
       'episodes',
       'openProductions',
       'isCurrentUserClient',
-      'isCurrentUserManager',
       'isEditDescription',
       'isEditEstimation',
       'isEditTime',
@@ -445,6 +445,9 @@ export default {
       'taskTypeMap',
       'user'
     ]),
+    ...mapGetters({
+      isCurrentUserManager: 'isCurrentUserProductionManager'
+    }),
 
     renderColumns() {
       const collection = [...this.dataMatchers, ...this.optionalColumns]

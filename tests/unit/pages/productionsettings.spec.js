@@ -37,7 +37,7 @@ const mountWithAssetTypes = async assetTypeIds => {
         asset_types: assetTypeIds,
         task_statuses: []
       }),
-      isCurrentUserManager: () => true,
+      isCurrentUserProductionManager: () => true,
       productionTaskStatuses: () => [],
       taskStatus: () => [],
       // Mirrors the real getter: an empty asset_types means "all".

@@ -727,6 +727,8 @@
       "delete_text": "Er du sikker på, at du vil fjerne {personName} fra din database? Alle relaterede kommentarer og previews vil også blive slettet. Bekræft venligst ved at skrive det fulde brugernavn nedenfor.",
       "edit_title": "Rediger bruger",
       "empty_team": "Der er ingen angivet på projektholdet.",
+      "global_role": "Global rolle: {role}",
+      "project_role": "Projektrolle",
       "invite": "Send en invitation",
       "invite_error": "Der opstod en fejl under afsendelse af invitationen",
       "invite_success": "Invitationen blev sendt med succes",
