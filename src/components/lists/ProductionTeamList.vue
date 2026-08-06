@@ -56,13 +56,11 @@
                   class="flexrow-item"
                   :options="roleOptions"
                   :with-margin="false"
-                  :model-value="projectRoles[person.id] || person.role"
+                  :model-value="displayedRole(person)"
                   @update:model-value="value => onRoleChange(person, value)"
                 />
                 <span v-else class="flexrow-item">
-                  {{
-                    $t(`people.role.${projectRoles[person.id] || person.role}`)
-                  }}
+                  {{ $t(`people.role.${displayedRole(person)}`) }}
                 </span>
                 <span
                   v-if="isOverridden(person)"
@@ -138,7 +136,13 @@ const roleOptions = computed(() =>
 )
 
 // Functions
-const isOverridden = person => Boolean(props.projectRoles[person.id])
+// Admins ignore project overrides (zou refuses to set one on them, but a
+// stale link role can linger from before a promotion to admin).
+const isOverridden = person =>
+  person.role !== 'admin' && Boolean(props.projectRoles[person.id])
+
+const displayedRole = person =>
+  isOverridden(person) ? props.projectRoles[person.id] : person.role
 
 const overriddenTitle = person =>
   isOverridden(person)
