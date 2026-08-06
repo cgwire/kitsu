@@ -169,15 +169,20 @@ export default {
 
     setupAuthChannel() {
       if (auth.getBroadcastChannel()) {
-        auth.getBroadcastChannel().onmessage = event => {
+        auth.getBroadcastChannel().onmessage = async event => {
           if (this.$route.name !== 'login' && event.data === 'logout') {
             // Another tab logged out: purge this tab's session too,
             // otherwise store and socket keep the previous user's data.
-            this.$store.dispatch('logoutLocal')
-            this.$router.push({
+            // Navigate first: purging while the current page is still
+            // mounted crashes the computed properties reading the user.
+            // The push resolves before the render flush unmounts the page,
+            // so also wait for the next tick.
+            await this.$router.push({
               name: 'login',
               query: { redirect: this.$route.fullPath }
             })
+            await this.$nextTick()
+            this.$store.dispatch('logoutLocal')
           }
         }
       }

@@ -688,7 +688,11 @@ export default {
     ]),
 
     async onLogout() {
+      // The push resolves before the render flush unmounts the current
+      // page: wait for the next tick so the session purge cannot race
+      // against watchers still reading the store.
       await this.$router.push({ name: 'login' })
+      await this.$nextTick()
       try {
         await this.logout()
       } catch (error) {
