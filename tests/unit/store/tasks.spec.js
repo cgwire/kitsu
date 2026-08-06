@@ -143,6 +143,55 @@ describe('Tasks store', () => {
       expect(comment.replies[0].person.full_name).toEqual('Guest Author')
       expect(comment.replies[0].person.initials).toEqual('GA')
     })
+
+    test('UPDATE_COMMENT_REPLIES resolves the realtime reply author', () => {
+      const state = {
+        taskComments: {
+          'task-1': [{ id: 'comment-studio', replies: [] }]
+        }
+      }
+      // The comment:reply payload carries person_id and no embedded author.
+      tasksStore.mutations.UPDATE_COMMENT_REPLIES(state, {
+        id: 'comment-studio',
+        object_id: 'task-1',
+        person_id: 'person-studio',
+        replies: [{ id: 'reply-studio', person_id: 'person-studio' }]
+      })
+      const [reply] = state.taskComments['task-1'][0].replies
+      expect(reply.person.full_name).toEqual('Studio Member (live)')
+      expect(reply.person.initials).toEqual('SM')
+    })
+
+    test('UPDATE_COMMENT_REPLIES ignores a comment absent from the store', () => {
+      const state = { taskComments: { 'task-1': [] } }
+      expect(() =>
+        tasksStore.mutations.UPDATE_COMMENT_REPLIES(state, {
+          id: 'comment-unknown',
+          object_id: 'task-1',
+          replies: []
+        })
+      ).not.toThrow()
+    })
+
+    test('UPDATE_COMMENT_CHECKLIST ignores a comment absent from the store', () => {
+      const state = { taskComments: { 'task-1': [] } }
+      expect(() =>
+        tasksStore.mutations.UPDATE_COMMENT_CHECKLIST(state, {
+          comment: { id: 'comment-unknown', object_id: 'task-1' },
+          checklist: []
+        })
+      ).not.toThrow()
+    })
+
+    test('ADD_ATTACHMENT_TO_COMMENT ignores an untracked task', () => {
+      const state = { taskComments: {} }
+      expect(() =>
+        tasksStore.mutations.ADD_ATTACHMENT_TO_COMMENT(state, {
+          comment: { id: 'comment-1', object_id: 'task-unknown' },
+          attachmentFiles: [{ id: 'file-1' }]
+        })
+      ).not.toThrow()
+    })
   })
 
   describe('batch actions', () => {

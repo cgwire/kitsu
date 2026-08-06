@@ -7,14 +7,13 @@
             <th scope="col" class="name datatable-row-header">
               {{ $t('people.list.name') }}
             </th>
-            <th scope="col" class="email" v-if="isCurrentUserProductionManager">
+            <!-- Email and contract stay on the global role: zou only serves
+                 these person fields to global managers, a per-project manager
+                 would get empty cells. -->
+            <th scope="col" class="email" v-if="isCurrentUserManager">
               {{ $t('people.list.email') }}
             </th>
-            <th
-              scope="col"
-              class="contract"
-              v-if="isCurrentUserProductionManager"
-            >
+            <th scope="col" class="contract" v-if="isCurrentUserManager">
               {{ $t('people.list.contract') }}
             </th>
             <th scope="col" class="role">
@@ -36,30 +35,32 @@
               class="name datatable-row-header"
               :person="person"
             />
-            <td class="email" v-if="isCurrentUserProductionManager">
+            <td class="email" v-if="isCurrentUserManager">
               {{ person.email }}
             </td>
-            <td class="contract" v-if="isCurrentUserProductionManager">
+            <td class="contract" v-if="isCurrentUserManager">
               {{ $t(`people.contract.${person.contract_type}`) }}
             </td>
             <td class="role">
               <div class="flexrow">
-                <!-- Admin is a global-only role: no project role select. -->
+                <!-- Admin is a global-only role: no project role select.
+                     Own row excluded too: a manager demoting themselves
+                     would lock themselves out with no way back. -->
                 <combobox
                   v-if="
-                    isCurrentUserProductionManager && person.role !== 'admin'
+                    isCurrentUserProductionManager &&
+                    person.role !== 'admin' &&
+                    person.id !== user.id
                   "
                   thin
                   class="flexrow-item"
                   :options="roleOptions"
                   :with-margin="false"
-                  :model-value="projectRoles[person.id] || person.role"
+                  :model-value="displayedRole(person)"
                   @update:model-value="value => onRoleChange(person, value)"
                 />
                 <span v-else class="flexrow-item">
-                  {{
-                    $t(`people.role.${projectRoles[person.id] || person.role}`)
-                  }}
+                  {{ $t(`people.role.${displayedRole(person)}`) }}
                 </span>
                 <span
                   v-if="isOverridden(person)"
@@ -118,12 +119,16 @@ const props = defineProps({
 const emit = defineEmits(['update-role'])
 
 // Computed
+const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
 const isCurrentUserProductionManager = computed(
   () => store.getters.isCurrentUserProductionManager
 )
+const user = computed(() => store.getters.user)
 const isEmpty = computed(() => !props.entries?.length)
 
-const PROJECT_ROLES = ['user', 'supervisor', 'manager', 'client', 'vendor']
+// No 'client' here: making someone a client on a single project makes no
+// sense, clients are invited as such globally.
+const PROJECT_ROLES = ['user', 'supervisor', 'manager', 'vendor']
 
 const roleOptions = computed(() =>
   PROJECT_ROLES.map(role => ({
@@ -133,7 +138,13 @@ const roleOptions = computed(() =>
 )
 
 // Functions
-const isOverridden = person => Boolean(props.projectRoles[person.id])
+// Admins ignore project overrides (zou refuses to set one on them, but a
+// stale link role can linger from before a promotion to admin).
+const isOverridden = person =>
+  person.role !== 'admin' && Boolean(props.projectRoles[person.id])
+
+const displayedRole = person =>
+  isOverridden(person) ? props.projectRoles[person.id] : person.role
 
 const overriddenTitle = person =>
   isOverridden(person)
