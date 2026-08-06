@@ -126,7 +126,9 @@ const isCurrentUserProductionManager = computed(
 const user = computed(() => store.getters.user)
 const isEmpty = computed(() => !props.entries?.length)
 
-const PROJECT_ROLES = ['user', 'supervisor', 'manager', 'client', 'vendor']
+// No 'client' here: making someone a client on a single project makes no
+// sense, clients are invited as such globally.
+const PROJECT_ROLES = ['user', 'supervisor', 'manager', 'vendor']
 
 const roleOptions = computed(() =>
   PROJECT_ROLES.map(role => ({
