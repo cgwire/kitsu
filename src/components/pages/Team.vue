@@ -25,7 +25,6 @@
           :entries="teamPersons"
           :project-roles="projectRoles"
           @update-role="updateRole"
-          @remove="removePerson"
         />
       </div>
     </template>
@@ -170,9 +169,6 @@ const addPerson = () => {
     peopleFieldRef.value.focus()
   }
 }
-
-const removePerson = personToRemove =>
-  store.dispatch('removePersonFromTeam', personToRemove)
 
 const importTeamFromProduction = () => {
   const production = productionMap.value.get(importProductionId.value)
