@@ -2557,6 +2557,10 @@ th.validation-cell {
   width: 118px;
 }
 
+#app .range .dp--input {
+  width: 190px;
+}
+
 #app .datatable .dp--input {
   border-radius: 3px;
   height: 43px;

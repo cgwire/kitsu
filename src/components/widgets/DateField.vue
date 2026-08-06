@@ -5,17 +5,17 @@
       auto-apply
       class="datepicker"
       :class="{ range }"
-      :range="range"
       :dark="isDark || isDarkTheme"
       :disabled="disabled"
       :filters="{ weekDays: weekDaysDisabled ? [6, 0] : [] }"
-      :formats="{ input: format }"
+      :formats="{ input: inputFormat }"
       :input-attrs="{ clearable: canDelete, hideInputIcon: true }"
       :locale="dateFnsLocale"
       :model-type="modelType"
       :min-date="minDate"
       :max-date="maxDate"
       :placeholder="placeholder"
+      :range="range ? { partialRange: false } : false"
       :teleport="true"
       :time-config="{ enableTimePicker: false }"
       :timezone="utc ? 'utc' : undefined"
@@ -26,6 +26,7 @@
 </template>
 
 <script setup>
+import { format as formatDate } from 'date-fns'
 import {
   da,
   de,
@@ -71,7 +72,7 @@ const isDarkTheme = computed(() => store.getters.isDarkTheme)
 const user = computed(() => store.getters.user)
 
 const dateFnsLocale = computed(() => {
-  const locale = user.value.locale || 'en_US'
+  const locale = user.value?.locale || 'en_US'
   if (locale.startsWith('zh_Hant')) return zhTW
   return DATE_FNS_LOCALES[locale.substring(0, 2)] || enUS
 })
@@ -141,15 +142,26 @@ const props = defineProps({
 
 const emit = defineEmits(['update:model-value', 'change'])
 
+// In range mode, formats.input receives [start, end]: a same-day range is collapsed to a single date in the input.
+const inputFormat = computed(() => {
+  if (!props.range) return props.format
+  return ([start, end]) => {
+    const fmt = date => formatDate(date, props.format)
+    if (fmt(start) === fmt(end)) return fmt(start)
+    return `${fmt(start)} - ${fmt(end)}`
+  }
+})
+
 const localValue = computed({
   get() {
     return props.modelValue
   },
   set(value) {
     if (props.range) {
-      // The picker emits [start, null] while the user is still choosing the
-      // second date. Only a complete range is worth propagating, otherwise
-      // every first click would trigger a reload.
+      // partialRange is disabled in the template: combined with auto-apply,
+      // the picker would otherwise apply [start, null] and close the menu on
+      // the very first click. This filter is a backstop so an incomplete
+      // range can never reach the parent and trigger a reload.
       const dates = value?.filter(Boolean) ?? []
       if (value?.length && dates.length !== 2) return
       const range = dates.length === 2 ? dates : null
@@ -171,9 +183,5 @@ const localValue = computed({
 .datepicker {
   display: inline-flex;
   max-width: 200px;
-
-  &.range {
-    max-width: 260px;
-  }
 }
 </style>
