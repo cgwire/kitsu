@@ -242,21 +242,11 @@ const onClick = event => {
   if (props.clickable) select(event)
 }
 
+// The href only serves middle click and the context menu, which never fire
+// click: block navigation on every click so modified clicks (ctrl = additive
+// select, shift = range select in entity_list.js) keep bubbling to onClick.
 const onTaskLinkClick = event => {
-  if (!props.taskHref) return
-  if (
-    // Preserve native non-left-click behavior.
-    event.button !== 0 ||
-    // Preserve native modifier-click behavior.
-    event.ctrlKey ||
-    event.metaKey ||
-    event.shiftKey ||
-    event.altKey
-  ) {
-    event.stopPropagation()
-  } else {
-    event.preventDefault()
-  }
+  if (props.taskHref) event.preventDefault()
 }
 
 watch(() => props.taskTest, resolveTask)
@@ -301,8 +291,12 @@ defineExpose({
 .task-link {
   color: inherit;
   display: block;
-  margin-block: -0.275rem;
-  padding-block: 0.275rem;
+  // Not the margin-block/padding-block shorthands: Safari 14.1+, the
+  // supported floor is Safari 14.
+  margin-top: -0.275rem;
+  margin-bottom: -0.275rem;
+  padding-top: 0.275rem;
+  padding-bottom: 0.275rem;
   text-decoration: none;
 }
 

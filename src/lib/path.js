@@ -42,6 +42,31 @@ export const getTaskPath = (
   return route
 }
 
+const taskHrefCache = new Map()
+
+// Grids call this for every cell on every render: resolving a route each
+// time is costly, so memoize by task and context. Entries are tiny and
+// contexts few, no eviction needed.
+export const getTaskHref = (
+  router,
+  task,
+  production,
+  isTVShow,
+  episode,
+  taskTypeMap
+) => {
+  if (!task) return ''
+  const key = [task.id, task.episode_id, production?.id, episode?.id].join(':')
+  let href = taskHrefCache.get(key)
+  if (href === undefined) {
+    href = router.resolve(
+      getTaskPath(task, production, isTVShow, episode, taskTypeMap)
+    ).href
+    taskHrefCache.set(key, href)
+  }
+  return href
+}
+
 export const getTaskEntityPath = (task, episodeId) => {
   if (task) {
     let type = task.entity_type_name

@@ -188,6 +188,7 @@
             </td>
             <validation-cell
               class="status unselectable"
+              :task-href="taskHref(task)"
               :task-test="task"
               :is-border="false"
               :is-assignees="false"
@@ -442,6 +443,7 @@ import {
   watch
 } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { pauseEvent } from '@/composables/dom'
@@ -452,6 +454,7 @@ import {
   getMetadataFieldValue,
   isSupervisorInDepartments
 } from '@/lib/descriptors'
+import { getTaskHref } from '@/lib/path'
 import {
   daysToMinutes,
   formatSimpleDate,
@@ -479,6 +482,7 @@ import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
 // Composables
 const { t } = useI18n()
+const router = useRouter()
 const store = useStore()
 const { formatDuration, formatDisplayDate, isDurationInHours, organisation } =
   useFormat()
@@ -609,7 +613,9 @@ const taskRows = new Map()
 const { startBrowsing } = useGrabList(bodyRef)
 
 // Computed
+const currentEpisode = computed(() => store.getters.currentEpisode)
 const currentProduction = computed(() => store.getters.currentProduction)
+const isTVShow = computed(() => store.getters.isTVShow)
 const isCurrentUserProductionManager = computed(
   () => store.getters.isCurrentUserProductionManager
 )
@@ -683,6 +689,16 @@ const groupTasks = (entityMap, groupKey, nameField) => {
 }
 
 const getEntity = entityId => entityMap.value.get(entityId) || {}
+
+const taskHref = task =>
+  getTaskHref(
+    router,
+    task,
+    currentProduction.value,
+    isTVShow.value,
+    currentEpisode.value,
+    taskTypeMap.value
+  )
 
 const setTaskRow = (taskId, el) => {
   if (el) {
