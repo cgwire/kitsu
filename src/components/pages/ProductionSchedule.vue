@@ -736,7 +736,11 @@ export default {
           person.role !== 'client' &&
           (['admin', 'manager'].includes(person.role) ||
             !person.departments.length ||
-            person.departments.includes(taskType?.department_id))
+            person.departments.includes(taskType?.department_id) ||
+            // an out-of-department person already assigned to the edited
+            // task stays listed: saveTask replaces the full assignee list,
+            // so hiding them here would silently unassign them
+            this.assignments.task?.assignees?.includes(person.id))
       )
     },
 
