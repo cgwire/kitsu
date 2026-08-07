@@ -1502,7 +1502,7 @@ export default {
         } catch (err) {
           console.error(err)
           taskTypeElement.children = []
-          taskTypeElement.people = []
+          taskTypeElement.people = {}
         } finally {
           taskTypeElement.loading = false
         }
@@ -2326,7 +2326,11 @@ export default {
       // update task to refresh the schedule
       task.assignees = task.assignees.filter(id => id !== personId)
       const tasks = task.parentElement.children.get(personId)
-      tasks.splice(tasks.indexOf(task), 1)
+      // guard: splice(-1, 1) on a miss would silently drop another task's bar
+      const taskIndex = tasks?.indexOf(task) ?? -1
+      if (taskIndex !== -1) {
+        tasks.splice(taskIndex, 1)
+      }
 
       // save change
       if (this.isVersioned) {
