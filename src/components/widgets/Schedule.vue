@@ -2615,6 +2615,7 @@ defineExpose({
   refreshItemPositions,
   refreshManDays,
   resetScheduleSize,
+  resetSelection,
   scrollToDate,
   scrollToToday,
   setScrollPosition

@@ -147,9 +147,9 @@
           class="close-button"
           role="button"
           tabindex="0"
-          @click="toggleSidePanel"
-          @keydown.enter.prevent="toggleSidePanel"
-          @keydown.space.prevent="toggleSidePanel"
+          @click="unselectAndCloseSidePanel"
+          @keydown.enter.prevent="unselectAndCloseSidePanel"
+          @keydown.space.prevent="unselectAndCloseSidePanel"
         >
           <x-icon class="align-middle" :size="16" />
         </a>
@@ -462,7 +462,10 @@
                   :text="$t('main.apply')"
                   type="submit"
                 />
-                <button class="button is-link ml05" @click="closeSidePanel()">
+                <button
+                  class="button is-link ml05"
+                  @click="unselectAndCloseSidePanel()"
+                >
                   {{ $t('main.cancel') }}
                 </button>
               </template>
@@ -1999,6 +2002,15 @@ export default {
     closeSidePanel() {
       this.isSidePanelOpen = false
       this.resetSidePanel()
+    },
+
+    // explicit close (close button, task cancel): also drop the schedule
+    // selection, or the bar keeps its ring and its resize handles swallow
+    // the next click. closeSidePanel alone must not do it: it also runs
+    // when a multi-selection starts and would clear it.
+    unselectAndCloseSidePanel() {
+      this.$refs.schedule?.resetSelection()
+      this.closeSidePanel()
     },
 
     onAssignmentItemSelected(item) {
