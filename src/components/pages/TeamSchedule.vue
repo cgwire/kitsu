@@ -55,7 +55,7 @@
         />
         <combobox-department
           class="flexrow-item"
-          all-departments-label
+          :display-all-and-my-departments="true"
           :label="$t('main.department')"
           v-model="selectedDepartment"
         />
@@ -300,7 +300,7 @@ export default {
       isTaskSidePanelOpen: false,
       personDates: {},
       scheduleItems: [],
-      selectedDepartment: null,
+      selectedDepartment: 'ALL',
       selectedEndDate: null,
       selectedPerson: null,
       selectedProduction: null,
@@ -341,7 +341,13 @@ export default {
   },
 
   mounted() {
-    this.selectedDepartment = this.$route.query.department || undefined
+    const department = this.$route.query.department
+    if (department) {
+      this.selectedDepartment = department
+    } else if (!this.isCurrentUserManager && this.user.departments.length) {
+      // Supervisors land on their own departments (issue #1579).
+      this.selectedDepartment = 'MY_DEPARTMENTS'
+    }
     this.selectedStudio = this.$route.query.studio || undefined
     this.selectedProduction = this.$route.query.production || undefined
     const zoom = Number(this.$route.query.zoom)
@@ -358,10 +364,12 @@ export default {
       'departmentMap',
       'displayedPeople',
       'getProductionTaskTypes',
+      'isCurrentUserManager',
       'openProductions',
       'organisation',
       'productionMap',
-      'taskTypeMap'
+      'taskTypeMap',
+      'user'
     ]),
 
     daysOffByPerson() {
@@ -374,13 +382,25 @@ export default {
       }, {})
     },
 
+    departmentFilter() {
+      if (!this.selectedDepartment || this.selectedDepartment === 'ALL') {
+        return []
+      }
+      if (this.selectedDepartment === 'MY_DEPARTMENTS') {
+        return this.user.departments
+      }
+      return [this.selectedDepartment]
+    },
+
     selectablePeople() {
       let selectablePeople = this.displayedPeople.filter(
         person => !person.is_bot
       )
-      if (this.selectedDepartment) {
+      if (this.departmentFilter.length > 0) {
         selectablePeople = selectablePeople.filter(person =>
-          person.departments.includes(this.selectedDepartment)
+          person.departments.some(departmentId =>
+            this.departmentFilter.includes(departmentId)
+          )
         )
       }
       if (this.selectedStudio) {
@@ -453,10 +473,10 @@ export default {
       this.startDate = moment()
       this.endDate = moment().add(3, 'months')
       Object.values(this.personDates).forEach(dates => {
-        if (dates.startDate.isBefore(this.startDate)) {
+        if (dates.startDate?.isBefore(this.startDate)) {
           this.startDate = dates.startDate.clone()
         }
-        if (dates.endDate.isAfter(this.endDate)) {
+        if (dates.endDate?.isAfter(this.endDate)) {
           this.endDate = dates.endDate.clone()
         }
       })
@@ -523,10 +543,23 @@ export default {
       const personDatesList = await this.getPersonsTasksDates()
       this.personDates = {}
       personDatesList.forEach(p => {
-        this.personDates[p.person_id] = {
-          endDate: parseSimpleDate(p.max_date),
-          startDate: parseSimpleDate(p.min_date)
-        }
+        const busyPeriods = (p.busy_periods || []).map(period => ({
+          startDate: parseSimpleDate(period.start_date),
+          endDate: parseSimpleDate(period.end_date)
+        }))
+        // min/max are null for a person only busy on other productions:
+        // the root bar then spans the anonymous periods alone.
+        let startDate = p.min_date ? parseSimpleDate(p.min_date) : null
+        let endDate = p.max_date ? parseSimpleDate(p.max_date) : null
+        busyPeriods.forEach(period => {
+          if (!startDate || period.startDate.isBefore(startDate)) {
+            startDate = period.startDate.clone()
+          }
+          if (!endDate || period.endDate.isAfter(endDate)) {
+            endDate = period.endDate.clone()
+          }
+        })
+        this.personDates[p.person_id] = { busyPeriods, endDate, startDate }
       })
     },
 
@@ -614,6 +647,22 @@ export default {
         editable: true,
         unresizable: false,
         color: taskType.color,
+        parentElement
+      }
+    },
+
+    // Anonymous availability from other productions (issue #1579): the
+    // server only ships merged date pairs, so the bar can name neither the
+    // production nor the task, and must stay inert.
+    buildBusyScheduleItem(parentElement, period, index) {
+      return {
+        id: `busy-${parentElement.id}-${index}`,
+        name: this.$t('team_schedule.busy'),
+        startDate: period.startDate.clone(),
+        endDate: period.endDate.clone(),
+        editable: false,
+        unresizable: true,
+        color: '#999999',
         parentElement
       }
     },
@@ -742,9 +791,13 @@ export default {
           tasks = await this.fetchPersonTasks(element.id)
           this.personTasksCache.set(element.id, tasks)
         }
+        const busyItems = (this.personDates[element.id]?.busyPeriods || []).map(
+          (period, index) => this.buildBusyScheduleItem(element, period, index)
+        )
         element.children = tasks
           .map(task => this.buildTaskScheduleItem(element, task))
           .filter(Boolean)
+          .concat(busyItems)
           .sort(firstBy('startDate').thenBy('project_name').thenBy('name'))
 
         if (refreshScheduleCallBack) {

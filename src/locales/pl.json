@@ -1802,6 +1802,7 @@
       }
     },
     "team_schedule": {
+      "busy": "Zajęty przy innej produkcji",
       "title": "Harmonogram",
       "title_main": "Harmonogram zespołu",
       "person_placeholder": "Wybierz osobę..."

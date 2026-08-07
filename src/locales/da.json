@@ -1870,6 +1870,7 @@
       "leave_room": "Forlad Rum"
     },
     "team_schedule": {
+      "busy": "Optaget på en anden produktion",
       "title": "Tidsplan",
       "title_main": "Teamets Tidsplan",
       "person_placeholder": "Vælg en person..."

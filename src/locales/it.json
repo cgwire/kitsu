@@ -1870,6 +1870,7 @@
       "leave_room": "Esci dalla stanza"
     },
     "team_schedule": {
+      "busy": "Occupato su un'altra produzione",
       "title": "Pianificazione",
       "title_main": "Pianificazione del team",
       "person_placeholder": "Seleziona una persona..."

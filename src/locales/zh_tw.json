@@ -1870,6 +1870,7 @@
       "leave_room": "離開房間"
     },
     "team_schedule": {
+      "busy": "忙於其他製作",
       "title": "時間表",
       "title_main": "團隊時間表",
       "person_placeholder": "選擇一個人..."

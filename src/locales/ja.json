@@ -1870,6 +1870,7 @@
       "leave_room": "ルームから退出"
     },
     "team_schedule": {
+      "busy": "別の作品で作業中",
       "title": "スケジュール",
       "title_main": "チームスケジュール",
       "person_placeholder": "ユーザーを選択…"

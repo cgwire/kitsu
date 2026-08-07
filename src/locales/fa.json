@@ -1870,6 +1870,7 @@
       "leave_room": "ترک اتاق"
     },
     "team_schedule": {
+      "busy": "مشغول در یک تولید دیگر",
       "title": "زمان بندی کردن",
       "title_main": "جدول زمانی تیم",
       "person_placeholder": "انتخاب یک شخص..."

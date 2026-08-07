@@ -1870,6 +1870,7 @@
       "leave_room": "Raum verlassen"
     },
     "team_schedule": {
+      "busy": "Mit einer anderen Produktion beschäftigt",
       "title": "Zeitplan",
       "title_main": "Zeitplan des Teams",
       "person_placeholder": "Wählen Sie eine Person aus …"

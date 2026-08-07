@@ -1886,6 +1886,7 @@
       "leave_room": "검수실 나가기"
     },
     "team_schedule": {
+      "busy": "다른 제작 작업 중",
       "title": "일정",
       "title_main": "팀 일정",
       "person_placeholder": "사람 선택..."
