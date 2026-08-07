@@ -317,6 +317,7 @@
                 :is-loading="loading.addComment"
                 :is-movie="isMovie"
                 :is-picture="isPicture"
+                :is-status-locked="isMentionedOnly"
                 :team="currentTeam"
                 :task-types="currentTaskTypes"
                 :task="task"
@@ -365,6 +366,7 @@
                     :is-replyable="
                       (user && user.id === comment.person?.id) ||
                       isAssigned ||
+                      isMentioned ||
                       isDepartmentSupervisor ||
                       isCurrentUserManager
                     "
@@ -953,9 +955,38 @@ export default {
       )
     },
 
+    isMentioned() {
+      const personId = this.user?.id
+      if (!personId) return false
+      const departmentIds = this.user.departments || []
+      // Replies carry their own mentions, and that is where people usually
+      // get named once a conversation is going.
+      const namesUser = entry =>
+        (entry.mentions || []).includes(personId) ||
+        (entry.department_mentions || []).some(departmentId =>
+          departmentIds.includes(departmentId)
+        )
+      return this.taskComments.some(
+        comment => namesUser(comment) || (comment.replies || []).some(namesUser)
+      )
+    },
+
+    // In the conversation only because someone named them: they may answer,
+    // but the status stays where the assignees left it.
+    isMentionedOnly() {
+      return (
+        this.isMentioned &&
+        !this.isAssigned &&
+        !this.isCurrentUserClient &&
+        !this.isDepartmentSupervisor &&
+        !this.isCurrentUserManager
+      )
+    },
+
     isCommentingAllowed() {
       return (
         this.isAssigned ||
+        this.isMentioned ||
         this.isCurrentUserClient ||
         this.isDepartmentSupervisor ||
         this.isCurrentUserManager
