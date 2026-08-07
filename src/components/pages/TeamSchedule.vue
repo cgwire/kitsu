@@ -55,7 +55,7 @@
         />
         <combobox-department
           class="flexrow-item"
-          all-departments-label
+          :display-all-and-my-departments="true"
           :label="$t('main.department')"
           v-model="selectedDepartment"
         />
@@ -300,7 +300,7 @@ export default {
       isTaskSidePanelOpen: false,
       personDates: {},
       scheduleItems: [],
-      selectedDepartment: null,
+      selectedDepartment: 'ALL',
       selectedEndDate: null,
       selectedPerson: null,
       selectedProduction: null,
@@ -341,7 +341,13 @@ export default {
   },
 
   mounted() {
-    this.selectedDepartment = this.$route.query.department || undefined
+    const department = this.$route.query.department
+    if (department) {
+      this.selectedDepartment = department
+    } else if (!this.isCurrentUserManager && this.user.departments.length) {
+      // Supervisors land on their own departments (issue #1579).
+      this.selectedDepartment = 'MY_DEPARTMENTS'
+    }
     this.selectedStudio = this.$route.query.studio || undefined
     this.selectedProduction = this.$route.query.production || undefined
     const zoom = Number(this.$route.query.zoom)
@@ -358,10 +364,12 @@ export default {
       'departmentMap',
       'displayedPeople',
       'getProductionTaskTypes',
+      'isCurrentUserManager',
       'openProductions',
       'organisation',
       'productionMap',
-      'taskTypeMap'
+      'taskTypeMap',
+      'user'
     ]),
 
     daysOffByPerson() {
@@ -374,13 +382,25 @@ export default {
       }, {})
     },
 
+    departmentFilter() {
+      if (!this.selectedDepartment || this.selectedDepartment === 'ALL') {
+        return []
+      }
+      if (this.selectedDepartment === 'MY_DEPARTMENTS') {
+        return this.user.departments
+      }
+      return [this.selectedDepartment]
+    },
+
     selectablePeople() {
       let selectablePeople = this.displayedPeople.filter(
         person => !person.is_bot
       )
-      if (this.selectedDepartment) {
+      if (this.departmentFilter.length > 0) {
         selectablePeople = selectablePeople.filter(person =>
-          person.departments.includes(this.selectedDepartment)
+          person.departments.some(departmentId =>
+            this.departmentFilter.includes(departmentId)
+          )
         )
       }
       if (this.selectedStudio) {
