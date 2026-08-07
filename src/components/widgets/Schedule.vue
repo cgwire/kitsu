@@ -2398,12 +2398,17 @@ const addMilestoneTitle = day => {
 }
 
 const checkUserIsAllowed = (item, person) => {
-  if (!item) {
+  // person may be any root element (e.g. a task type row on the production
+  // schedule): only actual person rows carry a departments list
+  if (!item || !person?.departments) {
     return false
   }
   const production = openProductions.value.find(
     ({ id }) => id === item.project_id
   )
+  if (!production) {
+    return false
+  }
   const isTeamMember = production.team.includes(person.id)
   const isDepartmentMember =
     !person.departments.length ||

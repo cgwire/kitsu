@@ -121,7 +121,7 @@
         is-estimation-linked
         hide-man-days
         :multiline="isAllEpisodes"
-        :reassignable="!isLockedSchedule"
+        :reassignable="!isLockedSchedule && !isAllEpisodes"
         show-expand-all
         :subchildren="!isAllEpisodes"
         :type="mode"
