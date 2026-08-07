@@ -1870,6 +1870,7 @@
       "leave_room": "Dejar la Sala"
     },
     "team_schedule": {
+      "busy": "Ocupado en otra producción",
       "title": "Horario",
       "title_main": "Horario del equipo",
       "person_placeholder": "Selecciona una persona..."

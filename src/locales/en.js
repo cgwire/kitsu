@@ -1879,6 +1879,7 @@ export default {
   },
 
   team_schedule: {
+    busy: 'Busy on another production',
     title: 'Schedule',
     title_main: 'Team Schedule',
     person_placeholder: 'Select a person...'

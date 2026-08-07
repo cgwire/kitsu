@@ -1870,6 +1870,7 @@
       "leave_room": "Verlaat Room"
     },
     "team_schedule": {
+      "busy": "Bezet met een andere productie",
       "title": "Schema",
       "title_main": "Teamschema",
       "person_placeholder": "Een persoon selecteren..."

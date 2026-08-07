@@ -1870,6 +1870,7 @@
       "leave_room": "Deixar espaço"
     },
     "team_schedule": {
+      "busy": "Ocupado em outra produção",
       "title": "Cronograma",
       "title_main": "Programação da equipe",
       "person_placeholder": "Selecione uma pessoa..."

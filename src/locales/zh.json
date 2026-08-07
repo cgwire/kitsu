@@ -1870,6 +1870,7 @@
       "leave_room": "离开审核室"
     },
     "team_schedule": {
+      "busy": "忙于其他制作",
       "title": "时间安排",
       "title_main": "团队日程",
       "person_placeholder": "选择一个人..."

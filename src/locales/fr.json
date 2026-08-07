@@ -1873,6 +1873,7 @@
       "leave_room": "Partir de la conférence"
     },
     "team_schedule": {
+      "busy": "Occupé sur une autre production",
       "title": "Planning",
       "title_main": "Planning d'équipe",
       "person_placeholder": "Sélectionner une personne..."
