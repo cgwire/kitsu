@@ -548,6 +548,7 @@ export default {
       this.productionAssetTaskTypes.forEach(item => {
         collection.push(item.name)
         collection.push(`${item.name} comment`)
+        collection.push(`${item.name} assignations`)
       })
 
       return collection
@@ -794,8 +795,11 @@ export default {
           headers.push(this.$t('shots.fields.resolution'))
         }
         this.assetValidationColumns.forEach(taskTypeId => {
-          headers.push(this.taskTypeMap.get(taskTypeId)?.name || '')
-          headers.push('Assignations')
+          const taskTypeName = this.taskTypeMap.get(taskTypeId)?.name || ''
+          headers.push(taskTypeName)
+          // Qualified by the task type so a re-import can tell the columns
+          // apart: bare duplicated headers collapse in the server's reader.
+          headers.push(`${taskTypeName} assignations`)
         })
         csv.buildCsvFile(name, [headers].concat(assetLines))
       })
