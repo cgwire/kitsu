@@ -2469,13 +2469,21 @@ const onTaskDrop = (event, rootElement) => {
     return // invalid user rights
   }
 
-  const position =
-    timelineContentWrapperRef.value.scrollLeft +
-    getClientX(event) -
-    300 -
-    cellWidth.value * 1.5
-  const dayPosition = Math.floor(position / cellWidth.value)
-  const dropDate = props.startDate.clone().add(dayPosition, 'days')
+  // resolve the hovered column the same way as the position bar: the
+  // previous math hardcoded a 300px entity panel offset and counted week
+  // cells as days, landing drops on the wrong date
+  const columns = isWeekMode.value ? weeksAvailable.value : displayedDays.value
+  if (!columns.length) {
+    return
+  }
+  if (!wrapperRect) {
+    wrapperRect = timelineContentWrapperRef.value.getBoundingClientRect()
+  }
+  const cursorX = getClientX(event) - wrapperRect.left
+  const index = Math.floor(
+    (timelineContentWrapperRef.value.scrollLeft + cursorX) / cellWidth.value
+  )
+  const dropDate = columns[Math.min(Math.max(index, 0), columns.length - 1)]
   const startDate = addBusinessDays(dropDate, 0, rootElement.daysOff)
   const endDate = item.estimation
     ? addBusinessDays(
