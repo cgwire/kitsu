@@ -2552,13 +2552,6 @@ watch(
   }
 )
 
-watch(
-  () => props.height,
-  () => {
-    nextTick(resetScheduleSize)
-  }
-)
-
 watch(currentElement, () => {
   if (currentElement.value && currentElement.value.task_type_id) {
     const task = taskMap.value.get(currentElement.value.id)
