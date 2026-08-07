@@ -2183,7 +2183,12 @@ export default {
 
                 // save versioned task
                 if (!versionedTask.id) {
-                  await this.createScheduleVersionedTask(versionedTask)
+                  const createdTask =
+                    await this.createScheduleVersionedTask(versionedTask)
+                  // keep the created id: without it the task edits right
+                  // after an assignment would post duplicates
+                  versionedTask.id = createdTask.id
+                  task.versionedTaskId = createdTask.id
                 } else {
                   await this.updateScheduleVersionedTask(versionedTask)
                 }
