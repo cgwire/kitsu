@@ -1755,6 +1755,16 @@ export default {
       this.selectedTaskType = this.scheduleItems.find(
         item => item.task_type_id === taskTypeId
       )
+      // clear the entity filter when it hides the selected row, or the
+      // expand below would fill the panel while the schedule shows nothing
+      if (
+        this.entityType &&
+        this.selectedTaskType &&
+        this.selectedTaskType.for_entity !== this.entityType
+      ) {
+        this.entityType = null
+        this.updateRoute({ type: null })
+      }
       // refresh schedule
       this.expandTaskTypeElement(
         this.selectedTaskType,
