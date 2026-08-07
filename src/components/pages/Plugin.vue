@@ -1,8 +1,5 @@
 <template>
-  <div class="plugin-page">
-    <h1>Plugin</h1>
-    {{ plugin?.name }}
-
+  <div class="plugin-page page fixed-page">
     <iframe
       class="plugin-iframe"
       :src="pluginUrl"
@@ -73,13 +70,15 @@ useHead({
 
 <style lang="scss" scoped>
 .plugin-page {
-  padding-top: 20px;
+  padding-left: 0;
+  padding-right: 0;
+  padding-bottom: 0;
 }
 
 .plugin-iframe {
   background-color: $white;
+  flex: 1;
   width: 100%;
-  height: calc(100vh - 68px);
   border: none;
   padding: 0;
   margin: 0;
