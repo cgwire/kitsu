@@ -454,6 +454,39 @@ describe('composables/annotation', () => {
     })
   })
 
+  describe('clearCanvas', () => {
+    // fabric's Canvas.clear() discards the active object before removing
+    // anything: an IText still in editing exits editing there and fires
+    // object:modified while attached. When the clear follows a resize
+    // (setDimensions ran just before), that serialization pairs old-box
+    // coordinates with the new dimensions and corrupts the stored note.
+    it('mutes the object:modified fabric fires while clearing', () => {
+      const canvas = createFakeCanvas()
+      const { api, postAnnotationUpdate, saveAnnotationsCb, wrapper } =
+        mountAnnotation({ canvas })
+      canvas.clear = vi.fn(() => {
+        api.onObjectModified({ target: createSerializableObject() })
+        canvas._objects.splice(0, canvas._objects.length)
+      })
+      api.clearCanvas()
+      expect(canvas.clear).toHaveBeenCalled()
+      expect(api.updates.value).toHaveLength(0)
+      expect(postAnnotationUpdate).not.toHaveBeenCalled()
+      expect(saveAnnotationsCb).not.toHaveBeenCalled()
+      wrapper.unmount()
+    })
+
+    it('keeps posting updates for a user-driven object:modified', () => {
+      const { api, postAnnotationUpdate, saveAnnotationsCb, wrapper } =
+        mountAnnotation()
+      api.onObjectModified({ target: createSerializableObject() })
+      expect(api.updates.value).toHaveLength(1)
+      expect(postAnnotationUpdate).toHaveBeenCalledTimes(1)
+      expect(saveAnnotationsCb).toHaveBeenCalled()
+      wrapper.unmount()
+    })
+  })
+
   describe('onErasingEnd', () => {
     it('routes erased objects to updates, not additions', () => {
       const { api, postAnnotationUpdate, saveAnnotationsCb, wrapper } =

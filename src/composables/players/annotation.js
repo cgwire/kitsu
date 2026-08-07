@@ -897,6 +897,13 @@ export const useAnnotation = ({
   }
 
   const onObjectModified = event => {
+    // fabric fires object:modified from Canvas.clear() when an IText still
+    // in editing gets discarded (exitEditing on a changed text). That
+    // programmatic exit must not post an update: after a resize the canvas
+    // dimensions no longer match the object's live coordinates, and the
+    // serialization would corrupt the stored note (coordinates multiplied
+    // by the resize ratio, note rendered off-canvas for everyone).
+    if (silentAnnotation) return
     const movedObject = event.target
     if (!movedObject._objects) {
       addToUpdates(movedObject)
@@ -1418,7 +1425,15 @@ export const useAnnotation = ({
     // don't land after this clear.
     mainLoadToken++
     if (isFabricReady(fabricCanvas.value)) {
-      fabricCanvas.value.clear()
+      // clear() discards the active object first, and discarding an IText
+      // still in editing fires object:modified while it is attached to the
+      // canvas: mute the handler so a programmatic wipe never posts updates.
+      silentAnnotation = true
+      try {
+        fabricCanvas.value.clear()
+      } finally {
+        silentAnnotation = false
+      }
     }
     clearComparisonCanvas()
   }

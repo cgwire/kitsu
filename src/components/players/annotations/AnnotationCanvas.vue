@@ -100,6 +100,14 @@ const updateBounds = () => {
     canvas &&
     (canvas.width !== mediaRect.width || canvas.height !== mediaRect.height)
   ) {
+    // A text note still in editing must exit before the dimensions change:
+    // exiting fires object:modified, whose serialization pairs the live
+    // coordinates with the current canvas box. Exited here it saves
+    // correctly; exited later (fabric does it from the clear() the resized
+    // reload triggers) the coordinates would belong to the old box and the
+    // stored note would drift by the resize ratio.
+    const active = canvas.getActiveObject?.()
+    if (active?.isEditing) active.exitEditing()
     canvas.setDimensions({ width: mediaRect.width, height: mediaRect.height })
     emit('resized', { width: mediaRect.width, height: mediaRect.height })
   }
