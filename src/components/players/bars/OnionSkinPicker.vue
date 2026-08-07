@@ -22,13 +22,13 @@
           {{ $t('playlists.actions.onion_skin_off') }}
         </button>
         <button
-          v-for="n in 5"
           :key="n"
           type="button"
           class="onion-option"
           :class="{ active: isOn && frames === n }"
           :title="`${n}`"
           @click="onPicked(true, n)"
+          v-for="n in 5"
         >
           {{ n }}
         </button>
