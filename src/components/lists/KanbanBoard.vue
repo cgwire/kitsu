@@ -832,9 +832,9 @@ export default {
 }
 
 .dark .board-card .ui-droppable {
-  // faint light edge: border-alt (#666) frames too hard against the
-  // darker panel
-  border-color: rgba(255, 255, 255, 0.08);
+  // faint light edge, as a solid color: an alpha border would let the
+  // cover image bleed through and look milky
+  border-color: #55585d;
 }
 
 .preview-placeholder {
