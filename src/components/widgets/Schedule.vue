@@ -1096,6 +1096,10 @@ let lastEndDate = null
 // person row the drag started on: a multi-assignee task renders one bar per
 // assignee, so assignees[0] is not necessarily the person being reassigned
 let dragSourcePersonId = null
+// person row each dragged bar last hopped to during the drag: once the bar
+// left its source row, the source id is gone from assignees and only this
+// map knows which row the next hop must unassign
+const dragPersonByItem = new Map()
 
 // cached wrapper rect: getBoundingClientRect on every mousemove forces a
 // layout; invalidated on resize and zoom via resetScheduleSize
@@ -1517,17 +1521,25 @@ const changeDates = event => {
 
       target.classList.add('droppable')
 
+      const newAssigneeId = target.dataset.personId
       selection.value.forEach(item => {
+        // multi-selection: an item already on the hovered row would get the
+        // assignee id and its bar duplicated
+        if (item.assignees.includes(newAssigneeId)) return
+        // unassign the row the bar currently sits on: past the first hop the
+        // source person is gone from assignees, and the assignees[0]
+        // fallback would unassign an untouched co-assignee
+        const previousAssigneeId =
+          dragPersonByItem.get(item) ??
+          (dragSourcePersonId && item.assignees.includes(dragSourcePersonId)
+            ? dragSourcePersonId
+            : item.assignees[0])
+
         // the handlers own the assignees and person-line updates: mutating
         // them here too duplicated the new assignee id
-        const previousAssigneeId =
-          dragSourcePersonId && item.assignees.includes(dragSourcePersonId)
-            ? dragSourcePersonId
-            : item.assignees[0]
-        const newAssigneeId = target.dataset.personId
-
         emit('item-unassign', item, previousAssigneeId)
         emit('item-assign', item, newAssigneeId)
+        dragPersonByItem.set(item, newAssigneeId)
         refreshItemPositions(currentRootElement)
       })
     } else if (
@@ -1847,6 +1859,7 @@ const moveTimebar = (timeElement, event) => {
     initialClientX = getClientX(event)
     dragSourcePersonId =
       event.target.closest?.('[data-person-id]')?.dataset.personId ?? null
+    dragPersonByItem.clear()
     document.body.style.cursor = props.reassignable ? 'all-scroll' : 'ew-resize'
 
     startMoveTracking()
@@ -2036,6 +2049,7 @@ const stopBrowsing = event => {
   initialClientX = null
   initialClientY = null
   dragSourcePersonId = null
+  dragPersonByItem.clear()
   currentElement.value = null
 }
 
@@ -2398,12 +2412,17 @@ const addMilestoneTitle = day => {
 }
 
 const checkUserIsAllowed = (item, person) => {
-  if (!item) {
+  // person may be any root element (e.g. a task type row on the production
+  // schedule): only actual person rows carry a departments list
+  if (!item || !person?.departments) {
     return false
   }
   const production = openProductions.value.find(
     ({ id }) => id === item.project_id
   )
+  if (!production) {
+    return false
+  }
   const isTeamMember = production.team.includes(person.id)
   const isDepartmentMember =
     !person.departments.length ||
@@ -2450,13 +2469,21 @@ const onTaskDrop = (event, rootElement) => {
     return // invalid user rights
   }
 
-  const position =
-    timelineContentWrapperRef.value.scrollLeft +
-    getClientX(event) -
-    300 -
-    cellWidth.value * 1.5
-  const dayPosition = Math.floor(position / cellWidth.value)
-  const dropDate = props.startDate.clone().add(dayPosition, 'days')
+  // resolve the hovered column the same way as the position bar: the
+  // previous math hardcoded a 300px entity panel offset and counted week
+  // cells as days, landing drops on the wrong date
+  const columns = isWeekMode.value ? weeksAvailable.value : displayedDays.value
+  if (!columns.length) {
+    return
+  }
+  if (!wrapperRect) {
+    wrapperRect = timelineContentWrapperRef.value.getBoundingClientRect()
+  }
+  const cursorX = getClientX(event) - wrapperRect.left
+  const index = Math.floor(
+    (timelineContentWrapperRef.value.scrollLeft + cursorX) / cellWidth.value
+  )
+  const dropDate = columns[Math.min(Math.max(index, 0), columns.length - 1)]
   const startDate = addBusinessDays(dropDate, 0, rootElement.daysOff)
   const endDate = item.estimation
     ? addBusinessDays(
@@ -2525,13 +2552,6 @@ watch(
   }
 )
 
-watch(
-  () => props.height,
-  () => {
-    nextTick(resetScheduleSize)
-  }
-)
-
 watch(currentElement, () => {
   if (currentElement.value && currentElement.value.task_type_id) {
     const task = taskMap.value.get(currentElement.value.id)
@@ -2588,6 +2608,7 @@ defineExpose({
   refreshItemPositions,
   refreshManDays,
   resetScheduleSize,
+  resetSelection,
   scrollToDate,
   scrollToToday,
   setScrollPosition

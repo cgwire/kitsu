@@ -2419,8 +2419,8 @@ watch(isAnnotationsDisplayed, () => {
 
 watch(isComparisonOverlay, () => {
   nextTick(() => {
-    previewViewer.value.resize()
-    comparisonViewer.value.resize()
+    previewViewer.value?.resize()
+    comparisonViewer.value?.resize()
   })
 })
 
@@ -2444,7 +2444,7 @@ watch(speed, () => {
 })
 
 watch(volume, () => {
-  previewViewer.value.setVolume(volume.value)
+  previewViewer.value?.setVolume(volume.value)
   localPreferences.setPreference('player:volume', volume.value)
 })
 
@@ -2471,13 +2471,13 @@ onMounted(() => {
   }
 
   if (isMuted.value) {
-    previewViewer.value.setVolume(0)
+    previewViewer.value?.setVolume(0)
   } else {
     volume.value = localPreferences.getIntPreference(
       'player:volume',
       volume.value
     )
-    previewViewer.value.setVolume(volume.value)
+    previewViewer.value?.setVolume(volume.value)
   }
 
   reloadAnnotations()

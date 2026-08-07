@@ -121,7 +121,7 @@
         is-estimation-linked
         hide-man-days
         :multiline="isAllEpisodes"
-        :reassignable="!isLockedSchedule"
+        :reassignable="!isLockedSchedule && !isAllEpisodes"
         show-expand-all
         :subchildren="!isAllEpisodes"
         :type="mode"
@@ -147,9 +147,9 @@
           class="close-button"
           role="button"
           tabindex="0"
-          @click="toggleSidePanel"
-          @keydown.enter.prevent="toggleSidePanel"
-          @keydown.space.prevent="toggleSidePanel"
+          @click="unselectAndCloseSidePanel"
+          @keydown.enter.prevent="unselectAndCloseSidePanel"
+          @keydown.space.prevent="unselectAndCloseSidePanel"
         >
           <x-icon class="align-middle" :size="16" />
         </a>
@@ -462,7 +462,10 @@
                   :text="$t('main.apply')"
                   type="submit"
                 />
-                <button class="button is-link ml05" @click="closeSidePanel()">
+                <button
+                  class="button is-link ml05"
+                  @click="unselectAndCloseSidePanel()"
+                >
                   {{ $t('main.cancel') }}
                 </button>
               </template>
@@ -733,7 +736,11 @@ export default {
           person.role !== 'client' &&
           (['admin', 'manager'].includes(person.role) ||
             !person.departments.length ||
-            person.departments.includes(taskType?.department_id))
+            person.departments.includes(taskType?.department_id) ||
+            // an out-of-department person already assigned to the edited
+            // task stays listed: saveTask replaces the full assignee list,
+            // so hiding them here would silently unassign them
+            this.assignments.task?.assignees?.includes(person.id))
       )
     },
 
@@ -1499,7 +1506,7 @@ export default {
         } catch (err) {
           console.error(err)
           taskTypeElement.children = []
-          taskTypeElement.people = []
+          taskTypeElement.people = {}
         } finally {
           taskTypeElement.loading = false
         }
@@ -1748,6 +1755,16 @@ export default {
       this.selectedTaskType = this.scheduleItems.find(
         item => item.task_type_id === taskTypeId
       )
+      // clear the entity filter when it hides the selected row, or the
+      // expand below would fill the panel while the schedule shows nothing
+      if (
+        this.entityType &&
+        this.selectedTaskType &&
+        this.selectedTaskType.for_entity !== this.entityType
+      ) {
+        this.entityType = null
+        this.updateRoute({ type: null })
+      }
       // refresh schedule
       this.expandTaskTypeElement(
         this.selectedTaskType,
@@ -2001,6 +2018,15 @@ export default {
       this.resetSidePanel()
     },
 
+    // explicit close (close button, task cancel): also drop the schedule
+    // selection, or the bar keeps its ring and its resize handles swallow
+    // the next click. closeSidePanel alone must not do it: it also runs
+    // when a multi-selection starts and would clear it.
+    unselectAndCloseSidePanel() {
+      this.$refs.schedule?.resetSelection()
+      this.closeSidePanel()
+    },
+
     onAssignmentItemSelected(item) {
       const today = moment().utc().toDate()
       this.assignments.type = 'entity'
@@ -2171,7 +2197,12 @@ export default {
 
                 // save versioned task
                 if (!versionedTask.id) {
-                  await this.createScheduleVersionedTask(versionedTask)
+                  const createdTask =
+                    await this.createScheduleVersionedTask(versionedTask)
+                  // keep the created id: without it the task edits right
+                  // after an assignment would post duplicates
+                  versionedTask.id = createdTask.id
+                  task.versionedTaskId = createdTask.id
                 } else {
                   await this.updateScheduleVersionedTask(versionedTask)
                 }
@@ -2314,7 +2345,11 @@ export default {
       // update task to refresh the schedule
       task.assignees = task.assignees.filter(id => id !== personId)
       const tasks = task.parentElement.children.get(personId)
-      tasks.splice(tasks.indexOf(task), 1)
+      // guard: splice(-1, 1) on a miss would silently drop another task's bar
+      const taskIndex = tasks?.indexOf(task) ?? -1
+      if (taskIndex !== -1) {
+        tasks.splice(taskIndex, 1)
+      }
 
       // save change
       if (this.isVersioned) {
