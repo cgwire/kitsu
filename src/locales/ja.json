@@ -26,7 +26,7 @@
         "time_spent": "作業時間",
         "type": "タイプ",
         "hidden_from_client": "クライアントに表示",
-        "ready_for": "準備対象",
+        "ready_for": "準備済み工程",
         "shared": "アセットライブラリで共有"
       },
       "cancel_text": "{name} をアーカイブしてもよろしいですか？",
@@ -71,7 +71,7 @@
       "title": "ブレイクダウン",
       "options": {
         "fixed": "固定",
-        "animate": "アニメート"
+        "animate": "アニメーションあり"
       },
       "remove": {
         "confirm": "エピソードからアセットを外す",
@@ -117,7 +117,7 @@
         "checklist": "チェックリスト",
         "acknowledgements": "確認済み",
         "revision": "改訂",
-        "attachments": "アタッチメント"
+        "attachments": "添付ファイル"
       },
       "checklist": "チェックリスト",
       "attachments": "添付",
@@ -364,23 +364,23 @@
         "password2": "パスワード（確認）",
         "totp": "TOTP",
         "email_otp": "メールの OTP",
-        "recovery_code": "リカバリコード"
+        "recovery_code": "リカバリーコード"
       },
       "too_many_failed_login_attemps": "ログイン失敗が多すぎます。1分後にお試しください。",
       "verify": "検証",
       "wrong_totp": "TOTP の検証に失敗しました。",
       "wrong_email_otp": "メールの OTP の検証に失敗しました。",
-      "wrong_recovery_code": "リカバリコードの検証に失敗しました。",
+      "wrong_recovery_code": "リカバリーコードの検証に失敗しました。",
       "information_totp": "モバイル端末の TOTP アプリを開き、認証コードを確認してください。",
       "information_email_otp": "メールに送信された認証コードを確認してください。",
-      "information_recovery_code": "他の二要素認証が使用できない場合は、リカバリコードのいずれかを入力してください。",
+      "information_recovery_code": "他の二要素認証が使用できない場合は、リカバリーコードのいずれかを入力してください。",
       "unable_to_verify_totp": "TOTP での認証ができませんか？",
       "unable_to_verify_email_otp": "メールでの認証ができませんか？",
       "send_email_otp": "メールで OTP を再送",
-      "unable_to_verify_recovery_code": "リカバリコードがありませんか？",
+      "unable_to_verify_recovery_code": "リカバリーコードがありませんか？",
       "choose_totp": "TOTP による二要素認証コードを入力",
       "choose_email_otp": "メールによる二要素認証コードを入力",
-      "choose_recovery_code": "リカバリコードを使用",
+      "choose_recovery_code": "リカバリーコードを使用",
       "choose_fido": "FIDO デバイスを使用",
       "error_requesting_fido": "FIDO チャレンジの要求中にエラーが発生しました。",
       "error_sending_email": "メールで OTP を送信中にエラーが発生しました。",
@@ -596,7 +596,7 @@
       "unassigned": "未アサイン",
       "year": "年",
       "apply": "適用",
-      "back": "バック",
+      "back": "戻る",
       "edit_mode_on": "編集モードの切り替え",
       "entities": "エンティティ",
       "expand_all": "すべて展開",
@@ -651,7 +651,7 @@
     "news": {
       "all": "すべて",
       "commented_on": "にコメント",
-      "infos": "インフォメーション",
+      "infos": "表示する情報",
       "no_news": "ニュースはありません",
       "only_comments": "コメントのみ",
       "only_previews": "プレビューのみ",
@@ -1406,8 +1406,8 @@
       "delete_version_error": "このスケジュールバージョンの削除中にエラーが発生しました。サポートチームまでお問い合わせください。",
       "delete_version_message": "スケジュールバージョン {name} を削除してもよろしいですか？確認のため、下にバージョン名を入力してください。",
       "versions": {
-        "reference": "参考予想",
-        "from": "より",
+        "reference": "基準予測",
+        "from": "作成元:",
         "locked": "ロック済み",
         "canceled": "キャンセル"
       },
@@ -1422,7 +1422,7 @@
     },
     "quota": {
       "average": "平均",
-      "count_label": "カウント単位",
+      "count_label": "集計単位",
       "detail_label": "詳細レベル",
       "details_name": "名前",
       "details_seconds": "秒",
@@ -1438,22 +1438,22 @@
       "type_label": "タイプ",
       "export_quotas": "クォータをエクスポート",
       "highlight_quotas": "以下のクォータをハイライト:",
-      "weight": "重み",
-      "count": "カウント",
+      "weight": "配分",
+      "count": "ショット",
       "compute_mode": "計算モード",
       "day": "日",
       "feedback_date": "フィードバック日",
       "frames": "フレーム",
       "month": "月",
       "seconds": "秒",
-      "weighted": "重み付け（フィードバック）",
+      "weighted": "日割り（フィードバック）",
       "week": "週",
       "explanation_feedback": "ショットは最初のフィードバック要求時に完了とみなされます。そのフレーム数がその日のクォータに追加されます。",
       "done_date": "承認日",
       "explanation_done": "ショットは最後の承認時に完了とみなされます。そのフレーム数がその日のクォータに追加されます。",
-      "explanation_weighted": "ショットは最初のフィードバック要求時に完了とみなされます。その後、クォータはアーティストのタイムシートに記録されたタスクの作業時間に基づいて重み付けされます。\n\n 時間が記録されていない場合、以下が想定されます:\n* タスクは最初のステータス変更で作業中になった時に開始。\n* タスクはフィードバック要求が行われた日に完了。\n* 完了したフレームは開始日と終了日の間のすべての営業日に均等に配分。",
-      "explanation_weighteddone": "ショットは最後の承認時に完了とみなされます。その後、クォータはアーティストのタイムシートに記録されたタスクの作業時間に基づいて重み付けされます。\n\n 時間が記録されていない場合、以下が想定されます:\n* タスクは最初のステータス変更で作業中になった時に開始。\n* タスクは承認された日に完了。\n* 完了したフレームは開始日と終了日の間のすべての営業日に均等に配分。",
-      "weighted_done": "重み付け（承認）",
+      "explanation_weighted": "ショットは最初のフィードバック要求時に完了とみなされます。フレーム数は完了日にまとめて計上せず、タイムシートの作業時間に応じて、作業した日に日割りで計上されます。\n\n 時間が記録されていない場合、以下が想定されます:\n* タスクは最初のステータス変更で作業中になった時に開始。\n* タスクはフィードバック要求が行われた日に完了。\n* 完了したフレームは開始日と終了日の間のすべての営業日に均等に配分。",
+      "explanation_weighteddone": "ショットは最後の承認時に完了とみなされます。フレーム数は完了日にまとめて計上せず、タイムシートの作業時間に応じて、作業した日に日割りで計上されます。\n\n 時間が記録されていない場合、以下が想定されます:\n* タスクは最初のステータス変更で作業中になった時に開始。\n* タスクは承認された日に完了。\n* 完了したフレームは開始日と終了日の間のすべての営業日に均等に配分。",
+      "weighted_done": "日割り（承認）",
       "drawings": "枚数"
     },
     "shots": {
@@ -1502,9 +1502,9 @@
       "delete_for_selection": "選択したショットを削除 | {nbSelectedShots} 件のショットを削除",
       "multiple_delete_error": "ショットの削除中にエラーが発生しました。関連データが存在する可能性があります。選択したショットにリンクされたタスクがないことを確認してください。",
       "creation_explanation": "ショットを追加するには、先にエピソードとシーケンスを作成します。まず「エピソード」列で名前を入力して「追加」し、作成したエピソードを選択してください。同じ手順で「シーケンス」列にシーケンスを追加して選択し、最後に「ショット」列でショット名を入力して「追加」します。「番組」以外のプロダクションでは「エピソード」列は表示されないため、シーケンスから作成してください。",
-      "get_frames_from_previews": "プレビューからフレーム番号を設定",
-      "get_frames_from_previews_description": "最新の公開された動画プレビューからフレーム番号を抽出するタスクタイプを選択してください。",
-      "get_frames_from_previews_error": "タスクタイプのプレビューからフレーム番号を抽出中にエラーが発生しました。サポートチームまでお問い合わせください。",
+      "get_frames_from_previews": "プレビューからフレーム数を設定",
+      "get_frames_from_previews_description": "タスクタイプを選択すると、そのタスクタイプの最新の動画プレビューの長さから、各ショットのフレーム数を計算して設定します。",
+      "get_frames_from_previews_error": "プレビューからのフレーム数の設定中にエラーが発生しました。サポートチームまでお問い合わせください。",
       "wrong_file_duration": "アップロードされた動画ファイルの1つの長さが現在のショットの予想される長さと一致しません。",
       "delete_for_selection_hard_text": "選択したショットを完全に削除してもよろしいですか？関連するすべてのタスク、コメント、プレビューも削除されます。下に「削除」と入力して確認してください。",
       "delete_for_selection_hard_lock_text": "削除",
@@ -1842,7 +1842,7 @@
       "multiple_delete_error": "エディットの削除中にエラーが発生しました。関連データが存在する可能性があります。選択したエディットにリンクされたタスクがないことを確認してください。"
     },
     "status_automations": {
-      "change_ready_for": "\"準備対象\"を変更",
+      "change_ready_for": "「準備済み工程」を変更",
       "change_status": "タスクステータスを変更",
       "create_error": "ステータス自動化の保存中にエラーが発生しました。同名の自動化が存在しないか確認してください。",
       "delete_text": "ステータス自動化 {name} をデータベースから削除してもよろしいですか？",
@@ -1875,7 +1875,7 @@
       },
       "field_types": {
         "status": "ステータス",
-        "ready_for": "準備対象"
+        "ready_for": "準備済み工程"
       },
       "add_status_automation_placeholder": "+ ステータス自動化の追加"
     },
