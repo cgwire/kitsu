@@ -154,7 +154,10 @@
         "mute": "ミュート",
         "unmute": "ミュート解除",
         "fullscreen": "フルスクリーン",
-        "download": "ダウンロード"
+        "download": "ダウンロード",
+        "video_unavailable": "動画を再生できません",
+        "audio_unavailable": "音声を再生できません",
+        "image_unavailable": "画像を表示できません"
       }
     },
     "custom_actions": {
@@ -1242,7 +1245,9 @@
         "status_disabled": "無効",
         "status_enabled": "有効"
       },
-      "notifications_title": "通知"
+      "notifications_title": "通知",
+      "date_format": "日付形式",
+      "use_12_hour_clock": "12時間表示（AM/PM）"
     },
     "settings": {
       "change_logo": "ロゴを変更",
@@ -1412,7 +1417,8 @@
         "name": "バージョン名",
         "locked": "ロック済みバージョン"
       },
-      "hours": "時間"
+      "hours": "時間",
+      "confirm_move_children": "このバーを移動すると、配下の {count} 件が新しい範囲に収まるように調整されます。続行しますか？ | このバーを移動すると、配下の {count} 件が新しい範囲に収まるように調整されます。続行しますか？"
     },
     "quota": {
       "average": "平均",
@@ -1487,7 +1493,10 @@
         "max_retakes": "最大リテイク",
         "resolution": "解像度",
         "placeholder": "SH01",
-        "nb_drawings": "枚数"
+        "nb_drawings": "枚数",
+        "start": "開始",
+        "count": "個数",
+        "step": "間隔"
       },
       "cancel_text": "{name} をアーカイブしてもよろしいですか？",
       "delete_for_selection": "選択したショットを削除 | {nbSelectedShots} 件のショットを削除",
@@ -1499,7 +1508,12 @@
       "wrong_file_duration": "アップロードされた動画ファイルの1つの長さが現在のショットの予想される長さと一致しません。",
       "delete_for_selection_hard_text": "選択したショットを完全に削除してもよろしいですか？関連するすべてのタスク、コメント、プレビューも削除されます。下に「削除」と入力して確認してください。",
       "delete_for_selection_hard_lock_text": "削除",
-      "show_timecode": "開始・最終フレームをタイムコードで表示"
+      "show_timecode": "開始・最終フレームをタイムコードで表示",
+      "single_tab": "個別",
+      "bulk_tab": "一括",
+      "bulk_generate": "一括作成",
+      "bulk_error": "一括作成に失敗しました。もう一度お試しください。",
+      "bulk_invalid_start": "開始の名前は数字で終わる必要があります。"
     },
     "server_down": {
       "text": "問題の原因を把握するには、サポートチームまたはシステム管理者までお問い合わせください。",
