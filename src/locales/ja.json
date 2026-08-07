@@ -230,7 +230,7 @@
         "no_logs": "このエンティティのタイムログはありません。"
       },
       "preview_files": {
-        "extension": "エクステンション",
+        "extension": "拡張子",
         "no_preview_files": "このエンティティのプレビューファイルはありません。",
         "original_file_name": "元のファイル名",
         "position": "位置",
@@ -796,8 +796,8 @@
       "departments_empty": "このユーザーはどの部門にもリンクされていません。",
       "edit_avatar_error": "ユーザーのアバター更新中にエラーが発生しました。",
       "contract": {
-        "open-ended": "無期限",
-        "fixed-term": "有期",
+        "open-ended": "無期雇用",
+        "fixed-term": "有期雇用",
         "short-term": "短期",
         "freelance": "フリーランス",
         "apprentice": "見習い",
@@ -1017,7 +1017,7 @@
       "fields": {
         "fps": "FPS",
         "name": "名前",
-        "ratio": "比率",
+        "ratio": "アスペクト比",
         "resolution": "解像度",
         "status": "ステータス",
         "type": "タイプ",
@@ -1025,17 +1025,17 @@
         "end_date": "終了日",
         "nb_episodes": "エピソード数",
         "episode_span": "エピソード間隔",
-        "is_clients_isolated": "クライアントコメントを分離（互いに見えない）",
-        "max_retakes": "最大リテイク回数",
+        "is_clients_isolated": "各クライアントごとにコメントを分離する（互いに見えないようにする）",
+        "max_retakes": "リテイク回数の上限",
         "style": "スタイル",
-        "is_preview_download_allowed": "アーティストがプレビューをダウンロード可能",
-        "is_set_preview_automated": "新しいプレビューを自動的にエンティティのサムネイルに設定",
+        "is_preview_download_allowed": "アーティストがプレビューをダウンロードできるようにする",
+        "is_set_preview_automated": "新しいプレビューを自動的にエンティティのサムネイルに設定する",
         "homepage": "ホームページ（最初に表示されるページ）",
         "code": "略称",
-        "is_publish_default": "アーティストのコメントウィジェットをデフォルトで公開モードに設定",
-        "is_single_preview_per_revision": "リビジョンごとにプレビューファイルを1つのみ許可",
-        "revision_padding": "リビジョン番号のパディング（0 = パディングなし）",
-        "is_frame_in_numbering": "プレイヤーのフレーム番号を開始フレームから数える"
+        "is_publish_default": "アーティストのコメント欄で「リビジョンを公開」を既定のタブにする",
+        "is_single_preview_per_revision": "リビジョンに追加できるプレビューファイルを1つまでに制限する",
+        "revision_padding": "リビジョン番号のゼロ埋め桁数（0 = ゼロ埋めなし）",
+        "is_frame_in_numbering": "プレイヤーのフレーム番号をショットの開始フレームから表示する"
       },
       "metadata": {
         "add_explanation": "このプロダクションに必要な項目を追加します。",
@@ -1077,14 +1077,14 @@
       },
       "edit_error": "プロダクションの編集中にエラーが発生しました。サポートチームまでお問い合わせください。",
       "brief": {
-        "title": "ブリーフ",
-        "empty": "まだブリーフがありません。作成しますか？",
-        "edit_error": "ブリーフの編集中にエラーが発生しました。"
+        "title": "概要",
+        "empty": "まだ概要がありません。ダブルクリックで作成できます。",
+        "edit_error": "概要の編集中にエラーが発生しました。"
       },
       "parameters": {
-        "title": "パラメーター",
+        "title": "基本設定",
         "save": {
-          "button": "確認"
+          "button": "確定"
         }
       },
       "creation": {
@@ -1246,7 +1246,7 @@
     },
     "settings": {
       "change_logo": "ロゴを変更",
-      "integrations": "統合",
+      "integrations": "連携",
       "logo": "スタジオロゴ",
       "no_logo": "ロゴが設定されていません。",
       "set_logo": "スタジオロゴを設定",
@@ -1256,29 +1256,29 @@
         "hours_by_day": "1日あたりの勤務時間",
         "slack_token": "Slack トークン（任意）",
         "use_original_name": "ダウンロードに元のファイル名を使用",
-        "timesheets_locked": "1週間以上前のアーティストのタイムシートをロック",
+        "timesheets_locked": "アーティストは1週間より前のタイムシートを編集不可",
         "mattermost_webhook": "Mattermost Webhook（任意）",
         "discord_token": "Discord トークン（任意）",
         "show_hd_default": "デフォルトでHD画質の動画を表示（表示が遅くなります）",
-        "format_duration_in_hours": "作業時間と工数を時間単位で表示",
+        "format_duration_in_hours": "作業時間と工数を人日ではなく時間で表示",
         "dark_theme_by_default": "デフォルトでダークテーマを使用"
       },
       "production": {
-        "empty_list": "現在リストは空のため、メイン設定のすべての項目が利用できます。このプロダクションで使う項目を絞り込むには、ここに項目を追加してください。",
+        "empty_list": "まだ何も追加されていないため、登録されているすべての項目がこのプロダクションで使用できます。特定の項目だけに限定したい場合は、ここに追加してください。",
         "empty_automation_list": "このプロダクションに設定された自動化はありません。",
         "empty_backgrounds": "リンクされた背景はありません。上のリストから選択して追加してください。",
-        "empty_board": "ボードでの表示を設定するには、まずタスクステータスを追加してください。",
-        "empty_metadata": "このエンティティタイプには、まだメタデータ列が定義されていません。"
+        "empty_board": "プロダクションにタスクステータスがまだ追加されていません。先に「タスクステータス」タブで追加すると、カンバンボードに表示するステータスをここで設定できます。",
+        "empty_metadata": "このタブのエンティティには、まだメタデータ列がありません。"
       },
       "save": {
         "button": "設定を保存",
-        "error": "設定の保存中にサーバーエラーが発生しました"
+        "error": "設定の保存中にサーバーエラーが発生しました。"
       },
-      "webhook_error": "webhook の投稿中にエラーが発生しました",
+      "webhook_error": "webhook への送信中にエラーが発生しました。",
       "remove_logo": "スタジオロゴを削除",
-      "available_items": "利用可能なアイテム",
+      "available_items": "追加できる項目",
       "import_from_production": "別のプロダクションからインポート",
-      "no_more_available_items": "追加できるアイテムがありません。",
+      "no_more_available_items": "これ以上追加できる項目はありません。",
       "preferences_title": "環境設定"
     },
     "task_status": {
@@ -1291,17 +1291,17 @@
       "title": "タスクステータス",
       "fields": {
         "color": "色",
-        "is_artist_allowed": "アーティストは許可されているか",
-        "is_client_allowed": "クライアントは許可されているか",
+        "is_artist_allowed": "アーティストが選択可能",
+        "is_client_allowed": "クライアントが選択可能",
         "is_done": "完了",
-        "is_retake": "リテイク値を持つ",
+        "is_retake": "リテイク",
         "name": "名前",
         "short_name": "略称",
         "is_feedback_request": "フィードバック要求",
         "is_default": "デフォルト",
         "for_concept": "コンセプト用",
         "description": "説明",
-        "is_wip": "WIPである"
+        "is_wip": "作業中"
       },
       "name": "タスクステータス",
       "title_entities": "エンティティ用ステータス",
@@ -1411,7 +1411,8 @@
         "new": "新しいスケジュール",
         "name": "バージョン名",
         "locked": "ロック済みバージョン"
-      }
+      },
+      "hours": "時間"
     },
     "quota": {
       "average": "平均",
@@ -1790,7 +1791,7 @@
       "hardware_used_by_artists": "アーティストが使用するハードウェア",
       "linked_hardware": "リンクされたハードウェア",
       "linked_items": "リンクされたアイテム",
-      "linked_software": "連動ソフトウェア",
+      "linked_software": "リンクされたソフトウェア",
       "no_items_linked": "この部門に関連するアイテムはありません。",
       "select_department": "アイテムをリンクする部門を選択します。",
       "software_used_by_artists": "アーティストが使用するソフトウェア"
@@ -1839,7 +1840,7 @@
       "out_title": "トリガー発火時に適用される変更",
       "new_status_automation": "ステータス自動化を作成",
       "run_for_selection": "選択したタスクにステータス自動化を実行:",
-      "title": "自動化",
+      "title": "ステータス自動化",
       "wrong_automation": "この自動化は上流のタスクタイプを対象にしているため動作しません。無限ループを防ぐため、Kitsu では上流方向への自動化を許可していません。",
       "fields": {
         "entity_type": "エンティティタイプ",
@@ -2125,7 +2126,7 @@
       "number": "ソフトウェア | ソフトウェア",
       "title": "ソフトウェア",
       "fields": {
-        "extension": "エクステンション",
+        "extension": "拡張子",
         "name": "名称",
         "monthly_cost": "月額費用",
         "inventory_amount": "在庫数",
@@ -2167,7 +2168,7 @@
       "name_required": "名前は必須です。",
       "new_project_template": "プロダクションテンプレートを追加",
       "number": "プロダクションテンプレート | プロダクションテンプレート",
-      "ratio_error": "比率は x:y 形式（例: 16:9）である必要があります。",
+      "ratio_error": "アスペクト比は x:y 形式（例: 16:9）で入力してください。",
       "resolution_error": "解像度は WxH 形式（例: 1920x1080）である必要があります。",
       "select": "テンプレートを選択",
       "tabs": {
