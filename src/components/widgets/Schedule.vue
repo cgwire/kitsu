@@ -1096,6 +1096,10 @@ let lastEndDate = null
 // person row the drag started on: a multi-assignee task renders one bar per
 // assignee, so assignees[0] is not necessarily the person being reassigned
 let dragSourcePersonId = null
+// person row each dragged bar last hopped to during the drag: once the bar
+// left its source row, the source id is gone from assignees and only this
+// map knows which row the next hop must unassign
+const dragPersonByItem = new Map()
 
 // cached wrapper rect: getBoundingClientRect on every mousemove forces a
 // layout; invalidated on resize and zoom via resetScheduleSize
@@ -1517,17 +1521,25 @@ const changeDates = event => {
 
       target.classList.add('droppable')
 
+      const newAssigneeId = target.dataset.personId
       selection.value.forEach(item => {
+        // multi-selection: an item already on the hovered row would get the
+        // assignee id and its bar duplicated
+        if (item.assignees.includes(newAssigneeId)) return
+        // unassign the row the bar currently sits on: past the first hop the
+        // source person is gone from assignees, and the assignees[0]
+        // fallback would unassign an untouched co-assignee
+        const previousAssigneeId =
+          dragPersonByItem.get(item) ??
+          (dragSourcePersonId && item.assignees.includes(dragSourcePersonId)
+            ? dragSourcePersonId
+            : item.assignees[0])
+
         // the handlers own the assignees and person-line updates: mutating
         // them here too duplicated the new assignee id
-        const previousAssigneeId =
-          dragSourcePersonId && item.assignees.includes(dragSourcePersonId)
-            ? dragSourcePersonId
-            : item.assignees[0]
-        const newAssigneeId = target.dataset.personId
-
         emit('item-unassign', item, previousAssigneeId)
         emit('item-assign', item, newAssigneeId)
+        dragPersonByItem.set(item, newAssigneeId)
         refreshItemPositions(currentRootElement)
       })
     } else if (
@@ -1847,6 +1859,7 @@ const moveTimebar = (timeElement, event) => {
     initialClientX = getClientX(event)
     dragSourcePersonId =
       event.target.closest?.('[data-person-id]')?.dataset.personId ?? null
+    dragPersonByItem.clear()
     document.body.style.cursor = props.reassignable ? 'all-scroll' : 'ew-resize'
 
     startMoveTracking()
@@ -2036,6 +2049,7 @@ const stopBrowsing = event => {
   initialClientX = null
   initialClientY = null
   dragSourcePersonId = null
+  dragPersonByItem.clear()
   currentElement.value = null
 }
 
