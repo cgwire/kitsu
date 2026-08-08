@@ -100,11 +100,15 @@
           :days-off="daysOff"
           :is-loading="isTodosLoading"
           :tasks="sortedTasks"
+          :time-spents="calendarTimeSpents"
+          @dates-changed="onCalendarDatesChanged"
+          @time-clicked="onCalendarTimeClicked"
           v-if="isActiveTab('calendar')"
         />
 
         <timesheet-list
           ref="timesheet-list"
+          :initial-date="selectedDate"
           :tasks="loggableTodos"
           :done-tasks="loggableDoneTasks"
           :is-loading="loading.timesheets || isTodosLoading"
@@ -198,6 +202,7 @@ export default {
         savingSearch: false
       },
       productionId: undefined,
+      calendarTimeSpents: [],
       selectedDate: moment().format('YYYY-MM-DD'),
       sortOptions: [
         'entity_name',
@@ -391,6 +396,7 @@ export default {
       'clearSelectedTasks',
       'loadAggregatedPersonDaysOff',
       'loadOpenProductions',
+      'loadPersonTimeSpentsByPeriod',
       'loadUserTimeSpents',
       'loadTodos',
       'loadDoneTasks',
@@ -455,6 +461,16 @@ export default {
         ? currentSection
         : 'todos'
 
+      const day = this.$route.query.day
+      if (
+        day &&
+        day !== this.selectedDate &&
+        moment(day, 'YYYY-MM-DD', true).isValid()
+      ) {
+        this.selectedDate = day
+        this.loadTimeSpents()
+      }
+
       const currentProduction = this.openProductions.find(
         ({ id }) => id === this.$route.query.productionId
       )
@@ -502,8 +518,33 @@ export default {
     async onDateChanged(date) {
       this.loading.timesheets = true
       this.selectedDate = moment(date).format('YYYY-MM-DD')
+      // keep the day shareable in the URL, without stacking history entries
+      if (this.$route.query.day !== this.selectedDate) {
+        this.$router.replace({
+          query: { ...this.$route.query, day: this.selectedDate }
+        })
+      }
       await this.loadTimeSpents()
       this.loading.timesheets = false
+    },
+
+    onCalendarTimeClicked(date) {
+      this.$router.push({
+        query: { ...this.$route.query, section: 'timesheets', day: date }
+      })
+    },
+
+    async onCalendarDatesChanged({ start, end }) {
+      try {
+        this.calendarTimeSpents = await this.loadPersonTimeSpentsByPeriod({
+          personId: this.user.id,
+          startDate: start,
+          endDate: end
+        })
+      } catch (err) {
+        console.error(err)
+        this.calendarTimeSpents = []
+      }
     },
 
     async onSetDayOff(dayOff) {
@@ -665,6 +706,10 @@ export default {
     },
 
     '$route.query.section'() {
+      this.updateActiveTab()
+    },
+
+    '$route.query.day'() {
       this.updateActiveTab()
     },
 

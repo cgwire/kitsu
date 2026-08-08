@@ -3,11 +3,39 @@
     <spinner />
   </div>
   <div class="user-calendar mt1" ref="rootRef" v-else>
+    <div class="week-rail" v-if="weekRows.length">
+      <div
+        class="week-total"
+        :class="{ attached: row.attached, 'attached-next': row.attachedNext }"
+        :key="`${row.top}-${row.label}`"
+        :style="{ top: `${row.top}px`, height: `${row.height}px` }"
+        v-for="row in weekRows"
+      >
+        {{ row.label }}
+      </div>
+    </div>
     <full-calendar
       ref="calendarRef"
       class="app-calendar"
       :options="calendarOptions"
     >
+      <template #dayCellContent="arg">
+        <span class="day-cell-content">
+          <span>{{ arg.dayNumberText }}</span>
+          <span
+            class="day-hours"
+            role="button"
+            tabindex="0"
+            @click.stop="emit('time-clicked', toDateKey(arg.date))"
+            @keydown.enter.stop.prevent="
+              emit('time-clicked', toDateKey(arg.date))
+            "
+            v-if="timeByDay.get(toDateKey(arg.date))"
+          >
+            {{ formatHours(timeByDay.get(toDateKey(arg.date))) }}
+          </span>
+        </span>
+      </template>
       <template #eventContent="{ event }">
         <div
           class="calendar-day-off"
@@ -67,7 +95,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onBeforeUnmount, onMounted } from 'vue'
+import { ref, computed, watch, nextTick, onBeforeUnmount, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 import { BriefcaseIcon } from 'lucide-vue-next'
@@ -99,11 +127,17 @@ const props = defineProps({
     type: Array,
     default: () => []
   },
+  timeSpents: {
+    type: Array,
+    default: () => []
+  },
   isLoading: {
     type: Boolean,
     default: true
   }
 })
+
+const emit = defineEmits(['dates-changed', 'time-clicked'])
 
 const currentTask = ref(null)
 const calendarRef = ref(null)
@@ -114,20 +148,130 @@ const rootRef = ref(null)
 // then scrolls sideways). Nudge it on every container resize.
 const resizeObserver = new ResizeObserver(() => {
   calendarRef.value?.getApi().updateSize()
+  computeWeekRows()
 })
+
+const toDateKey = date =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-` +
+  `${String(date.getDate()).padStart(2, '0')}`
+
+// time spent durations are stored in minutes
+const formatHours = minutes => {
+  const hours = minutes / 60
+  return `${Number.isInteger(hours) ? hours : hours.toFixed(1)}h`
+}
+
+const timeByDay = computed(() => {
+  const byDay = new Map()
+  props.timeSpents.forEach(timeSpent => {
+    const key = timeSpent.date?.slice(0, 10)
+    byDay.set(key, (byDay.get(key) || 0) + timeSpent.duration)
+  })
+  return byDay
+})
+
+const weekRows = ref([])
+const currentRange = ref(null)
+const currentViewType = ref('dayGridMonth')
+
+// the dedicated week column lives outside the FullCalendar table, so its
+// cells are aligned by measuring the rendered week rows
+const computeWeekRows = () => {
+  // the dedicated column only makes sense on the month grid
+  if (
+    !rootRef.value ||
+    !props.timeSpents.length ||
+    currentViewType.value !== 'dayGridMonth'
+  ) {
+    weekRows.value = []
+    return
+  }
+  const rootRect = rootRef.value.getBoundingClientRect()
+  const rows = rootRef.value.querySelectorAll('.fc-daygrid-body tbody tr')
+  const cells = []
+  Array.from(rows).forEach(row => {
+    const rect = row.getBoundingClientRect()
+    const total = Array.from(
+      row.querySelectorAll('.fc-daygrid-day[data-date]')
+    ).reduce(
+      (sum, cell) => sum + (timeByDay.value.get(cell.dataset.date) || 0),
+      0
+    )
+    if (total) {
+      const top = rect.top - rootRect.top
+      const previous = cells[cells.length - 1]
+      // contiguous cells fuse into one block: square the shared corners
+      // and draw a separator instead
+      const attached =
+        Boolean(previous) && Math.abs(previous.top + previous.height - top) < 2
+      if (attached) {
+        previous.attachedNext = true
+      }
+      cells.push({
+        top,
+        height: rect.height,
+        label: formatHours(total),
+        attached,
+        attachedNext: false
+      })
+    }
+  })
+  weekRows.value = cells
+}
+
+const refreshMonthTotal = () => {
+  const range = currentRange.value
+  let total = 0
+  if (range) {
+    timeByDay.value.forEach((minutes, date) => {
+      if (date >= range.start && date < range.end) {
+        total += minutes
+      }
+    })
+  }
+  calendarOptions.value.customButtons = {
+    monthTotal: { text: total ? formatHours(total) : '', click: () => {} }
+  }
+}
+
+const refreshTimeDisplays = () => {
+  computeWeekRows()
+  refreshMonthTotal()
+}
+
+const onDatesSet = info => {
+  currentViewType.value = info.view.type
+  // currentStart/currentEnd cover the actual month or week, without the
+  // leading and trailing days of the neighbour months
+  currentRange.value = {
+    start: toDateKey(info.view.currentStart),
+    end: toDateKey(info.view.currentEnd)
+  }
+  const endDate = new Date(info.end)
+  endDate.setDate(endDate.getDate() - 1)
+  emit('dates-changed', {
+    start: toDateKey(info.start),
+    end: toDateKey(endDate)
+  })
+  nextTick(refreshTimeDisplays)
+}
 
 const calendarOptions = ref({
   plugins: [dayGridPlugin, multiMonthPlugin],
+  customButtons: {
+    monthTotal: { text: '', click: () => {} }
+  },
   headerToolbar: {
     left: 'prev,next today',
     center: 'title',
     // multiMonthYear stays wired up, only its button is hidden for now
-    right: 'dayGridMonth,dayGridWeek'
+    right: 'monthTotal dayGridMonth,dayGridWeek'
   },
   initialView: 'dayGridMonth',
   firstDay: 1,
   locales: allLocales,
-  locale: localeCode.value
+  locale: localeCode.value,
+  datesSet: onDatesSet
 })
 
 const resetEvents = () => {
@@ -262,6 +406,13 @@ watch(
   }
 )
 
+watch(
+  () => props.timeSpents,
+  () => {
+    nextTick(refreshTimeDisplays)
+  }
+)
+
 watch(localeCode, code => {
   calendarOptions.value.locale = code
   calendarRef.value?.getApi().setOption('locale', code)
@@ -283,9 +434,46 @@ watch(localeCode, code => {
   --calendar-day-off: rgba(255, 200, 80, 0.09);
 }
 
+.user-calendar {
+  display: flex;
+  gap: 8px;
+}
+
 .app-calendar {
-  width: 100%;
+  flex: 1;
   height: 100%;
+  min-width: 0;
+}
+
+.week-rail {
+  flex-shrink: 0;
+  position: relative;
+  width: 52px;
+}
+
+.week-total {
+  align-items: center;
+  background: var(--background-panel);
+  border-radius: 8px;
+  color: var(--text);
+  display: flex;
+  font-size: 0.75rem;
+  font-weight: 600;
+  justify-content: center;
+  left: 0;
+  position: absolute;
+  right: 0;
+
+  &.attached {
+    border-top: 1px solid rgba(var(--skeleton-rgb), 0.25);
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+
+  &.attached-next {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
 }
 
 .calendar-day-off {
@@ -420,20 +608,52 @@ watch(localeCode, code => {
 :deep(.fc-daygrid-day-number) {
   color: var(--text);
   font-size: 0.8rem;
+  font-weight: 700;
   opacity: 0.7;
   padding: 6px 8px;
   text-decoration: none;
+  width: 100%;
+}
+
+:deep(.fc-daygrid-day-top) {
+  // fc defaults to row-reverse, which parks the day number on the right
+  flex-direction: row;
+}
+
+:deep(.day-cell-content) {
+  align-items: center;
+  display: flex;
+  gap: 4px;
+  justify-content: space-between;
+  width: 100%;
+}
+
+:deep(.day-hours) {
+  background: var(--background-selectable);
+  border-radius: 4px;
+  color: var(--text-strong);
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0 4px;
+
+  &:hover {
+    background: var(--background-selected);
+  }
 }
 
 :deep(.fc-day-today .fc-daygrid-day-number) {
+  opacity: 1;
+}
+
+// the today pill hugs the day number, not the hours badge next to it
+:deep(.fc-day-today .day-cell-content > span:first-child) {
   background: var(--background-selected);
   border-radius: 999px;
   color: var(--text-strong);
   font-weight: 700;
-  margin: 3px;
-  min-width: 26px;
-  opacity: 1;
-  padding: 4px 8px;
+  min-width: 22px;
+  padding: 2px 7px;
   text-align: center;
 }
 
@@ -523,6 +743,24 @@ watch(localeCode, code => {
     &:hover,
     &:not(:disabled):active,
     &:not(:disabled):focus {
+      border: none;
+    }
+  }
+
+  // plain text, not a button: fc customButtons is just the vehicle to get
+  // the period total into the toolbar
+  .fc-monthTotal-button {
+    background: transparent;
+    border: none;
+    color: var(--text-strong);
+    cursor: default;
+    font-weight: 700;
+    pointer-events: none;
+
+    &:hover,
+    &:not(:disabled):active,
+    &:not(:disabled):focus {
+      background: transparent;
       border: none;
     }
   }
