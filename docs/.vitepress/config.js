@@ -363,7 +363,6 @@ export default {
             items: [
               { text: "Update Task Progress", link: "/guides/review-publishing/update-task-progress/" },
               { text: "Publish", link: "/guides/review-publishing/publish/" },
-              { text: "Request Review", link: "/guides/review-publishing/request-review/" },
               { text: "Review", link: "/guides/review-publishing/review/" },
               { text: "Playlist", link: "/guides/review-publishing/playlist/" }
             ],

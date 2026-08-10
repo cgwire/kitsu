@@ -1,25 +1,14 @@
 # Updating Task Progress
 
+Task statuses are indicators reflecting the current state or progress of a task. 
+
+Boards allow you to easily see the current status of a task at a glance and add comments to update team members when a status changes.
+
 Once you've made progress on your task, you'll want to update your team on its status.
 
-### Updating Task Statuses
+## Updating a Task Status
 
-1. Click the task’s **Status** icon on the **My Tasks** page or the relevant asset page.
-2. Add comments to provide updates or ask questions.
-3. Change the status (e.g., from "Ready" to "WIP").
-4. Click **Post** to save changes.
-
-![Changing status](/img/getting-started/changing_status.png)
-
-You can edit your most recent comment by clicking the **History** button and selecting **Edit**. ![Edit button](/img/getting-started/edit_button.png)
-
-## Statuses and Feedback
-
-In Kitsu, statuses serve as indicators reflecting the current state or progress of a task. You can easily see the current status at a glance and add comments to update team members when a status changes.
-
-## The Comment Panel
-
-To change the status of a task and write a comment, click on the status of the task.
+1. Click the task's **Status** icon on the **My Tasks** page or the relevant asset page.
 
 ![Shot status](/img/getting-started/shot_status.png)
 
@@ -31,11 +20,21 @@ The **Comment Panel** is split into two tabs:
 - POST COMMENT
 - PUBLISH REVISION
 
-You can change the **Status**, from the **POST COMMENT** tab.
+2. Add comments to provide updates or ask questions. Comments support the use of **Markdown**, which is a markup language used for formatting plain text in a simple, readable way. It allows users to add basic formatting elements such as headings, lists, bold and italic text, links and much more. For specific syntax, you can refer to the markdown guide website: [Markdown Guide](https://www.markdownguide.org/basic-syntax/).
 
-Comments support the use of **Markdown**, which is a markup language used for formatting plain text in a simple, readable way. It allows users to add basic formatting elements such as headings, lists, bold and italic text, links and much more. For specific syntax, you can refer to the markdown guide website: [Markdown Guide](https://www.markdownguide.org/basic-syntax/).
+3. Change the status (e.g., from "Ready" to "WIP") from the **POST COMMENT** tab.
 
-### Tagging Team Members
+![Changing status](/img/getting-started/changing_status.png)
+
+![Status List](/img/getting-started/status_list.png)
+
+4. Click **Post** to save changes.
+
+You can edit your most recent comment by clicking the **History** button and selecting **Edit**.
+
+![Edit button](/img/getting-started/edit_button.png)
+
+## Tagging Team Members
 
 You can also **tag** a team member in the comments to notify them directly. To do this, type `@`, which will open a submenu with a list of team members. Select the person you wish to notify, and upon submitting your comment, they will receive a notification.
 
@@ -45,7 +44,7 @@ You can also **tag** an entire department by typing '@' followed by the departme
 
 ![Tag department](/img/getting-started/tag_department.png)
 
-### Adding Checklists
+## Adding Checklists
 
 You can also add checklist items to keep track of miscellaneous items that don't warrant their own task. To add a **checklist** to your comments, click the **Add checklist** button. The first item of the checklist will appear.
 
@@ -55,7 +54,7 @@ Hit **Enter** or click the button again to add more checklist items, and give ea
 
 ![Checklist](/img/getting-started/checklist_detailed.png)
 
-### Adding Attachments
+## Adding Attachments
 
 To attach a file as a picture, click on the **Add attachment** button.
 
@@ -67,15 +66,7 @@ Select a **file from your hard drive** or paste a **screenshot**.
 
 Validate the attachment by clicking on **Add file as attachment**.
 
-Next, select the **Status** you wish to change the task to from the dropdown menu.
-
-![Status List](/img/getting-started/status_list.png)
-
-Finally, click the **Post** button to submit your comment and status update.
-
 ## Changing Statuses In Bulk
-
-### Updating Multiple Statuses at Once
 
 You can also change the status for multiple tasks at once.
 
@@ -91,34 +82,6 @@ Choose the new status for your selected tasks (1). You can also add a comment fo
 
 ![Metadata Column Sort By](/img/getting-started/custom_column_sortby.png)
 
-## Artist Board Statuses
+## Delete Comments
 
-### Customizing Statuses Used on the Artist Board Page
-
-When you assign a task to an artist, it will appear on their to-do page when they log in.
-
-While the default view shows their tasks in a traditional list view, they can also choose to display their tasks in a board view. Each **Status** will be be represented by a column, and the assigned tasks will be cards that can be dragged from status to status as the tasks progress.
-
-To customize the board view, go to the settings page of your production.
-
-![Setting page](/img/getting-started/drop_down_menu_setting.png)
-
-Then go to the Task Status tab. You will see a list of the statuses used in your production.
-
-These statuses will be used as the columns on the board page. You can drag and move the statuses to change their order as they appear in the board view.
-
-![Setting page status order](/img/getting-started/setting_status_order.png)
-
-Next, click on the **Board Status** section.
-
-![Setting page status board](/img/getting-started/setting_status_board.png)
-
-Here you can customize which permission roles can see what statuses on their **Board** page.
-
-To access this view, select the **Board** tab from the **My Tasks** page. Your team will see a page that looks similar to this
-
-![Artist board page](/img/getting-started/artist_board_page.png)
-
-::: tip
-Customizing which statuses appear in the **Board** view is set per permission role. It cannot be customized on an individual user basis.
-:::
+To delete a comment, click on the chevron icon in the top right corner and select `Delete`.

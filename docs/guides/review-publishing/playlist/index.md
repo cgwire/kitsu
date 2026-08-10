@@ -176,7 +176,7 @@ There are two ways to share playlists depending on if the reviewer has access to
 
 ### 1. Invite Internal Reviewers
 
-TODO
+Simply assign a shot or sequence to a team member for them to be added to the corresponding playlist.
 
 ### 2. Guest Review Experience
 

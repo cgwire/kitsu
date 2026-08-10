@@ -98,7 +98,17 @@ You can also change the avatar of the production on the **Parameters** tab.
 
 ### Artist Board Status Configuration
 
+When you assign a task to an artist, it will appear on their to-do page when they log in.
+
+While the default view shows their tasks in a traditional list view, they can also choose to display their tasks in a board view. Each **Status** will be be represented by a column, and the assigned tasks will be cards that can be dragged from status to status as the tasks progress.
+
+To customize the board view, go to the settings page of your production.
+
+![Setting page](/img/getting-started/drop_down_menu_setting.png)
+
 In the **Task Status** tab, you can reorder the statuses for the **Board** view.
+
+You can drag and move the statuses to change their order as they appear in the board view.
 
 ![Setting status new](/img/getting-started/setting_status_new.png)
 
@@ -108,7 +118,7 @@ Once it's done, go to the **Board Status** tab.
 
 ![Setting board status order](/img/getting-started/setting_board_status.png)
 
-Here, you can choose who can see which status on the **Board view**
+Here, you can choose which permission roles can see which statuses on their **Board view**
 
 If you don't select the status properly, it can be overwhelming for the artists if they have too much choice.
 
@@ -120,6 +130,10 @@ Selecting the **Status** properly will make it easier for the artists.
 
 
 ![Board status good example](/img/getting-started/setting_board_status_selection_artist.png)
+
+::: tip
+Customizing which statuses appear in the **Board** view is set per permission role. It cannot be customized on an individual user basis.
+:::
 
 ## Close a Production (Archive)
 

@@ -38,7 +38,7 @@ This guide will help you get started and understand the Kitsu's key features as 
 ## 5. Request a Review"
 
 <EmbedDocument >
-<!--@include: ../../guides/review-publishing/request-review/index.md#body-->
+<!--@include: ../../guides/review-publishing/review/index.md#request-review-->
 </EmbedDocument>
 
 ## 6. Complete Your Timesheet"

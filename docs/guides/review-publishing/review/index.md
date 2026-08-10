@@ -1,10 +1,28 @@
 # Reviews
 
+## Request a Review
+
+<!-- #region request-review -->
+
+When you complete a task, you can submit it for review:
+
+1. Change the task status to **Waiting for Approval (WFA)**.
+2. Attach a preview file by dragging it into the upload area or clicking **Attach Preview**.
+3. Click **Post** to finalize your submission.
+
+![Request review](/img/getting-started/add_preview.png)
+
+People assigned to the task will receive a notification. You can also mention additional team members in a comment using the `@` operator. 
+
+Previous revisions are saved and remain accessible for reference.
+
+![Revision history](/img/getting-started/previewv2.png)
+
+<!-- #endregion request-review -->
+
 ## Reviewing Tasks
 
-When an artist needs someone to **review** their work, they can change the status of their task to ![wfa](/img/getting-started/wfa_icon.png).
-
-Click on the status to open the right hand panel and start the review.
+Click on a task status to open the right hand panel and start the review.
 
 You can watch the version from the right panel, enlarge it by grabbing the side of the panel, or even enter fullscreen by clicking this icon ![Fullscreen](/img/getting-started/fullscreen.png).
 
@@ -25,7 +43,21 @@ You can select a color to use and then draw directly on the preview with the **P
 
 ![review drawing](/img/getting-started/review_comment.png)
 
-### Drawing Annotations
+## Adding a Comment
+
+For general feedback, you can leave a written comment on the task from the right-hand panel.
+
+Type your feedback in the comment box and leave the task status unchanged if you want to let other teammate jump in or switch it to `Approved` to end the review.
+
+![add a comment for review](/img/getting-started/comment_panel.png)
+
+Click **Post** to publish your comment. It will appear in the task's comment history, along with a timestamp and your name, so the artist can see exactly what feedback was given and when.
+
+You can mention teammates in your comment using the `@` operator to notify them directly, or attach files (see **Exporting Annotations** below) alongside your written feedback.
+
+Once posted, comments can't be edited, but you can delete them if needed by clicking the **trash icon** next to your comment.
+
+## Drawing Annotations
 
 You can also annotate the frame with **text**.
 
@@ -34,13 +66,13 @@ You can also annotate the frame with **text**.
 If you'd like to temporarily **hide annotations**, click the **Fountain Pen** button.
 ![Hide Annotation](/img/getting-started/hide_annotation.png)
 
-### Shape Annotations
+## Shape Annotations
 
 Reviewers can draw squares, circles, and arrows instead of being limited to freehand sketching alone.
 
 ![](/guides/review-publishing/review/images/0.png)
 
-### Tagging Frames
+## Tagging Frames
 
 If you would like to refer back to a specific frame in your comments, you can easily tag a frame by typing `@`, which opens a sub-menu with the team list, and then start typing **frame**.
 
@@ -48,7 +80,7 @@ This will then add a timestamp of the current frame to this comment, and clickin
 
 ![Tag a frame](/img/getting-started/tag_frame.png)
 
-### Exporting Annotations
+## Exporting Annotations
 
 You can also export your drawings on each frame by attaching the **screenshots as attachments**.
 
@@ -64,13 +96,13 @@ Once you click the button, Kitsu will grab all the frames with annotations and d
 
 ![Attachment snapshot detail](/img/getting-started/attachment_snapshot_detail.png)
 
-### Deleting Annotations & Eraser
+## Deleting Annotations & Eraser
 
 If you need to delete an annotation, click the `Eraser` icon:
 
 ![](/guides/review-publishing/review/images/1.png)
 
-### Comparing Images
+## Comparing Images
 
 By entering **Full-Screen**, you can compare two task types or versions side by side by clicking on the **Compare** button ![compare button](/img/getting-started/compare_button.png).
 
@@ -80,7 +112,7 @@ From here, you can change the status to ![Retake](/img/getting-started/retake_ic
 
 Alternatively, you can change it to ![Done](/img/getting-started/done_icon.png) to notify the artist that their work is approved.
 
-### Onion Skinning
+## Onion Skinning
 
 If you need to check frame-to-frame consistency while reviewing animation in Kitsu, you can use onion skinning for annotations.
 
@@ -94,9 +126,11 @@ And here is how the overlay looks in frame N + 4:
 
 ![](/guides/review-publishing/review/images/3.png)
 
-## Reviewing Previews
+## Supervisor Reviews
 
-Now that everyone in your team knows what to do, you need to review their work. Typically, when an artist finishes a task, they will call you for a review. Frequent interruptions can be unproductive and make it difficult to maintain focus. To avoid this, set a specific timeframe for reviews. This approach benefits both you and your team by providing a structured schedule. Artists will know when they can expect feedback and can plan their work accordingly, while you can dedicate uninterrupted time to your own tasks.
+Typically, when an artist finishes a task, they call the supervisor for a review. But frequent interruptions can be unproductive and make it difficult to maintain focus. 
+
+To avoid this, set a specific timeframe for reviews. This approach benefits both you and your team by providing a structured schedule. Artists will know when they can expect feedback and can plan their work accordingly, while you can dedicate uninterrupted time to your own tasks.
 
 Click the **My Checks** button at the top of the screen to see a list of all your department's **WFA** tasks.
 
@@ -117,7 +151,7 @@ From here, you can click on the contact sheet to open the comment panel or selec
 
 ## Reviewing Concepts
 
-If you're a **Concept Artist**, you can upload and share concepts for review.
+If you're a **Concept Artist**, you can upload and share concepts for review. Once your artists upload a concept, the supervisor or director can review it.
 
 When your artists upload a concept, you can review it through the navigation menu at the top of the screen by selecting the **Concepts** page.
 
@@ -131,32 +165,12 @@ To review a concept, click on its status to open the comment panel. You can enla
 
 ![Concept status comment](/img/getting-started/concept_status_comment.png)
 
-You can narrow down the page using the **Status** filter to display all concepts with a **Neutral** status.
+You can narrow down the page using the **Status** filter to display all concepts with a **Neutral** status. Additionally, you can filter by artist and change the sort order to better hone in on the data you need to review.
 
 ![Concept status filter](/img/getting-started/concept_status_filter.png)
 
-Additionally, you can filter by artist and change the sort order to better hone in on the data you need to review.
+## Bulk Review
 
-## Reviewing Concepts
+Sometimes, you want to review multiple shots in a focused way, or together with your team in real-time. 
 
-Once your artists upload a concept, you can review it with the supervisor or the director.
-
-To review the concept, use the navigation menu at the top of the screen and select the concept page.
-
-![Menu concept](/img/getting-started/menu_concept.png)
-
-You can see all the uploaded concepts, their statuses, assignments, and linked assets.
-
-![Concept filled status](/img/getting-started/concept_empty_prod_linked.png)
-
-To review a concept, click on the status to open the comment panel. You can enlarge the comment panel or go fullscreen.
-
-Then, proceed to write a comment, select the status **Approved** or **Rejected**, and confirm with the **Post** button.
-
-![Concept status comment](/img/getting-started/concept_status_comment.png)
-
-You can filter the page with the **Status** filter to display all the concepts with a **Neutral** status. You can also filter by artist and change the sort order.
-
-![Concept status filter](/img/getting-started/concept_status_filter.png)
-
-## The "My Checks" Page
+For this use case, [you can leverage playlists](/guides/review-publishing/playlist/).
