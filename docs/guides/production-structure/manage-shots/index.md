@@ -1,5 +1,7 @@
 # Managing Shots
 
+<!-- #region body -->
+
 ```mermaid
 flowchart TD
     SEQUENCE -->|contains| SHOT
@@ -175,7 +177,7 @@ And the **Timelog** if people have filled out their timesheet on the tasks of th
 
 If you realize after creating the shots that a task is missing, you can still add it afterwards.
 
-First, [make sure the missing task type is added](/guides/task-management/managing-task-types/) to the `Settings` page under the `Task Type` tab.
+First, [make sure the missing task type is added](/guides/task-configuration/managing-task-types/) to the `Settings` page under the `Task Type` tab.
 
 Then go back to the `Shots` page and click on `+ Add tasks`.
 
@@ -252,4 +254,6 @@ And a dialog will appear with a table listing all your changes:
 
 Hover over the shot row you wish to remove in the list and click the `Delete` icon:
 
-![remove shot button](/guides/task-management/manage-shots/images/0.png)
+![remove shot button](/guides/production-structure/manage-shots/images/0.png)
+
+<!-- #endregion body -->

@@ -1,5 +1,7 @@
 # Reviews
 
+<!-- #region body -->
+
 ## Request a Review
 
 <!-- #region request-review -->
@@ -174,3 +176,5 @@ You can narrow down the page using the **Status** filter to display all concepts
 Sometimes, you want to review multiple shots in a focused way, or together with your team in real-time. 
 
 For this use case, [you can leverage playlists](/guides/review-publishing/playlist/).
+
+<!-- #endregion body -->

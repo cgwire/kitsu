@@ -1,5 +1,7 @@
 # Playlists
 
+<!-- #region body -->
+
 A playlist is a list of curated versions / previews compiled for review and approval.
 
 ## Accessing your Playlists
@@ -202,3 +204,5 @@ Getting feedback from temporary clients or external partners shouldn't require c
 4. Share the public link with your guests. Anyone with the link can view the playlist, so be careful not to leak outside your safe space.
 
 ![](/guides/review-publishing/playlist/images/3.png)
+
+<!-- #endregion body -->

@@ -1,5 +1,7 @@
 # Managing Task Statuses
 
+<!-- #region body -->
+
 ```mermaid
 flowchart TD
     SEQUENCE -->|tracked by| TASK
@@ -96,21 +98,21 @@ validate your choice with the **add** button.
 
 Go to `Main Menu > Task Status`:
 
-![update task status page](/guides/task-management/managing-task-statuses/images/0.png)
+![update task status page](/guides/task-configuration/managing-task-statuses/images/0.png)
 
 Select the Entities or Concepts tab and hover over the task status row you wish to change then click the `Edit` icon:
 
-![update task status button](/guides/task-management/managing-task-statuses/images/1.png)
+![update task status button](/guides/task-configuration/managing-task-statuses/images/1.png)
 
 ## Remove a Task Status
 
 To remove a task status from your studio's Global Library, go to `Main Menu > Task Status` and hover over the task status row you wish to select then click the `Delete` icon:
 
-![remove task status global](/guides/task-management/managing-task-statuses/images/2.png)
+![remove task status global](/guides/task-configuration/managing-task-statuses/images/2.png)
 
 To remove an task status from your production library, go to `Production Menu > Settings > Task Status` and click the `Remove` button to remove the task status from the list:  
 
-![remove task status production](/guides/task-management/managing-task-statuses/images/3.png)
+![remove task status production](/guides/task-configuration/managing-task-statuses/images/3.png)
 
 ## Status Automation
 
@@ -181,3 +183,5 @@ On the **Status Automation** tab, you can choose which automation you want to us
 validate your choice with the **add** button.
 
 ![Setting Add Task Type](/img/getting-started/setting_auto_add.png)
+
+<!-- #endregion body -->

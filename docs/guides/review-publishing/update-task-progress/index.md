@@ -1,5 +1,7 @@
 # Updating Task Progress
 
+<!-- #region body -->
+
 Task statuses are indicators reflecting the current state or progress of a task. 
 
 Boards allow you to easily see the current status of a task at a glance and add comments to update team members when a status changes.
@@ -85,3 +87,5 @@ Choose the new status for your selected tasks (1). You can also add a comment fo
 ## Delete Comments
 
 To delete a comment, click on the chevron icon in the top right corner and select `Delete`.
+
+<!-- #endregion body -->

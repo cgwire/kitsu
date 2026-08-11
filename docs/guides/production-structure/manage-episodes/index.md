@@ -1,5 +1,7 @@
 # Managing Episodes
 
+<!-- #region body -->
+
 ```mermaid
 flowchart TD
     PRODUCTION -->|contains| EPISODE
@@ -12,21 +14,21 @@ TV Show productions have access to Episode containers to organize sequences and 
 
 In your production menu, click `Episodes`:
 
-![episodes menu item](/guides/task-management/manage-episodes/images/0.png)
+![episodes menu item](/guides/production-structure/manage-episodes/images/0.png)
 
 You'll then reach the Episodes page with a full list of episodes for the current production:
 
-![episodes page](/guides/task-management/manage-episodes/images/1.png)
+![episodes page](/guides/production-structure/manage-episodes/images/1.png)
 
 ## Create Episodes
 
 In the `Episodes` page, click `New episode` in the top right corner:
 
-![new episode button](/guides/task-management/manage-episodes/images/2.png)
+![new episode button](/guides/production-structure/manage-episodes/images/2.png)
 
 A modal appears. Fill the form and click `Confirm`:
 
-![new episode modal](/guides/task-management/manage-episodes/images/3.png)
+![new episode modal](/guides/production-structure/manage-episodes/images/3.png)
 
 - **Name**: the episode name
 - **Status**: the production status of the episode (canceled, complete, running, standby)
@@ -37,10 +39,12 @@ A modal appears. Fill the form and click `Confirm`:
 
 Hover over the episode row you wish to edit in the list and click the `Edit` icon:  
 
-![edit episode button](/guides/task-management/manage-episodes/images/4.png)
+![edit episode button](/guides/production-structure/manage-episodes/images/4.png)
 
 ## Delete Episodes
 
 Hover over the episode row you wish to remove in the list and click the `Delete` icon:  
 
-![delete episode button](/guides/task-management/manage-episodes/images/5.png)
+![delete episode button](/guides/production-structure/manage-episodes/images/5.png)
+
+<!-- #endregion body -->

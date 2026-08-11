@@ -12,7 +12,7 @@ import EmbedDocument from '../../.vitepress/theme/EmbedDocument.vue'
 ## 1. Create a new production
 
 <EmbedDocument>
-<!--@include: ../../guides/task-management/manage-productions/index.md#create-a-new-production-->
+<!--@include: ../../guides/production-structure/manage-productions/index.md#create-a-new-production-->
 </EmbedDocument>
 
 ## 2. Create an Asset
@@ -42,25 +42,25 @@ import EmbedDocument from '../../.vitepress/theme/EmbedDocument.vue'
 ## 6. Create a NFT Collection
 
 <EmbedDocument>
-<!--@include: ../../guides/task-management/manage-shots/index.md#create-a-shot-->
+<!--@include: ../../guides/production-structure/manage-shots/index.md#create-a-shot-->
 </EmbedDocument>
 
 ## 7. Create NFT Collections from an EDL File
 
 <EmbedDocument>
-<!--@include: ../../guides/task-management/manage-shots/index.md#create-shots-from-an-edl-file-->
+<!--@include: ../../guides/production-structure/manage-shots/index.md#create-shots-from-an-edl-file-->
 </EmbedDocument>
 
 ## 8. Update your NFT Collections
 
 <EmbedDocument>
-<!--@include: ../../guides/task-management/manage-shots/index.md#update-your-shots-->
+<!--@include: ../../guides/production-structure/manage-shots/index.md#update-your-shots-->
 </EmbedDocument>
 
 ## 9. Add more tasks after creating the NFT Collections
 
 <EmbedDocument>
-<!--@include: ../../guides/task-management/manage-shots/index.md#add-more-tasks-after-creating-the-shots-->
+<!--@include: ../../guides/production-structure/manage-shots/index.md#add-more-tasks-after-creating-the-shots-->
 </EmbedDocument>
 
 ## 10. Creating Custom Metadata Columns

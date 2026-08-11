@@ -1,5 +1,7 @@
 # Schedules
 
+<!-- #region body -->
+
 ## Studio Schedule
 
 As a production manager, you have access to the Studio Schedule, which consolidates all production schedules in one place, aiding in better preparation for your productions.
@@ -13,6 +15,8 @@ Here, you'll find all your productions listed on each row, including their start
 ![Main Menu Schedule](/img/getting-started/main_schedule_fold.png)
 
 When you click on a production name, you can expand the view to see full details of each task type. The color scheme corresponds to the columns on the global pages.
+
+By unfolding multiple productions, you can which teams are being utilized simultaneously.
 
 ![Main Menu Schedule](/img/getting-started/main_schedule_unfold.png)
 
@@ -88,6 +92,8 @@ To view specific tasks in more detail, click on the task type's name. This will 
 
 ## Team Schedule
 
+<!-- #region team-schedule -->
+
 As a studio manager, staying informed about team activities is crucial. For a comprehensive overview of each department's activities, the Team Schedule provides valuable insights.
 
 To access the Team Schedule, navigate to the main menu (![Main menu button](/img/getting-started/main_button.png)) and click on **Team Schedule** under the **Studio** section.
@@ -117,6 +123,8 @@ From there, you can:
 - See days off.
 
 ![Team Schedule Global](/img/getting-started/team_schedule_global.png)
+
+<!-- #endregion team-schedule -->
 
 ## Task Type Schedule
 
@@ -183,3 +191,5 @@ On the detail page of an asset or a shot, you can access the **Schedule** tab.
 If you have entered a start and due date on the **Task Type** schedule, the Gantt bar will be displayed.
 
 From this page, you can modify the length, start, and end dates of each task in the asset or shot.
+
+<!-- #endregion body -->

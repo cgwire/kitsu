@@ -50,19 +50,19 @@ Your **Global Library** is where you can create and modify departments, task typ
 </EmbedCard>
 
 <EmbedCard title="2. Task Type Setup">
-<!--@include: ../../guides/task-management/managing-task-types/index.md#setup-->
+<!--@include: ../../guides/task-configuration/managing-task-types/index.md#setup-->
 </EmbedCard>
 
 <EmbedCard title="3. Task Status Setup">
-<!--@include: ../../guides/task-management/managing-task-statuses/index.md#setup-->
+<!--@include: ../../guides/task-configuration/managing-task-statuses/index.md#setup-->
 </EmbedCard>
 
 <EmbedCard title="4. Asset Type Setup">
-<!--@include: ../../guides/task-management/managing-asset-types/index.md#setup-->
+<!--@include: ../../guides/task-configuration/managing-asset-types/index.md#setup-->
 </EmbedCard>
 
 <EmbedCard title="5. Status Automation Setup">
-<!--@include: ../../guides/task-management/managing-task-statuses/index.md#statusautomationsetup-->
+<!--@include: ../../guides/task-configuration/managing-task-statuses/index.md#statusautomationsetup-->
 </EmbedCard>
 
 Once your **Global Library** is populated, you can fill out the **Production Library** with the newly created elements from the **Global Library**.

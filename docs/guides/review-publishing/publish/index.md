@@ -1,5 +1,7 @@
 # Publishing
 
+<!-- #region body -->
+
 In a pipeline, publishing means submitting a version of your work as a trackable deliverable tied to a specific task; so it can be reviewed, versioned, and referenced by the rest of the pipeline.
 
 In Kitsu, publishing a revision is another way to update a task status. The difference with comments is that a publication is tied to a versioned preview file.
@@ -84,3 +86,5 @@ To delete an additional preview, enlarge the comment panel, click on the number 
 ## Remove a Preview
 
 To remove a preview, simply delete the associated comment.
+
+<!-- #endregion body -->

@@ -12,7 +12,7 @@ import EmbedDocument from '../../.vitepress/theme/EmbedDocument.vue'
 ## 1. Create a new production
 
 <EmbedDocument >
-<!--@include: ../../guides/task-management/manage-productions/index.md#create-a-new-production-->
+<!--@include: ../../guides/production-structure/manage-productions/index.md#create-a-new-production-->
 </EmbedDocument>
 
 ## 2. Create an Asset
@@ -48,7 +48,7 @@ import EmbedDocument from '../../.vitepress/theme/EmbedDocument.vue'
 ## 7. Create an Edit
 
 <EmbedDocument >
-<!--@include: ../../guides/task-management/manage-edits/index.md#create-an-edit-->
+<!--@include: ../../guides/review-publishing/manage-edits/index.md#create-an-edit-->
 </EmbedDocument>
 
 ## 8. Create a Breakdown List

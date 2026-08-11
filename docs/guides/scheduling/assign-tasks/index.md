@@ -1,5 +1,7 @@
 # Task Assignments
 
+<!-- #region body -->
+
 In Kitsu, a task is a fundamental element used for planning, organizing, and tracking various aspects of your production.
 
 Assigning a task to a user offers several benefits:
@@ -75,3 +77,5 @@ When you assign one or several tasks to someone, you will notice that you only h
 
 - [Find assignments to work on](/guides/scheduling/find-assignments/)
 - [Fill in the **Estimates** for each task](/guides/scheduling/estimates/)
+
+<!-- #endregion body -->

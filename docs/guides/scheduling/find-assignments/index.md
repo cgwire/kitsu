@@ -1,5 +1,7 @@
 # Managing Your Assignments
 
+<!-- #region body -->
+
 ## The "My Tasks" Page
 
 Your **My Tasks** page is your main hub for assignments and opens automatically upon login. 
@@ -82,3 +84,5 @@ If you need more information about a task, click on it's name to open the commen
 
 ![Task Type filtered as contact sheet](/img/getting-started/task_type_contact_sheet_panel.png)
 :::
+
+<!-- #endregion body -->

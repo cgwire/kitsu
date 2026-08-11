@@ -1,5 +1,7 @@
 # Managing Productions
 
+<!-- #region body -->
+
 ```mermaid
 flowchart TD
     STUDIO -->|runs| PRODUCTION
@@ -48,7 +50,7 @@ Then, 7 and 8 are the option parts. If you already have a spreadsheet with your 
 See the **Import from CSV** sections of each entity page for more details:
 
 - [Import Asset from CSV](/guides/pre-production/manage-assets/)
-- [Import Shot from CSV](/guides/task-management/manage-shots/)
+- [Import Shot from CSV](/guides/production-structure/manage-shots/)
 
 Validate everything with the `All done` button.
 
@@ -60,13 +62,13 @@ Getting a new production set up often means repeating the same configuration ste
 
 With Project Templates, you can start from a predefined setup in one click:
 
-![](/guides/task-management/manage-productions/images/prodtemplate.png)
+![](/guides/production-structure/manage-productions/images/prodtemplate.png)
 
 When creating a new production, simply pick a template and Kitsu will automatically apply your preferred settings.
 
 In the example above, the template comes bundled with pre-configured asset types, task types, task statuses, etc. we don't need to pick manually from the Global Library:
 
-![](/guides/task-management/manage-productions/images/2.png)
+![](/guides/production-structure/manage-productions/images/2.png)
 
 Check out the section [Create Your Own Production Template](#create-your-own-production-template) below to add your own.
 
@@ -141,11 +143,11 @@ It's good practice to archive a production once it's over, in case you need to r
 
 First, click on the Edit button for the target production in the `Main Menu > Studio > Productions` page:
 
-![production edit button](/guides/task-management/manage-productions/images/0.png)
+![production edit button](/guides/production-structure/manage-productions/images/0.png)
 
 In the dialog, select `Closed` for the production status and click `Confirm`:
 
-![close production](/guides/task-management/manage-productions/images/1.png)
+![close production](/guides/production-structure/manage-productions/images/1.png)
 
 Your production is now listed as `Closed`.
 
@@ -155,7 +157,7 @@ Deleting a production requires you close it first.
 
 Once this is done, simply click the `Delete` button in the corresponding closed production list item and your production will be removed from your instance:
 
-![delete production](/guides/task-management/manage-productions/images/4.png)
+![delete production](/guides/production-structure/manage-productions/images/4.png)
 
 ## Create Your Own Production Template
 
@@ -169,3 +171,5 @@ To create a new one, click the `Add a production template` button and fill in th
 - Description: a short description of your template
 
 Click `Confirm` to save your template for future usage.
+
+<!-- #endregion body -->

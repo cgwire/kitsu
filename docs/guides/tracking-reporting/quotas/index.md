@@ -1,5 +1,7 @@
 # Quotas
 
+<!-- #region body -->
+
 **Quotas** visualize your **team speed**.
 
 A quota refers to the specific amount of work or number of tasks an artist is expected to complete within a given timeframe, ensuring that the project progresses according to schedule and meets production deadlines.
@@ -64,3 +66,5 @@ To check their **Actual Quotas**, go to the **Quotas** page.
 The first column, **Average**, is the most important. Kitsu calculates the average quotas for each artist per **Day**, **Week**, or **Month**.
 
 ![Weekly Quotas](/img/getting-started/supervisor_quotas_week.png)
+
+<!-- #endregion body -->

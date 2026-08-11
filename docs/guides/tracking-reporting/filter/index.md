@@ -1,15 +1,14 @@
 # Advanced Search & Filters
 
+<!-- #region body -->
+
 Filtering involves selectively retrieving data based on specific criteria or conditions. It enables users to easily hone in information they want to focus on, or extract relevant subsets of data for analysis.
 
 Kitsu provides a series of features that allow you to easily find what you are looking for.
 
 ## The Search Bar
 
-### Using the Search Bar to Create Filters
-In **Kitsu**, filters are set through the **search bar**. It allows you to
-**save** your search query. Once done, you can rerun your query with a
-simple click.
+In **Kitsu**, filters are set through the **search bar**. It allows you to **save** your search query. Once done, you can rerun your query with a simple click (see [Managing Saved Filters](#managing-saved-filters) below).
 
 ![Search bar](/img/getting-started/filter_search_bar.png)
 
@@ -22,8 +21,7 @@ bar](/img/getting-started/filter_save_button.png) in the following pages:
 * Edits
 * Episodes
 
-
-NB: The **Search Bar** only and pre-build filters are available on the following page
+NB: Only the **Search Bar** and pre-built filters are available on the following pages:
 * My Production
 * My Tasks
 * People
@@ -35,10 +33,8 @@ NB: The **Search Bar** only and pre-build filters are available on the following
 * Detailed Task Type page
 
 ::: tip
-On the other pages of Kitsu, you will find pre-build filters.
+On the other pages of Kitsu, you will find pre-built filters.
 :::
-
-
 
 The **search bar** query is applied every time a new character is typed. You don't need to type everything to get a quick result.
 
@@ -47,44 +43,40 @@ The filter is instant except for the **Feature Film** type of production.
 Kitsu expects to have thousands of elements, so to speed up the process, you must type your Search and press **enter** to apply it.
 :::
 
-### Example Filters
-For example, on the assets page, type the letter `Ot`, and you get the
-result of all the assets starting with an `Ot`.
+### Search Syntax & Examples
+
+For example, on the assets page, type the letter `Ot`, and you get the result of all the assets starting with an `Ot`.
 
 ![Search bar result](/img/getting-started/filter_autocompletion.png)
 
-You can also search for some specific **type of asset**: `Props`, `Character`,
-`Environment`, `Fx` ... The result displays all the assets of this type.
+You can also search for some specific **type of asset**: `Props`, `Character`, `Environment`, `Fx` ... The result displays all the assets of this type.
 
 For example, let's search all the **FX** assets.
 
 ![Search asset type](/img/getting-started/filter_asset_type.png)
 
-Another example gets **shots page** of a specific **sequence**.
-For example, you can only see the shots of the second sequence of the first episode.
+Another example gets the **shots page** of a specific **sequence**. For example, you can only see the shots of the second sequence of the first episode.
 
-Select the first episode on the dropdown menu, then search `sq002`; the result
- gets all the shots of all the episodes from sequence SQ002.
+Select the first episode on the dropdown menu, then search `sq002`; the result gets all the shots of all the episodes from sequence SQ002.
 
 ![Search bar sequence episode](/img/getting-started/filter_ep_seq.png)
 
-In the same way, you can search **specific status** link to the task.
+In the same way, you can search for a **specific status** linked to a task.
 
 ::: tip
 You can create **filters** about **entities** on all the pages:
 
-* **Sequences** : `se01`, `se02` etc. or exclude : `-se01`, `-se02` etc.
+* **Sequences**: `se01`, `se02` etc. or exclude: `-se01`, `-se02` etc.
 * **Asset Type**: `characters`, `environment`, `fx` etc., or exclude `-characters`, `-fx`, etc.
 
-You can also create **filters** about **task status** by following this syntax:
-**task=status** on the global entities page
+You can also create **filters** about **task status** by following this syntax: **task=status** on the global entities page
 
 Examples:
 
 * Layout is a work in progress (wip): `layout=wip.`
 * Concept is waiting for approval (wfa) only for the fx: `concept=wfa fx.`
 * On sequence 2, Layout is wip: `se02 layout=wip`
-* Animation is retaken, and Render is waiting for approval (wfa) `animation=retake render=wfa`.
+* Animation is retaken, and Render is waiting for approval (wfa): `animation=retake render=wfa`.
 
 For the **Detailed task type page**, you can filter by typing only
 - Status: `wip` or exclude `-done`, several status `[wfa] [retake].`
@@ -99,13 +91,13 @@ You can do a mix of all the filters:
 
 ### Using the Filter Builder
 
-The easiest way to achieve more advanced filtering is to use the filter builder. Click on the **Filter Builder** icon show below to get started.
+The easiest way to achieve more advanced filtering is to use the filter builder. Click on the **Filter Builder** icon shown below to get started.
 
 ![Filter build button](/img/getting-started/filter_builder.png)
 
 You can then use the interactive filter builder dialogue to create your desired filter criteria.
 
-![Filter build button](/img/getting-started/filter_builder_example04.png)
+![Filter build dialogue](/img/getting-started/filter_builder_example04.png)
 
 ::: warning
 The first option, **Match all the following filters**, will use all the options you select on the filter builder for the filtering:
@@ -120,7 +112,6 @@ The first option, **Match all the following filters**, will use all the options 
 The second option, **Match one of the following filters**, will skip the unavailable filter option.
 :::
 
-
 ### Task Status Filtering
 
 **Task Status** helps you filter a task type by status.
@@ -129,19 +120,16 @@ The second option, **Match one of the following filters**, will skip the unavail
 - **Not Equal** will report all the task **except** this status
 - **In** report all the tasks with all the statuses you've selected
 
-
 You can use the **-** button to remove one of the statuses selected.
 
 You can use the **+** below the status to add more status.
 
 ![Filter build example 01](/img/getting-started/filter_builder_double_status.png)
 
-
 ::: tip
 If you want to filter the status of several task types, click on the **+** below the task status option on the left part of the screen.
 
 ![Filter build example 01](/img/getting-started/filter_builder_double_status01.png)
-
 :::
 
 ### Metadata Filtering
@@ -152,14 +140,12 @@ The **Metadata** filter allows you to filter your page based on the information 
 - **Not Equal** will report all the task **except** this information
 - **In** report all the tasks with all the information you've selected
 
-![Filter build MEtadata](/img/getting-started/filter_builder_metadata.png)
-
+![Filter build Metadata](/img/getting-started/filter_builder_metadata.png)
 
 ::: tip
 If you want to filter elements on several Metadata, you can click on the **+** below the Metadata option on the left part of the screen.
 
 ![Filter build example 01](/img/getting-started/filter_builder_metadata2.png)
-
 :::
 
 ### Assignment Filtering
@@ -207,27 +193,24 @@ You can only filter priority on **ONE** Task type for **ONE** level of priority.
 You can not add several priority filters.
 :::
 
-### Using the "Ready For" status
+### Using the "Ready For" Status
 
 Depending on whether you are filtering on the asset or shot global page, you can filter on the **Ready For** status.
 
 - On the asset page, you will search for the **Ready for** column.
-
-On the shot page, you will check whether all the assets for these tasks are ready (see Create your production).
+- On the shot page, you will check whether all the assets for these tasks are ready (see Create your production).
 
 ::: warning
-You can only filter **Ready for**** on **ONE** Task type
+You can only filter **Ready for** on **ONE** Task type.
 
 You can not add several **Ready For** filters.
 :::
 
 ## Managing Saved Filters
 
-Kitsu allows you to save any filter queries to be re-used later. You can save them by pressing the
-**Enter**, or click on the **Save** button
-![Save button](/img/getting-started/filter_save_button.png).
+Kitsu allows you to save any filter query to be re-used later. Save a query by pressing **Enter**, or by clicking the **Save** button ![Save button](/img/getting-started/filter_save_button.png).
 
-Now, under the **search bar**, you can see your saved queries as buttons.
+Once saved, your query appears as a button under the **search bar**.
 
 ![Search saved](/img/getting-started/filter_saved.png)
 
@@ -237,39 +220,33 @@ Notice the first icon on the left and the colored buttons.
 It allows you to Create a Filter Group. This way, you can keep your saved filters organized under a colored Group.
 
 ![Add A Filter Group](/img/getting-started/filter_group_new.png)
-
 :::
 
-The buttons are there every time you return to this page. They help you run common queries faster.
+These buttons are there every time you return to this page. They help you run common queries faster.
 
-Once you have created your filter and saved it, it will appear as a button under the search bar.
+## Renaming a Saved Filter
 
-You can rename the filter with a more explicit choice of words.
-
-The saved filter is quite long and hard to read. Hover your mouse over the saved filter. You will see two icons, one to edit and the other to delete.
+The saved filter is quite long and hard to read. Hover your mouse over the saved filter to see two icons: one to edit and one to delete.
 
 ![Search saved example edit](/img/getting-started/filter_edit.png)
 
-You can now change the name displayed in the **Name** section in the pop-up window.
+You can change the name displayed in the **Name** section of the pop-up window.
 
 ![Edit filtered name](/img/getting-started/filter_edit_name.png)
 
-You can choose if you want to keep your saved queries in or out of a **Filtered Group**
+You can also choose whether to keep the saved query in or out of a **Filtered Group**.
 
 ![Filtered Group Example](/img/getting-started/filter_group_example.png)
 
-### Deleting a Filter
+## Deleting a Filter
 
-If you have created a **filter button** by mistake, click on the cross next to
-it ![Filter delete](/img/getting-started/filter_delete.png).
+If you have created a **filter button** by mistake, click on the cross next to it ![Filter delete](/img/getting-started/filter_delete.png).
 
-The result of the filter is displayed, but the button is not. Just
-cancel your research by deleting the text or use the cross next to the Search
-bar ![Search delete](/img/getting-started/filter_cross_delete.png)
+The result of the filter is displayed, but the button is not. Just cancel your research by deleting the text or use the cross next to the Search bar ![Search delete](/img/getting-started/filter_cross_delete.png).
 
-### Pre-built Filters
+## Pre-built Filters
 
-You can find pre-built Filters on the following page:
+You can find pre-built Filters on the following pages:
 
 - My Checks
 - Timesheets
@@ -280,6 +257,6 @@ You can find pre-built Filters on the following page:
 - Quotas
 - Task Type detailed page (+search bar)
 
-On this specific page, you can select the option we have created for you.
+On these pages, select the option you want from the dropdown menu.
 
-You can select the option you want on the dropdown menu.
+<!-- #endregion body -->

@@ -34,7 +34,7 @@ Kitsu offers various tools to help you stay informed and manage production effic
 ## 4. Durations over Estimates
 
 <EmbedDocument>
-<!--@include: ../../guides/tracking-reporting/durations-vs-estimates/index.md#body-->
+<!--@include: ../../guides/scheduling/durations-vs-estimates/index.md#body-->
 </EmbedDocument>
 
 ## 5. Checking Quotas
@@ -58,11 +58,11 @@ Kitsu offers various tools to help you stay informed and manage production effic
 ## 8. Studio Occupancy Rate
 
 <EmbedDocument>
-<!--@include: ../../guides/tracking-reporting/studio-occupancy/index.md#body-->
+<!--@include: ../../guides/scheduling/schedules/index.md#team-schedule-->
 </EmbedDocument>
 
 ## 9. Main Schedule
 
 <EmbedDocument>
-<!--@include: ../../guides/tracking-reporting/main-schedule/index.md#body-->
+<!--@include: ../../guides/scheduling/schedules/index.md#studio-schedule-->
 </EmbedDocument>

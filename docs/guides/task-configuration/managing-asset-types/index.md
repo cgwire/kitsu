@@ -1,5 +1,7 @@
 # Managing Asset Types
 
+<!-- #region body -->
+
 ```mermaid
 flowchart TD
     ASSET_TYPE -->|categorizes| ASSET
@@ -72,18 +74,20 @@ validate your choice with the **add** button.
 
 Go to `Main Menu > Asset Types`:
 
-![update asset type page](/guides/task-management/managing-asset-types/images/0.png)
+![update asset type page](/guides/task-configuration/managing-asset-types/images/0.png)
 
 Hover over the asset type row you wish to select then click the `Edit` icon:
 
-![update asset type button](/guides/task-management/managing-asset-types/images/1.png)
+![update asset type button](/guides/task-configuration/managing-asset-types/images/1.png)
 
 ## Remove an Asset Type
 
 To remove an asset type from your studio's Global Library, go to `Main Menu > Asset Types` and hover over the asset type row you wish to select then click the `Delete` icon:
 
-![remove asset type global](/guides/task-management/managing-asset-types/images/2.png)
+![remove asset type global](/guides/task-configuration/managing-asset-types/images/2.png)
 
 To remove an asset type from your production library, go to `Production Menu > Settings > Asset Types` and click the `Remove` button to remove the asset type from the list:  
 
-![remove asset type production](/guides/task-management/managing-asset-types/images/3.png)
+![remove asset type production](/guides/task-configuration/managing-asset-types/images/3.png)
+
+<!-- #endregion body -->

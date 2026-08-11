@@ -1,5 +1,7 @@
 # Managing Concepts
 
+<!-- #region body -->
+
 To manage your production's concepts, go to the **Concept** page in the production navigation menu:
 
 ![Concept Menu](/img/getting-started/menu_concept.png)
@@ -84,3 +86,5 @@ Once in the concept section, you will see all the concepts created for this asse
 To remove a concept, click on the corresponding card to open the concept menu and click the `Delete` icon:
 
 ![delete concept](/guides/pre-production/manage-concepts/images/0.png)
+
+<!-- #endregion body -->

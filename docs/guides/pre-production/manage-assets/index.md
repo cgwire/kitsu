@@ -1,5 +1,7 @@
 # Managing Assets
 
+<!-- #region body -->
+
 You can go to the `Assets` page using the dropdown menu on top of the screen:
 
 ![Client dropdown menu Asset](/img/getting-started/client_dropdown_asset.png)
@@ -285,3 +287,5 @@ Then, you will see all the assets cast in this shot and their status.
 ![Asset Status](/img/getting-started/asset_status_detail.png)
 
 It's the fastest way to know if you can start a shot for a specific task.
+
+<!-- #endregion body -->

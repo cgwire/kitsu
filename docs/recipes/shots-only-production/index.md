@@ -12,37 +12,37 @@ import EmbedDocument from '../../.vitepress/theme/EmbedDocument.vue'
 ## 1. Create a new production
 
 <EmbedDocument >
-<!--@include: ../../guides/task-management/manage-productions/index.md#create-a-new-production-->
+<!--@include: ../../guides/production-structure/manage-productions/index.md#create-a-new-production-->
 </EmbedDocument>
 
 ## 2. Create a Shot
 
 <EmbedDocument >
-<!--@include: ../../guides/task-management/manage-shots/index.md#create-a-shot-->
+<!--@include: ../../guides/production-structure/manage-shots/index.md#create-a-shot-->
 </EmbedDocument>
 
 ## 3. Create Shots from an EDL File
 
 <EmbedDocument >
-<!--@include: ../../guides/task-management/manage-shots/index.md#create-shots-from-an-edl-file-->
+<!--@include: ../../guides/production-structure/manage-shots/index.md#create-shots-from-an-edl-file-->
 </EmbedDocument>
 
 ## 4. Update your shots
 
 <EmbedDocument >
-<!--@include: ../../guides/task-management/manage-shots/index.md#update-your-shots-->
+<!--@include: ../../guides/production-structure/manage-shots/index.md#update-your-shots-->
 </EmbedDocument>
 
 ## 5. Add more tasks after creating the shots
 
 <EmbedDocument >
-<!--@include: ../../guides/task-management/manage-shots/index.md#add-more-tasks-after-creating-the-shots-->
+<!--@include: ../../guides/production-structure/manage-shots/index.md#add-more-tasks-after-creating-the-shots-->
 </EmbedDocument>
 
 ## 6. Adding Frame Numbers and Ranges to Shots
 
 <EmbedDocument >
-<!--@include: ../../guides/task-management/manage-shots/index.md#add-the-number-of-frames-and-frame-ranges-to-the-shots-->
+<!--@include: ../../guides/production-structure/manage-shots/index.md#add-the-number-of-frames-and-frame-ranges-to-the-shots-->
 </EmbedDocument>
 
 ## 7. Creating Custom Metadata Columns
@@ -54,11 +54,11 @@ import EmbedDocument from '../../.vitepress/theme/EmbedDocument.vue'
 ## 8. Create a Sequence
 
 <EmbedDocument >
-<!--@include: ../../guides/task-management/manage-sequences/index.md#create-a-sequence-->
+<!--@include: ../../guides/production-structure/manage-sequences/index.md#create-a-sequence-->
 </EmbedDocument>
 
 ## 9. Create an Edit
 
 <EmbedDocument >
-<!--@include: ../../guides/task-management/manage-edits/index.md#create-an-edit-->
+<!--@include: ../../guides/review-publishing/manage-edits/index.md#create-an-edit-->
 </EmbedDocument>

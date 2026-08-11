@@ -1,5 +1,7 @@
 # Budget
 
+<!-- #region body -->
+
 In your Production menu, go to Budget to find the Budget Forecasting page:
 
 ![](/guides/tracking-reporting/budget/images/0.png)
@@ -107,3 +109,5 @@ Kitsu automatically breaks down costs per department depending on the number of 
 Of course, reality isn't the same as planning. Kitsu accounts for that with a `Show real costs` button you can toggle to obtain a breakdown of how the budget forecast compares to the actual production budget:
 
 ![](/guides/tracking-reporting/budget/images/9.png)
+
+<!-- #endregion body -->

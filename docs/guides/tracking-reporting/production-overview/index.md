@@ -1,5 +1,7 @@
 # Production Overview
 
+<!-- #region body -->
+
 As a Producer, having a comprehensive overview of the entire production process is essential.
 
 Kitsu offers various tools to help you stay informed and manage production efficiently without getting overwhelmed by notifications or losing focus.
@@ -29,7 +31,7 @@ If you want to focus on a supervisor for a specific month, select their name and
 
 ## Know the Current State of the Production
 
-Understanding the current state of your production is crucial. Kitsu provides detailed statistics and visualizations to help you track progress effectively.
+Understanding the current state of your production is crucial. Kitsu provides detailed statistics and visualizations, available both to you internally and to your client, to help you track progress effectively.
 
 ### Short / Feature Specific
 
@@ -39,12 +41,12 @@ We're going to look at some features that are specific to Short / Feature Film w
 
 The **Sequence Stats** page offers pie charts that depict the status of your production, sequence by sequence. The color scheme of the pie charts corresponds to the status, allowing you to quickly understand the state of your production.
 
-![Global View Sequence](/img/getting-started/global_view_sequence.png)
-
 - **All Sequences**: The first line represents the whole production.
 - **All Tasks**: The first column includes all tasks simultaneously.
 
 By focusing on the first pie chart, you can see the exact state of your production. For more details, look at the rest of the line to get a global view of each task type's state.
+
+![Global View Sequence](/img/getting-started/global_view_sequence.png)
 
 #### Asset Types Stats
 
@@ -57,6 +59,8 @@ Similar to Sequence Stats, the **Asset Types Stats** page provides pie charts fo
 You can also display data as **Counts** to see the exact number of assets, shots, or frames, along with their percentage per status.
 
 ![Global View Sequence Counts](/img/getting-started/global_view_sequence_detail_count_stat.png)
+
+![Asset count Stat Page](/img/getting-started/global_view_asset_detail.png)
 
 #### Exporting Data
 
@@ -94,22 +98,25 @@ You can also display data as **Counts**. This way, you'll see the exact number o
 ![Global View Episode Status Count](/img/getting-started/global_view_episode_stat_count.png)
 
 You can export this page as a `.csv` text file and import it into spreadsheet software.
- 
-## Production Report
 
-To ease the communication with the studio, you have direct access to the production report, separated into two parts: the **Sequence Stats** and the **Asset Types Stats**
+## Client Production Reports
+
+To ease the communication with the studio, you have direct access to a client-facing version of the production report, mirroring the **Sequence Stats** and **Asset Types Stats** pages described above, and updated in real-time. Every time you look at this page, you are sure to have updated information.
 
 ![Client dropdown menu sequence stat](/img/getting-started/client_dropdown_sequence.png)
 
-The **Sequence Stats** page is updated in real-time. Every time you look at this page, you are sure to have updated information.
-
 ![Client sequence stat](/img/getting-started/client_sequence_stat.png)
 
-You can choose to display the stats per number of shots or number of frames.
-
-You can also change the **Display Mode**; you can switch from the **Pie charts** View
-to the **Counts** view.
+In this report, you can choose to display the stats per number of shots or number of frames, and switch the **Display Mode** between the **Pie charts** view and the **Counts** view, just as in the internal stats pages.
 
 ![Client sequence stat count](/img/getting-started/client_sequence_stat_count.png)
 
 It's this presentation that you can download to keep track of the production progress.
+
+As with the internal pages, you can export this page as a `.csv` text file to import it into spreadsheet software.
+
+Navigate from production to production using the **Navigation** menu at the top of the screen. You will stay on the same page, allowing you to check all the production stats by selecting each production.
+
+![Sequence Stat Navigation](/img/getting-started/global_sequence_navigation.png)
+
+<!-- #endregion body -->

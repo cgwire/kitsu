@@ -1,24 +1,26 @@
 # Managing Edits
 
-TODO
+<!-- #region body -->
 
-- what's an edit?
-- what's an edit used for?
+An Edit is a trackable entity type (like Asset or Shot) that represents a video edit. For example, your whole movie, several trailers, or different cut versions like the First Edit, Fine Edit, or Mix.
+
+What it's used for:
+
+- Tracking tasks at the Edit level when you have multiple edits that need to go through several validation steps (e.g., First Edit → Fine Edit → Mix)
+- Assigning tasks, doing reviews, and changing status on each edit, just like you would for assets/shots
+- Adding custom metadata columns and descriptions
+- Setting/changing resolution per edit depending on delivery requirements
 
 ## Create an Edit
 
-You can track tasks at the **Edit** Level in Kitsu.
-
-It's especially useful when you have several edits to track through several validation steps. For example, you can track your whole movie, several trailers, and the First Edit, Fine Edit, Mix, etc.
 
 ::: warning
 Per default, the **Edit** page will not be displayed until you have task types for it on your **production library** (setting page)
 :::
 
-To use this page, you need to first create a dedicated task type on your **Global Library**
- with the **Edit** attribute.
+To use this page, you need to first create a dedicated task type on your **Global Library** with the **Edit** attribute.
 
-See the [Creating a New Task Type](/guides/task-management/managing-task-types/#creating-a-new-task-type) section to create a new **Task Type**.
+See the [Creating a New Task Type](/guides/task-configuration/managing-task-types/#creating-a-new-task-type) section to create a new **Task Type**.
 
 Once you have created your **Task Types**  on your **Global Library**, add them to your **Production Library**, you will see the **Edit** displayed on the navigation drop-down menu.
 
@@ -49,3 +51,5 @@ TODO
 ## Delete Edits
 
 TODO
+
+<!-- #endregion body -->

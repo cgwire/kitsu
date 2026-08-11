@@ -1,5 +1,7 @@
 # Managing Sequences
 
+<!-- #region body -->
+
 ```mermaid
 flowchart TD
     PRODUCTION -->|contains| EPISODE
@@ -24,7 +26,7 @@ This new page behaves like the asset and shot global page.
 To use this page, You first need to create dedicated task types on your **Global Library**
  with the **Sequence** attribute.
 
-See the [Creating a New Task Type](/guides/task-management/managing-task-types/#creating-a-new-task-type) section to create a new Task Type.
+See the [Creating a New Task Type](/guides/task-configuration/managing-task-types/#creating-a-new-task-type) section to create a new Task Type.
 
 Once you have created your **Task Types**  on your **Global Library**, add them to your
 **Production Library** (setting page).
@@ -58,10 +60,12 @@ You can also access the schedule, Preview Files, Activity, and Timelog of the se
 
 Hover over the sequence row you wish to edit in the list and click the `Edit` icon:  
 
-![edit sequence button](/guides/task-management/manage-sequences/images/0.png)
+![edit sequence button](/guides/production-structure/manage-sequences/images/0.png)
 
 ## Delete a Sequence
 
 Hover over the sequence row you wish to remove in the list and click the `Delete` icon:  
 
-![delete sequence button](/guides/task-management/manage-sequences/images/1.png)
+![delete sequence button](/guides/production-structure/manage-sequences/images/1.png)
+
+<!-- #endregion body -->

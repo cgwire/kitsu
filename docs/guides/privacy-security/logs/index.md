@@ -1,5 +1,7 @@
 # Log Pages
 
+<!-- #region body -->
+
 Studio managers can use log pages in `Main Menu > Admin > Logs` to improve security or audit user activity for troubleshooting issues.
 
 ## Activity Logs
@@ -25,3 +27,5 @@ Preview file upload can be tricky for large videos, so this page lists all previ
 ![Preview File Status Logs page](/img/previewlogs.jpg)
 
 It shows how many preview files are being processed, or which file uploads failed to complete and why.
+
+<!-- #endregion body -->

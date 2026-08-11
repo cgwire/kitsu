@@ -38,7 +38,7 @@ This guide will help you get started and understand the Kitsu's key features as 
 ## 5. Global View of the Shots
 
 <EmbedDocument >
-<!--@include: ../../guides/task-management/manage-shots/index.md#body-->
+<!--@include: ../../guides/production-structure/manage-shots/index.md#body-->
 </EmbedDocument>
 
 ## 6. Production Report

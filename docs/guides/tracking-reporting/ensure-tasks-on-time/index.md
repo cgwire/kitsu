@@ -1,5 +1,7 @@
 # Ensure Tasks are On Time
 
+<!-- #region body -->
+
 To know if a task is on time, you need two things:
 - The **Task Type** of the task
 - An **Estimation** (Bid) in days, along with an estimated **Start date** and **Due date** for the task.
@@ -57,3 +59,5 @@ Change the **Coloring** from **Status color** to **Late in Red**. This will show
 ![Task Type Schedule Late](/img/getting-started/task_type_schedule_coloring_late.png)
 
 You can return to the **Tasks** tab for more details, and Kitsu will retain your filters from tab to tab.
+
+<!-- #endregion body -->

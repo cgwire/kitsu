@@ -1,5 +1,7 @@
 # Import Your Team
 
+<!-- #region body -->
+
 Chances are you already have a list of your employees somewhere. 
 
 You have three ways to import them in Kitsu: 
@@ -33,3 +35,5 @@ Once everything looks good, click on the **Confirm** button to import your data 
 Now, you have all your people imported into Kitsu.
 
 ![Import data copy paste data](/img/getting-started/import_result_people.png)
+
+<!-- #endregion body -->

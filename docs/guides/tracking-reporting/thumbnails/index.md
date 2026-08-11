@@ -1,5 +1,11 @@
 # Thumbnails
 
+<!-- #region body -->
+
+A thumbnail is the small preview image attached to an entity like a shot or an asset.
+
+It gives a quick visual reference so artists and production staff can identify an entity at a glance without opening the full file.
+
 ## Add Thumbnails Manually
 
 To define a preview as a thumbnail, the preview MUST have been uploaded as a revision.
@@ -38,3 +44,5 @@ A new pop-up opens and asks you to choose which task types the thumbnails are li
 In order for the thumbnails to be automatically links to the correct shot, you have to name your thumbnails as sequence_shot.
 
 For example, if you your sequence is named `SEQ_001` and your shot is named `SH_001`, then your thumbnail filename should be `SEQ_001_SH_001`.
+
+<!-- #endregion body -->

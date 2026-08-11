@@ -1,5 +1,7 @@
 # Authentication
 
+<!-- #region body -->
+
 ## Enable Two-Factor Authentication
 
 **Two-Factor Authentication** provides an additional layer for security for users logging in to Kitsu. It can be enabled on a per-user basis, so you can decide for which users it is enforced.
@@ -22,3 +24,5 @@ Rather than creating and maintaining a separate password for Kitsu, team members
 Once OIDC is enabled in your backend configuration, the login page automatically displays a "Login with [provider]" button alongside the standard login for:
 
 ![OpenID auth](/img/openid.webp)
+
+<!-- #endregion body -->

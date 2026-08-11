@@ -31,95 +31,96 @@ img[src$='#logo-kitsu'] {
 
 Here are some links to familiarize yourself with the basic concepts in Kitsu you'll need to be successful with your production:
 
-- [Getting Started](/start-here/getting-started/) - Learn key principles and common vocabulary terms used within Kitsu to better plan your production workflow.
+1. [Getting Started](/start-here/getting-started/) - Learn key principles and common vocabulary terms used within Kitsu to better plan your production workflow.
 
-- [Quickstart for TV Shows](/recipes/for-tvshows/) - Create a TV show production with assets, shots, sequences, episodes and edits.
-- [Quickstart for Feature Films](/recipes/for-feature-films/) - Create a feature film production (approximately 1 000 entities) with assets, shots, sequences and edit.
-- [Quickstart for Shorts](/recipes/for-shorts/) - Create a short production (approximately 500 assets and shots) with assets, shots, sequences and edit.
-- [Quickstart for Video Games](/recipes/for-videogames/) - Create a Video game production with Assets, Maps, Level and Chapters.
-- [Quickstart for NFTs](/recipes/for-nfts/) - Create a NFT Collection with Assets and NFT Collections.
-- [Quickstart for Shots-Only Productions](/recipes/shots-only-production/) - Create a short production (about 500 shots) with only shots, sequences and edit.
-- [Quickstart for Assets-Only Productions](/recipes/assets-only-production/) - Create a short production (about 500 assets) with only assets.
+1. [Quickstart for TV Shows](/recipes/for-tvshows/) - Create a TV show production with assets, shots, sequences, episodes and edits.
+1. [Quickstart for Feature Films](/recipes/for-feature-films/) - Create a feature film production (approximately 1 000 entities) with assets, shots, sequences and edit.
+1. [Quickstart for Shorts](/recipes/for-shorts/) - Create a short production (approximately 500 assets and shots) with assets, shots, sequences and edit.
+1. [Quickstart for Video Games](/recipes/for-videogames/) - Create a Video game production with Assets, Maps, Level and Chapters.
+1. [Quickstart for NFTs](/recipes/for-nfts/) - Create a NFT Collection with Assets and NFT Collections.
+1. [Quickstart for Shots-Only Productions](/recipes/shots-only-production/) - Create a short production (about 500 shots) with only shots, sequences and edit.
+1. [Quickstart for Assets-Only Productions](/recipes/assets-only-production/) - Create a short production (about 500 assets) with only assets.
 
 ## Workflows
 
-- [For Supervisors](/workflows/for-supervisors/) - 
-- [For Producers](/workflows/for-producers/) - 
-- [For Artists](/workflows/for-artists/) - 
-- [For Clients](/workflows/for-clients/) - 
-- [For Developers](https://dev.kitsu.cloud/) - 
+1. [For Supervisors](/workflows/for-supervisors/) - 
+1. [For Producers](/workflows/for-producers/) - 
+1. [For Artists](/workflows/for-artists/) - 
+1. [For Clients](/workflows/for-clients/) - 
+1. [For Developers](https://dev.kitsu.cloud/) - 
 
 ## Guides
 
 ### Team Management
 
-- [Managing Departments](/guides/team-management/managing-departments/) - Discover methods for effectively managing and overseeing your team.
-- [Managing Teams](/guides/team-management/managing-teams/) - 
-- [User Permission Roles](/guides/team-management/team-roles/) - 
-- [Import Team](/guides/team-management/import-team/) - 
-- [User Profile Settings](/guides/team-management/profile-settings/) - 
+1. [Managing Departments](/guides/team-management/managing-departments/) - Discover methods for effectively managing and overseeing your team.
+1. [Managing Teams](/guides/team-management/managing-teams/) - Learn how to add, organize, and manage the people working on your productions.
+1. [User Permission Roles](/guides/team-management/team-roles/) - Understand the different permission roles available and how to assign the right level of access to each team member.
+1. [Import Team](/guides/team-management/import-team/) - Quickly add multiple team members at once by importing them from a file instead of creating accounts one by one.
+1. [User Profile Settings](/guides/team-management/profile-settings/) - Customize personal account settings, including contact details, preferences, and notification options.
 
-### Task Management
+### Production Structure
 
-- [Manage Studios](/guides/task-management/manage-studios/) - 
-- [Manage Productions](/guides/task-management/manage-productions/) - 
-- [Manage Episodes](/guides/task-management/manage-episodes/) - 
-- [Manage Sequences](/guides/task-management/manage-sequences/) - 
-- [Manage Shots](/guides/task-management/manage-shots/) - 
-- [Manage Asset Types](/guides/task-management/managing-asset-types/) - 
-- [Manage Task Types](/guides/task-management/managing-task-types/) - 
-- [Manage Task Statuses](/guides/task-management/managing-task-statuses/) - 
-- [Manage Edits](/guides/task-management/manage-edits/) - 
+1. [Manage Studio Labels](/guides/production-structure/manage-studios/) - Create and organize the studio labels used to identify which studio is responsible for each task.
+1. [Manage Productions](/guides/production-structure/manage-productions/) - Create, configure, and organize the productions (projects) tracked in Kitsu.
+1. [Manage Episodes](/guides/production-structure/manage-episodes/) - Add, edit, and organize episodes within a production.
+1. [Manage Sequences](/guides/production-structure/manage-sequences/) - Add, edit, and organize sequences within a production or episode.
+1. [Manage Shots](/guides/production-structure/manage-shots/) - Add, edit, and organize the shots that make up a sequence.
+
+### Task Configuration
+
+1. [Manage Asset Types](/guides/task-configuration/managing-asset-types/) - Create and organize categories (like Characters, Props, or Environments) used to group and classify assets across a production.
+1. [Manage Task Types](/guides/task-configuration/managing-task-types/) - Define the pipeline stages (like Modeling, Rigging, or Compositing) that assets, shots, and other entities move through during production.
+1. [Manage Task Statuses](/guides/task-configuration/managing-task-statuses/) - Configure the review and approval states (like To Do, Work in Progress, or Done) that track a task's progress through the workflow.
 
 ### Pre-Production
 
-- [Manage Concepts](/guides/pre-production/manage-concepts/) - 
-- [Manage Assets](/guides/pre-production/manage-assets/) - 
-- [Breakdown & Casting](/guides/pre-production/breakdown-casting/) - 
-- [Meta-Columns](/guides/pre-production/meta-column/) - Learn how to create and organize metadata from your production.
+1. [Manage Concepts](/guides/pre-production/manage-concepts/) - Learn how to create, organize, and validate concept art for your production.
+1. [Manage Assets](/guides/pre-production/manage-assets/) - Learn how to create, organize, and track the assets used throughout your production.
+1. [Breakdown & Casting](/guides/pre-production/breakdown-casting/) - Learn how to break down your scripts or storyboards and cast assets into shots.
+1. [Meta-Columns](/guides/pre-production/meta-column/) - Learn how to create and organize metadata from your production.
 
 ### Scheduling
 
-- [Assign Tasks](/guides/scheduling/assign-tasks/) - Learn how to assign people to a task.
-- [Find Assignments](/guides/scheduling/find-assignments/) - Learn how to stay on top of task assignments.
-- [Schedules](/guides/scheduling/schedules/) - Discover the different scheduling capabilities in Kitsu, from the studio level to the task level.
-- [Estimates](/guides/scheduling/estimates/) - Learn how to calculate the number of days estimated to do a task (bids). 
+1. [Assign Tasks](/guides/scheduling/assign-tasks/) - Learn how to assign tasks to people
+1. [Find Assignments](/guides/scheduling/find-assignments/) - Learn how to find tasks assigned to you
+1. [Schedules](/guides/scheduling/schedules/) - Discover the different scheduling views of Kitsu, from the studio level to the task level
+1. [Estimates](/guides/scheduling/estimates/) - Learn how to set and calculate the number of days estimated to do a task (bids)
+1. [Durations vs Estimates](/guides/scheduling/durations-vs-estimates/) - Find the difference between estimated (bid) days and actual duration, and how to improve your bidding process
 
 ### Review & Publishing
 
-- [Update Task Progress](/guides/review-publishing/update-task-progress/) - How to change statuses and keep your team updated on the progress of work.
-- [Publish](/guides/review-publishing/publish/) - How to publish and share work with your team.
-- [Review](/guides/review-publishing/review/) - Learn how to review all feedback on a task.
-- [Playlist](/guides/review-publishing/playlist/) - Quickly gather video versions and stay focused during the review.
+1. [Update Task Progress](/guides/review-publishing/update-task-progress/) - How to change statuses and keep your team updated on the progress of work.
+1. [Publish](/guides/review-publishing/publish/) - How to publish and share work with your team.
+1. [Review](/guides/review-publishing/review/) - Learn how to review all feedback on a task.
+1. [Playlist](/guides/review-publishing/playlist/) - Quickly gather video versions and stay focused during internal and client reviews.
+1. [Manage Edits](/guides/review-publishing/manage-edits/) - Upload and track editorial cuts to keep shot timing and versions in sync with the latest edit.
 
 ### Tracking & Reporting
 
-- [Ensure Tasks are On-Time](/guides/tracking-reporting/ensure-tasks-on-time/) - 
-- [Understand Why a Task Is Late](/guides/tracking-reporting/understand-why-late-task/) - 
-- [Quotas](/guides/tracking-reporting/quotas/) - Learn how to check your team efficiency.
-- [Studio Overview](/guides/tracking-reporting/studio-overview/) -  Ensure you're ahead of the game with your studio's productions.
-- [Studio Occupancy](/guides/tracking-reporting/studio-occupancy/) - 
-- [Production Overview](/guides/tracking-reporting/production-overview/) - 
-- [Timesheets](/guides/tracking-reporting/timesheets/) - 
-- [Durations vs Estimates](/guides/tracking-reporting/durations-vs-estimates/) - 
-- [Advanced Search & Filters](/guides/tracking-reporting/filter/) - Hone in on key information with powerful search functionality.
-- [Main Schedule](/guides/tracking-reporting/main-schedule/) - 
-- [Budget](/guides/tracking-reporting/budget/) - 
-- [Thumbnails](/guides/tracking-reporting/thumbnails/) - How to apply thumbnails to assets and shots.
+1. [Ensure Tasks are On-Time](/guides/tracking-reporting/ensure-tasks-on-time/) - Keep production on schedule by monitoring task progress and deadlines
+1. [Understand Why a Task Is Late](/guides/tracking-reporting/understand-why-late-task/) - Identify the causes behind delayed tasks so you can address bottlenecks quickly
+1. [Quotas](/guides/tracking-reporting/quotas/) - Learn how to check your team efficiency against estimates
+1. [Studio Overview](/guides/tracking-reporting/studio-overview/) - Ensure you're ahead of the plan with your studio's productions
+1. [Production Overview](/guides/tracking-reporting/production-overview/) - Get a bird's-eye view of a production's progress, tasks, and status at a glance
+1. [Timesheets](/guides/tracking-reporting/timesheets/) - Track and log time spent on tasks to keep production hours accurate
+1. [Advanced Search & Filters](/guides/tracking-reporting/filter/) - Hone in on key information with powerful search functionality
+1. [Budget](/guides/tracking-reporting/budget/) - Monitor spending and compare actual costs against your production budget forecast
+1. [Thumbnails](/guides/tracking-reporting/thumbnails/) - How to apply thumbnails to entities like assets or shots
 
 ### Privacy & Security
 
-- [Authentication](/guides/privacy-security/authentication/) - 
-- [Logs](/guides/privacy-security/logs/) - 
+1. [Authentication](/guides/privacy-security/authentication/) - Manage how users sign in to Kitsu, including password policies and Two-Factor Authentication (TOTP, Email OTP, or a FIDO security key).
+1. [Logs](/guides/privacy-security/logs/) - Review login and activity logs to track who accessed your Kitsu instance and when.
   
 ## Recipes
   
-- [3D Background](/recipes/3d-background/) - 
+1. [3D Background](/recipes/3d-background/) - 
 
 ## Resources
 
-- [Frequently Asked Questions](/resources/faq/) - 
-- [Changelog](https://cgwire.canny.io/changelog) - 
+1. [Frequently Asked Questions](/resources/faq/) - 
+1. [Changelog](https://cgwire.canny.io/changelog) - 
 
 ## Tutorials
 

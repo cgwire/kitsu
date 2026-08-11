@@ -1,5 +1,7 @@
 # Meta Columns
 
+<!-- #region body -->
+
 To add more information on the general spreadsheet pages, you can create a **Metadata Column**.
 
 Metadata columns alow you to track additional information related to your production. Some examples could include a metadata colum to track the percieved difficulty of a task, or a column to try custom tags that help you identify certain aspects of a task. Custom metadata columns can store data in a veriety of formats for easier data entry, filtering and validation.
@@ -130,3 +132,5 @@ Hover over your meta column and click on the menu dropdown icon, then select `Ed
 Hover over your meta column and click on the menu dropdown icon, then select `Delete`:
 
 ![](/guides/pre-production/meta-column/images/0.png)
+
+<!-- #endregion body -->
