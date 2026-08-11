@@ -213,6 +213,7 @@
           <picture-viewer
             ref="picture-player-comparison"
             class="picture-preview"
+            :background-color="pictureBackgroundColor"
             :big="true"
             :default-height="pictureDefaultHeight"
             :full-screen="fullScreen"
@@ -352,6 +353,7 @@
         >
           <multi-picture-viewer
             ref="picture-player"
+            :background-color="pictureBackgroundColor"
             :default-height="pictureDefaultHeight"
             :full-screen="fullScreen"
             :light="false"
@@ -686,6 +688,7 @@
         v-model:is-laser-mode-on="isLaserModeOn"
         v-model:is-onion-skin-on="isOnionSkinOn"
         v-model:onion-skin-frames="onionSkinFrames"
+        v-model:picture-background-color="pictureBackgroundColor"
         v-model:is-shape-mode="isShapeMode"
         v-model:is-wireframe="isWireframe"
         @annotation-displayed-clicked="
@@ -1154,6 +1157,7 @@ const objectModel = ref({
 })
 const onNextTimeUpdateActions = ref([])
 const pencilPalette = ref(['huge', 'big', 'medium', 'small', 'tiny'])
+const pictureBackgroundColor = ref('#000000')
 const pictureDefaultHeight = ref(0)
 const playingEntityIndex = ref(0)
 const playlistDuration = ref(0)

@@ -55,6 +55,7 @@
 
     <picture-viewer
       ref="pictureViewer"
+      :background-color="pictureBackgroundColor"
       :big="isBig"
       :default-height="defaultHeight"
       :full-screen="isFullScreen"
@@ -141,6 +142,10 @@ import VideoViewer from '@/components/players/viewers/VideoViewer.vue'
 /* eslint-enable no-unused-vars */
 
 const props = defineProps({
+  pictureBackgroundColor: {
+    type: String,
+    default: '#000000'
+  },
   currentFrame: {
     type: Number,
     default: 0
