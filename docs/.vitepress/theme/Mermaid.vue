@@ -92,16 +92,31 @@ const renderChart = async () => {
         theme: hasDarkClass ? "dark" : "base",
     };
 
+    const lightThemeVariables = {
+        primaryColor: "green",
+        primaryBorderColor: "green",
+        primaryTextColor: "white",
+        textColor: "black",
+        secondaryColor: "black",
+        tertiaryColor: "black",
+    };
+
+    const darkThemeVariables = {
+        primaryColor: "green",
+        primaryBorderColor: "#4ade80", // lighter green border for contrast on dark bg
+        primaryTextColor: "white",
+        textColor: "white",
+        secondaryColor: "#374151", // dark gray instead of black
+        tertiaryColor: "#374151",
+        background: "#1f2937",
+        mainBkg: "green",
+        lineColor: "#9ca3af",
+        nodeBorder: "#4ade80",
+    };
+
     mermaid.initialize({
         ...mermaidConfig,
-        themeVariables: {
-            primaryColor: "green",
-            primaryBorderColor: "green",
-            primaryTextColor: "white",
-            textColor: "black",
-            secondaryColor: "black",
-            tertiaryColor: "black",
-        },
+        themeVariables: hasDarkClass ? darkThemeVariables : lightThemeVariables,
     });
 
     const uniqueId = `${props.id}-${Date.now()}`;

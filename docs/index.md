@@ -43,10 +43,10 @@ Here are some links to familiarize yourself with the basic concepts in Kitsu you
 
 ## Workflows
 
-1. [For Supervisors](/workflows/for-supervisors/) - 
-1. [For Producers](/workflows/for-producers/) - 
-1. [For Artists](/workflows/for-artists/) - 
-1. [For Clients](/workflows/for-clients/) - 
+1. [For Supervisors](/handbooks/for-supervisors/) - 
+1. [For Producers](/handbooks/for-producers/) - 
+1. [For Artists](/handbooks/for-artists/) - 
+1. [For Clients](/handbooks/for-clients/) - 
 1. [For Developers](https://dev.kitsu.cloud/) - 
 
 ## Guides

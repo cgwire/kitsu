@@ -276,24 +276,24 @@ export default {
         ],
       },
       {
-        text: "Workflows",
+        text: "Handbooks",
         collapsed: false,
         items: [
           {
             text: "For Supervisors",
-            link: "/workflows/for-supervisors/",
+            link: "/handbooks/for-supervisors/",
           },
           {
             text: "For Producers",
-            link: "/workflows/for-producers/",
+            link: "/handbooks/for-producers/",
           },
           {
             text: "For Artists",
-            link: "/workflows/for-artists/",
+            link: "/handbooks/for-artists/",
           },
           {
             text: "For Clients",
-            link: "/workflows/for-clients/",
+            link: "/handbooks/for-clients/",
           },
           {
             text: "For Developers",

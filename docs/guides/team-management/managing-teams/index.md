@@ -6,9 +6,9 @@ There are two libraries for users:
 - The **People Page** (Global Library) is used to determine users' permissions, contracts, and departments they belong to.
 - The **Team Page** (Production Library) is used to define who is working on a project and provide access to the production.
 
-<!-- #region setup -->
-
 ## Creating Users
+
+<!-- #region setup -->
 
 To assign tasks to people, you first need to create an account for them in Kitsu.
 

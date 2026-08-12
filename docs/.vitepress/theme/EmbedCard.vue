@@ -41,7 +41,8 @@ function toggle() {
 
 <style scoped>
 .detail-card {
-  background: #ffffff;
+  background: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-border);
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
@@ -62,7 +63,7 @@ function toggle() {
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
-  color: #00b242;
+  color: var(--vp-c-brand-1);
 }
 
 .detail-card__toggle {
@@ -75,12 +76,12 @@ function toggle() {
   align-items: center;
   justify-content: center;
   border-radius: 4px;
-  color: #555;
+  color: var(--vp-c-text-2);
   flex-shrink: 0;
 }
 
 .detail-card__toggle:hover {
-  background: rgba(0, 0, 0, 0.05);
+  background: var(--vp-c-default-soft);
 }
 
 .detail-card__icon {
@@ -90,7 +91,7 @@ function toggle() {
 
 .detail-card__content {
   padding: 0 16px 16px;
-  color: #333;
+  color: var(--vp-c-text-1);
   font-size: 0.9rem;
   line-height: 1.5;
 }
