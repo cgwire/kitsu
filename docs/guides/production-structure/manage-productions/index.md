@@ -14,6 +14,8 @@ flowchart TD
 
 ## Create a New Production
 
+<!-- #region setup -->
+
 Click on the `Create a new production` button:
 
 ![Create a production](/img/getting-started/create_production.png)
@@ -44,6 +46,8 @@ If you realize you missed some Task Types, you can create them later.
 
 See the [Studio Workflow](../../../configure-kitsu/index.html#studio-workflows) section.
 :::
+
+<!-- #endregion setup -->
 
 Then, 7 and 8 are the option parts. If you already have a spreadsheet with your asset/shot.
 

@@ -37,7 +37,6 @@ Here are some links to familiarize yourself with the basic concepts in Kitsu you
 1. [Quickstart for Feature Films](/recipes/for-feature-films/) - Create a feature film production (approximately 1 000 entities) with assets, shots, sequences and edit.
 1. [Quickstart for Shorts](/recipes/for-shorts/) - Create a short production (approximately 500 assets and shots) with assets, shots, sequences and edit.
 1. [Quickstart for Video Games](/recipes/for-videogames/) - Create a Video game production with Assets, Maps, Level and Chapters.
-1. [Quickstart for NFTs](/recipes/for-nfts/) - Create a NFT Collection with Assets and NFT Collections.
 1. [Quickstart for Shots-Only Productions](/recipes/shots-only-production/) - Create a short production (about 500 shots) with only shots, sequences and edit.
 1. [Quickstart for Assets-Only Productions](/recipes/assets-only-production/) - Create a short production (about 500 assets) with only assets.
 

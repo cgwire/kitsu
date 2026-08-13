@@ -13,7 +13,29 @@
     </div>
 
     <div v-show="isOpen" class="detail-card__content">
+      <div v-if="link" class="detail-card__link-row">
+        <a
+          :href="link"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="detail-card__link-btn"
+        >
+          Open Full Page ↗
+        </a>
+      </div>
+
       <slot></slot>
+
+      <div v-if="link" class="detail-card__link-row">
+        <a
+          :href="link"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="detail-card__link-btn"
+        >
+          Open Full Page ↗
+        </a>
+      </div>
     </div>
   </div>
 </template>
@@ -25,6 +47,10 @@ const props = defineProps({
   title: {
     type: String,
     required: true,
+  },
+  link: {
+    type: String,
+    required: false,
   },
   isOpen: {
     type: Boolean,
@@ -94,5 +120,32 @@ function toggle() {
   color: var(--vp-c-text-1);
   font-size: 0.9rem;
   line-height: 1.5;
+}
+
+.detail-card__link-row {
+  display: flex;
+  justify-content: flex-end;
+  margin: 8px 0;
+}
+
+.detail-card__link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--vp-c-brand-soft);
+  color: var(--vp-c-text-1);
+  border: 1px solid var(--vp-c-brand-1);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.detail-card__link-btn:hover {
+  background: var(--vp-c-brand-1);
+  color: var(--vp-c-white, #fff);
 }
 </style>

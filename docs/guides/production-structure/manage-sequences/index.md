@@ -34,6 +34,8 @@ Once you have created your **Task Types**  on your **Global Library**, add them
 
 ## Create a Sequence
 
+<!-- #region setup -->
+
 Once you have your task types ready in the settings page, you can create a sequence.
 
 This new page behaves like the asset and shot global page. You can add your edits with the **+ New Sequence** button.
@@ -55,6 +57,8 @@ If you click on the name of a sequence, you will see the detail page of this seq
 On the detailed page, you have access to the sequence casting to see all the assets used in the whole sequence.
 
 You can also access the schedule, Preview Files, Activity, and Timelog of the sequence **tasks**.
+
+<!-- #endregion setup -->
 
 ## Update a Sequence
 

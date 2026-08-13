@@ -65,6 +65,8 @@ The **Calendar View** displays tasks according to their **Start** and **Due Date
 
 ## The "Task Type" Page
 
+<!-- #region for-supervisors -->
+
 A supervisor will typically have tasks assigned to them in addition to supervising your department. You need to split your time between completing your work and managing your team. 
 
 Once the assignments and estimates are done, you can focus on the day-to-day operations. To easily see an overview of tasks from your department, you can click on your task type name from any page.
@@ -84,5 +86,7 @@ If you need more information about a task, click on it's name to open the commen
 
 ![Task Type filtered as contact sheet](/img/getting-started/task_type_contact_sheet_panel.png)
 :::
+
+<!-- #endregion for-supervisors -->
 
 <!-- #endregion body -->

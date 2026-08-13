@@ -49,6 +49,8 @@ Click the date picker to backfill entries. You can also mark days as **Day Off**
 
 ## Department Timesheets
 
+<!-- #region for-supervisors -->
+
 As a Supervisor, you may also be responsible for monitoring your team's hours. The Timesheet page shows how many hours they work daily, weekly, and monthly.
 
 ![Timesheet](/img/getting-started/supervisor_timesheet_team.png)
@@ -56,5 +58,7 @@ As a Supervisor, you may also be responsible for monitoring your team's hours. T
 It's important to highlight abnormal patterns such as extra hours, sick days, or lack of vacation. The timesheet view can provide a high-level overview of where artists are spending their time, which can help you take care of your team to ensure they are not burning out.
 
 ![Timesheet Detailed](/img/getting-started/supervisor_timesheet_team_detail.png)
+
+<!-- #endregion for-supervisors -->
 
 <!-- #endregion body -->

@@ -11,38 +11,48 @@ import EmbedDocument from '../../.vitepress/theme/EmbedDocument.vue'
 
 This guide will help you get started and understand the Kitsu's key features as an artist.
 
-## 1. Initial Profile Setup & Customization"
+## 1. Initial Profile Setup & Customization
 
-<EmbedDocument >
+<EmbedDocument link="/guides/team-management/profile-settings/">
 <!--@include: ../../guides/team-management/profile-settings/index.md#body-->
 </EmbedDocument>
 
-## 2. Managing Your Assignments"
+## 2. Managing Your Assignments
 
-<EmbedDocument >
+<EmbedDocument link="/guides/scheduling/find-assignments/">
 <!--@include: ../../guides/scheduling/find-assignments/index.md#body-->
 </EmbedDocument>
 
-## 3. Updating Task Progress"
+## 3. Updating Task Progress
 
-<EmbedDocument >
+<EmbedDocument link="/guides/review-publishing/update-task-progress/">
 <!--@include: ../../guides/review-publishing/update-task-progress/index.md#body-->
 </EmbedDocument>
 
-## 4. Publish a Concept"
+## 4. Publish a Concept
 
-<EmbedDocument >
+<EmbedDocument link="/guides/review-publishing/publish/publishing-a-concept">
 <!--@include: ../../guides/review-publishing/publish/index.md#publishing-a-concept-->
 </EmbedDocument>
 
-## 5. Request a Review"
+## 5. Request a Review
 
-<EmbedDocument >
+<EmbedDocument link="/guides/review-publishing/review/#request-review">
 <!--@include: ../../guides/review-publishing/review/index.md#request-review-->
 </EmbedDocument>
 
-## 6. Complete Your Timesheet"
+## 6. Complete Your Timesheet
+<EmbedDocument link="/guides/tracking-reporting/timesheets/">
 
-<EmbedDocument >
-<!--@include: ../../guides/tracking-reporting/timesheets/index.md#body-->
+### Viewing Timesheets
+
+<!--@include: ../../guides/tracking-reporting/timesheets/index.md#viewing-timesheets-->
+
+### Complete Your Timesheet
+
+<!--@include: ../../guides/tracking-reporting/timesheets/index.md#complete-your-timesheet-->
+
+### What If You Missed a Day?
+
+<!--@include: ../../guides/tracking-reporting/timesheets/index.md#what-if-you-missed-a-day-->
 </EmbedDocument>

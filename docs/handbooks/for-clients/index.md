@@ -13,36 +13,36 @@ This guide will help you get started and understand the Kitsu's key features as 
 
 ## 1. Initial Profile Setup & Customization
 
-<EmbedDocument>
+<EmbedDocument link="/guides/team-management/profile-settings/">
 <!--@include: ../../guides/team-management/profile-settings/index.md#body-->
 </EmbedDocument>
 
 ## 2. See your Playlists
 
-<EmbedDocument >
-<!--@include: ../../guides/review-publishing/playlist/index.md#body-->
+<EmbedDocument link="/guides/review-publishing/playlist/#accessing-your-playlists">
+<!--@include: ../../guides/review-publishing/playlist/index.md#for-clients-->
 </EmbedDocument>
 
 ## 3. Share your Comments
 
-<EmbedDocument >
-<!--@include: ../../guides/review-publishing/playlist/index.md#body-->
+<EmbedDocument link="/guides/review-publishing/playlist/#commenting">
+<!--@include: ../../guides/review-publishing/playlist/index.md#commenting-->
 </EmbedDocument>
 
 ## 4. Global View of the Assets
 
-<EmbedDocument >
-<!--@include: ../../guides/pre-production/manage-assets/index.md#body-->
+<EmbedDocument link="/guides/pre-production/manage-assets/">
+<!--@include: ../../guides/pre-production/manage-assets/index.md#intro-->
 </EmbedDocument>
 
 ## 5. Global View of the Shots
 
-<EmbedDocument >
-<!--@include: ../../guides/production-structure/manage-shots/index.md#body-->
+<EmbedDocument link="/guides/production-structure/manage-shots/#see-the-details-of-a-shot">
+<!--@include: ../../guides/production-structure/manage-shots/index.md#view-shots-->
 </EmbedDocument>
 
 ## 6. Production Report
 
-<EmbedDocument >
-<!--@include: ../../guides/tracking-reporting/production-overview/index.md#body-->
+<EmbedDocument link="/guides/tracking-reporting/production-overview/#client-production-reports">
+<!--@include: ../../guides/tracking-reporting/production-overview/index.md#client-production-reports-->
 </EmbedDocument>

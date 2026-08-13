@@ -408,11 +408,12 @@ export default {
         text: "Recipes",
         collapsed: false,
         items: [
+          { text: "(Concept) For TV Shows", link: "/recipes/tvshows/" },
+          { text: "(Concept) For 2D", link: "/recipes/2d/" },
           { text: "Quickstart for TV Shows", link: "/recipes/for-tvshows/" },
           { text: "Quickstart for Feature Films", link: "/recipes/for-feature-films/" },
           { text: "Quickstart for Shorts", link: "/recipes/for-shorts/" },
           { text: "Quickstart for Video Games", link: "/recipes/for-videogames/" },
-          { text: "Quickstart for NFTs", link: "/recipes/for-nfts/" },
           { text: "Quickstart for Shots-Only Productions", link: "/recipes/shots-only-production/" },
           { text: "Quickstart for Assets-Only Productions", link: "/recipes/assets-only-production/" },
           { text: "3D Background", link: "/recipes/3d-background/" },
@@ -422,6 +423,10 @@ export default {
         text: "Resources",
         collapsed: false,
         items: [
+          {
+            text: "UI Reference",
+            link: "/resources/ui/"
+          },
           {
             text: "Frequently Asked Questions",
             link: "/resources/faq/"

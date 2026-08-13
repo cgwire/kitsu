@@ -18,6 +18,8 @@ You must create a sequence first to populate it with shots.
 
 ## Create a Shot
 
+<!-- #region setup -->
+
 It's time to create **shots** for your production.
 
 You need to go to the **Shots** page: you can use the
@@ -61,6 +63,8 @@ Your second sequence is selected, and you can now add shots.
 
 > [!TIP]
 > If a shot is misplaced on a sequence, you have to edit the shot in its dedicated Shot page to change the sequence. Look at the section `Update your shots` for more information.
+
+<!-- #endregion setup -->
 
 ## Import Shots 
 
@@ -144,6 +148,8 @@ All your shots are imported into Kitsu, and the task is created according to you
 
 ## See the Details of a Shot
 
+<!-- #region view-shots -->
+
 If you want to see the details of a shot, click on its name.
 
 ![Shot detail](/img/getting-started/shot_detail.png)
@@ -172,6 +178,8 @@ the **Preview Files** uploaded at various task types,
 And the **Timelog** if people have filled out their timesheet on the tasks of this asset.
 
 ![Asset detail casting](/img/getting-started/shot_detail_page_timelog.png)
+
+<!-- #endregion view-shots -->
 
 ## Add More Tasks After Creating Shots
 

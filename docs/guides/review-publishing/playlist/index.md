@@ -6,6 +6,7 @@ A playlist is a list of curated versions / previews compiled for review and appr
 
 ## Accessing your Playlists
 
+
 **Production team members** can find the **Playlists** page in the drop-down menu.
 
 ![Playlist main menu](/img/getting-started/drop_down_menu_playlist.png)
@@ -16,6 +17,8 @@ The **Playlist** page is separated into two parts:
 - (2) The last created playlists and the last modified playlists.
 
 ![Playlist page](/img/getting-started/playlist_page.png)
+
+<!-- #region for-clients -->
 
 **Clients** access playlists differently: click on the production avatar to reach the **Playlist** page, which gathers all the assets and shots they have to comment on.
 
@@ -29,6 +32,8 @@ In the detail view, the left part keeps access to the different playlists, the c
 
 ![Client playlist global page](/img/getting-started/client_playlist_detaill.png)
 ![Client playlist global page](/img/getting-started/client_playlist_detail_comment.png)
+
+<!-- #endregion for-clients -->
 
 ## Create a Playlist
 
@@ -127,6 +132,8 @@ You can also play two tasks of a shot side by side. Click on the **Compare** but
 
 ## Commenting
 
+<!-- #region commenting -->
+
 The primary purpose of the playlist is to help review the shots and assets. You can comment directly from the preview by clicking the **comment** button.
 
 ![Playlist comment](/img/getting-started/playlist_comment_button.png)
@@ -161,6 +168,8 @@ You can add a **checklist** to your comments. Click the **Add checklist** button
 Type your comment, and hit **Enter** to add another line to your checklist, or click again on the **Add Checklist** button.
 
 ![checklist](/img/getting-started/checklist_detailed.png)
+
+<!-- #endregion commenting -->
 
 ## Review Room
 

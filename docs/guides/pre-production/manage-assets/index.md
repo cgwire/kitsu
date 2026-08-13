@@ -1,6 +1,7 @@
 # Managing Assets
 
 <!-- #region body -->
+<!-- #region intro -->
 
 You can go to the `Assets` page using the dropdown menu on top of the screen:
 
@@ -10,9 +11,12 @@ On the global page, you will be able to see all the statuses of the different st
 
 ![Client global page Asset](/img/getting-started/client_global_asset.png)
 
+<!-- #endregion intro -->
+
 ## Create an Asset
 
 <!-- #region create-an-asset -->
+<!-- #region setup -->
 
 On the asset page, click on **Add assets**.
 
@@ -58,6 +62,8 @@ If you click on **Confirm and stay, ** realize you don't have more assets to add
 You will also see the tasks that are selected for your assets workflow are created at the same time.
 
 If you need to add more **Assets**, click the **+ Create assets** button.
+
+<!-- #endregion setup -->
 
 ### Import Assets From a Spreadsheet
 

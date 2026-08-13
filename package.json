@@ -10,7 +10,8 @@
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "preview": "vitepress preview docs",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "toc": "./word_count.sh docs > toc.json"
   },
   "repository": {
     "type": "git",

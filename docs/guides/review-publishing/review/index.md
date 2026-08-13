@@ -130,6 +130,8 @@ And here is how the overlay looks in frame N + 4:
 
 ## Supervisor Reviews
 
+<!-- #region for-supervisors -->
+
 Typically, when an artist finishes a task, they call the supervisor for a review. But frequent interruptions can be unproductive and make it difficult to maintain focus. 
 
 To avoid this, set a specific timeframe for reviews. This approach benefits both you and your team by providing a structured schedule. Artists will know when they can expect feedback and can plan their work accordingly, while you can dedicate uninterrupted time to your own tasks.
@@ -150,6 +152,8 @@ Another option is to go to the **Task Type Page** and change the **Display as co
 ![Supervisor Contact Sheet](/img/getting-started/supervisor_contactsheet.png)
 
 From here, you can click on the contact sheet to open the comment panel or select several tasks to create a playlist.
+
+<!-- #endregion for-supervisors -->
 
 ## Reviewing Concepts
 

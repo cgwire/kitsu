@@ -22,6 +22,8 @@ You'll then reach the Episodes page with a full list of episodes for the current
 
 ## Create Episodes
 
+<!-- #region setup -->
+
 In the `Episodes` page, click `New episode` in the top right corner:
 
 ![new episode button](/guides/production-structure/manage-episodes/images/2.png)
@@ -34,6 +36,8 @@ A modal appears. Fill the form and click `Confirm`:
 - **Status**: the production status of the episode (canceled, complete, running, standby)
 - **Description**: a short description of what the episode is about
 - **Resolution**: the episode resolution e.g "1920x1080", "4K", etc.
+
+<!-- #endregion setup -->
 
 ## Update Episodes
 
