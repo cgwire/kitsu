@@ -740,7 +740,7 @@
       "new_person": "ユーザーを作成",
       "no_task_assigned": "アサインされているタスクはありません",
       "persons": "ユーザー | ユーザー",
-      "project_role": "プロジェクトロール",
+      "project_role": "プロダクションロール",
       "running_tasks": "実行中のタスク",
       "select_person": "ユーザーを選択…",
       "team": "チーム",
@@ -1886,7 +1886,7 @@
       "leave_room": "ルームから退出"
     },
     "team_schedule": {
-      "busy": "別の作品で作業中",
+      "busy": "別のプロダクションで作業中",
       "title": "スケジュール",
       "title_main": "チームスケジュール",
       "person_placeholder": "ユーザーを選択…"
