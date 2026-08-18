@@ -465,7 +465,7 @@
                     v-show="isVisible(rootElement)"
                     role="button"
                     tabindex="0"
-                    @click="$emit('root-element-selected', rootElement)"
+                    @click="onRootBarClick(rootElement)"
                     @keydown.enter.prevent="
                       $emit('root-element-selected', rootElement)
                     "
@@ -648,7 +648,7 @@
                     v-show="subchildren || isVisible(childElement)"
                     role="button"
                     tabindex="0"
-                    @click="$emit('item-selected', rootElement, childElement)"
+                    @click="onChildBarClick(rootElement, childElement)"
                     @keydown.enter.prevent="
                       $emit('item-selected', rootElement, childElement)
                     "
@@ -750,13 +750,7 @@
                           @mousedown="moveTimebar(task, $event)"
                           @touchstart="moveTimebar(task, $event)"
                           @click="
-                            $emit(
-                              'task-selected',
-                              rootElement,
-                              childElement,
-                              task,
-                              selection
-                            )
+                            onTaskBarClick(rootElement, childElement, task)
                           "
                           @keydown.enter.prevent="
                             $emit(
@@ -1100,6 +1094,12 @@ let dragSourcePersonId = null
 // left its source row, the source id is gone from assignees and only this
 // map knows which row the next hop must unassign
 const dragPersonByItem = new Map()
+
+// a native click still fires on mouseup after a genuine drag (mousedown and
+// mouseup landed on the same bar), so an unguarded click handler would
+// re-select/expand the row right after every move. stopBrowsing sets this
+// once it detects the pointer actually moved; the next click consumes it.
+let justDragged = false
 
 // cached wrapper rect: getBoundingClientRect on every mousemove forces a
 // layout; invalidated on resize and zoom via resetScheduleSize
@@ -2012,6 +2012,11 @@ const stopBrowsing = event => {
   }
   if (currentElement.value) {
     if (initialClientX !== getClientX(event)) {
+      // the mouseup below still dispatches a click on this same bar; without
+      // this it would fall straight through to root-element-selected /
+      // item-selected / task-selected and re-expand or re-select right after
+      // every drag
+      justDragged = true
       // on moving or resizing selected items
       selection.value.forEach(item => {
         emit('item-changed', item)
@@ -2257,6 +2262,30 @@ const timebarSubchildTitle = task => {
     ? formatDuration(task.duration)
     : formatDuration(task.estimation)
   return `${name} (${startDate} - ${endDate}) ${duration} ${durationUnit.value}`
+}
+
+// True the first time it's called after a drag, then resets: a click fires
+// on mouseup even after a real drag, so callers use this to skip acting on
+// that trailing click without also swallowing the next genuine click.
+const consumeDragClick = () => {
+  if (!justDragged) return false
+  justDragged = false
+  return true
+}
+
+const onRootBarClick = rootElement => {
+  if (consumeDragClick()) return
+  emit('root-element-selected', rootElement)
+}
+
+const onChildBarClick = (rootElement, childElement) => {
+  if (consumeDragClick()) return
+  emit('item-selected', rootElement, childElement)
+}
+
+const onTaskBarClick = (rootElement, childElement, task) => {
+  if (consumeDragClick()) return
+  emit('task-selected', rootElement, childElement, task, selection.value)
 }
 
 const getTimebarLeft = timeElement => {
