@@ -92,10 +92,9 @@ describe('Schedule widget - dragging a collapsed root row bar', () => {
     const bar = wrapper.find('.timebar-center')
     await dragBar(wrapper, bar, 500, 560)
 
-    // the drag itself moved the bar's dates
+    // sanity check: a drag actually happened
     expect(rootElement.startDate.isSame(moment('2026-08-15'))).toBe(false)
 
-    // but the trailing click must not also select/expand the row
     expect(wrapper.emitted('root-element-selected')).toBeFalsy()
 
     wrapper.unmount()

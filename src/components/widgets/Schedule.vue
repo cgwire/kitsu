@@ -2012,10 +2012,6 @@ const stopBrowsing = event => {
   }
   if (currentElement.value) {
     if (initialClientX !== getClientX(event)) {
-      // the mouseup below still dispatches a click on this same bar; without
-      // this it would fall straight through to root-element-selected /
-      // item-selected / task-selected and re-expand or re-select right after
-      // every drag
       justDragged = true
       // on moving or resizing selected items
       selection.value.forEach(item => {
@@ -2264,9 +2260,8 @@ const timebarSubchildTitle = task => {
   return `${name} (${startDate} - ${endDate}) ${duration} ${durationUnit.value}`
 }
 
-// True the first time it's called after a drag, then resets: a click fires
-// on mouseup even after a real drag, so callers use this to skip acting on
-// that trailing click without also swallowing the next genuine click.
+// True the first time it's called after a drag, then resets, so it skips
+// only that one trailing click and not the next genuine one.
 const consumeDragClick = () => {
   if (!justDragged) return false
   justDragged = false
