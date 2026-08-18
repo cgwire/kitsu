@@ -276,33 +276,6 @@ export default {
         ],
       },
       {
-        text: "Handbooks",
-        collapsed: false,
-        items: [
-          {
-            text: "For Supervisors",
-            link: "/handbooks/for-supervisors/",
-          },
-          {
-            text: "For Producers",
-            link: "/handbooks/for-producers/",
-          },
-          {
-            text: "For Artists",
-            link: "/handbooks/for-artists/",
-          },
-          {
-            text: "For Clients",
-            link: "/handbooks/for-clients/",
-          },
-          {
-            text: "For Developers",
-            collapsed: true,
-            link: "https://dev.kitsu.cloud/",
-          },
-        ]
-      },
-      {
         text: "Guides",
         collapsed: false,
         items: [
@@ -323,7 +296,7 @@ export default {
             collapsed: false,
             link: "/guides/production-structure/",
             items: [
-              { text: "Manage Studios", link: "/guides/production-structure/manage-studios/" },
+              { text: "Manage Studio Labels", link: "/guides/production-structure/manage-studios/" },
               { text: "Manage Productions", link: "/guides/production-structure/manage-productions/" },
               { text: "Manage Episodes", link: "/guides/production-structure/manage-episodes/" },
               { text: "Manage Sequences", link: "/guides/production-structure/manage-sequences/" },
@@ -335,20 +308,23 @@ export default {
             collapsed: false,
             link: "/guides/task-configuration/",
             items: [
-              { text: "Manage Asset Types", link: "/guides/task-configuration/managing-asset-types/" },
               { text: "Manage Task Types", link: "/guides/task-configuration/managing-task-types/" },
               { text: "Manage Task Statuses", link: "/guides/task-configuration/managing-task-statuses/" },
             ],
           },
           {
-            text: "Pre-Production",
+            text: "Production",
             collapsed: false,
-            link: "/guides/pre-production/",
+            link: "/guides/production/",
             items: [
-              { text: "Manage Concepts", link: "/guides/pre-production/manage-concepts/" },
-              { text: "Manage Assets", link: "/guides/pre-production/manage-assets/" },
-              { text: "Breakdown & Casting", link: "/guides/pre-production/breakdown-casting/" },
-              { text: "Meta-Columns", link: "/guides/pre-production/meta-column/"},
+              { text: "Manage Concepts", link: "/guides/production/manage-concepts/" },
+              { text: "Manage Asset Types", link: "/guides/production/managing-asset-types/" },
+              { text: "Manage Assets", link: "/guides/production/manage-assets/" },
+              { text: "Assign Tasks", link: "/guides/production/assign-tasks/" },
+              { text: "Find Assignments", link: "/guides/production/find-assignments/" },
+              { text: "Breakdown & Casting", link: "/guides/production/breakdown-casting/" },
+              { text: "Meta-Columns", link: "/guides/production/meta-column/"},
+              { text: "3D Background", link: "/guides/production/3d-background/" },
             ],
           },
           {
@@ -356,8 +332,6 @@ export default {
             collapsed: false,
             link: "/guides/scheduling/",
             items: [
-              { text: "Assign Tasks", link: "/guides/scheduling/assign-tasks/" },
-              { text: "Find Assignments", link: "/guides/scheduling/find-assignments/" },
               { text: "Schedules", link: "/guides/scheduling/schedules/" },
               { text: "Estimates", link: "/guides/scheduling/estimates/" },
               { text: "Durations vs Estimates", link: "/guides/scheduling/durations-vs-estimates/" },
@@ -405,6 +379,33 @@ export default {
         ]
       },
       {
+        text: "Handbooks",
+        collapsed: false,
+        items: [
+          {
+            text: "For Supervisors",
+            link: "/handbooks/for-supervisors/",
+          },
+          {
+            text: "For Producers",
+            link: "/handbooks/for-producers/",
+          },
+          {
+            text: "For Artists",
+            link: "/handbooks/for-artists/",
+          },
+          {
+            text: "For Clients",
+            link: "/handbooks/for-clients/",
+          },
+          {
+            text: "For Developers",
+            collapsed: true,
+            link: "https://dev.kitsu.cloud/",
+          },
+        ]
+      },
+      {
         text: "Recipes",
         collapsed: false,
         items: [
@@ -416,7 +417,6 @@ export default {
           { text: "Quickstart for Video Games", link: "/recipes/for-videogames/" },
           { text: "Quickstart for Shots-Only Productions", link: "/recipes/shots-only-production/" },
           { text: "Quickstart for Assets-Only Productions", link: "/recipes/assets-only-production/" },
-          { text: "3D Background", link: "/recipes/3d-background/" },
         ],
       },
       {
@@ -428,15 +428,15 @@ export default {
             link: "/resources/ui/"
           },
           {
-            text: "Frequently Asked Questions",
-            link: "/resources/faq/"
-          },
-          {
             text: "Changelog",
             collapsed: true,
             "link": "https://cgwire.canny.io/changelog"
           }
         ],
+      },
+      {
+          text: "Frequently Asked Questions",
+          link: "/resources/faq/"
       },
     ],
   },

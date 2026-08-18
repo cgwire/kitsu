@@ -19,8 +19,8 @@ This guide will help you get started and understand the Kitsu's key features as 
 
 ## 2. Managing Your Assignments
 
-<EmbedDocument link="/guides/scheduling/find-assignments/">
-<!--@include: ../../guides/scheduling/find-assignments/index.md#body-->
+<EmbedDocument link="/guides/production/find-assignments/">
+<!--@include: ../../guides/production/find-assignments/index.md#body-->
 </EmbedDocument>
 
 ## 3. Updating Task Progress

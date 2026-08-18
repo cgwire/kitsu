@@ -4,8 +4,6 @@
 
 ```mermaid
 flowchart TD
-    STUDIO -->|runs| PRODUCTION
-
     PRODUCTION -->|contains| EPISODE
     PRODUCTION -->|contains, non-episodic| SEQUENCE
 
@@ -53,7 +51,7 @@ Then, 7 and 8 are the option parts. If you already have a spreadsheet with your 
 
 See the **Import from CSV** sections of each entity page for more details:
 
-- [Import Asset from CSV](/guides/pre-production/manage-assets/)
+- [Import Asset from CSV](/guides/production/manage-assets/)
 - [Import Shot from CSV](/guides/production-structure/manage-shots/)
 
 Validate everything with the `All done` button.

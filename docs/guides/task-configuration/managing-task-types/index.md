@@ -121,6 +121,10 @@ Click the tab for the entity type you need (asset, shot, sequence, episode, or e
 
 ## Remove a Task Type
 
+::: danger Attention
+Removing a task type will remove all corresponding tasks, assignments, previews, and comments. This is not reversible, unless you have a backup solution in place.
+::: 
+
 To remove a task type from your studio's Global Library, go to `Main Menu > Task Types` and hover over the task type row you wish to select then click the `Delete` icon:
 
 ![remove task type global](/guides/task-configuration/managing-task-types/images/2.png)
@@ -128,5 +132,7 @@ To remove a task type from your studio's Global Library, go to `Main Menu > Task
 To remove an task type from your production library, go to `Production Menu > Settings > Task Types` and click the `Remove` button to remove the task type from the list:  
 
 ![remove task type production](/guides/task-configuration/managing-task-types/images/3.png)
+
+Alternatively, you can also remove a task type from the global Asset or Shot page. Click the chevron next to the Task Type name and select `Delete all`.
 
 <!-- #endregion body -->

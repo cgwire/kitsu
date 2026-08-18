@@ -73,9 +73,15 @@ When you assign one or several tasks to someone, you will notice that you only h
 
 ![Supervisor Assign Team](/img/getting-started/supervisor_assign_team.png)
 
+## Assign Tasks from the Production Schedule
+
+In `Production Menu > Schedule`, you can click the button `Assign Tasks` to assign tasks in batch to your team by task or asset type.
+
+It's much faster than hand-picking each task to assign manually.
+
 ## Next Steps
 
-- [Find assignments to work on](/guides/scheduling/find-assignments/)
+- [Find assignments to work on](/guides/production/find-assignments/)
 - [Fill in the **Estimates** for each task](/guides/scheduling/estimates/)
 
 <!-- #endregion body -->

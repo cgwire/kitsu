@@ -14,9 +14,6 @@ Kitsu's data model organizes work around a hierarchy of production entities (stu
 
 ```mermaid
 flowchart TD
-    STUDIO -->|defines| DEPARTMENT
-    STUDIO -->|runs| PRODUCTION
-
     PRODUCTION -->|contains| EPISODE
     PRODUCTION -->|contains, non-episodic| SEQUENCE
     EPISODE -->|contains| SEQUENCE

@@ -18,25 +18,25 @@ import EmbedDocument from '../../.vitepress/theme/EmbedDocument.vue'
 ## 2. Create an Asset
 
 <EmbedDocument >
-<!--@include: ../../guides/pre-production/manage-assets/index.md#create-an-asset-->
+<!--@include: ../../guides/production/manage-assets/index.md#create-an-asset-->
 </EmbedDocument>
 
 ## 3. Update Your Assets
 
 <EmbedDocument >
-<!--@include: ../../guides/pre-production/manage-assets/index.md#update-your-assets-->
+<!--@include: ../../guides/production/manage-assets/index.md#update-your-assets-->
 </EmbedDocument>
 
 ## 4. Add More Tasks After Creating the Assets
 
 <EmbedDocument >
-<!--@include: ../../guides/pre-production/manage-assets/index.md#add-more-tasks-after-creating-the-assets-->
+<!--@include: ../../guides/production/manage-assets/index.md#add-more-tasks-after-creating-the-assets-->
 </EmbedDocument>
 
 ## 5. Create a Concept
 
 <EmbedDocument >
-<!--@include: ../../guides/pre-production/manage-concepts/index.md#create-a-concept-->
+<!--@include: ../../guides/production/manage-concepts/index.md#create-a-concept-->
 </EmbedDocument>
 
 ## 6. Create a Map
@@ -72,7 +72,7 @@ import EmbedDocument from '../../.vitepress/theme/EmbedDocument.vue'
 ## 11. Creating Custom Metadata Columns
 
 <EmbedDocument >
-<!--@include: ../../guides/pre-production/meta-column/index.md#create-metadata-columns-->
+<!--@include: ../../guides/production/meta-column/index.md#create-metadata-columns-->
 </EmbedDocument>
 
 ## 12. Create a Level
@@ -90,17 +90,17 @@ import EmbedDocument from '../../.vitepress/theme/EmbedDocument.vue'
 ## 14. Create a Breakdown List
 
 <EmbedDocument >
-<!--@include: ../../guides/pre-production/breakdown-casting/index.md#create-a-breakdown-list-->
+<!--@include: ../../guides/production/breakdown-casting/index.md#create-a-breakdown-list-->
 </EmbedDocument>
 
 ## 15. Casting from the Asset Library
 
 <EmbedDocument >
-<!--@include: ../../guides/pre-production/breakdown-casting/index.md#casting-from-the-asset-library-->
+<!--@include: ../../guides/production/breakdown-casting/index.md#casting-from-the-asset-library-->
 </EmbedDocument>
 
 ## 16. Introduction to Asset State: Ready For
 
 <EmbedDocument >
-<!--@include: ../../guides/pre-production/breakdown-casting/index.md#introduction-to-asset-state-ready-for-->
+<!--@include: ../../guides/production/breakdown-casting/index.md#introduction-to-asset-state-ready-for-->
 </EmbedDocument>

@@ -22,7 +22,7 @@ A key aspect of this is to ensure your team knows what they are working on.
 ## 2. Assign Tasks
 
 <EmbedDocument link="/guides/scheduling/assign-tasks">
-<!--@include: ../../guides/scheduling/assign-tasks/index.md#body-->
+<!--@include: ../../guides/production/assign-tasks/index.md#body-->
 </EmbedDocument>
 
 ## 3. Bid Estimates
@@ -33,8 +33,8 @@ A key aspect of this is to ensure your team knows what they are working on.
 
 ## 4. Daily Supervision Tasks
 
-<EmbedDocument link="/guides/scheduling/find-assignments/#the-task-type-page">
-<!--@include: ../../guides/scheduling/find-assignments/index.md#for-supervisors-->
+<EmbedDocument link="/guides/production/find-assignments/#the-task-type-page">
+<!--@include: ../../guides/production/find-assignments/index.md#for-supervisors-->
 </EmbedDocument>
 
 ## 5. Team Schedule

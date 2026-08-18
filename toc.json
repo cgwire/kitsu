@@ -3,7 +3,7 @@
   "file_count": 63,
   "files": [
     {
-      "path": "docs/guides/pre-production/breakdown-casting/index.md",
+      "path": "docs/guides/production/breakdown-casting/index.md",
       "title": "Breakdown & Casting",
       "total_words": 1042,
       "sections": [
@@ -22,7 +22,7 @@
       ]
     },
     {
-      "path": "docs/guides/pre-production/index.md",
+      "path": "docs/guides/production/index.md",
       "title": "Pre-Production",
       "total_words": 67,
       "sections": [
@@ -33,7 +33,7 @@
       ]
     },
     {
-      "path": "docs/guides/pre-production/manage-assets/index.md",
+      "path": "docs/guides/production/manage-assets/index.md",
       "title": "Managing Assets",
       "total_words": 1724,
       "sections": [
@@ -72,7 +72,7 @@
       ]
     },
     {
-      "path": "docs/guides/pre-production/manage-concepts/index.md",
+      "path": "docs/guides/production/manage-concepts/index.md",
       "title": "Managing Concepts",
       "total_words": 508,
       "sections": [
@@ -99,7 +99,7 @@
       ]
     },
     {
-      "path": "docs/guides/pre-production/meta-column/index.md",
+      "path": "docs/guides/production/meta-column/index.md",
       "title": "Meta Columns",
       "total_words": 959,
       "sections": [
@@ -551,7 +551,7 @@
       ]
     },
     {
-      "path": "docs/guides/scheduling/assign-tasks/index.md",
+      "path": "docs/guides/production/assign-tasks/index.md",
       "title": "Task Assignments",
       "total_words": 633,
       "sections": [
@@ -624,7 +624,7 @@
       ]
     },
     {
-      "path": "docs/guides/scheduling/find-assignments/index.md",
+      "path": "docs/guides/production/find-assignments/index.md",
       "title": "Managing Your Assignments",
       "total_words": 626,
       "sections": [
@@ -712,7 +712,7 @@
       ]
     },
     {
-      "path": "docs/guides/task-configuration/managing-asset-types/index.md",
+      "path": "docs/guides/production/managing-asset-types/index.md",
       "title": "Managing Asset Types",
       "total_words": 496,
       "sections": [
@@ -1403,7 +1403,7 @@
       ]
     },
     {
-      "path": "docs/recipes/3d-background/index.md",
+      "path": "docs/guides/production/3d-background/index.md",
       "title": "3D Backgrounds",
       "total_words": 303,
       "sections": [

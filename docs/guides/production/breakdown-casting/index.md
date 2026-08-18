@@ -152,6 +152,6 @@ Assets from the global asset library will appear, and will be highlighted with a
 
 Back on your productions asset page, you can choose to display global assets that have been cast in your production by toggling the **Display Library** button (1). These assets will be highlighted in yellow, indicating that they originate from the global asset library, and not your current production. (2).
 
-To learn more about the Asset Library, [visit the dedicated section](/guides/pre-production/manage-assets/#asset-library).
+To learn more about the Asset Library, [visit the dedicated section](/guides/production/manage-assets/#asset-library).
 
 <!-- #endregion body -->

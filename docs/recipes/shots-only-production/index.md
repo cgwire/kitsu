@@ -48,7 +48,7 @@ import EmbedDocument from '../../.vitepress/theme/EmbedDocument.vue'
 ## 7. Creating Custom Metadata Columns
 
 <EmbedDocument >
-<!--@include: ../../guides/pre-production/meta-column/index.md#create-metadata-columns-->
+<!--@include: ../../guides/production/meta-column/index.md#create-metadata-columns-->
 </EmbedDocument>
 
 ## 8. Create a Sequence

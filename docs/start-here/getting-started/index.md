@@ -114,7 +114,7 @@ First, we set up the Global Library:
 </EmbedCard>
 
 <EmbedCard title="4. Asset Type Setup">
-<!--@include: ../../guides/task-configuration/managing-asset-types/index.md#setup-->
+<!--@include: ../../guides/production/managing-asset-types/index.md#setup-->
 </EmbedCard>
 
 <EmbedCard title="5. Status Automation Setup">

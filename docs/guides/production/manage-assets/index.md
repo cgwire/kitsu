@@ -250,7 +250,7 @@ There are specific rules around who can import assets into the asset library, de
 
 Hover over the asset you wish to remove in your production's asset list and click the `Delete` icon:  
 
-![delete asset button](/guides/pre-production/manage-assets/images/0.png)
+![delete asset button](/guides/production/manage-assets/images/0.png)
 
 ## Using The "Ready For" Asset State
 

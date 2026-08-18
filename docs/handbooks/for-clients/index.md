@@ -31,8 +31,8 @@ This guide will help you get started and understand the Kitsu's key features as 
 
 ## 4. Global View of the Assets
 
-<EmbedDocument link="/guides/pre-production/manage-assets/">
-<!--@include: ../../guides/pre-production/manage-assets/index.md#intro-->
+<EmbedDocument link="/guides/production/manage-assets/">
+<!--@include: ../../guides/production/manage-assets/index.md#intro-->
 </EmbedDocument>
 
 ## 5. Global View of the Shots

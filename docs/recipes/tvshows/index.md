@@ -21,8 +21,8 @@ import EmbedDocument from '../../.vitepress/theme/EmbedDocument.vue'
 
 ### 2. Create an Asset
 
-<EmbedDocument link="/guides/pre-production/manage-assets/#create-an-asset">
-<!--@include: ../../guides/pre-production/manage-assets/index.md#setup-->
+<EmbedDocument link="/guides/production/manage-assets/#create-an-asset">
+<!--@include: ../../guides/production/manage-assets/index.md#setup-->
 </EmbedDocument>
 
 ### 3. Create an Episode
@@ -40,7 +40,7 @@ import EmbedDocument from '../../.vitepress/theme/EmbedDocument.vue'
 ### 5. Next Steps
 
 - [Invite your team](/guides/team-management/managing-teams/#adding-users-to-a-production-team)
-- [Assign Your First Task](/guides/scheduling/assign-tasks/)
+- [Assign Your First Task](/guides/production/assign-tasks/)
 
 ## TV Show Features
 

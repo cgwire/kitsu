@@ -125,12 +125,12 @@ Click on the arrow to the right of the column to open the column menu, then choo
 
 Hover over your meta column and click on the menu dropdown icon, then select `Edit`. A modal dialog will appear to update your meta-column properties:
 
-![](/guides/pre-production/meta-column/images/1.png)
+![](/guides/production/meta-column/images/1.png)
 
 ## Remove Meta Columns
 
 Hover over your meta column and click on the menu dropdown icon, then select `Delete`:
 
-![](/guides/pre-production/meta-column/images/0.png)
+![](/guides/production/meta-column/images/0.png)
 
 <!-- #endregion body -->

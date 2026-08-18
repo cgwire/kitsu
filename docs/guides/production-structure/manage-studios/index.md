@@ -1,20 +1,14 @@
-# Managing Studios
+# Managing Studio Labels
 
 <!-- #region body -->
-
-```mermaid
-flowchart TD
-    STUDIO -->|defines| DEPARTMENT
-    STUDIO -->|runs| PRODUCTION
-```
-
-Go to `Main Menu > Admin > Studios` to reach the `Studios` page.
-
-![studios page](/guides/production-structure/manage-studios/images/0.png)
 
 A studio is a label used to organize teams and tasks in multi-studio or multi-site productions.
 
 You can use it to filter tasks, schedules, and teams per studio.
+
+Go to `Main Menu > Admin > Studios` to reach the `Studios` page.
+
+![studios page](/guides/production-structure/manage-studios/images/0.png)
 
 ## Create a Studio
 
@@ -33,6 +27,22 @@ Just click `Confirm` to save.
 Hover over the studio row you wish to edit in the list and click the `Edit` icon:  
 
 ![update studio button](/guides/production-structure/manage-studios/images/3.png)
+
+## How to Add People to a Studio
+
+In the `People` page (`Main Menu > Admin > People`), click on a user to edit their studio affiliation.
+
+![](/guides/production-structure/manage-studios/images/5.png)
+
+Similarly, you can remove someone from a studio by selecting the `No Studio` option.
+
+## How to Filter Views by Studios
+
+The `Team Schedule` and `All Tasks` pages display a studio filter you can use to filter tasks.
+
+![](/guides/production-structure/manage-studios/images/6.png)
+
+Simply pick the desired studio in the dropdown selector.
 
 ## Remove a Studio
 

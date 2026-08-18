@@ -68,24 +68,25 @@ Here are some links to familiarize yourself with the basic concepts in Kitsu you
 
 ### Task Configuration
 
-1. [Manage Asset Types](/guides/task-configuration/managing-asset-types/) - Create and organize categories (like Characters, Props, or Environments) used to group and classify assets across a production.
 1. [Manage Task Types](/guides/task-configuration/managing-task-types/) - Define the pipeline stages (like Modeling, Rigging, or Compositing) that assets, shots, and other entities move through during production.
-1. [Manage Task Statuses](/guides/task-configuration/managing-task-statuses/) - Configure the review and approval states (like To Do, Work in Progress, or Done) that track a task's progress through the workflow.
+2. [Manage Task Statuses](/guides/task-configuration/managing-task-statuses/) - Configure the review and approval states (like To Do, Work in Progress, or Done) that track a task's progress through the workflow.
 
-### Pre-Production
+### Production
 
-1. [Manage Concepts](/guides/pre-production/manage-concepts/) - Learn how to create, organize, and validate concept art for your production.
-1. [Manage Assets](/guides/pre-production/manage-assets/) - Learn how to create, organize, and track the assets used throughout your production.
-1. [Breakdown & Casting](/guides/pre-production/breakdown-casting/) - Learn how to break down your scripts or storyboards and cast assets into shots.
-1. [Meta-Columns](/guides/pre-production/meta-column/) - Learn how to create and organize metadata from your production.
+1. [Manage Concepts](/guides/production/manage-concepts/) - Learn how to create, organize, and validate concept art for your production.
+2. [Manage Asset Types](/guides/production/managing-asset-types/) - Create and organize categories (like Characters, Props, or Environments) used to group and classify assets across a production.
+3. [Manage Assets](/guides/production/manage-assets/) - Learn how to create, organize, and track the assets used throughout your production.
+4. [Assign Tasks](/guides/production/assign-tasks/) - Learn how to assign tasks to people
+5. [Find Assignments](/guides/production/find-assignments/) - Learn how to find tasks assigned to you
+6. [Breakdown & Casting](/guides/production/breakdown-casting/) - Learn how to break down your scripts or storyboards and cast assets into shots.
+7. [Meta-Columns](/guides/production/meta-column/) - Learn how to create and organize metadata from your production.
+8. [3D Background](/guides/production/3d-background) - Improve 3D reviews with a .HDR background
 
 ### Scheduling
 
-1. [Assign Tasks](/guides/scheduling/assign-tasks/) - Learn how to assign tasks to people
-1. [Find Assignments](/guides/scheduling/find-assignments/) - Learn how to find tasks assigned to you
 1. [Schedules](/guides/scheduling/schedules/) - Discover the different scheduling views of Kitsu, from the studio level to the task level
-1. [Estimates](/guides/scheduling/estimates/) - Learn how to set and calculate the number of days estimated to do a task (bids)
-1. [Durations vs Estimates](/guides/scheduling/durations-vs-estimates/) - Find the difference between estimated (bid) days and actual duration, and how to improve your bidding process
+2. [Estimates](/guides/scheduling/estimates/) - Learn how to set and calculate the number of days estimated to do a task (bids)
+3. [Durations vs Estimates](/guides/scheduling/durations-vs-estimates/) - Find the difference between estimated (bid) days and actual duration, and how to improve your bidding process
 
 ### Review & Publishing
 
@@ -111,10 +112,6 @@ Here are some links to familiarize yourself with the basic concepts in Kitsu you
 
 1. [Authentication](/guides/privacy-security/authentication/) - Manage how users sign in to Kitsu, including password policies and Two-Factor Authentication (TOTP, Email OTP, or a FIDO security key).
 1. [Logs](/guides/privacy-security/logs/) - Review login and activity logs to track who accessed your Kitsu instance and when.
-  
-## Recipes
-  
-1. [3D Background](/recipes/3d-background/) - 
 
 ## Resources
 

@@ -4,9 +4,8 @@ Kitsu's data model organizes work around a hierarchy of production entities (stu
 
 ## Table of Content
 
-1. [Manage Asset Types](/guides/task-configuration/managing-asset-types/) - Create and organize categories (like Characters, Props, or Environments) used to group and classify assets across a production.
 1. [Manage Task Types](/guides/task-configuration/managing-task-types/) - Define the pipeline stages (like Modeling, Rigging, or Compositing) that assets, shots, and other entities move through during production.
-1. [Manage Task Statuses](/guides/task-configuration/managing-task-statuses/) - Configure the review and approval states (like To Do, Work in Progress, or Done) that track a task's progress through the workflow.
+2. [Manage Task Statuses](/guides/task-configuration/managing-task-statuses/) - Configure the review and approval states (like To Do, Work in Progress, or Done) that track a task's progress through the workflow.
 
 ## Data Model
 
