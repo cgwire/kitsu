@@ -1,0 +1,65 @@
+{
+    "title": "view studio",
+    "steps": [
+        {
+            "type": "setViewport",
+            "width": 1920,
+            "height": 1080,
+            "deviceScaleFactor": 1,
+            "isMobile": false,
+            "hasTouch": false,
+            "isLandscape": false
+        },
+        {
+            "type": "navigate",
+            "url": "http://localhost/open-productions",
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "http://localhost/open-productions",
+                    "title": "My Productions - Kitsu"
+                }
+            ]
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div.nav-left img"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[1]/nav/div[1]/a/img"
+                ],
+                [
+                    "pierce/div.nav-left img"
+                ]
+            ],
+            "offsetY": 16.5,
+            "offsetX": 20
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Studios"
+                ],
+                [
+                    "div:nth-of-type(3) > p:nth-of-type(2) > a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[2]/aside/div/section/div[3]/p[2]/a"
+                ],
+                [
+                    "pierce/div:nth-of-type(3) > p:nth-of-type(2) > a"
+                ],
+                [
+                    "text/Studios"
+                ]
+            ],
+            "offsetY": 16.094146728515625,
+            "offsetX": 100.10311698913574
+        }
+    ]
+}
