@@ -11,7 +11,8 @@
     "docs:build": "vitepress build docs",
     "preview": "vitepress preview docs",
     "deploy": "wrangler deploy",
-    "toc": "./word_count.sh docs > toc.json"
+    "toc": "./word_count.sh docs > toc.json",
+    "screenshots": "node ./scripts/screenshots.js docs/guides/production-structure/manage-productions/replay-create.json"
   },
   "repository": {
     "type": "git",
@@ -35,7 +36,9 @@
   },
   "dependencies": {
     "@lucide/vue": "^1.25.0",
+    "@puppeteer/replay": "^4.0.2",
     "medium-zoom": "^1.1.0",
-    "mermaid": "^11.13.0"
+    "mermaid": "^11.13.0",
+    "puppeteer": "^25.8.0"
   }
 }

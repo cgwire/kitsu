@@ -1,0 +1,82 @@
+{
+    "title": "create studio",
+    "steps": [
+        {
+            "type": "setViewport",
+            "width": 1920,
+            "height": 1080,
+            "deviceScaleFactor": 1,
+            "isMobile": false,
+            "hasTouch": false,
+            "isLandscape": false
+        },
+        {
+            "type": "navigate",
+            "url": "http://localhost/studios",
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "http://localhost/studios",
+                    "title": "Studios - Kitsu"
+                }
+            ]
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Add a studio",
+                    "aria/[role=\"generic\"]"
+                ],
+                [
+                    "div.flexrow span"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/button[2]/span"
+                ],
+                [
+                    "pierce/div.flexrow span"
+                ]
+            ],
+            "offsetY": 10.515625,
+            "offsetX": 17.328125
+        },
+        {
+            "type": "change",
+            "value": "my studio",
+            "selectors": [
+                [
+                    "input"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[4]/div[2]/div/form/div[1]/p/input"
+                ],
+                [
+                    "pierce/input"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Confirm"
+                ],
+                [
+                    "div.is-active a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[4]/div[2]/div/div/p/a"
+                ],
+                [
+                    "pierce/div.is-active a"
+                ]
+            ],
+            "offsetY": 16.4375,
+            "offsetX": 33.421875
+        }
+    ]
+}

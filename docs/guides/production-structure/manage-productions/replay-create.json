@@ -1,0 +1,328 @@
+{
+    "title": "create production",
+    "steps": [
+        {
+            "type": "setViewport",
+            "width": 1920,
+            "height": 1080,
+            "deviceScaleFactor": 1,
+            "isMobile": false,
+            "hasTouch": false,
+            "isLandscape": false
+        },
+        {
+            "type": "navigate",
+            "url": "http://localhost/open-productions",
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "http://localhost/open-productions",
+                    "title": "My Productions - Kitsu"
+                }
+            ]
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Create a new production"
+                ],
+                [
+                    "button"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/button"
+                ],
+                [
+                    "pierce/button"
+                ],
+                [
+                    "text/Create a new"
+                ]
+            ],
+            "offsetY": 11,
+            "offsetX": 75.453125
+        },
+        {
+            "type": "change",
+            "value": "test production",
+            "selectors": [
+                [
+                    "aria/My Awesome Production"
+                ],
+                [
+                    "div.columns > div > div:nth-of-type(1) input"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/div/div[1]/div[2]/div/p/input"
+                ],
+                [
+                    "pierce/div.columns > div > div:nth-of-type(1) input"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Create Production"
+                ],
+                [
+                    "div.columns h1"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/div/section[1]/div/h1"
+                ],
+                [
+                    "pierce/div.columns h1"
+                ],
+                [
+                    "text/Create production"
+                ]
+            ],
+            "offsetY": 45,
+            "offsetX": 675
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div:nth-of-type(5) > div > div:nth-of-type(1) [data-test-id='dp-input']"
+                ],
+                [
+                    "xpath///*[@data-test-id=\"dp-input\"]"
+                ],
+                [
+                    "pierce/div:nth-of-type(5) > div > div:nth-of-type(1) [data-test-id='dp-input']"
+                ]
+            ],
+            "offsetY": 24.734375,
+            "offsetX": 62
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div:nth-of-type(6) > div.timeline-content > div:nth-of-type(1) span"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/div/div[6]/div[2]/div[1]/div/div[1]/div/div/span"
+                ],
+                [
+                    "pierce/div:nth-of-type(6) > div.timeline-content > div:nth-of-type(1) span"
+                ],
+                [
+                    "text/+ Add Task Status"
+                ]
+            ],
+            "offsetY": 19.234375,
+            "offsetX": 110.21875
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div.select-input > div:nth-of-type(1)"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/div/div[6]/div[2]/div[1]/div/div[1]/div[2]/div[1]"
+                ],
+                [
+                    "pierce/div.select-input > div:nth-of-type(1)"
+                ]
+            ],
+            "offsetY": 12.015625,
+            "offsetX": 109
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div:nth-of-type(6) > div.timeline-content > div:nth-of-type(1) span"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/div/div[6]/div[2]/div[1]/div/div[1]/div/div/span"
+                ],
+                [
+                    "pierce/div:nth-of-type(6) > div.timeline-content > div:nth-of-type(1) span"
+                ],
+                [
+                    "text/+ Add Task Status"
+                ]
+            ],
+            "offsetY": 2.234375,
+            "offsetX": 112.21875
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div.select-input > div:nth-of-type(1)"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/div/div[6]/div[2]/div[1]/div/div[1]/div[2]/div[1]"
+                ],
+                [
+                    "pierce/div.select-input > div:nth-of-type(1)"
+                ]
+            ],
+            "offsetY": 22.015625,
+            "offsetX": 111
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div:nth-of-type(6) > div.timeline-content > div:nth-of-type(1) span"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/div/div[6]/div[2]/div[1]/div/div[1]/div/div/span"
+                ],
+                [
+                    "pierce/div:nth-of-type(6) > div.timeline-content > div:nth-of-type(1) span"
+                ],
+                [
+                    "text/+ Add Task Status"
+                ]
+            ],
+            "offsetY": 8.234375,
+            "offsetX": 108.21875
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div.select-input > div:nth-of-type(1)"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/div/div[6]/div[2]/div[1]/div/div[1]/div[2]/div[1]"
+                ],
+                [
+                    "pierce/div.select-input > div:nth-of-type(1)"
+                ]
+            ],
+            "offsetY": 23.015625,
+            "offsetX": 108
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div:nth-of-type(6) > div.timeline-content > div:nth-of-type(1) span"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/div/div[6]/div[2]/div[1]/div/div[1]/div/div/span"
+                ],
+                [
+                    "pierce/div:nth-of-type(6) > div.timeline-content > div:nth-of-type(1) span"
+                ],
+                [
+                    "text/+ Add Task Status"
+                ]
+            ],
+            "offsetY": 5.234375,
+            "offsetX": 103.21875
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div.select-input > div"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/div/div[6]/div[2]/div[1]/div/div[1]/div[2]/div"
+                ],
+                [
+                    "pierce/div.select-input > div"
+                ]
+            ],
+            "offsetY": 20.015625,
+            "offsetX": 103
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div.columns select"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/div/div[7]/div[2]/div[1]/div/p/span/select"
+                ],
+                [
+                    "pierce/div.columns select"
+                ]
+            ],
+            "offsetY": 23.890625,
+            "offsetX": 97
+        },
+        {
+            "type": "change",
+            "value": "Environment",
+            "selectors": [
+                [
+                    "div.columns select"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/div/div[7]/div[2]/div[1]/div/p/span/select"
+                ],
+                [
+                    "pierce/div.columns select"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div:nth-of-type(7) div.mt1 > span:nth-of-type(1)"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/div/div[7]/div[2]/div[2]/span[1]"
+                ],
+                [
+                    "pierce/div:nth-of-type(7) div.mt1 > span:nth-of-type(1)"
+                ]
+            ],
+            "offsetY": 25.890625,
+            "offsetX": 51
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/All done let's go 🚀"
+                ],
+                [
+                    "section.has-text-centered > button"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/div/section[2]/button"
+                ],
+                [
+                    "pierce/section.has-text-centered > button"
+                ],
+                [
+                    "text/All done let's"
+                ]
+            ],
+            "offsetY": 18.453125,
+            "offsetX": 96.171875
+        }
+    ]
+}
