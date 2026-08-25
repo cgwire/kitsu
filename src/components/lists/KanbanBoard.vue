@@ -159,7 +159,7 @@ import { useStore } from 'vuex'
 
 import { getClientX } from '@/composables/dom'
 import { formatPrioritySymbol, useFormat } from '@/composables/format'
-import { sortPeople } from '@/lib/sorting'
+import { useTaskHelpers } from '@/composables/tasks'
 
 import AddPreviewModal from '@/components/modals/AddPreviewModal.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
@@ -168,6 +168,7 @@ import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
 const store = useStore()
 const { formatPriority } = useFormat()
+const { getSortedPeople, getTaskType } = useTaskHelpers()
 
 // Props / Emits
 // --------------------------------------------------------------------------
@@ -237,7 +238,6 @@ let proxyRotation = 0
 // Computed
 // --------------------------------------------------------------------------
 const isDarkTheme = computed(() => store.getters.isDarkTheme)
-const personMap = computed(() => store.getters.personMap)
 const productionMap = computed(() => store.getters.productionMap)
 const selectedTasks = computed(() => store.getters.selectedTasks)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
@@ -291,11 +291,6 @@ const checkColumnIsDroppable = taskStatus => {
   )
 }
 
-const getSortedPeople = personIds => {
-  const people = personIds.map(id => personMap.value.get(id)).filter(Boolean)
-  return sortPeople(people)
-}
-
 const getCardStyle = task => {
   if (!task.entity_preview_file_id) {
     return null
@@ -317,16 +312,6 @@ const getStatusTextColor = status => {
     return '#333'
   }
   return 'white'
-}
-
-const getTaskType = task => {
-  const taskType = { ...taskTypeMap.value.get(task.task_type_id) }
-  const production = productionMap.value.get(task.project_id)
-  taskType.episode_id = task.episode_id
-  if (production?.production_type === 'tvshow' && !task.episode_id) {
-    taskType.episode_id = production.first_episode_id
-  }
-  return taskType
 }
 
 const isSelected = task => selectedTasks.value.has(task.id)

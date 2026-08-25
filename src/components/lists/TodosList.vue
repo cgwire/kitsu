@@ -339,8 +339,8 @@ import {
 } from '@/composables/descriptors'
 import { pauseEvent } from '@/composables/dom'
 import { useFormat } from '@/composables/format'
+import { useTaskHelpers } from '@/composables/tasks'
 import { getTaskEntityPath } from '@/lib/path'
-import { sortPeople } from '@/lib/sorting'
 import {
   daysToMinutes,
   formatSimpleDate,
@@ -365,6 +365,7 @@ import TableInfo from '@/components/widgets/TableInfo.vue'
 const store = useStore()
 const { formatDisplayDate, formatDuration, isDurationInHours, organisation } =
   useFormat()
+const { getSortedPeople, getTaskType } = useTaskHelpers()
 
 // Props / Emits
 // --------------------------------------------------------------------------
@@ -420,10 +421,8 @@ const isCurrentUserSupervisor = computed(
 )
 const nbSelectedTasks = computed(() => store.getters.nbSelectedTasks)
 const openProductions = computed(() => store.getters.openProductions)
-const personMap = computed(() => store.getters.personMap)
 const productionMap = computed(() => store.getters.productionMap)
 const taskMap = computed(() => store.getters.taskMap)
-const taskTypeMap = computed(() => store.getters.taskTypeMap)
 const user = computed(() => store.getters.user)
 
 const isEditable = computed(
@@ -488,24 +487,14 @@ const assetEpisodes = (entry, full) => {
   const episodeNames = (entry.episode_names || []).filter(
     name => name !== mainEpisodeName
   )
-  let episodeNameString = ''
-  if (episodeNames.length > 2) {
-    if (full) {
-      episodeNameString = episodeNames.join(', ')
-    } else {
-      episodeNameString = episodeNames.slice(0, 2).join(', ') + ', ...'
-    }
-  } else if (episodeNames.length > 0) {
-    episodeNameString = episodeNames.join(', ')
+  if (!episodeNames.length) {
+    return mainEpisodeName
   }
-  return episodeNames.length > 0
-    ? mainEpisodeName + ', ' + episodeNameString
-    : mainEpisodeName
-}
-
-const getSortedPeople = personIds => {
-  const people = personIds.map(id => personMap.value.get(id)).filter(Boolean)
-  return sortPeople(people)
+  const episodeNameString =
+    !full && episodeNames.length > 2
+      ? episodeNames.slice(0, 2).join(', ') + ', ...'
+      : episodeNames.join(', ')
+  return mainEpisodeName + ', ' + episodeNameString
 }
 
 const setScrollPosition = scrollPosition => {
@@ -523,20 +512,6 @@ const getDate = date => (date ? moment(date, 'YYYY-MM-DD').toDate() : null)
 const onBodyScroll = event => {
   if (!bodyRef.value) return
   emit('scroll', event.target.scrollTop)
-}
-
-const getTaskType = entry => {
-  const taskType = { ...taskTypeMap.value.get(entry.task_type_id) }
-  const production = productionMap.value.get(entry.project_id)
-  taskType.episode_id = entry.episode_id
-  if (
-    production &&
-    production.production_type === 'tvshow' &&
-    !entry.episode_id
-  ) {
-    taskType.episode_id = production.first_episode_id
-  }
-  return taskType
 }
 
 const entityPath = entity => {
@@ -590,13 +565,10 @@ const mergeMetadataDescriptors = descriptors => {
   return mergedDescriptors
 }
 
-const getMetadataDescriptor = (fieldName, entry) => {
-  const entityType = entry.task_type_for_entity
-  const projectId = entry.project_id
-  return metadataDescriptorsMap.value[fieldName]?.[entityType]?.[projectId]
-    ? metadataDescriptorsMap.value[fieldName][entityType][projectId]
-    : null
-}
+const getMetadataDescriptor = (fieldName, entry) =>
+  metadataDescriptorsMap.value[fieldName]?.[entry.task_type_for_entity]?.[
+    entry.project_id
+  ] ?? null
 
 const isTaskChanged = (task, data) => {
   const taskStart = task.start_date ? task.start_date.substring(0, 10) : ''
@@ -619,89 +591,72 @@ const updateEstimation = duration => {
   updateTasksEstimation({ estimation })
 }
 
-const updateTasksEstimation = ({ estimation }) => {
+// Applies buildData to every selected task; a null data skips the task.
+const updateSelectedTasks = buildData => {
   Object.keys(selectionGrid.value).forEach(taskId => {
     const task = taskMap.value.get(taskId)
     if (!task) return
-    let data = { estimation }
-    if (task.start_date) {
-      const startDate = moment(task.start_date)
-      const dueDate = task.due_date ? moment(task.due_date) : null
-      data = getDatesFromStartDate(
-        organisation.value,
-        startDate,
-        dueDate,
-        minutesToDays(organisation.value, estimation)
-      )
-      data.estimation = estimation
-    }
-    if (isTaskChanged(task, data)) {
+    const data = buildData(task)
+    if (data && isTaskChanged(task, data)) {
       store.dispatch('updateTask', { taskId, data }).catch(console.error)
     }
   })
 }
 
-const updateStartDate = date => {
-  Object.keys(selectionGrid.value).forEach(taskId => {
-    const task = taskMap.value.get(taskId)
-    if (!task) return
-    const dueDate = task.due_date ? parseSimpleDate(task.due_date) : null
-    let data
-    if (date) {
-      const startDate = moment(date)
-      if (
-        task.start_date &&
-        task.start_date.substring(0, 10) === formatSimpleDate(startDate)
-      )
-        return
-      data = getDatesFromStartDate(
-        organisation.value,
-        startDate,
-        dueDate,
-        minutesToDays(organisation.value, task.estimation)
-      )
-    } else {
-      data = {
-        start_date: null,
-        due_date: task.due_date
-      }
+const updateTasksEstimation = ({ estimation }) =>
+  updateSelectedTasks(task => {
+    if (!task.start_date) {
+      return { estimation }
     }
-    if (isTaskChanged(task, data)) {
-      store.dispatch('updateTask', { taskId, data }).catch(console.error)
-    }
+    const data = getDatesFromStartDate(
+      organisation.value,
+      moment(task.start_date),
+      task.due_date ? moment(task.due_date) : null,
+      minutesToDays(organisation.value, estimation)
+    )
+    data.estimation = estimation
+    return data
   })
-}
 
-const updateDueDate = date => {
-  Object.keys(selectionGrid.value).forEach(taskId => {
-    const task = taskMap.value.get(taskId)
-    if (!task) return
-    const startDate = task.start_date ? parseSimpleDate(task.start_date) : null
-    let data
-    if (date) {
-      const dueDate = moment(date)
-      if (
-        task.due_date &&
-        task.due_date.substring(0, 10) === formatSimpleDate(dueDate)
-      )
-        return
-      data = getDatesFromEndDate(
-        organisation.value,
-        startDate,
-        dueDate,
-        minutesToDays(organisation.value, task.estimation)
-      )
-    } else {
-      data = {
-        start_date: task.start_date,
-        due_date: null
-      }
+const updateStartDate = date =>
+  updateSelectedTasks(task => {
+    if (!date) {
+      return { start_date: null, due_date: task.due_date }
     }
-    if (isTaskChanged(task, data)) {
-      store.dispatch('updateTask', { taskId, data }).catch(console.error)
+    const startDate = moment(date)
+    if (
+      task.start_date &&
+      task.start_date.substring(0, 10) === formatSimpleDate(startDate)
+    ) {
+      return null
     }
+    return getDatesFromStartDate(
+      organisation.value,
+      startDate,
+      task.due_date ? parseSimpleDate(task.due_date) : null,
+      minutesToDays(organisation.value, task.estimation)
+    )
   })
-}
+
+const updateDueDate = date =>
+  updateSelectedTasks(task => {
+    if (!date) {
+      return { start_date: task.start_date, due_date: null }
+    }
+    const dueDate = moment(date)
+    if (
+      task.due_date &&
+      task.due_date.substring(0, 10) === formatSimpleDate(dueDate)
+    ) {
+      return null
+    }
+    return getDatesFromEndDate(
+      organisation.value,
+      task.start_date ? parseSimpleDate(task.start_date) : null,
+      dueDate,
+      minutesToDays(organisation.value, task.estimation)
+    )
+  })
 
 const selectTask = (event, index, task) => {
   if (
