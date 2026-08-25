@@ -218,212 +218,188 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import moment from 'moment-timezone'
-import { mapGetters } from 'vuex'
+import { computed, onMounted, reactive, ref, useTemplateRef, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 
 import { PAGE_SIZE } from '@/lib/pagination'
 import { getTaskEntityPath } from '@/lib/path'
-import { formatVerboseDate } from '@/lib/time'
 
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
-import DateField from '@/components/widgets/DateField.vue'
+import ProductionNameCell from '@/components/cells/ProductionNameCell.vue'
+import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
+import TimeSliderCell from '@/components/cells/TimeSliderCell.vue'
 import DayOffModal from '@/components/modals/DayOffModal.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import DateField from '@/components/widgets/DateField.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import InfoQuestionMark from '@/components/widgets/InfoQuestionMark.vue'
 import PageSubtitle from '@/components/widgets/PageSubtitle.vue'
-import ProductionNameCell from '@/components/cells/ProductionNameCell.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
-import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
-import TimeSliderCell from '@/components/cells/TimeSliderCell.vue'
 
-export default {
-  name: 'timesheet-list',
+const { t } = useI18n()
+const store = useStore()
 
-  components: {
-    ButtonSimple,
-    DayOffModal,
-    DateField,
-    DeleteModal,
-    EntityThumbnail,
-    InfoQuestionMark,
-    ProductionNameCell,
-    PageSubtitle,
-    TableInfo,
-    TaskTypeCell,
-    TimeSliderCell
+// Props / Emits
+const props = defineProps({
+  tasks: {
+    default: () => [],
+    type: Array
   },
-
-  props: {
-    tasks: {
-      default: () => [],
-      type: Array
-    },
-    doneTasks: {
-      default: () => [],
-      type: Array
-    },
-    isLoading: {
-      default: false,
-      type: Boolean
-    },
-    isError: {
-      default: false,
-      type: Boolean
-    },
-    daysOff: {
-      default: () => [],
-      type: Array
-    },
-    dayOffError: {
-      default: false,
-      type: [String, Boolean]
-    },
-    timeSpentMap: {
-      default: () => {},
-      type: Object
-    },
-    timeSpentTotal: {
-      default: 0,
-      type: Number
-    },
-    hideDone: {
-      default: false,
-      type: Boolean
-    },
-    hideDayOff: {
-      default: true,
-      type: Boolean
-    },
-    initialDate: {
-      default: null,
-      type: String
-    }
+  doneTasks: {
+    default: () => [],
+    type: Array
   },
-
-  emits: ['date-changed', 'set-day-off', 'time-spent-change', 'unset-day-off'],
-
-  data() {
-    const today = new Date()
-    return {
-      colNamePosX: '',
-      colTypePosX: '',
-      disabledDates: {},
-      page: 1,
-      selectedDate: this.initialDate
-        ? moment(this.initialDate, 'YYYY-MM-DD').toDate()
-        : today,
-      modals: {
-        setDayOff: false,
-        unsetDayOff: false
-      }
-    }
+  isLoading: {
+    default: false,
+    type: Boolean
   },
-
-  mounted() {
-    this.colTypePosX = `${this.$refs['th-prod'].offsetWidth}px`
-    this.colNamePosX = `${
-      this.$refs['th-prod'].offsetWidth + this.$refs['th-type'].offsetWidth
-    }px`
-    this.disabledDates = {
-      to:
-        this.isCurrentUserArtist && this.organisation.timesheets_locked
-          ? moment().subtract(1, 'weeks').toDate() // Disable dates older than one week
-          : undefined,
-      from: moment().toDate() // Disable dates after today
-    }
+  isError: {
+    default: false,
+    type: Boolean
   },
-
-  computed: {
-    ...mapGetters([
-      'dateFormat',
-      'isCurrentUserArtist',
-      'organisation',
-      'productionMap',
-      'taskTypeMap',
-      'user'
-    ]),
-
-    personDayOff() {
-      const selectedDate = moment(this.selectedDate).format('YYYY-MM-DD')
-      return this.daysOff.find(
-        dayOff =>
-          selectedDate >= dayOff.date &&
-          selectedDate <= (dayOff.end_date || dayOff.date)
-      )
-    },
-
-    personIsDayOff() {
-      return Boolean(this.personDayOff)
-    },
-
-    displayedTasks() {
-      return this.tasks.slice(0, this.page * (PAGE_SIZE / 2))
-    },
-
-    dayOffInfo() {
-      const { description, date, end_date } = this.personDayOff
-      const period =
-        end_date && date !== end_date ? `${date} - ${end_date}` : date
-      return `${description || this.$t('timesheets.day_off')} (${period})`
-    },
-
-    isDayOffError() {
-      return Boolean(this.dayOffError)
-    },
-
-    dayOffTextError() {
-      return this.dayOffError?.length ? this.dayOffError : null
-    }
+  daysOff: {
+    default: () => [],
+    type: Array
   },
-
-  methods: {
-    onBodyScroll(event) {
-      if (!this.$refs.body) return
-      const position = event.target
-      const maxHeight =
-        this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
-      if (maxHeight < position.scrollTop + 100) {
-        this.page++
-      }
-    },
-
-    currentDate() {
-      return formatVerboseDate(moment(), this.dateFormat)
-    },
-
-    onSliderChange(valueInfo) {
-      this.$emit('time-spent-change', valueInfo)
-    },
-
-    entityPath(entity) {
-      return getTaskEntityPath(entity, entity.episode_id)
-    },
-
-    toggleDayOff() {
-      if (this.personIsDayOff) {
-        this.modals.unsetDayOff = true
-      } else {
-        this.modals.setDayOff = true
-      }
-    },
-
-    closeSetDayOffModal() {
-      this.modals.setDayOff = false
-    },
-
-    closeUnsetDayOffModal() {
-      this.modals.unsetDayOff = false
-    }
+  dayOffError: {
+    default: false,
+    type: [String, Boolean]
   },
+  timeSpentMap: {
+    default: () => {},
+    type: Object
+  },
+  timeSpentTotal: {
+    default: 0,
+    type: Number
+  },
+  hideDone: {
+    default: false,
+    type: Boolean
+  },
+  hideDayOff: {
+    default: true,
+    type: Boolean
+  },
+  initialDate: {
+    default: null,
+    type: String
+  }
+})
 
-  watch: {
-    selectedDate() {
-      this.$emit('date-changed', this.selectedDate)
-    }
+const emit = defineEmits([
+  'date-changed',
+  'set-day-off',
+  'time-spent-change',
+  'unset-day-off'
+])
+
+// State
+const colNamePosX = ref('')
+const colTypePosX = ref('')
+const disabledDates = ref({})
+const page = ref(1)
+const selectedDate = ref(
+  props.initialDate
+    ? moment(props.initialDate, 'YYYY-MM-DD').toDate()
+    : new Date()
+)
+const modals = reactive({
+  setDayOff: false,
+  unsetDayOff: false
+})
+
+const bodyRef = useTemplateRef('body')
+const thProdRef = useTemplateRef('th-prod')
+const thTypeRef = useTemplateRef('th-type')
+
+// Computed
+const isCurrentUserArtist = computed(() => store.getters.isCurrentUserArtist)
+const organisation = computed(() => store.getters.organisation)
+const productionMap = computed(() => store.getters.productionMap)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
+
+const personDayOff = computed(() => {
+  const date = moment(selectedDate.value).format('YYYY-MM-DD')
+  return props.daysOff.find(
+    dayOff => date >= dayOff.date && date <= (dayOff.end_date || dayOff.date)
+  )
+})
+
+const personIsDayOff = computed(() => Boolean(personDayOff.value))
+
+const displayedTasks = computed(() =>
+  props.tasks.slice(0, page.value * (PAGE_SIZE / 2))
+)
+
+const dayOffInfo = computed(() => {
+  const { description, date, end_date } = personDayOff.value
+  const period = end_date && date !== end_date ? `${date} - ${end_date}` : date
+  return `${description || t('timesheets.day_off')} (${period})`
+})
+
+const isDayOffError = computed(() => Boolean(props.dayOffError))
+
+const dayOffTextError = computed(() =>
+  props.dayOffError?.length ? props.dayOffError : null
+)
+
+// Functions
+const onBodyScroll = event => {
+  if (!bodyRef.value) return
+  const maxHeight = bodyRef.value.scrollHeight - bodyRef.value.offsetHeight
+  if (maxHeight < event.target.scrollTop + 100) {
+    page.value++
   }
 }
+
+const onSliderChange = valueInfo => {
+  emit('time-spent-change', valueInfo)
+}
+
+const entityPath = entity => getTaskEntityPath(entity, entity.episode_id)
+
+const toggleDayOff = () => {
+  if (personIsDayOff.value) {
+    modals.unsetDayOff = true
+  } else {
+    modals.setDayOff = true
+  }
+}
+
+const closeSetDayOffModal = () => {
+  modals.setDayOff = false
+}
+
+const closeUnsetDayOffModal = () => {
+  modals.unsetDayOff = false
+}
+
+// The parent pages close the modals from their day-off event handlers.
+defineExpose({ closeSetDayOffModal, closeUnsetDayOffModal })
+
+// Watchers
+watch(selectedDate, () => {
+  emit('date-changed', selectedDate.value)
+})
+
+// Lifecycle
+onMounted(() => {
+  colTypePosX.value = `${thProdRef.value.offsetWidth}px`
+  colNamePosX.value = `${
+    thProdRef.value.offsetWidth + thTypeRef.value.offsetWidth
+  }px`
+  disabledDates.value = {
+    to:
+      isCurrentUserArtist.value && organisation.value.timesheets_locked
+        ? moment().subtract(1, 'weeks').toDate() // Disable dates older than one week
+        : undefined,
+    from: moment().toDate() // Disable dates after today
+  }
+})
 </script>
 
 <style lang="scss" scoped>
@@ -457,16 +433,6 @@ export default {
   min-width: 230px;
 }
 
-.description {
-  width: 200px;
-  min-width: 200px;
-}
-
-.description li {
-  list-style-type: disc;
-  margin-left: 2em;
-}
-
 .name a {
   color: inherit;
 }
@@ -480,11 +446,6 @@ export default {
 .type {
   width: 160px;
   min-width: 160px;
-}
-
-.status {
-  width: 80px;
-  min-width: 80px;
 }
 
 .time-spent {
@@ -511,10 +472,6 @@ td.name {
   margin-top: 0.5em;
   margin-bottom: 0.5em;
   padding-left: 0.5em;
-}
-
-.calendar {
-  font-size: 0.6em;
 }
 
 .time-spent-total {
