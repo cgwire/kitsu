@@ -100,11 +100,15 @@
             :is-loading="isTasksLoading"
             :days-off="daysOff"
             :tasks="sortedAllTasks"
+            :time-spents="calendarTimeSpents"
+            @dates-changed="onCalendarDatesChanged"
+            @time-clicked="onCalendarTimeClicked"
             v-else-if="isActiveTab('calendar')"
           />
 
           <timesheet-list
             ref="timesheet-list"
+            :initial-date="selectedDate"
             :tasks="loggablePersonTasks"
             :done-tasks="loggableDoneTasks"
             :is-loading="isTasksLoading"
@@ -213,6 +217,7 @@ export default {
   data() {
     return {
       activeTab: 'todos',
+      calendarTimeSpents: [],
       currentSort: 'entity_name',
       daysOff: [],
       dayOffError: false,
@@ -497,6 +502,7 @@ export default {
       'loadPersonDoneTasks',
       'loadPersonTasks',
       'loadPersonTimeSpents',
+      'loadPersonTimeSpentsByPeriod',
       'setPersonTasksSearch',
       'savePersonTasksSearch',
       'removePersonTasksSearch',
@@ -506,6 +512,28 @@ export default {
       'unsetDayOff',
       'updateTask'
     ]),
+
+    onCalendarTimeClicked(date) {
+      this.$router.push({
+        query: { ...this.$route.query, section: 'timesheets', day: date }
+      })
+    },
+
+    async onCalendarDatesChanged({ start, end }) {
+      if (!this.person) {
+        return
+      }
+      try {
+        this.calendarTimeSpents = await this.loadPersonTimeSpentsByPeriod({
+          personId: this.person.id,
+          startDate: start,
+          endDate: end
+        })
+      } catch (err) {
+        console.error(err)
+        this.calendarTimeSpents = []
+      }
+    },
 
     sortTasks(tasks) {
       const isName = this.currentSort === 'entity_name'
@@ -750,6 +778,18 @@ export default {
         ? currentSection
         : 'todos'
 
+      const day = this.$route.query.day
+      if (
+        day &&
+        day !== this.selectedDate &&
+        moment(day, 'YYYY-MM-DD', true).isValid()
+      ) {
+        this.selectedDate = day
+        if (this.person) {
+          this.loadTimeSpents()
+        }
+      }
+
       const currentProduction = this.userOpenProductions.find(
         ({ id }) => id === this.$route.query.productionId
       )
@@ -776,6 +816,12 @@ export default {
 
     async onDateChanged(date) {
       this.selectedDate = moment(date).format('YYYY-MM-DD')
+      // keep the day shareable in the URL, without stacking history entries
+      if (this.$route.query.day !== this.selectedDate) {
+        this.$router.replace({
+          query: { ...this.$route.query, day: this.selectedDate }
+        })
+      }
       await this.loadTimeSpents()
     },
 
@@ -867,6 +913,10 @@ export default {
     },
 
     '$route.query.section'() {
+      this.updateActiveTab()
+    },
+
+    '$route.query.day'() {
       this.updateActiveTab()
     },
 

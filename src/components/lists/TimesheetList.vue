@@ -295,6 +295,10 @@ export default {
     hideDayOff: {
       default: true,
       type: Boolean
+    },
+    initialDate: {
+      default: null,
+      type: String
     }
   },
 
@@ -307,7 +311,9 @@ export default {
       colTypePosX: '',
       disabledDates: {},
       page: 1,
-      selectedDate: today,
+      selectedDate: this.initialDate
+        ? moment(this.initialDate, 'YYYY-MM-DD').toDate()
+        : today,
       modals: {
         setDayOff: false,
         unsetDayOff: false
