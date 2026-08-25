@@ -240,34 +240,16 @@ const todoSearchQueries = computed(() => store.getters.todoSearchQueries)
 const todoSelectionGrid = computed(() => store.getters.todoSelectionGrid)
 const user = computed(() => store.getters.user)
 
-const sortedTasks = computed(() => {
-  const tasks = productionId.value
-    ? displayedTodos.value.filter(
-        task => task.project_id === productionId.value
-      )
-    : displayedTodos.value
-  return sortTasks(tasks, currentFilter.value, currentSort.value)
-})
+const sortedTasks = computed(() => filterAndSortTasks(displayedTodos.value))
 
-const sortedDoneTasks = computed(() => {
-  const tasks = productionId.value
-    ? displayedDoneTasks.value.filter(
-        task => task.project_id === productionId.value
-      )
-    : displayedDoneTasks.value
-  return sortTasks(tasks, currentFilter.value, currentSort.value)
-})
-
-const pendingTasks = computed(() =>
-  sortedTasks.value.filter(
-    task => taskStatusMap.value.get(task.task_status_id)?.is_feedback_request
-  )
+const sortedDoneTasks = computed(() =>
+  filterAndSortTasks(displayedDoneTasks.value)
 )
 
+const pendingTasks = computed(() => sortedTasks.value.filter(isPending))
+
 const notPendingTasks = computed(() =>
-  sortedTasks.value.filter(
-    task => !taskStatusMap.value.get(task.task_status_id)?.is_feedback_request
-  )
+  sortedTasks.value.filter(task => !isPending(task))
 )
 
 const boardTasks = computed(() =>
@@ -347,20 +329,27 @@ const todoTabs = computed(() => {
   ].filter(Boolean)
 })
 
-const loggableTodos = computed(() =>
-  sortedTasks.value.filter(
-    task => taskTypeMap.value.get(task.task_type_id)?.allow_timelog
-  )
-)
+const loggableTodos = computed(() => sortedTasks.value.filter(isLoggable))
 
 const loggableDoneTasks = computed(() =>
-  sortedDoneTasks.value.filter(
-    task => taskTypeMap.value.get(task.task_type_id)?.allow_timelog
-  )
+  sortedDoneTasks.value.filter(isLoggable)
 )
 
 // Functions
 const isActiveTab = tab => currentSection.value === tab
+
+const isPending = task =>
+  taskStatusMap.value.get(task.task_status_id)?.is_feedback_request
+
+const isLoggable = task =>
+  taskTypeMap.value.get(task.task_type_id)?.allow_timelog
+
+const filterAndSortTasks = tasks => {
+  const filtered = productionId.value
+    ? tasks.filter(task => task.project_id === productionId.value)
+    : tasks
+  return sortTasks(filtered, currentFilter.value, currentSort.value)
+}
 
 const getBoardStatusesByProduction = production => {
   const statuses = getProductionTaskStatuses
@@ -542,13 +531,13 @@ const onSearchChange = () => {
 
 const saveSearchQuery = async searchQuery => {
   if (loading.savingSearch) return
+  loading.savingSearch = true
   try {
-    loading.savingSearch = true
     await store.dispatch('saveTodoSearch', searchQuery)
-    loading.savingSearch = false
   } catch (error) {
     console.error(error)
   }
+  loading.savingSearch = false
 }
 
 const removeSearchQuery = async searchQuery => {
@@ -647,9 +636,7 @@ watch(productionId, () => {
   })
 })
 
-watch(() => route.query.section, updateActiveTab)
-
-watch(() => route.query.day, updateActiveTab)
+watch(() => [route.query.section, route.query.day], updateActiveTab)
 
 watch(
   () => route.query.search,
