@@ -115,6 +115,13 @@ const emit = defineEmits([...])
 
 Skip sections that are not relevant. Order within each section is by usage proximity (related items together) rather than alphabetical.
 
+Underline every section title with a dashed line padded to the 80-column limit:
+
+```js
+// State
+// --------------------------------------------------------------------------
+```
+
 #### Import order
 
 Within `<script setup>`, sort imports **alphabetically by source path** within each of these blocks (separate blocks with a blank line):
