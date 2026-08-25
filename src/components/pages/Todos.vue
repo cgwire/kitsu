@@ -161,8 +161,8 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
+import { useBoardStatuses } from '@/composables/board'
 import { getTaskStatusPriorityOfProd } from '@/lib/productions'
-import { sortTaskStatuses } from '@/lib/sorting'
 import { parseDate } from '@/lib/time'
 
 import DayOffList from '@/components/lists/DayOffList.vue'
@@ -224,16 +224,12 @@ const dayOffListRef = useTemplateRef('day-off-list')
 const displayedDoneTasks = computed(() => store.getters.displayedDoneTasks)
 const displayedTodos = computed(() => store.getters.displayedTodos)
 const doneSelectionGrid = computed(() => store.getters.doneSelectionGrid)
-const getProductionTaskStatuses = computed(
-  () => store.getters.getProductionTaskStatuses
-)
 const isTodosLoading = computed(() => store.getters.isTodosLoading)
 const isTodosLoadingError = computed(() => store.getters.isTodosLoadingError)
 const nbSelectedTasks = computed(() => store.getters.nbSelectedTasks)
 const openProductions = computed(() => store.getters.openProductions)
 const productionMap = computed(() => store.getters.productionMap)
 const selectedTasks = computed(() => store.getters.selectedTasks)
-const taskStatuses = computed(() => store.getters.taskStatuses)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 const timeSpentMap = computed(() => store.getters.timeSpentMap)
@@ -258,30 +254,6 @@ const boardTasks = computed(() =>
   sortedTasks.value.concat(sortedDoneTasks.value)
 )
 
-const boardStatuses = computed(() => {
-  if (selectedProduction.value) {
-    return getBoardStatusesByProduction(selectedProduction.value)
-  }
-
-  const productionsByStatus = {}
-  openProductions.value.forEach(production => {
-    getBoardStatusesByProduction(production).forEach(status => {
-      productionsByStatus[status.id] = (
-        productionsByStatus[status.id] || []
-      ).concat(production.id)
-    })
-  })
-
-  return taskStatuses.value
-    .filter(status => !status.for_concept)
-    .map(status => ({
-      ...status,
-      productions: productionsByStatus[status.id] || []
-    }))
-    .filter(status => status.productions.length > 0)
-    .sort((a, b) => a.priority - b.priority)
-})
-
 const productionList = computed(() => [
   { name: t('main.all') },
   ...openProductions.value
@@ -289,6 +261,11 @@ const productionList = computed(() => [
 
 const selectedProduction = computed(() =>
   productionMap.value.get(productionId.value)
+)
+
+const { boardStatuses, getBoardStatusesByProduction } = useBoardStatuses(
+  openProductions,
+  selectedProduction
 )
 
 const todoTabs = computed(() => {
@@ -352,20 +329,6 @@ const filterAndSortTasks = tasks => {
     ? tasks.filter(task => task.project_id === productionId.value)
     : tasks
   return sortTasks(filtered, currentFilter.value, currentSort.value)
-}
-
-const getBoardStatusesByProduction = production => {
-  const statuses = getProductionTaskStatuses
-    .value(production.id)
-    .filter(status => {
-      if (status.for_concept) {
-        return false
-      }
-      const rolesForBoard =
-        production.task_statuses_link?.[status.id]?.roles_for_board
-      return rolesForBoard?.includes(user.value.role)
-    })
-  return sortTaskStatuses(statuses, production)
 }
 
 const sortTasks = (tasks, filter, sort) => {
