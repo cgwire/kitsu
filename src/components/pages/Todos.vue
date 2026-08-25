@@ -27,7 +27,7 @@
 
           <span class="filler"></span>
 
-          <combobox
+          <combobox-styled
             class="flexrow-item"
             :label="$t('main.show')"
             :options="filterOptions"
@@ -35,8 +35,9 @@
             v-model="currentFilter"
           />
 
-          <combobox
+          <combobox-styled
             class="flexrow-item"
+            open-left
             :label="$t('main.sorted_by')"
             :options="sortOptions"
             locale-key-prefix="tasks.fields."
@@ -170,8 +171,8 @@ import KanbanBoard from '@/components/lists/KanbanBoard.vue'
 import TimesheetList from '@/components/lists/TimesheetList.vue'
 import TodosList from '@/components/lists/TodosList.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
-import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
