@@ -102,115 +102,88 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import moment from 'moment-timezone'
+import { computed, reactive, ref } from 'vue'
 
 import { formatSimpleDate } from '@/lib/time'
 
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import DayOffModal from '@/components/modals/DayOffModal.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
-export default {
-  name: 'day-off-list',
-
-  components: {
-    ButtonSimple,
-    DayOffModal,
-    DeleteModal,
-    TableInfo
+// Props / Emits
+const props = defineProps({
+  daysOff: {
+    default: () => [],
+    type: Array
   },
-
-  props: {
-    daysOff: {
-      default: () => [],
-      type: Array
-    },
-    isLoading: {
-      default: false,
-      type: Boolean
-    },
-    isError: {
-      default: false,
-      type: Boolean
-    },
-    dayOffError: {
-      default: false,
-      type: [String, Boolean]
-    }
+  isLoading: {
+    default: false,
+    type: Boolean
   },
-
-  emits: ['set-day-off', 'unset-day-off'],
-
-  data() {
-    return {
-      dayOffToEdit: null,
-      modals: {
-        setDayOff: false,
-        unsetDayOff: false
-      }
-    }
+  isError: {
+    default: false,
+    type: Boolean
   },
-
-  computed: {
-    dayOffInfo() {
-      const { description, date, end_date } = this.personDayOff
-      const period =
-        end_date && date !== end_date ? `${date} - ${end_date}` : date
-      return `${description || this.$t('timesheets.day_off')} (${period})`
-    },
-
-    isDayOffError() {
-      return Boolean(this.dayOffError)
-    },
-
-    dayOffTextError() {
-      return this.dayOffError?.length ? this.dayOffError : null
-    },
-
-    sortedDaysOff() {
-      return [...this.daysOff]
-        .sort((a, b) => b.date.localeCompare(a.date))
-        .map(dayOff => {
-          return {
-            ...dayOff,
-            period:
-              dayOff.date !== dayOff.end_date
-                ? `${dayOff.date} - ${dayOff.end_date}`
-                : dayOff.date,
-            date: moment.utc(dayOff.date).toDate(),
-            end_date: moment.utc(dayOff.end_date || dayOff.date).toDate()
-          }
-        })
-    }
-  },
-
-  methods: {
-    formatSimpleDate,
-
-    openSetDayOffModal(dayOff = null) {
-      if (!dayOff) {
-        dayOff = { date: new Date() }
-      }
-      this.dayOffToEdit = dayOff
-      this.modals.setDayOff = true
-    },
-
-    openUnsetDayOffModal(dayOff) {
-      this.dayOffToEdit = dayOff
-      this.modals.unsetDayOff = true
-    },
-
-    closeSetDayOffModal() {
-      this.modals.setDayOff = false
-    },
-
-    closeUnsetDayOffModal() {
-      this.modals.unsetDayOff = false
-    }
+  dayOffError: {
+    default: false,
+    type: [String, Boolean]
   }
+})
+
+defineEmits(['set-day-off', 'unset-day-off'])
+
+// State
+const dayOffToEdit = ref(null)
+const modals = reactive({
+  setDayOff: false,
+  unsetDayOff: false
+})
+
+// Computed
+const isDayOffError = computed(() => Boolean(props.dayOffError))
+
+const dayOffTextError = computed(() =>
+  props.dayOffError?.length ? props.dayOffError : null
+)
+
+const sortedDaysOff = computed(() =>
+  [...props.daysOff]
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .map(dayOff => ({
+      ...dayOff,
+      period:
+        dayOff.date !== dayOff.end_date
+          ? `${dayOff.date} - ${dayOff.end_date}`
+          : dayOff.date,
+      date: moment.utc(dayOff.date).toDate(),
+      end_date: moment.utc(dayOff.end_date || dayOff.date).toDate()
+    }))
+)
+
+// Functions
+const openSetDayOffModal = (dayOff = null) => {
+  dayOffToEdit.value = dayOff || { date: new Date() }
+  modals.setDayOff = true
 }
+
+const openUnsetDayOffModal = dayOff => {
+  dayOffToEdit.value = dayOff
+  modals.unsetDayOff = true
+}
+
+const closeSetDayOffModal = () => {
+  modals.setDayOff = false
+}
+
+const closeUnsetDayOffModal = () => {
+  modals.unsetDayOff = false
+}
+
+// The parent pages close the modals from their day-off event handlers.
+defineExpose({ closeSetDayOffModal, closeUnsetDayOffModal })
 </script>
 
 <style lang="scss" scoped>
