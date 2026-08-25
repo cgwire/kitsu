@@ -243,6 +243,7 @@ const { t } = useI18n()
 const store = useStore()
 
 // Props / Emits
+// --------------------------------------------------------------------------
 const props = defineProps({
   tasks: {
     default: () => [],
@@ -298,6 +299,7 @@ const emit = defineEmits([
 ])
 
 // State
+// --------------------------------------------------------------------------
 const colNamePosX = ref('')
 const colTypePosX = ref('')
 const disabledDates = ref({})
@@ -317,6 +319,7 @@ const thProdRef = useTemplateRef('th-prod')
 const thTypeRef = useTemplateRef('th-type')
 
 // Computed
+// --------------------------------------------------------------------------
 const isCurrentUserArtist = computed(() => store.getters.isCurrentUserArtist)
 const organisation = computed(() => store.getters.organisation)
 const productionMap = computed(() => store.getters.productionMap)
@@ -348,6 +351,7 @@ const dayOffTextError = computed(() =>
 )
 
 // Functions
+// --------------------------------------------------------------------------
 const onBodyScroll = event => {
   if (!bodyRef.value) return
   const maxHeight = bodyRef.value.scrollHeight - bodyRef.value.offsetHeight
@@ -382,11 +386,13 @@ const closeUnsetDayOffModal = () => {
 defineExpose({ closeSetDayOffModal, closeUnsetDayOffModal })
 
 // Watchers
+// --------------------------------------------------------------------------
 watch(selectedDate, () => {
   emit('date-changed', selectedDate.value)
 })
 
 // Lifecycle
+// --------------------------------------------------------------------------
 onMounted(() => {
   colTypePosX.value = `${thProdRef.value.offsetWidth}px`
   colNamePosX.value = `${

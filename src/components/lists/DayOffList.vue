@@ -114,6 +114,7 @@ import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
 // Props / Emits
+// --------------------------------------------------------------------------
 const props = defineProps({
   daysOff: {
     default: () => [],
@@ -136,6 +137,7 @@ const props = defineProps({
 defineEmits(['set-day-off', 'unset-day-off'])
 
 // State
+// --------------------------------------------------------------------------
 const dayOffToEdit = ref(null)
 const modals = reactive({
   setDayOff: false,
@@ -143,6 +145,7 @@ const modals = reactive({
 })
 
 // Computed
+// --------------------------------------------------------------------------
 const isDayOffError = computed(() => Boolean(props.dayOffError))
 
 const dayOffTextError = computed(() =>
@@ -164,6 +167,7 @@ const sortedDaysOff = computed(() =>
 )
 
 // Functions
+// --------------------------------------------------------------------------
 const openSetDayOffModal = (dayOff = null) => {
   dayOffToEdit.value = dayOff || { date: new Date() }
   modals.setDayOff = true

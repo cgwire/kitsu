@@ -367,6 +367,7 @@ const { formatDisplayDate, formatDuration, isDurationInHours, organisation } =
   useFormat()
 
 // Props / Emits
+// --------------------------------------------------------------------------
 const props = defineProps({
   done: {
     type: Boolean,
@@ -401,6 +402,7 @@ const props = defineProps({
 const emit = defineEmits(['scroll', 'task-selected'])
 
 // State
+// --------------------------------------------------------------------------
 const colNamePosX = ref('')
 const colTypePosX = ref('')
 const lastSelection = ref(null)
@@ -411,6 +413,7 @@ const thProdRef = useTemplateRef('th-prod')
 const thTypeRef = useTemplateRef('th-type')
 
 // Computed
+// --------------------------------------------------------------------------
 const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
 const isCurrentUserSupervisor = computed(
   () => store.getters.isCurrentUserSupervisor
@@ -477,6 +480,7 @@ const isEpisodeVisible = computed(() =>
 )
 
 // Functions
+// --------------------------------------------------------------------------
 const assetEpisodes = (entry, full) => {
   if (['Episode', 'Sequence', 'Shot', 'Edit'].includes(entry.entity_type_name))
     return ''
@@ -757,6 +761,7 @@ const resetSelection = () => {
 defineExpose({ resizeHeaders, setScrollPosition })
 
 // Watchers
+// --------------------------------------------------------------------------
 watch(() => props.tasks, resetSelection)
 
 watch(nbSelectedTasks, () => {
@@ -764,6 +769,7 @@ watch(nbSelectedTasks, () => {
 })
 
 // Lifecycle
+// --------------------------------------------------------------------------
 onMounted(() => {
   window.addEventListener('keydown', onKeyDown, false)
   if (thProdRef.value) {

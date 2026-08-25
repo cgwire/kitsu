@@ -184,6 +184,7 @@ const store = useStore()
 const socket = getCurrentInstance().appContext.config.globalProperties.$socket
 
 // State
+// --------------------------------------------------------------------------
 const filterOptions = ['all_tasks', 'due_this_week'].map(name => ({
   label: name,
   value: name
@@ -219,6 +220,7 @@ const timesheetListRef = useTemplateRef('timesheet-list')
 const dayOffListRef = useTemplateRef('day-off-list')
 
 // Computed
+// --------------------------------------------------------------------------
 const displayedDoneTasks = computed(() => store.getters.displayedDoneTasks)
 const displayedTodos = computed(() => store.getters.displayedTodos)
 const doneSelectionGrid = computed(() => store.getters.doneSelectionGrid)
@@ -336,6 +338,7 @@ const loggableDoneTasks = computed(() =>
 )
 
 // Functions
+// --------------------------------------------------------------------------
 const isActiveTab = tab => currentSection.value === tab
 
 const isPending = task =>
@@ -626,6 +629,7 @@ const onAssignation = async eventData => {
 }
 
 // Watchers
+// --------------------------------------------------------------------------
 watch(productionId, () => {
   router.push({
     query: {
@@ -647,6 +651,7 @@ watch(
 )
 
 // Lifecycle
+// --------------------------------------------------------------------------
 onMounted(async () => {
   socket.on('task:assign', onAssignation)
   socket.on('task:unassign', onAssignation)
@@ -663,6 +668,7 @@ onBeforeUnmount(() => {
 })
 
 // Head
+// --------------------------------------------------------------------------
 useHead({ title: computed(() => `${t('tasks.my_tasks')} - Kitsu`) })
 </script>
 
