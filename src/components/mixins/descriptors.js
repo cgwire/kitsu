@@ -4,29 +4,13 @@
  */
 import { mapGetters } from 'vuex'
 
-// Descriptor choices are static per descriptor — no need to reparse them
-// for every row. Cache keyed by descriptor.id, cleared when it grows too large.
-const _checklistValuesCache = new Map()
+import {
+  getDescriptorChecklistValues,
+  getMetadataChecklistValues,
+  getMetadataFieldValue
+} from '@/composables/descriptors'
 
-export const getDescriptorChecklistValues = descriptor => {
-  const cached = _checklistValuesCache.get(descriptor.id)
-  if (cached) return cached
-  const values = descriptor.choices.reduce((result, choice) => {
-    if (choice && typeof choice === 'string' && choice.startsWith('[x] ')) {
-      result.push({ text: choice.slice(4), checked: true })
-    } else if (
-      choice &&
-      typeof choice === 'string' &&
-      choice.startsWith('[ ] ')
-    ) {
-      result.push({ text: choice.slice(4), checked: false })
-    }
-    return result
-  }, [])
-  const result = values.length === descriptor.choices.length ? values : []
-  _checklistValuesCache.set(descriptor.id, result)
-  return result
-}
+export { getDescriptorChecklistValues }
 
 export const descriptorMixin = {
   emits: [
@@ -178,40 +162,11 @@ export const descriptorMixin = {
       return values
     },
 
-    getMetadataFieldValue(descriptor, entity) {
-      if (
-        entity.data &&
-        descriptor.field_name in entity.data &&
-        entity.data[descriptor.field_name] != null
-      ) {
-        return entity.data[descriptor.field_name]
-      } else if (
-        entity.entity_data &&
-        descriptor.field_name in entity.entity_data &&
-        entity.entity_data[descriptor.field_name] != null
-      ) {
-        return entity.entity_data[descriptor.field_name]
-      } else {
-        return ''
-      }
-    },
+    getMetadataFieldValue,
 
     getDescriptorChecklistValues,
 
-    getMetadataChecklistValues(descriptor, entity) {
-      let values
-      try {
-        values = JSON.parse(this.getMetadataFieldValue(descriptor, entity))
-      } catch {
-        values = {}
-      }
-      this.getDescriptorChecklistValues(descriptor).forEach(function (option) {
-        if (!(option.text in values)) {
-          values[option.text] = option.checked
-        }
-      })
-      return values
-    },
+    getMetadataChecklistValues,
 
     isSupervisorInDepartments(departments = []) {
       if (!Array.isArray(departments)) {

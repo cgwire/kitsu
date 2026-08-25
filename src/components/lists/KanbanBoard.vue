@@ -1,5 +1,5 @@
 <template>
-  <div class="board">
+  <div class="board" ref="board">
     <div class="board-empty" v-if="!visibleColumns.length && !isLoading">
       <square-dashed-kanban-icon :size="40" />
       <p>{{ $t('board.empty') }}</p>
@@ -136,7 +136,6 @@
     </ol>
     <table-info :is-loading="isLoading" :is-error="isError" variant="kanban" />
     <add-preview-modal
-      ref="add-preview-modal"
       :active="modals.addPreview"
       :confirm-label="$t('main.confirmation')"
       :is-loading="loading.addPreview"
@@ -153,450 +152,396 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { ImageIcon, ImageUpIcon, SquareDashedKanbanIcon } from 'lucide-vue-next'
-import { mapActions, mapGetters } from 'vuex'
+import { computed, onBeforeUnmount, reactive, ref, useTemplateRef } from 'vue'
+import { useStore } from 'vuex'
 
-import { sortPeople } from '@/lib/sorting'
-
-import { domMixin } from '@/components/mixins/dom'
-import { formatListMixin } from '@/components/mixins/format'
+import { getClientX } from '@/composables/dom'
+import { formatPrioritySymbol, useFormat } from '@/composables/format'
+import { useTaskHelpers } from '@/composables/tasks'
 
 import AddPreviewModal from '@/components/modals/AddPreviewModal.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
-export default {
-  name: 'kanban-board',
+const store = useStore()
+const { formatPriority } = useFormat()
+const { getSortedPeople, getTaskType } = useTaskHelpers()
 
-  mixins: [domMixin, formatListMixin],
-
-  components: {
-    AddPreviewModal,
-    ImageIcon,
-    ImageUpIcon,
-    PeopleAvatar,
-    SquareDashedKanbanIcon,
-    TableInfo,
-    TaskTypeName
+// Props / Emits
+// --------------------------------------------------------------------------
+const props = defineProps({
+  isError: {
+    type: Boolean,
+    default: false
   },
-
-  props: {
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    production: {
-      type: Object,
-      default: () => {}
-    },
-    statuses: {
-      type: Array,
-      default: () => []
-    },
-    tasks: {
-      type: Array,
-      default: () => []
-    },
-    user: {
-      type: Object,
-      default: () => {}
-    }
+  isLoading: {
+    type: Boolean,
+    default: false
   },
-
-  data() {
-    return {
-      addPreviewFormData: null,
-      draggedTask: null,
-      dropColumnId: null,
-      initialClientX: null,
-      isScrollingX: false,
-      errors: {
-        addPreview: null
-      },
-      form: {
-        taskId: null,
-        taskStatusId: null
-      },
-      loading: {
-        addPreview: false
-      },
-      modals: {
-        addPreview: false,
-        task: null
-      }
-    }
+  production: {
+    type: Object,
+    default: () => {}
   },
-
-  created() {
-    // Non-reactive drag helpers. The transparent image replaces the native
-    // drag snapshot so the DOM proxy below can tilt while following the
-    // cursor (a native drag image is a bitmap frozen at dragstart).
-    this.emptyDragImage = new Image()
-    this.emptyDragImage.src =
-      'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
-    this.dragProxy = null
-    this.dragProxyInner = null
-    this.dragOffset = { x: 0, y: 0 }
-    this.lastDragX = 0
-    this.proxyRotation = 0
+  statuses: {
+    type: Array,
+    default: () => []
   },
-
-  beforeUnmount() {
-    this.removeDragProxy()
+  tasks: {
+    type: Array,
+    default: () => []
   },
+  user: {
+    type: Object,
+    default: () => {}
+  }
+})
 
-  computed: {
-    ...mapGetters([
-      'isDarkTheme',
-      'personMap',
-      'productionMap',
-      'selectedTasks',
-      'taskTypeMap'
-    ]),
+// State
+// --------------------------------------------------------------------------
+const addPreviewFormData = ref(null)
+const draggedTask = ref(null)
+const dropColumnId = ref(null)
+const initialClientX = ref(null)
+const isScrollingX = ref(false)
+const errors = reactive({
+  addPreview: null
+})
+const form = reactive({
+  taskId: null,
+  taskStatusId: null
+})
+const loading = reactive({
+  addPreview: false
+})
+const modals = reactive({
+  addPreview: false,
+  task: null
+})
 
-    columns() {
-      const columns = this.statuses.map(status => {
-        const tasks = this.tasks.filter(
-          task => task.task_status_id === status.id
-        )
-        return {
-          id: status.id,
-          status,
-          tasks,
-          droppable: this.checkColumnIsDroppable(status)
-        }
-      })
-      return columns
-    },
+const boardRef = useTemplateRef('board')
 
-    visibleColumns() {
-      return this.columns.filter(
-        column => column.tasks.length || column.droppable
-      )
-    },
+// Non-reactive drag helpers. The transparent image replaces the native
+// drag snapshot so the DOM proxy below can tilt while following the
+// cursor (a native drag image is a bitmap frozen at dragstart).
+const emptyDragImage = new Image()
+emptyDragImage.src =
+  'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+let dragProxy = null
+let dragProxyInner = null
+let dragOffset = { x: 0, y: 0 }
+let lastDragX = 0
+let proxyRotation = 0
 
-    taskIndexMap() {
-      return new Map(this.tasks.map((task, index) => [task.id, index]))
-    }
-  },
+// Computed
+// --------------------------------------------------------------------------
+const isDarkTheme = computed(() => store.getters.isDarkTheme)
+const productionMap = computed(() => store.getters.productionMap)
+const selectedTasks = computed(() => store.getters.selectedTasks)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
-  methods: {
-    ...mapActions([
-      'addSelectedTasks',
-      'clearSelectedTasks',
-      'commentTask',
-      'commentTaskWithPreview',
-      'loadPreviewFileFormData'
-    ]),
+const columns = computed(() =>
+  props.statuses.map(status => ({
+    id: status.id,
+    status,
+    tasks: props.tasks.filter(task => task.task_status_id === status.id),
+    droppable: checkColumnIsDroppable(status)
+  }))
+)
 
-    checkUserIsAllowed(taskStatus, user) {
-      const role = user.role
-      return !(
-        (role === 'user' && !taskStatus.is_artist_allowed) ||
-        (role === 'client' && !taskStatus.is_client_allowed)
-      )
-    },
+const visibleColumns = computed(() =>
+  columns.value.filter(column => column.tasks.length || column.droppable)
+)
 
-    checkStatusIsAllowed(taskStatus, task) {
-      return Boolean(
-        this.production ||
-        !task ||
-        taskStatus.productions.includes(task.project_id)
-      )
-    },
+const taskIndexMap = computed(
+  () => new Map(props.tasks.map((task, index) => [task.id, index]))
+)
 
-    checkColumnIsDroppable(taskStatus) {
-      if (!this.checkUserIsAllowed(taskStatus, this.user)) {
-        return false
-      }
-      if (this.production) {
-        return this.tasks.length > 0
-      }
-      // Without a selected production, a drop is only possible when at least
-      // one visible task belongs to a production exposing this status
-      // (mirrors checkStatusIsAllowed at drag time).
-      return this.tasks.some(task =>
-        taskStatus.productions?.includes(task.project_id)
-      )
-    },
+// Functions
+// --------------------------------------------------------------------------
+const checkUserIsAllowed = (taskStatus, user) => {
+  const role = user.role
+  return !(
+    (role === 'user' && !taskStatus.is_artist_allowed) ||
+    (role === 'client' && !taskStatus.is_client_allowed)
+  )
+}
 
-    getSortedPeople(personIds) {
-      const people = personIds.map(id => this.personMap.get(id)).filter(Boolean)
-      return sortPeople(people)
-    },
+const checkStatusIsAllowed = (taskStatus, task) =>
+  Boolean(
+    props.production ||
+    !task ||
+    taskStatus.productions.includes(task.project_id)
+  )
 
-    getCardStyle(task) {
-      if (!task.entity_preview_file_id) {
-        return null
-      }
-      return {
-        backgroundImage: `url(/api/pictures/previews/preview-files/${task.entity_preview_file_id}.png)`
-      }
-    },
+const checkColumnIsDroppable = taskStatus => {
+  if (!checkUserIsAllowed(taskStatus, props.user)) {
+    return false
+  }
+  if (props.production) {
+    return props.tasks.length > 0
+  }
+  // Without a selected production, a drop is only possible when at least
+  // one visible task belongs to a production exposing this status
+  // (mirrors checkStatusIsAllowed at drag time).
+  return props.tasks.some(task =>
+    taskStatus.productions?.includes(task.project_id)
+  )
+}
 
-    getStatusColor(status) {
-      if (status.name === 'Todo' && this.isDarkTheme) {
-        return '#5F626A'
-      } else {
-        return status.color
-      }
-    },
-
-    getStatusTextColor(status) {
-      if (status.name === 'Todo' && !this.isDarkTheme) {
-        return '#333'
-      } else {
-        return 'white'
-      }
-    },
-
-    getTaskType(task) {
-      const taskType = { ...this.taskTypeMap.get(task.task_type_id) }
-      const production = this.productionMap.get(task.project_id)
-      taskType.episode_id = task.episode_id
-      if (production?.production_type === 'tvshow' && !task.episode_id) {
-        taskType.episode_id = production.first_episode_id
-      }
-      return taskType
-    },
-
-    isSelected(task) {
-      return this.selectedTasks.has(task.id)
-    },
-
-    onSelectTask(task, isMultipleSelection = false) {
-      const selection = isMultipleSelection
-        ? new Map(this.selectedTasks)
-        : new Map()
-      if (this.isSelected(task)) {
-        selection.delete(task.id)
-      } else {
-        selection.set(task.id, task)
-      }
-      this.clearSelectedTasks()
-      this.addSelectedTasks(
-        Array.from(selection.values()).map(task => ({
-          task
-        }))
-      )
-    },
-
-    onBoardScrollStart(event) {
-      event.currentTarget.style.cursor = 'grabbing'
-      this.isScrollingX = !event.target.closest('.board-card')
-      this.initialClientX = this.getClientX(event)
-    },
-
-    onBoardScrolling(event) {
-      if (!this.isScrollingX) {
-        return
-      }
-      event.preventDefault()
-      const clientX = this.getClientX(event)
-      const diffX = clientX - this.initialClientX
-      event.currentTarget.scrollLeft -= diffX
-      this.initialClientX = clientX
-    },
-
-    onBoardScrollEnd(event) {
-      if (!this.isScrollingX) {
-        return
-      }
-      event.currentTarget.style.cursor = 'default'
-      this.isScrollingX = false
-    },
-
-    onCardDragStart(event, task, taskStatus) {
-      event.stopPropagation()
-      event.dataTransfer.dropEffect = 'move'
-      event.dataTransfer.effectAllowed = 'move'
-      event.dataTransfer.setData('taskId', task.id)
-      event.dataTransfer.setData('taskStatusId', taskStatus.id)
-      this.draggedTask = task
-      // dragenter/dragleave bubble from children and would make the drop
-      // state flicker, so the target column is derived from the pointer
-      // position in the document-level dragover instead.
-      document.addEventListener('dragover', this.onDocumentDragOver)
-      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        event.dataTransfer.setDragImage(this.emptyDragImage, 0, 0)
-        this.createDragProxy(event)
-      }
-    },
-
-    onCardDragEnd() {
-      this.draggedTask = null
-      this.dropColumnId = null
-      this.removeDragProxy()
-    },
-
-    onCardDragOver(event) {
-      event.preventDefault()
-    },
-
-    getGhostOrder(column) {
-      const movedTask = this.draggedTask || this.modals.task
-      if (!movedTask) {
-        return 0
-      }
-      // Cards use even order values (index * 2): the odd value slots the
-      // ghost where the dragged card will land in the column sort order.
-      const movedIndex = this.taskIndexMap.get(movedTask.id)
-      const before = column.tasks.filter(
-        task => this.taskIndexMap.get(task.id) < movedIndex
-      ).length
-      return before * 2 - 1
-    },
-
-    isGhostVisible(column) {
-      // during the drag, then while the preview-upload modal holds the
-      // pending move on a feedback-request status
-      return (
-        this.dropColumnId === column.id ||
-        (this.modals.addPreview && this.form.taskStatusId === column.id)
-      )
-    },
-
-    updateDropColumn(event) {
-      const columnEl = event.target.closest?.('.board-column')
-      const status = columnEl
-        ? this.statuses.find(({ id }) => id === columnEl.dataset.statusId)
-        : null
-      const isAllowed =
-        status &&
-        this.draggedTask &&
-        this.draggedTask.task_status_id !== status.id &&
-        this.checkUserIsAllowed(status, this.user) &&
-        this.checkStatusIsAllowed(status, this.draggedTask)
-      this.dropColumnId = isAllowed ? status.id : null
-    },
-
-    createDragProxy(event) {
-      const card = event.currentTarget
-      const rect = card.getBoundingClientRect()
-      this.dragOffset = {
-        x: event.clientX - rect.left,
-        y: event.clientY - rect.top
-      }
-      this.lastDragX = event.clientX
-      this.proxyRotation = 0
-      // The li clone keeps its board-card class and scoped data attributes,
-      // so the card styles apply outside the component tree.
-      const inner = card.cloneNode(true)
-      inner.style.cssText =
-        'margin: 0; list-style: none; transition: transform 120ms ease-out;'
-      const proxy = document.createElement('div')
-      proxy.style.cssText =
-        `position: fixed; left: 0; top: 0; width: ${rect.width}px; ` +
-        'margin: 0; pointer-events: none; z-index: 2000; will-change: transform;'
-      proxy.style.transform = `translate(${rect.left}px, ${rect.top}px)`
-      proxy.appendChild(inner)
-      // Kept inside the component tree: the theme class carrying the CSS
-      // custom properties wraps the app, so a body-level clone would
-      // resolve them to their light values.
-      this.$el.appendChild(proxy)
-      this.dragProxy = proxy
-      this.dragProxyInner = inner
-    },
-
-    onDocumentDragOver(event) {
-      this.updateDropColumn(event)
-      // The last dragover of a cancelled drag reports (0, 0)
-      if (!this.dragProxy || (event.clientX === 0 && event.clientY === 0)) {
-        return
-      }
-      const x = event.clientX - this.dragOffset.x
-      const y = event.clientY - this.dragOffset.y
-      this.dragProxy.style.transform = `translate(${x}px, ${y}px)`
-      const target = Math.max(
-        -6,
-        Math.min(6, (event.clientX - this.lastDragX) * 1.5)
-      )
-      this.lastDragX = event.clientX
-      // low-pass filter so the tilt follows the drag direction without jitter
-      this.proxyRotation = this.proxyRotation * 0.7 + target * 0.3
-      this.dragProxyInner.style.transform = `rotate(${this.proxyRotation}deg)`
-    },
-
-    removeDragProxy() {
-      document.removeEventListener('dragover', this.onDocumentDragOver)
-      this.dragProxy?.remove()
-      this.dragProxy = null
-      this.dragProxyInner = null
-    },
-
-    onCardDrop(event, taskStatus) {
-      this.dropColumnId = null
-
-      const isAllowed =
-        this.draggedTask &&
-        this.checkUserIsAllowed(taskStatus, this.user) &&
-        this.checkStatusIsAllowed(taskStatus, this.draggedTask)
-      if (!isAllowed) {
-        return
-      }
-
-      const previousTaskStatusId = event.dataTransfer.getData('taskStatusId')
-      if (previousTaskStatusId === taskStatus.id) {
-        return
-      }
-
-      const taskId = event.dataTransfer.getData('taskId')
-
-      if (taskStatus.is_feedback_request) {
-        this.form.taskId = taskId
-        this.form.taskStatusId = taskStatus.id
-        this.modals.task = this.tasks.find(({ id }) => id === taskId)
-        this.modals.addPreview = true
-        return
-      }
-
-      this.commentTask({
-        taskId,
-        taskStatusId: taskStatus.id
-      })
-    },
-
-    onCardMouseEnter(event) {
-      event.currentTarget.focus()
-    },
-
-    onCardMouseLeave(event) {
-      event.currentTarget.blur()
-    },
-
-    closeAddPreviewModal() {
-      this.modals.addPreview = false
-      this.modals.task = null
-    },
-
-    async confirmAddPreviewModal(forms) {
-      this.loading.addPreview = true
-      this.errors.addPreview = false
-      this.loadPreviewFileFormData(forms)
-      try {
-        // keep the modal (and the pending ghost) up until the upload went
-        // through, so a failure does not silently drop the move
-        await this.commentTaskWithPreview({
-          comment: '',
-          taskId: this.form.taskId,
-          taskStatusId: this.form.taskStatusId
-        })
-        this.closeAddPreviewModal()
-      } catch (err) {
-        console.error(err)
-        this.errors.addPreview = true
-      } finally {
-        this.loading.addPreview = false
-      }
-    }
+const getCardStyle = task => {
+  if (!task.entity_preview_file_id) {
+    return null
+  }
+  return {
+    backgroundImage: `url(/api/pictures/previews/preview-files/${task.entity_preview_file_id}.png)`
   }
 }
+
+const getStatusColor = status => {
+  if (status.name === 'Todo' && isDarkTheme.value) {
+    return '#5F626A'
+  }
+  return status.color
+}
+
+const getStatusTextColor = status => {
+  if (status.name === 'Todo' && !isDarkTheme.value) {
+    return '#333'
+  }
+  return 'white'
+}
+
+const isSelected = task => selectedTasks.value.has(task.id)
+
+const onSelectTask = (task, isMultipleSelection = false) => {
+  const selection = isMultipleSelection
+    ? new Map(selectedTasks.value)
+    : new Map()
+  if (isSelected(task)) {
+    selection.delete(task.id)
+  } else {
+    selection.set(task.id, task)
+  }
+  store.dispatch('clearSelectedTasks')
+  store.dispatch(
+    'addSelectedTasks',
+    Array.from(selection.values()).map(task => ({
+      task
+    }))
+  )
+}
+
+const onBoardScrollStart = event => {
+  event.currentTarget.style.cursor = 'grabbing'
+  isScrollingX.value = !event.target.closest('.board-card')
+  initialClientX.value = getClientX(event)
+}
+
+const onBoardScrolling = event => {
+  if (!isScrollingX.value) {
+    return
+  }
+  event.preventDefault()
+  const clientX = getClientX(event)
+  const diffX = clientX - initialClientX.value
+  event.currentTarget.scrollLeft -= diffX
+  initialClientX.value = clientX
+}
+
+const onBoardScrollEnd = event => {
+  if (!isScrollingX.value) {
+    return
+  }
+  event.currentTarget.style.cursor = 'default'
+  isScrollingX.value = false
+}
+
+const onCardDragStart = (event, task, taskStatus) => {
+  event.stopPropagation()
+  event.dataTransfer.dropEffect = 'move'
+  event.dataTransfer.effectAllowed = 'move'
+  event.dataTransfer.setData('taskId', task.id)
+  event.dataTransfer.setData('taskStatusId', taskStatus.id)
+  draggedTask.value = task
+  // dragenter/dragleave bubble from children and would make the drop
+  // state flicker, so the target column is derived from the pointer
+  // position in the document-level dragover instead.
+  document.addEventListener('dragover', onDocumentDragOver)
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    event.dataTransfer.setDragImage(emptyDragImage, 0, 0)
+    createDragProxy(event)
+  }
+}
+
+const onCardDragEnd = () => {
+  draggedTask.value = null
+  dropColumnId.value = null
+  removeDragProxy()
+}
+
+const onCardDragOver = event => {
+  event.preventDefault()
+}
+
+const getGhostOrder = column => {
+  const movedTask = draggedTask.value || modals.task
+  if (!movedTask) {
+    return 0
+  }
+  // Cards use even order values (index * 2): the odd value slots the
+  // ghost where the dragged card will land in the column sort order.
+  const movedIndex = taskIndexMap.value.get(movedTask.id)
+  const before = column.tasks.filter(
+    task => taskIndexMap.value.get(task.id) < movedIndex
+  ).length
+  return before * 2 - 1
+}
+
+const isGhostVisible = column =>
+  // during the drag, then while the preview-upload modal holds the
+  // pending move on a feedback-request status
+  dropColumnId.value === column.id ||
+  (modals.addPreview && form.taskStatusId === column.id)
+
+const updateDropColumn = event => {
+  const columnEl = event.target.closest?.('.board-column')
+  const status = columnEl
+    ? props.statuses.find(({ id }) => id === columnEl.dataset.statusId)
+    : null
+  const isAllowed =
+    status &&
+    draggedTask.value &&
+    draggedTask.value.task_status_id !== status.id &&
+    checkUserIsAllowed(status, props.user) &&
+    checkStatusIsAllowed(status, draggedTask.value)
+  dropColumnId.value = isAllowed ? status.id : null
+}
+
+const createDragProxy = event => {
+  const card = event.currentTarget
+  const rect = card.getBoundingClientRect()
+  dragOffset = {
+    x: event.clientX - rect.left,
+    y: event.clientY - rect.top
+  }
+  lastDragX = event.clientX
+  proxyRotation = 0
+  // The li clone keeps its board-card class and scoped data attributes,
+  // so the card styles apply outside the component tree.
+  const inner = card.cloneNode(true)
+  inner.style.cssText =
+    'margin: 0; list-style: none; transition: transform 120ms ease-out;'
+  const proxy = document.createElement('div')
+  proxy.style.cssText =
+    `position: fixed; left: 0; top: 0; width: ${rect.width}px; ` +
+    'margin: 0; pointer-events: none; z-index: 2000; will-change: transform;'
+  proxy.style.transform = `translate(${rect.left}px, ${rect.top}px)`
+  proxy.appendChild(inner)
+  // Kept inside the component tree: the theme class carrying the CSS
+  // custom properties wraps the app, so a body-level clone would
+  // resolve them to their light values.
+  boardRef.value.appendChild(proxy)
+  dragProxy = proxy
+  dragProxyInner = inner
+}
+
+const onDocumentDragOver = event => {
+  updateDropColumn(event)
+  // The last dragover of a cancelled drag reports (0, 0)
+  if (!dragProxy || (event.clientX === 0 && event.clientY === 0)) {
+    return
+  }
+  const x = event.clientX - dragOffset.x
+  const y = event.clientY - dragOffset.y
+  dragProxy.style.transform = `translate(${x}px, ${y}px)`
+  const target = Math.max(-6, Math.min(6, (event.clientX - lastDragX) * 1.5))
+  lastDragX = event.clientX
+  // low-pass filter so the tilt follows the drag direction without jitter
+  proxyRotation = proxyRotation * 0.7 + target * 0.3
+  dragProxyInner.style.transform = `rotate(${proxyRotation}deg)`
+}
+
+const removeDragProxy = () => {
+  document.removeEventListener('dragover', onDocumentDragOver)
+  dragProxy?.remove()
+  dragProxy = null
+  dragProxyInner = null
+}
+
+const onCardDrop = (event, taskStatus) => {
+  dropColumnId.value = null
+
+  const isAllowed =
+    draggedTask.value &&
+    checkUserIsAllowed(taskStatus, props.user) &&
+    checkStatusIsAllowed(taskStatus, draggedTask.value)
+  if (!isAllowed) {
+    return
+  }
+
+  const previousTaskStatusId = event.dataTransfer.getData('taskStatusId')
+  if (previousTaskStatusId === taskStatus.id) {
+    return
+  }
+
+  const taskId = event.dataTransfer.getData('taskId')
+
+  if (taskStatus.is_feedback_request) {
+    form.taskId = taskId
+    form.taskStatusId = taskStatus.id
+    modals.task = props.tasks.find(({ id }) => id === taskId)
+    modals.addPreview = true
+    return
+  }
+
+  store.dispatch('commentTask', {
+    taskId,
+    taskStatusId: taskStatus.id
+  })
+}
+
+const onCardMouseEnter = event => {
+  event.currentTarget.focus()
+}
+
+const onCardMouseLeave = event => {
+  event.currentTarget.blur()
+}
+
+const closeAddPreviewModal = () => {
+  modals.addPreview = false
+  modals.task = null
+}
+
+const confirmAddPreviewModal = async forms => {
+  loading.addPreview = true
+  errors.addPreview = false
+  store.dispatch('loadPreviewFileFormData', forms)
+  try {
+    // keep the modal (and the pending ghost) up until the upload went
+    // through, so a failure does not silently drop the move
+    await store.dispatch('commentTaskWithPreview', {
+      comment: '',
+      taskId: form.taskId,
+      taskStatusId: form.taskStatusId
+    })
+    closeAddPreviewModal()
+  } catch (err) {
+    console.error(err)
+    errors.addPreview = true
+  } finally {
+    loading.addPreview = false
+  }
+}
+
+// Lifecycle
+// --------------------------------------------------------------------------
+onBeforeUnmount(() => {
+  removeDragProxy()
+})
 </script>
 
 <style lang="scss" scoped>
