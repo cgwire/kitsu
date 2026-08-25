@@ -271,6 +271,9 @@ const calendarOptions = ref({
   firstDay: 1,
   locales: allLocales,
   locale: localeCode.value,
+  // day numbers and week-view day headers open the timesheet of that day
+  navLinks: true,
+  navLinkDayClick: date => emit('time-clicked', toDateKey(date)),
   datesSet: onDatesSet
 })
 
