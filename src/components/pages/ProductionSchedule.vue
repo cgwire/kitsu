@@ -2236,8 +2236,8 @@ export default {
           }
         }
 
-        // ponytail: chunks of 5 keep the server load reasonable, a bulk
-        // endpoint in zou would replace this
+        // Chunks of 5 keep the server load reasonable; a bulk endpoint in
+        // zou would replace this.
         for (let i = 0; i < taskUpdates.length; i += 5) {
           await Promise.all(
             taskUpdates.slice(i, i + 5).map(update => this.updateTask(update))
