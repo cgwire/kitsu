@@ -488,6 +488,9 @@ const loadUnassignedTasks = async (more = false) => {
     unassignedTasksPage.value = page
     if (!more) {
       unassignedTasks.value = []
+      // fresh list (filter change, panel reopen): stale selection ids
+      // would silently survive and reattach if the tasks come back
+      selectedTaskIds.value = new Set()
     }
     unassignedTasks.value = unassignedTasks.value.concat(
       // populate tasks with extra data
