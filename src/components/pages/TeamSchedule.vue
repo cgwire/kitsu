@@ -966,6 +966,12 @@ $filter-control-height: 40px;
     vertical-align: top;
   }
 
+  // ComboboxNumber tunes the dropdown arrow for its 3em select: recenter
+  // it for the 40px control (Bulma's own centering offset)
+  .zoom-level :deep(.select::after) {
+    margin-top: -0.4375em;
+  }
+
   :deep(.studio-combo),
   :deep(.department-combo),
   :deep(.production-combo) {
