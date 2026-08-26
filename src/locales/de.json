@@ -149,12 +149,15 @@
       "title": "Kommentare",
       "toggle_for_client": "Sichtbarkeit für Kunden",
       "player": {
+        "audio_unavailable": "Audio nicht verfügbar",
+        "image_unavailable": "Bild nicht verfügbar",
         "play": "Abspielen",
         "pause": "Pause",
         "mute": "Stummschalten",
         "unmute": "Stummschaltung aufheben",
         "fullscreen": "Vollbild",
-        "download": "Herunterladen"
+        "download": "Herunterladen",
+        "video_unavailable": "Video nicht verfügbar"
       }
     },
     "custom_actions": {
@@ -564,7 +567,7 @@
       "tasks": "Aufgaben",
       "week": "Woche",
       "clear_sorting": "Aktuelle Sortierung löschen",
-      "days": "Tage",
+      "days": "Tag | Tage",
       "drop_files_here": "Dateien hier ablegen",
       "import": "Importieren",
       "is_shared": "Gemeinsam mit dem gesamten Team",
@@ -1018,6 +1021,7 @@
       },
       "fields": {
         "fps": "FPS",
+        "is_frame_in_numbering": "Den Frame-Zähler des Players beim Frame-In starten",
         "name": "Name",
         "ratio": "Verhältnis",
         "resolution": "Auflösung",
@@ -1162,6 +1166,7 @@
     },
     "profile": {
       "change_avatar": "Avatar ändern",
+      "date_format": "Datumsformat",
       "info_title": "Informationen",
       "language": "Sprache",
       "notifications_enabled": "E-Mail-Benachrichtigungen aktiviert",
@@ -1193,6 +1198,7 @@
       },
       "notifications_mattermost_enabled": "Mattermost-Benachrichtigungen aktiviert",
       "notifications_mattermost_user": "Mattermost-Benutzername",
+      "use_12_hour_clock": "12-Stunden-Uhr (AM/PM)",
       "webhook_error": "der Mattermost-Webhook entspricht keinem Hook",
       "notifications_discord_enabled": "Discord-Benachrichtigungen aktiviert",
       "notifications_discord_user": "Discord-Benutzername",
@@ -1365,6 +1371,7 @@
       "apply_to_prod_confirm": "Sind Sie sicher, dass Sie diese Planversion auf die aktuelle Produktion anwenden wollen? Dadurch werden die aktuellen Aufgabenwerte außer Kraft gesetzt.",
       "apply_to_prod_error": "Bei der Anwendung der Planversion auf die aktuelle Produktion ist ein Fehler aufgetreten.",
       "assign": "Zuweisen an:",
+      "confirm_move_children": "Das Verschieben dieses Balkens wird {count} Unterelement zuschneiden oder verschieben, damit es in die neuen Grenzen passt. Fortfahren? | Das Verschieben dieses Balkens wird {count} Unterelemente zuschneiden oder verschieben, damit sie in die neuen Grenzen passen. Fortfahren?",
       "create_version": "Version des Zeitplans erstellen",
       "delete_version": "Planversion löschen",
       "delete_version_error": "Beim Löschen dieser Zeitplanversion ist ein Fehler aufgetreten. Bitte kontaktieren Sie unser Support-Team.",
@@ -1386,6 +1393,7 @@
       },
       "force_unassign": "Frühere Zuweisungen außer Kraft setzen",
       "forced_daily_quotas": "Erzwungene tägliche Quoten:",
+      "hours": "Std.",
       "md": "PT",
       "milestone": {
         "add_milestone": "Meilenstein hinzufügen für",
@@ -1453,6 +1461,10 @@
       "drawings": "Zeichnungen"
     },
     "shots": {
+      "bulk_error": "Die Massenerstellung ist fehlgeschlagen. Bitte erneut versuchen.",
+      "bulk_generate": "Generieren",
+      "bulk_invalid_start": "Der Startname muss mit einer Zahl enden.",
+      "bulk_tab": "Massen",
       "casting": "Aufnahmecasting",
       "delete_text": "Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?",
       "delete_error": "Beim Löschen dieses Shots ist ein Fehler aufgetreten. Wahrscheinlich sind damit Daten verknüpft. Bist du sicher, dass diese Aufnahme keine Aufgabe hat?",
@@ -1472,9 +1484,11 @@
       "restore_text": "Sind Sie sicher, dass Sie {name} in Ihrer Datenbank wiederherstellen möchten?",
       "restore_error": "Bei der Wiederherstellung des Shots ist ein Fehler aufgetreten.",
       "sequences": "Sequenzen",
+      "single_tab": "Einzeln",
       "tasks": "Shot Tasks",
       "title": "Shots",
       "fields": {
+        "count": "Anzahl",
         "description": "Beschreibung",
         "nb_frames": "Einzelbilder",
         "episode": "Episode",
@@ -1484,6 +1498,8 @@
         "name": "Name",
         "production": "Prod.",
         "sequence": "Sequenz",
+        "start": "Start",
+        "step": "Schritt",
         "time_spent": "Zeit",
         "person": "Modifikator",
         "max_retakes": "Max. Neuaufn.",

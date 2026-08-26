@@ -149,12 +149,15 @@
       "title": "Commenti",
       "toggle_for_client": "Visibilità cliente",
       "player": {
+        "audio_unavailable": "Audio non disponibile",
+        "image_unavailable": "Immagine non disponibile",
         "play": "Riproduci",
         "pause": "Pausa",
         "mute": "Disattiva l'audio",
         "unmute": "Riattiva l'audio",
         "fullscreen": "Schermo intero",
-        "download": "Scarica"
+        "download": "Scarica",
+        "video_unavailable": "Video non disponibile"
       }
     },
     "custom_actions": {
@@ -1018,6 +1021,7 @@
       },
       "fields": {
         "fps": "FPS",
+        "is_frame_in_numbering": "Avvia il contatore dei frame del player dal frame in",
         "name": "Nome",
         "ratio": "Proporzioni",
         "resolution": "Risoluzione",
@@ -1162,6 +1166,7 @@
     },
     "profile": {
       "change_avatar": "Cambia avatar",
+      "date_format": "Formato data",
       "info_title": "Informazioni",
       "language": "Lingua",
       "notifications_title": "Notifiche",
@@ -1194,6 +1199,7 @@
       },
       "notifications_mattermost_enabled": "Notifiche Mattermost attivate",
       "notifications_mattermost_user": "Nome utente Mattermost",
+      "use_12_hour_clock": "Orologio a 12 ore (AM/PM)",
       "webhook_error": "Il webhook Mattermost non corrisponde a un hook valido",
       "notifications_discord_enabled": "Notifiche Discord attivate",
       "notifications_discord_user": "Nome utente Discord",
@@ -1365,6 +1371,7 @@
       "apply_to_prod_confirm": "Sei sicuro di voler applicare questa versione della pianificazione alla produzione corrente? I valori attuali dei task verranno sovrascritti.",
       "apply_to_prod_error": "Si è verificato un errore durante l'applicazione della versione della pianificazione alla produzione corrente.",
       "assign": "Assegna a:",
+      "confirm_move_children": "Spostare questa barra ritaglierà o sposterà {count} sotto-elemento per adattarlo ai nuovi limiti. Continuare? | Spostare questa barra ritaglierà o sposterà {count} sotto-elementi per adattarli ai nuovi limiti. Continuare?",
       "create_version": "Crea una versione della pianificazione",
       "delete_version": "Elimina la versione della pianificazione",
       "delete_version_error": "Si è verificato un errore durante l'eliminazione di questa versione della pianificazione. Contatta il nostro team di supporto.",
@@ -1386,6 +1393,7 @@
       },
       "force_unassign": "Sovrascrivi le assegnazioni precedenti",
       "forced_daily_quotas": "Quote giornaliere forzate:",
+      "hours": "h",
       "md": "gp",
       "milestone": {
         "add_milestone": "Aggiungi milestone per",
@@ -1453,6 +1461,10 @@
       "drawings": "Disegni"
     },
     "shots": {
+      "bulk_error": "La creazione in blocco non è riuscita. Riprova.",
+      "bulk_generate": "Genera",
+      "bulk_invalid_start": "Il nome iniziale deve terminare con un numero.",
+      "bulk_tab": "In blocco",
       "casting": "Casting degli shot",
       "delete_text": "Sei sicuro di voler rimuovere {name} dal database?",
       "delete_error": "Si è verificato un errore durante l'eliminazione di questo shot. Potrebbero esserci dei dati attualmente collegati allo shot. Sei sicuro che nessun task sia collegato a questo shot?",
@@ -1472,9 +1484,11 @@
       "restore_text": "Sei sicuro di voler ripristinare {name} dall'archivio?",
       "restore_error": "Si è verificato un errore durante il ripristino di questo shot.",
       "sequences": "Sequenze",
+      "single_tab": "Singolo",
       "tasks": "Task degli shot",
       "title": "Shot",
       "fields": {
+        "count": "Quantità",
         "description": "Descrizione",
         "nb_frames": "Fotogrammi",
         "episode": "Episodio",
@@ -1484,6 +1498,8 @@
         "name": "Nome",
         "production": "Prod",
         "sequence": "Sequenza",
+        "start": "Inizio",
+        "step": "Passo",
         "time_spent": "Tempo",
         "person": "Modificato da",
         "max_retakes": "Max retake",

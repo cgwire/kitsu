@@ -149,12 +149,15 @@
       "title": "Kommentarer",
       "toggle_for_client": "Klientsynlighed",
       "player": {
+        "audio_unavailable": "Lyd utilgængelig",
+        "image_unavailable": "Billede utilgængeligt",
         "play": "Play",
         "pause": "Pause",
         "mute": "Mute",
         "unmute": "Unmute",
         "fullscreen": "Fuld skærm",
-        "download": "Download"
+        "download": "Download",
+        "video_unavailable": "Video utilgængelig"
       }
     },
     "custom_actions": {
@@ -564,7 +567,7 @@
       "tasks": "Opgaver",
       "week": "Uge",
       "clear_sorting": "Ryd nuværende sortering",
-      "days": "dage",
+      "days": "dag | dage",
       "drop_files_here": "Træk filer hertil",
       "import": "Import",
       "is_shared": "Delt med hele teamet",
@@ -1018,6 +1021,7 @@
       },
       "fields": {
         "fps": "FPS",
+        "is_frame_in_numbering": "Start afspillerens billedtæller ved frame in",
         "name": "Navn",
         "ratio": "Ratio",
         "resolution": "Opløsning",
@@ -1162,6 +1166,7 @@
     },
     "profile": {
       "change_avatar": "Skift avatar",
+      "date_format": "Datoformat",
       "info_title": "Information",
       "language": "Sprog",
       "notifications_enabled": "E-mail notifikationer aktiveret",
@@ -1193,6 +1198,7 @@
       },
       "notifications_mattermost_enabled": "Mattermost-notifikationer aktiveret",
       "notifications_mattermost_user": "Mattermost-brugernavn",
+      "use_12_hour_clock": "12-timers ur (AM/PM)",
       "webhook_error": "webhooken i Mattermost svarer ikke til en gyldig hook",
       "notifications_discord_enabled": "Discord-notifikationer aktiveret",
       "notifications_discord_user": "Discord brugernavn",
@@ -1365,6 +1371,7 @@
       "apply_to_prod_confirm": "Er du sikker på, at du vil anvende denne version af tidsplanen på den aktuelle produktion? Dette vil tilsidesætte de aktuelle opgaveværdier.",
       "apply_to_prod_error": "Der opstod en fejl under anvendelse af planlægningsversionen på den aktuelle produktion.",
       "assign": "Tildel til:",
+      "confirm_move_children": "Flytning af denne bjælke vil beskære eller flytte {count} under-element, så det passer til de nye grænser. Fortsæt? | Flytning af denne bjælke vil beskære eller flytte {count} under-elementer, så de passer til de nye grænser. Fortsæt?",
       "create_version": "Opret version af tidsplan",
       "delete_version": "Slet version af tidsplan",
       "delete_version_error": "Der opstod en fejl under sletning af denne skemaversion. Kontakt venligst vores supportteam.",
@@ -1386,6 +1393,7 @@
       },
       "force_unassign": "Tilsidesæt tidligere tildelinger",
       "forced_daily_quotas": "Tvungne daglige kvoter:",
+      "hours": "t",
       "md": "md",
       "milestone": {
         "add_milestone": "Tilføj milepæl for",
@@ -1453,6 +1461,10 @@
       "drawings": "Tegninger"
     },
     "shots": {
+      "bulk_error": "Masseoprettelsen mislykkedes. Prøv igen.",
+      "bulk_generate": "Generér",
+      "bulk_invalid_start": "Startnavnet skal ende med et tal.",
+      "bulk_tab": "Masse",
       "casting": "Shot-casting",
       "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database?",
       "delete_error": "Der opstod en fejl under sletning af dette shot. Der kan være eksisterende data knyttet til det. Er du sikker på, at dette shot ikke har nogen opgave knyttet til sig?",
@@ -1472,9 +1484,11 @@
       "restore_text": "Er du sikker på, at du vil gendanne {name} fra dit arkiv?",
       "restore_error": "Der opstod en fejl under gendannelse af dette shot.",
       "sequences": "Sequences",
+      "single_tab": "Enkelt",
       "tasks": "Shot-opgaver",
       "title": "Shots",
       "fields": {
+        "count": "Antal",
         "description": "Beskrivelse",
         "nb_frames": "Frames",
         "episode": "Episode",
@@ -1484,6 +1498,8 @@
         "name": "Navn",
         "production": "Prod",
         "sequence": "Sequence",
+        "start": "Start",
+        "step": "Trin",
         "time_spent": "Tid",
         "person": "Ændret af",
         "max_retakes": "Maks Rtks",

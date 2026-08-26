@@ -246,12 +246,15 @@
       "pinned": "Przypięty",
       "pinned_revision": "Przypięta wersja",
       "player": {
+        "audio_unavailable": "Dźwięk niedostępny",
+        "image_unavailable": "Obraz niedostępny",
         "play": "Odtwórz",
         "pause": "Wstrzymaj",
         "mute": "Wycisz",
         "unmute": "Wyłącz wyciszenie",
         "fullscreen": "Pełny ekran",
-        "download": "Pobierz"
+        "download": "Pobierz",
+        "video_unavailable": "Wideo niedostępne"
       },
       "post_status": "Dodaj komentarz",
       "previews": "Pliki podglądu do opublikowania jako nowa wersja",
@@ -1399,6 +1402,7 @@
         "episode_span": "Odstęp między odcinkami",
         "fps": "FPS",
         "is_clients_isolated": "Izoluj komentarze klientów (niewidoczne dla innych klientów)",
+        "is_frame_in_numbering": "Rozpocznij licznik klatek odtwarzacza od klatki wejściowej",
         "is_preview_download_allowed": "Pozwól artystom pobierać podglądy",
         "is_publish_default": "Domyślnie ustawiaj widżet komentarzy dla artystów w trybie publikacji",
         "is_set_preview_automated": "Automatycznie ustawiaj nowy podgląd jako miniaturę obiektu",
@@ -1498,6 +1502,7 @@
     "profile": {
       "change_avatar": "Zmień awatar",
       "clear_avatar": "Usuń awatar",
+      "date_format": "Format daty",
       "info_title": "Informacje",
       "language": "Język",
       "notifications_title": "Powiadomienia",
@@ -1511,6 +1516,7 @@
       "password_title": "Zmień hasło",
       "timezone": "Strefa czasowa",
       "title": "Twój profil",
+      "use_12_hour_clock": "Zegar 12-godzinny (AM/PM)",
       "webhook_error": "webhook Mattermost nie odpowiada żadnemu hookowi",
       "avatar": {
         "title": "Zmień awatar",
@@ -1752,6 +1758,7 @@
       "apply_to_prod_confirm": "Czy na pewno chcesz zastosować tę wersję harmonogramu do bieżącej produkcji? Spowoduje to nadpisanie bieżących wartości zadań.",
       "apply_to_prod_error": "Wystąpił błąd podczas stosowania wersji harmonogramu do bieżącej produkcji.",
       "assign": "Przypisz do:",
+      "confirm_move_children": "Przesunięcie tego paska przytnie lub przesunie {count} podelement, aby zmieścił się w nowych granicach. Kontynuować? | Przesunięcie tego paska przytnie lub przesunie {count} podelementów, aby zmieściły się w nowych granicach. Kontynuować?",
       "create_version": "Utwórz wersję harmonogramu",
       "delete_version": "Usuń wersję harmonogramu",
       "delete_version_error": "Wystąpił błąd podczas usuwania tej wersji harmonogramu. Skontaktuj się z naszym zespołem wsparcia.",
@@ -1773,6 +1780,7 @@
       },
       "force_unassign": "Nadpisz poprzednie przypisania",
       "forced_daily_quotas": "Wymuszone normy dzienne:",
+      "hours": "godz.",
       "md": "os.dni",
       "milestone": {
         "add_milestone": "Dodaj kamień milowy na",
@@ -1847,6 +1855,10 @@
       "week": "Tydzień"
     },
     "shots": {
+      "bulk_error": "Zbiorcze tworzenie nie powiodło się. Spróbuj ponownie.",
+      "bulk_generate": "Generuj",
+      "bulk_invalid_start": "Nazwa początkowa musi kończyć się liczbą.",
+      "bulk_tab": "Zbiorczo",
       "casting": "Casting ujęcia",
       "cancel_text": "Czy na pewno chcesz zarchiwizować {name}?",
       "creation_explanation": "Aby dodać ujęcia, musisz najpierw utworzyć odcinek i sekwencję. Wpisz nazwę odcinka na dole lewej kolumny, a następnie kliknij „Dodaj”, aby utworzyć nowy odcinek. Wybierz ten odcinek i powtórz tę samą operację dla sekwencji. Na koniec wybierz sekwencję i wpisz nazwę ujęcia w polu na dole prawej kolumny. Kliknij przycisk „Dodaj” poniżej. Twoje pierwsze ujęcie zostało utworzone. Możesz dodać ich znacznie więcej! Jeśli to nie serial telewizyjny, możesz od razu utworzyć sekwencję.",
@@ -1876,10 +1888,12 @@
       "restore_error": "Wystąpił błąd podczas przywracania tego ujęcia.",
       "sequences": "Sekwencje",
       "show_timecode": "Pokaż punkty wejścia i wyjścia jako timecode",
+      "single_tab": "Pojedynczo",
       "tasks": "Zadania ujęcia",
       "title": "Ujęcia",
       "wrong_file_duration": "Czas trwania jednego z przesłanych plików wideo nie odpowiada oczekiwanemu czasowi trwania bieżącego ujęcia.",
       "fields": {
+        "count": "Liczba",
         "description": "Opis",
         "nb_drawings": "Rysunki",
         "nb_frames": "Klatki",
@@ -1894,6 +1908,8 @@
         "production": "Prod.",
         "resolution": "Rozdzielczość",
         "sequence": "Sekwencja",
+        "start": "Początek",
+        "step": "Krok",
         "time_spent": "Czas"
       }
     },

@@ -149,12 +149,15 @@
       "title": "Comentários",
       "toggle_for_client": "Visibilidade para o cliente",
       "player": {
+        "audio_unavailable": "Áudio indisponível",
+        "image_unavailable": "Imagem indisponível",
         "play": "Reproduzir",
         "pause": "Pausar",
         "mute": "Mutar",
         "unmute": "Desmutar",
         "fullscreen": "Tela cheia",
-        "download": "Baixar"
+        "download": "Baixar",
+        "video_unavailable": "Vídeo indisponível"
       }
     },
     "custom_actions": {
@@ -564,7 +567,7 @@
       "tasks": "Tarefas",
       "week": "Semana",
       "clear_sorting": "Limpar a classificação atual",
-      "days": "dias",
+      "days": "dia | dias",
       "drop_files_here": "Coloque os arquivos aqui",
       "import": "Importação",
       "is_shared": "Compartilhado com toda a equipe",
@@ -1018,6 +1021,7 @@
       },
       "fields": {
         "fps": "FPS",
+        "is_frame_in_numbering": "Iniciar o contador de frames do player no frame de entrada",
         "name": "Nome",
         "ratio": "Ratio",
         "resolution": "Resolução",
@@ -1162,6 +1166,7 @@
     },
     "profile": {
       "change_avatar": "Alterar avatar",
+      "date_format": "Formato de data",
       "info_title": "Informação",
       "language": "Idioma",
       "notifications_enabled": "Notificações de email habilitadas",
@@ -1193,6 +1198,7 @@
       },
       "notifications_mattermost_enabled": "Notificações do Mattermost ativadas",
       "notifications_mattermost_user": "Nome de usuário do Mattermost",
+      "use_12_hour_clock": "Relógio de 12 horas (AM/PM)",
       "webhook_error": "o webhook do Mattermost não corresponde a um hook",
       "notifications_discord_enabled": "Notificações do Discord ativadas",
       "notifications_discord_user": "Nome de usuário do Discord",
@@ -1365,6 +1371,7 @@
       "apply_to_prod_confirm": "Tem certeza de que deseja aplicar essa versão de programação à produção atual? Isso substituirá os valores atuais da tarefa.",
       "apply_to_prod_error": "Ocorreu um erro ao aplicar a versão de programação à produção atual.",
       "assign": "Atribuir a:",
+      "confirm_move_children": "Mover esta barra vai cortar ou ajustar {count} subitem para caber nos novos limites. Continuar? | Mover esta barra vai cortar ou ajustar {count} subitens para caberem nos novos limites. Continuar?",
       "create_version": "Criar versão da programação",
       "delete_version": "Excluir versão da programação",
       "delete_version_error": "Ocorreu um erro ao excluir essa versão da programação. Entre em contato com nossa equipe de suporte.",
@@ -1386,6 +1393,7 @@
       },
       "force_unassign": "Substituir atribuições anteriores",
       "forced_daily_quotas": "Cotas diárias forçadas:",
+      "hours": "h",
       "md": "md",
       "milestone": {
         "add_milestone": "Adicionar meta para",
@@ -1453,6 +1461,10 @@
       "drawings": "Desenhos"
     },
     "shots": {
+      "bulk_error": "A criação em massa falhou. Tente novamente.",
+      "bulk_generate": "Gerar",
+      "bulk_invalid_start": "O nome inicial deve terminar com um número.",
+      "bulk_tab": "Em massa",
       "casting": "Elenco do shot",
       "delete_text": "Tem certeza de que deseja remover {name} de seu banco de dados?",
       "delete_error": "Ocorreu um erro ao excluir este shot. Provavelmente há dados vinculados a ele. Tem certeza de que este shot não tem nenhuma tarefa vinculada a ele?",
@@ -1472,9 +1484,11 @@
       "restore_text": "Tem certeza de que deseja restaurar {name} em seu banco de dados?",
       "restore_error": "Ocorreu um erro ao restaurar este shot.",
       "sequences": "Sequencias",
+      "single_tab": "Individual",
       "tasks": "Tarefas do Shot",
       "title": "Shots",
       "fields": {
+        "count": "Quantidade",
         "description": "Descrição",
         "nb_frames": "Frames",
         "episode": "Episódio",
@@ -1484,6 +1498,8 @@
         "name": "Nome",
         "production": "Prod",
         "sequence": "Sequencia",
+        "start": "Início",
+        "step": "Passo",
         "time_spent": "Tempo",
         "person": "Modificador",
         "max_retakes": "Rtks máximos",

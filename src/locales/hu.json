@@ -30,7 +30,7 @@
         "shared": "Megosztva az Asset könyvtárban"
       },
       "cancel_text": "Biztosan archiválni akarod {name}-t?",
-      "delete_for_selection": "{nbSelectedAssets} kijelölt asset törlése:\n",
+      "delete_for_selection": "A kijelölt asset törlése | {nbSelectedAssets} kijelölt asset törlése",
       "multiple_delete_error": "Hiba történt az asset törlésekor. Valószínűleg hivatkozik rá adat. Biztosan nincs feladat rendelve a kiválasztott asset-hez?",
       "only_current_episode": "Csak a jelenlegi epizód",
       "casted_in_shots": "{nbShots} shot-ban szerepel",
@@ -149,12 +149,15 @@
       "title": "Hozzászólások",
       "toggle_for_client": "Megrendelői láthatóság",
       "player": {
+        "audio_unavailable": "A hang nem érhető el",
+        "image_unavailable": "A kép nem érhető el",
         "play": "Lejátszás",
         "pause": "Szünet",
         "mute": "Némítás",
         "unmute": "Némítás feloldása",
         "fullscreen": "Teljes képernyő",
-        "download": "Letöltés"
+        "download": "Letöltés",
+        "video_unavailable": "A videó nem érhető el"
       }
     },
     "custom_actions": {
@@ -1018,6 +1021,7 @@
       },
       "fields": {
         "fps": "FPS",
+        "is_frame_in_numbering": "A lejátszó képkockaszámlálója a frame in-nél induljon",
         "name": "Név",
         "ratio": "Képarány",
         "resolution": "Képméret",
@@ -1162,6 +1166,7 @@
     },
     "profile": {
       "change_avatar": "Avatár cseréje",
+      "date_format": "Dátumformátum",
       "info_title": "Információ",
       "language": "Nyelv",
       "notifications_enabled": "E-mail értesítések bekapcsolva",
@@ -1243,6 +1248,7 @@
           "name": "Hitelesítő alkalmazás"
         }
       },
+      "use_12_hour_clock": "12 órás óra (AM/PM)",
       "webhook_error": "a mattermost webhook nem felel meg egy hook-nak"
     },
     "settings": {
@@ -1365,6 +1371,7 @@
       "apply_to_prod_confirm": "Biztosan alkalmazni akarod ezt az időbeosztás-verziót a jelenlegi produkcióra? Ez felülírja a jelenlegi feladatértékeket.",
       "apply_to_prod_error": "Hiba történt az időbeosztás-verzió jelenlegi produkcióra való alkalmazásakor.",
       "assign": "Kiosztva:",
+      "confirm_move_children": "A sáv mozgatása levágja vagy elmozdítja {count} alelemet, hogy az új határok közé férjen. Folytatja? | A sáv mozgatása levágja vagy elmozdítja {count} alelemet, hogy az új határok közé férjenek. Folytatja?",
       "create_version": "Időbeosztás-verzió létrehozása",
       "delete_version": "Időbeosztás-verzió törlése",
       "delete_version_error": "Hiba történt az időbeosztás-verzió törlésekor. Kérlek keresd fel a támogató csapatot.",
@@ -1386,6 +1393,7 @@
       },
       "force_unassign": "Korábbi kiosztások felülírása",
       "forced_daily_quotas": "Kényszerített napi kvóták:",
+      "hours": "ó",
       "md": "md",
       "milestone": {
         "add_milestone": "Mérföldkő hozzáadása ehhez: ",
@@ -1453,6 +1461,10 @@
       "weighted_done": "Súlyozott (jóváhagyás)"
     },
     "shots": {
+      "bulk_error": "A tömeges létrehozás nem sikerült. Próbálja újra.",
+      "bulk_generate": "Generálás",
+      "bulk_invalid_start": "A kezdőnévnek számra kell végződnie.",
+      "bulk_tab": "Tömeges",
       "casting": "Shotban szerepel",
       "delete_text": "Biztosan törölni akarod {name}-t az adatbázisból?",
       "delete_error": "Hiba történt a shot törlésekor. Valószínűleg adat hivatkozik rá. Biztos nincs hozzá kapcsolódó feladat?",
@@ -1472,9 +1484,11 @@
       "restore_text": "Biztosan visszaállítod {name}-t az adatbázisba?",
       "restore_error": "Hiba történt a shot visszaállításakor.",
       "sequences": "Szekvenciák",
+      "single_tab": "Egyedi",
       "tasks": "Shot feladatok",
       "title": "Shot-ok",
       "fields": {
+        "count": "Darabszám",
         "description": "Leírás",
         "nb_frames": "Képkockák",
         "episode": "Epizód",
@@ -1484,6 +1498,8 @@
         "name": "Név",
         "production": "Prod",
         "sequence": "Szekvencia",
+        "start": "Kezdet",
+        "step": "Lépés",
         "time_spent": "Idő",
         "person": "Módosító",
         "max_retakes": "Max ism.",
@@ -1492,7 +1508,7 @@
         "resolution": "Felbontás"
       },
       "cancel_text": "Biztosan archiválni akarod {name}-t?",
-      "delete_for_selection": "{nbSelectedShots} kijelölt shot törlése: ",
+      "delete_for_selection": "A kijelölt shot törlése | {nbSelectedShots} kijelölt shot törlése",
       "multiple_delete_error": "Hiba történt a shot törlésekor. Valószínűleg adat hivatkozik rá. Biztosan nincs feladat hozzárendelve?",
       "creation_explanation": "Shot-ok hozzáadásához először egy epizódot és egy szekvenciát kell létrehoznod. Add meg az epizód nevét a bal oszlop alján, majd kattints a \"Hozzáadás\" gombra egy új epizód létrehozásához. Jelöld ki ezt az epizódot, és ismételd meg ugyanezt a műveletet a szekvenciánál. Végül válassz ki egy szekvenciát, és gépelj be egy shot-nevet a jobb oszlop alján lévő mezőbe. Kattints az alábbi \"Hozzáadás\" gombra. Elkészült az első shot-od. Még sokkal többet is hozzáadhatsz! Ha nem TV sorozatról van szó, közvetlenül létrehozhatsz egy szekvenciát.",
       "delete_for_selection_hard_lock_text": "TÖRLÉS",

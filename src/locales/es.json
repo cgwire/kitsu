@@ -149,12 +149,15 @@
       "title": "Comentarios",
       "toggle_for_client": "Visibilidad para el cliente",
       "player": {
+        "audio_unavailable": "Audio no disponible",
+        "image_unavailable": "Imagen no disponible",
         "play": "Reproducir",
         "pause": "Pausa",
         "mute": "Silenciar",
         "unmute": "Activar sonido",
         "fullscreen": "Pantalla completa",
-        "download": "Descargar"
+        "download": "Descargar",
+        "video_unavailable": "Vídeo no disponible"
       }
     },
     "custom_actions": {
@@ -564,7 +567,7 @@
       "tasks": "Tareas",
       "week": "Semana",
       "clear_sorting": "Borrar la clasificación actual",
-      "days": "días",
+      "days": "día | días",
       "drop_files_here": "Suelte los archivos aquí",
       "import": "Importar",
       "is_shared": "Compartido con todo el equipo",
@@ -1018,6 +1021,7 @@
       },
       "fields": {
         "fps": "FPS",
+        "is_frame_in_numbering": "Iniciar el contador de frames del reproductor en el frame de entrada",
         "name": "Nombre",
         "ratio": "Relación de aspecto",
         "resolution": "Resolución",
@@ -1162,6 +1166,7 @@
     },
     "profile": {
       "change_avatar": "Cambiar avatar",
+      "date_format": "Formato de fecha",
       "info_title": "Información",
       "language": "Idioma",
       "notifications_enabled": "Notificaciones de correo electrónico habilitadas",
@@ -1193,6 +1198,7 @@
       },
       "notifications_mattermost_enabled": "Notificaciones de Mattermost activadas",
       "notifications_mattermost_user": "Usuario de Mattermost",
+      "use_12_hour_clock": "Reloj de 12 horas (AM/PM)",
       "webhook_error": "el webhook mattermost no corresponde a un gancho",
       "notifications_discord_enabled": "Notificaciones de Discord activadas",
       "notifications_discord_user": "Usuario de Discord",
@@ -1365,6 +1371,7 @@
       "apply_to_prod_confirm": "¿Está seguro de que desea aplicar esta versión del programa a la producción actual? Esto anulará los valores de la tarea actual.",
       "apply_to_prod_error": "Se ha producido un error al aplicar la versión del programa a la producción actual.",
       "assign": "Asignar a:",
+      "confirm_move_children": "Mover esta barra recortará o ajustará {count} subelemento para adaptarlo a los nuevos límites. ¿Continuar? | Mover esta barra recortará o ajustará {count} subelementos para adaptarlos a los nuevos límites. ¿Continuar?",
       "create_version": "Crear versión de la agenda",
       "delete_version": "Borrar la versión del calendario",
       "delete_version_error": "Se ha producido un error al eliminar esta versión del programa. Póngase en contacto con nuestro equipo de asistencia.",
@@ -1386,6 +1393,7 @@
       },
       "force_unassign": "Anular asignaciones anteriores",
       "forced_daily_quotas": "Cuotas diarias forzadas:",
+      "hours": "h",
       "md": "md",
       "milestone": {
         "add_milestone": "Añadir hito para",
@@ -1453,6 +1461,10 @@
       "drawings": "Dibujos"
     },
     "shots": {
+      "bulk_error": "La creación en masa ha fallado. Inténtelo de nuevo.",
+      "bulk_generate": "Generar",
+      "bulk_invalid_start": "El nombre inicial debe terminar con un número.",
+      "bulk_tab": "En masa",
       "casting": "Casting de la toma",
       "delete_text": "¿Está seguro de que desea eliminar {name} de su base de datos?",
       "delete_error": "Se ha producido un error al eliminar esta toma. Es probable que haya datos asociados. ¿Está seguro de que esta toma no tiene ninguna tarea asociada?",
@@ -1472,9 +1484,11 @@
       "restore_text": "¿Está seguro de que desea restaurar {name} de su archivo?",
       "restore_error": "Se ha producido un error al restaurar esta toma.",
       "sequences": "Secuencias",
+      "single_tab": "Individual",
       "tasks": "Tareas de las tomas",
       "title": "Tomas",
       "fields": {
+        "count": "Cantidad",
         "description": "Descripción",
         "nb_frames": "Fotogramas",
         "episode": "Episodio",
@@ -1484,6 +1498,8 @@
         "name": "Nombre",
         "production": "Prod",
         "sequence": "Secuencia",
+        "start": "Inicio",
+        "step": "Paso",
         "time_spent": "Tiempo",
         "person": "Modificador",
         "max_retakes": "Núm. máximo de Retomas",

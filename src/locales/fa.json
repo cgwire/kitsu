@@ -116,8 +116,8 @@
         "person": "نام شخص",
         "checklist": "چک لیست",
         "acknowledgements": "تأییدها",
-        "revision": "",
-        "attachments": ""
+        "revision": "نسخه",
+        "attachments": "پیوست‌ها"
       },
       "checklist": "چک لیست",
       "attachments": "پیوست ها",
@@ -149,12 +149,15 @@
       "title": "نظرات",
       "toggle_for_client": "قابلیت مشاهده برای مشتری",
       "player": {
+        "audio_unavailable": "صدا در دسترس نیست",
+        "image_unavailable": "تصویر در دسترس نیست",
         "play": "پخش",
         "pause": "توقف",
         "mute": "بی‌صدا کردن",
         "unmute": "باصدا کردن",
         "fullscreen": "تمام صفحه",
-        "download": "دانلود"
+        "download": "دانلود",
+        "video_unavailable": "ویدیو در دسترس نیست"
       }
     },
     "custom_actions": {
@@ -411,8 +414,8 @@
       "confirmation_and_stay": "تایید و ماندن",
       "date": "تاریخ",
       "dark_theme": "تم مشکی",
-      "days_spent": "روز/روزهای برآورد شده",
-      "days_estimated": "روز/روزهای برآورد شده",
+      "days_spent": "روز صرف‌شده | روزهای صرف‌شده",
+      "days_estimated": "روز برآوردشده | روزهای برآوردشده",
       "delete": "حذف",
       "delete_all": "حذف همه",
       "delete_text": "آیا مطمئن هستید که میخواهید {name} را حذف کنید؟",
@@ -564,7 +567,7 @@
       "tasks": "وظایف",
       "week": "هفته",
       "clear_sorting": "پاک کردن مرتب سازی فعلی",
-      "days": "روزها",
+      "days": "روز | روزها",
       "drop_files_here": "فایل ها را اینجا رها کنید",
       "import": "وارد کردن",
       "is_shared": "با کل تیم به اشتراک گذاشته شده است",
@@ -1018,6 +1021,7 @@
       },
       "fields": {
         "fps": "FPS",
+        "is_frame_in_numbering": "شمارنده فریم پخش‌کننده از فریم ورودی شروع شود",
         "name": "نام",
         "ratio": "نسبت تصویر",
         "resolution": "ابعاد تصویر",
@@ -1162,6 +1166,7 @@
     },
     "profile": {
       "change_avatar": "تغییرآواتار",
+      "date_format": "قالب تاریخ",
       "info_title": "اطلاعات",
       "language": "زبان",
       "notifications_enabled": "اطلاعیه های ایمیل فعال",
@@ -1193,6 +1198,7 @@
       },
       "notifications_mattermost_enabled": "اطلاعیه‌های Mattermost فعال شد",
       "notifications_mattermost_user": "نام کاربری Mattermost",
+      "use_12_hour_clock": "ساعت ۱۲ ساعته (AM/PM)",
       "webhook_error": "وب‌هوک Mattermost با یک هوک مطابقت ندارد",
       "notifications_discord_enabled": "اطلاعیه های Discord فعال شد",
       "notifications_discord_user": "نام کاربری Discord",
@@ -1365,6 +1371,7 @@
       "apply_to_prod_confirm": "آیا مطمئن هستید که می‌خواهید این نسخه از زمان‌بندی را روی محصول فعلی اعمال کنید؟ این کار مقادیر فعلی وظایف را لغو می‌کند.",
       "apply_to_prod_error": "هنگام اعمال نسخه زمانبندی به محصول فعلی، خطایی روی داد.",
       "assign": "اختصاص دادن به:",
+      "confirm_move_children": "جابه‌جایی این نوار باعث برش یا جابه‌جایی {count} زیرمورد برای جا شدن در محدوده جدید می‌شود. ادامه می‌دهید؟ | جابه‌جایی این نوار باعث برش یا جابه‌جایی {count} زیرمورد برای جا شدن در محدوده جدید می‌شود. ادامه می‌دهید؟",
       "create_version": "ایجاد نسخه زمانبندی",
       "delete_version": "نسخه برنامه را حذف کنید",
       "delete_version_error": "هنگام حذف این نسخه از برنامه، خطایی روی داد. لطفا با تیم پشتیبانی ما تماس بگیرید.",
@@ -1386,6 +1393,7 @@
       },
       "force_unassign": "لغو تکالیف قبلی",
       "forced_daily_quotas": "سهمیه‌های اجباری روزانه:",
+      "hours": "ساعت",
       "md": "md",
       "milestone": {
         "add_milestone": "هدف گذاری برای",
@@ -1453,6 +1461,10 @@
       "drawings": "طراحی ها"
     },
     "shots": {
+      "bulk_error": "ایجاد گروهی ناموفق بود. لطفاً دوباره تلاش کنید.",
+      "bulk_generate": "ایجاد",
+      "bulk_invalid_start": "نام شروع باید به عدد ختم شود.",
+      "bulk_tab": "گروهی",
       "casting": "محول کردن شات",
       "delete_text": "آیا مطمئنید که می خواهید {name} را حذف کنید؟",
       "delete_error": "هنگام حذف این شات خطایی رخ داده. آیا مطمئنید این شات به وظیفه ای لینک نشده؟",
@@ -1472,9 +1484,11 @@
       "restore_text": "آیا مطمئنید که می خواهید {name} را بازگردانی کنید؟",
       "restore_error": "هنگام بازگردانی این شات خطایی رخ داد.",
       "sequences": "سکانس ها",
+      "single_tab": "تکی",
       "tasks": "وظایف شات",
       "title": "شات ها",
       "fields": {
+        "count": "تعداد",
         "description": "توضیحات",
         "nb_frames": "فریم ها",
         "episode": "قسمت",
@@ -1484,6 +1498,8 @@
         "name": "نام",
         "production": "پروژه",
         "sequence": "سکانس",
+        "start": "شروع",
+        "step": "گام",
         "time_spent": "زمان",
         "person": "اصلاح کننده",
         "max_retakes": "Max Rtks",
