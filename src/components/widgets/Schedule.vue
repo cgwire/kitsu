@@ -1449,6 +1449,10 @@ const onMouseMove = event => {
 // document-level move listeners are attached only for the duration of a drag
 // or browse: a permanent listener ran on every mousemove of the whole page
 const startMoveTracking = () => {
+  // a new interaction begins: drop any drag-click flag left armed by a
+  // drag whose trailing click never fired (release off the bar, touch
+  // drags), otherwise it would swallow this interaction's genuine click
+  justDragged = false
   addEvents(moveEvents)
 }
 

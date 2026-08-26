@@ -111,4 +111,27 @@ describe('Schedule widget - dragging a collapsed root row bar', () => {
 
     wrapper.unmount()
   })
+
+  test('a click after a drag released off the bar still selects', async () => {
+    const rootElement = buildRootElement()
+    const wrapper = mountSchedule(rootElement)
+
+    const bar = wrapper.find('.timebar-center')
+    // drag, but release with the cursor elsewhere: the browser fires no
+    // trailing click, so the flag would stay armed without the reset
+    await bar.trigger('mousedown', { clientX: 500 })
+    document.dispatchEvent(
+      new MouseEvent('mousemove', { bubbles: true, clientX: 560 })
+    )
+    document.dispatchEvent(
+      new MouseEvent('mouseup', { bubbles: true, clientX: 560 })
+    )
+    await wrapper.vm.$nextTick()
+
+    await dragBar(wrapper, bar, 600, 600)
+
+    expect(wrapper.emitted('root-element-selected')).toBeTruthy()
+
+    wrapper.unmount()
+  })
 })
