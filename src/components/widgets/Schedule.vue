@@ -3430,6 +3430,15 @@ const setItemPositions = (items, unitOfTime = 'days') => {
   z-index: 200;
 }
 
+.dark .drop-ghost {
+  // the dark background swallows the 25% tint: raise the color share
+  background: color-mix(
+    in srgb,
+    var(--timebar-color, #888) 55%,
+    var(--background)
+  );
+}
+
 // crossed-out row: the person cannot receive the dragged task
 .drop-forbidden {
   align-items: center;
