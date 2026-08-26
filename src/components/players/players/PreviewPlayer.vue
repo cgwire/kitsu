@@ -86,6 +86,7 @@
               name="main"
               :nb-frames="nbFrames"
               :object-background-url="objectBackgroundUrl"
+              :picture-background-color="pictureBackgroundColor"
               :preview="currentPreview"
               :style="{
                 position: isComparisonOverlay ? 'absolute' : 'static'
@@ -116,6 +117,7 @@
               :is-muted="true"
               :is-repeating="isRepeating"
               :margin-bottom="marginBottom"
+              :picture-background-color="pictureBackgroundColor"
               :preview="comparisonPreview"
               :style="{
                 opacity: overlayOpacity
@@ -269,6 +271,7 @@
             v-model:is-eraser-mode-on="isEraserModeOn"
             v-model:is-onion-skin-on="isOnionSkinOn"
             v-model:onion-skin-frames="onionSkinFrames"
+            v-model:picture-background-color="pictureBackgroundColor"
             v-model:is-shape-mode="isShapeMode"
             v-model:is-wireframe="isWireframe"
             @annotation-displayed-clicked="onAnnotationDisplayedClicked"
@@ -654,6 +657,7 @@ const maxDuration = ref('00:00:00:00')
 const movieDimensions = ref({ width: 1920, height: 1080 })
 const objectBackgroundUrl = ref(null)
 const pencilPalette = ref(['huge', 'big', 'medium', 'small', 'tiny'])
+const pictureBackgroundColor = ref('#000000')
 const videoDuration = ref(0)
 const width = ref(0)
 

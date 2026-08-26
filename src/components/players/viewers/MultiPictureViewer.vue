@@ -3,6 +3,7 @@
     <picture-viewer
       :key="`${preview.id}-${preview.position}`"
       :ref="el => setPictureRef(preview, el)"
+      :background-color="backgroundColor"
       :big="true"
       :default-height="defaultHeight"
       :full-screen="fullScreen"
@@ -31,6 +32,10 @@ import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import PictureViewer from '@/components/players/viewers/PictureViewer.vue'
 
 const props = defineProps({
+  backgroundColor: {
+    type: String,
+    default: '#000000'
+  },
   currentPreview: {
     type: Object,
     default: () => null

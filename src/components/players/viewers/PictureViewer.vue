@@ -3,6 +3,7 @@
     <div
       ref="pictureWrapper"
       class="picture-wrapper"
+      :style="{ backgroundColor }"
       oncontextmenu="return false"
     >
       <div
@@ -43,6 +44,10 @@ import { isPicturePreview } from '@/lib/preview'
 import Spinner from '@/components/widgets/Spinner.vue'
 
 const props = defineProps({
+  backgroundColor: {
+    type: String,
+    default: '#000000'
+  },
   big: {
     type: Boolean,
     default: false
@@ -509,7 +514,6 @@ defineExpose({
   flex: 1;
   border-radius: 5px;
   display: flex;
-  background: black;
   align-items: center;
   justify-content: center;
   text-align: center;
