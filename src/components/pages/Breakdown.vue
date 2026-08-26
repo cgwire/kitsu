@@ -484,6 +484,7 @@ export default {
       importCsvFormData: {},
       isBigMode: false,
       isLoading: false,
+      wasDisconnected: false,
       isOnlyCurrentEpisode: false,
       isTextMode: false,
       libraryDisplayed: false,
@@ -940,6 +941,16 @@ export default {
       indexRange.forEach(i => {
         if (i >= 0) this.selection[keys[i]] = true
       })
+    },
+
+    reloadCasting() {
+      if (this.isEpisodeCasting) {
+        this.setCastingForProductionEpisodes()
+      } else if (this.assetTypeId) {
+        this.setCastingAssetType(this.assetTypeId)
+      } else {
+        this.setCastingSequence(this.sequenceId || 'all')
+      }
     },
 
     async addOneAsset(assetId, amount = 1) {
@@ -1730,6 +1741,21 @@ export default {
         const asset = this.assetMap.get(eventData.asset_id)
         if (asset && asset.asset_type_id === this.assetTypeId) {
           this.loadAssetCasting(asset)
+        }
+      },
+
+      // socket.io replays nothing emitted while the connection was down,
+      // so the casting on screen may miss changes made in the meantime:
+      // reload it once the connection is back, and only then (the first
+      // connect of the page brings nothing new).
+      disconnect() {
+        this.wasDisconnected = true
+      },
+
+      connect() {
+        if (this.wasDisconnected) {
+          this.wasDisconnected = false
+          this.reloadCasting()
         }
       }
     }
