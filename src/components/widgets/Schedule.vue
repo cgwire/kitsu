@@ -450,6 +450,8 @@
               <div
                 class="entity-line root-element"
                 :style="entityLineStyle(rootElement, true)"
+                @dragenter="onRootDragEnter($event, rootElement)"
+                @dragleave="onRootDragLeave($event, rootElement)"
                 v-show="!hideRoot"
               >
                 <div
@@ -491,7 +493,7 @@
               </div>
 
               <div
-                class="children"
+                class="children children-loading"
                 :style="childrenStyle(rootElement, multiline)"
                 v-if="rootElement.expanded && rootElement.loading"
               >
@@ -507,7 +509,7 @@
                 :style="childrenStyle(rootElement, multiline)"
                 v-else-if="rootElement.expanded"
                 @dragenter="onTaskDragEnter($event, rootElement)"
-                @dragover="onTaskDragOver"
+                @dragover="onTaskDragOver($event, rootElement)"
                 @dragleave="onTaskDragLeave"
                 @drop="onTaskDrop($event, rootElement)"
               >
@@ -516,6 +518,42 @@
                   v-if="invertLinesColor"
                 >
                   <!-- to invert odd/event line color -->
+                </div>
+                <template
+                  v-if="
+                    dropTarget.rootElementId === rootElement.id &&
+                    !dropTarget.forbidden
+                  "
+                >
+                  <div
+                    class="drop-ghost"
+                    :key="`drop-ghost-${segment.id}`"
+                    :style="{
+                      left: `${segment.left}px`,
+                      width: `${segment.width}px`,
+                      '--timebar-color': segment.color || undefined
+                    }"
+                    v-for="segment in dropTarget.segments"
+                  ></div>
+                </template>
+                <div
+                  class="drop-forbidden"
+                  v-if="
+                    dropTarget.rootElementId === rootElement.id &&
+                    dropTarget.forbidden
+                  "
+                >
+                  <span
+                    class="drop-forbidden-message"
+                    :style="{ left: `${dropTarget.messageLeft + 16}px` }"
+                  >
+                    <ban-icon :size="14" />
+                    {{
+                      dropTarget.forbidden === 'department'
+                        ? $t('schedule.drop_forbidden_department')
+                        : $t('schedule.drop_forbidden_team')
+                    }}
+                  </span>
                 </div>
                 <div
                   class="entity-line child-line"
@@ -816,6 +854,7 @@ import {
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 import {
+  BanIcon,
   BriefcaseIcon,
   ChevronDownIcon,
   ChevronRightIcon,
@@ -1104,6 +1143,22 @@ let justDragged = false
 // cached wrapper rect: getBoundingClientRect on every mousemove forces a
 // layout; invalidated on resize and zoom via resetScheduleSize
 let wrapperRect = null
+
+// spring-loading: hovering a collapsed person while dragging a task
+// expands the row after a short delay, so its drop zone appears under
+// the drag
+let expandHoverTimer = null
+let expandHoverRootId = null
+
+// external tasks hovering a person row: drives the drop-preview ghost
+// bars (allowed, one segment per dragged task) or the crossed-out
+// overlay (forbidden)
+const dropTarget = reactive({
+  forbidden: null,
+  messageLeft: 0,
+  rootElementId: null,
+  segments: []
+})
 let positionBarFrame = null
 let moveFrame = null
 let lastMoveEvent = null
@@ -1394,6 +1449,10 @@ const onMouseMove = event => {
 // document-level move listeners are attached only for the duration of a drag
 // or browse: a permanent listener ran on every mousemove of the whole page
 const startMoveTracking = () => {
+  // a new interaction begins: drop any drag-click flag left armed by a
+  // drag whose trailing click never fired (release off the bar, touch
+  // drags), otherwise it would swallow this interaction's genuine click
+  justDragged = false
   addEvents(moveEvents)
 }
 
@@ -2435,24 +2494,58 @@ const addMilestoneTitle = day => {
   return `${t('schedule.milestone.add_milestone')} ${day.format('YYYY-MM-DD')}`
 }
 
-const checkUserIsAllowed = (item, person) => {
+const getDropForbiddenReason = (item, person) => {
   // person may be any root element (e.g. a task type row on the production
   // schedule): only actual person rows carry a departments list
   if (!item || !person?.departments) {
-    return false
+    return 'team'
   }
   const production = openProductions.value.find(
     ({ id }) => id === item.project_id
   )
-  if (!production) {
-    return false
+  if (!production || !production.team.includes(person.id)) {
+    return 'team'
   }
-  const isTeamMember = production.team.includes(person.id)
   const isDepartmentMember =
     !person.departments.length ||
     !item.department ||
     person.departments.includes(item.department.id)
-  return isTeamMember && isDepartmentMember
+  return isDepartmentMember ? null : 'department'
+}
+
+const checkUserIsAllowed = (item, person) =>
+  !getDropForbiddenReason(item, person)
+
+const cancelExpandHover = () => {
+  clearTimeout(expandHoverTimer)
+  expandHoverRootId = null
+}
+
+const onRootDragEnter = (event, rootElement) => {
+  if (!props.draggedItems?.length) {
+    return
+  }
+  if (rootElement.expanded || rootElement.loading) {
+    return
+  }
+  if (expandHoverRootId === rootElement.id) {
+    return
+  }
+  clearTimeout(expandHoverTimer)
+  expandHoverRootId = rootElement.id
+  expandHoverTimer = setTimeout(() => {
+    expandHoverRootId = null
+    expandRootElement(rootElement)
+  }, 600)
+}
+
+const onRootDragLeave = (event, rootElement) => {
+  if (event.currentTarget.contains(event.relatedTarget)) {
+    return
+  }
+  if (expandHoverRootId === rootElement.id) {
+    cancelExpandHover()
+  }
 }
 
 const onTaskDragEnter = (event, rootElement) => {
@@ -2461,44 +2554,32 @@ const onTaskDragEnter = (event, rootElement) => {
     dataKey => dataKey === `task-type-${rootElement.task_type_id}`
   )
   if (!draggedItemTaskType) {
-    const item = props.draggedItems?.[0]
-    const isAllowed = checkUserIsAllowed(item, rootElement)
-    if (!isAllowed) {
+    const items = props.draggedItems || []
+    if (!items.length) {
+      return
+    }
+    // one forbidden task forbids the whole batch: no silent partial drop
+    const reason = items
+      .map(item => getDropForbiddenReason(item, rootElement))
+      .find(Boolean)
+    if (reason) {
+      dropTarget.rootElementId = rootElement.id
+      dropTarget.forbidden = reason
       return
     }
   }
   event.currentTarget.classList.add('droppable')
 }
 
-const onTaskDragOver = event => {
-  event.preventDefault()
-}
-
-const onTaskDragLeave = event => {
-  event.target.classList.remove('droppable')
-}
-
-const onTaskDrop = (event, rootElement) => {
-  event.target.classList.remove('droppable')
-
-  let item = props.draggedItems?.[0]
-  if (!item) {
-    const entityId = event.dataTransfer.getData('entityId')
-    const taskTypeId = event.dataTransfer.getData('taskTypeId')
-    if (!entityId || taskTypeId !== rootElement.task_type_id) {
-      return // invalid task type
-    }
-    item = { entity_id: entityId }
-  } else if (!checkUserIsAllowed(item, rootElement)) {
-    return // invalid user rights
-  }
-
-  // resolve the hovered column the same way as the position bar: the
-  // previous math hardcoded a 300px entity panel offset and counted week
-  // cells as days, landing drops on the wrong date
+// resolve the hovered column the same way as the position bar: the
+// previous math hardcoded a 300px entity panel offset and counted week
+// cells as days, landing drops on the wrong date.
+// Multiple tasks chain sequentially from the aimed day: each next task
+// starts on the first business day after the previous one ends.
+const getDropRanges = (event, rootElement, items) => {
   const columns = isWeekMode.value ? weeksAvailable.value : displayedDays.value
   if (!columns.length) {
-    return
+    return []
   }
   if (!wrapperRect) {
     wrapperRect = timelineContentWrapperRef.value.getBoundingClientRect()
@@ -2508,27 +2589,103 @@ const onTaskDrop = (event, rootElement) => {
     (timelineContentWrapperRef.value.scrollLeft + cursorX) / cellWidth.value
   )
   const dropDate = columns[Math.min(Math.max(index, 0), columns.length - 1)]
-  const startDate = addBusinessDays(dropDate, 0, rootElement.daysOff)
-  const endDate = item.estimation
-    ? addBusinessDays(
-        startDate,
-        minutesToDays(organisation.value, item.estimation) - 1,
-        rootElement.daysOff
-      )
-    : startDate
+  let cursorDate = addBusinessDays(dropDate, 0, rootElement.daysOff)
+  return items.map(item => {
+    const startDate = cursorDate
+    const endDate = item?.estimation
+      ? addBusinessDays(
+          startDate,
+          minutesToDays(organisation.value, item.estimation) - 1,
+          rootElement.daysOff
+        )
+      : startDate
+    cursorDate = addBusinessDays(endDate, 1, rootElement.daysOff)
+    return { item, startDate, endDate }
+  })
+}
 
-  // convert to schedule item
-  item.full_entity_name = `${item.entity_type_name} / ${item.entity_name}`
-  item.start_date = startDate.format('YYYY-MM-DD')
-  item.due_date = endDate.format('YYYY-MM-DD')
-  item.parentElement = rootElement
+const onTaskDragOver = (event, rootElement) => {
+  const items = props.draggedItems || []
+  if (
+    items.length &&
+    dropTarget.forbidden &&
+    dropTarget.rootElementId === rootElement.id
+  ) {
+    // the explanation pill follows the cursor so it cannot be missed
+    if (!wrapperRect) {
+      wrapperRect = timelineContentWrapperRef.value.getBoundingClientRect()
+    }
+    dropTarget.messageLeft =
+      timelineContentWrapperRef.value.scrollLeft +
+      getClientX(event) -
+      wrapperRect.left
+    // no preventDefault: the browser shows the native no-drop cursor
+    return
+  }
+  event.preventDefault()
+  if (!items.length) {
+    return
+  }
+  const ranges = getDropRanges(event, rootElement, items)
+  if (!ranges.length) {
+    return
+  }
+  dropTarget.rootElementId = rootElement.id
+  dropTarget.segments = ranges.map(({ item, startDate, endDate }) => ({
+    id: item.id,
+    left: getTimebarLeft({ startDate }),
+    width: getTimebarWidth({ startDate, endDate }),
+    color: item.type_color || null
+  }))
+}
 
-  emit(
-    'item-drop',
-    item,
-    rootElement,
-    props.multiline ? refreshItemPositions : undefined
-  )
+const clearDropTarget = () => {
+  dropTarget.rootElementId = null
+  dropTarget.forbidden = null
+  dropTarget.segments = []
+}
+
+const onTaskDragLeave = event => {
+  // child elements fire dragleave too: only react when the cursor
+  // actually leaves the row
+  if (event.currentTarget.contains(event.relatedTarget)) {
+    return
+  }
+  event.currentTarget.classList.remove('droppable')
+  clearDropTarget()
+}
+
+const onTaskDrop = (event, rootElement) => {
+  event.currentTarget.classList.remove('droppable')
+  clearDropTarget()
+
+  let items = props.draggedItems?.length ? [...props.draggedItems] : null
+  if (!items) {
+    const entityId = event.dataTransfer.getData('entityId')
+    const taskTypeId = event.dataTransfer.getData('taskTypeId')
+    if (!entityId || taskTypeId !== rootElement.task_type_id) {
+      return // invalid task type
+    }
+    items = [{ entity_id: entityId }]
+  } else if (items.some(item => !checkUserIsAllowed(item, rootElement))) {
+    return // invalid user rights
+  }
+
+  const ranges = getDropRanges(event, rootElement, items)
+  ranges.forEach(({ item, startDate, endDate }) => {
+    // convert to schedule item
+    item.full_entity_name = `${item.entity_type_name} / ${item.entity_name}`
+    item.start_date = startDate.format('YYYY-MM-DD')
+    item.due_date = endDate.format('YYYY-MM-DD')
+    item.parentElement = rootElement
+
+    emit(
+      'item-drop',
+      item,
+      rootElement,
+      props.multiline ? refreshItemPositions : undefined
+    )
+  })
 }
 
 const exportData = () => {
@@ -2539,6 +2696,18 @@ const exportData = () => {
 }
 
 // Watchers
+
+// the drag can end anywhere (drop elsewhere, Escape): dragleave alone
+// cannot be trusted to clear the drop preview or the spring-load timer
+watch(
+  () => props.draggedItems,
+  items => {
+    if (!items?.length) {
+      clearDropTarget()
+      cancelExpandHover()
+    }
+  }
+)
 
 watch(
   () => props.startDate,
@@ -2618,6 +2787,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  cancelExpandHover()
   removeEvents(domEvents)
   removeEvents(moveEvents)
   if (positionBarFrame) cancelAnimationFrame(positionBarFrame)
@@ -3001,6 +3171,9 @@ const setItemPositions = (items, unitOfTime = 'days') => {
         top: 0;
         bottom: 0;
         background: rgba(200, 255, 200, 0.3);
+        // purely visual overlay: crossing it must not fire dragleave on
+        // the row below (it made the drop ghost flicker)
+        pointer-events: none;
         z-index: 100;
 
         &.today {
@@ -3021,6 +3194,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
         width: 1px;
         border-left: 1px dashed black;
         margin-left: -0.5px;
+        pointer-events: none;
         z-index: 100;
       }
 
@@ -3268,10 +3442,84 @@ const setItemPositions = (items, unitOfTime = 'days') => {
   justify-content: center;
 }
 
+// Keep the expanded row at a stable two-line height while its tasks
+// load, so the content doesn't jump in under the spinner.
+.children-loading {
+  align-items: center;
+  display: flex;
+  min-height: 90px;
+
+  .children-loader {
+    flex: 1;
+  }
+}
+
 .children {
   position: relative;
   margin-bottom: 1em;
   min-height: 40px;
+}
+
+// preview of where the dragged task would land, at its estimated span
+.drop-ghost {
+  background: color-mix(
+    in srgb,
+    var(--timebar-color, #888) 25%,
+    var(--background)
+  );
+  border: 2px dashed var(--timebar-color, #888);
+  border-radius: 4px;
+  height: 30px;
+  pointer-events: none;
+  position: absolute;
+  top: 5px;
+  z-index: 200;
+}
+
+.dark .drop-ghost {
+  // the dark background swallows the 25% tint: raise the color share
+  background: color-mix(
+    in srgb,
+    var(--timebar-color, #888) 55%,
+    var(--background)
+  );
+}
+
+// crossed-out row: the person cannot receive the dragged task
+.drop-forbidden {
+  align-items: center;
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(229, 57, 53, 0.08),
+    rgba(229, 57, 53, 0.08) 10px,
+    transparent 10px,
+    transparent 20px
+  );
+  bottom: 0;
+  display: flex;
+  left: 0;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 200;
+
+  .drop-forbidden-message {
+    align-items: center;
+    background: var(--background-alt-2);
+    border: 1px solid $red;
+    border-radius: 999px;
+    color: $red;
+    display: flex;
+    font-size: 0.9em;
+    gap: 0.4em;
+    padding: 0.25em 0.75em;
+    // follows the drag cursor (left is set inline on dragover)
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    white-space: nowrap;
+  }
 }
 .timeline-element:last-child .children {
   margin-bottom: 0;

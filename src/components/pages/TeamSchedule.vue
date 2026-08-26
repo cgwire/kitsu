@@ -22,12 +22,16 @@
             @update:model-value="onUpdateSelectedEndDate"
           />
         </div>
-        <combobox-number
-          class="flexrow-item zoom-level"
-          :label="$t('schedule.zoom_level')"
-          :options="zoomOptions"
-          v-model="zoomLevel"
-        />
+        <div class="flexrow-item zoom-level">
+          <label class="label">
+            {{ $t('schedule.zoom_level') }}
+          </label>
+          <combobox-number
+            is-simple
+            :options="zoomOptions"
+            v-model="zoomLevel"
+          />
+        </div>
 
         <div class="filler"></div>
         <div class="flexrow">
@@ -51,12 +55,14 @@
           class="flexrow-item"
           all-studios-label
           :label="$t('main.studio')"
+          :width="300"
           v-model="selectedStudio"
         />
         <combobox-department
           class="flexrow-item"
           :display-all-and-my-departments="true"
           :label="$t('main.department')"
+          :width="300"
           v-model="selectedDepartment"
         />
         <combobox-production
@@ -73,7 +79,6 @@
             ref="people-field"
             :people="selectablePeople"
             :placeholder="$t('team_schedule.person_placeholder')"
-            wide
             v-model="selectedPerson"
           />
         </div>
@@ -97,7 +102,12 @@
         @item-drop="onScheduleItemDropped"
         @item-unassign="onScheduleItemUnassigned"
         @root-element-expanded="expandPersonElement"
+        v-if="loading.schedule || errors.schedule || scheduleItems.length > 0"
       />
+      <div class="empty-schedule" v-else>
+        <user-search-icon :size="40" />
+        <p>{{ $t('team_schedule.empty') }}</p>
+      </div>
     </div>
 
     <div class="column side-column" v-if="isTaskSidePanelOpen">
@@ -138,14 +148,18 @@
           <ul class="task-list">
             <li
               class="task-item"
+              :class="{
+                dragging: draggingTaskIds.has(task.id),
+                selected: selectedTaskIds.has(task.id)
+              }"
               :draggable="true"
               :key="task.id"
+              @click="toggleTaskSelection(task)"
               @dragstart="onTaskDragStart($event, task)"
-              @drag="onTaskDrag"
               @dragend="onTaskDragEnd"
               v-for="task in unassignedTasks"
             >
-              <div class="ui-droppable unassigned-task">
+              <div class="ui-droppable">
                 <div class="flexrow">
                   <entity-thumbnail
                     class="task-thumbnail flexrow-item"
@@ -228,14 +242,27 @@
   </div>
 </template>
 
-<script>
+<script setup>
 /*
  * Page to manage the schedule of all the people in the studio
  */
-import { XIcon } from 'lucide-vue-next'
+import { useHead } from '@unhead/vue'
+import { UserSearchIcon, XIcon } from 'lucide-vue-next'
 import moment from 'moment-timezone'
 import { firstBy } from 'thenby'
-import { mapGetters, mapActions } from 'vuex'
+import {
+  computed,
+  getCurrentInstance,
+  onBeforeUnmount,
+  onMounted,
+  reactive,
+  ref,
+  useTemplateRef,
+  watch
+} from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
 import colors from '@/lib/colors'
 import { getPersonPath } from '@/lib/path'
@@ -247,8 +274,7 @@ import {
   parseSimpleDate
 } from '@/lib/time'
 
-import { formatListMixin } from '@/components/mixins/format'
-
+import TaskInfo from '@/components/sides/TaskInfo.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
@@ -262,658 +288,621 @@ import PeopleField from '@/components/widgets/PeopleField.vue'
 import ProductionName from '@/components/widgets/ProductionName.vue'
 import Schedule from '@/components/widgets/Schedule.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
-import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
-import TaskInfo from '@/components/sides/TaskInfo.vue'
+import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
-export const DEFAULT_ZOOM = 1
+const DEFAULT_ZOOM = 1
+const childrenOrder = firstBy('startDate').thenBy('project_name').thenBy('name')
 
-export default {
-  name: 'team-schedule',
+const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
+const store = useStore()
+const socket = getCurrentInstance().appContext.config.globalProperties.$socket
 
-  mixins: [formatListMixin],
+// State
+// --------------------------------------------------------------------------
+const draggedTasks = ref([])
+const selectedTaskIds = ref(new Set())
+const endDate = ref(moment().add(3, 'months'))
+const isTaskSidePanelOpen = ref(false)
+const personDates = ref({})
+const scheduleItems = ref([])
+const selectedDepartment = ref('ALL')
+const selectedEndDate = ref(null)
+const selectedPerson = ref(null)
+const selectedProduction = ref(null)
+const selectedStartDate = ref(null)
+const selectedStudio = ref(null)
+const startDate = ref(moment())
+const totalUnassignedTasks = ref(0)
+const unassignedTasks = ref([])
+const unassignedTasksPage = ref(1)
+const zoomLevel = ref(DEFAULT_ZOOM)
 
-  components: {
-    ButtonSimple,
-    ComboboxDepartment,
-    ComboboxNumber,
-    ComboboxProduction,
-    ComboboxStudio,
-    ComboboxTaskType,
-    DateField,
-    DepartmentName,
-    EntityThumbnail,
-    PeopleField,
-    ProductionName,
-    Schedule,
-    Spinner,
-    TableInfo,
-    TaskInfo,
-    TaskTypeName,
-    XIcon
-  },
+const errors = reactive({
+  schedule: false,
+  unassignedTasks: false
+})
+const filters = reactive({
+  productionId: null,
+  taskTypeId: null
+})
+const loading = reactive({
+  hasMoreUnassignedTasks: false,
+  schedule: false,
+  unassignedTasks: false
+})
 
-  data() {
-    return {
-      draggedTasks: [],
-      endDate: moment().add(3, 'months'),
-      isTaskSidePanelOpen: false,
-      personDates: {},
-      scheduleItems: [],
-      selectedDepartment: 'ALL',
-      selectedEndDate: null,
-      selectedPerson: null,
-      selectedProduction: null,
-      selectedStartDate: null,
-      selectedStudio: null,
-      startDate: moment(),
-      unassignedTasks: [],
-      totalUnassignedTasks: 0,
-      zoomLevel: DEFAULT_ZOOM,
-      zoomOptions: [
-        { label: '1', value: 1 },
-        { label: '2', value: 2 },
-        { label: '3', value: 3 },
-        { label: '4', value: 4 }
-      ],
-      loading: {
-        hasMoreUnassignedTasks: false,
-        unassignedTasks: false
-      },
-      errors: {
-        unassignedTasks: false,
-        schedule: false
-      },
-      filters: {
-        productionId: null,
-        taskTypeId: null
-      },
-      pagination: {
-        unassignedTasks: 1
-      }
-    }
-  },
+const zoomOptions = [
+  { label: '1', value: 1 },
+  { label: '2', value: 2 },
+  { label: '3', value: 3 },
+  { label: '4', value: 4 }
+]
 
-  created() {
-    // non-reactive: person id -> raw tasks, so re-expanding a row is instant.
-    // Entries are dropped whenever the row's assignments or dates change.
-    this.personTasksCache = new Map()
-  },
+// non-reactive: person id -> raw tasks, so re-expanding a row is instant.
+// Entries are dropped whenever the row's assignments or dates change.
+const personTasksCache = new Map()
 
-  mounted() {
-    const department = this.$route.query.department
-    if (department) {
-      this.selectedDepartment = department
-    } else if (!this.isCurrentUserManager && this.user.departments.length) {
-      // Supervisors land on their own departments (issue #1579).
-      this.selectedDepartment = 'MY_DEPARTMENTS'
-    }
-    this.selectedStudio = this.$route.query.studio || undefined
-    this.selectedProduction = this.$route.query.production || undefined
-    const zoom = Number(this.$route.query.zoom)
-    this.zoomLevel = this.zoomOptions.map(o => o.value).includes(zoom)
-      ? zoom
-      : DEFAULT_ZOOM
+// transparent 1px image: hides the native drag snapshot so the only
+// drag feedback is the drop-preview ghost on the timeline
+const emptyDragImage = new Image()
+emptyDragImage.src =
+  'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
 
-    this.init()
-  },
+const peopleFieldRef = useTemplateRef('people-field')
+const scheduleRef = useTemplateRef('schedule')
 
-  computed: {
-    ...mapGetters([
-      'daysOff',
-      'departmentMap',
-      'displayedPeople',
-      'getProductionTaskTypes',
-      'isCurrentUserManager',
-      'openProductions',
-      'organisation',
-      'productionMap',
-      'taskTypeMap',
-      'user'
-    ]),
+// Computed
+// --------------------------------------------------------------------------
+const daysOff = computed(() => store.getters.daysOff)
+const departmentMap = computed(() => store.getters.departmentMap)
+const displayedPeople = computed(() => store.getters.displayedPeople)
+const getProductionTaskTypes = computed(
+  () => store.getters.getProductionTaskTypes
+)
+const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
+const openProductions = computed(() => store.getters.openProductions)
+const organisation = computed(() => store.getters.organisation)
+const productionMap = computed(() => store.getters.productionMap)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
+const user = computed(() => store.getters.user)
 
-    daysOffByPerson() {
-      return this.daysOff.reduce((acc, dayOff) => {
-        if (!acc[dayOff.person_id]) {
-          acc[dayOff.person_id] = []
-        }
-        acc[dayOff.person_id].push(dayOff)
-        return acc
-      }, {})
-    },
+const daysOffByPerson = computed(() =>
+  daysOff.value.reduce((acc, dayOff) => {
+    acc[dayOff.person_id] = (acc[dayOff.person_id] || []).concat(dayOff)
+    return acc
+  }, {})
+)
 
-    departmentFilter() {
-      if (!this.selectedDepartment || this.selectedDepartment === 'ALL') {
-        return []
-      }
-      if (this.selectedDepartment === 'MY_DEPARTMENTS') {
-        return this.user.departments
-      }
-      return [this.selectedDepartment]
-    },
+const departmentFilter = computed(() => {
+  if (!selectedDepartment.value || selectedDepartment.value === 'ALL') {
+    return []
+  }
+  if (selectedDepartment.value === 'MY_DEPARTMENTS') {
+    return user.value.departments
+  }
+  return [selectedDepartment.value]
+})
 
-    selectablePeople() {
-      let selectablePeople = this.displayedPeople.filter(
-        person => !person.is_bot
+const selectablePeople = computed(() => {
+  let people = displayedPeople.value.filter(person => !person.is_bot)
+  if (departmentFilter.value.length > 0) {
+    people = people.filter(person =>
+      person.departments.some(departmentId =>
+        departmentFilter.value.includes(departmentId)
       )
-      if (this.departmentFilter.length > 0) {
-        selectablePeople = selectablePeople.filter(person =>
-          person.departments.some(departmentId =>
-            this.departmentFilter.includes(departmentId)
-          )
-        )
-      }
-      if (this.selectedStudio) {
-        selectablePeople = selectablePeople.filter(
-          person => person.studio_id === this.selectedStudio
-        )
-      }
-      const production = this.selectedProduction
-        ? this.productionMap.get(this.selectedProduction)
-        : null
-      if (production) {
-        selectablePeople = selectablePeople.filter(person =>
-          production.team.includes(person.id)
-        )
-      }
-      return selectablePeople
-    },
+    )
+  }
+  if (selectedStudio.value) {
+    people = people.filter(person => person.studio_id === selectedStudio.value)
+  }
+  const production = selectedProduction.value
+    ? productionMap.value.get(selectedProduction.value)
+    : null
+  if (production) {
+    people = people.filter(person => production.team.includes(person.id))
+  }
+  return people
+})
 
-    productionList() {
-      return this.addAllValue(this.openProductions)
-    },
+const draggingTaskIds = computed(
+  () => new Set(draggedTasks.value.map(({ id }) => id))
+)
 
-    taskTypeList() {
-      const productionId = this.filters.productionId
-      const types = this.getProductionTaskTypes(productionId).filter(
-        type => type.for_entity !== 'Concept'
-      )
-      return this.addAllValue(types)
-    }
+const productionList = computed(() => addAllValue(openProductions.value))
+
+const taskTypeList = computed(() => {
+  const types = getProductionTaskTypes
+    .value(filters.productionId)
+    .filter(type => type.for_entity !== 'Concept')
+  return addAllValue(types)
+})
+
+// Functions
+// --------------------------------------------------------------------------
+const addAllValue = list => [
+  {
+    id: '',
+    color: '#999',
+    name: t('main.all'),
+    short_name: t('main.all')
   },
+  ...list
+]
 
-  methods: {
-    ...mapActions([
-      'assignSelectedTasks',
-      'fetchPersonTasks',
-      'getPersonsTasksDates',
-      'loadDaysOff',
-      'loadOpenTasks',
-      'loadPeople',
-      'unassignPersonFromTask',
-      'updateTask'
-    ]),
+const init = async () => {
+  loading.schedule = true
+  try {
+    await store.dispatch('loadPeople')
+    await loadPersonDates()
+    await store.dispatch('loadDaysOff')
+  } catch (err) {
+    console.error(err)
+    errors.schedule = true
+    loading.schedule = false
+    return
+  }
 
-    addAllValue(list) {
-      return [
-        {
-          id: '',
-          color: '#999',
-          name: this.$t('main.all'),
-          short_name: this.$t('main.all')
-        },
-        ...list
-      ]
-    },
+  refreshSchedule()
+  scrollScheduleToToday()
 
-    async init() {
-      try {
-        await this.loadPeople()
-        await this.loadPersonDates()
-        await this.loadDaysOff()
-      } catch (err) {
-        console.error(err)
-        this.errors.schedule = true
-        return
-      }
+  startDate.value = moment()
+  endDate.value = moment().add(3, 'months')
+  Object.values(personDates.value).forEach(dates => {
+    if (dates.startDate?.isBefore(startDate.value)) {
+      startDate.value = dates.startDate.clone()
+    }
+    if (dates.endDate?.isAfter(endDate.value)) {
+      endDate.value = dates.endDate.clone()
+    }
+  })
 
-      this.refreshSchedule()
-      this.scrollScheduleToToday()
+  selectedStartDate.value = startDate.value.toDate()
+  selectedEndDate.value = endDate.value.toDate()
+  loading.schedule = false
+}
 
-      this.startDate = moment()
-      this.endDate = moment().add(3, 'months')
-      Object.values(this.personDates).forEach(dates => {
-        if (dates.startDate?.isBefore(this.startDate)) {
-          this.startDate = dates.startDate.clone()
-        }
-        if (dates.endDate?.isAfter(this.endDate)) {
-          this.endDate = dates.endDate.clone()
-        }
-      })
+const toggleTaskSidePanel = () => {
+  isTaskSidePanelOpen.value = !isTaskSidePanelOpen.value
 
-      this.selectedStartDate = this.startDate.toDate()
-      this.selectedEndDate = this.endDate.toDate()
-    },
+  if (!isTaskSidePanelOpen.value) {
+    unassignedTasks.value = []
+    errors.unassignedTasks = false
+  }
+}
 
-    toggleTaskSidePanel() {
-      this.isTaskSidePanelOpen = !this.isTaskSidePanelOpen
-
-      if (!this.isTaskSidePanelOpen) {
-        this.unassignedTasks = []
-        this.errors.unassignedTasks = false
-      }
-    },
-
-    async loadUnassignedTasks(more = false) {
-      this.loading.unassignedTasks = true
-      this.errors.unassignedTasks = false
-      const page = more ? this.pagination.unassignedTasks + 1 : 1
-      try {
-        const { data, is_more, stats } = await this.loadOpenTasks({
-          limit: 20,
-          page,
-          person_id: 'unassigned',
-          project_id: this.filters.productionId,
-          task_type_id: this.filters.taskTypeId
-        })
-        if (more) {
-          this.pagination.unassignedTasks++
-        } else {
-          this.unassignedTasks = []
-        }
-        this.unassignedTasks = this.unassignedTasks.concat(
-          // populate tasks with extra data
-          data.map(task => ({
-            ...task,
-            full_entity_name: [
-              task.entity_type_name,
-              task.episode_name,
-              task.sequence_name,
-              task.entity_name
-            ]
-              .filter(Boolean)
-              .join(' / '),
-            man_days: minutesToDays(this.organisation, task.estimation),
-            department: this.departmentMap.get(
-              this.taskTypeMap.get(task.task_type_id)?.department_id
-            ),
-            production: this.productionMap.get(task.project_id)
-          }))
-        )
-        this.totalUnassignedTasks = stats.total
-        this.loading.hasMoreUnassignedTasks = is_more
-      } catch (err) {
-        this.errors.unassignedTasks = true
-        console.error(err)
-      }
-      this.loading.unassignedTasks = false
-    },
-
-    async loadPersonDates() {
-      const personDatesList = await this.getPersonsTasksDates()
-      this.personDates = {}
-      personDatesList.forEach(p => {
-        const busyPeriods = (p.busy_periods || []).map(period => ({
-          startDate: parseSimpleDate(period.start_date),
-          endDate: parseSimpleDate(period.end_date)
-        }))
-        // min/max are null for a person only busy on other productions:
-        // the root bar then spans the anonymous periods alone.
-        let startDate = p.min_date ? parseSimpleDate(p.min_date) : null
-        let endDate = p.max_date ? parseSimpleDate(p.max_date) : null
-        busyPeriods.forEach(period => {
-          if (!startDate || period.startDate.isBefore(startDate)) {
-            startDate = period.startDate.clone()
-          }
-          if (!endDate || period.endDate.isAfter(endDate)) {
-            endDate = period.endDate.clone()
-          }
-        })
-        this.personDates[p.person_id] = { busyPeriods, endDate, startDate }
-      })
-    },
-
-    // recompute the root bar locally after a drag: the person is expanded so
-    // its children are loaded, no need to refetch every person's dates
-    refreshPersonRootDates(person) {
-      if (!person?.children?.length) return
-      person.startDate = getFirstStartDate(person.children).clone()
-      person.endDate = getLastEndDate(person.children).clone()
-      this.personDates[person.id] = {
-        startDate: person.startDate.clone(),
-        endDate: person.endDate.clone()
-      }
-    },
-
-    refreshSchedule() {
-      const people = this.selectedPerson
-        ? [this.selectedPerson]
-        : this.selectablePeople
-      this.scheduleItems = this.convertScheduleItems(people)
-    },
-
-    convertScheduleItems(scheduleItems) {
-      return scheduleItems.map(item => {
-        let startDate = moment()
-        let endDate = moment()
-        const personDates = this.personDates[item.id]
-        if (personDates && personDates.startDate && personDates.endDate) {
-          startDate = parseSimpleDate(personDates.startDate)
-          endDate = parseSimpleDate(personDates.endDate)
-        }
-        return {
-          ...item,
-          avatar: true,
-          color: item.color || colors.fromString(item.name, true),
-          startDate,
-          endDate,
-          expanded: false,
-          loading: false,
-          editable: false,
-          route: getPersonPath(item.id, 'schedule'),
-          children: [],
-          daysOff: this.daysOffByPerson[item.id]
-        }
-      })
-    },
-
-    buildTaskScheduleItem(parentElement, task) {
-      let startDate = moment()
-      let endDate
-
-      if (!task.start_date || !task.due_date) {
-        return null
-      }
-
-      if (task.start_date) {
-        startDate = parseSimpleDate(task.start_date)
-      }
-
-      if (task.due_date) {
-        endDate = parseSimpleDate(task.due_date)
-      } else if (task.end_date) {
-        endDate = parseSimpleDate(task.end_date)
-      } else if (task.estimation) {
-        endDate = addBusinessDays(
-          task.startDate,
-          Math.ceil(minutesToDays(this.organisation, task.estimation)) - 1,
-          task.parentElement.daysOff
-        )
-      }
-
-      if (!endDate || endDate.isBefore(startDate)) {
-        endDate = startDate.clone().add(1, 'days')
-      }
-      const taskType = this.taskTypeMap.get(task.task_type_id)
-      if (!taskType) {
-        return null
-      }
-      return {
+const loadUnassignedTasks = async (more = false) => {
+  loading.unassignedTasks = true
+  errors.unassignedTasks = false
+  const page = more ? unassignedTasksPage.value + 1 : 1
+  try {
+    const { data, is_more, stats } = await store.dispatch('loadOpenTasks', {
+      limit: 20,
+      page,
+      person_id: 'unassigned',
+      project_id: filters.productionId,
+      task_type_id: filters.taskTypeId
+    })
+    unassignedTasksPage.value = page
+    if (!more) {
+      unassignedTasks.value = []
+      // fresh list (filter change, panel reopen): stale selection ids
+      // would silently survive and reattach if the tasks come back
+      selectedTaskIds.value = new Set()
+    }
+    unassignedTasks.value = unassignedTasks.value.concat(
+      // populate tasks with extra data
+      data.map(task => ({
         ...task,
-        name: `${task.full_entity_name} / ${taskType.name}`,
-        startDate,
-        endDate,
-        man_days: task.estimation,
-        editable: true,
-        unresizable: false,
-        color: taskType.color,
-        parentElement
-      }
-    },
-
-    // Anonymous availability from other productions (issue #1579): the
-    // server only ships merged date pairs, so the bar can name neither the
-    // production nor the task, and must stay inert.
-    buildBusyScheduleItem(parentElement, period, index) {
-      return {
-        id: `busy-${parentElement.id}-${index}`,
-        name: this.$t('team_schedule.busy'),
-        startDate: period.startDate.clone(),
-        endDate: period.endDate.clone(),
-        editable: false,
-        unresizable: true,
-        color: '#999999',
-        parentElement
-      }
-    },
-
-    saveTaskScheduleItem(task) {
-      return this.updateTask({
-        taskId: task.id,
-        data: {
-          start_date: task.startDate.format('YYYY-MM-DD'),
-          due_date: task.endDate.format('YYYY-MM-DD'),
-          estimation: task.estimation
-        }
-      })
-    },
-
-    onTaskDragStart(event, task) {
-      event.stopPropagation()
-      event.target.classList.add('drag')
-      event.dataTransfer.dropEffect = 'move'
-      event.dataTransfer.effectAllowed = 'move'
-      event.dataTransfer.setData('taskId', task.id)
-      this.draggedTasks = [task]
-    },
-
-    onTaskDrag(event) {
-      event.stopPropagation()
-      event.target.classList.add('dragging')
-    },
-
-    onTaskDragEnd(event) {
-      event.target.classList.remove('drag')
-      event.target.classList.remove('dragging')
-      this.draggedTasks = []
-    },
-
-    async onScheduleItemDropped(item, person, refreshScheduleCallBack) {
-      if (item.type === 'Task') {
-        const task = this.buildTaskScheduleItem(person, item)
-        if (!task) {
-          return
-        }
-        this.personTasksCache.delete(person.id)
-        person.children.push(task)
-        person.children.sort(
-          firstBy('startDate').thenBy('project_name').thenBy('name')
-        )
-        if (refreshScheduleCallBack) {
-          refreshScheduleCallBack(person)
-        }
-        try {
-          await this.assignSelectedTasks({
-            personId: person.id,
-            taskIds: [task.id]
-          })
-          await this.saveTaskScheduleItem(task)
-        } catch (err) {
-          console.error(err)
-          person.children = person.children.filter(({ id }) => id !== task.id)
-          if (refreshScheduleCallBack) {
-            refreshScheduleCallBack(person)
-          }
-        }
-        await this.loadUnassignedTasks()
-      }
-    },
-
-    async onScheduleItemChanged(item) {
-      if (item.type === 'Task') {
-        item.startDate = addBusinessDays(
-          item.startDate,
-          0,
-          item.parentElement.daysOff
-        )
-        if (item.estimation) {
-          item.endDate = addBusinessDays(
-            item.startDate,
-            Math.ceil(minutesToDays(this.organisation, item.estimation)) - 1,
-            item.parentElement.daysOff
-          )
-        }
-        try {
-          await this.saveTaskScheduleItem(item)
-          this.refreshPersonRootDates(item.parentElement)
-          this.personTasksCache.delete(item.parentElement.id)
-        } catch (err) {
-          console.error(err)
-        }
-      }
-    },
-
-    onScheduleItemAssigned(item, person) {
-      if (item.type === 'Task') {
-        this.personTasksCache.delete(person.id)
-        person.children.sort(
-          firstBy('startDate').thenBy('project_name').thenBy('name')
-        )
-        this.assignSelectedTasks({
-          personId: person.id,
-          taskIds: [item.id]
-        })
-      }
-    },
-
-    onScheduleItemUnassigned(item, person) {
-      if (item.type === 'Task') {
-        this.personTasksCache.delete(person.id)
-        this.unassignPersonFromTask({
-          person,
-          task: item
-        })
-      }
-    },
-
-    async expandPersonElement(element, refreshScheduleCallBack) {
-      element.expanded = !element.expanded
-
-      if (!element.expanded) {
-        return
-      }
-
-      element.loading = true
-      element.children = []
-      try {
-        let tasks = this.personTasksCache.get(element.id)
-        if (!tasks) {
-          tasks = await this.fetchPersonTasks(element.id)
-          this.personTasksCache.set(element.id, tasks)
-        }
-        const busyItems = (this.personDates[element.id]?.busyPeriods || []).map(
-          (period, index) => this.buildBusyScheduleItem(element, period, index)
-        )
-        element.children = tasks
-          .map(task => this.buildTaskScheduleItem(element, task))
+        full_entity_name: [
+          task.entity_type_name,
+          task.episode_name,
+          task.sequence_name,
+          task.entity_name
+        ]
           .filter(Boolean)
-          .concat(busyItems)
-          .sort(firstBy('startDate').thenBy('project_name').thenBy('name'))
+          .join(' / '),
+        man_days: minutesToDays(organisation.value, task.estimation),
+        department: departmentMap.value.get(
+          taskTypeMap.value.get(task.task_type_id)?.department_id
+        ),
+        production: productionMap.value.get(task.project_id)
+      }))
+    )
+    totalUnassignedTasks.value = stats.total
+    loading.hasMoreUnassignedTasks = is_more
+  } catch (err) {
+    errors.unassignedTasks = true
+    console.error(err)
+  }
+  loading.unassignedTasks = false
+}
 
-        if (refreshScheduleCallBack) {
-          refreshScheduleCallBack(element)
-        }
-      } catch (err) {
-        console.error(err)
+const loadPersonDates = async () => {
+  const personDatesList = await store.dispatch('getPersonsTasksDates')
+  personDates.value = {}
+  personDatesList.forEach(p => {
+    const busyPeriods = (p.busy_periods || []).map(period => ({
+      startDate: parseSimpleDate(period.start_date),
+      endDate: parseSimpleDate(period.end_date)
+    }))
+    // min/max are null for a person only busy on other productions:
+    // the root bar then spans the anonymous periods alone.
+    let minDate = p.min_date ? parseSimpleDate(p.min_date) : null
+    let maxDate = p.max_date ? parseSimpleDate(p.max_date) : null
+    busyPeriods.forEach(period => {
+      if (!minDate || period.startDate.isBefore(minDate)) {
+        minDate = period.startDate.clone()
       }
-      element.loading = false
-    },
-
-    onUpdateSelectedStartDate(date) {
-      this.startDate = parseSimpleDate(date)
-    },
-
-    onUpdateSelectedEndDate(date) {
-      this.endDate = parseSimpleDate(date)
-    },
-
-    scrollScheduleToToday() {
-      this.$refs.schedule?.scrollToToday()
-    },
-
-    updateRoute({ department, production, studio, zoom }) {
-      const query = { ...this.$route.query }
-
-      if (department !== undefined) {
-        query.department = department || undefined
+      if (!maxDate || period.endDate.isAfter(maxDate)) {
+        maxDate = period.endDate.clone()
       }
-      if (production !== undefined) {
-        query.production = production || undefined
-      }
-      if (studio !== undefined) {
-        query.studio = studio || undefined
-      }
-      if (zoom !== undefined) {
-        query.zoom = String(zoom)
-      }
-
-      if (JSON.stringify(query) !== JSON.stringify(this.$route.query)) {
-        this.$router.push({ query })
-      }
+    })
+    personDates.value[p.person_id] = {
+      busyPeriods,
+      endDate: maxDate,
+      startDate: minDate
     }
-  },
+  })
+}
 
-  socket: {
-    events: {
-      // The unassigned tasks are enriched copies, out of reach of the store
-      // mutations, so refresh their thumbnail here.
-      'preview-file:set-main'(eventData) {
-        this.unassignedTasks.forEach(task => {
-          if (task.entity_id === eventData.entity_id) {
-            task.entity_preview_file_id = eventData.preview_file_id
-          }
-        })
-      }
+// recompute the root bar locally after a drag: the person is expanded so
+// its children are loaded, no need to refetch every person's dates
+const refreshPersonRootDates = person => {
+  if (!person?.children?.length) return
+  person.startDate = getFirstStartDate(person.children).clone()
+  person.endDate = getLastEndDate(person.children).clone()
+  personDates.value[person.id] = {
+    startDate: person.startDate.clone(),
+    endDate: person.endDate.clone()
+  }
+}
+
+const refreshSchedule = () => {
+  const people = selectedPerson.value
+    ? [selectedPerson.value]
+    : selectablePeople.value
+  scheduleItems.value = convertScheduleItems(people)
+}
+
+const convertScheduleItems = items =>
+  items.map(item => {
+    let startDate = moment()
+    let endDate = moment()
+    const dates = personDates.value[item.id]
+    if (dates && dates.startDate && dates.endDate) {
+      startDate = parseSimpleDate(dates.startDate)
+      endDate = parseSimpleDate(dates.endDate)
     }
-  },
-
-  watch: {
-    selectedDepartment(value) {
-      this.updateRoute({ department: value })
-      if (
-        this.selectedPerson &&
-        !this.selectablePeople.includes(this.selectedPerson)
-      ) {
-        this.$refs['people-field'].clear()
-      }
-      this.refreshSchedule()
-    },
-
-    selectedStudio(value) {
-      this.updateRoute({ studio: value })
-      if (
-        this.selectedPerson &&
-        !this.selectablePeople.includes(this.selectedPerson)
-      ) {
-        this.$refs['people-field'].clear()
-      }
-      this.refreshSchedule()
-    },
-
-    selectedPerson() {
-      this.refreshSchedule()
-    },
-
-    selectedProduction(value) {
-      this.updateRoute({ production: value })
-      this.refreshSchedule()
-    },
-
-    zoomLevel(value) {
-      this.updateRoute({ zoom: value })
-    },
-
-    isTaskSidePanelOpen: {
-      immediate: true,
-      handler() {
-        if (this.isTaskSidePanelOpen) {
-          this.loadUnassignedTasks()
-        }
-      }
-    }
-  },
-
-  head() {
     return {
-      title: `${this.$t('team_schedule.title_main')} - Kitsu`
+      ...item,
+      avatar: true,
+      color: item.color || colors.fromString(item.name, true),
+      startDate,
+      endDate,
+      expanded: false,
+      loading: false,
+      editable: false,
+      route: getPersonPath(item.id, 'schedule'),
+      children: [],
+      daysOff: daysOffByPerson.value[item.id]
+    }
+  })
+
+const buildTaskScheduleItem = (parentElement, task) => {
+  if (!task.start_date || !task.due_date) {
+    return null
+  }
+  const taskType = taskTypeMap.value.get(task.task_type_id)
+  if (!taskType) {
+    return null
+  }
+  const startDate = parseSimpleDate(task.start_date)
+  let endDate = parseSimpleDate(task.due_date)
+  if (endDate.isBefore(startDate)) {
+    endDate = startDate.clone().add(1, 'days')
+  }
+  return {
+    ...task,
+    name: `${task.full_entity_name} / ${taskType.name}`,
+    startDate,
+    endDate,
+    man_days: task.estimation,
+    editable: true,
+    unresizable: false,
+    color: taskType.color,
+    parentElement
+  }
+}
+
+// Anonymous availability from other productions (issue #1579): the
+// server only ships merged date pairs, so the bar can name neither the
+// production nor the task, and must stay inert.
+const buildBusyScheduleItem = (parentElement, period, index) => ({
+  id: `busy-${parentElement.id}-${index}`,
+  name: t('team_schedule.busy'),
+  startDate: period.startDate.clone(),
+  endDate: period.endDate.clone(),
+  editable: false,
+  unresizable: true,
+  color: '#999999',
+  parentElement
+})
+
+const saveTaskScheduleItem = task =>
+  store.dispatch('updateTask', {
+    taskId: task.id,
+    data: {
+      start_date: task.startDate.format('YYYY-MM-DD'),
+      due_date: task.endDate.format('YYYY-MM-DD'),
+      estimation: task.estimation
+    }
+  })
+
+const toggleTaskSelection = task => {
+  const ids = new Set(selectedTaskIds.value)
+  if (ids.has(task.id)) {
+    ids.delete(task.id)
+  } else {
+    ids.add(task.id)
+  }
+  selectedTaskIds.value = ids
+}
+
+const onTaskDragStart = (event, task) => {
+  event.stopPropagation()
+  event.dataTransfer.dropEffect = 'move'
+  event.dataTransfer.effectAllowed = 'move'
+  event.dataTransfer.setData('taskId', task.id)
+  event.dataTransfer.setDragImage(emptyDragImage, 0, 0)
+  // dragging a selected card takes the whole selection along, in panel
+  // order; dragging an unselected card takes only that card
+  draggedTasks.value = selectedTaskIds.value.has(task.id)
+    ? unassignedTasks.value.filter(({ id }) => selectedTaskIds.value.has(id))
+    : [task]
+}
+
+const onTaskDragEnd = () => {
+  draggedTasks.value = []
+}
+
+const onScheduleItemDropped = async (item, person, refreshScheduleCallBack) => {
+  if (item.type === 'Task') {
+    const task = buildTaskScheduleItem(person, item)
+    if (!task) {
+      return
+    }
+    personTasksCache.delete(person.id)
+    person.children.push(task)
+    person.children.sort(childrenOrder)
+    if (refreshScheduleCallBack) {
+      refreshScheduleCallBack(person)
+    }
+    try {
+      await store.dispatch('assignSelectedTasks', {
+        personId: person.id,
+        taskIds: [task.id]
+      })
+      await saveTaskScheduleItem(task)
+      // the task left the backlog: update the panel locally instead of
+      // reloading it, which kept resetting the scroll and pagination
+      // (and multi-drop fires this handler once per task)
+      unassignedTasks.value = unassignedTasks.value.filter(
+        ({ id }) => id !== task.id
+      )
+      totalUnassignedTasks.value = Math.max(0, totalUnassignedTasks.value - 1)
+      if (selectedTaskIds.value.has(task.id)) {
+        const ids = new Set(selectedTaskIds.value)
+        ids.delete(task.id)
+        selectedTaskIds.value = ids
+      }
+    } catch (err) {
+      console.error(err)
+      person.children = person.children.filter(({ id }) => id !== task.id)
+      if (refreshScheduleCallBack) {
+        refreshScheduleCallBack(person)
+      }
     }
   }
 }
+
+const onScheduleItemChanged = async item => {
+  if (item.type === 'Task') {
+    item.startDate = addBusinessDays(
+      item.startDate,
+      0,
+      item.parentElement.daysOff
+    )
+    if (item.estimation) {
+      item.endDate = addBusinessDays(
+        item.startDate,
+        Math.ceil(minutesToDays(organisation.value, item.estimation)) - 1,
+        item.parentElement.daysOff
+      )
+    }
+    try {
+      await saveTaskScheduleItem(item)
+      refreshPersonRootDates(item.parentElement)
+      personTasksCache.delete(item.parentElement.id)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+}
+
+const onScheduleItemAssigned = (item, person) => {
+  if (item.type === 'Task') {
+    personTasksCache.delete(person.id)
+    person.children.sort(childrenOrder)
+    store.dispatch('assignSelectedTasks', {
+      personId: person.id,
+      taskIds: [item.id]
+    })
+  }
+}
+
+const onScheduleItemUnassigned = (item, person) => {
+  if (item.type === 'Task') {
+    personTasksCache.delete(person.id)
+    store.dispatch('unassignPersonFromTask', {
+      person,
+      task: item
+    })
+  }
+}
+
+const expandPersonElement = async (element, refreshScheduleCallBack) => {
+  element.expanded = !element.expanded
+
+  if (!element.expanded) {
+    return
+  }
+
+  element.loading = true
+  element.children = []
+  try {
+    let tasks = personTasksCache.get(element.id)
+    if (!tasks) {
+      tasks = await store.dispatch('fetchPersonTasks', element.id)
+      personTasksCache.set(element.id, tasks)
+    }
+    const busyItems = (personDates.value[element.id]?.busyPeriods || []).map(
+      (period, index) => buildBusyScheduleItem(element, period, index)
+    )
+    element.children = tasks
+      .map(task => buildTaskScheduleItem(element, task))
+      .filter(Boolean)
+      .concat(busyItems)
+      .sort(childrenOrder)
+
+    if (refreshScheduleCallBack) {
+      refreshScheduleCallBack(element)
+    }
+  } catch (err) {
+    console.error(err)
+  }
+  element.loading = false
+}
+
+const onUpdateSelectedStartDate = date => {
+  startDate.value = parseSimpleDate(date)
+}
+
+const onUpdateSelectedEndDate = date => {
+  endDate.value = parseSimpleDate(date)
+}
+
+const scrollScheduleToToday = () => {
+  scheduleRef.value?.scrollToToday()
+}
+
+const clearHiddenSelectedPerson = () => {
+  if (
+    selectedPerson.value &&
+    !selectablePeople.value.includes(selectedPerson.value)
+  ) {
+    peopleFieldRef.value.clear()
+  }
+}
+
+const updateRoute = ({ department, production, studio, zoom }) => {
+  const query = { ...route.query }
+
+  if (department !== undefined) {
+    query.department = department || undefined
+  }
+  if (production !== undefined) {
+    query.production = production || undefined
+  }
+  if (studio !== undefined) {
+    query.studio = studio || undefined
+  }
+  if (zoom !== undefined) {
+    query.zoom = String(zoom)
+  }
+
+  if (JSON.stringify(query) !== JSON.stringify(route.query)) {
+    router.push({ query })
+  }
+}
+
+// The unassigned tasks are enriched copies, out of reach of the store
+// mutations, so refresh their thumbnail here.
+const onPreviewFileSetMain = eventData => {
+  unassignedTasks.value.forEach(task => {
+    if (task.entity_id === eventData.entity_id) {
+      task.entity_preview_file_id = eventData.preview_file_id
+    }
+  })
+}
+
+// Watchers
+// --------------------------------------------------------------------------
+watch(selectedDepartment, value => {
+  updateRoute({ department: value })
+  clearHiddenSelectedPerson()
+  refreshSchedule()
+})
+
+watch(selectedStudio, value => {
+  updateRoute({ studio: value })
+  clearHiddenSelectedPerson()
+  refreshSchedule()
+})
+
+watch(selectedPerson, refreshSchedule)
+
+watch(selectedProduction, value => {
+  updateRoute({ production: value })
+  refreshSchedule()
+})
+
+watch(zoomLevel, value => {
+  updateRoute({ zoom: value })
+})
+
+watch(isTaskSidePanelOpen, open => {
+  if (open) {
+    loadUnassignedTasks()
+  }
+})
+
+// Lifecycle
+// --------------------------------------------------------------------------
+onMounted(() => {
+  const department = route.query.department
+  if (department) {
+    selectedDepartment.value = department
+  } else if (!isCurrentUserManager.value && user.value.departments.length) {
+    // Supervisors land on their own departments (issue #1579).
+    selectedDepartment.value = 'MY_DEPARTMENTS'
+  }
+  selectedStudio.value = route.query.studio || undefined
+  selectedProduction.value = route.query.production || undefined
+  const zoom = Number(route.query.zoom)
+  zoomLevel.value = zoomOptions.some(option => option.value === zoom)
+    ? zoom
+    : DEFAULT_ZOOM
+
+  socket.on('preview-file:set-main', onPreviewFileSetMain)
+
+  init()
+})
+
+onBeforeUnmount(() => {
+  socket.off('preview-file:set-main', onPreviewFileSetMain)
+})
+
+// Head
+// --------------------------------------------------------------------------
+useHead({
+  title: computed(() => `${t('team_schedule.title_main')} - Kitsu`)
+})
 </script>
 
 <style lang="scss" scoped>
-@use 'sass:color';
-
 .dark {
   .filters {
     color: $white-grey;
@@ -953,12 +942,75 @@ export default {
 }
 
 .zoom-level {
-  margin-top: -10px;
   white-space: nowrap;
 }
 
+// The filter rows mix five widgets with five natural control heights
+// (datepicker, select, custom combos, multiselect): force a single
+// height so both rows line up.
+$filter-control-height: 40px;
+
+.date-filters,
+.filters {
+  // vertical-align kills the baseline descender space under the
+  // inline-flex datepicker, and the fixed height overrides the 2.5em
+  // Bulma puts on the .select span regardless of its content: without
+  // both, the centered flexrow shifts the zoom item down.
+  :deep(.datepicker) {
+    vertical-align: top;
+  }
+
+  .zoom-level :deep(.select) {
+    height: $filter-control-height;
+  }
+
+  .zoom-level :deep(.select-input) {
+    height: $filter-control-height;
+    vertical-align: top;
+  }
+
+  // ComboboxNumber tunes the dropdown arrow for its 3em select: recenter
+  // it for the 40px control (Bulma's own centering offset)
+  .zoom-level :deep(.select::after) {
+    margin-top: -0.4375em;
+  }
+
+  :deep(.studio-combo),
+  :deep(.department-combo),
+  :deep(.production-combo) {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: $filter-control-height;
+  }
+
+  :deep(.multiselect),
+  :deep(.multiselect__tags) {
+    min-height: $filter-control-height;
+  }
+}
+
 .people-filter {
-  min-width: 250px;
+  width: 300px;
+}
+
+// same look as the kanban board empty state
+.empty-schedule {
+  align-items: center;
+  color: var(--text);
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.75em;
+  justify-content: flex-start;
+  opacity: 0.55;
+  padding: 2em 1em 0;
+  text-align: center;
+
+  p {
+    margin: 0;
+    max-width: 60ch;
+  }
 }
 
 .side-column {
@@ -988,61 +1040,66 @@ export default {
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.5em;
+    gap: 0.75em;
 
     .task-item {
       position: relative;
-      cursor: move;
+      cursor: grab;
 
       .ui-droppable {
-        padding: 0.3em;
-        border: 1px solid $light-grey;
-        border-radius: 5px;
-        box-shadow: 2px 2px 2px var(--box-shadow);
-        background-color: var(--background);
+        padding: 0.5em;
+        // borderless in light: the crisp shadows carry the edge, dark
+        // mode restores a faint solid border (same recipe as the board
+        // cards)
+        border: 1px solid transparent;
+        border-radius: 10px;
+        background-color: var(--background-alt-2);
+        box-shadow:
+          0 1px 2px rgba(0, 0, 0, 0.12),
+          0 2px 8px rgba(0, 0, 0, 0.06);
+        transition:
+          transform 150ms ease-out,
+          box-shadow 150ms ease-out;
 
         .production-name {
-          margin-bottom: 0em;
+          margin-bottom: 0;
           margin-top: 0.3em;
           font-size: 0.8em;
           text-transform: uppercase;
         }
 
         .dark & {
-          border: 1px solid var(--border);
-          background-color: color.adjust(#36393f, $lightness: 5%);
+          border-color: #55585d;
         }
       }
 
       &:hover .ui-droppable {
-        background-color: var(--background-selectable);
+        box-shadow:
+          0 2px 6px rgba(0, 0, 0, 0.14),
+          0 6px 16px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
       }
 
-      &.drag {
-        transform: translate(0, 0); // fix dragging style
-
-        .ui-droppable {
-          background-color: var(--background-selected);
-          transform: rotate(5deg) scale(0.5);
-        }
+      &.selected .ui-droppable {
+        box-shadow:
+          0 0 0 3px var(--background-selected),
+          0 2px 8px rgba(0, 0, 0, 0.06);
       }
 
       &.dragging {
         cursor: grabbing;
-        opacity: 0.5;
-
-        .ui-droppable {
-          transform: rotate(0);
-        }
+        opacity: 0.4;
       }
 
       .task-thumbnail {
+        border-radius: 6px;
         margin-right: 1em;
+        overflow: hidden;
       }
 
       .task-department {
         position: absolute;
-        top: 5px;
+        top: 8px;
         right: 0.5em;
       }
     }
