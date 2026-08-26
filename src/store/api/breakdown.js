@@ -19,14 +19,14 @@ export default {
     return client.pget(path)
   },
 
-  updateCasting(productionId, entityId, casting) {
-    const path = `/api/data/projects/${productionId}/entities/${entityId}/casting`
-    return client.pput(path, casting)
-  },
-
   updateCastings(productionId, castings) {
     const path = `/api/data/projects/${productionId}/entities/casting`
     return client.pput(path, castings)
+  },
+
+  castAsset(productionId, assetId, data) {
+    const path = `/api/data/projects/${productionId}/entities/casting/assets/${assetId}`
+    return client.pput(path, data)
   },
 
   postCastingCsv(production, formData) {
