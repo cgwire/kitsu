@@ -55,12 +55,14 @@
           class="flexrow-item"
           all-studios-label
           :label="$t('main.studio')"
+          :width="300"
           v-model="selectedStudio"
         />
         <combobox-department
           class="flexrow-item"
           :display-all-and-my-departments="true"
           :label="$t('main.department')"
+          :width="300"
           v-model="selectedDepartment"
         />
         <combobox-production
@@ -77,7 +79,6 @@
             ref="people-field"
             :people="selectablePeople"
             :placeholder="$t('team_schedule.person_placeholder')"
-            wide
             v-model="selectedPerson"
           />
         </div>
@@ -101,7 +102,12 @@
         @item-drop="onScheduleItemDropped"
         @item-unassign="onScheduleItemUnassigned"
         @root-element-expanded="expandPersonElement"
+        v-if="loading.schedule || errors.schedule || scheduleItems.length > 0"
       />
+      <div class="empty-schedule" v-else>
+        <user-search-icon :size="40" />
+        <p>{{ $t('team_schedule.empty') }}</p>
+      </div>
     </div>
 
     <div class="column side-column" v-if="isTaskSidePanelOpen">
@@ -142,10 +148,14 @@
           <ul class="task-list">
             <li
               class="task-item"
+              :class="{
+                dragging: draggingTaskIds.has(task.id),
+                selected: selectedTaskIds.has(task.id)
+              }"
               :draggable="true"
               :key="task.id"
+              @click="toggleTaskSelection(task)"
               @dragstart="onTaskDragStart($event, task)"
-              @drag="onTaskDrag"
               @dragend="onTaskDragEnd"
               v-for="task in unassignedTasks"
             >
@@ -237,7 +247,7 @@
  * Page to manage the schedule of all the people in the studio
  */
 import { useHead } from '@unhead/vue'
-import { XIcon } from 'lucide-vue-next'
+import { UserSearchIcon, XIcon } from 'lucide-vue-next'
 import moment from 'moment-timezone'
 import { firstBy } from 'thenby'
 import {
@@ -293,6 +303,7 @@ const socket = getCurrentInstance().appContext.config.globalProperties.$socket
 // State
 // --------------------------------------------------------------------------
 const draggedTasks = ref([])
+const selectedTaskIds = ref(new Set())
 const endDate = ref(moment().add(3, 'months'))
 const isTaskSidePanelOpen = ref(false)
 const personDates = ref({})
@@ -319,6 +330,7 @@ const filters = reactive({
 })
 const loading = reactive({
   hasMoreUnassignedTasks: false,
+  schedule: false,
   unassignedTasks: false
 })
 
@@ -332,6 +344,12 @@ const zoomOptions = [
 // non-reactive: person id -> raw tasks, so re-expanding a row is instant.
 // Entries are dropped whenever the row's assignments or dates change.
 const personTasksCache = new Map()
+
+// transparent 1px image: hides the native drag snapshot so the only
+// drag feedback is the drop-preview ghost on the timeline
+const emptyDragImage = new Image()
+emptyDragImage.src =
+  'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
 
 const peopleFieldRef = useTemplateRef('people-field')
 const scheduleRef = useTemplateRef('schedule')
@@ -389,6 +407,10 @@ const selectablePeople = computed(() => {
   return people
 })
 
+const draggingTaskIds = computed(
+  () => new Set(draggedTasks.value.map(({ id }) => id))
+)
+
 const productionList = computed(() => addAllValue(openProductions.value))
 
 const taskTypeList = computed(() => {
@@ -411,6 +433,7 @@ const addAllValue = list => [
 ]
 
 const init = async () => {
+  loading.schedule = true
   try {
     await store.dispatch('loadPeople')
     await loadPersonDates()
@@ -418,6 +441,7 @@ const init = async () => {
   } catch (err) {
     console.error(err)
     errors.schedule = true
+    loading.schedule = false
     return
   }
 
@@ -437,6 +461,7 @@ const init = async () => {
 
   selectedStartDate.value = startDate.value.toDate()
   selectedEndDate.value = endDate.value.toDate()
+  loading.schedule = false
 }
 
 const toggleTaskSidePanel = () => {
@@ -613,23 +638,30 @@ const saveTaskScheduleItem = task =>
     }
   })
 
+const toggleTaskSelection = task => {
+  const ids = new Set(selectedTaskIds.value)
+  if (ids.has(task.id)) {
+    ids.delete(task.id)
+  } else {
+    ids.add(task.id)
+  }
+  selectedTaskIds.value = ids
+}
+
 const onTaskDragStart = (event, task) => {
   event.stopPropagation()
-  event.target.classList.add('drag')
   event.dataTransfer.dropEffect = 'move'
   event.dataTransfer.effectAllowed = 'move'
   event.dataTransfer.setData('taskId', task.id)
-  draggedTasks.value = [task]
+  event.dataTransfer.setDragImage(emptyDragImage, 0, 0)
+  // dragging a selected card takes the whole selection along, in panel
+  // order; dragging an unselected card takes only that card
+  draggedTasks.value = selectedTaskIds.value.has(task.id)
+    ? unassignedTasks.value.filter(({ id }) => selectedTaskIds.value.has(id))
+    : [task]
 }
 
-const onTaskDrag = event => {
-  event.stopPropagation()
-  event.target.classList.add('dragging')
-}
-
-const onTaskDragEnd = event => {
-  event.target.classList.remove('drag')
-  event.target.classList.remove('dragging')
+const onTaskDragEnd = () => {
   draggedTasks.value = []
 }
 
@@ -651,6 +683,18 @@ const onScheduleItemDropped = async (item, person, refreshScheduleCallBack) => {
         taskIds: [task.id]
       })
       await saveTaskScheduleItem(task)
+      // the task left the backlog: update the panel locally instead of
+      // reloading it, which kept resetting the scroll and pagination
+      // (and multi-drop fires this handler once per task)
+      unassignedTasks.value = unassignedTasks.value.filter(
+        ({ id }) => id !== task.id
+      )
+      totalUnassignedTasks.value = Math.max(0, totalUnassignedTasks.value - 1)
+      if (selectedTaskIds.value.has(task.id)) {
+        const ids = new Set(selectedTaskIds.value)
+        ids.delete(task.id)
+        selectedTaskIds.value = ids
+      }
     } catch (err) {
       console.error(err)
       person.children = person.children.filter(({ id }) => id !== task.id)
@@ -658,7 +702,6 @@ const onScheduleItemDropped = async (item, person, refreshScheduleCallBack) => {
         refreshScheduleCallBack(person)
       }
     }
-    await loadUnassignedTasks()
   }
 }
 
@@ -857,8 +900,6 @@ useHead({
 </script>
 
 <style lang="scss" scoped>
-@use 'sass:color';
-
 .dark {
   .filters {
     color: $white-grey;
@@ -941,7 +982,26 @@ $filter-control-height: 40px;
 }
 
 .people-filter {
-  min-width: 250px;
+  width: 300px;
+}
+
+// same look as the kanban board empty state
+.empty-schedule {
+  align-items: center;
+  color: var(--text);
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.75em;
+  justify-content: flex-start;
+  opacity: 0.55;
+  padding: 2em 1em 0;
+  text-align: center;
+
+  p {
+    margin: 0;
+    max-width: 60ch;
+  }
 }
 
 .side-column {
@@ -971,18 +1031,26 @@ $filter-control-height: 40px;
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.5em;
+    gap: 0.75em;
 
     .task-item {
       position: relative;
-      cursor: move;
+      cursor: grab;
 
       .ui-droppable {
-        padding: 0.3em;
-        border: 1px solid $light-grey;
-        border-radius: 5px;
-        box-shadow: 2px 2px 2px var(--box-shadow);
-        background-color: var(--background);
+        padding: 0.5em;
+        // borderless in light: the crisp shadows carry the edge, dark
+        // mode restores a faint solid border (same recipe as the board
+        // cards)
+        border: 1px solid transparent;
+        border-radius: 10px;
+        background-color: var(--background-alt-2);
+        box-shadow:
+          0 1px 2px rgba(0, 0, 0, 0.12),
+          0 2px 8px rgba(0, 0, 0, 0.06);
+        transition:
+          transform 150ms ease-out,
+          box-shadow 150ms ease-out;
 
         .production-name {
           margin-bottom: 0;
@@ -992,40 +1060,37 @@ $filter-control-height: 40px;
         }
 
         .dark & {
-          border: 1px solid var(--border);
-          background-color: color.adjust(#36393f, $lightness: 5%);
+          border-color: #55585d;
         }
       }
 
       &:hover .ui-droppable {
-        background-color: var(--background-selectable);
+        box-shadow:
+          0 2px 6px rgba(0, 0, 0, 0.14),
+          0 6px 16px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
       }
 
-      &.drag {
-        transform: translate(0, 0); // fix dragging style
-
-        .ui-droppable {
-          background-color: var(--background-selected);
-          transform: rotate(5deg) scale(0.5);
-        }
+      &.selected .ui-droppable {
+        box-shadow:
+          0 0 0 3px var(--background-selected),
+          0 2px 8px rgba(0, 0, 0, 0.06);
       }
 
       &.dragging {
         cursor: grabbing;
-        opacity: 0.5;
-
-        .ui-droppable {
-          transform: rotate(0);
-        }
+        opacity: 0.4;
       }
 
       .task-thumbnail {
+        border-radius: 6px;
         margin-right: 1em;
+        overflow: hidden;
       }
 
       .task-department {
         position: absolute;
-        top: 5px;
+        top: 8px;
         right: 0.5em;
       }
     }
