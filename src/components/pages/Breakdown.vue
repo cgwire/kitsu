@@ -483,7 +483,6 @@ export default {
       episodeId: '',
       importCsvFormData: {},
       isBigMode: false,
-      isLocked: false,
       isLoading: false,
       isOnlyCurrentEpisode: false,
       isTextMode: false,
@@ -775,7 +774,7 @@ export default {
       'saveBreakdownSearch',
       'loadSequences',
       'saveBreakdownSearchFilterGroup',
-      'saveCasting',
+      'castAsset',
       'saveCastings',
       'setAssetLinkLabel',
       'setAssetSearch',
@@ -943,17 +942,7 @@ export default {
       })
     },
 
-    setLock() {
-      if (!this.$options.lockTimeout) {
-        this.$options.lockTimeout = setTimeout(() => {
-          this.isLocked = false
-          this.$options.lockTimeout = null
-        }, 3000)
-      }
-    },
-
     async addOneAsset(assetId, amount = 1) {
-      this.isLocked = true
       const entityIds = Object.keys(this.selection).filter(
         key => this.selection[key]
       )
@@ -969,8 +958,7 @@ export default {
       })
 
       try {
-        await this.saveCastings(entityIds)
-        this.setLock()
+        await this.castAsset({ entityIds, assetId })
       } catch (err) {
         entityIds.forEach(entityId => {
           this.saveErrors[entityId] = true
@@ -995,9 +983,8 @@ export default {
       this.loading.remove = true
       this.removeAssetFromCasting({ entityId, assetId, nbOccurences })
       delete this.saveErrors[entityId]
-      return this.saveCasting(entityId)
+      return this.castAsset({ entityIds: [entityId], assetId })
         .then(() => {
-          this.setLock()
           this.modals.isRemoveConfirmationDisplayed = false
         })
         .catch(err => {
@@ -1029,15 +1016,13 @@ export default {
         }
       }
       if (removals.length === 0) return
-      this.isLocked = true
       this.loading.remove = true
       removals.forEach(entityId => {
         this.removeAssetFromCasting({ entityId, assetId, nbOccurences: 1 })
         delete this.saveErrors[entityId]
       })
       try {
-        await this.saveCastings(removals)
-        this.setLock()
+        await this.castAsset({ entityIds: removals, assetId })
       } catch (err) {
         removals.forEach(entityId => {
           this.saveErrors[entityId] = true
@@ -1050,7 +1035,6 @@ export default {
     },
 
     removeOneAsset(assetId, entityId, nbOccurences) {
-      this.isLocked = true
       if (this.isEpisodeCasting && nbOccurences === 1) {
         this.removalData = { assetId, entityId, nbOccurences }
         this.modals.isRemoveConfirmationDisplayed = true
@@ -1324,7 +1308,6 @@ export default {
       })
       try {
         await this.saveCastings(selectedElements)
-        this.setLock()
       } catch (err) {
         selectedElements.forEach(entityId => {
           this.saveErrors[entityId] = true
@@ -1731,25 +1714,21 @@ export default {
     events: {
       'episode:casting-update'(eventData) {
         const episode = this.episodeMap.get(eventData.episode_id)
-        if (episode && !this.isLocked) {
+        if (episode) {
           this.loadEpisodeCasting(episode)
         }
       },
 
       'shot:casting-update'(eventData) {
         const shot = this.shotMap.get(eventData.shot_id)
-        if (shot && shot.sequence_id === this.sequenceId && !this.isLocked) {
+        if (shot && shot.sequence_id === this.sequenceId) {
           this.loadShotCasting(shot)
         }
       },
 
       'asset:casting-update'(eventData) {
         const asset = this.assetMap.get(eventData.asset_id)
-        if (
-          asset &&
-          asset.asset_type_id === this.assetTypeId &&
-          !this.isLocked
-        ) {
+        if (asset && asset.asset_type_id === this.assetTypeId) {
           this.loadAssetCasting(asset)
         }
       }
