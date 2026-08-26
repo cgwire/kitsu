@@ -22,12 +22,16 @@
             @update:model-value="onUpdateSelectedEndDate"
           />
         </div>
-        <combobox-number
-          class="flexrow-item zoom-level"
-          :label="$t('schedule.zoom_level')"
-          :options="zoomOptions"
-          v-model="zoomLevel"
-        />
+        <div class="flexrow-item zoom-level">
+          <label class="label">
+            {{ $t('schedule.zoom_level') }}
+          </label>
+          <combobox-number
+            is-simple
+            :options="zoomOptions"
+            v-model="zoomLevel"
+          />
+        </div>
 
         <div class="filler"></div>
         <div class="flexrow">
@@ -894,8 +898,46 @@ useHead({
 }
 
 .zoom-level {
-  margin-top: -10px;
   white-space: nowrap;
+}
+
+// The filter rows mix five widgets with five natural control heights
+// (datepicker, select, custom combos, multiselect): force a single
+// height so both rows line up.
+$filter-control-height: 40px;
+
+.date-filters,
+.filters {
+  // vertical-align kills the baseline descender space under the
+  // inline-flex datepicker, and the fixed height overrides the 2.5em
+  // Bulma puts on the .select span regardless of its content: without
+  // both, the centered flexrow shifts the zoom item down.
+  :deep(.datepicker) {
+    vertical-align: top;
+  }
+
+  .zoom-level :deep(.select) {
+    height: $filter-control-height;
+  }
+
+  .zoom-level :deep(.select-input) {
+    height: $filter-control-height;
+    vertical-align: top;
+  }
+
+  :deep(.studio-combo),
+  :deep(.department-combo),
+  :deep(.production-combo) {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: $filter-control-height;
+  }
+
+  :deep(.multiselect),
+  :deep(.multiselect__tags) {
+    min-height: $filter-control-height;
+  }
 }
 
 .people-filter {
