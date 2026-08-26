@@ -450,6 +450,8 @@
               <div
                 class="entity-line root-element"
                 :style="entityLineStyle(rootElement, true)"
+                @dragenter="onRootDragEnter($event, rootElement)"
+                @dragleave="onRootDragLeave($event, rootElement)"
                 v-show="!hideRoot"
               >
                 <div
@@ -1141,6 +1143,12 @@ let justDragged = false
 // cached wrapper rect: getBoundingClientRect on every mousemove forces a
 // layout; invalidated on resize and zoom via resetScheduleSize
 let wrapperRect = null
+
+// spring-loading: hovering a collapsed person while dragging a task
+// expands the row after a short delay, so its drop zone appears under
+// the drag
+let expandHoverTimer = null
+let expandHoverRootId = null
 
 // external tasks hovering a person row: drives the drop-preview ghost
 // bars (allowed, one segment per dragged task) or the crossed-out
@@ -2504,6 +2512,38 @@ const getDropForbiddenReason = (item, person) => {
 const checkUserIsAllowed = (item, person) =>
   !getDropForbiddenReason(item, person)
 
+const cancelExpandHover = () => {
+  clearTimeout(expandHoverTimer)
+  expandHoverRootId = null
+}
+
+const onRootDragEnter = (event, rootElement) => {
+  if (!props.draggedItems?.length) {
+    return
+  }
+  if (rootElement.expanded || rootElement.loading) {
+    return
+  }
+  if (expandHoverRootId === rootElement.id) {
+    return
+  }
+  clearTimeout(expandHoverTimer)
+  expandHoverRootId = rootElement.id
+  expandHoverTimer = setTimeout(() => {
+    expandHoverRootId = null
+    expandRootElement(rootElement)
+  }, 600)
+}
+
+const onRootDragLeave = (event, rootElement) => {
+  if (event.currentTarget.contains(event.relatedTarget)) {
+    return
+  }
+  if (expandHoverRootId === rootElement.id) {
+    cancelExpandHover()
+  }
+}
+
 const onTaskDragEnter = (event, rootElement) => {
   // HACK: the getData doesn't work on dragEnter, we use a "task-type-*" data key instead (key must be lowercase)
   const draggedItemTaskType = event.dataTransfer.types.find(
@@ -2654,12 +2694,13 @@ const exportData = () => {
 // Watchers
 
 // the drag can end anywhere (drop elsewhere, Escape): dragleave alone
-// cannot be trusted to clear the drop preview
+// cannot be trusted to clear the drop preview or the spring-load timer
 watch(
   () => props.draggedItems,
   items => {
     if (!items?.length) {
       clearDropTarget()
+      cancelExpandHover()
     }
   }
 )
@@ -2742,6 +2783,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  cancelExpandHover()
   removeEvents(domEvents)
   removeEvents(moveEvents)
   if (positionBarFrame) cancelAnimationFrame(positionBarFrame)
