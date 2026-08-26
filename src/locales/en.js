@@ -1821,13 +1821,35 @@ export default {
   },
 
   schedule: {
-    title: 'Schedule',
-    title_main: 'Main Schedule',
-    overall_man_days: 'Person-days',
-    md: 'md',
+    apply_to_prod: 'Apply to production',
+    apply_to_prod_confirm: 'Are you sure you want to apply this schedule version to the current production? This will override the current task values.',
+    apply_to_prod_error: 'An error occurred while applying the schedule version to the current production.',
+    assign: 'Assign to:',
+    confirm_move_children:
+      'Moving this bar will clip or snap {count} sub-item to fit the new bounds. Continue? | Moving this bar will clip or snap {count} sub-items to fit the new bounds. Continue?',
+    create_version: 'Create schedule version',
+    delete_version: 'Delete schedule version',
+    delete_version_error: 'An error occurred while deleting this schedule version. Please contact our support team.',
+    delete_version_message: 'Are you sure you want to delete the schedule version {name}? Please confirm by typing the schedule version name below.',
+    drop_forbidden_department: 'Not part of the task department',
+    drop_forbidden_team: 'Not part of the production team',
+    edit_task: 'Edit task',
+    edit_version: 'Edit schedule version',
+    edit_version_error: 'An error occurred while saving the schedule version. Please try again.',
+    edit_version_exist: 'A version with a similar name already exists.',
+    estimated_daily_quotas: 'Auto estimated daily quotas:',
+    export: 'Export schedule',
+    export_error: 'An error occurred while exporting data.',
+    fields: {
+      create_from_version: 'Create new or from a version',
+      new: 'new schedule',
+      name: 'version name',
+      locked: 'locked version'
+    },
+    force_unassign: 'Override previous assignments',
+    forced_daily_quotas: 'Forced daily quotas:',
     hours: 'h',
-    today: 'Today',
-    zoom_level: 'Zoom level',
+    md: 'md',
     milestone: {
       add_milestone: 'Add milestone for',
       delete_milestone: 'Delete milestone',
@@ -1838,51 +1860,33 @@ export default {
     mode: 'View Mode',
     mode_prev: 'Forecast',
     mode_real: 'Real',
-    version: 'Version',
-    apply_to_prod: 'Apply to production',
-    apply_to_prod_confirm: 'Are you sure you want to apply this schedule version to the current production? This will override the current task values.',
-    apply_to_prod_error: 'An error occurred while applying the schedule version to the current production.',
-    assign: 'Assign to:',
-    confirm_move_children:
-      'Moving this bar will clip or snap {count} sub-item to fit the new bounds. Continue? | Moving this bar will clip or snap {count} sub-items to fit the new bounds. Continue?',
-    export: 'Export schedule',
-    export_error: 'An error occurred while exporting data.',
-    reset_list: 'Reset list',
-    no_entity: 'No assignable entity',
+    new_version: 'New version',
     no_assignee: 'No assignable person',
+    no_entity: 'No assignable entity',
+    overall_man_days: 'Person-days',
+    reset_list: 'Reset list',
     select_task_type: 'Select a task type',
     show_assigned: 'Show assigned entities',
-    force_unassign: 'Override previous assignments',
-    forced_daily_quotas: 'Forced daily quotas:',
-    estimated_daily_quotas: 'Auto estimated daily quotas:',
-    edit_task: 'Edit task',
-    new_version: 'New version',
-    create_version: 'Create schedule version',
-    edit_version: 'Edit schedule version',
-    edit_version_error: 'An error occurred while saving the schedule version. Please try again.',
-    edit_version_exist: 'A version with a similar name already exists.',
-    delete_version: 'Delete schedule version',
-    delete_version_error: 'An error occurred while deleting this schedule version. Please contact our support team.',
-    delete_version_message: 'Are you sure you want to delete the schedule version {name}? Please confirm by typing the schedule version name below.',
+    title: 'Schedule',
+    title_main: 'Main Schedule',
+    today: 'Today',
+    version: 'Version',
     versions: {
       reference: 'Reference forecast',
       from: 'from',
       locked: 'locked',
       canceled: 'canceled'
     },
-    fields: {
-      create_from_version: 'Create new or from a version',
-      new: 'new schedule',
-      name: 'version name',
-      locked: 'locked version'
-    }
+    zoom_level: 'Zoom level'
   },
 
   team_schedule: {
     busy: 'Busy on another production',
+    empty:
+      'No person matches the current filters. Try widening the studio, department or production filters.',
+    person_placeholder: 'Select a person...',
     title: 'Schedule',
-    title_main: 'Team Schedule',
-    person_placeholder: 'Select a person...'
+    title_main: 'Team Schedule'
   },
 
   quota: {

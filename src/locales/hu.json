@@ -1361,18 +1361,6 @@
       "tasks": "Feladatok"
     },
     "schedule": {
-      "title": "Időbeosztás",
-      "title_main": "Fő időbeosztás",
-      "overall_man_days": "Munkanap",
-      "md": "md",
-      "zoom_level": "Zoom szint",
-      "milestone": {
-        "add_milestone": "Mérföldkő hozzáadása ehhez: ",
-        "edit_milestone": "Mérföldkő szerkesztése",
-        "name": "Név",
-        "error": "Hiba történt a mérföldkő szerkesztésekor. Kérlek próbáld újra.",
-        "delete_milestone": "Mérföldkő törlése"
-      },
       "apply_to_prod": "Alkalmazás a produkcióra",
       "apply_to_prod_confirm": "Biztosan alkalmazni akarod ezt az időbeosztás-verziót a jelenlegi produkcióra? Ez felülírja a jelenlegi feladatértékeket.",
       "apply_to_prod_error": "Hiba történt az időbeosztás-verzió jelenlegi produkcióra való alkalmazásakor.",
@@ -1381,6 +1369,8 @@
       "delete_version": "Időbeosztás-verzió törlése",
       "delete_version_error": "Hiba történt az időbeosztás-verzió törlésekor. Kérlek keresd fel a támogató csapatot.",
       "delete_version_message": "Biztosan törölni akarod a(z) {name} időbeosztás-verziót? Kérlek erősítsd meg az időbeosztás-verzió nevének begépelésével.",
+      "drop_forbidden_department": "Nem tagja a feladat részlegének",
+      "drop_forbidden_team": "Nem tagja a produkció csapatának",
       "edit_task": "Feladat szerkesztése",
       "edit_version": "Időbeosztás-verzió szerkesztése",
       "edit_version_error": "Hiba történt az időbeosztás-verzió mentésekor. Kérlek próbáld újra.",
@@ -1396,15 +1386,26 @@
       },
       "force_unassign": "Korábbi kiosztások felülírása",
       "forced_daily_quotas": "Kényszerített napi kvóták:",
+      "md": "md",
+      "milestone": {
+        "add_milestone": "Mérföldkő hozzáadása ehhez: ",
+        "edit_milestone": "Mérföldkő szerkesztése",
+        "name": "Név",
+        "error": "Hiba történt a mérföldkő szerkesztésekor. Kérlek próbáld újra.",
+        "delete_milestone": "Mérföldkő törlése"
+      },
       "mode": "Nézet módja",
       "mode_prev": "Előrejelzés",
       "mode_real": "Valós",
       "new_version": "Új verzió",
       "no_assignee": "Nincs kiosztható személy",
       "no_entity": "Nincs kiosztható elem",
+      "overall_man_days": "Munkanap",
       "reset_list": "Lista visszaállítása",
       "select_task_type": "Válassz feladat típust",
       "show_assigned": "Kiosztott elemek megjelenítése",
+      "title": "Időbeosztás",
+      "title_main": "Fő időbeosztás",
       "today": "Ma",
       "version": "Verzió",
       "versions": {
@@ -1412,7 +1413,8 @@
         "from": "innen:",
         "locked": "zárolt",
         "reference": "Referencia-előrejelzés"
-      }
+      },
+      "zoom_level": "Zoom szint"
     },
     "quota": {
       "average": "Átlag",
@@ -2198,6 +2200,7 @@
     },
     "team_schedule": {
       "busy": "Egy másik produkción dolgozik",
+      "empty": "Egyetlen személy sem felel meg a jelenlegi szűrőknek. Próbálja bővíteni a stúdió-, részleg- vagy produkciószűrőket.",
       "person_placeholder": "Válassz egy személyt...",
       "title": "Időbeosztás",
       "title_main": "Stáb időbeosztása"
