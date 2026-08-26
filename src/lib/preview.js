@@ -14,6 +14,8 @@ export const isMoviePreview = extension => extension === 'mp4'
 export const isPicturePreview = extension =>
   ['gif', 'jpeg', 'jpg', 'png'].includes(extension)
 
+export const isTransparentPicturePreview = extension => extension === 'png'
+
 export const isModelPreview = extension => ['glb', 'gltf'].includes(extension)
 
 export const isSoundPreview = extension => ['mp3', 'wav'].includes(extension)

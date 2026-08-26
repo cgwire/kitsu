@@ -254,6 +254,7 @@
             :is-movie="isMovie"
             :is-object-background="isObjectBackground"
             :is-picture="isPicture"
+            :is-transparent-picture="isTransparentPicture"
             :is-typing="isTyping"
             :is-zoom-pan="false"
             :light="light"
@@ -486,7 +487,8 @@ import {
   isModelPreview,
   isMoviePreview,
   isPicturePreview,
-  isSoundPreview
+  isSoundPreview,
+  isTransparentPicturePreview
 } from '@/lib/preview'
 import {
   DEFAULT_FPS,
@@ -914,6 +916,9 @@ const isReady = computed(
   () => !currentPreview.value?.status || currentPreview.value.status === 'ready'
 )
 const isPicture = computed(() => isPicturePreview(extension.value))
+const isTransparentPicture = computed(() =>
+  isTransparentPicturePreview(extension.value)
+)
 const isMovie = computed(() => isMoviePreview(extension.value))
 const is3DModel = computed(() => isModelPreview(extension.value))
 const isSound = computed(() => isSoundPreview(extension.value))

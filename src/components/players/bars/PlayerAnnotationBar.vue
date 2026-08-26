@@ -37,7 +37,7 @@
       v-bind="pickerState('picture-background')"
       :color="pictureBackgroundColor"
       @change="pictureBackgroundColor = $event"
-      v-if="isPicture"
+      v-if="isTransparentPicture"
     />
 
     <onion-skin-picker
@@ -279,6 +279,11 @@ defineProps({
     default: false
   },
   isPicture: {
+    type: Boolean,
+    default: false
+  },
+  // only alpha-capable pictures show the background color picker
+  isTransparentPicture: {
     type: Boolean,
     default: false
   },

@@ -14,7 +14,8 @@ import {
   isMoviePreview,
   isPdfPreview,
   isPicturePreview,
-  isSoundPreview
+  isSoundPreview,
+  isTransparentPicturePreview
 } from '@/lib/preview'
 
 export const useMediaKind = (extension, enabled = null) => {
@@ -28,6 +29,9 @@ export const useMediaKind = (extension, enabled = null) => {
   const isPdf = computed(() => isOn() && isPdfPreview(unref(extension)))
   const isPicture = computed(() => isOn() && isPicturePreview(unref(extension)))
   const isSound = computed(() => isOn() && isSoundPreview(unref(extension)))
+  const isTransparentPicture = computed(
+    () => isOn() && isTransparentPicturePreview(unref(extension))
+  )
   const isFile = computed(
     () =>
       isOn() &&
@@ -48,6 +52,7 @@ export const useMediaKind = (extension, enabled = null) => {
     isMovie,
     isPdf,
     isPicture,
-    isSound
+    isSound,
+    isTransparentPicture
   }
 }

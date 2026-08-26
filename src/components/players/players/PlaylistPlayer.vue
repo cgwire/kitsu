@@ -671,6 +671,7 @@
         :is-movie="isCurrentPreviewMovie"
         :is-object-background="isObjectBackground"
         :is-picture="isCurrentPreviewPicture"
+        :is-transparent-picture="isCurrentPreviewTransparentPicture"
         :is-typing="isTyping"
         :is-zoom-pan="false"
         :object-background-url="objectBackgroundUrl"
@@ -1246,7 +1247,8 @@ const {
   isMovie: isCurrentPreviewMovie,
   isPdf: isCurrentPreviewPdf,
   isPicture: isCurrentPreviewPicture,
-  isSound: isCurrentPreviewSound
+  isSound: isCurrentPreviewSound,
+  isTransparentPicture: isCurrentPreviewTransparentPicture
 } = useMediaKind(extension)
 
 // Computed — entity & preview state
