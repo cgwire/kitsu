@@ -1,5 +1,7 @@
 import { vi } from 'vitest'
 
+// Importing the sequences module transitively pulls in the root store
+// (lib/models → timezone → @/store); stub it so no Vuex store is built.
 vi.mock('@/store', () => ({ default: {} }))
 
 import sequencesStore from '@/store/modules/sequences'
@@ -82,5 +84,48 @@ describe('Sequences store, all-episodes pseudo-episode', () => {
     expect(commit.mock.calls.map(c => c[0])).not.toContain(
       'SET_SEQUENCES_WITH_TASKS'
     )
+  })
+
+  describe('sequenceOptions', () => {
+    const state = {
+      displayedSequences: [
+        {
+          id: 'sq-1',
+          name: 'SQ010',
+          episode_id: 'ep-a',
+          full_name: 'E01 / SQ010'
+        },
+        {
+          id: 'sq-2',
+          name: 'SQ010',
+          episode_id: 'ep-b',
+          full_name: 'E02 / SQ010'
+        }
+      ]
+    }
+
+    test('qualifies same-named sequences with their episode in All mode', () => {
+      const options = sequencesStore.getters.sequenceOptions(
+        state,
+        {},
+        {},
+        rootGetters
+      )
+      expect(options).toEqual([
+        { label: 'E01 / SQ010', value: 'sq-1' },
+        { label: 'E02 / SQ010', value: 'sq-2' }
+      ])
+    })
+
+    test('keeps the bare sequence name outside All mode', () => {
+      const options = sequencesStore.getters.sequenceOptions(state, {}, {}, {
+        ...rootGetters,
+        currentEpisode: { id: 'ep-a' }
+      })
+      expect(options).toEqual([
+        { label: 'SQ010', value: 'sq-1' },
+        { label: 'SQ010', value: 'sq-2' }
+      ])
+    })
   })
 })

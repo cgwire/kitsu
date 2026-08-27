@@ -58,6 +58,7 @@
                 :title="$t('main.edl.import_file')"
                 icon="import-edl"
                 @click="showEDLImportModal"
+                v-if="!isAllEpisodes"
               />
               <button-simple
                 class="flexrow-item"
@@ -639,13 +640,17 @@ export default {
     },
 
     reloadEpisodeShotsIfNeeded() {
-      // In All mode the first row says nothing about the loaded scope: rely
-      // on the store's loading key instead.
-      const isStale = this.isAllEpisodes
-        ? this.shotsLoadingKey !== `${this.currentProduction.id}/all`
-        : (this.isTVShow && this.displayedSequences.length === 0) ||
-          this.displayedSequences[0]?.episode_id !== this.currentEpisode?.id ||
-          this.displayedShots[0]?.episode_id !== this.currentEpisode?.id
+      // The first rows say nothing about the loaded scope: a production-wide
+      // All dataset passes the per-episode checks whenever the first episode
+      // owns the first rows. Compare the scope of the last load first.
+      const scope = this.isTVShow ? (this.currentEpisode?.id ?? '') : ''
+      const isStale =
+        this.shotsLoadingKey !== `${this.currentProduction?.id}/${scope}` ||
+        (!this.isAllEpisodes &&
+          ((this.isTVShow && this.displayedSequences.length === 0) ||
+            this.displayedSequences[0]?.episode_id !==
+              this.currentEpisode?.id ||
+            this.displayedShots[0]?.episode_id !== this.currentEpisode?.id))
       if (isStale && !this.isShotsLoading && !this.initialLoading) {
         this.$refs['shot-search-field']?.setValue('')
         this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)

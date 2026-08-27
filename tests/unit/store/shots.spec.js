@@ -12,10 +12,15 @@ import { buildShotIndex } from '@/lib/indexing'
 describe('Shots store', () => {
   describe('loading flag lifecycle', () => {
     test('CLEAR_SHOTS resets the loading flag so a stale in-flight load cannot wedge the next one (BUG-4)', () => {
-      const state = { isShotsLoading: true, isShotsLoadingError: true }
+      const state = {
+        isShotsLoading: true,
+        isShotsLoadingError: true,
+        shotsLoadingKey: 'p1/ep-a'
+      }
       shotsStore.mutations.CLEAR_SHOTS(state)
       expect(state.isShotsLoading).toBe(false)
       expect(state.isShotsLoadingError).toBe(false)
+      expect(state.shotsLoadingKey).toBe(null)
     })
 
     test('a concurrent same-scope caller shares the in-flight load instead of starting a second one (BUG-4)', async () => {
@@ -275,9 +280,15 @@ describe('Shots store', () => {
 
     test('loads the whole production instead of no-oping on the all pseudo-episode', async () => {
       const getShots = vi.spyOn(shotsApi, 'getShots').mockResolvedValue([])
-      const commit = vi.fn()
       const dispatch = vi.fn(() => Promise.resolve())
-      const state = { isShotsLoading: false }
+      const state = { isShotsLoading: false, shotsLoadingKey: null }
+      // Apply the real LOAD_SHOTS_START: the scope lives in the state the
+      // getter serves, not in the mocked commit.
+      const commit = vi.fn((type, payload) => {
+        if (type === 'LOAD_SHOTS_START') {
+          shotsStore.mutations[type](state, payload)
+        }
+      })
 
       await shotsStore.actions.loadShots({
         commit,
@@ -290,6 +301,17 @@ describe('Shots store', () => {
       // No episode_id on the wire: zou returns every shot of the project.
       expect(getShots).toHaveBeenCalledWith(baseGetters.currentProduction, null)
       expect(shotsStore.getters.shotsLoadingKey(state)).toBe('p-all/all')
+    })
+
+    test('the loading scope is served from the state, and cleared with the shots', () => {
+      const state = { shotsLoadingKey: null, selectedShots: new Map() }
+      shotsStore.mutations.LOAD_SHOTS_START(state, {
+        loadingKey: 'p-all/all'
+      })
+      expect(shotsStore.getters.shotsLoadingKey(state)).toBe('p-all/all')
+
+      shotsStore.mutations.CLEAR_SHOTS(state)
+      expect(shotsStore.getters.shotsLoadingKey(state)).toBe(null)
     })
 
     test('still no-ops on the main pack (there is no main pack for shots)', async () => {

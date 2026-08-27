@@ -295,6 +295,7 @@ const initialState = {
 
   isShotsLoading: false,
   isShotsLoadingError: false,
+  shotsLoadingKey: null,
   shotsCsvFormData: null,
 
   shotListScrollPosition: 0,
@@ -345,7 +346,7 @@ const getters = {
   },
   // Scope ("<productionId>/<episodeId>") of the last started load, so the
   // page can tell whether the store holds the shots of the current context.
-  shotsLoadingKey: () => cache.shotsLoadingKey,
+  shotsLoadingKey: state => state.shotsLoadingKey,
 
   isShotsLoading: state => state.isShotsLoading,
   isShotsLoadingError: state => state.isShotsLoadingError,
@@ -455,7 +456,7 @@ const actions = {
       )
     }
 
-    commit(LOAD_SHOTS_START)
+    commit(LOAD_SHOTS_START, { loadingKey })
     cache.shotsLoadingKey = loadingKey
     const loadingPromise = dispatch('loadSequencesWithTasks')
       .then(() => {
@@ -887,6 +888,7 @@ const mutations = {
 
     state.isShotsLoading = false
     state.isShotsLoadingError = false
+    state.shotsLoadingKey = null
     state.displayedShots = []
     state.displayedShotsCount = 0
     state.displayedShotsLength = 0
@@ -899,7 +901,7 @@ const mutations = {
     state.selectedShots = new Map()
   },
 
-  [LOAD_SHOTS_START](state) {
+  [LOAD_SHOTS_START](state, { loadingKey } = {}) {
     cache.shots = []
     cache.result = []
     cache.shotIndex = {}
@@ -909,6 +911,7 @@ const mutations = {
 
     state.isShotsLoading = true
     state.isShotsLoadingError = false
+    state.shotsLoadingKey = loadingKey ?? null
 
     state.displayedShots = []
     state.displayedShotsCount = 0
