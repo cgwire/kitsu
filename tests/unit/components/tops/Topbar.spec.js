@@ -333,6 +333,88 @@ describe('Topbar.vue', () => {
     })
   })
 
+  describe('shots episode selector', () => {
+    // The Shots page offers 'all' (every shot of the production) on top of
+    // the real episodes. There is no main pack for shots, so 'main' is still
+    // coerced to the first episode.
+    const mountForShots = (episodeId, episodes = []) => {
+      const production = { id: 'production-1', production_type: 'tvshow' }
+      const { store: shotsStore } = makeStore({
+        currentProduction: () => production,
+        episodes: () => episodes,
+        isTVShow: () => true,
+        productionEditTaskTypes: () => [],
+        productionMap: () => new Map([[production.id, production]])
+      })
+      const router = createRouter({
+        history: createWebHashHistory(),
+        routes: [
+          {
+            path: '/',
+            name: 'open-productions',
+            component: { template: '<div />' }
+          },
+          {
+            path: '/productions/:production_id/episodes/:episode_id/shots',
+            name: 'episode-shots',
+            component: { template: '<div />' }
+          }
+        ]
+      })
+      return shallowMount(Topbar, {
+        global: {
+          plugins: [shotsStore, router],
+          mocks: {
+            $t: key => key,
+            $route: {
+              path: `/productions/production-1/episodes/${episodeId}/shots`,
+              name: 'episode-shots',
+              params: { production_id: 'production-1', episode_id: episodeId },
+              query: {},
+              fullPath: '/'
+            }
+          },
+          stubs: {
+            TopbarProductionList: true,
+            TopbarSectionList: true,
+            TopbarEpisodeList: true,
+            GlobalSearchField: true,
+            NotificationBell: true,
+            PeopleAvatar: true,
+            ShortcutModal: true
+          }
+        }
+      })
+    }
+
+    it('offers an all shots option and no main pack', async () => {
+      const shotsWrapper = mountForShots('all')
+      shotsWrapper.vm.currentProjectSection = 'shots'
+      await nextTick()
+      expect(shotsWrapper.vm.currentEpisodeOptionGroups).toEqual([
+        {
+          name: '',
+          episodeList: [{ label: 'main.all_shots', value: 'all' }]
+        }
+      ])
+      shotsWrapper.unmount()
+    })
+
+    it('keeps the all pseudo-episode instead of coercing it to the first one', () => {
+      const shotsWrapper = mountForShots('all', [{ id: 'episode-1' }])
+      shotsWrapper.vm.updateCombosFromRoute()
+      expect(shotsWrapper.vm.currentEpisodeId).toBe('all')
+      shotsWrapper.unmount()
+    })
+
+    it('still coerces the main pack to the first episode', () => {
+      const shotsWrapper = mountForShots('main', [{ id: 'episode-1' }])
+      shotsWrapper.vm.updateCombosFromRoute()
+      expect(shotsWrapper.vm.currentEpisodeId).toBe('episode-1')
+      shotsWrapper.unmount()
+    })
+  })
+
   describe('notification:new socket handler', () => {
     const originalVisibility = Object.getOwnPropertyDescriptor(
       document,
