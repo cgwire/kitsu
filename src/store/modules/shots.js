@@ -340,8 +340,12 @@ const getters = {
   shotFilledColumns: state => state.shotFilledColumns,
 
   displayedShotsBySequence: state => {
-    return groupEntitiesByParents(state.displayedShots, 'sequence_name')
+    // Sequence names repeat across episodes (All shots view): group on id.
+    return groupEntitiesByParents(state.displayedShots, 'sequence_id')
   },
+  // Scope ("<productionId>/<episodeId>") of the last started load, so the
+  // page can tell whether the store holds the shots of the current context.
+  shotsLoadingKey: () => cache.shotsLoadingKey,
 
   isShotsLoading: state => state.isShotsLoading,
   isShotsLoadingError: state => state.isShotsLoadingError,
@@ -413,12 +417,14 @@ const actions = {
 
     if (!production) return Promise.resolve()
 
-    if (episode && ['all', 'main'].includes(episode.id)) {
-      // If it's a wide episode, we just store it. There isn't anything to
-      // load because we don't have episode defined.
+    if (episode?.id === 'main') {
+      // No main pack for shots: nothing to load.
       commit(SET_CURRENT_EPISODE, episode.id)
       return Promise.resolve()
     }
+    // 'all' is the cross-episode pseudo-episode: query the whole production
+    // (no episode_id on the wire) and keep 'all' as the loading scope.
+    const isAllEpisodes = episode?.id === 'all'
     if (isTVShow && !episode) {
       // If it's tv show and if we don't have any episode set, we use the first
       // one.
@@ -453,7 +459,7 @@ const actions = {
     cache.shotsLoadingKey = loadingKey
     const loadingPromise = dispatch('loadSequencesWithTasks')
       .then(() => {
-        return shotsApi.getShots(production, episode)
+        return shotsApi.getShots(production, isAllEpisodes ? null : episode)
       })
       .then(shots => {
         // Ignore a response for a production the user already switched away
@@ -465,6 +471,7 @@ const actions = {
         if (
           !isTVShow ||
           shots.length === 0 ||
+          rootGetters.currentEpisode?.id === 'all' ||
           shots[0].episode_id === rootGetters.currentEpisode?.id
         ) {
           const sequenceMap = sequenceStore.cache.sequenceMap
