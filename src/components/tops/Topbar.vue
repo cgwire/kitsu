@@ -850,6 +850,12 @@ export default {
               ['all', 'main'].includes(routeEpisodeId)
             ) {
               this.currentEpisodeId = routeEpisodeId
+            } else if (
+              this.shotSections.includes(this.currentProjectSection) &&
+              routeEpisodeId === 'all'
+            ) {
+              // No main pack for shots: only 'all' survives a direct link.
+              this.currentEpisodeId = routeEpisodeId
             } else {
               let episode = episodes.find(({ id }) => id === routeEpisodeId)
               if (!episode) {

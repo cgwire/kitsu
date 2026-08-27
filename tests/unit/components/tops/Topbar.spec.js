@@ -1,5 +1,5 @@
 import { nextTick, ref } from 'vue'
-import { shallowMount } from '@vue/test-utils'
+import { flushPromises, shallowMount } from '@vue/test-utils'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { createStore } from 'vuex'
 
@@ -339,13 +339,16 @@ describe('Topbar.vue', () => {
     // coerced to the first episode.
     const mountForShots = (episodeId, episodes = []) => {
       const production = { id: 'production-1', production_type: 'tvshow' }
-      const { store: shotsStore } = makeStore({
+      const { store: shotsStore, actions } = makeStore({
         currentProduction: () => production,
         episodes: () => episodes,
         isTVShow: () => true,
         productionEditTaskTypes: () => [],
         productionMap: () => new Map([[production.id, production]])
       })
+      // configureProduction resolves episodes from the loadEpisodes action,
+      // not from the episodes getter: keep both in sync for the fixture.
+      actions.loadEpisodes.mockResolvedValue(episodes)
       const router = createRouter({
         history: createWebHashHistory(),
         routes: [
@@ -410,6 +413,36 @@ describe('Topbar.vue', () => {
     it('still coerces the main pack to the first episode', () => {
       const shotsWrapper = mountForShots('main', [{ id: 'episode-1' }])
       shotsWrapper.vm.updateCombosFromRoute()
+      expect(shotsWrapper.vm.currentEpisodeId).toBe('episode-1')
+      shotsWrapper.unmount()
+    })
+
+    // Direct link / F5: configureProduction resolves the episode itself,
+    // before updateCombosFromRoute ever runs. Without the shots branch it
+    // falls into the generic else and picks the running episode instead.
+    it('keeps the all pseudo-episode when resolved from a direct link', async () => {
+      const shotsWrapper = mountForShots('all', [
+        { id: 'episode-1', status: 'running' }
+      ])
+      const routerSpy = vi
+        .spyOn(shotsWrapper.vm.$router, 'push')
+        .mockResolvedValue({})
+      await shotsWrapper.vm.configureProduction('production-1', 'all')
+      await flushPromises()
+      expect(shotsWrapper.vm.currentEpisodeId).toBe('all')
+      expect(routerSpy).toHaveBeenCalledWith({
+        params: { production_id: 'production-1', episode_id: 'all' },
+        query: {}
+      })
+      shotsWrapper.unmount()
+    })
+
+    it('still resolves the main pack to the running episode on a direct link', async () => {
+      const shotsWrapper = mountForShots('main', [
+        { id: 'episode-1', status: 'running' }
+      ])
+      await shotsWrapper.vm.configureProduction('production-1', 'main')
+      await flushPromises()
       expect(shotsWrapper.vm.currentEpisodeId).toBe('episode-1')
       shotsWrapper.unmount()
     })
