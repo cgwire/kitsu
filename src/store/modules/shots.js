@@ -468,11 +468,14 @@ const actions = {
         if (production.id !== rootGetters.currentProduction?.id) {
           return
         }
+        // Discard a response whose scope is not the one displayed any more
+        // (the user switched episode mid-load).
         if (
           !isTVShow ||
           shots.length === 0 ||
-          rootGetters.currentEpisode?.id === 'all' ||
-          shots[0].episode_id === rootGetters.currentEpisode?.id
+          (isAllEpisodes
+            ? rootGetters.currentEpisode?.id === 'all'
+            : shots[0].episode_id === rootGetters.currentEpisode?.id)
         ) {
           const sequenceMap = sequenceStore.cache.sequenceMap
           const taskMap = rootGetters.taskMap

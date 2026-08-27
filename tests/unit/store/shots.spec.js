@@ -308,6 +308,49 @@ describe('Shots store', () => {
       expect(commit.mock.calls.map(c => c[0])).not.toContain('LOAD_SHOTS_START')
     })
 
+    test('an all-scoped response is applied while the view is still all', async () => {
+      vi.spyOn(shotsApi, 'getShots').mockResolvedValue([
+        { id: 's1', episode_id: 'ep-a', sequence_id: 'sq-1' }
+      ])
+      const commit = vi.fn()
+      const dispatch = vi.fn(() => Promise.resolve())
+      const state = { isShotsLoading: false }
+
+      await shotsStore.actions.loadShots({
+        commit,
+        dispatch,
+        state,
+        rootGetters: { ...baseGetters, currentEpisode: { id: 'all' } }
+      })
+
+      expect(commit.mock.calls.map(c => c[0])).toContain('LOAD_SHOTS_END')
+      expect(commit.mock.calls.map(c => c[0])).not.toContain('END_SHOTS_LOADING')
+    })
+
+    test('a per-episode response is discarded once the view switched to all mid-load', async () => {
+      const commit = vi.fn()
+      const dispatch = vi.fn(() => Promise.resolve())
+      const state = { isShotsLoading: false }
+      // Mutable so the getShots mock can flip it mid-flight, simulating the
+      // user switching to All before the ep-a request resolves.
+      const rootGetters = { ...baseGetters, currentEpisode: { id: 'ep-a' } }
+
+      const getShots = vi.spyOn(shotsApi, 'getShots').mockImplementation(() => {
+        rootGetters.currentEpisode = { id: 'all' }
+        return Promise.resolve([
+          { id: 's1', episode_id: 'ep-a', sequence_id: 'sq-1' }
+        ])
+      })
+
+      await shotsStore.actions.loadShots({ commit, dispatch, state, rootGetters })
+
+      expect(getShots).toHaveBeenCalledWith(baseGetters.currentProduction, {
+        id: 'ep-a'
+      })
+      expect(commit.mock.calls.map(c => c[0])).not.toContain('LOAD_SHOTS_END')
+      expect(commit.mock.calls.map(c => c[0])).toContain('END_SHOTS_LOADING')
+    })
+
     test('groups shots by sequence id so same-named sequences of two episodes stay apart', () => {
       const state = {
         displayedShots: [
