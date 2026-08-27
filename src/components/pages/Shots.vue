@@ -76,6 +76,7 @@
                 :text="$t('shots.new_shots')"
                 icon="plus"
                 @click="showManageShots"
+                v-if="!isAllEpisodes"
               />
             </div>
           </div>
@@ -530,6 +531,7 @@ export default {
       'shotSearchQueries',
       'shotSearchText',
       'shotSearchFilterGroups',
+      'shotsLoadingKey',
       'shotsPath',
       'shotValidationColumns',
       'shotListScrollPosition',
@@ -541,6 +543,10 @@ export default {
     ...mapGetters({
       isCurrentUserManager: 'isCurrentUserProductionManager'
     }),
+
+    isAllEpisodes() {
+      return this.isTVShow && this.currentEpisode?.id === 'all'
+    },
 
     shotMap() {
       return shotStore.cache.shotMap
@@ -633,13 +639,14 @@ export default {
     },
 
     reloadEpisodeShotsIfNeeded() {
-      if (
-        ((this.isTVShow && this.displayedSequences.length === 0) ||
+      // In All mode the first row says nothing about the loaded scope: rely
+      // on the store's loading key instead.
+      const isStale = this.isAllEpisodes
+        ? this.shotsLoadingKey !== `${this.currentProduction.id}/all`
+        : (this.isTVShow && this.displayedSequences.length === 0) ||
           this.displayedSequences[0]?.episode_id !== this.currentEpisode?.id ||
-          this.displayedShots[0]?.episode_id !== this.currentEpisode?.id) &&
-        !this.isShotsLoading &&
-        !this.initialLoading
-      ) {
+          this.displayedShots[0]?.episode_id !== this.currentEpisode?.id
+      if (isStale && !this.isShotsLoading && !this.initialLoading) {
         this.$refs['shot-search-field']?.setValue('')
         this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)
         this.initialLoading = true
@@ -838,7 +845,13 @@ export default {
           this.$t('shots.title')
         ]
         if (this.currentEpisode) {
-          nameData.splice(3, 0, this.currentEpisode.name)
+          nameData.splice(
+            3,
+            0,
+            this.isAllEpisodes
+              ? this.$t('main.all_shots')
+              : this.currentEpisode.name
+          )
         }
         const name = stringHelpers.slugify(nameData.join('_'))
         const headers = [
@@ -963,7 +976,11 @@ export default {
         await this.setNbFramesFromTaskTypePreviews({
           taskTypeId,
           productionId: this.currentProduction.id,
-          episodeId: this.currentEpisode ? this.currentEpisode.id : null
+          // Whole production in All mode: zou rejects episode_id=all here.
+          episodeId:
+            this.currentEpisode && !this.isAllEpisodes
+              ? this.currentEpisode.id
+              : null
         })
         this.modals.isSetFramesDisplayed = false
       } catch (err) {
@@ -1034,7 +1051,11 @@ export default {
       return {
         title:
           `${this.currentProduction?.name || ''}` +
-          ` - ${this.currentEpisode?.name || ''}` +
+          ` - ${
+            this.isAllEpisodes
+              ? this.$t('main.all_shots')
+              : this.currentEpisode?.name || ''
+          }` +
           ` | ${this.$t('shots.title')} - Kitsu`
       }
     }
