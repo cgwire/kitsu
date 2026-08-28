@@ -774,6 +774,22 @@ export default {
       return this.allForEntity === 'shot' ? { for_entity: 'shot' } : {}
     },
 
+    // The store keeps the last loaded list across pages: on mount it can
+    // belong to another production, episode or all-mode entity type.
+    isPlaylistListStale() {
+      const [first] = this.playlists
+      if (!first) return false
+      if (first.project_id !== this.currentProduction.id) return true
+      if (!this.isTVShow || !this.currentEpisode) return false
+      if (this.currentEpisode.id === 'all') {
+        return !first.is_for_all || first.for_entity !== this.allForEntity
+      }
+      if (this.currentEpisode.id === 'main') {
+        return Boolean(first.episode_id || first.is_for_all)
+      }
+      return first.episode_id !== this.currentEpisode.id
+    },
+
     isAssetPlaylist() {
       return this.currentPlaylist.for_entity === 'asset'
     },
@@ -1737,7 +1753,7 @@ export default {
         await this.loadEditsData()
         await this.loadEpisodesData()
         this.page = 1
-        await this.loadPlaylistsData()
+        await this.loadPlaylistsData(this.isPlaylistListStale)
         this.loading.playlists = false
         this.resetPlaylist()
         setTimeout(() => {
