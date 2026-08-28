@@ -17,9 +17,8 @@
       <combobox-simple
         :label="$t('playlists.fields.for_entity')"
         :options="forEntityOptions"
-        :disabled="typeDisabled"
         v-model="form.for_entity"
-        v-if="!isEditing"
+        v-if="!isEditing && !typeDisabled"
       />
       <combobox-task-type
         class="flexrow-item selector"
@@ -116,23 +115,16 @@ const forClientOptions = computed(() => [
   { label: t('playlists.for_studio'), value: 'false' }
 ])
 
+const isPseudoEpisode = computed(() =>
+  ['main', 'all'].includes(currentEpisode.value?.id)
+)
+
 const forEntityOptions = computed(() => {
-  if (
-    ['main', 'all'].includes(currentEpisode.value?.id) ||
-    currentProduction.value?.production_type === 'assets'
-  ) {
+  const productionType = currentProduction.value?.production_type
+  if (productionType === 'assets') {
     return [{ label: t('assets.title'), value: 'asset' }]
   }
-  if (currentProduction.value?.production_type === 'shots') {
-    return [
-      { label: t('shots.title'), value: 'shot' },
-      { label: t('sequences.title'), value: 'sequence' },
-      { label: t('edits.title'), value: 'edit' }
-      // { label: t('episodes.title'), value: 'episode' }
-      // Episode playlists need an "all shots" cross-episode view first.
-    ]
-  }
-  return [
+  const options = [
     { label: t('assets.title'), value: 'asset' },
     { label: t('shots.title'), value: 'shot' },
     { label: t('sequences.title'), value: 'sequence' },
@@ -140,14 +132,25 @@ const forEntityOptions = computed(() => {
     // { label: t('episodes.title'), value: 'episode' }
     // Episode playlists need an "all shots" cross-episode view first.
   ]
+  if (isPseudoEpisode.value) {
+    // Pseudo-episodes are typed: All assets and the main pack hold asset
+    // playlists, All shots holds shot playlists (preset by the caller).
+    const entity = props.playlistToEdit.for_entity || 'asset'
+    return options.filter(option => option.value === entity)
+  }
+  if (productionType === 'shots') {
+    return options.filter(option => option.value !== 'asset')
+  }
+  return options
 })
 
 const defaultForEntity = computed(() => {
   const productionType = currentProduction.value?.production_type
   const isOnlyAssets = productionType === 'assets'
   const isOnlyShots = productionType === 'shots'
-  const isAssetEpisode = ['all', 'main'].includes(currentEpisode.value?.id)
-  return (isAssetEpisode || isOnlyAssets) && !isOnlyShots ? 'asset' : 'shot'
+  return (isPseudoEpisode.value || isOnlyAssets) && !isOnlyShots
+    ? 'asset'
+    : 'shot'
 })
 
 const taskTypeList = computed(() => {

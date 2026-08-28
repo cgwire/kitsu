@@ -448,6 +448,77 @@ describe('Topbar.vue', () => {
     })
   })
 
+  describe('playlists episode selector', () => {
+    // The playlists page splits the all pseudo-episode by entity type: All
+    // assets (default) and All shots (?for_entity=shot), plus the main pack.
+    it('offers all assets, all shots and the main pack', async () => {
+      const production = { id: 'production-1', production_type: 'tvshow' }
+      const { store: playlistsStore } = makeStore({
+        currentProduction: () => production,
+        episodes: () => [],
+        isTVShow: () => true,
+        productionEditTaskTypes: () => [],
+        productionMap: () => new Map([[production.id, production]])
+      })
+      const router = createRouter({
+        history: createWebHashHistory(),
+        routes: [
+          {
+            path: '/',
+            name: 'open-productions',
+            component: { template: '<div />' }
+          },
+          {
+            path: '/productions/:production_id/episodes/:episode_id/playlists',
+            name: 'episode-playlists',
+            component: { template: '<div />' }
+          }
+        ]
+      })
+      const playlistsWrapper = shallowMount(Topbar, {
+        global: {
+          plugins: [playlistsStore, router],
+          mocks: {
+            $t: key => key,
+            $route: {
+              path: '/productions/production-1/episodes/all/playlists',
+              name: 'episode-playlists',
+              params: { production_id: 'production-1', episode_id: 'all' },
+              query: {},
+              fullPath: '/'
+            }
+          },
+          stubs: {
+            TopbarProductionList: true,
+            TopbarSectionList: true,
+            TopbarEpisodeList: true,
+            GlobalSearchField: true,
+            NotificationBell: true,
+            PeopleAvatar: true,
+            ShortcutModal: true
+          }
+        }
+      })
+      playlistsWrapper.vm.currentProjectSection = 'playlists'
+      await nextTick()
+      expect(playlistsWrapper.vm.currentEpisodeOptionGroups).toEqual([
+        {
+          name: '',
+          episodeList: [
+            { label: 'main.all_assets', value: 'all' },
+            {
+              label: 'main.all_shots',
+              value: 'all',
+              query: { for_entity: 'shot' }
+            },
+            { label: 'main.main_pack', value: 'main' }
+          ]
+        }
+      ])
+      playlistsWrapper.unmount()
+    })
+  })
+
   describe('notification:new socket handler', () => {
     const originalVisibility = Object.getOwnPropertyDescriptor(
       document,

@@ -29,13 +29,13 @@
           </div>
           <template v-if="showAllMode || ['', 'running'].includes(group.name)">
             <div
-              :key="episode.value"
-              :ref="'episode-' + episode.value"
+              :key="optionKey(episode)"
+              :ref="'episode-' + optionKey(episode)"
               class="episode-line"
               @click="selectEpisode(episode)"
               v-for="episode in group.episodeList"
             >
-              <router-link :to="getEpisodePath(episode.value)">
+              <router-link :to="getEpisodePath(episode)">
                 {{ episode.label }}
               </router-link>
             </div>
@@ -111,11 +111,16 @@ export default {
     ...mapGetters(['currentProduction']),
 
     episodeLabel() {
-      let option
-      this.episodeGroups.forEach(group => {
-        const result = group.episodeList.find(o => o.value === this.episodeId)
-        if (result) option = result
-      })
+      const options = this.episodeGroups.flatMap(group =>
+        group.episodeList.filter(o => o.value === this.episodeId)
+      )
+      // Several options can share a value (All assets / All shots): the
+      // route query tells them apart.
+      const forEntity = this.$route.query.for_entity
+      const option =
+        options.find(o => o.query?.for_entity === forEntity) ||
+        options.find(o => !o.query) ||
+        options[0]
       return option ? option.label : ''
     },
 
@@ -124,16 +129,19 @@ export default {
       const section = this.section
       const pluginId = this.$route.params.plugin_id
       const currentQuery = this.$route.query
-      return episodeId => {
+      return episode => {
         const path = getProductionPath(
           currentProduction,
           section,
-          episodeId,
+          episode.value,
           pluginId
         )
         if (section === 'schedule') {
           // The production schedule keeps its view state (mode, version, ...) in the URL query.
           path.query = { ...currentQuery }
+        }
+        if (episode.query) {
+          path.query = { ...path.query, ...episode.query }
         }
         return path
       }
@@ -141,6 +149,12 @@ export default {
   },
 
   methods: {
+    optionKey(episode) {
+      return episode.query
+        ? `${episode.value}-${Object.values(episode.query).join('-')}`
+        : episode.value
+    },
+
     selectEpisode(episode) {
       this.$emit('input', episode.id)
       this.showEpisodeList = false

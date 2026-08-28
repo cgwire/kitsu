@@ -1,7 +1,7 @@
 import client from '@/store/api/client'
 
 export default {
-  getPlaylists(production, episode, taskTypeId, sortBy, page) {
+  getPlaylists(production, episode, taskTypeId, sortBy, page, forEntity) {
     let path = `/api/data/projects/${production.id}`
     if (episode) {
       path += `/episodes/${episode.id}/playlists?sort_by=${sortBy}&page=${page}`
@@ -10,6 +10,9 @@ export default {
     }
     if (taskTypeId?.length) {
       path += `&task_type_id=${taskTypeId}`
+    }
+    if (forEntity) {
+      path += `&for_entity=${forEntity}`
     }
     return client.pget(path)
   },

@@ -457,9 +457,14 @@ export default {
       }
       if (this.assetSections.includes(section)) {
         const episodeList = this.getBaseEpisodeOptionGroups('main.all_assets')
-        return [{ name: '', episodeList }].concat(this.episodeOptionGroups)
-      } else if (['playlists'].includes(section)) {
-        const episodeList = this.getBaseEpisodeOptionGroups('main.all_assets')
+        if (section === 'playlists') {
+          // Same all pseudo-episode, split by entity type through the query.
+          episodeList.splice(1, 0, {
+            label: this.$t('main.all_shots'),
+            value: 'all',
+            query: { for_entity: 'shot' }
+          })
+        }
         return [{ name: '', episodeList }].concat(this.episodeOptionGroups)
       } else if (['edits'].includes(section)) {
         return [

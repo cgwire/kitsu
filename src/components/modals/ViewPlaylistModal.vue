@@ -279,13 +279,19 @@ const onViewCreatedPlaylist = () => {
   if (!createdPlaylist.value) return
   modals.value.edit = false
   emit('cancel')
-  router.push(
-    getPlaylistPath(
-      currentProduction.value.id,
-      currentEpisode.value?.id,
-      createdPlaylist.value.id
-    )
+  const route = getPlaylistPath(
+    currentProduction.value.id,
+    currentEpisode.value?.id,
+    createdPlaylist.value.id
   )
+  if (
+    currentEpisode.value?.id === 'all' &&
+    currentEntityType.value === 'shot'
+  ) {
+    // The playlists page splits the all pseudo-episode by entity type.
+    route.query = { for_entity: 'shot' }
+  }
+  router.push(route)
 }
 
 const savePlaylist = async form => {

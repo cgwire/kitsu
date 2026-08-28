@@ -87,7 +87,7 @@ const getters = {
 const actions = {
   loadPlaylists(
     { commit, rootGetters },
-    { sortBy = 'updated_at', page = 1, taskTypeId }
+    { sortBy = 'updated_at', page = 1, taskTypeId, forEntity }
   ) {
     const production = rootGetters.currentProduction
     let episode = rootGetters.currentEpisode
@@ -98,7 +98,7 @@ const actions = {
 
     commit(LOAD_PLAYLISTS_END, [])
     return playlistsApi
-      .getPlaylists(production, episode, taskTypeId, sortBy, page)
+      .getPlaylists(production, episode, taskTypeId, sortBy, page, forEntity)
       .then(playlists => {
         commit(LOAD_PLAYLISTS_END, playlists)
         return playlists
@@ -107,7 +107,7 @@ const actions = {
 
   loadMorePlaylists(
     { commit, rootGetters },
-    { sortBy = 'updated_at', page = 1, taskTypeId }
+    { sortBy = 'updated_at', page = 1, taskTypeId, forEntity }
   ) {
     const production = rootGetters.currentProduction
     let episode = rootGetters.currentEpisode
@@ -117,7 +117,7 @@ const actions = {
     if (isTVShow && !episode) return Promise.resolve([])
     if (!isTVShow) episode = null
     return playlistsApi
-      .getPlaylists(production, episode, taskTypeId, sortBy, page)
+      .getPlaylists(production, episode, taskTypeId, sortBy, page, forEntity)
       .then(playlists => {
         commit(ADD_PLAYLISTS, playlists)
         return playlists
