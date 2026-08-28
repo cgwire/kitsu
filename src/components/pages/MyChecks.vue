@@ -42,6 +42,8 @@
             <people-field :people="assignees" small v-model="person" />
           </div>
 
+          <span class="filler"></span>
+
           <combobox
             class="flexrow-item"
             :label="$t('main.show')"
@@ -76,7 +78,7 @@
           :is-loading="isLoading"
           :is-error="isLoadingError"
           :selection-grid="selectionGrid"
-          :is-to-check="true"
+          is-to-check
         />
       </div>
     </div>
@@ -87,326 +89,228 @@
 
     <view-playlist-modal
       active
-      :task-ids="sortedTasks.map(t => t.id)"
+      :task-ids="sortedTasks.map(task => task.id)"
       @cancel="isPlaylist = false"
       v-if="isPlaylist"
     />
   </div>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+// Imports
+import { useHead } from '@unhead/vue'
 import moment from 'moment-timezone'
 import { firstBy } from 'thenby'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 
 import { populateTask } from '@/lib/models'
-import { sortByName, sortPeople } from '@/lib/sorting'
 import { buildSelectionGrid } from '@/lib/selection'
+import { sortByName, sortPeople } from '@/lib/sorting'
 import { parseDate } from '@/lib/time'
 
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
-import Combobox from '@/components/widgets/Combobox.vue'
-import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
-import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
-import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
-import PeopleField from '@/components/widgets/PeopleField.vue'
-import TaskInfo from '@/components/sides/TaskInfo.vue'
 import TodosList from '@/components/lists/TodosList.vue'
 import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal.vue'
+import TaskInfo from '@/components/sides/TaskInfo.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
+import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import PeopleField from '@/components/widgets/PeopleField.vue'
 
-export default {
-  name: 'my-checks',
+// Composables
+const { t } = useI18n()
+const store = useStore()
 
-  components: {
-    ButtonSimple,
-    Combobox,
-    ComboboxProduction,
-    ComboboxStatus,
-    ComboboxTaskType,
-    PeopleField,
-    TaskInfo,
-    TodosList,
-    ViewPlaylistModal
-  },
+// State
+// --------------------------------------------------------------------------
+const currentFilter = ref('all_tasks')
+const currentSort = ref('priority')
+const episodeId = ref('')
+const isLoading = ref(false)
+const isLoadingError = ref(false)
+const isPlaylist = ref(false)
+const person = ref({})
+const productionId = ref('')
+const productionList = ref([])
+const selectionGrid = ref(buildSelectionGrid())
+const taskStatusId = ref('')
+const taskStatusList = ref([])
+const taskTypeId = ref('')
+const taskTypeList = ref([])
+const tasksToCheck = ref([])
 
-  data() {
-    return {
-      currentFilter: 'all_tasks',
-      currentSort: 'priority',
-      episodeId: '',
-      isLoading: false,
-      isLoadingError: false,
-      isPlaylist: false,
-      filterOptions: ['all_tasks', 'due_this_week'].map(name => ({
-        label: name,
-        value: name
-      })),
-      person: {},
-      productionId: '',
-      productionList: [],
-      selectionGrid: new Set(),
-      sortOptions: [
-        'entity_name',
-        'priority',
-        'due_date',
-        'estimation',
-        'last_comment_date'
-      ].map(name => ({ label: name, value: name })),
-      taskStatusId: '',
-      taskTypeId: '',
-      taskStatusList: [],
-      taskTypeList: [],
-      tasksToCheck: []
-    }
-  },
+const filterOptions = ['all_tasks', 'due_this_week'].map(name => ({
+  label: name,
+  value: name
+}))
+const sortOptions = [
+  'entity_name',
+  'priority',
+  'due_date',
+  'estimation',
+  'last_comment_date'
+].map(name => ({ label: name, value: name }))
 
-  mounted() {
-    this.isLoading = true
-    this.clearSelectedTasks()
-    this.loadTasksToCheck()
-      .then(tasks => {
-        if (tasks) {
-          tasks.forEach(populateTask)
-          this.buildSelectionGrid(tasks)
-          this.resetProductionList(tasks)
-          this.resetTaskTypeList(tasks)
-          this.resetTaskStatusList(tasks)
-          this.tasksToCheck = tasks
-          this.isLoading = false
-        }
-      })
-      .catch(err => {
-        console.error(err)
-      })
-  },
+// Computed
+// --------------------------------------------------------------------------
+const nbSelectedTasks = computed(() => store.getters.nbSelectedTasks)
+const personMap = computed(() => store.getters.personMap)
+const productionMap = computed(() => store.getters.productionMap)
+const selectedTasks = computed(() => store.getters.selectedTasks)
+const taskStatusMap = computed(() => store.getters.taskStatusMap)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
-  computed: {
-    ...mapGetters([
-      'nbSelectedTasks',
-      'personMap',
-      'productionMap',
-      'selectedTasks',
-      'taskStatusMap',
-      'taskTypeMap'
-    ]),
+const assignees = computed(() => {
+  const personIds = [
+    ...new Set(tasksToCheck.value.flatMap(task => task.assignees))
+  ]
+  return sortPeople(
+    personIds.map(personId => personMap.value.get(personId)).filter(Boolean)
+  )
+})
 
-    nbTasksToCheck() {
-      return this.sortedTasks.filter(task => {
-        return this.taskStatusMap.get(task.task_status_id)?.is_feedback_request
-      }).length
-    },
-
-    assignees() {
-      const assignees = []
-      const assigneesMap = {}
-      this.tasksToCheck.forEach(task => {
-        task.assignees.forEach(personId => {
-          const person = this.personMap.get(personId)
-          if (person && !assigneesMap[personId]) {
-            assignees.push(person)
-            assigneesMap[personId] = true
-          }
-        })
-      })
-      return sortPeople(assignees)
-    },
-
-    episodeOptions() {
-      const episodeOptions = []
-      const episodeMap = {}
-      if (!this.productionId) return []
-      const production = this.productionMap.get(this.productionId)
-      if (!production || production.production_type !== 'tvshow') return []
-      this.tasksToCheck
-        .filter(t => t.project_id === this.productionId)
-        .forEach(task => {
-          if (
-            task.episode_id &&
-            !episodeMap[task.episode_id] &&
-            task.entity_type_name === 'Shot'
-          ) {
-            episodeMap[task.episode_id] = true
-            episodeOptions.push({
-              label: task.episode_name,
-              value: task.episode_id
-            })
-          }
-        })
-      return [
-        {
-          label: this.$t('main.all'),
-          value: 'all'
-        }
-      ].concat(
-        episodeOptions.sort((a, b) =>
-          a.label.localeCompare(b.label, undefined, {
-            numeric: true
-          })
-        )
+const episodeOptions = computed(() => {
+  if (!productionId.value) return []
+  const production = productionMap.value.get(productionId.value)
+  if (production?.production_type !== 'tvshow') return []
+  const episodes = new Map(
+    tasksToCheck.value
+      .filter(
+        task =>
+          task.project_id === productionId.value &&
+          task.episode_id &&
+          task.entity_type_name === 'Shot'
       )
-    },
+      .map(task => [
+        task.episode_id,
+        { label: task.episode_name, value: task.episode_id }
+      ])
+  )
+  const options = [...episodes.values()].sort((a, b) =>
+    a.label.localeCompare(b.label, undefined, { numeric: true })
+  )
+  return [{ label: t('main.all'), value: 'all' }, ...options]
+})
 
-    filteredTasks() {
-      let tasks =
-        this.currentFilter === 'all_tasks'
-          ? [...this.tasksToCheck]
-          : this.tasksToCheck.filter(t => {
-              const dueDate = parseDate(t.due_date)
-              return moment().startOf('week').isSame(dueDate, 'week')
-            })
-      if (this.productionId !== '') {
-        tasks = tasks.filter(t => t.project_id === this.productionId)
-      }
-      if (this.taskTypeId !== '') {
-        tasks = tasks.filter(t => t.task_type_id === this.taskTypeId)
-      }
-      if (this.taskStatusId !== '') {
-        tasks = tasks.filter(t => t.task_status_id === this.taskStatusId)
-      }
-      if (this.person && this.person.id) {
-        tasks = tasks.filter(t => t.assignees.includes(this.person.id))
-      }
-      if (this.productionId && this.episodeId && this.episodeId !== 'all') {
-        tasks = tasks.filter(t => t.episode_id === this.episodeId)
-      }
-      return tasks
-    },
+const filteredTasks = computed(() =>
+  tasksToCheck.value.filter(
+    task =>
+      (currentFilter.value === 'all_tasks' ||
+        moment().startOf('week').isSame(parseDate(task.due_date), 'week')) &&
+      (!productionId.value || task.project_id === productionId.value) &&
+      (!taskTypeId.value || task.task_type_id === taskTypeId.value) &&
+      (!taskStatusId.value || task.task_status_id === taskStatusId.value) &&
+      (!person.value?.id || task.assignees.includes(person.value.id)) &&
+      (!productionId.value ||
+        !episodeId.value ||
+        episodeId.value === 'all' ||
+        task.episode_id === episodeId.value)
+  )
+)
 
-    sortedTasks() {
-      const isName = this.currentSort === 'entity_name'
-      const isPriority = this.currentSort === 'priority'
-      const isDueDate = this.currentSort === 'due_date'
-      const tasks = [...this.filteredTasks]
-      if (isName) {
-        return tasks.sort(
-          firstBy('project_name')
-            .thenBy('task_type_name')
-            .thenBy('full_entity_name')
-        )
-      } else if (isPriority) {
-        return tasks.sort(
-          firstBy('priority', -1)
-            .thenBy((a, b) => {
-              if (!a.due_date) return 1
-              else if (!b.due_date) return -1
-              else return a.due_date.localeCompare(b.due_date)
-            })
-            .thenBy('project_name')
-            .thenBy('task_type_name')
-            .thenBy('entity_name')
-        )
-      } else if (isDueDate) {
-        return tasks.sort(
-          firstBy((a, b) => {
-            if (!a.due_date) return 1
-            else if (!b.due_date) return -1
-            else return a.due_date.localeCompare(b.due_date)
-          })
-            .thenBy('project_name')
-            .thenBy('task_type_name')
-            .thenBy('entity_name')
-        )
-      } else {
-        return tasks.sort(
-          firstBy(this.currentSort, -1)
-            .thenBy('project_name')
-            .thenBy('task_type_name')
-            .thenBy('entity_name')
-        )
-      }
-    }
-  },
-
-  methods: {
-    ...mapActions(['clearSelectedTasks', 'loadTasksToCheck']),
-
-    buildSelectionGrid(tasks) {
-      this.selectionGrid = buildSelectionGrid()
-    },
-
-    resetProductionList(tasks = []) {
-      const productionIds = {}
-      const productionList = []
-      tasks.forEach(task => {
-        const production = this.productionMap.get(task.project_id)
-        if (production && !productionIds[task.project_id]) {
-          productionIds[task.project_id] = true
-          productionList.push(production)
-        }
-      })
-      this.productionList = [
-        {
-          id: '',
-          name: this.$t('main.all')
-        }
-      ].concat(sortByName(productionList))
-    },
-
-    resetTaskTypeList(tasks) {
-      const taskTypeIds = {}
-      const taskTypeList = []
-      tasks.forEach(task => {
-        const taskType = this.taskTypeMap.get(task.task_type_id)
-        if (taskType && !taskTypeIds[task.task_type_id]) {
-          taskTypeIds[task.task_type_id] = true
-          taskTypeList.push(taskType)
-        }
-      })
-      this.taskTypeList = [
-        {
-          id: '',
-          color: '#999',
-          name: this.$t('news.all')
-        }
-      ].concat(sortByName(taskTypeList))
-    },
-
-    resetTaskStatusList(tasks) {
-      const taskStatusIds = {}
-      const taskStatusList = []
-      tasks.forEach(task => {
-        const taskStatus = this.taskStatusMap.get(task.task_status_id)
-        if (taskStatus && !taskStatusIds[task.task_status_id]) {
-          taskStatusIds[task.task_status_id] = true
-          taskStatusList.push(taskStatus)
-        }
-      })
-      this.taskStatusList = [
-        {
-          id: '',
-          color: '#999',
-          name: this.$t('news.all'),
-          short_name: this.$t('news.all')
-        }
-      ].concat(sortByName(taskStatusList))
-    }
-  },
-
-  watch: {
-    productionId() {
-      this.episodeId = ''
-    },
-
-    nbSelectedTasks() {
-      if (this.nbSelectedTasks === 0) {
-        this.buildSelectionGrid(this.sortedTasks)
-      }
-    }
-  },
-
-  head() {
-    return {
-      title: `${this.$t('tasks.my_checks')} - Kitsu`
-    }
-  }
+const byDueDate = (a, b) => {
+  if (!a.due_date) return 1
+  if (!b.due_date) return -1
+  return a.due_date.localeCompare(b.due_date)
 }
+
+const thenByNames = comparator =>
+  comparator
+    .thenBy('project_name')
+    .thenBy('task_type_name')
+    .thenBy('entity_name')
+
+const sortedTasks = computed(() => {
+  const tasks = [...filteredTasks.value]
+  if (currentSort.value === 'entity_name') {
+    return tasks.sort(
+      firstBy('project_name')
+        .thenBy('task_type_name')
+        .thenBy('full_entity_name')
+    )
+  }
+  if (currentSort.value === 'priority') {
+    return tasks.sort(thenByNames(firstBy('priority', -1).thenBy(byDueDate)))
+  }
+  if (currentSort.value === 'due_date') {
+    return tasks.sort(thenByNames(firstBy(byDueDate)))
+  }
+  return tasks.sort(thenByNames(firstBy(currentSort.value, -1)))
+})
+
+const nbTasksToCheck = computed(
+  () =>
+    sortedTasks.value.filter(
+      task => taskStatusMap.value.get(task.task_status_id)?.is_feedback_request
+    ).length
+)
+
+// Functions
+// --------------------------------------------------------------------------
+const taskEntities = (tasks, idField, entityMap) => {
+  const entities = new Map(
+    tasks
+      .map(task => [task[idField], entityMap.get(task[idField])])
+      .filter(([, entity]) => entity)
+  )
+  return sortByName([...entities.values()])
+}
+
+const resetFilterLists = tasks => {
+  productionList.value = [
+    { id: '', name: t('main.all') },
+    ...taskEntities(tasks, 'project_id', productionMap.value)
+  ]
+  taskTypeList.value = [
+    { id: '', color: '#999', name: t('news.all') },
+    ...taskEntities(tasks, 'task_type_id', taskTypeMap.value)
+  ]
+  taskStatusList.value = [
+    { id: '', color: '#999', name: t('news.all'), short_name: t('news.all') },
+    ...taskEntities(tasks, 'task_status_id', taskStatusMap.value)
+  ]
+}
+
+// Watchers
+// --------------------------------------------------------------------------
+watch(productionId, () => {
+  episodeId.value = ''
+})
+
+watch(nbSelectedTasks, () => {
+  if (nbSelectedTasks.value === 0) {
+    selectionGrid.value = buildSelectionGrid()
+  }
+})
+
+// Lifecycle
+// --------------------------------------------------------------------------
+onMounted(async () => {
+  isLoading.value = true
+  store.dispatch('clearSelectedTasks')
+  try {
+    const tasks = await store.dispatch('loadTasksToCheck')
+    if (tasks) {
+      tasks.forEach(populateTask)
+      selectionGrid.value = buildSelectionGrid()
+      resetFilterLists(tasks)
+      tasksToCheck.value = tasks
+      isLoading.value = false
+    }
+  } catch (err) {
+    console.error(err)
+  }
+})
+
+// Head
+// --------------------------------------------------------------------------
+useHead({ title: computed(() => `${t('tasks.my_checks')} - Kitsu`) })
 </script>
 
 <style lang="scss" scoped>
-.data-list {
-  margin-top: 0;
-}
-
 .data-list {
   margin-top: 0;
 }
@@ -425,11 +329,6 @@ export default {
 .column {
   overflow-y: auto;
   padding: 0;
-}
-
-.push-right {
-  flex: 1;
-  text-align: right;
 }
 
 .field {
