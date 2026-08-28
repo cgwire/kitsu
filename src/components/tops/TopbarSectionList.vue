@@ -170,6 +170,17 @@ export default {
         this.episodeId,
         section.plugin_id
       )
+      // The all pseudo-episode is typed on the playlists page: coming from
+      // the shot side, stay on the shot side.
+      const isShotContext =
+        this.section === 'shots' || this.$route.query.for_entity === 'shot'
+      if (
+        section.value === 'playlists' &&
+        this.episodeId === 'all' &&
+        isShotContext
+      ) {
+        result.query = { ...result.query, for_entity: 'shot' }
+      }
       return result
     }
   },
