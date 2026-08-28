@@ -315,7 +315,7 @@
                     $emit('sequence-clicked', group[0].sequence_name)
                   "
                 >
-                  {{ group[0] ? group[0].sequence_name : '' }}
+                  {{ groupHeader(group) }}
                 </div>
               </th>
             </tr>
@@ -779,7 +779,7 @@
     <empty-list
       :text="$t('shots.empty_list')"
       :read-only-text="$t('shots.empty_list_read_only')"
-      :button-text="$t('shots.new_shots')"
+      :button-text="isAllEpisodes ? '' : $t('shots.new_shots')"
       @create="$emit('add-shots')"
       v-if="isEmptyList && !isLoading"
     />
@@ -1009,6 +1009,10 @@ export default {
       isCurrentUserSupervisor: 'isCurrentUserProductionSupervisor'
     }),
 
+    isAllEpisodes() {
+      return this.isTVShow && this.currentEpisode?.id === 'all'
+    },
+
     isEmptyList() {
       return (
         this.displayedShots &&
@@ -1054,6 +1058,15 @@ export default {
     ...mapActions(['displayMoreShots', 'setShotSelection']),
 
     formatToTimecode,
+
+    groupHeader(group) {
+      const shot = group[0]
+      if (!shot) return ''
+      // Sequence names repeat across episodes: say which one in All mode.
+      return this.isAllEpisodes && shot.episode_name
+        ? `${shot.episode_name} / ${shot.sequence_name}`
+        : shot.sequence_name
+    },
 
     isSelected(indexInGroup, groupIndex, columnIndex) {
       const lineIndex = this.getIndex(indexInGroup, groupIndex)

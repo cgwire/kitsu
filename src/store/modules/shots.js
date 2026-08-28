@@ -295,6 +295,7 @@ const initialState = {
 
   isShotsLoading: false,
   isShotsLoadingError: false,
+  shotsLoadingKey: null,
   shotsCsvFormData: null,
 
   shotListScrollPosition: 0,
@@ -340,8 +341,12 @@ const getters = {
   shotFilledColumns: state => state.shotFilledColumns,
 
   displayedShotsBySequence: state => {
-    return groupEntitiesByParents(state.displayedShots, 'sequence_name')
+    // Sequence names repeat across episodes (All shots view): group on id.
+    return groupEntitiesByParents(state.displayedShots, 'sequence_id')
   },
+  // Scope ("<productionId>/<episodeId>") of the last started load, so the
+  // page can tell whether the store holds the shots of the current context.
+  shotsLoadingKey: state => state.shotsLoadingKey,
 
   isShotsLoading: state => state.isShotsLoading,
   isShotsLoadingError: state => state.isShotsLoadingError,
@@ -413,12 +418,14 @@ const actions = {
 
     if (!production) return Promise.resolve()
 
-    if (episode && ['all', 'main'].includes(episode.id)) {
-      // If it's a wide episode, we just store it. There isn't anything to
-      // load because we don't have episode defined.
+    if (episode?.id === 'main') {
+      // No main pack for shots: nothing to load.
       commit(SET_CURRENT_EPISODE, episode.id)
       return Promise.resolve()
     }
+    // 'all' is the cross-episode pseudo-episode: query the whole production
+    // (no episode_id on the wire) and keep 'all' as the loading scope.
+    const isAllEpisodes = episode?.id === 'all'
     if (isTVShow && !episode) {
       // If it's tv show and if we don't have any episode set, we use the first
       // one.
@@ -449,11 +456,11 @@ const actions = {
       )
     }
 
-    commit(LOAD_SHOTS_START)
+    commit(LOAD_SHOTS_START, { loadingKey })
     cache.shotsLoadingKey = loadingKey
     const loadingPromise = dispatch('loadSequencesWithTasks')
       .then(() => {
-        return shotsApi.getShots(production, episode)
+        return shotsApi.getShots(production, isAllEpisodes ? null : episode)
       })
       .then(shots => {
         // Ignore a response for a production the user already switched away
@@ -462,10 +469,14 @@ const actions = {
         if (production.id !== rootGetters.currentProduction?.id) {
           return
         }
+        // Discard a response whose scope is not the one displayed any more
+        // (the user switched episode mid-load).
         if (
           !isTVShow ||
           shots.length === 0 ||
-          shots[0].episode_id === rootGetters.currentEpisode?.id
+          (isAllEpisodes
+            ? rootGetters.currentEpisode?.id === 'all'
+            : shots[0].episode_id === rootGetters.currentEpisode?.id)
         ) {
           const sequenceMap = sequenceStore.cache.sequenceMap
           const taskMap = rootGetters.taskMap
@@ -877,6 +888,7 @@ const mutations = {
 
     state.isShotsLoading = false
     state.isShotsLoadingError = false
+    state.shotsLoadingKey = null
     state.displayedShots = []
     state.displayedShotsCount = 0
     state.displayedShotsLength = 0
@@ -889,7 +901,7 @@ const mutations = {
     state.selectedShots = new Map()
   },
 
-  [LOAD_SHOTS_START](state) {
+  [LOAD_SHOTS_START](state, { loadingKey } = {}) {
     cache.shots = []
     cache.result = []
     cache.shotIndex = {}
@@ -899,6 +911,7 @@ const mutations = {
 
     state.isShotsLoading = true
     state.isShotsLoadingError = false
+    state.shotsLoadingKey = loadingKey ?? null
 
     state.displayedShots = []
     state.displayedShotsCount = 0

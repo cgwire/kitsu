@@ -457,9 +457,14 @@ export default {
       }
       if (this.assetSections.includes(section)) {
         const episodeList = this.getBaseEpisodeOptionGroups('main.all_assets')
-        return [{ name: '', episodeList }].concat(this.episodeOptionGroups)
-      } else if (['playlists'].includes(section)) {
-        const episodeList = this.getBaseEpisodeOptionGroups('main.all_assets')
+        if (section === 'playlists') {
+          // Same all pseudo-episode, split by entity type through the query.
+          episodeList.splice(1, 0, {
+            label: this.$t('main.all_shots'),
+            value: 'all',
+            query: { for_entity: 'shot' }
+          })
+        }
         return [{ name: '', episodeList }].concat(this.episodeOptionGroups)
       } else if (['edits'].includes(section)) {
         return [
@@ -471,6 +476,15 @@ export default {
       } else if (['breakdown'].includes(section)) {
         const episodeList = this.getBaseEpisodeOptionGroups('shots.episodes')
         return [{ name: '', episodeList }].concat(this.episodeOptionGroups)
+      } else if (this.shotSections.includes(section)) {
+        // No main pack for shots: every shot of a TV show belongs to an
+        // episode, so the only pseudo-episode is "all".
+        return [
+          {
+            name: '',
+            episodeList: [{ label: this.$t('main.all_shots'), value: 'all' }]
+          }
+        ].concat(this.episodeOptionGroups)
       } else if (this.scheduleSections.includes(section)) {
         const episodeList = this.getBaseEpisodeOptionGroups(
           'episodes.all_episodes'
@@ -841,6 +855,12 @@ export default {
               ['all', 'main'].includes(routeEpisodeId)
             ) {
               this.currentEpisodeId = routeEpisodeId
+            } else if (
+              this.shotSections.includes(this.currentProjectSection) &&
+              routeEpisodeId === 'all'
+            ) {
+              // No main pack for shots: only 'all' survives a direct link.
+              this.currentEpisodeId = routeEpisodeId
             } else {
               let episode = episodes.find(({ id }) => id === routeEpisodeId)
               if (!episode) {
@@ -927,12 +947,18 @@ export default {
       // Plugin pages keep the all / main pseudo-episodes: coercing to the
       // first episode desyncs the combobox from the episode_id actually
       // forwarded to the plugin iframe.
+      // The Shots page keeps 'all' (every shot of the production) but has no
+      // main pack: 'main' is coerced to the first episode like before.
+      const isShotSection = this.shotSections.includes(section)
+      const keepsPseudoEpisode =
+        pluginId !== undefined ||
+        isAssetSection ||
+        isEditSection ||
+        isBreakdownSection ||
+        isScheduleSection ||
+        (isShotSection && episodeId === 'all')
       if (
-        pluginId === undefined &&
-        !isAssetSection &&
-        !isEditSection &&
-        !isBreakdownSection &&
-        !isScheduleSection &&
+        !keepsPseudoEpisode &&
         ['all', 'main'].includes(episodeId) &&
         this.episodes.length > 0
       ) {

@@ -18,6 +18,35 @@ describe('Playlists store', () => {
       task_statuses: [{ id: 'task-status-1', name: 'Done' }]
     }
 
+    test('loadPlaylists forwards the entity type filter of the all pseudo-episode', async () => {
+      const getPlaylists = vi
+        .spyOn(playlistsApi, 'getPlaylists')
+        .mockResolvedValue([])
+      const production = { id: 'production-1' }
+      const episode = { id: 'all' }
+
+      await store.actions.loadPlaylists(
+        {
+          commit: vi.fn(),
+          rootGetters: {
+            currentProduction: production,
+            currentEpisode: episode,
+            isTVShow: true
+          }
+        },
+        { sortBy: 'name', page: 2, taskTypeId: '', forEntity: 'shot' }
+      )
+
+      expect(getPlaylists).toHaveBeenCalledWith(
+        production,
+        episode,
+        '',
+        'name',
+        2,
+        'shot'
+      )
+    })
+
     test('loadSharedPlaylistContext adds the missing task types and statuses', async () => {
       vi.spyOn(playlistsApi, 'loadSharedPlaylistContext').mockResolvedValue(
         context

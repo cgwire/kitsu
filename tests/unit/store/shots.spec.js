@@ -6,15 +6,21 @@ vi.mock('@/store', () => ({ default: {} }))
 
 import shotsStore from '@/store/modules/shots'
 import entitiesApi from '@/store/api/entities'
+import shotsApi from '@/store/api/shots'
 import { buildShotIndex } from '@/lib/indexing'
 
 describe('Shots store', () => {
   describe('loading flag lifecycle', () => {
     test('CLEAR_SHOTS resets the loading flag so a stale in-flight load cannot wedge the next one (BUG-4)', () => {
-      const state = { isShotsLoading: true, isShotsLoadingError: true }
+      const state = {
+        isShotsLoading: true,
+        isShotsLoadingError: true,
+        shotsLoadingKey: 'p1/ep-a'
+      }
       shotsStore.mutations.CLEAR_SHOTS(state)
       expect(state.isShotsLoading).toBe(false)
       expect(state.isShotsLoadingError).toBe(false)
+      expect(state.shotsLoadingKey).toBe(null)
     })
 
     test('a concurrent same-scope caller shares the in-flight load instead of starting a second one (BUG-4)', async () => {
@@ -253,6 +259,130 @@ describe('Shots store', () => {
         shotsStore.actions.deleteSelectedShots({ state, commit, rootGetters })
       ).rejects.toThrow('boom')
       expect(commit).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('all-episodes pseudo-episode', () => {
+    const baseGetters = {
+      currentProduction: { id: 'p-all' },
+      episodes: [{ id: 'ep-a' }, { id: 'ep-b' }],
+      userFilters: {},
+      userFilterGroups: {},
+      taskTypeMap: new Map(),
+      personMap: new Map(),
+      taskMap: new Map(),
+      isTVShow: true
+    }
+
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    test('loads the whole production instead of no-oping on the all pseudo-episode', async () => {
+      const getShots = vi.spyOn(shotsApi, 'getShots').mockResolvedValue([])
+      const dispatch = vi.fn(() => Promise.resolve())
+      const state = { isShotsLoading: false, shotsLoadingKey: null }
+      // Apply the real LOAD_SHOTS_START: the scope lives in the state the
+      // getter serves, not in the mocked commit.
+      const commit = vi.fn((type, payload) => {
+        if (type === 'LOAD_SHOTS_START') {
+          shotsStore.mutations[type](state, payload)
+        }
+      })
+
+      await shotsStore.actions.loadShots({
+        commit,
+        dispatch,
+        state,
+        rootGetters: { ...baseGetters, currentEpisode: { id: 'all' } }
+      })
+
+      expect(commit.mock.calls.map(c => c[0])).toContain('LOAD_SHOTS_START')
+      // No episode_id on the wire: zou returns every shot of the project.
+      expect(getShots).toHaveBeenCalledWith(baseGetters.currentProduction, null)
+      expect(shotsStore.getters.shotsLoadingKey(state)).toBe('p-all/all')
+    })
+
+    test('the loading scope is served from the state, and cleared with the shots', () => {
+      const state = { shotsLoadingKey: null, selectedShots: new Map() }
+      shotsStore.mutations.LOAD_SHOTS_START(state, {
+        loadingKey: 'p-all/all'
+      })
+      expect(shotsStore.getters.shotsLoadingKey(state)).toBe('p-all/all')
+
+      shotsStore.mutations.CLEAR_SHOTS(state)
+      expect(shotsStore.getters.shotsLoadingKey(state)).toBe(null)
+    })
+
+    test('still no-ops on the main pack (there is no main pack for shots)', async () => {
+      const getShots = vi.spyOn(shotsApi, 'getShots').mockResolvedValue([])
+      const commit = vi.fn()
+      const dispatch = vi.fn(() => Promise.resolve())
+
+      await shotsStore.actions.loadShots({
+        commit,
+        dispatch,
+        state: { isShotsLoading: false },
+        rootGetters: { ...baseGetters, currentEpisode: { id: 'main' } }
+      })
+
+      expect(getShots).not.toHaveBeenCalled()
+      expect(commit.mock.calls.map(c => c[0])).not.toContain('LOAD_SHOTS_START')
+    })
+
+    test('an all-scoped response is applied while the view is still all', async () => {
+      vi.spyOn(shotsApi, 'getShots').mockResolvedValue([
+        { id: 's1', episode_id: 'ep-a', sequence_id: 'sq-1' }
+      ])
+      const commit = vi.fn()
+      const dispatch = vi.fn(() => Promise.resolve())
+      const state = { isShotsLoading: false }
+
+      await shotsStore.actions.loadShots({
+        commit,
+        dispatch,
+        state,
+        rootGetters: { ...baseGetters, currentEpisode: { id: 'all' } }
+      })
+
+      expect(commit.mock.calls.map(c => c[0])).toContain('LOAD_SHOTS_END')
+      expect(commit.mock.calls.map(c => c[0])).not.toContain('END_SHOTS_LOADING')
+    })
+
+    test('a per-episode response is discarded once the view switched to all mid-load', async () => {
+      const commit = vi.fn()
+      const dispatch = vi.fn(() => Promise.resolve())
+      const state = { isShotsLoading: false }
+      // Mutable so the getShots mock can flip it mid-flight, simulating the
+      // user switching to All before the ep-a request resolves.
+      const rootGetters = { ...baseGetters, currentEpisode: { id: 'ep-a' } }
+
+      const getShots = vi.spyOn(shotsApi, 'getShots').mockImplementation(() => {
+        rootGetters.currentEpisode = { id: 'all' }
+        return Promise.resolve([
+          { id: 's1', episode_id: 'ep-a', sequence_id: 'sq-1' }
+        ])
+      })
+
+      await shotsStore.actions.loadShots({ commit, dispatch, state, rootGetters })
+
+      expect(getShots).toHaveBeenCalledWith(baseGetters.currentProduction, {
+        id: 'ep-a'
+      })
+      expect(commit.mock.calls.map(c => c[0])).not.toContain('LOAD_SHOTS_END')
+      expect(commit.mock.calls.map(c => c[0])).toContain('END_SHOTS_LOADING')
+    })
+
+    test('groups shots by sequence id so same-named sequences of two episodes stay apart', () => {
+      const state = {
+        displayedShots: [
+          { id: 's1', sequence_id: 'sq-ep1', sequence_name: 'SQ010' },
+          { id: 's2', sequence_id: 'sq-ep1', sequence_name: 'SQ010' },
+          { id: 's3', sequence_id: 'sq-ep2', sequence_name: 'SQ010' }
+        ]
+      }
+      const groups = shotsStore.getters.displayedShotsBySequence(state)
+      expect(groups.map(g => g.map(s => s.id))).toEqual([['s1', 's2'], ['s3']])
     })
   })
 })

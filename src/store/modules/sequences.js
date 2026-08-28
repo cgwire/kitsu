@@ -238,11 +238,17 @@ const getters = {
   searchSequenceFilters: state => state.searchSequenceFilters,
 
   isSingleSequence: state => state.displayedSequences.length < 2,
-  sequenceOptions: state =>
-    state.displayedSequences.map(sequence => ({
-      label: sequence.name,
+  // In All mode the list spans the production, where sequence names repeat
+  // from one episode to the next: qualify them with the episode name.
+  sequenceOptions: (state, getters, rootState, rootGetters) => {
+    const isAllEpisodes = rootGetters?.currentEpisode?.id === 'all'
+    return state.displayedSequences.map(sequence => ({
+      label: isAllEpisodes
+        ? sequence.full_name || sequence.name
+        : sequence.name,
       value: sequence.id
     }))
+  }
 }
 
 const actions = {
@@ -363,7 +369,10 @@ const actions = {
     const production = rootGetters.currentProduction
     const userFilters = rootGetters.userFilters
     const isTVShow = rootGetters.isTVShow
-    const episode = isTVShow ? rootGetters.currentEpisode : null
+    const currentEpisode = rootGetters.currentEpisode
+    // 'all' is the cross-episode pseudo-episode: list the whole production.
+    const episode =
+      isTVShow && currentEpisode?.id !== 'all' ? currentEpisode : null
     const episodeMap = rootGetters.episodeMap
     return shotsApi.getSequences(production, episode).then(sequences => {
       if (production.id !== rootGetters.currentProduction?.id) {
@@ -384,6 +393,7 @@ const actions = {
     const personMap = rootGetters.personMap
     const production = rootGetters.currentProduction
     let episode = rootGetters.currentEpisode
+    const isAllEpisodes = episode?.id === 'all'
     const isTVShow = rootGetters.isTVShow
     const routeSequenceId = rootGetters.route.params.sequence_id
     const userFilters = rootGetters.userFilters
@@ -414,16 +424,17 @@ const actions = {
       }
     }
     return shotsApi
-      .getSequencesWithTasks(production, episode)
+      .getSequencesWithTasks(production, isAllEpisodes ? null : episode)
       .then(sequences => {
         if (production.id !== rootGetters.currentProduction?.id) {
           return sequences
         }
-        if (
-          !isTVShow ||
-          sequences.length === 0 ||
-          sequences[0].episode_id === rootGetters.currentEpisode?.id
-        ) {
+        // Discard a response whose scope is not the one displayed any more
+        // (the user switched episode mid-load).
+        const isCurrentScope = isAllEpisodes
+          ? rootGetters.currentEpisode?.id === 'all'
+          : sequences[0]?.episode_id === rootGetters.currentEpisode?.id
+        if (!isTVShow || sequences.length === 0 || isCurrentScope) {
           commit(SET_SEQUENCES_WITH_TASKS, {
             sequences,
             episodeMap,

@@ -763,6 +763,33 @@ export default {
       )
     },
 
+    // The all pseudo-episode is split by entity type: "All assets" (default)
+    // and "All shots" (?for_entity=shot). Undefined outside of it.
+    allForEntity() {
+      if (!this.isTVShow || this.currentEpisode?.id !== 'all') return undefined
+      return this.$route.query.for_entity === 'shot' ? 'shot' : 'asset'
+    },
+
+    allShotsQuery() {
+      return this.allForEntity === 'shot' ? { for_entity: 'shot' } : {}
+    },
+
+    // The store keeps the last loaded list across pages: on mount it can
+    // belong to another production, episode or all-mode entity type.
+    isPlaylistListStale() {
+      const [first] = this.playlists
+      if (!first) return false
+      if (first.project_id !== this.currentProduction.id) return true
+      if (!this.isTVShow || !this.currentEpisode) return false
+      if (this.currentEpisode.id === 'all') {
+        return !first.is_for_all || first.for_entity !== this.allForEntity
+      }
+      if (this.currentEpisode.id === 'main') {
+        return Boolean(first.episode_id || first.is_for_all)
+      }
+      return first.episode_id !== this.currentEpisode.id
+    },
+
     isAssetPlaylist() {
       return this.currentPlaylist.for_entity === 'asset'
     },
@@ -819,7 +846,9 @@ export default {
       let episodeName = ''
       if (this.currentEpisode) {
         if (this.currentEpisode.id === 'all') {
-          episodeName = this.$t('main.all')
+          episodeName = this.$t(
+            this.allForEntity === 'shot' ? 'main.all_shots' : 'main.all_assets'
+          )
         } else if (this.currentEpisode.id === 'main') {
           episodeName = this.$t('main.main_pack')
         } else {
@@ -911,12 +940,14 @@ export default {
     },
 
     getPlaylistPath(playlistId, section) {
-      return getPlaylistPath(
+      const route = getPlaylistPath(
         this.currentProduction.id,
         this.currentEpisode ? this.currentEpisode.id : null,
         playlistId,
         section
       )
+      route.query = this.allShotsQuery
+      return route
     },
 
     playlistElementStyle(playlist) {
@@ -1030,7 +1061,8 @@ export default {
         return this.loadPlaylists({
           sortBy: this.currentSort,
           page: this.page,
-          taskTypeId: this.taskTypeId
+          taskTypeId: this.taskTypeId,
+          forEntity: this.allForEntity
         })
           .then(() => {
             return setFirstPlaylist()
@@ -1062,7 +1094,8 @@ export default {
       this.loadMorePlaylists({
         sortBy: this.currentSort,
         page: this.page,
-        taskTypeId: this.taskTypeId
+        taskTypeId: this.taskTypeId,
+        forEntity: this.allForEntity
       })
         .then(playlists => {
           setTimeout(() => {
@@ -1607,10 +1640,11 @@ export default {
           params: {
             production_id: this.currentProduction.id,
             playlist_id: this.playlists[0].id
-          }
+          },
+          query: this.allShotsQuery
         })
       } else {
-        this.$router.push(this.playlistsPath)
+        this.$router.push({ ...this.playlistsPath, query: this.allShotsQuery })
       }
     },
 
@@ -1688,7 +1722,8 @@ export default {
     showAddModal() {
       this.playlistToEdit = {
         name: `${moment().format('YYYY-MM-DD HH:mm:ss')}`,
-        for_client: false
+        for_client: false,
+        for_entity: this.allForEntity
       }
       this.errors.editPlaylist = false
       this.modals.isEditDisplayed = true
@@ -1718,7 +1753,7 @@ export default {
         await this.loadEditsData()
         await this.loadEpisodesData()
         this.page = 1
-        await this.loadPlaylistsData()
+        await this.loadPlaylistsData(this.isPlaylistListStale)
         this.loading.playlists = false
         this.resetPlaylist()
         setTimeout(() => {
@@ -1762,6 +1797,14 @@ export default {
     currentEpisode() {
       this.$store.commit('LOAD_PLAYLISTS_END', [])
       if (this.currentEpisode) {
+        this.reloadAll()
+      }
+    },
+
+    allForEntity(forEntity, previous) {
+      // All assets <-> All shots: same episode, different query.
+      if (forEntity && previous) {
+        this.$store.commit('LOAD_PLAYLISTS_END', [])
         this.reloadAll()
       }
     },

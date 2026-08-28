@@ -809,7 +809,11 @@ export default {
     async reloadEntities() {
       this.isLoading = true
       try {
-        if (!this.isTVShow || this.currentEpisode?.id !== 'main') {
+        // 'all' is episode casting here: it reads neither sequences nor shots.
+        if (
+          !this.isTVShow ||
+          !['main', 'all'].includes(this.currentEpisode?.id)
+        ) {
           await this.loadSequences()
           await this.loadShots()
         }
