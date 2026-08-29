@@ -1991,6 +1991,7 @@
       "title": "Cómo apoyar a Kitsu"
     },
     "my_checks": {
+      "build_playlist_loaded_only": "Solo las tareas cargadas en la lista se incluyen en la lista de reproducción",
       "title": "Tarea a comprobar | Tareas a comprobar"
     },
     "preview": {

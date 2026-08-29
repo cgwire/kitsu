@@ -1991,6 +1991,7 @@
       "title": "Hoe Kitsu ondersteunen"
     },
     "my_checks": {
+      "build_playlist_loaded_only": "Alleen de in de lijst geladen taken worden opgenomen in de afspeellijst",
       "title": "Taak om te controleren | Taken om te controleren"
     },
     "preview": {

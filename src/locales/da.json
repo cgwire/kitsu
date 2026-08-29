@@ -1991,6 +1991,7 @@
       "title": "Sådan kan du støtte Kitsu"
     },
     "my_checks": {
+      "build_playlist_loaded_only": "Kun de opgaver, der er indlæst i listen, medtages i playlisten",
       "title": "Opgave der skal tjekkes | Opgaver der skal tjekkes"
     },
     "preview": {

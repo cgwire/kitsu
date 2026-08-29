@@ -1908,6 +1908,7 @@
       "title": "Hogyan támogasd a Kitsu-t"
     },
     "my_checks": {
+      "build_playlist_loaded_only": "Csak a listába betöltött feladatok kerülnek a lejátszási listába",
       "title": "Ellenőrzendő feladat | Ellenőrzendő feladatok"
     },
     "edits": {

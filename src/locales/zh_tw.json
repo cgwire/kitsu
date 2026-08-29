@@ -1991,6 +1991,7 @@
       "title": "如何支援 Kitsu"
     },
     "my_checks": {
+      "build_playlist_loaded_only": "播放清單僅包含清單中已載入的任務",
       "title": "要檢查的任務 | 要檢查的任務"
     },
     "preview": {

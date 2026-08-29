@@ -1991,6 +1991,7 @@
       "title": "Wie kann man Kitsu unterstützen?"
     },
     "my_checks": {
+      "build_playlist_loaded_only": "Nur die in der Liste geladenen Aufgaben werden in die Wiedergabeliste aufgenommen",
       "title": "Zu prüfende Aufgabe | Zu prüfende Aufgaben"
     },
     "preview": {

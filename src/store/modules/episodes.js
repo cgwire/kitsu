@@ -391,6 +391,12 @@ const actions = {
       .catch(console.error)
   },
 
+  // Episodes of an arbitrary production, without touching the
+  // current-production episode state (used by cross-production pages).
+  loadProductionEpisodes(context, production) {
+    return shotsApi.getEpisodes(production)
+  },
+
   loadEpisodes({ commit, state, rootGetters }) {
     const currentProduction = rootGetters.currentProduction
     const routeEpisodeId = rootGetters.route.params.episode_id

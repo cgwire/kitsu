@@ -1991,6 +1991,7 @@
       "title": "Kitsu を応援するには"
     },
     "my_checks": {
+      "build_playlist_loaded_only": "リストに読み込まれたタスクのみがプレイリストに含まれます",
       "title": "件のチェック待ちタスク | 件のチェック待ちタスク"
     },
     "preview": {

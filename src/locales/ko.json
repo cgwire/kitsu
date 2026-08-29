@@ -1991,6 +1991,7 @@
       "title": "Kitsu를 지원하는 방법"
     },
     "my_checks": {
+      "build_playlist_loaded_only": "목록에 불러온 작업만 재생 목록에 포함됩니다",
       "title": "확인해야 할 작업 | 확인해야 할 작업"
     },
     "preview": {

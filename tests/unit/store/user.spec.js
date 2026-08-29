@@ -203,13 +203,40 @@ describe('User store', () => {
     })
 
     describe('loadTasksToCheck', () => {
-      test('commits an empty list when the API resolves null', async () => {
+      test('requests page 1 by default and commits the page data', async () => {
+        const result = {
+          data: [{ id: 'task-1' }],
+          stats: { total: 1 },
+          page: 1,
+          limit: 100,
+          is_more: false
+        }
+        peopleApi.loadTasksToCheck.mockResolvedValue(result)
+        const commit = vi.fn()
+
+        const returned = await store.actions.loadTasksToCheck(
+          { commit },
+          { project_id: 'project-1' }
+        )
+
+        expect(peopleApi.loadTasksToCheck).toHaveBeenCalledWith({
+          project_id: 'project-1',
+          page: 1
+        })
+        expect(returned).toBe(result)
+        expect(commit).toHaveBeenCalledWith('REGISTER_USER_TASKS', {
+          tasks: result.data
+        })
+      })
+
+      test('commits an empty page when the API resolves null', async () => {
         peopleApi.loadTasksToCheck.mockResolvedValue(null)
         const commit = vi.fn()
 
-        const tasks = await store.actions.loadTasksToCheck({ commit })
+        const result = await store.actions.loadTasksToCheck({ commit })
 
-        expect(tasks).toEqual([])
+        expect(result.data).toEqual([])
+        expect(result.is_more).toBe(false)
         expect(commit).toHaveBeenCalledWith('REGISTER_USER_TASKS', {
           tasks: []
         })

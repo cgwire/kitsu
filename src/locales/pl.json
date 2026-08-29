@@ -977,6 +977,7 @@
       "subscribe": "Subskrybuj powiadomienia"
     },
     "my_checks": {
+      "build_playlist_loaded_only": "Tylko zadania wczytane na listę są uwzględniane w playliście",
       "title": "Zadanie do sprawdzenia | Zadania do sprawdzenia"
     },
     "news": {

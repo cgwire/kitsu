@@ -332,10 +332,17 @@ const actions = {
     commit(USER_LOAD_TIME_SPENTS_END, timeSpents)
   },
 
-  async loadTasksToCheck({ commit }) {
-    const tasks = (await peopleApi.loadTasksToCheck()) || []
-    commit(REGISTER_USER_TASKS, { tasks })
-    return tasks
+  async loadTasksToCheck({ commit }, params = {}) {
+    const result = (await peopleApi.loadTasksToCheck({
+      ...params,
+      page: params.page || 1
+    })) || { data: [], stats: { total: 0 }, is_more: false }
+    commit(REGISTER_USER_TASKS, { tasks: result.data })
+    return result
+  },
+
+  loadTasksToCheckFilterValues() {
+    return peopleApi.loadTasksToCheckFilterValues()
   },
 
   async uploadAvatar({ commit, state }, formData) {

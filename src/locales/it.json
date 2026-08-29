@@ -1991,6 +1991,7 @@
       "title": "Come supportare Kitsu"
     },
     "my_checks": {
+      "build_playlist_loaded_only": "Solo i task caricati nella lista sono inclusi nella playlist",
       "title": "Task da verificare | Task da verificare"
     },
     "preview": {

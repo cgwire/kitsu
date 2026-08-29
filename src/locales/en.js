@@ -1013,6 +1013,8 @@ export default {
   },
 
   my_checks : {
+    build_playlist_loaded_only:
+      'Only the tasks loaded in the list are included in the playlist',
     title: 'Task to check | Tasks to check'
   },
 
