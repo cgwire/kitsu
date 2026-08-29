@@ -34,7 +34,7 @@
         <spinner class="mt1" />
       </div>
       <entity-chat-days
-        ref="messages"
+        ref="chatDays"
         :messages="messages"
         @delete-message="showConfirmDeleteMessage"
         v-else
@@ -93,7 +93,6 @@
     </template>
 
     <add-attachment-modal
-      ref="add-attachment-modal"
       :active="modals.addAttachment"
       :is-loading="loading.addAttachment"
       :is-error="errors.addAttachment"
@@ -116,289 +115,303 @@
   </div>
 </template>
 
-<script>
+<script setup>
+// Imports
 import { XIcon } from 'lucide-vue-next'
-import { mapGetters, mapActions } from 'vuex'
+import {
+  computed,
+  getCurrentInstance,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  reactive,
+  ref,
+  useTemplateRef,
+  watch
+} from 'vue'
+import { useStore } from 'vuex'
 
 import { sortPeople } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
-import { domMixin } from '@/components/mixins/dom'
 
 import AddAttachmentModal from '@/components/modals/AddAttachmentModal.vue'
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
-import EmojiButton from '@/components/widgets/EmojiButton.vue'
 import EntityChatDays from '@/components/pages/entities/EntityChatDays.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import EmojiButton from '@/components/widgets/EmojiButton.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 
-export default {
-  name: 'entity-chat',
+// Composables
+const store = useStore()
+const socket = getCurrentInstance().appContext.config.globalProperties.$socket
 
-  mixins: [domMixin],
-
-  components: {
-    AddAttachmentModal,
-    ButtonSimple,
-    ConfirmModal,
-    EmojiButton,
-    EntityChatDays,
-    PeopleAvatar,
-    Spinner,
-    XIcon
+// Props / Emits
+// --------------------------------------------------------------------------
+const props = defineProps({
+  entity: {
+    type: Object,
+    default: null
   },
+  name: {
+    type: String,
+    default: ''
+  }
+})
 
-  data() {
-    return {
-      attachments: [],
-      chat: {},
-      errors: {
-        addAttachment: false,
-        chat: false,
-        deleteMessage: false,
-        join: false,
-        leave: false,
-        send: false
-      },
-      loading: {
-        addAttachment: false,
-        chat: false,
-        deleteMessage: false,
-        join: false,
-        leave: false,
-        send: false
-      },
-      modals: {
-        addAttachment: false,
-        deleteMessage: false
-      },
-      participants: [],
-      currentMessage: '',
-      messages: [],
-      messageMap: new Map()
-    }
-  },
+// State
+// --------------------------------------------------------------------------
+const attachments = ref([])
+const chat = ref({})
+const currentMessage = ref('')
+const messages = ref([])
+const participants = ref([])
 
-  props: {
-    entity: {
-      type: Object,
-      default: () => {}
-    },
-    name: {
-      type: String,
-      default: ''
-    }
-  },
+const errors = reactive({
+  addAttachment: false,
+  chat: false,
+  deleteMessage: false,
+  join: false,
+  leave: false,
+  send: false
+})
+const loading = reactive({
+  addAttachment: false,
+  chat: false,
+  deleteMessage: false,
+  join: false,
+  leave: false,
+  send: false
+})
+const modals = reactive({
+  addAttachment: false,
+  deleteMessage: false
+})
 
-  mounted() {
-    if (!this.entity) return
-    this.reset()
-  },
+// dedup index for socket-received messages, never rendered
+const messageMap = new Map()
+let messageToDeleteId = null
 
-  computed: {
-    ...mapGetters(['mainConfig', 'personMap', 'user']),
+// the ref name must not collide with the messages data ref: a template
+// ref sharing a setup ref's name overwrites it with the component instance
+const chatDaysRef = useTemplateRef('chatDays')
+const messageBoxRef = useTemplateRef('messageBox')
 
-    attachmentNamePrefix() {
-      return stringHelpers.attachmentNamePrefix(this.name)
-    },
+// Computed
+// --------------------------------------------------------------------------
+const mainConfig = computed(() => store.getters.mainConfig)
+const personMap = computed(() => store.getters.personMap)
+const user = computed(() => store.getters.user)
 
-    isInChat() {
-      return this.participants.includes(this.user.id)
-    },
+const attachmentNamePrefix = computed(() =>
+  stringHelpers.attachmentNamePrefix(props.name)
+)
 
-    participantList() {
-      return sortPeople(this.participants.map(pid => this.personMap.get(pid)))
-    }
-  },
+const isInChat = computed(() => participants.value.includes(user.value.id))
 
-  methods: {
-    ...mapActions([
-      'deleteChatMessage',
-      'getChatMessage',
-      'getEntityChat',
+const participantList = computed(() =>
+  sortPeople(participants.value.map(personId => personMap.value.get(personId)))
+)
+
+// Functions
+// --------------------------------------------------------------------------
+const reset = async () => {
+  loading.chat = true
+  errors.chat = false
+  try {
+    chat.value = await store.dispatch('getEntityChat', props.entity.id)
+    messages.value = await store.dispatch(
       'getEntityChatMessages',
-      'joinEntityChat',
-      'leaveEntityChat',
-      'sendChatMessage'
-    ]),
+      props.entity.id
+    )
+    messages.value.forEach(message => messageMap.set(message.id, message))
+    participants.value = chat.value.participants || []
+  } catch (error) {
+    errors.chat = true
+    console.error(error)
+  } finally {
+    loading.chat = false
+  }
+}
 
-    async reset() {
-      this.loading.chat = true
-      this.errors.chat = false
-      try {
-        this.chat = await this.getEntityChat(this.entity.id)
-        this.messages = await this.getEntityChatMessages(this.entity.id)
-        this.messages.forEach(m => this.messageMap.set(m.id, m))
-        this.participants = this.chat.participants || []
-      } catch (e) {
-        this.errors.chat = true
-        console.error(e)
-      } finally {
-        this.loading.chat = false
-      }
-    },
+const joinChat = async () => {
+  loading.join = true
+  errors.join = false
+  try {
+    await store.dispatch('joinEntityChat', props.entity.id)
+  } catch (error) {
+    errors.join = true
+    console.error(error)
+  } finally {
+    loading.join = false
+  }
+}
 
-    async joinChat() {
-      this.loading.join = true
-      this.errors.join = false
-      try {
-        await this.joinEntityChat(this.entity.id)
-      } catch (e) {
-        this.errors.join = true
-        console.error(e)
-      } finally {
-        this.loading.join = false
-      }
-    },
+const leaveChat = async () => {
+  loading.leave = true
+  errors.leave = false
+  try {
+    await store.dispatch('leaveEntityChat', props.entity.id)
+  } catch (error) {
+    errors.leave = true
+    console.error(error)
+  } finally {
+    loading.leave = false
+  }
+}
 
-    async leaveChat() {
-      this.loading.leave = true
-      this.errors.leave = false
-      try {
-        await this.leaveEntityChat(this.entity.id)
-      } catch (e) {
-        this.errors.leave = true
-        console.error(e)
-      } finally {
-        this.loading.leave = false
-      }
-    },
+const sendMessage = async event => {
+  if (event && event.keyCode === 13 && event.shiftKey) {
+    currentMessage.value += '\n'
+    return
+  }
+  errors.send = false
+  loading.send = true
+  try {
+    const message = await store.dispatch('sendChatMessage', {
+      entityId: props.entity.id,
+      message: currentMessage.value,
+      attachments: attachments.value
+    })
+    currentMessage.value = ''
+    attachments.value = []
+    messages.value.push(message)
+    messageMap.set(message.id, message)
+    chatDaysRef.value.scrollToBottom()
+    await nextTick()
+    messageBoxRef.value.focus()
+  } catch (error) {
+    errors.send = true
+    console.error(error)
+  } finally {
+    loading.send = false
+  }
+}
 
-    async sendMessage(event) {
-      if (event && event.keyCode === 13 && event.shiftKey) {
-        this.currentMessage += '\n'
-        return
-      }
-      this.errors.send = false
-      this.loading.send = true
-      try {
-        const message = await this.sendChatMessage({
-          entityId: this.entity.id,
-          message: this.currentMessage,
-          attachments: this.attachments
-        })
-        this.currentMessage = ''
-        this.attachments = []
-        this.messages.push(message)
-        this.messageMap.set(message.id, message)
-        this.$refs.messages.scrollToBottom()
-        this.$nextTick(() => {
-          this.$refs.messageBox.focus()
-        })
-      } catch (e) {
-        this.errors.send = true
-        console.error(e)
-      } finally {
-        this.loading.send = false
-      }
-    },
+const showConfirmDeleteMessage = messageId => {
+  modals.deleteMessage = true
+  errors.deleteMessage = false
+  loading.deleteMessage = false
+  messageToDeleteId = messageId
+}
 
-    showConfirmDeleteMessage(messageId) {
-      this.modals.deleteMessage = true
-      this.errors.deleteMessage = false
-      this.loading.deleteMessage = false
-      this.messageToDeleteId = messageId
-    },
+const deleteMessage = async () => {
+  const messageId = messageToDeleteId
+  errors.deleteMessage = false
+  try {
+    loading.deleteMessage = true
+    messages.value = messages.value.filter(message => message.id !== messageId)
+    messageMap.delete(messageId)
+    await store.dispatch('deleteChatMessage', {
+      entityId: props.entity.id,
+      messageId
+    })
+    modals.deleteMessage = false
+    messageToDeleteId = null
+  } catch (error) {
+    errors.deleteMessage = true
+    console.error(error)
+  } finally {
+    loading.deleteMessage = false
+  }
+}
 
-    async deleteMessage() {
-      const messageId = this.messageToDeleteId
-      this.errors.deleteMessage = false
-      try {
-        this.loading.deleteMessage = true
-        this.messages = this.messages.filter(m => m.id !== messageId)
-        this.messageMap.delete(messageId)
-        await this.deleteChatMessage({
-          entityId: this.entity.id,
-          messageId
-        })
-        this.modals.deleteMessage = false
-        this.messageToDeleteId = null
-      } catch (e) {
-        this.errors.deleteMessage = true
-        console.error(e)
-      } finally {
-        this.loading.deleteMessage = false
-      }
-    },
+const focusMessageBox = () => {
+  messageBoxRef.value?.focus()
+}
 
-    focusMessageBox() {
-      const messageBox = this.$refs.messageBox
-      if (messageBox) messageBox.focus()
-    },
+const addAttachment = forms => {
+  attachments.value = attachments.value.concat(forms)
+  closeAttachmentModal()
+}
 
-    addAttachment(forms) {
-      this.attachments = this.attachments.concat(forms)
-      this.closeAttachmentModal()
-    },
+const closeAttachmentModal = () => {
+  modals.addAttachment = false
+}
 
-    closeAttachmentModal() {
-      this.modals.addAttachment = false
-    },
+const removeAttachment = form => {
+  attachments.value = attachments.value.filter(
+    attachment => attachment !== form
+  )
+}
 
-    removeAttachment(form) {
-      this.attachments = this.attachments.filter(f => f !== form)
-    },
+const onSelectEmoji = emoji => {
+  currentMessage.value = stringHelpers.insertInTextArea(
+    messageBoxRef.value,
+    emoji.i
+  )
+}
 
-    onSelectEmoji(emoji) {
-      this.currentMessage = stringHelpers.insertInTextArea(
-        this.$refs.messageBox,
-        emoji.i
-      )
-    }
-  },
+const onChatJoined = eventData => {
+  if (
+    eventData.chat_id === chat.value.id &&
+    !participants.value.includes(eventData.person_id)
+  ) {
+    participants.value.push(eventData.person_id)
+  }
+}
 
-  socket: {
-    events: {
-      'chat:joined'(eventData) {
-        if (
-          eventData.chat_id === this.chat.id &&
-          !this.participants.includes(eventData.person_id)
-        ) {
-          this.participants.push(eventData.person_id)
-        }
-      },
+const onChatLeft = eventData => {
+  if (
+    eventData.chat_id === chat.value.id &&
+    participants.value.includes(eventData.person_id)
+  ) {
+    participants.value = participants.value.filter(
+      personId => personId !== eventData.person_id
+    )
+  }
+}
 
-      'chat:left'(eventData) {
-        if (
-          eventData.chat_id === this.chat.id &&
-          this.participants.includes(eventData.person_id)
-        ) {
-          this.participants = this.participants.filter(
-            pId => pId !== eventData.person_id
-          )
-        }
-      },
-
-      async 'chat:new-message'(eventData) {
-        if (eventData.chat_id === this.chat.id) {
-          const message = await this.getChatMessage({
-            entityId: this.entity.id,
-            messageId: eventData.chat_message_id
-          })
-          if (!this.messageMap.has(eventData.chat_message_id)) {
-            this.messageMap.set(message.id, message)
-            this.messages.push(message)
-            this.focusMessageBox()
-          }
-        }
-      },
-
-      'chat:deleted-message'(eventData) {
-        if (eventData.chat_id === this.chat.id) {
-          this.messages = this.messages.filter(
-            m => m.id !== eventData.message_id
-          )
-        }
-      }
-    }
-  },
-
-  watch: {
-    entity() {
-      if (this.entity) this.reset()
+const onChatNewMessage = async eventData => {
+  if (eventData.chat_id === chat.value.id) {
+    const message = await store.dispatch('getChatMessage', {
+      entityId: props.entity.id,
+      messageId: eventData.chat_message_id
+    })
+    if (!messageMap.has(eventData.chat_message_id)) {
+      messageMap.set(message.id, message)
+      messages.value.push(message)
+      focusMessageBox()
     }
   }
 }
+
+const onChatDeletedMessage = eventData => {
+  if (eventData.chat_id === chat.value.id) {
+    messages.value = messages.value.filter(
+      message => message.id !== eventData.message_id
+    )
+  }
+}
+
+// the parent page focuses the message box through a template ref
+defineExpose({ focusMessageBox })
+
+// Watchers
+// --------------------------------------------------------------------------
+watch(
+  () => props.entity,
+  () => {
+    if (props.entity) reset()
+  }
+)
+
+// Lifecycle
+// --------------------------------------------------------------------------
+onMounted(() => {
+  socket.on('chat:joined', onChatJoined)
+  socket.on('chat:left', onChatLeft)
+  socket.on('chat:new-message', onChatNewMessage)
+  socket.on('chat:deleted-message', onChatDeletedMessage)
+  if (props.entity) reset()
+})
+
+onBeforeUnmount(() => {
+  socket.off('chat:joined', onChatJoined)
+  socket.off('chat:left', onChatLeft)
+  socket.off('chat:new-message', onChatNewMessage)
+  socket.off('chat:deleted-message', onChatDeletedMessage)
+})
 </script>
 
 <style lang="scss" scoped>

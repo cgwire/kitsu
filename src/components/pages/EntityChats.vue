@@ -2,11 +2,12 @@
   <page-left-side-layout>
     <template #side>
       <div class="chat-column">
-        <spinner class="mt1" v-if="loading.list" />
+        <spinner class="mt1" v-if="isListLoading" />
         <div class="chat-list" v-else>
           <div
             :key="chat.id"
-            :class="chatClass(chat)"
+            class="chat-item"
+            :class="{ selected: entity?.id === chat.object_id }"
             role="button"
             tabindex="0"
             @click="selectChat(chat)"
@@ -46,158 +47,161 @@
         <entity-chat
           ref="entityChat"
           :entity="entity"
-          :name="chatList.find(c => c.object_id === entity.id)?.entity_name"
+          :name="selectedChatName"
         />
       </div>
     </template>
   </page-left-side-layout>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+// Imports
+import { useHead } from '@unhead/vue'
+import {
+  computed,
+  getCurrentInstance,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  useTemplateRef,
+  watch
+} from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
-import { formatListMixin } from '@/components/mixins/format'
+import { useFormat } from '@/composables/format'
 
+import PageLeftSideLayout from '@/components/layouts/PageLeftSideLayout.vue'
 import EntityChat from '@/components/pages/entities/EntityChat.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
-import PageLeftSideLayout from '@/components/layouts/PageLeftSideLayout.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 
-export default {
-  name: 'entity-chats',
+// Composables
+const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
+const store = useStore()
+const socket = getCurrentInstance().appContext.config.globalProperties.$socket
+const { formatDate } = useFormat()
 
-  mixins: [formatListMixin],
+// State
+// --------------------------------------------------------------------------
+const chats = ref([])
+const entity = ref(null)
+const isListLoading = ref(false)
 
-  components: {
-    EntityChat,
-    EntityThumbnail,
-    PageLeftSideLayout,
-    Spinner
-  },
+const entityChatRef = useTemplateRef('entityChat')
 
-  data() {
-    return {
-      chats: [],
-      entity: null,
-      loading: {
-        list: false
-      }
-    }
-  },
+// Computed
+// --------------------------------------------------------------------------
+const productionMap = computed(() => store.getters.productionMap)
+const user = computed(() => store.getters.user)
 
-  async mounted() {
-    this.loading.list = true
-    this.chats = await this.getEntityChats()
-    if (this.$route.query.entity_id) {
-      this.selectFromQuery()
-    } else {
-      this.selectFirstChat()
-    }
-    this.loading.list = false
-  },
+// newest message first, chats without any message last; ISO timestamps
+// compare fine as strings
+const chatList = computed(() =>
+  [...chats.value].sort((a, b) => {
+    if (!a.last_message) return 1
+    if (!b.last_message) return -1
+    return (
+      b.last_message.localeCompare(a.last_message) ||
+      a.entity_name.localeCompare(b.entity_name)
+    )
+  })
+)
 
-  computed: {
-    ...mapGetters(['productionMap', 'user']),
+const selectedChatName = computed(
+  () =>
+    chatList.value.find(chat => chat.object_id === entity.value?.id)
+      ?.entity_name
+)
 
-    chatList() {
-      return [...this.chats].sort((a, b) => {
-        if (!a.last_message) return 1
-        if (!b.last_message) return -1
-        if (a.last_message === b.last_message) {
-          return a.entity_name.localeCompare(b.entity_name)
-        }
-        return a.last_message < b.last_message
-      })
-    }
-  },
-
-  methods: {
-    ...mapActions(['getEntityChats']),
-
-    selectFirstChat() {
-      if (this.chats.length > 0) {
-        const chat = this.chats[this.chats.length - 1]
-        this.entity = { id: chat.object_id }
-      }
-    },
-
-    selectFromQuery() {
-      const chat = this.chats.find(
-        c => c.object_id === this.$route.query.entity_id
-      )
-      if (chat) {
-        this.entity = { id: chat.object_id }
-      } else {
-        this.selectFirstChat()
-      }
-    },
-
-    selectChat(chat) {
-      this.entity = { id: chat.object_id }
-      this.$nextTick(() => {
-        this.$refs.entityChat.focusMessageBox()
-      })
-      this.$router.push({ query: { entity_id: chat.object_id } })
-    },
-
-    chatClass(chat) {
-      return {
-        'chat-item': true,
-        selected: this.entity && this.entity.id === chat.object_id
-      }
-    },
-
-    getChatProjectName(chat) {
-      return this.productionMap.get(chat.project_id)?.name
-    },
-
-    getChatDate(chat) {
-      if (!chat.last_message) return this.$t('chats.no_message_yet')
-      return this.formatDate(chat.last_message)
-    }
-  },
-
-  watch: {
-    '$route.query.entity_id'() {
-      this.selectFromQuery()
-    }
-  },
-
-  socket: {
-    events: {
-      async 'chat:joined'(eventData) {
-        if (
-          !this.chats.some(c => c.id === eventData.chat_id) &&
-          this.user.id === eventData.person_id
-        ) {
-          this.chats = await this.getEntityChats()
-        }
-      },
-
-      'chat:left'(eventData) {
-        if (
-          this.chats.some(c => c.id === eventData.chat_id) &&
-          this.user.id === eventData.person_id
-        ) {
-          this.chats = this.chats.filter(c => c.id !== eventData.chat_id)
-        }
-      },
-
-      'chat:new-message'(eventData) {
-        const chat = this.chats.find(c => c.id === eventData.chat_id)
-        if (chat) {
-          chat.last_message = eventData.last_message
-        }
-      }
-    }
-  },
-
-  head() {
-    return {
-      title: `${this.$t('chats.title')} - Kitsu`
-    }
+// Functions
+// --------------------------------------------------------------------------
+const selectFirstChat = () => {
+  const [chat] = chatList.value
+  if (chat) {
+    entity.value = { id: chat.object_id }
   }
 }
+
+// falls back to the first chat when the query has no (known) entity id
+const selectFromQuery = () => {
+  const chat = chats.value.find(
+    chat => chat.object_id === route.query.entity_id
+  )
+  if (chat) {
+    entity.value = { id: chat.object_id }
+  } else {
+    selectFirstChat()
+  }
+}
+
+const selectChat = async chat => {
+  entity.value = { id: chat.object_id }
+  await nextTick()
+  entityChatRef.value.focusMessageBox()
+  router.push({ query: { entity_id: chat.object_id } })
+}
+
+const getChatProjectName = chat =>
+  productionMap.value.get(chat.project_id)?.name
+
+const getChatDate = chat =>
+  chat.last_message ? formatDate(chat.last_message) : t('chats.no_message_yet')
+
+const onChatJoined = async eventData => {
+  if (
+    !chats.value.some(chat => chat.id === eventData.chat_id) &&
+    user.value.id === eventData.person_id
+  ) {
+    chats.value = await store.dispatch('getEntityChats')
+  }
+}
+
+const onChatLeft = eventData => {
+  if (
+    chats.value.some(chat => chat.id === eventData.chat_id) &&
+    user.value.id === eventData.person_id
+  ) {
+    chats.value = chats.value.filter(chat => chat.id !== eventData.chat_id)
+  }
+}
+
+const onChatNewMessage = eventData => {
+  const chat = chats.value.find(chat => chat.id === eventData.chat_id)
+  if (chat) {
+    chat.last_message = eventData.last_message
+  }
+}
+
+// Watchers
+// --------------------------------------------------------------------------
+watch(() => route.query.entity_id, selectFromQuery)
+
+// Lifecycle
+// --------------------------------------------------------------------------
+onMounted(async () => {
+  socket.on('chat:joined', onChatJoined)
+  socket.on('chat:left', onChatLeft)
+  socket.on('chat:new-message', onChatNewMessage)
+  isListLoading.value = true
+  chats.value = await store.dispatch('getEntityChats')
+  selectFromQuery()
+  isListLoading.value = false
+})
+
+onBeforeUnmount(() => {
+  socket.off('chat:joined', onChatJoined)
+  socket.off('chat:left', onChatLeft)
+  socket.off('chat:new-message', onChatNewMessage)
+})
+
+// Head
+// --------------------------------------------------------------------------
+useHead({ title: computed(() => `${t('chats.title')} - Kitsu`) })
 </script>
 
 <style lang="scss" scoped>
