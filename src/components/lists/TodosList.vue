@@ -30,14 +30,7 @@
               {{ $t('assets.fields.episode') }}
             </th>
 
-            <th class="assignees" v-if="isToCheck">
-              {{ $t('tasks.fields.assignees') }}
-            </th>
-            <th
-              class="description"
-              scope="col"
-              v-if="isDescriptionPresent && !isToCheck"
-            >
+            <th class="description" scope="col" v-if="isDescriptionPresent">
               {{ $t('assets.fields.description') }}
             </th>
             <th scope="col" class="estimation" :title="$t('main.estimation')">
@@ -46,7 +39,7 @@
             <th scope="col" class="duration number-cell">
               {{ $t('tasks.fields.duration').substring(0, 3) }}.
             </th>
-            <th scope="col" class="start-date" v-if="!isToCheck">
+            <th scope="col" class="start-date">
               {{ $t('tasks.fields.start_date_short') }}
             </th>
             <th scope="col" class="due-date">
@@ -63,15 +56,12 @@
             <th scope="col" class="status">
               {{ $t('tasks.fields.task_status') }}
             </th>
-            <template v-if="!isToCheck">
-              <th scope="col" class="last-comment" v-if="!done">
-                {{ $t('tasks.fields.last_comment') }}
-              </th>
-              <th scope="col" class="end-date" v-else>
-                {{ $t('tasks.fields.end_date') }}
-              </th>
-            </template>
-            <th class="actions" v-else></th>
+            <th scope="col" class="last-comment" v-if="!done">
+              {{ $t('tasks.fields.last_comment') }}
+            </th>
+            <th scope="col" class="end-date" v-else>
+              {{ $t('tasks.fields.end_date') }}
+            </th>
           </tr>
         </thead>
         <tbody class="datatable-body" v-if="tasks.length > 0">
@@ -130,19 +120,8 @@
             <description-cell
               class="description"
               :entry="{ description: entry.entity_description }"
-              v-if="isDescriptionPresent && !isToCheck"
+              v-if="isDescriptionPresent"
             />
-            <td class="assignees" v-if="isToCheck">
-              <div class="avatars">
-                <people-avatar
-                  :key="`${entry.id}-${person.id}`"
-                  :person="person"
-                  :size="30"
-                  :font-size="16"
-                  v-for="person in getSortedPeople(entry.assignees)"
-                />
-              </div>
-            </td>
             <td class="estimation number-cell">
               <input
                 class="input"
@@ -157,15 +136,10 @@
                 {{ formatDuration(entry.estimation) }}
               </template>
             </td>
-            <td
-              class="duration number-cell"
-              :class="{
-                error: isEstimationBurned(entry)
-              }"
-            >
+            <td class="duration number-cell">
               {{ formatDuration(entry.duration) }}
             </td>
-            <td class="start-date" v-if="!isToCheck">
+            <td class="start-date">
               <date-field
                 class="flexrow-item"
                 :min-date="disabledDates"
@@ -260,17 +234,14 @@
               :selected="selectionGrid[entry.id]"
               :task-test="entry"
             />
-            <template v-if="!isToCheck">
-              <last-comment-cell
-                class="last-comment"
-                :task="entry"
-                v-if="!done"
-              />
-              <td class="end-date" v-else>
-                {{ formatDisplayDate(entry.end_date) }}
-              </td>
-            </template>
-            <th class="actions" v-else></th>
+            <last-comment-cell
+              class="last-comment"
+              :task="entry"
+              v-if="!done"
+            />
+            <td class="end-date" v-else>
+              {{ formatDisplayDate(entry.end_date) }}
+            </td>
           </tr>
         </tbody>
       </table>
@@ -359,13 +330,12 @@ import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
 import ValidationCell from '@/components/cells/ValidationCell.vue'
 import DateField from '@/components/widgets/DateField.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
 const store = useStore()
 const { formatDisplayDate, formatDuration, isDurationInHours, organisation } =
   useFormat()
-const { getSortedPeople, getTaskType } = useTaskHelpers()
+const { getTaskType } = useTaskHelpers()
 
 // Props / Emits
 // --------------------------------------------------------------------------
@@ -383,10 +353,6 @@ const props = defineProps({
     default: false
   },
   isLoading: {
-    type: Boolean,
-    default: false
-  },
-  isToCheck: {
     type: Boolean,
     default: false
   },
@@ -435,28 +401,26 @@ const isDescriptionPresent = computed(() =>
 
 const metadataDescriptorsMap = computed(() => {
   const descriptorsMap = {}
-  if (!props.isToCheck) {
-    openProductions.value.forEach(project => {
-      project.descriptors.forEach(descriptor => {
-        const isUserDepartment = user.value.departments.some(department =>
-          descriptor.departments.includes(department)
-        )
-        if (isUserDepartment) {
-          // group them by field_name if they have the same field_name
-          if (!(descriptor.field_name in descriptorsMap)) {
-            descriptorsMap[descriptor.field_name] = {}
-          }
-          const descriptorFieldNameEntry = descriptorsMap[descriptor.field_name]
-          // group them by entity_type if the have the same entity_type
-          if (!(descriptor.entity_type in descriptorFieldNameEntry)) {
-            descriptorFieldNameEntry[descriptor.entity_type] = {}
-          }
-          descriptorFieldNameEntry[descriptor.entity_type][project.id] =
-            descriptor
+  openProductions.value.forEach(project => {
+    project.descriptors.forEach(descriptor => {
+      const isUserDepartment = user.value.departments.some(department =>
+        descriptor.departments.includes(department)
+      )
+      if (isUserDepartment) {
+        // group them by field_name if they have the same field_name
+        if (!(descriptor.field_name in descriptorsMap)) {
+          descriptorsMap[descriptor.field_name] = {}
         }
-      })
+        const descriptorFieldNameEntry = descriptorsMap[descriptor.field_name]
+        // group them by entity_type if the have the same entity_type
+        if (!(descriptor.entity_type in descriptorFieldNameEntry)) {
+          descriptorFieldNameEntry[descriptor.entity_type] = {}
+        }
+        descriptorFieldNameEntry[descriptor.entity_type][project.id] =
+          descriptor
+      }
     })
-  }
+  })
   return descriptorsMap
 })
 
@@ -579,9 +543,6 @@ const isTaskChanged = (task, data) => {
     (data.estimation !== undefined && task.estimation !== data.estimation)
   )
 }
-
-const isEstimationBurned = task =>
-  props.isToCheck && task.estimation > 0 && task.duration > task.estimation
 
 const updateEstimation = duration => {
   const estimation = organisation.value.format_duration_in_hours
@@ -777,17 +738,6 @@ onBeforeUnmount(() => {
 .type {
   width: 130px;
   min-width: 130px;
-}
-
-.assignees {
-  width: 140px;
-  max-width: 140px;
-
-  .avatars {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
 }
 
 .status {
