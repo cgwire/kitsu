@@ -12,34 +12,33 @@
   </div>
 </template>
 
-<script>
-export default {
-  props: {
-    size: {
-      default: '40px'
-    },
-    background: {
-      default: '#41b883'
-    },
-    duration: {
-      default: '1.3s'
-    }
+<script setup>
+import { computed } from 'vue'
+
+const props = defineProps({
+  size: {
+    type: String,
+    default: '40px'
   },
-  computed: {
-    cubeStyles() {
-      return {
-        backgroundColor: this.background,
-        animationDuration: this.duration
-      }
-    },
-    styles() {
-      return {
-        width: this.size,
-        height: this.size
-      }
-    }
+  background: {
+    type: String,
+    default: '#41b883'
+  },
+  duration: {
+    type: String,
+    default: '1.3s'
   }
-}
+})
+
+const cubeStyles = computed(() => ({
+  backgroundColor: props.background,
+  animationDuration: props.duration
+}))
+
+const styles = computed(() => ({
+  width: props.size,
+  height: props.size
+}))
 </script>
 
 <style lang="scss" scoped>

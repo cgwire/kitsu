@@ -2,7 +2,6 @@
   <div class="has-text-centered" :style="sizeStyle">
     <img src="../../assets/spinner-white.svg" alt="" v-if="isWhite" />
     <square-grid :style="{ margin: 'auto' }" v-else-if="isProcessing" />
-    <origami :style="{ margin: 'auto' }" v-else-if="isStylish" />
     <img src="../../assets/spinner.svg" alt="" v-else />
   </div>
 </template>
@@ -10,7 +9,6 @@
 <script setup>
 import { computed } from 'vue'
 
-import Origami from '@/components/spinners/Origami.vue'
 import SquareGrid from '@/components/spinners/SquareGrid.vue'
 
 const props = defineProps({
@@ -19,10 +17,6 @@ const props = defineProps({
     default: false
   },
   isProcessing: {
-    type: Boolean,
-    default: false
-  },
-  isStylish: {
     type: Boolean,
     default: false
   },
