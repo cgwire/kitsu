@@ -2,7 +2,7 @@
   <div class="columns fixed-page">
     <div class="column main-column">
       <div class="todos page">
-        <div class="filters flexrow">
+        <div class="filters flexrow mt1">
           <combobox-production
             class="flexrow-item"
             :label="$t('main.production')"
