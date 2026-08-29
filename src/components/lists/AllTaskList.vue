@@ -1,64 +1,56 @@
 <template>
   <div class="data-list">
-    <div ref="body" class="datatable-wrapper">
+    <div class="datatable-wrapper">
       <table class="datatable">
-        <thead ref="thead" class="datatable-head">
+        <thead class="datatable-head">
           <tr class="row-header">
-            <th class="project" ref="th-name">
+            <th class="project">
               {{ $t('tasks.fields.production') }}
             </th>
-            <th class="thumbnail" ref="th-thumbnail"></th>
-            <th class="asset-type" ref="th-type">
+            <th class="thumbnail"></th>
+            <th class="asset-type">
               {{ $t('tasks.fields.parent') }}
             </th>
-            <th class="name" ref="th-name">
+            <th class="name">
               {{ $t('tasks.fields.entity') }}
             </th>
-            <th class="name" ref="th-name">
+            <th class="name">
               {{ $t('tasks.fields.task_type') }}
             </th>
-            <th class="status" ref="th-status">
+            <th class="status">
               {{ $t('tasks.fields.task_status') }}
             </th>
-            <th class="assignees" ref="th-assignees">
+            <th class="assignees">
               {{ $t('tasks.fields.assignees') }}
             </th>
-            <th
-              ref="th-estimation"
-              class="estimation number-cell"
-              :title="$t('main.estimation')"
-            >
+            <th class="estimation number-cell" :title="$t('main.estimation')">
               {{ $t('tasks.fields.estimation').substring(0, 3) }}.
             </th>
-            <th class="duration number-cell" ref="th-duration">
+            <th class="duration number-cell">
               {{ $t('tasks.fields.duration').substring(0, 3) }}.
             </th>
-            <th class="start-date" ref="th-date">
+            <th class="start-date">
               {{ $t('tasks.fields.start_date') }}
             </th>
-            <th class="due-date" ref="th-date">
+            <th class="due-date">
               {{ $t('tasks.fields.due_date') }}
             </th>
-            <th class="done-date" ref="th-date">
+            <th class="done-date">
               {{ $t('tasks.fields.done_date') }}
             </th>
-            <th class="empty" ref="">&nbsp;</th>
+            <th class="empty">&nbsp;</th>
           </tr>
         </thead>
 
         <tbody class="datatable-body">
           <tr
-            :ref="'task-' + task.id"
             :key="task.id"
-            :class="{
-              'task-line': true,
-              'datatable-row': true,
-              selected: selectionGrid[task.id]
-            }"
+            class="task-line datatable-row"
+            :class="{ selected: selectionGrid[task.id] }"
             role="button"
             tabindex="0"
-            @click="selectTask($event, index, task)"
-            @keydown.enter.prevent="selectTask($event, index, task)"
+            @click="selectTask(index, task)"
+            @keydown.enter.prevent="selectTask(index, task)"
             v-for="(task, index) in tasks"
           >
             <td class="project">
@@ -114,11 +106,8 @@
               {{ formatDuration(task.estimation) }}
             </td>
             <td
-              :class="{
-                duration: true,
-                'number-cell': true,
-                error: isEstimationBurned(task)
-              }"
+              class="duration number-cell"
+              :class="{ error: isEstimationBurned(task) }"
             >
               {{ formatDuration(task.duration) }}
             </td>
@@ -137,11 +126,7 @@
       </table>
       <div class="has-text-centered" v-if="isMore && !isLoading">
         <spinner class="mt2" v-if="isMoreLoading" />
-        <button
-          class="button mt2"
-          @click="$emit('more-clicked')"
-          v-else-if="!isLoading"
-        >
+        <button class="button mt2" @click="$emit('more-clicked')" v-else>
           {{ $t('main.load_more') }}
         </button>
       </div>
@@ -180,210 +165,138 @@
   </div>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
-import moment from 'moment-timezone'
+<script setup>
+// Imports
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { useStore } from 'vuex'
 
-import { formatListMixin } from '@/components/mixins/format'
-import { domMixin } from '@/components/mixins/dom'
+import { pauseEvent } from '@/composables/dom'
+import { useFormat } from '@/composables/format'
 
-import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
-import PeopleAvatarWithMenu from '@/components/widgets/PeopleAvatarWithMenu.vue'
 import ProductionNameCell from '@/components/cells/ProductionNameCell.vue'
-import Spinner from '@/components/widgets/Spinner.vue'
-import TableInfo from '@/components/widgets/TableInfo.vue'
 import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
 import ValidationCell from '@/components/cells/ValidationCell.vue'
+import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+import PeopleAvatarWithMenu from '@/components/widgets/PeopleAvatarWithMenu.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
+import TableInfo from '@/components/widgets/TableInfo.vue'
 
-export default {
-  name: 'all-task-list',
+// Composables
+const store = useStore()
+const { formatDisplayDate, formatDuration, isDurationInHours } = useFormat()
 
-  mixins: [domMixin, formatListMixin],
-
-  components: {
-    EntityThumbnail,
-    PeopleAvatarWithMenu,
-    ProductionNameCell,
-    Spinner,
-    TableInfo,
-    TaskTypeCell,
-    ValidationCell
+// Props / Emits
+// --------------------------------------------------------------------------
+const props = defineProps({
+  isError: {
+    type: Boolean,
+    default: false
   },
-
-  emits: ['more-clicked', 'task-selected'],
-
-  data() {
-    return {
-      lastSelection: null,
-      page: 1,
-      selectionGrid: {}
-    }
+  isLoading: {
+    type: Boolean,
+    default: false
   },
-
-  props: {
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    isMore: {
-      type: Boolean,
-      default: false
-    },
-    isMoreLoading: {
-      type: Boolean,
-      default: false
-    },
-    stats: {
-      type: Object,
-      default: () => {}
-    },
-    tasks: {
-      type: Array,
-      default: () => []
-    }
+  isMore: {
+    type: Boolean,
+    default: false
   },
-
-  mounted() {
-    window.addEventListener('keydown', this.onKeyDown, false)
+  isMoreLoading: {
+    type: Boolean,
+    default: false
   },
-
-  beforeUnmount() {
-    window.removeEventListener('keydown', this.onKeyDown)
+  stats: {
+    type: Object,
+    default: () => ({ total: 0, total_duration: 0, total_estimation: 0 })
   },
+  tasks: {
+    type: Array,
+    default: () => []
+  }
+})
 
-  computed: {
-    ...mapGetters([
-      'assetMap',
-      'editMap',
-      'episodeMap',
-      'nbSelectedTasks',
-      'personMap',
-      'user',
-      'selectedTasks',
-      'sequenceMap',
-      'shotMap',
-      'taskMap',
-      'isCurrentUserManager',
-      'isCurrentUserSupervisor',
-      'taskTypeMap'
-    ]),
+const emit = defineEmits(['more-clicked', 'task-selected'])
 
-    nbFrames() {
-      let total = 0
-      this.tasks.forEach(task => {
-        total += task.entity_nb_frames
-      })
-      return total
-    }
-  },
+// State
+// --------------------------------------------------------------------------
+const lastSelection = ref(null)
+const selectionGrid = ref({})
 
-  methods: {
-    ...mapActions([
-      'addSelectedTask',
-      'addSelectedTasks',
-      'clearSelectedTasks',
-      'updateTask',
-      'unassignPersonFromTask',
-      'removeSelectedTask'
-    ]),
+// Computed
+// --------------------------------------------------------------------------
+const nbSelectedTasks = computed(() => store.getters.nbSelectedTasks)
+const personMap = computed(() => store.getters.personMap)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
-    getParentName(task) {
-      if (task.sequence_name) {
-        if (task.episode_name) {
-          return `${task.episode_name} - ${task.sequence_name}`
-        } else {
-          return task.sequence_name
-        }
-      } else {
-        return task.entity_type_name
-      }
-    },
+// Functions
+// --------------------------------------------------------------------------
+const getParentName = task => {
+  if (task.sequence_name) {
+    return task.episode_name
+      ? `${task.episode_name} - ${task.sequence_name}`
+      : task.sequence_name
+  }
+  return task.entity_type_name
+}
 
-    getTaskName(task) {
-      return task.entity_name
-    },
+const isEstimationBurned = task =>
+  task.estimation > 0 && task.duration > task.estimation
 
-    getDate(date) {
-      return date ? moment(date, 'YYYY-MM-DD').toDate() : null
-    },
+const onUnassign = (task, person) =>
+  store
+    .dispatch('unassignPersonFromTask', { task, person })
+    .catch(console.error)
 
-    isEstimationBurned(task) {
-      return (
-        task.estimation &&
-        task.estimation > 0 &&
-        task.duration > task.estimation
-      )
-    },
+// alt + arrows walk the list, wrapping at both ends
+const onKeyDown = event => {
+  if (props.tasks.length === 0 || !event.altKey) return
+  const delta = [37, 38].includes(event.keyCode)
+    ? -1
+    : [39, 40].includes(event.keyCode)
+      ? 1
+      : 0
+  if (delta === 0) return
+  const { length } = props.tasks
+  const index = ((lastSelection.value || 0) + delta + length) % length
+  selectTask(index, props.tasks[index])
+  pauseEvent(event)
+}
 
-    onKeyDown(event) {
-      if (this.tasks.length > 0 && event.altKey) {
-        let index = this.lastSelection ? this.lastSelection : 0
-        if ([37, 38].includes(event.keyCode)) {
-          index = index - 1 < 0 ? this.tasks.length - 1 : index - 1
-          this.selectTask({}, index, this.tasks[index])
-          this.pauseEvent(event)
-        } else if ([39, 40].includes(event.keyCode)) {
-          index = index + 1 >= this.tasks.length ? 0 : index + 1
-          this.selectTask({}, index, this.tasks[index])
-          this.pauseEvent(event)
-        }
-      }
-    },
+const selectTask = (index, task) => {
+  const isSelected = selectionGrid.value[task.id]
+  const isManySelection = Object.keys(selectionGrid.value).length > 1
+  store.dispatch('clearSelectedTasks', { task })
+  resetSelection()
 
-    selectTask(event, index, task) {
-      if (
-        event &&
-        event.target &&
-        // Dirty hack needed to make date picker and inputs work properly
-        (['INPUT'].includes(event.target.nodeName) ||
-          (event.target.parentNode &&
-            ['HEADER'].includes(event.target.parentNode.nodeName)) ||
-          ['cell day selected'].includes(event.target.className))
-      )
-        return
-      const isSelected = this.selectionGrid[task.id]
-      const isManySelection = Object.keys(this.selectionGrid).length > 1
-      this.clearSelectedTasks({ task })
-      this.resetSelection()
-
-      if (this.selectionGrid[task.id]) {
-        this.removeSelectedTask({ task })
-        this.selectionGrid[task.id] = undefined
-      } else if (!isSelected || isManySelection) {
-        this.addSelectedTask({ task })
-        this.$emit('task-selected', task)
-        this.selectionGrid[task.id] = true
-        this.lastSelection = index
-      }
-    },
-
-    setScrollPosition(scrollPosition) {
-      if (this.$refs.body) {
-        this.$refs.body.scrollTop = scrollPosition
-      }
-    },
-
-    resetSelection() {
-      this.selectionGrid = {}
-      this.lastSelection = null
-    }
-  },
-
-  watch: {
-    tasks() {
-      this.page = 1
-      this.resetSelection()
-    },
-
-    nbSelectedTasks() {
-      if (this.nbSelectedTasks === 0) this.resetSelection()
-    }
+  if (!isSelected || isManySelection) {
+    store.dispatch('addSelectedTask', { task })
+    emit('task-selected', task)
+    selectionGrid.value[task.id] = true
+    lastSelection.value = index
   }
 }
+
+const resetSelection = () => {
+  selectionGrid.value = {}
+  lastSelection.value = null
+}
+
+// Watchers
+// --------------------------------------------------------------------------
+watch(() => props.tasks, resetSelection)
+
+watch(nbSelectedTasks, () => {
+  if (nbSelectedTasks.value === 0) resetSelection()
+})
+
+// Lifecycle
+// --------------------------------------------------------------------------
+onMounted(() => {
+  window.addEventListener('keydown', onKeyDown, false)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKeyDown)
+})
 </script>
 
 <style lang="scss" scoped>
@@ -394,11 +307,6 @@ export default {
 }
 
 .asset-type {
-  min-width: 120px;
-  width: 120px;
-}
-
-.sequence {
   min-width: 120px;
   width: 120px;
 }
@@ -419,19 +327,10 @@ export default {
   width: 100px;
 }
 
-.frames,
 .duration,
 .estimation {
   min-width: 60px;
   width: 60px;
-}
-
-.last-comment-date,
-.real-start-date,
-.real-end-date {
-  min-width: 110px;
-  max-width: 110px;
-  width: 110px;
 }
 
 th.start-date,
@@ -456,21 +355,9 @@ td.due-date {
   padding: 0.5em;
 }
 
-.table-header th {
-  padding: 0.5em 0;
-
-  &.status {
-    padding-left: 1em;
-  }
-}
-
 .datatable-head {
   th {
     padding-left: 5px;
-
-    &.retake-count {
-      padding-right: 1em;
-    }
 
     &.status {
       padding-left: 1em;
@@ -479,25 +366,12 @@ td.due-date {
   }
 }
 
-.input {
-  padding: 0.5em;
-}
-
 .datatable-wrapper {
   min-height: calc(100% - 50px);
 }
 
 .data-list {
   margin-top: 0.6em;
-}
-
-.list-wrapper {
-  overflow-x: auto;
-  overflow-y: auto;
-}
-
-.list-wrapper div:first-child h2 {
-  margin-top: 0;
 }
 
 .datatable-body {
@@ -513,10 +387,6 @@ td.due-date {
     &.thumbnail {
       padding: 6px;
     }
-  }
-
-  td.retake-count {
-    padding-right: 0.5em;
   }
 
   td.name {

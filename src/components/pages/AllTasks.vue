@@ -56,254 +56,220 @@
     </template>
     <template #side>
       <task-info :task="selectedTasks.values().next().value">
-        <status-stats :stats="statusStats" v-if="!isLoading" />
+        <status-stats :stats="statusStatsList" v-if="!isLoading" />
       </task-info>
     </template>
   </page-layout>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+// Imports
+import { useHead } from '@unhead/vue'
+import {
+  computed,
+  getCurrentInstance,
+  onBeforeUnmount,
+  onMounted,
+  reactive,
+  ref,
+  watch
+} from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
 import { sortPeople } from '@/lib/sorting'
 
+import PageLayout from '@/components/layouts/PageLayout.vue'
 import AllTaskList from '@/components/lists/AllTaskList.vue'
+import TaskInfo from '@/components/sides/TaskInfo.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
-import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ComboboxStudio from '@/components/widgets/ComboboxStudio.vue'
-import PageLayout from '@/components/layouts/PageLayout.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 import StatusStats from '@/components/widgets/StatusStats.vue'
-import TaskInfo from '@/components/sides/TaskInfo.vue'
 
-export default {
-  name: 'all-tasks',
+// Composables
+const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
+const store = useStore()
+const socket = getCurrentInstance().appContext.config.globalProperties.$socket
 
-  components: {
-    AllTaskList,
-    ComboboxDepartment,
-    ComboboxProduction,
-    ComboboxTaskType,
-    ComboboxStatus,
-    ComboboxStudio,
-    PageLayout,
-    PeopleField,
-    StatusStats,
-    TaskInfo
-  },
+// State
+// --------------------------------------------------------------------------
+const isLoading = ref(false)
+const isLoadingError = ref(false)
+const isMore = ref(false)
+const isMoreLoading = ref(false)
+const stats = ref({ status: [] })
+const tasks = ref([])
 
-  data() {
-    return {
-      filters: {
-        productionId: null,
-        departmentId: null,
-        studioId: null,
-        taskStatusId: null,
-        taskTypeId: null,
-        person: null
-      },
-      isMore: false,
-      isMoreLoading: false,
-      isLoading: false,
-      isLoadingError: false,
-      tasks: [],
-      stats: {
-        status: []
-      }
-    }
-  },
-
-  mounted() {
-    const routeQuery = this.$route.query
-    if (routeQuery.project_id) {
-      this.filters.productionId = routeQuery.project_id
-    }
-    if (routeQuery.task_status_id) {
-      this.filters.taskStatusId = routeQuery.task_status_id
-    }
-    if (routeQuery.task_type_id) {
-      this.filters.taskTypeId = routeQuery.task_type_id
-    }
-    if (routeQuery.person_id) {
-      const personIds = routeQuery.person_id.split(',')
-      this.filters.person = this.activePeopleWithoutBot.filter(person =>
-        personIds.includes(person.id)
+// reading the query here instead of in onMounted spares the double reload
+// the deep filters watcher used to trigger on pages opened with filters
+const filters = reactive({
+  departmentId: route.query.department_id || null,
+  person: route.query.person_id
+    ? store.getters.activePeopleWithoutBot.filter(person =>
+        route.query.person_id.split(',').includes(person.id)
       )
-    }
-    if (routeQuery.department_id) {
-      this.filters.departmentId = routeQuery.department_id
-    }
-    if (routeQuery.studio_id) {
-      this.filters.studioId = routeQuery.studio_id
-    }
+    : null,
+  productionId: route.query.project_id || null,
+  studioId: route.query.studio_id || null,
+  taskStatusId: route.query.task_status_id || null,
+  taskTypeId: route.query.task_type_id || null
+})
 
-    this.reload()
-  },
+let page = 1
 
-  computed: {
-    ...mapGetters([
-      'activePeopleWithoutBot',
-      'getProductionTaskStatuses',
-      'getProductionTaskTypes',
-      'nbSelectedTasks',
-      'openProductions',
-      'personMap',
-      'productionMap',
-      'selectedTasks',
-      'taskStatus',
-      'taskStatusMap',
-      'taskTypes'
-    ]),
+// Computed
+// --------------------------------------------------------------------------
+const activePeopleWithoutBot = computed(
+  () => store.getters.activePeopleWithoutBot
+)
+const getProductionTaskStatuses = computed(
+  () => store.getters.getProductionTaskStatuses
+)
+const getProductionTaskTypes = computed(
+  () => store.getters.getProductionTaskTypes
+)
+const openProductions = computed(() => store.getters.openProductions)
+const personMap = computed(() => store.getters.personMap)
+const productionMap = computed(() => store.getters.productionMap)
+const selectedTasks = computed(() => store.getters.selectedTasks)
+const taskStatusMap = computed(() => store.getters.taskStatusMap)
 
-    taskStatusList() {
-      const productionId = this.filters.productionId
-      const statuses = this.getProductionTaskStatuses(productionId).filter(
-        status => !status.for_concept
-      )
-      return this.addAllValue(statuses)
-    },
+const addAllValue = list => [
+  { id: '', color: '#999', name: t('main.all'), short_name: t('main.all') },
+  ...list
+]
 
-    taskTypeList() {
-      const productionId = this.filters.productionId
-      const types = this.getProductionTaskTypes(productionId).filter(
-        type => type.for_entity !== 'Concept'
-      )
-      return this.addAllValue(types)
-    },
+const productionList = computed(() => addAllValue(openProductions.value))
 
-    personList() {
-      const productionId = this.filters.productionId
-      const production = this.productionMap.get(productionId)
-      if (production) {
-        return sortPeople(
-          production.team
-            .map(personId => this.personMap.get(personId))
-            .filter(person => person && !person.is_bot)
-        )
-      } else {
-        return this.activePeopleWithoutBot
-      }
-    },
+const taskStatusList = computed(() =>
+  addAllValue(
+    getProductionTaskStatuses
+      .value(filters.productionId)
+      .filter(status => !status.for_concept)
+  )
+)
 
-    productionList() {
-      return this.addAllValue(this.openProductions)
-    },
+const taskTypeList = computed(() =>
+  addAllValue(
+    getProductionTaskTypes
+      .value(filters.productionId)
+      .filter(type => type.for_entity !== 'Concept')
+  )
+)
 
-    params() {
+const personList = computed(() => {
+  const production = productionMap.value.get(filters.productionId)
+  if (!production) return activePeopleWithoutBot.value
+  return sortPeople(
+    production.team
+      .map(personId => personMap.value.get(personId))
+      .filter(person => person && !person.is_bot)
+  )
+})
+
+const params = computed(() => ({
+  project_id: filters.productionId,
+  task_status_id: filters.taskStatusId,
+  task_type_id: filters.taskTypeId,
+  person_id: filters.person?.map(person => person.id).join(',') || null,
+  department_id: filters.departmentId,
+  studio_id: filters.studioId
+}))
+
+// statusStats would shadow the StatusStats component tag in the template
+const statusStatsList = computed(() =>
+  [...stats.value.status]
+    .sort((a, b) => b.amount - a.amount)
+    .map(stat => {
+      const taskStatus = taskStatusMap.value.get(stat.task_status_id)
+      if (!taskStatus) return null
       return {
-        project_id: this.filters.productionId,
-        task_status_id: this.filters.taskStatusId,
-        task_type_id: this.filters.taskTypeId,
-        person_id:
-          this.filters.person?.map(person => person.id).join(',') || null,
-        department_id: this.filters.departmentId,
-        studio_id: this.filters.studioId
+        name: taskStatus.short_name.toUpperCase(),
+        color: taskStatus.color,
+        value: stat.amount
       }
-    },
+    })
+    .filter(Boolean)
+)
 
-    statusStats() {
-      return [...this.stats.status]
-        .sort((a, b) => b.amount - a.amount)
-        .map(stat => {
-          const taskStatus = this.taskStatusMap.get(stat.task_status_id)
-          if (!taskStatus) return null
-          return {
-            name: taskStatus.short_name.toUpperCase(),
-            color: taskStatus.color,
-            value: stat.amount
-          }
-        })
-        .filter(Boolean)
-    }
-  },
+// Functions
+// --------------------------------------------------------------------------
+const syncRouteQuery = () => {
+  const query = Object.fromEntries(
+    Object.entries(params.value).filter(([, value]) => value)
+  )
+  router.push({ query })
+}
 
-  methods: {
-    ...mapActions(['clearSelectedTasks', 'loadOpenTasks', 'loadTask']),
+const reload = async () => {
+  isLoading.value = true
+  page = 1
+  store.dispatch('clearSelectedTasks')
+  tasks.value = []
+  syncRouteQuery()
+  try {
+    const taskInfos = await store.dispatch('loadOpenTasks', params.value)
+    tasks.value = taskInfos.data
+    stats.value = taskInfos.stats
+    isMore.value = taskInfos.is_more
+  } catch (error) {
+    isLoadingError.value = true
+    console.error(error)
+  }
+  isLoading.value = false
+}
 
-    addAllValue(list) {
-      return [
-        {
-          id: '',
-          color: '#999',
-          name: this.$t('main.all'),
-          short_name: this.$t('main.all')
-        }
-      ].concat([...list])
-    },
+const loadMore = async () => {
+  isMoreLoading.value = true
+  try {
+    const taskInfos = await store.dispatch('loadOpenTasks', {
+      ...params.value,
+      page: page + 1
+    })
+    page += 1
+    tasks.value = tasks.value.concat(taskInfos.data)
+    isMore.value = taskInfos.is_more
+  } catch (error) {
+    console.error(error)
+  }
+  isMoreLoading.value = false
+}
 
-    async reload() {
-      this.isLoading = true
-      this.page = 1
-      this.clearSelectedTasks()
-      this.tasks = []
-      try {
-        const routeQuery = {}
-        Object.keys(this.params).forEach(key => {
-          if (this.params[key]) {
-            routeQuery[key] = this.params[key]
-          }
-        })
-        this.$router.push({ query: routeQuery })
-        const taskInfos = await this.loadOpenTasks(this.params)
-        this.tasks = taskInfos.data
-        this.stats = taskInfos.stats
-        this.isMore = taskInfos.is_more
-      } catch (error) {
-        this.isLoadingError = true
-        console.error(error)
-      }
-      this.isLoading = false
-    },
-
-    loadMore() {
-      this.isMoreLoading = true
-      this.page = (this.page || 1) + 1
-      const params = {
-        ...this.params,
-        page: this.page
-      }
-      this.loadOpenTasks(params)
-        .then(taskInfos => {
-          this.tasks = this.tasks.concat(taskInfos.data)
-          this.isMore = taskInfos.is_more
-          this.isMoreLoading = false
-        })
-        .catch(error => {
-          this.isMoreLoading = false
-          this.isMoreLoadingError = true
-          console.error(error)
-        })
-    }
-  },
-
-  watch: {
-    filters: {
-      handler() {
-        this.reload()
-      },
-      deep: true
-    }
-  },
-
-  socket: {
-    events: {
-      'task:update'(eventData) {
-        const task = this.tasks.find(t => t.id === eventData.task_id)
-        if (task) {
-          this.loadTask({ taskId: task.id }).then(updatedTask => {
-            Object.assign(task, updatedTask)
-          })
-        }
-      }
-    }
-  },
-
-  head() {
-    return { title: `${this.$t('tasks.all_tasks')} - Kitsu` }
+const onTaskUpdate = async eventData => {
+  const task = tasks.value.find(({ id }) => id === eventData.task_id)
+  if (task) {
+    const updatedTask = await store.dispatch('loadTask', { taskId: task.id })
+    Object.assign(task, updatedTask)
   }
 }
+
+// Watchers
+// --------------------------------------------------------------------------
+watch(filters, () => {
+  reload()
+})
+
+// Lifecycle
+// --------------------------------------------------------------------------
+onMounted(() => {
+  socket.on('task:update', onTaskUpdate)
+  reload()
+})
+
+onBeforeUnmount(() => {
+  socket.off('task:update', onTaskUpdate)
+})
+
+// Head
+// --------------------------------------------------------------------------
+useHead({ title: computed(() => `${t('tasks.all_tasks')} - Kitsu`) })
 </script>
 
 <style lang="scss" scoped>
