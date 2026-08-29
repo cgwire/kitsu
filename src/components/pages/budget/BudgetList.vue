@@ -48,7 +48,7 @@
               :converted-expenses="convertedExpenses"
               :hardware-items-costs="hardwareItemsCosts"
               :software-licenses-costs="softwareLicensesCosts"
-              :done-previsional="doneSubset"
+              :done-previsional="donePrevisional"
               :remaining-previsional="remainingPrevisional"
             />
 
@@ -68,7 +68,7 @@
                 :software-licenses-costs="softwareLicensesCosts"
                 :collapsed-departments="collapsedDepartments"
                 :department-map="departmentMap"
-                :done-previsional="doneSubset"
+                :done-previsional="donePrevisional"
                 :remaining-previsional="remainingPrevisional"
                 :toggle-department="toggleDepartment"
               />
@@ -85,7 +85,7 @@
                   "
                   :converted-expenses="convertedExpenses"
                   :hardware-items-costs="hardwareItemsCosts"
-                  :done-previsional="doneSubset"
+                  :done-previsional="donePrevisional"
                   :remaining-previsional="remainingPrevisional"
                   v-if="isShowingItems"
                 />
@@ -101,7 +101,7 @@
                   "
                   :converted-expenses="convertedExpenses"
                   :software-licenses-costs="softwareLicensesCosts"
-                  :done-previsional="doneSubset"
+                  :done-previsional="donePrevisional"
                   :remaining-previsional="remainingPrevisional"
                   v-if="isShowingItems"
                 />
@@ -118,7 +118,7 @@
                   "
                   :converted-expenses="convertedExpenses"
                   :person-map="personMap"
-                  :done-previsional="doneSubset"
+                  :done-previsional="donePrevisional"
                   :remaining-previsional="remainingPrevisional"
                   @delete-budget-entry="
                     $emit('delete-budget-entry', personEntry)
@@ -180,9 +180,17 @@ export default {
       type: Object,
       default: () => {}
     },
-    expenses: {
+    convertedExpenses: {
       type: Object,
-      default: () => {}
+      default: () => ({})
+    },
+    donePrevisional: {
+      type: Object,
+      default: () => ({})
+    },
+    extendedBudgetDepartments: {
+      type: Array,
+      default: () => []
     },
     isError: {
       type: Boolean,
@@ -199,14 +207,6 @@ export default {
     isShowingItems: {
       type: Boolean,
       default: false
-    },
-    linkedHardwareItems: {
-      type: Object,
-      required: true
-    },
-    linkedSoftwareLicenses: {
-      type: Object,
-      required: true
     },
     hardwareItemsCosts: {
       type: Object,
@@ -228,9 +228,9 @@ export default {
       type: Array,
       default: () => []
     },
-    salaryScale: {
+    remainingPrevisional: {
       type: Object,
-      default: () => {}
+      default: () => ({})
     },
     totalEntry: {
       type: Object,
@@ -265,281 +265,11 @@ export default {
   },
 
   computed: {
-    ...mapGetters([
-      'currentProduction',
-      'departmentMap',
-      'personMap',
-      'organisation'
-    ]),
-
-    /* It converts the expenses to the budget format where there is an
-     * entry for each department and each person. It also calculates the totals
-     * for each person, department and for all the departments.
-     * It also converts the time spent to a cost.
-     */
-    convertedExpenses() {
-      const convertedExpenses = {}
-      const expenses = this.expenses || {}
-      let total = 0
-      Object.keys(expenses).forEach(departmentId => {
-        let departmentTotal = 0
-        convertedExpenses[departmentId] = {
-          'software-licenses': { total: 0 },
-          'hardware-items': { total: 0 }
-        }
-        const licenses = this.linkedSoftwareLicenses[departmentId] || []
-        const items = this.linkedHardwareItems[departmentId] || []
-        const monthlySoftwareLicensesCosts = licenses.reduce((acc, item) => {
-          return acc + item.monthly_cost
-        }, 0)
-        const monthlyHardwareItemsCosts = items.reduce((acc, item) => {
-          return acc + item.monthly_cost
-        }, 0)
-
-        Object.keys(expenses[departmentId]).forEach(personId => {
-          let personTotal = 0
-          let personTotalWithItems = 0
-
-          const dailyRate = this.getDailyRate(departmentId, personId)
-
-          convertedExpenses[departmentId][personId] = {}
-          Object.keys(expenses[departmentId][personId]).forEach(month => {
-            if (month === 'total') return
-
-            // Salaries
-            const timeSpent = expenses[departmentId][personId][month]
-            const { cost, ratio } = this.convertTimeSpentToCost(
-              dailyRate,
-              timeSpent
-            )
-            convertedExpenses[departmentId][personId][month] = cost
-            if (!convertedExpenses[departmentId][month]) {
-              convertedExpenses[departmentId][month] = 0
-            }
-
-            // Hardware and software
-            let costWithItems = cost
-            if (this.isShowingItems && cost > 0) {
-              if (
-                !convertedExpenses[departmentId]['software-licenses'][month]
-              ) {
-                convertedExpenses[departmentId]['software-licenses'][month] = 0
-              }
-              if (!convertedExpenses[departmentId]['hardware-items'][month]) {
-                convertedExpenses[departmentId]['hardware-items'][month] = 0
-              }
-              const softwareCost = Math.round(
-                monthlySoftwareLicensesCosts * ratio
-              )
-              const hardwareCost = Math.round(monthlyHardwareItemsCosts * ratio)
-              convertedExpenses[departmentId]['software-licenses'][month] +=
-                softwareCost
-              convertedExpenses[departmentId]['software-licenses'].total +=
-                softwareCost
-              convertedExpenses[departmentId]['hardware-items'][month] +=
-                hardwareCost
-              convertedExpenses[departmentId]['hardware-items'].total +=
-                hardwareCost
-              costWithItems += softwareCost + hardwareCost
-            }
-
-            convertedExpenses[departmentId][month] += costWithItems
-            if (!convertedExpenses[month]) {
-              convertedExpenses[month] = 0
-            }
-            convertedExpenses[month] += costWithItems
-            personTotal += cost
-            personTotalWithItems += costWithItems
-          })
-
-          convertedExpenses[departmentId][personId].total = personTotal
-          departmentTotal += personTotalWithItems
-        })
-        convertedExpenses[departmentId].total = departmentTotal
-        total += departmentTotal
-      })
-      convertedExpenses.total = total
-      return convertedExpenses
-    },
-
-    /* It extends the budget departments with the expenses that don't have
-     * equivalent entries in the budget departments. It also adds the new
-     * departments to the budget departments if needed.
-     */
-    extendedBudgetDepartments() {
-      if (!this.isShowingExpenses) return this.budgetDepartments
-
-      const existingDepartments = this.budgetDepartments.reduce(
-        (acc, department) => {
-          acc[department.id] = true
-          return acc
-        },
-        {}
-      )
-
-      const newDepartments = Object.keys(this.expenses)
-        .filter(departmentId => !existingDepartments[departmentId])
-        .map(departmentId => ({
-          id: departmentId,
-          monthCosts: {},
-          total: 0,
-          duration: 0,
-          persons: [],
-          start_date: null
-        }))
-
-      const extendedBudgetDepartments = [
-        ...this.budgetDepartments,
-        ...newDepartments
-      ]
-
-      const existingEntries = extendedBudgetDepartments.reduce(
-        (acc, department) => {
-          department.persons.forEach(entry => {
-            if (!acc[department.id]) {
-              acc[department.id] = {}
-            }
-            acc[department.id][entry.person_id] = true
-          })
-          return acc
-        },
-        {}
-      )
-
-      Object.keys(this.expenses).forEach(departmentId => {
-        if (departmentId === 'total') return
-        Object.keys(this.expenses[departmentId]).forEach(personId => {
-          if (personId === 'total') return
-          if (!existingEntries[departmentId]?.[personId]) {
-            const person = this.personMap.get(personId)
-            extendedBudgetDepartments
-              .find(department => department.id === departmentId)
-              .persons.push({
-                id: null,
-                person_id: personId,
-                budget_entry_id: null,
-                department_id: departmentId,
-                monthCosts: {},
-                position: person?.position,
-                seniority: person?.seniority,
-                total: 0,
-                months_duration: 0,
-                monthly_salary: 0,
-                daily_salary: person?.daily_salary || 0,
-                start_date: null,
-                exceptions: {}
-              })
-          }
-        })
-      })
-
-      return extendedBudgetDepartments
-    },
-
-    remainingPrevisional() {
-      return this.getPrevisionalSubset(this.monthsBetweenNowAndEnd)
-    },
-
-    doneSubset() {
-      return this.getPrevisionalSubset(this.monthsBetweenStartAndNow)
-    }
+    ...mapGetters(['currentProduction', 'departmentMap', 'personMap'])
   },
 
   methods: {
     ...mapActions(['updateProductionBudgetEntry']),
-
-    getPrevisionalSubset(months) {
-      const subset = { total: 0 }
-      this.budgetDepartments.forEach(department => {
-        if (!subset[department.id]) {
-          subset[department.id] = { total: 0 }
-        }
-        department.persons.forEach(person => {
-          if (!person.budget_entry_id) {
-            return
-          }
-
-          if (!subset[department.id][person.budget_entry_id]) {
-            subset[department.id][person.budget_entry_id] = 0
-          }
-          let personTotal = 0
-          months.forEach(month => {
-            personTotal += this.getMonthCost(person, month)
-          })
-          subset[department.id][person.budget_entry_id] = personTotal
-          subset[department.id].total += personTotal
-        })
-        if (this.isShowingItems) {
-          let softwareCosts = 0
-          let hardwareCosts = 0
-          months.forEach(month => {
-            softwareCosts +=
-              this.softwareLicensesCosts[department.id][
-                month.format('YYYY-MM')
-              ] || 0
-            hardwareCosts +=
-              this.hardwareItemsCosts[department.id][month.format('YYYY-MM')] ||
-              0
-          })
-          subset[department.id]['software-licenses'] = softwareCosts
-          subset[department.id]['hardware-items'] = hardwareCosts
-          subset[department.id].total += softwareCosts + hardwareCosts
-        }
-        subset.total += subset[department.id].total
-      })
-      return subset
-    },
-
-    /* It gets the daily rate of a person: the rate set in the People
-     * section, else the rate of the matching budget entry, else the
-     * salary scale.
-     */
-    getDailyRate(departmentId, personId) {
-      const person = this.personMap.get(personId)
-      const budgetEntry = this.budgetDepartments
-        .find(department => department.id === departmentId)
-        ?.persons.find(entry => entry.person_id === personId)
-      const salaryScale =
-        person?.seniority && person?.position
-          ? this.salaryScale[departmentId]?.[person.position]?.[
-              person.seniority
-            ]
-          : 0
-      return (
-        person?.daily_salary || budgetEntry?.daily_salary || salaryScale || 0
-      )
-    },
-
-    /* It converts the time spent to days then multiply it with the
-     * given daily rate.
-     */
-    convertTimeSpentToCost(dailyRate, timeSpent) {
-      const validTimeSpent = Number(timeSpent) || 0
-      const validDailyRate = Number(dailyRate) || 0
-      const hoursByDay = Number(this.organisation?.hours_by_day) || 8
-
-      if (validTimeSpent <= 0 || validDailyRate <= 0 || hoursByDay <= 0) {
-        return { cost: 0, ratio: 0 }
-      }
-
-      const days = validTimeSpent / 60 / hoursByDay
-      const ratio = days / 20
-      return { cost: Math.round(days * dailyRate), ratio }
-    },
-
-    /* It gets the cost of a person for a given month, exceptions are
-     * prioritized over the month costs.
-     */
-    getMonthCost(personEntry, month) {
-      const monthKey =
-        typeof month === 'string' ? month : month.format('YYYY-MM')
-      personEntry.exceptions = personEntry.exceptions || {}
-      return (
-        parseInt(personEntry.exceptions[monthKey]) ||
-        parseInt(personEntry.monthCosts[monthKey]) ||
-        0
-      )
-    },
 
     /* It toggles the department visibility and save it to local storage. */
     toggleDepartment(departmentId) {

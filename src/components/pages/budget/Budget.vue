@@ -23,19 +23,19 @@
         <budget-list
           :budget-departments="budgetDepartments"
           :current-budget="currentBudget"
-          :expenses="expenses.data"
+          :converted-expenses="convertedExpenses"
+          :done-previsional="donePrevisional"
+          :extended-budget-departments="extendedBudgetDepartments"
           :is-error="errors.entries"
           :is-loading="loading.entries"
           :is-showing-expenses="expenses.showing"
           :is-showing-items="items.showing"
-          :linked-hardware-items="linkedHardwareItems"
-          :linked-software-licenses="linkedSoftwareLicenses"
           :hardware-items-costs="hardwareItemsCosts"
           :software-licenses-costs="softwareLicensesCosts"
           :months-between-start-and-now="monthsBetweenStartAndNow"
           :months-between-now-and-end="monthsBetweenNowAndEnd"
           :months-between-production-dates="monthsBetweenProductionDates"
-          :salary-scale="salaryScale"
+          :remaining-previsional="remainingPrevisional"
           :total-entry="totalEntry"
           @add-budget-entry="onAddBudgetEntry"
           @delete-budget-entry="deleteBudgetEntry"
@@ -214,7 +214,12 @@ export default {
   },
 
   computed: {
-    ...mapGetters(['currentProduction', 'departmentMap', 'personMap']),
+    ...mapGetters([
+      'currentProduction',
+      'departmentMap',
+      'organisation',
+      'personMap'
+    ]),
 
     monthsBetweenStartAndNow() {
       // Split the timeline on calendar months, not on the day of the month:
@@ -343,6 +348,178 @@ export default {
       return this.getItemCosts(this.linkedSoftwareLicenses)
     },
 
+    /* It converts the expenses to the budget format where there is an
+     * entry for each department and each person. It also calculates the totals
+     * for each person, department and for all the departments.
+     * It also converts the time spent to a cost.
+     */
+    convertedExpenses() {
+      const convertedExpenses = {}
+      const expenses = this.expenses.data || {}
+      let total = 0
+      Object.keys(expenses).forEach(departmentId => {
+        let departmentTotal = 0
+        convertedExpenses[departmentId] = {
+          'software-licenses': { total: 0 },
+          'hardware-items': { total: 0 }
+        }
+        const licenses = this.linkedSoftwareLicenses[departmentId] || []
+        const items = this.linkedHardwareItems[departmentId] || []
+        const monthlySoftwareLicensesCosts = licenses.reduce((acc, item) => {
+          return acc + item.monthly_cost
+        }, 0)
+        const monthlyHardwareItemsCosts = items.reduce((acc, item) => {
+          return acc + item.monthly_cost
+        }, 0)
+
+        Object.keys(expenses[departmentId]).forEach(personId => {
+          let personTotal = 0
+          let personTotalWithItems = 0
+
+          const dailyRate = this.getDailyRate(departmentId, personId)
+
+          convertedExpenses[departmentId][personId] = {}
+          Object.keys(expenses[departmentId][personId]).forEach(month => {
+            if (month === 'total') return
+
+            // Salaries
+            const timeSpent = expenses[departmentId][personId][month]
+            const { cost, ratio } = this.convertTimeSpentToCost(
+              dailyRate,
+              timeSpent
+            )
+            convertedExpenses[departmentId][personId][month] = cost
+            if (!convertedExpenses[departmentId][month]) {
+              convertedExpenses[departmentId][month] = 0
+            }
+
+            // Hardware and software
+            let costWithItems = cost
+            if (this.items.showing && cost > 0) {
+              if (
+                !convertedExpenses[departmentId]['software-licenses'][month]
+              ) {
+                convertedExpenses[departmentId]['software-licenses'][month] = 0
+              }
+              if (!convertedExpenses[departmentId]['hardware-items'][month]) {
+                convertedExpenses[departmentId]['hardware-items'][month] = 0
+              }
+              const softwareCost = Math.round(
+                monthlySoftwareLicensesCosts * ratio
+              )
+              const hardwareCost = Math.round(monthlyHardwareItemsCosts * ratio)
+              convertedExpenses[departmentId]['software-licenses'][month] +=
+                softwareCost
+              convertedExpenses[departmentId]['software-licenses'].total +=
+                softwareCost
+              convertedExpenses[departmentId]['hardware-items'][month] +=
+                hardwareCost
+              convertedExpenses[departmentId]['hardware-items'].total +=
+                hardwareCost
+              costWithItems += softwareCost + hardwareCost
+            }
+
+            convertedExpenses[departmentId][month] += costWithItems
+            if (!convertedExpenses[month]) {
+              convertedExpenses[month] = 0
+            }
+            convertedExpenses[month] += costWithItems
+            personTotal += cost
+            personTotalWithItems += costWithItems
+          })
+
+          convertedExpenses[departmentId][personId].total = personTotal
+          departmentTotal += personTotalWithItems
+        })
+        convertedExpenses[departmentId].total = departmentTotal
+        total += departmentTotal
+      })
+      convertedExpenses.total = total
+      return convertedExpenses
+    },
+
+    /* It extends the budget departments with the expenses that don't have
+     * equivalent entries in the budget departments. It also adds the new
+     * departments to the budget departments if needed.
+     */
+    extendedBudgetDepartments() {
+      if (!this.expenses.showing) return this.budgetDepartments
+
+      const existingDepartments = this.budgetDepartments.reduce(
+        (acc, department) => {
+          acc[department.id] = true
+          return acc
+        },
+        {}
+      )
+
+      const newDepartments = Object.keys(this.expenses.data)
+        .filter(departmentId => !existingDepartments[departmentId])
+        .map(departmentId => ({
+          id: departmentId,
+          monthCosts: {},
+          total: 0,
+          duration: 0,
+          persons: [],
+          start_date: null
+        }))
+
+      const extendedBudgetDepartments = [
+        ...this.budgetDepartments,
+        ...newDepartments
+      ]
+
+      const existingEntries = extendedBudgetDepartments.reduce(
+        (acc, department) => {
+          department.persons.forEach(entry => {
+            if (!acc[department.id]) {
+              acc[department.id] = {}
+            }
+            acc[department.id][entry.person_id] = true
+          })
+          return acc
+        },
+        {}
+      )
+
+      Object.keys(this.expenses.data).forEach(departmentId => {
+        if (departmentId === 'total') return
+        Object.keys(this.expenses.data[departmentId]).forEach(personId => {
+          if (personId === 'total') return
+          if (!existingEntries[departmentId]?.[personId]) {
+            const person = this.personMap.get(personId)
+            extendedBudgetDepartments
+              .find(department => department.id === departmentId)
+              .persons.push({
+                id: null,
+                person_id: personId,
+                budget_entry_id: null,
+                department_id: departmentId,
+                monthCosts: {},
+                position: person?.position,
+                seniority: person?.seniority,
+                total: 0,
+                months_duration: 0,
+                monthly_salary: 0,
+                daily_salary: person?.daily_salary || 0,
+                start_date: null,
+                exceptions: {}
+              })
+          }
+        })
+      })
+
+      return extendedBudgetDepartments
+    },
+
+    remainingPrevisional() {
+      return this.getPrevisionalSubset(this.monthsBetweenNowAndEnd)
+    },
+
+    donePrevisional() {
+      return this.getPrevisionalSubset(this.monthsBetweenStartAndNow)
+    },
+
     pieChartData() {
       return this.budgetDepartments.map(departmentEntry => {
         const department = this.departmentMap.get(departmentEntry.id)
@@ -384,6 +561,85 @@ export default {
       'updateProductionBudget',
       'updateProductionBudgetEntry'
     ]),
+
+    getPrevisionalSubset(months) {
+      const subset = { total: 0 }
+      this.budgetDepartments.forEach(department => {
+        if (!subset[department.id]) {
+          subset[department.id] = { total: 0 }
+        }
+        department.persons.forEach(person => {
+          if (!person.budget_entry_id) {
+            return
+          }
+
+          if (!subset[department.id][person.budget_entry_id]) {
+            subset[department.id][person.budget_entry_id] = 0
+          }
+          let personTotal = 0
+          months.forEach(month => {
+            personTotal += this.getMonthCost(person, month)
+          })
+          subset[department.id][person.budget_entry_id] = personTotal
+          subset[department.id].total += personTotal
+        })
+        if (this.items.showing) {
+          let softwareCosts = 0
+          let hardwareCosts = 0
+          months.forEach(month => {
+            softwareCosts +=
+              this.softwareLicensesCosts[department.id][
+                month.format('YYYY-MM')
+              ] || 0
+            hardwareCosts +=
+              this.hardwareItemsCosts[department.id][month.format('YYYY-MM')] ||
+              0
+          })
+          subset[department.id]['software-licenses'] = softwareCosts
+          subset[department.id]['hardware-items'] = hardwareCosts
+          subset[department.id].total += softwareCosts + hardwareCosts
+        }
+        subset.total += subset[department.id].total
+      })
+      return subset
+    },
+
+    /* It gets the daily rate of a person: the rate set in the People
+     * section, else the rate of the matching budget entry, else the
+     * salary scale.
+     */
+    getDailyRate(departmentId, personId) {
+      const person = this.personMap.get(personId)
+      const budgetEntry = this.budgetDepartments
+        .find(department => department.id === departmentId)
+        ?.persons.find(entry => entry.person_id === personId)
+      const salaryScale =
+        person?.seniority && person?.position
+          ? this.salaryScale[departmentId]?.[person.position]?.[
+              person.seniority
+            ]
+          : 0
+      return (
+        person?.daily_salary || budgetEntry?.daily_salary || salaryScale || 0
+      )
+    },
+
+    /* It converts the time spent to days then multiply it with the
+     * given daily rate.
+     */
+    convertTimeSpentToCost(dailyRate, timeSpent) {
+      const validTimeSpent = Number(timeSpent) || 0
+      const validDailyRate = Number(dailyRate) || 0
+      const hoursByDay = Number(this.organisation?.hours_by_day) || 8
+
+      if (validTimeSpent <= 0 || validDailyRate <= 0 || hoursByDay <= 0) {
+        return { cost: 0, ratio: 0 }
+      }
+
+      const days = validTimeSpent / 60 / hoursByDay
+      const ratio = days / 20
+      return { cost: Math.round(days * dailyRate), ratio }
+    },
 
     /*
      * It calculates the cost of the items for each department and each month.
@@ -500,6 +756,15 @@ export default {
         this.currentBudget.name,
         this.currentBudget.currency
       ]
+      const expenses = this.expenses.showing
+        ? {
+            monthsBetweenStartAndNow: this.monthsBetweenStartAndNow,
+            monthsBetweenNowAndEnd: this.monthsBetweenNowAndEnd,
+            convertedExpenses: this.convertedExpenses,
+            donePrevisional: this.donePrevisional,
+            remainingPrevisional: this.remainingPrevisional
+          }
+        : null
       csv.generateBudget(
         this.$t,
         this.departmentMap,
@@ -508,7 +773,8 @@ export default {
         this.currentBudget.currency,
         this.monthsBetweenProductionDates,
         this.totalEntry,
-        this.budgetDepartments
+        this.extendedBudgetDepartments,
+        expenses
       )
     },
 
