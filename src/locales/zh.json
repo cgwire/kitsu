@@ -2121,6 +2121,7 @@
     "burndown": {
       "estimations": "预估",
       "ideal": "理想",
+      "projection": "预测",
       "remaining_days": "剩余人天",
       "remaining_tasks": "剩余任务",
       "title": "燃尽图"

@@ -2121,6 +2121,7 @@
     "burndown": {
       "estimations": "Stime",
       "ideal": "Ideale",
+      "projection": "Proiezione",
       "remaining_days": "Giorni-uomo rimanenti",
       "remaining_tasks": "Task rimanenti",
       "title": "Grafico burndown"

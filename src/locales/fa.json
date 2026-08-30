@@ -2121,6 +2121,7 @@
     "burndown": {
       "estimations": "برآوردها",
       "ideal": "ایده‌آل",
+      "projection": "پیش‌بینی",
       "remaining_days": "نفر-روزهای باقی‌مانده",
       "remaining_tasks": "وظایف باقی‌مانده",
       "title": "نمودار برن‌داون"

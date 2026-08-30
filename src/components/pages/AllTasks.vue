@@ -51,12 +51,14 @@
             v-model="filters.person"
           />
         </div>
-        <burndown-chart
-          :burndown="burndown"
-          :is-loading="isBurndownLoading"
-          :is-error="isBurndownError"
-          v-if="showBurndown"
-        />
+        <template v-if="showBurndown">
+          <burndown-chart
+            :burndown="burndown"
+            :is-loading="isBurndownLoading"
+            :is-error="isBurndownError"
+          />
+          <tasks-stats-line :stats="stats" v-if="!isLoading" />
+        </template>
         <all-task-list
           :tasks="tasks"
           :stats="stats"
@@ -107,6 +109,7 @@ import ComboboxStudio from '@/components/widgets/ComboboxStudio.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 import StatusStats from '@/components/widgets/StatusStats.vue'
+import TasksStatsLine from '@/components/widgets/TasksStatsLine.vue'
 
 // Composables
 const { t } = useI18n()
@@ -317,7 +320,9 @@ useHead({ title: computed(() => `${t('tasks.all_tasks')} - Kitsu`) })
   display: flex;
   flex-direction: column;
   gap: 1em;
-  max-height: 100%;
+  // a definite height (not only a max) so the burndown chart can flex to
+  // fill the page; the task list scrolls inside either way
+  height: 100%;
   padding: 5em 1em 1em 1em;
   color: var(--text);
 }

@@ -2121,6 +2121,7 @@
     "burndown": {
       "estimations": "견적",
       "ideal": "이상",
+      "projection": "예측",
       "remaining_days": "남은 인일",
       "remaining_tasks": "남은 작업",
       "title": "번다운 차트"

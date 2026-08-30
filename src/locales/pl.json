@@ -205,6 +205,7 @@
     "burndown": {
       "estimations": "Szacunki",
       "ideal": "Idealny",
+      "projection": "Prognoza",
       "remaining_days": "Pozostałe osobodni",
       "remaining_tasks": "Pozostałe zadania",
       "title": "Wykres burndown"

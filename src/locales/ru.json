@@ -2121,6 +2121,7 @@
     "burndown": {
       "estimations": "Оценки",
       "ideal": "Идеал",
+      "projection": "Прогноз",
       "remaining_days": "Оставшиеся человеко-дни",
       "remaining_tasks": "Оставшиеся задачи",
       "title": "Диаграмма сгорания"

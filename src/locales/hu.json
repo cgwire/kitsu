@@ -2152,6 +2152,7 @@
     "burndown": {
       "estimations": "Becslések",
       "ideal": "Ideális",
+      "projection": "Előrejelzés",
       "remaining_days": "Hátralévő embernapok",
       "remaining_tasks": "Hátralévő feladatok",
       "title": "Burndown diagram"

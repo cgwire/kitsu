@@ -137,31 +137,7 @@
         :with-actions="false"
       />
     </div>
-    <p class="has-text-centered nb-tasks" v-if="!isLoading">
-      {{ stats.total }}
-      {{ $t('tasks.number', { count: stats.total }) }}
-      ({{ formatDuration(stats.total_duration) }}
-      {{
-        isDurationInHours
-          ? $t('main.hours_spent', {
-              count: formatDuration(stats.total_duration, false)
-            })
-          : $t('main.days_spent', {
-              count: formatDuration(stats.total_duration, false)
-            })
-      }}
-      /
-      {{ formatDuration(stats.total_estimation) }}
-      {{
-        isDurationInHours
-          ? $t('main.hours_estimated', {
-              count: formatDuration(stats.total_estimation, false)
-            })
-          : $t('main.days_estimated', {
-              count: formatDuration(stats.total_estimation, false)
-            })
-      }})
-    </p>
+    <tasks-stats-line :stats="stats" v-if="!isLoading" />
   </div>
 </template>
 
@@ -180,10 +156,11 @@ import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import PeopleAvatarWithMenu from '@/components/widgets/PeopleAvatarWithMenu.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
+import TasksStatsLine from '@/components/widgets/TasksStatsLine.vue'
 
 // Composables
 const store = useStore()
-const { formatDisplayDate, formatDuration, isDurationInHours } = useFormat()
+const { formatDisplayDate, formatDuration } = useFormat()
 
 // Props / Emits
 // --------------------------------------------------------------------------
@@ -349,10 +326,6 @@ td.due-date {
 
 .empty {
   width: 100%;
-}
-
-.nb-tasks {
-  padding: 0.5em;
 }
 
 .datatable-head {

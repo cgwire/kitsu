@@ -2121,6 +2121,7 @@
     "burndown": {
       "estimations": "Estimater",
       "ideal": "Ideel",
+      "projection": "Fremskrivning",
       "remaining_days": "Resterende manddage",
       "remaining_tasks": "Resterende opgaver",
       "title": "Burndown-diagram"

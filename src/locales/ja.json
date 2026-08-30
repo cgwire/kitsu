@@ -2121,6 +2121,7 @@
     "burndown": {
       "estimations": "見積もり",
       "ideal": "理想",
+      "projection": "予測",
       "remaining_days": "残り人日",
       "remaining_tasks": "残りタスク",
       "title": "バーンダウンチャート"

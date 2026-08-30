@@ -212,6 +212,7 @@ export default {
   burndown: {
     estimations: 'Estimations',
     ideal: 'Ideal',
+    projection: 'Projection',
     remaining_days: 'Remaining man-days',
     remaining_tasks: 'Remaining tasks',
     title: 'Burndown chart'
