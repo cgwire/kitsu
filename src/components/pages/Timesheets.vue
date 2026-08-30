@@ -463,4 +463,20 @@ useHead({ title: computed(() => `${t('timesheets.title')} - Kitsu`) })
   margin-right: 1em;
   white-space: nowrap;
 }
+
+// measured on the live row: ComboboxStudio deviates on BOTH metrics of
+// the centered header row, so both need pinning. Its label takes a 5px
+// padding-top under the field class, and its control renders 38px tall
+// against 42px for the production combo and the Bulma selects.
+.page-header :deep(.label) {
+  margin-bottom: 5px;
+  padding-top: 0;
+}
+
+.page-header :deep(.studio-combo) {
+  display: flex;
+  flex-direction: column;
+  height: 42px;
+  justify-content: center;
+}
 </style>
