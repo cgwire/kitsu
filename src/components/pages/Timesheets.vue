@@ -87,7 +87,6 @@
         :is-loading-error="isInfoLoadingError"
         :tasks="tasks"
         :day-off-count="dayOffCount"
-        @close="showInfo = false"
       />
     </div>
   </div>
