@@ -135,6 +135,7 @@
 </template>
 
 <script setup>
+import { getMonthCost } from '@/lib/budget'
 import { localeCode } from '@/lib/lang'
 import { XIcon } from 'lucide-vue-next'
 import { computed } from 'vue'
@@ -222,19 +223,6 @@ const personTotalGap = computed(() => {
         (personExpense.value.total + personRemainingPrevisional.value)
     : 0
 })
-
-/* It gets the cost of a person for a given month, exceptions are
- * prioritized over the month costs.
- */
-const getMonthCost = (personEntry, month) => {
-  const monthKey = typeof month === 'string' ? month : month.format('YYYY-MM')
-  personEntry.exceptions = personEntry.exceptions || {}
-  return (
-    parseInt(personEntry.exceptions[monthKey]) ||
-    parseInt(personEntry.monthCosts[monthKey]) ||
-    0
-  )
-}
 
 /* It tells whether the person has an explicit salary override for the given
  * month, as opposed to the salary computed from the daily rate.
