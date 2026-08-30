@@ -2118,6 +2118,13 @@
       },
       "clear_exception": "이번 달 급여 재정의 지우기"
     },
+    "burndown": {
+      "estimations": "견적",
+      "ideal": "이상",
+      "remaining_days": "남은 인일",
+      "remaining_tasks": "남은 작업",
+      "title": "번다운 차트"
+    },
     "hard_delete": {
       "delete_for_selection_hard_text": "선택한 항목을 영구 삭제하시겠습니까? 아래에 '삭제'를 입력하여 확인해주세요.",
       "delete_for_selection_hard_lock_text": "삭제"

@@ -2118,6 +2118,13 @@
       },
       "clear_exception": "Ryd lønjustering for denne måned"
     },
+    "burndown": {
+      "estimations": "Estimater",
+      "ideal": "Ideel",
+      "remaining_days": "Resterende manddage",
+      "remaining_tasks": "Resterende opgaver",
+      "title": "Burndown-diagram"
+    },
     "hard_delete": {
       "delete_for_selection_hard_text": "Er du sikker på, at du vil fjerne de valgte elementer permanent? Bekræft venligst ved at skrive 'SLET' nedenfor.",
       "delete_for_selection_hard_lock_text": "SLET"

@@ -209,6 +209,14 @@ export default {
     }
   },
 
+  burndown: {
+    estimations: 'Estimations',
+    ideal: 'Ideal',
+    remaining_days: 'Remaining man-days',
+    remaining_tasks: 'Remaining tasks',
+    title: 'Burndown chart'
+  },
+
   chats: {
     delete_message: 'Are you sure you want to delete this message?',
     delete_message_confirm: 'Delete message',

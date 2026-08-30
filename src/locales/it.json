@@ -2118,6 +2118,13 @@
       },
       "clear_exception": "Rimuovi la modifica dello stipendio per questo mese"
     },
+    "burndown": {
+      "estimations": "Stime",
+      "ideal": "Ideale",
+      "remaining_days": "Giorni-uomo rimanenti",
+      "remaining_tasks": "Task rimanenti",
+      "title": "Grafico burndown"
+    },
     "hard_delete": {
       "delete_for_selection_hard_text": "Sei sicuro di voler rimuovere definitivamente gli elementi selezionati? Conferma digitando \"ELIMINA\" qui sotto.",
       "delete_for_selection_hard_lock_text": "ELIMINA"

@@ -21,6 +21,14 @@
             :task-type-list="taskTypeList"
             v-model="filters.taskTypeId"
           />
+          <div class="filler"></div>
+          <button-simple
+            class="flexrow-item burndown-button"
+            icon="chart"
+            :active="showBurndown"
+            :title="$t('burndown.title')"
+            @click="showBurndown = !showBurndown"
+          />
         </div>
         <div class="filters flexrow">
           <combobox-studio
@@ -43,6 +51,12 @@
             v-model="filters.person"
           />
         </div>
+        <burndown-chart
+          :burndown="burndown"
+          :is-loading="isBurndownLoading"
+          :is-error="isBurndownError"
+          v-if="showBurndown"
+        />
         <all-task-list
           :tasks="tasks"
           :stats="stats"
@@ -51,6 +65,7 @@
           :is-more="isMore"
           :is-more-loading="isMoreLoading"
           @more-clicked="loadMore"
+          v-else
         />
       </div>
     </template>
@@ -83,6 +98,8 @@ import { sortPeople } from '@/lib/sorting'
 import PageLayout from '@/components/layouts/PageLayout.vue'
 import AllTaskList from '@/components/lists/AllTaskList.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
+import BurndownChart from '@/components/widgets/BurndownChart.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
@@ -100,10 +117,14 @@ const socket = getCurrentInstance().appContext.config.globalProperties.$socket
 
 // State
 // --------------------------------------------------------------------------
+const burndown = ref(null)
+const isBurndownLoading = ref(false)
+const isBurndownError = ref(false)
 const isLoading = ref(false)
 const isLoadingError = ref(false)
 const isMore = ref(false)
 const isMoreLoading = ref(false)
+const showBurndown = ref(route.query.view === 'burndown')
 const stats = ref({ status: [] })
 const tasks = ref([])
 
@@ -205,7 +226,20 @@ const syncRouteQuery = () => {
   const query = Object.fromEntries(
     Object.entries(params.value).filter(([, value]) => value)
   )
+  if (showBurndown.value) query.view = 'burndown'
   router.push({ query })
+}
+
+const loadBurndown = async () => {
+  isBurndownLoading.value = true
+  isBurndownError.value = false
+  try {
+    burndown.value = await store.dispatch('loadOpenTasksBurndown', params.value)
+  } catch (error) {
+    isBurndownError.value = true
+    console.error(error)
+  }
+  isBurndownLoading.value = false
 }
 
 const reload = async () => {
@@ -214,6 +248,7 @@ const reload = async () => {
   store.dispatch('clearSelectedTasks')
   tasks.value = []
   syncRouteQuery()
+  if (showBurndown.value) loadBurndown()
   try {
     const taskInfos = await store.dispatch('loadOpenTasks', params.value)
     tasks.value = taskInfos.data
@@ -256,6 +291,11 @@ watch(filters, () => {
   reload()
 })
 
+watch(showBurndown, () => {
+  syncRouteQuery()
+  if (showBurndown.value) loadBurndown()
+})
+
 // Lifecycle
 // --------------------------------------------------------------------------
 onMounted(() => {
@@ -288,5 +328,10 @@ useHead({ title: computed(() => `${t('tasks.all_tasks')} - Kitsu`) })
 
 .combobox-production {
   padding-top: 7px;
+}
+
+.burndown-button {
+  align-self: flex-end;
+  height: 42px;
 }
 </style>

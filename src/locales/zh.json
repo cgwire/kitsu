@@ -2118,6 +2118,13 @@
       },
       "clear_exception": "清除本月工资覆盖值"
     },
+    "burndown": {
+      "estimations": "预估",
+      "ideal": "理想",
+      "remaining_days": "剩余人天",
+      "remaining_tasks": "剩余任务",
+      "title": "燃尽图"
+    },
     "hard_delete": {
       "delete_for_selection_hard_text": "您确定要永久删除所选项目吗？请在下面输入 \"删除 \"确认。",
       "delete_for_selection_hard_lock_text": "删除"

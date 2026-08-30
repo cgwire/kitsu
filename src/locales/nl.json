@@ -2118,6 +2118,13 @@
       },
       "clear_exception": "Salarisaanpassing van deze maand wissen"
     },
+    "burndown": {
+      "estimations": "Schattingen",
+      "ideal": "Ideaal",
+      "remaining_days": "Resterende mensdagen",
+      "remaining_tasks": "Resterende taken",
+      "title": "Burndown-grafiek"
+    },
     "hard_delete": {
       "delete_for_selection_hard_text": "Weet je zeker dat je de geselecteerde items definitief wilt verwijderen? Bevestig dit door hieronder 'WISSEN' te typen.",
       "delete_for_selection_hard_lock_text": "WISSEN"

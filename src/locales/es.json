@@ -2118,6 +2118,13 @@
       },
       "clear_exception": "Borrar el ajuste salarial de este mes"
     },
+    "burndown": {
+      "estimations": "Estimaciones",
+      "ideal": "Ideal",
+      "remaining_days": "Días-persona restantes",
+      "remaining_tasks": "Tareas restantes",
+      "title": "Gráfico burndown"
+    },
     "hard_delete": {
       "delete_for_selection_hard_text": "¿Está seguro de que desea eliminar permanentemente los elementos seleccionados? Confírmelo escribiendo \"BORRAR\" a continuación.",
       "delete_for_selection_hard_lock_text": "BORRAR"

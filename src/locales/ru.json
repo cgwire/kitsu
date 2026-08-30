@@ -2118,6 +2118,13 @@
       },
       "clear_exception": "Сбросить переопределение зарплаты за этот месяц"
     },
+    "burndown": {
+      "estimations": "Оценки",
+      "ideal": "Идеал",
+      "remaining_days": "Оставшиеся человеко-дни",
+      "remaining_tasks": "Оставшиеся задачи",
+      "title": "Диаграмма сгорания"
+    },
     "hard_delete": {
       "delete_for_selection_hard_text": "Вы уверены, что хотите навсегда удалить выбранные элементы? Пожалуйста, подтвердите это, набрав ниже 'УДАЛИТЬ'.",
       "delete_for_selection_hard_lock_text": "УДАЛИТЬ"

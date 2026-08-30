@@ -2149,6 +2149,13 @@
       "title": "Költségvetés",
       "clear_exception": "E havi fizetésfelülírás törlése"
     },
+    "burndown": {
+      "estimations": "Becslések",
+      "ideal": "Ideális",
+      "remaining_days": "Hátralévő embernapok",
+      "remaining_tasks": "Hátralévő feladatok",
+      "title": "Burndown diagram"
+    },
     "status_automations": {
       "add_status_automation_placeholder": "+ Állapot-automatizálás hozzáadása",
       "change_ready_for": "a \"kész ennek\" értéket erre változtatja:",

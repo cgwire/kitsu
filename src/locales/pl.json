@@ -202,6 +202,13 @@
         "senior": "Senior"
       }
     },
+    "burndown": {
+      "estimations": "Szacunki",
+      "ideal": "Idealny",
+      "remaining_days": "Pozostałe osobodni",
+      "remaining_tasks": "Pozostałe zadania",
+      "title": "Wykres burndown"
+    },
     "chats": {
       "delete_message": "Czy na pewno chcesz usunąć tę wiadomość?",
       "delete_message_confirm": "Usuń wiadomość",

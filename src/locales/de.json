@@ -2118,6 +2118,13 @@
       },
       "clear_exception": "Gehaltsanpassung für diesen Monat zurücksetzen"
     },
+    "burndown": {
+      "estimations": "Schätzungen",
+      "ideal": "Ideal",
+      "remaining_days": "Verbleibende Personentage",
+      "remaining_tasks": "Verbleibende Aufgaben",
+      "title": "Burndown-Diagramm"
+    },
     "hard_delete": {
       "delete_for_selection_hard_text": "Sind Sie sicher, dass Sie die ausgewählten Elemente dauerhaft entfernen möchten? Bitte bestätigen Sie, indem Sie unten \"LÖSCHEN\" eingeben.",
       "delete_for_selection_hard_lock_text": "LÖSCHEN"

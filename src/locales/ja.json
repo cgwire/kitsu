@@ -2118,6 +2118,13 @@
       },
       "clear_exception": "この月の給与の上書きを解除して自動計算に戻す"
     },
+    "burndown": {
+      "estimations": "見積もり",
+      "ideal": "理想",
+      "remaining_days": "残り人日",
+      "remaining_tasks": "残りタスク",
+      "title": "バーンダウンチャート"
+    },
     "hard_delete": {
       "delete_for_selection_hard_text": "選択したアイテムを完全に削除してもよろしいですか？下に「削除」と入力して確認してください。",
       "delete_for_selection_hard_lock_text": "削除"
