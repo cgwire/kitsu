@@ -247,7 +247,14 @@ useHead({
   flex-direction: column;
 }
 
-.zoom-level {
-  margin-top: -10px;
+// measured on the live row: the ComboboxNumber select renders 3em (42px)
+// while Bulma fixes its .select/.control wrappers at 2.5em (35px), so the
+// flex child ends up shorter than the date blocks and the row centering
+// shifts it 2.5px. Pin all three to the date-field input height instead
+// of the old margin-top hack.
+.zoom-level :deep(.select-input),
+.zoom-level :deep(.select),
+.zoom-level :deep(.control) {
+  height: 40px;
 }
 </style>
