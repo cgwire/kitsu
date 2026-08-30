@@ -282,38 +282,33 @@ export default {
   methods: {
     monthToString,
 
-    yearDuration(year, personId) {
-      const yearString = `${year}`
-      const duration = this.getDuration(yearString, personId)
-      return this.isHours
+    // convert to the selected unit and cap at two decimals, without
+    // padding; empty cells ('-') pass through untouched
+    cellDuration(duration) {
+      if (typeof duration !== 'number') return duration
+      const value = this.isHours
         ? duration
-        : hoursToDays(this.organisation, duration).toFixed(2)
+        : hoursToDays(this.organisation, duration)
+      return Math.round(value * 100) / 100
+    },
+
+    yearDuration(year, personId) {
+      return this.cellDuration(this.getDuration(`${year}`, personId))
     },
 
     monthDuration(month, personId) {
-      const monthString = `${month}`
-      const duration = this.getDuration(monthString, personId)
-      return this.isHours
-        ? duration
-        : hoursToDays(this.organisation, duration).toFixed(2)
+      return this.cellDuration(this.getDuration(`${month}`, personId))
     },
 
     weekDuration(week, personId) {
-      const duration = this.getDuration(week, personId)
-      return this.isHours
-        ? duration
-        : hoursToDays(this.organisation, duration).toFixed(2)
+      return this.cellDuration(this.getDuration(week, personId))
     },
 
     dayDuration(day, personId) {
       if (this.dayOffMap[personId]?.[`${day}`] === true) {
         return this.$t('timesheets.off').toUpperCase()
-      } else {
-        const duration = this.getDuration(day, personId)
-        return this.isHours
-          ? duration
-          : hoursToDays(this.organisation, duration).toFixed(2)
       }
+      return this.cellDuration(this.getDuration(day, personId))
     },
 
     getDuration(index, personId) {
@@ -460,6 +455,18 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.datatable {
+  // auto layout recomputes column widths from the cell contents at every
+  // reload (the tbody unmounts while loading), which makes the columns
+  // jitter: fixed layout sizes them from the header row once
+  table-layout: fixed;
+  width: 100%;
+}
+
+.name {
+  overflow: hidden;
+}
+
 .datatable-body tr:first-child th,
 .datatable-body tr:first-child td {
   border-top: 0;
