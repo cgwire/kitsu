@@ -42,11 +42,11 @@
         ref="schedule"
         :end-date="endDate"
         :hierarchy="scheduleItems"
-        :is-loading="loading.schedule"
-        :is-error="errors.schedule"
+        :is-loading="false"
+        :is-error="false"
         :start-date="startDate"
         :zoom-level="zoomLevel"
-        :hide-man-days="true"
+        hide-man-days
         :with-milestones="false"
         @item-changed="onScheduleItemChanged"
         @root-element-expanded="expandProductionElement"
@@ -55,200 +55,165 @@
   </div>
 </template>
 
-<script>
-/*
- * Page to manage the schedule of the big steps of the production. It allows
- * to set milestones too.
- */
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+// Imports
+import { useHead } from '@unhead/vue'
 import moment from 'moment-timezone'
-import { getProductionSchedulePath } from '@/lib/path'
+import { computed, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
+import colors from '@/lib/colors'
+import { getProductionSchedulePath } from '@/lib/path'
 import {
+  getEndDateFromString,
   getFirstStartDate,
   getLastEndDate,
   getStartDateFromString,
-  getEndDateFromString,
   parseSimpleDate
 } from '@/lib/time'
-import colors from '@/lib/colors'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import DateField from '@/components/widgets/DateField.vue'
 import Schedule from '@/components/widgets/Schedule.vue'
 
-export default {
-  name: 'main-schedule',
+// Composables
+const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
+const store = useStore()
 
-  components: {
-    ButtonSimple,
-    ComboboxNumber,
-    DateField,
-    Schedule
-  },
+// State
+// --------------------------------------------------------------------------
+const endDate = ref(moment().add(6, 'months'))
+const scheduleItems = ref([])
+const selectedEndDate = ref(null)
+const selectedStartDate = ref(null)
+const startDate = ref(moment())
+const zoomLevel = ref(0)
 
-  data() {
-    return {
-      endDate: moment().add(6, 'months'),
-      scheduleItems: [],
-      startDate: moment(),
-      selectedStartDate: null,
-      selectedEndDate: null,
-      zoomLevel: 0,
-      zoomOptions: [
-        { label: this.$t('main.week'), value: 0 },
-        { label: '1', value: 1 },
-        { label: '2', value: 2 },
-        { label: '3', value: 3 }
-      ],
-      loading: {
-        schedule: false
-      },
-      errors: {
-        schedule: false
-      }
-    }
-  },
+const scheduleRef = useTemplateRef('schedule')
 
-  mounted() {
-    let zoom = parseInt(this.$route.query.zoom)
-    zoom = isNaN(zoom) ? 1 : zoom
-    this.zoomLevel = Math.min(Math.max(zoom, 0), 3)
+// Computed
+// --------------------------------------------------------------------------
+const openProductions = computed(() => store.getters.openProductions)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
-    this.init()
-    this.scrollScheduleToToday()
-  },
+const zoomOptions = computed(() => [
+  { label: t('main.week'), value: 0 },
+  { label: '1', value: 1 },
+  { label: '2', value: 2 },
+  { label: '3', value: 3 }
+])
 
-  computed: {
-    ...mapGetters(['openProductions', 'taskTypeMap', 'user'])
-  },
-
-  methods: {
-    ...mapActions(['editProduction', 'loadScheduleItems', 'saveScheduleItem']),
-
-    init() {
-      if (!this.openProductions.length) {
-        return
-      }
-      this.scheduleItems = this.convertScheduleItems(this.openProductions)
-      this.startDate = getFirstStartDate(this.scheduleItems)
-      this.endDate = getLastEndDate(this.scheduleItems)
-      this.selectedStartDate = this.startDate.toDate()
-      this.selectedEndDate = this.endDate.toDate()
-    },
-
-    convertScheduleItems(scheduleItems) {
-      return scheduleItems.map(item => {
-        const startDate = getStartDateFromString(item.start_date)
-        const endDate = getEndDateFromString(startDate, item.end_date)
-        return {
-          ...item,
-          avatar: item.type === 'Project',
-          color: item.color || colors.fromString(item.name, true),
-          startDate: startDate,
-          endDate: endDate,
-          expanded: false,
-          loading: false,
-          editable: true,
-          route: getProductionSchedulePath(item.id),
-          children: []
-        }
-      })
-    },
-
-    convertTaskTypeScheduleItems(scheduleItems) {
-      return scheduleItems
-        .filter(item => this.taskTypeMap.get(item.task_type_id))
-        .map(item => {
-          const startDate = getStartDateFromString(item.start_date)
-          const endDate = getEndDateFromString(startDate, item.end_date)
-          const taskType = this.taskTypeMap.get(item.task_type_id)
-
-          return {
-            ...item,
-            name: taskType.name,
-            color: taskType.color,
-            startDate: startDate,
-            endDate: endDate,
-            expanded: false,
-            loading: false,
-            editable: true,
-            children: []
-          }
-        })
-    },
-
-    expandProductionElement(productionElement) {
-      if (!productionElement.expanded) {
-        productionElement.loading = true
-        productionElement.expanded = true
-        this.loadScheduleItems(productionElement)
-          .then(scheduleItems => {
-            scheduleItems = this.convertTaskTypeScheduleItems(scheduleItems)
-            productionElement.children = scheduleItems
-          })
-          .catch(err => {
-            console.error(err)
-            productionElement.expanded = false
-          })
-          .finally(() => {
-            productionElement.loading = false
-          })
-      } else {
-        productionElement.expanded = false
-      }
-    },
-
-    onUpdateSelectedStartDate(date) {
-      this.startDate = parseSimpleDate(date)
-    },
-
-    onUpdateSelectedEndDate(date) {
-      this.endDate = parseSimpleDate(date)
-    },
-
-    scrollScheduleToToday() {
-      this.$refs.schedule?.scrollToToday()
-    },
-
-    onScheduleItemChanged(item) {
-      if (item.type !== 'Project') {
-        this.saveScheduleItem(item)
-      } else {
-        this.editProduction({
-          id: item.id,
-          start_date: item.startDate.format('YYYY-MM-DD'),
-          end_date: item.endDate.format('YYYY-MM-DD')
-        })
-      }
-    },
-
-    updateRoute({ zoom }) {
-      const query = { ...this.$route.query }
-
-      if (zoom !== undefined) {
-        query.zoom = String(zoom)
-      }
-
-      if (JSON.stringify(query) !== JSON.stringify(this.$route.query)) {
-        this.$router.push({ query })
-      }
-    }
-  },
-
-  watch: {
-    zoomLevel(value) {
-      this.updateRoute({ zoom: value })
-    }
-  },
-
-  head() {
-    return {
-      title: `${this.$t('schedule.title_main')} - Kitsu`
-    }
+// Functions
+// --------------------------------------------------------------------------
+const toScheduleItem = (item, extra) => {
+  const start = getStartDateFromString(item.start_date)
+  return {
+    ...item,
+    startDate: start,
+    endDate: getEndDateFromString(start, item.end_date),
+    expanded: false,
+    loading: false,
+    editable: true,
+    children: [],
+    ...extra
   }
 }
+
+const convertScheduleItems = items =>
+  items.map(item =>
+    toScheduleItem(item, {
+      avatar: item.type === 'Project',
+      color: item.color || colors.fromString(item.name, true),
+      route: getProductionSchedulePath(item.id)
+    })
+  )
+
+const convertTaskTypeScheduleItems = items =>
+  items
+    .filter(item => taskTypeMap.value.get(item.task_type_id))
+    .map(item => {
+      const taskType = taskTypeMap.value.get(item.task_type_id)
+      return toScheduleItem(item, {
+        name: taskType.name,
+        color: taskType.color
+      })
+    })
+
+const expandProductionElement = async productionElement => {
+  if (productionElement.expanded) {
+    productionElement.expanded = false
+    return
+  }
+  productionElement.loading = true
+  productionElement.expanded = true
+  try {
+    const items = await store.dispatch('loadScheduleItems', productionElement)
+    productionElement.children = convertTaskTypeScheduleItems(items)
+  } catch (err) {
+    console.error(err)
+    productionElement.expanded = false
+  }
+  productionElement.loading = false
+}
+
+const onUpdateSelectedStartDate = date => {
+  startDate.value = parseSimpleDate(date)
+}
+
+const onUpdateSelectedEndDate = date => {
+  endDate.value = parseSimpleDate(date)
+}
+
+const scrollScheduleToToday = () => {
+  scheduleRef.value?.scrollToToday()
+}
+
+const onScheduleItemChanged = item => {
+  if (item.type !== 'Project') {
+    store.dispatch('saveScheduleItem', item)
+  } else {
+    store.dispatch('editProduction', {
+      id: item.id,
+      start_date: item.startDate.format('YYYY-MM-DD'),
+      end_date: item.endDate.format('YYYY-MM-DD')
+    })
+  }
+}
+
+// Watchers
+// --------------------------------------------------------------------------
+watch(zoomLevel, zoom => {
+  const query = { ...route.query, zoom: String(zoom) }
+  if (JSON.stringify(query) !== JSON.stringify(route.query)) {
+    router.push({ query })
+  }
+})
+
+// Lifecycle
+// --------------------------------------------------------------------------
+onMounted(() => {
+  const zoom = parseInt(route.query.zoom)
+  zoomLevel.value = Math.min(Math.max(isNaN(zoom) ? 1 : zoom, 0), 3)
+  if (openProductions.value.length) {
+    scheduleItems.value = convertScheduleItems(openProductions.value)
+    startDate.value = getFirstStartDate(scheduleItems.value)
+    endDate.value = getLastEndDate(scheduleItems.value)
+    selectedStartDate.value = startDate.value.toDate()
+    selectedEndDate.value = endDate.value.toDate()
+  }
+  scrollScheduleToToday()
+})
+
+// Head
+// --------------------------------------------------------------------------
+useHead({
+  title: computed(() => `${t('schedule.title_main')} - Kitsu`)
+})
 </script>
 
 <style lang="scss" scoped>
@@ -266,12 +231,6 @@ export default {
   .field {
     padding-bottom: 0;
     margin-bottom: 0;
-  }
-
-  .overall-man-days {
-    width: 120px;
-    font-size: 0.9em;
-    margin-right: 1em;
   }
 }
 
