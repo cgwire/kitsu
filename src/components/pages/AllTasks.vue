@@ -326,12 +326,31 @@ useHead({ title: computed(() => `${t('tasks.all_tasks')} - Kitsu`) })
   align-items: flex-start;
 }
 
-.combobox-production {
-  padding-top: 7px;
-}
-
 .burndown-button {
   align-self: flex-end;
   height: 42px;
+}
+
+// measured on the live rows: the status and task-type labels carry a 5px
+// padding-top the other labels lack, which the old 7px padding hack on the
+// production combobox compensated approximately
+.filters :deep(.label) {
+  margin-bottom: 5px;
+  padding-top: 0;
+}
+
+// the status combobox carries its own 1px margin-top the siblings lack
+.filters :deep(.status-combo) {
+  margin-top: 0;
+}
+
+// measured on the live rows: both combos render a 38px control against
+// the 42px of the Bulma selects and the person multiselect
+.filters :deep(.studio-combo),
+.filters :deep(.department-combo) {
+  display: flex;
+  flex-direction: column;
+  height: 42px;
+  justify-content: center;
 }
 </style>
