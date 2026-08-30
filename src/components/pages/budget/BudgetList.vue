@@ -38,18 +38,10 @@
             @touchstart="startBrowsing"
           >
             <budget-total-row
-              :budget-departments="budgetDepartments"
+              v-bind="commonRowProps"
               :total-entry="totalEntry"
-              :is-showing-expenses="isShowingExpenses"
-              :is-showing-items="isShowingItems"
-              :months-between-start-and-now="monthsBetweenStartAndNow"
-              :months-between-now-and-end="monthsBetweenNowAndEnd"
-              :months-between-production-dates="monthsBetweenProductionDates"
-              :converted-expenses="convertedExpenses"
               :hardware-items-costs="hardwareItemsCosts"
               :software-licenses-costs="softwareLicensesCosts"
-              :done-previsional="donePrevisional"
-              :remaining-previsional="remainingPrevisional"
             />
 
             <template
@@ -57,74 +49,38 @@
               :key="departmentEntry.id"
             >
               <budget-department-row
+                v-bind="commonRowProps"
                 :department-entry="departmentEntry"
-                :is-showing-expenses="isShowingExpenses"
                 :is-showing-items="isShowingItems"
-                :months-between-start-and-now="monthsBetweenStartAndNow"
-                :months-between-now-and-end="monthsBetweenNowAndEnd"
-                :months-between-production-dates="monthsBetweenProductionDates"
-                :converted-expenses="convertedExpenses"
+                :is-collapsed="!!collapsedDepartments[departmentEntry.id]"
                 :hardware-items-costs="hardwareItemsCosts"
                 :software-licenses-costs="softwareLicensesCosts"
-                :collapsed-departments="collapsedDepartments"
-                :department-map="departmentMap"
-                :done-previsional="donePrevisional"
-                :remaining-previsional="remainingPrevisional"
-                :toggle-department="toggleDepartment"
+                @toggle-department="toggleDepartment"
               />
 
               <template v-if="!collapsedDepartments[departmentEntry.id]">
                 <budget-hardware-item-row
-                  :key="departmentEntry.id"
+                  v-bind="commonRowProps"
                   :department-entry="departmentEntry"
-                  :is-showing-expenses="isShowingExpenses"
-                  :months-between-start-and-now="monthsBetweenStartAndNow"
-                  :months-between-now-and-end="monthsBetweenNowAndEnd"
-                  :months-between-production-dates="
-                    monthsBetweenProductionDates
-                  "
-                  :converted-expenses="convertedExpenses"
                   :hardware-items-costs="hardwareItemsCosts"
-                  :done-previsional="donePrevisional"
-                  :remaining-previsional="remainingPrevisional"
                   v-if="isShowingItems"
                 />
 
                 <budget-software-license-row
-                  :key="departmentEntry.id"
+                  v-bind="commonRowProps"
                   :department-entry="departmentEntry"
-                  :is-showing-expenses="isShowingExpenses"
-                  :months-between-start-and-now="monthsBetweenStartAndNow"
-                  :months-between-now-and-end="monthsBetweenNowAndEnd"
-                  :months-between-production-dates="
-                    monthsBetweenProductionDates
-                  "
-                  :converted-expenses="convertedExpenses"
                   :software-licenses-costs="softwareLicensesCosts"
-                  :done-previsional="donePrevisional"
-                  :remaining-previsional="remainingPrevisional"
                   v-if="isShowingItems"
                 />
 
                 <budget-person-row
-                  :key="personEntry.id"
+                  :key="personEntry.budget_entry_id || personEntry.person_id"
+                  v-bind="commonRowProps"
                   :department-entry="departmentEntry"
                   :person-entry="personEntry"
-                  :is-showing-expenses="isShowingExpenses"
-                  :months-between-start-and-now="monthsBetweenStartAndNow"
-                  :months-between-now-and-end="monthsBetweenNowAndEnd"
-                  :months-between-production-dates="
-                    monthsBetweenProductionDates
-                  "
-                  :converted-expenses="convertedExpenses"
-                  :person-map="personMap"
-                  :done-previsional="donePrevisional"
-                  :remaining-previsional="remainingPrevisional"
-                  @delete-budget-entry="
-                    $emit('delete-budget-entry', personEntry)
-                  "
-                  @edit-budget-entry="$emit('edit-budget-entry', personEntry)"
-                  @add-person-exception="addPersonException($event)"
+                  @add-person-exception="$emit('add-person-exception', $event)"
+                  @delete-budget-entry="$emit('delete-budget-entry', $event)"
+                  @edit-budget-entry="$emit('edit-budget-entry', $event)"
                   v-for="personEntry in departmentEntry.persons"
                 />
               </template>
@@ -136,179 +92,89 @@
   </div>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+import { computed, onMounted, ref, useTemplateRef } from 'vue'
+import { useStore } from 'vuex'
 
-import { domMixin } from '@/components/mixins/dom'
-import { grabListMixin } from '@/components/mixins/grablist'
-
+import { useGrabList } from '@/composables/grabList'
 import preferences from '@/lib/preferences'
 
-import BudgetListHeader from '@/components/pages/budget/BudgetListHeader.vue'
+import BudgetDepartmentRow from '@/components/pages/budget/BudgetDepartmentRow.vue'
 import BudgetHardwareItemRow from '@/components/pages/budget/BudgetHardwareItemRow.vue'
-import BudgetSoftwareLicenseRow from '@/components/pages/budget/BudgetSoftwareLicenseRow.vue'
+import BudgetListHeader from '@/components/pages/budget/BudgetListHeader.vue'
 import BudgetPersonRow from '@/components/pages/budget/BudgetPersonRow.vue'
+import BudgetSoftwareLicenseRow from '@/components/pages/budget/BudgetSoftwareLicenseRow.vue'
 import BudgetTotalRow from '@/components/pages/budget/BudgetTotalRow.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
-import BudgetDepartmentRow from '@/components/pages/budget/BudgetDepartmentRow.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 
-export default {
-  name: 'budget-list',
+// Composables
+const store = useStore()
+const bodyRef = useTemplateRef('body')
+const { startBrowsing } = useGrabList(bodyRef)
 
-  mixins: [domMixin, grabListMixin],
+// Props / Emits
+const props = defineProps({
+  budgetDepartments: { type: Array, default: () => [] },
+  convertedExpenses: { type: Object, default: () => ({}) },
+  donePrevisional: { type: Object, default: () => ({}) },
+  extendedBudgetDepartments: { type: Array, default: () => [] },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  isShowingExpenses: { type: Boolean, default: false },
+  isShowingItems: { type: Boolean, default: false },
+  hardwareItemsCosts: { type: Object, required: true },
+  softwareLicensesCosts: { type: Object, required: true },
+  monthsBetweenStartAndNow: { type: Array, default: () => [] },
+  monthsBetweenNowAndEnd: { type: Array, default: () => [] },
+  monthsBetweenProductionDates: { type: Array, default: () => [] },
+  remainingPrevisional: { type: Object, default: () => ({}) },
+  totalEntry: { type: Object, default: () => ({}) }
+})
+defineEmits([
+  'add-budget-entry',
+  'add-person-exception',
+  'delete-budget-entry',
+  'edit-budget-entry'
+])
 
-  emits: ['add-budget-entry', 'delete-budget-entry', 'edit-budget-entry'],
+// State
+// --------------------------------------------------------------------------
+const collapsedDepartments = ref({})
 
-  components: {
-    BudgetListHeader,
-    BudgetPersonRow,
-    BudgetHardwareItemRow,
-    BudgetSoftwareLicenseRow,
-    BudgetTotalRow,
-    BudgetDepartmentRow,
-    ButtonSimple,
-    Spinner
-  },
+// Computed
+// --------------------------------------------------------------------------
+const currentProduction = computed(() => store.getters.currentProduction)
 
-  props: {
-    budgetDepartments: {
-      type: Array,
-      default: () => []
-    },
-    currentBudget: {
-      type: Object,
-      default: () => {}
-    },
-    convertedExpenses: {
-      type: Object,
-      default: () => ({})
-    },
-    donePrevisional: {
-      type: Object,
-      default: () => ({})
-    },
-    extendedBudgetDepartments: {
-      type: Array,
-      default: () => []
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    isShowingExpenses: {
-      type: Boolean,
-      default: false
-    },
-    isShowingItems: {
-      type: Boolean,
-      default: false
-    },
-    hardwareItemsCosts: {
-      type: Object,
-      required: true
-    },
-    softwareLicensesCosts: {
-      type: Object,
-      required: true
-    },
-    monthsBetweenStartAndNow: {
-      type: Array,
-      default: () => []
-    },
-    monthsBetweenNowAndEnd: {
-      type: Array,
-      default: () => []
-    },
-    monthsBetweenProductionDates: {
-      type: Array,
-      default: () => []
-    },
-    remainingPrevisional: {
-      type: Object,
-      default: () => ({})
-    },
-    totalEntry: {
-      type: Object,
-      default: () => ({})
-    }
-  },
+const preferenceKey = computed(
+  () => `budget:collapsed-departments-${currentProduction.value.id}`
+)
 
-  data() {
-    return {
-      collapsedDepartments: {},
-      domEvents: [
-        ['mousemove', this.onMouseMove],
-        ['touchmove', this.onMouseMove],
-        ['mouseup', this.stopBrowsing],
-        ['mouseleave', this.stopBrowsing],
-        ['touchend', this.stopBrowsing],
-        ['touchcancel', this.stopBrowsing],
-        ['keyup', this.stopBrowsing]
-      ]
-    }
-  },
+const commonRowProps = computed(() => ({
+  isShowingExpenses: props.isShowingExpenses,
+  monthsBetweenStartAndNow: props.monthsBetweenStartAndNow,
+  monthsBetweenNowAndEnd: props.monthsBetweenNowAndEnd,
+  monthsBetweenProductionDates: props.monthsBetweenProductionDates,
+  convertedExpenses: props.convertedExpenses,
+  donePrevisional: props.donePrevisional,
+  remainingPrevisional: props.remainingPrevisional
+}))
 
-  mounted() {
-    const key = `budget:collapsed-departments-${this.currentProduction.id}`
-    this.addEvents(this.domEvents)
-    this.collapsedDepartments = preferences.getObjectPreference(key) || {}
-  },
-
-  beforeUnmount() {
-    this.removeEvents(this.domEvents)
-    document.body.style.cursor = 'default'
-  },
-
-  computed: {
-    ...mapGetters(['currentProduction', 'departmentMap', 'personMap'])
-  },
-
-  methods: {
-    ...mapActions(['updateProductionBudgetEntry']),
-
-    /* It toggles the department visibility and save it to local storage. */
-    toggleDepartment(departmentId) {
-      this.collapsedDepartments[departmentId] =
-        !this.collapsedDepartments[departmentId]
-
-      const key = `budget:collapsed-departments-${this.currentProduction.id}`
-      preferences.setObjectPreference(key, this.collapsedDepartments)
-    },
-
-    /* It sets a salary exception for a person, for a given month. An empty,
-     * zero or negative value clears the override instead: the month falls
-     * back to the computed salary rather than storing a 0 exception (which
-     * the backend would drop anyway).
-     */
-    addPersonException({ personEntry, month, value }) {
-      const monthKey = month.format('YYYY-MM')
-      const exceptions = personEntry.exceptions || {}
-      const amount = parseInt(value)
-      if (value == null || value === '' || isNaN(amount) || amount <= 0) {
-        delete exceptions[monthKey]
-      } else {
-        exceptions[monthKey] = amount
-      }
-      personEntry.exceptions = exceptions
-      const budgetEntry = {
-        id: personEntry.budget_entry_id,
-        ...personEntry,
-        exceptions
-      }
-      this.updateProductionBudgetEntry({
-        productionId: this.currentProduction.id,
-        budgetId: this.currentBudget.id,
-        budgetEntryId: personEntry.budget_entry_id,
-        budgetEntry
-      })
-    }
-  }
+// Functions
+// --------------------------------------------------------------------------
+const toggleDepartment = departmentId => {
+  collapsedDepartments.value[departmentId] =
+    !collapsedDepartments.value[departmentId]
+  preferences.setObjectPreference(
+    preferenceKey.value,
+    collapsedDepartments.value
+  )
 }
-</script>
 
-<style lang="scss" scoped></style>
+// Lifecycle
+// --------------------------------------------------------------------------
+onMounted(() => {
+  collapsedDepartments.value =
+    preferences.getObjectPreference(preferenceKey.value) || {}
+})
+</script>

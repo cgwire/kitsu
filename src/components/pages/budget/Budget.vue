@@ -22,7 +22,6 @@
 
         <budget-list
           :budget-departments="budgetDepartments"
-          :current-budget="currentBudget"
           :converted-expenses="convertedExpenses"
           :done-previsional="donePrevisional"
           :extended-budget-departments="extendedBudgetDepartments"
@@ -38,6 +37,7 @@
           :remaining-previsional="remainingPrevisional"
           :total-entry="totalEntry"
           @add-budget-entry="onAddBudgetEntry"
+          @add-person-exception="addPersonException"
           @delete-budget-entry="deleteBudgetEntry"
           @edit-budget-entry="editBudgetEntry"
           v-if="currentBudget.id"
@@ -166,21 +166,15 @@ const mergeById = (list, id, patch) => {
   if (item) Object.assign(item, patch)
 }
 
-// Exceptions are edited in place by BudgetList, so they must be a real
-// (reactive) object on the store entry, not the null zou returns by default.
-const withExceptions = entry => ({
-  ...entry,
-  exceptions: entry.exceptions || {}
-})
-
 const buildPersonEntry = entry => {
   const monthlySalary = entry.daily_salary * 20
+  const exceptions = entry.exceptions || {}
   const monthCosts = Object.fromEntries(
     Array.from({ length: entry.months_duration }, (_, i) => {
       const monthKey = moment(entry.start_date)
         .add(i, 'month')
         .format('YYYY-MM')
-      return [monthKey, entry.exceptions[monthKey] || monthlySalary]
+      return [monthKey, exceptions[monthKey] || monthlySalary]
     })
   )
   return {
@@ -196,7 +190,7 @@ const buildPersonEntry = entry => {
     monthly_salary: monthlySalary,
     daily_salary: entry.daily_salary,
     start_date: entry.start_date,
-    exceptions: entry.exceptions
+    exceptions
   }
 }
 
@@ -623,7 +617,7 @@ const loadBudgetEntries = () => {
       productionId: currentProduction.value.id,
       budgetId: currentBudget.value.id
     })
-    budgetEntries.value = loaded.map(withExceptions)
+    budgetEntries.value = loaded
   })
 }
 
@@ -749,6 +743,34 @@ const confirmCreateBudgetEntry = budgetEntry => {
   )
 }
 
+/* An empty, zero or negative value clears the override instead: the month
+ * falls back to the computed salary rather than storing a 0 exception (which
+ * the backend would drop anyway).
+ */
+const addPersonException = ({ personEntry, month, value }) => {
+  const entry = budgetEntries.value.find(
+    e => e.id === personEntry.budget_entry_id
+  )
+  if (!entry) return
+  const monthKey = month.format('YYYY-MM')
+  const amount = parseInt(value)
+  const exceptions = { ...entry.exceptions }
+  if (amount > 0) {
+    exceptions[monthKey] = amount
+  } else {
+    delete exceptions[monthKey]
+  }
+  entry.exceptions = exceptions
+  return runRequest('editBudgetEntry', () =>
+    store.dispatch('updateProductionBudgetEntry', {
+      productionId: currentProduction.value.id,
+      budgetId: currentBudget.value.id,
+      budgetEntryId: entry.id,
+      budgetEntry: entry
+    })
+  )
+}
+
 const deleteBudgetEntry = budgetEntry => {
   errors.deleteBudgetEntry = false
   modals.deleteBudgetEntry = true
@@ -833,14 +855,14 @@ const socketEvents = {
     if (!isCurrentBudget(data)) return
     if (budgetEntries.value.some(b => b.id === data.budget_entry_id)) return
     const budgetEntry = await loadBudgetEntry(data.budget_entry_id)
-    budgetEntries.value.push(withExceptions(budgetEntry))
+    budgetEntries.value.push(budgetEntry)
   },
 
   'budget-entry:update': async data => {
     if (!isCurrentBudget(data)) return
     if (!budgetEntries.value.some(b => b.id === data.budget_entry_id)) return
     const budgetEntry = await loadBudgetEntry(data.budget_entry_id)
-    mergeById(budgetEntries.value, budgetEntry.id, withExceptions(budgetEntry))
+    mergeById(budgetEntries.value, budgetEntry.id, budgetEntry)
   },
 
   'budget-entry:delete': data => {

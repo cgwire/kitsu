@@ -3,19 +3,16 @@
     class="datatable-row department-row pointer"
     role="button"
     tabindex="0"
-    @click="toggleDepartment(departmentEntry.id)"
-    @keydown.enter.prevent="toggleDepartment(departmentEntry.id)"
-    @keydown.space.prevent="toggleDepartment(departmentEntry.id)"
+    @click="$emit('toggle-department', departmentEntry.id)"
+    @keydown.enter.prevent="$emit('toggle-department', departmentEntry.id)"
+    @keydown.space.prevent="$emit('toggle-department', departmentEntry.id)"
   >
     <td class="datatable-row-header strong department-header" colspan="3">
       <div
         class="flexrow department-header-content"
         :style="getDepartmentStyle(departmentEntry.id, '99')"
       >
-        <chevron-right-icon
-          class="flexrow-item"
-          v-if="collapsedDepartments[departmentEntry.id]"
-        />
+        <chevron-right-icon class="flexrow-item" v-if="isCollapsed" />
         <chevron-down-icon class="flexrow-item" v-else />
         <div class="flexrow-item">
           {{ departmentMap.get(departmentEntry.id)?.name }}
@@ -129,8 +126,13 @@
 <script setup>
 import { localeCode } from '@/lib/lang'
 import { computed } from 'vue'
+import { useStore } from 'vuex'
 
 import { ChevronDownIcon, ChevronRightIcon } from 'lucide-vue-next'
+
+const store = useStore()
+
+defineEmits(['toggle-department'])
 
 const props = defineProps({
   departmentEntry: {
@@ -177,19 +179,13 @@ const props = defineProps({
     type: Object,
     required: true
   },
-  collapsedDepartments: {
-    type: Object,
-    required: true
-  },
-  departmentMap: {
-    type: Object,
-    required: true
-  },
-  toggleDepartment: {
-    type: Function,
-    required: true
+  isCollapsed: {
+    type: Boolean,
+    default: false
   }
 })
+
+const departmentMap = computed(() => store.getters.departmentMap)
 
 const departmentExpense = computed(() => {
   return props.convertedExpenses[props.departmentEntry.id] || { total: 0 }
@@ -210,9 +206,8 @@ const departmentTotalGap = computed(() => {
     : 0
 })
 
-/* It sets the background with the color of the department. */
 const getDepartmentStyle = (departmentId, opacity) => {
-  const department = props.departmentMap.get(departmentId)
+  const department = departmentMap.value.get(departmentId)
   return {
     backgroundColor: department ? department.color + opacity : undefined
   }

@@ -139,6 +139,7 @@ import { getMonthCost } from '@/lib/budget'
 import { localeCode } from '@/lib/lang'
 import { XIcon } from 'lucide-vue-next'
 import { computed } from 'vue'
+import { useStore } from 'vuex'
 
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
@@ -149,6 +150,8 @@ defineEmits([
   'edit-budget-entry',
   'add-person-exception'
 ])
+
+const store = useStore()
 
 const props = defineProps({
   personEntry: {
@@ -179,10 +182,6 @@ const props = defineProps({
     type: Object,
     required: true
   },
-  personMap: {
-    type: Map,
-    required: true
-  },
   donePrevisional: {
     type: Object,
     required: true
@@ -192,6 +191,8 @@ const props = defineProps({
     required: true
   }
 })
+
+const personMap = computed(() => store.getters.personMap)
 
 const personDonePrevisional = computed(() => {
   return (
