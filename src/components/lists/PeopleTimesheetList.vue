@@ -1,6 +1,11 @@
 <template>
   <div class="data-list">
-    <div class="datatable-wrapper" ref="body">
+    <div
+      class="datatable-wrapper"
+      ref="body"
+      @mousedown="startBrowsing"
+      @touchstart="startBrowsing"
+    >
       <table class="datatable">
         <thead class="datatable-head">
           <tr>
@@ -178,6 +183,8 @@
 import moment from 'moment-timezone'
 import { mapGetters } from 'vuex'
 
+import { domMixin } from '@/components/mixins/dom'
+import { grabListMixin } from '@/components/mixins/grablist'
 import {
   formatDisplayDate,
   getMonthRange,
@@ -195,6 +202,8 @@ import TableInfo from '@/components/widgets/TableInfo.vue'
 export default {
   name: 'people-timesheet-list',
 
+  mixins: [domMixin, grabListMixin],
+
   components: {
     PeopleAvatar,
     PeopleName,
@@ -204,8 +213,26 @@ export default {
   data() {
     return {
       currentMonth: moment().month() + 1,
-      currentYear: moment().year()
+      currentYear: moment().year(),
+      domEvents: [
+        ['mousemove', this.onMouseMove],
+        ['touchmove', this.onMouseMove],
+        ['mouseup', this.stopBrowsing],
+        ['mouseleave', this.stopBrowsing],
+        ['touchend', this.stopBrowsing],
+        ['touchcancel', this.stopBrowsing],
+        ['keyup', this.stopBrowsing]
+      ]
     }
+  },
+
+  mounted() {
+    this.addEvents(this.domEvents)
+  },
+
+  beforeUnmount() {
+    this.removeEvents(this.domEvents)
+    document.body.style.cursor = 'default'
   },
 
   props: {
@@ -282,14 +309,14 @@ export default {
   methods: {
     monthToString,
 
-    // convert to the selected unit and cap at two decimals, without
+    // convert to the selected unit and cap at one decimal, without
     // padding; empty cells ('-') pass through untouched
     cellDuration(duration) {
       if (typeof duration !== 'number') return duration
       const value = this.isHours
         ? duration
         : hoursToDays(this.organisation, duration)
-      return Math.round(value * 100) / 100
+      return Math.round(value * 10) / 10
     },
 
     yearDuration(year, personId) {

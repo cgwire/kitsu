@@ -208,7 +208,7 @@ export default {
 }
 
 .people-timesheet-info {
-  padding: 1em;
+  padding: 1.5em 1.5em 1em;
 }
 
 .info-date {
