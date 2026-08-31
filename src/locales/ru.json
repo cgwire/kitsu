@@ -294,7 +294,7 @@
     },
     "keyboard": {
       "altdown": "Переместить выделение задачи вниз",
-      "altj": "Выбрать предыдущее превью ",
+      "altj": "Выбрать предыдущее превью",
       "altk": "Выбрать следующее превью",
       "altleft": "Переместить выделение задачи влево",
       "altright": "Переместить выделение задачи вправо",
@@ -455,6 +455,8 @@
       "yes": "Да",
       "csv": {
         "choose": "Выбрать",
+        "error_imported_rows": "До ошибки импортирована {count} строка. | До ошибки импортировано {count} строк.",
+        "error_line": "Строка {line}",
         "error_upload": "Ошибка при загрузке CSV.",
         "export_file": "Экспортировать данные в CSV",
         "import_file": "Импортировать данные из CSV",
@@ -1116,7 +1118,7 @@
         "import_assets_button": "Импортировать ассеты",
         "import_shots_button": "Импортировать шоты",
         "new_project": "Новый проект",
-        "placeholder_date_start": "начинается  с",
+        "placeholder_date_start": "начинается с",
         "placeholder_date_end": "завершается",
         "placeholder_name": "Мой Крутой Проект",
         "placeholder_fps": "25",

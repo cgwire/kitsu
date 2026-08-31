@@ -457,6 +457,8 @@
       "yes": "Sì",
       "csv": {
         "choose": "Scegli",
+        "error_imported_rows": "{count} riga è stata importata prima dell'errore. | {count} righe sono state importate prima dell'errore.",
+        "error_line": "Riga {line}",
         "error_upload": "Si è verificato un errore durante il caricamento del file CSV.",
         "export_file": "Esporta dati in CSV",
         "import_file": "Importa dati da CSV",

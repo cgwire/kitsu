@@ -919,6 +919,8 @@
       },
       "csv": {
         "choose": "Wybierz",
+        "error_imported_rows": "Przed błędem zaimportowano {count} wiersz. | Przed błędem zaimportowano {count} wierszy.",
+        "error_line": "Wiersz {line}",
         "error_upload": "Wystąpił błąd podczas przesyłania pliku CSV.",
         "export_current_view": "Eksportuj bieżący widok",
         "export_file": "Eksportuj dane do pliku CSV",

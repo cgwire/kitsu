@@ -3,7 +3,7 @@
     "assets": {
       "cast_in": "Szerepel:",
       "delete_error": "Hiba történt az asset törlésekor. Valószínűleg adat hivatkozik rá. Biztos vagy benne, hogy ehhez az asset típushoz nem tartozik feladat?",
-      "delete_text": "Biztos hogy törölni akarod  {name} -t az adatbázisodból?",
+      "delete_text": "Biztos hogy törölni akarod {name} -t az adatbázisodból?",
       "edit_fail": "Mentés sikertelen. Lehetséges, hogy egy megegyező nevű asset már létezik.",
       "edit_success": "{name} sikeresen szerkesztve.",
       "edit_title": "Asset szerkesztése",
@@ -42,7 +42,7 @@
     },
     "asset_types": {
       "all_asset_types": "Minden asset típus",
-      "create_error": "Hiba történt az asset típus  mentésekor. Biztos, hogy nincs azonos nevű asset típus?",
+      "create_error": "Hiba történt az asset típus mentésekor. Biztos, hogy nincs azonos nevű asset típus?",
       "delete_text": "Biztos törölni akarod {name}-t az adatbázisodból?",
       "delete_error": "Hiba történt as asset típus törlésekor. Valószínűleg adat hivatkozik rá. Biztos vagy benne, hogy nem tartozik asset hozzá?",
       "edit_title": "Asset típus szerkesztése",
@@ -103,7 +103,7 @@
       "post_status": "Hozzászólás küldése",
       "retake": "Ismétlés",
       "revision": "revízió",
-      "set_status_to": "Állapot beállítása: ",
+      "set_status_to": "Állapot beállítása:",
       "task_placeholder": "Új elem...",
       "text": "Szöveg",
       "unpin": "Rögzítés feloldása",
@@ -189,7 +189,7 @@
         "asset_type": "Asset típus",
         "all_types": "Minden asset típus",
         "assignation": "Feladatkiosztás",
-        "assignation_exists_for": "Már kiosztva: ",
+        "assignation_exists_for": "Már kiosztva:",
         "assigned_to": "Kiosztva:",
         "descriptor": "Metaadat",
         "equal": "Egyenlő",
@@ -197,7 +197,7 @@
         "no_assignation_for": "Nincs kiosztva:",
         "no_filter": "Nincs szűrő",
         "not_equal": "Nem egyenlő",
-        "not_assigned_to": "Nincs kiosztva: ",
+        "not_assigned_to": "Nincs kiosztva:",
         "status": "Feladat állapot",
         "thumbnail": "Nézőkép",
         "title": "Szűrés ezen...",
@@ -455,6 +455,8 @@
       "yes": "Igen",
       "csv": {
         "choose": "Kiválaszt",
+        "error_imported_rows": "A hiba előtt {count} sor lett importálva. | A hiba előtt {count} sor lett importálva.",
+        "error_line": "{line}. sor",
         "error_upload": "Hiba történt a CSV feltöltésekor.",
         "export_file": "Adatok exportálása CSV-be",
         "import_file": "Adatok importálása CSV-ből",
@@ -723,7 +725,7 @@
     "people": {
       "active": "Aktív",
       "active_persons": "aktív felhasználó | aktív felhasználó",
-      "add_member_to_team": "Stábtag hozzáadása: ",
+      "add_member_to_team": "Stábtag hozzáadása:",
       "create_invite": "Meghívó készítése és küldése",
       "create_error": "Szerverhiba történt a felhasználó létrehozásakor vagy frissítésekor. További információért kérlek lépj kapcsolatba a támogató csapattal.",
       "delete_error": "Hiba történt a felhasználó törlésekor. Valószínűleg adat tartozik hozzá. Biztos vagy benne, hogy nincs számára feladat kiosztva, és nincs hozzászólása?",
@@ -876,7 +878,7 @@
         "created_at": "Létrehozás dátuma",
         "updated_at": "Frissítés dátuma",
         "for_entity": "Válaszd ki a megjelenítendő elemet",
-        "for_client": "Megosztásra kerül vele: "
+        "for_client": "Megosztásra kerül vele:"
       },
       "actions": {
         "annotation": "Megjegyzés",
@@ -1396,7 +1398,7 @@
       "hours": "ó",
       "md": "md",
       "milestone": {
-        "add_milestone": "Mérföldkő hozzáadása ehhez: ",
+        "add_milestone": "Mérföldkő hozzáadása ehhez:",
         "edit_milestone": "Mérföldkő szerkesztése",
         "name": "Név",
         "error": "Hiba történt a mérföldkő szerkesztésekor. Kérlek próbáld újra.",
@@ -1544,7 +1546,7 @@
       "assign": "Feladat kiosztása: | {nbSelectedTasks} feladat kiosztása:",
       "back_to_list": "vissza a listához",
       "bigger": "Feladat panel szélesítése",
-      "change_status_to": "Feladat állapotának megváltoztatása: ",
+      "change_status_to": "Feladat állapotának megváltoztatása:",
       "change_preview": "Előnézet cseréje",
       "change_priority": "A kijelölt feladat prioritásának módosítása | A {nbSelectedTasks} kijelölt feladat prioritásának módosítása",
       "clear_assignations": "feladatkiosztás tisztítása",
@@ -1599,7 +1601,7 @@
       "with_comment": "Hozzászólással...",
       "fields": {
         "asset_type": "Asset típus",
-        "assignees": "Feladat rábízva: ",
+        "assignees": "Feladat rábízva:",
         "count": "Darab",
         "due_date": "Határidő",
         "duration": "Időtartam",

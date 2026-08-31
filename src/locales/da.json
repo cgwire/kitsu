@@ -455,6 +455,8 @@
       "yes": "Ja",
       "csv": {
         "choose": "Vælg",
+        "error_imported_rows": "{count} linje blev importeret før fejlen. | {count} linjer blev importeret før fejlen.",
+        "error_line": "Linje {line}",
         "error_upload": "Der opstod en fejl under upload af din CSV-fil.",
         "export_file": "Eksporter data til CSV",
         "import_file": "Importer data fra CSV",

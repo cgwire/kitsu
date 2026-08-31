@@ -455,6 +455,8 @@
       "yes": "はい",
       "csv": {
         "choose": "選択",
+        "error_imported_rows": "エラーの前に {count} 行がインポートされました。 | エラーの前に {count} 行がインポートされました。",
+        "error_line": "{line} 行目",
         "error_upload": "CSV のアップロード中にエラーが発生しました。",
         "export_file": "データを CSV にエクスポート",
         "import_file": "データを CSV からインポート",

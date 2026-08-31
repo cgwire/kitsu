@@ -215,7 +215,7 @@
       "thumbnails": {
         "error": "Se ha producido un error al subir las miniaturas",
         "shots_pattern": "\"NombreDeSecuencia NombreDeToma\", por ejemplo SQ01_SH01.",
-        "assets_pattern": "Nombre de asset del tipo de asset, por ejemplo, Environment_Forest.",
+        "assets_pattern": "\"TipoDeAsset NombreDeAsset\", por ejemplo Environment_Forest.",
         "select_files": "Seleccion archivos",
         "selected_files": "Archivos seleccionados",
         "select_task_type": "Seleccionar tipo de tarea",
@@ -223,8 +223,8 @@
         "undefined": "indefinido",
         "undefined_pattern": "Indefinido",
         "upload": "Agregar miniaturas",
-        "edits_pattern": "\"EditName\" ej. Trailer.",
-        "edits_tvshow_pattern": "\"EpisodeName EditName\" eg. E01_Trailer.",
+        "edits_pattern": "\"NombreDeEdit\", por ejemplo Trailer.",
+        "edits_tvshow_pattern": "\"NombreDeEpisodio NombreDeEdit\", por ejemplo E01_Trailer.",
         "explanation": "Para añadir una miniatura es necesario establecer una nueva vista previa. Para establecer varias miniaturas al mismo tiempo, primero debe elegir un tipo de tarea para crear las nuevas previsualizaciones. Las miniaturas se establecerán a partir de estas nuevas vistas previas.",
         "explanation_two": "A continuación, debe seleccionar los archivos que desea cargar. Para encontrar las entidades adecuadas, los nombres de los archivos deben coincidir con el siguiente patrón:",
         "invalid_files": "Archivos no válidos (no coinciden con el patrón)"
@@ -455,6 +455,8 @@
       "yes": "Sí",
       "csv": {
         "choose": "Elige",
+        "error_imported_rows": "Se importó {count} línea antes del error. | Se importaron {count} líneas antes del error.",
+        "error_line": "Línea {line}",
         "error_upload": "Se ha producido un error al subir su CSV.",
         "export_file": "Exportar datos a un archivo CSV",
         "import_file": "Importar datos de un archivo CSV",
@@ -1003,7 +1005,7 @@
     },
     "productions": {
       "current": "Producción seleccionada",
-      "delete_text": "¿Está seguro de que desea eliminar {name} de su base de datos?\nConfirme escribiendo el nombre del proyecto que desea eliminar a continuación.",
+      "delete_text": "¿Está seguro de que desea eliminar {name} de su base de datos? Confirme escribiendo el nombre del proyecto que desea eliminar a continuación.",
       "delete_error": "Se ha producido un error al eliminar esta producción. Es probable que haya datos asociados. ¿Está seguro de que esta producción no tiene ninguna tarea, toma o recurso asociado? Kitsu no permite la eliminación de producciones. Si no desea verla más, puede cerrarla.",
       "edit_title": "Modificar producción",
       "new_production": "Añadir una producción",

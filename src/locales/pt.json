@@ -455,6 +455,8 @@
       "yes": "Sim",
       "csv": {
         "choose": "Escolher",
+        "error_imported_rows": "{count} linha foi importada antes do erro. | {count} linhas foram importadas antes do erro.",
+        "error_line": "Linha {line}",
         "error_upload": "Um erro ocorreu no upload do seu CSV.",
         "export_file": "Exportar dados para um CSV",
         "import_file": "Importar dados de um CSV",
@@ -1188,7 +1190,7 @@
       },
       "change_password": {
         "button": "Alterar senha",
-        "error": "\nOcorreu um erro ao alterar a senha. Por favor, verifique sua senha atual.",
+        "error": "Ocorreu um erro ao alterar a senha. Por favor, verifique sua senha atual.",
         "success": "Sua senha foi alterada com sucesso!",
         "unvalid": "A confirmação de sua nova senha não corresponde ou sua senha é muito curta (8 caracteres, pelo menos, são esperados)."
       },

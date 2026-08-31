@@ -214,8 +214,8 @@
       },
       "thumbnails": {
         "error": "Er is een fout opgetreden bij het uploaden van thumbnails",
-        "shots_pattern": "\"SequentieNaam ShotNaam\" eg. SQ01_SH01.\n",
-        "assets_pattern": "\"AssetType AssetNaam\" bv. Omgeving_Bos.\n",
+        "shots_pattern": "\"SequentieNaam ShotNaam\" eg. SQ01_SH01.",
+        "assets_pattern": "\"AssetType AssetNaam\" bv. Omgeving_Bos.",
         "select_files": "Selecteer bestanden",
         "selected_files": "Geselecteerde bestanden",
         "select_task_type": "Kies taak type",
@@ -455,6 +455,8 @@
       "yes": "Ja",
       "csv": {
         "choose": "Kies",
+        "error_imported_rows": "{count} regel is geïmporteerd vóór de fout. | {count} regels zijn geïmporteerd vóór de fout.",
+        "error_line": "Regel {line}",
         "error_upload": "Er is een fout opgetreden tijdens het uploaden van de CSV.",
         "export_file": "Data naar CSV exporteren",
         "import_file": "Data uit CSV importeren",
@@ -1196,7 +1198,7 @@
         "button": "Wijzigingen opslaan",
         "error": "Er is een fout opgetreden bij het opslaan van wijzigingen"
       },
-      "notifications_mattermost_enabled": "Mattermost notificaties aan\n",
+      "notifications_mattermost_enabled": "Mattermost notificaties aan",
       "notifications_mattermost_user": "Mattermost gebruikersnaam",
       "use_12_hour_clock": "12-uursklok (AM/PM)",
       "webhook_error": "de webhook mattermost komt niet overeen met een hook",
@@ -1561,7 +1563,7 @@
       "create_tasks_asset_failed": "Er is een serverfout opgetreden tijdens het maken van creaties.",
       "current": "Taken",
       "current_status": "Huidige status:",
-      "delete_all_text": "Weet je zeker dat je alle taken voor de opgegeven {name} wilt verwijderen?  Bevestig door de naam van het taaktype van de taken die je wilt verwijderen in het tekstveld te typen.",
+      "delete_all_text": "Weet je zeker dat je alle taken voor de opgegeven {name} wilt verwijderen? Bevestig door de naam van het taaktype van de taken die je wilt verwijderen in het tekstveld te typen.",
       "delete_all_error": "Het verwijderen van alle taken voor een bepaald taaktype is mislukt.",
       "delete_error": "Er is een fout opgetreden bij het verwijderen van de taak.",
       "delete_comment": "Weet je zeker dat je de reactie wilt verwijderen?",
