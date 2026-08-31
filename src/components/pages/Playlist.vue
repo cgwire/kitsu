@@ -1438,7 +1438,7 @@ export default {
       this.loading.addEpisode = true
       this.setSilent()
       try {
-        const shots = [].concat(...this.shotsByEpisode)
+        const shots = this.shotsByEpisode.flat()
         await this.addEntities(sortShots(shots))
       } finally {
         this.loading.addEpisode = false
