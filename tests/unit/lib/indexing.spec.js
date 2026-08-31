@@ -89,6 +89,41 @@ describe('lib/indexing', () => {
     })
   })
 
+  // buildAssetIndex compares against itself, so nothing else pins the words
+  // this returns: assert the list exactly, order included, as the index keeps
+  // insertion order and every caller searches through it.
+  describe('getAssetIndexWords', () => {
+    it('splits the asset type, the separators and the camel case parts', () => {
+      expect(
+        getAssetIndexWords({
+          name: 'BigChief_Tree-01',
+          asset_type_name: 'Set Dressing'
+        })
+      ).toEqual([
+        'set',
+        'dressing',
+        'bigchief',
+        'tree',
+        '01',
+        'bigchief_tree-01',
+        'big',
+        'chief'
+      ])
+    })
+
+    it('keeps the raw name next to the words it was split into', () => {
+      expect(
+        getAssetIndexWords({ name: 'Big_Buck', asset_type_name: 'Characters' })
+      ).toEqual(['characters', 'big', 'buck', 'big_buck'])
+    })
+
+    it('adds nothing when the name holds no camel case', () => {
+      expect(
+        getAssetIndexWords({ name: 'tree_01', asset_type_name: 'props' })
+      ).toEqual(['props', 'tree', '01', 'tree_01'])
+    })
+  })
+
   it('buildNameIndex', () => {
     const entries = [
       { name: 'Agent327', id: 1 },
