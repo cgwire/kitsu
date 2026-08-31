@@ -17,94 +17,88 @@
     :error-text="errorText"
     :is-loading="isLoading"
     :is-error="isError"
-    :text="hardDeleteTextComputed"
-    :lock-text="hardDeleteLockTextComputed"
+    :text="hardDeleteMessage"
+    :lock-text="hardDeleteLockMessage"
     @cancel="modals.deleteConfirmation = false"
     @confirm="confirm"
     v-if="modals.deleteConfirmation"
   />
 </template>
 
-<script>
-import Spinner from '@/components/widgets/Spinner.vue'
+<script setup>
+// Imports
+import { computed, reactive } from 'vue'
+import { useI18n } from 'vue-i18n'
+
 import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
 
-export default {
-  name: 'delete-entities',
+// Composables
+const { t } = useI18n()
 
-  components: {
-    Spinner,
-    HardDeleteModal
+// Props / Emits
+// --------------------------------------------------------------------------
+const props = defineProps({
+  isError: {
+    default: false,
+    type: Boolean
   },
-
-  props: {
-    isError: {
-      default: false,
-      type: Boolean
-    },
-    isLoading: {
-      default: false,
-      type: Boolean
-    },
-    errorText: {
-      default: '',
-      type: String
-    },
-    text: {
-      default: '',
-      type: String
-    },
-    // HARD DELETE MODAL
-    requireHardDeleteConfirmation: {
-      default: false,
-      type: Boolean
-    },
-    hardDeleteText: {
-      default: '',
-      type: String
-    },
-    hardDeleteLockText: {
-      default: '',
-      type: String
-    }
+  isLoading: {
+    default: false,
+    type: Boolean
   },
-
-  emits: ['confirm'],
-
-  data() {
-    return {
-      modals: {
-        deleteConfirmation: false
-      }
-    }
+  errorText: {
+    default: '',
+    type: String
   },
-
-  computed: {
-    hardDeleteTextComputed() {
-      return (
-        this.hardDeleteText ||
-        this.$t('hard_delete.delete_for_selection_hard_text')
-      )
-    },
-    hardDeleteLockTextComputed() {
-      return (
-        this.hardDeleteLockText ||
-        this.$t('hard_delete.delete_for_selection_hard_lock_text')
-      )
-    }
+  text: {
+    default: '',
+    type: String
   },
+  // HARD DELETE MODAL
+  requireHardDeleteConfirmation: {
+    default: false,
+    type: Boolean
+  },
+  hardDeleteText: {
+    default: '',
+    type: String
+  },
+  hardDeleteLockText: {
+    default: '',
+    type: String
+  }
+})
 
-  methods: {
-    confirmDeletion() {
-      if (this.requireHardDeleteConfirmation) {
-        this.modals.deleteConfirmation = true
-      } else {
-        this.confirm()
-      }
-    },
-    confirm() {
-      this.$emit('confirm')
-    }
+const emit = defineEmits(['confirm'])
+
+// State
+// --------------------------------------------------------------------------
+const modals = reactive({
+  deleteConfirmation: false
+})
+
+// Computed
+// --------------------------------------------------------------------------
+const hardDeleteMessage = computed(
+  () => props.hardDeleteText || t('hard_delete.delete_for_selection_hard_text')
+)
+
+const hardDeleteLockMessage = computed(
+  () =>
+    props.hardDeleteLockText ||
+    t('hard_delete.delete_for_selection_hard_lock_text')
+)
+
+// Functions
+// --------------------------------------------------------------------------
+const confirm = () => emit('confirm')
+
+const confirmDeletion = () => {
+  if (props.requireHardDeleteConfirmation) {
+    modals.deleteConfirmation = true
+  } else {
+    confirm()
   }
 }
 </script>

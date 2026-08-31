@@ -185,6 +185,10 @@ const actions = {
     return tasksApi.getOpenTasks(filters)
   },
 
+  loadOpenTasksBurndown({}, filters) {
+    return tasksApi.getOpenTasksBurndown(filters)
+  },
+
   subscribeToTask({ commit }, taskId) {
     return tasksApi.subscribeToTask(taskId).then(() => {
       commit(LOAD_TASK_SUBSCRIBE_END, { taskId, subscribed: true })

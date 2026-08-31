@@ -232,8 +232,14 @@ export default {
     return client.pget('/api/data/user/done-tasks')
   },
 
-  loadTasksToCheck() {
-    return client.pget('/api/data/user/tasks-to-check')
+  loadTasksToCheck(params = {}) {
+    return client.pget(
+      buildQueryString('/api/data/user/tasks-to-check', params)
+    )
+  },
+
+  loadTasksToCheckFilterValues() {
+    return client.pget('/api/data/user/tasks-to-check/filter-values')
   },
 
   loadTimeSpents(date) {

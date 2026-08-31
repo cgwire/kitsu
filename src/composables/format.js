@@ -10,7 +10,7 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
 import {
-  formatDate,
+  formatDate as libFormatDate,
   formatDisplayDate as libFormatDisplayDate,
   formatDuration as libFormatDuration,
   formatFullDate,
@@ -21,7 +21,7 @@ import {
 // the reactive parts can import them directly without instantiating the
 // composable.
 
-export { formatDate, formatFullDate, formatSimpleDate }
+export { libFormatDate as formatDate, formatFullDate, formatSimpleDate }
 
 export const formatPrioritySymbol = priority => {
   const clamped = Math.max(0, Math.min(priority, 3))
@@ -58,8 +58,14 @@ export const useFormat = () => {
   )
 
   const dateFormat = computed(() => store.getters.dateFormat)
+  const use12HourClock = computed(() => store.getters.use12HourClock)
 
   const formatBoolean = value => (value ? t('main.yes') : t('main.no'))
+
+  // unlike the pure export above, this one applies the user preferences,
+  // matching the legacy mixin's formatDate
+  const formatDate = date =>
+    libFormatDate(date, dateFormat.value, use12HourClock.value)
 
   const formatDisplayDate = date => libFormatDisplayDate(date, dateFormat.value)
 
@@ -78,6 +84,7 @@ export const useFormat = () => {
     organisation,
     isDurationInHours,
     dateFormat,
+    use12HourClock,
     formatBoolean,
     formatDate,
     formatDisplayDate,

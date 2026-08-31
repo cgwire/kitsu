@@ -1908,6 +1908,7 @@
       "title": "Hogyan támogasd a Kitsu-t"
     },
     "my_checks": {
+      "build_playlist_loaded_only": "Csak a listába betöltött feladatok kerülnek a lejátszási listába",
       "title": "Ellenőrzendő feladat | Ellenőrzendő feladatok"
     },
     "edits": {
@@ -2147,6 +2148,14 @@
       "show_items": "Hardver és szoftver beszámítása",
       "title": "Költségvetés",
       "clear_exception": "E havi fizetésfelülírás törlése"
+    },
+    "burndown": {
+      "estimations": "Becslések",
+      "ideal": "Ideális",
+      "projection": "Előrejelzés",
+      "remaining_days": "Hátralévő embernapok",
+      "remaining_tasks": "Hátralévő feladatok",
+      "title": "Burndown diagram"
     },
     "status_automations": {
       "add_status_automation_placeholder": "+ Állapot-automatizálás hozzáadása",

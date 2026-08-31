@@ -16,6 +16,7 @@
     @click="$emit('click', $event)"
   >
     <bell-icon class="icon" v-if="icon === 'bell'" />
+    <chart-line-icon class="icon" v-else-if="icon === 'chart'" />
     <grid-icon class="icon" v-else-if="icon === 'grid'" />
     <send-icon class="icon" v-else-if="icon === 'send'" />
     <paperclip-icon class="icon" v-else-if="icon === 'attach'" />
@@ -95,6 +96,7 @@ import {
   BellIcon,
   CalendarIcon,
   CalendarPlusIcon,
+  ChartLineIcon,
   ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,

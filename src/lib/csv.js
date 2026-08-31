@@ -118,6 +118,12 @@ const csv = {
     return entries
   },
 
+  /*
+   * Build the budget export. When `expenses` is given (the "real costs" view
+   * is active), the columns mirror the on-screen table: real cost per past
+   * month, real total, estimated so far and gap, then the estimated future
+   * months, remaining, real + remaining, estimated total and final gap.
+   */
   generateBudget(
     t,
     departmentMap,
@@ -126,50 +132,95 @@ const csv = {
     currency,
     monthsBetweenProductionDates,
     totalEntry,
-    budgetDepartments
+    budgetDepartments,
+    expenses = null
   ) {
     const name = csv.generateName(nameData)
+    const monthLabel = month =>
+      month.month() === 0 ? month.format('MMM / YY') : month.format('MMM')
+    const monthCells = (costs, months) =>
+      months.map(month => costs?.[month.format('YYYY-MM')] || '')
+
+    const pastMonths = expenses ? expenses.monthsBetweenStartAndNow : []
+    const futureMonths = expenses
+      ? expenses.monthsBetweenNowAndEnd
+      : monthsBetweenProductionDates
+
     const headers = [
       t('budget.fields.department'),
       '',
       '',
       t('budget.fields.base_salary'),
       t('budget.fields.duration'),
-      ...monthsBetweenProductionDates.map(month => {
-        if (month.month() === 0) {
-          return month.format('MMM / YY')
-        } else {
-          return month.format('MMM')
-        }
-      }),
-      `${t('main.total')} (${currency})`
+      ...pastMonths.map(monthLabel),
+      ...(expenses
+        ? [
+            t('budget.costs'),
+            t('budget.previsional_costs'),
+            t('budget.difference')
+          ]
+        : []),
+      ...futureMonths.map(monthLabel),
+      ...(expenses
+        ? [t('budget.remaining'), t('budget.remaining_and_costs')]
+        : []),
+      `${t('main.total')} (${currency})`,
+      ...(expenses ? [t('budget.difference')] : [])
     ]
+
+    const costCells = (monthCosts, total, realCosts, done, remaining) => {
+      if (!expenses) return [...monthCells(monthCosts, futureMonths), total]
+      const real = realCosts?.total || 0
+      return [
+        ...monthCells(realCosts, pastMonths),
+        real,
+        done,
+        done - real,
+        ...monthCells(monthCosts, futureMonths),
+        remaining,
+        real + remaining,
+        total,
+        total - (real + remaining)
+      ]
+    }
+    const realCosts = expenses?.convertedExpenses || {}
+    const done = expenses?.donePrevisional || {}
+    const remaining = expenses?.remainingPrevisional || {}
+
     const totalLine = [
       `${t('main.total')}`,
       '',
       '',
       '',
       '',
-      ...monthsBetweenProductionDates.map(month => {
-        return totalEntry.monthCosts[month.format('YYYY-MM')] || ''
-      }),
-      totalEntry.total
+      ...costCells(
+        totalEntry.monthCosts,
+        totalEntry.total,
+        realCosts,
+        done.total || 0,
+        remaining.total || 0
+      )
     ]
     const entries = [totalLine]
     budgetDepartments.forEach(departmentEntry => {
       const department = departmentMap.get(departmentEntry.id)
+      const departmentId = departmentEntry.id
       entries.push([
         department?.name || '',
         '',
         '',
         departmentEntry.monthly_salary,
         departmentEntry.months_duration,
-        ...monthsBetweenProductionDates.map(month => {
-          return departmentEntry.monthCosts[month.format('YYYY-MM')] || ''
-        }),
-        departmentEntry.total
+        ...costCells(
+          departmentEntry.monthCosts,
+          departmentEntry.total,
+          realCosts[departmentId],
+          done[departmentId]?.total || 0,
+          remaining[departmentId]?.total || 0
+        )
       ])
       departmentEntry.persons.forEach(personEntry => {
+        const entryId = personEntry.budget_entry_id
         entries.push([
           personEntry.position
             ? t('budget.positions.' + personEntry.position)
@@ -182,10 +233,13 @@ const csv = {
             : t('budget.new_hiring'),
           personEntry.monthly_salary,
           personEntry.months_duration,
-          ...monthsBetweenProductionDates.map(month => {
-            return personEntry.monthCosts[month.format('YYYY-MM')] || ''
-          }),
-          personEntry.total
+          ...costCells(
+            personEntry.monthCosts,
+            personEntry.total,
+            realCosts[departmentId]?.[personEntry.person_id],
+            done[departmentId]?.[entryId] || 0,
+            remaining[departmentId]?.[entryId] || 0
+          )
         ])
       })
     })

@@ -1991,6 +1991,7 @@
       "title": "如何支援 Kitsu"
     },
     "my_checks": {
+      "build_playlist_loaded_only": "播放清單僅包含清單中已載入的任務",
       "title": "要檢查的任務 | 要檢查的任務"
     },
     "preview": {
@@ -2116,6 +2117,14 @@
         "senior": "資深"
       },
       "clear_exception": "清除本月的薪資覆寫"
+    },
+    "burndown": {
+      "estimations": "預估",
+      "ideal": "理想",
+      "projection": "預測",
+      "remaining_days": "剩餘人天",
+      "remaining_tasks": "剩餘任務",
+      "title": "燃盡圖"
     },
     "hard_delete": {
       "delete_for_selection_hard_text": "您確定要永久移除選取的項目？請在下方輸入「刪除」確認。",

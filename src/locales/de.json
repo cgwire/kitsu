@@ -1991,6 +1991,7 @@
       "title": "Wie kann man Kitsu unterstützen?"
     },
     "my_checks": {
+      "build_playlist_loaded_only": "Nur die in der Liste geladenen Aufgaben werden in die Wiedergabeliste aufgenommen",
       "title": "Zu prüfende Aufgabe | Zu prüfende Aufgaben"
     },
     "preview": {
@@ -2116,6 +2117,14 @@
         "senior": "Senior"
       },
       "clear_exception": "Gehaltsanpassung für diesen Monat zurücksetzen"
+    },
+    "burndown": {
+      "estimations": "Schätzungen",
+      "ideal": "Ideal",
+      "projection": "Prognose",
+      "remaining_days": "Verbleibende Personentage",
+      "remaining_tasks": "Verbleibende Aufgaben",
+      "title": "Burndown-Diagramm"
     },
     "hard_delete": {
       "delete_for_selection_hard_text": "Sind Sie sicher, dass Sie die ausgewählten Elemente dauerhaft entfernen möchten? Bitte bestätigen Sie, indem Sie unten \"LÖSCHEN\" eingeben.",

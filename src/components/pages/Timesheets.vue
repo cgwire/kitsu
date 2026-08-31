@@ -87,486 +87,355 @@
         :is-loading-error="isInfoLoadingError"
         :tasks="tasks"
         :day-off-count="dayOffCount"
-        @close="hideSideInfo"
       />
     </div>
   </div>
 </template>
 
-<script>
+<script setup>
+// Imports
+import { useHead } from '@unhead/vue'
 import moment from 'moment-timezone'
-import { mapGetters, mapActions } from 'vuex'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
 import csv from '@/lib/csv'
-import { monthToString, range } from '@/lib/time'
 import { sortByName } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
+import { monthToString, range } from '@/lib/time'
 
+import PeopleTimesheetList from '@/components/lists/PeopleTimesheetList.vue'
+import PeopleTimesheetInfo from '@/components/sides/PeopleTimesheetInfo.vue'
 import ButtonHrefLink from '@/components/widgets/ButtonHrefLink.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 import ComboboxStudio from '@/components/widgets/ComboboxStudio.vue'
-import PeopleTimesheetList from '@/components/lists/PeopleTimesheetList.vue'
-import PeopleTimesheetInfo from '@/components/sides/PeopleTimesheetInfo.vue'
 import PageTitle from '@/components/widgets/PageTitle.vue'
 
-export default {
-  name: 'timesheets',
+// Composables
+const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
+const store = useStore()
 
-  components: {
-    ButtonSimple,
-    ButtonHrefLink,
-    Combobox,
-    ComboboxProduction,
-    ComboboxStudio,
-    PageTitle,
-    PeopleTimesheetList,
-    PeopleTimesheetInfo
-  },
+// State
+// --------------------------------------------------------------------------
+const currentDay = ref(moment().date())
+const currentMonth = ref(moment().month() + 1)
+const currentWeek = ref(moment().isoWeek())
+const currentYear = ref(moment().year())
+const dayOffCount = ref(0)
+const detailLevel = ref('day')
+const detailLevelString = ref('day')
+const isInfoLoading = ref(false)
+const isInfoLoadingError = ref(false)
+const isLoading = ref(false)
+const isLoadingError = ref(false)
+const monthString = ref(`${moment().month() + 1}`)
+const productionId = ref(route.query.productionId || '')
+const productionIdString = ref(route.query.productionId || '')
+const showInfo = ref(true)
+const studioId = ref(route.query.studioId || '')
+const studioIdString = ref(route.query.studioId || '')
+const tasks = ref([])
+const unit = ref('hour')
+const yearString = ref(`${moment().year()}`)
 
-  data() {
-    return {
-      detailOptions: [
-        {
-          label: this.$t('main.day'),
-          value: 'day'
-        },
-        {
-          label: this.$t('main.week'),
-          value: 'week'
-        },
-        {
-          label: this.$t('main.month'),
-          value: 'month'
-        },
-        {
-          label: this.$t('main.year'),
-          value: 'year'
-        }
-      ],
-      unitOptions: [
-        {
-          label: this.$t('main.hour'),
-          value: 'hour'
-        },
-        {
-          label: this.$t('main.day'),
-          value: 'day'
-        }
-      ],
+// guards the combobox watchers while loadRoute applies the route context,
+// so route-driven updates never push a new navigation themselves
+let silent = false
 
-      detailLevelString: 'day',
-      detailLevel: 'day',
-      productionId: '',
-      productionIdString: '',
-      studioId: '',
-      studioIdString: '',
-      yearString: `${moment().year()}`,
-      monthString: `${moment().month() + 1}`,
-      unit: 'hour',
+// Computed
+// --------------------------------------------------------------------------
+const isCurrentUserAdmin = computed(() => store.getters.isCurrentUserAdmin)
+const organisation = computed(() => store.getters.organisation)
+const people = computed(() => store.getters.people)
+const personMap = computed(() => store.getters.personMap)
+const productions = computed(() => store.getters.productions)
+const timesheet = computed(() => store.getters.timesheet)
 
-      currentYear: moment().year(),
-      currentMonth: moment().month() + 1,
-      currentWeek: moment().isoWeek(),
-      currentDay: moment().date(),
-      currentPerson: this.getCurrentPerson(),
+const detailOptions = computed(() => [
+  { label: t('main.day'), value: 'day' },
+  { label: t('main.week'), value: 'week' },
+  { label: t('main.month'), value: 'month' },
+  { label: t('main.year'), value: 'year' }
+])
 
-      isLoading: false,
-      isLoadingError: false,
+const unitOptions = computed(() => [
+  { label: t('main.hour'), value: 'hour' },
+  { label: t('main.day'), value: 'day' }
+])
 
-      dayOffCount: 0,
-      isInfoLoading: false,
-      isInfoLoadingError: false,
-      showInfo: true,
-      tasks: []
+const productionList = computed(() => {
+  const productionOptions = sortByName([...productions.value]).map(
+    production => {
+      const suffix =
+        production.project_status_name === 'Closed' ? ' (closed)' : ''
+      return { ...production, name: production.name + suffix }
     }
-  },
+  )
+  return [{ id: '', name: t('main.all') }, ...productionOptions]
+})
 
-  async created() {
-    this.isLoading = true
-    this.loadProductions()
-    if (!this.people.length) {
-      await this.loadPeople()
-    }
-    this.loadRoute()
-  },
+const filteredPeople = computed(() =>
+  people.value.filter(person =>
+    Object.values(timesheet.value).some(
+      entry => entry?.[person.id] !== undefined
+    )
+  )
+)
 
-  mounted() {
-    const productionId = this.$route.query.productionId || undefined
-    const studioId = this.$route.query.studioId || undefined
+const yearOptions = computed(() =>
+  range(2018, moment().year()).map(year => ({
+    label: year,
+    value: `${year}`
+  }))
+)
 
-    if (productionId || studioId) {
-      this.silent = true
-      this.productionId = productionId
-      this.productionIdString = productionId
-      this.studioId = studioId
-      this.studioIdString = studioId
-      this.reloadTimesheet().then(() => {
-        this.silent = false
-      })
-    }
-  },
+const monthOptions = computed(() => {
+  const lastMonth =
+    yearString.value === `${moment().year()}` ? moment().month() + 1 : 12
+  return range(1, lastMonth).map(month => ({
+    label: monthToString(month),
+    value: `${month}`
+  }))
+})
 
-  computed: {
-    ...mapGetters([
-      'isCurrentUserAdmin',
-      'organisation',
-      'people',
-      'productions',
-      'personMap',
-      'timesheet'
-    ]),
+const currentPerson = computed(
+  () =>
+    (route.params.person_id && personMap.value.get(route.params.person_id)) ||
+    {}
+)
 
-    productionList() {
-      const productions = sortByName([...this.productions]).map(production => {
-        const suffix =
-          production.project_status_name === 'Closed' ? ' (closed)' : ''
-        return {
-          ...production,
-          name: production.name + suffix
-        }
-      })
-      return [
-        {
-          id: '',
-          name: this.$t('main.all')
-        },
-        ...productions
-      ]
-    },
+// Functions
+// --------------------------------------------------------------------------
+const reloadTimesheet = async () => {
+  isLoading.value = true
+  isLoadingError.value = false
+  try {
+    await store.dispatch('loadTimesheets', {
+      detailLevel: detailLevel.value,
+      year: currentYear.value,
+      month: currentMonth.value,
+      productionId: productionId.value,
+      studioId: studioId.value
+    })
+  } catch (error) {
+    console.error(error)
+    isLoadingError.value = true
+  }
+  isLoading.value = false
+}
 
-    filteredPeople() {
-      return this.people.filter(person => {
-        const keys = Object.keys(this.timesheet)
-        let isThere = false
-        let i = 0
-        do {
-          if (this.timesheet[keys[i]]) {
-            isThere = this.timesheet[keys[i]][person.id] !== undefined
-          }
-          i++
-        } while (!isThere && i < keys.length)
-
-        return isThere
-      })
-    },
-
-    yearOptions() {
-      const year = 2018
-      const currentYear = moment().year()
-      return range(year, currentYear).map(year => ({
-        label: year,
-        value: `${year}`
-      }))
-    },
-
-    monthOptions() {
-      const currentYear = `${moment().year()}`
-      const month = 1
-      const currentMonth = moment().month() + 1
-      let monthRange = range(month, 12)
-      if (currentYear === this.yearString) {
-        monthRange = range(month, currentMonth)
-      }
-
-      return monthRange.map(month => ({
-        label: monthToString(month),
-        value: `${month}`
-      }))
-    }
-  },
-
-  methods: {
-    ...mapActions([
-      'loadPeople',
-      'loadProductions',
-      'loadAggregatedPersonDaysOff',
+const loadAggregate = async () => {
+  isInfoLoading.value = true
+  isInfoLoadingError.value = false
+  tasks.value = []
+  try {
+    const aggregatedTasks = await store.dispatch(
       'loadAggregatedPersonTimeSpents',
-      'loadTimesheets'
-    ]),
-
-    reloadTimesheet() {
-      this.isLoading = true
-      this.isLoadingError = false
-      return this.loadTimesheets({
-        detailLevel: this.detailLevel,
-        year: this.currentYear,
-        month: this.currentMonth,
-        productionId: this.productionId,
-        studioId: this.studioId
-      })
-        .then(() => {
-          this.isLoading = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.isLoading = false
-          this.isLoadingError = true
-        })
-    },
-
-    showSideInfo() {
-      this.showInfo = true
-    },
-
-    hideSideInfo() {
-      this.showInfo = false
-    },
-
-    loadRoute() {
-      // The main idea is to build the context from the route and compare it
-      // to the current context. If there are changes, it applies it.
-      // It handles too the display or not of the side column.
-      this.$options.silent = true
-      const { month, year, week, day } = this.$route.params
-      const previousProduction = `${this.productionId}`
-      const previousStudio = `${this.studioId}`
-      const previousDetailLevel = `${this.detailLevel}`
-      const previousMonth = `${this.currentMonth}`
-      const previousYear = `${this.currentYear}`
-
-      if (this.$route.path.indexOf('week') > 0) this.detailLevel = 'week'
-      if (this.$route.path.indexOf('month') > 0) this.detailLevel = 'month'
-      if (this.$route.path.indexOf('day') > 0) this.detailLevel = 'day'
-      if (this.$route.path.indexOf('year') > 0) this.detailLevel = 'year'
-      this.currentPerson = this.getCurrentPerson()
-      this.detailLevelString = this.detailLevel
-
-      if (month) {
-        this.currentMonth = Number(month)
-        this.monthString = `${month}`
+      {
+        personId: route.params.person_id,
+        detailLevel: detailLevel.value,
+        year: route.params.year,
+        month: route.params.month,
+        week: route.params.week,
+        day: route.params.day,
+        productionId: productionId.value,
+        studioId: studioId.value
       }
-      if (year) {
-        this.currentYear = Number(year)
-        this.yearString = `${year}`
-      }
-      if (week) {
-        this.currentWeek = Number(week)
-        this.weekString = `${week}`
-      }
-      if (day) {
-        this.currentDay = Number(day)
-      }
-      this.productionId = this.$route.query.productionId || ''
-      this.studioId = this.$route.query.studioId || ''
-
-      const detailLevelHasChanged = previousDetailLevel !== this.detailLevel
-      const monthHasChanged =
-        previousMonth.localeCompare(`${this.currentMonth}`) !== 0
-      const yearHasChanged =
-        previousYear.localeCompare(`${this.currentYear}`) !== 0
-      const productionHasChanged =
-        previousProduction.localeCompare(`${this.productionId}`) !== 0
-      const studioHasChanged =
-        previousStudio.localeCompare(`${this.studioId}`) !== 0
-      this.$nextTick(() => {
-        this.$options.silent = false
-      })
-
-      if (this.$route.path.indexOf('person') > 0) {
-        this.showSideInfo()
-        this.loadAggregate()
-      } else {
-        this.hideSideInfo()
-      }
-
-      if (
-        this.isLoading ||
-        monthHasChanged ||
-        yearHasChanged ||
-        detailLevelHasChanged ||
-        productionHasChanged ||
-        studioHasChanged
-      ) {
-        this.reloadTimesheet()
-      }
-    },
-
-    loadAggregate() {
-      this.isInfoLoading = true
-      this.isInfoLoadingError = false
-      this.tasks = []
-      this.loadAggregatedPersonTimeSpents({
-        personId: this.$route.params.person_id,
-        detailLevel: this.detailLevel,
-        year: this.$route.params.year,
-        month: this.$route.params.month,
-        week: this.$route.params.week,
-        day: this.$route.params.day,
-        productionId: this.productionId,
-        studioId: this.studioId
-      })
-        .then(tasks => {
-          this.tasks = tasks.filter(task => task.duration > 0)
-          return this.loadAggregatedPersonDaysOff({
-            personId: this.$route.params.person_id,
-            detailLevel: this.detailLevel,
-            year: this.$route.params.year,
-            month: this.$route.params.month,
-            week: this.$route.params.week
-          })
-        })
-        .then(dayOffs => {
-          this.dayOffCount = dayOffs.length
-          this.isInfoLoading = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.isInfoLoadingError = true
-        })
-    },
-
-    getCurrentPerson() {
-      const personId = this.$route.params.person_id
-      if (personId && this.personMap) {
-        return this.personMap.get(personId)
-      } else {
-        return {}
-      }
-    },
-
-    exportTimesheet() {
-      const nameData = ['timesheet', this.detailLevel, this.currentYear]
-      if (this.detailLevel === 'day') nameData.push(this.currentMonth)
-      const name = stringHelpers.slugify(nameData.join('_'))
-      csv.generateTimesheet({
-        name,
-        timesheet: this.timesheet,
-        people: this.filteredPeople,
-        unit: this.unit,
-        organisation: this.organisation,
-        detailLevel: this.detailLevel,
-        todayYear: this.currentYear,
-        todayMonth: this.currentMonth,
-        year: moment().year(),
-        month: moment().month() + 1,
-        week: moment().isoWeek()
-      })
-    },
-
-    updateRoute({ productionId, studioId }) {
-      const query = { ...this.$route.query }
-
-      if (productionId !== undefined) {
-        query.productionId = productionId || undefined
-      }
-      if (studioId !== undefined) {
-        query.studioId = studioId || undefined
-      }
-
-      if (JSON.stringify(query) !== JSON.stringify(this.$route.query)) {
-        this.$router.push({ query })
-      }
-    }
-  },
-
-  watch: {
-    detailLevelString() {
-      if (this.silent) return
-      if (this.detailLevel !== this.detailLevelString) {
-        if (this.detailLevelString === 'month') {
-          this.$router.push({
-            name: 'timesheets-month',
-            params: {
-              year: this.currentYear
-            },
-            query: this.$route.query
-          })
-        } else if (this.detailLevelString === 'week') {
-          this.$router.push({
-            name: 'timesheets-week',
-            params: {
-              year: this.currentYear
-            },
-            query: this.$route.query
-          })
-        } else if (this.detailLevelString === 'day') {
-          this.$router.push({
-            name: 'timesheets-day',
-            params: {
-              year: this.currentYear,
-              month: this.currentMonth
-            },
-            query: this.$route.query
-          })
-        } else if (this.detailLevelString === 'year') {
-          this.$router.push({
-            name: 'timesheets-year',
-            params: {
-              year: this.currentYear
-            },
-            query: this.$route.query
-          })
-        }
-      }
-    },
-
-    yearString() {
-      if (this.silent) return
-      const year = Number(this.yearString)
-      const currentMonth = moment().month() + 1
-      if (this.currentYear !== year) {
-        if (this.detailLevel === 'month') {
-          this.$router.push({
-            name: 'timesheets-month',
-            params: { year },
-            query: this.$route.query
-          })
-        } else if (this.detailLevel === 'week') {
-          this.$router.push({
-            name: 'timesheets-week',
-            params: { year },
-            query: this.$route.query
-          })
-        } else {
-          this.$router.push({
-            name: 'timesheets-day',
-            params: {
-              year: year,
-              month: Math.min(Number(this.monthString), currentMonth)
-            },
-            query: this.$route.query
-          })
-        }
-      }
-    },
-
-    monthString() {
-      if (this.silent) return
-      if (this.currentMonth !== Number(this.monthString)) {
-        this.$router.push({
-          name: 'timesheets-day',
-          params: {
-            year: this.currentYear,
-            month: Number(this.monthString)
-          },
-          query: this.$route.query
-        })
-      }
-    },
-
-    productionIdString(value) {
-      if (this.silent) return
-      this.updateRoute({ productionId: value })
-    },
-
-    studioIdString(value) {
-      if (this.silent) return
-      this.updateRoute({ studioId: value })
-    },
-
-    $route() {
-      this.loadRoute()
-    }
-  },
-
-  head() {
-    return {
-      title: `${this.$t('timesheets.title')} - Kitsu`
-    }
+    )
+    tasks.value = aggregatedTasks.filter(task => task.duration > 0)
+    const dayOffs = await store.dispatch('loadAggregatedPersonDaysOff', {
+      personId: route.params.person_id,
+      detailLevel: detailLevel.value,
+      year: route.params.year,
+      month: route.params.month,
+      week: route.params.week
+    })
+    dayOffCount.value = dayOffs.length
+    isInfoLoading.value = false
+  } catch (error) {
+    console.error(error)
+    isInfoLoadingError.value = true
   }
 }
+
+// Build the context from the route, compare it to the current one and
+// apply the differences; also drives the side column visibility.
+const loadRoute = () => {
+  silent = true
+  const { month, year, week, day } = route.params
+  const previousProduction = `${productionId.value}`
+  const previousStudio = `${studioId.value}`
+  const previousDetailLevel = detailLevel.value
+  const previousMonth = `${currentMonth.value}`
+  const previousYear = `${currentYear.value}`
+
+  if (route.path.indexOf('week') > 0) detailLevel.value = 'week'
+  if (route.path.indexOf('month') > 0) detailLevel.value = 'month'
+  if (route.path.indexOf('day') > 0) detailLevel.value = 'day'
+  if (route.path.indexOf('year') > 0) detailLevel.value = 'year'
+  detailLevelString.value = detailLevel.value
+
+  if (month) {
+    currentMonth.value = Number(month)
+    monthString.value = `${month}`
+  }
+  if (year) {
+    currentYear.value = Number(year)
+    yearString.value = `${year}`
+  }
+  if (week) {
+    currentWeek.value = Number(week)
+  }
+  if (day) {
+    currentDay.value = Number(day)
+  }
+  productionId.value = route.query.productionId || ''
+  studioId.value = route.query.studioId || ''
+  productionIdString.value = productionId.value
+  studioIdString.value = studioId.value
+
+  const hasChanged =
+    previousDetailLevel !== detailLevel.value ||
+    previousMonth !== `${currentMonth.value}` ||
+    previousYear !== `${currentYear.value}` ||
+    previousProduction !== `${productionId.value}` ||
+    previousStudio !== `${studioId.value}`
+
+  // the combobox watchers flush before this callback runs
+  nextTick(() => {
+    silent = false
+  })
+
+  if (route.path.indexOf('person') > 0) {
+    showInfo.value = true
+    loadAggregate()
+  } else {
+    showInfo.value = false
+  }
+
+  if (isLoading.value || hasChanged) {
+    reloadTimesheet()
+  }
+}
+
+const exportTimesheet = () => {
+  const nameData = ['timesheet', detailLevel.value, currentYear.value]
+  if (detailLevel.value === 'day') nameData.push(currentMonth.value)
+  const name = stringHelpers.slugify(nameData.join('_'))
+  csv.generateTimesheet({
+    name,
+    timesheet: timesheet.value,
+    people: filteredPeople.value,
+    unit: unit.value,
+    organisation: organisation.value,
+    detailLevel: detailLevel.value,
+    todayYear: currentYear.value,
+    todayMonth: currentMonth.value,
+    year: moment().year(),
+    month: moment().month() + 1,
+    week: moment().isoWeek()
+  })
+}
+
+const updateRoute = ({
+  productionId: newProductionId,
+  studioId: newStudioId
+}) => {
+  const query = { ...route.query }
+
+  if (newProductionId !== undefined) {
+    query.productionId = newProductionId || undefined
+  }
+  if (newStudioId !== undefined) {
+    query.studioId = newStudioId || undefined
+  }
+
+  if (JSON.stringify(query) !== JSON.stringify(route.query)) {
+    router.push({ query })
+  }
+}
+
+// Watchers
+// --------------------------------------------------------------------------
+watch(detailLevelString, () => {
+  if (silent) return
+  if (detailLevel.value === detailLevelString.value) return
+  const params = { year: currentYear.value }
+  if (detailLevelString.value === 'day') params.month = currentMonth.value
+  router.push({
+    name: `timesheets-${detailLevelString.value}`,
+    params,
+    query: route.query
+  })
+})
+
+watch(yearString, () => {
+  if (silent) return
+  const year = Number(yearString.value)
+  if (currentYear.value === year) return
+  if (['month', 'week'].includes(detailLevel.value)) {
+    router.push({
+      name: `timesheets-${detailLevel.value}`,
+      params: { year },
+      query: route.query
+    })
+  } else {
+    router.push({
+      name: 'timesheets-day',
+      params: {
+        year,
+        month: Math.min(Number(monthString.value), moment().month() + 1)
+      },
+      query: route.query
+    })
+  }
+})
+
+watch(monthString, () => {
+  if (silent) return
+  if (currentMonth.value === Number(monthString.value)) return
+  router.push({
+    name: 'timesheets-day',
+    params: {
+      year: currentYear.value,
+      month: Number(monthString.value)
+    },
+    query: route.query
+  })
+})
+
+watch(productionIdString, value => {
+  if (silent) return
+  updateRoute({ productionId: value })
+})
+
+watch(studioIdString, value => {
+  if (silent) return
+  updateRoute({ studioId: value })
+})
+
+watch(() => route.fullPath, loadRoute)
+
+// Lifecycle
+// --------------------------------------------------------------------------
+onMounted(async () => {
+  isLoading.value = true
+  store.dispatch('loadProductions')
+  if (!people.value.length) {
+    await store.dispatch('loadPeople')
+  }
+  loadRoute()
+})
+
+// Head
+// --------------------------------------------------------------------------
+useHead({ title: computed(() => `${t('timesheets.title')} - Kitsu`) })
 </script>
 
 <style lang="scss" scoped>
@@ -592,5 +461,21 @@ export default {
 .title {
   margin-right: 1em;
   white-space: nowrap;
+}
+
+// measured on the live row: ComboboxStudio deviates on BOTH metrics of
+// the centered header row, so both need pinning. Its label takes a 5px
+// padding-top under the field class, and its control renders 38px tall
+// against 42px for the production combo and the Bulma selects.
+.page-header :deep(.label) {
+  margin-bottom: 5px;
+  padding-top: 0;
+}
+
+.page-header :deep(.studio-combo) {
+  display: flex;
+  flex-direction: column;
+  height: 42px;
+  justify-content: center;
 }
 </style>

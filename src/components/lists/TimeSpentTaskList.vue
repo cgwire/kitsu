@@ -150,9 +150,11 @@ export default {
   methods: {
     getDuration(task) {
       const duration = task.duration / 60
-      return this.isHours
+      const value = this.isHours
         ? duration
-        : hoursToDays(this.organisation, duration).toFixed(2)
+        : hoursToDays(this.organisation, duration)
+      // one decimal max, no padding
+      return Math.round(value * 10) / 10
     },
 
     getTaskPath(task) {
@@ -185,16 +187,16 @@ export default {
   border-color: $dark-grey;
 }
 
+// the side panel is narrow: let the name column flex and keep a real
+// column for the numbers instead of a fixed 300px name squeezing them
 .name {
-  width: 300px;
+  width: 100%;
 }
 
 .duration {
+  min-width: 70px;
   text-align: right;
-}
-
-.data-list {
-  padding-right: 1em;
+  white-space: nowrap;
 }
 
 .table {
@@ -206,7 +208,6 @@ export default {
 
 .by-task-type-id {
   margin-top: 1em;
-  padding-left: 1em;
 }
 
 .by-project {

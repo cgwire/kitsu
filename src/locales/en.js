@@ -209,6 +209,15 @@ export default {
     }
   },
 
+  burndown: {
+    estimations: 'Estimations',
+    ideal: 'Ideal',
+    projection: 'Projection',
+    remaining_days: 'Remaining man-days',
+    remaining_tasks: 'Remaining tasks',
+    title: 'Burndown chart'
+  },
+
   chats: {
     delete_message: 'Are you sure you want to delete this message?',
     delete_message_confirm: 'Delete message',
@@ -1013,6 +1022,8 @@ export default {
   },
 
   my_checks : {
+    build_playlist_loaded_only:
+      'Only the tasks loaded in the list are included in the playlist',
     title: 'Task to check | Tasks to check'
   },
 

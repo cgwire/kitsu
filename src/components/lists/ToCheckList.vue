@@ -1,6 +1,6 @@
 <template>
   <div class="data-list task-list">
-    <div class="datatable-wrapper" ref="body" @scroll.passive="onBodyScroll">
+    <div class="datatable-wrapper" ref="body">
       <table class="datatable" v-if="!isLoading">
         <thead class="datatable-head">
           <tr>
@@ -29,9 +29,8 @@
             <th scope="col" class="episode" v-if="isEpisodeVisible">
               {{ $t('assets.fields.episode') }}
             </th>
-
-            <th class="description" scope="col" v-if="isDescriptionPresent">
-              {{ $t('assets.fields.description') }}
+            <th scope="col" class="assignees">
+              {{ $t('tasks.fields.assignees') }}
             </th>
             <th scope="col" class="estimation" :title="$t('main.estimation')">
               {{ $t('main.estimation_short') }}
@@ -39,34 +38,18 @@
             <th scope="col" class="duration number-cell">
               {{ $t('tasks.fields.duration').substring(0, 3) }}.
             </th>
-            <th scope="col" class="start-date">
-              {{ $t('tasks.fields.start_date_short') }}
-            </th>
             <th scope="col" class="due-date">
               {{ $t('tasks.fields.due_date') }}
             </th>
-            <metadata-header
-              :key="'desc-header' + field_name"
-              :descriptor="
-                mergeMetadataDescriptors(metadataDescriptorsMap[field_name])
-              "
-              :no-menu="true"
-              v-for="field_name in Object.keys(metadataDescriptorsMap)"
-            />
             <th scope="col" class="status">
               {{ $t('tasks.fields.task_status') }}
             </th>
-            <th scope="col" class="last-comment" v-if="!done">
-              {{ $t('tasks.fields.last_comment') }}
-            </th>
-            <th scope="col" class="end-date" v-else>
-              {{ $t('tasks.fields.end_date') }}
-            </th>
+            <th class="actions"></th>
           </tr>
         </thead>
         <tbody class="datatable-body" v-if="tasks.length > 0">
           <tr
-            :key="entry + '-' + i"
+            :key="entry.id"
             class="datatable-row datatable-row--selectable"
             :class="{
               selected: selectionGrid[entry.id]
@@ -117,11 +100,17 @@
               </div>
             </td>
 
-            <description-cell
-              class="description"
-              :entry="{ description: entry.entity_description }"
-              v-if="isDescriptionPresent"
-            />
+            <td class="assignees">
+              <div class="avatars">
+                <people-avatar
+                  :key="`${entry.id}-${person.id}`"
+                  :person="person"
+                  :size="30"
+                  :font-size="16"
+                  v-for="person in getSortedPeople(entry.assignees)"
+                />
+              </div>
+            </td>
             <td class="estimation number-cell">
               <input
                 class="input"
@@ -136,26 +125,17 @@
                 {{ formatDuration(entry.estimation) }}
               </template>
             </td>
-            <td class="duration number-cell">
+            <td
+              class="duration number-cell"
+              :class="{
+                error: isEstimationBurned(entry)
+              }"
+            >
               {{ formatDuration(entry.duration) }}
-            </td>
-            <td class="start-date">
-              <date-field
-                class="flexrow-item"
-                :min-date="disabledDates"
-                :model-value="getDate(entry.start_date)"
-                :with-margin="false"
-                @update:model-value="updateStartDate"
-                v-if="isEditable && selectionGrid[entry.id]"
-              />
-              <template v-else>
-                {{ formatDisplayDate(entry.start_date) }}
-              </template>
             </td>
             <td class="due-date">
               <date-field
                 class="flexrow-item"
-                :min-date="disabledDates"
                 :model-value="getDate(entry.due_date)"
                 :with-margin="false"
                 @update:model-value="updateDueDate"
@@ -165,133 +145,74 @@
                 {{ formatDisplayDate(entry.due_date) }}
               </template>
             </td>
-            <td
-              class="metadata-descriptor"
-              :key="'desc-' + entry.id + '-' + fieldName"
-              v-for="fieldName in Object.keys(metadataDescriptorsMap)"
-            >
-              <div
-                v-if="
-                  entry.entity_data && getMetadataDescriptor(fieldName, entry)
-                "
-              >
-                <div
-                  v-if="
-                    getDescriptorChecklistValues(
-                      getMetadataDescriptor(fieldName, entry)
-                    ).length > 0
-                  "
-                >
-                  <p
-                    :key="`${entry.id}-
-                    ${getMetadataDescriptor(fieldName, entry).id}
-                    -${i}-${option.text}-div`"
-                    v-for="(option, i) in getDescriptorChecklistValues(
-                      getMetadataDescriptor(fieldName, entry)
-                    )"
-                  >
-                    <input
-                      type="checkbox"
-                      disabled
-                      :id="`${entry.id}
-                      -${getMetadataDescriptor(fieldName, entry).id}
-                      -${i}-${option.text}-input`"
-                      :checked="
-                        getMetadataChecklistValues(
-                          getMetadataDescriptor(fieldName, entry),
-                          entry
-                        )[option.text]
-                      "
-                    />
-                    <label
-                      style="cursor: pointer"
-                      :for="`${entry.id}
-                      -${getMetadataDescriptor(fieldName, entry).id}
-                      -${i}-${option.text}-input`"
-                    >
-                      {{ option.text }}
-                    </label>
-                  </p>
-                </div>
-                <p v-else>
-                  {{
-                    getMetadataFieldValue(
-                      getMetadataDescriptor(fieldName, entry),
-                      entry
-                    )
-                  }}
-                </p>
-              </div>
-            </td>
             <validation-cell
               class="status unselectable"
-              :clickable="false"
-              :column="entry.taskStatus"
-              :column-y="0"
               :is-assignees="false"
               :is-border="false"
-              :row-x="i"
+              :is-static="true"
+              :selectable="false"
               :selected="selectionGrid[entry.id]"
               :task-test="entry"
             />
-            <last-comment-cell
-              class="last-comment"
-              :task="entry"
-              v-if="!done"
-            />
-            <td class="end-date" v-else>
-              {{ formatDisplayDate(entry.end_date) }}
-            </td>
+            <th class="actions"></th>
           </tr>
         </tbody>
       </table>
-    </div>
 
-    <table-info
-      :is-loading="isLoading"
-      :is-error="isError"
-      :cells="10"
-      :with-actions="false"
-    />
+      <div class="has-text-centered" v-if="isMore && !isLoading">
+        <spinner class="mt2" v-if="isMoreLoading" />
+        <button class="button mt2" @click="$emit('more-clicked')" v-else>
+          {{ $t('main.load_more') }}
+        </button>
+      </div>
 
-    <div
-      class="has-text-centered empty-list"
-      v-if="tasks.length === 0 && !isLoading"
-    >
-      <p>
-        <img src="../../assets/illustrations/empty_todo.png" alt="" />
-      </p>
-      <p>
-        {{ emptyText }}
-      </p>
+      <table-info
+        :is-loading="isLoading"
+        :is-error="isError"
+        :cells="10"
+        :with-actions="false"
+      />
+
+      <div
+        class="has-text-centered empty-list"
+        v-if="tasks.length === 0 && !isLoading && !isError"
+      >
+        <p>
+          <img src="../../assets/illustrations/empty_todo.png" alt="" />
+        </p>
+      </div>
     </div>
 
     <p class="has-text-centered footer-info" v-if="tasks.length && !isLoading">
-      {{ tasks.length }}
-      {{ $t('tasks.number', { count: tasks.length }) }}
-      ({{ formatDuration(timeSpent) }}
+      {{ stats.total }}
+      {{ $t('tasks.number', { count: stats.total }) }}
+      ({{ formatDuration(stats.total_duration) }}
       {{
         isDurationInHours
-          ? $t('main.hours_spent', { count: formatDuration(timeSpent, false) })
-          : $t('main.days_spent', { count: formatDuration(timeSpent, false) })
+          ? $t('main.hours_spent', {
+              count: formatDuration(stats.total_duration, false)
+            })
+          : $t('main.days_spent', {
+              count: formatDuration(stats.total_duration, false)
+            })
       }}
       /
-      {{ formatDuration(timeEstimated) }}
+      {{ formatDuration(stats.total_estimation) }}
       {{
         isDurationInHours
           ? $t('main.hours_estimated', {
-              count: formatDuration(timeEstimated, false)
+              count: formatDuration(stats.total_estimation, false)
             })
           : $t('main.days_estimated', {
-              count: formatDuration(timeEstimated, false)
+              count: formatDuration(stats.total_estimation, false)
             })
-      }}
-      )
+      }})
     </p>
   </div>
 </template>
 
 <script setup>
+// Imports
 import moment from 'moment-timezone'
 import {
   computed,
@@ -303,11 +224,6 @@ import {
 } from 'vue'
 import { useStore } from 'vuex'
 
-import {
-  getDescriptorChecklistValues,
-  getMetadataChecklistValues,
-  getMetadataFieldValue
-} from '@/composables/descriptors'
 import { pauseEvent } from '@/composables/dom'
 import { useFormat } from '@/composables/format'
 import { useTaskHelpers } from '@/composables/tasks'
@@ -322,31 +238,32 @@ import {
   range
 } from '@/lib/time'
 
-import DescriptionCell from '@/components/cells/DescriptionCell.vue'
-import LastCommentCell from '@/components/cells/LastCommentCell.vue'
-import MetadataHeader from '@/components/cells/MetadataHeader.vue'
 import ProductionNameCell from '@/components/cells/ProductionNameCell.vue'
 import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
 import ValidationCell from '@/components/cells/ValidationCell.vue'
 import DateField from '@/components/widgets/DateField.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
+// Composables
 const store = useStore()
 const { formatDisplayDate, formatDuration, isDurationInHours, organisation } =
   useFormat()
-const { getTaskType } = useTaskHelpers()
+const { getSortedPeople, getTaskType } = useTaskHelpers()
 
 // Props / Emits
 // --------------------------------------------------------------------------
 const props = defineProps({
-  done: {
-    type: Boolean,
-    default: false
-  },
   tasks: {
     type: Array,
     default: () => []
+  },
+  // totals for the whole paginated result set, from the API envelope
+  stats: {
+    type: Object,
+    default: () => ({ total: 0, total_duration: 0, total_estimation: 0 })
   },
   isError: {
     type: Boolean,
@@ -356,17 +273,17 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  emptyText: {
-    type: String,
-    default: ''
+  isMore: {
+    type: Boolean,
+    default: false
   },
-  disabledDates: {
-    type: Object,
-    default: () => {}
+  isMoreLoading: {
+    type: Boolean,
+    default: false
   }
 })
 
-const emit = defineEmits(['scroll', 'task-selected'])
+const emit = defineEmits(['more-clicked', 'task-selected'])
 
 // State
 // --------------------------------------------------------------------------
@@ -375,7 +292,6 @@ const colTypePosX = ref('')
 const lastSelection = ref(null)
 const selectionGrid = ref({})
 
-const bodyRef = useTemplateRef('body')
 const thProdRef = useTemplateRef('th-prod')
 const thTypeRef = useTemplateRef('th-type')
 
@@ -386,50 +302,11 @@ const isCurrentUserSupervisor = computed(
   () => store.getters.isCurrentUserSupervisor
 )
 const nbSelectedTasks = computed(() => store.getters.nbSelectedTasks)
-const openProductions = computed(() => store.getters.openProductions)
 const productionMap = computed(() => store.getters.productionMap)
 const taskMap = computed(() => store.getters.taskMap)
-const user = computed(() => store.getters.user)
 
 const isEditable = computed(
   () => isCurrentUserManager.value || isCurrentUserSupervisor.value
-)
-
-const isDescriptionPresent = computed(() =>
-  props.tasks.some(task => task.entity_description?.length > 0)
-)
-
-const metadataDescriptorsMap = computed(() => {
-  const descriptorsMap = {}
-  openProductions.value.forEach(project => {
-    project.descriptors.forEach(descriptor => {
-      const isUserDepartment = user.value.departments.some(department =>
-        descriptor.departments.includes(department)
-      )
-      if (isUserDepartment) {
-        // group them by field_name if they have the same field_name
-        if (!(descriptor.field_name in descriptorsMap)) {
-          descriptorsMap[descriptor.field_name] = {}
-        }
-        const descriptorFieldNameEntry = descriptorsMap[descriptor.field_name]
-        // group them by entity_type if the have the same entity_type
-        if (!(descriptor.entity_type in descriptorFieldNameEntry)) {
-          descriptorFieldNameEntry[descriptor.entity_type] = {}
-        }
-        descriptorFieldNameEntry[descriptor.entity_type][project.id] =
-          descriptor
-      }
-    })
-  })
-  return descriptorsMap
-})
-
-const timeSpent = computed(() =>
-  props.tasks.reduce((acc, task) => acc + task.duration, 0)
-)
-
-const timeEstimated = computed(() =>
-  props.tasks.reduce((acc, task) => acc + task.estimation, 0)
 )
 
 const isEpisodeVisible = computed(() =>
@@ -461,22 +338,7 @@ const assetEpisodes = (entry, full) => {
   return mainEpisodeName + ', ' + episodeNameString
 }
 
-const setScrollPosition = scrollPosition => {
-  if (bodyRef.value) {
-    bodyRef.value.scrollTop = scrollPosition
-  }
-}
-
-// Historical no-op kept because parent pages still call it through the
-// template ref: the tbody ref it used to measure never existed here.
-const resizeHeaders = () => {}
-
 const getDate = date => (date ? moment(date, 'YYYY-MM-DD').toDate() : null)
-
-const onBodyScroll = event => {
-  if (!bodyRef.value) return
-  emit('scroll', event.target.scrollTop)
-}
 
 const entityPath = entity => {
   const entityType = entity.entity_type_name
@@ -492,47 +354,8 @@ const entityPath = entity => {
   return getTaskEntityPath(entity, episodeId)
 }
 
-const onKeyDown = event => {
-  if (props.tasks.length > 0 && event.altKey) {
-    let index = lastSelection.value ? lastSelection.value : 0
-    if ([37, 38].includes(event.keyCode)) {
-      index = index - 1 < 0 ? props.tasks.length - 1 : index - 1
-      selectTask({}, index, props.tasks[index])
-      pauseEvent(event)
-    } else if ([39, 40].includes(event.keyCode)) {
-      index = index + 1 >= props.tasks.length ? 0 : index + 1
-      selectTask({}, index, props.tasks[index])
-      pauseEvent(event)
-    }
-  }
-}
-
-const mergeMetadataDescriptors = descriptors => {
-  const firstKeyEntityType = Object.keys(descriptors)[0]
-  const firstKeyProjectId = Object.keys(descriptors[firstKeyEntityType])[0]
-  const mergedDescriptors = {
-    departments: [],
-    field_name: descriptors[firstKeyEntityType][firstKeyProjectId].field_name,
-    name: descriptors[firstKeyEntityType][firstKeyProjectId].name
-  }
-  // merge departments
-  Object.keys(descriptors).forEach(entityType =>
-    Object.keys(descriptors[entityType]).forEach(projectId => {
-      mergedDescriptors.departments = [
-        ...new Set([
-          ...descriptors[entityType][projectId].departments,
-          ...mergedDescriptors.departments
-        ])
-      ]
-    })
-  )
-  return mergedDescriptors
-}
-
-const getMetadataDescriptor = (fieldName, entry) =>
-  metadataDescriptorsMap.value[fieldName]?.[entry.task_type_for_entity]?.[
-    entry.project_id
-  ] ?? null
+const isEstimationBurned = task =>
+  task.estimation > 0 && task.duration > task.estimation
 
 const isTaskChanged = (task, data) => {
   const taskStart = task.start_date ? task.start_date.substring(0, 10) : ''
@@ -542,14 +365,6 @@ const isTaskChanged = (task, data) => {
     (data.due_date !== undefined && taskDue !== data.due_date) ||
     (data.estimation !== undefined && task.estimation !== data.estimation)
   )
-}
-
-const updateEstimation = duration => {
-  const estimation = organisation.value.format_duration_in_hours
-    ? duration * 60
-    : daysToMinutes(organisation.value, duration)
-
-  updateTasksEstimation({ estimation })
 }
 
 // Applies buildData to every selected task; a null data skips the task.
@@ -564,7 +379,11 @@ const updateSelectedTasks = buildData => {
   })
 }
 
-const updateTasksEstimation = ({ estimation }) =>
+const updateEstimation = duration => {
+  const estimation = organisation.value.format_duration_in_hours
+    ? duration * 60
+    : daysToMinutes(organisation.value, duration)
+
   updateSelectedTasks(task => {
     if (!task.start_date) {
       return { estimation }
@@ -578,26 +397,7 @@ const updateTasksEstimation = ({ estimation }) =>
     data.estimation = estimation
     return data
   })
-
-const updateStartDate = date =>
-  updateSelectedTasks(task => {
-    if (!date) {
-      return { start_date: null, due_date: task.due_date }
-    }
-    const startDate = moment(date)
-    if (
-      task.start_date &&
-      task.start_date.substring(0, 10) === formatSimpleDate(startDate)
-    ) {
-      return null
-    }
-    return getDatesFromStartDate(
-      organisation.value,
-      startDate,
-      task.due_date ? parseSimpleDate(task.due_date) : null,
-      minutesToDays(organisation.value, task.estimation)
-    )
-  })
+}
 
 const updateDueDate = date =>
   updateSelectedTasks(task => {
@@ -619,18 +419,27 @@ const updateDueDate = date =>
     )
   })
 
+const onKeyDown = event => {
+  if (props.tasks.length > 0 && event.altKey) {
+    let index = lastSelection.value ? lastSelection.value : 0
+    if ([37, 38].includes(event.keyCode)) {
+      index = index - 1 < 0 ? props.tasks.length - 1 : index - 1
+      selectTask({}, index, props.tasks[index])
+      pauseEvent(event)
+    } else if ([39, 40].includes(event.keyCode)) {
+      index = index + 1 >= props.tasks.length ? 0 : index + 1
+      selectTask({}, index, props.tasks[index])
+      pauseEvent(event)
+    }
+  }
+}
+
 const selectTask = (event, index, task) => {
   if (
     event &&
     event.target &&
     // Dirty hack needed to make date picker and inputs work properly
     (['INPUT'].includes(event.target.nodeName) ||
-      // Combo box should not trigger selection
-      event.target.className.indexOf('selected-line') >= 0 ||
-      event.target.className.indexOf('down-icon') >= 0 ||
-      event.target.className.indexOf('c-mask') >= 0 ||
-      event.target.className.indexOf('option-line') >= 0 ||
-      event.target.className.indexOf('combobox') >= 0 ||
       (event.target.parentNode &&
         ['HEADER'].includes(event.target.parentNode.nodeName)) ||
       ['cell day selected'].includes(event.target.className))
@@ -672,10 +481,6 @@ const resetSelection = () => {
   lastSelection.value = null
 }
 
-// The parent pages restore the scroll position and trigger header
-// resizes through a template ref.
-defineExpose({ resizeHeaders, setScrollPosition })
-
 // Watchers
 // --------------------------------------------------------------------------
 watch(() => props.tasks, resetSelection)
@@ -715,18 +520,13 @@ onBeforeUnmount(() => {
   min-width: 300px;
 }
 
-.description {
-  width: 200px;
-  min-width: 200px;
-}
-
-.description li {
-  list-style-type: disc;
-  margin-left: 2em;
-}
-
 .name a {
   color: inherit;
+}
+
+.entity-name {
+  color: var(--text);
+  font-weight: bold;
 }
 
 .production {
@@ -740,9 +540,25 @@ onBeforeUnmount(() => {
   min-width: 130px;
 }
 
-.status {
-  width: 130px;
+.episode {
   min-width: 130px;
+  width: 130px;
+}
+
+.assignees {
+  width: 140px;
+  max-width: 140px;
+
+  .avatars {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+}
+
+.status {
+  width: 160px;
+  min-width: 160px;
 }
 
 .duration,
@@ -761,7 +577,6 @@ td.estimation {
   text-align: right;
 }
 
-.start-date,
 .due-date {
   min-width: 110px;
   text-align: center;
@@ -772,41 +587,9 @@ td.due-date {
   border-right: 1px solid var(--border);
 }
 
-th.last-comment {
+th.actions {
   max-width: 100%;
   width: 100%;
-}
-
-td.last-comment {
-  min-width: 450px;
-}
-
-td.end-date {
-  width: 100%;
-  min-width: 150px;
-  color: $grey;
-}
-
-.thumbnail {
-  min-width: 60px;
-  max-width: 60px;
-  width: 60px;
-  padding: 0;
-}
-
-.empty-list img {
-  max-width: 80vh;
-  -webkit-filter: brightness(103%);
-}
-
-.entity-name {
-  color: var(--text);
-  font-weight: bold;
-}
-
-.episode {
-  min-width: 130px;
-  width: 130px;
 }
 
 .input {
@@ -825,5 +608,14 @@ input[type='number'] {
 
 .error {
   color: $red;
+}
+
+.empty-list img {
+  max-width: 80vh;
+  -webkit-filter: brightness(103%);
+}
+
+.footer-info {
+  padding: 0.5em;
 }
 </style>

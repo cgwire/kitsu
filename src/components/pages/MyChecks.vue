@@ -2,52 +2,52 @@
   <div class="columns fixed-page">
     <div class="column main-column">
       <div class="todos page">
-        <div class="flexrow">
+        <div class="filters flexrow mt1">
           <combobox-production
             class="flexrow-item"
             :label="$t('main.production')"
             :production-list="productionList"
-            v-model="productionId"
-            v-if="productionList.length > 0"
+            v-model="filters.productionId"
           />
 
           <combobox
             class="flexrow-item"
             :label="$t('shots.fields.episode')"
             :options="episodeOptions"
-            v-model="episodeId"
-            v-show="productionId"
-            v-if="episodeOptions.length > 0"
+            v-model="filters.episodeId"
+            v-if="isTVShow && episodes.length > 0"
           />
 
           <combobox-task-type
             class="flexrow-item selector"
             :label="$t('news.task_type')"
             :task-type-list="taskTypeList"
-            v-model="taskTypeId"
-            v-if="taskTypeList.length > 0"
+            v-model="filters.taskTypeId"
           />
 
           <combobox-status
             class="flexrow-item selector"
             :label="$t('news.task_status')"
             :task-status-list="taskStatusList"
-            v-model="taskStatusId"
+            v-model="filters.taskStatusId"
           />
 
-          <div class="field flexrow-item selector">
-            <label class="label person-label">
-              {{ $t('main.person') }}
-            </label>
-            <people-field :people="assignees" small v-model="person" />
-          </div>
+          <people-field
+            class="flexrow-item selector"
+            :label="$t('main.person')"
+            :people="personList"
+            small
+            v-model="filters.person"
+          />
+
+          <span class="filler"></span>
 
           <combobox
             class="flexrow-item"
             :label="$t('main.show')"
             :options="filterOptions"
             locale-key-prefix="tasks."
-            v-model="currentFilter"
+            v-model="filters.currentFilter"
           />
 
           <combobox
@@ -55,28 +55,31 @@
             :label="$t('main.sorted_by')"
             :options="sortOptions"
             locale-key-prefix="tasks.fields."
-            v-model="currentSort"
+            v-model="filters.currentSort"
           />
         </div>
 
         <div class="flexrow">
           <h1 class="title mt1 flexrow-item filler">
-            {{ nbTasksToCheck }}
-            {{ $t('my_checks.title', { count: nbTasksToCheck }) }}
+            {{ stats.total }}
+            {{ $t('my_checks.title', { count: stats.total }) }}
           </h1>
           <button-simple
             class="flexrow-item"
             @click="isPlaylist = true"
-            :text="$t('tasks.build_playlist')"
+            :text="buildPlaylistText"
+            :title="isMore ? $t('my_checks.build_playlist_loaded_only') : ''"
           />
         </div>
 
-        <todos-list
-          :tasks="sortedTasks"
+        <to-check-list
+          :tasks="tasks"
+          :stats="stats"
           :is-loading="isLoading"
           :is-error="isLoadingError"
-          :selection-grid="selectionGrid"
-          :is-to-check="true"
+          :is-more="isMore"
+          :is-more-loading="isMoreLoading"
+          @more-clicked="loadMore"
         />
       </div>
     </div>
@@ -87,326 +90,295 @@
 
     <view-playlist-modal
       active
-      :task-ids="sortedTasks.map(t => t.id)"
+      :task-ids="tasks.map(task => task.id)"
       @cancel="isPlaylist = false"
       v-if="isPlaylist"
     />
   </div>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+// Imports
+import { useHead } from '@unhead/vue'
 import moment from 'moment-timezone'
-import { firstBy } from 'thenby'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
-import { populateTask } from '@/lib/models'
-import { sortByName, sortPeople } from '@/lib/sorting'
-import { buildSelectionGrid } from '@/lib/selection'
-import { parseDate } from '@/lib/time'
+import { sortPeople } from '@/lib/sorting'
 
+import ToCheckList from '@/components/lists/ToCheckList.vue'
+import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal.vue'
+import TaskInfo from '@/components/sides/TaskInfo.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
-import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
+import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
-import TaskInfo from '@/components/sides/TaskInfo.vue'
-import TodosList from '@/components/lists/TodosList.vue'
-import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal.vue'
 
-export default {
-  name: 'my-checks',
+// Composables
+const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
+const store = useStore()
 
-  components: {
-    ButtonSimple,
-    Combobox,
-    ComboboxProduction,
-    ComboboxStatus,
-    ComboboxTaskType,
-    PeopleField,
-    TaskInfo,
-    TodosList,
-    ViewPlaylistModal
-  },
+// State
+// --------------------------------------------------------------------------
+const episodes = ref([])
+const filterValues = ref(null)
+const isLoading = ref(false)
+const isLoadingError = ref(false)
+const isMore = ref(false)
+const isMoreLoading = ref(false)
+const isPlaylist = ref(false)
+const page = ref(1)
+const stats = ref({ total: 0 })
+const tasks = ref([])
 
-  data() {
-    return {
-      currentFilter: 'all_tasks',
-      currentSort: 'priority',
-      episodeId: '',
-      isLoading: false,
-      isLoadingError: false,
-      isPlaylist: false,
-      filterOptions: ['all_tasks', 'due_this_week'].map(name => ({
-        label: name,
-        value: name
-      })),
-      person: {},
-      productionId: '',
-      productionList: [],
-      selectionGrid: new Set(),
-      sortOptions: [
-        'entity_name',
-        'priority',
-        'due_date',
-        'estimation',
-        'last_comment_date'
-      ].map(name => ({ label: name, value: name })),
-      taskStatusId: '',
-      taskTypeId: '',
-      taskStatusList: [],
-      taskTypeList: [],
-      tasksToCheck: []
-    }
-  },
+const filters = reactive({
+  currentFilter: 'all_tasks',
+  currentSort: 'priority',
+  episodeId: route.query.episode_id || '',
+  person:
+    store.getters.activePeopleWithoutBot.find(
+      person => person.id === route.query.person_id
+    ) || null,
+  productionId: route.query.project_id || '',
+  taskStatusId: route.query.task_status_id || '',
+  taskTypeId: route.query.task_type_id || ''
+})
 
-  mounted() {
-    this.isLoading = true
-    this.clearSelectedTasks()
-    this.loadTasksToCheck()
-      .then(tasks => {
-        if (tasks) {
-          tasks.forEach(populateTask)
-          this.buildSelectionGrid(tasks)
-          this.resetProductionList(tasks)
-          this.resetTaskTypeList(tasks)
-          this.resetTaskStatusList(tasks)
-          this.tasksToCheck = tasks
-          this.isLoading = false
-        }
-      })
-      .catch(err => {
-        console.error(err)
-      })
-  },
+const filterOptions = ['all_tasks', 'due_this_week'].map(name => ({
+  label: name,
+  value: name
+}))
+const sortOptions = ['entity_name', 'priority', 'due_date', 'estimation'].map(
+  name => ({ label: name, value: name })
+)
 
-  computed: {
-    ...mapGetters([
-      'nbSelectedTasks',
-      'personMap',
-      'productionMap',
-      'selectedTasks',
-      'taskStatusMap',
-      'taskTypeMap'
-    ]),
+// requests raced by quick filter changes are dropped when stale
+let reloadToken = 0
 
-    nbTasksToCheck() {
-      return this.sortedTasks.filter(task => {
-        return this.taskStatusMap.get(task.task_status_id)?.is_feedback_request
-      }).length
-    },
+// Computed
+// --------------------------------------------------------------------------
+const activePeopleWithoutBot = computed(
+  () => store.getters.activePeopleWithoutBot
+)
+const getProductionTaskStatuses = computed(
+  () => store.getters.getProductionTaskStatuses
+)
+const getProductionTaskTypes = computed(
+  () => store.getters.getProductionTaskTypes
+)
+const nbSelectedTasks = computed(() => store.getters.nbSelectedTasks)
+const openProductions = computed(() => store.getters.openProductions)
+const personMap = computed(() => store.getters.personMap)
+const productionMap = computed(() => store.getters.productionMap)
+const selectedTasks = computed(() => store.getters.selectedTasks)
 
-    assignees() {
-      const assignees = []
-      const assigneesMap = {}
-      this.tasksToCheck.forEach(task => {
-        task.assignees.forEach(personId => {
-          const person = this.personMap.get(personId)
-          if (person && !assigneesMap[personId]) {
-            assignees.push(person)
-            assigneesMap[personId] = true
-          }
-        })
-      })
-      return sortPeople(assignees)
-    },
+const addAllValue = list => [
+  { id: '', color: '#999', name: t('main.all'), short_name: t('main.all') },
+  ...list
+]
 
-    episodeOptions() {
-      const episodeOptions = []
-      const episodeMap = {}
-      if (!this.productionId) return []
-      const production = this.productionMap.get(this.productionId)
-      if (!production || production.production_type !== 'tvshow') return []
-      this.tasksToCheck
-        .filter(t => t.project_id === this.productionId)
-        .forEach(task => {
-          if (
-            task.episode_id &&
-            !episodeMap[task.episode_id] &&
-            task.entity_type_name === 'Shot'
-          ) {
-            episodeMap[task.episode_id] = true
-            episodeOptions.push({
-              label: task.episode_name,
-              value: task.episode_id
-            })
-          }
-        })
-      return [
-        {
-          label: this.$t('main.all'),
-          value: 'all'
-        }
-      ].concat(
-        episodeOptions.sort((a, b) =>
-          a.label.localeCompare(b.label, undefined, {
-            numeric: true
-          })
-        )
+// while the first filter-values request is in flight, combos fall back to
+// the full store lists
+const isAvailable = (key, id) =>
+  !filterValues.value || filterValues.value[key].has(id)
+
+const productionList = computed(() =>
+  addAllValue(
+    openProductions.value.filter(production =>
+      isAvailable('projectIds', production.id)
+    )
+  )
+)
+
+const taskTypeList = computed(() =>
+  addAllValue(
+    getProductionTaskTypes
+      .value(filters.productionId || null)
+      .filter(
+        taskType =>
+          taskType.for_entity !== 'Concept' &&
+          isAvailable('taskTypeIds', taskType.id)
       )
-    },
+  )
+)
 
-    filteredTasks() {
-      let tasks =
-        this.currentFilter === 'all_tasks'
-          ? [...this.tasksToCheck]
-          : this.tasksToCheck.filter(t => {
-              const dueDate = parseDate(t.due_date)
-              return moment().startOf('week').isSame(dueDate, 'week')
-            })
-      if (this.productionId !== '') {
-        tasks = tasks.filter(t => t.project_id === this.productionId)
-      }
-      if (this.taskTypeId !== '') {
-        tasks = tasks.filter(t => t.task_type_id === this.taskTypeId)
-      }
-      if (this.taskStatusId !== '') {
-        tasks = tasks.filter(t => t.task_status_id === this.taskStatusId)
-      }
-      if (this.person && this.person.id) {
-        tasks = tasks.filter(t => t.assignees.includes(this.person.id))
-      }
-      if (this.productionId && this.episodeId && this.episodeId !== 'all') {
-        tasks = tasks.filter(t => t.episode_id === this.episodeId)
-      }
-      return tasks
-    },
+const taskStatusList = computed(() =>
+  addAllValue(
+    getProductionTaskStatuses
+      .value(filters.productionId || null)
+      .filter(
+        status =>
+          status.is_feedback_request && isAvailable('taskStatusIds', status.id)
+      )
+  )
+)
 
-    sortedTasks() {
-      const isName = this.currentSort === 'entity_name'
-      const isPriority = this.currentSort === 'priority'
-      const isDueDate = this.currentSort === 'due_date'
-      const tasks = [...this.filteredTasks]
-      if (isName) {
-        return tasks.sort(
-          firstBy('project_name')
-            .thenBy('task_type_name')
-            .thenBy('full_entity_name')
-        )
-      } else if (isPriority) {
-        return tasks.sort(
-          firstBy('priority', -1)
-            .thenBy((a, b) => {
-              if (!a.due_date) return 1
-              else if (!b.due_date) return -1
-              else return a.due_date.localeCompare(b.due_date)
-            })
-            .thenBy('project_name')
-            .thenBy('task_type_name')
-            .thenBy('entity_name')
-        )
-      } else if (isDueDate) {
-        return tasks.sort(
-          firstBy((a, b) => {
-            if (!a.due_date) return 1
-            else if (!b.due_date) return -1
-            else return a.due_date.localeCompare(b.due_date)
-          })
-            .thenBy('project_name')
-            .thenBy('task_type_name')
-            .thenBy('entity_name')
-        )
-      } else {
-        return tasks.sort(
-          firstBy(this.currentSort, -1)
-            .thenBy('project_name')
-            .thenBy('task_type_name')
-            .thenBy('entity_name')
-        )
-      }
-    }
-  },
+const personList = computed(() => {
+  const production = productionMap.value.get(filters.productionId)
+  const people = production
+    ? sortPeople(
+        production.team
+          .map(personId => personMap.value.get(personId))
+          .filter(person => person && !person.is_bot)
+      )
+    : activePeopleWithoutBot.value
+  return people.filter(person => isAvailable('personIds', person.id))
+})
 
-  methods: {
-    ...mapActions(['clearSelectedTasks', 'loadTasksToCheck']),
+const isTVShow = computed(
+  () =>
+    productionMap.value.get(filters.productionId)?.production_type === 'tvshow'
+)
 
-    buildSelectionGrid(tasks) {
-      this.selectionGrid = buildSelectionGrid()
-    },
+const episodeOptions = computed(() => [
+  { label: t('main.all'), value: '' },
+  ...episodes.value
+    .filter(episode => isAvailable('episodeIds', episode.id))
+    .map(episode => ({
+      label: episode.name,
+      value: episode.id
+    }))
+])
 
-    resetProductionList(tasks = []) {
-      const productionIds = {}
-      const productionList = []
-      tasks.forEach(task => {
-        const production = this.productionMap.get(task.project_id)
-        if (production && !productionIds[task.project_id]) {
-          productionIds[task.project_id] = true
-          productionList.push(production)
-        }
-      })
-      this.productionList = [
-        {
-          id: '',
-          name: this.$t('main.all')
-        }
-      ].concat(sortByName(productionList))
-    },
+const buildPlaylistText = computed(() =>
+  isMore.value
+    ? `${t('tasks.build_playlist')} (${tasks.value.length}/${stats.value.total})`
+    : t('tasks.build_playlist')
+)
 
-    resetTaskTypeList(tasks) {
-      const taskTypeIds = {}
-      const taskTypeList = []
-      tasks.forEach(task => {
-        const taskType = this.taskTypeMap.get(task.task_type_id)
-        if (taskType && !taskTypeIds[task.task_type_id]) {
-          taskTypeIds[task.task_type_id] = true
-          taskTypeList.push(taskType)
-        }
-      })
-      this.taskTypeList = [
-        {
-          id: '',
-          color: '#999',
-          name: this.$t('news.all')
-        }
-      ].concat(sortByName(taskTypeList))
-    },
+const params = computed(() => {
+  const dueThisWeek = filters.currentFilter === 'due_this_week'
+  return {
+    project_id: filters.productionId,
+    episode_id: filters.episodeId,
+    task_type_id: filters.taskTypeId,
+    task_status_id: filters.taskStatusId,
+    person_id: filters.person?.id,
+    due_date_since: dueThisWeek
+      ? moment().startOf('week').format('YYYY-MM-DD')
+      : null,
+    due_date_until: dueThisWeek
+      ? moment().endOf('week').format('YYYY-MM-DD')
+      : null,
+    order_by: filters.currentSort
+  }
+})
 
-    resetTaskStatusList(tasks) {
-      const taskStatusIds = {}
-      const taskStatusList = []
-      tasks.forEach(task => {
-        const taskStatus = this.taskStatusMap.get(task.task_status_id)
-        if (taskStatus && !taskStatusIds[task.task_status_id]) {
-          taskStatusIds[task.task_status_id] = true
-          taskStatusList.push(taskStatus)
-        }
-      })
-      this.taskStatusList = [
-        {
-          id: '',
-          color: '#999',
-          name: this.$t('news.all'),
-          short_name: this.$t('news.all')
-        }
-      ].concat(sortByName(taskStatusList))
-    }
-  },
+// Functions
+// --------------------------------------------------------------------------
+const syncRouteQuery = () => {
+  const query = {}
+  if (filters.productionId) query.project_id = filters.productionId
+  if (filters.episodeId) query.episode_id = filters.episodeId
+  if (filters.taskTypeId) query.task_type_id = filters.taskTypeId
+  if (filters.taskStatusId) query.task_status_id = filters.taskStatusId
+  if (filters.person?.id) query.person_id = filters.person.id
+  router.push({ query })
+}
 
-  watch: {
-    productionId() {
-      this.episodeId = ''
-    },
-
-    nbSelectedTasks() {
-      if (this.nbSelectedTasks === 0) {
-        this.buildSelectionGrid(this.sortedTasks)
-      }
-    }
-  },
-
-  head() {
-    return {
-      title: `${this.$t('tasks.my_checks')} - Kitsu`
+const reload = async () => {
+  const token = ++reloadToken
+  isLoading.value = true
+  isLoadingError.value = false
+  page.value = 1
+  tasks.value = []
+  store.dispatch('clearSelectedTasks')
+  syncRouteQuery()
+  try {
+    const result = await store.dispatch('loadTasksToCheck', params.value)
+    if (token !== reloadToken) return
+    tasks.value = result.data
+    stats.value = result.stats
+    isMore.value = result.is_more
+    isLoading.value = false
+  } catch (error) {
+    console.error(error)
+    if (token === reloadToken) {
+      isLoading.value = false
+      isLoadingError.value = true
     }
   }
 }
+
+const loadMore = async () => {
+  const token = reloadToken
+  isMoreLoading.value = true
+  try {
+    const result = await store.dispatch('loadTasksToCheck', {
+      ...params.value,
+      page: page.value + 1
+    })
+    if (token !== reloadToken) return
+    page.value += 1
+    tasks.value = tasks.value.concat(result.data)
+    isMore.value = result.is_more
+  } catch (error) {
+    console.error(error)
+  }
+  isMoreLoading.value = false
+}
+
+const loadFilterValues = async () => {
+  try {
+    const result = await store.dispatch('loadTasksToCheckFilterValues')
+    filterValues.value = {
+      episodeIds: new Set(result.episode_ids),
+      personIds: new Set(result.person_ids),
+      projectIds: new Set(result.project_ids),
+      taskStatusIds: new Set(result.task_status_ids),
+      taskTypeIds: new Set(result.task_type_ids)
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+const loadEpisodesForProduction = async productionId => {
+  episodes.value = []
+  const production = productionMap.value.get(productionId)
+  if (production?.production_type === 'tvshow') {
+    episodes.value = await store.dispatch('loadProductionEpisodes', production)
+  }
+}
+
+// Watchers
+// --------------------------------------------------------------------------
+// registered before the deep filters watcher so the episode reset lands in
+// the same flush and reload runs once with clean params
+watch(
+  () => filters.productionId,
+  productionId => {
+    filters.episodeId = ''
+    loadEpisodesForProduction(productionId)
+  }
+)
+
+watch(filters, () => {
+  reload()
+})
+
+// Lifecycle
+// --------------------------------------------------------------------------
+onMounted(() => {
+  loadFilterValues()
+  if (filters.productionId) {
+    loadEpisodesForProduction(filters.productionId)
+  }
+  reload()
+})
+
+// Head
+// --------------------------------------------------------------------------
+useHead({ title: computed(() => `${t('tasks.my_checks')} - Kitsu`) })
 </script>
 
 <style lang="scss" scoped>
-.data-list {
-  margin-top: 0;
-}
-
 .data-list {
   margin-top: 0;
 }
@@ -427,12 +399,30 @@ export default {
   padding: 0;
 }
 
-.push-right {
-  flex: 1;
-  text-align: right;
-}
-
 .field {
   margin-bottom: 0;
+}
+
+// measured on the live row: the Bulma selects are 42px tall while the
+// vue-multiselect control stops at 40.6px, and the task-type / status
+// combos pad their labels 5px more (status adds a 1px margin on top).
+// The centered flexrow turns every difference into a vertical stagger,
+// so pin all three metrics to the same values.
+.filters {
+  :deep(.label) {
+    margin-bottom: 5px;
+    padding-top: 0;
+  }
+
+  :deep(.status-combo) {
+    margin-top: 0;
+  }
+
+  :deep(.people-field),
+  :deep(.multiselect),
+  :deep(.multiselect__tags) {
+    height: 42px;
+    min-height: 42px;
+  }
 }
 </style>

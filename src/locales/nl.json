@@ -1991,6 +1991,7 @@
       "title": "Hoe Kitsu ondersteunen"
     },
     "my_checks": {
+      "build_playlist_loaded_only": "Alleen de in de lijst geladen taken worden opgenomen in de afspeellijst",
       "title": "Taak om te controleren | Taken om te controleren"
     },
     "preview": {
@@ -2116,6 +2117,14 @@
         "senior": "Senior"
       },
       "clear_exception": "Salarisaanpassing van deze maand wissen"
+    },
+    "burndown": {
+      "estimations": "Schattingen",
+      "ideal": "Ideaal",
+      "projection": "Prognose",
+      "remaining_days": "Resterende mensdagen",
+      "remaining_tasks": "Resterende taken",
+      "title": "Burndown-grafiek"
     },
     "hard_delete": {
       "delete_for_selection_hard_text": "Weet je zeker dat je de geselecteerde items definitief wilt verwijderen? Bevestig dit door hieronder 'WISSEN' te typen.",

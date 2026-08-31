@@ -1991,6 +1991,7 @@
       "title": "Como apoiar a Kitsu"
     },
     "my_checks": {
+      "build_playlist_loaded_only": "Apenas as tarefas carregadas na lista são incluídas na lista de reprodução",
       "title": "Tarefa a ser verificada | Tarefas a serem verificadas"
     },
     "preview": {
@@ -2116,6 +2117,14 @@
         "senior": "Sênior"
       },
       "clear_exception": "Limpar a substituição salarial deste mês"
+    },
+    "burndown": {
+      "estimations": "Estimativas",
+      "ideal": "Ideal",
+      "projection": "Projeção",
+      "remaining_days": "Dias-homem restantes",
+      "remaining_tasks": "Tarefas restantes",
+      "title": "Gráfico burndown"
     },
     "hard_delete": {
       "delete_for_selection_hard_text": "Tem certeza de que deseja remover permanentemente os itens selecionados? Por favor, confirme digitando \"EXCLUIR\" abaixo.",

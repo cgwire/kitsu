@@ -104,7 +104,13 @@ export default {
     }
   },
 
-  emits: ['close'],
+  mounted() {
+    window.addEventListener('keydown', this.onKeyDown)
+  },
+
+  beforeUnmount() {
+    window.removeEventListener('keydown', this.onKeyDown)
+  },
 
   computed: {
     // Monday of the displayed ISO week, as aggregated by the backend.
@@ -195,8 +201,8 @@ export default {
   },
 
   methods: {
-    onCloseClicked() {
-      this.$emit('close')
+    onKeyDown(event) {
+      if (event.key === 'Escape') this.$router.push(this.closeRoute)
     }
   }
 }
@@ -208,7 +214,7 @@ export default {
 }
 
 .people-timesheet-info {
-  padding: 1em;
+  padding: 1.5em 1.5em 1em;
 }
 
 .info-date {

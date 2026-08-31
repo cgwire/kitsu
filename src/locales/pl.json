@@ -202,6 +202,14 @@
         "senior": "Senior"
       }
     },
+    "burndown": {
+      "estimations": "Szacunki",
+      "ideal": "Idealny",
+      "projection": "Prognoza",
+      "remaining_days": "Pozostałe osobodni",
+      "remaining_tasks": "Pozostałe zadania",
+      "title": "Wykres burndown"
+    },
     "chats": {
       "delete_message": "Czy na pewno chcesz usunąć tę wiadomość?",
       "delete_message_confirm": "Usuń wiadomość",
@@ -977,6 +985,7 @@
       "subscribe": "Subskrybuj powiadomienia"
     },
     "my_checks": {
+      "build_playlist_loaded_only": "Tylko zadania wczytane na listę są uwzględniane w playliście",
       "title": "Zadanie do sprawdzenia | Zadania do sprawdzenia"
     },
     "news": {

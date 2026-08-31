@@ -17,6 +17,11 @@ export default {
     return client.pget(buildQueryString(path, filters))
   },
 
+  getOpenTasksBurndown(filters) {
+    const path = '/api/data/tasks/open-tasks/burndown'
+    return client.pget(buildQueryString(path, filters))
+  },
+
   updateTask(taskId, data) {
     return client.pput(`/api/data/tasks/${taskId}`, data)
   },
