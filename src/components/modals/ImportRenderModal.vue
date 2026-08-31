@@ -76,6 +76,7 @@
         <tbody>
           <tr
             :class="{
+              'error-row': index + 2 === errorLine,
               overwrite: updateData && existingData(index),
               disabled: !updateData && existingData(index)
             }"
@@ -119,16 +120,31 @@
       />
     </div>
 
+    <div class="import-error" v-if="isError">
+      <p class="import-error-title">{{ $t('main.csv.error_upload') }}</p>
+      <p v-if="serverError">
+        <span class="line-badge" v-if="serverError.line_number">
+          {{ $t('main.csv.error_line', { line: serverError.line_number }) }}
+        </span>
+        {{ serverError.message }}
+      </p>
+      <p class="imported-rows" v-if="serverError?.imported_rows > 0">
+        {{
+          $t('main.csv.error_imported_rows', {
+            count: serverError.imported_rows
+          })
+        }}
+      </p>
+    </div>
+
     <div class="render-footer">
       <button-simple
         :text="$t('main.csv.preview_reupload')"
         @click="$emit('reupload')"
       />
       <modal-footer
-        :error-text="errorText"
         :is-loading="isLoading"
         :is-disabled="isConfirmDisabled"
-        :is-error="isError"
         @confirm="$emit('confirm', parsedCsv, updateData)"
         @cancel="$emit('cancel')"
       />
@@ -274,14 +290,13 @@ const isConfirmDisabled = computed(
     !newEntitiesConfirmed.value
 )
 
-const errorText = computed(() => {
-  let text = t('main.csv.error_upload')
-  if (props.importError?.status === 400) {
-    const res = props.importError.response
-    text += ` (line: ${res.body.line_number}) ${res.body.message}`
-  }
-  return text
-})
+const serverError = computed(() =>
+  props.importError?.status === 400
+    ? (props.importError.response?.body ?? null)
+    : null
+)
+
+const errorLine = computed(() => serverError.value?.line_number ?? null)
 
 const stateColumn = data =>
   columnsAllowed.value.includes(data) ? undefined : 'ignored'
@@ -330,9 +345,9 @@ watch(
   border-radius: 10px;
   display: flex;
   flex-direction: column;
-  gap: 1.2em;
-  margin: 1.6em 0;
-  padding: 1.2em 1.4em;
+  gap: 0.6em;
+  margin: 1.2em 0;
+  padding: 0.9em 1.4em;
 }
 
 .group-label {
@@ -421,6 +436,40 @@ watch(
     max-height: 100px;
     overflow: auto;
   }
+}
+
+.import-error {
+  background: rgba($red, 0.08);
+  border: 1px solid $red;
+  border-radius: 10px;
+  color: var(--text);
+  margin-top: 1em;
+  padding: 1em;
+
+  .import-error-title {
+    font-weight: bold;
+    margin-bottom: 0.5em;
+  }
+
+  .imported-rows {
+    color: var(--text-alt);
+    font-size: 0.9em;
+    margin-top: 0.5em;
+  }
+}
+
+.line-badge {
+  background: $red;
+  border-radius: 4px;
+  color: white;
+  font-size: 0.85em;
+  font-weight: 600;
+  margin-right: 0.5em;
+  padding: 0.1em 0.5em;
+}
+
+.error-row td {
+  background-color: rgba($red, 0.15);
 }
 
 .render-footer {

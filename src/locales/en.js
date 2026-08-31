@@ -954,6 +954,8 @@ export default {
     },
     csv: {
       choose: 'Choose',
+      error_imported_rows: '{count} row was imported before the error. | {count} rows were imported before the error.',
+      error_line: 'Line {line}',
       error_upload: 'An error occurred while uploading your CSV.',
       export_current_view: 'Export current view',
       export_file: 'Export data to CSV',

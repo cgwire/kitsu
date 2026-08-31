@@ -87,6 +87,7 @@
       active
       :is-loading="isImportPeopleLoading"
       :is-error="isImportPeopleLoadingError"
+      :import-error="errors.importingError"
       :parsed-csv="parsedCSV"
       :form-data="personCsvFormData"
       :columns="[...dataMatchers, ...csvColumns, ...optionalCsvColumns]"
@@ -270,6 +271,8 @@ export default {
         avatar: false,
         del: false,
         edit: false,
+        importing: false,
+        importingError: null,
         invite: false,
         inviteLink: false,
         invalidEmailDomain: false,
@@ -547,6 +550,7 @@ export default {
 
       this.loading.importing = true
       this.errors.importing = false
+      this.errors.importingError = null
       try {
         await this.uploadPersonFile(toUpdate)
         this.hideImportRenderModal()
@@ -554,6 +558,7 @@ export default {
       } catch (err) {
         console.error(err)
         this.errors.importing = true
+        this.errors.importingError = err
       } finally {
         this.loading.importing = false
       }
@@ -561,6 +566,7 @@ export default {
 
     resetImport() {
       this.errors.importing = false
+      this.errors.importingError = null
       this.hideImportRenderModal()
       this.$store.commit('PERSON_CSV_FILE_SELECTED', null)
       this.$refs['import-modal']?.reset()
