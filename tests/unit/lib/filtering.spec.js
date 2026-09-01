@@ -426,6 +426,25 @@ describe('lib/filtering', () => {
       expect(filter.descriptor.id).toEqual('descriptor-1')
     })
 
+    it('filters explicit empty metadata strings', () => {
+      const filters = getFilters({
+        entryIndex,
+        assetTypes,
+        taskTypes,
+        taskStatuses,
+        descriptors,
+        persons,
+        query: '[Family]=[]'
+      })
+      const entries = [
+        { id: 'asset-empty', data: { family: '' } },
+        { id: 'asset-value', data: { family: 'big' } },
+        { id: 'asset-missing', data: {} }
+      ]
+
+      expect(applyFilters(entries, filters, new Map())).toEqual([entries[0]])
+    })
+
     it('withthumbnail in query case', () => {
       let filters = getFilters({
         entryIndex,
