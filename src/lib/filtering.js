@@ -97,7 +97,9 @@ const applyFiltersFunctions = {
       (filter.descriptor.entity_type === 'Task'
         ? undefined
         : entry.entity_data?.[filter.descriptor.field_name])
-    if (dataValue !== undefined && dataValue !== null && filter.values) {
+    if ((dataValue === undefined || dataValue === null) && filter.values) {
+      isOk = filter.values.includes('')
+    } else if (filter.values) {
       if (typeof dataValue === 'string') dataValue = dataValue.toLowerCase()
 
       // Checklist case

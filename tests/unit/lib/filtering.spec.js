@@ -426,7 +426,7 @@ describe('lib/filtering', () => {
       expect(filter.descriptor.id).toEqual('descriptor-1')
     })
 
-    it('filters explicit empty metadata strings', () => {
+    it('filters empty and missing metadata strings', () => {
       const filters = getFilters({
         entryIndex,
         assetTypes,
@@ -442,7 +442,10 @@ describe('lib/filtering', () => {
         { id: 'asset-missing', data: {} }
       ]
 
-      expect(applyFilters(entries, filters, new Map())).toEqual([entries[0]])
+      expect(applyFilters(entries, filters, new Map())).toEqual([
+        entries[0],
+        entries[2]
+      ])
     })
 
     it('withthumbnail in query case', () => {
