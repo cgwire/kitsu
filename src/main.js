@@ -21,9 +21,6 @@ import IO from 'socket.io-client'
 import VueAnimXYZ from '@animxyz/vue3'
 import '@animxyz/core'
 
-import { VueDatePicker } from '@vuepic/vue-datepicker'
-import '@vuepic/vue-datepicker/dist/main.css'
-
 const app = createApp(App)
 const head = createHead()
 
@@ -37,8 +34,6 @@ app.use(VueWebsocket.default || VueWebsocket, IO, '/events')
 app.directive('autosize', vAutosize)
 app.use(VueChartkick)
 app.use(VueAnimXYZ)
-
-app.component('vue-date-picker', VueDatePicker)
 
 // Make the current route part of the main state.
 sync(store, router)
