@@ -21,6 +21,16 @@ export default defineConfig({
         codeSplitting: {
           groups: [
             {
+              // oxc lowering helpers otherwise park in whichever vendor chunk
+              // uses them first (date-fns/parse, so `charts`), which drags that
+              // chunk into the entry preload. Isolating them frees the entry.
+              // The test matches a rolldown-internal virtual module id: if that
+              // format changes the group silently stops matching and the graph
+              // reverts to its previous shape (size regression, not a crash).
+              name: 'helpers',
+              test: /@oxc-project\+runtime/
+            },
+            {
               name: 'vue-vendor',
               test: /node_modules[\\/](?:@intlify|@vue|vue-i18n|vue-router|vuex|vue)[\\/]/
             },
