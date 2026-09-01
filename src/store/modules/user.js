@@ -665,7 +665,6 @@ const mutations = {
         last_comment: comment
       })
       cache.todosIndex = buildTaskIndex(state.todos)
-      cache.doneIndex = buildTaskIndex(cache.doneTasks)
     }
   },
 

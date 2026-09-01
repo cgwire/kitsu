@@ -12,6 +12,7 @@ vi.mock('@/store/api/people', () => ({
 
 import peopleApi from '@/store/api/people'
 import store from '@/store/modules/user'
+import taskStatusStore from '@/store/modules/taskstatus'
 
 describe('User store', () => {
   describe('Getters', () => {
@@ -151,6 +152,51 @@ describe('User store', () => {
       }
       store.mutations.USER_LOGOUT(state)
       expect(state.projectRoles).toEqual({})
+    })
+
+    // NEW_TASK_COMMENT_END no longer rebuilds cache.doneIndex. That rebuild
+    // is dead only because the done list comes from its own fetch: the same
+    // task sits in both lists as two distinct objects, so commenting the todo
+    // one cannot make the done index stale.
+    test('NEW_TASK_COMMENT_END leaves the done list and its index alone', () => {
+      const statuses = {
+        wip: { id: 'status-wip', name: 'Work in progress', short_name: 'wip' },
+        done: { id: 'status-done', name: 'Done', short_name: 'done' },
+        retake: { id: 'status-retake', name: 'Retake', short_name: 'retake' }
+      }
+      Object.values(statuses).forEach(status =>
+        taskStatusStore.cache.taskStatusMap.set(status.id, status)
+      )
+      const buildTask = status => ({
+        id: 'task-1',
+        entity_type_name: 'Asset',
+        entity_name: 'Tree',
+        entity_id: 'entity-1',
+        project_id: 'production-1',
+        project_name: 'Big Buck Bunny',
+        full_entity_name: 'Asset / Tree',
+        task_type_name: 'Modeling',
+        task_status_id: status.id,
+        task_status_short_name: status.short_name
+      })
+
+      const doneTask = buildTask(statuses.done)
+      const state = {
+        todos: [buildTask(statuses.wip)],
+        displayedTodos: [],
+        displayedDoneTasks: []
+      }
+      store.mutations.USER_LOAD_DONE_TASKS_END(state, [doneTask])
+
+      store.mutations.NEW_TASK_COMMENT_END(state, {
+        taskId: 'task-1',
+        comment: { id: 'comment-1', task_status_id: statuses.retake.id }
+      })
+
+      expect(state.todos[0].task_status_short_name).toEqual('retake')
+      expect(doneTask.task_status_short_name).toEqual('done')
+      store.mutations.SET_TODOS_SEARCH(state, 'done')
+      expect(state.displayedDoneTasks).toEqual([doneTask])
     })
   })
 
