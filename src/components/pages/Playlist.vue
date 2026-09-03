@@ -729,6 +729,7 @@ export default {
       'displayedAssets',
       'displayedAssetsByType',
       'displayedEdits',
+      'editsLoadingKey',
       'displayedEpisodes',
       'displayedSequences',
       'displayedShots',
@@ -1014,9 +1015,12 @@ export default {
     },
 
     async loadEditsData() {
+      // The first row says nothing about the loaded scope: only the scope the
+      // store recorded tells an episode dataset from another one.
+      const scope = this.isTVShow ? (this.currentEpisode?.id ?? '') : ''
       if (
         this.displayedEdits.length === 0 ||
-        this.displayedEdits[0].project_id !== this.currentProduction.id
+        this.editsLoadingKey !== `${this.currentProduction.id}/${scope}`
       ) {
         if (this.isTVShow && !this.currentEpisode) {
           await this.loadEpisodes()
