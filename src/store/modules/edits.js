@@ -46,6 +46,7 @@ import {
   NEW_TASK_END,
   CREATE_TASKS_END,
   SET_EDIT_SEARCH,
+  SET_CURRENT_EPISODE,
   SET_CURRENT_PRODUCTION,
   DISPLAY_MORE_EDITS,
   SET_EDIT_LIST_SCROLL_POSITION,
@@ -71,7 +72,6 @@ const cache = {
   edits: [],
   editIndex: [],
   editsLoadingPromise: null,
-  editsLoadingKey: null,
   editMap: new Map(),
   result: []
 }
@@ -274,6 +274,7 @@ const initialState = {
 
   isEditsLoading: false,
   isEditsLoadingError: false,
+  editsLoadingKey: null,
   editsCsvFormData: null,
 
   editListScrollPosition: 0,
@@ -312,6 +313,7 @@ const getters = {
 
   isEditsLoading: state => state.isEditsLoading,
   isEditsLoadingError: state => state.isEditsLoadingError,
+  editsLoadingKey: state => state.editsLoadingKey,
   editCreated: state => state.editCreated,
 
   isLongEditList: state => cache.editMap.size > 500,
@@ -331,40 +333,40 @@ const actions = {
     const isTVShow = rootGetters.isTVShow
     let episode = isTVShow ? rootGetters.currentEpisode : null
 
-    if (isTVShow) {
-      if (!episode) {
-        if (rootGetters.episodes.length > 0) {
-          episode =
-            rootGetters.episodes.length > 0 ? rootGetters.episodes[0] : null
-        } else {
-          return Promise.resolve([])
-        }
-      } else if (['all'].includes(episode.id)) {
-        episode = null
-      }
+    if (isTVShow && !episode) {
+      if (rootGetters.episodes.length === 0) return Promise.resolve([])
+      episode = rootGetters.episodes[0]
+      // Publish the fallback so the pages, which read currentEpisode to build
+      // the scope they compare against, agree with the key recorded below.
+      commit(SET_CURRENT_EPISODE, episode.id)
     }
 
-    if (!isTVShow && episode) {
-      episode = null
-    }
-
+    // Scope of the dataset about to be loaded, recorded for the pages that
+    // decide whether their cache is stale. 'all' is a pseudo-episode: it must
+    // be recorded as itself even though the request is not filtered by it.
     const loadingKey = `${production.id}/${episode?.id ?? ''}`
+
+    if (episode?.id === 'all') {
+      episode = null // Do not filter by episode
+    }
+
     if (state.isEditsLoading) {
-      if (cache.editsLoadingKey === loadingKey) {
+      if (state.editsLoadingKey === loadingKey) {
         // Same production+episode already loading: share the in-flight load
         // so concurrent callers (e.g. schedule expands) await the same edits.
         return cache.editsLoadingPromise || Promise.resolve([])
       }
       // A different production/episode is in flight (e.g. the user switched
       // episode mid-load): wait for it to settle, then run our own load so
-      // the newly selected episode's edits are actually fetched.
+      // the newly selected episode's edits are actually fetched. Re-dispatching
+      // unconditionally is what terminates: the second pass either joins the
+      // load a previous waiter started for the same scope or queues once more.
       return (cache.editsLoadingPromise || Promise.resolve([])).then(() =>
         dispatch('loadEdits')
       )
     }
 
-    commit(LOAD_EDITS_START)
-    cache.editsLoadingKey = loadingKey
+    commit(LOAD_EDITS_START, { loadingKey })
     const loadingPromise = editsApi
       .getEdits(production, episode)
       .then(edits => {
@@ -697,7 +699,7 @@ const actions = {
 }
 
 const mutations = {
-  [LOAD_EDITS_START](state) {
+  [LOAD_EDITS_START](state, { loadingKey } = {}) {
     cache.edits = []
     cache.result = []
     cache.editIndex = {}
@@ -706,6 +708,7 @@ const mutations = {
 
     state.isEditsLoading = true
     state.isEditsLoadingError = false
+    state.editsLoadingKey = loadingKey ?? null
 
     state.displayedEdits = []
     state.displayedEditsCount = 0

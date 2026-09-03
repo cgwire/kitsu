@@ -410,6 +410,7 @@ export default {
     } else {
       if (!this.isEditsLoading) this.initialLoading = false
       finalize()
+      this.reloadEpisodeEditsIfNeeded()
     }
   },
 
@@ -423,6 +424,7 @@ export default {
       'editMap',
       'editFilledColumns',
       'editsCsvFormData',
+      'editsLoadingKey',
       'editSearchQueries',
       'editSearchText',
       'editValidationColumns',
@@ -590,6 +592,22 @@ export default {
       })
     },
 
+    // The topbar sets the current episode before this page instance exists, so
+    // the currentEpisode watcher below cannot fire on a fresh mount: without
+    // this check the cache of the episode left behind is displayed as is.
+    reloadEpisodeEditsIfNeeded() {
+      const scope = this.isTVShow ? (this.currentEpisode?.id ?? '') : ''
+      if (
+        !this.currentProduction ||
+        this.editsLoadingKey === `${this.currentProduction.id}/${scope}`
+      ) {
+        return
+      }
+      this.$refs['edit-search-field']?.setValue('')
+      this.$store.commit('SET_EDIT_LIST_SCROLL_POSITION', 0)
+      this.reset()
+    },
+
     resetEditModal() {
       const form = { name: '' }
       if (this.openProductions.length > 0) {
@@ -755,14 +773,7 @@ export default {
     },
 
     currentSection() {
-      if (
-        (this.isTVShow && this.edits.length === 0) ||
-        this.edits[0].episode_id !== this.currentEpisode.id
-      ) {
-        this.$refs['edit-search-field'].setValue('')
-        this.$store.commit('SET_EDIT_LIST_SCROLL_POSITION', 0)
-        this.reset()
-      }
+      this.reloadEpisodeEditsIfNeeded()
     },
 
     isEditsLoading() {
