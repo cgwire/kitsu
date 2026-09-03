@@ -426,6 +426,63 @@ describe('lib/filtering', () => {
       expect(filter.descriptor.id).toEqual('descriptor-1')
     })
 
+    it('filters empty and missing metadata strings', () => {
+      const filters = getFilters({
+        entryIndex,
+        assetTypes,
+        taskTypes,
+        taskStatuses,
+        descriptors,
+        persons,
+        query: '[Family]=[]'
+      })
+      const entries = [
+        { id: 'asset-empty', data: { family: '' } },
+        { id: 'asset-value', data: { family: 'big' } },
+        { id: 'asset-missing', data: {} }
+      ]
+
+      expect(applyFilters(entries, filters, new Map())).toEqual([
+        entries[0],
+        entries[2]
+      ])
+    })
+
+    it.each([
+      ['string', '', 'text'],
+      ['number', '', 12],
+      ['list', '', 'Choice'],
+      ['taglist', [], ['Tag']],
+      ['boolean', '', 'false'],
+      ['checklist', '', JSON.stringify({ Item: false })],
+      ['date', '', '2026-09-03'],
+      ['url', '', 'https://example.com'],
+      ['textarea', '', 'Long text'],
+      ['person', '', 'person-1']
+    ])('filters empty %s metadata', (dataType, emptyValue, populatedValue) => {
+      const descriptor = {
+        id: 'descriptor',
+        name: 'Metadata',
+        field_name: 'metadata',
+        data_type: dataType
+      }
+      const filters = getFilters({
+        entryIndex,
+        assetTypes,
+        taskTypes,
+        taskStatuses,
+        descriptors: [descriptor],
+        persons,
+        query: '[Metadata]=[]'
+      })
+      const entries = [
+        { id: 'asset-empty', data: { metadata: emptyValue } },
+        { id: 'asset-populated', data: { metadata: populatedValue } }
+      ]
+
+      expect(applyFilters(entries, filters, new Map())).toEqual([entries[0]])
+    })
+
     it('withthumbnail in query case', () => {
       let filters = getFilters({
         entryIndex,

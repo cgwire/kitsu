@@ -97,7 +97,11 @@ const applyFiltersFunctions = {
       (filter.descriptor.entity_type === 'Task'
         ? undefined
         : entry.entity_data?.[filter.descriptor.field_name])
-    if ((dataValue || dataValue === 0) && filter.values) {
+    const isBlank =
+      dataValue === undefined || dataValue === null || dataValue === ''
+    if (isBlank && filter.values) {
+      isOk = filter.values.includes('')
+    } else if (filter.values) {
       if (typeof dataValue === 'string') dataValue = dataValue.toLowerCase()
 
       // Checklist case
@@ -136,7 +140,10 @@ const applyFiltersFunctions = {
       } else {
         filter.values.forEach(value => {
           dataValue = `${dataValue}`
-          isOk = isOk || dataValue.includes(value.toLowerCase())
+          value = value.toLowerCase()
+          isOk =
+            isOk ||
+            (value === '' ? dataValue === '' : dataValue.includes(value))
         })
       }
     } else {
