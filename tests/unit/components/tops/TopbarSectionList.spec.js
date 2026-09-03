@@ -24,7 +24,10 @@ describe('TopbarSectionList', () => {
             }
           })
         ],
-        mocks: { $t: key => key, $route: { params: {}, query } }
+        mocks: { $t: key => key, $route: { params: {}, query } },
+        // The section dropdown stays closed, so router-link never renders,
+        // yet Vue still resolves it at the top of the render fn.
+        stubs: { RouterLink: true }
       },
       props: { sectionList: [playlists], section, episodeId: 'all' }
     })
