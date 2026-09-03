@@ -360,6 +360,7 @@ export default {
     } else {
       if (!this.isSequencesLoading) this.initialLoading = false
       finalize()
+      this.reloadEpisodeSequencesIfNeeded()
     }
   },
 
@@ -374,6 +375,7 @@ export default {
       'sequenceMap',
       'sequences',
       'sequenceSearchQueries',
+      'sequencesLoadingKey',
       'isCurrentUserClient',
       'isSequenceDescription',
       'isSequenceEstimation',
@@ -472,6 +474,22 @@ export default {
         this.applySearchFromUrl()
         this.initialLoading = false
       })
+    },
+
+    // The topbar sets the current episode before this page instance exists, so
+    // the currentEpisode watcher below cannot fire on a fresh mount: without
+    // this check the cache of the episode left behind is displayed as is.
+    reloadEpisodeSequencesIfNeeded() {
+      const scope = this.isTVShow ? (this.currentEpisode?.id ?? '') : ''
+      if (
+        !this.currentProduction ||
+        this.sequencesLoadingKey === `${this.currentProduction.id}/${scope}`
+      ) {
+        return
+      }
+      this.$refs['sequence-search-field']?.setValue('')
+      this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
+      this.reset()
     },
 
     resetEditModal() {
@@ -605,15 +623,7 @@ export default {
     },
 
     currentSection() {
-      if (
-        (this.isTVShow && this.displayedSequences.length === 0) ||
-        this.displayedSequences[0]?.episode_id !== this.currentEpisode?.id
-      ) {
-        this.$refs['sequence-search-field'].setValue('')
-        this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
-        this.initialLoading = false
-        this.reset()
-      }
+      this.reloadEpisodeSequencesIfNeeded()
     },
 
     isSequencesLoading() {

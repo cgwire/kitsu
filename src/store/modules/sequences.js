@@ -41,6 +41,7 @@ import {
   RESET_PRODUCTION_PATH,
   SAVE_SEQUENCE_SEARCH_END,
   REMOVE_SEQUENCE_SEARCH_END,
+  SET_CURRENT_EPISODE,
   SET_CURRENT_PRODUCTION,
   SET_CURRENT_SEQUENCE,
   SET_SEQUENCE_LIST_SCROLL_POSITION,
@@ -194,6 +195,7 @@ const initialState = {
   isSequenceTime: false,
   isSequencesLoading: false,
   isSequencesLoadingError: false,
+  sequencesLoadingKey: null,
 
   sequenceListScrollPosition: 0,
   sequenceSearchText: '',
@@ -216,6 +218,7 @@ const getters = {
 
   isSequencesLoading: state => state.isSequencesLoading,
   isSequencesLoadingError: state => state.isSequencesLoadingError,
+  sequencesLoadingKey: state => state.sequencesLoadingKey,
   displayedSequences: state => state.displayedSequences,
   displayedSequencesLength: state => state.displayedSequencesLength,
   displayedSequencesEstimation: state => state.displayedSequencesEstimation,
@@ -408,6 +411,9 @@ const actions = {
     if (!episode && isTVShow) {
       if (rootGetters.episodes && rootGetters.episodes.length > 0) {
         episode = rootGetters.episodes[0]
+        // Publish the fallback so the pages, which read currentEpisode to
+        // build the scope they compare against, agree with the key below.
+        commit(SET_CURRENT_EPISODE, episode.id)
       } else {
         commit(SET_SEQUENCES_WITH_TASKS, {
           sequences: [],
@@ -418,11 +424,17 @@ const actions = {
           routeSequenceId,
           taskMap,
           taskTypeMap,
-          taskStatusMap
+          taskStatusMap,
+          loadingKey: `${production.id}/`
         })
         return []
       }
     }
+
+    // Scope of the dataset about to be loaded, recorded for the pages that
+    // decide whether their cache is stale. 'all' is a pseudo-episode: it must
+    // be recorded as itself even though the request is not filtered by it.
+    const loadingKey = `${production.id}/${isTVShow ? (episode?.id ?? '') : ''}`
     return shotsApi
       .getSequencesWithTasks(production, isAllEpisodes ? null : episode)
       .then(sequences => {
@@ -444,7 +456,8 @@ const actions = {
             taskMap,
             taskTypeMap,
             taskStatusMap,
-            userFilters
+            userFilters,
+            loadingKey
           })
         }
         return sequences
@@ -628,6 +641,7 @@ const mutations = {
 
   [CLEAR_SEQUENCES](state) {
     cache.sequences = []
+    state.sequencesLoadingKey = null
     state.currentSequence = null
     state.displayedSequences = []
     cache.sequenceMap.clear()
@@ -660,7 +674,8 @@ const mutations = {
       sequences,
       taskMap,
       taskTypeMap,
-      taskStatusMap
+      taskStatusMap,
+      loadingKey
     }
   ) {
     const validationColumns = {}
@@ -740,6 +755,7 @@ const mutations = {
 
     state.isSequencesLoading = false
     state.isSequencesLoadingError = false
+    state.sequencesLoadingKey = loadingKey ?? null
 
     state.displayedSequences = displayedSequences
     state.displayedSequencesLength = displayedSequences.length
