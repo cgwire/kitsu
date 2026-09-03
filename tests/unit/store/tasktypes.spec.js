@@ -166,10 +166,70 @@ describe('Task types store', () => {
         shotMap: new Map([
           ['shot-1', {}],
           ['shot-2', {}]
-        ])
+        ]),
+        currentProduction: { id: 'p' },
+        currentEpisode: null,
+        isTVShow: false,
+        shotsLoadingKey: 'p/'
       }
       await store.actions.initTaskType({ dispatch, rootGetters }, false)
       expect(dispatch).not.toHaveBeenCalled()
+    })
+
+    test('initTaskType reloads the assets cached for another episode', async () => {
+      const dispatch = vi.fn().mockResolvedValue()
+      const rootGetters = {
+        currentTaskType: { for_entity: 'Asset' },
+        assetMap: new Map([
+          ['asset-1', {}],
+          ['asset-2', {}]
+        ]),
+        // Warm, but filled by the episode the user came from: the page
+        // filters on the current one and would display nothing.
+        assetsLoadingKey: 'p/ep-a',
+        currentProduction: { id: 'p' },
+        currentEpisode: { id: 'ep-b' },
+        isTVShow: true,
+        episodes: [{ id: 'ep-a' }, { id: 'ep-b' }]
+      }
+      await store.actions.initTaskType({ dispatch, rootGetters }, false)
+      expect(dispatch).toHaveBeenCalledWith('loadAssets')
+    })
+
+    test('initTaskType keeps the assets cached for the displayed episode', async () => {
+      const dispatch = vi.fn().mockResolvedValue()
+      const rootGetters = {
+        currentTaskType: { for_entity: 'Asset' },
+        assetMap: new Map([
+          ['asset-1', {}],
+          ['asset-2', {}]
+        ]),
+        assetsLoadingKey: 'p/ep-b',
+        currentProduction: { id: 'p' },
+        currentEpisode: { id: 'ep-b' },
+        isTVShow: true,
+        episodes: [{ id: 'ep-a' }, { id: 'ep-b' }]
+      }
+      await store.actions.initTaskType({ dispatch, rootGetters }, false)
+      expect(dispatch).not.toHaveBeenCalled()
+    })
+
+    test('initTaskType reloads the sequences cached for the all pseudo-episode', async () => {
+      const dispatch = vi.fn().mockResolvedValue()
+      const rootGetters = {
+        currentTaskType: { for_entity: 'Sequence' },
+        sequenceMap: new Map([
+          ['sq-1', {}],
+          ['sq-2', {}]
+        ]),
+        sequencesLoadingKey: 'p/all',
+        currentProduction: { id: 'p' },
+        currentEpisode: { id: 'ep-b' },
+        isTVShow: true,
+        episodes: [{ id: 'ep-a' }, { id: 'ep-b' }]
+      }
+      await store.actions.initTaskType({ dispatch, rootGetters }, false)
+      expect(dispatch).toHaveBeenCalledWith('loadSequencesWithTasks')
     })
 
     test('initTaskType loads shots when the shot map is empty', async () => {

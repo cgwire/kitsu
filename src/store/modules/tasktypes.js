@@ -117,6 +117,18 @@ const getters = {
     }
 }
 
+// Entity lists are cached per production and per episode: a map warm with the
+// episode the user came from holds nothing the page can display, so its size
+// alone cannot say whether a load is needed.
+const isScopeLoaded = (rootGetters, loadingKey) => {
+  const production = rootGetters.currentProduction
+  if (!production) return false
+  const scope = rootGetters.isTVShow
+    ? (rootGetters.currentEpisode?.id ?? '')
+    : ''
+  return loadingKey === `${production.id}/${scope}`
+}
+
 const actions = {
   uploadTaskTypeEstimations({ commit, state, rootGetters }, formData) {
     return taskTypesApi.postTaskTypeEstimations(
@@ -195,7 +207,11 @@ const actions = {
   initTaskType({ commit, dispatch, state, rootState, rootGetters }, force) {
     return new Promise((resolve, reject) => {
       if (rootGetters.currentTaskType.for_entity === 'Shot') {
-        if (rootGetters.shotMap.size < 2 || force) {
+        if (
+          rootGetters.shotMap.size < 2 ||
+          force ||
+          !isScopeLoaded(rootGetters, rootGetters.shotsLoadingKey)
+        ) {
           if (rootGetters.episodes.length === 0 && rootGetters.isTVShow) {
             return dispatch('loadEpisodes')
               .then(() => dispatch('loadShots'))
@@ -208,7 +224,11 @@ const actions = {
           resolve()
         }
       } else if (rootGetters.currentTaskType.for_entity === 'Asset') {
-        if (rootGetters.assetMap.size < 2 || force) {
+        if (
+          rootGetters.assetMap.size < 2 ||
+          force ||
+          !isScopeLoaded(rootGetters, rootGetters.assetsLoadingKey)
+        ) {
           if (rootGetters.episodes.length === 0 && rootGetters.isTVShow) {
             return dispatch('loadEpisodes')
               .then(() => dispatch('loadAssets'))
@@ -221,7 +241,11 @@ const actions = {
           resolve()
         }
       } else if (rootGetters.currentTaskType.for_entity === 'Edit') {
-        if (rootGetters.editMap.size < 2 || force) {
+        if (
+          rootGetters.editMap.size < 2 ||
+          force ||
+          !isScopeLoaded(rootGetters, rootGetters.editsLoadingKey)
+        ) {
           return dispatch('loadEdits').then(resolve).catch(reject)
         } else {
           resolve()
@@ -233,7 +257,11 @@ const actions = {
           resolve()
         }
       } else if (rootGetters.currentTaskType.for_entity === 'Sequence') {
-        if (rootGetters.sequenceMap.size < 2 || force) {
+        if (
+          rootGetters.sequenceMap.size < 2 ||
+          force ||
+          !isScopeLoaded(rootGetters, rootGetters.sequencesLoadingKey)
+        ) {
           return dispatch('loadSequencesWithTasks').then(resolve).catch(reject)
         } else {
           resolve()
