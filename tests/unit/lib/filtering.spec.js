@@ -448,6 +448,41 @@ describe('lib/filtering', () => {
       ])
     })
 
+    it.each([
+      ['string', '', 'text'],
+      ['number', '', 12],
+      ['list', '', 'Choice'],
+      ['taglist', [], ['Tag']],
+      ['boolean', '', 'false'],
+      ['checklist', '', JSON.stringify({ Item: false })],
+      ['date', '', '2026-09-03'],
+      ['url', '', 'https://example.com'],
+      ['textarea', '', 'Long text'],
+      ['person', '', 'person-1']
+    ])('filters empty %s metadata', (dataType, emptyValue, populatedValue) => {
+      const descriptor = {
+        id: 'descriptor',
+        name: 'Metadata',
+        field_name: 'metadata',
+        data_type: dataType
+      }
+      const filters = getFilters({
+        entryIndex,
+        assetTypes,
+        taskTypes,
+        taskStatuses,
+        descriptors: [descriptor],
+        persons,
+        query: '[Metadata]=[]'
+      })
+      const entries = [
+        { id: 'asset-empty', data: { metadata: emptyValue } },
+        { id: 'asset-populated', data: { metadata: populatedValue } }
+      ]
+
+      expect(applyFilters(entries, filters, new Map())).toEqual([entries[0]])
+    })
+
     it('withthumbnail in query case', () => {
       let filters = getFilters({
         entryIndex,
