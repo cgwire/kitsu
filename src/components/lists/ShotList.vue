@@ -90,7 +90,7 @@
                     ? `${offsets['validation-' + columnIndexInGrid]}px`
                     : '0'
                 "
-                type="assets"
+                type="shots"
                 @show-header-menu="
                   event => showHeaderMenu(columnId, columnIndexInGrid, event)
                 "
