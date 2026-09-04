@@ -553,6 +553,7 @@
       "fields": {
         "name": "nazwa",
         "description": "opis",
+        "time_spent": "Czas",
         "placeholder": "E01"
       },
       "status": {
@@ -1187,6 +1188,7 @@
       "add_episode": "Dodaj cały odcinek",
       "add_movie": "Dodaj cały film",
       "apply_task_type_change": "Spowoduje to ustawienie ostatniej wersji danego typu zadania dla wszystkich obiektów.",
+      "change_task_type_error": "Wystąpił błąd podczas zmiany typu zadania.",
       "update_versions_title": "Zaktualizuj wybrane wersje",
       "update_to_latest_version": "Zaktualizuj do najnowszej wersji",
       "update_to_latest_version_help": "Ustaw najnowszą wersję każdego obiektu, zachowując jego bieżący typ zadania.",
@@ -1730,6 +1732,7 @@
         "name": "Nazwa",
         "description": "opis",
         "person": "Osoba",
+        "time_spent": "Czas",
         "placeholder": "SQ01"
       }
     },
@@ -1761,7 +1764,8 @@
         "name": "Nazwa",
         "episode": "Odc.",
         "description": "Opis",
-        "person": "Autor zmiany"
+        "person": "Autor zmiany",
+        "time_spent": "Czas"
       }
     },
     "schedule": {

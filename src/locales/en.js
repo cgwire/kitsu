@@ -579,6 +579,7 @@ export default {
     fields: {
       name: 'name',
       description: 'description',
+      time_spent: 'Time',
       placeholder: 'E01'
     },
     status: {
@@ -1231,6 +1232,7 @@ export default {
     add_episode: 'Add entire episode',
     add_movie: 'Add entire movie',
     apply_task_type_change: 'This will set the last revision for the given task type on all entities.',
+    change_task_type_error: 'An error occurred while changing the task type.',
     update_versions_title: 'Update selected versions',
     update_to_latest_version: 'Update to latest version',
     update_to_latest_version_help:
@@ -1797,6 +1799,7 @@ export default {
       name: 'Name',
       description: 'description',
       person: 'Person',
+      time_spent: 'Time',
       placeholder: 'SQ01'
     }
   },
@@ -1829,7 +1832,8 @@ export default {
       name: 'Name',
       episode: 'Ep.',
       description: 'Description',
-      person: 'Modifier'
+      person: 'Modifier',
+      time_spent: 'Time'
     }
   },
 
@@ -1917,8 +1921,8 @@ export default {
     feedback_date: 'Feedback date',
     explanation_feedback: 'The shot is considered complete on the first feedback request. Its number of frames is added to the quotas for that day.',
     explanation_done: 'The shot is considered complete on the last approval. Its number of frames is added to the quotas for that day.',
-    explanation_weighted: 'Shots are considered complete upon the first feedback request. Then, quotas are weighted based on the time spent on the task, as recorded in the artist\'s timesheet.\n\n If no time is recorded, it is assumed that:\n* The task started at the first status change to WIP.\n* The task was completed on the day the feedback request was made.\n * The completed frames are distributed evenly among all business days between the start and end dates.',
-    explanation_weighteddone: 'Shots are considered complete upon the last approval. Then, quotas are weighted based on the time spent on the task, as recorded in the artist\'s timesheet.\n\n If no time is recorded, it is assumed that:\n* The task started at the first status change to WIP.\n* The task was completed on the day it was approved.\n * The completed frames are distributed evenly among all business days between the start and end dates.',
+    explanation_weighted: 'Shots are considered complete upon the first feedback request. Then, quotas are weighted based on the time spent on the task, as recorded in the artist\'s timesheet.\n\nIf no time is recorded, it is assumed that:\n* The task started at the first status change to WIP.\n* The task was completed on the day the feedback request was made.\n* The completed frames are distributed evenly among all business days between the start and end dates.',
+    explanation_weighteddone: 'Shots are considered complete upon the last approval. Then, quotas are weighted based on the time spent on the task, as recorded in the artist\'s timesheet.\n\nIf no time is recorded, it is assumed that:\n* The task started at the first status change to WIP.\n* The task was completed on the day it was approved.\n* The completed frames are distributed evenly among all business days between the start and end dates.',
     export_quotas: 'Export quotas',
     frames: 'Frames',
     highlight_quotas: 'Highlight quotas below:',

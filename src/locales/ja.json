@@ -279,6 +279,7 @@
       "fields": {
         "name": "名前",
         "description": "説明",
+        "time_spent": "作業時間",
         "placeholder": "E01"
       },
       "no_casting": "エピソードのキャスティングが空です。",
@@ -654,7 +655,7 @@
       "all": "すべて",
       "commented_on": "にコメント",
       "infos": "表示する情報",
-      "no_news": "ニュースはありません",
+      "no_news": "ニュースはありません。",
       "only_comments": "コメントのみ",
       "only_previews": "プレビューのみ",
       "set_preview_on": "プレビューを設定",
@@ -787,7 +788,7 @@
         "client": "クライアント",
         "manager": "プロダクションマネージャー",
         "user": "アーティスト",
-        "undefined": "未定",
+        "undefined": "",
         "vendor": "ベンダー",
         "supervisor": "スーパーバイザー",
         "all": "すべて"
@@ -840,6 +841,7 @@
       "add_episode": "エピソード全体を追加",
       "add_movie": "ムービー全体を追加",
       "apply_task_type_change": "すべてのエンティティについて、指定したタスクタイプの最新リビジョンを設定します。",
+      "change_task_type_error": "タスクタイプの変更中にエラーが発生しました。",
       "available_build": "利用可能なビルド",
       "build_daily": "今日のチェック待ちを追加",
       "build_weekly": "すべてのチェック待ちを追加",
@@ -1362,6 +1364,7 @@
         "name": "名前",
         "description": "説明",
         "person": "ユーザー",
+        "time_spent": "作業時間",
         "placeholder": "SQ01"
       },
       "no_casting": "シーケンスのキャスティングが空です。",
@@ -1834,7 +1837,8 @@
         "name": "名前",
         "episode": "エピソード",
         "description": "説明",
-        "person": "修正者"
+        "person": "修正者",
+        "time_spent": "作業時間"
       },
       "tasks": "タスク",
       "cancel_text": "{name} をアーカイブしてもよろしいですか？",

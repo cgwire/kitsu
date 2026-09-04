@@ -4,8 +4,8 @@
       "cast_in": "Distribuído em",
       "delete_error": "Ocorreu um erro ao excluir este asset. Provavelmente há dados vinculados a ele. Tem certeza de que este tipo de asset não possui nenhuma tarefa vinculada a ele?",
       "delete_text": "Tem certeza de que deseja remover {name} de seu banco de dados?",
-      "edit_fail": "Falha ao salvar, pode ser devido ao fato de que já existe um asset com um nome semelhante",
-      "edit_success": "Asset {name} editado com sucesso",
+      "edit_fail": "Falha ao salvar, pode ser devido ao fato de que já existe um asset com um nome semelhante.",
+      "edit_success": "Asset {name} editado com sucesso.",
       "edit_title": "Editar asset",
       "empty_list": "Não há nenhum asset na produção. Que tal criar alguns?",
       "empty_list_read_only": "Não há nenhum asset nesta produção.",
@@ -279,6 +279,7 @@
       "fields": {
         "name": "nome",
         "description": "descrição",
+        "time_spent": "Tempo",
         "placeholder": "E01"
       },
       "no_casting": "O elenco do episódio está vazio.",
@@ -344,7 +345,7 @@
       "back_to_login": "Voltar para a página de login",
       "forgot_password": "Esqueceu a senha?",
       "login": "Entrar",
-      "login_failed": "Falha no login, verifique suas credenciais",
+      "login_failed": "Falha no login, verifique suas credenciais.",
       "login_inactive": "Falha no login, sua conta está inativa.",
       "login_page": "Cancelar",
       "redirecting": "Redirecionando em {secondsLeft} segundos ...",
@@ -671,7 +672,7 @@
       "title": "Página não encontrada..."
     },
     "notifications": {
-      "and_change_status": "e alterou o status da tarefa",
+      "and_change_status": " e alterou o status da tarefa",
       "assigned_you": "designou você para",
       "commented_on": "comentou sobre",
       "mention_you_on": "mencionou você em",
@@ -787,7 +788,7 @@
         "client": "Cliente",
         "manager": "Gerente de Produção",
         "user": "Artista",
-        "undefined": "desconhecido",
+        "undefined": "",
         "vendor": "Fornecedor",
         "supervisor": "Supervisor",
         "all": "Todos"
@@ -840,6 +841,7 @@
       "add_episode": "Adicionar episódio inteiro",
       "add_movie": "Adicionar filme inteiro",
       "apply_task_type_change": "Isso definirá a última revisão para o tipo de tarefa indicado em todas as entidades.",
+      "change_task_type_error": "Um erro ocorreu ao alterar o tipo de tarefa.",
       "available_build": "Compilações disponíveis",
       "build_daily": "Diariamente pendente",
       "build_weekly": "Todos pendentes",
@@ -1362,6 +1364,7 @@
         "name": "nome",
         "description": "descrição",
         "person": "Pessoa",
+        "time_spent": "Tempo",
         "placeholder": "SQ01"
       },
       "no_casting": "O elenco de sequência está vazio.",
@@ -1581,8 +1584,8 @@
       "my_tasks": "Minhas Tarefas",
       "next": "Próxima tarefa",
       "no_assignation_right": "Você não tem permissão para mudar Atribuições",
-      "no_comment": "Ainda não há comentários para esta tarefa",
-      "no_preview": "Ainda não há preview para essa tarefa",
+      "no_comment": "Ainda não há comentários para esta tarefa.",
+      "no_preview": "Ainda não há preview para essa tarefa.",
       "no_task_selected": "Nenhuma tarefa selecionada",
       "number": "Tarefa | Tarefas",
       "preview": "Prévia",
@@ -1834,7 +1837,8 @@
         "name": "Nome",
         "episode": "Ep.",
         "description": "Descrição",
-        "person": "Modificador"
+        "person": "Modificador",
+        "time_spent": "Tempo"
       },
       "tasks": "Tarefas",
       "cancel_text": "Tem certeza de que deseja arquivar {name}?",

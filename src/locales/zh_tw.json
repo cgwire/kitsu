@@ -4,7 +4,7 @@
       "cast_in": "角色分配",
       "delete_error": "刪除此資產時出現錯誤。很可能存在有連接至此的數據。您確定沒有任務連接至此資產類型嗎？",
       "delete_text": "您確定要從您的資料庫移除{name}嗎？",
-      "edit_fail": "儲存失敗，可能是因為已存在類似名稱的資產",
+      "edit_fail": "儲存失敗，可能是因為已存在類似名稱的資產。",
       "edit_success": "已成功編輯資產{name}。",
       "edit_title": "編輯資產",
       "empty_list": "製作項目中沒有資產。要創建一些嗎？",
@@ -279,6 +279,7 @@
       "fields": {
         "name": "名稱",
         "description": "說明",
+        "time_spent": "時間",
         "placeholder": "E01"
       },
       "no_casting": "集數選角是空的。",
@@ -344,7 +345,7 @@
       "back_to_login": "返回登入頁面",
       "forgot_password": "密碼忘記了？",
       "login": "登入",
-      "login_failed": "登入失敗，請核實您的憑據",
+      "login_failed": "登入失敗，請核實您的憑據。",
       "login_inactive": "登入失敗，您的帳號已停止活動。",
       "login_page": "取消",
       "redirecting": "{secondsLeft} 秒內重新導向",
@@ -671,7 +672,7 @@
       "title": "找不到頁面…"
     },
     "notifications": {
-      "and_change_status": "將狀態更改為",
+      "and_change_status": "並更改了任務狀態",
       "assigned_you": "將此任務指派給您",
       "commented_on": "已評論",
       "mention_you_on": "在評論中提到您",
@@ -787,7 +788,7 @@
         "client": "客戶",
         "manager": "製作經理",
         "user": "藝術家",
-        "undefined": "未定義",
+        "undefined": "",
         "vendor": "外包",
         "supervisor": "主管",
         "all": "全部"
@@ -840,6 +841,7 @@
       "add_episode": "新增整集",
       "add_movie": "新增整部影片",
       "apply_task_type_change": "這將為所有實體設定指定任務類型的最新修訂版。",
+      "change_task_type_error": "更改任務類型時發生錯誤。",
       "available_build": "可用的版本",
       "build_daily": "當日待處理",
       "build_weekly": "所有待處理",
@@ -1179,7 +1181,7 @@
       "title": "您的簡介",
       "avatar": {
         "title": "更換頭像",
-        "error_upload": "上傳圖片時出錯",
+        "error_upload": "上傳圖片時出錯。",
         "updating": "更新...",
         "removing": "移除...",
         "drop_or_click": "按一下或將相片拖放至此處",
@@ -1257,7 +1259,7 @@
       "change_logo": "更改Logo",
       "integrations": "整合",
       "logo": "公司Logo",
-      "no_logo": "沒有設置Logo",
+      "no_logo": "沒有設置Logo。",
       "set_logo": "設置公司Logo",
       "title": "設置",
       "fields": {
@@ -1362,6 +1364,7 @@
         "name": "名稱",
         "description": "說明",
         "person": "個人",
+        "time_spent": "時間",
         "placeholder": "SQ01"
       },
       "no_casting": "序列的角色分配為空。",
@@ -1502,7 +1505,7 @@
         "sequence": "序列",
         "start": "起始",
         "step": "步進",
-        "time_spent": "時長",
+        "time_spent": "時間",
         "person": "修改者",
         "max_retakes": "Max Rtks",
         "resolution": "解析度",
@@ -1567,7 +1570,7 @@
       "delete_all_error": "刪除所有給定任務類型的任務失敗。",
       "delete_error": "刪除任務時出現錯誤。",
       "delete_comment": "您確定要刪除評論嗎？",
-      "delete_comment_error": "刪除評論時出現錯誤",
+      "delete_comment_error": "刪除評論時出現錯誤。",
       "delete_for_selection": "刪除所選的任務 | 刪除所選的 {nbSelectedTasks} 個任務",
       "delete_preview": "您確定要刪除此預覽圖嗎？",
       "delete_preview_error": "刪除預覽圖時出現錯誤。",
@@ -1834,7 +1837,8 @@
         "name": "名稱",
         "episode": "集數",
         "description": "說明",
-        "person": "修改者"
+        "person": "修改者",
+        "time_spent": "時間"
       },
       "tasks": "任務",
       "cancel_text": "您確定要將 {name} 存檔嗎？",

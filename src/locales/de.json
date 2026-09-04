@@ -279,6 +279,7 @@
       "fields": {
         "name": "Name",
         "description": "Beschreibung",
+        "time_spent": "Zeit",
         "placeholder": "E01"
       },
       "no_casting": "Das Episodencasting ist leer.",
@@ -671,7 +672,7 @@
       "title": "Seite nicht gefunden..."
     },
     "notifications": {
-      "and_change_status": "und änderte den Status auf",
+      "and_change_status": " und änderte den Aufgabenstatus",
       "assigned_you": "hat Sie dieser Aufgabe zugewiesen",
       "commented_on": "kommentiert",
       "mention_you_on": "hat Sie in einem Kommentar erwähnt",
@@ -787,7 +788,7 @@
         "client": "Kunde",
         "manager": "Produktionsleiter",
         "user": "CG Artist",
-        "undefined": "undefiniert",
+        "undefined": "",
         "vendor": "Anbieter",
         "supervisor": "Vorgesetzter",
         "all": "Alle"
@@ -840,6 +841,7 @@
       "add_episode": "Ganze episode hinzufügen",
       "add_movie": "Ganzen film hinzufügen",
       "apply_task_type_change": "Dadurch wird die letzte Revision für den angegebenen Aufgabentyp für alle Entitäten festgelegt.",
+      "change_task_type_error": "Beim Ändern des Aufgabentyps ist ein Fehler aufgetreten.",
       "available_build": "Verfügbare Builds",
       "build_daily": "Täglich ausstehend",
       "build_weekly": "Alle ausstehend",
@@ -1362,6 +1364,7 @@
         "name": "Name",
         "description": "Beschreibung",
         "person": "Person",
+        "time_spent": "Zeit",
         "placeholder": "SQ01"
       },
       "no_casting": "Das Sequenzcasting ist leer.",
@@ -1834,7 +1837,8 @@
         "name": "Name",
         "episode": "Ep.",
         "description": "Beschreibung",
-        "person": "Modifikator"
+        "person": "Modifikator",
+        "time_spent": "Zeit"
       },
       "tasks": "Aufgaben",
       "cancel_text": "Sind Sie sicher, dass Sie {name} archivieren möchten?",

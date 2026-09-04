@@ -279,6 +279,7 @@
       "fields": {
         "name": "nome",
         "description": "descrizione",
+        "time_spent": "Tempo",
         "placeholder": "E01"
       },
       "no_casting": "Il casting dell'episodio è vuoto.",
@@ -840,6 +841,7 @@
       "add_episode": "Aggiungi l'intero episodio",
       "add_movie": "Aggiungi l'intero film",
       "apply_task_type_change": "Questa operazione imposta l'ultima revisione per il tipo di task indicato su tutte le entità.",
+      "change_task_type_error": "Si è verificato un errore durante la modifica del tipo di task.",
       "available_build": "Build disponibili",
       "build_daily": "In attesa (daily)",
       "build_weekly": "Tutte in attesa",
@@ -1362,6 +1364,7 @@
         "name": "Nome",
         "description": "Descrizione",
         "person": "Persona",
+        "time_spent": "Tempo",
         "placeholder": "SQ01"
       },
       "no_casting": "Il casting della sequenza è vuoto.",
@@ -1834,7 +1837,8 @@
         "name": "Nome",
         "episode": "Ep.",
         "description": "Descrizione",
-        "person": "Modificato da"
+        "person": "Modificato da",
+        "time_spent": "Tempo"
       },
       "tasks": "Task",
       "cancel_text": "Sei sicuro di voler archiviare {name}?",

@@ -279,6 +279,7 @@
       "fields": {
         "name": "이름",
         "description": "설명",
+        "time_spent": "시간",
         "placeholder": "E01"
       },
       "no_casting": "에피소드 캐스팅이 비어 있습니다.",
@@ -366,7 +367,7 @@
         "email_otp": "이메일을 통한 OTP",
         "recovery_code": "복구 코드"
       },
-      "too_many_failed_login_attemps": "실패한 로그인 시도가 너무 많습니다, 잠시만 기다려 주십시오",
+      "too_many_failed_login_attemps": "실패한 로그인 시도가 너무 많습니다, 잠시만 기다려 주십시오.",
       "verify": "확인하기",
       "wrong_totp": "TOTP 확인이 실패했습니다.",
       "wrong_email_otp": "이메일을 통한 OTP 확인이 실패했습니다.",
@@ -671,7 +672,7 @@
       "title": "페이지를 찾을 수 없습니다..."
     },
     "notifications": {
-      "and_change_status": "그리고 다음으로 변경된 상태:",
+      "and_change_status": " 그리고 작업 상태를 변경했습니다",
       "assigned_you": "귀하를 다음으로 할당:",
       "commented_on": "다음에서 의견:",
       "mention_you_on": "다음에서 귀하를 언급:",
@@ -700,7 +701,7 @@
       "read": "읽기",
       "reply": "답글",
       "publish": "게시",
-      "published": "미리 보기를 게시했습니다.",
+      "published": "미리 보기를 게시했습니다",
       "show_comments": "댓글 표시",
       "watching": "시청 중",
       "only_playlists_ready": "준비된 재생 목록만",
@@ -787,7 +788,7 @@
         "client": "고객",
         "manager": "프로덕션 관리자",
         "user": "아티스트",
-        "undefined": "미정",
+        "undefined": "",
         "vendor": "외주 업체",
         "supervisor": "감독자",
         "all": "모두"
@@ -840,6 +841,7 @@
       "add_episode": "전체 에피소드 추가",
       "add_movie": "전체 영화 추가",
       "apply_task_type_change": "이렇게 하면 모든 엔티티에 대해 주어진 작업 유형의 마지막 수정본이 설정됩니다.",
+      "change_task_type_error": "작업 유형을 변경하는 도중에 오류가 발생했습니다.",
       "available_build": "사용할 수 있는 빌드",
       "build_daily": "매일 보류 중",
       "build_weekly": "모두 보류 중",
@@ -1353,7 +1355,7 @@
       "delete_error": "이 시퀀스를 삭제하는 동안 오류가 발생했습니다. 아마도 연결된 데이터가 있는 것 같습니다. 이 시퀀스에 연결된 샷이 정말로 없습니까?",
       "edit_title": "시퀀스 편집",
       "empty_list": "프로덕션에 시퀀스가 없습니다. 시퀀스를 좀 만들어 보시겠습니까?",
-      "empty_list_read_only": "이 프로덕션에 시퀀스가 없습니다",
+      "empty_list_read_only": "이 프로덕션에 시퀀스가 없습니다.",
       "new_sequence": "새 시퀀스",
       "new_sequences": "시퀀스 만들기",
       "number": "시퀀스 | 시퀀스",
@@ -1362,6 +1364,7 @@
         "name": "이름",
         "description": "설명",
         "person": "사람",
+        "time_spent": "시간",
         "placeholder": "SQ01"
       },
       "no_casting": "시퀀스 캐스팅이 비어 있습니다.",
@@ -1834,7 +1837,8 @@
         "name": "이름",
         "episode": "에피소드",
         "description": "설명",
-        "person": "수정자"
+        "person": "수정자",
+        "time_spent": "시간"
       },
       "tasks": "작업",
       "cancel_text": "정말 {name}을(를) 보관하시겠습니까?",

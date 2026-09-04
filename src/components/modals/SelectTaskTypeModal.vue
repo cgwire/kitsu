@@ -69,7 +69,7 @@
     </p>
 
     <p class="error has-text-right info-message" v-if="isError">
-      {{ $t('playlist.change_task_type_fails') }}
+      {{ $t('playlists.change_task_type_error') }}
     </p>
   </base-modal>
 </template>

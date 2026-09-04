@@ -279,6 +279,7 @@
       "fields": {
         "name": "navn",
         "description": "beskrivelse",
+        "time_spent": "Tid",
         "placeholder": "E01"
       },
       "no_casting": "Episode-castingen er tom.",
@@ -671,7 +672,7 @@
       "title": "Siden blev ikke fundet..."
     },
     "notifications": {
-      "and_change_status": "og ændrede opgavestatus",
+      "and_change_status": " og ændrede opgavestatus",
       "assigned_you": "tildelte dig denne opgave",
       "commented_on": "kommenterede",
       "mention_you_on": "nævnte dig i en kommentar",
@@ -787,7 +788,7 @@
         "client": "Klient",
         "manager": "Produktionsleder",
         "user": "Kunstner",
-        "undefined": "Udefineret",
+        "undefined": "",
         "vendor": "Leverandør",
         "supervisor": "Supervisor",
         "all": "Alle"
@@ -840,6 +841,7 @@
       "add_episode": "Tilføj hele episoden",
       "add_movie": "Tilføj hele filmen",
       "apply_task_type_change": "Dette vil sætte den seneste revision for den givne opgavetype på alle enheder.",
+      "change_task_type_error": "Der opstod en fejl under ændring af opgavetypen.",
       "available_build": "Tilgængelige builds",
       "build_daily": "Daglige afventende",
       "build_weekly": "Alle afventende",
@@ -1362,6 +1364,7 @@
         "name": "Navn",
         "description": "beskrivelse",
         "person": "Person",
+        "time_spent": "Tid",
         "placeholder": "SQ01"
       },
       "no_casting": "Sequence-castingen er tom.",
@@ -1834,7 +1837,8 @@
         "name": "Navn",
         "episode": "Ep.",
         "description": "Beskrivelse",
-        "person": "Ændret af"
+        "person": "Ændret af",
+        "time_spent": "Tid"
       },
       "tasks": "Opgaver",
       "cancel_text": "Er du sikker på, at du vil arkivere {name}?",

@@ -15,7 +15,7 @@
       "no_cast_in": "Ez az asset nem szerepel egy shot-ban sem.",
       "number": "asset | asset",
       "restore_text": "Biztosan visszaállítod {name}-t az archívumodból?",
-      "restore_error": "Hiba történt az asset visszaállításakor",
+      "restore_error": "Hiba történt az asset visszaállításakor.",
       "tasks": "Asset feladatok",
       "title": "Asset-ek",
       "fields": {
@@ -279,6 +279,7 @@
       "fields": {
         "name": "név",
         "description": "leírás",
+        "time_spent": "Idő",
         "placeholder": "E01"
       },
       "no_casting": "Az epizód szereposztása üres.",
@@ -344,7 +345,7 @@
       "back_to_login": "Vissza a belépő oldalra",
       "forgot_password": "Elfelejtetted a jelszavad?",
       "login": "Belépés",
-      "login_failed": "Belépés sikertelen, kérlek ellenőrizd a felhasználóneved és jelszavad",
+      "login_failed": "Belépés sikertelen, kérlek ellenőrizd a felhasználóneved és jelszavad.",
       "login_inactive": "A bejelentkezés sikertelen, a fiókod inaktív.",
       "login_page": "Mégsem",
       "redirecting": "Átirányítás {secondsLeft} mp múlva...",
@@ -472,7 +473,7 @@
         "preview": "Előnézet",
         "preview_episode_name": "Epizód cím",
         "preview_title": "Importált adatok előnézete",
-        "preview_description": "Tölts fel egy .csv file-t a tábla adatokkal történő benépesítésére",
+        "preview_description": "Tölts fel egy .csv file-t a tábla adatokkal történő benépesítésére.",
         "preview_required": "A fejlécek alapján történik az oszlopok megfeleltetése a beállítandó adatokkal. A fejléceket az első sorban kell megadni.",
         "preview_reupload": ".CSV file újrafeltöltése",
         "required_fields": "A CSV-fájlnak a következő oszlopokat kell tartalmaznia:",
@@ -654,7 +655,7 @@
       "all": "Mind",
       "commented_on": "hozzászólt",
       "infos": "Info-k",
-      "no_news": "Nincsenek hírek ebben a produkcióban, vagy szűrőben",
+      "no_news": "Nincsenek hírek ebben a produkcióban, vagy szűrőben.",
       "only_comments": "Csak hozzászólások",
       "only_previews": "Csak előnézetek",
       "set_preview_on": "előnézet beállítása ezen",
@@ -671,11 +672,11 @@
       "title": "Oldal nem található... talán törlésre került?"
     },
     "notifications": {
-      "and_change_status": "és az állapotát erre változtatta: ",
+      "and_change_status": " és megváltoztatta a feladat állapotát",
       "assigned_you": "kiosztotta neked ezt a feladatot",
       "commented_on": "megjegyzést írt erre:",
       "mention_you_on": "megemlített téged itt:",
-      "no_notifications": "Nincs értesítésed a jelenlegi projektjeiden",
+      "no_notifications": "Nincs értesítésed a jelenlegi projektjeiden.",
       "unread_notifications": "olvasatlan értesítés | olvasatlan értesítés",
       "title": "Értesítések",
       "with_preview": "rendelkezik előnézettel",
@@ -788,7 +789,7 @@
         "manager": "Produkciós manager",
         "supervisor": "Supervisor",
         "user": "Művész",
-        "undefined": "nincs megadva",
+        "undefined": "",
         "vendor": "Beszállító",
         "all": "Minden szerep"
       },
@@ -840,6 +841,7 @@
       "add_episode": "Teljes epizód hozzáadása",
       "add_movie": "Teljes film hozzáadása",
       "apply_task_type_change": "A művelet az összes elemen beállítja az adott feladattípus utolsó revízióját.",
+      "change_task_type_error": "Hiba történt a feladattípus módosításakor.",
       "available_build": "Rendelkezésre álló build-ek",
       "build_daily": "Napi függőben lévő",
       "build_weekly": "Minden függőben lévő",
@@ -864,7 +866,7 @@
       "no_build": "Nincs build",
       "no_playlist": "Nincs lejátszási lista ehhez a projekthez vagy epizódhoz.",
       "no_preview": "Nincs előnézet",
-      "no_selection": "Kérlek válassz ki egy lejátszási listát a bal oldalon",
+      "no_selection": "Kérlek válassz ki egy lejátszási listát a bal oldalon.",
       "no_sequence_for_episode": "Nincs szekvencia ebben az epizódban",
       "no_shot_for_production": "Nincs shot ebben a produkcióban",
       "select_shot": "Kérlek válassz ki egy shot-ot a jobb oldali oszlopon",
@@ -1045,7 +1047,7 @@
         "revision_padding": "Revíziószám kitöltése nullákkal (0 = nincs kitöltés)"
       },
       "metadata": {
-        "add_explanation": "Projekt-specifikus adatok hozzáadása",
+        "add_explanation": "Projekt-specifikus adatok hozzáadása.",
         "add_failed": "Hiba történt a metaadatok projekthez adása közben.",
         "add_new_values": "Nincs hozzáférhető érték.",
         "available_values": "Rendelkezésre álló értékek",
@@ -1257,7 +1259,7 @@
       "change_logo": "Logo cseréje",
       "integrations": "Integrációk",
       "logo": "Stúdió logó",
-      "no_logo": "Nincs logó beállítva",
+      "no_logo": "Nincs logó beállítva.",
       "set_logo": "Stúdió logó beállítása",
       "title": "Beállítások",
       "webhook_error": "Hiba történt a webhook elküldésekor",
@@ -1362,6 +1364,7 @@
         "name": "név",
         "description": "leírás",
         "person": "Személy",
+        "time_spent": "Idő",
         "placeholder": "SQ01"
       },
       "no_casting": "A szekvencia szereposztása üres.",
@@ -1470,7 +1473,7 @@
       "casting": "Shot szereposztás",
       "delete_text": "Biztosan törölni akarod {name}-t az adatbázisból?",
       "delete_error": "Hiba történt a shot törlésekor. Valószínűleg adat hivatkozik rá. Biztos nincs hozzá kapcsolódó feladat?",
-      "edit_success": "{name} shot sikeresen szerkesztve",
+      "edit_success": "{name} shot sikeresen szerkesztve.",
       "edit_fail": "Létrehozás vagy szerkesztés sikertelen, hiba történt. Ellenőrizd, hogy nincs-e névegyezés az adott szekvenciában.",
       "edit_title": "Shot szerkesztése",
       "empty_list": "Nincs shot a produkcióban. Hozz létre egyet!",
@@ -1932,7 +1935,8 @@
         "description": "Leírás",
         "episode": "Ep.",
         "name": "Név",
-        "person": "Módosító"
+        "person": "Módosító",
+        "time_spent": "Idő"
       },
       "history": "Vágás értéknapló",
       "multiple_delete_error": "Hiba történt egy vágás törlésekor. Valószínűleg adat hivatkozik rá. Biztosan nincs feladat rendelve a kijelölt vágáshoz?",
