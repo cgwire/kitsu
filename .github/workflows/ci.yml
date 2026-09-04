@@ -3,6 +3,12 @@ name: Kitsu CI
 
 on: [push, pull_request]
 
+# A new push to the same branch makes the run in flight pointless: stop it
+# instead of paying for it to finish.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   NODE_OPTIONS: --max_old_space_size=8192
   HUSKY: 0
