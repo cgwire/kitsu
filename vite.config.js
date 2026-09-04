@@ -113,7 +113,18 @@ export default defineConfig({
     deps: {
       optimizer: {
         client: {
-          include: ['vue', 'vuex', 'vue-router', '@vue/test-utils']
+          // Without `enabled`, Vitest ignores the `include` list below.
+          enabled: true,
+          // Heavy graphs re-walked per spec file. Keep vi.mock() targets out.
+          include: [
+            '@sentry/vue',
+            '@vuepic/vue-datepicker',
+            'color',
+            'date-fns',
+            'date-fns/locale',
+            'lucide-vue-next',
+            'vue3-emoji-picker'
+          ]
         }
       }
     },
