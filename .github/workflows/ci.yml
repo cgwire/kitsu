@@ -27,6 +27,13 @@ jobs:
           echo "Node.js $(node -v)"
           echo "npm v$(npm -v)"
           npm ci
+      # Restored after npm ci, which wipes node_modules. Holds the Vitest
+      # dependency prebundle; the npm cache above only covers downloads.
+      - name: Cache the Vite prebundle
+        uses: actions/cache@v6
+        with:
+          path: node_modules/.vite
+          key: vite-${{ runner.os }}-node${{ matrix.node }}-${{ hashFiles('package-lock.json', 'vite.config.js') }}
       - name: Run tests
         run: npm run test:unit
 
