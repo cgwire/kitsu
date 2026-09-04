@@ -1,0 +1,2 @@
+import{M as e,at as t,d as n,j as r,k as i,nt as a}from"./vue-vendor-CLskcy-m.js";n();var o={class:`columns fixed-page`},s={class:`column main-column`},c={key:0,class:`column side-column`},l={__name:`PageLayout`,props:{side:{type:Boolean,default:!0}},setup(n){return(l,u)=>(a(),e(`div`,o,[i(`div`,s,[t(l.$slots,`main`)]),n.side?(a(),e(`div`,c,[t(l.$slots,`side`)])):r(``,!0)]))}};export{l as t};
+//# sourceMappingURL=PageLayout-dMBZ33gA.js.map

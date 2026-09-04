@@ -1,0 +1,2 @@
+var e=(e,t)=>{try{localStorage.setItem(e,t)}catch(e){console.error(e)}},t={setPreference(t,n){e(t,n)},getPreference(e){return localStorage.getItem(e)},setBoolPreference(t,n){e(t,n?`true`:`false`)},getBoolPreference(e,t=!1){let n=this.getPreference(e);return n===null?t:n===`true`},getIntPreference(e,t=0){let n=this.getPreference(e),r=parseInt(n,10);return isNaN(r)?t:r},setObjectPreference(t,n){e(t,JSON.stringify(n))},getObjectPreference(e){let t=this.getPreference(e);try{return JSON.parse(t)}catch{return null}}};export{t};
+//# sourceMappingURL=preferences-PWYFQtqN.js.map
