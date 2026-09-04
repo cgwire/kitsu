@@ -883,7 +883,6 @@ const mutations = {
       })
 
       cache.personTasksIndex = buildTaskIndex(state.personTasks)
-      cache.personDoneTasksIndex = buildTaskIndex(cache.personDoneTasks)
     }
   },
 

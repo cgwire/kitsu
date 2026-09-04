@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import { formatRevision } from '@/lib/preview'
 
 describe('lib/preview', () => {

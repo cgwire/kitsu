@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import { vi } from 'vitest'
 
 // Fake superagent: every call returns a thenable request that resolves with

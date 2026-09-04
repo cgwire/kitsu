@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import { ref } from 'vue'
 
 import { useMediaPlayer } from '@/composables/players/mediaPlayer'

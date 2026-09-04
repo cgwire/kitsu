@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import { usePanzoomSync } from '@/composables/panzoom'
 
 describe('composables/panzoom', () => {

@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import { audioBufferToMono, encodeWav, encodeWavBuffer } from '@/lib/audio'
 
 const readString = (view, offset, length) => {

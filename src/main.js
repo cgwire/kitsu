@@ -1,6 +1,6 @@
 import './polyfills'
 
-import { createApp } from 'vue'
+import { createApp, defineAsyncComponent } from 'vue'
 import { createHead, VueHeadMixin } from '@unhead/vue/client'
 import { sync } from 'vuex-router-sync'
 
@@ -14,15 +14,10 @@ import store from '@/store'
 import { setupChunkErrorHandler } from '@/lib/chunk-error'
 
 import vAutosize from '@/directives/autosize'
-import VueChartkick from 'vue-chartkick'
-import 'chartkick/chart.js'
 import VueWebsocket from 'vue-websocket-next'
 import IO from 'socket.io-client'
 import VueAnimXYZ from '@animxyz/vue3'
 import '@animxyz/core'
-
-import { VueDatePicker } from '@vuepic/vue-datepicker'
-import '@vuepic/vue-datepicker/dist/main.css'
 
 const app = createApp(App)
 const head = createHead()
@@ -35,10 +30,28 @@ app.use(store)
 app.use(resizableColumn)
 app.use(VueWebsocket.default || VueWebsocket, IO, '/events')
 app.directive('autosize', vAutosize)
-app.use(VueChartkick)
 app.use(VueAnimXYZ)
 
-app.component('vue-date-picker', VueDatePicker)
+// chart.js weighs ~90 kB gzipped and only a handful of screens draw a chart:
+// registering the tags lazily keeps it out of the initial payload.
+const chartTags = [
+  'line-chart',
+  'pie-chart',
+  'column-chart',
+  'bar-chart',
+  'area-chart',
+  'scatter-chart',
+  'geo-chart',
+  'timeline'
+]
+chartTags.forEach(name =>
+  app.component(
+    name,
+    defineAsyncComponent(
+      async () => (await import('@/lib/chartkick')).default[name]
+    )
+  )
+)
 
 // Make the current route part of the main state.
 sync(store, router)

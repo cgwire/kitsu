@@ -3,6 +3,12 @@ name: Kitsu CI
 
 on: [push, pull_request]
 
+# A new push to the same branch makes the run in flight pointless: stop it
+# instead of paying for it to finish.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   NODE_OPTIONS: --max_old_space_size=8192
   HUSKY: 0
@@ -18,7 +24,7 @@ jobs:
       - name: Git checkout
         uses: actions/checkout@v7
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node }}
           cache: npm
@@ -27,6 +33,13 @@ jobs:
           echo "Node.js $(node -v)"
           echo "npm v$(npm -v)"
           npm ci
+      # Restored after npm ci, which wipes node_modules. Holds the Vitest
+      # dependency prebundle; the npm cache above only covers downloads.
+      - name: Cache the Vite prebundle
+        uses: actions/cache@v6
+        with:
+          path: node_modules/.vite
+          key: vite-${{ runner.os }}-node${{ matrix.node }}-${{ hashFiles('package-lock.json', 'vite.config.js') }}
       - name: Run tests
         run: npm run test:unit
 
@@ -37,7 +50,7 @@ jobs:
       - name: Git checkout
         uses: actions/checkout@v7
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: current
           cache: npm
@@ -58,7 +71,7 @@ jobs:
       - name: Git checkout
         uses: actions/checkout@v7
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: current
           cache: npm

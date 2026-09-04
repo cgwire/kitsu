@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import colors from '@/lib/colors'
 
 describe('colors', () => {

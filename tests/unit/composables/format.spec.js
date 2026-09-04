@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import { sanitizeInteger, sanitizeIntegerLight } from '@/composables/format'
 
 describe('composables/format', () => {

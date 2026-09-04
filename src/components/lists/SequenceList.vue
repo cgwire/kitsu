@@ -90,7 +90,7 @@
                   ? `${offsets['validation-' + columnIndexInGrid]}px`
                   : '0'
               "
-              type="editor"
+              type="sequences"
               is-stick
               @show-header-menu="
                 event => showHeaderMenu(columnId, columnIndexInGrid, event)

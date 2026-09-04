@@ -25,7 +25,10 @@ describe('TopbarEpisodeList', () => {
         mocks: {
           $t: key => key,
           $route: { params: {}, query }
-        }
+        },
+        // The episode dropdown stays closed, so router-link never renders,
+        // yet Vue still resolves it at the top of the render fn.
+        stubs: { RouterLink: true }
       },
       props: { episodeGroups, episodeId: 'all', section: 'playlists' }
     })

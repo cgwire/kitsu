@@ -279,6 +279,7 @@ const helpers = {
 
 const cache = {
   assets: [],
+  assetsLoadingPromise: null,
   assetMap: new Map(),
   assetIndex: {},
   assetTypeIndex: {},
@@ -311,6 +312,7 @@ const initialState = {
 
   isAssetsLoading: false,
   isAssetsLoadingError: false,
+  assetsLoadingKey: null,
   isAssetDescription: false,
   isAssetEstimation: false,
   isAssetResolution: false,
@@ -344,6 +346,7 @@ const getters = {
 
   isAssetsLoading: state => state.isAssetsLoading,
   isAssetsLoadingError: state => state.isAssetsLoadingError,
+  assetsLoadingKey: state => state.assetsLoadingKey,
 
   displayedAssets: state => state.displayedAssets,
   displayedAssetsCount: state => state.displayedAssetsCount,
@@ -405,8 +408,8 @@ const actions = {
     const assetTypeMap = rootGetters.assetTypeMap
     const production = rootGetters.currentProduction
     if (!production) return []
-    let episode = rootGetters.currentEpisode
     const isTVShow = rootGetters.isTVShow
+    let episode = isTVShow ? rootGetters.currentEpisode : null
     const userFilters = rootGetters.userFilters
     const userFilterGroups = rootGetters.userFilterGroups
     const personMap = rootGetters.personMap
@@ -431,15 +434,31 @@ const actions = {
       }
     }
 
+    // Scope of the dataset about to be loaded. The rows cannot tell one scope
+    // from another (an episode load legitimately holds assets cast in from
+    // other episodes, and 'all' / 'main' are pseudo-episodes), so the store
+    // records it for the pages that decide whether their cache is stale.
+    const loadingKey = `${production.id}/${all ? 'all' : (episode?.id ?? '')}`
+
     if (state.isAssetsLoading) {
-      return cache.assetsLoadingPromise || cache.assets
+      if (state.assetsLoadingKey === loadingKey) {
+        return cache.assetsLoadingPromise || cache.assets
+      }
+      // Another scope is in flight (the user switched episode mid-load): wait
+      // for it, then fetch the requested one instead of adopting its result.
+      // Re-dispatching unconditionally is what terminates: the second pass
+      // either joins the load a previous waiter started for the same scope or
+      // queues once more.
+      return (cache.assetsLoadingPromise || Promise.resolve(cache.assets)).then(
+        () => dispatch('loadAssets', { all, withShared, withTasks })
+      )
     }
 
     if (all || episode?.id === 'all') {
       episode = null // Do not filter by episode
     }
 
-    commit(LOAD_ASSETS_START)
+    commit(LOAD_ASSETS_START, { loadingKey })
     const loadingPromise = assetsApi
       .getAssets(production, episode, withTasks)
       .then(async assets => {
@@ -937,14 +956,16 @@ const mutations = {
     state.selectedAssets = new Map()
     state.isAssetsLoading = false
     state.isAssetsLoadingError = false
+    state.assetsLoadingKey = null
   },
 
-  [LOAD_ASSETS_START](state) {
+  [LOAD_ASSETS_START](state, { loadingKey } = {}) {
     cache.assets = []
     cache.result = []
     cache.assetMap.clear()
     state.isAssetsLoading = true
     state.isAssetsLoadingError = false
+    state.assetsLoadingKey = loadingKey ?? null
     state.assetValidationColumns = []
 
     cache.assetIndex = {}

@@ -12,7 +12,7 @@
       "new_asset": "アセットを作成",
       "new_assets": "アセットを作成",
       "new_success": "アセット {name} を作成しました。",
-      "no_cast_in": "このアセットはどのショットにも登場しません。",
+      "no_cast_in": "このアセットはどのショットにもキャスティングされていません。",
       "number": "アセット | アセット",
       "restore_text": "アーカイブから {name} を復元してもよろしいですか？",
       "restore_error": "このアセットの復元中にエラーが発生しました。",
@@ -75,7 +75,7 @@
       },
       "remove": {
         "confirm": "エピソードからアセットを外す",
-        "error": "アセットの削除中にサーバーエラーが発生しました。問題が続く場合はサポートチームまでお問い合わせください。",
+        "error": "アセットの削除中にサーバーエラーが発生しました。もう一度お試しください。問題が続く場合はサポートチームまでお問い合わせください。",
         "text": "選択したエピソードからこのアセットを外すと、配下のすべてのショットからも外れます。削除してもよろしいですか？"
       },
       "fields": {
@@ -116,7 +116,7 @@
         "person": "ユーザー名",
         "checklist": "チェックリスト",
         "acknowledgements": "確認済み",
-        "revision": "改訂",
+        "revision": "リビジョン",
         "attachments": "添付ファイル"
       },
       "checklist": "チェックリスト",
@@ -167,7 +167,7 @@
       "edit_title": "カスタムアクションを編集",
       "new_custom_action": "カスタムアクションを作成",
       "number": "カスタムアクション | カスタムアクション",
-      "run_for_selection": "選択したタスクにカスタムアクションを実行 | 選択した {nbSelectedTasks} 件のタスクに実行",
+      "run_for_selection": "選択したタスクにカスタムアクションを実行 | 選択した {nbSelectedTasks} 件のタスクにカスタムアクションを実行",
       "title": "カスタムアクション",
       "fields": {
         "name": "名前",
@@ -279,6 +279,7 @@
       "fields": {
         "name": "名前",
         "description": "説明",
+        "time_spent": "作業時間",
         "placeholder": "E01"
       },
       "no_casting": "エピソードのキャスティングが空です。",
@@ -310,8 +311,8 @@
       "shortcuts": "ショートカット",
       "ctrldown": "メタデータセルの選択を下に移動",
       "ctrlleft": "メタデータセルの選択を左に移動",
-      "ctrlright": "メタデータセルの選択範囲を右に移動",
-      "ctrlup": "メタデータセルの選択範囲を上に移動",
+      "ctrlright": "メタデータセルの選択を右に移動",
+      "ctrlup": "メタデータセルの選択を上に移動",
       "plhome": "最初のフレームへ移動",
       "plend": "最後のフレームへ移動",
       "plaltright": "次のショットの最初のフレームへ移動",
@@ -402,7 +403,7 @@
       "reset_change_password_token_failed": "パスワードリセットリンクが無効か、有効期限が切れています。手続きをやり直してください。"
     },
     "main": {
-      "about": "当社について",
+      "about": "Kitsu について",
       "add": "追加",
       "all": "すべて",
       "all_assets": "すべてのアセット",
@@ -455,9 +456,11 @@
       "yes": "はい",
       "csv": {
         "choose": "選択",
+        "error_imported_rows": "エラーの前に {count} 行がインポートされました。 | エラーの前に {count} 行がインポートされました。",
+        "error_line": "{line} 行目",
         "error_upload": "CSV のアップロード中にエラーが発生しました。",
         "export_file": "データを CSV にエクスポート",
-        "import_file": "データを CSV からインポート",
+        "import_file": "CSV からデータをインポート",
         "import_title": "CSV からデータをインポート",
         "legend": "凡例",
         "legend_ok": "インポートされる列",
@@ -495,7 +498,7 @@
       "before": "前",
       "from": "開始日",
       "home": "ホームページに戻る",
-      "less_filters": "少ないフィルター",
+      "less_filters": "フィルターを減らす",
       "more_filters": "フィルターを追加",
       "reload": "再読み込み",
       "search_query": "検索クエリ",
@@ -603,7 +606,7 @@
       "hours": "時間 | 時間",
       "remove_search_query": "検索クエリ「{name}」を削除してもよろしいですか？",
       "remove_search_filter_group": "検索フィルターグループ「{name}」を削除してもよろしいですか？",
-      "shared_by": "{name} によって共有される",
+      "shared_by": "{name} が共有",
       "continue": "続ける",
       "developer_documentation": "開発者向けドキュメント",
       "feedback": "ロードマップ / フィードバック",
@@ -652,7 +655,7 @@
       "all": "すべて",
       "commented_on": "にコメント",
       "infos": "表示する情報",
-      "no_news": "ニュースはありません",
+      "no_news": "ニュースはありません。",
       "only_comments": "コメントのみ",
       "only_previews": "プレビューのみ",
       "set_preview_on": "プレビューを設定",
@@ -703,7 +706,7 @@
       "watching": "ウォッチ中",
       "only_playlists_ready": "準備の整ったプレイリストのみ",
       "playlist_is_ready": "プレイリストが完成",
-      "playlist_ready_text": "新しいプレイリストが出来上がりました:",
+      "playlist_ready_text": "レビュー用の新しいプレイリストの準備ができました:",
       "desktop": {
         "assignation_title": "{name} があなたをアサインしました",
         "banner_blocked_text": "デスクトップ通知がブロックされています。有効にするにはブラウザのサイト設定で許可してください。",
@@ -785,7 +788,7 @@
         "client": "クライアント",
         "manager": "プロダクションマネージャー",
         "user": "アーティスト",
-        "undefined": "未定",
+        "undefined": "",
         "vendor": "ベンダー",
         "supervisor": "スーパーバイザー",
         "all": "すべて"
@@ -837,11 +840,12 @@
       "add_sequence": "シーケンス全体を追加",
       "add_episode": "エピソード全体を追加",
       "add_movie": "ムービー全体を追加",
-      "apply_task_type_change": "これは、すべてのエンティティの指定されたタスクタイプの最終リビジョンを設定します。",
+      "apply_task_type_change": "すべてのエンティティについて、指定したタスクタイプの最新リビジョンを設定します。",
+      "change_task_type_error": "タスクタイプの変更中にエラーが発生しました。",
       "available_build": "利用可能なビルド",
       "build_daily": "今日のチェック待ちを追加",
       "build_weekly": "すべてのチェック待ちを追加",
-      "build_mp4": "ビルド .mp4",
+      "build_mp4": ".mp4 をビルド",
       "building": "ビルド中…",
       "client_playlist": "クライアントプレイリスト",
       "create_for_selection": "選択したタスクからプレイリストを作成",
@@ -929,7 +933,7 @@
         "toggle_playing_annotations": "動画再生中にアノテーションを表示/非表示",
         "toggle_waveform": "動画の波形を表示/非表示",
         "annotation_erase": "アノテーションを消去",
-        "toggle_annotations": "動画が一時停止中にアノテーションを表示/非表示",
+        "toggle_annotations": "動画の一時停止中にアノテーションを表示/非表示",
         "toggle_laser": "描画レーザーモードを有効/無効",
         "annotation_zoom_pan": "ズームをリセット",
         "default": "デフォルト",
@@ -951,7 +955,7 @@
       },
       "download_csv": ".csv をダウンロード",
       "filter_task_type": "タスクタイプでフィルター",
-      "comparing_missing_plan": "現在のタイプでエンティティが見つからない",
+      "comparing_missing_plan": "現在のタイプにエンティティがありません",
       "add_sequences": "シーケンスを追加",
       "clients_to_notify": "通知するクライアント",
       "mute": "ミュート",
@@ -1017,7 +1021,7 @@
         "no_task": "今のところタスクはありません。スーパーバイザーに相談して、できることを確認してみましょう。",
         "no_prod_for_client": "プロダクションにアクセスできません。アクセス権を取得するには、管理者にお問い合わせください。",
         "title": "マイプロダクション",
-        "welcome": "Kitsuへようこそ"
+        "welcome": "Kitsu へようこそ"
       },
       "fields": {
         "fps": "FPS",
@@ -1208,8 +1212,8 @@
         "totp": {
           "button_enable": "TOTP を有効化",
           "button_disable": "TOTP を無効化",
-          "button_validate_disable": "検証してTOTP を無効化",
-          "button_validate": "検証してTOTP を有効化",
+          "button_validate_disable": "検証して TOTP を無効化",
+          "button_validate": "検証して TOTP を有効化",
           "error_enable": "TOTP の有効化中にエラーが発生しました。",
           "error_disable": "TOTP の無効化中にエラーが発生しました。",
           "description": "Google Authenticator、Authy、1Password などの TOTP アプリを使用します。",
@@ -1243,7 +1247,7 @@
         },
         "enabled": "二要素認証が有効",
         "mandatory": "所属組織では二要素認証が必須です。続行するには、少なくとも1つの方法を有効にしてください。",
-        "description": "二要素認証（<abbr title=\"二要素認証\">2FA</abbr>）を有効にすると、ログインのたびにパスワードに加えて2つ目の認証が必要になり、アカウントの保護が一段強化されます。2つ目の認証要素には、認証アプリ（<abbr title=\"Time-based One-Time Password\">TOTP</abbr>）、メール認証（<abbr title=\"One-Time Password\">OTP</abbr>）、ハードウェアセキュリティキー（<abbr title=\"Fast IDentity Online\">FIDO</abbr>）を使用できます。",
+        "description": "二要素認証（<abbr title=\"Two-Factor Authentication (二要素認証)\">2FA</abbr>）を有効にすると、ログインのたびにパスワードに加えて2つ目の認証が必要になり、アカウントの保護が一段強化されます。2つ目の認証要素には、認証アプリ（<abbr title=\"Time-based One-Time Password (時刻ベースのワンタイムパスワード)\">TOTP</abbr>）、メール認証（<abbr title=\"One-Time Password (ワンタイムパスワード)\">OTP</abbr>）、ハードウェアセキュリティキー（<abbr title=\"Fast IDentity Online (高速なオンライン本人認証)\">FIDO</abbr>）を使用できます。",
         "status_disabled": "無効",
         "status_enabled": "有効"
       },
@@ -1360,6 +1364,7 @@
         "name": "名前",
         "description": "説明",
         "person": "ユーザー",
+        "time_spent": "作業時間",
         "placeholder": "SQ01"
       },
       "no_casting": "シーケンスのキャスティングが空です。",
@@ -1521,7 +1526,7 @@
     },
     "server_down": {
       "text": "問題の原因を把握するには、サポートチームまたはシステム管理者までお問い合わせください。",
-      "title": "Kitsu がデータAPI にアクセス中にエラーが発生しました"
+      "title": "Kitsu がデータ API へのアクセス中にエラーが発生しました"
     },
     "statistics": {
       "count": "カウント",
@@ -1561,7 +1566,7 @@
       "create_tasks_asset_failed": "作成の処理中にサーバーエラーが発生しました。",
       "current": "タスク",
       "current_status": "現在のステータス:",
-      "delete_all_text": "指定された {name} のすべてのタスクを削除してもよろしいですか？削除するには、削除したいタスクタイプを入力して続行してください。",
+      "delete_all_text": "指定された {name} のすべてのタスクを削除してもよろしいですか？確認のため、下にタスクタイプ名を入力してください。",
       "delete_all_error": "指定されたタスクタイプのすべてのタスクの削除に失敗しました。",
       "delete_error": "タスクの削除中にエラーが発生しました。",
       "delete_comment": "コメントを削除してもよろしいですか？",
@@ -1603,7 +1608,7 @@
         "count": "カウント",
         "due_date": "締切日",
         "duration": "期間",
-        "end_date": "レビュー実施日",
+        "end_date": "フィードバック日",
         "entity": "エンティティ",
         "entity_name": "名前",
         "estimated_quota": "クォータ",
@@ -1700,16 +1705,16 @@
       "new_revision_number": "新しいリビジョン番号",
       "post": "投稿",
       "publish_revision": "リビジョンを公開",
-      "revision_preview_file": "選択したファイル名にリビジョン番号（例: \"preview-v3.png\"）が含まれている場合、次のステップで新しいリビジョン名（例: \"リビジョン3\"）として自動的に設定されます。",
+      "revision_preview_file": "選択したファイル名にリビジョン番号（例: \"preview-v3.png\"）が含まれている場合、次のステップで新しいリビジョン名（例: \"リビジョン3\"）として提案されます。",
       "selected_entities": "選択中のエンティティ",
       "selected_tasks": "選択中のタスク",
       "show_contact_sheet": "コンタクトシートとして表示",
       "subscribe_to_tasks": "選択したタスクの通知を購読 | {nbSelectedTasks} 件のタスクの通知を購読",
       "use_current_frame": "現在のフレームを使用",
-      "build_playlist": "選択したタスクからプレイリストを作成",
+      "build_playlist": "リストのタスクからプレイリストを作成",
       "calendar": "カレンダー",
       "pending": "保留中",
-      "validated": "承認済",
+      "validated": "承認済み",
       "unassigned_tasks": "未アサインのタスク",
       "difficulty": {
         "very_easy": "非常に簡単",
@@ -1745,11 +1750,11 @@
       "unit": "単位",
       "confirm_day_offs": "これらの日を休日にすると、対象日に記録済みの作業時間はすべて削除されます。続行してもよろしいですか？",
       "confirm_unset_day_offs": "{start} から {end} まで休日が設定されています。この期間の休日を解除してもよろしいですか？",
-      "off": "オフ",
+      "off": "休日",
       "day_off_no_logging": "休日には作業時間を記録できません"
     },
     "wrong_browser": {
-      "title": "お使いのブラウザはKitsuでサポートされていません",
+      "title": "お使いのブラウザは Kitsu でサポートされていません",
       "outdated": "お使いのブラウザ（{browser}）はバージョンが古いため利用できません。ブラウザを最新バージョンに更新するか、対応ブラウザ（Chrome、Firefox、Safari、Edge、Opera）の最新版をご利用ください。"
     },
     "logs": {
@@ -1832,7 +1837,8 @@
         "name": "名前",
         "episode": "エピソード",
         "description": "説明",
-        "person": "修正者"
+        "person": "修正者",
+        "time_spent": "作業時間"
       },
       "tasks": "タスク",
       "cancel_text": "{name} をアーカイブしてもよろしいですか？",
@@ -1889,7 +1895,7 @@
     },
     "team_schedule": {
       "busy": "別のプロダクションで作業中",
-      "empty": "現在のフィルターに一致する人がいません。スタジオ、部門、プロダクションのフィルターを広げてみてください。",
+      "empty": "現在のフィルターに一致するユーザーがいません。スタジオ、部門、プロダクションのフィルターを広げてみてください。",
       "person_placeholder": "ユーザーを選択…",
       "title": "スケジュール",
       "title_main": "チームスケジュール"
@@ -1901,7 +1907,7 @@
       "title": "エンティティ検索"
     },
     "backgrounds": {
-      "create_error": "この背景を保存する際にエラーが発生しました。同様の名前の背景がありませんか？",
+      "create_error": "背景の保存中にエラーが発生しました。類似の名前の背景がないか確認してください。",
       "delete_text": "{name} をデータベースから削除してもよろしいですか？",
       "delete_error": "背景の削除中にエラーが発生しました。関連データが存在する可能性があります。この背景にリンクされたタスクがないことを確認してください。",
       "name": "背景",
@@ -1918,7 +1924,7 @@
     },
     "board": {
       "title": "ボード",
-      "empty": "カンバンボードは空です。あなたのロールで表示するタスクステータスが、プロダクション設定でまだ設定されていません。",
+      "empty": "ボードに表示できるものがありません。進行中のタスクがないか、検索結果が0件か、プロダクション設定であなたのロール向けのタスクステータスが有効になっていない可能性があります。",
       "settings": {
         "title": "ボードのステータス",
         "visible": "表示先のカンバンボード",
@@ -2024,7 +2030,7 @@
       "add": "休日を追加",
       "edit": "休日を編集",
       "delete": "休日を削除",
-      "confirm_day_offs": "休日として登録すると、対象期間に記録済みの作業時間はすべて削除されます。",
+      "confirm_day_offs": "休日として登録すると、対象期間に記録済みの作業時間はすべて削除されます。続行してもよろしいですか？",
       "confirm_unset_day_offs": "{start} から {end} まで休日が設定されています。この期間の休日を解除してもよろしいですか？",
       "error_days_off": "休日の更新中にエラーが発生しました。"
     },
@@ -2119,7 +2125,7 @@
       "clear_exception": "この月の給与の上書きを解除して自動計算に戻す"
     },
     "burndown": {
-      "estimations": "見積もり",
+      "estimations": "工数",
       "ideal": "理想",
       "projection": "予測",
       "remaining_days": "残り人日",
@@ -2228,7 +2234,7 @@
       "player_placeholder": "ここにプレイヤーが表示されます。",
       "post_comment_error": "コメントを投稿できませんでした。ページを再読み込みしてもう一度お試しください。",
       "review_session": "レビューセッション",
-      "your_name": "あなたの名前"
+      "your_name": "お名前"
     }
   }
 }

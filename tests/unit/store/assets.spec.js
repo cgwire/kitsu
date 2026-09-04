@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import { vi } from 'vitest'
 
 // Importing the assets module transitively pulls in the root store
@@ -62,6 +64,137 @@ describe('Assets store', () => {
       expect(getAssets).toHaveBeenCalledTimes(1)
       expect(r1).toEqual(sentinel)
       expect(r2).toEqual(sentinel) // buggy guard resolved to [] instead
+    })
+
+    test('does not adopt an in-flight load made for another episode', async () => {
+      const buildAsset = id => ({
+        id,
+        name: id,
+        asset_type_id: 't1',
+        asset_type_name: 'Char',
+        canceled: false,
+        tasks: [],
+        data: {}
+      })
+      const assetsA = [buildAsset('a-ep-a')]
+      const assetsB = [buildAsset('a-ep-b')]
+      let releaseA = () => {}
+      const getAssets = vi
+        .spyOn(assetsApi, 'getAssets')
+        .mockImplementation((production, episode) =>
+          episode?.id === 'ep-a'
+            ? new Promise(resolve => {
+                releaseA = () => resolve(assetsA)
+              })
+            : Promise.resolve(assetsB)
+        )
+      const state = {
+        isAssetsLoading: false,
+        isAssetsLoadingError: false,
+        assetsLoadingKey: null,
+        assetSearchText: ''
+      }
+      const commit = realCommit(state)
+      const rootGetters = {
+        ...baseRootGetters(),
+        isTVShow: true,
+        currentEpisode: { id: 'ep-a' },
+        episodes: [{ id: 'ep-a' }, { id: 'ep-b' }]
+      }
+      const ctx = { commit, state, rootGetters }
+      ctx.dispatch = vi.fn((name, payload) =>
+        assetsStore.actions[name](ctx, payload)
+      )
+
+      const promiseA = assetsStore.actions.loadAssets(ctx, {
+        withShared: false
+      })
+      // The user picks another episode while the first load is still running.
+      rootGetters.currentEpisode = { id: 'ep-b' }
+      const promiseB = assetsStore.actions.loadAssets(ctx, {
+        withShared: false
+      })
+      releaseA()
+
+      const [, resultB] = await Promise.all([promiseA, promiseB])
+      expect(getAssets).toHaveBeenCalledTimes(2)
+      // The episode-B caller must get episode B's assets, not the ones the
+      // episode-A load was already fetching.
+      expect(resultB.map(asset => asset.id)).toEqual(['a-ep-b'])
+    })
+
+    test('a second queued caller resolves with the episode that was loaded', async () => {
+      const buildAsset = id => ({
+        id,
+        name: id,
+        asset_type_id: 't1',
+        asset_type_name: 'Char',
+        canceled: false,
+        tasks: [],
+        data: {}
+      })
+      const assetsA = [buildAsset('a-ep-a')]
+      let releaseA = () => {}
+      const getAssets = vi
+        .spyOn(assetsApi, 'getAssets')
+        .mockImplementation((production, episode) =>
+          episode?.id === 'ep-a'
+            ? new Promise(resolve => {
+                releaseA = () => resolve(assetsA)
+              })
+            : Promise.resolve([buildAsset(`a-${episode?.id}`)])
+        )
+      const state = {
+        isAssetsLoading: false,
+        isAssetsLoadingError: false,
+        assetsLoadingKey: null,
+        assetSearchText: ''
+      }
+      const commit = realCommit(state)
+      const rootGetters = {
+        ...baseRootGetters(),
+        isTVShow: true,
+        currentEpisode: { id: 'ep-a' },
+        episodes: [{ id: 'ep-a' }, { id: 'ep-b' }, { id: 'ep-c' }]
+      }
+      const ctx = { commit, state, rootGetters }
+      ctx.dispatch = vi.fn((name, payload) =>
+        assetsStore.actions[name](ctx, payload)
+      )
+
+      // The user clicks through two more episodes while ep-a is still in
+      // flight: both queue behind it.
+      const promiseA = assetsStore.actions.loadAssets(ctx, {
+        withShared: false
+      })
+      rootGetters.currentEpisode = { id: 'ep-b' }
+      const promiseB = assetsStore.actions.loadAssets(ctx, {
+        withShared: false
+      })
+      rootGetters.currentEpisode = { id: 'ep-c' }
+      const promiseC = assetsStore.actions.loadAssets(ctx, {
+        withShared: false
+      })
+      releaseA()
+
+      const [, , resultC] = await Promise.all([promiseA, promiseB, promiseC])
+      // Once the first queued caller requeues for ep-c, the second must join
+      // that load instead of being handed the ep-a assets it merely awaited.
+      expect(getAssets).toHaveBeenCalledTimes(2)
+      expect(resultC.map(asset => asset.id)).toEqual(['a-ep-c'])
+    })
+
+    test('records the loaded scope and clears it with the assets', () => {
+      const state = { isAssetsLoading: false, isAssetsLoadingError: false }
+
+      assetsStore.mutations.LOAD_ASSETS_START(state, {
+        loadingKey: 'p1/ep-a'
+      })
+      expect(state.assetsLoadingKey).toEqual('p1/ep-a')
+      expect(assetsStore.getters.assetsLoadingKey(state)).toEqual('p1/ep-a')
+
+      assetsStore.mutations.CLEAR_ASSETS(state)
+      expect(state.assetsLoadingKey).toBeNull()
     })
 
     test('ignores a response for a production the user already switched away from (BUG-3)', async () => {

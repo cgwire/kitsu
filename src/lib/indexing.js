@@ -138,12 +138,12 @@ export const buildSupervisorTaskIndex = (tasks, personMap, taskStatusMap) => {
  */
 export const getAssetIndexWords = asset => {
   const stringToIndex = asset.name.replace(/_/g, ' ').replace(/-/g, ' ')
-  let words = []
-    .concat(asset.asset_type_name.split(' '))
-    .concat(stringToIndex.split(' '))
-    .concat([asset.name])
-  const camelWords = stringToIndex.match(/[A-Z]+[a-z0-9]*/g)
-  if (camelWords) words = words.concat(camelWords)
+  const words = [
+    ...asset.asset_type_name.split(' '),
+    ...stringToIndex.split(' '),
+    asset.name,
+    ...(stringToIndex.match(/[A-Z]+[a-z0-9]*/g) ?? [])
+  ]
   return [...new Set(words.map(word => word.toLowerCase()))]
 }
 

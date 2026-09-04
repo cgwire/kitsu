@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import { vi } from 'vitest'
 
 // Importing the sequences module transitively pulls in the root store
@@ -84,6 +86,78 @@ describe('Sequences store, all-episodes pseudo-episode', () => {
     expect(commit.mock.calls.map(c => c[0])).not.toContain(
       'SET_SEQUENCES_WITH_TASKS'
     )
+  })
+
+  describe('loaded scope', () => {
+    test('records the scope the sequences were loaded for', async () => {
+      vi.spyOn(shotsApi, 'getSequencesWithTasks').mockResolvedValue([])
+      const commit = vi.fn()
+      await sequencesStore.actions.loadSequencesWithTasks({
+        commit,
+        state: {},
+        rootGetters: { ...rootGetters, currentEpisode: { id: 'ep-a' } }
+      })
+
+      const payload = commit.mock.calls.find(
+        call => call[0] === 'SET_SEQUENCES_WITH_TASKS'
+      )[1]
+      expect(payload.loadingKey).toEqual('p-all/ep-a')
+    })
+
+    test('records the all pseudo-episode as itself', async () => {
+      vi.spyOn(shotsApi, 'getSequencesWithTasks').mockResolvedValue([])
+      const commit = vi.fn()
+      await sequencesStore.actions.loadSequencesWithTasks({
+        commit,
+        state: {},
+        rootGetters
+      })
+
+      const payload = commit.mock.calls.find(
+        call => call[0] === 'SET_SEQUENCES_WITH_TASKS'
+      )[1]
+      expect(payload.loadingKey).toEqual('p-all/all')
+    })
+
+    test('sets the episode it fell back to as the current one', async () => {
+      vi.spyOn(shotsApi, 'getSequencesWithTasks').mockResolvedValue([])
+      const commit = vi.fn()
+      await sequencesStore.actions.loadSequencesWithTasks({
+        commit,
+        state: {},
+        rootGetters: { ...rootGetters, currentEpisode: null }
+      })
+
+      // The page derives its own scope from currentEpisode. Without this the
+      // store records p-all/ep-a while the page still computes p-all/, and
+      // every mount reloads the sequences it already holds.
+      expect(commit).toHaveBeenCalledWith('SET_CURRENT_EPISODE', 'ep-a')
+      const payload = commit.mock.calls.find(
+        call => call[0] === 'SET_SEQUENCES_WITH_TASKS'
+      )[1]
+      expect(payload.loadingKey).toEqual('p-all/ep-a')
+    })
+
+    test('serves the recorded scope through a getter and drops it on clear', () => {
+      const state = {}
+      sequencesStore.mutations.SET_SEQUENCES_WITH_TASKS(state, {
+        episodeMap: new Map(),
+        userFilters: {},
+        personMap: new Map(),
+        production,
+        sequences: [],
+        taskMap: new Map(),
+        taskTypeMap: new Map(),
+        taskStatusMap: new Map(),
+        loadingKey: 'p-all/ep-a'
+      })
+      expect(sequencesStore.getters.sequencesLoadingKey(state)).toEqual(
+        'p-all/ep-a'
+      )
+
+      sequencesStore.mutations.CLEAR_SEQUENCES(state)
+      expect(state.sequencesLoadingKey).toBeNull()
+    })
   })
 
   describe('sequenceOptions', () => {

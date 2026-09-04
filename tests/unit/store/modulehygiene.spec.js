@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import { vi } from 'vitest'
 
 // Some module imports transitively pull the root store; stub it so no

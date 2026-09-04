@@ -132,7 +132,7 @@ export default {
     number: 'NFT | NFTs',
     new_success: 'NFT {name} successfully created.',
     restore_error: 'An error occurred while restoring this NFT.',
-    tasks: 'NFT Tasks',
+    tasks: 'NFT tasks',
     title: 'NFT Collection',
     wrong_file_duration: 'One of the uploaded video file duration doesn\'t match the expected duration of the current NFT.',
     fields: {

@@ -21,6 +21,16 @@ export default defineConfig({
         codeSplitting: {
           groups: [
             {
+              // oxc lowering helpers otherwise park in whichever vendor chunk
+              // uses them first (date-fns/parse, so `charts`), which drags that
+              // chunk into the entry preload. Isolating them frees the entry.
+              // The test matches a rolldown-internal virtual module id: if that
+              // format changes the group silently stops matching and the graph
+              // reverts to its previous shape (size regression, not a crash).
+              name: 'helpers',
+              test: /@oxc-project\+runtime/
+            },
+            {
               name: 'vue-vendor',
               test: /node_modules[\\/](?:@intlify|@vue|vue-i18n|vue-router|vuex|vue)[\\/]/
             },
@@ -96,6 +106,9 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['vitest-localstorage-mock', 'tests/unit.setup.js'],
     mockReset: false,
+    // A fresh runner spawns per spec file, so spawn cost dominates: threads
+    // reuse the process where the default 'forks' pool pays a Node bootstrap.
+    pool: 'threads',
     isolate: true,
     // Agent worktrees under .claude/ carry their own copy of the suite;
     // without this exclude `vitest tests/unit` picks them up too.
@@ -103,7 +116,18 @@ export default defineConfig({
     deps: {
       optimizer: {
         client: {
-          include: ['vue', 'vuex', 'vue-router', '@vue/test-utils']
+          // Without `enabled`, Vitest ignores the `include` list below.
+          enabled: true,
+          // Heavy graphs re-walked per spec file. Keep vi.mock() targets out.
+          include: [
+            '@sentry/vue',
+            '@vuepic/vue-datepicker',
+            'color',
+            'date-fns',
+            'date-fns/locale',
+            'lucide-vue-next',
+            'vue3-emoji-picker'
+          ]
         }
       }
     },

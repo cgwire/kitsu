@@ -26,6 +26,11 @@
 </template>
 
 <script setup>
+/* eslint-disable no-unused-vars */
+import { VueDatePicker } from '@vuepic/vue-datepicker'
+/* eslint-enable no-unused-vars */
+import '@vuepic/vue-datepicker/dist/main.css'
+
 import { format as formatDate } from 'date-fns'
 import {
   da,

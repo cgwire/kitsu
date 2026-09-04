@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import {
   applyFilters,
   getKeyWords,
@@ -450,10 +452,10 @@ describe('lib/filtering', () => {
 
     it.each([
       ['string', '', 'text'],
-      ['number', '', 12],
+      ['number', '', 0],
       ['list', '', 'Choice'],
       ['taglist', [], ['Tag']],
-      ['boolean', '', 'false'],
+      ['boolean', '', false],
       ['checklist', '', JSON.stringify({ Item: false })],
       ['date', '', '2026-09-03'],
       ['url', '', 'https://example.com'],

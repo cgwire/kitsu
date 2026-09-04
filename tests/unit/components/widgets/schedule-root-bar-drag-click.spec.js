@@ -50,6 +50,9 @@ const mountSchedule = rootElement =>
       withMilestones: false,
       isLoading: false
     },
+    // The root and child links are v-if'd out (the fixture carries no route),
+    // yet Vue still resolves router-link at the top of the render fn.
+    global: { stubs: { RouterLink: true } },
     attachTo: document.body
   })
 

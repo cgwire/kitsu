@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import store from '@/store/modules/news'
 
 const timezone = 'Europe/Paris'

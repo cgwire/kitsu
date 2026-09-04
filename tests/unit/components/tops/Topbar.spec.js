@@ -1,6 +1,6 @@
 import { nextTick, ref } from 'vue'
 import { flushPromises, shallowMount } from '@vue/test-utils'
-import { createRouter, createWebHashHistory } from 'vue-router'
+import { createMemoryHistory, createRouter } from 'vue-router'
 import { createStore } from 'vuex'
 
 vi.mock('@/composables/desktopNotifications', () => ({
@@ -12,6 +12,22 @@ import '@/lib/auth'
 
 import { useDesktopNotifications } from '@/composables/desktopNotifications'
 import Topbar from '@/components/tops/Topbar.vue'
+
+// A memory history keeps each test's navigation out of the jsdom URL shared by
+// the whole file: with a hash history, installing the next router replays the
+// previous test's location and warns about the routes this one does not declare.
+const makeRouter = (routes = []) =>
+  createRouter({
+    history: createMemoryHistory(),
+    routes: [
+      {
+        path: '/',
+        name: 'open-productions',
+        component: { template: '<div />' }
+      },
+      ...routes
+    ]
+  })
 
 const makeStore = (getterOverrides = {}) => {
   const actions = {
@@ -103,12 +119,7 @@ describe('Topbar.vue', () => {
 
     ;({ store } = makeStore())
 
-    const router = createRouter({
-      history: createWebHashHistory(),
-      routes: [
-        { path: '/', name: 'open-productions', component: { template: '<div />' } }
-      ]
-    })
+    const router = makeRouter()
 
     wrapper = shallowMount(Topbar, {
       global: {
@@ -261,21 +272,13 @@ describe('Topbar.vue', () => {
         productionEditTaskTypes: () => [],
         productionMap: () => new Map([[production.id, production]])
       })
-      const router = createRouter({
-        history: createWebHashHistory(),
-        routes: [
-          {
-            path: '/',
-            name: 'open-productions',
-            component: { template: '<div />' }
-          },
-          {
-            path: '/productions/:production_id/episodes/:episode_id/schedule',
-            name: 'episode-schedule',
-            component: { template: '<div />' }
-          }
-        ]
-      })
+      const router = makeRouter([
+        {
+          path: '/productions/:production_id/episodes/:episode_id/schedule',
+          name: 'episode-schedule',
+          component: { template: '<div />' }
+        }
+      ])
       return shallowMount(Topbar, {
         global: {
           plugins: [scheduleStore, router],
@@ -349,21 +352,13 @@ describe('Topbar.vue', () => {
       // configureProduction resolves episodes from the loadEpisodes action,
       // not from the episodes getter: keep both in sync for the fixture.
       actions.loadEpisodes.mockResolvedValue(episodes)
-      const router = createRouter({
-        history: createWebHashHistory(),
-        routes: [
-          {
-            path: '/',
-            name: 'open-productions',
-            component: { template: '<div />' }
-          },
-          {
-            path: '/productions/:production_id/episodes/:episode_id/shots',
-            name: 'episode-shots',
-            component: { template: '<div />' }
-          }
-        ]
-      })
+      const router = makeRouter([
+        {
+          path: '/productions/:production_id/episodes/:episode_id/shots',
+          name: 'episode-shots',
+          component: { template: '<div />' }
+        }
+      ])
       return shallowMount(Topbar, {
         global: {
           plugins: [shotsStore, router],
@@ -460,21 +455,13 @@ describe('Topbar.vue', () => {
         productionEditTaskTypes: () => [],
         productionMap: () => new Map([[production.id, production]])
       })
-      const router = createRouter({
-        history: createWebHashHistory(),
-        routes: [
-          {
-            path: '/',
-            name: 'open-productions',
-            component: { template: '<div />' }
-          },
-          {
-            path: '/productions/:production_id/episodes/:episode_id/playlists',
-            name: 'episode-playlists',
-            component: { template: '<div />' }
-          }
-        ]
-      })
+      const router = makeRouter([
+        {
+          path: '/productions/:production_id/episodes/:episode_id/playlists',
+          name: 'episode-playlists',
+          component: { template: '<div />' }
+        }
+      ])
       const playlistsWrapper = shallowMount(Topbar, {
         global: {
           plugins: [playlistsStore, router],

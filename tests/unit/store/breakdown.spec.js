@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import { vi } from 'vitest'
 
 // The breakdown module pulls the assets module, which transitively imports

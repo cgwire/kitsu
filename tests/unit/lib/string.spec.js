@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import stringHelpers from '@/lib/string'
 
 describe('lib/string', () => {

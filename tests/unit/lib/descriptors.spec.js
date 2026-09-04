@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import { getMetadataFieldValue } from '@/lib/descriptors'
 
 describe('lib/descriptors', () => {
