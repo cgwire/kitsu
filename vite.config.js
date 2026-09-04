@@ -106,6 +106,9 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['vitest-localstorage-mock', 'tests/unit.setup.js'],
     mockReset: false,
+    // A fresh runner spawns per spec file, so spawn cost dominates: threads
+    // reuse the process where the default 'forks' pool pays a Node bootstrap.
+    pool: 'threads',
     isolate: true,
     // Agent worktrees under .claude/ carry their own copy of the suite;
     // without this exclude `vitest tests/unit` picks them up too.
