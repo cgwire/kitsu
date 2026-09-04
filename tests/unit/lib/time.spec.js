@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import moment from 'moment-timezone'
 import {
   addBusinessDays,

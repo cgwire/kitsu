@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import store from '@/store/modules/departments'
 
 const buildDepartments = () => [

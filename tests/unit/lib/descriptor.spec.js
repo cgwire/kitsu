@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import { getDescriptorChoicesOptions } from '@/lib/descriptors'
 
 describe('descriptors', () => {

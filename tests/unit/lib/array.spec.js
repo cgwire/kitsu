@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import {
   intersection
 } from '@/lib/array'

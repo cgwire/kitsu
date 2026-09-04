@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import moment from 'moment-timezone'
 import lang, { localeCode } from '@/lib/lang'
 import timezone from '@/lib/timezone'

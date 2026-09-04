@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import { Arrow } from '@/lib/players/arrowshape'
 
 describe('lib/players/arrowshape', () => {

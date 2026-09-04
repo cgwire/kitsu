@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import store from '@/store/modules/productions'
 import assetTypeStore from '@/store/modules/assettypes'
 import taskStatusStore from '@/store/modules/taskstatus'

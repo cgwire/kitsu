@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import { scrubFrame } from '@/lib/players/scrub'
 
 describe('lib/players/scrub', () => {

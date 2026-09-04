@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import { createStore } from 'vuex'
 
 import store from '@/store/modules/tasktypes'

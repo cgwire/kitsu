@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import { vi } from 'vitest'
 
 // Some lib imports transitively pull the root store; stub it so no Vuex

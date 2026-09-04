@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import { buildSelectionGrid, clearSelectionGrid } from '@/lib/selection'
 
 describe('selection', () => {

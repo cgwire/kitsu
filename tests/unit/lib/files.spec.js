@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import files from '@/lib/files'
 
 describe('lib/files extension sets', () => {

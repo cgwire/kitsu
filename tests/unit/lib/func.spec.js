@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import func from '@/lib/func'
 
 describe('func', () => {

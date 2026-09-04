@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import {
   ONION_MAX_OPACITY,
   ONION_MIN_OPACITY,
