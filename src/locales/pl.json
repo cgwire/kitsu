@@ -79,7 +79,7 @@
     },
     "board": {
       "title": "Tablica",
-      "empty": "Twoja tablica kanban jest obecnie pusta. Oznacza to, że w ustawieniach produkcji nie skonfigurowano statusów zadań dla Twojej roli.",
+      "empty": "Nie ma nic do pokazania na tablicy: nie masz bieżących zadań, wyszukiwanie nie zwróciło wyników albo w ustawieniach produkcji nie włączono żadnych statusów zadań dla Twojej roli.",
       "settings": {
         "title": "Status na tablicy",
         "visible": "Wyświetlany na tablicy kanban dla...",
@@ -88,8 +88,8 @@
       }
     },
     "bots": {
-      "active_bots": "aktywny bot | aktywne boty",
-      "bots": "bot | boty",
+      "active_bots": "aktywny bot | aktywnych botów",
+      "bots": "bot | botów",
       "confirm_edit": "Zapisz zmiany bota",
       "copy_token_warning": "Pamiętaj, aby skopiować poniższy token. Nie zobaczysz go ponownie.",
       "create": "Utwórz bota",
@@ -203,7 +203,7 @@
       }
     },
     "burndown": {
-      "estimations": "Szacunki",
+      "estimations": "Estymacje",
       "ideal": "Idealny",
       "projection": "Prognoza",
       "remaining_days": "Pozostałe osobodni",
@@ -572,7 +572,7 @@
       "delete_text": "Czy na pewno chcesz usunąć ten sprzęt?",
       "edit_title": "Edytuj sprzęt",
       "new_hardware_item": "Nowy sprzęt",
-      "number": "sprzęt | sprzęty",
+      "number": "sprzęt | sprzętów",
       "title": "Sprzęt",
       "fields": {
         "inventory_amount": "Ilość w magazynie",
@@ -954,7 +954,7 @@
           "title": "Opcje",
           "update": "Aktualizuj istniejące dane"
         },
-        "new_entities_confirmation": "Potwierdzam, że chcę utworzyć ten nowy wpis | Potwierdzam, że chcę utworzyć te {count} nowe wpisy",
+        "new_entities_confirmation": "Potwierdzam, że chcę utworzyć ten nowy wpis | Potwierdzam, że chcę utworzyć nowe wpisy ({count})",
         "new_entities_to_create": "{count} wiersz nie pasuje do żadnego istniejącego wpisu i zostanie utworzony jako nowy wpis: | {count} wierszy nie pasuje do żadnych istniejących wpisów i zostanie utworzonych jako nowe wpisy:"
       },
       "edl": {
@@ -1057,14 +1057,14 @@
       "publish": "Publikacja",
       "published": "opublikował(a) podgląd",
       "show_comments": "Pokaż komentarze",
-      "unread_notifications": "nieprzeczytane powiadomienie | nieprzeczytane powiadomienia",
+      "unread_notifications": "nieprzeczytane powiadomienie | nieprzeczytanych powiadomień",
       "title": "Powiadomienia",
       "watching": "obserwowane",
       "with_preview": "z podglądem"
     },
     "people": {
       "active": "Aktywni",
-      "active_persons": "aktywny użytkownik | aktywni użytkownicy",
+      "active_persons": "aktywny użytkownik | aktywnych użytkowników",
       "add_member_to_team": "Dodaj członka do zespołu",
       "confirm_edit": "Zapisz zmiany użytkownika",
       "create": "Utwórz użytkownika",
@@ -1088,7 +1088,7 @@
       "invite_link_error": "Wystąpił błąd podczas generowania linku zaproszenia",
       "new_person": "Dodaj nowego użytkownika",
       "no_task_assigned": "Nie masz przypisanych żadnych bieżących zadań",
-      "persons": "użytkownik | użytkownicy",
+      "persons": "użytkownik | użytkowników",
       "project_role": "Rola projektu",
       "seats_remaining": "brak wolnych miejsc | pozostało {count} miejsce | pozostało miejsc: {count}",
       "running_tasks": "Bieżące zadania",
@@ -1108,7 +1108,7 @@
       "change_password_error": "Wystąpił błąd podczas zmiany hasła. Sprawdź poprawność nowego hasła.",
       "disable_2FA": "Wyłącz 2FA",
       "disable_2FA_error": "Wystąpił błąd podczas wyłączania uwierzytelniania dwuskładnikowego.",
-      "self_role_downgrade_confirm": "Obniżyć własną rolę z {currentRole} na {newRole}? Natychmiast tracisz uprawnienia administratora: tworzenie produkcji i zarządzanie użytkownikami nie będzie już możliwe, a przywrócić twoją rolę może tylko inny {currentRole}.",
+      "self_role_downgrade_confirm": "Obniżyć własną rolę z {currentRole} na {newRole}? Natychmiast tracisz uprawnienia administratora: tworzenie produkcji i zarządzanie użytkownikami nie będzie już możliwe, a przywrócić Twoją rolę może tylko inny {currentRole}.",
       "fields": {
         "active": "Aktywny",
         "contract": "Umowa",
@@ -1413,7 +1413,7 @@
         "episode_span": "Odstęp między odcinkami",
         "fps": "FPS",
         "is_clients_isolated": "Izoluj komentarze klientów (niewidoczne dla innych klientów)",
-        "is_frame_in_numbering": "Rozpocznij licznik klatek odtwarzacza od klatki wejściowej",
+        "is_frame_in_numbering": "Rozpocznij licznik klatek odtwarzacza od klatki początkowej",
         "is_preview_download_allowed": "Pozwól artystom pobierać podglądy",
         "is_publish_default": "Domyślnie ustawiaj widżet komentarzy dla artystów w trybie publikacji",
         "is_set_preview_automated": "Automatycznie ustawiaj nowy podgląd jako miniaturę obiektu",
@@ -1548,7 +1548,7 @@
       },
       "two_factor_authentication": {
         "title": "Uwierzytelnianie dwuskładnikowe",
-        "description": "Uwierzytelnianie dwuskładnikowe (<abbr title=\"Two-Factor Authentication\">2FA</abbr>) dodaje dodatkową warstwę zabezpieczeń do Twojego konta. Po jego włączeniu przy każdym logowaniu oprócz hasła będzie wymagana druga forma weryfikacji. Jako drugiego składnika możesz użyć aplikacji uwierzytelniającej (<abbr title=\"Time-based One-Time Password\">TOTP</abbr>), weryfikacji e-mail (<abbr title=\"One-Time Password\">OTP</abbr>) lub sprzętowego klucza bezpieczeństwa (<abbr title=\"Fast IDentity Online\">FIDO</abbr>).",
+        "description": "Uwierzytelnianie dwuskładnikowe (<abbr title=\"Two-Factor Authentication (Uwierzytelnianie dwuskładnikowe)\">2FA</abbr>) dodaje dodatkową warstwę zabezpieczeń do Twojego konta. Po jego włączeniu przy każdym logowaniu oprócz hasła będzie wymagana druga forma weryfikacji. Jako drugiego składnika możesz użyć aplikacji uwierzytelniającej (<abbr title=\"Time-based One-Time Password (Jednorazowe hasło oparte na czasie)\">TOTP</abbr>), weryfikacji e-mail (<abbr title=\"One-Time Password (Jednorazowe hasło)\">OTP</abbr>) lub sprzętowego klucza bezpieczeństwa (<abbr title=\"Fast IDentity Online (Szybkie uwierzytelnianie tożsamości online)\">FIDO</abbr>).",
         "mandatory": "Twoja organizacja wymaga uwierzytelniania dwuskładnikowego. Włącz co najmniej jedną metodę, aby kontynuować.",
         "enabled": "Uwierzytelnianie dwuskładnikowe włączone",
         "status_enabled": "Włączone",
@@ -1646,7 +1646,7 @@
       "player_placeholder": "Tutaj zostanie wyświetlony odtwarzacz.",
       "no_preview": "Brak podglądu",
       "no_comments_yet": "Nie ma jeszcze komentarzy.",
-      "comment_placeholder": "Zostaw komentarz...",
+      "comment_placeholder": "Napisz komentarz...",
       "comments_disabled": "Komentarze dla tego linku są wyłączone.",
       "download_preview": "Pobierz podgląd",
       "identity_required": "Przed opublikowaniem musisz podać swoje imię.",
@@ -1664,7 +1664,7 @@
       "edit_title": "Edytuj status zadania",
       "library_title": "Biblioteka statusów zadań",
       "name": "status zadania",
-      "number": "status zadania | statusy zadań",
+      "number": "status zadania | statusów zadań",
       "new_task_status": "Dodaj status zadania",
       "title": "Statusy zadań",
       "title_entities": "Statusy dla obiektów",
@@ -1761,7 +1761,7 @@
         "name": "Nazwa",
         "episode": "Odc.",
         "description": "Opis",
-        "person": "Autor zmian"
+        "person": "Autor zmiany"
       }
     },
     "schedule": {
@@ -1792,7 +1792,7 @@
       "force_unassign": "Nadpisz poprzednie przypisania",
       "forced_daily_quotas": "Wymuszone normy dzienne:",
       "hours": "godz.",
-      "md": "os.dni",
+      "md": "osobodni",
       "milestone": {
         "add_milestone": "Dodaj kamień milowy na",
         "delete_milestone": "Usuń kamień milowy",
@@ -1950,7 +1950,7 @@
       "add_revision_confirm": "Dodaj pliki do publikacji",
       "all_tasks": "Wszystkie zadania",
       "auto_revision": "Przywróć automatyczny numer wersji",
-      "assign": "Przypisz do wybranego zadania | Przypisz do wybranych zadań ({nbSelectedTasks}) ",
+      "assign": "Przypisz do wybranego zadania | Przypisz do wybranych zadań ({nbSelectedTasks})",
       "assignation_disclaimer": "Jeśli na liście brakuje osób, oznacza to, że nie należą do zespołu.",
       "assign_explanation": "Wybierz osobę do przypisania...",
       "assignation_warning": "Uwaga: nie zobaczysz wyniku, ponieważ przypisania są ukryte",
@@ -1964,7 +1964,7 @@
       "change_status_to": "Zmień status zadania na:",
       "change_status": "Dodaj komentarz",
       "change_preview": "Zmień podgląd",
-      "change_priority": "Zmień priorytet wybranego zadania | Zmień priorytet wybranych zadań ({nbSelectedTasks}) ",
+      "change_priority": "Zmień priorytet wybranego zadania | Zmień priorytet wybranych zadań ({nbSelectedTasks})",
       "change_priority_to": "Nowy priorytet:",
       "change_task_status": "Zmień status wybranego zadania | Zmień status wybranych zadań ({nbSelectedTasks})",
       "clear_all_assignations": "usuń wszystkie przypisania",
@@ -2032,7 +2032,7 @@
       "late": "Status opóźnienia",
       "my_checks": "Moje sprawdzenia",
       "my_tasks": "Moje zadania",
-      "nb_selected_tasks": "wybrano {nbSelectedTasks} zadanie | wybrano {nbSelectedTasks} zadań",
+      "nb_selected_tasks": "Zaznaczono {nbSelectedTasks} zadanie | Zaznaczono {nbSelectedTasks} zadań",
       "new_revision_number": "Nowy numer wersji",
       "next": "następne zadanie",
       "no_assignation_right": "Nie masz uprawnień do zarządzania przypisaniami",
@@ -2150,14 +2150,14 @@
       "delete_text": "Czy na pewno chcesz usunąć tę licencję na oprogramowanie?",
       "edit_title": "Edytuj licencję na oprogramowanie",
       "new_software_license": "Nowa licencja na oprogramowanie",
-      "number": "licencja na oprogramowanie | licencje na oprogramowanie",
+      "number": "licencja na oprogramowanie | licencji na oprogramowanie",
       "title": "Licencje na oprogramowanie",
       "fields": {
         "extension": "Rozszerzenie",
         "name": "Nazwa",
         "monthly_cost": "Koszt miesięczny",
         "inventory_amount": "Stan magazynowy",
-        "short_name": "Skrócona nazwa",
+        "short_name": "Krótka nazwa",
         "status": "Status",
         "version": "Wersja"
       }
@@ -2186,7 +2186,7 @@
       "period": "Okres",
       "description": "Opis",
       "updated_at": "Data aktualizacji",
-      "nb_days_off": "Dzień wolny | Dni wolne",
+      "nb_days_off": "Dzień wolny | Dni wolnych",
       "no_day_off": "Brak dni wolnych w wybranym okresie.",
       "no_days_off": "Nie zarejestrowano jeszcze żadnego dnia wolnego.",
       "add": "Dodaj dzień wolny",

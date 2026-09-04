@@ -123,7 +123,7 @@
       "attachments": "Allegati",
       "attachments_to_add": "Aggiungi allegati",
       "max_retakes_error": "Non puoi più aggiungere retake su questo task.",
-      "unknown_status_error": "Lo stato attività selezionato non è più disponibile. Ricarica la pagina e riprova.",
+      "unknown_status_error": "Lo stato del task selezionato non è più disponibile. Ricarica la pagina e riprova.",
       "previews": "File di anteprima da pubblicare come nuova revisione",
       "selected_files": "File selezionati",
       "no_attachments": "Non ci sono allegati per questo commento.",
@@ -153,8 +153,8 @@
         "image_unavailable": "Immagine non disponibile",
         "play": "Riproduci",
         "pause": "Pausa",
-        "mute": "Disattiva l'audio",
-        "unmute": "Riattiva l'audio",
+        "mute": "Disattiva audio",
+        "unmute": "Riattiva audio",
         "fullscreen": "Schermo intero",
         "download": "Scarica",
         "video_unavailable": "Video non disponibile"
@@ -418,7 +418,7 @@
       "days_estimated": "giorno stimato | giorni stimati",
       "delete": "Elimina",
       "delete_all": "Elimina tutto",
-      "delete_text": "Sei sicuro di voler eliminare {name} dal database?",
+      "delete_text": "Sei sicuro di voler rimuovere {name} dal database?",
       "disable_desktop_notifications": "Disattiva le notifiche desktop",
       "documentation": "Documentazione",
       "edit": "Modifica",
@@ -574,7 +574,7 @@
       "clear_sorting": "Rimuovi l'ordinamento corrente",
       "days": "giorno | giorni",
       "drop_files_here": "Trascina qui i file",
-      "import": "Importazione",
+      "import": "Importa",
       "is_shared": "Condiviso con tutto il team",
       "no_results": "Nessun risultato",
       "link": "Link",
@@ -672,7 +672,7 @@
     },
     "notifications": {
       "desktop": {
-        "assignation_title": "{name} ti ha assegnato",
+        "assignation_title": "{name} ti ha assegnato un task",
         "banner_blocked_text": "Le notifiche desktop sono bloccate. Per attivarle, consentile nelle impostazioni del sito del tuo browser.",
         "banner_dismiss": "Non ora",
         "banner_enable": "Attiva",
@@ -849,7 +849,7 @@
       "create_for_selection": "Genera una playlist dai task selezionati",
       "create_title": "Crea playlist",
       "created_at": "Creata il:",
-      "delete_text": "Sei sicuro di voler eliminare {name} dal database?",
+      "delete_text": "Sei sicuro di voler rimuovere {name} dal database?",
       "delete_error": "Si è verificato un errore durante l'eliminazione della playlist.",
       "edit_error": "Si è verificato un errore durante il salvataggio della playlist.",
       "download_zip": "Scarica .zip",
@@ -1023,7 +1023,7 @@
       },
       "fields": {
         "fps": "FPS",
-        "is_frame_in_numbering": "Avvia il contatore dei frame del player dal frame in",
+        "is_frame_in_numbering": "Avvia il contatore dei fotogrammi del player dal fotogramma in",
         "name": "Nome",
         "ratio": "Proporzioni",
         "resolution": "Risoluzione",
@@ -1250,7 +1250,7 @@
         },
         "enabled": "Autenticazione a due fattori attivata",
         "mandatory": "La tua organizzazione richiede l'autenticazione a due fattori. Attiva almeno un metodo per continuare.",
-        "description": "L'autenticazione a due fattori (<abbr title=\"Two-Factor Authentication\">2FA</abbr>) aggiunge un ulteriore livello di sicurezza al tuo account. Quando è attivata, a ogni accesso dovrai fornire una seconda forma di verifica oltre alla password. Come secondo fattore puoi usare un'app di autenticazione (<abbr title=\"Time-based One-Time Password\">TOTP</abbr>), una verifica via email (<abbr title=\"One-Time Password\">OTP</abbr>) o una chiave di sicurezza hardware (<abbr title=\"Fast IDentity Online\">FIDO</abbr>)."
+        "description": "L'autenticazione a due fattori (<abbr title=\"Two-Factor Authentication (Autenticazione a due fattori)\">2FA</abbr>) aggiunge un ulteriore livello di sicurezza al tuo account. Quando è attivata, a ogni accesso dovrai fornire una seconda forma di verifica oltre alla password. Come secondo fattore puoi usare un'app di autenticazione (<abbr title=\"Time-based One-Time Password (Password monouso basata sul tempo)\">TOTP</abbr>), una verifica via email (<abbr title=\"One-Time Password (Password monouso)\">OTP</abbr>) o una chiave di sicurezza hardware (<abbr title=\"Fast IDentity Online (Identità rapida online)\">FIDO</abbr>)."
       }
     },
     "settings": {
@@ -1307,7 +1307,7 @@
         "name": "Nome",
         "short_name": "Nome breve",
         "is_feedback_request": "È una richiesta di feedback",
-        "is_default": "È predefinito",
+        "is_default": "Predefinito",
         "for_concept": "Per i concept",
         "description": "Descrizione",
         "is_wip": "È WIP"
@@ -1373,7 +1373,7 @@
       "apply_to_prod_confirm": "Sei sicuro di voler applicare questa versione della pianificazione alla produzione corrente? I valori attuali dei task verranno sovrascritti.",
       "apply_to_prod_error": "Si è verificato un errore durante l'applicazione della versione della pianificazione alla produzione corrente.",
       "assign": "Assegna a:",
-      "confirm_move_children": "Spostare questa barra ritaglierà o sposterà {count} sotto-elemento per adattarlo ai nuovi limiti. Continuare? | Spostare questa barra ritaglierà o sposterà {count} sotto-elementi per adattarli ai nuovi limiti. Continuare?",
+      "confirm_move_children": "Spostare questa barra ritaglierà o sposterà {count} sotto-elemento per adattarlo ai nuovi limiti. Vuoi continuare? | Spostare questa barra ritaglierà o sposterà {count} sotto-elementi per adattarli ai nuovi limiti. Vuoi continuare?",
       "create_version": "Crea una versione della pianificazione",
       "delete_version": "Elimina la versione della pianificazione",
       "delete_version_error": "Si è verificato un errore durante l'eliminazione di questa versione della pianificazione. Contatta il nostro team di supporto.",
@@ -1420,7 +1420,7 @@
       "version": "Versione",
       "versions": {
         "reference": "Previsioni di riferimento",
-        "from": "dal",
+        "from": "da",
         "locked": "bloccata",
         "canceled": "annullata"
       },
@@ -1612,7 +1612,7 @@
         "estimation": "Stima",
         "frames": "Fotogr.",
         "last_comment": "Ultimo commento",
-        "last_comment_date": "Ultimo comm.",
+        "last_comment_date": "Ultimo commento",
         "priority": "Priorità",
         "production": "Prod",
         "real_end_date": "Data di feedback",
@@ -1920,7 +1920,7 @@
     },
     "board": {
       "title": "Bacheca",
-      "empty": "La tua bacheca kanban è attualmente vuota. Significa che nessuno stato dei task è configurato per il tuo ruolo utente nelle impostazioni della produzione.",
+      "empty": "Niente da mostrare nella bacheca: non hai task in corso, la ricerca non ha dato risultati oppure nessuno stato dei task è attivato per il tuo ruolo nelle impostazioni della produzione.",
       "settings": {
         "title": "Stati della bacheca",
         "visible": "Visualizzato sulla bacheca kanban di...",
@@ -2002,7 +2002,7 @@
     },
     "studios": {
       "create_error": "Si è verificato un errore durante il salvataggio di questo studio. Sei sicuro che non esista già uno studio con un nome simile?",
-      "delete_text": "Sei sicuro di voler rimuovere {name} dal tuo database?",
+      "delete_text": "Sei sicuro di voler rimuovere {name} dal database?",
       "delete_error": "Si è verificato un errore durante l'eliminazione di questo studio.",
       "edit_title": "Modifica studio",
       "new_studios": "Aggiungi uno studio",
@@ -2124,7 +2124,7 @@
       "estimations": "Stime",
       "ideal": "Ideale",
       "projection": "Proiezione",
-      "remaining_days": "Giorni-uomo rimanenti",
+      "remaining_days": "Giorni-persona rimanenti",
       "remaining_tasks": "Task rimanenti",
       "title": "Grafico burndown"
     },

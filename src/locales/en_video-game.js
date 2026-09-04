@@ -198,7 +198,7 @@ export default {
     new_success: 'Map {name} successfully created.',
     restore_error: 'An error occurred while restoring this map.',
     sequences: 'Levels',
-    tasks: 'Map Tasks',
+    tasks: 'Map tasks',
     title: 'Maps',
     wrong_file_duration: 'One of the uploaded video file duration doesn\'t match the expected duration of the current map.',
     fields: {

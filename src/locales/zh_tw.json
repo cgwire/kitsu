@@ -57,7 +57,7 @@
         "description": "說明"
       },
       "include_all": "包括所有資產任務類型",
-      "add_asset_type_to_library": "新增資產類型到資料庫",
+      "add_asset_type_to_library": "新增資產類型到資產類型庫",
       "library_title": "資產類型庫",
       "add_asset_type_placeholder": "+ 新增資產類型"
     },
@@ -74,7 +74,7 @@
         "animate": "動畫"
       },
       "remove": {
-        "confirm": "將資產從插曲中移除",
+        "confirm": "將資產從其集數中移除",
         "error": "移除資產時發生伺服器錯誤。請再試一次。如果問題仍然存在，請聯絡我們的支援團隊。",
         "text": "如果您從選取的集數中移除此資產，則會移除所有底層鏡頭中的資產。您確定要移除它嗎？"
       },
@@ -97,11 +97,11 @@
       "empty_text": "此條評論為空",
       "edit_error": "編輯評論時發生錯誤。請聯絡我們的技術人員。",
       "error": "發佈評論時出現錯誤",
-      "no_file_attached": "未附加檔案",
+      "no_file_attached": "未附加預覽",
       "pin": "釘",
       "pinned": "釘住",
       "post_status": "發佈評論",
-      "retake": "Retake",
+      "retake": "重拍",
       "revision": "修訂",
       "set_status_to": "將狀態設為",
       "task_placeholder": "新事項...",
@@ -203,8 +203,8 @@
         "title": "篩選...",
         "union_and": "符合以下所有過濾器",
         "union_or": "符合以下過濾器",
-        "with_thumbnail": "顯示縮略圖",
-        "without_thumbnail": "關閉縮略圖",
+        "with_thumbnail": "有縮略圖",
+        "without_thumbnail": "無縮略圖",
         "department": "部門",
         "is_assets_ready": "資產準備就緒",
         "assets_ready": "準備就緒",
@@ -233,7 +233,7 @@
         "no_logs": "此實體沒有時間記錄。"
       },
       "preview_files": {
-        "extension": "擴展",
+        "extension": "副檔名",
         "no_preview_files": "此實體沒有預覽檔案。",
         "original_file_name": "原始檔案名稱",
         "position": "位置",
@@ -248,7 +248,7 @@
       "nb_selected_shots": "已選取 {nbSelectedShots} 個鏡頭 | 已選取 {nbSelectedShots} 個鏡頭",
       "nb_selected_edits": "已選取 {nbSelectedEdits} 個剪輯 | 已選取 {nbSelectedEdits} 個剪輯",
       "output_files": {
-        "extension": "擴展",
+        "extension": "副檔名",
         "name": "名稱",
         "no_output_files": "此實體沒有輸出檔案。",
         "person": "擁有者",
@@ -258,11 +258,11 @@
         "task_type": "任務類型",
         "type": "類型"
       },
-      "display_options": "顯示器設定",
+      "display_options": "顯示設定",
       "title": "實體"
     },
     "estimation": {
-      "title": "預算"
+      "title": "估算"
     },
     "episodes": {
       "all_episodes": "所有",
@@ -349,14 +349,14 @@
       "login_page": "取消",
       "redirecting": "{secondsLeft} 秒內重新導向",
       "reset_change_password": "更改密碼",
-      "reset_change_password_form_failed": "您給出的密碼有問題。請確認密碼長度大於6個字符且兩次密碼一致。",
+      "reset_change_password_form_failed": "您提供的密碼有問題。請確認密碼長度至少為 8 個字元，且兩次輸入的密碼一致。",
       "reset_change_password_failed": "更改密碼失敗。請重新執行整個步驟。",
       "reset_change_password_succeed": "您的密碼已成功更改。請返回到登入頁面來使用它。",
       "reset_change_password_title": "輸入新密碼",
       "reset_password": "重置密碼",
       "reset_password_failed": "重置密碼失敗。請查看您的E-Mail.",
       "reset_password_succeed": "已成功重置密碼。請查看您的收件箱。",
-      "reset_password_title": "進入您的電子郵件來重置密碼",
+      "reset_password_title": "輸入您的電子郵件以重設密碼",
       "title": "登入Kitsu",
       "fields": {
         "email": "E-Mail",
@@ -423,9 +423,9 @@
       "edit": "編輯",
       "empty_comment": "空評論",
       "end_date": "結束日期",
-      "files_selected": "選擇檔案",
+      "files_selected": "個檔案已選取",
       "for": "給",
-      "go_productions": "轉到製作項目",
+      "go_productions": "返回製作項目",
       "history": "歷史",
       "info": "資訊",
       "or": "或",
@@ -565,7 +565,7 @@
       "filter_group_error": "保存此過濾器群組時發生錯誤。",
       "load_more": "載入更多",
       "on": "於",
-      "optional": "選購",
+      "optional": "選填",
       "tasks": "任務",
       "week": "週",
       "clear_sorting": "清除目前的排序",
@@ -640,7 +640,7 @@
       "create_tasks": "創建任務",
       "delete_tasks": "刪除任務",
       "run_custom_action": "執行自定義操作",
-      "set_estimations": "設定預算",
+      "set_estimations": "設定預估",
       "delete_assets": "刪除資產",
       "delete_shots": "刪除鏡頭",
       "delete_edits": "刪除剪輯",
@@ -672,9 +672,9 @@
     },
     "notifications": {
       "and_change_status": "將狀態更改為",
-      "assigned_you": "分配給你",
+      "assigned_you": "將此任務指派給您",
       "commented_on": "已評論",
-      "mention_you_on": "在評論中提到你",
+      "mention_you_on": "在評論中提到您",
       "no_notifications": "目前沒有關於您當前項目的通知。",
       "unread_notifications": "未讀通知 | 未讀通知",
       "title": "通知",
@@ -682,7 +682,7 @@
       "replied_on": "回覆評論",
       "all_types": "所有類型",
       "new_revision": "新修訂版本已發佈",
-      "only_assignations": "僅任務",
+      "only_assignations": "僅指派",
       "only_comments": "只有評論",
       "only_mentions": "僅提及",
       "only_replies": "僅回覆",
@@ -731,7 +731,7 @@
       "delete_error": "刪除此人員時出現錯誤。很可能存在有連接至其的數據。您確定此人員沒有分配任務或是沒寫評論嗎？",
       "delete_text": "您確定要從您的資料庫移除{personName}嗎？所有相關的評論和預覽也將被刪除。請在下方輸入完整的使用者名稱以確認。",
       "edit_title": "編輯人員",
-      "empty_team": "項目團隊里沒有所列人員。",
+      "empty_team": "製作團隊中沒有列出任何人員。",
       "global_role": "全域角色：{role}",
       "invite": "發送邀請",
       "invite_error": "發送邀請時發生錯誤",
@@ -771,7 +771,7 @@
         "name": "名稱",
         "email": "E-Mail",
         "phone": "電話",
-        "role": "職位",
+        "role": "職責",
         "active": "活動",
         "departments": "部門",
         "contract": "合約",
@@ -869,7 +869,7 @@
       "no_shot_for_production": "此製作項目沒有鏡頭",
       "select_shot": "請從右列中選擇鏡頭",
       "select_playlist": "請從左列中選擇播放列表",
-      "select_task_type": "更改所有鏡頭的任務類型",
+      "select_task_type": "更改所有實體的任務類型",
       "title": "播放列表",
       "updated_at": "更新時間：",
       "remove": "移除",
@@ -1006,7 +1006,7 @@
     "productions": {
       "current": "所選製作項目",
       "delete_text": "您確定要從資料庫中刪除{name}嗎？請在文本字段中輸入要刪除的項目的名稱，以進行確認。",
-      "delete_error": "刪除此製作項目時出現錯誤。很可能存在有連接至此的數據。您確定沒有任務，鏡頭或資產連接至此製作項目嗎？",
+      "delete_error": "刪除此製作項目時發生錯誤。目前可能有資料連結至此。您確定沒有任務、鏡頭或資產連結至此製作項目嗎？Kitsu 不允許刪除製作項目。如果您不想再看到此製作項目，可以改為將它關閉。",
       "edit_title": "編輯製作項目",
       "new_production": "新增製作項目",
       "number": "製作項目 | 製作項目",
@@ -1017,7 +1017,7 @@
         "create_new": "創建新製作項目",
         "empty": "您什麼製作項目也沒開啟。要創建一個新的嗎？",
         "no_task": "還沒有任務分配給您。您可以去向主管反應！",
-        "no_prod_for_client": "您無權訪問任何製作項目。請聯絡您的主管獲取訪問權限。",
+        "no_prod_for_client": "您無權存取任何製作項目。請聯絡您的網站管理員以取得存取權限。",
         "title": "我的製作項目",
         "welcome": "歡迎使用Kitsu"
       },
@@ -1233,7 +1233,7 @@
           "title": "恢復代碼",
           "button_new": "取得新的復原代碼",
           "button_validate": "驗證並取得新的復原碼",
-          "warning": "將您的復原密碼存放在安全的地方。如果您遺失了密碼和第二要素，這些代碼是您存取帳戶的最後手段。如果您找不到這些代碼，您將無法存取您的帳戶。",
+          "warning": "請將您的復原碼存放在安全的地方。如果您遺失了密碼和第二驗證因素，這些復原碼是您存取帳戶的最後手段。如果您找不到這些復原碼，您將無法存取您的帳戶。",
           "error_new": "產生新的復原碼時發生錯誤"
         },
         "fido": {
@@ -1247,7 +1247,7 @@
         },
         "enabled": "啟用雙重認證",
         "mandatory": "您的組織需要雙因素驗證。請啟用至少一種方法以繼續。",
-        "description": "雙因素驗證 (<abbr title=\"雙因素驗證\">2FA</abbr>) 為您的帳戶增加了一層額外的安全性。啟用後，您每次登入時，除了密碼之外，還需要提供第二種驗證方式。您可以使用驗證器應用程式 (<abbr title=\"基於時間的一次性密碼\">TOTP</abbr>)、電子郵件驗證 (<abbr title=\"一次性密碼\">OTP</abbr>) 或硬件安全鑰匙 (<abbr title=\"快速身份在線\">FIDO</abbr>) 作為您的第二個因素。",
+        "description": "雙因素驗證 (<abbr title=\"Two-Factor Authentication (雙因素認證)\">2FA</abbr>) 為您的帳戶增加了一層額外的安全性。啟用後，您每次登入時，除了密碼之外，還需要提供第二種驗證方式。您可以使用驗證器應用程式 (<abbr title=\"Time-based One-Time Password (時間型一次性密碼)\">TOTP</abbr>)、電子郵件驗證 (<abbr title=\"One-Time Password (一次性密碼)\">OTP</abbr>) 或硬體安全金鑰 (<abbr title=\"Fast IDentity Online (線上快速身分驗證)\">FIDO</abbr>) 作為您的第二個因素。",
         "status_disabled": "已停用",
         "status_enabled": "已啟用"
       },
@@ -1255,7 +1255,7 @@
     },
     "settings": {
       "change_logo": "更改Logo",
-      "integrations": "Integrations",
+      "integrations": "整合",
       "logo": "公司Logo",
       "no_logo": "沒有設置Logo",
       "set_logo": "設置公司Logo",
@@ -1273,7 +1273,7 @@
         "dark_theme_by_default": "預設使用深色主題"
       },
       "production": {
-        "empty_list": "該列表當前為空。這意味着用戶可以使用主設置中的所有數據。新增一些條目以限制此製作項目的選擇。",
+        "empty_list": "此清單目前是空的。這表示使用者可以使用主要設定中的所有資料。新增一些項目以限制此製作項目的選擇。",
         "empty_automation_list": "本製作沒有自動化設定。",
         "empty_backgrounds": "沒有連結的背景。請從上方清單中選擇一個以新增。",
         "empty_board": "請先新增任務狀態，以設定其在看板上的可見性。",
@@ -1300,7 +1300,7 @@
       "title": "任務狀態",
       "fields": {
         "color": "顏色",
-        "is_artist_allowed": "Artist允許",
+        "is_artist_allowed": "藝術家允許",
         "is_client_allowed": "客戶允許",
         "is_done": "已完成",
         "is_retake": "具有重拍值",
@@ -1318,7 +1318,7 @@
       "help": {
         "entities": "資產、鏡頭、序列..."
       },
-      "add_task_status_to_library": "在資料庫中新增任務狀態",
+      "add_task_status_to_library": "在任務狀態庫中新增任務狀態",
       "library_title": "任務狀態庫",
       "add_task_status_placeholder": "+ 新增任務狀態"
     },
@@ -1343,7 +1343,7 @@
       "no_task_types": "此實體類型沒有任務類型",
       "add_task_type_placeholder": "+ 新增任務類型",
       "select_task_type": "選擇任務類型...",
-      "add_task_type_to_library": "新增任務類型到資料庫",
+      "add_task_type_to_library": "新增任務類型到任務類型庫",
       "library_title": "任務類型庫"
     },
     "sequences": {
@@ -1409,7 +1409,7 @@
       "mode_real": "真實",
       "new_version": "新版本",
       "no_assignee": "無可指派人員",
-      "no_entity": "無可轉讓實體",
+      "no_entity": "無可指派的實體",
       "overall_man_days": "人日",
       "reset_list": "重設清單",
       "select_task_type": "選擇任務類型",
@@ -1444,7 +1444,7 @@
       "type_label": "類型",
       "export_quotas": "匯出配額",
       "highlight_quotas": "強調以下配額：",
-      "weight": "重量",
+      "weight": "權重",
       "count": "計數",
       "compute_mode": "計算模式",
       "day": "日",
@@ -1497,13 +1497,13 @@
         "frame_in": "入鏡",
         "frame_out": "出鏡",
         "fps": "FPS",
-        "name": "鏡頭",
+        "name": "名稱",
         "production": "製作項目",
         "sequence": "序列",
         "start": "起始",
         "step": "步進",
         "time_spent": "時長",
-        "person": "修改器",
+        "person": "修改者",
         "max_retakes": "Max Rtks",
         "resolution": "解析度",
         "placeholder": "SH01",
@@ -1566,7 +1566,7 @@
       "delete_all_text": "您確定要刪除所有給定{name}的任務嗎？請通過在文本字段輸入您想要刪除的那些任務的任務類型名稱來確認。",
       "delete_all_error": "刪除所有給定任務類型的任務失敗。",
       "delete_error": "刪除任務時出現錯誤。",
-      "delete_comment": "您確定要刪除最新評論嗎？",
+      "delete_comment": "您確定要刪除評論嗎？",
       "delete_comment_error": "刪除評論時出現錯誤",
       "delete_for_selection": "刪除所選的任務 | 刪除所選的 {nbSelectedTasks} 個任務",
       "delete_preview": "您確定要刪除此預覽圖嗎？",
@@ -1668,7 +1668,7 @@
       "add_revision_confirm": "新增要發佈的檔案",
       "confirm_attachments": "將檔案新增為附件",
       "change_status": "發表評論",
-      "clear_own_assignations": "清除您的作業",
+      "clear_own_assignations": "清除您的任務分配",
       "publish": "發表",
       "all": "所有任務",
       "assign_explanation": "選擇一個人來指派...",
@@ -1834,7 +1834,7 @@
         "name": "名稱",
         "episode": "集數",
         "description": "說明",
-        "person": "修改器"
+        "person": "修改者"
       },
       "tasks": "任務",
       "cancel_text": "您確定要將 {name} 存檔嗎？",
@@ -1920,7 +1920,7 @@
     },
     "board": {
       "title": "看板",
-      "empty": "您的看板目前是空的。這表示在生產設定中沒有為您的使用者角色設定任務狀態。",
+      "empty": "看板上沒有可顯示的內容：您沒有進行中的任務、搜尋沒有結果，或是在製作項目設定中未為您的角色啟用任何任務狀態。",
       "settings": {
         "title": "看板狀態",
         "visible": "顯示在...",
@@ -1937,7 +1937,7 @@
       "edit_avatar_error": "更新機器人頭像時發生錯誤。",
       "new_token_title": "{name} 的新 API 令牌",
       "new_token_warning": "如果您產生新的令牌，舊的令牌將會停用。",
-      "generate": "產生新的標記",
+      "generate": "產生新的令牌",
       "copy_token_warning": "請務必複製下面的令牌。您將無法再次看到它。",
       "token_copied": "令牌複製到剪貼簿！",
       "fields": {
@@ -2037,17 +2037,17 @@
       "import_from_assets": "從選取的生產和資產類型匯入資產",
       "import_from_list": "從清單中匯入選取的資產",
       "import_from_production": "匯入選定生產的所有資產",
-      "manage": "將資產加入您的資料庫",
+      "manage": "將資產加入您的資產庫",
       "no_entities": "無實體可用",
-      "no_open_productions": "無公開製作",
+      "no_open_productions": "沒有已開啟的製作項目",
       "no_shared_assets": "沒有可用的共用資產",
-      "remove_selected_assets": "從資料庫移除選取的資產 | 從資料庫移除 {nbSelectedAssets} 選取的資產",
+      "remove_selected_assets": "從資產庫移除選取的資產 | 從資產庫移除選取的 {nbSelectedAssets} 個資產",
       "select_asset_type": "選擇資產類型",
       "select_production": "選擇生產",
-      "selected_assets": "精選資產",
+      "selected_assets": "選取的資產",
       "fields": {
         "name": "名稱",
-        "production": "生產",
+        "production": "製作項目",
         "created_at": "建立日期",
         "updated_at": "更新日期"
       }
