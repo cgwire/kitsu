@@ -46,6 +46,7 @@ import {
   CLEAR_ASSETS,
   LOAD_ASSETS_START,
   LOAD_ASSETS_ERROR,
+  MARK_ASSETS_PARTIAL,
   LOAD_ASSETS_END,
   SORT_VALIDATION_COLUMNS,
   EDIT_ASSET_END,
@@ -570,14 +571,12 @@ const actions = {
         // Displayed when its refresh started and gone since: deleted, or
         // dropped by a list load whose own response decides.
         if (displayedAsset) return
-        if (
-          !onlyInScope ||
-          isEpisodeInLoadedScope(
-            state.assetsLoadingKey,
-            asset.episode_id || asset.source_id || null,
-            asset.project_id
-          )
-        ) {
+        const isInLoadedScope = isEpisodeInLoadedScope(
+          state.assetsLoadingKey,
+          asset.episode_id || asset.source_id || null,
+          asset.project_id
+        )
+        if (!onlyInScope || isInLoadedScope) {
           asset.tasks.forEach(task => {
             commit(NEW_TASK_END, { task })
           })
@@ -590,6 +589,9 @@ const actions = {
             personMap,
             production
           })
+          // A detail page loads its asset whatever the list holds: holding more
+          // than its recorded scope, the list must be refetched by its pages.
+          if (!isInLoadedScope) commit(MARK_ASSETS_PARTIAL)
         }
         return asset
       })
@@ -1020,6 +1022,12 @@ const mutations = {
     state.assetSearchFilterGroups = []
 
     state.selectedAssets = new Map()
+  },
+
+  [MARK_ASSETS_PARTIAL](state) {
+    if (state.assetsLoadingKey && !state.assetsLoadingKey.includes('#')) {
+      state.assetsLoadingKey = `${state.assetsLoadingKey}#partial`
+    }
   },
 
   [LOAD_ASSETS_ERROR](state) {

@@ -46,6 +46,7 @@ import {
   LOAD_SHOTS_ERROR,
   LOAD_SHOTS_END,
   END_SHOTS_LOADING,
+  MARK_SHOTS_PARTIAL,
   SORT_VALIDATION_COLUMNS,
   SET_CURRENT_EPISODE,
   LOAD_SHOT_END,
@@ -543,14 +544,12 @@ const actions = {
         // Displayed when its refresh started and gone since: deleted, or
         // dropped by a list load whose own response decides.
         if (displayedShot) return
-        if (
-          !onlyInScope ||
-          isEpisodeInLoadedScope(
-            state.shotsLoadingKey,
-            shot.episode_id,
-            shot.project_id
-          )
-        ) {
+        const isInLoadedScope = isEpisodeInLoadedScope(
+          state.shotsLoadingKey,
+          shot.episode_id,
+          shot.project_id
+        )
+        if (!onlyInScope || isInLoadedScope) {
           shot.tasks.forEach(task => {
             commit(NEW_TASK_END, { task })
           })
@@ -563,6 +562,9 @@ const actions = {
             production,
             shot
           })
+          // A detail page loads its shot whatever the list holds: holding more
+          // than its recorded scope, the list must be refetched by its pages.
+          if (!isInLoadedScope) commit(MARK_SHOTS_PARTIAL)
         }
       })
       .catch(err => console.error(err))
@@ -1071,6 +1073,12 @@ const mutations = {
   [END_SHOTS_LOADING](state) {
     state.isShotsLoading = false
     state.shotsLoadingKey = null
+  },
+
+  [MARK_SHOTS_PARTIAL](state) {
+    if (state.shotsLoadingKey && !state.shotsLoadingKey.includes('#')) {
+      state.shotsLoadingKey = `${state.shotsLoadingKey}#partial`
+    }
   },
 
   [SAVE_SHOT_SEARCH_END](state, { searchQuery }) {

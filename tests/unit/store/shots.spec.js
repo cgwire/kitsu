@@ -512,6 +512,18 @@ describe('Shots store, loadShot live insertion', () => {
     expect(types).toContain('ADD_SHOT')
   })
 
+  // The list pages adopt the dataset on its recorded scope: they must refetch
+  // it rather than show a row of another episode.
+  test('marks the list partial for a shot loaded by id out of its scope', async () => {
+    expect(
+      await committedTypes('sh-other', 'p-live/ep-a', {
+        id: 'sh-other',
+        episode_id: 'ep-b',
+        project_id: 'p-live'
+      })
+    ).toContain('MARK_SHOTS_PARTIAL')
+  })
+
   // An update then a deletion within one round trip: the refresh must not
   // bring back the row the deletion removed.
   test('keeps out a displayed shot deleted during its refresh', async () => {
@@ -675,5 +687,18 @@ describe('Shots store, UPDATE_SHOT', () => {
       name: 'new',
       tasks: ['t1']
     })
+  })
+})
+
+describe('Shots store, MARK_SHOTS_PARTIAL', () => {
+  test('marks the recorded scope once, and nothing when none is recorded', () => {
+    const state = { shotsLoadingKey: 'p1/ep-a' }
+    shotsStore.mutations.MARK_SHOTS_PARTIAL(state)
+    shotsStore.mutations.MARK_SHOTS_PARTIAL(state)
+    expect(state.shotsLoadingKey).toBe('p1/ep-a#partial')
+
+    const empty = { shotsLoadingKey: null }
+    shotsStore.mutations.MARK_SHOTS_PARTIAL(empty)
+    expect(empty.shotsLoadingKey).toBeNull()
   })
 })

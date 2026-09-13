@@ -713,6 +713,16 @@ describe('Assets store, loadAsset live insertion', () => {
 
   // An update then a deletion within one round trip: the refresh must not
   // bring back the row the deletion removed.
+  test('marks the list partial for an asset loaded by id out of its scope', async () => {
+    expect(
+      await committedTypes('a-other', 'p1/ep-a', {
+        id: 'a-other',
+        episode_id: 'ep-b',
+        project_id: 'p1'
+      })
+    ).toContain('MARK_ASSETS_PARTIAL')
+  })
+
   test('keeps out a displayed asset deleted during its refresh', async () => {
     assetsStore.cache.assetMap.set('a-gone', { id: 'a-gone' })
     vi.spyOn(assetsApi, 'getAsset').mockImplementation(async () => {
