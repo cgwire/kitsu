@@ -330,6 +330,13 @@ import TopbarSectionList from '@/components/tops/TopbarSectionList.vue'
 import NotificationBell from '@/components/widgets/NotificationBell.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 
+// Pages about one episode: no other episode can stand in for a missing one.
+const EPISODE_PAGE_ROUTES = [
+  'episode',
+  'episode-episode-task',
+  'episode-episode-task-preview'
+]
+
 export default {
   name: 'topbar',
 
@@ -854,6 +861,13 @@ export default {
             const routeEpisodeId = this.$route.params.episode_id
             const query = this.$route.query
             this.currentProjectSection = this.getCurrentSectionFromRoute()
+            if (
+              EPISODE_PAGE_ROUTES.includes(this.$route.name) &&
+              !this.isKnownEpisode(routeEpisodeId)
+            ) {
+              this.redirectToKnownEpisode()
+              return
+            }
             if (this.currentProjectSection === 'assets') {
               const isValidEpisode =
                 this.keepsPseudoEpisode(
@@ -978,9 +992,10 @@ export default {
     // must not reach the store: SET_CURRENT_EPISODE cannot resolve the id,
     // the combobox goes blank and a mounted page keeps the list it had.
     redirectToKnownEpisode() {
-      // The detail page of an episode the production lost has no stand-in:
-      // another episode's casting under the same URL shape would mislead.
-      if (this.$route.name === 'episode') {
+      // The pages of an episode the production lost, its detail page and its
+      // own tasks, have no stand-in: another episode under the same URL shape
+      // would mislead.
+      if (EPISODE_PAGE_ROUTES.includes(this.$route.name)) {
         this.$router
           .replace({
             name: 'episodes',

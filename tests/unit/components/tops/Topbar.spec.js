@@ -773,6 +773,25 @@ describe('Topbar.vue', () => {
         wrapper.unmount()
       })
 
+      // A direct link to a task of an episode the production does not have
+      // lands through configureProduction: no stand-in episode there either.
+      it('leaves a stale episode task link for the list', async () => {
+        const { wrapper, replaceSpy, route } = mountFor('shots', 'episode-1')
+        replaceSpy.mockClear()
+        route.name = 'episode-episode-task'
+        route.path = '/productions/production-1/episodes/ghost/tasks/task-1'
+        route.params.episode_id = 'ghost'
+
+        await wrapper.vm.configureProduction('production-1')
+        await flushPromises()
+
+        expect(replaceSpy).toHaveBeenCalledWith({
+          name: 'episodes',
+          params: { production_id: 'production-1' }
+        })
+        wrapper.unmount()
+      })
+
       // The list also changes on a production switch, while the route still
       // carries the episode of the production left: the store resolves
       // another episode then, and configureProduction moves the route.
