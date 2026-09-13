@@ -59,6 +59,10 @@ const initialState = {
 }
 const state = { ...initialState }
 
+// Casting responses land in selection order only by chance: the request
+// started last owns the rows on screen.
+let castingRequest = 0
+
 const getters = {
   breakdownSearchFilterGroups: state => state.breakdownSearchFilterGroups,
   breakdownSearchQueries: state => state.breakdownSearchQueries,
@@ -86,10 +90,13 @@ const actions = {
       (a, b) => a.name.localeCompare(b.name, undefined, { numeric: true })
     )
     commit(CASTING_SET_FOR_EPISODES, episodes)
+    const request = ++castingRequest
     return breakdownApi
       .getProductionEpisodesCasting(production.id)
       .then(casting => {
-        commit(CASTING_SET_CASTING, { casting, production })
+        if (request === castingRequest) {
+          commit(CASTING_SET_CASTING, { casting, production })
+        }
       })
   },
 
@@ -107,10 +114,13 @@ const actions = {
     )
     commit(CASTING_SET_SEQUENCE, sequenceId)
     commit(CASTING_SET_SHOTS, shots)
+    const request = ++castingRequest
     return breakdownApi
       .getSequenceCasting(production.id, sequenceId, episodeId)
       .then(casting => {
-        commit(CASTING_SET_CASTING, { casting, production })
+        if (request === castingRequest) {
+          commit(CASTING_SET_CASTING, { casting, production })
+        }
       })
   },
 
@@ -131,10 +141,13 @@ const actions = {
       )
     commit(CASTING_SET_ASSET_TYPE, assetTypeId)
     commit(CASTING_SET_ASSETS, assets)
+    const request = ++castingRequest
     return breakdownApi
       .getAssetTypeCasting(production.id, assetTypeId)
       .then(casting => {
-        commit(CASTING_SET_CASTING, { casting, production })
+        if (request === castingRequest) {
+          commit(CASTING_SET_CASTING, { casting, production })
+        }
       })
   },
 

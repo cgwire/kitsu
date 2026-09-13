@@ -39,6 +39,40 @@ describe('Breakdown store', () => {
     })
   })
 
+  describe('casting responses', () => {
+    // The rows on screen belong to the last sequence picked: an earlier
+    // response landing after would show them empty, and an asset added
+    // then would overwrite their real count on the server.
+    test('keeps the casting of the last sequence picked', async () => {
+      let endFirst
+      vi.spyOn(breakdownApi, 'getSequenceCasting')
+        .mockImplementationOnce(
+          () =>
+            new Promise(resolve => {
+              endFirst = resolve
+            })
+        )
+        .mockResolvedValueOnce({ 'shot-b': [] })
+      const commit = vi.fn()
+      const context = {
+        commit,
+        rootGetters: { ...rootGetters, currentEpisode: null }
+      }
+
+      const first = breakdownStore.actions.setCastingSequence(context, 'seq-a')
+      await breakdownStore.actions.setCastingSequence(context, 'seq-b')
+      endFirst({ 'shot-a': [] })
+      await first
+
+      const castings = commit.mock.calls.filter(
+        ([type]) => type === 'CASTING_SET_CASTING'
+      )
+      expect(castings.map(([, { casting }]) => casting)).toEqual([
+        { 'shot-b': [] }
+      ])
+    })
+  })
+
   describe('uncastAsset', () => {
     test('removes the asset from the entity with a zero count', async () => {
       const castAsset = vi.spyOn(breakdownApi, 'castAsset').mockResolvedValue({})
