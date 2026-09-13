@@ -216,6 +216,27 @@ describe('Assets store', () => {
       // ...and must leave the loading flag to the newer load (reset by CLEAR).
       expect(state.isAssetsLoading).toBe(true)
     })
+
+    // Its flag raised for the production left, no response would ever lower
+    // it, and every later load would queue behind it in a loop.
+    test('gives up when the production changed while it waited for the episodes', async () => {
+      const state = { isAssetsLoading: false, isAssetsLoadingError: false }
+      const commit = realCommit(state)
+      const rootGetters = { ...baseRootGetters(), isTVShow: true }
+      const dispatch = vi.fn(async () => {
+        rootGetters.currentProduction = { id: 'p2' }
+      })
+
+      const result = await assetsStore.actions.loadAssets({
+        commit,
+        dispatch,
+        state,
+        rootGetters
+      })
+
+      expect(result).toEqual([])
+      expect(commit).not.toHaveBeenCalled()
+    })
   })
 
   describe('cache.result aliasing on creation', () => {

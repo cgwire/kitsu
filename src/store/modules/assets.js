@@ -422,6 +422,9 @@ const actions = {
       // first, then pick the first one.
       if (rootGetters.episodes.length === 0) {
         await dispatch('loadEpisodes')
+        // A production switched during the fetch: the load would start for
+        // the production left, over the stores of the new one.
+        if (rootGetters.currentProduction?.id !== production.id) return []
         // loadEpisodes may resolve currentEpisode from the route (e.g. "all").
         episode = rootGetters.currentEpisode
       }
