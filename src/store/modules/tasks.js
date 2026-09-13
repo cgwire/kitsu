@@ -1103,12 +1103,18 @@ const mutations = {
     state.taskComments[task.id] = undefined
     state.taskPreviews[task.id] = undefined
     state.taskMap.delete(task.id)
-    const validationKey = `${task.entity_id}-${task.task_type_id}`
-    state.selectedValidations.set(validationKey, {
-      entity: { id: task.entity_id },
-      column: { id: task.task_type_id }
-    })
-    state.selectedTasks.delete(task.id)
+    // A selected task leaves its empty cell selected in its place. Any other
+    // deletion, a colleague's included, must not plant a selection: the next
+    // task creation would recreate the deleted task from it.
+    if (state.selectedTasks.delete(task.id)) {
+      const validationKey = `${task.entity_id}-${task.task_type_id}`
+      state.selectedValidations.set(validationKey, {
+        entity: { id: task.entity_id },
+        column: { id: task.task_type_id }
+      })
+      state.nbSelectedTasks = state.selectedTasks.size
+      state.nbSelectedValidations = state.selectedValidations.size
+    }
   },
 
   [DELETE_COMMENT_END](
