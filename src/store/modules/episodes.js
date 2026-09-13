@@ -667,6 +667,13 @@ const mutations = {
     })
     episodes = sortByName(episodes)
 
+    // The topbar may list an episode added live during the fetch: keep it
+    // resolvable, or choosing it sets no current episode.
+    state.episodes.forEach(episode => {
+      if (!cache.episodeMap.has(episode.id)) {
+        cache.episodeMap.set(episode.id, episode)
+      }
+    })
     cache.episodes = episodes
     cache.result = episodes
     cache.episodeIndex = buildEpisodeIndex(episodes)
@@ -822,6 +829,12 @@ const mutations = {
     const responseIds = new Set(episodes.map(({ id }) => id))
     const liveEpisodes = state.episodes.filter(({ id }) => !responseIds.has(id))
     episodes = episodes.concat(liveEpisodes)
+    // The Episodes page may have loaded them with their tasks first: keep
+    // those rows, refreshed, rather than plain ones without task columns.
+    episodes = episodes.map(episode => {
+      const loaded = cache.episodeMap.get(episode.id)
+      return loaded?.validations ? Object.assign(loaded, episode) : episode
+    })
     state.isEpisodeListLoaded = true
     cache.episodeMap.clear()
     episodes.forEach(episode => {

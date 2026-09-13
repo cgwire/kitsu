@@ -423,3 +423,57 @@ describe('Episodes store, CREATE_TASKS_END', () => {
     expect(episode.tasks).toEqual(['t-live'])
   })
 })
+
+describe('Episodes store, lists loaded with and without tasks', () => {
+  afterEach(() => {
+    episodesStore.cache.episodeMap.clear()
+  })
+
+  // The plain list of the topbar can land after the Episodes page loaded the
+  // same episodes with their tasks: the rows must keep their task columns.
+  test('keeps the task columns of rows loaded with tasks', () => {
+    const validations = new Map([['tt1', 't1']])
+    episodesStore.cache.episodeMap.set('ep-a', {
+      id: 'ep-a',
+      name: 'E01',
+      validations
+    })
+    const state = {
+      episodes: [],
+      displayedEpisodes: [],
+      isEpisodeListLoaded: false,
+      currentEpisode: null
+    }
+
+    episodesStore.mutations.LOAD_EPISODES_END(state, {
+      episodes: [{ id: 'ep-a', name: 'E01 renamed', status: 'running' }],
+      routeEpisodeId: 'ep-a'
+    })
+
+    expect(state.displayedEpisodes[0].validations).toBe(validations)
+    expect(state.displayedEpisodes[0].name).toBe('E01 renamed')
+  })
+
+  // An episode added live while the Episodes page loaded with tasks stays
+  // resolvable for the topbar selector.
+  test('keeps an episode added live during a load with tasks', () => {
+    const live = { id: 'ep-live', name: 'E02' }
+    const state = {
+      episodes: [live],
+      displayedEpisodes: [],
+      episodeValidationColumns: []
+    }
+
+    episodesStore.mutations.SET_EPISODES_WITH_TASKS(state, {
+      production: { id: 'p1', name: 'P1' },
+      episodes: [],
+      userFilters: {},
+      taskMap: new Map(),
+      taskTypeMap: new Map(),
+      personMap: new Map(),
+      taskStatusMap: new Map()
+    })
+
+    expect(episodesStore.cache.episodeMap.get('ep-live')).toBe(live)
+  })
+})
