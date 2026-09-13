@@ -737,6 +737,23 @@ describe('Topbar.vue', () => {
       wrapper.unmount()
     })
 
+    // Back to the assets page of another production, a search result or a
+    // production card: a valid episode of the production survives a switch.
+    it('keeps an episode of the production on the assets page after a switch', async () => {
+      const { wrapper, replaceSpy } = mountFor('assets', 'episode-2')
+      replaceSpy.mockClear()
+      wrapper.vm.hasConfiguredProduction = true
+
+      await wrapper.vm.configureProduction('production-1')
+      await flushPromises()
+
+      expect(replaceSpy).toHaveBeenCalledWith({
+        params: { production_id: 'production-1', episode_id: 'episode-2' },
+        query: { search: 'hero' }
+      })
+      wrapper.unmount()
+    })
+
     // The team page has no episode: the section links reopen the episode of
     // the store instead of all.
     it('keeps the episode of the store on a page without episode', () => {

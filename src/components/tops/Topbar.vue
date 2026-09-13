@@ -876,16 +876,22 @@ export default {
               return
             }
             if (this.currentProjectSection === 'assets') {
-              const isValidEpisode =
+              // An episode of this production is kept on any load: a switch
+              // through the production list carries an episode of the one
+              // left. That switch carries pseudo-episodes too, which only a
+              // first load keeps.
+              const isOwnEpisode = this.episodes.some(
+                ({ id }) => id === routeEpisodeId
+              )
+              const isKeptPseudoEpisode =
+                isInitialLoad &&
                 this.keepsPseudoEpisode(
                   'assets',
                   routeEpisodeId,
                   this.$route.params.plugin_id
-                ) || this.episodes.some(({ id }) => id === routeEpisodeId)
+                )
               this.currentEpisodeId =
-                isInitialLoad && routeEpisodeId && isValidEpisode
-                  ? routeEpisodeId
-                  : 'all'
+                isOwnEpisode || isKeptPseudoEpisode ? routeEpisodeId : 'all'
             } else if (
               this.keepsPseudoEpisode(
                 this.currentProjectSection,
