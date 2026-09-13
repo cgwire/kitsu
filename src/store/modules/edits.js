@@ -408,8 +408,8 @@ const actions = {
   loadEdit({ commit, state, rootGetters }, payload) {
     const { editId, onlyInScope = false } =
       typeof payload === 'string' ? { editId: payload } : payload
-    const edit = cache.editMap.get(editId)
-    if (edit?.lock) return
+    const displayedEdit = cache.editMap.get(editId)
+    if (displayedEdit?.lock) return
 
     const personMap = rootGetters.personMap
     const production = rootGetters.currentProduction
@@ -421,7 +421,7 @@ const actions = {
     // displayed edit is refreshed now: waiting would apply this payload
     // after a younger response and undo it.
     const listSettled =
-      (!edit && state.isEditsLoading && cache.editsLoadingPromise) ||
+      (!displayedEdit && state.isEditsLoading && cache.editsLoadingPromise) ||
       Promise.resolve()
     return listSettled
       .then(() => editsApi.getEdit(editId))
@@ -430,6 +430,9 @@ const actions = {
           commit(UPDATE_EDIT, edit)
           return
         }
+        // Displayed when its refresh started and gone since: deleted, or
+        // dropped by a list load whose own response decides.
+        if (displayedEdit) return
         if (
           !onlyInScope ||
           isEpisodeInLoadedScope(

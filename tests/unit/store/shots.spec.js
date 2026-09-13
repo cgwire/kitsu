@@ -511,6 +511,29 @@ describe('Shots store, loadShot live insertion', () => {
     })
     expect(types).toContain('ADD_SHOT')
   })
+
+  // An update then a deletion within one round trip: the refresh must not
+  // bring back the row the deletion removed.
+  test('keeps out a displayed shot deleted during its refresh', async () => {
+    shotsStore.cache.shotMap.set('sh-gone', { id: 'sh-gone' })
+    vi.spyOn(shotsApi, 'getShot').mockImplementation(async () => {
+      shotsStore.cache.shotMap.delete('sh-gone')
+      return {
+        id: 'sh-gone',
+        episode_id: 'ep-a',
+        project_id: 'p-live',
+        tasks: []
+      }
+    })
+    const commit = vi.fn()
+
+    await shotsStore.actions.loadShot(
+      { commit, state: { shotsLoadingKey: 'p-live/ep-a' }, rootGetters },
+      { shotId: 'sh-gone', onlyInScope: true }
+    )
+
+    expect(commit).not.toHaveBeenCalled()
+  })
 })
 
 describe('Shots store, live insertion during a list load', () => {

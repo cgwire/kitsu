@@ -515,8 +515,8 @@ const actions = {
   loadShot({ commit, state, rootGetters }, payload) {
     const { shotId, onlyInScope = false } =
       typeof payload === 'string' ? { shotId: payload } : payload
-    const shot = cache.shotMap.get(shotId)
-    if (shot?.lock) return
+    const displayedShot = cache.shotMap.get(shotId)
+    if (displayedShot?.lock) return
 
     const personMap = rootGetters.personMap
     const production = rootGetters.currentProduction
@@ -531,7 +531,7 @@ const actions = {
     // displayed shot is refreshed now: waiting would apply this payload
     // after a younger response and undo it.
     const listSettled =
-      (!shot && state.isShotsLoading && cache.shotsLoadingPromise) ||
+      (!displayedShot && state.isShotsLoading && cache.shotsLoadingPromise) ||
       Promise.resolve()
     return listSettled
       .then(() => shotsApi.getShot(shotId))
@@ -540,6 +540,9 @@ const actions = {
           commit(UPDATE_SHOT, shot)
           return
         }
+        // Displayed when its refresh started and gone since: deleted, or
+        // dropped by a list load whose own response decides.
+        if (displayedShot) return
         if (
           !onlyInScope ||
           isEpisodeInLoadedScope(

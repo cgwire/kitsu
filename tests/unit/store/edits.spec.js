@@ -316,6 +316,29 @@ describe('Edits store, loadEdit live insertion', () => {
     })
     expect(types).toContain('ADD_EDIT')
   })
+
+  // An update then a deletion within one round trip: the refresh must not
+  // bring back the row the deletion removed.
+  test('keeps out a displayed edit deleted during its refresh', async () => {
+    editsStore.cache.editMap.set('e-gone', { id: 'e-gone' })
+    editsApi.getEdit = vi.fn(async () => {
+      editsStore.cache.editMap.delete('e-gone')
+      return {
+        id: 'e-gone',
+        parent_id: 'ep-a',
+        project_id: 'p-live',
+        tasks: []
+      }
+    })
+    const commit = vi.fn()
+
+    await editsStore.actions.loadEdit(
+      { commit, state: { editsLoadingKey: 'p-live/ep-a' }, rootGetters },
+      { editId: 'e-gone', onlyInScope: true }
+    )
+
+    expect(commit).not.toHaveBeenCalled()
+  })
 })
 
 describe('Edits store, LOAD_EDITS_ERROR', () => {

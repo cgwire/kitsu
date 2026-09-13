@@ -425,6 +425,24 @@ describe('Sequences store, loadSequence live insertion', () => {
     })
     expect(types).toContain('ADD_SEQUENCE')
   })
+
+  // An update then a deletion within one round trip: the refresh must not
+  // bring back the row the deletion removed.
+  test('keeps out a displayed sequence deleted during its refresh', async () => {
+    sequencesStore.cache.sequenceMap.set('s-gone', { id: 's-gone' })
+    vi.spyOn(shotsApi, 'getSequence').mockImplementation(async () => {
+      sequencesStore.cache.sequenceMap.delete('s-gone')
+      return { id: 's-gone', parent_id: 'ep-a', project_id: 'p-live' }
+    })
+    const commit = vi.fn()
+
+    await sequencesStore.actions.loadSequence(
+      { commit, state: { sequencesLoadingKey: 'p-live/ep-a' }, rootGetters },
+      { sequenceId: 's-gone', onlyInScope: true }
+    )
+
+    expect(commit).not.toHaveBeenCalled()
+  })
 })
 
 describe('Sequences store, ADD_SEQUENCE', () => {

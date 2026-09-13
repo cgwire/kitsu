@@ -680,6 +680,28 @@ describe('Assets store, loadAsset live insertion', () => {
     )
     expect(types).toContain('ADD_ASSET')
   })
+
+  // An update then a deletion within one round trip: the refresh must not
+  // bring back the row the deletion removed.
+  test('keeps out a displayed asset deleted during its refresh', async () => {
+    assetsStore.cache.assetMap.set('a-gone', { id: 'a-gone' })
+    vi.spyOn(assetsApi, 'getAsset').mockImplementation(async () => {
+      assetsStore.cache.assetMap.delete('a-gone')
+      return { id: 'a-gone', episode_id: 'ep-a', project_id: 'p1', tasks: [] }
+    })
+    const commit = vi.fn()
+
+    await assetsStore.actions.loadAsset(
+      {
+        commit,
+        state: { assetsLoadingKey: 'p1/ep-a' },
+        rootGetters: rootGetters()
+      },
+      { assetId: 'a-gone', onlyInScope: true }
+    )
+
+    expect(commit).not.toHaveBeenCalled()
+  })
 })
 
 describe('Assets store, ADD_ASSET', () => {

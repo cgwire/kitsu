@@ -540,8 +540,8 @@ const actions = {
   loadAsset({ commit, state, rootGetters }, payload) {
     const { assetId, onlyInScope = false } =
       typeof payload === 'string' ? { assetId: payload } : payload
-    const asset = cache.assetMap.get(assetId)
-    if (asset?.lock) return
+    const displayedAsset = cache.assetMap.get(assetId)
+    if (displayedAsset?.lock) return
 
     const personMap = rootGetters.personMap
     const production = rootGetters.currentProduction
@@ -556,7 +556,9 @@ const actions = {
     // displayed asset is refreshed now: waiting would apply this payload
     // after a younger response and undo it.
     const listSettled =
-      (!asset && state.isAssetsLoading && cache.assetsLoadingPromise) ||
+      (!displayedAsset &&
+        state.isAssetsLoading &&
+        cache.assetsLoadingPromise) ||
       Promise.resolve()
     return listSettled
       .then(() => assetsApi.getAsset(assetId))
@@ -565,6 +567,9 @@ const actions = {
           commit(UPDATE_ASSET, asset)
           return
         }
+        // Displayed when its refresh started and gone since: deleted, or
+        // dropped by a list load whose own response decides.
+        if (displayedAsset) return
         if (
           !onlyInScope ||
           isEpisodeInLoadedScope(

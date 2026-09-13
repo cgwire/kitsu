@@ -550,8 +550,8 @@ const actions = {
   loadSequence({ commit, state, rootGetters }, payload) {
     const { sequenceId, onlyInScope = false } =
       typeof payload === 'string' ? { sequenceId: payload } : payload
-    const sequence = cache.sequenceMap.get(sequenceId)
-    if (sequence?.lock) return
+    const displayedSequence = cache.sequenceMap.get(sequenceId)
+    if (displayedSequence?.lock) return
 
     const episodeMap = rootGetters.episodeMap
     // A list load in flight replaces the whole dataset: fetch once it has
@@ -561,7 +561,7 @@ const actions = {
     // after a younger response and undo it. The list actions never raise
     // isSequencesLoading: the promise, settled or not, is the only signal.
     const listSettled =
-      (!sequence && cache.sequencesLoadingPromise) || Promise.resolve()
+      (!displayedSequence && cache.sequencesLoadingPromise) || Promise.resolve()
     return listSettled
       .then(() => shotsApi.getSequence(sequenceId))
       .then(sequence => {
@@ -569,6 +569,9 @@ const actions = {
           commit(UPDATE_SEQUENCE, sequence)
           return sequence
         }
+        // Displayed when its refresh started and gone since: deleted, or
+        // dropped by a list load whose own response decides.
+        if (displayedSequence) return sequence
         if (
           !onlyInScope ||
           isEpisodeInLoadedScope(
