@@ -491,7 +491,11 @@ const resetData = async () => {
 
 const init = async () => {
   try {
-    currentSequence.value = await getCurrentSequence()
+    const sequenceId = route.params.sequence_id
+    const sequence = await getCurrentSequence()
+    // Another sequence opened during the load: its own init shows it.
+    if (route.params.sequence_id !== sequenceId) return
+    currentSequence.value = sequence
     currentSection.value = route.query.section || 'infos'
     if (currentSequence.value) {
       loadCastingData()

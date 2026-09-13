@@ -529,7 +529,11 @@ const resetData = async () => {
 
 const init = async () => {
   try {
-    currentShot.value = await getCurrentShot()
+    const shotId = route.params.shot_id
+    const shot = await getCurrentShot()
+    // Another shot opened during the load: its own init shows it.
+    if (route.params.shot_id !== shotId) return
+    currentShot.value = shot
     currentSection.value = route.query.section || 'infos'
     if (currentShot.value) {
       loadCastingData()

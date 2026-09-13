@@ -301,13 +301,16 @@ export const useEntity = ({ type, currentEntity, entityList, init }) => {
     }
   }
 
-  // Watch route params and re-init when the entity id in the URL changes.
-  // Mirrors the mixin's `$route` watcher.
+  // Re-init when the entity id in the URL changes. Compared with the id of
+  // the last init, not with the entity shown: that one is still the previous
+  // entity while a load runs, and null after a failed load.
+  let initEntityId = route.params[`${type}_id`]
   watch(
     () => route.params,
     () => {
       const entityId = route.params[`${type}_id`]
-      if (currentEntity.value && currentEntity.value.id !== entityId) {
+      if (entityId && entityId !== initEntityId) {
+        initEntityId = entityId
         init?.()
       }
       currentSection.value = route.query.section || 'infos'
