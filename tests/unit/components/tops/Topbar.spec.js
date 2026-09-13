@@ -814,6 +814,27 @@ describe('Topbar.vue', () => {
         wrapper.unmount()
       })
 
+      // Deleted while the user was on a page without production: the watcher
+      // had no route episode to check, and coming back must resolve it.
+      it('redirects on return to a route whose episode left the list', () => {
+        const { wrapper, replaceSpy, episodes } = mountFor(
+          'shots',
+          'episode-1',
+          { currentEpisode: { id: 'episode-1' } }
+        )
+        replaceSpy.mockClear()
+        episodes.splice(0, 1)
+
+        wrapper.vm.setProductionFromRoute()
+
+        expect(replaceSpy).toHaveBeenCalledWith({
+          name: 'episode-shots',
+          params: { production_id: 'production-1', episode_id: 'all' },
+          query: { search: 'hero' }
+        })
+        wrapper.unmount()
+      })
+
       // The list also changes on a production switch, while the route still
       // carries the episode of the production left: the store resolves
       // another episode then, and configureProduction moves the route.

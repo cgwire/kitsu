@@ -966,7 +966,12 @@ export default {
         this.isTVShow &&
         (!this.currentEpisode ||
           this.currentEpisodeId !== episodeId ||
-          this.currentEpisode.id !== episodeId)
+          this.currentEpisode.id !== episodeId ||
+          // Deleted while no page of the production was shown: the route and
+          // the store still name it, it must be resolved again.
+          (Boolean(episodeId) &&
+            this.isEpisodeListLoaded &&
+            !this.isKnownEpisode(episodeId)))
       )
     },
 
