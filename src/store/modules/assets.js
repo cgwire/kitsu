@@ -280,6 +280,8 @@ const helpers = {
 }
 
 const cache = {
+  // Assets deleted while a list load runs: its response may still hold them.
+  removedAssetIds: new Set(),
   assets: [],
   assetsLoadingPromise: null,
   assetMap: new Map(),
@@ -1009,6 +1011,7 @@ const mutations = {
     cache.assets = []
     cache.result = []
     cache.assetMap.clear()
+    cache.removedAssetIds.clear()
     state.isAssetsLoading = true
     state.isAssetsLoadingError = false
     state.assetsLoadingKey = loadingKey ?? null
@@ -1048,6 +1051,9 @@ const mutations = {
       taskTypeMap
     }
   ) {
+    // Deleted during the load, after the response was built.
+    assets = assets.filter(({ id }) => !cache.removedAssetIds.has(id))
+    cache.removedAssetIds.clear()
     const validationColumns = {}
     const assetTypeMap = new Map()
     let isTime = false
@@ -1224,6 +1230,7 @@ const mutations = {
   },
 
   [REMOVE_ASSET](state, assetToDelete) {
+    if (state.isAssetsLoading) cache.removedAssetIds.add(assetToDelete.id)
     if (cache.assetMap.get(assetToDelete.id)) {
       cache.assetMap.delete(assetToDelete.id)
       cache.assets = removeModelFromList(cache.assets, assetToDelete)

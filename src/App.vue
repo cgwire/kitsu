@@ -76,6 +76,9 @@ const personMap = computed(() => store.getters.personMap)
 const previewFileIdToShow = computed(() => store.getters.previewFileIdToShow)
 const productionMap = computed(() => store.getters.productionMap)
 const shotsLoadingKey = computed(() => store.getters.shotsLoadingKey)
+const isAssetsLoading = computed(() => store.getters.isAssetsLoading)
+const isEditsLoading = computed(() => store.getters.isEditsLoading)
+const isShotsLoading = computed(() => store.getters.isShotsLoading)
 const taskComments = computed(() => store.getters.taskComments)
 const taskMap = computed(() => store.getters.taskMap)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
@@ -238,8 +241,10 @@ const socketEvents = {
     }
   },
 
+  // A list load in flight emptied the map and its response may still hold
+  // the edit: the removal is recorded for that response.
   'edit:delete': eventData => {
-    if (editMap.get(eventData.edit_id)) {
+    if (editMap.get(eventData.edit_id) || isEditsLoading.value) {
       store.commit('REMOVE_EDIT', { id: eventData.edit_id })
     }
   },
@@ -298,8 +303,10 @@ const socketEvents = {
     }
   },
 
+  // A list load in flight emptied the map and its response may still hold
+  // the shot: the removal is recorded for that response.
   'shot:delete': eventData => {
-    if (shotMap.get(eventData.shot_id)) {
+    if (shotMap.get(eventData.shot_id) || isShotsLoading.value) {
       store.commit('REMOVE_SHOT', { id: eventData.shot_id })
     }
   },
@@ -328,8 +335,10 @@ const socketEvents = {
     }
   },
 
+  // A list load in flight emptied the map and its response may still hold
+  // the asset: the removal is recorded for that response.
   'asset:delete': eventData => {
-    if (assetMap.get(eventData.asset_id)) {
+    if (assetMap.get(eventData.asset_id) || isAssetsLoading.value) {
       store.commit('REMOVE_ASSET', { id: eventData.asset_id })
     }
   },

@@ -89,6 +89,8 @@ import {
 
 const cache = {
   shots: [],
+  // Shots deleted while a list load runs: its response may still hold them.
+  removedShotIds: new Set(),
   shotsLoadingPromise: null,
   shotsLoadingKey: null,
   shotMap: new Map(),
@@ -936,6 +938,7 @@ const mutations = {
     cache.shotIndex = {}
     // Same as CLEAR_SHOTS: keep the map identity, the getter is memoized.
     cache.shotMap.clear()
+    cache.removedShotIds.clear()
     state.shotValidationColumns = []
 
     state.isShotsLoading = true
@@ -973,6 +976,9 @@ const mutations = {
       sequenceMap
     }
   ) {
+    // Deleted during the load, after the response was built.
+    shots = shots.filter(({ id }) => !cache.removedShotIds.has(id))
+    cache.removedShotIds.clear()
     const validationColumns = {}
     let isFps = false
     let isFrames = false
@@ -1464,6 +1470,7 @@ const mutations = {
   },
 
   [REMOVE_SHOT](state, shotToDelete) {
+    if (state.isShotsLoading) cache.removedShotIds.add(shotToDelete.id)
     cache.shotMap.delete(shotToDelete.id)
     cache.shots = removeModelFromList(cache.shots, shotToDelete)
     cache.result = removeModelFromList(cache.result, shotToDelete)

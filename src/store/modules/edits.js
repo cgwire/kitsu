@@ -71,6 +71,8 @@ import {
 } from '@/store/mutation-types'
 
 const cache = {
+  // Edits deleted while a list load runs: its response may still hold them.
+  removedEditIds: new Set(),
   edits: [],
   editIndex: [],
   editsLoadingPromise: null,
@@ -733,6 +735,7 @@ const mutations = {
     cache.result = []
     cache.editIndex = {}
     cache.editMap.clear()
+    cache.removedEditIds.clear()
     state.editValidationColumns = []
 
     state.isEditsLoading = true
@@ -768,6 +771,9 @@ const mutations = {
     state,
     { production, edits, userFilters, taskMap, taskTypeMap, personMap }
   ) {
+    // Deleted during the load, after the response was built.
+    edits = edits.filter(({ id }) => !cache.removedEditIds.has(id))
+    cache.removedEditIds.clear()
     const validationColumns = {}
     let isDescription = false
     let isTime = false
@@ -1147,6 +1153,7 @@ const mutations = {
   },
 
   [REMOVE_EDIT](state, editToDelete) {
+    if (state.isEditsLoading) cache.removedEditIds.add(editToDelete.id)
     cache.editMap.delete(editToDelete.id)
     cache.edits = removeModelFromList(cache.edits, editToDelete)
     cache.result = removeModelFromList(cache.result, editToDelete)
