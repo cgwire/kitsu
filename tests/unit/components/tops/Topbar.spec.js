@@ -157,6 +157,12 @@ describe('Topbar.vue', () => {
     vi.clearAllMocks()
   })
 
+  // Artists land on pages without production: the fallback production of the
+  // store must not be configured for them.
+  it('configures no production on a page without one', () => {
+    expect(wrapper.vm.hasConfiguredProduction).toBe(false)
+  })
+
   describe('toggleDesktopNotifications', () => {
     it('toggles setPreferenceEnabled based on current state', async () => {
       permission.value = 'default'
@@ -426,6 +432,7 @@ describe('Topbar.vue', () => {
       const routerSpy = vi
         .spyOn(shotsWrapper.vm.$router, 'replace')
         .mockResolvedValue({})
+      shotsWrapper.vm.hasConfiguredProduction = false
       await shotsWrapper.vm.configureProduction('production-1')
       await flushPromises()
       expect(shotsWrapper.vm.currentEpisodeId).toBe('all')
@@ -445,6 +452,7 @@ describe('Topbar.vue', () => {
       const routerSpy = vi
         .spyOn(shotsWrapper.vm.$router, 'replace')
         .mockResolvedValue({})
+      shotsWrapper.vm.hasConfiguredProduction = false
       await shotsWrapper.vm.configureProduction('production-1')
       await flushPromises()
       expect(routerSpy).toHaveBeenCalledWith({
@@ -474,10 +482,22 @@ describe('Topbar.vue', () => {
       shotsWrapper.unmount()
     })
 
+    // The direct link tests above simulate a first load by resetting the flag
+    // the mount sets: F5 on the production the store fell back to runs no
+    // configuration, yet that production counts as configured.
+    it('counts the production of the store as configured on mount', () => {
+      const shotsWrapper = mountForShots('episode-1', [
+        { id: 'episode-1', status: 'running' }
+      ])
+      expect(shotsWrapper.vm.hasConfiguredProduction).toBe(true)
+      shotsWrapper.unmount()
+    })
+
     it('still resolves the main pack to the running episode on a direct link', async () => {
       const shotsWrapper = mountForShots('main', [
         { id: 'episode-1', status: 'running' }
       ])
+      shotsWrapper.vm.hasConfiguredProduction = false
       await shotsWrapper.vm.configureProduction('production-1')
       await flushPromises()
       expect(shotsWrapper.vm.currentEpisodeId).toBe('episode-1')
@@ -626,6 +646,7 @@ describe('Topbar.vue', () => {
         const pushSpy = vi
           .spyOn(wrapper.vm.$router, 'push')
           .mockResolvedValue({})
+        wrapper.vm.hasConfiguredProduction = false
         await wrapper.vm.configureProduction('production-1')
         await flushPromises()
         wrapper.unmount()
@@ -782,6 +803,7 @@ describe('Topbar.vue', () => {
         route.path = '/productions/production-1/episodes/ghost/tasks/task-1'
         route.params.episode_id = 'ghost'
 
+        wrapper.vm.hasConfiguredProduction = false
         await wrapper.vm.configureProduction('production-1')
         await flushPromises()
 
@@ -832,6 +854,7 @@ describe('Topbar.vue', () => {
     it('resolves an unknown episode to the running one on a direct link where the section has no all', async () => {
       const { wrapper, replaceSpy } = mountFor('sequences', 'ghost')
       replaceSpy.mockClear()
+      wrapper.vm.hasConfiguredProduction = false
       await wrapper.vm.configureProduction('production-1')
       await flushPromises()
       expect(replaceSpy).toHaveBeenCalledWith({
@@ -846,6 +869,7 @@ describe('Topbar.vue', () => {
     it('resolves the episode from the route at response time', async () => {
       const { wrapper, route, replaceSpy } = mountFor('sequences', 'ghost')
       replaceSpy.mockClear()
+      wrapper.vm.hasConfiguredProduction = false
       wrapper.vm.configureProduction('production-1')
       route.params.episode_id = 'episode-1'
       await flushPromises()
@@ -859,6 +883,7 @@ describe('Topbar.vue', () => {
     it('gives up when the production changed during the episodes fetch', async () => {
       const { wrapper, route, replaceSpy } = mountFor('sequences', 'ghost')
       replaceSpy.mockClear()
+      wrapper.vm.hasConfiguredProduction = false
       wrapper.vm.configureProduction('production-1')
       route.params.production_id = 'production-2'
       await flushPromises()

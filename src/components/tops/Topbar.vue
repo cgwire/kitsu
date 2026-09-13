@@ -392,7 +392,9 @@ export default {
 
   mounted() {
     this.currentProjectSection = this.getCurrentSectionFromRoute()
-    this.setProductionFromRoute()
+    // A page without production has nothing to configure: the fallback
+    // production of the store would get its episodes fetched for nothing.
+    if (this.$route.params.production_id) this.setProductionFromRoute()
   },
 
   computed: {
@@ -836,7 +838,12 @@ export default {
       const routeEpisodeId = this.$route.params.episode_id
       if (this.isProductionChanged(routeProductionId)) {
         this.configureProduction(routeProductionId)
-      } else if (this.isEpisodeChanged(routeEpisodeId)) {
+        return
+      }
+      // Already the production of the store, its fallback one on a first
+      // load: a later switch must not pass for a first load.
+      this.hasConfiguredProduction = true
+      if (this.isEpisodeChanged(routeEpisodeId)) {
         this.configureEpisode(routeEpisodeId)
       } else {
         this.updateCombosFromRoute()
