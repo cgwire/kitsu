@@ -121,11 +121,17 @@ describe('Sequences store, all-episodes pseudo-episode', () => {
 
     test('sets the episode it fell back to as the current one', async () => {
       vi.spyOn(shotsApi, 'getSequencesWithTasks').mockResolvedValue([])
-      const commit = vi.fn()
+      const fallbackGetters = { ...rootGetters, currentEpisode: null }
+      // Like the store, the committed fallback becomes the current episode.
+      const commit = vi.fn((type, episodeId) => {
+        if (type === 'SET_CURRENT_EPISODE') {
+          fallbackGetters.currentEpisode = { id: episodeId }
+        }
+      })
       await sequencesStore.actions.loadSequencesWithTasks({
         commit,
         state: {},
-        rootGetters: { ...rootGetters, currentEpisode: null }
+        rootGetters: fallbackGetters
       })
 
       // The page derives its own scope from currentEpisode. Without this the
@@ -610,5 +616,64 @@ describe('Sequences store, CREATE_TASKS_END', () => {
     const sequence = sequencesStore.cache.sequenceMap.get('s-live-tasks')
     expect(sequence.validations.get('tt1')).toBe('t-live')
     expect(sequence.tasks).toEqual(['t-live'])
+  })
+})
+
+describe('Sequences store, late responses', () => {
+  const buildRootGetters = () => ({
+    currentProduction: { id: 'p1' },
+    currentEpisode: { id: 'ep-empty' },
+    episodes: [],
+    episodeMap: new Map(),
+    isTVShow: true,
+    personMap: new Map(),
+    route: { params: {} },
+    taskMap: new Map(),
+    taskStatusMap: new Map(),
+    taskTypeMap: new Map(),
+    userFilters: {}
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  // The Sequences page reloads on every episode change without serializing
+  // the loads: an empty episode answering last must not empty the list of
+  // the episode switched to.
+  test('drops an empty response for an episode left during the fetch', async () => {
+    const rootGetters = buildRootGetters()
+    vi.spyOn(shotsApi, 'getSequencesWithTasks').mockImplementation(async () => {
+      rootGetters.currentEpisode = { id: 'ep-b' }
+      return []
+    })
+    const commit = vi.fn()
+
+    await sequencesStore.actions.loadSequencesWithTasks({
+      commit,
+      state: {},
+      rootGetters
+    })
+
+    expect(commit.mock.calls.map(([type]) => type)).not.toContain(
+      'SET_SEQUENCES_WITH_TASKS'
+    )
+  })
+
+  test('drops a plain response for an episode left during the fetch', async () => {
+    const rootGetters = buildRootGetters()
+    vi.spyOn(shotsApi, 'getSequences').mockImplementation(async () => {
+      rootGetters.currentEpisode = { id: 'ep-b' }
+      return [{ id: 's1', parent_id: 'ep-empty' }]
+    })
+    const commit = vi.fn()
+
+    await sequencesStore.actions.loadSequences({
+      commit,
+      state: {},
+      rootGetters
+    })
+
+    expect(commit).not.toHaveBeenCalled()
   })
 })

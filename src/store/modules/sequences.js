@@ -406,7 +406,15 @@ const actions = {
     const loadingPromise = shotsApi
       .getSequences(production, episode)
       .then(sequences => {
-        if (production.id !== rootGetters.currentProduction?.id) {
+        // A production or an episode switched during the fetch: its page
+        // loads the sequences of the new scope.
+        const currentScope = rootGetters.isTVShow
+          ? (rootGetters.currentEpisode?.id ?? '')
+          : ''
+        if (
+          production.id !== rootGetters.currentProduction?.id ||
+          scope !== currentScope
+        ) {
           return sequences
         }
         commit(LOAD_SEQUENCES_END, {
@@ -474,10 +482,12 @@ const actions = {
         }
         // Discard a response whose scope is not the one displayed any more
         // (the user switched episode mid-load).
+        // An empty response carries no episode: compare the one requested.
         const isCurrentScope = isAllEpisodes
           ? rootGetters.currentEpisode?.id === 'all'
-          : sequences[0]?.episode_id === rootGetters.currentEpisode?.id
-        if (!isTVShow || sequences.length === 0 || isCurrentScope) {
+          : (sequences[0]?.episode_id ?? episode?.id) ===
+            rootGetters.currentEpisode?.id
+        if (!isTVShow || isCurrentScope) {
           commit(SET_SEQUENCES_WITH_TASKS, {
             sequences,
             episodeMap,
