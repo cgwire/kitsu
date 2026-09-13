@@ -1018,6 +1018,9 @@ const mutations = {
             taskTypeMap,
             taskStatusMap
           )
+          // A sequence added live has no task columns yet.
+          if (!sequence.validations) sequence.validations = new Map()
+          if (!sequence.tasks) sequence.tasks = []
           sequence.validations.set(task.task_type_id, task.id)
           sequence.tasks.push(task.id)
           const displayedSequence = state.displayedSequences.find(
@@ -1080,6 +1083,7 @@ const mutations = {
         state.sequenceFilledColumns[task.task_type_id] = true
       }
       // Push task and readds the whole map to activate the realtime display.
+      if (!sequence.tasks) sequence.tasks = []
       sequence.tasks.push(task.id)
       if (!sequence.validations) sequence.validations = new Map()
       sequence.validations.set(task.task_type_id, task.id)

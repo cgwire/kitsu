@@ -578,3 +578,37 @@ describe('Sequences store, live insertion during a list load', () => {
     await loading
   })
 })
+
+describe('Sequences store, CREATE_TASKS_END', () => {
+  afterEach(() => {
+    sequencesStore.cache.sequenceMap.delete('s-live-tasks')
+  })
+
+  // Created by a colleague, the row arrives without task columns: a task
+  // created on it threw and never showed.
+  test('creates a task on a sequence added live', () => {
+    sequencesStore.cache.sequenceMap.set('s-live-tasks', {
+      id: 's-live-tasks',
+      name: 'SQ01'
+    })
+    sequencesStore.mutations.CREATE_TASKS_END(
+      { displayedSequences: [] },
+      {
+        tasks: [
+          {
+            id: 't-live',
+            entity_id: 's-live-tasks',
+            task_type_id: 'tt1',
+            task_status_id: 'ts1'
+          }
+        ],
+        production: { id: 'p1' },
+        taskTypeMap: new Map([['tt1', { id: 'tt1', priority: 1 }]]),
+        taskStatusMap: new Map()
+      }
+    )
+    const sequence = sequencesStore.cache.sequenceMap.get('s-live-tasks')
+    expect(sequence.validations.get('tt1')).toBe('t-live')
+    expect(sequence.tasks).toEqual(['t-live'])
+  })
+})

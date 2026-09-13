@@ -906,6 +906,9 @@ const mutations = {
             taskTypeMap,
             taskStatusMap
           )
+          // An episode added live has no task columns yet.
+          if (!episode.validations) episode.validations = new Map()
+          if (!episode.tasks) episode.tasks = []
           episode.validations.set(task.task_type_id, task.id)
           const displayedEpisode = state.displayedEpisodes.find(
             e => e.id === episode.id
@@ -966,6 +969,7 @@ const mutations = {
         state.episodeFilledColumns[task.task_type_id] = true
       }
       // Push task and readds the whole map to activate the realtime display.
+      if (!episode.tasks) episode.tasks = []
       episode.tasks.push(task.id)
       if (!episode.validations) episode.validations = new Map()
       episode.validations.set(task.task_type_id, task.id)

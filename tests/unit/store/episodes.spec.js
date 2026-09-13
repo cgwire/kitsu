@@ -389,3 +389,37 @@ describe('Episodes store', () => {
     })
   })
 })
+
+describe('Episodes store, CREATE_TASKS_END', () => {
+  afterEach(() => {
+    episodesStore.cache.episodeMap.delete('ep-live-tasks')
+  })
+
+  // Created by a colleague, the row arrives without task columns: a task
+  // created on it threw and never showed.
+  test('creates a task on an episode added live', () => {
+    episodesStore.cache.episodeMap.set('ep-live-tasks', {
+      id: 'ep-live-tasks',
+      name: 'E01'
+    })
+    episodesStore.mutations.CREATE_TASKS_END(
+      { displayedEpisodes: [] },
+      {
+        tasks: [
+          {
+            id: 't-live',
+            entity_id: 'ep-live-tasks',
+            task_type_id: 'tt1',
+            task_status_id: 'ts1'
+          }
+        ],
+        production: { id: 'p1' },
+        taskTypeMap: new Map([['tt1', { id: 'tt1', priority: 1 }]]),
+        taskStatusMap: new Map()
+      }
+    )
+    const episode = episodesStore.cache.episodeMap.get('ep-live-tasks')
+    expect(episode.validations.get('tt1')).toBe('t-live')
+    expect(episode.tasks).toEqual(['t-live'])
+  })
+})
