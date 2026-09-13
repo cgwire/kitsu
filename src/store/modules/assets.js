@@ -497,9 +497,11 @@ const actions = {
             asset.asset_type_name = assetType?.name || ''
           }
         })
-        // Ignore a response for a production the user already switched away
-        // from; committing would overwrite the current production's assets.
-        if (production.id !== rootGetters.currentProduction?.id) {
+        // Ignore a response for a scope the user already left: a production
+        // switch (CLEAR_ASSETS forgets the key) or a newer load of another
+        // episode (LOAD_ASSETS_START records its own). Committing would put
+        // the old scope's assets under the newer key.
+        if (state.assetsLoadingKey !== loadingKey) {
           return assets
         }
         commit(LOAD_ASSETS_END, {
@@ -515,9 +517,9 @@ const actions = {
       })
       .catch(err => {
         console.error('an error occurred while loading assets', err)
-        // Same guard as the success path: a rejection for a production the
-        // user already left would forget the scope of the load running now.
-        if (production.id === rootGetters.currentProduction?.id) {
+        // Same guard as the success path: a rejection for a scope the user
+        // already left would forget the scope of the load running now.
+        if (state.assetsLoadingKey === loadingKey) {
           commit(LOAD_ASSETS_ERROR)
         }
         return []

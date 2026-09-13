@@ -280,17 +280,21 @@ describe('Shots store', () => {
       vi.restoreAllMocks()
     })
 
-    test('loads the whole production instead of no-oping on the all pseudo-episode', async () => {
-      const getShots = vi.spyOn(shotsApi, 'getShots').mockResolvedValue([])
-      const dispatch = vi.fn(() => Promise.resolve())
-      const state = { isShotsLoading: false, shotsLoadingKey: null }
-      // Apply the real LOAD_SHOTS_START: the scope lives in the state the
-      // getter serves, not in the mocked commit.
-      const commit = vi.fn((type, payload) => {
+    // Apply the real LOAD_SHOTS_START: the scope lives in the state the
+    // getter serves and the response is checked against, not in the mocked
+    // commit.
+    const commitRecordingScope = state =>
+      vi.fn((type, payload) => {
         if (type === 'LOAD_SHOTS_START') {
           shotsStore.mutations[type](state, payload)
         }
       })
+
+    test('loads the whole production instead of no-oping on the all pseudo-episode', async () => {
+      const getShots = vi.spyOn(shotsApi, 'getShots').mockResolvedValue([])
+      const dispatch = vi.fn(() => Promise.resolve())
+      const state = { isShotsLoading: false, shotsLoadingKey: null }
+      const commit = commitRecordingScope(state)
 
       await shotsStore.actions.loadShots({
         commit,
@@ -336,9 +340,9 @@ describe('Shots store', () => {
       vi.spyOn(shotsApi, 'getShots').mockResolvedValue([
         { id: 's1', episode_id: 'ep-a', sequence_id: 'sq-1' }
       ])
-      const commit = vi.fn()
-      const dispatch = vi.fn(() => Promise.resolve())
       const state = { isShotsLoading: false }
+      const commit = commitRecordingScope(state)
+      const dispatch = vi.fn(() => Promise.resolve())
 
       await shotsStore.actions.loadShots({
         commit,
@@ -352,9 +356,9 @@ describe('Shots store', () => {
     })
 
     test('a per-episode response is discarded once the view switched to all mid-load', async () => {
-      const commit = vi.fn()
-      const dispatch = vi.fn(() => Promise.resolve())
       const state = { isShotsLoading: false }
+      const commit = commitRecordingScope(state)
+      const dispatch = vi.fn(() => Promise.resolve())
       // Mutable so the getShots mock can flip it mid-flight, simulating the
       // user switching to All before the ep-a request resolves.
       const rootGetters = { ...baseGetters, currentEpisode: { id: 'ep-a' } }
@@ -373,6 +377,30 @@ describe('Shots store', () => {
       })
       expect(commit.mock.calls.map(c => c[0])).not.toContain('LOAD_SHOTS_END')
       expect(commit.mock.calls.map(c => c[0])).toContain('END_SHOTS_LOADING')
+    })
+
+    // A production switch and back forgets the load in flight, and the load
+    // started on return records its own scope: the late response must
+    // neither land under that newer key nor end that load.
+    test('drops a response whose scope a newer load replaced', async () => {
+      vi.spyOn(shotsApi, 'getShots').mockResolvedValue([
+        { id: 's1', episode_id: 'ep-a', sequence_id: 'sq-1' }
+      ])
+      const state = { isShotsLoading: false }
+      const commit = commitRecordingScope(state)
+
+      const loading = shotsStore.actions.loadShots({
+        commit,
+        dispatch: vi.fn(() => Promise.resolve()),
+        state,
+        rootGetters: { ...baseGetters, currentEpisode: { id: 'ep-a' } }
+      })
+      state.shotsLoadingKey = 'p-all/all'
+      await loading
+
+      const types = commit.mock.calls.map(c => c[0])
+      expect(types).not.toContain('LOAD_SHOTS_END')
+      expect(types).not.toContain('END_SHOTS_LOADING')
     })
 
     test('groups shots by sequence id so same-named sequences of two episodes stay apart', () => {

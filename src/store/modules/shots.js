@@ -464,10 +464,10 @@ const actions = {
         return shotsApi.getShots(production, isAllEpisodes ? null : episode)
       })
       .then(shots => {
-        // Ignore a response for a production the user already switched away
-        // from; the loading flag is owned by the newer load (reset via
-        // CLEAR_SHOTS on switch).
-        if (production.id !== rootGetters.currentProduction?.id) {
+        // Ignore a response for a scope the user already left: a production
+        // switch (CLEAR_SHOTS forgets the key) or a newer load started after
+        // it. The loading flag and the key belong to that newer load.
+        if (state.shotsLoadingKey !== loadingKey) {
           return
         }
         // Discard a response whose scope is not the one displayed any more
@@ -497,9 +497,9 @@ const actions = {
         }
       })
       .catch(err => {
-        // Same guard as the success path: a rejection for a production the
-        // user already left would forget the scope of the load running now.
-        if (production.id === rootGetters.currentProduction?.id) {
+        // Same guard as the success path: a rejection for a scope the user
+        // already left would forget the scope of the load running now.
+        if (state.shotsLoadingKey === loadingKey) {
           commit(LOAD_SHOTS_ERROR)
         }
         console.error(err)

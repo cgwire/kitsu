@@ -59,6 +59,7 @@ describe('Assets store', () => {
       // Switch away so the response short-circuits before the heavy
       // LOAD_ASSETS_END commit; both calls still resolve to the loaded assets.
       rootGetters.currentProduction = { id: 'p2' }
+      assetsStore.mutations.CLEAR_ASSETS(state)
 
       const [r1, r2] = await Promise.all([p1, p2])
       expect(getAssets).toHaveBeenCalledTimes(1)
@@ -206,8 +207,10 @@ describe('Assets store', () => {
       const ctx = { commit, dispatch: vi.fn(), state, rootGetters }
 
       const promise = assetsStore.actions.loadAssets(ctx, { withShared: false })
-      // User navigates to another production before the response lands.
+      // User navigates to another production before the response lands, and
+      // the load of that production records its own scope.
       rootGetters.currentProduction = { id: 'p2' }
+      state.assetsLoadingKey = 'p2/'
       const result = await promise
 
       expect(result).toEqual(sentinel)
@@ -215,6 +218,27 @@ describe('Assets store', () => {
       expect(commit.mock.calls.map(c => c[0])).not.toContain('LOAD_ASSETS_END')
       // ...and must leave the loading flag to the newer load (reset by CLEAR).
       expect(state.isAssetsLoading).toBe(true)
+    })
+
+    // A production switch and back forgets the load in flight, and the load
+    // started on return records its own scope: the late response must not
+    // land under that newer key.
+    test('drops a response whose scope a newer load replaced', async () => {
+      vi.spyOn(assetsApi, 'getAssets').mockResolvedValue([
+        { id: 'a1', asset_type_id: 't1', name: 'A1' }
+      ])
+      const state = { isAssetsLoading: false, isAssetsLoadingError: false }
+      const commit = realCommit(state)
+
+      const loading = assetsStore.actions.loadAssets(
+        { commit, dispatch: vi.fn(), state, rootGetters: baseRootGetters() },
+        { withShared: false }
+      )
+      state.assetsLoadingKey = 'p1/all#partial'
+      await loading
+
+      const types = commit.mock.calls.map(([type]) => type)
+      expect(types).not.toContain('LOAD_ASSETS_END')
     })
 
     // Its flag raised for the production left, no response would ever lower
@@ -708,14 +732,19 @@ describe('Assets store, partial loads', () => {
   // dataset cannot stand in for the one the list pages display, so its scope
   // must not match theirs.
   const startLoad = options => {
-    vi.spyOn(assetsApi, 'getAssets').mockResolvedValue([])
     vi.spyOn(assetsApi, 'getUsedSharedAssets').mockResolvedValue([])
     const state = { isAssetsLoading: false, isAssetsLoadingError: false }
+    // The response lands after a production switch, which forgets the scope:
+    // it short-circuits before LOAD_ASSETS_END.
+    vi.spyOn(assetsApi, 'getAssets').mockImplementation(() =>
+      Promise.resolve().then(() => {
+        assetsStore.mutations.CLEAR_ASSETS(state)
+        return []
+      })
+    )
     const rootGetters = baseRootGetters()
     const ctx = { commit: realCommit(state), dispatch: vi.fn(), state, rootGetters }
     const loading = assetsStore.actions.loadAssets(ctx, options)
-    // Switch away so the response short-circuits before LOAD_ASSETS_END.
-    rootGetters.currentProduction = { id: 'p2' }
     return { state, loading }
   }
 
@@ -778,15 +807,17 @@ describe('Assets store, LOAD_ASSETS_ERROR', () => {
         rejectLoad = reject
       })
     )
-    const commit = vi.fn()
+    const state = { isAssetsLoading: false }
+    const commit = realCommit(state)
     const loading = assetsStore.actions.loadAssets({
       commit,
       dispatch: vi.fn(),
-      state: { isAssetsLoading: false },
+      state,
       rootGetters
     })
     return {
       rootGetters,
+      state,
       types: async () => {
         rejectLoad(new Error('down'))
         await loading
@@ -801,8 +832,9 @@ describe('Assets store, LOAD_ASSETS_ERROR', () => {
   })
 
   test('keeps the scope when the failure comes from the production left', async () => {
-    const { rootGetters, types } = failingLoad()
+    const { rootGetters, state, types } = failingLoad()
     rootGetters.currentProduction = { id: 'p2' }
+    assetsStore.mutations.CLEAR_ASSETS(state)
     expect(await types()).not.toContain('LOAD_ASSETS_ERROR')
   })
 })
