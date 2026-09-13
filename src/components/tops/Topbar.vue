@@ -1083,7 +1083,10 @@ export default {
       const productionId = this.$route.params.production_id
       const pluginId = this.$route.params.plugin_id
       const section = this.getCurrentSectionFromRoute()
-      let episodeId = resolvedEpisodeId ?? this.$route.params.episode_id
+      const routeEpisodeId = resolvedEpisodeId ?? this.$route.params.episode_id
+      // A page without episode keeps the one of the store, which the section
+      // links reopen.
+      let episodeId = routeEpisodeId ?? this.currentEpisode?.id
       this.silent = true
       this.currentProductionId = productionId
       this.currentProjectSection = section
@@ -1092,6 +1095,7 @@ export default {
       // episode, the same fallback as a direct link: Back from a corrected
       // link must not land on a third episode.
       if (
+        routeEpisodeId &&
         ['all', 'main'].includes(episodeId) &&
         !this.keepsPseudoEpisode(section, episodeId, pluginId) &&
         this.episodes.length > 0

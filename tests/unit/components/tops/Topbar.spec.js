@@ -737,6 +737,22 @@ describe('Topbar.vue', () => {
       wrapper.unmount()
     })
 
+    // The team page has no episode: the section links reopen the episode of
+    // the store instead of all.
+    it('keeps the episode of the store on a page without episode', () => {
+      const { wrapper, route } = mountFor('shots', 'episode-2', {
+        currentEpisode: { id: 'episode-2' }
+      })
+      route.name = 'team'
+      route.path = '/productions/production-1/team'
+      delete route.params.episode_id
+
+      wrapper.vm.updateCombosFromRoute()
+
+      expect(wrapper.vm.currentEpisodeId).toBe('episode-2')
+      wrapper.unmount()
+    })
+
     // A live deletion of the displayed episode leaves the route, the store
     // and the selector on an id the production no longer has.
     describe('displayed episode deleted live', () => {
