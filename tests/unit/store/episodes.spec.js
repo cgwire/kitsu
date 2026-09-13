@@ -1,6 +1,7 @@
 // @vitest-environment node
 
 import { vi } from 'vitest'
+import { computed, reactive } from 'vue'
 
 // Importing the episodes module transitively pulls in the root store
 // (lib/models → timezone → @/store); stub it so no Vuex store is built.
@@ -475,5 +476,28 @@ describe('Episodes store, lists loaded with and without tasks', () => {
     })
 
     expect(episodesStore.cache.episodeMap.get('ep-live')).toBe(live)
+  })
+})
+
+describe('Episodes store, UPDATE_EPISODE', () => {
+  afterEach(() => {
+    episodesStore.cache.episodeMap.delete('ep-renamed')
+  })
+
+  // A remote rename reaches the map through its raw object: the topbar
+  // selector reads the reactive list, which must see the new name.
+  test('updates the reactive lists showing the episode', () => {
+    const episode = { id: 'ep-renamed', name: 'E01', status: 'running' }
+    episodesStore.cache.episodeMap.set('ep-renamed', episode)
+    const state = reactive({ episodes: [episode], displayedEpisodes: [] })
+    const labels = computed(() => state.episodes.map(({ name }) => name))
+    expect(labels.value).toEqual(['E01'])
+
+    episodesStore.mutations.UPDATE_EPISODE(state, {
+      id: 'ep-renamed',
+      name: 'E01 new'
+    })
+
+    expect(labels.value).toEqual(['E01 new'])
   })
 })

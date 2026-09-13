@@ -725,6 +725,13 @@ const mutations = {
   },
 
   [UPDATE_EPISODE](state, episode) {
+    // The map holds raw objects: assigned through it first, the lists showing
+    // the episode, the topbar selector among them, would see no change.
+    const lists = [state.episodes, state.displayedEpisodes]
+    lists.forEach(list => {
+      const listedEpisode = list.find(({ id }) => id === episode.id)
+      if (listedEpisode) Object.assign(listedEpisode, episode)
+    })
     Object.assign(cache.episodeMap.get(episode.id), episode)
     cache.episodeIndex = buildEpisodeIndex(state.episodes)
   },
