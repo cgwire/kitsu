@@ -273,6 +273,7 @@ const init = () => {
     // replace, not push: filter changes must not stack history entries the
     // back button then has to walk through.
     router.replace({ query: filterQuery.value })
+    const loadedParams = JSON.stringify(params.value)
     store
       .dispatch('loadNews', params.value)
       .then(() => {
@@ -282,6 +283,11 @@ const init = () => {
         console.error(err)
         loading.news = false
         errors.news = true
+      })
+      .finally(() => {
+        // A production or filter change during the load was dropped by the
+        // guard above: load again for it.
+        if (JSON.stringify(params.value) !== loadedParams) init()
       })
   }
 }
