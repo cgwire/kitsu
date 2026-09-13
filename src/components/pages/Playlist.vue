@@ -622,7 +622,7 @@ import moment from 'moment-timezone'
 import { mapGetters, mapActions } from 'vuex'
 import { PlusIcon, XIcon } from 'lucide-vue-next'
 
-import { DEFAULT_NB_FRAMES_PICTURE } from '@/lib/playlist'
+import { DEFAULT_NB_FRAMES_PICTURE, isPlaylistInScope } from '@/lib/playlist'
 import { formatDate as formatDateBase } from '@/lib/time'
 import { getPlaylistPath } from '@/lib/path'
 import { updateModelFromList, removeModelFromList } from '@/lib/models'
@@ -785,15 +785,11 @@ export default {
     isPlaylistListStale() {
       const [first] = this.playlists
       if (!first) return false
-      if (first.project_id !== this.currentProduction.id) return true
-      if (!this.isTVShow || !this.currentEpisode) return false
-      if (this.currentEpisode.id === 'all') {
-        return !first.is_for_all || first.for_entity !== this.allForEntity
-      }
-      if (this.currentEpisode.id === 'main') {
-        return Boolean(first.episode_id || first.is_for_all)
-      }
-      return first.episode_id !== this.currentEpisode.id
+      return !isPlaylistInScope(first, {
+        productionId: this.currentProduction.id,
+        episodeId: this.isTVShow ? this.currentEpisode?.id : undefined,
+        forEntity: this.allForEntity
+      })
     },
 
     isAssetPlaylist() {
@@ -1912,7 +1908,16 @@ export default {
           return
         }
         if (!this.playlistMap.get(eventData.playlist_id)) {
-          this.refreshPlaylist(eventData.playlist_id)
+          this.refreshPlaylist({
+            id: eventData.playlist_id,
+            // The scope the list was loaded for, as in isPlaylistListStale.
+            scope: {
+              productionId: this.currentProduction.id,
+              episodeId: this.isTVShow ? this.currentEpisode?.id : undefined,
+              forEntity: this.allForEntity,
+              taskTypeId: this.taskTypeId
+            }
+          })
         }
       },
 
@@ -1925,7 +1930,7 @@ export default {
           !this.lockSystem.isSilent &&
           !this.isAddingEntity
         ) {
-          this.refreshPlaylist(eventData.playlist_id).then(playlist => {
+          this.refreshPlaylist({ id: eventData.playlist_id }).then(playlist => {
             if (eventData.playlist_id === this.currentPlaylist.id) {
               this.currentPlaylist = ref(playlist)
               this.$nextTick(() => {

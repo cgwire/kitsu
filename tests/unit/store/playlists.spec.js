@@ -20,6 +20,26 @@ describe('Playlists store', () => {
       task_statuses: [{ id: 'task-status-1', name: 'Done' }]
     }
 
+    // An update fetch may land after the list was replaced by another
+    // scope's: the playlist it refreshed must not join that list.
+    test('refreshPlaylist leaves out an updated playlist no longer listed', async () => {
+      vi.spyOn(playlistsApi, 'getPlaylist').mockResolvedValue({
+        id: 'playlist-gone'
+      })
+      const commit = vi.fn()
+
+      await store.actions.refreshPlaylist(
+        {
+          commit,
+          state: { playlistMap: new Map() },
+          rootGetters: { currentProduction: { id: 'production-1' } }
+        },
+        { id: 'playlist-gone' }
+      )
+
+      expect(commit).not.toHaveBeenCalled()
+    })
+
     // Opening a playlist then another: the preview maps belong to the last
     // one opened, whatever order the responses land in.
     test('loadPlaylist commits only the playlist opened last', async () => {

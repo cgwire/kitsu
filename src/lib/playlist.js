@@ -43,3 +43,23 @@ export const warmPlaylistMovies = (
 
   return () => controller.abort()
 }
+
+// Whether a playlist belongs to the list loaded for a scope, with the rules
+// of zou's episode playlists route: all holds the playlists made for all
+// episodes, main the ones of no episode, a real episode its own ones.
+export const isPlaylistInScope = (
+  playlist,
+  { productionId, episodeId, forEntity, taskTypeId }
+) => {
+  if (playlist.project_id !== productionId) return false
+  if (taskTypeId && playlist.task_type_id !== taskTypeId) return false
+  if (forEntity && playlist.for_entity !== forEntity) return false
+  if (!episodeId) return true
+  if (episodeId === 'all') {
+    return !playlist.episode_id && Boolean(playlist.is_for_all)
+  }
+  if (episodeId === 'main') {
+    return !playlist.episode_id && !playlist.is_for_all
+  }
+  return playlist.episode_id === episodeId
+}
