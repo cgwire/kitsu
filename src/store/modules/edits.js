@@ -1138,7 +1138,11 @@ const mutations = {
   },
 
   [UPDATE_EDIT](state, edit) {
-    Object.assign(cache.editMap.get(edit.id), edit)
+    // A refetched edit lists task objects where the cache keeps the ids the
+    // task columns resolve: tasks have their own events.
+    const fields = { ...edit }
+    delete fields.tasks
+    Object.assign(cache.editMap.get(edit.id), fields)
     cache.editIndex = buildEditIndex(cache.edits)
   },
 

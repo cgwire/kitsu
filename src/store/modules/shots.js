@@ -1442,7 +1442,11 @@ const mutations = {
   [UPDATE_SHOT](state, shot) {
     const cachedShot = cache.shotMap.get(shot.id)
     if (cachedShot) {
-      Object.assign(cachedShot, shot)
+      // A refetched shot lists task objects where the cache keeps the ids the
+      // task columns and the detail page resolve: tasks have their own events.
+      const fields = { ...shot }
+      delete fields.tasks
+      Object.assign(cachedShot, fields)
       updateEntryInIndex(
         cache.shotIndex,
         cachedShot,

@@ -1195,9 +1195,13 @@ const mutations = {
   },
 
   [UPDATE_ASSET](state, asset) {
+    // A refetched asset lists task objects where the cache keeps the ids the
+    // task columns and the detail page resolve: tasks have their own events.
+    const fields = { ...asset }
+    delete fields.tasks
     const cachedAsset = cache.assetMap.get(asset.id)
     if (cachedAsset) {
-      Object.assign(cachedAsset, asset)
+      Object.assign(cachedAsset, fields)
       updateEntryInIndex(
         cache.assetIndex,
         cachedAsset,
@@ -1206,7 +1210,7 @@ const mutations = {
     }
     const displayedAsset = state.displayedAssets.find(a => a.id === asset.id)
     if (displayedAsset) {
-      Object.assign(displayedAsset, asset)
+      Object.assign(displayedAsset, fields)
     }
     state.displayedAssets = [...state.displayedAssets]
   },

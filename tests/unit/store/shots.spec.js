@@ -653,3 +653,27 @@ describe('Shots store, live insertion during a list load', () => {
     expect(commit.mock.calls.map(([type]) => type)).not.toContain('ADD_SHOT')
   })
 })
+
+describe('Shots store, UPDATE_SHOT', () => {
+  afterEach(() => {
+    shotsStore.cache.shotMap.delete('sh-upd')
+  })
+
+  // A colleague's edit refetches the full entity, whose tasks are objects:
+  // the cached ids must survive it, or the task lists come out empty.
+  test('keeps the cached task ids', () => {
+    shotsStore.cache.shotMap.set('sh-upd', {
+      id: 'sh-upd',
+      name: 'old',
+      tasks: ['t1']
+    })
+    shotsStore.mutations.UPDATE_SHOT(
+      {},
+      { id: 'sh-upd', name: 'new', tasks: [{ id: 't1' }] }
+    )
+    expect(shotsStore.cache.shotMap.get('sh-upd')).toMatchObject({
+      name: 'new',
+      tasks: ['t1']
+    })
+  })
+})

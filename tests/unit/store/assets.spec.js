@@ -1029,3 +1029,31 @@ describe('Assets store, live insertion during a list load', () => {
     expect(commit.mock.calls.map(([type]) => type)).not.toContain('ADD_ASSET')
   })
 })
+
+describe('Assets store, UPDATE_ASSET', () => {
+  afterEach(() => {
+    assetsStore.cache.assetMap.delete('a-upd')
+  })
+
+  // A colleague's edit refetches the full entity, whose tasks are objects:
+  // the cached ids must survive it, or the task lists come out empty.
+  test('keeps the cached task ids', () => {
+    const asset = {
+      id: 'a-upd',
+      name: 'old',
+      asset_type_name: 'Props',
+      tasks: ['t1']
+    }
+    assetsStore.cache.assetMap.set('a-upd', asset)
+    const state = { displayedAssets: [asset] }
+    assetsStore.mutations.UPDATE_ASSET(state, {
+      id: 'a-upd',
+      name: 'new',
+      tasks: [{ id: 't1' }]
+    })
+    expect(state.displayedAssets[0]).toMatchObject({
+      name: 'new',
+      tasks: ['t1']
+    })
+  })
+})

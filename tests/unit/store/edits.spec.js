@@ -552,3 +552,27 @@ describe('Edits store, live insertion during a list load', () => {
     expect(commit.mock.calls.map(([type]) => type)).not.toContain('ADD_EDIT')
   })
 })
+
+describe('Edits store, UPDATE_EDIT', () => {
+  afterEach(() => {
+    editsStore.cache.editMap.delete('e-upd')
+  })
+
+  // A colleague's edit refetches the full entity, whose tasks are objects:
+  // the cached ids must survive it, or the task lists come out empty.
+  test('keeps the cached task ids', () => {
+    editsStore.cache.editMap.set('e-upd', {
+      id: 'e-upd',
+      name: 'old',
+      tasks: ['t1']
+    })
+    editsStore.mutations.UPDATE_EDIT(
+      {},
+      { id: 'e-upd', name: 'new', tasks: [{ id: 't1' }] }
+    )
+    expect(editsStore.cache.editMap.get('e-upd')).toMatchObject({
+      name: 'new',
+      tasks: ['t1']
+    })
+  })
+})
