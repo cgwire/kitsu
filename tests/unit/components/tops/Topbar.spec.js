@@ -46,6 +46,7 @@ const makeStore = (getterOverrides = {}) => {
     logout: vi.fn(),
     clearSelectedTasks: vi.fn(),
     loadEpisodes: vi.fn(() => Promise.resolve([])),
+    loadProduction: vi.fn(() => Promise.resolve()),
     saveLastProductionRoute: vi.fn(),
     setProduction: vi.fn(),
     setCurrentEpisode: vi.fn(),
@@ -734,6 +735,23 @@ describe('Topbar.vue', () => {
       expect(wrapper.vm.currentEpisodeId).toBe('episode-2')
       expect(replaceSpy).toHaveBeenCalled()
       expect(pushSpy).not.toHaveBeenCalled()
+      wrapper.unmount()
+    })
+
+    // A closed production is missing from the open ones the store holds: it
+    // is loaded, rather than the first open production standing in for it.
+    it('loads a production missing from the open ones before configuring it', () => {
+      const { wrapper, actions, route } = mountFor('shots', 'episode-1')
+      actions.setProduction.mockClear()
+      route.params.production_id = 'production-closed'
+
+      wrapper.vm.setProductionFromRoute()
+
+      expect(actions.loadProduction).toHaveBeenCalledWith(
+        expect.anything(),
+        'production-closed'
+      )
+      expect(actions.setProduction).not.toHaveBeenCalled()
       wrapper.unmount()
     })
 

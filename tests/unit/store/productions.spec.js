@@ -895,12 +895,12 @@ describe('Productions store', () => {
       state.productionMap = new Map()
       state.productionStatusMap = new Map(Object.entries({
         1: { name: 'old status' },
-        2: { name: 'new status' }
+        2: { name: 'Open' }
       }))
       store.mutations.ADD_PRODUCTION(state, { id: 123, name: 'new production', project_status_id: '2' })
       expect(state.productions).toHaveLength(2)
       expect(state.openProductions).toHaveLength(1)
-      expect(state.productionMap.get(123)).toEqual({ id: 123, name: 'new production', project_status_id: '2', project_status_name: 'new status' })
+      expect(state.productionMap.get(123)).toEqual({ id: 123, name: 'new production', project_status_id: '2', project_status_name: 'Open' })
     })
 
     test('UPDATE_PRODUCTION', () => {
@@ -1253,5 +1253,28 @@ describe('Productions store, production paths', () => {
       name: 'episode-stats',
       params: { production_id: 'production-id' }
     })
+  })
+})
+
+describe('Productions store, closed production', () => {
+  // A closed production loaded for a link must not show among the open ones.
+  test('adds a closed production to the map only', () => {
+    const state = {
+      productions: [],
+      openProductions: [],
+      productionMap: new Map(),
+      productionStatusMap: new Map([
+        ['status-closed', { id: 'status-closed', name: 'Closed' }]
+      ])
+    }
+
+    store.mutations.ADD_PRODUCTION(state, {
+      id: 'production-closed',
+      name: 'Archive',
+      project_status_id: 'status-closed'
+    })
+
+    expect(state.productionMap.has('production-closed')).toBe(true)
+    expect(state.openProductions).toEqual([])
   })
 })

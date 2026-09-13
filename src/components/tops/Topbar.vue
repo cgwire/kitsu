@@ -707,6 +707,7 @@ export default {
       'clearSelectedTasks',
       'decrementNotificationCounter',
       'loadEpisodes',
+      'loadProduction',
       'incrementNotificationCounter',
       'markAllNotificationsAsReadLocal',
       'resetNotificationCounter',
@@ -833,9 +834,35 @@ export default {
       this.silent = false
     },
 
+    loadProductionFromRoute(productionId) {
+      const leave = () =>
+        this.$router.replace({ name: 'open-productions' }).catch(console.error)
+      this.loadProduction(productionId)
+        .then(() => {
+          if (this.$route.params.production_id !== productionId) return
+          if (this.productionMap.get(productionId)) {
+            this.setProductionFromRoute()
+          } else {
+            leave()
+          }
+        })
+        .catch(err => {
+          // Deleted, or not shared with the user.
+          console.error(err)
+          leave()
+        })
+    },
+
     setProductionFromRoute() {
       const routeProductionId = this.$route.params.production_id
       const routeEpisodeId = this.$route.params.episode_id
+      // A production outside the open ones, a closed one reached by a link or
+      // a reload, is missing from the map: the store would stand the first
+      // open production in for it.
+      if (routeProductionId && !this.productionMap.get(routeProductionId)) {
+        this.loadProductionFromRoute(routeProductionId)
+        return
+      }
       if (this.isProductionChanged(routeProductionId)) {
         this.configureProduction(routeProductionId)
         return

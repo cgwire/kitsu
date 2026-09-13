@@ -992,9 +992,13 @@ const mutations = {
     production.project_status_name = productionStatus.name
     state.productions.push(production)
     state.productionMap.set(production.id, production)
-    state.openProductions.push(production)
+    // A closed production loaded for a link joins the map, not the open ones.
+    // The status names are the ones zou counts as open.
+    if (['Active', 'open', 'Open'].includes(production.project_status_name)) {
+      state.openProductions.push(production)
+      state.openProductions = sortByName(state.openProductions)
+    }
     state.productions = sortProductions(state.productions)
-    state.openProductions = sortByName(state.openProductions)
   },
 
   [UPDATE_PRODUCTION](state, production) {
