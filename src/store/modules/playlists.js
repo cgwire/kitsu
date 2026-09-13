@@ -84,6 +84,10 @@ const getters = {
   previewFileMap: state => state.previewFileMap
 }
 
+// Playlist loads land in click order only by chance: the load started last
+// owns the preview maps.
+let playlistRequest = 0
+
 const actions = {
   loadPlaylists(
     { commit, rootGetters },
@@ -126,11 +130,12 @@ const actions = {
 
   loadPlaylist({ commit, rootGetters }, playlist) {
     const currentProduction = rootGetters.currentProduction
+    const request = ++playlistRequest
     commit(LOAD_PLAYLIST_START)
     return playlistsApi
       .getPlaylist(currentProduction, playlist)
       .then(playlist => {
-        commit(LOAD_PLAYLIST_END, playlist)
+        if (request === playlistRequest) commit(LOAD_PLAYLIST_END, playlist)
         return playlist
       })
       .catch(err => {

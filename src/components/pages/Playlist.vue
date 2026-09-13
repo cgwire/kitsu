@@ -1250,11 +1250,14 @@ export default {
       if (playlist) {
         this.loading.playlist = true
         const loadedPlaylist = await this.loadPlaylist(playlist)
+        // Another playlist opened during the load: its own load shows it.
+        if (this.$route.params.playlist_id !== playlistId) return
         this.currentPlaylist = ref(loadedPlaylist)
         this.rebuildCurrentEntities()
         this.loading.playlist = false
         this.loadShareLinksCount(loadedPlaylist.id)
       } else {
+        this.loading.playlist = false
         this.currentPlaylist = {
           name: ''
         }
@@ -1486,6 +1489,7 @@ export default {
         })
         if (playlist.id === this.currentPlaylist.id) {
           const loadedPlaylist = await this.loadPlaylist(playlist)
+          if (this.$route.params.playlist_id !== playlist.id) return
           this.currentPlaylist = ref(loadedPlaylist)
           this.rebuildCurrentEntities()
           this.$nextTick(() => {

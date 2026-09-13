@@ -20,6 +20,38 @@ describe('Playlists store', () => {
       task_statuses: [{ id: 'task-status-1', name: 'Done' }]
     }
 
+    // Opening a playlist then another: the preview maps belong to the last
+    // one opened, whatever order the responses land in.
+    test('loadPlaylist commits only the playlist opened last', async () => {
+      let endFirst
+      vi.spyOn(playlistsApi, 'getPlaylist')
+        .mockImplementationOnce(
+          () =>
+            new Promise(resolve => {
+              endFirst = resolve
+            })
+        )
+        .mockResolvedValueOnce({ id: 'playlist-b' })
+      const commit = vi.fn()
+      const rootGetters = { currentProduction: { id: 'production-1' } }
+
+      const first = store.actions.loadPlaylist(
+        { commit, rootGetters },
+        { id: 'playlist-a' }
+      )
+      await store.actions.loadPlaylist(
+        { commit, rootGetters },
+        { id: 'playlist-b' }
+      )
+      endFirst({ id: 'playlist-a' })
+      expect(await first).toEqual({ id: 'playlist-a' })
+
+      const ends = commit.mock.calls.filter(
+        ([type]) => type === 'LOAD_PLAYLIST_END'
+      )
+      expect(ends.map(([, playlist]) => playlist.id)).toEqual(['playlist-b'])
+    })
+
     test('loadPlaylists forwards the entity type filter of the all pseudo-episode', async () => {
       const getPlaylists = vi
         .spyOn(playlistsApi, 'getPlaylists')
