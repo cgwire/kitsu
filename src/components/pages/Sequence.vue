@@ -449,7 +449,14 @@ const getCurrentSequence = async () => {
       const { parent_id } =
         sequence || (await store.dispatch('loadSequence', sequenceId)) || {}
       const episodeId = currentEpisode.value?.id
-      if (parent_id && episodeId !== 'all' && episodeId !== parent_id) {
+      // Left during the fetches: the page shown now owns the episode.
+      const isStillShown = route.params.sequence_id === sequenceId
+      if (
+        isStillShown &&
+        parent_id &&
+        episodeId !== 'all' &&
+        episodeId !== parent_id
+      ) {
         store.dispatch('setCurrentEpisode', parent_id)
       }
     }
