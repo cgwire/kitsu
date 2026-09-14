@@ -947,7 +947,7 @@ import { usePlayerTransport } from '@/composables/players/transport'
 import { usePreviewRoom } from '@/composables/previewRoom'
 import { isValidRoomId } from '@/lib/players/events'
 import { scrubFrame } from '@/lib/players/scrub'
-import { warmPlaylistMovies } from '@/lib/playlistWarmup'
+import { warmPlaylistMovies } from '@/lib/playlist'
 import preferences from '@/lib/preferences'
 import {
   buildAnnotationSnapshotFilename,

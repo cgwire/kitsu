@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 
-import { warmPlaylistMovies } from '@/lib/playlistWarmup'
+import { warmPlaylistMovies } from '@/lib/playlist'
 
 const entities = [
   { preview_file_id: 'a', preview_file_extension: 'mp4' },
@@ -12,7 +12,7 @@ const entities = [
 
 const flush = () => new Promise(resolve => setTimeout(resolve, 0))
 
-describe('lib/playlistWarmup', () => {
+describe('lib/playlist warmPlaylistMovies', () => {
   it('asks one byte of each movie, two at a time, in order', async () => {
     const resolvers = []
     const fetcher = vi.fn(
