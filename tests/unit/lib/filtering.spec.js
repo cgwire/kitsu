@@ -215,6 +215,122 @@ describe('lib/filtering', () => {
       expect(taskTypeFilters[0].taskType.id).toEqual('task-type-fx')
     })
 
+    // Zou's unique constraint is (name, for_entity, department_id), so two
+    // live task types can carry the same name in two departments. Electing
+    // one of them made the other column silently unfilterable.
+    describe('two live task types sharing a name', () => {
+      const twins = [
+        { name: 'Compositing', id: 'task-type-render', department_id: 'dep-1' },
+        { name: 'COMPOSITING', id: 'task-type-2d', department_id: 'dep-2' }
+      ]
+      const renderShot = {
+        id: 'shot-render',
+        validations: new Map([['task-type-render', 'task-render']]),
+        tasks: ['task-render'],
+        ready_for: 'task-type-render',
+        nb_entities_out: 2
+      }
+      const twoDShot = {
+        id: 'shot-2d',
+        validations: new Map([['task-type-2d', 'task-2d']]),
+        tasks: ['task-2d'],
+        ready_for: 'task-type-2d',
+        nb_entities_out: 2
+      }
+      const twinTaskMap = new Map([
+        [
+          'task-render',
+          {
+            id: 'task-render',
+            task_type_id: 'task-type-render',
+            task_status_id: 'task-status-1',
+            assignees: [],
+            nb_assets_ready: 2
+          }
+        ],
+        [
+          'task-2d',
+          {
+            id: 'task-2d',
+            task_type_id: 'task-type-2d',
+            task_status_id: 'task-status-1',
+            assignees: ['person-1'],
+            priority: 3,
+            nb_assets_ready: 2
+          }
+        ]
+      ])
+      const keptBy = query =>
+        applyFilters(
+          [renderShot, twoDShot],
+          getFilters({
+            entryIndex,
+            assetTypes,
+            taskTypes: twins,
+            taskStatuses,
+            descriptors,
+            persons,
+            query
+          }),
+          twinTaskMap
+        ).map(entry => entry.id)
+
+      it('matches the status on either task type', () => {
+        expect(keptBy('[COMPOSITING]=[wip]')).toEqual([
+          'shot-render',
+          'shot-2d'
+        ])
+      })
+
+      it('excludes an entry as soon as one of them holds the status', () => {
+        expect(keptBy('[COMPOSITING]=[-wip]')).toEqual([])
+      })
+
+      it('matches assigned and unassigned on either task type', () => {
+        expect(keptBy('[COMPOSITING]=assigned')).toEqual(['shot-2d'])
+        expect(keptBy('[COMPOSITING]=unassigned')).toEqual(['shot-render'])
+      })
+
+      it('matches assignedto on either task type', () => {
+        expect(keptBy('assignedto[COMPOSITING]=[John Doe]')).toEqual([
+          'shot-2d'
+        ])
+      })
+
+      it('matches the priority on either task type', () => {
+        expect(keptBy('priority-[COMPOSITING]=3')).toEqual(['shot-2d'])
+      })
+
+      it('matches readyfor on either task type', () => {
+        expect(keptBy('readyfor=[COMPOSITING]')).toEqual([
+          'shot-render',
+          'shot-2d'
+        ])
+      })
+
+      it('matches assetsready on either task type', () => {
+        expect(keptBy('assetsready=[COMPOSITING]')).toEqual([
+          'shot-render',
+          'shot-2d'
+        ])
+      })
+
+      it('still exposes the first match for the filter builder modal', () => {
+        const filters = getFilters({
+          entryIndex,
+          assetTypes,
+          taskTypes: twins,
+          taskStatuses,
+          descriptors,
+          persons,
+          query: '[COMPOSITING]=[wip]'
+        })
+        const statusFilter = filters.find(f => f.type === 'status')
+        expect(statusFilter.taskType).toEqual(twins[0])
+        expect(statusFilter.taskTypes).toHaveLength(2)
+      })
+    })
+
     describe('archived task type sharing a live task type name', () => {
       // A studio archived an old COMPOSITING task type and kept a live one
       // with the same name. The archived twin used to win the name lookup,
