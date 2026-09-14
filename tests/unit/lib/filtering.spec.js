@@ -215,6 +215,107 @@ describe('lib/filtering', () => {
       expect(taskTypeFilters[0].taskType.id).toEqual('task-type-fx')
     })
 
+    describe('archived task type sharing a live task type name', () => {
+      // A studio archived an old COMPOSITING task type and kept a live one
+      // with the same name. The archived twin used to win the name lookup,
+      // which left that single column unfilterable.
+      const compositingTaskTypes = [
+        { name: 'COMPOSITING', id: 'task-type-archived', archived: true },
+        { name: 'COMPOSITING', id: 'task-type-live' }
+      ]
+      const shot = {
+        id: 'shot-1',
+        validations: new Map([['task-type-live', 'task-1']]),
+        tasks: ['task-1']
+      }
+      const taskMap = new Map([
+        ['task-1', { id: 'task-1', task_status_id: 'task-status-1' }]
+      ])
+      const filtersFor = query =>
+        getFilters({
+          entryIndex,
+          assetTypes,
+          taskTypes: compositingTaskTypes,
+          taskStatuses,
+          descriptors,
+          persons,
+          query
+        })
+
+      it('resolves the filter to the live task type', () => {
+        const statusFilters = filtersFor('[COMPOSITING]=[wip]').filter(
+          f => f.type === 'status'
+        )
+        expect(statusFilters).toHaveLength(1)
+        expect(statusFilters[0].taskType.id).toEqual('task-type-live')
+      })
+
+      it('keeps the matching shot instead of emptying the list', () => {
+        const filters = filtersFor('[COMPOSITING]=[wip]')
+        expect(applyFilters([shot], filters, taskMap)).toEqual([shot])
+      })
+
+      it('still excludes on a negated status instead of matching everything', () => {
+        const filters = filtersFor('[COMPOSITING]=[-wip]')
+        expect(applyFilters([shot], filters, taskMap)).toEqual([])
+      })
+
+      it('keeps a shot whose task is not in the excluded status', () => {
+        const filters = filtersFor('[COMPOSITING]=[-done]')
+        expect(applyFilters([shot], filters, taskMap)).toEqual([shot])
+      })
+
+      // Zou rejects an exact name duplicate but not a case differing one:
+      // the guard at blueprints/crud/task_type.py:157 is a case sensitive
+      // get_by(name=name), so this is the shape a studio can actually reach.
+      // An archived task type that still carries tasks keeps a column, so a
+      // filter aimed at it has to keep working.
+      it('still filters on an archived task type that has no live twin', () => {
+        const archivedOnly = [
+          { name: 'COMPOSITING', id: 'task-type-archived', archived: true }
+        ]
+        const archivedShot = {
+          id: 'shot-2',
+          validations: new Map([['task-type-archived', 'task-1']]),
+          tasks: ['task-1']
+        }
+        const filters = getFilters({
+          entryIndex,
+          assetTypes,
+          taskTypes: archivedOnly,
+          taskStatuses,
+          descriptors,
+          persons,
+          query: '[COMPOSITING]=[wip]'
+        })
+        const statusFilters = filters.filter(f => f.type === 'status')
+        expect(statusFilters).toHaveLength(1)
+        expect(statusFilters[0].taskType.id).toEqual('task-type-archived')
+        expect(applyFilters([archivedShot], filters, taskMap)).toEqual([
+          archivedShot
+        ])
+      })
+
+      it('puts the live task type ahead of an archived twin differing only by case', () => {
+        const filters = getFilters({
+          entryIndex,
+          assetTypes,
+          taskTypes: [
+            { name: 'Compositing', id: 'task-type-archived', archived: true },
+            { name: 'COMPOSITING', id: 'task-type-live' }
+          ],
+          taskStatuses,
+          descriptors,
+          persons,
+          query: '[COMPOSITING]=[wip]'
+        })
+        const statusFilters = filters.filter(f => f.type === 'status')
+        expect(statusFilters).toHaveLength(1)
+        expect(statusFilters[0].taskType.id).toEqual('task-type-live')
+        expect(applyFilters([shot], filters, taskMap)).toEqual([shot])
+      })
+    })
+
     it('several task types', () => {
       const filters = getFilters({
         entryIndex,
