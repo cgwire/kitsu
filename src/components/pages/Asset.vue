@@ -708,7 +708,11 @@ const resetData = async () => {
 
 const init = async () => {
   try {
-    currentAsset.value = await getCurrentAsset()
+    const assetId = route.params.asset_id
+    const asset = await getCurrentAsset()
+    // Another asset opened during the load: its own init shows it.
+    if (route.params.asset_id !== assetId) return
+    currentAsset.value = asset
     currentSection.value = route.query.section || 'infos'
     if (currentAsset.value) {
       loadCastingData()

@@ -439,3 +439,34 @@ describe('Tasks store', () => {
     })
   })
 })
+
+describe('Tasks store, DELETE_TASK_END', () => {
+  const task = { id: 't1', entity_id: 'e1', task_type_id: 'tt1' }
+  const buildState = () => ({
+    taskComments: {},
+    taskPreviews: {},
+    taskMap: new Map([['t1', task]]),
+    selectedTasks: new Map(),
+    selectedValidations: new Map(),
+    nbSelectedTasks: 0,
+    nbSelectedValidations: 0
+  })
+
+  // A colleague's deletion reaches every open list: an empty cell selected
+  // behind the user's back would recreate the task on the next creation.
+  test('selects nothing when the deleted task was not selected', () => {
+    const state = buildState()
+    tasksStore.mutations.DELETE_TASK_END(state, task)
+    expect(state.selectedValidations.size).toBe(0)
+  })
+
+  test('keeps the empty cell of a selected task selected, and counted', () => {
+    const state = buildState()
+    state.selectedTasks.set('t1', task)
+    state.nbSelectedTasks = 1
+    tasksStore.mutations.DELETE_TASK_END(state, task)
+    expect(state.nbSelectedTasks).toBe(0)
+    expect(state.selectedValidations.has('e1-tt1')).toBe(true)
+    expect(state.nbSelectedValidations).toBe(1)
+  })
+})

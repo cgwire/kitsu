@@ -46,6 +46,7 @@ import {
   LOAD_SHOTS_ERROR,
   LOAD_SHOTS_END,
   END_SHOTS_LOADING,
+  MARK_SHOTS_PARTIAL,
   SORT_VALIDATION_COLUMNS,
   SET_CURRENT_EPISODE,
   LOAD_SHOT_END,
@@ -88,6 +89,8 @@ import {
 
 const cache = {
   shots: [],
+  // Shots deleted while a list load runs: its response may still hold them.
+  removedShotIds: new Set(),
   shotsLoadingPromise: null,
   shotsLoadingKey: null,
   shotMap: new Map(),
@@ -543,14 +546,12 @@ const actions = {
         // Displayed when its refresh started and gone since: deleted, or
         // dropped by a list load whose own response decides.
         if (displayedShot) return
-        if (
-          !onlyInScope ||
-          isEpisodeInLoadedScope(
-            state.shotsLoadingKey,
-            shot.episode_id,
-            shot.project_id
-          )
-        ) {
+        const isInLoadedScope = isEpisodeInLoadedScope(
+          state.shotsLoadingKey,
+          shot.episode_id,
+          shot.project_id
+        )
+        if (!onlyInScope || isInLoadedScope) {
           shot.tasks.forEach(task => {
             commit(NEW_TASK_END, { task })
           })
@@ -563,6 +564,9 @@ const actions = {
             production,
             shot
           })
+          // A detail page loads its shot whatever the list holds: holding more
+          // than its recorded scope, the list must be refetched by its pages.
+          if (!isInLoadedScope) commit(MARK_SHOTS_PARTIAL)
         }
       })
       .catch(err => console.error(err))
@@ -934,6 +938,7 @@ const mutations = {
     cache.shotIndex = {}
     // Same as CLEAR_SHOTS: keep the map identity, the getter is memoized.
     cache.shotMap.clear()
+    cache.removedShotIds.clear()
     state.shotValidationColumns = []
 
     state.isShotsLoading = true
@@ -971,6 +976,9 @@ const mutations = {
       sequenceMap
     }
   ) {
+    // Deleted during the load, after the response was built.
+    shots = shots.filter(({ id }) => !cache.removedShotIds.has(id))
+    cache.removedShotIds.clear()
     const validationColumns = {}
     let isFps = false
     let isFrames = false
@@ -1071,6 +1079,12 @@ const mutations = {
   [END_SHOTS_LOADING](state) {
     state.isShotsLoading = false
     state.shotsLoadingKey = null
+  },
+
+  [MARK_SHOTS_PARTIAL](state) {
+    if (state.shotsLoadingKey && !state.shotsLoadingKey.includes('#')) {
+      state.shotsLoadingKey = `${state.shotsLoadingKey}#partial`
+    }
   },
 
   [SAVE_SHOT_SEARCH_END](state, { searchQuery }) {
@@ -1442,7 +1456,11 @@ const mutations = {
   [UPDATE_SHOT](state, shot) {
     const cachedShot = cache.shotMap.get(shot.id)
     if (cachedShot) {
-      Object.assign(cachedShot, shot)
+      // A refetched shot lists task objects where the cache keeps the ids the
+      // task columns and the detail page resolve: tasks have their own events.
+      const fields = { ...shot }
+      delete fields.tasks
+      Object.assign(cachedShot, fields)
       updateEntryInIndex(
         cache.shotIndex,
         cachedShot,
@@ -1452,6 +1470,7 @@ const mutations = {
   },
 
   [REMOVE_SHOT](state, shotToDelete) {
+    if (state.isShotsLoading) cache.removedShotIds.add(shotToDelete.id)
     cache.shotMap.delete(shotToDelete.id)
     cache.shots = removeModelFromList(cache.shots, shotToDelete)
     cache.result = removeModelFromList(cache.result, shotToDelete)

@@ -449,7 +449,14 @@ const getCurrentSequence = async () => {
       const { parent_id } =
         sequence || (await store.dispatch('loadSequence', sequenceId)) || {}
       const episodeId = currentEpisode.value?.id
-      if (parent_id && episodeId !== 'all' && episodeId !== parent_id) {
+      // Left during the fetches: the page shown now owns the episode.
+      const isStillShown = route.params.sequence_id === sequenceId
+      if (
+        isStillShown &&
+        parent_id &&
+        episodeId !== 'all' &&
+        episodeId !== parent_id
+      ) {
         store.dispatch('setCurrentEpisode', parent_id)
       }
     }
@@ -484,7 +491,11 @@ const resetData = async () => {
 
 const init = async () => {
   try {
-    currentSequence.value = await getCurrentSequence()
+    const sequenceId = route.params.sequence_id
+    const sequence = await getCurrentSequence()
+    // Another sequence opened during the load: its own init shows it.
+    if (route.params.sequence_id !== sequenceId) return
+    currentSequence.value = sequence
     currentSection.value = route.query.section || 'infos'
     if (currentSequence.value) {
       loadCastingData()

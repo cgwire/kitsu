@@ -406,7 +406,15 @@ const actions = {
     const loadingPromise = shotsApi
       .getSequences(production, episode)
       .then(sequences => {
-        if (production.id !== rootGetters.currentProduction?.id) {
+        // A production or an episode switched during the fetch: its page
+        // loads the sequences of the new scope.
+        const currentScope = rootGetters.isTVShow
+          ? (rootGetters.currentEpisode?.id ?? '')
+          : ''
+        if (
+          production.id !== rootGetters.currentProduction?.id ||
+          scope !== currentScope
+        ) {
           return sequences
         }
         commit(LOAD_SEQUENCES_END, {
@@ -474,10 +482,12 @@ const actions = {
         }
         // Discard a response whose scope is not the one displayed any more
         // (the user switched episode mid-load).
+        // An empty response carries no episode: compare the one requested.
         const isCurrentScope = isAllEpisodes
           ? rootGetters.currentEpisode?.id === 'all'
-          : sequences[0]?.episode_id === rootGetters.currentEpisode?.id
-        if (!isTVShow || sequences.length === 0 || isCurrentScope) {
+          : (sequences[0]?.episode_id ?? episode?.id) ===
+            rootGetters.currentEpisode?.id
+        if (!isTVShow || isCurrentScope) {
           commit(SET_SEQUENCES_WITH_TASKS, {
             sequences,
             episodeMap,
@@ -1018,6 +1028,9 @@ const mutations = {
             taskTypeMap,
             taskStatusMap
           )
+          // A sequence added live has no task columns yet.
+          if (!sequence.validations) sequence.validations = new Map()
+          if (!sequence.tasks) sequence.tasks = []
           sequence.validations.set(task.task_type_id, task.id)
           sequence.tasks.push(task.id)
           const displayedSequence = state.displayedSequences.find(
@@ -1080,6 +1093,7 @@ const mutations = {
         state.sequenceFilledColumns[task.task_type_id] = true
       }
       // Push task and readds the whole map to activate the realtime display.
+      if (!sequence.tasks) sequence.tasks = []
       sequence.tasks.push(task.id)
       if (!sequence.validations) sequence.validations = new Map()
       sequence.validations.set(task.task_type_id, task.id)

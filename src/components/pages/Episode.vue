@@ -486,7 +486,11 @@ const resetData = async () => {
 
 const init = async () => {
   try {
-    currentEpisode.value = await getCurrentEpisode()
+    const episodeId = route.params.episode_id
+    const episode = await getCurrentEpisode()
+    // Another episode opened during the load: its own init shows it.
+    if (route.params.episode_id !== episodeId) return
+    currentEpisode.value = episode
     currentSection.value = route.query.section || 'infos'
     if (currentEpisode.value) {
       loadCastingData()

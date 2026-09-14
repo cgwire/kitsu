@@ -1010,13 +1010,12 @@ export default {
 
     currentProduction() {
       this.setOptionalImportColumns()
-      if (!this.initialLoading) {
-        this.$refs['shot-search-field']?.setValue('')
-        this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)
-
-        if (this.currentProduction && !this.isTVShow) {
-          this.loadShots()
-        }
+      this.$refs['shot-search-field']?.setValue('')
+      this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)
+      // Even during the first load: the switch dropped its response. A TV
+      // show reloads from the episode watcher instead.
+      if (this.currentProduction && !this.isTVShow) {
+        this.loadShots()
       }
     },
 

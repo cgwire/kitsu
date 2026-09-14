@@ -392,7 +392,9 @@ export default {
 
   mounted() {
     this.currentProjectSection = this.getCurrentSectionFromRoute()
-    this.setProductionFromRoute()
+    // A page without production has nothing to configure: the fallback
+    // production of the store would get its episodes fetched for nothing.
+    if (this.$route.params.production_id) this.setProductionFromRoute()
   },
 
   computed: {
@@ -705,6 +707,7 @@ export default {
       'clearSelectedTasks',
       'decrementNotificationCounter',
       'loadEpisodes',
+      'loadProduction',
       'incrementNotificationCounter',
       'markAllNotificationsAsReadLocal',
       'resetNotificationCounter',
@@ -831,12 +834,43 @@ export default {
       this.silent = false
     },
 
+    loadProductionFromRoute(productionId) {
+      const leave = () =>
+        this.$router.replace({ name: 'open-productions' }).catch(console.error)
+      this.loadProduction(productionId)
+        .then(() => {
+          if (this.$route.params.production_id !== productionId) return
+          if (this.productionMap.get(productionId)) {
+            this.setProductionFromRoute()
+          } else {
+            leave()
+          }
+        })
+        .catch(err => {
+          // Deleted, or not shared with the user.
+          console.error(err)
+          leave()
+        })
+    },
+
     setProductionFromRoute() {
       const routeProductionId = this.$route.params.production_id
       const routeEpisodeId = this.$route.params.episode_id
+      // A production outside the open ones, a closed one reached by a link or
+      // a reload, is missing from the map: the store would stand the first
+      // open production in for it.
+      if (routeProductionId && !this.productionMap.get(routeProductionId)) {
+        this.loadProductionFromRoute(routeProductionId)
+        return
+      }
       if (this.isProductionChanged(routeProductionId)) {
         this.configureProduction(routeProductionId)
-      } else if (this.isEpisodeChanged(routeEpisodeId)) {
+        return
+      }
+      // Already the production of the store, its fallback one on a first
+      // load: a later switch must not pass for a first load.
+      this.hasConfiguredProduction = true
+      if (this.isEpisodeChanged(routeEpisodeId)) {
         this.configureEpisode(routeEpisodeId)
       } else {
         this.updateCombosFromRoute()
@@ -869,16 +903,22 @@ export default {
               return
             }
             if (this.currentProjectSection === 'assets') {
-              const isValidEpisode =
+              // An episode of this production is kept on any load: a switch
+              // through the production list carries an episode of the one
+              // left. That switch carries pseudo-episodes too, which only a
+              // first load keeps.
+              const isOwnEpisode = this.episodes.some(
+                ({ id }) => id === routeEpisodeId
+              )
+              const isKeptPseudoEpisode =
+                isInitialLoad &&
                 this.keepsPseudoEpisode(
                   'assets',
                   routeEpisodeId,
                   this.$route.params.plugin_id
-                ) || this.episodes.some(({ id }) => id === routeEpisodeId)
+                )
               this.currentEpisodeId =
-                isInitialLoad && routeEpisodeId && isValidEpisode
-                  ? routeEpisodeId
-                  : 'all'
+                isOwnEpisode || isKeptPseudoEpisode ? routeEpisodeId : 'all'
             } else if (
               this.keepsPseudoEpisode(
                 this.currentProjectSection,
@@ -959,7 +999,12 @@ export default {
         this.isTVShow &&
         (!this.currentEpisode ||
           this.currentEpisodeId !== episodeId ||
-          this.currentEpisode.id !== episodeId)
+          this.currentEpisode.id !== episodeId ||
+          // Deleted while no page of the production was shown: the route and
+          // the store still name it, it must be resolved again.
+          (Boolean(episodeId) &&
+            this.isEpisodeListLoaded &&
+            !this.isKnownEpisode(episodeId)))
       )
     },
 
@@ -1071,7 +1116,10 @@ export default {
       const productionId = this.$route.params.production_id
       const pluginId = this.$route.params.plugin_id
       const section = this.getCurrentSectionFromRoute()
-      let episodeId = resolvedEpisodeId ?? this.$route.params.episode_id
+      const routeEpisodeId = resolvedEpisodeId ?? this.$route.params.episode_id
+      // A page without episode keeps the one of the store, which the section
+      // links reopen.
+      let episodeId = routeEpisodeId ?? this.currentEpisode?.id
       this.silent = true
       this.currentProductionId = productionId
       this.currentProjectSection = section
@@ -1080,6 +1128,7 @@ export default {
       // episode, the same fallback as a direct link: Back from a corrected
       // link must not land on a third episode.
       if (
+        routeEpisodeId &&
         ['all', 'main'].includes(episodeId) &&
         !this.keepsPseudoEpisode(section, episodeId, pluginId) &&
         this.episodes.length > 0

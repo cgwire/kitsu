@@ -1,4 +1,4 @@
-import { DEFAULT_NB_FRAMES_PICTURE } from '@/lib/playlist'
+import { DEFAULT_NB_FRAMES_PICTURE, isPlaylistInScope } from '@/lib/playlist'
 import playlistsApi from '@/store/api/playlists'
 import { sortByDate } from '@/lib/sorting'
 import { removeModelFromList, updateModelFromList } from '@/lib/models'
@@ -84,6 +84,10 @@ const getters = {
   previewFileMap: state => state.previewFileMap
 }
 
+// Playlist loads land in click order only by chance: the load started last
+// owns the preview maps.
+let playlistRequest = 0
+
 const actions = {
   loadPlaylists(
     { commit, rootGetters },
@@ -126,11 +130,12 @@ const actions = {
 
   loadPlaylist({ commit, rootGetters }, playlist) {
     const currentProduction = rootGetters.currentProduction
+    const request = ++playlistRequest
     commit(LOAD_PLAYLIST_START)
     return playlistsApi
       .getPlaylist(currentProduction, playlist)
       .then(playlist => {
-        commit(LOAD_PLAYLIST_END, playlist)
+        if (request === playlistRequest) commit(LOAD_PLAYLIST_END, playlist)
         return playlist
       })
       .catch(err => {
@@ -139,10 +144,16 @@ const actions = {
       })
   },
 
-  async refreshPlaylist({ commit, rootGetters }, id) {
+  // A live event refetches a playlist. A new one joins the list only when it
+  // matches the scope the list was loaded for, an updated one is refreshed
+  // only while listed: the list may have been replaced during the fetch.
+  async refreshPlaylist({ commit, state, rootGetters }, { id, scope = null }) {
     const currentProduction = rootGetters.currentProduction
     const playlist = await playlistsApi.getPlaylist(currentProduction, { id })
-    commit(EDIT_PLAYLIST_END, playlist)
+    const isListed = scope
+      ? isPlaylistInScope(playlist, scope)
+      : Boolean(state.playlistMap.get(playlist.id))
+    if (isListed) commit(EDIT_PLAYLIST_END, playlist)
     return playlist
   },
 

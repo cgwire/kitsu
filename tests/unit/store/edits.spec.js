@@ -552,3 +552,56 @@ describe('Edits store, live insertion during a list load', () => {
     expect(commit.mock.calls.map(([type]) => type)).not.toContain('ADD_EDIT')
   })
 })
+
+describe('Edits store, UPDATE_EDIT', () => {
+  afterEach(() => {
+    editsStore.cache.editMap.delete('e-upd')
+  })
+
+  // A colleague's edit refetches the full entity, whose tasks are objects:
+  // the cached ids must survive it, or the task lists come out empty.
+  test('keeps the cached task ids', () => {
+    editsStore.cache.editMap.set('e-upd', {
+      id: 'e-upd',
+      name: 'old',
+      tasks: ['t1']
+    })
+    editsStore.mutations.UPDATE_EDIT(
+      {},
+      { id: 'e-upd', name: 'new', tasks: [{ id: 't1' }] }
+    )
+    expect(editsStore.cache.editMap.get('e-upd')).toMatchObject({
+      name: 'new',
+      tasks: ['t1']
+    })
+  })
+})
+
+describe('Edits store, deletion during a list load', () => {
+  afterEach(() => {
+    editsStore.cache.removedEditIds.clear()
+    editsStore.cache.editMap.clear()
+  })
+
+  // The response was built before the deletion reached the page: the edit
+  // must not come back with it.
+  test('keeps an edit deleted during the load out of its response', () => {
+    const state = {
+      isEditsLoading: true,
+      displayedEdits: [],
+      editSearchQueries: []
+    }
+    editsStore.mutations.REMOVE_EDIT(state, { id: 'e-deleted' })
+
+    editsStore.mutations.LOAD_EDITS_END(state, {
+      production: { id: 'p1' },
+      edits: [{ id: 'e-deleted', name: 'E1', tasks: [] }],
+      userFilters: {},
+      taskMap: new Map(),
+      taskTypeMap: new Map(),
+      personMap: new Map()
+    })
+
+    expect(editsStore.cache.editMap.has('e-deleted')).toBe(false)
+  })
+})

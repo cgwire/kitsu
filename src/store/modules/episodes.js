@@ -667,6 +667,13 @@ const mutations = {
     })
     episodes = sortByName(episodes)
 
+    // The topbar may list an episode added live during the fetch: keep it
+    // resolvable, or choosing it sets no current episode.
+    state.episodes.forEach(episode => {
+      if (!cache.episodeMap.has(episode.id)) {
+        cache.episodeMap.set(episode.id, episode)
+      }
+    })
     cache.episodes = episodes
     cache.result = episodes
     cache.episodeIndex = buildEpisodeIndex(episodes)
@@ -718,6 +725,13 @@ const mutations = {
   },
 
   [UPDATE_EPISODE](state, episode) {
+    // The map holds raw objects: assigned through it first, the lists showing
+    // the episode, the topbar selector among them, would see no change.
+    const lists = [state.episodes, state.displayedEpisodes]
+    lists.forEach(list => {
+      const listedEpisode = list.find(({ id }) => id === episode.id)
+      if (listedEpisode) Object.assign(listedEpisode, episode)
+    })
     Object.assign(cache.episodeMap.get(episode.id), episode)
     cache.episodeIndex = buildEpisodeIndex(state.episodes)
   },
@@ -822,6 +836,12 @@ const mutations = {
     const responseIds = new Set(episodes.map(({ id }) => id))
     const liveEpisodes = state.episodes.filter(({ id }) => !responseIds.has(id))
     episodes = episodes.concat(liveEpisodes)
+    // The Episodes page may have loaded them with their tasks first: keep
+    // those rows, refreshed, rather than plain ones without task columns.
+    episodes = episodes.map(episode => {
+      const loaded = cache.episodeMap.get(episode.id)
+      return loaded?.validations ? Object.assign(loaded, episode) : episode
+    })
     state.isEpisodeListLoaded = true
     cache.episodeMap.clear()
     episodes.forEach(episode => {
@@ -906,6 +926,9 @@ const mutations = {
             taskTypeMap,
             taskStatusMap
           )
+          // An episode added live has no task columns yet.
+          if (!episode.validations) episode.validations = new Map()
+          if (!episode.tasks) episode.tasks = []
           episode.validations.set(task.task_type_id, task.id)
           const displayedEpisode = state.displayedEpisodes.find(
             e => e.id === episode.id
@@ -966,6 +989,7 @@ const mutations = {
         state.episodeFilledColumns[task.task_type_id] = true
       }
       // Push task and readds the whole map to activate the realtime display.
+      if (!episode.tasks) episode.tasks = []
       episode.tasks.push(task.id)
       if (!episode.validations) episode.validations = new Map()
       episode.validations.set(task.task_type_id, task.id)

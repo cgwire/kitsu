@@ -200,6 +200,7 @@ export default {
         person: null,
         taskTypeId: ''
       },
+      paramsProductionId: null,
       personShots: [],
       silent: false,
 
@@ -210,32 +211,11 @@ export default {
 
   mounted() {
     this.setCountModeOptions()
-    const key = `quota:${this.currentProduction.id}:params`
-    const savedParams = preferences.getObjectPreference(key) || {}
-    const defaultParams = {
-      countMode: this.countModeOptions[0].value,
-      computeMode: this.computeModeOptions[0].value,
-      taskTypeId: this.productionShotTaskTypes[0].id
-    }
     this.activeTab = this.$route.query.tab || 'tasktypes'
-    this.params = {
-      countMode:
-        this.$route.query.countMode ||
-        savedParams.countMode ||
-        defaultParams.countMode,
-      computeMode:
-        this.$route.query.computeMode ||
-        savedParams.computeMode ||
-        defaultParams.computeMode,
-      taskTypeId: this.$route.query.taskTypeId,
-      person: this.$route.query.personId
-        ? personMap.get(this.$route.query.personId)
-        : null
-    }
-    if (!this.params.taskTypeId && !this.params.person) {
-      this.params.taskTypeId =
-        savedParams.taskTypeId || defaultParams.taskTypeId
-    }
+    // Mounted before the topbar set the production of the route: the
+    // production watcher starts from the params of that production.
+    if (this.$route.params.production_id !== this.currentProduction.id) return
+    this.initParams()
     this.resetRouteQuery()
     this.loadRoute()
   },
@@ -406,11 +386,44 @@ export default {
       }
     },
 
+    // Params of the current production: the route query first, then the ones
+    // saved for this production.
+    initParams() {
+      const key = `quota:${this.currentProduction.id}:params`
+      const savedParams = preferences.getObjectPreference(key) || {}
+      const defaultParams = {
+        countMode: this.countModeOptions[0].value,
+        computeMode: this.computeModeOptions[0].value,
+        taskTypeId: this.productionShotTaskTypes[0].id
+      }
+      this.params = {
+        countMode:
+          this.$route.query.countMode ||
+          savedParams.countMode ||
+          defaultParams.countMode,
+        computeMode:
+          this.$route.query.computeMode ||
+          savedParams.computeMode ||
+          defaultParams.computeMode,
+        taskTypeId: this.$route.query.taskTypeId,
+        person: this.$route.query.personId
+          ? personMap.get(this.$route.query.personId)
+          : null
+      }
+      if (!this.params.taskTypeId && !this.params.person) {
+        this.params.taskTypeId =
+          savedParams.taskTypeId || defaultParams.taskTypeId
+      }
+      this.paramsProductionId = this.currentProduction.id
+    },
+
     resetRouteQuery() {
       const query = this.getQuery()
       const key = `quota:${this.currentProduction.id}:params`
       preferences.setObjectPreference(key, this.params)
-      this.$router.push({ query })
+      // Replace: the query mirrors the params, it is no navigation of the
+      // user's. A pushed entry was landed on by Back, then pushed again.
+      this.$router.replace({ query })
     },
 
     throttledResetRouteQuery() {
@@ -519,7 +532,11 @@ export default {
     },
 
     currentProduction() {
+      if (!this.currentProduction) return
       this.setCountModeOptions()
+      // The params of the production left must neither be saved under this
+      // one nor written into its URL.
+      this.initParams()
       this.reloadShots()
     },
 
@@ -529,6 +546,9 @@ export default {
 
     $route() {
       this.activeTab = this.$route.query.tab || 'tasktypes'
+      // A production switch: the production watcher starts over from the
+      // params of the new production.
+      if (this.$route.params.production_id !== this.paramsProductionId) return
       this.resetRouteQuery()
       this.loadRoute()
     }

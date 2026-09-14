@@ -512,6 +512,18 @@ describe('Shots store, loadShot live insertion', () => {
     expect(types).toContain('ADD_SHOT')
   })
 
+  // The list pages adopt the dataset on its recorded scope: they must refetch
+  // it rather than show a row of another episode.
+  test('marks the list partial for a shot loaded by id out of its scope', async () => {
+    expect(
+      await committedTypes('sh-other', 'p-live/ep-a', {
+        id: 'sh-other',
+        episode_id: 'ep-b',
+        project_id: 'p-live'
+      })
+    ).toContain('MARK_SHOTS_PARTIAL')
+  })
+
   // An update then a deletion within one round trip: the refresh must not
   // bring back the row the deletion removed.
   test('keeps out a displayed shot deleted during its refresh', async () => {
@@ -651,5 +663,42 @@ describe('Shots store, live insertion during a list load', () => {
     await loading
 
     expect(commit.mock.calls.map(([type]) => type)).not.toContain('ADD_SHOT')
+  })
+})
+
+describe('Shots store, UPDATE_SHOT', () => {
+  afterEach(() => {
+    shotsStore.cache.shotMap.delete('sh-upd')
+  })
+
+  // A colleague's edit refetches the full entity, whose tasks are objects:
+  // the cached ids must survive it, or the task lists come out empty.
+  test('keeps the cached task ids', () => {
+    shotsStore.cache.shotMap.set('sh-upd', {
+      id: 'sh-upd',
+      name: 'old',
+      tasks: ['t1']
+    })
+    shotsStore.mutations.UPDATE_SHOT(
+      {},
+      { id: 'sh-upd', name: 'new', tasks: [{ id: 't1' }] }
+    )
+    expect(shotsStore.cache.shotMap.get('sh-upd')).toMatchObject({
+      name: 'new',
+      tasks: ['t1']
+    })
+  })
+})
+
+describe('Shots store, MARK_SHOTS_PARTIAL', () => {
+  test('marks the recorded scope once, and nothing when none is recorded', () => {
+    const state = { shotsLoadingKey: 'p1/ep-a' }
+    shotsStore.mutations.MARK_SHOTS_PARTIAL(state)
+    shotsStore.mutations.MARK_SHOTS_PARTIAL(state)
+    expect(state.shotsLoadingKey).toBe('p1/ep-a#partial')
+
+    const empty = { shotsLoadingKey: null }
+    shotsStore.mutations.MARK_SHOTS_PARTIAL(empty)
+    expect(empty.shotsLoadingKey).toBeNull()
   })
 })

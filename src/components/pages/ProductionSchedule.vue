@@ -916,13 +916,16 @@ export default {
     },
 
     async loadData() {
+      const production = this.currentProduction
       this.loading.schedule = true
       this.availableTaskTypes = []
 
       try {
-        await this.loadScheduleVersions(this.currentProduction)
+        await this.loadScheduleVersions(production)
 
-        const items = await this.loadScheduleItems(this.currentProduction)
+        const items = await this.loadScheduleItems(production)
+        // A production switched during the fetches runs its own load.
+        if (this.currentProduction?.id !== production.id) return
         const scheduleStartDate = parseDate(this.selectedStartDate)
         const scheduleEndDate = parseDate(this.selectedEndDate)
         const scheduleItems = items.map(item => {
@@ -986,7 +989,9 @@ export default {
       } catch (err) {
         console.error(err)
       } finally {
-        this.loading.schedule = false
+        if (this.currentProduction?.id === production.id) {
+          this.loading.schedule = false
+        }
       }
     },
 

@@ -46,6 +46,7 @@ import {
   CLEAR_ASSETS,
   LOAD_ASSETS_START,
   LOAD_ASSETS_ERROR,
+  MARK_ASSETS_PARTIAL,
   LOAD_ASSETS_END,
   SORT_VALIDATION_COLUMNS,
   EDIT_ASSET_END,
@@ -279,6 +280,8 @@ const helpers = {
 }
 
 const cache = {
+  // Assets deleted while a list load runs: its response may still hold them.
+  removedAssetIds: new Set(),
   assets: [],
   assetsLoadingPromise: null,
   assetMap: new Map(),
@@ -570,14 +573,12 @@ const actions = {
         // Displayed when its refresh started and gone since: deleted, or
         // dropped by a list load whose own response decides.
         if (displayedAsset) return
-        if (
-          !onlyInScope ||
-          isEpisodeInLoadedScope(
-            state.assetsLoadingKey,
-            asset.episode_id || asset.source_id || null,
-            asset.project_id
-          )
-        ) {
+        const isInLoadedScope = isEpisodeInLoadedScope(
+          state.assetsLoadingKey,
+          asset.episode_id || asset.source_id || null,
+          asset.project_id
+        )
+        if (!onlyInScope || isInLoadedScope) {
           asset.tasks.forEach(task => {
             commit(NEW_TASK_END, { task })
           })
@@ -590,6 +591,9 @@ const actions = {
             personMap,
             production
           })
+          // A detail page loads its asset whatever the list holds: holding more
+          // than its recorded scope, the list must be refetched by its pages.
+          if (!isInLoadedScope) commit(MARK_ASSETS_PARTIAL)
         }
         return asset
       })
@@ -1007,6 +1011,7 @@ const mutations = {
     cache.assets = []
     cache.result = []
     cache.assetMap.clear()
+    cache.removedAssetIds.clear()
     state.isAssetsLoading = true
     state.isAssetsLoadingError = false
     state.assetsLoadingKey = loadingKey ?? null
@@ -1020,6 +1025,12 @@ const mutations = {
     state.assetSearchFilterGroups = []
 
     state.selectedAssets = new Map()
+  },
+
+  [MARK_ASSETS_PARTIAL](state) {
+    if (state.assetsLoadingKey && !state.assetsLoadingKey.includes('#')) {
+      state.assetsLoadingKey = `${state.assetsLoadingKey}#partial`
+    }
   },
 
   [LOAD_ASSETS_ERROR](state) {
@@ -1040,6 +1051,9 @@ const mutations = {
       taskTypeMap
     }
   ) {
+    // Deleted during the load, after the response was built.
+    assets = assets.filter(({ id }) => !cache.removedAssetIds.has(id))
+    cache.removedAssetIds.clear()
     const validationColumns = {}
     const assetTypeMap = new Map()
     let isTime = false
@@ -1195,9 +1209,13 @@ const mutations = {
   },
 
   [UPDATE_ASSET](state, asset) {
+    // A refetched asset lists task objects where the cache keeps the ids the
+    // task columns and the detail page resolve: tasks have their own events.
+    const fields = { ...asset }
+    delete fields.tasks
     const cachedAsset = cache.assetMap.get(asset.id)
     if (cachedAsset) {
-      Object.assign(cachedAsset, asset)
+      Object.assign(cachedAsset, fields)
       updateEntryInIndex(
         cache.assetIndex,
         cachedAsset,
@@ -1206,12 +1224,13 @@ const mutations = {
     }
     const displayedAsset = state.displayedAssets.find(a => a.id === asset.id)
     if (displayedAsset) {
-      Object.assign(displayedAsset, asset)
+      Object.assign(displayedAsset, fields)
     }
     state.displayedAssets = [...state.displayedAssets]
   },
 
   [REMOVE_ASSET](state, assetToDelete) {
+    if (state.isAssetsLoading) cache.removedAssetIds.add(assetToDelete.id)
     if (cache.assetMap.get(assetToDelete.id)) {
       cache.assetMap.delete(assetToDelete.id)
       cache.assets = removeModelFromList(cache.assets, assetToDelete)

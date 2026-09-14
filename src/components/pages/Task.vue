@@ -1146,6 +1146,9 @@ const loadTaskData = () => {
             store
               .dispatch('loadEpisodes')
               .then(() => {
+                // Left during the fetches: the page shown now owns the
+                // episode and the shots loaded.
+                if (route.params.task_id !== loadedTask.id) return
                 if (isTVShow.value) {
                   store.dispatch('setCurrentEpisode', loadedTask.episode.id)
                 }

@@ -46,6 +46,7 @@ const makeStore = (getterOverrides = {}) => {
     logout: vi.fn(),
     clearSelectedTasks: vi.fn(),
     loadEpisodes: vi.fn(() => Promise.resolve([])),
+    loadProduction: vi.fn(() => Promise.resolve()),
     saveLastProductionRoute: vi.fn(),
     setProduction: vi.fn(),
     setCurrentEpisode: vi.fn(),
@@ -155,6 +156,12 @@ describe('Topbar.vue', () => {
   afterEach(() => {
     if (wrapper) wrapper.unmount()
     vi.clearAllMocks()
+  })
+
+  // Artists land on pages without production: the fallback production of the
+  // store must not be configured for them.
+  it('configures no production on a page without one', () => {
+    expect(wrapper.vm.hasConfiguredProduction).toBe(false)
   })
 
   describe('toggleDesktopNotifications', () => {
@@ -426,6 +433,7 @@ describe('Topbar.vue', () => {
       const routerSpy = vi
         .spyOn(shotsWrapper.vm.$router, 'replace')
         .mockResolvedValue({})
+      shotsWrapper.vm.hasConfiguredProduction = false
       await shotsWrapper.vm.configureProduction('production-1')
       await flushPromises()
       expect(shotsWrapper.vm.currentEpisodeId).toBe('all')
@@ -445,6 +453,7 @@ describe('Topbar.vue', () => {
       const routerSpy = vi
         .spyOn(shotsWrapper.vm.$router, 'replace')
         .mockResolvedValue({})
+      shotsWrapper.vm.hasConfiguredProduction = false
       await shotsWrapper.vm.configureProduction('production-1')
       await flushPromises()
       expect(routerSpy).toHaveBeenCalledWith({
@@ -474,10 +483,22 @@ describe('Topbar.vue', () => {
       shotsWrapper.unmount()
     })
 
+    // The direct link tests above simulate a first load by resetting the flag
+    // the mount sets: F5 on the production the store fell back to runs no
+    // configuration, yet that production counts as configured.
+    it('counts the production of the store as configured on mount', () => {
+      const shotsWrapper = mountForShots('episode-1', [
+        { id: 'episode-1', status: 'running' }
+      ])
+      expect(shotsWrapper.vm.hasConfiguredProduction).toBe(true)
+      shotsWrapper.unmount()
+    })
+
     it('still resolves the main pack to the running episode on a direct link', async () => {
       const shotsWrapper = mountForShots('main', [
         { id: 'episode-1', status: 'running' }
       ])
+      shotsWrapper.vm.hasConfiguredProduction = false
       await shotsWrapper.vm.configureProduction('production-1')
       await flushPromises()
       expect(shotsWrapper.vm.currentEpisodeId).toBe('episode-1')
@@ -626,6 +647,7 @@ describe('Topbar.vue', () => {
         const pushSpy = vi
           .spyOn(wrapper.vm.$router, 'push')
           .mockResolvedValue({})
+        wrapper.vm.hasConfiguredProduction = false
         await wrapper.vm.configureProduction('production-1')
         await flushPromises()
         wrapper.unmount()
@@ -716,6 +738,56 @@ describe('Topbar.vue', () => {
       wrapper.unmount()
     })
 
+    // A closed production is missing from the open ones the store holds: it
+    // is loaded, rather than the first open production standing in for it.
+    it('loads a production missing from the open ones before configuring it', () => {
+      const { wrapper, actions, route } = mountFor('shots', 'episode-1')
+      actions.setProduction.mockClear()
+      route.params.production_id = 'production-closed'
+
+      wrapper.vm.setProductionFromRoute()
+
+      expect(actions.loadProduction).toHaveBeenCalledWith(
+        expect.anything(),
+        'production-closed'
+      )
+      expect(actions.setProduction).not.toHaveBeenCalled()
+      wrapper.unmount()
+    })
+
+    // Back to the assets page of another production, a search result or a
+    // production card: a valid episode of the production survives a switch.
+    it('keeps an episode of the production on the assets page after a switch', async () => {
+      const { wrapper, replaceSpy } = mountFor('assets', 'episode-2')
+      replaceSpy.mockClear()
+      wrapper.vm.hasConfiguredProduction = true
+
+      await wrapper.vm.configureProduction('production-1')
+      await flushPromises()
+
+      expect(replaceSpy).toHaveBeenCalledWith({
+        params: { production_id: 'production-1', episode_id: 'episode-2' },
+        query: { search: 'hero' }
+      })
+      wrapper.unmount()
+    })
+
+    // The team page has no episode: the section links reopen the episode of
+    // the store instead of all.
+    it('keeps the episode of the store on a page without episode', () => {
+      const { wrapper, route } = mountFor('shots', 'episode-2', {
+        currentEpisode: { id: 'episode-2' }
+      })
+      route.name = 'team'
+      route.path = '/productions/production-1/team'
+      delete route.params.episode_id
+
+      wrapper.vm.updateCombosFromRoute()
+
+      expect(wrapper.vm.currentEpisodeId).toBe('episode-2')
+      wrapper.unmount()
+    })
+
     // A live deletion of the displayed episode leaves the route, the store
     // and the selector on an id the production no longer has.
     describe('displayed episode deleted live', () => {
@@ -782,12 +854,34 @@ describe('Topbar.vue', () => {
         route.path = '/productions/production-1/episodes/ghost/tasks/task-1'
         route.params.episode_id = 'ghost'
 
+        wrapper.vm.hasConfiguredProduction = false
         await wrapper.vm.configureProduction('production-1')
         await flushPromises()
 
         expect(replaceSpy).toHaveBeenCalledWith({
           name: 'episodes',
           params: { production_id: 'production-1' }
+        })
+        wrapper.unmount()
+      })
+
+      // Deleted while the user was on a page without production: the watcher
+      // had no route episode to check, and coming back must resolve it.
+      it('redirects on return to a route whose episode left the list', () => {
+        const { wrapper, replaceSpy, episodes } = mountFor(
+          'shots',
+          'episode-1',
+          { currentEpisode: { id: 'episode-1' } }
+        )
+        replaceSpy.mockClear()
+        episodes.splice(0, 1)
+
+        wrapper.vm.setProductionFromRoute()
+
+        expect(replaceSpy).toHaveBeenCalledWith({
+          name: 'episode-shots',
+          params: { production_id: 'production-1', episode_id: 'all' },
+          query: { search: 'hero' }
         })
         wrapper.unmount()
       })
@@ -832,6 +926,7 @@ describe('Topbar.vue', () => {
     it('resolves an unknown episode to the running one on a direct link where the section has no all', async () => {
       const { wrapper, replaceSpy } = mountFor('sequences', 'ghost')
       replaceSpy.mockClear()
+      wrapper.vm.hasConfiguredProduction = false
       await wrapper.vm.configureProduction('production-1')
       await flushPromises()
       expect(replaceSpy).toHaveBeenCalledWith({
@@ -846,6 +941,7 @@ describe('Topbar.vue', () => {
     it('resolves the episode from the route at response time', async () => {
       const { wrapper, route, replaceSpy } = mountFor('sequences', 'ghost')
       replaceSpy.mockClear()
+      wrapper.vm.hasConfiguredProduction = false
       wrapper.vm.configureProduction('production-1')
       route.params.episode_id = 'episode-1'
       await flushPromises()
@@ -859,6 +955,7 @@ describe('Topbar.vue', () => {
     it('gives up when the production changed during the episodes fetch', async () => {
       const { wrapper, route, replaceSpy } = mountFor('sequences', 'ghost')
       replaceSpy.mockClear()
+      wrapper.vm.hasConfiguredProduction = false
       wrapper.vm.configureProduction('production-1')
       route.params.production_id = 'production-2'
       await flushPromises()

@@ -713,6 +713,16 @@ describe('Assets store, loadAsset live insertion', () => {
 
   // An update then a deletion within one round trip: the refresh must not
   // bring back the row the deletion removed.
+  test('marks the list partial for an asset loaded by id out of its scope', async () => {
+    expect(
+      await committedTypes('a-other', 'p1/ep-a', {
+        id: 'a-other',
+        episode_id: 'ep-b',
+        project_id: 'p1'
+      })
+    ).toContain('MARK_ASSETS_PARTIAL')
+  })
+
   test('keeps out a displayed asset deleted during its refresh', async () => {
     assetsStore.cache.assetMap.set('a-gone', { id: 'a-gone' })
     vi.spyOn(assetsApi, 'getAsset').mockImplementation(async () => {
@@ -1027,5 +1037,33 @@ describe('Assets store, live insertion during a list load', () => {
     await loading
 
     expect(commit.mock.calls.map(([type]) => type)).not.toContain('ADD_ASSET')
+  })
+})
+
+describe('Assets store, UPDATE_ASSET', () => {
+  afterEach(() => {
+    assetsStore.cache.assetMap.delete('a-upd')
+  })
+
+  // A colleague's edit refetches the full entity, whose tasks are objects:
+  // the cached ids must survive it, or the task lists come out empty.
+  test('keeps the cached task ids', () => {
+    const asset = {
+      id: 'a-upd',
+      name: 'old',
+      asset_type_name: 'Props',
+      tasks: ['t1']
+    }
+    assetsStore.cache.assetMap.set('a-upd', asset)
+    const state = { displayedAssets: [asset] }
+    assetsStore.mutations.UPDATE_ASSET(state, {
+      id: 'a-upd',
+      name: 'new',
+      tasks: [{ id: 't1' }]
+    })
+    expect(state.displayedAssets[0]).toMatchObject({
+      name: 'new',
+      tasks: ['t1']
+    })
   })
 })
