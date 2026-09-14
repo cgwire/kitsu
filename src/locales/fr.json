@@ -1023,6 +1023,7 @@
       "number": "production | productions",
       "open_productions": "Mes productions",
       "picture": "Changer l'image",
+      "remove_picture": "Supprimer l'image",
       "title": "Productions",
       "home": {
         "create_new": "Créer une nouvelle production",

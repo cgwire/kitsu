@@ -1374,6 +1374,7 @@
       "number": "produkcja | produkcji",
       "open_productions": "Moje produkcje",
       "picture": "Zmień obraz",
+      "remove_picture": "Usuń obraz",
       "title": "Produkcje",
       "creation": {
         "add_assets": "Dodaj assety (opcjonalnie)",

@@ -71,6 +71,15 @@
               shape="rounded"
               @fileselected="onFileSelected"
             />
+            <button
+              class="remove-button"
+              type="button"
+              :disabled="isLoading"
+              @click="$emit('remove-picture')"
+              v-if="productionToEdit.has_avatar"
+            >
+              {{ $t('productions.remove_picture') }}
+            </button>
           </div>
         </form>
 
@@ -108,7 +117,12 @@ const props = defineProps({
   productionToEdit: { type: Object, required: true }
 })
 
-const emit = defineEmits(['cancel', 'confirm', 'fileselected'])
+const emit = defineEmits([
+  'cancel',
+  'confirm',
+  'fileselected',
+  'remove-picture'
+])
 
 const store = useStore()
 
@@ -175,5 +189,25 @@ watch(() => props.productionToEdit, resetForm, { immediate: true })
 
 .picture-field {
   margin-top: 1.5em;
+}
+
+.remove-button {
+  background: none;
+  border: none;
+  color: var(--text-alt);
+  cursor: pointer;
+  display: block;
+  font-size: 0.9rem;
+  margin: 1rem auto 0;
+  padding: 0;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.6;
+  }
 }
 </style>

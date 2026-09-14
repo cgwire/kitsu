@@ -1023,6 +1023,7 @@
       "number": "productie | producties",
       "open_productions": "Mijn producties",
       "picture": "Wijzig afbeelding",
+      "remove_picture": "Afbeelding verwijderen",
       "title": "Producties",
       "home": {
         "create_new": "Een nieuwe productie toevoegen",

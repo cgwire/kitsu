@@ -1419,6 +1419,7 @@ export default {
     number: 'production | productions',
     open_productions: 'My Productions',
     picture: 'Change picture',
+    remove_picture: 'Remove picture',
     show_stats: 'Show stats',
     title: 'Productions',
 

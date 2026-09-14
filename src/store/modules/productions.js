@@ -1056,7 +1056,12 @@ const mutations = {
 
   [PRODUCTION_AVATAR_UPLOADED](state, productionId) {
     const production = state.productionMap.get(productionId)
-    if (production) production.has_avatar = true
+    if (production) {
+      production.has_avatar = true
+      // The thumbnail URL is cache-busted on updated_at, which the picture
+      // upload does not touch server-side.
+      production.updated_at = new Date().toISOString()
+    }
   },
 
   [SET_CURRENT_PRODUCTION](state, productionId) {

@@ -1023,6 +1023,7 @@
       "number": "produktion | produktioner",
       "open_productions": "Mine Produktioner",
       "picture": "Skift billede",
+      "remove_picture": "Fjern billede",
       "title": "Produktioner",
       "home": {
         "create_new": "Opret en ny produktion",

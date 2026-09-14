@@ -1023,6 +1023,7 @@
       "number": "프로덕션 | 프로덕션",
       "open_productions": "내 프로덕션",
       "picture": "사진 변경",
+      "remove_picture": "이미지 삭제",
       "title": "프로덕션",
       "home": {
         "create_new": "새 프로덕션 생성",

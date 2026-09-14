@@ -55,6 +55,7 @@
       :production-to-edit="productionToEdit"
       @cancel="modals.isEditDisplayed = false"
       @fileselected="onProductionPictureSelected"
+      @remove-picture="removeProductionPicture"
       @confirm="confirmEditProduction"
       v-if="modals.isEditDisplayed"
     />
@@ -221,6 +222,21 @@ const confirmEditProduction = async form => {
       id: productionToEdit.value.id
     })
     modals.isEditDisplayed = false
+  } catch (error) {
+    console.error(error)
+    errors.edit = true
+  }
+  loading.edit = false
+}
+
+const removeProductionPicture = async () => {
+  loading.edit = true
+  errors.edit = false
+  try {
+    await store.dispatch('editProduction', {
+      id: productionToEdit.value.id,
+      has_avatar: false
+    })
   } catch (error) {
     console.error(error)
     errors.edit = true

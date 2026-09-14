@@ -1023,6 +1023,7 @@
       "number": "プロダクション | プロダクション",
       "open_productions": "マイプロダクション",
       "picture": "画像を変更",
+      "remove_picture": "画像を削除",
       "title": "プロダクション",
       "home": {
         "create_new": "プロダクションを作成",

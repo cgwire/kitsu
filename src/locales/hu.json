@@ -1023,6 +1023,7 @@
       "number": "produkció | produkció",
       "open_productions": "Produkcióim",
       "picture": "Kép cseréje",
+      "remove_picture": "Kép eltávolítása",
       "title": "Produkciók",
       "home": {
         "create_new": "Új produkció létrehozása",
