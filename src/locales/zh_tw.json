@@ -407,6 +407,7 @@
       "reset_change_password_token_failed": "密碼重設連結無效或已過期。請重新啟動程序。"
     },
     "main": {
+      "technical_details": "技術詳情：",
       "about": "關於",
       "add": "新增",
       "all": "全部",
@@ -1338,6 +1339,9 @@
     "task_types": {
       "delete_text": "您確定要從您的資料庫移除{name}嗎？",
       "delete_error": "刪除此任務類型時出現錯誤。很可能存在有連接至此的數據。您確定沒有任務連接至此任務類型嗎？",
+      "delete_blocked_by_links": "此任務類型仍在某些製作項目的時間表或工作流程中使用。解除關聯將刪除其在所有製作項目中的時間表日期。",
+      "delete_blocked_by_tasks": "仍有任務在使用此任務類型。請先刪除或重新指派這些任務，再移除它。",
+      "delete_force": "解除關聯並刪除",
       "edit_title": "編輯任務類型",
       "create_error": "創建任務類型時發生錯誤。請檢查是否沒有名稱相似的任務類型。",
       "new_task_type": "新增任務類型",

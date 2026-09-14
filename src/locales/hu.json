@@ -407,6 +407,7 @@
       "wrong_totp": "A TOTP hitelesítése sikertelen."
     },
     "main": {
+      "technical_details": "Technikai részletek:",
       "about": "Rólunk",
       "add": "hozzáadás",
       "all": "Mind",
@@ -1338,6 +1339,9 @@
     "task_types": {
       "delete_text": "Biztosan törölni akarod {name}-t az adatbázisból?",
       "delete_error": "Hiba történt a feladat típus törlésekor. Valószínűleg adat hivatkozik rá. Biztosan nem hivatkozik semmi rá?",
+      "delete_blocked_by_links": "Ezt a feladat típust még használja néhány produkció időbeosztása vagy munkafolyamata. A leválasztás minden produkcióban törli az időbeosztási dátumait.",
+      "delete_blocked_by_tasks": "Még vannak feladatok, amelyek ezt a feladat típust használják. Töröld vagy oszd ki újra őket, mielőtt eltávolítod.",
+      "delete_force": "Leválasztás és törlés",
       "edit_title": "Feladat típus szerkesztése",
       "create_error": "Hiba történt a feladat típus létrehozásakor. Kérlek ellenőrizd, hogy nincs-e azonos nevű feladat típus.",
       "new_task_type": "Feladat típus hozzáadása",

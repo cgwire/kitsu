@@ -407,6 +407,7 @@
       "reset_change_password_token_failed": "Il link per la reimpostazione della password non è valido o è scaduto. Ricomincia la procedura."
     },
     "main": {
+      "technical_details": "Dettagli tecnici:",
       "about": "Informazioni",
       "add": "aggiungi",
       "all": "Tutti",
@@ -1338,6 +1339,9 @@
     "task_types": {
       "delete_text": "Sei sicuro di voler rimuovere {name} dal database?",
       "delete_error": "Si è verificato un errore durante l'eliminazione di questo tipo di task. Potrebbero esserci dei dati ancora collegati. Sei sicuro che nessun task sia collegato a questo tipo di task?",
+      "delete_blocked_by_links": "Questo tipo di task è ancora usato nella pianificazione o nel flusso di lavoro di alcune produzioni. Scollegarlo eliminerà le sue date di pianificazione in tutte le produzioni.",
+      "delete_blocked_by_tasks": "Alcuni task usano ancora questo tipo di task. Eliminali o riassegnali prima di rimuoverlo.",
+      "delete_force": "Scollega ed elimina",
       "edit_title": "Modifica tipo di task",
       "create_error": "Si è verificato un errore durante la creazione del tipo di task. Verifica che non esista già un tipo di task con un nome simile.",
       "new_task_type": "Aggiungi un tipo di task",

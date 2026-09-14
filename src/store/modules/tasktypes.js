@@ -196,9 +196,9 @@ const actions = {
     return taskTypesApi.reorderTaskTypes(taskTypeIds)
   },
 
-  deleteTaskType({ commit, state }, taskType) {
+  deleteTaskType({ commit, state }, { taskType, force = false }) {
     commit(DELETE_TASK_TYPE_START)
-    return taskTypesApi.deleteTaskType(taskType).then(() => {
+    return taskTypesApi.deleteTaskType(taskType, force).then(() => {
       commit(DELETE_TASK_TYPE_END, taskType)
       Promise.resolve(taskType)
     })

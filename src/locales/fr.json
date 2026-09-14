@@ -407,6 +407,7 @@
       "reset_change_password_token_failed": "Le lien de réinitialisation du mot de passe n'est pas valide ou a expiré. Veuillez recommencer la procédure."
     },
     "main": {
+      "technical_details": "Détails techniques :",
       "about": "À propos",
       "add": "Ajouter",
       "all": "Tous",
@@ -1338,6 +1339,9 @@
     "task_types": {
       "delete_text": "Êtes-vous sûr de vouloir supprimer {name} de la base de données ?",
       "delete_error": "Une erreur s'est produite lors de la suppression de ce type de tâche. Il se peut que des données existantes soient actuellement liées à ce type de tâche. Êtes-vous sûr qu'aucune tâche n'est liée à ce type de tâche ?",
+      "delete_blocked_by_links": "Ce type de tâche est encore utilisé dans le planning ou dans le workflow de certaines productions. Le détacher supprimera ses dates de planning dans toutes les productions.",
+      "delete_blocked_by_tasks": "Des tâches utilisent encore ce type de tâche. Supprimez-les ou réaffectez-les avant de le retirer.",
+      "delete_force": "Détacher et supprimer",
       "edit_title": "Modifier le type de tâche",
       "create_error": "Une erreur est survenue en créant le type de tâche. Êtes-vous sûr qu'il n'y a pas un type avec un nom similaire ?",
       "new_task_type": "Ajouter un type de tâche",

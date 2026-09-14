@@ -61,8 +61,9 @@ export default {
     })
   },
 
-  deleteTaskType(taskType) {
-    return client.pdel(`/api/data/task-types/${taskType.id}`)
+  deleteTaskType(taskType, force = false) {
+    const query = force ? '?force=true' : ''
+    return client.pdel(`/api/data/task-types/${taskType.id}${query}`)
   },
 
   getTaskType(taskTypeId) {

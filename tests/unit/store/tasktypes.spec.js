@@ -156,9 +156,20 @@ describe('Task types store', () => {
       const taskType = taskTypes[0]
       vi.spyOn(taskTypesApi, 'deleteTaskType').mockResolvedValue()
       const commit = vi.fn()
-      await store.actions.deleteTaskType({ commit }, taskType)
+      await store.actions.deleteTaskType({ commit }, { taskType })
+      expect(taskTypesApi.deleteTaskType).toHaveBeenCalledWith(taskType, false)
       expect(commit).toHaveBeenCalledWith('DELETE_TASK_TYPE_START')
       expect(commit).toHaveBeenCalledWith('DELETE_TASK_TYPE_END', taskType)
+    })
+
+    test('deleteTaskType passes the force flag to the API', async () => {
+      const taskType = taskTypes[0]
+      vi.spyOn(taskTypesApi, 'deleteTaskType').mockResolvedValue()
+      await store.actions.deleteTaskType(
+        { commit: vi.fn() },
+        { taskType, force: true }
+      )
+      expect(taskTypesApi.deleteTaskType).toHaveBeenCalledWith(taskType, true)
     })
 
     test('initTaskType resolves without loading when shots are cached', async () => {

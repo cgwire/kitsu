@@ -747,6 +747,7 @@
       }
     },
     "main": {
+      "technical_details": "Szczegóły techniczne:",
       "about": "O programie",
       "active": "Aktywne",
       "activity": "Aktywność",
@@ -1709,6 +1710,9 @@
       "add_task_type_to_library": "Dodaj typ zadania do biblioteki",
       "delete_text": "Czy na pewno chcesz usunąć {name} z bazy danych?",
       "delete_error": "Wystąpił błąd podczas usuwania tego typu zadania. Mogą istnieć dane, które są obecnie z nim powiązane. Czy na pewno żadne zadanie nie jest powiązane z tym typem zadania?",
+      "delete_blocked_by_links": "Ten typ zadania jest nadal używany w harmonogramie lub w przepływie pracy niektórych produkcji. Odłączenie go usunie jego daty z harmonogramu we wszystkich produkcjach.",
+      "delete_blocked_by_tasks": "Nadal istnieją zadania używające tego typu zadania. Usuń je lub przypisz ponownie przed jego usunięciem.",
+      "delete_force": "Odłącz i usuń",
       "edit_title": "Edytuj typ zadania",
       "create_error": "Wystąpił błąd podczas tworzenia typu zadania. Sprawdź, czy nie istnieje już typ zadania o podobnej nazwie.",
       "library_title": "Biblioteka typów zadań",

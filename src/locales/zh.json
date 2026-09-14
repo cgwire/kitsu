@@ -407,6 +407,7 @@
       "reset_change_password_token_failed": "密码重置链接无效或已过期。请重新启动程序。"
     },
     "main": {
+      "technical_details": "技术详情：",
       "about": "关于",
       "add": "添加",
       "all": "全部",
@@ -1338,6 +1339,9 @@
     "task_types": {
       "delete_text": "您确定要从您的数据库移除{name}吗？",
       "delete_error": "删除此任务类型时出现错误。很可能存在有链接至此的数据。您确定没有任务链接至此任务类型吗？",
+      "delete_blocked_by_links": "此任务类型仍在某些制作的日程计划或工作流程中使用。解除关联将删除其在所有制作中的日程日期。",
+      "delete_blocked_by_tasks": "仍有任务在使用此任务类型。请先删除或重新分配这些任务，再移除它。",
+      "delete_force": "解除关联并删除",
       "edit_title": "编辑任务类型",
       "create_error": "创建任务类型时发生错误。请检查是否没有名称相似的任务类型。",
       "new_task_type": "添加任务类型",

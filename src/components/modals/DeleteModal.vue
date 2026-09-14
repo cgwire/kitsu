@@ -11,6 +11,10 @@
       <div class="box">
         <p class="text">{{ text }}</p>
         <p class="is-danger has-text-right" v-if="isError">{{ errorText }}</p>
+        <p class="error-details has-text-right" v-if="isError && errorDetails">
+          (<strong>{{ $t('main.technical_details') }}</strong>
+          {{ errorDetails }})
+        </p>
         <p class="has-text-right">
           <a
             :class="{
@@ -46,6 +50,7 @@ const props = defineProps({
   isLoading: { default: false, type: Boolean },
   isError: { default: false, type: Boolean },
   errorText: { default: '', type: String },
+  errorDetails: { default: '', type: String },
   deleteButtonText: { default: '', type: String }
 })
 
@@ -59,6 +64,12 @@ useModal(toRef(props, 'active'), emit)
   padding: 2em;
 }
 .modal-content .box p.text {
+  margin-bottom: 1em;
+}
+.error-details {
+  color: var(--text-alt);
+  font-family: monospace;
+  font-size: 0.85em;
   margin-bottom: 1em;
 }
 </style>
