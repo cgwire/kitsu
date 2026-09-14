@@ -270,11 +270,15 @@ describe('Assets store', () => {
     // Its flag raised for the production left, no response would ever lower
     // it, and every later load would queue behind it in a loop.
     test('gives up when the production changed while it waited for the episodes', async () => {
+      vi.spyOn(assetsApi, 'getAssets').mockResolvedValue([])
       const state = { isAssetsLoading: false, isAssetsLoadingError: false }
       const commit = realCommit(state)
       const rootGetters = { ...baseRootGetters(), isTVShow: true }
+      // Like the real loadEpisodes, the fetch also resolves an episode:
+      // without one the load stops on the no episode path, guard or not.
       const dispatch = vi.fn(async () => {
         rootGetters.currentProduction = { id: 'p2' }
+        rootGetters.currentEpisode = { id: 'ep-a' }
       })
 
       const result = await assetsStore.actions.loadAssets({
