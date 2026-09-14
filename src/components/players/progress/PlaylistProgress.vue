@@ -256,9 +256,9 @@ const ensureTileGeometry = (id, tilePathUrl) => {
   if (tileGeometries.value.has(id)) return tileGeometries.value.get(id)
   tileGeometries.value.set(id, null)
   getTileGeometry(tilePathUrl).then(geometry => {
-    if (!geometry) return
+    // false marks a movie without a sprite, null one still loading.
     const next = new Map(tileGeometries.value)
-    next.set(id, geometry)
+    next.set(id, geometry || false)
     tileGeometries.value = next
   })
   return null
@@ -284,16 +284,19 @@ const getFrameBackgroundStyle = frame => {
   frame = frame - props.playlistShotPosition[frame].start * props.fps
   const base = props.urlPrefix || '/api'
 
+  const thumbnailStyle = {
+    background: `url(${base}/pictures/thumbnails/preview-files/${id}.png)`,
+    'background-position': '0 0',
+    width: '150px'
+  }
   if (extension === 'png') {
-    const tp = `${base}/pictures/thumbnails/preview-files/${id}.png`
-    return {
-      background: `url(${tp})`,
-      'background-position': '0 0',
-      width: '150px'
-    }
+    return thumbnailStyle
   } else if (extension === 'mp4') {
     const tp = `${base}/movies/tiles/preview-files/${id}.png`
     const geometry = ensureTileGeometry(id, tp)
+    // No sprite for this movie: its thumbnail, rather than a background
+    // URL the browser would request again at every hover.
+    if (geometry === false) return thumbnailStyle
     const frameWidth =
       geometry?.cellWidth ?? Math.ceil(TILE_CELL_HEIGHT * (pw / ph))
     const cellCount = geometry?.cellCount ?? 3840

@@ -203,7 +203,8 @@ const hoverFrame = ref(0)
 const isFrameNumberVisible = ref(false)
 const progress = ref(null)
 const progressDragging = ref(false)
-const tileGeometry = ref(null)
+// undefined while the sprite loads, null when there is none.
+const tileGeometry = ref(undefined)
 const width = ref(0)
 
 // Mouse scratch state; not reactive — written from event handlers, never read by template
@@ -388,7 +389,7 @@ const onWindowResize = () => {
 watch(
   () => props.previewId,
   () => {
-    tileGeometry.value = null
+    tileGeometry.value = undefined
     if (!props.previewId) return
     const previewId = props.previewId
     const base = props.urlPrefix || '/api'
@@ -542,6 +543,15 @@ const getFrameBackgroundStyle = frame => {
   // preview's stored dimensions, which drift from the file the sprite
   // was built from (source ratio ≠ production ratio, renormalisations).
   const geometry = tileGeometry.value
+  if (geometry === null) {
+    // No sprite for this movie: its thumbnail, rather than a background
+    // URL the browser would request again at every hover.
+    return {
+      background: `url(${base}/pictures/thumbnails/preview-files/${previewId}.png)`,
+      'background-position': '0 0',
+      width: '150px'
+    }
+  }
   const frameWidth =
     geometry?.cellWidth ?? Math.ceil(TILE_CELL_HEIGHT * videoRatio.value)
   const cellCount = geometry?.cellCount ?? 3840
