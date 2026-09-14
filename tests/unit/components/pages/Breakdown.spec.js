@@ -9,6 +9,16 @@ import Breakdown from '@/components/pages/Breakdown.vue'
 describe('Breakdown page, reloadEntities', () => {
   const production = { id: 'p1', production_type: 'tvshow' }
 
+  // The page logs the failed episodes fetch: keep that expected error out
+  // of the test output.
+  beforeEach(() => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
   // The method only reads its component instance, so a plain object is
   // enough to exercise the reload decision without mounting the page.
   const buildContext = (overrides = {}) => ({
