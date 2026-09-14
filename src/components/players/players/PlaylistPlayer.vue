@@ -947,6 +947,7 @@ import { usePlayerTransport } from '@/composables/players/transport'
 import { usePreviewRoom } from '@/composables/previewRoom'
 import { isValidRoomId } from '@/lib/players/events'
 import { scrubFrame } from '@/lib/players/scrub'
+import { warmPlaylistMovies } from '@/lib/playlistWarmup'
 import preferences from '@/lib/preferences'
 import {
   buildAnnotationSnapshotFilename,
@@ -4619,6 +4620,7 @@ watch(
     const currentId = currentEntity.value?.id
     if (currentId) entityIdBeforeRebuild = currentId
     resetPlaylist()
+    warmMovies()
     if (newEntities?.length) {
       const index = newEntities.findIndex(
         entity => entity.id === entityIdBeforeRebuild
@@ -4780,12 +4782,23 @@ watch(speed, () => {
 
 // Lifecycle
 
+// The server fills its movie cache on first read: ask it for the first
+// clips as soon as the list is known, so playback never starts cold.
+let stopMovieWarmup = null
+const warmMovies = () => {
+  if (stopMovieWarmup) stopMovieWarmup()
+  stopMovieWarmup = warmPlaylistMovies(entityList.value, {
+    isHd: isHd.value
+  })
+}
+
 onMounted(() => {
   if (isMounted) return
   isScrubbing.value = false
   if (isCurrentUserClient.value) isCommentsHidden.value = false
   isHd.value = Boolean(organisation.value?.hd_by_default)
   entityList.value = props.entities ? props.entities : []
+  warmMovies()
   startProgressiveRender()
   resetPlaylistFrameData()
   room.value.id = props.playlist?.id
@@ -4832,6 +4845,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  if (stopMovieWarmup) stopMovieWarmup()
   endAnnotationSaving()
   cancelProgressiveRender()
   _stopPlaylistProgressUpdateLoop()
