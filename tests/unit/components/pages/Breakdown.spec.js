@@ -180,3 +180,44 @@ describe('Breakdown page, reloadEntities', () => {
     expect(context.reset).not.toHaveBeenCalled()
   })
 })
+
+describe('Breakdown page, removeOneAssetFromSelection', () => {
+  // The casting map only carries the entities the API returned, so an
+  // entity without any asset has no key at all: the selection is built
+  // from the full entity list and can still include it.
+  const buildContext = (overrides = {}) => ({
+    selection: { 'shot-a': true, 'shot-b': true },
+    casting: {
+      'shot-a': [{ asset_id: 'asset-1', nb_occurences: 2 }]
+    },
+    isEpisodeCasting: false,
+    loading: { remove: false },
+    errors: { remove: false },
+    saveErrors: {},
+    removeAssetFromCasting: vi.fn(),
+    removeOneAsset: vi.fn(() => Promise.resolve()),
+    castAsset: vi.fn(() => Promise.resolve()),
+    ...overrides
+  })
+
+  test('skips a selected entity that has no casting', async () => {
+    const context = buildContext()
+
+    await Breakdown.methods.removeOneAssetFromSelection.call(
+      context,
+      'asset-1'
+    )
+
+    expect(context.removeAssetFromCasting).toHaveBeenCalledTimes(1)
+    expect(context.removeAssetFromCasting).toHaveBeenCalledWith({
+      entityId: 'shot-a',
+      assetId: 'asset-1',
+      nbOccurences: 1
+    })
+    expect(context.castAsset).toHaveBeenCalledWith({
+      entityIds: ['shot-a'],
+      assetId: 'asset-1'
+    })
+    expect(context.loading.remove).toBe(false)
+  })
+})

@@ -561,7 +561,7 @@ const mutations = {
   },
 
   [CASTING_REMOVE_FROM_CASTING](state, { entityId, asset, nbOccurences }) {
-    const previousAsset = state.casting[entityId].find(
+    const previousAsset = state.casting[entityId]?.find(
       a => a.asset_id === asset.id
     )
     if (previousAsset) {
@@ -660,10 +660,10 @@ const mutations = {
   },
 
   [CASTING_SET_LINK_LABEL](state, { label, asset, targetEntityId }) {
-    const link = state.casting[targetEntityId].find(
+    const link = state.casting[targetEntityId]?.find(
       link => link.asset_id === asset.asset_id
     )
-    link.label = label
+    if (link) link.label = label
   },
 
   [SAVE_BREAKDOWN_SEARCH_END](state, { searchQuery }) {

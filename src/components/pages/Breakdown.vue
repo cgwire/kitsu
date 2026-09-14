@@ -1058,7 +1058,7 @@ export default {
       )
       const removals = []
       for (const entityId of entityIds) {
-        const asset = this.casting[entityId].find(
+        const asset = this.casting[entityId]?.find(
           asset => asset.asset_id === assetId
         )
         if (asset) {
