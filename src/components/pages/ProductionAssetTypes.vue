@@ -42,155 +42,139 @@
   </div>
 </template>
 
-<script>
+<script setup>
+// Imports
+// --------------------------------------------------------------------------
+import { useHead } from '@unhead/vue'
 import moment from 'moment'
-import { mapGetters, mapActions } from 'vuex'
+import { computed, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
 import csv from '@/lib/csv'
 import stringHelpers from '@/lib/string'
 
-import { searchMixin } from '@/components/mixins/search'
-
+import ProductionAssetTypeList from '@/components/lists/ProductionAssetTypeList.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
-import ProductionAssetTypeList from '@/components/lists/ProductionAssetTypeList.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 
-export default {
-  name: 'production-asset-types',
+const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
+const store = useStore()
 
-  mixins: [searchMixin],
+// State
+// --------------------------------------------------------------------------
+const assetTypeListRef = useTemplateRef('asset-type-list')
+const searchFieldRef = useTemplateRef('asset-type-search-field')
 
-  components: {
-    ButtonSimple,
-    Combobox,
-    ProductionAssetTypeList,
-    SearchField
-  },
+const displayMode = ref('pie')
+const initialLoading = ref(true)
 
-  data() {
-    return {
-      initialLoading: true,
-      displayMode: 'pie',
-      displayModeOptions: [
-        { label: 'pie', value: 'pie' },
-        { label: 'count', value: 'count' }
-      ]
-    }
-  },
+const displayModeOptions = [
+  { label: 'pie', value: 'pie' },
+  { label: 'count', value: 'count' }
+]
 
-  computed: {
-    ...mapGetters([
-      'assetTypeMap',
-      'assetTypeStats',
-      'assetTypeSearchText',
-      'assetTypeListScrollPosition',
-      'assetValidationColumns',
-      'currentEpisode',
-      'currentProduction',
-      'displayedAssetTypes',
-      'isAssetsLoading',
-      'isAssetsLoadingError',
-      'isTVShow',
-      'taskStatusMap',
-      'taskTypeMap'
-    ]),
+// Computed
+// --------------------------------------------------------------------------
+const assetTypeListScrollPosition = computed(
+  () => store.getters.assetTypeListScrollPosition
+)
+const assetTypeMap = computed(() => store.getters.assetTypeMap)
+const assetTypeSearchText = computed(() => store.getters.assetTypeSearchText)
+const assetTypeStats = computed(() => store.getters.assetTypeStats)
+const assetValidationColumns = computed(
+  () => store.getters.assetValidationColumns
+)
+const currentEpisode = computed(() => store.getters.currentEpisode)
+const currentProduction = computed(() => store.getters.currentProduction)
+const displayedAssetTypes = computed(() => store.getters.displayedAssetTypes)
+const isAssetsLoading = computed(() => store.getters.isAssetsLoading)
+const isAssetsLoadingError = computed(() => store.getters.isAssetsLoadingError)
+const isTVShow = computed(() => store.getters.isTVShow)
+const taskStatusMap = computed(() => store.getters.taskStatusMap)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
-    searchField() {
-      return this.$refs['asset-type-search-field']
-    }
-  },
+// Functions
+// --------------------------------------------------------------------------
+const onSearchChange = () => {
+  const searchQuery = searchFieldRef.value?.getValue()
+  store.dispatch('setAssetTypeSearch', searchQuery)
+  router.push({
+    query: { ...route.query, search: searchQuery || undefined }
+  })
+}
 
-  mounted() {
-    this.setDefaultSearchText()
-    this.setDefaultListScrollPosition()
-    setTimeout(() => {
-      this.reset()
-    }, 100)
-  },
-
-  methods: {
-    ...mapActions([
-      'computeAssetTypeStats',
-      'initAssetTypes',
-      'loadAssets',
-      'setAssetTypeSearch',
-      'setAssetTypeListScrollPosition',
-      'setLastProductionScreen'
-    ]),
-
-    setDefaultSearchText() {
-      if (this.assetTypeSearchText) {
-        this.$refs['asset-type-search-field'].setValue(this.assetTypeSearchText)
-      }
-    },
-
-    setDefaultListScrollPosition() {
-      this.$refs['asset-type-list'].setScrollPosition(
-        this.assetTypeListScrollPosition
-      )
-    },
-
-    onSearchChange() {
-      const searchQuery = this.$refs['asset-type-search-field']?.getValue()
-      this.setAssetTypeSearch(searchQuery)
-      this.setSearchInUrl(searchQuery)
-    },
-
-    saveScrollPosition(scrollPosition) {
-      this.setAssetTypeListScrollPosition(scrollPosition)
-    },
-
-    exportStatisticsToCsv() {
-      const nameData = [
-        moment().format('YYYYMMDD'),
-        this.currentProduction.name,
-        'asset_types',
-        'statistics'
-      ]
-      if (this.currentEpisode) {
-        nameData.splice(2, 0, this.currentEpisode.name)
-      }
-      const name = stringHelpers.slugify(nameData.join('_'))
-      csv.generateStatReports(
-        name,
-        this.assetTypeStats,
-        this.taskTypeMap,
-        this.taskStatusMap,
-        this.assetTypeMap,
-        this.countMode,
-        this.currentProduction
-      )
-    },
-
-    reset() {
-      this.initialLoading = true
-      this.loadAssets().then(() => {
-        this.computeAssetTypeStats()
-        this.setAssetTypeListScrollPosition(0)
-        this.initialLoading = false
-        this.setSearchFromUrl()
-        this.onSearchChange()
-      })
-    }
-  },
-
-  watch: {
-    currentProduction() {
-      if (!this.isTVShow) this.reset()
-    },
-
-    currentEpisode() {
-      if (this.isTVShow) this.reset()
-    }
-  },
-
-  head() {
-    return {
-      title: `${this.currentProduction.name} | ${this.$t(
-        'asset_types.production_title'
-      )} - Kitsu`
-    }
+const setSearchFromUrl = () => {
+  const searchFromUrl = route.query.search
+  if (!searchFieldRef.value?.getValue() && searchFromUrl) {
+    searchFieldRef.value?.setValue(searchFromUrl)
   }
 }
+
+const saveScrollPosition = scrollPosition => {
+  store.dispatch('setAssetTypeListScrollPosition', scrollPosition)
+}
+
+const exportStatisticsToCsv = () => {
+  const nameData = [
+    moment().format('YYYYMMDD'),
+    currentProduction.value.name,
+    ...(currentEpisode.value ? [currentEpisode.value.name] : []),
+    'asset_types',
+    'statistics'
+  ]
+  const name = stringHelpers.slugify(nameData.join('_'))
+  csv.generateStatReports(
+    name,
+    assetTypeStats.value,
+    taskTypeMap.value,
+    taskStatusMap.value,
+    assetTypeMap.value,
+    'count',
+    currentProduction.value
+  )
+}
+
+const reset = async () => {
+  initialLoading.value = true
+  await store.dispatch('loadAssets')
+  store.dispatch('computeAssetTypeStats')
+  store.dispatch('setAssetTypeListScrollPosition', 0)
+  initialLoading.value = false
+  setSearchFromUrl()
+  onSearchChange()
+}
+
+// Watchers
+// --------------------------------------------------------------------------
+watch(currentProduction, () => {
+  if (!isTVShow.value) reset()
+})
+
+watch(currentEpisode, () => {
+  if (isTVShow.value) reset()
+})
+
+// Lifecycle
+// --------------------------------------------------------------------------
+onMounted(() => {
+  if (assetTypeSearchText.value) {
+    searchFieldRef.value.setValue(assetTypeSearchText.value)
+  }
+  assetTypeListRef.value.setScrollPosition(assetTypeListScrollPosition.value)
+  setTimeout(reset, 100)
+})
+
+// Head
+// --------------------------------------------------------------------------
+useHead({
+  title: computed(
+    () =>
+      `${currentProduction.value?.name} | ${t('asset_types.production_title')} - Kitsu`
+  )
+})
 </script>
