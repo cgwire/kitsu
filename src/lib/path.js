@@ -67,6 +67,8 @@ export const getTaskHref = (
   return href
 }
 
+// Returns null for a task without an entity id: vue-router fills a missing
+// production_id from the current route but throws on the missing entity id.
 export const getTaskEntityPath = (task, episodeId) => {
   if (task) {
     let type = task.entity_type_name
@@ -74,6 +76,7 @@ export const getTaskEntityPath = (task, episodeId) => {
       type = 'Asset'
     }
     const entityId = task.entity ? task.entity.id : task.entity_id
+    if (!entityId) return null
     const route = {
       name: type.toLowerCase(),
       params: {

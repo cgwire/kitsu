@@ -46,7 +46,10 @@
           </span>
 
           <h1 class="title flexrow-item">
-            <router-link :to="taskEntityPath" v-if="!isCurrentUserClient">
+            <router-link
+              :to="taskEntityPath"
+              v-if="!isCurrentUserClient && taskEntityPath"
+            >
               {{ title }}
             </router-link>
             <template v-else>
