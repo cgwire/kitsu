@@ -6,35 +6,40 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+// Imports
+// --------------------------------------------------------------------------
+import { useHead } from '@unhead/vue'
+import { computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
 import ProductionBrief from '@/components/pages/production/ProductionBrief.vue'
 
-export default {
-  name: 'brief',
+const { t } = useI18n()
+const router = useRouter()
+const store = useStore()
 
-  components: {
-    ProductionBrief
-  },
+// Computed
+// --------------------------------------------------------------------------
+const currentProduction = computed(() => store.getters.currentProduction)
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 
-  computed: {
-    ...mapGetters(['currentProduction', 'isCurrentUserClient'])
-  },
+// Lifecycle
+// --------------------------------------------------------------------------
+onMounted(() => {
+  if (isCurrentUserClient.value) router.push({ name: 'not-found' })
+})
 
-  mounted() {
-    if (this.isCurrentUserClient) {
-      this.$router.push({ name: 'not-found' })
-      return
-    }
-  },
-
-  head() {
-    return {
-      title: `${this.currentProduction?.name} | ${this.$t('productions.brief.title')} - Kitsu`
-    }
-  }
-}
+// Head
+// --------------------------------------------------------------------------
+useHead({
+  title: computed(
+    () =>
+      `${currentProduction.value?.name} | ${t('productions.brief.title')} - Kitsu`
+  )
+})
 </script>
 
 <style lang="scss" scoped>
