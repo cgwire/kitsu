@@ -448,8 +448,8 @@ const actions = {
     // instance where the Assets page under all fetches the ones the
     // production uses: mark those scopes so the pages refetch instead of
     // adopting them.
-    const isPartial = !withTasks || !withShared || all
-    const marker = isPartial ? '#partial' : ''
+    const isPartial = !withTasks || !withShared
+    const marker = isPartial ? '#partial' : all ? '#shared' : ''
     const scope = all ? 'all' : (episode?.id ?? '')
     const loadingKey = `${production.id}/${scope}${marker}`
 

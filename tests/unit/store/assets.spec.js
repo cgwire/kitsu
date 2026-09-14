@@ -241,6 +241,32 @@ describe('Assets store', () => {
       expect(types).not.toContain('LOAD_ASSETS_END')
     })
 
+    // The schedule under the all pseudo-episode loads without tasks nor
+    // shared assets: a breakdown opened meanwhile must wait for that load,
+    // then fetch its own dataset instead of adopting it.
+    test('does not join a partial load in flight for a production-wide one', async () => {
+      vi.spyOn(assetsApi, 'getAssets').mockResolvedValue([])
+      const state = { isAssetsLoading: false, isAssetsLoadingError: false }
+      const rootGetters = {
+        ...baseRootGetters(),
+        isTVShow: true,
+        currentEpisode: { id: 'all' }
+      }
+      const ctx = { commit: realCommit(state), dispatch: vi.fn(), state, rootGetters }
+
+      assetsStore.actions.loadAssets(ctx, { withTasks: false, withShared: false })
+      const loading = assetsStore.actions.loadAssets(ctx, { all: true })
+      // Switch away so the response short-circuits before LOAD_ASSETS_END.
+      state.assetsLoadingKey = 'p2/'
+      await loading
+
+      expect(ctx.dispatch).toHaveBeenCalledWith('loadAssets', {
+        all: true,
+        withShared: true,
+        withTasks: true
+      })
+    })
+
     // Its flag raised for the production left, no response would ever lower
     // it, and every later load would queue behind it in a loop.
     test('gives up when the production changed while it waited for the episodes', async () => {
@@ -787,7 +813,7 @@ describe('Assets store, partial loads', () => {
   test('a production-wide load records its own scope', async () => {
     vi.spyOn(assetsApi, 'getSharedAssets').mockResolvedValue([])
     const { state, loading } = startLoad({ all: true })
-    expect(state.assetsLoadingKey).toBe('p1/all#partial')
+    expect(state.assetsLoadingKey).toBe('p1/all#shared')
     await loading
   })
 

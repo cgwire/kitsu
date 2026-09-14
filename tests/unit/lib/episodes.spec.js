@@ -38,7 +38,7 @@ describe('isEpisodeInLoadedScope', () => {
   test('holds everything under the all pseudo-episode, marker or not', () => {
     expect(isEpisodeInLoadedScope('p1/all', 'ep-b')).toBe(true)
     expect(isEpisodeInLoadedScope('p1/all#partial', 'ep-b')).toBe(true)
-    expect(isEpisodeInLoadedScope('p1/all#partial', 'ep-b')).toBe(true)
+    expect(isEpisodeInLoadedScope('p1/all#shared', 'ep-b')).toBe(true)
   })
 
   test('holds only the entities without episode under the main pack', () => {
