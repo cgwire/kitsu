@@ -4,7 +4,8 @@ import {
   getTileCellIndex,
   getTileGeometry,
   TILE_CELL_HEIGHT,
-  TILE_COLUMNS
+  TILE_COLUMNS,
+  TILE_RETRY_DELAY
 } from '@/lib/players/tiles'
 
 describe('lib/players/tiles', () => {
@@ -65,13 +66,24 @@ describe('lib/players/tiles', () => {
       expect(second).toBe(first)
     })
 
-    it('resolves null on load failure and allows a retry', async () => {
-      installImageMock({ width: 0, height: 0, fail: true })
-      expect(await getTileGeometry('/tiles/broken.png')).toBeNull()
-      installImageMock({ width: 800, height: 100 })
-      const retried = await getTileGeometry('/tiles/broken.png')
-      expect(retried).not.toBeNull()
-      expect(retried.cellWidth).toBe(100)
+    it('resolves null on load failure, keeps the miss, then retries', async () => {
+      vi.useFakeTimers()
+      try {
+        installImageMock({ width: 0, height: 0, fail: true })
+        const missing = getTileGeometry('/tiles/broken.png')
+        // Only the image mock's timer: the eviction one must stay pending.
+        await vi.runOnlyPendingTimersAsync()
+        expect(await missing).toBeNull()
+        // The miss is memoized: no new request on the next hover.
+        installImageMock({ width: 800, height: 100 })
+        expect(getTileGeometry('/tiles/broken.png')).toBe(missing)
+        await vi.advanceTimersByTimeAsync(TILE_RETRY_DELAY)
+        const retried = getTileGeometry('/tiles/broken.png')
+        await vi.runOnlyPendingTimersAsync()
+        expect((await retried).cellWidth).toBe(100)
+      } finally {
+        vi.useRealTimers()
+      }
     })
   })
 })

@@ -15,13 +15,18 @@
 
 export const TILE_COLUMNS = 8
 export const TILE_CELL_HEIGHT = 100
+// How long a missing sprite stays missing before the next attempt: the
+// progress bars ask on every entity switch and hover, and the server
+// builds a missing sprite in the background after the first 404.
+export const TILE_RETRY_DELAY = 60000
 
 const tileGeometryCache = new Map()
 
 /**
  * Resolve the real geometry of a tile sprite. Resolves null when the
  * image cannot be loaded (broken preview, no tile yet). Results are
- * memoized per URL; failures are evicted so a later retry can succeed.
+ * memoized per URL; a failure is kept for TILE_RETRY_DELAY, then evicted
+ * so a later retry can succeed.
  */
 export const getTileGeometry = url => {
   if (tileGeometryCache.has(url)) return tileGeometryCache.get(url)
@@ -39,7 +44,7 @@ export const getTileGeometry = url => {
       })
     }
     image.onerror = () => {
-      tileGeometryCache.delete(url)
+      setTimeout(() => tileGeometryCache.delete(url), TILE_RETRY_DELAY)
       resolve(null)
     }
     image.src = url
