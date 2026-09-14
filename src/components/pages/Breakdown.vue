@@ -1409,7 +1409,7 @@ export default {
 
     getEntityName(entity) {
       return this.sequenceId === 'all' &&
-        (!this.isTVShow || (this.isTVShow && this.currentEpisode.id !== 'all'))
+        (!this.isTVShow || this.currentEpisode?.id !== 'all')
         ? entity.sequence_name + ' / ' + entity.name
         : entity.name
     },

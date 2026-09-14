@@ -221,3 +221,25 @@ describe('Breakdown page, removeOneAssetFromSelection', () => {
     expect(context.loading.remove).toBe(false)
   })
 })
+
+describe('Breakdown page, getEntityName', () => {
+  const entity = { name: 'SH01', sequence_name: 'SEQ01' }
+
+  test('prefixes the sequence on a TV show before the episode resolves', () => {
+    const context = { sequenceId: 'all', isTVShow: true, currentEpisode: null }
+
+    expect(Breakdown.methods.getEntityName.call(context, entity)).toBe(
+      'SEQ01 / SH01'
+    )
+  })
+
+  test('keeps the bare name on the episode casting', () => {
+    const context = {
+      sequenceId: 'all',
+      isTVShow: true,
+      currentEpisode: { id: 'all' }
+    }
+
+    expect(Breakdown.methods.getEntityName.call(context, entity)).toBe('SH01')
+  })
+})
