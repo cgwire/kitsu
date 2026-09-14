@@ -14,11 +14,11 @@
         {
             "type": "navigate",
             
-            "url": "http://localhost/open-productions",
+            "url": "http://localhost:8080/open-productions",
             "assertedEvents": [
                 {
                     "type": "navigation",
-                    "url": "http://localhost/open-productions",
+                    "url": "http://localhost:8080/open-productions",
                     "title": "My Productions - Kitsu"
                 }
             ]
@@ -610,6 +610,131 @@
             ],
             "offsetY": 22.90625,
             "offsetX": 40.421875
+        },
+        {
+            "type": "navigate",
+            "url": "http://localhost:8080/project-templates?search=",
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "http://localhost:8080/project-templates?search=",
+                    "title": "Templates - Kitsu"
+                }
+            ]
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Add a production template",
+                    "aria/[role=\"generic\"]"
+                ],
+                [
+                    "div.project-templates span"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/button[2]/span"
+                ],
+                [
+                    "pierce/div.project-templates span"
+                ]
+            ],
+            "offsetY": 19.515625,
+            "offsetX": 91.828125
+        },
+        {
+            "type": "change",
+            "value": "my template",
+            "selectors": [
+                [
+                    "form > div:nth-of-type(1) input"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[3]/div[2]/div/form/div[1]/p/input"
+                ],
+                [
+                    "pierce/form > div:nth-of-type(1) input"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "form > div.flexrow"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[3]/div[2]/div/form/div[2]"
+                ],
+                [
+                    "pierce/form > div.flexrow"
+                ],
+                [
+                    "text/TypeShortStyle2D/3D"
+                ]
+            ],
+            "offsetY": 31.828125,
+            "offsetX": 374
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Confirm"
+                ],
+                [
+                    "div.is-active a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[3]/div[2]/div/div/p/a"
+                ],
+                [
+                    "pierce/div.is-active a"
+                ]
+            ],
+            "offsetY": 5.65625,
+            "offsetX": 30.421875
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "tr:nth-of-type(1) [data-test='button-delete-admin'] > svg"
+                ],
+                [
+                    "xpath///*[@data-test=\"button-delete-admin\"]/svg"
+                ],
+                [
+                    "pierce/tr:nth-of-type(1) [data-test='button-delete-admin'] > svg"
+                ]
+            ],
+            "offsetY": 5.875,
+            "offsetX": 6.5
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Confirm"
+                ],
+                [
+                    "div.delete-modal a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[4]/div[2]/div/p[2]/a"
+                ],
+                [
+                    "pierce/div.delete-modal a"
+                ]
+            ],
+            "offsetY": 26,
+            "offsetX": 54.421875
         }
     ]
 }

@@ -42,7 +42,7 @@ You need to select your asset task type (3), shot task type (4), task status (5)
 ::: tip
 To create your **Production Workflow**, you will select Task Types from the Global Library.
 
-If you realize you missed some Task Types, you can create them later.
+If you realize you missed some Task Types, Asset Types, or Task Statuses, you can add them later on during production.
 
 See the [Studio Workflow](../../../configure-kitsu/index.html#studio-workflows) section.
 :::
@@ -165,7 +165,11 @@ Once this is done, simply click the `Delete` button in the corresponding closed 
 
 Go to `Main Menu > Admin > Templates` to manage your production templates.
 
+![](/guides/production-structure/manage-productions/screenshots/034.png)
+
 To create a new one, click the `Add a production template` button and fill in the form:
+
+![](/guides/production-structure/manage-productions/screenshots/035.png)
 
 - Name: your template name
 - Type: `Short`, `TV Show`, `Feature Film`, `Only Assets`, or `Only Shots`

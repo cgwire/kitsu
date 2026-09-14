@@ -95,19 +95,19 @@ On the **Task Types** tab, you can choose which production or task type you want
 validate your choice with the **Import** button.
 
 ::: warning
-If you add a new task type **AFTER** creating an asset or shot, here is the **DELIVERY** task type.
+If you add a new task type **AFTER** creating an asset or shot:
 
 ![Setting Task Type add](/img/getting-started/setting_task_add2.png)
 
-You need to **add this task type** on the global page.
+You need to **add this task type** on the global entity page (shot, asset, sequence, etc.):
 
 ![Add Task Type Global](/img/getting-started/global_add_task.png)
 
-A pop-in will appear, and you must select the new task type on the dropdown menu.
+A pop-up appears, and you must select the new task type in the dropdown menu:
 
 ![Add Task Type Global](/img/getting-started/add_task_current.png)
 
-Validate with **Confirm**.
+Confirm to see the task type added to your dashboard:
 
 ![Add Task Type example](/img/getting-started/add_task_example.png)
 :::

@@ -45,11 +45,11 @@ Here are some links to familiarize yourself with the basic concepts in Kitsu you
 
 ## Workflows
 
-1. [For Supervisors](/handbooks/for-supervisors/) - 
-1. [For Producers](/handbooks/for-producers/) - 
-1. [For Artists](/handbooks/for-artists/) - 
-1. [For Clients](/handbooks/for-clients/) - 
-1. [For Developers](https://dev.kitsu.cloud/) - 
+1. [For Supervisors](/handbooks/for-supervisors/)
+1. [For Producers](/handbooks/for-producers/)
+1. [For Artists](/handbooks/for-artists/)
+1. [For Clients](/handbooks/for-clients/)
+1. [For Developers](https://dev.kitsu.cloud/)
 
 ## Guides
 
@@ -61,6 +61,11 @@ Here are some links to familiarize yourself with the basic concepts in Kitsu you
 1. [Import Team](/guides/team-management/import-team/) - Quickly add multiple team members at once by importing them from a file instead of creating accounts one by one.
 1. [User Profile Settings](/guides/team-management/profile-settings/) - Customize personal account settings, including contact details, preferences, and notification options.
 
+### Task Configuration
+
+1. [Manage Task Types](/guides/task-configuration/managing-task-types/) - Define the pipeline stages (like Modeling, Rigging, or Compositing) that assets, shots, and other entities move through during production.
+2. [Manage Task Statuses](/guides/task-configuration/managing-task-statuses/) - Configure the review and approval states (like To Do, Work in Progress, or Done) that track a task's progress through the workflow.
+
 ### Production Structure
 
 1. [Manage Studio Labels](/guides/production-structure/manage-studios/) - Create and organize the studio labels used to identify which studio is responsible for each task.
@@ -68,11 +73,6 @@ Here are some links to familiarize yourself with the basic concepts in Kitsu you
 1. [Manage Episodes](/guides/production-structure/manage-episodes/) - Add, edit, and organize episodes within a production.
 1. [Manage Sequences](/guides/production-structure/manage-sequences/) - Add, edit, and organize sequences within a production or episode.
 1. [Manage Shots](/guides/production-structure/manage-shots/) - Add, edit, and organize the shots that make up a sequence.
-
-### Task Configuration
-
-1. [Manage Task Types](/guides/task-configuration/managing-task-types/) - Define the pipeline stages (like Modeling, Rigging, or Compositing) that assets, shots, and other entities move through during production.
-2. [Manage Task Statuses](/guides/task-configuration/managing-task-statuses/) - Configure the review and approval states (like To Do, Work in Progress, or Done) that track a task's progress through the workflow.
 
 ### Production
 

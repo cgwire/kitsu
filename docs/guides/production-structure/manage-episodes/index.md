@@ -57,6 +57,29 @@ Hover over the episode row you wish to edit in the list and click the `Edit` ico
 
 ![edit episode button](/guides/production-structure/manage-episodes/images/4.png)
 
+## Episode Task Types
+
+Episodes can have their own tasks, which is useful for work that covers a whole episode rather than a single sequence or shot: editing, conform, animatic, sound mix, delivery, etc.
+
+For a task type to be available on episodes, it must be created with `Episode` as its entity type. 
+
+In the main menu, go to `Task Types`, then click `Add task type`:
+
+- **Name**: the task type name e.g "Edit", "Conform", "Delivery"
+- **For entity type**: select `Episode`
+- **Color**: the color used for the task type in the interface
+- **Priority**: the position of the task type column in the lists
+
+Once the task type exists, add it to your production: go to the production settings and select it in the task types list.
+
+The Episodes page then displays one column per episode task type, with the status of each task.
+
+Click a task cell to open the task panel, where you can change the status, assign artists, publish previews, and add comments, exactly like a shot or asset task.
+
+::: info
+Episode task types are only available in TV Show productions, since other production types have no episode container.
+:::
+
 ## Delete Episodes
 
 Hover over the episode row you wish to remove in the list and click the `Delete` icon:  

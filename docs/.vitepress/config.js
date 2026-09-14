@@ -292,6 +292,15 @@ export default {
             ],
           },
           {
+            text: "Task Configuration",
+            collapsed: false,
+            link: "/guides/task-configuration/",
+            items: [
+              { text: "Manage Task Types", link: "/guides/task-configuration/managing-task-types/" },
+              { text: "Manage Task Statuses", link: "/guides/task-configuration/managing-task-statuses/" },
+            ],
+          },
+          {
             text: "Production Structure",
             collapsed: false,
             link: "/guides/production-structure/",
@@ -301,15 +310,6 @@ export default {
               { text: "Manage Sequences", link: "/guides/production-structure/manage-sequences/" },
               { text: "Manage Shots", link: "/guides/production-structure/manage-shots/" },
               { text: "Manage Studio Labels", link: "/guides/production-structure/manage-studios/" },
-            ],
-          },
-          {
-            text: "Task Configuration",
-            collapsed: false,
-            link: "/guides/task-configuration/",
-            items: [
-              { text: "Manage Task Types", link: "/guides/task-configuration/managing-task-types/" },
-              { text: "Manage Task Statuses", link: "/guides/task-configuration/managing-task-statuses/" },
             ],
           },
           {

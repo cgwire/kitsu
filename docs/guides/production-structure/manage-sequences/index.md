@@ -15,7 +15,9 @@ flowchart TD
     EPISODE -->|contains| SEQUENCE
     SEQUENCE -->|contains| SHOT
 
+    EPISODE -->|tracked by| TASK
     SEQUENCE -->|tracked by| TASK
+    SHOT -->|tracked by| TASK
 ```
 
 In Kitsu, you can also track tasks at the **Sequence** Level.

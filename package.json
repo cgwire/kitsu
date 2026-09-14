@@ -12,7 +12,7 @@
     "preview": "vitepress preview docs",
     "deploy": "wrangler deploy",
     "toc": "./word_count.sh docs > toc.json",
-    "screenshots": "node ./scripts/screenshots.js docs/guides/team-management/managing-teams/replay.json",
+    "screenshots": "node ./scripts/screenshots.js docs/guides/production-structure/manage-productions/replay.json",
     "pre:translate": "./scripts/find-outdated-content.sh && node scripts/translator.js",
     "post:translate": "./scripts/parse_batch_output.sh && ./scripts/localize-links.sh"
   },
