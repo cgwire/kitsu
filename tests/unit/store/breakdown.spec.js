@@ -88,4 +88,48 @@ describe('Breakdown store', () => {
       })
     })
   })
+
+  // A full casting reload drops the entities the API returned no link for,
+  // so a modal confirmed after such a reload can target a missing key.
+  describe('CASTING_REMOVE_FROM_CASTING', () => {
+    test('ignores an entity missing from the casting map', () => {
+      breakdownStore.state.casting = {}
+      breakdownStore.state.castingByType = {}
+
+      breakdownStore.mutations.CASTING_REMOVE_FROM_CASTING(
+        breakdownStore.state,
+        { entityId: 's1', asset: { id: 'a1' }, nbOccurences: 1 }
+      )
+
+      expect(breakdownStore.state.casting).toEqual({})
+      expect(breakdownStore.state.castingByType).toEqual({})
+    })
+  })
+
+  describe('CASTING_SET_LINK_LABEL', () => {
+    test('ignores an entity missing from the casting map', () => {
+      breakdownStore.state.casting = {}
+
+      breakdownStore.mutations.CASTING_SET_LINK_LABEL(breakdownStore.state, {
+        label: 'fixed',
+        asset: { asset_id: 'a1' },
+        targetEntityId: 's1'
+      })
+
+      expect(breakdownStore.state.casting).toEqual({})
+    })
+
+    test('ignores an asset missing from the entity casting', () => {
+      const link = { asset_id: 'a2', label: 'animate' }
+      breakdownStore.state.casting = { s1: [link] }
+
+      breakdownStore.mutations.CASTING_SET_LINK_LABEL(breakdownStore.state, {
+        label: 'fixed',
+        asset: { asset_id: 'a1' },
+        targetEntityId: 's1'
+      })
+
+      expect(link.label).toBe('animate')
+    })
+  })
 })

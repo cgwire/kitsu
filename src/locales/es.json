@@ -407,6 +407,7 @@
       "reset_change_password_token_failed": "El enlace para restablecer la contraseña no es válido o ha caducado. Por favor, reinicie el procedimiento."
     },
     "main": {
+      "technical_details": "Detalles técnicos:",
       "about": "Acerca de",
       "add": "añadir",
       "all": "Todos",
@@ -1338,6 +1339,9 @@
     "task_types": {
       "delete_text": "¿Está seguro de que desea eliminar {name} de su base de datos?",
       "delete_error": "Se ha producido un error al eliminar este tipo de tarea. Es probable que haya datos asociados. ¿Está seguro de que este tipo de tarea no tiene ninguna tarea asociada?",
+      "delete_blocked_by_links": "Este tipo de tarea todavía se usa en el calendario o en el flujo de trabajo de algunas producciones. Desvincularlo eliminará sus fechas del calendario en todas las producciones.",
+      "delete_blocked_by_tasks": "Todavía hay tareas que usan este tipo de tarea. Bórrelas o reasígnelas antes de quitarlo.",
+      "delete_force": "Desvincular y borrar",
       "edit_title": "Modificar tipo de tarea",
       "create_error": "Se ha producido un error al crear el tipo de tarea. Asegúrese que no haya otro tipo de tarea con un nombre similar.",
       "new_task_type": "Añadir un tipo de tarea",

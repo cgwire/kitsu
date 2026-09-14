@@ -407,6 +407,7 @@
       "reset_change_password_token_failed": "De link om het wachtwoord te resetten is ongeldig of verlopen. Start de procedure opnieuw."
     },
     "main": {
+      "technical_details": "Technische details:",
       "about": "Over",
       "add": "toevoegen",
       "all": "Alle",
@@ -1338,6 +1339,9 @@
     "task_types": {
       "delete_text": "Weet je zeker dat je {name} uit de database wilt verwijderen?",
       "delete_error": "Er is een fout opgetreden bij het verwijderen van dit taaktype. Waarschijnlijk zijn er gegevens aan gekoppeld. Weet je zeker dat er geen taak aan dit taaktype is gekoppeld?",
+      "delete_blocked_by_links": "Dit taaktype wordt nog gebruikt in de planning of in de workflow van sommige producties. Loskoppelen verwijdert de planningsdatums ervan in alle producties.",
+      "delete_blocked_by_tasks": "Er zijn nog taken die dit taaktype gebruiken. Verwijder ze of wijs ze opnieuw toe voordat je het verwijdert.",
+      "delete_force": "Loskoppelen en verwijderen",
       "edit_title": "Bewerk taaktype",
       "create_error": "Er is een fout opgetreden bij het maken van het taaktype. Controleer of er geen taaktype is met een vergelijkbare naam.",
       "new_task_type": "Voeg een taaktype toe",

@@ -850,6 +850,16 @@ describe('Assets store, partial loads', () => {
 })
 
 describe('Assets store, LOAD_ASSETS_ERROR', () => {
+  // The store logs the failed load: keep that expected error out of the
+  // test output.
+  beforeEach(() => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
   // The pages decide from the recorded scope whether a reload is needed: a
   // failed load must not leave its scope behind an empty dataset, or they
   // never retry.

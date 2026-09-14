@@ -407,6 +407,7 @@
       "reset_change_password_token_failed": "Linket til nulstilling af adgangskode er ugyldigt eller udløbet. Genstart venligst proceduren."
     },
     "main": {
+      "technical_details": "Tekniske detaljer:",
       "about": "Om",
       "add": "tilføj",
       "all": "Alle",
@@ -1338,6 +1339,9 @@
     "task_types": {
       "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database?",
       "delete_error": "Der opstod en fejl under sletning af denne opgavetype. Der kan være eksisterende data knyttet til den. Er du sikker på, at denne opgavetype ikke har nogen opgave knyttet til sig?",
+      "delete_blocked_by_links": "Denne opgavetype bruges stadig i tidsplanen eller i arbejdsgangen for nogle produktioner. Hvis den frakobles, slettes dens tidsplandatoer i alle produktioner.",
+      "delete_blocked_by_tasks": "Der er stadig opgaver, der bruger denne opgavetype. Slet eller omfordel dem, før du fjerner den.",
+      "delete_force": "Frakobl og slet",
       "edit_title": "Rediger opgavetype",
       "create_error": "Der opstod en fejl under oprettelse af opgavetypen. Kontrollér venligst, at der ikke allerede findes en opgavetype med et lignende navn.",
       "new_task_type": "Tilføj opgavetype",

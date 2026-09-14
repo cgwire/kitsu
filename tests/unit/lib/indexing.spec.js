@@ -6,6 +6,7 @@ import {
   buildNameIndex,
   buildShotIndex,
   buildTaskIndex,
+  buildTaskTypeIndex,
   getAssetIndexWords,
   getShotIndexWords,
   indexSearch,
@@ -188,6 +189,35 @@ describe('lib/indexing', () => {
       const index = buildExactNameIndex([{ name: 'constructor', id: 1 }])
       expect(index.constructor).toHaveLength(1)
       expect(index.toString).toBeUndefined()
+    })
+  })
+
+  describe('buildTaskTypeIndex', () => {
+    it('puts the live task type ahead of an archived twin', () => {
+      const index = buildTaskTypeIndex([
+        { name: 'COMPOSITING', id: 'archived', archived: true },
+        { name: 'COMPOSITING', id: 'live' }
+      ])
+      expect(index.compositing).toHaveLength(2)
+      expect(index.compositing[0].id).toEqual('live')
+    })
+
+    // An archived task type that still carries tasks keeps a column in the
+    // lists, so it has to stay filterable.
+    it('still indexes an archived task type that has no live twin', () => {
+      const index = buildTaskTypeIndex([
+        { name: 'COMPOSITING', id: 'archived', archived: true }
+      ])
+      expect(index.compositing).toHaveLength(1)
+      expect(index.compositing[0].id).toEqual('archived')
+    })
+
+    it('keeps the relative order of task types sharing an archived state', () => {
+      const index = buildTaskTypeIndex([
+        { name: 'fx', id: 'first' },
+        { name: 'fx', id: 'second' }
+      ])
+      expect(index.fx.map(taskType => taskType.id)).toEqual(['first', 'second'])
     })
   })
 

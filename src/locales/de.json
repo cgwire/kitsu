@@ -407,6 +407,7 @@
       "reset_change_password_token_failed": "Der Link zum Zurücksetzen des Passworts ist ungültig oder abgelaufen. Bitte starten Sie den Vorgang erneut."
     },
     "main": {
+      "technical_details": "Technische Details:",
       "about": "Über",
       "add": "hinzufügen",
       "all": "Alle",
@@ -1338,6 +1339,9 @@
     "task_types": {
       "delete_text": "Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?",
       "delete_error": "Beim Löschen dieses Aufgabentyps ist ein Fehler aufgetreten. Wahrscheinlich sind damit Daten verknüpft. Sind Sie sicher, dass dieser Aufgabentyp keine Aufgabe hat, die mit ihm verknüpft ist?",
+      "delete_blocked_by_links": "Dieser Aufgabentyp wird noch im Zeitplan oder im Workflow einiger Produktionen verwendet. Beim Loslösen werden seine Zeitplandaten in allen Produktionen gelöscht.",
+      "delete_blocked_by_tasks": "Es gibt noch Aufgaben mit diesem Aufgabentyp. Löschen Sie sie oder weisen Sie sie neu zu, bevor Sie ihn entfernen.",
+      "delete_force": "Loslösen und löschen",
       "edit_title": "Aufgabentyp bearbeiten",
       "create_error": "Beim Erstellen des Aufgabentyps ist ein Fehler aufgetreten. Bitte überprüfen Sie, ob es keinen Aufgabentyp mit einem ähnlichen Namen gibt.",
       "new_task_type": "Hinzufügen eines Aufgabentyps",

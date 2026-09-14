@@ -41,7 +41,9 @@
       :is-loading="loading.del"
       :is-error="errors.del"
       :text="deleteText"
-      :error-text="$t('task_types.delete_error')"
+      :error-text="deleteErrorText"
+      :error-details="deleteErrorMessage"
+      :delete-button-text="deleteButtonText"
       @cancel="modals.del = false"
       @confirm="confirmDeleteTaskType"
     />
@@ -75,6 +77,8 @@ const activeTab = ref('active')
 const entityTab = ref('assets')
 const taskTypeToDelete = ref({ color: '#999999' })
 const taskTypeToEdit = ref(null)
+const deleteBlockedBy = ref('')
+const deleteErrorMessage = ref('')
 
 const errors = reactive({
   taskTypes: false,
@@ -132,6 +136,21 @@ const deleteText = computed(() =>
     : ''
 )
 
+// Zou refuses to delete a task type still attached to schedule items or
+// productions unless force is passed, and force does not help with
+// remaining tasks. The server message says which case it is.
+const deleteErrorText = computed(() => {
+  const explanations = {
+    links: 'task_types.delete_blocked_by_links',
+    tasks: 'task_types.delete_blocked_by_tasks'
+  }
+  return t(explanations[deleteBlockedBy.value] || 'task_types.delete_error')
+})
+
+const deleteButtonText = computed(() =>
+  deleteBlockedBy.value === 'links' ? t('task_types.delete_force') : ''
+)
+
 // Functions
 
 const confirmEditTaskType = async form => {
@@ -154,15 +173,32 @@ const confirmEditTaskType = async form => {
   loading.edit = false
 }
 
+// Zou's refusal names the force flag when detaching would unblock the
+// deletion; a foreign key error means tasks still use the type.
+const getDeleteBlocker = message => {
+  if (message.includes('force=true')) return 'links'
+  return message.includes('referencing') ? 'tasks' : ''
+}
+
 const confirmDeleteTaskType = async () => {
+  if (loading.del) return
+  const taskType = taskTypeToDelete.value
   loading.del = true
   errors.del = false
   try {
-    await store.dispatch('deleteTaskType', taskTypeToDelete.value)
-    modals.del = false
+    await store.dispatch('deleteTaskType', {
+      taskType,
+      force: deleteBlockedBy.value === 'links'
+    })
+    if (taskType === taskTypeToDelete.value) modals.del = false
   } catch (err) {
     console.error(err)
-    errors.del = true
+    // A late answer must not land on a modal reopened for another type.
+    if (modals.del && taskType === taskTypeToDelete.value) {
+      deleteErrorMessage.value = err.body?.message || ''
+      deleteBlockedBy.value = getDeleteBlocker(deleteErrorMessage.value)
+      errors.del = true
+    }
   }
   loading.del = false
 }
@@ -229,6 +265,9 @@ const onEditClicked = taskType => {
 
 const onDeleteClicked = taskType => {
   taskTypeToDelete.value = taskType
+  deleteBlockedBy.value = ''
+  deleteErrorMessage.value = ''
+  errors.del = false
   modals.del = true
 }
 

@@ -48,6 +48,21 @@ const hashName = name => {
   return name.toLowerCase().replace(/ /g, '')
 }
 
+/*
+ * A filter names a task type, but several task types can carry that name
+ * once lower-cased: Zou's unique constraint is per department, and older
+ * databases hold twins differing only by case. All of them are matched, so
+ * filtering on "compositing" covers every column bearing that name, and a
+ * negated filter excludes an entry as soon as one of them matches.
+ */
+const getFilterTaskTypes = filter =>
+  filter.taskTypes ?? (filter.taskType ? [filter.taskType] : [])
+
+const getFilterTasks = (entry, filter, taskMap) =>
+  getFilterTaskTypes(filter)
+    .map(taskType => taskMap.get(entry.validations.get(taskType.id)))
+    .filter(Boolean)
+
 const applyFiltersFunctions = {
   assettype(entry, filter, taskMap) {
     let isOk = filter.assetType && entry.asset_type_id === filter.assetType.id
@@ -56,32 +71,21 @@ const applyFiltersFunctions = {
   },
 
   assignation(entry, filter, taskMap) {
-    const task = taskMap.get(entry.validations.get(filter.taskType.id))
-    if (filter.assigned) {
-      return task && task.assignees && task.assignees.length > 0
-    } else {
-      return !task || (task && task.assignees && task.assignees.length === 0)
-    }
+    const isAssigned = getFilterTasks(entry, filter, taskMap).some(
+      task => task.assignees?.length > 0
+    )
+    return filter.assigned ? isAssigned : !isAssigned
   },
 
   assignedto(entry, filter, taskMap) {
-    let isOk = false
-    if (filter.taskType) {
-      const taskId = entry.validations.get(filter.taskType.id)
-      const task = taskMap.get(taskId)
-      filter.personIds.forEach(personId => {
-        isOk = isOk || task?.assignees.includes(personId)
-      })
+    const hasPerson = task =>
+      filter.personIds.some(personId => task?.assignees.includes(personId))
+    let isOk
+    if (getFilterTaskTypes(filter).length > 0) {
+      isOk = getFilterTasks(entry, filter, taskMap).some(hasPerson)
     } else {
       isOk =
-        entry.tasks?.some(taskId => {
-          const task = taskMap.get(taskId)
-          let hasAssignees = false
-          filter.personIds.forEach(personId => {
-            hasAssignees = hasAssignees || task?.assignees.includes(personId)
-          })
-          return hasAssignees
-        }) ?? false
+        entry.tasks?.some(taskId => hasPerson(taskMap.get(taskId))) ?? false
     }
     return filter.excluding ? !isOk : isOk
   },
@@ -162,9 +166,9 @@ const applyFiltersFunctions = {
   },
 
   status(entry, filter, taskMap) {
-    const task = taskMap.get(entry.validations.get(filter.taskType.id))
-    let isOk = task && filter.taskStatuses.includes(task.task_status_id)
-    isOk = isOk || false
+    let isOk = getFilterTasks(entry, filter, taskMap).some(task =>
+      filter.taskStatuses.includes(task.task_status_id)
+    )
     if (filter.excluding) isOk = !isOk
     return isOk
   },
@@ -197,12 +201,15 @@ const applyFiltersFunctions = {
   },
 
   priority(entry, filter, taskMap) {
-    const task = taskMap.get(entry.validations.get(filter.taskTypeId))
-    return task && task.priority === filter.value
+    const taskTypeIds = filter.taskTypeIds ?? [filter.taskTypeId]
+    return taskTypeIds.some(taskTypeId => {
+      const task = taskMap.get(entry.validations.get(taskTypeId))
+      return task?.priority === filter.value
+    })
   },
 
   readyfor(entry, filter, taskMap) {
-    return entry.ready_for === filter.value
+    return (filter.values ?? [filter.value]).includes(entry.ready_for)
   },
 
   assetsready(entry, filter, taskMap) {
@@ -214,7 +221,7 @@ const applyFiltersFunctions = {
         const task = taskMap.get(taskId)
         return (
           task &&
-          task.task_type_id === filter.value &&
+          (filter.values ?? [filter.value]).includes(task.task_type_id) &&
           entry.nb_entities_out === task.nb_assets_ready
         )
       }) ?? false
@@ -473,17 +480,19 @@ export const getTaskTypeFilters = (taskTypes, taskStatuses, queryText) => {
         return
       }
 
-      const taskTypes = taskTypeNameIndex[taskTypeName.toLowerCase()]
-      if (taskTypes) {
+      const matchedTaskTypes = taskTypeNameIndex[taskTypeName.toLowerCase()]
+      if (matchedTaskTypes) {
         if (value === 'unassigned') {
           results.push({
-            taskType: taskTypes[0],
+            taskType: matchedTaskTypes[0],
+            taskTypes: matchedTaskTypes,
             assigned: false,
             type: 'assignation'
           })
         } else if (value === 'assigned') {
           results.push({
-            taskType: taskTypes[0],
+            taskType: matchedTaskTypes[0],
+            taskTypes: matchedTaskTypes,
             assigned: true,
             type: 'assignation'
           })
@@ -495,7 +504,8 @@ export const getTaskTypeFilters = (taskTypes, taskStatuses, queryText) => {
             .map(shortName => taskStatusShortNameIndex[shortName].id)
           if (values.length > 0) {
             results.push({
-              taskType: taskTypes[0],
+              taskType: matchedTaskTypes[0],
+              taskTypes: matchedTaskTypes,
               taskStatuses: values,
               type: 'status',
               excluding
@@ -616,9 +626,10 @@ export const getAssignedToFilters = (persons, taskTypes, queryText) => {
       const pattern = rgxMatch.split('=')
       let taskTypeName = pattern[0].substring('assignedto'.length)
       taskTypeName = cleanParenthesis(taskTypeName)
-      const taskType = taskTypeName
-        ? taskTypeNameIndex[taskTypeName.toLowerCase()]?.[0]
+      const matchedTaskTypes = taskTypeName
+        ? taskTypeNameIndex[taskTypeName.toLowerCase()]
         : null
+      const taskType = matchedTaskTypes?.[0] ?? null
       let value = pattern[1]
       value = cleanParenthesis(value)
       const excluding = value.startsWith('-')
@@ -629,6 +640,7 @@ export const getAssignedToFilters = (persons, taskTypes, queryText) => {
         results.push({
           personIds: personIndex[simplifiedValue],
           taskType,
+          taskTypes: matchedTaskTypes,
           value,
           type: 'assignedto',
           excluding
@@ -667,10 +679,11 @@ export const getPriorityFilter = (taskTypes, queryText) => {
       const pattern = rgxMatch.split('=')
       const taskTypeName = cleanParenthesis(pattern[0].substring(9))
       const value = cleanParenthesis(pattern[1])
-      const taskTypes = taskTypeNameIndex[taskTypeName.toLowerCase()]
-      if (taskTypes && taskTypes.length > 0) {
+      const matchedTaskTypes = taskTypeNameIndex[taskTypeName.toLowerCase()]
+      if (matchedTaskTypes && matchedTaskTypes.length > 0) {
         results.push({
-          taskTypeId: taskTypes[0].id,
+          taskTypeId: matchedTaskTypes[0].id,
+          taskTypeIds: matchedTaskTypes.map(taskType => taskType.id),
           value: parseInt(value),
           type: 'priority'
         })
@@ -691,10 +704,11 @@ export const getReadyForFilter = (taskTypes, queryText) => {
     rgxMatches.forEach(rgxMatch => {
       const pattern = rgxMatch.split('=')
       const taskTypeName = cleanParenthesis(pattern[1])
-      const taskTypes = taskTypeNameIndex[taskTypeName.toLowerCase()]
-      if (taskTypes && taskTypes.length > 0) {
+      const matchedTaskTypes = taskTypeNameIndex[taskTypeName.toLowerCase()]
+      if (matchedTaskTypes && matchedTaskTypes.length > 0) {
         results.push({
-          value: taskTypes[0].id,
+          value: matchedTaskTypes[0].id,
+          values: matchedTaskTypes.map(taskType => taskType.id),
           type: 'readyfor'
         })
       }
@@ -717,10 +731,11 @@ export const getAssetsReadyFilter = (taskTypes, queryText) => {
       let taskTypeName = cleanParenthesis(pattern[1])
       const excluding = taskTypeName.startsWith('-')
       if (excluding) taskTypeName = taskTypeName.substring(1)
-      const taskTypes = taskTypeNameIndex[taskTypeName.toLowerCase()]
-      if (taskTypes && taskTypes.length > 0) {
+      const matchedTaskTypes = taskTypeNameIndex[taskTypeName.toLowerCase()]
+      if (matchedTaskTypes && matchedTaskTypes.length > 0) {
         results.push({
-          value: taskTypes[0].id,
+          value: matchedTaskTypes[0].id,
+          values: matchedTaskTypes.map(taskType => taskType.id),
           type: 'assetsready',
           excluding
         })

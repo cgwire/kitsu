@@ -64,10 +64,16 @@ export const buildExactNameIndex = entries => {
 }
 
 /*
- * Generate an index to find task type easily.
+ * Generate an index to find task type easily. Live task types are indexed
+ * first so that a live one always wins a name shared with an archived twin,
+ * which used to make that column unfilterable. Archived task types stay in
+ * the index: one that still carries tasks keeps a column to filter on.
  */
 export const buildTaskTypeIndex = taskTypes => {
-  return buildExactNameIndex(taskTypes)
+  return buildExactNameIndex([
+    ...taskTypes.filter(taskType => !taskType?.archived),
+    ...taskTypes.filter(taskType => taskType?.archived)
+  ])
 }
 
 /*

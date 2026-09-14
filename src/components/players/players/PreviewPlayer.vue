@@ -160,7 +160,7 @@
           @comment-added="$emit('comment-added')"
           @time-code-clicked="timeCodeClicked"
           v-show="!isCommentsHidden"
-          v-if="!readOnly"
+          v-if="!readOnly && task.id"
         />
       </div>
     </div>

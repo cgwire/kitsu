@@ -407,6 +407,7 @@
       "reset_change_password_token_failed": "O link de redefinição de senha é inválido ou expirou. Reinicie o procedimento."
     },
     "main": {
+      "technical_details": "Detalhes técnicos:",
       "about": "Sobre",
       "add": "Adicionar",
       "all": "Todos",
@@ -1338,6 +1339,9 @@
     "task_types": {
       "delete_text": "Tem certeza de que deseja remover {name} de seu banco de dados?",
       "delete_error": "Ocorreu um erro ao excluir este tipo de tarefa. Provavelmente há dados vinculados a ele. Tem certeza de que este tipo de tarefa não possui nenhuma tarefa vinculada a ele?",
+      "delete_blocked_by_links": "Este tipo de tarefa ainda é usado no cronograma ou no fluxo de trabalho de algumas produções. Desvinculá-lo excluirá suas datas de cronograma em todas as produções.",
+      "delete_blocked_by_tasks": "Ainda há tarefas que usam este tipo de tarefa. Exclua-as ou reatribua-as antes de removê-lo.",
+      "delete_force": "Desvincular e deletar",
       "edit_title": "Editar tipo de tarefa",
       "create_error": "Ocorreu um erro ao criar o tipo de tarefa. Por favor, verifique se não há tipo de tarefa com nome semelhante.",
       "new_task_type": "Adicionar um tipo de tarefa",

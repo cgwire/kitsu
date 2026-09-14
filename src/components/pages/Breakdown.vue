@@ -1058,7 +1058,7 @@ export default {
       )
       const removals = []
       for (const entityId of entityIds) {
-        const asset = this.casting[entityId].find(
+        const asset = this.casting[entityId]?.find(
           asset => asset.asset_id === assetId
         )
         if (asset) {
@@ -1409,7 +1409,7 @@ export default {
 
     getEntityName(entity) {
       return this.sequenceId === 'all' &&
-        (!this.isTVShow || (this.isTVShow && this.currentEpisode.id !== 'all'))
+        (!this.isTVShow || this.currentEpisode?.id !== 'all')
         ? entity.sequence_name + ' / ' + entity.name
         : entity.name
     },

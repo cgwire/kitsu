@@ -218,6 +218,13 @@ describe('path', () => {
       }
     })
   })
+  test('getTaskEntityPath without an entity', () => {
+    // An empty task (the preview player's prop default) must not resolve to
+    // a bare asset route that vue-router rejects for its missing asset_id.
+    expect(getTaskEntityPath({})).toBeNull()
+    expect(getTaskEntityPath({ entity_type_name: 'Shot', project_id: 3 }, 4))
+      .toBeNull()
+  })
   test('getEntityPath', () => {
     expect(getEntityPath(1, 2, 'other', null)).toEqual({
       name: 'other',

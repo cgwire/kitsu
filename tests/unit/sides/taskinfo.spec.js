@@ -223,6 +223,15 @@ describe('TaskInfo.vue', () => {
       expect(wrapper.find('.header-title .title').text()).toBe('SH01')
       expect(wrapper.find('.header-title .title a').exists()).toBe(false)
     })
+
+    it('drops the entity link when the task carries no entity', async () => {
+      const { wrapper } = await mountPanel({
+        task: buildTask({ entity: undefined, entity_id: undefined })
+      })
+      // A link without an entity id has no route to resolve.
+      expect(wrapper.find('.header-title .title').text()).toBe('SH01')
+      expect(wrapper.find('.header-title .title a').exists()).toBe(false)
+    })
   })
 
   describe('commenting permissions', () => {
