@@ -330,6 +330,13 @@ import TopbarSectionList from '@/components/tops/TopbarSectionList.vue'
 import NotificationBell from '@/components/widgets/NotificationBell.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 
+// Pages about one episode: no other episode can stand in for a missing one.
+const EPISODE_PAGE_ROUTES = [
+  'episode',
+  'episode-episode-task',
+  'episode-episode-task-preview'
+]
+
 export default {
   name: 'topbar',
 
@@ -400,6 +407,7 @@ export default {
       'isCurrentUserSupervisor',
       'isCurrentUserVendor',
       'isDarkTheme',
+      'isEpisodeListLoaded',
       'isSupportChat',
       'isUserMenuHidden',
       'isTVShow',
@@ -853,6 +861,13 @@ export default {
             const routeEpisodeId = this.$route.params.episode_id
             const query = this.$route.query
             this.currentProjectSection = this.getCurrentSectionFromRoute()
+            if (
+              EPISODE_PAGE_ROUTES.includes(this.$route.name) &&
+              !this.isKnownEpisode(routeEpisodeId)
+            ) {
+              this.redirectToKnownEpisode()
+              return
+            }
             if (this.currentProjectSection === 'assets') {
               const isValidEpisode =
                 this.keepsPseudoEpisode(
@@ -914,7 +929,7 @@ export default {
     },
 
     configureEpisode(routeEpisodeId) {
-      if (this.episodes.length < 2) {
+      if (!this.isEpisodeListLoaded) {
         // The fetch may outlive a production switch: its response must not
         // resolve the route against the list of the production left.
         const routeProductionId = this.$route.params.production_id
@@ -977,6 +992,18 @@ export default {
     // must not reach the store: SET_CURRENT_EPISODE cannot resolve the id,
     // the combobox goes blank and a mounted page keeps the list it had.
     redirectToKnownEpisode() {
+      // The pages of an episode the production lost, its detail page and its
+      // own tasks, have no stand-in: another episode under the same URL shape
+      // would mislead.
+      if (EPISODE_PAGE_ROUTES.includes(this.$route.name)) {
+        this.$router
+          .replace({
+            name: 'episodes',
+            params: { production_id: this.$route.params.production_id }
+          })
+          .catch(console.error)
+        return
+      }
       const episodeId = this.fallbackEpisodeId(
         this.getCurrentSectionFromRoute(),
         this.$route.params.plugin_id

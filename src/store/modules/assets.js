@@ -422,6 +422,9 @@ const actions = {
       // first, then pick the first one.
       if (rootGetters.episodes.length === 0) {
         await dispatch('loadEpisodes')
+        // A production switched during the fetch: the load would start for
+        // the production left, over the stores of the new one.
+        if (rootGetters.currentProduction?.id !== production.id) return []
         // loadEpisodes may resolve currentEpisode from the route (e.g. "all").
         episode = rootGetters.currentEpisode
       }
@@ -494,9 +497,11 @@ const actions = {
             asset.asset_type_name = assetType?.name || ''
           }
         })
-        // Ignore a response for a production the user already switched away
-        // from; committing would overwrite the current production's assets.
-        if (production.id !== rootGetters.currentProduction?.id) {
+        // Ignore a response for a scope the user already left: a production
+        // switch (CLEAR_ASSETS forgets the key) or a newer load of another
+        // episode (LOAD_ASSETS_START records its own). Committing would put
+        // the old scope's assets under the newer key.
+        if (state.assetsLoadingKey !== loadingKey) {
           return assets
         }
         commit(LOAD_ASSETS_END, {
@@ -512,9 +517,9 @@ const actions = {
       })
       .catch(err => {
         console.error('an error occurred while loading assets', err)
-        // Same guard as the success path: a rejection for a production the
-        // user already left would forget the scope of the load running now.
-        if (production.id === rootGetters.currentProduction?.id) {
+        // Same guard as the success path: a rejection for a scope the user
+        // already left would forget the scope of the load running now.
+        if (state.assetsLoadingKey === loadingKey) {
           commit(LOAD_ASSETS_ERROR)
         }
         return []
@@ -535,8 +540,8 @@ const actions = {
   loadAsset({ commit, state, rootGetters }, payload) {
     const { assetId, onlyInScope = false } =
       typeof payload === 'string' ? { assetId: payload } : payload
-    const asset = cache.assetMap.get(assetId)
-    if (asset?.lock) return
+    const displayedAsset = cache.assetMap.get(assetId)
+    if (displayedAsset?.lock) return
 
     const personMap = rootGetters.personMap
     const production = rootGetters.currentProduction
@@ -545,24 +550,26 @@ const actions = {
     const taskStatusMap = rootGetters.taskStatusMap
     const persons = rootGetters.people
 
-    return assetsApi
-      .getAsset(assetId)
-      .then(async asset => {
-        // Displayed already: refresh the row now. Waiting for a list load
-        // would apply this payload after a younger response and undo it.
+    // A list load in flight replaces the whole dataset: fetch once it has
+    // settled, so the payload is younger than its response and an asset
+    // deleted meanwhile is not re-inserted (the fetch fails instead). A
+    // displayed asset is refreshed now: waiting would apply this payload
+    // after a younger response and undo it.
+    const listSettled =
+      (!displayedAsset &&
+        state.isAssetsLoading &&
+        cache.assetsLoadingPromise) ||
+      Promise.resolve()
+    return listSettled
+      .then(() => assetsApi.getAsset(assetId))
+      .then(asset => {
         if (cache.assetMap.get(asset.id)) {
           commit(UPDATE_ASSET, asset)
           return
         }
-        // A list load in flight replaces the whole dataset: inserting now
-        // would be thrown away by its response, and no second event
-        // announces this asset again. Decide once that load settled.
-        if (state.isAssetsLoading) {
-          await (cache.assetsLoadingPromise || Promise.resolve())
-          // Its response was built after this fetch: the row it holds is
-          // the fresher one, and the asset it dropped stays dropped.
-          if (cache.assetMap.get(asset.id)) return
-        }
+        // Displayed when its refresh started and gone since: deleted, or
+        // dropped by a list load whose own response decides.
+        if (displayedAsset) return
         if (
           !onlyInScope ||
           isEpisodeInLoadedScope(

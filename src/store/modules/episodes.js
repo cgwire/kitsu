@@ -219,6 +219,7 @@ const getters = {
   isEpisodeTime: state => state.isEpisodeTime,
 
   episodes: state => state.episodes,
+  isEpisodeListLoaded: state => state.isEpisodeListLoaded,
   episodeMap: state => cache.episodeMap,
   episodeRetakeStats: state => state.episodeRetakeStats,
   episodeStats: state => state.episodeStats,

@@ -464,10 +464,10 @@ const actions = {
         return shotsApi.getShots(production, isAllEpisodes ? null : episode)
       })
       .then(shots => {
-        // Ignore a response for a production the user already switched away
-        // from; the loading flag is owned by the newer load (reset via
-        // CLEAR_SHOTS on switch).
-        if (production.id !== rootGetters.currentProduction?.id) {
+        // Ignore a response for a scope the user already left: a production
+        // switch (CLEAR_SHOTS forgets the key) or a newer load started after
+        // it. The loading flag and the key belong to that newer load.
+        if (state.shotsLoadingKey !== loadingKey) {
           return
         }
         // Discard a response whose scope is not the one displayed any more
@@ -497,9 +497,9 @@ const actions = {
         }
       })
       .catch(err => {
-        // Same guard as the success path: a rejection for a production the
-        // user already left would forget the scope of the load running now.
-        if (production.id === rootGetters.currentProduction?.id) {
+        // Same guard as the success path: a rejection for a scope the user
+        // already left would forget the scope of the load running now.
+        if (state.shotsLoadingKey === loadingKey) {
           commit(LOAD_SHOTS_ERROR)
         }
         console.error(err)
@@ -515,8 +515,8 @@ const actions = {
   loadShot({ commit, state, rootGetters }, payload) {
     const { shotId, onlyInScope = false } =
       typeof payload === 'string' ? { shotId: payload } : payload
-    const shot = cache.shotMap.get(shotId)
-    if (shot?.lock) return
+    const displayedShot = cache.shotMap.get(shotId)
+    if (displayedShot?.lock) return
 
     const personMap = rootGetters.personMap
     const production = rootGetters.currentProduction
@@ -525,24 +525,24 @@ const actions = {
     const persons = rootGetters.people
     const taskStatusMap = rootGetters.taskStatusMap
 
-    return shotsApi
-      .getShot(shotId)
-      .then(async shot => {
-        // Displayed already: refresh the row now. Waiting for a list load
-        // would apply this payload after a younger response and undo it.
+    // A list load in flight replaces the whole dataset: fetch once it has
+    // settled, so the payload is younger than its response and a shot
+    // deleted meanwhile is not re-inserted (the fetch fails instead). A
+    // displayed shot is refreshed now: waiting would apply this payload
+    // after a younger response and undo it.
+    const listSettled =
+      (!displayedShot && state.isShotsLoading && cache.shotsLoadingPromise) ||
+      Promise.resolve()
+    return listSettled
+      .then(() => shotsApi.getShot(shotId))
+      .then(shot => {
         if (cache.shotMap.get(shot.id)) {
           commit(UPDATE_SHOT, shot)
           return
         }
-        // A list load in flight replaces the whole dataset: inserting now
-        // would be thrown away by its response, and no second event
-        // announces this shot again. Decide once that load settled.
-        if (state.isShotsLoading) {
-          await (cache.shotsLoadingPromise || Promise.resolve())
-          // Its response was built after this fetch: the row it holds is
-          // the fresher one, and the shot it dropped stays dropped.
-          if (cache.shotMap.get(shot.id)) return
-        }
+        // Displayed when its refresh started and gone since: deleted, or
+        // dropped by a list load whose own response decides.
+        if (displayedShot) return
         if (
           !onlyInScope ||
           isEpisodeInLoadedScope(

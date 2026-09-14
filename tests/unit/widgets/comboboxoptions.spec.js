@@ -60,6 +60,14 @@ describe('ComboboxOptions', () => {
     expect(wrapper.find('.select-input').exists()).toBe(true)
   })
 
+  it('keeps the list open after selecting via keyboard', async () => {
+    const trigger = wrapper.find('.flexrow')
+    await trigger.trigger('keydown', { key: 'ArrowDown' })
+    await trigger.trigger('keydown', { key: 'ArrowDown' })
+    await trigger.trigger('keydown', { key: 'Enter' })
+    expect(wrapper.find('.select-input').exists()).toBe(true)
+  })
+
   it('aligns the list on the right when it would overflow, on every open', async () => {
     // jsdom has no layout: only a left-aligned list overflows, a flipped one
     // fits. Without a reset the reopened list is measured flipped and

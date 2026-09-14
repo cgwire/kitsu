@@ -72,6 +72,7 @@ const makeStore = (getterOverrides = {}) => {
       isCurrentUserSupervisor: () => false,
       isCurrentUserVendor: () => false,
       isDarkTheme: () => false,
+      isEpisodeListLoaded: () => true,
       isSupportChat: () => false,
       isUserMenuHidden: () => true,
       isTVShow: () => false,
@@ -512,6 +513,7 @@ describe('Topbar.vue', () => {
         currentProduction: () => production,
         // The same array every time: tests prune it to simulate a deletion.
         episodes: () => episodes,
+        isEpisodeListLoaded: () => !holdEpisodes,
         isTVShow: () => true,
         productionEditTaskTypes: () => [],
         productionMap: () => new Map([[production.id, production]])
@@ -529,6 +531,11 @@ describe('Topbar.vue', () => {
         {
           path: `/productions/:production_id/episodes/:episode_id/${section}`,
           name: `episode-${section}`,
+          component: { template: '<div />' }
+        },
+        {
+          path: '/productions/:production_id/episodes/:episode_id',
+          name: 'episode',
           component: { template: '<div />' }
         }
       ])
@@ -567,8 +574,8 @@ describe('Topbar.vue', () => {
       }
     }
 
-    // A production with fewer than two episodes refetches the list on every
-    // episode change: that fetch may outlive a production switch too.
+    // An episode change before the list is loaded fetches it: that fetch
+    // may outlive a production switch too.
     describe('episode refetch outliving a production switch', () => {
       const singleEpisode = () => [{ id: 'episode-1', status: 'running' }]
 
@@ -736,6 +743,51 @@ describe('Topbar.vue', () => {
           name: 'episode-shots',
           params: { production_id: 'production-1', episode_id: 'all' },
           query: { search: 'hero' }
+        })
+        wrapper.unmount()
+      })
+
+      // The detail page has no stand-in episode: another episode's casting
+      // under the same URL shape would mislead.
+      it('leaves the detail page of the deleted episode for the list', async () => {
+        const { wrapper, replaceSpy, route, episodes } = mountFor(
+          'shots',
+          'episode-1',
+          { currentEpisode: { id: 'episode-1' } }
+        )
+        // Both the mocked route and the router's one are read on the way.
+        route.name = 'episode'
+        route.path = '/productions/production-1/episodes/episode-1'
+        await wrapper.vm.$router.push({
+          name: 'episode',
+          params: { production_id: 'production-1', episode_id: 'episode-1' }
+        })
+
+        episodes.splice(0, 1)
+        wrapper.vm.$options.watch.episodes.call(wrapper.vm)
+
+        expect(replaceSpy).toHaveBeenCalledWith({
+          name: 'episodes',
+          params: { production_id: 'production-1' }
+        })
+        wrapper.unmount()
+      })
+
+      // A direct link to a task of an episode the production does not have
+      // lands through configureProduction: no stand-in episode there either.
+      it('leaves a stale episode task link for the list', async () => {
+        const { wrapper, replaceSpy, route } = mountFor('shots', 'episode-1')
+        replaceSpy.mockClear()
+        route.name = 'episode-episode-task'
+        route.path = '/productions/production-1/episodes/ghost/tasks/task-1'
+        route.params.episode_id = 'ghost'
+
+        await wrapper.vm.configureProduction('production-1')
+        await flushPromises()
+
+        expect(replaceSpy).toHaveBeenCalledWith({
+          name: 'episodes',
+          params: { production_id: 'production-1' }
         })
         wrapper.unmount()
       })

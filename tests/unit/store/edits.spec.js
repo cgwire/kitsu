@@ -93,6 +93,41 @@ describe('Edits store', () => {
       expect(loadB).not.toBe(loadA)
       expect(commit.mock.calls.map(c => c[0])).not.toContain('LOAD_EDITS_START')
     })
+
+    // A production switch forgets the load in flight, and a load started
+    // after it records its own scope: the late response must not land
+    // under that newer key.
+    test('drops a response whose scope a newer load replaced', async () => {
+      let endA
+      editsApi.getEdits = vi.fn(
+        () =>
+          new Promise(resolve => {
+            endA = resolve
+          })
+      )
+      const commit = vi.fn()
+      const state = { isEditsLoading: false }
+      const loadA = editsStore.actions.loadEdits({
+        commit,
+        dispatch: vi.fn(),
+        state,
+        rootGetters: {
+          currentProduction: { id: 'p-switch' },
+          currentEpisode: { id: 'ep-a' },
+          episodes: [{ id: 'ep-a' }],
+          userFilters: {},
+          taskTypeMap: new Map(),
+          taskMap: new Map(),
+          personMap: new Map(),
+          isTVShow: true
+        }
+      })
+      state.editsLoadingKey = 'p-switch/all'
+      endA([{ id: 'e-a' }])
+      await loadA
+
+      expect(commit.mock.calls.map(c => c[0])).not.toContain('LOAD_EDITS_END')
+    })
   })
 
   describe('queued scopes', () => {
@@ -281,6 +316,29 @@ describe('Edits store, loadEdit live insertion', () => {
     })
     expect(types).toContain('ADD_EDIT')
   })
+
+  // An update then a deletion within one round trip: the refresh must not
+  // bring back the row the deletion removed.
+  test('keeps out a displayed edit deleted during its refresh', async () => {
+    editsStore.cache.editMap.set('e-gone', { id: 'e-gone' })
+    editsApi.getEdit = vi.fn(async () => {
+      editsStore.cache.editMap.delete('e-gone')
+      return {
+        id: 'e-gone',
+        parent_id: 'ep-a',
+        project_id: 'p-live',
+        tasks: []
+      }
+    })
+    const commit = vi.fn()
+
+    await editsStore.actions.loadEdit(
+      { commit, state: { editsLoadingKey: 'p-live/ep-a' }, rootGetters },
+      { editId: 'e-gone', onlyInScope: true }
+    )
+
+    expect(commit).not.toHaveBeenCalled()
+  })
 })
 
 describe('Edits store, LOAD_EDITS_ERROR', () => {
@@ -398,9 +456,9 @@ describe('Edits store, live insertion during a list load', () => {
     expect(commit.mock.calls.map(([type]) => type)).toContain('ADD_EDIT')
   })
 
-  // The list response is younger than this fetch: it rebuilt the row from
-  // fresher data, and the payload parked behind it must not land on top.
-  test('keeps the row the list load rebuilt', async () => {
+  // The fetch waits for the list response: issued after it, the payload is
+  // the younger one and refreshes the row the list rebuilt.
+  test('fetches once the list load settled and refreshes the row', async () => {
     editsApi.getEdit = vi.fn(() =>
       Promise.resolve({
         id: 'e-flight-3',
@@ -440,11 +498,14 @@ describe('Edits store, live insertion during a list load', () => {
       { editId: 'e-flight-3', onlyInScope: true }
     )
     await Promise.resolve()
+    expect(editsApi.getEdit).not.toHaveBeenCalled()
     endList()
     await loading
 
-    expect(commit.mock.calls).toEqual([])
-    expect(editsStore.cache.editMap.get('e-flight-3').name).toBe('from-list')
+    expect(editsApi.getEdit).toHaveBeenCalledWith('e-flight-3')
+    expect(commit.mock.calls).toEqual([
+      ['UPDATE_EDIT', expect.objectContaining({ name: 'from-socket' })]
+    ])
   })
 
   // An update of an edit the page displayed must not recreate it under the

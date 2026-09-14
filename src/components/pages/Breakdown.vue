@@ -812,17 +812,18 @@ export default {
     async reloadEntities() {
       if (this.isUnmounted) return
       this.isLoading = true
-      let production = this.currentProduction
+      const production = this.currentProduction
       let episode = this.currentEpisode
       this.hasScopeMoved = false
       try {
         // Resolve the episode first: starting on a direct link before the
         // topbar has it costs a full production-wide second pass. Inside the
         // try, so a failed fetch releases the loading flag like any other.
+        // Only the episode is rebound: a production switched during the
+        // fetch must still reset the column widths in the finally block.
         if (this.isTVShow && !this.currentEpisode) {
           await this.loadEpisodes()
           if (this.isUnmounted) return
-          production = this.currentProduction
           episode = this.currentEpisode
           // The watcher flagged the episode this run just resolved: nothing
           // was loaded under another scope yet, the loads start from it.

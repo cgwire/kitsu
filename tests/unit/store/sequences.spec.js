@@ -425,6 +425,24 @@ describe('Sequences store, loadSequence live insertion', () => {
     })
     expect(types).toContain('ADD_SEQUENCE')
   })
+
+  // An update then a deletion within one round trip: the refresh must not
+  // bring back the row the deletion removed.
+  test('keeps out a displayed sequence deleted during its refresh', async () => {
+    sequencesStore.cache.sequenceMap.set('s-gone', { id: 's-gone' })
+    vi.spyOn(shotsApi, 'getSequence').mockImplementation(async () => {
+      sequencesStore.cache.sequenceMap.delete('s-gone')
+      return { id: 's-gone', parent_id: 'ep-a', project_id: 'p-live' }
+    })
+    const commit = vi.fn()
+
+    await sequencesStore.actions.loadSequence(
+      { commit, state: { sequencesLoadingKey: 'p-live/ep-a' }, rootGetters },
+      { sequenceId: 's-gone', onlyInScope: true }
+    )
+
+    expect(commit).not.toHaveBeenCalled()
+  })
 })
 
 describe('Sequences store, ADD_SEQUENCE', () => {
@@ -502,9 +520,9 @@ describe('Sequences store, live insertion during a list load', () => {
     expect(commit.mock.calls.map(([type]) => type)).toContain('ADD_SEQUENCE')
   })
 
-  // The list response is younger than this fetch: it rebuilt the row from
-  // fresher data, and the payload parked behind it must not land on top.
-  test('keeps the row the list load rebuilt', async () => {
+  // The fetch waits for the list response: issued after it, the payload is
+  // the younger one and refreshes the row the list rebuilt.
+  test('fetches once the list load settled and refreshes the row', async () => {
     vi.spyOn(shotsApi, 'getSequence').mockResolvedValue({
       id: 's-flight-3',
       parent_id: 'ep-b',
@@ -530,13 +548,14 @@ describe('Sequences store, live insertion during a list load', () => {
       { sequenceId: 's-flight-3', onlyInScope: true }
     )
     await Promise.resolve()
+    expect(shotsApi.getSequence).not.toHaveBeenCalled()
     endList()
     await loading
 
-    expect(commit.mock.calls).toEqual([])
-    expect(sequencesStore.cache.sequenceMap.get('s-flight-3').name).toBe(
-      'from-list'
-    )
+    expect(shotsApi.getSequence).toHaveBeenCalledWith('s-flight-3')
+    expect(commit.mock.calls).toEqual([
+      ['UPDATE_SEQUENCE', expect.objectContaining({ name: 'from-socket' })]
+    ])
   })
 
   test('records the list load in flight', async () => {

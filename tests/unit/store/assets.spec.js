@@ -59,6 +59,7 @@ describe('Assets store', () => {
       // Switch away so the response short-circuits before the heavy
       // LOAD_ASSETS_END commit; both calls still resolve to the loaded assets.
       rootGetters.currentProduction = { id: 'p2' }
+      assetsStore.mutations.CLEAR_ASSETS(state)
 
       const [r1, r2] = await Promise.all([p1, p2])
       expect(getAssets).toHaveBeenCalledTimes(1)
@@ -206,8 +207,10 @@ describe('Assets store', () => {
       const ctx = { commit, dispatch: vi.fn(), state, rootGetters }
 
       const promise = assetsStore.actions.loadAssets(ctx, { withShared: false })
-      // User navigates to another production before the response lands.
+      // User navigates to another production before the response lands, and
+      // the load of that production records its own scope.
       rootGetters.currentProduction = { id: 'p2' }
+      state.assetsLoadingKey = 'p2/'
       const result = await promise
 
       expect(result).toEqual(sentinel)
@@ -215,6 +218,78 @@ describe('Assets store', () => {
       expect(commit.mock.calls.map(c => c[0])).not.toContain('LOAD_ASSETS_END')
       // ...and must leave the loading flag to the newer load (reset by CLEAR).
       expect(state.isAssetsLoading).toBe(true)
+    })
+
+    // A production switch and back forgets the load in flight, and the load
+    // started on return records its own scope: the late response must not
+    // land under that newer key.
+    test('drops a response whose scope a newer load replaced', async () => {
+      vi.spyOn(assetsApi, 'getAssets').mockResolvedValue([
+        { id: 'a1', asset_type_id: 't1', name: 'A1' }
+      ])
+      const state = { isAssetsLoading: false, isAssetsLoadingError: false }
+      const commit = realCommit(state)
+
+      const loading = assetsStore.actions.loadAssets(
+        { commit, dispatch: vi.fn(), state, rootGetters: baseRootGetters() },
+        { withShared: false }
+      )
+      state.assetsLoadingKey = 'p1/all#partial'
+      await loading
+
+      const types = commit.mock.calls.map(([type]) => type)
+      expect(types).not.toContain('LOAD_ASSETS_END')
+    })
+
+    // The schedule under the all pseudo-episode loads without tasks nor
+    // shared assets: a breakdown opened meanwhile must wait for that load,
+    // then fetch its own dataset instead of adopting it.
+    test('does not join a partial load in flight for a production-wide one', async () => {
+      vi.spyOn(assetsApi, 'getAssets').mockResolvedValue([])
+      const state = { isAssetsLoading: false, isAssetsLoadingError: false }
+      const rootGetters = {
+        ...baseRootGetters(),
+        isTVShow: true,
+        currentEpisode: { id: 'all' }
+      }
+      const ctx = { commit: realCommit(state), dispatch: vi.fn(), state, rootGetters }
+
+      assetsStore.actions.loadAssets(ctx, { withTasks: false, withShared: false })
+      const loading = assetsStore.actions.loadAssets(ctx, { all: true })
+      // Switch away so the response short-circuits before LOAD_ASSETS_END.
+      state.assetsLoadingKey = 'p2/'
+      await loading
+
+      expect(ctx.dispatch).toHaveBeenCalledWith('loadAssets', {
+        all: true,
+        withShared: true,
+        withTasks: true
+      })
+    })
+
+    // Its flag raised for the production left, no response would ever lower
+    // it, and every later load would queue behind it in a loop.
+    test('gives up when the production changed while it waited for the episodes', async () => {
+      vi.spyOn(assetsApi, 'getAssets').mockResolvedValue([])
+      const state = { isAssetsLoading: false, isAssetsLoadingError: false }
+      const commit = realCommit(state)
+      const rootGetters = { ...baseRootGetters(), isTVShow: true }
+      // Like the real loadEpisodes, the fetch also resolves an episode:
+      // without one the load stops on the no episode path, guard or not.
+      const dispatch = vi.fn(async () => {
+        rootGetters.currentProduction = { id: 'p2' }
+        rootGetters.currentEpisode = { id: 'ep-a' }
+      })
+
+      const result = await assetsStore.actions.loadAssets({
+        commit,
+        dispatch,
+        state,
+        rootGetters
+      })
+
+      expect(result).toEqual([])
+      expect(commit).not.toHaveBeenCalled()
     })
   })
 
@@ -635,6 +710,28 @@ describe('Assets store, loadAsset live insertion', () => {
     )
     expect(types).toContain('ADD_ASSET')
   })
+
+  // An update then a deletion within one round trip: the refresh must not
+  // bring back the row the deletion removed.
+  test('keeps out a displayed asset deleted during its refresh', async () => {
+    assetsStore.cache.assetMap.set('a-gone', { id: 'a-gone' })
+    vi.spyOn(assetsApi, 'getAsset').mockImplementation(async () => {
+      assetsStore.cache.assetMap.delete('a-gone')
+      return { id: 'a-gone', episode_id: 'ep-a', project_id: 'p1', tasks: [] }
+    })
+    const commit = vi.fn()
+
+    await assetsStore.actions.loadAsset(
+      {
+        commit,
+        state: { assetsLoadingKey: 'p1/ep-a' },
+        rootGetters: rootGetters()
+      },
+      { assetId: 'a-gone', onlyInScope: true }
+    )
+
+    expect(commit).not.toHaveBeenCalled()
+  })
 })
 
 describe('Assets store, ADD_ASSET', () => {
@@ -687,14 +784,19 @@ describe('Assets store, partial loads', () => {
   // dataset cannot stand in for the one the list pages display, so its scope
   // must not match theirs.
   const startLoad = options => {
-    vi.spyOn(assetsApi, 'getAssets').mockResolvedValue([])
     vi.spyOn(assetsApi, 'getUsedSharedAssets').mockResolvedValue([])
     const state = { isAssetsLoading: false, isAssetsLoadingError: false }
+    // The response lands after a production switch, which forgets the scope:
+    // it short-circuits before LOAD_ASSETS_END.
+    vi.spyOn(assetsApi, 'getAssets').mockImplementation(() =>
+      Promise.resolve().then(() => {
+        assetsStore.mutations.CLEAR_ASSETS(state)
+        return []
+      })
+    )
     const rootGetters = baseRootGetters()
     const ctx = { commit: realCommit(state), dispatch: vi.fn(), state, rootGetters }
     const loading = assetsStore.actions.loadAssets(ctx, options)
-    // Switch away so the response short-circuits before LOAD_ASSETS_END.
-    rootGetters.currentProduction = { id: 'p2' }
     return { state, loading }
   }
 
@@ -757,15 +859,17 @@ describe('Assets store, LOAD_ASSETS_ERROR', () => {
         rejectLoad = reject
       })
     )
-    const commit = vi.fn()
+    const state = { isAssetsLoading: false }
+    const commit = realCommit(state)
     const loading = assetsStore.actions.loadAssets({
       commit,
       dispatch: vi.fn(),
-      state: { isAssetsLoading: false },
+      state,
       rootGetters
     })
     return {
       rootGetters,
+      state,
       types: async () => {
         rejectLoad(new Error('down'))
         await loading
@@ -780,8 +884,9 @@ describe('Assets store, LOAD_ASSETS_ERROR', () => {
   })
 
   test('keeps the scope when the failure comes from the production left', async () => {
-    const { rootGetters, types } = failingLoad()
+    const { rootGetters, state, types } = failingLoad()
     rootGetters.currentProduction = { id: 'p2' }
+    assetsStore.mutations.CLEAR_ASSETS(state)
     expect(await types()).not.toContain('LOAD_ASSETS_ERROR')
   })
 })
@@ -834,9 +939,9 @@ describe('Assets store, live insertion during a list load', () => {
     expect(commit.mock.calls.map(([type]) => type)).toContain('ADD_ASSET')
   })
 
-  // The list response is younger than this fetch: it rebuilt the row from
-  // fresher data, and the payload parked behind it must not land on top.
-  test('keeps the row the list load rebuilt', async () => {
+  // The fetch waits for the list response: issued after it, the payload is
+  // the younger one and refreshes the row the list rebuilt.
+  test('fetches once the list load settled and refreshes the row', async () => {
     vi.spyOn(assetsApi, 'getAsset').mockResolvedValue({
       id: 'a-flight-3',
       episode_id: 'ep-a',
@@ -873,11 +978,14 @@ describe('Assets store, live insertion during a list load', () => {
       { assetId: 'a-flight-3', onlyInScope: true }
     )
     await Promise.resolve()
+    expect(assetsApi.getAsset).not.toHaveBeenCalled()
     endList()
     await loading
 
-    expect(commit.mock.calls).toEqual([])
-    expect(assetsStore.cache.assetMap.get('a-flight-3').name).toBe('from-list')
+    expect(assetsApi.getAsset).toHaveBeenCalledWith('a-flight-3')
+    expect(commit.mock.calls).toEqual([
+      ['UPDATE_ASSET', expect.objectContaining({ name: 'from-socket' })]
+    ])
   })
 
   // An update of an asset the page displayed must not recreate it under the

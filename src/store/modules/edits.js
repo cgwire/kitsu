@@ -372,9 +372,11 @@ const actions = {
     const loadingPromise = editsApi
       .getEdits(production, episode)
       .then(edits => {
-        // Ignore a response for a production the user already switched away
-        // from; committing would overwrite the current production's edits.
-        if (production.id !== rootGetters.currentProduction?.id) {
+        // Ignore a response for a scope the user already left: a production
+        // switch (CLEAR_EDITS forgets the key) or a newer load of another
+        // episode (LOAD_EDITS_START records its own). Committing would put
+        // the old scope's edits under the newer key.
+        if (state.editsLoadingKey !== loadingKey) {
           return edits
         }
         commit(LOAD_EDITS_END, {
@@ -389,9 +391,9 @@ const actions = {
       })
       .catch(err => {
         console.error('an error occurred while loading edits', err)
-        // Same guard as the success path: a rejection for a production the
-        // user already left would forget the scope of the load running now.
-        if (production.id === rootGetters.currentProduction?.id) {
+        // Same guard as the success path: a rejection for a scope the user
+        // already left would forget the scope of the load running now.
+        if (state.editsLoadingKey === loadingKey) {
           commit(LOAD_EDITS_ERROR)
         }
         return []
@@ -406,31 +408,31 @@ const actions = {
   loadEdit({ commit, state, rootGetters }, payload) {
     const { editId, onlyInScope = false } =
       typeof payload === 'string' ? { editId: payload } : payload
-    const edit = cache.editMap.get(editId)
-    if (edit?.lock) return
+    const displayedEdit = cache.editMap.get(editId)
+    if (displayedEdit?.lock) return
 
     const personMap = rootGetters.personMap
     const production = rootGetters.currentProduction
     const taskMap = rootGetters.taskMap
     const taskTypeMap = rootGetters.taskTypeMap
-    return editsApi
-      .getEdit(editId)
-      .then(async edit => {
-        // Displayed already: refresh the row now. Waiting for a list load
-        // would apply this payload after a younger response and undo it.
+    // A list load in flight replaces the whole dataset: fetch once it has
+    // settled, so the payload is younger than its response and an edit
+    // deleted meanwhile is not re-inserted (the fetch fails instead). A
+    // displayed edit is refreshed now: waiting would apply this payload
+    // after a younger response and undo it.
+    const listSettled =
+      (!displayedEdit && state.isEditsLoading && cache.editsLoadingPromise) ||
+      Promise.resolve()
+    return listSettled
+      .then(() => editsApi.getEdit(editId))
+      .then(edit => {
         if (cache.editMap.get(edit.id)) {
           commit(UPDATE_EDIT, edit)
           return
         }
-        // A list load in flight replaces the whole dataset: inserting now
-        // would be thrown away by its response, and no second event
-        // announces this edit again. Decide once that load settled.
-        if (state.isEditsLoading) {
-          await (cache.editsLoadingPromise || Promise.resolve())
-          // Its response was built after this fetch: the row it holds is
-          // the fresher one, and the edit it dropped stays dropped.
-          if (cache.editMap.get(edit.id)) return
-        }
+        // Displayed when its refresh started and gone since: deleted, or
+        // dropped by a list load whose own response decides.
+        if (displayedEdit) return
         if (
           !onlyInScope ||
           isEpisodeInLoadedScope(
@@ -757,25 +759,9 @@ const mutations = {
   // any mutation: forget that load with the dataset, or the next loadEdits
   // waits on it forever.
   [CLEAR_EDITS](state) {
-    cache.edits = []
-    cache.result = []
-    cache.editIndex = {}
-    cache.editMap.clear()
-    cache.editsLoadingPromise = null
-    state.editValidationColumns = []
-
+    mutations[LOAD_EDITS_START](state)
     state.isEditsLoading = false
-    state.isEditsLoadingError = false
-    state.editsLoadingKey = null
-
-    state.displayedEdits = []
-    state.displayedEditsCount = 0
-    state.displayedEditsLength = 0
-    state.displayedEditsTimeSpent = 0
-    state.displayedEditsEstimation = 0
-    state.editSearchQueries = []
-
-    state.selectedEdits = new Map()
+    cache.editsLoadingPromise = null
   },
 
   [LOAD_EDITS_END](

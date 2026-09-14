@@ -1005,7 +1005,9 @@ export default {
           (this.currentEpisode.id === 'main' ||
             this.currentEpisode.id === 'all')
         ) {
-          // Do nothing for main or all episodes
+          // Pseudo-episodes load nothing of their own: only let the load in
+          // flight refill the map it emptied.
+          if (this.isShotsLoading) await shotStore.cache.shotsLoadingPromise
         } else {
           if (this.isTVShow && !this.currentEpisode) {
             await this.loadEpisodes()
