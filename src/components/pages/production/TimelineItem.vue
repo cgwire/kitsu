@@ -14,7 +14,7 @@
       <div v-if="!isLast" class="dots"></div>
     </div>
     <div class="timeline-content">
-      <h3 class="title" :class="{ 'is-completed': isCompleted, optional }">
+      <h3 class="title" :class="{ optional }">
         {{ title }}
       </h3>
       <p class="subtitle">{{ subtitle }}</p>
@@ -24,34 +24,21 @@
   </div>
 </template>
 
-<script>
+<script setup>
+// Imports
+// --------------------------------------------------------------------------
 import { CheckIcon } from 'lucide-vue-next'
 
-export default {
-  name: 'timeline-item',
-
-  components: {
-    CheckIcon
-  },
-
-  props: {
-    title: String,
-    subtitle: String,
-    isLast: {
-      type: Boolean,
-      default: false
-    },
-    step: Number,
-    isCompleted: {
-      type: Boolean,
-      default: false
-    },
-    optional: {
-      type: Boolean,
-      default: false
-    }
-  }
-}
+// Props
+// --------------------------------------------------------------------------
+defineProps({
+  title: { type: String, default: '' },
+  subtitle: { type: String, default: '' },
+  isLast: { type: Boolean, default: false },
+  step: { type: Number, default: null },
+  isCompleted: { type: Boolean, default: false },
+  optional: { type: Boolean, default: false }
+})
 </script>
 
 <style lang="scss" scoped>
@@ -124,12 +111,7 @@ export default {
     padding-top: 0.2em;
   }
 
-  h3.title.is-completed {
-    color: $green;
-  }
-
-  h3.title.optional,
-  h3.title.optional.is-completed {
+  h3.title.optional {
     color: var(--text) !important;
   }
 

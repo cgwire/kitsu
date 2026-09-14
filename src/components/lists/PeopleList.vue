@@ -5,13 +5,7 @@
         <thead class="datatable-head">
           <tr>
             <th scope="col" class="user datatable-row-header">
-              {{
-                isBots
-                  ? $t('bots.bots')
-                  : isGuests
-                    ? $t('people.guests')
-                    : $t('people.persons')
-              }}
+              {{ $t(usersLabelKey) }}
             </th>
             <th scope="col" class="phone" v-if="!isBots && !isGuests">
               {{ $t('people.list.phone') }}
@@ -150,15 +144,17 @@
   </div>
 </template>
 
-<script>
+<script setup>
+// Imports
+// --------------------------------------------------------------------------
 import { AlertTriangleIcon } from 'lucide-vue-next'
-import { mapGetters } from 'vuex'
+import { computed, useTemplateRef } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 
+import { useGrabList } from '@/composables/grabList'
 import { getCountryName } from '@/lib/countries'
 import { localeCode } from '@/lib/lang'
-
-import { grabListMixin } from '@/components/mixins/grablist'
-import { domMixin } from '@/components/mixins/dom'
 
 import DepartmentNamesCell from '@/components/cells/DepartmentNamesCell.vue'
 import PeopleUserCell from '@/components/cells/PeopleUserCell.vue'
@@ -166,129 +162,72 @@ import RowActionsCell from '@/components/cells/RowActionsCell.vue'
 import StudioName from '@/components/widgets/StudioName.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
-export default {
-  name: 'people-list',
+const { t } = useI18n()
+const store = useStore()
+const bodyRef = useTemplateRef('body')
+const { startBrowsing } = useGrabList(bodyRef)
 
-  mixins: [domMixin, grabListMixin],
+// Props / Emits
+// --------------------------------------------------------------------------
+const props = defineProps({
+  entries: { type: Array, default: () => [] },
+  isArchivedGuests: { type: Boolean, default: false },
+  isBots: { type: Boolean, default: false },
+  isError: { type: Boolean, default: false },
+  isGuests: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  seatsRemaining: { type: Number, default: null }
+})
 
-  components: {
-    AlertTriangleIcon,
-    DepartmentNamesCell,
-    PeopleUserCell,
-    RowActionsCell,
-    StudioName,
-    TableInfo
-  },
+defineEmits([
+  'archive-clicked',
+  'avatar-clicked',
+  'change-password-clicked',
+  'delete-clicked',
+  'edit-clicked',
+  'refresh-clicked',
+  'restore-clicked'
+])
 
-  props: {
-    entries: {
-      type: Array,
-      default: () => []
-    },
-    isArchivedGuests: {
-      type: Boolean,
-      default: false
-    },
-    isBots: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isGuests: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    seatsRemaining: {
-      type: Number,
-      default: null
-    }
-  },
+// State
+// --------------------------------------------------------------------------
+const today = new Date().toJSON().slice(0, 10)
+const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+  .toJSON()
+  .slice(0, 10)
 
-  emits: [
-    'archive-clicked',
-    'avatar-clicked',
-    'change-password-clicked',
-    'delete-clicked',
-    'edit-clicked',
-    'refresh-clicked',
-    'restore-clicked'
-  ],
+// Computed
+// --------------------------------------------------------------------------
+const isCurrentUserAdmin = computed(() => store.getters.isCurrentUserAdmin)
 
-  data() {
-    return {
-      domEvents: [
-        ['mousemove', this.onMouseMove],
-        ['touchmove', this.onMouseMove],
-        ['mouseup', this.stopBrowsing],
-        ['mouseleave', this.stopBrowsing],
-        ['touchend', this.stopBrowsing],
-        ['touchcancel', this.stopBrowsing],
-        ['keyup', this.stopBrowsing]
-      ]
-    }
-  },
+const usersLabelKey = computed(() =>
+  props.isBots
+    ? 'bots.bots'
+    : props.isGuests
+      ? 'people.guests'
+      : 'people.persons'
+)
 
-  mounted() {
-    this.addEvents(this.domEvents)
-  },
-
-  beforeUnmount() {
-    this.removeEvents(this.domEvents)
-    document.body.style.cursor = 'default'
-  },
-
-  computed: {
-    ...mapGetters(['isCurrentUserAdmin']),
-
-    today() {
-      return new Date().toJSON().slice(0, 10)
-    },
-
-    nextWeek() {
-      const date = new Date()
-      date.setDate(date.getDate() + 7)
-      return date.toJSON().slice(0, 10)
-    },
-
-    nbUsersDetails() {
-      const nbUsers = this.entries.length
-      const key = this.isBots
-        ? 'bots.bots'
-        : this.isGuests
-          ? 'people.guests'
-          : 'people.persons'
-      const labelUsers = this.$t(key, { count: nbUsers })
-      if (!this.isBots && !this.isGuests && this.seatsRemaining !== null) {
-        const labelRemaining = this.$t('people.seats_remaining', {
-          count: this.seatsRemaining
-        })
-        return `${nbUsers} ${labelUsers} (${labelRemaining})`
-      }
-      return `${nbUsers} ${labelUsers}`
-    }
-  },
-
-  methods: {
-    countryName(country) {
-      return getCountryName(country, localeCode.value)
-    },
-
-    isExpired(expirationDate) {
-      return expirationDate < this.today
-    },
-
-    isSoonExpired(expirationDate) {
-      return !this.isExpired(expirationDate) && expirationDate < this.nextWeek
-    }
+const nbUsersDetails = computed(() => {
+  const nbUsers = props.entries.length
+  const details = `${nbUsers} ${t(usersLabelKey.value, { count: nbUsers })}`
+  if (props.isBots || props.isGuests || props.seatsRemaining === null) {
+    return details
   }
-}
+  const labelRemaining = t('people.seats_remaining', {
+    count: props.seatsRemaining
+  })
+  return `${details} (${labelRemaining})`
+})
+
+// Functions
+// --------------------------------------------------------------------------
+const countryName = country => getCountryName(country, localeCode.value)
+
+const isExpired = expirationDate => expirationDate < today
+
+const isSoonExpired = expirationDate =>
+  !isExpired(expirationDate) && expirationDate < nextWeek
 </script>
 
 <style lang="scss" scoped>
@@ -382,10 +321,6 @@ export default {
     background: transparent;
     border: 0;
     overflow-x: visible;
-  }
-
-  .expiration .icon {
-    margin-left: 0;
   }
 
   .footer-info {

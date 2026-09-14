@@ -1,5 +1,5 @@
 <template>
-  <div class="preview-card flexcolumn" :key="previewFile.id">
+  <div class="preview-card flexcolumn">
     <entity-preview
       :entity="{
         preview_file_id: previewFile.id,
@@ -49,7 +49,7 @@
         </span>
         <a
           class="download-button"
-          :href="getDownloadPath(previewFile.id)"
+          :href="downloadPath"
           :title="$t('playlists.actions.download_file')"
           v-if="!isCurrentUserArtist"
         >
@@ -60,57 +60,36 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+// Imports
+// --------------------------------------------------------------------------
 import { DownloadIcon } from 'lucide-vue-next'
+import { computed } from 'vue'
+import { useStore } from 'vuex'
 
 import { renderFileSize } from '@/lib/render'
 
 import EntityPreview from '@/components/widgets/EntityPreview.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 
-export default {
-  name: 'entity-preview-file-card',
+const store = useStore()
 
-  components: {
-    DownloadIcon,
-    EntityPreview,
-    PeopleAvatar
-  },
+// Props
+// --------------------------------------------------------------------------
+const props = defineProps({
+  previewFile: { type: Object, required: true }
+})
 
-  props: {
-    previewFile: {
-      type: Object,
-      required: true,
-      default: () => {}
-    }
-  },
+// Computed
+// --------------------------------------------------------------------------
+const isCurrentUserArtist = computed(() => store.getters.isCurrentUserArtist)
+const personMap = computed(() => store.getters.personMap)
 
-  mounted() {},
-
-  computed: {
-    ...mapGetters([
-      'isCurrentUserArtist',
-      'personMap',
-      'taskMap',
-      'taskTypeMap'
-    ])
-  },
-
-  methods: {
-    getTaskType(previewFile) {
-      const task = this.taskMap.get(previewFile.task_id)
-      return this.taskTypeMap.get(task.task_type_id)
-    },
-
-    getDownloadPath(previewFileId) {
-      const type = this.previewFile.extension === 'mp4' ? 'movies' : 'pictures'
-      return `/api/${type}/originals/preview-files/${previewFileId}/download`
-    },
-
-    renderFileSize
-  }
-}
+const downloadPath = computed(() => {
+  const { extension, id } = props.previewFile
+  const type = extension === 'mp4' ? 'movies' : 'pictures'
+  return `/api/${type}/originals/preview-files/${id}/download`
+})
 </script>
 
 <style lang="scss" scoped>
@@ -139,7 +118,6 @@ export default {
     text-overflow: ellipsis;
     text-transform: uppercase;
     white-space: nowrap;
-    word-break: none;
   }
 
   .card-extension {
@@ -147,7 +125,6 @@ export default {
     border-radius: 4px;
     font-size: 0.8rem;
     padding: 0.2rem 0.5rem;
-    margin-right: 0rem;
     text-transform: uppercase;
   }
 

@@ -5,55 +5,46 @@
     <template v-if="timeSpent > 0 || estimation > 0">
       ({{ formatDuration(timeSpent) }}
       {{
-        isDurationInHours
-          ? $t('main.hours_spent', { count: formatDuration(timeSpent, false) })
-          : $t('main.days_spent', { count: formatDuration(timeSpent, false) })
+        $t(isDurationInHours ? 'main.hours_spent' : 'main.days_spent', {
+          count: formatDuration(timeSpent, false)
+        })
       }},
       {{ formatDuration(estimation) }}
       {{
-        isDurationInHours
-          ? $t('main.hours_estimated', {
-              count: formatDuration(estimation, false)
-            })
-          : $t('main.man_days', { count: formatDuration(estimation, false) })
+        $t(isDurationInHours ? 'main.hours_estimated' : 'main.man_days', {
+          count: formatDuration(estimation, false)
+        })
       }})
     </template>
   </div>
 </template>
 
-<script>
-import { formatListMixin } from '@/components/mixins/format'
+<script setup>
+// Imports
+// --------------------------------------------------------------------------
+import { computed } from 'vue'
 
-export default {
-  name: 'asset-list-numbers',
+import { useFormat } from '@/composables/format'
 
-  mixins: [formatListMixin],
+const { formatDuration, isDurationInHours } = useFormat()
 
-  props: {
-    assets: {
-      type: Array,
-      default: () => []
-    }
-  },
+// Props
+// --------------------------------------------------------------------------
+const props = defineProps({
+  assets: { type: Array, default: () => [] }
+})
 
-  computed: {
-    activeAssets() {
-      return this.assets.flat().filter(a => !a.canceled)
-    },
+// Computed
+// --------------------------------------------------------------------------
+const activeAssets = computed(() =>
+  props.assets.flat().filter(asset => !asset.canceled)
+)
 
-    timeSpent() {
-      return this.activeAssets.reduce(
-        (acc, asset) => acc + (asset.timeSpent || 0),
-        0
-      )
-    },
+const timeSpent = computed(() =>
+  activeAssets.value.reduce((acc, asset) => acc + (asset.timeSpent || 0), 0)
+)
 
-    estimation() {
-      return this.activeAssets.reduce(
-        (acc, asset) => acc + (asset.estimation || 0),
-        0
-      )
-    }
-  }
-}
+const estimation = computed(() =>
+  activeAssets.value.reduce((acc, asset) => acc + (asset.estimation || 0), 0)
+)
 </script>
