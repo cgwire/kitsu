@@ -1,5 +1,5 @@
 <template>
-  <div class="people-timesheet-info">
+  <div class="people-quota-info">
     <div class="close">
       <router-link class="close-button" :to="closeRoute">
         <x-icon />
@@ -30,152 +30,77 @@
   </div>
 </template>
 
-<script>
+<script setup>
+// Imports
+// --------------------------------------------------------------------------
 import { XIcon } from 'lucide-vue-next'
 import moment from 'moment-timezone'
-import { mapGetters } from 'vuex'
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 
 import { monthToString } from '@/lib/time'
 
+import QuotaShotList from '@/components/lists/QuotaShotList.vue'
 import PageTitle from '@/components/widgets/PageTitle.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
-import QuotaShotList from '@/components/lists/QuotaShotList.vue'
 
-export default {
-  name: 'people-quota-info',
+const route = useRoute()
+const store = useStore()
 
-  components: {
-    XIcon,
-    PageTitle,
-    PeopleAvatar,
-    QuotaShotList
-  },
+// Props
+// --------------------------------------------------------------------------
+const props = defineProps({
+  person: { type: Object, default: () => ({}) },
+  year: { type: Number, default: 0 },
+  month: { type: Number, default: 0 },
+  week: { type: Number, default: 0 },
+  day: { type: Number, default: 0 },
+  countMode: { type: String, default: 'frames' },
+  isLoading: { type: Boolean, default: false },
+  isLoadingError: { type: Boolean, default: false },
+  shots: { type: Array, default: () => [] }
+})
 
-  props: {
-    person: {
-      type: Object,
-      default: () => {}
-    },
-    year: {
-      type: Number,
-      default: 0
-    },
-    month: {
-      type: Number,
-      default: 0
-    },
-    week: {
-      type: Number,
-      default: 0
-    },
-    day: {
-      type: Number,
-      default: 0
-    },
-    countMode: {
-      type: String,
-      default: 'frames'
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    isLoadingError: {
-      type: Boolean,
-      default: false
-    },
-    shots: {
-      type: Array,
-      default: () => []
-    }
-  },
+// Computed
+// --------------------------------------------------------------------------
+const currentEpisode = computed(() => store.getters.currentEpisode)
+const currentProduction = computed(() => store.getters.currentProduction)
 
-  emits: ['close'],
+const weekStart = computed(() =>
+  moment().day('Monday').year(props.year).week(props.week)
+)
+const startDay = computed(() => weekStart.value.date())
+const endDay = computed(() => weekStart.value.clone().add(6, 'days').date())
+const weekMonth = computed(() => weekStart.value.format('MMM'))
+const monthString = computed(() => monthToString(props.month))
 
-  computed: {
-    ...mapGetters(['currentEpisode', 'currentProduction']),
+const isMonthInfo = computed(() => route.path.includes('month'))
+const isWeekInfo = computed(() => route.path.includes('week'))
+const isDayInfo = computed(() => route.path.includes('day'))
 
-    startDay() {
-      return moment().day('Monday').year(this.year).week(this.week).date()
-    },
-
-    endDay() {
-      return moment()
-        .day('Monday')
-        .year(this.year)
-        .week(this.week)
-        .add(6, 'days')
-        .date()
-    },
-
-    weekMonth() {
-      return moment()
-        .day('Monday')
-        .year(this.year)
-        .week(this.week)
-        .format('MMM')
-    },
-
-    monthString() {
-      return monthToString(this.month)
-    },
-
-    isMonthInfo() {
-      return this.$route.path.indexOf('month') > 0
-    },
-
-    isWeekInfo() {
-      return this.$route.path.indexOf('week') > 0
-    },
-
-    isDayInfo() {
-      return this.$route.path.indexOf('day') > 0
-    },
-
-    closeRoute() {
-      if (!this.currentProduction) return {}
-      let route = {
-        name: 'quota',
-        production_id: this.currentProduction.id
-      }
-      if (this.isMonthInfo) {
-        route = {
-          name: 'quota-month',
-          params: {
-            year: this.year
-          }
-        }
-      } else if (this.isWeekInfo) {
-        route = {
-          name: 'quota-week',
-          params: {
-            year: this.year
-          }
-        }
-      } else if (this.isDayInfo) {
-        route = {
-          name: 'quota-day',
-          params: {
-            year: this.year,
-            month: this.month
-          }
-        }
-      }
-      if (this.currentEpisode) {
-        route.name = `episode-${route.name}`
-        route.params.episode_id = this.currentEpisode.id
-      }
-      route.query = this.$route.query
-      return route
-    }
-  },
-
-  methods: {
-    onCloseClicked() {
-      this.$emit('close')
+const closeRoute = computed(() => {
+  if (!currentProduction.value) return {}
+  let target = {
+    name: 'quota',
+    params: { production_id: currentProduction.value.id }
+  }
+  if (isMonthInfo.value) {
+    target = { name: 'quota-month', params: { year: props.year } }
+  } else if (isWeekInfo.value) {
+    target = { name: 'quota-week', params: { year: props.year } }
+  } else if (isDayInfo.value) {
+    target = {
+      name: 'quota-day',
+      params: { year: props.year, month: props.month }
     }
   }
-}
+  if (currentEpisode.value) {
+    target.name = `episode-${target.name}`
+    target.params.episode_id = currentEpisode.value.id
+  }
+  return { ...target, query: route.query }
+})
 </script>
 
 <style lang="scss" scoped>
@@ -187,7 +112,7 @@ export default {
   padding-bottom: 5em;
 }
 
-.people-timesheet-info {
+.people-quota-info {
   border-left: 1px solid var(--border);
   height: 100%;
   padding: 1em;
@@ -213,7 +138,6 @@ export default {
 }
 
 .close-button:hover {
-  display: inline-block;
   background: $white-grey;
   border-radius: 50%;
 }

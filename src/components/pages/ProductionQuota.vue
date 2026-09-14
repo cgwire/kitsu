@@ -112,7 +112,6 @@
         :is-loading-error="false"
         :shots="personShots"
         :count-mode="params.countMode"
-        @close="hideSideInfo"
       />
     </div>
   </div>
