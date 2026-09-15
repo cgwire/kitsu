@@ -72,10 +72,10 @@ export default {
     return client.pget(`/api/data/project-templates/${templateId}/task-types`)
   },
 
-  addTaskTypeToTemplate(templateId, taskTypeId, priority) {
+  addTaskTypeToTemplate(templateId, taskTypeId, priority, bitrates = {}) {
     return client.ppost(
       `/api/data/project-templates/${templateId}/task-types`,
-      { task_type_id: taskTypeId, priority }
+      { task_type_id: taskTypeId, priority, ...bitrates }
     )
   },
 

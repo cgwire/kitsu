@@ -62,10 +62,11 @@ const link = computed(
 )
 
 const onBitrateChange = (key, value) => {
-  emit('bitrates-changed', {
-    taskType: props.taskType,
-    [key]: parseBitrate(value)
-  })
+  const bitrates = Object.fromEntries(
+    BITRATE_KEYS.map(k => [k, parseBitrate(link.value[k])])
+  )
+  bitrates[key] = parseBitrate(value)
+  emit('bitrates-changed', { taskType: props.taskType, ...bitrates })
 }
 
 // eslint-disable-next-line no-unused-vars
