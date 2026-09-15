@@ -66,46 +66,26 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'available-asset-block',
+<script setup>
+// Props / Emits
+// --------------------------------------------------------------------------
+const props = defineProps({
+  asset: { type: Object, default: () => ({ id: '', name: '' }) },
+  active: { type: Boolean, default: false },
+  textMode: { type: Boolean, default: false },
+  bigMode: { type: Boolean, default: true }
+})
 
-  props: {
-    asset: {
-      default: () => ({
-        id: '',
-        name: ''
-      }),
-      type: Object
-    },
-    active: {
-      default: false,
-      type: Boolean
-    },
-    textMode: {
-      default: false,
-      type: Boolean
-    },
-    bigMode: {
-      default: true,
-      type: Boolean
-    }
-  },
+const emit = defineEmits(['add-one', 'add-ten'])
 
-  emits: ['add-one', 'add-ten'],
+// Functions
+// --------------------------------------------------------------------------
+const addOneAsset = () => {
+  if (props.active) emit('add-one', props.asset.id)
+}
 
-  methods: {
-    addOneAsset(event) {
-      if (this.active) {
-        this.$emit('add-one', this.asset.id)
-      }
-    },
-    addTenAssets(event) {
-      if (this.active) {
-        this.$emit('add-ten', this.asset.id)
-      }
-    }
-  }
+const addTenAssets = () => {
+  if (props.active) emit('add-ten', props.asset.id)
 }
 </script>
 
@@ -114,7 +94,6 @@ export default {
   background-color: $dark-grey-lightest;
 }
 
-.dark .asset.casted,
 .dark .asset .asset-add,
 .dark .asset .asset-add-10 {
   background-color: #8f91eb;
@@ -213,17 +192,6 @@ export default {
   img {
     border-radius: 8px;
   }
-}
-
-.asset-name {
-  text-align: center;
-  position: relative;
-  word-break: break-all;
-  top: -55px;
-}
-
-.asset.casted {
-  background: $purple;
 }
 
 .active {
