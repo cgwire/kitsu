@@ -31,10 +31,10 @@
             selected: production.id === currentProduction.id
           }"
           :key="production.id"
-          @click="selectProduction(production)"
+          @click="showProductionList = false"
           v-for="production in productionList"
         >
-          <router-link :to="getProductionPath(production)">
+          <router-link :to="productionPath(production)">
             <span class="name-wrapper">
               <production-name
                 class="link"
@@ -54,87 +54,67 @@
   </div>
 </template>
 
-<script>
+<script setup>
+// Imports
+// --------------------------------------------------------------------------
 import { ChevronDownIcon } from 'lucide-vue-next'
-import { mapGetters } from 'vuex'
+import { computed, nextTick, ref, useTemplateRef } from 'vue'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 
 import { getProductionPath } from '@/lib/path'
 
 import ComboboxMask from '@/components/widgets/ComboboxMask.vue'
 import ProductionName from '@/components/widgets/ProductionName.vue'
 
-export default {
-  name: 'topbar-production-list',
+const route = useRoute()
+const store = useStore()
 
-  components: {
-    ChevronDownIcon,
-    ComboboxMask,
-    ProductionName
-  },
+// Props
+// --------------------------------------------------------------------------
+const props = defineProps({
+  productionList: { type: Array, required: true },
+  section: { type: String, default: 'assets' },
+  episodeId: { type: String, default: '' }
+})
 
-  data() {
-    return {
-      lastScrollPosition: 0,
-      showProductionList: false
-    }
-  },
+// State
+// --------------------------------------------------------------------------
+const selectRef = useTemplateRef('select')
+const showProductionList = ref(false)
+let lastScrollPosition = 0
 
-  props: {
-    productionList: {
-      required: true,
-      type: Array
-    },
-    section: {
-      default: 'assets',
-      type: String
-    },
-    episodeId: {
-      default: '',
-      type: String
-    }
-  },
+// Computed
+// --------------------------------------------------------------------------
+const currentProduction = computed(() => store.getters.currentProduction)
 
-  computed: {
-    ...mapGetters(['currentProduction'])
-  },
-
-  methods: {
-    selectProduction(production) {
-      this.value = production.id
-      this.showProductionList = false
-    },
-
-    toggleProductionList() {
-      if (this.showProductionList) {
-        this.lastScrollPosition = this.$refs.select.scrollTop
-      }
-      this.$nextTick(() => {
-        this.showProductionList = !this.showProductionList
-        if (this.showProductionList) {
-          this.$refs.select.scrollTo({ top: this.lastScrollPosition, left: 0 })
-        }
-      })
-    },
-
-    getProductionPath(production) {
-      const pluginId = this.$route.params.plugin_id
-      return getProductionPath(
-        production,
-        this.section,
-        this.episodeId || 'all',
-        pluginId
-      )
-    }
+// Functions
+// --------------------------------------------------------------------------
+const toggleProductionList = async () => {
+  if (showProductionList.value) {
+    lastScrollPosition = selectRef.value.scrollTop
+  }
+  await nextTick()
+  showProductionList.value = !showProductionList.value
+  if (showProductionList.value) {
+    selectRef.value.scrollTo({ top: lastScrollPosition, left: 0 })
   }
 }
+
+const productionPath = production =>
+  getProductionPath(
+    production,
+    props.section,
+    props.episodeId || 'all',
+    route.params.plugin_id
+  )
 </script>
 
 <style lang="scss" scoped>
 .dark {
   .select-input,
   .selected-production-line,
-  .production-line,
-  .production-combo {
+  .production-line {
     background: $black;
     border-color: $dark-grey;
   }
