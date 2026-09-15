@@ -802,6 +802,9 @@ const actions = {
     if (cache.result && cache.result.length > 0) {
       assets = cache.result
     }
+    const sortedDescriptors = sortByName([
+      ...(production.descriptors || [])
+    ]).filter(d => d.entity_type === 'Asset')
     const lines = assets.map(asset => {
       if (asset.shared) {
         return [asset.asset_type_name, asset.name]
@@ -823,20 +826,18 @@ const actions = {
         taskTypeMap.get(asset.ready_for)?.name || ''
       ])
       asset.data = asset.data || {}
-      sortByName([...production.descriptors])
-        .filter(d => d.entity_type === 'Asset')
-        .forEach(descriptor => {
-          if (descriptor.data_type === 'boolean') {
-            assetLine.push(
-              asset.data[descriptor.field_name]?.toLowerCase() === 'true'
-            )
-          } else if (descriptor.data_type === 'person') {
-            const person = personMap.get(asset.data[descriptor.field_name])
-            assetLine.push(person ? person.full_name : '')
-          } else {
-            assetLine.push(asset.data[descriptor.field_name])
-          }
-        })
+      sortedDescriptors.forEach(descriptor => {
+        if (descriptor.data_type === 'boolean') {
+          assetLine.push(
+            asset.data[descriptor.field_name]?.toLowerCase() === 'true'
+          )
+        } else if (descriptor.data_type === 'person') {
+          const person = personMap.get(asset.data[descriptor.field_name])
+          assetLine.push(person ? person.full_name : '')
+        } else {
+          assetLine.push(asset.data[descriptor.field_name])
+        }
+      })
       if (state.isAssetTime) {
         assetLine.push(minutesToDays(organisation, asset.timeSpent).toFixed(2))
       }

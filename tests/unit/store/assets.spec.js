@@ -455,6 +455,68 @@ describe('Assets store', () => {
       expect(lines[0]).toContain('John Doe')
       expect(lines[0]).not.toContain('person-1')
     })
+
+    test('exports the base columns when the production has no descriptors key', () => {
+      assetsStore.cache.assets = [
+        { id: 'a1', name: 'A1', asset_type_name: 'Char', description: '' }
+      ]
+      assetsStore.cache.result = []
+      const rootGetters = baseRootGetters()
+      rootGetters.currentProduction = { id: 'p1' }
+      const state = { assetValidationColumns: [] }
+
+      const lines = assetsStore.actions.getAssetsCsvLines({
+        state,
+        rootGetters
+      })
+
+      expect(lines).toEqual([['Char', 'A1', '', '']])
+    })
+
+    test('orders the descriptor columns by name and skips the other entity types', () => {
+      const asset = {
+        id: 'a1',
+        name: 'A1',
+        asset_type_name: 'Char',
+        description: '',
+        data: { zeta: 'z', alpha: 'a', other: 'x' },
+        validations: new Map()
+      }
+      assetsStore.cache.assets = [asset]
+      assetsStore.cache.result = []
+      const rootGetters = baseRootGetters()
+      rootGetters.currentProduction = {
+        id: 'p1',
+        descriptors: [
+          {
+            name: 'Zeta',
+            field_name: 'zeta',
+            data_type: 'string',
+            entity_type: 'Asset'
+          },
+          {
+            name: 'Alpha',
+            field_name: 'alpha',
+            data_type: 'string',
+            entity_type: 'Asset'
+          },
+          {
+            name: 'Other',
+            field_name: 'other',
+            data_type: 'string',
+            entity_type: 'Shot'
+          }
+        ]
+      }
+      const state = { assetValidationColumns: [] }
+
+      const lines = assetsStore.actions.getAssetsCsvLines({
+        state,
+        rootGetters
+      })
+
+      expect(lines[0].slice(4)).toEqual(['a', 'z'])
+    })
   })
 
   describe('cache.result maintenance', () => {

@@ -622,3 +622,68 @@ describe('Edits store, NEW_EDIT_END', () => {
     expect(state.displayedEdits.map(({ id }) => id)).toEqual(['edit-1'])
   })
 })
+
+describe('Edits store, getEditsCsvLines', () => {
+  test('exports the base columns when the production has no descriptors key', () => {
+    editsStore.cache.edits = [{ id: 'e1', name: 'E1', description: '' }]
+    editsStore.cache.result = []
+    const rootGetters = {
+      currentProduction: { id: 'p1' },
+      isTVShow: false,
+      organisation: { hours_by_day: 8 },
+      personMap: new Map(),
+      taskMap: new Map()
+    }
+    const state = { editValidationColumns: [] }
+
+    const lines = editsStore.actions.getEditsCsvLines({ state, rootGetters })
+
+    expect(lines).toEqual([['E1', '']])
+  })
+
+  test('orders the descriptor columns by name and skips the other entity types', () => {
+    const edit = {
+      id: 'e1',
+      name: 'E1',
+      description: '',
+      data: { zeta: 'z', alpha: 'a', other: 'x' },
+      validations: new Map()
+    }
+    editsStore.cache.edits = [edit]
+    editsStore.cache.result = []
+    const rootGetters = {
+      currentProduction: {
+        id: 'p1',
+        descriptors: [
+          {
+            name: 'Zeta',
+            field_name: 'zeta',
+            data_type: 'string',
+            entity_type: 'Edit'
+          },
+          {
+            name: 'Alpha',
+            field_name: 'alpha',
+            data_type: 'string',
+            entity_type: 'Edit'
+          },
+          {
+            name: 'Other',
+            field_name: 'other',
+            data_type: 'string',
+            entity_type: 'Shot'
+          }
+        ]
+      },
+      isTVShow: false,
+      organisation: { hours_by_day: 8 },
+      personMap: new Map(),
+      taskMap: new Map()
+    }
+    const state = { editValidationColumns: [] }
+
+    const lines = editsStore.actions.getEditsCsvLines({ state, rootGetters })
+
+    expect(lines[0].slice(2)).toEqual(['a', 'z'])
+  })
+})
