@@ -1,8 +1,33 @@
 // @vitest-environment node
 
-import { getMetadataFieldValue } from '@/lib/descriptors'
+import { getExportDescriptors, getMetadataFieldValue } from '@/lib/descriptors'
 
 describe('lib/descriptors', () => {
+  describe('getExportDescriptors', () => {
+    test('lists the descriptors of the entity type by name', () => {
+      const production = {
+        descriptors: [
+          { name: 'Zeta', entity_type: 'Shot' },
+          { name: 'Other', entity_type: 'Asset' },
+          { name: 'Alpha', entity_type: 'Shot' }
+        ]
+      }
+
+      const descriptors = getExportDescriptors(production, 'Shot')
+
+      expect(descriptors.map(d => d.name)).toEqual(['Alpha', 'Zeta'])
+      expect(production.descriptors.map(d => d.name)).toEqual([
+        'Zeta',
+        'Other',
+        'Alpha'
+      ])
+    })
+
+    test('returns an empty list when the production has no descriptors key', () => {
+      expect(getExportDescriptors({ id: 'p1' }, 'Shot')).toEqual([])
+    })
+  })
+
   describe('getMetadataFieldValue', () => {
     test('returns the value from the entity own data', () => {
       const descriptor = { field_name: 'reviewer', entity_type: 'Shot' }

@@ -10,6 +10,7 @@ import tasksStore from '@/store/modules/tasks'
 import taskTypesStore from '@/store/modules/tasktypes'
 import taskStatusStore from '@/store/modules/taskstatus'
 
+import { getExportDescriptors } from '@/lib/descriptors'
 import { isEpisodeInLoadedScope } from '@/lib/episodes'
 import { PAGE_SIZE } from '@/lib/pagination'
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
@@ -577,9 +578,7 @@ const actions = {
     if (cache.result && cache.result.length > 0) {
       edits = cache.result
     }
-    const sortedDescriptors = sortByName([
-      ...(production.descriptors || [])
-    ]).filter(d => d.entity_type === 'Edit')
+    const sortedDescriptors = getExportDescriptors(production, 'Edit')
     const lines = edits.map(edit => {
       let editLine = []
       if (isTVShow) {

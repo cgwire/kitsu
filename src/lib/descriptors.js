@@ -6,6 +6,8 @@
  * `<script setup>` yet. New code should import from here.
  */
 
+import { sortByName } from '@/lib/sorting'
+
 export const getDescriptorChoicesOptions = (descriptor, emptyChoice = true) => {
   const values = (descriptor?.choices || []).map(c => ({ label: c, value: c }))
   if (emptyChoice) {
@@ -82,3 +84,11 @@ export const isSupervisorInDepartments = (
       user.departments.some(department => departments.includes(department)))
   )
 }
+
+// CSV exports list the descriptor columns by name, in the header and in the
+// lines alike. A production stored from the single-project payload has no
+// descriptors key.
+export const getExportDescriptors = (production, entityType) =>
+  sortByName(
+    (production.descriptors || []).filter(d => d.entity_type === entityType)
+  )

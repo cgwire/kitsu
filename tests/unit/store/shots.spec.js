@@ -738,3 +738,71 @@ describe('Shots store, NEW_SHOT_END', () => {
     expect(state.displayedShots.map(({ id }) => id)).toEqual(['shot-1'])
   })
 })
+
+describe('Shots store, getShotsCsvLines', () => {
+  test('exports the base columns when the production has no descriptors key', () => {
+    shotsStore.cache.shots = [
+      { id: 's1', sequence_name: 'SEQ01', name: 'SH01', description: '' }
+    ]
+    shotsStore.cache.result = []
+    const rootGetters = {
+      currentProduction: { id: 'p1' },
+      isTVShow: false,
+      organisation: { hours_by_day: 8 },
+      personMap: new Map(),
+      taskMap: new Map()
+    }
+    const state = { shotValidationColumns: [] }
+
+    const lines = shotsStore.actions.getShotsCsvLines({ state, rootGetters })
+
+    expect(lines).toEqual([['SEQ01', 'SH01', '']])
+  })
+
+  test('orders the descriptor columns by name and skips the other entity types', () => {
+    const shot = {
+      id: 's1',
+      sequence_name: 'SEQ01',
+      name: 'SH01',
+      description: '',
+      data: { zeta: 'z', alpha: 'a', other: 'x' },
+      validations: new Map()
+    }
+    shotsStore.cache.shots = [shot]
+    shotsStore.cache.result = []
+    const rootGetters = {
+      currentProduction: {
+        id: 'p1',
+        descriptors: [
+          {
+            name: 'Zeta',
+            field_name: 'zeta',
+            data_type: 'string',
+            entity_type: 'Shot'
+          },
+          {
+            name: 'Alpha',
+            field_name: 'alpha',
+            data_type: 'string',
+            entity_type: 'Shot'
+          },
+          {
+            name: 'Other',
+            field_name: 'other',
+            data_type: 'string',
+            entity_type: 'Asset'
+          }
+        ]
+      },
+      isTVShow: false,
+      organisation: { hours_by_day: 8 },
+      personMap: new Map(),
+      taskMap: new Map()
+    }
+    const state = { shotValidationColumns: [] }
+
+    const lines = shotsStore.actions.getShotsCsvLines({ state, rootGetters })
+
+    expect(lines[0].slice(3)).toEqual(['a', 'z'])
+  })
+})

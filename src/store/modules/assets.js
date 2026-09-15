@@ -12,6 +12,7 @@ import tasksStore from '@/store/modules/tasks'
 import taskStatusStore from '@/store/modules/taskstatus'
 import taskTypesStore from '@/store/modules/tasktypes'
 
+import { getExportDescriptors } from '@/lib/descriptors'
 import { isEpisodeInLoadedScope } from '@/lib/episodes'
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
 import { minutesToDays } from '@/lib/time'
@@ -802,9 +803,7 @@ const actions = {
     if (cache.result && cache.result.length > 0) {
       assets = cache.result
     }
-    const sortedDescriptors = sortByName([
-      ...(production.descriptors || [])
-    ]).filter(d => d.entity_type === 'Asset')
+    const sortedDescriptors = getExportDescriptors(production, 'Asset')
     const lines = assets.map(asset => {
       if (asset.shared) {
         return [asset.asset_type_name, asset.name]

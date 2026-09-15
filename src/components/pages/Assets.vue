@@ -258,7 +258,7 @@ import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
 
 import csv from '@/lib/csv'
-import { sortByName } from '@/lib/sorting'
+import { getExportDescriptors } from '@/lib/descriptors'
 import stringHelpers from '@/lib/string'
 
 import { searchMixin } from '@/components/mixins/search'
@@ -782,11 +782,11 @@ export default {
           this.$t('assets.fields.description'),
           this.$t('assets.fields.ready_for')
         ])
-        sortByName([...this.currentProduction.descriptors])
-          .filter(d => d.entity_type === 'Asset')
-          .forEach(descriptor => {
+        getExportDescriptors(this.currentProduction, 'Asset').forEach(
+          descriptor => {
             headers.push(descriptor.name)
-          })
+          }
+        )
         if (this.isAssetTime) {
           headers.push(this.$t('assets.fields.time_spent'))
         }

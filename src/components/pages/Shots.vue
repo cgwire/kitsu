@@ -310,7 +310,7 @@ import { mapGetters, mapActions } from 'vuex'
 import shotStore from '@/store/modules/shots'
 
 import csv from '@/lib/csv'
-import { sortByName } from '@/lib/sorting'
+import { getExportDescriptors } from '@/lib/descriptors'
 import stringHelpers from '@/lib/string'
 
 import { searchMixin } from '@/components/mixins/search'
@@ -867,11 +867,11 @@ export default {
         if (this.currentEpisode) {
           headers.splice(0, 0, 'Episode')
         }
-        sortByName([...this.currentProduction.descriptors])
-          .filter(d => d.entity_type === 'Shot')
-          .forEach(descriptor => {
+        getExportDescriptors(this.currentProduction, 'Shot').forEach(
+          descriptor => {
             headers.push(descriptor.name)
-          })
+          }
+        )
         if (this.isShotTime) {
           headers.push(this.$t('shots.fields.time_spent'))
         }
