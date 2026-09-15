@@ -4,10 +4,20 @@ import { describe, it, expect } from 'vitest'
 
 import {
   getTaskTypePriorityOfProd,
-  getTaskStatusPriorityOfProd
+  getTaskStatusPriorityOfProd,
+  parseBitrate
 } from '@/lib/productions'
 
 describe('productions', () => {
+  describe('parseBitrate', () => {
+    it('sends an empty field as null and a typed value as a number', () => {
+      expect(parseBitrate('')).toBeNull()
+      expect(parseBitrate(null)).toBeNull()
+      expect(parseBitrate('20')).toBe(20)
+      expect(parseBitrate(6)).toBe(6)
+    })
+  })
+
   describe('getTaskTypePriorityOfProd', () => {
     it('returns 1 when taskType is null', () => {
       expect(getTaskTypePriorityOfProd(null, {})).toBe(1)
