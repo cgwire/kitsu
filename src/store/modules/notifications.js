@@ -16,14 +16,14 @@ import {
   RESET_ALL
 } from '@/store/mutation-types'
 
-const initialState = {
+// A factory, not a literal: the mutations push into the list in place, and
+// RESET_ALL must not hand the same array back.
+const initialState = () => ({
   notificationCount: 0,
   notifications: []
-}
+})
 
-const state = {
-  ...initialState
-}
+const state = initialState()
 
 const getters = {
   notificationCount: state => state.notificationCount,
@@ -50,7 +50,13 @@ const actions = {
     ) {
       const lastNotification = state.notifications.length - 1
       params.before = state.notifications[lastNotification].created_at
+      // A filter change replaces the list while the page is in flight: the
+      // page was fetched for the previous list and would land out of order.
+      const list = state.notifications
       return notificationsApi.getNotifications(params).then(notifications => {
+        if (state.notifications !== list) {
+          return []
+        }
         commit(LOAD_MORE_NOTIFICATIONS_END, notifications)
         return notifications
       })
@@ -121,7 +127,9 @@ const mutations = {
   },
 
   [LOAD_MORE_NOTIFICATIONS_END](state, notifications) {
-    state.notifications = sortByDate(state.notifications.concat(notifications))
+    // The page is fetched with before = the oldest loaded created_at, so it
+    // only holds older entries: append it instead of re-sorting the list.
+    state.notifications.push(...sortByDate(notifications))
   },
 
   [LOAD_NOTIFICATION_END](state, notification) {
@@ -182,7 +190,7 @@ const mutations = {
   },
 
   [RESET_ALL](state) {
-    Object.assign(state, { ...initialState })
+    Object.assign(state, initialState())
   }
 }
 
