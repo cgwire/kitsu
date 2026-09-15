@@ -215,7 +215,9 @@
         <task-type-settings
           :task-types="templateTaskTypes"
           :all-task-types="allTaskTypes"
+          :default-bitrates="params"
           @add="addTaskType"
+          @bitrates-changed="setTaskTypeBitrates"
           @import-items="importTaskTypes"
           @remove="removeTaskType"
           @reorder="reorderTaskTypes"
@@ -664,6 +666,15 @@ const addTaskType = async taskTypeId => {
   await store.dispatch('addTaskTypeToTemplate', {
     templateId: templateId.value,
     taskTypeId
+  })
+  await loadTemplateData()
+}
+
+const setTaskTypeBitrates = async ({ taskTypeId, ...bitrates }) => {
+  await store.dispatch('addTaskTypeToTemplate', {
+    templateId: templateId.value,
+    taskTypeId,
+    ...bitrates
   })
   await loadTemplateData()
 }
