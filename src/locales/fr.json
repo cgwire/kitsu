@@ -1036,6 +1036,8 @@
       },
       "fields": {
         "fps": "FPS",
+        "hd_bitrate_compression": "Débit des vidéos haute définition (Mbit/s)",
+        "ld_bitrate_compression": "Débit des vidéos basse définition (Mbit/s)",
         "is_frame_in_numbering": "Démarrer le compteur de frames du lecteur au frame in",
         "name": "Nom",
         "ratio": "Ratio",

@@ -156,6 +156,22 @@
               <p class="field-error" v-if="resolutionError">
                 {{ resolutionError }}
               </p>
+              <text-field
+                type="number"
+                :min="1"
+                :max="200"
+                :label="$t('productions.fields.hd_bitrate_compression')"
+                placeholder="28"
+                v-model="params.hd_bitrate_compression"
+              />
+              <text-field
+                type="number"
+                :min="1"
+                :max="200"
+                :label="$t('productions.fields.ld_bitrate_compression')"
+                placeholder="6"
+                v-model="params.ld_bitrate_compression"
+              />
               <combobox-boolean
                 :label="$t('productions.fields.is_clients_isolated')"
                 v-model="params.is_clients_isolated"
@@ -401,9 +417,10 @@ import TaskTypeSettings from '@/components/pages/production/TaskTypeSettings.vue
 import TextField from '@/components/widgets/TextField.vue'
 
 import {
-  PRODUCTION_TYPE_OPTIONS,
+  HOME_PAGE_OPTIONS,
   PRODUCTION_STYLE_OPTIONS,
-  HOME_PAGE_OPTIONS
+  PRODUCTION_TYPE_OPTIONS,
+  parseBitrate
 } from '@/lib/productions'
 
 const { t } = useI18n()
@@ -485,6 +502,8 @@ const params = ref({
   fps: '25',
   ratio: '16:9',
   resolution: '1920x1080',
+  hd_bitrate_compression: '',
+  ld_bitrate_compression: '',
   is_clients_isolated: 'false',
   is_preview_download_allowed: 'false',
   is_set_preview_automated: 'false',
@@ -547,6 +566,8 @@ const loadTemplateData = async () => {
     fps: tmpl.fps || '25',
     ratio: tmpl.ratio || '16:9',
     resolution: tmpl.resolution || '1920x1080',
+    hd_bitrate_compression: tmpl.hd_bitrate_compression ?? '',
+    ld_bitrate_compression: tmpl.ld_bitrate_compression ?? '',
     is_clients_isolated: tmpl.is_clients_isolated ? 'true' : 'false',
     is_preview_download_allowed: tmpl.is_preview_download_allowed
       ? 'true'
@@ -599,6 +620,8 @@ const saveParameters = async () => {
       name: template.value.name,
       description: template.value.description,
       ...params.value,
+      hd_bitrate_compression: parseBitrate(params.value.hd_bitrate_compression),
+      ld_bitrate_compression: parseBitrate(params.value.ld_bitrate_compression),
       is_clients_isolated: params.value.is_clients_isolated === 'true',
       is_preview_download_allowed:
         params.value.is_preview_download_allowed === 'true',

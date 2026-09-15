@@ -63,6 +63,7 @@
                     class="task-type"
                     :task-type="taskTypeData.taskType"
                     :schedule-item="taskTypeData.scheduleItem"
+                    @bitrates-changed="onBitratesChanged"
                     @date-changed="onDateChanged"
                     @remove="removeTaskType"
                   />
@@ -289,6 +290,19 @@ const removeTaskType = async ({ taskType, scheduleItem }) => {
   await nextTick()
   updateTaskTypeIdFromRemaining()
   resetDisplayedTaskTypes()
+}
+
+const onBitratesChanged = async ({ taskType, ...bitrates }) => {
+  errors.scheduleTimeUpdate = false
+  try {
+    await store.dispatch('addTaskTypeToProduction', {
+      taskTypeId: taskType.id,
+      ...bitrates
+    })
+  } catch (err) {
+    console.error(err)
+    errors.scheduleTimeUpdate = true
+  }
 }
 
 const onDateChanged = async scheduleItem => {

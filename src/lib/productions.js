@@ -45,6 +45,15 @@ export const HOME_PAGE_OPTIONS = [
   { label: 'sequences', value: 'sequences' }
 ]
 
+/*
+ * Value to send for a movie bitrate typed in a number field: an empty
+ * field means "inherit", so it goes as null instead of an empty string.
+ */
+export function parseBitrate(value) {
+  if (value === '' || value === null || value === undefined) return null
+  return Number(value)
+}
+
 export function getTaskTypePriorityOfProd(taskType, production) {
   if (!taskType) {
     return 1

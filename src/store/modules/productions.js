@@ -39,6 +39,7 @@ import {
   PRODUCTION_REMOVE_BACKGROUND,
   PRODUCTION_UPDATE_DEFAULT_BACKGROUND,
   PRODUCTION_ADD_TASK_TYPE,
+  PRODUCTION_SET_TASK_TYPE_LINK,
   PRODUCTION_REMOVE_TASK_TYPE,
   PRODUCTION_ADD_TASK_STATUS,
   PRODUCTION_REMOVE_TASK_STATUS,
@@ -592,13 +593,21 @@ const actions = {
     )
   },
 
-  addTaskTypeToProduction({ commit, state }, { taskTypeId, priority = null }) {
+  addTaskTypeToProduction(
+    { commit, state },
+    { taskTypeId, priority = null, ...bitrates }
+  ) {
     commit(PRODUCTION_ADD_TASK_TYPE, taskTypeId)
-    return productionsApi.addTaskTypeToProduction(
-      state.currentProduction.id,
-      taskTypeId,
-      priority
-    )
+    return productionsApi
+      .addTaskTypeToProduction(
+        state.currentProduction.id,
+        taskTypeId,
+        priority,
+        bitrates
+      )
+      .then(() => {
+        commit(PRODUCTION_SET_TASK_TYPE_LINK, { taskTypeId, ...bitrates })
+      })
   },
 
   removeTaskTypeFromProduction({ commit, state }, taskTypeId) {
@@ -1134,6 +1143,15 @@ const mutations = {
 
   [PRODUCTION_ADD_TASK_TYPE](state, taskTypeId) {
     addToIdList(state.currentProduction, 'task_types', taskTypeId)
+  },
+
+  [PRODUCTION_SET_TASK_TYPE_LINK](state, { taskTypeId, ...link }) {
+    const production = state.currentProduction
+    if (!production.task_type_links) production.task_type_links = {}
+    production.task_type_links[taskTypeId] = {
+      ...production.task_type_links[taskTypeId],
+      ...link
+    }
   },
 
   [PRODUCTION_REMOVE_TASK_TYPE](state, taskTypeId) {

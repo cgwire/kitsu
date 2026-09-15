@@ -136,6 +136,26 @@
           v-model.trim="form.resolution"
           v-if="currentProduction && currentProduction.id"
         />
+        <text-field
+          type="number"
+          :min="1"
+          :max="200"
+          :label="$t('productions.fields.hd_bitrate_compression')"
+          placeholder="28"
+          @enter="runConfirmation"
+          v-model="form.hd_bitrate_compression"
+          v-if="currentProduction && currentProduction.id"
+        />
+        <text-field
+          type="number"
+          :min="1"
+          :max="200"
+          :label="$t('productions.fields.ld_bitrate_compression')"
+          placeholder="6"
+          @enter="runConfirmation"
+          v-model="form.ld_bitrate_compression"
+          v-if="currentProduction && currentProduction.id"
+        />
         <combobox-boolean
           :label="$t('productions.fields.is_clients_isolated')"
           @enter="runConfirmation"
@@ -223,9 +243,10 @@ import { useStore } from 'vuex'
 
 import { formatSimpleDate, parseSimpleDate } from '@/lib/time'
 import {
-  PRODUCTION_TYPE_OPTIONS,
+  HOME_PAGE_OPTIONS,
   PRODUCTION_STYLE_OPTIONS,
-  HOME_PAGE_OPTIONS
+  PRODUCTION_TYPE_OPTIONS,
+  parseBitrate
 } from '@/lib/productions'
 
 import ChangeAvatarModal from '@/components/modals/ChangeAvatarModal.vue'
@@ -270,6 +291,8 @@ const emptyForm = () => ({
   fps: '',
   ratio: '',
   resolution: '',
+  hd_bitrate_compression: '',
+  ld_bitrate_compression: '',
   homepage: HOME_PAGE_OPTIONS[0].value
 })
 
@@ -356,6 +379,8 @@ const resetForm = () => {
         : 'false',
       ratio: production.ratio,
       resolution: production.resolution,
+      hd_bitrate_compression: production.hd_bitrate_compression ?? '',
+      ld_bitrate_compression: production.ld_bitrate_compression ?? '',
       homepage: production.homepage
     }
   } else {
@@ -371,7 +396,9 @@ const editParameters = async () => {
       ...form.value,
       id: currentProduction.value.id,
       start_date: formatSimpleDate(form.value.start_date),
-      end_date: formatSimpleDate(form.value.end_date)
+      end_date: formatSimpleDate(form.value.end_date),
+      hd_bitrate_compression: parseBitrate(form.value.hd_bitrate_compression),
+      ld_bitrate_compression: parseBitrate(form.value.ld_bitrate_compression)
     })
   } catch {
     isError.value = true

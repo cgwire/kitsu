@@ -26,6 +26,7 @@ import {
   PRODUCTION_ADD_ASSET_TYPE,
   PRODUCTION_ADD_TASK_STATUS,
   PRODUCTION_ADD_TASK_TYPE,
+  PRODUCTION_SET_TASK_TYPE_LINK,
   PRODUCTION_AVATAR_UPLOADED,
   PRODUCTION_PICTURE_FILE_SELECTED,
   PRODUCTION_REMOVE_ASSET_TYPE,
@@ -664,21 +665,45 @@ describe('Productions store', () => {
       expect(productionApi.removeAssetTypeFromProduction).toBeCalledTimes(1)
     })
 
-    test('addTaskTypeToProduction', () => {
+    test('addTaskTypeToProduction', async () => {
       const mockCommit = vi.fn()
       const state = {
         currentProduction: { id: '123' }
       }
-      productionApi.addTaskTypeToProduction = vi.fn()
-      store.actions.addTaskTypeToProduction(
+      productionApi.addTaskTypeToProduction = vi.fn(() => Promise.resolve())
+      await store.actions.addTaskTypeToProduction(
         { commit: mockCommit, state },
-        { taskTypeId: '456', priority: 1 }
+        { taskTypeId: '456', priority: 1, hd_bitrate_compression: 20 }
       )
-      expect(mockCommit).toBeCalledTimes(1)
+      expect(mockCommit).toBeCalledTimes(2)
       expect(mockCommit).toHaveBeenNthCalledWith(
         1, PRODUCTION_ADD_TASK_TYPE, '456'
       )
-      expect(productionApi.addTaskTypeToProduction).toBeCalledTimes(1)
+      expect(mockCommit).toHaveBeenNthCalledWith(
+        2, PRODUCTION_SET_TASK_TYPE_LINK,
+        { taskTypeId: '456', hd_bitrate_compression: 20 }
+      )
+      expect(productionApi.addTaskTypeToProduction).toHaveBeenCalledWith(
+        '123', '456', 1, { hd_bitrate_compression: 20 }
+      )
+    })
+
+    test('PRODUCTION_SET_TASK_TYPE_LINK keeps the other link fields', () => {
+      const state = {
+        currentProduction: {
+          id: '123',
+          task_type_links: { 456: { priority: 3, ld_bitrate_compression: 4 } }
+        }
+      }
+      store.mutations[PRODUCTION_SET_TASK_TYPE_LINK](state, {
+        taskTypeId: '456',
+        hd_bitrate_compression: 20
+      })
+      expect(state.currentProduction.task_type_links['456']).toEqual({
+        priority: 3,
+        hd_bitrate_compression: 20,
+        ld_bitrate_compression: 4
+      })
     })
 
     test('addSettingsToProduction', async () => {
