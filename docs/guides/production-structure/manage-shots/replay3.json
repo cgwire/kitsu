@@ -1,0 +1,177 @@
+{
+    "title": "csv",
+    "steps": [
+        {
+            "type": "setViewport",
+            "width": 1920,
+            "height": 1080,
+            "deviceScaleFactor": 1,
+            "isMobile": false,
+            "hasTouch": false,
+            "isLandscape": false
+        },
+        {
+            "type": "navigate",
+            "url": "http://localhost:8080/productions/5b388012-7bda-4b97-a7be-9702e10a2968/episodes/640f4073-f138-47ac-bed9-43106fd90510/shots?search=",
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "http://localhost:8080/productions/5b388012-7bda-4b97-a7be-9702e10a2968/episodes/640f4073-f138-47ac-bed9-43106fd90510/shots?search=",
+                    "title": "El Camino - E00000 | Shots - Kitsu"
+                }
+            ]
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Import[role=\"button\"]"
+                ],
+                [
+                    "button:nth-of-type(4)"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/div/div[1]/div[1]/div[4]/button[4]"
+                ],
+                [
+                    "pierce/button:nth-of-type(4)"
+                ]
+            ],
+            "offsetY": 14.703125,
+            "offsetX": 5.640625
+        },
+        {
+            "type": "uploadFile",
+            "selectors": [
+                [
+                    "#app > div > div > div.columns.fixed-page > div.modal.is-active > div.modal-content > div > div:nth-child(6) > div > form > div > label > input"
+                ]
+            ],
+            "file": "/home/bazamel/clients/cgwire/docs/assets/shots.csv"
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Confirm"
+                ],
+                [
+                    "div.is-active a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[9]/div[2]/div/div[3]/div/p/a"
+                ],
+                [
+                    "pierce/div.is-active a"
+                ]
+            ],
+            "offsetY": 15.40625,
+            "offsetX": 43.421875
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div.episode-menu > div > div"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[1]/nav/div[1]/div/div[5]/div/div[1]/div/div"
+                ],
+                [
+                    "pierce/div.episode-menu > div > div"
+                ]
+            ],
+            "offsetY": 15,
+            "offsetX": 35.8125
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div.nav-left div:nth-of-type(2) > a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[1]/nav/div[1]/div/div[5]/div/div[1]/div[2]/div[1]/div[2]/a"
+                ],
+                [
+                    "pierce/div.nav-left div:nth-of-type(2) > a"
+                ]
+            ],
+            "offsetY": 15,
+            "offsetX": 43.8125
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Import[role=\"button\"]"
+                ],
+                [
+                    "button:nth-of-type(4)"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/div/div[1]/div[1]/div[4]/button[4]"
+                ],
+                [
+                    "pierce/button:nth-of-type(4)"
+                ]
+            ],
+            "offsetY": 14.703125,
+            "offsetX": 5.640625
+        },
+        {
+            "type": "uploadFile",
+            "selectors": [
+                [
+                    "#app > div > div > div.columns.fixed-page > div.modal.is-active > div.modal-content > div > div:nth-child(6) > div > form > div > label > input"
+                ]
+            ],
+            "file": "/home/bazamel/clients/cgwire/docs/assets/shots_updated.csv"
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div.is-active label"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[9]/div[2]/div/div[1]/div[1]/div/div/label"
+                ],
+                [
+                    "pierce/div.is-active label"
+                ],
+                [
+                    "text/Update existing"
+                ]
+            ],
+            "offsetY": 10.40625,
+            "offsetX": 21
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Confirm"
+                ],
+                [
+                    "div.is-active a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[9]/div[2]/div/div[3]/div/p/a"
+                ],
+                [
+                    "pierce/div.is-active a"
+                ]
+            ],
+            "offsetY": 14.40625,
+            "offsetX": 42.421875
+        }
+    ]
+}

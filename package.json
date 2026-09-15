@@ -3,9 +3,18 @@
   "version": "1.0.0",
   "description": "Documentation for Kitsu, CG production manager",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "docs:dev": "vuepress dev docs",
-    "docs:build": "vuepress build docs"
+    "dev": "vitepress dev docs",
+    "build": "vitepress build docs",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "preview": "npm run build && wrangler dev",
+    "deploy": "npm run build && wrangler deploy",
+    "toc": "./word_count.sh docs > toc.json",
+    "screenshots": "node ./scripts/screenshots.js docs/guides/task-configuration/managing-task-types/replay.json",
+    "pre:translate": "./scripts/find-outdated-content.sh && node scripts/translator.js",
+    "post:translate": "./scripts/parse_batch_output.sh && ./scripts/localize-links.sh"
   },
   "repository": {
     "type": "git",
@@ -23,6 +32,15 @@
   },
   "homepage": "https://github.com/cgwire/kitsu#readme",
   "devDependencies": {
-    "vuepress": "1.9.10"
+    "vitepress": "^2.0.0-alpha.16",
+    "vue": "^3.5.13",
+    "wrangler": "^4.131.2"
+  },
+  "dependencies": {
+    "@lucide/vue": "^1.25.0",
+    "@puppeteer/replay": "^4.0.2",
+    "medium-zoom": "^1.1.0",
+    "mermaid": "^11.13.0",
+    "puppeteer": "^25.8.0"
   }
 }

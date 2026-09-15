@@ -1,0 +1,300 @@
+{
+    "title": "episode",
+    "steps": [
+        {
+            "type": "setViewport",
+            
+            "width": 1920,
+            "height": 1080,
+            "deviceScaleFactor": 1,
+            "isMobile": false,
+            "hasTouch": false,
+            "isLandscape": false
+        },
+        {
+            "type": "navigate",
+            
+            "url": "http://localhost/open-productions",
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "http://localhost/open-productions",
+                    "title": "My Productions - Kitsu"
+                }
+            ]
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/EL CAMINO",
+                    "aria/[role=\"image\"]"
+                ],
+                [
+                    "div.open-productions-box img"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[2]/div/div/a/div[1]/img"
+                ],
+                [
+                    "pierce/div.open-productions-box img"
+                ]
+            ],
+            "offsetY": 65.31759643554688,
+            "offsetX": 41.90118408203125
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "div.section-menu > div > div"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[1]/nav/div[1]/div/div[3]/div/div[1]/div/div"
+                ],
+                [
+                    "pierce/div.section-menu > div > div"
+                ],
+                [
+                    "text/Assets"
+                ]
+            ],
+            "offsetY": 20.5,
+            "offsetX": 67.40625,
+            
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Episodes",
+                    "aria/[role=\"generic\"]"
+                ],
+                [
+                    "div.topbar div:nth-of-type(5) span"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[1]/nav/div[1]/div/div[3]/div/div[1]/div[2]/div[5]/a/span"
+                ],
+                [
+                    "pierce/div.topbar div:nth-of-type(5) span"
+                ]
+            ],
+            "offsetY": 5.828125,
+            "offsetX": 54.625
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/New episode",
+                    "aria/[role=\"generic\"]"
+                ],
+                [
+                    "div.flexrow > div:nth-of-type(4) span"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/div/div[1]/div[1]/div[4]/button/span"
+                ],
+                [
+                    "pierce/div.flexrow > div:nth-of-type(4) span"
+                ]
+            ],
+            "offsetY": 11.21875,
+            "offsetX": 29.328125
+        },
+        {
+            "type": "change",
+            
+            "value": "E01",
+            "selectors": [
+                [
+                    "div.is-active form > div:nth-of-type(1) input"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[9]/div[2]/div/form/div[1]/p/input"
+                ],
+                [
+                    "pierce/div.is-active form > div:nth-of-type(1) input"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Confirm"
+                ],
+                [
+                    "div.is-active a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[9]/div[2]/div/div/p/a"
+                ],
+                [
+                    "pierce/div.is-active a"
+                ]
+            ],
+            "offsetY": 9.265625,
+            "offsetX": 33.421875
+        },
+        {
+            "type": "hover",
+            
+            "target": "main",
+            ,
+            "selectors": [
+                [
+                    "tr:nth-of-type(2) [data-test='button-edit']"
+                ],
+                [
+                    "xpath///*[@data-test=\"button-edit\"]"
+                ],
+                [
+                    "pierce/tr:nth-of-type(2) [data-test='button-edit']"
+                ]
+            ]
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "tr:nth-of-type(2) [data-test='button-edit'] path:nth-of-type(2)"
+                ],
+                [
+                    "xpath///*[@data-test=\"button-edit\"]/svg/path[2]"
+                ],
+                [
+                    "pierce/tr:nth-of-type(2) [data-test='button-edit'] path:nth-of-type(2)"
+                ]
+            ],
+            "offsetY": 8.9185791015625,
+            "offsetX": 0.2999267578125
+        },
+        {
+            "type": "change",
+            
+            "value": "E02",
+            ,
+            "selectors": [
+                [
+                    "div.is-active form > div:nth-of-type(1) input"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[9]/div[2]/div/form/div[1]/p/input"
+                ],
+                [
+                    "pierce/div.is-active form > div:nth-of-type(1) input"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Confirm"
+                ],
+                [
+                    "div.is-active a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[9]/div[2]/div/div/p/a"
+                ],
+                [
+                    "pierce/div.is-active a"
+                ]
+            ],
+            "offsetY": 10.265625,
+            "offsetX": 15.421875
+        },
+        {
+            "type": "hover",
+            
+            "target": "main",
+            ,
+            "selectors": [
+                [
+                    "tr:nth-of-type(2) [data-test='button-delete-admin'] > svg"
+                ],
+                [
+                    "xpath///*[@data-test=\"button-delete-admin\"]/svg"
+                ],
+                [
+                    "pierce/tr:nth-of-type(2) [data-test='button-delete-admin'] > svg"
+                ]
+            ],
+            "offsetY": 11.421875,
+            "offsetX": 7.5
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "tr:nth-of-type(2) [data-test='button-delete-admin'] > svg"
+                ],
+                [
+                    "xpath///*[@data-test=\"button-delete-admin\"]/svg"
+                ],
+                [
+                    "pierce/tr:nth-of-type(2) [data-test='button-delete-admin'] > svg"
+                ]
+            ],
+            "offsetY": 11.421875,
+            "offsetX": 7.5
+        },
+        {
+            "type": "change",
+            
+            "value": "E02",
+            ,
+            "selectors": [
+                [
+                    "div:nth-of-type(10) input"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[10]/div[2]/div/p[2]/input"
+                ],
+                [
+                    "pierce/div:nth-of-type(10) input"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "div:nth-of-type(10) a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[10]/div[2]/div/div/a"
+                ],
+                [
+                    "pierce/div:nth-of-type(10) a"
+                ]
+            ],
+            "offsetY": 15.40625,
+            "offsetX": 39.421875
+        }
+    ]
+}

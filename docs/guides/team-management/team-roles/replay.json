@@ -1,0 +1,665 @@
+{
+    "title": "teamroles",
+    "steps": [
+        {
+            "type": "setViewport",
+            
+            "width": 1920,
+            "height": 1080,
+            "deviceScaleFactor": 1,
+            "isMobile": false,
+            "hasTouch": false,
+            "isLandscape": true
+        },
+        {
+            "type": "navigate",
+            
+            "url": "http://localhost/people",
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "http://localhost/people",
+                    "title": "People - Kitsu"
+                }
+            ]
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "div.combo > div"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[2]/div[4]/div[1]/div"
+                ],
+                [
+                    "pierce/div.combo > div"
+                ]
+            ],
+            "offsetY": 13.421875,
+            "offsetX": 61
+        },
+        {
+            "type": "navigate",
+            
+            "url": "http://localhost/open-productions",
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "http://localhost/open-productions",
+                    "title": "My Productions - Kitsu"
+                }
+            ]
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/EL CAMINO",
+                    "aria/[role=\"image\"]"
+                ],
+                [
+                    "div.open-productions-box img"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[2]/div/div/a/div[1]/img"
+                ],
+                [
+                    "pierce/div.open-productions-box img"
+                ]
+            ],
+            "offsetY": 85.46484375,
+            "offsetX": 60
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "div.section-menu > div > div"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[1]/nav/div[1]/div/div[3]/div/div[1]/div/div"
+                ],
+                [
+                    "pierce/div.section-menu > div > div"
+                ],
+                [
+                    "text/Assets"
+                ]
+            ],
+            ,
+            "offsetY": 17.5,
+            "offsetX": 68.40625
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Shots"
+                ],
+                [
+                    "div.nav-left div:nth-of-type(2) > a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[1]/nav/div[1]/div/div[3]/div/div[1]/div[2]/div[2]/a"
+                ],
+                [
+                    "pierce/div.nav-left div:nth-of-type(2) > a"
+                ]
+            ],
+            "offsetY": 9.40625,
+            "offsetX": 90.40625
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "tbody:nth-of-type(1) > tr:nth-of-type(2) > td:nth-of-type(7) > div > div"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/div/div[2]/div[1]/table/tbody[1]/tr[2]/td[7]/div/div"
+                ],
+                [
+                    "pierce/tbody:nth-of-type(1) > tr:nth-of-type(2) > td:nth-of-type(7) > div > div"
+                ]
+            ],
+            "offsetY": 21.28125,
+            "offsetX": 103.28125
+        },
+        {
+            "type": "click",
+            
+            "selectors": [
+                "#side-column > div > div.side.task-info > div:nth-child(2) > div.task-columns.pa1.pt0 > div.task-column.comments-column.mt1 > div > div > article > div.media-content > div.atwho-wrap > textarea"
+            ],
+            "offsetX": 1,
+            "offsetY": 1
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Filter on...[role=\"image\"]"
+                ],
+                [
+                    "div.shot-list-header > div.flexrow > button > img"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/div/div[1]/div[1]/button/img"
+                ],
+                [
+                    "pierce/div.shot-list-header > div.flexrow > button > img"
+                ]
+            ],
+            "offsetY": 13.71875,
+            "offsetX": 14
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Cancel"
+                ],
+                [
+                    "div.is-active div.modal-footer button"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[16]/div[2]/div/div[8]/p/button"
+                ],
+                [
+                    "pierce/div.is-active div.modal-footer button"
+                ]
+            ],
+            "offsetY": 14.578125,
+            "offsetX": 34.1875,
+            "ignore": true
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "div.topbar a > img"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[1]/nav/div[1]/a/img"
+                ],
+                [
+                    "pierce/div.topbar a > img"
+                ]
+            ],
+            ,
+            "offsetY": 12.5,
+            "offsetX": 7
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/My Tasks"
+                ],
+                [
+                    "div.navbar div:nth-of-type(1) > p:nth-of-type(1) > a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[2]/aside/div/section/div[1]/p[1]/a"
+                ],
+                [
+                    "pierce/div.navbar div:nth-of-type(1) > p:nth-of-type(1) > a"
+                ],
+                [
+                    "text/My Tasks"
+                ]
+            ],
+            "offsetY": 9.547271728515625,
+            "offsetX": 114.10311698913574
+        },
+        {
+            "type": "navigate",
+            
+            "url": "http://localhost/productions/5b388012-7bda-4b97-a7be-9702e10a2968/episodes/640f4073-f138-47ac-bed9-43106fd90510/shots/task-types/0ac230e8-fb19-4eae-8053-a3e464762d55",
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "http://localhost/productions/5b388012-7bda-4b97-a7be-9702e10a2968/episodes/640f4073-f138-47ac-bed9-43106fd90510/shots/task-types/0ac230e8-fb19-4eae-8053-a3e464762d55",
+                    "title": "El Camino / E00000 / Storyboard - Kitsu"
+                }
+            ]
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "tr:nth-of-type(1) > td.assignees > div"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div/div/div[2]/div/table/tbody/tr[1]/td[5]/div"
+                ],
+                [
+                    "pierce/tr:nth-of-type(1) > td.assignees > div"
+                ]
+            ],
+            "offsetY": 23.359375,
+            "offsetX": 62.703125
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "tr:nth-of-type(1) > td.status > div > div"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div/div/div[2]/div/table/tbody/tr[1]/td[4]/div/div"
+                ],
+                [
+                    "pierce/tr:nth-of-type(1) > td.status > div > div"
+                ]
+            ],
+            "offsetY": 22.4375,
+            "offsetX": 89.203125
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Leave a comment..."
+                ],
+                [
+                    "div:nth-of-type(2) > div.task-columns > div.comments-column textarea"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[2]/div/div[2]/div[2]/div[3]/div[2]/div/div/article/div[1]/div[2]/textarea"
+                ],
+                [
+                    "pierce/div:nth-of-type(2) > div.task-columns > div.comments-column textarea"
+                ]
+            ],
+            "offsetY": 25.890625,
+            "offsetX": 58
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Generate a playlist"
+                ],
+                [
+                    "div:nth-of-type(6) > img"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[2]/div/div[2]/div[1]/div[1]/div/div[6]/img"
+                ],
+                [
+                    "pierce/div:nth-of-type(6) > img"
+                ]
+            ],
+            ,
+            "offsetY": 21.2578125,
+            "offsetX": 11.106201171875
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Generate a playlist from selected tasks"
+                ],
+                [
+                    "div.action-topbar button"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[2]/div/div[2]/div[1]/div[1]/div[2]/div/button"
+                ],
+                [
+                    "pierce/div.action-topbar button"
+                ],
+                [
+                    "text/Generate a playlist"
+                ]
+            ],
+            "offsetY": 19.765625,
+            "offsetX": 202
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Show/Hide comments"
+                ],
+                [
+                    "div:nth-of-type(8) > button.playlist-button"
+                ],
+                [
+                    "xpath///*[@id=\"temp-playlist-modal\"]/div[2]/div/div/div[4]/div[8]/button[8]"
+                ],
+                [
+                    "pierce/div:nth-of-type(8) > button.playlist-button"
+                ]
+            ],
+            "offsetY": 25.5,
+            "offsetX": 20
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "div.side-column > div > div.side > div:nth-of-type(1) div.task-columns textarea"
+                ],
+                [
+                    "xpath///*[@id=\"temp-playlist-modal\"]/div[2]/div/div/div[1]/div[2]/div/div/div[4]/div/div/div/article/div[1]/div[2]/textarea"
+                ],
+                [
+                    "pierce/div.side-column > div > div.side > div:nth-of-type(1) div.task-columns textarea"
+                ]
+            ],
+            "offsetY": 31.921875,
+            "offsetX": 182
+        },
+        {
+            "type": "navigate",
+            
+            "url": "http://localhost/all-tasks",
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "http://localhost/all-tasks",
+                    "title": "All tasks - Kitsu"
+                }
+            ]
+        },
+        {
+            "type": "navigate",
+            
+            "url": "http://localhost/my-tasks?section=todos",
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "http://localhost/my-tasks?section=todos",
+                    "title": "My Tasks - Kitsu"
+                }
+            ]
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Modeling"
+                ],
+                [
+                    "tr:nth-of-type(2) > td.type"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div/div/div[4]/div[1]/table/tbody/tr[2]/td[2]"
+                ],
+                [
+                    "pierce/tr:nth-of-type(2) > td.type"
+                ]
+            ],
+            "offsetY": 30.015625,
+            "offsetX": 140
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Leave a comment..."
+                ],
+                [
+                    "div.task-columns textarea"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[2]/div/div[2]/div[2]/div[3]/div[2]/div/div/article/div[1]/div[2]/textarea"
+                ],
+                [
+                    "pierce/div.task-columns textarea"
+                ]
+            ],
+            "offsetY": 26.1875,
+            "offsetX": 54
+        },
+        {
+            "type": "navigate",
+            
+            "url": "http://localhost/settings",
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "http://localhost/settings",
+                    "title": "Settings - Kitsu"
+                }
+            ]
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "div.nav-left img"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[1]/nav/div[1]/a/img"
+                ],
+                [
+                    "pierce/div.nav-left img"
+                ]
+            ],
+            ,
+            "offsetY": 25.5,
+            "offsetX": 23
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/People"
+                ],
+                [
+                    "div:nth-of-type(2) > p:nth-of-type(2) > a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[2]/aside/div/section/div[2]/p[2]/a"
+                ],
+                [
+                    "pierce/div:nth-of-type(2) > p:nth-of-type(2) > a"
+                ],
+                [
+                    "text/People"
+                ]
+            ],
+            "offsetY": 13.406646728515625,
+            "offsetX": 109.10311698913574
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Add a new user",
+                    "aria/[role=\"generic\"]"
+                ],
+                [
+                    "div.page-header span"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/button[2]/span"
+                ],
+                [
+                    "pierce/div.page-header span"
+                ],
+                [
+                    "text/Add a new user"
+                ]
+            ],
+            "offsetY": 7.515625,
+            "offsetX": 34.859375
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Cancel"
+                ],
+                [
+                    "div.is-active button.is-link"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[6]/div[2]/div/form/div[14]/button[3]"
+                ],
+                [
+                    "pierce/div.is-active button.is-link"
+                ]
+            ],
+            "ignore": true,
+            "offsetY": 19.828125,
+            "offsetX": 24.1875
+        },
+        {
+            "type": "navigate",
+            
+            "url": "http://localhost/productions/5b388012-7bda-4b97-a7be-9702e10a2968/episodes/640f4073-f138-47ac-bed9-43106fd90510/shots?search=",
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "http://localhost/productions/5b388012-7bda-4b97-a7be-9702e10a2968/episodes/640f4073-f138-47ac-bed9-43106fd90510/shots?search=",
+                    "title": "El Camino - E00000 | Shots - Kitsu"
+                }
+            ]
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "div.section-menu > div > div"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[1]/nav/div[1]/div/div[3]/div/div[1]/div/div"
+                ],
+                [
+                    "pierce/div.section-menu > div > div"
+                ]
+            ],
+            ,
+            "offsetY": 21.5,
+            "offsetX": 88.40625
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Sequence Stats",
+                    "aria/[role=\"generic\"]"
+                ],
+                [
+                    "div.topbar div:nth-of-type(11) span"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[1]/nav/div[1]/div/div[3]/div/div[1]/div[2]/div[11]/a/span"
+                ],
+                [
+                    "pierce/div.topbar div:nth-of-type(11) span"
+                ],
+                [
+                    "text/Sequence Stats"
+                ]
+            ],
+            "offsetY": 10.453125,
+            "offsetX": 78.625
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "div.section-menu > div > div"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[1]/nav/div[1]/div/div[3]/div/div[1]/div/div"
+                ],
+                [
+                    "pierce/div.section-menu > div > div"
+                ],
+                [
+                    "text/Sequence Stats"
+                ]
+            ],
+            ,
+            "offsetY": 13.5,
+            "offsetX": 89.40625
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Playlists"
+                ],
+                [
+                    "div:nth-of-type(8) > a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[1]/nav/div[1]/div/div[3]/div/div[1]/div[2]/div[8]/a"
+                ],
+                [
+                    "pierce/div:nth-of-type(8) > a"
+                ]
+            ],
+            "offsetY": 12.4375,
+            "offsetX": 103.40625
+        },
+        {
+            "type": "click",
+            
+            "selectors": [
+                "#app > div > div > div.playlists.page.fixed-page.dark > div.columns > div.playlist-column.no-selection > div > a > div.playlist-infos.flexrow"
+            ],
+            "offsetX": 1,
+            "offsetY": 1
+        }
+    ]
+}

@@ -1,5 +1,4 @@
 # Logs
-logs
 *.log
 npm-debug.log*
 
@@ -40,3 +39,14 @@ jspm_packages
 docs/.vuepress/dist/
 docs/.DS_Store
 docs/ja/.DS_Store
+docs/.vitepress/dist
+docs/.vitepress/cache
+.wrangler
+to-translate.md
+batch_*.jsonl
+requests-*.jsonl
+
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example

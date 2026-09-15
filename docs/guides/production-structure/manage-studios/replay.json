@@ -1,0 +1,686 @@
+{
+    "title": "studio",
+    "steps": [
+        {
+            "type": "setViewport",
+            "width": 1920,
+            "height": 1080,
+            "deviceScaleFactor": 1,
+            "isMobile": false,
+            "hasTouch": false,
+            "isLandscape": false
+        },
+        {
+            "type": "navigate",
+            
+            "url": "http://localhost/open-productions",
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "http://localhost/open-productions",
+                    "title": "My Productions - Kitsu"
+                }
+            ]
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "div.nav-left img"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[1]/nav/div[1]/a/img"
+                ],
+                [
+                    "pierce/div.nav-left img"
+                ]
+            ],
+            "offsetY": 18.5,
+            "offsetX": 19
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Studios"
+                ],
+                [
+                    "div:nth-of-type(3) > p:nth-of-type(2) > a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[2]/aside/div/section/div[3]/p[2]/a"
+                ],
+                [
+                    "pierce/div:nth-of-type(3) > p:nth-of-type(2) > a"
+                ],
+                [
+                    "text/Studios"
+                ]
+            ],
+            "offsetY": 12.094146728515625,
+            "offsetX": 83.10311698913574
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Add a studio"
+                ],
+                [
+                    "button.mr0"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/button[2]"
+                ],
+                [
+                    "pierce/button.mr0"
+                ]
+            ],
+            "offsetY": 2,
+            "offsetX": 74.828125
+        },
+        {
+            "type": "change",
+            
+            "value": "my studio",
+            "selectors": [
+                [
+                    "input"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[4]/div[2]/div/form/div[1]/p/input"
+                ],
+                [
+                    "pierce/input"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "div.studios div:nth-of-type(4) > span"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[4]/div[2]/div/form/div[2]/div/div[4]/span"
+                ],
+                [
+                    "pierce/div.studios div:nth-of-type(4) > span"
+                ]
+            ],
+            "offsetY": 9.837493896484375,
+            "offsetX": 18.4000244140625
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Confirm"
+                ],
+                [
+                    "div.is-active a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[4]/div[2]/div/div/p/a"
+                ],
+                [
+                    "pierce/div.is-active a"
+                ]
+            ],
+            "offsetY": 10.4375,
+            "offsetX": 22.421875
+        },
+        {
+            "type": "hover",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "[data-test='button-edit'] > svg"
+                ],
+                [
+                    "xpath///*[@data-test=\"button-edit\"]/svg"
+                ],
+                [
+                    "pierce/[data-test='button-edit'] > svg"
+                ]
+            ],
+            ,
+            "offsetY": 6.359375,
+            "offsetX": 4.296875
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "[data-test='button-edit'] > svg"
+                ],
+                [
+                    "xpath///*[@data-test=\"button-edit\"]/svg"
+                ],
+                [
+                    "pierce/[data-test='button-edit'] > svg"
+                ]
+            ],
+            "offsetY": 6.359375,
+            "offsetX": 4.296875
+        },
+        {
+            "type": "change",
+            
+            "value": "my studio modified",
+            "selectors": [
+                [
+                    "input"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[4]/div[2]/div/form/div[1]/p/input"
+                ],
+                [
+                    "pierce/input"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Confirm"
+                ],
+                [
+                    "div.is-active a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[4]/div[2]/div/div/p/a"
+                ],
+                [
+                    "pierce/div.is-active a"
+                ]
+            ],
+            "offsetY": 11.046875,
+            "offsetX": 15.421875
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "div.nav-left img"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[1]/nav/div[1]/a/img"
+                ],
+                [
+                    "pierce/div.nav-left img"
+                ]
+            ],
+            "offsetY": 23.5,
+            "offsetX": 17
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/People"
+                ],
+                [
+                    "div:nth-of-type(2) > p:nth-of-type(2) > a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[2]/aside/div/section/div[2]/p[2]/a"
+                ],
+                [
+                    "pierce/div:nth-of-type(2) > p:nth-of-type(2) > a"
+                ],
+                [
+                    "text/People"
+                ]
+            ],
+            "offsetY": 17.406639099121094,
+            "offsetX": 92.10311698913574
+        },
+        {
+            "type": "hover",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "tr:nth-of-type(1) [data-test='button-edit'] > svg"
+                ],
+                [
+                    "xpath///*[@data-test=\"button-edit\"]/svg"
+                ],
+                [
+                    "pierce/tr:nth-of-type(1) [data-test='button-edit'] > svg"
+                ]
+            ],
+            ,
+            "offsetY": 8.640625,
+            "offsetX": 14.09375
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "tr:nth-of-type(1) [data-test='button-edit'] > svg"
+                ],
+                [
+                    "xpath///*[@data-test=\"button-edit\"]/svg"
+                ],
+                [
+                    "pierce/tr:nth-of-type(1) [data-test='button-edit'] > svg"
+                ]
+            ],
+            "offsetY": 8.640625,
+            "offsetX": 14.09375
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "div.is-active div.studio-combo > div > div"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[6]/div[2]/div/form/div[11]/div[1]/div/div"
+                ],
+                [
+                    "pierce/div.is-active div.studio-combo > div > div"
+                ]
+            ],
+            "offsetY": 19.296875,
+            "offsetX": 179.90625
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "div.is-active div:nth-of-type(2) > span"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[6]/div[2]/div/form/div[11]/div[1]/div[2]/div[2]/span"
+                ],
+                [
+                    "pierce/div.is-active div:nth-of-type(2) > span"
+                ]
+            ],
+            "offsetY": 7.40625,
+            "offsetX": 149.203125
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Save user changes"
+                ],
+                [
+                    "button.is-primary"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[6]/div[2]/div/form/div[14]/button[2]"
+                ],
+                [
+                    "pierce/button.is-primary"
+                ],
+                [
+                    "text/Save user changes"
+                ]
+            ],
+            "offsetY": 23.234375,
+            "offsetX": 68.390625
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "div.nav-left img"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[1]/nav/div[1]/a/img"
+                ],
+                [
+                    "pierce/div.nav-left img"
+                ]
+            ],
+            "offsetY": 21.5,
+            "offsetX": 24
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/All tasks"
+                ],
+                [
+                    "div:nth-of-type(2) > p:nth-of-type(6) > a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[2]/aside/div/section/div[2]/p[6]/a"
+                ],
+                [
+                    "pierce/div:nth-of-type(2) > p:nth-of-type(6) > a"
+                ],
+                [
+                    "text/All tasks"
+                ]
+            ],
+            "offsetY": 13.844146728515625,
+            "offsetX": 102.10311698913574
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "div.studio-combo > div > div"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/div/div[2]/div[1]/div[1]/div/div"
+                ],
+                [
+                    "pierce/div.studio-combo > div > div"
+                ]
+            ],
+            "offsetY": 17.34375,
+            "offsetX": 113.90625
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "div.select-input > div:nth-of-type(2) span.name"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/div/div[2]/div[1]/div[1]/div[2]/div[2]/span/span[2]"
+                ],
+                [
+                    "pierce/div.select-input > div:nth-of-type(2) span.name"
+                ],
+                [
+                    "text/my studio modified"
+                ]
+            ],
+            "offsetY": 3.65625,
+            "offsetX": 99.625
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "div.nav-left img"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[1]/nav/div[1]/a/img"
+                ],
+                [
+                    "pierce/div.nav-left img"
+                ]
+            ],
+            "offsetY": 21.5,
+            "offsetX": 20,
+            "ignore": true
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/People"
+                ],
+                [
+                    "div:nth-of-type(2) > p:nth-of-type(2) > a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[2]/aside/div/section/div[2]/p[2]/a"
+                ],
+                [
+                    "pierce/div:nth-of-type(2) > p:nth-of-type(2) > a"
+                ],
+                [
+                    "text/People"
+                ]
+            ],
+            "offsetY": 15.406639099121094,
+            "offsetX": 76.10311698913574,
+            "ignore": true
+        },
+        {
+            "type": "hover",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "tr:nth-of-type(1) [data-test='button-edit'] > svg"
+                ],
+                [
+                    "xpath///*[@data-test=\"button-edit\"]/svg"
+                ],
+                [
+                    "pierce/tr:nth-of-type(1) [data-test='button-edit'] > svg"
+                ]
+            ],
+            ,
+            "offsetY": 6.640625,
+            "offsetX": 3.09375,
+            "ignore": true
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "tr:nth-of-type(1) [data-test='button-edit'] > svg"
+                ],
+                [
+                    "xpath///*[@data-test=\"button-edit\"]/svg"
+                ],
+                [
+                    "pierce/tr:nth-of-type(1) [data-test='button-edit'] > svg"
+                ]
+            ],
+            "offsetY": 6.640625,
+            "offsetX": 3.09375,
+            "ignore": true
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "div:nth-of-type(11) span.name"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[6]/div[2]/div/form/div[11]/div[1]/div/div/span/span[2]"
+                ],
+                [
+                    "pierce/div:nth-of-type(11) span.name"
+                ]
+            ],
+            "offsetY": 11.703125,
+            "offsetX": 120.53125,
+            "ignore": true
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "div.select-input > div:nth-of-type(1)"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[6]/div[2]/div/form/div[11]/div[1]/div[2]/div[1]"
+                ],
+                [
+                    "pierce/div.select-input > div:nth-of-type(1)"
+                ]
+            ],
+            "offsetY": 4.390625,
+            "offsetX": 133,
+            "ignore": true
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Save user changes"
+                ],
+                [
+                    "button.is-primary"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[6]/div[2]/div/form/div[14]/button[2]"
+                ],
+                [
+                    "pierce/button.is-primary"
+                ],
+                [
+                    "text/Save user changes"
+                ]
+            ],
+            "offsetY": 14.234375,
+            "offsetX": 71.390625,
+            "ignore": true
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "div.nav-left img"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[1]/nav/div[1]/a/img"
+                ],
+                [
+                    "pierce/div.nav-left img"
+                ]
+            ],
+            "offsetY": 21.5,
+            "offsetX": 23
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Studios"
+                ],
+                [
+                    "div:nth-of-type(3) > p:nth-of-type(2) > a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[2]/aside/div/section/div[3]/p[2]/a"
+                ],
+                [
+                    "pierce/div:nth-of-type(3) > p:nth-of-type(2) > a"
+                ],
+                [
+                    "text/Studios"
+                ]
+            ],
+            "offsetY": 7.094146728515625,
+            "offsetX": 99.10311698913574
+        },
+        {
+            "type": "hover",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "[data-test='button-delete-admin'] > svg"
+                ],
+                [
+                    "xpath///*[@data-test=\"button-delete-admin\"]/svg"
+                ],
+                [
+                    "pierce/[data-test='button-delete-admin'] > svg"
+                ]
+            ],
+            ,
+            "offsetY": 8.359375,
+            "offsetX": 12.5
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "[data-test='button-delete-admin'] > svg"
+                ],
+                [
+                    "xpath///*[@data-test=\"button-delete-admin\"]/svg"
+                ],
+                [
+                    "pierce/[data-test='button-delete-admin'] > svg"
+                ]
+            ],
+            "offsetY": 8.359375,
+            "offsetX": 12.5
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Confirm"
+                ],
+                [
+                    "div.delete-modal a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[5]/div[2]/div/p[2]/a"
+                ],
+                [
+                    "pierce/div.delete-modal a"
+                ]
+            ],
+            "offsetY": 19.5,
+            "offsetX": 44.421875
+        }
+    ]
+}

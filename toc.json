@@ -1,0 +1,1915 @@
+{
+  "directory": "docs",
+  "file_count": 63,
+  "files": [
+    {
+      "path": "docs/guides/production/breakdown-casting/index.md",
+      "title": "Breakdown & Casting",
+      "total_words": 1042,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 56
+        },
+        {
+          "title": "Create a Breakdown List",
+          "words": 829
+        },
+        {
+          "title": "Casting from the Asset Library",
+          "words": 151
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/production/index.md",
+      "title": "Pre-Production",
+      "total_words": 67,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 67
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/production/manage-assets/index.md",
+      "title": "Managing Assets",
+      "total_words": 1724,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 59
+        },
+        {
+          "title": "Create an Asset",
+          "words": 489
+        },
+        {
+          "title": "See the Details of an Asset",
+          "words": 144
+        },
+        {
+          "title": "Add more tasks after creating the assets",
+          "words": 51
+        },
+        {
+          "title": "Update your assets",
+          "words": 312
+        },
+        {
+          "title": "Asset Library",
+          "words": 322
+        },
+        {
+          "title": "Remove Assets",
+          "words": 21
+        },
+        {
+          "title": "Using The \"Ready For\" Asset State",
+          "words": 295
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/production/manage-concepts/index.md",
+      "title": "Managing Concepts",
+      "total_words": 508,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 24
+        },
+        {
+          "title": "Create a Concept",
+          "words": 83
+        },
+        {
+          "title": "Edit a Concept",
+          "words": 104
+        },
+        {
+          "title": "Link a Concept to an Asset",
+          "words": 254
+        },
+        {
+          "title": "Delete Concepts",
+          "words": 25
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/production/meta-column/index.md",
+      "title": "Meta Columns",
+      "total_words": 959,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 83
+        },
+        {
+          "title": "Create Metadata Columns",
+          "words": 302
+        },
+        {
+          "title": "Linking Metadata Columns to Departments",
+          "words": 320
+        },
+        {
+          "title": "Organizing Metadata Columns",
+          "words": 142
+        },
+        {
+          "title": "Sticky Columns",
+          "words": 41
+        },
+        {
+          "title": "Update Meta Columns",
+          "words": 26
+        },
+        {
+          "title": "Remove Meta Columns",
+          "words": 20
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/privacy-security/authentication/index.md",
+      "title": "Authentication",
+      "total_words": 269,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 6
+        },
+        {
+          "title": "Enable Two-Factor Authentication",
+          "words": 174
+        },
+        {
+          "title": "OpenID / SSO auth",
+          "words": 80
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/privacy-security/index.md",
+      "title": "Privacy & Security",
+      "total_words": 45,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 45
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/privacy-security/logs/index.md",
+      "title": "Log Pages",
+      "total_words": 156,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 30
+        },
+        {
+          "title": "Activity Logs",
+          "words": 19
+        },
+        {
+          "title": "Login Logs",
+          "words": 46
+        },
+        {
+          "title": "Preview File Status Logs",
+          "words": 50
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/production-structure/index.md",
+      "title": "Production Structure",
+      "total_words": 249,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 32
+        },
+        {
+          "title": "Table of Content",
+          "words": 76
+        },
+        {
+          "title": "Data Model",
+          "words": 111
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/production-structure/manage-episodes/index.md",
+      "title": "Managing Episodes",
+      "total_words": 185,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 20
+        },
+        {
+          "title": "Episodes Overview",
+          "words": 27
+        },
+        {
+          "title": "Create Episodes",
+          "words": 72
+        },
+        {
+          "title": "Update Episodes",
+          "words": 20
+        },
+        {
+          "title": "Delete Episodes",
+          "words": 24
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/production-structure/manage-productions/index.md",
+      "title": "Managing Productions",
+      "total_words": 907,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 7
+        },
+        {
+          "title": "Create a New Production",
+          "words": 317
+        },
+        {
+          "title": "Configure Production-Specific Settings",
+          "words": 341
+        },
+        {
+          "title": "Close a Production (Archive)",
+          "words": 68
+        },
+        {
+          "title": "Delete a Production",
+          "words": 35
+        },
+        {
+          "title": "Create Your Own Production Template",
+          "words": 98
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/production-structure/manage-sequences/index.md",
+      "title": "Managing Sequences",
+      "total_words": 361,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 115
+        },
+        {
+          "title": "Create a Sequence",
+          "words": 169
+        },
+        {
+          "title": "Update a Sequence",
+          "words": 20
+        },
+        {
+          "title": "Delete a Sequence",
+          "words": 24
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/production-structure/manage-shots/index.md",
+      "title": "Managing Shots",
+      "total_words": 1435,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 28
+        },
+        {
+          "title": "Create a Shot",
+          "words": 303
+        },
+        {
+          "title": "Import Shots",
+          "words": 395
+        },
+        {
+          "title": "See the Details of a Shot",
+          "words": 158
+        },
+        {
+          "title": "Add More Tasks After Creating Shots",
+          "words": 49
+        },
+        {
+          "title": "Update Shots",
+          "words": 150
+        },
+        {
+          "title": "Add the number of Frames and Frame ranges to the shots",
+          "words": 237
+        },
+        {
+          "title": "Access a Shot's Change History",
+          "words": 33
+        },
+        {
+          "title": "Remove Shots",
+          "words": 24
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/production-structure/manage-studios/index.md",
+      "title": "Managing Studios",
+      "total_words": 153,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 50
+        },
+        {
+          "title": "Create a Studio",
+          "words": 37
+        },
+        {
+          "title": "Update a Studio",
+          "words": 20
+        },
+        {
+          "title": "Remove a Studio",
+          "words": 24
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/review-publishing/index.md",
+      "title": "Review & Publishing",
+      "total_words": 83,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 83
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/review-publishing/manage-edits/index.md",
+      "title": "Managing Edits",
+      "total_words": 318,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 107
+        },
+        {
+          "title": "Create an Edit",
+          "words": 195
+        },
+        {
+          "title": "Update Edits",
+          "words": 1
+        },
+        {
+          "title": "Delete Edits",
+          "words": 5
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/review-publishing/playlist/index.md",
+      "title": "Playlists",
+      "total_words": 1592,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 21
+        },
+        {
+          "title": "Accessing your Playlists",
+          "words": 186
+        },
+        {
+          "title": "Create a Playlist",
+          "words": 103
+        },
+        {
+          "title": "Populating a Playlist",
+          "words": 151
+        },
+        {
+          "title": "Review Controls",
+          "words": 569
+        },
+        {
+          "title": "Commenting",
+          "words": 246
+        },
+        {
+          "title": "Review Room",
+          "words": 115
+        },
+        {
+          "title": "Share Playlist",
+          "words": 178
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/review-publishing/publish/index.md",
+      "title": "Publishing",
+      "total_words": 612,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 68
+        },
+        {
+          "title": "Publishing a Concept",
+          "words": 148
+        },
+        {
+          "title": "Publish a Preview as a Version",
+          "words": 279
+        },
+        {
+          "title": "Combining Previews Into a Version",
+          "words": 83
+        },
+        {
+          "title": "Remove a Preview",
+          "words": 13
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/review-publishing/review/index.md",
+      "title": "Reviews",
+      "total_words": 1179,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 6
+        },
+        {
+          "title": "Request a Review",
+          "words": 88
+        },
+        {
+          "title": "Reviewing Tasks",
+          "words": 128
+        },
+        {
+          "title": "Adding a Comment",
+          "words": 133
+        },
+        {
+          "title": "Drawing Annotations",
+          "words": 25
+        },
+        {
+          "title": "Shape Annotations",
+          "words": 16
+        },
+        {
+          "title": "Tagging Frames",
+          "words": 62
+        },
+        {
+          "title": "Exporting Annotations",
+          "words": 92
+        },
+        {
+          "title": "Deleting Annotations & Eraser",
+          "words": 12
+        },
+        {
+          "title": "Comparing Images",
+          "words": 57
+        },
+        {
+          "title": "Onion Skinning",
+          "words": 72
+        },
+        {
+          "title": "Supervisor Reviews",
+          "words": 253
+        },
+        {
+          "title": "Reviewing Concepts",
+          "words": 162
+        },
+        {
+          "title": "Bulk Review",
+          "words": 30
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/review-publishing/update-task-progress/index.md",
+      "title": "Updating Task Progress",
+      "total_words": 509,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 63
+        },
+        {
+          "title": "Updating a Task Status",
+          "words": 158
+        },
+        {
+          "title": "Tagging Team Members",
+          "words": 66
+        },
+        {
+          "title": "Adding Checklists",
+          "words": 59
+        },
+        {
+          "title": "Adding Attachments",
+          "words": 39
+        },
+        {
+          "title": "Changing Statuses In Bulk",
+          "words": 80
+        },
+        {
+          "title": "Delete Comments",
+          "words": 21
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/production/assign-tasks/index.md",
+      "title": "Task Assignments",
+      "total_words": 633,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 110
+        },
+        {
+          "title": "Assign Tasks From the Global Page",
+          "words": 345
+        },
+        {
+          "title": "Assign Tasks From the Detailed Task Type Page",
+          "words": 62
+        },
+        {
+          "title": "Assign Tasks as a Department Supervisor",
+          "words": 72
+        },
+        {
+          "title": "Next Steps",
+          "words": 18
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/scheduling/durations-vs-estimates/index.md",
+      "title": "Durations over Estimates",
+      "total_words": 390,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 37
+        },
+        {
+          "title": "Estimation Summary",
+          "words": 160
+        },
+        {
+          "title": "Task Type Duration over Estimation",
+          "words": 92
+        },
+        {
+          "title": "Detailed Analysis",
+          "words": 89
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/scheduling/estimates/index.md",
+      "title": "Estimates",
+      "total_words": 976,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 132
+        },
+        {
+          "title": "Add an Estimate for a Task",
+          "words": 266
+        },
+        {
+          "title": "Forecasting Team Speed and Bidding Estimates",
+          "words": 400
+        },
+        {
+          "title": "Changing Priorities",
+          "words": 161
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/production/find-assignments/index.md",
+      "title": "Managing Your Assignments",
+      "total_words": 626,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 8
+        },
+        {
+          "title": "The \"My Tasks\" Page",
+          "words": 260
+        },
+        {
+          "title": "Board View",
+          "words": 81
+        },
+        {
+          "title": "Calendar View",
+          "words": 47
+        },
+        {
+          "title": "The \"Task Type\" Page",
+          "words": 214
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/scheduling/index.md",
+      "title": "Scheduling",
+      "total_words": 84,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 84
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/scheduling/schedules/index.md",
+      "title": "Schedules",
+      "total_words": 1591,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 6
+        },
+        {
+          "title": "Studio Schedule",
+          "words": 186
+        },
+        {
+          "title": "Production Schedule",
+          "words": 551
+        },
+        {
+          "title": "Team Schedule",
+          "words": 275
+        },
+        {
+          "title": "Task Type Schedule",
+          "words": 492
+        },
+        {
+          "title": "Asset and Shot Schedule",
+          "words": 63
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/task-configuration/index.md",
+      "title": "Task Configuration",
+      "total_words": 250,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 32
+        },
+        {
+          "title": "Table of Content",
+          "words": 74
+        },
+        {
+          "title": "Data Model",
+          "words": 99
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/production/managing-asset-types/index.md",
+      "title": "Managing Asset Types",
+      "total_words": 496,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 8
+        },
+        {
+          "title": "Define Your Asset Workflow",
+          "words": 271
+        },
+        {
+          "title": "Enabling Specific Asset Types for a Production",
+          "words": 82
+        },
+        {
+          "title": "Update an Asset Type",
+          "words": 30
+        },
+        {
+          "title": "Remove an Asset Type",
+          "words": 76
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/task-configuration/managing-task-statuses/index.md",
+      "title": "Managing Task Statuses",
+      "total_words": 1297,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 66
+        },
+        {
+          "title": "Create a Task Status",
+          "words": 576
+        },
+        {
+          "title": "Adding Task Statuses to a Production",
+          "words": 81
+        },
+        {
+          "title": "Update a Task Status",
+          "words": 37
+        },
+        {
+          "title": "Remove a Task Status",
+          "words": 72
+        },
+        {
+          "title": "Status Automation",
+          "words": 411
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/task-configuration/managing-task-types/index.md",
+      "title": "Managing Task Types",
+      "total_words": 680,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 24
+        },
+        {
+          "title": "Creating a New Task Type",
+          "words": 316
+        },
+        {
+          "title": "Adding Task Types in a Production",
+          "words": 167
+        },
+        {
+          "title": "Update a Task Type",
+          "words": 46
+        },
+        {
+          "title": "Remove a Task Type",
+          "words": 76
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/team-management/import-team/index.md",
+      "title": "Import Your Team",
+      "total_words": 169,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 47
+        },
+        {
+          "title": "Add Employees from a CSV Spreadsheet File",
+          "words": 114
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/team-management/index.md",
+      "title": "Team Management",
+      "total_words": 97,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 97
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/team-management/managing-departments/index.md",
+      "title": "Managing Departments",
+      "total_words": 311,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 117
+        },
+        {
+          "title": "Creating Departments",
+          "words": 136
+        },
+        {
+          "title": "Update Departments",
+          "words": 27
+        },
+        {
+          "title": "Delete Departments",
+          "words": 22
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/team-management/managing-teams/index.md",
+      "title": "Managing Teams",
+      "total_words": 718,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 53
+        },
+        {
+          "title": "Creating Users",
+          "words": 347
+        },
+        {
+          "title": "Adding Users to a Production Team",
+          "words": 188
+        },
+        {
+          "title": "Removing Users From A Team",
+          "words": 69
+        },
+        {
+          "title": "Delete Users",
+          "words": 42
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/team-management/profile-settings/index.md",
+      "title": "User Profile Settings",
+      "total_words": 236,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 47
+        },
+        {
+          "title": "Access Your Profile",
+          "words": 71
+        },
+        {
+          "title": "Customize Your Details",
+          "words": 66
+        },
+        {
+          "title": "Change Your Password",
+          "words": 40
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/team-management/team-roles/index.md",
+      "title": "User Permission Roles",
+      "total_words": 1128,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 362
+        },
+        {
+          "title": "Artist",
+          "words": 125
+        },
+        {
+          "title": "Supervisor",
+          "words": 130
+        },
+        {
+          "title": "Production Manager",
+          "words": 124
+        },
+        {
+          "title": "Studio Manager",
+          "words": 226
+        },
+        {
+          "title": "Vendor",
+          "words": 52
+        },
+        {
+          "title": "Client",
+          "words": 76
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/tracking-reporting/budget/index.md",
+      "title": "Budget",
+      "total_words": 685,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 108
+        },
+        {
+          "title": "Create a new budget",
+          "words": 20
+        },
+        {
+          "title": "Add a new budget entry",
+          "words": 171
+        },
+        {
+          "title": "Define a salary scale",
+          "words": 47
+        },
+        {
+          "title": "Add a new budget version",
+          "words": 39
+        },
+        {
+          "title": "Managing software licenses",
+          "words": 79
+        },
+        {
+          "title": "Accounting hardware items",
+          "words": 62
+        },
+        {
+          "title": "Linking software licenses and hardware items to departments",
+          "words": 73
+        },
+        {
+          "title": "Budget forecast vs real costs",
+          "words": 41
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/tracking-reporting/ensure-tasks-on-time/index.md",
+      "title": "Ensure Tasks are On Time",
+      "total_words": 452,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 66
+        },
+        {
+          "title": "Methods to Compare Estimations and Actuals",
+          "words": 65
+        },
+        {
+          "title": "Filtering by Due Date Status",
+          "words": 112
+        },
+        {
+          "title": "Using the Late Status Filter",
+          "words": 75
+        },
+        {
+          "title": "Using the Gantt Diagram",
+          "words": 110
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/tracking-reporting/filter/index.md",
+      "title": "Advanced Search & Filters",
+      "total_words": 1437,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 58
+        },
+        {
+          "title": "The Search Bar",
+          "words": 458
+        },
+        {
+          "title": "Creating Filters",
+          "words": 634
+        },
+        {
+          "title": "Managing Saved Filters",
+          "words": 97
+        },
+        {
+          "title": "Renaming a Saved Filter",
+          "words": 69
+        },
+        {
+          "title": "Deleting a Filter",
+          "words": 49
+        },
+        {
+          "title": "Pre-built Filters",
+          "words": 49
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/tracking-reporting/index.md",
+      "title": "Tracking & Reporting",
+      "total_words": 141,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 141
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/tracking-reporting/production-overview/index.md",
+      "title": "Production Overview",
+      "total_words": 855,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 42
+        },
+        {
+          "title": "News Feed Features",
+          "words": 143
+        },
+        {
+          "title": "Know the Current State of the Production",
+          "words": 479
+        },
+        {
+          "title": "Client Production Reports",
+          "words": 175
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/tracking-reporting/quotas/index.md",
+      "title": "Quotas",
+      "total_words": 472,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 83
+        },
+        {
+          "title": "Quotas Based on Timesheets",
+          "words": 87
+        },
+        {
+          "title": "Quotas Based on Status Changes",
+          "words": 174
+        },
+        {
+          "title": "Managing Department Quotas",
+          "words": 113
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/tracking-reporting/studio-overview/index.md",
+      "title": "Studio Resource Overview",
+      "total_words": 267,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 75
+        },
+        {
+          "title": "The `All Tasks` Page",
+          "words": 108
+        },
+        {
+          "title": "Current State of All Productions",
+          "words": 73
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/tracking-reporting/thumbnails/index.md",
+      "title": "Thumbnails",
+      "total_words": 298,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 46
+        },
+        {
+          "title": "Add Thumbnails Manually",
+          "words": 69
+        },
+        {
+          "title": "Add Thumbnails Automatically",
+          "words": 65
+        },
+        {
+          "title": "Batch Upload Previews (as Thumbnails)",
+          "words": 104
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/tracking-reporting/timesheets/index.md",
+      "title": "Team Timesheets",
+      "total_words": 376,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 64
+        },
+        {
+          "title": "Viewing Timesheets",
+          "words": 97
+        },
+        {
+          "title": "Exporting Timesheets",
+          "words": 26
+        },
+        {
+          "title": "Complete Your Timesheet",
+          "words": 57
+        },
+        {
+          "title": "What If You Missed a Day?",
+          "words": 24
+        },
+        {
+          "title": "Department Timesheets",
+          "words": 88
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/tracking-reporting/understand-why-late-task/index.md",
+      "title": "Understanding Why a Task is Late",
+      "total_words": 342,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 342
+        }
+      ]
+    },
+    {
+      "path": "docs/handbooks/for-artists/index.md",
+      "title": "Getting Started as an Artist",
+      "total_words": 115,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 35
+        },
+        {
+          "title": "1. Initial Profile Setup & Customization",
+          "words": 5
+        },
+        {
+          "title": "2. Managing Your Assignments",
+          "words": 5
+        },
+        {
+          "title": "3. Updating Task Progress",
+          "words": 5
+        },
+        {
+          "title": "4. Publish a Concept",
+          "words": 5
+        },
+        {
+          "title": "5. Request a Review",
+          "words": 5
+        },
+        {
+          "title": "6. Complete Your Timesheet",
+          "words": 23
+        }
+      ]
+    },
+    {
+      "path": "docs/handbooks/for-clients/index.md",
+      "title": "Getting Started As A Client",
+      "total_words": 100,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 35
+        },
+        {
+          "title": "1. Initial Profile Setup & Customization",
+          "words": 5
+        },
+        {
+          "title": "2. See your Playlists",
+          "words": 5
+        },
+        {
+          "title": "3. Share your Comments",
+          "words": 5
+        },
+        {
+          "title": "4. Global View of the Assets",
+          "words": 5
+        },
+        {
+          "title": "5. Global View of the Shots",
+          "words": 5
+        },
+        {
+          "title": "6. Production Report",
+          "words": 5
+        }
+      ]
+    },
+    {
+      "path": "docs/handbooks/for-producers/index.md",
+      "title": "Getting Started As A Producer / Production Manager",
+      "total_words": 145,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 54
+        },
+        {
+          "title": "1. Production Overview",
+          "words": 5
+        },
+        {
+          "title": "2. Ensure Tasks are On Time",
+          "words": 5
+        },
+        {
+          "title": "3. Understanding Why a Task is Late",
+          "words": 5
+        },
+        {
+          "title": "4. Durations over Estimates",
+          "words": 5
+        },
+        {
+          "title": "5. Checking Quotas",
+          "words": 5
+        },
+        {
+          "title": "6. Team Timesheets",
+          "words": 5
+        },
+        {
+          "title": "7. Studio Resource Overview",
+          "words": 5
+        },
+        {
+          "title": "8. Studio Occupancy Rate",
+          "words": 5
+        },
+        {
+          "title": "9. Main Schedule",
+          "words": 5
+        }
+      ]
+    },
+    {
+      "path": "docs/handbooks/for-supervisors/index.md",
+      "title": "Getting Started As A Supervisor / Lead",
+      "total_words": 139,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 66
+        },
+        {
+          "title": "1. Manage Your Department",
+          "words": 5
+        },
+        {
+          "title": "2. Assign Tasks",
+          "words": 5
+        },
+        {
+          "title": "3. Bid Estimates",
+          "words": 5
+        },
+        {
+          "title": "4. Daily Supervision Tasks",
+          "words": 5
+        },
+        {
+          "title": "5. Team Schedule",
+          "words": 5
+        },
+        {
+          "title": "6. Timesheets",
+          "words": 5
+        },
+        {
+          "title": "7. Review Previews",
+          "words": 5
+        },
+        {
+          "title": "8. Review Concepts",
+          "words": 5
+        }
+      ]
+    },
+    {
+      "path": "docs/index.md",
+      "title": "Kitsu Documentation",
+      "total_words": 1051,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 74
+        },
+        {
+          "title": "Start Here",
+          "words": 152
+        },
+        {
+          "title": "Workflows",
+          "words": 20
+        },
+        {
+          "title": "Guides",
+          "words": 673
+        },
+        {
+          "title": "Recipes",
+          "words": 4
+        },
+        {
+          "title": "Resources",
+          "words": 8
+        },
+        {
+          "title": "Tutorials",
+          "words": 20
+        },
+        {
+          "title": "About the Authors",
+          "words": 79
+        }
+      ]
+    },
+    {
+      "path": "docs/recipes/2d/index.md",
+      "title": "Kitsu for 2D Productions",
+      "total_words": 329,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 51
+        },
+        {
+          "title": "Asset Types",
+          "words": 67
+        },
+        {
+          "title": "Task Types",
+          "words": 105
+        },
+        {
+          "title": "Task Statuses",
+          "words": 47
+        },
+        {
+          "title": "Episodes & Sequences",
+          "words": 46
+        }
+      ]
+    },
+    {
+      "path": "docs/guides/production/3d-background/index.md",
+      "title": "3D Backgrounds",
+      "total_words": 303,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 9
+        },
+        {
+          "title": "Create a Global Library of HDR Files",
+          "words": 216
+        },
+        {
+          "title": "Select Specific Preview Background for a Production",
+          "words": 62
+        }
+      ]
+    },
+    {
+      "path": "docs/recipes/assets-only-production/index.md",
+      "title": "Quickstart for Assets-Only Productions",
+      "total_words": 116,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 18
+        },
+        {
+          "title": "1. Create a new production",
+          "words": 5
+        },
+        {
+          "title": "2. Create an Asset",
+          "words": 4
+        },
+        {
+          "title": "3. Update Your Assets",
+          "words": 5
+        },
+        {
+          "title": "4. Add More Tasks After Creating the Assets",
+          "words": 5
+        },
+        {
+          "title": "5. Create a Concept",
+          "words": 5
+        },
+        {
+          "title": "6. Creating Custom Metadata Columns",
+          "words": 5
+        },
+        {
+          "title": "7. Create an Edit",
+          "words": 5
+        },
+        {
+          "title": "8. Create a Breakdown List",
+          "words": 5
+        },
+        {
+          "title": "9. Casting from the Asset Library",
+          "words": 5
+        }
+      ]
+    },
+    {
+      "path": "docs/recipes/for-feature-films/index.md",
+      "title": "Quickstart for Feature Film Productions",
+      "total_words": 210,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 19
+        },
+        {
+          "title": "1. Create a new production",
+          "words": 4
+        },
+        {
+          "title": "2. Create an Asset",
+          "words": 28
+        },
+        {
+          "title": "3. Update Your Assets",
+          "words": 4
+        },
+        {
+          "title": "4. Add More Tasks After Creating the Assets",
+          "words": 4
+        },
+        {
+          "title": "5. Create a Concept",
+          "words": 4
+        },
+        {
+          "title": "6. Create a Shot",
+          "words": 4
+        },
+        {
+          "title": "7. Create Shots from an EDL File",
+          "words": 4
+        },
+        {
+          "title": "8. Update your shots",
+          "words": 4
+        },
+        {
+          "title": "9. Add more tasks after creating the shots",
+          "words": 4
+        },
+        {
+          "title": "10. Adding Frame Numbers and Ranges to Shots",
+          "words": 4
+        },
+        {
+          "title": "11. Creating Custom Metadata Columns",
+          "words": 4
+        },
+        {
+          "title": "12. Create a Sequence",
+          "words": 4
+        },
+        {
+          "title": "13. Create an Edit",
+          "words": 4
+        },
+        {
+          "title": "14. Create a Breakdown List",
+          "words": 4
+        },
+        {
+          "title": "15. Casting from the Asset Library",
+          "words": 4
+        },
+        {
+          "title": "16. Introduction to Asset State: Ready For",
+          "words": 4
+        }
+      ]
+    },
+    {
+      "path": "docs/recipes/for-shorts/index.md",
+      "title": "Quickstart for Shorts Productions",
+      "total_words": 185,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 18
+        },
+        {
+          "title": "1. Create a new production",
+          "words": 4
+        },
+        {
+          "title": "2. Create an Asset",
+          "words": 4
+        },
+        {
+          "title": "3. Update Your Assets",
+          "words": 4
+        },
+        {
+          "title": "4. Add More Tasks After Creating the Assets",
+          "words": 4
+        },
+        {
+          "title": "5. Create a Concept",
+          "words": 4
+        },
+        {
+          "title": "6. Create a Shot",
+          "words": 4
+        },
+        {
+          "title": "7. Create Shots from an EDL File",
+          "words": 4
+        },
+        {
+          "title": "8. Update your shots",
+          "words": 4
+        },
+        {
+          "title": "9. Add more tasks after creating the shots",
+          "words": 4
+        },
+        {
+          "title": "10. Adding Frame Numbers and Ranges to Shots",
+          "words": 4
+        },
+        {
+          "title": "11. Creating Custom Metadata Columns",
+          "words": 4
+        },
+        {
+          "title": "12. Create a Sequence",
+          "words": 4
+        },
+        {
+          "title": "13. Create an Edit",
+          "words": 4
+        },
+        {
+          "title": "14. Create a Breakdown List",
+          "words": 4
+        },
+        {
+          "title": "15. Casting from the Asset Library",
+          "words": 4
+        },
+        {
+          "title": "16. Introduction to Asset State: Ready For",
+          "words": 4
+        }
+      ]
+    },
+    {
+      "path": "docs/recipes/for-tvshows/index.md",
+      "title": "Quickstart for TV Show Productions",
+      "total_words": 202,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 19
+        },
+        {
+          "title": "1. Create a new production",
+          "words": 5
+        },
+        {
+          "title": "2. Create an Asset",
+          "words": 5
+        },
+        {
+          "title": "3. Update Your Assets",
+          "words": 5
+        },
+        {
+          "title": "4. Add More Tasks After Creating the Assets",
+          "words": 5
+        },
+        {
+          "title": "5. Create a Concept",
+          "words": 5
+        },
+        {
+          "title": "6. Create a Shot",
+          "words": 5
+        },
+        {
+          "title": "7. Create Shots from an EDL File",
+          "words": 5
+        },
+        {
+          "title": "8. Update your shots",
+          "words": 5
+        },
+        {
+          "title": "9. Add more tasks after creating the shots",
+          "words": 5
+        },
+        {
+          "title": "10. Adding Frame Numbers and Ranges to Shots",
+          "words": 5
+        },
+        {
+          "title": "11. Creating Custom Metadata Columns",
+          "words": 5
+        },
+        {
+          "title": "12. Create a Sequence",
+          "words": 5
+        },
+        {
+          "title": "13. Create an Edit",
+          "words": 5
+        },
+        {
+          "title": "14. Create a Breakdown List",
+          "words": 5
+        },
+        {
+          "title": "15. Casting from the Asset Library",
+          "words": 5
+        },
+        {
+          "title": "16. Introduction to Asset State: Ready For",
+          "words": 5
+        }
+      ]
+    },
+    {
+      "path": "docs/recipes/for-videogames/index.md",
+      "title": "Quickstart for Video Game Productions",
+      "total_words": 202,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 19
+        },
+        {
+          "title": "1. Create a new production",
+          "words": 5
+        },
+        {
+          "title": "2. Create an Asset",
+          "words": 5
+        },
+        {
+          "title": "3. Update Your Assets",
+          "words": 5
+        },
+        {
+          "title": "4. Add More Tasks After Creating the Assets",
+          "words": 5
+        },
+        {
+          "title": "5. Create a Concept",
+          "words": 5
+        },
+        {
+          "title": "6. Create a Map",
+          "words": 5
+        },
+        {
+          "title": "7. Create Maps from an EDL File",
+          "words": 5
+        },
+        {
+          "title": "8. Update your maps",
+          "words": 5
+        },
+        {
+          "title": "9. Add more tasks after creating the maps",
+          "words": 5
+        },
+        {
+          "title": "10. Adding Frame Numbers and Ranges to Maps",
+          "words": 5
+        },
+        {
+          "title": "11. Creating Custom Metadata Columns",
+          "words": 5
+        },
+        {
+          "title": "12. Create a Level",
+          "words": 5
+        },
+        {
+          "title": "13. Create an Edit",
+          "words": 5
+        },
+        {
+          "title": "14. Create a Breakdown List",
+          "words": 5
+        },
+        {
+          "title": "15. Casting from the Asset Library",
+          "words": 5
+        },
+        {
+          "title": "16. Introduction to Asset State: Ready For",
+          "words": 5
+        }
+      ]
+    },
+    {
+      "path": "docs/recipes/shots-only-production/index.md",
+      "title": "Quickstart for Shots-Only Productions",
+      "total_words": 121,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 18
+        },
+        {
+          "title": "1. Create a new production",
+          "words": 5
+        },
+        {
+          "title": "2. Create a Shot",
+          "words": 5
+        },
+        {
+          "title": "3. Create Shots from an EDL File",
+          "words": 5
+        },
+        {
+          "title": "4. Update your shots",
+          "words": 5
+        },
+        {
+          "title": "5. Add more tasks after creating the shots",
+          "words": 5
+        },
+        {
+          "title": "6. Adding Frame Numbers and Ranges to Shots",
+          "words": 5
+        },
+        {
+          "title": "7. Creating Custom Metadata Columns",
+          "words": 5
+        },
+        {
+          "title": "8. Create a Sequence",
+          "words": 5
+        },
+        {
+          "title": "9. Create an Edit",
+          "words": 5
+        }
+      ]
+    },
+    {
+      "path": "docs/recipes/tvshows/index.md",
+      "title": "Kitsu for TV Show Productions",
+      "total_words": 243,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 37
+        },
+        {
+          "title": "Quickstart",
+          "words": 54
+        },
+        {
+          "title": "TV Show Features",
+          "words": 146
+        }
+      ]
+    },
+    {
+      "path": "docs/resources/faq/index.md",
+      "title": "Frequently Asked Questions",
+      "total_words": 967,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 45
+        },
+        {
+          "title": "Login Issues",
+          "words": 117
+        },
+        {
+          "title": "Task Management",
+          "words": 352
+        },
+        {
+          "title": "Team and Assignments",
+          "words": 132
+        },
+        {
+          "title": "Production Management",
+          "words": 210
+        },
+        {
+          "title": "Miscellaneous",
+          "words": 96
+        }
+      ]
+    },
+    {
+      "path": "docs/resources/ui/index.md",
+      "title": "Quick Interface Tour",
+      "total_words": 966,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 966
+        }
+      ]
+    },
+    {
+      "path": "docs/start-here/getting-started/index.md",
+      "title": "Getting Started With Kitsu",
+      "total_words": 1032,
+      "sections": [
+        {
+          "title": "(preamble)",
+          "words": 12
+        },
+        {
+          "title": "Introduction",
+          "words": 168
+        },
+        {
+          "title": "1. General Kitsu Settings",
+          "words": 204
+        },
+        {
+          "title": "2. Studio Workflows",
+          "words": 401
+        },
+        {
+          "title": "3. Preparing Your Team",
+          "words": 71
+        },
+        {
+          "title": "4. Create a New Production",
+          "words": 69
+        },
+        {
+          "title": "5. Next Steps",
+          "words": 81
+        }
+      ]
+    }
+  ]
+}
