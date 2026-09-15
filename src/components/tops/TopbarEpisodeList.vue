@@ -30,9 +30,8 @@
           <template v-if="showAllMode || ['', 'running'].includes(group.name)">
             <div
               :key="optionKey(episode)"
-              :ref="'episode-' + optionKey(episode)"
               class="episode-line"
-              @click="selectEpisode(episode)"
+              @click="showEpisodeList = false"
               v-for="episode in group.episodeList"
             >
               <router-link :to="getEpisodePath(episode)">
@@ -69,108 +68,87 @@
   </div>
 </template>
 
-<script>
+<script setup>
+// Imports
+// --------------------------------------------------------------------------
 import { ChevronDownIcon } from 'lucide-vue-next'
-import { mapGetters } from 'vuex'
+import { computed, nextTick, ref, useTemplateRef } from 'vue'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 
 import { getProductionPath } from '@/lib/path'
 
 import ComboboxMask from '@/components/widgets/ComboboxMask.vue'
 
-export default {
-  name: 'topbar-episode-list',
+const route = useRoute()
+const store = useStore()
 
-  components: {
-    ChevronDownIcon,
-    ComboboxMask
-  },
+// Props
+// --------------------------------------------------------------------------
+const props = defineProps({
+  episodeGroups: { type: Array, required: true },
+  section: { type: String, default: '' },
+  episodeId: { type: String, default: '' }
+})
 
-  emits: ['input'],
+// State
+// --------------------------------------------------------------------------
+const selectRef = useTemplateRef('select')
+const showAllMode = ref(false)
+const showEpisodeList = ref(false)
+let lastScrollPosition = 0
 
-  data() {
-    return {
-      showAllMode: false,
-      lastScrollPosition: 0,
-      showEpisodeList: false
-    }
-  },
+// Computed
+// --------------------------------------------------------------------------
+const currentProduction = computed(() => store.getters.currentProduction)
 
-  props: {
-    episodeGroups: {
-      required: true,
-      type: Array
-    },
-    section: {},
-    episodeId: {
-      default: '',
-      type: String
-    }
-  },
+const episodeLabel = computed(() => {
+  const options = props.episodeGroups.flatMap(group =>
+    group.episodeList.filter(option => option.value === props.episodeId)
+  )
+  // Several options can share a value (All assets / All shots): the
+  // route query tells them apart.
+  const forEntity = route.query.for_entity
+  const option =
+    options.find(o => o.query?.for_entity === forEntity) ||
+    options.find(o => !o.query) ||
+    options[0]
+  return option ? option.label : ''
+})
 
-  computed: {
-    ...mapGetters(['currentProduction']),
+// Functions
+// --------------------------------------------------------------------------
+const getEpisodePath = episode => {
+  const path = getProductionPath(
+    currentProduction.value,
+    props.section,
+    episode.value,
+    route.params.plugin_id
+  )
+  if (props.section === 'schedule') {
+    // The production schedule keeps its view state (mode, version, ...) in
+    // the URL query.
+    path.query = { ...route.query }
+  }
+  if (episode.query) {
+    path.query = { ...path.query, ...episode.query }
+  }
+  return path
+}
 
-    episodeLabel() {
-      const options = this.episodeGroups.flatMap(group =>
-        group.episodeList.filter(o => o.value === this.episodeId)
-      )
-      // Several options can share a value (All assets / All shots): the
-      // route query tells them apart.
-      const forEntity = this.$route.query.for_entity
-      const option =
-        options.find(o => o.query?.for_entity === forEntity) ||
-        options.find(o => !o.query) ||
-        options[0]
-      return option ? option.label : ''
-    },
+const optionKey = episode =>
+  episode.query
+    ? `${episode.value}-${Object.values(episode.query).join('-')}`
+    : episode.value
 
-    getEpisodePath() {
-      const currentProduction = this.currentProduction
-      const section = this.section
-      const pluginId = this.$route.params.plugin_id
-      const currentQuery = this.$route.query
-      return episode => {
-        const path = getProductionPath(
-          currentProduction,
-          section,
-          episode.value,
-          pluginId
-        )
-        if (section === 'schedule') {
-          // The production schedule keeps its view state (mode, version, ...) in the URL query.
-          path.query = { ...currentQuery }
-        }
-        if (episode.query) {
-          path.query = { ...path.query, ...episode.query }
-        }
-        return path
-      }
-    }
-  },
-
-  methods: {
-    optionKey(episode) {
-      return episode.query
-        ? `${episode.value}-${Object.values(episode.query).join('-')}`
-        : episode.value
-    },
-
-    selectEpisode(episode) {
-      this.$emit('input', episode.id)
-      this.showEpisodeList = false
-    },
-
-    toggleEpisodeList() {
-      if (this.showEpisodeList) {
-        this.lastScrollPosition = this.$refs.select.scrollTop
-      }
-      this.showEpisodeList = !this.showEpisodeList
-      if (this.showEpisodeList) {
-        this.$nextTick(() => {
-          this.$refs.select.scrollTo({ top: this.lastScrollPosition, left: 0 })
-        })
-      }
-    }
+const toggleEpisodeList = async () => {
+  if (showEpisodeList.value) {
+    lastScrollPosition = selectRef.value.scrollTop
+  }
+  showEpisodeList.value = !showEpisodeList.value
+  if (showEpisodeList.value) {
+    await nextTick()
+    selectRef.value.scrollTo({ top: lastScrollPosition, left: 0 })
   }
 }
 </script>
@@ -178,9 +156,7 @@ export default {
 <style lang="scss" scoped>
 .dark {
   .select-input,
-  .selected-episode-line,
-  .episode-line,
-  .episode-combo {
+  .episode-line {
     background: $black;
     border-color: $dark-grey;
   }
@@ -195,26 +171,6 @@ export default {
       color: $white;
     }
   }
-}
-
-.episode-combo {
-  background: $white;
-  min-width: 300px;
-  width: 300px;
-  border: 1px solid $light-grey-light;
-  user-select: none;
-  cursor: pointer;
-  border-radius: 3px;
-  margin: 0;
-  padding: 0.15em;
-  position: relative;
-}
-
-.selected-episode-line {
-  background: $white;
-  padding: 0.4em;
-  flex: 1;
-  cursor: pointer;
 }
 
 .episode-menu {
