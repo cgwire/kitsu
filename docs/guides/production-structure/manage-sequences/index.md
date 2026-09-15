@@ -54,6 +54,8 @@ You can create a sequence with the **+ New Sequence** button.
 You can create a sequence directly from here (+New sequence button) or create a sequence linked to your shots from the global shot page.
 :::
 
+<!-- #endregion setup -->
+
 ## Update a Sequence
 
 Hover over the sequence row you wish to edit in the list and click the `Edit` icon:  

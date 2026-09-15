@@ -15,53 +15,29 @@ import EmbedDocument from '../../.vitepress/theme/EmbedDocument.vue'
 ## 1. Create a new production
 
 <EmbedDocument >
-<!--@include: ../../guides/production-structure/manage-productions/index.md#create-a-new-production-->
+<!--@include: ../../guides/production-structure/manage-productions/index.md#setup-->
 </EmbedDocument>
 
 ## 2. Create a Shot
 
 <EmbedDocument >
-<!--@include: ../../guides/production-structure/manage-shots/index.md#create-a-shot-->
+<!--@include: ../../guides/production-structure/manage-shots/index.md#setup-->
 </EmbedDocument>
 
-## 3. Create Shots from an EDL File
+## 3. Creating Custom Metadata Columns
 
 <EmbedDocument >
-<!--@include: ../../guides/production-structure/manage-shots/index.md#create-shots-from-an-edl-file-->
+<!--@include: ../../guides/production/meta-column/index.md#setup-->
 </EmbedDocument>
 
-## 4. Update your shots
+## 4. Create a Sequence
 
 <EmbedDocument >
-<!--@include: ../../guides/production-structure/manage-shots/index.md#update-your-shots-->
+<!--@include: ../../guides/production-structure/manage-sequences/index.md#setup-->
 </EmbedDocument>
 
-## 5. Add more tasks after creating the shots
+## 5. Create an Edit
 
 <EmbedDocument >
-<!--@include: ../../guides/production-structure/manage-shots/index.md#add-more-tasks-after-creating-the-shots-->
-</EmbedDocument>
-
-## 6. Adding Frame Numbers and Ranges to Shots
-
-<EmbedDocument >
-<!--@include: ../../guides/production-structure/manage-shots/index.md#add-the-number-of-frames-and-frame-ranges-to-the-shots-->
-</EmbedDocument>
-
-## 7. Creating Custom Metadata Columns
-
-<EmbedDocument >
-<!--@include: ../../guides/production/meta-column/index.md#create-metadata-columns-->
-</EmbedDocument>
-
-## 8. Create a Sequence
-
-<EmbedDocument >
-<!--@include: ../../guides/production-structure/manage-sequences/index.md#create-a-sequence-->
-</EmbedDocument>
-
-## 9. Create an Edit
-
-<EmbedDocument >
-<!--@include: ../../guides/review-publishing/manage-edits/index.md#create-an-edit-->
+<!--@include: ../../guides/review-publishing/manage-edits/index.md#setup-->
 </EmbedDocument>

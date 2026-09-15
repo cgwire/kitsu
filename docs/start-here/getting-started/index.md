@@ -122,7 +122,7 @@ First, we set up the Global Library:
 </EmbedCard>
 
 <EmbedCard title="5. Status Automation Setup">
-<!--@include: ../../guides/task-configuration/managing-task-statuses/index.md#statusautomationsetup-->
+<!--@include: ../../guides/task-configuration/status-automation/index.md#setup-->
 </EmbedCard>
 
 When you'll later create your first production, you'll fill out the **Production Library** with the elements from the **Global Library**.

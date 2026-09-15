@@ -14,6 +14,8 @@ Metadata columns alow you to track additional information related to your produc
 
 ## Create Metadata Columns
 
+<!-- #region setup -->
+
 To add a new custom metadata column, click on the **+** icon next to the Name column.
 
 ![Metadata Column](/img/getting-started/add_column_custom.png)
@@ -43,6 +45,8 @@ However, when using the **List of value**, **List of tags**, and **Checklist**, 
 
 Type the list elements below **Available values**, and confirm them by clicking on **Add value**.
 :::
+
+<!-- #endregion setup -->
 
 ## Linking Metadata Columns to Departments
 

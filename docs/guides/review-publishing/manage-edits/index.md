@@ -19,6 +19,8 @@ What it's used for:
 
 ## Create an Edit
 
+<!-- #region setup -->
+
 
 ::: warning
 Per default, the **Edit** page will not be displayed until you have task types for it on your **production library** (setting page)
@@ -49,6 +51,8 @@ As **Edit** focuses on a specific long video, the detail page looks more like th
 :::
 
 You can **Rename** and **Delete** the Edit entity on this page for the asset and shot entity.
+
+<!-- #endregion setup -->
 
 ## Update Edits
 

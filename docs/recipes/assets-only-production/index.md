@@ -15,52 +15,40 @@ import EmbedDocument from '../../.vitepress/theme/EmbedDocument.vue'
 ## 1. Create a new production
 
 <EmbedDocument >
-<!--@include: ../../guides/production-structure/manage-productions/index.md#create-a-new-production-->
+<!--@include: ../../guides/production-structure/manage-productions/index.md#setup-->
 </EmbedDocument>
 
 ## 2. Create an Asset
 
 <EmbedDocument>
-<!--@include: ../../guides/production/manage-assets/index.md#create-an-asset-->
+<!--@include: ../../guides/production/manage-assets/index.md#setup-->
 </EmbedDocument>
 
-## 3. Update Your Assets
+## 3. Create a Concept
 
 <EmbedDocument >
-<!--@include: ../../guides/production/manage-assets/index.md#update-your-assets-->
+<!--@include: ../../guides/production/manage-concepts/index.md#setup-->
 </EmbedDocument>
 
-## 4. Add More Tasks After Creating the Assets
+## 4. Creating Custom Metadata Columns
 
 <EmbedDocument >
-<!--@include: ../../guides/production/manage-assets/index.md#add-more-tasks-after-creating-the-assets-->
+<!--@include: ../../guides/production/meta-column/index.md#setup-->
 </EmbedDocument>
 
-## 5. Create a Concept
+## 5. Create an Edit
 
 <EmbedDocument >
-<!--@include: ../../guides/production/manage-concepts/index.md#create-a-concept-->
+<!--@include: ../../guides/review-publishing/manage-edits/index.md#setup-->
 </EmbedDocument>
 
-## 6. Creating Custom Metadata Columns
+## 6. Create a Breakdown List
 
 <EmbedDocument >
-<!--@include: ../../guides/production/meta-column/index.md#create-metadata-columns-->
+<!--@include: ../../guides/production/breakdown-casting/index.md#setup-->
 </EmbedDocument>
 
-## 7. Create an Edit
-
-<EmbedDocument >
-<!--@include: ../../guides/review-publishing/manage-edits/index.md#create-an-edit-->
-</EmbedDocument>
-
-## 8. Create a Breakdown List
-
-<EmbedDocument >
-<!--@include: ../../guides/production/breakdown-casting/index.md#create-a-breakdown-list-->
-</EmbedDocument>
-
-## 9. Casting from the Asset Library
+## 7. Casting from the Asset Library
 
 <EmbedDocument >
 <!--@include: ../../guides/production/breakdown-casting/index.md#casting-from-the-asset-library-->

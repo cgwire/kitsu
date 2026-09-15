@@ -9,10 +9,10 @@
     "build": "vitepress build docs",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "preview": "vitepress preview docs",
-    "deploy": "wrangler deploy",
+    "preview": "npm run build && wrangler dev",
+    "deploy": "npm run build && wrangler deploy",
     "toc": "./word_count.sh docs > toc.json",
-    "screenshots": "node ./scripts/screenshots.js docs/guides/production-structure/manage-productions/replay.json",
+    "screenshots": "node ./scripts/screenshots.js docs/guides/task-configuration/managing-task-types/replay.json",
     "pre:translate": "./scripts/find-outdated-content.sh && node scripts/translator.js",
     "post:translate": "./scripts/parse_batch_output.sh && ./scripts/localize-links.sh"
   },
@@ -34,7 +34,7 @@
   "devDependencies": {
     "vitepress": "^2.0.0-alpha.16",
     "vue": "^3.5.13",
-    "wrangler": "^4.61.1"
+    "wrangler": "^4.131.2"
   },
   "dependencies": {
     "@lucide/vue": "^1.25.0",

@@ -85,7 +85,7 @@ On the **Global Shot Page**, you will see an **Import EDL** button.
 
 You can select the naming convention of the video file used during the editing on the pop-up.
 
-![Import EDL Menu](/img/getting-started/import_edl_menu.png)
+![Import EDL Menu](/guides/production-structure/manage-shots/screenshots/035.png)
 
 It means the video clip on the editing is named as project_sequence_shot.extension.
 
@@ -117,24 +117,24 @@ Then, return to the shot page on Kitsu and click the **Import** icon.
 
 A pop-up window **Import data from a CSV** opens. Click on **Browse** to pick your `.csv` file.
 
-![Import csv file](/img/getting-started/import_csv_shot.png)
+![Import csv file](/guides/production-structure/manage-shots/screenshots/038.png)
 
 #### Option 2: Copy / paste from a spreadsheet
 
 Open your spreadsheet, select your data, and copy them.
 
-![Import copy data](/img/getting-started/import_copypas_shot.png)
+![Import copy data](/guides/production-structure/manage-shots/images/01.png)
 
 Then, go back to the shot page on Kitsu and click on the **Import** icon.
 ![Import Icon](/img/getting-started/import.png)
 
 A pop-up window **Import data from a CSV** opens; click on the **Paste a CSV data** tab.
 
-![Import data copy paste tab](/img/getting-started/import_pastcsvdata_shot.png)
+![Import data copy paste tab](/guides/production-structure/manage-shots/images/02.png)
 
 You can paste your previously selected data.
 
-![Import data copy paste data](/img/getting-started/import_pastcsvdata2_shot.png)
+![Import data copy paste data](/guides/production-structure/manage-shots/images/03.png)
 
 #### Previewing and confirming your import
 
@@ -144,13 +144,13 @@ You can check and adjust the name of the columns by previewing your data.
 
 NB: the **Episode** column is only mandatory for a **TV Show** production.
 
-![Import data copy paste data](/img/getting-started/import_preview_data_shot.png)
+![Import data copy paste data](/guides/production-structure/manage-shots/screenshots/039.png)
 
 Once everything is good, click the **Confirm** button to import your data into Kitsu.
 
-All your shots are imported into Kitsu, and the task is created according to your **Settings**.
+All your shots are imported into Kitsu, and the tasks are created according to your **Settings**.
 
-![Import data copy paste data](/img/getting-started/import_result_shot.png)
+![Import data copy paste data](/guides/production-structure/manage-shots/screenshots/042.png)
 
 ## See the Details of a Shot
 
@@ -221,7 +221,7 @@ The updated shots will apear in blue:
  
 NB: the **Episode** column is only mandatory for a **TV Show** production.
  
-![Import data copy paste data](/img/getting-started/update_preview_data_shot.png)
+![Import data copy paste data](/guides/production-structure/manage-shots/screenshots/045.png)
 
 ## Add the number of Frames and Frame ranges to the shots
 

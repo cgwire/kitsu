@@ -12,11 +12,11 @@
         },
         {
             "type": "navigate",
-            "url": "http://localhost/open-productions",
+            "url": "http://localhost:8080/open-productions",
             "assertedEvents": [
                 {
                     "type": "navigation",
-                    "url": "http://localhost/open-productions",
+                    "url": "http://localhost:8080/open-productions",
                     "title": "My Productions - Kitsu"
                 }
             ],
@@ -336,7 +336,7 @@
             "target": "main",
             "selectors": [
                 [
-                    "#app > div > div > div.production-settings.fixed-page > div > div:nth-child(5) > div > div > div.columns > div:nth-child(1) > div:nth-child(3) > table > tbody > tr:nth-child(7) > td.remove > button"
+                    "#app > div > div > div.production-settings.fixed-page > div > div:nth-child(5) > div > div > div.columns > div:nth-child(1) > div:nth-child(3) > table > tbody > tr:nth-child(8) > td.remove > button"
                 ]
             ],
             "offsetY": 17.640625,
@@ -408,13 +408,13 @@
             "target": "main",
             "selectors": [
                 [
-                    "tr:nth-of-type(8) [data-test='button-edit'] > svg"
+                    "tr:nth-of-type(9) [data-test='button-edit'] > svg"
                 ],
                 [
                     "xpath///*[@data-test=\"button-edit\"]/svg"
                 ],
                 [
-                    "pierce/tr:nth-of-type(8) [data-test='button-edit'] > svg"
+                    "pierce/tr:nth-of-type(9) [data-test='button-edit'] > svg"
                 ]
             ],
             "offsetY": 5.28125,
@@ -425,13 +425,13 @@
             "target": "main",
             "selectors": [
                 [
-                    "tr:nth-of-type(8) [data-test='button-edit'] > svg"
+                    "tr:nth-of-type(9) [data-test='button-edit'] > svg"
                 ],
                 [
                     "xpath///*[@data-test=\"button-edit\"]/svg"
                 ],
                 [
-                    "pierce/tr:nth-of-type(8) [data-test='button-edit'] > svg"
+                    "pierce/tr:nth-of-type(9) [data-test='button-edit'] > svg"
                 ]
             ],
             "offsetY": 5.28125,
@@ -493,13 +493,13 @@
             "target": "main",
             "selectors": [
                 [
-                    "tr:nth-of-type(8) [data-test='button-delete-admin'] > svg"
+                    "tr:nth-of-type(9) [data-test='button-delete-admin'] > svg"
                 ],
                 [
                     "xpath///*[@data-test=\"button-delete-admin\"]/svg"
                 ],
                 [
-                    "pierce/tr:nth-of-type(8) [data-test='button-delete-admin'] > svg"
+                    "pierce/tr:nth-of-type(9) [data-test='button-delete-admin'] > svg"
                 ]
             ],
             "offsetY": 10.28125,
@@ -510,13 +510,13 @@
             "target": "main",
             "selectors": [
                 [
-                    "tr:nth-of-type(8) [data-test='button-delete-admin'] > svg"
+                    "tr:nth-of-type(9) [data-test='button-delete-admin'] > svg"
                 ],
                 [
                     "xpath///*[@data-test=\"button-delete-admin\"]/svg"
                 ],
                 [
-                    "pierce/tr:nth-of-type(8) [data-test='button-delete-admin'] > svg"
+                    "pierce/tr:nth-of-type(9) [data-test='button-delete-admin'] > svg"
                 ]
             ],
             "offsetY": 10.28125,
@@ -669,6 +669,294 @@
             "offsetY": 1.0625,
             "offsetX": 1.28125,
             "startTime": 166
+        },
+        {
+            "type": "navigate",
+            "url": "http://localhost:8080/productions/5b388012-7bda-4b97-a7be-9702e10a2968/episodes/640f4073-f138-47ac-bed9-43106fd90510/shots?search=",
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "http://localhost:8080/productions/5b388012-7bda-4b97-a7be-9702e10a2968/episodes/640f4073-f138-47ac-bed9-43106fd90510/shots?search=",
+                    "title": "El Camino - E00000 | Shots - Kitsu"
+                }
+            ]
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div.section-menu > div"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[1]/nav/div[1]/div/div[3]/div/div[1]/div"
+                ],
+                [
+                    "pierce/div.section-menu > div"
+                ]
+            ],
+            "offsetY": 27.5,
+            "offsetX": 102.40625
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/[role=\"navigation\"]",
+                    "aria/Settings"
+                ],
+                [
+                    "div:nth-of-type(20) > a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[1]/nav/div[1]/div/div[3]/div/div[1]/div[2]/div[20]/a"
+                ],
+                [
+                    "pierce/div:nth-of-type(20) > a"
+                ]
+            ],
+            "offsetY": 15.09375,
+            "offsetX": 98.40625
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/[role=\"list\"]",
+                    "aria/Task Types"
+                ],
+                [
+                    "div.production-settings > div > div.tabs li:nth-of-type(4) > a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div/div[1]/ul/li[4]/a"
+                ],
+                [
+                    "pierce/div.production-settings > div > div.tabs li:nth-of-type(4) > a"
+                ]
+            ],
+            "offsetY": 21,
+            "offsetX": 47.234375
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Shots"
+                ],
+                [
+                    "div:nth-of-type(5) li:nth-of-type(2) > a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div/div[5]/div/div/div[1]/ul/li[2]/a"
+                ],
+                [
+                    "pierce/div:nth-of-type(5) li:nth-of-type(2) > a"
+                ],
+                [
+                    "text/Shots"
+                ]
+            ],
+            "offsetY": 12,
+            "offsetX": 44
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div.columns > div:nth-of-type(2) span"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div/div[5]/div/div/div[2]/div[2]/div/div/div/div/div/span"
+                ],
+                [
+                    "pierce/div.columns > div:nth-of-type(2) span"
+                ]
+            ],
+            "offsetY": 6.65625,
+            "offsetX": 38.1875
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div.section-menu > div > div"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[1]/nav/div[1]/div/div[3]/div/div[1]/div/div"
+                ],
+                [
+                    "pierce/div.section-menu > div > div"
+                ]
+            ],
+            "offsetY": 19.5,
+            "offsetX": 77.40625
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/[role=\"navigation\"]",
+                    "aria/Shots"
+                ],
+                [
+                    "div.nav-left div:nth-of-type(2) > a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[1]/nav/div[1]/div/div[3]/div/div[1]/div[2]/div[2]/a"
+                ],
+                [
+                    "pierce/div.nav-left div:nth-of-type(2) > a"
+                ]
+            ],
+            "offsetY": 8.40625,
+            "offsetX": 76.40625
+        },
+        {
+            "type": "scroll",
+            "selectors": [
+                [
+                    "#app > div > div > div.columns.fixed-page > div.column.main-column > div > div.data-list > div.datatable-wrapper"
+                ]
+            ],
+            "target": "main",
+            "x": 9999,
+            "y": 0
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Add tasks[role=\"button\"]",
+                    "aria/[role=\"generic\"]"
+                ],
+                [
+                    "th.actions span"
+                ],
+                [
+                    "xpath///*[@id=\"datatable-shot\"]/tr/th[15]/button[1]/span"
+                ],
+                [
+                    "pierce/th.actions span"
+                ]
+            ],
+            "offsetY": 8.203125,
+            "offsetX": 13.8125
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Confirm"
+                ],
+                [
+                    "div.is-active a:nth-of-type(2)"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[12]/div[2]/div/div/a[2]"
+                ],
+                [
+                    "pierce/div.is-active a:nth-of-type(2)"
+                ]
+            ],
+            "offsetY": 13.625,
+            "offsetX": 39.421875
+        },
+        {
+            "type": "scroll",
+            "selectors": [
+                [
+                    "#app > div > div > div.columns.fixed-page > div.column.main-column > div > div.data-list > div.datatable-wrapper"
+                ]
+            ],
+            "target": "main",
+            "x": 9999,
+            "y": 0
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Animatic[role=\"columnheader\"]",
+                    "aria/[role=\"graphics-symbol\"]"
+                ],
+                [
+                    "th:nth-of-type(15) path"
+                ],
+                [
+                    "xpath///*[@id=\"datatable-shot\"]/tr/th[15]/div/span/svg/path"
+                ],
+                [
+                    "pierce/th:nth-of-type(15) path"
+                ]
+            ],
+            "offsetY": 2.0625,
+            "offsetX": 4.78125
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div.error"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/div/div[2]/div[1]/div[1]/div[5]"
+                ],
+                [
+                    "pierce/div.error"
+                ],
+                [
+                    "text/Delete all"
+                ]
+            ],
+            "offsetY": 15.3125,
+            "offsetX": 35.28125
+        },
+        {
+            "type": "change",
+            "value": "Animatic",
+            "selectors": [
+                [
+                    "div.is-active input"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[8]/div[2]/div/p[2]/input"
+                ],
+                [
+                    "pierce/div.is-active input"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Confirm"
+                ],
+                [
+                    "div.is-active a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[8]/div[2]/div/div/a"
+                ],
+                [
+                    "pierce/div.is-active a"
+                ]
+            ],
+            "offsetY": 11.40625,
+            "offsetX": 22.421875
         }
     ]
 }

@@ -18,6 +18,8 @@ On the dropdown menu, choose **BREAKDOWN**.
 
 ## Create a Breakdown List
 
+<!-- #region setup -->
+
 On the left of the breakdown page is the episode/sequence/shot menu (1); you can choose between those you created. They are the right part of the screen; all the assets created are available for this production (main pack and episodes) (3). Moreover, in the middle section, it is your selection for the shot (2).
 
 ![Breakdown page](/img/getting-started/breakdown_general_empty.png)
@@ -143,6 +145,8 @@ Now, all your assets have been imported into Kitsu.
 
 ![Import data copy paste data](/img/getting-started/breakdown_general_bulk_select_full.png)
 :::
+
+<!-- #endregion setup -->
 
 ## Casting from the Asset Library
 

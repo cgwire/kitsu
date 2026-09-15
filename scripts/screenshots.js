@@ -163,7 +163,7 @@ let metaIndex = 0;
 const PNG_BASE64 =
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQADhQGAWjR9awAAAABJRU5ErkJggg==";
 
-const tmpUploadFile = path.join(os.tmpdir(), "test-upload.png");
+var tmpUploadFile = path.join(os.tmpdir(), "test-upload.png");
 await fs.writeFile(tmpUploadFile, Buffer.from(PNG_BASE64, "base64"));
 console.log(`Temporary upload file created at: ${tmpUploadFile}`);
 
@@ -209,18 +209,15 @@ class Extension extends PuppeteerRunnerExtension {
   async handleFileUpload(step) {
     const element = await Locator.race([
       page.locator(
-        "::-p-aria(Select files from your hard drive: Screenshot from 2026-05-21 18-15-13.png)",
-      ),
-      page.locator("div.is-active input"),
-      page.locator(
-        '::-p-xpath(//*[@id="modal-content"]/div[1]/form/div/label/input)',
-      ),
-      page.locator(":scope >>> div.is-active input"),
+        step.selectors[0][0]
+      )
     ])
-      .setTimeout(UPLOAD_LOCATOR_TIMEOUT)
-      .waitHandle();
-
-    await element.uploadFile(tmpUploadFile);
+    .setTimeout(UPLOAD_LOCATOR_TIMEOUT)
+    .waitHandle();
+    
+    const filename = step.file
+    
+    await element.uploadFile(filename);
   }
 
   async afterEachStep(step, flow) {

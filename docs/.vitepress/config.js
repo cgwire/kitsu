@@ -298,6 +298,7 @@ export default {
             items: [
               { text: "Manage Task Types", link: "/guides/task-configuration/managing-task-types/" },
               { text: "Manage Task Statuses", link: "/guides/task-configuration/managing-task-statuses/" },
+              { text: "Status Automation", link: "/guides/task-configuration/status-automation/" },
             ],
           },
           {

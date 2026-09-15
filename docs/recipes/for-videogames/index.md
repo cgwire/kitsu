@@ -15,94 +15,58 @@ import EmbedDocument from '../../.vitepress/theme/EmbedDocument.vue'
 ## 1. Create a new production
 
 <EmbedDocument >
-<!--@include: ../../guides/production-structure/manage-productions/index.md#create-a-new-production-->
+<!--@include: ../../guides/production-structure/manage-productions/index.md#setup-->
 </EmbedDocument>
 
 ## 2. Create an Asset
 
 <EmbedDocument >
-<!--@include: ../../guides/production/manage-assets/index.md#create-an-asset-->
+<!--@include: ../../guides/production/manage-assets/index.md#setup-->
 </EmbedDocument>
 
-## 3. Update Your Assets
+## 3. Create a Concept
 
 <EmbedDocument >
-<!--@include: ../../guides/production/manage-assets/index.md#update-your-assets-->
+<!--@include: ../../guides/production/manage-concepts/index.md#setup-->
 </EmbedDocument>
 
-## 4. Add More Tasks After Creating the Assets
+## 4. Create a Map
 
 <EmbedDocument >
-<!--@include: ../../guides/production/manage-assets/index.md#add-more-tasks-after-creating-the-assets-->
+<!--@include: ../../guides/production-structure/manage-shots/index.md#setup-->
 </EmbedDocument>
 
-## 5. Create a Concept
+## 5. Creating Custom Metadata Columns
 
 <EmbedDocument >
-<!--@include: ../../guides/production/manage-concepts/index.md#create-a-concept-->
+<!--@include: ../../guides/production/meta-column/index.md#setup-->
 </EmbedDocument>
 
-## 6. Create a Map
+## 6. Create a Level
 
 <EmbedDocument >
-<!--@include: ../../guides/production-structure/manage-shots/index.md#create-a-shot-->
+<!--@include: ../../guides/production-structure/manage-sequences/index.md#setup-->
 </EmbedDocument>
 
-## 7. Create Maps from an EDL File
+## 7. Create an Edit
 
 <EmbedDocument >
-<!--@include: ../../guides/production-structure/manage-shots/index.md#create-shots-from-an-edl-file-->
+<!--@include: ../../guides/review-publishing/manage-edits/index.md#setup-->
 </EmbedDocument>
 
-## 8. Update your maps
+## 8. Create a Breakdown List
 
 <EmbedDocument >
-<!--@include: ../../guides/production-structure/manage-shots/index.md#update-your-shots-->
+<!--@include: ../../guides/production/breakdown-casting/index.md#setup-->
 </EmbedDocument>
 
-## 9. Add more tasks after creating the maps
-
-<EmbedDocument >
-<!--@include: ../../guides/production-structure/manage-shots/index.md#add-more-tasks-after-creating-the-shots-->
-</EmbedDocument>
-
-## 10. Adding Frame Numbers and Ranges to Maps
-
-<EmbedDocument >
-<!--@include: ../../guides/production-structure/manage-shots/index.md#add-the-number-of-frames-and-frame-ranges-to-the-shots-->
-</EmbedDocument>
-
-## 11. Creating Custom Metadata Columns
-
-<EmbedDocument >
-<!--@include: ../../guides/production/meta-column/index.md#create-metadata-columns-->
-</EmbedDocument>
-
-## 12. Create a Level
-
-<EmbedDocument >
-<!--@include: ../../guides/production-structure/manage-sequences/index.md#create-a-sequence-->
-</EmbedDocument>
-
-## 13. Create an Edit
-
-<EmbedDocument >
-<!--@include: ../../guides/review-publishing/manage-edits/index.md#create-an-edit-->
-</EmbedDocument>
-
-## 14. Create a Breakdown List
-
-<EmbedDocument >
-<!--@include: ../../guides/production/breakdown-casting/index.md#create-a-breakdown-list-->
-</EmbedDocument>
-
-## 15. Casting from the Asset Library
+## 9. Casting from the Asset Library
 
 <EmbedDocument >
 <!--@include: ../../guides/production/breakdown-casting/index.md#casting-from-the-asset-library-->
 </EmbedDocument>
 
-## 16. Introduction to Asset State: Ready For
+## 10. Introduction to Asset State: Ready For
 
 <EmbedDocument >
 <!--@include: ../../guides/production/breakdown-casting/index.md#introduction-to-asset-state-ready-for-->

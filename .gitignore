@@ -45,3 +45,8 @@ docs/.vitepress/cache
 to-translate.md
 batch_*.jsonl
 requests-*.jsonl
+
+.dev.vars*
+!.dev.vars.example
+.env*
+!.env.example

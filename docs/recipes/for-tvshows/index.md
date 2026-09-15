@@ -15,7 +15,7 @@ import EmbedDocument from '../../.vitepress/theme/EmbedDocument.vue'
 ## 1. Create a new production
 
 <EmbedDocument >
-<!--@include: ../../guides/production-structure/manage-productions/index.md#create-a-new-production-->
+<!--@include: ../../guides/production-structure/manage-productions/index.md#setup-->
 </EmbedDocument>
 
 ## 2. Create an Asset
@@ -45,64 +45,40 @@ import EmbedDocument from '../../.vitepress/theme/EmbedDocument.vue'
 ## 6. Create a Shot
 
 <EmbedDocument >
-<!--@include: ../../guides/production-structure/manage-shots/index.md#create-a-shot-->
+<!--@include: ../../guides/production-structure/manage-shots/index.md#setup-->
 </EmbedDocument>
 
-## 7. Create Shots from an EDL File
+## 7. Creating Custom Metadata Columns
 
 <EmbedDocument >
-<!--@include: ../../guides/production-structure/manage-shots/index.md#create-shots-from-an-edl-file-->
+<!--@include: ../../guides/production/meta-column/index.md#setup-->
 </EmbedDocument>
 
-## 8. Update your shots
+## 8. Create a Sequence
 
 <EmbedDocument >
-<!--@include: ../../guides/production-structure/manage-shots/index.md#update-your-shots-->
+<!--@include: ../../guides/production-structure/manage-sequences/index.md#setup-->
 </EmbedDocument>
 
-## 9. Add more tasks after creating the shots
+## 9. Create an Edit
 
 <EmbedDocument >
-<!--@include: ../../guides/production-structure/manage-shots/index.md#add-more-tasks-after-creating-the-shots-->
+<!--@include: ../../guides/review-publishing/manage-edits/index.md#setup-->
 </EmbedDocument>
 
-## 10. Adding Frame Numbers and Ranges to Shots
+## 10. Create a Breakdown List
 
 <EmbedDocument >
-<!--@include: ../../guides/production-structure/manage-shots/index.md#add-the-number-of-frames-and-frame-ranges-to-the-shots-->
+<!--@include: ../../guides/production/breakdown-casting/index.md#setup-->
 </EmbedDocument>
 
-## 11. Creating Custom Metadata Columns
-
-<EmbedDocument >
-<!--@include: ../../guides/production/meta-column/index.md#create-metadata-columns-->
-</EmbedDocument>
-
-## 12. Create a Sequence
-
-<EmbedDocument >
-<!--@include: ../../guides/production-structure/manage-sequences/index.md#create-a-sequence-->
-</EmbedDocument>
-
-## 13. Create an Edit
-
-<EmbedDocument >
-<!--@include: ../../guides/review-publishing/manage-edits/index.md#create-an-edit-->
-</EmbedDocument>
-
-## 14. Create a Breakdown List
-
-<EmbedDocument >
-<!--@include: ../../guides/production/breakdown-casting/index.md#create-a-breakdown-list-->
-</EmbedDocument>
-
-## 15. Casting from the Asset Library
+## 11. Casting from the Asset Library
 
 <EmbedDocument >
 <!--@include: ../../guides/production/breakdown-casting/index.md#casting-from-the-asset-library-->
 </EmbedDocument>
 
-## 16. Introduction to Asset State: Ready For
+## 12. Introduction to Asset State: Ready For
 
 <EmbedDocument >
 <!--@include: ../../guides/production/breakdown-casting/index.md#introduction-to-asset-state-ready-for-->

@@ -1,9 +1,6 @@
 ---
 path: "/handbooks/for-artists"
 slug: "for-artists"
----
-
----
 prev: false
 next: false
 published_at: 2026-09-10

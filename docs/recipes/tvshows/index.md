@@ -37,7 +37,7 @@ import EmbedDocument from '../../.vitepress/theme/EmbedDocument.vue'
 ### 4. Create a Shot
 
 <EmbedDocument link="/guides/production-structure/manage-shots/">
-<!--@include: ../../guides/production-structure/manage-shots/index.md#create-a-shot-->
+<!--@include: ../../guides/production-structure/manage-shots/index.md#setup-->
 </EmbedDocument>
 
 ### 5. Next Steps
