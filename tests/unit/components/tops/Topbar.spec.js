@@ -772,6 +772,35 @@ describe('Topbar.vue', () => {
       wrapper.unmount()
     })
 
+    // A params-only replace keeps a param the route does not declare: an
+    // episode forced onto a page without episode showed the selector there
+    // after a reload or a production switch, never after a section link.
+    describe('page without episode', () => {
+      it.each([
+        ['news-feed', 'a first load', false],
+        ['news-feed', 'a production switch', true],
+        ['team', 'a first load', false]
+      ])(
+        'adds no episode to the %s route on %s',
+        async (routeName, _, hasConfiguredProduction) => {
+          const { wrapper, replaceSpy, route } = mountFor('shots', 'episode-1')
+          route.name = routeName
+          route.path = `/productions/production-1/${routeName}`
+          delete route.params.episode_id
+          replaceSpy.mockClear()
+          wrapper.vm.hasConfiguredProduction = hasConfiguredProduction
+
+          await wrapper.vm.configureProduction('production-1')
+          await flushPromises()
+
+          expect(replaceSpy).not.toHaveBeenCalled()
+          // The section links still reopen the running episode.
+          expect(wrapper.vm.currentEpisodeId).toBe('episode-2')
+          wrapper.unmount()
+        }
+      )
+    })
+
     // The team page has no episode: the section links reopen the episode of
     // the store instead of all.
     it('keeps the episode of the store on a page without episode', () => {
