@@ -6,6 +6,8 @@ published_at: 2026-09-10
 
 # Managing Studio Labels
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/u-KI4g55dFQ?si=9NbdBH_bLRfK5cC0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
 <!-- #region body -->
 
 A studio is a label used to organize teams in multi-studio or multi-site productions.

@@ -6,6 +6,8 @@ published_at: 2026-09-10
 
 # Managing Shots
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/akjCFIaryYw?si=0qtJQUoLF7C_xPdE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
 <!-- #region body -->
 
 ```mermaid

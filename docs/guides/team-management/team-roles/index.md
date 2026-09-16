@@ -6,6 +6,8 @@ published_at: 2026-09-10
 
 # User Permission Roles
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/hPXF4dGz7AQ?si=5HLEQbY6P9l9TEu_" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
 <!-- #region body -->
 
 ::: warning Definition

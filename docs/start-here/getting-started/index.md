@@ -10,6 +10,8 @@ import EmbedCard from '../../.vitepress/theme/EmbedCard.vue'
 
 # Getting Started With Kitsu
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/iP5fp-x_7VA?si=F6Q89meflNHBaBM6" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
 ## Introduction
 
 Kitsu is a production tracking tool built for studios working across 2D and 3D production, VFX, video games, and related fields. It's flexible enough to handle everything from a single still-frame ad to a full 3-hour feature film.

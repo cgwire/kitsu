@@ -6,12 +6,15 @@ published_at: 2026-09-10
 
 # Managing Asset Types
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/Mgnenq75Wv0?si=ZR67ZkflyMUf5ga4" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
 <!-- #region body -->
 
 ```mermaid
 flowchart TD
     ASSET_TYPE -->|categorizes| ASSET
 ```
+
 
 ## Define Your Asset Workflow
 

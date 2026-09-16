@@ -265,3 +265,10 @@
 .medium-zoom-image {
   z-index: 31;
 }
+
+iframe {
+    margin-top: 4rem;
+    margin-bottom: 4rem;
+    margin-left: auto;
+    margin-right: auto;
+}

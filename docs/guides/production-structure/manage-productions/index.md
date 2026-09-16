@@ -6,6 +6,8 @@ published_at: 2026-09-10
 
 # Managing Productions
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/ZDDqZxdED0s?si=aZTOFBXQeV6SpBcQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
 <!-- #region body -->
 
 ```mermaid

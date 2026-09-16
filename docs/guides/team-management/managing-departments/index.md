@@ -6,6 +6,8 @@ published_at: 2026-09-10
 
 # Managing Departments
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/qjj7kjH7o-I?si=5oybbwGCC6Vo9iR6" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
 <!-- #region body -->
 
 Departments are designed to help supervisors and artists focus on their tasks. Once a user is linked to one or more departments, supervisors and artists gain direct access to a filtered view of all tasks associated with that task type. 
