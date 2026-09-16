@@ -18,7 +18,9 @@ import { markRaw, ref, watch } from 'vue'
 
 import { useDrawingTools } from '@/composables/players/drawingTools'
 import {
+  DEFAULT_TEXT_SIZE,
   SHAPE_WIDTHS,
+  TEXT_SIZES,
   addSerialization,
   attachShapeDrawing,
   buildReadOnlyShape,
@@ -156,6 +158,7 @@ export const useAnnotation = ({
   const pencilColor = ref('#ff3860')
   const pencilWidth = ref('big')
   const textColor = ref('#ff3860')
+  const textSize = ref(DEFAULT_TEXT_SIZE)
   const isShapeMode = ref(false)
   const currentShape = ref('rectangle')
   const mouseIsDrawing = ref(false)
@@ -270,7 +273,7 @@ export const useAnnotation = ({
     const posX = getClientX(event) - offsetCanvas.x
     const posY = getClientY(event) - offsetCanvas.y
     const baseHeight = 320
-    let fontSize = 12
+    let fontSize = TEXT_SIZES[textSize.value] || TEXT_SIZES[DEFAULT_TEXT_SIZE]
     if (fabricCanvas.value.getHeight() > baseHeight) {
       fontSize = fontSize * (fabricCanvas.value.getHeight() / baseHeight)
     }
@@ -1703,6 +1706,7 @@ export const useAnnotation = ({
     onChangePencilColor,
     onChangePencilWidth,
     onChangeTextColor,
+    onChangeTextSize,
     _resetColor,
     _resetPencil,
     resetPencilConfiguration,
@@ -1719,6 +1723,7 @@ export const useAnnotation = ({
     pencilColor,
     pencilWidth,
     textColor,
+    textSize,
     showCanvas,
     localPreferences
   })
@@ -1781,6 +1786,7 @@ export const useAnnotation = ({
     pencilColor,
     pencilWidth,
     textColor,
+    textSize,
 
     // Objects
     findAnnotation,
@@ -1819,6 +1825,7 @@ export const useAnnotation = ({
     onChangePencilColor,
     onChangePencilWidth,
     onChangeTextColor,
+    onChangeTextSize,
     _resetColor,
     _resetPencil,
     resetPencilConfiguration,

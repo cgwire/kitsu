@@ -264,6 +264,7 @@
             :read-only="readOnly"
             :show-comments-button="showCommentsButton"
             :text-color="textColor"
+            :text-size="textSize"
             v-model:current-background="currentBackground"
             v-model:current-shape="currentShape"
             v-model:is-environment-skybox="isEnvironmentSkybox"
@@ -278,6 +279,7 @@
             @change-pencil-width="onChangePencilWidth"
             @change-shape="setShapeTool"
             @change-text-color="onChangeTextColor"
+            @change-text-size="onChangeTextSize"
             @comment-clicked="onCommentClicked"
             @delete-clicked="onDeleteClicked"
             @erase-clicked="onEraseClicked"
@@ -719,6 +721,7 @@ const {
   pencilColor,
   pencilWidth,
   textColor,
+  textSize,
   addText,
   addTypeArea,
   removeTypeArea,
@@ -733,6 +736,7 @@ const {
   onChangePencilColor,
   onChangePencilWidth,
   onChangeTextColor,
+  onChangeTextSize,
   _resetColor,
   _resetPencil,
   resetPencilConfiguration,
