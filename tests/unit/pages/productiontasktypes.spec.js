@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from 'vitest'
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }))
 
 import ProductionTaskTypes from '@/components/pages/production/ProductionTaskTypes.vue'
+import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
 import SettingImporter from '@/components/widgets/SettingImporter.vue'
 
 const assetTaskType = {
@@ -29,10 +30,10 @@ const router = createRouter({
   routes: [{ path: '/settings', component: { template: '<div />' } }]
 })
 
-const mountComponent = async () => {
+const mountComponent = async (productionType = 'short') => {
   const currentProduction = {
     id: 'production-1',
-    production_type: 'short',
+    production_type: productionType,
     task_types: [assetTaskType.id, ...shotTaskTypes.map(taskType => taskType.id)]
   }
   const store = createStore({
@@ -40,6 +41,7 @@ const mountComponent = async () => {
       currentProduction: () => currentProduction,
       currentScheduleItems: () => [],
       getProductionTaskTypes: () => () => [],
+      isTVShow: () => productionType === 'tvshow',
       productionAssetTaskTypes: () => [assetTaskType],
       productionEditTaskTypes: () => [],
       productionEpisodeTaskTypes: () => [],
@@ -59,7 +61,27 @@ const mountComponent = async () => {
   return { store, wrapper }
 }
 
+const tabNames = wrapper =>
+  wrapper
+    .findComponent(RouteSectionTabs)
+    .props('tabs')
+    .map(tab => tab.name)
+
 describe('ProductionTaskTypes', () => {
+  it('hides the entity tabs the production type does not use', async () => {
+    const { wrapper } = await mountComponent('short')
+    expect(tabNames(wrapper)).toEqual(['assets', 'shots', 'sequences', 'edits'])
+
+    const { wrapper: tvShow } = await mountComponent('tvshow')
+    expect(tabNames(tvShow)).toContain('episodes')
+
+    const { wrapper: shotsOnly } = await mountComponent('shots')
+    expect(tabNames(shotsOnly)).toEqual(['shots', 'sequences', 'edits'])
+
+    const { wrapper: assetsOnly } = await mountComponent('assets')
+    expect(tabNames(assetsOnly)).toEqual(['assets'])
+  })
+
   it('appends a shot task type after the existing shot workflow', async () => {
     const { store, wrapper } = await mountComponent()
 
