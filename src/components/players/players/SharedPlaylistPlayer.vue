@@ -216,7 +216,7 @@
       <div
         class="flexrow-item has-text-centered playlisted-wrapper"
         :data-entity-index="index"
-        :key="entity.id || index"
+        :key="entity.id ? `${entity.id}-${entity.preview_file_id}` : index"
         v-for="(entity, index) in entityList"
       >
         <playlisted-entity
