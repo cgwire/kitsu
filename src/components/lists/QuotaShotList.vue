@@ -6,9 +6,11 @@
           <th>{{ $t('quota.details_name') }}</th>
           <th>
             {{
-              countMode === 'seconds'
-                ? $t('quota.details_seconds')
-                : $t('quota.details_frames')
+              $t(
+                countMode === 'seconds'
+                  ? 'quota.details_seconds'
+                  : 'quota.details_frames'
+              )
             }}
           </th>
           <th>{{ $t('quota.weight') }}</th>
@@ -33,61 +35,41 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+// Imports
+// --------------------------------------------------------------------------
+import { computed } from 'vue'
+import { useStore } from 'vuex'
 
 import { frameToSeconds } from '@/lib/video'
 
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
-export default {
-  name: 'quota-shot-list',
+const store = useStore()
 
-  components: {
-    TableInfo
-  },
+// Props
+// --------------------------------------------------------------------------
+const props = defineProps({
+  shots: { type: Array, default: () => [] },
+  isLoading: { type: Boolean, default: false },
+  isLoadingError: { type: Boolean, default: false },
+  countMode: { type: String, default: 'frames' }
+})
 
-  props: {
-    shots: {
-      type: Array,
-      default: () => []
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    isLoadingError: {
-      type: Boolean,
-      default: false
-    },
-    countMode: {
-      type: String,
-      default: 'frames'
-    }
-  },
+// Computed
+// --------------------------------------------------------------------------
+const currentProduction = computed(() => store.getters.currentProduction)
 
-  computed: {
-    ...mapGetters(['currentProduction'])
-  },
-
-  methods: {
-    getQuota(shot) {
-      if (this.countMode === 'seconds') {
-        return frameToSeconds(shot.nb_frames, this.currentProduction, shot)
-      } else {
-        return shot.nb_frames
-      }
-    }
-  }
-}
+// Functions
+// --------------------------------------------------------------------------
+const getQuota = shot =>
+  props.countMode === 'seconds'
+    ? frameToSeconds(shot.nb_frames, currentProduction.value, shot)
+    : shot.nb_frames
 </script>
 
 <style lang="scss" scoped>
 .dark {
-  header tr:hover {
-    background: transparent;
-  }
-
   .table {
     thead,
     tbody tr:nth-child(odd) {
@@ -126,9 +108,5 @@ tbody {
   tr:hover {
     background: $light-green-lightest;
   }
-}
-
-.name {
-  width: 300px;
 }
 </style>
