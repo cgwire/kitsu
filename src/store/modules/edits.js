@@ -950,12 +950,20 @@ const mutations = {
     edit.validations = new Map()
     edit.data = {}
 
-    cache.edits.push(edit)
-    cache.edits = sortEdits(cache.edits)
+    // zou emits edit:new before this response lands, so the socket handler
+    // may already have inserted the edit through ADD_EDIT: merge into that
+    // copy instead of appending a second one.
+    const knownEdit = cache.editMap.get(edit.id)
+    if (knownEdit) {
+      Object.assign(knownEdit, edit)
+    } else {
+      cache.edits.push(edit)
+      cache.edits = sortEdits(cache.edits)
+      cache.editMap.set(edit.id, edit)
+    }
     state.displayedEdits = cache.edits.slice(0, PAGE_SIZE)
     helpers.setListStats(state, cache.edits)
     state.editFilledColumns = getFilledColumns(state.displayedEdits)
-    cache.editMap.set(edit.id, edit)
     cache.editIndex = buildEditIndex(cache.edits)
 
     state.editSelectionGrid = buildSelectionGrid()

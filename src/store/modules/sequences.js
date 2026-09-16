@@ -900,11 +900,19 @@ const mutations = {
 
     state.sequenceSelectionGrid = buildSelectionGrid()
 
-    cache.sequences.push(sequence)
-    cache.sequences = sortByName(cache.sequences)
-    state.displayedSequences = cache.sequences
+    // zou emits sequence:new before this response lands, so the socket
+    // handler may already have inserted the sequence through ADD_SEQUENCE:
+    // merge into that copy instead of appending a second one.
+    const knownSequence = cache.sequenceMap.get(sequence.id)
+    if (knownSequence) {
+      Object.assign(knownSequence, sequence)
+    } else {
+      cache.sequences.push(sequence)
+      cache.sequences = sortByName(cache.sequences)
+      state.displayedSequences = cache.sequences
+      cache.sequenceMap.set(sequence.id, sequence)
+    }
     helpers.setListStats(state, cache.sequences)
-    cache.sequenceMap.set(sequence.id, sequence)
     state.sequenceFilledColumns = getFilledColumns(state.displayedSequences)
     cache.sequenceIndex = buildSequenceIndex(cache.sequences)
   },

@@ -479,6 +479,38 @@ describe('Sequences store, ADD_SEQUENCE', () => {
     ])
     expect(state.displayedSequencesLength).toBe(3)
   })
+
+  // zou emits sequence:new before the creation response lands, so the socket
+  // handler inserts the sequence first: the response must not append a copy.
+  test('does not duplicate a sequence the socket handler already added', () => {
+    const state = { displayedSequences: [] }
+    sequencesStore.mutations.LOAD_SEQUENCES_END(state, {
+      sequences: [{ id: 'sq-1', name: 'SQ01', parent_id: 'ep-a' }],
+      episodeMap: new Map(),
+      production: { id: 'p-race' },
+      userFilters: {},
+      loadingKey: 'p-race/ep-a'
+    })
+    const sequence = { id: 'sq-2', name: 'SQ02', parent_id: 'ep-a' }
+
+    sequencesStore.mutations.ADD_SEQUENCE(state, {
+      sequence: { ...sequence },
+      episodeMap: new Map()
+    })
+    sequencesStore.mutations.NEW_SEQUENCE_END(state, {
+      sequence: { ...sequence },
+      episodeMap: new Map()
+    })
+
+    expect(sequencesStore.cache.sequences.map(({ id }) => id)).toEqual([
+      'sq-1',
+      'sq-2'
+    ])
+    expect(state.displayedSequences.map(({ id }) => id)).toEqual([
+      'sq-1',
+      'sq-2'
+    ])
+  })
 })
 
 describe('Sequences store, live insertion during a list load', () => {
