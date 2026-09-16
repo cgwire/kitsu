@@ -1,7 +1,7 @@
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { createStore } from 'vuex'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 vi.mock('vue-i18n', async importOriginal => ({
@@ -39,6 +39,8 @@ const newsList = [
   }
 ]
 
+let mounted = null
+
 const mountPage = async path => {
   pget.mockReset()
   pget.mockResolvedValue({ data: newsList, total: 2, stats: [] })
@@ -69,7 +71,7 @@ const mountPage = async path => {
     }
   })
 
-  const wrapper = shallowMount(ProductionNewsFeed, {
+  mounted = shallowMount(ProductionNewsFeed, {
     global: {
       plugins: [
         router,
@@ -83,10 +85,18 @@ const mountPage = async path => {
     }
   })
   await flushPromises()
-  return { store, wrapper }
+  return { store, wrapper: mounted }
 }
 
 describe('pages/ProductionNewsFeed', () => {
+  // The page saves its filters to localStorage: a mode left there by one
+  // test would reach the next one.
+  afterEach(() => {
+    mounted?.unmount()
+    mounted = null
+    localStorage.clear()
+  })
+
   it.each([
     ['production', `/productions/${production.id}/news-feed`],
     ['studio', '/news-feed']
@@ -97,5 +107,19 @@ describe('pages/ProductionNewsFeed', () => {
     expect(store.getters.newsList).toHaveLength(2)
     expect(wrapper.findAllComponents(NewsRow)).toHaveLength(2)
     expect(wrapper.find('.empty-state').exists()).toBe(false)
+  })
+
+  // Zou reads the page size from `limit` and ignores `page_size`.
+  it.each([
+    ['comments', '', 50],
+    ['previews', '?preview_mode=previews', 6]
+  ])('asks for the page size of the %s mode', async (_, query, limit) => {
+    await mountPage(`/productions/${production.id}/news-feed${query}`)
+
+    const path = pget.mock.calls[0][0]
+    expect(new URL(path, 'http://kitsu').searchParams.get('limit')).toBe(
+      String(limit)
+    )
+    expect(path).not.toContain('page_size')
   })
 })
