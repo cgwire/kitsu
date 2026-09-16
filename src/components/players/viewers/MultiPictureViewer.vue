@@ -1,7 +1,7 @@
 <template>
   <div ref="container" class="multi-picture-player">
     <picture-viewer
-      :key="`${preview.id}-${preview.position}`"
+      :key="previewKey(preview)"
       :ref="el => setPictureRef(preview, el)"
       :background-color="backgroundColor"
       :big="true"
@@ -17,10 +17,7 @@
       @panzoom-ready="() => $emit('panzoom-ready')"
       @size-changed="() => $emit('size-changed')"
       v-for="preview in mountedPreviews"
-      v-show="
-        preview.id === currentPreview.id &&
-        preview.position === currentPreview.position
-      "
+      v-show="previewKey(preview) === previewKey(currentPreview)"
     />
   </div>
 </template>
@@ -83,23 +80,26 @@ const pictureRefs = reactive({})
 
 const validPreviews = computed(() => props.previews.filter(p => p?.id))
 
+// A viewer is identified by its playlist entry and its rank inside that
+// entry, not by the preview file id: the same entity repeated in a
+// playlist can point at the same preview file twice.
+const previewKey = preview =>
+  preview ? `${preview.entry}-${preview.position}` : null
+
 // Only mount the displayed picture and its immediate neighbours: the
 // strip used to mount (and download) every picture of the playlist up
 // front, saturating the network the moment a playlist opened. The +/-1
 // window keeps prev/next navigation and continuous playback preloaded.
 const mountedPreviews = computed(() => {
   const list = validPreviews.value
-  const index = list.findIndex(
-    p =>
-      p.id === props.currentPreview?.id &&
-      p.position === props.currentPreview?.position
-  )
+  const currentKey = previewKey(props.currentPreview)
+  const index = list.findIndex(p => previewKey(p) === currentKey)
   if (index === -1) return list.slice(0, 2)
   return list.filter((p, i) => Math.abs(i - index) <= 1)
 })
 
 const setPictureRef = (preview, el) => {
-  const key = `${preview.id}-${preview.position}`
+  const key = previewKey(preview)
   if (el) {
     pictureRefs[key] = el
   } else {
@@ -112,18 +112,14 @@ const setPictureRef = (preview, el) => {
 // its download resets the live annotation canvas (wiping in-progress
 // strokes) for seconds after opening a picture-heavy playlist.
 const onViewerLoaded = preview => {
-  if (
-    preview.id === props.currentPreview?.id &&
-    preview.position === props.currentPreview?.position
-  ) {
+  if (previewKey(preview) === previewKey(props.currentPreview)) {
     emit('loaded')
   }
 }
 
 const getCurrentViewer = () => {
   if (!props.currentPreview) return null
-  const key = `${props.currentPreview.id}-${props.currentPreview.position}`
-  return pictureRefs[key] || null
+  return pictureRefs[previewKey(props.currentPreview)] || null
 }
 
 const getNaturalDimensions = () => {

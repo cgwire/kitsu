@@ -357,6 +357,7 @@
             :margin-bottom="0"
             :current-preview="{
               ...currentPreview,
+              entry: playingEntityIndex,
               position: currentPreviewIndex + 1
             }"
             :previews="picturePreviews"
@@ -848,7 +849,7 @@
       <template v-else>
         <div
           class="flexrow-item has-text-centered playlisted-wrapper"
-          :key="entity.id"
+          :key="`${entity.id}-${entity.preview_file_id}`"
           v-for="(entity, index) in renderedEntities"
         >
           <playlisted-entity
@@ -1339,14 +1340,18 @@ const nextEntityHandleIn = computed(
   () => getEntityHandles(entityList.value[nextEntityIndex.value]).handleIn
 )
 
+// `entry` is the rank of the playlist entry, `position` the rank of the
+// preview inside it. The couple identifies a viewer: the preview file id
+// can't, the same entity repeated in a playlist may point at the same one.
 const picturePreviews = computed(() =>
-  entityList.value.flatMap(e => [
+  entityList.value.flatMap((e, entry) => [
     {
       id: e.preview_file_id,
       height: e.preview_file_height,
       width: e.preview_file_width,
       extension: e.preview_file_extension,
       revision: e.preview_file_revision,
+      entry,
       position: 1
     },
     ...(e.preview_file_previews || []).map((p, index) => ({
@@ -1355,6 +1360,7 @@ const picturePreviews = computed(() =>
       width: p.width,
       extension: p.extension,
       revision: p.revision,
+      entry,
       position: index + 2
     }))
   ])
