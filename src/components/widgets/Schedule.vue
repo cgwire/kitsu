@@ -845,6 +845,7 @@ import {
   onMounted,
   reactive,
   ref,
+  toRaw,
   watch
 } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -1020,7 +1021,7 @@ const currentProduction = computed(() => store.getters.currentProduction)
 const dateFormat = computed(() => store.getters.dateFormat)
 const departmentMap = computed(() => store.getters.departmentMap)
 
-const displayDate = date => formatDisplayDate(date, dateFormat.value)
+const displayDate = date => formatDisplayDate(toRaw(date), dateFormat.value)
 const isCurrentUserProductionManager = computed(
   () => store.getters.isCurrentUserProductionManager
 )
@@ -1343,6 +1344,12 @@ const unitOfTime = computed(() => {
 })
 
 // Methods
+//
+// The items keep their moments in reactive state. The helpers below read
+// them with toRaw so the clone/diff/format chains stop paying a Proxy trap
+// per internal moment field, which leaves only the property read tracked:
+// always assign a new moment to an item date (clone first), never mutate
+// one in place with add/subtract/startOf, or the bars stop re-rendering.
 
 const getNbLines = (items = []) => {
   const values = items.map(item => item.line || 0)
@@ -1404,8 +1411,12 @@ const refreshManDays = rootElement => {
 }
 
 const isVisible = timeElement => {
-  const isStartDateOk = timeElement.startDate.isSameOrAfter(props.startDate)
-  const isEndDateOk = timeElement.endDate.isSameOrBefore(dayAfterEndDate.value)
+  const isStartDateOk = toRaw(timeElement.startDate).isSameOrAfter(
+    toRaw(props.startDate)
+  )
+  const isEndDateOk = toRaw(timeElement.endDate).isSameOrBefore(
+    dayAfterEndDate.value
+  )
   return isStartDateOk && isEndDateOk
 }
 
@@ -1517,17 +1528,18 @@ const isValidItemDates = (startDate, endDate) => {
 // end) resolve to the nearest boundary instead of undefined, which made the
 // drag computations crash or silently no-op
 const getDisplayedDaysIndex = date => {
-  const index = displayedDaysIndex.value[date.format('YYYY-MM-DD')]
+  const rawDate = toRaw(date)
+  const index = displayedDaysIndex.value[rawDate.format('YYYY-MM-DD')]
   if (index !== undefined) {
     return index
   }
-  return date.isBefore(props.startDate) ? 0 : displayedDays.value.length - 1
+  return rawDate.isBefore(props.startDate) ? 0 : displayedDays.value.length - 1
 }
 
 const getDisplayedWeeksIndex = date => {
   // clone before startOf: moment mutates in place and callers pass the
   // items' own dates, which snapped them back to their week's Monday
-  const monday = date.clone().startOf('isoweek')
+  const monday = toRaw(date).clone().startOf('isoweek')
   const index = displayedWeeksIndex.value[monday.format('YYYY-MM-DD')]
   if (index !== undefined) {
     return index
@@ -1877,9 +1889,11 @@ const isOverlapping = item => {
   return (
     props.withGhosts &&
     ((item.previousElement &&
-      item.startDate.isSameOrBefore(item.previousElement.endDate)) ||
+      toRaw(item.startDate).isSameOrBefore(
+        toRaw(item.previousElement.endDate)
+      )) ||
       (item.nextElement &&
-        item.endDate.isSameOrAfter(item.nextElement.startDate)))
+        toRaw(item.endDate).isSameOrAfter(toRaw(item.nextElement.startDate))))
   )
 }
 
@@ -2145,13 +2159,14 @@ const taskTimesheets = (rootElement, taskId) => {
 }
 
 const dateDiff = (startDate, endDate, unit = 'days') => {
-  if (startDate.isSame(endDate) || !startDate.isValid() || !endDate.isValid()) {
+  const start = toRaw(startDate)
+  const end = toRaw(endDate)
+  if (start.isSame(end) || !start.isValid() || !end.isValid()) {
     return 0
   }
-  const first = startDate.clone().utc().startOf('day')
-  const last = endDate.clone().utc().endOf('day')
-  const diff = last.diff(first, unit)
-  return diff
+  const first = start.clone().utc().startOf('day')
+  const last = end.clone().utc().endOf('day')
+  return last.diff(first, unit)
 }
 
 // Styles
@@ -2347,11 +2362,11 @@ const getTimebarLeft = timeElement => {
 }
 
 const getTimebarWidth = timeElement => {
-  const startDate = timeElement.startDate || props.startDate
+  const startDate = toRaw(timeElement.startDate || props.startDate)
   let endDate =
-    timeElement.endDate ||
-    (timeElement.startDate && timeElement.startDate.clone().add(1, 'days')) ||
-    props.startDate.clone().add(1, 'days')
+    toRaw(timeElement.endDate) ||
+    (timeElement.startDate && startDate.clone().add(1, 'days')) ||
+    toRaw(props.startDate).clone().add(1, 'days')
 
   if (
     timeElement.man_days > 0 &&
@@ -2822,18 +2837,21 @@ const setItemPositions = (items, unitOfTime = 'days') => {
     return
   }
   const minDate = moment
-    .min(items.map(item => item.startDate))
+    .min(items.map(item => toRaw(item.startDate)))
     .clone()
     .startOf(unitOfTime)
 
   // one entry per line: the [start, end] ranges already placed on it
   const lines = []
   items.forEach(item => {
-    const start = item.startDate
+    const start = toRaw(item.startDate)
       .clone()
       .startOf(unitOfTime)
       .diff(minDate, unitOfTime)
-    const end = item.endDate.clone().endOf(unitOfTime).diff(minDate, unitOfTime)
+    const end = toRaw(item.endDate)
+      .clone()
+      .endOf(unitOfTime)
+      .diff(minDate, unitOfTime)
     let line = 0
     while (lines[line]?.some(([s, e]) => start <= e && end >= s)) {
       line++

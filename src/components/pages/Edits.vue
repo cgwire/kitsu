@@ -259,7 +259,7 @@ import moment from 'moment'
 import { mapGetters, mapActions } from 'vuex'
 
 import csv from '@/lib/csv'
-import { sortByName } from '@/lib/sorting'
+import { getExportDescriptors } from '@/lib/descriptors'
 import stringHelpers from '@/lib/string'
 
 import { searchMixin } from '@/components/mixins/search'
@@ -717,11 +717,11 @@ export default {
         if (this.currentEpisode) {
           headers.splice(0, 0, 'Episode')
         }
-        sortByName([...this.currentProduction.descriptors])
-          .filter(d => d.entity_type === 'Edit')
-          .forEach(descriptor => {
+        getExportDescriptors(this.currentProduction, 'Edit').forEach(
+          descriptor => {
             headers.push(descriptor.name)
-          })
+          }
+        )
         if (this.isEditTime) {
           headers.push(this.$t('edits.fields.time_spent'))
         }

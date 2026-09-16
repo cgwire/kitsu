@@ -296,16 +296,16 @@ export const getDatesFromEndDate = (
 }
 
 export const getBusinessDays = (startDate, endDate, daysOff = []) => {
-  const datesOff = daysOff
-    ? getDayOffRange(daysOff).map(dayOff => dayOff.date)
-    : []
+  const datesOff = new Set(
+    daysOff ? getDayOffRange(daysOff).map(dayOff => dayOff.date) : []
+  )
   const newDate = startDate.clone()
   let nbDays = 0
   while (newDate.isSameOrBefore(endDate)) {
     if (
       newDate.day() !== SUNDAY &&
       newDate.day() !== SATURDAY &&
-      !datesOff.includes(newDate.format('YYYY-MM-DD'))
+      !datesOff.has(newDate.format('YYYY-MM-DD'))
     ) {
       nbDays++
     }
@@ -316,16 +316,16 @@ export const getBusinessDays = (startDate, endDate, daysOff = []) => {
 
 const adjustBusinessDays = (originalDate, numDays, daysOff, method) => {
   if (!originalDate) return
-  const datesOff = daysOff
-    ? getDayOffRange(daysOff).map(dayOff => dayOff.date)
-    : []
+  const datesOff = new Set(
+    daysOff ? getDayOffRange(daysOff).map(dayOff => dayOff.date) : []
+  )
   const newDate = originalDate.clone()
   let daysRemaining = numDays
   while (daysRemaining >= 0) {
     if (
       newDate.day() !== SUNDAY &&
       newDate.day() !== SATURDAY &&
-      !datesOff.includes(newDate.format('YYYY-MM-DD'))
+      !datesOff.has(newDate.format('YYYY-MM-DD'))
     ) {
       daysRemaining--
     }

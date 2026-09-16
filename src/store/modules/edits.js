@@ -10,6 +10,7 @@ import tasksStore from '@/store/modules/tasks'
 import taskTypesStore from '@/store/modules/tasktypes'
 import taskStatusStore from '@/store/modules/taskstatus'
 
+import { getExportDescriptors } from '@/lib/descriptors'
 import { isEpisodeInLoadedScope } from '@/lib/episodes'
 import { PAGE_SIZE } from '@/lib/pagination'
 import { getTaskTypePriorityOfProd } from '@/lib/productions'
@@ -577,26 +578,25 @@ const actions = {
     if (cache.result && cache.result.length > 0) {
       edits = cache.result
     }
+    const sortedDescriptors = getExportDescriptors(production, 'Edit')
     const lines = edits.map(edit => {
       let editLine = []
       if (isTVShow) {
         editLine.push(edit.episode_name)
       }
       editLine = editLine.concat([edit.name, edit.description || ''])
-      sortByName([...production.descriptors])
-        .filter(d => d.entity_type === 'Edit')
-        .forEach(descriptor => {
-          if (descriptor.data_type === 'boolean') {
-            editLine.push(
-              edit.data[descriptor.field_name]?.toLowerCase() === 'true'
-            )
-          } else if (descriptor.data_type === 'person') {
-            const person = personMap.get(edit.data[descriptor.field_name])
-            editLine.push(person ? person.full_name : '')
-          } else {
-            editLine.push(edit.data[descriptor.field_name])
-          }
-        })
+      sortedDescriptors.forEach(descriptor => {
+        if (descriptor.data_type === 'boolean') {
+          editLine.push(
+            edit.data[descriptor.field_name]?.toLowerCase() === 'true'
+          )
+        } else if (descriptor.data_type === 'person') {
+          const person = personMap.get(edit.data[descriptor.field_name])
+          editLine.push(person ? person.full_name : '')
+        } else {
+          editLine.push(edit.data[descriptor.field_name])
+        }
+      })
       if (state.isEditTime) {
         editLine.push(minutesToDays(organisation, edit.timeSpent).toFixed(2))
       }

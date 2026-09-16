@@ -2,17 +2,17 @@ import client from '@/store/api/client'
 import { buildQueryString } from '@/lib/query'
 
 export default {
+  // Works on a copy: the news feed compares the params it passed once the load
+  // is over, and a removed key would read as a filter change.
   getLastNews(params) {
-    const { isStudio, productionId } = params
+    const { isStudio, productionId, ...query } = params
     if (isStudio) {
-      delete params.isStudio
-      const path = buildQueryString(`/api/data/projects/news`, params)
+      const path = buildQueryString(`/api/data/projects/news`, query)
       return client.pget(path)
     } else if (productionId) {
-      delete params.productionId
       const path = buildQueryString(
         `/api/data/projects/${productionId}/news`,
-        params
+        query
       )
       return client.pget(path)
     } else {

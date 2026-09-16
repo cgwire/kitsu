@@ -95,8 +95,8 @@
 <script setup>
 /*
  * This module displays what happened on the production during the last few
- * days. News entries are fetched by page of 50; older entries load via
- * infinite scrolling.
+ * days. News entries are fetched by page of 50, or 6 in previews mode; older
+ * entries load via infinite scrolling.
  */
 import { useHead } from '@unhead/vue'
 import { AlertTriangleIcon, NewspaperIcon, XIcon } from 'lucide-vue-next'
@@ -188,7 +188,7 @@ const params = computed(() => ({
   isStudio: isStudio.value || undefined,
   productionId: !isStudio.value ? currentProduction.value?.id : undefined,
   only_preview: previewMode.value === 'previews',
-  page_size: previewMode.value === 'previews' ? 6 : 50,
+  limit: previewMode.value === 'previews' ? 6 : 50,
   task_type_id: taskTypeId.value !== '' ? taskTypeId.value : undefined,
   task_status_id: taskStatusId.value !== '' ? taskStatusId.value : undefined,
   person_id: person.value ? person.value.id : undefined,

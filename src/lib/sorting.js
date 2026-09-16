@@ -5,23 +5,21 @@ import {
   getTaskTypePriorityOfProd
 } from '@/lib/productions'
 
+// localeCompare(x, undefined, { numeric: true }) builds a new Intl.Collator
+// on every call: V8 only caches the collator when no options are passed.
+const collator = new Intl.Collator(undefined, { numeric: true })
+
 const sortByEpisode = (a, b) => {
   if (a.episode_name) {
-    return a.episode_name.localeCompare(b.episode_name, undefined, {
-      numeric: true
-    })
+    return collator.compare(a.episode_name, b.episode_name)
   }
   return 0
 }
 
 const assetComparator = firstBy('canceled')
-  .thenBy((a, b) =>
-    a.asset_type_name.localeCompare(b.asset_type_name, undefined, {
-      numeric: true
-    })
-  )
+  .thenBy((a, b) => collator.compare(a.asset_type_name, b.asset_type_name))
   .thenBy('shared')
-  .thenBy((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
+  .thenBy((a, b) => collator.compare(a.name, b.name))
 
 export const sortAssets = assets => {
   return assets.sort(assetComparator)
@@ -29,12 +27,8 @@ export const sortAssets = assets => {
 
 const shotComparator = firstBy('canceled')
   .thenBy(sortByEpisode)
-  .thenBy((a, b) =>
-    a.sequence_name.localeCompare(b.sequence_name, undefined, {
-      numeric: true
-    })
-  )
-  .thenBy((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
+  .thenBy((a, b) => collator.compare(a.sequence_name, b.sequence_name))
+  .thenBy((a, b) => collator.compare(a.name, b.name))
 
 export const sortShots = shots => {
   return shots.sort(shotComparator)
@@ -67,9 +61,7 @@ export const sortEdits = edits => {
   return edits.sort(
     firstBy('canceled')
       .thenBy(sortByEpisode)
-      .thenBy((a, b) =>
-        a.name.localeCompare(b.name, undefined, { numeric: true })
-      )
+      .thenBy((a, b) => collator.compare(a.name, b.name))
   )
 }
 
@@ -77,13 +69,11 @@ export const sortSequences = sequences => {
   return sequences.sort(
     firstBy((a, b) => {
       if (a.episode_name) {
-        return a.episode_name.localeCompare(b.episode_name, undefined, {
-          numeric: true
-        })
+        return collator.compare(a.episode_name, b.episode_name)
       }
       return 0
     }).thenBy((a, b) => {
-      return a.name.localeCompare(b.name, undefined, { numeric: true })
+      return collator.compare(a.name, b.name)
     })
   )
 }
@@ -91,14 +81,9 @@ export const sortSequences = sequences => {
 export const sortProductions = productions => {
   return productions.sort((a, b) => {
     if (a.project_status_name === b.project_status_name) {
-      return a.name.localeCompare(b.name, undefined, { numeric: true })
+      return collator.compare(a.name, b.name)
     }
-    return (
-      -1 *
-      a.project_status_name.localeCompare(b.project_status_name, undefined, {
-        numeric: true
-      })
-    )
+    return -1 * collator.compare(a.project_status_name, b.project_status_name)
   })
 }
 
@@ -107,22 +92,14 @@ export const sortProductions = productions => {
 const getEntityName = task => task.full_entity_name || task.entity_name || ''
 
 const compareByEntityName = (a, b) =>
-  getEntityName(a).localeCompare(getEntityName(b), undefined, {
-    numeric: true
-  })
+  collator.compare(getEntityName(a), getEntityName(b))
 
 export const sortTaskNames = (tasks, taskTypeMap) => {
   return tasks.sort(
     firstBy((a, b) => {
       const taskTypeA = taskTypeMap.get(a.task_type_id)
       const taskTypeB = taskTypeMap.get(b.task_type_id)
-      return (taskTypeA?.name || '').localeCompare(
-        taskTypeB?.name || '',
-        undefined,
-        {
-          numeric: true
-        }
-      )
+      return collator.compare(taskTypeA?.name || '', taskTypeB?.name || '')
     }).thenBy(compareByEntityName)
   )
 }
@@ -132,22 +109,14 @@ export const sortTasks = (tasks, taskTypeMap) => {
     firstBy('priority', -1)
       .thenBy((a, b) => {
         if (a.project_name) {
-          return a.project_name.localeCompare(b.project_name, undefined, {
-            numeric: true
-          })
+          return collator.compare(a.project_name, b.project_name)
         }
         return 0
       })
       .thenBy((a, b) => {
         const taskTypeA = taskTypeMap.get(a.task_type_id)
         const taskTypeB = taskTypeMap.get(b.task_type_id)
-        return (taskTypeA?.name || '').localeCompare(
-          taskTypeB?.name || '',
-          undefined,
-          {
-            numeric: true
-          }
-        )
+        return collator.compare(taskTypeA?.name || '', taskTypeB?.name || '')
       })
       .thenBy(compareByEntityName)
   )
@@ -223,9 +192,7 @@ export const sortTaskTypeScheduleItems = (
 
 export const sortPlaylists = playlists => {
   return playlists.sort(
-    firstBy('created_at', -1).thenBy((a, b) =>
-      a.name.localeCompare(b.name, undefined, { numeric: true })
-    )
+    firstBy('created_at', -1).thenBy((a, b) => collator.compare(a.name, b.name))
   )
 }
 
@@ -238,9 +205,7 @@ export const sortPeople = people => {
 }
 
 export const sortByName = entries => {
-  return entries.sort((a, b) =>
-    a.name.localeCompare(b.name, undefined, { numeric: true })
-  )
+  return entries.sort((a, b) => collator.compare(a.name, b.name))
 }
 
 // Sort a list of person ids alphabetically by the person's name. Ids missing
@@ -258,9 +223,7 @@ export const sortByPersonName = (personIds, personMap) => {
 }
 
 export const sortByValue = entries => {
-  return entries.sort((a, b) =>
-    a.value.localeCompare(b.value, undefined, { numeric: true })
-  )
+  return entries.sort((a, b) => collator.compare(a.value, b.value))
 }
 
 export const sortByDate = entries => {
@@ -287,13 +250,7 @@ export const sortValidationColumns = (
     if (taskTypeAPriority === taskTypeBPriority) {
       const taskTypeA = taskTypeMap.get(a)
       const taskTypeB = taskTypeMap.get(b)
-      return (taskTypeA?.name || '').localeCompare(
-        taskTypeB?.name || '',
-        undefined,
-        {
-          numeric: true
-        }
-      )
+      return collator.compare(taskTypeA?.name || '', taskTypeB?.name || '')
     } else if (taskTypeAPriority > taskTypeBPriority) {
       return 1
     }
@@ -301,8 +258,7 @@ export const sortValidationColumns = (
   })
 }
 
-const compareByName = (a, b) =>
-  a.name.localeCompare(b.name, undefined, { numeric: true })
+const compareByName = (a, b) => collator.compare(a.name, b.name)
 
 const NUMERIC_FIELDS = new Set(['estimation', 'timeSpent'])
 
@@ -327,9 +283,7 @@ const sortByField = (sortInfo, taskTypeMap, episodeMap) => (a, b) => {
   if (NUMERIC_FIELDS.has(sortInfo.column)) return dataA - dataB
   if (!dataB) return -1
   if (!dataA) return 1
-  return String(dataA).localeCompare(String(dataB), undefined, {
-    numeric: true
-  })
+  return collator.compare(String(dataA), String(dataB))
 }
 
 const sortEntityResult = (
@@ -378,10 +332,7 @@ export const sortAssetResult = (
     episodeMap,
     taskMap,
     [
-      (a, b) =>
-        a.asset_type_name.localeCompare(b.asset_type_name, undefined, {
-          numeric: true
-        }),
+      (a, b) => collator.compare(a.asset_type_name, b.asset_type_name),
       compareByName
     ],
     sortAssets
@@ -397,10 +348,7 @@ export const sortShotResult = (result, sorting, taskTypeMap, taskMap) => {
     taskMap,
     [
       sortByEpisode,
-      (a, b) =>
-        a.sequence_name.localeCompare(b.sequence_name, undefined, {
-          numeric: true
-        }),
+      (a, b) => collator.compare(a.sequence_name, b.sequence_name),
       compareByName
     ],
     sortShots
@@ -460,7 +408,7 @@ export const sortByMetadata = sortInfo => {
       if (dataA === dataB) return 0
       if (dataB === '') return -1
       if (dataA === '') return 1
-      return dataA.localeCompare(dataB, undefined, { numeric: true })
+      return collator.compare(dataA, dataB)
     }
   } else if (sortInfo.data_type === 'boolean') {
     return (a, b) => {
@@ -498,7 +446,7 @@ export const sortByMetadata = sortInfo => {
       if (dataA === dataB) return 0
       if (!dataB) return -1
       if (!dataA) return 1
-      return dataA.localeCompare(dataB, undefined, { numeric: true })
+      return collator.compare(dataA, dataB)
     }
   } else {
     return (a, b) => {
@@ -506,7 +454,7 @@ export const sortByMetadata = sortInfo => {
       if (dataA === dataB) return 0
       if (!dataB) return -1
       if (!dataA) return 1
-      return dataA.localeCompare(dataB, undefined, { numeric: true })
+      return collator.compare(dataA, dataB)
     }
   }
 }
@@ -518,5 +466,5 @@ const sortByTaskType = (taskMap, sortInfo) => (a, b) => {
   if (!taskB) return 1
   const taskStatusA = taskMap.get(taskA)?.task_status_short_name || ''
   const taskStatusB = taskMap.get(taskB)?.task_status_short_name || ''
-  return taskStatusA.localeCompare(taskStatusB, undefined, { numeric: true })
+  return collator.compare(taskStatusA, taskStatusB)
 }

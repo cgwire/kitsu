@@ -949,14 +949,18 @@ export default {
             }
             // Replace: this corrects the landing URL, it is no navigation of
             // the user's. A push would keep the rejected URL in the history
-            // and Back would land on it, to be corrected again.
-            this.$router.replace({
-              params: {
-                production_id: routeProductionId,
-                episode_id: this.currentEpisodeId
-              },
-              query
-            })
+            // and Back would land on it, to be corrected again. A page without
+            // episode param is left alone: the router keeps a param its route
+            // does not declare, and the episode selector would show there.
+            if (routeEpisodeId !== undefined) {
+              this.$router.replace({
+                params: {
+                  production_id: routeProductionId,
+                  episode_id: this.currentEpisodeId
+                },
+                query
+              })
+            }
             // The navigation is confirmed asynchronously: pass the episode
             // just resolved, or the route still names the one being left and
             // the coercion navigates a second time, over this very one.

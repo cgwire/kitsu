@@ -6,6 +6,13 @@ on:
     branches:
       - main
 
+# Every deploy runs npm ci in the same directory of the staging server, so
+# parallel runs break each other's install. Queue them, and never cancel one
+# in flight: npm ci stopped halfway leaves node_modules broken all the same.
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 env:
   NODE_OPTIONS: --max_old_space_size=8192
   HUSKY: 0
