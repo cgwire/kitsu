@@ -146,6 +146,18 @@ export const SHAPE_WIDTHS = {
   tiny: 1
 }
 
+// Font sizes in canvas units, keyed like the pencil widths so the text tool
+// reuses the pencil picker. `medium` keeps the historical 12px default.
+export const TEXT_SIZES = {
+  huge: 24,
+  big: 17,
+  medium: 12,
+  small: 9,
+  tiny: 6
+}
+
+export const DEFAULT_TEXT_SIZE = 'medium'
+
 /* -------------------------------------------------------------------------
  * Object helpers
  * -----------------------------------------------------------------------*/

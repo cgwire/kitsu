@@ -50,6 +50,12 @@
 
     <transition name="slide">
       <div class="annotation-tools" v-show="isTyping && (!light || fullScreen)">
+        <pencil-picker
+          v-bind="pickerState('text-size')"
+          :pencil="textSize"
+          :sizes="pencilPalette"
+          @change="$emit('change-text-size', $event)"
+        />
         <color-picker
           v-bind="pickerState('text-color')"
           :color="textColor"
@@ -330,6 +336,10 @@ defineProps({
   textColor: {
     type: String,
     default: '#ff3860'
+  },
+  textSize: {
+    type: String,
+    default: 'medium'
   }
 })
 
@@ -339,6 +349,7 @@ defineEmits([
   'change-pencil-width',
   'change-shape',
   'change-text-color',
+  'change-text-size',
   'comment-clicked',
   'delete-clicked',
   'erase-clicked',

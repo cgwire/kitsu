@@ -6,7 +6,10 @@
  */
 import { PSBrush } from 'fabricjs-psbrush'
 
-import { lockBrushToFirstPointer } from '@/lib/players/annotation'
+import {
+  DEFAULT_TEXT_SIZE,
+  lockBrushToFirstPointer
+} from '@/lib/players/annotation'
 import { EraserBrush } from '@/lib/players/eraserbrush'
 
 export const useDrawingTools = ({
@@ -17,6 +20,7 @@ export const useDrawingTools = ({
   pencilColor,
   pencilWidth,
   textColor,
+  textSize,
   showCanvas,
   localPreferences
 }) => {
@@ -35,6 +39,11 @@ export const useDrawingTools = ({
   const onChangeTextColor = newValue => {
     textColor.value = newValue
     localPreferences.setPreference('player:text-color', textColor.value)
+  }
+
+  const onChangeTextSize = size => {
+    textSize.value = size
+    localPreferences.setPreference('player:text-size', size)
   }
 
   const _resetColor = () => {
@@ -62,6 +71,8 @@ export const useDrawingTools = ({
       localPreferences.getPreference('player:text-color') || '#ff3860'
     pencilWidth.value =
       localPreferences.getPreference('player:pencil-width') || 'big'
+    textSize.value =
+      localPreferences.getPreference('player:text-size') || DEFAULT_TEXT_SIZE
 
     _resetColor()
     _resetPencil()
@@ -171,6 +182,7 @@ export const useDrawingTools = ({
     onChangePencilColor,
     onChangePencilWidth,
     onChangeTextColor,
+    onChangeTextSize,
     _resetColor,
     _resetPencil,
     _resetEraserWidth,
