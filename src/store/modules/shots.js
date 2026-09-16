@@ -1217,12 +1217,25 @@ const mutations = {
     shot.validations = new Map()
     shot.data = {}
 
-    insertSortedShot(cache.shots, shot)
+    // zou emits shot:new before this response lands, so the socket handler
+    // may already have inserted the shot through ADD_SHOT: merge into that
+    // copy instead of appending a second one.
+    const knownShot = cache.shotMap.get(shot.id)
+    const listedShot = knownShot || shot
+    if (knownShot) {
+      Object.assign(knownShot, shot)
+    } else {
+      insertSortedShot(cache.shots, shot)
+      cache.shotMap.set(shot.id, shot)
+    }
     state.displayedShots = cache.shots.slice(0, PAGE_SIZE)
     helpers.setListStats(state, cache.shots)
     state.shotFilledColumns = getFilledColumns(state.displayedShots)
-    cache.shotMap.set(shot.id, shot)
-    updateEntryInIndex(cache.shotIndex, shot, getShotIndexWords(shot))
+    updateEntryInIndex(
+      cache.shotIndex,
+      listedShot,
+      getShotIndexWords(listedShot)
+    )
 
     state.shotSelectionGrid = buildSelectionGrid()
 

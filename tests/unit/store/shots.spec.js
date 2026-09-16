@@ -9,6 +9,7 @@ vi.mock('@/store', () => ({ default: {} }))
 import shotsStore from '@/store/modules/shots'
 import entitiesApi from '@/store/api/entities'
 import shotsApi from '@/store/api/shots'
+import sequenceStore from '@/store/modules/sequences'
 import { buildShotIndex } from '@/lib/indexing'
 
 describe('Shots store', () => {
@@ -700,5 +701,40 @@ describe('Shots store, MARK_SHOTS_PARTIAL', () => {
     const empty = { shotsLoadingKey: null }
     shotsStore.mutations.MARK_SHOTS_PARTIAL(empty)
     expect(empty.shotsLoadingKey).toBeNull()
+  })
+})
+
+// zou emits shot:new before the creation response lands, so the socket
+// handler inserts the shot first: the response must not append a copy.
+describe('Shots store, NEW_SHOT_END', () => {
+  test('does not duplicate a shot the socket handler already added', () => {
+    sequenceStore.cache.sequenceMap.set('sq-1', {
+      id: 'sq-1',
+      name: 'SQ01',
+      parent_id: 'ep-1'
+    })
+    shotsStore.cache.shots = []
+    shotsStore.cache.shotMap = new Map()
+    shotsStore.cache.shotIndex = {}
+    const state = { displayedShots: [], shotSearchText: '' }
+    const shot = {
+      id: 'shot-1',
+      name: 'SH01',
+      parent_id: 'sq-1',
+      project_id: 'p-1',
+      data: {}
+    }
+
+    shotsStore.mutations.NEW_SHOT_END(state, {
+      shot: { ...shot },
+      episodeMap: new Map()
+    })
+    shotsStore.mutations.NEW_SHOT_END(state, {
+      shot: { ...shot },
+      episodeMap: new Map()
+    })
+
+    expect(shotsStore.cache.shots.map(({ id }) => id)).toEqual(['shot-1'])
+    expect(state.displayedShots.map(({ id }) => id)).toEqual(['shot-1'])
   })
 })

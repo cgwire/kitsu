@@ -605,3 +605,20 @@ describe('Edits store, deletion during a list load', () => {
     expect(editsStore.cache.editMap.has('e-deleted')).toBe(false)
   })
 })
+
+// zou emits edit:new before the creation response lands, so the socket
+// handler inserts the edit first: the response must not append a copy.
+describe('Edits store, NEW_EDIT_END', () => {
+  test('does not duplicate an edit the socket handler already added', () => {
+    editsStore.cache.edits = []
+    editsStore.cache.editMap = new Map()
+    const state = { displayedEdits: [] }
+    const edit = { id: 'edit-1', name: 'E01', project_id: 'p-1' }
+
+    editsStore.mutations.NEW_EDIT_END(state, { ...edit })
+    editsStore.mutations.NEW_EDIT_END(state, { ...edit })
+
+    expect(editsStore.cache.edits.map(({ id }) => id)).toEqual(['edit-1'])
+    expect(state.displayedEdits.map(({ id }) => id)).toEqual(['edit-1'])
+  })
+})

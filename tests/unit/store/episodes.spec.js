@@ -285,6 +285,39 @@ describe('Episodes store', () => {
       expect(state.displayedEpisodesTimeSpent).toBe(60)
       expect(state.displayedEpisodesEstimation).toBe(90)
     })
+
+    // zou emits episode:new before the creation response lands, so the
+    // socket handler inserts the episode first: the response must not
+    // append a copy.
+    test('does not duplicate an episode the socket handler already added', () => {
+      const state = { episodes: [], displayedEpisodes: [] }
+      episodesStore.mutations.LOAD_EPISODES_END(state, {
+        episodes: [{ id: 'episode-1', name: 'E01', status: 'running' }],
+        routeEpisodeId: 'episode-1'
+      })
+      const episode = {
+        id: 'episode-2',
+        name: 'E02',
+        status: 'running',
+        project_id: 'production-1'
+      }
+
+      episodesStore.mutations.ADD_EPISODE(state, { ...episode })
+      episodesStore.mutations.NEW_EPISODE_END(state, { ...episode })
+
+      expect(state.episodes.map(({ id }) => id)).toEqual([
+        'episode-1',
+        'episode-2'
+      ])
+      expect(episodesStore.cache.episodes.map(({ id }) => id)).toEqual([
+        'episode-1',
+        'episode-2'
+      ])
+      expect(state.displayedEpisodes.map(({ id }) => id)).toEqual([
+        'episode-1',
+        'episode-2'
+      ])
+    })
   })
 
   describe('REMOVE_EPISODE', () => {

@@ -770,13 +770,24 @@ const mutations = {
 
     state.episodeSelectionGrid = buildSelectionGrid()
 
-    // Each list copied from itself, like ADD_EPISODE: the displayed list is
-    // a search result, and taking it for the whole dataset dropped every
-    // episode the search filtered out, the topbar selector included.
-    cache.episodeMap.set(episode.id, episode)
-    state.episodes = sortByName([...state.episodes, episode])
-    cache.episodes = sortByName([...cache.episodes, episode])
-    state.displayedEpisodes = sortByName([...state.displayedEpisodes, episode])
+    // zou emits episode:new before this response lands, so the socket
+    // handler may already have inserted the episode through ADD_EPISODE:
+    // merge into that copy instead of appending a second one.
+    const knownEpisode = cache.episodeMap.get(episode.id)
+    if (knownEpisode) {
+      Object.assign(knownEpisode, episode)
+    } else {
+      // Each list copied from itself, like ADD_EPISODE: the displayed list is
+      // a search result, and taking it for the whole dataset dropped every
+      // episode the search filtered out, the topbar selector included.
+      cache.episodeMap.set(episode.id, episode)
+      state.episodes = sortByName([...state.episodes, episode])
+      cache.episodes = sortByName([...cache.episodes, episode])
+      state.displayedEpisodes = sortByName([
+        ...state.displayedEpisodes,
+        episode
+      ])
+    }
 
     helpers.setListStats(state, state.displayedEpisodes)
     state.episodeFilledColumns = getFilledColumns(state.displayedEpisodes)
