@@ -10,20 +10,6 @@ next:
 published_at: 2026-09-10
 ---
 
-<style>
-img {
-  border: 1px solid #EEE;
-  box-shadow: 0 0 6px 0px #DDD;
-  border-radius: 5px;
-}
-
-img[src$='#logo-cgwire'],
-img[src$='#logo-kitsu'] {
-  border: 0;
-  box-shadow: none;
-}
-</style>
-
 ![Kitsu バナー](./img/kitsu-banner.png#logo-kitsu)
 
 # Kitsu ドキュメント
