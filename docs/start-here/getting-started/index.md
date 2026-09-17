@@ -2,6 +2,8 @@
 path: "/start-here/getting-started"
 slug: "getting-started"
 published_at: 2026-09-10
+prev: false
+next: false
 ---
 
 <script setup>
@@ -155,7 +157,7 @@ Now that you have designed your global workflow and invited more people, it's ti
 The last setup step is to add studio teammates to the production:
 
 <EmbedCard title="Adding Users to a Production Team">
-<!--@include: ../../guides/team-management/managing-teams/index.md#adding-users-to-a-production-team-->
+<!--@include: ../../guides/team-management/managing-teams/index.md#addusers-->
 </EmbedCard>
 
 ## 5. Next Steps

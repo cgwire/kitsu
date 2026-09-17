@@ -146,93 +146,372 @@ export default {
       description:
         "クリエイティブチームのコラボレーションプラットフォーム、Kitsuのドキュメント",
       themeConfig: {
+        logo: "/kitsu.png",
+        search: {
+          provider: "local",
+        },
+        outline: {
+          level: [2, 3]
+        },
         sidebar: [
           {
-            text: "Kitsuの紹介",
+            text: "はじめに",
             collapsed: false,
             items: [
-              { text: "Introduction", link: "/ja/" },
-              { text: "Configure Kitsu", link: "/ja/configure-kitsu/" },
-              { text: "Team", link: "/ja/team/" },
+              { text: "入門", link: "/ja/start-here/getting-started/",},
             ],
           },
           {
-            text: "制作物の作成",
-            collapsed: true,
+            text: "ガイド",
+            collapsed: false,
             items: [
-              { text: "TV Show", link: "/ja/tvshow/" },
-              { text: "Feature", link: "/ja/feature/" },
-              { text: "Short", link: "/ja/short/" },
-              { text: "Short Shot", link: "/ja/short-shot/" },
-              { text: "Short Asset", link: "/ja/short-asset/" },
-              { text: "Video Game", link: "/ja/videogame/" },
-              { text: "NFT", link: "/ja/nft/" },
-            ],
+              {
+                text: "チーム管理",
+                collapsed: false,
+                link: "/ja/guides/team-management/",
+                items: [
+                  { text: "部門の管理", link: "/ja/guides/team-management/managing-departments/" },
+                  { text: "チームの管理", link: "/ja/guides/team-management/managing-teams/" },
+                  { text: "ユーザー権限ロール", link: "/ja/guides/team-management/team-roles/" },
+                  { text: "チームのインポート", link: "/ja/guides/team-management/import-team/" },
+                  { text: "ユーザープロフィール設定", link: "/ja/guides/team-management/profile-settings/" },
+                ],
+              },
+              {
+                text: "タスク設定",
+                collapsed: false,
+                link: "/ja/guides/task-configuration/",
+                items: [
+                  { text: "タスクタイプの管理", link: "/ja/guides/task-configuration/managing-task-types/" },
+                  { text: "タスクステータスの管理", link: "/ja/guides/task-configuration/managing-task-statuses/" },
+                  { text: "ステータスの自動化", link: "/ja/guides/task-configuration/status-automation/" },
+                ],
+              },
+              {
+                text: "プロダクション構成",
+                collapsed: false,
+                link: "/ja/guides/production-structure/",
+                items: [
+                  { text: "プロダクションの管理", link: "/ja/guides/production-structure/manage-productions/" },
+                  { text: "エピソードの管理", link: "/ja/guides/production-structure/manage-episodes/" },
+                  { text: "シーケンスの管理", link: "/ja/guides/production-structure/manage-sequences/" },
+                  { text: "ショットの管理", link: "/ja/guides/production-structure/manage-shots/" },
+                  { text: "スタジオラベルの管理", link: "/ja/guides/production-structure/manage-studios/" },
+                ],
+              },
+              {
+                text: "プロダクション",
+                collapsed: false,
+                link: "/ja/guides/production/",
+                items: [
+                  { text: "コンセプトの管理", link: "/ja/guides/production/manage-concepts/" },
+                  { text: "アセットタイプの管理", link: "/ja/guides/production/managing-asset-types/" },
+                  { text: "アセットの管理", link: "/ja/guides/production/manage-assets/" },
+                  { text: "タスクの割り当て", link: "/ja/guides/production/assign-tasks/" },
+                  { text: "担当タスクの確認", link: "/ja/guides/production/find-assignments/" },
+                  { text: "ブレイクダウンとキャスティング", link: "/ja/guides/production/breakdown-casting/" },
+                  { text: "メタカラム", link: "/ja/guides/production/meta-column/"},
+                  { text: "3D背景", link: "/ja/guides/production/3d-background/" },
+                ],
+              },
+              {
+                text: "スケジューリング",
+                collapsed: false,
+                link: "/ja/guides/scheduling/",
+                items: [
+                  { text: "スケジュール", link: "/ja/guides/scheduling/schedules/" },
+                  { text: "見積もり", link: "/ja/guides/scheduling/estimates/" },
+                  { text: "実績時間と見積もりの比較", link: "/ja/guides/scheduling/durations-vs-estimates/" },
+                ],
+              },
+              {
+                text: "レビューとパブリッシュ",
+                collapsed: false,
+                link: "/ja/guides/review-publishing/",
+                items: [
+                  { text: "タスク進捗の更新", link: "/ja/guides/review-publishing/update-task-progress/" },
+                  { text: "パブリッシュ", link: "/ja/guides/review-publishing/publish/" },
+                  { text: "レビュー", link: "/ja/guides/review-publishing/review/" },
+                  { text: "プレイリスト", link: "/ja/guides/review-publishing/playlist/" },
+                  { text: "エディットの管理", link: "/ja/guides/review-publishing/manage-edits/" },
+                ],
+              },
+              {
+                text: "トラッキングとレポート",
+                collapsed: false,
+                link: "/ja/guides/tracking-reporting/",
+                items: [
+                    { text: "タイムシート", link: "/ja/guides/tracking-reporting/timesheets/" },
+                    { text: "タスクを期限内に完了させる", link: "/ja/guides/tracking-reporting/ensure-tasks-on-time/" },
+                    { text: "タスク遅延の原因を把握する", link: "/ja/guides/tracking-reporting/understand-why-late-task/" },
+                    { text: "スタジオ概要", link: "/ja/guides/tracking-reporting/studio-overview/" },
+                    { text: "プロダクション概要", link: "/ja/guides/tracking-reporting/production-overview/" },
+                    { text: "ノルマ", link: "/ja/guides/tracking-reporting/quotas/" },
+                    { text: "高度な検索とフィルター", link: "/ja/guides/tracking-reporting/filter/" },
+                    { text: "予算管理", link: "/ja/guides/tracking-reporting/budget/" },
+                    { text: "サムネイル", link: "/ja/guides/tracking-reporting/thumbnails/" },
+                ],
+              },
+              {
+                text: "プライバシーとセキュリティ",
+                collapsed: false,
+                link: "/ja/guides/privacy-security/",
+                items: [
+                  { text: "認証", link: "/ja/guides/privacy-security/authentication/" },
+                  { text: "ログ", link: "/ja/guides/privacy-security/logs/" },
+                    // { text: "知的財産保護", link: "/ja/" },
+                    // { text: "認可", link: "/ja/" },
+                ],
+              },
+            ]
           },
           {
-            text: "メタカラム、フィルター、および制作設定",
-            collapsed: true,
+            text: "ハンドブック",
+            collapsed: false,
             items: [
-              { text: "Meta Column", link: "/ja/meta-column/" },
-              { text: "Filter", link: "/ja/filter/" },
-              { text: "Configure Production", link: "/ja/configure-prod/" },
-            ],
+              {
+                text: "スーパーバイザー向け",
+                link: "/ja/handbooks/for-supervisors/",
+              },
+              {
+                text: "プロデューサー向け",
+                link: "/ja/handbooks/for-producers/",
+              },
+              {
+                text: "アーティスト向け",
+                link: "/ja/handbooks/for-artists/",
+              },
+              {
+                text: "クライアント向け",
+                link: "/ja/handbooks/for-clients/",
+              },
+              {
+                text: "開発者向け",
+                collapsed: true,
+                link: "https://dev.kitsu.cloud/",
+              },
+            ]
           },
           {
-            text: "割り当て、見積もり、およびスケジュール",
-            collapsed: true,
+            text: "レシピ",
+            collapsed: false,
             items: [
-              { text: "Assignation", link: "/ja/assignation/" },
-              { text: "Estimation", link: "/ja/estimation/" },
-              { text: "Schedules", link: "/ja/schedules/" },
+              { text: "TVシリーズ向けクイックスタート", link: "/ja/recipes/for-tvshows/" },
+              { text: "長編映画向けクイックスタート", link: "/ja/recipes/for-feature-films/" },
+              { text: "短編向けクイックスタート", link: "/ja/recipes/for-shorts/" },
+              { text: "ビデオゲーム向けクイックスタート", link: "/ja/recipes/for-videogames/" },
+              { text: "ショットのみのプロダクション向けクイックスタート", link: "/ja/recipes/shots-only-production/" },
+              { text: "アセットのみのプロダクション向けクイックスタート", link: "/ja/recipes/assets-only-production/" },
             ],
           },
           {
-            text: "ステータス、公開、サムネイル",
-            collapsed: true,
+            text: "リソース",
+            collapsed: false,
             items: [
-              { text: "Status", link: "/ja/status/" },
-              { text: "Publish", link: "/ja/publish/" },
-              { text: "Thumbnails", link: "/ja/thumbnails/" },
+              {
+                text: "UIリファレンス",
+                link: "/ja/resources/ui/"
+              },
+              {
+                text: "変更履歴",
+                collapsed: true,
+                "link": "https://cgwire.canny.io/changelog"
+              }
             ],
           },
           {
-            text: "社内レビューおよびクライアント用プレイリスト",
-            collapsed: true,
-            items: [
-              { text: "Review", link: "/ja/review/" },
-              { text: "Weekly Review", link: "/ja/review-weekly/" },
-              { text: "Client Playlist", link: "/ja/playlist-client/" },
-            ],
-          },
-          {
-            text: "スーパーバイザーのワークフロー",
-            collapsed: true,
-            items: [
-              { text: "Supervisor Team", link: "/ja/supervisor-team/" },
-              { text: "Supervisor Tasks", link: "/ja/supervisor-tasks/" },
-            ],
-          },
-          {
-            text: "プロデューサーのワークフロー",
-            collapsed: true,
-            items: [
-              { text: "Production Report", link: "/ja/production-report/" },
-              { text: "Studio Report", link: "/ja/studio-report/" },
-            ],
-          },
-          {
-            text: "アーティストのワークフロー",
-            collapsed: true,
-            items: [{ text: "Artist", link: "/ja/artist/" }],
-          },
-          {
-            text: "よくある質問",
-            collapsed: true,
-            items: [{ text: "FAQ", link: "/ja/faq/" }],
+              text: "よくある質問",
+              link: "/ja/resources/faq/"
           },
         ],
-      },
+      }
+    },
+    fr: {
+      lang: "fr-FR",
+      label: "Français",
+      title: "Documentation Kitsu",
+      description:
+        "La documentation de Kitsu, la plateforme de collaboration pour les équipes créatives",
+      themeConfig: {
+        logo: "/kitsu.png",
+        search: {
+          provider: "local",
+        },
+        outline: {
+          level: [2, 3]
+        },
+        sidebar: [
+          {
+            text: "Commencer ici",
+            collapsed: false,
+            items: [
+              { text: "Premiers pas", link: "/fr/start-here/getting-started/",},
+            ],
+          },
+          {
+            text: "Guides",
+            collapsed: false,
+            items: [
+              {
+                text: "Gestion d'équipe",
+                collapsed: false,
+                link: "/fr/guides/team-management/",
+                items: [
+                  { text: "Gérer les départements", link: "/fr/guides/team-management/managing-departments/" },
+                  { text: "Gérer les équipes", link: "/fr/guides/team-management/managing-teams/" },
+                  { text: "Rôles et permissions des utilisateurs", link: "/fr/guides/team-management/team-roles/" },
+                  { text: "Importer une équipe", link: "/fr/guides/team-management/import-team/" },
+                  { text: "Paramètres du profil utilisateur", link: "/fr/guides/team-management/profile-settings/" },
+                ],
+              },
+              {
+                text: "Configuration des tâches",
+                collapsed: false,
+                link: "/fr/guides/task-configuration/",
+                items: [
+                  { text: "Gérer les types de tâches", link: "/fr/guides/task-configuration/managing-task-types/" },
+                  { text: "Gérer les statuts de tâches", link: "/fr/guides/task-configuration/managing-task-statuses/" },
+                  { text: "Automatisation des statuts", link: "/fr/guides/task-configuration/status-automation/" },
+                ],
+              },
+              {
+                text: "Structure de production",
+                collapsed: false,
+                link: "/fr/guides/production-structure/",
+                items: [
+                  { text: "Gérer les productions", link: "/fr/guides/production-structure/manage-productions/" },
+                  { text: "Gérer les épisodes", link: "/fr/guides/production-structure/manage-episodes/" },
+                  { text: "Gérer les séquences", link: "/fr/guides/production-structure/manage-sequences/" },
+                  { text: "Gérer les plans", link: "/fr/guides/production-structure/manage-shots/" },
+                  { text: "Gérer les labels de studio", link: "/fr/guides/production-structure/manage-studios/" },
+                ],
+              },
+              {
+                text: "Production",
+                collapsed: false,
+                link: "/fr/guides/production/",
+                items: [
+                  { text: "Gérer les concepts", link: "/fr/guides/production/manage-concepts/" },
+                  { text: "Gérer les types d'assets", link: "/fr/guides/production/managing-asset-types/" },
+                  { text: "Gérer les assets", link: "/fr/guides/production/manage-assets/" },
+                  { text: "Assigner des tâches", link: "/fr/guides/production/assign-tasks/" },
+                  { text: "Trouver les assignations", link: "/fr/guides/production/find-assignments/" },
+                  { text: "Breakdown et casting", link: "/fr/guides/production/breakdown-casting/" },
+                  { text: "Méta-colonnes", link: "/fr/guides/production/meta-column/"},
+                  { text: "Arrière-plan 3D", link: "/fr/guides/production/3d-background/" },
+                ],
+              },
+              {
+                text: "Planification",
+                collapsed: false,
+                link: "/fr/guides/scheduling/",
+                items: [
+                  { text: "Plannings", link: "/fr/guides/scheduling/schedules/" },
+                  { text: "Estimations", link: "/fr/guides/scheduling/estimates/" },
+                  { text: "Durées vs estimations", link: "/fr/guides/scheduling/durations-vs-estimates/" },
+                ],
+              },
+              {
+                text: "Review et publication",
+                collapsed: false,
+                link: "/fr/guides/review-publishing/",
+                items: [
+                  { text: "Mettre à jour l'avancement des tâches", link: "/fr/guides/review-publishing/update-task-progress/" },
+                  { text: "Publier", link: "/fr/guides/review-publishing/publish/" },
+                  { text: "Review", link: "/fr/guides/review-publishing/review/" },
+                  { text: "Playlist", link: "/fr/guides/review-publishing/playlist/" },
+                  { text: "Gérer les montages", link: "/fr/guides/review-publishing/manage-edits/" },
+                ],
+              },
+              {
+                text: "Suivi et rapports",
+                collapsed: false,
+                link: "/fr/guides/tracking-reporting/",
+                items: [
+                    { text: "Feuilles de temps", link: "/fr/guides/tracking-reporting/timesheets/" },
+                    { text: "Garantir le respect des délais", link: "/fr/guides/tracking-reporting/ensure-tasks-on-time/" },
+                    { text: "Comprendre le retard d'une tâche", link: "/fr/guides/tracking-reporting/understand-why-late-task/" },
+                    { text: "Vue d'ensemble du studio", link: "/fr/guides/tracking-reporting/studio-overview/" },
+                    { text: "Vue d'ensemble de la production", link: "/fr/guides/tracking-reporting/production-overview/" },
+                    { text: "Quotas", link: "/fr/guides/tracking-reporting/quotas/" },
+                    { text: "Recherche avancée et filtres", link: "/fr/guides/tracking-reporting/filter/" },
+                    { text: "Budget", link: "/fr/guides/tracking-reporting/budget/" },
+                    { text: "Vignettes", link: "/fr/guides/tracking-reporting/thumbnails/" },
+                ],
+              },
+              {
+                text: "Confidentialité et sécurité",
+                collapsed: false,
+                link: "/fr/guides/privacy-security/",
+                items: [
+                  { text: "Authentification", link: "/fr/guides/privacy-security/authentication/" },
+                  { text: "Journaux", link: "/fr/guides/privacy-security/logs/" },
+                    // { text: "Protection de la propriété intellectuelle", link: "/fr/" },
+                    // { text: "Autorisation", link: "/fr/" },
+                ],
+              },
+            ]
+          },
+          {
+            text: "Manuels",
+            collapsed: false,
+            items: [
+              {
+                text: "Pour les superviseurs",
+                link: "/fr/handbooks/for-supervisors/",
+              },
+              {
+                text: "Pour les producteurs",
+                link: "/fr/handbooks/for-producers/",
+              },
+              {
+                text: "Pour les artistes",
+                link: "/fr/handbooks/for-artists/",
+              },
+              {
+                text: "Pour les clients",
+                link: "/fr/handbooks/for-clients/",
+              },
+              {
+                text: "Pour les développeurs",
+                collapsed: true,
+                link: "https://dev.kitsu.cloud/",
+              },
+            ]
+          },
+          {
+            text: "Recettes",
+            collapsed: false,
+            items: [
+              { text: "Démarrage rapide pour les séries TV", link: "/fr/recipes/for-tvshows/" },
+              { text: "Démarrage rapide pour les longs métrages", link: "/fr/recipes/for-feature-films/" },
+              { text: "Démarrage rapide pour les courts métrages", link: "/fr/recipes/for-shorts/" },
+              { text: "Démarrage rapide pour les jeux vidéo", link: "/fr/recipes/for-videogames/" },
+              { text: "Démarrage rapide pour les productions de plans uniquement", link: "/fr/recipes/shots-only-production/" },
+              { text: "Démarrage rapide pour les productions d'assets uniquement", link: "/fr/recipes/assets-only-production/" },
+            ],
+          },
+          {
+            text: "Ressources",
+            collapsed: false,
+            items: [
+              {
+                text: "Référence de l'interface",
+                link: "/fr/resources/ui/"
+              },
+              {
+                text: "Journal des modifications",
+                collapsed: true,
+                "link": "https://cgwire.canny.io/changelog"
+              }
+            ],
+          },
+          {
+              text: "Foire aux questions",
+              link: "/fr/resources/faq/"
+          },
+        ],
+      }
     },
   },
   markdown: {
@@ -410,8 +689,6 @@ export default {
         text: "Recipes",
         collapsed: false,
         items: [
-          { text: "(Concept) For TV Shows", link: "/recipes/tvshows/" },
-          { text: "(Concept) For 2D", link: "/recipes/2d/" },
           { text: "Quickstart for TV Shows", link: "/recipes/for-tvshows/" },
           { text: "Quickstart for Feature Films", link: "/recipes/for-feature-films/" },
           { text: "Quickstart for Shorts", link: "/recipes/for-shorts/" },

@@ -128,6 +128,12 @@ const renderChart = async () => {
 </script>
 
 <style>
+
+.flowchart {
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .editable-code:focus {
     outline: none; /* Removes the default focus indicator */
 }

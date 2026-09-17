@@ -8,6 +8,8 @@ published_at: 2026-09-10
 
 <!-- #region body -->
 
+<!-- #region setup -->
+
 To manage your production's concepts, go to the **Concept** page in the production navigation menu:
 
 ![Concept Menu](/img/getting-started/menu_concept.png)
@@ -31,6 +33,8 @@ Alternatively, if you're coming from the **Todo Page**:
 3. Click **Add a new reference to concepts** and upload your files.
 
 ![Upload concepts](/img/getting-started/concept_empty.png)
+
+<!-- #endregion setup -->
 
 ## Edit a Concept
 

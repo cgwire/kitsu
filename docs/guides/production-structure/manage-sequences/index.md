@@ -26,6 +26,8 @@ In Kitsu, you can also track tasks at the **Sequence** Level.
 
 It's especially useful when you have macro tasks to track, like Story and color Board, Color Grading, etc.
 
+<!-- #region setup -->
+
 Use the navigation menu to go to the **Sequences** page:
 
 ![Navigation Sequences](/guides/production-structure/manage-sequences/screenshots/002.png)
@@ -46,7 +48,6 @@ You can also access the schedule, Preview Files, Activity, and Timelog of the se
 
 ## Create a Sequence
 
-<!-- #region setup -->
 
 You can create a sequence with the **+ New Sequence** button.
 

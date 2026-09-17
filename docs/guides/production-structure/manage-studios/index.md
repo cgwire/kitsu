@@ -14,6 +14,8 @@ A studio is a label used to organize teams in multi-studio or multi-site product
 
 You can use it to filter tasks, schedules, and teams per studio.
 
+<!-- #region setup -->
+
 Go to `Main Menu > Admin > Studios` to reach the `Studios` page.
 
 ![studios page](/guides/production-structure/manage-studios/images/0.png)
@@ -29,6 +31,8 @@ It'll open a dialog to add a name for the studio and pick a color:
 ![create studio modal](/guides/production-structure/manage-studios/images/2.png)
 
 Just click `Confirm` to save.
+
+<!-- #endregion setup -->
 
 ## Update a Studio
 

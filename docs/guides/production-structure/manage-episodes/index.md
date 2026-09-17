@@ -20,6 +20,8 @@ TV Show productions have access to Episode containers to organize sequences and 
 
 ## Episodes Overview
 
+<!-- #region setup -->
+
 In your production menu, click `Episodes`:
 
 ![episodes menu item](/guides/production-structure/manage-episodes/images/0.png)
@@ -32,7 +34,6 @@ If you click on an episode name, you'll reach the detail page.
 
 ## Create Episodes
 
-<!-- #region setup -->
 
 In the `Episodes` page, click `New episode` in the top right corner:
 

@@ -18,9 +18,17 @@ flowchart TD
     PRODUCTION -->|contains| ASSET
 ```
 
-## Create a New Production
-
 <!-- #region setup -->
+
+To access the list of productions, use the navigation menu and click `My Productions`:
+
+![Create a production](/guides/production-structure/manage-productions/screenshots/000.png)
+
+Admins can also use the `Productions` page to edit and delete productions:
+
+![production edit button](/guides/production-structure/manage-productions/screenshots/023.png)
+
+## Create a New Production
 
 Click on the `Create a new production` button to make the page appear:
 

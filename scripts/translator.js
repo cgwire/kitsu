@@ -103,7 +103,7 @@ async function buildJsonlForLanguage(files, language) {
       method: "POST",
       url: "/v1/responses",
       body: {
-        model: "gpt-5.4-nano",
+        model: "gpt-5.6-luna",
         input: buildFullFilePrompt(file.content, language.name),
       },
     };

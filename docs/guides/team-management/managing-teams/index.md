@@ -70,6 +70,8 @@ Each user requires an individual account to log in to Kitsu.
 
 ## Adding Users to a Production Team
 
+<!-- #region addusers -->
+
 Once you have created your production, you need to add users to the production's team to allow them access. 
 
 Being part of a team also allows tasks to be assigned to you.
@@ -89,6 +91,8 @@ On the **Team** page, you can see all the users who have been assigned to this p
 ::: warning
 Permissions and departments are set at the **Studio Level**. You can't adjust these at the production level.
 :::
+
+<!-- #endregion addusers -->
 
 ## Removing Users From A Team
 

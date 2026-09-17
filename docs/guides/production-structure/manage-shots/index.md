@@ -30,8 +30,7 @@ You must create a sequence first to populate it with shots.
 
 It's time to create **shots** for your production.
 
-You need to go to the **Shots** page: you can use the
-dropdown menu and click on the **SHOTS**.
+To reach the **Shots** page, use the dropdown menu and click on `Shots`.
 
 ![Drop down menu shot](/guides/production-structure/manage-shots/screenshots/002.png)
 
