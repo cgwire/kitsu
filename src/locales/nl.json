@@ -1435,6 +1435,8 @@
       "reset_list": "Lijst resetten",
       "select_task_type": "Selecteer een taaktype...",
       "show_assigned": "Toegewezen entiteiten weergeven",
+      "task_types_filter": "Taken filteren",
+      "task_types_filter_select": "Taken selecteren",
       "title": "Planning",
       "title_main": "Algemene planning",
       "today": "Vandaag",

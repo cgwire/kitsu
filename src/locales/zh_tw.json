@@ -1435,6 +1435,8 @@
       "reset_list": "重設清單",
       "select_task_type": "選擇任務類型",
       "show_assigned": "顯示指定的實體",
+      "task_types_filter": "篩選任務",
+      "task_types_filter_select": "選擇任務",
       "title": "時間表",
       "title_main": "主時間表",
       "today": "今天",

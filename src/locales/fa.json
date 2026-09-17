@@ -1435,6 +1435,8 @@
       "reset_list": "تنظیم مجدد لیست",
       "select_task_type": "نوع وظیفه را انتخاب کنید",
       "show_assigned": "نمایش موجودیت‌های اختصاص داده شده",
+      "task_types_filter": "فیلتر وظایف",
+      "task_types_filter_select": "انتخاب وظایف",
       "title": "برنامه ریزی",
       "title_main": "برنامه ریزی اصلی",
       "today": "امروز",

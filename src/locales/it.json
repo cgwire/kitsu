@@ -1435,6 +1435,8 @@
       "reset_list": "Reimposta la lista",
       "select_task_type": "Seleziona un tipo di task",
       "show_assigned": "Mostra le entità assegnate",
+      "task_types_filter": "Filtra task",
+      "task_types_filter_select": "Seleziona task",
       "title": "Pianificazione",
       "title_main": "Pianificazione principale",
       "today": "Oggi",

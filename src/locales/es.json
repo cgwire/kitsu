@@ -1435,6 +1435,8 @@
       "reset_list": "Restablecer lista",
       "select_task_type": "Seleccione un tipo de tarea",
       "show_assigned": "Mostrar entidades asignadas",
+      "task_types_filter": "Filtrar tareas",
+      "task_types_filter_select": "Seleccionar tareas",
       "title": "Calendario",
       "title_main": "Calendario principal",
       "today": "Hoy",
