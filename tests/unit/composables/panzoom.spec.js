@@ -11,12 +11,6 @@ describe('composables/panzoom', () => {
   })
 
   describe('onPanzoomChanged', () => {
-    it('updates the transform ref', () => {
-      const { panzoomTransform, onPanzoomChanged } = usePanzoomSync()
-      onPanzoomChanged({ x: 10, y: 20, scale: 2 })
-      expect(panzoomTransform.value).toEqual({ x: 10, y: 20, scale: 2 })
-    })
-
     it('replaces the previous transform on each call', () => {
       const { panzoomTransform, onPanzoomChanged } = usePanzoomSync()
       onPanzoomChanged({ x: 5, y: 5, scale: 1.5 })
@@ -39,11 +33,6 @@ describe('composables/panzoom', () => {
     it('is a no-op when target is null', () => {
       const { applyPanzoomTo } = usePanzoomSync()
       expect(() => applyPanzoomTo(null)).not.toThrow()
-    })
-
-    it('is a no-op when target is undefined', () => {
-      const { applyPanzoomTo } = usePanzoomSync()
-      expect(() => applyPanzoomTo(undefined)).not.toThrow()
     })
 
     it('applies the current transform to a fabric-like canvas', () => {

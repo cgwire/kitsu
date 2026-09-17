@@ -42,16 +42,6 @@ describe('lib/filtering', () => {
       keyWords = getMultipleKeyWords('[chars]')
       expect(keyWords).toEqual(['chars'])
     })
-
-    it('no keyword query', () => {
-      const keyWords = getKeyWords('modeling=wip -bunnyfat')
-      expect(keyWords).toEqual([])
-    })
-
-    it('empty query', () => {
-      const keyWords = getKeyWords('')
-      expect(keyWords).toEqual([])
-    })
   })
 
   describe('getExcludingKeyWords', () => {

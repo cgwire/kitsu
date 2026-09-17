@@ -74,10 +74,6 @@ describe('lib/annotation', () => {
       expect(findAnnotationAtTime(list, 5.0, 0.04)).toBeNull()
     })
 
-    it('returns null for empty list', () => {
-      expect(findAnnotationAtTime([], 1.0, 0.04)).toBeNull()
-    })
-
     it('returns null for null/undefined list', () => {
       expect(findAnnotationAtTime(null, 1.0, 0.04)).toBeNull()
       expect(findAnnotationAtTime(undefined, 1.0, 0.04)).toBeNull()
@@ -349,14 +345,10 @@ describe('lib/annotation', () => {
       expect(canvas.freeDrawingBrush.width).toBe(7)
     })
 
-    it('does nothing when no canvas is provided', () => {
+    it('does nothing without a canvas or a brush', () => {
       expect(() => applyPencilWidth(null, 'big')).not.toThrow()
       expect(() => applyPencilWidth(undefined, 'big')).not.toThrow()
-    })
-
-    it('does nothing when the canvas has no freeDrawingBrush', () => {
-      const canvas = { width: 0, height: 0 }
-      expect(() => applyPencilWidth(canvas, 'big')).not.toThrow()
+      expect(() => applyPencilWidth({ width: 0, height: 0 }, 'big')).not.toThrow()
     })
 
     it('does nothing for unknown width names', () => {
@@ -374,13 +366,9 @@ describe('lib/annotation', () => {
       expect(canvas.freeDrawingBrush.color).toBe('#00ff00')
     })
 
-    it('does nothing when no canvas is provided', () => {
+    it('does nothing without a canvas or a brush', () => {
       expect(() => applyPencilColor(null, '#000')).not.toThrow()
-    })
-
-    it('does nothing when the canvas has no freeDrawingBrush', () => {
-      const canvas = { width: 0, height: 0 }
-      expect(() => applyPencilColor(canvas, '#000')).not.toThrow()
+      expect(() => applyPencilColor({ width: 0, height: 0 }, '#000')).not.toThrow()
     })
   })
 

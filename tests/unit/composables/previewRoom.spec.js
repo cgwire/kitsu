@@ -356,28 +356,15 @@ describe('composables/previewRoom', () => {
   })
 
   describe('socket lifecycle', () => {
-    it('registers all preview-room handlers on mount', () => {
+    it('registers each handler once and unregisters the same references on unmount', () => {
       const socket = makeSocket()
       const { wrapper } = mountWithRoom({
         room: makeRoom(),
         userId: 'user-1',
         socket
       })
+      // The Map below would fold a duplicate registration into one entry.
       expect(socket.on).toHaveBeenCalledTimes(SOCKET_EVENTS.length)
-      SOCKET_EVENTS.forEach(event => {
-        expect(socket.on).toHaveBeenCalledWith(event, expect.any(Function))
-      })
-      wrapper.unmount()
-    })
-
-    it('unregisters the same handler references on unmount', () => {
-      const socket = makeSocket()
-      const { wrapper } = mountWithRoom({
-        room: makeRoom(),
-        userId: 'user-1',
-        socket
-      })
-      // Capture handler refs registered with socket.on(...)
       const registered = new Map(socket.on.mock.calls)
       wrapper.unmount()
       expect(socket.off).toHaveBeenCalledTimes(SOCKET_EVENTS.length)

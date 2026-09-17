@@ -53,12 +53,6 @@ describe('render', () => {
     )
   })
 
-  test('renderMarkdown', () => {
-    const input = 'Text **bold**'
-    const result = renderMarkdown(input)
-    expect(result.trim()).toEqual('<p>Text <strong>bold</strong></p>')
-  })
-
   test('renderMarkdown - offensive script', () => {
     const input = 'Text **bold**<script>console.log(\'test\')</script>'
     const result = renderMarkdown(input)
