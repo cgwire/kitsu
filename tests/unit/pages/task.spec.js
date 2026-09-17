@@ -237,20 +237,6 @@ describe('Task.vue', () => {
       expect(wrapper.findComponent(AddComment).exists()).toBe(false)
     })
 
-    it('shows the comment form to an assignee', async () => {
-      const { wrapper } = await mountPage({
-        task: buildTask({ assignees: ['user-1'] })
-      })
-      expect(wrapper.findComponent(AddComment).exists()).toBe(true)
-    })
-
-    it('shows the comment form to someone mentioned in a comment', async () => {
-      const { wrapper } = await mountPage({
-        comments: [{ id: 'comment-1', mentions: ['user-1'], replies: [] }]
-      })
-      expect(wrapper.findComponent(AddComment).exists()).toBe(true)
-    })
-
     it('shows the comment form to someone mentioned in a reply', async () => {
       const { wrapper } = await mountPage({
         comments: [

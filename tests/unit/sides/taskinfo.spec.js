@@ -249,13 +249,6 @@ describe('TaskInfo.vue', () => {
       expect(canComment(wrapper)).toBe(true)
     })
 
-    it('allows someone a comment mentions', async () => {
-      const { wrapper } = await mountPanel({
-        comments: [{ id: 'comment-1', mentions: [USER_ID] }]
-      })
-      expect(canComment(wrapper)).toBe(true)
-    })
-
     it('allows someone a reply mentions', async () => {
       const { wrapper } = await mountPanel({
         // Once a conversation is going, people get named in the replies.

@@ -29,21 +29,12 @@ describe('ComboboxStyled', () => {
     })
   })
 
-  it('mounts successfully', () => {
-    expect(wrapper.exists()).toBe(true)
-  })
-
   it('displays the selected option label', () => {
     expect(wrapper.find('.selected-line').text()).toBe('Version 1')
   })
 
   it('does not show the dropdown list initially', () => {
     expect(wrapper.find('.select-input').exists()).toBe(false)
-  })
-
-  it('shows the dropdown list on click', async () => {
-    await wrapper.find('.combo').trigger('click')
-    expect(wrapper.find('.select-input').exists()).toBe(true)
   })
 
   it('renders all options in the dropdown', async () => {

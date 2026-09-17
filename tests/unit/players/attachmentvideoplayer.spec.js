@@ -9,11 +9,14 @@ const mountPlayer = (props = {}) =>
   })
 
 describe('players/AttachmentVideoPlayer', () => {
-  it('renders a video element and play + fullscreen buttons', () => {
+  it('clicking play calls the video element play()', async () => {
     const wrapper = mountPlayer()
-    expect(wrapper.find('video').exists()).toBe(true)
-    expect(wrapper.find('.play-button').exists()).toBe(true)
-    expect(wrapper.find('.fullscreen-button').exists()).toBe(true)
+    const video = wrapper.find('video').element
+    video.play = vi.fn(() => Promise.resolve())
+    video.pause = vi.fn()
+    Object.defineProperty(video, 'paused', { value: true, configurable: true })
+    await wrapper.find('.play-button').trigger('click')
+    expect(video.play).toHaveBeenCalled()
   })
 
   it('exposes a download link to downloadHref', () => {

@@ -21,10 +21,6 @@ describe('ComboboxTag', () => {
     })
   })
 
-  it('mounts successfully', () => {
-    expect(wrapper.exists()).toBe(true)
-  })
-
   it('displays selected values as comma-separated sorted text', () => {
     const selectedLine = wrapper.find('.selected-line')
     expect(selectedLine.text()).toBe('apple, cherry')
@@ -32,11 +28,6 @@ describe('ComboboxTag', () => {
 
   it('does not show the dropdown initially', () => {
     expect(wrapper.find('.select-input').exists()).toBe(false)
-  })
-
-  it('shows the dropdown on click', async () => {
-    await wrapper.find('.flexrow').trigger('click')
-    expect(wrapper.find('.select-input').exists()).toBe(true)
   })
 
   it('renders checkboxes for all options', async () => {

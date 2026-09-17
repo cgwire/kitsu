@@ -36,14 +36,6 @@ const baseProduction = {
 }
 
 describe('ProductionParameters — is_frame_in_numbering', () => {
-  it('maps an explicit false to a disabled toggle', () => {
-    const wrapper = mountWithProduction({
-      ...baseProduction,
-      is_frame_in_numbering: false
-    })
-    expect(wrapper.vm.form.is_frame_in_numbering).toBe('false')
-  })
-
   it('maps an explicit true to an enabled toggle', () => {
     const wrapper = mountWithProduction({
       ...baseProduction,

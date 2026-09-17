@@ -27,7 +27,6 @@ import {
   PRODUCTION_ADD_TASK_STATUS,
   PRODUCTION_ADD_TASK_TYPE,
   PRODUCTION_AVATAR_UPLOADED,
-  PRODUCTION_PICTURE_FILE_SELECTED,
   PRODUCTION_REMOVE_ASSET_TYPE,
   PRODUCTION_REMOVE_TASK_STATUS,
   PRODUCTION_REMOVE_TASK_TYPE,
@@ -58,7 +57,7 @@ describe('Productions store', () => {
           }))
         },
         taskStatus: {
-          taskStatus: [
+          taskStatuses: [
             { id: 'task-status-1', name: 'Task status 1' },
             { id: 'task-status-2', name: 'Task status 2' },
             { id: 'task-status-3', name: 'Task status 3' }
@@ -589,11 +588,24 @@ describe('Productions store', () => {
       expect(mockCommit).toHaveBeenNthCalledWith(4, CLEAR_EDITS)
     })
 
-    test('storeProductionPicture', () => {
-      const mockCommit = vi.fn()
-      store.actions.storeProductionPicture({ commit: mockCommit }, 'form-data')
-      expect(mockCommit).toBeCalledTimes(1)
-      expect(mockCommit).toHaveBeenNthCalledWith(1, PRODUCTION_PICTURE_FILE_SELECTED, 'form-data')
+    // Productions.vue stores the picture on selection and uploads it only
+    // once the production is saved: a lost form data skips the upload.
+    test('storeProductionPicture keeps the picture for uploadProductionAvatar', async () => {
+      const state = { productionAvatarFormData: null }
+      const commit = (type, payload) => store.mutations[type](state, payload)
+      productionApi.postAvatar = vi.fn(() => Promise.resolve())
+
+      store.actions.storeProductionPicture({ commit }, 'form-data')
+      expect(store.getters.productionAvatarFormData(state)).toBe('form-data')
+
+      await store.actions.uploadProductionAvatar(
+        { commit: vi.fn(), state },
+        'production-id'
+      )
+      expect(productionApi.postAvatar).toHaveBeenCalledWith(
+        'production-id',
+        'form-data'
+      )
     })
 
     test('uploadProductionAvatar', async () => {
@@ -836,53 +848,80 @@ describe('Productions store', () => {
       expect(state.productions).toEqual([])
     })
 
-    test('LOAD_PRODUCTIONS_START', () => {
-      store.mutations.LOAD_PRODUCTIONS_START(state)
-      expect(state.productions).toHaveLength(0)
-      expect(state.isProductionsLoading).toBeTruthy()
-      expect(state.isProductionsLoadingError).toBeFalsy()
-    })
-
-    test('LOAD_PRODUCTIONS_ERROR', () => {
-      store.mutations.LOAD_PRODUCTIONS_ERROR(state)
-      expect(state.productions).toHaveLength(0)
-      expect(state.isProductionsLoading).toBeFalsy()
-      expect(state.isProductionsLoadingError).toBeTruthy()
-    })
-
     test('LOAD_PRODUCTIONS_END', () => {
       store.mutations.LOAD_PRODUCTIONS_END(state, [{ id: 1, project_status_name: 'Status 1' }, { id: 2, project_status_name: 'Status 2' }])
       expect(state.productions).toHaveLength(2)
-      expect(state.isProductionsLoading).toBeFalsy()
-      expect(state.isProductionsLoadingError).toBeFalsy()
       expect(state.productionMap.get(1)).toEqual({ id: 1, project_status_name: 'Status 1' })
       expect(state.productionMap.get(2)).toEqual({ id: 2, project_status_name: 'Status 2' })
     })
 
-    test('LOAD_OPEN_PRODUCTIONS_START', () => {
-      store.mutations.LOAD_OPEN_PRODUCTIONS_START(state)
-      expect(state.isOpenProductionsLoading).toBeTruthy()
-      expect(state.openProductions).toHaveLength(0)
+    // Productions.vue feeds both flags to the list: a failed load must show
+    // the error, and a reload must clear it. Each step starts from the
+    // opposite flag values, so every assignment is checked.
+    describe('productions loading flags', () => {
+      test('START shows the loading state and drops the list', () => {
+        state.isProductionsLoading = false
+        state.isProductionsLoadingError = true
+
+        store.mutations.LOAD_PRODUCTIONS_START(state)
+
+        expect(state.productions).toEqual([])
+        expect(state.isProductionsLoading).toBe(true)
+        expect(state.isProductionsLoadingError).toBe(false)
+      })
+
+      test('ERROR shows the error and drops the list', () => {
+        state.isProductionsLoading = true
+        state.isProductionsLoadingError = false
+
+        store.mutations.LOAD_PRODUCTIONS_ERROR(state)
+
+        expect(state.productions).toEqual([])
+        expect(state.isProductionsLoading).toBe(false)
+        expect(state.isProductionsLoadingError).toBe(true)
+      })
+
+      test('END clears both flags', () => {
+        state.isProductionsLoading = true
+        state.isProductionsLoadingError = true
+
+        store.mutations.LOAD_PRODUCTIONS_END(state, [])
+
+        expect(state.isProductionsLoading).toBe(false)
+        expect(state.isProductionsLoadingError).toBe(false)
+      })
     })
 
-    test('LOAD_OPEN_PRODUCTIONS_ERROR', () => {
-      store.mutations.LOAD_OPEN_PRODUCTIONS_ERROR(state)
-      expect(state.isOpenProductionsLoading).toBeFalsy()
+    describe('open productions loading flag', () => {
+      test('START shows the loading state and drops the list', () => {
+        state.isOpenProductionsLoading = false
+        state.openProductions = [{ id: 'production-1', name: 'caminandes' }]
+
+        store.mutations.LOAD_OPEN_PRODUCTIONS_START(state)
+
+        expect(state.isOpenProductionsLoading).toBe(true)
+        expect(state.openProductions).toEqual([])
+      })
+
+      test('ERROR and END clear it', () => {
+        state.isOpenProductionsLoading = true
+        store.mutations.LOAD_OPEN_PRODUCTIONS_ERROR(state)
+        expect(state.isOpenProductionsLoading).toBe(false)
+
+        state.currentProduction = null
+        state.isOpenProductionsLoading = true
+        store.mutations.LOAD_OPEN_PRODUCTIONS_END(state, [])
+        expect(state.isOpenProductionsLoading).toBe(false)
+      })
     })
 
     test('LOAD_OPEN_PRODUCTIONS_END', () => {
       state.currentProduction = null
       store.mutations.LOAD_OPEN_PRODUCTIONS_END(state, [{ id: 1, name: 'Name 1' }, { id: 2, name: 'Name 2' }])
-      expect(state.isOpenProductionsLoading).toBeFalsy()
       expect(state.openProductions).toHaveLength(2)
       expect(state.productionMap.get(1)).toEqual({ id: 1, name: 'Name 1' })
       expect(state.productionMap.get(2)).toEqual({ id: 2, name: 'Name 2' })
       expect(state.currentProduction).toEqual({ id: 1, name: 'Name 1' })
-    })
-
-    test('LOAD_PRODUCTION_STATUS_START', () => {
-      store.mutations.LOAD_PRODUCTION_STATUS_START(state)
-      expect(state.productionStatus).toHaveLength(0)
     })
 
     test('LOAD_PRODUCTION_STATUS_END', () => {
@@ -927,11 +966,6 @@ describe('Productions store', () => {
       expect(state.productions).toHaveLength(0)
       expect(state.openProductions).toHaveLength(0)
       expect(state.productionMap).toEqual(new Map())
-    })
-
-    test('PRODUCTION_PICTURE_FILE_SELECTED', () => {
-      store.mutations.PRODUCTION_PICTURE_FILE_SELECTED(state, 'form-data')
-      expect(state.productionAvatarFormData).toEqual('form-data')
     })
 
     test('PRODUCTION_AVATAR_UPLOADED', () => {

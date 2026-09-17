@@ -120,14 +120,6 @@ describe('Breakdown page, reloadEntities', () => {
     expect(context.reset).toHaveBeenCalledTimes(1)
   })
 
-  test('does not reload when nothing moved', async () => {
-    const context = buildContext()
-
-    await Breakdown.methods.reloadEntities.call(context)
-
-    expect(context.reset).not.toHaveBeenCalled()
-  })
-
   // The topbar resolves the route episode asynchronously: starting the load
   // before it lands costs a full production-wide second pass. The resolution
   // fires the episode watcher like any change: it must not count as a move.

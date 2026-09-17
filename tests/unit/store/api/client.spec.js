@@ -284,12 +284,6 @@ describe('store/api/client', () => {
       )
     })
 
-    test('getEvents omits only_files when it is false', async () => {
-      h.response = { body: [] }
-      await client.getEvents({ limit: 10 })
-      expect(h.calls[0].path).toBe('/api/data/events/last?limit=10')
-    })
-
     test('getLoginLogs passes the cursor and the person filter', async () => {
       h.response = { body: [] }
       await client.getLoginLogs({

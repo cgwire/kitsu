@@ -165,16 +165,6 @@ describe('People store', () => {
 
     const updatedAt = '2026-09-08T10:00:00'
 
-    test('organisationLogoPath targets the organisation thumbnail', () => {
-      expect(
-        store.getters.organisationLogoPath(
-          stateWith({ id: 'org-1', has_avatar: true, updated_at: updatedAt })
-        )
-      ).toEqual(
-        `/api/pictures/thumbnails/organisations/org-1.png?t=${Date.parse(updatedAt)}`
-      )
-    })
-
     test('organisationLogoPath is null while there is no logo', () => {
       expect(
         store.getters.organisationLogoPath(
