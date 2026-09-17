@@ -1,0 +1,87 @@
+{
+    "title": "edl",
+    "steps": [
+        {
+            "type": "setViewport",
+            "width": 1920,
+            "height": 1080,
+            "deviceScaleFactor": 1,
+            "isMobile": false,
+            "hasTouch": false,
+            "isLandscape": false
+        },
+        {
+            "type": "navigate",
+            "url": "http://localhost:8080/productions/5b388012-7bda-4b97-a7be-9702e10a2968/episodes/640f4073-f138-47ac-bed9-43106fd90510/shots?search=",
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "http://localhost:8080/productions/5b388012-7bda-4b97-a7be-9702e10a2968/episodes/640f4073-f138-47ac-bed9-43106fd90510/shots?search=",
+                    "title": "El Camino - E00000 | Shots - Kitsu"
+                }
+            ]
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Import EDL[role=\"image\"]"
+                ],
+                [
+                    "button:nth-of-type(3) > img"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/div/div[1]/div[1]/div[4]/button[3]/img"
+                ],
+                [
+                    "pierce/button:nth-of-type(3) > img"
+                ]
+            ],
+            "offsetY": 11.71875,
+            "offsetX": 13.640625
+        },
+        {
+            "type": "change",
+            "value": "${project_name}_${sequence_name}-${shot_name}",
+            "selectors": [
+                [
+                    "div.modal-content > div > div:nth-of-type(2) input"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[11]/div[2]/div/div[2]/p/input"
+                ],
+                [
+                    "pierce/div.modal-content > div > div:nth-of-type(2) input"
+                ],
+                [
+                    "text/${project_name}_${episode_name}-${sequence_name}-${shot_name}"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "uploadFile",
+            "selectors": [
+                [
+                    "#app > div > div > div.columns.fixed-page > div.modal.is-active > div.modal-content > div > div:nth-child(4) > form > div > label > input"
+                ]
+            ],
+            "file": "/home/bazamel/clients/cgwire/docs/assets/shots.edl"
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "#app > div > div > div.columns.fixed-page > div.modal.is-active > div.modal-content > div > div.modal-footer > p > a"
+                ],
+                [
+                    "text/Upload EDL"
+                ]
+            ],
+            "offsetY": 17.640625,
+            "offsetX": 418
+        }
+    ]
+}

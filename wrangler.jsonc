@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kitsu-docs",
+  "compatibility_date": "2026-09-15",
+  "observability": {
+    "enabled": true
+  },
+  "assets": {
+    "directory": "docs/.vitepress/dist"
+  },
+  "compatibility_flags": [
+    "nodejs_compat"
+  ]
+}

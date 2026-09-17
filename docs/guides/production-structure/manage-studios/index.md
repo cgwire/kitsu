@@ -1,0 +1,65 @@
+---
+path: "/guides/production-structure/manage-studios"
+slug: "manage-studios"
+published_at: 2026-09-10
+---
+
+# Managing Studio Labels
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/u-KI4g55dFQ?si=9NbdBH_bLRfK5cC0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+<!-- #region body -->
+
+A studio is a label used to organize teams in multi-studio or multi-site productions.
+
+You can use it to filter tasks, schedules, and teams per studio.
+
+<!-- #region setup -->
+
+Go to `Main Menu > Admin > Studios` to reach the `Studios` page.
+
+![studios page](/guides/production-structure/manage-studios/images/0.png)
+
+## Create a Studio
+
+To create a new studio, click the `Add a studio` button:
+
+![create studio button](/guides/production-structure/manage-studios/images/1.png)
+
+It'll open a dialog to add a name for the studio and pick a color:  
+
+![create studio modal](/guides/production-structure/manage-studios/images/2.png)
+
+Just click `Confirm` to save.
+
+<!-- #endregion setup -->
+
+## Update a Studio
+
+Hover over the studio row you wish to edit in the list and click the `Edit` icon:  
+
+![update studio button](/guides/production-structure/manage-studios/images/3.png)
+
+## How to Add People to a Studio
+
+In the `People` page (`Main Menu > Admin > People`), click on a user to edit their studio affiliation.
+
+![](/guides/production-structure/manage-studios/images/5.png)
+
+Similarly, you can remove someone from a studio by selecting the `No Studio` option.
+
+## How to Filter Views by Studios
+
+The `Team Schedule` and `All Tasks` pages display a studio filter you can use to filter tasks.
+
+![](/guides/production-structure/manage-studios/images/6.png)
+
+Simply pick the desired studio in the dropdown selector.
+
+## Remove a Studio
+
+Hover over the studio row you wish to remove in the list and click the `Delete` icon:  
+
+![remove studio button](/guides/production-structure/manage-studios/images/4.png)
+
+<!-- #endregion body -->

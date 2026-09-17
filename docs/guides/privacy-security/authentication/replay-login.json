@@ -1,0 +1,62 @@
+{
+  "title": "login",
+  "steps": [
+    {
+      "type": "setViewport",
+      "width": 1920,
+      "height": 1080,
+      "deviceScaleFactor": 1,
+      "isMobile": false,
+      "hasTouch": false,
+      "isLandscape": false
+    },
+    {
+      "type": "navigate",
+      "url": "http://localhost/login",
+      "assertedEvents": [
+        {
+          "type": "navigation",
+          "url": "http://localhost/login",
+          "title": "Log in to Kitsu"
+        }
+      ]
+    },
+    {
+      "type": "change",
+      "value": "admin@example.com",
+      "selectors": [
+        ["aria/Email"],
+        ["div.mt2 input"],
+        ["xpath///*[@id=\"app\"]/div/div/div/div/form/div[1]/p/input"],
+        ["pierce/div.mt2 input"],
+        ["text/debian-sys-maint"]
+      ],
+      "target": "main"
+    },
+    {
+      "type": "change",
+      "value": "mysecretpassword",
+      "selectors": [
+        ["aria/Password"],
+        ["div:nth-of-type(2) input"],
+        ["xpath///*[@id=\"app\"]/div/div/div/div/form/div[2]/p/input"],
+        ["pierce/div:nth-of-type(2) input"],
+        ["text/wduyTQH0v91qtszK"]
+      ],
+      "target": "main"
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        ["aria/Log in"],
+        ["p.control > a"],
+        ["xpath///*[@id=\"app\"]/div/div/div/div/p[1]/a"],
+        ["pierce/p.control > a"],
+        ["text/Log in"]
+      ],
+      "offsetY": 21,
+      "offsetX": 170
+    }
+  ]
+}

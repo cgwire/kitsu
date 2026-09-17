@@ -1,0 +1,427 @@
+{
+    "title": "asset type",
+    "steps": [
+        {
+            "type": "setViewport",
+            
+            "width": 1920,
+            "height": 1080,
+            "deviceScaleFactor": 1,
+            "isMobile": false,
+            "hasTouch": false,
+            "isLandscape": false
+        },
+        {
+            "type": "navigate",
+            
+            "url": "http://localhost/open-productions",
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "http://localhost/open-productions",
+                    "title": "My Productions - Kitsu"
+                }
+            ]
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "div.nav-left img"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[1]/nav/div[1]/a/img"
+                ],
+                [
+                    "pierce/div.nav-left img"
+                ]
+            ],
+            "offsetY": 16.5,
+            "offsetX": 15
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Asset Types"
+                ],
+                [
+                    "div:nth-of-type(3) > p:nth-of-type(5) > a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[2]/aside/div/section/div[3]/p[5]/a"
+                ],
+                [
+                    "pierce/div:nth-of-type(3) > p:nth-of-type(5) > a"
+                ],
+                [
+                    "text/Asset Types"
+                ]
+            ],
+            "offsetY": 22.922271728515625,
+            "offsetX": 116.10311698913574
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Add an asset type",
+                    "aria/[role=\"generic\"]"
+                ],
+                [
+                    "div.asset-types > div.flexrow span"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/button[2]/span"
+                ],
+                [
+                    "pierce/div.asset-types > div.flexrow span"
+                ]
+            ],
+            "offsetY": 5.515625,
+            "offsetX": 17.546875
+        },
+        {
+            "type": "change",
+            
+            "value": "Particle",
+            "selectors": [
+                [
+                    "form > div:nth-of-type(1) input"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[4]/div[2]/div/form/div[1]/p/input"
+                ],
+                [
+                    "pierce/form > div:nth-of-type(1) input"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Confirm"
+                ],
+                [
+                    "div.is-active a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[4]/div[2]/div/div/p/a"
+                ],
+                [
+                    "pierce/div.is-active a"
+                ]
+            ],
+            "offsetY": 16.265625,
+            "offsetX": 32.421875
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "div.nav-left img"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[1]/nav/div[1]/a/img"
+                ],
+                [
+                    "pierce/div.nav-left img"
+                ]
+            ],
+            "offsetY": 21.5,
+            "offsetX": 7
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Productions"
+                ],
+                [
+                    "div:nth-of-type(2) > p:nth-of-type(1) > a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[2]/aside/div/section/div[2]/p[1]/a"
+                ],
+                [
+                    "pierce/div:nth-of-type(2) > p:nth-of-type(1) > a"
+                ]
+            ],
+            "offsetY": 15.797271728515625,
+            "offsetX": 117.10311698913574
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "tr.datatable-row span"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[2]/div[2]/table/tbody/tr[2]/th/div/a/span"
+                ],
+                [
+                    "pierce/tr.datatable-row span"
+                ],
+                [
+                    "text/El Camino"
+                ]
+            ],
+            "offsetY": 1.421875,
+            "offsetX": 34.5
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "div.section-menu > div > div"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[1]/nav/div[1]/div/div[3]/div/div[1]/div/div"
+                ],
+                [
+                    "pierce/div.section-menu > div > div"
+                ],
+                [
+                    "text/Assets"
+                ]
+            ],
+            "offsetY": 14.5,
+            "offsetX": 97.40625
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/[role=\"navigation\"]",
+                    "aria/Settings"
+                ],
+                [
+                    "div:nth-of-type(21) > a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[1]/nav/div[1]/div/div[3]/div/div[1]/div[2]/div[21]/a"
+                ],
+                [
+                    "pierce/div:nth-of-type(21) > a"
+                ]
+            ],
+            "offsetY": 10.5,
+            "offsetX": 95.40625
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/[role=\"list\"]",
+                    "aria/Asset Types"
+                ],
+                [
+                    "div.production-settings > div > div.tabs li:nth-of-type(3) > a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div/div[1]/ul/li[3]/a"
+                ],
+                [
+                    "pierce/div.production-settings > div > div.tabs li:nth-of-type(3) > a"
+                ]
+            ],
+            "offsetY": 18,
+            "offsetX": 66.765625
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "div.topbar a > img"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[1]/nav/div[1]/a/img"
+                ],
+                [
+                    "pierce/div.topbar a > img"
+                ]
+            ],
+            "offsetY": 14.5,
+            "offsetX": 17
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/[role=\"complementary\"]",
+                    "aria/Asset Types"
+                ],
+                [
+                    "div:nth-of-type(3) > p:nth-of-type(5) > a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[2]/aside/div/section/div[3]/p[5]/a"
+                ],
+                [
+                    "pierce/div:nth-of-type(3) > p:nth-of-type(5) > a"
+                ]
+            ],
+            "offsetY": 11.922271728515625,
+            "offsetX": 105.10311698913574
+        },
+        {
+            "type": "hover",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "tr:nth-of-type(5) [data-test='button-edit'] > svg"
+                ],
+                [
+                    "xpath///*[@data-test=\"button-edit\"]/svg"
+                ],
+                [
+                    "pierce/tr:nth-of-type(5) [data-test='button-edit'] > svg"
+                ]
+            ],
+            ,
+            "offsetY": 4.359375,
+            "offsetX": 13.296875
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "tr:nth-of-type(5) [data-test='button-edit'] > svg"
+                ],
+                [
+                    "xpath///*[@data-test=\"button-edit\"]/svg"
+                ],
+                [
+                    "pierce/tr:nth-of-type(5) [data-test='button-edit'] > svg"
+                ]
+            ],
+            "offsetY": 4.359375,
+            "offsetX": 13.296875
+        },
+        {
+            "type": "change",
+            
+            "value": "Particles",
+            "selectors": [
+                [
+                    "form > div:nth-of-type(1) input"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[4]/div[2]/div/form/div[1]/p/input"
+                ],
+                [
+                    "pierce/form > div:nth-of-type(1) input"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Confirm"
+                ],
+                [
+                    "div.is-active a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[4]/div[2]/div/div/p/a"
+                ],
+                [
+                    "pierce/div.is-active a"
+                ]
+            ],
+            "offsetY": 10.875,
+            "offsetX": 13.421875
+        },
+        {
+            "type": "hover",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "tr:nth-of-type(5) [data-test='button-delete-admin'] path:nth-of-type(1)"
+                ],
+                [
+                    "xpath///*[@data-test=\"button-delete-admin\"]/svg/path[1]"
+                ],
+                [
+                    "pierce/tr:nth-of-type(5) [data-test='button-delete-admin'] path:nth-of-type(1)"
+                ]
+            ],
+            ,
+            "offsetY": 3.859375,
+            "offsetX": 0.75
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "tr:nth-of-type(5) [data-test='button-delete-admin'] path:nth-of-type(1)"
+                ],
+                [
+                    "xpath///*[@data-test=\"button-delete-admin\"]/svg/path[1]"
+                ],
+                [
+                    "pierce/tr:nth-of-type(5) [data-test='button-delete-admin'] path:nth-of-type(1)"
+                ]
+            ],
+            "offsetY": 3.859375,
+            "offsetX": 0.75
+        },
+        {
+            "type": "click",
+            
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Confirm"
+                ],
+                [
+                    "div.delete-modal a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[5]/div[2]/div/p[2]/a"
+                ],
+                [
+                    "pierce/div.delete-modal a"
+                ]
+            ],
+            "offsetY": 19.5,
+            "offsetX": 30.421875
+        }
+    ]
+}

@@ -1,0 +1,526 @@
+{
+    "title": "departments",
+    "steps": [
+        {
+            "type": "setViewport",
+            "width": 1920,
+            "height": 1080,
+            "deviceScaleFactor": 1,
+            "isMobile": false,
+            "hasTouch": false,
+            "isLandscape": true
+        },
+        {
+            "type": "navigate",
+            "url": "http://localhost/open-productions",
+            
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "http://localhost/open-productions",
+                    "title": "My Productions - Kitsu"
+                }
+            ]
+        },
+        {
+            "type": "click",
+            "target": "main",
+            
+            "selectors": [
+                [
+                    "div.nav-left img"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[1]/nav/div[1]/a/img"
+                ],
+                [
+                    "pierce/div.nav-left img"
+                ]
+            ],
+            "offsetY": 10.5,
+            "offsetX": 15
+        },
+        {
+            "type": "click",
+            "target": "main",
+            
+            "selectors": [
+                [
+                    "aria/Departments"
+                ],
+                [
+                    "div:nth-of-type(3) > p:nth-of-type(1) > a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[2]/aside/div/section/div[3]/p[1]/a"
+                ],
+                [
+                    "pierce/div:nth-of-type(3) > p:nth-of-type(1) > a"
+                ],
+                [
+                    "text/Departments"
+                ]
+            ],
+            "offsetY": 17.484771728515625,
+            "offsetX": 117.10311698913574
+        },
+        {
+            "type": "click",
+            "target": "main",
+            
+            "selectors": [
+                [
+                    "aria/Add a department",
+                    "aria/[role=\"generic\"]"
+                ],
+                [
+                    "div.flexrow span"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/button[2]/span"
+                ],
+                [
+                    "pierce/div.flexrow span"
+                ]
+            ],
+            "offsetY": 7.515625,
+            "offsetX": 23.578125
+        },
+        {
+            "type": "change",
+            "value": "Department 1",
+            
+            "selectors": [
+                [
+                    "input"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[4]/div[2]/div/form/div[1]/p/input"
+                ],
+                [
+                    "pierce/input"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "click",
+            "target": "main",
+            
+            "selectors": [
+                [
+                    "div:nth-of-type(16) > span"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[4]/div[2]/div/form/div[2]/div/div[16]/span"
+                ],
+                [
+                    "pierce/div:nth-of-type(16) > span"
+                ]
+            ],
+            "offsetY": 22.837493896484375,
+            "offsetX": 30.4000244140625
+        },
+        {
+            "type": "click",
+            "target": "main",
+            
+            "selectors": [
+                [
+                    "aria/Confirm"
+                ],
+                [
+                    "div.is-active a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[4]/div[2]/div/div/p/a"
+                ],
+                [
+                    "pierce/div.is-active a"
+                ]
+            ],
+            "offsetY": 12.4375,
+            "offsetX": 53.421875
+        },
+        {
+            "type": "click",
+            "target": "main",
+            
+            "selectors": [
+                [
+                    "div.nav-left img"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[1]/nav/div[1]/a/img"
+                ],
+                [
+                    "pierce/div.nav-left img"
+                ]
+            ],
+            "offsetY": 24.5,
+            "offsetX": 21
+        },
+        {
+            "type": "click",
+            "target": "main",
+            
+            "selectors": [
+                [
+                    "aria/Task Types"
+                ],
+                [
+                    "div:nth-of-type(3) > p:nth-of-type(3) > a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[2]/aside/div/section/div[3]/p[3]/a"
+                ],
+                [
+                    "pierce/div:nth-of-type(3) > p:nth-of-type(3) > a"
+                ],
+                [
+                    "text/Task Types"
+                ]
+            ],
+            "offsetY": 15.703521728515625,
+            "offsetX": 116.10311698913574
+        },
+        {
+            "type": "click",
+            "target": "main",
+            
+            "selectors": [
+                [
+                    "aria/Add a task type",
+                    "aria/[role=\"generic\"]"
+                ],
+                [
+                    "div.task-types > div.flexrow span"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/button[2]/span"
+                ],
+                [
+                    "pierce/div.task-types > div.flexrow span"
+                ]
+            ],
+            "offsetY": 15.515625,
+            "offsetX": 25.75
+        },
+        {
+            "type": "click",
+            "target": "main",
+            
+            "selectors": [
+                [
+                    "div.department-combo > div > div"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[5]/div[2]/div/form/div[5]/div[1]/div/div"
+                ],
+                [
+                    "pierce/div.department-combo > div > div"
+                ]
+            ],
+            "offsetY": 20.625,
+            "offsetX": 180.90625
+        },
+        {
+            "type": "click",
+            "target": "main",
+            
+            "selectors": [
+                [
+                    "div.nav-left img"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[1]/nav/div[1]/a/img"
+                ],
+                [
+                    "pierce/div.nav-left img"
+                ]
+            ],
+            "offsetY": 19.5,
+            "offsetX": 18
+        },
+        {
+            "type": "click",
+            "target": "main",
+            
+            "selectors": [
+                [
+                    "aria/People"
+                ],
+                [
+                    "div:nth-of-type(2) > p:nth-of-type(2) > a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[2]/aside/div/section/div[2]/p[2]/a"
+                ],
+                [
+                    "pierce/div:nth-of-type(2) > p:nth-of-type(2) > a"
+                ],
+                [
+                    "text/People"
+                ]
+            ],
+            "offsetY": 9.406646728515625,
+            "offsetX": 98.10311698913574
+        },
+        {
+            "type": "click",
+            "target": "main",
+            
+            "selectors": [
+                [
+                    "aria/Return To Production",
+                    "aria/[role=\"generic\"]"
+                ],
+                [
+                    "div.nav-left span"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[1]/nav/div[1]/div/a/span"
+                ],
+                [
+                    "pierce/div.nav-left span"
+                ],
+                [
+                    "text/Return To Production"
+                ]
+            ],
+            "offsetY": 7,
+            "offsetX": 82.5
+        },
+        {
+            "type": "click",
+            "target": "main",
+            
+            "selectors": [
+                [
+                    "aria/EL CAMINO",
+                    "aria/[role=\"image\"]"
+                ],
+                [
+                    "div.open-productions-box img"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[2]/div/div/a/div[1]/img"
+                ],
+                [
+                    "pierce/div.open-productions-box img"
+                ]
+            ],
+            "offsetY": 70.46484375,
+            "offsetX": 77
+        },
+        {
+            "type": "click",
+            "target": "main",
+            
+            "selectors": [
+                [
+                    "div.main-column span.name"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/div/div[1]/div[1]/div[3]/div[1]/div[1]/div/div/span/span[2]"
+                ],
+                [
+                    "pierce/div.main-column span.name"
+                ],
+                [
+                    "text/All Departments"
+                ]
+            ],
+            "offsetY": 10.203125,
+            "offsetX": 91.46875
+        },
+        {
+            "type": "click",
+            "target": "main",
+            
+            "selectors": [
+                [
+                    "div.columns div.select-input > div:nth-of-type(1)"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[1]/div/div[1]/div[1]/div[3]/div[1]/div[1]/div[2]/div[1]"
+                ],
+                [
+                    "pierce/div.columns div.select-input > div:nth-of-type(1)"
+                ]
+            ],
+            "offsetY": 22.09375,
+            "offsetX": 128.9375
+        },
+        {
+            "type": "click",
+            "target": "main",
+            
+            "selectors": [
+                [
+                    "div.topbar a > img"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[1]/nav/div[1]/a/img"
+                ],
+                [
+                    "pierce/div.topbar a > img"
+                ]
+            ],
+            "offsetY": 21.5,
+            "offsetX": 22
+        },
+        {
+            "type": "click",
+            "target": "main",
+            
+            "selectors": [
+                [
+                    "aria/Departments"
+                ],
+                [
+                    "div:nth-of-type(3) > p:nth-of-type(1) > a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[2]/aside/div/section/div[3]/p[1]/a"
+                ],
+                [
+                    "pierce/div:nth-of-type(3) > p:nth-of-type(1) > a"
+                ]
+            ],
+            "offsetY": 11.484771728515625,
+            "offsetX": 103.10311698913574
+        },
+        {
+            "type": "hover",
+            "target": "main",
+            
+            "selectors": [
+                [
+                    "tr:nth-of-type(4) [data-test='button-edit'] > svg"
+                ],
+                [
+                    "xpath///*[@data-test=\"button-edit\"]/svg"
+                ],
+                [
+                    "pierce/tr:nth-of-type(4) [data-test='button-edit'] > svg"
+                ]
+            ],
+            "offsetY": 9.359375,
+            "offsetX": 12.296875
+        },
+        {
+            "type": "click",
+            "target": "main",
+            
+            "selectors": [
+                [
+                    "tr:nth-of-type(4) [data-test='button-edit'] > svg"
+                ],
+                [
+                    "xpath///*[@data-test=\"button-edit\"]/svg"
+                ],
+                [
+                    "pierce/tr:nth-of-type(4) [data-test='button-edit'] > svg"
+                ]
+            ],
+            "offsetY": 9.359375,
+            "offsetX": 12.296875
+        },
+        {
+            "type": "change",
+            "value": "Department 1 updated",
+            
+            "selectors": [
+                [
+                    "input"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[4]/div[2]/div/form/div[1]/p/input"
+                ],
+                [
+                    "pierce/input"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "click",
+            "target": "main",
+            
+            "selectors": [
+                [
+                    "aria/Confirm"
+                ],
+                [
+                    "div.is-active a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[4]/div[2]/div/div/p/a"
+                ],
+                [
+                    "pierce/div.is-active a"
+                ]
+            ],
+            "offsetY": 15.84375,
+            "offsetX": 49.421875
+        },
+        {
+            "type": "hover",
+            "target": "main",
+            
+            "selectors": [
+                [
+                    "tr:nth-of-type(4) [data-test='button-delete-admin'] > svg"
+                ],
+                [
+                    "xpath///*[@data-test=\"button-delete-admin\"]/svg"
+                ],
+                [
+                    "pierce/tr:nth-of-type(4) [data-test='button-delete-admin'] > svg"
+                ]
+            ],
+            "offsetY": 7.359375,
+            "offsetX": 8.5
+        },
+        {
+            "type": "click",
+            "target": "main",
+            
+            "selectors": [
+                [
+                    "tr:nth-of-type(4) [data-test='button-delete-admin'] > svg"
+                ],
+                [
+                    "xpath///*[@data-test=\"button-delete-admin\"]/svg"
+                ],
+                [
+                    "pierce/tr:nth-of-type(4) [data-test='button-delete-admin'] > svg"
+                ]
+            ],
+            "offsetY": 7.359375,
+            "offsetX": 8.5
+        },
+        {
+            "type": "click",
+            "target": "main",
+            
+            "selectors": [
+                [
+                    "aria/Confirm"
+                ],
+                [
+                    "div.delete-modal a"
+                ],
+                [
+                    "xpath///*[@id=\"app\"]/div/div/div[3]/div[5]/div[2]/div/p[2]/a"
+                ],
+                [
+                    "pierce/div.delete-modal a"
+                ]
+            ],
+            "offsetY": 11.5,
+            "offsetX": 31.421875
+        }
+    ]
+}
