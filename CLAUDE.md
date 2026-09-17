@@ -338,7 +338,12 @@ This keeps auth/error handling, retries and store updates centralised. If you fi
 - Test files go in `tests/unit/` with `.spec.js` extension
 - Framework: Vitest with jsdom
 - Run: `npm run test:unit`
+- **Transform cache** (`fsModuleCache`): entries ignore how imports resolve. When an extensionless import starts resolving to another file (module turned into `dir/index.js` or back, new extension, same-named file added), run `npx vitest --clearCache` after committing, pulling, or checking out across that change. Symptom: a missing module on an unchanged import. In that change and in its revert, delete the old path and set `VITEST_CACHE_VERSION` in `.github/workflows/ci.yml` to a unique value (date and module).
+- **Use jsdom only when a spec needs the DOM**: its setup is the largest share of suite time. A spec that mounts nothing and never touches `document`/`window` starts with `// @vitest-environment node` on line 1. Test a `ref`/`computed`/`watch`-only composable inside an `effectScope()`, not a mounted host.
+  - Node 22 and 24 lack DOM globals Node 26 has, such as `Storage`: a node spec can pass on Node 26 (locally or on the `current` CI job), then fail on 22 and 24. `localStorage`/`sessionStorage` are plain objects from `tests/storage.setup.js`: spy on the global, never on `Storage.prototype`. Stub any other DOM global on `globalThis`.
+  - Vitest matches the pragma anywhere in the file: never quote it elsewhere in a spec.
 - A green unit test is NOT proof a UI/player bug is fixed — reproduce against the running dev app (localhost:8080) before claiming success.
+- **Strict Red/Green TDD Cycle:** To prevent shallow or fake tests, you must write the test or assertion first, run `npx vitest run <file>` to verify that it **fails (Red)**, write the minimal code to make it **pass (Green)**, and then refactor. Never mock internal module logic that can be tested through public component interfaces.
 
 ## Migration status
 
