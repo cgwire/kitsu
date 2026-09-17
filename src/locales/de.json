@@ -1435,6 +1435,8 @@
       "reset_list": "Liste zurücksetzen",
       "select_task_type": "Wählen Sie einen Aufgabentyp...",
       "show_assigned": "Zugeordnete Einheiten anzeigen",
+      "task_types_filter": "Aufgaben filtern",
+      "task_types_filter_select": "Aufgaben auswählen",
       "title": "Zeitplan",
       "title_main": "Hauptterminplan",
       "today": "Heute",
