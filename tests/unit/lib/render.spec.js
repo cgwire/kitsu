@@ -1,7 +1,6 @@
 // @vitest-environment node
 
 import {
-  getTaskTypeStyle,
   renderComment,
   renderFileSize,
   renderMarkdown,
@@ -23,16 +22,6 @@ describe('render', () => {
       expect(safeUrl('vbscript:msgbox')).toBe(null)
       expect(safeUrl('')).toBe(null)
       expect(safeUrl(undefined)).toBe(null)
-    })
-  })
-
-  test('getTaskTypeStyle', () => {
-    const task = { task_type_color: 'red' }
-    expect(getTaskTypeStyle(task)).toEqual({
-      'border-left': '4px solid red'
-    })
-    expect(getTaskTypeStyle(null)).toEqual({
-      'border-left': '4px solid transparent'
     })
   })
 

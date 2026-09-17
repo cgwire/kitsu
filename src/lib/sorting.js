@@ -190,12 +190,6 @@ export const sortTaskTypeScheduleItems = (
   return items.sort(sortFunc)
 }
 
-export const sortPlaylists = playlists => {
-  return playlists.sort(
-    firstBy('created_at', -1).thenBy((a, b) => collator.compare(a.name, b.name))
-  )
-}
-
 export const sortPeople = people => {
   return [...people].sort(
     firstBy('active', -1)

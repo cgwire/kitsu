@@ -6,7 +6,6 @@ import {
   removeFromIdList,
   getFilledColumns,
   groupEntitiesByParents,
-  findModelInList,
   populateTask,
   setTasksEntityPreview,
   updateModelFromList,
@@ -102,17 +101,6 @@ describe('lib/helpers', () => {
         }
       ]
     ])
-  })
-
-  it('findModelInList', () => {
-    const items = [
-      { id: '1', name: 'item-1' },
-      { id: '2', name: 'item-2' },
-      { id: '3', name: 'item-3' }
-    ]
-    const model = { id: '2', name: 'item-2' }
-    expect(findModelInList(items, model)).toEqual(items[1])
-    expect(findModelInList(items, { id: '5' })).toEqual(undefined)
   })
 
   it('updateModeFromList', () => {

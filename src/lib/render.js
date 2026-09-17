@@ -45,14 +45,6 @@ export const sanitize = (html, options) => {
   })
 }
 
-export const getTaskTypeStyle = task => {
-  let border = 'transparent'
-  if (task) border = task.task_type_color
-  return {
-    'border-left': `4px solid ${border}`
-  }
-}
-
 export const renderComment = (
   input,
   mentions,
