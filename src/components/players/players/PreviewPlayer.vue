@@ -474,6 +474,7 @@ import { useComparison } from '@/composables/players/comparison'
 import { useOnionSkin } from '@/composables/players/onionSkin'
 import { usePreviewShortcuts } from '@/composables/players/previewShortcuts'
 import { usePlayerTransport } from '@/composables/players/transport'
+import { useTrimmedShot } from '@/composables/players/trimmedShot'
 import func from '@/lib/func'
 import { getEntityPath } from '@/lib/path'
 import { mergeAnnotationsByFrame } from '@/lib/players/annotation'
@@ -1355,18 +1356,11 @@ const onProgressChanged = frame => {
 }
 
 // Shot trim handles, shown on the progress bar like in PlaylistPlayer.
-// Not every parent passes entity-type (the Task page doesn't): derive the
-// type from the task payload too. A plain function, not a computed: the
-// shotMap getter exposes a non-reactive cache, so it must be re-read at
-// call time (the watcher below re-runs when the shots finish loading).
-const getTrimmedShot = () => {
-  const entityType =
-    props.entityType ||
-    props.task?.entity_type?.name ||
-    props.task?.entity_type_name
-  if (entityType !== 'Shot') return null
-  return store.getters.shotMap?.get(props.task?.entity_id) || props.task?.entity
-}
+const { getTrimmedShot, saveTrimmedShot } = useTrimmedShot({
+  entityType: computed(() => props.entityType),
+  store,
+  task: computed(() => props.task)
+})
 
 const toFrameNumber = value => {
   const frame = parseInt(value, 10)
@@ -1404,15 +1398,9 @@ const onHandleOutChanged = ({ frameNumber, save }) => {
 }
 
 const saveHandles = () => {
-  const shot = getTrimmedShot()
-  if (!shot?.id) return
-  store.dispatch('editShot', {
-    id: shot.id,
-    data: {
-      ...shot.data,
-      ...(handleIn.value >= 0 && { handle_in: handleIn.value }),
-      ...(handleOut.value >= 0 && { handle_out: handleOut.value })
-    }
+  saveTrimmedShot({
+    ...(handleIn.value >= 0 && { handle_in: handleIn.value }),
+    ...(handleOut.value >= 0 && { handle_out: handleOut.value })
   })
 }
 
