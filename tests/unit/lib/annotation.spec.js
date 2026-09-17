@@ -743,4 +743,12 @@ describe('lib/annotation', () => {
       expect(clone.serialize().eraser.objects).toHaveLength(1)
     })
   })
+
+  describe('Arrow', () => {
+    it('exposes a static type so Fabric v6 toObject serializes it as "arrow"', () => {
+      // Arrow extends fabric.Line; without its own static type, v6's
+      // toObject() would read Line's static type and serialize it as "line".
+      expect(Arrow.type).toBe('arrow')
+    })
+  })
 })

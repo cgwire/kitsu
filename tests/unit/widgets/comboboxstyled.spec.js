@@ -72,6 +72,21 @@ describe('ComboboxStyled', () => {
     expect(wrapper.find('.selected-line').text()).toBe('Version 3')
   })
 
+  it('translates prefixed labels and leaves raw ones untouched', async () => {
+    await wrapper.setProps({
+      options: [
+        { label: 'due_date', value: 'due_date' },
+        { label: 'due_date', value: 'metadata.due_date', raw: true }
+      ],
+      localeKeyPrefix: 'tasks.fields.',
+      modelValue: 'due_date'
+    })
+    await wrapper.find('.combo').trigger('click')
+    const optionLines = wrapper.findAll('.option-line')
+    expect(optionLines[0].text()).toBe('Due date')
+    expect(optionLines[1].text()).toBe('due_date')
+  })
+
   it('selects first option when modelValue does not match', () => {
     const w = shallowMount(ComboboxStyled, {
       props: { options, modelValue: 'nonexistent' },
