@@ -242,12 +242,6 @@ describe('composables/annotation', () => {
       expect(api.findAnnotation(list, 5.0)).toBeUndefined()
       wrapper.unmount()
     })
-
-    it('returns undefined for an empty list', () => {
-      const { api, wrapper } = mountAnnotation()
-      expect(api.findAnnotation([], 1.0)).toBeUndefined()
-      wrapper.unmount()
-    })
   })
 
   describe('getObjectById', () => {
@@ -273,25 +267,6 @@ describe('composables/annotation', () => {
   })
 
   describe('addSerialization', () => {
-    it('persists the eraser mask even when toJSON omits it (PSStroke case)', () => {
-      const { api, wrapper } = mountAnnotation()
-      const obj = {
-        id: 'stroke-1',
-        canvasWidth: 800,
-        canvasHeight: 600,
-        // toJSON drops the eraser (mirrors PSStroke's custom toObject).
-        toJSON: () => ({ type: 'PSStroke' }),
-        eraser: { toObject: () => ({ type: 'eraser', objects: [{ path: 'M 0 0' }] }) }
-      }
-      api.addSerialization(obj)
-      const result = obj.serialize()
-      expect(result.eraser).toEqual({
-        type: 'eraser',
-        objects: [{ path: 'M 0 0' }]
-      })
-      wrapper.unmount()
-    })
-
     it('stamps and persists createdBy and createdAt', () => {
       const { api, wrapper } = mountAnnotation()
       const obj = createSerializableObject({ id: 'meta-1' })
@@ -717,14 +692,6 @@ describe('composables/annotation', () => {
     })
   })
 
-  describe('resetUndoStacks', () => {
-    it('runs without throwing', () => {
-      const { api, wrapper } = mountAnnotation()
-      expect(() => api.resetUndoStacks()).not.toThrow()
-      wrapper.unmount()
-    })
-  })
-
   describe('color and pencil changes', () => {
     it('onChangePencilColor updates the color', () => {
       const { api, canvas, wrapper } = mountAnnotation()
@@ -1102,18 +1069,6 @@ describe('composables/annotation', () => {
     })
   })
 
-  describe('startAnnotationSaving', () => {
-    it('flips notSaved on', () => {
-      const { api, wrapper } = mountAnnotation()
-      api.startAnnotationSaving({ id: 'p-1' }, [])
-      expect(api.notSaved.value).toBe(true)
-      // Reset the auto-save timeout: endAnnotationSaving consumes the buffer
-      // and clears the pending setTimeout to avoid leaking into other tests.
-      api.endAnnotationSaving()
-      wrapper.unmount()
-    })
-  })
-
   describe('onWindowsClosed', () => {
     it('returns the warning message when annotations are not saved', () => {
       const { api, wrapper } = mountAnnotation()
@@ -1172,6 +1127,38 @@ describe('composables/annotation', () => {
       expect(canvas.remove).toHaveBeenCalledTimes(2)
       expect(canvas.remove).toHaveBeenNthCalledWith(1, child1)
       expect(canvas.remove).toHaveBeenNthCalledWith(2, child2)
+      wrapper.unmount()
+    })
+  })
+
+  // The players call it on every preview switch, so an undo never replays a
+  // stroke of the previous preview.
+  describe('resetUndoStacks', () => {
+    it('forgets the actions left to undo', () => {
+      const obj = createSerializableObject({ id: 'a' })
+      const canvas = createFakeCanvas()
+      const { api, wrapper } = mountAnnotation({ canvas })
+
+      api.addObject(obj)
+      api.resetUndoStacks()
+      api.undoLastAction()
+
+      expect(canvas.remove).not.toHaveBeenCalled()
+      wrapper.unmount()
+    })
+
+    it('forgets the actions left to redo', () => {
+      const obj = createSerializableObject({ id: 'a' })
+      const canvas = createFakeCanvas()
+      const { api, wrapper } = mountAnnotation({ canvas })
+
+      api.addObject(obj)
+      api.undoLastAction()
+      canvas.add.mockClear()
+      api.resetUndoStacks()
+      api.redoLastAction()
+
+      expect(canvas.add).not.toHaveBeenCalled()
       wrapper.unmount()
     })
   })

@@ -19,10 +19,6 @@ describe('ComboboxActions', () => {
     })
   })
 
-  it('mounts successfully', () => {
-    expect(wrapper.exists()).toBe(true)
-  })
-
   it('exposes combobox/listbox ARIA roles', async () => {
     const trigger = wrapper.find('.flexrow')
     expect(trigger.attributes('role')).toBe('combobox')

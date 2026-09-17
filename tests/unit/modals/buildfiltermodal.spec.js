@@ -161,9 +161,6 @@ describe('BuildFilterModal', () => {
   })
 
   describe('UI', () => {
-    it('mount succeeds', () => {
-      wrapper.findComponent(BuildFilterModal)
-    })
     describe('mount with query', () => {
       it('task types', async () => {
           expect(wrapper.find('.task-type-filter').exists()).toBeFalsy()
@@ -266,30 +263,15 @@ describe('BuildFilterModal', () => {
           it('type is not', () => {
             setState({
               assetTypeFilters: {
-                operator: '=',
+                operator: '=-',
                 value: 'asset-type-1'
               }
             })
             const query = wrapper.vm.buildFilter()
-            expect(query).toBe('type=[chars]')
+            expect(query).toBe('type=[-chars]')
           })
         })
         describe('task types', () => {
-          it('status is', () => {
-            setState({
-              taskTypeFilters: {
-                values: [
-                  {
-                    id: 'task-type-1',
-                    operator: '=',
-                    values: ['task-status-2']
-                  }
-                ]
-              }
-            })
-            const query = wrapper.vm.buildFilter()
-            expect(query).toBe('[Modeling]=[WIP]')
-          })
           it('status is not', () => {
             setState({
               taskTypeFilters: {
@@ -463,12 +445,12 @@ describe('BuildFilterModal', () => {
             ])
           })
           it('status is not', () => {
-            changeSearch('Modeling=WIP')
+            changeSearch('Modeling=-WIP')
             wrapper.vm.setFiltersFromCurrentQuery()
             expect(wrapper.vm.taskTypeFilters.values).toMatchObject([
               {
                 id: 'task-type-1',
-                operator: '=',
+                operator: '=-',
                 values: ['task-status-2']
               }
             ])

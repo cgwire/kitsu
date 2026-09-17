@@ -13,8 +13,6 @@ const fadeColorIndex = new Map()
 let colorHashConstructor = ColorHash
 if (ColorHash.default) colorHashConstructor = ColorHash.default
 
-const DARK_STATUS_NAMES = ['todo', 'wtg']
-
 export default {
   /*
    * Turn hexadecimal color (#FFFFFF) to a darker and more saturated version.
@@ -86,16 +84,5 @@ export default {
     if (fadeColorIndex.size > 10000) fadeColorIndex.clear()
     fadeColorIndex.set(cacheKey, result)
     return result
-  },
-
-  /*
-   * Quick and dirty function to change the text color in case the status color
-   * is too dark.
-   */
-  validationTextColor(task) {
-    if (task && !DARK_STATUS_NAMES.includes(task.task_status_short_name)) {
-      return 'white'
-    }
-    return '#333'
   }
 }

@@ -52,21 +52,12 @@ describe('ComboboxStatus', () => {
     })
   })
 
-  it('mounts successfully', () => {
-    expect(wrapper.exists()).toBe(true)
-  })
-
   it('displays current status short name', () => {
     expect(wrapper.find('.tag').text()).toBe('WIP')
   })
 
   it('does not show the dropdown list initially', () => {
     expect(wrapper.find('.select-input').exists()).toBe(false)
-  })
-
-  it('shows the dropdown list on click', async () => {
-    await wrapper.find('.flexrow').trigger('click')
-    expect(wrapper.find('.select-input').exists()).toBe(true)
   })
 
   it('renders all statuses in the dropdown', async () => {

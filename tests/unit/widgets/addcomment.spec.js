@@ -132,10 +132,6 @@ describe('AddComment', () => {
     })
   })
 
-  it('mounts successfully', () => {
-    expect(wrapper.exists()).toBe(true)
-  })
-
   it('renders the status tab as active by default', () => {
     const tabs = wrapper.findAll('.tab-row span')
     const statusTab = tabs[0]
@@ -154,16 +150,6 @@ describe('AddComment', () => {
     expect(
       html.includes('at-ta') || html.includes('textarea')
     ).toBe(true)
-  })
-
-  it('updates draft text via exposed API', () => {
-    draftComment.text = 'Great work!'
-    expect(draftComment.text).toBe('Great work!')
-  })
-
-  it('shows post button', () => {
-    const postButton = wrapper.find('.post-button')
-    expect(postButton.exists()).toBe(true)
   })
 
   it('emits add-comment when post button is clicked in status mode', async () => {

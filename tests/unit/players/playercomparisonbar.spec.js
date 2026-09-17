@@ -18,15 +18,14 @@ const mountBar = (props = {}) =>
 
 describe('players/PlayerComparisonBar', () => {
   describe('comparison picture picker', () => {
-    it('is hidden when the compared revision has a single picture', () => {
-      const wrapper = mountBar({ comparisonPreviewLength: 1 })
-      expect(wrapper.find('.comparison-list').exists()).toBe(false)
-    })
-
-    it('is hidden when the compared revision picture count is unknown', () => {
-      const wrapper = mountBar({ comparisonPreviewLength: 0 })
-      expect(wrapper.find('.comparison-list').exists()).toBe(false)
-    })
+    // The players send 0 when the compared revision has no previews array.
+    it.each([0, 1])(
+      'is hidden when the compared revision has %s picture',
+      comparisonPreviewLength => {
+        const wrapper = mountBar({ comparisonPreviewLength })
+        expect(wrapper.find('.comparison-list').exists()).toBe(false)
+      }
+    )
 
     it('is hidden when not comparing', () => {
       const wrapper = mountBar({

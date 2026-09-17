@@ -21,10 +21,6 @@ describe('ComboboxSimple', () => {
     })
   })
 
-  it('mounts successfully', () => {
-    expect(wrapper.exists()).toBe(true)
-  })
-
   it('renders all options as clickable spans', () => {
     const choices = wrapper.findAll('.choice')
     expect(choices).toHaveLength(3)

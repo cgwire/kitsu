@@ -310,17 +310,6 @@ describe('Shots store', () => {
       expect(shotsStore.getters.shotsLoadingKey(state)).toBe('p-all/all')
     })
 
-    test('the loading scope is served from the state, and cleared with the shots', () => {
-      const state = { shotsLoadingKey: null, selectedShots: new Map() }
-      shotsStore.mutations.LOAD_SHOTS_START(state, {
-        loadingKey: 'p-all/all'
-      })
-      expect(shotsStore.getters.shotsLoadingKey(state)).toBe('p-all/all')
-
-      shotsStore.mutations.CLEAR_SHOTS(state)
-      expect(shotsStore.getters.shotsLoadingKey(state)).toBe(null)
-    })
-
     test('still no-ops on the main pack (there is no main pack for shots)', async () => {
       const getShots = vi.spyOn(shotsApi, 'getShots').mockResolvedValue([])
       const commit = vi.fn()

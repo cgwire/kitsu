@@ -17,6 +17,11 @@ jobs:
   test:
     name: Test (Node ${{ matrix.node }})
     runs-on: ubuntu-latest
+    env:
+      # Vitest transform cache version (see its cache step). Change it to a
+      # value no other branch would pick, such as the date and the moved
+      # module: two branches changing it at the same time then conflict here.
+      VITEST_CACHE_VERSION: 2026-09-17
     strategy:
       matrix:
         node: [22, 24, current]
@@ -40,6 +45,20 @@ jobs:
         with:
           path: node_modules/.vite
           key: vite-${{ runner.os }}-node${{ matrix.node }}-${{ hashFiles('package-lock.json', 'vite.config.js') }}
+      # Vitest transform cache: each passing run saves its own copy and restores
+      # the latest one saved on its ref, then on the base branch. Entries
+      # ignore how imports resolve (see vite.config.js): with a change to the
+      # file an unchanged extensionless import resolves to, and again with its
+      # revert, change VITEST_CACHE_VERSION, or restored entries keep the old
+      # paths. To clear a branch already red without a commit:
+      # gh cache list --key vitest- --json id --jq '.[].id' | xargs -n1 gh cache delete
+      - name: Cache the Vitest transforms
+        uses: actions/cache@v6
+        with:
+          path: node_modules/.vitest-cache
+          key: vitest-${{ env.VITEST_CACHE_VERSION }}-${{ runner.os }}-node${{ matrix.node }}-${{ hashFiles('package-lock.json', 'vite.config.js') }}-${{ github.sha }}
+          restore-keys: |
+            vitest-${{ env.VITEST_CACHE_VERSION }}-${{ runner.os }}-node${{ matrix.node }}-${{ hashFiles('package-lock.json', 'vite.config.js') }}-
       - name: Run tests
         run: npm run test:unit
 

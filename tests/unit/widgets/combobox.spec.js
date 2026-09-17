@@ -21,10 +21,6 @@ describe('Combobox', () => {
     })
   })
 
-  it('mounts successfully', () => {
-    expect(wrapper.exists()).toBe(true)
-  })
-
   it('renders all options', () => {
     const optionEls = wrapper.findAll('option')
     expect(optionEls).toHaveLength(3)

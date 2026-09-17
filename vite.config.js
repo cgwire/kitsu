@@ -112,6 +112,18 @@ export default defineConfig({
     // reuse the process where the default 'forks' pool pays a Node bootstrap.
     pool: 'threads',
     isolate: true,
+    // Transforms are a third of the run: persist them in
+    // node_modules/.vitest-cache. Entries are keyed on each file's own content,
+    // config, and lockfile, not on how its imports resolve. Whenever the working
+    // tree crosses a change to the file an unchanged extensionless import
+    // resolves to (a module turned into a directory index or back, renamed to
+    // another extension, or joined by a same-named file with another one),
+    // making, pulling, checking out, or bisecting across it, run
+    // `npx vitest --clearCache`: the symptom is a missing module on an import
+    // that did not change. Delete the old path in that change, or cached
+    // importers keep loading it without any error. In CI, change
+    // VITEST_CACHE_VERSION (.github/workflows/ci.yml).
+    fsModuleCache: true,
     deps: {
       optimizer: {
         client: {

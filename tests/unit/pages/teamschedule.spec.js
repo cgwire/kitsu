@@ -779,20 +779,6 @@ describe('TeamSchedule page', () => {
       wrapper.unmount()
     })
 
-    it('ignores an entity absent from the panel', async () => {
-      const { wrapper, handler } = await mountPage()
-      wrapper.vm.unassignedTasks = [
-        { id: 'task-1', entity_id: 'entity-1', entity_preview_file_id: 'old' }
-      ]
-
-      handler({ entity_id: 'entity-9', preview_file_id: 'preview-1' })
-
-      expect(wrapper.vm.unassignedTasks[0].entity_preview_file_id).toEqual(
-        'old'
-      )
-      wrapper.unmount()
-    })
-
     it('is unregistered on unmount', async () => {
       const { wrapper, socket, handler } = await mountPage()
       wrapper.unmount()

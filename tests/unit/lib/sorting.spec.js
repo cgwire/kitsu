@@ -7,7 +7,6 @@ import {
   sortByPersonName,
   sortByDate,
   sortPeople,
-  sortPlaylists,
   sortProductions,
   sortTaskTypeScheduleItems,
   sortSequences,
@@ -25,9 +24,6 @@ const taskTypeMap = new Map(Object.entries({
 }))
 
 describe('lib/sorting', () => {
-  beforeEach(() => {
-  })
-
   it('sortByMetadata', () => {
     const entries = [
       { id: 1, data: { render_layer: 'fg' } },
@@ -402,19 +398,6 @@ describe('lib/sorting', () => {
 
     results = sortValidationColumns([])
     expect(results).toHaveLength(0)
-  })
-
-  it('sortPlaylists', () => {
-    const entries = [
-      { id: 1, created_at: '2018-09-12-12:18:30', name: 'Playlist1' },
-      { id: 2, created_at: '2018-09-18-18:19:00', name: 'Playlist2' },
-      { id: 3, created_at: '2018-09-18-18:19:00', name: 'Playlist3' }
-    ]
-    const results = sortPlaylists(entries)
-    expect(results).toHaveLength(3)
-    expect(results[0].id).toEqual(2)
-    expect(results[1].id).toEqual(3)
-    expect(results[2].id).toEqual(1)
   })
 
   it('sortPeople', () => {

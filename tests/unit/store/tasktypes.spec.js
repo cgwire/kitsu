@@ -70,8 +70,9 @@ describe('Task types store', () => {
         .toHaveLength(1)
     })
     test('editTaskTypes', () => {
-      expect(store.getters.shotTaskTypes(state, null, null, rootGetters))
-        .toHaveLength(1)
+      expect(
+        store.getters.editTaskTypes(state, null, null, rootGetters)
+      ).toEqual([taskTypes[3]])
     })
     test('getTaskTypeOptions', () => {
       expect(

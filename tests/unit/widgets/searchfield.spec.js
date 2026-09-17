@@ -20,14 +20,6 @@ describe('SearchField', () => {
     })
   })
 
-  it('mounts successfully', () => {
-    expect(wrapper.exists()).toBe(true)
-  })
-
-  it('renders a search input', () => {
-    expect(wrapper.find('.search-input').exists()).toBe(true)
-  })
-
   it('emits change event on input, debounced', async () => {
     vi.useFakeTimers()
     const input = wrapper.find('.search-input')
