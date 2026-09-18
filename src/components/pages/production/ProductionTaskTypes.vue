@@ -446,6 +446,7 @@ watch(
 .datatable th {
   color: var(--text);
   padding-left: 10px;
+  padding-top: 1em;
 }
 
 .th-grab {
