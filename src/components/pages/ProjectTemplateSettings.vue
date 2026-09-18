@@ -25,6 +25,17 @@
               {{ $t('productions.parameters.title') }}
             </a>
           </li>
+          <li :class="{ 'is-active': isActiveTab('video') }">
+            <a
+              role="button"
+              tabindex="0"
+              @click="activeTab = 'video'"
+              @keydown.enter.prevent="activeTab = 'video'"
+              @keydown.space.prevent="activeTab = 'video'"
+            >
+              {{ $t('productions.video.title') }}
+            </a>
+          </li>
           <li :class="{ 'is-active': isActiveTab('metadataDescriptors') }">
             <a
               role="button"
@@ -130,47 +141,6 @@
                 :label="$t('productions.fields.homepage')"
                 :options="homepageOptions"
                 v-model="params.homepage"
-              />
-              <text-field
-                type="number"
-                :max="60"
-                :step="0.001"
-                :label="$t('productions.fields.fps')"
-                placeholder="25"
-                v-model="params.fps"
-              />
-              <text-field
-                :label="$t('productions.fields.ratio')"
-                placeholder="16:9"
-                :maxlength="10"
-                v-model.trim="params.ratio"
-                @input="ratioError = ''"
-              />
-              <p class="field-error" v-if="ratioError">{{ ratioError }}</p>
-              <text-field
-                :label="$t('productions.fields.resolution')"
-                placeholder="1920x1080"
-                v-model.trim="params.resolution"
-                @input="resolutionError = ''"
-              />
-              <p class="field-error" v-if="resolutionError">
-                {{ resolutionError }}
-              </p>
-              <text-field
-                type="number"
-                :min="1"
-                :max="200"
-                :label="$t('productions.fields.hd_bitrate_compression')"
-                placeholder="28"
-                v-model="params.hd_bitrate_compression"
-              />
-              <text-field
-                type="number"
-                :min="1"
-                :max="200"
-                :label="$t('productions.fields.ld_bitrate_compression')"
-                placeholder="6"
-                v-model="params.ld_bitrate_compression"
               />
               <h3 class="section-title">
                 {{ $t('productions.parameters.previews_and_comments') }}
@@ -282,6 +252,62 @@
       </div>
 
       <!-- Metadata Descriptors -->
+      <div class="tab" v-show="isActiveTab('video')">
+        <div class="columns">
+          <div class="column is-one-third box">
+            <div class="form">
+              <p class="explanation mb1">
+                {{ $t('productions.creation.explanation_video') }}
+              </p>
+              <text-field
+                type="number"
+                :max="60"
+                :step="0.001"
+                :label="$t('productions.fields.fps')"
+                placeholder="25"
+                v-model="params.fps"
+              />
+              <text-field
+                :label="$t('productions.fields.ratio')"
+                placeholder="16:9"
+                :maxlength="10"
+                v-model.trim="params.ratio"
+                @input="ratioError = ''"
+              />
+              <p class="field-error" v-if="ratioError">{{ ratioError }}</p>
+              <text-field
+                :label="$t('productions.fields.resolution')"
+                placeholder="1920x1080"
+                v-model.trim="params.resolution"
+                @input="resolutionError = ''"
+              />
+              <p class="field-error" v-if="resolutionError">
+                {{ resolutionError }}
+              </p>
+              <text-field
+                type="number"
+                :min="1"
+                :max="200"
+                :label="$t('productions.fields.hd_bitrate_compression')"
+                placeholder="28"
+                v-model="params.hd_bitrate_compression"
+              />
+              <text-field
+                type="number"
+                :min="1"
+                :max="200"
+                :label="$t('productions.fields.ld_bitrate_compression')"
+                placeholder="6"
+                v-model="params.ld_bitrate_compression"
+              />
+              <p v-if="errors.parameters" class="error mt1">
+                {{ $t('productions.edit_error') }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="tab" v-show="isActiveTab('metadataDescriptors')">
         <div class="section-tabs tabs">
           <ul>
@@ -979,6 +1005,10 @@ h2.subtitle {
   max-width: 600px;
   width: 100%;
   padding: 2em;
+}
+
+.explanation {
+  color: var(--text-alt);
 }
 
 .section-title {
