@@ -1143,7 +1143,7 @@ const confirmEditLabel = async (form = {}) => {
 
 const toggleTextMode = () => {
   isTextMode.value = !isTextMode.value
-  localStorage.setItem('breakdown:text-mode', isTextMode.value)
+  preferences.setBoolPreference('breakdown:text-mode', isTextMode.value)
 }
 
 const toggleColumnSelector = () => {

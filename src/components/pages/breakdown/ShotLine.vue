@@ -44,9 +44,7 @@
         type="checkbox"
         :checked="entity ? entity.is_casting_standby : false"
         :disabled="!isCurrentUserManager"
-        :style="[
-          isCurrentUserManager ? { cursor: 'pointer' } : { cursor: 'auto' }
-        ]"
+        :class="{ 'is-editable': isCurrentUserManager }"
         @input="event => onStandbyChanged(entity, event)"
       />
     </div>
@@ -185,20 +183,12 @@
                 getMetadataChecklistValues(descriptor, entity)[option.text]
               "
               :disabled="!canEditDescriptor(descriptor)"
-              :style="[
-                canEditDescriptor(descriptor)
-                  ? { cursor: 'pointer' }
-                  : { cursor: 'auto' }
-              ]"
+              :class="{ 'is-editable': canEditDescriptor(descriptor) }"
             />
             <label
               class="ml05"
               :for="`${entity.id}-${descriptor.id}-${i}-${option.text}-input`"
-              :style="[
-                canEditDescriptor(descriptor)
-                  ? { cursor: 'pointer' }
-                  : { cursor: 'auto' }
-              ]"
+              :class="{ 'is-editable': canEditDescriptor(descriptor) }"
             >
               {{ option.text }}
             </label>
@@ -423,6 +413,15 @@ const nbAssetsForType = assetType =>
 </script>
 
 <style lang="scss" scoped>
+input[type='checkbox'],
+label {
+  cursor: auto;
+
+  &.is-editable {
+    cursor: pointer;
+  }
+}
+
 .dark {
   .asset-list {
     color: $light-grey;
