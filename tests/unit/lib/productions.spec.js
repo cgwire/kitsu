@@ -3,12 +3,33 @@
 import { describe, it, expect } from 'vitest'
 
 import {
+  clampBitrates,
   getTaskTypePriorityOfProd,
   getTaskStatusPriorityOfProd,
   parseBitrate
 } from '@/lib/productions'
 
 describe('productions', () => {
+  describe('clampBitrates', () => {
+    it('caps the high definition at 28 and the low one at the high one', () => {
+      expect(
+        clampBitrates({ hd_bitrate_compression: '40', ld_bitrate_compression: 30 })
+      ).toEqual({ hd_bitrate_compression: 28, ld_bitrate_compression: 28 })
+      expect(
+        clampBitrates({ hd_bitrate_compression: 10, ld_bitrate_compression: 12 })
+      ).toEqual({ hd_bitrate_compression: 10, ld_bitrate_compression: 10 })
+    })
+
+    it('uses the inherited high definition when the own one is unset', () => {
+      expect(
+        clampBitrates({ hd_bitrate_compression: '', ld_bitrate_compression: 12 }, 8)
+      ).toEqual({ hd_bitrate_compression: null, ld_bitrate_compression: 8 })
+      expect(
+        clampBitrates({ hd_bitrate_compression: null, ld_bitrate_compression: null })
+      ).toEqual({ hd_bitrate_compression: null, ld_bitrate_compression: null })
+    })
+  })
+
   describe('parseBitrate', () => {
     it('sends an empty field as null and a typed value as a number', () => {
       expect(parseBitrate('')).toBeNull()

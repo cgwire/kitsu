@@ -287,7 +287,7 @@
               <text-field
                 type="number"
                 :min="1"
-                :max="200"
+                :max="MAX_MOVIE_BITRATE"
                 :label="$t('productions.fields.hd_bitrate_compression')"
                 placeholder="28"
                 v-model="params.hd_bitrate_compression"
@@ -295,7 +295,7 @@
               <text-field
                 type="number"
                 :min="1"
-                :max="200"
+                :max="params.hd_bitrate_compression || MAX_MOVIE_BITRATE"
                 :label="$t('productions.fields.ld_bitrate_compression')"
                 placeholder="6"
                 v-model="params.ld_bitrate_compression"
@@ -462,9 +462,10 @@ import TextField from '@/components/widgets/TextField.vue'
 
 import {
   HOME_PAGE_OPTIONS,
+  MAX_MOVIE_BITRATE,
   PRODUCTION_STYLE_OPTIONS,
   PRODUCTION_TYPE_OPTIONS,
-  parseBitrate
+  clampBitrates
 } from '@/lib/productions'
 
 const { t } = useI18n()
@@ -652,14 +653,14 @@ const saveParameters = async () => {
   if (ratioError.value || resolutionError.value) return
   loading.parameters = true
   errors.parameters = false
+  const bitrates = clampBitrates(params.value)
   try {
     await store.dispatch('editProjectTemplate', {
       id: templateId.value,
       name: template.value.name,
       description: template.value.description,
       ...params.value,
-      hd_bitrate_compression: parseBitrate(params.value.hd_bitrate_compression),
-      ld_bitrate_compression: parseBitrate(params.value.ld_bitrate_compression)
+      ...bitrates
     })
   } catch {
     errors.parameters = true

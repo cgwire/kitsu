@@ -56,7 +56,7 @@
                     class="input"
                     type="number"
                     min="1"
-                    max="200"
+                    :max="bitrateCeiling(taskType, key)"
                     :placeholder="defaultBitrates[key] || ''"
                     :title="$t(`productions.fields.${key}`)"
                     :value="taskType[key] ?? ''"
@@ -100,7 +100,11 @@ import { useStore } from 'vuex'
 import draggable from 'vuedraggable'
 import { GripVerticalIcon } from 'lucide-vue-next'
 
-import { parseBitrate } from '@/lib/productions'
+import {
+  MAX_MOVIE_BITRATE,
+  clampBitrates,
+  parseBitrate
+} from '@/lib/productions'
 import { sortByName } from '@/lib/sorting'
 
 import SettingImporter from '@/components/widgets/SettingImporter.vue'
@@ -203,11 +207,18 @@ const onImportFromProduction = async productionId => {
   })
 }
 
+const bitrateCeiling = (taskType, key) =>
+  key === 'hd_bitrate_compression'
+    ? MAX_MOVIE_BITRATE
+    : taskType.hd_bitrate_compression ||
+      props.defaultBitrates.hd_bitrate_compression ||
+      MAX_MOVIE_BITRATE
+
 const onBitrateChange = (taskType, key, value) => {
-  const bitrates = Object.fromEntries(
-    BITRATE_KEYS.map(k => [k, parseBitrate(taskType[k])])
+  const bitrates = clampBitrates(
+    { ...taskType, [key]: value },
+    parseBitrate(props.defaultBitrates.hd_bitrate_compression)
   )
-  bitrates[key] = parseBitrate(value)
   emit('bitrates-changed', { taskTypeId: taskType.id, ...bitrates })
 }
 
