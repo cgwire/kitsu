@@ -172,6 +172,16 @@
                 placeholder="6"
                 v-model="params.ld_bitrate_compression"
               />
+              <h3 class="section-title">
+                {{ $t('productions.parameters.previews_and_comments') }}
+              </h3>
+              <text-field
+                class="number-line"
+                type="number"
+                :step="1"
+                :label="$t('productions.fields.max_retakes')"
+                v-model="params.max_retakes"
+              />
               <checkbox
                 class="mb1"
                 :toggle="true"
@@ -207,13 +217,6 @@
                 :toggle="true"
                 :label="$t('productions.fields.is_frame_in_numbering')"
                 v-model="params.is_frame_in_numbering"
-              />
-              <text-field
-                class="number-line"
-                type="number"
-                :step="1"
-                :label="$t('productions.fields.max_retakes')"
-                v-model="params.max_retakes"
               />
               <p v-if="errors.parameters" class="error mt1">
                 {{ $t('productions.edit_error') }}
@@ -976,6 +979,14 @@ h2.subtitle {
   max-width: 600px;
   width: 100%;
   padding: 2em;
+}
+
+.section-title {
+  color: var(--text);
+  font-size: 1.1em;
+  font-weight: 500;
+  margin: 1.5em 0 0.8em;
+  text-transform: uppercase;
 }
 
 // Short numeric settings: the input sits on the left of its label.

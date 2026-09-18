@@ -1125,6 +1125,7 @@
       },
       "parameters": {
         "title": "Paramètres",
+        "previews_and_comments": "Previews et commentaires",
         "save": {
           "button": "Confirmer"
         }
