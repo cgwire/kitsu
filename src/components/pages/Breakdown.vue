@@ -320,7 +320,7 @@
               <available-asset-block
                 :key="asset.id"
                 :asset="asset"
-                :active="Object.keys(selection).length > 0"
+                :active="selectedEntityIds.length > 0"
                 :text-mode="isTextMode"
                 :big-mode="isBigMode"
                 @add-one="addOneAsset"
