@@ -845,7 +845,6 @@ const onSearchChange = searchQuery => {
   store.dispatch('setAssetSearch', searchQuery)
   setSearchInUrl(searchQuery)
   store.dispatch('displayMoreAssets')
-  store.dispatch('displayMoreAssets')
   fillAssetList()
 }
 
