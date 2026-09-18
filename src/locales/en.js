@@ -1556,6 +1556,7 @@ export default {
     },
     parameters: {
       title: 'Parameters',
+      previews_and_comments: 'Previews and Comments',
       save: {
         button: 'Confirm'
       }

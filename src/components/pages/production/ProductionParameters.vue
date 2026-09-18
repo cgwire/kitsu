@@ -111,6 +111,31 @@
           v-if="currentProduction && currentProduction.id && isLocalTVShow"
         /-->
 
+        <h3 class="section-title">
+          {{ $t('productions.parameters.previews_and_comments') }}
+        </h3>
+        <text-field
+          class="number-line"
+          type="number"
+          :step="1"
+          :label="$t('productions.fields.max_retakes')"
+          @enter="runConfirmation"
+          v-model="form.max_retakes"
+          v-if="currentProduction && currentProduction.id"
+        />
+
+        <text-field
+          class="number-line"
+          type="number"
+          :step="1"
+          :min="0"
+          :max="8"
+          :label="$t('productions.fields.revision_padding')"
+          @enter="runConfirmation"
+          v-model="form.revision_padding"
+          v-if="currentProduction && currentProduction.id"
+        />
+
         <checkbox
           class="mb1"
           :toggle="true"
@@ -151,26 +176,6 @@
           :toggle="true"
           :label="$t('productions.fields.is_publish_default')"
           v-model="form.is_publish_default_for_artists"
-          v-if="currentProduction && currentProduction.id"
-        />
-        <text-field
-          class="number-line"
-          type="number"
-          :step="1"
-          :label="$t('productions.fields.max_retakes')"
-          @enter="runConfirmation"
-          v-model="form.max_retakes"
-          v-if="currentProduction && currentProduction.id"
-        />
-        <text-field
-          class="number-line"
-          type="number"
-          :step="1"
-          :min="0"
-          :max="8"
-          :label="$t('productions.fields.revision_padding')"
-          @enter="runConfirmation"
-          v-model="form.revision_padding"
           v-if="currentProduction && currentProduction.id"
         />
         <p v-if="isError" class="error mt1">
@@ -383,6 +388,14 @@ watch(
   padding: 2em;
 }
 
+.section-title {
+  color: var(--text);
+  font-size: 1.1em;
+  font-weight: 500;
+  margin: 1.5em 0 0.8em;
+  text-transform: uppercase;
+}
+
 // Short numeric settings: the input sits on the left of its label.
 .number-line {
   align-items: center;
@@ -400,8 +413,9 @@ watch(
   }
 
   :deep(.input) {
-    padding: 0.3em 0.5em;
-    width: 65px;
+    padding: 0.3em 0.3em;
+    width: 45px;
+    height: 35px;
   }
 }
 
