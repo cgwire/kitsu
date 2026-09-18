@@ -1019,12 +1019,17 @@ const hideImportRenderModal = () => {
 const renderImport = async (data, mode) => {
   loading.importing = true
   errors.importing = false
-  parsedCSV.value = await csv.processCSV(
-    mode === 'file' ? data.get('file') : data
-  )
-  hideImportModal()
+  try {
+    parsedCSV.value = await csv.processCSV(
+      mode === 'file' ? data.get('file') : data
+    )
+    hideImportModal()
+    modals.isImportRenderDisplayed = true
+  } catch (err) {
+    console.error(err)
+    errors.importing = true
+  }
   loading.importing = false
-  modals.isImportRenderDisplayed = true
 }
 
 const uploadImportFile = async data => {
