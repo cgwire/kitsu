@@ -41,7 +41,7 @@ describe('ProductionParameters — is_frame_in_numbering', () => {
       ...baseProduction,
       is_frame_in_numbering: false
     })
-    expect(wrapper.vm.form.is_frame_in_numbering).toBe('false')
+    expect(wrapper.vm.form.is_frame_in_numbering).toBe(false)
   })
 
   it('maps an explicit true to an enabled toggle', () => {
@@ -49,12 +49,12 @@ describe('ProductionParameters — is_frame_in_numbering', () => {
       ...baseProduction,
       is_frame_in_numbering: true
     })
-    expect(wrapper.vm.form.is_frame_in_numbering).toBe('true')
+    expect(wrapper.vm.form.is_frame_in_numbering).toBe(true)
   })
 
   // The option is an opt-in; old zou versions without the column stay off.
   it('defaults to disabled when the field is missing', () => {
     const wrapper = mountWithProduction(baseProduction)
-    expect(wrapper.vm.form.is_frame_in_numbering).toBe('false')
+    expect(wrapper.vm.form.is_frame_in_numbering).toBe(false)
   })
 })

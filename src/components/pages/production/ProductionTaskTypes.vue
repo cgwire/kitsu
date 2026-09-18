@@ -56,8 +56,12 @@
                   <th class="th-grab"></th>
                   <th>{{ $t('task_types.fields.name') }}</th>
                   <th>{{ $t('task_types.fields.short_name') }}</th>
-                  <th>{{ $t('productions.fields.hd_bitrate_short') }}</th>
-                  <th>{{ $t('productions.fields.ld_bitrate_short') }}</th>
+                  <th class="th-bitrate">
+                    {{ $t('productions.fields.hd_bitrate_short') }}
+                  </th>
+                  <th class="th-bitrate">
+                    {{ $t('productions.fields.ld_bitrate_short') }}
+                  </th>
                   <th></th>
                 </tr>
               </thead>
@@ -446,6 +450,11 @@ watch(
 
 .th-grab {
   width: 30px;
+}
+
+.th-bitrate {
+  min-width: 120px;
+  white-space: nowrap;
 }
 
 table {

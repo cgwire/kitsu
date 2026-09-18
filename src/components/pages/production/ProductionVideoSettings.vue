@@ -106,6 +106,19 @@ watch(currentProduction, resetForm, { deep: true })
 </script>
 
 <style lang="scss" scoped>
+.columns {
+  margin-bottom: 2em;
+}
+
+.column {
+  overflow-y: initial;
+  padding: initial;
+}
+
+.box {
+  padding: 1em;
+}
+
 .explanation {
   color: var(--text-alt);
 }

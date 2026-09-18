@@ -29,8 +29,12 @@
             <tr>
               <th class="th-grab"></th>
               <th>{{ $t('task_types.fields.name') }}</th>
-              <th>{{ $t('productions.fields.hd_bitrate_short') }}</th>
-              <th>{{ $t('productions.fields.ld_bitrate_short') }}</th>
+              <th class="th-bitrate">
+                {{ $t('productions.fields.hd_bitrate_short') }}
+              </th>
+              <th class="th-bitrate">
+                {{ $t('productions.fields.ld_bitrate_short') }}
+              </th>
               <th></th>
             </tr>
           </thead>
@@ -253,10 +257,11 @@ const onReorder = () => {
 }
 
 .bitrate {
-  width: 100px;
+  min-width: 120px;
+  width: 120px;
 
   input {
-    width: 85px;
+    width: 100px;
   }
 }
 
@@ -271,6 +276,11 @@ const onReorder = () => {
 
 .th-grab {
   width: 30px;
+}
+
+.th-bitrate {
+  min-width: 120px;
+  white-space: nowrap;
 }
 
 .task-type {
