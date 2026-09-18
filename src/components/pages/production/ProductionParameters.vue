@@ -400,7 +400,8 @@ watch(
   }
 
   :deep(.input) {
-    width: 80px;
+    padding: 0.3em 0.5em;
+    width: 65px;
   }
 }
 
