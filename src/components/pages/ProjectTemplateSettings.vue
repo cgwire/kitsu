@@ -209,6 +209,7 @@
                 v-model="params.is_frame_in_numbering"
               />
               <text-field
+                class="number-line"
                 type="number"
                 :step="1"
                 :label="$t('productions.fields.max_retakes')"
@@ -975,6 +976,27 @@ h2.subtitle {
   max-width: 600px;
   width: 100%;
   padding: 2em;
+}
+
+// Short numeric settings: the input sits on the left of its label.
+.number-line {
+  align-items: center;
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 0.6em;
+  justify-content: flex-end;
+
+  :deep(.label) {
+    margin-bottom: 0;
+  }
+
+  :deep(.control) {
+    flex: 0 0 auto;
+  }
+
+  :deep(.input) {
+    width: 80px;
+  }
 }
 
 .input.is-small,
