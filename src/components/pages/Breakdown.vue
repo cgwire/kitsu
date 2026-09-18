@@ -364,7 +364,7 @@
     <edit-label-modal
       :active="modals.isEditLabelDisplayed"
       :is-loading="loading.editLabel"
-      :is-error="loading.editError"
+      :is-error="errors.editLabel"
       :asset="editedAsset"
       :label="editedAssetLinkLabel"
       @cancel="modals.isEditLabelDisplayed = false"
@@ -395,7 +395,7 @@
       :delete-button-text="$t('breakdown.remove.confirm')"
       :error-text="$t('breakdown.remove.error')"
       :is-loading="loading.remove"
-      :is-error="loading.error"
+      :is-error="errors.remove"
       :text="$t('breakdown.remove.text')"
       @confirm="confirmAssetRemoval"
       @cancel="modals.isRemoveConfirmationDisplayed = false"
@@ -929,6 +929,7 @@ const addTenAssets = assetId => addOneAsset(assetId, 10)
 // Returns whether the removal was saved.
 const saveAssetRemovals = async (entityIds, assetId, nbOccurences) => {
   loading.remove = true
+  errors.remove = false
   entityIds.forEach(entityId => {
     store.dispatch('removeAssetFromCasting', {
       entityId,
@@ -1121,6 +1122,7 @@ const onEditLabelClicked = (asset, label, entityId) => {
 
 const confirmEditLabel = async (form = {}) => {
   loading.editLabel = true
+  errors.editLabel = false
   try {
     await store.dispatch('setAssetLinkLabel', {
       label: form.label,

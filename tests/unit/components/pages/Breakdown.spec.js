@@ -22,6 +22,7 @@ vi.mock('@/lib/preferences', () => ({
 
 import preferences from '@/lib/preferences'
 
+import DeleteModal from '@/components/modals/DeleteModal.vue'
 import Breakdown from '@/components/pages/Breakdown.vue'
 
 const production = { id: 'p1', production_type: 'tvshow' }
@@ -299,6 +300,24 @@ describe('Breakdown page, removeOneAssetFromSelection', () => {
       assetId: 'asset-1'
     })
     expect(wrapper.vm.loading.remove).toBe(false)
+  })
+
+  test('shows the error of a failed removal in the confirmation modal', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { wrapper } = mountPage({
+      state: {
+        casting: { 'shot-a': [{ asset_id: 'asset-1', nb_occurences: 2 }] }
+      },
+      actions: { castAsset: vi.fn(() => Promise.reject(new Error('down'))) }
+    })
+    wrapper.vm.selection = { 'shot-a': true }
+
+    await wrapper.vm.removeOneAssetFromSelection('asset-1')
+    await nextTick()
+
+    expect(wrapper.findComponent(DeleteModal).props('isError')).toBe(true)
+    expect(wrapper.vm.saveErrors).toEqual({ 'shot-a': true })
+    vi.restoreAllMocks()
   })
 })
 
