@@ -1247,11 +1247,12 @@ const getCsvFileName = () => {
   const episode = isTVShow.value ? currentEpisode.value : null
   const episodeName = { all: 'all', main: 'main pack' }[episode?.id]
   const hasScope = isTVShow.value ? episode && episode.id !== 'all' : true
-  const scope = hasScope ? [...sequenceName, ...assetTypeName] : []
-  const episodePart = episode ? [episodeName || episode.name] : []
-  const nameData = isTVShow.value
-    ? [...head, ...episodePart, ...scope, title]
-    : [...head, title, ...scope]
+  const nameData = [
+    ...head,
+    ...(episode ? [episodeName || episode.name] : []),
+    ...(hasScope ? [...sequenceName, ...assetTypeName] : []),
+    title
+  ]
   return stringHelpers.slugify(nameData.join('_'))
 }
 
