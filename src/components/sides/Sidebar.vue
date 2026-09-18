@@ -3,11 +3,14 @@
     <aside :class="{ 'hidden-bar': isSidebarHidden, smallfont: isLongLocale }">
       <div>
         <router-link class="home-link" to="/" @click="toggleSidebar()">
-          <div class="company-logo has-text-centered" :title="title">
+          <div
+            class="company-logo has-text-centered"
+            :title="organisation.name"
+          >
             <img
               :src="organisationLogoPath"
               :alt="organisation.name"
-              v-if="organisation && organisation.has_avatar"
+              v-if="organisation.has_avatar"
             />
             <img
               src="../../assets/kitsu-text-dark.svg"
@@ -92,10 +95,7 @@
               @click="toggleSidebar()"
               v-if="isCurrentUserSupervisor || isCurrentUserManager"
             >
-              <router-link
-                style="position: relative"
-                :to="{ name: 'team-schedule' }"
-              >
+              <router-link :to="{ name: 'team-schedule' }">
                 <kitsu-icon class="nav-icon" name="team-schedule" />
                 {{ $t('team_schedule.title_main') }}
               </router-link>
@@ -171,10 +171,7 @@
               </router-link>
             </p>
             <p @click="toggleSidebar()">
-              <router-link
-                :to="{ name: 'task-status' }"
-                class="task-status-link"
-              >
+              <router-link :to="{ name: 'task-status' }">
                 <kitsu-icon class="nav-icon" name="task-status" />
                 {{ $t('task_status.title') }}
               </router-link>
@@ -257,7 +254,8 @@
   </div>
 </template>
 
-<script>
+<script setup>
+/* eslint-disable no-unused-vars */
 import {
   BotIcon,
   BuildingIcon,
@@ -267,72 +265,41 @@ import {
   LayersIcon,
   Rows4Icon
 } from 'lucide-vue-next'
-import { defineAsyncComponent } from 'vue'
-import { mapGetters, mapActions } from 'vuex'
+import { computed, defineAsyncComponent } from 'vue'
+import { useStore } from 'vuex'
 
-const Icon = defineAsyncComponent(() => import('@/components/widgets/Icon.vue'))
+import { localeCode } from '@/lib/lang'
 
 import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 
-export default {
-  name: 'sidebar',
+const Icon = defineAsyncComponent(() => import('@/components/widgets/Icon.vue'))
+/* eslint-enable no-unused-vars */
 
-  components: {
-    BotIcon,
-    BuildingIcon,
-    ComputerIcon,
-    EggIcon,
-    GlobeIcon,
-    Icon,
-    KitsuIcon,
-    LayersIcon,
-    Rows4Icon
-  },
+const store = useStore()
 
-  data() {
-    return {
-      title: ''
-    }
-  },
+// Computed
+// --------------------------------------------------------------------------
 
-  mounted() {
-    this.reset()
-  },
+const isCurrentUserAdmin = computed(() => store.getters.isCurrentUserAdmin)
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
+const isCurrentUserSupervisor = computed(
+  () => store.getters.isCurrentUserSupervisor
+)
+const isCurrentUserVendor = computed(() => store.getters.isCurrentUserVendor)
+const isDarkTheme = computed(() => store.getters.isDarkTheme)
+const isSidebarHidden = computed(() => store.getters.isSidebarHidden)
+const mainConfig = computed(() => store.getters.mainConfig)
+const organisation = computed(() => store.getters.organisation)
+const organisationLogoPath = computed(() => store.getters.organisationLogoPath)
+const studioPlugins = computed(() => store.getters.studioPlugins)
 
-  computed: {
-    ...mapGetters([
-      'isDarkTheme',
-      'isCurrentUserAdmin',
-      'isCurrentUserClient',
-      'isCurrentUserManager',
-      'isCurrentUserSupervisor',
-      'isCurrentUserVendor',
-      'isSidebarHidden',
-      'mainConfig',
-      'organisation',
-      'organisationLogoPath',
-      'studioPlugins'
-    ]),
+const isLongLocale = computed(() => ['fr', 'ja'].includes(localeCode.value))
 
-    isLongLocale() {
-      return this.$i18n.locale === 'ja' || this.$i18n.locale === 'fr'
-    }
-  },
+// Functions
+// --------------------------------------------------------------------------
 
-  methods: {
-    ...mapActions(['toggleSidebar']),
-
-    reset() {
-      this.title = this.organisation.name
-    }
-  },
-
-  watch: {
-    organisation() {
-      this.reset()
-    }
-  }
-}
+const toggleSidebar = () => store.dispatch('toggleSidebar')
 </script>
 
 <style lang="scss" scoped>
@@ -368,7 +335,6 @@ aside {
 
 aside.hidden-bar {
   left: -250px;
-  transition: all 0.3s ease;
 }
 
 aside p a {
@@ -385,13 +351,6 @@ aside p a {
 
 aside section {
   margin-bottom: 2em;
-}
-
-.sidebar-title {
-  margin-top: 0.5em;
-  margin-bottom: 1.5em;
-  text-align: center;
-  font-size: 1.6em;
 }
 
 .company-logo {
@@ -459,10 +418,6 @@ p:hover {
     display: flex;
     flex-direction: row;
     align-items: center;
-  }
-
-  .home-link h2 {
-    margin-bottom: 0;
   }
 }
 </style>
