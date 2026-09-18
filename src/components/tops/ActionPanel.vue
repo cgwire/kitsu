@@ -1291,9 +1291,13 @@ const clearAllAssignations = () => runUnassignation('unassignSelectedTasks', {})
 
 const confirmPriorityChange = async () => {
   loading.changePriority = true
-  await store.dispatch('changeSelectedPriorities', {
-    priority: Number(priority.value)
-  })
+  try {
+    await store.dispatch('changeSelectedPriorities', {
+      priority: Number(priority.value)
+    })
+  } catch (err) {
+    console.error(err)
+  }
   loading.changePriority = false
 }
 
