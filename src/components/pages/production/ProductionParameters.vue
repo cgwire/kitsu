@@ -111,31 +111,6 @@
           v-if="currentProduction && currentProduction.id && isLocalTVShow"
         /-->
 
-        <text-field
-          type="number"
-          :max="60"
-          :step="0.001"
-          :label="$t('productions.fields.fps')"
-          placeholder="25"
-          @enter="runConfirmation"
-          v-model="form.fps"
-          v-if="currentProduction && currentProduction.id"
-        />
-        <text-field
-          :label="$t('productions.fields.ratio')"
-          placeholder="16:9"
-          :maxlength="10"
-          @enter="runConfirmation"
-          v-model.trim="form.ratio"
-          v-if="currentProduction && currentProduction.id"
-        />
-        <text-field
-          :label="$t('productions.fields.resolution')"
-          placeholder="1920x1080"
-          @enter="runConfirmation"
-          v-model.trim="form.resolution"
-          v-if="currentProduction && currentProduction.id"
-        />
         <combobox-boolean
           :label="$t('productions.fields.is_clients_isolated')"
           @enter="runConfirmation"
@@ -223,9 +198,9 @@ import { useStore } from 'vuex'
 
 import { formatSimpleDate, parseSimpleDate } from '@/lib/time'
 import {
-  PRODUCTION_TYPE_OPTIONS,
+  HOME_PAGE_OPTIONS,
   PRODUCTION_STYLE_OPTIONS,
-  HOME_PAGE_OPTIONS
+  PRODUCTION_TYPE_OPTIONS
 } from '@/lib/productions'
 
 import ChangeAvatarModal from '@/components/modals/ChangeAvatarModal.vue'
@@ -267,9 +242,6 @@ const emptyForm = () => ({
   is_set_preview_automated: 'false',
   is_single_preview_per_revision: 'false',
   is_publish_default_for_artists: 'false',
-  fps: '',
-  ratio: '',
-  resolution: '',
   homepage: HOME_PAGE_OPTIONS[0].value
 })
 
@@ -334,7 +306,6 @@ const resetForm = () => {
       production_type: production.production_type || 'short',
       production_style: production.production_style || '2d3d',
       episode_span: production.episode_span,
-      fps: production.fps,
       max_retakes: production.max_retakes,
       revision_padding: production.revision_padding,
       nb_episodes: production.nb_episodes,
@@ -354,8 +325,6 @@ const resetForm = () => {
       is_publish_default_for_artists: production.is_publish_default_for_artists
         ? 'true'
         : 'false',
-      ratio: production.ratio,
-      resolution: production.resolution,
       homepage: production.homepage
     }
   } else {

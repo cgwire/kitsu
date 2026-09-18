@@ -1036,6 +1036,10 @@
       },
       "fields": {
         "fps": "FPS",
+        "hd_bitrate_compression": "Débit des vidéos haute définition (Mbit/s)",
+        "hd_bitrate_short": "Débit HD (Mbit/s)",
+        "ld_bitrate_compression": "Débit des vidéos basse définition (Mbit/s)",
+        "ld_bitrate_short": "Débit BD (Mbit/s)",
         "is_frame_in_numbering": "Démarrer le compteur de frames du lecteur au frame in",
         "name": "Nom",
         "ratio": "Ratio",
@@ -1100,6 +1104,9 @@
         "title": "Brief",
         "empty": "Il n'y a pas encore de brief. Pourquoi ne pas en créer un ?",
         "edit_error": "Une erreur s'est produite lors de l'édition du brief."
+      },
+      "video": {
+        "title": "Vidéo"
       },
       "parameters": {
         "title": "Paramètres",
