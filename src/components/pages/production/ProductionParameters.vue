@@ -154,6 +154,7 @@
           v-if="currentProduction && currentProduction.id"
         />
         <text-field
+          class="number-line"
           type="number"
           :step="1"
           :label="$t('productions.fields.max_retakes')"
@@ -162,6 +163,7 @@
           v-if="currentProduction && currentProduction.id"
         />
         <text-field
+          class="number-line"
           type="number"
           :step="1"
           :min="0"
@@ -379,6 +381,27 @@ watch(
 
 .box {
   padding: 2em;
+}
+
+// Short numeric settings: the input sits on the left of its label.
+.number-line {
+  align-items: center;
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 0.6em;
+  justify-content: flex-end;
+
+  :deep(.label) {
+    margin-bottom: 0;
+  }
+
+  :deep(.control) {
+    flex: 0 0 auto;
+  }
+
+  :deep(.input) {
+    width: 80px;
+  }
 }
 
 .picture-header {
