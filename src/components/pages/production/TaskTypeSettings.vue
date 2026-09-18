@@ -25,6 +25,15 @@
           {{ $t('settings.production.empty_list') }}
         </div>
         <table class="datatable list" v-else>
+          <thead>
+            <tr>
+              <th class="th-grab"></th>
+              <th>{{ $t('task_types.fields.name') }}</th>
+              <th>{{ $t('productions.fields.hd_bitrate_short') }}</th>
+              <th>{{ $t('productions.fields.ld_bitrate_short') }}</th>
+              <th></th>
+            </tr>
+          </thead>
           <draggable
             class="datatable-body"
             item-key="id"
@@ -253,6 +262,15 @@ const onReorder = () => {
 
 .box {
   max-width: 600px;
+}
+
+.datatable th {
+  color: var(--text);
+  padding-left: 10px;
+}
+
+.th-grab {
+  width: 30px;
 }
 
 .task-type {

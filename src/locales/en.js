@@ -1494,6 +1494,7 @@ export default {
       episode_span: 'Episode spacing',
       fps: 'FPS',
       hd_bitrate_compression: 'High definition movie bitrate (Mbit/s)',
+      hd_bitrate_short: 'HD bitrate (Mbit/s)',
       is_clients_isolated: 'Isolate client comments (not visible to each others)',
       is_frame_in_numbering: 'Start the player frame counter at the frame in',
       is_preview_download_allowed: 'Allow artists to download previews',
@@ -1501,6 +1502,7 @@ export default {
       is_set_preview_automated: 'Set new preview as entity thumbnail automatically',
       is_single_preview_per_revision: 'Allow only one preview file per revision',
       ld_bitrate_compression: 'Low definition movie bitrate (Mbit/s)',
+      ld_bitrate_short: 'LD bitrate (Mbit/s)',
       max_retakes: 'Maximum number of retakes',
       name: 'Name',
       nb_episodes: 'Number of episodes',
@@ -1564,6 +1566,9 @@ export default {
       'sequences': 'Sequences'
     },
 
+    video: {
+      title: 'Video'
+    },
     parameters: {
       title: 'Parameters',
       save: {

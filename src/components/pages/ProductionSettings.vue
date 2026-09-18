@@ -14,6 +14,17 @@
               {{ $t('productions.parameters.title') }}
             </a>
           </li>
+          <li :class="{ 'is-active': isActiveTab('video') }">
+            <a
+              role="button"
+              tabindex="0"
+              @click="activeTab = 'video'"
+              @keydown.enter.prevent="activeTab = 'video'"
+              @keydown.space.prevent="activeTab = 'video'"
+            >
+              {{ $t('productions.video.title') }}
+            </a>
+          </li>
           <li :class="{ 'is-active': isActiveTab('brief') }">
             <a
               role="button"
@@ -96,6 +107,10 @@
 
       <div class="tab" v-show="isActiveTab('parameters')">
         <production-parameters />
+      </div>
+
+      <div class="tab" v-show="isActiveTab('video')">
+        <production-video-settings />
       </div>
 
       <div class="tab" v-show="isActiveTab('brief')">
@@ -226,6 +241,7 @@ import ProductionBrief from '@/components/pages/production/ProductionBrief.vue'
 import ProductionParameters from '@/components/pages/production/ProductionParameters.vue'
 import ProductionStatusAutomations from '@/components/pages/production/ProductionStatusAutomations.vue'
 import ProductionTaskTypes from '@/components/pages/production/ProductionTaskTypes.vue'
+import ProductionVideoSettings from '@/components/pages/production/ProductionVideoSettings.vue'
 import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
 const { t } = useI18n()
