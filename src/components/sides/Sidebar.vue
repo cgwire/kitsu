@@ -109,11 +109,8 @@
                 {{ $t('tasks.all_tasks') }}
               </router-link>
             </p>
-            <p @click="toggleSidebar()">
-              <router-link
-                :to="{ name: 'newsfeed' }"
-                v-if="isCurrentUserManager"
-              >
+            <p @click="toggleSidebar()" v-if="isCurrentUserManager">
+              <router-link :to="{ name: 'newsfeed' }">
                 <kitsu-icon class="nav-icon" name="newsFeed" />
                 {{ $t('news.title') }}
               </router-link>
