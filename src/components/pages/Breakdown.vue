@@ -727,9 +727,9 @@ const selectedEntityIds = computed(() =>
 const reset = () => {
   if (!isTVShow.value && route.params?.episode_id) {
     router.push({
-      ...route,
       name: 'breakdown',
-      params: { ...route.params, episode_id: null }
+      params: { production_id: route.params.production_id },
+      query: route.query
     })
   }
   isLoading.value = true
