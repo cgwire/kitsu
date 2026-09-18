@@ -116,7 +116,7 @@ watch(currentProduction, resetForm, { deep: true })
 }
 
 .box {
-  padding: 1em;
+  padding: 2em;
 }
 
 .explanation {

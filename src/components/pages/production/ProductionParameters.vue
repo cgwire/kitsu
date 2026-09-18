@@ -147,7 +147,7 @@
           v-if="currentProduction && currentProduction.id"
         />
         <checkbox
-          class="mb1"
+          class="mb2"
           :toggle="true"
           :label="$t('productions.fields.is_publish_default')"
           v-model="form.is_publish_default_for_artists"
@@ -378,7 +378,7 @@ watch(
 }
 
 .box {
-  padding: 1em;
+  padding: 2em;
 }
 
 .picture-header {
