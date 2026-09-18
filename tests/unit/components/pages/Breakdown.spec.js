@@ -1,185 +1,276 @@
+import { shallowMount } from '@vue/test-utils'
 import { vi } from 'vitest'
+import { nextTick } from 'vue'
+import { createStore } from 'vuex'
 
 // Importing the page transitively pulls in the root store
 // (lib/models → timezone → @/store); stub it so no Vuex store is built.
 vi.mock('@/store', () => ({ default: {} }))
+vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
+vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }))
+vi.mock('vue-router', () => ({
+  useRoute: () => ({ params: {}, query: {}, path: '/' }),
+  useRouter: () => ({ push: vi.fn() })
+}))
+vi.mock('@/lib/preferences', () => ({
+  default: {
+    getBoolPreference: vi.fn(() => false),
+    getPreference: vi.fn(() => null),
+    setPreference: vi.fn()
+  }
+}))
+
+import preferences from '@/lib/preferences'
 
 import Breakdown from '@/components/pages/Breakdown.vue'
 
-describe('Breakdown page, reloadEntities', () => {
-  const production = { id: 'p1', production_type: 'tvshow' }
+const production = { id: 'p1', production_type: 'tvshow' }
 
-  // The page logs the failed episodes fetch: keep that expected error out
-  // of the test output.
+// The page is mounted on a store whose scope (production, episode) the tests
+// move from inside the load actions, as the topbar does during a real load.
+const mountPage = ({ state = {}, actions = {} } = {}) => {
+  const storeActions = {
+    addAssetToCasting: vi.fn(),
+    castAsset: vi.fn(() => Promise.resolve()),
+    displayMoreAssets: vi.fn(),
+    loadAssets: vi.fn(() => Promise.resolve()),
+    loadEpisodes: vi.fn(() => Promise.resolve()),
+    loadSequences: vi.fn(() => Promise.resolve()),
+    loadShots: vi.fn(() => Promise.resolve()),
+    removeAssetFromCasting: vi.fn(),
+    setCastingAssetType: vi.fn(),
+    setCastingAssetTypes: vi.fn(),
+    setCastingEpisode: vi.fn(),
+    setCastingForProductionEpisodes: vi.fn(),
+    setCastingSequence: vi.fn(),
+    setLastProductionScreen: vi.fn(),
+    ...actions
+  }
+  const store = createStore({
+    state: () => ({
+      casting: {},
+      currentEpisode: { id: 'ep-a' },
+      currentProduction: production,
+      isTVShow: true,
+      ...state
+    }),
+    getters: {
+      assetMetadataDescriptors: () => [],
+      assetTypeMap: () => new Map(),
+      assetsByType: () => [],
+      breakdownSearchFilterGroups: () => [],
+      breakdownSearchQueries: () => [],
+      casting: state => state.casting,
+      castingAssetTypeAssets: () => [],
+      castingAssetTypesOptions: () => [],
+      castingByType: () => ({}),
+      castingEpisodes: () => [],
+      castingSequenceShots: () => [],
+      castingSequencesOptions: () => [],
+      currentEpisode: state => state.currentEpisode,
+      currentProduction: state => state.currentProduction,
+      departmentMap: () => new Map(),
+      displayedAssets: () => [],
+      displayedSequences: () => [],
+      episodes: () => [],
+      isAssetsLoading: () => false,
+      isCurrentUserProductionManager: () => true,
+      isFrameIn: () => false,
+      isFrameOut: () => false,
+      isFrames: () => false,
+      isShowInfosBreakdown: () => false,
+      isTVShow: state => state.isTVShow,
+      sequenceMap: () => new Map(),
+      shotMetadataDescriptors: () => []
+    },
+    actions: storeActions
+  })
+  const wrapper = shallowMount(Breakdown, {
+    global: {
+      plugins: [store],
+      config: {
+        globalProperties: { $socket: { on: vi.fn(), off: vi.fn() } }
+      },
+      mocks: { $t: key => key },
+      // The page drives its search field through a ref.
+      stubs: {
+        SearchField: {
+          template: '<div />',
+          methods: { getValue: () => '', setValue: () => {} }
+        }
+      }
+    }
+  })
+  return { wrapper, store, actions: storeActions }
+}
+
+// Moves the scope of the store and lets the page watchers see it, as they
+// would between two steps of a real load.
+const moveScope = async (store, scope) => {
+  Object.assign(store.state, scope)
+  await nextTick()
+}
+
+describe('Breakdown page, reloadEntities', () => {
+  // Mounting schedules a first load: fake timers keep it from running, each
+  // test drives reloadEntities on its own. A reload decided by the load shows
+  // as the loading flag raised again, which is all reset() does synchronously.
   beforeEach(() => {
+    vi.useFakeTimers()
+    // The page logs the failed episodes fetch: keep that expected error out
+    // of the test output.
     vi.spyOn(console, 'error').mockImplementation(() => {})
   })
 
   afterEach(() => {
+    vi.useRealTimers()
     vi.restoreAllMocks()
-  })
-
-  // The method only reads its component instance, so a plain object is
-  // enough to exercise the reload decision without mounting the page.
-  const buildContext = (overrides = {}) => ({
-    isTVShow: true,
-    currentProduction: production,
-    currentEpisode: { id: 'ep-a' },
-    episodeId: '',
-    assetTypeId: null,
-    sequenceId: null,
-    isLoading: false,
-    isUnmounted: false,
-    hasScopeMoved: false,
-    loadEpisodes: vi.fn(() => Promise.resolve()),
-    castingType: 'shot',
-    loadSequences: vi.fn(() => Promise.resolve()),
-    loadShots: vi.fn(() => Promise.resolve()),
-    loadAssets: vi.fn(() => Promise.resolve()),
-    setCastingEpisode: vi.fn(),
-    setCastingForProductionEpisodes: vi.fn(),
-    displayMoreAssets: vi.fn(),
-    fillAssetList: vi.fn(),
-    setCastingAssetTypes: vi.fn(),
-    setCastingAssetType: vi.fn(),
-    setCastingSequence: vi.fn(),
-    resetSequenceOption: vi.fn(),
-    resetSelection: vi.fn(),
-    resetColumnWidth: vi.fn(),
-    reset: vi.fn(),
-    ...overrides
   })
 
   // The currentEpisode watcher ignores a change made while the page loads:
   // the load itself has to notice the switch once it settles.
   test('reloads when the episode changed during the load', async () => {
-    const context = buildContext()
-    context.loadShots = vi.fn(() => {
-      context.currentEpisode = { id: 'ep-b' }
-      return Promise.resolve()
+    const { wrapper, store } = mountPage({
+      actions: {
+        loadShots: vi.fn(() =>
+          moveScope(store, { currentEpisode: { id: 'ep-b' } })
+        )
+      }
     })
+    preferences.getPreference.mockClear()
 
-    await Breakdown.methods.reloadEntities.call(context)
+    await wrapper.vm.reloadEntities()
 
-    expect(context.isLoading).toBe(false)
-    expect(context.reset).toHaveBeenCalledTimes(1)
-    expect(context.resetColumnWidth).not.toHaveBeenCalled()
+    expect(wrapper.vm.isLoading).toBe(true)
+    expect(preferences.getPreference).not.toHaveBeenCalled()
   })
 
   test('reloads when the production changed during the load', async () => {
-    const context = buildContext()
-    context.loadShots = vi.fn(() => {
-      context.currentProduction = { id: 'p2', production_type: 'tvshow' }
-      return Promise.resolve()
+    const { wrapper, store } = mountPage({
+      actions: {
+        loadShots: vi.fn(() =>
+          moveScope(store, {
+            currentProduction: { id: 'p2', production_type: 'tvshow' }
+          })
+        )
+      }
     })
+    preferences.getPreference.mockClear()
 
-    await Breakdown.methods.reloadEntities.call(context)
+    await wrapper.vm.reloadEntities()
 
-    expect(context.reset).toHaveBeenCalledTimes(1)
-    // Same as the currentProduction watcher, which the load short-circuited.
-    expect(context.resetColumnWidth).toHaveBeenCalledTimes(1)
+    expect(wrapper.vm.isLoading).toBe(true)
+    // Same as the currentProduction watcher, which the load short-circuited:
+    // the column widths are read again.
+    expect(preferences.getPreference).toHaveBeenCalled()
   })
 
   // Leaving the page during the load must not replay it: the ghost reload
   // would push a production-wide dataset under the page displayed next.
   test('does not reload once the page is unmounted', async () => {
-    const context = buildContext()
-    context.loadShots = vi.fn(() => {
-      context.currentEpisode = { id: 'ep-b' }
-      context.isUnmounted = true
-      return Promise.resolve()
+    const { wrapper, store, actions } = mountPage({
+      actions: {
+        loadShots: vi.fn(async () => {
+          await moveScope(store, { currentEpisode: { id: 'ep-b' } })
+          wrapper.unmount()
+        })
+      }
     })
 
-    await Breakdown.methods.reloadEntities.call(context)
+    await wrapper.vm.reloadEntities()
 
-    expect(context.reset).not.toHaveBeenCalled()
+    expect(wrapper.vm.isLoading).toBe(false)
     // The production-wide load would land under the page displayed next.
-    expect(context.loadAssets).not.toHaveBeenCalled()
-    expect(context.setCastingEpisode).not.toHaveBeenCalled()
+    expect(actions.loadAssets).not.toHaveBeenCalled()
+    expect(actions.setCastingEpisode).not.toHaveBeenCalled()
   })
 
   // The watchers are inert while the page loads, so a switch that comes back
   // to the episode the run started with leaves the store on the other one.
   test('reloads when the episode moved and came back during the load', async () => {
-    const context = buildContext()
-    context.loadSequences = vi.fn(() => {
-      Breakdown.watch.currentEpisode.call(
-        Object.assign(context, { currentEpisode: { id: 'ep-b' } })
-      )
-      return Promise.resolve()
-    })
-    context.loadShots = vi.fn(() => {
-      Breakdown.watch.currentEpisode.call(
-        Object.assign(context, { currentEpisode: { id: 'ep-a' } })
-      )
-      return Promise.resolve()
+    const { wrapper, store } = mountPage({
+      actions: {
+        loadSequences: vi.fn(() =>
+          moveScope(store, { currentEpisode: { id: 'ep-b' } })
+        ),
+        loadShots: vi.fn(() =>
+          moveScope(store, { currentEpisode: { id: 'ep-a' } })
+        )
+      }
     })
 
-    await Breakdown.methods.reloadEntities.call(context)
+    await wrapper.vm.reloadEntities()
 
-    expect(context.reset).toHaveBeenCalledTimes(1)
+    expect(wrapper.vm.isLoading).toBe(true)
   })
 
   // The topbar resolves the route episode asynchronously: starting the load
   // before it lands costs a full production-wide second pass. The resolution
   // fires the episode watcher like any change: it must not count as a move.
   test('resolves the episode before loading on a direct link', async () => {
-    const context = buildContext({ currentEpisode: null })
-    context.loadEpisodes = vi.fn(() => {
-      Breakdown.watch.currentEpisode.call(
-        Object.assign(context, { currentEpisode: { id: 'ep-a' } })
-      )
-      return Promise.resolve()
+    const { wrapper, store, actions } = mountPage({
+      state: { currentEpisode: null },
+      actions: {
+        loadEpisodes: vi.fn(() =>
+          moveScope(store, { currentEpisode: { id: 'ep-a' } })
+        )
+      }
     })
 
-    await Breakdown.methods.reloadEntities.call(context)
+    await wrapper.vm.reloadEntities()
 
-    expect(context.loadEpisodes).toHaveBeenCalledTimes(1)
-    expect(context.reset).not.toHaveBeenCalled()
-    expect(context.episodeId).toBe('ep-a')
+    expect(actions.loadEpisodes).toHaveBeenCalledTimes(1)
+    expect(wrapper.vm.isLoading).toBe(false)
+    expect(wrapper.vm.episodeId).toBe('ep-a')
   })
 
   // The episodes fetch can fail like any other: the page must come back
   // to life, or the watchers stay muted behind a stuck loading flag.
   test('releases the loading flag when the episodes fetch fails', async () => {
-    const context = buildContext({ currentEpisode: null })
-    context.loadEpisodes = vi.fn(() => Promise.reject(new Error('down')))
+    const { wrapper } = mountPage({
+      state: { currentEpisode: null },
+      actions: {
+        loadEpisodes: vi.fn(() => Promise.reject(new Error('down')))
+      }
+    })
 
-    await Breakdown.methods.reloadEntities.call(context)
+    await wrapper.vm.reloadEntities()
 
-    expect(context.isLoading).toBe(false)
-    expect(context.reset).not.toHaveBeenCalled()
+    expect(wrapper.vm.isLoading).toBe(false)
   })
 
   test('loads nothing when the page unmounts during the episodes fetch', async () => {
-    const context = buildContext({ currentEpisode: null })
-    context.loadEpisodes = vi.fn(() => {
-      context.isUnmounted = true
-      return Promise.resolve()
+    const { wrapper, actions } = mountPage({
+      state: { currentEpisode: null },
+      actions: {
+        loadEpisodes: vi.fn(async () => wrapper.unmount())
+      }
     })
 
-    await Breakdown.methods.reloadEntities.call(context)
+    await wrapper.vm.reloadEntities()
 
-    expect(context.loadSequences).not.toHaveBeenCalled()
-    expect(context.loadAssets).not.toHaveBeenCalled()
+    expect(actions.loadSequences).not.toHaveBeenCalled()
+    expect(actions.loadAssets).not.toHaveBeenCalled()
   })
 
   test('loads nothing on an unmounted page', async () => {
-    const context = buildContext({ isUnmounted: true })
+    const { wrapper, actions } = mountPage()
+    const { reloadEntities } = wrapper.vm
+    wrapper.unmount()
 
-    await Breakdown.methods.reloadEntities.call(context)
+    await reloadEntities()
 
-    expect(context.loadSequences).not.toHaveBeenCalled()
-    expect(context.loadAssets).not.toHaveBeenCalled()
+    expect(actions.loadSequences).not.toHaveBeenCalled()
+    expect(actions.loadAssets).not.toHaveBeenCalled()
   })
 
   test('settles on the episode it loaded', async () => {
-    const context = buildContext()
+    const { wrapper } = mountPage()
 
-    await Breakdown.methods.reloadEntities.call(context)
+    await wrapper.vm.reloadEntities()
 
-    expect(context.episodeId).toBe('ep-a')
-    expect(context.reset).not.toHaveBeenCalled()
+    expect(wrapper.vm.episodeId).toBe('ep-a')
+    expect(wrapper.vm.isLoading).toBe(false)
   })
 })
 
@@ -187,40 +278,27 @@ describe('Breakdown page, removeOneAssetFromSelection', () => {
   // The casting map only carries the entities the API returned, so an
   // entity without any asset has no key at all: the selection is built
   // from the full entity list and can still include it.
-  const buildContext = (overrides = {}) => ({
-    selection: { 'shot-a': true, 'shot-b': true },
-    casting: {
-      'shot-a': [{ asset_id: 'asset-1', nb_occurences: 2 }]
-    },
-    isEpisodeCasting: false,
-    loading: { remove: false },
-    errors: { remove: false },
-    saveErrors: {},
-    removeAssetFromCasting: vi.fn(),
-    removeOneAsset: vi.fn(() => Promise.resolve()),
-    castAsset: vi.fn(() => Promise.resolve()),
-    ...overrides
-  })
-
   test('skips a selected entity that has no casting', async () => {
-    const context = buildContext()
+    const { wrapper, actions } = mountPage({
+      state: {
+        casting: { 'shot-a': [{ asset_id: 'asset-1', nb_occurences: 2 }] }
+      }
+    })
+    wrapper.vm.selection = { 'shot-a': true, 'shot-b': true }
 
-    await Breakdown.methods.removeOneAssetFromSelection.call(
-      context,
-      'asset-1'
-    )
+    await wrapper.vm.removeOneAssetFromSelection('asset-1')
 
-    expect(context.removeAssetFromCasting).toHaveBeenCalledTimes(1)
-    expect(context.removeAssetFromCasting).toHaveBeenCalledWith({
+    expect(actions.removeAssetFromCasting).toHaveBeenCalledTimes(1)
+    expect(actions.removeAssetFromCasting.mock.calls[0][1]).toEqual({
       entityId: 'shot-a',
       assetId: 'asset-1',
       nbOccurences: 1
     })
-    expect(context.castAsset).toHaveBeenCalledWith({
+    expect(actions.castAsset.mock.calls[0][1]).toEqual({
       entityIds: ['shot-a'],
       assetId: 'asset-1'
     })
-    expect(context.loading.remove).toBe(false)
+    expect(wrapper.vm.loading.remove).toBe(false)
   })
 })
 
@@ -228,20 +306,14 @@ describe('Breakdown page, getEntityName', () => {
   const entity = { name: 'SH01', sequence_name: 'SEQ01' }
 
   test('prefixes the sequence on a TV show before the episode resolves', () => {
-    const context = { sequenceId: 'all', isTVShow: true, currentEpisode: null }
+    const { wrapper } = mountPage({ state: { currentEpisode: null } })
 
-    expect(Breakdown.methods.getEntityName.call(context, entity)).toBe(
-      'SEQ01 / SH01'
-    )
+    expect(wrapper.vm.getEntityName(entity)).toBe('SEQ01 / SH01')
   })
 
   test('keeps the bare name on the episode casting', () => {
-    const context = {
-      sequenceId: 'all',
-      isTVShow: true,
-      currentEpisode: { id: 'all' }
-    }
+    const { wrapper } = mountPage({ state: { currentEpisode: { id: 'all' } } })
 
-    expect(Breakdown.methods.getEntityName.call(context, entity)).toBe('SH01')
+    expect(wrapper.vm.getEntityName(entity)).toBe('SH01')
   })
 })

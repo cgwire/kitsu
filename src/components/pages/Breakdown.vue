@@ -109,7 +109,6 @@
         >
           <div
             class="entity-header"
-            ref="name-header"
             :style="{ 'min-width': nameHeaderMinWidth }"
           >
             <div>
@@ -117,11 +116,8 @@
             </div>
             <div class="filler"></div>
             <div
-              ref="resizable-knob-name"
               class="resizable-knob"
-              @mousedown.prevent="
-                initResize('resizable-knob-name', 'name-header')
-              "
+              @mousedown.prevent="initResize($event)"
             ></div>
           </div>
           <div class="standby-header" v-if="isShowInfosBreakdown">
@@ -169,7 +165,6 @@
           <div
             class="descriptor-header"
             :key="'descriptor-header-' + descriptor.id"
-            :ref="'descriptor-header-' + descriptor.id"
             :style="{
               'min-width': columnWidth[descriptor.id]
                 ? columnWidth[descriptor.id] + 'px'
@@ -197,15 +192,8 @@
               {{ descriptor.name }}
             </span>
             <div
-              :ref="'resizable-knob-descriptor-' + descriptor.id"
               class="resizable-knob"
-              @mousedown.prevent="
-                initResize(
-                  'resizable-knob-descriptor-',
-                  'descriptor-header-',
-                  descriptor.id
-                )
-              "
+              @mousedown.prevent="initResize($event, descriptor.id)"
             ></div>
           </div>
           <div
@@ -374,7 +362,6 @@
     />
 
     <edit-label-modal
-      ref="edit-label-modal"
       :active="modals.isEditLabelDisplayed"
       :is-loading="loading.editLabel"
       :is-error="loading.editError"
@@ -385,7 +372,6 @@
     />
 
     <build-filter-modal
-      ref="build-filter-modal"
       :active="modals.isBuildFilterDisplayed"
       @confirm="confirmBuildFilter"
       @cancel="modals.isBuildFilterDisplayed = false"
@@ -417,1408 +403,1166 @@
   </div>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+/* eslint-disable no-unused-vars */
+import { useHead } from '@unhead/vue'
 import moment from 'moment'
+import {
+  computed,
+  getCurrentInstance,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  reactive,
+  ref,
+  useTemplateRef,
+  watch
+} from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
-import csv from '@/lib/csv'
 import clipboard from '@/lib/clipboard'
+import csv from '@/lib/csv'
 import preferences from '@/lib/preferences'
 import stringHelpers from '@/lib/string'
 import { range } from '@/lib/time'
-import { searchMixin } from '@/components/mixins/search'
-import { entityListMixin } from '@/components/mixins/entity_list'
 
-import AvailableAssetBlock from '@/components/pages/breakdown/AvailableAssetBlock.vue'
 import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
+import DeleteModal from '@/components/modals/DeleteModal.vue'
+import EditAssetModal from '@/components/modals/EditAssetModal.vue'
+import EditLabelModal from '@/components/modals/EditLabelModal.vue'
+import ImportModal from '@/components/modals/ImportModal.vue'
+import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
+import AvailableAssetBlock from '@/components/pages/breakdown/AvailableAssetBlock.vue'
+import ShotLine from '@/components/pages/breakdown/ShotLine.vue'
 import ButtonHrefLink from '@/components/widgets/ButtonHrefLink.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
-import DeleteModal from '@/components/modals/DeleteModal.vue'
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
-import EditAssetModal from '@/components/modals/EditAssetModal.vue'
-import EditLabelModal from '@/components/modals/EditLabelModal.vue'
-import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
-import ImportModal from '@/components/modals/ImportModal.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
-import ShotLine from '@/components/pages/breakdown/ShotLine.vue'
 import ShowInfosButton from '@/components/widgets/ShowInfosButton.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu.vue'
+/* eslint-enable no-unused-vars */
 
-export default {
-  name: 'breakdown',
+const SHOT_DISPLAY_HEADERS = {
+  stdby: true,
+  fps: false,
+  frameIn: true,
+  frameOut: true,
+  frames: true,
+  estimation: false,
+  maxRetakes: false,
+  resolution: false,
+  timeSpent: false
+}
 
-  mixins: [entityListMixin, searchMixin],
+const ASSET_DISPLAY_HEADERS = {
+  estimation: false,
+  readyFor: false,
+  timeSpent: false
+}
 
-  components: {
-    AvailableAssetBlock,
-    BuildFilterModal,
-    ButtonHrefLink,
-    ButtonSimple,
-    ComboboxStyled,
-    DeleteModal,
-    DepartmentName,
-    EditAssetModal,
-    EditLabelModal,
-    ImportModal,
-    ImportRenderModal,
-    SearchField,
-    SearchQueryList,
-    ShotLine,
-    ShowInfosButton,
-    Spinner,
-    TableMetadataSelectorMenu
-  },
+const optionalCsvColumns = ['Label']
 
-  data() {
-    return {
-      assetTypeId: '',
-      castingType: 'shot',
-      columnSelectorDisplayed: false,
-      editedAsset: null,
-      editedEntityId: null,
-      editedAssetLinkLabel: null,
-      episodeId: '',
-      importCsvFormData: {},
-      isBigMode: false,
-      isLoading: false,
-      isUnmounted: false,
-      hasScopeMoved: false,
-      wasDisconnected: false,
-      isOnlyCurrentEpisode: false,
-      isTextMode: false,
-      libraryDisplayed: false,
-      optionalCsvColumns: ['Label'],
-      parsedCSV: [],
-      removalData: {},
-      saveErrors: {},
-      selection: {},
-      sequenceId: 'all',
-      errors: {
-        edit: false,
-        editLabel: false,
-        importing: false,
-        importingError: null,
-        remove: false
-      },
-      loading: {
-        edit: false,
-        editLabel: false,
-        importing: false,
-        remove: false,
-        stay: false
-      },
-      metadataDisplayHeaders: {
-        stdby: true,
-        fps: false,
-        frameIn: true,
-        frameOut: true,
-        frames: true,
-        estimation: false,
-        maxRetakes: false,
-        resolution: false,
-        timeSpent: false
-      },
-      modals: {
-        isBuildFilterDisplayed: false,
-        isEditLabelDisplayed: false,
-        isNewDisplayed: false,
-        isImportRenderDisplayed: false,
-        isRemoveConfirmationDisplayed: false,
-        importing: false
-      },
-      success: {
-        edit: false
-      },
-      columnWidth: {}
-    }
-  },
+const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
+const store = useStore()
+const socket = getCurrentInstance().appContext.config.globalProperties.$socket
 
-  mounted() {
-    if (!this.isLoading) {
-      this.reset()
-    }
-    this.resetSequenceOption()
-    this.setLastProductionScreen('breakdown')
-    this.isTextMode = preferences.getBoolPreference('breakdown:text-mode')
-    window.addEventListener('keydown', this.onKeyDown, false)
+// State
+// --------------------------------------------------------------------------
 
-    this.resetDisplayHeaders()
-    this.resetColumnWidth()
-    this.setSearchFromUrl()
-  },
+const assetListRef = useTemplateRef('asset-list')
+const castingHeaderRef = useTemplateRef('casting-header')
+const castingListRef = useTemplateRef('casting-list')
+const editAssetModalRef = useTemplateRef('edit-asset-modal')
+const importModalRef = useTemplateRef('import-modal')
+const searchFieldRef = useTemplateRef('search-field')
 
-  beforeUnmount() {
-    this.isUnmounted = true
-    window.removeEventListener('keydown', this.onKeyDown)
-  },
+const assetTypeId = ref('')
+const castingType = ref('shot')
+const columnSelectorDisplayed = ref(false)
+const columnWidth = ref({})
+const editedAsset = ref(null)
+const editedAssetLinkLabel = ref(null)
+const editedEntityId = ref(null)
+const episodeId = ref('')
+const importCsvFormData = ref({})
+const isBigMode = ref(false)
+const isLoading = ref(false)
+const isOnlyCurrentEpisode = ref(false)
+const isTextMode = ref(false)
+const libraryDisplayed = ref(false)
+const metadataDisplayHeaders = ref({ ...SHOT_DISPLAY_HEADERS })
+const parsedCSV = ref([])
+const removalData = ref({})
+const saveErrors = ref({})
+const selection = ref({})
+const sequenceId = ref('all')
 
-  computed: {
-    ...mapGetters([
-      'assetMap',
-      'assetMetadataDescriptors',
-      'assetTypeMap',
-      'assetsByType',
-      'breakdownSearchQueries',
-      'breakdownSearchFilterGroups',
-      'casting',
-      'castingAssetTypeAssets',
-      'castingAssetTypesOptions',
-      'castingByType',
-      'castingCurrentShot',
-      'castingEpisodes',
-      'castingSequenceShots',
-      'castingSequencesOptions',
-      'currentEpisode',
-      'currentProduction',
-      'departmentMap',
-      'displayedAssets',
-      'displayedSequences',
-      'displayedShots',
-      'episodeMap',
-      'episodes',
-      'isAssetsLoading',
-      'isFrameIn',
-      'isFrameOut',
-      'isFrames',
-      'isShotsLoading',
-      'isShowInfosBreakdown',
-      'isTVShow',
-      'sequenceMap',
-      'shotMap',
-      'shotMetadataDescriptors'
-    ]),
-    ...mapGetters({
-      isCurrentUserManager: 'isCurrentUserProductionManager'
-    }),
+const errors = reactive({
+  edit: false,
+  editLabel: false,
+  importing: false,
+  importingError: null,
+  remove: false
+})
 
-    searchField() {
-      return this.$refs['search-field']
-    },
+const loading = reactive({
+  edit: false,
+  editLabel: false,
+  importing: false,
+  remove: false,
+  savingSearch: false,
+  stay: false
+})
 
-    castingTypeOptions() {
-      const isAssetsOnly = this.currentProduction.production_type === 'assets'
-      const isShotsOnly = this.currentProduction.production_type === 'shots'
-      const options = []
-      if (!isShotsOnly) {
-        options.push({
-          label: this.$t('assets.title'),
-          value: 'asset'
-        })
-      }
-      if (
-        !isAssetsOnly &&
-        (!this.isTVShow ||
-          (this.currentEpisode && this.currentEpisode.id !== 'main'))
-      ) {
-        options.unshift({
-          label: this.$t('shots.title'),
-          value: 'shot'
-        })
-      }
-      return options
-    },
+const modals = reactive({
+  isBuildFilterDisplayed: false,
+  isEditLabelDisplayed: false,
+  isNewDisplayed: false,
+  isImportRenderDisplayed: false,
+  isRemoveConfirmationDisplayed: false,
+  importing: false
+})
 
-    availableAssetsByType() {
-      const result = []
-      this.assetsByType.forEach(typeGroup => {
-        let newGroup = typeGroup.filter(
-          asset => !asset.canceled && (!asset.shared || this.libraryDisplayed)
-        )
-        if (this.isTVShow && this.isOnlyCurrentEpisode) {
-          newGroup = typeGroup.filter(asset => {
-            return (
-              asset.episode_id === this.currentEpisode.id ||
-              asset.casting_episode_ids?.includes(this.currentEpisode.id)
-            )
-          })
-        }
-        if (newGroup.length > 0) result.push(newGroup)
-      })
-      return result
-    },
+const success = reactive({
+  edit: false
+})
 
-    exportUrlPath() {
-      let path = `/api/export/csv/projects/${this.currentProduction.id}/casting.csv`
-      let paramAdded = false
-      if (this.currentEpisode) {
-        path += `?episode_id=${this.currentEpisode.id}`
-        paramAdded = true
-      }
-      if (this.isShotCasting) {
-        path += `${paramAdded ? '&' : '?'}is_shot_casting=${this.isShotCasting}`
-      }
-      return path
-    },
+let hasScopeMoved = false
+let isUnmounted = false
+let previousEntityId = null
+let resizing = null
+let wasDisconnected = false
 
-    isEpisodeCasting() {
-      return this.currentEpisode && this.currentEpisode.id === 'all'
-    },
+// Computed
+// --------------------------------------------------------------------------
 
-    isAssetCasting() {
-      return !this.isEpisodeCasting && this.castingType === 'asset'
-    },
+const assetMetadataDescriptors = computed(
+  () => store.getters.assetMetadataDescriptors
+)
+const assetTypeMap = computed(() => store.getters.assetTypeMap)
+const assetsByType = computed(() => store.getters.assetsByType)
+const breakdownSearchFilterGroups = computed(
+  () => store.getters.breakdownSearchFilterGroups
+)
+const breakdownSearchQueries = computed(
+  () => store.getters.breakdownSearchQueries
+)
+const casting = computed(() => store.getters.casting)
+const castingAssetTypeAssets = computed(
+  () => store.getters.castingAssetTypeAssets
+)
+const castingAssetTypesOptions = computed(
+  () => store.getters.castingAssetTypesOptions
+)
+const castingByType = computed(() => store.getters.castingByType)
+const castingEpisodes = computed(() => store.getters.castingEpisodes)
+const castingSequenceShots = computed(() => store.getters.castingSequenceShots)
+const castingSequencesOptions = computed(
+  () => store.getters.castingSequencesOptions
+)
+const currentEpisode = computed(() => store.getters.currentEpisode)
+const currentProduction = computed(() => store.getters.currentProduction)
+const departmentMap = computed(() => store.getters.departmentMap)
+const displayedAssets = computed(() => store.getters.displayedAssets)
+const displayedSequences = computed(() => store.getters.displayedSequences)
+const episodes = computed(() => store.getters.episodes)
+const isAssetsLoading = computed(() => store.getters.isAssetsLoading)
+const isCurrentUserManager = computed(
+  () => store.getters.isCurrentUserProductionManager
+)
+const isFrameIn = computed(() => store.getters.isFrameIn)
+const isFrameOut = computed(() => store.getters.isFrameOut)
+const isFrames = computed(() => store.getters.isFrames)
+const isShowInfosBreakdown = computed(() => store.getters.isShowInfosBreakdown)
+const isTVShow = computed(() => store.getters.isTVShow)
+const sequenceMap = computed(() => store.getters.sequenceMap)
+const shotMetadataDescriptors = computed(
+  () => store.getters.shotMetadataDescriptors
+)
 
-    isShotCasting() {
-      return !this.isEpisodeCasting && this.castingType === 'shot'
-    },
+const isEpisodeCasting = computed(() => currentEpisode.value?.id === 'all')
 
-    castingEntities() {
-      if (this.isEpisodeCasting) {
-        return this.castingEpisodes
-      } else if (this.isShotCasting) {
-        return this.castingSequenceShots
-      } else {
-        if (
-          this.isTVShow &&
-          this.currentEpisode &&
-          this.currentEpisode.id !== 'main'
-        ) {
-          return this.castingAssetTypeAssets.filter(
+const isAssetCasting = computed(
+  () => !isEpisodeCasting.value && castingType.value === 'asset'
+)
+
+const isShotCasting = computed(
+  () => !isEpisodeCasting.value && castingType.value === 'shot'
+)
+
+const castingTypeOptions = computed(() => {
+  const productionType = currentProduction.value.production_type
+  const hasShots =
+    productionType !== 'assets' &&
+    (!isTVShow.value ||
+      (currentEpisode.value && currentEpisode.value.id !== 'main'))
+  return [
+    ...(hasShots ? [{ label: t('shots.title'), value: 'shot' }] : []),
+    ...(productionType !== 'shots'
+      ? [{ label: t('assets.title'), value: 'asset' }]
+      : [])
+  ]
+})
+
+const isInCurrentEpisode = asset =>
+  asset.episode_id === currentEpisode.value.id ||
+  asset.casting_episode_ids?.includes(currentEpisode.value.id)
+
+const availableAssetsByType = computed(() =>
+  assetsByType.value
+    .map(typeGroup =>
+      isTVShow.value && isOnlyCurrentEpisode.value
+        ? typeGroup.filter(isInCurrentEpisode)
+        : typeGroup.filter(
             asset =>
-              asset.episode_id === this.currentEpisode.id ||
-              asset.casting_episode_ids?.includes(this.currentEpisode.id)
+              !asset.canceled && (!asset.shared || libraryDisplayed.value)
           )
-        } else if (this.isTVShow && this.currentEpisode.id === 'main') {
-          return this.castingAssetTypeAssets.filter(asset => !asset.episode_id)
-        } else {
-          return this.castingAssetTypeAssets
-        }
-      }
-    },
+    )
+    .filter(typeGroup => typeGroup.length > 0)
+)
 
-    castingAssetTypes() {
-      const castingAssetTypes = []
-      const assetTypeNameMap = {}
-      this.castingEntities.forEach(entity => {
-        if (this.castingByType[entity.id]) {
-          this.castingByType[entity.id].forEach(type => {
-            if (type[0] && !assetTypeNameMap[type[0].asset_type_name]) {
-              assetTypeNameMap[type[0].asset_type_name] = true
-              castingAssetTypes.push(type[0].asset_type_name)
-            }
-          })
-        }
-      })
-      return castingAssetTypes.sort()
-    },
+const exportUrlPath = computed(() => {
+  const params = [
+    currentEpisode.value && `episode_id=${currentEpisode.value.id}`,
+    isShotCasting.value && 'is_shot_casting=true'
+  ].filter(Boolean)
+  const path = `/api/export/csv/projects/${currentProduction.value.id}/casting.csv`
+  return params.length > 0 ? `${path}?${params.join('&')}` : path
+})
 
-    filteredCasting() {
-      const casting = {}
-      this.castingEntities.forEach(entity => {
-        if (this.castingByType[entity.id]) {
-          this.castingByType[entity.id].forEach(type => {
-            type.forEach(item => {
-              const castKey = `${item.asset_name}${item.asset_type_name}${item.name}`
-              casting[castKey] = true
-            })
-          })
-        }
-      })
-      return casting
-    },
+const castingEntities = computed(() => {
+  if (isEpisodeCasting.value) return castingEpisodes.value
+  if (isShotCasting.value) return castingSequenceShots.value
+  if (!isTVShow.value) return castingAssetTypeAssets.value
+  if (currentEpisode.value && currentEpisode.value.id !== 'main') {
+    return castingAssetTypeAssets.value.filter(isInCurrentEpisode)
+  }
+  if (currentEpisode.value?.id === 'main') {
+    return castingAssetTypeAssets.value.filter(asset => !asset.episode_id)
+  }
+  return castingAssetTypeAssets.value
+})
 
-    isDescription() {
-      return this.castingEntities.some(
-        e => e.description && e.description.length > 0
-      )
-    },
+// Asset lists of the displayed entities, one per asset type and entity.
+const castingEntityTypeGroups = computed(() =>
+  castingEntities.value.flatMap(entity => castingByType.value[entity.id] || [])
+)
 
-    csvColumns() {
-      return this.isTVShow && this.currentEpisode?.id !== 'all'
-        ? ['Episode', 'Parent', 'Name', 'Asset Type', 'Asset', 'Occurences']
-        : ['Parent', 'Name', 'Asset Type', 'Asset', 'Occurences']
-    },
+const castingAssetTypes = computed(() =>
+  [
+    ...new Set(
+      castingEntityTypeGroups.value
+        .filter(typeGroup => typeGroup[0])
+        .map(typeGroup => typeGroup[0].asset_type_name)
+    )
+  ].sort()
+)
 
-    renderColumns() {
-      return [...this.csvColumns, ...this.optionalCsvColumns]
-    },
+const filteredCasting = computed(() =>
+  Object.fromEntries(
+    castingEntityTypeGroups.value
+      .flat()
+      .map(item => [
+        `${item.asset_name}${item.asset_type_name}${item.name}`,
+        true
+      ])
+  )
+)
 
-    dataMatchers() {
-      return this.isTVShow
-        ? ['Episode', 'Name', 'Asset Type', 'Asset']
-        : ['Name', 'Asset Type', 'Asset']
-    },
+const isDescription = computed(() =>
+  castingEntities.value.some(e => e.description && e.description.length > 0)
+)
 
-    metadataDescriptors() {
-      if (this.isEpisodeCasting) {
-        return []
-      } else if (this.isShotCasting) {
-        return this.shotMetadataDescriptors
-      } else {
-        return this.assetMetadataDescriptors
-      }
-    },
+const csvColumns = computed(() =>
+  isTVShow.value && currentEpisode.value?.id !== 'all'
+    ? ['Episode', 'Parent', 'Name', 'Asset Type', 'Asset', 'Occurences']
+    : ['Parent', 'Name', 'Asset Type', 'Asset', 'Occurences']
+)
 
-    nameHeaderMinWidth() {
-      return this.columnWidth.name
-        ? parseInt(this.columnWidth.name, 10) + 1 + 'px'
-        : '251px'
+const renderColumns = computed(() => [
+  ...csvColumns.value,
+  ...optionalCsvColumns
+])
+
+const dataMatchers = computed(() =>
+  isTVShow.value
+    ? ['Episode', 'Name', 'Asset Type', 'Asset']
+    : ['Name', 'Asset Type', 'Asset']
+)
+
+const metadataDescriptors = computed(() => {
+  if (isEpisodeCasting.value) return []
+  return isShotCasting.value
+    ? shotMetadataDescriptors.value
+    : assetMetadataDescriptors.value
+})
+
+const visibleMetadataDescriptors = computed(() =>
+  metadataDescriptors.value.filter(descriptor => {
+    const header = metadataDisplayHeaders.value[descriptor.field_name]
+    return header === undefined || header
+  })
+)
+
+const nameHeaderMinWidth = computed(() =>
+  columnWidth.value.name
+    ? parseInt(columnWidth.value.name, 10) + 1 + 'px'
+    : '251px'
+)
+
+const selectedEntityIds = computed(() =>
+  Object.keys(selection.value).filter(key => selection.value[key])
+)
+
+// Functions
+// --------------------------------------------------------------------------
+
+const reset = () => {
+  if (!isTVShow.value && route.params?.episode_id) {
+    router.push({
+      ...route,
+      name: 'breakdown',
+      params: { ...route.params, episode_id: null }
+    })
+  }
+  isLoading.value = true
+  setTimeout(reloadEntities, 100)
+}
+
+const reloadEntities = async () => {
+  if (isUnmounted) return
+  isLoading.value = true
+  const production = currentProduction.value
+  let episode = currentEpisode.value
+  hasScopeMoved = false
+  try {
+    // Resolve the episode first: starting on a direct link before the
+    // topbar has it costs a full production-wide second pass. Inside the
+    // try, so a failed fetch releases the loading flag like any other.
+    // Only the episode is rebound: a production switched during the
+    // fetch must still reset the column widths in the finally block.
+    if (isTVShow.value && !currentEpisode.value) {
+      await store.dispatch('loadEpisodes')
+      if (isUnmounted) return
+      episode = currentEpisode.value
+      // The watcher flagged the episode this run just resolved: nothing
+      // was loaded under another scope yet, the loads start from it.
+      hasScopeMoved = false
     }
-  },
-
-  methods: {
-    ...mapActions([
-      'addAssetToCasting',
-      'editEpisode',
-      'editShot',
-      'editAsset',
-      'displayMoreAssets',
-      'loadEpisodeCasting',
-      'loadEpisodes',
-      'loadAssetCasting',
-      'loadAssets',
-      'loadShotCasting',
-      'loadShots',
-      'newAsset',
-      'removeAssetFromCasting',
-      'removeBreakdownSearch',
-      'saveBreakdownSearch',
-      'loadSequences',
-      'saveBreakdownSearchFilterGroup',
-      'castAsset',
-      'saveCastings',
-      'setAssetLinkLabel',
-      'setAssetSearch',
-      'setCastingEpisodes',
-      'setCastingAssetType',
-      'setCastingAssetTypes',
-      'setCastingEpisode',
-      'setCastingForProductionEpisodes',
-      'setCastingSequence',
-      'setCurrentEpisode',
-      'setEntityCasting',
-      'setLastProductionScreen',
-      'uploadCastingFile'
-    ]),
-
-    reset() {
-      if (!this.isTVShow) {
-        const route = { ...this.$route }
-        if (route && route.params && route.params.episode_id) {
-          route.name = 'breakdown'
-          route.params.episode_id = null
-          this.$router.push(route)
-        }
-      }
-      this.isLoading = true
-      setTimeout(() => {
-        this.reloadEntities()
-      }, 100)
-    },
-
-    async reloadEntities() {
-      if (this.isUnmounted) return
-      this.isLoading = true
-      const production = this.currentProduction
-      let episode = this.currentEpisode
-      this.hasScopeMoved = false
-      try {
-        // Resolve the episode first: starting on a direct link before the
-        // topbar has it costs a full production-wide second pass. Inside the
-        // try, so a failed fetch releases the loading flag like any other.
-        // Only the episode is rebound: a production switched during the
-        // fetch must still reset the column widths in the finally block.
-        if (this.isTVShow && !this.currentEpisode) {
-          await this.loadEpisodes()
-          if (this.isUnmounted) return
-          episode = this.currentEpisode
-          // The watcher flagged the episode this run just resolved: nothing
-          // was loaded under another scope yet, the loads start from it.
-          this.hasScopeMoved = false
-        }
-        // 'all' is episode casting here: it reads neither sequences nor shots.
-        if (
-          !this.isTVShow ||
-          !['main', 'all'].includes(this.currentEpisode?.id)
-        ) {
-          await this.loadSequences()
-          if (this.isUnmounted) return
-          await this.loadShots()
-          // Leaving the page during a load must stop the chain: the
-          // production-wide assets load would land under the page shown next.
-          if (this.isUnmounted) return
-        }
-        if (this.isTVShow) {
-          if (this.currentEpisode) {
-            this.episodeId = this.currentEpisode.id
-          }
-          this.setCastingEpisode(this.episodeId)
-          this.setCastingForProductionEpisodes()
-        } else {
-          this.setCastingEpisode(null)
-        }
-        await this.loadAssets({ all: true, withTasks: true })
-        if (this.isUnmounted) return
-        this.displayMoreAssets()
-        this.fillAssetList()
-        this.setCastingAssetTypes()
-        if (this.assetTypeId) {
-          this.setCastingAssetType(this.assetTypeId)
-        } else if (
-          !this.isTVShow ||
-          (this.episodeId && !['main', 'all'].includes(this.episodeId))
-        ) {
-          this.setCastingSequence(this.sequenceId || 'all')
-        }
-        this.resetSequenceOption()
-        this.resetSelection()
-        if (
-          (this.currentEpisode && this.currentEpisode.id === 'main') ||
-          this.currentProduction.production_type === 'assets'
-        ) {
-          this.castingType = 'asset'
-        }
-      } catch (err) {
-        console.error(err)
-      } finally {
-        this.isLoading = false
-        // The production and episode watchers ignore a change made while
-        // the page loads: pick it up here or the casting of the scope left
-        // behind stays displayed under a topbar that shows the new one. Not
-        // after unmount: the ghost reload would push a production-wide
-        // dataset under the page displayed next.
-        // hasScopeMoved catches a switch that came back to the scope the run
-        // started with: the loads in between served the other one.
-        const isScopeChanged =
-          this.hasScopeMoved ||
-          this.currentProduction !== production ||
-          this.currentEpisode?.id !== episode?.id
-        if (isScopeChanged && !this.isUnmounted) {
-          this.reset()
-          if (this.currentProduction !== production) this.resetColumnWidth()
-        }
-      }
-    },
-
-    resetSequenceOption() {
-      if (
-        this.currentProduction?.production_style === 'nft' &&
-        this.castingSequencesOptions[1]
-      ) {
-        this.sequenceId = this.castingSequencesOptions[1].value
-      }
-    },
-
-    resetSelection() {
-      const selection = {}
-      if (this.isEpisodeCasting) {
-        this.castingEpisodes.forEach(episode => {
-          selection[episode.id] = false
-        })
-      } else if (this.isShotCasting) {
-        this.castingSequenceShots.forEach(shot => {
-          selection[shot.id] = false
-        })
-      } else {
-        this.castingAssetTypeAssets.forEach(asset => {
-          selection[asset.id] = false
-        })
-      }
-      this.selection = selection
-    },
-
-    confirmBuildFilter(query) {
-      this.modals.isBuildFilterDisplayed = false
-      this.searchField.setValue(query)
-      this.onSearchChange(query)
-    },
-
-    onSearchChange(searchQuery) {
-      this.setAssetSearch(searchQuery)
-      this.setSearchInUrl(searchQuery)
-      this.displayMoreAssets()
-      this.displayMoreAssets()
-      this.fillAssetList()
-    },
-
-    selectEntity(entityId, event) {
-      const previousSelection = { ...this.selection }
-      if (!(event.ctrlKey || event.metaKey) && !event.shitKey) {
-        this.clearSelection()
-      }
-
-      if (this.previousEntityId && event.shiftKey) {
-        this.selectRange(this.previousEntityId, entityId)
-      }
-
-      if (!this.previousEntityId || !event.shiftKey) {
-        this.previousEntityId = entityId
-      }
-
-      const nbElementsSelected = Object.keys(previousSelection).filter(
-        k => previousSelection[k]
-      ).length
-      if (
-        !previousSelection[entityId] ||
-        (nbElementsSelected > 1 && !(event.ctrlKey || event.metaKey))
-      ) {
-        this.selection[entityId] = true
-      } else if (
-        previousSelection[entityId] &&
-        (event.ctrlKey || event.metaKey)
-      ) {
-        this.selection[entityId] = false
-      }
-    },
-
-    clearSelection() {
-      Object.keys(this.selection)
-        .filter(k => this.selection[k])
-        .forEach(shotId => {
-          this.selection[shotId] = false
-        })
-    },
-
-    selectRange(previousEntityId, entityId) {
-      const keys = Object.keys(this.selection)
-      const previousIndex = keys.findIndex(k => k === previousEntityId)
-      const index = keys.findIndex(k => k === entityId)
-
-      const indexRange =
-        previousIndex < index
-          ? range(previousIndex, index)
-          : range(index, previousIndex)
-
-      indexRange.forEach(i => {
-        if (i >= 0) this.selection[keys[i]] = true
-      })
-    },
-
-    reloadCasting() {
-      if (this.isEpisodeCasting) {
-        this.setCastingForProductionEpisodes()
-      } else if (this.assetTypeId) {
-        this.setCastingAssetType(this.assetTypeId)
-      } else {
-        this.setCastingSequence(this.sequenceId || 'all')
-      }
-    },
-
-    async addOneAsset(assetId, amount = 1) {
-      const entityIds = Object.keys(this.selection).filter(
-        key => this.selection[key]
-      )
-
-      entityIds.forEach(entityId => {
-        this.addAssetToCasting({
-          entityId,
-          assetId,
-          nbOccurences: amount,
-          label: this.castingType === 'shot' ? 'animate' : 'fixed'
-        })
-        delete this.saveErrors[entityId]
-      })
-
-      try {
-        await this.castAsset({ entityIds, assetId })
-      } catch (err) {
-        entityIds.forEach(entityId => {
-          this.saveErrors[entityId] = true
-        })
-        console.error(err)
-      }
-    },
-
-    async addTenAssets(assetId) {
-      this.addOneAsset(assetId, 10)
-    },
-
-    confirmAssetRemoval() {
-      this.saveAssetRemoval(
-        this.removalData.entityId,
-        this.removalData.assetId,
-        this.removalData.nbOccurences
-      )
-    },
-
-    saveAssetRemoval(entityId, assetId, nbOccurences) {
-      this.loading.remove = true
-      this.removeAssetFromCasting({ entityId, assetId, nbOccurences })
-      delete this.saveErrors[entityId]
-      return this.castAsset({ entityIds: [entityId], assetId })
-        .then(() => {
-          this.modals.isRemoveConfirmationDisplayed = false
-        })
-        .catch(err => {
-          this.saveErrors[entityId] = true
-          this.errors.remove = true
-          console.error(err)
-        })
-        .finally(() => {
-          this.loading.remove = false
-        })
-    },
-
-    async removeOneAssetFromSelection(assetId) {
-      const entityIds = Object.keys(this.selection).filter(
-        key => this.selection[key]
-      )
-      const removals = []
-      for (const entityId of entityIds) {
-        const asset = this.casting[entityId]?.find(
-          asset => asset.asset_id === assetId
-        )
-        if (asset) {
-          if (this.isEpisodeCasting && asset.nb_occurences === 1) {
-            // The confirmation modal flow handles this entity on its own.
-            await this.removeOneAsset(assetId, entityId, asset.nb_occurences)
-          } else {
-            removals.push(entityId)
-          }
-        }
-      }
-      if (removals.length === 0) return
-      this.loading.remove = true
-      removals.forEach(entityId => {
-        this.removeAssetFromCasting({ entityId, assetId, nbOccurences: 1 })
-        delete this.saveErrors[entityId]
-      })
-      try {
-        await this.castAsset({ entityIds: removals, assetId })
-      } catch (err) {
-        removals.forEach(entityId => {
-          this.saveErrors[entityId] = true
-        })
-        this.errors.remove = true
-        console.error(err)
-      } finally {
-        this.loading.remove = false
-      }
-    },
-
-    removeOneAsset(assetId, entityId, nbOccurences) {
-      if (this.isEpisodeCasting && nbOccurences === 1) {
-        this.removalData = { assetId, entityId, nbOccurences }
-        this.modals.isRemoveConfirmationDisplayed = true
-        return Promise.resolve()
-      } else {
-        return this.saveAssetRemoval(entityId, assetId, 1)
-      }
-    },
-
-    onAssetListScroll(event) {
-      const assetList = this.$refs['asset-list']
-      const maxHeight = assetList.scrollHeight - assetList.offsetHeight
-      const position = event.target
-      if (maxHeight < position.scrollTop + 100) {
-        this.displayMoreAssets()
-      }
-    },
-
-    // On tall screens the first pages may not overflow the container, so
-    // scrolling can never trigger the next page: keep loading until the
-    // scrollbar shows up or every asset is displayed.
-    fillAssetList() {
-      this.$nextTick(() => {
-        const assetList = this.$refs['asset-list']
-        if (!assetList || assetList.scrollHeight > assetList.clientHeight) {
-          return
-        }
-        const displayedCountBefore = this.displayedAssets.length
-        this.displayMoreAssets()
-        this.$nextTick(() => {
-          if (this.displayedAssets.length > displayedCountBefore) {
-            this.fillAssetList()
-          }
-        })
-      })
-    },
-
-    showImportModal() {
-      this.modals.importing = true
-    },
-
-    hideImportModal() {
-      this.modals.importing = false
-    },
-
-    showImportRenderModal() {
-      this.modals.isImportRenderDisplayed = true
-    },
-
-    hideImportRenderModal() {
-      this.modals.isImportRenderDisplayed = false
-    },
-
-    renderImport(data, mode) {
-      this.loading.importing = true
-      this.errors.importing = false
-      if (mode === 'file') {
-        data = data.get('file')
-      }
-      csv.processCSV(data).then(results => {
-        this.parsedCSV = results
-        this.hideImportModal()
-        this.loading.importing = false
-        this.showImportRenderModal()
-      })
-    },
-
-    uploadImportFile(data) {
-      const formData = new FormData()
-      const filename = 'import.csv'
-      const csvContent = csv.turnEntriesToCsvString(data)
-      const file = new File([csvContent], filename, { type: 'text/csv' })
-
-      formData.append('file', file)
-
-      this.loading.importing = true
-      this.errors.importing = false
-      this.errors.importingError = null
-      this.importCsvFormData = formData
-
-      this.uploadCastingFile(this.importCsvFormData)
-        .then(() => {
-          this.hideImportRenderModal()
-          if (this.sequenceId) {
-            this.setCastingSequence(this.sequenceId || 'all')
-          }
-        })
-        .catch(err => {
-          this.errors.importingError = err
-          this.errors.importing = true
-        })
-        .finally(() => {
-          this.loading.importing = false
-        })
-    },
-
-    resetImport() {
-      this.errors.importing = false
-      this.errors.importingError = null
-      this.hideImportRenderModal()
-      this.importCsvFormData = undefined
-      this.$refs['import-modal']?.reset()
-      this.showImportModal()
-    },
-
-    updateUrl() {
-      let isChange = false
-      let route = {}
-      if (this.isEpisodeCasting) {
-        const episodeId = this.$route.params.episode_id
-        if (episodeId !== this.episodeId) {
-          isChange = true
-          route = {
-            name: 'breakdown-episode',
-            params: {
-              production_id: this.currentProduction.id,
-              episode_id: this.episodeId
-            }
-          }
-        }
-      } else if (this.isAssetCasting) {
-        const assetTypeId = this.$route.params.asset_type_id || ''
-        if (assetTypeId !== this.assetTypeId) {
-          isChange = true
-          route = {
-            name: 'breakdown-asset-type',
-            params: {
-              production_id: this.currentProduction.id,
-              asset_type_id: this.assetTypeId
-            }
-          }
-        }
-      } else {
-        const sequenceId = this.$route.params.sequence_id || 'all'
-        if (sequenceId !== this.sequenceId) {
-          isChange = true
-          route = {
-            name: 'breakdown-sequence',
-            params: {
-              production_id: this.currentProduction.id,
-              sequence_id: this.sequenceId || 'all'
-            }
-          }
-        }
-      }
-      if (isChange) {
-        let episodeId = this.$route.params.episode_id
-        if (!episodeId && this.currentEpisode) {
-          episodeId = this.currentEpisode.id
-        }
-        if (episodeId) {
-          route.name = `episode-${route.name}`
-          route.params.episode_id = episodeId
-          if (episodeId === 'all') route.params.sequence_id = 'all'
-        }
-        this.$router.push(route)
-      }
-    },
-
-    onEditLabelClicked(asset, label, entityId) {
-      this.editedAsset = asset
-      this.editedEntityId = entityId
-      this.editedAssetLinkLabel = label
-      this.modals.isEditLabelDisplayed = true
-    },
-
-    confirmEditLabel(form = {}) {
-      const label = form.label
-      this.loading.editLabel = true
-      this.setAssetLinkLabel({
-        label: label,
-        asset: this.editedAsset,
-        targetEntityId: this.editedEntityId
-      })
-        .then(() => {
-          this.modals.isEditLabelDisplayed = false
-          this.loading.editLabel = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.errors.editLabel = true
-          this.loading.editLabel = false
-        })
-    },
-
-    toggleTextMode() {
-      this.isTextMode = !this.isTextMode
-      localStorage.setItem('breakdown:text-mode', this.isTextMode)
-    },
-
-    toggleColumnSelector() {
-      this.columnSelectorDisplayed = !this.columnSelectorDisplayed
-    },
-
-    confirmNewAssetStay(form) {
-      this.loading.stay = true
-      this.success.edit = false
-      this.newAsset(form)
-        .then(asset => {
-          this.loading.stay = false
-          this.loading.edit = false
-          this.resetLightEditModal(asset)
-          this.$refs['edit-asset-modal'].focusName()
-          this.success.edit = true
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.stay = false
-          this.loading.edit = false
-          this.success.edit = false
-          this.errors.edit = true
-        })
-    },
-
-    confirmNewAsset(form) {
-      this.loading.edit = true
-      this.errors.edit = false
-      this.newAsset(form)
-        .then(() => {
-          this.loading.edit = false
-          this.modals.isNewDisplayed = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.edit = false
-          this.errors.edit = true
-        })
-    },
-
-    resetLightEditModal(asset) {
-      const form = {
-        name: '',
-        entity_type_id: asset.entit_type_id,
-        production_id: this.currentProduction.id
-      }
-      this.assetToEdit = form
-    },
-
-    onKeyDown(event) {
-      if (!['INPUT', 'TEXTAREA'].includes(event.target.tagName)) {
-        if ((event.ctrlKey || event.metaKey) && event.keyCode === 67) {
-          // ctrl + c
-          this.copyCasting()
-        } else if ((event.ctrlKey || event.metaKey) && event.keyCode === 86) {
-          // ctrl + v
-          this.pasteCasting()
-        }
-      }
-    },
-
-    copyCasting() {
-      const selectedElementId = Object.keys(this.selection).find(
-        key => this.selection[key]
-      )
-      const selectedCasting = this.casting[selectedElementId]
-      clipboard.copyCasting(selectedCasting)
-    },
-
-    async pasteCasting() {
-      const castingToPaste = clipboard.pasteCasting()
-      if (!castingToPaste || castingToPaste.length === 0) return
-      const selectedElements = Object.keys(this.selection).filter(
-        key => this.selection[key]
-      )
-      selectedElements.forEach(entityId => {
-        this.setEntityCasting({
-          entityId,
-          casting: castingToPaste
-        })
-        delete this.saveErrors[entityId]
-      })
-      try {
-        await this.saveCastings(selectedElements)
-      } catch (err) {
-        selectedElements.forEach(entityId => {
-          this.saveErrors[entityId] = true
-        })
-        console.error(err)
-      }
-      return castingToPaste
-    },
-
-    async editEntity(data) {
-      if (this.isEpisodeCasting) {
-        await this.editEpisode(data)
-      } else if (this.isShotCasting) {
-        await this.editShot(data)
-      } else {
-        await this.editAsset(data)
-      }
-    },
-
-    async onFieldChanged({ entry, fieldName, value }) {
-      const data = {
-        id: entry.id,
-        [fieldName]: value
-      }
-      await this.editEntity(data)
-    },
-
-    async onMetadataChanged({ entry, descriptor, value }) {
-      const data = {
-        id: entry.id,
-        data: {
-          [descriptor.field_name]: value
-        }
-      }
-      await this.editEntity(data)
-    },
-
-    descriptorCurrentDepartments(descriptor) {
-      const departments = descriptor.departments || []
-      return departments.map(departmentId =>
-        this.departmentMap.get(departmentId)
-      )
-    },
-
-    getEntityName(entity) {
-      return this.sequenceId === 'all' &&
-        (!this.isTVShow || this.currentEpisode?.id !== 'all')
-        ? entity.sequence_name + ' / ' + entity.name
-        : entity.name
-    },
-
-    getCsvFileName() {
-      const nameData = [
-        moment().format('YYYY-MM-DD'),
-        'kitsu',
-        this.castingType + 's',
-        this.currentProduction.name,
-        this.$t('breakdown.title')
-      ]
-      if (this.isTVShow) {
-        if (this.currentEpisode) {
-          if (this.currentEpisode.id === 'all') {
-            nameData.splice(4, 0, 'all')
-          } else if (this.currentEpisode.id === 'main') {
-            nameData.splice(4, 0, 'main pack')
-            if (this.assetTypeId !== 'all' && this.castingType === 'asset') {
-              nameData.splice(
-                5,
-                0,
-                this.assetTypeMap.get(this.assetTypeId)?.name || ''
-              )
-            }
-          } else {
-            nameData.splice(4, 0, this.currentEpisode.name)
-            if (this.sequenceId !== 'all' && this.castingType === 'shot') {
-              nameData.splice(
-                5,
-                0,
-                this.sequenceMap.get(this.sequenceId)?.name || ''
-              )
-            }
-            if (this.assetTypeId !== 'all' && this.castingType === 'asset') {
-              nameData.splice(
-                5,
-                0,
-                this.assetTypeMap.get(this.assetTypeId)?.name || ''
-              )
-            }
-          }
-        }
-      } else {
-        if (this.sequenceId !== 'all' && this.castingType === 'shot') {
-          nameData.splice(
-            5,
-            0,
-            this.sequenceMap.get(this.sequenceId)?.name || ''
-          )
-        }
-        if (this.assetTypeId !== 'all' && this.castingType === 'asset') {
-          nameData.splice(
-            5,
-            0,
-            this.assetTypeMap.get(this.assetTypeId)?.name || ''
-          )
-        }
-      }
-      return stringHelpers.slugify(nameData.join('_'))
-    },
-
-    getCsvFileHeaders() {
-      const headers = [
-        this.$t('shots.fields.name'),
-        this.$t('breakdown.fields.standby')
-      ]
-      if (this.isFrames) {
-        headers.push(this.$t('main.frames'))
-      }
-      if (this.isFrameIn) {
-        headers.push(this.$t('main.frame_in'))
-      }
-      if (this.isFrameOut) {
-        headers.push(this.$t('main.frame_out'))
-      }
-      this.metadataDescriptors.forEach(descriptor => {
-        headers.push(descriptor.name)
-      })
-      return headers.concat(this.castingAssetTypes)
-    },
-
-    getCsvEntries() {
-      const entries = this.castingEntities.map(entity => {
-        const entry = [entity.name, entity.is_casting_standby ? 'X' : '']
-        if (this.isFrames) {
-          entry.push(entity.nb_frames)
-        }
-        if (this.isFrameIn) {
-          entry.push(entity.data.frame_in)
-        }
-        if (this.isFrameOut) {
-          entry.push(entity.data.frame_out)
-        }
-        this.metadataDescriptors.forEach(descriptor => {
-          entry.push(entity.data[descriptor.field_name] || '')
-        })
-
-        const assets = this.castingByType[entity.id] || []
-        const assetsByAssetTypesMap = {}
-        assets.forEach(assetTypeAssets => {
-          assetsByAssetTypesMap[assetTypeAssets[0].asset_type_name] =
-            assetTypeAssets
-        })
-        this.castingAssetTypes.forEach(assetTypeName => {
-          const typeAssets = assetsByAssetTypesMap[assetTypeName] || []
-          const nbAssetsForType = typeAssets.reduce(
-            (acc, a) => acc + a.nb_occurences,
-            0
-          )
-          if (nbAssetsForType > 0) {
-            let casting = nbAssetsForType + ' assets: '
-            casting += typeAssets
-              .map(asset => {
-                return asset.asset_name + ' (' + asset.nb_occurences + ')'
-              })
-              .join(', ')
-            entry.push(casting)
-          } else {
-            entry.push('')
-          }
-        })
-        return entry
-      })
-      return entries
-    },
-
-    exportViewToCsv() {
-      const entries = this.getCsvEntries()
-      const name = this.getCsvFileName()
-      const headers = this.getCsvFileHeaders()
-      csv.buildCsvFile(name, [headers].concat(entries))
-    },
-
-    removeSearchQuery(searchQuery) {
-      this.removeBreakdownSearch(searchQuery).catch(console.error)
-    },
-
-    saveSearchQuery(searchQuery) {
-      if (this.loading.savingSearch) {
-        return
-      }
-      this.loading.savingSearch = true
-      this.saveBreakdownSearch(searchQuery)
-        .catch(console.error)
-        .finally(() => {
-          this.loading.savingSearch = false
-        })
-    },
-
-    initResize(knobRefName, refName, descriptorId) {
-      this.resizedKnobRefName = knobRefName + (descriptorId ? descriptorId : '')
-      this.resizedRefName = refName + (descriptorId ? descriptorId : '')
-      this.resizedDescriptorId = descriptorId
-      window.addEventListener('mousemove', this.startResizing)
-      window.addEventListener('mouseup', this.stopResizing)
-    },
-
-    startResizing(event) {
-      const knobRef = this.resizedKnobRefName
-      const headerRef = this.resizedRefName
-      const knob = this.$refs[knobRef][0]
-        ? this.$refs[knobRef][0]
-        : this.$refs[knobRef]
-      const header = this.$refs[headerRef][0]
-        ? this.$refs[headerRef][0]
-        : this.$refs[headerRef]
-      const diff = event.clientX - knob.getBoundingClientRect().left
-      const actualWidth = header.getBoundingClientRect().width
-      this.columnWidth = { ...this.columnWidth }
-      if (this.resizedDescriptorId) {
-        const newWidth = Math.max(actualWidth + diff, 110)
-        this.columnWidth[this.resizedDescriptorId] = newWidth
-        const preferenceKey = `breakdown:column-width-descriptor-${this.resizedDescriptorId}`
-        preferences.setPreference(preferenceKey, newWidth)
-      } else {
-        const newWidth = Math.max(actualWidth + diff, 160)
-        this.columnWidth.name = newWidth
-        const preferenceKey =
-          'breakdown:column-width-name-' +
-          `${this.castingType}-${this.currentProduction.id}`
-        preferences.setPreference(preferenceKey, newWidth)
-      }
-    },
-
-    stopResizing() {
-      window.removeEventListener('mousemove', this.startResizing)
-      window.removeEventListener('mouseup', this.stopResizing)
-      this.resizedKnobRefName = null
-      this.resizedRefName = null
-      this.resizedDescriptorId = null
-    },
-
-    resetDisplayHeaders() {
-      if (this.isEpisodeCasting) {
-        this.metadataDisplayHeaders = {}
-      } else if (this.isShotCasting) {
-        this.metadataDisplayHeaders = {
-          stdby: true,
-          fps: false,
-          frameIn: true,
-          frameOut: true,
-          frames: true,
-          estimation: false,
-          maxRetakes: false,
-          resolution: false,
-          timeSpent: false
-        }
-      } else {
-        this.metadataDisplayHeaders = {
-          estimation: false,
-          readyFor: false,
-          timeSpent: false
-        }
-      }
-    },
-
-    resetColumnWidth() {
-      const namePreferenceKey =
-        'breakdown:column-width-name-' +
-        `${this.castingType}-${this.currentProduction.id}`
-      const nameColumnWidth = preferences.getPreference(namePreferenceKey)
-      if (nameColumnWidth) {
-        this.columnWidth.name = nameColumnWidth
-      }
-
-      this.metadataDescriptors.forEach(descriptor => {
-        const descriptorColumnWidth = preferences.getPreference(
-          `breakdown:column-width-descriptor-${descriptor.id}`
-        )
-        if (descriptorColumnWidth) {
-          this.columnWidth[descriptor.id] = descriptorColumnWidth
-        }
-      })
-    },
-
-    onCastingHeaderScroll(event) {
-      const position = event.target
-      this.$refs['casting-list'].scrollLeft = position.scrollLeft
-    },
-
-    onCastingScroll(event) {
-      const position = event.target
-      this.$refs['casting-header'].scrollLeft = position.scrollLeft
+    // 'all' is episode casting here: it reads neither sequences nor shots.
+    if (
+      !isTVShow.value ||
+      !['main', 'all'].includes(currentEpisode.value?.id)
+    ) {
+      await store.dispatch('loadSequences')
+      if (isUnmounted) return
+      await store.dispatch('loadShots')
+      // Leaving the page during a load must stop the chain: the
+      // production-wide assets load would land under the page shown next.
+      if (isUnmounted) return
     }
-  },
-
-  watch: {
-    castingType() {
-      if (this.isShotCasting && this.displayedSequences.length > 0) {
-        this.sequenceId = this.displayedSequences[0].id
-        this.assetTypeId = ''
-      }
-      if (this.isAssetCasting && this.castingAssetTypesOptions.length > 0) {
-        const assetTypeId = this.$route.params.asset_type_id
-        this.sequenceId = 'all'
-        this.castingType = 'asset'
-        if (assetTypeId) {
-          this.assetTypeId = assetTypeId
-        } else if (this.castingAssetTypesOptions.length > 0) {
-          this.assetTypeId = this.castingAssetTypesOptions[0].value
-        }
-      }
-      this.resetDisplayHeaders()
-      this.resetColumnWidth()
-    },
-
-    sequenceId() {
-      if (
-        this.sequenceId &&
-        this.displayedSequences &&
-        this.displayedSequences.length > 0 &&
-        !this.isAssetCasting
-      ) {
-        this.setCastingSequence(this.sequenceId)
-        this.updateUrl()
-        this.resetSelection()
-      }
-    },
-
-    assetTypeId() {
-      if (this.assetTypeId && this.castingAssetTypesOptions.length > 0) {
-        this.setCastingAssetType(this.assetTypeId)
-        this.updateUrl()
-        this.resetSelection()
-      }
-    },
-
-    episodeId() {
-      if (this.episodeId && this.episodes && this.episodes.length > 0) {
-        if (this.episodeId === 'all') {
-          this.setCastingForProductionEpisodes()
-        }
-        this.resetSelection()
-      }
-    },
-
-    castingSequencesOptions() {
-      if (this.$route.path.indexOf('asset-type') < 0) {
-        const sequenceId = this.$route.params.sequence_id || 'all'
-        if (sequenceId && this.sequenceMap.get(sequenceId)) {
-          this.sequenceId = sequenceId
-        } else if (this.castingSequencesOptions.length > 0) {
-          this.sequenceId = this.castingSequencesOptions[0].value
-        } else {
-          this.sequenceId = 'all'
-        }
-      }
-    },
-
-    castingAssetTypesOptions() {
-      if (this.$route.path.indexOf('asset-type') > 0) {
-        const assetTypeId = this.$route.params.asset_type_id
-        this.castingType = 'asset'
-        if (assetTypeId) {
-          this.assetTypeId = assetTypeId
-        } else if (this.castingAssetTypesOptions.length > 0) {
-          this.assetTypeId = this.castingAssetTypesOptions[0].value
-        } else {
-          this.assetTypeId = ''
-        }
-      }
-    },
-
-    currentProduction() {
-      if (this.isLoading) {
-        this.hasScopeMoved = true
-      } else {
-        this.reset()
-        this.resetColumnWidth()
-      }
-    },
-
-    currentEpisode() {
-      if (this.currentEpisode && this.episodeId !== this.currentEpisode.id) {
-        if (this.isLoading) {
-          this.hasScopeMoved = true
-        } else if (this.currentEpisode.id === 'all') {
-          this.episodeId = 'all'
-        } else {
-          this.reset()
-        }
-      }
-    },
-
-    displayedSequences() {
-      this.$store.commit('CASTING_SET_SEQUENCES', this.displayedSequences)
-    },
-
-    '$route.query.search'(search) {
-      this.searchField?.setValue(search)
-      this.onSearchChange(search)
+    if (isTVShow.value) {
+      if (currentEpisode.value) episodeId.value = currentEpisode.value.id
+      store.dispatch('setCastingEpisode', episodeId.value)
+      store.dispatch('setCastingForProductionEpisodes')
+    } else {
+      store.dispatch('setCastingEpisode', null)
     }
-  },
-
-  socket: {
-    events: {
-      'episode:casting-update'(eventData) {
-        const episode = this.episodeMap.get(eventData.episode_id)
-        if (episode) {
-          this.loadEpisodeCasting(episode)
-        }
-      },
-
-      'shot:casting-update'(eventData) {
-        const shot = this.shotMap.get(eventData.shot_id)
-        if (shot && shot.sequence_id === this.sequenceId) {
-          this.loadShotCasting(shot)
-        }
-      },
-
-      'asset:casting-update'(eventData) {
-        const asset = this.assetMap.get(eventData.asset_id)
-        if (asset && asset.asset_type_id === this.assetTypeId) {
-          this.loadAssetCasting(asset)
-        }
-      },
-
-      // socket.io replays nothing emitted while the connection was down,
-      // so the casting on screen may miss changes made in the meantime:
-      // reload it once the connection is back, and only then (the first
-      // connect of the page brings nothing new).
-      disconnect() {
-        this.wasDisconnected = true
-      },
-
-      connect() {
-        if (this.wasDisconnected) {
-          this.wasDisconnected = false
-          this.reloadCasting()
-        }
-      }
+    await store.dispatch('loadAssets', { all: true, withTasks: true })
+    if (isUnmounted) return
+    store.dispatch('displayMoreAssets')
+    fillAssetList()
+    store.dispatch('setCastingAssetTypes')
+    if (assetTypeId.value) {
+      store.dispatch('setCastingAssetType', assetTypeId.value)
+    } else if (
+      !isTVShow.value ||
+      (episodeId.value && !['main', 'all'].includes(episodeId.value))
+    ) {
+      store.dispatch('setCastingSequence', sequenceId.value || 'all')
     }
-  },
-
-  head() {
-    if (this.isTVShow) {
-      return {
-        title:
-          `${this.currentProduction?.name || ''}` +
-          ` - ${this.currentEpisode?.name || ''}` +
-          ` | ${this.$t('breakdown.title')} - Kitsu`
-      }
+    resetSequenceOption()
+    resetSelection()
+    if (
+      currentEpisode.value?.id === 'main' ||
+      currentProduction.value.production_type === 'assets'
+    ) {
+      castingType.value = 'asset'
     }
-    return {
-      title: `${this.currentProduction.name} | ${this.$t('breakdown.title')} - Kitsu`
+  } catch (err) {
+    console.error(err)
+  } finally {
+    isLoading.value = false
+    // The production and episode watchers ignore a change made while
+    // the page loads: pick it up here or the casting of the scope left
+    // behind stays displayed under a topbar that shows the new one. Not
+    // after unmount: the ghost reload would push a production-wide
+    // dataset under the page displayed next.
+    // hasScopeMoved catches a switch that came back to the scope the run
+    // started with: the loads in between served the other one.
+    const isScopeChanged =
+      hasScopeMoved ||
+      currentProduction.value !== production ||
+      currentEpisode.value?.id !== episode?.id
+    if (isScopeChanged && !isUnmounted) {
+      reset()
+      if (currentProduction.value !== production) resetColumnWidth()
     }
   }
 }
+
+const resetSequenceOption = () => {
+  if (
+    currentProduction.value?.production_style === 'nft' &&
+    castingSequencesOptions.value[1]
+  ) {
+    sequenceId.value = castingSequencesOptions.value[1].value
+  }
+}
+
+const resetSelection = () => {
+  let entities = castingAssetTypeAssets.value
+  if (isEpisodeCasting.value) entities = castingEpisodes.value
+  else if (isShotCasting.value) entities = castingSequenceShots.value
+  selection.value = Object.fromEntries(
+    entities.map(entity => [entity.id, false])
+  )
+}
+
+const setSearchInUrl = query => {
+  const searchQuery = query || searchFieldRef.value?.getValue()
+  router.push({ query: { ...route.query, search: searchQuery || undefined } })
+}
+
+const onSearchChange = searchQuery => {
+  store.dispatch('setAssetSearch', searchQuery)
+  setSearchInUrl(searchQuery)
+  store.dispatch('displayMoreAssets')
+  store.dispatch('displayMoreAssets')
+  fillAssetList()
+}
+
+const confirmBuildFilter = query => {
+  modals.isBuildFilterDisplayed = false
+  searchFieldRef.value.setValue(query)
+  onSearchChange(query)
+}
+
+const clearSelection = () => {
+  selectedEntityIds.value.forEach(entityId => {
+    selection.value[entityId] = false
+  })
+}
+
+const selectRange = (fromEntityId, toEntityId) => {
+  const keys = Object.keys(selection.value)
+  const fromIndex = keys.indexOf(fromEntityId)
+  const toIndex = keys.indexOf(toEntityId)
+  range(Math.min(fromIndex, toIndex), Math.max(fromIndex, toIndex))
+    .filter(index => index >= 0)
+    .forEach(index => {
+      selection.value[keys[index]] = true
+    })
+}
+
+const selectEntity = (entityId, event) => {
+  const isMultiSelect = event.ctrlKey || event.metaKey
+  const wasSelected = selection.value[entityId]
+  const nbElementsSelected = selectedEntityIds.value.length
+  if (!isMultiSelect) clearSelection()
+  if (previousEntityId && event.shiftKey) {
+    selectRange(previousEntityId, entityId)
+  }
+  if (!previousEntityId || !event.shiftKey) previousEntityId = entityId
+  if (!wasSelected || (nbElementsSelected > 1 && !isMultiSelect)) {
+    selection.value[entityId] = true
+  } else if (isMultiSelect) {
+    selection.value[entityId] = false
+  }
+}
+
+const reloadCasting = () => {
+  if (isEpisodeCasting.value) {
+    store.dispatch('setCastingForProductionEpisodes')
+  } else if (assetTypeId.value) {
+    store.dispatch('setCastingAssetType', assetTypeId.value)
+  } else {
+    store.dispatch('setCastingSequence', sequenceId.value || 'all')
+  }
+}
+
+const setSaveErrors = (entityIds, isError) => {
+  entityIds.forEach(entityId => {
+    if (isError) saveErrors.value[entityId] = true
+    else delete saveErrors.value[entityId]
+  })
+}
+
+const addOneAsset = async (assetId, amount = 1) => {
+  const entityIds = selectedEntityIds.value
+  entityIds.forEach(entityId => {
+    store.dispatch('addAssetToCasting', {
+      entityId,
+      assetId,
+      nbOccurences: amount,
+      label: castingType.value === 'shot' ? 'animate' : 'fixed'
+    })
+  })
+  setSaveErrors(entityIds, false)
+  try {
+    await store.dispatch('castAsset', { entityIds, assetId })
+  } catch (err) {
+    setSaveErrors(entityIds, true)
+    console.error(err)
+  }
+}
+
+const addTenAssets = assetId => addOneAsset(assetId, 10)
+
+// Returns whether the removal was saved.
+const saveAssetRemovals = async (entityIds, assetId, nbOccurences) => {
+  loading.remove = true
+  entityIds.forEach(entityId => {
+    store.dispatch('removeAssetFromCasting', {
+      entityId,
+      assetId,
+      nbOccurences
+    })
+  })
+  setSaveErrors(entityIds, false)
+  try {
+    await store.dispatch('castAsset', { entityIds, assetId })
+    return true
+  } catch (err) {
+    setSaveErrors(entityIds, true)
+    errors.remove = true
+    console.error(err)
+    return false
+  } finally {
+    loading.remove = false
+  }
+}
+
+const confirmAssetRemoval = async () => {
+  const { entityId, assetId, nbOccurences } = removalData.value
+  const isSaved = await saveAssetRemovals([entityId], assetId, nbOccurences)
+  if (isSaved) modals.isRemoveConfirmationDisplayed = false
+}
+
+const removeOneAssetFromSelection = async assetId => {
+  const castings = selectedEntityIds.value
+    .map(entityId => ({
+      entityId,
+      asset: casting.value[entityId]?.find(a => a.asset_id === assetId)
+    }))
+    .filter(({ asset }) => asset)
+  // The last occurence on an episode asks for a confirmation: the modal flow
+  // handles that entity on its own.
+  const isToConfirm = ({ asset }) =>
+    isEpisodeCasting.value && asset.nb_occurences === 1
+  const toConfirm = castings.filter(isToConfirm).pop()
+  if (toConfirm) {
+    removalData.value = {
+      assetId,
+      entityId: toConfirm.entityId,
+      nbOccurences: 1
+    }
+    modals.isRemoveConfirmationDisplayed = true
+  }
+  const removals = castings
+    .filter(item => !isToConfirm(item))
+    .map(({ entityId }) => entityId)
+  if (removals.length > 0) await saveAssetRemovals(removals, assetId, 1)
+}
+
+const onAssetListScroll = event => {
+  const assetList = assetListRef.value
+  const maxHeight = assetList.scrollHeight - assetList.offsetHeight
+  if (maxHeight < event.target.scrollTop + 100) {
+    store.dispatch('displayMoreAssets')
+  }
+}
+
+// On tall screens the first pages may not overflow the container, so
+// scrolling can never trigger the next page: keep loading until the
+// scrollbar shows up or every asset is displayed.
+const fillAssetList = async () => {
+  await nextTick()
+  const assetList = assetListRef.value
+  if (assetList && assetList.scrollHeight <= assetList.clientHeight) {
+    const displayedCountBefore = displayedAssets.value.length
+    store.dispatch('displayMoreAssets')
+    await nextTick()
+    if (displayedAssets.value.length > displayedCountBefore) fillAssetList()
+  }
+}
+
+const showImportModal = () => {
+  modals.importing = true
+}
+
+const hideImportModal = () => {
+  modals.importing = false
+}
+
+const hideImportRenderModal = () => {
+  modals.isImportRenderDisplayed = false
+}
+
+const renderImport = async (data, mode) => {
+  loading.importing = true
+  errors.importing = false
+  parsedCSV.value = await csv.processCSV(
+    mode === 'file' ? data.get('file') : data
+  )
+  hideImportModal()
+  loading.importing = false
+  modals.isImportRenderDisplayed = true
+}
+
+const uploadImportFile = async data => {
+  const formData = new FormData()
+  const csvContent = csv.turnEntriesToCsvString(data)
+  formData.append(
+    'file',
+    new File([csvContent], 'import.csv', { type: 'text/csv' })
+  )
+  loading.importing = true
+  errors.importing = false
+  errors.importingError = null
+  importCsvFormData.value = formData
+  try {
+    await store.dispatch('uploadCastingFile', formData)
+    hideImportRenderModal()
+    if (sequenceId.value) {
+      store.dispatch('setCastingSequence', sequenceId.value)
+    }
+  } catch (err) {
+    errors.importingError = err
+    errors.importing = true
+  }
+  loading.importing = false
+}
+
+const resetImport = () => {
+  errors.importing = false
+  errors.importingError = null
+  hideImportRenderModal()
+  importCsvFormData.value = undefined
+  importModalRef.value?.reset()
+  showImportModal()
+}
+
+// Route of the scope the page shows, null when the URL already names it.
+const getScopeRoute = () => {
+  const productionId = currentProduction.value.id
+  if (isEpisodeCasting.value) {
+    return route.params.episode_id !== episodeId.value
+      ? {
+          name: 'breakdown-episode',
+          params: { production_id: productionId, episode_id: episodeId.value }
+        }
+      : null
+  }
+  if (isAssetCasting.value) {
+    return (route.params.asset_type_id || '') !== assetTypeId.value
+      ? {
+          name: 'breakdown-asset-type',
+          params: {
+            production_id: productionId,
+            asset_type_id: assetTypeId.value
+          }
+        }
+      : null
+  }
+  return (route.params.sequence_id || 'all') !== sequenceId.value
+    ? {
+        name: 'breakdown-sequence',
+        params: {
+          production_id: productionId,
+          sequence_id: sequenceId.value || 'all'
+        }
+      }
+    : null
+}
+
+const updateUrl = () => {
+  const scopeRoute = getScopeRoute()
+  if (scopeRoute) {
+    const routeEpisodeId = route.params.episode_id || currentEpisode.value?.id
+    router.push(
+      routeEpisodeId
+        ? {
+            name: `episode-${scopeRoute.name}`,
+            params: {
+              ...scopeRoute.params,
+              episode_id: routeEpisodeId,
+              ...(routeEpisodeId === 'all' ? { sequence_id: 'all' } : {})
+            }
+          }
+        : scopeRoute
+    )
+  }
+}
+
+const onEditLabelClicked = (asset, label, entityId) => {
+  editedAsset.value = asset
+  editedEntityId.value = entityId
+  editedAssetLinkLabel.value = label
+  modals.isEditLabelDisplayed = true
+}
+
+const confirmEditLabel = async (form = {}) => {
+  loading.editLabel = true
+  try {
+    await store.dispatch('setAssetLinkLabel', {
+      label: form.label,
+      asset: editedAsset.value,
+      targetEntityId: editedEntityId.value
+    })
+    modals.isEditLabelDisplayed = false
+  } catch (err) {
+    console.error(err)
+    errors.editLabel = true
+  }
+  loading.editLabel = false
+}
+
+const toggleTextMode = () => {
+  isTextMode.value = !isTextMode.value
+  localStorage.setItem('breakdown:text-mode', isTextMode.value)
+}
+
+const toggleColumnSelector = () => {
+  columnSelectorDisplayed.value = !columnSelectorDisplayed.value
+}
+
+const confirmNewAssetStay = async form => {
+  loading.stay = true
+  success.edit = false
+  try {
+    await store.dispatch('newAsset', form)
+    editAssetModalRef.value.focusName()
+    success.edit = true
+  } catch (err) {
+    console.error(err)
+    errors.edit = true
+  }
+  loading.stay = false
+  loading.edit = false
+}
+
+const confirmNewAsset = async form => {
+  loading.edit = true
+  errors.edit = false
+  try {
+    await store.dispatch('newAsset', form)
+    modals.isNewDisplayed = false
+  } catch (err) {
+    console.error(err)
+    errors.edit = true
+  }
+  loading.edit = false
+}
+
+const copyCasting = () => {
+  clipboard.copyCasting(casting.value[selectedEntityIds.value[0]])
+}
+
+const pasteCasting = async () => {
+  const castingToPaste = clipboard.pasteCasting()
+  if (!castingToPaste || castingToPaste.length === 0) return
+  const entityIds = selectedEntityIds.value
+  entityIds.forEach(entityId => {
+    store.dispatch('setEntityCasting', { entityId, casting: castingToPaste })
+  })
+  setSaveErrors(entityIds, false)
+  try {
+    await store.dispatch('saveCastings', entityIds)
+  } catch (err) {
+    setSaveErrors(entityIds, true)
+    console.error(err)
+  }
+}
+
+const onKeyDown = event => {
+  const isShortcut =
+    (event.ctrlKey || event.metaKey) &&
+    !['INPUT', 'TEXTAREA'].includes(event.target.tagName)
+  if (isShortcut && event.keyCode === 67) {
+    copyCasting() // ctrl + c
+  } else if (isShortcut && event.keyCode === 86) {
+    pasteCasting() // ctrl + v
+  }
+}
+
+const editEntity = data => {
+  if (isEpisodeCasting.value) return store.dispatch('editEpisode', data)
+  if (isShotCasting.value) return store.dispatch('editShot', data)
+  return store.dispatch('editAsset', data)
+}
+
+const onFieldChanged = ({ entry, fieldName, value }) =>
+  editEntity({ id: entry.id, [fieldName]: value })
+
+const onMetadataChanged = ({ entry, descriptor, value }) =>
+  editEntity({ id: entry.id, data: { [descriptor.field_name]: value } })
+
+const descriptorCurrentDepartments = descriptor =>
+  (descriptor.departments || []).map(departmentId =>
+    departmentMap.value.get(departmentId)
+  )
+
+const getEntityName = entity =>
+  sequenceId.value === 'all' &&
+  (!isTVShow.value || currentEpisode.value?.id !== 'all')
+    ? entity.sequence_name + ' / ' + entity.name
+    : entity.name
+
+const getCsvFileName = () => {
+  const head = [
+    moment().format('YYYY-MM-DD'),
+    'kitsu',
+    castingType.value + 's',
+    currentProduction.value.name
+  ]
+  const title = t('breakdown.title')
+  const sequenceName =
+    castingType.value === 'shot' && sequenceId.value !== 'all'
+      ? [sequenceMap.value.get(sequenceId.value)?.name || '']
+      : []
+  const assetTypeName =
+    castingType.value === 'asset' && assetTypeId.value !== 'all'
+      ? [assetTypeMap.value.get(assetTypeId.value)?.name || '']
+      : []
+  const episode = isTVShow.value ? currentEpisode.value : null
+  const episodeName = { all: 'all', main: 'main pack' }[episode?.id]
+  const hasScope = isTVShow.value ? episode && episode.id !== 'all' : true
+  const scope = hasScope ? [...sequenceName, ...assetTypeName] : []
+  const episodePart = episode ? [episodeName || episode.name] : []
+  const nameData = isTVShow.value
+    ? [...head, ...episodePart, ...scope, title]
+    : [...head, title, ...scope]
+  return stringHelpers.slugify(nameData.join('_'))
+}
+
+const getCsvFileHeaders = () => [
+  t('shots.fields.name'),
+  t('breakdown.fields.standby'),
+  ...(isFrames.value ? [t('main.frames')] : []),
+  ...(isFrameIn.value ? [t('main.frame_in')] : []),
+  ...(isFrameOut.value ? [t('main.frame_out')] : []),
+  ...metadataDescriptors.value.map(descriptor => descriptor.name),
+  ...castingAssetTypes.value
+]
+
+const getCsvCastingCell = typeAssets => {
+  const nbAssets = typeAssets.reduce((acc, a) => acc + a.nb_occurences, 0)
+  if (nbAssets === 0) return ''
+  const assetNames = typeAssets
+    .map(asset => `${asset.asset_name} (${asset.nb_occurences})`)
+    .join(', ')
+  return `${nbAssets} assets: ${assetNames}`
+}
+
+const getCsvEntries = () =>
+  castingEntities.value.map(entity => {
+    const typeGroups = castingByType.value[entity.id] || []
+    return [
+      entity.name,
+      entity.is_casting_standby ? 'X' : '',
+      ...(isFrames.value ? [entity.nb_frames] : []),
+      ...(isFrameIn.value ? [entity.data.frame_in] : []),
+      ...(isFrameOut.value ? [entity.data.frame_out] : []),
+      ...metadataDescriptors.value.map(
+        descriptor => entity.data[descriptor.field_name] || ''
+      ),
+      ...castingAssetTypes.value.map(assetTypeName =>
+        getCsvCastingCell(
+          typeGroups.find(
+            typeAssets => typeAssets[0]?.asset_type_name === assetTypeName
+          ) || []
+        )
+      )
+    ]
+  })
+
+const exportViewToCsv = () => {
+  csv.buildCsvFile(getCsvFileName(), [getCsvFileHeaders(), ...getCsvEntries()])
+}
+
+const removeSearchQuery = searchQuery => {
+  store.dispatch('removeBreakdownSearch', searchQuery).catch(console.error)
+}
+
+const saveSearchQuery = async searchQuery => {
+  if (loading.savingSearch) return
+  loading.savingSearch = true
+  try {
+    await store.dispatch('saveBreakdownSearch', searchQuery)
+  } catch (err) {
+    console.error(err)
+  }
+  loading.savingSearch = false
+}
+
+// The knob is a direct child of the header it resizes.
+const initResize = (event, descriptorId) => {
+  const knob = event.currentTarget
+  resizing = { knob, header: knob.parentElement, descriptorId }
+  window.addEventListener('mousemove', onResizing)
+  window.addEventListener('mouseup', stopResizing)
+}
+
+const onResizing = event => {
+  const { knob, header, descriptorId } = resizing
+  const diff = event.clientX - knob.getBoundingClientRect().left
+  const width = header.getBoundingClientRect().width + diff
+  if (descriptorId) {
+    const newWidth = Math.max(width, 110)
+    columnWidth.value = { ...columnWidth.value, [descriptorId]: newWidth }
+    preferences.setPreference(
+      `breakdown:column-width-descriptor-${descriptorId}`,
+      newWidth
+    )
+  } else {
+    const newWidth = Math.max(width, 160)
+    columnWidth.value = { ...columnWidth.value, name: newWidth }
+    preferences.setPreference(getNameWidthPreferenceKey(), newWidth)
+  }
+}
+
+const stopResizing = () => {
+  window.removeEventListener('mousemove', onResizing)
+  window.removeEventListener('mouseup', stopResizing)
+  resizing = null
+}
+
+const getNameWidthPreferenceKey = () =>
+  'breakdown:column-width-name-' +
+  `${castingType.value}-${currentProduction.value.id}`
+
+const resetDisplayHeaders = () => {
+  if (isEpisodeCasting.value) {
+    metadataDisplayHeaders.value = {}
+  } else if (isShotCasting.value) {
+    metadataDisplayHeaders.value = { ...SHOT_DISPLAY_HEADERS }
+  } else {
+    metadataDisplayHeaders.value = { ...ASSET_DISPLAY_HEADERS }
+  }
+}
+
+const resetColumnWidth = () => {
+  const nameWidth = preferences.getPreference(getNameWidthPreferenceKey())
+  const descriptorWidths = metadataDescriptors.value
+    .map(descriptor => [
+      descriptor.id,
+      preferences.getPreference(
+        `breakdown:column-width-descriptor-${descriptor.id}`
+      )
+    ])
+    .filter(([, width]) => width)
+  columnWidth.value = {
+    ...columnWidth.value,
+    ...(nameWidth ? { name: nameWidth } : {}),
+    ...Object.fromEntries(descriptorWidths)
+  }
+}
+
+const onCastingHeaderScroll = event => {
+  castingListRef.value.scrollLeft = event.target.scrollLeft
+}
+
+const onCastingScroll = event => {
+  castingHeaderRef.value.scrollLeft = event.target.scrollLeft
+}
+
+const onEpisodeCastingUpdate = eventData => {
+  const episode = store.getters.episodeMap.get(eventData.episode_id)
+  if (episode) store.dispatch('loadEpisodeCasting', episode)
+}
+
+const onShotCastingUpdate = eventData => {
+  const shot = store.getters.shotMap.get(eventData.shot_id)
+  if (shot && shot.sequence_id === sequenceId.value) {
+    store.dispatch('loadShotCasting', shot)
+  }
+}
+
+const onAssetCastingUpdate = eventData => {
+  const asset = store.getters.assetMap.get(eventData.asset_id)
+  if (asset && asset.asset_type_id === assetTypeId.value) {
+    store.dispatch('loadAssetCasting', asset)
+  }
+}
+
+// socket.io replays nothing emitted while the connection was down,
+// so the casting on screen may miss changes made in the meantime:
+// reload it once the connection is back, and only then (the first
+// connect of the page brings nothing new).
+const onSocketDisconnect = () => {
+  wasDisconnected = true
+}
+
+const onSocketConnect = () => {
+  if (wasDisconnected) {
+    wasDisconnected = false
+    reloadCasting()
+  }
+}
+
+const SOCKET_EVENTS = {
+  'episode:casting-update': onEpisodeCastingUpdate,
+  'shot:casting-update': onShotCastingUpdate,
+  'asset:casting-update': onAssetCastingUpdate,
+  disconnect: onSocketDisconnect,
+  connect: onSocketConnect
+}
+
+// Watchers
+// --------------------------------------------------------------------------
+
+watch(castingType, () => {
+  if (isShotCasting.value && displayedSequences.value.length > 0) {
+    sequenceId.value = displayedSequences.value[0].id
+    assetTypeId.value = ''
+  }
+  if (isAssetCasting.value && castingAssetTypesOptions.value.length > 0) {
+    sequenceId.value = 'all'
+    assetTypeId.value =
+      route.params.asset_type_id || castingAssetTypesOptions.value[0].value
+  }
+  resetDisplayHeaders()
+  resetColumnWidth()
+})
+
+watch(sequenceId, () => {
+  if (
+    sequenceId.value &&
+    displayedSequences.value?.length > 0 &&
+    !isAssetCasting.value
+  ) {
+    store.dispatch('setCastingSequence', sequenceId.value)
+    updateUrl()
+    resetSelection()
+  }
+})
+
+watch(assetTypeId, () => {
+  if (assetTypeId.value && castingAssetTypesOptions.value.length > 0) {
+    store.dispatch('setCastingAssetType', assetTypeId.value)
+    updateUrl()
+    resetSelection()
+  }
+})
+
+watch(episodeId, () => {
+  if (episodeId.value && episodes.value?.length > 0) {
+    if (episodeId.value === 'all') {
+      store.dispatch('setCastingForProductionEpisodes')
+    }
+    resetSelection()
+  }
+})
+
+watch(castingSequencesOptions, () => {
+  if (route.path.indexOf('asset-type') < 0) {
+    const routeSequenceId = route.params.sequence_id || 'all'
+    sequenceId.value = sequenceMap.value.get(routeSequenceId)
+      ? routeSequenceId
+      : castingSequencesOptions.value[0]?.value || 'all'
+  }
+})
+
+watch(castingAssetTypesOptions, () => {
+  if (route.path.indexOf('asset-type') > 0) {
+    castingType.value = 'asset'
+    assetTypeId.value =
+      route.params.asset_type_id ||
+      castingAssetTypesOptions.value[0]?.value ||
+      ''
+  }
+})
+
+watch(currentProduction, () => {
+  if (isLoading.value) {
+    hasScopeMoved = true
+  } else {
+    reset()
+    resetColumnWidth()
+  }
+})
+
+watch(currentEpisode, () => {
+  if (currentEpisode.value && episodeId.value !== currentEpisode.value.id) {
+    if (isLoading.value) {
+      hasScopeMoved = true
+    } else if (currentEpisode.value.id === 'all') {
+      episodeId.value = 'all'
+    } else {
+      reset()
+    }
+  }
+})
+
+watch(displayedSequences, () => {
+  store.commit('CASTING_SET_SEQUENCES', displayedSequences.value)
+})
+
+watch(
+  () => route.query.search,
+  search => {
+    searchFieldRef.value?.setValue(search)
+    onSearchChange(search)
+  }
+)
+
+// Lifecycle
+// --------------------------------------------------------------------------
+
+onMounted(() => {
+  reset()
+  resetSequenceOption()
+  store.dispatch('setLastProductionScreen', 'breakdown')
+  isTextMode.value = preferences.getBoolPreference('breakdown:text-mode')
+  window.addEventListener('keydown', onKeyDown, false)
+  Object.entries(SOCKET_EVENTS).forEach(([eventName, handler]) => {
+    socket.on(eventName, handler)
+  })
+  resetDisplayHeaders()
+  resetColumnWidth()
+  if (!searchFieldRef.value?.getValue() && route.query.search) {
+    searchFieldRef.value?.setValue(route.query.search)
+  }
+})
+
+onBeforeUnmount(() => {
+  isUnmounted = true
+  window.removeEventListener('keydown', onKeyDown)
+  Object.entries(SOCKET_EVENTS).forEach(([eventName, handler]) => {
+    socket.off(eventName, handler)
+  })
+})
+
+// Head
+// --------------------------------------------------------------------------
+
+useHead({
+  title: computed(() =>
+    isTVShow.value
+      ? `${currentProduction.value?.name || ''}` +
+        ` - ${currentEpisode.value?.name || ''}` +
+        ` | ${t('breakdown.title')} - Kitsu`
+      : `${currentProduction.value.name} | ${t('breakdown.title')} - Kitsu`
+  )
+})
 </script>
 
 <style lang="scss" scoped>
@@ -1899,10 +1643,6 @@ export default {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-}
-
-.shots-title {
-  font-weight: bold;
 }
 
 .subtitle {

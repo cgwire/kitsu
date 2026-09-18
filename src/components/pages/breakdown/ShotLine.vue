@@ -61,7 +61,6 @@
       ></div>
       <textarea
         class="tooltip-editor"
-        ref="text"
         :value="entity.description"
         @input="event => onDescriptionChanged(entity, event)"
         v-else
@@ -156,9 +155,7 @@
           @input="event => onMetadataFieldChanged(entity, descriptor, event)"
           :value="getMetadataFieldValue(descriptor, entity)"
           v-if="
-            descriptor.choices.length === 0 &&
-            (isCurrentUserManager ||
-              isSupervisorInDepartments(descriptor.departments))
+            descriptor.choices.length === 0 && canEditDescriptor(descriptor)
           "
         />
         <div
@@ -187,15 +184,9 @@
               :checked="
                 getMetadataChecklistValues(descriptor, entity)[option.text]
               "
-              :disabled="
-                !(
-                  isCurrentUserManager ||
-                  isSupervisorInDepartments(descriptor.departments)
-                )
-              "
+              :disabled="!canEditDescriptor(descriptor)"
               :style="[
-                isCurrentUserManager ||
-                isSupervisorInDepartments(descriptor.departments)
+                canEditDescriptor(descriptor)
                   ? { cursor: 'pointer' }
                   : { cursor: 'auto' }
               ]"
@@ -204,8 +195,7 @@
               class="ml05"
               :for="`${entity.id}-${descriptor.id}-${i}-${option.text}-input`"
               :style="[
-                isCurrentUserManager ||
-                isSupervisorInDepartments(descriptor.departments)
+                canEditDescriptor(descriptor)
                   ? { cursor: 'pointer' }
                   : { cursor: 'auto' }
               ]"
@@ -214,13 +204,7 @@
             </label>
           </p>
         </div>
-        <span
-          class="select"
-          v-else-if="
-            isCurrentUserManager ||
-            isSupervisorInDepartments(descriptor.departments)
-          "
-        >
+        <span class="select" v-else-if="canEditDescriptor(descriptor)">
           <select
             class="select-input"
             @change="event => onMetadataFieldChanged(entity, descriptor, event)"
@@ -280,177 +264,166 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+/* eslint-disable no-unused-vars */
+import { computed } from 'vue'
+import { useStore } from 'vuex'
 
+import {
+  getDescriptorChecklistValues,
+  getDescriptorChoicesOptions,
+  getMetadataChecklistValues,
+  getMetadataEventValue,
+  getMetadataFieldValue
+} from '@/composables/descriptors'
 import { renderMarkdown } from '@/lib/render'
-import { entityListMixin } from '@/components/mixins/entity_list'
-import { descriptorMixin } from '@/components/mixins/descriptors'
 
 import AssetBlock from '@/components/pages/breakdown/AssetBlock.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+/* eslint-enable no-unused-vars */
 
-export default {
-  name: 'shot-line',
+const store = useStore()
 
-  mixins: [entityListMixin, descriptorMixin],
+// Props / Emits
+// --------------------------------------------------------------------------
 
-  components: {
-    AssetBlock,
-    EntityThumbnail
-  },
+const props = defineProps({
+  entity: { type: Object, default: () => ({}) },
+  previewFileId: { type: String, default: '' },
+  selected: { type: Boolean, default: false },
+  name: { type: String, default: '' },
+  assets: { type: Array, default: () => [] },
+  assetTypes: { type: Array, default: () => [] },
+  readOnly: { type: Boolean, default: false },
+  textMode: { type: Boolean, default: false },
+  metadataDescriptors: { type: Array, default: () => [] },
+  metadataDisplayHeaders: { type: Object, default: () => ({}) },
+  bigMode: { type: Boolean, default: false },
+  isDescription: { type: Boolean, default: true },
+  isSaveError: { type: Boolean, default: false },
+  columnWidth: { type: Object, default: () => ({}) }
+})
 
-  props: {
-    entity: {
-      default: () => {},
-      type: Object
-    },
-    previewFileId: {
-      default: '',
-      type: String
-    },
-    selected: {
-      default: false,
-      type: Boolean
-    },
-    name: {
-      default: '',
-      type: String
-    },
-    assets: {
-      default: () => [],
-      type: Array
-    },
-    assetTypes: {
-      default: () => [],
-      type: Array
-    },
-    readOnly: {
-      default: false,
-      type: Boolean
-    },
-    textMode: {
-      default: false,
-      type: Boolean
-    },
-    metadataDescriptors: {
-      default: () => [],
-      type: Array
-    },
-    metadataDisplayHeaders: {
-      default: () => {},
-      type: Object
-    },
-    bigMode: {
-      default: false,
-      type: Boolean
-    },
-    isDescription: {
-      default: true,
-      type: Boolean
-    },
-    isSaveError: {
-      default: false,
-      type: Boolean
-    },
-    columnWidth: {
-      default: () => {},
-      type: Object
-    }
-  },
+const emit = defineEmits([
+  'add-one',
+  'click',
+  'edit-label',
+  'field-changed',
+  'metadata-changed',
+  'remove-one'
+])
 
-  emits: ['add-one', 'click', 'edit-label', 'field-changed', 'remove-one'],
+// Computed
+// --------------------------------------------------------------------------
 
-  computed: {
-    ...mapGetters([
-      'assetMap',
-      'isFrameIn',
-      'isFrameOut',
-      'isFrames',
-      'isShowInfosBreakdown',
-      'user'
-    ]),
-    ...mapGetters({
-      isCurrentUserManager: 'isCurrentUserProductionManager',
-      isCurrentUserSupervisor: 'isCurrentUserProductionSupervisor'
-    }),
+const isCurrentUserManager = computed(
+  () => store.getters.isCurrentUserProductionManager
+)
+const isCurrentUserSupervisor = computed(
+  () => store.getters.isCurrentUserProductionSupervisor
+)
+const isFrameIn = computed(() => store.getters.isFrameIn)
+const isFrameOut = computed(() => store.getters.isFrameOut)
+const isFrames = computed(() => store.getters.isFrames)
+const isShowInfosBreakdown = computed(() => store.getters.isShowInfosBreakdown)
+const user = computed(() => store.getters.user)
 
-    chunks() {
-      const chunks = this.name.split(' / ')
-      return chunks.filter(chunk => chunk && chunk !== 'undefined')
-    },
+const chunks = computed(() =>
+  props.name.split(' / ').filter(chunk => chunk && chunk !== 'undefined')
+)
 
-    assetsByAssetTypesMap() {
-      const assetsByAssetTypes = {}
-      this.assets.forEach(assetTypeAssets => {
-        if (assetTypeAssets[0]) {
-          assetsByAssetTypes[assetTypeAssets[0].asset_type_name] =
-            assetTypeAssets
-        }
-      })
-      return assetsByAssetTypes
-    }
-  },
+const assetsByAssetTypesMap = computed(() =>
+  Object.fromEntries(
+    props.assets
+      .filter(assetTypeAssets => assetTypeAssets[0])
+      .map(assetTypeAssets => [
+        assetTypeAssets[0].asset_type_name,
+        assetTypeAssets
+      ])
+  )
+)
 
-  methods: {
-    onClicked(event) {
-      this.$emit('click', this.entity.id, event)
-    },
+const visibleMetadataDescriptors = computed(() =>
+  props.metadataDescriptors.filter(descriptor => {
+    const header = props.metadataDisplayHeaders[descriptor.field_name]
+    return header === undefined || header
+  })
+)
 
-    onEditLabelClicked(asset, label) {
-      this.$emit('edit-label', asset, label, this.entity.id)
-    },
+// Functions
+// --------------------------------------------------------------------------
 
-    removeOneAsset(assetId) {
-      this.$emit('remove-one', assetId)
-    },
+const onClicked = event => emit('click', props.entity.id, event)
 
-    addOneAsset(assetId) {
-      this.$emit('add-one', assetId)
-    },
+const onEditLabelClicked = (asset, label) =>
+  emit('edit-label', asset, label, props.entity.id)
 
-    onDescriptionChanged(entity, event) {
-      this.$emit('field-changed', {
-        entry: entity,
-        fieldName: 'description',
-        value: event.target.value
-      })
-    },
+const removeOneAsset = assetId => emit('remove-one', assetId)
 
-    onNbFramesChanged(entity, event) {
-      this.$emit('field-changed', {
-        entry: entity,
-        fieldName: 'nb_frames',
-        value: event.target.value
-      })
-    },
+const addOneAsset = assetId => emit('add-one', assetId)
 
-    onStandbyChanged(entity, event) {
-      this.$emit('field-changed', {
-        entry: entity,
-        fieldName: 'is_casting_standby',
-        value: event.target.checked
-      })
-    },
+const emitFieldChanged = (entry, fieldName, value) =>
+  emit('field-changed', { entry, fieldName, value })
 
-    renderMarkdown,
+const onDescriptionChanged = (entity, event) =>
+  emitFieldChanged(entity, 'description', event.target.value)
 
-    nbAssetsForType(assetType) {
-      return this.assetsByAssetTypesMap[assetType].reduce(
-        (acc, a) => acc + a.nb_occurences,
-        0
-      )
-    }
+const onNbFramesChanged = (entity, event) =>
+  emitFieldChanged(entity, 'nb_frames', event.target.value)
+
+const onStandbyChanged = (entity, event) =>
+  emitFieldChanged(entity, 'is_casting_standby', event.target.checked)
+
+const onMetadataFieldChanged = (entry, descriptor, event) => {
+  const value = getMetadataEventValue(descriptor, entry, event)
+  if (value !== undefined) {
+    // If the line is selected, also modify the cells of the other selected
+    // lines.
+    const selection = [
+      store.getters.selectedShots,
+      store.getters.selectedAssets,
+      store.getters.selectedEdits
+    ].find(selected => selected.has(entry.id))
+    const entries = selection ? Array.from(selection.values()) : [entry]
+    entries.forEach(selectedEntry => {
+      emit('metadata-changed', { entry: selectedEntry, descriptor, value })
+    })
   }
 }
+
+const onMetadataChecklistChanged = (entry, descriptor, option, event) => {
+  const values = {
+    ...getMetadataChecklistValues(descriptor, entry),
+    [option]: event.target.checked
+  }
+  event.target.value = JSON.stringify(values)
+  onMetadataFieldChanged(entry, descriptor, event)
+}
+
+const isSupervisorInDepartments = (departments = []) => {
+  const departmentIds = Array.isArray(departments) ? departments : [departments]
+  return (
+    isCurrentUserSupervisor.value &&
+    (user.value.departments.length === 0 ||
+      user.value.departments.some(department =>
+        departmentIds.includes(department)
+      ))
+  )
+}
+
+const canEditDescriptor = descriptor =>
+  isCurrentUserManager.value ||
+  isSupervisorInDepartments(descriptor.departments)
+
+const nbAssetsForType = assetType =>
+  assetsByAssetTypesMap.value[assetType].reduce(
+    (acc, asset) => acc + asset.nb_occurences,
+    0
+  )
 </script>
 
 <style lang="scss" scoped>
 .dark {
-  .asset-type-name {
-    color: $light-grey-light;
-  }
-
   .asset-list {
     color: $light-grey;
   }
@@ -506,14 +479,6 @@ export default {
   max-width: 160px;
   padding-top: 0;
   word-break: break-all;
-}
-
-.asset-type-name {
-  display: flex;
-  width: 150px;
-  height: 40px;
-  color: $grey-strong;
-  text-transform: uppercase;
 }
 
 .asset-type-items {
