@@ -51,6 +51,16 @@
                 taskListObject.entity === activeTab
               "
             >
+              <thead>
+                <tr>
+                  <th class="th-grab"></th>
+                  <th>{{ $t('task_types.fields.name') }}</th>
+                  <th>{{ $t('task_types.fields.short_name') }}</th>
+                  <th>{{ $t('productions.fields.hd_bitrate_short') }}</th>
+                  <th>{{ $t('productions.fields.ld_bitrate_short') }}</th>
+                  <th></th>
+                </tr>
+              </thead>
               <draggable
                 class="datatable-body"
                 item-key="taskType.id"
@@ -431,6 +441,11 @@ watch(
 
 .datatable th {
   color: var(--text);
+  padding-left: 10px;
+}
+
+.th-grab {
+  width: 30px;
 }
 
 table {
