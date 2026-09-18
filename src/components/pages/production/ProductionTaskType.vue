@@ -145,10 +145,11 @@ watch(
 }
 
 .bitrate {
-  width: 110px;
+  min-width: 120px;
+  width: 120px;
 
   input {
-    width: 90px;
+    width: 100px;
   }
 }
 

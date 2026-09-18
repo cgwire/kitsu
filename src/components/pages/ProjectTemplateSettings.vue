@@ -172,27 +172,39 @@
                 placeholder="6"
                 v-model="params.ld_bitrate_compression"
               />
-              <combobox-boolean
+              <checkbox
+                class="mb1"
+                :toggle="true"
                 :label="$t('productions.fields.is_clients_isolated')"
                 v-model="params.is_clients_isolated"
               />
-              <combobox-boolean
+              <checkbox
+                class="mb1"
+                :toggle="true"
                 :label="$t('productions.fields.is_preview_download_allowed')"
                 v-model="params.is_preview_download_allowed"
               />
-              <combobox-boolean
+              <checkbox
+                class="mb1"
+                :toggle="true"
                 :label="$t('productions.fields.is_set_preview_automated')"
                 v-model="params.is_set_preview_automated"
               />
-              <combobox-boolean
+              <checkbox
+                class="mb1"
+                :toggle="true"
                 :label="$t('productions.fields.is_single_preview_per_revision')"
                 v-model="params.is_single_preview_per_revision"
               />
-              <combobox-boolean
+              <checkbox
+                class="mb1"
+                :toggle="true"
                 :label="$t('productions.fields.is_publish_default')"
                 v-model="params.is_publish_default_for_artists"
               />
-              <combobox-boolean
+              <checkbox
+                class="mb1"
+                :toggle="true"
                 :label="$t('productions.fields.is_frame_in_numbering')"
                 v-model="params.is_frame_in_numbering"
               />
@@ -411,7 +423,7 @@ import BackgroundSettings from '@/components/pages/production/BackgroundSettings
 import RowActionsCell from '@/components/cells/RowActionsCell.vue'
 import BoardSettings from '@/components/pages/production/BoardSettings.vue'
 import StatusAutomationSettings from '@/components/pages/production/StatusAutomationSettings.vue'
-import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
+import Checkbox from '@/components/widgets/Checkbox.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 import TaskStatusSettings from '@/components/pages/production/TaskStatusSettings.vue'
@@ -506,12 +518,12 @@ const params = ref({
   resolution: '1920x1080',
   hd_bitrate_compression: '',
   ld_bitrate_compression: '',
-  is_clients_isolated: 'false',
-  is_preview_download_allowed: 'false',
-  is_set_preview_automated: 'false',
-  is_single_preview_per_revision: 'false',
-  is_publish_default_for_artists: 'false',
-  is_frame_in_numbering: 'false',
+  is_clients_isolated: false,
+  is_preview_download_allowed: false,
+  is_set_preview_automated: false,
+  is_single_preview_per_revision: false,
+  is_publish_default_for_artists: false,
+  is_frame_in_numbering: false,
   max_retakes: 0
 })
 
@@ -570,18 +582,12 @@ const loadTemplateData = async () => {
     resolution: tmpl.resolution || '1920x1080',
     hd_bitrate_compression: tmpl.hd_bitrate_compression ?? '',
     ld_bitrate_compression: tmpl.ld_bitrate_compression ?? '',
-    is_clients_isolated: tmpl.is_clients_isolated ? 'true' : 'false',
-    is_preview_download_allowed: tmpl.is_preview_download_allowed
-      ? 'true'
-      : 'false',
-    is_set_preview_automated: tmpl.is_set_preview_automated ? 'true' : 'false',
-    is_single_preview_per_revision: tmpl.is_single_preview_per_revision
-      ? 'true'
-      : 'false',
-    is_publish_default_for_artists: tmpl.is_publish_default_for_artists
-      ? 'true'
-      : 'false',
-    is_frame_in_numbering: tmpl.is_frame_in_numbering ? 'true' : 'false',
+    is_clients_isolated: !!tmpl.is_clients_isolated,
+    is_preview_download_allowed: !!tmpl.is_preview_download_allowed,
+    is_set_preview_automated: !!tmpl.is_set_preview_automated,
+    is_single_preview_per_revision: !!tmpl.is_single_preview_per_revision,
+    is_publish_default_for_artists: !!tmpl.is_publish_default_for_artists,
+    is_frame_in_numbering: !!tmpl.is_frame_in_numbering,
     max_retakes: tmpl.max_retakes || 0
   }
   // Build roles map from task status link data (if available from API)
@@ -623,17 +629,7 @@ const saveParameters = async () => {
       description: template.value.description,
       ...params.value,
       hd_bitrate_compression: parseBitrate(params.value.hd_bitrate_compression),
-      ld_bitrate_compression: parseBitrate(params.value.ld_bitrate_compression),
-      is_clients_isolated: params.value.is_clients_isolated === 'true',
-      is_preview_download_allowed:
-        params.value.is_preview_download_allowed === 'true',
-      is_set_preview_automated:
-        params.value.is_set_preview_automated === 'true',
-      is_single_preview_per_revision:
-        params.value.is_single_preview_per_revision === 'true',
-      is_publish_default_for_artists:
-        params.value.is_publish_default_for_artists === 'true',
-      is_frame_in_numbering: params.value.is_frame_in_numbering === 'true'
+      ld_bitrate_compression: parseBitrate(params.value.ld_bitrate_compression)
     })
   } catch {
     errors.parameters = true

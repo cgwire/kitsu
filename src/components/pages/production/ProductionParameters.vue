@@ -111,39 +111,45 @@
           v-if="currentProduction && currentProduction.id && isLocalTVShow"
         /-->
 
-        <combobox-boolean
+        <checkbox
+          class="mb1"
+          :toggle="true"
           :label="$t('productions.fields.is_clients_isolated')"
-          @enter="runConfirmation"
           v-model="form.is_clients_isolated"
           v-if="currentProduction && currentProduction.id"
         />
-        <combobox-boolean
+        <checkbox
+          class="mb1"
+          :toggle="true"
           :label="$t('productions.fields.is_preview_download_allowed')"
-          @enter="runConfirmation"
           v-model="form.is_preview_download_allowed"
           v-if="currentProduction && currentProduction.id"
         />
-        <combobox-boolean
+        <checkbox
+          class="mb1"
+          :toggle="true"
           :label="$t('productions.fields.is_set_preview_automated')"
-          @enter="runConfirmation"
           v-model="form.is_set_preview_automated"
           v-if="currentProduction && currentProduction.id"
         />
-        <combobox-boolean
+        <checkbox
+          class="mb1"
+          :toggle="true"
           :label="$t('productions.fields.is_single_preview_per_revision')"
-          @enter="runConfirmation"
           v-model="form.is_single_preview_per_revision"
           v-if="currentProduction && currentProduction.id"
         />
-        <combobox-boolean
+        <checkbox
+          class="mb1"
+          :toggle="true"
           :label="$t('productions.fields.is_frame_in_numbering')"
-          @enter="runConfirmation"
           v-model="form.is_frame_in_numbering"
           v-if="currentProduction && currentProduction.id"
         />
-        <combobox-boolean
+        <checkbox
+          class="mb1"
+          :toggle="true"
           :label="$t('productions.fields.is_publish_default')"
-          @enter="runConfirmation"
           v-model="form.is_publish_default_for_artists"
           v-if="currentProduction && currentProduction.id"
         />
@@ -205,7 +211,7 @@ import {
 
 import ChangeAvatarModal from '@/components/modals/ChangeAvatarModal.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
-import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
+import Checkbox from '@/components/widgets/Checkbox.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import DateField from '@/components/widgets/DateField.vue'
 import ProductionName from '@/components/widgets/ProductionName.vue'
@@ -236,12 +242,12 @@ const emptyForm = () => ({
   episode_span: 0,
   max_retakes: 0,
   revision_padding: 0,
-  is_clients_isolated: 'false',
-  is_frame_in_numbering: 'false',
-  is_preview_download_allowed: 'false',
-  is_set_preview_automated: 'false',
-  is_single_preview_per_revision: 'false',
-  is_publish_default_for_artists: 'false',
+  is_clients_isolated: false,
+  is_frame_in_numbering: false,
+  is_preview_download_allowed: false,
+  is_set_preview_automated: false,
+  is_single_preview_per_revision: false,
+  is_publish_default_for_artists: false,
   homepage: HOME_PAGE_OPTIONS[0].value
 })
 
@@ -309,22 +315,14 @@ const resetForm = () => {
       max_retakes: production.max_retakes,
       revision_padding: production.revision_padding,
       nb_episodes: production.nb_episodes,
-      is_clients_isolated: production.is_clients_isolated ? 'true' : 'false',
-      is_frame_in_numbering: production.is_frame_in_numbering
-        ? 'true'
-        : 'false',
-      is_preview_download_allowed: production.is_preview_download_allowed
-        ? 'true'
-        : 'false',
-      is_set_preview_automated: production.is_set_preview_automated
-        ? 'true'
-        : 'false',
-      is_single_preview_per_revision: production.is_single_preview_per_revision
-        ? 'true'
-        : 'false',
-      is_publish_default_for_artists: production.is_publish_default_for_artists
-        ? 'true'
-        : 'false',
+      is_clients_isolated: !!production.is_clients_isolated,
+      is_frame_in_numbering: !!production.is_frame_in_numbering,
+      is_preview_download_allowed: !!production.is_preview_download_allowed,
+      is_set_preview_automated: !!production.is_set_preview_automated,
+      is_single_preview_per_revision:
+        !!production.is_single_preview_per_revision,
+      is_publish_default_for_artists:
+        !!production.is_publish_default_for_artists,
       homepage: production.homepage
     }
   } else {
