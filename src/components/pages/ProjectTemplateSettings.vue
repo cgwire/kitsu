@@ -203,7 +203,7 @@
                 v-model="params.is_publish_default_for_artists"
               />
               <checkbox
-                class="mb1"
+                class="mb2"
                 :toggle="true"
                 :label="$t('productions.fields.is_frame_in_numbering')"
                 v-model="params.is_frame_in_numbering"
@@ -974,7 +974,7 @@ h2.subtitle {
 .box {
   max-width: 600px;
   width: 100%;
-  padding: 1em;
+  padding: 2em;
 }
 
 .input.is-small,
