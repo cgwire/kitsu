@@ -45,6 +45,9 @@ export const HOME_PAGE_OPTIONS = [
   { label: 'sequences', value: 'sequences' }
 ]
 
+// Ceiling of every movie bitrate, the instance high definition bitrate.
+export const MAX_MOVIE_BITRATE = 28
+
 /*
  * Value to send for a movie bitrate typed in a number field: an empty
  * field means "inherit", so it goes as null instead of an empty string.
@@ -52,6 +55,22 @@ export const HOME_PAGE_OPTIONS = [
 export function parseBitrate(value) {
   if (value === '' || value === null || value === undefined) return null
   return Number(value)
+}
+
+/*
+ * Bring a pair of typed bitrates within the rules the API enforces: the
+ * high definition one never above MAX_MOVIE_BITRATE, the low definition
+ * one never above the high definition one, inherited when unset.
+ */
+export function clampBitrates(bitrates, inheritedHd = null) {
+  const hd = parseBitrate(bitrates.hd_bitrate_compression)
+  const ld = parseBitrate(bitrates.ld_bitrate_compression)
+  const clampedHd = hd === null ? null : Math.min(hd, MAX_MOVIE_BITRATE)
+  const ceiling = clampedHd ?? inheritedHd ?? MAX_MOVIE_BITRATE
+  return {
+    hd_bitrate_compression: clampedHd,
+    ld_bitrate_compression: ld === null ? null : Math.min(ld, ceiling)
+  }
 }
 
 export function getTaskTypePriorityOfProd(taskType, production) {

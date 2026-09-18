@@ -27,7 +27,7 @@
         <text-field
           type="number"
           :min="1"
-          :max="200"
+          :max="MAX_MOVIE_BITRATE"
           :label="$t('productions.fields.hd_bitrate_compression')"
           placeholder="28"
           v-model="form.hd_bitrate_compression"
@@ -35,7 +35,7 @@
         <text-field
           type="number"
           :min="1"
-          :max="200"
+          :max="form.hd_bitrate_compression || MAX_MOVIE_BITRATE"
           :label="$t('productions.fields.ld_bitrate_compression')"
           placeholder="6"
           v-model="form.ld_bitrate_compression"
@@ -61,7 +61,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useStore } from 'vuex'
 
-import { parseBitrate } from '@/lib/productions'
+import { MAX_MOVIE_BITRATE, clampBitrates } from '@/lib/productions'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import TextField from '@/components/widgets/TextField.vue'
@@ -88,12 +88,13 @@ const resetForm = () => {
 const save = async () => {
   isLoading.value = true
   isError.value = false
+  const bitrates = clampBitrates(form.value)
+  Object.assign(form.value, bitrates)
   try {
     await store.dispatch('editProduction', {
       ...form.value,
       id: currentProduction.value.id,
-      hd_bitrate_compression: parseBitrate(form.value.hd_bitrate_compression),
-      ld_bitrate_compression: parseBitrate(form.value.ld_bitrate_compression)
+      ...bitrates
     })
   } catch {
     isError.value = true

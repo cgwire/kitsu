@@ -12,7 +12,7 @@
         class="input"
         type="number"
         min="1"
-        max="200"
+        :max="bitrateCeiling(key)"
         :placeholder="currentProduction[key] || ''"
         :title="$t(`productions.fields.${key}`)"
         :value="link[key] ?? ''"
@@ -35,7 +35,7 @@ import moment from 'moment'
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useStore } from 'vuex'
 
-import { parseBitrate } from '@/lib/productions'
+import { MAX_MOVIE_BITRATE, clampBitrates } from '@/lib/productions'
 import { parseDate } from '@/lib/time'
 import { GripVerticalIcon } from 'lucide-vue-next'
 
@@ -61,11 +61,18 @@ const link = computed(
   () => currentProduction.value.task_type_links?.[props.taskType.id] || {}
 )
 
+const bitrateCeiling = key =>
+  key === 'hd_bitrate_compression'
+    ? MAX_MOVIE_BITRATE
+    : link.value.hd_bitrate_compression ||
+      currentProduction.value.hd_bitrate_compression ||
+      MAX_MOVIE_BITRATE
+
 const onBitrateChange = (key, value) => {
-  const bitrates = Object.fromEntries(
-    BITRATE_KEYS.map(k => [k, parseBitrate(link.value[k])])
+  const bitrates = clampBitrates(
+    { ...link.value, [key]: value },
+    currentProduction.value.hd_bitrate_compression
   )
-  bitrates[key] = parseBitrate(value)
   emit('bitrates-changed', { taskType: props.taskType, ...bitrates })
 }
 
