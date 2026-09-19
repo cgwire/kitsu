@@ -11,6 +11,7 @@ import assetsApi from '@/store/api/assets'
 import entitiesApi from '@/store/api/entities'
 import taskStatusStore from '@/store/modules/taskstatus'
 import { buildAssetIndex } from '@/lib/indexing'
+import { PAGE_SIZE } from '@/lib/pagination'
 
 const baseRootGetters = () => ({
   assetTypeMap: new Map(),
@@ -370,6 +371,63 @@ describe('Assets store', () => {
       expect(
         assetsStore.cache.assets.filter(a => a.id === 'a2')
       ).toHaveLength(1)
+    })
+  })
+
+  describe('SET_ASSET_SEARCH paging', () => {
+    const searchPayload = (assetSearch, options = {}) => ({
+      assetSearch,
+      production: { id: 'p1', descriptors: [] },
+      taskStatusMap: new Map(),
+      taskTypeMap: new Map(),
+      persons: [],
+      ...options
+    })
+
+    const makeState = displayedAssets => ({
+      assetSorting: [],
+      assetTypes: [],
+      displayedAssets,
+      displayedAssetsTimeSpent: 0,
+      displayedAssetsEstimation: 0
+    })
+
+    beforeEach(() => {
+      assetsStore.cache.assets = Array.from(
+        { length: PAGE_SIZE * 3 },
+        (_, index) => ({
+          id: `a${index}`,
+          name: `Asset ${index}`,
+          asset_type_name: 'Char',
+          canceled: false,
+          timeSpent: 0,
+          estimation: 0,
+          tasks: [],
+          data: {}
+        })
+      )
+      assetsStore.cache.assetIndex = {}
+      assetsStore.cache.result = []
+    })
+
+    // The Assets page keeps its scroll depth across searches.
+    test('keeps the number of displayed assets by default', () => {
+      const state = makeState(assetsStore.cache.assets.slice(0, PAGE_SIZE * 2))
+
+      assetsStore.mutations.SET_ASSET_SEARCH(state, searchPayload(''))
+
+      expect(state.displayedAssets).toHaveLength(PAGE_SIZE * 2)
+    })
+
+    test('comes back to one page when asked to', () => {
+      const state = makeState(assetsStore.cache.assets.slice(0, PAGE_SIZE * 2))
+
+      assetsStore.mutations.SET_ASSET_SEARCH(
+        state,
+        searchPayload('', { isPageReset: true })
+      )
+
+      expect(state.displayedAssets).toHaveLength(PAGE_SIZE)
     })
   })
 

@@ -358,7 +358,12 @@ describe('Breakdown page, asset search', () => {
     await search(wrapper, 'hero')
 
     expect(setAssetSearch).toHaveBeenCalledTimes(1)
-    expect(setAssetSearch.mock.calls[0][1]).toBe('hero')
+    // One page only: after a long scroll, every keystroke would render all
+    // the tiles loaded so far.
+    expect(setAssetSearch.mock.calls[0][1]).toEqual({
+      assetSearch: 'hero',
+      isPageReset: true
+    })
   })
 
   test('still applies a search coming from the URL', async () => {
@@ -369,7 +374,7 @@ describe('Breakdown page, asset search', () => {
     await nextTick()
 
     expect(setAssetSearch).toHaveBeenCalledTimes(1)
-    expect(setAssetSearch.mock.calls[0][1]).toBe('saved')
+    expect(setAssetSearch.mock.calls[0][1].assetSearch).toBe('saved')
   })
 
   // The store keeps the number of assets displayed across searches: asking

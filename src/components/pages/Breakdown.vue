@@ -795,12 +795,15 @@ const setSearchInUrl = query => {
   router.push({ query: { ...route.query, search: searchQuery || undefined } })
 }
 
-// The store keeps the number of assets displayed across searches: no page is
-// added here or the list grows with every keystroke. fillAssetList tops it up
-// when the result does not overflow the column.
+// Each search starts from one page: after a long scroll, every keystroke would
+// render all the tiles loaded so far. fillAssetList tops it up when the result
+// does not overflow the column.
 const onSearchChange = searchQuery => {
   appliedSearch = searchQuery || ''
-  store.dispatch('setAssetSearch', searchQuery)
+  store.dispatch('setAssetSearch', {
+    assetSearch: searchQuery,
+    isPageReset: true
+  })
   setSearchInUrl(searchQuery)
   fillAssetList()
 }
