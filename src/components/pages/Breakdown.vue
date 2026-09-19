@@ -29,7 +29,7 @@
             v-model="lineFilter"
           />
           <combobox-task-type
-            class="ml1"
+            class="ml1 desktop-only"
             :label="$t('assets.fields.ready_for')"
             :task-type-list="readyForTaskTypes"
             :with-margin="false"
@@ -37,7 +37,7 @@
             v-if="isShotCasting"
           />
           <input
-            class="input casted-asset-search ml1"
+            class="input casted-asset-search ml1 desktop-only"
             type="search"
             :aria-label="$t('breakdown.filters.asset')"
             :placeholder="$t('breakdown.filters.asset')"
