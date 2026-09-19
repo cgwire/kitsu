@@ -69,6 +69,7 @@
       "label": "標籤",
       "nb_assets": "{count} 個資產 | {count} 個資產",
       "nb_occurrences": "出現 {count} 次 | 出現 {count} 次",
+      "nb_ready": "{ready} / {total} 已就緒",
       "occurrences": "出現次數",
       "picture_mode": "切換到圖片模式",
       "remove_from_casting": "從選角中移除",

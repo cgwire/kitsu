@@ -69,6 +69,7 @@
       "label": "Etichetta",
       "nb_assets": "{count} asset | {count} asset",
       "nb_occurrences": "{count} occorrenza | {count} occorrenze",
+      "nb_ready": "{ready} / {total} pronti",
       "occurrences": "Occorrenze",
       "picture_mode": "Passa alla modalità immagini",
       "remove_from_casting": "Rimuovi dal casting",

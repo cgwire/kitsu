@@ -33,6 +33,14 @@
             :options="lineFilterOptions"
             v-model="lineFilter"
           />
+          <combobox-task-type
+            class="ml1"
+            :label="$t('assets.fields.ready_for')"
+            :task-type-list="readyForTaskTypes"
+            :with-margin="false"
+            v-model="readyTaskTypeId"
+            v-if="isShotCasting"
+          />
           <input
             class="input casted-asset-search ml1"
             type="search"
@@ -232,6 +240,7 @@
               :name="getEntityName(entity)"
               :asset-types="castingAssetTypes"
               :read-only="!isCurrentUserManager"
+              :ready-task-type-id="isShotCasting ? readyTaskTypeId : ''"
               :text-mode="isTextMode"
               :metadata-descriptors="metadataDescriptors"
               :metadata-display-headers="metadataDisplayHeaders"
@@ -449,6 +458,7 @@ import ShotLine from '@/components/pages/breakdown/ShotLine.vue'
 import ButtonHrefLink from '@/components/widgets/ButtonHrefLink.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
@@ -513,6 +523,7 @@ const libraryDisplayed = ref(false)
 const lineFilter = ref('all')
 const metadataDisplayHeaders = ref({ ...SHOT_DISPLAY_HEADERS })
 const parsedCSV = ref([])
+const readyTaskTypeId = ref('')
 const removalData = ref({})
 const saveErrors = ref({})
 const selection = ref(new Set())
@@ -664,6 +675,17 @@ const castingEntities = computed(() => {
   }
   return castingAssetTypeAssets.value
 })
+
+// Steps of the shots in pipeline order: an asset is ready for a step and for
+// the ones before it.
+const readyForTaskTypes = computed(() => [
+  { id: '', color: '#999', name: t('main.none') },
+  ...[...store.getters.productionShotTaskTypes].sort(
+    (a, b) =>
+      store.getters.getTaskTypePriority(a.id) -
+      store.getters.getTaskTypePriority(b.id)
+  )
+])
 
 const lineFilterOptions = computed(() => [
   { label: t('breakdown.filters.all'), value: 'all' },
@@ -1347,6 +1369,14 @@ const stopResizing = () => {
   resizing = null
 }
 
+const getReadyForPreferenceKey = () =>
+  `breakdown:ready-for-${currentProduction.value?.id}`
+
+const resetReadyTaskType = () => {
+  readyTaskTypeId.value =
+    preferences.getPreference(getReadyForPreferenceKey()) || ''
+}
+
 const getNameWidthPreferenceKey = () =>
   'breakdown:column-width-name-' +
   `${castingType.value}-${currentProduction.value.id}`
@@ -1510,6 +1540,11 @@ watch(castingAssetTypesOptions, () => {
 watch(currentProduction, () => {
   leaveEpisodeRoute()
   resetColumnWidth()
+  resetReadyTaskType()
+})
+
+watch(readyTaskTypeId, () => {
+  preferences.setPreference(getReadyForPreferenceKey(), readyTaskTypeId.value)
 })
 
 watch(displayedSequences, () => {
@@ -1544,6 +1579,7 @@ onMounted(() => {
   })
   resetDisplayHeaders()
   resetColumnWidth()
+  resetReadyTaskType()
   if (!searchFieldRef.value?.getValue() && route.query.search) {
     searchFieldRef.value?.setValue(route.query.search)
   }
@@ -1602,6 +1638,19 @@ useHead({
 // the control, not with the middle of label + control.
 .casting-toolbar {
   align-items: flex-end;
+}
+
+// Same height as the other controls of the toolbar, or its label sits higher
+// than theirs.
+.casting-toolbar :deep(.task-type-combo) {
+  align-items: center;
+  box-sizing: border-box;
+  display: flex;
+  height: 40px;
+
+  .selector {
+    flex: 1;
+  }
 }
 
 .casted-asset-search {

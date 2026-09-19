@@ -69,6 +69,7 @@
       "label": "ラベル",
       "nb_assets": "アセット {count} 件 | アセット {count} 件",
       "nb_occurrences": "出現 {count} 回 | 出現 {count} 回",
+      "nb_ready": "準備完了 {ready} / {total}",
       "occurrences": "出現回数",
       "picture_mode": "ピクチャーモードに切り替え",
       "remove_from_casting": "キャスティングから削除",

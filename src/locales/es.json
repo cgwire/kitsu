@@ -69,6 +69,7 @@
       "label": "Etiqueta",
       "nb_assets": "{count} asset | {count} assets",
       "nb_occurrences": "{count} aparición | {count} apariciones",
+      "nb_ready": "{ready} / {total} listos",
       "occurrences": "Ocurrencias",
       "picture_mode": "Cambiar a modo de imagen",
       "remove_from_casting": "Quitar del casting",

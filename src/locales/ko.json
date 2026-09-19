@@ -69,6 +69,7 @@
       "label": "라벨",
       "nb_assets": "에셋 {count}개 | 에셋 {count}개",
       "nb_occurrences": "등장 {count}회 | 등장 {count}회",
+      "nb_ready": "{ready} / {total} 준비됨",
       "occurrences": "등장 횟수",
       "picture_mode": "사진 모드로 전환",
       "remove_from_casting": "캐스팅에서 제거",

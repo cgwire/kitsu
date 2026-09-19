@@ -69,6 +69,7 @@
       "label": "Лейбл",
       "nb_assets": "Ассетов: {count} | Ассетов: {count}",
       "nb_occurrences": "Вхождений: {count} | Вхождений: {count}",
+      "nb_ready": "Готово: {ready} / {total}",
       "occurrences": "Вхождения",
       "picture_mode": "Переключиться в режим картинок",
       "remove_from_casting": "Убрать из кастинга",

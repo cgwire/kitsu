@@ -36,6 +36,13 @@
           <div v-for="(chunk, index) in chunks" :key="`chunk-${index}`">
             {{ chunk }}
           </div>
+          <div
+            class="ready-assets"
+            :class="{ 'is-ready': readyAssets.ready === readyAssets.total }"
+            v-if="readyAssets"
+          >
+            {{ $t('breakdown.nb_ready', readyAssets) }}
+          </div>
         </div>
         <button
           class="copy-casting"
@@ -280,6 +287,7 @@ import {
   getMetadataEventValue,
   getMetadataFieldValue
 } from '@/composables/descriptors'
+import { isAssetReadyFor } from '@/lib/casting'
 import { renderMarkdown } from '@/lib/render'
 
 import AssetBlock from '@/components/pages/breakdown/AssetBlock.vue'
@@ -298,6 +306,7 @@ const props = defineProps({
   name: { type: String, default: '' },
   assetTypes: { type: Array, default: () => [] },
   readOnly: { type: Boolean, default: false },
+  readyTaskTypeId: { type: String, default: '' },
   textMode: { type: Boolean, default: false },
   metadataDescriptors: { type: Array, default: () => [] },
   metadataDisplayHeaders: { type: Object, default: () => ({}) },
@@ -335,6 +344,24 @@ const user = computed(() => store.getters.user)
 // Read from the selection set of the page so that a click renders the lines
 // it changes, not the page and its whole list.
 const selected = computed(() => props.selection.has(props.entity.id))
+
+// Casted assets ready for the chosen step, null when there is nothing to
+// tell. The asset map is a plain cache of the store: an asset delivered while
+// the page is open shows at the next casting change or reload.
+const readyAssets = computed(() => {
+  const links = (store.getters.castingByType[props.entity.id] || []).flat()
+  if (!props.readyTaskTypeId || links.length === 0) return null
+  const ready = links.filter(
+    link =>
+      link.shared ||
+      isAssetReadyFor(
+        store.getters.assetMap.get(link.asset_id),
+        props.readyTaskTypeId,
+        store.getters.getTaskTypePriority
+      )
+  )
+  return { ready: ready.length, total: links.length }
+})
 
 const chunks = computed(() =>
   props.name.split(' / ').filter(chunk => chunk && chunk !== 'undefined')
@@ -488,6 +515,18 @@ label {
 }
 .asset-type-line:not(:first-child) {
   margin-top: 0.5em;
+}
+
+.ready-assets {
+  color: var(--text-alt);
+  font-size: 0.8em;
+  font-weight: normal;
+  margin-top: 0.3em;
+
+  &.is-ready {
+    color: $green;
+    font-weight: bold;
+  }
 }
 
 .copy-casting {

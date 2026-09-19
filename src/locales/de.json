@@ -69,6 +69,7 @@
       "label": "Etikett",
       "nb_assets": "{count} Asset | {count} Assets",
       "nb_occurrences": "{count} Vorkommen | {count} Vorkommen",
+      "nb_ready": "{ready} / {total} bereit",
       "occurrences": "Vorkommen",
       "picture_mode": "Zum Bildmodus wechseln",
       "remove_from_casting": "Aus dem Casting entfernen",

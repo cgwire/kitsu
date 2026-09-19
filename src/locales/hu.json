@@ -69,6 +69,7 @@
       "label": "Címke",
       "nb_assets": "{count} asset | {count} asset",
       "nb_occurrences": "{count} előfordulás | {count} előfordulás",
+      "nb_ready": "{ready} / {total} kész",
       "occurrences": "Előfordulások",
       "picture_mode": "Váltás kép módra",
       "remove_from_casting": "Eltávolítás a castingból",

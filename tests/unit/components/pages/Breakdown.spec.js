@@ -92,6 +92,7 @@ const mountPage = ({
       displayedAssets: () => [],
       displayedSequences: () => [],
       episodes: () => [],
+      getTaskTypePriority: () => () => 1,
       isAssetsLoading: () => false,
       isCurrentUserProductionManager: () => true,
       isFrameIn: () => false,
@@ -99,6 +100,7 @@ const mountPage = ({
       isFrames: () => false,
       isShowInfosBreakdown: () => false,
       isTVShow: state => state.isTVShow,
+      productionShotTaskTypes: () => [],
       sequenceMap: () => new Map(),
       shotMetadataDescriptors: () => [],
       ...getters
@@ -465,7 +467,13 @@ describe('Breakdown page, casting helpers', () => {
           'shot-a': [[hero], [forest]],
           'shot-c': [[hero, villain]]
         }),
-        castingSequenceShots: () => shots
+        castingSequenceShots: () => shots,
+        getTaskTypePriority: () => taskTypeId =>
+          ({ layout: 1, animation: 2 })[taskTypeId],
+        productionShotTaskTypes: () => [
+          { id: 'animation', name: 'Animation' },
+          { id: 'layout', name: 'Layout' }
+        ]
       },
       stubs: { CastingTypeTotal: false }
     })
@@ -531,6 +539,26 @@ describe('Breakdown page, casting helpers', () => {
     // The totals follow the lines displayed.
     expect(typeTotals(wrapper).Characters[1]).toBe(
       'breakdown.nb_occurrences {"count":5}'
+    )
+  })
+
+  test('hands the step chosen for the ready indicator to the lines', async () => {
+    const { wrapper } = await mountCasting()
+
+    // Pipeline order, not alphabetical: the first option is "no indicator".
+    expect(wrapper.vm.readyForTaskTypes.map(taskType => taskType.id)).toEqual([
+      '',
+      'layout',
+      'animation'
+    ])
+    wrapper.vm.readyTaskTypeId = 'animation'
+    await nextTick()
+
+    const line = wrapper.findComponent({ name: 'ShotLine' })
+    expect(line.props('readyTaskTypeId')).toBe('animation')
+    expect(preferences.setPreference).toHaveBeenCalledWith(
+      'breakdown:ready-for-p1',
+      'animation'
     )
   })
 

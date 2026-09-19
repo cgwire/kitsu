@@ -69,6 +69,7 @@
       "label": "Label",
       "nb_assets": "{count} asset | {count} assets",
       "nb_occurrences": "{count} occurrence | {count} occurrences",
+      "nb_ready": "{ready} / {total} prêts",
       "occurrences": "Occurrences",
       "picture_mode": "Passer en mode image",
       "remove_from_casting": "Retirer du casting",

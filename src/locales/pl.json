@@ -119,6 +119,7 @@
       "label": "Etykieta",
       "nb_assets": "{count} asset | {count} assetów",
       "nb_occurrences": "{count} wystąpienie | {count} wystąpień",
+      "nb_ready": "{ready} / {total} gotowych",
       "occurrences": "Wystąpienia",
       "picture_mode": "Przełącz na tryb graficzny",
       "remove_from_casting": "Usuń z castingu",

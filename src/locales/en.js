@@ -124,6 +124,7 @@ export default {
     label: 'Label',
     nb_assets: '{count} asset | {count} assets',
     nb_occurrences: '{count} occurrence | {count} occurrences',
+    nb_ready: '{ready} / {total} ready',
     occurrences: 'Occurrences',
     picture_mode: 'Switch to picture mode',
     remove_from_casting: 'Remove from casting',

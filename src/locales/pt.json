@@ -69,6 +69,7 @@
       "label": "Rótulo",
       "nb_assets": "{count} asset | {count} assets",
       "nb_occurrences": "{count} ocorrência | {count} ocorrências",
+      "nb_ready": "{ready} / {total} prontos",
       "occurrences": "Ocorrências",
       "picture_mode": "Mudar para o modo de imagem",
       "remove_from_casting": "Remover do casting",
