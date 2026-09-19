@@ -305,7 +305,7 @@
           />
         </div>
 
-        <spinner v-if="isAssetsLoading" />
+        <spinner v-if="isLoading || isAssetsLoading" />
         <template v-else>
           <div
             class="type-assets"
@@ -421,6 +421,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
+import { useBreakdownLoader } from '@/composables/breakdownLoader'
 import clipboard from '@/lib/clipboard'
 import csv from '@/lib/csv'
 import preferences from '@/lib/preferences'
@@ -471,6 +472,9 @@ const route = useRoute()
 const router = useRouter()
 const store = useStore()
 const socket = getCurrentInstance().appContext.config.globalProperties.$socket
+const { episodeId, isLoading, load } = useBreakdownLoader(store, () =>
+  onEntitiesLoaded()
+)
 
 // State
 // --------------------------------------------------------------------------
@@ -489,10 +493,8 @@ const columnWidth = ref({})
 const editedAsset = ref(null)
 const editedAssetLinkLabel = ref(null)
 const editedEntityId = ref(null)
-const episodeId = ref('')
 const importCsvFormData = ref({})
 const isBigMode = ref(false)
-const isLoading = ref(false)
 const isOnlyCurrentEpisode = ref(false)
 const isTextMode = ref(false)
 const libraryDisplayed = ref(false)
@@ -534,8 +536,6 @@ const success = reactive({
 })
 
 let appliedSearch = ''
-let hasScopeMoved = false
-let isUnmounted = false
 let previousEntityId = null
 let resizing = null
 let wasDisconnected = false
@@ -738,7 +738,9 @@ const hasSelection = computed(() => selectedEntityIds.value.length > 0)
 // Functions
 // --------------------------------------------------------------------------
 
-const reset = () => {
+// A production without episodes has no episode route: a link kept from a TV
+// show would carry its episode along.
+const leaveEpisodeRoute = () => {
   if (!isTVShow.value && route.params?.episode_id) {
     router.push({
       name: 'breakdown',
@@ -746,89 +748,27 @@ const reset = () => {
       query: route.query
     })
   }
-  isLoading.value = true
-  setTimeout(reloadEntities, 100)
 }
 
-const reloadEntities = async () => {
-  if (isUnmounted) return
-  isLoading.value = true
-  const production = currentProduction.value
-  let episode = currentEpisode.value
-  hasScopeMoved = false
-  try {
-    // Resolve the episode first: starting on a direct link before the
-    // topbar has it costs a full production-wide second pass. Inside the
-    // try, so a failed fetch releases the loading flag like any other.
-    // Only the episode is rebound: a production switched during the
-    // fetch must still reset the column widths in the finally block.
-    if (isTVShow.value && !currentEpisode.value) {
-      await store.dispatch('loadEpisodes')
-      if (isUnmounted) return
-      episode = currentEpisode.value
-      // The watcher flagged the episode this run just resolved: nothing
-      // was loaded under another scope yet, the loads start from it.
-      hasScopeMoved = false
-    }
-    // 'all' is episode casting here: it reads neither sequences nor shots.
-    if (
-      !isTVShow.value ||
-      !['main', 'all'].includes(currentEpisode.value?.id)
-    ) {
-      await store.dispatch('loadSequences')
-      if (isUnmounted) return
-      await store.dispatch('loadShots')
-      // Leaving the page during a load must stop the chain: the
-      // production-wide assets load would land under the page shown next.
-      if (isUnmounted) return
-    }
-    if (isTVShow.value) {
-      if (currentEpisode.value) episodeId.value = currentEpisode.value.id
-      store.dispatch('setCastingEpisode', episodeId.value)
-      store.dispatch('setCastingForProductionEpisodes')
-    } else {
-      store.dispatch('setCastingEpisode', null)
-    }
-    await store.dispatch('loadAssets', { all: true, withTasks: true })
-    if (isUnmounted) return
-    store.dispatch('displayMoreAssets')
-    fillAssetList()
-    store.dispatch('setCastingAssetTypes')
-    if (assetTypeId.value) {
-      store.dispatch('setCastingAssetType', assetTypeId.value)
-    } else if (
-      !isTVShow.value ||
-      (episodeId.value && !['main', 'all'].includes(episodeId.value))
-    ) {
-      store.dispatch('setCastingSequence', sequenceId.value || 'all')
-    }
-    resetSequenceOption()
-    resetSelection()
-    if (
-      currentEpisode.value?.id === 'main' ||
-      currentProduction.value.production_type === 'assets'
-    ) {
-      castingType.value = 'asset'
-    }
-  } catch (err) {
-    console.error(err)
-  } finally {
-    isLoading.value = false
-    // The production and episode watchers ignore a change made while
-    // the page loads: pick it up here or the casting of the scope left
-    // behind stays displayed under a topbar that shows the new one. Not
-    // after unmount: the ghost reload would push a production-wide
-    // dataset under the page displayed next.
-    // hasScopeMoved catches a switch that came back to the scope the run
-    // started with: the loads in between served the other one.
-    const isScopeChanged =
-      hasScopeMoved ||
-      currentProduction.value !== production ||
-      currentEpisode.value?.id !== episode?.id
-    if (isScopeChanged && !isUnmounted) {
-      reset()
-      if (currentProduction.value !== production) resetColumnWidth()
-    }
+const onEntitiesLoaded = () => {
+  store.dispatch('displayMoreAssets')
+  fillAssetList()
+  store.dispatch('setCastingAssetTypes')
+  if (assetTypeId.value) {
+    store.dispatch('setCastingAssetType', assetTypeId.value)
+  } else if (
+    !isTVShow.value ||
+    (episodeId.value && !['main', 'all'].includes(episodeId.value))
+  ) {
+    store.dispatch('setCastingSequence', sequenceId.value || 'all')
+  }
+  resetSequenceOption()
+  resetSelection()
+  if (
+    currentEpisode.value?.id === 'main' ||
+    currentProduction.value.production_type === 'assets'
+  ) {
+    castingType.value = 'asset'
   }
 }
 
@@ -1516,24 +1456,8 @@ watch(castingAssetTypesOptions, () => {
 })
 
 watch(currentProduction, () => {
-  if (isLoading.value) {
-    hasScopeMoved = true
-  } else {
-    reset()
-    resetColumnWidth()
-  }
-})
-
-watch(currentEpisode, () => {
-  if (currentEpisode.value && episodeId.value !== currentEpisode.value.id) {
-    if (isLoading.value) {
-      hasScopeMoved = true
-    } else if (currentEpisode.value.id === 'all') {
-      episodeId.value = 'all'
-    } else {
-      reset()
-    }
-  }
+  leaveEpisodeRoute()
+  resetColumnWidth()
 })
 
 watch(displayedSequences, () => {
@@ -1557,7 +1481,8 @@ watch(
 // --------------------------------------------------------------------------
 
 onMounted(() => {
-  reset()
+  leaveEpisodeRoute()
+  load()
   resetSequenceOption()
   store.dispatch('setLastProductionScreen', 'breakdown')
   isTextMode.value = preferences.getBoolPreference('breakdown:text-mode')
@@ -1573,7 +1498,6 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  isUnmounted = true
   window.removeEventListener('keydown', onKeyDown)
   Object.entries(SOCKET_EVENTS).forEach(([eventName, handler]) => {
     socket.off(eventName, handler)

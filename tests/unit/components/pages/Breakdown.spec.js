@@ -1,4 +1,4 @@
-import { shallowMount } from '@vue/test-utils'
+import { flushPromises, shallowMount } from '@vue/test-utils'
 import { vi } from 'vitest'
 import { nextTick, reactive } from 'vue'
 import { createStore } from 'vuex'
@@ -134,166 +134,45 @@ const moveScope = async (store, scope) => {
   await nextTick()
 }
 
-describe('Breakdown page, reloadEntities', () => {
-  // Mounting schedules a first load: fake timers keep it from running, each
-  // test drives reloadEntities on its own. A reload decided by the load shows
-  // as the loading flag raised again, which is all reset() does synchronously.
-  beforeEach(() => {
-    vi.useFakeTimers()
-    // The page logs the failed episodes fetch: keep that expected error out
-    // of the test output.
-    vi.spyOn(console, 'error').mockImplementation(() => {})
-  })
-
-  afterEach(() => {
-    vi.useRealTimers()
-    vi.restoreAllMocks()
-  })
-
-  // The currentEpisode watcher ignores a change made while the page loads:
-  // the load itself has to notice the switch once it settles.
-  test('reloads when the episode changed during the load', async () => {
-    const { wrapper, store } = mountPage({
-      actions: {
-        loadShots: vi.fn(() =>
-          moveScope(store, { currentEpisode: { id: 'ep-b' } })
-        )
-      }
-    })
-    preferences.getPreference.mockClear()
-
-    await wrapper.vm.reloadEntities()
-
-    expect(wrapper.vm.isLoading).toBe(true)
-    expect(preferences.getPreference).not.toHaveBeenCalled()
-  })
-
-  test('reloads when the production changed during the load', async () => {
-    const { wrapper, store } = mountPage({
-      actions: {
-        loadShots: vi.fn(() =>
-          moveScope(store, {
-            currentProduction: { id: 'p2', production_type: 'tvshow' }
-          })
-        )
-      }
-    })
-    preferences.getPreference.mockClear()
-
-    await wrapper.vm.reloadEntities()
-
-    expect(wrapper.vm.isLoading).toBe(true)
-    // Same as the currentProduction watcher, which the load short-circuited:
-    // the column widths are read again.
-    expect(preferences.getPreference).toHaveBeenCalled()
-  })
-
-  // Leaving the page during the load must not replay it: the ghost reload
-  // would push a production-wide dataset under the page displayed next.
-  test('does not reload once the page is unmounted', async () => {
-    const { wrapper, store, actions } = mountPage({
-      actions: {
-        loadShots: vi.fn(async () => {
-          await moveScope(store, { currentEpisode: { id: 'ep-b' } })
-          wrapper.unmount()
-        })
-      }
-    })
-
-    await wrapper.vm.reloadEntities()
-
-    expect(wrapper.vm.isLoading).toBe(false)
-    // The production-wide load would land under the page displayed next.
-    expect(actions.loadAssets).not.toHaveBeenCalled()
-    expect(actions.setCastingEpisode).not.toHaveBeenCalled()
-  })
-
-  // The watchers are inert while the page loads, so a switch that comes back
-  // to the episode the run started with leaves the store on the other one.
-  test('reloads when the episode moved and came back during the load', async () => {
-    const { wrapper, store } = mountPage({
-      actions: {
-        loadSequences: vi.fn(() =>
-          moveScope(store, { currentEpisode: { id: 'ep-b' } })
-        ),
-        loadShots: vi.fn(() =>
-          moveScope(store, { currentEpisode: { id: 'ep-a' } })
-        )
-      }
-    })
-
-    await wrapper.vm.reloadEntities()
-
-    expect(wrapper.vm.isLoading).toBe(true)
-  })
-
-  // The topbar resolves the route episode asynchronously: starting the load
-  // before it lands costs a full production-wide second pass. The resolution
-  // fires the episode watcher like any change: it must not count as a move.
-  test('resolves the episode before loading on a direct link', async () => {
-    const { wrapper, store, actions } = mountPage({
-      state: { currentEpisode: null },
-      actions: {
-        loadEpisodes: vi.fn(() =>
-          moveScope(store, { currentEpisode: { id: 'ep-a' } })
-        )
-      }
-    })
-
-    await wrapper.vm.reloadEntities()
-
-    expect(actions.loadEpisodes).toHaveBeenCalledTimes(1)
-    expect(wrapper.vm.isLoading).toBe(false)
-    expect(wrapper.vm.episodeId).toBe('ep-a')
-  })
-
-  // The episodes fetch can fail like any other: the page must come back
-  // to life, or the watchers stay muted behind a stuck loading flag.
-  test('releases the loading flag when the episodes fetch fails', async () => {
-    const { wrapper } = mountPage({
-      state: { currentEpisode: null },
-      actions: {
-        loadEpisodes: vi.fn(() => Promise.reject(new Error('down')))
-      }
-    })
-
-    await wrapper.vm.reloadEntities()
-
-    expect(wrapper.vm.isLoading).toBe(false)
-  })
-
-  test('loads nothing when the page unmounts during the episodes fetch', async () => {
-    const { wrapper, actions } = mountPage({
-      state: { currentEpisode: null },
-      actions: {
-        loadEpisodes: vi.fn(async () => wrapper.unmount())
-      }
-    })
-
-    await wrapper.vm.reloadEntities()
-
-    expect(actions.loadSequences).not.toHaveBeenCalled()
-    expect(actions.loadAssets).not.toHaveBeenCalled()
-  })
-
-  test('loads nothing on an unmounted page', async () => {
+// The load races are covered by the spec of useBreakdownLoader.
+describe('Breakdown page, loading', () => {
+  test('loads on mount, without delay, and fills the page once loaded', async () => {
     const { wrapper, actions } = mountPage()
-    const { reloadEntities } = wrapper.vm
-    wrapper.unmount()
 
-    await reloadEntities()
+    await flushPromises()
 
-    expect(actions.loadSequences).not.toHaveBeenCalled()
-    expect(actions.loadAssets).not.toHaveBeenCalled()
-  })
-
-  test('settles on the episode it loaded', async () => {
-    const { wrapper } = mountPage()
-
-    await wrapper.vm.reloadEntities()
-
+    expect(actions.loadAssets).toHaveBeenCalledTimes(1)
+    expect(actions.setCastingSequence.mock.calls[0][1]).toBe('all')
     expect(wrapper.vm.episodeId).toBe('ep-a')
     expect(wrapper.vm.isLoading).toBe(false)
+  })
+
+  // Coming from the Assets page, the store already holds the assets of its
+  // episode: showing them until the production-wide load replaces them looks
+  // like a list loading twice.
+  test('hides the assets left by another page while it loads', async () => {
+    const asset = { id: 'asset-1', name: 'Hero', asset_type_name: 'Characters' }
+    const { wrapper } = mountPage({
+      actions: { loadSequences: vi.fn(() => new Promise(() => {})) },
+      getters: { assetsByType: () => [[asset]] }
+    })
+    await nextTick()
+
+    expect(
+      wrapper.findAllComponents({ name: 'AvailableAssetBlock' })
+    ).toHaveLength(0)
+  })
+
+  test('reads the column widths of the production it switches to', async () => {
+    const { store } = mountPage()
+    await flushPromises()
+    preferences.getPreference.mockClear()
+
+    await moveScope(store, {
+      currentProduction: { id: 'p2', production_type: 'tvshow' }
+    })
+
+    expect(preferences.getPreference).toHaveBeenCalled()
   })
 })
 
@@ -388,9 +267,7 @@ describe('Breakdown page, selection', () => {
         }
       ]
     })
-    wrapper.vm.isLoading = false
-    wrapper.vm.selection = { 'shot-a': false, 'shot-b': false, 'shot-c': false }
-    await nextTick()
+    await flushPromises()
     const lines = wrapper.findAll('.shot')
     // The first selection also enables the available assets column.
     await lines[0].trigger('click')
@@ -427,7 +304,7 @@ describe('Breakdown page, selection', () => {
       ]
     ]
     const updates = {}
-    const { wrapper, store } = mountPage({
+    const { store } = mountPage({
       state: {
         isTVShow: false,
         currentEpisode: null,
@@ -455,8 +332,7 @@ describe('Breakdown page, selection', () => {
         }
       ]
     })
-    wrapper.vm.isLoading = false
-    await nextTick()
+    await flushPromises()
     Object.keys(updates).forEach(name => delete updates[name])
 
     store.state.castingByType['shot-b'] = castAsset(2)
@@ -508,6 +384,9 @@ describe('Breakdown page, asset search', () => {
     const { wrapper } = mountPage({
       actions: { setAssetSearch: vi.fn(), displayMoreAssets }
     })
+    // The load of the page displays the first page of assets.
+    await flushPromises()
+    displayMoreAssets.mockClear()
 
     await search(wrapper, 'hero')
 
