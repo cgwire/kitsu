@@ -530,6 +530,9 @@ label {
   flex: 1 1 auto;
   display: flex;
   flex-wrap: wrap;
+  // The right margin of flexrow-item left room for one small tile per row
+  // only: two of them need 130px out of the 134px of the cell.
+  margin-right: 0;
 }
 
 .shot {
