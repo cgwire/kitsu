@@ -27,6 +27,19 @@
             v-model="assetTypeId"
             v-if="isAssetCasting"
           />
+          <combobox-styled
+            class="ml1"
+            :label="$t('breakdown.filters.label')"
+            :options="lineFilterOptions"
+            v-model="lineFilter"
+          />
+          <input
+            class="input casted-asset-search ml1"
+            type="search"
+            :aria-label="$t('breakdown.filters.asset')"
+            :placeholder="$t('breakdown.filters.asset')"
+            v-model="castedAssetSearch"
+          />
           <span class="filler"></span>
           <show-infos-button class="flexrow-item desktop-only" />
           <button-simple
@@ -228,7 +241,7 @@
               @field-changed="onFieldChanged"
               @metadata-changed="onMetadataChanged"
               @remove-one="removeOneAssetFromSelection"
-              v-for="entity in castingEntities"
+              v-for="entity in displayedEntities"
             />
           </div>
         </div>
@@ -479,6 +492,7 @@ const importModalRef = useTemplateRef('import-modal')
 const searchFieldRef = useTemplateRef('search-field')
 
 const assetTypeId = ref('')
+const castedAssetSearch = ref('')
 const castingType = ref('shot')
 const columnSelectorDisplayed = ref(false)
 const columnWidth = ref({})
@@ -490,6 +504,7 @@ const isBigMode = ref(false)
 const isOnlyCurrentEpisode = ref(false)
 const isTextMode = ref(false)
 const libraryDisplayed = ref(false)
+const lineFilter = ref('all')
 const metadataDisplayHeaders = ref({ ...SHOT_DISPLAY_HEADERS })
 const parsedCSV = ref([])
 const removalData = ref({})
@@ -644,7 +659,32 @@ const castingEntities = computed(() => {
   return castingAssetTypeAssets.value
 })
 
-// Asset lists of the displayed entities, one per asset type and entity.
+const lineFilterOptions = computed(() => [
+  { label: t('breakdown.filters.all'), value: 'all' },
+  { label: t('breakdown.filters.empty'), value: 'empty' },
+  { label: t('breakdown.filters.standby'), value: 'standby' }
+])
+
+const isLineDisplayed = (entity, search) => {
+  const links = casting.value[entity.id] || []
+  if (lineFilter.value === 'empty' && links.length > 0) return false
+  if (lineFilter.value === 'standby' && !entity.is_casting_standby) return false
+  return (
+    !search ||
+    links.some(link => link.asset_name?.toLowerCase().includes(search))
+  )
+}
+
+// Without filter the list itself is handed over: reading the casting here
+// would render the page on every casting change.
+const displayedEntities = computed(() => {
+  const search = castedAssetSearch.value.trim().toLowerCase()
+  return lineFilter.value === 'all' && !search
+    ? castingEntities.value
+    : castingEntities.value.filter(entity => isLineDisplayed(entity, search))
+})
+
+// Asset lists of the entities of the scope, one per asset type and entity.
 const castingEntityTypeGroups = computed(() =>
   castingEntities.value.flatMap(entity => castingByType.value[entity.id] || [])
 )
@@ -800,7 +840,7 @@ const confirmBuildFilter = query => {
 }
 
 const selectRange = (fromEntityId, toEntityId) => {
-  const entityIds = castingEntities.value.map(entity => entity.id)
+  const entityIds = displayedEntities.value.map(entity => entity.id)
   const fromIndex = entityIds.indexOf(fromEntityId)
   const toIndex = entityIds.indexOf(toEntityId)
   if (fromIndex >= 0 && toIndex >= 0) {
@@ -1119,7 +1159,9 @@ const confirmNewAsset = async form => {
 
 // The first selected line of the list, whatever the order of the clicks.
 const copyCasting = () => {
-  const entity = castingEntities.value.find(({ id }) => selection.value.has(id))
+  const entity = displayedEntities.value.find(({ id }) =>
+    selection.value.has(id)
+  )
   clipboard.copyCasting(casting.value[entity?.id])
 }
 
@@ -1221,7 +1263,7 @@ const getCsvCastingCell = typeAssets => {
 }
 
 const getCsvEntries = () =>
-  castingEntities.value.map(entity => {
+  displayedEntities.value.map(entity => {
     const typeGroups = castingByType.value[entity.id] || []
     return [
       entity.name,
@@ -1548,6 +1590,12 @@ useHead({
 // the control, not with the middle of label + control.
 .casting-toolbar {
   align-items: flex-end;
+}
+
+.casted-asset-search {
+  border-radius: 10px;
+  height: 40px;
+  max-width: 200px;
 }
 
 .breakdown-columns {

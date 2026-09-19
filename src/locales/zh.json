@@ -88,7 +88,14 @@
       "episode_casting": "剧集选角",
       "save_error": "保存选角时出错",
       "hide_library": "隐藏资源库",
-      "show_library": "显示资源库"
+      "show_library": "显示资源库",
+      "filters": {
+        "all": "所有行",
+        "asset": "包含资产…",
+        "empty": "无选角",
+        "label": "行",
+        "standby": "待定"
+      }
     },
     "comments": {
       "add_attachment": "添加附件",

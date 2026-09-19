@@ -88,7 +88,14 @@
       "episode_casting": "Episode-casting",
       "save_error": "Fejl under gemning af casting",
       "hide_library": "Skjul bibliotek",
-      "show_library": "Vis bibliotek"
+      "show_library": "Vis bibliotek",
+      "filters": {
+        "all": "Alle linjer",
+        "asset": "Indeholder asset…",
+        "empty": "Uden casting",
+        "label": "Linjer",
+        "standby": "Standby"
+      }
     },
     "comments": {
       "add_attachment": "Tilføj vedhæftning",

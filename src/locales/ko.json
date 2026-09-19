@@ -88,7 +88,14 @@
       "episode_casting": "에피소드 출연",
       "save_error": "출연 저장 중 오류",
       "hide_library": "라이브러리 숨기기",
-      "show_library": "라이브러리 표시"
+      "show_library": "라이브러리 표시",
+      "filters": {
+        "all": "모든 줄",
+        "asset": "에셋 포함…",
+        "empty": "캐스팅 없음",
+        "label": "줄",
+        "standby": "대기"
+      }
     },
     "comments": {
       "add_attachment": "첨부파일 추가",

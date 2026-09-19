@@ -88,7 +88,14 @@
       "episode_casting": "エピソードのキャスティング",
       "save_error": "キャスティングの保存中にエラーが発生しました",
       "hide_library": "ライブラリを隠す",
-      "show_library": "ライブラリを表示"
+      "show_library": "ライブラリを表示",
+      "filters": {
+        "all": "すべての行",
+        "asset": "アセットを含む…",
+        "empty": "キャスティングなし",
+        "label": "行",
+        "standby": "スタンバイ"
+      }
     },
     "comments": {
       "add_attachment": "添付を追加",

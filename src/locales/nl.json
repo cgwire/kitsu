@@ -88,7 +88,14 @@
       "episode_casting": "Casting van de aflevering",
       "save_error": "Fout bij het opslaan van casting",
       "hide_library": "Bibliotheek verbergen",
-      "show_library": "Bibliotheek weergeven"
+      "show_library": "Bibliotheek weergeven",
+      "filters": {
+        "all": "Alle regels",
+        "asset": "Bevat het asset…",
+        "empty": "Zonder casting",
+        "label": "Regels",
+        "standby": "Stand-by"
+      }
     },
     "comments": {
       "add_attachment": "Bijlage toevoegen",

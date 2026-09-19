@@ -136,6 +136,13 @@
       },
       "fields": {
         "standby": "STDB"
+      },
+      "filters": {
+        "all": "Wszystkie wiersze",
+        "asset": "Zawiera asset…",
+        "empty": "Bez obsady",
+        "label": "Wiersze",
+        "standby": "Wstrzymane"
       }
     },
     "budget": {

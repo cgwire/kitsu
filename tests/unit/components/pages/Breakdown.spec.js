@@ -424,6 +424,84 @@ describe('Breakdown page, selection', () => {
   })
 })
 
+describe('Breakdown page, casting helpers', () => {
+  const link = (assetId, name, type, nbOccurences) => ({
+    id: `link-${assetId}`,
+    asset_id: assetId,
+    asset_name: name,
+    name,
+    asset_type_name: type,
+    nb_occurences: nbOccurences
+  })
+  const shots = [
+    { id: 'shot-a', name: 'SH01', sequence_name: 'SEQ01', data: {} },
+    { id: 'shot-b', name: 'SH02', sequence_name: 'SEQ01', data: {} },
+    {
+      id: 'shot-c',
+      name: 'SH03',
+      sequence_name: 'SEQ01',
+      data: {},
+      is_casting_standby: true
+    }
+  ]
+  const hero = link('asset-1', 'Hero', 'Characters', 2)
+  const villain = link('asset-2', 'Villain', 'Characters', 3)
+  const forest = link('asset-3', 'Forest', 'Environments', 1)
+
+  const mountCasting = async (actions = {}) => {
+    const mounted = mountPage({
+      state: {
+        isTVShow: false,
+        currentEpisode: null,
+        casting: { 'shot-a': [hero, forest], 'shot-c': [hero, villain] }
+      },
+      actions: { setEntityCasting: vi.fn(), saveCastings: vi.fn(), ...actions },
+      getters: {
+        castingByType: () => ({
+          'shot-a': [[hero], [forest]],
+          'shot-c': [[hero, villain]]
+        }),
+        castingSequenceShots: () => shots
+      }
+    })
+    await flushPromises()
+    return mounted
+  }
+
+  const displayedIds = wrapper =>
+    wrapper
+      .findAllComponents({ name: 'ShotLine' })
+      .map(line => line.props('entity').id)
+
+  test('displays the lines without casting only', async () => {
+    const { wrapper } = await mountCasting()
+
+    wrapper.vm.lineFilter = 'empty'
+    await nextTick()
+
+    expect(displayedIds(wrapper)).toEqual(['shot-b'])
+  })
+
+  test('displays the standby lines only', async () => {
+    const { wrapper } = await mountCasting()
+
+    wrapper.vm.lineFilter = 'standby'
+    await nextTick()
+
+    expect(displayedIds(wrapper)).toEqual(['shot-c'])
+  })
+
+  test('displays the lines that cast a given asset', async () => {
+    const { wrapper } = await mountCasting()
+
+    wrapper.vm.castedAssetSearch = 'vill'
+    await nextTick()
+
+    expect(displayedIds(wrapper)).toEqual(['shot-c'])
+  })
+
+})
+
 describe('Breakdown page, asset search', () => {
   // The page writes the search in the URL and watches that same URL for the
   // searches coming from elsewhere (saved queries, back button).

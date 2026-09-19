@@ -88,7 +88,14 @@
       "episode_casting": "Episodencasting",
       "save_error": "Fehler beim Speichern des Castings",
       "hide_library": "Bibliothek ausblenden",
-      "show_library": "Bibliothek anzeigen"
+      "show_library": "Bibliothek anzeigen",
+      "filters": {
+        "all": "Alle Zeilen",
+        "asset": "Enthält das Asset…",
+        "empty": "Ohne Casting",
+        "label": "Zeilen",
+        "standby": "Standby"
+      }
     },
     "comments": {
       "add_attachment": "Anhang hinzufügen",

@@ -88,7 +88,14 @@
       "episode_casting": "کستینگ اپیزود",
       "save_error": "خطا هنگام ذخیره کستینگ",
       "hide_library": "مخفی کردن کتابخانه",
-      "show_library": "نمایش کتابخانه"
+      "show_library": "نمایش کتابخانه",
+      "filters": {
+        "all": "همه ردیف‌ها",
+        "asset": "شامل دارایی…",
+        "empty": "بدون کستینگ",
+        "label": "ردیف‌ها",
+        "standby": "در انتظار"
+      }
     },
     "comments": {
       "add_attachment": "اضافه کردن پیوست",

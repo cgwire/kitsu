@@ -141,6 +141,13 @@ export default {
     },
     fields: {
       standby: 'STDB'
+    },
+    filters: {
+      all: 'All lines',
+      asset: 'Casts the asset…',
+      empty: 'Without casting',
+      label: 'Lines',
+      standby: 'Standby'
     }
   },
 

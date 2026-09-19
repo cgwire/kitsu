@@ -88,7 +88,14 @@
       "episode_casting": "Elenco de episódios",
       "save_error": "Erro ao salvar o casting",
       "hide_library": "Ocultar biblioteca",
-      "show_library": "Exibir biblioteca"
+      "show_library": "Exibir biblioteca",
+      "filters": {
+        "all": "Todas as linhas",
+        "asset": "Contém o asset…",
+        "empty": "Sem casting",
+        "label": "Linhas",
+        "standby": "Em espera"
+      }
     },
     "comments": {
       "add_attachment": "Adicionar anexo",

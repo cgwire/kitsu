@@ -88,7 +88,14 @@
       "episode_casting": "集數角色分配",
       "save_error": "儲存角色分配時出錯",
       "hide_library": "隱藏資產庫",
-      "show_library": "顯示資產庫"
+      "show_library": "顯示資產庫",
+      "filters": {
+        "all": "所有列",
+        "asset": "包含資產…",
+        "empty": "無選角",
+        "label": "列",
+        "standby": "待定"
+      }
     },
     "comments": {
       "add_attachment": "新增附件",

@@ -88,7 +88,14 @@
         "text": "Ha eltávolítod ezt az asset-et a kijelölt epizódból, az eltávolítja az asset-eket az összes hozzá tartozó shot-ból is. Biztosan eltávolítod?"
       },
       "save_error": "Hiba történt a szereposztás mentésekor",
-      "show_library": "Könyvtár megjelenítése"
+      "show_library": "Könyvtár megjelenítése",
+      "filters": {
+        "all": "Minden sor",
+        "asset": "Tartalmazza az assetet…",
+        "empty": "Casting nélkül",
+        "label": "Sorok",
+        "standby": "Készenlét"
+      }
     },
     "comments": {
       "add_attachment": "Csatolmány",
