@@ -218,6 +218,8 @@
     </template>
     <div
       class="asset-list flexrow-item"
+      :class="{ 'is-empty': assetsByAssetTypesMap[assetType] === undefined }"
+      :data-label="assetType"
       :key="entity.id + '-' + assetType"
       v-for="assetType in assetTypes"
     >
@@ -710,5 +712,67 @@ input::-webkit-inner-spin-button {
 
 input[type='number'] {
   -moz-appearance: textfield; /* Firefox */
+}
+
+// Mobile shows one card per entity: the asset type columns stack under the
+// name, each one titled from its data-label since the header row is hidden.
+@media screen and (max-width: 768px) {
+  .standby-column,
+  .description-column,
+  .frames-column,
+  .metadata-descriptor,
+  .asset-list.is-empty {
+    display: none;
+  }
+
+  .shot {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    flex-direction: column;
+    margin-bottom: 0.5em;
+    overflow: hidden;
+  }
+
+  // The width is set inline from the column resizing preference.
+  .sticky {
+    border-bottom: 1px solid var(--border);
+    border-right: 0;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    position: static;
+    width: 100%;
+  }
+
+  .shot-name {
+    flex: 1;
+    max-width: none;
+    min-width: 0;
+  }
+
+  .asset-list {
+    border-left: 0;
+    max-width: none;
+    min-width: 0;
+    padding: 0 0.5em;
+
+    &:last-child {
+      border-right: 0;
+    }
+
+    &::before {
+      color: var(--text-alt);
+      content: attr(data-label);
+      display: block;
+      font-size: 0.8em;
+      font-weight: 600;
+      letter-spacing: 1px;
+      padding-top: 0.5em;
+      text-transform: uppercase;
+    }
+  }
+
+  .asset-type-line {
+    padding-top: 0;
+  }
 }
 </style>

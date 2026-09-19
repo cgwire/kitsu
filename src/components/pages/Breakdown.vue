@@ -2,7 +2,7 @@
   <div class="breakdown page">
     <div class="breakdown-columns">
       <div class="breakdown-column casting-column">
-        <div class="flexrow mb1">
+        <div class="flexrow mb1 casting-toolbar">
           <div v-if="isEpisodeCasting">
             <h2 class="subtitle mt05">
               {{ $t('breakdown.episode_casting') }}
@@ -28,7 +28,7 @@
             v-if="isAssetCasting"
           />
           <span class="filler"></span>
-          <show-infos-button class="flexrow-item" />
+          <show-infos-button class="flexrow-item desktop-only" />
           <button-simple
             class="flexrow-item"
             :title="
@@ -42,14 +42,14 @@
             @click="toggleTextMode"
           />
           <button-simple
-            class="flexrow-item"
+            class="flexrow-item desktop-only"
             icon="big-thumbnail"
             :is-on="isBigMode"
             :title="$t('tasks.big_thumbnails')"
             @click="isBigMode = !isBigMode"
           />
           <button-simple
-            class="flexrow-item"
+            class="flexrow-item desktop-only"
             :title="$t('main.csv.import_file')"
             icon="import"
             :is-responsive="true"
@@ -57,14 +57,14 @@
             v-if="isCurrentUserManager"
           />
           <button-simple
-            class="flexrow-item"
+            class="flexrow-item desktop-only"
             icon="export"
             :is-responsive="true"
             :title="$t('main.csv.export_current_view')"
             @click="exportViewToCsv"
           />
           <button-href-link
-            class="flexrow-item"
+            class="flexrow-item desktop-only"
             :title="$t('main.csv.export_file')"
             icon="export-lines"
             :is-responsive="true"
@@ -1806,5 +1806,36 @@ useHead({
 
 .query-list {
   margin-bottom: 0.5em;
+}
+
+// Mobile is read-only: the casting alone, as one card per entity (see
+// ShotLine), without the asset picker, the exports and the info columns.
+@media screen and (max-width: 768px) {
+  .breakdown {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    padding-bottom: 0.5em;
+  }
+
+  .breakdown-column {
+    padding: 0.5em;
+  }
+
+  .casting-toolbar {
+    flex-wrap: wrap;
+    gap: 0.5em;
+  }
+
+  .assets-column,
+  .list-options,
+  .desktop-only,
+  .casting-header {
+    display: none;
+  }
+
+  // No selection means no add, remove, label or paste action on the casting.
+  .shot-lines {
+    pointer-events: none;
+  }
 }
 </style>
