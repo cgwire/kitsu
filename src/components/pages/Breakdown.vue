@@ -220,9 +220,8 @@
               :key="entity.id"
               :entity="entity"
               :preview-file-id="entity.preview_file_id"
-              :selected="selection[entity.id]"
+              :selection="selection"
               :name="getEntityName(entity)"
-              :assets="castingByType[entity.id] || []"
               :asset-types="castingAssetTypes"
               :read-only="!isCurrentUserManager"
               :text-mode="isTextMode"
@@ -320,7 +319,7 @@
               <available-asset-block
                 :key="asset.id"
                 :asset="asset"
-                :active="selectedEntityIds.length > 0"
+                :active="hasSelection"
                 :text-mode="isTextMode"
                 :big-mode="isBigMode"
                 @add-one="addOneAsset"
@@ -655,25 +654,35 @@ const castingEntityTypeGroups = computed(() =>
   castingEntities.value.flatMap(entity => castingByType.value[entity.id] || [])
 )
 
-const castingAssetTypes = computed(() =>
-  [
+// Every line takes this list as a prop: hand back the previous array while
+// the types are the same, or casting one asset renders all the lines again.
+const castingAssetTypes = computed(previousTypes => {
+  const types = [
     ...new Set(
       castingEntityTypeGroups.value
         .filter(typeGroup => typeGroup[0])
         .map(typeGroup => typeGroup[0].asset_type_name)
     )
   ].sort()
-)
+  const isUnchanged =
+    previousTypes?.length === types.length &&
+    types.every((type, index) => type === previousTypes[index])
+  return isUnchanged ? previousTypes : types
+})
 
+// Only the import preview reads it: while it is closed, a casting change must
+// not rebuild the index of every casted asset of the page.
 const filteredCasting = computed(() =>
-  Object.fromEntries(
-    castingEntityTypeGroups.value
-      .flat()
-      .map(item => [
-        `${item.asset_name}${item.asset_type_name}${item.name}`,
-        true
-      ])
-  )
+  modals.isImportRenderDisplayed
+    ? Object.fromEntries(
+        castingEntityTypeGroups.value
+          .flat()
+          .map(item => [
+            `${item.asset_name}${item.asset_type_name}${item.name}`,
+            true
+          ])
+      )
+    : {}
 )
 
 const isDescription = computed(() =>
@@ -720,6 +729,10 @@ const nameHeaderMinWidth = computed(() =>
 const selectedEntityIds = computed(() =>
   Object.keys(selection.value).filter(key => selection.value[key])
 )
+
+// The template reads this flag, not the list: the page must not render again
+// on every click, only the lines whose selection changed do.
+const hasSelection = computed(() => selectedEntityIds.value.length > 0)
 
 // Functions
 // --------------------------------------------------------------------------

@@ -280,9 +280,8 @@ const store = useStore()
 const props = defineProps({
   entity: { type: Object, default: () => ({}) },
   previewFileId: { type: String, default: '' },
-  selected: { type: Boolean, default: false },
+  selection: { type: Object, default: () => ({}) },
   name: { type: String, default: '' },
-  assets: { type: Array, default: () => [] },
   assetTypes: { type: Array, default: () => [] },
   readOnly: { type: Boolean, default: false },
   textMode: { type: Boolean, default: false },
@@ -318,13 +317,19 @@ const isFrames = computed(() => store.getters.isFrames)
 const isShowInfosBreakdown = computed(() => store.getters.isShowInfosBreakdown)
 const user = computed(() => store.getters.user)
 
+// Read from the selection map of the page so that a click renders the lines
+// it changes, not the page and its whole list.
+const selected = computed(() => Boolean(props.selection[props.entity.id]))
+
 const chunks = computed(() =>
   props.name.split(' / ').filter(chunk => chunk && chunk !== 'undefined')
 )
 
+// Read from the store, not passed by the page: casting an asset then renders
+// this line alone, where a prop would make the page render its whole list.
 const assetsByAssetTypesMap = computed(() =>
   Object.fromEntries(
-    props.assets
+    (store.getters.castingByType[props.entity.id] || [])
       .filter(assetTypeAssets => assetTypeAssets[0])
       .map(assetTypeAssets => [
         assetTypeAssets[0].asset_type_name,

@@ -29,7 +29,13 @@ const production = { id: 'p1', production_type: 'tvshow' }
 
 // The page is mounted on a store whose scope (production, episode) the tests
 // move from inside the load actions, as the topbar does during a real load.
-const mountPage = ({ state = {}, actions = {} } = {}) => {
+const mountPage = ({
+  state = {},
+  actions = {},
+  getters = {},
+  stubs = {},
+  mixins = []
+} = {}) => {
   const storeActions = {
     addAssetToCasting: vi.fn(),
     castAsset: vi.fn(() => Promise.resolve()),
@@ -82,7 +88,8 @@ const mountPage = ({ state = {}, actions = {} } = {}) => {
       isShowInfosBreakdown: () => false,
       isTVShow: state => state.isTVShow,
       sequenceMap: () => new Map(),
-      shotMetadataDescriptors: () => []
+      shotMetadataDescriptors: () => [],
+      ...getters
     },
     actions: storeActions
   })
@@ -93,12 +100,14 @@ const mountPage = ({ state = {}, actions = {} } = {}) => {
         globalProperties: { $socket: { on: vi.fn(), off: vi.fn() } }
       },
       mocks: { $t: key => key },
+      mixins,
       // The page drives its search field through a ref.
       stubs: {
         SearchField: {
           template: '<div />',
           methods: { getValue: () => '', setValue: () => {} }
-        }
+        },
+        ...stubs
       }
     }
   })
@@ -334,5 +343,112 @@ describe('Breakdown page, getEntityName', () => {
     const { wrapper } = mountPage({ state: { currentEpisode: { id: 'all' } } })
 
     expect(wrapper.vm.getEntityName(entity)).toBe('SH01')
+  })
+})
+
+describe('Breakdown page, selection', () => {
+  // A click must cost the lines it selects and unselects, not a render of the
+  // whole page: the page lists every entity and every available asset.
+  test('renders only the lines whose selection changed', async () => {
+    const shots = ['shot-a', 'shot-b', 'shot-c'].map(id => ({
+      id,
+      name: id,
+      sequence_name: 'SEQ01',
+      data: {}
+    }))
+    const updates = {}
+    const { wrapper } = mountPage({
+      state: { isTVShow: false, currentEpisode: null },
+      getters: {
+        castingByType: () => ({}),
+        castingSequenceShots: () => shots,
+        isCurrentUserProductionSupervisor: () => false,
+        user: () => ({ departments: [] })
+      },
+      stubs: { ShotLine: false },
+      mixins: [
+        {
+          updated() {
+            const name = this.$options.__name
+            updates[name] = (updates[name] || 0) + 1
+          }
+        }
+      ]
+    })
+    wrapper.vm.isLoading = false
+    wrapper.vm.selection = { 'shot-a': false, 'shot-b': false, 'shot-c': false }
+    await nextTick()
+    const lines = wrapper.findAll('.shot')
+    // The first selection also enables the available assets column.
+    await lines[0].trigger('click')
+    await nextTick()
+    Object.keys(updates).forEach(name => delete updates[name])
+
+    await lines[1].trigger('click')
+    await nextTick()
+
+    expect(lines[0].classes()).not.toContain('selected')
+    expect(lines[1].classes()).toContain('selected')
+    expect(updates).toEqual({ ShotLine: 2 })
+  })
+
+  // Casting an asset rewrites the casting of its entity only: the asset type
+  // columns are unchanged, so the other lines have nothing to render.
+  test('renders only the line whose casting changed', async () => {
+    const shots = ['shot-a', 'shot-b', 'shot-c'].map(id => ({
+      id,
+      name: id,
+      sequence_name: 'SEQ01',
+      data: {}
+    }))
+    const castAsset = nbOccurences => [
+      [
+        {
+          id: 'link-1',
+          asset_id: 'asset-1',
+          asset_name: 'Hero',
+          name: 'Hero',
+          asset_type_name: 'Characters',
+          nb_occurences: nbOccurences
+        }
+      ]
+    ]
+    const updates = {}
+    const { wrapper, store } = mountPage({
+      state: {
+        isTVShow: false,
+        currentEpisode: null,
+        castingByType: {
+          'shot-a': castAsset(1),
+          'shot-b': castAsset(1),
+          'shot-c': castAsset(1)
+        }
+      },
+      getters: {
+        castingByType: state => state.castingByType,
+        castingSequenceShots: () => shots,
+        isCurrentUserProductionSupervisor: () => false,
+        user: () => ({ departments: [] })
+      },
+      stubs: { ShotLine: false },
+      mixins: [
+        {
+          updated() {
+            // Stubs have no __name: the stubbed asset block of the line is
+            // expected to update along with it.
+            const name = this.$options.__name
+            if (name) updates[name] = (updates[name] || 0) + 1
+          }
+        }
+      ]
+    })
+    wrapper.vm.isLoading = false
+    await nextTick()
+    Object.keys(updates).forEach(name => delete updates[name])
+
+    store.state.castingByType['shot-b'] = castAsset(2)
+    await nextTick()
+
+    expect(updates).toEqual({ ShotLine: 1 })
   })
 })
