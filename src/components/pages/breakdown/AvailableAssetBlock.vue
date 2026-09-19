@@ -96,7 +96,7 @@ const addTenAssets = () => {
 
 .dark .asset .asset-add,
 .dark .asset .asset-add-10 {
-  background-color: #8f91eb;
+  background-color: $purple-strong;
 }
 
 .asset-add {

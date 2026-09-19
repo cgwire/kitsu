@@ -84,66 +84,34 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import stringHelpers from '@/lib/string'
-import { domMixin } from '@/components/mixins/dom'
 
-export default {
-  name: 'asset-block',
+// Props / Emits
+// --------------------------------------------------------------------------
 
-  mixins: [domMixin],
+const props = defineProps({
+  asset: { type: Object, default: () => ({ id: '', name: '' }) },
+  nbOccurences: { type: Number, default: 1 },
+  active: { type: Boolean, default: true },
+  readOnly: { type: Boolean, default: false },
+  textMode: { type: Boolean, default: false },
+  bigMode: { type: Boolean, default: false }
+})
 
-  props: {
-    asset: {
-      default: () => ({
-        id: '',
-        name: ''
-      }),
-      type: Object
-    },
-    nbOccurences: {
-      default: 1,
-      type: Number
-    },
-    active: {
-      default: true,
-      type: Boolean
-    },
-    readOnly: {
-      default: false,
-      type: Boolean
-    },
-    textMode: {
-      default: false,
-      type: Boolean
-    },
-    bigMode: {
-      default: false,
-      type: Boolean
-    }
-  },
+const emit = defineEmits(['add-one', 'edit-label', 'remove-one'])
 
-  emits: ['add-one', 'edit-label', 'remove-one'],
+// Functions
+// --------------------------------------------------------------------------
 
-  methods: {
-    removeOneAsset(event) {
-      this.$emit('remove-one', this.asset.asset_id)
-    },
+const removeOneAsset = () => emit('remove-one', props.asset.asset_id)
 
-    addOneAsset(event) {
-      this.$emit('add-one', this.asset.asset_id)
-    },
+const addOneAsset = () => emit('add-one', props.asset.asset_id)
 
-    shortenName(name) {
-      return stringHelpers.shortenText(name, 13)
-    },
+const shortenName = name => stringHelpers.shortenText(name, 13)
 
-    onEditLabelClicked() {
-      if (!this.readOnly) {
-        this.$emit('edit-label', this.asset, this.asset.label)
-      }
-    }
-  }
+const onEditLabelClicked = () => {
+  if (!props.readOnly) emit('edit-label', props.asset, props.asset.label)
 }
 </script>
 
@@ -153,8 +121,7 @@ export default {
 }
 
 .dark .asset.casted .asset-picture,
-.dark .asset .asset-add,
-.dark .asset .asset-add-10 {
+.dark .asset .asset-add {
   background-color: $purple-strong;
 }
 
@@ -262,13 +229,6 @@ export default {
   img {
     border-radius: 5px;
   }
-}
-
-.asset-name {
-  text-align: center;
-  position: relative;
-  word-break: break-all;
-  top: -75px;
 }
 
 .asset-label {

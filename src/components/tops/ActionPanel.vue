@@ -64,8 +64,7 @@
           v-if="
             (isCurrentViewSingleEntity ||
               isCurrentViewEntity ||
-              isCurrentViewPerson ||
-              isCurrentViewSingleEntity) &&
+              isCurrentViewPerson) &&
             (isCurrentUserManager || isSupervisorInDepartment) &&
             !isEntitySelection &&
             isTaskSelection
@@ -246,15 +245,7 @@
           />
         </div>
 
-        <div
-          class="menu-separator"
-          v-if="
-            !isEntitySelection &&
-            isTaskSelection &&
-            !isCurrentViewConcept &&
-            customActions?.length
-          "
-        ></div>
+        <div class="menu-separator" v-if="isCustomActionAvailable"></div>
 
         <div
           class="menu-item"
@@ -267,12 +258,7 @@
           @click="selectBar('custom-actions')"
           @keydown.enter.prevent="selectBar('custom-actions')"
           @keydown.space.prevent="selectBar('custom-actions')"
-          v-if="
-            !isEntitySelection &&
-            isTaskSelection &&
-            !isCurrentViewConcept &&
-            customActions?.length
-          "
+          v-if="isCustomActionAvailable"
         >
           <play-circle-icon />
         </div>
@@ -376,7 +362,7 @@
         </div>
       </div>
 
-      <div class="flexrow action-bar" v-if="selectedBar && !minimized">
+      <div class="flexrow action-bar" v-if="selectedBar">
         <div class="flexcolumn is-wide" v-if="selectedBar === 'change-status'">
           <div class="flexrow mb05">
             <div class="flexrow-item change-status-item">
@@ -845,7 +831,7 @@
       class="flexrow-item is-wide pa1"
       v-if="selectedBar === 'edit-concepts'"
     >
-      <div ref="asset-list" class="concept-links">
+      <div class="concept-links">
         <h2 class="subtitle">{{ $t('concepts.add_links') }}</h2>
         <div class="flexrow mb2">
           <search-field
@@ -906,915 +892,668 @@
   </div>
 </template>
 
-<script>
+<script setup>
+/* eslint-disable no-unused-vars */
 import {
   CheckSquareIcon,
   LinkIcon,
   PlayCircleIcon,
   XIcon
 } from 'lucide-vue-next'
-import { mapGetters, mapActions } from 'vuex'
+import {
+  computed,
+  onBeforeUnmount,
+  onMounted,
+  reactive,
+  ref,
+  useTemplateRef,
+  watch
+} from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 
-import assetsStore from '@/store/modules/assets.js'
 import { intersection } from '@/lib/array'
+import assetsStore from '@/store/modules/assets.js'
 
 import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
+import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal.vue'
+import DeleteEntities from '@/components/tops/actions/DeleteEntities.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxModel from '@/components/widgets/ComboboxModel.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
-import DeleteEntities from '@/components/tops/actions/DeleteEntities.vue'
 import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
-import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal.vue'
+/* eslint-enable no-unused-vars */
 
-export default {
-  name: 'action-panel',
+const { t } = useI18n()
+const route = useRoute()
+const store = useStore()
 
-  props: {
-    isMoviePreview: {
-      type: Boolean,
-      default: false
-    },
-    isSetFrameThumbnailLoading: {
-      type: Boolean,
-      default: false
-    },
-    productionId: {
-      type: String,
-      default: null
-    },
-    team: {
-      type: Array,
-      default: () => []
-    }
-  },
+// Props / Emits
+// --------------------------------------------------------------------------
 
-  components: {
-    BuildFilterModal,
-    ButtonSimple,
-    CheckSquareIcon,
-    ComboboxModel,
-    ComboboxStatus,
-    ComboboxStyled,
-    DeleteEntities,
-    KitsuIcon,
-    LinkIcon,
-    PeopleField,
-    PlayCircleIcon,
-    SearchField,
-    Spinner,
-    ViewPlaylistModal,
-    XIcon
-  },
+const props = defineProps({
+  isMoviePreview: { type: Boolean, default: false },
+  isSetFrameThumbnailLoading: { type: Boolean, default: false },
+  productionId: { type: String, default: null },
+  team: { type: Array, default: () => [] }
+})
 
-  emits: ['export-task', 'set-frame-thumbnail'],
+const emit = defineEmits(['export-task', 'set-frame-thumbnail'])
 
-  data() {
-    return {
-      availableTaskStatuses: [],
-      customAction: {},
-      customActions: [],
-      isUseCurrentFrame: false,
-      person: null,
-      priority: '0',
-      selectedBar: '',
-      taskStatusId: '',
-      statusComment: '',
-      modals: {
-        buildFilter: false,
-        playlist: false
-      },
-      priorityOptions: [
-        {
-          label: this.$t('tasks.priority.normal'),
-          value: '0'
-        },
-        {
-          label: this.$t('tasks.priority.high'),
-          value: '1'
-        },
-        {
-          label: this.$t('tasks.priority.very_high'),
-          value: '2'
-        },
-        {
-          label: this.$t('tasks.priority.emergency'),
-          value: '3'
-        }
-      ],
-      loading: {
-        assignation: false,
-        assetDeletion: false,
-        changePriority: false,
-        changeStatus: false,
-        conceptDeletion: false,
-        editDeletion: false,
-        taskCreation: false,
-        taskDeletion: false,
-        setThumbnails: false,
-        shotDeletion: false,
-        tasksSubscription: false
-      },
-      errors: {
-        assetDeletion: false,
-        taskAssignation: false,
-        taskDeletion: false,
-        conceptDeletion: false,
-        editDeletion: false,
-        shotDeletion: false
-      }
-    }
-  },
+// State
+// --------------------------------------------------------------------------
 
-  mounted() {
-    this.customAction = this.defaultCustomAction
-  },
+const assignationFieldRef = useTemplateRef('assignation-field')
+const entitySearchFieldRef = useTemplateRef('entity-search-field')
 
-  beforeUnmount() {
-    window.removeEventListener('keydown', this.onKeyDown)
-  },
+const availableTaskStatuses = ref([])
+const customAction = ref({})
+const customActions = ref([])
+const isUseCurrentFrame = ref(false)
+const person = ref(null)
+const priority = ref('0')
+const selectedBar = ref('')
+const statusComment = ref('')
+const taskStatusId = ref('')
 
-  computed: {
-    ...mapGetters([
-      'assetsByType',
-      'currentProduction',
-      'getCustomActionsByType',
-      'isCurrentUserArtist',
-      'isCurrentUserClient',
-      'isShowAssignations',
-      'nbSelectedTasks',
-      'nbSelectedValidations',
-      'productionMap',
-      'selectedAssets',
-      'selectedConcepts',
-      'selectedEdits',
-      'selectedShots',
-      'selectedTasks',
-      'taskMap',
-      'taskStatusForCurrentUser',
-      'taskTypeMap',
-      'user'
-    ]),
+const modals = reactive({
+  buildFilter: false,
+  playlist: false
+})
 
-    // Role gating follows the production of the displayed tasks, not the
-    // globally selected one: this panel also serves cross-production views
-    // (Todos, All Tasks, checks, notifications).
-    currentUserProductionRole() {
-      return this.$store.getters.currentUserRoleForProduction(this.productionId)
-    },
+const loading = reactive({
+  assignation: false,
+  assetDeletion: false,
+  changePriority: false,
+  changeStatus: false,
+  conceptDeletion: false,
+  editDeletion: false,
+  taskCreation: false,
+  taskDeletion: false,
+  setThumbnails: false,
+  shotDeletion: false,
+  tasksSubscription: false
+})
 
-    isCurrentUserManager() {
-      return (
-        this.$store.getters.isCurrentUserAdmin ||
-        this.currentUserProductionRole === 'manager'
-      )
-    },
+const errors = reactive({
+  assetDeletion: false,
+  conceptDeletion: false,
+  editDeletion: false,
+  shotDeletion: false,
+  taskAssignation: false,
+  taskDeletion: false
+})
 
-    isCurrentUserSupervisor() {
-      return this.currentUserProductionRole === 'supervisor'
-    },
+const currentHost = window.location.host
 
-    assetMap() {
-      return assetsStore.cache.assetMap
-    },
+// Computed
+// --------------------------------------------------------------------------
 
-    minimized() {
-      return this.selectedBar === ''
-    },
+const assetsByType = computed(() => store.getters.assetsByType)
+const currentProduction = computed(() => store.getters.currentProduction)
+const isCurrentUserArtist = computed(() => store.getters.isCurrentUserArtist)
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+const isShowAssignations = computed(() => store.getters.isShowAssignations)
+const nbSelectedTasks = computed(() => store.getters.nbSelectedTasks)
+const nbSelectedValidations = computed(
+  () => store.getters.nbSelectedValidations
+)
+const productionMap = computed(() => store.getters.productionMap)
+const selectedAssets = computed(() => store.getters.selectedAssets)
+const selectedConcepts = computed(() => store.getters.selectedConcepts)
+const selectedEdits = computed(() => store.getters.selectedEdits)
+const selectedShots = computed(() => store.getters.selectedShots)
+const selectedTasks = computed(() => store.getters.selectedTasks)
+const taskMap = computed(() => store.getters.taskMap)
+const taskStatusForCurrentUser = computed(
+  () => store.getters.taskStatusForCurrentUser
+)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
+const user = computed(() => store.getters.user)
 
-    currentUrl() {
-      return this.$route.path
-    },
+// Role gating follows the production of the displayed tasks, not the
+// globally selected one: this panel also serves cross-production views
+// (Todos, All Tasks, checks, notifications).
+const currentUserProductionRole = computed(() =>
+  store.getters.currentUserRoleForProduction(props.productionId)
+)
 
-    currentHost() {
-      return window.location.host
-    },
+const isCurrentUserManager = computed(
+  () =>
+    store.getters.isCurrentUserAdmin ||
+    currentUserProductionRole.value === 'manager'
+)
 
-    currentEntityType() {
-      if (this.isCurrentViewAsset) return 'asset'
-      if (this.isCurrentViewShot) return 'shot'
-      if (this.isCurrentViewSequence) return 'sequence'
-      if (this.isCurrentViewEdit) return 'edit'
-      return 'episode'
-    },
+const isCurrentUserSupervisor = computed(
+  () => currentUserProductionRole.value === 'supervisor'
+)
 
-    currentConcept() {
-      return this.selectedConcepts.values().next().value
-    },
+const currentUrl = computed(() => route.path)
 
-    conceptLinkedEntities() {
-      return this.getLinkedEntities(this.currentConcept)
-    },
+const isCurrentViewSingleEntity = computed(() =>
+  [
+    'asset',
+    'shot',
+    'edit',
+    'episode',
+    'sequence',
+    'episode-asset',
+    'episode-shot',
+    'episode-edit',
+    'episode-sequence'
+  ].includes(route.name)
+)
 
-    currentTeam() {
-      const isSupervisorWithDepartments =
-        this.isCurrentUserSupervisor && this.user.departments.length > 0
+const isCurrentViewAsset = computed(
+  () => route.path.includes('asset') && !route.params.shot_id
+)
 
-      return this.team.filter(person => {
-        if (!person?.is_bot) {
-          if (isSupervisorWithDepartments) {
-            return (
-              person.departments.length === 0 ||
-              person.departments.some(department =>
-                this.user.departments.includes(department)
-              )
-            )
-          }
-          return true
-        }
-        return false
-      })
-    },
+const isCurrentViewShot = computed(
+  () => route.path.includes('shot') && !route.params.shot_id
+)
 
-    defaultCustomAction() {
-      return this.customActions?.[0] ?? {}
-    },
+const isCurrentViewEdit = computed(
+  () => route.path.includes('edit') && !route.params.edit_id
+)
 
-    isTaskSelection() {
-      return this.nbSelectedTasks > 0
-    },
+const isCurrentViewConcept = computed(() => route.path.includes('concept'))
 
-    isEntitySelection() {
-      return (
-        this.selectedAssets.size > 0 ||
-        this.selectedShots.size > 0 ||
-        this.selectedEdits.size > 0
-      )
-    },
+const isCurrentViewPerson = computed(() => route.path.includes('people/'))
 
-    nbSelectedAssets() {
-      return this.selectedAssets.size
-    },
+const isCurrentViewTodos = computed(
+  () => route.path.includes('my-tasks') || isCurrentViewPerson.value
+)
 
-    nbSelectedShots() {
-      return this.selectedShots.size
-    },
+const isCurrentViewTaskType = computed(() => route.path.includes('task-type'))
 
-    nbSelectedEdits() {
-      return this.selectedEdits.size
-    },
+const isCurrentViewAssetShotOrEdit = computed(
+  () =>
+    isCurrentViewAsset.value ||
+    isCurrentViewShot.value ||
+    isCurrentViewEdit.value
+)
 
-    nbSelectedConcepts() {
-      return this.selectedConcepts.size
-    },
+const isCurrentViewEpisode = computed(
+  () => !isCurrentViewAssetShotOrEdit.value && route.path.includes('episodes')
+)
 
-    allAssetsCanceled() {
-      return Array.from(this.selectedAssets.values()).every(
-        asset => asset.canceled
-      )
-    },
+const isCurrentViewSequence = computed(
+  () => !isCurrentViewAssetShotOrEdit.value && route.path.includes('sequences')
+)
 
-    allShotsCanceled() {
-      const allShotsCanceled = Array.from(this.selectedShots.values()).every(
-        shot => shot.canceled
-      )
-      return allShotsCanceled
-    },
+const isCurrentViewEntity = computed(
+  () =>
+    isCurrentViewAssetShotOrEdit.value ||
+    isCurrentViewSequence.value ||
+    isCurrentViewEpisode.value
+)
 
-    allEditsCanceled() {
-      return Array.from(this.selectedEdits.values()).every(
-        edit => edit.canceled
-      )
-    },
+const currentEntityType = computed(() => {
+  if (isCurrentViewAsset.value) return 'asset'
+  if (isCurrentViewShot.value) return 'shot'
+  if (isCurrentViewSequence.value) return 'sequence'
+  if (isCurrentViewEdit.value) return 'edit'
+  return 'episode'
+})
 
-    isHidden() {
-      return (
-        (this.nbSelectedTasks === 0 &&
-          this.nbSelectedValidations === 0 &&
-          this.nbSelectedAssets === 0 &&
-          this.nbSelectedShots === 0 &&
-          this.nbSelectedEdits === 0 &&
-          this.nbSelectedConcepts === 0) ||
-        !(
-          this.isCurrentViewAsset ||
-          this.isCurrentViewTodos ||
-          this.isCurrentViewShot ||
-          this.isCurrentViewEpisode ||
-          this.isCurrentViewSequence ||
-          this.isCurrentViewEdit ||
-          this.isCurrentViewConcept
+const currentConcept = computed(
+  () => selectedConcepts.value.values().next().value
+)
+
+const isConceptPublisher = computed(
+  () => currentConcept.value?.created_by === user.value.id
+)
+
+const conceptLinkedEntities = computed(() =>
+  (currentConcept.value?.entity_concept_links ?? [])
+    .map(id => assetsStore.cache.assetMap.get(id))
+    .filter(Boolean)
+)
+
+const availableLinksByType = computed(() =>
+  assetsByType.value
+    .filter(assets => assets.length)
+    .map(assets => ({
+      type: assets[0].asset_type_name,
+      links: assets
+        .filter(
+          asset =>
+            !conceptLinkedEntities.value.some(entity => entity.id === asset.id)
         )
-      )
-    },
+        .map(asset => ({ id: asset.id, name: asset.name }))
+    }))
+)
 
-    isConceptPublisher() {
-      return this.currentConcept?.created_by === this.user.id
-    },
+const currentTeam = computed(() => {
+  const isSupervisorWithDepartments =
+    isCurrentUserSupervisor.value && user.value.departments.length > 0
+  return props.team.filter(
+    member =>
+      !member?.is_bot &&
+      (!isSupervisorWithDepartments ||
+        member.departments.length === 0 ||
+        member.departments.some(department =>
+          user.value.departments.includes(department)
+        ))
+  )
+})
 
-    isCurrentViewSingleEntity() {
-      return [
-        'asset',
-        'shot',
-        'edit',
-        'episode',
-        'sequence',
-        'episode-asset',
-        'episode-shot',
-        'episode-edit',
-        'episode-sequence'
-      ].includes(this.$route.name)
-    },
+const priorityOptions = computed(() =>
+  ['normal', 'high', 'very_high', 'emergency'].map((name, index) => ({
+    label: t(`tasks.priority.${name}`),
+    value: String(index)
+  }))
+)
 
-    isCurrentViewAsset() {
-      return this.$route.path.includes('asset') && !this.$route.params.shot_id
-    },
+const isTaskSelection = computed(() => nbSelectedTasks.value > 0)
 
-    isCurrentViewShot() {
-      return this.$route.path.includes('shot') && !this.$route.params.shot_id
-    },
+const nbSelectedAssets = computed(() => selectedAssets.value.size)
+const nbSelectedShots = computed(() => selectedShots.value.size)
+const nbSelectedEdits = computed(() => selectedEdits.value.size)
+const nbSelectedConcepts = computed(() => selectedConcepts.value.size)
 
-    isCurrentViewEdit() {
-      return this.$route.path.includes('edit') && !this.$route.params.edit_id
-    },
+const isEntitySelection = computed(
+  () =>
+    nbSelectedAssets.value > 0 ||
+    nbSelectedShots.value > 0 ||
+    nbSelectedEdits.value > 0
+)
 
-    isCurrentViewConcept() {
-      return this.$route.path.includes('concept')
-    },
+const isCustomActionAvailable = computed(
+  () =>
+    !isEntitySelection.value &&
+    isTaskSelection.value &&
+    !isCurrentViewConcept.value &&
+    customActions.value.length > 0
+)
 
-    isCurrentViewTodos() {
-      return (
-        this.$route.path.includes('my-tasks') ||
-        this.$route.path.includes('people/')
-      )
-    },
+const allAssetsCanceled = computed(() =>
+  Array.from(selectedAssets.value.values()).every(asset => asset.canceled)
+)
 
-    isCurrentViewPerson() {
-      return this.$route.path.includes('people/')
-    },
+const allShotsCanceled = computed(() =>
+  Array.from(selectedShots.value.values()).every(shot => shot.canceled)
+)
 
-    isCurrentViewTaskType() {
-      return this.$route.path.includes('task-type')
-    },
+const allEditsCanceled = computed(() =>
+  Array.from(selectedEdits.value.values()).every(edit => edit.canceled)
+)
 
-    isCurrentViewEntity() {
-      return (
-        this.isCurrentViewAsset ||
-        this.isCurrentViewShot ||
-        this.isCurrentViewEdit ||
-        this.isCurrentViewSequence ||
-        this.isCurrentViewEpisode
-      )
-    },
+const isHidden = computed(
+  () =>
+    (nbSelectedTasks.value === 0 &&
+      nbSelectedValidations.value === 0 &&
+      nbSelectedAssets.value === 0 &&
+      nbSelectedShots.value === 0 &&
+      nbSelectedEdits.value === 0 &&
+      nbSelectedConcepts.value === 0) ||
+    !(
+      isCurrentViewEntity.value ||
+      isCurrentViewTodos.value ||
+      isCurrentViewConcept.value
+    )
+)
 
-    isCurrentViewEpisode() {
-      return (
-        !(
-          this.isCurrentViewAsset ||
-          this.isCurrentViewShot ||
-          this.isCurrentViewEdit
-        ) && this.$route.path.includes('episodes')
-      )
-    },
+const selectedTaskIds = computed(() => Array.from(selectedTasks.value.keys()))
 
-    isCurrentViewSequence() {
-      return (
-        !(
-          this.isCurrentViewAsset ||
-          this.isCurrentViewShot ||
-          this.isCurrentViewEdit
-        ) && this.$route.path.includes('sequences')
-      )
-    },
+const isInDepartment = computed(() =>
+  selectedTaskIds.value.every(taskId => {
+    const task = taskMap.value.get(taskId)
+    // A task that is not loaded must not block the action here.
+    if (!task) return true
+    const taskType = taskTypeMap.value.get(task.task_type_id)
+    return (
+      taskType?.department_id &&
+      user.value.departments.includes(taskType.department_id)
+    )
+  })
+)
 
-    selectedPersonId() {
-      return this.person ? this.person.id : null
-    },
+const isSupervisorInDepartment = computed(
+  () =>
+    isCurrentUserSupervisor.value &&
+    (user.value.departments.length === 0 || isInDepartment.value)
+)
 
-    selectedTaskIds() {
-      return Array.from(this.selectedTasks.keys())
-    },
+const storagePrefix = computed(() => {
+  if (isCurrentViewTaskType.value) return 'tasks-'
+  if (isCurrentViewConcept.value) return 'concepts-'
+  if (isCurrentViewAssetShotOrEdit.value) return 'entities-'
+  return 'todos-'
+})
 
-    isInDepartment() {
-      return this.selectedTaskIds.every(taskId => {
-        const task = this.taskMap.get(taskId)
-        if (task) {
-          const taskType = this.taskTypeMap.get(task.task_type_id)
-          return (
-            taskType?.department_id &&
-            this.user.departments.includes(taskType.department_id)
-          )
-        } else {
-          return true // The task is not loaded, don't block the action here.
-        }
-      })
-    },
+// Functions
+// --------------------------------------------------------------------------
 
-    isSupervisorInDepartment() {
-      return (
-        this.isCurrentUserSupervisor &&
-        (this.user.departments.length === 0 || this.isInDepartment)
-      )
-    },
+const confirmTaskStatusChange = async () => {
+  loading.changeStatus = true
+  if (!taskStatusId.value) {
+    taskStatusId.value = availableTaskStatuses.value[0].id
+  }
+  try {
+    await store.dispatch('changeSelectedTaskStatus', {
+      taskStatusId: taskStatusId.value,
+      comment: statusComment.value
+    })
+    statusComment.value = ''
+  } catch (err) {
+    console.error(err)
+  }
+  loading.changeStatus = false
+}
 
-    storagePrefix() {
-      let prefix = 'todos-'
-      if (
-        this.isCurrentViewAsset ||
-        this.isCurrentViewShot ||
-        this.isCurrentViewEdit
-      ) {
-        prefix = 'entities-'
-      }
-      if (this.isCurrentViewConcept) prefix = 'concepts-'
-      if (this.isCurrentViewTaskType) prefix = 'tasks-'
-      return prefix
-    },
-
-    availableLinksByType() {
-      const assetGroups = [...this.assetsByType]
-      const result = assetGroups
-        .map(assets => {
-          if (!assets.length) return
-          const links = assets
-            .filter(
-              asset =>
-                !this.conceptLinkedEntities.some(
-                  entity => entity.id === asset.id
-                )
-            )
-            .map(asset => ({
-              id: asset.id,
-              name: asset.name
-            }))
-          return {
-            type: assets[0].asset_type_name,
-            links
-          }
-        })
-        .filter(Boolean)
-      return result
-    }
-  },
-
-  methods: {
-    ...mapActions([
-      'assignSelectedTasks',
-      'changeSelectedTaskStatus',
-      'changeSelectedPriorities',
-      'clearSelectedAssets',
-      'clearSelectedShots',
-      'clearSelectedEdits',
-      'clearSelectedConcepts',
-      'clearSelectedTasks',
-      'createSelectedTasks',
-      'deleteSelectedAssets',
-      'deleteSelectedShots',
-      'deleteSelectedTasks',
-      'deleteSelectedEdits',
-      'deleteSelectedConcepts',
-      'editConcept',
-      'loadAssets',
-      'postCustomAction',
-      'setAssetSearch',
-      'setLastTaskPreview',
-      'setTasksMainPreview',
-      'subscribeToTask',
-      'subscribeToTasks',
-      'unassignPersonFromTasks',
-      'unassignSelectedTasks',
-      'unsubscribeFromTask',
-      'unsubscribeFromTasks'
-    ]),
-
-    getLinkedEntities(concept) {
-      return concept.entity_concept_links
-        .map(id => this.assetMap.get(id))
-        .filter(Boolean)
-    },
-
-    confirmTaskStatusChange() {
-      this.loading.changeStatus = true
-      if (!this.taskStatusId) {
-        this.taskStatusId = this.availableTaskStatuses[0].id
-      }
-      this.changeSelectedTaskStatus({
-        taskStatusId: this.taskStatusId,
-        comment: this.statusComment
-      })
-        .then(() => {
-          this.statusComment = ''
-          this.loading.changeStatus = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.changeStatus = false
-        })
-    },
-
-    async confirmAssign() {
-      if (this.selectedPersonId || this.isInDepartment) {
-        const personId =
-          this.isCurrentUserManager || this.isCurrentUserSupervisor
-            ? this.selectedPersonId
-            : this.user.id
-        this.loading.assignation = true
-        this.errors.taskAssignation = false
-        try {
-          await this.assignSelectedTasks({ personId })
-          this.$refs['assignation-field']?.clear()
-        } catch (err) {
-          this.errors.taskAssignation = true
-          console.error(err)
-        } finally {
-          this.loading.assignation = false
-        }
-      }
-    },
-
-    clearAssignation() {
-      const person = this.isCurrentUserArtist ? this.user : this.person
-      if (person) {
-        this.loading.assignation = true
-        this.unassignPersonFromTasks({
-          tasks: Array.from(this.selectedTasks.values()),
-          person
-        })
-          .catch(console.error)
-          .finally(() => {
-            this.loading.assignation = false
-          })
-      }
-    },
-
-    clearAllAssignations() {
-      this.loading.assignation = true
-      return this.unassignSelectedTasks({})
-        .then(() => {
-          this.loading.assignation = false
-        })
-        .catch(console.error)
-    },
-
-    async confirmPriorityChange() {
-      this.loading.changePriority = true
-      await this.changeSelectedPriorities({
-        priority: Number(this.priority)
-      })
-      this.loading.changePriority = false
-    },
-
-    confirmTaskCreation() {
-      const type = this.$route.path.includes('shots')
-        ? 'shots'
-        : this.$route.path.includes('assets')
-          ? 'assets'
-          : this.$route.path.includes('edits')
-            ? 'edits'
-            : 'episodes'
-      this.loading.taskCreation = true
-      this.createSelectedTasks({
-        type,
-        projectId: this.productionId
-      })
-        .then(() => {
-          this.loading.taskCreation = false
-        })
-        .catch(err => {
-          this.loading.taskCreation = false
-          console.error(err)
-        })
-    },
-
-    confirmTaskDeletion() {
-      this.loading.taskDeletion = true
-      this.errors.taskDeletion = false
-      this.deleteSelectedTasks()
-        .then(() => {
-          this.loading.taskDeletion = false
-          this.clearSelectedTasks()
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.taskDeletion = false
-          this.errors.taskDeletion = true
-        })
-    },
-
-    confirmAssetDeletion() {
-      this.loading.assetDeletion = true
-      this.errors.assetDeletion = false
-      this.deleteSelectedAssets()
-        .then(() => {
-          this.loading.assetDeletion = false
-          this.clearSelectedAssets()
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.assetDeletion = false
-          this.errors.assetDeletion = true
-        })
-    },
-
-    confirmShotDeletion() {
-      this.loading.shotDeletion = true
-      this.errors.shotDeletion = false
-      this.deleteSelectedShots()
-        .then(() => {
-          this.loading.shotDeletion = false
-          this.clearSelectedShots()
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.shotDeletion = false
-          this.errors.shotDeletion = true
-        })
-    },
-
-    confirmEditDeletion() {
-      this.loading.editDeletion = true
-      this.errors.editDeletion = false
-      this.deleteSelectedEdits()
-        .then(() => {
-          this.loading.editDeletion = false
-          this.clearSelectedEdits()
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.editDeletion = false
-          this.errors.editDeletion = true
-        })
-    },
-
-    confirmConceptDeletion() {
-      this.loading.conceptDeletion = true
-      this.errors.conceptDeletion = false
-      this.deleteSelectedConcepts()
-        .then(() => {
-          this.loading.conceptDeletion = false
-          this.clearSelectedConcepts()
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.conceptDeletion = false
-          this.errors.conceptDeletion = true
-        })
-    },
-
-    confirmPlaylistGeneration() {
-      this.modals.playlist = true
-      this.selectedBar = ''
-    },
-
-    confirmTasksSubscription() {
-      this.loading.tasksSubscription = true
-      this.subscribeToTasks(Array.from(this.selectedTasks.keys()))
-        .catch(err => {
-          console.error(err)
-        })
-        .finally(() => {
-          this.loading.tasksSubscription = false
-        })
-    },
-
-    confirmTasksUnsubscription() {
-      this.loading.tasksSubscription = true
-      this.unsubscribeFromTasks(Array.from(this.selectedTasks.keys()))
-        .catch(err => {
-          console.error(err)
-        })
-        .finally(() => {
-          this.loading.tasksSubscription = false
-        })
-    },
-
-    hidePlaylistModal() {
-      this.modals.playlist = false
-    },
-
-    confirmSetThumbnailsFromTasks() {
-      this.loading.setThumbnails = true
-      if (this.nbSelectedTasks === 1) {
-        this.$emit(
-          'set-frame-thumbnail',
-          this.isMoviePreview && this.isUseCurrentFrame
-        )
-        this.loading.setThumbnails = false
-      } else {
-        this.setTasksMainPreview(Array.from(this.selectedTasks.keys()))
-          .catch(console.error)
-          .finally(() => {
-            this.loading.setThumbnails = false
-          })
-      }
-    },
-
-    runCustomAction() {
-      this.postCustomAction({
-        data: {
-          entitytype: this.currentEntityType,
-          originurl: this.currentUrl,
-          originserver: this.currentHost,
-          selection: this.selectedTaskIds,
-          productionid: this.productionId,
-          userid: this.user.id,
-          useremail: this.user.email
-        },
-        url: this.customAction.url
-      })
-    },
-
-    onKeyDown(event) {
-      if (event.keyCode === 27) {
-        if (!this.modals.playlist) {
-          this.$store.commit('CLEAR_SELECTED_TASKS')
-        }
-      }
-    },
-
-    clearSelection() {
-      this.clearSelectedAssets()
-      this.clearSelectedShots()
-      this.clearSelectedTasks()
-      this.clearSelectedEdits()
-      this.clearSelectedConcepts()
-    },
-
-    selectBar(barName) {
-      localStorage.setItem(`${this.storagePrefix}-selected-bar`, barName)
-      if (this.selectedBar !== barName) {
-        this.selectedBar = barName
-      } else {
-        this.selectedBar = ''
-      }
-    },
-
-    autoChooseSelectBar() {
-      if (!this.isHidden) {
-        window.addEventListener('keydown', this.onKeyDown)
-        if (this.isCurrentViewAsset && this.nbSelectedAssets > 0) {
-          this.selectedBar = 'delete-assets'
-          return
-        }
-        if (this.isCurrentViewShot && this.nbSelectedShots > 0) {
-          this.selectedBar = 'delete-shots'
-          return
-        }
-        if (this.isCurrentViewEdit && this.nbSelectedEdits > 0) {
-          this.selectedBar = 'delete-edits'
-          return
-        }
-        if (this.isCurrentViewConcept && this.nbSelectedConcepts > 1) {
-          this.selectedBar = 'delete-concepts'
-          return
-        }
-        if (this.nbSelectedTasks === 1) {
-          this.selectedBar = ''
-        }
-
-        const lastSelection = localStorage.getItem(
-          `${this.storagePrefix}-selected-bar`
-        )
-        if (lastSelection) {
-          this.selectedBar = lastSelection
-        } else if (
-          this.isCurrentViewAsset ||
-          this.isCurrentViewShot ||
-          this.isCurrentViewEdit
-        ) {
-          this.selectedBar = 'change-status'
-        }
-      } else {
-        window.removeEventListener('keydown', this.onKeyDown)
-      }
-    },
-
-    setAvailableStatuses() {
-      let availableTaskStatuses
-      if (this.selectedTasks.size === 0) {
-        availableTaskStatuses = []
-      } else if (this.isCurrentViewTodos) {
-        const statusLists = Array.from(this.selectedTasks.values())
-          .map(task => this.productionMap.get(task.project_id)?.task_statuses)
-          .filter(Boolean)
-        const availableStatus = new Set(intersection(statusLists))
-        availableTaskStatuses = this.taskStatusForCurrentUser.filter(status =>
-          availableStatus.has(status.id)
-        )
-      } else {
-        availableTaskStatuses = this.taskStatusForCurrentUser
-      }
-      availableTaskStatuses = availableTaskStatuses.filter(
-        status => Boolean(status.for_concept) === this.isCurrentViewConcept
-      )
-      this.availableTaskStatuses = availableTaskStatuses
-    },
-
-    onRemoveLink(link) {
-      const concept = {
-        id: this.currentConcept.id,
-        entity_concept_links: this.currentConcept.entity_concept_links.filter(
-          id => id !== link.id
-        )
-      }
-      this.editConcept(concept)
-    },
-
-    confirmBuildFilter(query) {
-      this.modals.buildFilter = false
-      this.$refs['entity-search-field'].setValue(query)
-      this.onEntitySearchChange(query)
-    },
-
-    onEntitySearchChange(searchQuery) {
-      this.setAssetSearch(searchQuery)
-    },
-
-    onSelectLink(link) {
-      const concept = {
-        id: this.currentConcept.id,
-        entity_concept_links: [
-          ...this.currentConcept.entity_concept_links
-        ].concat(link.id)
-      }
-      this.editConcept(concept)
-    }
-  },
-
-  watch: {
-    nbSelectedAssets() {
-      this.autoChooseSelectBar()
-      if (this.nbSelectedAssets > 0) this.clearSelectedTasks()
-    },
-
-    nbSelectedShots() {
-      this.autoChooseSelectBar()
-      if (this.nbSelectedShots > 0) this.clearSelectedTasks()
-    },
-
-    nbSelectedEdits() {
-      this.autoChooseSelectBar()
-      if (this.nbSelectedEdits > 0) this.clearSelectedTasks()
-    },
-
-    nbSelectedConcepts() {
-      this.autoChooseSelectBar()
-      if (this.nbSelectedConcepts > 1) this.clearSelectedTasks()
-    },
-
-    isHidden() {
-      this.autoChooseSelectBar()
-    },
-
-    nbSelectedTasks: {
-      immediate: true,
-      handler() {
-        if (this.nbSelectedTasks > 0) {
-          this.setAvailableStatuses()
-
-          const selectedTypes = {
-            Asset: false,
-            Shot: false,
-            Sequence: false,
-            Edit: false,
-            Episode: false
-          }
-          this.selectedTasks.forEach(task => {
-            const type = this.taskTypeMap.get(task.task_type_id)
-            selectedTypes[type?.for_entity] = true
-          })
-
-          this.customActions = this.getCustomActionsByType(
-            selectedTypes.Asset,
-            selectedTypes.Shot,
-            selectedTypes.Sequence,
-            selectedTypes.Edit,
-            selectedTypes.Episode
-          )
-
-          if (this.customActions.length > 0) {
-            const isUrlSelected =
-              this.customAction.url &&
-              this.customActions.findIndex(action => {
-                return action.id === this.customAction.id
-              }) >= 0
-
-            if (!isUrlSelected) {
-              this.customAction = this.customActions[0]
-            }
-          }
-
-          if (this.nbSelectedTasks === 1) {
-            this.lastSelectedBar = this.selectedBar
-            this.selectedBar === ''
-          } else if (this.lastSelectedBar) {
-            this.selectedBar === this.lastSelectedBar
-          }
-        }
-      }
-    },
-
-    $route(oldRoute, newRoute) {
-      if (oldRoute.name !== newRoute.name) {
-        if (this.nbSelectedTasks > 0) {
-          this.clearSelectedTasks()
-        }
-      }
+const confirmAssign = async () => {
+  if (person.value || isInDepartment.value) {
+    const personId =
+      isCurrentUserManager.value || isCurrentUserSupervisor.value
+        ? (person.value?.id ?? null)
+        : user.value.id
+    loading.assignation = true
+    errors.taskAssignation = false
+    try {
+      await store.dispatch('assignSelectedTasks', { personId })
+      assignationFieldRef.value?.clear()
+    } catch (err) {
+      errors.taskAssignation = true
+      console.error(err)
+    } finally {
+      loading.assignation = false
     }
   }
 }
+
+const runUnassignation = async (action, payload) => {
+  loading.assignation = true
+  try {
+    await store.dispatch(action, payload)
+  } catch (err) {
+    console.error(err)
+  }
+  loading.assignation = false
+}
+
+const clearAssignation = () => {
+  const personToClear = isCurrentUserArtist.value ? user.value : person.value
+  if (personToClear) {
+    runUnassignation('unassignPersonFromTasks', {
+      tasks: Array.from(selectedTasks.value.values()),
+      person: personToClear
+    })
+  }
+}
+
+const clearAllAssignations = () => runUnassignation('unassignSelectedTasks', {})
+
+const confirmPriorityChange = async () => {
+  loading.changePriority = true
+  try {
+    await store.dispatch('changeSelectedPriorities', {
+      priority: Number(priority.value)
+    })
+  } catch (err) {
+    console.error(err)
+  }
+  loading.changePriority = false
+}
+
+const confirmTaskCreation = async () => {
+  const type =
+    ['shots', 'assets', 'edits'].find(name => route.path.includes(name)) ||
+    'episodes'
+  loading.taskCreation = true
+  try {
+    await store.dispatch('createSelectedTasks', {
+      type,
+      projectId: props.productionId
+    })
+  } catch (err) {
+    console.error(err)
+  }
+  loading.taskCreation = false
+}
+
+const runDeletion = async (key, deleteAction, clearAction) => {
+  loading[key] = true
+  errors[key] = false
+  try {
+    await store.dispatch(deleteAction)
+    store.dispatch(clearAction)
+  } catch (err) {
+    console.error(err)
+    errors[key] = true
+  }
+  loading[key] = false
+}
+
+const confirmTaskDeletion = () =>
+  runDeletion('taskDeletion', 'deleteSelectedTasks', 'clearSelectedTasks')
+
+const confirmAssetDeletion = () =>
+  runDeletion('assetDeletion', 'deleteSelectedAssets', 'clearSelectedAssets')
+
+const confirmShotDeletion = () =>
+  runDeletion('shotDeletion', 'deleteSelectedShots', 'clearSelectedShots')
+
+const confirmEditDeletion = () =>
+  runDeletion('editDeletion', 'deleteSelectedEdits', 'clearSelectedEdits')
+
+const confirmConceptDeletion = () =>
+  runDeletion(
+    'conceptDeletion',
+    'deleteSelectedConcepts',
+    'clearSelectedConcepts'
+  )
+
+const confirmPlaylistGeneration = () => {
+  modals.playlist = true
+  selectedBar.value = ''
+}
+
+const hidePlaylistModal = () => {
+  modals.playlist = false
+}
+
+const runSubscription = async action => {
+  loading.tasksSubscription = true
+  try {
+    await store.dispatch(action, selectedTaskIds.value)
+  } catch (err) {
+    console.error(err)
+  }
+  loading.tasksSubscription = false
+}
+
+const confirmTasksSubscription = () => runSubscription('subscribeToTasks')
+
+const confirmTasksUnsubscription = () => runSubscription('unsubscribeFromTasks')
+
+const confirmSetThumbnailsFromTasks = async () => {
+  if (nbSelectedTasks.value === 1) {
+    emit('set-frame-thumbnail', props.isMoviePreview && isUseCurrentFrame.value)
+  } else {
+    loading.setThumbnails = true
+    try {
+      await store.dispatch('setTasksMainPreview', selectedTaskIds.value)
+    } catch (err) {
+      console.error(err)
+    }
+    loading.setThumbnails = false
+  }
+}
+
+const runCustomAction = () => {
+  store.dispatch('postCustomAction', {
+    data: {
+      entitytype: currentEntityType.value,
+      originurl: currentUrl.value,
+      originserver: currentHost,
+      selection: selectedTaskIds.value,
+      productionid: props.productionId,
+      userid: user.value.id,
+      useremail: user.value.email
+    },
+    url: customAction.value.url
+  })
+}
+
+const onKeyDown = event => {
+  if (event.keyCode === 27 && !modals.playlist) {
+    store.commit('CLEAR_SELECTED_TASKS')
+  }
+}
+
+const clearSelection = () => {
+  store.dispatch('clearSelectedAssets')
+  store.dispatch('clearSelectedShots')
+  store.dispatch('clearSelectedTasks')
+  store.dispatch('clearSelectedEdits')
+  store.dispatch('clearSelectedConcepts')
+}
+
+const selectBar = barName => {
+  localStorage.setItem(`${storagePrefix.value}-selected-bar`, barName)
+  selectedBar.value = selectedBar.value !== barName ? barName : ''
+}
+
+const autoChooseSelectBar = () => {
+  if (isHidden.value) {
+    window.removeEventListener('keydown', onKeyDown)
+    return
+  }
+  window.addEventListener('keydown', onKeyDown)
+  if (isCurrentViewAsset.value && nbSelectedAssets.value > 0) {
+    selectedBar.value = 'delete-assets'
+  } else if (isCurrentViewShot.value && nbSelectedShots.value > 0) {
+    selectedBar.value = 'delete-shots'
+  } else if (isCurrentViewEdit.value && nbSelectedEdits.value > 0) {
+    selectedBar.value = 'delete-edits'
+  } else if (isCurrentViewConcept.value && nbSelectedConcepts.value > 1) {
+    selectedBar.value = 'delete-concepts'
+  } else {
+    if (nbSelectedTasks.value === 1) selectedBar.value = ''
+    const lastSelection = localStorage.getItem(
+      `${storagePrefix.value}-selected-bar`
+    )
+    if (lastSelection) {
+      selectedBar.value = lastSelection
+    } else if (isCurrentViewAssetShotOrEdit.value) {
+      selectedBar.value = 'change-status'
+    }
+  }
+}
+
+const getAvailableStatuses = () => {
+  if (selectedTasks.value.size === 0) return []
+  const isForCurrentView = status =>
+    Boolean(status.for_concept) === isCurrentViewConcept.value
+  if (!isCurrentViewTodos.value) {
+    return taskStatusForCurrentUser.value.filter(isForCurrentView)
+  }
+  const statusLists = Array.from(selectedTasks.value.values())
+    .map(task => productionMap.value.get(task.project_id)?.task_statuses)
+    .filter(Boolean)
+  const availableStatus = new Set(intersection(statusLists))
+  return taskStatusForCurrentUser.value.filter(
+    status => availableStatus.has(status.id) && isForCurrentView(status)
+  )
+}
+
+const getSelectionCustomActions = () => {
+  const selectedTypes = new Set(
+    Array.from(selectedTasks.value.values()).map(
+      task => taskTypeMap.value.get(task.task_type_id)?.for_entity
+    )
+  )
+  return store.getters.getCustomActionsByType(
+    ...['Asset', 'Shot', 'Sequence', 'Edit', 'Episode'].map(type =>
+      selectedTypes.has(type)
+    )
+  )
+}
+
+const editConceptLinks = entityConceptLinks => {
+  store.dispatch('editConcept', {
+    id: currentConcept.value.id,
+    entity_concept_links: entityConceptLinks
+  })
+}
+
+const onRemoveLink = link => {
+  editConceptLinks(
+    currentConcept.value.entity_concept_links.filter(id => id !== link.id)
+  )
+}
+
+const onSelectLink = link => {
+  editConceptLinks([...currentConcept.value.entity_concept_links, link.id])
+}
+
+const onEntitySearchChange = searchQuery => {
+  store.dispatch('setAssetSearch', searchQuery)
+}
+
+const confirmBuildFilter = query => {
+  modals.buildFilter = false
+  entitySearchFieldRef.value.setValue(query)
+  onEntitySearchChange(query)
+}
+
+// Watchers
+// --------------------------------------------------------------------------
+
+const watchEntitySelection = (count, threshold = 0) => {
+  watch(count, () => {
+    autoChooseSelectBar()
+    if (count.value > threshold) store.dispatch('clearSelectedTasks')
+  })
+}
+
+watchEntitySelection(nbSelectedAssets)
+watchEntitySelection(nbSelectedShots)
+watchEntitySelection(nbSelectedEdits)
+watchEntitySelection(nbSelectedConcepts, 1)
+
+watch(isHidden, autoChooseSelectBar)
+
+watch(
+  nbSelectedTasks,
+  () => {
+    if (nbSelectedTasks.value > 0) {
+      availableTaskStatuses.value = getAvailableStatuses()
+      customActions.value = getSelectionCustomActions()
+      const isActionStillAvailable =
+        customAction.value.url &&
+        customActions.value.some(action => action.id === customAction.value.id)
+      if (customActions.value.length > 0 && !isActionStillAvailable) {
+        customAction.value = customActions.value[0]
+      }
+    }
+  },
+  { immediate: true }
+)
+
+watch(
+  () => route.name,
+  () => {
+    if (nbSelectedTasks.value > 0) store.dispatch('clearSelectedTasks')
+  }
+)
+
+// Lifecycle
+// --------------------------------------------------------------------------
+
+onMounted(() => {
+  customAction.value = customActions.value[0] ?? {}
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKeyDown)
+})
 </script>
 
 <style lang="scss" scoped>
@@ -1843,10 +1582,6 @@ export default {
   background: #f4f4ff;
   color: $grey;
   z-index: 1000;
-}
-
-.hidden {
-  display: none;
 }
 
 .clear-assignation-button {
@@ -1986,20 +1721,8 @@ export default {
     border: 1px solid $light-green;
     transition: transform 0.1s linear;
 
-    .action {
-      border-radius: 50%;
-      display: none;
-      height: 14px;
-      width: 14px;
-      line-height: 8px;
-    }
-
     &:hover {
       transform: scale(1.1);
-
-      .action {
-        display: inline-block;
-      }
     }
   }
 }
@@ -2039,12 +1762,6 @@ export default {
 
     .tag {
       border-color: $light-grey;
-      cursor: pointer;
-      transition: transform 0.1s linear;
-
-      &:hover {
-        transform: scale(1.1);
-      }
     }
   }
 }

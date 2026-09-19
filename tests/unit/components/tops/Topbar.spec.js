@@ -1,4 +1,4 @@
-import { nextTick, ref } from 'vue'
+import { nextTick, reactive, ref } from 'vue'
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { createStore } from 'vuex'
@@ -6,6 +6,17 @@ import { createStore } from 'vuex'
 vi.mock('@/composables/desktopNotifications', () => ({
   useDesktopNotifications: vi.fn()
 }))
+vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }))
+
+// The component reads the route of useRoute(): each mount hands it the same
+// object as the $route mock, which tests move to simulate navigations.
+const routeHolder = vi.hoisted(() => ({ current: null }))
+vi.mock('vue-router', async importOriginal => ({
+  ...(await importOriginal()),
+  useRoute: () => routeHolder.current
+}))
+const mockRoute = route => (routeHolder.current = reactive(route))
+const socketMock = { on: vi.fn(), off: vi.fn() }
 
 // Pre-load real store to avoid circular-import issues
 import '@/lib/auth'
@@ -128,16 +139,17 @@ describe('Topbar.vue', () => {
 
     wrapper = shallowMount(Topbar, {
       global: {
+        config: { globalProperties: { $socket: socketMock } },
         plugins: [store, router],
         mocks: {
           $t: key => key,
-          $route: {
+          $route: mockRoute({
             path: '/',
             name: 'open-productions',
             params: {},
             query: {},
             fullPath: '/'
-          }
+          })
         },
         stubs: {
           TopbarProductionList: true,
@@ -292,16 +304,17 @@ describe('Topbar.vue', () => {
       ])
       return shallowMount(Topbar, {
         global: {
+          config: { globalProperties: { $socket: socketMock } },
           plugins: [scheduleStore, router],
           mocks: {
             $t: key => key,
-            $route: {
+            $route: mockRoute({
               path: `/productions/production-1/episodes/${episodeId}/schedule`,
               name: 'episode-schedule',
               params: { production_id: 'production-1', episode_id: episodeId },
               query: {},
               fullPath: '/'
-            }
+            })
           },
           stubs: {
             TopbarProductionList: true,
@@ -372,16 +385,17 @@ describe('Topbar.vue', () => {
       ])
       return shallowMount(Topbar, {
         global: {
+          config: { globalProperties: { $socket: socketMock } },
           plugins: [shotsStore, router],
           mocks: {
             $t: key => key,
-            $route: {
+            $route: mockRoute({
               path: `/productions/production-1/episodes/${episodeId}/shots`,
               name: 'episode-shots',
               params: { production_id: 'production-1', episode_id: episodeId },
               query: {},
               fullPath: '/'
-            }
+            })
           },
           stubs: {
             TopbarProductionList: true,
@@ -572,8 +586,9 @@ describe('Topbar.vue', () => {
       }
       const wrapper = shallowMount(Topbar, {
         global: {
+          config: { globalProperties: { $socket: socketMock } },
           plugins: [sectionStore, router],
-          mocks: { $t: key => key, $route: route },
+          mocks: { $t: key => key, $route: mockRoute(route) },
           stubs: {
             TopbarProductionList: true,
             TopbarSectionList: true,
@@ -838,7 +853,7 @@ describe('Topbar.vue', () => {
         expect(replaceSpy).not.toHaveBeenCalled()
 
         episodes.splice(0, 1)
-        wrapper.vm.$options.watch.episodes.call(wrapper.vm)
+        wrapper.vm.onEpisodesChanged()
 
         expect(replaceSpy).toHaveBeenCalledWith({
           name: 'episode-shots',
@@ -865,7 +880,7 @@ describe('Topbar.vue', () => {
         })
 
         episodes.splice(0, 1)
-        wrapper.vm.$options.watch.episodes.call(wrapper.vm)
+        wrapper.vm.onEpisodesChanged()
 
         expect(replaceSpy).toHaveBeenCalledWith({
           name: 'episodes',
@@ -924,7 +939,7 @@ describe('Topbar.vue', () => {
         })
 
         episodes.splice(0, 1)
-        wrapper.vm.$options.watch.episodes.call(wrapper.vm)
+        wrapper.vm.onEpisodesChanged()
 
         expect(replaceSpy).not.toHaveBeenCalled()
         wrapper.unmount()
@@ -1035,16 +1050,17 @@ describe('Topbar.vue', () => {
       ])
       const playlistsWrapper = shallowMount(Topbar, {
         global: {
+          config: { globalProperties: { $socket: socketMock } },
           plugins: [playlistsStore, router],
           mocks: {
             $t: key => key,
-            $route: {
+            $route: mockRoute({
               path: '/productions/production-1/episodes/all/playlists',
               name: 'episode-playlists',
               params: { production_id: 'production-1', episode_id: 'all' },
               query: {},
               fullPath: '/'
-            }
+            })
           },
           stubs: {
             TopbarProductionList: true,
@@ -1094,30 +1110,28 @@ describe('Topbar.vue', () => {
       }
     })
 
-    const fire = eventData =>
-      wrapper.vm.$options.socket.events['notification:new'].call(
-        wrapper.vm,
-        eventData
-      )
+    // The handler calls showDesktopNotificationForNew through its closure, out
+    // of reach of a spy: the multi-tab lock is its first observable step.
+    const fire = eventData => {
+      isActive.value = true
+      wrapper.vm.onNotificationNew(eventData)
+    }
 
     it('skips desktop notification on /notifications page when foregrounded', async () => {
       wrapper.vm.$route.name = 'notifications'
       setVisibility('visible')
-      const spy = vi
-        .spyOn(wrapper.vm, 'showDesktopNotificationForNew')
-        .mockImplementation(() => {})
       fire({ person_id: 'user-1', notification_id: 'notification-1' })
-      expect(spy).not.toHaveBeenCalled()
+      expect(wrapper.vm.withDesktopNotificationLock).not.toHaveBeenCalled()
     })
 
     it('fires desktop notification on /notifications when tab is backgrounded', async () => {
       wrapper.vm.$route.name = 'notifications'
       setVisibility('hidden')
-      const spy = vi
-        .spyOn(wrapper.vm, 'showDesktopNotificationForNew')
-        .mockImplementation(() => {})
       fire({ person_id: 'user-1', notification_id: 'notification-1' })
-      expect(spy).toHaveBeenCalledWith('notification-1')
+      expect(wrapper.vm.withDesktopNotificationLock).toHaveBeenCalledWith(
+        'notification-1',
+        expect.any(Function)
+      )
     })
   })
 })

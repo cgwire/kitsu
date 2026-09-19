@@ -44,9 +44,7 @@
         type="checkbox"
         :checked="entity ? entity.is_casting_standby : false"
         :disabled="!isCurrentUserManager"
-        :style="[
-          isCurrentUserManager ? { cursor: 'pointer' } : { cursor: 'auto' }
-        ]"
+        :class="{ 'is-editable': isCurrentUserManager }"
         @input="event => onStandbyChanged(entity, event)"
       />
     </div>
@@ -61,7 +59,6 @@
       ></div>
       <textarea
         class="tooltip-editor"
-        ref="text"
         :value="entity.description"
         @input="event => onDescriptionChanged(entity, event)"
         v-else
@@ -156,9 +153,7 @@
           @input="event => onMetadataFieldChanged(entity, descriptor, event)"
           :value="getMetadataFieldValue(descriptor, entity)"
           v-if="
-            descriptor.choices.length === 0 &&
-            (isCurrentUserManager ||
-              isSupervisorInDepartments(descriptor.departments))
+            descriptor.choices.length === 0 && canEditDescriptor(descriptor)
           "
         />
         <div
@@ -187,40 +182,19 @@
               :checked="
                 getMetadataChecklistValues(descriptor, entity)[option.text]
               "
-              :disabled="
-                !(
-                  isCurrentUserManager ||
-                  isSupervisorInDepartments(descriptor.departments)
-                )
-              "
-              :style="[
-                isCurrentUserManager ||
-                isSupervisorInDepartments(descriptor.departments)
-                  ? { cursor: 'pointer' }
-                  : { cursor: 'auto' }
-              ]"
+              :disabled="!canEditDescriptor(descriptor)"
+              :class="{ 'is-editable': canEditDescriptor(descriptor) }"
             />
             <label
               class="ml05"
               :for="`${entity.id}-${descriptor.id}-${i}-${option.text}-input`"
-              :style="[
-                isCurrentUserManager ||
-                isSupervisorInDepartments(descriptor.departments)
-                  ? { cursor: 'pointer' }
-                  : { cursor: 'auto' }
-              ]"
+              :class="{ 'is-editable': canEditDescriptor(descriptor) }"
             >
               {{ option.text }}
             </label>
           </p>
         </div>
-        <span
-          class="select"
-          v-else-if="
-            isCurrentUserManager ||
-            isSupervisorInDepartments(descriptor.departments)
-          "
-        >
+        <span class="select" v-else-if="canEditDescriptor(descriptor)">
           <select
             class="select-input"
             @change="event => onMetadataFieldChanged(entity, descriptor, event)"
@@ -244,6 +218,8 @@
     </template>
     <div
       class="asset-list flexrow-item"
+      :class="{ 'is-empty': assetsByAssetTypesMap[assetType] === undefined }"
+      :data-label="assetType"
       :key="entity.id + '-' + assetType"
       v-for="assetType in assetTypes"
     >
@@ -280,177 +256,180 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+/* eslint-disable no-unused-vars */
+import { computed } from 'vue'
+import { useStore } from 'vuex'
 
+import {
+  getDescriptorChecklistValues,
+  getDescriptorChoicesOptions,
+  getMetadataChecklistValues,
+  getMetadataEventValue,
+  getMetadataFieldValue
+} from '@/composables/descriptors'
 import { renderMarkdown } from '@/lib/render'
-import { entityListMixin } from '@/components/mixins/entity_list'
-import { descriptorMixin } from '@/components/mixins/descriptors'
 
 import AssetBlock from '@/components/pages/breakdown/AssetBlock.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+/* eslint-enable no-unused-vars */
 
-export default {
-  name: 'shot-line',
+const store = useStore()
 
-  mixins: [entityListMixin, descriptorMixin],
+// Props / Emits
+// --------------------------------------------------------------------------
 
-  components: {
-    AssetBlock,
-    EntityThumbnail
-  },
+const props = defineProps({
+  entity: { type: Object, default: () => ({}) },
+  previewFileId: { type: String, default: '' },
+  selection: { type: Object, default: () => ({}) },
+  name: { type: String, default: '' },
+  assetTypes: { type: Array, default: () => [] },
+  readOnly: { type: Boolean, default: false },
+  textMode: { type: Boolean, default: false },
+  metadataDescriptors: { type: Array, default: () => [] },
+  metadataDisplayHeaders: { type: Object, default: () => ({}) },
+  bigMode: { type: Boolean, default: false },
+  isDescription: { type: Boolean, default: true },
+  isSaveError: { type: Boolean, default: false },
+  columnWidth: { type: Object, default: () => ({}) }
+})
 
-  props: {
-    entity: {
-      default: () => {},
-      type: Object
-    },
-    previewFileId: {
-      default: '',
-      type: String
-    },
-    selected: {
-      default: false,
-      type: Boolean
-    },
-    name: {
-      default: '',
-      type: String
-    },
-    assets: {
-      default: () => [],
-      type: Array
-    },
-    assetTypes: {
-      default: () => [],
-      type: Array
-    },
-    readOnly: {
-      default: false,
-      type: Boolean
-    },
-    textMode: {
-      default: false,
-      type: Boolean
-    },
-    metadataDescriptors: {
-      default: () => [],
-      type: Array
-    },
-    metadataDisplayHeaders: {
-      default: () => {},
-      type: Object
-    },
-    bigMode: {
-      default: false,
-      type: Boolean
-    },
-    isDescription: {
-      default: true,
-      type: Boolean
-    },
-    isSaveError: {
-      default: false,
-      type: Boolean
-    },
-    columnWidth: {
-      default: () => {},
-      type: Object
-    }
-  },
+const emit = defineEmits([
+  'add-one',
+  'click',
+  'edit-label',
+  'field-changed',
+  'metadata-changed',
+  'remove-one'
+])
 
-  emits: ['add-one', 'click', 'edit-label', 'field-changed', 'remove-one'],
+// Computed
+// --------------------------------------------------------------------------
 
-  computed: {
-    ...mapGetters([
-      'assetMap',
-      'isFrameIn',
-      'isFrameOut',
-      'isFrames',
-      'isShowInfosBreakdown',
-      'user'
-    ]),
-    ...mapGetters({
-      isCurrentUserManager: 'isCurrentUserProductionManager',
-      isCurrentUserSupervisor: 'isCurrentUserProductionSupervisor'
-    }),
+const isCurrentUserManager = computed(
+  () => store.getters.isCurrentUserProductionManager
+)
+const isCurrentUserSupervisor = computed(
+  () => store.getters.isCurrentUserProductionSupervisor
+)
+const isFrameIn = computed(() => store.getters.isFrameIn)
+const isFrameOut = computed(() => store.getters.isFrameOut)
+const isFrames = computed(() => store.getters.isFrames)
+const isShowInfosBreakdown = computed(() => store.getters.isShowInfosBreakdown)
+const user = computed(() => store.getters.user)
 
-    chunks() {
-      const chunks = this.name.split(' / ')
-      return chunks.filter(chunk => chunk && chunk !== 'undefined')
-    },
+// Read from the selection map of the page so that a click renders the lines
+// it changes, not the page and its whole list.
+const selected = computed(() => Boolean(props.selection[props.entity.id]))
 
-    assetsByAssetTypesMap() {
-      const assetsByAssetTypes = {}
-      this.assets.forEach(assetTypeAssets => {
-        if (assetTypeAssets[0]) {
-          assetsByAssetTypes[assetTypeAssets[0].asset_type_name] =
-            assetTypeAssets
-        }
-      })
-      return assetsByAssetTypes
-    }
-  },
+const chunks = computed(() =>
+  props.name.split(' / ').filter(chunk => chunk && chunk !== 'undefined')
+)
 
-  methods: {
-    onClicked(event) {
-      this.$emit('click', this.entity.id, event)
-    },
+// Read from the store, not passed by the page: casting an asset then renders
+// this line alone, where a prop would make the page render its whole list.
+const assetsByAssetTypesMap = computed(() =>
+  Object.fromEntries(
+    (store.getters.castingByType[props.entity.id] || [])
+      .filter(assetTypeAssets => assetTypeAssets[0])
+      .map(assetTypeAssets => [
+        assetTypeAssets[0].asset_type_name,
+        assetTypeAssets
+      ])
+  )
+)
 
-    onEditLabelClicked(asset, label) {
-      this.$emit('edit-label', asset, label, this.entity.id)
-    },
+const visibleMetadataDescriptors = computed(() =>
+  props.metadataDescriptors.filter(descriptor => {
+    const header = props.metadataDisplayHeaders[descriptor.field_name]
+    return header === undefined || header
+  })
+)
 
-    removeOneAsset(assetId) {
-      this.$emit('remove-one', assetId)
-    },
+// Functions
+// --------------------------------------------------------------------------
 
-    addOneAsset(assetId) {
-      this.$emit('add-one', assetId)
-    },
+const onClicked = event => emit('click', props.entity.id, event)
 
-    onDescriptionChanged(entity, event) {
-      this.$emit('field-changed', {
-        entry: entity,
-        fieldName: 'description',
-        value: event.target.value
-      })
-    },
+const onEditLabelClicked = (asset, label) =>
+  emit('edit-label', asset, label, props.entity.id)
 
-    onNbFramesChanged(entity, event) {
-      this.$emit('field-changed', {
-        entry: entity,
-        fieldName: 'nb_frames',
-        value: event.target.value
-      })
-    },
+const removeOneAsset = assetId => emit('remove-one', assetId)
 
-    onStandbyChanged(entity, event) {
-      this.$emit('field-changed', {
-        entry: entity,
-        fieldName: 'is_casting_standby',
-        value: event.target.checked
-      })
-    },
+const addOneAsset = assetId => emit('add-one', assetId)
 
-    renderMarkdown,
+const emitFieldChanged = (entry, fieldName, value) =>
+  emit('field-changed', { entry, fieldName, value })
 
-    nbAssetsForType(assetType) {
-      return this.assetsByAssetTypesMap[assetType].reduce(
-        (acc, a) => acc + a.nb_occurences,
-        0
-      )
-    }
+const onDescriptionChanged = (entity, event) =>
+  emitFieldChanged(entity, 'description', event.target.value)
+
+const onNbFramesChanged = (entity, event) =>
+  emitFieldChanged(entity, 'nb_frames', event.target.value)
+
+const onStandbyChanged = (entity, event) =>
+  emitFieldChanged(entity, 'is_casting_standby', event.target.checked)
+
+const onMetadataFieldChanged = (entry, descriptor, event) => {
+  const value = getMetadataEventValue(descriptor, entry, event)
+  if (value !== undefined) {
+    // If the line is selected, also modify the cells of the other selected
+    // lines.
+    const selection = [
+      store.getters.selectedShots,
+      store.getters.selectedAssets,
+      store.getters.selectedEdits
+    ].find(selected => selected.has(entry.id))
+    const entries = selection ? Array.from(selection.values()) : [entry]
+    entries.forEach(selectedEntry => {
+      emit('metadata-changed', { entry: selectedEntry, descriptor, value })
+    })
   }
 }
+
+const onMetadataChecklistChanged = (entry, descriptor, option, event) => {
+  const values = {
+    ...getMetadataChecklistValues(descriptor, entry),
+    [option]: event.target.checked
+  }
+  event.target.value = JSON.stringify(values)
+  onMetadataFieldChanged(entry, descriptor, event)
+}
+
+const isSupervisorInDepartments = (departments = []) => {
+  const departmentIds = Array.isArray(departments) ? departments : [departments]
+  return (
+    isCurrentUserSupervisor.value &&
+    (user.value.departments.length === 0 ||
+      user.value.departments.some(department =>
+        departmentIds.includes(department)
+      ))
+  )
+}
+
+const canEditDescriptor = descriptor =>
+  isCurrentUserManager.value ||
+  isSupervisorInDepartments(descriptor.departments)
+
+const nbAssetsForType = assetType =>
+  assetsByAssetTypesMap.value[assetType].reduce(
+    (acc, asset) => acc + asset.nb_occurences,
+    0
+  )
 </script>
 
 <style lang="scss" scoped>
-.dark {
-  .asset-type-name {
-    color: $light-grey-light;
-  }
+input[type='checkbox'],
+label {
+  cursor: auto;
 
+  &.is-editable {
+    cursor: pointer;
+  }
+}
+
+.dark {
   .asset-list {
     color: $light-grey;
   }
@@ -506,14 +485,6 @@ export default {
   max-width: 160px;
   padding-top: 0;
   word-break: break-all;
-}
-
-.asset-type-name {
-  display: flex;
-  width: 150px;
-  height: 40px;
-  color: $grey-strong;
-  text-transform: uppercase;
 }
 
 .asset-type-items {
@@ -741,5 +712,80 @@ input::-webkit-inner-spin-button {
 
 input[type='number'] {
   -moz-appearance: textfield; /* Firefox */
+}
+
+// Mobile shows one card per entity: the asset type columns stack under the
+// name, each one titled from its data-label since the header row is hidden.
+@media screen and (max-width: 768px) {
+  .standby-column,
+  .description-column,
+  .frames-column,
+  .metadata-descriptor,
+  .asset-list.is-empty {
+    display: none;
+  }
+
+  .shot {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    flex-direction: column;
+    margin-bottom: 0.5em;
+    overflow: hidden;
+  }
+
+  // The width is set inline from the column resizing preference.
+  .sticky {
+    border-right: 0;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    position: static;
+    width: 100%;
+  }
+
+  .shot-name {
+    flex: 1;
+    max-width: none;
+    min-width: 0;
+  }
+
+  // The rule sits on the sections, not under the head: a card without casting
+  // would double its own bottom border.
+  .asset-list {
+    border-left: 0;
+    border-top: 1px solid var(--border);
+    max-width: none;
+    min-width: 0;
+    padding: 0 0.5em;
+
+    &:last-child {
+      border-right: 0;
+    }
+
+    &::before {
+      color: var(--text-alt);
+      content: attr(data-label);
+      display: block;
+      font-size: 0.8em;
+      font-weight: 600;
+      letter-spacing: 1px;
+      padding-top: 0.5em;
+      text-transform: uppercase;
+    }
+  }
+
+  .asset-type-line {
+    padding-top: 0;
+  }
+
+  // Light theme only: the tiles get lost on the white card, while the dark
+  // alt background is lighter than the card and would wash them out. A
+  // standby card keeps its own tint.
+  .shot:not(.stdby) .asset-list {
+    background: var(--background-alt);
+
+    .dark & {
+      background: transparent;
+    }
+  }
 }
 </style>

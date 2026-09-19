@@ -6,7 +6,9 @@ import { mapGetters } from 'vuex'
 
 import {
   getDescriptorChecklistValues,
+  getDescriptorChoicesOptions,
   getMetadataChecklistValues,
+  getMetadataEventValue,
   getMetadataFieldValue
 } from '@/composables/descriptors'
 
@@ -58,30 +60,8 @@ export const descriptorMixin = {
     },
 
     onMetadataFieldChanged(entry, descriptor, event) {
-      let value
-      if (typeof event === 'string') {
-        value = event
-      } else if (
-        event.inputType === 'historyUndo' ||
-        event.inputType === 'historyRedo'
-      ) {
-        // The browser rewrote the field on its own: its undo stack belongs to
-        // the frame, not to the focused element, so Ctrl+Z anywhere on the
-        // page replays the last edited cell. Put the stored value back instead
-        // of pushing this one onto every selected entry.
-        event.target.value = this.getMetadataFieldValue(descriptor, entry)
-        return
-      } else if (!event.target.validity.valid) {
-        return
-      } else if (descriptor.data_type === 'boolean') {
-        value = event.target.checked ? 'true' : 'false'
-      } else if (descriptor.data_type === 'number') {
-        value = !isNaN(event.target.valueAsNumber)
-          ? event.target.valueAsNumber
-          : null
-      } else {
-        value = event.target.value
-      }
+      const value = getMetadataEventValue(descriptor, entry, event)
+      if (value === undefined) return
 
       if (this.selectedShots.has(entry.id)) {
         // if the line is selected, also modify the cells of the other selected
@@ -154,13 +134,7 @@ export const descriptorMixin = {
       this.lastMetadataHeaderMenuDisplayed = columnId
     },
 
-    getDescriptorChoicesOptions(descriptor, emptyChoice = true) {
-      const values = descriptor.choices.map(c => ({ label: c, value: c }))
-      if (emptyChoice) {
-        values.unshift({ label: '', value: '' })
-      }
-      return values
-    },
+    getDescriptorChoicesOptions,
 
     getMetadataFieldValue,
 
