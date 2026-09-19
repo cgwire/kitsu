@@ -1756,6 +1756,19 @@ useHead({
   margin-bottom: 0.5em;
 }
 
+// Tablet: the toolbar wraps instead of clipping its last buttons, and the
+// asset picker leaves more room to the casting.
+@media screen and (max-width: 1000px) {
+  .casting-toolbar {
+    flex-wrap: wrap;
+    row-gap: 0.5em;
+  }
+
+  .assets-column {
+    max-width: 300px;
+  }
+}
+
 // Mobile is read-only: the casting alone, as one card per entity (see
 // ShotLine), without the asset picker, the exports and the info columns.
 @media screen and (max-width: 768px) {
