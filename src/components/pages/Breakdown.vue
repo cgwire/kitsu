@@ -467,6 +467,9 @@ const ASSET_DISPLAY_HEADERS = {
 
 const optionalCsvColumns = ['Label']
 
+const CASTING_LOAD_DELAY = 300
+const MAX_ENTITY_CASTING_LOADS = 5
+
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
@@ -536,9 +539,11 @@ const success = reactive({
 })
 
 let appliedSearch = ''
+let castingLoadTimer = null
 let previousEntityId = null
 let resizing = null
 let wasDisconnected = false
+const pendingCastingLoads = new Map()
 
 // Computed
 // --------------------------------------------------------------------------
@@ -1343,6 +1348,24 @@ const resetColumnWidth = () => {
   }
 }
 
+// Another user pasting a casting on 50 shots sends 50 events: they are
+// gathered over a short window, and past a few entities one request for the
+// whole scope replaces one request per entity.
+const queueCastingLoad = (entityId, loadEntityCasting) => {
+  pendingCastingLoads.set(entityId, loadEntityCasting)
+  if (!castingLoadTimer) {
+    castingLoadTimer = setTimeout(flushCastingLoads, CASTING_LOAD_DELAY)
+  }
+}
+
+const flushCastingLoads = () => {
+  const loads = [...pendingCastingLoads.values()]
+  pendingCastingLoads.clear()
+  castingLoadTimer = null
+  if (loads.length > MAX_ENTITY_CASTING_LOADS) reloadCasting()
+  else loads.forEach(loadEntityCasting => loadEntityCasting())
+}
+
 const onCastingHeaderScroll = event => {
   castingListRef.value.scrollLeft = event.target.scrollLeft
 }
@@ -1353,20 +1376,24 @@ const onCastingScroll = event => {
 
 const onEpisodeCastingUpdate = eventData => {
   const episode = store.getters.episodeMap.get(eventData.episode_id)
-  if (episode) store.dispatch('loadEpisodeCasting', episode)
+  if (episode) {
+    queueCastingLoad(episode.id, () =>
+      store.dispatch('loadEpisodeCasting', episode)
+    )
+  }
 }
 
 const onShotCastingUpdate = eventData => {
   const shot = store.getters.shotMap.get(eventData.shot_id)
   if (shot && shot.sequence_id === sequenceId.value) {
-    store.dispatch('loadShotCasting', shot)
+    queueCastingLoad(shot.id, () => store.dispatch('loadShotCasting', shot))
   }
 }
 
 const onAssetCastingUpdate = eventData => {
   const asset = store.getters.assetMap.get(eventData.asset_id)
   if (asset && asset.asset_type_id === assetTypeId.value) {
-    store.dispatch('loadAssetCasting', asset)
+    queueCastingLoad(asset.id, () => store.dispatch('loadAssetCasting', asset))
   }
 }
 
@@ -1501,6 +1528,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  clearTimeout(castingLoadTimer)
   window.removeEventListener('keydown', onKeyDown)
   Object.entries(SOCKET_EVENTS).forEach(([eventName, handler]) => {
     socket.off(eventName, handler)

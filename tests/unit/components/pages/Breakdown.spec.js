@@ -176,6 +176,65 @@ describe('Breakdown page, loading', () => {
   })
 })
 
+describe('Breakdown page, live casting updates', () => {
+  const shots = Array.from({ length: 50 }, (_, index) => ({
+    id: `shot-${index}`,
+    sequence_id: 'seq-1'
+  }))
+
+  const mountLivePage = async () => {
+    const mounted = mountPage({
+      actions: { loadShotCasting: vi.fn() },
+      getters: {
+        shotMap: () => new Map(shots.map(shot => [shot.id, shot]))
+      }
+    })
+    await flushPromises()
+    mounted.wrapper.vm.sequenceId = 'seq-1'
+    mounted.actions.setCastingSequence.mockClear()
+    vi.useFakeTimers()
+    return mounted
+  }
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  test('loads the casting of the few shots another user changed', async () => {
+    const { wrapper, actions } = await mountLivePage()
+
+    wrapper.vm.onShotCastingUpdate({ shot_id: 'shot-1' })
+    wrapper.vm.onShotCastingUpdate({ shot_id: 'shot-2' })
+    wrapper.vm.onShotCastingUpdate({ shot_id: 'shot-2' })
+    vi.runAllTimers()
+
+    expect(actions.loadShotCasting).toHaveBeenCalledTimes(2)
+    expect(actions.setCastingSequence).not.toHaveBeenCalled()
+  })
+
+  // A casting pasted on 50 shots sends 50 events: one request for the whole
+  // scope instead of one per shot.
+  test('loads the scope once when many shots change together', async () => {
+    const { wrapper, actions } = await mountLivePage()
+
+    shots.forEach(shot => wrapper.vm.onShotCastingUpdate({ shot_id: shot.id }))
+    vi.runAllTimers()
+
+    expect(actions.loadShotCasting).not.toHaveBeenCalled()
+    expect(actions.setCastingSequence).toHaveBeenCalledTimes(1)
+  })
+
+  test('drops the pending loads when the page is left', async () => {
+    const { wrapper, actions } = await mountLivePage()
+
+    wrapper.vm.onShotCastingUpdate({ shot_id: 'shot-1' })
+    wrapper.unmount()
+    vi.runAllTimers()
+
+    expect(actions.loadShotCasting).not.toHaveBeenCalled()
+  })
+})
+
 describe('Breakdown page, removeOneAssetFromSelection', () => {
   // The casting map only carries the entities the API returned, so an
   // entity without any asset has no key at all: the selection is built
