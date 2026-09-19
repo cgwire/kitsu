@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils'
 import { vi } from 'vitest'
-import { nextTick } from 'vue'
+import { nextTick, reactive } from 'vue'
 import { createStore } from 'vuex'
 
 // Importing the page transitively pulls in the root store
@@ -8,9 +8,17 @@ import { createStore } from 'vuex'
 vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }))
+// The route follows the pushes of the page, as the router would: the page
+// watches the search of the URL it writes itself.
+const routeHolder = vi.hoisted(() => ({ route: null }))
 vi.mock('vue-router', () => ({
-  useRoute: () => ({ params: {}, query: {}, path: '/' }),
-  useRouter: () => ({ push: vi.fn() })
+  useRoute: () => routeHolder.route,
+  useRouter: () => ({
+    push: location => {
+      if (location.query) routeHolder.route.query = location.query
+      return Promise.resolve()
+    }
+  })
 }))
 vi.mock('@/lib/preferences', () => ({
   default: {
@@ -29,6 +37,10 @@ const production = { id: 'p1', production_type: 'tvshow' }
 
 // The page is mounted on a store whose scope (production, episode) the tests
 // move from inside the load actions, as the topbar does during a real load.
+beforeEach(() => {
+  routeHolder.route = reactive({ params: {}, query: {}, path: '/' })
+})
+
 const mountPage = ({
   state = {},
   actions = {},
@@ -104,6 +116,7 @@ const mountPage = ({
       // The page drives its search field through a ref.
       stubs: {
         SearchField: {
+          name: 'SearchField',
           template: '<div />',
           methods: { getValue: () => '', setValue: () => {} }
         },
@@ -450,5 +463,59 @@ describe('Breakdown page, selection', () => {
     await nextTick()
 
     expect(updates).toEqual({ ShotLine: 1 })
+  })
+})
+
+describe('Breakdown page, asset search', () => {
+  // The page writes the search in the URL and watches that same URL for the
+  // searches coming from elsewhere (saved queries, back button).
+  const search = async (wrapper, query) => {
+    wrapper.findComponent({ name: 'SearchField' }).vm.$emit('change', query)
+    await nextTick()
+    await nextTick()
+  }
+
+  test('runs a typed search once', async () => {
+    const setAssetSearch = vi.fn()
+    const { wrapper } = mountPage({ actions: { setAssetSearch } })
+
+    await search(wrapper, 'hero')
+
+    expect(setAssetSearch).toHaveBeenCalledTimes(1)
+    expect(setAssetSearch.mock.calls[0][1]).toBe('hero')
+  })
+
+  test('still applies a search coming from the URL', async () => {
+    const setAssetSearch = vi.fn()
+    mountPage({ actions: { setAssetSearch } })
+
+    routeHolder.route.query = { search: 'saved' }
+    await nextTick()
+
+    expect(setAssetSearch).toHaveBeenCalledTimes(1)
+    expect(setAssetSearch.mock.calls[0][1]).toBe('saved')
+  })
+
+  // The store keeps the number of assets displayed across searches: asking
+  // for one more page on each of them made the list grow with every keystroke.
+  test('does not display more assets on each search', async () => {
+    // jsdom has no layout: an overflowing column keeps fillAssetList quiet.
+    const overflow = { configurable: true, get: () => 1000 }
+    const fit = { configurable: true, get: () => 500 }
+    Object.defineProperty(HTMLElement.prototype, 'scrollHeight', overflow)
+    Object.defineProperty(HTMLElement.prototype, 'clientHeight', fit)
+    const displayMoreAssets = vi.fn()
+    const { wrapper } = mountPage({
+      actions: { setAssetSearch: vi.fn(), displayMoreAssets }
+    })
+
+    await search(wrapper, 'hero')
+
+    expect(displayMoreAssets).not.toHaveBeenCalled()
+  })
+
+  afterEach(() => {
+    delete HTMLElement.prototype.scrollHeight
+    delete HTMLElement.prototype.clientHeight
   })
 })

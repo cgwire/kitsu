@@ -533,6 +533,7 @@ const success = reactive({
   edit: false
 })
 
+let appliedSearch = ''
 let hasScopeMoved = false
 let isUnmounted = false
 let previousEntityId = null
@@ -854,10 +855,13 @@ const setSearchInUrl = query => {
   router.push({ query: { ...route.query, search: searchQuery || undefined } })
 }
 
+// The store keeps the number of assets displayed across searches: no page is
+// added here or the list grows with every keystroke. fillAssetList tops it up
+// when the result does not overflow the column.
 const onSearchChange = searchQuery => {
+  appliedSearch = searchQuery || ''
   store.dispatch('setAssetSearch', searchQuery)
   setSearchInUrl(searchQuery)
-  store.dispatch('displayMoreAssets')
   fillAssetList()
 }
 
@@ -1536,11 +1540,16 @@ watch(displayedSequences, () => {
   store.commit('CASTING_SET_SEQUENCES', displayedSequences.value)
 })
 
+// Searches coming from elsewhere (saved queries, back button). The page
+// writes its own search in the URL too: that one is already applied, running
+// it again would filter and sort every asset twice per keystroke.
 watch(
   () => route.query.search,
   search => {
-    searchFieldRef.value?.setValue(search)
-    onSearchChange(search)
+    if ((search || '') !== appliedSearch) {
+      searchFieldRef.value?.setValue(search)
+      onSearchChange(search)
+    }
   }
 )
 
