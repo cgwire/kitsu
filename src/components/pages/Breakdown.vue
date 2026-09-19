@@ -1771,8 +1771,12 @@ useHead({
     padding-bottom: 0.5em;
   }
 
+  // Closes the last column like the right border of the lines does: as tall
+  // as the header, not a centered stub.
   .actions {
-    height: 100%;
+    align-self: stretch;
+    height: auto;
+    padding: 0;
   }
 
   .dark & {
