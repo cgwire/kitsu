@@ -42,7 +42,7 @@
             @click="toggleTextMode"
           />
           <button-simple
-            class="flexrow-item desktop-only"
+            class="flexrow-item"
             icon="big-thumbnail"
             :is-on="isBigMode"
             :title="$t('tasks.big_thumbnails')"
@@ -1612,6 +1612,12 @@ useHead({
   padding-bottom: 1em;
 }
 
+// The comboboxes carry a label above their control: the buttons line up with
+// the control, not with the middle of label + control.
+.casting-toolbar {
+  align-items: flex-end;
+}
+
 .breakdown-columns {
   flex: 1;
   display: flex;
@@ -1824,6 +1830,12 @@ useHead({
   .casting-toolbar {
     flex-wrap: wrap;
     gap: 0.5em;
+
+    // The gap spaces the buttons: the last one displayed is not the last
+    // child, so it would keep its right margin.
+    .flexrow-item {
+      margin-right: 0;
+    }
   }
 
   .assets-column,

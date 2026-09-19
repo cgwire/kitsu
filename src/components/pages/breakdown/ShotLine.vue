@@ -735,7 +735,6 @@ input[type='number'] {
 
   // The width is set inline from the column resizing preference.
   .sticky {
-    border-bottom: 1px solid var(--border);
     border-right: 0;
     max-width: 100% !important;
     min-width: 100% !important;
@@ -749,8 +748,11 @@ input[type='number'] {
     min-width: 0;
   }
 
+  // The rule sits on the sections, not under the head: a card without casting
+  // would double its own bottom border.
   .asset-list {
     border-left: 0;
+    border-top: 1px solid var(--border);
     max-width: none;
     min-width: 0;
     padding: 0 0.5em;
@@ -773,6 +775,17 @@ input[type='number'] {
 
   .asset-type-line {
     padding-top: 0;
+  }
+
+  // Light theme only: the tiles get lost on the white card, while the dark
+  // alt background is lighter than the card and would wash them out. A
+  // standby card keeps its own tint.
+  .shot:not(.stdby) .asset-list {
+    background: var(--background-alt);
+
+    .dark & {
+      background: transparent;
+    }
   }
 }
 </style>
