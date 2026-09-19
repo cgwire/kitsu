@@ -89,7 +89,6 @@
       "fields": {
         "standby": "STDB"
       },
-      "episode_casting": "Episode-casting",
       "save_error": "Fejl under gemning af casting",
       "hide_library": "Skjul bibliotek",
       "show_library": "Vis bibliotek",

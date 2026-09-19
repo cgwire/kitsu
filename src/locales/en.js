@@ -119,7 +119,6 @@ export default {
     copy_casting: 'Copy this casting (ctrl + V pastes it on the selected lines)',
     edit_label: 'Change the asset\'s label',
     empty: 'Empty casting',
-    episode_casting: 'Episode casting',
     hide_library: 'Hide Library',
     label: 'Label',
     nb_assets: '{count} asset | {count} assets',

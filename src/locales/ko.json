@@ -89,7 +89,6 @@
       "fields": {
         "standby": "대기"
       },
-      "episode_casting": "에피소드 출연",
       "save_error": "출연 저장 중 오류",
       "hide_library": "라이브러리 숨기기",
       "show_library": "라이브러리 표시",

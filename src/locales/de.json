@@ -89,7 +89,6 @@
       "fields": {
         "standby": "STDB"
       },
-      "episode_casting": "Episodencasting",
       "save_error": "Fehler beim Speichern des Castings",
       "hide_library": "Bibliothek ausblenden",
       "show_library": "Bibliothek anzeigen",

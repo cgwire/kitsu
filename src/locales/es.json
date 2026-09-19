@@ -89,7 +89,6 @@
       "fields": {
         "standby": "En Espera"
       },
-      "episode_casting": "Reparto de episodios",
       "save_error": "Se ha producido un error al guardar el reparto",
       "hide_library": "Ocultar biblioteca",
       "show_library": "Mostrar biblioteca",

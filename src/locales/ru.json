@@ -89,7 +89,6 @@
       "fields": {
         "standby": "STDB"
       },
-      "episode_casting": "Кастинг эпизода",
       "save_error": "Ошибка при сохранении кастинга",
       "hide_library": "Скрыть библиотеку",
       "show_library": "Показать библиотеку",

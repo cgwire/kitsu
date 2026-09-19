@@ -89,7 +89,6 @@
       "fields": {
         "standby": "STDB"
       },
-      "episode_casting": "Casting van de aflevering",
       "save_error": "Fout bij het opslaan van casting",
       "hide_library": "Bibliotheek verbergen",
       "show_library": "Bibliotheek weergeven",

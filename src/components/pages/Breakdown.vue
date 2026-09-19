@@ -3,11 +3,6 @@
     <div class="breakdown-columns">
       <div class="breakdown-column casting-column">
         <div class="flexrow mb1 casting-toolbar">
-          <div v-if="isEpisodeCasting">
-            <h2 class="subtitle mt05">
-              {{ $t('breakdown.episode_casting') }}
-            </h2>
-          </div>
           <combobox-styled
             class="mr1"
             :label="$t('main.for')"

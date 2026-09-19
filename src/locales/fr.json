@@ -89,7 +89,6 @@
       "fields": {
         "standby": "Stand By"
       },
-      "episode_casting": "Casting de l'épisode",
       "save_error": "Une erreur est survenue en enregistrant le casting",
       "hide_library": "Cacher la bibliothèque",
       "show_library": "Afficher la bibliothèque",

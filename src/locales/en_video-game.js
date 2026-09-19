@@ -30,7 +30,6 @@ export default {
   },
 
   breakdown: {
-    episode_casting: 'Chapter casting',
     remove: {
       confirm: 'Remove asset from its chapter',
       text: 'If you remove this asset from the selected chapter, it will remove the assets in all the underlying maps. Are you sure you want to remove it?'

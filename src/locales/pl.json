@@ -114,7 +114,6 @@
       "copy_casting": "Skopiuj tę obsadę (ctrl + V wkleja ją do zaznaczonych wierszy)",
       "edit_label": "Zmień etykietę assetu",
       "empty": "Pusty casting",
-      "episode_casting": "Casting odcinka",
       "hide_library": "Ukryj bibliotekę",
       "label": "Etykieta",
       "nb_assets": "{count} asset | {count} assetów",

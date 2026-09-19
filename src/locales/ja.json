@@ -89,7 +89,6 @@
       "fields": {
         "standby": "待機"
       },
-      "episode_casting": "エピソードのキャスティング",
       "save_error": "キャスティングの保存中にエラーが発生しました",
       "hide_library": "ライブラリを隠す",
       "show_library": "ライブラリを表示",
