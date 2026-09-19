@@ -1,3 +1,6 @@
+// Type of the data carried while an available asset is dragged onto a line.
+export const ASSET_DRAG_TYPE = 'application/x-kitsu-asset'
+
 /*
  * Tells whether a casted asset is ready for a shot task type. Same rule as
  * zou (breakdown_service._is_asset_ready), which only stores the resulting

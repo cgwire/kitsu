@@ -8,6 +8,8 @@
       shared: asset.shared
     }"
     :title="asset.name"
+    draggable="true"
+    @dragstart="onDragStart"
     v-if="!textMode"
   >
     <div
@@ -48,6 +50,8 @@
     :class="{
       shared: asset.shared
     }"
+    draggable="true"
+    @dragstart="onDragStart"
     v-else
   >
     <span class="asset-text-name flexrow-item">
@@ -67,6 +71,8 @@
 </template>
 
 <script setup>
+import { ASSET_DRAG_TYPE } from '@/lib/casting'
+
 // Props / Emits
 // --------------------------------------------------------------------------
 const props = defineProps({
@@ -82,6 +88,12 @@ const emit = defineEmits(['add-one', 'add-ten'])
 // --------------------------------------------------------------------------
 const addOneAsset = () => {
   if (props.active) emit('add-one', props.asset.id)
+}
+
+// No selection needed: the line the asset is dropped on is the target.
+const onDragStart = event => {
+  event.dataTransfer.setData(ASSET_DRAG_TYPE, props.asset.id)
+  event.dataTransfer.effectAllowed = 'copy'
 }
 
 const addTenAssets = () => {

@@ -4,6 +4,8 @@ import { createStore } from 'vuex'
 
 vi.mock('@/store', () => ({ default: {} }))
 
+import { ASSET_DRAG_TYPE } from '@/lib/casting'
+
 import ShotLine from '@/components/pages/breakdown/ShotLine.vue'
 
 const link = assetId => ({ id: `link-${assetId}`, asset_id: assetId })
@@ -95,5 +97,49 @@ describe('ShotLine, ready assets', () => {
         .find('.ready-assets')
         .exists()
     ).toBe(false)
+  })
+})
+
+describe('ShotLine, asset drop', () => {
+  const dragged = assetId => ({
+    dataTransfer: { types: [ASSET_DRAG_TYPE], getData: () => assetId }
+  })
+
+  test('asks to cast the asset dropped on it', async () => {
+    const wrapper = mountLine()
+
+    await wrapper.find('.shot').trigger('drop', dragged('asset-9'))
+
+    expect(wrapper.emitted('drop-asset')).toEqual([['shot-b', 'asset-9']])
+  })
+
+  test('shows it as the target while an asset hovers it', async () => {
+    const wrapper = mountLine()
+    const line = wrapper.find('.shot')
+
+    await line.trigger('dragenter', dragged('asset-9'))
+    expect(line.classes()).toContain('is-drop-target')
+    // Moving over a child of the line is not leaving it.
+    await line.trigger('dragleave', { relatedTarget: line.element.firstChild })
+    expect(line.classes()).toContain('is-drop-target')
+    await line.trigger('dragleave', { relatedTarget: document.body })
+    expect(line.classes()).not.toContain('is-drop-target')
+  })
+
+  test('accepts assets only: a dragged file or text is left to the browser', async () => {
+    const wrapper = mountLine()
+    const event = { dataTransfer: { types: ['Files'], getData: () => '' } }
+
+    await wrapper.find('.shot').trigger('drop', event)
+
+    expect(wrapper.emitted('drop-asset')).toBeUndefined()
+  })
+
+  test('accepts nothing in read-only mode', async () => {
+    const wrapper = mountLine({ readOnly: true })
+
+    await wrapper.find('.shot').trigger('drop', dragged('asset-9'))
+
+    expect(wrapper.emitted('drop-asset')).toBeUndefined()
   })
 })

@@ -5,12 +5,17 @@
     :class="{
       selected,
       stdby: entity ? entity.is_casting_standby : false,
-      'text-mode': textMode
+      'text-mode': textMode,
+      'is-drop-target': isDropTarget
     }"
     role="button"
     tabindex="0"
     @click="onClicked($event)"
     @keydown.enter.prevent="onClicked($event)"
+    @dragenter="onDragEnter"
+    @dragover="onDragOver"
+    @dragleave="onDragLeave"
+    @drop="onDrop"
   >
     <div
       class="flexrow-item sticky"
@@ -277,7 +282,7 @@
 <script setup>
 /* eslint-disable no-unused-vars */
 import { CopyIcon } from 'lucide-vue-next'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 
 import {
@@ -287,7 +292,7 @@ import {
   getMetadataEventValue,
   getMetadataFieldValue
 } from '@/composables/descriptors'
-import { isAssetReadyFor } from '@/lib/casting'
+import { ASSET_DRAG_TYPE, isAssetReadyFor } from '@/lib/casting'
 import { renderMarkdown } from '@/lib/render'
 
 import AssetBlock from '@/components/pages/breakdown/AssetBlock.vue'
@@ -320,11 +325,17 @@ const emit = defineEmits([
   'add-one',
   'click',
   'copy-casting',
+  'drop-asset',
   'edit-label',
   'field-changed',
   'metadata-changed',
   'remove-one'
 ])
+
+// State
+// --------------------------------------------------------------------------
+
+const isDropTarget = ref(false)
 
 // Computed
 // --------------------------------------------------------------------------
@@ -446,6 +457,42 @@ const isSupervisorInDepartments = (departments = []) => {
         departmentIds.includes(department)
       ))
   )
+}
+
+// Only available assets are accepted: a dragged file or text is left to the
+// browser.
+const isAssetDragged = event =>
+  !props.readOnly && event.dataTransfer?.types?.includes(ASSET_DRAG_TYPE)
+
+const onDragEnter = event => {
+  if (isAssetDragged(event)) isDropTarget.value = true
+}
+
+// Without preventDefault the browser refuses the drop.
+const onDragOver = event => {
+  if (isAssetDragged(event)) {
+    event.preventDefault()
+    event.dataTransfer.dropEffect = 'copy'
+  }
+}
+
+// Also fired when the pointer moves over a child of the line.
+const onDragLeave = event => {
+  if (!event.currentTarget.contains(event.relatedTarget)) {
+    isDropTarget.value = false
+  }
+}
+
+const onDrop = event => {
+  isDropTarget.value = false
+  if (isAssetDragged(event)) {
+    event.preventDefault()
+    emit(
+      'drop-asset',
+      props.entity.id,
+      event.dataTransfer.getData(ASSET_DRAG_TYPE)
+    )
+  }
 }
 
 const canEditDescriptor = descriptor =>
@@ -598,6 +645,20 @@ label {
   background: var(--background-selectable);
   .sticky {
     background: var(--background-selectable);
+  }
+}
+
+// The browser applies no :hover while dragging: the line under the dragged
+// asset takes the hover look itself, plus an outline (it draws over the cells
+// and moves nothing).
+.shot.is-drop-target {
+  background: var(--background-selectable);
+  outline: 2px solid $purple-strong;
+  outline-offset: -2px;
+
+  .sticky {
+    background: var(--background-selectable);
+    box-shadow: inset 2px 0 0 $purple-strong;
   }
 }
 

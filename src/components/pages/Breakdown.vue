@@ -246,6 +246,7 @@
               @add-one="addOneAsset"
               @click="selectEntity"
               @copy-casting="copyEntityCasting"
+              @drop-asset="onAssetDropped"
               @edit-label="onEditLabelClicked"
               @field-changed="onFieldChanged"
               @metadata-changed="onMetadataChanged"
@@ -906,8 +907,18 @@ const setSaveErrors = (entityIds, isError) => {
   })
 }
 
-const addOneAsset = async (assetId, amount = 1) => {
-  const entityIds = selectedEntityIds.value
+const addOneAsset = (assetId, amount = 1) =>
+  castAssetOnEntities(selectedEntityIds.value, assetId, amount)
+
+// Dropped on a selected line, the asset goes to the whole selection, as "+1"
+// does; anywhere else, to that line only.
+const onAssetDropped = (entityId, assetId) =>
+  castAssetOnEntities(
+    selection.value.has(entityId) ? selectedEntityIds.value : [entityId],
+    assetId
+  )
+
+const castAssetOnEntities = async (entityIds, assetId, amount = 1) => {
   entityIds.forEach(entityId => {
     store.dispatch('addAssetToCasting', {
       entityId,

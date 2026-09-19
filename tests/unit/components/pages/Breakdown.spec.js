@@ -562,6 +562,43 @@ describe('Breakdown page, casting helpers', () => {
     )
   })
 
+  test('casts a dropped asset on the line it lands on', async () => {
+    const { wrapper, actions } = await mountCasting()
+    wrapper.vm.selection = new Set(['shot-a'])
+
+    wrapper
+      .findAllComponents({ name: 'ShotLine' })[1]
+      .vm.$emit('drop-asset', 'shot-b', 'asset-2')
+    await flushPromises()
+
+    expect(actions.addAssetToCasting).toHaveBeenCalledTimes(1)
+    expect(actions.addAssetToCasting.mock.calls[0][1]).toMatchObject({
+      entityId: 'shot-b',
+      assetId: 'asset-2',
+      nbOccurences: 1
+    })
+    expect(actions.castAsset.mock.calls[0][1]).toEqual({
+      entityIds: ['shot-b'],
+      assetId: 'asset-2'
+    })
+  })
+
+  // Dropping on one of the selected lines works like "+1": all of them.
+  test('casts a dropped asset on the whole selection it lands in', async () => {
+    const { wrapper, actions } = await mountCasting()
+    wrapper.vm.selection = new Set(['shot-a', 'shot-b'])
+
+    wrapper
+      .findAllComponents({ name: 'ShotLine' })[1]
+      .vm.$emit('drop-asset', 'shot-b', 'asset-2')
+    await flushPromises()
+
+    expect(actions.castAsset.mock.calls[0][1]).toEqual({
+      entityIds: ['shot-a', 'shot-b'],
+      assetId: 'asset-2'
+    })
+  })
+
   test('copies the casting of a line to paste it on the selection', async () => {
     const { wrapper, actions } = await mountCasting()
     const lines = wrapper.findAllComponents({ name: 'ShotLine' })
