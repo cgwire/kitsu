@@ -494,7 +494,7 @@ const metadataDisplayHeaders = ref({ ...SHOT_DISPLAY_HEADERS })
 const parsedCSV = ref([])
 const removalData = ref({})
 const saveErrors = ref({})
-const selection = ref({})
+const selection = ref(new Set())
 const sequenceId = ref('all')
 
 const errors = reactive({
@@ -719,13 +719,11 @@ const nameHeaderMinWidth = computed(() =>
   columnWidth.value.name ? columnWidth.value.name + 'px' : '250px'
 )
 
-const selectedEntityIds = computed(() =>
-  Object.keys(selection.value).filter(key => selection.value[key])
-)
+const selectedEntityIds = computed(() => [...selection.value])
 
 // The template reads this flag, not the list: the page must not render again
 // on every click, only the lines whose selection changed do.
-const hasSelection = computed(() => selectedEntityIds.value.length > 0)
+const hasSelection = computed(() => selection.value.size > 0)
 
 // Functions
 // --------------------------------------------------------------------------
@@ -774,12 +772,7 @@ const resetSequenceOption = () => {
 }
 
 const resetSelection = () => {
-  let entities = castingAssetTypeAssets.value
-  if (isEpisodeCasting.value) entities = castingEpisodes.value
-  else if (isShotCasting.value) entities = castingSequenceShots.value
-  selection.value = Object.fromEntries(
-    entities.map(entity => [entity.id, false])
-  )
+  selection.value = new Set()
 }
 
 const setSearchInUrl = query => {
@@ -806,36 +799,30 @@ const confirmBuildFilter = query => {
   onSearchChange(query)
 }
 
-const clearSelection = () => {
-  selectedEntityIds.value.forEach(entityId => {
-    selection.value[entityId] = false
-  })
-}
-
 const selectRange = (fromEntityId, toEntityId) => {
-  const keys = Object.keys(selection.value)
-  const fromIndex = keys.indexOf(fromEntityId)
-  const toIndex = keys.indexOf(toEntityId)
-  range(Math.min(fromIndex, toIndex), Math.max(fromIndex, toIndex))
-    .filter(index => index >= 0)
-    .forEach(index => {
-      selection.value[keys[index]] = true
-    })
+  const entityIds = castingEntities.value.map(entity => entity.id)
+  const fromIndex = entityIds.indexOf(fromEntityId)
+  const toIndex = entityIds.indexOf(toEntityId)
+  if (fromIndex >= 0 && toIndex >= 0) {
+    range(Math.min(fromIndex, toIndex), Math.max(fromIndex, toIndex)).forEach(
+      index => selection.value.add(entityIds[index])
+    )
+  }
 }
 
 const selectEntity = (entityId, event) => {
   const isMultiSelect = event.ctrlKey || event.metaKey
-  const wasSelected = selection.value[entityId]
-  const nbElementsSelected = selectedEntityIds.value.length
-  if (!isMultiSelect) clearSelection()
+  const wasSelected = selection.value.has(entityId)
+  const nbElementsSelected = selection.value.size
+  if (!isMultiSelect) selection.value.clear()
   if (previousEntityId && event.shiftKey) {
     selectRange(previousEntityId, entityId)
   }
   if (!previousEntityId || !event.shiftKey) previousEntityId = entityId
   if (!wasSelected || (nbElementsSelected > 1 && !isMultiSelect)) {
-    selection.value[entityId] = true
+    selection.value.add(entityId)
   } else if (isMultiSelect) {
-    selection.value[entityId] = false
+    selection.value.delete(entityId)
   }
 }
 
@@ -1130,8 +1117,10 @@ const confirmNewAsset = async form => {
   loading.edit = false
 }
 
+// The first selected line of the list, whatever the order of the clicks.
 const copyCasting = () => {
-  clipboard.copyCasting(casting.value[selectedEntityIds.value[0]])
+  const entity = castingEntities.value.find(({ id }) => selection.value.has(id))
+  clipboard.copyCasting(casting.value[entity?.id])
 }
 
 const pasteCasting = async () => {

@@ -245,7 +245,7 @@ describe('Breakdown page, removeOneAssetFromSelection', () => {
         casting: { 'shot-a': [{ asset_id: 'asset-1', nb_occurences: 2 }] }
       }
     })
-    wrapper.vm.selection = { 'shot-a': true, 'shot-b': true }
+    wrapper.vm.selection = new Set(['shot-a', 'shot-b'])
 
     await wrapper.vm.removeOneAssetFromSelection('asset-1')
 
@@ -270,7 +270,7 @@ describe('Breakdown page, removeOneAssetFromSelection', () => {
       },
       actions: { castAsset: vi.fn(() => Promise.reject(new Error('down'))) }
     })
-    wrapper.vm.selection = { 'shot-a': true }
+    wrapper.vm.selection = new Set(['shot-a'])
 
     await wrapper.vm.removeOneAssetFromSelection('asset-1')
     await nextTick()
@@ -339,6 +339,29 @@ describe('Breakdown page, selection', () => {
     expect(lines[0].classes()).not.toContain('selected')
     expect(lines[1].classes()).toContain('selected')
     expect(updates).toEqual({ ShotLine: 2 })
+  })
+
+  test('selects the lines between two shift clicks, in list order', async () => {
+    const shots = ['shot-a', 'shot-b', 'shot-c', 'shot-d'].map(id => ({
+      id,
+      name: id,
+      sequence_name: 'SEQ01',
+      data: {}
+    }))
+    const { wrapper } = mountPage({
+      state: { isTVShow: false, currentEpisode: null },
+      getters: { castingSequenceShots: () => shots }
+    })
+    await flushPromises()
+
+    wrapper.vm.selectEntity('shot-c', {})
+    wrapper.vm.selectEntity('shot-a', { shiftKey: true })
+
+    expect(wrapper.vm.selectedEntityIds.sort()).toEqual([
+      'shot-a',
+      'shot-b',
+      'shot-c'
+    ])
   })
 
   // Casting an asset rewrites the casting of its entity only: the asset type

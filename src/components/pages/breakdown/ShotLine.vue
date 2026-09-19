@@ -282,7 +282,7 @@ const store = useStore()
 const props = defineProps({
   entity: { type: Object, default: () => ({}) },
   previewFileId: { type: String, default: '' },
-  selection: { type: Object, default: () => ({}) },
+  selection: { type: Set, default: () => new Set() },
   name: { type: String, default: '' },
   assetTypes: { type: Array, default: () => [] },
   readOnly: { type: Boolean, default: false },
@@ -319,9 +319,9 @@ const isFrames = computed(() => store.getters.isFrames)
 const isShowInfosBreakdown = computed(() => store.getters.isShowInfosBreakdown)
 const user = computed(() => store.getters.user)
 
-// Read from the selection map of the page so that a click renders the lines
+// Read from the selection set of the page so that a click renders the lines
 // it changes, not the page and its whole list.
-const selected = computed(() => Boolean(props.selection[props.entity.id]))
+const selected = computed(() => props.selection.has(props.entity.id))
 
 const chunks = computed(() =>
   props.name.split(' / ').filter(chunk => chunk && chunk !== 'undefined')
