@@ -66,6 +66,8 @@
       "edit_label": "更改資產的標籤",
       "empty": "角色分配為空",
       "label": "標籤",
+      "nb_assets": "{count} 個資產 | {count} 個資產",
+      "nb_occurrences": "出現 {count} 次 | 出現 {count} 次",
       "occurrences": "出現次數",
       "picture_mode": "切換到圖片模式",
       "remove_from_casting": "從選角中移除",

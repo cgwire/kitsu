@@ -116,6 +116,8 @@
       "episode_casting": "Casting odcinka",
       "hide_library": "Ukryj bibliotekę",
       "label": "Etykieta",
+      "nb_assets": "{count} asset | {count} assetów",
+      "nb_occurrences": "{count} wystąpienie | {count} wystąpień",
       "occurrences": "Wystąpienia",
       "picture_mode": "Przełącz na tryb graficzny",
       "remove_from_casting": "Usuń z castingu",

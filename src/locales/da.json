@@ -66,6 +66,8 @@
       "edit_label": "Rediger assetets label",
       "empty": "Tom casting",
       "label": "Label",
+      "nb_assets": "{count} asset | {count} assets",
+      "nb_occurrences": "{count} forekomst | {count} forekomster",
       "occurrences": "Forekomster",
       "picture_mode": "Skift til billedtilstand",
       "remove_from_casting": "Fjern fra casting",

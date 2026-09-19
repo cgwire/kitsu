@@ -66,6 +66,8 @@
       "edit_label": "تغییر برچسب منبع",
       "empty": "کستینگ خالی",
       "label": "برچسب",
+      "nb_assets": "{count} دارایی | {count} دارایی",
+      "nb_occurrences": "{count} تکرار | {count} تکرار",
       "occurrences": "تعداد تکرار",
       "picture_mode": "به حالت تصویر بروید",
       "remove_from_casting": "حذف از کستینگ",

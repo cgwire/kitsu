@@ -66,6 +66,8 @@
       "edit_label": "Changer le label de l'asset",
       "empty": "Casting vide",
       "label": "Label",
+      "nb_assets": "{count} asset | {count} assets",
+      "nb_occurrences": "{count} occurrence | {count} occurrences",
       "occurrences": "Occurrences",
       "picture_mode": "Passer en mode image",
       "remove_from_casting": "Retirer du casting",

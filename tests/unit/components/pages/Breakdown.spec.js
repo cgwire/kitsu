@@ -111,7 +111,11 @@ const mountPage = ({
       config: {
         globalProperties: { $socket: { on: vi.fn(), off: vi.fn() } }
       },
-      mocks: { $t: key => key },
+      // Keys with their parameters: the counts of a plural show in the text.
+      mocks: {
+        $t: (key, params) =>
+          params ? `${key} ${JSON.stringify(params)}` : key
+      },
       mixins,
       // The page drives its search field through a ref.
       stubs: {
@@ -462,16 +466,42 @@ describe('Breakdown page, casting helpers', () => {
           'shot-c': [[hero, villain]]
         }),
         castingSequenceShots: () => shots
-      }
+      },
+      stubs: { CastingTypeTotal: false }
     })
     await flushPromises()
     return mounted
   }
 
+  const typeTotals = wrapper =>
+    Object.fromEntries(
+      wrapper
+        .findAllComponents({ name: 'CastingTypeTotal' })
+        .map(total => [
+          total.props('assetType'),
+          total.findAll('span').map(part => part.text())
+        ])
+    )
+
   const displayedIds = wrapper =>
     wrapper
       .findAllComponents({ name: 'ShotLine' })
       .map(line => line.props('entity').id)
+
+  test('totals the distinct assets and the occurrences of each type', async () => {
+    const { wrapper } = await mountCasting()
+
+    expect(typeTotals(wrapper)).toEqual({
+      Characters: [
+        'breakdown.nb_assets {"count":2}',
+        'breakdown.nb_occurrences {"count":7}'
+      ],
+      Environments: [
+        'breakdown.nb_assets {"count":1}',
+        'breakdown.nb_occurrences {"count":1}'
+      ]
+    })
+  })
 
   test('displays the lines without casting only', async () => {
     const { wrapper } = await mountCasting()
@@ -498,6 +528,10 @@ describe('Breakdown page, casting helpers', () => {
     await nextTick()
 
     expect(displayedIds(wrapper)).toEqual(['shot-c'])
+    // The totals follow the lines displayed.
+    expect(typeTotals(wrapper).Characters[1]).toBe(
+      'breakdown.nb_occurrences {"count":5}'
+    )
   })
 
 })

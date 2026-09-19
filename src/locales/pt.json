@@ -66,6 +66,8 @@
       "edit_label": "Alterar o rótulo do asset",
       "empty": "Elenco vazio",
       "label": "Rótulo",
+      "nb_assets": "{count} asset | {count} assets",
+      "nb_occurrences": "{count} ocorrência | {count} ocorrências",
       "occurrences": "Ocorrências",
       "picture_mode": "Mudar para o modo de imagem",
       "remove_from_casting": "Remover do casting",

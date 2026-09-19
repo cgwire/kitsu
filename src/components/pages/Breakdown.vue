@@ -216,6 +216,10 @@
                 <span class="ellipsis nowrap" :title="assetType">
                   {{ assetType }}
                 </span>
+                <casting-type-total
+                  :asset-type="assetType"
+                  :entities="displayedEntities"
+                />
               </div>
 
               <div class="actions filler"></div>
@@ -439,6 +443,7 @@ import EditLabelModal from '@/components/modals/EditLabelModal.vue'
 import ImportModal from '@/components/modals/ImportModal.vue'
 import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
 import AvailableAssetBlock from '@/components/pages/breakdown/AvailableAssetBlock.vue'
+import CastingTypeTotal from '@/components/pages/breakdown/CastingTypeTotal.vue'
 import ShotLine from '@/components/pages/breakdown/ShotLine.vue'
 import ButtonHrefLink from '@/components/widgets/ButtonHrefLink.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
@@ -1703,6 +1708,9 @@ useHead({
 }
 
 .asset-type-header {
+  align-items: flex-start;
+  flex-direction: column;
+  justify-content: center;
   padding-left: 1em;
   min-width: 150px;
   max-width: 150px;

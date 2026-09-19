@@ -121,6 +121,8 @@ export default {
     episode_casting: 'Episode casting',
     hide_library: 'Hide Library',
     label: 'Label',
+    nb_assets: '{count} asset | {count} assets',
+    nb_occurrences: '{count} occurrence | {count} occurrences',
     occurrences: 'Occurrences',
     picture_mode: 'Switch to picture mode',
     remove_from_casting: 'Remove from casting',

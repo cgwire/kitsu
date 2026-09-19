@@ -66,6 +66,8 @@
       "edit_label": "Cambiar la etiqueta del recurso",
       "empty": "Casting vacío",
       "label": "Etiqueta",
+      "nb_assets": "{count} asset | {count} assets",
+      "nb_occurrences": "{count} aparición | {count} apariciones",
       "occurrences": "Ocurrencias",
       "picture_mode": "Cambiar a modo de imagen",
       "remove_from_casting": "Quitar del casting",

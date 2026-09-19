@@ -66,6 +66,8 @@
       "edit_label": "어셋 레이블 변경",
       "empty": "출연진 없음",
       "label": "라벨",
+      "nb_assets": "에셋 {count}개 | 에셋 {count}개",
+      "nb_occurrences": "등장 {count}회 | 등장 {count}회",
       "occurrences": "등장 횟수",
       "picture_mode": "사진 모드로 전환",
       "remove_from_casting": "캐스팅에서 제거",

@@ -66,6 +66,8 @@
       "edit_label": "Cambia l'etichetta dell'asset",
       "empty": "Casting vuoto",
       "label": "Etichetta",
+      "nb_assets": "{count} asset | {count} asset",
+      "nb_occurrences": "{count} occorrenza | {count} occorrenze",
       "occurrences": "Occorrenze",
       "picture_mode": "Passa alla modalità immagini",
       "remove_from_casting": "Rimuovi dal casting",
