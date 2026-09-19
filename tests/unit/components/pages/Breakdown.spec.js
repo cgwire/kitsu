@@ -615,6 +615,114 @@ describe('Breakdown page, casting helpers', () => {
   })
 })
 
+describe('Breakdown page, undo', () => {
+  const link = (assetId, nbOccurences) => ({
+    asset_id: assetId,
+    asset_name: assetId,
+    asset_type_name: 'Characters',
+    nb_occurences: nbOccurences
+  })
+
+  // The store of the page for real: the casting actions write in the state.
+  const mountUndo = async () => {
+    const mounted = mountPage({
+      state: {
+        isTVShow: false,
+        currentEpisode: null,
+        casting: { 'shot-a': [link('hero', 2)], 'shot-b': [] }
+      },
+      actions: {
+        addAssetToCasting: ({ state }, { entityId, assetId, nbOccurences }) => {
+          const casted = state.casting[entityId].find(
+            ({ asset_id }) => asset_id === assetId
+          )
+          // In place, as the store does.
+          if (casted) casted.nb_occurences += nbOccurences
+          else state.casting[entityId].push(link(assetId, nbOccurences))
+        },
+        saveCastings: vi.fn(() => Promise.resolve()),
+        setEntityCasting: ({ state }, { entityId, casting }) => {
+          state.casting[entityId] = casting
+        }
+      },
+      getters: {
+        castingSequenceShots: () => [
+          { id: 'shot-a', name: 'SH01', data: {} },
+          { id: 'shot-b', name: 'SH02', data: {} }
+        ]
+      }
+    })
+    await flushPromises()
+    return mounted
+  }
+
+  test('has nothing to undo before a change', async () => {
+    const { wrapper, actions } = await mountUndo()
+
+    expect(wrapper.vm.canUndo).toBe(false)
+    await wrapper.vm.undoCasting()
+
+    expect(actions.saveCastings).not.toHaveBeenCalled()
+  })
+
+  test('puts back the castings a paste replaced', async () => {
+    const { wrapper, store, actions } = await mountUndo()
+    wrapper.vm.copyEntityCasting('shot-a')
+    wrapper.vm.selection = new Set(['shot-b'])
+    await wrapper.vm.pasteCasting()
+    expect(store.state.casting['shot-b']).toHaveLength(1)
+
+    await wrapper.vm.undoCasting()
+
+    expect(store.state.casting['shot-b']).toEqual([])
+    expect(actions.saveCastings.mock.calls.at(-1)[1]).toEqual(['shot-b'])
+    expect(wrapper.vm.canUndo).toBe(false)
+  })
+
+  // The store adds occurrences in place: the snapshot must be a copy.
+  test('undoes the changes one by one, the last first', async () => {
+    const { wrapper, store } = await mountUndo()
+    wrapper.vm.selection = new Set(['shot-a'])
+    await wrapper.vm.addOneAsset('hero')
+    await wrapper.vm.addOneAsset('villain')
+    expect(store.state.casting['shot-a']).toEqual([
+      link('hero', 3),
+      link('villain', 1)
+    ])
+
+    await wrapper.vm.undoCasting()
+    expect(store.state.casting['shot-a']).toEqual([link('hero', 3)])
+    await wrapper.vm.undoCasting()
+    expect(store.state.casting['shot-a']).toEqual([link('hero', 2)])
+  })
+
+  test('undoes on ctrl + z, outside text fields', async () => {
+    const { wrapper, store } = await mountUndo()
+    wrapper.vm.selection = new Set(['shot-a'])
+    await wrapper.vm.addOneAsset('hero')
+
+    window.dispatchEvent(
+      new KeyboardEvent('keydown', { keyCode: 90, ctrlKey: true })
+    )
+    await flushPromises()
+
+    expect(store.state.casting['shot-a']).toEqual([link('hero', 2)])
+  })
+
+  // The lines of another sequence are not displayed: undoing them blind
+  // would rewrite castings nobody is looking at.
+  test('forgets the changes when the scope moves', async () => {
+    const { wrapper } = await mountUndo()
+    wrapper.vm.selection = new Set(['shot-a'])
+    await wrapper.vm.addOneAsset('hero')
+    expect(wrapper.vm.canUndo).toBe(true)
+
+    wrapper.vm.resetSelection()
+
+    expect(wrapper.vm.canUndo).toBe(false)
+  })
+})
+
 describe('Breakdown page, asset search', () => {
   // The page writes the search in the URL and watches that same URL for the
   // searches coming from elsewhere (saved queries, back button).

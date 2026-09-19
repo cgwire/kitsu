@@ -73,6 +73,7 @@
       "occurrences": "등장 횟수",
       "picture_mode": "사진 모드로 전환",
       "remove_from_casting": "캐스팅에서 제거",
+      "undo": "마지막 캐스팅 변경 실행 취소 (ctrl + Z)",
       "view_as_cards": "카드로 보기",
       "view_as_list": "목록으로 보기",
       "text_mode": "텍스트 모드로 전환",

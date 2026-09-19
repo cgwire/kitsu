@@ -131,6 +131,7 @@ export default {
     show_library: 'Display Library',
     text_mode: 'Switch to text mode',
     title: 'Breakdown',
+    undo: 'Undo the last casting change (ctrl + Z)',
     view_as_cards: 'View as cards',
     view_as_list: 'View as list',
     options: {

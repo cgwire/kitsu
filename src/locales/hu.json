@@ -73,6 +73,7 @@
       "occurrences": "Előfordulások",
       "picture_mode": "Váltás kép módra",
       "remove_from_casting": "Eltávolítás a castingból",
+      "undo": "Az utolsó castingmódosítás visszavonása (ctrl + Z)",
       "view_as_cards": "Kártyás nézet",
       "view_as_list": "Listás nézet",
       "text_mode": "Váltás szöveges módra",

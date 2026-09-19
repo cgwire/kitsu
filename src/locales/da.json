@@ -73,6 +73,7 @@
       "occurrences": "Forekomster",
       "picture_mode": "Skift til billedtilstand",
       "remove_from_casting": "Fjern fra casting",
+      "undo": "Fortryd den seneste castingændring (ctrl + Z)",
       "view_as_cards": "Vis som kort",
       "view_as_list": "Vis som liste",
       "text_mode": "Skift til teksttilstand",

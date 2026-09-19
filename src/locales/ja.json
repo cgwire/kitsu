@@ -73,6 +73,7 @@
       "occurrences": "出現回数",
       "picture_mode": "ピクチャーモードに切り替え",
       "remove_from_casting": "キャスティングから削除",
+      "undo": "直前のキャスティング変更を元に戻す（ctrl + Z）",
       "view_as_cards": "カード表示",
       "view_as_list": "リスト表示",
       "text_mode": "テキストモードに切り替え",

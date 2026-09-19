@@ -73,6 +73,7 @@
       "occurrences": "出現次數",
       "picture_mode": "切換到圖片模式",
       "remove_from_casting": "從選角中移除",
+      "undo": "復原上一次選角變更（ctrl + Z）",
       "view_as_cards": "卡片檢視",
       "view_as_list": "列表檢視",
       "text_mode": "切換到文字模式",

@@ -44,6 +44,14 @@
             v-model="castedAssetSearch"
           />
           <span class="filler"></span>
+          <button-simple
+            class="flexrow-item desktop-only"
+            icon="undo"
+            :disabled="!canUndo"
+            :title="$t('breakdown.undo')"
+            @click="undoCasting"
+            v-if="isCurrentUserManager"
+          />
           <show-infos-button class="flexrow-item desktop-only" />
           <button-simple
             class="flexrow-item"
@@ -485,6 +493,7 @@ const optionalCsvColumns = ['Label']
 
 const CASTING_LOAD_DELAY = 300
 const MAX_ENTITY_CASTING_LOADS = 5
+const MAX_UNDO_STEPS = 20
 
 const { t } = useI18n()
 const route = useRoute()
@@ -524,6 +533,7 @@ const removalData = ref({})
 const saveErrors = ref({})
 const selection = ref(new Set())
 const sequenceId = ref('all')
+const undoSteps = ref([])
 
 const errors = reactive({
   edit: false,
@@ -785,6 +795,8 @@ const nameHeaderMinWidth = computed(() =>
 
 const selectedEntityIds = computed(() => [...selection.value])
 
+const canUndo = computed(() => undoSteps.value.length > 0)
+
 // The template reads this flag, not the list: the page must not render again
 // on every click, only the lines whose selection changed do.
 const hasSelection = computed(() => selection.value.size > 0)
@@ -835,8 +847,12 @@ const resetSequenceOption = () => {
   }
 }
 
+// Runs when the lines displayed change: the castings to undo belong to lines
+// that may not be there anymore, and undoing them blind would rewrite
+// castings nobody is looking at.
 const resetSelection = () => {
   selection.value = new Set()
+  undoSteps.value = []
 }
 
 const setSearchInUrl = query => {
@@ -918,7 +934,40 @@ const onAssetDropped = (entityId, assetId) =>
     assetId
   )
 
+// Keeps the castings about to change. Copies: the store adds and removes
+// occurrences in place.
+const rememberCastings = entityIds => {
+  const castings = Object.fromEntries(
+    entityIds.map(entityId => [
+      entityId,
+      (casting.value[entityId] || []).map(link => ({ ...link }))
+    ])
+  )
+  undoSteps.value = [...undoSteps.value, castings].slice(-MAX_UNDO_STEPS)
+}
+
+const undoCasting = async () => {
+  const castings = undoSteps.value[undoSteps.value.length - 1]
+  if (!castings) return
+  undoSteps.value = undoSteps.value.slice(0, -1)
+  const entityIds = Object.keys(castings)
+  entityIds.forEach(entityId => {
+    store.dispatch('setEntityCasting', {
+      entityId,
+      casting: castings[entityId]
+    })
+  })
+  setSaveErrors(entityIds, false)
+  try {
+    await store.dispatch('saveCastings', entityIds)
+  } catch (err) {
+    setSaveErrors(entityIds, true)
+    console.error(err)
+  }
+}
+
 const castAssetOnEntities = async (entityIds, assetId, amount = 1) => {
+  rememberCastings(entityIds)
   entityIds.forEach(entityId => {
     store.dispatch('addAssetToCasting', {
       entityId,
@@ -940,6 +989,7 @@ const addTenAssets = assetId => addOneAsset(assetId, 10)
 
 // Returns whether the removal was saved.
 const saveAssetRemovals = async (entityIds, assetId, nbOccurences) => {
+  rememberCastings(entityIds)
   loading.remove = true
   errors.remove = false
   entityIds.forEach(entityId => {
@@ -1209,6 +1259,7 @@ const pasteCasting = async () => {
   const castingToPaste = clipboard.pasteCasting()
   if (!castingToPaste || castingToPaste.length === 0) return
   const entityIds = selectedEntityIds.value
+  rememberCastings(entityIds)
   entityIds.forEach(entityId => {
     store.dispatch('setEntityCasting', { entityId, casting: castingToPaste })
   })
@@ -1229,6 +1280,8 @@ const onKeyDown = event => {
     copyCasting() // ctrl + c
   } else if (isShortcut && event.keyCode === 86) {
     pasteCasting() // ctrl + v
+  } else if (isShortcut && event.keyCode === 90 && !event.shiftKey) {
+    undoCasting() // ctrl + z
   }
 }
 

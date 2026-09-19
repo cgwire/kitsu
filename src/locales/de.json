@@ -73,6 +73,7 @@
       "occurrences": "Vorkommen",
       "picture_mode": "Zum Bildmodus wechseln",
       "remove_from_casting": "Aus dem Casting entfernen",
+      "undo": "Letzte Casting-Änderung rückgängig machen (Strg + Z)",
       "view_as_cards": "Als Karten anzeigen",
       "view_as_list": "Als Liste anzeigen",
       "text_mode": "Zum Textmodus wechseln",

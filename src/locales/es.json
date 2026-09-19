@@ -73,6 +73,7 @@
       "occurrences": "Ocurrencias",
       "picture_mode": "Cambiar a modo de imagen",
       "remove_from_casting": "Quitar del casting",
+      "undo": "Deshacer el último cambio de casting (ctrl + Z)",
       "view_as_cards": "Ver como tarjetas",
       "view_as_list": "Ver como lista",
       "text_mode": "Cambiar a modo de texto",

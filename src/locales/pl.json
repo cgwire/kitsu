@@ -122,6 +122,7 @@
       "occurrences": "Wystąpienia",
       "picture_mode": "Przełącz na tryb graficzny",
       "remove_from_casting": "Usuń z castingu",
+      "undo": "Cofnij ostatnią zmianę obsady (ctrl + Z)",
       "view_as_cards": "Widok kart",
       "view_as_list": "Widok listy",
       "save_error": "Błąd podczas zapisywania castingu",
