@@ -241,6 +241,7 @@
               :column-width="columnWidth"
               @add-one="addOneAsset"
               @click="selectEntity"
+              @copy-casting="copyEntityCasting"
               @edit-label="onEditLabelClicked"
               @field-changed="onFieldChanged"
               @metadata-changed="onMetadataChanged"
@@ -1168,6 +1169,12 @@ const copyCasting = () => {
     selection.value.has(id)
   )
   clipboard.copyCasting(casting.value[entity?.id])
+}
+
+// Same as ctrl + C on a selected line, one click away: in a sequence most of
+// the casting repeats from one shot to the next.
+const copyEntityCasting = entityId => {
+  clipboard.copyCasting(casting.value[entityId])
 }
 
 const pasteCasting = async () => {

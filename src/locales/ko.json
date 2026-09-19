@@ -63,6 +63,7 @@
     },
     "breakdown": {
       "all_assets": "사용 가능한 모든 어셋",
+      "copy_casting": "이 캐스팅 복사 (ctrl + V로 선택한 줄에 붙여넣기)",
       "edit_label": "어셋 레이블 변경",
       "empty": "출연진 없음",
       "label": "라벨",

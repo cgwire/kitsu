@@ -37,6 +37,17 @@
             {{ chunk }}
           </div>
         </div>
+        <button
+          class="copy-casting"
+          type="button"
+          :title="$t('breakdown.copy_casting')"
+          :aria-label="$t('breakdown.copy_casting')"
+          @click.stop="emit('copy-casting', entity.id)"
+          @keydown.enter.stop
+          v-if="!readOnly"
+        >
+          <copy-icon :size="16" />
+        </button>
       </div>
     </div>
     <div class="standby-column flexrow-item" v-if="isShowInfosBreakdown">
@@ -258,6 +269,7 @@
 
 <script setup>
 /* eslint-disable no-unused-vars */
+import { CopyIcon } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useStore } from 'vuex'
 
@@ -298,6 +310,7 @@ const props = defineProps({
 const emit = defineEmits([
   'add-one',
   'click',
+  'copy-casting',
   'edit-label',
   'field-changed',
   'metadata-changed',
@@ -475,6 +488,32 @@ label {
 }
 .asset-type-line:not(:first-child) {
   margin-top: 0.5em;
+}
+
+.copy-casting {
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: var(--text-alt);
+  bottom: 4px;
+  cursor: pointer;
+  line-height: 0;
+  opacity: 0;
+  padding: 4px;
+  // The name cell is full: the button sits in its corner (the cell is sticky,
+  // hence positioned).
+  position: absolute;
+  right: 4px;
+
+  .shot:hover &,
+  &:focus-visible {
+    opacity: 1;
+  }
+
+  &:hover {
+    background: var(--background-hover);
+    color: var(--text);
+  }
 }
 
 .shot-name {

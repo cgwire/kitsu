@@ -63,6 +63,7 @@
     },
     "breakdown": {
       "all_assets": "Tutti gli asset disponibili",
+      "copy_casting": "Copia questo casting (ctrl + V lo incolla nelle righe selezionate)",
       "edit_label": "Cambia l'etichetta dell'asset",
       "empty": "Casting vuoto",
       "label": "Etichetta",

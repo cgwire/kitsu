@@ -63,6 +63,7 @@
     },
     "breakdown": {
       "all_assets": "利用可能なすべてのアセット",
+      "copy_casting": "このキャスティングをコピー（ctrl + V で選択した行に貼り付け）",
       "edit_label": "アセットのラベルを変更",
       "empty": "キャスティングなし",
       "label": "ラベル",

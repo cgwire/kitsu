@@ -63,6 +63,7 @@
     },
     "breakdown": {
       "all_assets": "所有可用资产",
+      "copy_casting": "复制此选角（ctrl + V 粘贴到所选行）",
       "edit_label": "更改资产的标签",
       "empty": "空的选角",
       "label": "标签",

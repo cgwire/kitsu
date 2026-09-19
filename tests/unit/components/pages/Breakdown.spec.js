@@ -534,6 +534,20 @@ describe('Breakdown page, casting helpers', () => {
     )
   })
 
+  test('copies the casting of a line to paste it on the selection', async () => {
+    const { wrapper, actions } = await mountCasting()
+    const lines = wrapper.findAllComponents({ name: 'ShotLine' })
+
+    lines[0].vm.$emit('copy-casting', 'shot-a')
+    wrapper.vm.selection = new Set(['shot-b'])
+    await wrapper.vm.pasteCasting()
+
+    expect(actions.setEntityCasting.mock.calls[0][1]).toEqual({
+      entityId: 'shot-b',
+      casting: [hero, forest]
+    })
+    expect(actions.saveCastings.mock.calls[0][1]).toEqual(['shot-b'])
+  })
 })
 
 describe('Breakdown page, asset search', () => {

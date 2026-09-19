@@ -63,6 +63,7 @@
     },
     "breakdown": {
       "all_assets": "Todos los recursos disponibles",
+      "copy_casting": "Copiar este casting (ctrl + V lo pega en las líneas seleccionadas)",
       "edit_label": "Cambiar la etiqueta del recurso",
       "empty": "Casting vacío",
       "label": "Etiqueta",

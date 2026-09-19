@@ -63,6 +63,7 @@
     },
     "breakdown": {
       "all_assets": "Alle tilgængelige assets",
+      "copy_casting": "Kopiér denne casting (ctrl + V indsætter den på de valgte linjer)",
       "edit_label": "Rediger assetets label",
       "empty": "Tom casting",
       "label": "Label",

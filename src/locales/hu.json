@@ -63,6 +63,7 @@
     },
     "breakdown": {
       "all_assets": "Minden rendelkezésre álló asset",
+      "copy_casting": "Casting másolása (a ctrl + V beilleszti a kijelölt sorokba)",
       "edit_label": "Asset címkéjének megváltoztatása",
       "empty": "Üres szereplista",
       "label": "Címke",

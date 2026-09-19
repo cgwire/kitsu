@@ -116,6 +116,7 @@ export default {
 
   breakdown: {
     all_assets: 'All available assets',
+    copy_casting: 'Copy this casting (ctrl + V pastes it on the selected lines)',
     edit_label: 'Change the asset\'s label',
     empty: 'Empty casting',
     episode_casting: 'Episode casting',

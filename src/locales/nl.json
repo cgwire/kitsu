@@ -63,6 +63,7 @@
     },
     "breakdown": {
       "all_assets": "Alle beschikbare assets",
+      "copy_casting": "Deze casting kopiëren (ctrl + V plakt deze op de geselecteerde regels)",
       "edit_label": "Asset label aanpassen",
       "empty": "Lege casting",
       "label": "Label",

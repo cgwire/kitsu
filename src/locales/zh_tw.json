@@ -63,6 +63,7 @@
     },
     "breakdown": {
       "all_assets": "所有可用資產",
+      "copy_casting": "複製此選角（ctrl + V 貼到所選列）",
       "edit_label": "更改資產的標籤",
       "empty": "角色分配為空",
       "label": "標籤",

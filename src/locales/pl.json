@@ -111,6 +111,7 @@
     },
     "breakdown": {
       "all_assets": "Wszystkie dostępne assety",
+      "copy_casting": "Skopiuj tę obsadę (ctrl + V wkleja ją do zaznaczonych wierszy)",
       "edit_label": "Zmień etykietę assetu",
       "empty": "Pusty casting",
       "episode_casting": "Casting odcinka",
