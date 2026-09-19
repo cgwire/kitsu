@@ -615,7 +615,7 @@ describe('Breakdown page, casting helpers', () => {
   })
 })
 
-describe('Breakdown page, undo', () => {
+describe('Breakdown page, paste and undo', () => {
   const link = (assetId, nbOccurences) => ({
     asset_id: assetId,
     asset_name: assetId,
@@ -655,6 +655,35 @@ describe('Breakdown page, undo', () => {
     await flushPromises()
     return mounted
   }
+
+  // The store adds occurrences in place: lines sharing one pasted array, and
+  // the clipboard with them, would all change along with the line edited.
+  test('pastes a casting of its own on each line', async () => {
+    const { wrapper, store } = await mountUndo()
+    store.state.casting['shot-c'] = []
+    wrapper.vm.copyEntityCasting('shot-a')
+    wrapper.vm.selection = new Set(['shot-b', 'shot-c'])
+    await wrapper.vm.pasteCasting()
+
+    wrapper.vm.selection = new Set(['shot-b'])
+    await wrapper.vm.addOneAsset('hero')
+
+    expect(store.state.casting['shot-b']).toEqual([link('hero', 3)])
+    expect(store.state.casting['shot-c']).toEqual([link('hero', 2)])
+    expect(store.state.casting['shot-a']).toEqual([link('hero', 2)])
+  })
+
+  test('pastes the casting as it was when copied', async () => {
+    const { wrapper, store } = await mountUndo()
+    wrapper.vm.copyEntityCasting('shot-a')
+    wrapper.vm.selection = new Set(['shot-a'])
+    await wrapper.vm.addOneAsset('hero')
+
+    wrapper.vm.selection = new Set(['shot-b'])
+    await wrapper.vm.pasteCasting()
+
+    expect(store.state.casting['shot-b']).toEqual([link('hero', 2)])
+  })
 
   test('has nothing to undo before a change', async () => {
     const { wrapper, actions } = await mountUndo()

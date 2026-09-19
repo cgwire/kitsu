@@ -22,10 +22,25 @@ describe('clipboard', () => {
       expect(clipboard.pasteCasting()).toEqual([])
     })
 
-    it('returns the same reference after copy', () => {
+    // The store edits the casting of a line in place: the clipboard keeps the
+    // casting as it was when copied, and each paste gets links of its own.
+    it('keeps a copy of the casting and hands out a copy per paste', () => {
       const casting = [{ asset_id: 'a1', nb_occurences: 2 }]
       clipboard.copyCasting(casting)
-      expect(clipboard.pasteCasting()).toBe(casting)
+      casting[0].nb_occurences = 5
+
+      const pasted = clipboard.pasteCasting()
+      pasted[0].nb_occurences = 9
+
+      expect(pasted).toEqual([{ asset_id: 'a1', nb_occurences: 9 }])
+      expect(clipboard.pasteCasting()).toEqual([
+        { asset_id: 'a1', nb_occurences: 2 }
+      ])
+    })
+
+    it('copies an empty casting for a line without one', () => {
+      clipboard.copyCasting(undefined)
+      expect(clipboard.pasteCasting()).toEqual([])
     })
   })
 })

@@ -1256,12 +1256,15 @@ const copyEntityCasting = entityId => {
 }
 
 const pasteCasting = async () => {
-  const castingToPaste = clipboard.pasteCasting()
-  if (!castingToPaste || castingToPaste.length === 0) return
+  if (clipboard.pasteCasting().length === 0) return
   const entityIds = selectedEntityIds.value
   rememberCastings(entityIds)
+  // One paste per line: each gets a casting of its own.
   entityIds.forEach(entityId => {
-    store.dispatch('setEntityCasting', { entityId, casting: castingToPaste })
+    store.dispatch('setEntityCasting', {
+      entityId,
+      casting: clipboard.pasteCasting()
+    })
   })
   setSaveErrors(entityIds, false)
   try {
