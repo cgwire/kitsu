@@ -63,12 +63,17 @@
     },
     "breakdown": {
       "all_assets": "Alle verfügbaren Assets",
+      "copy_casting": "Dieses Casting kopieren (Strg + V fügt es in die ausgewählten Zeilen ein)",
       "edit_label": "Etikett bearbeiten",
       "empty": "Leeres Casting",
       "label": "Etikett",
+      "nb_assets": "{count} Asset | {count} Assets",
+      "nb_occurrences": "{count} Vorkommen | {count} Vorkommen",
+      "nb_ready": "{ready} / {total} bereit",
       "occurrences": "Vorkommen",
       "picture_mode": "Zum Bildmodus wechseln",
       "remove_from_casting": "Aus dem Casting entfernen",
+      "undo": "Letzte Casting-Änderung rückgängig machen (Strg + Z)",
       "view_as_cards": "Als Karten anzeigen",
       "view_as_list": "Als Liste anzeigen",
       "text_mode": "Zum Textmodus wechseln",
@@ -85,10 +90,16 @@
       "fields": {
         "standby": "STDB"
       },
-      "episode_casting": "Episodencasting",
       "save_error": "Fehler beim Speichern des Castings",
       "hide_library": "Bibliothek ausblenden",
-      "show_library": "Bibliothek anzeigen"
+      "show_library": "Bibliothek anzeigen",
+      "filters": {
+        "all": "Alle Zeilen",
+        "asset": "Enthält das Asset…",
+        "empty": "Ohne Casting",
+        "label": "Zeilen",
+        "standby": "Standby"
+      }
     },
     "comments": {
       "add_attachment": "Anhang hinzufügen",

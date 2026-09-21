@@ -111,14 +111,18 @@
     },
     "breakdown": {
       "all_assets": "Wszystkie dostępne assety",
+      "copy_casting": "Skopiuj tę obsadę (ctrl + V wkleja ją do zaznaczonych wierszy)",
       "edit_label": "Zmień etykietę assetu",
       "empty": "Pusty casting",
-      "episode_casting": "Casting odcinka",
       "hide_library": "Ukryj bibliotekę",
       "label": "Etykieta",
+      "nb_assets": "{count} asset | {count} assetów",
+      "nb_occurrences": "{count} wystąpienie | {count} wystąpień",
+      "nb_ready": "{ready} / {total} gotowych",
       "occurrences": "Wystąpienia",
       "picture_mode": "Przełącz na tryb graficzny",
       "remove_from_casting": "Usuń z castingu",
+      "undo": "Cofnij ostatnią zmianę obsady (ctrl + Z)",
       "view_as_cards": "Widok kart",
       "view_as_list": "Widok listy",
       "save_error": "Błąd podczas zapisywania castingu",
@@ -136,6 +140,13 @@
       },
       "fields": {
         "standby": "STDB"
+      },
+      "filters": {
+        "all": "Wszystkie wiersze",
+        "asset": "Zawiera asset…",
+        "empty": "Bez obsady",
+        "label": "Wiersze",
+        "standby": "Wstrzymane"
       }
     },
     "budget": {

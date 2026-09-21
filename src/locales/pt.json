@@ -63,12 +63,17 @@
     },
     "breakdown": {
       "all_assets": "Todos os assets disponíveis",
+      "copy_casting": "Copiar este casting (ctrl + V cola-o nas linhas selecionadas)",
       "edit_label": "Alterar o rótulo do asset",
       "empty": "Elenco vazio",
       "label": "Rótulo",
+      "nb_assets": "{count} asset | {count} assets",
+      "nb_occurrences": "{count} ocorrência | {count} ocorrências",
+      "nb_ready": "{ready} / {total} prontos",
       "occurrences": "Ocorrências",
       "picture_mode": "Mudar para o modo de imagem",
       "remove_from_casting": "Remover do casting",
+      "undo": "Desfazer a última alteração de casting (ctrl + Z)",
       "view_as_cards": "Ver como cartões",
       "view_as_list": "Ver como lista",
       "text_mode": "Mudar para o modo de texto",
@@ -85,10 +90,16 @@
       "fields": {
         "standby": "STDB"
       },
-      "episode_casting": "Elenco de episódios",
       "save_error": "Erro ao salvar o casting",
       "hide_library": "Ocultar biblioteca",
-      "show_library": "Exibir biblioteca"
+      "show_library": "Exibir biblioteca",
+      "filters": {
+        "all": "Todas as linhas",
+        "asset": "Contém o asset…",
+        "empty": "Sem casting",
+        "label": "Linhas",
+        "standby": "Em espera"
+      }
     },
     "comments": {
       "add_attachment": "Adicionar anexo",

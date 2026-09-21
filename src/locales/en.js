@@ -116,11 +116,14 @@ export default {
 
   breakdown: {
     all_assets: 'All available assets',
+    copy_casting: 'Copy this casting (ctrl + V pastes it on the selected lines)',
     edit_label: 'Change the asset\'s label',
     empty: 'Empty casting',
-    episode_casting: 'Episode casting',
     hide_library: 'Hide Library',
     label: 'Label',
+    nb_assets: '{count} asset | {count} assets',
+    nb_occurrences: '{count} occurrence | {count} occurrences',
+    nb_ready: '{ready} / {total} ready',
     occurrences: 'Occurrences',
     picture_mode: 'Switch to picture mode',
     remove_from_casting: 'Remove from casting',
@@ -128,6 +131,7 @@ export default {
     show_library: 'Display Library',
     text_mode: 'Switch to text mode',
     title: 'Breakdown',
+    undo: 'Undo the last casting change (ctrl + Z)',
     view_as_cards: 'View as cards',
     view_as_list: 'View as list',
     options: {
@@ -141,6 +145,13 @@ export default {
     },
     fields: {
       standby: 'STDB'
+    },
+    filters: {
+      all: 'All lines',
+      asset: 'Casts the asset…',
+      empty: 'Without casting',
+      label: 'Lines',
+      standby: 'Standby'
     }
   },
 

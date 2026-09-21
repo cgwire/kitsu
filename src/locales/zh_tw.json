@@ -63,12 +63,17 @@
     },
     "breakdown": {
       "all_assets": "所有可用資產",
+      "copy_casting": "複製此選角（ctrl + V 貼到所選列）",
       "edit_label": "更改資產的標籤",
       "empty": "角色分配為空",
       "label": "標籤",
+      "nb_assets": "{count} 個資產 | {count} 個資產",
+      "nb_occurrences": "出現 {count} 次 | 出現 {count} 次",
+      "nb_ready": "{ready} / {total} 已就緒",
       "occurrences": "出現次數",
       "picture_mode": "切換到圖片模式",
       "remove_from_casting": "從選角中移除",
+      "undo": "復原上一次選角變更（ctrl + Z）",
       "view_as_cards": "卡片檢視",
       "view_as_list": "列表檢視",
       "text_mode": "切換到文字模式",
@@ -85,10 +90,16 @@
       "fields": {
         "standby": "STDB"
       },
-      "episode_casting": "集數角色分配",
       "save_error": "儲存角色分配時出錯",
       "hide_library": "隱藏資產庫",
-      "show_library": "顯示資產庫"
+      "show_library": "顯示資產庫",
+      "filters": {
+        "all": "所有列",
+        "asset": "包含資產…",
+        "empty": "無選角",
+        "label": "列",
+        "standby": "待定"
+      }
     },
     "comments": {
       "add_attachment": "新增附件",

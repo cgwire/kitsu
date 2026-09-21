@@ -63,12 +63,17 @@
     },
     "breakdown": {
       "all_assets": "Alle tilgængelige assets",
+      "copy_casting": "Kopiér denne casting (ctrl + V indsætter den på de valgte linjer)",
       "edit_label": "Rediger assetets label",
       "empty": "Tom casting",
       "label": "Label",
+      "nb_assets": "{count} asset | {count} assets",
+      "nb_occurrences": "{count} forekomst | {count} forekomster",
+      "nb_ready": "{ready} / {total} klar",
       "occurrences": "Forekomster",
       "picture_mode": "Skift til billedtilstand",
       "remove_from_casting": "Fjern fra casting",
+      "undo": "Fortryd den seneste castingændring (ctrl + Z)",
       "view_as_cards": "Vis som kort",
       "view_as_list": "Vis som liste",
       "text_mode": "Skift til teksttilstand",
@@ -85,10 +90,16 @@
       "fields": {
         "standby": "STDB"
       },
-      "episode_casting": "Episode-casting",
       "save_error": "Fejl under gemning af casting",
       "hide_library": "Skjul bibliotek",
-      "show_library": "Vis bibliotek"
+      "show_library": "Vis bibliotek",
+      "filters": {
+        "all": "Alle linjer",
+        "asset": "Indeholder asset…",
+        "empty": "Uden casting",
+        "label": "Linjer",
+        "standby": "Standby"
+      }
     },
     "comments": {
       "add_attachment": "Tilføj vedhæftning",

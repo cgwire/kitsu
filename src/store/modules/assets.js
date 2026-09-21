@@ -229,7 +229,15 @@ const helpers = {
 
   buildResult(
     state,
-    { assetSearch, production, sorting, taskStatusMap, taskTypeMap, persons }
+    {
+      assetSearch,
+      isPageReset = false,
+      production,
+      sorting,
+      taskStatusMap,
+      taskTypeMap,
+      persons
+    }
   ) {
     const taskMap = tasksStore.state.taskMap
     const taskTypes = Array.from(taskTypeMap.values()).filter(
@@ -258,10 +266,11 @@ const helpers = {
     )
     cache.result = result
 
-    const limit =
-      state.displayedAssets.length > PAGE_SIZE
-        ? state.displayedAssets.length
-        : PAGE_SIZE
+    // The pages loaded by scrolling are kept across searches, unless the
+    // caller asks for the first one only (breakdown asset picker).
+    const limit = isPageReset
+      ? PAGE_SIZE
+      : Math.max(state.displayedAssets.length, PAGE_SIZE)
     const displayedAssets = result.slice(0, limit)
     state.displayedAssets = displayedAssets
     state.assetFilledColumns = getFilledColumns(displayedAssets)
@@ -692,7 +701,10 @@ const actions = {
       })
   },
 
-  setAssetSearch({ commit, state, rootGetters }, assetSearch) {
+  // Takes the query, or { assetSearch, isPageReset } to come back to one page.
+  setAssetSearch({ commit, state, rootGetters }, search) {
+    const { assetSearch, isPageReset } =
+      search && typeof search === 'object' ? search : { assetSearch: search }
     const taskStatusMap = rootGetters.taskStatusMap
     const taskTypeMap = rootGetters.taskTypeMap
     const taskMap = rootGetters.taskMap
@@ -700,6 +712,7 @@ const actions = {
     const persons = rootGetters.people
     commit(SET_ASSET_SEARCH, {
       assetSearch,
+      isPageReset,
       taskMap,
       taskStatusMap,
       taskTypeMap,

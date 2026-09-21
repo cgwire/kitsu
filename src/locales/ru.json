@@ -63,12 +63,17 @@
     },
     "breakdown": {
       "all_assets": "Доступные ассеты",
+      "copy_casting": "Скопировать этот кастинг (ctrl + V вставляет его в выбранные строки)",
       "edit_label": "Изменить лейбл ассета",
       "empty": "Пустой кастинг",
       "label": "Лейбл",
+      "nb_assets": "Ассетов: {count} | Ассетов: {count}",
+      "nb_occurrences": "Вхождений: {count} | Вхождений: {count}",
+      "nb_ready": "Готово: {ready} / {total}",
       "occurrences": "Вхождения",
       "picture_mode": "Переключиться в режим картинок",
       "remove_from_casting": "Убрать из кастинга",
+      "undo": "Отменить последнее изменение кастинга (ctrl + Z)",
       "view_as_cards": "Показать карточками",
       "view_as_list": "Показать списком",
       "text_mode": "Переключиться в текстовый режим",
@@ -85,10 +90,16 @@
       "fields": {
         "standby": "STDB"
       },
-      "episode_casting": "Кастинг эпизода",
       "save_error": "Ошибка при сохранении кастинга",
       "hide_library": "Скрыть библиотеку",
-      "show_library": "Показать библиотеку"
+      "show_library": "Показать библиотеку",
+      "filters": {
+        "all": "Все строки",
+        "asset": "Содержит ассет…",
+        "empty": "Без кастинга",
+        "label": "Строки",
+        "standby": "В ожидании"
+      }
     },
     "comments": {
       "add_attachment": "Прикрепить вложение",

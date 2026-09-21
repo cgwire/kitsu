@@ -5,12 +5,17 @@
     :class="{
       selected,
       stdby: entity ? entity.is_casting_standby : false,
-      'text-mode': textMode
+      'text-mode': textMode,
+      'is-drop-target': isDropTarget
     }"
     role="button"
     tabindex="0"
     @click="onClicked($event)"
     @keydown.enter.prevent="onClicked($event)"
+    @dragenter="onDragEnter"
+    @dragover="onDragOver"
+    @dragleave="onDragLeave"
+    @drop="onDrop"
   >
     <div
       class="flexrow-item sticky"
@@ -36,7 +41,25 @@
           <div v-for="(chunk, index) in chunks" :key="`chunk-${index}`">
             {{ chunk }}
           </div>
+          <div
+            class="ready-assets"
+            :class="{ 'is-ready': readyAssets.ready === readyAssets.total }"
+            v-if="readyAssets"
+          >
+            {{ $t('breakdown.nb_ready', readyAssets) }}
+          </div>
         </div>
+        <button
+          class="copy-casting"
+          type="button"
+          :title="$t('breakdown.copy_casting')"
+          :aria-label="$t('breakdown.copy_casting')"
+          @click.stop="emit('copy-casting', entity.id)"
+          @keydown.enter.stop
+          v-if="!readOnly"
+        >
+          <copy-icon :size="16" />
+        </button>
       </div>
     </div>
     <div class="standby-column flexrow-item" v-if="isShowInfosBreakdown">
@@ -258,7 +281,8 @@
 
 <script setup>
 /* eslint-disable no-unused-vars */
-import { computed } from 'vue'
+import { CopyIcon } from 'lucide-vue-next'
+import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 
 import {
@@ -268,6 +292,7 @@ import {
   getMetadataEventValue,
   getMetadataFieldValue
 } from '@/composables/descriptors'
+import { ASSET_DRAG_TYPE, isAssetReadyFor } from '@/lib/casting'
 import { renderMarkdown } from '@/lib/render'
 
 import AssetBlock from '@/components/pages/breakdown/AssetBlock.vue'
@@ -282,10 +307,11 @@ const store = useStore()
 const props = defineProps({
   entity: { type: Object, default: () => ({}) },
   previewFileId: { type: String, default: '' },
-  selection: { type: Object, default: () => ({}) },
+  selection: { type: Set, default: () => new Set() },
   name: { type: String, default: '' },
   assetTypes: { type: Array, default: () => [] },
   readOnly: { type: Boolean, default: false },
+  readyTaskTypeId: { type: String, default: '' },
   textMode: { type: Boolean, default: false },
   metadataDescriptors: { type: Array, default: () => [] },
   metadataDisplayHeaders: { type: Object, default: () => ({}) },
@@ -298,11 +324,18 @@ const props = defineProps({
 const emit = defineEmits([
   'add-one',
   'click',
+  'copy-casting',
+  'drop-asset',
   'edit-label',
   'field-changed',
   'metadata-changed',
   'remove-one'
 ])
+
+// State
+// --------------------------------------------------------------------------
+
+const isDropTarget = ref(false)
 
 // Computed
 // --------------------------------------------------------------------------
@@ -319,9 +352,27 @@ const isFrames = computed(() => store.getters.isFrames)
 const isShowInfosBreakdown = computed(() => store.getters.isShowInfosBreakdown)
 const user = computed(() => store.getters.user)
 
-// Read from the selection map of the page so that a click renders the lines
+// Read from the selection set of the page so that a click renders the lines
 // it changes, not the page and its whole list.
-const selected = computed(() => Boolean(props.selection[props.entity.id]))
+const selected = computed(() => props.selection.has(props.entity.id))
+
+// Casted assets ready for the chosen step, null when there is nothing to
+// tell. The asset map is a plain cache of the store: an asset delivered while
+// the page is open shows at the next casting change or reload.
+const readyAssets = computed(() => {
+  const links = (store.getters.castingByType[props.entity.id] || []).flat()
+  if (!props.readyTaskTypeId || links.length === 0) return null
+  const ready = links.filter(
+    link =>
+      link.shared ||
+      isAssetReadyFor(
+        store.getters.assetMap.get(link.asset_id),
+        props.readyTaskTypeId,
+        store.getters.getTaskTypePriority
+      )
+  )
+  return { ready: ready.length, total: links.length }
+})
 
 const chunks = computed(() =>
   props.name.split(' / ').filter(chunk => chunk && chunk !== 'undefined')
@@ -408,6 +459,42 @@ const isSupervisorInDepartments = (departments = []) => {
   )
 }
 
+// Only available assets are accepted: a dragged file or text is left to the
+// browser.
+const isAssetDragged = event =>
+  !props.readOnly && event.dataTransfer?.types?.includes(ASSET_DRAG_TYPE)
+
+const onDragEnter = event => {
+  if (isAssetDragged(event)) isDropTarget.value = true
+}
+
+// Without preventDefault the browser refuses the drop.
+const onDragOver = event => {
+  if (isAssetDragged(event)) {
+    event.preventDefault()
+    event.dataTransfer.dropEffect = 'copy'
+  }
+}
+
+// Also fired when the pointer moves over a child of the line.
+const onDragLeave = event => {
+  if (!event.currentTarget.contains(event.relatedTarget)) {
+    isDropTarget.value = false
+  }
+}
+
+const onDrop = event => {
+  isDropTarget.value = false
+  if (isAssetDragged(event)) {
+    event.preventDefault()
+    emit(
+      'drop-asset',
+      props.entity.id,
+      event.dataTransfer.getData(ASSET_DRAG_TYPE)
+    )
+  }
+}
+
 const canEditDescriptor = descriptor =>
   isCurrentUserManager.value ||
   isSupervisorInDepartments(descriptor.departments)
@@ -477,6 +564,44 @@ label {
   margin-top: 0.5em;
 }
 
+.ready-assets {
+  color: var(--text-alt);
+  font-size: 0.8em;
+  font-weight: normal;
+  margin-top: 0.3em;
+
+  &.is-ready {
+    color: $green;
+    font-weight: bold;
+  }
+}
+
+.copy-casting {
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: var(--text-alt);
+  bottom: 4px;
+  cursor: pointer;
+  line-height: 0;
+  opacity: 0;
+  padding: 4px;
+  // The name cell is full: the button sits in its corner (the cell is sticky,
+  // hence positioned).
+  position: absolute;
+  right: 4px;
+
+  .shot:hover &,
+  &:focus-visible {
+    opacity: 1;
+  }
+
+  &:hover {
+    background: var(--background-hover);
+    color: var(--text);
+  }
+}
+
 .shot-name {
   color: var(--text);
   font-weight: bold;
@@ -491,6 +616,9 @@ label {
   flex: 1 1 auto;
   display: flex;
   flex-wrap: wrap;
+  // The right margin of flexrow-item left room for one small tile per row
+  // only: two of them need 130px out of the 134px of the cell.
+  margin-right: 0;
 }
 
 .shot {
@@ -517,6 +645,20 @@ label {
   background: var(--background-selectable);
   .sticky {
     background: var(--background-selectable);
+  }
+}
+
+// The browser applies no :hover while dragging: the line under the dragged
+// asset takes the hover look itself, plus an outline (it draws over the cells
+// and moves nothing).
+.shot.is-drop-target {
+  background: var(--background-selectable);
+  outline: 2px solid $purple-strong;
+  outline-offset: -2px;
+
+  .sticky {
+    background: var(--background-selectable);
+    box-shadow: inset 2px 0 0 $purple-strong;
   }
 }
 

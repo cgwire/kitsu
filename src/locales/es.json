@@ -63,12 +63,17 @@
     },
     "breakdown": {
       "all_assets": "Todos los recursos disponibles",
+      "copy_casting": "Copiar este casting (ctrl + V lo pega en las líneas seleccionadas)",
       "edit_label": "Cambiar la etiqueta del recurso",
       "empty": "Casting vacío",
       "label": "Etiqueta",
+      "nb_assets": "{count} asset | {count} assets",
+      "nb_occurrences": "{count} aparición | {count} apariciones",
+      "nb_ready": "{ready} / {total} listos",
       "occurrences": "Ocurrencias",
       "picture_mode": "Cambiar a modo de imagen",
       "remove_from_casting": "Quitar del casting",
+      "undo": "Deshacer el último cambio de casting (ctrl + Z)",
       "view_as_cards": "Ver como tarjetas",
       "view_as_list": "Ver como lista",
       "text_mode": "Cambiar a modo de texto",
@@ -85,10 +90,16 @@
       "fields": {
         "standby": "En Espera"
       },
-      "episode_casting": "Reparto de episodios",
       "save_error": "Se ha producido un error al guardar el reparto",
       "hide_library": "Ocultar biblioteca",
-      "show_library": "Mostrar biblioteca"
+      "show_library": "Mostrar biblioteca",
+      "filters": {
+        "all": "Todas las líneas",
+        "asset": "Contiene el asset…",
+        "empty": "Sin casting",
+        "label": "Líneas",
+        "standby": "En espera"
+      }
     },
     "comments": {
       "add_attachment": "Adjuntar archivo...",

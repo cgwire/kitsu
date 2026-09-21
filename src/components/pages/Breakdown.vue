@@ -3,11 +3,6 @@
     <div class="breakdown-columns">
       <div class="breakdown-column casting-column">
         <div class="flexrow mb1 casting-toolbar">
-          <div v-if="isEpisodeCasting">
-            <h2 class="subtitle mt05">
-              {{ $t('breakdown.episode_casting') }}
-            </h2>
-          </div>
           <combobox-styled
             class="mr1"
             :label="$t('main.for')"
@@ -27,7 +22,36 @@
             v-model="assetTypeId"
             v-if="isAssetCasting"
           />
+          <combobox-styled
+            class="ml1"
+            :label="$t('breakdown.filters.label')"
+            :options="lineFilterOptions"
+            v-model="lineFilter"
+          />
+          <combobox-task-type
+            class="ml1 desktop-only"
+            :label="$t('assets.fields.ready_for')"
+            :task-type-list="readyForTaskTypes"
+            :with-margin="false"
+            v-model="readyTaskTypeId"
+            v-if="isShotCasting"
+          />
+          <input
+            class="input casted-asset-search ml1 desktop-only"
+            type="search"
+            :aria-label="$t('breakdown.filters.asset')"
+            :placeholder="$t('breakdown.filters.asset')"
+            v-model="castedAssetSearch"
+          />
           <span class="filler"></span>
+          <button-simple
+            class="flexrow-item desktop-only"
+            icon="undo"
+            :disabled="!canUndo"
+            :title="$t('breakdown.undo')"
+            @click="undoCasting"
+            v-if="isCurrentUserManager"
+          />
           <show-infos-button class="flexrow-item desktop-only" />
           <button-simple
             class="flexrow-item"
@@ -101,121 +125,116 @@
           />
         </div>
 
-        <div
-          ref="casting-header"
-          class="casting-header flexrow"
-          @scroll.passive="onCastingHeaderScroll"
-          v-if="!isLoading"
-        >
-          <div
-            class="entity-header"
-            :style="{ 'min-width': nameHeaderMinWidth }"
-          >
-            <div>
-              {{ $t('shots.fields.name') }}
-            </div>
-            <div class="filler"></div>
-            <div
-              class="resizable-knob"
-              @mousedown.prevent="initResize($event)"
-            ></div>
-          </div>
-          <div class="standby-header" v-if="isShowInfosBreakdown">
-            {{ $t('breakdown.fields.standby') }}
-          </div>
-          <div
-            class="description-header"
-            v-if="isShowInfosBreakdown && isDescription"
-          >
-            {{ $t('shots.fields.description') }}
-          </div>
-          <div
-            class="frames-header"
-            v-if="
-              isShotCasting &&
-              isFrames &&
-              isShowInfosBreakdown &&
-              metadataDisplayHeaders.frames
-            "
-          >
-            {{ $t('shots.fields.nb_frames') }}
-          </div>
-          <div
-            class="frames-header"
-            v-if="
-              isShotCasting &&
-              isFrameIn &&
-              isShowInfosBreakdown &&
-              metadataDisplayHeaders.frameIn
-            "
-          >
-            {{ $t('shots.fields.frame_in') }}
-          </div>
-          <div
-            class="frames-header"
-            v-if="
-              isShotCasting &&
-              isFrameOut &&
-              isShowInfosBreakdown &&
-              metadataDisplayHeaders.frameOut
-            "
-          >
-            {{ $t('shots.fields.frame_out') }}
-          </div>
-          <div
-            class="descriptor-header"
-            :key="'descriptor-header-' + descriptor.id"
-            :style="{
-              'min-width': columnWidth[descriptor.id]
-                ? columnWidth[descriptor.id] + 'px'
-                : '110px'
-            }"
-            v-for="descriptor in visibleMetadataDescriptors"
-            v-show="isShowInfosBreakdown"
-          >
-            <span
-              class="descriptor-departments mr05"
-              v-if="descriptorCurrentDepartments(descriptor).length"
-            >
-              <department-name
-                :key="department.id"
-                :department="department"
-                no-padding
-                only-dot
-                v-for="department in descriptorCurrentDepartments(descriptor)"
-              />
-            </span>
-            <span
-              class="ellipsis nowrap descriptor-name filler"
-              :title="descriptor.name"
-            >
-              {{ descriptor.name }}
-            </span>
-            <div
-              class="resizable-knob"
-              @mousedown.prevent="initResize($event, descriptor.id)"
-            ></div>
-          </div>
-          <div
-            :key="assetType"
-            class="asset-type-header"
-            v-for="assetType in castingAssetTypes"
-          >
-            <span class="ellipsis nowrap" :title="assetType">
-              {{ assetType }}
-            </span>
-          </div>
-
-          <div class="actions filler"></div>
-        </div>
-
-        <div
-          ref="casting-list"
-          class="casting-list"
-          @scroll.passive="onCastingScroll"
-          v-if="!isLoading"
-        >
+        <div class="casting-list" v-if="!isLoading">
           <div class="shot-lines">
+            <div class="casting-header flexrow">
+              <div
+                class="entity-header"
+                :style="{ 'min-width': nameHeaderMinWidth }"
+              >
+                <div>
+                  {{ $t('shots.fields.name') }}
+                </div>
+                <div class="filler"></div>
+                <div
+                  class="resizable-knob"
+                  @mousedown.prevent="initResize($event)"
+                ></div>
+              </div>
+              <div class="standby-header" v-if="isShowInfosBreakdown">
+                {{ $t('breakdown.fields.standby') }}
+              </div>
+              <div
+                class="description-header"
+                v-if="isShowInfosBreakdown && isDescription"
+              >
+                {{ $t('shots.fields.description') }}
+              </div>
+              <div
+                class="frames-header"
+                v-if="
+                  isShotCasting &&
+                  isFrames &&
+                  isShowInfosBreakdown &&
+                  metadataDisplayHeaders.frames
+                "
+              >
+                {{ $t('shots.fields.nb_frames') }}
+              </div>
+              <div
+                class="frames-header"
+                v-if="
+                  isShotCasting &&
+                  isFrameIn &&
+                  isShowInfosBreakdown &&
+                  metadataDisplayHeaders.frameIn
+                "
+              >
+                {{ $t('shots.fields.frame_in') }}
+              </div>
+              <div
+                class="frames-header"
+                v-if="
+                  isShotCasting &&
+                  isFrameOut &&
+                  isShowInfosBreakdown &&
+                  metadataDisplayHeaders.frameOut
+                "
+              >
+                {{ $t('shots.fields.frame_out') }}
+              </div>
+              <div
+                class="descriptor-header"
+                :key="'descriptor-header-' + descriptor.id"
+                :style="{
+                  'min-width': columnWidth[descriptor.id]
+                    ? columnWidth[descriptor.id] + 'px'
+                    : '110px'
+                }"
+                v-for="descriptor in visibleMetadataDescriptors"
+                v-show="isShowInfosBreakdown"
+              >
+                <span
+                  class="descriptor-departments mr05"
+                  v-if="descriptorCurrentDepartments(descriptor).length"
+                >
+                  <department-name
+                    :key="department.id"
+                    :department="department"
+                    no-padding
+                    only-dot
+                    v-for="department in descriptorCurrentDepartments(
+                      descriptor
+                    )"
+                  />
+                </span>
+                <span
+                  class="ellipsis nowrap descriptor-name filler"
+                  :title="descriptor.name"
+                >
+                  {{ descriptor.name }}
+                </span>
+                <div
+                  class="resizable-knob"
+                  @mousedown.prevent="initResize($event, descriptor.id)"
+                ></div>
+              </div>
+              <div
+                :key="assetType"
+                class="asset-type-header"
+                v-for="assetType in castingAssetTypes"
+              >
+                <span class="ellipsis nowrap" :title="assetType">
+                  {{ assetType }}
+                </span>
+                <casting-type-total
+                  :asset-type="assetType"
+                  :entities="displayedEntities"
+                />
+              </div>
+
+              <div class="actions filler"></div>
+            </div>
             <shot-line
               :key="entity.id"
               :entity="entity"
@@ -224,6 +243,7 @@
               :name="getEntityName(entity)"
               :asset-types="castingAssetTypes"
               :read-only="!isCurrentUserManager"
+              :ready-task-type-id="isShotCasting ? readyTaskTypeId : ''"
               :text-mode="isTextMode"
               :metadata-descriptors="metadataDescriptors"
               :metadata-display-headers="metadataDisplayHeaders"
@@ -233,11 +253,13 @@
               :column-width="columnWidth"
               @add-one="addOneAsset"
               @click="selectEntity"
+              @copy-casting="copyEntityCasting"
+              @drop-asset="onAssetDropped"
               @edit-label="onEditLabelClicked"
               @field-changed="onFieldChanged"
               @metadata-changed="onMetadataChanged"
               @remove-one="removeOneAssetFromSelection"
-              v-for="entity in castingEntities"
+              v-for="entity in displayedEntities"
             />
           </div>
         </div>
@@ -305,7 +327,7 @@
           />
         </div>
 
-        <spinner v-if="isAssetsLoading" />
+        <spinner v-if="isLoading || isAssetsLoading" />
         <template v-else>
           <div
             class="type-assets"
@@ -421,6 +443,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
+import { useBreakdownLoader } from '@/composables/breakdownLoader'
 import clipboard from '@/lib/clipboard'
 import csv from '@/lib/csv'
 import preferences from '@/lib/preferences'
@@ -434,10 +457,12 @@ import EditLabelModal from '@/components/modals/EditLabelModal.vue'
 import ImportModal from '@/components/modals/ImportModal.vue'
 import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
 import AvailableAssetBlock from '@/components/pages/breakdown/AvailableAssetBlock.vue'
+import CastingTypeTotal from '@/components/pages/breakdown/CastingTypeTotal.vue'
 import ShotLine from '@/components/pages/breakdown/ShotLine.vue'
 import ButtonHrefLink from '@/components/widgets/ButtonHrefLink.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
@@ -466,42 +491,49 @@ const ASSET_DISPLAY_HEADERS = {
 
 const optionalCsvColumns = ['Label']
 
+const CASTING_LOAD_DELAY = 300
+const MAX_ENTITY_CASTING_LOADS = 5
+const MAX_UNDO_STEPS = 20
+
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const store = useStore()
 const socket = getCurrentInstance().appContext.config.globalProperties.$socket
+const { episodeId, isLoading, load } = useBreakdownLoader(store, () =>
+  onEntitiesLoaded()
+)
 
 // State
 // --------------------------------------------------------------------------
 
 const assetListRef = useTemplateRef('asset-list')
-const castingHeaderRef = useTemplateRef('casting-header')
-const castingListRef = useTemplateRef('casting-list')
 const editAssetModalRef = useTemplateRef('edit-asset-modal')
 const importModalRef = useTemplateRef('import-modal')
 const searchFieldRef = useTemplateRef('search-field')
 
 const assetTypeId = ref('')
+const castedAssetSearch = ref('')
 const castingType = ref('shot')
 const columnSelectorDisplayed = ref(false)
 const columnWidth = ref({})
 const editedAsset = ref(null)
 const editedAssetLinkLabel = ref(null)
 const editedEntityId = ref(null)
-const episodeId = ref('')
 const importCsvFormData = ref({})
 const isBigMode = ref(false)
-const isLoading = ref(false)
 const isOnlyCurrentEpisode = ref(false)
 const isTextMode = ref(false)
 const libraryDisplayed = ref(false)
+const lineFilter = ref('all')
 const metadataDisplayHeaders = ref({ ...SHOT_DISPLAY_HEADERS })
 const parsedCSV = ref([])
+const readyTaskTypeId = ref('')
 const removalData = ref({})
 const saveErrors = ref({})
-const selection = ref({})
+const selection = ref(new Set())
 const sequenceId = ref('all')
+const undoSteps = ref([])
 
 const errors = reactive({
   edit: false,
@@ -534,11 +566,11 @@ const success = reactive({
 })
 
 let appliedSearch = ''
-let hasScopeMoved = false
-let isUnmounted = false
+let castingLoadTimer = null
 let previousEntityId = null
 let resizing = null
 let wasDisconnected = false
+const pendingCastingLoads = new Map()
 
 // Computed
 // --------------------------------------------------------------------------
@@ -650,7 +682,43 @@ const castingEntities = computed(() => {
   return castingAssetTypeAssets.value
 })
 
-// Asset lists of the displayed entities, one per asset type and entity.
+// Steps of the shots in pipeline order: an asset is ready for a step and for
+// the ones before it.
+const readyForTaskTypes = computed(() => [
+  { id: '', color: '#999', name: t('main.none') },
+  ...[...store.getters.productionShotTaskTypes].sort(
+    (a, b) =>
+      store.getters.getTaskTypePriority(a.id) -
+      store.getters.getTaskTypePriority(b.id)
+  )
+])
+
+const lineFilterOptions = computed(() => [
+  { label: t('breakdown.filters.all'), value: 'all' },
+  { label: t('breakdown.filters.empty'), value: 'empty' },
+  { label: t('breakdown.filters.standby'), value: 'standby' }
+])
+
+const isLineDisplayed = (entity, search) => {
+  const links = casting.value[entity.id] || []
+  if (lineFilter.value === 'empty' && links.length > 0) return false
+  if (lineFilter.value === 'standby' && !entity.is_casting_standby) return false
+  return (
+    !search ||
+    links.some(link => link.asset_name?.toLowerCase().includes(search))
+  )
+}
+
+// Without filter the list itself is handed over: reading the casting here
+// would render the page on every casting change.
+const displayedEntities = computed(() => {
+  const search = castedAssetSearch.value.trim().toLowerCase()
+  return lineFilter.value === 'all' && !search
+    ? castingEntities.value
+    : castingEntities.value.filter(entity => isLineDisplayed(entity, search))
+})
+
+// Asset lists of the entities of the scope, one per asset type and entity.
 const castingEntityTypeGroups = computed(() =>
   castingEntities.value.flatMap(entity => castingByType.value[entity.id] || [])
 )
@@ -722,23 +790,23 @@ const visibleMetadataDescriptors = computed(() =>
 )
 
 const nameHeaderMinWidth = computed(() =>
-  columnWidth.value.name
-    ? parseInt(columnWidth.value.name, 10) + 1 + 'px'
-    : '251px'
+  columnWidth.value.name ? columnWidth.value.name + 'px' : '250px'
 )
 
-const selectedEntityIds = computed(() =>
-  Object.keys(selection.value).filter(key => selection.value[key])
-)
+const selectedEntityIds = computed(() => [...selection.value])
+
+const canUndo = computed(() => undoSteps.value.length > 0)
 
 // The template reads this flag, not the list: the page must not render again
 // on every click, only the lines whose selection changed do.
-const hasSelection = computed(() => selectedEntityIds.value.length > 0)
+const hasSelection = computed(() => selection.value.size > 0)
 
 // Functions
 // --------------------------------------------------------------------------
 
-const reset = () => {
+// A production without episodes has no episode route: a link kept from a TV
+// show would carry its episode along.
+const leaveEpisodeRoute = () => {
   if (!isTVShow.value && route.params?.episode_id) {
     router.push({
       name: 'breakdown',
@@ -746,89 +814,27 @@ const reset = () => {
       query: route.query
     })
   }
-  isLoading.value = true
-  setTimeout(reloadEntities, 100)
 }
 
-const reloadEntities = async () => {
-  if (isUnmounted) return
-  isLoading.value = true
-  const production = currentProduction.value
-  let episode = currentEpisode.value
-  hasScopeMoved = false
-  try {
-    // Resolve the episode first: starting on a direct link before the
-    // topbar has it costs a full production-wide second pass. Inside the
-    // try, so a failed fetch releases the loading flag like any other.
-    // Only the episode is rebound: a production switched during the
-    // fetch must still reset the column widths in the finally block.
-    if (isTVShow.value && !currentEpisode.value) {
-      await store.dispatch('loadEpisodes')
-      if (isUnmounted) return
-      episode = currentEpisode.value
-      // The watcher flagged the episode this run just resolved: nothing
-      // was loaded under another scope yet, the loads start from it.
-      hasScopeMoved = false
-    }
-    // 'all' is episode casting here: it reads neither sequences nor shots.
-    if (
-      !isTVShow.value ||
-      !['main', 'all'].includes(currentEpisode.value?.id)
-    ) {
-      await store.dispatch('loadSequences')
-      if (isUnmounted) return
-      await store.dispatch('loadShots')
-      // Leaving the page during a load must stop the chain: the
-      // production-wide assets load would land under the page shown next.
-      if (isUnmounted) return
-    }
-    if (isTVShow.value) {
-      if (currentEpisode.value) episodeId.value = currentEpisode.value.id
-      store.dispatch('setCastingEpisode', episodeId.value)
-      store.dispatch('setCastingForProductionEpisodes')
-    } else {
-      store.dispatch('setCastingEpisode', null)
-    }
-    await store.dispatch('loadAssets', { all: true, withTasks: true })
-    if (isUnmounted) return
-    store.dispatch('displayMoreAssets')
-    fillAssetList()
-    store.dispatch('setCastingAssetTypes')
-    if (assetTypeId.value) {
-      store.dispatch('setCastingAssetType', assetTypeId.value)
-    } else if (
-      !isTVShow.value ||
-      (episodeId.value && !['main', 'all'].includes(episodeId.value))
-    ) {
-      store.dispatch('setCastingSequence', sequenceId.value || 'all')
-    }
-    resetSequenceOption()
-    resetSelection()
-    if (
-      currentEpisode.value?.id === 'main' ||
-      currentProduction.value.production_type === 'assets'
-    ) {
-      castingType.value = 'asset'
-    }
-  } catch (err) {
-    console.error(err)
-  } finally {
-    isLoading.value = false
-    // The production and episode watchers ignore a change made while
-    // the page loads: pick it up here or the casting of the scope left
-    // behind stays displayed under a topbar that shows the new one. Not
-    // after unmount: the ghost reload would push a production-wide
-    // dataset under the page displayed next.
-    // hasScopeMoved catches a switch that came back to the scope the run
-    // started with: the loads in between served the other one.
-    const isScopeChanged =
-      hasScopeMoved ||
-      currentProduction.value !== production ||
-      currentEpisode.value?.id !== episode?.id
-    if (isScopeChanged && !isUnmounted) {
-      reset()
-      if (currentProduction.value !== production) resetColumnWidth()
-    }
+const onEntitiesLoaded = () => {
+  store.dispatch('displayMoreAssets')
+  fillAssetList()
+  store.dispatch('setCastingAssetTypes')
+  if (assetTypeId.value) {
+    store.dispatch('setCastingAssetType', assetTypeId.value)
+  } else if (
+    !isTVShow.value ||
+    (episodeId.value && !['main', 'all'].includes(episodeId.value))
+  ) {
+    store.dispatch('setCastingSequence', sequenceId.value || 'all')
+  }
+  resetSequenceOption()
+  resetSelection()
+  if (
+    currentEpisode.value?.id === 'main' ||
+    currentProduction.value.production_type === 'assets'
+  ) {
+    castingType.value = 'asset'
   }
 }
 
@@ -841,13 +847,12 @@ const resetSequenceOption = () => {
   }
 }
 
+// Runs when the lines displayed change: the castings to undo belong to lines
+// that may not be there anymore, and undoing them blind would rewrite
+// castings nobody is looking at.
 const resetSelection = () => {
-  let entities = castingAssetTypeAssets.value
-  if (isEpisodeCasting.value) entities = castingEpisodes.value
-  else if (isShotCasting.value) entities = castingSequenceShots.value
-  selection.value = Object.fromEntries(
-    entities.map(entity => [entity.id, false])
-  )
+  selection.value = new Set()
+  undoSteps.value = []
 }
 
 const setSearchInUrl = query => {
@@ -855,12 +860,15 @@ const setSearchInUrl = query => {
   router.push({ query: { ...route.query, search: searchQuery || undefined } })
 }
 
-// The store keeps the number of assets displayed across searches: no page is
-// added here or the list grows with every keystroke. fillAssetList tops it up
-// when the result does not overflow the column.
+// Each search starts from one page: after a long scroll, every keystroke would
+// render all the tiles loaded so far. fillAssetList tops it up when the result
+// does not overflow the column.
 const onSearchChange = searchQuery => {
   appliedSearch = searchQuery || ''
-  store.dispatch('setAssetSearch', searchQuery)
+  store.dispatch('setAssetSearch', {
+    assetSearch: searchQuery,
+    isPageReset: true
+  })
   setSearchInUrl(searchQuery)
   fillAssetList()
 }
@@ -871,36 +879,30 @@ const confirmBuildFilter = query => {
   onSearchChange(query)
 }
 
-const clearSelection = () => {
-  selectedEntityIds.value.forEach(entityId => {
-    selection.value[entityId] = false
-  })
-}
-
 const selectRange = (fromEntityId, toEntityId) => {
-  const keys = Object.keys(selection.value)
-  const fromIndex = keys.indexOf(fromEntityId)
-  const toIndex = keys.indexOf(toEntityId)
-  range(Math.min(fromIndex, toIndex), Math.max(fromIndex, toIndex))
-    .filter(index => index >= 0)
-    .forEach(index => {
-      selection.value[keys[index]] = true
-    })
+  const entityIds = displayedEntities.value.map(entity => entity.id)
+  const fromIndex = entityIds.indexOf(fromEntityId)
+  const toIndex = entityIds.indexOf(toEntityId)
+  if (fromIndex >= 0 && toIndex >= 0) {
+    range(Math.min(fromIndex, toIndex), Math.max(fromIndex, toIndex)).forEach(
+      index => selection.value.add(entityIds[index])
+    )
+  }
 }
 
 const selectEntity = (entityId, event) => {
   const isMultiSelect = event.ctrlKey || event.metaKey
-  const wasSelected = selection.value[entityId]
-  const nbElementsSelected = selectedEntityIds.value.length
-  if (!isMultiSelect) clearSelection()
+  const wasSelected = selection.value.has(entityId)
+  const nbElementsSelected = selection.value.size
+  if (!isMultiSelect) selection.value.clear()
   if (previousEntityId && event.shiftKey) {
     selectRange(previousEntityId, entityId)
   }
   if (!previousEntityId || !event.shiftKey) previousEntityId = entityId
   if (!wasSelected || (nbElementsSelected > 1 && !isMultiSelect)) {
-    selection.value[entityId] = true
+    selection.value.add(entityId)
   } else if (isMultiSelect) {
-    selection.value[entityId] = false
+    selection.value.delete(entityId)
   }
 }
 
@@ -921,8 +923,51 @@ const setSaveErrors = (entityIds, isError) => {
   })
 }
 
-const addOneAsset = async (assetId, amount = 1) => {
-  const entityIds = selectedEntityIds.value
+const addOneAsset = (assetId, amount = 1) =>
+  castAssetOnEntities(selectedEntityIds.value, assetId, amount)
+
+// Dropped on a selected line, the asset goes to the whole selection, as "+1"
+// does; anywhere else, to that line only.
+const onAssetDropped = (entityId, assetId) =>
+  castAssetOnEntities(
+    selection.value.has(entityId) ? selectedEntityIds.value : [entityId],
+    assetId
+  )
+
+// Keeps the castings about to change. Copies: the store adds and removes
+// occurrences in place.
+const rememberCastings = entityIds => {
+  const castings = Object.fromEntries(
+    entityIds.map(entityId => [
+      entityId,
+      (casting.value[entityId] || []).map(link => ({ ...link }))
+    ])
+  )
+  undoSteps.value = [...undoSteps.value, castings].slice(-MAX_UNDO_STEPS)
+}
+
+const undoCasting = async () => {
+  const castings = undoSteps.value[undoSteps.value.length - 1]
+  if (!castings) return
+  undoSteps.value = undoSteps.value.slice(0, -1)
+  const entityIds = Object.keys(castings)
+  entityIds.forEach(entityId => {
+    store.dispatch('setEntityCasting', {
+      entityId,
+      casting: castings[entityId]
+    })
+  })
+  setSaveErrors(entityIds, false)
+  try {
+    await store.dispatch('saveCastings', entityIds)
+  } catch (err) {
+    setSaveErrors(entityIds, true)
+    console.error(err)
+  }
+}
+
+const castAssetOnEntities = async (entityIds, assetId, amount = 1) => {
+  rememberCastings(entityIds)
   entityIds.forEach(entityId => {
     store.dispatch('addAssetToCasting', {
       entityId,
@@ -944,6 +989,7 @@ const addTenAssets = assetId => addOneAsset(assetId, 10)
 
 // Returns whether the removal was saved.
 const saveAssetRemovals = async (entityIds, assetId, nbOccurences) => {
+  rememberCastings(entityIds)
   loading.remove = true
   errors.remove = false
   entityIds.forEach(entityId => {
@@ -1195,16 +1241,30 @@ const confirmNewAsset = async form => {
   loading.edit = false
 }
 
+// The first selected line of the list, whatever the order of the clicks.
 const copyCasting = () => {
-  clipboard.copyCasting(casting.value[selectedEntityIds.value[0]])
+  const entity = displayedEntities.value.find(({ id }) =>
+    selection.value.has(id)
+  )
+  clipboard.copyCasting(casting.value[entity?.id])
+}
+
+// Same as ctrl + C on a selected line, one click away: in a sequence most of
+// the casting repeats from one shot to the next.
+const copyEntityCasting = entityId => {
+  clipboard.copyCasting(casting.value[entityId])
 }
 
 const pasteCasting = async () => {
-  const castingToPaste = clipboard.pasteCasting()
-  if (!castingToPaste || castingToPaste.length === 0) return
+  if (clipboard.pasteCasting().length === 0) return
   const entityIds = selectedEntityIds.value
+  rememberCastings(entityIds)
+  // One paste per line: each gets a casting of its own.
   entityIds.forEach(entityId => {
-    store.dispatch('setEntityCasting', { entityId, casting: castingToPaste })
+    store.dispatch('setEntityCasting', {
+      entityId,
+      casting: clipboard.pasteCasting()
+    })
   })
   setSaveErrors(entityIds, false)
   try {
@@ -1223,6 +1283,8 @@ const onKeyDown = event => {
     copyCasting() // ctrl + c
   } else if (isShortcut && event.keyCode === 86) {
     pasteCasting() // ctrl + v
+  } else if (isShortcut && event.keyCode === 90 && !event.shiftKey) {
+    undoCasting() // ctrl + z
   }
 }
 
@@ -1297,7 +1359,7 @@ const getCsvCastingCell = typeAssets => {
 }
 
 const getCsvEntries = () =>
-  castingEntities.value.map(entity => {
+  displayedEntities.value.map(entity => {
     const typeGroups = castingByType.value[entity.id] || []
     return [
       entity.name,
@@ -1369,6 +1431,14 @@ const stopResizing = () => {
   resizing = null
 }
 
+const getReadyForPreferenceKey = () =>
+  `breakdown:ready-for-${currentProduction.value?.id}`
+
+const resetReadyTaskType = () => {
+  readyTaskTypeId.value =
+    preferences.getPreference(getReadyForPreferenceKey()) || ''
+}
+
 const getNameWidthPreferenceKey = () =>
   'breakdown:column-width-name-' +
   `${castingType.value}-${currentProduction.value.id}`
@@ -1400,30 +1470,44 @@ const resetColumnWidth = () => {
   }
 }
 
-const onCastingHeaderScroll = event => {
-  castingListRef.value.scrollLeft = event.target.scrollLeft
+// Another user pasting a casting on 50 shots sends 50 events: they are
+// gathered over a short window, and past a few entities one request for the
+// whole scope replaces one request per entity.
+const queueCastingLoad = (entityId, loadEntityCasting) => {
+  pendingCastingLoads.set(entityId, loadEntityCasting)
+  if (!castingLoadTimer) {
+    castingLoadTimer = setTimeout(flushCastingLoads, CASTING_LOAD_DELAY)
+  }
 }
 
-const onCastingScroll = event => {
-  castingHeaderRef.value.scrollLeft = event.target.scrollLeft
+const flushCastingLoads = () => {
+  const loads = [...pendingCastingLoads.values()]
+  pendingCastingLoads.clear()
+  castingLoadTimer = null
+  if (loads.length > MAX_ENTITY_CASTING_LOADS) reloadCasting()
+  else loads.forEach(loadEntityCasting => loadEntityCasting())
 }
 
 const onEpisodeCastingUpdate = eventData => {
   const episode = store.getters.episodeMap.get(eventData.episode_id)
-  if (episode) store.dispatch('loadEpisodeCasting', episode)
+  if (episode) {
+    queueCastingLoad(episode.id, () =>
+      store.dispatch('loadEpisodeCasting', episode)
+    )
+  }
 }
 
 const onShotCastingUpdate = eventData => {
   const shot = store.getters.shotMap.get(eventData.shot_id)
   if (shot && shot.sequence_id === sequenceId.value) {
-    store.dispatch('loadShotCasting', shot)
+    queueCastingLoad(shot.id, () => store.dispatch('loadShotCasting', shot))
   }
 }
 
 const onAssetCastingUpdate = eventData => {
   const asset = store.getters.assetMap.get(eventData.asset_id)
   if (asset && asset.asset_type_id === assetTypeId.value) {
-    store.dispatch('loadAssetCasting', asset)
+    queueCastingLoad(asset.id, () => store.dispatch('loadAssetCasting', asset))
   }
 }
 
@@ -1516,24 +1600,13 @@ watch(castingAssetTypesOptions, () => {
 })
 
 watch(currentProduction, () => {
-  if (isLoading.value) {
-    hasScopeMoved = true
-  } else {
-    reset()
-    resetColumnWidth()
-  }
+  leaveEpisodeRoute()
+  resetColumnWidth()
+  resetReadyTaskType()
 })
 
-watch(currentEpisode, () => {
-  if (currentEpisode.value && episodeId.value !== currentEpisode.value.id) {
-    if (isLoading.value) {
-      hasScopeMoved = true
-    } else if (currentEpisode.value.id === 'all') {
-      episodeId.value = 'all'
-    } else {
-      reset()
-    }
-  }
+watch(readyTaskTypeId, () => {
+  preferences.setPreference(getReadyForPreferenceKey(), readyTaskTypeId.value)
 })
 
 watch(displayedSequences, () => {
@@ -1557,7 +1630,8 @@ watch(
 // --------------------------------------------------------------------------
 
 onMounted(() => {
-  reset()
+  leaveEpisodeRoute()
+  load()
   resetSequenceOption()
   store.dispatch('setLastProductionScreen', 'breakdown')
   isTextMode.value = preferences.getBoolPreference('breakdown:text-mode')
@@ -1567,13 +1641,14 @@ onMounted(() => {
   })
   resetDisplayHeaders()
   resetColumnWidth()
+  resetReadyTaskType()
   if (!searchFieldRef.value?.getValue() && route.query.search) {
     searchFieldRef.value?.setValue(route.query.search)
   }
 })
 
 onBeforeUnmount(() => {
-  isUnmounted = true
+  clearTimeout(castingLoadTimer)
   window.removeEventListener('keydown', onKeyDown)
   Object.entries(SOCKET_EVENTS).forEach(([eventName, handler]) => {
     socket.off(eventName, handler)
@@ -1625,6 +1700,25 @@ useHead({
 // the control, not with the middle of label + control.
 .casting-toolbar {
   align-items: flex-end;
+}
+
+// Same height as the other controls of the toolbar, or its label sits higher
+// than theirs.
+.casting-toolbar :deep(.task-type-combo) {
+  align-items: center;
+  box-sizing: border-box;
+  display: flex;
+  height: 40px;
+
+  .selector {
+    flex: 1;
+  }
+}
+
+.casted-asset-search {
+  border-radius: 10px;
+  height: 40px;
+  max-width: 200px;
 }
 
 .breakdown-columns {
@@ -1694,13 +1788,15 @@ useHead({
   }
 }
 
+// Same borders as the cells of the lines (ShotLine), or the separators of
+// the header sit one pixel off the ones below.
 .entity-header,
 .description-header,
 .descriptor-header,
 .frames-header,
 .asset-type-header,
 .standby-header {
-  border-right: 1px solid $light-grey;
+  border-left: 1px solid $light-grey;
   padding-left: 10px;
   align-self: stretch;
   display: flex;
@@ -1730,6 +1826,9 @@ useHead({
 }
 
 .asset-type-header {
+  align-items: flex-start;
+  flex-direction: column;
+  justify-content: center;
   padding-left: 1em;
   min-width: 150px;
   max-width: 150px;
@@ -1745,7 +1844,8 @@ useHead({
 
 .entity-header {
   border-top-left-radius: 10px;
-  border-right: 2px solid $light-grey;
+  border-left: 0;
+  border-right: 1px solid $light-grey;
   margin: 0;
   max-width: 301px;
   min-width: 301px;
@@ -1755,6 +1855,7 @@ useHead({
 }
 
 .actions {
+  border-left: 1px solid $light-grey;
   border-top-right-radius: 10px;
   height: 45px;
   text-align: right;
@@ -1769,7 +1870,6 @@ useHead({
   font-weight: 600;
   letter-spacing: 1px;
   min-height: 40px;
-  overflow-y: hidden;
   padding: 0;
   position: sticky;
   top: 0;
@@ -1782,8 +1882,12 @@ useHead({
     padding-bottom: 0.5em;
   }
 
+  // Closes the last column like the right border of the lines does: as tall
+  // as the header, not a centered stub.
   .actions {
-    height: 100%;
+    align-self: stretch;
+    height: auto;
+    padding: 0;
   }
 
   .dark & {
@@ -1795,9 +1899,13 @@ useHead({
   position: relative;
 }
 
+// Transparent and no taller than the header: an opaque knob hanging below it
+// cut the bottom border at each resizable column.
 .casting-header div.resizable-knob {
+  align-self: stretch;
+  background: transparent;
   cursor: col-resize;
-  height: 142%;
+  padding: 0;
   width: 5px;
 
   &:hover {
@@ -1807,10 +1915,13 @@ useHead({
 
 .casting-list {
   overflow: auto;
-  display: flex;
 
+  // A sticky element never leaves its containing block: the lines must be as
+  // tall and as wide as their content (a stretched flex item is as tall as
+  // the visible area and lets its content overflow), or the header leaves
+  // after one screen and the names after one screen width.
   .shot-lines {
-    flex: 1;
+    min-width: max-content;
   }
 
   .actions {
@@ -1821,6 +1932,19 @@ useHead({
 
 .query-list {
   margin-bottom: 0.5em;
+}
+
+// Tablet: the toolbar wraps instead of clipping its last buttons, and the
+// asset picker leaves more room to the casting.
+@media screen and (max-width: 1000px) {
+  .casting-toolbar {
+    flex-wrap: wrap;
+    row-gap: 0.5em;
+  }
+
+  .assets-column {
+    max-width: 300px;
+  }
 }
 
 // Mobile is read-only: the casting alone, as one card per entity (see
@@ -1855,7 +1979,9 @@ useHead({
   }
 
   // No selection means no add, remove, label or paste action on the casting.
+  // Cards fit the screen: they do not take the width of the desktop columns.
   .shot-lines {
+    min-width: 0;
     pointer-events: none;
   }
 }

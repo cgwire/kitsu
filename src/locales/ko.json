@@ -63,12 +63,17 @@
     },
     "breakdown": {
       "all_assets": "사용 가능한 모든 어셋",
+      "copy_casting": "이 캐스팅 복사 (ctrl + V로 선택한 줄에 붙여넣기)",
       "edit_label": "어셋 레이블 변경",
       "empty": "출연진 없음",
       "label": "라벨",
+      "nb_assets": "에셋 {count}개 | 에셋 {count}개",
+      "nb_occurrences": "등장 {count}회 | 등장 {count}회",
+      "nb_ready": "{ready} / {total} 준비됨",
       "occurrences": "등장 횟수",
       "picture_mode": "사진 모드로 전환",
       "remove_from_casting": "캐스팅에서 제거",
+      "undo": "마지막 캐스팅 변경 실행 취소 (ctrl + Z)",
       "view_as_cards": "카드로 보기",
       "view_as_list": "목록으로 보기",
       "text_mode": "텍스트 모드로 전환",
@@ -85,10 +90,16 @@
       "fields": {
         "standby": "대기"
       },
-      "episode_casting": "에피소드 출연",
       "save_error": "출연 저장 중 오류",
       "hide_library": "라이브러리 숨기기",
-      "show_library": "라이브러리 표시"
+      "show_library": "라이브러리 표시",
+      "filters": {
+        "all": "모든 줄",
+        "asset": "에셋 포함…",
+        "empty": "캐스팅 없음",
+        "label": "줄",
+        "standby": "대기"
+      }
     },
     "comments": {
       "add_attachment": "첨부파일 추가",

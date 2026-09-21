@@ -63,12 +63,17 @@
     },
     "breakdown": {
       "all_assets": "所有可用资产",
+      "copy_casting": "复制此选角（ctrl + V 粘贴到所选行）",
       "edit_label": "更改资产的标签",
       "empty": "空的选角",
       "label": "标签",
+      "nb_assets": "{count} 个资产 | {count} 个资产",
+      "nb_occurrences": "出现 {count} 次 | 出现 {count} 次",
+      "nb_ready": "{ready} / {total} 已就绪",
       "occurrences": "出现次数",
       "picture_mode": "切换到图片模式",
       "remove_from_casting": "从选角中移除",
+      "undo": "撤销上一次选角更改（ctrl + Z）",
       "view_as_cards": "卡片视图",
       "view_as_list": "列表视图",
       "text_mode": "切换到文字模式",
@@ -85,10 +90,16 @@
       "fields": {
         "standby": "待命"
       },
-      "episode_casting": "剧集选角",
       "save_error": "保存选角时出错",
       "hide_library": "隐藏资源库",
-      "show_library": "显示资源库"
+      "show_library": "显示资源库",
+      "filters": {
+        "all": "所有行",
+        "asset": "包含资产…",
+        "empty": "无选角",
+        "label": "行",
+        "standby": "待定"
+      }
     },
     "comments": {
       "add_attachment": "添加附件",

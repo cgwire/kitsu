@@ -1,4 +1,4 @@
-import { shallowMount } from '@vue/test-utils'
+import { flushPromises, shallowMount } from '@vue/test-utils'
 import { vi } from 'vitest'
 import { nextTick, reactive } from 'vue'
 import { createStore } from 'vuex'
@@ -92,6 +92,7 @@ const mountPage = ({
       displayedAssets: () => [],
       displayedSequences: () => [],
       episodes: () => [],
+      getTaskTypePriority: () => () => 1,
       isAssetsLoading: () => false,
       isCurrentUserProductionManager: () => true,
       isFrameIn: () => false,
@@ -99,6 +100,7 @@ const mountPage = ({
       isFrames: () => false,
       isShowInfosBreakdown: () => false,
       isTVShow: state => state.isTVShow,
+      productionShotTaskTypes: () => [],
       sequenceMap: () => new Map(),
       shotMetadataDescriptors: () => [],
       ...getters
@@ -111,7 +113,11 @@ const mountPage = ({
       config: {
         globalProperties: { $socket: { on: vi.fn(), off: vi.fn() } }
       },
-      mocks: { $t: key => key },
+      // Keys with their parameters: the counts of a plural show in the text.
+      mocks: {
+        $t: (key, params) =>
+          params ? `${key} ${JSON.stringify(params)}` : key
+      },
       mixins,
       // The page drives its search field through a ref.
       stubs: {
@@ -134,166 +140,104 @@ const moveScope = async (store, scope) => {
   await nextTick()
 }
 
-describe('Breakdown page, reloadEntities', () => {
-  // Mounting schedules a first load: fake timers keep it from running, each
-  // test drives reloadEntities on its own. A reload decided by the load shows
-  // as the loading flag raised again, which is all reset() does synchronously.
-  beforeEach(() => {
-    vi.useFakeTimers()
-    // The page logs the failed episodes fetch: keep that expected error out
-    // of the test output.
-    vi.spyOn(console, 'error').mockImplementation(() => {})
+// The load races are covered by the spec of useBreakdownLoader.
+describe('Breakdown page, loading', () => {
+  test('loads on mount, without delay, and fills the page once loaded', async () => {
+    const { wrapper, actions } = mountPage()
+
+    await flushPromises()
+
+    expect(actions.loadAssets).toHaveBeenCalledTimes(1)
+    expect(actions.setCastingSequence.mock.calls[0][1]).toBe('all')
+    expect(wrapper.vm.episodeId).toBe('ep-a')
+    expect(wrapper.vm.isLoading).toBe(false)
   })
+
+  // Coming from the Assets page, the store already holds the assets of its
+  // episode: showing them until the production-wide load replaces them looks
+  // like a list loading twice.
+  test('hides the assets left by another page while it loads', async () => {
+    const asset = { id: 'asset-1', name: 'Hero', asset_type_name: 'Characters' }
+    const { wrapper } = mountPage({
+      actions: { loadSequences: vi.fn(() => new Promise(() => {})) },
+      getters: { assetsByType: () => [[asset]] }
+    })
+    await nextTick()
+
+    expect(
+      wrapper.findAllComponents({ name: 'AvailableAssetBlock' })
+    ).toHaveLength(0)
+  })
+
+  test('reads the column widths of the production it switches to', async () => {
+    const { store } = mountPage()
+    await flushPromises()
+    preferences.getPreference.mockClear()
+
+    await moveScope(store, {
+      currentProduction: { id: 'p2', production_type: 'tvshow' }
+    })
+
+    expect(preferences.getPreference).toHaveBeenCalled()
+  })
+})
+
+describe('Breakdown page, live casting updates', () => {
+  const shots = Array.from({ length: 50 }, (_, index) => ({
+    id: `shot-${index}`,
+    sequence_id: 'seq-1'
+  }))
+
+  const mountLivePage = async () => {
+    const mounted = mountPage({
+      actions: { loadShotCasting: vi.fn() },
+      getters: {
+        shotMap: () => new Map(shots.map(shot => [shot.id, shot]))
+      }
+    })
+    await flushPromises()
+    mounted.wrapper.vm.sequenceId = 'seq-1'
+    mounted.actions.setCastingSequence.mockClear()
+    vi.useFakeTimers()
+    return mounted
+  }
 
   afterEach(() => {
     vi.useRealTimers()
-    vi.restoreAllMocks()
   })
 
-  // The currentEpisode watcher ignores a change made while the page loads:
-  // the load itself has to notice the switch once it settles.
-  test('reloads when the episode changed during the load', async () => {
-    const { wrapper, store } = mountPage({
-      actions: {
-        loadShots: vi.fn(() =>
-          moveScope(store, { currentEpisode: { id: 'ep-b' } })
-        )
-      }
-    })
-    preferences.getPreference.mockClear()
+  test('loads the casting of the few shots another user changed', async () => {
+    const { wrapper, actions } = await mountLivePage()
 
-    await wrapper.vm.reloadEntities()
+    wrapper.vm.onShotCastingUpdate({ shot_id: 'shot-1' })
+    wrapper.vm.onShotCastingUpdate({ shot_id: 'shot-2' })
+    wrapper.vm.onShotCastingUpdate({ shot_id: 'shot-2' })
+    vi.runAllTimers()
 
-    expect(wrapper.vm.isLoading).toBe(true)
-    expect(preferences.getPreference).not.toHaveBeenCalled()
+    expect(actions.loadShotCasting).toHaveBeenCalledTimes(2)
+    expect(actions.setCastingSequence).not.toHaveBeenCalled()
   })
 
-  test('reloads when the production changed during the load', async () => {
-    const { wrapper, store } = mountPage({
-      actions: {
-        loadShots: vi.fn(() =>
-          moveScope(store, {
-            currentProduction: { id: 'p2', production_type: 'tvshow' }
-          })
-        )
-      }
-    })
-    preferences.getPreference.mockClear()
+  // A casting pasted on 50 shots sends 50 events: one request for the whole
+  // scope instead of one per shot.
+  test('loads the scope once when many shots change together', async () => {
+    const { wrapper, actions } = await mountLivePage()
 
-    await wrapper.vm.reloadEntities()
+    shots.forEach(shot => wrapper.vm.onShotCastingUpdate({ shot_id: shot.id }))
+    vi.runAllTimers()
 
-    expect(wrapper.vm.isLoading).toBe(true)
-    // Same as the currentProduction watcher, which the load short-circuited:
-    // the column widths are read again.
-    expect(preferences.getPreference).toHaveBeenCalled()
+    expect(actions.loadShotCasting).not.toHaveBeenCalled()
+    expect(actions.setCastingSequence).toHaveBeenCalledTimes(1)
   })
 
-  // Leaving the page during the load must not replay it: the ghost reload
-  // would push a production-wide dataset under the page displayed next.
-  test('does not reload once the page is unmounted', async () => {
-    const { wrapper, store, actions } = mountPage({
-      actions: {
-        loadShots: vi.fn(async () => {
-          await moveScope(store, { currentEpisode: { id: 'ep-b' } })
-          wrapper.unmount()
-        })
-      }
-    })
+  test('drops the pending loads when the page is left', async () => {
+    const { wrapper, actions } = await mountLivePage()
 
-    await wrapper.vm.reloadEntities()
-
-    expect(wrapper.vm.isLoading).toBe(false)
-    // The production-wide load would land under the page displayed next.
-    expect(actions.loadAssets).not.toHaveBeenCalled()
-    expect(actions.setCastingEpisode).not.toHaveBeenCalled()
-  })
-
-  // The watchers are inert while the page loads, so a switch that comes back
-  // to the episode the run started with leaves the store on the other one.
-  test('reloads when the episode moved and came back during the load', async () => {
-    const { wrapper, store } = mountPage({
-      actions: {
-        loadSequences: vi.fn(() =>
-          moveScope(store, { currentEpisode: { id: 'ep-b' } })
-        ),
-        loadShots: vi.fn(() =>
-          moveScope(store, { currentEpisode: { id: 'ep-a' } })
-        )
-      }
-    })
-
-    await wrapper.vm.reloadEntities()
-
-    expect(wrapper.vm.isLoading).toBe(true)
-  })
-
-  // The topbar resolves the route episode asynchronously: starting the load
-  // before it lands costs a full production-wide second pass. The resolution
-  // fires the episode watcher like any change: it must not count as a move.
-  test('resolves the episode before loading on a direct link', async () => {
-    const { wrapper, store, actions } = mountPage({
-      state: { currentEpisode: null },
-      actions: {
-        loadEpisodes: vi.fn(() =>
-          moveScope(store, { currentEpisode: { id: 'ep-a' } })
-        )
-      }
-    })
-
-    await wrapper.vm.reloadEntities()
-
-    expect(actions.loadEpisodes).toHaveBeenCalledTimes(1)
-    expect(wrapper.vm.isLoading).toBe(false)
-    expect(wrapper.vm.episodeId).toBe('ep-a')
-  })
-
-  // The episodes fetch can fail like any other: the page must come back
-  // to life, or the watchers stay muted behind a stuck loading flag.
-  test('releases the loading flag when the episodes fetch fails', async () => {
-    const { wrapper } = mountPage({
-      state: { currentEpisode: null },
-      actions: {
-        loadEpisodes: vi.fn(() => Promise.reject(new Error('down')))
-      }
-    })
-
-    await wrapper.vm.reloadEntities()
-
-    expect(wrapper.vm.isLoading).toBe(false)
-  })
-
-  test('loads nothing when the page unmounts during the episodes fetch', async () => {
-    const { wrapper, actions } = mountPage({
-      state: { currentEpisode: null },
-      actions: {
-        loadEpisodes: vi.fn(async () => wrapper.unmount())
-      }
-    })
-
-    await wrapper.vm.reloadEntities()
-
-    expect(actions.loadSequences).not.toHaveBeenCalled()
-    expect(actions.loadAssets).not.toHaveBeenCalled()
-  })
-
-  test('loads nothing on an unmounted page', async () => {
-    const { wrapper, actions } = mountPage()
-    const { reloadEntities } = wrapper.vm
+    wrapper.vm.onShotCastingUpdate({ shot_id: 'shot-1' })
     wrapper.unmount()
+    vi.runAllTimers()
 
-    await reloadEntities()
-
-    expect(actions.loadSequences).not.toHaveBeenCalled()
-    expect(actions.loadAssets).not.toHaveBeenCalled()
-  })
-
-  test('settles on the episode it loaded', async () => {
-    const { wrapper } = mountPage()
-
-    await wrapper.vm.reloadEntities()
-
-    expect(wrapper.vm.episodeId).toBe('ep-a')
-    expect(wrapper.vm.isLoading).toBe(false)
+    expect(actions.loadShotCasting).not.toHaveBeenCalled()
   })
 })
 
@@ -307,7 +251,7 @@ describe('Breakdown page, removeOneAssetFromSelection', () => {
         casting: { 'shot-a': [{ asset_id: 'asset-1', nb_occurences: 2 }] }
       }
     })
-    wrapper.vm.selection = { 'shot-a': true, 'shot-b': true }
+    wrapper.vm.selection = new Set(['shot-a', 'shot-b'])
 
     await wrapper.vm.removeOneAssetFromSelection('asset-1')
 
@@ -332,7 +276,7 @@ describe('Breakdown page, removeOneAssetFromSelection', () => {
       },
       actions: { castAsset: vi.fn(() => Promise.reject(new Error('down'))) }
     })
-    wrapper.vm.selection = { 'shot-a': true }
+    wrapper.vm.selection = new Set(['shot-a'])
 
     await wrapper.vm.removeOneAssetFromSelection('asset-1')
     await nextTick()
@@ -388,9 +332,7 @@ describe('Breakdown page, selection', () => {
         }
       ]
     })
-    wrapper.vm.isLoading = false
-    wrapper.vm.selection = { 'shot-a': false, 'shot-b': false, 'shot-c': false }
-    await nextTick()
+    await flushPromises()
     const lines = wrapper.findAll('.shot')
     // The first selection also enables the available assets column.
     await lines[0].trigger('click')
@@ -403,6 +345,29 @@ describe('Breakdown page, selection', () => {
     expect(lines[0].classes()).not.toContain('selected')
     expect(lines[1].classes()).toContain('selected')
     expect(updates).toEqual({ ShotLine: 2 })
+  })
+
+  test('selects the lines between two shift clicks, in list order', async () => {
+    const shots = ['shot-a', 'shot-b', 'shot-c', 'shot-d'].map(id => ({
+      id,
+      name: id,
+      sequence_name: 'SEQ01',
+      data: {}
+    }))
+    const { wrapper } = mountPage({
+      state: { isTVShow: false, currentEpisode: null },
+      getters: { castingSequenceShots: () => shots }
+    })
+    await flushPromises()
+
+    wrapper.vm.selectEntity('shot-c', {})
+    wrapper.vm.selectEntity('shot-a', { shiftKey: true })
+
+    expect(wrapper.vm.selectedEntityIds.sort()).toEqual([
+      'shot-a',
+      'shot-b',
+      'shot-c'
+    ])
   })
 
   // Casting an asset rewrites the casting of its entity only: the asset type
@@ -427,7 +392,7 @@ describe('Breakdown page, selection', () => {
       ]
     ]
     const updates = {}
-    const { wrapper, store } = mountPage({
+    const { store } = mountPage({
       state: {
         isTVShow: false,
         currentEpisode: null,
@@ -455,14 +420,335 @@ describe('Breakdown page, selection', () => {
         }
       ]
     })
-    wrapper.vm.isLoading = false
-    await nextTick()
+    await flushPromises()
     Object.keys(updates).forEach(name => delete updates[name])
 
     store.state.castingByType['shot-b'] = castAsset(2)
     await nextTick()
 
     expect(updates).toEqual({ ShotLine: 1 })
+  })
+})
+
+describe('Breakdown page, casting helpers', () => {
+  const link = (assetId, name, type, nbOccurences) => ({
+    id: `link-${assetId}`,
+    asset_id: assetId,
+    asset_name: name,
+    name,
+    asset_type_name: type,
+    nb_occurences: nbOccurences
+  })
+  const shots = [
+    { id: 'shot-a', name: 'SH01', sequence_name: 'SEQ01', data: {} },
+    { id: 'shot-b', name: 'SH02', sequence_name: 'SEQ01', data: {} },
+    {
+      id: 'shot-c',
+      name: 'SH03',
+      sequence_name: 'SEQ01',
+      data: {},
+      is_casting_standby: true
+    }
+  ]
+  const hero = link('asset-1', 'Hero', 'Characters', 2)
+  const villain = link('asset-2', 'Villain', 'Characters', 3)
+  const forest = link('asset-3', 'Forest', 'Environments', 1)
+
+  const mountCasting = async (actions = {}) => {
+    const mounted = mountPage({
+      state: {
+        isTVShow: false,
+        currentEpisode: null,
+        casting: { 'shot-a': [hero, forest], 'shot-c': [hero, villain] }
+      },
+      actions: { setEntityCasting: vi.fn(), saveCastings: vi.fn(), ...actions },
+      getters: {
+        castingByType: () => ({
+          'shot-a': [[hero], [forest]],
+          'shot-c': [[hero, villain]]
+        }),
+        castingSequenceShots: () => shots,
+        getTaskTypePriority: () => taskTypeId =>
+          ({ layout: 1, animation: 2 })[taskTypeId],
+        productionShotTaskTypes: () => [
+          { id: 'animation', name: 'Animation' },
+          { id: 'layout', name: 'Layout' }
+        ]
+      },
+      stubs: { CastingTypeTotal: false }
+    })
+    await flushPromises()
+    return mounted
+  }
+
+  const typeTotals = wrapper =>
+    Object.fromEntries(
+      wrapper
+        .findAllComponents({ name: 'CastingTypeTotal' })
+        .map(total => [
+          total.props('assetType'),
+          total.findAll('span').map(part => part.text())
+        ])
+    )
+
+  const displayedIds = wrapper =>
+    wrapper
+      .findAllComponents({ name: 'ShotLine' })
+      .map(line => line.props('entity').id)
+
+  test('totals the distinct assets and the occurrences of each type', async () => {
+    const { wrapper } = await mountCasting()
+
+    expect(typeTotals(wrapper)).toEqual({
+      Characters: [
+        'breakdown.nb_assets {"count":2}',
+        'breakdown.nb_occurrences {"count":7}'
+      ],
+      Environments: [
+        'breakdown.nb_assets {"count":1}',
+        'breakdown.nb_occurrences {"count":1}'
+      ]
+    })
+  })
+
+  test('displays the lines without casting only', async () => {
+    const { wrapper } = await mountCasting()
+
+    wrapper.vm.lineFilter = 'empty'
+    await nextTick()
+
+    expect(displayedIds(wrapper)).toEqual(['shot-b'])
+  })
+
+  test('displays the standby lines only', async () => {
+    const { wrapper } = await mountCasting()
+
+    wrapper.vm.lineFilter = 'standby'
+    await nextTick()
+
+    expect(displayedIds(wrapper)).toEqual(['shot-c'])
+  })
+
+  test('displays the lines that cast a given asset', async () => {
+    const { wrapper } = await mountCasting()
+
+    wrapper.vm.castedAssetSearch = 'vill'
+    await nextTick()
+
+    expect(displayedIds(wrapper)).toEqual(['shot-c'])
+    // The totals follow the lines displayed.
+    expect(typeTotals(wrapper).Characters[1]).toBe(
+      'breakdown.nb_occurrences {"count":5}'
+    )
+  })
+
+  test('hands the step chosen for the ready indicator to the lines', async () => {
+    const { wrapper } = await mountCasting()
+
+    // Pipeline order, not alphabetical: the first option is "no indicator".
+    expect(wrapper.vm.readyForTaskTypes.map(taskType => taskType.id)).toEqual([
+      '',
+      'layout',
+      'animation'
+    ])
+    wrapper.vm.readyTaskTypeId = 'animation'
+    await nextTick()
+
+    const line = wrapper.findComponent({ name: 'ShotLine' })
+    expect(line.props('readyTaskTypeId')).toBe('animation')
+    expect(preferences.setPreference).toHaveBeenCalledWith(
+      'breakdown:ready-for-p1',
+      'animation'
+    )
+  })
+
+  test('casts a dropped asset on the line it lands on', async () => {
+    const { wrapper, actions } = await mountCasting()
+    wrapper.vm.selection = new Set(['shot-a'])
+
+    wrapper
+      .findAllComponents({ name: 'ShotLine' })[1]
+      .vm.$emit('drop-asset', 'shot-b', 'asset-2')
+    await flushPromises()
+
+    expect(actions.addAssetToCasting).toHaveBeenCalledTimes(1)
+    expect(actions.addAssetToCasting.mock.calls[0][1]).toMatchObject({
+      entityId: 'shot-b',
+      assetId: 'asset-2',
+      nbOccurences: 1
+    })
+    expect(actions.castAsset.mock.calls[0][1]).toEqual({
+      entityIds: ['shot-b'],
+      assetId: 'asset-2'
+    })
+  })
+
+  // Dropping on one of the selected lines works like "+1": all of them.
+  test('casts a dropped asset on the whole selection it lands in', async () => {
+    const { wrapper, actions } = await mountCasting()
+    wrapper.vm.selection = new Set(['shot-a', 'shot-b'])
+
+    wrapper
+      .findAllComponents({ name: 'ShotLine' })[1]
+      .vm.$emit('drop-asset', 'shot-b', 'asset-2')
+    await flushPromises()
+
+    expect(actions.castAsset.mock.calls[0][1]).toEqual({
+      entityIds: ['shot-a', 'shot-b'],
+      assetId: 'asset-2'
+    })
+  })
+
+  test('copies the casting of a line to paste it on the selection', async () => {
+    const { wrapper, actions } = await mountCasting()
+    const lines = wrapper.findAllComponents({ name: 'ShotLine' })
+
+    lines[0].vm.$emit('copy-casting', 'shot-a')
+    wrapper.vm.selection = new Set(['shot-b'])
+    await wrapper.vm.pasteCasting()
+
+    expect(actions.setEntityCasting.mock.calls[0][1]).toEqual({
+      entityId: 'shot-b',
+      casting: [hero, forest]
+    })
+    expect(actions.saveCastings.mock.calls[0][1]).toEqual(['shot-b'])
+  })
+})
+
+describe('Breakdown page, paste and undo', () => {
+  const link = (assetId, nbOccurences) => ({
+    asset_id: assetId,
+    asset_name: assetId,
+    asset_type_name: 'Characters',
+    nb_occurences: nbOccurences
+  })
+
+  // The store of the page for real: the casting actions write in the state.
+  const mountUndo = async () => {
+    const mounted = mountPage({
+      state: {
+        isTVShow: false,
+        currentEpisode: null,
+        casting: { 'shot-a': [link('hero', 2)], 'shot-b': [] }
+      },
+      actions: {
+        addAssetToCasting: ({ state }, { entityId, assetId, nbOccurences }) => {
+          const casted = state.casting[entityId].find(
+            ({ asset_id }) => asset_id === assetId
+          )
+          // In place, as the store does.
+          if (casted) casted.nb_occurences += nbOccurences
+          else state.casting[entityId].push(link(assetId, nbOccurences))
+        },
+        saveCastings: vi.fn(() => Promise.resolve()),
+        setEntityCasting: ({ state }, { entityId, casting }) => {
+          state.casting[entityId] = casting
+        }
+      },
+      getters: {
+        castingSequenceShots: () => [
+          { id: 'shot-a', name: 'SH01', data: {} },
+          { id: 'shot-b', name: 'SH02', data: {} }
+        ]
+      }
+    })
+    await flushPromises()
+    return mounted
+  }
+
+  // The store adds occurrences in place: lines sharing one pasted array, and
+  // the clipboard with them, would all change along with the line edited.
+  test('pastes a casting of its own on each line', async () => {
+    const { wrapper, store } = await mountUndo()
+    store.state.casting['shot-c'] = []
+    wrapper.vm.copyEntityCasting('shot-a')
+    wrapper.vm.selection = new Set(['shot-b', 'shot-c'])
+    await wrapper.vm.pasteCasting()
+
+    wrapper.vm.selection = new Set(['shot-b'])
+    await wrapper.vm.addOneAsset('hero')
+
+    expect(store.state.casting['shot-b']).toEqual([link('hero', 3)])
+    expect(store.state.casting['shot-c']).toEqual([link('hero', 2)])
+    expect(store.state.casting['shot-a']).toEqual([link('hero', 2)])
+  })
+
+  test('pastes the casting as it was when copied', async () => {
+    const { wrapper, store } = await mountUndo()
+    wrapper.vm.copyEntityCasting('shot-a')
+    wrapper.vm.selection = new Set(['shot-a'])
+    await wrapper.vm.addOneAsset('hero')
+
+    wrapper.vm.selection = new Set(['shot-b'])
+    await wrapper.vm.pasteCasting()
+
+    expect(store.state.casting['shot-b']).toEqual([link('hero', 2)])
+  })
+
+  test('has nothing to undo before a change', async () => {
+    const { wrapper, actions } = await mountUndo()
+
+    expect(wrapper.vm.canUndo).toBe(false)
+    await wrapper.vm.undoCasting()
+
+    expect(actions.saveCastings).not.toHaveBeenCalled()
+  })
+
+  test('puts back the castings a paste replaced', async () => {
+    const { wrapper, store, actions } = await mountUndo()
+    wrapper.vm.copyEntityCasting('shot-a')
+    wrapper.vm.selection = new Set(['shot-b'])
+    await wrapper.vm.pasteCasting()
+    expect(store.state.casting['shot-b']).toHaveLength(1)
+
+    await wrapper.vm.undoCasting()
+
+    expect(store.state.casting['shot-b']).toEqual([])
+    expect(actions.saveCastings.mock.calls.at(-1)[1]).toEqual(['shot-b'])
+    expect(wrapper.vm.canUndo).toBe(false)
+  })
+
+  // The store adds occurrences in place: the snapshot must be a copy.
+  test('undoes the changes one by one, the last first', async () => {
+    const { wrapper, store } = await mountUndo()
+    wrapper.vm.selection = new Set(['shot-a'])
+    await wrapper.vm.addOneAsset('hero')
+    await wrapper.vm.addOneAsset('villain')
+    expect(store.state.casting['shot-a']).toEqual([
+      link('hero', 3),
+      link('villain', 1)
+    ])
+
+    await wrapper.vm.undoCasting()
+    expect(store.state.casting['shot-a']).toEqual([link('hero', 3)])
+    await wrapper.vm.undoCasting()
+    expect(store.state.casting['shot-a']).toEqual([link('hero', 2)])
+  })
+
+  test('undoes on ctrl + z, outside text fields', async () => {
+    const { wrapper, store } = await mountUndo()
+    wrapper.vm.selection = new Set(['shot-a'])
+    await wrapper.vm.addOneAsset('hero')
+
+    window.dispatchEvent(
+      new KeyboardEvent('keydown', { keyCode: 90, ctrlKey: true })
+    )
+    await flushPromises()
+
+    expect(store.state.casting['shot-a']).toEqual([link('hero', 2)])
+  })
+
+  // The lines of another sequence are not displayed: undoing them blind
+  // would rewrite castings nobody is looking at.
+  test('forgets the changes when the scope moves', async () => {
+    const { wrapper } = await mountUndo()
+    wrapper.vm.selection = new Set(['shot-a'])
+    await wrapper.vm.addOneAsset('hero')
+    expect(wrapper.vm.canUndo).toBe(true)
+
+    wrapper.vm.resetSelection()
+
+    expect(wrapper.vm.canUndo).toBe(false)
   })
 })
 
@@ -482,7 +768,12 @@ describe('Breakdown page, asset search', () => {
     await search(wrapper, 'hero')
 
     expect(setAssetSearch).toHaveBeenCalledTimes(1)
-    expect(setAssetSearch.mock.calls[0][1]).toBe('hero')
+    // One page only: after a long scroll, every keystroke would render all
+    // the tiles loaded so far.
+    expect(setAssetSearch.mock.calls[0][1]).toEqual({
+      assetSearch: 'hero',
+      isPageReset: true
+    })
   })
 
   test('still applies a search coming from the URL', async () => {
@@ -493,7 +784,7 @@ describe('Breakdown page, asset search', () => {
     await nextTick()
 
     expect(setAssetSearch).toHaveBeenCalledTimes(1)
-    expect(setAssetSearch.mock.calls[0][1]).toBe('saved')
+    expect(setAssetSearch.mock.calls[0][1].assetSearch).toBe('saved')
   })
 
   // The store keeps the number of assets displayed across searches: asking
@@ -508,6 +799,9 @@ describe('Breakdown page, asset search', () => {
     const { wrapper } = mountPage({
       actions: { setAssetSearch: vi.fn(), displayMoreAssets }
     })
+    // The load of the page displays the first page of assets.
+    await flushPromises()
+    displayMoreAssets.mockClear()
 
     await search(wrapper, 'hero')
 

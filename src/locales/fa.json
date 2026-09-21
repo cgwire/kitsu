@@ -63,12 +63,17 @@
     },
     "breakdown": {
       "all_assets": "همه منابع موجود",
+      "copy_casting": "کپی این کستینگ (ctrl + V آن را در ردیف‌های انتخاب‌شده جای‌گذاری می‌کند)",
       "edit_label": "تغییر برچسب منبع",
       "empty": "کستینگ خالی",
       "label": "برچسب",
+      "nb_assets": "{count} دارایی | {count} دارایی",
+      "nb_occurrences": "{count} تکرار | {count} تکرار",
+      "nb_ready": "{ready} / {total} آماده",
       "occurrences": "تعداد تکرار",
       "picture_mode": "به حالت تصویر بروید",
       "remove_from_casting": "حذف از کستینگ",
+      "undo": "واگرد آخرین تغییر کستینگ (ctrl + Z)",
       "view_as_cards": "نمایش به صورت کارت",
       "view_as_list": "نمایش به صورت فهرست",
       "text_mode": "تغییر به حالت متن",
@@ -85,10 +90,16 @@
       "fields": {
         "standby": "STDB"
       },
-      "episode_casting": "کستینگ اپیزود",
       "save_error": "خطا هنگام ذخیره کستینگ",
       "hide_library": "مخفی کردن کتابخانه",
-      "show_library": "نمایش کتابخانه"
+      "show_library": "نمایش کتابخانه",
+      "filters": {
+        "all": "همه ردیف‌ها",
+        "asset": "شامل دارایی…",
+        "empty": "بدون کستینگ",
+        "label": "ردیف‌ها",
+        "standby": "در انتظار"
+      }
     },
     "comments": {
       "add_attachment": "اضافه کردن پیوست",

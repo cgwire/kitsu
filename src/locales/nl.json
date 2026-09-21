@@ -63,12 +63,17 @@
     },
     "breakdown": {
       "all_assets": "Alle beschikbare assets",
+      "copy_casting": "Deze casting kopiëren (ctrl + V plakt deze op de geselecteerde regels)",
       "edit_label": "Asset label aanpassen",
       "empty": "Lege casting",
       "label": "Label",
+      "nb_assets": "{count} asset | {count} assets",
+      "nb_occurrences": "{count} voorkomen | {count} voorkomens",
+      "nb_ready": "{ready} / {total} klaar",
       "occurrences": "Voorkomens",
       "picture_mode": "Wissel naar galerij modus",
       "remove_from_casting": "Uit de casting verwijderen",
+      "undo": "Laatste castingwijziging ongedaan maken (ctrl + Z)",
       "view_as_cards": "Als kaarten weergeven",
       "view_as_list": "Als lijst weergeven",
       "text_mode": "Wissel naar tekst modus",
@@ -85,10 +90,16 @@
       "fields": {
         "standby": "STDB"
       },
-      "episode_casting": "Casting van de aflevering",
       "save_error": "Fout bij het opslaan van casting",
       "hide_library": "Bibliotheek verbergen",
-      "show_library": "Bibliotheek weergeven"
+      "show_library": "Bibliotheek weergeven",
+      "filters": {
+        "all": "Alle regels",
+        "asset": "Bevat het asset…",
+        "empty": "Zonder casting",
+        "label": "Regels",
+        "standby": "Stand-by"
+      }
     },
     "comments": {
       "add_attachment": "Bijlage toevoegen",

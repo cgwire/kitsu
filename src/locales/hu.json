@@ -63,12 +63,17 @@
     },
     "breakdown": {
       "all_assets": "Minden rendelkezésre álló asset",
+      "copy_casting": "Casting másolása (a ctrl + V beilleszti a kijelölt sorokba)",
       "edit_label": "Asset címkéjének megváltoztatása",
       "empty": "Üres szereplista",
       "label": "Címke",
+      "nb_assets": "{count} asset | {count} asset",
+      "nb_occurrences": "{count} előfordulás | {count} előfordulás",
+      "nb_ready": "{ready} / {total} kész",
       "occurrences": "Előfordulások",
       "picture_mode": "Váltás kép módra",
       "remove_from_casting": "Eltávolítás a castingból",
+      "undo": "Az utolsó castingmódosítás visszavonása (ctrl + Z)",
       "view_as_cards": "Kártyás nézet",
       "view_as_list": "Listás nézet",
       "text_mode": "Váltás szöveges módra",
@@ -77,7 +82,6 @@
         "fixed": "fix",
         "animate": "animálni"
       },
-      "episode_casting": "Epizód szereposztás",
       "fields": {
         "standby": "STDB"
       },
@@ -88,7 +92,14 @@
         "text": "Ha eltávolítod ezt az asset-et a kijelölt epizódból, az eltávolítja az asset-eket az összes hozzá tartozó shot-ból is. Biztosan eltávolítod?"
       },
       "save_error": "Hiba történt a szereposztás mentésekor",
-      "show_library": "Könyvtár megjelenítése"
+      "show_library": "Könyvtár megjelenítése",
+      "filters": {
+        "all": "Minden sor",
+        "asset": "Tartalmazza az assetet…",
+        "empty": "Casting nélkül",
+        "label": "Sorok",
+        "standby": "Készenlét"
+      }
     },
     "comments": {
       "add_attachment": "Csatolmány",

@@ -21,6 +21,8 @@
 import { computed, onMounted, watch } from 'vue'
 import { useStore } from 'vuex'
 
+import preferences from '@/lib/preferences'
+
 import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 
 const store = useStore()
@@ -46,16 +48,18 @@ const toggleInfos = () => {
 }
 
 onMounted(() => {
-  if (localStorage.getItem('show-infos-breakdown') === 'false') {
-    hideInfosBreakdown()
-  } else {
+  if (preferences.getBoolPreference('show-infos-breakdown', true)) {
     showInfosBreakdown()
+  } else {
+    hideInfosBreakdown()
   }
 })
 
 watch(isShowInfosBreakdown, () => {
-  const value = isShowInfosBreakdown.value.toString()
-  localStorage.setItem('show-infos-breakdown', value)
+  preferences.setBoolPreference(
+    'show-infos-breakdown',
+    isShowInfosBreakdown.value
+  )
 })
 </script>
 

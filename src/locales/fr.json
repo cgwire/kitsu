@@ -63,12 +63,17 @@
     },
     "breakdown": {
       "all_assets": "Tous les assets disponibles",
+      "copy_casting": "Copier ce casting (ctrl + V le colle sur les lignes sélectionnées)",
       "edit_label": "Changer le label de l'asset",
       "empty": "Casting vide",
       "label": "Label",
+      "nb_assets": "{count} asset | {count} assets",
+      "nb_occurrences": "{count} occurrence | {count} occurrences",
+      "nb_ready": "{ready} / {total} prêts",
       "occurrences": "Occurrences",
       "picture_mode": "Passer en mode image",
       "remove_from_casting": "Retirer du casting",
+      "undo": "Annuler le dernier changement de casting (ctrl + Z)",
       "view_as_cards": "Voir en cartes",
       "view_as_list": "Voir en liste",
       "text_mode": "Passer en mode texte",
@@ -85,10 +90,16 @@
       "fields": {
         "standby": "Stand By"
       },
-      "episode_casting": "Casting de l'épisode",
       "save_error": "Une erreur est survenue en enregistrant le casting",
       "hide_library": "Cacher la bibliothèque",
-      "show_library": "Afficher la bibliothèque"
+      "show_library": "Afficher la bibliothèque",
+      "filters": {
+        "all": "Toutes les lignes",
+        "asset": "Contient l'asset…",
+        "empty": "Sans casting",
+        "label": "Lignes",
+        "standby": "En attente"
+      }
     },
     "comments": {
       "add_attachment": "Ajouter une pièce jointe",
