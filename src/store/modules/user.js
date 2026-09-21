@@ -134,20 +134,30 @@ const state = {
   ...initialState
 }
 
+// Keyed on the route rather than on currentProduction: the latter is never
+// cleared, so it would leak a project role onto studio-wide pages. Admin is
+// a global-only role, as in zou.
+const routeRole = (state, rootState) => {
+  const role = state.user?.role
+  if (role === 'admin') return role
+  const productionId = rootState?.route?.params?.production_id
+  return (productionId && state.projectRoles?.[productionId]) || role
+}
+
 const getters = {
   user: state => state.user,
   isAuthenticated: state => state.isAuthenticated,
-  isCurrentUserManager: state => {
-    return state.user && ['admin', 'manager'].includes(state.user.role)
-  },
+  isCurrentUserManager: (state, getters, rootState) =>
+    state.user && ['admin', 'manager'].includes(routeRole(state, rootState)),
   isCurrentUserAdmin: state => state.user && state.user.role === 'admin',
-  isCurrentUserArtist: state => {
-    return state.user && ['user', 'vendor'].includes(state.user.role)
-  },
-  isCurrentUserSupervisor: state =>
-    state.user && state.user.role === 'supervisor',
-  isCurrentUserClient: state => state.user && state.user.role === 'client',
-  isCurrentUserVendor: state => state.user && state.user.role === 'vendor',
+  isCurrentUserArtist: (state, getters, rootState) =>
+    state.user && ['user', 'vendor'].includes(routeRole(state, rootState)),
+  isCurrentUserSupervisor: (state, getters, rootState) =>
+    state.user && routeRole(state, rootState) === 'supervisor',
+  isCurrentUserClient: (state, getters, rootState) =>
+    state.user && routeRole(state, rootState) === 'client',
+  isCurrentUserVendor: (state, getters, rootState) =>
+    state.user && routeRole(state, rootState) === 'vendor',
 
   // Role the user effectively holds on given production: the per-project
   // role when one is set, the global role otherwise.
