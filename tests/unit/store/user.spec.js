@@ -107,6 +107,43 @@ describe('User store', () => {
       })
     })
 
+    describe('role getters follow the project role on production routes', () => {
+      const routeFor = productionId => ({
+        route: { params: productionId ? { production_id: productionId } : {} }
+      })
+      const promoted = stateFor('user', { 'production-1': 'manager' })
+
+      test('artist promoted manager on the production', () => {
+        const rootState = routeFor('production-1')
+        expect(
+          store.getters.isCurrentUserManager(promoted, {}, rootState)
+        ).toBe(true)
+        expect(store.getters.isCurrentUserArtist(promoted, {}, rootState)).toBe(
+          false
+        )
+      })
+
+      test('global role applies outside of a production route', () => {
+        const rootState = routeFor(null)
+        expect(
+          store.getters.isCurrentUserManager(promoted, {}, rootState)
+        ).toBe(false)
+        expect(store.getters.isCurrentUserArtist(promoted, {}, rootState)).toBe(
+          true
+        )
+      })
+
+      test('admin stays manager whatever the project role says', () => {
+        expect(
+          store.getters.isCurrentUserManager(
+            stateFor('admin', { 'production-1': 'user' }),
+            {},
+            routeFor('production-1')
+          )
+        ).toBe(true)
+      })
+    })
+
     describe('isCurrentUserProductionSupervisor', () => {
       const getter = store.getters.isCurrentUserProductionSupervisor
 
