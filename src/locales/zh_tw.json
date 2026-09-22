@@ -95,7 +95,7 @@
       "show_library": "顯示資產庫",
       "filters": {
         "all": "所有列",
-        "asset": "包含資產…",
+        "asset": "依已分配的資產篩選…",
         "empty": "無選角",
         "label": "列",
         "standby": "待定"

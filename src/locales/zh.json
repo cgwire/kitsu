@@ -95,7 +95,7 @@
       "show_library": "显示资源库",
       "filters": {
         "all": "所有行",
-        "asset": "包含资产…",
+        "asset": "按已分配的资产筛选…",
         "empty": "无选角",
         "label": "行",
         "standby": "待定"

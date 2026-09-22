@@ -2,7 +2,7 @@
 export const ASSET_DRAG_TYPE = 'application/x-kitsu-asset'
 
 /*
- * Tells whether a casted asset is ready for a shot task type. Same rule as
+ * Tells whether a cast asset is ready for a shot task type. Same rule as
  * zou (breakdown_service._is_asset_ready), which only stores the resulting
  * count on the tasks: the step the asset is delivered for (ready_for) must
  * come at or after the given one in the pipeline order of the production.

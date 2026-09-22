@@ -740,7 +740,7 @@ const castingAssetTypes = computed(previousTypes => {
 })
 
 // Only the import preview reads it: while it is closed, a casting change must
-// not rebuild the index of every casted asset of the page.
+// not rebuild the index of every cast asset of the page.
 const filteredCasting = computed(() =>
   modals.isImportRenderDisplayed
     ? Object.fromEntries(

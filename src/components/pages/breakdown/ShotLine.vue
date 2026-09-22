@@ -356,7 +356,7 @@ const user = computed(() => store.getters.user)
 // it changes, not the page and its whole list.
 const selected = computed(() => props.selection.has(props.entity.id))
 
-// Casted assets ready for the chosen step, null when there is nothing to
+// Cast assets ready for the chosen step, null when there is nothing to
 // tell. The asset map is a plain cache of the store: an asset delivered while
 // the page is open shows at the next casting change or reload.
 const readyAssets = computed(() => {

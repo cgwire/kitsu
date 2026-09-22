@@ -95,7 +95,7 @@
       "show_library": "Exibir biblioteca",
       "filters": {
         "all": "Todas as linhas",
-        "asset": "Contém o asset…",
+        "asset": "Filtrar por asset distribuído…",
         "empty": "Sem casting",
         "label": "Linhas",
         "standby": "Em espera"

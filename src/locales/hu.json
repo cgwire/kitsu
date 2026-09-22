@@ -95,7 +95,7 @@
       "show_library": "Könyvtár megjelenítése",
       "filters": {
         "all": "Minden sor",
-        "asset": "Tartalmazza az assetet…",
+        "asset": "Szűrés szereplő asset szerint…",
         "empty": "Casting nélkül",
         "label": "Sorok",
         "standby": "Készenlét"

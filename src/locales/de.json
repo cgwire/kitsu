@@ -95,7 +95,7 @@
       "show_library": "Bibliothek anzeigen",
       "filters": {
         "all": "Alle Zeilen",
-        "asset": "Enthält das Asset…",
+        "asset": "Nach gecastetem Asset filtern…",
         "empty": "Ohne Casting",
         "label": "Zeilen",
         "standby": "Standby"
