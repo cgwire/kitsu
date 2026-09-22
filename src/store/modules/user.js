@@ -187,6 +187,18 @@ const getters = {
       departments.length === 0 || departments.includes(taskType?.department_id)
     )
   },
+  // Mirrors zou's metadata access for the trim handles, data keys without a
+  // descriptor: admins anywhere, managers and supervisors without department
+  // when they belong to the production team.
+  canEditShotTrim: (state, getters, rootState, rootGetters) => task => {
+    if (!state.user) return false
+    if (state.user.role === 'admin') return true
+    const production = rootGetters.productionMap.get(task?.project_id)
+    if (!production?.team?.includes(state.user.id)) return false
+    const role = getters.currentUserRoleForProduction(task?.project_id)
+    if (role === 'manager') return true
+    return role === 'supervisor' && !(state.user.departments || []).length
+  },
   use12HourClock: state => Boolean(state.user?.use_12_hour_clock),
   isSaveProfileLoading: state => state.isSaveProfileLoading,
   isSaveProfileLoadingError: state => state.isSaveProfileLoadingError,

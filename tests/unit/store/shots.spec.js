@@ -728,6 +728,33 @@ describe('Shots store, NEW_SHOT_END', () => {
   })
 })
 
+// The task panel's preview player trims shots from pages that never load the
+// shots list (news feed, my tasks): the edit payload only holds the id and
+// the data.
+describe('Shots store, editShot', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  test('saves a shot missing from the loaded list without adding it', async () => {
+    shotsStore.cache.shots = []
+    shotsStore.cache.shotMap = new Map()
+    vi.spyOn(shotsApi, 'updateShot').mockResolvedValue({})
+    const state = { displayedShots: [], shotSearchText: '' }
+    const commit = (type, payload) => shotsStore.mutations[type](state, payload)
+    const edit = { id: 'sh-trim', data: { handle_in: 12 } }
+
+    await shotsStore.actions.editShot(
+      { commit, rootGetters: { displayedSequences: [] } },
+      edit
+    )
+
+    expect(shotsApi.updateShot).toHaveBeenCalledWith(edit)
+    expect(shotsStore.cache.shots).toEqual([])
+    expect(shotsStore.cache.shotMap.size).toBe(0)
+  })
+})
+
 describe('Shots store, getShotsCsvLines', () => {
   test('exports the base columns when the production has no descriptors key', () => {
     shotsStore.cache.shots = [

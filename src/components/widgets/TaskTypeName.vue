@@ -2,7 +2,7 @@
   <router-link
     :to="targetRoute"
     v-if="
-      taskType &&
+      taskType?.for_entity &&
       isLink &&
       productionId &&
       !isCurrentUserClient &&

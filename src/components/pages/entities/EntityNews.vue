@@ -99,10 +99,10 @@ const taskTypeMap = computed(() => store.getters.taskTypeMap)
 // --------------------------------------------------------------------------
 const buildTaskFromNews = news => ({ task_status_id: news.task_status_id })
 
-const buildTaskTypeFromNews = news => ({
-  ...taskTypeMap.value.get(news.task_type_id),
-  episode_id: news.episode_id
-})
+const buildTaskTypeFromNews = news => {
+  const taskType = taskTypeMap.value.get(news.task_type_id)
+  return taskType ? { ...taskType, episode_id: news.episode_id } : null
+}
 
 const hasRetakeValue = news => {
   const taskStatus = taskStatusMap.value.get(news.task_status_id)

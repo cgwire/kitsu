@@ -1538,7 +1538,9 @@ export default {
           estimation: task.estimation,
           startDate: task.startDate.format('YYYY-MM-DD'),
           dueDate: task.endDate.format('YYYY-MM-DD'),
-          assignees: task.assignees
+          // 'unassigned' is the local row placeholder, not a person id: the
+          // API rejects it and drops the whole update
+          assignees: task.assignees.filter(id => id !== 'unassigned')
         })
       } else {
         return this.updateTask({

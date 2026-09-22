@@ -51,4 +51,27 @@ describe('players/VideoProgress', () => {
       expect(emitted).toEqual([3, 6, 12, 15, 100])
     })
   })
+
+  describe('trim handles', () => {
+    const dragHandleIn = async wrapper => {
+      await wrapper.find('.handle-in').trigger('mousedown')
+      document.dispatchEvent(new MouseEvent('mouseup'))
+    }
+
+    it('emits the dragged handle-in frame', async () => {
+      const wrapper = mountProgress({ handleIn: 10, handleOut: 100 })
+      await dragHandleIn(wrapper)
+      expect(wrapper.emitted('handle-in-changed')).toHaveLength(1)
+    })
+
+    it('ignores a drag when read only', async () => {
+      const wrapper = mountProgress({
+        handleIn: 10,
+        handleOut: 100,
+        readOnly: true
+      })
+      await dragHandleIn(wrapper)
+      expect(wrapper.emitted('handle-in-changed')).toBeUndefined()
+    })
+  })
 })

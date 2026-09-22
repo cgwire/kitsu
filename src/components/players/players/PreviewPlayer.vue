@@ -160,7 +160,7 @@
           @comment-added="$emit('comment-added')"
           @time-code-clicked="timeCodeClicked"
           v-show="!isCommentsHidden"
-          v-if="!readOnly && task.id"
+          v-if="!readOnly && task?.id"
         />
       </div>
     </div>
@@ -179,6 +179,7 @@
         :handle-in="handleIn"
         :handle-out="handleOut"
         :preview-id="isMovie && currentPreview ? currentPreview.id : ''"
+        :read-only="areHandlesReadOnly"
         @start-scrub="$refs['button-bar'].classList.add('unselectable')"
         @end-scrub="$refs['button-bar'].classList.remove('unselectable')"
         @progress-changed="onProgressChanged"
@@ -474,6 +475,7 @@ import { useComparison } from '@/composables/players/comparison'
 import { useOnionSkin } from '@/composables/players/onionSkin'
 import { usePreviewShortcuts } from '@/composables/players/previewShortcuts'
 import { usePlayerTransport } from '@/composables/players/transport'
+import { useTrimmedShot } from '@/composables/players/trimmedShot'
 import func from '@/lib/func'
 import { getEntityPath } from '@/lib/path'
 import { mergeAnnotationsByFrame } from '@/lib/players/annotation'
@@ -843,7 +845,7 @@ const {
   currentPreview,
   taskTypeMap: computed(() => props.taskTypeMap),
   currentProduction: computed(() =>
-    productionMap.value.get(props.task.project_id)
+    productionMap.value.get(props.task?.project_id)
   ),
   t
 })
@@ -855,7 +857,7 @@ if (props.entityPreviewFiles) {
 }
 
 const currentProduction = computed(() =>
-  productionMap.value.get(props.task.project_id)
+  productionMap.value.get(props.task?.project_id)
 )
 
 const allowExtraPreview = computed(
@@ -1355,18 +1357,15 @@ const onProgressChanged = frame => {
 }
 
 // Shot trim handles, shown on the progress bar like in PlaylistPlayer.
-// Not every parent passes entity-type (the Task page doesn't): derive the
-// type from the task payload too. A plain function, not a computed: the
-// shotMap getter exposes a non-reactive cache, so it must be re-read at
-// call time (the watcher below re-runs when the shots finish loading).
-const getTrimmedShot = () => {
-  const entityType =
-    props.entityType ||
-    props.task?.entity_type?.name ||
-    props.task?.entity_type_name
-  if (entityType !== 'Shot') return null
-  return store.getters.shotMap?.get(props.task?.entity_id) || props.task?.entity
-}
+const { canEditTrim, getTrimmedShot, saveTrimmedShot } = useTrimmedShot({
+  entityType: computed(() => props.entityType),
+  store,
+  task: computed(() => props.task)
+})
+
+// Zou refuses the trim of clients and department supervisors: keep the
+// handles visible but frozen for them.
+const areHandlesReadOnly = computed(() => props.readOnly || !canEditTrim.value)
 
 const toFrameNumber = value => {
   const frame = parseInt(value, 10)
@@ -1392,27 +1391,24 @@ const resetHandles = () => {
 }
 
 const onHandleInChanged = ({ frameNumber, save }) => {
-  if (props.readOnly) return
+  if (areHandlesReadOnly.value) return
   handleIn.value = frameNumber
   if (save) saveHandles()
 }
 
 const onHandleOutChanged = ({ frameNumber, save }) => {
-  if (props.readOnly) return
+  if (areHandlesReadOnly.value) return
   handleOut.value = frameNumber
   if (save) saveHandles()
 }
 
 const saveHandles = () => {
-  const shot = getTrimmedShot()
-  if (!shot?.id) return
-  store.dispatch('editShot', {
-    id: shot.id,
-    data: {
-      ...shot.data,
-      ...(handleIn.value >= 0 && { handle_in: handleIn.value }),
-      ...(handleOut.value >= 0 && { handle_out: handleOut.value })
-    }
+  saveTrimmedShot({
+    ...(handleIn.value >= 0 && { handle_in: handleIn.value }),
+    ...(handleOut.value >= 0 && { handle_out: handleOut.value })
+  }).catch(err => {
+    console.error(err)
+    resetHandles()
   })
 }
 
@@ -2480,6 +2476,11 @@ watch(isMuted, () => {
 // Lifecycle
 
 onMounted(() => {
+  // A render that threw leaves every template ref null: Vue mounts a comment
+  // node in its place and still runs this hook. The render error is already
+  // reported, so skip the wiring instead of failing a second time.
+  if (!container.value) return
+
   configureEvents()
 
   resetPreviewFileMap()

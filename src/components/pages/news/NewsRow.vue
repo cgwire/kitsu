@@ -203,10 +203,10 @@ const task = computed(() => ({
   episode_id: props.news.episode_id
 }))
 
-const taskType = computed(() => ({
-  ...taskTypeMap.value.get(props.news.task_type_id),
-  episode_id: props.news.episode_id
-}))
+const taskType = computed(() => {
+  const entry = taskTypeMap.value.get(props.news.task_type_id)
+  return entry ? { ...entry, episode_id: props.news.episode_id } : null
+})
 
 const previewPlayerTask = computed(() => ({
   id: props.news.task_id,

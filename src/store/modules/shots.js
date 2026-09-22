@@ -1137,32 +1137,24 @@ const mutations = {
 
   [EDIT_SHOT_END](state, { newShot, sequences }) {
     const shot = cache.shotMap.get(newShot.id)
+    // The edit payload is partial: a shot outside the loaded list (trim saved
+    // from the task panel on the news feed) must not enter it.
+    if (!shot) return
     const sequence = sequences.find(
       sequence => sequence.id === newShot.parent_id
     )
     if (sequence) newShot.sequence_name = sequence.name
 
-    if (shot) {
-      const copyNewShot = { ...newShot }
-      copyNewShot.data = { ...shot.data, ...newShot.data }
-      Object.assign(shot, copyNewShot)
-      state.displayedShots = state.displayedShots.map(stateShot => {
-        if (stateShot.id === newShot.id) {
-          return { ...shot }
-        }
-        return stateShot
-      })
-    } else {
-      insertSortedShot(cache.shots, newShot)
-      cache.shotMap.set(newShot.id, newShot)
-      state.shotSelectionGrid = buildSelectionGrid()
-    }
-    const indexedShot = shot || newShot
-    updateEntryInIndex(
-      cache.shotIndex,
-      indexedShot,
-      getShotIndexWords(indexedShot)
-    )
+    const copyNewShot = { ...newShot }
+    copyNewShot.data = { ...shot.data, ...newShot.data }
+    Object.assign(shot, copyNewShot)
+    state.displayedShots = state.displayedShots.map(stateShot => {
+      if (stateShot.id === newShot.id) {
+        return { ...shot }
+      }
+      return stateShot
+    })
+    updateEntryInIndex(cache.shotIndex, shot, getShotIndexWords(shot))
     state.shotCreated = newShot.name
 
     if (state.shotSearchText) {

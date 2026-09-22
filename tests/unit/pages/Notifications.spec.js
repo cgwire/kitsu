@@ -1,5 +1,5 @@
 import { nextTick, ref } from 'vue'
-import { shallowMount } from '@vue/test-utils'
+import { flushPromises, shallowMount } from '@vue/test-utils'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { createStore } from 'vuex'
 
@@ -21,13 +21,14 @@ import '@/lib/auth'
 
 import { useDesktopNotifications } from '@/composables/desktopNotifications'
 import NotificationsPage from '@/components/pages/Notifications.vue'
+import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
 const ButtonSimpleStub = {
   template: '<button v-bind="$attrs"><slot /></button>',
   inheritAttrs: true
 }
 
-const makeStore = () => {
+const makeStore = (getterOverrides = {}) => {
   const actions = {
     clearNotifications: vi.fn(),
     loadNotifications: vi.fn(() => Promise.resolve()),
@@ -48,7 +49,8 @@ const makeStore = () => {
       taskStatus: () => [],
       taskTypes: () => [],
       taskTypeMap: () => new Map(),
-      user: () => ({ id: 'user-1' })
+      user: () => ({ id: 'user-1' }),
+      ...getterOverrides
     },
     actions
   })
@@ -62,6 +64,27 @@ describe('Notifications.vue', () => {
 
   const getSocketHandler = event =>
     socketMock.on.mock.calls.find(([e]) => e === event)?.[1]
+
+  const mountPage = store => {
+    const router = createRouter({
+      history: createWebHashHistory(),
+      routes: [{ path: '/', component: { template: '<div />' } }]
+    })
+    return shallowMount(NotificationsPage, {
+      global: {
+        plugins: [
+          store,
+          router,
+          {
+            install: app => {
+              app.config.globalProperties.$socket = socketMock
+            }
+          }
+        ],
+        stubs: { ButtonSimple: ButtonSimpleStub }
+      }
+    })
+  }
 
   beforeEach(async () => {
     socketMock = { on: vi.fn(), off: vi.fn() }
@@ -85,32 +108,57 @@ describe('Notifications.vue', () => {
     })
 
     ;({ store } = makeStore())
-
-    const router = createRouter({
-      history: createWebHashHistory(),
-      routes: [{ path: '/', component: { template: '<div />' } }]
-    })
-
-    wrapper = shallowMount(NotificationsPage, {
-      global: {
-        plugins: [
-          store,
-          router,
-          {
-            install: app => {
-              app.config.globalProperties.$socket = socketMock
-            }
-          }
-        ],
-        stubs: { ButtonSimple: ButtonSimpleStub }
-      }
-    })
+    wrapper = mountPage(store)
     await nextTick()
   })
 
   afterEach(() => {
     wrapper.unmount()
     vi.clearAllMocks()
+  })
+
+  describe('task type tag', () => {
+    const notification = {
+      id: 'notification-1',
+      author_id: 'person-1',
+      created_at: '2026-09-21T10:00:00',
+      episode_id: 'episode-1',
+      full_entity_name: 'SH010',
+      notification_type: 'comment',
+      project_id: 'production-1',
+      read: false,
+      task_id: 'task-1',
+      task_type_id: 'task-type-1'
+    }
+
+    const remountWith = async getters => {
+      wrapper.unmount()
+      ;({ store } = makeStore(getters))
+      wrapper = mountPage(store)
+      await flushPromises()
+    }
+
+    it('passes the task type scoped to the episode when it is known', async () => {
+      const taskType = { id: 'task-type-1', name: 'Animation', for_entity: 'Shot' }
+      await remountWith({
+        notifications: () => [notification],
+        taskTypeMap: () => new Map([[taskType.id, taskType]])
+      })
+
+      expect(wrapper.findComponent(TaskTypeName).props('taskType')).toEqual({
+        ...taskType,
+        episode_id: 'episode-1'
+      })
+    })
+
+    // A task type created after the tab loaded, or whose socket event was
+    // missed, is absent from the map: the tag must not receive a partial
+    // object the widget would turn into a broken link.
+    it('passes null when the task type is unknown', async () => {
+      await remountWith({ notifications: () => [notification] })
+
+      expect(wrapper.findComponent(TaskTypeName).props('taskType')).toBeNull()
+    })
   })
 
   describe('desktop banner', () => {
