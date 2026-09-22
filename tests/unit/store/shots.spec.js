@@ -755,6 +755,147 @@ describe('Shots store, editShot', () => {
   })
 })
 
+// The inline cells of the shots list save on every keystroke: the edits of a
+// shot dispatched within the delay are merged into one request, so a typed
+// number reaches the server (and its version history) as a single value.
+describe('Shots store, editShotDebounced', () => {
+  const buildContext = () => {
+    const shot = {
+      id: 'sh-typed',
+      name: 'SH01',
+      sequence_name: 'SQ01',
+      data: { frame_out: 100 },
+      nb_frames: 50
+    }
+    const other = {
+      id: 'sh-other',
+      name: 'SH02',
+      sequence_name: 'SQ01',
+      data: { frame_out: 200 },
+      nb_frames: 50
+    }
+    shotsStore.cache.shots = [shot, other]
+    shotsStore.cache.shotMap = new Map([
+      [shot.id, shot],
+      [other.id, other]
+    ])
+    shotsStore.cache.shotIndex = buildShotIndex([shot, other])
+    const state = { displayedShots: [shot, other], shotSearchText: '' }
+    const commit = (type, payload) => shotsStore.mutations[type](state, payload)
+    const context = { commit, rootGetters: { displayedSequences: [] } }
+    const edit = (id, data) =>
+      shotsStore.actions.editShotDebounced(context, { id, ...data })
+    return { shot, other, state, edit }
+  }
+
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.spyOn(shotsApi, 'updateShot').mockResolvedValue({})
+  })
+
+  afterEach(async () => {
+    // Flush the pending edit of a failed test so it cannot leak into the next.
+    await vi.runOnlyPendingTimersAsync()
+    vi.useRealTimers()
+    vi.restoreAllMocks()
+  })
+
+  test('merges the keystrokes of a shot into one request holding the last values', async () => {
+    const { shot, state, edit } = buildContext()
+
+    const first = edit(shot.id, { data: { frame_in: 1 }, nb_frames: 100 })
+    const second = edit(shot.id, { data: { frame_in: 12 }, nb_frames: 89 })
+
+    // The list shows the typed value at once, the request waits.
+    expect(state.displayedShots[0].data.frame_in).toBe(12)
+    expect(shotsApi.updateShot).not.toHaveBeenCalled()
+
+    await vi.advanceTimersByTimeAsync(400)
+
+    expect(shotsApi.updateShot).toHaveBeenCalledTimes(1)
+    expect(shotsApi.updateShot).toHaveBeenCalledWith({
+      id: shot.id,
+      data: { frame_in: 12 },
+      nb_frames: 89
+    })
+    await expect(Promise.all([first, second])).resolves.toEqual([{}, {}])
+  })
+
+  test('keeps the fields an edit of another cell does not carry', async () => {
+    const { shot, edit } = buildContext()
+
+    edit(shot.id, { data: { frame_in: 12 }, nb_frames: 89 })
+    edit(shot.id, { data: { frame_out: 120 } })
+    await vi.advanceTimersByTimeAsync(400)
+
+    expect(shotsApi.updateShot).toHaveBeenCalledWith({
+      id: shot.id,
+      data: { frame_in: 12, frame_out: 120 },
+      nb_frames: 89
+    })
+  })
+
+  test('restarts the delay on each keystroke', async () => {
+    const { shot, edit } = buildContext()
+
+    edit(shot.id, { data: { frame_in: 1 } })
+    await vi.advanceTimersByTimeAsync(300)
+    edit(shot.id, { data: { frame_in: 12 } })
+    await vi.advanceTimersByTimeAsync(300)
+    expect(shotsApi.updateShot).not.toHaveBeenCalled()
+
+    await vi.advanceTimersByTimeAsync(100)
+    expect(shotsApi.updateShot).toHaveBeenCalledTimes(1)
+  })
+
+  test('sends one request per shot', async () => {
+    const { shot, other, edit } = buildContext()
+
+    edit(shot.id, { data: { frame_in: 1 } })
+    edit(other.id, { data: { frame_in: 1 } })
+    edit(shot.id, { data: { frame_in: 12 } })
+    await vi.advanceTimersByTimeAsync(400)
+
+    const sent = shotsApi.updateShot.mock.calls.map(([data]) => data)
+    expect(sent.sort((a, b) => a.id.localeCompare(b.id))).toEqual([
+      { id: other.id, data: { frame_in: 1 } },
+      { id: shot.id, data: { frame_in: 12 } }
+    ])
+  })
+
+  test('keeps the shot locked until 2 s after the shared request settles', async () => {
+    const { shot, edit } = buildContext()
+
+    edit(shot.id, { data: { frame_in: 1 } })
+    edit(shot.id, { data: { frame_in: 12 } })
+    expect(shot.lock).toBe(2)
+
+    await vi.advanceTimersByTimeAsync(400 + 1999)
+    expect(shot.lock).toBe(2)
+    await vi.advanceTimersByTimeAsync(1)
+    expect(shot.lock).toBe(0)
+  })
+
+  test('rejects every merged call when the request fails', async () => {
+    shotsApi.updateShot.mockRejectedValue(new Error('offline'))
+    const { shot, edit } = buildContext()
+
+    const settled = Promise.allSettled([
+      edit(shot.id, { data: { frame_in: 1 } }),
+      edit(shot.id, { data: { frame_in: 12 } })
+    ])
+    await vi.advanceTimersByTimeAsync(400)
+
+    expect(shotsApi.updateShot).toHaveBeenCalledTimes(1)
+    expect((await settled).map(({ status }) => status)).toEqual([
+      'rejected',
+      'rejected'
+    ])
+    await vi.advanceTimersByTimeAsync(2000)
+    expect(shot.lock).toBe(0)
+  })
+})
+
 describe('Shots store, getShotsCsvLines', () => {
   test('exports the base columns when the production has no descriptors key', () => {
     shotsStore.cache.shots = [
