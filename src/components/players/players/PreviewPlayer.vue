@@ -179,6 +179,7 @@
         :handle-in="handleIn"
         :handle-out="handleOut"
         :preview-id="isMovie && currentPreview ? currentPreview.id : ''"
+        :read-only="areHandlesReadOnly"
         @start-scrub="$refs['button-bar'].classList.add('unselectable')"
         @end-scrub="$refs['button-bar'].classList.remove('unselectable')"
         @progress-changed="onProgressChanged"
@@ -1356,11 +1357,15 @@ const onProgressChanged = frame => {
 }
 
 // Shot trim handles, shown on the progress bar like in PlaylistPlayer.
-const { getTrimmedShot, saveTrimmedShot } = useTrimmedShot({
+const { canEditTrim, getTrimmedShot, saveTrimmedShot } = useTrimmedShot({
   entityType: computed(() => props.entityType),
   store,
   task: computed(() => props.task)
 })
+
+// Zou refuses the trim of clients and department supervisors: keep the
+// handles visible but frozen for them.
+const areHandlesReadOnly = computed(() => props.readOnly || !canEditTrim.value)
 
 const toFrameNumber = value => {
   const frame = parseInt(value, 10)
@@ -1386,13 +1391,13 @@ const resetHandles = () => {
 }
 
 const onHandleInChanged = ({ frameNumber, save }) => {
-  if (props.readOnly) return
+  if (areHandlesReadOnly.value) return
   handleIn.value = frameNumber
   if (save) saveHandles()
 }
 
 const onHandleOutChanged = ({ frameNumber, save }) => {
-  if (props.readOnly) return
+  if (areHandlesReadOnly.value) return
   handleOut.value = frameNumber
   if (save) saveHandles()
 }
@@ -1401,6 +1406,9 @@ const saveHandles = () => {
   saveTrimmedShot({
     ...(handleIn.value >= 0 && { handle_in: handleIn.value }),
     ...(handleOut.value >= 0 && { handle_out: handleOut.value })
+  }).catch(err => {
+    console.error(err)
+    resetHandles()
   })
 }
 

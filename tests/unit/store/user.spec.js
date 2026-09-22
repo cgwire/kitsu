@@ -188,6 +188,53 @@ describe('User store', () => {
     })
   })
 
+  describe('canEditShotTrim', () => {
+    const task = { project_id: 'production-1' }
+    const call = (role, departments, options = {}) => {
+      const { team = ['person-1'], projectRoles = {} } = options
+      const state = { user: { id: 'person-1', role, departments }, projectRoles }
+      return store.getters.canEditShotTrim(
+        state,
+        {
+          currentUserRoleForProduction:
+            store.getters.currentUserRoleForProduction(state)
+        },
+        {},
+        { productionMap: new Map([['production-1', { team }]]) }
+      )(task)
+    }
+
+    test('admins edit the trim of any production', () => {
+      expect(call('admin', ['dep-1'], { team: [] })).toBe(true)
+    })
+
+    test('managers and department-less supervisors edit it from the team', () => {
+      expect(call('manager', [])).toBe(true)
+      expect(call('supervisor', [])).toBe(true)
+      const projectRoles = { 'production-1': 'manager' }
+      expect(call('user', [], { projectRoles })).toBe(true)
+    })
+
+    // zou only lets a supervisor with departments edit the descriptor keys
+    // of those departments, and the trim handles are not descriptors
+    test('supervisors with departments, clients and artists do not', () => {
+      expect(call('supervisor', ['dep-1'])).toBe(false)
+      expect(call('client', [])).toBe(false)
+      expect(call('user', [])).toBe(false)
+    })
+
+    test('managers outside the production team do not', () => {
+      expect(call('manager', [], { team: ['person-2'] })).toBe(false)
+    })
+
+    test('nobody edits it without a user', () => {
+      const rootGetters = { productionMap: new Map() }
+      expect(
+        store.getters.canEditShotTrim({ user: null }, {}, {}, rootGetters)(task)
+      ).toBe(false)
+    })
+  })
+
   describe('Mutations', () => {
     test('SET_USER_PROJECT_ROLES', () => {
       const state = { projectRoles: {} }

@@ -1,4 +1,4 @@
-import { toRaw } from 'vue'
+import { computed, toRaw } from 'vue'
 
 /*
  * The shot whose trim handles the preview player edits: the cached shot when
@@ -8,6 +8,8 @@ export const useTrimmedShot = ({ entityType, store, task }) => {
   // The store refreshes cached shots only: keep the data saved for a task
   // payload's shot until a reload brings a new payload.
   const savedData = new WeakMap()
+
+  const canEditTrim = computed(() => store.getters.canEditShotTrim(task.value))
 
   // Not every parent passes entity-type (the Task page doesn't): derive the
   // type from the task payload too. A plain function, not a computed: the
@@ -28,13 +30,26 @@ export const useTrimmedShot = ({ entityType, store, task }) => {
 
   const saveTrimmedShot = handles => {
     const shot = getTrimmedShot()
-    if (!shot?.id) return
+    if (!shot?.id) return Promise.resolve()
     const data = { ...shot.data, ...handles }
-    store.dispatch('editShot', { id: shot.id, data })
-    if (!store.getters.shotMap?.has(shot.id)) {
-      savedData.set(toRaw(task.value.entity), data)
-    }
+    const isCached = Boolean(store.getters.shotMap?.has(shot.id))
+    const entity = isCached ? null : toRaw(task.value.entity)
+    const previousData = entity && savedData.get(entity)
+    if (entity) savedData.set(entity, data)
+    return store.dispatch('editShot', { id: shot.id, data }).catch(err => {
+      // The store keeps the optimistic edit of a cached shot: only the
+      // payload memory is ours to roll back, and only while this save is
+      // still its latest write.
+      if (entity && savedData.get(entity) === data) {
+        if (previousData) {
+          savedData.set(entity, previousData)
+        } else {
+          savedData.delete(entity)
+        }
+      }
+      throw err
+    })
   }
 
-  return { getTrimmedShot, saveTrimmedShot }
+  return { canEditTrim, getTrimmedShot, saveTrimmedShot }
 }

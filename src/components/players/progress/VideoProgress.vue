@@ -33,7 +33,7 @@
     >
       <span
         class="handle-in"
-        :class="{ dragging: handleInDragging }"
+        :class="{ dragging: handleInDragging, 'read-only': readOnly }"
         :style="{ width: handleInWidth }"
         @mousedown="startHandleInDrag"
         @touchstart="startHandleInDrag"
@@ -46,7 +46,7 @@
 
       <span
         class="handle-out"
-        :class="{ dragging: handleOutDragging }"
+        :class="{ dragging: handleOutDragging, 'read-only': readOnly }"
         :style="{ width: handleOutWidth }"
         @mousedown="startHandleOutDrag"
         @touchstart="startHandleOutDrag"
@@ -181,6 +181,10 @@ const props = defineProps({
   previewId: {
     default: '',
     type: String
+  },
+  readOnly: {
+    default: false,
+    type: Boolean
   },
   urlPrefix: {
     default: null,
@@ -436,6 +440,7 @@ const stopProgressDrag = () => {
 }
 
 const startHandleInDrag = () => {
+  if (props.readOnly) return
   handleInDragging.value = true
 }
 
@@ -448,6 +453,7 @@ const stopHandleInDrag = () => {
 }
 
 const startHandleOutDrag = () => {
+  if (props.readOnly) return
   handleOutDragging.value = true
 }
 
@@ -778,6 +784,10 @@ progress {
     transition: width 0.1s ease-in-out;
     width: 4px;
     z-index: 120;
+  }
+
+  &.read-only::after {
+    cursor: default;
   }
 
   &::before {
