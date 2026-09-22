@@ -67,7 +67,9 @@ const mountPage = async ({
   task = buildTask(),
   getterOverrides = {},
   comments = [],
-  previews = []
+  previews = [],
+  // Leave the task load hanging: the page then mounts with no task at all.
+  pendingTaskLoad = false
 } = {}) => {
   const dispatched = []
   const socket = { on: vi.fn(), off: vi.fn() }
@@ -120,7 +122,8 @@ const mountPage = async ({
       sequenceMap: () => new Map(),
       shotMap: () => new Map(),
       taskEntityPreviews: () => [],
-      taskMap: () => new Map(task ? [[task.id, task]] : []),
+      taskMap: () =>
+        new Map(task && !pendingTaskLoad ? [[task.id, task]] : []),
       taskMetadataDescriptors: () => [],
       taskStatusForCurrentUser: () => null,
       taskTypeMap: () => new Map([[taskType.id, taskType]]),
@@ -131,7 +134,9 @@ const mountPage = async ({
   // Record every dispatch while letting the unregistered ones resolve.
   store.dispatch = vi.fn(type => {
     dispatched.push(type)
-    if (type === 'loadTask') return Promise.resolve(task)
+    if (type === 'loadTask') {
+      return pendingTaskLoad ? new Promise(() => {}) : Promise.resolve(task)
+    }
     return Promise.resolve()
   })
   store.commit = vi.fn()
@@ -369,6 +374,59 @@ describe('Task.vue timecode navigation', () => {
     // revision that was deleted or never existed.
     await clickTimeCode(wrapper, '9')
     expect(router.currentRoute.value.name).toBe('task')
+  })
+})
+
+describe('Task.vue comment events', () => {
+  const previews = [{ id: 'preview-1', revision: 1, extension: 'mp4' }]
+  const comment = { id: 'comment-1', text: 'v1', previews: [] }
+
+  // The handler waits a second for the store to finish loading the comment.
+  const emitCommentNew = async (socket, taskId) => {
+    const [, onCommentNew] = socket.on.mock.calls.find(
+      ([event]) => event === 'comment:new'
+    )
+    vi.useFakeTimers()
+    onCommentNew({ comment_id: comment.id, task_id: taskId })
+    vi.advanceTimersByTime(1000)
+    vi.useRealTimers()
+    await flushPromises()
+  }
+
+  it('mounts the player once a comment brings the first preview', async () => {
+    // The store replaces its lists when the comment lands, and the page
+    // notices the new length.
+    let storeComments = []
+    let storePreviews = []
+    const { wrapper, socket } = await mountPage({
+      getterOverrides: {
+        getTaskComments: () => () => storeComments,
+        getTaskPreviews: () => () => storePreviews
+      }
+    })
+    expect(wrapper.findComponent(PreviewPlayer).exists()).toBe(false)
+
+    storeComments = [comment]
+    storePreviews = previews
+    await emitCommentNew(socket, TASK_ID)
+
+    expect(wrapper.findComponent(PreviewPlayer).exists()).toBe(true)
+  })
+
+  it('keeps the player unmounted while the task is still loading', async () => {
+    // The store keeps the lists of a task viewed earlier (a side panel, a
+    // previous visit): the player must not mount on them against a null
+    // task, its render throws on the task's production.
+    const { wrapper, socket } = await mountPage({
+      comments: [comment],
+      previews,
+      pendingTaskLoad: true
+    })
+    expect(wrapper.findComponent(PreviewPlayer).exists()).toBe(false)
+
+    await emitCommentNew(socket, TASK_ID)
+
+    expect(wrapper.findComponent(PreviewPlayer).exists()).toBe(false)
   })
 })
 

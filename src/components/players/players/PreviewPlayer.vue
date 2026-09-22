@@ -160,7 +160,7 @@
           @comment-added="$emit('comment-added')"
           @time-code-clicked="timeCodeClicked"
           v-show="!isCommentsHidden"
-          v-if="!readOnly && task.id"
+          v-if="!readOnly && task?.id"
         />
       </div>
     </div>
@@ -845,7 +845,7 @@ const {
   currentPreview,
   taskTypeMap: computed(() => props.taskTypeMap),
   currentProduction: computed(() =>
-    productionMap.value.get(props.task.project_id)
+    productionMap.value.get(props.task?.project_id)
   ),
   t
 })
@@ -857,7 +857,7 @@ if (props.entityPreviewFiles) {
 }
 
 const currentProduction = computed(() =>
-  productionMap.value.get(props.task.project_id)
+  productionMap.value.get(props.task?.project_id)
 )
 
 const allowExtraPreview = computed(
@@ -2476,6 +2476,11 @@ watch(isMuted, () => {
 // Lifecycle
 
 onMounted(() => {
+  // A render that threw leaves every template ref null: Vue mounts a comment
+  // node in its place and still runs this hook. The render error is already
+  // reported, so skip the wiring instead of failing a second time.
+  if (!container.value) return
+
   configureEvents()
 
   resetPreviewFileMap()

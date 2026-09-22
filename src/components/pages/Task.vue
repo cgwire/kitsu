@@ -1673,8 +1673,11 @@ const onCommentAcknowledge = eventData => onRemoteAcknowledge(eventData, 'ack')
 const onCommentUnacknowledge = eventData =>
   onRemoteAcknowledge(eventData, 'unack')
 
-const onCommentNew = () => {
+const onCommentNew = eventData => {
   setTimeout(() => {
+    // The store keeps the lists of a task viewed earlier: refreshing from
+    // them before the task is loaded would mount the player on a null task.
+    if (eventData.task_id !== task.value?.id) return
     if (getCurrentTaskComments().length !== taskComments.value.length) {
       taskComments.value = getCurrentTaskComments()
       taskPreviews.value = getCurrentTaskPreviews()
