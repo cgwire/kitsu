@@ -1,0 +1,2 @@
+var e=[],t=[],n=e=>(e||[]).map(e=>({...e})),r={copyAnnotations(t){e=t},pasteAnnotations(){return e},copyCasting(e){t=n(e)},pasteCasting(){return n(t)}};export{r as t};
+//# sourceMappingURL=clipboard-Cq9bYXYP.js.map
