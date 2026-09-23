@@ -1960,8 +1960,8 @@ const onCommentClicked = () => {
   }
   endAnnotationSaving()
   nextTick(() => {
-    previewViewer.value.resize()
-    comparisonViewer.value.resize()
+    previewViewer.value?.resize()
+    comparisonViewer.value?.resize()
     loadAnnotation()
   })
 }
@@ -2261,7 +2261,7 @@ watch(currentPreview, (newPreview, oldPreview) => {
       if (previewViewer.value) {
         movieDimensions.value = previewViewer.value.getNaturalDimensions()
         previewViewer.value.resize()
-        comparisonViewer.value.resize()
+        comparisonViewer.value?.resize()
       }
     }, RESIZE_DELAY)
   } else if (isPicture.value) {
@@ -2329,8 +2329,8 @@ watch(currentIndex, () => {
 watch(previewToCompare, () => {
   comparisonPreviewIndex.value = 0
   nextTick(() => {
-    previewViewer.value.resize()
-    comparisonViewer.value.resize()
+    previewViewer.value?.resize()
+    comparisonViewer.value?.resize()
   })
 })
 
@@ -2386,8 +2386,8 @@ watch(
   () => props.light,
   () => {
     endAnnotationSaving()
-    previewViewer.value.resize()
-    comparisonViewer.value.resize()
+    previewViewer.value?.resize()
+    comparisonViewer.value?.resize()
   }
 )
 
@@ -2395,8 +2395,8 @@ watch(
   () => props.extraWide,
   () => {
     endAnnotationSaving()
-    previewViewer.value.resize()
-    comparisonViewer.value.resize()
+    previewViewer.value?.resize()
+    comparisonViewer.value?.resize()
   }
 )
 
@@ -2409,8 +2409,8 @@ watch(isDrawing, () => {
 
 watch(isOrdering, () => {
   nextTick(() => {
-    previewViewer.value.resize()
-    comparisonViewer.value.resize()
+    previewViewer.value?.resize()
+    comparisonViewer.value?.resize()
   })
 })
 
