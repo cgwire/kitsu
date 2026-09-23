@@ -99,6 +99,28 @@ const cache = {
   result: []
 }
 
+// The inline cells of the shots list save on every keystroke: the edits of a
+// shot dispatched within this delay go to the server as one request, so a
+// typed number reaches it (and its version history) as a single value.
+const EDIT_SHOT_DELAY = 400
+const pendingEdits = new Map()
+
+const mergeShotEdits = (previous, next) => {
+  const merged = { ...previous, ...next }
+  if (previous.data && next.data) {
+    merged.data = { ...previous.data, ...next.data }
+  }
+  return merged
+}
+
+const applyShotEdit = ({ commit, rootGetters }, data) => {
+  commit(LOCK_SHOT, data)
+  commit(EDIT_SHOT_END, {
+    newShot: data,
+    sequences: rootGetters.displayedSequences
+  })
+}
+
 const helpers = {
   getCurrentProduction() {
     return productionsStore.getters.currentProduction(productionsStore.state)
@@ -585,16 +607,40 @@ const actions = {
     })
   },
 
-  editShot({ commit, rootGetters }, data) {
-    commit(LOCK_SHOT, data)
-    commit(EDIT_SHOT_END, {
-      newShot: data,
-      sequences: rootGetters.displayedSequences
-    })
+  editShot(context, data) {
+    applyShotEdit(context, data)
     return shotsApi.updateShot(data).finally(() => {
       setTimeout(() => {
-        commit(UNLOCK_SHOT, data)
+        context.commit(UNLOCK_SHOT, data)
       }, 2000)
+    })
+  },
+
+  // editShot for the inline cells: the list is updated at once, the edits of
+  // a shot made within EDIT_SHOT_DELAY are merged into one request, each call
+  // resolves once that request settles and keeps its own lock 2 s after it.
+  editShotDebounced(context, data) {
+    applyShotEdit(context, data)
+    const pending = pendingEdits.get(data.id) || { data: {}, waiters: [] }
+    pending.data = mergeShotEdits(pending.data, data)
+    clearTimeout(pending.timer)
+    pendingEdits.set(data.id, pending)
+    return new Promise((resolve, reject) => {
+      pending.waiters.push({ resolve, reject })
+      pending.timer = setTimeout(() => {
+        pendingEdits.delete(data.id)
+        shotsApi
+          .updateShot(pending.data)
+          .then(
+            result => pending.waiters.forEach(waiter => waiter.resolve(result)),
+            err => pending.waiters.forEach(waiter => waiter.reject(err))
+          )
+          .finally(() => {
+            setTimeout(() => {
+              pending.waiters.forEach(() => context.commit(UNLOCK_SHOT, data))
+            }, 2000)
+          })
+      }, EDIT_SHOT_DELAY)
     })
   },
 

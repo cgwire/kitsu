@@ -144,6 +144,8 @@ const getDimensions = () => {
 }
 
 const resetPicture = () => {
+  // Deferred callers (nextTick, setTimeout) can outlive the component.
+  if (!container.value) return
   container.value.style.height = props.defaultHeight + 'px'
   const viewer = getCurrentViewer()
   if (viewer) viewer.resetPicture()

@@ -95,7 +95,7 @@
       "show_library": "Bibliotheek weergeven",
       "filters": {
         "all": "Alle regels",
-        "asset": "Bevat het asset…",
+        "asset": "Filteren op gecast asset…",
         "empty": "Zonder casting",
         "label": "Regels",
         "standby": "Stand-by"

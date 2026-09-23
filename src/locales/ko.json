@@ -95,7 +95,7 @@
       "show_library": "라이브러리 표시",
       "filters": {
         "all": "모든 줄",
-        "asset": "에셋 포함…",
+        "asset": "캐스팅된 에셋으로 필터링…",
         "empty": "캐스팅 없음",
         "label": "줄",
         "standby": "대기"

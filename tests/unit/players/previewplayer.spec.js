@@ -1,6 +1,8 @@
 import { shallowMount } from '@vue/test-utils'
-import { createStore } from 'vuex'
+import process from 'node:process'
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
+import { nextTick } from 'vue'
+import { createStore } from 'vuex'
 
 vi.mock('vue-i18n', async importOriginal => ({
   ...(await importOriginal()),
@@ -133,6 +135,31 @@ describe('PreviewPlayer.vue', () => {
       expect(errorHandler.mock.calls.map(([error]) => error.message)).toEqual(
         ['render failure']
       )
+    })
+  })
+
+  describe('deferred viewer resize', () => {
+    // The ordering watcher defers the viewer resize with nextTick, and the
+    // player can be torn down before that callback runs (a task switch, a
+    // failed render leaving the refs null). Unmounting right after the flush
+    // mimics it.
+    it('survives a teardown before the deferred resize runs', async () => {
+      const rejections = []
+      const onRejection = reason => rejections.push(reason)
+      process.on('unhandledRejection', onRejection)
+
+      vi.spyOn(console, 'warn').mockImplementation(() => {})
+      wrapper = mountPlayer()
+      await nextTick()
+      wrapper.findComponent({ name: 'BrowsingBar' }).vm.$emit('current-index-clicked')
+      await nextTick()
+      wrapper.unmount()
+      wrapper = null
+      // Node reports a rejected promise once the microtask queue has drained.
+      await new Promise(resolve => setTimeout(resolve))
+      process.off('unhandledRejection', onRejection)
+
+      expect(rejections).toEqual([])
     })
   })
 })

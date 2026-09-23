@@ -9,7 +9,6 @@
             class="flexrow-item"
             :label="$t('quota.type_label')"
             :task-type-list="taskTypeList"
-            :disabled="!params.person"
             v-model="params.taskTypeId"
           />
         </div>

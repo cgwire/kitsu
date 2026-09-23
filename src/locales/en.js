@@ -2,7 +2,7 @@ export default {
 
   assets: {
     cast_in: 'Cast in',
-    casted_in_shots: 'Casted in {nbShots} shots',
+    casted_in_shots: 'Cast in {nbShots} shots',
     cancel_text: 'Are you sure you want to archive {name}?',
     delete_error: 'An error occurred while deleting this asset. There may be existing data currently linked to it. Are you sure this asset type has no task linked to it?',
     delete_for_selection: 'Delete the selected asset | Delete the {nbSelectedAssets} selected assets',
@@ -148,7 +148,7 @@ export default {
     },
     filters: {
       all: 'All lines',
-      asset: 'Casts the asset…',
+      asset: 'Filter by cast asset…',
       empty: 'Without casting',
       label: 'Lines',
       standby: 'Standby'

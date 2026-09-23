@@ -66,7 +66,7 @@ describe('ShotLine, copy of the casting', () => {
 })
 
 describe('ShotLine, ready assets', () => {
-  test('counts the casted assets ready for the chosen step', () => {
+  test('counts the cast assets ready for the chosen step', () => {
     const wrapper = mountLine({ readyTaskTypeId: 'animation' })
 
     expect(wrapper.find('.ready-assets').text()).toBe(

@@ -605,6 +605,7 @@ export default {
       'deleteShot',
       'deleteMetadataDescriptor',
       'editShot',
+      'editShotDebounced',
       'getShotsCsvLines',
       'hideAssignations',
       'loadEpisodes',
@@ -914,7 +915,7 @@ export default {
         description: entry.description
       }
       data[fieldName] = value
-      await this.editShot(data)
+      await this.editShotDebounced(data)
       this.onSearchChange(false)
     },
 
@@ -942,7 +943,7 @@ export default {
       ) {
         data.nb_frames = parseInt(value) - parseInt(shot.data.frame_in) + 1
       }
-      await this.editShot(data)
+      await this.editShotDebounced(data)
       this.applySearchFromUrl(false)
     },
 

@@ -95,7 +95,7 @@
       "show_library": "Vis bibliotek",
       "filters": {
         "all": "Alle linjer",
-        "asset": "Indeholder asset…",
+        "asset": "Filtrer efter castet asset…",
         "empty": "Uden casting",
         "label": "Linjer",
         "standby": "Standby"
