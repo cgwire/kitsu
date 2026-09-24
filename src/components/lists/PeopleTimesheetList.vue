@@ -35,7 +35,7 @@
                 :class="{ today: isCurrentColumn(month) }"
                 v-for="month in columnRange"
               >
-                {{ monthToString(month) }}
+                {{ columnLabel(month) }}
               </th>
             </template>
 
@@ -109,7 +109,7 @@
               <td
                 :key="`month-${month}-${person.id}`"
                 class="time month"
-                :data-label="monthToString(month)"
+                :data-label="columnLabel(month)"
                 :class="{
                   today: isCurrentColumn(month),
                   selected: isSelected(person.id, { year, month })
