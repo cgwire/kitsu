@@ -437,8 +437,8 @@ const actions = {
     commit(SET_TODO_LIST_SCROLL_POSITION, scrollPosition)
   },
 
-  loadContext({ commit, rootGetters }) {
-    return peopleApi.getContext().then(context => {
+  loadContext({ commit, dispatch, rootGetters }) {
+    return peopleApi.getContext().then(async context => {
       commit(LOAD_USER_FILTERS_END, context.search_filters)
       commit(LOAD_USER_FILTER_GROUPS_END, context.search_filter_groups)
       commit(LOAD_PRODUCTION_STATUS_END, context.project_status)
@@ -463,6 +463,13 @@ const actions = {
       }
       commit(LOAD_TASK_TYPES_END, context.task_types)
       commit(LOAD_PLUGINS_END, context.plugins)
+      // A closed current production is out of the open listing: reload it,
+      // since its settings pages read back from here what they saved.
+      const production = rootGetters.currentProduction
+      const isListed = context.projects.some(({ id }) => id === production?.id)
+      if (production && !isListed) {
+        await dispatch('loadProduction', production.id).catch(console.error)
+      }
     })
   }
 }

@@ -939,15 +939,19 @@ const mutations = {
     state.isProductionsLoadingError = false
     state.productions = sortProductions(productions)
 
-    const productionMap = new Map()
-    const addProductionToMap = production => {
-      if (!productionMap.get(production.id)) {
-        productionMap.set(production.id, production)
+    // The all-productions listing carries no relations and the Project
+    // descriptors only: an entry loaded in full, an open production or a
+    // closed one reloaded for a link, keeps its object and its own
+    // descriptors, and takes the listed fields.
+    state.productions.forEach(production => {
+      const known = state.productionMap.get(production.id)
+      if (!known) {
+        state.productionMap.set(production.id, production)
+      } else {
+        const descriptors = known.descriptors || production.descriptors
+        Object.assign(known, production, { descriptors })
       }
-    }
-    state.openProductions.forEach(addProductionToMap)
-    state.productions.forEach(addProductionToMap)
-    state.productionMap = productionMap
+    })
   },
 
   [LOAD_OPEN_PRODUCTIONS_START](state) {
@@ -959,13 +963,19 @@ const mutations = {
   },
   [LOAD_OPEN_PRODUCTIONS_END](state, productions) {
     state.isOpenProductionsLoading = false
-    state.openProductions = sortByName(productions)
-
-    const productionMap = new Map()
-    productions.forEach(production => {
-      productionMap.set(production.id, production)
-    })
-    state.productionMap = productionMap
+    // The map keeps its objects, the current production among them: a
+    // known open production takes the listed fields, a closed one, absent
+    // from this listing, stays as it was loaded.
+    state.openProductions = sortByName(
+      productions.map(production => {
+        const known = state.productionMap.get(production.id)
+        if (!known) {
+          state.productionMap.set(production.id, production)
+          return production
+        }
+        return Object.assign(known, production)
+      })
+    )
 
     if (!state.currentProduction && state.openProductions.length > 0) {
       state.currentProduction = state.openProductions[0]
@@ -1018,26 +1028,37 @@ const mutations = {
       previousProduction.project_status_id !== productionStatus.id
     production.project_status_name = productionStatus.name
 
-    // update states
-    if (previousProduction) {
-      Object.assign(previousProduction, production)
-      Object.assign(production, previousProduction)
-    }
-    if (openProduction) {
-      Object.assign(openProduction, production)
-      Object.assign(production, openProduction)
+    // The response of an edit carries no relations, and the all-productions
+    // copy lists the Project descriptors only: the whole record is the
+    // response over the fullest copy in the store, the map entry first.
+    // Every copy then takes it, and the map keeps its object, the one the
+    // current production points to.
+    Object.assign(production, {
+      ...previousProduction,
+      ...openProduction,
+      ...state.productionMap.get(production.id),
+      ...production
+    })
+    forEachProductionAlias(
+      state,
+      production.id,
+      alias => Object.assign(alias, production),
+      state.currentProduction
+    )
+    if (!state.productionMap.has(production.id)) {
+      state.productionMap.set(production.id, production)
     }
     if (isStatusChanged) {
+      const known = state.productionMap.get(production.id)
       if (production.project_status_name === 'Open') {
-        state.openProductions.push(previousProduction)
+        state.openProductions.push(known)
       } else {
         state.openProductions = removeModelFromList(
           state.openProductions,
-          previousProduction
+          known
         )
       }
     }
-    state.productionMap.set(production.id, production)
     state.productions = sortProductions(state.productions)
     state.openProductions = sortByName(state.openProductions)
   },
@@ -1217,7 +1238,8 @@ const mutations = {
   },
 
   [RESET_ALL](state) {
-    Object.assign(state, { ...initialState })
+    // The map is filled in place: the initial one must not come back.
+    Object.assign(state, { ...initialState, productionMap: new Map() })
   }
 }
 
