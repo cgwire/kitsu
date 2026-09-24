@@ -287,7 +287,11 @@ describe('Topbar.vue', () => {
     // The schedule offers 'all' (production-wide planning) and 'main' (main
     // pack) on top of the real episodes, and coerces neither.
     const mountForSchedule = (episodeId, episodes = []) => {
-      const production = { id: 'production-1', production_type: 'tvshow' }
+      const production = {
+        id: 'production-1',
+        production_type: 'tvshow',
+        task_types: []
+      }
       const { store: scheduleStore } = makeStore({
         currentProduction: () => production,
         episodes: () => episodes,
@@ -365,7 +369,11 @@ describe('Topbar.vue', () => {
     // the real episodes. There is no main pack for shots, so 'main' is still
     // coerced to the first episode.
     const mountForShots = (episodeId, episodes = []) => {
-      const production = { id: 'production-1', production_type: 'tvshow' }
+      const production = {
+        id: 'production-1',
+        production_type: 'tvshow',
+        task_types: []
+      }
       const { store: shotsStore, actions } = makeStore({
         currentProduction: () => production,
         episodes: () => episodes,
@@ -535,13 +543,15 @@ describe('Topbar.vue', () => {
         episodes = defaultEpisodes(),
         currentEpisode = null,
         productionStyle = undefined,
-        holdEpisodes = false
+        holdEpisodes = false,
+        otherProductions = []
       } = {}
     ) => {
       const production = {
         id: 'production-1',
         production_type: 'tvshow',
-        production_style: productionStyle
+        production_style: productionStyle,
+        task_types: []
       }
       const { store: sectionStore, actions } = makeStore({
         currentEpisode: () => currentEpisode,
@@ -551,7 +561,8 @@ describe('Topbar.vue', () => {
         isEpisodeListLoaded: () => !holdEpisodes,
         isTVShow: () => true,
         productionEditTaskTypes: () => [],
-        productionMap: () => new Map([[production.id, production]])
+        productionMap: () =>
+          new Map([production, ...otherProductions].map(p => [p.id, p]))
       })
       actions.loadEpisodes.mockResolvedValue(episodes)
       let releaseEpisodes = () => {}
@@ -767,6 +778,193 @@ describe('Topbar.vue', () => {
         'production-closed'
       )
       expect(actions.setProduction).not.toHaveBeenCalled()
+      wrapper.unmount()
+    })
+
+    // The all-productions listing (productions page, timesheets, logs) puts
+    // the closed productions in the map without their relations: installed
+    // as is, the page crashed on its missing task types.
+    describe('production listed without its relations', () => {
+      const closedProduction = { id: 'production-closed' }
+      const mountOnClosed = () => {
+        const mounted = mountFor('edits', 'all', {
+          otherProductions: [closedProduction]
+        })
+        mounted.actions.setProduction.mockClear()
+        // Loads stay pending unless a test resolves one: without the loop
+        // guard, the reload then shows as a second call instead of spinning.
+        mounted.actions.loadProduction.mockReturnValue(new Promise(() => {}))
+        mounted.route.params.production_id = 'production-closed'
+        return mounted
+      }
+
+      it('loads it before configuring it', () => {
+        const { wrapper, actions } = mountOnClosed()
+
+        wrapper.vm.setProductionFromRoute()
+
+        expect(actions.loadProduction).toHaveBeenCalledWith(
+          expect.anything(),
+          'production-closed'
+        )
+        expect(actions.setProduction).not.toHaveBeenCalled()
+        wrapper.unmount()
+      })
+
+      // A Zou serving the production without relations must not trap the
+      // topbar in a reload loop.
+      it('configures it once loaded, relations or not', async () => {
+        const { wrapper, actions } = mountOnClosed()
+        actions.loadProduction.mockResolvedValueOnce()
+
+        wrapper.vm.setProductionFromRoute()
+        await flushPromises()
+
+        expect(actions.loadProduction).toHaveBeenCalledTimes(1)
+        expect(actions.setProduction).toHaveBeenCalledWith(
+          expect.anything(),
+          'production-closed'
+        )
+        wrapper.unmount()
+      })
+
+      // A navigation while the load is pending, a click on Shots before the
+      // production answered, must not start a second load: the first one
+      // configures the route as it stands on resolution.
+      it('loads it once while a load is pending', async () => {
+        const { wrapper, actions } = mountOnClosed()
+        let releaseLoad = () => {}
+        actions.loadProduction.mockReturnValueOnce(
+          new Promise(resolve => {
+            releaseLoad = resolve
+          })
+        )
+
+        wrapper.vm.setProductionFromRoute()
+        wrapper.vm.setProductionFromRoute()
+        expect(actions.loadProduction).toHaveBeenCalledTimes(1)
+
+        releaseLoad()
+        await flushPromises()
+        expect(actions.setProduction).toHaveBeenCalledTimes(1)
+
+        // Answered, a production still without relations loads again.
+        wrapper.vm.setProductionFromRoute()
+        expect(actions.loadProduction).toHaveBeenCalledTimes(2)
+        wrapper.unmount()
+      })
+
+      // A switch to another production during the load starts the load of
+      // that one: the first load, answering before it, must not lift its
+      // guard.
+      it('loads the next production once when the first load answers', async () => {
+        const { wrapper, actions, route } = mountOnClosed()
+        let releaseLoad = () => {}
+        actions.loadProduction.mockReturnValueOnce(
+          new Promise(resolve => {
+            releaseLoad = resolve
+          })
+        )
+
+        wrapper.vm.setProductionFromRoute()
+        route.params.production_id = 'production-missing'
+        wrapper.vm.setProductionFromRoute()
+        expect(actions.loadProduction).toHaveBeenCalledTimes(2)
+
+        releaseLoad()
+        await flushPromises()
+        wrapper.vm.setProductionFromRoute()
+        expect(actions.loadProduction).toHaveBeenCalledTimes(2)
+        wrapper.unmount()
+      })
+
+      // Back to the first production before it answered: its pending load
+      // configures it, no second one starts.
+      it('loads a production once when the user comes back to it', async () => {
+        const { wrapper, actions, route } = mountOnClosed()
+        let releaseLoad = () => {}
+        actions.loadProduction.mockReturnValueOnce(
+          new Promise(resolve => {
+            releaseLoad = resolve
+          })
+        )
+
+        wrapper.vm.setProductionFromRoute()
+        route.params.production_id = 'production-missing'
+        wrapper.vm.setProductionFromRoute()
+        route.params.production_id = 'production-closed'
+        wrapper.vm.setProductionFromRoute()
+        expect(actions.loadProduction).toHaveBeenCalledTimes(2)
+
+        releaseLoad()
+        await flushPromises()
+        expect(actions.setProduction).toHaveBeenCalledWith(
+          expect.anything(),
+          'production-closed'
+        )
+        wrapper.unmount()
+      })
+
+      // Deleted, or not shared with the user: there is nothing to show.
+      it('leaves a production that fails to load', async () => {
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const { wrapper, actions, replaceSpy } = mountOnClosed()
+        actions.loadProduction.mockRejectedValueOnce(new Error('Not found'))
+
+        wrapper.vm.setProductionFromRoute()
+        await flushPromises()
+
+        expect(replaceSpy).toHaveBeenCalledWith({ name: 'open-productions' })
+        consoleError.mockRestore()
+        wrapper.unmount()
+      })
+
+      // The failure comes once the user is on another production: leaving
+      // would throw them out of it.
+      it('stays on the next production when the first load fails', async () => {
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const { wrapper, actions, replaceSpy, route } = mountOnClosed()
+        let failLoad = () => {}
+        actions.loadProduction.mockReturnValueOnce(
+          new Promise((_resolve, reject) => {
+            failLoad = reject
+          })
+        )
+
+        wrapper.vm.setProductionFromRoute()
+        route.params.production_id = 'production-1'
+        wrapper.vm.setProductionFromRoute()
+        failLoad(new Error('Not found'))
+        await flushPromises()
+
+        expect(replaceSpy).not.toHaveBeenCalledWith({
+          name: 'open-productions'
+        })
+        consoleError.mockRestore()
+        wrapper.unmount()
+      })
+    })
+
+    // An open production comes with its relations: a switch to it costs no
+    // fetch.
+    it('configures a production listed with its relations without reloading it', () => {
+      const { wrapper, actions, route } = mountFor('edits', 'all', {
+        otherProductions: [{ id: 'production-2', task_types: [] }]
+      })
+      actions.setProduction.mockClear()
+      route.params.production_id = 'production-2'
+
+      wrapper.vm.setProductionFromRoute()
+
+      expect(actions.loadProduction).not.toHaveBeenCalled()
+      expect(actions.setProduction).toHaveBeenCalledWith(
+        expect.anything(),
+        'production-2'
+      )
       wrapper.unmount()
     })
 
@@ -1033,7 +1231,11 @@ describe('Topbar.vue', () => {
     // The playlists page splits the all pseudo-episode by entity type: All
     // assets (default) and All shots (?for_entity=shot), plus the main pack.
     it('offers all assets, all shots and the main pack', async () => {
-      const production = { id: 'production-1', production_type: 'tvshow' }
+      const production = {
+        id: 'production-1',
+        production_type: 'tvshow',
+        task_types: []
+      }
       const { store: playlistsStore } = makeStore({
         currentProduction: () => production,
         episodes: () => [],

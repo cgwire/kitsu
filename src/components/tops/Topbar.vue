@@ -673,18 +673,31 @@ const getBaseEpisodeOptions = allLabel => [
 const leaveToOpenProductions = () =>
   router.replace({ name: 'open-productions' }).catch(console.error)
 
+// The all-productions listing leaves the relations out (task types, team,
+// asset types): a missing task_types marks such a production.
+const isFullProduction = production => Array.isArray(production?.task_types)
+
+// Productions a load is pending for: a navigation meanwhile must not start
+// a second one, the first configures the route as it stands on resolution.
+const pendingProductionIds = new Set()
+
 const loadProductionFromRoute = async productionId => {
+  pendingProductionIds.add(productionId)
   try {
     await store.dispatch('loadProduction', productionId)
   } catch (err) {
     // Deleted, or not shared with the user.
     console.error(err)
-    leaveToOpenProductions()
+    // The user may have moved to another page during the load.
+    if (route.params.production_id === productionId) leaveToOpenProductions()
     return
+  } finally {
+    pendingProductionIds.delete(productionId)
   }
   if (route.params.production_id === productionId) {
     if (productionMap.value.get(productionId)) {
-      setProductionFromRoute()
+      // Taken as served: one still without relations would reload in a loop.
+      configureFromRoute()
     } else {
       leaveToOpenProductions()
     }
@@ -693,14 +706,25 @@ const loadProductionFromRoute = async productionId => {
 
 const setProductionFromRoute = () => {
   const routeProductionId = route.params.production_id
-  const routeEpisodeId = route.params.episode_id
   // A production outside the open ones, a closed one reached by a link or
-  // a reload, is missing from the map: the store would stand the first
-  // open production in for it.
-  if (routeProductionId && !productionMap.value.get(routeProductionId)) {
-    loadProductionFromRoute(routeProductionId)
+  // a reload, is missing from the map, or held there without its relations
+  // by the all-productions listing: the store would stand the first open
+  // production in for it, or the page would read relations it lacks.
+  if (
+    routeProductionId &&
+    !isFullProduction(productionMap.value.get(routeProductionId))
+  ) {
+    if (!pendingProductionIds.has(routeProductionId)) {
+      loadProductionFromRoute(routeProductionId)
+    }
     return
   }
+  configureFromRoute()
+}
+
+const configureFromRoute = () => {
+  const routeProductionId = route.params.production_id
+  const routeEpisodeId = route.params.episode_id
   if (isProductionChanged(routeProductionId)) {
     configureProduction(routeProductionId)
     return
