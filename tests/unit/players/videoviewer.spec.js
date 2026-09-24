@@ -161,6 +161,37 @@ describe('players/VideoViewer (canvas pipeline)', () => {
     wrapper.unmount()
   })
 
+  it('keeps the canvas visible when a stalled movie still has enough data', async () => {
+    // WebKit fires 'stalled' on a paused movie once its prefetch stops, with
+    // readyState still 4. No canplay follows, so the canvas stayed hidden
+    // behind the spinner and every arrow step was invisible.
+    const wrapper = mountViewer()
+    await new Promise(resolve => setTimeout(resolve))
+    const video = wrapper.find('video').element
+    await video.dispatchEvent(new Event('loadedmetadata'))
+    Object.defineProperty(video, 'readyState', {
+      value: HTMLMediaElement.HAVE_ENOUGH_DATA,
+      configurable: true
+    })
+    await video.dispatchEvent(new Event('stalled'))
+    expect(wrapper.find('canvas').element.style.display).not.toBe('none')
+    wrapper.unmount()
+  })
+
+  it('shows the loader when a stalled movie lacks data to play', async () => {
+    const wrapper = mountViewer()
+    await new Promise(resolve => setTimeout(resolve))
+    const video = wrapper.find('video').element
+    await video.dispatchEvent(new Event('loadedmetadata'))
+    Object.defineProperty(video, 'readyState', {
+      value: HTMLMediaElement.HAVE_CURRENT_DATA,
+      configurable: true
+    })
+    await video.dispatchEvent(new Event('stalled'))
+    expect(wrapper.find('canvas').element.style.display).toBe('none')
+    wrapper.unmount()
+  })
+
   it('cancels the rVFC loop and disposes the renderer on unmount', async () => {
     const wrapper = mountViewer()
     // Wait for the setTimeout(0) in onMounted to complete

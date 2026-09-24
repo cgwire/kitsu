@@ -717,7 +717,11 @@ onMounted(() => {
       })
 
       video.value.addEventListener('stalled', () => {
-        isLoading.value = true
+        // WebKit fires 'stalled' on a paused movie whose prefetch stopped
+        // while readyState is still 4: no canplay follows to clear the flag.
+        if (video.value?.readyState < HTMLMediaElement.HAVE_FUTURE_DATA) {
+          isLoading.value = true
+        }
       })
 
       video.value.addEventListener('waiting', () => {
