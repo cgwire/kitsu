@@ -1446,6 +1446,8 @@
       "reset_list": "목록 초기화",
       "select_task_type": "작업 유형 선택",
       "show_assigned": "할당된 엔티티 표시",
+      "task_types_filter": "작업 필터",
+      "task_types_filter_select": "작업 선택",
       "title": "일정",
       "title_main": "주요 일정",
       "today": "오늘",

@@ -1446,6 +1446,8 @@
       "reset_list": "リストをリセット",
       "select_task_type": "タスクタイプを選択",
       "show_assigned": "アサインされたエンティティの表示",
+      "task_types_filter": "タスクの絞り込み",
+      "task_types_filter_select": "タスクを選択",
       "title": "スケジュール",
       "title_main": "メインスケジュール",
       "today": "今日",

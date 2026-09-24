@@ -1446,6 +1446,8 @@
       "reset_list": "Lista visszaállítása",
       "select_task_type": "Válassz feladat típust",
       "show_assigned": "Kiosztott elemek megjelenítése",
+      "task_types_filter": "Feladatok szűrése",
+      "task_types_filter_select": "Feladatok kiválasztása",
       "title": "Időbeosztás",
       "title_main": "Fő időbeosztás",
       "today": "Ma",

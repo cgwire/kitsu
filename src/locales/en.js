@@ -1917,6 +1917,8 @@ export default {
     reset_list: 'Reset list',
     select_task_type: 'Select a task type',
     show_assigned: 'Show assigned entities',
+    task_types_filter: 'Filter Tasks',
+    task_types_filter_select: 'Select Tasks',
     title: 'Schedule',
     title_main: 'Main Schedule',
     today: 'Today',

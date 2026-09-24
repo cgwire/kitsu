@@ -1446,6 +1446,8 @@
       "reset_list": "重置列表",
       "select_task_type": "选择任务类型",
       "show_assigned": "显示分配的实体",
+      "task_types_filter": "筛选任务",
+      "task_types_filter_select": "选择任务",
       "title": "日程计划",
       "title_main": "主要日程",
       "today": "今天",

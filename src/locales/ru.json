@@ -1446,6 +1446,8 @@
       "reset_list": "Сброс списка",
       "select_task_type": "Выберите тип задачи",
       "show_assigned": "Показать назначенные сущности",
+      "task_types_filter": "Фильтр задач",
+      "task_types_filter_select": "Выбрать задачи",
       "title": "Расписание",
       "title_main": "Основное расписание",
       "today": "Сегодня",

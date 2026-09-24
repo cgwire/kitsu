@@ -1446,6 +1446,8 @@
       "reset_list": "Redefinir lista",
       "select_task_type": "Selecione um tipo de tarefa",
       "show_assigned": "Mostrar entidades atribuídas",
+      "task_types_filter": "Filtrar tarefas",
+      "task_types_filter_select": "Selecionar tarefas",
       "title": "Cronograma",
       "title_main": "Cronograma Geral",
       "today": "Hoje",

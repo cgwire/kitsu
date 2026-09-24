@@ -1847,6 +1847,8 @@
       "reset_list": "Zresetuj listę",
       "select_task_type": "Wybierz typ zadania",
       "show_assigned": "Pokaż przypisane obiekty",
+      "task_types_filter": "Filtruj zadania",
+      "task_types_filter_select": "Wybierz zadania",
       "title": "Harmonogram",
       "title_main": "Harmonogram główny",
       "today": "Dziś",

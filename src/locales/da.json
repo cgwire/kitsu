@@ -1446,6 +1446,8 @@
       "reset_list": "Nulstil listen",
       "select_task_type": "Vælg en opgavetype",
       "show_assigned": "Vis tildelte enheder",
+      "task_types_filter": "Filtrér opgaver",
+      "task_types_filter_select": "Vælg opgaver",
       "title": "Tidsplan",
       "title_main": "Hovedtidsplan",
       "today": "I dag",
