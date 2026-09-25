@@ -651,6 +651,7 @@ export default {
 
       this.loading.importing = true
       this.errors.importing = false
+      this.errors.importingError = null
       this.$store.commit('EDIT_CSV_FILE_SELECTED', formData)
 
       this.uploadEditFile(toUpdate)
@@ -661,7 +662,7 @@ export default {
         })
         .catch(err => {
           console.error(err)
-          this.loading.importingError = err
+          this.errors.importingError = err
           this.errors.importing = true
         })
         .finally(() => {
