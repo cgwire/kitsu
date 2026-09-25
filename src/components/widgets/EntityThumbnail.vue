@@ -1,4 +1,14 @@
 <template>
+  <span
+    class="thumbnail-picture thumbnail-empty thumbnail-processing"
+    :style="{
+      width: emptyWidth + 'px',
+      'min-width': emptyWidth + 'px',
+      height: emptyHeight + 'px'
+    }"
+    v-if="isProcessing"
+  />
+
   <a
     class="thumbnail-wrapper thumbnail-picture"
     target="_blank"
@@ -13,7 +23,7 @@
     @click="onClicked"
     @keydown.enter.prevent="onClicked"
     @keydown.space.prevent="onClicked"
-    v-if="isPreview && withLink"
+    v-else-if="isPreview && withLink"
   >
     <img
       class="thumbnail-picture"
@@ -95,6 +105,10 @@ const props = defineProps({
     default: null,
     type: String
   },
+  previewFileStatus: {
+    type: String,
+    default: 'ready'
+  },
   withLink: {
     default: true,
     type: Boolean
@@ -107,6 +121,10 @@ const isPreview = computed(() => {
   const previewFileId = props.previewFileId || props.entity?.preview_file_id
   return previewFileId?.length > 0
 })
+
+// The server builds the variants in the background: asking for a picture
+// that is not stored yet would only draw a broken image.
+const isProcessing = computed(() => props.previewFileStatus === 'processing')
 
 const imgStyle = computed(() => {
   const style = {}
@@ -180,6 +198,17 @@ watch(
     timer.value = '?t=' + new Date().valueOf()
   }
 )
+
+watch(
+  () => props.previewFileStatus,
+  (status, previousStatus) => {
+    // The browser may have cached the 404 it got while the variants were
+    // being built.
+    if (previousStatus === 'processing' && status === 'ready') {
+      timer.value = '?t=' + new Date().valueOf()
+    }
+  }
+)
 </script>
 
 <style lang="scss" scoped>
@@ -233,5 +262,46 @@ table .thumbnail-picture {
   border: 0;
   border-radius: 4px;
   display: inline-block;
+}
+
+// The variants are still being built: a slow shimmer reads as "on its
+// way", where the plain empty block reads as "no preview at all".
+.thumbnail-processing {
+  background-image: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0) 35%,
+    rgba(255, 255, 255, 0.65) 50%,
+    rgba(255, 255, 255, 0) 65%
+  );
+  background-repeat: no-repeat;
+  background-size: 250% 100%;
+  animation: thumbnail-processing-shimmer 1.6s ease-in-out infinite;
+}
+
+.dark .thumbnail-processing {
+  background-image: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0) 35%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0) 65%
+  );
+}
+
+@keyframes thumbnail-processing-shimmer {
+  from {
+    background-position: 175% 0;
+  }
+  to {
+    background-position: -75% 0;
+  }
+}
+
+// Respect a reader who asked the system for less movement.
+@media (prefers-reduced-motion: reduce) {
+  .thumbnail-processing {
+    animation: none;
+    background-image: none;
+    opacity: 0.6;
+  }
 }
 </style>

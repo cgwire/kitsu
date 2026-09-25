@@ -523,4 +523,66 @@ describe('TaskInfo.vue', () => {
       expect(focus).toHaveBeenCalled()
     })
   })
+
+  describe('preview-file:update', () => {
+    const emitPreviewFileUpdate = async (socket, eventData) => {
+      const [, onRemotePreviewUpdate] = socket.on.mock.calls.find(
+        ([event]) => event === 'preview-file:update'
+      )
+      onRemotePreviewUpdate(eventData)
+      await flushPromises()
+    }
+
+    it('updates a preview that is not first in the comment, a second or third bulk-upload image', async () => {
+      // A comment carrying several previews of the same revision (the
+      // bulk-upload case): only previews[0] used to be looked up, so a
+      // later one flipping from "processing" to "ready" never refreshed.
+      const previews = [
+        { id: 'preview-1', revision: 1, status: 'ready' },
+        { id: 'preview-2', revision: 1, status: 'processing' },
+        { id: 'preview-3', revision: 1, status: 'processing' }
+      ]
+      const comment = { id: 'comment-1', text: 'v1', previews }
+      const { socket, store } = await mountPanel({
+        comments: [comment],
+        previews: [previews[0]]
+      })
+      store.dispatch = vi.fn(type => {
+        if (type === 'refreshPreview') {
+          return Promise.resolve({ validation_status: 'wip', status: 'ready' })
+        }
+        return Promise.resolve()
+      })
+
+      await emitPreviewFileUpdate(socket, { preview_file_id: 'preview-3' })
+
+      expect(previews[2].status).toBe('ready')
+      expect(previews[2].validation_status).toBe('wip')
+      // Untouched: only the preview named by the event is refreshed.
+      expect(previews[0].status).toBe('ready')
+      expect(previews[1].status).toBe('processing')
+    })
+
+    it('does nothing when no comment carries the named preview', async () => {
+      const comment = {
+        id: 'comment-1',
+        text: 'v1',
+        previews: [{ id: 'preview-1', revision: 1, status: 'ready' }]
+      }
+      const { socket, store } = await mountPanel({ comments: [comment] })
+      store.dispatch = vi.fn(type => {
+        if (type === 'refreshPreview') return Promise.resolve({})
+        return Promise.resolve()
+      })
+
+      await emitPreviewFileUpdate(socket, {
+        preview_file_id: 'unknown-preview'
+      })
+
+      expect(store.dispatch).not.toHaveBeenCalledWith(
+        'refreshPreview',
+        expect.anything()
+      )
+    })
+  })
 })
