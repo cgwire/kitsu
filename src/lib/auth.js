@@ -92,7 +92,8 @@ const auth = {
   },
 
   // Resolves when the server answered (authenticated or not), rejects when
-  // the server is unreachable.
+  // the server is unreachable. Only an answer can end the session: a check
+  // failing late would otherwise empty the user under a mounted page.
   async isServerLoggedIn() {
     let res
     try {
@@ -100,9 +101,9 @@ const auth = {
         .get('/api/auth/authenticated')
         .timeout(AUTHENTICATED_REQUEST_TIMEOUT_MS)
     } catch (err) {
+      if (![401, 422].includes(err.status)) throw err
       store.commit(USER_LOGIN_FAIL)
-      if ([401, 422].includes(err.status)) return
-      throw err
+      return
     }
 
     if (res.body === null) {
