@@ -1664,6 +1664,7 @@ const onPreviewFileUpdate = eventData => {
       })
       .then(preview => {
         comment.previews[0].validation_status = preview.validation_status
+        comment.previews[0].status = preview.status
       })
   }
 }

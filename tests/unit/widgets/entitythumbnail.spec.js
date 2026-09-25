@@ -29,4 +29,17 @@ describe('EntityThumbnail', () => {
     expect(wrapper.find('img').exists()).toBe(false)
     expect(wrapper.find('.thumbnail-processing').exists()).toBe(true)
   })
+
+  test('requests the picture again once the preview turns ready', async () => {
+    const wrapper = mountThumbnail({ previewFileStatus: 'processing' })
+    expect(wrapper.find('img').exists()).toBe(false)
+
+    await wrapper.setProps({ previewFileStatus: 'ready' })
+
+    const img = wrapper.find('img')
+    expect(img.exists()).toBe(true)
+    // A picture the browser tried while it was missing must not be
+    // served from the cache.
+    expect(img.attributes('src')).toContain('?t=')
+  })
 })

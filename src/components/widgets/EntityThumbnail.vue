@@ -198,6 +198,17 @@ watch(
     timer.value = '?t=' + new Date().valueOf()
   }
 )
+
+watch(
+  () => props.previewFileStatus,
+  (status, previousStatus) => {
+    // The browser may have cached the 404 it got while the variants were
+    // being built.
+    if (previousStatus === 'processing' && status === 'ready') {
+      timer.value = '?t=' + new Date().valueOf()
+    }
+  }
+)
 </script>
 
 <style lang="scss" scoped>
