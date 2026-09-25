@@ -214,6 +214,7 @@
       :columns="renderColumns"
       :data-matchers="dataMatchers"
       :database="filteredShots"
+      :required-values="dataMatchers"
       @reupload="resetImport"
       @cancel="hideImportRenderModal"
       @confirm="uploadImportFile"
@@ -948,6 +949,8 @@ export default {
     },
 
     showEDLImportModal() {
+      this.errors.importing = false
+      this.errors.importingError = null
       this.modals.isEDLImportDisplayed = true
     },
 

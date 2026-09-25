@@ -148,7 +148,7 @@ export default {
   postCsv(formData, toUpdate) {
     let path = '/api/import/csv/persons'
     if (toUpdate) path += '?update=true'
-    return client.ppost(path, formData)
+    return client.ppostImport(path, formData)
   },
 
   postAvatar(userId, formData) {

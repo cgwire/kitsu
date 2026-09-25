@@ -10,6 +10,11 @@
   </div>
 </template>
 
+<script>
+// Module scope: shared with the copies App.vue mounts of this page.
+let isRedirecting = false
+</script>
+
 <script setup>
 import { onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -26,11 +31,24 @@ const router = useRouter()
 // --------------------------------------------------------------------------
 
 onMounted(async () => {
+  // The redirect runs the / guard, whose loading screen mounts this page
+  // again while the navigation waits: a check from that copy would push the
+  // redirect anew and restart the guard, once more on every answer.
+  if (isRedirecting) return
   try {
     await auth.isServerLoggedIn()
-    router.push(route.query.redirect || '/')
   } catch {
     // Server still down: stay on this page.
+    return
+  }
+  // A copy mounted during a navigation it did not start answers after the
+  // app has moved on, and must not navigate.
+  if (route.name !== 'server-down') return
+  isRedirecting = true
+  try {
+    await router.push(route.query.redirect || '/')
+  } finally {
+    isRedirecting = false
   }
 })
 </script>

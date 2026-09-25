@@ -255,7 +255,7 @@ describe('lib/csv', () => {
       ])
     })
 
-    test('ignores empty and single-cell lines', () => {
+    test('ignores empty lines', () => {
       const sparseCsv = [
         ['Sequence', 'Name'],
         [''],
@@ -264,6 +264,20 @@ describe('lib/csv', () => {
       ]
       expect(csv.getNewEntityNames(sparseCsv, indexMatchers, {})).toEqual([
         'SEQ01 / SH001'
+      ])
+    })
+
+    // The preview shows such a line and Kitsu uploads it: the user must see
+    // it among the entries to create.
+    test('lists a line holding a single cell', () => {
+      const singleCellCsv = [
+        ['Name', 'Description'],
+        ['E010', 'An edit'],
+        ['E020']
+      ]
+      expect(csv.getNewEntityNames(singleCellCsv, [0], {})).toEqual([
+        'E010',
+        'E020'
       ])
     })
 

@@ -91,3 +91,51 @@ describe('Edits page, reloadEpisodeEditsIfNeeded', () => {
     expect(context.loadEdits).not.toHaveBeenCalled()
   })
 })
+
+describe('Edits page, uploadImportFile', () => {
+  const buildContext = uploadEditFile => ({
+    errors: { importing: false, importingError: null },
+    loading: { importing: false },
+    uploadEditFile,
+    loadEpisodes: vi.fn(() => Promise.resolve()),
+    loadEdits: vi.fn(),
+    hideImportRenderModal: vi.fn(),
+    $store: { commit: vi.fn() }
+  })
+
+  const upload = async context => {
+    Edits.methods.uploadImportFile.call(
+      context,
+      [
+        ['Name', 'Description'],
+        ['E01', 'intro']
+      ],
+      false
+    )
+    await new Promise(resolve => setTimeout(resolve))
+  }
+
+  // The modal reads errors.importingError to show the rejected line or
+  // the timeout message.
+  test('hands the failure to the import modal', async () => {
+    const error = Object.assign(new Error('Bad Request'), { status: 400 })
+    const context = buildContext(vi.fn(() => Promise.reject(error)))
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    await upload(context)
+
+    expect(context.errors.importing).toBe(true)
+    expect(context.errors.importingError).toBe(error)
+    expect(context.loading.importing).toBe(false)
+  })
+
+  test('clears the previous failure before a new upload', async () => {
+    const context = buildContext(vi.fn(() => Promise.resolve()))
+    context.errors.importingError = new Error('previous')
+
+    await upload(context)
+
+    expect(context.errors.importingError).toBe(null)
+    expect(context.hideImportRenderModal).toHaveBeenCalled()
+  })
+})

@@ -125,3 +125,25 @@ describe('Shots page, reloadEpisodeShotsIfNeeded', () => {
     expect(context.loadShots).toHaveBeenCalled()
   })
 })
+
+describe('Shots page, showEDLImportModal', () => {
+  // A timed out import disables the upload of the EDL modal: reopening
+  // it must not keep the previous failure.
+  test('clears the previous import failure', () => {
+    const context = {
+      errors: {
+        importing: true,
+        importingError: Object.assign(new Error('timeout'), {
+          isTimeout: true
+        })
+      },
+      modals: { isEDLImportDisplayed: false }
+    }
+
+    Shots.methods.showEDLImportModal.call(context)
+
+    expect(context.errors.importing).toBe(false)
+    expect(context.errors.importingError).toBe(null)
+    expect(context.modals.isEDLImportDisplayed).toBe(true)
+  })
+})

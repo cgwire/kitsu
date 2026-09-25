@@ -1,5 +1,9 @@
 <template>
-  <div class="columns fixed-page episode xyz-in" xyz="fade">
+  <div
+    class="columns fixed-page episode xyz-in"
+    xyz="fade"
+    v-if="currentProduction"
+  >
     <div class="page column main-column">
       <div class="page-header flexrow">
         <router-link

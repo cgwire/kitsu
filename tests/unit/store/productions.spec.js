@@ -839,7 +839,8 @@ describe('Productions store', () => {
         productions: [
           { id: 'production-1', name: 'caminandes' }
         ],
-        openProductions: []
+        openProductions: [],
+        productionMap: new Map()
       }
     })
 
@@ -848,11 +849,57 @@ describe('Productions store', () => {
       expect(state.productions).toEqual([])
     })
 
+    // The map is filled in place, so a reset must not hand back the very
+    // Map the initial state holds, filled since the last reset.
+    test('RESET_ALL empties the production map', () => {
+      store.mutations.RESET_ALL(state)
+      state.productionMap.set('production-1', { id: 'production-1' })
+
+      store.mutations.RESET_ALL(state)
+
+      expect(state.productionMap.size).toBe(0)
+    })
+
     test('LOAD_PRODUCTIONS_END', () => {
       store.mutations.LOAD_PRODUCTIONS_END(state, [{ id: 1, project_status_name: 'Status 1' }, { id: 2, project_status_name: 'Status 2' }])
       expect(state.productions).toHaveLength(2)
       expect(state.productionMap.get(1)).toEqual({ id: 1, project_status_name: 'Status 1' })
       expect(state.productionMap.get(2)).toEqual({ id: 2, project_status_name: 'Status 2' })
+    })
+
+    // The all-productions listing carries no relations and the Project
+    // descriptors only: an entry loaded in full keeps them and its object,
+    // and takes the listed fields.
+    test('LOAD_PRODUCTIONS_END keeps a production loaded in full', () => {
+      const projectDescriptor = {
+        id: 'descriptor-project',
+        entity_type: 'Project'
+      }
+      const full = {
+        id: 'production-closed',
+        name: 'Archive',
+        project_status_name: 'Closed',
+        task_types: ['task-type-id'],
+        descriptors: [
+          projectDescriptor,
+          { id: 'descriptor-asset', entity_type: 'Asset' }
+        ]
+      }
+      state.productionMap = new Map([[full.id, full]])
+
+      store.mutations.LOAD_PRODUCTIONS_END(state, [
+        {
+          id: 'production-closed',
+          name: 'Archive 2',
+          project_status_name: 'Closed',
+          descriptors: [projectDescriptor]
+        }
+      ])
+
+      expect(state.productionMap.get('production-closed')).toBe(full)
+      expect(full.name).toBe('Archive 2')
+      expect(full.task_types).toEqual(['task-type-id'])
+      expect(full.descriptors).toHaveLength(2)
     })
 
     // Productions.vue feeds both flags to the list: a failed load must show
@@ -922,6 +969,34 @@ describe('Productions store', () => {
       expect(state.productionMap.get(1)).toEqual({ id: 1, name: 'Name 1' })
       expect(state.productionMap.get(2)).toEqual({ id: 2, name: 'Name 2' })
       expect(state.currentProduction).toEqual({ id: 1, name: 'Name 1' })
+    })
+
+    // A context reload lists the open productions only: the map keeps its
+    // objects, an open one taking the listed fields, a closed one, the
+    // current one among others, staying as loaded.
+    test('LOAD_OPEN_PRODUCTIONS_END keeps the known productions', () => {
+      const open = {
+        id: 'production-open',
+        name: 'Open',
+        task_types: ['task-type-id']
+      }
+      const closed = { id: 'production-closed', name: 'Archive' }
+      state.currentProduction = closed
+      state.openProductions = [open]
+      state.productionMap = new Map([
+        [open.id, open],
+        [closed.id, closed]
+      ])
+
+      store.mutations.LOAD_OPEN_PRODUCTIONS_END(state, [
+        { id: 'production-open', name: 'Renamed', task_types: ['task-type-id'] }
+      ])
+
+      expect(state.openProductions[0]).toBe(open)
+      expect(state.productionMap.get('production-open')).toBe(open)
+      expect(open.name).toBe('Renamed')
+      expect(state.productionMap.get('production-closed')).toBe(closed)
+      expect(state.currentProduction).toBe(closed)
     })
 
     test('LOAD_PRODUCTION_STATUS_END', () => {
@@ -1310,5 +1385,54 @@ describe('Productions store, closed production', () => {
 
     expect(state.productionMap.has('production-closed')).toBe(true)
     expect(state.openProductions).toEqual([])
+  })
+
+  // Listed by the productions page without its relations and with the
+  // Project descriptors only, a closed production is reloaded in full before
+  // it becomes the current one. An edit must reach that copy, and must not
+  // narrow it down to the listed one.
+  test('keeps the current production whole and up to date after an edit', () => {
+    const projectDescriptor = {
+      id: 'descriptor-project',
+      entity_type: 'Project'
+    }
+    const listed = {
+      id: 'production-closed',
+      name: 'Archive',
+      project_status_id: 'status-closed',
+      descriptors: [projectDescriptor]
+    }
+    const current = {
+      ...listed,
+      task_types: ['task-type-id'],
+      descriptors: [
+        projectDescriptor,
+        { id: 'descriptor-asset', entity_type: 'Asset' }
+      ]
+    }
+    const state = {
+      currentProduction: current,
+      productions: [listed],
+      openProductions: [],
+      productionMap: new Map([[current.id, current]]),
+      productionStatusMap: new Map([
+        ['status-closed', { id: 'status-closed', name: 'Closed' }]
+      ])
+    }
+
+    store.mutations.UPDATE_PRODUCTION(state, {
+      id: 'production-closed',
+      name: 'Archive',
+      project_status_id: 'status-closed',
+      description: 'New brief'
+    })
+
+    expect(state.currentProduction).toBe(
+      state.productionMap.get('production-closed')
+    )
+    expect(state.currentProduction.description).toBe('New brief')
+    expect(state.currentProduction.task_types).toEqual(['task-type-id'])
+    expect(state.currentProduction.descriptors).toHaveLength(2)
+    expect(listed.description).toBe('New brief')
   })
 })

@@ -36,7 +36,7 @@ const rolesMap = computed(() => {
 
 const onUpdateRoles = async ({ taskStatusId, roles }) => {
   const taskStatusLink = {
-    ...currentProduction.value.task_statuses_link[taskStatusId],
+    ...currentProduction.value.task_statuses_link?.[taskStatusId],
     roles_for_board: roles,
     project_id: currentProduction.value.id,
     task_status_id: taskStatusId

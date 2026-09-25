@@ -36,7 +36,7 @@
       :confirm-label="$t('main.edl.upload_edl')"
       :error-text="errorText"
       :is-loading="isLoading"
-      :is-disabled="formData === null"
+      :is-disabled="isConfirmDisabled"
       :is-error="isError"
       @confirm="onConfirmClicked"
       @cancel="$emit('cancel')"
@@ -84,7 +84,17 @@ const inputFile = ref(null)
 const currentProduction = computed(() => store.getters.currentProduction)
 const isTVShow = computed(() => store.getters.isTVShow)
 
+// Importing again right away would race the import still running.
+const isConfirmDisabled = computed(
+  () =>
+    formData.value === null ||
+    (props.isError && Boolean(props.importError?.isTimeout))
+)
+
 const errorText = computed(() => {
+  if (props.importError?.isTimeout) {
+    return `${t('main.csv.error_timeout')} ${t('main.csv.error_timeout_hint')}`
+  }
   let text = t('main.edl.error_upload')
   if (props.importError?.status === 400) {
     text += ` ${props.importError.response.body.message}`
@@ -99,6 +109,7 @@ const onFileSelected = data => {
 }
 
 const onConfirmClicked = () => {
+  if (isConfirmDisabled.value) return
   emit(
     'confirm',
     formData.value.get('file'),

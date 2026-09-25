@@ -49,6 +49,18 @@ describe('resizable column directive', () => {
     directive.unmounted(header)
   })
 
+  test('sets up the header as soon as it mounts', () => {
+    localStorage.setItem('asset-list-Name', '120px')
+    const { directive, header } = mountHeader()
+
+    directive.mounted(header)
+
+    expect(header.querySelectorAll('.resizable-knob')).toHaveLength(3)
+    expect(header.querySelector('.name').style.width).toBe('120px')
+
+    directive.unmounted(header)
+  })
+
   test('persists the column width once the resize ends', () => {
     const { directive, header } = mountHeader()
     directive.updated(header)
