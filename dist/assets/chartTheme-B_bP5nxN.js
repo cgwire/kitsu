@@ -1,0 +1,2 @@
+import{O as e,d as t,o as n}from"./vue-vendor-CR5wN_9h.js";t();var r=()=>{let t=n(),r=e(()=>t.getters.isDarkTheme);return{font:{family:`Lato, sans-serif`},theme:e(()=>r.value?{fillTop:`rgba(0, 178, 66, 0.28)`,fillBottom:`rgba(0, 178, 66, 0.03)`,futureFill:`rgba(255, 255, 255, 0.04)`,grid:`rgba(255, 255, 255, 0.08)`,muted:`#9a9da8`}:{fillTop:`rgba(0, 178, 66, 0.22)`,fillBottom:`rgba(0, 178, 66, 0.02)`,futureFill:`rgba(0, 0, 0, 0.03)`,grid:`rgba(0, 0, 0, 0.06)`,muted:`#7b7e87`})}};export{r as t};
+//# sourceMappingURL=chartTheme-B_bP5nxN.js.map
