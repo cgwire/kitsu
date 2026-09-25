@@ -1499,7 +1499,10 @@ const onEpisodeCastingUpdate = eventData => {
 
 const onShotCastingUpdate = eventData => {
   const shot = store.getters.shotMap.get(eventData.shot_id)
-  if (shot && shot.sequence_id === sequenceId.value) {
+  // "all" displays the shots of every sequence.
+  const isDisplayed =
+    shot && ['all', shot.sequence_id].includes(sequenceId.value)
+  if (isDisplayed) {
     queueCastingLoad(shot.id, () => store.dispatch('loadShotCasting', shot))
   }
 }
