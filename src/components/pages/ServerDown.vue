@@ -28,7 +28,9 @@ const router = useRouter()
 onMounted(async () => {
   try {
     await auth.isServerLoggedIn()
-    router.push(route.query.redirect || '/')
+    // App.vue mounts this page again while the redirect loads its data:
+    // that copy answers after the app has moved on, and must not navigate.
+    if (route.name === 'server-down') router.push(route.query.redirect || '/')
   } catch {
     // Server still down: stay on this page.
   }
