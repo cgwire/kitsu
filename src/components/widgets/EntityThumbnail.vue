@@ -1,4 +1,14 @@
 <template>
+  <span
+    class="thumbnail-empty thumbnail-processing"
+    :style="{
+      width: emptyWidth + 'px',
+      'min-width': emptyWidth + 'px',
+      height: emptyHeight + 'px'
+    }"
+    v-if="isProcessing"
+  />
+
   <a
     class="thumbnail-wrapper thumbnail-picture"
     target="_blank"
@@ -13,7 +23,7 @@
     @click="onClicked"
     @keydown.enter.prevent="onClicked"
     @keydown.space.prevent="onClicked"
-    v-if="isPreview && withLink"
+    v-else-if="isPreview && withLink"
   >
     <img
       class="thumbnail-picture"
@@ -95,6 +105,10 @@ const props = defineProps({
     default: null,
     type: String
   },
+  previewFileStatus: {
+    type: String,
+    default: 'ready'
+  },
   withLink: {
     default: true,
     type: Boolean
@@ -107,6 +121,10 @@ const isPreview = computed(() => {
   const previewFileId = props.previewFileId || props.entity?.preview_file_id
   return previewFileId?.length > 0
 })
+
+// The server builds the variants in the background: asking for a picture
+// that is not stored yet would only draw a broken image.
+const isProcessing = computed(() => props.previewFileStatus === 'processing')
 
 const imgStyle = computed(() => {
   const style = {}
