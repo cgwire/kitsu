@@ -16,6 +16,7 @@
   />
   <span
     class="thumbnail-picture thumbnail-empty"
+    :class="{ 'thumbnail-processing': isProcessing }"
     :style="{
       width: emptyWidth ? emptyWidth : width,
       height: emptyHeight ? emptyHeight : height
@@ -31,6 +32,10 @@ import { computed } from 'vue'
 const props = defineProps({
   previewFileId: {
     type: String
+  },
+  previewFileStatus: {
+    type: String,
+    default: 'ready'
   },
   extension: {
     type: String
@@ -67,8 +72,13 @@ const props = defineProps({
   }
 })
 
+// The server builds the variants in the background: asking for a picture
+// that is not stored yet would only draw a broken image.
+const isProcessing = computed(() => props.previewFileStatus === 'processing')
+
 const isPreviewWithThumbnail = computed(() => {
   return (
+    !isProcessing.value &&
     props.previewFileId &&
     (!props.extension || ['mp4', 'png'].includes(props.extension))
   )

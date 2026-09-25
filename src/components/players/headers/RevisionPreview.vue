@@ -12,6 +12,7 @@
           width="150px"
           height="103px"
           :preview-file-id="previewFile.id"
+          :preview-file-status="previewFile.status"
           :title="originalName"
           v-if="hasThumbnail"
         />
