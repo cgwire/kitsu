@@ -73,6 +73,6 @@ export default {
   postTaskTypeEstimations(production, episode, taskType, formData) {
     const episodePath = episode ? `episodes/${episode.id}/` : ''
     const path = `/api/import/csv/projects/${production.id}/${episodePath}task-types/${taskType.id}/estimations`
-    return client.ppost(path, formData)
+    return client.ppostImport(path, formData)
   }
 }

@@ -109,6 +109,6 @@ export default {
   postCsv(production, formData, toUpdate) {
     let path = `/api/import/csv/projects/${production.id}/assets`
     if (toUpdate) path += '?update=true'
-    return client.ppost(path, formData)
+    return client.ppostImport(path, formData)
   }
 }

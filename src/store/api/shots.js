@@ -164,7 +164,7 @@ export default {
   postCsv(production, formData, toUpdate) {
     let path = `/api/import/csv/projects/${production.id}/shots`
     if (toUpdate) path += '?update=true'
-    return client.ppost(path, formData)
+    return client.ppostImport(path, formData)
   },
 
   postEdl(production, edl_file, namingConvention, matchCase, episode) {
@@ -174,7 +174,7 @@ export default {
     formData.append('match_case', matchCase)
     let path = `/api/import/otio/projects/${production.id}`
     if (episode) path += `/episodes/${episode.id}`
-    return client.ppost(path, formData)
+    return client.ppostImport(path, formData)
   },
 
   getEpisodeStats(productionId) {

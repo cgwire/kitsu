@@ -20,6 +20,11 @@ function handleError(err) {
 // File uploads (ppostFile) stay unbounded — multi-GB movies are legit.
 const REQUEST_TIMEOUT = { response: 60000, deadline: 300000 }
 
+// Zou answers an import only once every row is processed, so there is
+// no early answer to wait for. 10 min matches the documented nginx
+// proxy_read_timeout.
+const IMPORT_TIMEOUT = { deadline: 600000 }
+
 // Build a query string from a plain object. Empty values are dropped so an
 // unset filter never reaches the API, and array values become one repeated
 // key per entry, the form the backend reads with action="append".
@@ -94,9 +99,9 @@ async function handleNdjsonResponse(response) {
 }
 
 const client = {
-  request(method, path, data) {
+  request(method, path, data, timeout = REQUEST_TIMEOUT) {
     return superagent(method, path)
-      .timeout(REQUEST_TIMEOUT)
+      .timeout(timeout)
       .send(data)
       .then(handleResponse)
       .catch(handleError)
@@ -148,6 +153,10 @@ const client = {
 
   ppost(path, data) {
     return client.request('POST', path, data)
+  },
+
+  ppostImport(path, data) {
+    return client.request('POST', path, data, IMPORT_TIMEOUT)
   },
 
   ppostFile(path, data) {

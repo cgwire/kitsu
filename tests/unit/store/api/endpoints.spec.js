@@ -3,12 +3,22 @@
 import { vi } from 'vitest'
 
 vi.mock('@/store/api/client', () => ({
-  default: { pdel: vi.fn(), pget: vi.fn(), ppost: vi.fn() }
+  default: {
+    pdel: vi.fn(),
+    pget: vi.fn(),
+    ppost: vi.fn(),
+    ppostImport: vi.fn()
+  }
 }))
 
+import assetsApi from '@/store/api/assets'
+import breakdownApi from '@/store/api/breakdown'
 import client from '@/store/api/client'
+import editsApi from '@/store/api/edits'
 import entitiesApi from '@/store/api/entities'
 import newsApi from '@/store/api/news'
+import peopleApi from '@/store/api/people'
+import shotsApi from '@/store/api/shots'
 import taskTypesApi from '@/store/api/tasktypes'
 
 describe('store/api endpoints', () => {
@@ -16,6 +26,68 @@ describe('store/api endpoints', () => {
     client.pdel.mockClear()
     client.pget.mockClear()
     client.ppost.mockClear()
+    client.ppostImport.mockClear()
+  })
+
+  // Zou answers an import only once every row is processed: the imports
+  // must not go through the 60s response timeout of regular requests.
+  describe('imports', () => {
+    const production = { id: 'p1' }
+    const formData = { file: 'import.csv' }
+
+    test.each([
+      [
+        'shots CSV',
+        () => shotsApi.postCsv(production, formData, true),
+        '/api/import/csv/projects/p1/shots?update=true'
+      ],
+      [
+        'assets CSV',
+        () => assetsApi.postCsv(production, formData, false),
+        '/api/import/csv/projects/p1/assets'
+      ],
+      [
+        'edits CSV',
+        () => editsApi.postCsv(production, formData, true),
+        '/api/import/csv/projects/p1/edits?update=true'
+      ],
+      [
+        'people CSV',
+        () => peopleApi.postCsv(formData, false),
+        '/api/import/csv/persons'
+      ],
+      [
+        'casting CSV',
+        () => breakdownApi.postCastingCsv(production, formData),
+        '/api/import/csv/projects/p1/casting'
+      ],
+      [
+        'estimations CSV',
+        () =>
+          taskTypesApi.postTaskTypeEstimations(
+            production,
+            { id: 'e1' },
+            { id: 't1' },
+            formData
+          ),
+        '/api/import/csv/projects/p1/episodes/e1/task-types/t1/estimations'
+      ]
+    ])('%s posts through ppostImport', (label, post, path) => {
+      post()
+
+      expect(client.ppostImport).toHaveBeenCalledWith(path, formData)
+      expect(client.ppost).not.toHaveBeenCalled()
+    })
+
+    test('the OTIO import posts through ppostImport', () => {
+      shotsApi.postEdl(production, 'cut.otio', 'naming', true, { id: 'e1' })
+
+      expect(client.ppostImport).toHaveBeenCalledWith(
+        '/api/import/otio/projects/p1/episodes/e1',
+        expect.any(FormData)
+      )
+      expect(client.ppost).not.toHaveBeenCalled()
+    })
   })
 
   describe('entities deleteEntities', () => {
