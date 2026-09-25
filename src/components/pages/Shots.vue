@@ -948,6 +948,8 @@ export default {
     },
 
     showEDLImportModal() {
+      this.errors.importing = false
+      this.errors.importingError = null
       this.modals.isEDLImportDisplayed = true
     },
 

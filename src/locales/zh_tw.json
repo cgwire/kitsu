@@ -477,6 +477,8 @@
         "choose": "選擇",
         "error_imported_rows": "錯誤發生前已匯入 {count} 行。 | 錯誤發生前已匯入 {count} 行。",
         "error_line": "第 {line} 行",
+        "error_timeout": "匯入耗時超出預期，正在背景繼續進行。",
+        "error_timeout_hint": "請在幾分鐘後重新整理頁面，確認結果後再重新匯入。",
         "error_upload": "上傳您的CSV檔案時出現錯誤。",
         "export_file": "匯出資料至CSV檔案",
         "import_file": "從CSV檔案匯入資料",

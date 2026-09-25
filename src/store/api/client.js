@@ -12,6 +12,8 @@ function handleError(err) {
     return new Promise(() => {})
   }
   err.body = err?.response?.body || ''
+  // No answer in time: the server may still be processing the request.
+  err.isTimeout = Boolean(err.timeout) || err.status === 504
   throw err
 }
 

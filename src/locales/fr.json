@@ -479,6 +479,8 @@
         "choose": "Choisir",
         "error_imported_rows": "{count} ligne a été importée avant l'erreur. | {count} lignes ont été importées avant l'erreur.",
         "error_line": "Ligne {line}",
+        "error_timeout": "L'import prend plus de temps que prévu et se poursuit en arrière-plan.",
+        "error_timeout_hint": "Rechargez la page dans quelques minutes pour vérifier le résultat avant de relancer l'import.",
         "error_upload": "Une erreur est survenue en important votre fichier .csv.",
         "export_file": "Exporter vers un .csv",
         "import_file": "Importer depuis un .csv",

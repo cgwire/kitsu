@@ -477,6 +477,8 @@
         "choose": "Kiválaszt",
         "error_imported_rows": "A hiba előtt {count} sor lett importálva. | A hiba előtt {count} sor lett importálva.",
         "error_line": "{line}. sor",
+        "error_timeout": "Az importálás a vártnál tovább tart, és a háttérben folytatódik.",
+        "error_timeout_hint": "Néhány perc múlva töltsd újra az oldalt, és ellenőrizd az eredményt, mielőtt újra importálnál.",
         "error_upload": "Hiba történt a CSV feltöltésekor.",
         "export_file": "Adatok exportálása CSV-be",
         "import_file": "Adatok importálása CSV-ből",

@@ -477,6 +477,8 @@
         "choose": "Auswählen",
         "error_imported_rows": "{count} Zeile wurde vor dem Fehler importiert. | {count} Zeilen wurden vor dem Fehler importiert.",
         "error_line": "Zeile {line}",
+        "error_timeout": "Der Import dauert länger als erwartet und läuft im Hintergrund weiter.",
+        "error_timeout_hint": "Laden Sie die Seite in ein paar Minuten neu, um das Ergebnis zu prüfen, bevor Sie erneut importieren.",
         "error_upload": "Beim Hochladen Ihrer CSV-Datei ist ein Fehler aufgetreten.",
         "export_file": "Daten in eine CSV-Datei exportieren",
         "import_file": "Daten aus einer CSV-Datei importieren",

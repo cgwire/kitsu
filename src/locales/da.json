@@ -477,6 +477,8 @@
         "choose": "Vælg",
         "error_imported_rows": "{count} linje blev importeret før fejlen. | {count} linjer blev importeret før fejlen.",
         "error_line": "Linje {line}",
+        "error_timeout": "Importen tager længere tid end forventet og fortsætter i baggrunden.",
+        "error_timeout_hint": "Genindlæs siden om et par minutter for at kontrollere resultatet, før du importerer igen.",
         "error_upload": "Der opstod en fejl under upload af din CSV-fil.",
         "export_file": "Eksporter data til CSV",
         "import_file": "Importer data fra CSV",

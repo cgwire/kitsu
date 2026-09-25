@@ -132,6 +132,30 @@ describe('store/api/client', () => {
     expect(h.timeout).toEqual({ deadline: 600000 })
   })
 
+  test('a request that timed out rejects as a timeout', async () => {
+    h.error = Object.assign(new Error('Response timeout of 60000ms exceeded'), {
+      code: 'ECONNABORTED',
+      timeout: 60000
+    })
+    await expect(client.ppost('/api/data/foo')).rejects.toMatchObject({
+      isTimeout: true
+    })
+  })
+
+  test('a gateway timeout rejects as a timeout', async () => {
+    h.error = { status: 504, response: { status: 504, body: '' } }
+    await expect(client.ppost('/api/data/foo')).rejects.toMatchObject({
+      isTimeout: true
+    })
+  })
+
+  test('other failures are not timeouts', async () => {
+    h.error = { status: 500, response: { status: 500, body: {} } }
+    await expect(client.ppost('/api/data/foo')).rejects.toMatchObject({
+      isTimeout: false
+    })
+  })
+
   test('getText resolves with the response text', async () => {
     h.response = { text: 'plain content' }
     await expect(client.getText('/api/foo.txt')).resolves.toEqual(

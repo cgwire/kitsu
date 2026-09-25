@@ -120,7 +120,11 @@
       />
     </div>
 
-    <div class="import-error" v-if="isError">
+    <div class="import-error is-timeout" v-if="isError && isTimeout">
+      <p class="import-error-title">{{ $t('main.csv.error_timeout') }}</p>
+      <p>{{ $t('main.csv.error_timeout_hint') }}</p>
+    </div>
+    <div class="import-error" v-else-if="isError">
       <p class="import-error-title">{{ $t('main.csv.error_upload') }}</p>
       <p v-if="serverError">
         <span class="line-badge" v-if="serverError.line_number">
@@ -283,11 +287,15 @@ const newEntityNames = computed(() => {
   )
 })
 
+const isTimeout = computed(() => Boolean(props.importError?.isTimeout))
+
 const isConfirmDisabled = computed(
   () =>
-    updateData.value &&
-    newEntityNames.value.length > 0 &&
-    !newEntitiesConfirmed.value
+    // Importing again right away would race the import still running.
+    (props.isError && isTimeout.value) ||
+    (updateData.value &&
+      newEntityNames.value.length > 0 &&
+      !newEntitiesConfirmed.value)
 )
 
 const serverError = computed(() =>
@@ -449,6 +457,11 @@ watch(
   .import-error-title {
     font-weight: bold;
     margin-bottom: 0.5em;
+  }
+
+  &.is-timeout {
+    background: rgba($orange-carrot, 0.08);
+    border-color: $orange-carrot;
   }
 
   .imported-rows {

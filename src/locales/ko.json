@@ -477,6 +477,8 @@
         "choose": "선택",
         "error_imported_rows": "에러 발생 전에 {count}개의 행을 가져왔습니다. | 에러 발생 전에 {count}개의 행을 가져왔습니다.",
         "error_line": "{line}행",
+        "error_timeout": "가져오기가 예상보다 오래 걸리고 있으며 백그라운드에서 계속 진행됩니다.",
+        "error_timeout_hint": "몇 분 후 페이지를 새로고침하여 결과를 확인한 뒤 다시 가져오세요.",
         "error_upload": "CSV 업로드 중에 에러가 발생했습니다.",
         "export_file": "데이터를 CSV로 내보내기",
         "import_file": "CSV에서 데이터 가져오기",
