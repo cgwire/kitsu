@@ -33,7 +33,7 @@
           <task-type-name
             class="task-type-name"
             :is-static="true"
-            :production-id="currentProduction.id"
+            :production-id="currentProduction?.id"
             :task-type="buildTaskTypeFromNews(news)"
           />
         </div>
@@ -129,7 +129,7 @@ const reset = async () => {
 }
 
 const onNewsNew = eventData => {
-  if (eventData.project_id === currentProduction.value.id) reset()
+  if (eventData.project_id === currentProduction.value?.id) reset()
 }
 
 // Watchers
