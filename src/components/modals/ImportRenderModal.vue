@@ -360,8 +360,10 @@ const isConfirmDisabled = computed(
       !newEntitiesConfirmed.value)
 )
 
+// Most pages keep the last error until the next upload, a new preview
+// included: it only counts while it shows.
 const serverError = computed(() =>
-  props.importError?.status === 400
+  props.isError && props.importError?.status === 400
     ? (props.importError.response?.body ?? null)
     : null
 )

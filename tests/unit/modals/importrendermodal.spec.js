@@ -198,6 +198,24 @@ describe('ImportRenderModal', () => {
       expect(wrapper.text()).toContain('main.csv.error_line {"line":3}')
     })
 
+    // Most pages keep the last error in their props until the next upload:
+    // the preview of a file sent again must not highlight its line.
+    test('forgets the rejected line once the error is dismissed', async () => {
+      const importError = Object.assign(new Error('Bad Request'), {
+        isTimeout: false,
+        status: 400,
+        response: { body: { message: 'Name cannot be empty', line_number: 3 } }
+      })
+      const wrapper = mountModal({ importError, isError: true })
+      expect(rows(wrapper).map(row => row.classes('error-row'))).toContain(true)
+
+      await wrapper.setProps({ isError: false })
+
+      expect(
+        rows(wrapper).map(row => row.classes('error-row'))
+      ).not.toContain(true)
+    })
+
     test('a timed out import says it continues in the background', () => {
       const importError = Object.assign(new Error('Response timeout'), {
         isTimeout: true
