@@ -1650,11 +1650,8 @@ const onRemoteAcknowledge = (eventData, type) => {
 const onPreviewFileAddFile = eventData => onPreviewAdded(eventData)
 
 const onPreviewFileUpdate = eventData => {
-  const comment = taskComments.value.find(
-    c =>
-      c.previews &&
-      c.previews.length > 0 &&
-      c.previews[0].id === eventData.preview_file_id
+  const comment = taskComments.value.find(c =>
+    c.previews?.some(preview => preview.id === eventData.preview_file_id)
   )
   if (comment && task.value) {
     store
@@ -1663,8 +1660,13 @@ const onPreviewFileUpdate = eventData => {
         previewId: eventData.preview_file_id
       })
       .then(preview => {
-        comment.previews[0].validation_status = preview.validation_status
-        comment.previews[0].status = preview.status
+        const target = comment.previews.find(
+          p => p.id === eventData.preview_file_id
+        )
+        if (target) {
+          target.validation_status = preview.validation_status
+          target.status = preview.status
+        }
       })
   }
 }
