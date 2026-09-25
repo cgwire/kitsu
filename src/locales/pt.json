@@ -489,6 +489,8 @@
         "legend_missing": "Coluna esperada que não foi encontrada",
         "legend_disabled": "Linha que não será atualizada nem criada",
         "legend_overwrite": "Linha que será atualizada",
+        "legend_incomplete": "Linha sem um valor obrigatório",
+        "missing_values": "A linha {lines} não tem valor em uma coluna obrigatória ({columns}). Preencha-a ou remova-a e envie o arquivo novamente. | As linhas {lines} não têm valor em uma coluna obrigatória ({columns}). Preencha-as ou remova-as e envie o arquivo novamente.",
         "paste": "Colar",
         "paste_code": "Por favor cole aqui seus dados CSV:",
         "preview": "Prévia",

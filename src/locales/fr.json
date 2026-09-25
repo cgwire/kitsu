@@ -491,6 +491,8 @@
         "legend_missing": "Colonne attendue qui n'a pas été trouvée",
         "legend_disabled": "Ligne qui ne sera pas mise à jour ou créée",
         "legend_overwrite": "Ligne qui sera mise à jour",
+        "legend_incomplete": "Ligne à laquelle il manque une valeur obligatoire",
+        "missing_values": "La ligne {lines} n'a pas de valeur dans une colonne obligatoire ({columns}). Complétez-la ou supprimez-la, puis importez à nouveau le fichier. | Les lignes {lines} n'ont pas de valeur dans une colonne obligatoire ({columns}). Complétez-les ou supprimez-les, puis importez à nouveau le fichier.",
         "paste": "Coller",
         "paste_code": "Veuillez coller vos données CSV ici :",
         "preview": "Aperçu",

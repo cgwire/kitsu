@@ -489,6 +489,8 @@
         "legend_missing": "未找到的預期欄",
         "legend_disabled": "不會被更新或建立的行",
         "legend_overwrite": "將被更新的行",
+        "legend_incomplete": "缺少必填值的行",
+        "missing_values": "第 {lines} 行的必填欄（{columns}）沒有值。請補齊或刪除該行，然後重新上傳檔案。 | 第 {lines} 行的必填欄（{columns}）沒有值。請補齊或刪除這些行，然後重新上傳檔案。",
         "paste": "貼上",
         "paste_code": "請在此處貼上您的CSV資料：",
         "preview": "預覽",

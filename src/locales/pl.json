@@ -961,6 +961,8 @@
         "legend_missing_optional": "Opcjonalna kolumna, której nie znaleziono",
         "legend_disabled": "Wiersz, który nie zostanie zaktualizowany ani utworzony",
         "legend_overwrite": "Wiersz, który zostanie zaktualizowany",
+        "legend_incomplete": "Wiersz bez wymaganej wartości",
+        "missing_values": "Wiersz {lines} nie ma wartości w wymaganej kolumnie ({columns}). Uzupełnij go lub usuń, a następnie prześlij plik ponownie. | Wiersze {lines} nie mają wartości w wymaganej kolumnie ({columns}). Uzupełnij je lub usuń, a następnie prześlij plik ponownie.",
         "paste": "Wklej",
         "paste_code": "Wklej tutaj dane CSV:",
         "preview": "Podgląd",

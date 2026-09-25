@@ -480,6 +480,7 @@
       :data-matchers="shotsDataMatchers"
       :database="{}"
       :disable-update="true"
+      :required-values="shotsDataMatchers"
       @reupload="resetShotsImport"
       @confirm="uploadShotsImportFile"
       @cancel="toggleModal('isShotsImportRenderDisplayed')"

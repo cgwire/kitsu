@@ -76,14 +76,13 @@
         <tbody>
           <tr
             :class="{
-              'error-row': index + 2 === errorLine,
-              overwrite: updateData && existingData(index),
-              disabled: !updateData && existingData(index)
+              'error-row': lineNumber === errorLine,
+              incomplete: incompleteLineSet.has(lineNumber),
+              overwrite: updateData && existingData(lineNumber),
+              disabled: !updateData && existingData(lineNumber)
             }"
-            :key="`line-${index}`"
-            v-for="(line, index) in parsedCsv
-              .slice(1)
-              .filter(line => line.length > 1)"
+            :key="`line-${lineNumber}`"
+            v-for="{ line, lineNumber } in displayedLines"
           >
             <td v-for="cell in columnsRequired" :key="`cell-${cell}`">
               {{ '-' }}
@@ -120,6 +119,18 @@
       />
     </div>
 
+    <div class="import-error" v-if="incompleteLines.length > 0">
+      <p class="import-error-title">
+        {{
+          $t('main.csv.missing_values', {
+            columns: requiredValues.join(', '),
+            count: incompleteLines.length,
+            lines: incompleteLines.join(', ')
+          })
+        }}
+      </p>
+    </div>
+
     <div class="import-error is-timeout" v-if="isError && isTimeout">
       <p class="import-error-title">{{ $t('main.csv.error_timeout') }}</p>
       <p>{{ $t('main.csv.error_timeout_hint') }}</p>
@@ -127,8 +138,8 @@
     <div class="import-error" v-else-if="isError">
       <p class="import-error-title">{{ $t('main.csv.error_upload') }}</p>
       <p v-if="serverError">
-        <span class="line-badge" v-if="serverError.line_number">
-          {{ $t('main.csv.error_line', { line: serverError.line_number }) }}
+        <span class="line-badge" v-if="errorLine">
+          {{ $t('main.csv.error_line', { line: errorLine }) }}
         </span>
         {{ serverError.message }}
       </p>
@@ -183,7 +194,10 @@ const props = defineProps({
   importError: { type: Error, default: null },
   isError: { type: Boolean, default: false },
   isLoading: { type: Boolean, default: false },
-  parsedCsv: { type: Array, default: () => [] }
+  parsedCsv: { type: Array, default: () => [] },
+  // Columns that must hold a value on every line: Zou rejects a line
+  // missing one of them.
+  requiredValues: { type: Array, default: () => [] }
 })
 
 defineEmits(['cancel', 'confirm', 'reupload'])
@@ -266,6 +280,9 @@ const legendItems = computed(() => {
   if (!props.disableUpdate) {
     items.push({ state: 'overwrite', label: t('main.csv.legend_overwrite') })
   }
+  if (props.requiredValues.length > 0) {
+    items.push({ state: 'incomplete', label: t('main.csv.legend_incomplete') })
+  }
   return items
 })
 
@@ -277,6 +294,50 @@ const columnSelect = computed(() => props.parsedCsv[0])
 const indexMatchers = computed(() =>
   props.dataMatchers.map(item => props.parsedCsv[0].indexOf(item))
 )
+
+// Physical lines a line of the file takes once uploaded: a quoted cell can
+// hold line breaks, and Zou reads \r\n, \r, and \n as such.
+const countUploadedLines = line =>
+  line.reduce(
+    (count, cell) => count + (String(cell).match(/\r\n|\r|\n/g)?.length ?? 0),
+    1
+  )
+
+// The lines Kitsu uploads, empty ones left out (see turnEntriesToCsvString).
+// The user reads the line numbers of their own file (header on line 1),
+// Zou errors give the last physical line of the upload a line ends on.
+const displayedLines = computed(() => {
+  if (props.parsedCsv.length === 0) return []
+  let uploadedLineNumber = countUploadedLines(props.parsedCsv[0])
+  return props.parsedCsv
+    .slice(1)
+    .map((line, index) => ({ line, lineNumber: index + 2 }))
+    .filter(({ line }) => line.length > 1 || line[0])
+    .map(entry => {
+      uploadedLineNumber += countUploadedLines(entry.line)
+      return { ...entry, uploadedLineNumber }
+    })
+})
+
+const requiredIndexes = computed(() => {
+  if (props.parsedCsv.length === 0) return []
+  return props.requiredValues
+    .map(column => props.parsedCsv[0].indexOf(column))
+    .filter(index => index >= 0)
+})
+
+// A blank line carries nothing to import: Zou skips it.
+const incompleteLines = computed(() =>
+  displayedLines.value
+    .filter(
+      ({ line }) =>
+        line.some(cell => cell) &&
+        requiredIndexes.value.some(index => !line[index])
+    )
+    .map(({ lineNumber }) => lineNumber)
+)
+
+const incompleteLineSet = computed(() => new Set(incompleteLines.value))
 
 const newEntityNames = computed(() => {
   if (props.parsedCsv.length === 0) return []
@@ -291,6 +352,7 @@ const isTimeout = computed(() => Boolean(props.importError?.isTimeout))
 
 const isConfirmDisabled = computed(
   () =>
+    incompleteLines.value.length > 0 ||
     // Importing again right away would race the import still running.
     (props.isError && isTimeout.value) ||
     (updateData.value &&
@@ -304,7 +366,14 @@ const serverError = computed(() =>
     : null
 )
 
-const errorLine = computed(() => serverError.value?.line_number ?? null)
+const errorLine = computed(() => {
+  const uploadedLineNumber = serverError.value?.line_number
+  if (!uploadedLineNumber) return null
+  const entry = displayedLines.value.find(
+    entry => entry.uploadedLineNumber === uploadedLineNumber
+  )
+  return entry?.lineNumber ?? uploadedLineNumber
+})
 
 const stateColumn = data =>
   columnsAllowed.value.includes(data) ? undefined : 'ignored'
@@ -319,8 +388,8 @@ const checkForDuplicate = () => {
 const isDuplicated = index =>
   duplicates.value.includes(columnSelect.value[index])
 
-const existingData = index => {
-  const line = props.parsedCsv[index + 1]
+const existingData = lineNumber => {
+  const line = props.parsedCsv[lineNumber - 1]
   let itemName = ''
   indexMatchers.value.forEach(col => {
     itemName += line[col]
@@ -482,6 +551,10 @@ watch(
 }
 
 .error-row td {
+  background-color: rgba($red, 0.15);
+}
+
+.incomplete {
   background-color: rgba($red, 0.15);
 }
 

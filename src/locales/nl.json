@@ -489,6 +489,8 @@
         "legend_missing": "Verwachte kolom die niet is gevonden",
         "legend_disabled": "Regel die niet wordt bijgewerkt of aangemaakt",
         "legend_overwrite": "Regel die wordt bijgewerkt",
+        "legend_incomplete": "Regel waarin een verplichte waarde ontbreekt",
+        "missing_values": "Regel {lines} heeft geen waarde in een verplichte kolom ({columns}). Vul de regel aan of verwijder hem, en upload het bestand daarna opnieuw. | De regels {lines} hebben geen waarde in een verplichte kolom ({columns}). Vul ze aan of verwijder ze, en upload het bestand daarna opnieuw.",
         "paste": "Plakken",
         "paste_code": "Plak hier uw CSV data",
         "preview": "Preview",

@@ -214,6 +214,7 @@
       :columns="renderColumns"
       :data-matchers="dataMatchers"
       :database="filteredShots"
+      :required-values="dataMatchers"
       @reupload="resetImport"
       @cancel="hideImportRenderModal"
       @confirm="uploadImportFile"

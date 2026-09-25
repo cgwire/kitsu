@@ -265,7 +265,7 @@ const csv = {
     const names = new Map()
     parsedCsv
       .slice(1)
-      .filter(line => line.length > 1)
+      .filter(line => line.length > 1 || line[0])
       .forEach(line => {
         const values = indexMatchers.map(index => line[index] || '')
         const key = values.join('')

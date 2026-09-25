@@ -489,6 +489,8 @@
         "legend_missing": "Forventet kolonne, der ikke blev fundet",
         "legend_disabled": "Linje, der ikke vil blive opdateret eller oprettet",
         "legend_overwrite": "Linje, der vil blive opdateret",
+        "legend_incomplete": "Linje, der mangler en påkrævet værdi",
+        "missing_values": "Linje {lines} har ingen værdi i en påkrævet kolonne ({columns}). Udfyld eller fjern den, og upload derefter filen igen. | Linjerne {lines} har ingen værdi i en påkrævet kolonne ({columns}). Udfyld eller fjern dem, og upload derefter filen igen.",
         "paste": "Indsæt",
         "paste_code": "Indsæt venligst dine CSV-data her:",
         "preview": "Preview",

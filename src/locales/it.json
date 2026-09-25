@@ -491,6 +491,8 @@
         "legend_missing": "Colonna attesa ma non trovata",
         "legend_disabled": "Riga che non verrà aggiornata né creata",
         "legend_overwrite": "Riga che verrà aggiornata",
+        "legend_incomplete": "Riga a cui manca un valore obbligatorio",
+        "missing_values": "La riga {lines} non ha alcun valore in una colonna obbligatoria ({columns}). Completala o rimuovila, poi carica di nuovo il file. | Le righe {lines} non hanno alcun valore in una colonna obbligatoria ({columns}). Completale o rimuovile, poi carica di nuovo il file.",
         "paste": "Incolla",
         "paste_code": "Incolla qui i dati CSV:",
         "preview": "Anteprima",

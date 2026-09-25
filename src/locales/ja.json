@@ -489,6 +489,8 @@
         "legend_missing": "見つからない必須列",
         "legend_disabled": "更新または作成されない行",
         "legend_overwrite": "更新される行",
+        "legend_incomplete": "必須の値が欠けている行",
+        "missing_values": "{lines} 行目の必須列 ({columns}) に値がありません。値を入力するか行を削除してから、ファイルを再度アップロードしてください。 | {lines} 行目の必須列 ({columns}) に値がありません。値を入力するか行を削除してから、ファイルを再度アップロードしてください。",
         "paste": "貼り付け",
         "paste_code": "CSV データをここに貼り付けてください:",
         "preview": "プレビュー",
