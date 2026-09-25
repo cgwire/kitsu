@@ -2,7 +2,7 @@
   <div class="data-list task-list">
     <div class="datatable-wrapper" ref="body" @scroll.passive="onBodyScroll">
       <table class="datatable" v-if="!isLoading">
-        <thead class="datatable-head">
+        <thead class="datatable-head" id="datatable-todos" v-columns-resizable>
           <tr>
             <th
               scope="col"
@@ -710,7 +710,7 @@ onBeforeUnmount(() => {
   cursor: pointer;
 }
 
-.name {
+thead .name {
   width: 300px;
   min-width: 300px;
 }
