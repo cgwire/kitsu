@@ -27,7 +27,11 @@ describe('EntityThumbnail', () => {
   test('requests nothing while the preview is processing', () => {
     const wrapper = mountThumbnail({ previewFileStatus: 'processing' })
     expect(wrapper.find('img').exists()).toBe(false)
-    expect(wrapper.find('.thumbnail-processing').exists()).toBe(true)
+    const placeholder = wrapper.find('.thumbnail-processing')
+    expect(placeholder.exists()).toBe(true)
+    // The placeholder is styled like a thumbnail, so it keeps the size
+    // and the rounded corners of the picture it stands for.
+    expect(placeholder.classes()).toContain('thumbnail-picture')
   })
 
   test('requests the picture again once the preview turns ready', async () => {
