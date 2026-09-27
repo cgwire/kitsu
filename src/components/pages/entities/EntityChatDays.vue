@@ -144,7 +144,7 @@ const user = computed(() => store.getters.user)
 // less than 5 minutes apart share a single header.
 const messageList = computed(() => {
   const messages = [...props.messages].sort((a, b) =>
-    moment(a.created_at).isAfter(moment(b.created_at))
+    moment(a.created_at).diff(b.created_at)
   )
   const dayList = []
   let lastMessage = null

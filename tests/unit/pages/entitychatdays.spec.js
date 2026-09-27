@@ -41,6 +41,21 @@ describe('EntityChatDays', () => {
     expect(wrapper.findAll('.message-text')).toHaveLength(3)
   })
 
+  // The API does not guarantee the order of the messages.
+  test('orders the messages by date before grouping them', () => {
+    const wrapper = mountDays([
+      message('m3', '2026-09-02T10:00:00'),
+      message('m2', '2026-09-01T10:02:00'),
+      message('m4', '2026-09-02T10:03:00'),
+      message('m1', '2026-09-01T10:00:00')
+    ])
+    const days = wrapper.findAll('.day-messages')
+    expect(days).toHaveLength(2)
+    expect(days.map(day => day.findAll('.message-text').length)).toEqual([
+      2, 2
+    ])
+  })
+
   test('emits the id of a message to delete', async () => {
     const wrapper = mountDays([message('m1', '2026-09-01T10:00:00')])
     await wrapper.find('.delete-message-button').trigger('click')
