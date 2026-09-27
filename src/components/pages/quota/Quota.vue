@@ -467,18 +467,6 @@ defineExpose({ quotaMap })
 </script>
 
 <style lang="scss" scoped>
-.dark {
-  .weekend {
-    background-color: $dark-grey;
-  }
-  .quota-button:hover {
-    color: #333;
-  }
-  .info {
-    color: $white;
-  }
-}
-
 .data-list {
   margin-top: 0;
 }
@@ -522,8 +510,12 @@ defineExpose({ quotaMap })
   }
 }
 
+.info {
+  color: var(--text);
+}
+
 .quota-low {
-  color: red;
+  color: $red;
 }
 
 .quota-button {
@@ -534,8 +526,9 @@ defineExpose({ quotaMap })
   cursor: pointer;
   color: inherit;
   font-size: inherit;
-  &:focus {
-    background-color: $dark-grey-lightest;
+  &:focus,
+  &:hover {
+    background-color: var(--background-hover);
   }
 }
 
@@ -544,15 +537,11 @@ defineExpose({ quotaMap })
 }
 
 .selected .quota-button {
-  background: $purple;
-  color: #333;
-}
-
-.quota-button:hover {
-  background: #bbeebb;
+  background: var(--purple);
+  color: var(--text-strong);
 }
 
 .weekend {
-  background-color: $white-grey;
+  background-color: var(--background-panel);
 }
 </style>

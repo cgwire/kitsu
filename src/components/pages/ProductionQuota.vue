@@ -504,13 +504,8 @@ useHead({
 </script>
 
 <style lang="scss" scoped>
-.dark {
-  .filters {
-    color: $white-grey;
-  }
-}
-
 .filters {
+  color: var(--text);
   padding-bottom: 2rem;
 
   .field {
