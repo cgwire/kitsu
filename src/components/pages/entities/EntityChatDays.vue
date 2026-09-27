@@ -204,10 +204,6 @@ defineExpose({ scrollToBottom })
 </script>
 
 <style lang="scss" scoped>
-.dark .messages {
-  background-color: var(--background-alt);
-}
-
 .day-messages {
   width: 100%;
 }
@@ -231,6 +227,7 @@ defineExpose({ scrollToBottom })
 
 .messages {
   align-items: flex-end;
+  background-color: var(--background-alt);
   color: var(--text);
   display: flex;
   flex: 1;
