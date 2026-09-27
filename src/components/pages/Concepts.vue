@@ -4,15 +4,6 @@
       <div class="concepts page">
         <div class="page-header">
           <div class="filters">
-            <search-field
-              ref="search-field"
-              class="field"
-              :can-save="true"
-              placeholder="ex: chara"
-              @change="onSearchChange"
-              @save="saveSearchQuery"
-              v-if="false"
-            />
             <combobox-status
               :label="$t('main.status')"
               :task-status-list="taskStatusList"
@@ -29,12 +20,6 @@
               />
             </span>
             <combobox
-              :label="$t('concepts.fields.entity_type')"
-              :options="entityTypeOptions"
-              v-model="filters.entityType"
-              v-if="false"
-            />
-            <combobox
               class="right"
               :label="$t('main.sorted_by')"
               locale-key-prefix="concepts.fields."
@@ -49,7 +34,6 @@
           v-if="loading.loadingConcepts || errors.loadingConcepts"
         />
         <div
-          ref="concept-list"
           class="concept-list pb1"
           @dragover="onFileDragover"
           v-else-if="filteredConcepts?.length"
@@ -118,357 +102,244 @@
   </div>
 </template>
 
-<script>
-import assetsStore from '@/store/modules/assets.js'
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+// Imports
+// --------------------------------------------------------------------------
+import { useHead } from '@unhead/vue'
 import { firstBy } from 'thenby'
+import {
+  computed,
+  getCurrentInstance,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  reactive,
+  ref,
+  useTemplateRef,
+  watch
+} from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 
+import { pauseEvent } from '@/composables/dom'
+import files from '@/lib/files'
 import { sortByName, sortPeople } from '@/lib/sorting'
 
-import { searchMixin } from '@/components/mixins/search'
-import { domMixin } from '@/components/mixins/dom'
-
-import files from '@/lib/files'
-
 import AddPreviewModal from '@/components/modals/AddPreviewModal.vue'
+import TaskInfo from '@/components/sides/TaskInfo.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ConceptCard from '@/components/widgets/ConceptCard.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
-import SearchField from '@/components/widgets/SearchField.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
-import TaskInfo from '@/components/sides/TaskInfo.vue'
 
-export default {
-  name: 'concepts',
+const { t } = useI18n()
+const route = useRoute()
+const store = useStore()
 
-  mixins: [searchMixin, domMixin],
+const socket = getCurrentInstance().appContext.config.globalProperties.$socket
 
-  components: {
-    AddPreviewModal,
-    ButtonSimple,
-    Combobox,
-    ComboboxStatus,
-    ConceptCard,
-    PeopleField,
-    SearchField,
-    TableInfo,
-    TaskInfo
+// State
+// --------------------------------------------------------------------------
+const addPreviewModalRef = useTemplateRef('add-preview-modal')
+
+const isDraggingFile = ref(false)
+
+const errors = reactive({
+  addingConcept: false,
+  loadingConcepts: false
+})
+const filters = reactive({
+  publisher: null,
+  sortBy: 'created_at',
+  taskStatusId: null
+})
+const loading = reactive({
+  addingConcept: false,
+  loadingConcepts: false
+})
+const modals = reactive({
+  addConcept: false
+})
+
+const imgExtensions = files.IMG_EXTENSIONS_STRING
+const sortByOptions = ['created_at', 'updated_at', 'last_comment_date'].map(
+  name => ({ label: name, value: name })
+)
+
+// Computed
+// --------------------------------------------------------------------------
+const concepts = computed(() => store.getters.concepts)
+const currentProduction = computed(() => store.getters.currentProduction)
+const personMap = computed(() => store.getters.personMap)
+const selectedConcepts = computed(() => store.getters.selectedConcepts)
+const taskStatusMap = computed(() => store.getters.taskStatusMap)
+
+const filteredConcepts = computed(() =>
+  concepts.value
+    .filter(
+      concept =>
+        !filters.taskStatusId ||
+        concept.tasks[0].task_status_id === filters.taskStatusId
+    )
+    .filter(
+      concept =>
+        !filters.publisher || concept.created_by === filters.publisher.id
+    )
+    .sort(firstBy(filters.sortBy, -1).thenBy('created_at', -1))
+)
+
+const publishers = computed(() => {
+  const personIds = new Set(
+    filteredConcepts.value.map(concept => concept.created_by)
+  )
+  return sortPeople(
+    [...personIds]
+      .map(personId => personMap.value.get(personId))
+      .filter(Boolean)
+  )
+})
+
+const currentConcept = computed(() =>
+  selectedConcepts.value.size === 1
+    ? selectedConcepts.value.values().next().value
+    : null
+)
+
+const currentTask = computed(() => currentConcept.value?.tasks?.[0])
+
+const taskStatusList = computed(() => [
+  {
+    id: null,
+    color: '#999',
+    name: t('main.all'),
+    short_name: t('main.all')
   },
+  ...sortByName(
+    [...taskStatusMap.value.values()].filter(status => status.for_concept)
+  )
+])
 
-  data() {
-    return {
-      imgExtensions: files.IMG_EXTENSIONS_STRING,
-      isDraggingFile: false,
-      loading: {
-        addingConcept: false,
-        loadingConcepts: false,
-        savingSearch: false
-      },
-      errors: {
-        addingConcept: false,
-        loadingConcepts: false
-      },
-      filters: {
-        entityType: null,
-        publisher: null,
-        sortBy: 'created_at',
-        taskStatusId: null
-      },
-      form: {
-        file: null
-      },
-      modals: {
-        addConcept: false
-      },
+// Functions
+// --------------------------------------------------------------------------
+const refreshConcepts = async () => {
+  loading.loadingConcepts = true
+  try {
+    await store.dispatch('loadAssets', { all: true })
+    await store.dispatch('loadConcepts')
+  } catch (err) {
+    console.error(err)
+    errors.loadingConcepts = true
+  }
+  loading.loadingConcepts = false
+}
 
-      // TODO: module getters
-      conceptSearchQueries: [
-        {
-          id: 'filter-test-1',
-          list_type: 'concept',
-          name: 'test',
-          search_query: 'test'
-        }
-      ]
-    }
-  },
+const isSelected = concept => selectedConcepts.value.has(concept.id)
 
-  mounted() {
-    // TODO: concept search
-    // this.setSearch(this.$route.query.search)
-    // this.searchField.focus()
-  },
+const onSelectConcept = (concept, isMultipleSelection = false) => {
+  const selection = isMultipleSelection
+    ? new Map(selectedConcepts.value)
+    : new Map()
+  if (
+    (isMultipleSelection && isSelected(concept)) ||
+    (!isMultipleSelection && concept === currentConcept.value)
+  ) {
+    selection.delete(concept.id)
+  } else {
+    selection.set(concept.id, concept)
+  }
+  store.dispatch('clearSelectedConcepts')
+  store.dispatch('addSelectedConcepts', selection)
 
-  computed: {
-    ...mapGetters([
-      'concepts',
-      'currentProduction',
-      'isDarkTheme',
-      'personMap',
-      'selectedConcepts',
-      'taskStatusMap'
-    ]),
-
-    assetMap() {
-      return assetsStore.cache.assetMap
-    },
-
-    publishers() {
-      const publishers = new Map()
-      this.filteredConcepts.forEach(concept => {
-        const personId = concept.created_by
-        if (!publishers.has(personId)) {
-          const person = this.personMap.get(personId)
-          if (person) {
-            publishers.set(personId, person)
-          }
-        }
-      })
-      return sortPeople([...publishers.values()])
-    },
-
-    currentTask() {
-      return this.currentConcept?.tasks?.[0]
-    },
-
-    currentConcept() {
-      return this.selectedConcepts.size === 1
-        ? this.selectedConcepts.values().next().value
-        : null
-    },
-
-    entityTypeOptions() {
-      const allEntityTypeOptions = {
-        label: this.$t('main.all'),
-        value: null
-      }
-      const options = ['assets', 'shots', 'sequences', 'edits', 'episodes'].map(
-        name => ({
-          label: this.$t(`${name}.title`),
-          value: name
-        })
-      )
-      return [allEntityTypeOptions].concat(options)
-    },
-
-    sortByOptions() {
-      return ['created_at', 'updated_at', 'last_comment_date'].map(name => ({
-        label: name,
-        value: name
-      }))
-    },
-
-    filteredConcepts() {
-      let concepts = [...this.concepts]
-
-      if (this.filters.taskStatusId) {
-        concepts = concepts.filter(
-          concept =>
-            concept.tasks[0].task_status_id === this.filters.taskStatusId
-        )
-      }
-      if (this.filters.publisher) {
-        concepts = concepts.filter(
-          concept => concept.created_by === this.filters.publisher.id
-        )
-      }
-      if (this.filters.entityType) {
-        concepts = concepts.filter(concept =>
-          concept.tags?.some(
-            // FIXME: condition related to many-to-many relationship
-            entity => entity.type === this.filters.entityType
-          )
-        )
-      }
-      return concepts.sort(
-        firstBy(this.filters.sortBy, -1).thenBy('created_at', -1)
-      )
-    },
-
-    searchField() {
-      return this.$refs['search-field']
-    },
-
-    taskStatusList() {
-      const allStatusItem = {
-        id: null,
-        color: '#999',
-        name: this.$t('main.all'),
-        short_name: this.$t('main.all')
-      }
-      const conceptTaskStatusList = sortByName(
-        Array.from(this.taskStatusMap.values()).filter(
-          status => status.for_concept
-        )
-      )
-      return [allStatusItem].concat(conceptTaskStatusList)
-    }
-  },
-
-  methods: {
-    ...mapActions([
-      'addSelectedConcepts',
-      'addSelectedTask',
-      'clearSelectedConcepts',
-      'clearSelectedTasks',
-      'loadAssets',
-      'loadConcepts',
-      'newConcepts'
-    ]),
-
-    setConceptSearch: searchQuery => Promise.resolve(),
-    saveConceptSearch: searchQuery => Promise.resolve(),
-    removeConceptSearch: searchQuery => Promise.resolve(),
-
-    setSearch(value) {
-      this.searchField.setValue(value)
-    },
-
-    onSearchChange() {
-      const searchQuery = this.searchField.getValue() || ''
-      if (searchQuery?.length !== 1) {
-        this.setConceptSearch(searchQuery)
-      }
-      this.setSearchInUrl()
-    },
-
-    saveSearchQuery(searchQuery) {
-      if (this.loading.savingSearch) {
-        return
-      }
-      this.loading.savingSearch = true
-      this.saveConceptSearch(searchQuery)
-        .catch(console.error)
-        .finally(() => {
-          this.loading.savingSearch = false
-        })
-    },
-
-    removeSearchQuery(searchQuery) {
-      this.removeConceptSearch(searchQuery).catch(err => {
-        if (err) console.error(err)
-      })
-    },
-
-    async refreshConcepts() {
-      this.loading.loadingConcepts = true
-      try {
-        await this.loadAssets({ all: true })
-        await this.loadConcepts()
-      } catch (err) {
-        console.error(err)
-        this.errors.loadingConcepts = true
-      } finally {
-        this.loading.loadingConcepts = false
-      }
-    },
-
-    isSelected(concept) {
-      return this.selectedConcepts.has(concept.id)
-    },
-
-    onSelectConcept(concept, isMultipleSelection = false) {
-      const selection = isMultipleSelection
-        ? new Map(this.selectedConcepts)
-        : new Map()
-      if (
-        (isMultipleSelection && this.isSelected(concept)) ||
-        (!isMultipleSelection && concept === this.currentConcept)
-      ) {
-        selection.delete(concept.id)
-      } else {
-        selection.set(concept.id, concept)
-      }
-      this.clearSelectedConcepts()
-      this.addSelectedConcepts(selection)
-
-      this.clearSelectedTasks()
-      if (this.currentTask) {
-        this.addSelectedTask(this.currentTask)
-      }
-    },
-
-    openAddConceptModal() {
-      this.modals.addConcept = true
-    },
-
-    closeAddConceptModal() {
-      this.modals.addConcept = false
-    },
-
-    async confirmAddConceptModal(forms) {
-      this.loading.addingConcept = true
-      try {
-        await this.newConcepts(forms)
-        this.closeAddConceptModal()
-      } catch (err) {
-        console.error(err)
-        this.errors.addingConcept = true
-      } finally {
-        this.loading.addingConcept = false
-      }
-    },
-
-    reset() {
-      this.clearSelectedConcepts()
-      this.clearSelectedTasks()
-      this.refreshConcepts()
-    },
-
-    onFileDrop(event) {
-      this.pauseEvent(event)
-      const files = event.dataTransfer.files
-      this.modals.addConcept = true
-      this.isDraggingFile = false
-      this.$nextTick(() => {
-        this.$refs['add-preview-modal'].setFiles(files)
-      })
-    },
-
-    onFileDragover(event) {
-      this.pauseEvent(event)
-      this.isDraggingFile = true
-    },
-
-    onFileDragLeave() {
-      this.isDraggingFile = false
-    }
-  },
-
-  watch: {
-    currentProduction: {
-      immediate: true,
-      handler() {
-        // HACK: the store init a wrong current production by default
-        const productionId = this.$route.params.production_id
-        if (this.currentProduction?.id === productionId) {
-          this.reset()
-        }
-      }
-    }
-  },
-
-  socket: {
-    events: {
-      'task:status-changed'(eventData) {
-        const concept = this.concepts.find(
-          concept => concept.tasks[0].id === eventData.task_id
-        )
-        if (concept) {
-          concept.tasks[0].task_status_id = eventData.new_task_status_id
-        }
-      }
-    }
-  },
-
-  head() {
-    return {
-      title: `${this.currentProduction.name} | ${this.$t('concepts.title')} - Kitsu`
-    }
+  store.dispatch('clearSelectedTasks')
+  if (currentTask.value) {
+    store.dispatch('addSelectedTask', currentTask.value)
   }
 }
+
+const openAddConceptModal = () => {
+  modals.addConcept = true
+}
+
+const closeAddConceptModal = () => {
+  modals.addConcept = false
+}
+
+const confirmAddConceptModal = async forms => {
+  loading.addingConcept = true
+  try {
+    await store.dispatch('newConcepts', forms)
+    closeAddConceptModal()
+  } catch (err) {
+    console.error(err)
+    errors.addingConcept = true
+  }
+  loading.addingConcept = false
+}
+
+const reset = () => {
+  store.dispatch('clearSelectedConcepts')
+  store.dispatch('clearSelectedTasks')
+  refreshConcepts()
+}
+
+const onFileDrop = async event => {
+  pauseEvent(event)
+  const droppedFiles = event.dataTransfer.files
+  modals.addConcept = true
+  isDraggingFile.value = false
+  await nextTick()
+  addPreviewModalRef.value.setFiles(droppedFiles)
+}
+
+const onFileDragover = event => {
+  pauseEvent(event)
+  isDraggingFile.value = true
+}
+
+const onFileDragLeave = () => {
+  isDraggingFile.value = false
+}
+
+const onTaskStatusChanged = eventData => {
+  const concept = concepts.value.find(
+    concept => concept.tasks[0].id === eventData.task_id
+  )
+  if (concept) {
+    concept.tasks[0].task_status_id = eventData.new_task_status_id
+  }
+}
+
+// Watchers
+// --------------------------------------------------------------------------
+watch(
+  currentProduction,
+  () => {
+    // HACK: the store init a wrong current production by default
+    if (currentProduction.value?.id === route.params.production_id) reset()
+  },
+  { immediate: true }
+)
+
+// Lifecycle
+// --------------------------------------------------------------------------
+onMounted(() => {
+  socket.on('task:status-changed', onTaskStatusChanged)
+})
+
+onBeforeUnmount(() => {
+  socket.off('task:status-changed', onTaskStatusChanged)
+})
+
+// Head
+// --------------------------------------------------------------------------
+useHead({
+  title: computed(
+    () => `${currentProduction.value?.name} | ${t('concepts.title')} - Kitsu`
+  )
+})
 </script>
 
 <style lang="scss" scoped>
