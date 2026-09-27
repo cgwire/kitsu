@@ -144,9 +144,13 @@ const loadSequences = async () => {
 
 const reloadData = async () => {
   initialLoading.value = true
-  await store.dispatch('loadShots')
+  try {
+    await store.dispatch('loadShots')
+    store.dispatch('computeSequenceStats')
+  } catch (err) {
+    console.error(err)
+  }
   initialLoading.value = false
-  store.dispatch('computeSequenceStats')
 }
 
 const setSearchFromUrl = () => {
