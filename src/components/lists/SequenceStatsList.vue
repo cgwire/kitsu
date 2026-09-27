@@ -71,7 +71,7 @@
           </tr>
 
           <tr class="datatable-row" :key="entry.id" v-for="entry in entryStats">
-            <td scope="row" class="name datatable-row-header">
+            <td class="name datatable-row-header">
               {{ entry.name }}
             </td>
 

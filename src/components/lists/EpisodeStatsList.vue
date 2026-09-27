@@ -43,7 +43,7 @@
           <tr class="all-line datatable-row" v-if="showAll && !isEmptyList">
             <td class="expander"></td>
 
-            <td scope="col" class="name datatable-row-header">
+            <td class="name datatable-row-header">
               {{ $t('episodes.all_episodes') }}
             </td>
 

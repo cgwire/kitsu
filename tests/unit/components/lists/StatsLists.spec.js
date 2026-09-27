@@ -63,6 +63,12 @@ describe.each([
     await body.trigger('scroll')
     expect(wrapper.emitted('scroll')).toEqual([[80]])
   })
+
+  // scope is only valid on header cells.
+  test('puts no scope on data cells', () => {
+    const wrapper = mountList(component, { ...props, showAll: true })
+    expect(wrapper.findAll('td[scope]')).toHaveLength(0)
+  })
 })
 
 // max_retake_count 1 gives two takes: the retake and the current one.
