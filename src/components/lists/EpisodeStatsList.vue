@@ -5,7 +5,7 @@
         <thead class="datatable-head">
           <tr>
             <th class="expander"></th>
-            <th scope="col" class="name datatable-row-header" ref="th-episode">
+            <th scope="col" class="name datatable-row-header">
               {{ $t('shots.fields.episode') }}
             </th>
             <th scope="col" class="validation">{{ $t('main.all') }}</th>
@@ -197,7 +197,7 @@
     <empty-list
       :text="$t('episodes.empty_list')"
       :read-only-text="$t('episodes.empty_list_read_only')"
-      v-if="!isLoading && isEmptyList"
+      v-if="isEmptyList"
     />
 
     <p class="has-text-centered nb-episodes" v-if="!isEmptyList">
@@ -207,12 +207,14 @@
   </div>
 </template>
 
-<script>
+<script setup>
+// Imports
+// --------------------------------------------------------------------------
 import { ChevronDownIcon, ChevronRightIcon } from 'lucide-vue-next'
-import { mapGetters } from 'vuex'
+import { computed, ref, useTemplateRef, watch } from 'vue'
+import { useStore } from 'vuex'
 
-import { entityListMixin } from '@/components/mixins/entity_list'
-import { range } from '@/lib/time'
+import colors from '@/lib/colors'
 import {
   aggregateRetakeStats,
   aggregateStats,
@@ -220,241 +222,159 @@ import {
   getChartRetakeCount,
   getRetakeChartData
 } from '@/lib/stats'
+import { range } from '@/lib/time'
 
-import EmptyList from '@/components/widgets/EmptyList.vue'
 import StatsCell from '@/components/cells/StatsCell.vue'
+import EmptyList from '@/components/widgets/EmptyList.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
-export default {
-  name: 'episode-stats-list',
+const store = useStore()
 
-  mixins: [entityListMixin],
+// Props / Emits
+// --------------------------------------------------------------------------
+const props = defineProps({
+  countMode: { type: String, default: 'count' },
+  dataMode: { type: String, default: 'retakes' },
+  displayMode: { type: String, default: 'pie' },
+  entries: { type: Array, default: () => [] },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  showAll: { type: Boolean, default: false },
+  validationColumns: { type: Array, default: () => [] }
+})
 
-  components: {
-    ChevronDownIcon,
-    ChevronRightIcon,
-    EmptyList,
-    StatsCell,
-    TableInfo
-  },
+const emit = defineEmits(['scroll'])
 
-  props: {
-    countMode: {
-      type: String,
-      default: 'count'
-    },
-    dataMode: {
-      type: String,
-      default: 'retakes'
-    },
-    displayMode: {
-      type: String,
-      default: 'pie'
-    },
-    entries: {
-      type: Array,
-      default: () => []
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    showAll: {
-      type: Boolean,
-      default: false
-    },
-    validationColumns: {
-      type: Array,
-      default: () => []
-    }
-  },
+// State
+// --------------------------------------------------------------------------
+const bodyRef = useTemplateRef('body')
 
-  data() {
-    return {
-      expanded: {},
-      lastSelection: null,
-      takeLabelColors: ['#FB8C00', '#EF6C00', '#d35400', '#e74c3c', '#c0392b']
-    }
-  },
+const expanded = ref({})
 
-  mounted() {
-    this.entries.forEach(e => {
-      this.expanded[e.id] = false
-    })
-  },
+const retakeColors = ['#ff3860', '#6f727a', '#22d160']
+const takeLabelColors = ['#FB8C00', '#EF6C00', '#d35400', '#e74c3c', '#c0392b']
 
-  computed: {
-    ...mapGetters([
-      'currentEpisode',
-      'currentProduction',
-      'displayedEpisodesLength',
-      'episodeSearchText',
-      'episodeStats',
-      'episodeRetakeStats',
-      'isCurrentUserClient',
-      'isTVShow',
-      'taskTypeMap'
-    ]),
+// Computed
+// --------------------------------------------------------------------------
+const currentEpisode = computed(() => store.getters.currentEpisode)
+const currentProduction = computed(() => store.getters.currentProduction)
+const displayedEpisodesLength = computed(
+  () => store.getters.displayedEpisodesLength
+)
+const episodeRetakeStats = computed(() => store.getters.episodeRetakeStats)
+const episodeSearchText = computed(() => store.getters.episodeSearchText)
+const episodeStats = computed(() => store.getters.episodeStats)
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+const isTVShow = computed(() => store.getters.isTVShow)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
-    isEmptyList() {
-      return (
-        this.entries &&
-        this.entries.length === 0 &&
-        !this.isLoading &&
-        !this.isError &&
-        (!this.episodeSearchText || this.episodeSearchText.length === 0)
-      )
-    },
+const isEmptyList = computed(
+  () =>
+    props.entries.length === 0 &&
+    !props.isLoading &&
+    !props.isError &&
+    !episodeSearchText.value
+)
 
-    isRetakes() {
-      return this.dataMode === 'retakes'
-    },
+const isRetakes = computed(() => props.dataMode === 'retakes')
 
-    // The "all" row aggregates the displayed entries only, so it stays
-    // consistent when episodes are filtered (e.g. "only running").
-    displayedEntriesStats() {
-      const entryIds = this.entries.map(entry => entry.id)
-      return { all: aggregateStats(this.episodeStats, entryIds) }
-    },
+// The "all" row aggregates the displayed entries only, so it stays
+// consistent when episodes are filtered (e.g. "only running").
+const entryIds = computed(() => props.entries.map(entry => entry.id))
 
-    displayedEntriesRetakeStats() {
-      const entryIds = this.entries.map(entry => entry.id)
-      return { all: aggregateRetakeStats(this.episodeRetakeStats, entryIds) }
-    }
-  },
+const displayedEntriesStats = computed(() => ({
+  all: aggregateStats(episodeStats.value, entryIds.value)
+}))
 
-  methods: {
-    chartColors(entryId, columnId) {
-      if (this.isRetakes) {
-        return ['#ff3860', '#6f727a', '#22d160']
-      } else {
-        return this.chartData(entryId, columnId).map(data => data[2])
-      }
-    },
+const displayedEntriesRetakeStats = computed(() => ({
+  all: aggregateRetakeStats(episodeRetakeStats.value, entryIds.value)
+}))
 
-    chartData(entryId, columnId, dataType = 'count') {
-      if (this.isRetakes) {
-        const stats =
-          entryId === 'all'
-            ? this.displayedEntriesRetakeStats
-            : this.episodeRetakeStats
-        return getRetakeChartData(stats, entryId, columnId, dataType)
-      } else {
-        const stats =
-          entryId === 'all' ? this.displayedEntriesStats : this.episodeStats
-        return getChartData(stats, entryId, columnId, dataType)
-      }
-    },
+// Functions
+// --------------------------------------------------------------------------
+const chartData = (entryId, columnId, dataType = 'count') => {
+  const isAll = entryId === 'all'
+  if (isRetakes.value) {
+    const stats = isAll
+      ? displayedEntriesRetakeStats.value
+      : episodeRetakeStats.value
+    return getRetakeChartData(stats, entryId, columnId, dataType)
+  }
+  const stats = isAll ? displayedEntriesStats.value : episodeStats.value
+  return getChartData(stats, entryId, columnId, dataType)
+}
 
-    chartTakeData(entryId, columnId, takeNumber, dataType = 'count') {
-      const evolutionStats =
-        this.episodeRetakeStats[entryId][columnId].evolution
-      const nbRetakes = evolutionStats[takeNumber].retake[dataType]
-      const nbDones = evolutionStats[takeNumber].done[dataType]
-      const nbOthers = evolutionStats[takeNumber].other[dataType]
-      // Order here is important
-      return [
-        ['retake', nbRetakes, '#ff3860'],
-        ['other', nbOthers, '#6f727a'],
-        ['done', nbDones, '#22d160']
-      ]
-    },
+const chartColors = (entryId, columnId) =>
+  isRetakes.value
+    ? retakeColors
+    : chartData(entryId, columnId).map(data => data[2])
 
-    chartLabel(entryId, columnId) {
-      if (this.isRetakes) {
-        const count = getChartRetakeCount(
-          this.episodeRetakeStats,
-          entryId,
-          columnId
-        )
-        return count >= 1 ? `Take ${count + 1}` : ''
-      } else {
-        return ''
-      }
-    },
+const chartTakeData = (entryId, columnId, takeNumber, dataType = 'count') => {
+  const take = episodeRetakeStats.value[entryId][columnId].evolution[takeNumber]
+  // Order matters: it matches retakeColors.
+  return [
+    ['retake', take.retake[dataType], retakeColors[0]],
+    ['other', take.other[dataType], retakeColors[1]],
+    ['done', take.done[dataType], retakeColors[2]]
+  ]
+}
 
-    chartLabelColor(entryId, columnId) {
-      if (this.isRetakes) {
-        let count = getChartRetakeCount(
-          this.episodeRetakeStats,
-          entryId,
-          columnId
-        )
-        count = Math.min(count, 4)
-        return this.takeLabelColors[count]
-      } else {
-        return ''
-      }
-    },
+const chartRetakeMaxCount = (entryId, columnId) =>
+  getChartRetakeCount(episodeRetakeStats.value, entryId, columnId)
 
-    chartRetakeMaxCount(entryId, columnId) {
-      return getChartRetakeCount(this.episodeRetakeStats, entryId, columnId)
-    },
+const chartLabel = (entryId, columnId) => {
+  if (!isRetakes.value) return ''
+  const count = chartRetakeMaxCount(entryId, columnId)
+  return count >= 1 ? `Take ${count + 1}` : ''
+}
 
-    takeRange(entryId) {
-      return range(1, this.chartRetakeMaxCount(entryId, 'all') + 1)
-    },
+const chartLabelColor = (entryId, columnId) => {
+  if (!isRetakes.value) return ''
+  return takeLabelColors[Math.min(chartRetakeMaxCount(entryId, columnId), 4)]
+}
 
-    isStats(entryId, columnId) {
-      return this.episodeStats[entryId] && this.episodeStats[entryId][columnId]
-    },
+const takeRange = entryId => range(1, chartRetakeMaxCount(entryId, 'all') + 1)
 
-    taskTypePath(taskTypeId) {
-      const route = {
-        name: 'task-type',
-        params: {
-          production_id: this.currentProduction.id,
-          task_type_id: taskTypeId,
-          type: 'count'
-        }
-      }
+const isStats = (entryId, columnId) => episodeStats.value[entryId]?.[columnId]
 
-      if (this.isTVShow) {
-        route.name = 'episode-task-type'
-        route.params.episode_id = this.currentEpisode.id
-      }
+const toggleExpanded = episodeId => {
+  expanded.value[episodeId] = !expanded.value[episodeId]
+}
 
-      return route
-    },
-
-    getPath(section, episodeId) {
-      const route = {
-        name: section,
-        params: {
-          production_id: this.currentProduction.id,
-          episode_id: episodeId
-        }
-      }
-
-      return route
-    },
-
-    toggleExpanded(episodeId) {
-      this.expanded[episodeId] = !this.expanded[episodeId]
-    }
-  },
-
-  watch: {
-    entries() {
-      this.entries.forEach(e => {
-        const value = this.expanded[e.id] || false
-        this.expanded[e.id] = value
-      })
-    },
-
-    isRetakes() {
-      if (!this.isRetakes) {
-        this.entries.forEach(e => {
-          this.expanded[e.id] = false
-        })
-      }
-    }
+const getValidationStyle = columnId => {
+  const taskType = taskTypeMap.value.get(columnId)
+  if (!taskType) return {}
+  return {
+    'border-left': `1px solid ${taskType.color}`,
+    background: colors.hexToRGBa(taskType.color, 0.08)
   }
 }
+
+const taskTypePath = taskTypeId => ({
+  name: isTVShow.value ? 'episode-task-type' : 'task-type',
+  params: {
+    production_id: currentProduction.value.id,
+    task_type_id: taskTypeId,
+    type: 'count',
+    ...(isTVShow.value ? { episode_id: currentEpisode.value.id } : {})
+  }
+})
+
+const onBodyScroll = event => {
+  emit('scroll', event.target.scrollTop)
+}
+
+const setScrollPosition = scrollPosition => {
+  if (bodyRef.value) bodyRef.value.scrollTop = scrollPosition
+}
+
+// Watchers
+// --------------------------------------------------------------------------
+watch(isRetakes, () => {
+  if (!isRetakes.value) expanded.value = {}
+})
+
+defineExpose({ setScrollPosition })
 </script>
 
 <style lang="scss" scoped>
@@ -462,14 +382,11 @@ export default {
 .datatable-body tr:first-child td {
   border-top: 0;
 }
+
 .name {
   min-width: 100px;
   width: 100px;
   font-weight: bold;
-}
-
-.name a {
-  color: inherit;
 }
 
 td.name {
@@ -481,12 +398,6 @@ td.name {
   min-width: 10px;
   width: 10px;
   padding-top: 10px;
-}
-
-.description {
-  min-width: 200px;
-  max-width: 200px;
-  width: 200px;
 }
 
 .validation {
