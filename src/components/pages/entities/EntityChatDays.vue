@@ -1,5 +1,5 @@
 <template>
-  <div class="messages" ref="messages">
+  <div class="messages" ref="messages-wrapper">
     <div class="day-messages" :key="day.title" v-for="day in messageList">
       <div class="day-title">
         <span>
@@ -35,7 +35,7 @@
             <div
               v-html="
                 renderComment(
-                  messageText ? messageText.text : '',
+                  messageText.text,
                   [],
                   [],
                   personMap,
@@ -43,7 +43,7 @@
                 )
               "
             ></div>
-            <div class="attachments" v-if="messageText">
+            <div class="attachments">
               <img
                 class="attachment-thumbnail"
                 :key="attachment.id"
@@ -97,159 +97,115 @@
   </div>
 </template>
 
-<script>
+<script setup>
+// Imports
+// --------------------------------------------------------------------------
 import { XIcon } from 'lucide-vue-next'
 import moment from 'moment-timezone'
-import { mapGetters } from 'vuex'
+import { computed, ref, useTemplateRef } from 'vue'
+import { useStore } from 'vuex'
 
-import { domMixin } from '@/components/mixins/dom'
+import files from '@/lib/files'
 import {
   getAttachmentThumbnailPath,
   getDownloadAttachmentPath
 } from '@/lib/path'
-import { formatTimeOfDay, formatVerboseDate, parseDate } from '@/lib/time'
 import { renderComment } from '@/lib/render'
-import files from '@/lib/files'
+import { formatTimeOfDay, formatVerboseDate, parseDate } from '@/lib/time'
 
-import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PreviewModal from '@/components/modals/PreviewModal.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 
-export default {
-  name: 'entity-chat-days',
+const store = useStore()
 
-  mixins: [domMixin],
+// Props / Emits
+// --------------------------------------------------------------------------
+const props = defineProps({
+  messages: { type: Array, default: () => [] }
+})
 
-  components: {
-    PeopleAvatar,
-    PreviewModal,
-    XIcon
-  },
+defineEmits(['delete-message'])
 
-  emits: ['delete-message'],
+// State
+// --------------------------------------------------------------------------
+const messagesWrapperRef = useTemplateRef('messages-wrapper')
 
-  data() {
-    return {
-      currentAttachment: null
+const currentAttachment = ref(null)
+
+// Computed
+// --------------------------------------------------------------------------
+const dateFormat = computed(() => store.getters.dateFormat)
+const departmentMap = computed(() => store.getters.departmentMap)
+const personMap = computed(() => store.getters.personMap)
+const use12HourClock = computed(() => store.getters.use12HourClock)
+const user = computed(() => store.getters.user)
+
+// Messages are grouped by day, then consecutive messages of one sender sent
+// less than 5 minutes apart share a single header.
+const messageList = computed(() => {
+  const messages = [...props.messages].sort((a, b) =>
+    moment(a.created_at).isAfter(moment(b.created_at))
+  )
+  const dayList = []
+  let lastMessage = null
+  let lastDay = null
+
+  messages.forEach(message => {
+    const messageDate = moment(message.created_at).tz(user.value.timezone)
+    const date = messageDate.format('YYYY-MM-DD')
+    const element = { data: message, texts: [message] }
+    if (lastDay?.date !== date) {
+      lastDay = {
+        title: formatVerboseDate(messageDate, dateFormat.value),
+        date,
+        messages: [element]
+      }
+      lastMessage = element
+      dayList.push(lastDay)
+    } else if (
+      message.person_id === lastMessage.data.person_id &&
+      moment(message.created_at).diff(lastMessage.data.created_at, 'm') < 5
+    ) {
+      lastMessage.texts.push(message)
+    } else {
+      lastMessage = element
+      lastDay.messages.push(element)
     }
-  },
+  })
 
-  props: {
-    messages: {
-      type: Array,
-      default: () => []
-    }
-  },
+  return dayList.reverse()
+})
 
-  computed: {
-    ...mapGetters([
-      'dateFormat',
-      'departmentMap',
-      'personMap',
-      'use12HourClock',
-      'user'
-    ]),
+// Functions
+// --------------------------------------------------------------------------
+const renderDate = date =>
+  formatTimeOfDay(
+    moment(parseDate(date)).tz(user.value.timezone),
+    use12HourClock.value
+  )
 
-    messageList() {
-      const messages = [...this.messages].sort((a, b) =>
-        moment(a.created_at).isAfter(moment(b.created_at))
-      )
-      const dayList = []
-      let lastMessage = { data: null }
-      let lastDay = null
+const byName = (a, b) =>
+  a.name.localeCompare(b.name, undefined, { numeric: true })
 
-      messages.forEach(message => {
-        const messageDate = moment(message.created_at).tz(this.user.timezone)
-        if (lastDay && messageDate.format('YYYY-MM-DD') === lastDay.date) {
-          if (
-            lastMessage &&
-            lastMessage.data &&
-            message.person_id === lastMessage.data.person_id &&
-            moment(message.created_at).diff(lastMessage.data.created_at, 'm') <
-              5
-          ) {
-            lastMessage.texts.push(message)
-          } else {
-            const element = {
-              data: message,
-              texts: [message ? message : '']
-            }
-            lastMessage = element
-            lastDay.messages.push(element)
-          }
-        } else {
-          const element = {
-            data: message,
-            texts: [message ? message : '']
-          }
-          lastDay = {
-            title: formatVerboseDate(messageDate, this.dateFormat),
-            date: messageDate.format('YYYY-MM-DD'),
-            messages: [element]
-          }
-          lastMessage = element
-          dayList.push(lastDay)
-        }
-      })
+const isPicture = attachment =>
+  files.IMG_EXTENSIONS.includes(attachment.extension)
 
-      return dayList.reverse()
-    }
-  },
+const pictureAttachments = (attachments = []) =>
+  attachments.filter(isPicture).sort(byName)
 
-  methods: {
-    renderComment,
+const fileAttachments = (attachments = []) =>
+  attachments.filter(attachment => !isPicture(attachment)).sort(byName)
 
-    renderDate(date) {
-      date = moment(parseDate(date)).tz(this.user.timezone)
-      return formatTimeOfDay(date, this.use12HourClock)
-    },
-
-    getAttachmentThumbnailPath,
-
-    getDownloadAttachmentPath,
-
-    pictureAttachments(attachments) {
-      if (!attachments) return []
-      return attachments
-        .filter(attachment =>
-          files.IMG_EXTENSIONS.includes(attachment.extension)
-        )
-        .sort((a, b) =>
-          a.name.localeCompare(b.name, undefined, {
-            numeric: true
-          })
-        )
-    },
-
-    fileAttachments(attachments) {
-      if (!attachments) return []
-      return attachments
-        .filter(
-          attachment => !files.IMG_EXTENSIONS.includes(attachment.extension)
-        )
-        .sort((a, b) =>
-          a.name.localeCompare(b.name, undefined, {
-            numeric: true
-          })
-        )
-    },
-
-    scrollToBottom() {
-      this.$refs.messages.scrollTop = this.$refs.messages.offsetHeight
-    }
-  }
+const scrollToBottom = () => {
+  messagesWrapperRef.value.scrollTop = messagesWrapperRef.value.offsetHeight
 }
+
+defineExpose({ scrollToBottom })
 </script>
 
 <style lang="scss" scoped>
-.dark {
-  .messages {
-    background-color: var(--background-alt);
-    .message-box {
-      textarea {
-        background: var(--background-alt);
-      }
-    }
-  }
+.dark .messages {
+  background-color: var(--background-alt);
 }
 
 .day-messages {
