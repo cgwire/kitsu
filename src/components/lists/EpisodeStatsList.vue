@@ -200,7 +200,7 @@
       v-if="isEmptyList"
     />
 
-    <p class="has-text-centered nb-episodes" v-if="!isEmptyList">
+    <p class="has-text-centered nb-episodes" v-if="!isEmptyList && !isLoading">
       {{ displayedEpisodesLength }}
       {{ $t('episodes.number', { count: displayedEpisodesLength }) }}
     </p>

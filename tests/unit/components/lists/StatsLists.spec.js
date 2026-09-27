@@ -71,6 +71,13 @@ describe.each([
   })
 })
 
+describe('lists/EpisodeStatsList', () => {
+  test('hides the episode count while loading', () => {
+    const wrapper = mountList(EpisodeStatsList, { isLoading: true })
+    expect(wrapper.find('.nb-episodes').exists()).toBe(false)
+  })
+})
+
 // max_retake_count 1 gives two takes: the retake and the current one.
 const takeRows = wrapper =>
   wrapper.findAll('td.name').filter(cell => cell.text().startsWith('- Take'))
