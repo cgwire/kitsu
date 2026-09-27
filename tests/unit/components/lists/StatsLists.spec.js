@@ -19,7 +19,13 @@ const retakeStats = {
   }
 }
 
-const mountList = (component, props = {}) => {
+const RouterLinkStub = {
+  name: 'RouterLink',
+  props: { to: { type: Object, default: () => ({}) } },
+  template: '<a><slot /></a>'
+}
+
+const mountList = (component, props = {}, getters = {}) => {
   const store = createStore({
     getters: {
       currentEpisode: () => null,
@@ -34,12 +40,17 @@ const mountList = (component, props = {}) => {
       isTVShow: () => false,
       assetTypeSearchText: () => '',
       sequenceSearchText: () => '',
-      taskTypeMap: () => new Map()
+      taskTypeMap: () => new Map(),
+      ...getters
     }
   })
   return shallowMount(component, {
     props: { entries: [{ id: 'episode-1', name: 'E01' }], ...props },
-    global: { plugins: [store], mocks: { $t: key => key } }
+    global: {
+      plugins: [store],
+      mocks: { $t: key => key },
+      stubs: { RouterLink: RouterLinkStub }
+    }
   })
 }
 
@@ -72,6 +83,22 @@ describe.each([
 })
 
 describe('lists/EpisodeStatsList', () => {
+  const taskTypeMap = () =>
+    new Map([['task-type-1', { id: 'task-type-1', name: 'Story', color: '#ff0000' }]])
+
+  // Episode task types have their own route, outside any current episode.
+  test('links a column to the episodes task type page', () => {
+    const wrapper = mountList(
+      EpisodeStatsList,
+      { validationColumns: ['task-type-1'] },
+      { isTVShow: () => true, currentEpisode: () => null, taskTypeMap }
+    )
+    expect(wrapper.findComponent(RouterLinkStub).props('to')).toEqual({
+      name: 'episodes-task-type',
+      params: { production_id: 'production-1', task_type_id: 'task-type-1' }
+    })
+  })
+
   test('hides the episode count while loading', () => {
     const wrapper = mountList(EpisodeStatsList, { isLoading: true })
     expect(wrapper.find('.nb-episodes').exists()).toBe(false)

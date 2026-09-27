@@ -256,7 +256,6 @@ const takeLabelColors = ['#FB8C00', '#EF6C00', '#d35400', '#e74c3c', '#c0392b']
 
 // Computed
 // --------------------------------------------------------------------------
-const currentEpisode = computed(() => store.getters.currentEpisode)
 const currentProduction = computed(() => store.getters.currentProduction)
 const displayedEpisodesLength = computed(
   () => store.getters.displayedEpisodesLength
@@ -265,7 +264,6 @@ const episodeRetakeStats = computed(() => store.getters.episodeRetakeStats)
 const episodeSearchText = computed(() => store.getters.episodeSearchText)
 const episodeStats = computed(() => store.getters.episodeStats)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
-const isTVShow = computed(() => store.getters.isTVShow)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
 const isEmptyList = computed(
@@ -351,12 +349,10 @@ const getValidationStyle = columnId => {
 }
 
 const taskTypePath = taskTypeId => ({
-  name: isTVShow.value ? 'episode-task-type' : 'task-type',
+  name: 'episodes-task-type',
   params: {
     production_id: currentProduction.value.id,
-    task_type_id: taskTypeId,
-    type: 'count',
-    ...(isTVShow.value ? { episode_id: currentEpisode.value.id } : {})
+    task_type_id: taskTypeId
   }
 })
 
