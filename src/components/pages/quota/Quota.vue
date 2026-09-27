@@ -112,7 +112,7 @@
               <td
                 :class="{
                   selected: isWeekSelected(key, year, week),
-                  'quota-low': isWeekQuotaLow(key, year, month)
+                  'quota-low': isWeekQuotaLow(key, year, week)
                 }"
                 :key="'week-' + week"
                 v-for="week in weekRange"
