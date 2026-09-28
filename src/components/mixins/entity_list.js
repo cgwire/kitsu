@@ -100,6 +100,15 @@ export const entityListMixin = {
       )
     },
 
+    // The sticky columns can change without any loading state: the task
+    // types of the sequence and episode pages arrive once they have loaded.
+    stickyColumnIds() {
+      return [
+        ...this.stickedVisibleMetadataDescriptors.map(({ id }) => id),
+        ...this.stickedDisplayedValidationColumns
+      ].join()
+    },
+
     isEmptyTask() {
       return (
         !this.isEmptyList &&
@@ -121,12 +130,12 @@ export const entityListMixin = {
         return
       }
       this.$nextTick(() => {
-        let offset = this.$refs['th-episode']
-          ? this.$refs['th-episode'].getBoundingClientRect().width
+        let offset = this.$refs['th-name']
+          ? this.$refs['th-name'].getBoundingClientRect().width
           : 0
         this.offsets = {}
 
-        if (this.isShowInfos) {
+        if (this.displaySettings.showInfos) {
           for (
             let metadataCol = 0;
             metadataCol < this.stickedVisibleMetadataDescriptors.length;
@@ -717,6 +726,10 @@ export const entityListMixin = {
   watch: {
     nbSelectedTasks() {
       this.updateTaskInQuery()
+    },
+
+    stickyColumnIds() {
+      this.updateOffsets()
     },
 
     'displaySettings.bigThumbnails'() {

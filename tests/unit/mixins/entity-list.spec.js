@@ -76,10 +76,11 @@ describe('entity list sticky offsets', () => {
       isLoading: false,
       $nextTick: callback => callback(),
       $refs: {
-        'th-episode': header(200.5),
+        'th-name': header(200.5),
         'validation-0': [{ $el: header(151) }],
         'validation-1': [{ $el: header(151) }]
       },
+      displaySettings: { showInfos: true },
       stickedVisibleMetadataDescriptors: [],
       stickedDisplayedValidationColumns: ['task-type-1', 'task-type-2']
     }
@@ -89,6 +90,28 @@ describe('entity list sticky offsets', () => {
     expect(context.offsets).toEqual({
       'validation-0': 200.5,
       'validation-1': 351.5
+    })
+  })
+
+  test('places the sticky metadata columns after the name', () => {
+    const context = {
+      isLoading: false,
+      $nextTick: callback => callback(),
+      $refs: {
+        'th-name': header(200.5),
+        'editor-0': [{ $el: header(121) }],
+        'validation-0': [{ $el: header(151) }]
+      },
+      displaySettings: { showInfos: true },
+      stickedVisibleMetadataDescriptors: [{ id: 'descriptor-1' }],
+      stickedDisplayedValidationColumns: ['task-type-1']
+    }
+
+    entityListMixin.methods.updateOffsets.call(context)
+
+    expect(context.offsets).toEqual({
+      'editor-0': 200.5,
+      'validation-0': 321.5
     })
   })
 })

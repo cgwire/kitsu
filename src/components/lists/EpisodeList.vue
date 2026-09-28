@@ -46,7 +46,7 @@
               scope="col"
               class="name episode-name datatable-row-header"
               data-column-key="name"
-              ref="th-episode"
+              ref="th-name"
             >
               <sortable-field-header
                 field-name="name"

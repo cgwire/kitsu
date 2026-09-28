@@ -44,7 +44,7 @@
               scope="col"
               class="name sequence-name datatable-row-header"
               data-column-key="name"
-              ref="th-sequence"
+              ref="th-name"
             >
               <sortable-field-header
                 field-name="name"
