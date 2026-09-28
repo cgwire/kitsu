@@ -4,7 +4,7 @@
       <table class="datatable">
         <thead class="datatable-head">
           <tr>
-            <th scope="col" class="name datatable-row-header" ref="th-sequence">
+            <th scope="col" class="name datatable-row-header">
               {{ $t('shots.fields.sequence') }}
             </th>
             <th scope="col" class="validation">{{ $t('main.all') }}</th>
@@ -47,7 +47,6 @@
             </th>
 
             <stats-cell
-              class="all-validation"
               :colors="chartColors('all', 'all')"
               :data="chartData('all', 'all')"
               :frames-data="chartData('all', 'all', 'frames')"
@@ -72,7 +71,7 @@
           </tr>
 
           <tr class="datatable-row" :key="entry.id" v-for="entry in entryStats">
-            <td scope="row" class="name datatable-row-header">
+            <td class="name datatable-row-header">
               {{ entry.name }}
             </td>
 
@@ -122,7 +121,7 @@
     <empty-list
       :text="$t('sequences.empty_list')"
       :read-only-text="$t('sequences.empty_list_read_only')"
-      v-if="isEmptyList && !isLoading"
+      v-if="isEmptyList"
     />
 
     <p class="has-text-centered nb-sequences" v-if="!isEmptyList && !isLoading">
@@ -132,170 +131,118 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+// Imports
+// --------------------------------------------------------------------------
+import { computed, useTemplateRef } from 'vue'
+import { useStore } from 'vuex'
 
+import colors from '@/lib/colors'
 import { getChartColors, getChartData } from '@/lib/stats'
 
-import { entityListMixin } from '@/components/mixins/entity_list'
-
+import StatsCell from '@/components/cells/StatsCell.vue'
 import EmptyList from '@/components/widgets/EmptyList.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
-import StatsCell from '@/components/cells/StatsCell.vue'
 
-export default {
-  name: 'sequence-stats-list',
+const store = useStore()
 
-  mixins: [entityListMixin],
+// Props / Emits
+// --------------------------------------------------------------------------
+const props = defineProps({
+  countMode: { type: String, default: 'count' },
+  displayMode: { type: String, default: 'pie' },
+  entries: { type: Array, default: () => [] },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  sequenceStats: { type: Object, default: () => ({}) },
+  showAll: { type: Boolean, default: false },
+  validationColumns: { type: Array, default: () => [] }
+})
 
-  components: {
-    EmptyList,
-    StatsCell,
-    TableInfo
-  },
+const emit = defineEmits(['scroll'])
 
-  props: {
-    countMode: {
-      type: String,
-      default: 'count'
-    },
-    displayMode: {
-      type: String,
-      default: 'pie'
-    },
-    entries: {
-      type: Array,
-      default: () => []
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    sequenceStats: {
-      type: Object,
-      default: () => {}
-    },
-    showAll: {
-      type: Boolean,
-      default: false
-    },
-    validationColumns: {
-      type: Array,
-      default: () => []
-    }
-  },
+// State
+// --------------------------------------------------------------------------
+const bodyRef = useTemplateRef('body')
 
-  computed: {
-    ...mapGetters([
-      'currentProduction',
-      'currentEpisode',
-      'displayedSequencesLength',
-      'isCurrentUserClient',
-      'isTVShow',
-      'sequenceSearchText',
-      'taskTypeMap'
-    ]),
+// Computed
+// --------------------------------------------------------------------------
+const currentEpisode = computed(() => store.getters.currentEpisode)
+const currentProduction = computed(() => store.getters.currentProduction)
+const displayedSequencesLength = computed(
+  () => store.getters.displayedSequencesLength
+)
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+const isTVShow = computed(() => store.getters.isTVShow)
+const sequenceSearchText = computed(() => store.getters.sequenceSearchText)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
-    entryStats() {
-      return this.entries.filter(entry => this.isEntryStats(entry.id))
-    },
+const entryStats = computed(() =>
+  props.entries.filter(entry => isEntryStats(entry.id))
+)
 
-    isEmptyList() {
-      return (
-        this.entries &&
-        this.entries.length === 0 &&
-        !this.isLoading &&
-        !this.isError &&
-        (!this.sequenceSearchText || this.sequenceSearchText.length === 0)
-      )
-    }
-  },
+const isEmptyList = computed(
+  () =>
+    props.entries.length === 0 &&
+    !props.isLoading &&
+    !props.isError &&
+    !sequenceSearchText.value
+)
 
-  methods: {
-    chartColors(entryId, columnId) {
-      return getChartColors(this.sequenceStats, entryId, columnId)
-    },
+// Functions
+// --------------------------------------------------------------------------
+const chartColors = (entryId, columnId) =>
+  getChartColors(props.sequenceStats, entryId, columnId)
 
-    chartData(entryId, columnId, dataType = 'count') {
-      return getChartData(this.sequenceStats, entryId, columnId, dataType)
-    },
+const chartData = (entryId, columnId, dataType = 'count') =>
+  getChartData(props.sequenceStats, entryId, columnId, dataType)
 
-    isStats(entryId, columnId) {
-      return (
-        this.sequenceStats[entryId] && this.sequenceStats[entryId][columnId]
-      )
-    },
+const isStats = (entryId, columnId) => props.sequenceStats[entryId]?.[columnId]
 
-    isEntryStats(entryId) {
-      if (!this.sequenceStats[entryId] && this.sequenceSearchText) return false
-      if (!this.sequenceStats[entryId]) return true
-      let isStats = false
-      Object.keys(this.sequenceStats[entryId]).forEach(statKey => {
-        isStats = isStats || this.sequenceStats[entryId][statKey]
-      })
-      return isStats
-    },
+// A sequence without stats is kept, unless a search is filtering the list.
+const isEntryStats = entryId => {
+  const stats = props.sequenceStats[entryId]
+  if (!stats) return !sequenceSearchText.value
+  return Object.values(stats).some(Boolean)
+}
 
-    editPath(sequenceId) {
-      return this.getPath('edit-sequence', sequenceId)
-    },
+const getValidationStyle = columnId => {
+  const taskType = taskTypeMap.value.get(columnId)
+  if (!taskType) return {}
+  return {
+    'border-left': `1px solid ${taskType.color}`,
+    background: colors.hexToRGBa(taskType.color, 0.08)
+  }
+}
 
-    deletePath(sequenceId) {
-      return this.getPath('delete-sequence', sequenceId)
-    },
-
-    taskTypePath(taskTypeId) {
-      const route = {
-        name: 'task-type',
-        params: {
-          production_id: this.currentProduction.id,
-          task_type_id: taskTypeId,
-          type: 'shots'
-        }
-      }
-
-      if (this.isTVShow && this.currentEpisode) {
-        route.name = 'episode-task-type'
-        route.params.episode_id = this.currentEpisode.id
-      }
-
-      return route
-    },
-
-    getPath(section, sequenceId) {
-      const route = {
-        name: section,
-        params: {
-          production_id: this.currentProduction.id
-        }
-      }
-
-      if (this.isTVShow && this.currentEpisode) {
-        route.name = `episode-${section}`
-        route.params.episode_id = this.currentEpisode.id
-      }
-
-      if (sequenceId) {
-        route.params.sequence_id = sequenceId
-      }
-      return route
+const taskTypePath = taskTypeId => {
+  const withEpisode = isTVShow.value && currentEpisode.value
+  return {
+    name: withEpisode ? 'episode-task-type' : 'task-type',
+    params: {
+      production_id: currentProduction.value.id,
+      task_type_id: taskTypeId,
+      type: 'shots',
+      ...(withEpisode ? { episode_id: currentEpisode.value.id } : {})
     }
   }
 }
+
+const onBodyScroll = event => {
+  emit('scroll', event.target.scrollTop)
+}
+
+const setScrollPosition = scrollPosition => {
+  if (bodyRef.value) bodyRef.value.scrollTop = scrollPosition
+}
+
+defineExpose({ setScrollPosition })
 </script>
 
 <style lang="scss" scoped>
 .datatable-body tr:first-child th,
 .datatable-body tr:first-child td {
   border-top: 0;
-}
-.episode {
-  min-width: 100px;
-  width: 100px;
 }
 
 .name {
@@ -304,17 +251,8 @@ export default {
   font-weight: bold;
 }
 
-.name a {
-  color: inherit;
-}
-
 td.name {
   font-size: 1.2em;
-}
-
-.description {
-  min-width: 200px;
-  width: 200px;
 }
 
 .validation {
@@ -322,10 +260,6 @@ td.name {
   max-width: 170px;
   width: 170px;
   word-wrap: break-word;
-}
-
-.actions {
-  min-width: 100px;
 }
 
 th.actions {

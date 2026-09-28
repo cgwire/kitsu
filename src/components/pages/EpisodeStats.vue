@@ -56,236 +56,189 @@
       :count-mode="countMode"
       :data-mode="dataMode"
       :display-mode="displayMode"
-      :entries="
-        statusMode === 'running'
-          ? displayedEpisodes.filter(e => e.status === 'running')
-          : displayedEpisodes
-      "
+      :entries="episodeEntries"
       :is-loading="isLoading"
       :is-error="isLoadingError"
-      :show-all="episodeSearchText.length === 0"
+      :show-all="!episodeSearchText"
       :validation-columns="episodeValidationColumns"
-      @field-changed="onFieldChanged"
       @scroll="saveScrollPosition"
     />
   </div>
 </template>
 
-<script>
+<script setup>
+// Imports
+// --------------------------------------------------------------------------
+import { useHead } from '@unhead/vue'
 import moment from 'moment'
-import { mapGetters, mapActions } from 'vuex'
-
-import { searchMixin } from '@/components/mixins/search'
+import { computed, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
 import csv from '@/lib/csv'
 import preferences from '@/lib/preferences'
 import stringHelpers from '@/lib/string'
 
+import EpisodeStatsList from '@/components/lists/EpisodeStatsList.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
-import EpisodeStatsList from '@/components/lists/EpisodeStatsList.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 
-export default {
-  name: 'episode-stats',
+const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
+const store = useStore()
 
-  mixins: [searchMixin],
+// State
+// --------------------------------------------------------------------------
+const episodeListRef = useTemplateRef('episode-list')
+const searchFieldRef = useTemplateRef('episode-search-field')
 
-  components: {
-    ButtonSimple,
-    Combobox,
-    EpisodeStatsList,
-    SearchField
-  },
+const countMode = ref('count')
+const dataMode = ref('retakes')
+const displayMode = ref('pie')
+const isLoading = ref(true)
+const isLoadingError = ref(false)
+const statusMode = ref('running')
 
-  data() {
-    return {
-      countMode: 'count',
-      dataMode: 'retakes',
-      displayMode: 'pie',
-      isLoading: true,
-      isLoadingError: false,
-      statusMode: 'running',
-      countModeOptions: [
-        { label: 'shots', value: 'count' },
-        { label: 'frames', value: 'frames' }
-      ],
-      dataModeOptions: [
-        { label: 'retakes', value: 'retakes' },
-        { label: 'status', value: 'status' }
-      ],
-      displayModeOptions: [
-        { label: 'pie', value: 'pie' },
-        { label: 'count', value: 'count' }
-      ],
-      statusModeOptions: [
-        { label: 'only_running', value: 'running' },
-        { label: 'all', value: 'all' }
-      ]
-    }
-  },
+const dataModeOptions = [
+  { label: 'retakes', value: 'retakes' },
+  { label: 'status', value: 'status' }
+]
+const displayModeOptions = [
+  { label: 'pie', value: 'pie' },
+  { label: 'count', value: 'count' }
+]
+const statusModeOptions = [
+  { label: 'only_running', value: 'running' },
+  { label: 'all', value: 'all' }
+]
 
-  mounted() {
-    this.setCountOptions()
-    const mode = preferences.getPreference('stats:episode-mode') || 'retakes'
-    this.dataMode = mode
-    this.setDefaultListScrollPosition()
-    this.isLoading = true
-    this.isLoadingError = false
-    this.setSearchFromUrl()
-    this.initEpisodeStats()
-      .then(() => {
-        this.isLoading = false
-        this.setSearchInUrl()
-        this.onSearchChange()
-      })
-      .catch(err => {
-        this.isLoading = false
-        this.isLoadingError = true
-        console.error(err)
-      })
-  },
+// Computed
+// --------------------------------------------------------------------------
+const currentProduction = computed(() => store.getters.currentProduction)
+const displayedEpisodes = computed(() => store.getters.displayedEpisodes)
+const episodeListScrollPosition = computed(
+  () => store.getters.episodeListScrollPosition
+)
+const episodeMap = computed(() => store.getters.episodeMap)
+const episodeRetakeStats = computed(() => store.getters.episodeRetakeStats)
+const episodeSearchText = computed(() => store.getters.episodeSearchText)
+const episodeStats = computed(() => store.getters.episodeStats)
+const episodeValidationColumns = computed(
+  () => store.getters.episodeValidationColumns
+)
+const isPaperProduction = computed(() => store.getters.isPaperProduction)
+const taskStatusMap = computed(() => store.getters.taskStatusMap)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
-  computed: {
-    ...mapGetters([
-      'currentProduction',
-      'displayedEpisodes',
-      'episodeMap',
-      'episodeStats',
-      'episodeRetakeStats',
-      'episodeSearchText',
-      'episodeListScrollPosition',
-      'episodeValidationColumns',
-      'isPaperProduction',
-      'taskStatusMap',
-      'taskTypeMap'
-    ]),
+const countModeOptions = computed(() => [
+  { label: 'shots', value: 'count' },
+  isPaperProduction.value
+    ? { label: 'drawings', value: 'drawings' }
+    : { label: 'frames', value: 'frames' }
+])
 
-    searchField() {
-      return this.$refs['episode-search-field']
-    },
+const episodeEntries = computed(() =>
+  statusMode.value === 'running'
+    ? displayedEpisodes.value.filter(episode => episode.status === 'running')
+    : displayedEpisodes.value
+)
 
-    isRetakeDataMode() {
-      return this.dataMode === 'retakes'
-    }
-  },
+const isRetakeDataMode = computed(() => dataMode.value === 'retakes')
 
-  methods: {
-    ...mapActions([
-      'editEpisode',
-      'initEpisodeStats',
-      'loadEpisodeStats',
-      'loadEpisodeRetakeStats',
-      'setEpisodeSearch',
-      'setEpisodeListScrollPosition'
-    ]),
-
-    setCountOptions() {
-      if (this.isPaperProduction) {
-        this.countModeOptions = [
-          { label: 'shots', value: 'count' },
-          { label: 'drawings', value: 'drawings' }
-        ]
-      } else {
-        this.countModeOptions = [
-          { label: 'shots', value: 'count' },
-          { label: 'frames', value: 'frames' }
-        ]
-      }
-      this.countMode = this.countModeOptions[0].value
-    },
-
-    setDefaultListScrollPosition() {
-      this.$refs['episode-list'].setScrollPosition(
-        this.episodeListScrollPosition
-      )
-    },
-
-    onSearchChange() {
-      const searchQuery = this.searchField.getValue()
-      this.setSearchInUrl()
-      this.setEpisodeSearch(searchQuery)
-    },
-
-    saveScrollPosition(scrollPosition) {
-      this.setEpisodeListScrollPosition(scrollPosition)
-    },
-
-    exportStatisticsToCsv() {
-      const nameData = [
-        moment().format('YYYYMMDD'),
-        this.currentProduction.name,
-        'episodes',
-        'statistics'
-      ]
-      if (this.isRetakeDataMode) nameData.splice(3, 0, 'retake')
-      const name = stringHelpers.slugify(nameData.join('_'))
-      if (this.isRetakeDataMode) {
-        csv.generateRetakeStatReports(
-          name,
-          this.episodeRetakeStats,
-          this.taskTypeMap,
-          this.taskStatusMap,
-          this.episodeMap,
-          this.countMode,
-          this.currentProduction
-        )
-      } else {
-        csv.generateStatReports(
-          name,
-          this.episodeStats,
-          this.taskTypeMap,
-          this.taskStatusMap,
-          this.episodeMap,
-          this.countMode,
-          this.currentProduction
-        )
-      }
-    },
-
-    onFieldChanged({ entry, fieldName, value }) {
-      const data = { id: entry.id }
-      data[fieldName] = value
-      this.editEpisode(data)
-    },
-
-    reset() {
-      this.isLoading = true
-      this.isLoadingError = false
-      this.setCountOptions()
-      this.loadEpisodeStats(this.currentProduction.id)
-        .then(() => {
-          return this.loadEpisodeRetakeStats(this.currentProduction.id)
-        })
-        .then(() => {
-          this.isLoading = false
-        })
-        .catch(err => {
-          this.isLoading = false
-          this.isLoadingError = true
-          console.error(err)
-        })
-    }
-  },
-
-  watch: {
-    currentProduction() {
-      this.searchField.setValue('')
-      this.$store.commit('SET_EPISODE_LIST_SCROLL_POSITION', 0)
-      this.reset()
-    },
-
-    dataMode() {
-      preferences.setPreference('stats:episode-mode', this.dataMode)
-    }
-  },
-
-  head() {
-    return {
-      title: `${this.currentProduction.name} ${this.$t(
-        'episodes.title'
-      )} - Kitsu`
-    }
+// Functions
+// --------------------------------------------------------------------------
+const setSearchFromUrl = () => {
+  const searchFromUrl = route.query.search
+  if (!searchFieldRef.value?.getValue() && searchFromUrl) {
+    searchFieldRef.value?.setValue(searchFromUrl)
   }
 }
+
+const onSearchChange = () => {
+  const searchQuery = searchFieldRef.value?.getValue()
+  router.push({
+    query: { ...route.query, search: searchQuery || undefined }
+  })
+  store.dispatch('setEpisodeSearch', searchQuery)
+}
+
+const saveScrollPosition = scrollPosition => {
+  store.dispatch('setEpisodeListScrollPosition', scrollPosition)
+}
+
+const exportStatisticsToCsv = () => {
+  const nameData = [
+    moment().format('YYYYMMDD'),
+    currentProduction.value.name,
+    'episodes',
+    ...(isRetakeDataMode.value ? ['retake'] : []),
+    'statistics'
+  ]
+  const name = stringHelpers.slugify(nameData.join('_'))
+  const generateReports = isRetakeDataMode.value
+    ? csv.generateRetakeStatReports
+    : csv.generateStatReports
+  generateReports(
+    name,
+    isRetakeDataMode.value ? episodeRetakeStats.value : episodeStats.value,
+    taskTypeMap.value,
+    taskStatusMap.value,
+    episodeMap.value,
+    countMode.value,
+    currentProduction.value
+  )
+}
+
+const reset = async () => {
+  isLoading.value = true
+  isLoadingError.value = false
+  countMode.value = 'count'
+  try {
+    await store.dispatch('loadEpisodeStats', currentProduction.value.id)
+    await store.dispatch('loadEpisodeRetakeStats', currentProduction.value.id)
+  } catch (err) {
+    console.error(err)
+    isLoadingError.value = true
+  }
+  isLoading.value = false
+}
+
+// Watchers
+// --------------------------------------------------------------------------
+watch(currentProduction, () => {
+  searchFieldRef.value.setValue('')
+  store.commit('SET_EPISODE_LIST_SCROLL_POSITION', 0)
+  reset()
+})
+
+watch(dataMode, () => {
+  preferences.setPreference('stats:episode-mode', dataMode.value)
+})
+
+// Lifecycle
+// --------------------------------------------------------------------------
+onMounted(async () => {
+  dataMode.value = preferences.getPreference('stats:episode-mode') || 'retakes'
+  episodeListRef.value.setScrollPosition(episodeListScrollPosition.value)
+  setSearchFromUrl()
+  try {
+    await store.dispatch('initEpisodeStats')
+    onSearchChange()
+  } catch (err) {
+    console.error(err)
+    isLoadingError.value = true
+  }
+  isLoading.value = false
+})
+
+// Head
+// --------------------------------------------------------------------------
+useHead({
+  title: computed(
+    () => `${currentProduction.value?.name} ${t('episodes.title')} - Kitsu`
+  )
+})
 </script>

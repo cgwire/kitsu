@@ -7,7 +7,7 @@
             <th
               scope="col"
               class="name datatable-row-header"
-              ref="rowHeaderName"
+              ref="row-header-name"
             >
               {{ $t('quota.name') }}
             </th>
@@ -112,7 +112,7 @@
               <td
                 :class="{
                   selected: isWeekSelected(key, year, week),
-                  'quota-low': isWeekQuotaLow(key, year, month)
+                  'quota-low': isWeekQuotaLow(key, year, week)
                 }"
                 :key="'week-' + week"
                 v-for="week in weekRange"
@@ -172,18 +172,10 @@
                   "
                   v-if="key !== 'total' && getQuota(key, { year, month, day })"
                 >
-                  {{
-                    countMode === 'seconds'
-                      ? getQuota(key, { year, month, day })
-                      : getQuota(key, { year, month, day })
-                  }}
+                  {{ getQuota(key, { year, month, day }) }}
                 </router-link>
                 <span v-else-if="key === 'total'">
-                  {{
-                    countMode === 'seconds'
-                      ? getQuota(key, { year, month, day })
-                      : getQuota(key, { year, month, day })
-                  }}
+                  {{ getQuota(key, { year, month, day }) }}
                 </span>
                 <span v-else> - </span>
               </td>
@@ -199,380 +191,282 @@
       <p class="info">{{ $t('quota.no_quota') }}</p>
     </div>
 
-    <table-info :is-loading="isLoading" :is-error="isError" />
+    <table-info :is-loading="isLoading" />
   </div>
 </template>
 
-<script>
+<script setup>
+// Imports
+// --------------------------------------------------------------------------
 import moment from 'moment-timezone'
-import { mapGetters, mapActions } from 'vuex'
+import { computed, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 
 import { buildNameIndex, indexSearch } from '@/lib/indexing'
-import { episodifyRoute } from '@/lib/path'
+import { episodifyRoute as addEpisodeToRoute } from '@/lib/path'
 import { sortTaskTypes } from '@/lib/sorting'
 import {
-  monthToString,
+  getDayRange,
   getMonthRange,
   getWeekRange,
-  getDayRange
+  monthToString
 } from '@/lib/time'
 
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
-export default {
-  name: 'quota',
+const route = useRoute()
+const store = useStore()
 
-  components: {
-    PeopleAvatar,
-    TableInfo
-  },
+// Props / Emits
+// --------------------------------------------------------------------------
+const props = defineProps({
+  computeMode: { type: String, required: true },
+  countMode: { type: String, required: true },
+  detailLevel: { type: String, required: true },
+  maxQuota: { type: [Number, String], default: 0 },
+  month: { type: Number, default: 0 },
+  personId: { type: String, default: null },
+  searchText: { type: String, default: '' },
+  taskTypeId: { type: String, default: null },
+  year: { type: Number, default: 0 }
+})
 
-  props: {
-    taskTypeId: {
-      type: String,
-      required: false
-    },
-    personId: {
-      type: String,
-      required: false
-    },
-    detailLevel: {
-      type: String,
-      required: true
-    },
-    countMode: {
-      type: String,
-      required: true
-    },
-    computeMode: {
-      type: String,
-      required: true
-    },
-    year: {
-      type: Number,
-      default: 0
-    },
-    month: {
-      type: Number,
-      default: 0
-    },
-    searchText: {
-      type: String,
-      default: ''
-    },
-    maxQuota: {
-      default: 0
-    }
-  },
+// State
+// --------------------------------------------------------------------------
+const bodyRef = useTemplateRef('body')
+const rowHeaderNameRef = useTemplateRef('row-header-name')
 
-  data() {
-    return {
-      currentMonth: moment().month() + 1,
-      currentYear: moment().year(),
-      detailsMap: {},
-      isLoading: true,
-      isError: false,
-      personIds: [],
-      quotaMap: {},
-      quotaLength: 0,
-      averageColumnX: '12rem'
-    }
-  },
+const averageColumnX = ref('12rem')
+const isLoading = ref(true)
+const personIds = ref([])
+const quotaLength = ref(0)
+const quotaMap = ref({})
 
-  mounted() {
-    if (this.shotMap.size < 2) {
-      this.isLoading = true
-      setTimeout(() => {
-        this.loadShots().then(() => {
-          this.loadData()
-        })
-      }, 100)
-    } else {
-      if (!this.isShotsLoading) this.isLoading = false
-      this.loadData()
-    }
-  },
+const currentMonth = moment().month() + 1
+const currentYear = moment().year()
+let personIndex = null
 
-  computed: {
-    ...mapGetters([
-      'currentEpisode',
-      'currentProduction',
-      'isShotsLoading',
-      'personMap',
-      'shotMap',
-      'taskTypeMap'
-    ]),
+// Computed
+// --------------------------------------------------------------------------
+const currentEpisode = computed(() => store.getters.currentEpisode)
+const currentProduction = computed(() => store.getters.currentProduction)
+const isShotsLoading = computed(() => store.getters.isShotsLoading)
+const personMap = computed(() => store.getters.personMap)
+const shotMap = computed(() => store.getters.shotMap)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
-    monthRange() {
-      return getMonthRange(this.year, this.currentYear, this.currentMonth)
-    },
+const monthRange = computed(() =>
+  getMonthRange(props.year, currentYear, currentMonth)
+)
 
-    dayRange() {
-      return getDayRange(
-        this.year,
-        this.month,
-        this.currentYear,
-        this.currentMonth
-      )
-    },
+const dayRange = computed(() =>
+  getDayRange(props.year, props.month, currentYear, currentMonth)
+)
 
-    weekRange() {
-      return getWeekRange(this.year, this.currentYear)
-    },
+const weekRange = computed(() => getWeekRange(props.year, currentYear))
 
-    entryIds() {
-      if (this.personId) {
-        return sortTaskTypes(
-          Object.keys(this.quotaMap)
-            .filter(key => key !== 'total')
-            .map(taskTypeId => this.taskTypeMap.get(taskTypeId))
-            .filter(Boolean),
-          this.currentProduction
-        )
-          .map(taskType => taskType.id)
-          .concat(['total'])
-      } else {
-        return this.filteredPersonIds
-      }
-    },
+const filteredPersonIds = computed(() => {
+  if (props.searchText.length === 0) return personIds.value
+  return indexSearch(personIndex, props.searchText.split(' ')).map(
+    person => person.id
+  )
+})
 
-    filteredPersonIds() {
-      let personIds = this.personIds
-      if (this.searchText.length > 0) {
-        personIds = indexSearch(
-          this.personIndex,
-          this.searchText.split(' ')
-        ).map(person => person.id)
-      }
-      return personIds
-    }
-  },
+const entryIds = computed(() => {
+  if (!props.personId) return filteredPersonIds.value
+  const taskTypes = Object.keys(quotaMap.value)
+    .filter(key => key !== 'total')
+    .map(taskTypeId => taskTypeMap.value.get(taskTypeId))
+    .filter(Boolean)
+  return [
+    ...sortTaskTypes(taskTypes, currentProduction.value).map(
+      taskType => taskType.id
+    ),
+    'total'
+  ]
+})
 
-  methods: {
-    ...mapActions(['loadShots', 'computeQuota', 'getPeriodDetails']),
+// Functions
+// --------------------------------------------------------------------------
+const episodifyRoute = targetRoute => {
+  if (currentEpisode.value) {
+    addEpisodeToRoute(targetRoute, currentEpisode.value.id)
+  }
+  return targetRoute
+}
 
-    episodifyRoute(route) {
-      if (this.currentEpisode) {
-        episodifyRoute(route, this.currentEpisode.id)
-      }
-      return route
-    },
+const dateDigit = date => date.toString().padStart(2, '0')
 
-    isWeekend(year, month, day) {
-      let date = moment(`${year}-${month}-${day}`, 'YYYY-MM-DD')
-      if (day < 10) date = moment(`${year}-${month}-0${day}`, 'YYYY-MM-DD')
-      return [0, 6].includes(date.day())
-    },
+const isWeekend = (year, month, day) => {
+  const date = moment(`${year}-${month}-${dateDigit(day)}`, 'YYYY-MM-DD')
+  return [0, 6].includes(date.day())
+}
 
-    loadData() {
-      if (this.taskTypeId || this.personId) {
-        this.isLoading = true
-        this.computeQuota({
-          taskTypeId: this.taskTypeId,
-          personId: this.personId,
-          detailLevel: this.detailLevel,
-          countMode: this.countMode,
-          computeMode: this.computeMode
-        })
-          .then(quotas => {
-            this.quotaMap = quotas
-            this.quotaLength = Object.keys(this.quotaMap).length
-            this.calcAverageColumnX()
-            this.$nextTick(() => {
-              this.isLoading = false
-            })
-          })
-          .catch(err => {
-            this.quotaMap = {}
-            this.quotaLength = 0
-            this.calcAverageColumnX()
-            this.isLoading = false
-            console.error(err)
-          })
-      }
-    },
-
-    loadDetails(personId, dateString) {
-      this.loadShots().then(() => {
-        this.isLoading = true
-        if (this.taskTypeId) {
-          this.getPeriodDetails({
-            taskTypeId: this.taskTypeId,
-            detailLevel: this.detailLevel,
-            personId,
-            dateString
-          }).then(shots => {
-            this.detailsMap = shots
-          })
-        }
-      })
-    },
-    monthToString,
-
-    dateDigit(date) {
-      return date.toString().padStart(2, '0')
-    },
-
-    getQuota(personId, opt = {}) {
-      let quota = '-'
-      if (!personId) return quota
-      if (opt.day) {
-        const dayKey = `${opt.year}-${this.dateDigit(
-          opt.month
-        )}-${this.dateDigit(opt.day)}`
-        quota = this.quotaMap[personId].day[this.countMode][dayKey]
-      } else if (opt.week) {
-        const weekKey = `${opt.year}-${opt.week}`
-        quota = this.quotaMap[personId].week[this.countMode][weekKey]
-      } else {
-        const monthKey = `${opt.year}-${this.dateDigit(opt.month)}`
-        quota = this.quotaMap[personId].month[this.countMode][monthKey]
-      }
-      if (this.countMode === 'seconds') {
-        return quota ? quota.toFixed(2) : '-'
-      } else {
-        return quota || '-'
-      }
-    },
-
-    getQuotaAverage(personId, opt = {}) {
-      if (!personId) {
-        return '-'
-      }
-      let total = 0
-      let nbEntries
-      if (this.detailLevel === 'day') {
-        const monthKey = `${opt.year}-${this.dateDigit(opt.month)}`
-        total = this.quotaMap[personId].month[this.countMode][monthKey]
-        nbEntries = this.quotaMap[personId].day.entries[monthKey]
-      } else if (this.detailLevel === 'week') {
-        const yearKey = opt.year
-        total = this.quotaMap[personId].year[this.countMode][yearKey]
-        nbEntries = this.quotaMap[personId].week.entries[yearKey]
-      } else if (this.detailLevel === 'month') {
-        const yearKey = opt.year
-        total = this.quotaMap[personId].year[this.countMode][yearKey]
-        nbEntries = this.quotaMap[personId].month.entries[yearKey]
-      }
-      const average = total / nbEntries
-      return average ? average.toFixed(2) : '-'
-    },
-
-    isDaySelected(personId, year, month, day) {
-      return (
-        this.$route.params.person_id &&
-        this.$route.params.person_id === personId &&
-        '' + this.$route.params.year === '' + year &&
-        '' + this.$route.params.month === '' + month &&
-        '' + this.$route.params.day === '' + day
-      )
-    },
-
-    isWeekSelected(personId, year, week) {
-      return (
-        this.$route.params.person_id &&
-        this.$route.params.person_id === personId &&
-        '' + this.$route.params.year === '' + year &&
-        '' + this.$route.params.week === '' + week
-      )
-    },
-
-    isMonthSelected(personId, year, month) {
-      return (
-        this.$route.params.person_id &&
-        this.$route.params.person_id === personId &&
-        '' + this.$route.params.year === '' + year &&
-        '' + this.$route.params.month === '' + month
-      )
-    },
-
-    isDayQuotaLow(personId, year, month, day) {
-      const quota = this.getQuota(personId, { year, month, day })
-      return quota !== null && this.maxQuota > quota
-    },
-
-    isWeekQuotaLow(personId, year, week) {
-      return this.maxQuota > this.getQuota(personId, { year, week })
-    },
-
-    isMonthQuotaLow(personId, year, month) {
-      return this.maxQuota > this.getQuota(personId, { year, month })
-    },
-
-    calcAverageColumnX() {
-      if (this.quotaLength > 0) {
-        this.averageColumnX = `${this.$refs.rowHeaderName.offsetWidth}px`
-      }
-    },
-
-    resetPersonIds() {
-      const personIds = Object.keys(this.quotaMap).filter(
-        personId => personId !== 'total'
-      )
-      const persons = personIds.map(pId => this.personMap.get(pId))
-      this.personIndex = buildNameIndex(persons)
-      this.personIds = personIds
-        .sort((a, b) => {
-          const personAName = this.personMap.get(a)?.full_name || ''
-          const personBName = this.personMap.get(b)?.full_name || ''
-          return personAName.localeCompare(personBName)
-        })
-        .concat(['total'])
-    }
-  },
-
-  watch: {
-    $route() {
-      const els = document.getElementsByClassName('selected')
-      if (els.length === 0) {
-        // selected element is not visible
-        setTimeout(() => {
-          this.$refs.body.scrollLeft += 380
-        }, 100)
-      }
-    },
-
-    computeMode() {
-      if (this.taskTypeId || this.personId) {
-        this.loadData()
-      }
-    },
-
-    quotaMap() {
-      if (this.taskTypeId) {
-        this.resetPersonIds()
-      }
-    },
-
-    taskTypeId() {
-      if (this.taskTypeId) {
-        this.loadData()
-      }
-    },
-
-    personId() {
-      if (this.personId) {
-        this.loadData()
-      }
-    }
+const calcAverageColumnX = () => {
+  if (quotaLength.value > 0) {
+    averageColumnX.value = `${rowHeaderNameRef.value.offsetWidth}px`
   }
 }
+
+const loadData = async () => {
+  if (!props.taskTypeId && !props.personId) return
+  isLoading.value = true
+  try {
+    quotaMap.value = await store.dispatch('computeQuota', {
+      taskTypeId: props.taskTypeId,
+      personId: props.personId,
+      detailLevel: props.detailLevel,
+      countMode: props.countMode,
+      computeMode: props.computeMode
+    })
+    quotaLength.value = Object.keys(quotaMap.value).length
+    calcAverageColumnX()
+    await nextTick()
+  } catch (err) {
+    console.error(err)
+    quotaMap.value = {}
+    quotaLength.value = 0
+    calcAverageColumnX()
+  }
+  isLoading.value = false
+}
+
+const getQuota = (personId, opt = {}) => {
+  if (!personId) return '-'
+  const periods = quotaMap.value[personId]
+  let quota
+  if (opt.day) {
+    const dayKey = `${opt.year}-${dateDigit(opt.month)}-${dateDigit(opt.day)}`
+    quota = periods.day[props.countMode][dayKey]
+  } else if (opt.week) {
+    quota = periods.week[props.countMode][`${opt.year}-${opt.week}`]
+  } else {
+    const monthKey = `${opt.year}-${dateDigit(opt.month)}`
+    quota = periods.month[props.countMode][monthKey]
+  }
+  if (props.countMode === 'seconds') return quota ? quota.toFixed(2) : '-'
+  return quota || '-'
+}
+
+const getQuotaAverage = (personId, opt = {}) => {
+  if (!personId) return '-'
+  const periods = quotaMap.value[personId]
+  let total = 0
+  let nbEntries
+  if (props.detailLevel === 'day') {
+    const monthKey = `${opt.year}-${dateDigit(opt.month)}`
+    total = periods.month[props.countMode][monthKey]
+    nbEntries = periods.day.entries[monthKey]
+  } else if (props.detailLevel === 'week') {
+    total = periods.year[props.countMode][opt.year]
+    nbEntries = periods.week.entries[opt.year]
+  } else if (props.detailLevel === 'month') {
+    total = periods.year[props.countMode][opt.year]
+    nbEntries = periods.month.entries[opt.year]
+  }
+  const average = total / nbEntries
+  return average ? average.toFixed(2) : '-'
+}
+
+const isPeriodSelected = (personId, params) =>
+  Boolean(route.params.person_id) &&
+  route.params.person_id === personId &&
+  Object.entries(params).every(
+    ([key, value]) => `${route.params[key]}` === `${value}`
+  )
+
+const isDaySelected = (personId, year, month, day) =>
+  isPeriodSelected(personId, { year, month, day })
+
+const isWeekSelected = (personId, year, week) =>
+  isPeriodSelected(personId, { year, week })
+
+const isMonthSelected = (personId, year, month) =>
+  isPeriodSelected(personId, { year, month })
+
+const isDayQuotaLow = (personId, year, month, day) =>
+  props.maxQuota > getQuota(personId, { year, month, day })
+
+const isWeekQuotaLow = (personId, year, week) =>
+  props.maxQuota > getQuota(personId, { year, week })
+
+const isMonthQuotaLow = (personId, year, month) =>
+  props.maxQuota > getQuota(personId, { year, month })
+
+const resetPersonIds = () => {
+  const fullName = personId => personMap.value.get(personId)?.full_name || ''
+  const ids = Object.keys(quotaMap.value).filter(
+    personId => personId !== 'total'
+  )
+  personIndex = buildNameIndex(
+    ids.map(personId => personMap.value.get(personId))
+  )
+  personIds.value = [
+    ...ids.sort((a, b) => fullName(a).localeCompare(fullName(b))),
+    'total'
+  ]
+}
+
+// Watchers
+// --------------------------------------------------------------------------
+watch(
+  () => route.fullPath,
+  () => {
+    // Bring a selected cell hidden on the right into view.
+    if (document.getElementsByClassName('selected').length === 0) {
+      setTimeout(() => {
+        bodyRef.value.scrollLeft += 380
+      }, 100)
+    }
+  }
+)
+
+watch(
+  () => props.computeMode,
+  () => {
+    loadData()
+  }
+)
+
+watch(quotaMap, () => {
+  if (props.taskTypeId) resetPersonIds()
+})
+
+watch(
+  () => props.taskTypeId,
+  () => {
+    if (props.taskTypeId) loadData()
+  }
+)
+
+watch(
+  () => props.personId,
+  () => {
+    if (props.personId) loadData()
+  }
+)
+
+// Lifecycle
+// --------------------------------------------------------------------------
+onMounted(() => {
+  if (shotMap.value.size < 2) {
+    setTimeout(async () => {
+      await store.dispatch('loadShots')
+      loadData()
+    }, 100)
+  } else {
+    if (!isShotsLoading.value) isLoading.value = false
+    loadData()
+  }
+})
+
+// The page exports the quotas displayed by this list.
+defineExpose({ quotaMap })
 </script>
 
 <style lang="scss" scoped>
-.dark {
-  .weekend {
-    background-color: $dark-grey;
-  }
-  .quota-button:hover {
-    color: #333;
-  }
-  .info {
-    color: $white;
-  }
-}
-
 .data-list {
   margin-top: 0;
 }
@@ -616,8 +510,12 @@ export default {
   }
 }
 
+.info {
+  color: var(--text);
+}
+
 .quota-low {
-  color: red;
+  color: $red;
 }
 
 .quota-button {
@@ -628,10 +526,9 @@ export default {
   cursor: pointer;
   color: inherit;
   font-size: inherit;
-  &:hover,
   &:focus,
-  &.is-selected {
-    background-color: $dark-grey-lightest;
+  &:hover {
+    background-color: var(--background-hover);
   }
 }
 
@@ -640,15 +537,11 @@ export default {
 }
 
 .selected .quota-button {
-  background: $purple;
-  color: #333;
-}
-
-.quota-button:hover {
-  background: #bbeebb;
+  background: var(--purple);
+  color: var(--text-strong);
 }
 
 .weekend {
-  background-color: $white-grey;
+  background-color: var(--background-panel);
 }
 </style>

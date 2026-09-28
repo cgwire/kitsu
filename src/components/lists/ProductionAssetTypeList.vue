@@ -65,7 +65,7 @@
           </tr>
 
           <tr class="datatable-row" :key="entry.id" v-for="entry in entries">
-            <td scope="row" class="name datatable-row-header">
+            <td class="name datatable-row-header">
               {{ entry.name }}
             </td>
 
@@ -110,7 +110,7 @@
       :text="$t('assets.empty_list')"
       :read-only-text="$t('assets.empty_list_read_only')"
       :illustration="emptyAssetIllustration"
-      v-if="isEmptyList && !isLoading"
+      v-if="isEmptyList"
     />
 
     <p
@@ -123,126 +123,101 @@
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+// Imports
+// --------------------------------------------------------------------------
+import { computed, useTemplateRef } from 'vue'
+import { useStore } from 'vuex'
 
 import emptyAssetIllustration from '@/assets/illustrations/empty_asset.png'
+import colors from '@/lib/colors'
 import { getChartColors, getChartData } from '@/lib/stats'
 
-import { entityListMixin } from '@/components/mixins/entity_list'
-
-import EmptyList from '@/components/widgets/EmptyList.vue'
 import StatsCell from '@/components/cells/StatsCell.vue'
+import EmptyList from '@/components/widgets/EmptyList.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
-export default {
-  name: 'production-asset-type-list',
+const store = useStore()
 
-  mixins: [entityListMixin],
+// Props / Emits
+// --------------------------------------------------------------------------
+const props = defineProps({
+  assetTypeStats: { type: Object, default: () => ({}) },
+  displayMode: { type: String, default: 'pie' },
+  entries: { type: Array, default: () => [] },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  showAll: { type: Boolean, default: false },
+  validationColumns: { type: Array, default: () => [] }
+})
 
-  props: {
-    displayMode: {
-      type: String,
-      default: 'pie'
-    },
-    entries: {
-      type: Array,
-      default: () => []
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    assetTypeStats: {
-      type: Object,
-      default: () => {}
-    },
-    showAll: {
-      type: Boolean,
-      default: false
-    },
-    validationColumns: {
-      type: Array,
-      default: () => []
-    }
-  },
+const emit = defineEmits(['scroll'])
 
-  components: {
-    EmptyList,
-    StatsCell,
-    TableInfo
-  },
+// State
+// --------------------------------------------------------------------------
+const bodyRef = useTemplateRef('body')
 
-  data() {
-    return {
-      emptyAssetIllustration
-    }
-  },
+// Computed
+// --------------------------------------------------------------------------
+const assetTypeSearchText = computed(() => store.getters.assetTypeSearchText)
+const currentEpisode = computed(() => store.getters.currentEpisode)
+const currentProduction = computed(() => store.getters.currentProduction)
+const displayedAssetTypesLength = computed(
+  () => store.getters.displayedAssetTypesLength
+)
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+const isTVShow = computed(() => store.getters.isTVShow)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
-  computed: {
-    ...mapGetters([
-      'assetTypeSearchText',
-      'currentEpisode',
-      'currentProduction',
-      'displayedAssetTypesLength',
-      'isCurrentUserClient',
-      'isTVShow',
-      'taskTypeMap'
-    ]),
+const isEmptyList = computed(
+  () =>
+    props.entries.length === 0 &&
+    !props.isLoading &&
+    !props.isError &&
+    !assetTypeSearchText.value
+)
 
-    isEmptyList() {
-      return (
-        this.entries &&
-        this.entries.length === 0 &&
-        !this.isLoading &&
-        !this.isError &&
-        (!this.assetTypeSearchText || this.assetTypeSearchText.length === 0)
-      )
-    }
-  },
+// Functions
+// --------------------------------------------------------------------------
+const chartColors = (entryId, columnId) =>
+  getChartColors(props.assetTypeStats, entryId, columnId)
 
-  methods: {
-    chartColors(entryId, columnId) {
-      return getChartColors(this.assetTypeStats, entryId, columnId)
-    },
+const chartData = (entryId, columnId) =>
+  getChartData(props.assetTypeStats, entryId, columnId)
 
-    chartData(entryId, columnId) {
-      return getChartData(this.assetTypeStats, entryId, columnId)
-    },
+const isStats = (entryId, columnId) => props.assetTypeStats[entryId]?.[columnId]
 
-    isStats(entryId, columnId) {
-      return (
-        this.assetTypeStats[entryId] && this.assetTypeStats[entryId][columnId]
-      )
-    },
+const getValidationStyle = columnId => {
+  const taskType = taskTypeMap.value.get(columnId)
+  if (!taskType) return {}
+  return {
+    'border-left': `1px solid ${taskType.color}`,
+    background: colors.hexToRGBa(taskType.color, 0.08)
+  }
+}
 
-    onHeaderScroll(event, position) {
-      this.$refs.tableWrapper.scrollLeft = position.scrollLeft
-    },
-
-    taskTypePath(taskTypeId) {
-      const route = {
-        name: 'task-type',
-        params: {
-          production_id: this.currentProduction.id,
-          task_type_id: taskTypeId,
-          type: 'assets'
-        }
-      }
-
-      if (this.isTVShow && this.currentEpisode) {
-        route.name = 'episode-task-type'
-        route.params.episode_id = this.currentEpisode.id
-      }
-
-      return route
+const taskTypePath = taskTypeId => {
+  const withEpisode = isTVShow.value && currentEpisode.value
+  return {
+    name: withEpisode ? 'episode-task-type' : 'task-type',
+    params: {
+      production_id: currentProduction.value.id,
+      task_type_id: taskTypeId,
+      type: 'assets',
+      ...(withEpisode ? { episode_id: currentEpisode.value.id } : {})
     }
   }
 }
+
+const onBodyScroll = event => {
+  emit('scroll', event.target.scrollTop)
+}
+
+const setScrollPosition = scrollPosition => {
+  if (bodyRef.value) bodyRef.value.scrollTop = scrollPosition
+}
+
+defineExpose({ setScrollPosition })
 </script>
 
 <style lang="scss" scoped>
@@ -250,14 +225,11 @@ export default {
 .datatable-body tr:first-child td {
   border-top: 0;
 }
+
 .name {
   min-width: 200px;
   width: 200px;
   font-weight: bold;
-}
-
-.name a {
-  color: inherit;
 }
 
 td.name {
