@@ -36,11 +36,16 @@
         class="datatable multi-section"
         :class="{ 'expand-task-types': displaySettings.fullTaskTypeNames }"
       >
-        <thead class="datatable-head" id="datatable-shot" v-columns-resizable>
+        <thead
+          class="datatable-head"
+          id="datatable-shot"
+          v-columns-resizable="currentProduction?.id"
+        >
           <tr>
             <th
               scope="col"
               class="name shot-name datatable-row-header"
+              data-column-key="name"
               ref="th-shot"
             >
               <sortable-field-header
@@ -104,6 +109,7 @@
             <th
               scope="col"
               class="description selectable"
+              data-column-key="description"
               v-if="
                 !isCurrentUserClient &&
                 displaySettings.showInfos &&

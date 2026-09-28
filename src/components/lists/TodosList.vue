@@ -22,6 +22,7 @@
             <th
               scope="col"
               class="name datatable-row-header"
+              data-column-key="name"
               :style="{ left: colNamePosX }"
             >
               {{ $t('tasks.fields.entity') }}
@@ -30,7 +31,12 @@
               {{ $t('assets.fields.episode') }}
             </th>
 
-            <th class="description" scope="col" v-if="isDescriptionPresent">
+            <th
+              class="description"
+              data-column-key="description"
+              scope="col"
+              v-if="isDescriptionPresent"
+            >
               {{ $t('assets.fields.description') }}
             </th>
             <th scope="col" class="estimation" :title="$t('main.estimation')">

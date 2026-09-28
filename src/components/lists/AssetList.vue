@@ -36,10 +36,15 @@
         class="datatable multi-section"
         :class="{ 'expand-task-types': displaySettings.fullTaskTypeNames }"
       >
-        <thead class="datatable-head" v-columns-resizable id="datatable-asset">
+        <thead
+          class="datatable-head"
+          v-columns-resizable="currentProduction?.id"
+          id="datatable-asset"
+        >
           <tr>
             <th
               ref="th-name"
+              data-column-key="name"
               :class="{
                 name: true,
                 'datatable-row-header': true,
@@ -140,6 +145,7 @@
             <th
               scope="col"
               class="description"
+              data-column-key="description"
               ref="th-description"
               v-if="
                 !isCurrentUserClient &&

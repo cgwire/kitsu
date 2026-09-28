@@ -3,6 +3,7 @@
     scope="col"
     class="metadata-descriptor"
     :class="{ 'datatable-row-header': isStick, resizable }"
+    :data-column-key="`metadata-${descriptor.id || descriptor.field_name}`"
     :style="thStyle"
   >
     <div class="flexrow metadata-wrapper-header">

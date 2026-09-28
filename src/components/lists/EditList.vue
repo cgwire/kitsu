@@ -29,7 +29,11 @@
         class="datatable"
         :class="{ 'expand-task-types': displaySettings.fullTaskTypeNames }"
       >
-        <thead class="datatable-head" id="datatable-edit" v-columns-resizable>
+        <thead
+          class="datatable-head"
+          id="datatable-edit"
+          v-columns-resizable="currentProduction?.id"
+        >
           <tr>
             <th scope="col" class="episode" ref="th-episode" v-if="isTVShow">
               {{ $t('edits.fields.episode') }}
@@ -37,6 +41,7 @@
             <th
               scope="col"
               class="name edit-name datatable-row-header"
+              data-column-key="name"
               ref="th-edit"
             >
               <div class="flexrow">
@@ -101,6 +106,7 @@
             <th
               scope="col"
               class="description selectable"
+              data-column-key="description"
               v-if="
                 !isCurrentUserClient &&
                 displaySettings.showInfos &&
