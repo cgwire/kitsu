@@ -226,4 +226,62 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
 
     wrapper.unmount()
   })
+
+  describe('scrub seeks', () => {
+    const mountSeekingViewer = async () => {
+      const wrapper = mountViewer()
+      wrapper.vm.loadEntity(0)
+      await wrapper.vm.$nextTick()
+      const player = wrapper.vm.currentPlayer
+      Object.defineProperty(player, 'currentTime', {
+        value: 0,
+        writable: true,
+        configurable: true
+      })
+      Object.defineProperty(player, 'duration', {
+        value: 10,
+        configurable: true
+      })
+      Object.defineProperty(player, 'seeking', {
+        value: true,
+        writable: true,
+        configurable: true
+      })
+      return { wrapper, player }
+    }
+
+    it('holds the latest target while a seek is in flight', async () => {
+      // A seek per mousemove aborts the in-flight one, so no frame lands
+      // until the cursor stops. Waiting for 'seeked' lets frames show.
+      const { wrapper, player } = await mountSeekingViewer()
+      wrapper.vm.setCurrentFrame(10)
+      wrapper.vm.setCurrentFrame(20)
+      expect(player.currentTime).toBe(0)
+      expect(wrapper.emitted('frame-update').at(-1)).toEqual([20])
+      player.seeking = false
+      player.dispatchEvent(new Event('seeked'))
+      expect(player.currentTime).toBeCloseTo(20 / 25 + 0.001)
+      wrapper.unmount()
+    })
+
+    it('reports the held target as the current time', async () => {
+      // The comparison player syncs on getCurrentTimeRaw().
+      const { wrapper } = await mountSeekingViewer()
+      wrapper.vm.setCurrentFrame(20)
+      expect(wrapper.vm.getCurrentTimeRaw()).toBeCloseTo(20 / 25 + 0.001)
+      wrapper.unmount()
+    })
+
+    it('pauses on the held target and drops it', async () => {
+      const { wrapper, player } = await mountSeekingViewer()
+      wrapper.vm.setCurrentFrame(20)
+      wrapper.vm.pause()
+      expect(player.currentTime).toBeCloseTo(20 / 25)
+      player.currentTime = 0.4
+      player.seeking = false
+      player.dispatchEvent(new Event('seeked'))
+      expect(player.currentTime).toBe(0.4)
+      wrapper.unmount()
+    })
+  })
 })

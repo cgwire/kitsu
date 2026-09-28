@@ -157,6 +157,8 @@ let renderLoopGeneration = 0
 // Target of a seek issued while playing — the render loop skips stale
 // presentations until the target frame lands (same guard as VideoViewer).
 let seekGuardTarget = null
+// Latest scrub target, applied once the in-flight seek lands.
+let pendingSeekTime = null
 // One play-next per trim end: entity switches to non-movie previews are
 // asynchronous, and extra presentations past the handle-out would emit
 // again and skip entities.
@@ -470,6 +472,7 @@ const loadEntity = (index = 0, currentTime = 0, silentLoad = false) => {
     const nextEntity = props.entities[nextIndex]
 
     currentIndex.value = index
+    pendingSeekTime = null
     // Reuse the decoder that already holds the target movie (usually the
     // one that preloaded the next entity): swapping keeps its buffer
     // instead of re-downloading on every manual navigation.
@@ -530,10 +533,7 @@ const pause = () => {
   seekGuardTarget = null
   if (currentPlayer.value) {
     currentPlayer.value.pause()
-    currentPlayer.value.currentTime = roundToFrame(
-      currentPlayer.value.currentTime,
-      fps.value
-    )
+    seekNow(roundToFrame(getCurrentTime(), fps.value))
     currentTimeRaw = currentPlayer.value.currentTime
     const frameNumber = Math.round(
       currentPlayer.value.currentTime / frameDuration.value
@@ -561,9 +561,11 @@ const playNext = handleIn => {
   if (!isPlaying.value) return
   handleIn = handleIn || props.handleIn
   if (props.isRepeating) {
-    currentPlayer.value.currentTime = props.handleIn
-      ? props.handleIn * frameDuration.value
-      : frameDuration.value
+    seekNow(
+      props.handleIn
+        ? props.handleIn * frameDuration.value
+        : frameDuration.value
+    )
     currentPlayer.value.play()?.catch(() => {})
     emit('repeat')
   } else {
@@ -584,7 +586,13 @@ const playNext = handleIn => {
 }
 
 const getCurrentTime = () =>
-  currentPlayer.value ? currentPlayer.value.currentTime : 0
+  currentPlayer.value ? (pendingSeekTime ?? currentPlayer.value.currentTime) : 0
+
+// Direct seeks (pause, loops, raw sync) win over a held scrub target.
+const seekNow = currentTime => {
+  pendingSeekTime = null
+  currentPlayer.value.currentTime = currentTime
+}
 
 const getCurrentFrame = () => {
   let time = getCurrentTime()
@@ -592,13 +600,12 @@ const getCurrentFrame = () => {
   return time / frameDuration.value
 }
 
-const getCurrentTimeRaw = () =>
-  currentPlayer.value ? currentPlayer.value.currentTime : 0
+const getCurrentTimeRaw = getCurrentTime
 
 const setCurrentTimeRaw = currentTime => {
   if (currentPlayer.value) {
     if (isPlaying.value) seekGuardTarget = currentTime
-    currentPlayer.value.currentTime = currentTime
+    seekNow(currentTime)
   }
 }
 
@@ -630,12 +637,16 @@ const runSetCurrentTime = currentTime => {
   // onTimeUpdate emits frame-update, which PlaylistPlayer can answer with
   // another seek: ignore those re-entrant calls so the loop can't recurse.
   if (isSeeking) return
-  if (currentPlayer.value && currentPlayer.value.currentTime !== currentTime) {
+  if (currentPlayer.value && getCurrentTime() !== currentTime) {
     isSeeking = true
     try {
       if (isPlaying.value) seekGuardTarget = currentTime
       // tweaks needed because the html video player is messy with frames
-      currentPlayer.value.currentTime = currentTime + 0.001
+      const target = currentTime + 0.001
+      // Scrubbing asks for a seek per mousemove and each one aborts the
+      // in-flight seek, so no frame landed until the cursor stopped.
+      if (currentPlayer.value.seeking) pendingSeekTime = target
+      else seekNow(target)
       onTimeUpdate()
     } finally {
       isSeeking = false
@@ -647,14 +658,21 @@ const onTimeUpdate = () => {
   const isChromium = !!window.chrome
   const change = isChromium ? frameDuration.value : 0
   if (currentPlayer.value) {
-    currentTimeRaw = currentPlayer.value.currentTime - change
+    currentTimeRaw = getCurrentTime() - change
   } else {
     currentTimeRaw = 0 + change
   }
   emit('frame-update', Math.round(currentTimeRaw / frameDuration.value))
 }
 
+const onSeeked = event => {
+  if (pendingSeekTime !== null && event.target === currentPlayer.value) {
+    seekNow(pendingSeekTime)
+  }
+}
+
 const switchPlayers = () => {
+  pendingSeekTime = null
   const nextIndex = getNextIndex(currentIndex.value)
   const nextEntity = props.entities[nextIndex]
   const tmpPlayer = currentPlayer.value
@@ -750,7 +768,8 @@ const LOADING_HANDLERS = [
   ['stalled', showLoading],
   ['waiting', showLoading],
   ['loadstart', showLoading],
-  ['error', hideLoading]
+  ['error', hideLoading],
+  ['seeked', onSeeked]
 ]
 
 const bindLoadingHandlers = player => {
