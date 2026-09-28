@@ -1675,9 +1675,7 @@ export default {
       if (item.startDate && item.endDate && item.parentElement) {
         item.parentElement.startDate = this.getMinDate(item.parentElement)
         item.parentElement.endDate = this.getMaxDate(item.parentElement)
-        if (!this.isVersioned) {
-          this.saveScheduleItem(item.parentElement)
-        }
+        this.updateScheduleItem(item.parentElement)
       } else if (!item.parentElement) {
         if (!Array.isArray(item.children)) {
           await this.updateScheduleItem(item)
@@ -1703,15 +1701,9 @@ export default {
     },
 
     async updateScheduleItem(item) {
-      const scheduleItem = this.scheduleItems.find(
-        scheduleItem => scheduleItem === item
-      )
-      if (scheduleItem) {
-        scheduleItem.startDate = item.startDate
-        scheduleItem.start_date = item.startDate.format('YYYY-MM-DD')
-        scheduleItem.endDate = item.endDate
-        scheduleItem.end_date = item.endDate.format('YYYY-MM-DD')
-      }
+      // the raw strings feed the Excel export and the side panel ranges
+      item.start_date = item.startDate.format('YYYY-MM-DD')
+      item.end_date = item.endDate.format('YYYY-MM-DD')
       if (!this.isVersioned) {
         await this.saveScheduleItem(item)
       }

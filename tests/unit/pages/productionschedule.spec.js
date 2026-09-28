@@ -11,11 +11,15 @@ import ProductionSchedule, {
 } from '@/components/pages/ProductionSchedule.vue'
 
 const {
+  getMaxDate,
+  getMinDate,
+  onScheduleItemChanged,
   onSelectTaskType,
   onTaskTypeVisibilityChanged,
   saveTaskChanged,
   toggleSidePanel,
-  updateRoute
+  updateRoute,
+  updateScheduleItem
 } = ProductionSchedule.methods
 const {
   filteredScheduleItems,
@@ -344,5 +348,55 @@ describe('ProductionSchedule hiddenTypes query param', () => {
       query: { zoom: '1', mode: 'real' }
     })
     expect(page.$router.replace).not.toHaveBeenCalled()
+  })
+})
+
+// The Excel export and the side panel date ranges read the raw start_date /
+// end_date strings, while a drag moves the startDate / endDate moments.
+describe('ProductionSchedule bar date strings', () => {
+  const buildPage = (overrides = {}) => ({
+    isVersioned: false,
+    scheduleItems: [],
+    startDate: moment.utc('2026-01-01'),
+    endDate: moment.utc('2026-12-31'),
+    saveScheduleItem: vi.fn().mockResolvedValue(),
+    getMinDate,
+    getMaxDate,
+    updateScheduleItem,
+    ...overrides
+  })
+
+  const buildBar = (start, end) => ({
+    start_date: '2026-03-01',
+    end_date: '2026-03-02',
+    startDate: moment.utc(start),
+    endDate: moment.utc(end)
+  })
+
+  it('refreshes the raw dates of an entity bar after a drag', async () => {
+    const page = buildPage()
+    const entityBar = buildBar('2026-10-01', '2026-10-05')
+
+    await updateScheduleItem.call(page, entityBar)
+
+    expect(entityBar.start_date).toBe('2026-10-01')
+    expect(entityBar.end_date).toBe('2026-10-05')
+    expect(page.saveScheduleItem).toHaveBeenCalledWith(entityBar)
+  })
+
+  it('refreshes the raw dates of the task type bar an entity drag resizes', async () => {
+    const page = buildPage()
+    const taskTypeBar = buildBar('2026-03-01', '2026-03-02')
+    const movedBar = buildBar('2026-04-01', '2026-04-10')
+    const otherBar = buildBar('2026-05-01', '2026-05-20')
+    taskTypeBar.children = [movedBar, otherBar]
+    movedBar.parentElement = taskTypeBar
+    otherBar.parentElement = taskTypeBar
+
+    await onScheduleItemChanged.call(page, movedBar)
+
+    expect(taskTypeBar.start_date).toBe('2026-04-01')
+    expect(taskTypeBar.end_date).toBe('2026-05-20')
+    expect(page.saveScheduleItem).toHaveBeenCalledWith(taskTypeBar)
   })
 })
