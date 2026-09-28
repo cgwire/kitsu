@@ -75,6 +75,7 @@
             <th
               scope="col"
               class="episode datatable-row-header"
+              data-resize-column="name"
               ref="th-episode"
               :style="{ left: `${nameWidth}px` }"
               v-if="hasStickyEpisode"

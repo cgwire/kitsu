@@ -53,7 +53,7 @@ const setUpColumns = (el, binding) => {
     }
 
     const onMouseDown = e => {
-      curCol = e.target.parentElement
+      curCol = item
       pageX = e.pageX
       curColWidth = curCol.offsetWidth
       newWidth = undefined
@@ -86,18 +86,34 @@ const setUpColumns = (el, binding) => {
     })
   }
 
-  ths.forEach(item => {
-    if (!item.getElementsByClassName('resizable-knob').length > 0) {
+  const addKnob = (host, item) => {
+    if (!host.getElementsByClassName('resizable-knob').length) {
       const div = document.createElement('div')
       div.className = 'resizable-knob'
-      item.appendChild(div)
+      host.appendChild(div)
       setListeners(item, div)
     }
+  }
+
+  ths.forEach(item => {
+    addKnob(item, item)
     // Nothing else sizes these headers inline: clearing drops the width of
     // the previous scope when the new one has none.
     const width = getStoredWidth(item) || ''
     item.style.minWidth = width
     item.style.width = width
+  })
+
+  // A header glued to the right of a column carries the edge the user sees
+  // (the sticky episode column of a TV show asset list): its knob resizes
+  // that column.
+  Array.from(el.querySelectorAll('[data-resize-column]')).forEach(host => {
+    const item = ths.find(
+      th => th.dataset.columnKey === host.dataset.resizeColumn
+    )
+    if (item) {
+      addKnob(host, item)
+    }
   })
 }
 

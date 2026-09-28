@@ -239,4 +239,23 @@ describe('resizable column directive', () => {
 
     directive.unmounted(header)
   })
+
+  test('resizes a column from the edge of the header standing for it', () => {
+    const { directive, header } = mountHeader(
+      '<th class="episode" data-resize-column="name">Ep.</th>'
+    )
+    directive.updated(header)
+    directive.updated(header)
+    const setItem = vi.spyOn(localStorage, 'setItem')
+    const episode = header.querySelector('.episode')
+
+    expect(episode.querySelectorAll('.resizable-knob')).toHaveLength(1)
+    drag(episode.querySelector('.resizable-knob'), 100, 140)
+
+    expect(header.querySelector('.name').style.width).toBe('40px')
+    expect(episode.style.width).toBe('')
+    expect(setItem.mock.calls).toEqual([['asset-list-name', '40px']])
+
+    directive.unmounted(header)
+  })
 })
