@@ -305,26 +305,28 @@
               </td>
 
               <!-- Metadata stick -->
-              <td
-                :ref="`editor-${i}-${j}`"
-                class="metadata-descriptor datatable-row-header"
-                :title="edit.data ? edit.data[descriptor.field_name] : ''"
-                :style="{
-                  'z-index': 1000 - i, // Need for combo to be above the next cell
-                  left: offsets['editor-' + j]
-                    ? `${offsets['editor-' + j]}px`
-                    : '0'
-                }"
-                :key="edit.id + '-' + descriptor.id"
-                v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
-              >
-                <metadata-input
-                  :entity="edit"
-                  :descriptor="descriptor"
-                  :indexes="{ i, j }"
-                  @metadata-changed="$emit('metadata-changed', $event)"
-                />
-              </td>
+              <template v-if="displaySettings.showInfos">
+                <td
+                  :ref="`editor-${i}-${j}`"
+                  class="metadata-descriptor datatable-row-header"
+                  :title="edit.data ? edit.data[descriptor.field_name] : ''"
+                  :style="{
+                    'z-index': 1000 - i, // Need for combo to be above the next cell
+                    left: offsets['editor-' + j]
+                      ? `${offsets['editor-' + j]}px`
+                      : '0'
+                  }"
+                  :key="edit.id + '-' + descriptor.id"
+                  v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
+                >
+                  <metadata-input
+                    :entity="edit"
+                    :descriptor="descriptor"
+                    :indexes="{ i, j }"
+                    @metadata-changed="$emit('metadata-changed', $event)"
+                  />
+                </td>
+              </template>
 
               <template v-if="!isLoading">
                 <validation-cell

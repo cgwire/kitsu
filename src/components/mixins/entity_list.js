@@ -734,6 +734,11 @@ export const entityListMixin = {
 
     'displaySettings.bigThumbnails'() {
       this.updateOffsets()
+    },
+
+    // The infos add or remove sticky columns (metadata, TV show episodes).
+    'displaySettings.showInfos'() {
+      this.updateOffsets()
     }
   }
 }

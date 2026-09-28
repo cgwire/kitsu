@@ -2,6 +2,17 @@ vi.mock('@/store', () => ({ default: {} }))
 
 import EditList from '@/components/lists/EditList.vue'
 
+import {
+  descriptor,
+  filledColumns,
+  mountEntityList,
+  production,
+  stickColumns,
+  stickyLeft,
+  stubHeaderWidths,
+  taskTypeId
+} from '../../fixtures/entity-list'
+
 const isEmptyList = EditList.computed.isEmptyList
 const updateOffsets = EditList.methods.updateOffsets
 
@@ -69,5 +80,46 @@ describe('lists/EditList sticky offsets', () => {
       'editor-0': 300.5,
       'validation-0': 421.5
     })
+  })
+})
+
+describe('lists/EditList sticky columns', () => {
+  beforeEach(() => {
+    stubHeaderWidths()
+    stickColumns('edit')
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+    localStorage.clear()
+  })
+
+  test('hides the sticky metadata columns along with the other infos', async () => {
+    const wrapper = await mountEntityList(EditList, {
+      getters: {
+        currentProduction: production,
+        displayedEditsCount: 1,
+        editFilledColumns: filledColumns,
+        editMetadataDescriptors: [descriptor]
+      },
+      props: {
+        displaySettings: { showInfos: false },
+        displayedEdits: [
+          {
+            id: 'edit-1',
+            name: 'Edit 1',
+            data: {},
+            validations: new Map([[taskTypeId, 'task-1']])
+          }
+        ]
+      }
+    })
+
+    expect(wrapper.find('tbody th.name').exists()).toBe(true)
+    expect(wrapper.find('thead metadata-header-stub').exists()).toBe(false)
+    expect(wrapper.findAll('tbody td.metadata-descriptor')).toHaveLength(0)
+    expect(stickyLeft(wrapper, 'validation-header-stub')).toBe('200px')
+
+    wrapper.unmount()
   })
 })

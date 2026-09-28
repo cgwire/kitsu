@@ -1,5 +1,7 @@
 vi.mock('@/store', () => ({ default: {} }))
 
+import { flushPromises } from '@vue/test-utils'
+
 import SequenceList from '@/components/lists/SequenceList.vue'
 
 import {
@@ -35,6 +37,18 @@ describe('lists/SequenceList sticky columns', () => {
 
   test('places the sticky columns right after the sequence names', async () => {
     const wrapper = await mountList()
+
+    expect(stickyLeft(wrapper, 'metadata-header-stub')).toBe('200px')
+    expect(stickyLeft(wrapper, 'validation-header-stub')).toBe('320px')
+
+    wrapper.unmount()
+  })
+
+  test('places the sticky metadata columns once the infos show', async () => {
+    const wrapper = await mountList({ displaySettings: { showInfos: false } })
+
+    await wrapper.setProps({ displaySettings: { showInfos: true } })
+    await flushPromises()
 
     expect(stickyLeft(wrapper, 'metadata-header-stub')).toBe('200px')
     expect(stickyLeft(wrapper, 'validation-header-stub')).toBe('320px')

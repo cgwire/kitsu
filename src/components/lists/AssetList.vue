@@ -87,19 +87,21 @@
               />
             </th>
 
-            <metadata-header
-              :ref="`editor-${j}`"
-              :key="'sticky-header' + descriptor.id"
-              :descriptor="descriptor"
-              :left="
-                offsets['editor-' + j] ? `${offsets['editor-' + j]}px` : '0'
-              "
-              is-stick
-              @show-metadata-header-menu="
-                event => showMetadataHeaderMenu(descriptor.id, event)
-              "
-              v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
-            />
+            <template v-if="displaySettings.showInfos">
+              <metadata-header
+                :ref="`editor-${j}`"
+                :key="'sticky-header' + descriptor.id"
+                :descriptor="descriptor"
+                :left="
+                  offsets['editor-' + j] ? `${offsets['editor-' + j]}px` : '0'
+                "
+                is-stick
+                @show-metadata-header-menu="
+                  event => showMetadataHeaderMenu(descriptor.id, event)
+                "
+                v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
+              />
+            </template>
 
             <template v-if="!isLoading">
               <validation-header
@@ -368,28 +370,30 @@
               </td>
 
               <!-- Metadata stick -->
-              <td
-                class="metadata-descriptor datatable-row-header"
-                :title="asset.data ? asset.data[descriptor.field_name] : ''"
-                :style="{
-                  'z-index':
-                    descriptor.data_type === 'taglist'
-                      ? 1000 - (getIndex(i, k) % 1000) // Needed for combo to be above the next cell
-                      : undefined,
-                  left: offsets['editor-' + j]
-                    ? `${offsets['editor-' + j]}px`
-                    : '0'
-                }"
-                :key="'sticky-desc-' + asset.id + '-' + descriptor.id"
-                v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
-              >
-                <metadata-input
-                  :entity="asset"
-                  :descriptor="descriptor"
-                  :indexes="{ i, j, k }"
-                  @metadata-changed="$emit('metadata-changed', $event)"
-                />
-              </td>
+              <template v-if="displaySettings.showInfos">
+                <td
+                  class="metadata-descriptor datatable-row-header"
+                  :title="asset.data ? asset.data[descriptor.field_name] : ''"
+                  :style="{
+                    'z-index':
+                      descriptor.data_type === 'taglist'
+                        ? 1000 - (getIndex(i, k) % 1000) // Needed for combo to be above the next cell
+                        : undefined,
+                    left: offsets['editor-' + j]
+                      ? `${offsets['editor-' + j]}px`
+                      : '0'
+                  }"
+                  :key="'sticky-desc-' + asset.id + '-' + descriptor.id"
+                  v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
+                >
+                  <metadata-input
+                    :entity="asset"
+                    :descriptor="descriptor"
+                    :indexes="{ i, j, k }"
+                    @metadata-changed="$emit('metadata-changed', $event)"
+                  />
+                </td>
+              </template>
 
               <template v-if="!isLoading">
                 <validation-cell

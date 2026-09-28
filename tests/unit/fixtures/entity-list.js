@@ -52,9 +52,8 @@ const neutralValue = name => {
   if (name.startsWith('is')) return false
   if (name.startsWith('displayed') || name.startsWith('nb')) return 0
   if (name.endsWith('SearchText')) return ''
-  if (name.endsWith('FilledColumns') || name.endsWith('SelectionGrid')) {
-    return {}
-  }
+  if (name.endsWith('SelectionGrid')) return new Set()
+  if (name.endsWith('FilledColumns')) return {}
   if (name.startsWith('current')) return null
   return []
 }
@@ -76,12 +75,15 @@ const buildStore = getters => ({
 export const mountEntityList = async (component, { getters, props }) => {
   const wrapper = shallowMount(component, {
     global: {
-      mocks: { $store: buildStore(getters) },
+      // No task in the rows: task links never resolve a route.
+      mocks: { $router: {}, $store: buildStore(getters) },
       plugins: [resizableColumn],
       stubs: { RouterLink: true }
     },
     props: {
       displaySettings: { showInfos: true },
+      isError: false,
+      isLoading: false,
       validationColumns: [taskTypeId],
       ...props
     }
