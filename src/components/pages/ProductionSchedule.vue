@@ -2581,11 +2581,13 @@ export default {
     },
 
     async applyToProduction() {
+      let isApplied = false
       this.loading.applyScheduleVersion = true
       this.errors.applyScheduleVersion = false
       try {
         await this.applyScheduleVersionToProduction(this.version)
         this.modals.applyScheduleVersion = false
+        isApplied = true
       } catch (err) {
         console.error(err)
         this.errors.applyScheduleVersion = true
@@ -2594,6 +2596,13 @@ export default {
       }
       // refresh version list
       await this.loadScheduleVersions(this.currentProduction)
+      if (isApplied) {
+        // the applied version is locked now: rebuild the rows built while it
+        // was open, the expanded ones included, read-only
+        this.unselectAndCloseSidePanel()
+        this.refreshScheduleItemsEditable()
+        this.refreshSchedule()
+      }
     },
 
     async expandAllScheduleItems() {

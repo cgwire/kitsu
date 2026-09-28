@@ -11,6 +11,7 @@ import ProductionSchedule, {
 } from '@/components/pages/ProductionSchedule.vue'
 
 const {
+  applyToProduction,
   getMaxDate,
   getMinDate,
   onScheduleItemChanged,
@@ -473,5 +474,51 @@ describe('ProductionSchedule bar date strings', () => {
       '2026-01-05',
       '2026-01-16'
     ])
+  })
+})
+
+// Applying a version locks it: the rows built while it was open must be
+// rebuilt read-only, once the version list says it is locked.
+describe('ProductionSchedule apply to production', () => {
+  const buildPage = applyResult => ({
+    currentProduction: { id: 'p1' },
+    errors: { applyScheduleVersion: false },
+    loading: { applyScheduleVersion: false },
+    modals: { applyScheduleVersion: true },
+    version: 'v1',
+    applyScheduleVersionToProduction: vi.fn(() => applyResult),
+    loadScheduleVersions: vi.fn().mockResolvedValue([]),
+    refreshSchedule: vi.fn(),
+    refreshScheduleItemsEditable: vi.fn(),
+    unselectAndCloseSidePanel: vi.fn()
+  })
+
+  it('rebuilds the rows read-only once the version is applied', async () => {
+    const page = buildPage(Promise.resolve())
+
+    await applyToProduction.call(page)
+
+    expect(page.refreshScheduleItemsEditable).toHaveBeenCalled()
+    expect(page.refreshSchedule).toHaveBeenCalled()
+    expect(page.unselectAndCloseSidePanel).toHaveBeenCalled()
+    const versionsLoadedAt =
+      page.loadScheduleVersions.mock.invocationCallOrder[0]
+    expect(
+      page.refreshScheduleItemsEditable.mock.invocationCallOrder[0]
+    ).toBeGreaterThan(versionsLoadedAt)
+    expect(page.refreshSchedule.mock.invocationCallOrder[0]).toBeGreaterThan(
+      versionsLoadedAt
+    )
+  })
+
+  it('leaves the rows alone when the apply fails', async () => {
+    const page = buildPage(Promise.reject(new Error('refused')))
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    await applyToProduction.call(page)
+
+    expect(page.errors.applyScheduleVersion).toBe(true)
+    expect(page.refreshSchedule).not.toHaveBeenCalled()
+    expect(page.refreshScheduleItemsEditable).not.toHaveBeenCalled()
   })
 })
