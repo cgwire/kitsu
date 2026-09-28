@@ -195,6 +195,50 @@ describe('players/VideoViewer (canvas pipeline)', () => {
     wrapper.unmount()
   })
 
+  describe('scrub seeks', () => {
+    const mountSeekableViewer = async () => {
+      const wrapper = mountViewer()
+      await new Promise(resolve => setTimeout(resolve))
+      const video = wrapper.find('video').element
+      await video.dispatchEvent(new Event('loadedmetadata'))
+      Object.defineProperty(video, 'currentTime', {
+        value: 0,
+        writable: true,
+        configurable: true
+      })
+      Object.defineProperty(video, 'seeking', {
+        value: true,
+        writable: true,
+        configurable: true
+      })
+      return { wrapper, video }
+    }
+
+    it('holds the latest target while a seek is in flight', async () => {
+      // A seek per mousemove aborts the in-flight one, so no frame lands
+      // until the cursor stops. Waiting for 'seeked' lets frames show.
+      const { wrapper, video } = await mountSeekableViewer()
+      wrapper.vm.setCurrentFrame(10)
+      wrapper.vm.setCurrentFrame(20)
+      expect(video.currentTime).toBe(0)
+      video.seeking = false
+      video.dispatchEvent(new Event('seeked'))
+      expect(video.currentTime).toBe(20.5 / 25)
+      wrapper.unmount()
+    })
+
+    it('drops a held target when a frame step seeks directly', async () => {
+      const { wrapper, video } = await mountSeekableViewer()
+      wrapper.vm.setCurrentFrame(20)
+      await wrapper.setProps({ currentFrame: 4 })
+      wrapper.vm.goNextFrame()
+      video.seeking = false
+      video.dispatchEvent(new Event('seeked'))
+      expect(video.currentTime).toBe(5.5 / 25)
+      wrapper.unmount()
+    })
+  })
+
   it('cancels the rVFC loop and disposes the renderer on unmount', async () => {
     const wrapper = mountViewer()
     // Wait for the setTimeout(0) in onMounted to complete

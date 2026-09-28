@@ -141,7 +141,7 @@ let panzoomSilent = false
 // so we remember that intent here and apply it when the instance
 // finally exists.
 let panzoomActive = false
-let currentTimeCalls = []
+let pendingSeekTime = null
 let lastEmittedFrame = null
 let isPlaying = false
 let previousDimensions = null
@@ -220,14 +220,7 @@ const getDimensions = () => {
   return { width, height }
 }
 
-const getLastPushedCurrentTime = () => {
-  const length = currentTimeCalls.length
-  if (length > 0) {
-    return currentTimeCalls[length - 1]
-  } else {
-    return currentTimeRaw.value
-  }
-}
+const getLastPushedCurrentTime = () => pendingSeekTime ?? currentTimeRaw.value
 
 // Seek to the middle of the target frame rather than its boundary.
 // frame / fps lands right on the edge between two frames, and the rounding
@@ -245,30 +238,28 @@ const setCurrentFrame = frame => {
 const setCurrentTimeRaw = currentTime => {
   if (currentTime < frameDuration.value) currentTime = 0
   if (!video.value.paused) seekGuardTarget = currentTime
+  seekNow(currentTime)
+}
+
+// Direct seeks (frame steps, pause) win over a target held for scrubbing.
+const seekNow = currentTime => {
+  pendingSeekTime = null
   video.value.currentTime = currentTime
 }
 
-const runSetCurrentTime = () => {
-  if (currentTimeCalls.length === 0) {
-    return
-  } else {
-    const currentTime = currentTimeCalls.shift()
-    if (video.value.currentTime !== currentTime) {
-      video.value.currentTime = currentTime
-    }
-    setTimeout(() => {
-      runSetCurrentTime()
-    }, 10)
+const setCurrentTime = currentTime => {
+  // Scrubbing asks for a seek per mousemove. Each new seek aborts the
+  // in-flight one, so no frame landed until the cursor stopped: hold the
+  // latest target until 'seeked' instead.
+  if (video.value.seeking) {
+    pendingSeekTime = currentTime
+  } else if (video.value.currentTime !== currentTime) {
+    seekNow(currentTime)
   }
 }
 
-const setCurrentTime = currentTime => {
-  // Scrubbing queues a seek per mousemove; only the latest target
-  // matters, and every landed seek now costs a decode + a canvas paint.
-  // Drop the stale backlog instead of replaying the whole trail.
-  currentTimeCalls.length = 0
-  currentTimeCalls.push(currentTime)
-  runSetCurrentTime()
+const onSeeked = () => {
+  if (pendingSeekTime !== null) setCurrentTime(pendingSeekTime)
 }
 
 const resetSize = () => {
@@ -460,7 +451,7 @@ const play = () => {
 const pause = () => {
   seekGuardTarget = null
   video.value.pause()
-  video.value.currentTime = frameToTime(props.currentFrame)
+  seekNow(frameToTime(props.currentFrame))
   emit('frame-update', props.currentFrame)
 }
 
@@ -471,7 +462,7 @@ const toggleMute = () => {
 const goPreviousFrame = () => {
   const nextFrame = props.currentFrame - 1
   if (nextFrame < 0) return
-  video.value.currentTime = frameToTime(nextFrame)
+  seekNow(frameToTime(nextFrame))
   emit('frame-update', nextFrame)
   return nextFrame
 }
@@ -479,7 +470,7 @@ const goPreviousFrame = () => {
 const goNextFrame = () => {
   const nextFrame = props.currentFrame + 1
   if (nextFrame >= props.nbFrames) return
-  video.value.currentTime = frameToTime(nextFrame)
+  seekNow(frameToTime(nextFrame))
   emit('frame-update', nextFrame)
   return nextFrame
 }
@@ -490,7 +481,7 @@ const onVideoEnd = () => {
   if (!video.value) return
   if (props.isRepeating) {
     emit('video-end')
-    video.value.currentTime = 0
+    seekNow(0)
     play()
   } else {
     emit('play-ended')
@@ -656,7 +647,6 @@ watch(
 // Lifecycle
 
 onMounted(() => {
-  currentTimeCalls = []
   container.value.style.height = props.defaultHeight + 'px'
   isLoading.value = true
   if (props.isMuted) {
@@ -671,12 +661,13 @@ onMounted(() => {
         setCurrentTime(0)
         setCurrentTimeRaw(0)
         nextTick(() => {
-          video.value.currentTime = 0
+          seekNow(0)
         })
         emit('video-loaded')
         setupPanZoom()
       }
       video.value.addEventListener('focus', e => e.target.blur())
+      video.value.addEventListener('seeked', onSeeked)
       video.value.addEventListener('resize', () => {
         resizeRenderer()
         resetSize()
