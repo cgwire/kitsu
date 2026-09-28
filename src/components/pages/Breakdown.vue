@@ -1499,7 +1499,10 @@ const onEpisodeCastingUpdate = eventData => {
 
 const onShotCastingUpdate = eventData => {
   const shot = store.getters.shotMap.get(eventData.shot_id)
-  if (shot && shot.sequence_id === sequenceId.value) {
+  // "all" displays the shots of every sequence.
+  const isDisplayed =
+    shot && ['all', shot.sequence_id].includes(sequenceId.value)
+  if (isDisplayed) {
     queueCastingLoad(shot.id, () => store.dispatch('loadShotCasting', shot))
   }
 }
@@ -1698,8 +1701,20 @@ useHead({
 
 // The comboboxes carry a label above their control: the buttons line up with
 // the control, not with the middle of label + control.
+// Wraps rather than squeezing its controls: the room depends on the asset
+// picker next to it as much as on the screen.
 .casting-toolbar {
   align-items: flex-end;
+  flex-wrap: wrap;
+  // The filler fills the first row: only the wrapped buttons move right.
+  justify-content: flex-end;
+  row-gap: 0.5em;
+}
+
+// The buttons are as tall as the comboboxes and the field next to them.
+.casting-toolbar :deep(.button) {
+  height: 40px;
+  min-width: 40px;
 }
 
 // Same height as the other controls of the toolbar, or its label sits higher
@@ -1717,7 +1732,9 @@ useHead({
 
 .casted-asset-search {
   border-radius: 10px;
+  flex: 1 1 140px;
   height: 40px;
+  min-width: 140px;
   max-width: 200px;
 }
 
@@ -1934,14 +1951,8 @@ useHead({
   margin-bottom: 0.5em;
 }
 
-// Tablet: the toolbar wraps instead of clipping its last buttons, and the
-// asset picker leaves more room to the casting.
+// Tablet: the asset picker leaves more room to the casting.
 @media screen and (max-width: 1000px) {
-  .casting-toolbar {
-    flex-wrap: wrap;
-    row-gap: 0.5em;
-  }
-
   .assets-column {
     max-width: 300px;
   }

@@ -218,6 +218,17 @@ describe('Breakdown page, live casting updates', () => {
     expect(actions.setCastingSequence).not.toHaveBeenCalled()
   })
 
+  // "All" is the default view: it shows every sequence, so every shot counts.
+  test('follows the shots of every sequence when all of them are displayed', async () => {
+    const { wrapper, actions } = await mountLivePage()
+    wrapper.vm.sequenceId = 'all'
+
+    wrapper.vm.onShotCastingUpdate({ shot_id: 'shot-1' })
+    vi.runAllTimers()
+
+    expect(actions.loadShotCasting).toHaveBeenCalledTimes(1)
+  })
+
   // A casting pasted on 50 shots sends 50 events: one request for the whole
   // scope instead of one per shot.
   test('loads the scope once when many shots change together', async () => {
