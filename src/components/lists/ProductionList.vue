@@ -17,7 +17,11 @@
           v-columns-resizable
         >
           <tr>
-            <th class="name datatable-row-header" scope="col">
+            <th
+              class="name datatable-row-header"
+              data-column-key="name"
+              scope="col"
+            >
               <div class="flexrow">
                 <span class="flexrow-item">
                   {{ $t('productions.fields.name') }}

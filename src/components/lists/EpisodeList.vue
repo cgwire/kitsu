@@ -39,13 +39,14 @@
         <thead
           class="datatable-head"
           id="datatable-episode"
-          v-columns-resizable
+          v-columns-resizable="currentProduction?.id"
         >
           <tr>
             <th
               scope="col"
               class="name episode-name datatable-row-header"
-              ref="th-episode"
+              data-column-key="name"
+              ref="th-name"
             >
               <sortable-field-header
                 field-name="name"
@@ -108,6 +109,7 @@
             <th
               scope="col"
               class="description selectable"
+              data-column-key="description"
               v-if="
                 !isCurrentUserClient &&
                 displaySettings.showInfos &&

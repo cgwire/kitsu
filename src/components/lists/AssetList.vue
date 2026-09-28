@@ -36,10 +36,15 @@
         class="datatable multi-section"
         :class="{ 'expand-task-types': displaySettings.fullTaskTypeNames }"
       >
-        <thead class="datatable-head" v-columns-resizable id="datatable-asset">
+        <thead
+          class="datatable-head"
+          v-columns-resizable="currentProduction?.id"
+          id="datatable-asset"
+        >
           <tr>
             <th
               ref="th-name"
+              data-column-key="name"
               :class="{
                 name: true,
                 'datatable-row-header': true,
@@ -70,6 +75,7 @@
             <th
               scope="col"
               class="episode datatable-row-header"
+              data-resize-column="name"
               ref="th-episode"
               :style="{ left: `${nameWidth}px` }"
               v-if="hasStickyEpisode"
@@ -81,19 +87,21 @@
               />
             </th>
 
-            <metadata-header
-              :ref="`editor-${j}`"
-              :key="'sticky-header' + descriptor.id"
-              :descriptor="descriptor"
-              :left="
-                offsets['editor-' + j] ? `${offsets['editor-' + j]}px` : '0'
-              "
-              is-stick
-              @show-metadata-header-menu="
-                event => showMetadataHeaderMenu(descriptor.id, event)
-              "
-              v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
-            />
+            <template v-if="displaySettings.showInfos">
+              <metadata-header
+                :ref="`editor-${j}`"
+                :key="'sticky-header' + descriptor.id"
+                :descriptor="descriptor"
+                :left="
+                  offsets['editor-' + j] ? `${offsets['editor-' + j]}px` : '0'
+                "
+                is-stick
+                @show-metadata-header-menu="
+                  event => showMetadataHeaderMenu(descriptor.id, event)
+                "
+                v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
+              />
+            </template>
 
             <template v-if="!isLoading">
               <validation-header
@@ -140,6 +148,7 @@
             <th
               scope="col"
               class="description"
+              data-column-key="description"
               ref="th-description"
               v-if="
                 !isCurrentUserClient &&
@@ -361,28 +370,30 @@
               </td>
 
               <!-- Metadata stick -->
-              <td
-                class="metadata-descriptor datatable-row-header"
-                :title="asset.data ? asset.data[descriptor.field_name] : ''"
-                :style="{
-                  'z-index':
-                    descriptor.data_type === 'taglist'
-                      ? 1000 - (getIndex(i, k) % 1000) // Needed for combo to be above the next cell
-                      : undefined,
-                  left: offsets['editor-' + j]
-                    ? `${offsets['editor-' + j]}px`
-                    : '0'
-                }"
-                :key="'sticky-desc-' + asset.id + '-' + descriptor.id"
-                v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
-              >
-                <metadata-input
-                  :entity="asset"
-                  :descriptor="descriptor"
-                  :indexes="{ i, j, k }"
-                  @metadata-changed="$emit('metadata-changed', $event)"
-                />
-              </td>
+              <template v-if="displaySettings.showInfos">
+                <td
+                  class="metadata-descriptor datatable-row-header"
+                  :title="asset.data ? asset.data[descriptor.field_name] : ''"
+                  :style="{
+                    'z-index':
+                      descriptor.data_type === 'taglist'
+                        ? 1000 - (getIndex(i, k) % 1000) // Needed for combo to be above the next cell
+                        : undefined,
+                    left: offsets['editor-' + j]
+                      ? `${offsets['editor-' + j]}px`
+                      : '0'
+                  }"
+                  :key="'sticky-desc-' + asset.id + '-' + descriptor.id"
+                  v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
+                >
+                  <metadata-input
+                    :entity="asset"
+                    :descriptor="descriptor"
+                    :indexes="{ i, j, k }"
+                    @metadata-changed="$emit('metadata-changed', $event)"
+                  />
+                </td>
+              </template>
 
               <template v-if="!isLoading">
                 <validation-cell
@@ -741,26 +752,8 @@ export default {
       ],
       offsets: {},
       nameWidth: 200,
-      nameResizeObserver: null,
       lastSelectedAsset: null
     }
-  },
-
-  mounted() {
-    this.$nextTick(() => {
-      const thName = this.$refs['th-name']
-      if (thName && typeof ResizeObserver !== 'undefined') {
-        this.nameResizeObserver = new ResizeObserver(() => {
-          this.nameWidth = thName.clientWidth
-          this.updateOffsets()
-        })
-        this.nameResizeObserver.observe(thName)
-      }
-    })
-  },
-
-  beforeUnmount() {
-    this.nameResizeObserver?.disconnect()
   },
 
   computed: {
@@ -1114,10 +1107,10 @@ export default {
         return
       }
       this.$nextTick(function () {
-        this.nameWidth = this.$refs['th-name'].clientWidth
+        this.nameWidth = this.$refs['th-name'].getBoundingClientRect().width
         let offset = this.nameWidth
         if (this.$refs['th-episode']) {
-          offset += this.$refs['th-episode'].clientWidth
+          offset += this.$refs['th-episode'].getBoundingClientRect().width
         }
         this.offsets = {}
 
@@ -1128,7 +1121,8 @@ export default {
             metadataCol++
           ) {
             this.offsets[`editor-${metadataCol}`] = offset
-            offset += this.$refs[`editor-${metadataCol}`][0].$el.clientWidth
+            const editor = this.$refs[`editor-${metadataCol}`][0].$el
+            offset += editor.getBoundingClientRect().width
           }
         }
         for (
@@ -1137,7 +1131,8 @@ export default {
           validationCol++
         ) {
           this.offsets[`validation-${validationCol}`] = offset
-          offset += this.$refs[`validation-${validationCol}`][0].$el.clientWidth
+          const validation = this.$refs[`validation-${validationCol}`][0].$el
+          offset += validation.getBoundingClientRect().width
         }
       })
     }

@@ -36,12 +36,17 @@
         class="datatable multi-section"
         :class="{ 'expand-task-types': displaySettings.fullTaskTypeNames }"
       >
-        <thead class="datatable-head" id="datatable-shot" v-columns-resizable>
+        <thead
+          class="datatable-head"
+          id="datatable-shot"
+          v-columns-resizable="currentProduction?.id"
+        >
           <tr>
             <th
               scope="col"
               class="name shot-name datatable-row-header"
-              ref="th-shot"
+              data-column-key="name"
+              ref="th-name"
             >
               <sortable-field-header
                 field-name="name"
@@ -63,19 +68,21 @@
               </sortable-field-header>
             </th>
 
-            <metadata-header
-              :ref="`editor-${j}`"
-              :key="descriptor.id"
-              :descriptor="descriptor"
-              :left="
-                offsets['editor-' + j] ? `${offsets['editor-' + j]}px` : '0'
-              "
-              @show-metadata-header-menu="
-                event => showMetadataHeaderMenu(descriptor.id, event)
-              "
-              is-stick
-              v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
-            />
+            <template v-if="displaySettings.showInfos">
+              <metadata-header
+                :ref="`editor-${j}`"
+                :key="descriptor.id"
+                :descriptor="descriptor"
+                :left="
+                  offsets['editor-' + j] ? `${offsets['editor-' + j]}px` : '0'
+                "
+                @show-metadata-header-menu="
+                  event => showMetadataHeaderMenu(descriptor.id, event)
+                "
+                is-stick
+                v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
+              />
+            </template>
 
             <template v-if="!isLoading">
               <validation-header
@@ -104,6 +111,7 @@
             <th
               scope="col"
               class="description selectable"
+              data-column-key="description"
               v-if="
                 !isCurrentUserClient &&
                 displaySettings.showInfos &&
@@ -364,29 +372,31 @@
               </th>
 
               <!-- Metadata stick -->
-              <td
-                :ref="`editor-${getIndex(i, k)}-${j}`"
-                class="metadata-descriptor datatable-row-header"
-                :title="shot.data ? shot.data[descriptor.field_name] : ''"
-                :style="{
-                  'z-index':
-                    descriptor.data_type === 'taglist'
-                      ? 1000 - (getIndex(i, k) % 1000) // Needed for combo to be above the next cell
-                      : undefined,
-                  left: offsets['editor-' + j]
-                    ? `${offsets['editor-' + j]}px`
-                    : '0'
-                }"
-                :key="shot.id + '-' + descriptor.id"
-                v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
-              >
-                <metadata-input
-                  :entity="shot"
-                  :descriptor="descriptor"
-                  :indexes="{ i, j, k }"
-                  @metadata-changed="$emit('metadata-changed', $event)"
-                />
-              </td>
+              <template v-if="displaySettings.showInfos">
+                <td
+                  :ref="`editor-${getIndex(i, k)}-${j}`"
+                  class="metadata-descriptor datatable-row-header"
+                  :title="shot.data ? shot.data[descriptor.field_name] : ''"
+                  :style="{
+                    'z-index':
+                      descriptor.data_type === 'taglist'
+                        ? 1000 - (getIndex(i, k) % 1000) // Needed for combo to be above the next cell
+                        : undefined,
+                    left: offsets['editor-' + j]
+                      ? `${offsets['editor-' + j]}px`
+                      : '0'
+                  }"
+                  :key="shot.id + '-' + descriptor.id"
+                  v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
+                >
+                  <metadata-input
+                    :entity="shot"
+                    :descriptor="descriptor"
+                    :indexes="{ i, j, k }"
+                    @metadata-changed="$emit('metadata-changed', $event)"
+                  />
+                </td>
+              </template>
 
               <template v-if="!isLoading">
                 <validation-cell
@@ -1227,7 +1237,7 @@ export default {
         return
       }
       this.$nextTick(() => {
-        let offset = this.$refs['th-shot'].clientWidth
+        let offset = this.$refs['th-name'].getBoundingClientRect().width
         this.offsets = {}
 
         if (this.displaySettings.showInfos) {
@@ -1237,7 +1247,8 @@ export default {
             metadataCol++
           ) {
             this.offsets[`editor-${metadataCol}`] = offset
-            offset += this.$refs[`editor-${metadataCol}`][0].$el.clientWidth
+            const editor = this.$refs[`editor-${metadataCol}`][0].$el
+            offset += editor.getBoundingClientRect().width
           }
         }
         for (
@@ -1246,7 +1257,8 @@ export default {
           validationCol++
         ) {
           this.offsets[`validation-${validationCol}`] = offset
-          offset += this.$refs[`validation-${validationCol}`][0].$el.clientWidth
+          const validation = this.$refs[`validation-${validationCol}`][0].$el
+          offset += validation.getBoundingClientRect().width
         }
       })
     }

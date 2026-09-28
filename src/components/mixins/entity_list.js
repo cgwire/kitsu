@@ -41,9 +41,22 @@ export const entityListMixin = {
     this.stickedColumns =
       preferences.getObjectPreference(this.localStorageStickKey) || {}
     if (this.domEvents) this.addEvents(this.domEvents)
+    if (typeof ResizeObserver !== 'undefined') {
+      this.stickyHeaders = new Set()
+      this.stickyHeadersObserver = new ResizeObserver(() =>
+        this.updateOffsets()
+      )
+      this.observeStickyHeaders()
+    }
+  },
+
+  // Sticky headers come and go with the stick menu and the display settings.
+  updated() {
+    this.observeStickyHeaders()
   },
 
   beforeUnmount() {
+    this.stickyHeadersObserver?.disconnect()
     window.removeEventListener('keydown', this.onKeyDown)
     window.removeEventListener('keyup', this.onKeyUp)
     document.removeEventListener('click', this.onHeaderMenuDocumentClick)
@@ -100,6 +113,15 @@ export const entityListMixin = {
       )
     },
 
+    // The sticky columns can change without any loading state: the task
+    // types of the sequence and episode pages arrive once they have loaded.
+    stickyColumnIds() {
+      return [
+        ...this.stickedVisibleMetadataDescriptors.map(({ id }) => id),
+        ...this.stickedDisplayedValidationColumns
+      ].join()
+    },
+
     isEmptyTask() {
       return (
         !this.isEmptyList &&
@@ -111,6 +133,33 @@ export const entityListMixin = {
   },
 
   methods: {
+    // A sticky header resized by a drag or by its content moves the next
+    // sticky columns.
+    observeStickyHeaders() {
+      if (!this.stickyHeadersObserver) return
+      const headers = new Set(
+        [
+          this.$refs['th-name'],
+          this.$refs['th-episode'],
+          ...this.stickedVisibleMetadataDescriptors.map(
+            (descriptor, j) => this.$refs[`editor-${j}`]?.[0]?.$el
+          ),
+          ...this.stickedDisplayedValidationColumns.map(
+            (columnId, j) => this.$refs[`validation-${j}`]?.[0]?.$el
+          )
+        ].filter(Boolean)
+      )
+      this.stickyHeaders.forEach(header => {
+        if (!headers.has(header)) this.stickyHeadersObserver.unobserve(header)
+      })
+      headers.forEach(header => {
+        if (!this.stickyHeaders.has(header)) {
+          this.stickyHeadersObserver.observe(header)
+        }
+      })
+      this.stickyHeaders = headers
+    },
+
     onBodyScroll(event) {
       const position = event.target
       this.$emit('scroll', position.scrollTop)
@@ -121,19 +170,20 @@ export const entityListMixin = {
         return
       }
       this.$nextTick(() => {
-        let offset = this.$refs['th-episode']
-          ? this.$refs['th-episode'].clientWidth
+        let offset = this.$refs['th-name']
+          ? this.$refs['th-name'].getBoundingClientRect().width
           : 0
         this.offsets = {}
 
-        if (this.isShowInfos) {
+        if (this.displaySettings.showInfos) {
           for (
             let metadataCol = 0;
             metadataCol < this.stickedVisibleMetadataDescriptors.length;
             metadataCol++
           ) {
             this.offsets[`editor-${metadataCol}`] = offset
-            offset += this.$refs[`editor-${metadataCol}`][0].$el.clientWidth
+            const editor = this.$refs[`editor-${metadataCol}`][0].$el
+            offset += editor.getBoundingClientRect().width
           }
         }
         for (
@@ -142,7 +192,8 @@ export const entityListMixin = {
           validationCol++
         ) {
           this.offsets[`validation-${validationCol}`] = offset
-          offset += this.$refs[`validation-${validationCol}`][0].$el.clientWidth
+          const validation = this.$refs[`validation-${validationCol}`][0].$el
+          offset += validation.getBoundingClientRect().width
         }
       })
     },
@@ -717,7 +768,16 @@ export const entityListMixin = {
       this.updateTaskInQuery()
     },
 
+    stickyColumnIds() {
+      this.updateOffsets()
+    },
+
     'displaySettings.bigThumbnails'() {
+      this.updateOffsets()
+    },
+
+    // The infos add or remove sticky columns (metadata, TV show episodes).
+    'displaySettings.showInfos'() {
       this.updateOffsets()
     }
   }

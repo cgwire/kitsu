@@ -29,7 +29,11 @@
         class="datatable"
         :class="{ 'expand-task-types': displaySettings.fullTaskTypeNames }"
       >
-        <thead class="datatable-head" id="datatable-edit" v-columns-resizable>
+        <thead
+          class="datatable-head"
+          id="datatable-edit"
+          v-columns-resizable="currentProduction?.id"
+        >
           <tr>
             <th scope="col" class="episode" ref="th-episode" v-if="isTVShow">
               {{ $t('edits.fields.episode') }}
@@ -37,7 +41,8 @@
             <th
               scope="col"
               class="name edit-name datatable-row-header"
-              ref="th-edit"
+              data-column-key="name"
+              ref="th-name"
             >
               <div class="flexrow">
                 <span class="flexrow-item">
@@ -101,6 +106,7 @@
             <th
               scope="col"
               class="description selectable"
+              data-column-key="description"
               v-if="
                 !isCurrentUserClient &&
                 displaySettings.showInfos &&
@@ -299,26 +305,28 @@
               </td>
 
               <!-- Metadata stick -->
-              <td
-                :ref="`editor-${i}-${j}`"
-                class="metadata-descriptor datatable-row-header"
-                :title="edit.data ? edit.data[descriptor.field_name] : ''"
-                :style="{
-                  'z-index': 1000 - i, // Need for combo to be above the next cell
-                  left: offsets['editor-' + j]
-                    ? `${offsets['editor-' + j]}px`
-                    : '0'
-                }"
-                :key="edit.id + '-' + descriptor.id"
-                v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
-              >
-                <metadata-input
-                  :entity="edit"
-                  :descriptor="descriptor"
-                  :indexes="{ i, j }"
-                  @metadata-changed="$emit('metadata-changed', $event)"
-                />
-              </td>
+              <template v-if="displaySettings.showInfos">
+                <td
+                  :ref="`editor-${i}-${j}`"
+                  class="metadata-descriptor datatable-row-header"
+                  :title="edit.data ? edit.data[descriptor.field_name] : ''"
+                  :style="{
+                    'z-index': 1000 - i, // Need for combo to be above the next cell
+                    left: offsets['editor-' + j]
+                      ? `${offsets['editor-' + j]}px`
+                      : '0'
+                  }"
+                  :key="edit.id + '-' + descriptor.id"
+                  v-for="(descriptor, j) in stickedVisibleMetadataDescriptors"
+                >
+                  <metadata-input
+                    :entity="edit"
+                    :descriptor="descriptor"
+                    :indexes="{ i, j }"
+                    @metadata-changed="$emit('metadata-changed', $event)"
+                  />
+                </td>
+              </template>
 
               <template v-if="!isLoading">
                 <validation-cell
@@ -803,7 +811,7 @@ export default {
         return
       }
       this.$nextTick(() => {
-        let offset = this.$refs['th-edit'].clientWidth
+        let offset = this.$refs['th-name'].getBoundingClientRect().width
         this.offsets = {}
 
         if (this.displaySettings.showInfos) {
@@ -813,7 +821,8 @@ export default {
             metadataCol++
           ) {
             this.offsets[`editor-${metadataCol}`] = offset
-            offset += this.$refs[`editor-${metadataCol}`][0].$el.clientWidth
+            const editor = this.$refs[`editor-${metadataCol}`][0].$el
+            offset += editor.getBoundingClientRect().width
           }
         }
         for (
@@ -822,7 +831,8 @@ export default {
           validationCol++
         ) {
           this.offsets[`validation-${validationCol}`] = offset
-          offset += this.$refs[`validation-${validationCol}`][0].$el.clientWidth
+          const validation = this.$refs[`validation-${validationCol}`][0].$el
+          offset += validation.getBoundingClientRect().width
         }
       })
     }

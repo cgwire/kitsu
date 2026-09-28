@@ -1,6 +1,6 @@
 import preferences from '@/lib/preferences'
 
-const setUpColumns = el => {
+const setUpColumns = (el, binding) => {
   if (!el.id) {
     console.error('Resizable headers must be in a thead with an id')
     return
@@ -10,10 +10,19 @@ const setUpColumns = el => {
     el.className += ' resizable'
   }
 
+  // The binding value scopes the widths, typically to a production. A list
+  // keeps its thead when the production changes, and the knob listeners
+  // outlive that change: they read the scope from the element.
+  el._columnScope = binding?.value
   // updated() re-runs on every re-render of the header: read each
   // stored width once and keep it on the element.
   el._columnWidths = el._columnWidths || new Map()
-  const storageKey = item => `${el.id}-${item.textContent}`
+  const storageKey = item => {
+    const column = item.dataset.columnKey || item.textContent
+    return el._columnScope
+      ? `${el.id}-${el._columnScope}-${column}`
+      : `${el.id}-${column}`
+  }
   const getStoredWidth = item => {
     const key = storageKey(item)
     if (!el._columnWidths.has(key)) {
@@ -44,7 +53,7 @@ const setUpColumns = el => {
     }
 
     const onMouseDown = e => {
-      curCol = e.target.parentElement
+      curCol = item
       pageX = e.pageX
       curColWidth = curCol.offsetWidth
       newWidth = undefined
@@ -77,17 +86,33 @@ const setUpColumns = el => {
     })
   }
 
-  ths.forEach(item => {
-    if (!item.getElementsByClassName('resizable-knob').length > 0) {
+  const addKnob = (host, item) => {
+    if (!host.getElementsByClassName('resizable-knob').length) {
       const div = document.createElement('div')
       div.className = 'resizable-knob'
-      item.appendChild(div)
+      host.appendChild(div)
       setListeners(item, div)
     }
-    const width = getStoredWidth(item)
-    if (width) {
-      item.style.minWidth = width
-      item.style.width = width
+  }
+
+  ths.forEach(item => {
+    addKnob(item, item)
+    // Nothing else sizes these headers inline: clearing drops the width of
+    // the previous scope when the new one has none.
+    const width = getStoredWidth(item) || ''
+    item.style.minWidth = width
+    item.style.width = width
+  })
+
+  // A header glued to the right of a column carries the edge the user sees
+  // (the sticky episode column of a TV show asset list): its knob resizes
+  // that column.
+  Array.from(el.querySelectorAll('[data-resize-column]')).forEach(host => {
+    const item = ths.find(
+      th => th.dataset.columnKey === host.dataset.resizeColumn
+    )
+    if (item) {
+      addKnob(host, item)
     }
   })
 }

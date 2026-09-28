@@ -62,3 +62,56 @@ describe('entity list header menus', () => {
     expect(menus.headerFieldMenu.style.width).toBe('149px')
   })
 })
+
+// Sticky offsets add up full header widths: clientWidth leaves out the
+// border and rounds, so each sticky column overlapped the previous one.
+const header = (width, clientWidth = Math.floor(width) - 1) => ({
+  clientWidth,
+  getBoundingClientRect: () => ({ width })
+})
+
+describe('entity list sticky offsets', () => {
+  test('places the sticky columns after the full width of the previous ones', () => {
+    const context = {
+      isLoading: false,
+      $nextTick: callback => callback(),
+      $refs: {
+        'th-name': header(200.5),
+        'validation-0': [{ $el: header(151) }],
+        'validation-1': [{ $el: header(151) }]
+      },
+      displaySettings: { showInfos: true },
+      stickedVisibleMetadataDescriptors: [],
+      stickedDisplayedValidationColumns: ['task-type-1', 'task-type-2']
+    }
+
+    entityListMixin.methods.updateOffsets.call(context)
+
+    expect(context.offsets).toEqual({
+      'validation-0': 200.5,
+      'validation-1': 351.5
+    })
+  })
+
+  test('places the sticky metadata columns after the name', () => {
+    const context = {
+      isLoading: false,
+      $nextTick: callback => callback(),
+      $refs: {
+        'th-name': header(200.5),
+        'editor-0': [{ $el: header(121) }],
+        'validation-0': [{ $el: header(151) }]
+      },
+      displaySettings: { showInfos: true },
+      stickedVisibleMetadataDescriptors: [{ id: 'descriptor-1' }],
+      stickedDisplayedValidationColumns: ['task-type-1']
+    }
+
+    entityListMixin.methods.updateOffsets.call(context)
+
+    expect(context.offsets).toEqual({
+      'editor-0': 200.5,
+      'validation-0': 321.5
+    })
+  })
+})

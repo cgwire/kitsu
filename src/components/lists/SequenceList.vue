@@ -37,13 +37,14 @@
         <thead
           class="datatable-head"
           id="datatable-sequence"
-          v-columns-resizable
+          v-columns-resizable="currentProduction?.id"
         >
           <tr>
             <th
               scope="col"
               class="name sequence-name datatable-row-header"
-              ref="th-sequence"
+              data-column-key="name"
+              ref="th-name"
             >
               <sortable-field-header
                 field-name="name"
@@ -103,6 +104,7 @@
             <th
               scope="col"
               class="description selectable"
+              data-column-key="description"
               v-if="
                 !isCurrentUserClient &&
                 displaySettings.showInfos &&
