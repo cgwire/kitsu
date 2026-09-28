@@ -356,6 +356,8 @@ describe('ProductionSchedule hiddenTypes query param', () => {
 // end_date strings, while a drag moves the startDate / endDate moments.
 describe('ProductionSchedule bar date strings', () => {
   const buildPage = (overrides = {}) => ({
+    currentEpisodeId: null,
+    isMainPack: false,
     isVersioned: false,
     scheduleItems: [],
     startDate: moment.utc('2026-01-01'),
@@ -399,6 +401,41 @@ describe('ProductionSchedule bar date strings', () => {
 
     expect(taskTypeBar.start_date).toBe('2026-04-01')
     expect(taskTypeBar.end_date).toBe('2026-05-20')
+    expect(page.saveScheduleItem).toHaveBeenCalledWith(taskTypeBar)
+  })
+
+  // An episode view only holds the sequences and edits of that episode,
+  // and the main pack view its asset types, while the task type bar spans
+  // the whole production: their dates can widen it, never shrink it.
+  it.each([
+    ['an episode', { currentEpisodeId: 'episode-3' }],
+    ['the main pack', { isMainPack: true }]
+  ])('never shrinks the task type bar from %s view', async (_, scope) => {
+    const page = buildPage(scope)
+    const taskTypeBar = buildBar('2026-02-01', '2026-11-30')
+    const movedBar = buildBar('2026-05-01', '2026-05-10')
+    taskTypeBar.children = [movedBar]
+    movedBar.parentElement = taskTypeBar
+
+    await onScheduleItemChanged.call(page, movedBar)
+
+    expect(taskTypeBar.startDate.format('YYYY-MM-DD')).toBe('2026-02-01')
+    expect(taskTypeBar.endDate.format('YYYY-MM-DD')).toBe('2026-11-30')
+    expect(page.saveScheduleItem).not.toHaveBeenCalledWith(taskTypeBar)
+    expect(page.saveScheduleItem).toHaveBeenCalledWith(movedBar)
+  })
+
+  it('widens the task type bar from an episode view', async () => {
+    const page = buildPage({ currentEpisodeId: 'episode-3' })
+    const taskTypeBar = buildBar('2026-02-01', '2026-06-30')
+    const movedBar = buildBar('2026-06-20', '2026-07-15')
+    taskTypeBar.children = [movedBar]
+    movedBar.parentElement = taskTypeBar
+
+    await onScheduleItemChanged.call(page, movedBar)
+
+    expect(taskTypeBar.startDate.format('YYYY-MM-DD')).toBe('2026-02-01')
+    expect(taskTypeBar.end_date).toBe('2026-07-15')
     expect(page.saveScheduleItem).toHaveBeenCalledWith(taskTypeBar)
   })
 

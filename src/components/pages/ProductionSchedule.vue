@@ -1647,9 +1647,15 @@ export default {
       }
 
       if (item.startDate && item.endDate && item.parentElement) {
-        item.parentElement.startDate = this.getMinDate(item.parentElement)
-        item.parentElement.endDate = this.getMaxDate(item.parentElement)
-        this.updateScheduleItem(item.parentElement)
+        if (this.currentEpisodeId || this.isMainPack) {
+          // the view only holds the rows of one episode, while the task
+          // type bar spans the production: they can widen it, not shrink it
+          this.widenScheduleItemParents(item)
+        } else {
+          item.parentElement.startDate = this.getMinDate(item.parentElement)
+          item.parentElement.endDate = this.getMaxDate(item.parentElement)
+          this.updateScheduleItem(item.parentElement)
+        }
       } else if (!item.parentElement) {
         if (!Array.isArray(item.children)) {
           await this.updateScheduleItem(item)
