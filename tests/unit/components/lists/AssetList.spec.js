@@ -3,6 +3,7 @@ vi.mock('@/store', () => ({ default: {} }))
 import AssetList from '@/components/lists/AssetList.vue'
 
 const isSelectable = AssetList.methods.isSelectable
+const updateOffsets = AssetList.methods.updateOffsets
 
 const modelingId = 'task-type-modeling'
 const riggingId = 'task-type-rigging'
@@ -61,6 +62,39 @@ describe('lists/AssetList', () => {
     test('stale validation entry pointing to a deleted task does not force selectability', () => {
       const asset = buildAsset(new Map([[modelingId, 'task-gone']]))
       expect(isSelectable.call(buildContext(), asset, modelingId)).toBe(false)
+    })
+  })
+})
+
+// Sticky offsets add up full header widths: clientWidth leaves out the
+// border and rounds, so each sticky column overlapped the previous one.
+const header = (width, clientWidth = Math.floor(width) - 1) => ({
+  clientWidth,
+  getBoundingClientRect: () => ({ width })
+})
+
+describe('lists/AssetList sticky offsets', () => {
+  test('places the sticky columns after the full width of the previous ones', () => {
+    const context = {
+      isLoading: false,
+      displaySettings: { showInfos: true },
+      $refs: {
+        'th-name': header(300.5),
+        'th-episode': header(81),
+        'editor-0': [{ $el: header(121) }],
+        'validation-0': [{ $el: header(151) }]
+      },
+      stickedVisibleMetadataDescriptors: [{ id: 'descriptor-1' }],
+      stickedDisplayedValidationColumns: ['task-type-1']
+    }
+    context.$nextTick = callback => callback.call(context)
+
+    updateOffsets.call(context)
+
+    expect(context.nameWidth).toBe(300.5)
+    expect(context.offsets).toEqual({
+      'editor-0': 381.5,
+      'validation-0': 502.5
     })
   })
 })

@@ -122,7 +122,7 @@ export const entityListMixin = {
       }
       this.$nextTick(() => {
         let offset = this.$refs['th-episode']
-          ? this.$refs['th-episode'].clientWidth
+          ? this.$refs['th-episode'].getBoundingClientRect().width
           : 0
         this.offsets = {}
 
@@ -133,7 +133,8 @@ export const entityListMixin = {
             metadataCol++
           ) {
             this.offsets[`editor-${metadataCol}`] = offset
-            offset += this.$refs[`editor-${metadataCol}`][0].$el.clientWidth
+            const editor = this.$refs[`editor-${metadataCol}`][0].$el
+            offset += editor.getBoundingClientRect().width
           }
         }
         for (
@@ -142,7 +143,8 @@ export const entityListMixin = {
           validationCol++
         ) {
           this.offsets[`validation-${validationCol}`] = offset
-          offset += this.$refs[`validation-${validationCol}`][0].$el.clientWidth
+          const validation = this.$refs[`validation-${validationCol}`][0].$el
+          offset += validation.getBoundingClientRect().width
         }
       })
     },

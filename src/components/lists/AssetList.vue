@@ -758,7 +758,7 @@ export default {
       const thName = this.$refs['th-name']
       if (thName && typeof ResizeObserver !== 'undefined') {
         this.nameResizeObserver = new ResizeObserver(() => {
-          this.nameWidth = thName.clientWidth
+          this.nameWidth = thName.getBoundingClientRect().width
           this.updateOffsets()
         })
         this.nameResizeObserver.observe(thName)
@@ -1121,10 +1121,10 @@ export default {
         return
       }
       this.$nextTick(function () {
-        this.nameWidth = this.$refs['th-name'].clientWidth
+        this.nameWidth = this.$refs['th-name'].getBoundingClientRect().width
         let offset = this.nameWidth
         if (this.$refs['th-episode']) {
-          offset += this.$refs['th-episode'].clientWidth
+          offset += this.$refs['th-episode'].getBoundingClientRect().width
         }
         this.offsets = {}
 
@@ -1135,7 +1135,8 @@ export default {
             metadataCol++
           ) {
             this.offsets[`editor-${metadataCol}`] = offset
-            offset += this.$refs[`editor-${metadataCol}`][0].$el.clientWidth
+            const editor = this.$refs[`editor-${metadataCol}`][0].$el
+            offset += editor.getBoundingClientRect().width
           }
         }
         for (
@@ -1144,7 +1145,8 @@ export default {
           validationCol++
         ) {
           this.offsets[`validation-${validationCol}`] = offset
-          offset += this.$refs[`validation-${validationCol}`][0].$el.clientWidth
+          const validation = this.$refs[`validation-${validationCol}`][0].$el
+          offset += validation.getBoundingClientRect().width
         }
       })
     }

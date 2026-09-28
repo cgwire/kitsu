@@ -1233,7 +1233,7 @@ export default {
         return
       }
       this.$nextTick(() => {
-        let offset = this.$refs['th-shot'].clientWidth
+        let offset = this.$refs['th-shot'].getBoundingClientRect().width
         this.offsets = {}
 
         if (this.displaySettings.showInfos) {
@@ -1243,7 +1243,8 @@ export default {
             metadataCol++
           ) {
             this.offsets[`editor-${metadataCol}`] = offset
-            offset += this.$refs[`editor-${metadataCol}`][0].$el.clientWidth
+            const editor = this.$refs[`editor-${metadataCol}`][0].$el
+            offset += editor.getBoundingClientRect().width
           }
         }
         for (
@@ -1252,7 +1253,8 @@ export default {
           validationCol++
         ) {
           this.offsets[`validation-${validationCol}`] = offset
-          offset += this.$refs[`validation-${validationCol}`][0].$el.clientWidth
+          const validation = this.$refs[`validation-${validationCol}`][0].$el
+          offset += validation.getBoundingClientRect().width
         }
       })
     }
