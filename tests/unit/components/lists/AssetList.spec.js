@@ -8,9 +8,11 @@ import {
   descriptor,
   mountEntityList,
   production,
+  setHeaderWidth,
   stickColumns,
   stickyLeft,
   stubHeaderWidths,
+  stubResizeObserver,
   taskTypeId
 } from '../../fixtures/entity-list'
 
@@ -143,6 +145,7 @@ describe('lists/AssetList sticky columns', () => {
 
   afterEach(() => {
     vi.restoreAllMocks()
+    vi.unstubAllGlobals()
     localStorage.clear()
   })
 
@@ -165,6 +168,19 @@ describe('lists/AssetList sticky columns', () => {
     await flushPromises()
 
     expect(stickyLeft(wrapper, 'validation-header-stub')).toBe('200px')
+
+    wrapper.unmount()
+  })
+
+  test('moves the next sticky columns along with a resized one', async () => {
+    const resize = stubResizeObserver()
+    const wrapper = await mountList({ showInfos: true })
+
+    setHeaderWidth('metadata-header-stub', 90)
+    resize(wrapper.find('thead metadata-header-stub').element)
+    await flushPromises()
+
+    expect(stickyLeft(wrapper, 'validation-header-stub')).toBe('290px')
 
     wrapper.unmount()
   })

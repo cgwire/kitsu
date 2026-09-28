@@ -1,5 +1,7 @@
 vi.mock('@/store', () => ({ default: {} }))
 
+import { flushPromises } from '@vue/test-utils'
+
 import EditList from '@/components/lists/EditList.vue'
 
 import {
@@ -7,9 +9,11 @@ import {
   filledColumns,
   mountEntityList,
   production,
+  setHeaderWidth,
   stickColumns,
   stickyLeft,
   stubHeaderWidths,
+  stubResizeObserver,
   taskTypeId
 } from '../../fixtures/entity-list'
 
@@ -65,7 +69,7 @@ describe('lists/EditList sticky offsets', () => {
       isLoading: false,
       displaySettings: { showInfos: true },
       $refs: {
-        'th-edit': header(300.5),
+        'th-name': header(300.5),
         'editor-0': [{ $el: header(121) }],
         'validation-0': [{ $el: header(151) }]
       },
@@ -84,18 +88,8 @@ describe('lists/EditList sticky offsets', () => {
 })
 
 describe('lists/EditList sticky columns', () => {
-  beforeEach(() => {
-    stubHeaderWidths()
-    stickColumns('edit')
-  })
-
-  afterEach(() => {
-    vi.restoreAllMocks()
-    localStorage.clear()
-  })
-
-  test('hides the sticky metadata columns along with the other infos', async () => {
-    const wrapper = await mountEntityList(EditList, {
+  const mountList = displaySettings =>
+    mountEntityList(EditList, {
       getters: {
         currentProduction: production,
         displayedEditsCount: 1,
@@ -103,7 +97,7 @@ describe('lists/EditList sticky columns', () => {
         editMetadataDescriptors: [descriptor]
       },
       props: {
-        displaySettings: { showInfos: false },
+        displaySettings,
         displayedEdits: [
           {
             id: 'edit-1',
@@ -115,10 +109,38 @@ describe('lists/EditList sticky columns', () => {
       }
     })
 
+  beforeEach(() => {
+    stubHeaderWidths()
+    stickColumns('edit')
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+    vi.unstubAllGlobals()
+    localStorage.clear()
+  })
+
+  test('hides the sticky metadata columns along with the other infos', async () => {
+    const wrapper = await mountList({ showInfos: false })
+
     expect(wrapper.find('tbody th.name').exists()).toBe(true)
     expect(wrapper.find('thead metadata-header-stub').exists()).toBe(false)
     expect(wrapper.findAll('tbody td.metadata-descriptor')).toHaveLength(0)
     expect(stickyLeft(wrapper, 'validation-header-stub')).toBe('200px')
+
+    wrapper.unmount()
+  })
+
+  test('moves the sticky columns along with a resized name column', async () => {
+    const resize = stubResizeObserver()
+    const wrapper = await mountList({ showInfos: true })
+
+    setHeaderWidth('name', 250)
+    resize(wrapper.find('thead th.name').element)
+    await flushPromises()
+
+    expect(stickyLeft(wrapper, 'metadata-header-stub')).toBe('250px')
+    expect(stickyLeft(wrapper, 'validation-header-stub')).toBe('370px')
 
     wrapper.unmount()
   })

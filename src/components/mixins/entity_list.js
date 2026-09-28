@@ -41,9 +41,22 @@ export const entityListMixin = {
     this.stickedColumns =
       preferences.getObjectPreference(this.localStorageStickKey) || {}
     if (this.domEvents) this.addEvents(this.domEvents)
+    if (typeof ResizeObserver !== 'undefined') {
+      this.stickyHeaders = new Set()
+      this.stickyHeadersObserver = new ResizeObserver(() =>
+        this.updateOffsets()
+      )
+      this.observeStickyHeaders()
+    }
+  },
+
+  // Sticky headers come and go with the stick menu and the display settings.
+  updated() {
+    this.observeStickyHeaders()
   },
 
   beforeUnmount() {
+    this.stickyHeadersObserver?.disconnect()
     window.removeEventListener('keydown', this.onKeyDown)
     window.removeEventListener('keyup', this.onKeyUp)
     document.removeEventListener('click', this.onHeaderMenuDocumentClick)
@@ -120,6 +133,33 @@ export const entityListMixin = {
   },
 
   methods: {
+    // A sticky header resized by a drag or by its content moves the next
+    // sticky columns.
+    observeStickyHeaders() {
+      if (!this.stickyHeadersObserver) return
+      const headers = new Set(
+        [
+          this.$refs['th-name'],
+          this.$refs['th-episode'],
+          ...this.stickedVisibleMetadataDescriptors.map(
+            (descriptor, j) => this.$refs[`editor-${j}`]?.[0]?.$el
+          ),
+          ...this.stickedDisplayedValidationColumns.map(
+            (columnId, j) => this.$refs[`validation-${j}`]?.[0]?.$el
+          )
+        ].filter(Boolean)
+      )
+      this.stickyHeaders.forEach(header => {
+        if (!headers.has(header)) this.stickyHeadersObserver.unobserve(header)
+      })
+      headers.forEach(header => {
+        if (!this.stickyHeaders.has(header)) {
+          this.stickyHeadersObserver.observe(header)
+        }
+      })
+      this.stickyHeaders = headers
+    },
+
     onBodyScroll(event) {
       const position = event.target
       this.$emit('scroll', position.scrollTop)

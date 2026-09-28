@@ -42,7 +42,7 @@
               scope="col"
               class="name edit-name datatable-row-header"
               data-column-key="name"
-              ref="th-edit"
+              ref="th-name"
             >
               <div class="flexrow">
                 <span class="flexrow-item">
@@ -811,7 +811,7 @@ export default {
         return
       }
       this.$nextTick(() => {
-        let offset = this.$refs['th-edit'].getBoundingClientRect().width
+        let offset = this.$refs['th-name'].getBoundingClientRect().width
         this.offsets = {}
 
         if (this.displaySettings.showInfos) {

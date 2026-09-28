@@ -46,7 +46,7 @@
               scope="col"
               class="name shot-name datatable-row-header"
               data-column-key="name"
-              ref="th-shot"
+              ref="th-name"
             >
               <sortable-field-header
                 field-name="name"
@@ -1237,7 +1237,7 @@ export default {
         return
       }
       this.$nextTick(() => {
-        let offset = this.$refs['th-shot'].getBoundingClientRect().width
+        let offset = this.$refs['th-name'].getBoundingClientRect().width
         this.offsets = {}
 
         if (this.displaySettings.showInfos) {

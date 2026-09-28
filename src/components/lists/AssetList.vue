@@ -752,26 +752,8 @@ export default {
       ],
       offsets: {},
       nameWidth: 200,
-      nameResizeObserver: null,
       lastSelectedAsset: null
     }
-  },
-
-  mounted() {
-    this.$nextTick(() => {
-      const thName = this.$refs['th-name']
-      if (thName && typeof ResizeObserver !== 'undefined') {
-        this.nameResizeObserver = new ResizeObserver(() => {
-          this.nameWidth = thName.getBoundingClientRect().width
-          this.updateOffsets()
-        })
-        this.nameResizeObserver.observe(thName)
-      }
-    })
-  },
-
-  beforeUnmount() {
-    this.nameResizeObserver?.disconnect()
   },
 
   computed: {

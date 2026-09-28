@@ -25,16 +25,43 @@ const HEADER_WIDTHS = {
   'validation-header-stub': 150
 }
 
-export const stubHeaderWidths = () =>
-  vi
+let headerWidths = HEADER_WIDTHS
+
+export const stubHeaderWidths = () => {
+  headerWidths = { ...HEADER_WIDTHS }
+  return vi
     .spyOn(Element.prototype, 'getBoundingClientRect')
     .mockImplementation(function () {
-      const key = Object.keys(HEADER_WIDTHS).find(
+      const key = Object.keys(headerWidths).find(
         name =>
           this.tagName.toLowerCase() === name || this.classList.contains(name)
       )
-      return { width: HEADER_WIDTHS[key] || 0 }
+      return { width: headerWidths[key] || 0 }
     })
+}
+
+export const setHeaderWidth = (header, width) => {
+  headerWidths[header] = width
+}
+
+// jsdom has no ResizeObserver: record what the lists observe, and let a spec
+// report a header resize the way the browser does.
+export const stubResizeObserver = () => {
+  const observers = []
+  vi.stubGlobal('ResizeObserver', function (callback) {
+    const targets = new Set()
+    observers.push({ callback, targets })
+    return {
+      observe: target => targets.add(target),
+      unobserve: target => targets.delete(target),
+      disconnect: () => targets.clear()
+    }
+  })
+  return target =>
+    observers
+      .filter(({ targets }) => targets.has(target))
+      .forEach(({ callback }) => callback([{ target }]))
+}
 
 export const stickyLeft = (wrapper, stub) =>
   wrapper.find(`thead ${stub}`).attributes('left')
