@@ -1641,33 +1641,7 @@ export default {
           Math.ceil(minutesToDays(this.organisation, item.estimation)) - 1,
           daysOff
         )
-        // update parents
-        if (item.startDate.isBefore(item.parentElement.startDate)) {
-          item.parentElement.startDate = item.startDate.clone()
-          this.updateScheduleItem(item.parentElement)
-          if (
-            item.parentElement.startDate.isBefore(
-              item.parentElement.parentElement.startDate
-            )
-          ) {
-            item.parentElement.parentElement.startDate =
-              item.parentElement.startDate.clone()
-            this.updateScheduleItem(item.parentElement.parentElement)
-          }
-        }
-        if (item.endDate.isAfter(item.parentElement.endDate)) {
-          item.parentElement.endDate = item.endDate.clone()
-          this.updateScheduleItem(item.parentElement)
-          if (
-            item.parentElement.endDate.isAfter(
-              item.parentElement.parentElement.endDate
-            )
-          ) {
-            item.parentElement.parentElement.endDate =
-              item.parentElement.endDate.clone()
-            this.updateScheduleItem(item.parentElement.parentElement)
-          }
-        }
+        this.widenScheduleItemParents(item)
         await this.saveTaskChanged(item)
         return
       }
@@ -1698,6 +1672,34 @@ export default {
       }
 
       await this.updateScheduleItem(item)
+    },
+
+    // Widen the bars above a moved one so they still enclose it, and save
+    // each widened bar once, with both its dates.
+    widenScheduleItemParents(item) {
+      const widenedParents = []
+      let child = item
+      let parent = item.parentElement
+      let isWidened = true
+      while (parent && isWidened) {
+        isWidened = false
+        if (child.startDate.isBefore(parent.startDate)) {
+          parent.startDate = child.startDate.clone()
+          isWidened = true
+        }
+        if (child.endDate.isAfter(parent.endDate)) {
+          parent.endDate = child.endDate.clone()
+          isWidened = true
+        }
+        if (isWidened) {
+          widenedParents.push(parent)
+        }
+        child = parent
+        parent = parent.parentElement
+      }
+      widenedParents.forEach(widenedParent => {
+        this.updateScheduleItem(widenedParent)
+      })
     },
 
     async updateScheduleItem(item) {

@@ -19,7 +19,8 @@ const {
   saveTaskChanged,
   toggleSidePanel,
   updateRoute,
-  updateScheduleItem
+  updateScheduleItem,
+  widenScheduleItemParents
 } = ProductionSchedule.methods
 const {
   filteredScheduleItems,
@@ -363,6 +364,7 @@ describe('ProductionSchedule bar date strings', () => {
     getMinDate,
     getMaxDate,
     updateScheduleItem,
+    widenScheduleItemParents,
     ...overrides
   })
 
@@ -398,5 +400,41 @@ describe('ProductionSchedule bar date strings', () => {
     expect(taskTypeBar.start_date).toBe('2026-04-01')
     expect(taskTypeBar.end_date).toBe('2026-05-20')
     expect(page.saveScheduleItem).toHaveBeenCalledWith(taskTypeBar)
+  })
+
+  // A task stretching past both ends of its bars must save each bar once
+  // with its two new dates: two requests racing could keep a stale end.
+  it('saves each widened parent of a task once', async () => {
+    const page = buildPage({
+      daysOffByPerson: {},
+      organisation: { hours_by_day: 8 },
+      saveTaskChanged: vi.fn().mockResolvedValue()
+    })
+    const taskTypeBar = buildBar('2026-01-06', '2026-01-15')
+    const entityBar = buildBar('2026-01-07', '2026-01-14')
+    entityBar.parentElement = taskTypeBar
+    // Monday 5 to Friday 16: ten working days
+    const task = {
+      type: 'Task',
+      assignees: [],
+      estimation: 10 * 8 * 60,
+      startDate: moment.utc('2026-01-05'),
+      endDate: moment.utc('2026-01-16'),
+      parentElement: entityBar
+    }
+
+    await onScheduleItemChanged.call(page, task)
+
+    expect(page.saveScheduleItem).toHaveBeenCalledTimes(2)
+    expect(page.saveScheduleItem).toHaveBeenCalledWith(entityBar)
+    expect(page.saveScheduleItem).toHaveBeenCalledWith(taskTypeBar)
+    expect([entityBar.start_date, entityBar.end_date]).toEqual([
+      '2026-01-05',
+      '2026-01-16'
+    ])
+    expect([taskTypeBar.start_date, taskTypeBar.end_date]).toEqual([
+      '2026-01-05',
+      '2026-01-16'
+    ])
   })
 })
