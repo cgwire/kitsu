@@ -28,11 +28,7 @@
         type="video/mp4"
         playsinline
       ></video>
-      <canvas
-        ref="displayCanvas"
-        class="annotation-movie"
-        v-show="!isLoading"
-      ></canvas>
+      <canvas ref="displayCanvas" class="annotation-movie"></canvas>
     </div>
   </div>
 </template>
@@ -782,6 +778,9 @@ defineExpose({
 .loading-background {
   background: #00000088;
   position: absolute;
+  // The canvas stays visible under the loader; panzoom's transform
+  // would otherwise paint it above.
+  z-index: 1;
   display: flex;
   top: 0;
   left: 0;

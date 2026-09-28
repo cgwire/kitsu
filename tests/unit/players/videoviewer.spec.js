@@ -178,7 +178,9 @@ describe('players/VideoViewer (canvas pipeline)', () => {
     wrapper.unmount()
   })
 
-  it('shows the loader when a stalled movie lacks data to play', async () => {
+  it('shows the loader over the last frame when a stalled movie lacks data', async () => {
+    // The loader background is translucent: hiding the canvas turned every
+    // buffering hiccup into a black screen instead of a dimmed last frame.
     const wrapper = mountViewer()
     await new Promise(resolve => setTimeout(resolve))
     const video = wrapper.find('video').element
@@ -188,7 +190,8 @@ describe('players/VideoViewer (canvas pipeline)', () => {
       configurable: true
     })
     await video.dispatchEvent(new Event('stalled'))
-    expect(wrapper.find('canvas').element.style.display).toBe('none')
+    expect(wrapper.find('.loading-background').exists()).toBe(true)
+    expect(wrapper.find('canvas').element.style.display).not.toBe('none')
     wrapper.unmount()
   })
 
