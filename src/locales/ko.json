@@ -1051,6 +1051,8 @@
       },
       "fields": {
         "fps": "FPS",
+        "hd_bitrate_compression": "고화질 동영상 비트레이트 (Mbit/s)",
+        "hd_bitrate_short": "HD Mbit/s",
         "name": "이름",
         "ratio": "비율",
         "resolution": "해상도",
@@ -1069,6 +1071,8 @@
         "code": "짧은 이름",
         "is_publish_default": "게시 모드에서 아티스트의 댓글 위젯을 기본적으로 설정합니다.",
         "is_single_preview_per_revision": "수정본당 미리 보기 파일 하나만 허용",
+        "ld_bitrate_compression": "저화질 동영상 비트레이트 (Mbit/s)",
+        "ld_bitrate_short": "LD Mbit/s",
         "revision_padding": "수정본 번호 자릿수 채우기 (0 = 채우지 않음)",
         "is_frame_in_numbering": "플레이어 프레임 카운터를 프레임 인부터 시작"
       },
@@ -1118,6 +1122,7 @@
       },
       "parameters": {
         "title": "매개변수",
+        "previews_and_comments": "프리뷰 및 댓글",
         "save": {
           "button": "확인"
         }
@@ -1191,6 +1196,9 @@
         "assets": "어셋",
         "shots": "샷",
         "sequences": "시퀀스"
+      },
+      "video": {
+        "title": "동영상"
       },
       "hide_stats": "통계 숨기기",
       "show_stats": "통계 표시"

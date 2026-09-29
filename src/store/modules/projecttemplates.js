@@ -75,11 +75,12 @@ const actions = {
     return projectTemplatesApi.getTemplateTaskTypes(templateId)
   },
 
-  addTaskTypeToTemplate(_, { templateId, taskTypeId, priority }) {
+  addTaskTypeToTemplate(_, { templateId, taskTypeId, priority, ...bitrates }) {
     return projectTemplatesApi.addTaskTypeToTemplate(
       templateId,
       taskTypeId,
-      priority
+      priority,
+      bitrates
     )
   },
 

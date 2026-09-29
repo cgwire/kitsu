@@ -51,6 +51,20 @@
                 taskListObject.entity === activeTab
               "
             >
+              <thead>
+                <tr>
+                  <th class="th-grab"></th>
+                  <th>{{ $t('task_types.fields.name') }}</th>
+                  <th>{{ $t('task_types.fields.short_name') }}</th>
+                  <th class="th-bitrate">
+                    {{ $t('productions.fields.hd_bitrate_short') }}
+                  </th>
+                  <th class="th-bitrate">
+                    {{ $t('productions.fields.ld_bitrate_short') }}
+                  </th>
+                  <th></th>
+                </tr>
+              </thead>
               <draggable
                 class="datatable-body"
                 item-key="taskType.id"
@@ -63,6 +77,7 @@
                     class="task-type"
                     :task-type="taskTypeData.taskType"
                     :schedule-item="taskTypeData.scheduleItem"
+                    @bitrates-changed="onBitratesChanged"
                     @date-changed="onDateChanged"
                     @remove="removeTaskType"
                   />
@@ -292,6 +307,19 @@ const removeTaskType = async ({ taskType, scheduleItem }) => {
   resetDisplayedTaskTypes()
 }
 
+const onBitratesChanged = async ({ taskType, ...bitrates }) => {
+  errors.scheduleTimeUpdate = false
+  try {
+    await store.dispatch('addTaskTypeToProduction', {
+      taskTypeId: taskType.id,
+      ...bitrates
+    })
+  } catch (err) {
+    console.error(err)
+    errors.scheduleTimeUpdate = true
+  }
+}
+
 const onDateChanged = async scheduleItem => {
   errors.scheduleTimeUpdate = false
   try {
@@ -416,6 +444,17 @@ watch(
 
 .datatable th {
   color: var(--text);
+  padding-left: 10px;
+  padding-top: 1em;
+}
+
+.th-grab {
+  width: 30px;
+}
+
+.th-bitrate {
+  min-width: 120px;
+  white-space: nowrap;
 }
 
 table {

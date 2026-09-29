@@ -111,68 +111,11 @@
           v-if="currentProduction && currentProduction.id && isLocalTVShow"
         /-->
 
+        <h3 class="section-title">
+          {{ $t('productions.parameters.previews_and_comments') }}
+        </h3>
         <text-field
-          type="number"
-          :max="60"
-          :step="0.001"
-          :label="$t('productions.fields.fps')"
-          placeholder="25"
-          @enter="runConfirmation"
-          v-model="form.fps"
-          v-if="currentProduction && currentProduction.id"
-        />
-        <text-field
-          :label="$t('productions.fields.ratio')"
-          placeholder="16:9"
-          :maxlength="10"
-          @enter="runConfirmation"
-          v-model.trim="form.ratio"
-          v-if="currentProduction && currentProduction.id"
-        />
-        <text-field
-          :label="$t('productions.fields.resolution')"
-          placeholder="1920x1080"
-          @enter="runConfirmation"
-          v-model.trim="form.resolution"
-          v-if="currentProduction && currentProduction.id"
-        />
-        <combobox-boolean
-          :label="$t('productions.fields.is_clients_isolated')"
-          @enter="runConfirmation"
-          v-model="form.is_clients_isolated"
-          v-if="currentProduction && currentProduction.id"
-        />
-        <combobox-boolean
-          :label="$t('productions.fields.is_preview_download_allowed')"
-          @enter="runConfirmation"
-          v-model="form.is_preview_download_allowed"
-          v-if="currentProduction && currentProduction.id"
-        />
-        <combobox-boolean
-          :label="$t('productions.fields.is_set_preview_automated')"
-          @enter="runConfirmation"
-          v-model="form.is_set_preview_automated"
-          v-if="currentProduction && currentProduction.id"
-        />
-        <combobox-boolean
-          :label="$t('productions.fields.is_single_preview_per_revision')"
-          @enter="runConfirmation"
-          v-model="form.is_single_preview_per_revision"
-          v-if="currentProduction && currentProduction.id"
-        />
-        <combobox-boolean
-          :label="$t('productions.fields.is_frame_in_numbering')"
-          @enter="runConfirmation"
-          v-model="form.is_frame_in_numbering"
-          v-if="currentProduction && currentProduction.id"
-        />
-        <combobox-boolean
-          :label="$t('productions.fields.is_publish_default')"
-          @enter="runConfirmation"
-          v-model="form.is_publish_default_for_artists"
-          v-if="currentProduction && currentProduction.id"
-        />
-        <text-field
+          class="number-line"
           type="number"
           :step="1"
           :label="$t('productions.fields.max_retakes')"
@@ -180,7 +123,9 @@
           v-model="form.max_retakes"
           v-if="currentProduction && currentProduction.id"
         />
+
         <text-field
+          class="number-line"
           type="number"
           :step="1"
           :min="0"
@@ -188,6 +133,49 @@
           :label="$t('productions.fields.revision_padding')"
           @enter="runConfirmation"
           v-model="form.revision_padding"
+          v-if="currentProduction && currentProduction.id"
+        />
+
+        <checkbox
+          class="mb1"
+          :toggle="true"
+          :label="$t('productions.fields.is_clients_isolated')"
+          v-model="form.is_clients_isolated"
+          v-if="currentProduction && currentProduction.id"
+        />
+        <checkbox
+          class="mb1"
+          :toggle="true"
+          :label="$t('productions.fields.is_preview_download_allowed')"
+          v-model="form.is_preview_download_allowed"
+          v-if="currentProduction && currentProduction.id"
+        />
+        <checkbox
+          class="mb1"
+          :toggle="true"
+          :label="$t('productions.fields.is_set_preview_automated')"
+          v-model="form.is_set_preview_automated"
+          v-if="currentProduction && currentProduction.id"
+        />
+        <checkbox
+          class="mb1"
+          :toggle="true"
+          :label="$t('productions.fields.is_single_preview_per_revision')"
+          v-model="form.is_single_preview_per_revision"
+          v-if="currentProduction && currentProduction.id"
+        />
+        <checkbox
+          class="mb1"
+          :toggle="true"
+          :label="$t('productions.fields.is_frame_in_numbering')"
+          v-model="form.is_frame_in_numbering"
+          v-if="currentProduction && currentProduction.id"
+        />
+        <checkbox
+          class="mb2"
+          :toggle="true"
+          :label="$t('productions.fields.is_publish_default')"
+          v-model="form.is_publish_default_for_artists"
           v-if="currentProduction && currentProduction.id"
         />
         <p v-if="isError" class="error mt1">
@@ -223,14 +211,14 @@ import { useStore } from 'vuex'
 
 import { formatSimpleDate, parseSimpleDate } from '@/lib/time'
 import {
-  PRODUCTION_TYPE_OPTIONS,
+  HOME_PAGE_OPTIONS,
   PRODUCTION_STYLE_OPTIONS,
-  HOME_PAGE_OPTIONS
+  PRODUCTION_TYPE_OPTIONS
 } from '@/lib/productions'
 
 import ChangeAvatarModal from '@/components/modals/ChangeAvatarModal.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
-import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
+import Checkbox from '@/components/widgets/Checkbox.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import DateField from '@/components/widgets/DateField.vue'
 import ProductionName from '@/components/widgets/ProductionName.vue'
@@ -261,15 +249,12 @@ const emptyForm = () => ({
   episode_span: 0,
   max_retakes: 0,
   revision_padding: 0,
-  is_clients_isolated: 'false',
-  is_frame_in_numbering: 'false',
-  is_preview_download_allowed: 'false',
-  is_set_preview_automated: 'false',
-  is_single_preview_per_revision: 'false',
-  is_publish_default_for_artists: 'false',
-  fps: '',
-  ratio: '',
-  resolution: '',
+  is_clients_isolated: false,
+  is_frame_in_numbering: false,
+  is_preview_download_allowed: false,
+  is_set_preview_automated: false,
+  is_single_preview_per_revision: false,
+  is_publish_default_for_artists: false,
   homepage: HOME_PAGE_OPTIONS[0].value
 })
 
@@ -334,28 +319,17 @@ const resetForm = () => {
       production_type: production.production_type || 'short',
       production_style: production.production_style || '2d3d',
       episode_span: production.episode_span,
-      fps: production.fps,
       max_retakes: production.max_retakes,
       revision_padding: production.revision_padding,
       nb_episodes: production.nb_episodes,
-      is_clients_isolated: production.is_clients_isolated ? 'true' : 'false',
-      is_frame_in_numbering: production.is_frame_in_numbering
-        ? 'true'
-        : 'false',
-      is_preview_download_allowed: production.is_preview_download_allowed
-        ? 'true'
-        : 'false',
-      is_set_preview_automated: production.is_set_preview_automated
-        ? 'true'
-        : 'false',
-      is_single_preview_per_revision: production.is_single_preview_per_revision
-        ? 'true'
-        : 'false',
-      is_publish_default_for_artists: production.is_publish_default_for_artists
-        ? 'true'
-        : 'false',
-      ratio: production.ratio,
-      resolution: production.resolution,
+      is_clients_isolated: !!production.is_clients_isolated,
+      is_frame_in_numbering: !!production.is_frame_in_numbering,
+      is_preview_download_allowed: !!production.is_preview_download_allowed,
+      is_set_preview_automated: !!production.is_set_preview_automated,
+      is_single_preview_per_revision:
+        !!production.is_single_preview_per_revision,
+      is_publish_default_for_artists:
+        !!production.is_publish_default_for_artists,
       homepage: production.homepage
     }
   } else {
@@ -411,7 +385,38 @@ watch(
 }
 
 .box {
-  padding: 1em;
+  padding: 2em;
+}
+
+.section-title {
+  color: var(--text);
+  font-size: 1.1em;
+  font-weight: 500;
+  margin: 1.5em 0 0.8em;
+  text-transform: uppercase;
+}
+
+// Short numeric settings: the input sits on the left of its label.
+.number-line {
+  align-items: center;
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 0.6em;
+  justify-content: flex-end;
+
+  :deep(.label) {
+    margin-bottom: 0;
+  }
+
+  :deep(.control) {
+    flex: 0 0 auto;
+  }
+
+  :deep(.input) {
+    padding: 0.3em 0.3em;
+    width: 45px;
+    height: 35px;
+  }
 }
 
 .picture-header {

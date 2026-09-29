@@ -25,6 +25,19 @@
           {{ $t('settings.production.empty_list') }}
         </div>
         <table class="datatable list" v-else>
+          <thead>
+            <tr>
+              <th class="th-grab"></th>
+              <th>{{ $t('task_types.fields.name') }}</th>
+              <th class="th-bitrate">
+                {{ $t('productions.fields.hd_bitrate_short') }}
+              </th>
+              <th class="th-bitrate">
+                {{ $t('productions.fields.ld_bitrate_short') }}
+              </th>
+              <th></th>
+            </tr>
+          </thead>
           <draggable
             class="datatable-body"
             item-key="id"
@@ -38,6 +51,20 @@
                   <grip-vertical-icon />
                 </td>
                 <task-type-cell :task-type="taskType" />
+                <td class="bitrate" v-for="key in BITRATE_KEYS" :key="key">
+                  <input
+                    class="input"
+                    type="number"
+                    min="1"
+                    :max="bitrateCeiling(taskType, key)"
+                    :placeholder="defaultBitrates[key] || ''"
+                    :title="$t(`productions.fields.${key}`)"
+                    :value="taskType[key] ?? ''"
+                    @change="
+                      onBitrateChange(taskType, key, $event.target.value)
+                    "
+                  />
+                </td>
                 <td class="remove">
                   <button class="button" @click="$emit('remove', taskType.id)">
                     {{ $t('main.remove') }}
@@ -73,6 +100,11 @@ import { useStore } from 'vuex'
 import draggable from 'vuedraggable'
 import { GripVerticalIcon } from 'lucide-vue-next'
 
+import {
+  MAX_MOVIE_BITRATE,
+  clampBitrates,
+  parseBitrate
+} from '@/lib/productions'
 import { sortByName } from '@/lib/sorting'
 
 import SettingImporter from '@/components/widgets/SettingImporter.vue'
@@ -85,13 +117,22 @@ const router = useRouter()
 const store = useStore()
 
 const VALID_SECTIONS = ['assets', 'shots', 'sequences', 'episodes', 'edits']
+const BITRATE_KEYS = ['hd_bitrate_compression', 'ld_bitrate_compression']
 
 const props = defineProps({
   taskTypes: { type: Array, default: () => [] },
-  allTaskTypes: { type: Array, default: () => [] }
+  allTaskTypes: { type: Array, default: () => [] },
+  // Bitrates shown as placeholders when a task type inherits them.
+  defaultBitrates: { type: Object, default: () => ({}) }
 })
 
-const emit = defineEmits(['add', 'import-items', 'remove', 'reorder'])
+const emit = defineEmits([
+  'add',
+  'bitrates-changed',
+  'import-items',
+  'remove',
+  'reorder'
+])
 
 const initialSection = VALID_SECTIONS.includes(route.query.section)
   ? route.query.section
@@ -166,6 +207,21 @@ const onImportFromProduction = async productionId => {
   })
 }
 
+const bitrateCeiling = (taskType, key) =>
+  key === 'hd_bitrate_compression'
+    ? MAX_MOVIE_BITRATE
+    : taskType.hd_bitrate_compression ||
+      props.defaultBitrates.hd_bitrate_compression ||
+      MAX_MOVIE_BITRATE
+
+const onBitrateChange = (taskType, key, value) => {
+  const bitrates = clampBitrates(
+    { ...taskType, [key]: value },
+    parseBitrate(props.defaultBitrates.hd_bitrate_compression)
+  )
+  emit('bitrates-changed', { taskTypeId: taskType.id, ...bitrates })
+}
+
 const onReorder = () => {
   const ordered = draggableList.value.map((tt, index) => ({
     taskTypeId: tt.id,
@@ -198,21 +254,45 @@ const onReorder = () => {
 .column {
   overflow-y: initial;
   flex: 0 0 auto;
-  max-width: 400px;
+  max-width: 600px;
 }
 
 .list {
-  width: 400px;
-  min-width: 400px;
-  max-width: 400px;
+  width: 600px;
+  min-width: 600px;
+  max-width: 600px;
 
   .name {
     width: 100%;
   }
 }
 
+.bitrate {
+  min-width: 120px;
+  width: 120px;
+
+  input {
+    width: 100px;
+  }
+}
+
 .box {
-  max-width: 400px;
+  max-width: 600px;
+}
+
+.datatable th {
+  color: var(--text);
+  padding-left: 10px;
+  padding-top: 1em;
+}
+
+.th-grab {
+  width: 30px;
+}
+
+.th-bitrate {
+  min-width: 120px;
+  white-space: nowrap;
 }
 
 .task-type {

@@ -109,8 +109,8 @@ export default {
     })
   },
 
-  addTaskTypeToProduction(productionId, taskTypeId, priority) {
-    const data = { task_type_id: taskTypeId, priority }
+  addTaskTypeToProduction(productionId, taskTypeId, priority, bitrates = {}) {
+    const data = { task_type_id: taskTypeId, priority, ...bitrates }
     const path = `/api/data/projects/${productionId}/settings/task-types`
     return client.ppost(path, data)
   },
