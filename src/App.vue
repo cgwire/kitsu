@@ -485,7 +485,9 @@ const socketEvents = {
   'task:update': eventData => {
     if (taskMap.value.get(eventData.task_id)) {
       nextTick(() => {
-        store.dispatch('loadTask', { taskId: eventData.task_id })
+        store
+          .dispatch('loadTask', { taskId: eventData.task_id })
+          .catch(console.error)
       })
     }
   },
