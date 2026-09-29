@@ -33,6 +33,15 @@
           @update:model-value="onEntityTypeChanged"
           v-if="availableEntityTypes.length > 1"
         />
+        <div class="flexrow-item" v-if="hasTaskTypeFilter">
+          <label class="label">{{ $t('task_types.title') }}</label>
+          <combobox-options
+            :title="taskTypeFilterTitle"
+            :options="taskTypeFilterOptions"
+            :model-value="taskTypeVisibilityMap"
+            @change="onTaskTypeVisibilityChanged"
+          />
+        </div>
         <combobox
           class="flexrow-item ml1"
           :label="$t('schedule.mode')"
@@ -568,6 +577,7 @@ import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Checkbox from '@/components/widgets/Checkbox.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
+import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 import DateField from '@/components/widgets/DateField.vue'
@@ -591,6 +601,14 @@ export const DEFAULT_MODE = 'prev'
 export const DEFAULT_VERSION = 'ref'
 export const DEFAULT_ZOOM = 1
 
+// A query param repeated in the URL reaches the page as an array of values.
+export const parseHiddenTaskTypeIds = (queryValue, taskTypeMap) =>
+  [queryValue]
+    .flat()
+    .filter(Boolean)
+    .flatMap(value => value.split(','))
+    .filter(id => taskTypeMap.has(id))
+
 export default {
   name: 'production-schedule',
 
@@ -603,6 +621,7 @@ export default {
     ChevronRightIcon,
     Combobox,
     ComboboxNumber,
+    ComboboxOptions,
     ComboboxTaskType,
     ConfirmModal,
     DateField,
@@ -641,6 +660,7 @@ export default {
       endDate: moment().add(6, 'months').endOf('day'),
       entityType: null,
       expandAll: false,
+      hiddenTaskTypeIds: [],
       isSidePanelOpen: false,
       resetTimeout: null,
       scheduleItems: [],
@@ -853,7 +873,7 @@ export default {
       return options
     },
 
-    filteredScheduleItems() {
+    entityFilteredScheduleItems() {
       if (!this.entityType) {
         return this.scopedScheduleItems
       }
@@ -861,6 +881,47 @@ export default {
         const taskType = this.taskTypeMap.get(item.task_type_id)
         return taskType && taskType.for_entity === this.entityType
       })
+    },
+
+    // Named and ordered like the rows they toggle: two entities can share a
+    // task type name, the bare name would list two identical options.
+    taskTypeFilterOptions() {
+      return this.entityFilteredScheduleItems.map(item => ({
+        label: item.name,
+        value: item.task_type_id
+      }))
+    },
+
+    // A single option is nothing to choose from, unless it is the hidden one:
+    // dropping the filter there would leave no way to bring the row back.
+    hasTaskTypeFilter() {
+      return (
+        this.taskTypeFilterOptions.length > 1 ||
+        this.filteredScheduleItems.length <
+          this.entityFilteredScheduleItems.length
+      )
+    },
+
+    taskTypeFilterTitle() {
+      const total = this.taskTypeFilterOptions.length
+      const visible = this.filteredScheduleItems.length
+      return visible === total ? this.$t('main.all') : `(${visible}/${total})`
+    },
+
+    taskTypeVisibilityMap() {
+      return this.taskTypeFilterOptions.reduce((map, option) => {
+        map[option.value] = !this.hiddenTaskTypeIds.includes(option.value)
+        return map
+      }, {})
+    },
+
+    filteredScheduleItems() {
+      if (!this.hiddenTaskTypeIds.length) {
+        return this.entityFilteredScheduleItems
+      }
+      return this.entityFilteredScheduleItems.filter(
+        item => !this.hiddenTaskTypeIds.includes(item.task_type_id)
+      )
     }
   },
 
@@ -894,7 +955,7 @@ export default {
       'updateTask'
     ]),
 
-    updateRoute({ mode, type, version, zoom }) {
+    updateRoute({ mode, type, version, zoom, hiddenTypes }) {
       const query = { ...this.$route.query }
 
       if (mode !== undefined) {
@@ -909,9 +970,18 @@ export default {
       if (zoom !== undefined) {
         query.zoom = String(zoom)
       }
+      if (hiddenTypes !== undefined) {
+        query.hiddenTypes = hiddenTypes || undefined
+      }
 
       if (JSON.stringify(query) !== JSON.stringify(this.$route.query)) {
-        this.$router.push({ query })
+        // the page never reads the history back, and the task type checkboxes
+        // stay open: one entry per click would take as many Back presses
+        if (hiddenTypes !== undefined) {
+          this.$router.replace({ query })
+        } else {
+          this.$router.push({ query })
+        }
       }
     },
 
@@ -1022,6 +1092,7 @@ export default {
       const type = this.$route.query.type
       const version = this.$route.query.version
       const zoom = Number(this.$route.query.zoom)
+      const hiddenTypes = this.$route.query.hiddenTypes
 
       this.mode = this.modeOptions.map(o => o.value).includes(mode)
         ? mode
@@ -1035,6 +1106,10 @@ export default {
       this.zoomLevel = this.zoomOptions.map(o => o.value).includes(zoom)
         ? zoom
         : DEFAULT_ZOOM
+      this.hiddenTaskTypeIds = parseHiddenTaskTypeIds(
+        hiddenTypes,
+        this.taskTypeMap
+      )
 
       // loadData computed the editable flags with the default mode/version,
       // before the query params were applied
@@ -1734,6 +1809,15 @@ export default {
 
       this.isSidePanelOpen = !this.isSidePanelOpen
 
+      // expanding a row selects it, and Expand all or the export expand the
+      // filtered out rows too: the panel would open on a row out of sight
+      if (
+        this.isSidePanelOpen &&
+        !this.filteredScheduleItems.includes(this.selectedTaskType)
+      ) {
+        this.selectedTaskType = null
+      }
+
       if (
         this.isSidePanelOpen &&
         this.assignments.type !== 'task' &&
@@ -1758,16 +1842,24 @@ export default {
       this.selectedTaskType = this.scheduleItems.find(
         item => item.task_type_id === taskTypeId
       )
-      // clear the entity filter when it hides the selected row, or the
-      // expand below would fill the panel while the schedule shows nothing
+      // clear the filters hiding the selected row, or the expand below would
+      // fill the panel while the schedule shows nothing
+      const query = {}
       if (
         this.entityType &&
         this.selectedTaskType &&
         this.selectedTaskType.for_entity !== this.entityType
       ) {
         this.entityType = null
-        this.updateRoute({ type: null })
+        query.type = null
       }
+      if (this.hiddenTaskTypeIds.includes(taskTypeId)) {
+        this.hiddenTaskTypeIds = this.hiddenTaskTypeIds.filter(
+          id => id !== taskTypeId
+        )
+        query.hiddenTypes = this.hiddenTaskTypeIds.join(',') || null
+      }
+      this.updateRoute(query)
       // refresh schedule
       this.expandTaskTypeElement(
         this.selectedTaskType,
@@ -2375,6 +2467,27 @@ export default {
 
     onEntityTypeChanged(type) {
       this.updateRoute({ type })
+    },
+
+    // One id at a time: the options only cover the current entity filter, and
+    // rebuilding the list from them would show the types hidden in the others.
+    onTaskTypeVisibilityChanged({ key, value }) {
+      this.hiddenTaskTypeIds = value
+        ? this.hiddenTaskTypeIds.filter(id => id !== key)
+        : [...this.hiddenTaskTypeIds, key]
+      this.updateRoute({
+        hiddenTypes: this.hiddenTaskTypeIds.join(',') || null
+      })
+
+      if (!value) {
+        // a hidden row leaves the schedule with its tasks still selected: the
+        // next drag would move them out of sight
+        this.$refs.schedule?.resetSelection()
+        // the side panel would keep editing a task type no longer displayed
+        if (this.selectedTaskType?.task_type_id === key) {
+          this.closeSidePanel()
+        }
+      }
     },
 
     onModeChanged(mode) {
