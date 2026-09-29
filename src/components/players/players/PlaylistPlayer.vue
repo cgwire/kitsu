@@ -2233,6 +2233,9 @@ const playEntity = (entityIndex, updateFullPlaylist = true, frame = -1) => {
   framesSeenOfPicture.value = 1
   playingEntityIndex.value = entityIndex
   if (entity && isMoviePreview(entity.preview_file_extension)) {
+    // The handles otherwise stay those of the previous entity until its
+    // metadata loads, and a playing switch seeked on them.
+    resetHandles(entity)
     nextTick(() => {
       scrollToEntity(playingEntityIndex.value)
       rawPlayer.value?.loadEntity(entityIndex)
