@@ -162,4 +162,32 @@ describe('PreviewPlayer.vue', () => {
       expect(rejections).toEqual([])
     })
   })
+
+  describe('focus', () => {
+    // TaskInfo focuses the player in a nextTick once a task is loaded. A
+    // render that threw on update keeps the player mounted with every
+    // template ref null.
+    it('does nothing after a failed render', async () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => {})
+      const errorHandler = vi.fn()
+      let isRenderFailing = false
+      wrapper = mountPlayer({
+        config: { errorHandler },
+        getterOverrides: {
+          getProductionBackgrounds: () => () => {
+            if (isRenderFailing) throw new Error('render failure')
+            return []
+          }
+        }
+      })
+      isRenderFailing = true
+      await wrapper.setProps({ task: { ...task, id: 'task-2' } })
+      expect(errorHandler.mock.calls.map(([error]) => error.message)).toEqual(
+        ['render failure']
+      )
+      expect(wrapper.find('.preview-player').exists()).toBe(false)
+
+      expect(() => wrapper.vm.focus()).not.toThrow()
+    })
+  })
 })

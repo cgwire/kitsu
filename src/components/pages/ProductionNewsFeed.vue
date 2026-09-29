@@ -368,6 +368,10 @@ const onNewsNew = eventData => {
         newsId: eventData.news_id
       })
       .then(() => markRecent(eventData.news_id))
+      .catch(err => {
+        // Its comment was deleted or moved before the news could load.
+        if (err?.status !== 404) console.error(err)
+      })
   }
 }
 
@@ -378,10 +382,16 @@ const onTaskUpdate = eventData => {
       news.task_id === eventData.task_id
   )
   if (relatedNews) {
-    store.dispatch('loadSingleNews', {
-      productionId: relatedNews.project_id,
-      newsId: relatedNews.id
-    })
+    store
+      .dispatch('loadSingleNews', {
+        productionId: relatedNews.project_id,
+        newsId: relatedNews.id
+      })
+      .catch(err => {
+        // Deleting or moving a comment deletes its news, then updates its task.
+        if (err?.status === 404) store.commit('REMOVE_NEWS', relatedNews.id)
+        else console.error(err)
+      })
   }
 }
 

@@ -1116,7 +1116,8 @@ const toggleIsOrdering = () => {
 }
 
 const focus = () => {
-  container.value.focus()
+  // Null after a render that threw, and TaskInfo still calls this.
+  container.value?.focus()
 }
 
 const timeCodeClicked = ({ versionRevision, frame }) => {
