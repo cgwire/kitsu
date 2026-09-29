@@ -965,6 +965,7 @@ import {
   floorToFrame,
   formatFrame,
   formatTime,
+  frameStartTime,
   getEntityFrameStart,
   roundToFrame
 } from '@/lib/video'
@@ -2168,7 +2169,7 @@ const playFullBuild = () => {
 
 const _setCurrentTimeOnHandleIn = () => {
   if (handleIn.value > 1 && frameNumber.value < handleIn.value) {
-    rawPlayer.value.setCurrentTimeRaw(handleIn.value * frameDuration.value)
+    rawPlayer.value.setCurrentTimeRaw(frameStartTime(handleIn.value, fps.value))
     syncComparisonPlayer()
   }
 }
@@ -2749,8 +2750,9 @@ const onFrameUpdate = frame => {
         // Raw frame-start seek: setCurrentFrame goes through
         // runSetCurrentTime, whose re-entrancy gate can drop the loop
         // seek and let the clip play through to its real end.
-        rawPlayer.value?.setCurrentTimeRaw(startFrame / fps.value)
-        rawPlayerComparison.value?.setCurrentTimeRaw(startFrame / fps.value)
+        const startTime = frameStartTime(startFrame, fps.value)
+        rawPlayer.value?.setCurrentTimeRaw(startTime)
+        rawPlayerComparison.value?.setCurrentTimeRaw(startTime)
       } else {
         onPlayNext()
       }

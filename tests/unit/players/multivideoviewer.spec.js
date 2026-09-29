@@ -308,4 +308,28 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
     expect(player.currentTime).toBe(2)
     wrapper.unmount()
   })
+
+  it('loops on the handle-in frame with the seek nudge, not on its boundary', async () => {
+    // 120 * 0.0333 (rounded frame duration) is 3.996 s, frame 119.88 at
+    // 30 fps: the loop restarted one frame before the handle-in. An exact
+    // boundary can also truncate to the previous frame.
+    vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
+    const wrapper = mountViewer({
+      entities: [
+        { id: 'e1', preview_file_id: 'p1', preview_file_extension: 'mp4', fps: 30 }
+      ],
+      handleIn: 120,
+      handleOut: 200,
+      isRepeating: true
+    })
+    wrapper.vm.loadEntity(0)
+    await wrapper.vm.$nextTick()
+    wrapper.vm.play()
+    const player = wrapper.vm.currentPlayer
+    const { cb: tick } = rvfcCallbacks.at(-1)
+    tick(performance.now(), { mediaTime: 200 / 30 })
+    expect(player.currentTime).toBeCloseTo(120 / 30 + 0.001, 6)
+    expect(wrapper.emitted('repeat')).toHaveLength(1)
+    wrapper.unmount()
+  })
 })

@@ -497,6 +497,7 @@ import {
   floorToFrame,
   formatFrame,
   formatTime,
+  frameStartTime,
   getEntityFrameStart,
   roundToFrame
 } from '@/lib/video'
@@ -1182,7 +1183,7 @@ const getCurrentFrame = () => {
 // the first playback emission after the seek lands is ceil+1-based
 // (~start + 2), so the counter would visibly restart a few frames in.
 const seekTrimStart = () => {
-  const startTime = trimStartFrame.value * frameDuration.value
+  const startTime = frameStartTime(trimStartFrame.value, fps.value)
   pendingTrimSeek = true
   previewViewer.value.setCurrentTimeRaw(startTime)
   comparisonViewer.value?.setCurrentTimeRaw(startTime)

@@ -1,5 +1,14 @@
 const PRECISION_FACTOR = 10000
 export const DEFAULT_FPS = 25
+// Seeking exactly on a frame boundary can decode the previous frame (the
+// browser truncates the time to its timescale), so seeks aim just past it.
+export const SEEK_NUDGE = 0.001
+
+/*
+ * Time to seek so the decoder lands on the start of the given frame. Uses
+ * the unrounded fps: frame * frameDuration drifts along the clip.
+ */
+export const frameStartTime = (frame, fps) => frame / fps + SEEK_NUDGE
 
 const roundPrecision = value =>
   Math.round(value * PRECISION_FACTOR) / PRECISION_FACTOR

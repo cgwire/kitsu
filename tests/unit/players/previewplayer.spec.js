@@ -149,6 +149,25 @@ describe('PreviewPlayer.vue', () => {
       expect(viewer.setCurrentFrame).toHaveBeenLastCalledWith(87)
       expect(viewer.play).toHaveBeenCalledTimes(1)
     })
+
+    it('starts a trimmed shot on its handle-in frame at any fps', async () => {
+      // 120 * 0.0333 (rounded frame duration) is frame 119.88 at 30 fps: the
+      // play jump landed one frame before the trim.
+      wrapper = mountPlayer({
+        props: { previews: [moviePreview] },
+        getterOverrides: {
+          productionMap: () => new Map([[task.project_id, { fps: 30 }]]),
+          shotMap: () =>
+            new Map([[task.entity_id, { id: task.entity_id, data: { handle_in: 120 } }]])
+        }
+      })
+      await nextTick()
+      wrapper.vm.play()
+      expect(viewer.setCurrentTimeRaw.mock.calls[0][0]).toBeCloseTo(
+        120 / 30 + 0.001,
+        6
+      )
+    })
   })
 
   describe('render', () => {
