@@ -386,6 +386,9 @@ const startRenderLoop = () => {
       // target while the decoder still holds the old position — drawing
       // would paint stale frames past the trim and emit stale times.
       if (video.value && !video.value.seeking) {
+        // The seek landed: release the guard armed by a playing raw seek,
+        // or every later 'waiting' would be ignored.
+        seekGuardTarget = null
         if (video.value.currentTime !== lastDrawnTime) {
           hasPaintedVideoFrame = true
           lastDrawnTime = video.value.currentTime

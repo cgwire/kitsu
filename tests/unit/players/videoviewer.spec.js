@@ -239,6 +239,40 @@ describe('players/VideoViewer (canvas pipeline)', () => {
     })
   })
 
+  describe('without rVFC (rAF fallback)', () => {
+    let rafCallbacks
+
+    beforeEach(() => {
+      removeRvfcMock()
+      rafCallbacks = []
+      vi.spyOn(window, 'requestAnimationFrame').mockImplementation(cb => {
+        rafCallbacks.push(cb)
+        return rafCallbacks.length
+      })
+      vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {})
+    })
+
+    it('shows the loader on waiting once a playing raw seek has landed', async () => {
+      // The seek guard armed by a raw seek during playback was never
+      // released on this path: every later 'waiting' was ignored and a
+      // buffering movie froze on the canvas without a spinner.
+      const wrapper = mountViewer()
+      await new Promise(resolve => setTimeout(resolve))
+      const video = wrapper.find('video').element
+      await video.dispatchEvent(new Event('loadedmetadata'))
+      Object.defineProperty(video, 'paused', {
+        value: false,
+        configurable: true
+      })
+      wrapper.vm.setCurrentTimeRaw(2)
+      // The seek landed: seeking is false and a new frame is painted.
+      rafCallbacks.at(-1)()
+      await video.dispatchEvent(new Event('waiting'))
+      expect(wrapper.find('.loading-background').exists()).toBe(true)
+      wrapper.unmount()
+    })
+  })
+
   it('cancels the rVFC loop and disposes the renderer on unmount', async () => {
     const wrapper = mountViewer()
     // Wait for the setTimeout(0) in onMounted to complete
