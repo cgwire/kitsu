@@ -11,13 +11,10 @@ export class Canvas2DFrameRenderer {
   constructor(canvas, video) {
     this.canvas = canvas
     this.video = video
-    // alpha:false skips per-pixel compositing; desynchronized lets the
-    // browser present paints without waiting for the compositor frame,
-    // which keeps scrubbing responsive while the pointer is dragging.
-    this.context = canvas.getContext('2d', {
-      alpha: false,
-      desynchronized: true
-    })
+    // alpha:false skips per-pixel compositing. No `desynchronized`: it
+    // presents through a hardware overlay on some Chrome platforms, with
+    // visible tearing, and scrub seeks are held until 'seeked' anyway.
+    this.context = canvas.getContext('2d', { alpha: false })
   }
 
   // Internal bitmap resolution (native video size), not the CSS size.
