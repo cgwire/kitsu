@@ -276,12 +276,21 @@ const getFrameBackgroundStyle = frame => {
   if (!frame || !props.playlistShotPosition[frame]) return {}
   const {
     id,
+    index,
     extension,
     width: pw,
     height: ph
   } = props.playlistShotPosition[frame]
+  // The sprite subsampling depends on the hovered entity's own length, not
+  // on the playing entity's nbFrames.
+  const entityNbFrames =
+    props.entityList[index]?.playlist_nb_frames || props.nbFrames
 
-  frame = frame - props.playlistShotPosition[frame].start * props.fps
+  // Rounded: start * fps is a float, and a fractional cell index would
+  // shift the sprite by a fraction of a cell.
+  frame = Math.round(
+    frame - props.playlistShotPosition[frame].start * props.fps
+  )
   const base = props.urlPrefix || '/api'
 
   const thumbnailStyle = {
@@ -300,7 +309,7 @@ const getFrameBackgroundStyle = frame => {
     const frameWidth =
       geometry?.cellWidth ?? Math.ceil(TILE_CELL_HEIGHT * (pw / ph))
     const cellCount = geometry?.cellCount ?? 3840
-    const cell = getTileCellIndex(frame, props.nbFrames, cellCount)
+    const cell = getTileCellIndex(frame, entityNbFrames, cellCount)
     const frameX = cell % TILE_COLUMNS
     const frameY = Math.floor(cell / TILE_COLUMNS)
     return {
