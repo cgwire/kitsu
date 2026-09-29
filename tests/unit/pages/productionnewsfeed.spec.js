@@ -1,7 +1,8 @@
 import { flushPromises, shallowMount } from '@vue/test-utils'
+import process from 'node:process'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { createStore } from 'vuex'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 vi.mock('vue-i18n', async importOriginal => ({
@@ -71,6 +72,7 @@ const mountPage = async path => {
     }
   })
 
+  const socket = { on: vi.fn(), off: vi.fn() }
   mounted = shallowMount(ProductionNewsFeed, {
     global: {
       plugins: [
@@ -78,15 +80,27 @@ const mountPage = async path => {
         store,
         {
           install: app => {
-            app.config.globalProperties.$socket = { on: vi.fn(), off: vi.fn() }
+            app.config.globalProperties.$socket = socket
           }
         }
       ]
     }
   })
   await flushPromises()
-  return { store, wrapper: mounted }
+  return { socket, store, wrapper: mounted }
 }
+
+const emitSocketEvent = (socket, event, eventData) => {
+  const [, handler] = socket.on.mock.calls.find(([name]) => name === event)
+  handler(eventData)
+}
+
+// The API client rejects with the superagent error, which carries the status.
+const httpError = status =>
+  Object.assign(new Error(`HTTP ${status}`), { status })
+
+// Node reports a rejected promise once the microtask queue has drained.
+const settle = () => new Promise(resolve => setTimeout(resolve))
 
 describe('pages/ProductionNewsFeed', () => {
   // The page saves its filters to localStorage: a mode left there by one
@@ -121,5 +135,85 @@ describe('pages/ProductionNewsFeed', () => {
       String(limit)
     )
     expect(path).not.toContain('page_size')
+  })
+
+  describe('socket reloads', () => {
+    const feedPath = `/productions/${production.id}/news-feed`
+    const rejections = []
+    const onRejection = reason => rejections.push(reason)
+
+    beforeEach(() => {
+      rejections.length = 0
+      process.on('unhandledRejection', onRejection)
+    })
+
+    afterEach(() => {
+      process.off('unhandledRejection', onRejection)
+      vi.restoreAllMocks()
+    })
+
+    // Deleting or moving a comment deletes its news in Zou, then emits
+    // task:update for its task.
+    it('drops a deleted news when its task updates', async () => {
+      const { socket, store, wrapper } = await mountPage(feedPath)
+      pget.mockRejectedValueOnce(httpError(404))
+
+      emitSocketEvent(socket, 'task:update', {
+        project_id: production.id,
+        task_id: 'task-2'
+      })
+      await settle()
+
+      expect(pget).toHaveBeenLastCalledWith(
+        `/api/data/projects/${production.id}/news/news-2`
+      )
+      expect(rejections).toEqual([])
+      expect(store.getters.newsList.map(news => news.id)).toEqual(['news-1'])
+      expect(wrapper.findAllComponents(NewsRow)).toHaveLength(1)
+    })
+
+    it('skips a new news deleted before it loads', async () => {
+      const { socket, store } = await mountPage(feedPath)
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      pget.mockRejectedValueOnce(httpError(404))
+
+      emitSocketEvent(socket, 'news:new', {
+        project_id: production.id,
+        news_id: 'news-3'
+      })
+      await settle()
+
+      expect(pget).toHaveBeenLastCalledWith(
+        `/api/data/projects/${production.id}/news/news-3`
+      )
+      expect(rejections).toEqual([])
+      expect(consoleError).not.toHaveBeenCalled()
+      expect(store.getters.newsList).toHaveLength(2)
+    })
+
+    it('logs any other reload failure', async () => {
+      const { socket, store } = await mountPage(feedPath)
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const error = httpError(500)
+      pget.mockRejectedValue(error)
+
+      emitSocketEvent(socket, 'task:update', {
+        project_id: production.id,
+        task_id: 'task-2'
+      })
+      emitSocketEvent(socket, 'news:new', {
+        project_id: production.id,
+        news_id: 'news-3'
+      })
+      await settle()
+
+      expect(rejections).toEqual([])
+      expect(consoleError.mock.calls).toEqual([[error], [error]])
+      expect(store.getters.newsList).toHaveLength(2)
+    })
   })
 })
