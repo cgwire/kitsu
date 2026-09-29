@@ -425,6 +425,8 @@ watch(
       isLoading.value = true
       setPictureEmptyPath()
       nextTick(() => {
+        // Deferred like resetPicture: the viewer may be gone by now.
+        if (!container.value) return
         resetPicture()
         setPicturePath()
         if (props.fullScreen) {
