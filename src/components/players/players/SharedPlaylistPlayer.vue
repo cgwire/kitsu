@@ -450,12 +450,14 @@ const overlayDimensions = computed(() => {
 })
 
 const nbFrames = computed(() => {
+  // The preview duration first, like the studio player: the decoder
+  // duration floored to the frame plus the Chromium offset read one frame
+  // more on the same clip.
   const isChromium = !!window.chrome
   const change = isChromium ? frameDuration.value : 0
   const duration =
-    maxDuration.value > 0
-      ? maxDuration.value + change
-      : currentPreview.value?.duration || 0
+    currentPreview.value?.duration ||
+    (maxDuration.value > 0 ? maxDuration.value + change : 0)
   if (duration > 0) return Math.round(duration * fps.value)
   if (isPicture.value) return Math.round(2 * fps.value)
   return 0
