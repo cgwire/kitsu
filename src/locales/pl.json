@@ -1445,12 +1445,16 @@
         "end_date": "Data zakończenia",
         "episode_span": "Odstęp między odcinkami",
         "fps": "FPS",
+        "hd_bitrate_compression": "Przepływność filmów w wysokiej rozdzielczości (Mbit/s)",
+        "hd_bitrate_short": "HD Mbit/s",
         "is_clients_isolated": "Izoluj komentarze klientów (niewidoczne dla innych klientów)",
         "is_frame_in_numbering": "Rozpocznij licznik klatek odtwarzacza od klatki początkowej",
         "is_preview_download_allowed": "Pozwól artystom pobierać podglądy",
         "is_publish_default": "Domyślnie ustawiaj widżet komentarzy dla artystów w trybie publikacji",
         "is_set_preview_automated": "Automatycznie ustawiaj nowy podgląd jako miniaturę obiektu",
         "is_single_preview_per_revision": "Zezwalaj tylko na jeden plik podglądu na wersję",
+        "ld_bitrate_compression": "Przepływność filmów w niskiej rozdzielczości (Mbit/s)",
+        "ld_bitrate_short": "LD Mbit/s",
         "max_retakes": "Maksymalna liczba poprawek",
         "name": "Nazwa",
         "nb_episodes": "Liczba odcinków",
@@ -1506,8 +1510,12 @@
         "shots": "Ujęcia",
         "sequences": "Sekwencje"
       },
+      "video": {
+        "title": "Wideo"
+      },
       "parameters": {
         "title": "Parametry",
+        "previews_and_comments": "Previews i komentarze",
         "save": {
           "button": "Potwierdź"
         }

@@ -1051,6 +1051,8 @@
       },
       "fields": {
         "fps": "FPS",
+        "hd_bitrate_compression": "高解像度動画のビットレート (Mbit/s)",
+        "hd_bitrate_short": "HD Mbit/s",
         "name": "名前",
         "ratio": "アスペクト比",
         "resolution": "解像度",
@@ -1069,6 +1071,8 @@
         "code": "略称",
         "is_publish_default": "アーティストのコメント欄で「リビジョンを公開」を既定のタブにする",
         "is_single_preview_per_revision": "リビジョンに追加できるプレビューファイルを1つまでに制限する",
+        "ld_bitrate_compression": "低解像度動画のビットレート (Mbit/s)",
+        "ld_bitrate_short": "LD Mbit/s",
         "revision_padding": "リビジョン番号のゼロ埋め桁数（0 = ゼロ埋めなし）",
         "is_frame_in_numbering": "プレイヤーのフレーム番号をショットの開始フレームから表示する"
       },
@@ -1118,6 +1122,7 @@
       },
       "parameters": {
         "title": "基本設定",
+        "previews_and_comments": "プレビューとコメント",
         "save": {
           "button": "確定"
         }
@@ -1191,6 +1196,9 @@
         "assets": "アセット",
         "shots": "ショット",
         "sequences": "シーケンス"
+      },
+      "video": {
+        "title": "動画"
       },
       "hide_stats": "統計を隠す",
       "show_stats": "統計を表示"

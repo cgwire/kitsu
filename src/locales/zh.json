@@ -1051,6 +1051,8 @@
       },
       "fields": {
         "fps": "FPS",
+        "hd_bitrate_compression": "高清视频码率 (Mbit/s)",
+        "hd_bitrate_short": "HD Mbit/s",
         "is_frame_in_numbering": "播放器帧计数器从入点帧开始",
         "name": "名称",
         "ratio": "宽高比",
@@ -1070,6 +1072,8 @@
         "code": "简称",
         "is_publish_default": "在发布模式下默认设置艺术家评论小部件",
         "is_single_preview_per_revision": "每个修订仅允许一个预览文件",
+        "ld_bitrate_compression": "低清视频码率 (Mbit/s)",
+        "ld_bitrate_short": "LD Mbit/s",
         "revision_padding": "修订号补零位数（0 = 不补零）"
       },
       "metadata": {
@@ -1118,6 +1122,7 @@
       },
       "parameters": {
         "title": "参数",
+        "previews_and_comments": "预览和评论",
         "save": {
           "button": "确定"
         }
@@ -1191,6 +1196,9 @@
         "assets": "资产",
         "shots": "镜头",
         "sequences": "序列"
+      },
+      "video": {
+        "title": "视频"
       },
       "hide_stats": "隐藏统计",
       "show_stats": "显示统计数据"

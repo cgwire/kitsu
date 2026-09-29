@@ -1051,6 +1051,8 @@
       },
       "fields": {
         "fps": "FPS",
+        "hd_bitrate_compression": "Nagy felbontású videók bitrátája (Mbit/s)",
+        "hd_bitrate_short": "HD Mbit/s",
         "is_frame_in_numbering": "A lejátszó képkockaszámlálója a kezdő kockánál induljon",
         "name": "Név",
         "ratio": "Képarány",
@@ -1070,6 +1072,8 @@
         "max_retakes": "Újraforgatások maximális száma",
         "style": "Stílus",
         "is_single_preview_per_revision": "Revíziónként csak egy előnézet file engedélyezése",
+        "ld_bitrate_compression": "Alacsony felbontású videók bitrátája (Mbit/s)",
+        "ld_bitrate_short": "LD Mbit/s",
         "revision_padding": "Revíziószám kitöltése nullákkal (0 = nincs kitöltés)"
       },
       "metadata": {
@@ -1118,6 +1122,7 @@
       },
       "parameters": {
         "title": "Paraméterek",
+        "previews_and_comments": "Previewk és megjegyzések",
         "save": {
           "button": "Megerősítés"
         }
@@ -1174,6 +1179,9 @@
         "assets": "Asset-ek",
         "sequences": "Szekvenciák",
         "shots": "Shot-ok"
+      },
+      "video": {
+        "title": "Videó"
       },
       "hide_stats": "Statisztika elrejtése",
       "show_stats": "Statisztika mutatása",

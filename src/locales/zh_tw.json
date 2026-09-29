@@ -1051,6 +1051,8 @@
       },
       "fields": {
         "fps": "FPS",
+        "hd_bitrate_compression": "高畫質影片位元率 (Mbit/s)",
+        "hd_bitrate_short": "HD Mbit/s",
         "is_frame_in_numbering": "播放器影格計數器從入點影格開始",
         "name": "名稱",
         "ratio": "寬高比",
@@ -1070,6 +1072,8 @@
         "code": "簡稱",
         "is_publish_default": "預設在發佈模式下為藝術家設定評論小工具",
         "is_single_preview_per_revision": "每個修訂版僅允許一個預覽檔案",
+        "ld_bitrate_compression": "低畫質影片位元率 (Mbit/s)",
+        "ld_bitrate_short": "LD Mbit/s",
         "revision_padding": "修訂版編號補零（0 = 不補零）"
       },
       "metadata": {
@@ -1118,6 +1122,7 @@
       },
       "parameters": {
         "title": "參數",
+        "previews_and_comments": "預覽與留言",
         "save": {
           "button": "確定"
         }
@@ -1191,6 +1196,9 @@
         "assets": "資產",
         "shots": "鏡頭",
         "sequences": "序列"
+      },
+      "video": {
+        "title": "影片"
       },
       "hide_stats": "隱藏統計",
       "show_stats": "顯示統計資料"

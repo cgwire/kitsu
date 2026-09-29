@@ -1051,6 +1051,8 @@
       },
       "fields": {
         "fps": "FPS",
+        "hd_bitrate_compression": "Tasa de bits de vídeos en alta definición (Mbit/s)",
+        "hd_bitrate_short": "HD Mbit/s",
         "is_frame_in_numbering": "Iniciar el contador de frames del reproductor en el frame de entrada",
         "name": "Nombre",
         "ratio": "Relación de aspecto",
@@ -1070,6 +1072,8 @@
         "code": "Nombre corto",
         "is_publish_default": "Establecer widget de comentarios para los artistas en el modo de publicación por defecto",
         "is_single_preview_per_revision": "Permitir solo un archivo de vista previa por revisión",
+        "ld_bitrate_compression": "Tasa de bits de vídeos en baja definición (Mbit/s)",
+        "ld_bitrate_short": "LD Mbit/s",
         "revision_padding": "Relleno del número de revisión (0 = sin relleno)"
       },
       "metadata": {
@@ -1118,6 +1122,7 @@
       },
       "parameters": {
         "title": "Parámetros",
+        "previews_and_comments": "Previews y comentarios",
         "save": {
           "button": "Confirmar"
         }
@@ -1191,6 +1196,9 @@
         "assets": "Recursos",
         "shots": "Tomas",
         "sequences": "Secuencias"
+      },
+      "video": {
+        "title": "Vídeo"
       },
       "hide_stats": "Ocultar estadísticas",
       "show_stats": "Mostrar estadísticas"
