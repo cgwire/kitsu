@@ -605,7 +605,10 @@ const getCurrentTimeRaw = getCurrentTime
 const setCurrentTimeRaw = currentTime => {
   if (currentPlayer.value) {
     if (isPlaying.value) seekGuardTarget = currentTime
-    seekNow(currentTime)
+    // The comparison viewer is re-synced on every scrub move: hold the
+    // target like setCurrentTime does, or each seek aborts the previous one.
+    if (currentPlayer.value.seeking) pendingSeekTime = currentTime
+    else seekNow(currentTime)
   }
 }
 

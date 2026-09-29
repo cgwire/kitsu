@@ -284,4 +284,28 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
       wrapper.unmount()
     })
   })
+
+  it('holds a raw seek issued while the decoder is still seeking', async () => {
+    // The comparison viewer is re-synced through setCurrentTimeRaw on every
+    // scrub move: each direct seek aborted the in-flight one, so its frame
+    // only landed once the cursor stopped.
+    const wrapper = mountViewer()
+    wrapper.vm.loadEntity(0)
+    await wrapper.vm.$nextTick()
+    const player = wrapper.vm.currentPlayer
+    player.currentTime = 1
+    Object.defineProperty(player, 'seeking', {
+      value: true,
+      configurable: true
+    })
+    wrapper.vm.setCurrentTimeRaw(2)
+    expect(player.currentTime).toBe(1)
+    Object.defineProperty(player, 'seeking', {
+      value: false,
+      configurable: true
+    })
+    player.dispatchEvent(new Event('seeked'))
+    expect(player.currentTime).toBe(2)
+    wrapper.unmount()
+  })
 })
