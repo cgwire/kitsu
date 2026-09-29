@@ -70,12 +70,6 @@
         icon="repeat"
         @click="isRepeating = !isRepeating"
       />
-      <button-simple
-        class="playlist-button flexrow-item"
-        :title="$t('playlists.actions.' + (isHd ? 'switch_ld' : 'switch_hd'))"
-        :text="isHd ? 'HD' : 'LD'"
-        @click="isHd = !isHd"
-      />
       <button-sound
         class="flexrow-item playlist-button"
         v-model:muted="isMuted"
@@ -169,7 +163,6 @@ const isEntitiesHidden = defineModel('isEntitiesHidden', {
   type: Boolean,
   default: false
 })
-const isHd = defineModel('isHd', { type: Boolean, default: true })
 const isMuted = defineModel('isMuted', { type: Boolean, default: false })
 const isRepeating = defineModel('isRepeating', {
   type: Boolean,
