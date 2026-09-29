@@ -757,6 +757,9 @@ const actions = {
         return preview
       })
       .catch(err => {
+        // The preview was deleted meanwhile: drop the strokes, a retry could
+        // never succeed.
+        if (err?.response?.status === 404) return
         Sentry.captureException(err, {
           tags: { feature: 'annotations' },
           extra: {

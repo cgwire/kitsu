@@ -5,8 +5,10 @@ import { vi } from 'vitest'
 // Importing the tasks module transitively pulls in the root store
 // (lib/models → timezone → @/store); stub it so no Vuex store is built.
 vi.mock('@/store', () => ({ default: {} }))
+vi.mock('@sentry/vue', () => ({ captureException: vi.fn() }))
 vi.mock('@/store/api/tasks', () => ({
   default: {
+    updatePreviewAnnotation: vi.fn(),
     unassignPersonFromTasks: vi.fn(() => Promise.resolve()),
     createEntityTasks: vi.fn(() =>
       Promise.resolve([{ id: 'task-1' }, { id: 'task-2' }])
@@ -21,6 +23,8 @@ vi.mock('@/store/api/tasks', () => ({
     )
   }
 }))
+
+import * as Sentry from '@sentry/vue'
 
 import tasksApi from '@/store/api/tasks'
 import tasksStore from '@/store/modules/tasks'
@@ -321,6 +325,51 @@ describe('Tasks store', () => {
       expect(commit).toHaveBeenCalledTimes(2)
       expect(commit.mock.calls[0][0]).toEqual('NEW_TASK_END')
       expect(commit.mock.calls[0][1].task).toEqual(tasks[0])
+    })
+  })
+
+  describe('updatePreviewAnnotation action', () => {
+    const preview = { id: 'preview-1', task_id: 'task-1' }
+    const payload = {
+      taskId: 'task-1',
+      preview,
+      additions: [],
+      deletions: [],
+      updates: []
+    }
+    const httpError = status =>
+      Object.assign(new Error(`HTTP ${status}`), {
+        response: { status },
+        status
+      })
+
+    beforeEach(() => {
+      Sentry.captureException.mockClear()
+    })
+
+    // A retry could never succeed: the preview was deleted meanwhile.
+    test('drops the save of a deleted preview without reporting it', async () => {
+      const commit = vi.fn()
+      tasksApi.updatePreviewAnnotation.mockRejectedValueOnce(httpError(404))
+
+      await tasksStore.actions.updatePreviewAnnotation({ commit }, payload)
+
+      expect(commit).not.toHaveBeenCalled()
+      expect(Sentry.captureException).not.toHaveBeenCalled()
+    })
+
+    test('reports any other failure and rethrows it', async () => {
+      const commit = vi.fn()
+      const error = httpError(500)
+      tasksApi.updatePreviewAnnotation.mockRejectedValueOnce(error)
+
+      await expect(
+        tasksStore.actions.updatePreviewAnnotation({ commit }, payload)
+      ).rejects.toBe(error)
+      expect(Sentry.captureException).toHaveBeenCalledWith(
+        error,
+        expect.anything()
+      )
     })
   })
 
