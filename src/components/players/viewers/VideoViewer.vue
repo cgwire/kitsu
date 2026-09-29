@@ -657,10 +657,13 @@ onMounted(() => {
   }
   setTimeout(() => {
     if (video.value) {
-      if (video.value.readyState === 4) {
+      // A cached movie can fire loadedmetadata before these listeners
+      // exist: rescue any state past HAVE_METADATA, not only fully loaded.
+      if (video.value.readyState >= HTMLMediaElement.HAVE_METADATA) {
         configureVideo()
         onWindowResize()
-        isLoading.value = false
+        isLoading.value =
+          video.value.readyState < HTMLMediaElement.HAVE_FUTURE_DATA
         setCurrentTime(0)
         setCurrentTimeRaw(0)
         nextTick(() => {

@@ -239,6 +239,22 @@ describe('players/VideoViewer (canvas pipeline)', () => {
     })
   })
 
+  it('emits video-loaded when the metadata was already there at mount', async () => {
+    // Cached movie: loadedmetadata fires before the deferred listeners are
+    // attached, with readyState between HAVE_METADATA and HAVE_FUTURE_DATA.
+    // Only the HAVE_ENOUGH_DATA case was rescued: the canvas stayed black.
+    const wrapper = mountViewer()
+    const video = wrapper.find('video').element
+    Object.defineProperty(video, 'readyState', {
+      value: HTMLMediaElement.HAVE_METADATA,
+      configurable: true
+    })
+    video.dispatchEvent(new Event('loadedmetadata'))
+    await new Promise(resolve => setTimeout(resolve))
+    expect(wrapper.emitted('video-loaded')).toHaveLength(1)
+    wrapper.unmount()
+  })
+
   describe('without rVFC (rAF fallback)', () => {
     let rafCallbacks
 
