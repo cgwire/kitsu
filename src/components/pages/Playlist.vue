@@ -1663,51 +1663,7 @@ useHead({ title: pageTitle })
 </script>
 
 <style lang="scss" scoped>
-.dark {
-  .playlist-item {
-    background: $dark-grey-lightmore;
-    box-shadow: 0 0 6px #333;
-    border-color: $dark-grey;
-    color: $white-grey;
-  }
-
-  .playlist-list-column {
-    background: $dark-grey-light;
-    border-color: $dark-grey;
-    box-shadow: 0 0 6px #333;
-  }
-
-  .playlist-column {
-    button,
-    h2.entity-group-title {
-      color: white;
-    }
-  }
-
-  .playlist-column.no-selection {
-    background: $dark-grey-light;
-
-    .recent-playlist {
-      position: relative;
-      max-width: 800px;
-      margin: auto;
-      overflow: hidden;
-      background: $dark-grey-lightmore;
-      border: 2px solid $dark-grey;
-      box-shadow: 0 0 6px #333;
-      margin-bottom: 1em;
-
-      h3 {
-        color: white;
-      }
-    }
-  }
-
-  span.thumbnail-picture {
-    box-shadow: 0 0 6px #333;
-  }
-}
-
+// The page is always dark, whatever the theme: see the root class.
 .page {
   display: flex;
   padding-left: 0;
@@ -1724,21 +1680,21 @@ useHead({ title: pageTitle })
 
 .playlist-list-column {
   max-width: 300px;
-  background: #f4f5f9;
+  background: $dark-grey-light;
   overflow-y: auto;
   padding: 1em;
-  border-right: 1px solid #ddd;
-  box-shadow: 0 0 6px #f0f0f0;
+  border-right: 1px solid $dark-grey;
+  box-shadow: 0 0 6px #333;
   z-index: 201;
 }
 
 .playlist-item {
   display: block;
-  background: white;
-  border: 2px solid $white-grey;
+  background: $dark-grey-lightmore;
+  border: 2px solid $dark-grey;
   border-radius: 3px;
-  box-shadow: 0 0 6px #ddd;
-  color: $grey-strong;
+  box-shadow: 0 0 6px #333;
+  color: $white-grey;
   margin: 0.2em;
   padding: 0.4em;
   transition: all 0.2s ease;
@@ -1798,7 +1754,7 @@ useHead({ title: pageTitle })
 }
 
 span.thumbnail-picture {
-  box-shadow: 0 0 6px #ddd;
+  box-shadow: 0 0 6px #333;
   margin-bottom: 2px;
 }
 
@@ -1810,6 +1766,14 @@ span.thumbnail-picture {
   overflow: hidden;
   flex: 1;
   background: $dark-grey-2;
+}
+
+// The .page prefix outweighs the global button colors.
+.page .playlist-column {
+  button,
+  h2.entity-group-title {
+    color: white;
+  }
 }
 
 .playlisted-shot-name {
@@ -1825,13 +1789,11 @@ span.thumbnail-picture {
 
 .entity-group-title {
   border-bottom: 1px solid $light-grey-light;
-  color: $grey;
   margin: 1em;
   padding-bottom: 0.2em;
   text-transform: uppercase;
 
   button {
-    color: $grey;
     padding: 0.3em 0.8em;
     font-size: 0.7em;
   }
@@ -1883,13 +1845,18 @@ h2 {
 .playlist-column.no-selection {
   padding: 2em;
   overflow: auto;
-  background: #f4f5f9;
+  background: $dark-grey-light;
 
   .recent-playlist {
+    position: relative;
     height: 320px;
-    background: white;
-    border: 2px solid $light-grey-light;
-    box-shadow: 0 0 6px #ddd;
+    max-width: 800px;
+    margin: auto;
+    margin-bottom: 1em;
+    overflow: hidden;
+    background: $dark-grey-lightmore;
+    border: 2px solid $dark-grey;
+    box-shadow: 0 0 6px #333;
     border-radius: 1em;
     padding: 0;
     width: 100%;
@@ -1915,7 +1882,7 @@ h2 {
     }
 
     h3 {
-      color: $grey-strong;
+      color: white;
       font-size: 1.4em;
       font-weight: bold;
     }
