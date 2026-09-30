@@ -13,6 +13,7 @@ vi.mock('vue-router', () => ({
 
 import '@/lib/auth'
 import editStore from '@/store/modules/edits'
+import sequenceStore from '@/store/modules/sequences'
 
 import Playlist from '@/components/pages/Playlist.vue'
 import PlaylistPlayer from '@/components/players/players/PlaylistPlayer.vue'
@@ -588,5 +589,24 @@ describe('Playlist page, silent lock', () => {
     onPlaylistUpdate({ project_id: 'p1', playlist_id: 'pl-1' })
 
     expect(actions.refreshPlaylist).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('Playlist page, sequence playlist', () => {
+  const sequence = { id: 'sq-1', name: 'SQ01' }
+
+  beforeEach(() => sequenceStore.cache.sequenceMap.set(sequence.id, sequence))
+  afterEach(() => sequenceStore.cache.sequenceMap.delete(sequence.id))
+
+  it('names the episode of a sequence without writing on the cached one', async () => {
+    const { wrapper } = await openPlaylist(
+      { for_entity: 'sequence', shots: [{ id: 'sq-1', preview_files: {} }] },
+      { state: { currentEpisode: { id: 'ep-a', name: 'E01' } } }
+    )
+    await flushPromises()
+
+    const [entity] = wrapper.findComponent(PlaylistPlayer).props('entities')
+    expect(entity.parent_name).toBe('E01')
+    expect(sequence.episode_name).toBeUndefined()
   })
 })

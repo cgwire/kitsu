@@ -991,14 +991,14 @@ const convertEntityToPlaylistFormat = entityInfo => {
   if (!entityInfo) return null
   const entity = getCachedEntity(entityInfo.id)
   if (!entity) return null
-  if (isSequencePlaylist.value && currentEpisode.value) {
-    entity.episode_name = currentEpisode.value.name
-  }
+  const episodeName =
+    isSequencePlaylist.value && currentEpisode.value
+      ? currentEpisode.value.name
+      : entity.episode_name
   const playlistEntity = {
     id: entityInfo.id,
     name: entity.name,
-    parent_name:
-      entity.sequence_name || entity.episode_name || entity.asset_type_name,
+    parent_name: entity.sequence_name || episodeName || entity.asset_type_name,
     // Per-entity fps: an entity can override the production fps via
     // data.fps. Carried here so the player uses the right rate for
     // whichever entity is playing (a playlist can mix fps).
