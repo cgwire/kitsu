@@ -484,6 +484,7 @@ const removeSearchQuery = searchQuery => {
 const updateRoute = () => {
   router.push({
     query: {
+      ...route.query,
       search: searchFieldRef.value.getValue(),
       department: selectedDepartment.value,
       studio: selectedStudio.value,

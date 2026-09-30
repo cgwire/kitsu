@@ -16,7 +16,12 @@ vi.mock('vue-i18n', async importOriginal => ({
 const routeHolder = vi.hoisted(() => ({ route: null }))
 vi.mock('vue-router', () => ({
   useRoute: () => routeHolder.route,
-  useRouter: () => ({ push: vi.fn() })
+  // The route follows the pushes of the page, as the router would.
+  useRouter: () => ({
+    push: location => {
+      routeHolder.route.query = location.query
+    }
+  })
 }))
 
 // Pre-load the real store to avoid circular-import race from child components.
@@ -26,11 +31,12 @@ import PeopleList from '@/components/lists/PeopleList.vue'
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 import EditPersonModal from '@/components/modals/EditPersonModal.vue'
 import People from '@/components/pages/People.vue'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 
 const currentUser = { id: 'person-1', role: 'admin' }
 
-const mountPage = async ({ user = currentUser } = {}) => {
-  routeHolder.route = reactive({ params: {}, query: {} })
+const mountPage = async ({ user = currentUser, query = {} } = {}) => {
+  routeHolder.route = reactive({ params: {}, query })
   const resolved = () => vi.fn(() => Promise.resolve())
   const actions = {
     editPerson: resolved(),
@@ -172,6 +178,29 @@ describe('People page', () => {
 
       expect(actions.editPerson).not.toHaveBeenCalled()
       expect(downgradeModal().exists()).toBe(false)
+    })
+  })
+
+  describe('toolbar filters', () => {
+    // The filters rewrite the query of the URL: they used to drop its tab,
+    // which sent the page back to the active people.
+    it('stays on the guests tab when a filter applies', async () => {
+      const { wrapper } = await mountPage({
+        query: { tab: 'guests', role: 'client' }
+      })
+      const list = () => wrapper.findComponent(PeopleList)
+      expect(list().props('isGuests')).toBe(true)
+
+      await wrapper
+        .findComponent(ComboboxStyled)
+        .vm.$emit('update:modelValue', 'user')
+      await flushPromises()
+
+      expect(list().props('isGuests')).toBe(true)
+      expect(routeHolder.route.query).toMatchObject({
+        tab: 'guests',
+        role: 'user'
+      })
     })
   })
 })
