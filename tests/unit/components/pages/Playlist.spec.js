@@ -19,6 +19,11 @@ import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import ErrorText from '@/components/widgets/ErrorText.vue'
 
+afterEach(() => {
+  vi.useRealTimers()
+  vi.restoreAllMocks()
+})
+
 beforeEach(() => {
   localStorage.removeItem('playlist-sort')
   routeHolder.route = reactive({ params: {}, query: {}, fullPath: '/' })
@@ -107,19 +112,18 @@ const mountPage = async ({
     },
     actions: storeActions
   })
+  const socket = { on: vi.fn(), off: vi.fn() }
   const wrapper = shallowMount(Playlist, {
     global: {
       plugins: [store],
-      config: {
-        globalProperties: { $socket: { on: vi.fn(), off: vi.fn() } }
-      },
+      config: { globalProperties: { $socket: socket } },
       mocks: { $t: key => key },
       stubs: { RouterLink: true }
     }
   })
   mountedWrapper = wrapper
   await nextTick()
-  return { wrapper, store, actions: storeActions }
+  return { wrapper, store, actions: storeActions, socket }
 }
 
 // Moves the scope of the store and lets the page watchers see it.
@@ -535,5 +539,17 @@ describe('Playlist page, task status of the entities to add', () => {
     await flushPromises()
 
     expect(wrapper.find('span[title="Done"]').exists()).toBe(true)
+  })
+})
+
+describe('Playlist page, displayed playlist', () => {
+  it('loads the displayed playlist once per reload', async () => {
+    const { wrapper, actions } = await openPlaylist()
+    await flushPromises()
+    expect(actions.loadPlaylist).toHaveBeenCalledTimes(1)
+
+    changeSort(wrapper, 'name')
+    await flushPromises()
+    expect(actions.loadPlaylist).toHaveBeenCalledTimes(2)
   })
 })

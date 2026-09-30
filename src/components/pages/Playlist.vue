@@ -908,7 +908,6 @@ const loadPlaylistsData = async (force = false) => {
       throw err
     }
   }
-  setCurrentPlaylist()
 }
 
 const onPlaylistListScroll = event => {
@@ -1502,10 +1501,11 @@ const reloadAll = (force = false) =>
 // first page: the page reached before holds nothing once fewer
 // playlists match.
 const reloadPlaylistList = () =>
-  runReload(() => {
+  runReload(async () => {
     servedScope = reloadScope()
     page = 1
-    return loadPlaylistsData(true)
+    await loadPlaylistsData(true)
+    setCurrentPlaylist()
   })
 
 const resetPlaylistsAndReload = () => {
