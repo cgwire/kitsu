@@ -842,4 +842,29 @@ useHead({ title: computed(() => `${t('people.title')} - Kitsu`) })
 .search-options {
   align-items: flex-end;
 }
+
+@media screen and (max-width: 768px) {
+  .people {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+
+  // Mobile is read-only: no import, export or creation.
+  .page-header {
+    display: none;
+  }
+
+  // Margins, not gap: Safari 14.0 has no gap on flex containers.
+  .search-options {
+    flex-wrap: wrap;
+
+    .flexrow-item {
+      margin-bottom: 0.5em;
+    }
+  }
+
+  .search {
+    margin-top: 1em;
+  }
+}
 </style>
