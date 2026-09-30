@@ -278,7 +278,7 @@
                 :class="{
                   button: true,
                   'add-sequence': true,
-                  'is-loading': loading.addDaily
+                  'is-loading': loading.addWeekly
                 }"
                 :disabled="isAdditionLoading"
                 @click="addAllPending"

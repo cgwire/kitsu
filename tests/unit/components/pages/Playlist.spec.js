@@ -462,3 +462,49 @@ describe('Playlist page, list loading error', () => {
     expect(wrapper.findComponent(ErrorText).exists()).toBe(false)
   })
 })
+
+// Mounts the page on an empty playlist, which opens the addition panel.
+const openPlaylist = (playlist = {}, options = {}) => {
+  const stored = {
+    id: 'pl-1',
+    name: 'Playlist',
+    project_id: 'p1',
+    shots: [],
+    ...playlist
+  }
+  return mountPage({
+    ...options,
+    params: { playlist_id: stored.id },
+    state: { playlists: [stored], ...options.state },
+    getters: {
+      playlistMap: () => new Map([[stored.id, stored]]),
+      ...options.getters
+    },
+    actions: {
+      loadPlaylist: vi.fn(() => Promise.resolve(stored)),
+      ...options.actions
+    }
+  })
+}
+
+describe('Playlist page, addition buttons', () => {
+  it('shows the weekly build as loading on its own button', async () => {
+    const pending = gatedAction()
+    const { wrapper } = await openPlaylist(
+      {},
+      { actions: { getPendingShots: pending.fn } }
+    )
+    await flushPromises()
+    const button = label =>
+      wrapper.findAll('button').find(b => b.text() === label)
+
+    await button('playlists.build_weekly').trigger('click')
+
+    expect(button('playlists.build_weekly').classes()).toContain('is-loading')
+    expect(button('playlists.build_daily').classes()).not.toContain(
+      'is-loading'
+    )
+    pending.release([])
+    await flushPromises()
+  })
+})
