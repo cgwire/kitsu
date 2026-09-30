@@ -481,14 +481,15 @@ const removeSearchQuery = searchQuery => {
   store.dispatch('removePeopleSearch', searchQuery).catch(console.error)
 }
 
+// Unset filters stay out of the URL: the router drops undefined values.
 const updateRoute = () => {
   router.push({
     query: {
       ...route.query,
-      search: searchFieldRef.value.getValue(),
-      department: selectedDepartment.value,
-      studio: selectedStudio.value,
-      role: role.value
+      search: searchFieldRef.value.getValue() || undefined,
+      department: selectedDepartment.value || undefined,
+      studio: selectedStudio.value || undefined,
+      role: role.value === 'all' ? undefined : role.value
     }
   })
 }

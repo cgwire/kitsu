@@ -184,6 +184,22 @@ describe('People page', () => {
   describe('toolbar filters', () => {
     // The filters rewrite the query of the URL: they used to drop its tab,
     // which sent the page back to the active people.
+    it('keeps the unset filters out of the URL', async () => {
+      const { wrapper } = await mountPage()
+      const pickRole = async role => {
+        await wrapper
+          .findComponent(ComboboxStyled)
+          .vm.$emit('update:modelValue', role)
+        await flushPromises()
+      }
+
+      await pickRole('user')
+      expect(routeHolder.route.query).toEqual({ role: 'user' })
+
+      await pickRole('all')
+      expect(routeHolder.route.query).toEqual({})
+    })
+
     it('stays on the guests tab when a filter applies', async () => {
       const { wrapper } = await mountPage({
         query: { tab: 'guests', role: 'client' }
