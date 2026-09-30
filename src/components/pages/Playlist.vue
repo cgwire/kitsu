@@ -781,6 +781,16 @@ const withSilent = async work => {
   }
 }
 
+// A failed save is logged and still releases the lock.
+const saveSilently = (action, payload) =>
+  withSilent(async () => {
+    try {
+      await store.dispatch(action, payload)
+    } catch (err) {
+      console.error(err)
+    }
+  })
+
 // Helpers
 
 const formatDate = dateString =>
@@ -1105,20 +1115,18 @@ const onNewEntityDropped = async info => {
   clearSilent()
 }
 
-const removeEntity = async ({ entity, previewFileId }) => {
-  setSilent()
+const removeEntity = ({ entity, previewFileId }) => {
   currentEntitiesList.value = currentEntitiesList.value.filter(
     e => e.id !== entity.id || e.preview_file_id !== previewFileId
   )
   if (!currentEntitiesList.value.some(e => e.id === entity.id)) {
     currentEntitiesMap.value[entity.id] = undefined
   }
-  await store.dispatch('removeEntityPreviewFromPlaylist', {
+  return saveSilently('removeEntityPreviewFromPlaylist', {
     playlist: currentPlaylist.value,
     entity,
     previewFileId
   })
-  clearSilent()
 }
 
 const resetPlaylist = () => {
@@ -1208,20 +1216,13 @@ const addMovie = () =>
 
 // Save data
 
-const onPreviewChanged = async ({
-  entity,
-  previewFileId,
-  previousPreviewFileId
-}) => {
-  setSilent()
-  await store.dispatch('changePlaylistPreview', {
+const onPreviewChanged = ({ entity, previewFileId, previousPreviewFileId }) =>
+  saveSilently('changePlaylistPreview', {
     playlist: currentPlaylist.value,
     entity,
     previewFileId,
     previousPreviewFileId
   })
-  clearSilent()
-}
 
 const onOrderChange = info => {
   setSilent()

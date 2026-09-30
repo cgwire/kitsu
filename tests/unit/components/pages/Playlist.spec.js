@@ -15,6 +15,7 @@ import '@/lib/auth'
 import editStore from '@/store/modules/edits'
 
 import Playlist from '@/components/pages/Playlist.vue'
+import PlaylistPlayer from '@/components/players/players/PlaylistPlayer.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import ErrorText from '@/components/widgets/ErrorText.vue'
@@ -551,5 +552,41 @@ describe('Playlist page, displayed playlist', () => {
     changeSort(wrapper, 'name')
     await flushPromises()
     expect(actions.loadPlaylist).toHaveBeenCalledTimes(2)
+  })
+})
+
+describe('Playlist page, silent lock', () => {
+  // The playlist:update events are ignored while the page saves. A failed
+  // save must release the lock, or the page stays deaf to every update.
+  it.each([
+    ['preview-changed', 'changePlaylistPreview'],
+    ['remove-entity', 'removeEntityPreviewFromPlaylist']
+  ])('listens to the updates again after a failed %s', async (event, action) => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const { wrapper, actions, socket } = await openPlaylist(
+      { shots: [{ id: 's1' }] },
+      {
+        actions: {
+          [action]: vi.fn(() => Promise.reject(new Error('down'))),
+          refreshPlaylist: vi.fn(() => Promise.resolve({ id: 'pl-1' }))
+        }
+      }
+    )
+    await flushPromises()
+    const onPlaylistUpdate = socket.on.mock.calls.find(
+      ([name]) => name === 'playlist:update'
+    )[1]
+
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    wrapper.findComponent(PlaylistPlayer).vm.$emit(event, {
+      entity: { id: 's1' },
+      previewFileId: 'pf-2',
+      previousPreviewFileId: 'pf-1'
+    })
+    await vi.advanceTimersByTimeAsync(2100)
+    onPlaylistUpdate({ project_id: 'p1', playlist_id: 'pl-1' })
+
+    expect(actions.refreshPlaylist).toHaveBeenCalledTimes(1)
   })
 })
