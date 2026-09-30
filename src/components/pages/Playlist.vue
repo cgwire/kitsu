@@ -904,11 +904,12 @@ const listQuery = () => ({
 
 const loadPlaylistsData = async (force = false) => {
   if (playlists.value.length === 0 || force) {
+    errors.playlistLoading = false
     try {
       await store.dispatch('loadPlaylists', listQuery())
     } catch (err) {
       console.error(err)
-      errors.loadPlaylists = true
+      errors.playlistLoading = true
       throw err
     }
   }
@@ -928,6 +929,7 @@ const onLoadMoreClicked = async () => {
   isSilentMore = true
   page++
   loading.morePlaylists = true
+  errors.playlistLoading = false
   try {
     const morePlaylists = await store.dispatch('loadMorePlaylists', listQuery())
     setTimeout(() => {
@@ -939,9 +941,11 @@ const onLoadMoreClicked = async () => {
     }
   } catch (err) {
     console.error(err)
+    // The page asked for was not served: the next try asks for it again.
+    page--
+    loading.morePlaylists = false
     isSilentMore = false
-    errors.loadPlaylists = true
-    throw err
+    errors.playlistLoading = true
   }
 }
 

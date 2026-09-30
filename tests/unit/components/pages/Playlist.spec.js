@@ -16,6 +16,7 @@ import '@/lib/auth'
 import Playlist from '@/components/pages/Playlist.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import ErrorText from '@/components/widgets/ErrorText.vue'
 
 beforeEach(() => {
   localStorage.removeItem('playlist-sort')
@@ -27,10 +28,17 @@ let mountedWrapper = null
 
 // The page is mounted on a store whose scope (production, episode) the tests
 // move, as the topbar does. Its first reload runs on the tick after the mount.
-const mountPage = async ({ state = {}, actions = {}, query = {} } = {}) => {
-  routeHolder.route.query = query
+const mountPage = async ({
+  state = {},
+  actions = {},
+  getters = {},
+  query = {},
+  params = {}
+} = {}) => {
+  Object.assign(routeHolder.route, { query, params })
   const resolved = () => vi.fn(() => Promise.resolve())
   const storeActions = {
+    addEntitiesToPlaylist: resolved(),
     displayMoreAssets: vi.fn(),
     displayMoreShots: vi.fn(),
     loadAssets: resolved(),
@@ -38,6 +46,7 @@ const mountPage = async ({ state = {}, actions = {}, query = {} } = {}) => {
     loadEpisodes: resolved(),
     loadMorePlaylists: vi.fn(() => Promise.resolve([])),
     loadPlaylist: resolved(),
+    loadPlaylistShareLinks: vi.fn(() => Promise.resolve([])),
     loadPlaylists: resolved(),
     loadShots: resolved(),
     ...actions
@@ -86,7 +95,8 @@ const mountPage = async ({ state = {}, actions = {}, query = {} } = {}) => {
       taskMap: () => new Map(),
       taskStatusMap: () => new Map(),
       taskTypeMap: () => new Map(),
-      use12HourClock: () => false
+      use12HourClock: () => false,
+      ...getters
     },
     mutations: {
       DELETE_PLAYLIST_END: () => {},
@@ -126,7 +136,7 @@ const gateNextCall = fn => {
         release = resolve
       })
   )
-  return () => release()
+  return value => release(value)
 }
 
 const gatedAction = () => {
@@ -429,5 +439,26 @@ describe('Playlist page, reload gate', () => {
     await flushPromises()
 
     expect(lastPayload(actions.loadPlaylists)).toMatchObject({ page: 1 })
+  })
+})
+
+describe('Playlist page, list loading error', () => {
+  it('shows the error of a failed load until the next load succeeds', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { wrapper } = await mountPage({
+      actions: {
+        loadMorePlaylists: vi.fn(() => Promise.reject(new Error('down')))
+      }
+    })
+    await flushPromises()
+    expect(wrapper.findComponent(ErrorText).exists()).toBe(false)
+
+    await wrapper.find('.playlist-list-column').trigger('scroll')
+    await flushPromises()
+    expect(wrapper.findComponent(ErrorText).exists()).toBe(true)
+
+    changeSort(wrapper, 'name')
+    await flushPromises()
+    expect(wrapper.findComponent(ErrorText).exists()).toBe(false)
   })
 })
