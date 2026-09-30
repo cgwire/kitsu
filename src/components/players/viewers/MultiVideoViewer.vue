@@ -54,7 +54,13 @@ import {
 import { useStore } from 'vuex'
 
 import { swallowBrowserZoom } from '@/lib/players/wheel'
-import { DEFAULT_FPS, floorToFrame, roundToFrame } from '@/lib/video'
+import {
+  DEFAULT_FPS,
+  floorToFrame,
+  frameStartTime,
+  roundToFrame,
+  SEEK_NUDGE
+} from '@/lib/video'
 import {
   createFrameRenderer,
   supportsVideoFrameCallback
@@ -268,7 +274,7 @@ const startRenderLoop = () => {
         Math.round(metadata.mediaTime * fps.value) >= props.handleOut
       ) {
         if (props.isRepeating) {
-          const target = props.handleIn / fps.value
+          const target = frameStartTime(props.handleIn, fps.value)
           seekGuardTarget = target
           player.currentTime = target
           emit('repeat')
@@ -462,7 +468,7 @@ const preseekNextPlayer = () => {
     parseFloat(nextEntity?.fps) ||
     parseFloat(currentProduction.value?.fps) ||
     DEFAULT_FPS
-  player.currentTime = props.nextHandleIn / nextFps
+  player.currentTime = frameStartTime(props.nextHandleIn, nextFps)
 }
 
 const loadEntity = (index = 0, currentTime = 0, silentLoad = false) => {
@@ -561,11 +567,7 @@ const playNext = handleIn => {
   if (!isPlaying.value) return
   handleIn = handleIn || props.handleIn
   if (props.isRepeating) {
-    seekNow(
-      props.handleIn
-        ? props.handleIn * frameDuration.value
-        : frameDuration.value
-    )
+    seekNow(frameStartTime(props.handleIn || 1, fps.value))
     currentPlayer.value.play()?.catch(() => {})
     emit('repeat')
   } else {
@@ -574,9 +576,7 @@ const playNext = handleIn => {
     emit('entity-change', currentIndex.value)
 
     if (nextPlayer.value) {
-      nextPlayer.value.currentTime = handleIn
-        ? handleIn * frameDuration.value
-        : 0
+      nextPlayer.value.currentTime = frameStartTime(handleIn || 0, fps.value)
       nextPlayer.value.play()?.catch(() => {})
     }
 
@@ -605,7 +605,10 @@ const getCurrentTimeRaw = getCurrentTime
 const setCurrentTimeRaw = currentTime => {
   if (currentPlayer.value) {
     if (isPlaying.value) seekGuardTarget = currentTime
-    seekNow(currentTime)
+    // The comparison viewer is re-synced on every scrub move: hold the
+    // target like setCurrentTime does, or each seek aborts the previous one.
+    if (currentPlayer.value.seeking) pendingSeekTime = currentTime
+    else seekNow(currentTime)
   }
 }
 
@@ -642,7 +645,7 @@ const runSetCurrentTime = currentTime => {
     try {
       if (isPlaying.value) seekGuardTarget = currentTime
       // tweaks needed because the html video player is messy with frames
-      const target = currentTime + 0.001
+      const target = currentTime + SEEK_NUDGE
       // Scrubbing asks for a seek per mousemove and each one aborts the
       // in-flight seek, so no frame landed until the cursor stopped.
       if (currentPlayer.value.seeking) pendingSeekTime = target

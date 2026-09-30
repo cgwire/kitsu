@@ -30,6 +30,27 @@ const preview = {
   annotations: []
 }
 
+// One set of spies shared by the main and the comparison viewer stubs.
+const viewer = {
+  pause: vi.fn(),
+  play: vi.fn(),
+  resetZoom: vi.fn(),
+  resize: vi.fn(),
+  resumeZoom: vi.fn(),
+  setCurrentFrame: vi.fn(),
+  setCurrentTimeRaw: vi.fn(),
+  setVolume: vi.fn()
+}
+
+const moviePreview = {
+  id: 'preview-2',
+  extension: 'mp4',
+  revision: 1,
+  task_id: task.id,
+  annotations: [],
+  duration: 10
+}
+
 const mountPlayer = ({ props = {}, getterOverrides = {}, config = {} } = {}) => {
   const store = createStore({
     getters: {
@@ -59,10 +80,16 @@ const mountPlayer = ({ props = {}, getterOverrides = {}, config = {} } = {}) => 
         // The mounted hook and the ordering watcher drive the viewers; the
         // default stub has none of their methods.
         PreviewViewer: {
+          name: 'PreviewViewer',
           template: '<div />',
-          methods: { resize: () => {}, resumeZoom: () => {}, setVolume: () => {} }
+          methods: viewer
         },
-        RouterLink: { template: '<a><slot /></a>' }
+        RouterLink: { template: '<a><slot /></a>' },
+        VideoProgress: {
+          name: 'VideoProgress',
+          template: '<div />',
+          methods: { updateProgressBar: () => {} }
+        }
       },
       plugins: [store]
     }
@@ -100,6 +127,47 @@ describe('PreviewPlayer.vue', () => {
     wrapper?.unmount()
     wrapper = null
     vi.restoreAllMocks()
+    Object.values(viewer).forEach(spy => spy.mockClear())
+  })
+
+  describe('movie playback', () => {
+    it('keeps the frame and the playback across a quality switch', async () => {
+      // The LD/HD reload fires video-loaded again: the player reset the
+      // frame to 0 and left the play button on a decoder the reload paused.
+      wrapper = mountPlayer({ props: { previews: [moviePreview] } })
+      await nextTick()
+      const mainViewer = wrapper.findAllComponents({ name: 'PreviewViewer' })[0]
+      mainViewer.vm.$emit('video-loaded')
+      wrapper.vm.setCurrentFrame(87)
+      wrapper.vm.play()
+      viewer.play.mockClear()
+      wrapper
+        .findComponent({ name: 'PlayerPlaybackBar' })
+        .vm.$emit('update:isHd', true)
+      await nextTick()
+      mainViewer.vm.$emit('video-loaded')
+      expect(viewer.setCurrentFrame).toHaveBeenLastCalledWith(87)
+      expect(viewer.play).toHaveBeenCalledTimes(1)
+    })
+
+    it('starts a trimmed shot on its handle-in frame at any fps', async () => {
+      // 120 * 0.0333 (rounded frame duration) is frame 119.88 at 30 fps: the
+      // play jump landed one frame before the trim.
+      wrapper = mountPlayer({
+        props: { previews: [moviePreview] },
+        getterOverrides: {
+          productionMap: () => new Map([[task.project_id, { fps: 30 }]]),
+          shotMap: () =>
+            new Map([[task.entity_id, { id: task.entity_id, data: { handle_in: 120 } }]])
+        }
+      })
+      await nextTick()
+      wrapper.vm.play()
+      expect(viewer.setCurrentTimeRaw.mock.calls[0][0]).toBeCloseTo(
+        120 / 30 + 0.001,
+        6
+      )
+    })
   })
 
   describe('render', () => {

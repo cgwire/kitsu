@@ -21,7 +21,6 @@
             class="raw-player"
             :entities="entityList"
             :current-preview-index="currentPreviewIndex"
-            :is-hd="isHd"
             :is-repeating="isRepeating"
             :muted="isMuted"
             :panzoom="true"
@@ -177,7 +176,6 @@
       v-model:is-annotating="isAnnotating"
       v-model:is-comments-hidden="isCommentsHidden"
       v-model:is-entities-hidden="isEntitiesHidden"
-      v-model:is-hd="isHd"
       v-model:is-muted="isMuted"
       v-model:is-repeating="isRepeating"
       v-model:volume="volume"
@@ -309,7 +307,6 @@ const isCommentsHidden = ref(
 )
 const isEntitiesHidden = ref(false)
 const isFullScreen = ref(false)
-const isHd = ref(true)
 const { isMuted, isPlaying, isRepeating } = usePlayerTransport()
 const maxDuration = ref(0)
 const movieDimensions = ref({ width: 0, height: 0 })
@@ -450,12 +447,14 @@ const overlayDimensions = computed(() => {
 })
 
 const nbFrames = computed(() => {
+  // The preview duration first, like the studio player: the decoder
+  // duration floored to the frame plus the Chromium offset read one frame
+  // more on the same clip.
   const isChromium = !!window.chrome
   const change = isChromium ? frameDuration.value : 0
   const duration =
-    maxDuration.value > 0
-      ? maxDuration.value + change
-      : currentPreview.value?.duration || 0
+    currentPreview.value?.duration ||
+    (maxDuration.value > 0 ? maxDuration.value + change : 0)
   if (duration > 0) return Math.round(duration * fps.value)
   if (isPicture.value) return Math.round(2 * fps.value)
   return 0

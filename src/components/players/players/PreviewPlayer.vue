@@ -497,6 +497,7 @@ import {
   floorToFrame,
   formatFrame,
   formatTime,
+  frameStartTime,
   getEntityFrameStart,
   roundToFrame
 } from '@/lib/video'
@@ -1182,7 +1183,7 @@ const getCurrentFrame = () => {
 // the first playback emission after the seek lands is ceil+1-based
 // (~start + 2), so the counter would visibly restart a few frames in.
 const seekTrimStart = () => {
-  const startTime = trimStartFrame.value * frameDuration.value
+  const startTime = frameStartTime(trimStartFrame.value, fps.value)
   pendingTrimSeek = true
   previewViewer.value.setCurrentTimeRaw(startTime)
   comparisonViewer.value?.setCurrentTimeRaw(startTime)
@@ -1996,8 +1997,21 @@ const onPreviewLoaded = () => {
       width: currentPreview.value.width,
       height: currentPreview.value.height
     }
-    setCurrentFrame(0)
-    progress.value.updateProgressBar(0)
+    if (isQualitySwitchPending) {
+      // The LD/HD reload restarted the decoder at 0 and paused it: put
+      // it back where the user was.
+      isQualitySwitchPending = false
+      previewViewer.value.setCurrentFrame(currentFrame.value)
+      if (isPlaying.value) {
+        previewViewer.value.play()
+        if (comparisonViewer.value && isComparing.value) {
+          comparisonViewer.value.play()
+        }
+      }
+    } else {
+      setCurrentFrame(0)
+      progress.value.updateProgressBar(0)
+    }
   }
   // Replay the same sequence that fires on a comparison toggle: it
   // forces a resetPicture/mountVideo round-trip on the viewers, which
@@ -2465,6 +2479,13 @@ watch(speed, () => {
 watch(volume, () => {
   previewViewer.value?.setVolume(volume.value)
   localPreferences.setPreference('player:volume', volume.value)
+})
+
+// The viewers reload their source on a quality switch: onPreviewLoaded then
+// restores the frame instead of resetting it.
+let isQualitySwitchPending = false
+watch(isHd, () => {
+  if (isMovie.value) isQualitySwitchPending = true
 })
 
 // Persist through a watcher: ButtonSound drives isMuted via v-model and

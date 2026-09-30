@@ -479,27 +479,14 @@ const getMouseFrame = (event, annotation) => {
   if (position > width.value) position = width.value - 1
   // Clicking an annotation marker must land on that annotation's exact
   // frame so the annotation loads — not the pixel the cursor hit, which can
-  // be a frame off and make the annotation lookup miss. Bar clicks (no
-  // annotation) map the click position through the zoom window.
-  let duration = annotation
-    ? annotation.time
-    : xToFrame(position) * props.frameDuration
-  if (duration < 0) duration = 0
-
-  const isChromium = !!window.chrome
-  const change = isChromium ? props.frameDuration : 0
-  const vd = props.nbFrames * props.frameDuration
-  if (duration > vd) {
-    duration = vd - change
-  }
-  // Annotation times sit exactly on the frame grid (N * frameDuration), but
-  // the float quotient can land just below N — floor() would drop to the
-  // previous frame. round() matches getAnnotationPosition, so the click lands
-  // on the frame the marker is drawn on. Bar clicks keep floor(): their
-  // duration is a continuous position, not a grid value.
+  // be a frame off and make the annotation lookup miss. Annotation times sit
+  // on the frame grid (N * frameDuration), but the float quotient can land
+  // just below N: round() matches getAnnotationPosition. Bar clicks map the
+  // pixel through the zoom window without a detour through seconds, whose
+  // float quotient dropped the first pixel of a frame onto the previous one.
   const frameNumber = annotation
     ? Math.round(annotation.time / props.frameDuration)
-    : Math.floor(duration / props.frameDuration)
+    : Math.max(Math.floor(xToFrame(position)), 0)
   return { frameNumber, position }
 }
 
