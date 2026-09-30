@@ -12,6 +12,7 @@ vi.mock('vue-router', () => ({
 }))
 
 import '@/lib/auth'
+import editStore from '@/store/modules/edits'
 
 import Playlist from '@/components/pages/Playlist.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
@@ -506,5 +507,33 @@ describe('Playlist page, addition buttons', () => {
     )
     pending.release([])
     await flushPromises()
+  })
+})
+
+describe('Playlist page, task status of the entities to add', () => {
+  const edit = {
+    id: 'e1',
+    name: 'Edit',
+    validations: new Map([['tt-1', 'task-1']])
+  }
+
+  beforeEach(() => editStore.cache.editMap.set(edit.id, edit))
+  afterEach(() => editStore.cache.editMap.delete(edit.id))
+
+  it('shows the status of an edit for the task type of the playlist', async () => {
+    const { wrapper } = await openPlaylist(
+      { for_entity: 'edit', task_type_id: 'tt-1' },
+      {
+        getters: {
+          displayedEdits: () => [edit],
+          taskMap: () => new Map([['task-1', { task_status_id: 'st-1' }]]),
+          taskStatusMap: () =>
+            new Map([['st-1', { name: 'Done', color: '#00ff00' }]])
+        }
+      }
+    )
+    await flushPromises()
+
+    expect(wrapper.find('span[title="Done"]').exists()).toBe(true)
   })
 })
