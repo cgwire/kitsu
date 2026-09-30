@@ -26,11 +26,14 @@ vi.mock('vue-router', () => ({
 
 // Pre-load the real store to avoid circular-import race from child components.
 import '@/lib/auth'
+import csv from '@/lib/csv'
 
 import PeopleList from '@/components/lists/PeopleList.vue'
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 import EditPersonModal from '@/components/modals/EditPersonModal.vue'
+import ImportModal from '@/components/modals/ImportModal.vue'
 import People from '@/components/pages/People.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 
 const currentUser = { id: 'person-1', role: 'admin' }
@@ -217,6 +220,27 @@ describe('People page', () => {
         tab: 'guests',
         role: 'user'
       })
+    })
+  })
+
+  describe('CSV import', () => {
+    afterEach(() => vi.restoreAllMocks())
+
+    it('keeps the import modal open on an error when the CSV cannot be read', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      vi.spyOn(csv, 'processCSV').mockRejectedValue(new Error('unreadable'))
+      const { wrapper } = await mountPage()
+      await wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.props('icon') === 'import')
+        .vm.$emit('click')
+      const importModal = () => wrapper.findComponent(ImportModal)
+      expect(importModal().props('isError')).toBe(false)
+
+      await importModal().vm.$emit('confirm', 'First Name;Last Name', 'text')
+      await flushPromises()
+
+      expect(importModal().props('isError')).toBe(true)
     })
   })
 })

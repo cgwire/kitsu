@@ -100,7 +100,7 @@
     <import-modal
       active
       :is-loading="isImportPeopleLoading"
-      :is-error="isImportPeopleLoadingError"
+      :is-error="errors.importing || isImportPeopleLoadingError"
       :form-data="personCsvFormData"
       :columns="[...dataMatchers, ...csvColumns]"
       :optional-columns="optionalCsvColumns"
@@ -264,6 +264,7 @@ const errors = reactive({
   avatar: false,
   del: false,
   edit: false,
+  importing: false,
   importingError: null,
   invite: false,
   inviteLink: false,
@@ -497,6 +498,7 @@ const updateRoute = () => {
 // Import
 
 const showImportModal = () => {
+  errors.importing = false
   modals.importModal = true
 }
 
@@ -509,11 +511,17 @@ const hideImportRenderModal = () => {
 }
 
 const renderImport = async (data, mode) => {
-  parsedCSV.value = await csv.processCSV(
-    mode === 'file' ? data.get('file') : data
-  )
-  hideImportModal()
-  modals.isImportRenderDisplayed = true
+  errors.importing = false
+  try {
+    parsedCSV.value = await csv.processCSV(
+      mode === 'file' ? data.get('file') : data
+    )
+    hideImportModal()
+    modals.isImportRenderDisplayed = true
+  } catch (err) {
+    console.error(err)
+    errors.importing = true
+  }
 }
 
 const uploadImportFile = async (data, toUpdate) => {
