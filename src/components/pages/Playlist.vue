@@ -3,11 +3,8 @@
     <div class="columns">
       <div
         ref="playlistList"
-        :class="{
-          'playlist-list-column': true,
-          column: true,
-          toggled: isListToggled
-        }"
+        class="playlist-list-column column"
+        :class="{ toggled: isListToggled }"
         @scroll.passive="onPlaylistListScroll"
       >
         <div class="flexrow top-section">
@@ -42,10 +39,7 @@
         </div>
 
         <button
-          :class="{
-            button: true,
-            'is-loading': loading.addPlaylist
-          }"
+          class="button"
           @click="showAddModal"
           key="new-playlist-button"
           v-if="
@@ -188,11 +182,7 @@
             {{ $t('playlists.no_playlist') }}
           </p>
           <button
-            :class="{
-              big: true,
-              button: true,
-              'is-loading': loading.addPlaylist
-            }"
+            class="big button"
             @click="showAddModal"
             key="new-playlist-button"
             v-if="isCurrentUserManager || isCurrentUserSupervisor"
@@ -265,11 +255,7 @@
                 @click="modals.isBuildFilterDisplayed = true"
               />
               <button
-                :class="{
-                  button: true,
-                  'flexrow-item': true,
-                  'add-sequence': true
-                }"
+                class="button flexrow-item add-sequence"
                 :disabled="isAdditionLoading"
                 @click="addCurrentSelection"
                 v-if="isAddSearchVisible"
@@ -393,135 +379,45 @@
                 </div>
               </div>
             </div>
-            <div v-else-if="isSequencePlaylist">
+            <div v-else-if="flatAdditionEntities">
               <div class="addition-entities">
                 <div
-                  :key="sequence.id"
+                  :key="entity.id"
                   :class="{
                     'addition-shot': true,
-                    playlisted: currentEntitiesMap[sequence.id] !== undefined
+                    playlisted: currentEntitiesMap[entity.id] !== undefined
                   }"
                   draggable="true"
                   role="button"
                   tabindex="0"
-                  @dragstart="onEntityDragStart($event, sequence)"
-                  @click.prevent="addEntityToPlaylist(sequence)"
-                  @keydown.enter.prevent="addEntityToPlaylist(sequence)"
-                  @keydown.space.prevent="addEntityToPlaylist(sequence)"
-                  v-for="sequence in displayedSequences.filter(
-                    s => !s.canceled
-                  )"
+                  @dragstart="onEntityDragStart($event, entity)"
+                  @click.prevent="addEntityToPlaylist(entity)"
+                  @keydown.enter.prevent="addEntityToPlaylist(entity)"
+                  @keydown.space.prevent="addEntityToPlaylist(entity)"
+                  v-for="entity in flatAdditionEntities"
                 >
                   <div
                     class="entity-loading-spinner"
-                    v-if="entityLoading[sequence.id]"
+                    v-if="entityLoading[entity.id]"
                   >
                     <spinner />
                   </div>
                   <light-entity-thumbnail
-                    :preview-file-id="sequence.preview_file_id"
+                    :preview-file-id="entity.preview_file_id"
                     width="150px"
                     height="100px"
                   />
                   <div>
                     <span
-                      :title="getTaskStatus(sequence).name"
+                      :title="getTaskStatus(entity).name"
                       :style="{
-                        color: getTaskStatus(sequence).color
+                        color: getTaskStatus(entity).color
                       }"
                       v-if="currentPlaylist.task_type_id"
                     >
                       &bullet;
                     </span>
-                    <span class="playlisted-shot-name">{{
-                      sequence.name
-                    }}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div v-else-if="isEditPlaylist">
-              <div class="addition-entities">
-                <div
-                  :key="edit.id"
-                  :class="{
-                    'addition-shot': true,
-                    playlisted: currentEntitiesMap[edit.id] !== undefined
-                  }"
-                  draggable="true"
-                  role="button"
-                  tabindex="0"
-                  @dragstart="onEntityDragStart($event, edit)"
-                  @click.prevent="addEntityToPlaylist(edit)"
-                  @keydown.enter.prevent="addEntityToPlaylist(edit)"
-                  @keydown.space.prevent="addEntityToPlaylist(edit)"
-                  v-for="edit in displayedEdits.filter(e => !e.canceled)"
-                >
-                  <div
-                    class="entity-loading-spinner"
-                    v-if="entityLoading[edit.id]"
-                  >
-                    <spinner />
-                  </div>
-                  <light-entity-thumbnail
-                    :preview-file-id="edit.preview_file_id"
-                    width="150px"
-                    height="100px"
-                  />
-                  <div>
-                    <span
-                      :title="getTaskStatus(edit).name"
-                      :style="{
-                        color: getTaskStatus(edit).color
-                      }"
-                      v-if="currentPlaylist.task_type_id"
-                    >
-                      &bullet;
-                    </span>
-                    <span class="playlisted-shot-name">{{ edit.name }}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div v-else-if="isEpisodePlaylist">
-              <div class="addition-entities">
-                <div
-                  :key="episode.id"
-                  :class="{
-                    'addition-shot': true,
-                    playlisted: currentEntitiesMap[episode.id] !== undefined
-                  }"
-                  draggable="true"
-                  role="button"
-                  tabindex="0"
-                  @dragstart="onEntityDragStart($event, episode)"
-                  @click.prevent="addEntityToPlaylist(episode)"
-                  @keydown.enter.prevent="addEntityToPlaylist(episode)"
-                  @keydown.space.prevent="addEntityToPlaylist(episode)"
-                  v-for="episode in displayedEpisodes.filter(e => !e.canceled)"
-                >
-                  <div
-                    class="entity-loading-spinner"
-                    v-if="entityLoading[episode.id]"
-                  >
-                    <spinner />
-                  </div>
-                  <light-entity-thumbnail
-                    :preview-file-id="episode.preview_file_id"
-                    width="150px"
-                    height="100px"
-                  />
-                  <div>
-                    <span
-                      :title="getTaskStatus(episode).name"
-                      :style="{
-                        color: getTaskStatus(episode).color
-                      }"
-                      v-if="currentPlaylist.task_type_id"
-                    >
-                      &bullet;
-                    </span>
-                    <span class="playlisted-shot-name">{{ episode.name }}</span>
+                    <span class="playlisted-shot-name">{{ entity.name }}</span>
                   </div>
                 </div>
               </div>
@@ -705,11 +601,9 @@ const errors = reactive({
   playlistLoading: false
 })
 const loading = reactive({
-  addPlaylist: false,
   addDaily: false,
   addEpisode: false,
   addMovie: false,
-  addSequence: false,
   addWeekly: false,
   editPlaylist: false,
   morePlaylists: false,
@@ -775,11 +669,7 @@ const taskTypeMap = computed(() => store.getters.taskTypeMap)
 const use12HourClock = computed(() => store.getters.use12HourClock)
 
 const isAdditionLoading = computed(
-  () =>
-    loading.addSequence ||
-    loading.addWeekly ||
-    loading.addDaily ||
-    loading.addEpisode
+  () => loading.addWeekly || loading.addDaily || loading.addEpisode
 )
 
 // The all pseudo-episode is split by entity type: "All assets" (default)
@@ -812,6 +702,15 @@ const isEpisodePlaylist = computed(() => currentEntityType.value === 'episode')
 const isSequencePlaylist = computed(
   () => currentEntityType.value === 'sequence'
 )
+
+// Sequences, edits and episodes are listed flat, the others by group.
+const flatAdditionEntities = computed(() => {
+  let entities
+  if (isSequencePlaylist.value) entities = displayedSequences.value
+  else if (isEditPlaylist.value) entities = displayedEdits.value
+  else if (isEpisodePlaylist.value) entities = displayedEpisodes.value
+  return entities?.filter(entity => !entity.canceled)
+})
 
 const isAddSearchVisible = computed(
   () =>
@@ -1789,10 +1688,6 @@ useHead({ title: pageTitle })
   .playlist-column.no-selection {
     background: $dark-grey-light;
 
-    h2 {
-      color: white;
-    }
-
     .recent-playlist {
       position: relative;
       max-width: 800px;
@@ -1883,13 +1778,10 @@ useHead({ title: pageTitle })
   text-align: center;
   margin: 0;
   opacity: 0.5;
+  position: relative;
   width: 170px;
   display: flex;
   flex-direction: column;
-
-  a {
-    margin: auto;
-  }
 
   &:hover {
     opacity: 0.75;
@@ -1994,17 +1886,6 @@ h2 {
   overflow: auto;
   background: #f4f5f9;
 
-  h2 {
-    font-size: 2em;
-    margin-top: 1.5em;
-    margin-bottom: 0.3em;
-    border-bottom: 0;
-
-    &:first-child {
-      margin-top: 0.5em;
-    }
-  }
-
   .recent-playlist {
     height: 320px;
     background: white;
@@ -2030,10 +1911,8 @@ h2 {
       bottom: 0;
       right: 0;
       left: 0;
-      align-items: middle;
       padding: 0.3em 1.2em;
       height: 65px;
-      padding-top: 0.3em;
     }
 
     h3 {
@@ -2079,10 +1958,6 @@ h2 {
       margin-top: 1px;
     }
   }
-}
-
-.addition-shot {
-  position: relative;
 }
 
 .entity-loading-spinner {
