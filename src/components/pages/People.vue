@@ -98,7 +98,6 @@
     />
 
     <import-modal
-      ref="import-modal"
       active
       :is-loading="isImportPeopleLoading"
       :is-error="isImportPeopleLoadingError"
@@ -247,7 +246,6 @@ const roleOptions = [
 // State
 // --------------------------------------------------------------------------
 
-const importModalRef = useTemplateRef('import-modal')
 const searchFieldRef = useTemplateRef('people-search-field')
 
 const activeTab = ref('active')
@@ -540,7 +538,6 @@ const resetImport = () => {
   errors.importingError = null
   hideImportRenderModal()
   store.commit('PERSON_CSV_FILE_SELECTED', null)
-  importModalRef.value?.reset()
   showImportModal()
 }
 
@@ -818,10 +815,6 @@ useHead({ title: computed(() => `${t('people.title')} - Kitsu`) })
 
 <style lang="scss" scoped>
 .page-header {
-  margin-bottom: 0em;
-}
-
-.tabs {
   margin-bottom: 0;
 }
 
