@@ -3,6 +3,7 @@ import { flushPromises } from '@vue/test-utils'
 vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 
+import DeleteModal from '@/components/modals/DeleteModal.vue'
 import Assets from '@/components/pages/Assets.vue'
 
 import { mountEntityPage, production } from '../../fixtures/entity-page'
@@ -82,3 +83,23 @@ describe('Assets page, reload of another episode', () => {
   })
 })
 
+describe('Assets page, restore', () => {
+  test('shows the error of a failed restore in its modal', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { wrapper } = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      actions: { restoreAsset: () => Promise.reject(new Error('down')) }
+    })
+    await flushPromises()
+    await wrapper
+      .findComponent({ name: 'AssetList' })
+      .vm.$emit('restore-clicked', { id: 'asset-1', name: 'Tree' })
+    const modal = () =>
+      wrapper.findAllComponents(DeleteModal).find(modal => modal.props('active'))
+
+    await modal().vm.$emit('confirm')
+    await flushPromises()
+
+    expect(modal().props('isError')).toBe(true)
+  })
+})

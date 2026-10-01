@@ -146,7 +146,7 @@
     <delete-modal
       :active="modals.isRestoreDisplayed"
       :is-loading="loading.restore"
-      :is-error="loading.del"
+      :is-error="errors.restore"
       :text="restoreText"
       :error-text="$t('assets.restore_error')"
       @confirm="confirmRestoreAsset"
