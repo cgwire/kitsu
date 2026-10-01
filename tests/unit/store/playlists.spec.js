@@ -40,6 +40,75 @@ describe('Playlists store', () => {
       expect(commit).not.toHaveBeenCalled()
     })
 
+    // Zou answers 403 to a client once a playlist is made internal, and 404
+    // once it is deleted: the live refresh drops it instead of rejecting.
+    test('refreshPlaylist drops a listed playlist the user may no longer read', async () => {
+      vi.spyOn(playlistsApi, 'getPlaylist').mockRejectedValue({ status: 403 })
+      const commit = vi.fn()
+
+      const playlist = await store.actions.refreshPlaylist(
+        {
+          commit,
+          state: {
+            playlistMap: new Map([['playlist-1', { id: 'playlist-1' }]])
+          },
+          rootGetters: { currentProduction: { id: 'production-1' } }
+        },
+        { id: 'playlist-1' }
+      )
+
+      expect(playlist).toBeNull()
+      expect(commit).toHaveBeenCalledWith('DELETE_PLAYLIST_END', {
+        id: 'playlist-1'
+      })
+    })
+
+    // Every internal playlist a manager creates reaches the clients' sockets.
+    test('refreshPlaylist quietly skips a new playlist the user may not read', async () => {
+      vi.spyOn(playlistsApi, 'getPlaylist').mockRejectedValue({ status: 403 })
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const commit = vi.fn()
+
+      const playlist = await store.actions.refreshPlaylist(
+        {
+          commit,
+          state: { playlistMap: new Map() },
+          rootGetters: { currentProduction: { id: 'production-1' } }
+        },
+        { id: 'playlist-internal', scope: { productionId: 'production-1' } }
+      )
+
+      expect(playlist).toBeNull()
+      expect(commit).not.toHaveBeenCalled()
+      expect(consoleError).not.toHaveBeenCalled()
+    })
+
+    test('refreshPlaylist logs any other failure', async () => {
+      const error = { status: 500 }
+      vi.spyOn(playlistsApi, 'getPlaylist').mockRejectedValue(error)
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const commit = vi.fn()
+
+      const playlist = await store.actions.refreshPlaylist(
+        {
+          commit,
+          state: {
+            playlistMap: new Map([['playlist-1', { id: 'playlist-1' }]])
+          },
+          rootGetters: { currentProduction: { id: 'production-1' } }
+        },
+        { id: 'playlist-1' }
+      )
+
+      expect(playlist).toBeNull()
+      expect(commit).not.toHaveBeenCalled()
+      expect(consoleError).toHaveBeenCalledWith(error)
+    })
+
     // Opening a playlist then another: the preview maps belong to the last
     // one opened, whatever order the responses land in.
     test('loadPlaylist commits only the playlist opened last', async () => {
