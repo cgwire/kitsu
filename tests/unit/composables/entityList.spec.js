@@ -210,3 +210,32 @@ describe('entity list metadata edition', () => {
     }
   )
 })
+
+describe('entity list drag browsing', () => {
+  const dragStart = () => {
+    const event = new Event('dragstart', { bubbles: true, cancelable: true })
+    document.body.dispatchEvent(event)
+    return event.defaultPrevented
+  }
+
+  // Firefox starts a native drag of the task links and thumbnails under
+  // the pointer, which swallows the mouse moves the grab scrolls with.
+  test('blocks the native drags while the list is grabbed', async () => {
+    const wrapper = await mountEntityList(Host, {
+      getters: { currentProduction: production }
+    })
+    expect(dragStart()).toBe(false)
+
+    wrapper.vm.list.startBrowsing({
+      target: document.createElement('td'),
+      clientX: 10,
+      clientY: 10
+    })
+    expect(dragStart()).toBe(true)
+
+    document.dispatchEvent(new Event('mouseup'))
+    expect(dragStart()).toBe(false)
+
+    wrapper.unmount()
+  })
+})

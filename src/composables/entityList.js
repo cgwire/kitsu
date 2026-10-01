@@ -877,7 +877,14 @@ export const useEntityList = ({
     }
   }
 
+  // Firefox starts a native drag of the task links and thumbnails under
+  // the pointer, which swallows the mouse moves the grab scrolls with.
+  const onDragStart = event => {
+    if (isBrowsingX || isBrowsingY) event.preventDefault()
+  }
+
   const domEvents = [
+    ['dragstart', onDragStart],
     ['mousemove', onMouseMove],
     ['touchmove', onMouseMove],
     ['mouseup', stopBrowsing],
