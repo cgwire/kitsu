@@ -98,16 +98,6 @@
     </div>
 
     <delete-modal
-      :active="modals.isDeleteDisplayed"
-      :is-loading="loading.del"
-      :is-error="errors.del"
-      :text="deleteText"
-      :error-text="$t('sequences.delete_error')"
-      @cancel="modals.isDeleteDisplayed = false"
-      @confirm="confirmDeleteSequence"
-    />
-
-    <delete-modal
       :active="modals.isDeleteMetadataDisplayed"
       :is-loading="loading.deleteMetadata"
       :is-error="errors.deleteMetadata"
