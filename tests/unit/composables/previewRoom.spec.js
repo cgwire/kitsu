@@ -10,7 +10,9 @@ const SOCKET_EVENTS = [
   'preview-room:comparison-panzoom-changed',
   'preview-room:add-annotation',
   'preview-room:remove-annotation',
-  'preview-room:update-annotation'
+  'preview-room:update-annotation',
+  'disconnect',
+  'connect'
 ]
 
 const makeSocket = () => ({
@@ -18,6 +20,14 @@ const makeSocket = () => ({
   on: vi.fn(),
   off: vi.fn()
 })
+
+/**
+ * Helper: grab the handler registered for `event` on the socket.
+ */
+const handlerFor = (socket, event) => {
+  const call = socket.on.mock.calls.find(([name]) => name === event)
+  return call?.[1]
+}
 
 const makeRoom = (overrides = {}) =>
   reactive({
@@ -374,6 +384,185 @@ describe('composables/previewRoom', () => {
     })
   })
 
+  describe('reconnection', () => {
+    const emitsOf = (socket, event) =>
+      socket.emit.mock.calls.filter(([name]) => name === event)
+
+    const dropConnection = socket => handlerFor(socket, 'disconnect')()
+    const restoreConnection = socket => handlerFor(socket, 'connect')()
+
+    // Zou acknowledges open-playlist once the socket is back in the room.
+    const acknowledgeOpenPlaylist = socket => {
+      const [, , acknowledge] = emitsOf(
+        socket,
+        'preview-room:open-playlist'
+      ).pop()
+      acknowledge()
+    }
+
+    it('opens the room again, then rejoins it once Zou acknowledges', () => {
+      const socket = makeSocket()
+      const { wrapper } = mountWithRoom({
+        room: makeRoom({ people: ['user-1'] }),
+        userId: 'user-1',
+        socket,
+        currentFrame: ref(42)
+      })
+      dropConnection(socket)
+      restoreConnection(socket)
+      expect(socket.emit).toHaveBeenCalledWith(
+        'preview-room:open-playlist',
+        { playlist_id: 'playlist-1', user_id: 'user-1' },
+        expect.any(Function)
+      )
+      expect(emitsOf(socket, 'preview-room:join')).toHaveLength(0)
+      acknowledgeOpenPlaylist(socket)
+      expect(socket.emit).toHaveBeenLastCalledWith(
+        'preview-room:join',
+        expect.objectContaining({
+          user_id: 'user-1',
+          playlist_id: 'playlist-1',
+          current_frame: 42
+        })
+      )
+      wrapper.unmount()
+    })
+
+    it('only opens the room again when the user was not in it', () => {
+      const socket = makeSocket()
+      const { wrapper } = mountWithRoom({
+        room: makeRoom({ people: ['user-2'] }),
+        userId: 'user-1',
+        socket
+      })
+      dropConnection(socket)
+      restoreConnection(socket)
+      acknowledgeOpenPlaylist(socket)
+      expect(emitsOf(socket, 'preview-room:open-playlist')).toHaveLength(1)
+      expect(emitsOf(socket, 'preview-room:join')).toHaveLength(0)
+      wrapper.unmount()
+    })
+
+    it('ignores the first connection', () => {
+      const socket = makeSocket()
+      const { wrapper } = mountWithRoom({
+        room: makeRoom({ people: ['user-1'] }),
+        userId: 'user-1',
+        socket
+      })
+      restoreConnection(socket)
+      expect(socket.emit).not.toHaveBeenCalled()
+      wrapper.unmount()
+    })
+
+    it('ignores a temporary room', () => {
+      const socket = makeSocket()
+      const { wrapper } = mountWithRoom({
+        room: makeRoom({ id: 'temp', people: ['user-1'] }),
+        userId: 'user-1',
+        socket
+      })
+      dropConnection(socket)
+      restoreConnection(socket)
+      expect(socket.emit).not.toHaveBeenCalled()
+      wrapper.unmount()
+    })
+
+    it('does not rejoin a room left while the connection was down', () => {
+      const socket = makeSocket()
+      const { wrapper, api } = mountWithRoom({
+        room: makeRoom({ people: ['user-1'] }),
+        userId: 'user-1',
+        socket
+      })
+      dropConnection(socket)
+      api.leaveRoom()
+      restoreConnection(socket)
+      acknowledgeOpenPlaylist(socket)
+      expect(emitsOf(socket, 'preview-room:join')).toHaveLength(0)
+      wrapper.unmount()
+    })
+
+    it('joins again after the ack when the user joined while down', () => {
+      const socket = makeSocket()
+      const { wrapper, api } = mountWithRoom({
+        room: makeRoom({ people: [] }),
+        userId: 'user-1',
+        socket
+      })
+      dropConnection(socket)
+      api.joinRoom()
+      restoreConnection(socket)
+      acknowledgeOpenPlaylist(socket)
+      expect(emitsOf(socket, 'preview-room:join')).toHaveLength(2)
+      wrapper.unmount()
+    })
+
+    it('still rejoins when the connection drops again before the ack', () => {
+      const socket = makeSocket()
+      const { wrapper } = mountWithRoom({
+        room: makeRoom({ people: ['user-1'] }),
+        userId: 'user-1',
+        socket
+      })
+      dropConnection(socket)
+      restoreConnection(socket)
+      // Zou answers open-playlist with the people it dropped the user from.
+      handlerFor(socket, 'preview-room:room-people-updated')({ people: [] })
+      dropConnection(socket)
+      restoreConnection(socket)
+      acknowledgeOpenPlaylist(socket)
+      expect(emitsOf(socket, 'preview-room:join')).toHaveLength(1)
+      wrapper.unmount()
+    })
+
+    it('takes the room state again at the next drop', () => {
+      const socket = makeSocket()
+      const { wrapper } = mountWithRoom({
+        room: makeRoom({ people: ['user-1'] }),
+        userId: 'user-1',
+        socket
+      })
+      dropConnection(socket)
+      restoreConnection(socket)
+      acknowledgeOpenPlaylist(socket)
+      // Zou then drops the user from the room while the socket stays up.
+      handlerFor(socket, 'preview-room:room-people-updated')({ people: [] })
+      dropConnection(socket)
+      restoreConnection(socket)
+      acknowledgeOpenPlaylist(socket)
+      expect(emitsOf(socket, 'preview-room:join')).toHaveLength(1)
+      wrapper.unmount()
+    })
+
+    it('does not rejoin once unmounted', () => {
+      const socket = makeSocket()
+      const { wrapper } = mountWithRoom({
+        room: makeRoom({ people: ['user-1'] }),
+        userId: 'user-1',
+        socket
+      })
+      dropConnection(socket)
+      restoreConnection(socket)
+      wrapper.unmount()
+      acknowledgeOpenPlaylist(socket)
+      expect(emitsOf(socket, 'preview-room:join')).toHaveLength(0)
+    })
+
+    it('does not join a playlist opened before the ack', () => {
+      const socket = makeSocket()
+      const room = makeRoom({ people: ['user-1'] })
+      const { wrapper } = mountWithRoom({ room, userId: 'user-1', socket })
+      dropConnection(socket)
+      restoreConnection(socket)
+      handlerFor(socket, 'preview-room:room-people-updated')({ people: [] })
+      room.id = 'playlist-2'
+      acknowledgeOpenPlaylist(socket)
+      expect(emitsOf(socket, 'preview-room:join')).toHaveLength(0)
+      wrapper.unmount()
+    })
+  })
+
   describe('loadRoomCurrentState', () => {
     const makeEntity = () => ({
       id: 'entity-7',
@@ -479,14 +668,6 @@ describe('composables/previewRoom', () => {
   })
 
   describe('incoming event echo guard', () => {
-    /**
-     * Helper: mount, grab the registered handler for `event`, return it.
-     */
-    const handlerFor = (socket, event) => {
-      const call = socket.on.mock.calls.find(([name]) => name === event)
-      return call?.[1]
-    }
-
     it("'preview-room:room-updated' ignores events from our own localId", () => {
       const socket = makeSocket()
       const pause = vi.fn()

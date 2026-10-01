@@ -202,6 +202,11 @@ export const usePreviewRoom = options => {
   let lastEmitTime = 0
   let pendingPreviousPreviewFileId = null
 
+  // Set from a socket drop until the room is open again (see
+  // onSocketConnect).
+  let isReconnecting = false
+  let rejoinAfterReconnect = false
+
   // ---- Computed ----
 
   const joinedRoom = computed(() => {
@@ -231,6 +236,7 @@ export const usePreviewRoom = options => {
   const joinRoom = () => {
     const r = unref(room)
     if (!isValidRoomId(r)) return
+    rejoinAfterReconnect = true
     const entity = unref(currentEntity)
     const preview = unref(currentPreview)
     socket.emit(PREVIEW_ROOM_EVENTS.join, {
@@ -263,6 +269,7 @@ export const usePreviewRoom = options => {
   const leaveRoom = playlistId => {
     const uid = unref(userId)
     if (!uid) return
+    rejoinAfterReconnect = false
     const r = unref(room)
     socket.emit(PREVIEW_ROOM_EVENTS.leave, {
       user_id: uid,
@@ -641,6 +648,35 @@ export const usePreviewRoom = options => {
     updateObjectInCanvas(annotation, obj)
   }
 
+  // Zou drops the user from every room when the socket closes, and the
+  // socket that socket.io reconnects is in none: open the room again,
+  // then rejoin it if the user was in it before the drop.
+  const onSocketDisconnect = () => {
+    // A drop before the room is open again keeps the first drop's state.
+    if (!isReconnecting) rejoinAfterReconnect = Boolean(joinedRoom.value)
+    isReconnecting = true
+  }
+
+  const onSocketConnect = () => {
+    if (!isReconnecting) return
+    const r = unref(room)
+    if (!isValidRoomId(r)) {
+      isReconnecting = false
+      return
+    }
+    const playlistId = r.id
+    // Only open-playlist puts the socket in the room: join waits for its
+    // acknowledgment, or the room state Zou sends back would be lost.
+    socket.emit(
+      PREVIEW_ROOM_EVENTS.openPlaylist,
+      { playlist_id: playlistId, user_id: unref(userId) },
+      () => {
+        isReconnecting = false
+        if (rejoinAfterReconnect && unref(room)?.id === playlistId) joinRoom()
+      }
+    )
+  }
+
   // Bound (event name, handler) pairs — stored so unmount can pass the
   // exact same function references to socket.off().
   const handlerPairs = [
@@ -650,7 +686,9 @@ export const usePreviewRoom = options => {
     [PREVIEW_ROOM_EVENTS.comparisonPanzoomChanged, onComparisonPanzoomChanged],
     [PREVIEW_ROOM_EVENTS.addAnnotation, onAddAnnotation],
     [PREVIEW_ROOM_EVENTS.removeAnnotation, onRemoveAnnotation],
-    [PREVIEW_ROOM_EVENTS.updateAnnotation, onUpdateAnnotation]
+    [PREVIEW_ROOM_EVENTS.updateAnnotation, onUpdateAnnotation],
+    ['disconnect', onSocketDisconnect],
+    ['connect', onSocketConnect]
   ]
 
   onMounted(() => {
@@ -659,6 +697,7 @@ export const usePreviewRoom = options => {
 
   onBeforeUnmount(() => {
     handlerPairs.forEach(([event, handler]) => socket.off(event, handler))
+    rejoinAfterReconnect = false
     clearTimeout(pendingEmitTimer)
     clearTimeout(applyMuteTimer)
   })
