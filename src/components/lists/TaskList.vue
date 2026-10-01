@@ -867,9 +867,10 @@ const selectTask = (event, index, task) => {
     event.target &&
     // Dirty hack needed to make date picker and inputs work properly
     (['INPUT', 'LABEL', 'SELECT', 'TEXTAREA'].includes(event.target.nodeName) ||
+      // Icons should not trigger selection (an SVG className is no string)
+      event.target instanceof SVGElement ||
       // Combo box should not trigger selection
       event.target.className.indexOf('selected-line') >= 0 ||
-      event.target.className.indexOf('down-icon') >= 0 ||
       event.target.className.indexOf('flexrow') >= 0 ||
       event.target.className.indexOf('c-mask') >= 0 ||
       event.target.className.indexOf('option-line') >= 0 ||
