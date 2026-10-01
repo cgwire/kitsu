@@ -278,8 +278,8 @@
               <!-- Metadata stick -->
               <template v-if="displaySettings.showInfos">
                 <td
-                  :ref="`editor-${i}-${j}`"
                   class="metadata-descriptor datatable-row-header"
+                  @keyup.ctrl="onInputKeyUp"
                   :title="
                     episode.data ? episode.data[descriptor.field_name] : ''
                   "
@@ -351,6 +351,7 @@
               <template v-if="displaySettings.showInfos">
                 <td
                   class="metadata-descriptor"
+                  @keyup.ctrl="onInputKeyUp"
                   :title="
                     episode.data ? episode.data[descriptor.field_name] : ''
                   "
@@ -439,9 +440,7 @@
                         event
                       )
                   "
-                  @keyup.ctrl="
-                    event => onInputKeyUp(event, i, descriptorLength + 3)
-                  "
+                  @keyup.ctrl="onInputKeyUp"
                   v-if="isCurrentUserManager"
                 />
 
@@ -654,7 +653,6 @@ const isListVisible = computed(
 
 const {
   columnSelectorDisplayed,
-  descriptorLength,
   hiddenColumns,
   isEmptyTask,
   lastHeaderMenuDisplayed,
@@ -700,8 +698,7 @@ const {
   filledColumns: episodeFilledColumns,
   metadataDescriptors: episodeMetadataDescriptors,
   metadataDisplayHeaders: { estimation: true, timeSpent: true, status: true },
-  isEmptyList,
-  listHeight: () => displayedEpisodesLength.value
+  isEmptyList
 })
 
 // Functions

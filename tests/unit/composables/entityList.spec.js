@@ -3,6 +3,7 @@ vi.mock('@/store', () => ({ default: {} }))
 import { computed, defineComponent } from 'vue'
 
 import {
+  getNextEditableCell,
   getStickyOffsets,
   showHeaderMenuAt,
   useEntityList
@@ -237,5 +238,67 @@ describe('entity list drag browsing', () => {
     expect(dragStart()).toBe(false)
 
     wrapper.unmount()
+  })
+})
+
+describe('entity list keyboard navigation', () => {
+  // A row per string: "i" is a cell with a text input, "c" a checkbox only,
+  // "-" a cell without any editor.
+  const buildTable = rows => {
+    const table = document.createElement('table')
+    const body = document.createElement('tbody')
+    table.append(body)
+    rows.forEach(cells => {
+      const row = document.createElement('tr')
+      body.append(row)
+      Array.from(cells).forEach(kind => {
+        const cell = document.createElement('td')
+        if (kind === 'i') cell.append(document.createElement('input'))
+        if (kind === 'c') {
+          const checkbox = document.createElement('input')
+          checkbox.type = 'checkbox'
+          cell.append(checkbox)
+        }
+        row.append(cell)
+      })
+    })
+    return body
+  }
+  const cell = (body, row, column) => body.children[row].children[column]
+
+  test('moves to the next editable cell of the row, wrapping around', () => {
+    const body = buildTable(['i-ic'])
+
+    expect(getNextEditableCell(cell(body, 0, 0), 'ArrowRight')).toBe(
+      cell(body, 0, 2)
+    )
+    expect(getNextEditableCell(cell(body, 0, 2), 'ArrowRight')).toBe(
+      cell(body, 0, 0)
+    )
+    expect(getNextEditableCell(cell(body, 0, 0), 'ArrowLeft')).toBe(
+      cell(body, 0, 2)
+    )
+  })
+
+  test('moves to the same column of the next editable row, wrapping around', () => {
+    const body = buildTable(['ii', '-i', 'ii'])
+
+    expect(getNextEditableCell(cell(body, 0, 0), 'ArrowDown')).toBe(
+      cell(body, 2, 0)
+    )
+    expect(getNextEditableCell(cell(body, 2, 0), 'ArrowDown')).toBe(
+      cell(body, 0, 0)
+    )
+    expect(getNextEditableCell(cell(body, 0, 1), 'ArrowUp')).toBe(
+      cell(body, 2, 1)
+    )
+  })
+
+  test('stays when no other cell is editable', () => {
+    const body = buildTable(['i-'])
+
+    expect(getNextEditableCell(cell(body, 0, 0), 'ArrowRight')).toBeNull()
+    expect(getNextEditableCell(cell(body, 0, 0), 'ArrowDown')).toBeNull()
+    expect(getNextEditableCell(cell(body, 0, 0), 'Enter')).toBeNull()
   })
 })

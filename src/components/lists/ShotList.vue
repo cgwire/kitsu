@@ -372,8 +372,8 @@
               <!-- Metadata stick -->
               <template v-if="displaySettings.showInfos">
                 <td
-                  :ref="`editor-${getIndex(i, k)}-${j}`"
                   class="metadata-descriptor datatable-row-header"
+                  @keyup.ctrl="onInputKeyUp"
                   :title="shot.data ? shot.data[descriptor.field_name] : ''"
                   :style="{
                     'z-index':
@@ -498,10 +498,7 @@
                   min="0"
                   @input="event => onNbFramesChanged(shot, event.target.value)"
                   @keydown="onNumberFieldKeyDown"
-                  @keyup.ctrl="
-                    event =>
-                      onInputKeyUp(event, getIndex(i, k), descriptorLength)
-                  "
+                  @keyup.ctrl="onInputKeyUp"
                   v-if="isCurrentUserManager"
                 />
                 <span class="metadata-value selectable" v-else>
@@ -544,10 +541,7 @@
                       )
                   "
                   @keydown="onNumberFieldKeyDown"
-                  @keyup.ctrl="
-                    event =>
-                      onInputKeyUp(event, getIndex(i, k), descriptorLength + 1)
-                  "
+                  @keyup.ctrl="onInputKeyUp"
                   v-else-if="isCurrentUserManager"
                 />
                 <span class="metadata-value selectable" v-else>
@@ -590,10 +584,7 @@
                         event
                       )
                   "
-                  @keyup.ctrl="
-                    event =>
-                      onInputKeyUp(event, getIndex(i, k), descriptorLength + 2)
-                  "
+                  @keyup.ctrl="onInputKeyUp"
                   v-else-if="isCurrentUserManager"
                 />
                 <span class="metadata-value selectable" v-else>
@@ -625,10 +616,7 @@
                         event
                       )
                   "
-                  @keyup.ctrl="
-                    event =>
-                      onInputKeyUp(event, getIndex(i, k), descriptorLength + 3)
-                  "
+                  @keyup.ctrl="onInputKeyUp"
                   v-if="isCurrentUserManager"
                 />
                 <span class="metadata-value selectable" v-else>
@@ -660,10 +648,7 @@
                         event
                       )
                   "
-                  @keyup.ctrl="
-                    event =>
-                      onInputKeyUp(event, getIndex(i, k), descriptorLength + 3)
-                  "
+                  @keyup.ctrl="onInputKeyUp"
                   v-if="isCurrentUserManager"
                 />
                 <span class="metadata-value selectable" v-else>
@@ -697,10 +682,7 @@
                         event
                       )
                   "
-                  @keyup.ctrl="
-                    event =>
-                      onInputKeyUp(event, getIndex(i, k), descriptorLength + 3)
-                  "
+                  @keyup.ctrl="onInputKeyUp"
                   v-if="isCurrentUserManager"
                 />
                 <span class="metadata-value selectable" v-else>
@@ -714,6 +696,7 @@
               <template v-if="displaySettings.showInfos">
                 <td
                   class="metadata-descriptor"
+                  @keyup.ctrl="onInputKeyUp"
                   :title="shot.data ? shot.data[descriptor.field_name] : ''"
                   :key="shot.id + '-' + descriptor.id"
                   v-for="(
@@ -967,7 +950,6 @@ const isListVisible = computed(
 
 const {
   columnSelectorDisplayed,
-  descriptorLength,
   getEntityLineNumber,
   getGroupKey,
   getValidationStyle,
@@ -1030,7 +1012,6 @@ const {
     timeSpent: true
   },
   isEmptyList,
-  listHeight: () => displayedShotsCount.value,
   onScrollEnd: () => store.dispatch('displayMoreShots')
 })
 

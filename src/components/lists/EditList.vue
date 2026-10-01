@@ -289,9 +289,7 @@
                         event
                       )
                   "
-                  @keyup.ctrl="
-                    event => onInputKeyUp(event, i, descriptorLength)
-                  "
+                  @keyup.ctrl="onInputKeyUp"
                   v-if="isCurrentUserManager"
                 />
                 <span class="metadata-value selectable" v-else>
@@ -304,8 +302,8 @@
               <!-- Metadata stick -->
               <template v-if="displaySettings.showInfos">
                 <td
-                  :ref="`editor-${i}-${j}`"
                   class="metadata-descriptor datatable-row-header"
+                  @keyup.ctrl="onInputKeyUp"
                   :title="edit.data ? edit.data[descriptor.field_name] : ''"
                   :style="{
                     'z-index': 1000 - i, // Need for combo to be above the next cell
@@ -375,6 +373,7 @@
               <template v-if="displaySettings.showInfos">
                 <td
                   class="metadata-descriptor"
+                  @keyup.ctrl="onInputKeyUp"
                   :title="edit.data ? edit.data[descriptor.field_name] : ''"
                   :key="edit.id + '-' + descriptor.id"
                   v-for="(
@@ -617,7 +616,6 @@ const isListVisible = computed(
 
 const {
   columnSelectorDisplayed,
-  descriptorLength,
   hiddenColumns,
   isEmptyTask,
   lastHeaderMenuDisplayed,
@@ -663,7 +661,6 @@ const {
   metadataDescriptors: editMetadataDescriptors,
   metadataDisplayHeaders: { estimation: true, timeSpent: true },
   isEmptyList,
-  listHeight: () => displayedEditsCount.value,
   onScrollEnd: () => store.dispatch('displayMoreEdits')
 })
 

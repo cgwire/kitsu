@@ -7,8 +7,8 @@
  * The list template owns the refs this composable reads: `body`,
  * `th-name`, `th-episode`, the header menus (`headerMenu`,
  * `headerMetadataMenu`, `headerFieldMenu`), the sticky headers
- * (`editor-${j}`, `validation-${j}`) and the cells (`editor-${i}-${j}`,
- * `validation-${i}-${j}`).
+ * (`editor-${j}`, `validation-${j}`) and the validation cells
+ * (`validation-${i}-${j}`).
  */
 import {
   computed,
@@ -120,15 +120,39 @@ export const getStickyOffsets = (
   return { nameWidth, offsets }
 }
 
+const EDITABLE_SELECTOR = 'input:not([type="checkbox"]), select, textarea'
+
+const getEditor = cell => cell.querySelector(EDITABLE_SELECTOR)
+
+// The items after `start`, in steps of `step` and wrapping around.
+const cycleFrom = (items, start, step) =>
+  Array.from({ length: items.length - 1 }, (_, n) => {
+    const distance = step * (n + 1)
+    return items[(start + distance + items.length * (n + 1)) % items.length]
+  })
+
 /*
- * Arrow key navigation between the metadata inputs: the next input is
- * found by its `editor-${i}-${j}` ref, wrapping around the grid.
+ * Arrow key navigation between the editors of a table: the next cell of
+ * the row holding an editor, or the cell of the same column in the next
+ * row holding one, wrapping around. Null when there is none.
  */
-export const getNextInputIndexes = (listWidth, listHeight, i, j, key) => {
-  if (key === 'ArrowDown') return [i + 1 >= listHeight ? 0 : i + 1, j]
-  if (key === 'ArrowUp') return [i - 1 < 0 ? listHeight - 1 : i - 1, j]
-  if (key === 'ArrowLeft') return [i, j - 1 < 0 ? listWidth - 1 : j - 1]
-  if (key === 'ArrowRight') return [i, j + 1 >= listWidth ? 0 : j + 1]
+export const getNextEditableCell = (cell, key) => {
+  const row = cell.parentElement
+  const cells = Array.from(row.children)
+  const column = cells.indexOf(cell)
+  if (['ArrowLeft', 'ArrowRight'].includes(key)) {
+    const step = key === 'ArrowRight' ? 1 : -1
+    return cycleFrom(cells, column, step).find(getEditor) || null
+  }
+  if (['ArrowUp', 'ArrowDown'].includes(key)) {
+    const rows = Array.from(row.parentElement.children)
+    const step = key === 'ArrowDown' ? 1 : -1
+    return (
+      cycleFrom(rows, rows.indexOf(row), step)
+        .map(nextRow => nextRow.children[column])
+        .find(nextCell => nextCell && getEditor(nextCell)) || null
+    )
+  }
   return null
 }
 
@@ -143,7 +167,6 @@ export const getNextInputIndexes = (listWidth, listHeight, i, j, key) => {
  * - metadataDescriptors: ref of the production descriptors of the type
  * - metadataDisplayHeaders: the initial column display switches
  * - isEmptyList: ref
- * - listHeight: () => number of rows, for the arrow key navigation
  * - onScrollEnd: called when the body is scrolled near its end
  */
 export const useEntityList = ({
@@ -155,7 +178,6 @@ export const useEntityList = ({
   metadataDescriptors,
   metadataDisplayHeaders: initialDisplayHeaders = {},
   isEmptyList,
-  listHeight = () => 0,
   onScrollEnd = null
 }) => {
   const instance = getCurrentInstance()
@@ -224,8 +246,6 @@ export const useEntityList = ({
     return current && current.type === 'field' ? current : null
   })
   provide('activeFieldSort', activeFieldSort)
-
-  const descriptorLength = computed(() => metadataDescriptors.value.length)
 
   const visibleMetadataDescriptors = computed(() =>
     metadataDescriptors.value.filter(descriptor => {
@@ -832,14 +852,12 @@ export const useEntityList = ({
     }
   }
 
-  const keyMetadataNavigation = (listWidth, listHeight, i, j, key) => {
-    const next = getNextInputIndexes(listWidth, listHeight, i, j, key)
-    if (next) getRef(`editor-${next[0]}-${next[1]}`)?.[0]?.focus()
-  }
-
-  const onInputKeyUp = (event, i, j) => {
-    const listWidth = visibleMetadataDescriptors.value.length + 4
-    keyMetadataNavigation(listWidth, listHeight(), i, j, event.key)
+  // Ctrl + arrow in an editor focuses the editor of the neighbouring cell.
+  const onInputKeyUp = event => {
+    const cell = event.target.closest('td, th')
+    const nextCell = cell && getNextEditableCell(cell, event.key)
+    if (!nextCell) return
+    getEditor(nextCell).focus()
     return pauseEvent(event)
   }
 
@@ -949,7 +967,6 @@ export const useEntityList = ({
     shiftKeyPressed,
     stickedColumns,
 
-    descriptorLength,
     displayedValidationColumns,
     isEmptyTask,
     nonStickedDisplayedValidationColumns,
@@ -963,7 +980,6 @@ export const useEntityList = ({
     getValidationStyle,
     isMetadataColumnEditAllowed,
     isValidResolution,
-    keyMetadataNavigation,
     metadataStickColumnClicked,
     onAddMetadataClicked,
     onBodyScroll,

@@ -266,8 +266,8 @@
               <!-- Metadata stick -->
               <template v-if="displaySettings.showInfos && !isLoading">
                 <td
-                  :ref="`editor-${i}-${j}`"
                   class="metadata-descriptor datatable-row-header"
+                  @keyup.ctrl="onInputKeyUp"
                   :title="
                     sequence.data ? sequence.data[descriptor.field_name] : ''
                   "
@@ -358,9 +358,7 @@
                         event
                       )
                   "
-                  @keyup.ctrl="
-                    event => onInputKeyUp(event, i, descriptorLength + 3)
-                  "
+                  @keyup.ctrl="onInputKeyUp"
                   v-if="isCurrentUserManager"
                 />
 
@@ -378,6 +376,7 @@
               <template v-if="displaySettings.showInfos">
                 <td
                   class="metadata-descriptor"
+                  @keyup.ctrl="onInputKeyUp"
                   :title="
                     sequence.data ? sequence.data[descriptor.field_name] : ''
                   "
@@ -625,7 +624,6 @@ const isListVisible = computed(
 
 const {
   columnSelectorDisplayed,
-  descriptorLength,
   hiddenColumns,
   isEmptyTask,
   lastHeaderMenuDisplayed,
@@ -671,8 +669,7 @@ const {
   filledColumns: sequenceFilledColumns,
   metadataDescriptors: sequenceMetadataDescriptors,
   metadataDisplayHeaders: { estimation: true, timeSpent: true },
-  isEmptyList,
-  listHeight: () => displayedSequencesLength.value
+  isEmptyList
 })
 
 // Functions

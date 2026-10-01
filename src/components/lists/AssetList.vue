@@ -369,6 +369,7 @@
               <template v-if="displaySettings.showInfos">
                 <td
                   class="metadata-descriptor datatable-row-header"
+                  @keyup.ctrl="onInputKeyUp"
                   :title="asset.data ? asset.data[descriptor.field_name] : ''"
                   :style="{
                     'z-index':
@@ -506,10 +507,7 @@
                         event
                       )
                   "
-                  @keyup.ctrl="
-                    event =>
-                      onInputKeyUp(event, getIndex(i, k), descriptorLength + 3)
-                  "
+                  @keyup.ctrl="onInputKeyUp"
                   v-if="isCurrentUserManager"
                 />
 
@@ -524,6 +522,7 @@
               <template v-if="displaySettings.showInfos">
                 <td
                   class="metadata-descriptor"
+                  @keyup.ctrl="onInputKeyUp"
                   :title="asset.data ? asset.data[descriptor.field_name] : ''"
                   :key="'desc' + asset.id + '-' + descriptor.id"
                   v-for="(
@@ -800,7 +799,6 @@ const filteredDisplayedAssets = computed(() => {
 
 const {
   columnSelectorDisplayed,
-  descriptorLength,
   getEntityLineNumber,
   getGroupKey,
   getValidationStyle,
@@ -808,7 +806,6 @@ const {
   isEmptyTask,
   isMetadataColumnEditAllowed,
   isValidResolution,
-  keyMetadataNavigation,
   lastHeaderMenuDisplayed,
   lastMetadataHeaderMenuDisplayed,
   metadataDisplayHeaders,
@@ -823,6 +820,7 @@ const {
   onDeleteMetadataClicked,
   onDescriptionChanged,
   onEditMetadataClicked,
+  onInputKeyUp,
   onMetadataFieldChanged,
   onMinimizeColumnToggled,
   onSelectColumn,
@@ -842,8 +840,7 @@ const {
   stickedColumns,
   stickedDisplayedValidationColumns,
   stickedVisibleMetadataDescriptors,
-  toggleColumnSelector,
-  visibleMetadataDescriptors
+  toggleColumnSelector
 } = useEntityList({
   type: 'asset',
   props,
@@ -858,7 +855,6 @@ const {
     timeSpent: true
   },
   isEmptyList,
-  listHeight: () => displayedAssetsCount.value,
   onScrollEnd: () => store.dispatch('displayMoreAssets')
 })
 
@@ -951,11 +947,6 @@ const assetPath = assetId => {
     route.params.episode_id = currentEpisode.value.id
   }
   return route
-}
-
-const onInputKeyUp = (event, i, j) => {
-  const listWidth = visibleMetadataDescriptors.value.length
-  keyMetadataNavigation(listWidth, displayedAssetsCount.value, i, j, event.key)
 }
 
 // The pages drive the list through a ref.
