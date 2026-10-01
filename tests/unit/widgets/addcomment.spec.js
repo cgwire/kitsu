@@ -294,5 +294,32 @@ describe('AddComment', () => {
       await wrapper.trigger('dragleave')
       expect(wrapper.classes()).not.toContain('is-dragging')
     })
+
+    const dropFileOn = element => {
+      const event = new Event('drop', { bubbles: true })
+      event.dataTransfer = { files: [new File([''], 'notes.txt')] }
+      element.dispatchEvent(event)
+    }
+
+    it('attaches a file dropped on an icon stroke', () => {
+      const svgNamespace = 'http://www.w3.org/2000/svg'
+      const icon = document.createElementNS(svgNamespace, 'svg')
+      const stroke = document.createElementNS(svgNamespace, 'path')
+      icon.appendChild(stroke)
+      wrapper.find('.button-row').element.appendChild(icon)
+      dropFileOn(stroke)
+      expect(draftComment.attachments).toHaveLength(1)
+    })
+
+    it('ignores a drop handled by the attachment modal', () => {
+      const modalBox = document.createElement('div')
+      modalBox.className = 'box attachment-modal-box'
+      const dropMask = document.createElement('div')
+      dropMask.id = 'drop-mask'
+      modalBox.appendChild(dropMask)
+      wrapper.element.appendChild(modalBox)
+      dropFileOn(dropMask)
+      expect(draftComment.attachments).toHaveLength(0)
+    })
   })
 })
