@@ -511,7 +511,30 @@ describe('TaskInfo.vue', () => {
   })
 
   describe('comment actions', () => {
-    const comment = { id: 'comment-1', task_status_id: 'wip' }
+    const comments = [
+      { id: 'comment-1', task_status_id: 'wip' },
+      { id: 'comment-2', task_status_id: 'wip' }
+    ]
+
+    const emitOn = (wrapper, comment, event) =>
+      wrapper
+        .findAllComponents(Comment)
+        .find(component => component.props('comment').id === comment.id)
+        .vm.$emit(event, comment)
+
+    const failAck = async (wrapper, store, comment) => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      store.dispatch.mockImplementationOnce(() =>
+        Promise.reject(new Error('Request has been terminated'))
+      )
+      emitOn(wrapper, comment, 'ack-comment')
+      await flushPromises()
+    }
+
+    const actionErrors = wrapper =>
+      wrapper
+        .findAllComponents(Comment)
+        .map(component => component.props('isActionError'))
 
     afterEach(() => {
       vi.restoreAllMocks()
@@ -526,16 +549,43 @@ describe('TaskInfo.vue', () => {
         .spyOn(console, 'error')
         .mockImplementation(() => {})
       const error = new Error('Request has been terminated')
-      const { wrapper, store } = await mountPanel({ comments: [comment] })
+      const { wrapper, store } = await mountPanel({ comments })
       store.dispatch.mockImplementation(type =>
         type === action ? Promise.reject(error) : Promise.resolve()
       )
 
-      wrapper.findComponent(Comment).vm.$emit(event, comment)
+      emitOn(wrapper, comments[0], event)
       await flushPromises()
 
-      expect(store.dispatch).toHaveBeenCalledWith(action, comment)
+      expect(store.dispatch).toHaveBeenCalledWith(action, comments[0])
       expect(consoleError).toHaveBeenCalledWith(error)
+    })
+
+    it('flags the comment whose action failed', async () => {
+      const { wrapper, store } = await mountPanel({ comments })
+      await failAck(wrapper, store, comments[1])
+      expect(actionErrors(wrapper)).toEqual([false, true])
+    })
+
+    it('clears the flag on the next action', async () => {
+      const { wrapper, store } = await mountPanel({ comments })
+      await failAck(wrapper, store, comments[1])
+
+      emitOn(wrapper, comments[0], 'pin-comment')
+      await flushPromises()
+
+      expect(actionErrors(wrapper)).toEqual([false, false])
+    })
+
+    it('clears the flag when it is handed another task', async () => {
+      const { wrapper, store } = await mountPanel({ comments })
+      await failAck(wrapper, store, comments[1])
+
+      // The stubbed getter hands the same comments to the new task.
+      await wrapper.setProps({ task: buildTask({ id: 'task-2' }) })
+      await flushPromises()
+
+      expect(actionErrors(wrapper)).toEqual([false, false])
     })
   })
 

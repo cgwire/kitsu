@@ -226,6 +226,7 @@
                       :comment="comment"
                       :fps="currentFps"
                       :frame="displayedFrame"
+                      :is-action-error="comment.id === failedActionCommentId"
                       :is-change="isStatusChange(index)"
                       :is-checkable="
                         (user && user.id === comment.person?.id) ||
@@ -513,6 +514,7 @@ const currentFrameRaw = ref(0)
 const currentPreviewIndex = ref(0)
 const commentToEdit = ref(null)
 const commentToMove = ref(null)
+const failedActionCommentId = ref(null)
 const isWide = ref(false)
 const isExtraWide = ref(false)
 const taskComments = ref([])
@@ -1110,8 +1112,16 @@ const setCurrentPreviewAsEntityThumbnail = frame => {
     })
 }
 
+const runCommentAction = (action, comment) => {
+  failedActionCommentId.value = null
+  store.dispatch(action, comment).catch(err => {
+    console.error(err)
+    failedActionCommentId.value = comment.id
+  })
+}
+
 const onAckComment = comment => {
-  store.dispatch('ackComment', comment).catch(console.error)
+  runCommentAction('ackComment', comment)
 }
 
 const onDuplicateComment = comment => {
@@ -1119,11 +1129,11 @@ const onDuplicateComment = comment => {
 }
 
 const onPinComment = comment => {
-  store.dispatch('pinComment', comment).catch(console.error)
+  runCommentAction('pinComment', comment)
 }
 
 const onToggleForClient = comment => {
-  store.dispatch('toggleCommentForClient', comment).catch(console.error)
+  runCommentAction('toggleCommentForClient', comment)
 }
 
 const onEditComment = comment => {
@@ -1650,6 +1660,7 @@ watch(
   () => {
     clearPreviewFiles()
     currentPreviewIndex.value = 0
+    failedActionCommentId.value = null
     if (!props.silent) {
       loadTaskData()
     }

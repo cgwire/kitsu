@@ -110,6 +110,7 @@
       "comment_from_client": "고객의 코멘트",
       "edit_title": "댓글 수정",
       "empty_text": "댓글이 비어 있습니다",
+      "action_error": "저장할 수 없습니다. 다시 시도해 주세요.",
       "edit_error": "코멘트를 수정하는 도중 오류가 발생했습니다. 고객 지원팀에 문의하십시오.",
       "error": "코멘트를 게시하는 도중 오류가 발생했습니다",
       "no_file_attached": "첨부된 미리 보기 없음",

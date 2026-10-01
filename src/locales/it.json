@@ -110,6 +110,7 @@
       "comment_from_client": "Commento del cliente",
       "edit_title": "Modifica commento",
       "empty_text": "Questo commento è vuoto",
+      "action_error": "Impossibile salvare. Riprova.",
       "edit_error": "Si è verificato un errore durante la modifica del commento. Contatta il nostro team di supporto.",
       "error": "Si è verificato un errore durante la pubblicazione del commento",
       "no_file_attached": "Nessuna anteprima allegata",

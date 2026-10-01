@@ -410,6 +410,9 @@
                 {{ $t('main.reply') }}
               </span>
             </div>
+            <div class="error action-error has-text-right" v-if="isActionError">
+              <em>{{ $t('comments.action_error') }}</em>
+            </div>
             <div class="pinned-text" v-if="comment.pinned">
               {{ $t('comments.pinned') }}
             </div>
@@ -627,6 +630,10 @@ const props = defineProps({
   fps: {
     type: Number,
     default: 25
+  },
+  isActionError: {
+    type: Boolean,
+    default: false
   },
   isChange: {
     type: Boolean,

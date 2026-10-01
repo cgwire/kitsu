@@ -352,6 +352,7 @@
                     :comment="comment"
                     :fps="currentFps"
                     :frame="currentFrame"
+                    :is-action-error="comment.id === failedActionCommentId"
                     :is-change="isStatusChange(index)"
                     :is-checkable="
                       (user && user.id === comment.person?.id) ||
@@ -558,6 +559,7 @@ const task = ref(null)
 const taskComments = ref([])
 const taskPreviews = ref([])
 const commentToEdit = ref(null)
+const failedActionCommentId = ref(null)
 const selectedPreviewId = ref(null)
 const previewForms = ref([])
 const currentFrame = ref(0)
@@ -1337,16 +1339,22 @@ const isStatusChange = index => {
   )
 }
 
-const onAckComment = comment =>
-  store.dispatch('ackComment', comment).catch(console.error)
+const runCommentAction = (action, comment) => {
+  failedActionCommentId.value = null
+  store.dispatch(action, comment).catch(err => {
+    console.error(err)
+    failedActionCommentId.value = comment.id
+  })
+}
+
+const onAckComment = comment => runCommentAction('ackComment', comment)
 
 const onDuplicateComment = comment => addCommentRef.value.setValue(comment)
 
-const onPinComment = comment =>
-  store.dispatch('pinComment', comment).catch(console.error)
+const onPinComment = comment => runCommentAction('pinComment', comment)
 
 const onToggleForClient = comment =>
-  store.dispatch('toggleCommentForClient', comment).catch(console.error)
+  runCommentAction('toggleCommentForClient', comment)
 
 const onEditComment = comment => {
   commentToEdit.value = comment
@@ -1779,6 +1787,7 @@ const socketEvents = {
 // --------------------------------------------------------------------------
 watch(route, () => {
   if (task.value && route.params.task_id !== task.value.id) {
+    failedActionCommentId.value = null
     loadTaskData()
   }
   if (route.params.preview_id !== selectedPreviewId.value) {

@@ -110,6 +110,7 @@
       "comment_from_client": "Comentario del cliente",
       "edit_title": "Modificar comentario",
       "empty_text": "Este comentario está vacío",
+      "action_error": "No se ha podido guardar. Por favor, inténtalo de nuevo.",
       "edit_error": "Se ha producido un error al modificar este comentario. Por favor contacte con nuestro equipo de soporte.",
       "error": "Se ha producido un error al publicar el comentario",
       "no_file_attached": "Ninguna vista previa adjunta",

@@ -110,6 +110,7 @@
       "comment_from_client": "Comentário do cliente",
       "edit_title": "Editar comentário",
       "empty_text": "Este comentário está vazio",
+      "action_error": "Não foi possível salvar. Tente novamente.",
       "edit_error": "Ocorreu um erro ao editar o comentário. Entre em contato com nossa equipe de suporte.",
       "error": "Ocorreu um erro ao postar o comentário",
       "no_file_attached": "Nenhum arquivo anexado",

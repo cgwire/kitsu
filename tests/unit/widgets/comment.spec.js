@@ -78,13 +78,21 @@ const makeStore = ({ isAdmin = false, user = { id: 'person-1' } } = {}) =>
 
 const mountComment = ({
   comment = makeComment(),
+  isActionError = false,
   isEditable = true,
   storeOptions,
   attachTo
 } = {}) =>
   shallowMount(Comment, {
     attachTo,
-    props: { comment, isEditable, task, taskTypes: [], team: [] },
+    props: {
+      comment,
+      isActionError,
+      isEditable,
+      task,
+      taskTypes: [],
+      team: []
+    },
     global: {
       plugins: [i18n, makeStore(storeOptions), router],
       stubs: {
@@ -143,6 +151,22 @@ describe('Comment', () => {
         .join(' ')
       expect(linkText).not.toContain('voice.wav')
       expect(linkText).not.toContain('clip.mp4')
+    })
+  })
+
+  describe('action error', () => {
+    test('stays hidden while the last action succeeded', () => {
+      const wrapper = mountComment()
+      expect(wrapper.find('.like-button').exists()).toBe(true)
+      expect(wrapper.find('.action-error').exists()).toBe(false)
+    })
+
+    // Same look as the errors of the comment form: italic, right aligned.
+    test('tells that the last action was not saved', () => {
+      const wrapper = mountComment({ isActionError: true })
+      const error = wrapper.find('.action-error')
+      expect(error.classes()).toContain('has-text-right')
+      expect(error.find('em').text()).toBe('Could not save. Please try again.')
     })
   })
 

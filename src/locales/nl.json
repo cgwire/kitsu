@@ -110,6 +110,7 @@
       "comment_from_client": "Commentaar van klant",
       "edit_title": "Commentaar aanpassen",
       "empty_text": "Deze comment is leeg.",
+      "action_error": "Opslaan mislukt. Probeer het opnieuw.",
       "edit_error": "Er is een fout opgetreden bij het aanpassen van het commentaar. Contacteer ons support team.",
       "error": "Er is een fout opgetreden bij het plaatsen van het commentaar.",
       "no_file_attached": "Geen preview gekoppeld.",

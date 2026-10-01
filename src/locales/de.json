@@ -110,6 +110,7 @@
       "comment_from_client": "Kommentar vom Kunden",
       "edit_title": "Kommentar bearbeiten",
       "empty_text": "Dieser Kommentar ist leer",
+      "action_error": "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut.",
       "edit_error": "Beim Bearbeiten des Kommentars ist ein Fehler aufgetreten. Bitte kontaktieren Sie unser Support-Team.",
       "error": "Beim Posten von Kommentaren ist ein Fehler aufgetreten.",
       "no_file_attached": "Keine Datei angehängt",

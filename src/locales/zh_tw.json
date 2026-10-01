@@ -110,6 +110,7 @@
       "comment_from_client": "客戶評論",
       "edit_title": "編輯評論",
       "empty_text": "此條評論為空",
+      "action_error": "無法儲存。請再試一次。",
       "edit_error": "編輯評論時發生錯誤。請聯絡我們的技術人員。",
       "error": "發佈評論時出現錯誤",
       "no_file_attached": "未附加預覽",

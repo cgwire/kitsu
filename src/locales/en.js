@@ -272,6 +272,7 @@ export default {
     edit_title: 'Edit comment',
     edited_by: 'Edited by {name}',
     empty_text: 'This comment is empty',
+    action_error: 'Could not save. Please try again.',
     edit_error: 'An error occurred while editing the comment. Please contact our support team.',
     error: 'An error occurred while posting comment',
     max_retakes_error: 'You cannot add retakes anymore on this task.',
