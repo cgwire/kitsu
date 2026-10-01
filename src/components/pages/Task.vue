@@ -1337,14 +1337,16 @@ const isStatusChange = index => {
   )
 }
 
-const onAckComment = comment => store.dispatch('ackComment', comment)
+const onAckComment = comment =>
+  store.dispatch('ackComment', comment).catch(console.error)
 
 const onDuplicateComment = comment => addCommentRef.value.setValue(comment)
 
-const onPinComment = comment => store.dispatch('pinComment', comment)
+const onPinComment = comment =>
+  store.dispatch('pinComment', comment).catch(console.error)
 
 const onToggleForClient = comment =>
-  store.dispatch('toggleCommentForClient', comment)
+  store.dispatch('toggleCommentForClient', comment).catch(console.error)
 
 const onEditComment = comment => {
   commentToEdit.value = comment

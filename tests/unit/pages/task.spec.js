@@ -430,6 +430,35 @@ describe('Task.vue comment events', () => {
   })
 })
 
+describe('Task.vue comment actions', () => {
+  const comment = { id: 'comment-1', text: 'v1' }
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it.each([
+    ['ack-comment', 'ackComment'],
+    ['pin-comment', 'pinComment'],
+    ['toggle-for-client', 'toggleCommentForClient']
+  ])('logs a failed %s', async (event, action) => {
+    const consoleError = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {})
+    const error = new Error('Request has been terminated')
+    const { wrapper, store } = await mountPage({ comments: [comment] })
+    store.dispatch.mockImplementation(type =>
+      type === action ? Promise.reject(error) : Promise.resolve()
+    )
+
+    wrapper.findComponent(Comment).vm.$emit(event, comment)
+    await flushPromises()
+
+    expect(store.dispatch).toHaveBeenCalledWith(action, comment)
+    expect(consoleError).toHaveBeenCalledWith(error)
+  })
+})
+
 describe('Task.vue navigation', () => {
   const taskTypes = [
     { id: 'tt-layout', name: 'Layout', for_entity: 'Shot', priority: 1 },

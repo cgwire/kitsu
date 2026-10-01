@@ -510,6 +510,35 @@ describe('TaskInfo.vue', () => {
     })
   })
 
+  describe('comment actions', () => {
+    const comment = { id: 'comment-1', task_status_id: 'wip' }
+
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    it.each([
+      ['ack-comment', 'ackComment'],
+      ['pin-comment', 'pinComment'],
+      ['toggle-for-client', 'toggleCommentForClient']
+    ])('logs a failed %s', async (event, action) => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const error = new Error('Request has been terminated')
+      const { wrapper, store } = await mountPanel({ comments: [comment] })
+      store.dispatch.mockImplementation(type =>
+        type === action ? Promise.reject(error) : Promise.resolve()
+      )
+
+      wrapper.findComponent(Comment).vm.$emit(event, comment)
+      await flushPromises()
+
+      expect(store.dispatch).toHaveBeenCalledWith(action, comment)
+      expect(consoleError).toHaveBeenCalledWith(error)
+    })
+  })
+
   describe('public interface', () => {
     it('lets a parent focus the comment box', async () => {
       const focus = vi.fn()
