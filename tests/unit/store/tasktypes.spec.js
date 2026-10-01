@@ -276,7 +276,9 @@ describe('Task types store', () => {
     test('LOAD_TASK_TYPES_END', () => {
       store.mutations.RESET_ALL(state)
       store.mutations.LOAD_TASK_TYPES_END(state, taskTypes)
-      expect(state.taskTypes).toStrictEqual(taskTypes)
+      // Sorted into a new array: the given one is left as is.
+      expect(state.taskTypes).toHaveLength(4)
+      expect(state.taskTypes).toEqual(expect.arrayContaining(taskTypes))
       expect(store.cache.taskTypeMap.size).toEqual(4)
     })
 
