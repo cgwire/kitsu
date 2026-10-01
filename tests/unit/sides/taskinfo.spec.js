@@ -12,6 +12,7 @@ vi.mock('vue-i18n', async importOriginal => ({
 import '@/lib/auth'
 
 import TaskInfo from '@/components/sides/TaskInfo.vue'
+import ActionPanel from '@/components/tops/ActionPanel.vue'
 import PreviewPlayer from '@/components/players/players/PreviewPlayer.vue'
 import AddComment from '@/components/widgets/AddComment.vue'
 import Comment from '@/components/widgets/Comment.vue'
@@ -612,6 +613,30 @@ describe('TaskInfo.vue', () => {
       await flushPromises()
     }
 
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    it('logs a refresh that fails', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const error = new Error('Request has been terminated')
+      const comment = {
+        id: 'comment-1',
+        text: 'v1',
+        previews: [{ id: 'preview-1', revision: 1, status: 'processing' }]
+      }
+      const { socket, store } = await mountPanel({ comments: [comment] })
+      store.dispatch = vi.fn(type =>
+        type === 'refreshPreview' ? Promise.reject(error) : Promise.resolve()
+      )
+
+      await emitPreviewFileUpdate(socket, { preview_file_id: 'preview-1' })
+
+      expect(consoleError).toHaveBeenCalledWith(error)
+    })
+
     it('updates a preview that is not first in the comment, a second or third bulk-upload image', async () => {
       // A comment carrying several previews of the same revision (the
       // bulk-upload case): only previews[0] used to be looked up, so a
@@ -662,6 +687,85 @@ describe('TaskInfo.vue', () => {
         'refreshPreview',
         expect.anything()
       )
+    })
+  })
+
+  describe('player requests', () => {
+    const previews = [
+      { id: 'preview-1', revision: 1, extension: 'mp4', previews: ['p-1'] }
+    ]
+    // The shallow stub carries none of the player members the panel reads.
+    const PlayerStub = {
+      props: ['fps', 'previews', 'readOnly'],
+      template: '<div />',
+      data: () => ({
+        currentPreview: { id: 'preview-1', task_id: TASK_ID },
+        notSaved: false
+      }),
+      methods: {
+        focus: () => {},
+        setCurrentFrame: () => {},
+        isValidPreviewModification: () => true
+      }
+    }
+    const error = new Error('Request has been terminated')
+
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    it('logs an annotation refresh that fails', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const { socket, store } = await mountPanel({
+        previews,
+        stubs: { PreviewPlayer: PlayerStub }
+      })
+      store.dispatch = vi.fn(type =>
+        type === 'refreshPreview' ? Promise.reject(error) : Promise.resolve()
+      )
+      const [, onRemoteAnnotationUpdate] = socket.on.mock.calls.find(
+        ([event]) => event === 'preview-file:annotation-update'
+      )
+
+      onRemoteAnnotationUpdate({
+        preview_file_id: 'preview-1',
+        updated_at: '2026-10-01T10:00:00'
+      })
+      await flushPromises()
+
+      expect(store.dispatch).toHaveBeenCalledWith('refreshPreview', {
+        previewId: 'preview-1',
+        taskId: TASK_ID
+      })
+      expect(consoleError).toHaveBeenCalledWith(error)
+    })
+
+    it('logs a thumbnail that fails to save', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const { wrapper, store } = await mountPanel({
+        previews,
+        props: { withActions: true },
+        getterOverrides: { nbSelectedTasks: () => 1 },
+        stubs: { PreviewPlayer: PlayerStub }
+      })
+      store.dispatch = vi.fn(type =>
+        type === 'setPreview' ? Promise.reject(error) : Promise.resolve()
+      )
+      const actionPanel = wrapper.findComponent(ActionPanel)
+
+      actionPanel.vm.$emit('set-frame-thumbnail', false)
+      await flushPromises()
+
+      expect(store.dispatch).toHaveBeenCalledWith(
+        'setPreview',
+        expect.objectContaining({ previewId: 'preview-1' })
+      )
+      expect(consoleError).toHaveBeenCalledWith(error)
+      expect(actionPanel.props('isSetFrameThumbnailLoading')).toBe(false)
     })
   })
 })

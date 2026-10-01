@@ -1426,12 +1426,12 @@ const setPreview = () => {
       previewId,
       frame
     })
-    .then(() => {
-      loading.value.setPreview = false
-    })
     .catch(err => {
       console.error(err)
       errors.value.setPreview = true
+    })
+    .finally(() => {
+      loading.value.setPreview = false
     })
 }
 
@@ -1591,9 +1591,9 @@ const timeCodeClicked = ({ versionRevision, frame }) => {
 const toggleSubscribe = () => {
   if (task.value && !isAssigned.value) {
     if (task.value.is_subscribed) {
-      store.dispatch('unsubscribeFromTask', task.value.id)
+      store.dispatch('unsubscribeFromTask', task.value.id).catch(console.error)
     } else {
-      store.dispatch('subscribeToTask', task.value.id)
+      store.dispatch('subscribeToTask', task.value.id).catch(console.error)
     }
   }
 }
@@ -1678,6 +1678,7 @@ const onPreviewFileUpdate = eventData => {
           target.status = preview.status
         }
       })
+      .catch(console.error)
   }
 }
 
@@ -1767,6 +1768,7 @@ const onAnnotationUpdate = eventData => {
           })
         }
       })
+      .catch(console.error)
   }
 }
 

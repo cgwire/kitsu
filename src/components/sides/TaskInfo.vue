@@ -1107,6 +1107,7 @@ const setCurrentPreviewAsEntityThumbnail = frame => {
       previewId,
       frame
     })
+    .catch(console.error)
     .finally(() => {
       loading.setFrameThumbnail = false
     })
@@ -1514,6 +1515,7 @@ const onRemotePreviewUpdate = eventData => {
           target.status = preview.status
         }
       })
+      .catch(console.error)
   }
 }
 
@@ -1637,6 +1639,7 @@ const onRemoteAnnotationUpdate = eventData => {
           })
         }
       })
+      .catch(console.error)
   }
 }
 
