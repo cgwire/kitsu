@@ -779,8 +779,12 @@ const onMaxDurationUpdate = duration => {
   maxDuration.value = duration ? floorToFrame(duration, fps.value) : 0
 }
 
-const onTimeCodeClicked = ({ frame }) => {
+const onTimeCodeClicked = ({ versionRevision, frame }) => {
   if (!isMovie.value) return
+  // The link shares a single version: a timecode of another one would seek
+  // the shared movie to a frame that belongs to a version the guest can't see.
+  const revision = currentEntity.value?.preview_file_revision
+  if (parseInt(versionRevision, 10) !== revision) return
   const frameNumber = Math.max(parseInt(frame, 10) || 0, 0)
   rawPlayer.value?.setCurrentFrame(frameNumber)
   onFrameUpdate(frameNumber)
