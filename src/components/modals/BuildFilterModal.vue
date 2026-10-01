@@ -325,8 +325,8 @@ import { computed, onMounted, reactive, ref, toRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
-import { getDescriptorChecklistValues } from '@/components/mixins/descriptors'
 import { useModal } from '@/composables/modal'
+import { getDescriptorChecklistValues } from '@/lib/descriptors'
 import { getFilters } from '@/lib/filtering'
 import { sortPeople } from '@/lib/sorting'
 

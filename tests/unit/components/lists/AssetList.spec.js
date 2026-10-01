@@ -3,6 +3,7 @@ vi.mock('@/store', () => ({ default: {} }))
 import { flushPromises } from '@vue/test-utils'
 
 import AssetList from '@/components/lists/AssetList.vue'
+import assetTypeStore from '@/store/modules/assettypes'
 
 import {
   descriptor,
@@ -16,99 +17,102 @@ import {
   taskTypeId
 } from '../../fixtures/entity-list'
 
-const isSelectable = AssetList.methods.isSelectable
-const updateOffsets = AssetList.methods.updateOffsets
-
 const modelingId = 'task-type-modeling'
 const riggingId = 'task-type-rigging'
-const assetTypeId = 'asset-type-props'
+const propsTypeId = 'asset-type-props'
+const charactersTypeId = 'asset-type-characters'
 
-const buildContext = () => ({
-  assetTypeMap: new Map([
-    [assetTypeId, { id: assetTypeId, task_types: [riggingId] }]
-  ]),
-  taskTypeMap: new Map([
-    [modelingId, { id: modelingId }],
-    [riggingId, { id: riggingId }]
-  ]),
-  taskMap: new Map([['task-1', { id: 'task-1' }]]),
-  productionAssetTaskTypes: [{ id: modelingId }, { id: riggingId }]
-})
-
-const buildAsset = validations => ({
+const buildAsset = (validations, fields = {}) => ({
   id: 'asset-1',
-  asset_type_id: assetTypeId,
-  validations
+  name: 'Asset 1',
+  data: {},
+  asset_type_id: propsTypeId,
+  validations,
+  ...fields
 })
+
+// The character accepts both task types, so both columns show: the
+// selectability of the props cells is read on the first row.
+const character = buildAsset(
+  new Map([
+    [modelingId, 'task-2'],
+    [riggingId, 'task-3']
+  ]),
+  { id: 'asset-2', name: 'Asset 2', asset_type_id: charactersTypeId }
+)
+
+const selectableCells = async asset => {
+  const wrapper = await mountEntityList(AssetList, {
+    getters: {
+      currentProduction: production,
+      displayedAssetsCount: 2,
+      productionAssetTaskTypes: [{ id: modelingId }, { id: riggingId }],
+      taskMap: new Map([['task-1', { id: 'task-1' }]]),
+      taskTypeMap: new Map([
+        [modelingId, { id: modelingId, color: '#000000' }],
+        [riggingId, { id: riggingId, color: '#000000' }]
+      ])
+    },
+    props: {
+      displaySettings: { showInfos: true, showSharedAssets: true },
+      validationColumns: [modelingId, riggingId],
+      displayedAssets: [[asset], [character]]
+    }
+  })
+  const [modeling, rigging] = wrapper
+    .findAll('tbody validation-cell-stub')
+    .slice(0, 2)
+    .map(cell => cell.attributes('selectable') === 'true')
+  wrapper.unmount()
+  return { modeling, rigging }
+}
 
 describe('lists/AssetList', () => {
-  describe('isSelectable', () => {
-    test('cell with an existing task stays selectable when its task type left the workflow', () => {
+  describe('selectable cells', () => {
+    beforeEach(() => {
+      assetTypeStore.cache.assetTypeMap.set(propsTypeId, {
+        id: propsTypeId,
+        task_types: [riggingId]
+      })
+      assetTypeStore.cache.assetTypeMap.set(charactersTypeId, {
+        id: charactersTypeId,
+        task_types: [modelingId, riggingId]
+      })
+    })
+
+    afterEach(() => {
+      assetTypeStore.cache.assetTypeMap.delete(propsTypeId)
+      assetTypeStore.cache.assetTypeMap.delete(charactersTypeId)
+    })
+
+    test('cell with an existing task stays selectable when its task type left the workflow', async () => {
       const asset = buildAsset(new Map([[modelingId, 'task-1']]))
-      expect(isSelectable.call(buildContext(), asset, modelingId)).toBe(true)
+      expect((await selectableCells(asset)).modeling).toBe(true)
     })
 
-    test('empty cell outside the workflow is not selectable', () => {
-      const asset = buildAsset(new Map())
-      expect(isSelectable.call(buildContext(), asset, modelingId)).toBe(false)
+    test('empty cell outside the workflow is not selectable', async () => {
+      expect((await selectableCells(buildAsset(new Map()))).modeling).toBe(false)
     })
 
-    test('empty cell inside the workflow is selectable', () => {
-      const asset = buildAsset(new Map())
-      expect(isSelectable.call(buildContext(), asset, riggingId)).toBe(true)
+    test('empty cell inside the workflow is selectable', async () => {
+      expect((await selectableCells(buildAsset(new Map()))).rigging).toBe(true)
     })
 
-    test('empty workflow allows every production task type', () => {
-      const context = buildContext()
-      context.assetTypeMap.get(assetTypeId).task_types = []
-      const asset = buildAsset(new Map())
-      expect(isSelectable.call(context, asset, modelingId)).toBe(true)
+    test('empty workflow allows every production task type', async () => {
+      assetTypeStore.cache.assetTypeMap.get(propsTypeId).task_types = []
+      expect((await selectableCells(buildAsset(new Map()))).modeling).toBe(true)
     })
 
-    test('shared asset cells are never selectable', () => {
-      const asset = {
-        ...buildAsset(new Map([[modelingId, 'task-1']])),
+    test('shared asset cells are never selectable', async () => {
+      const asset = buildAsset(new Map([[modelingId, 'task-1']]), {
         shared: true
-      }
-      expect(isSelectable.call(buildContext(), asset, modelingId)).toBe(false)
+      })
+      expect((await selectableCells(asset)).modeling).toBe(false)
     })
 
-    test('stale validation entry pointing to a deleted task does not force selectability', () => {
+    test('stale validation entry pointing to a deleted task does not force selectability', async () => {
       const asset = buildAsset(new Map([[modelingId, 'task-gone']]))
-      expect(isSelectable.call(buildContext(), asset, modelingId)).toBe(false)
-    })
-  })
-})
-
-// Sticky offsets add up full header widths: clientWidth leaves out the
-// border and rounds, so each sticky column overlapped the previous one.
-const header = (width, clientWidth = Math.floor(width) - 1) => ({
-  clientWidth,
-  getBoundingClientRect: () => ({ width })
-})
-
-describe('lists/AssetList sticky offsets', () => {
-  test('places the sticky columns after the full width of the previous ones', () => {
-    const context = {
-      isLoading: false,
-      displaySettings: { showInfos: true },
-      $refs: {
-        'th-name': header(300.5),
-        'th-episode': header(81),
-        'editor-0': [{ $el: header(121) }],
-        'validation-0': [{ $el: header(151) }]
-      },
-      stickedVisibleMetadataDescriptors: [{ id: 'descriptor-1' }],
-      stickedDisplayedValidationColumns: ['task-type-1']
-    }
-    context.$nextTick = callback => callback.call(context)
-
-    updateOffsets.call(context)
-
-    expect(context.nameWidth).toBe(300.5)
-    expect(context.offsets).toEqual({
-      'editor-0': 381.5,
-      'validation-0': 502.5
+      expect((await selectableCells(asset)).modeling).toBe(false)
     })
   })
 })
@@ -128,7 +132,7 @@ describe('lists/AssetList sticky columns', () => {
           [
             {
               id: 'asset-1',
-              asset_type_id: assetTypeId,
+              asset_type_id: propsTypeId,
               name: 'Asset 1',
               data: {},
               validations: new Map([[taskTypeId, 'task-1']])

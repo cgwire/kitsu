@@ -309,14 +309,14 @@ import {
 } from 'vue'
 import { useStore } from 'vuex'
 
+import { pauseEvent } from '@/composables/dom'
+import { useFormat } from '@/composables/format'
+import { useTaskHelpers } from '@/composables/tasks'
 import {
   getDescriptorChecklistValues,
   getMetadataChecklistValues,
   getMetadataFieldValue
-} from '@/composables/descriptors'
-import { pauseEvent } from '@/composables/dom'
-import { useFormat } from '@/composables/format'
-import { useTaskHelpers } from '@/composables/tasks'
+} from '@/lib/descriptors'
 import { getTaskEntityPath } from '@/lib/path'
 import {
   daysToMinutes,

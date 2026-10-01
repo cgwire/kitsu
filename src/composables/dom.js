@@ -1,8 +1,7 @@
 /*
- * Composition API counterpart of `src/components/mixins/dom.js`.
- * Every helper is a pure function, so there is no `useDom()` to
- * instantiate: import the named exports directly. The legacy mixin
- * stays in place so existing Options API components keep working.
+ * Helpers to access the DOM through vanilla javascript. Every helper is a
+ * pure function, so there is no `useDom()` to instantiate: import the
+ * named exports directly.
  */
 
 export const isFocusTextArea = () =>

@@ -579,8 +579,8 @@ import {
 import stringHelpers from '@/lib/string'
 
 import { useAtMentionsMembers } from '@/composables/atMentions'
+import { pauseEvent } from '@/composables/dom'
 import { useTime } from '@/composables/time'
-import { domMixin } from '@/components/mixins/dom'
 
 import AddAttachmentModal from '@/components/modals/AddAttachmentModal.vue'
 import AttachmentAudioPlayer from '@/components/players/viewers/AttachmentAudioPlayer.vue'
@@ -594,8 +594,6 @@ import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 import ValidationTag from '@/components/widgets/ValidationTag.vue'
-
-const { pauseEvent } = domMixin.methods
 
 const store = useStore()
 const route = useRoute()
