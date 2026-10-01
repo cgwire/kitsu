@@ -10,7 +10,8 @@ vi.mock('@/store/api/people', () => ({
   default: {
     deleteOrganisationLogo: vi.fn(),
     getDaysOff: vi.fn(),
-    postOrganisationLogo: vi.fn()
+    postOrganisationLogo: vi.fn(),
+    setTimeSpent: vi.fn()
   }
 }))
 
@@ -325,5 +326,118 @@ describe('People store loadDaysOff action', () => {
       )
     ).rejects.toThrow('403')
     expect(commit).not.toHaveBeenCalled()
+  })
+})
+
+describe('People store setTimeSpent action', () => {
+  const deferred = () => {
+    const handlers = {}
+    const promise = new Promise((resolve, reject) => {
+      handlers.resolve = resolve
+      handlers.reject = reject
+    })
+    return { promise, ...handlers }
+  }
+
+  const settle = () => new Promise(resolve => setTimeout(resolve))
+
+  const setTimeSpent = (commit, taskId, duration) =>
+    store.actions.setTimeSpent(
+      { commit },
+      { personId: 'person-1', taskId, date: '2026-09-29', duration }
+    )
+
+  beforeEach(() => {
+    peopleApi.setTimeSpent.mockReset()
+  })
+
+  // The sliders save on every wheel notch: concurrent writes of one day could
+  // land out of order, and Zou answers 404 to a write whose row a concurrent
+  // delete removed.
+  test('sends one write at a time, with the last value set meanwhile', async () => {
+    const first = deferred()
+    const second = deferred()
+    peopleApi.setTimeSpent
+      .mockReturnValueOnce(first.promise)
+      .mockReturnValueOnce(second.promise)
+    const commit = vi.fn()
+
+    const writes = [setTimeSpent(commit, 'task-1', 1)]
+    await settle()
+    writes.push(
+      setTimeSpent(commit, 'task-1', 0.5),
+      setTimeSpent(commit, 'task-1', 0)
+    )
+    await settle()
+
+    expect(peopleApi.setTimeSpent.mock.calls).toEqual([
+      ['task-1', 'person-1', '2026-09-29', 1]
+    ])
+
+    first.resolve({ task_id: 'task-1', duration: 60 })
+    await settle()
+
+    expect(peopleApi.setTimeSpent.mock.calls).toEqual([
+      ['task-1', 'person-1', '2026-09-29', 1],
+      ['task-1', 'person-1', '2026-09-29', 0]
+    ])
+
+    second.resolve({ task_id: 'task-1', duration: 0 })
+    await Promise.all(writes)
+
+    expect(commit.mock.calls).toEqual([
+      ['SET_TIME_SPENT', { task_id: 'task-1', duration: 60 }],
+      ['SET_TIME_SPENT', { task_id: 'task-1', duration: 0 }]
+    ])
+  })
+
+  test('sends the next value after a failed write', async () => {
+    const failure = deferred()
+    const error = new Error('404')
+    peopleApi.setTimeSpent
+      .mockReturnValueOnce(failure.promise)
+      .mockResolvedValueOnce({ task_id: 'task-2', duration: 30 })
+    const commit = vi.fn()
+
+    const failed = setTimeSpent(commit, 'task-2', 1)
+    await settle()
+    const next = setTimeSpent(commit, 'task-2', 0.5)
+    failure.reject(error)
+
+    await expect(failed).rejects.toBe(error)
+    await next
+    expect(peopleApi.setTimeSpent).toHaveBeenLastCalledWith(
+      'task-2',
+      'person-1',
+      '2026-09-29',
+      0.5
+    )
+    expect(commit.mock.calls).toEqual([
+      ['SET_TIME_SPENT', { task_id: 'task-2', duration: 30 }]
+    ])
+  })
+
+  test('writes the time of two tasks at the same time', async () => {
+    const first = deferred()
+    const second = deferred()
+    peopleApi.setTimeSpent
+      .mockReturnValueOnce(first.promise)
+      .mockReturnValueOnce(second.promise)
+    const commit = vi.fn()
+
+    const writes = [
+      setTimeSpent(commit, 'task-3', 1),
+      setTimeSpent(commit, 'task-4', 2)
+    ]
+    await settle()
+
+    expect(peopleApi.setTimeSpent.mock.calls).toEqual([
+      ['task-3', 'person-1', '2026-09-29', 1],
+      ['task-4', 'person-1', '2026-09-29', 2]
+    ])
+
+    first.resolve({ task_id: 'task-3', duration: 60 })
+    second.resolve({ task_id: 'task-4', duration: 120 })
+    await Promise.all(writes)
   })
 })

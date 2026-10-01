@@ -13,6 +13,7 @@ vi.mock('vue-i18n', async importOriginal => ({
 // Pre-load the real store to avoid circular-import race from child components.
 import '@/lib/auth'
 
+import TimesheetList from '@/components/lists/TimesheetList.vue'
 import Todos from '@/components/pages/Todos.vue'
 
 const feedbackStatus = { id: 'status-1', is_feedback_request: true }
@@ -230,6 +231,32 @@ describe('Todos page', () => {
 
       expect(dayOffList.props('isError')).toBe(false)
       expect(dayOffList.props('daysOff')).toEqual([dayOff])
+      wrapper.unmount()
+    })
+  })
+
+  describe('time spent', () => {
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    it('logs a time spent that fails to save', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const error = new Error('404 Not Found')
+      const wrapper = await mountPage([], {
+        actions: { setTimeSpent: () => Promise.reject(error) },
+        query: { section: 'timesheets' }
+      })
+      await flushPromises()
+
+      wrapper
+        .findComponent(TimesheetList)
+        .vm.$emit('time-spent-change', { taskId: 'task-1', duration: 2 })
+      await flushPromises()
+
+      expect(consoleError).toHaveBeenCalledWith(error)
       wrapper.unmount()
     })
   })

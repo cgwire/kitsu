@@ -586,11 +586,13 @@ const onUnsetDayOff = async dayOff => {
 }
 
 const onTimeSpentChange = timeSpentInfo => {
-  store.dispatch('setTimeSpent', {
-    ...timeSpentInfo,
-    personId: user.value.id,
-    date: selectedDate.value
-  })
+  store
+    .dispatch('setTimeSpent', {
+      ...timeSpentInfo,
+      personId: user.value.id,
+      date: selectedDate.value
+    })
+    .catch(console.error)
 }
 
 const onAssignation = async eventData => {
