@@ -327,6 +327,7 @@
             class="button"
             ref="preview-file"
             :href="currentPreviewDlPath"
+            download
             v-if="extension && extension.length > 0"
           >
             <download-icon class="icon" />
@@ -725,10 +726,17 @@
             hidden: isDlButtonsHidden
           }"
         >
-          <a class="dl-button zip-button" :href="zipDlPath">
+          <!-- Zou builds the zip while it answers: a new tab shows the wait
+               and keeps the player tab out of the navigation. -->
+          <a
+            class="dl-button zip-button"
+            :href="zipDlPath"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             {{ $t('playlists.download_zip') }}
           </a>
-          <a class="dl-button zip-button" :href="csvDlPath">
+          <a class="dl-button zip-button" :href="csvDlPath" download>
             {{ $t('playlists.download_csv') }}
           </a>
           <span
@@ -791,7 +799,7 @@
                 >
                   <play-icon :size="12" />
                 </button>
-                <a class="flexrow-item" :href="getBuildPath(job)">
+                <a class="flexrow-item" :href="getBuildPath(job)" download>
                   {{ formatDate(job.created_at) }}
                 </a>
               </template>
