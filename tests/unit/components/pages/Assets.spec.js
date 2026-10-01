@@ -1,114 +1,84 @@
-import { vi } from 'vitest'
+import { flushPromises } from '@vue/test-utils'
 
-// Importing the assets page transitively pulls in the root store
-// (lib/models → timezone → @/store); stub it so no Vuex store is built.
 vi.mock('@/store', () => ({ default: {} }))
+vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 
 import Assets from '@/components/pages/Assets.vue'
 
-describe('Assets page, reloadEpisodeAssetsIfNeeded', () => {
-  const production = { id: 'p' }
+import { mountEntityPage, production } from '../../fixtures/entity-page'
 
-  // The method only reads its component instance, so a plain object is
-  // enough to exercise the staleness decision without mounting the page.
-  const buildContext = (overrides = {}) => ({
-    currentProduction: production,
-    currentEpisode: null,
-    isTVShow: false,
-    assetsLoadingKey: 'p/',
-    isAssetsLoading: false,
-    initialLoading: false,
-    loadAssets: vi.fn(() => Promise.resolve()),
-    applySearchFromUrl: vi.fn(),
-    $refs: {},
-    $store: { commit: vi.fn() },
-    ...overrides
+// Two assets with their tasks in the store: the page decides on mount
+// whether their scope (episode) is the displayed one.
+const asset = id => ({
+  id,
+  project_id: production.id,
+  validations: new Map([['task-type-1', 'task-1']])
+})
+const assetMap = new Map([
+  ['asset-1', asset('asset-1')],
+  ['asset-2', asset('asset-2')]
+])
+
+const mountPage = async getters => {
+  const page = await mountEntityPage(Assets, {
+    listName: 'AssetList',
+    getters: { assetMap, assetValidationColumns: ['task-type-1'], ...getters }
+  })
+  await flushPromises()
+  return page.dispatched('loadAssets')
+}
+
+describe('Assets page, reload of another episode', () => {
+  test('reloads when the store holds another episode', async () => {
+    const loads = await mountPage({
+      isTVShow: true,
+      currentEpisode: { id: 'ep-b' },
+      assetsLoadingKey: `${production.id}/ep-a`
+    })
+
+    expect(loads).toHaveLength(1)
   })
 
-  const run = context => {
-    Assets.methods.reloadEpisodeAssetsIfNeeded.call(context)
-    return context
-  }
+  test('reloads when the store holds the production-wide dataset', async () => {
+    const loads = await mountPage({
+      isTVShow: true,
+      currentEpisode: { id: 'ep-a' },
+      assetsLoadingKey: `${production.id}/all`
+    })
 
-  test('reloads when the store holds another episode', () => {
-    const context = run(
-      buildContext({
+    expect(loads).toHaveLength(1)
+  })
+
+  test('does not reload when the store holds the displayed episode', async () => {
+    const loads = await mountPage({
+      isTVShow: true,
+      currentEpisode: { id: 'ep-a' },
+      assetsLoadingKey: `${production.id}/ep-a`
+    })
+
+    expect(loads).toHaveLength(0)
+  })
+
+  test.each(['all', 'main'])(
+    'does not reload the %s pseudo-episode already loaded',
+    async episodeId => {
+      const loads = await mountPage({
         isTVShow: true,
-        currentEpisode: { id: 'ep-b' },
-        assetsLoadingKey: 'p/ep-a'
+        currentEpisode: { id: episodeId },
+        assetsLoadingKey: `${production.id}/${episodeId}`
       })
-    )
 
-    expect(context.loadAssets).toHaveBeenCalled()
-    expect(context.initialLoading).toBe(true)
-  })
+      expect(loads).toHaveLength(0)
+    }
+  )
 
-  test('reloads when the store holds the production-wide dataset', () => {
-    // Assets cast in from other episodes are legitimate rows of an episode
-    // load, so only the recorded scope tells an All dataset from an episode
-    // one: the rows themselves cannot.
-    const context = run(
-      buildContext({
-        isTVShow: true,
-        currentEpisode: { id: 'ep-a' },
-        assetsLoadingKey: 'p/all'
-      })
-    )
+  test('does not reload on a production without episodes', async () => {
+    const loads = await mountPage({
+      currentEpisode: { id: 'ep-a' },
+      assetsLoadingKey: `${production.id}/`
+    })
 
-    expect(context.loadAssets).toHaveBeenCalled()
-  })
-
-  test('does not reload when the store holds the displayed episode', () => {
-    const context = run(
-      buildContext({
-        isTVShow: true,
-        currentEpisode: { id: 'ep-a' },
-        assetsLoadingKey: 'p/ep-a'
-      })
-    )
-
-    expect(context.loadAssets).not.toHaveBeenCalled()
-    expect(context.initialLoading).toBe(false)
-  })
-
-  test('does not reload for the all and main pseudo-episodes already loaded', () => {
-    const all = run(
-      buildContext({
-        isTVShow: true,
-        currentEpisode: { id: 'all' },
-        assetsLoadingKey: 'p/all'
-      })
-    )
-    const main = run(
-      buildContext({
-        isTVShow: true,
-        currentEpisode: { id: 'main' },
-        assetsLoadingKey: 'p/main'
-      })
-    )
-
-    expect(all.loadAssets).not.toHaveBeenCalled()
-    expect(main.loadAssets).not.toHaveBeenCalled()
-  })
-
-  test('does not reload on a production without episodes', () => {
-    const context = run(
-      buildContext({
-        // A stale currentEpisode left by a previous TV show must not make an
-        // episode-less production look out of scope.
-        currentEpisode: { id: 'ep-a' },
-        assetsLoadingKey: 'p/'
-      })
-    )
-
-    expect(context.loadAssets).not.toHaveBeenCalled()
-  })
-
-  test('does nothing while no production is set', () => {
-    const context = run(
-      buildContext({ currentProduction: null, assetsLoadingKey: null })
-    )
-
-    expect(context.loadAssets).not.toHaveBeenCalled()
+    expect(loads).toHaveLength(0)
   })
 })
+

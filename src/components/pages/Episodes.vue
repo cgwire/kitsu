@@ -97,18 +97,16 @@
     </div>
 
     <delete-modal
-      ref="delete-episode-modal"
       :active="modals.isDeleteDisplayed"
       :is-loading="loading.del"
       :is-error="errors.del"
-      :text="deleteText()"
+      :text="deleteText"
       :error-text="$t('episodes.delete_error')"
       @cancel="modals.isDeleteDisplayed = false"
       @confirm="confirmDeleteEpisode"
     />
 
     <delete-modal
-      ref="delete-metadata-modal"
       :active="modals.isDeleteMetadataDisplayed"
       :is-loading="loading.deleteMetadata"
       :is-error="errors.deleteMetadata"
@@ -119,7 +117,6 @@
     />
 
     <hard-delete-modal
-      ref="delete-all-tasks-modal"
       :active="modals.isDeleteAllTasksDisplayed"
       :is-loading="loading.deleteAllTasks"
       :is-error="errors.deleteAllTasks"
@@ -157,7 +154,6 @@
     />
 
     <add-thumbnails-modal
-      ref="add-thumbnails-modal"
       entity-type="Episode"
       parent="episodes"
       :active="modals.isAddThumbnailsDisplayed"
@@ -169,7 +165,6 @@
     />
 
     <build-filter-modal
-      ref="build-filter-modal"
       :active="modals.isBuildFilterDisplayed"
       entity-type="episode"
       @cancel="modals.isBuildFilterDisplayed = false"
@@ -189,7 +184,7 @@
       :active="modals.isDeleteDisplayed"
       :is-loading="loading.del"
       :is-error="errors.del"
-      :text="deleteText()"
+      :text="deleteText"
       :error-text="$t('episodes.delete_error')"
       :lock-text="episodeToDelete ? episodeToDelete.name : ''"
       @cancel="modals.isDeleteDisplayed = false"
@@ -198,422 +193,248 @@
   </div>
 </template>
 
-<script>
-import moment from 'moment'
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+import { useHead } from '@unhead/vue'
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  useTemplateRef,
+  watch
+} from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 
-import csv from '@/lib/csv'
-import { sortByName } from '@/lib/sorting'
-import stringHelpers from '@/lib/string'
+import { useEntityPage } from '@/composables/entityPage'
 
-import { searchMixin } from '@/components/mixins/search'
-import { entitiesMixin } from '@/components/mixins/entities'
-
+/* eslint-disable no-unused-vars */
+import EpisodeList from '@/components/lists/EpisodeList.vue'
 import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
 import AddThumbnailsModal from '@/components/modals/AddThumbnailsModal.vue'
 import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
-import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
-import ComboboxDisplayOptions from '@/components/widgets/ComboboxDisplayOptions.vue'
 import CreateTasksModal from '@/components/modals/CreateTasksModal.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditEpisodeModal from '@/components/modals/EditEpisodeModal.vue'
-import EpisodeList from '@/components/lists/EpisodeList.vue'
 import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
+import TaskInfo from '@/components/sides/TaskInfo.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
+import ComboboxDisplayOptions from '@/components/widgets/ComboboxDisplayOptions.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import SortingInfo from '@/components/widgets/SortingInfo.vue'
-import TaskInfo from '@/components/sides/TaskInfo.vue'
+/* eslint-enable no-unused-vars */
 
-export default {
-  name: 'episodes',
+const { t } = useI18n()
+const store = useStore()
 
-  mixins: [searchMixin, entitiesMixin],
+const type = 'episode'
 
-  components: {
-    AddMetadataModal,
-    AddThumbnailsModal,
-    BuildFilterModal,
-    ButtonSimple,
-    ComboboxDepartment,
-    ComboboxDisplayOptions,
-    CreateTasksModal,
-    DeleteModal,
-    EditEpisodeModal,
-    EpisodeList,
-    HardDeleteModal,
-    SearchField,
-    SearchQueryList,
-    SortingInfo,
-    TaskInfo
-  },
+// State
+// --------------------------------------------------------------------------
 
-  data() {
-    return {
-      type: 'episode',
-      contactSheetMode: false,
-      deleteAllTasksLockText: null,
-      descriptorToEdit: {},
-      departmentFilter: [],
-      episodeToDelete: null,
-      episodeToEdit: null,
-      formData: null,
-      genericColumns: [
-        'Metadata column name (text value)',
-        'Task type name (task status name value)',
-        'Task type name + comment (text value)'
-      ],
-      historyEdit: {},
-      initialLoading: true,
-      optionalColumns: ['Description'],
-      pageName: 'Episodes',
-      parsedCSV: [],
-      selectedDepartment: 'ALL',
-      taskTypeForTaskDeletion: null,
-      modals: {
-        isAddMetadataDisplayed: false,
-        isAddThumbnailsDisplayed: false,
-        isBuildFilterDisplayed: false,
-        isCreateTasksDisplayed: false,
-        isDeleteDisplayed: false,
-        isDeleteMetadataDisplayed: false,
-        isDeleteAllTasksDisplayed: false,
-        isImportRenderDisplayed: false,
-        isImportDisplayed: false,
-        isNewDisplayed: false
-      },
-      loading: {
-        addMetadata: false,
-        addThumbnails: false,
-        creatingTasks: false,
-        creatingTasksStay: false,
-        creatingAllTasks: false,
-        del: false,
-        deleteAllTasks: false,
-        deleteMetadata: false,
-        edit: false,
-        episode: false,
-        importing: false,
-        savingSearch: false,
-        stay: false
-      },
-      errors: {
-        addMetadata: false,
-        creatingTasks: false,
-        deleteAllTasks: false,
-        deleteMetadata: false,
-        edit: false,
-        importing: false,
-        importingError: null
-      }
-    }
-  },
+const listRef = useTemplateRef('episode-list')
+const searchFieldRef = useTemplateRef('episode-search-field')
 
-  beforeUnmount() {
-    this.clearSelectedEpisodes()
-  },
+const initialLoading = ref(true)
 
-  created() {
-    this.setLastProductionScreen('episodes')
-  },
+// Computed
+// --------------------------------------------------------------------------
 
-  mounted() {
-    this.setSearchFromUrl()
-    this.$refs['episode-list'].setScrollPosition(this.episodeListScrollPosition)
-    if (!this.isCurrentUserManager && this.user.departments.length > 0) {
-      this.selectedDepartment = 'MY_DEPARTMENTS'
-      this.departmentFilter = this.user.departments
+const currentProduction = computed(() => store.getters.currentProduction)
+const departments = computed(() => store.getters.departments)
+const displayedEpisodes = computed(() => store.getters.displayedEpisodes)
+const episodeMap = computed(() => store.getters.episodeMap)
+const episodeSearchQueries = computed(() => store.getters.episodeSearchQueries)
+const episodeSorting = computed(() => store.getters.episodeSorting)
+const episodeValidationColumns = computed(
+  () => store.getters.episodeValidationColumns
+)
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+const isCurrentUserManager = computed(
+  () => store.getters.isCurrentUserProductionManager
+)
+const isEpisodesLoading = computed(() => store.getters.isEpisodesLoading)
+const isEpisodesLoadingError = computed(
+  () => store.getters.isEpisodesLoadingError
+)
+const selectedTasks = computed(() => store.getters.selectedTasks)
+const user = computed(() => store.getters.user)
+
+// Functions
+// --------------------------------------------------------------------------
+
+const reset = () => {
+  initialLoading.value = false
+  store.dispatch('loadEpisodesWithTasks', err => {
+    if (err) console.error(err)
+    initialLoading.value = false
+  })
+}
+
+const {
+  applySearchFromUrl,
+  closeMetadataModal,
+  confirmAddMetadata,
+  confirmAddThumbnails,
+  confirmBuildFilter,
+  confirmCreateAllMissingTasks,
+  confirmCreateTasks,
+  confirmCreateTasksAndStay,
+  confirmDelete: confirmDeleteEpisode,
+  confirmDeleteAllTasks,
+  confirmDeleteMetadata,
+  deleteAllTasksLockText,
+  deleteAllTasksText,
+  deleteText,
+  departmentFilter,
+  descriptorToEdit,
+  displaySettings,
+  entityToDelete: episodeToDelete,
+  entityToEdit: episodeToEdit,
+  errors,
+  hideAddThumbnailsModal,
+  hideCreateTasksModal,
+  isTaskSidePanelOpen,
+  loading,
+  modals,
+  onAddMetadataClicked,
+  onChangeSortClicked,
+  onDeleteAllTasksClicked,
+  onDeleteClicked,
+  onDeleteMetadataClicked,
+  onEditMetadataClicked,
+  onKeepTaskPanelOpenChanged,
+  onMetadataChanged,
+  onSearchChange,
+  openEditModal: onEditClicked,
+  removeSearchQuery,
+  saveScrollPosition,
+  saveSearchQuery,
+  selectableDepartments,
+  selectedDepartment,
+  setScrollPosition,
+  setSearchFromUrl,
+  showCreateTasksModal
+} = useEntityPage({
+  type,
+  pageName: 'Episodes',
+  listRef,
+  searchFieldRef,
+  reset
+})
+
+const showNewModal = () => onEditClicked()
+
+const confirmEditEpisode = async form => {
+  loading.edit = true
+  errors.edit = false
+  try {
+    if (form.id) {
+      await store.dispatch('editEpisode', form)
+      applySearchFromUrl(false)
     } else {
-      this.departmentFilter = []
-    }
-
-    const finalize = () => {
-      this.initialLoading = false
-      if (this.$refs['episode-list']) {
-        this.setSearchFromUrl()
-        this.onSearchChange()
-        this.$refs['episode-list'].setScrollPosition(
-          this.episodeListScrollPosition
-        )
-        this.$nextTick(() => {
-          this.$refs['episode-list']?.selectTaskFromQuery()
-        })
-      }
-    }
-
-    if (
-      this.episodeMap.size < 1 ||
-      this.episodeValidationColumns.length === 0 ||
-      this.episodeMap.values().next().value?.project_id !==
-        this.currentProduction.id
-    ) {
-      this.loadEpisodesWithTasks()
-        .then(() => {
-          setTimeout(() => {
-            finalize()
-          }, 200)
-        })
-        .catch(console.error)
-    } else {
-      if (!this.isEpisodesLoading) this.initialLoading = false
-      finalize()
-    }
-  },
-
-  computed: {
-    ...mapGetters([
-      'currentEpisode',
-      'currentProduction',
-      'departmentMap',
-      'departments',
-      'displayedEpisodes',
-      'episodeMap',
-      'episodes',
-      'episodeMap',
-      'episodeFilledColumns',
-      'episodeSearchText',
-      'episodeValidationColumns',
-      'episodeListScrollPosition',
-      'episodeSorting',
-      'episodeSearchQueries',
-      'isCurrentUserClient',
-      'isEpisodeDescription',
-      'isEpisodeEstimation',
-      'isEpisodeTime',
-      'isEpisodesLoading',
-      'isEpisodesLoadingError',
-      'isShowAssignations',
-      'isTVShow',
-      'openProductions',
-      'productionEpisodeTaskTypes',
-      'selectedTasks',
-      'taskTypeMap',
-      'user'
-    ]),
-    ...mapGetters({
-      isCurrentUserManager: 'isCurrentUserProductionManager'
-    }),
-
-    renderColumns() {
-      const collection = [...this.dataMatchers, ...this.optionalColumns]
-
-      this.productionEpisodeTaskTypes.forEach(item => {
-        collection.push(item.name)
-        collection.push(`${item.name} comment`)
+      await store.dispatch('newEpisode', {
+        ...form,
+        project_id: currentProduction.value.id
       })
-      return collection
-    },
-
-    filteredEpisodes() {
-      const episodes = {}
-      this.displayedEpisodes.forEach(episode => {
-        const episodeKey = episode.name
-        episodes[episodeKey] = true
-      })
-      return episodes
-    },
-
-    metadataDescriptors() {
-      return this.episodeMetadataDescriptors
     }
-  },
-
-  methods: {
-    ...mapActions([
-      'addMetadataDescriptor',
-      'createTasks',
-      'changeEpisodeSort',
-      'clearSelectedEpisodes',
-      'commentTaskWithPreview',
-      'deleteAllEpisodeTasks',
-      'deleteEpisode',
-      'deleteMetadataDescriptor',
-      'editEpisode',
-      'getEpisodesCsvLines',
-      'hideAssignations',
-      'loadEpisodesWithTasks',
-      'newEpisode',
-      'removeEpisodeSearch',
-      'saveEpisodeSearch',
-      'setLastProductionScreen',
-      'setPreview',
-      'setEpisodeSearch',
-      'showAssignations',
-      'uploadEpisodeFile'
-    ]),
-
-    showNewModal() {
-      this.episodeToEdit = {}
-      this.modals.isNewDisplayed = true
-    },
-
-    confirmDeleteEpisode() {
-      this.loading.del = true
-      this.errors.del = false
-      this.deleteEpisode(this.episodeToDelete)
-        .then(() => {
-          this.loading.del = false
-          this.modals.isDeleteDisplayed = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.del = false
-          this.errors.del = true
-        })
-    },
-
-    reset() {
-      this.initialLoading = false
-      this.loadEpisodesWithTasks(err => {
-        if (err) console.error(err)
-        this.initialLoading = false
-      })
-    },
-
-    resetEditModal() {
-      const form = { name: '' }
-      if (this.openProductions.length > 0) {
-        form.production_id = this.openProductions[0].id
-      }
-      this.episodeToEdit = form
-    },
-
-    onExportClick() {
-      this.getEpisodesCsvLines().then(episodeLines => {
-        const nameData = [
-          moment().format('YYYY-MM-DD'),
-          'kitsu',
-          this.currentProduction.name,
-          this.$t('episodes.title')
-        ]
-        const name = stringHelpers.slugify(nameData.join('_'))
-        const headers = [
-          this.$t('episodes.fields.name'),
-          this.$t('episodes.fields.description')
-        ]
-        if (this.currentEpisode) {
-          headers.splice(0, 0, 'Episode')
-        }
-        sortByName([...this.currentProduction.descriptors])
-          .filter(d => d.entity_type === 'Episode')
-          .forEach(descriptor => {
-            headers.push(descriptor.name)
-          })
-        if (this.isEpisodeTime) {
-          headers.push(this.$t('episodes.fields.time_spent'))
-        }
-        if (this.isEpisodeEstimation) {
-          headers.push(this.$t('main.estimation_short'))
-        }
-        this.episodeValidationColumns.forEach(taskTypeId => {
-          headers.push(this.taskTypeMap.get(taskTypeId)?.name || '')
-          headers.push('Assignations')
-        })
-        csv.buildCsvFile(name, [headers].concat(episodeLines))
-      })
-    },
-
-    async onFieldChanged({ entry, fieldName, value }) {
-      const data = {
-        id: entry.id,
-        description: entry.description,
-        [fieldName]: value
-      }
-      await this.editEpisode(data)
-      this.applySearchFromUrl(false)
-    },
-
-    async onMetadataChanged({ entry, descriptor, value }) {
-      const data = {
-        id: entry.id,
-        data: {
-          [descriptor.field_name]: value
-        }
-      }
-      await this.editEpisode(data)
-      this.applySearchFromUrl(false)
-    },
-
-    onEditClicked(episode) {
-      this.episodeToEdit = episode
-      this.modals.isNewDisplayed = true
-    },
-
-    onDeleteClicked(episode) {
-      this.episodeToDelete = episode
-      this.modals.isDeleteDisplayed = true
-    },
-
-    confirmEditEpisode(form) {
-      this.loading.edit = true
-      this.errors.edit = false
-
-      if (form.id) {
-        this.editEpisode(form)
-          .then(() => {
-            this.loading.edit = false
-            this.modals.isNewDisplayed = false
-            this.applySearchFromUrl(false)
-          })
-          .catch(err => {
-            console.error(err)
-            this.loading.edit = false
-            this.errors.edit = true
-          })
-      } else {
-        form.project_id = this.currentProduction.id
-        this.newEpisode(form)
-          .then(() => {
-            this.loading.edit = false
-            this.modals.isNewDisplayed = false
-          })
-          .catch(() => {
-            this.loading.edit = false
-            this.errors.edit = true
-          })
-      }
-    },
-
-    deleteText() {
-      const episode = this.episodeToDelete
-      if (episode) {
-        return this.$t('episodes.delete_text', { name: episode.name })
-      }
-      return ''
-    }
-  },
-
-  watch: {
-    currentProduction() {
-      this.$store.commit('SET_EPISODE_LIST_SCROLL_POSITION', 0)
-      this.initialLoading = false
-      this.reset()
-    },
-
-    isEpisodesLoading() {
-      if (!this.isEpisodesLoading) {
-        this.initialLoading = false
-        this.$nextTick(() => {
-          this.setSearchFromUrl()
-          this.onSearchChange()
-        })
-        if (this.$refs['episode-list']) {
-          this.$refs['episode-list'].setScrollPosition(
-            this.episodeListScrollPosition
-          )
-        }
-      }
-    }
-  },
-
-  head() {
-    return {
-      title: `${this.currentProduction.name} ${this.$t(
-        'episodes.title'
-      )} - Kitsu`
-    }
+    modals.isNewDisplayed = false
+  } catch (err) {
+    console.error(err)
+    errors.edit = true
+  } finally {
+    loading.edit = false
   }
 }
+
+const onFieldChanged = async ({ entry, fieldName, value }) => {
+  await store.dispatch('editEpisode', {
+    id: entry.id,
+    description: entry.description,
+    [fieldName]: value
+  })
+  applySearchFromUrl(false)
+}
+
+// Watchers
+// --------------------------------------------------------------------------
+
+watch(currentProduction, () => {
+  store.commit('SET_EPISODE_LIST_SCROLL_POSITION', 0)
+  initialLoading.value = false
+  reset()
+})
+
+watch(isEpisodesLoading, isLoading => {
+  if (isLoading) return
+  initialLoading.value = false
+  nextTick(() => {
+    setSearchFromUrl()
+    onSearchChange()
+  })
+  setScrollPosition()
+})
+
+// Lifecycle
+// --------------------------------------------------------------------------
+
+store.dispatch('setLastProductionScreen', 'episodes')
+
+onMounted(() => {
+  setSearchFromUrl()
+  setScrollPosition()
+  if (!isCurrentUserManager.value && user.value.departments.length > 0) {
+    selectedDepartment.value = 'MY_DEPARTMENTS'
+    departmentFilter.value = user.value.departments
+  } else {
+    departmentFilter.value = []
+  }
+
+  const finalize = () => {
+    initialLoading.value = false
+    if (listRef.value) {
+      setSearchFromUrl()
+      onSearchChange()
+      setScrollPosition()
+      nextTick(() => {
+        listRef.value?.selectTaskFromQuery()
+      })
+    }
+  }
+
+  if (
+    episodeMap.value.size < 1 ||
+    episodeValidationColumns.value.length === 0 ||
+    episodeMap.value.values().next().value?.project_id !==
+      currentProduction.value.id
+  ) {
+    store
+      .dispatch('loadEpisodesWithTasks')
+      .then(() => {
+        setTimeout(finalize, 200)
+      })
+      .catch(console.error)
+  } else {
+    if (!isEpisodesLoading.value) initialLoading.value = false
+    finalize()
+  }
+})
+
+onBeforeUnmount(() => {
+  store.dispatch('clearSelectedEpisodes')
+})
+
+// Head
+// --------------------------------------------------------------------------
+
+useHead({
+  title: computed(
+    () => `${currentProduction.value.name} ${t('episodes.title')} - Kitsu`
+  )
+})
 </script>
 
 <style lang="scss" scoped>

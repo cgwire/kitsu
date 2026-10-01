@@ -128,18 +128,16 @@
     />
 
     <delete-modal
-      ref="delete-edit-modal"
       :active="modals.isDeleteDisplayed"
       :is-loading="loading.del"
       :is-error="errors.del"
-      :text="deleteText()"
+      :text="deleteText"
       :error-text="$t('edits.delete_error')"
       @cancel="modals.isDeleteDisplayed = false"
       @confirm="confirmDeleteEdit"
     />
 
     <delete-modal
-      ref="restore-edit-modal"
       :active="modals.isRestoreDisplayed"
       :is-loading="loading.restore"
       :is-error="errors.restore"
@@ -150,7 +148,6 @@
     />
 
     <delete-modal
-      ref="delete-metadata-modal"
       :active="modals.isDeleteMetadataDisplayed"
       :is-loading="loading.deleteMetadata"
       :is-error="errors.deleteMetadata"
@@ -161,7 +158,6 @@
     />
 
     <hard-delete-modal
-      ref="delete-all-tasks-modal"
       :active="modals.isDeleteAllTasksDisplayed"
       :is-loading="loading.deleteAllTasks"
       :is-error="errors.deleteAllTasks"
@@ -227,7 +223,6 @@
     />
 
     <add-thumbnails-modal
-      ref="add-thumbnails-modal"
       active
       entity-type="Edit"
       :parent="isTVShow ? 'edits_tvshow' : 'edits'"
@@ -245,7 +240,6 @@
     />
 
     <build-filter-modal
-      ref="build-filter-modal"
       :active="modals.isBuildFilterDisplayed"
       entity-type="edit"
       @cancel="modals.isBuildFilterDisplayed = false"
@@ -254,564 +248,352 @@
   </div>
 </template>
 
-<script>
-import moment from 'moment'
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+import { useHead } from '@unhead/vue'
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  useTemplateRef,
+  watch
+} from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 
-import csv from '@/lib/csv'
+import {
+  GENERIC_IMPORT_COLUMNS as genericColumns,
+  useEntityPage
+} from '@/composables/entityPage'
 import { getExportDescriptors } from '@/lib/descriptors'
-import stringHelpers from '@/lib/string'
 
-import { searchMixin } from '@/components/mixins/search'
-import { entitiesMixin } from '@/components/mixins/entities'
-
+/* eslint-disable no-unused-vars */
+import EditList from '@/components/lists/EditList.vue'
 import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
 import AddThumbnailsModal from '@/components/modals/AddThumbnailsModal.vue'
 import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
-import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
-import ComboboxDisplayOptions from '@/components/widgets/ComboboxDisplayOptions.vue'
 import CreateTasksModal from '@/components/modals/CreateTasksModal.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditEditModal from '@/components/modals/EditEditModal.vue'
-import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
-import ImportModal from '@/components/modals/ImportModal.vue'
+import EditHistoryModal from '@/components/modals/EditHistoryModal.vue'
 import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
+import ImportModal from '@/components/modals/ImportModal.vue'
+import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
+import TaskInfo from '@/components/sides/TaskInfo.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
+import ComboboxDisplayOptions from '@/components/widgets/ComboboxDisplayOptions.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import SortingInfo from '@/components/widgets/SortingInfo.vue'
-import EditHistoryModal from '@/components/modals/EditHistoryModal.vue'
-import EditList from '@/components/lists/EditList.vue'
-import TaskInfo from '@/components/sides/TaskInfo.vue'
+/* eslint-enable no-unused-vars */
 
-export default {
-  name: 'edits',
+const { t } = useI18n()
+const route = useRoute()
+const store = useStore()
 
-  mixins: [searchMixin, entitiesMixin],
+const type = 'edit'
 
-  components: {
-    AddMetadataModal,
-    AddThumbnailsModal,
-    BuildFilterModal,
-    ButtonSimple,
-    ComboboxDepartment,
-    ComboboxDisplayOptions,
-    CreateTasksModal,
-    DeleteModal,
-    EditEditModal,
-    ImportModal,
-    HardDeleteModal,
-    ImportRenderModal,
-    SearchField,
-    SearchQueryList,
-    SortingInfo,
-    EditHistoryModal,
-    EditList,
-    TaskInfo
-  },
+// State
+// --------------------------------------------------------------------------
 
-  data() {
-    return {
-      type: 'edit',
-      contactSheetMode: false,
-      deleteAllTasksLockText: null,
-      descriptorToEdit: {},
-      departmentFilter: [],
-      editToDelete: null,
-      editToEdit: null,
-      editToRestore: null,
-      formData: null,
-      genericColumns: [
-        'Metadata column name (text value)',
-        'Task type name (task status name value)',
-        'Task type name + comment (text value)'
-      ],
-      historyEdit: {},
-      initialLoading: true,
-      optionalColumns: ['Description'],
-      pageName: 'Edits',
-      parsedCSV: [],
-      selectedDepartment: 'ALL',
-      taskTypeForTaskDeletion: null,
-      modals: {
-        isAddMetadataDisplayed: false,
-        isAddThumbnailsDisplayed: false,
-        isBuildFilterDisplayed: false,
-        isCreateTasksDisplayed: false,
-        isDeleteDisplayed: false,
-        isDeleteMetadataDisplayed: false,
-        isDeleteAllTasksDisplayed: false,
-        isImportRenderDisplayed: false,
-        isImportDisplayed: false,
-        isNewDisplayed: false,
-        isRestoreDisplayed: false,
-        isEditHistoryDisplayed: false
-      },
-      loading: {
-        addMetadata: false,
-        addThumbnails: false,
-        creatingTasks: false,
-        creatingTasksStay: false,
-        creatingAllTasks: false,
-        deleteAllTasks: false,
-        deleteMetadata: false,
-        edit: false,
-        del: false,
-        importing: false,
-        restore: false,
-        savingSearch: false,
-        stay: false
-      },
-      errors: {
-        addMetadata: false,
-        deleteMetadata: false,
-        creatingTasks: false,
-        deleteAllTasks: false,
-        importing: false,
-        importingError: null
-      }
-    }
-  },
+const importModalRef = useTemplateRef('import-modal')
+const listRef = useTemplateRef('edit-list')
+const searchFieldRef = useTemplateRef('edit-search-field')
 
-  beforeUnmount() {
-    this.clearSelectedEdits()
-  },
+const historyEdit = ref({})
+const initialLoading = ref(true)
 
-  created() {
-    this.setLastProductionScreen('edits')
-  },
+// Computed
+// --------------------------------------------------------------------------
 
-  mounted() {
-    if (this.editSearchText.length > 0) {
-      this.$refs['edit-search-field']?.setValue(this.editSearchText)
-    }
-    this.$refs['edit-list']?.setScrollPosition(this.editListScrollPosition)
-    const finalize = () => {
-      if (this.$refs['edit-list']) {
-        this.applySearchFromUrl()
-        this.$refs['edit-list'].setScrollPosition(this.editListScrollPosition)
-        this.$refs['edit-list'].selectTaskFromQuery()
-      }
-    }
+const currentEpisode = computed(() => store.getters.currentEpisode)
+const currentProduction = computed(() => store.getters.currentProduction)
+const departments = computed(() => store.getters.departments)
+const displayedEdits = computed(() => store.getters.displayedEdits)
+const editMap = computed(() => store.getters.editMap)
+const editsCsvFormData = computed(() => store.getters.editsCsvFormData)
+const editSearchQueries = computed(() => store.getters.editSearchQueries)
+const editSearchText = computed(() => store.getters.editSearchText)
+const editSorting = computed(() => store.getters.editSorting)
+const editValidationColumns = computed(
+  () => store.getters.editValidationColumns
+)
+const episodeMap = computed(() => store.getters.episodeMap)
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+const isCurrentUserManager = computed(
+  () => store.getters.isCurrentUserProductionManager
+)
+const isEditEstimation = computed(() => store.getters.isEditEstimation)
+const isEditsLoading = computed(() => store.getters.isEditsLoading)
+const isEditsLoadingError = computed(() => store.getters.isEditsLoadingError)
+const isEditTime = computed(() => store.getters.isEditTime)
+const isLongEditList = computed(() => store.getters.isLongEditList)
+const isTVShow = computed(() => store.getters.isTVShow)
+const selectedTasks = computed(() => store.getters.selectedTasks)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
-    if (
-      this.editMap.size < 2 ||
-      (this.editValidationColumns.length > 0 &&
-        !this.editMap.get(this.editMap.keys().next().value).validations)
-    ) {
-      setTimeout(() => {
-        this.loadEdits().then(() => {
-          setTimeout(() => {
-            this.initialLoading = false
-            finalize()
-          }, 200)
-        })
-      }, 0)
+const dataMatchers = computed(() =>
+  isTVShow.value ? ['Episode', 'Name'] : ['Name']
+)
+
+// Built from the full edit cache, not the filtered display list, so the
+// import creation check sees every edit. The cache Map is not reactive:
+// depend on displayedEdits (updated by the same mutations) to invalidate.
+const filteredEdits = computed(() => {
+  displayedEdits.value // eslint-disable-line no-unused-expressions
+  return Object.fromEntries(
+    Array.from(editMap.value.values()).map(edit => {
+      const episode = isTVShow.value && episodeMap.value.get(edit.episode_id)
+      return [`${episode ? episode.name : ''}${edit.name}`, true]
+    })
+  )
+})
+
+// Functions
+// --------------------------------------------------------------------------
+
+const reset = () => {
+  initialLoading.value = true
+  store.dispatch('loadEdits', err => {
+    if (err) console.error(err)
+    initialLoading.value = false
+  })
+}
+
+const {
+  applySearch,
+  applySearchFromUrl,
+  clearSearchAndScroll,
+  clearSelection,
+  closeMetadataModal,
+  confirmAddMetadata,
+  confirmAddThumbnails,
+  confirmBuildFilter,
+  confirmCreateAllMissingTasks,
+  confirmCreateTasks,
+  confirmCreateTasksAndStay,
+  confirmDelete: confirmDeleteEdit,
+  confirmDeleteAllTasks,
+  confirmDeleteMetadata,
+  confirmRestore: confirmRestoreEdit,
+  deleteAllTasksLockText,
+  deleteAllTasksText,
+  deleteText,
+  departmentFilter,
+  descriptorToEdit,
+  displaySettings,
+  entityToEdit: editToEdit,
+  errors,
+  exportCsv,
+  hideAddThumbnailsModal,
+  hideCreateTasksModal,
+  hideImportModal,
+  hideImportRenderModal,
+  isLoadedScopeStale,
+  isTaskSidePanelOpen,
+  loading,
+  modals,
+  onAddMetadataClicked,
+  onChangeSortClicked,
+  onDeleteAllTasksClicked,
+  onDeleteClicked,
+  onDeleteMetadataClicked,
+  onEditMetadataClicked,
+  onKeepTaskPanelOpenChanged,
+  onMetadataChanged,
+  onRestoreClicked,
+  openEditModal: onEditClicked,
+  parsedCSV,
+  removeSearchQuery,
+  renderColumns,
+  renderImport,
+  resetImport,
+  restoreText,
+  saveScrollPosition,
+  saveSearchQuery,
+  selectableDepartments,
+  selectedDepartment,
+  setScrollPosition,
+  setSearchInUrl,
+  showCreateTasksModal,
+  showImportModal,
+  uploadImportFile
+} = useEntityPage({
+  type,
+  pageName: 'Edits',
+  listRef,
+  searchFieldRef,
+  importModalRef,
+  reset,
+  loadEntities: () => store.dispatch('loadEdits'),
+  dataMatchers,
+  optionalColumns: ref(['Description']),
+  canCancel: true,
+  modals: { isEditHistoryDisplayed: false }
+})
+
+const showNewModal = () => onEditClicked()
+
+const reloadEpisodeEditsIfNeeded = () => {
+  if (!isLoadedScopeStale()) return
+  clearSearchAndScroll()
+  reset()
+}
+
+const onExportClick = () =>
+  exportCsv(
+    [
+      ...(currentEpisode.value ? ['Episode'] : []),
+      t('edits.fields.name'),
+      t('edits.fields.description'),
+      ...getExportDescriptors(currentProduction.value, 'Edit').map(
+        descriptor => descriptor.name
+      ),
+      ...(isEditTime.value ? [t('edits.fields.time_spent')] : []),
+      ...(isEditEstimation.value ? [t('main.estimation_short')] : []),
+      ...editValidationColumns.value.flatMap(taskTypeId => [
+        taskTypeMap.value.get(taskTypeId)?.name || '',
+        'Assignations'
+      ])
+    ],
+    currentEpisode.value?.name
+  )
+
+// A long list is only filtered through the URL, by the route watcher.
+const onSearchChange = (clearSelectionAfter = true) => {
+  if (!searchFieldRef.value) return
+  const searchQuery = searchFieldRef.value.getValue() || ''
+  setSearchInUrl()
+  if (searchQuery.length !== 1 && !isLongEditList.value) {
+    applySearch(searchQuery)
+  }
+  if (clearSelectionAfter) clearSelection()
+}
+
+const confirmEditEdit = async form => {
+  loading.edit = true
+  errors.edit = false
+  try {
+    if (editToEdit.value?.id) {
+      await store.dispatch('editEdit', { ...form, id: editToEdit.value.id })
     } else {
-      if (!this.isEditsLoading) this.initialLoading = false
-      finalize()
-      this.reloadEpisodeEditsIfNeeded()
+      await store.dispatch('newEdit', form)
     }
-  },
-
-  computed: {
-    ...mapGetters([
-      'currentEpisode',
-      'currentProduction',
-      'displayedEdits',
-      'departmentMap',
-      'departments',
-      'editMap',
-      'editFilledColumns',
-      'editsCsvFormData',
-      'editsLoadingKey',
-      'editSearchQueries',
-      'editSearchText',
-      'editValidationColumns',
-      'editListScrollPosition',
-      'editSorting',
-      'episodeMap',
-      'episodes',
-      'openProductions',
-      'isCurrentUserClient',
-      'isEditDescription',
-      'isEditEstimation',
-      'isEditTime',
-      'isEditsLoading',
-      'isEditsLoadingError',
-      'isLongEditList',
-      'isShowAssignations',
-      'isTVShow',
-      'productionEditTaskTypes',
-      'selectedEdits',
-      'taskTypeMap',
-      'user'
-    ]),
-    ...mapGetters({
-      isCurrentUserManager: 'isCurrentUserProductionManager'
-    }),
-
-    renderColumns() {
-      const collection = [...this.dataMatchers, ...this.optionalColumns]
-
-      this.productionEditTaskTypes.forEach(item => {
-        collection.push(item.name)
-        collection.push(`${item.name} comment`)
-      })
-      return collection
-    },
-
-    dataMatchers() {
-      return this.isTVShow ? ['Episode', 'Name'] : ['Name']
-    },
-
-    filteredEdits() {
-      // Build the lookup from the full edit cache, not the filtered display
-      // list, so the import creation check sees every edit.
-      // The cache Map is not reactive: depend on displayedEdits (updated
-      // by the same mutations) to invalidate this computed.
-      this.displayedEdits // eslint-disable-line no-unused-expressions
-      const edits = {}
-      this.editMap.forEach(edit => {
-        let editKey = ''
-        if (
-          this.isTVShow &&
-          edit.episode_id &&
-          this.episodeMap.has(edit.episode_id)
-        ) {
-          editKey += this.episodeMap.get(edit.episode_id).name
-        }
-        editKey += `${edit.name}`
-        edits[editKey] = true
-      })
-      return edits
-    },
-
-    metadataDescriptors() {
-      return this.editMetadataDescriptors
-    }
-  },
-
-  methods: {
-    ...mapActions([
-      'addMetadataDescriptor',
-      'createTasks',
-      'changeEditSort',
-      'clearSelectedEdits',
-      'commentTaskWithPreview',
-      'deleteAllEditTasks',
-      'deleteEdit',
-      'deleteMetadataDescriptor',
-      'editEdit',
-      'getEditsCsvLines',
-      'hideAssignations',
-      'loadEpisodes',
-      'loadEdits',
-      'newEdit',
-      'removeEditSearch',
-      'restoreEdit',
-      'saveEditSearch',
-      'setLastProductionScreen',
-      'setPreview',
-      'setEditSearch',
-      'showAssignations',
-      'uploadEditFile'
-    ]),
-
-    onDeleteClicked(edit) {
-      this.editToDelete = edit
-      this.modals.isDeleteDisplayed = true
-    },
-
-    showNewModal() {
-      this.editToEdit = {}
-      this.modals.isNewDisplayed = true
-    },
-
-    onEditClicked(edit) {
-      this.editToEdit = edit
-      this.modals.isNewDisplayed = true
-    },
-
-    confirmEditEdit(form) {
-      let action = 'newEdit'
-      this.loading.edit = true
-      this.errors.edit = false
-      if (this.editToEdit && this.editToEdit.id) {
-        action = 'editEdit'
-        form.id = this.editToEdit.id
-      }
-      this[action](form)
-        .then(form => {
-          this.loading.edit = false
-          this.modals.isNewDisplayed = false
-          this.applySearchFromUrl(false)
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.edit = false
-          this.errors.edit = true
-        })
-    },
-
-    confirmDeleteEdit() {
-      this.loading.del = true
-      this.errors.del = false
-      this.deleteEdit(this.editToDelete)
-        .then(() => {
-          this.loading.del = false
-          this.modals.isDeleteDisplayed = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.del = false
-          this.errors.del = true
-        })
-    },
-
-    confirmRestoreEdit() {
-      this.loading.restore = true
-      this.errors.restore = false
-      this.restoreEdit(this.editToRestore)
-        .then(() => {
-          this.loading.restore = false
-          this.modals.isRestoreDisplayed = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.restore = false
-          this.errors.restore = true
-        })
-    },
-
-    reset() {
-      this.initialLoading = true
-      this.loadEdits(err => {
-        if (err) console.error(err)
-        this.initialLoading = false
-      })
-    },
-
-    // The topbar sets the current episode before this page instance exists, so
-    // the currentEpisode watcher below cannot fire on a fresh mount: without
-    // this check the cache of the episode left behind is displayed as is.
-    reloadEpisodeEditsIfNeeded() {
-      const scope = this.isTVShow ? (this.currentEpisode?.id ?? '') : ''
-      if (
-        !this.currentProduction ||
-        this.editsLoadingKey === `${this.currentProduction.id}/${scope}`
-      ) {
-        return
-      }
-      this.$refs['edit-search-field']?.setValue('')
-      this.$store.commit('SET_EDIT_LIST_SCROLL_POSITION', 0)
-      this.reset()
-    },
-
-    resetEditModal() {
-      const form = { name: '' }
-      if (this.openProductions.length > 0) {
-        form.production_id = this.openProductions[0].id
-      }
-      this.editToEdit = form
-    },
-
-    deleteText() {
-      const edit = this.editToDelete
-      if (edit && (edit.canceled || !edit.tasks || edit.tasks.length === 0)) {
-        return this.$t('edits.delete_text', { name: edit.name })
-      } else if (edit) {
-        return this.$t('edits.cancel_text', { name: edit.name })
-      }
-      return ''
-    },
-
-    renderImport(data, mode) {
-      this.loading.importing = true
-      this.errors.importing = false
-      this.formData = data
-      if (mode === 'file') {
-        data = data.get('file')
-      }
-      csv.processCSV(data).then(results => {
-        this.parsedCSV = results
-        this.hideImportModal()
-        this.loading.importing = false
-        this.showImportRenderModal()
-      })
-    },
-
-    uploadImportFile(data, toUpdate) {
-      const formData = new FormData()
-      const filename = 'import.csv'
-      const csvContent = csv.turnEntriesToCsvString(data)
-      const file = new File([csvContent], filename, { type: 'text/csv' })
-
-      formData.append('file', file)
-
-      this.loading.importing = true
-      this.errors.importing = false
-      this.errors.importingError = null
-      this.$store.commit('EDIT_CSV_FILE_SELECTED', formData)
-
-      this.uploadEditFile(toUpdate)
-        .then(() => {
-          this.loadEpisodes().catch(console.error)
-          this.hideImportRenderModal()
-          this.loadEdits()
-        })
-        .catch(err => {
-          console.error(err)
-          this.errors.importingError = err
-          this.errors.importing = true
-        })
-        .finally(() => {
-          this.loading.importing = false
-        })
-    },
-
-    resetImport() {
-      this.errors.importing = false
-      this.hideImportRenderModal()
-      this.$store.commit('EDIT_CSV_FILE_SELECTED', null)
-      this.$refs['import-modal']?.reset()
-      this.showImportModal()
-    },
-
-    onSearchChange(clearSelection = true) {
-      if (!this.searchField) return
-      const searchQuery = this.searchField.getValue() || ''
-      this.setSearchInUrl()
-      if (searchQuery.length !== 1 && !this.isLongEditList) {
-        this.applySearch(searchQuery)
-      }
-      if (clearSelection) {
-        this.clearSelection()
-      }
-    },
-
-    showEditHistoryModal(edit) {
-      this.historyEdit = edit
-      this.modals.isEditHistoryDisplayed = true
-    },
-
-    hideEditHistoryModal() {
-      this.modals.isEditHistoryDisplayed = false
-    },
-
-    onExportClick() {
-      this.getEditsCsvLines().then(editLines => {
-        const nameData = [
-          moment().format('YYYY-MM-DD'),
-          'kitsu',
-          this.currentProduction.name,
-          this.$t('edits.title')
-        ]
-        if (this.currentEpisode) {
-          nameData.splice(3, 0, this.currentEpisode.name)
-        }
-        const name = stringHelpers.slugify(nameData.join('_'))
-        const headers = [
-          this.$t('edits.fields.name'),
-          this.$t('edits.fields.description')
-        ]
-        if (this.currentEpisode) {
-          headers.splice(0, 0, 'Episode')
-        }
-        getExportDescriptors(this.currentProduction, 'Edit').forEach(
-          descriptor => {
-            headers.push(descriptor.name)
-          }
-        )
-        if (this.isEditTime) {
-          headers.push(this.$t('edits.fields.time_spent'))
-        }
-        if (this.isEditEstimation) {
-          headers.push(this.$t('main.estimation_short'))
-        }
-        this.editValidationColumns.forEach(taskTypeId => {
-          headers.push(this.taskTypeMap.get(taskTypeId)?.name || '')
-          headers.push('Assignations')
-        })
-        csv.buildCsvFile(name, [headers].concat(editLines))
-      })
-    },
-
-    async onFieldChanged({ entry, fieldName, value }) {
-      const data = {
-        id: entry.id,
-        description: entry.description,
-        [fieldName]: value
-      }
-      await this.editEdit(data)
-      this.applySearchFromUrl(false)
-    },
-
-    async onMetadataChanged({ entry, descriptor, value }) {
-      const data = {
-        id: entry.id,
-        data: {
-          [descriptor.field_name]: value
-        }
-      }
-      await this.editEdit(data)
-      this.applySearchFromUrl(false)
-    }
-  },
-
-  watch: {
-    currentProduction() {
-      this.$refs['edit-search-field']?.setValue('')
-      this.$store.commit('SET_EDIT_LIST_SCROLL_POSITION', 0)
-      this.initialLoading = true
-      if (!this.isTVShow) this.reset()
-    },
-
-    currentEpisode() {
-      this.$refs['edit-search-field']?.setValue('')
-      this.$store.commit('SET_EDIT_LIST_SCROLL_POSITION', 0)
-      if (this.isTVShow && this.currentEpisode) this.reset()
-    },
-
-    currentSection() {
-      this.reloadEpisodeEditsIfNeeded()
-    },
-
-    isEditsLoading() {
-      if (!this.isEditsLoading) {
-        let searchQuery = ''
-        if (this.$route.query.search && this.$route.query.search.length > 0) {
-          searchQuery = `${this.$route.query.search}`
-        }
-        this.initialLoading = false
-        this.$refs['edit-search-field'].setValue(searchQuery)
-        this.$nextTick(() => {
-          this.applySearch(searchQuery)
-        })
-        if (this.$refs['edit-list']) {
-          this.$refs['edit-list'].setScrollPosition(this.editListScrollPosition)
-        }
-      }
-    }
-  },
-
-  head() {
-    if (this.isTVShow) {
-      return {
-        title: `${
-          this.currentProduction ? this.currentProduction.name : ''
-        } - ${
-          this.currentEpisode
-            ? this.currentEpisode.name || this.$t('main.all')
-            : ''
-        } | ${this.$t('edits.title')} - Kitsu`
-      }
-    }
-    return {
-      title: `${this.currentProduction ? this.currentProduction.name : ''} ${this.$t('edits.title')} - Kitsu`
-    }
+    modals.isNewDisplayed = false
+    applySearchFromUrl(false)
+  } catch (err) {
+    console.error(err)
+    errors.edit = true
+  } finally {
+    loading.edit = false
   }
 }
+
+const showEditHistoryModal = edit => {
+  historyEdit.value = edit
+  modals.isEditHistoryDisplayed = true
+}
+
+const hideEditHistoryModal = () => {
+  modals.isEditHistoryDisplayed = false
+}
+
+const onFieldChanged = async ({ entry, fieldName, value }) => {
+  await store.dispatch('editEdit', {
+    id: entry.id,
+    description: entry.description,
+    [fieldName]: value
+  })
+  applySearchFromUrl(false)
+}
+
+// Watchers
+// --------------------------------------------------------------------------
+
+watch(currentProduction, () => {
+  clearSearchAndScroll()
+  initialLoading.value = true
+  if (!isTVShow.value) reset()
+})
+
+watch(currentEpisode, () => {
+  clearSearchAndScroll()
+  if (isTVShow.value && currentEpisode.value) reset()
+})
+
+watch(isEditsLoading, isLoading => {
+  if (isLoading) return
+  const search = route.query.search
+  const searchQuery = search?.length > 0 ? `${search}` : ''
+  initialLoading.value = false
+  searchFieldRef.value.setValue(searchQuery)
+  nextTick(() => {
+    applySearch(searchQuery)
+  })
+  setScrollPosition()
+})
+
+// Lifecycle
+// --------------------------------------------------------------------------
+
+store.dispatch('setLastProductionScreen', 'edits')
+
+onMounted(() => {
+  if (editSearchText.value.length > 0) {
+    searchFieldRef.value?.setValue(editSearchText.value)
+  }
+  setScrollPosition()
+  const finalize = () => {
+    if (listRef.value) {
+      applySearchFromUrl()
+      setScrollPosition()
+      listRef.value.selectTaskFromQuery()
+    }
+  }
+
+  const firstEdit = editMap.value.get(editMap.value.keys().next().value)
+  if (
+    editMap.value.size < 2 ||
+    (editValidationColumns.value.length > 0 && !firstEdit.validations)
+  ) {
+    setTimeout(() => {
+      store.dispatch('loadEdits').then(() => {
+        setTimeout(() => {
+          initialLoading.value = false
+          finalize()
+        }, 200)
+      })
+    }, 0)
+  } else {
+    if (!isEditsLoading.value) initialLoading.value = false
+    finalize()
+    reloadEpisodeEditsIfNeeded()
+  }
+})
+
+onBeforeUnmount(() => {
+  store.dispatch('clearSelectedEdits')
+})
+
+// Head
+// --------------------------------------------------------------------------
+
+useHead({
+  title: computed(() => {
+    const productionName = currentProduction.value?.name || ''
+    const title = `${t('edits.title')} - Kitsu`
+    if (isTVShow.value) {
+      const episodeName = currentEpisode.value
+        ? currentEpisode.value.name || t('main.all')
+        : ''
+      return `${productionName} - ${episodeName} | ${title}`
+    }
+    return `${productionName} ${title}`
+  })
+})
 </script>
 
 <style lang="scss" scoped>
@@ -821,10 +603,6 @@ export default {
 
 .page-header {
   margin-bottom: 1em;
-}
-
-.level {
-  align-items: flex-start;
 }
 
 .edits {

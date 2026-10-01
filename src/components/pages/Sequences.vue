@@ -98,18 +98,16 @@
     </div>
 
     <delete-modal
-      ref="delete-sequence-modal"
       :active="modals.isDeleteDisplayed"
       :is-loading="loading.del"
       :is-error="errors.del"
-      :text="deleteText()"
+      :text="deleteText"
       :error-text="$t('sequences.delete_error')"
       @cancel="modals.isDeleteDisplayed = false"
       @confirm="confirmDeleteSequence"
     />
 
     <delete-modal
-      ref="delete-metadata-modal"
       :active="modals.isDeleteMetadataDisplayed"
       :is-loading="loading.deleteMetadata"
       :is-error="errors.deleteMetadata"
@@ -120,7 +118,6 @@
     />
 
     <hard-delete-modal
-      ref="delete-all-tasks-modal"
       :active="modals.isDeleteAllTasksDisplayed"
       :is-loading="loading.deleteAllTasks"
       :is-error="errors.deleteAllTasks"
@@ -158,7 +155,6 @@
     />
 
     <add-thumbnails-modal
-      ref="add-thumbnails-modal"
       entity-type="Sequence"
       parent="sequences"
       :active="modals.isAddThumbnailsDisplayed"
@@ -170,7 +166,6 @@
     />
 
     <build-filter-modal
-      ref="build-filter-modal"
       :active="modals.isBuildFilterDisplayed"
       entity-type="sequence"
       @cancel="modals.isBuildFilterDisplayed = false"
@@ -190,7 +185,7 @@
       :active="modals.isDeleteDisplayed"
       :is-loading="loading.del"
       :is-error="errors.del"
-      :text="deleteText()"
+      :text="deleteText"
       :error-text="$t('sequences.delete_error')"
       :lock-text="sequenceToDelete ? sequenceToDelete.name : ''"
       @cancel="modals.isDeleteDisplayed = false"
@@ -199,459 +194,261 @@
   </div>
 </template>
 
-<script>
-import moment from 'moment'
-import { mapGetters, mapActions } from 'vuex'
-import csv from '@/lib/csv'
-import { sortByName } from '@/lib/sorting'
-import stringHelpers from '@/lib/string'
+<script setup>
+import { useHead } from '@unhead/vue'
+import {
+  computed,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  useTemplateRef,
+  watch
+} from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 
-import { searchMixin } from '@/components/mixins/search'
-import { entitiesMixin } from '@/components/mixins/entities'
+import { useEntityPage } from '@/composables/entityPage'
 
+/* eslint-disable no-unused-vars */
+import SequenceList from '@/components/lists/SequenceList.vue'
 import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
 import AddThumbnailsModal from '@/components/modals/AddThumbnailsModal.vue'
 import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
-import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
-import ComboboxDisplayOptions from '@/components/widgets/ComboboxDisplayOptions.vue'
 import CreateTasksModal from '@/components/modals/CreateTasksModal.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditSequenceModal from '@/components/modals/EditSequenceModal.vue'
-import SequenceList from '@/components/lists/SequenceList.vue'
 import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
+import TaskInfo from '@/components/sides/TaskInfo.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
+import ComboboxDisplayOptions from '@/components/widgets/ComboboxDisplayOptions.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import SortingInfo from '@/components/widgets/SortingInfo.vue'
-import TaskInfo from '@/components/sides/TaskInfo.vue'
+/* eslint-enable no-unused-vars */
 
-export default {
-  name: 'sequences',
+const { t } = useI18n()
+const store = useStore()
 
-  mixins: [searchMixin, entitiesMixin],
+const type = 'sequence'
+const contactSheetMode = false
 
-  components: {
-    AddMetadataModal,
-    AddThumbnailsModal,
-    BuildFilterModal,
-    ButtonSimple,
-    ComboboxDepartment,
-    ComboboxDisplayOptions,
-    CreateTasksModal,
-    DeleteModal,
-    EditSequenceModal,
-    SequenceList,
-    HardDeleteModal,
-    SearchField,
-    SearchQueryList,
-    SortingInfo,
-    TaskInfo
-  },
+// State
+// --------------------------------------------------------------------------
 
-  data() {
-    return {
-      type: 'sequence',
-      contactSheetMode: false,
-      deleteAllTasksLockText: null,
-      descriptorToEdit: {},
-      departmentFilter: [],
-      sequenceToDelete: null,
-      sequenceToEdit: null,
-      formData: null,
-      genericColumns: [
-        'Metadata column name (text value)',
-        'Task type name (task status name value)',
-        'Task type name + comment (text value)'
-      ],
-      historyEdit: {},
-      initialLoading: true,
-      optionalColumns: ['Description'],
-      pageName: 'Sequences',
-      parsedCSV: [],
-      selectedDepartment: 'ALL',
-      taskTypeForTaskDeletion: null,
-      modals: {
-        isAddMetadataDisplayed: false,
-        isAddThumbnailsDisplayed: false,
-        isBuildFilterDisplayed: false,
-        isCreateTasksDisplayed: false,
-        isDeleteDisplayed: false,
-        isDeleteMetadataDisplayed: false,
-        isDeleteAllTasksDisplayed: false,
-        isImportRenderDisplayed: false,
-        isImportDisplayed: false,
-        isNewDisplayed: false
-      },
-      loading: {
-        addMetadata: false,
-        addThumbnails: false,
-        creatingTasks: false,
-        creatingTasksStay: false,
-        creatingAllTasks: false,
-        del: false,
-        deleteAllTasks: false,
-        deleteMetadata: false,
-        edit: false,
-        importing: false,
-        savingSearch: false,
-        sequence: false,
-        stay: false
-      },
-      errors: {
-        addMetadata: false,
-        creatingTasks: false,
-        deleteAllTasks: false,
-        deleteMetadata: false,
-        edit: false,
-        importing: false,
-        importingError: null
-      }
-    }
-  },
+const listRef = useTemplateRef('sequence-list')
+const searchFieldRef = useTemplateRef('sequence-search-field')
 
-  beforeUnmount() {
-    this.clearSelectedSequences()
-  },
+const initialLoading = ref(true)
 
-  created() {
-    this.setLastProductionScreen('sequences')
-  },
+// Computed
+// --------------------------------------------------------------------------
 
-  mounted() {
-    this.$refs['sequence-list'].setScrollPosition(
-      this.sequenceListScrollPosition
-    )
-    this.$refs['sequence-list'].setScrollPosition(
-      this.sequenceListScrollPosition
-    )
-    if (!this.isCurrentUserManager && this.user.departments.length > 0) {
-      this.selectedDepartment = 'MY_DEPARTMENTS'
-      this.departmentFilter = this.user.departments
+const currentEpisode = computed(() => store.getters.currentEpisode)
+const currentProduction = computed(() => store.getters.currentProduction)
+const currentSection = computed(() => store.getters.currentSection)
+const departments = computed(() => store.getters.departments)
+const displayedSequences = computed(() => store.getters.displayedSequences)
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+const isCurrentUserManager = computed(
+  () => store.getters.isCurrentUserProductionManager
+)
+const isSequencesLoading = computed(() => store.getters.isSequencesLoading)
+const isSequencesLoadingError = computed(
+  () => store.getters.isSequencesLoadingError
+)
+const isTVShow = computed(() => store.getters.isTVShow)
+const selectedTasks = computed(() => store.getters.selectedTasks)
+const sequenceMap = computed(() => store.getters.sequenceMap)
+const sequenceSearchQueries = computed(
+  () => store.getters.sequenceSearchQueries
+)
+const sequenceSorting = computed(() => store.getters.sequenceSorting)
+const sequenceValidationColumns = computed(
+  () => store.getters.sequenceValidationColumns
+)
+const user = computed(() => store.getters.user)
+
+// Functions
+// --------------------------------------------------------------------------
+
+const reset = () => {
+  initialLoading.value = false
+  store.dispatch('loadSequencesWithTasks', err => {
+    if (err) console.error(err)
+    applySearchFromUrl()
+    initialLoading.value = false
+  })
+}
+
+const {
+  applySearchFromUrl,
+  clearSearchAndScroll,
+  closeMetadataModal,
+  confirmAddMetadata,
+  confirmAddThumbnails,
+  confirmBuildFilter,
+  confirmCreateAllMissingTasks,
+  confirmCreateTasks,
+  confirmCreateTasksAndStay,
+  confirmDelete: confirmDeleteSequence,
+  confirmDeleteAllTasks,
+  confirmDeleteMetadata,
+  deleteAllTasksLockText,
+  deleteAllTasksText,
+  deleteText,
+  departmentFilter,
+  descriptorToEdit,
+  displaySettings,
+  entityToDelete: sequenceToDelete,
+  entityToEdit: sequenceToEdit,
+  errors,
+  hideAddThumbnailsModal,
+  hideCreateTasksModal,
+  isLoadedScopeStale,
+  isTaskSidePanelOpen,
+  loading,
+  modals,
+  onAddMetadataClicked,
+  onChangeSortClicked,
+  onDeleteAllTasksClicked,
+  onDeleteClicked,
+  onDeleteMetadataClicked,
+  onEditMetadataClicked,
+  onKeepTaskPanelOpenChanged,
+  onMetadataChanged,
+  onSearchChange,
+  openEditModal: onEditClicked,
+  removeSearchQuery,
+  saveScrollPosition,
+  saveSearchQuery,
+  selectableDepartments,
+  selectedDepartment,
+  setScrollPosition,
+  showCreateTasksModal
+} = useEntityPage({
+  type,
+  pageName: 'Sequences',
+  listRef,
+  searchFieldRef,
+  reset
+})
+
+const showNewModal = () => onEditClicked()
+
+const clearListAndReset = () => {
+  clearSearchAndScroll()
+  initialLoading.value = false
+  reset()
+}
+
+const reloadEpisodeSequencesIfNeeded = () => {
+  if (isLoadedScopeStale()) clearListAndReset()
+}
+
+const confirmEditSequence = async form => {
+  loading.edit = true
+  errors.edit = false
+  try {
+    if (form.id) {
+      await store.dispatch('editSequence', form)
+      applySearchFromUrl(false)
     } else {
-      this.departmentFilter = []
-    }
-
-    const finalize = () => {
-      this.initialLoading = false
-      if (this.$refs['sequence-list']) {
-        this.$refs['sequence-list'].setScrollPosition(
-          this.sequenceListScrollPosition
-        )
-        this.$refs['sequence-list'].selectTaskFromQuery()
-
-        setTimeout(() => {
-          this.applySearchFromUrl()
-        }, 200)
-      }
-    }
-
-    if (
-      this.sequenceMap.size < 1 ||
-      this.sequenceValidationColumns.length === 0 ||
-      this.sequenceMap.values().next().value?.project_id !==
-        this.currentProduction.id
-    ) {
-      this.loadSequencesWithTasks()
-        .then(() => {
-          this.initialLoading = false
-          finalize()
-        })
-        .catch(console.error)
-    } else {
-      if (!this.isSequencesLoading) this.initialLoading = false
-      finalize()
-      this.reloadEpisodeSequencesIfNeeded()
-    }
-  },
-
-  computed: {
-    ...mapGetters([
-      'currentEpisode',
-      'currentProduction',
-      'currentSection',
-      'displayedSequences',
-      'departmentMap',
-      'departments',
-      'sequenceMap',
-      'sequences',
-      'sequenceSearchQueries',
-      'sequencesLoadingKey',
-      'isCurrentUserClient',
-      'isSequenceDescription',
-      'isSequenceEstimation',
-      'isSequenceTime',
-      'isSequencesLoading',
-      'isSequencesLoadingError',
-      'isShowAssignations',
-      'isTVShow',
-      'openProductions',
-      'productionSequenceTaskTypes',
-      'sequenceMap',
-      'sequenceFilledColumns',
-      'sequenceSearchText',
-      'sequenceValidationColumns',
-      'sequenceListScrollPosition',
-      'sequenceSorting',
-      'taskTypeMap',
-      'user'
-    ]),
-    ...mapGetters({
-      isCurrentUserManager: 'isCurrentUserProductionManager'
-    }),
-
-    renderColumns() {
-      const collection = [...this.dataMatchers, ...this.optionalColumns]
-
-      this.productionSequenceTaskTypes.forEach(item => {
-        collection.push(item.name)
-        collection.push(`${item.name} comment`)
+      await store.dispatch('newSequence', {
+        ...form,
+        project_id: currentProduction.value.id,
+        ...(currentEpisode.value ? { episode_id: currentEpisode.value.id } : {})
       })
-      return collection
-    },
-
-    filteredSequences() {
-      const sequences = {}
-      this.displayedSequences.forEach(sequence => {
-        const sequenceKey = sequence.name
-        sequences[sequenceKey] = true
-      })
-      return sequences
-    },
-
-    metadataDescriptors() {
-      return this.sequenceMetadataDescriptors
     }
-  },
-
-  methods: {
-    ...mapActions([
-      'addMetadataDescriptor',
-      'createTasks',
-      'changeSequenceSort',
-      'clearSelectedSequences',
-      'commentTaskWithPreview',
-      'deleteAllSequenceTasks',
-      'deleteSequence',
-      'deleteMetadataDescriptor',
-      'editSequence',
-      'getSequencesCsvLines',
-      'hideAssignations',
-      'loadSequencesWithTasks',
-      'newSequence',
-      'removeSequenceSearch',
-      'saveSequenceSearch',
-      'setLastProductionScreen',
-      'setPreview',
-      'setSequenceSearch',
-      'showAssignations',
-      'uploadSequenceFile'
-    ]),
-
-    showNewModal() {
-      this.sequenceToEdit = {}
-      this.modals.isNewDisplayed = true
-    },
-
-    confirmDeleteSequence() {
-      this.loading.del = true
-      this.errors.del = false
-      this.deleteSequence(this.sequenceToDelete)
-        .then(() => {
-          this.loading.del = false
-          this.modals.isDeleteDisplayed = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.del = false
-          this.errors.del = true
-        })
-    },
-
-    reset() {
-      this.initialLoading = false
-      this.loadSequencesWithTasks(err => {
-        if (err) console.error(err)
-        this.applySearchFromUrl()
-        this.initialLoading = false
-      })
-    },
-
-    // The topbar sets the current episode before this page instance exists, so
-    // the currentEpisode watcher below cannot fire on a fresh mount: without
-    // this check the cache of the episode left behind is displayed as is.
-    reloadEpisodeSequencesIfNeeded() {
-      const scope = this.isTVShow ? (this.currentEpisode?.id ?? '') : ''
-      if (
-        !this.currentProduction ||
-        this.sequencesLoadingKey === `${this.currentProduction.id}/${scope}`
-      ) {
-        return
-      }
-      this.$refs['sequence-search-field']?.setValue('')
-      this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
-      this.reset()
-    },
-
-    resetEditModal() {
-      const form = { name: '' }
-      if (this.openProductions.length > 0) {
-        form.production_id = this.openProductions[0].id
-      }
-      this.sequenceToEdit = form
-    },
-
-    onExportClick() {
-      this.getSequencesCsvLines().then(sequenceLines => {
-        const nameData = [
-          moment().format('YYYY-MM-DD'),
-          'kitsu',
-          this.currentProduction.name,
-          this.$t('sequences.title')
-        ]
-        const name = stringHelpers.slugify(nameData.join('_'))
-        const headers = [
-          this.$t('sequences.fields.name'),
-          this.$t('sequences.fields.description')
-        ]
-        if (this.currentSequence) {
-          headers.splice(0, 0, 'Sequence')
-        }
-        sortByName([...this.currentProduction.descriptors])
-          .filter(d => d.entity_type === 'Sequence')
-          .forEach(descriptor => {
-            headers.push(descriptor.name)
-          })
-        if (this.isSequenceTime) {
-          headers.push(this.$t('sequences.fields.time_spent'))
-        }
-        if (this.isSequenceEstimation) {
-          headers.push(this.$t('main.estimation_short'))
-        }
-        this.sequenceValidationColumns.forEach(taskTypeId => {
-          headers.push(this.taskTypeMap.get(taskTypeId)?.name || '')
-          headers.push('Assignations')
-        })
-        csv.buildCsvFile(name, [headers].concat(sequenceLines))
-      })
-    },
-
-    async onFieldChanged({ entry, fieldName, value }) {
-      const data = {
-        id: entry.id,
-        [fieldName]: value
-      }
-      await this.editSequence(data)
-      this.applySearchFromUrl(false)
-    },
-
-    async onMetadataChanged({ entry, descriptor, value }) {
-      const data = {
-        id: entry.id,
-        data: {
-          [descriptor.field_name]: value
-        }
-      }
-      await this.editSequence(data)
-      this.applySearchFromUrl(false)
-    },
-
-    onEditClicked(sequence) {
-      this.sequenceToEdit = sequence
-      this.modals.isNewDisplayed = true
-    },
-
-    onDeleteClicked(sequence) {
-      this.sequenceToDelete = sequence
-      this.modals.isDeleteDisplayed = true
-    },
-
-    confirmEditSequence(form) {
-      this.loading.edit = true
-      this.errors.edit = false
-      if (form.id) {
-        this.editSequence(form)
-          .then(() => {
-            this.loading.edit = false
-            this.modals.isNewDisplayed = false
-            this.applySearchFromUrl(false)
-          })
-          .catch(err => {
-            console.error(err)
-            this.loading.edit = false
-            this.errors.edit = true
-          })
-      } else {
-        form.project_id = this.currentProduction.id
-        if (this.currentEpisode) {
-          form.episode_id = this.currentEpisode.id
-        }
-        this.newSequence(form)
-          .then(() => {
-            this.loading.edit = false
-            this.modals.isNewDisplayed = false
-          })
-          .catch(err => {
-            console.error(err)
-            this.loading.edit = false
-            this.errors.edit = true
-          })
-      }
-    },
-
-    deleteText() {
-      const sequence = this.sequenceToDelete
-      if (sequence) {
-        return this.$t('sequences.delete_text', { name: sequence.name })
-      }
-      return ''
-    }
-  },
-
-  watch: {
-    currentProduction() {
-      this.$refs['sequence-search-field'].setValue('')
-      this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
-      this.initialLoading = false
-      this.reset()
-    },
-
-    currentEpisode() {
-      this.$refs['sequence-search-field'].setValue('')
-      this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
-      this.initialLoading = false
-      this.reset()
-    },
-
-    currentSection() {
-      this.reloadEpisodeSequencesIfNeeded()
-    },
-
-    isSequencesLoading() {
-      if (!this.isSequencesLoading) {
-        this.initialLoading = false
-        if (this.$refs['sequence-list']) {
-          this.$refs['sequence-list'].setScrollPosition(
-            this.sequenceListScrollPosition
-          )
-        }
-      }
-    }
-  },
-
-  head() {
-    if (this.isTVShow) {
-      return {
-        title:
-          `${this.currentProduction?.name || ''}` +
-          ` - ${this.currentEpisode?.name || ''}` +
-          ` | ${this.$t('sequences.title')} - Kitsu`
-      }
-    }
-    return {
-      title: `${this.currentProduction?.name || ''} | ${this.$t('sequences.title')} - Kitsu`
-    }
+    modals.isNewDisplayed = false
+  } catch (err) {
+    console.error(err)
+    errors.edit = true
+  } finally {
+    loading.edit = false
   }
 }
+
+const onFieldChanged = async ({ entry, fieldName, value }) => {
+  await store.dispatch('editSequence', { id: entry.id, [fieldName]: value })
+  applySearchFromUrl(false)
+}
+
+// Watchers
+// --------------------------------------------------------------------------
+
+watch(currentProduction, clearListAndReset)
+watch(currentEpisode, clearListAndReset)
+watch(currentSection, reloadEpisodeSequencesIfNeeded)
+
+watch(isSequencesLoading, isLoading => {
+  if (isLoading) return
+  initialLoading.value = false
+  setScrollPosition()
+})
+
+// Lifecycle
+// --------------------------------------------------------------------------
+
+store.dispatch('setLastProductionScreen', 'sequences')
+
+onMounted(() => {
+  setScrollPosition()
+  if (!isCurrentUserManager.value && user.value.departments.length > 0) {
+    selectedDepartment.value = 'MY_DEPARTMENTS'
+    departmentFilter.value = user.value.departments
+  } else {
+    departmentFilter.value = []
+  }
+
+  const finalize = () => {
+    initialLoading.value = false
+    if (listRef.value) {
+      setScrollPosition()
+      listRef.value.selectTaskFromQuery()
+      setTimeout(() => {
+        applySearchFromUrl()
+      }, 200)
+    }
+  }
+
+  if (
+    sequenceMap.value.size < 1 ||
+    sequenceValidationColumns.value.length === 0 ||
+    sequenceMap.value.values().next().value?.project_id !==
+      currentProduction.value.id
+  ) {
+    store
+      .dispatch('loadSequencesWithTasks')
+      .then(() => {
+        initialLoading.value = false
+        finalize()
+      })
+      .catch(console.error)
+  } else {
+    if (!isSequencesLoading.value) initialLoading.value = false
+    finalize()
+    reloadEpisodeSequencesIfNeeded()
+  }
+})
+
+onBeforeUnmount(() => {
+  store.dispatch('clearSelectedSequences')
+})
+
+// Head
+// --------------------------------------------------------------------------
+
+useHead({
+  title: computed(() => {
+    const productionName = currentProduction.value?.name || ''
+    const title = `${t('sequences.title')} - Kitsu`
+    if (isTVShow.value) {
+      return `${productionName} - ${currentEpisode.value?.name || ''} | ${title}`
+    }
+    return `${productionName} | ${title}`
+  })
+})
 </script>
 
 <style lang="scss" scoped>

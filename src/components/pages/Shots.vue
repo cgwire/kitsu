@@ -159,18 +159,16 @@
     />
 
     <delete-modal
-      ref="delete-shot-modal"
       :active="modals.isDeleteDisplayed"
       :is-loading="loading.del"
       :is-error="errors.del"
-      :text="deleteText()"
+      :text="deleteText"
       :error-text="$t('shots.delete_error')"
       @cancel="modals.isDeleteDisplayed = false"
       @confirm="confirmDeleteShot"
     />
 
     <delete-modal
-      ref="restore-shot-modal"
       :active="modals.isRestoreDisplayed"
       :is-loading="loading.restore"
       :is-error="errors.restore"
@@ -181,7 +179,6 @@
     />
 
     <delete-modal
-      ref="delete-metadata-modal"
       :active="modals.isDeleteMetadataDisplayed"
       :is-loading="loading.deleteMetadata"
       :is-error="errors.deleteMetadata"
@@ -192,7 +189,6 @@
     />
 
     <hard-delete-modal
-      ref="delete-all-tasks-modal"
       :active="modals.isDeleteAllTasksDisplayed"
       :is-loading="loading.deleteAllTasks"
       :is-error="errors.deleteAllTasks"
@@ -234,7 +230,6 @@
     />
 
     <import-edl-modal
-      ref="import-edl-modal"
       :active="modals.isEDLImportDisplayed"
       :is-loading="loading.importing"
       :is-error="errors.importing"
@@ -277,7 +272,6 @@
     />
 
     <add-thumbnails-modal
-      ref="add-thumbnails-modal"
       active
       entity-type="Shot"
       parent="shots"
@@ -295,7 +289,6 @@
     />
 
     <build-filter-modal
-      ref="build-filter-modal"
       :active="modals.isBuildFilterDisplayed"
       entity-type="shot"
       @cancel="modals.isBuildFilterDisplayed = false"
@@ -304,779 +297,550 @@
   </div>
 </template>
 
-<script>
-import moment from 'moment'
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+import { useHead } from '@unhead/vue'
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  useTemplateRef,
+  watch
+} from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 
+import {
+  GENERIC_IMPORT_COLUMNS as genericColumns,
+  useEntityPage
+} from '@/composables/entityPage'
+import { getExportDescriptors } from '@/lib/descriptors'
 import shotStore from '@/store/modules/shots'
 
-import csv from '@/lib/csv'
-import { getExportDescriptors } from '@/lib/descriptors'
-import stringHelpers from '@/lib/string'
-
-import { searchMixin } from '@/components/mixins/search'
-import { entitiesMixin } from '@/components/mixins/entities'
-
+/* eslint-disable no-unused-vars */
+import ShotList from '@/components/lists/ShotList.vue'
 import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
 import AddThumbnailsModal from '@/components/modals/AddThumbnailsModal.vue'
 import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
-import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
-import ComboboxDisplayOptions from '@/components/widgets/ComboboxDisplayOptions.vue'
 import CreateTasksModal from '@/components/modals/CreateTasksModal.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditShotModal from '@/components/modals/EditShotModal.vue'
-import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
-import ImportModal from '@/components/modals/ImportModal.vue'
-import ImportEdlModal from '@/components/modals/ImportEdlModal.vue'
-import InfoQuestionMark from '@/components/widgets/InfoQuestionMark.vue'
 import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
+import ImportEdlModal from '@/components/modals/ImportEdlModal.vue'
+import ImportModal from '@/components/modals/ImportModal.vue'
+import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
 import ManageShotsModal from '@/components/modals/ManageShotsModal.vue'
+import SetFramesFromTaskTypePreviewsModal from '@/components/modals/SetFramesFromTaskTypePreviewsModal.vue'
+import ShotHistoryModal from '@/components/modals/ShotHistoryModal.vue'
+import TaskInfo from '@/components/sides/TaskInfo.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
+import ComboboxDisplayOptions from '@/components/widgets/ComboboxDisplayOptions.vue'
+import InfoQuestionMark from '@/components/widgets/InfoQuestionMark.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
-import SetFramesFromTaskTypePreviewsModal from '@/components/modals/SetFramesFromTaskTypePreviewsModal.vue'
 import SortingInfo from '@/components/widgets/SortingInfo.vue'
-import ShotHistoryModal from '@/components/modals/ShotHistoryModal.vue'
-import ShotList from '@/components/lists/ShotList.vue'
-import TaskInfo from '@/components/sides/TaskInfo.vue'
+/* eslint-enable no-unused-vars */
 
-export default {
-  name: 'shots',
+const { t } = useI18n()
+const store = useStore()
 
-  mixins: [searchMixin, entitiesMixin],
+const type = 'shot'
+// Non-reactive store cache, read at call time.
+const shotMap = shotStore.cache.shotMap
 
-  components: {
-    AddMetadataModal,
-    AddThumbnailsModal,
-    BuildFilterModal,
-    ButtonSimple,
-    ComboboxDepartment,
-    ComboboxDisplayOptions,
-    CreateTasksModal,
-    DeleteModal,
-    EditShotModal,
-    ImportModal,
-    ImportEdlModal,
-    HardDeleteModal,
-    ManageShotsModal,
-    ImportRenderModal,
-    InfoQuestionMark,
-    SearchField,
-    SearchQueryList,
-    SetFramesFromTaskTypePreviewsModal,
-    SortingInfo,
-    ShotHistoryModal,
-    ShotList,
-    TaskInfo
+// State
+// --------------------------------------------------------------------------
+
+const importModalRef = useTemplateRef('import-modal')
+const listRef = useTemplateRef('shot-list')
+const searchFieldRef = useTemplateRef('shot-search-field')
+
+const historyShot = ref({})
+const initialLoading = ref(true)
+const optionalColumns = ref([
+  'Description',
+  'Nb Frames',
+  'Frame In',
+  'Frame Out',
+  'FPS',
+  'Resolution'
+])
+
+// Computed
+// --------------------------------------------------------------------------
+
+const currentEpisode = computed(() => store.getters.currentEpisode)
+const currentProduction = computed(() => store.getters.currentProduction)
+const currentSection = computed(() => store.getters.currentSection)
+const departments = computed(() => store.getters.departments)
+const displayedSequences = computed(() => store.getters.displayedSequences)
+const displayedShots = computed(() => store.getters.displayedShots)
+const displayedShotsBySequence = computed(
+  () => store.getters.displayedShotsBySequence
+)
+const episodes = computed(() => store.getters.episodes)
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+const isCurrentUserManager = computed(
+  () => store.getters.isCurrentUserProductionManager
+)
+const isFps = computed(() => store.getters.isFps)
+const isFrameIn = computed(() => store.getters.isFrameIn)
+const isFrameOut = computed(() => store.getters.isFrameOut)
+const isFrames = computed(() => store.getters.isFrames)
+const isMaxRetakes = computed(() => store.getters.isMaxRetakes)
+const isPaperProduction = computed(() => store.getters.isPaperProduction)
+const isResolution = computed(() => store.getters.isResolution)
+const isShotEstimation = computed(() => store.getters.isShotEstimation)
+const isShotsLoading = computed(() => store.getters.isShotsLoading)
+const isShotsLoadingError = computed(() => store.getters.isShotsLoadingError)
+const isShotTime = computed(() => store.getters.isShotTime)
+const isTVShow = computed(() => store.getters.isTVShow)
+const selectedTasks = computed(() => store.getters.selectedTasks)
+const shotsCsvFormData = computed(() => store.getters.shotsCsvFormData)
+const shotSearchFilterGroups = computed(
+  () => store.getters.shotSearchFilterGroups
+)
+const shotSearchQueries = computed(() => store.getters.shotSearchQueries)
+const shotSearchText = computed(() => store.getters.shotSearchText)
+const shotsLoadingKey = computed(() => store.getters.shotsLoadingKey)
+const shotSorting = computed(() => store.getters.shotSorting)
+const shotValidationColumns = computed(
+  () => store.getters.shotValidationColumns
+)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
+
+const isAllEpisodes = computed(
+  () => isTVShow.value && currentEpisode.value?.id === 'all'
+)
+
+const dataMatchers = computed(() =>
+  isTVShow.value ? ['Episode', 'Sequence', 'Name'] : ['Sequence', 'Name']
+)
+
+// Built from the full shot cache, not the filtered display list, so the
+// import creation check sees every shot. The cache Map is not reactive:
+// depend on displayedShots (updated by the same mutations) to invalidate.
+const filteredShots = computed(() => {
+  displayedShots.value // eslint-disable-line no-unused-expressions
+  return Object.fromEntries(
+    Array.from(shotMap.values()).map(shot => [
+      `${isTVShow.value ? shot.episode_name : ''}${shot.sequence_name}${shot.name}`,
+      true
+    ])
+  )
+})
+
+// Functions
+// --------------------------------------------------------------------------
+
+const reset = async () => {
+  initialLoading.value = true
+  await store.dispatch('loadShots')
+  initialLoading.value = false
+}
+
+const {
+  applySearchFromUrl,
+  clearSearchAndScroll,
+  closeMetadataModal,
+  confirmAddMetadata,
+  confirmAddThumbnails,
+  confirmBuildFilter,
+  confirmCreateAllMissingTasks,
+  confirmCreateTasks,
+  confirmCreateTasksAndStay,
+  confirmDelete: confirmDeleteShot,
+  confirmDeleteAllTasks,
+  confirmDeleteMetadata,
+  confirmRestore: confirmRestoreShot,
+  deleteAllTasksLockText,
+  deleteAllTasksText,
+  deleteText,
+  departmentFilter,
+  descriptorToEdit,
+  displaySettings,
+  entityToEdit: shotToEdit,
+  errors,
+  exportCsv,
+  hideAddThumbnailsModal,
+  hideCreateTasksModal,
+  hideImportModal,
+  hideImportRenderModal,
+  isTaskSidePanelOpen,
+  loading,
+  modals,
+  onAddMetadataClicked,
+  onChangeSortClicked,
+  onDeleteAllTasksClicked,
+  onDeleteClicked,
+  onDeleteMetadataClicked,
+  onEditMetadataClicked,
+  onKeepTaskPanelOpenChanged,
+  onRestoreClicked,
+  onSearchChange,
+  openEditModal: onEditClicked,
+  parsedCSV,
+  removeSearchQuery,
+  renderColumns,
+  renderImport,
+  resetImport,
+  restoreText,
+  saveScrollPosition,
+  saveSearchQuery,
+  selectableDepartments,
+  selectedDepartment,
+  setScrollPosition,
+  showCreateTasksModal,
+  showImportModal,
+  uploadImportFile
+} = useEntityPage({
+  type,
+  pageName: 'Shots',
+  listRef,
+  searchFieldRef,
+  importModalRef,
+  reset,
+  loadEntities: () => store.dispatch('loadShots'),
+  dataMatchers,
+  optionalColumns,
+  hasAssignationColumns: true,
+  canCancel: true,
+  displaySettings: { inOutTimecode: false },
+  modals: {
+    isEDLImportDisplayed: false,
+    isManageDisplayed: false,
+    isSetFramesDisplayed: false,
+    isShotHistoryDisplayed: false
   },
+  loading: { getFrames: false },
+  errors: { getFrames: false }
+})
 
-  data() {
-    return {
-      type: 'shot',
-      deleteAllTasksLockText: null,
-      descriptorToEdit: {},
-      displaySettings: {
-        bigThumbnails: false,
-        contactSheetMode: false,
-        fullTaskTypeNames: false,
-        inOutTimecode: false,
-        showAssignations: true,
-        showInfos: true
-      },
-      formData: null,
-      historyShot: {},
-      initialLoading: true,
-      optionalColumns: [
-        'Description',
-        'Nb Frames',
-        'Frame In',
-        'Frame Out',
-        'FPS',
-        'Resolution'
-      ],
-      genericColumns: [
-        'Metadata column name (text value)',
-        'Task type name (task status name value)',
-        'Task type name + comment (text value)'
-      ],
-      parsedCSV: [],
-      selectedDepartment: 'ALL',
-      shotToDelete: null,
-      shotToEdit: null,
-      shotToRestore: null,
-      taskTypeForTaskDeletion: null,
-      departmentFilter: [],
-      modals: {
-        isAddMetadataDisplayed: false,
-        isAddThumbnailsDisplayed: false,
-        isBuildFilterDisplayed: false,
-        isCreateTasksDisplayed: false,
-        isDeleteDisplayed: false,
-        isDeleteMetadataDisplayed: false,
-        isDeleteAllTasksDisplayed: false,
-        isSetFramesDisplayed: false,
-        isImportRenderDisplayed: false,
-        isImportDisplayed: false,
-        isEDLImportDisplayed: false,
-        isManageDisplayed: false,
-        isNewDisplayed: false,
-        isRestoreDisplayed: false,
-        isShotHistoryDisplayed: false
-      },
-      loading: {
-        addMetadata: false,
-        addThumbnails: false,
-        creatingTasks: false,
-        creatingTasksStay: false,
-        creatingAllTasks: false,
-        deleteAllTasks: false,
-        deleteMetadata: false,
-        edit: false,
-        del: false,
-        getFrames: false,
-        importing: false,
-        restore: false,
-        savingSearch: false,
-        stay: false
-      },
-      pageName: 'Shots',
-      errors: {
-        addMetadata: false,
-        deleteMetadata: false,
-        creatingTasks: false,
-        deleteAllTasks: false,
-        getFrames: false,
-        importing: false,
-        importingError: null
-      }
-    }
-  },
-
-  beforeUnmount() {
-    this.clearSelectedShots()
-  },
-
-  mounted() {
-    this.setOptionalImportColumns()
-    const finalize = () => {
-      this.$nextTick(() => {
-        // Needed to be sure the current production is set
-        this.loadShots().then(() => {
-          this.initialLoading = false
-        })
+const onExportClick = () =>
+  exportCsv(
+    [
+      ...(currentEpisode.value ? ['Episode'] : []),
+      t('shots.fields.sequence'),
+      t('shots.fields.name'),
+      t('shots.fields.description'),
+      ...getExportDescriptors(currentProduction.value, 'Shot').map(
+        descriptor => descriptor.name
+      ),
+      ...(isShotTime.value ? [t('shots.fields.time_spent')] : []),
+      ...(isShotEstimation.value ? [t('main.estimation_short')] : []),
+      ...(isFrames.value ? [t('main.frames')] : []),
+      ...(isFrameIn.value ? [t('main.frame_in')] : []),
+      ...(isFrameOut.value ? [t('main.frame_out')] : []),
+      ...(isFps.value ? [t('main.fps')] : []),
+      ...(isResolution.value ? [t('shots.fields.resolution')] : []),
+      ...(isMaxRetakes.value ? [t('shots.fields.max_retakes')] : []),
+      // Qualified by the task type so a re-import can tell the columns
+      // apart: bare duplicated headers collapse in the server's reader.
+      ...shotValidationColumns.value.flatMap(taskTypeId => {
+        const taskTypeName = taskTypeMap.value.get(taskTypeId)?.name || ''
+        return [taskTypeName, `${taskTypeName} assignations`]
       })
-    }
+    ],
+    currentEpisode.value &&
+      (isAllEpisodes.value ? t('main.all_shots') : currentEpisode.value.name)
+  )
 
-    if (
-      this.shotMap.size < 2 ||
-      (this.shotValidationColumns.length > 0 &&
-        (!this.shotMap.get(this.shotMap.keys().next().value) ||
-          !this.shotMap.get(this.shotMap.keys().next().value).validations))
-    ) {
-      if (
-        this.currentProduction &&
-        this.episodes.length > 0 &&
-        this.episodes[0].project_id !== this.currentProduction.id
-      ) {
-        this.loadEpisodes()
-          .then(() => finalize())
-          .catch(console.error)
-      } else {
-        finalize()
-      }
-    } else {
-      if (!this.isShotsLoading) this.initialLoading = false
-      this.onSearchChange()
-      this.$refs['shot-list']?.setScrollPosition(this.shotListScrollPosition)
-      this.$nextTick(() => {
-        this.$refs['shot-list']?.selectTaskFromQuery()
-        this.applySearchFromUrl()
-        this.onSearchChange()
-      })
-      this.reloadEpisodeShotsIfNeeded()
-    }
-  },
+const setOptionalImportColumns = () => {
+  optionalColumns.value = [
+    t('shots.fields.description'),
+    ...(isPaperProduction.value ? [] : [t('shots.fields.nb_frames')]),
+    t('shots.fields.frame_in'),
+    t('shots.fields.frame_out'),
+    t('shots.fields.fps'),
+    t('shots.fields.resolution')
+  ]
+}
 
-  computed: {
-    ...mapGetters([
-      'currentEpisode',
-      'currentProduction',
-      'currentSection',
-      'departmentMap',
-      'displayedSequences',
-      'displayedShots',
-      'displayedShotsBySequence',
-      'episodeMap',
-      'episodes',
-      'departments',
-      'isCurrentUserClient',
-      'isFrames',
-      'isFrameIn',
-      'isFrameOut',
-      'isFps',
-      'isLongShotList',
-      'isMaxRetakes',
-      'isPaperProduction',
-      'isResolution',
-      'isShotDescription',
-      'isShotEstimation',
-      'isShotTime',
-      'isShotsLoading',
-      'isShotsLoadingError',
-      'isTVShow',
-      'openProductions',
-      'productionShotTaskTypes',
-      'selectedShots',
-      'sequences',
-      'shotFilledColumns',
-      'shotsCsvFormData',
-      'shotSearchQueries',
-      'shotSearchText',
-      'shotSearchFilterGroups',
-      'shotsLoadingKey',
-      'shotsPath',
-      'shotValidationColumns',
-      'shotListScrollPosition',
-      'shots',
-      'shotSorting',
-      'taskTypeMap',
-      'user'
-    ]),
-    ...mapGetters({
-      isCurrentUserManager: 'isCurrentUserProductionManager'
-    }),
+const reloadShots = async () => {
+  initialLoading.value = true
+  await store.dispatch('loadShots')
+  initialLoading.value = false
+  applySearchFromUrl()
+}
 
-    isAllEpisodes() {
-      return this.isTVShow && this.currentEpisode?.id === 'all'
-    },
-
-    shotMap() {
-      return shotStore.cache.shotMap
-    },
-
-    renderColumns() {
-      const collection = [...this.dataMatchers, ...this.optionalColumns]
-
-      this.productionShotTaskTypes.forEach(item => {
-        collection.push(item.name)
-        collection.push(`${item.name} comment`)
-        collection.push(`${item.name} assignations`)
-      })
-
-      return collection
-    },
-
-    dataMatchers() {
-      return this.isTVShow
-        ? ['Episode', 'Sequence', 'Name']
-        : ['Sequence', 'Name']
-    },
-
-    filteredShots() {
-      // Build the lookup from the full shot cache, not the filtered display
-      // list, so the import creation check sees every shot.
-      // The cache Map is not reactive: depend on displayedShots (updated
-      // by the same mutations) to invalidate this computed.
-      this.displayedShots // eslint-disable-line no-unused-expressions
-      const shots = {}
-      this.shotMap.forEach(item => {
-        let shotKey = `${item.sequence_name}${item.name}`
-        if (this.isTVShow) {
-          shotKey = item.episode_name + shotKey
-        }
-        shots[shotKey] = true
-      })
-      return shots
-    },
-
-    metadataDescriptors() {
-      return this.shotMetadataDescriptors
-    }
-  },
-
-  methods: {
-    ...mapActions([
-      'addMetadataDescriptor',
-      'createTasks',
-      'changeShotSort',
-      'clearSelectedShots',
-      'clearSelectedTasks',
-      'commentTaskWithPreview',
-      'deleteAllShotTasks',
-      'deleteShot',
-      'deleteMetadataDescriptor',
-      'editShot',
-      'editShotDebounced',
-      'getShotsCsvLines',
-      'hideAssignations',
-      'loadEpisodes',
-      'loadShots',
-      'setNbFramesFromTaskTypePreviews',
-      'newEpisode',
-      'newSequence',
-      'newShot',
-      'removeShotSearch',
-      'restoreShot',
-      'saveShotSearch',
-      'setLastProductionScreen',
-      'setPreview',
-      'setShotSearch',
-      'showAssignations',
-      'uploadShotFile',
-      'uploadEdlFile'
-    ]),
-
-    setOptionalImportColumns() {
-      const columns = [
-        this.$t('shots.fields.description'),
-        this.$t('shots.fields.nb_frames'),
-        this.$t('shots.fields.frame_in'),
-        this.$t('shots.fields.frame_out'),
-        this.$t('shots.fields.fps'),
-        this.$t('shots.fields.resolution')
-      ]
-      if (this.isPaperProduction) {
-        columns.splice(1, 1)
-      }
-      this.optionalColumns = columns
-    },
-
-    reloadEpisodeShotsIfNeeded() {
-      // The first rows say nothing about the loaded scope: a production-wide
-      // All dataset passes the per-episode checks whenever the first episode
-      // owns the first rows. Compare the scope of the last load first.
-      const scope = this.isTVShow ? (this.currentEpisode?.id ?? '') : ''
-      const isStale =
-        this.shotsLoadingKey !== `${this.currentProduction?.id}/${scope}` ||
-        (!this.isAllEpisodes &&
-          ((this.isTVShow && this.displayedSequences.length === 0) ||
-            this.displayedSequences[0]?.episode_id !==
-              this.currentEpisode?.id ||
-            this.displayedShots[0]?.episode_id !== this.currentEpisode?.id))
-      if (isStale && !this.isShotsLoading && !this.initialLoading) {
-        this.$refs['shot-search-field']?.setValue('')
-        this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)
-        this.initialLoading = true
-        this.loadShots().then(() => {
-          this.initialLoading = false
-          this.applySearchFromUrl()
-        })
-      }
-    },
-
-    addEpisode(episode, callback) {
-      this.newEpisode(episode).then(callback).catch(console.error)
-    },
-
-    addSequence(sequence, callback) {
-      this.newSequence(sequence).then(callback).catch(console.error)
-    },
-
-    addShot(shot, callback) {
-      this.newShot(shot).then(callback).catch(console.error)
-    },
-
-    onDeleteClicked(shot) {
-      this.shotToDelete = shot
-      this.modals.isDeleteDisplayed = true
-    },
-
-    onEditClicked(shot) {
-      this.shotToEdit = shot
-      this.modals.isNewDisplayed = true
-    },
-
-    confirmEditShot(form) {
-      form.id = this.shotToEdit.id
-      form.data.resolution = form.resolution
-      form.data.max_retakes = form.max_retakes
-      form.data.frame_in = form.frameIn
-      form.data.frame_out = form.frameOut
-      form.data.fps = form.fps
-      this.loading.edit = true
-      this.errors.edit = false
-      this.editShot(form)
-        .then(() => {
-          this.loading.edit = false
-          this.modals.isNewDisplayed = false
-          this.applySearchFromUrl(false)
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.edit = false
-          this.errors.edit = true
-        })
-    },
-
-    confirmDeleteShot() {
-      this.loading.del = true
-      this.errors.del = false
-      this.deleteShot(this.shotToDelete)
-        .then(() => {
-          this.loading.del = false
-          this.modals.isDeleteDisplayed = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.del = false
-          this.errors.del = true
-        })
-    },
-
-    confirmRestoreShot() {
-      this.loading.restore = true
-      this.errors.restore = false
-      this.restoreShot(this.shotToRestore)
-        .then(() => {
-          this.loading.restore = false
-          this.modals.isRestoreDisplayed = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.restore = false
-          this.errors.restore = true
-        })
-    },
-
-    reset() {
-      this.initialLoading = true
-      this.loadShots().then(() => {
-        this.initialLoading = false
-      })
-    },
-
-    resetEditModal() {
-      const form = { name: '' }
-      if (this.sequences.length > 0) {
-        form.sequence_id = this.sequences[0].id
-      }
-      if (this.openProductions.length > 0) {
-        form.production_id = this.openProductions[0].id
-      }
-      this.shotToEdit = form
-    },
-
-    deleteText() {
-      const shot = this.shotToDelete
-      if (shot && (shot.canceled || !shot.tasks || shot.tasks.length === 0)) {
-        return this.$t('shots.delete_text', { name: shot.name })
-      } else if (shot) {
-        return this.$t('shots.cancel_text', { name: shot.name })
-      }
-      return ''
-    },
-
-    renderImport(data, mode) {
-      this.loading.importing = true
-      this.errors.importing = false
-      this.formData = data
-      if (mode === 'file') {
-        data = data.get('file')
-      }
-      csv.processCSV(data).then(results => {
-        this.parsedCSV = results
-        this.hideImportModal()
-        this.loading.importing = false
-        this.showImportRenderModal()
-      })
-    },
-
-    uploadImportFile(data, toUpdate) {
-      const formData = new FormData()
-      const filename = 'import.csv'
-      const csvContent = csv.turnEntriesToCsvString(data)
-      const file = new File([csvContent], filename, { type: 'text/csv' })
-
-      formData.append('file', file)
-
-      this.loading.importing = true
-      this.errors.importing = false
-      this.errors.importingError = null
-      this.$store.commit('SHOT_CSV_FILE_SELECTED', formData)
-
-      this.uploadShotFile(toUpdate)
-        .then(() => {
-          this.loadEpisodes().catch(console.error)
-          this.hideImportRenderModal()
-          this.loadShots()
-        })
-        .catch(err => {
-          console.error(err)
-          this.errors.importingError = err
-          this.errors.importing = true
-        })
-        .finally(() => {
-          this.loading.importing = false
-        })
-    },
-
-    resetImport() {
-      this.errors.importing = false
-      this.hideImportRenderModal()
-      this.$store.commit('SHOT_CSV_FILE_SELECTED', null)
-      this.$refs['import-modal']?.reset()
-      this.showImportModal()
-    },
-
-    onSequenceClicked(sequenceName) {
-      if (sequenceName.includes(' ')) {
-        sequenceName = `"${sequenceName}"`
-      }
-      this.searchField.setValue(`${this.shotSearchText} ${sequenceName}`)
-      this.onSearchChange()
-    },
-
-    showManageShots() {
-      this.modals.isManageDisplayed = true
-    },
-
-    hideManageShots() {
-      this.modals.isManageDisplayed = false
-    },
-
-    showShotHistoryModal(shot) {
-      this.historyShot = shot
-      this.modals.isShotHistoryDisplayed = true
-    },
-
-    hideShotHistoryModal() {
-      this.modals.isShotHistoryDisplayed = false
-    },
-
-    onExportClick() {
-      this.getShotsCsvLines().then(shotLines => {
-        const nameData = [
-          moment().format('YYYY-MM-DD'),
-          'kitsu',
-          this.currentProduction.name,
-          this.$t('shots.title')
-        ]
-        if (this.currentEpisode) {
-          nameData.splice(
-            3,
-            0,
-            this.isAllEpisodes
-              ? this.$t('main.all_shots')
-              : this.currentEpisode.name
-          )
-        }
-        const name = stringHelpers.slugify(nameData.join('_'))
-        const headers = [
-          this.$t('shots.fields.sequence'),
-          this.$t('shots.fields.name'),
-          this.$t('shots.fields.description')
-        ]
-        if (this.currentEpisode) {
-          headers.splice(0, 0, 'Episode')
-        }
-        getExportDescriptors(this.currentProduction, 'Shot').forEach(
-          descriptor => {
-            headers.push(descriptor.name)
-          }
-        )
-        if (this.isShotTime) {
-          headers.push(this.$t('shots.fields.time_spent'))
-        }
-        if (this.isShotEstimation) {
-          headers.push(this.$t('main.estimation_short'))
-        }
-        if (this.isFrames) {
-          headers.push(this.$t('main.frames'))
-        }
-        if (this.isFrameIn) {
-          headers.push(this.$t('main.frame_in'))
-        }
-        if (this.isFrameOut) {
-          headers.push(this.$t('main.frame_out'))
-        }
-        if (this.isFps) {
-          headers.push(this.$t('main.fps'))
-        }
-        if (this.isResolution) {
-          headers.push(this.$t('shots.fields.resolution'))
-        }
-        if (this.isMaxRetakes) {
-          headers.push(this.$t('shots.fields.max_retakes'))
-        }
-        this.shotValidationColumns.forEach(taskTypeId => {
-          const taskTypeName = this.taskTypeMap.get(taskTypeId)?.name || ''
-          headers.push(taskTypeName)
-          // Qualified by the task type so a re-import can tell the columns
-          // apart: bare duplicated headers collapse in the server's reader.
-          headers.push(`${taskTypeName} assignations`)
-        })
-        csv.buildCsvFile(name, [headers].concat(shotLines))
-      })
-    },
-
-    async onFieldChanged({ entry, fieldName, value }) {
-      const data = {
-        id: entry.id,
-        nb_frames: entry.nb_frames,
-        description: entry.description
-      }
-      data[fieldName] = value
-      await this.editShotDebounced(data)
-      this.onSearchChange(false)
-    },
-
-    async onMetadataChanged({ entry, descriptor, value }) {
-      const data = {
-        id: entry.id,
-        data: {
-          [descriptor.field_name]: value
-        }
-      }
-      const shot = this.shotMap.get(entry.id)
-      if (
-        descriptor.field_name === 'frame_in' &&
-        shot.data?.frame_out &&
-        parseInt(shot.data.frame_out) > parseInt(value) &&
-        !this.isPaperProduction
-      ) {
-        data.nb_frames = parseInt(shot.data.frame_out) - parseInt(value) + 1
-      }
-      if (
-        descriptor.field_name === 'frame_out' &&
-        shot.data?.frame_in &&
-        parseInt(shot.data.frame_in) < parseInt(value) &&
-        !this.isPaperProduction
-      ) {
-        data.nb_frames = parseInt(value) - parseInt(shot.data.frame_in) + 1
-      }
-      await this.editShotDebounced(data)
-      this.applySearchFromUrl(false)
-    },
-
-    showEDLImportModal() {
-      this.errors.importing = false
-      this.errors.importingError = null
-      this.modals.isEDLImportDisplayed = true
-    },
-
-    hideEDLImportModal() {
-      this.modals.isEDLImportDisplayed = false
-    },
-
-    uploadEDLFile(edl_file, namingConvention, matchCase) {
-      this.loading.importing = true
-      this.errors.importing = false
-      this.errors.importingError = null
-
-      this.uploadEdlFile({ edl_file, namingConvention, matchCase })
-        .then(() => {
-          this.loadEpisodes().catch(console.error)
-          this.hideEDLImportModal()
-          this.loadShots()
-        })
-        .catch(err => {
-          console.error(err)
-          this.errors.importingError = err
-          this.errors.importing = true
-        })
-        .finally(() => {
-          this.loading.importing = false
-        })
-    },
-
-    async confirmSetFrames(taskTypeId) {
-      this.loading.getFrames = true
-      try {
-        await this.setNbFramesFromTaskTypePreviews({
-          taskTypeId,
-          productionId: this.currentProduction.id,
-          // Whole production in All mode: zou rejects episode_id=all here.
-          episodeId:
-            this.currentEpisode && !this.isAllEpisodes
-              ? this.currentEpisode.id
-              : null
-        })
-        this.modals.isSetFramesDisplayed = false
-      } catch (err) {
-        console.error(err)
-        this.errors.getFrames = true
-      } finally {
-        this.loading.getFrames = false
-      }
-    },
-
-    onSearchTyped() {
-      if (this.shotMap.size < 800 || this.searchField?.getValue() === '') {
-        this.onSearchChange()
-      }
-    }
-  },
-
-  watch: {
-    currentSection() {
-      this.reloadEpisodeShotsIfNeeded()
-    },
-
-    currentProduction() {
-      this.setOptionalImportColumns()
-      this.$refs['shot-search-field']?.setValue('')
-      this.$store.commit('SET_SHOT_LIST_SCROLL_POSITION', 0)
-      // Even during the first load: the switch dropped its response. A TV
-      // show reloads from the episode watcher instead.
-      if (this.currentProduction && !this.isTVShow) {
-        this.loadShots()
-      }
-    },
-
-    currentEpisode() {
-      const finalize = () => {
-        this.loadShots()
-      }
-      if (this.isTVShow && this.currentEpisode) {
-        if (
-          this.currentProduction &&
-          this.episodes.length > 0 &&
-          this.episodes[0].project_id !== this.currentProduction.id
-        ) {
-          this.loadEpisodes()
-            .then(() => finalize())
-            .catch(console.error)
-        } else {
-          finalize()
-        }
-      }
-    },
-
-    isShotsLoading() {
-      if (!this.isShotsLoading) {
-        this.initialLoading = false
-        this.applySearchFromUrl()
-        this.$nextTick(() => {
-          this.$refs['shot-list']?.selectTaskFromQuery()
-        })
-        this.$refs['shot-list']?.setScrollPosition(this.shotListScrollPosition)
-      }
-    }
-  },
-
-  head() {
-    if (this.isTVShow) {
-      return {
-        title:
-          `${this.currentProduction?.name || ''}` +
-          ` - ${
-            this.isAllEpisodes
-              ? this.$t('main.all_shots')
-              : this.currentEpisode?.name || ''
-          }` +
-          ` | ${this.$t('shots.title')} - Kitsu`
-      }
-    }
-    if (!this.currentProduction) {
-      return {
-        title: `${this.$t('shots.title')} - Kitsu`
-      }
-    }
-    return {
-      title: `${this.currentProduction.name} | ${this.$t('shots.title')} - Kitsu`
-    }
+const reloadEpisodeShotsIfNeeded = () => {
+  // The first rows say nothing about the loaded scope: a production-wide
+  // All dataset passes the per-episode checks whenever the first episode
+  // owns the first rows. Compare the scope of the last load first.
+  const scope = isTVShow.value ? (currentEpisode.value?.id ?? '') : ''
+  const episodeId = currentEpisode.value?.id
+  const isStale =
+    shotsLoadingKey.value !== `${currentProduction.value?.id}/${scope}` ||
+    (!isAllEpisodes.value &&
+      ((isTVShow.value && displayedSequences.value.length === 0) ||
+        displayedSequences.value[0]?.episode_id !== episodeId ||
+        displayedShots.value[0]?.episode_id !== episodeId))
+  if (isStale && !isShotsLoading.value && !initialLoading.value) {
+    clearSearchAndScroll()
+    reloadShots()
   }
 }
+
+// The episodes of another production are reloaded before the shots.
+const loadShotsWithEpisodes = async () => {
+  if (
+    currentProduction.value &&
+    episodes.value.length > 0 &&
+    episodes.value[0].project_id !== currentProduction.value.id
+  ) {
+    await store.dispatch('loadEpisodes')
+  }
+  await store.dispatch('loadShots')
+}
+
+const addEpisode = (episode, callback) => {
+  store.dispatch('newEpisode', episode).then(callback).catch(console.error)
+}
+
+const addSequence = (sequence, callback) => {
+  store.dispatch('newSequence', sequence).then(callback).catch(console.error)
+}
+
+const addShot = (shot, callback) => {
+  store.dispatch('newShot', shot).then(callback).catch(console.error)
+}
+
+const confirmEditShot = async form => {
+  loading.edit = true
+  errors.edit = false
+  try {
+    await store.dispatch('editShot', {
+      ...form,
+      id: shotToEdit.value.id,
+      data: {
+        ...form.data,
+        resolution: form.resolution,
+        max_retakes: form.max_retakes,
+        frame_in: form.frameIn,
+        frame_out: form.frameOut,
+        fps: form.fps
+      }
+    })
+    modals.isNewDisplayed = false
+    applySearchFromUrl(false)
+  } catch (err) {
+    console.error(err)
+    errors.edit = true
+  } finally {
+    loading.edit = false
+  }
+}
+
+const onSequenceClicked = sequenceName => {
+  const quotedName = sequenceName.includes(' ')
+    ? `"${sequenceName}"`
+    : sequenceName
+  searchFieldRef.value.setValue(`${shotSearchText.value} ${quotedName}`)
+  onSearchChange()
+}
+
+const showManageShots = () => {
+  modals.isManageDisplayed = true
+}
+
+const hideManageShots = () => {
+  modals.isManageDisplayed = false
+}
+
+const showShotHistoryModal = shot => {
+  historyShot.value = shot
+  modals.isShotHistoryDisplayed = true
+}
+
+const hideShotHistoryModal = () => {
+  modals.isShotHistoryDisplayed = false
+}
+
+const onFieldChanged = async ({ entry, fieldName, value }) => {
+  await store.dispatch('editShotDebounced', {
+    id: entry.id,
+    nb_frames: entry.nb_frames,
+    description: entry.description,
+    [fieldName]: value
+  })
+  onSearchChange(false)
+}
+
+// A frame in or out typed on a shot holding the other bound sets the
+// frame count too.
+const getFrameCount = (shot, fieldName, value) => {
+  if (isPaperProduction.value) return undefined
+  const frameIn = parseInt(
+    fieldName === 'frame_in' ? value : shot.data?.frame_in
+  )
+  const frameOut = parseInt(
+    fieldName === 'frame_out' ? value : shot.data?.frame_out
+  )
+  const isOtherBoundSet =
+    fieldName === 'frame_in' ? shot.data?.frame_out : shot.data?.frame_in
+  if (!['frame_in', 'frame_out'].includes(fieldName) || !isOtherBoundSet) {
+    return undefined
+  }
+  return frameOut > frameIn ? frameOut - frameIn + 1 : undefined
+}
+
+const onMetadataChanged = async ({ entry, descriptor, value }) => {
+  const shot = shotMap.get(entry.id)
+  const nbFrames = getFrameCount(shot, descriptor.field_name, value)
+  await store.dispatch('editShotDebounced', {
+    id: entry.id,
+    data: { [descriptor.field_name]: value },
+    ...(nbFrames === undefined ? {} : { nb_frames: nbFrames })
+  })
+  applySearchFromUrl(false)
+}
+
+// A timed out import disables the upload of the EDL modal: reopening it
+// must not keep the previous failure.
+const showEDLImportModal = () => {
+  errors.importing = false
+  errors.importingError = null
+  modals.isEDLImportDisplayed = true
+}
+
+const hideEDLImportModal = () => {
+  modals.isEDLImportDisplayed = false
+}
+
+const uploadEDLFile = async (edl_file, namingConvention, matchCase) => {
+  loading.importing = true
+  errors.importing = false
+  errors.importingError = null
+  try {
+    await store.dispatch('uploadEdlFile', {
+      edl_file,
+      namingConvention,
+      matchCase
+    })
+    store.dispatch('loadEpisodes').catch(console.error)
+    hideEDLImportModal()
+    store.dispatch('loadShots')
+  } catch (err) {
+    console.error(err)
+    errors.importingError = err
+    errors.importing = true
+  } finally {
+    loading.importing = false
+  }
+}
+
+const confirmSetFrames = async taskTypeId => {
+  loading.getFrames = true
+  try {
+    await store.dispatch('setNbFramesFromTaskTypePreviews', {
+      taskTypeId,
+      productionId: currentProduction.value.id,
+      // Whole production in All mode: zou rejects episode_id=all here.
+      episodeId:
+        currentEpisode.value && !isAllEpisodes.value
+          ? currentEpisode.value.id
+          : null
+    })
+    modals.isSetFramesDisplayed = false
+  } catch (err) {
+    console.error(err)
+    errors.getFrames = true
+  } finally {
+    loading.getFrames = false
+  }
+}
+
+// A long list is only filtered through the URL, by the route watcher.
+const onSearchTyped = () => {
+  if (shotMap.size < 800 || searchFieldRef.value?.getValue() === '') {
+    onSearchChange()
+  }
+}
+
+// Watchers
+// --------------------------------------------------------------------------
+
+watch(currentSection, reloadEpisodeShotsIfNeeded)
+
+watch(currentProduction, () => {
+  setOptionalImportColumns()
+  clearSearchAndScroll()
+  // Even during the first load: the switch dropped its response. A TV
+  // show reloads from the episode watcher instead.
+  if (currentProduction.value && !isTVShow.value) {
+    store.dispatch('loadShots')
+  }
+})
+
+watch(currentEpisode, () => {
+  if (isTVShow.value && currentEpisode.value) {
+    loadShotsWithEpisodes().catch(console.error)
+  }
+})
+
+watch(isShotsLoading, isLoading => {
+  if (isLoading) return
+  initialLoading.value = false
+  applySearchFromUrl()
+  nextTick(() => {
+    listRef.value?.selectTaskFromQuery()
+  })
+  setScrollPosition()
+})
+
+// Lifecycle
+// --------------------------------------------------------------------------
+
+onMounted(() => {
+  setOptionalImportColumns()
+  const firstShot = shotMap.get(shotMap.keys().next().value)
+  if (
+    shotMap.size < 2 ||
+    (shotValidationColumns.value.length > 0 && !firstShot?.validations)
+  ) {
+    // Next tick: the current production must be set.
+    nextTick(() => {
+      loadShotsWithEpisodes()
+        .then(() => {
+          initialLoading.value = false
+        })
+        .catch(console.error)
+    })
+  } else {
+    if (!isShotsLoading.value) initialLoading.value = false
+    onSearchChange()
+    setScrollPosition()
+    nextTick(() => {
+      listRef.value?.selectTaskFromQuery()
+      applySearchFromUrl()
+      onSearchChange()
+    })
+    reloadEpisodeShotsIfNeeded()
+  }
+})
+
+onBeforeUnmount(() => {
+  store.dispatch('clearSelectedShots')
+})
+
+// Head
+// --------------------------------------------------------------------------
+
+useHead({
+  title: computed(() => {
+    const title = `${t('shots.title')} - Kitsu`
+    if (isTVShow.value) {
+      const episodeName = isAllEpisodes.value
+        ? t('main.all_shots')
+        : currentEpisode.value?.name || ''
+      return `${currentProduction.value?.name || ''} - ${episodeName} | ${title}`
+    }
+    if (!currentProduction.value) return title
+    return `${currentProduction.value.name} | ${title}`
+  })
+})
 </script>
 
 <style lang="scss" scoped>
@@ -1086,10 +850,6 @@ export default {
 
 .page-header {
   margin-bottom: 1em;
-}
-
-.level {
-  align-items: flex-start;
 }
 
 .shots {

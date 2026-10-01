@@ -1,149 +1,145 @@
-import { vi } from 'vitest'
+import { flushPromises } from '@vue/test-utils'
 
-// Importing the shots page transitively pulls in the root store
-// (lib/models → timezone → @/store); stub it so no Vuex store is built.
 vi.mock('@/store', () => ({ default: {} }))
+vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 
+import ImportEdlModal from '@/components/modals/ImportEdlModal.vue'
 import Shots from '@/components/pages/Shots.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import shotStore from '@/store/modules/shots'
 
-describe('Shots page, reloadEpisodeShotsIfNeeded', () => {
-  const production = { id: 'p' }
+import { mountEntityPage, production } from '../../fixtures/entity-page'
 
-  // The method only reads its component instance, so a plain object is
-  // enough to exercise the staleness decision without mounting the page.
-  const buildContext = (overrides = {}) => {
-    const context = {
-      currentProduction: production,
-      currentEpisode: null,
-      isTVShow: false,
-      shotsLoadingKey: 'p/',
-      displayedSequences: [],
-      displayedShots: [],
-      isShotsLoading: false,
-      initialLoading: false,
-      loadShots: vi.fn(() => Promise.resolve()),
-      applySearchFromUrl: vi.fn(),
-      $refs: {},
-      $store: { commit: vi.fn() },
-      ...overrides
-    }
-    context.isAllEpisodes = Shots.computed.isAllEpisodes.call(context)
-    return context
+// Two shots with their tasks in the cache: the page decides on mount
+// whether their scope (episode) is the displayed one.
+const shot = id => ({ id, validations: new Map([['task-type-1', 'task-1']]) })
+
+beforeEach(() => {
+  shotStore.cache.shotMap.set('shot-1', shot('shot-1'))
+  shotStore.cache.shotMap.set('shot-2', shot('shot-2'))
+})
+
+afterEach(() => {
+  shotStore.cache.shotMap.clear()
+  vi.restoreAllMocks()
+})
+
+const mountPage = async ({ getters = {}, actions = {} } = {}) => {
+  const page = await mountEntityPage(Shots, {
+    listName: 'ShotList',
+    getters: {
+      shotValidationColumns: ['task-type-1'],
+      isCurrentUserProductionManager: true,
+      ...getters
+    },
+    actions
+  })
+  await flushPromises()
+  return page
+}
+
+const loadsOnMount = async getters =>
+  (await mountPage({ getters })).dispatched('loadShots')
+
+describe('Shots page, reload of another episode', () => {
+  const episodeA = { id: 'ep-a' }
+  const rows = {
+    displayedSequences: [
+      { id: 'sq-1', episode_id: 'ep-a' },
+      { id: 'sq-2', episode_id: 'ep-b' }
+    ],
+    displayedShots: [
+      { id: 's1', episode_id: 'ep-a' },
+      { id: 's2', episode_id: 'ep-b' }
+    ]
   }
 
-  const run = context => {
-    Shots.methods.reloadEpisodeShotsIfNeeded.call(context)
-    return context
-  }
-
-  test('reloads when a coerced episode switch left the All dataset in the store', () => {
-    const context = buildContext({
+  // Episodes and rows are sorted by episode name, so the first rows of a
+  // production-wide dataset belong to the first episode: the per-episode
+  // checks pass by construction and only the scope tells them apart.
+  test('reloads when a coerced episode switch left the All dataset in the store', async () => {
+    const loads = await loadsOnMount({
       isTVShow: true,
-      currentEpisode: { id: 'ep-a' },
-      shotsLoadingKey: 'p/all',
-      // Episodes and rows are sorted by episode name, so the first rows of a
-      // production-wide dataset belong to the first episode: the per-episode
-      // checks pass by construction and only the scope tells them apart.
-      displayedSequences: [
-        { id: 'sq-1', episode_id: 'ep-a' },
-        { id: 'sq-2', episode_id: 'ep-b' }
-      ],
-      displayedShots: [
-        { id: 's1', episode_id: 'ep-a' },
-        { id: 's2', episode_id: 'ep-b' }
-      ]
+      currentEpisode: episodeA,
+      shotsLoadingKey: `${production.id}/all`,
+      ...rows
     })
 
-    run(context)
-
-    expect(context.loadShots).toHaveBeenCalled()
-    expect(context.initialLoading).toBe(true)
+    expect(loads).toHaveLength(1)
   })
 
-  test('does not reload when the store holds the displayed episode', () => {
-    const context = buildContext({
+  test('does not reload when the store holds the displayed episode', async () => {
+    const loads = await loadsOnMount({
       isTVShow: true,
-      currentEpisode: { id: 'ep-a' },
-      shotsLoadingKey: 'p/ep-a',
+      currentEpisode: episodeA,
+      shotsLoadingKey: `${production.id}/ep-a`,
       displayedSequences: [{ id: 'sq-1', episode_id: 'ep-a' }],
       displayedShots: [{ id: 's1', episode_id: 'ep-a' }]
     })
 
-    run(context)
-
-    expect(context.loadShots).not.toHaveBeenCalled()
+    expect(loads).toHaveLength(0)
   })
 
-  test('does not reload when the store already holds the production-wide dataset', () => {
-    const context = buildContext({
+  test('does not reload when the store already holds the production-wide dataset', async () => {
+    const loads = await loadsOnMount({
       isTVShow: true,
       currentEpisode: { id: 'all' },
-      shotsLoadingKey: 'p/all',
-      displayedSequences: [
-        { id: 'sq-1', episode_id: 'ep-a' },
-        { id: 'sq-2', episode_id: 'ep-b' }
-      ],
-      displayedShots: [
-        { id: 's1', episode_id: 'ep-a' },
-        { id: 's2', episode_id: 'ep-b' }
-      ]
+      shotsLoadingKey: `${production.id}/all`,
+      ...rows
     })
 
-    run(context)
-
-    expect(context.isAllEpisodes).toBe(true)
-    expect(context.loadShots).not.toHaveBeenCalled()
+    expect(loads).toHaveLength(0)
   })
 
-  test('reloads in All mode when the store only holds one episode', () => {
-    const context = buildContext({
+  test('reloads in All mode when the store only holds one episode', async () => {
+    const loads = await loadsOnMount({
       isTVShow: true,
       currentEpisode: { id: 'all' },
-      shotsLoadingKey: 'p/ep-a',
+      shotsLoadingKey: `${production.id}/ep-a`,
       displayedSequences: [{ id: 'sq-1', episode_id: 'ep-a' }],
       displayedShots: [{ id: 's1', episode_id: 'ep-a' }]
     })
 
-    run(context)
-
-    expect(context.loadShots).toHaveBeenCalled()
+    expect(loads).toHaveLength(1)
   })
 
-  test('does not reload a non-TV-show production loaded under the empty scope', () => {
-    const context = buildContext({ shotsLoadingKey: 'p/' })
+  test('does not reload a non-TV-show production loaded under the empty scope', async () => {
+    const loads = await loadsOnMount({ shotsLoadingKey: `${production.id}/` })
 
-    run(context)
-
-    expect(context.loadShots).not.toHaveBeenCalled()
+    expect(loads).toHaveLength(0)
   })
 
-  test('reloads when the store holds another production', () => {
-    const context = buildContext({ shotsLoadingKey: 'other-p/' })
+  test('reloads when the store holds another production', async () => {
+    const loads = await loadsOnMount({ shotsLoadingKey: 'other-production/' })
 
-    run(context)
-
-    expect(context.loadShots).toHaveBeenCalled()
+    expect(loads).toHaveLength(1)
   })
 })
 
-describe('Shots page, showEDLImportModal', () => {
+describe('Shots page, EDL import', () => {
   // A timed out import disables the upload of the EDL modal: reopening
   // it must not keep the previous failure.
-  test('clears the previous import failure', () => {
-    const context = {
-      errors: {
-        importing: true,
-        importingError: Object.assign(new Error('timeout'), {
-          isTimeout: true
-        })
-      },
-      modals: { isEDLImportDisplayed: false }
-    }
+  test('clears the previous failure when the modal opens again', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const error = Object.assign(new Error('timeout'), { isTimeout: true })
+    const { wrapper } = await mountPage({
+      actions: { uploadEdlFile: () => Promise.reject(error) }
+    })
+    const modal = () => wrapper.findComponent(ImportEdlModal)
+    const importButton = wrapper
+      .findAllComponents(ButtonSimple)
+      .find(button => button.props('icon') === 'import-edl')
 
-    Shots.methods.showEDLImportModal.call(context)
+    await importButton.vm.$emit('click')
+    await modal().vm.$emit('confirm', new File([], 'edit.edl'), 'name', false)
+    await flushPromises()
+    expect(modal().props('importError')).toBe(error)
 
-    expect(context.errors.importing).toBe(false)
-    expect(context.errors.importingError).toBe(null)
-    expect(context.modals.isEDLImportDisplayed).toBe(true)
+    await modal().vm.$emit('cancel')
+    await importButton.vm.$emit('click')
+
+    expect(modal().props('active')).toBe(true)
+    expect(modal().props('isError')).toBe(false)
+    expect(modal().props('importError')).toBe(null)
   })
 })
