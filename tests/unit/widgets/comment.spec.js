@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils'
-import { createRouter, createWebHistory } from 'vue-router'
+import { RouterLink, createRouter, createWebHistory } from 'vue-router'
 import { createStore } from 'vuex'
 
 // The component imports bare `moment` without the timezone plugin loaded in
@@ -60,6 +60,7 @@ const task = {
 const makeStore = ({ isAdmin = false, user = { id: 'person-1' } } = {}) =>
   createStore({
     getters: {
+      canValidatePreviewFiles: () => () => false,
       dateFormat: () => 'dd/MM/yyyy',
       departmentMap: () => new Map(),
       isCurrentUserAdmin: () => isAdmin,
@@ -81,7 +82,8 @@ const mountComment = ({
   isActionError = false,
   isEditable = true,
   storeOptions,
-  attachTo
+  attachTo,
+  urlPrefix = ''
 } = {}) =>
   shallowMount(Comment, {
     attachTo,
@@ -91,7 +93,8 @@ const mountComment = ({
       isEditable,
       task,
       taskTypes: [],
-      team: []
+      team: [],
+      urlPrefix
     },
     global: {
       plugins: [i18n, makeStore(storeOptions), router],
@@ -249,6 +252,26 @@ describe('Comment', () => {
       const wrapper = mountWithReply('person-2', { user: null })
       expect(wrapper.text()).toContain('A reply')
       expect(wrapper.find('.reply-delete').exists()).toBe(false)
+    })
+  })
+
+  describe('revision badge', () => {
+    const comment = makeComment({
+      previews: [{ id: 'preview-1', revision: 1 }]
+    })
+
+    test('links to the preview of the revision', () => {
+      const wrapper = mountComment({ comment })
+      expect(wrapper.findComponent(RouterLink).exists()).toBe(true)
+    })
+
+    test('shows the revision without a link to shared playlist guests', () => {
+      const wrapper = mountComment({
+        comment,
+        urlPrefix: '/api/shared/playlists/token-1'
+      })
+      expect(wrapper.findComponent(RouterLink).exists()).toBe(false)
+      expect(wrapper.find('.round-name.revision').text()).toContain('1')
     })
   })
 })

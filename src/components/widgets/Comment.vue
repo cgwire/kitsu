@@ -435,14 +435,19 @@
         class="flexrow content-wrapper preview-info"
         v-if="comment.previews.length > 0 && !isConcept"
       >
-        <router-link class="round-name revision" :to="previewRoute">
+        <!-- Shared playlist guests can't open the studio preview page. -->
+        <component
+          :is="urlPrefix ? 'span' : 'router-link'"
+          class="round-name revision"
+          :to="urlPrefix ? undefined : previewRoute"
+        >
           {{
             comment.pinned
               ? $t('comments.pinned_revision')
               : $t('comments.revision')
           }}
           {{ comment.previews[0].revision }}
-        </router-link>
+        </component>
         <a
           class="preview-link button"
           :href="safeUrl(comment.links[0])"
