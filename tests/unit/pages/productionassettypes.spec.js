@@ -252,6 +252,14 @@ describe('ProductionAssetTypes', () => {
     })
   })
 
+  it('offers the heatmap as a display mode', async () => {
+    await mountPage()
+    expect(wrapper.findComponent(Combobox).props('options')).toContainEqual({
+      label: 'heatmap',
+      value: 'heatmap'
+    })
+  })
+
   it('remembers the display mode between visits', async () => {
     await mountPage()
     expect(listProps().displayMode).toBe('pie')

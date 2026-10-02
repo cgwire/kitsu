@@ -19,6 +19,7 @@
       </span>
     </div>
     <stats-bar :data="selectedData" v-else-if="displayMode === 'bars'" />
+    <stats-heat :data="selectedData" v-else-if="displayMode === 'heatmap'" />
     <div v-else>
       <div :key="data[0]" v-for="data in selectedData">
         <template v-if="data[0]">
@@ -53,6 +54,7 @@
 import { computed } from 'vue'
 
 import StatsBar from '@/components/widgets/StatsBar.vue'
+import StatsHeat from '@/components/widgets/StatsHeat.vue'
 
 // Chart.js outlines the slices with 2px by default, heavy on a 50px pie.
 const PIE_DATASET = { borderWidth: 1 }

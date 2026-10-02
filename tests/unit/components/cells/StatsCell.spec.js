@@ -2,6 +2,7 @@ import { shallowMount } from '@vue/test-utils'
 
 import StatsCell from '@/components/cells/StatsCell.vue'
 import StatsBar from '@/components/widgets/StatsBar.vue'
+import StatsHeat from '@/components/widgets/StatsHeat.vue'
 
 // The real pie-chart is registered globally by main.js.
 const PieChart = {
@@ -37,6 +38,12 @@ describe('cells/StatsCell', () => {
       framesData
     })
     expect(wrapper.findComponent(StatsBar).props('data')).toEqual(framesData)
+    expect(wrapper.findComponent(PieChart).exists()).toBe(false)
+  })
+
+  test('draws a heat tile of the counted data in heatmap mode', () => {
+    const wrapper = mountCell({ displayMode: 'heatmap' })
+    expect(wrapper.findComponent(StatsHeat).props('data')).toEqual(data)
     expect(wrapper.findComponent(PieChart).exists()).toBe(false)
   })
 })

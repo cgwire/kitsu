@@ -1578,6 +1578,7 @@
       "display_mode": "Visualización",
       "frames": "Fotogramas",
       "pie": "Gráficos circulares",
+      "heatmap": "Mapa de calor",
       "shots": "Tomas",
       "data_mode": "Datos",
       "retakes": "Retomas",

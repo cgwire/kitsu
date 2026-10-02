@@ -2068,6 +2068,7 @@ export default {
     drawings: 'Drawings',
     episode_status: 'Episode status',
     frames: 'Frames',
+    heatmap: 'Heatmap',
     only_running: 'Only running',
     pie: 'Pie charts',
     retakes: 'Retakes',

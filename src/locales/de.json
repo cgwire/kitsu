@@ -1578,6 +1578,7 @@
       "display_mode": "Anzeigemodus",
       "frames": "Einzelbilder",
       "pie": "Kreisdiagramme",
+      "heatmap": "Heatmap",
       "shots": "Shots",
       "data_mode": "Daten",
       "retakes": "Retakes",
