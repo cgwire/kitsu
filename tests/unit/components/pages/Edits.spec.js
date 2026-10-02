@@ -131,6 +131,17 @@ describe('Edits page, CSV import', () => {
   })
 })
 
+describe('Edits page, search', () => {
+  test('applies the search on Enter', async () => {
+    const { wrapper, searchField, dispatched } = await mountPage()
+    searchField.value = 'e01'
+
+    await wrapper.findComponent({ name: 'SearchField' }).vm.$emit('enter', 'e01')
+
+    expect(dispatched('setEditSearch')).toContainEqual(['setEditSearch', 'e01'])
+  })
+})
+
 describe('Edits page, thumbnails import', () => {
   test('opens the modal and marks each edit while its preview uploads', async () => {
     const modalStub = buildAddThumbnailsModalStub()

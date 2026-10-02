@@ -8,7 +8,7 @@
               ref="edit-search-field"
               :can-save="true"
               @change="onSearchChange"
-              @enter="applySearch(searchField.getValue())"
+              @enter="applySearch"
               @save="saveSearchQuery"
               placeholder="ex: e01 edit=wip"
             />
