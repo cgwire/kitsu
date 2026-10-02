@@ -42,6 +42,7 @@
     },
     "asset_types": {
       "all_asset_types": "Tutti i tipi di asset",
+      "all_hidden": "Tutti i tipi di asset sono nascosti.",
       "create_error": "Si è verificato un errore durante il salvataggio di questo tipo di asset. Sei sicuro che non esista già un tipo di asset con un nome simile?",
       "delete_text": "Sei sicuro di voler rimuovere {name} dal database?",
       "delete_error": "Si è verificato un errore durante l'eliminazione di questo tipo di asset. Potrebbero esserci dati esistenti attualmente collegati. Sei sicuro che a questo tipo di asset non sia collegato nessun asset?",

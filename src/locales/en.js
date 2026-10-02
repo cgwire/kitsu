@@ -45,6 +45,7 @@ export default {
     add_asset_type_placeholder: '+ Add Asset Type',
     add_asset_type_to_library: 'Add an asset type to the library',
     all_asset_types: 'All asset types',
+    all_hidden: 'All asset types are hidden.',
     create_error: 'An error occurred while saving this asset type. Are you sure there is no asset type with a similar name?',
     delete_text: 'Are you sure you want to remove {name} from your database?',
     delete_error: 'An error occurred while deleting this asset type. There may be existing data currently linked to it. Are you sure this asset type has no asset linked to it?',

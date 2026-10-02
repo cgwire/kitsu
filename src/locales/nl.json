@@ -42,6 +42,7 @@
     },
     "asset_types": {
       "all_asset_types": "Alle assettypes",
+      "all_hidden": "Alle assettypes zijn verborgen.",
       "create_error": "Er is een fout opgetreden bij het opslaan van dit assettype. Weet je zeker dat er geen assettype bestaat met dezelfde naam?",
       "delete_text": "Weet je zeker dat je {name} uit de database wilt verwijderen?",
       "delete_error": "Er is een fout opgetreden bij het verwijderen van dit asset-type. Er zijn waarschijnlijk assets aan verbonden. Weet u zeker dat er geen assets aan dit asset-type verbonden zijn?",

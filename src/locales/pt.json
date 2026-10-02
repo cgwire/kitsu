@@ -42,6 +42,7 @@
     },
     "asset_types": {
       "all_asset_types": "Todos os tipos de assets",
+      "all_hidden": "Todos os tipos de assets estão ocultos.",
       "create_error": "Ocorreu um erro ao salvar este tipo de asset. Tem certeza de que não há nenhum tipo de asset com nome semelhante?",
       "delete_text": "Tem certeza de que deseja remover {name} de seu banco de dados?",
       "delete_error": "Ocorreu um erro ao excluir este tipo de ativo. Provavelmente há dados vinculados a ele. Tem certeza de que este tipo de ativo não possui nenhum ativo vinculado a ele?",

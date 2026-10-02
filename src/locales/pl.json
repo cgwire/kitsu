@@ -44,6 +44,7 @@
       "add_asset_type_placeholder": "+ Dodaj typ assetu",
       "add_asset_type_to_library": "Dodaj typ assetu do biblioteki",
       "all_asset_types": "Wszystkie typy assetów",
+      "all_hidden": "Wszystkie typy assetów są ukryte.",
       "create_error": "Wystąpił błąd podczas zapisywania tego typu assetu. Czy na pewno nie istnieje już typ assetu o podobnej nazwie?",
       "delete_text": "Czy na pewno chcesz usunąć {name} z bazy danych?",
       "delete_error": "Wystąpił błąd podczas usuwania tego typu assetu. Mogą istnieć dane, które są z nim powiązane. Czy na pewno żaden asset nie jest powiązany z tym typem assetu?",

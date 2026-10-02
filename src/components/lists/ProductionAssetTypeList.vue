@@ -1,6 +1,6 @@
 <template>
   <div class="data-list">
-    <div class="datatable-wrapper" ref="body" @scroll.passive="onBodyScroll">
+    <div class="datatable-wrapper">
       <table class="datatable">
         <thead class="datatable-head">
           <tr>
@@ -41,9 +41,13 @@
           </tr>
         </thead>
         <tbody class="datatable-body" v-if="!isLoading">
-          <tr class="all-line datatable-row" v-if="showAll && !isEmptyList">
+          <tr class="all-line datatable-row" v-if="entries.length > 0">
             <th scope="row" class="name datatable-row-header">
               {{ $t('asset_types.all_asset_types') }}
+              <span class="asset-count">
+                {{ totalAssetCount }}
+                {{ $t('assets.number', { count: totalAssetCount }) }}
+              </span>
             </th>
 
             <stats-cell
@@ -66,7 +70,13 @@
 
           <tr class="datatable-row" :key="entry.id" v-for="entry in entries">
             <td class="name datatable-row-header">
-              {{ entry.name }}
+              <router-link :to="assetsPath(entry)">
+                {{ entry.name }}
+              </router-link>
+              <span class="asset-count">
+                {{ assetCount(entry.id) }}
+                {{ $t('assets.number', { count: assetCount(entry.id) }) }}
+              </span>
             </td>
 
             <stats-cell
@@ -113,12 +123,15 @@
       v-if="isEmptyList"
     />
 
+    <p class="has-text-centered all-hidden" v-if="isAllHidden">
+      {{ $t('asset_types.all_hidden') }}
+    </p>
     <p
       class="has-text-centered nb-asset-types"
-      v-if="!isEmptyList && !isLoading"
+      v-else-if="!isEmptyList && !isLoading"
     >
-      {{ displayedAssetTypesLength }}
-      {{ $t('asset_types.number', { count: displayedAssetTypesLength }) }}
+      {{ entries.length }}
+      {{ $t('asset_types.number', { count: entries.length }) }}
     </p>
   </div>
 </template>
@@ -126,11 +139,12 @@
 <script setup>
 // Imports
 // --------------------------------------------------------------------------
-import { computed, useTemplateRef } from 'vue'
+import { computed } from 'vue'
 import { useStore } from 'vuex'
 
 import emptyAssetIllustration from '@/assets/illustrations/empty_asset.png'
 import colors from '@/lib/colors'
+import { getEntitiesPath } from '@/lib/path'
 import { getChartColors, getChartData } from '@/lib/stats'
 
 import StatsCell from '@/components/cells/StatsCell.vue'
@@ -142,29 +156,20 @@ const store = useStore()
 // Props / Emits
 // --------------------------------------------------------------------------
 const props = defineProps({
+  assetCounts: { type: Object, default: () => ({}) },
   assetTypeStats: { type: Object, default: () => ({}) },
   displayMode: { type: String, default: 'pie' },
   entries: { type: Array, default: () => [] },
   isError: { type: Boolean, default: false },
+  isFiltered: { type: Boolean, default: false },
   isLoading: { type: Boolean, default: false },
-  showAll: { type: Boolean, default: false },
   validationColumns: { type: Array, default: () => [] }
 })
 
-const emit = defineEmits(['scroll'])
-
-// State
-// --------------------------------------------------------------------------
-const bodyRef = useTemplateRef('body')
-
 // Computed
 // --------------------------------------------------------------------------
-const assetTypeSearchText = computed(() => store.getters.assetTypeSearchText)
 const currentEpisode = computed(() => store.getters.currentEpisode)
 const currentProduction = computed(() => store.getters.currentProduction)
-const displayedAssetTypesLength = computed(
-  () => store.getters.displayedAssetTypesLength
-)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 const isTVShow = computed(() => store.getters.isTVShow)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
@@ -174,11 +179,25 @@ const isEmptyList = computed(
     props.entries.length === 0 &&
     !props.isLoading &&
     !props.isError &&
-    !assetTypeSearchText.value
+    !props.isFiltered
+)
+
+const isAllHidden = computed(
+  () =>
+    props.isFiltered &&
+    props.entries.length === 0 &&
+    !props.isLoading &&
+    !props.isError
+)
+
+const totalAssetCount = computed(() =>
+  props.entries.reduce((total, entry) => total + assetCount(entry.id), 0)
 )
 
 // Functions
 // --------------------------------------------------------------------------
+const assetCount = entryId => props.assetCounts[entryId] || 0
+
 const chartColors = (entryId, columnId) =>
   getChartColors(props.assetTypeStats, entryId, columnId)
 
@@ -209,15 +228,14 @@ const taskTypePath = taskTypeId => {
   }
 }
 
-const onBodyScroll = event => {
-  emit('scroll', event.target.scrollTop)
-}
-
-const setScrollPosition = scrollPosition => {
-  if (bodyRef.value) bodyRef.value.scrollTop = scrollPosition
-}
-
-defineExpose({ setScrollPosition })
+const assetsPath = assetType => ({
+  ...getEntitiesPath(
+    currentProduction.value?.id,
+    'assets',
+    isTVShow.value ? currentEpisode.value?.id : null
+  ),
+  query: { search: `type=[${assetType.name}]` }
+})
 </script>
 
 <style lang="scss" scoped>
@@ -234,6 +252,13 @@ defineExpose({ setScrollPosition })
 
 td.name {
   font-size: 1.2em;
+}
+
+.asset-count {
+  display: block;
+  color: var(--text-alt);
+  font-size: 0.8rem;
+  font-weight: normal;
 }
 
 .validation {

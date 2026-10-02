@@ -6,6 +6,7 @@ vi.mock('@/store', () => ({ default: {} }))
 import EpisodeStatsList from '@/components/lists/EpisodeStatsList.vue'
 import ProductionAssetTypeList from '@/components/lists/ProductionAssetTypeList.vue'
 import SequenceStatsList from '@/components/lists/SequenceStatsList.vue'
+import EmptyList from '@/components/widgets/EmptyList.vue'
 
 const retakeStats = {
   'episode-1': {
@@ -30,7 +31,6 @@ const mountList = (component, props = {}, getters = {}) => {
     getters: {
       currentEpisode: () => null,
       currentProduction: () => ({ id: 'production-1' }),
-      displayedAssetTypesLength: () => 1,
       displayedEpisodesLength: () => 1,
       displayedSequencesLength: () => 1,
       episodeRetakeStats: () => retakeStats,
@@ -38,7 +38,6 @@ const mountList = (component, props = {}, getters = {}) => {
       episodeStats: () => ({}),
       isCurrentUserClient: () => false,
       isTVShow: () => false,
-      assetTypeSearchText: () => '',
       sequenceSearchText: () => '',
       taskTypeMap: () => new Map(),
       ...getters
@@ -58,7 +57,6 @@ const mountList = (component, props = {}, getters = {}) => {
 // stay reachable from the parent.
 describe.each([
   ['EpisodeStatsList', EpisodeStatsList, {}],
-  ['ProductionAssetTypeList', ProductionAssetTypeList, { assetTypeStats: {} }],
   ['SequenceStatsList', SequenceStatsList, { sequenceStats: {} }]
 ])('lists/%s', (name, component, props) => {
   test('restores the scroll position asked by the page', () => {
@@ -75,10 +73,95 @@ describe.each([
     expect(wrapper.emitted('scroll')).toEqual([[80]])
   })
 
+})
+
+describe.each([
+  ['EpisodeStatsList', EpisodeStatsList, {}],
+  ['ProductionAssetTypeList', ProductionAssetTypeList, { assetTypeStats: {} }],
+  ['SequenceStatsList', SequenceStatsList, { sequenceStats: {} }]
+])('lists/%s', (name, component, props) => {
   // scope is only valid on header cells.
   test('puts no scope on data cells', () => {
     const wrapper = mountList(component, { ...props, showAll: true })
     expect(wrapper.findAll('td[scope]')).toHaveLength(0)
+  })
+})
+
+describe('lists/ProductionAssetTypeList', () => {
+  const entries = [
+    { id: 'chars', name: 'Characters' },
+    { id: 'props', name: 'Props' }
+  ]
+  const mountAssetTypes = (props = {}, getters = {}) =>
+    mountList(
+      ProductionAssetTypeList,
+      { entries, assetCounts: { chars: 12, props: 3 }, ...props },
+      getters
+    )
+
+  test('links an asset type to the assets filtered on it', () => {
+    const wrapper = mountAssetTypes()
+    expect(wrapper.findComponent(RouterLinkStub).props('to')).toEqual({
+      name: 'assets',
+      params: { production_id: 'production-1' },
+      query: { search: 'type=[Characters]' }
+    })
+  })
+
+  test('keeps the link inside the current episode', () => {
+    const wrapper = mountAssetTypes(
+      {},
+      { isTVShow: () => true, currentEpisode: () => ({ id: 'episode-1' }) }
+    )
+    expect(wrapper.findComponent(RouterLinkStub).props('to')).toEqual({
+      name: 'episode-assets',
+      params: { production_id: 'production-1', episode_id: 'episode-1' },
+      query: { search: 'type=[Characters]' }
+    })
+  })
+
+  test('shows the number of assets of each type', () => {
+    const wrapper = mountAssetTypes()
+    const counts = wrapper
+      .findAll('td.name .asset-count')
+      .map(count => count.text())
+    expect(counts).toEqual(['12 assets.number', '3 assets.number'])
+  })
+
+  test('totals the assets of the displayed types', () => {
+    const wrapper = mountAssetTypes()
+    expect(wrapper.find('.all-line .asset-count').text()).toBe(
+      '15 assets.number'
+    )
+  })
+
+  test('counts the displayed asset types', () => {
+    const wrapper = mountAssetTypes()
+    expect(wrapper.find('.nb-asset-types').text()).toBe('2 asset_types.number')
+  })
+
+  test('invites to create assets when the production has none', () => {
+    const wrapper = mountAssetTypes({ entries: [] })
+    expect(wrapper.findComponent(EmptyList).exists()).toBe(true)
+  })
+
+  // Hiding every asset type empties the table of a production that has assets.
+  test('says that every asset type is hidden rather than that there is no asset', () => {
+    const wrapper = mountAssetTypes({ entries: [], isFiltered: true })
+    expect(wrapper.findComponent(EmptyList).exists()).toBe(false)
+    expect(wrapper.find('.all-hidden').text()).toBe('asset_types.all_hidden')
+    expect(wrapper.find('.nb-asset-types').exists()).toBe(false)
+  })
+
+  test('keeps the hidden message for an empty table only', () => {
+    const wrapper = mountAssetTypes({ isFiltered: true })
+    expect(wrapper.find('.all-hidden').exists()).toBe(false)
+    expect(wrapper.find('.nb-asset-types').exists()).toBe(true)
+  })
+
+  test('hides the total row when no asset type is displayed', () => {
+    const wrapper = mountAssetTypes({ entries: [] })
+    expect(wrapper.find('.all-line').exists()).toBe(false)
   })
 })
 

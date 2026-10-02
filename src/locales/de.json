@@ -42,6 +42,7 @@
     },
     "asset_types": {
       "all_asset_types": "Alle Assettypen",
+      "all_hidden": "Alle Assettypen sind ausgeblendet.",
       "create_error": "Beim Speichern dieses Asset-Typs ist ein Fehler aufgetreten. Sind Sie sicher, dass es keinen Asset-Typ mit einem ähnlichen Namen gibt?",
       "delete_text": "Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten?",
       "delete_error": "Beim Löschen dieses Asset-Typs ist ein Fehler aufgetreten. Wahrscheinlich sind damit Daten verknüpft. Sind Sie sicher, dass mit diesem Asset-Typ kein Asset verknüpft ist?",

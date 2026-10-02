@@ -4,9 +4,11 @@ import {
   aggregateRetakeStats,
   aggregateStats,
   computeStats,
+  countEntities,
   getChartData,
   getChartColors,
-  getPercentage
+  getPercentage,
+  omitStatsColumns
 } from '@/lib/stats'
 
 const taskMap = new Map(Object.entries({
@@ -132,6 +134,39 @@ const expectedStatResult = {
 }
 
 describe('lib/stats', () => {
+  it('omitStatsColumns - drops the columns and rebuilds the all column', () => {
+    const entry = (count, frames) => ({
+      done: { name: 'done', color: 'green', count, frames, drawings: 0 }
+    })
+    const entryStats = {
+      all: entry(3, 30),
+      'task-type-1': entry(1, 10),
+      'task-type-2': entry(2, 20)
+    }
+    expect(omitStatsColumns(entryStats, ['task-type-2'])).toEqual({
+      all: entry(1, 10),
+      'task-type-1': entry(1, 10)
+    })
+    expect(omitStatsColumns(entryStats, [])).toEqual(entryStats)
+    expect(omitStatsColumns(entryStats, ['task-type-1', 'task-type-2'])).toEqual(
+      { all: {} }
+    )
+    expect(entryStats.all.done.count).toBe(3)
+  })
+
+  it('countEntities - counts the entities of each group, canceled ones aside', () => {
+    const assets = [
+      { id: 'asset-1', asset_type_id: 'chars' },
+      { id: 'asset-2', asset_type_id: 'chars' },
+      { id: 'asset-3', asset_type_id: 'chars', canceled: true },
+      { id: 'asset-4', asset_type_id: 'props' }
+    ]
+    expect(countEntities(assets, 'asset_type_id')).toEqual({
+      chars: 2,
+      props: 1
+    })
+  })
+
   it('computeStats - empty list', () => {
     const shots = []
     const stats = computeStats(shots, 'sequence_id', taskStatusMap, taskMap)

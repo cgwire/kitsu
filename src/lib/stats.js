@@ -126,6 +126,16 @@ export const computeStats = (entities, idField, taskStatusMap, taskMap) => {
   return results
 }
 
+// Count the entities of each group. Canceled ones are left out, as in
+// computeStats.
+export const countEntities = (entities, idField) =>
+  entities.reduce((counts, entity) => {
+    if (!entity.canceled) {
+      counts[entity[idField]] = (counts[entity[idField]] || 0) + 1
+    }
+    return counts
+  }, {})
+
 // Add to result map, statistic for given task (add 1 for task status matching
 // given task).
 // Increment: all stats, task type stats, entity stats, and task type for
@@ -214,6 +224,23 @@ export const aggregateStats = (mainStats, entryIds) => {
     })
   })
   return result
+}
+
+// Drop the given columns of an entry and rebuild its "all" column from the
+// remaining ones.
+export const omitStatsColumns = (entryStats, hiddenColumnIds) => {
+  const columnIds = Object.keys(entryStats).filter(
+    id => id !== 'all' && !hiddenColumnIds.includes(id)
+  )
+  // aggregateStats sums entries: each kept column is given to it as an entry
+  // holding a single "all" column.
+  const columns = Object.fromEntries(
+    columnIds.map(id => [id, { all: entryStats[id] }])
+  )
+  return {
+    ...Object.fromEntries(columnIds.map(id => [id, entryStats[id]])),
+    all: aggregateStats(columns, columnIds).all || {}
+  }
 }
 
 // Same as aggregateStats for retake stats (retake / done / other buckets).

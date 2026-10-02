@@ -42,6 +42,7 @@
     },
     "asset_types": {
       "all_asset_types": "Alle asset-typer",
+      "all_hidden": "Alle asset-typer er skjult.",
       "create_error": "Der opstod en fejl under gemning af denne asset-type. Er du sikker på, at der ikke er en asset-type med et lignende navn?",
       "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database?",
       "delete_error": "Der opstod en fejl under sletningen af denne asset-type. Der kan være eksisterende data, der er knyttet til den. Er du sikker på, at denne asset-type ikke har nogen asset knyttet til den?",

@@ -32,10 +32,9 @@ import {
   groupEntitiesByParents,
   removeModelFromList
 } from '@/lib/models'
-import { computeStats } from '@/lib/stats'
+import { computeStats, countEntities } from '@/lib/stats'
 import {
   buildAssetIndex,
-  buildNameIndex,
   getAssetIndexWords,
   indexSearch,
   removeEntryFromIndex,
@@ -69,7 +68,6 @@ import {
   DISPLAY_MORE_ASSETS,
   SET_PREVIEW,
   SET_ASSET_LIST_SCROLL_POSITION,
-  SET_PRODUCTION_ASSET_TYPE_LIST_SCROLL_POSITION,
   REMOVE_SELECTED_TASK,
   ADD_SELECTED_TASK,
   ADD_SELECTED_TASKS,
@@ -77,7 +75,6 @@ import {
   CREATE_TASKS_END,
   SAVE_ASSET_SEARCH_END,
   REMOVE_ASSET_SEARCH_END,
-  SET_ASSET_TYPE_SEARCH,
   SAVE_ASSET_SEARCH_FILTER_GROUP_END,
   REMOVE_ASSET_SEARCH_FILTER_GROUP_END,
   COMPUTE_ASSET_TYPE_STATS,
@@ -296,7 +293,6 @@ const cache = {
   assetsLoadingPromise: null,
   assetMap: new Map(),
   assetIndex: {},
-  assetTypeIndex: {},
   result: [],
   sharedAssetIndex: {}
 }
@@ -318,10 +314,8 @@ const initialState = {
   assetSearchFilterGroups: [],
   assetSorting: [],
 
-  displayedAssetTypes: [],
-  displayedAssetTypesLength: 0,
-  assetTypeSearchText: '',
   assetTypeStats: {},
+  assetTypeAssetCounts: {},
   assetTypes: [],
 
   isAssetsLoading: false,
@@ -369,11 +363,9 @@ const getters = {
   displayedAssetsEstimation: state => state.displayedAssetsEstimation,
   assetFilledColumns: state => state.assetFilledColumns,
 
-  displayedAssetTypes: state => state.displayedAssetTypes,
-  displayedAssetTypesLength: state => state.displayedAssetTypesLength,
-  assetTypeSearchText: state => state.assetTypeSearchText,
+  usedAssetTypes: state => state.assetTypes,
   assetTypeStats: state => state.assetTypeStats,
-  assetTypeListScrollPosition: state => state.assetTypeListScrollPosition,
+  assetTypeAssetCounts: state => state.assetTypeAssetCounts,
   assetSorting: state => state.assetSorting,
 
   assetListScrollPosition: state => state.assetListScrollPosition,
@@ -785,25 +777,10 @@ const actions = {
     })
   },
 
-  initAssetTypes({ dispatch }) {
-    dispatch('setLastProductionScreen', 'production-asset-types')
-    return dispatch('loadAssets').then(() => {
-      dispatch('computeAssetTypeStats')
-    })
-  },
-
-  setAssetTypeListScrollPosition({ commit }, scrollPosition) {
-    commit(SET_PRODUCTION_ASSET_TYPE_LIST_SCROLL_POSITION, scrollPosition)
-  },
-
   computeAssetTypeStats({ commit, rootGetters }) {
     const taskStatusMap = rootGetters.taskStatusMap
     const taskMap = rootGetters.taskMap
     commit(COMPUTE_ASSET_TYPE_STATS, { taskStatusMap, taskMap })
-  },
-
-  setAssetTypeSearch({ commit }, searchQuery) {
-    commit(SET_ASSET_TYPE_SEARCH, searchQuery)
   },
 
   getAssetsCsvLines({ state, rootGetters }) {
@@ -1097,7 +1074,6 @@ const mutations = {
     })
 
     const assetTypes = Array.from(assetTypeMap.values())
-    cache.assetTypeIndex = buildNameIndex(assetTypes)
     const displayedAssets = cache.assets.slice(0, PAGE_SIZE)
     const filledColumns = getFilledColumns(displayedAssets)
 
@@ -1121,8 +1097,6 @@ const mutations = {
     state.assetFilledColumns = filledColumns
 
     state.assetTypes = assetTypes
-    state.displayedAssetTypes = assetTypes
-    state.displayedAssetTypesLength = assetTypes.length
 
     state.assetSelectionGrid = buildSelectionGrid()
 
@@ -1470,10 +1444,6 @@ const mutations = {
     state.assetListScrollPosition = scrollPosition
   },
 
-  [SET_PRODUCTION_ASSET_TYPE_LIST_SCROLL_POSITION](state, scrollPosition) {
-    state.assetTypeListScrollPosition = scrollPosition
-  },
-
   [REMOVE_SELECTED_TASK](state, validationInfo) {
     if (
       validationInfo.x === undefined &&
@@ -1550,18 +1520,6 @@ const mutations = {
     })
   },
 
-  [SET_ASSET_TYPE_SEARCH](state, searchQuery) {
-    const keywords = getKeyWords(searchQuery)
-    const result =
-      indexSearch(cache.assetTypeIndex, keywords) || state.assetTypes
-
-    Object.assign(state, {
-      displayedAssetTypes: result,
-      displayedAssetTypesLength: result ? result.length : 0,
-      assetTypeSearchText: searchQuery
-    })
-  },
-
   [COMPUTE_ASSET_TYPE_STATS](state, { taskStatusMap, taskMap }) {
     state.assetTypeStats = computeStats(
       cache.assets,
@@ -1569,6 +1527,7 @@ const mutations = {
       taskStatusMap,
       taskMap
     )
+    state.assetTypeAssetCounts = countEntities(cache.assets, 'asset_type_id')
   },
 
   [CHANGE_ASSET_SORT](
