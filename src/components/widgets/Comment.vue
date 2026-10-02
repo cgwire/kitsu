@@ -23,7 +23,7 @@
             :size="25"
             :font-size="12"
             :person="comment.person"
-            :is-link="!isCurrentUserClient"
+            :is-link="isAvatarLink"
             v-if="comment.person?.id"
           />
           <people-name
@@ -185,7 +185,7 @@
                       :size="18"
                       :font-size="10"
                       :person="replyComment.person"
-                      :is-link="!isCurrentUserClient"
+                      :is-link="isAvatarLink"
                     />
                     <people-name
                       class="flexrow-item strong"
@@ -488,7 +488,7 @@
           :person="comment.person"
           :size="25"
           :font-size="12"
-          :is-link="!isCurrentUserClient"
+          :is-link="isAvatarLink"
         />
         <people-name class="flexrow-item strong" :person="comment.person" />
         <span class="filler"> </span>
@@ -745,6 +745,11 @@ const isConcept = computed(() => {
 })
 
 const canToggleForClient = computed(() => isCurrentUserManager.value)
+
+// The person page sits behind the login, and stays out of the clients' reach.
+const isAvatarLink = computed(
+  () => Boolean(user.value) && !isCurrentUserClient.value
+)
 
 const isPreviewBound = computed(() => {
   return Boolean(

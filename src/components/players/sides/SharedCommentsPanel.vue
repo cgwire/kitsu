@@ -280,11 +280,22 @@ const taskComments = computed(() =>
 
 // Functions — helpers
 
+// The store keeps initials for the people of the link (see
+// populatePersonMap): the comment widgets get their picture from the link.
+const sharedPerson = (personId, embedded) => {
+  const person = store.getters.personMap.get(personId) || embedded
+  if (!person || !embedded?.has_avatar) return person
+  return {
+    ...person,
+    has_avatar: true,
+    avatarPath: `/api/shared/playlists/${props.token}/pictures/thumbnails/persons/${personId}.png`
+  }
+}
+
 const normalizeComment = comment => {
-  const enrichedPerson = store.getters.personMap.get(comment.person_id)
   return {
     ...comment,
-    person: enrichedPerson || comment.person || {},
+    person: sharedPerson(comment.person_id, comment.person) || {},
     text: comment.text || '',
     checklist: comment.checklist || [],
     attachment_files: comment.attachment_files || [],
@@ -292,7 +303,10 @@ const normalizeComment = comment => {
     acknowledgements: comment.acknowledgements || [],
     mentions: comment.mentions || [],
     department_mentions: comment.department_mentions || [],
-    replies: comment.replies || [],
+    replies: (comment.replies || []).map(reply => ({
+      ...reply,
+      person: sharedPerson(reply.person_id, reply.person)
+    })),
     task_status: comment.task_status || {}
   }
 }
@@ -319,22 +333,26 @@ const buildFullName = person => {
   return fromNames || person.email || person.name || 'Guest'
 }
 
-// Comment authors are not in the regular people store; surface them so
-// avatars and mentions resolve in the embedded comment widgets.
+// Comment and reply authors are not in the regular people store; surface
+// them so avatars and mentions resolve in the embedded comment widgets.
 const populatePersonMap = () => {
   const byId = new Map()
-  comments.value.forEach(comment => {
-    if (comment.person?.id) {
-      byId.set(comment.person.id, {
-        ...comment.person,
-        full_name: comment.person.full_name || buildFullName(comment.person),
-        role: comment.person.role || 'client',
+  const register = person => {
+    if (person?.id) {
+      byId.set(person.id, {
+        ...person,
+        full_name: person.full_name || buildFullName(person),
+        role: person.role || 'client',
         // The shared playlist is unauthenticated and the auth-protected
         // /api/pictures/thumbnails/persons/<id>.png endpoint will 401.
         // Force initials-fallback avatars instead.
         has_avatar: false
       })
     }
+  }
+  comments.value.forEach(comment => {
+    register(comment.person)
+    comment.replies?.forEach(reply => register(reply.person))
   })
   if (byId.size > 0) {
     store.commit(LOAD_PEOPLE_END, {

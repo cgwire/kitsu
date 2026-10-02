@@ -20,6 +20,7 @@ vi.mock('moment', async () => {
 import i18n from '@/lib/i18n'
 
 import Comment from '@/components/widgets/Comment.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 
 import './setup'
 
@@ -262,6 +263,37 @@ describe('Comment', () => {
       const wrapper = mountWithReply('person-2', { user: null })
       expect(wrapper.text()).toContain('A reply')
       expect(wrapper.find('.reply-delete').exists()).toBe(false)
+    })
+  })
+
+  describe('avatar links', () => {
+    const comment = makeComment({
+      replies: [
+        {
+          id: 'reply-1',
+          text: 'A reply',
+          mentions: [],
+          department_mentions: [],
+          person_id: 'person-2',
+          person: { id: 'person-2', role: 'user' },
+          date: '2026-06-06T11:00:00'
+        }
+      ]
+    })
+
+    const avatarLinks = wrapper =>
+      wrapper
+        .findAllComponents(PeopleAvatar)
+        .map(avatar => avatar.props('isLink'))
+
+    test('lead to the page of the author and of the repliers', () => {
+      expect(avatarLinks(mountComment({ comment }))).toEqual([true, true])
+    })
+
+    // The person page sits behind the login.
+    test('stay inert for an anonymous guest', () => {
+      const wrapper = mountComment({ comment, storeOptions: { user: null } })
+      expect(avatarLinks(wrapper)).toEqual([false, false])
     })
   })
 
