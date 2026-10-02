@@ -73,6 +73,20 @@ describe('modals/EditShotModal', () => {
     expect(confirmForm(wrapper).nb_frames).toBe(110)
   })
 
+  it('counts one frame when the frame out meets the frame in', async () => {
+    const wrapper = mountModal({
+      ...shot,
+      data: { frame_in: 1, frame_out: 100 }
+    })
+    await nextTick()
+    findField(wrapper, 'shots.fields.frame_out').vm.$emit(
+      'update:model-value',
+      1
+    )
+    await nextTick()
+    expect(confirmForm(wrapper).nb_frames).toBe(1)
+  })
+
   it('keeps the frame count while a bound is empty', async () => {
     const wrapper = mountModal({ ...shot, nb_frames: 24, data: {} })
     await nextTick()

@@ -124,7 +124,7 @@ describe('Shots page, reload of another episode', () => {
 // A bound typed in the list sets the frame count when the shot holds the
 // other one, and a frame in of 0 is held like any other.
 describe('Shots page, frame range edit', () => {
-  const typeFrameOut = async data => {
+  const typeFrameOut = async (data, value = 99) => {
     shotStore.cache.shotMap.set('shot-1', { ...shot('shot-1'), data })
     const page = await mountPage()
     await page.wrapper.findComponent({ name: 'ShotList' }).vm.$emit(
@@ -132,7 +132,7 @@ describe('Shots page, frame range edit', () => {
       {
         entry: { id: 'shot-1' },
         descriptor: { field_name: 'frame_out' },
-        value: 99
+        value
       }
     )
     await flushPromises()
@@ -145,6 +145,16 @@ describe('Shots page, frame range edit', () => {
       data: { frame_out: 99 },
       nb_frames: 100
     })
+  })
+
+  test('counts one frame when the frame out meets the frame in', async () => {
+    const range = { frame_in: 1, frame_out: 100 }
+    expect(await typeFrameOut(range, 1)).toMatchObject({ nb_frames: 1 })
+  })
+
+  test('leaves the frame count alone for a frame out before the frame in', async () => {
+    const range = { frame_in: 1, frame_out: 100 }
+    expect(await typeFrameOut(range, 0)).not.toHaveProperty('nb_frames')
   })
 
   test('leaves the frame count alone without a frame in', async () => {

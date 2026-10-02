@@ -689,7 +689,7 @@ const getFrameCount = (shot, fieldName, value) => {
   if (!['frame_in', 'frame_out'].includes(fieldName) || !isOtherBoundSet) {
     return undefined
   }
-  return frameOut > frameIn ? frameOut - frameIn + 1 : undefined
+  return frameOut >= frameIn ? frameOut - frameIn + 1 : undefined
 }
 
 const onMetadataChanged = async ({ entry, descriptor, value }) => {

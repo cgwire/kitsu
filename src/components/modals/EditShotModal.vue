@@ -178,7 +178,7 @@ const updateNbFramesFromRange = () => {
   if (bounds.some(value => value === '' || value == null)) return
   const frameIn = sanitizeInteger(form.value.frameIn)
   const frameOut = sanitizeInteger(form.value.frameOut)
-  if (frameOut > frameIn) {
+  if (frameOut >= frameIn) {
     form.value.nb_frames = frameOut - frameIn + 1
   }
 }
