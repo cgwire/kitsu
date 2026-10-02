@@ -128,4 +128,35 @@ describe('ComboboxStyled', () => {
     await wrapper.find('.combo').trigger('click')
     expect(wrapper.find('.c-mask.is-active').exists()).toBe(true)
   })
+
+  describe('on a middle click', () => {
+    let openSpy
+
+    beforeEach(() => {
+      openSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
+    })
+
+    afterEach(() => {
+      openSpy.mockRestore()
+    })
+
+    it('opens the option route in a new tab', async () => {
+      await wrapper.setProps({
+        options: [{ label: 'All', value: 'all', route: { path: '/casting' } }],
+        modelValue: 'all'
+      })
+      await wrapper.find('.combo').trigger('click')
+      await wrapper.find('.option-line').trigger('click.middle')
+      expect(openSpy).toHaveBeenCalledWith(
+        `${window.location.origin}/casting`,
+        '_blank'
+      )
+    })
+
+    it('ignores an option without a route', async () => {
+      await wrapper.find('.combo').trigger('click')
+      await wrapper.find('.option-line').trigger('click.middle')
+      expect(openSpy).not.toHaveBeenCalled()
+    })
+  })
 })

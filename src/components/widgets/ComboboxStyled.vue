@@ -180,6 +180,7 @@ const selectedOptionLabel = computed(() => {
 })
 
 const openRoute = option => {
+  if (!option.route) return
   const ahref = router.resolve(option.route).href
   const url = `${window.location.protocol}//${window.location.host}${ahref}`
   window.open(url, '_blank')
