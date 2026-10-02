@@ -119,6 +119,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
+import { filterPeople, roleOptions } from '@/lib/people'
 import { sortPeople } from '@/lib/sorting'
 
 /* eslint-disable no-unused-vars */
@@ -171,16 +172,6 @@ const teamPersons = computed(() =>
   )
 )
 
-// the roles a team member can hold, as the list shows them
-const roleOptions = [
-  'all',
-  'admin',
-  'manager',
-  'supervisor',
-  'user',
-  'vendor'
-].map(name => ({ label: name, value: name }))
-
 // the filters live in the query so that a reload or a shared link keeps
 // them; defaults stay out of the URL
 const departmentId = computed({
@@ -194,11 +185,11 @@ const role = computed({
 })
 
 const filteredTeam = computed(() =>
-  teamPersons.value.filter(
-    person =>
-      (role.value === 'all' || roleOf(person) === role.value) &&
-      (!departmentId.value || person.departments?.includes(departmentId.value))
-  )
+  filterPeople(teamPersons.value, {
+    departmentId: departmentId.value,
+    role: role.value,
+    projectRoles: projectRoles.value
+  })
 )
 
 const unlistedPeople = computed(() =>
@@ -210,11 +201,6 @@ const unlistedPeople = computed(() =>
 // Functions
 const pushQuery = (key, value) =>
   router.push({ query: { ...route.query, [key]: value || undefined } })
-
-// the role held in the production, as the list displays it: admins ignore
-// the project overrides
-const roleOf = person =>
-  (person.role !== 'admin' && projectRoles.value[person.id]) || person.role
 
 const addPersonToTeam = personToAdd =>
   store.dispatch('addPersonToTeam', personToAdd)
