@@ -277,6 +277,99 @@ describe('Task.vue', () => {
     })
   })
 
+  // The client sees the name and avatar of whoever answers a comment it is
+  // shown: there, the production managers answer for the studio, and the
+  // client once it is mentioned.
+  describe('reply permissions', () => {
+    const comments = [
+      { id: 'internal', person: { id: 'author-1', role: 'supervisor' } },
+      {
+        id: 'for-client',
+        for_client: true,
+        person: { id: 'author-1', role: 'supervisor' }
+      },
+      { id: 'from-client', person: { id: 'client-1', role: 'client' } },
+      {
+        id: 'own-for-client',
+        for_client: true,
+        person: { id: 'user-1', role: 'user' }
+      }
+    ]
+
+    const replyable = wrapper =>
+      Object.fromEntries(
+        wrapper
+          .findAllComponents(Comment)
+          .map(component => [
+            component.props('comment').id,
+            component.props('isReplyable')
+          ])
+      )
+
+    it('keeps an assignee out of the client threads, its own included', async () => {
+      const { wrapper } = await mountPage({
+        task: buildTask({ assignees: ['user-1'] }),
+        comments
+      })
+      expect(replyable(wrapper)).toEqual({
+        internal: true,
+        'for-client': false,
+        'from-client': false,
+        'own-for-client': false
+      })
+    })
+
+    describe('as a client', () => {
+      const mountAsClient = mentions =>
+        mountPage({
+          comments: [
+            { id: 'internal', person: { id: 'author-1', role: 'supervisor' } },
+            {
+              id: 'for-client',
+              for_client: true,
+              mentions,
+              person: { id: 'author-1', role: 'supervisor' }
+            },
+            { id: 'own', person: { id: 'user-1', role: 'client' } }
+          ],
+          getterOverrides: { isCurrentUserClient: () => true }
+        })
+
+      it('answers its own comments only', async () => {
+        const { wrapper } = await mountAsClient([])
+        expect(replyable(wrapper)).toEqual({
+          internal: false,
+          'for-client': false,
+          own: true
+        })
+      })
+
+      // An internal comment reaches the client emptied of its text: an
+      // answer there would land in a thread the client never sees.
+      it('answers the threads it sees once mentioned', async () => {
+        const { wrapper } = await mountAsClient(['user-1'])
+        expect(replyable(wrapper)).toEqual({
+          internal: false,
+          'for-client': true,
+          own: true
+        })
+      })
+    })
+
+    it('lets a manager answer every thread', async () => {
+      const { wrapper } = await mountPage({
+        comments,
+        getterOverrides: { isCurrentUserProductionManager: () => true }
+      })
+      expect(Object.values(replyable(wrapper))).toEqual([
+        true,
+        true,
+        true,
+        true
+      ])
+    })
+  })
+
   describe('task metadata', () => {
     const descriptor = {
       id: 'descriptor-1',

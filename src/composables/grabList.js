@@ -1,7 +1,5 @@
 /*
- * Composition API counterpart of `src/components/mixins/grablist.js`:
- * grab-and-drag scrolling for list wrappers. The legacy mixin stays in
- * place so existing Options API components keep working.
+ * Grab-and-drag scrolling for list wrappers.
  *
  * Wire `startBrowsing` on the grabbable area (tbody usually); document
  * level move/stop listeners are managed here.

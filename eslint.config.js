@@ -58,7 +58,6 @@ export default defineConfig([
 
       // Code quality
       eqeqeq: ['error', 'always', { null: 'ignore' }],
-      'no-constant-binary-expression': 'off',
       'no-empty-pattern': ['error', { allowObjectPatternsAsParameters: true }],
       'no-unused-vars': ['error', { args: 'none', caughtErrors: 'none' }],
       'no-var': 'error',

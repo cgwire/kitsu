@@ -23,13 +23,13 @@
             :size="25"
             :font-size="12"
             :person="comment.person"
-            :is-link="!isCurrentUserClient"
-            v-if="comment.person?.id"
+            :is-link="isAvatarLink"
+            v-if="comment.person?.id && !isAuthorHidden"
           />
           <people-name
             class="flexrow-item strong"
             :person="comment.person"
-            v-if="comment.person?.id"
+            v-if="comment.person?.id && !isAuthorHidden"
           />
           <div class="filler"></div>
           <span class="flexrow-item date" :title="fullDate">
@@ -185,7 +185,7 @@
                       :size="18"
                       :font-size="10"
                       :person="replyComment.person"
-                      :is-link="!isCurrentUserClient"
+                      :is-link="isAvatarLink"
                     />
                     <people-name
                       class="flexrow-item strong"
@@ -378,7 +378,7 @@
 
             <div
               class="flexrow"
-              :title="isLikedBy"
+              :title="isAcknowledgeable ? isLikedBy : undefined"
               v-if="
                 comment.text.length > 0 ||
                 comment.previews.length > 0 ||
@@ -393,6 +393,7 @@
                 }"
                 type="button"
                 @click="acknowledgeComment(comment)"
+                v-if="isAcknowledgeable"
               >
                 <thumbs-up-icon class="icon-1x" />
                 <span>{{ comment.acknowledgements.length }}</span>
@@ -419,7 +420,9 @@
             <div
               class="edited-text"
               v-if="
-                comment.editor_id && comment.editor_id !== comment.person_id
+                comment.editor_id &&
+                comment.editor_id !== comment.person_id &&
+                !isAuthorHidden
               "
             >
               {{
@@ -487,9 +490,14 @@
           :person="comment.person"
           :size="25"
           :font-size="12"
-          :is-link="!isCurrentUserClient"
+          :is-link="isAvatarLink"
+          v-if="!isAuthorHidden"
         />
-        <people-name class="flexrow-item strong" :person="comment.person" />
+        <people-name
+          class="flexrow-item strong"
+          :person="comment.person"
+          v-if="!isAuthorHidden"
+        />
         <span class="filler"> </span>
         <span class="flexrow-item date" :title="fullDate">
           {{ shortDate }}
@@ -569,6 +577,7 @@ import {
   ThumbsUpIcon
 } from 'lucide-vue-next'
 
+import { isClientThread } from '@/lib/comments'
 import files from '@/lib/files'
 import { remove } from '@/lib/models'
 import {
@@ -635,6 +644,10 @@ const props = defineProps({
   fps: {
     type: Number,
     default: 25
+  },
+  isAcknowledgeable: {
+    type: Boolean,
+    default: true
   },
   isActionError: {
     type: Boolean,
@@ -740,6 +753,17 @@ const isConcept = computed(() => {
 })
 
 const canToggleForClient = computed(() => isCurrentUserManager.value)
+
+// The person page sits behind the login, and stays out of the clients' reach.
+const isAvatarLink = computed(
+  () => Boolean(user.value) && !isCurrentUserClient.value
+)
+
+// Zou hands the client the internal comments that carry a preview, emptied
+// of their text, for the revisions they hold: who wrote them stays internal.
+const isAuthorHidden = computed(
+  () => isCurrentUserClient.value && !isClientThread(props.comment)
+)
 
 const isPreviewBound = computed(() => {
   return Boolean(
