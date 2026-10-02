@@ -8,6 +8,7 @@
         :legend="false"
         :colors="colors"
         :data="selectedData"
+        :dataset="PIE_DATASET"
       />
       <span
         class="tag flexrow-item"
@@ -49,6 +50,9 @@
  * [['name', count, 'color'], ...  ]
  */
 import { computed } from 'vue'
+
+// Chart.js outlines the slices with 2px by default, heavy on a 50px pie.
+const PIE_DATASET = { borderWidth: 1 }
 
 const props = defineProps({
   colors: { type: Array, required: true },
