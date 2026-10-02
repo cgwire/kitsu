@@ -682,8 +682,10 @@ const getFrameCount = (shot, fieldName, value) => {
   const frameOut = parseInt(
     fieldName === 'frame_out' ? value : shot.data?.frame_out
   )
-  const isOtherBoundSet =
+  const otherBound =
     fieldName === 'frame_in' ? shot.data?.frame_out : shot.data?.frame_in
+  // A bound of 0 is set: only an empty one leaves the count alone.
+  const isOtherBoundSet = otherBound != null && otherBound !== ''
   if (!['frame_in', 'frame_out'].includes(fieldName) || !isOtherBoundSet) {
     return undefined
   }

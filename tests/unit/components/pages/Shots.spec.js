@@ -121,6 +121,38 @@ describe('Shots page, reload of another episode', () => {
   })
 })
 
+// A bound typed in the list sets the frame count when the shot holds the
+// other one, and a frame in of 0 is held like any other.
+describe('Shots page, frame range edit', () => {
+  const typeFrameOut = async data => {
+    shotStore.cache.shotMap.set('shot-1', { ...shot('shot-1'), data })
+    const page = await mountPage()
+    await page.wrapper.findComponent({ name: 'ShotList' }).vm.$emit(
+      'metadata-changed',
+      {
+        entry: { id: 'shot-1' },
+        descriptor: { field_name: 'frame_out' },
+        value: 99
+      }
+    )
+    await flushPromises()
+    return page.dispatched('editShotDebounced')[0][1]
+  }
+
+  test('counts the frames of a range starting at 0', async () => {
+    expect(await typeFrameOut({ frame_in: 0 })).toMatchObject({
+      id: 'shot-1',
+      data: { frame_out: 99 },
+      nb_frames: 100
+    })
+  })
+
+  test('leaves the frame count alone without a frame in', async () => {
+    expect(await typeFrameOut({})).not.toHaveProperty('nb_frames')
+    expect(await typeFrameOut({ frame_in: '' })).not.toHaveProperty('nb_frames')
+  })
+})
+
 describe('Shots page, EDL import', () => {
   // A timed out import disables the upload of the EDL modal: reopening
   // it must not keep the previous failure.
