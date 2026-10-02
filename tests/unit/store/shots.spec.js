@@ -728,6 +728,35 @@ describe('Shots store, NEW_SHOT_END', () => {
   })
 })
 
+// A frame in of 0 is a value: the edit must reveal the Frame In column, as
+// the list load and the creation do.
+describe('Shots store, EDIT_SHOT_END', () => {
+  const editShot = data => {
+    const shot = { id: 'sh-edit', name: 'SH01', parent_id: 'sq-1', data: {} }
+    shotsStore.cache.shots = [shot]
+    shotsStore.cache.shotMap = new Map([[shot.id, shot]])
+    shotsStore.cache.shotIndex = {}
+    const state = {
+      displayedShots: [shot],
+      shotSearchText: '',
+      isFrameIn: false
+    }
+    shotsStore.mutations.EDIT_SHOT_END(state, {
+      newShot: { id: shot.id, data },
+      sequences: []
+    })
+    return state
+  }
+
+  test('shows the frame in column for a frame in of 0', () => {
+    expect(editShot({ frame_in: 0 }).isFrameIn).toBe(true)
+  })
+
+  test('keeps the frame in column hidden without a frame in', () => {
+    expect(editShot({ handle_in: 12 }).isFrameIn).toBe(false)
+  })
+})
+
 // The task panel's preview player trims shots from pages that never load the
 // shots list (news feed, my tasks): the edit payload only holds the id and
 // the data.
