@@ -241,14 +241,7 @@
                       :is-pinnable="
                         isDepartmentSupervisor || isCurrentUserManager
                       "
-                      :is-replyable="
-                        (user && user.id === comment.person?.id) ||
-                        isAssigned ||
-                        isMentioned ||
-                        isDepartmentSupervisor ||
-                        isCurrentUserManager ||
-                        isClientFromSameStudio(comment.person)
-                      "
+                      :is-replyable="canReplyTo(comment)"
                       :can-move="isCurrentUserManager"
                       :revision="currentRevision"
                       :task="task"
@@ -402,6 +395,7 @@ import { useStore } from 'vuex'
 import { addEvents, getClientX, removeEvents } from '@/composables/dom'
 import { getEntityMap } from '@/composables/entity'
 import { useTime } from '@/composables/time'
+import { isClientThread } from '@/lib/comments'
 import csv from '@/lib/csv'
 import { isSupervisorInDepartments } from '@/lib/descriptors'
 import drafts from '@/lib/drafts'
@@ -1230,6 +1224,28 @@ const isClientFromSameStudio = person =>
   isCurrentUserClient.value &&
   user.value.studio_id === person.studio_id &&
   person.role === 'client'
+
+// The client is shown who answers the threads it sees: there, the production
+// managers answer for the studio, and the client once mentioned. The other
+// threads reach the client emptied of their text, so only the studio answers.
+const canReplyTo = comment => {
+  if (isCurrentUserManager.value) return true
+  const isAuthor = Boolean(user.value) && user.value.id === comment.person?.id
+  if (isCurrentUserClient.value) {
+    return (
+      isAuthor ||
+      isClientFromSameStudio(comment.person) ||
+      (isClientThread(comment) && (isAssigned.value || isMentioned.value))
+    )
+  }
+  return (
+    !isClientThread(comment) &&
+    (isAuthor ||
+      isAssigned.value ||
+      isMentioned.value ||
+      isDepartmentSupervisor.value)
+  )
+}
 
 const saveComment = async comment => {
   try {
