@@ -12,6 +12,9 @@
             <th scope="col" class="name datatable-row-header">
               {{ $t('people.list.name') }}
             </th>
+            <th scope="col" class="total datatable-row-header">
+              {{ $t('main.total') }}
+            </th>
 
             <!-- Year columns -->
             <template v-if="detailLevel === 'year'">
@@ -66,11 +69,28 @@
                 {{ day }}
               </th>
             </template>
-            <th scope="col" class="total">{{ $t('main.total') }}</th>
             <th scope="col" class="actions"></th>
           </tr>
         </thead>
         <tbody class="datatable-body" v-if="!isLoading">
+          <tr class="datatable-row total-row" v-if="people.length">
+            <th class="datatable-row-header name">{{ $t('main.total') }}</th>
+            <td
+              class="total datatable-row-header"
+              :data-label="$t('main.total')"
+            >
+              {{ grandTotalLabel }}
+            </td>
+            <td
+              :key="`total-${index}`"
+              class="column-total"
+              :data-label="columnLabel(index)"
+              v-for="index in columnRange"
+            >
+              {{ columnTotals[index] }}
+            </td>
+            <td class="actions"></td>
+          </tr>
           <tr class="datatable-row" v-for="person in people" :key="person.id">
             <th class="datatable-row-header name">
               <div class="flexrow">
@@ -78,6 +98,12 @@
                 <people-name class="flexrow-item" with-link :person="person" />
               </div>
             </th>
+            <td
+              class="total datatable-row-header"
+              :data-label="$t('main.total')"
+            >
+              {{ personTotals[person.id] }}
+            </td>
 
             <!-- Year cells -->
             <template v-if="detailLevel === 'year'">
@@ -182,22 +208,6 @@
                 <span class="blank" v-else>-</span>
               </td>
             </template>
-            <td class="total" :data-label="$t('main.total')">
-              {{ personTotals[person.id] }}
-            </td>
-            <td class="actions"></td>
-          </tr>
-          <tr class="datatable-row total-row" v-if="people.length">
-            <th class="datatable-row-header name">{{ $t('main.total') }}</th>
-            <td
-              :key="`total-${index}`"
-              class="column-total"
-              :data-label="columnLabel(index)"
-              v-for="index in columnRange"
-            >
-              {{ columnTotals[index] }}
-            </td>
-            <td class="total"></td>
             <td class="actions"></td>
           </tr>
         </tbody>
@@ -523,11 +533,21 @@ th.actions {
   vertical-align: middle;
 }
 
-// the total column closes the grid, the daily columns keep scrolling
+// the totals open the grid, stuck next to the names, the period columns
+// scroll under them: the name cells drop their own sticky edge so that
+// both read as one block
 .total {
-  border-left: 1px solid var(--border);
+  left: 230px;
   width: 80px;
   min-width: 80px;
+}
+
+.name.datatable-row-header {
+  border-right: 0;
+
+  &::after {
+    display: none;
+  }
 }
 
 // the other rows get their height from the avatar: pad the plain text
@@ -690,7 +710,9 @@ th.today {
       flex-direction: row;
       justify-content: space-between;
       margin-top: 0.5em;
+      order: 1;
       padding: 0.75em 0.25em 0.25em;
+      position: static;
       width: 100%;
 
       &::before {
