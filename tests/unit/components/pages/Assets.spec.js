@@ -6,6 +6,7 @@ vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import Assets from '@/components/pages/Assets.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 
 import {
   buildAddThumbnailsModalStub,
@@ -135,5 +136,26 @@ describe('Assets page, thumbnails import', () => {
 
     expect(modalStub.methods.markLoading).toHaveBeenCalledWith('asset-1')
     expect(modalStub.methods.markUploaded).toHaveBeenCalledWith('asset-1')
+  })
+})
+
+describe('Assets page, department filter', () => {
+  // The page saves the selected department as a preference.
+  afterEach(() => localStorage.clear())
+
+  test('hands the selected department to the list', async () => {
+    const { wrapper } = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters: { departments: [{ id: 'department-1', name: 'Modeling' }] }
+    })
+
+    await wrapper
+      .findComponent(ComboboxDepartment)
+      .vm.$emit('update:modelValue', 'department-1')
+    await flushPromises()
+
+    expect(
+      wrapper.findComponent({ name: 'AssetList' }).props('departmentFilter')
+    ).toEqual(['department-1'])
   })
 })

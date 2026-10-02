@@ -86,6 +86,7 @@ export const mountEntityPage = async (
   const searchField = buildSearchFieldStub()
   const list = {
     name: listName,
+    props: { departmentFilter: { type: Array, default: () => [] } },
     template: '<div />',
     methods: { setScrollPosition: vi.fn(), selectTaskFromQuery: vi.fn() }
   }

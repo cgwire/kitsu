@@ -411,6 +411,7 @@ const {
   deleteAllTasksLockText,
   deleteAllTasksText,
   deleteText,
+  departmentFilter,
   descriptorToEdit,
   displaySettings,
   entityToEdit: assetToEdit,
