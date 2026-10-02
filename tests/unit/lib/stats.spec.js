@@ -227,6 +227,29 @@ describe('lib/stats', () => {
     ])
   })
 
+  // The flag decides, not the name: a studio names its final status freely.
+  it('getChartData - trusts the is_done flag over the status name', () => {
+    const statuses = new Map([
+      ['s1', { id: 's1', short_name: 'approved', color: 'green', is_done: true }],
+      ['s2', { id: 's2', short_name: 'done', color: 'grey', is_done: false }]
+    ])
+    const shots = [{ id: 'shot-1', sequence_id: 'sequence-1', tasks: ['t1', 't2'] }]
+    const tasks = new Map([
+      ['t1', { task_status_id: 's1', task_type_id: 'task-type-1' }],
+      ['t2', { task_status_id: 's2', task_type_id: 'task-type-1' }]
+    ])
+    const data = getChartData(
+      computeStats(shots, 'sequence_id', statuses, tasks),
+      'sequence-1',
+      'all'
+    )
+    expect(data).toEqual([
+      ['approved', 1, 'green', true],
+      ['done', 1, 'grey', false]
+    ])
+    expect(getDoneRatio(data)).toBe(0.5)
+  })
+
   it('getDoneRatio', () => {
     const rows = [
       ['done', 3, 'green', true],
