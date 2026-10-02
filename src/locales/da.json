@@ -283,6 +283,7 @@
     },
     "episodes": {
       "all_episodes": "Alle",
+      "all_hidden": "Alle episoder er skjult.",
       "edit_error": "Der er opstået en fejl under gemning af denne episode. Er du sikker på, at der ikke er en episode med et lignende navn?",
       "delete_error": "Der er opstået en fejl under sletningen af denne episode. Der kan være eksisterende data, der er knyttet til den. Er du sikker på, at denne episode ikke har nogen sequence knyttet til den?",
       "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database? Alle relaterede shots og previews vil blive slettet. Bekræft venligst ved at skrive episodens navn nedenfor.",
@@ -1389,6 +1390,7 @@
       "library_title": "Opgavetype-bibliotek"
     },
     "sequences": {
+      "all_hidden": "Alle sequences er skjult.",
       "all_sequences": "Alle sequences",
       "edit_error": "Der opstod en fejl under gemning af denne sequence. Er du sikker på, at der ikke allerede findes en sequence med et lignende navn?",
       "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database? Alle relaterede shots og previews vil også blive slettet. Bekræft venligst ved at skrive sequence-navnet nedenfor.",

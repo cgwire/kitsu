@@ -8,6 +8,7 @@ vi.mock('@/store', () => ({ default: {} }))
 
 import sequencesStore from '@/store/modules/sequences'
 import shotsApi from '@/store/api/shots'
+import shotsStore from '@/store/modules/shots'
 
 describe('Sequences store, all-episodes pseudo-episode', () => {
   const production = { id: 'p-all' }
@@ -282,6 +283,24 @@ describe('Sequences store, all-episodes pseudo-episode', () => {
         { label: 'SQ010', value: 'sq-2' }
       ])
     })
+  })
+})
+
+describe('Sequences store, COMPUTE_SEQUENCE_STATS', () => {
+  test('counts the shots of each sequence along with the task stats', () => {
+    shotsStore.cache.shots = [
+      { id: 's1', sequence_id: 'sq01', tasks: [] },
+      { id: 's2', sequence_id: 'sq01', tasks: [] },
+      { id: 's3', sequence_id: 'sq02', tasks: [], canceled: true }
+    ]
+    const state = { searchSequenceFilters: [] }
+    sequencesStore.mutations.COMPUTE_SEQUENCE_STATS(state, {
+      taskStatusMap: new Map(),
+      taskMap: new Map()
+    })
+    expect(state.sequenceShotCounts).toEqual({ sq01: 2 })
+    expect(sequencesStore.getters.sequenceShotCounts(state)).toEqual({ sq01: 2 })
+    shotsStore.cache.shots = []
   })
 })
 

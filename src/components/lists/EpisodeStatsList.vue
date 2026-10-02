@@ -1,7 +1,7 @@
 <template>
   <div class="data-list">
-    <div class="datatable-wrapper" ref="body" @scroll.passive="onBodyScroll">
-      <table class="datatable">
+    <div class="datatable-wrapper">
+      <table class="datatable datatable--cards">
         <thead class="datatable-head">
           <tr>
             <th class="expander"></th>
@@ -40,14 +40,15 @@
           </tr>
         </thead>
         <tbody class="datatable-body" v-if="!isLoading">
-          <tr class="all-line datatable-row" v-if="showAll && !isEmptyList">
+          <tr class="all-line datatable-row" v-if="entries.length > 0">
             <td class="expander"></td>
 
-            <td class="name datatable-row-header">
+            <td class="name datatable-row-header card-head">
               {{ $t('episodes.all_episodes') }}
             </td>
 
             <stats-cell
+              :data-label="$t('main.all')"
               :colors="chartColors('all', 'all')"
               :data="chartData('all', 'all')"
               :frames-data="chartData('all', 'all', 'frames')"
@@ -59,6 +60,7 @@
             <stats-cell
               :style="getValidationStyle(columnId)"
               :key="'all-' + columnId"
+              :data-label="taskTypeMap.get(columnId)?.name"
               :colors="chartColors('all', columnId)"
               :data="chartData('all', columnId)"
               :frames-data="chartData('all', columnId, 'frames')"
@@ -88,11 +90,14 @@
                 />
               </td>
 
-              <td class="name datatable-row-header">
-                {{ entry.name }}
+              <td class="name datatable-row-header card-head">
+                <router-link :to="shotsPath(entry)">
+                  {{ entry.name }}
+                </router-link>
               </td>
 
               <stats-cell
+                :data-label="$t('main.all')"
                 :colors="chartColors(entry.id, 'all')"
                 :data="chartData(entry.id, 'all')"
                 :frames-data="chartData(entry.id, 'all', 'frames')"
@@ -106,6 +111,7 @@
               <template v-for="columnId in validationColumns">
                 <stats-cell
                   :key="entry.id + columnId"
+                  :data-label="taskTypeMap.get(columnId)?.name"
                   :style="getValidationStyle(columnId)"
                   :colors="chartColors(entry.id, columnId)"
                   :data="chartData(entry.id, columnId)"
@@ -128,19 +134,29 @@
             </tr>
             <template v-if="expanded[entry.id]">
               <tr
-                class="datatable-row"
+                class="datatable-row take-row"
+                :class="{
+                  'take-row--first': takeNumber === 1,
+                  'take-row--last': takeNumber === takeRange(entry.id).length
+                }"
                 :key="takeNumber + '-' + entry.id"
                 v-for="takeNumber in takeRange(entry.id)"
               >
                 <td class="expander"></td>
-                <td class="name datatable-row-header">
-                  - Take {{ takeNumber }}
+                <td class="name datatable-row-header take-name card-head">
+                  <span
+                    class="tag take-tag"
+                    :style="{ backgroundColor: takeColor(takeNumber) }"
+                  >
+                    Take {{ takeNumber }}
+                  </span>
                 </td>
                 <td></td>
 
                 <template v-for="columnId in validationColumns">
                   <stats-cell
                     :key="takeNumber + entry.id + columnId"
+                    :data-label="taskTypeMap.get(columnId)?.name"
                     :style="getValidationStyle(columnId)"
                     :colors="chartColors(entry.id, columnId)"
                     :data="chartTakeData(entry.id, columnId, takeNumber)"
@@ -159,6 +175,7 @@
 
                   <stats-cell
                     :key="takeNumber + entry.id + columnId"
+                    :data-label="taskTypeMap.get(columnId)?.name"
                     :style="getValidationStyle(columnId)"
                     :colors="chartColors(entry.id, columnId)"
                     :data="chartData(entry.id, columnId)"
@@ -200,9 +217,15 @@
       v-if="isEmptyList"
     />
 
-    <p class="has-text-centered nb-episodes" v-if="!isEmptyList && !isLoading">
-      {{ displayedEpisodesLength }}
-      {{ $t('episodes.number', { count: displayedEpisodesLength }) }}
+    <p class="has-text-centered all-hidden" v-if="isAllHidden">
+      {{ $t('episodes.all_hidden') }}
+    </p>
+    <p
+      class="has-text-centered nb-episodes"
+      v-else-if="!isEmptyList && !isLoading"
+    >
+      {{ entries.length }}
+      {{ $t('episodes.number', { count: entries.length }) }}
     </p>
   </div>
 </template>
@@ -211,13 +234,12 @@
 // Imports
 // --------------------------------------------------------------------------
 import { ChevronDownIcon, ChevronRightIcon } from 'lucide-vue-next'
-import { computed, ref, useTemplateRef, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useStore } from 'vuex'
 
 import colors from '@/lib/colors'
+import { getEntitiesPath } from '@/lib/path'
 import {
-  aggregateRetakeStats,
-  aggregateStats,
   getChartData,
   getChartRetakeCount,
   getRetakeChartData
@@ -237,18 +259,16 @@ const props = defineProps({
   dataMode: { type: String, default: 'retakes' },
   displayMode: { type: String, default: 'pie' },
   entries: { type: Array, default: () => [] },
+  episodeRetakeStats: { type: Object, default: () => ({}) },
+  episodeStats: { type: Object, default: () => ({}) },
   isError: { type: Boolean, default: false },
+  isFiltered: { type: Boolean, default: false },
   isLoading: { type: Boolean, default: false },
-  showAll: { type: Boolean, default: false },
   validationColumns: { type: Array, default: () => [] }
 })
 
-const emit = defineEmits(['scroll'])
-
 // State
 // --------------------------------------------------------------------------
-const bodyRef = useTemplateRef('body')
-
 const expanded = ref({})
 
 const retakeColors = ['#ff3860', '#6f727a', '#22d160']
@@ -257,13 +277,9 @@ const takeLabelColors = ['#FB8C00', '#EF6C00', '#d35400', '#e74c3c', '#c0392b']
 // Computed
 // --------------------------------------------------------------------------
 const currentProduction = computed(() => store.getters.currentProduction)
-const displayedEpisodesLength = computed(
-  () => store.getters.displayedEpisodesLength
-)
-const episodeRetakeStats = computed(() => store.getters.episodeRetakeStats)
 const episodeSearchText = computed(() => store.getters.episodeSearchText)
-const episodeStats = computed(() => store.getters.episodeStats)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+const taskStatusMap = computed(() => store.getters.taskStatusMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
 const isEmptyList = computed(
@@ -271,36 +287,34 @@ const isEmptyList = computed(
     props.entries.length === 0 &&
     !props.isLoading &&
     !props.isError &&
+    !props.isFiltered &&
     !episodeSearchText.value
+)
+
+const isAllHidden = computed(
+  () =>
+    props.isFiltered &&
+    props.entries.length === 0 &&
+    !props.isLoading &&
+    !props.isError
 )
 
 const isRetakes = computed(() => props.dataMode === 'retakes')
 
-// The "all" row aggregates the displayed entries only, so it stays
-// consistent when episodes are filtered (e.g. "only running").
-const entryIds = computed(() => props.entries.map(entry => entry.id))
-
-const displayedEntriesStats = computed(() => ({
-  all: aggregateStats(episodeStats.value, entryIds.value)
-}))
-
-const displayedEntriesRetakeStats = computed(() => ({
-  all: aggregateRetakeStats(episodeRetakeStats.value, entryIds.value)
-}))
-
 // Functions
 // --------------------------------------------------------------------------
-const chartData = (entryId, columnId, dataType = 'count') => {
-  const isAll = entryId === 'all'
-  if (isRetakes.value) {
-    const stats = isAll
-      ? displayedEntriesRetakeStats.value
-      : episodeRetakeStats.value
-    return getRetakeChartData(stats, entryId, columnId, dataType)
-  }
-  const stats = isAll ? displayedEntriesStats.value : episodeStats.value
-  return getChartData(stats, entryId, columnId, dataType)
-}
+// The status stats come from the server without the done flag of their
+// statuses: the status map provides it.
+const chartData = (entryId, columnId, dataType = 'count') =>
+  isRetakes.value
+    ? getRetakeChartData(props.episodeRetakeStats, entryId, columnId, dataType)
+    : getChartData(
+        props.episodeStats,
+        entryId,
+        columnId,
+        dataType,
+        taskStatusMap.value
+      )
 
 const chartColors = (entryId, columnId) =>
   isRetakes.value
@@ -308,17 +322,17 @@ const chartColors = (entryId, columnId) =>
     : chartData(entryId, columnId).map(data => data[2])
 
 const chartTakeData = (entryId, columnId, takeNumber, dataType = 'count') => {
-  const take = episodeRetakeStats.value[entryId][columnId].evolution[takeNumber]
+  const take = props.episodeRetakeStats[entryId][columnId].evolution[takeNumber]
   // Order matters: it matches retakeColors.
   return [
-    ['retake', take.retake[dataType], retakeColors[0]],
-    ['other', take.other[dataType], retakeColors[1]],
-    ['done', take.done[dataType], retakeColors[2]]
+    ['retake', take.retake[dataType], retakeColors[0], false],
+    ['other', take.other[dataType], retakeColors[1], false],
+    ['done', take.done[dataType], retakeColors[2], true]
   ]
 }
 
 const chartRetakeMaxCount = (entryId, columnId) =>
-  getChartRetakeCount(episodeRetakeStats.value, entryId, columnId)
+  getChartRetakeCount(props.episodeRetakeStats, entryId, columnId)
 
 const chartLabel = (entryId, columnId) => {
   if (!isRetakes.value) return ''
@@ -326,14 +340,17 @@ const chartLabel = (entryId, columnId) => {
   return count >= 1 ? `Take ${count + 1}` : ''
 }
 
+// A cell is labelled with its current take, one more than its retake count.
+const takeColor = takeNumber => takeLabelColors[Math.min(takeNumber - 1, 4)]
+
 const chartLabelColor = (entryId, columnId) => {
   if (!isRetakes.value) return ''
-  return takeLabelColors[Math.min(chartRetakeMaxCount(entryId, columnId), 4)]
+  return takeColor(chartRetakeMaxCount(entryId, columnId) + 1)
 }
 
 const takeRange = entryId => range(1, chartRetakeMaxCount(entryId, 'all') + 1)
 
-const isStats = (entryId, columnId) => episodeStats.value[entryId]?.[columnId]
+const isStats = (entryId, columnId) => props.episodeStats[entryId]?.[columnId]
 
 const toggleExpanded = episodeId => {
   expanded.value[episodeId] = !expanded.value[episodeId]
@@ -356,21 +373,14 @@ const taskTypePath = taskTypeId => ({
   }
 })
 
-const onBodyScroll = event => {
-  emit('scroll', event.target.scrollTop)
-}
-
-const setScrollPosition = scrollPosition => {
-  if (bodyRef.value) bodyRef.value.scrollTop = scrollPosition
-}
+const shotsPath = episode =>
+  getEntitiesPath(currentProduction.value?.id, 'shots', episode.id)
 
 // Watchers
 // --------------------------------------------------------------------------
 watch(isRetakes, () => {
   if (!isRetakes.value) expanded.value = {}
 })
-
-defineExpose({ setScrollPosition })
 </script>
 
 <style lang="scss" scoped>
@@ -387,6 +397,51 @@ defineExpose({ setScrollPosition })
 
 td.name {
   font-size: 1.2em;
+}
+
+// Row titles are links: keep the text colour of the row instead of the grey
+// of plain links, which reads as dimmed in dark mode.
+.name a {
+  color: inherit;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// Take rows detail the episode above them: indented, and tagged like the
+// "Take N" label of the cells rather than titled like an episode.
+td.take-name {
+  // Rail linking the takes to their episode. A background layer spans the
+  // whole cell height whatever its positioning, and joins from row to row.
+  background-image: linear-gradient(var(--border-alt), var(--border-alt));
+  background-position: 1em 0;
+  background-repeat: no-repeat;
+  background-size: 1px 100%;
+  font-size: 1em;
+  padding-left: 2em;
+}
+
+// The rail stops short at both ends of the group of takes.
+.take-row--first td.take-name {
+  background-position: 1em 100%;
+  background-size: 1px 70%;
+}
+
+.take-row--last td.take-name {
+  background-size: 1px 70%;
+}
+
+.take-row--first.take-row--last td.take-name {
+  background-position: 1em 50%;
+  background-size: 1px 40%;
+}
+
+.take-tag {
+  color: white;
+  cursor: default;
+  font-weight: bold;
+  text-transform: uppercase;
 }
 
 .expander {
@@ -410,5 +465,39 @@ td.name {
 
 th.actions {
   padding: 0.4em;
+}
+
+@media screen and (max-width: 768px) {
+  .data-list {
+    margin-top: 1em;
+  }
+
+  .datatable-wrapper {
+    background: transparent;
+    border: 0;
+    overflow-x: visible;
+  }
+
+  // The expander sits in the top right corner of the card of its episode.
+  .datatable-body .datatable-row {
+    position: relative;
+  }
+
+  .datatable-body td.expander[role='button'] {
+    display: block;
+    padding: 0;
+    position: absolute;
+    right: 1em;
+    top: 1em;
+    width: auto;
+    // The name cell keeps the z-index of the sticky column and spans the
+    // card: without this it covers the expander and takes its clicks.
+    z-index: 2;
+  }
+
+  // The cards of the takes nest under the card of their episode.
+  .datatable-body .take-row.datatable-row {
+    margin-left: 1.5em;
+  }
 }
 </style>

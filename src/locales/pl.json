@@ -557,6 +557,7 @@
     },
     "episodes": {
       "all_episodes": "Wszystkie",
+      "all_hidden": "Wszystkie odcinki są ukryte.",
       "edit_error": "Wystąpił błąd podczas zapisywania tego odcinka. Czy na pewno nie istnieje już odcinek o podobnej nazwie?",
       "delete_error": "Wystąpił błąd podczas usuwania tego odcinka. Mogą istnieć dane, które są z nim powiązane. Czy na pewno z tym odcinkiem nie jest powiązana żadna sekwencja?",
       "delete_text": "Czy na pewno chcesz usunąć {name} z bazy danych? Wszystkie powiązane ujęcia i podglądy również zostaną usunięte. Potwierdź, wpisując poniżej nazwę odcinka.",
@@ -1758,6 +1759,7 @@
       }
     },
     "sequences": {
+      "all_hidden": "Wszystkie sekwencje są ukryte.",
       "all_sequences": "Wszystkie sekwencje",
       "edit_error": "Wystąpił błąd podczas zapisywania tej sekwencji. Czy na pewno nie istnieje już sekwencja o podobnej nazwie?",
       "delete_text": "Czy na pewno chcesz usunąć {name} z bazy danych? Wszystkie powiązane ujęcia i podglądy również zostaną usunięte. Potwierdź, wpisując poniżej nazwę sekwencji.",

@@ -19,7 +19,16 @@
       </span>
     </div>
     <stats-bar :data="selectedData" v-else-if="displayMode === 'bars'" />
-    <stats-heat :data="selectedData" v-else-if="displayMode === 'heatmap'" />
+    <div class="heat-cell flexrow" v-else-if="displayMode === 'heatmap'">
+      <stats-heat class="heat-tile" :data="selectedData" />
+      <span
+        class="tag heat-tag"
+        :style="{ 'background-color': labelColor }"
+        v-if="label"
+      >
+        {{ label }}
+      </span>
+    </div>
     <div v-else>
       <div :key="data[0]" v-for="data in selectedData">
         <template v-if="data[0]">
@@ -32,14 +41,14 @@
           </span>
         </template>
       </div>
-      <span
-        class="tag flexrow-item"
-        :style="{ 'background-color': labelColor }"
-        v-if="label"
-      >
-        {{ label }}
-      </span>
     </div>
+    <span
+      class="tag flexrow-item"
+      :style="{ 'background-color': labelColor }"
+      v-if="label && !['pie', 'heatmap'].includes(displayMode)"
+    >
+      {{ label }}
+    </span>
   </td>
 </template>
 
@@ -91,11 +100,50 @@ const percent = value => {
   text-transform: uppercase;
 }
 
+// The tile shares its line with the label of the cell.
+.heat-tile {
+  flex: 1;
+}
+
+.heat-tag {
+  margin-left: 0.5em;
+}
+
 .tag {
   background: $orange-carrot;
   color: white;
   cursor: default;
   font-weight: bold;
   text-transform: uppercase;
+}
+
+@media screen and (max-width: 768px) {
+  // The lists tint the desktop columns per task type with an inline style.
+  .datatable--cards td.validation {
+    border-left: 0 !important;
+  }
+
+  // Same width on every line, so the bars and tiles of a card compare.
+  .datatable--cards .stats-bar,
+  .datatable--cards .heat-tile {
+    flex: 0 0 55%;
+  }
+
+  // The label of the cell moves next to the column name instead of taking
+  // room from the value: a card line reads "column, label, value".
+  .datatable--cards .heat-cell {
+    display: contents;
+  }
+
+  .datatable--cards td.validation > div,
+  .datatable--cards .heat-tile {
+    order: 2;
+  }
+
+  .datatable--cards td.validation > .tag,
+  .datatable--cards .heat-cell > .tag {
+    margin: 0 auto 0 0.5em;
+    order: 1;
+  }
 }
 </style>

@@ -41,6 +41,15 @@ describe('cells/StatsCell', () => {
     expect(wrapper.findComponent(PieChart).exists()).toBe(false)
   })
 
+  // The episode stats tag a cell with its take number.
+  test.each(['pie', 'count', 'bars', 'heatmap'])(
+    'shows the label of the cell in %s mode',
+    displayMode => {
+      const wrapper = mountCell({ displayMode, label: 'Take 2' })
+      expect(wrapper.findAll('.tag').map(tag => tag.text())).toEqual(['Take 2'])
+    }
+  )
+
   test('draws a heat tile of the counted data in heatmap mode', () => {
     const wrapper = mountCell({ displayMode: 'heatmap' })
     expect(wrapper.findComponent(StatsHeat).props('data')).toEqual(data)
