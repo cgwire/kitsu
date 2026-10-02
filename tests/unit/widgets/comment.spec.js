@@ -57,7 +57,11 @@ const task = {
 
 // user is null for the anonymous guests of a shared playlist, so the guard has
 // to survive that too.
-const makeStore = ({ isAdmin = false, user = { id: 'person-1' } } = {}) =>
+const makeStore = ({
+  isAdmin = false,
+  persons = [],
+  user = { id: 'person-1' }
+} = {}) =>
   createStore({
     getters: {
       canValidatePreviewFiles: () => () => false,
@@ -68,7 +72,11 @@ const makeStore = ({ isAdmin = false, user = { id: 'person-1' } } = {}) =>
       isCurrentUserClient: () => false,
       isCurrentUserManager: () => false,
       currentUserRoleForProduction: () => () => null,
-      personMap: () => new Map([['person-1', { id: 'person-1' }]]),
+      personMap: () =>
+        new Map([
+          ['person-1', { id: 'person-1' }],
+          ...persons.map(person => [person.id, person])
+        ]),
       productionDepartmentIds: () => [],
       taskTypeMap: () =>
         new Map([['task-type-1', { id: 'task-type-1', for_entity: 'Asset' }]]),
@@ -79,6 +87,7 @@ const makeStore = ({ isAdmin = false, user = { id: 'person-1' } } = {}) =>
 
 const mountComment = ({
   comment = makeComment(),
+  isAcknowledgeable,
   isActionError = false,
   isEditable = true,
   storeOptions,
@@ -89,6 +98,7 @@ const mountComment = ({
     attachTo,
     props: {
       comment,
+      isAcknowledgeable,
       isActionError,
       isEditable,
       task,
@@ -272,6 +282,39 @@ describe('Comment', () => {
       })
       expect(wrapper.findComponent(RouterLink).exists()).toBe(false)
       expect(wrapper.find('.round-name.revision').text()).toContain('1')
+    })
+  })
+
+  describe('acknowledgment button', () => {
+    test('shows the thumbs up with its counter', () => {
+      const wrapper = mountComment({
+        comment: makeComment({ acknowledgements: ['person-1', 'person-2'] })
+      })
+      expect(wrapper.find('.like-button').text()).toBe('2')
+    })
+
+    test('stays hidden when the comment cannot be acknowledged', () => {
+      const wrapper = mountComment({ isAcknowledgeable: false })
+      expect(wrapper.find('.like-button').exists()).toBe(false)
+    })
+
+    test('names the people who acknowledged the comment in a tooltip', () => {
+      const wrapper = mountComment({
+        comment: makeComment({ acknowledgements: ['person-2'] }),
+        storeOptions: { persons: [{ id: 'person-2', name: 'Sam Supervisor' }] }
+      })
+      expect(wrapper.find('[title="Sam Supervisor"]').exists()).toBe(true)
+    })
+
+    // A shared playlist guest gets the acknowledgments back when editing a
+    // comment, although the button is hidden.
+    test('keeps their names out when the comment cannot be acknowledged', () => {
+      const wrapper = mountComment({
+        comment: makeComment({ acknowledgements: ['person-2'] }),
+        isAcknowledgeable: false,
+        storeOptions: { persons: [{ id: 'person-2', name: 'Sam Supervisor' }] }
+      })
+      expect(wrapper.html()).not.toContain('Sam Supervisor')
     })
   })
 })

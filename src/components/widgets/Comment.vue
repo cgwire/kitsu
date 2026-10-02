@@ -378,7 +378,7 @@
 
             <div
               class="flexrow"
-              :title="isLikedBy"
+              :title="isAcknowledgeable ? isLikedBy : undefined"
               v-if="
                 comment.text.length > 0 ||
                 comment.previews.length > 0 ||
@@ -393,6 +393,7 @@
                 }"
                 type="button"
                 @click="acknowledgeComment(comment)"
+                v-if="isAcknowledgeable"
               >
                 <thumbs-up-icon class="icon-1x" />
                 <span>{{ comment.acknowledgements.length }}</span>
@@ -635,6 +636,10 @@ const props = defineProps({
   fps: {
     type: Number,
     default: 25
+  },
+  isAcknowledgeable: {
+    type: Boolean,
+    default: true
   },
   isActionError: {
     type: Boolean,

@@ -124,6 +124,7 @@
           :task="buildTaskForComment(comment)"
           :fps="fps"
           :frame="currentFrame || 0"
+          :is-acknowledgeable="false"
           :is-change="false"
           :is-checkable="isOwnedByGuest(comment)"
           :is-editable="isOwnedByGuest(comment)"
@@ -870,7 +871,6 @@ onMounted(() => {
     width: fit-content;
   }
 
-  :deep(.like-button),
   :deep(.menu-icon),
   :deep(.reply-button),
   :deep(.attachment-button) {
