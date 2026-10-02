@@ -127,7 +127,6 @@
 
             <th
               scope="col"
-              ref="th-spent"
               class="time-spent number-cell"
               v-if="
                 !isCurrentUserClient &&
@@ -142,7 +141,6 @@
             <th
               scope="col"
               class="estimation number-cell"
-              ref="th-spent"
               :title="$t('main.estimation')"
               v-if="
                 !isCurrentUserClient &&
@@ -263,7 +261,7 @@
               />
             </template>
 
-            <th scope="col" class="actions" ref="actionsSection">
+            <th scope="col" class="actions">
               <button-simple
                 :class="{
                   'is-small': true,
@@ -374,8 +372,8 @@
               <!-- Metadata stick -->
               <template v-if="displaySettings.showInfos">
                 <td
-                  :ref="`editor-${getIndex(i, k)}-${j}`"
                   class="metadata-descriptor datatable-row-header"
+                  @keyup.ctrl="onInputKeyUp"
                   :title="shot.data ? shot.data[descriptor.field_name] : ''"
                   :style="{
                     'z-index':
@@ -500,10 +498,7 @@
                   min="0"
                   @input="event => onNbFramesChanged(shot, event.target.value)"
                   @keydown="onNumberFieldKeyDown"
-                  @keyup.ctrl="
-                    event =>
-                      onInputKeyUp(event, getIndex(i, k), descriptorLength)
-                  "
+                  @keyup.ctrl="onInputKeyUp"
                   v-if="isCurrentUserManager"
                 />
                 <span class="metadata-value selectable" v-else>
@@ -546,10 +541,7 @@
                       )
                   "
                   @keydown="onNumberFieldKeyDown"
-                  @keyup.ctrl="
-                    event =>
-                      onInputKeyUp(event, getIndex(i, k), descriptorLength + 1)
-                  "
+                  @keyup.ctrl="onInputKeyUp"
                   v-else-if="isCurrentUserManager"
                 />
                 <span class="metadata-value selectable" v-else>
@@ -592,10 +584,7 @@
                         event
                       )
                   "
-                  @keyup.ctrl="
-                    event =>
-                      onInputKeyUp(event, getIndex(i, k), descriptorLength + 2)
-                  "
+                  @keyup.ctrl="onInputKeyUp"
                   v-else-if="isCurrentUserManager"
                 />
                 <span class="metadata-value selectable" v-else>
@@ -627,10 +616,7 @@
                         event
                       )
                   "
-                  @keyup.ctrl="
-                    event =>
-                      onInputKeyUp(event, getIndex(i, k), descriptorLength + 3)
-                  "
+                  @keyup.ctrl="onInputKeyUp"
                   v-if="isCurrentUserManager"
                 />
                 <span class="metadata-value selectable" v-else>
@@ -662,10 +648,7 @@
                         event
                       )
                   "
-                  @keyup.ctrl="
-                    event =>
-                      onInputKeyUp(event, getIndex(i, k), descriptorLength + 3)
-                  "
+                  @keyup.ctrl="onInputKeyUp"
                   v-if="isCurrentUserManager"
                 />
                 <span class="metadata-value selectable" v-else>
@@ -699,10 +682,7 @@
                         event
                       )
                   "
-                  @keyup.ctrl="
-                    event =>
-                      onInputKeyUp(event, getIndex(i, k), descriptorLength + 3)
-                  "
+                  @keyup.ctrl="onInputKeyUp"
                   v-if="isCurrentUserManager"
                 />
                 <span class="metadata-value selectable" v-else>
@@ -716,6 +696,7 @@
               <template v-if="displaySettings.showInfos">
                 <td
                   class="metadata-descriptor"
+                  @keyup.ctrl="onInputKeyUp"
                   :title="shot.data ? shot.data[descriptor.field_name] : ''"
                   :key="shot.id + '-' + descriptor.id"
                   v-for="(
@@ -833,459 +814,316 @@
   </div>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+import { computed, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
+import { useEntityList } from '@/composables/entityList'
+import { sanitizeIntegerLight, useFormat } from '@/composables/format'
+import { getMetadataFieldValue } from '@/lib/descriptors'
 import { getTaskHref } from '@/lib/path'
-import preferences from '@/lib/preferences'
 import { range } from '@/lib/time'
 import { formatToTimecode } from '@/lib/video'
 
-import { descriptorMixin } from '@/components/mixins/descriptors'
-import { domMixin } from '@/components/mixins/dom'
-import { entityListMixin } from '@/components/mixins/entity_list'
-import { formatListMixin } from '@/components/mixins/format'
-import { selectionListMixin } from '@/components/mixins/selection'
-
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+/* eslint-disable no-unused-vars */
 import DescriptionCell from '@/components/cells/DescriptionCell.vue'
-import EmptyList from '@/components/widgets/EmptyList.vue'
-import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import MetadataHeader from '@/components/cells/MetadataHeader.vue'
 import MetadataInput from '@/components/cells/MetadataInput.vue'
 import RowActionsCell from '@/components/cells/RowActionsCell.vue'
-import SortableFieldHeader from '@/components/widgets/SortableFieldHeader.vue'
-import TableMetadataHeaderMenu from '@/components/widgets/TableMetadataHeaderMenu.vue'
-import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu.vue'
-import TableHeaderMenu from '@/components/widgets/TableHeaderMenu.vue'
-import TableInfo from '@/components/widgets/TableInfo.vue'
 import ValidationCell from '@/components/cells/ValidationCell.vue'
 import ValidationHeader from '@/components/cells/ValidationHeader.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import EmptyList from '@/components/widgets/EmptyList.vue'
+import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+import SortableFieldHeader from '@/components/widgets/SortableFieldHeader.vue'
+import TableHeaderMenu from '@/components/widgets/TableHeaderMenu.vue'
+import TableInfo from '@/components/widgets/TableInfo.vue'
+import TableMetadataHeaderMenu from '@/components/widgets/TableMetadataHeaderMenu.vue'
+import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu.vue'
+/* eslint-enable no-unused-vars */
 
-export default {
-  name: 'shot-list',
+const router = useRouter()
+const store = useStore()
+const { formatDuration, isDurationInHours } = useFormat()
 
-  mixins: [
-    descriptorMixin,
-    domMixin,
-    formatListMixin,
-    entityListMixin,
-    selectionListMixin
-  ],
+// Props / Emits
+// --------------------------------------------------------------------------
 
-  components: {
-    ButtonSimple,
-    DescriptionCell,
-    EmptyList,
-    EntityThumbnail,
-    MetadataHeader,
-    MetadataInput,
-    RowActionsCell,
-    SortableFieldHeader,
-    TableHeaderMenu,
-    TableMetadataHeaderMenu,
-    TableMetadataSelectorMenu,
-    TableInfo,
-    ValidationCell,
-    ValidationHeader
+const props = defineProps({
+  displaySettings: { type: Object, default: () => ({}) },
+  displayedShots: { type: Array, default: () => [] },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  validationColumns: { type: Array, default: () => [] },
+  departmentFilter: { type: Array, default: () => [] }
+})
+
+const emit = defineEmits([
+  'add-metadata',
+  'add-shots',
+  'change-sort',
+  'create-tasks',
+  'delete-all-tasks',
+  'delete-clicked',
+  'delete-metadata',
+  'edit-clicked',
+  'edit-metadata',
+  'field-changed',
+  'keep-task-panel-open',
+  'metadata-changed',
+  'restore-clicked',
+  'scroll',
+  'sequence-clicked',
+  'shot-history'
+])
+
+// State
+// --------------------------------------------------------------------------
+
+const lastSelectedShot = ref(null)
+
+// Computed
+// --------------------------------------------------------------------------
+
+const currentEpisode = computed(() => store.getters.currentEpisode)
+const currentProduction = computed(() => store.getters.currentProduction)
+const displayedShotsCount = computed(() => store.getters.displayedShotsCount)
+const displayedShotsDrawings = computed(
+  () => store.getters.displayedShotsDrawings
+)
+const displayedShotsEstimation = computed(
+  () => store.getters.displayedShotsEstimation
+)
+const displayedShotsFrames = computed(() => store.getters.displayedShotsFrames)
+const displayedShotsLength = computed(() => store.getters.displayedShotsLength)
+const displayedShotsTimeSpent = computed(
+  () => store.getters.displayedShotsTimeSpent
+)
+const isBigThumbnails = computed(() => store.getters.isBigThumbnails)
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+// Production-scoped: effective role on the current production (global
+// admins/managers still pass, but a per-project override wins).
+const isCurrentUserManager = computed(
+  () => store.getters.isCurrentUserProductionManager
+)
+const isCurrentUserSupervisor = computed(
+  () => store.getters.isCurrentUserProductionSupervisor
+)
+const isFps = computed(() => store.getters.isFps)
+const isFrameIn = computed(() => store.getters.isFrameIn)
+const isFrameOut = computed(() => store.getters.isFrameOut)
+const isFrames = computed(() => store.getters.isFrames)
+const isMaxRetakes = computed(() => store.getters.isMaxRetakes)
+const isPaperProduction = computed(() => store.getters.isPaperProduction)
+const isResolution = computed(() => store.getters.isResolution)
+const isShotDescription = computed(() => store.getters.isShotDescription)
+const isShotEstimation = computed(() => store.getters.isShotEstimation)
+const isShotTime = computed(() => store.getters.isShotTime)
+const isTVShow = computed(() => store.getters.isTVShow)
+const selectedShots = computed(() => store.getters.selectedShots)
+const shotFilledColumns = computed(() => store.getters.shotFilledColumns)
+const shotMetadataDescriptors = computed(
+  () => store.getters.shotMetadataDescriptors
+)
+const shotSearchText = computed(() => store.getters.shotSearchText)
+const shotSelectionGrid = computed(() => store.getters.shotSelectionGrid)
+const taskMap = computed(() => store.getters.taskMap)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
+
+const isAllEpisodes = computed(
+  () => isTVShow.value && currentEpisode.value?.id === 'all'
+)
+
+const isEmptyList = computed(
+  () =>
+    props.displayedShots &&
+    props.displayedShots[0].length === 0 &&
+    !props.isLoading &&
+    !props.isError &&
+    (!shotSearchText.value || shotSearchText.value.length === 0)
+)
+
+const isListVisible = computed(
+  () => !props.isLoading && !props.isError && displayedShotsCount.value > 0
+)
+
+const {
+  columnSelectorDisplayed,
+  getEntityLineNumber,
+  getGroupKey,
+  getValidationStyle,
+  hiddenColumns,
+  isEmptyTask,
+  isMetadataColumnEditAllowed,
+  isValidResolution,
+  lastHeaderMenuDisplayed,
+  lastMetadataHeaderMenuDisplayed,
+  metadataDisplayHeaders,
+  metadataStickColumnClicked,
+  nonStickedDisplayedValidationColumns,
+  nonStickedVisibleMetadataDescriptors,
+  offsets,
+  onAddMetadataClicked,
+  onBodyScroll,
+  onDeleteAllTasksClicked,
+  onDeleteMetadataClicked,
+  onDescriptionChanged,
+  onEditMetadataClicked,
+  onInputKeyUp,
+  onMetadataFieldChanged,
+  onMinimizeColumnToggled,
+  onNumberFieldKeyDown,
+  onSelectColumn,
+  onSortByFieldClicked,
+  onSortByMetadataClicked,
+  onSortByTaskTypeClicked,
+  onTaskSelected,
+  onTaskUnselected,
+  selectTaskFromQuery,
+  setScrollPosition,
+  shiftKeyPressed,
+  showFieldHeaderMenu,
+  showHeaderMenu,
+  showMetadataHeaderMenu,
+  startBrowsing,
+  stickColumnClicked,
+  stickedColumns,
+  stickedDisplayedValidationColumns,
+  stickedVisibleMetadataDescriptors,
+  toggleColumnSelector,
+  updateOffsets
+} = useEntityList({
+  type: 'shot',
+  props,
+  emit,
+  entities: computed(() => props.displayedShots),
+  filledColumns: shotFilledColumns,
+  metadataDescriptors: shotMetadataDescriptors,
+  metadataDisplayHeaders: {
+    drawings: true,
+    fps: true,
+    frameIn: true,
+    frameOut: true,
+    frames: true,
+    estimation: true,
+    maxRetakes: true,
+    resolution: true,
+    timeSpent: true
   },
+  isEmptyList,
+  onScrollEnd: () => store.dispatch('displayMoreShots')
+})
 
-  props: {
-    displaySettings: {
-      type: Object,
-      default: () => ({})
-    },
-    displayedShots: {
-      type: Array,
-      default: () => []
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    validationColumns: {
-      type: Array,
-      default: () => []
-    },
-    departmentFilter: {
-      type: Array,
-      default: () => []
-    }
-  },
+// Functions
+// --------------------------------------------------------------------------
 
-  emits: [
-    'add-shots',
-    'create-tasks',
-    'delete-clicked',
-    'edit-clicked',
-    'field-changed',
-    'metadata-changed',
-    'restore-clicked',
-    'scroll',
-    'sequence-clicked',
-    'shot-history'
-  ],
+const groupHeader = group => {
+  const shot = group[0]
+  if (!shot) return ''
+  // Sequence names repeat across episodes: say which one in All mode.
+  return isAllEpisodes.value && shot.episode_name
+    ? `${shot.episode_name} / ${shot.sequence_name}`
+    : shot.sequence_name
+}
 
-  data() {
-    return {
-      type: 'shot',
-      hiddenColumns: {},
-      lastFieldHeaderMenuDisplayed: null,
-      lastFieldHeaderMenuLabel: null,
-      lastHeaderMenuDisplayed: null,
-      lastMetadataHeaderMenuDisplayed: null,
-      lastHeaderMenuDisplayedIndexInGrid: null,
-      lastSelectedShot: null,
-      lastSelection: null,
-      metadataDisplayHeaders: {
-        drawings: true,
-        fps: true,
-        frameIn: true,
-        frameOut: true,
-        frames: true,
-        estimation: true,
-        maxRetakes: true,
-        resolution: true,
-        timeSpent: true
-      },
-      offsets: {},
-      stickedColumns: {},
-      domEvents: [
-        ['mousemove', this.onMouseMove],
-        ['touchmove', this.onMouseMove],
-        ['mouseup', this.stopBrowsing],
-        ['mouseleave', this.stopBrowsing],
-        ['touchend', this.stopBrowsing],
-        ['touchcancel', this.stopBrowsing],
-        ['keyup', this.stopBrowsing]
-      ]
-    }
-  },
+const getIndex = (i, k) => getEntityLineNumber(props.displayedShots, i, k)
 
-  beforeUnmount() {
-    this.removeEvents(this.domEvents)
-  },
+const isSelected = (indexInGroup, groupIndex, columnIndex) =>
+  shotSelectionGrid.value.has(
+    `${getIndex(indexInGroup, groupIndex)}-${columnIndex}`
+  )
 
-  computed: {
-    ...mapGetters([
-      'currentProduction',
-      'currentEpisode',
-      'displayedShotsEstimation',
-      'displayedShotsCount',
-      'displayedShotsDrawings',
-      'displayedShotsFrames',
-      'displayedShotsLength',
-      'displayedShotsTimeSpent',
-      'isBigThumbnails',
-      'isCurrentUserAdmin',
-      'isCurrentUserClient',
-      'isFps',
-      'isFrames',
-      'isFrameIn',
-      'isFrameOut',
-      'isPaperProduction',
-      'isMaxRetakes',
-      'isResolution',
-      'isSingleEpisode',
-      'isShotDescription',
-      'isShotEstimation',
-      'isShotTime',
-      'isShowAssignations',
-      'displaySettings.showInfos',
-      'isTVShow',
-      'nbSelectedTasks',
-      'selectedShots',
-      'selectedTasks',
-      'sequenceMap',
-      'shotFilledColumns',
-      'shotMap',
-      'shotMetadataDescriptors',
-      'shots',
-      'shotSearchText',
-      'shotSelectionGrid',
-      'taskMap',
-      'taskTypeMap',
-      'user'
-    ]),
+const getCastingTask = (shot, columnId) =>
+  shot.nb_entities_out
+    ? taskMap.value.get(shot.validations.get(columnId))
+    : null
 
-    // Production-scoped: effective role on the current production (global
-    // admins/managers still pass, but a per-project override wins).
-    ...mapGetters({
-      isCurrentUserManager: 'isCurrentUserProductionManager',
-      isCurrentUserSupervisor: 'isCurrentUserProductionSupervisor'
-    }),
+const isCastingReady = (shot, columnId) => {
+  const task = getCastingTask(shot, columnId)
+  return Boolean(
+    task &&
+    task.nb_assets_ready > 0 &&
+    shot.nb_entities_out === task.nb_assets_ready
+  )
+}
 
-    isAllEpisodes() {
-      return this.isTVShow && this.currentEpisode?.id === 'all'
-    },
+const castingTitle = (shot, columnId) => {
+  const task = getCastingTask(shot, columnId)
+  return task
+    ? `${task.nb_assets_ready} / ${shot.nb_entities_out} assets ready`
+    : ''
+}
 
-    isEmptyList() {
-      return (
-        this.displayedShots &&
-        this.displayedShots[0].length === 0 &&
-        !this.isLoading &&
-        !this.isError &&
-        (!this.shotSearchText || this.shotSearchText.length === 0)
-      )
-    },
-
-    isEmptyTask() {
-      return (
-        !this.isEmptyList &&
-        !this.isLoading &&
-        this.validationColumns &&
-        this.validationColumns.length === 0
-      )
-    },
-
-    isListVisible() {
-      return !this.isLoading && !this.isError && this.displayedShotsCount > 0
-    },
-
-    displayedValidationColumns() {
-      return this.validationColumns.filter(columnId => {
-        return (
-          this.shotFilledColumns[columnId] &&
-          (!this.hiddenColumns[columnId] || this.displaySettings.showInfos)
-        )
+// Shift-click selects every line between the last selected one and this
+// one.
+const toggleLine = (shot, event) => {
+  const selected = event.target.checked
+  const shotsToSelect = [shot]
+  if (selected && shiftKeyPressed.value && lastSelectedShot.value) {
+    const shots = props.displayedShots.flat()
+    const indexes = [lastSelectedShot.value.id, shot.id].map(id =>
+      shots.findIndex(displayedShot => displayedShot.id === id)
+    )
+    const [startIndex, endIndex] = indexes.sort((a, b) => a - b)
+    if (startIndex >= 0) {
+      range(startIndex, endIndex).forEach(index => {
+        shotsToSelect.push(shots[index])
       })
-    },
-
-    metadataDescriptors() {
-      return this.shotMetadataDescriptors
-    },
-
-    localStorageStickKey() {
-      return `stick-shots-${this.currentProduction?.id}`
-    }
-  },
-
-  methods: {
-    ...mapActions(['displayMoreShots', 'setShotSelection']),
-
-    formatToTimecode,
-
-    groupHeader(group) {
-      const shot = group[0]
-      if (!shot) return ''
-      // Sequence names repeat across episodes: say which one in All mode.
-      return this.isAllEpisodes && shot.episode_name
-        ? `${shot.episode_name} / ${shot.sequence_name}`
-        : shot.sequence_name
-    },
-
-    isSelected(indexInGroup, groupIndex, columnIndex) {
-      const lineIndex = this.getIndex(indexInGroup, groupIndex)
-      return this.shotSelectionGrid.has(`${lineIndex}-${columnIndex}`)
-    },
-
-    isCastingReady(shot, columnId) {
-      if (!shot.nb_entities_out) {
-        return false
-      }
-      const task = this.taskMap.get(shot.validations.get(columnId))
-      return (
-        task &&
-        task.nb_assets_ready > 0 &&
-        shot.nb_entities_out === task.nb_assets_ready
-      )
-    },
-
-    castingTitle(shot, columnId) {
-      if (!shot.nb_entities_out) {
-        return ''
-      }
-      const task = this.taskMap.get(shot.validations.get(columnId))
-      return task
-        ? task.nb_assets_ready + ' / ' + shot.nb_entities_out + ' assets ready'
-        : ''
-    },
-
-    toggleLine(shot, event) {
-      const selected = event.target.checked
-      const shotsToSelect = [shot]
-      if (selected && this.shiftKeyPressed && this.lastSelectedShot) {
-        const shotsFlatten = this.displayedShots.flat()
-        let startShotIndex = shotsFlatten.findIndex(
-          displayedShot => displayedShot.id === this.lastSelectedShot.id
-        )
-        let endShotIndex = shotsFlatten.findIndex(
-          displayedShot => displayedShot.id === shot.id
-        )
-        if (startShotIndex > endShotIndex) {
-          ;[startShotIndex, endShotIndex] = [endShotIndex, startShotIndex]
-        }
-        if (startShotIndex >= 0 && endShotIndex >= 0) {
-          range(startShotIndex, endShotIndex).forEach(index => {
-            shotsToSelect.push(shotsFlatten[index])
-          })
-        }
-      }
-      if (selected) {
-        this.lastSelectedShot = shot
-      }
-      shotsToSelect.forEach(shot => {
-        this.setShotSelection({ shot, selected })
-      })
-    },
-
-    onBodyScroll(event) {
-      if (!this.$refs.body) return
-      const position = event.target
-      this.$emit('scroll', position.scrollTop)
-      const maxHeight =
-        this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
-      if (maxHeight < position.scrollTop + 100) {
-        this.loadMoreShots()
-      }
-    },
-
-    loadMoreShots() {
-      this.displayMoreShots()
-    },
-
-    taskHref(taskId) {
-      return getTaskHref(
-        this.$router,
-        this.taskMap.get(taskId),
-        this.currentProduction,
-        this.isTVShow,
-        this.currentEpisode,
-        this.taskTypeMap
-      )
-    },
-
-    shotPath(shotId) {
-      return this.getPath('shot', shotId)
-    },
-
-    getPath(section, shotId) {
-      const route = {
-        name: section,
-        params: {
-          production_id: this.currentProduction?.id
-        }
-      }
-
-      if (this.isTVShow && this.currentEpisode) {
-        route.name = `episode-${section}`
-        route.params.episode_id = this.currentEpisode.id
-      }
-
-      if (shotId) {
-        route.params.shot_id = shotId
-      }
-
-      return route
-    },
-
-    onInputKeyUp(event, i, j) {
-      const listWidth = this.visibleMetadataDescriptors.length + 4
-      const listHeight = this.displayedShotsCount
-      this.keyMetadataNavigation(listWidth, listHeight, i, j, event.key)
-      return this.pauseEvent(event)
-    },
-
-    onNbFramesChanged(entry, value) {
-      const shotsToChange = this.selectedShots.has(entry.id)
-        ? this.selectedShots
-        : [entry]
-
-      const cleanValue = this.sanitizeIntegerLight(value)
-
-      shotsToChange.forEach(shot => {
-        this.$emit('field-changed', {
-          entry: shot,
-          fieldName: 'nb_frames',
-          value: cleanValue
-        })
-      })
-    },
-
-    getIndex(i, k) {
-      return this.getEntityLineNumber(this.displayedShots, i, k)
-    },
-
-    toggleStickedColumns(columnId) {
-      const sticked = !this.stickedColumns[columnId]
-      this.stickedColumns = {
-        ...this.stickedColumns,
-        [columnId]: sticked
-      }
-      preferences.setObjectPreference(
-        this.localStorageStickKey,
-        this.stickedColumns
-      )
-    },
-
-    stickColumnClicked() {
-      this.toggleStickedColumns(this.lastHeaderMenuDisplayed)
-      this.showHeaderMenu()
-    },
-
-    metadataStickColumnClicked(event) {
-      this.toggleStickedColumns(this.lastMetadataHeaderMenuDisplayed)
-      this.showMetadataHeaderMenu(this.lastMetadataHeaderMenuDisplayed, event)
-    },
-
-    updateOffsets() {
-      if (this.isLoading) {
-        return
-      }
-      this.$nextTick(() => {
-        let offset = this.$refs['th-name'].getBoundingClientRect().width
-        this.offsets = {}
-
-        if (this.displaySettings.showInfos) {
-          for (
-            let metadataCol = 0;
-            metadataCol < this.stickedVisibleMetadataDescriptors.length;
-            metadataCol++
-          ) {
-            this.offsets[`editor-${metadataCol}`] = offset
-            const editor = this.$refs[`editor-${metadataCol}`][0].$el
-            offset += editor.getBoundingClientRect().width
-          }
-        }
-        for (
-          let validationCol = 0;
-          validationCol < this.stickedDisplayedValidationColumns.length;
-          validationCol++
-        ) {
-          this.offsets[`validation-${validationCol}`] = offset
-          const validation = this.$refs[`validation-${validationCol}`][0].$el
-          offset += validation.getBoundingClientRect().width
-        }
-      })
-    }
-  },
-
-  watch: {
-    displayedShots() {
-      this.$options.lineIndex = {}
-    },
-
-    validationColumns() {
-      this.initHiddenColumns(this.validationColumns, this.hiddenColumns)
-    },
-
-    stickedColumns() {
-      this.updateOffsets()
-    },
-
-    isLoading() {
-      this.updateOffsets()
-    },
-
-    isBigThumbnails() {
-      this.updateOffsets()
     }
   }
+  if (selected) {
+    lastSelectedShot.value = shot
+  }
+  shotsToSelect.forEach(shot => {
+    store.dispatch('setShotSelection', { shot, selected })
+  })
 }
+
+const taskHref = taskId =>
+  getTaskHref(
+    router,
+    taskMap.value.get(taskId),
+    currentProduction.value,
+    isTVShow.value,
+    currentEpisode.value,
+    taskTypeMap.value
+  )
+
+const shotPath = shotId => {
+  const route = {
+    name: 'shot',
+    params: { production_id: currentProduction.value?.id, shot_id: shotId }
+  }
+  if (isTVShow.value && currentEpisode.value) {
+    route.name = 'episode-shot'
+    route.params.episode_id = currentEpisode.value.id
+  }
+  return route
+}
+
+// A change on a selected line applies to every selected line.
+const onNbFramesChanged = (entry, value) => {
+  const shotsToChange = selectedShots.value.has(entry.id)
+    ? selectedShots.value
+    : [entry]
+  const cleanValue = sanitizeIntegerLight(value)
+  shotsToChange.forEach(shot => {
+    emit('field-changed', {
+      entry: shot,
+      fieldName: 'nb_frames',
+      value: cleanValue
+    })
+  })
+}
+
+// Watchers
+// --------------------------------------------------------------------------
+
+watch(isBigThumbnails, updateOffsets)
+
+// The pages drive the list through a ref.
+defineExpose({ selectTaskFromQuery, setScrollPosition })
 </script>
 
 <style lang="scss" scoped>

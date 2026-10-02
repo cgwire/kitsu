@@ -129,7 +129,6 @@
             <th
               scope="col"
               class="time-spent"
-              ref="th-spent"
               v-if="
                 !isCurrentUserClient &&
                 displaySettings.showInfos &&
@@ -143,7 +142,6 @@
               scope="col"
               class="estimation"
               :title="$t('main.estimation')"
-              ref="th-spent"
               v-if="
                 !isCurrentUserClient &&
                 displaySettings.showInfos &&
@@ -171,7 +169,7 @@
                 ) in nonStickedDisplayedValidationColumns"
               />
             </template>
-            <th scope="col" class="actions" ref="actionsSection">
+            <th scope="col" class="actions">
               <button-simple
                 :class="{
                   'is-small': true,
@@ -291,10 +289,7 @@
                         event
                       )
                   "
-                  @keyup.ctrl="
-                    event =>
-                      onInputKeyUp(event, getIndex(i, k), descriptorLength)
-                  "
+                  @keyup.ctrl="onInputKeyUp"
                   v-if="isCurrentUserManager"
                 />
                 <span class="metadata-value selectable" v-else>
@@ -307,8 +302,8 @@
               <!-- Metadata stick -->
               <template v-if="displaySettings.showInfos">
                 <td
-                  :ref="`editor-${i}-${j}`"
                   class="metadata-descriptor datatable-row-header"
+                  @keyup.ctrl="onInputKeyUp"
                   :title="edit.data ? edit.data[descriptor.field_name] : ''"
                   :style="{
                     'z-index': 1000 - i, // Need for combo to be above the next cell
@@ -378,6 +373,7 @@
               <template v-if="displaySettings.showInfos">
                 <td
                   class="metadata-descriptor"
+                  @keyup.ctrl="onInputKeyUp"
                   :title="edit.data ? edit.data[descriptor.field_name] : ''"
                   :key="edit.id + '-' + descriptor.id"
                   v-for="(
@@ -503,364 +499,226 @@
   </div>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
+import { useEntityList } from '@/composables/entityList'
+import { useFormat } from '@/composables/format'
+import { getMetadataFieldValue } from '@/lib/descriptors'
 import { getTaskHref } from '@/lib/path'
-import preferences from '@/lib/preferences'
 import { range } from '@/lib/time'
 
-import { descriptorMixin } from '@/components/mixins/descriptors'
-import { domMixin } from '@/components/mixins/dom'
-import { entityListMixin } from '@/components/mixins/entity_list'
-import { formatListMixin } from '@/components/mixins/format'
-import { selectionListMixin } from '@/components/mixins/selection'
-
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+/* eslint-disable no-unused-vars */
 import DescriptionCell from '@/components/cells/DescriptionCell.vue'
-import EmptyList from '@/components/widgets/EmptyList.vue'
-import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import MetadataHeader from '@/components/cells/MetadataHeader.vue'
 import MetadataInput from '@/components/cells/MetadataInput.vue'
 import RowActionsCell from '@/components/cells/RowActionsCell.vue'
-import TableMetadataHeaderMenu from '@/components/widgets/TableMetadataHeaderMenu.vue'
-import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu.vue'
-import TableHeaderMenu from '@/components/widgets/TableHeaderMenu.vue'
-import TableInfo from '@/components/widgets/TableInfo.vue'
 import ValidationCell from '@/components/cells/ValidationCell.vue'
 import ValidationHeader from '@/components/cells/ValidationHeader.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import EmptyList from '@/components/widgets/EmptyList.vue'
+import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+import TableHeaderMenu from '@/components/widgets/TableHeaderMenu.vue'
+import TableInfo from '@/components/widgets/TableInfo.vue'
+import TableMetadataHeaderMenu from '@/components/widgets/TableMetadataHeaderMenu.vue'
+import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu.vue'
+/* eslint-enable no-unused-vars */
 
-export default {
-  name: 'edit-list',
+const router = useRouter()
+const store = useStore()
+const { formatDuration, isDurationInHours } = useFormat()
 
-  mixins: [
-    descriptorMixin,
-    domMixin,
-    formatListMixin,
-    entityListMixin,
-    selectionListMixin
-  ],
+// Props / Emits
+// --------------------------------------------------------------------------
 
-  props: {
-    displayedEdits: {
-      type: Array,
-      default: () => []
-    },
-    displaySettings: {
-      type: Object,
-      default: () => {}
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    validationColumns: {
-      type: Array,
-      default: () => []
-    },
-    departmentFilter: {
-      type: Array,
-      default: () => []
-    }
-  },
+const props = defineProps({
+  displayedEdits: { type: Array, default: () => [] },
+  displaySettings: { type: Object, default: () => ({}) },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  validationColumns: { type: Array, default: () => [] },
+  departmentFilter: { type: Array, default: () => [] }
+})
 
-  emits: [
-    'add-edits',
-    'create-tasks',
-    'delete-clicked',
-    'edit-clicked',
-    'edit-history',
-    'metadata-changed',
-    'restore-clicked',
-    'scroll'
-  ],
+const emit = defineEmits([
+  'add-edits',
+  'add-metadata',
+  'change-sort',
+  'create-tasks',
+  'delete-all-tasks',
+  'delete-clicked',
+  'delete-metadata',
+  'edit-clicked',
+  'edit-history',
+  'edit-metadata',
+  'field-changed',
+  'keep-task-panel-open',
+  'metadata-changed',
+  'restore-clicked',
+  'scroll'
+])
 
-  data() {
-    return {
-      type: 'edit',
-      hiddenColumns: {},
-      lastHeaderMenuDisplayed: null,
-      lastMetadataHeaderMenuDisplayed: null,
-      lastHeaderMenuDisplayedIndexInGrid: null,
-      lastSelectedEdit: null,
-      lastSelection: null,
-      metadataDisplayHeaders: {
-        estimation: true,
-        timeSpent: true
-      },
-      offsets: {},
-      stickedColumns: {}
-    }
-  },
+// State
+// --------------------------------------------------------------------------
 
-  components: {
-    ButtonSimple,
-    DescriptionCell,
-    EmptyList,
-    EntityThumbnail,
-    MetadataHeader,
-    MetadataInput,
-    RowActionsCell,
-    TableHeaderMenu,
-    TableMetadataHeaderMenu,
-    TableMetadataSelectorMenu,
-    TableInfo,
-    ValidationCell,
-    ValidationHeader
-  },
+const lastSelectedEdit = ref(null)
 
-  computed: {
-    ...mapGetters([
-      'edits',
-      'episodes',
-      'currentProduction',
-      'episodeMap',
-      'currentEpisode',
-      'displayedEditsEstimation',
-      'displayedEditsCount',
-      'displayedEditsLength',
-      'displayedEditsTimeSpent',
-      'isCurrentUserAdmin',
-      'isCurrentUserClient',
-      'isSingleEpisode',
-      'isEditDescription',
-      'isEditEstimation',
-      'isEditTime',
-      'isTVShow',
-      'nbSelectedTasks',
-      'selectedEdits',
-      'edits',
-      'editFilledColumns',
-      'editMap',
-      'editMetadataDescriptors',
-      'editSearchText',
-      'editSelectionGrid',
-      'selectedTasks',
-      'taskMap',
-      'taskTypeMap',
-      'user'
-    ]),
+// Computed
+// --------------------------------------------------------------------------
 
-    // Production-scoped: effective role on the current production (global
-    // admins/managers still pass, but a per-project override wins).
-    ...mapGetters({
-      isCurrentUserManager: 'isCurrentUserProductionManager',
-      isCurrentUserSupervisor: 'isCurrentUserProductionSupervisor'
-    }),
+const currentEpisode = computed(() => store.getters.currentEpisode)
+const currentProduction = computed(() => store.getters.currentProduction)
+const displayedEditsCount = computed(() => store.getters.displayedEditsCount)
+const displayedEditsEstimation = computed(
+  () => store.getters.displayedEditsEstimation
+)
+const displayedEditsLength = computed(() => store.getters.displayedEditsLength)
+const displayedEditsTimeSpent = computed(
+  () => store.getters.displayedEditsTimeSpent
+)
+const editFilledColumns = computed(() => store.getters.editFilledColumns)
+const editMetadataDescriptors = computed(
+  () => store.getters.editMetadataDescriptors
+)
+const editSearchText = computed(() => store.getters.editSearchText)
+const editSelectionGrid = computed(() => store.getters.editSelectionGrid)
+const episodeMap = computed(() => store.getters.episodeMap)
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+// Production-scoped: effective role on the current production (global
+// admins/managers still pass, but a per-project override wins).
+const isCurrentUserManager = computed(
+  () => store.getters.isCurrentUserProductionManager
+)
+const isCurrentUserSupervisor = computed(
+  () => store.getters.isCurrentUserProductionSupervisor
+)
+const isEditDescription = computed(() => store.getters.isEditDescription)
+const isEditEstimation = computed(() => store.getters.isEditEstimation)
+const isEditTime = computed(() => store.getters.isEditTime)
+const isTVShow = computed(() => store.getters.isTVShow)
+const selectedEdits = computed(() => store.getters.selectedEdits)
+const taskMap = computed(() => store.getters.taskMap)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
-    isEmptyList() {
-      return (
-        this.displayedEdits.length === 0 &&
-        !this.isLoading &&
-        !this.isError &&
-        (!this.editSearchText || this.editSearchText.length === 0)
-      )
-    },
+const isEmptyList = computed(
+  () =>
+    props.displayedEdits.length === 0 &&
+    !props.isLoading &&
+    !props.isError &&
+    (!editSearchText.value || editSearchText.value.length === 0)
+)
 
-    isEmptyTask() {
-      return (
-        !this.isEmptyList &&
-        !this.isLoading &&
-        this.validationColumns &&
-        this.validationColumns.length === 0
-      )
-    },
+const isListVisible = computed(
+  () => !props.isLoading && !props.isError && displayedEditsCount.value > 0
+)
 
-    isListVisible() {
-      return !this.isLoading && !this.isError && this.displayedEditsCount > 0
-    },
+const {
+  columnSelectorDisplayed,
+  hiddenColumns,
+  isEmptyTask,
+  lastHeaderMenuDisplayed,
+  lastMetadataHeaderMenuDisplayed,
+  metadataDisplayHeaders,
+  metadataStickColumnClicked,
+  nonStickedDisplayedValidationColumns,
+  nonStickedVisibleMetadataDescriptors,
+  offsets,
+  onAddMetadataClicked,
+  onBodyScroll,
+  onDeleteAllTasksClicked,
+  onDeleteMetadataClicked,
+  onDescriptionChanged,
+  onEditMetadataClicked,
+  onInputKeyUp,
+  onMetadataFieldChanged,
+  onMinimizeColumnToggled,
+  onSelectColumn,
+  onSortByMetadataClicked,
+  onSortByTaskTypeClicked,
+  onTaskSelected,
+  onTaskUnselected,
+  getValidationStyle,
+  isMetadataColumnEditAllowed,
+  isValidResolution,
+  selectTaskFromQuery,
+  setScrollPosition,
+  shiftKeyPressed,
+  showHeaderMenu,
+  showMetadataHeaderMenu,
+  stickColumnClicked,
+  stickedColumns,
+  stickedDisplayedValidationColumns,
+  stickedVisibleMetadataDescriptors,
+  toggleColumnSelector
+} = useEntityList({
+  type: 'edit',
+  props,
+  emit,
+  entities: computed(() => props.displayedEdits),
+  filledColumns: editFilledColumns,
+  metadataDescriptors: editMetadataDescriptors,
+  metadataDisplayHeaders: { estimation: true, timeSpent: true },
+  isEmptyList,
+  onScrollEnd: () => store.dispatch('displayMoreEdits')
+})
 
-    displayedValidationColumns() {
-      return this.validationColumns.filter(columnId => {
-        return (
-          this.editFilledColumns[columnId] &&
-          (!this.hiddenColumns[columnId] || this.displaySettings.showInfos)
-        )
-      })
-    },
+// Functions
+// --------------------------------------------------------------------------
 
-    metadataDescriptors() {
-      return this.editMetadataDescriptors
-    },
+const isSelected = (lineIndex, columnIndex) =>
+  editSelectionGrid.value.has(`${lineIndex}-${columnIndex}`)
 
-    localStorageStickKey() {
-      return `stick-edits-${this.currentProduction?.id}`
-    }
-  },
-
-  methods: {
-    ...mapActions(['displayMoreEdits', 'setEditSelection']),
-
-    isSelected(lineIndex, columnIndex) {
-      return this.editSelectionGrid.has(`${lineIndex}-${columnIndex}`)
-    },
-
-    toggleLine(edit, event) {
-      const selected = event.target.checked
-      const editsToSelect = [edit]
-      if (selected && this.shiftKeyPressed && this.lastSelectedEdit) {
-        const editsFlatten = this.displayedEdits.flat()
-        let startEditIndex = editsFlatten.findIndex(
-          displayedEdit => displayedEdit.id === this.lastSelectedEdit.id
-        )
-        let endEditIndex = editsFlatten.findIndex(
-          displayedEdit => displayedEdit.id === edit.id
-        )
-        if (startEditIndex > endEditIndex) {
-          ;[startEditIndex, endEditIndex] = [endEditIndex, startEditIndex]
-        }
-        if (startEditIndex >= 0 && endEditIndex >= 0) {
-          range(startEditIndex, endEditIndex).forEach(index => {
-            editsToSelect.push(editsFlatten[index])
-          })
-        }
-      }
-      if (selected) {
-        this.lastSelectedEdit = edit
-      }
-      editsToSelect.forEach(edit => {
-        this.setEditSelection({ edit, selected })
-      })
-    },
-
-    onBodyScroll(event) {
-      if (!this.$refs.body) return
-      const position = event.target
-      this.$emit('scroll', position.scrollTop)
-      const maxHeight =
-        this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
-      if (maxHeight < position.scrollTop + 100) {
-        this.loadMoreEdits()
-      }
-    },
-
-    loadMoreEdits() {
-      this.displayMoreEdits()
-    },
-
-    taskHref(taskId) {
-      return getTaskHref(
-        this.$router,
-        this.taskMap.get(taskId),
-        this.currentProduction,
-        this.isTVShow,
-        this.currentEpisode,
-        this.taskTypeMap
-      )
-    },
-
-    editPath(editId) {
-      return this.getPath('edit', editId)
-    },
-
-    getPath(section, editId) {
-      const route = {
-        name: section,
-        params: {
-          production_id: this.currentProduction?.id
-        }
-      }
-
-      if (this.isTVShow && this.currentEpisode) {
-        route.name = `episode-${section}`
-        route.params.episode_id = this.currentEpisode.id
-      }
-
-      if (editId) {
-        route.params.edit_id = editId
-      }
-
-      return route
-    },
-
-    onInputKeyUp(event, i, j) {
-      const listWidth = this.visibleMetadataDescriptors.length + 4
-      const listHeight = this.displayedEditsCount
-      this.keyMetadataNavigation(listWidth, listHeight, i, j, event.key)
-      return this.pauseEvent(event)
-    },
-
-    toggleStickedColumns(columnId) {
-      const sticked = !this.stickedColumns[columnId]
-      this.stickedColumns = {
-        ...this.stickedColumns,
-        [columnId]: sticked
-      }
-      preferences.setObjectPreference(
-        this.localStorageStickKey,
-        this.stickedColumns
-      )
-    },
-
-    stickColumnClicked() {
-      this.toggleStickedColumns(this.lastHeaderMenuDisplayed)
-      this.showHeaderMenu()
-    },
-
-    metadataStickColumnClicked(event) {
-      this.toggleStickedColumns(this.lastMetadataHeaderMenuDisplayed)
-      this.showMetadataHeaderMenu(this.lastMetadataHeaderMenuDisplayed, event)
-    },
-
-    updateOffsets() {
-      if (this.isLoading) {
-        return
-      }
-      this.$nextTick(() => {
-        let offset = this.$refs['th-name'].getBoundingClientRect().width
-        this.offsets = {}
-
-        if (this.displaySettings.showInfos) {
-          for (
-            let metadataCol = 0;
-            metadataCol < this.stickedVisibleMetadataDescriptors.length;
-            metadataCol++
-          ) {
-            this.offsets[`editor-${metadataCol}`] = offset
-            const editor = this.$refs[`editor-${metadataCol}`][0].$el
-            offset += editor.getBoundingClientRect().width
-          }
-        }
-        for (
-          let validationCol = 0;
-          validationCol < this.stickedDisplayedValidationColumns.length;
-          validationCol++
-        ) {
-          this.offsets[`validation-${validationCol}`] = offset
-          const validation = this.$refs[`validation-${validationCol}`][0].$el
-          offset += validation.getBoundingClientRect().width
-        }
+// Shift-click selects every line between the last selected one and this
+// one.
+const toggleLine = (edit, event) => {
+  const selected = event.target.checked
+  const editsToSelect = [edit]
+  if (selected && shiftKeyPressed.value && lastSelectedEdit.value) {
+    const edits = props.displayedEdits
+    const indexes = [lastSelectedEdit.value.id, edit.id].map(id =>
+      edits.findIndex(displayedEdit => displayedEdit.id === id)
+    )
+    const [startIndex, endIndex] = indexes.sort((a, b) => a - b)
+    if (startIndex >= 0) {
+      range(startIndex, endIndex).forEach(index => {
+        editsToSelect.push(edits[index])
       })
     }
-  },
-
-  watch: {
-    displayedEdits() {
-      this.$options.lineIndex = {}
-    },
-
-    validationColumns() {
-      this.initHiddenColumns(this.validationColumns, this.hiddenColumns)
-    },
-
-    stickedColumns() {
-      this.updateOffsets()
-    },
-
-    isLoading() {
-      this.updateOffsets()
-    }
-  },
-
-  mounted() {
-    this.stickedColumns =
-      preferences.getObjectPreference(this.localStorageStickKey) || {}
   }
+  if (selected) {
+    lastSelectedEdit.value = edit
+  }
+  editsToSelect.forEach(edit => {
+    store.dispatch('setEditSelection', { edit, selected })
+  })
 }
+
+const taskHref = taskId =>
+  getTaskHref(
+    router,
+    taskMap.value.get(taskId),
+    currentProduction.value,
+    isTVShow.value,
+    currentEpisode.value,
+    taskTypeMap.value
+  )
+
+const editPath = editId => {
+  const route = {
+    name: 'edit',
+    params: { production_id: currentProduction.value?.id, edit_id: editId }
+  }
+  if (isTVShow.value && currentEpisode.value) {
+    route.name = 'episode-edit'
+    route.params.episode_id = currentEpisode.value.id
+  }
+  return route
+}
+
+// The pages drive the list through a ref.
+defineExpose({ selectTaskFromQuery, setScrollPosition })
 </script>
 
 <style lang="scss" scoped>
@@ -947,37 +805,14 @@ span.thumbnail-empty {
   background: #f3f3f3;
 }
 
-.info {
-  margin-top: 2em;
-}
-
 .datatable-row th.name {
   font-size: 1.1em;
   padding: 6px;
 }
 
-.dark {
-  th .input-editor,
-  td .select select,
-  td .input-editor {
-    color: $white;
-
-    option {
-      background: $dark-grey-light;
-      color: $white;
-    }
-
-    &:focus,
-    &:active,
-    &:hover {
-      background: $dark-grey-light;
-    }
-  }
-}
-
 th .input-editor,
 td .input-editor {
-  color: $grey-strong;
+  color: var(--text);
   height: 100%;
   padding: 0.5rem;
   width: 100%;
@@ -985,11 +820,15 @@ td .input-editor {
   border: 1px solid transparent;
   z-index: 100;
 
+  option {
+    background: var(--background-alt-2);
+    color: var(--text);
+  }
+
   &:active,
   &:focus,
   &:hover {
-    background: transparent;
-    background: white;
+    background: var(--background-alt-2);
   }
 
   &:active,
@@ -1006,61 +845,11 @@ td .input-editor {
   }
 }
 
-input[type='number']::-webkit-outer-spin-button,
-input[type='number']::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-input[type='number'] {
-  -moz-appearance: textfield;
-}
-
 // Metadata cell CSS
 
 td.metadata-descriptor {
   height: 3.1rem;
   padding: 0;
-}
-
-td .select {
-  color: $grey-strong;
-  margin: 0;
-  height: 100%;
-  width: 100%;
-  border: 1px solid transparent;
-
-  &::after {
-    border-color: transparent;
-  }
-
-  &:active,
-  &:focus,
-  &:hover {
-    &::after {
-      border-color: $green;
-    }
-  }
-
-  select {
-    color: $grey-strong;
-    height: 100%;
-    width: 100%;
-    background: transparent;
-    border-radius: 0;
-    border: 1px solid transparent;
-
-    &:focus {
-      border: 1px solid $green;
-      background: white;
-    }
-
-    &:hover {
-      background: transparent;
-      background: white;
-      border: 1px solid $light-green;
-    }
-  }
 }
 
 .metadata-value {

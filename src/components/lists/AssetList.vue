@@ -127,7 +127,6 @@
             </template>
 
             <th
-              ref="th-ready-for"
               scope="col"
               class="ready-for"
               :title="$t('assets.fields.ready_for')"
@@ -149,7 +148,6 @@
               scope="col"
               class="description"
               data-column-key="description"
-              ref="th-description"
               v-if="
                 !isCurrentUserClient &&
                 displaySettings.showInfos &&
@@ -166,7 +164,6 @@
             <th
               scope="col"
               class="time-spent number-cell"
-              ref="th-spent"
               v-if="
                 !isCurrentUserClient &&
                 displaySettings.showInfos &&
@@ -185,7 +182,6 @@
               scope="col"
               class="estimation number-cell"
               :title="$t('main.estimation')"
-              ref="th-spent"
               v-if="
                 !isCurrentUserClient &&
                 displaySettings.showInfos &&
@@ -245,7 +241,7 @@
               />
             </template>
 
-            <th scope="col" class="actions" ref="actionsSection">
+            <th scope="col" class="actions">
               <button-simple
                 :class="{
                   'is-small': true,
@@ -373,6 +369,7 @@
               <template v-if="displaySettings.showInfos">
                 <td
                   class="metadata-descriptor datatable-row-header"
+                  @keyup.ctrl="onInputKeyUp"
                   :title="asset.data ? asset.data[descriptor.field_name] : ''"
                   :style="{
                     'z-index':
@@ -510,10 +507,7 @@
                         event
                       )
                   "
-                  @keyup.ctrl="
-                    event =>
-                      onInputKeyUp(event, getIndex(i, k), descriptorLength + 3)
-                  "
+                  @keyup.ctrl="onInputKeyUp"
                   v-if="isCurrentUserManager"
                 />
 
@@ -528,6 +522,7 @@
               <template v-if="displaySettings.showInfos">
                 <td
                   class="metadata-descriptor"
+                  @keyup.ctrl="onInputKeyUp"
                   :title="asset.data ? asset.data[descriptor.field_name] : ''"
                   :key="'desc' + asset.id + '-' + descriptor.id"
                   v-for="(
@@ -612,21 +607,24 @@
   </div>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
-
-import { descriptorMixin } from '@/components/mixins/descriptors'
-import { domMixin } from '@/components/mixins/dom'
-import { entityListMixin } from '@/components/mixins/entity_list'
-import { formatListMixin } from '@/components/mixins/format'
-import { selectionListMixin } from '@/components/mixins/selection'
+<script setup>
+import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
 import emptyAssetIllustration from '@/assets/illustrations/empty_asset.png'
-import preferences from '@/lib/preferences'
+import { useEntityList } from '@/composables/entityList'
+import { useFormat } from '@/composables/format'
+import { getMetadataFieldValue } from '@/lib/descriptors'
 import { getTaskHref } from '@/lib/path'
 import { sortTaskTypes } from '@/lib/sorting'
 import { range } from '@/lib/time'
+import assetStore from '@/store/modules/assets'
+import assetTypeStore from '@/store/modules/assettypes'
+import episodeStore from '@/store/modules/episodes'
 
+/* eslint-disable no-unused-vars */
 import DescriptionCell from '@/components/cells/DescriptionCell.vue'
 import MetadataHeader from '@/components/cells/MetadataHeader.vue'
 import MetadataInput from '@/components/cells/MetadataInput.vue'
@@ -643,547 +641,319 @@ import TableHeaderMenu from '@/components/widgets/TableHeaderMenu.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 import TableMetadataHeaderMenu from '@/components/widgets/TableMetadataHeaderMenu.vue'
 import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu.vue'
+/* eslint-enable no-unused-vars */
 
-import assetStore from '@/store/modules/assets'
-import assetTypeStore from '@/store/modules/assettypes'
-import episodeStore from '@/store/modules/episodes'
-import taskTypeStore from '@/store/modules/tasktypes'
+const { t } = useI18n()
+const router = useRouter()
+const store = useStore()
+const { formatDuration } = useFormat()
 
-export default {
-  name: 'asset-list',
+// Non-reactive store caches, read at call time.
+const assetCache = assetStore.cache
+const assetTypeMap = assetTypeStore.cache.assetTypeMap
+const episodeMap = episodeStore.cache.episodeMap
 
-  mixins: [
-    entityListMixin,
-    descriptorMixin,
-    domMixin,
-    formatListMixin,
-    selectionListMixin
-  ],
+// Props / Emits
+// --------------------------------------------------------------------------
 
-  components: {
-    AssetListNumbers,
-    ButtonSimple,
-    ComboboxTaskType,
-    DescriptionCell,
-    EmptyList,
-    EntityThumbnail,
-    MetadataInput,
-    MetadataHeader,
-    RowActionsCell,
-    SortableFieldHeader,
-    TableInfo,
-    TableHeaderMenu,
-    TableMetadataHeaderMenu,
-    TableMetadataSelectorMenu,
-    ValidationCell,
-    ValidationHeader
-  },
+const props = defineProps({
+  contactSheetMode: { type: Boolean, default: false },
+  displaySettings: { type: Object, default: () => ({}) },
+  displayedAssets: { type: Array, default: () => [] },
+  isLoading: { type: Boolean, default: true },
+  isError: { type: Boolean, default: true },
+  validationColumns: { type: Array, default: () => [] },
+  departmentFilter: { type: Array, default: () => [] }
+})
 
-  props: {
-    contactSheetMode: {
-      type: Boolean,
-      default: false
-    },
-    displaySettings: {
-      type: Object,
-      default: () => {}
-    },
-    displayedAssets: {
-      type: Array,
-      default: () => []
-    },
-    isLoading: {
-      type: Boolean,
-      default: true
-    },
-    isError: {
-      type: Boolean,
-      default: true
-    },
-    validationColumns: {
-      type: Array,
-      default: () => []
-    },
-    departmentFilter: {
-      type: Array,
-      default: () => []
-    }
-  },
+const emit = defineEmits([
+  'add-metadata',
+  'asset-changed',
+  'asset-type-clicked',
+  'change-sort',
+  'create-tasks',
+  'delete-all-tasks',
+  'delete-clicked',
+  'delete-metadata',
+  'edit-clicked',
+  'edit-metadata',
+  'field-changed',
+  'keep-task-panel-open',
+  'metadata-changed',
+  'new-clicked',
+  'restore-clicked',
+  'scroll'
+])
 
-  emits: [
-    'asset-changed',
-    'asset-type-clicked',
-    'create-tasks',
-    'delete-clicked',
-    'edit-clicked',
-    'metadata-changed',
-    'new-clicked',
-    'restore-clicked',
-    'scroll'
-  ],
+// State
+// --------------------------------------------------------------------------
 
-  data() {
-    return {
-      type: 'asset',
-      columnSelectorDisplayed: false,
-      emptyAssetIllustration,
-      hiddenColumns: {},
-      lastSelection: null,
-      lastFieldHeaderMenuDisplayed: null,
-      lastFieldHeaderMenuLabel: null,
-      lastHeaderMenuDisplayed: null,
-      lastMetadataHeaderMenuDisplayed: null,
-      lastHeaderMenuDisplayedIndexInGrid: null,
-      metadataDisplayHeaders: {
-        estimation: true,
-        readyFor: true,
-        resolution: true,
-        timeSpent: true
-      },
-      stickedColumns: {},
-      domEvents: [
-        ['mousemove', this.onMouseMove],
-        ['touchmove', this.onMouseMove],
-        ['mouseup', this.stopBrowsing],
-        ['mouseleave', this.stopBrowsing],
-        ['touchend', this.stopBrowsing],
-        ['touchcancel', this.stopBrowsing],
-        ['keyup', this.stopBrowsing]
-      ],
-      offsets: {},
-      nameWidth: 200,
-      lastSelectedAsset: null
-    }
-  },
+const lastSelectedAsset = ref(null)
 
-  computed: {
-    ...mapGetters([
-      'assets',
-      'assetFilledColumns',
-      'assetMap',
-      'assetMetadataDescriptors',
-      'assetSearchText',
-      'assetSelectionGrid',
-      'currentEpisode',
-      'currentProduction',
-      'displayedAssetsCount',
-      'nbSelectedTasks',
-      'organisation',
-      'isAssetDescription',
-      'isAssetResolution',
-      'isCurrentUserClient',
-      'isShowAssignations',
-      'isAssetEstimation',
-      'isAssetTime',
-      'isTVShow',
-      'productionAssetTaskTypes',
-      'productionShotTaskTypes',
-      'selectedAssets',
-      'selectedTasks',
-      'taskMap',
-      'user'
-    ]),
+// Computed
+// --------------------------------------------------------------------------
 
-    // Production-scoped: effective role on the current production (global
-    // admins/managers still pass, but a per-project override wins).
-    ...mapGetters({
-      isCurrentUserManager: 'isCurrentUserProductionManager',
-      isCurrentUserSupervisor: 'isCurrentUserProductionSupervisor'
-    }),
+const assetMetadataDescriptors = computed(
+  () => store.getters.assetMetadataDescriptors
+)
+const assetSearchText = computed(() => store.getters.assetSearchText)
+const assetSelectionGrid = computed(() => store.getters.assetSelectionGrid)
+const currentEpisode = computed(() => store.getters.currentEpisode)
+const currentProduction = computed(() => store.getters.currentProduction)
+const displayedAssetsCount = computed(() => store.getters.displayedAssetsCount)
+const isAssetDescription = computed(() => store.getters.isAssetDescription)
+const isAssetEstimation = computed(() => store.getters.isAssetEstimation)
+const isAssetResolution = computed(() => store.getters.isAssetResolution)
+const isAssetTime = computed(() => store.getters.isAssetTime)
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+// Production-scoped: effective role on the current production (global
+// admins/managers still pass, but a per-project override wins).
+const isCurrentUserManager = computed(
+  () => store.getters.isCurrentUserProductionManager
+)
+const isCurrentUserSupervisor = computed(
+  () => store.getters.isCurrentUserProductionSupervisor
+)
+const isTVShow = computed(() => store.getters.isTVShow)
+const productionAssetTaskTypes = computed(
+  () => store.getters.productionAssetTaskTypes
+)
+const productionShotTaskTypes = computed(
+  () => store.getters.productionShotTaskTypes
+)
+const selectedAssets = computed(() => store.getters.selectedAssets)
+const taskMap = computed(() => store.getters.taskMap)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
-    assetCache() {
-      return assetStore.cache
-    },
+const isEmptyList = computed(
+  () =>
+    displayedAssetsCount.value === 0 &&
+    !props.isLoading &&
+    !props.isError &&
+    (!assetSearchText.value || assetSearchText.value.length === 0)
+)
 
-    assetTypeMap() {
-      return assetTypeStore.cache.assetTypeMap
-    },
+const isListVisible = computed(
+  () => !props.isLoading && !props.isError && displayedAssetsCount.value > 0
+)
 
-    episodeMap() {
-      return episodeStore.cache.episodeMap
-    },
+const isAssetsOnly = computed(
+  () => currentProduction.value?.production_type === 'assets'
+)
 
-    taskTypeMap() {
-      return taskTypeStore.cache.taskTypeMap
-    },
+const hasStickyEpisode = computed(
+  () => isTVShow.value && props.displaySettings.showInfos
+)
 
-    isEmptyList() {
-      return (
-        this.displayedAssetsCount === 0 &&
-        !this.isLoading &&
-        !this.isError &&
-        (!this.assetSearchText || this.assetSearchText.length === 0)
-      )
-    },
+const readyForTaskTypes = computed(() => [
+  { id: null, name: t('tasks.fields.no_task_type'), color: '#CCC' },
+  ...sortTaskTypes(productionShotTaskTypes.value, currentProduction.value)
+])
 
-    isEmptyTask() {
-      return (
-        !this.isEmptyList &&
-        !this.isLoading &&
-        this.validationColumns &&
-        this.validationColumns.length === 0
-      )
-    },
+// Task types an asset type accepts: its own workflow, or every production
+// task type when it has none.
+const getAllowedTaskTypeIds = assetTypeId => {
+  const taskTypeIds = assetTypeMap.get(assetTypeId)?.task_types
+  return taskTypeIds?.length
+    ? taskTypeIds
+    : productionAssetTaskTypes.value.map(taskType => taskType.id)
+}
 
-    isListVisible() {
-      return !this.isLoading && !this.isError && this.displayedAssetsCount > 0
-    },
-
-    /**
-     * Map of task type id → true for columns considered "filled" for the
-     * displayed assets. A column counts as filled only when at least one
-     * displayed asset has a task whose type is part of the asset type's
-     * workflow.
-     *
-     * Tasks lingering on assets whose type no longer accepts that task
-     * type (workflow-change leftovers, asset type reassignments, etc.) are
-     * deliberately treated as if they did not exist, so the column hides
-     * instead of being kept visible by orphaned tasks the artist cannot
-     * actually edit.
-     */
-    inWorkflowFilledColumns() {
-      const filled = {}
-      const productionTaskTypeIds = this.productionAssetTaskTypes.map(t => t.id)
-      for (const typeGroup of this.displayedAssets) {
-        if (!typeGroup.length) continue
-        const assetType = this.assetTypeMap.get(typeGroup[0].asset_type_id)
-        const allowedTaskTypes = assetType?.task_types?.length
-          ? assetType.task_types
-          : productionTaskTypeIds
-        const allowedSet = new Set(allowedTaskTypes)
-        for (const asset of typeGroup) {
-          if (!asset.validations) continue
-          for (const columnId of asset.validations.keys()) {
-            if (!filled[columnId] && allowedSet.has(columnId)) {
-              filled[columnId] = true
-            }
-          }
-        }
-      }
-      return filled
-    },
-
-    displayedValidationColumns() {
-      return this.validationColumns.filter(columnId => {
-        return (
-          this.inWorkflowFilledColumns[columnId] &&
-          (!this.hiddenColumns[columnId] || this.displaySettings.showInfos)
-        )
-      })
-    },
-
-    metadataDescriptors() {
-      return this.assetMetadataDescriptors
-    },
-
-    localStorageStickKey() {
-      return `stick-assets-${this.currentProduction?.id}`
-    },
-
-    readyForTaskTypes() {
-      return [
-        {
-          id: null,
-          name: this.$t('tasks.fields.no_task_type'),
-          color: '#CCC'
-        },
-        ...sortTaskTypes(this.productionShotTaskTypes, this.currentProduction)
-      ]
-    },
-
-    isAssetsOnly() {
-      return this.currentProduction?.production_type === 'assets'
-    },
-
-    formatDurationInHours() {
-      return this.organisation.format_duration_in_hours
-    },
-
-    hasStickyEpisode() {
-      return this.isTVShow && this.displaySettings.showInfos
-    },
-
-    /** Filter the displayed assets by the display settings */
-    filteredDisplayedAssets() {
-      if (
-        this.displaySettings.showSharedAssets &&
-        this.displaySettings.showLinkedAssets
-      ) {
-        return this.displayedAssets
-      }
-      const episodeId = this.currentEpisode?.id
-
-      return this.displayedAssets.map(typeList =>
-        typeList.filter(asset => {
-          if (!this.displaySettings.showSharedAssets && asset.shared) {
-            return false
-          }
-          if (
-            this.isTVShow &&
-            !this.displaySettings.showLinkedAssets &&
-            !['all', asset.episode_id || 'main'].includes(episodeId)
-          ) {
-            return false
-          }
-          return true
-        })
-      )
-    }
-  },
-
-  methods: {
-    ...mapActions(['displayMoreAssets', 'editAsset', 'setAssetSelection']),
-
-    assetEpisodes(asset, full) {
-      if (!this.episodeMap) return ''
-      const mainEpisode = this.episodeMap.get(asset.episode_id)
-      const mainEpisodeName = mainEpisode ? mainEpisode.name : 'MP'
-      const episodeNames = (asset.casting_episode_ids || [])
-        .map(eId => this.episodeMap.get(eId)?.name)
-        .filter(name => name && name !== mainEpisodeName)
-      let episodeNameString = ''
-      if (episodeNames.length > 2) {
-        if (full) {
-          episodeNameString = episodeNames.join(', ')
-        } else {
-          episodeNameString = episodeNames.slice(0, 2).join(', ') + ', ...'
-        }
-      } else if (episodeNames.length > 0) {
-        episodeNameString = episodeNames.join(', ')
-      }
-      return episodeNames.length > 0
-        ? mainEpisodeName + ', ' + episodeNameString
-        : mainEpisodeName
-    },
-
-    // Selectable if the cell already holds a task or if the task type is
-    // included in the workflow. Cells with existing tasks stay actionable
-    // even when a workflow change removed their task type, so they can
-    // still be selected and managed instead of freezing.
-    isSelectable(asset, columnId) {
-      if (asset.shared) {
-        return false
-      }
-      if (this.taskMap.get(asset.validations?.get(columnId))) {
-        return true
-      }
-      const assetType = this.assetTypeMap.get(asset.asset_type_id)
-      let taskTypes = assetType?.task_types || []
-      if (taskTypes.length === 0) {
-        taskTypes = this.productionAssetTaskTypes.map(t => t.id)
-      }
-      return taskTypes.includes(columnId)
-    },
-
-    isSelected(indexInGroup, groupIndex, columnIndex) {
-      const lineIndex = this.getIndex(indexInGroup, groupIndex)
-      return this.assetSelectionGrid.has(`${lineIndex}-${columnIndex}`)
-    },
-
-    toggleLine(asset, event) {
-      const selected = event.target.checked
-      const assetsToSelect = [asset]
-      if (selected && this.shiftKeyPressed && this.lastSelectedAsset) {
-        const assetsFlatten = this.displayedAssets.flat()
-        let startAssetIndex = assetsFlatten.findIndex(
-          displayedAsset => displayedAsset.id === this.lastSelectedAsset.id
-        )
-        let endAssetIndex = assetsFlatten.findIndex(
-          displayedAsset => displayedAsset.id === asset.id
-        )
-        if (startAssetIndex > endAssetIndex) {
-          ;[startAssetIndex, endAssetIndex] = [endAssetIndex, startAssetIndex]
-        }
-        if (startAssetIndex >= 0 && endAssetIndex >= 0) {
-          range(startAssetIndex, endAssetIndex).forEach(index => {
-            assetsToSelect.push(assetsFlatten[index])
+// A column counts as filled only when at least one displayed asset has a
+// task whose type is part of the asset type's workflow. Tasks lingering
+// on assets whose type no longer accepts that task type (workflow-change
+// leftovers, asset type reassignments) are treated as if they did not
+// exist, so the column hides instead of being kept visible by orphaned
+// tasks the artist cannot actually edit.
+const inWorkflowFilledColumns = computed(() =>
+  props.displayedAssets.reduce((filled, typeGroup) => {
+    if (typeGroup.length) {
+      const allowed = new Set(getAllowedTaskTypeIds(typeGroup[0].asset_type_id))
+      typeGroup.forEach(asset => {
+        Array.from(asset.validations?.keys() || [])
+          .filter(columnId => allowed.has(columnId))
+          .forEach(columnId => {
+            filled[columnId] = true
           })
-        }
-      }
-      if (selected) {
-        this.lastSelectedAsset = asset
-      }
-      assetsToSelect.forEach(asset => {
-        this.setAssetSelection({ asset, selected })
-      })
-    },
-
-    onBodyScroll(event) {
-      if (!this.$refs.body) return
-      const position = event.target
-      this.$emit('scroll', position.scrollTop)
-      const maxHeight =
-        this.$refs.body.scrollHeight - this.$refs.body.offsetHeight
-      if (maxHeight < position.scrollTop + 100) {
-        this.loadMoreAssets()
-      }
-    },
-
-    onReadyForChanged(asset, taskTypeId) {
-      if (this.selectedAssets.has(asset.id)) {
-        this.selectedAssets.forEach(asset => {
-          const data = { id: asset.id, ready_for: taskTypeId }
-          this.$emit('asset-changed', data)
-        })
-      } else {
-        const data = { id: asset.id, ready_for: taskTypeId }
-        this.$emit('asset-changed', data)
-      }
-    },
-
-    loadMoreAssets() {
-      this.displayMoreAssets()
-    },
-
-    getIndex(i, k) {
-      return this.getEntityLineNumber(this.displayedAssets, i, k)
-    },
-
-    taskHref(taskId) {
-      return getTaskHref(
-        this.$router,
-        this.taskMap.get(taskId),
-        this.currentProduction,
-        this.isTVShow,
-        this.currentEpisode,
-        this.taskTypeMap
-      )
-    },
-
-    assetPath(assetId) {
-      return this.getPath('asset', assetId)
-    },
-
-    getPath(section, assetId) {
-      const route = {
-        name: section,
-        params: {
-          production_id: this.currentProduction?.id
-        }
-      }
-
-      if (this.isTVShow && this.currentEpisode) {
-        route.name = `episode-${section}`
-        route.params.episode_id = this.currentEpisode.id
-      }
-
-      if (assetId) {
-        route.params.asset_id = assetId
-      }
-
-      return route
-    },
-
-    onInputKeyUp(event, i, j) {
-      const listWidth = this.visibleMetadataDescriptors.length
-      const listHeight = this.displayedAssetsCount
-      this.keyMetadataNavigation(listWidth, listHeight, i, j, event.key)
-    },
-
-    toggleStickedColumns(columnId) {
-      const sticked = !this.stickedColumns[columnId]
-      this.stickedColumns = {
-        ...this.stickedColumns,
-        [columnId]: sticked
-      }
-      preferences.setObjectPreference(
-        this.localStorageStickKey,
-        this.stickedColumns
-      )
-    },
-
-    stickColumnClicked() {
-      this.toggleStickedColumns(this.lastHeaderMenuDisplayed)
-      this.showHeaderMenu()
-    },
-
-    metadataStickColumnClicked(event) {
-      this.toggleStickedColumns(this.lastMetadataHeaderMenuDisplayed)
-      this.showMetadataHeaderMenu(this.lastMetadataHeaderMenuDisplayed, event)
-    },
-
-    updateOffsets() {
-      if (this.isLoading) {
-        return
-      }
-      this.$nextTick(function () {
-        this.nameWidth = this.$refs['th-name'].getBoundingClientRect().width
-        let offset = this.nameWidth
-        if (this.$refs['th-episode']) {
-          offset += this.$refs['th-episode'].getBoundingClientRect().width
-        }
-        this.offsets = {}
-
-        if (this.displaySettings.showInfos) {
-          for (
-            let metadataCol = 0;
-            metadataCol < this.stickedVisibleMetadataDescriptors.length;
-            metadataCol++
-          ) {
-            this.offsets[`editor-${metadataCol}`] = offset
-            const editor = this.$refs[`editor-${metadataCol}`][0].$el
-            offset += editor.getBoundingClientRect().width
-          }
-        }
-        for (
-          let validationCol = 0;
-          validationCol < this.stickedDisplayedValidationColumns.length;
-          validationCol++
-        ) {
-          this.offsets[`validation-${validationCol}`] = offset
-          const validation = this.$refs[`validation-${validationCol}`][0].$el
-          offset += validation.getBoundingClientRect().width
-        }
       })
     }
+    return filled
+  }, {})
+)
+
+// Filter the displayed assets by the display settings.
+const filteredDisplayedAssets = computed(() => {
+  const { showSharedAssets, showLinkedAssets } = props.displaySettings
+  if (showSharedAssets && showLinkedAssets) return props.displayedAssets
+  const episodeId = currentEpisode.value?.id
+  return props.displayedAssets.map(typeList =>
+    typeList.filter(
+      asset =>
+        (showSharedAssets || !asset.shared) &&
+        (!isTVShow.value ||
+          showLinkedAssets ||
+          ['all', asset.episode_id || 'main'].includes(episodeId))
+    )
+  )
+})
+
+const {
+  columnSelectorDisplayed,
+  getEntityLineNumber,
+  getGroupKey,
+  getValidationStyle,
+  hiddenColumns,
+  isEmptyTask,
+  isMetadataColumnEditAllowed,
+  isValidResolution,
+  lastHeaderMenuDisplayed,
+  lastMetadataHeaderMenuDisplayed,
+  metadataDisplayHeaders,
+  metadataStickColumnClicked,
+  nameWidth,
+  nonStickedDisplayedValidationColumns,
+  nonStickedVisibleMetadataDescriptors,
+  offsets,
+  onAddMetadataClicked,
+  onBodyScroll,
+  onDeleteAllTasksClicked,
+  onDeleteMetadataClicked,
+  onDescriptionChanged,
+  onEditMetadataClicked,
+  onInputKeyUp,
+  onMetadataFieldChanged,
+  onMinimizeColumnToggled,
+  onSelectColumn,
+  onSortByFieldClicked,
+  onSortByMetadataClicked,
+  onSortByTaskTypeClicked,
+  onTaskSelected,
+  onTaskUnselected,
+  selectTaskFromQuery,
+  setScrollPosition,
+  shiftKeyPressed,
+  showFieldHeaderMenu,
+  showHeaderMenu,
+  showMetadataHeaderMenu,
+  startBrowsing,
+  stickColumnClicked,
+  stickedColumns,
+  stickedDisplayedValidationColumns,
+  stickedVisibleMetadataDescriptors,
+  toggleColumnSelector
+} = useEntityList({
+  type: 'asset',
+  props,
+  emit,
+  entities: computed(() => props.displayedAssets),
+  filledColumns: inWorkflowFilledColumns,
+  metadataDescriptors: assetMetadataDescriptors,
+  metadataDisplayHeaders: {
+    estimation: true,
+    readyFor: true,
+    resolution: true,
+    timeSpent: true
   },
+  isEmptyList,
+  onScrollEnd: () => store.dispatch('displayMoreAssets')
+})
 
-  watch: {
-    displayedAssets() {
-      this.$options.lineIndex = {}
-    },
+// Functions
+// --------------------------------------------------------------------------
 
-    validationColumns: {
-      deep: true,
-      handler() {
-        this.initHiddenColumns(this.validationColumns, this.hiddenColumns)
-      }
-    },
+const assetEpisodes = (asset, full) => {
+  if (!episodeMap) return ''
+  const mainEpisodeName = episodeMap.get(asset.episode_id)?.name || 'MP'
+  const episodeNames = (asset.casting_episode_ids || [])
+    .map(episodeId => episodeMap.get(episodeId)?.name)
+    .filter(name => name && name !== mainEpisodeName)
+  if (episodeNames.length === 0) return mainEpisodeName
+  const listedNames =
+    episodeNames.length > 2 && !full
+      ? `${episodeNames.slice(0, 2).join(', ')}, ...`
+      : episodeNames.join(', ')
+  return `${mainEpisodeName}, ${listedNames}`
+}
 
-    stickedColumns() {
-      this.updateOffsets()
-    },
+// Selectable if the cell already holds a task or if the task type is
+// included in the workflow. Cells with existing tasks stay actionable
+// even when a workflow change removed their task type, so they can
+// still be selected and managed instead of freezing.
+const isSelectable = (asset, columnId) => {
+  if (asset.shared) return false
+  if (taskMap.value.get(asset.validations?.get(columnId))) return true
+  return getAllowedTaskTypeIds(asset.asset_type_id).includes(columnId)
+}
 
-    isLoading() {
-      this.updateOffsets()
-    },
+const getIndex = (i, k) => getEntityLineNumber(props.displayedAssets, i, k)
 
-    'displaySettings.bigThumbnails'() {
-      this.updateOffsets()
+const isSelected = (indexInGroup, groupIndex, columnIndex) =>
+  assetSelectionGrid.value.has(
+    `${getIndex(indexInGroup, groupIndex)}-${columnIndex}`
+  )
+
+// Shift-click selects every line between the last selected one and this
+// one.
+const toggleLine = (asset, event) => {
+  const selected = event.target.checked
+  const assetsToSelect = [asset]
+  if (selected && shiftKeyPressed.value && lastSelectedAsset.value) {
+    const assets = props.displayedAssets.flat()
+    const indexes = [lastSelectedAsset.value.id, asset.id].map(id =>
+      assets.findIndex(displayedAsset => displayedAsset.id === id)
+    )
+    const [startIndex, endIndex] = indexes.sort((a, b) => a - b)
+    if (startIndex >= 0) {
+      range(startIndex, endIndex).forEach(index => {
+        assetsToSelect.push(assets[index])
+      })
     }
   }
+  if (selected) {
+    lastSelectedAsset.value = asset
+  }
+  assetsToSelect.forEach(asset => {
+    store.dispatch('setAssetSelection', { asset, selected })
+  })
 }
+
+// A change on a selected line applies to every selected line.
+const onReadyForChanged = (asset, taskTypeId) => {
+  const assetsToChange = selectedAssets.value.has(asset.id)
+    ? selectedAssets.value
+    : [asset]
+  assetsToChange.forEach(({ id }) => {
+    emit('asset-changed', { id, ready_for: taskTypeId })
+  })
+}
+
+const taskHref = taskId =>
+  getTaskHref(
+    router,
+    taskMap.value.get(taskId),
+    currentProduction.value,
+    isTVShow.value,
+    currentEpisode.value,
+    taskTypeMap.value
+  )
+
+const assetPath = assetId => {
+  const route = {
+    name: 'asset',
+    params: { production_id: currentProduction.value?.id, asset_id: assetId }
+  }
+  if (isTVShow.value && currentEpisode.value) {
+    route.name = 'episode-asset'
+    route.params.episode_id = currentEpisode.value.id
+  }
+  return route
+}
+
+// The pages drive the list through a ref.
+defineExpose({ selectTaskFromQuery, setScrollPosition })
 </script>
 
 <style lang="scss" scoped>
-.dark thead tr a {
-  color: $light-grey;
-
-  .asset-name {
-    color: $white;
-  }
-
-  td .select {
-    &:active,
-    &:focus,
-    &:hover {
-      &::after {
-        border-color: $green;
-      }
-    }
-  }
-}
-
 .actions {
   min-width: 160px;
   padding: 0.4em;
@@ -1291,16 +1061,6 @@ td.ready-for {
 
 .asset-name {
   color: inherit;
-}
-
-input[type='number']::-webkit-outer-spin-button,
-input[type='number']::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-input[type='number'] {
-  -moz-appearance: textfield;
 }
 
 // Metadata cell CSS

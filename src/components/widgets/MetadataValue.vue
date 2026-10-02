@@ -51,7 +51,10 @@ import { computed } from 'vue'
 import { useStore } from 'vuex'
 
 import { useFormat } from '@/composables/format'
-import { descriptorMixin } from '@/components/mixins/descriptors'
+import {
+  getDescriptorChecklistValues,
+  getMetadataChecklistValues
+} from '@/lib/descriptors'
 
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 
@@ -62,9 +65,6 @@ const props = defineProps({
 
 const store = useStore()
 const { formatDisplayDate } = useFormat()
-
-const { getDescriptorChecklistValues, getMetadataChecklistValues } =
-  descriptorMixin.methods
 
 const getMetadataFieldValue = (descriptor, entity) => {
   if (
@@ -82,11 +82,7 @@ const checklistOptions = computed(() =>
 )
 
 const checklistValues = computed(() =>
-  getMetadataChecklistValues.call(
-    { getMetadataFieldValue, getDescriptorChecklistValues },
-    props.descriptor,
-    props.entity
-  )
+  getMetadataChecklistValues(props.descriptor, props.entity)
 )
 
 const rawValue = computed(() =>

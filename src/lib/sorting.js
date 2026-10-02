@@ -147,7 +147,7 @@ export const sortTaskStatuses = (taskStatuses, currentProduction) => {
 }
 
 export const sortTaskTypes = (taskTypes, currentProduction) => {
-  return taskTypes.sort(
+  return [...taskTypes].sort(
     firstBy('for_entity')
       .thenBy((taskTypeA, taskTypeB) => {
         const taskTypeAPriority = getTaskTypePriorityOfProd(

@@ -134,21 +134,19 @@
     />
 
     <delete-modal
-      ref="delete-asset-modal"
       :active="modals.isDeleteDisplayed"
-      :is-loading="loading.delete"
-      :is-error="errors.delete"
-      :text="deleteText()"
+      :is-loading="loading.del"
+      :is-error="errors.del"
+      :text="deleteText"
       :error-text="$t('assets.delete_error')"
       @confirm="confirmDeleteAsset"
       @cancel="modals.isDeleteDisplayed = false"
     />
 
     <delete-modal
-      ref="restore-asset-modal"
       :active="modals.isRestoreDisplayed"
       :is-loading="loading.restore"
-      :is-error="loading.delete"
+      :is-error="errors.restore"
       :text="restoreText"
       :error-text="$t('assets.restore_error')"
       @confirm="confirmRestoreAsset"
@@ -156,7 +154,6 @@
     />
 
     <hard-delete-modal
-      ref="delete-all-tasks-modal"
       :active="modals.isDeleteAllTasksDisplayed"
       :is-loading="loading.deleteAllTasks"
       :is-error="errors.deleteAllTasks"
@@ -169,7 +166,6 @@
     />
 
     <delete-modal
-      ref="delete-metadata-modal"
       :active="modals.isDeleteMetadataDisplayed"
       :is-loading="loading.deleteMetadata"
       :is-error="errors.deleteMetadata"
@@ -233,7 +229,6 @@
     />
 
     <add-thumbnails-modal
-      ref="add-thumbnails-modal"
       active
       entity-type="Asset"
       parent="assets"
@@ -245,7 +240,6 @@
     />
 
     <build-filter-modal
-      ref="build-filter-modal"
       :active="modals.isBuildFilterDisplayed"
       @confirm="confirmBuildFilter"
       @cancel="modals.isBuildFilterDisplayed = false"
@@ -253,662 +247,404 @@
   </div>
 </template>
 
-<script>
-import moment from 'moment'
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+import { useHead } from '@unhead/vue'
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  reactive,
+  ref,
+  useTemplateRef,
+  watch
+} from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 
-import csv from '@/lib/csv'
+import {
+  GENERIC_IMPORT_COLUMNS as genericColumns,
+  useEntityPage
+} from '@/composables/entityPage'
 import { getExportDescriptors } from '@/lib/descriptors'
-import stringHelpers from '@/lib/string'
 
-import { searchMixin } from '@/components/mixins/search'
-import { entitiesMixin } from '@/components/mixins/entities'
-
+/* eslint-disable no-unused-vars */
 import AssetList from '@/components/lists/AssetList.vue'
 import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
 import AddThumbnailsModal from '@/components/modals/AddThumbnailsModal.vue'
 import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
-import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
-import ComboboxDisplayOptions from '@/components/widgets/ComboboxDisplayOptions.vue'
 import CreateTasksModal from '@/components/modals/CreateTasksModal.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditAssetModal from '@/components/modals/EditAssetModal.vue'
+import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
 import ImportModal from '@/components/modals/ImportModal.vue'
 import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
-import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
+import TaskInfo from '@/components/sides/TaskInfo.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
+import ComboboxDisplayOptions from '@/components/widgets/ComboboxDisplayOptions.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import SortingInfo from '@/components/widgets/SortingInfo.vue'
-import TaskInfo from '@/components/sides/TaskInfo.vue'
+/* eslint-enable no-unused-vars */
 
-export default {
-  name: 'assets',
+const { t } = useI18n()
+const route = useRoute()
+const store = useStore()
 
-  mixins: [searchMixin, entitiesMixin],
+const type = 'asset'
 
-  components: {
-    AssetList,
-    AddMetadataModal,
-    AddThumbnailsModal,
-    BuildFilterModal,
-    ButtonSimple,
-    ComboboxDepartment,
-    ComboboxDisplayOptions,
-    CreateTasksModal,
-    DeleteModal,
-    EditAssetModal,
-    HardDeleteModal,
-    ImportModal,
-    ImportRenderModal,
-    SearchField,
-    SearchQueryList,
-    SortingInfo,
-    TaskInfo
-  },
+// State
+// --------------------------------------------------------------------------
 
-  data() {
-    return {
-      type: 'asset',
-      assetToDelete: {},
-      assetToRestore: {},
-      assetToEdit: {},
-      assetFilters: [
-        {
-          type: 'Type',
-          value: {
-            name: 'open'
-          }
-        }
-      ],
-      assetFilterTypes: ['Type'],
-      contactSheetMode: false,
-      deleteAllTasksLockText: null,
-      descriptorToEdit: {},
-      departmentFilter: [],
-      displaySettings: {
-        bigThumbnails: false,
-        contactSheetMode: false,
-        fullTaskTypeNames: false,
-        showAssignations: true,
-        showInfos: true,
-        showSharedAssets: true,
-        showLinkedAssets: true
-      },
-      optionalColumns: ['Description', 'Ready for', 'Resolution'],
-      pageName: 'Assets',
-      parsedCSV: [],
-      selectedDepartment: 'ALL',
-      taskTypeForTaskDeletion: null,
-      errors: {
-        addMetadata: false,
-        addThumbnails: false,
-        creatingTasks: false,
-        delete: false,
-        deleteMetadata: false,
-        edit: false,
-        restore: false,
-        importing: false,
-        importingError: null
-      },
-      genericColumns: [
-        'Metadata column name (text value)',
-        'Task type name (task status name value)',
-        'Task type name + comment (text value)'
-      ],
-      initialLoading: true,
-      loading: {
-        addMetadata: false,
-        addThumbnails: false,
-        creatingTasks: false,
-        creatingTasksStay: false,
-        creatingAllTasks: false,
-        deleteAllTasks: false,
-        deleteMetadata: false,
-        delete: false,
-        edit: false,
-        importing: false,
-        restore: false,
-        savingSearch: false,
-        stay: false
-      },
-      modals: {
-        isAddMetadataDisplayed: false,
-        isAddThumbnailsDisplayed: false,
-        isBuildFilterDisplayed: false,
-        isCreateTasksDisplayed: false,
-        isDeleteDisplayed: false,
-        isDeleteAllTasksDisplayed: false,
-        isDeleteMetadataDisplayed: false,
-        isImportDisplayed: false,
-        isImportRenderDisplayed: false,
-        isNewDisplayed: false
-      },
-      resetTimeout: null,
-      success: {
-        edit: false
-      }
-    }
-  },
+const editAssetModalRef = useTemplateRef('edit-asset-modal')
+const importModalRef = useTemplateRef('import-modal')
+const listRef = useTemplateRef('asset-list')
+const searchFieldRef = useTemplateRef('asset-search-field')
 
-  created() {
-    this.setLastProductionScreen('assets')
-  },
+const initialLoading = ref(true)
+const optionalColumns = ref(['Description', 'Ready for', 'Resolution'])
 
-  mounted() {
-    const searchQuery = this.$route.query.search ?? ''
-    if (this.assetSearchText) {
-      this.$refs['asset-search-field']?.setValue(this.assetSearchText)
-    }
-    this.$refs['asset-list']?.setScrollPosition(this.assetListScrollPosition)
-    const finalize = () => {
-      if (this.$refs['asset-list']) {
-        this.searchField.setValue(searchQuery)
-        this.applySearchFromUrl()
-        this.$refs['asset-list'].setScrollPosition(this.assetListScrollPosition)
-        this.$nextTick(() => {
-          this.$refs['asset-list']?.selectTaskFromQuery()
-        })
-      }
-    }
+const success = reactive({ edit: false })
 
-    if (
-      this.assetMap.size < 2 ||
-      this.assetValidationColumns.length === 0 ||
-      (this.assetValidationColumns.length > 0 &&
-        (!this.assetMap.get(this.assetMap.keys().next().value).validations ||
-          this.assetMap.get(this.assetMap.keys().next().value).validations
-            .size === 0))
-    ) {
-      setTimeout(() => {
-        this.loadAssets().then(() => {
-          setTimeout(() => {
-            this.initialLoading = false
-            finalize()
-          }, 500)
-        })
-      }, 0)
+let resetTimeout = null
+
+// Computed
+// --------------------------------------------------------------------------
+
+const assetMap = computed(() => store.getters.assetMap)
+const assetsCsvFormData = computed(() => store.getters.assetsCsvFormData)
+const assetSearchText = computed(() => store.getters.assetSearchText)
+const assetSorting = computed(() => store.getters.assetSorting)
+const assetValidationColumns = computed(
+  () => store.getters.assetValidationColumns
+)
+const currentEpisode = computed(() => store.getters.currentEpisode)
+const currentProduction = computed(() => store.getters.currentProduction)
+const currentSection = computed(() => store.getters.currentSection)
+const departments = computed(() => store.getters.departments)
+const displayedAssets = computed(() => store.getters.displayedAssets)
+const displayedAssetsByType = computed(
+  () => store.getters.displayedAssetsByType
+)
+const episodeMap = computed(() => store.getters.episodeMap)
+const isAssetEstimation = computed(() => store.getters.isAssetEstimation)
+const isAssetResolution = computed(() => store.getters.isAssetResolution)
+const isAssetsLoading = computed(() => store.getters.isAssetsLoading)
+const isAssetsLoadingError = computed(() => store.getters.isAssetsLoadingError)
+const isAssetTime = computed(() => store.getters.isAssetTime)
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+const isCurrentUserManager = computed(
+  () => store.getters.isCurrentUserProductionManager
+)
+const isPaperProduction = computed(() => store.getters.isPaperProduction)
+const isTVShow = computed(() => store.getters.isTVShow)
+const selectedTasks = computed(() => store.getters.selectedTasks)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
+const userFilterGroups = computed(() => store.getters.userFilterGroups)
+const userFilters = computed(() => store.getters.userFilters)
+
+const productionAssetSearchQueries = computed(
+  () => userFilters.value?.asset?.[currentProduction.value?.id] || []
+)
+
+const productionAssetFilterGroups = computed(
+  () => userFilterGroups.value?.asset?.[currentProduction.value?.id] || []
+)
+
+const dataMatchers = computed(() =>
+  isTVShow.value ? ['Episode', 'Type', 'Name'] : ['Type', 'Name']
+)
+
+// Built from the full asset cache, not the paginated display list, so the
+// import duplicate check sees every asset. The cache Map is not reactive:
+// depend on displayedAssets (updated by the same mutations) to invalidate.
+const filteredAssets = computed(() => {
+  displayedAssets.value // eslint-disable-line no-unused-expressions
+  return Object.fromEntries(
+    Array.from(assetMap.value.values()).map(asset => {
+      const episode = isTVShow.value && episodeMap.value.get(asset.episode_id)
+      const episodeName = episode ? episode.name : ''
+      return [`${episodeName}${asset.asset_type_name}${asset.name}`, true]
+    })
+  )
+})
+
+// Functions
+// --------------------------------------------------------------------------
+
+const loadAssets = async () => {
+  await store.dispatch('loadAssets')
+  initialLoading.value = false
+  applySearchFromUrl()
+}
+
+// Debounced: a cross-production navigation changes the current episode
+// twice in a row (a transient 'main', then 'all').
+const reset = () => {
+  if (resetTimeout) clearTimeout(resetTimeout)
+  resetTimeout = setTimeout(() => {
+    resetTimeout = null
+    // No bail while a load runs: the store queues the new scope behind the
+    // in-flight one, where returning would drop the episode switch.
+    initialLoading.value = true
+    loadAssets()
+  }, 50)
+}
+
+const {
+  applySearchFromUrl,
+  clearSearchAndScroll,
+  confirmAddMetadata,
+  confirmAddThumbnails,
+  confirmBuildFilter,
+  confirmCreateAllMissingTasks,
+  confirmCreateTasks,
+  confirmCreateTasksAndStay,
+  confirmDelete: confirmDeleteAsset,
+  confirmDeleteAllTasks,
+  confirmDeleteMetadata,
+  confirmRestore: confirmRestoreAsset,
+  deleteAllTasksLockText,
+  deleteAllTasksText,
+  deleteText,
+  descriptorToEdit,
+  displaySettings,
+  entityToEdit: assetToEdit,
+  errors,
+  exportCsv,
+  hideAddThumbnailsModal,
+  hideCreateTasksModal,
+  hideImportModal,
+  hideImportRenderModal,
+  isLoadedScopeStale,
+  isTaskSidePanelOpen,
+  loading,
+  modals,
+  onAddMetadataClicked,
+  onChangeSortClicked,
+  onDeleteAllTasksClicked,
+  onDeleteClicked,
+  onDeleteMetadataClicked,
+  onEditMetadataClicked,
+  onKeepTaskPanelOpenChanged,
+  onMetadataChanged,
+  onRestoreClicked,
+  onSearchChange,
+  openEditModal: onEditClicked,
+  parsedCSV,
+  removeSearchQuery,
+  renderColumns,
+  renderImport,
+  resetImport,
+  restoreText,
+  saveScrollPosition,
+  saveSearchQuery,
+  selectableDepartments,
+  selectedDepartment,
+  setScrollPosition,
+  showCreateTasksModal,
+  showImportModal,
+  uploadImportFile
+} = useEntityPage({
+  type,
+  pageName: 'Assets',
+  listRef,
+  searchFieldRef,
+  importModalRef,
+  reset,
+  loadEntities: () => store.dispatch('loadAssets'),
+  dataMatchers,
+  optionalColumns,
+  hasAssignationColumns: true,
+  canCancel: true,
+  displaySettings: { showSharedAssets: true, showLinkedAssets: true }
+})
+
+const showNewModal = () => onEditClicked()
+
+const reloadEpisodeAssetsIfNeeded = () => {
+  if (!isLoadedScopeStale()) return
+  clearSearchAndScroll()
+  initialLoading.value = true
+  loadAssets()
+}
+
+const onExportClick = () =>
+  exportCsv(
+    [
+      ...(isTVShow.value ? ['Episode'] : []),
+      t('assets.fields.type'),
+      t('assets.fields.name'),
+      t('assets.fields.description'),
+      t('assets.fields.ready_for'),
+      ...getExportDescriptors(currentProduction.value, 'Asset').map(
+        descriptor => descriptor.name
+      ),
+      ...(isAssetTime.value ? [t('assets.fields.time_spent')] : []),
+      ...(isAssetEstimation.value ? [t('main.estimation_short')] : []),
+      ...(isAssetResolution.value ? [t('shots.fields.resolution')] : []),
+      // Qualified by the task type so a re-import can tell the columns
+      // apart: bare duplicated headers collapse in the server's reader.
+      ...assetValidationColumns.value.flatMap(taskTypeId => {
+        const taskTypeName = taskTypeMap.value.get(taskTypeId)?.name || ''
+        return [taskTypeName, `${taskTypeName} assignations`]
+      })
+    ],
+    currentEpisode.value?.name
+  )
+
+const setOptionalImportColumns = () => {
+  optionalColumns.value = [
+    t('assets.fields.description'),
+    ...(isPaperProduction.value ? [] : [t('assets.fields.ready_for')]),
+    t('shots.fields.resolution')
+  ]
+}
+
+const saveAsset = async (form, { stay = false } = {}) => {
+  const loadingKey = stay ? 'stay' : 'edit'
+  loading[loadingKey] = true
+  success.edit = false
+  errors.edit = false
+  try {
+    if (!stay && assetToEdit.value?.id) {
+      await store.dispatch('editAsset', { ...form, id: assetToEdit.value.id })
     } else {
-      if (!this.isAssetsLoading) this.initialLoading = false
-      finalize()
-      this.reloadEpisodeAssetsIfNeeded()
+      await store.dispatch('newAsset', form)
     }
-  },
-
-  beforeUnmount() {
-    this.clearSelectedAssets()
-    if (this.resetTimeout) clearTimeout(this.resetTimeout)
-  },
-
-  computed: {
-    ...mapGetters([
-      'assetMap',
-      'assetsPath',
-      'assetListScrollPosition',
-      'assetsCsvFormData',
-      'assetsLoadingKey',
-      'assetSearchText',
-      'assetSorting',
-      'assetTypes',
-      'assetValidationColumns',
-      'currentEpisode',
-      'currentProduction',
-      'currentSection',
-      'departmentMap',
-      'departments',
-      'displayedAssets',
-      'displayedAssetsByType',
-      'episodeMap',
-      'isAssetEstimation',
-      'isAssetTime',
-      'isAssetsLoading',
-      'isAssetsLoadingError',
-      'isCurrentUserClient',
-      'isTVShow',
-      'isAssetResolution',
-      'openProductions',
-      'productionAssetTaskTypes',
-      'selectedAssets',
-      'taskTypeMap',
-      'user',
-      'userFilters',
-      'userFilterGroups'
-    ]),
-    ...mapGetters({
-      isCurrentUserManager: 'isCurrentUserProductionManager'
-    }),
-
-    productionAssetSearchQueries() {
-      const productionId = this.currentProduction?.id
-      if (!productionId) return []
-      return this.userFilters?.asset?.[productionId] || []
-    },
-
-    productionAssetFilterGroups() {
-      const productionId = this.currentProduction?.id
-      if (!productionId) return []
-      return this.userFilterGroups?.asset?.[productionId] || []
-    },
-
-    filteredAssets() {
-      // Build the lookup from the full asset cache, not the paginated
-      // display list, so the import duplicate check sees every asset.
-      // The cache Map is not reactive: depend on displayedAssets (updated
-      // by the same mutations) to invalidate this computed.
-      this.displayedAssets // eslint-disable-line no-unused-expressions
-      const assets = {}
-      this.assetMap.forEach(item => {
-        let assetKey = ''
-        if (
-          this.isTVShow &&
-          item.episode_id &&
-          this.episodeMap.has(item.episode_id)
-        ) {
-          assetKey += this.episodeMap.get(item.episode_id).name
-        }
-        assetKey += `${item.asset_type_name}${item.name}`
-        assets[assetKey] = true
-      })
-      return assets
-    },
-
-    // Page titles
-
-    tvShowPageTitle() {
-      const productionName = this.currentProduction?.name || ''
-      let episodeName = ''
-      if (this.currentEpisode) {
-        switch (this.currentEpisode.id) {
-          case 'all':
-            episodeName = this.$t('main.all')
-            break
-          case 'main':
-            episodeName = this.$t('main.main_pack')
-            break
-          default:
-            episodeName = this.currentEpisode.name
-        }
-      }
-      return (
-        `${productionName} - ${episodeName}` +
-        ` | ${this.$t('assets.title')} - Kitsu`
-      )
-    },
-
-    shortPageTitle() {
-      const productionName = this.currentProduction?.name || ''
-      return `${productionName} | ${this.$t('assets.title')} - Kitsu`
-    },
-
-    dataMatchers() {
-      return this.isTVShow ? ['Episode', 'Type', 'Name'] : ['Type', 'Name']
-    },
-
-    renderColumns() {
-      const collection = [...this.dataMatchers, ...this.optionalColumns]
-
-      this.productionAssetTaskTypes.forEach(item => {
-        collection.push(item.name)
-        collection.push(`${item.name} comment`)
-        collection.push(`${item.name} assignations`)
-      })
-
-      return collection
-    }
-  },
-
-  methods: {
-    ...mapActions([
-      'addMetadataDescriptor',
-      'changeAssetSort',
-      'clearSelectedAssets',
-      'commentTaskWithPreview',
-      'createTasks',
-      'deleteAllAssetTasks',
-      'deleteAsset',
-      'deleteMetadataDescriptor',
-      'editAsset',
-      'getAssetsCsvLines',
-      'loadAssets',
-      'loadEpisodes',
-      'newAsset',
-      'removeAssetSearch',
-      'restoreAsset',
-      'saveAssetSearch',
-      'setLastProductionScreen',
-      'setAssetSearch',
-      'setPreview',
-      'uploadAssetFile'
-    ]),
-
-    setOptionalImportColumns() {
-      const columns = [
-        this.$t('assets.fields.description'),
-        this.$t('assets.fields.ready_for'),
-        this.$t('shots.fields.resolution')
-      ]
-      if (this.isPaperProduction) {
-        columns.splice(1, 1)
-      }
-      this.optionalColumns = columns
-    },
-
-    showNewModal() {
-      this.assetToEdit = {}
-      this.modals.isNewDisplayed = true
-    },
-
-    onEditClicked(asset) {
-      this.assetToEdit = asset
-      this.modals.isNewDisplayed = true
-    },
-
-    onDeleteClicked(asset) {
-      this.assetToDelete = asset
-      this.modals.isDeleteDisplayed = true
-    },
-
-    confirmNewAssetStay(form) {
-      this.loading.stay = true
-      this.success.edit = false
-      this.errors.edit = false
-      this.newAsset(form)
-        .then(() => {
-          this.loading.stay = false
-          this.loading.edit = false
-          this.resetLightEditModal()
-          this.$refs['edit-asset-modal'].focusName()
-          this.success.edit = true
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.stay = false
-          this.loading.edit = false
-          this.success.edit = false
-          this.errors.edit = true
-        })
-    },
-
-    confirmEditAsset(form) {
-      let action = 'newAsset'
-      this.loading.edit = true
-      this.success.edit = false
-      this.errors.edit = false
-      if (this.assetToEdit && this.assetToEdit.id) {
-        action = 'editAsset'
-        form.id = this.assetToEdit.id
-      }
-      this[action](form)
-        .then(form => {
-          this.loading.edit = false
-          this.modals.isNewDisplayed = false
-          this.applySearchFromUrl(false)
-          this.success.edit = true
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.edit = false
-          this.errors.edit = true
-        })
-    },
-
-    confirmDeleteAsset() {
-      this.loading.delete = true
-      this.errors.delete = false
-      this.deleteAsset(this.assetToDelete)
-        .then(form => {
-          this.loading.delete = false
-          this.modals.isDeleteDisplayed = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.delete = false
-          this.errors.delete = true
-        })
-    },
-
-    confirmRestoreAsset() {
-      this.loading.restore = true
-      this.errors.restore = false
-      this.restoreAsset(this.assetToRestore)
-        .then(form => {
-          this.loading.restore = false
-          this.modals.isRestoreDisplayed = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.restore = false
-          this.errors.restore = true
-        })
-    },
-
-    resetLightEditModal() {
-      const form = {
+    if (stay) {
+      // The modal stays open, ready for the next asset of the same type.
+      assetToEdit.value = {
         name: '',
-        entity_type_id: this.assetToEdit.entity_type_id,
-        production_id: this.currentProduction.id
+        entity_type_id: assetToEdit.value.entity_type_id,
+        production_id: currentProduction.value.id
       }
-      this.assetToEdit = form
-    },
-
-    resetEditModal() {
-      const form = { name: '' }
-      if (this.assetTypes.length > 0) {
-        form.asset_type_id = this.assetTypes[0].id
-      }
-      form.production_id = this.currentProduction.id
-      this.assetToEdit = form
-    },
-
-    deleteText() {
-      const asset = this.assetToDelete
-      if (
-        asset &&
-        (asset.canceled || !asset.tasks || asset.tasks.length === 0)
-      ) {
-        return this.$t('assets.delete_text', { name: asset.name })
-      } else if (asset) {
-        return this.$t('assets.cancel_text', { name: asset.name })
-      }
-      return ''
-    },
-
-    renderImport(data, mode) {
-      this.loading.importing = true
-      this.errors.importing = false
-      this.formData = data
-      if (mode === 'file') {
-        data = data.get('file')
-      }
-      csv.processCSV(data).then(results => {
-        this.parsedCSV = results
-        this.hideImportModal()
-        this.loading.importing = false
-        this.showImportRenderModal()
-      })
-    },
-
-    uploadImportFile(data, toUpdate) {
-      const formData = new FormData()
-      const filename = 'import.csv'
-      const csvContent = csv.turnEntriesToCsvString(data)
-      const file = new File([csvContent], filename, { type: 'text/csv' })
-
-      formData.append('file', file)
-
-      this.loading.importing = true
-      this.errors.importing = false
-      this.$store.commit('ASSET_CSV_FILE_SELECTED', formData)
-
-      this.uploadAssetFile(toUpdate)
-        .then(() => {
-          this.hideImportRenderModal()
-          this.loadEpisodes().catch(console.error)
-          this.loadAssets()
-        })
-        .catch(err => {
-          this.errors.importing = true
-          this.errors.importingError = err
-        })
-        .finally(() => {
-          this.loading.importing = false
-        })
-    },
-
-    resetImport() {
-      this.errors.importing = false
-      this.hideImportRenderModal()
-      this.$store.commit('ASSET_CSV_FILE_SELECTED', null)
-      this.$refs['import-modal']?.reset()
-      this.showImportModal()
-    },
-
-    onExportClick() {
-      this.getAssetsCsvLines().then(assetLines => {
-        const nameData = [
-          moment().format('YYYY-MM-DD'),
-          'kitsu',
-          this.currentProduction.name,
-          this.$t('assets.title')
-        ]
-        if (this.currentEpisode) {
-          nameData.splice(3, 0, this.currentEpisode.name)
-        }
-        const name = stringHelpers.slugify(nameData.join('_'))
-        let headers = this.isTVShow ? ['Episode'] : []
-        headers = headers.concat([
-          this.$t('assets.fields.type'),
-          this.$t('assets.fields.name'),
-          this.$t('assets.fields.description'),
-          this.$t('assets.fields.ready_for')
-        ])
-        getExportDescriptors(this.currentProduction, 'Asset').forEach(
-          descriptor => {
-            headers.push(descriptor.name)
-          }
-        )
-        if (this.isAssetTime) {
-          headers.push(this.$t('assets.fields.time_spent'))
-        }
-        if (this.isAssetEstimation) {
-          headers.push(this.$t('main.estimation_short'))
-        }
-        if (this.isAssetResolution) {
-          headers.push(this.$t('shots.fields.resolution'))
-        }
-        this.assetValidationColumns.forEach(taskTypeId => {
-          const taskTypeName = this.taskTypeMap.get(taskTypeId)?.name || ''
-          headers.push(taskTypeName)
-          // Qualified by the task type so a re-import can tell the columns
-          // apart: bare duplicated headers collapse in the server's reader.
-          headers.push(`${taskTypeName} assignations`)
-        })
-        csv.buildCsvFile(name, [headers].concat(assetLines))
-      })
-    },
-
-    onAssetTypeClicked(assetType) {
-      this.searchField.setValue(`${this.assetSearchText} type=[${assetType}]`)
-      this.onSearchChange()
-    },
-
-    async onFieldChanged({ entry, fieldName, value }) {
-      const data = {
-        id: entry.id,
-        [fieldName]: value
-      }
-      await this.editAsset(data)
-      this.applySearchFromUrl(false)
-    },
-
-    async onMetadataChanged({ entry, descriptor, value }) {
-      const data = {
-        id: entry.id,
-        data: {
-          [descriptor.field_name]: value
-        }
-      }
-      await this.editAsset(data)
-      this.applySearchFromUrl(false)
-    },
-
-    async onAssetChanged(asset) {
-      await this.editAsset(asset)
-      this.applySearchFromUrl(false)
-    },
-
-    reset() {
-      // Debounce: cross-prod navigation triggers two close currentEpisode changes (transient 'main' then 'all').
-      if (this.resetTimeout) clearTimeout(this.resetTimeout)
-      this.resetTimeout = setTimeout(() => {
-        this.resetTimeout = null
-        // No bail while a load runs: the store queues the new scope behind the
-        // in-flight one, where returning would drop the episode switch.
-        this.initialLoading = true
-        this.loadAssets().then(() => {
-          this.initialLoading = false
-          this.applySearchFromUrl()
-        })
-      }, 50)
-    },
-
-    // The topbar sets the current episode before this page instance exists, so
-    // the currentEpisode watcher below cannot fire on a fresh mount: without
-    // this check the cache of the episode left behind is displayed as is.
-    reloadEpisodeAssetsIfNeeded() {
-      const scope = this.isTVShow ? (this.currentEpisode?.id ?? '') : ''
-      if (
-        !this.currentProduction ||
-        this.assetsLoadingKey === `${this.currentProduction.id}/${scope}`
-      ) {
-        return
-      }
-      this.$refs['asset-search-field']?.setValue('')
-      this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
-      this.initialLoading = true
-      this.loadAssets().then(() => {
-        this.initialLoading = false
-        this.applySearchFromUrl()
-      })
+      editAssetModalRef.value.focusName()
+    } else {
+      modals.isNewDisplayed = false
+      applySearchFromUrl(false)
     }
-  },
-
-  watch: {
-    currentProduction() {
-      this.setOptionalImportColumns()
-      this.$refs['asset-search-field']?.setValue('')
-      this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
-      this.initialLoading = true
-      if (!this.isTVShow) this.reset()
-    },
-
-    currentEpisode() {
-      this.$refs['asset-search-field']?.setValue('')
-      this.$store.commit('SET_ASSET_LIST_SCROLL_POSITION', 0)
-      if (this.isTVShow && this.currentEpisode) this.reset()
-    },
-
-    currentSection() {
-      this.reloadEpisodeAssetsIfNeeded()
-    }
-  },
-
-  head() {
-    if (this.isTVShow) {
-      return { title: this.tvShowPageTitle }
-    }
-    return { title: this.shortPageTitle }
+    success.edit = true
+  } catch (err) {
+    console.error(err)
+    errors.edit = true
+  } finally {
+    loading[loadingKey] = false
+    loading.edit = false
   }
 }
+
+const confirmEditAsset = form => saveAsset(form)
+
+const confirmNewAssetStay = form => saveAsset(form, { stay: true })
+
+const onAssetTypeClicked = assetType => {
+  searchFieldRef.value.setValue(`${assetSearchText.value} type=[${assetType}]`)
+  onSearchChange()
+}
+
+const onFieldChanged = async ({ entry, fieldName, value }) => {
+  await store.dispatch('editAsset', { id: entry.id, [fieldName]: value })
+  applySearchFromUrl(false)
+}
+
+const onAssetChanged = async asset => {
+  await store.dispatch('editAsset', asset)
+  applySearchFromUrl(false)
+}
+
+// Watchers
+// --------------------------------------------------------------------------
+
+watch(currentProduction, () => {
+  setOptionalImportColumns()
+  clearSearchAndScroll()
+  initialLoading.value = true
+  if (!isTVShow.value) reset()
+})
+
+watch(currentEpisode, () => {
+  clearSearchAndScroll()
+  if (isTVShow.value && currentEpisode.value) reset()
+})
+
+watch(currentSection, reloadEpisodeAssetsIfNeeded)
+
+// Lifecycle
+// --------------------------------------------------------------------------
+
+store.dispatch('setLastProductionScreen', 'assets')
+
+onMounted(() => {
+  const searchQuery = route.query.search ?? ''
+  if (assetSearchText.value) {
+    searchFieldRef.value?.setValue(assetSearchText.value)
+  }
+  setScrollPosition()
+  const finalize = () => {
+    if (listRef.value) {
+      searchFieldRef.value.setValue(searchQuery)
+      applySearchFromUrl()
+      setScrollPosition()
+      nextTick(() => {
+        listRef.value?.selectTaskFromQuery()
+      })
+    }
+  }
+
+  const firstAsset = assetMap.value.get(assetMap.value.keys().next().value)
+  if (
+    assetMap.value.size < 2 ||
+    assetValidationColumns.value.length === 0 ||
+    !firstAsset.validations?.size
+  ) {
+    setTimeout(() => {
+      store.dispatch('loadAssets').then(() => {
+        setTimeout(() => {
+          initialLoading.value = false
+          finalize()
+        }, 500)
+      })
+    }, 0)
+  } else {
+    if (!isAssetsLoading.value) initialLoading.value = false
+    finalize()
+    reloadEpisodeAssetsIfNeeded()
+  }
+})
+
+onBeforeUnmount(() => {
+  store.dispatch('clearSelectedAssets')
+  if (resetTimeout) clearTimeout(resetTimeout)
+})
+
+// Head
+// --------------------------------------------------------------------------
+
+const episodeName = computed(() => {
+  if (!currentEpisode.value) return ''
+  if (currentEpisode.value.id === 'all') return t('main.all')
+  if (currentEpisode.value.id === 'main') return t('main.main_pack')
+  return currentEpisode.value.name
+})
+
+useHead({
+  title: computed(() => {
+    const productionName = currentProduction.value?.name || ''
+    const title = `${t('assets.title')} - Kitsu`
+    if (isTVShow.value) {
+      return `${productionName} - ${episodeName.value} | ${title}`
+    }
+    return `${productionName} | ${title}`
+  })
+})
 </script>
 
 <style lang="scss" scoped>
 .data-list {
   margin-top: 0;
-}
-
-.level {
-  align-items: flex-start;
 }
 
 .assets {

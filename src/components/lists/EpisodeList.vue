@@ -136,7 +136,6 @@
             <th
               scope="col"
               class="time-spent"
-              ref="th-spent"
               v-if="
                 !isCurrentUserClient &&
                 displaySettings.showInfos &&
@@ -150,7 +149,6 @@
               scope="col"
               class="estimation"
               :title="$t('main.estimation')"
-              ref="th-spent"
               v-if="
                 !isCurrentUserClient &&
                 displaySettings.showInfos &&
@@ -163,7 +161,6 @@
             <th
               scope="col"
               class="status"
-              ref="th-status"
               v-if="displaySettings.showInfos && metadataDisplayHeaders.status"
             >
               {{ $t('main.status') }}
@@ -198,7 +195,7 @@
                 ) in nonStickedDisplayedValidationColumns"
               />
             </template>
-            <th scope="col" class="actions" ref="actionsSection">
+            <th scope="col" class="actions">
               <button-simple
                 :class="{
                   'is-small': true,
@@ -281,8 +278,8 @@
               <!-- Metadata stick -->
               <template v-if="displaySettings.showInfos">
                 <td
-                  :ref="`editor-${i}-${j}`"
                   class="metadata-descriptor datatable-row-header"
+                  @keyup.ctrl="onInputKeyUp"
                   :title="
                     episode.data ? episode.data[descriptor.field_name] : ''
                   "
@@ -354,6 +351,7 @@
               <template v-if="displaySettings.showInfos">
                 <td
                   class="metadata-descriptor"
+                  @keyup.ctrl="onInputKeyUp"
                   :title="
                     episode.data ? episode.data[descriptor.field_name] : ''
                   "
@@ -398,7 +396,6 @@
               <td
                 scope="col"
                 class="status metadata-descriptor"
-                ref="th-status"
                 v-if="
                   displaySettings.showInfos && metadataDisplayHeaders.status
                 "
@@ -443,10 +440,7 @@
                         event
                       )
                   "
-                  @keyup.ctrl="
-                    event =>
-                      onInputKeyUp(event, getIndex(i, k), descriptorLength + 3)
-                  "
+                  @keyup.ctrl="onInputKeyUp"
                   v-if="isCurrentUserManager"
                 />
 
@@ -544,282 +538,199 @@
   </div>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
+import { useEntityList } from '@/composables/entityList'
+import { useFormat } from '@/composables/format'
+import { getMetadataFieldValue } from '@/lib/descriptors'
 import { getTaskHref } from '@/lib/path'
 
-import { descriptorMixin } from '@/components/mixins/descriptors'
-import { domMixin } from '@/components/mixins/dom'
-import { entityListMixin } from '@/components/mixins/entity_list'
-import { formatListMixin } from '@/components/mixins/format'
-import { selectionListMixin } from '@/components/mixins/selection'
-
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+/* eslint-disable no-unused-vars */
 import DescriptionCell from '@/components/cells/DescriptionCell.vue'
-import EmptyList from '@/components/widgets/EmptyList.vue'
-import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import MetadataHeader from '@/components/cells/MetadataHeader.vue'
 import MetadataInput from '@/components/cells/MetadataInput.vue'
 import RowActionsCell from '@/components/cells/RowActionsCell.vue'
-import SortableFieldHeader from '@/components/widgets/SortableFieldHeader.vue'
-import TableMetadataHeaderMenu from '@/components/widgets/TableMetadataHeaderMenu.vue'
-import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu.vue'
-import TableHeaderMenu from '@/components/widgets/TableHeaderMenu.vue'
-import TableInfo from '@/components/widgets/TableInfo.vue'
 import ValidationCell from '@/components/cells/ValidationCell.vue'
 import ValidationHeader from '@/components/cells/ValidationHeader.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import EmptyList from '@/components/widgets/EmptyList.vue'
+import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+import SortableFieldHeader from '@/components/widgets/SortableFieldHeader.vue'
+import TableHeaderMenu from '@/components/widgets/TableHeaderMenu.vue'
+import TableInfo from '@/components/widgets/TableInfo.vue'
+import TableMetadataHeaderMenu from '@/components/widgets/TableMetadataHeaderMenu.vue'
+import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu.vue'
+/* eslint-enable no-unused-vars */
 
-export default {
-  name: 'episode-list',
+const router = useRouter()
+const store = useStore()
+const { formatDuration, isDurationInHours } = useFormat()
 
-  mixins: [
-    descriptorMixin,
-    domMixin,
-    formatListMixin,
-    entityListMixin,
-    selectionListMixin
-  ],
+const episodeStatusOptions = ['canceled', 'complete', 'running', 'standby'].map(
+  status => ({ label: status, value: status })
+)
 
-  props: {
-    contactSheetMode: {
-      type: Boolean,
-      default: false
-    },
-    displayedEpisodes: {
-      type: Array,
-      default: () => []
-    },
-    displaySettings: {
-      type: Object,
-      default: () => {}
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    validationColumns: {
-      type: Array,
-      default: () => []
-    },
-    departmentFilter: {
-      type: Array,
-      default: () => []
-    }
-  },
+// Props / Emits
+// --------------------------------------------------------------------------
 
-  emits: [
-    'add-episodes',
-    'create-tasks',
-    'delete-clicked',
-    'edit-clicked',
-    'field-changed',
-    'metadata-changed'
-  ],
+const props = defineProps({
+  contactSheetMode: { type: Boolean, default: false },
+  displayedEpisodes: { type: Array, default: () => [] },
+  displaySettings: { type: Object, default: () => ({}) },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  validationColumns: { type: Array, default: () => [] },
+  departmentFilter: { type: Array, default: () => [] }
+})
 
-  data() {
-    return {
-      type: 'episode',
-      hiddenColumns: {},
-      lastFieldHeaderMenuDisplayed: null,
-      lastFieldHeaderMenuLabel: null,
-      lastHeaderMenuDisplayed: null,
-      lastMetadataHeaderMenuDisplayed: null,
-      lastHeaderMenuDisplayedIndexInGrid: null,
-      lastSelectedEpisode: null,
-      lastSelection: null,
-      metadataDisplayHeaders: {
-        estimation: true,
-        timeSpent: true,
-        status: true
-      },
-      offsets: {},
-      stickedColumns: {},
-      episodeStatusOptions: [
-        { label: 'canceled', value: 'canceled' },
-        { label: 'complete', value: 'complete' },
-        { label: 'running', value: 'running' },
-        { label: 'standby', value: 'standby' }
-      ]
-    }
-  },
+const emit = defineEmits([
+  'add-episodes',
+  'add-metadata',
+  'change-sort',
+  'create-tasks',
+  'delete-all-tasks',
+  'delete-clicked',
+  'delete-metadata',
+  'edit-clicked',
+  'edit-metadata',
+  'field-changed',
+  'keep-task-panel-open',
+  'metadata-changed',
+  'scroll'
+])
 
-  components: {
-    ButtonSimple,
-    DescriptionCell,
-    EmptyList,
-    EntityThumbnail,
-    MetadataHeader,
-    MetadataInput,
-    RowActionsCell,
-    SortableFieldHeader,
-    TableHeaderMenu,
-    TableMetadataHeaderMenu,
-    TableMetadataSelectorMenu,
-    TableInfo,
-    ValidationCell,
-    ValidationHeader
-  },
+// Computed
+// --------------------------------------------------------------------------
 
-  computed: {
-    ...mapGetters([
-      'currentProduction',
-      'episodeMap',
-      'episodeFilledColumns',
-      'episodeMetadataDescriptors',
-      'episodes',
-      'episodeSearchText',
-      'episodeSelectionGrid',
-      'currentEpisode',
-      'displayedEpisodesEstimation',
-      'displayedEpisodesLength',
-      'displayedEpisodesTimeSpent',
-      'displaySettings.bigThumbnails',
-      'isCurrentUserAdmin',
-      'isCurrentUserClient',
-      'isSingleEpisode',
-      'isTVShow',
-      'isEpisodeDescription',
-      'isEpisodeEstimation',
-      'isEpisodeResolution',
-      'isEpisodeTime',
-      'displaySettings.showAssignations',
-      'displaySettings.showInfos',
-      'nbSelectedTasks',
-      'selectedTasks',
-      'taskMap',
-      'taskTypeMap',
-      'user'
-    ]),
+const currentEpisode = computed(() => store.getters.currentEpisode)
+const currentProduction = computed(() => store.getters.currentProduction)
+const displayedEpisodesEstimation = computed(
+  () => store.getters.displayedEpisodesEstimation
+)
+const displayedEpisodesLength = computed(
+  () => store.getters.displayedEpisodesLength
+)
+const displayedEpisodesTimeSpent = computed(
+  () => store.getters.displayedEpisodesTimeSpent
+)
+const episodeFilledColumns = computed(() => store.getters.episodeFilledColumns)
+const episodeMetadataDescriptors = computed(
+  () => store.getters.episodeMetadataDescriptors
+)
+const episodeSearchText = computed(() => store.getters.episodeSearchText)
+const episodeSelectionGrid = computed(() => store.getters.episodeSelectionGrid)
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+// Production-scoped: effective role on the current production (global
+// admins/managers still pass, but a per-project override wins).
+const isCurrentUserManager = computed(
+  () => store.getters.isCurrentUserProductionManager
+)
+const isCurrentUserSupervisor = computed(
+  () => store.getters.isCurrentUserProductionSupervisor
+)
+const isEpisodeDescription = computed(() => store.getters.isEpisodeDescription)
+const isEpisodeEstimation = computed(() => store.getters.isEpisodeEstimation)
+const isEpisodeResolution = computed(() => store.getters.isEpisodeResolution)
+const isEpisodeTime = computed(() => store.getters.isEpisodeTime)
+const isTVShow = computed(() => store.getters.isTVShow)
+const taskMap = computed(() => store.getters.taskMap)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
-    // Production-scoped: effective role on the current production (global
-    // admins/managers still pass, but a per-project override wins).
-    ...mapGetters({
-      isCurrentUserManager: 'isCurrentUserProductionManager',
-      isCurrentUserSupervisor: 'isCurrentUserProductionSupervisor'
-    }),
+const isEmptyList = computed(
+  () =>
+    props.displayedEpisodes.length === 0 &&
+    !props.isLoading &&
+    !props.isError &&
+    (!episodeSearchText.value || episodeSearchText.value.length === 0)
+)
 
-    isEmptyList() {
-      return (
-        this.displayedEpisodes.length === 0 &&
-        !this.isLoading &&
-        !this.isError &&
-        (!this.episodeSearchText || this.episodeSearchText.length === 0)
-      )
-    },
+const isListVisible = computed(
+  () => !props.isLoading && !props.isError && displayedEpisodesLength.value > 0
+)
 
-    isListVisible() {
-      return (
-        !this.isLoading && !this.isError && this.displayedEpisodesLength > 0
-      )
-    },
+const {
+  columnSelectorDisplayed,
+  hiddenColumns,
+  isEmptyTask,
+  lastHeaderMenuDisplayed,
+  lastMetadataHeaderMenuDisplayed,
+  metadataDisplayHeaders,
+  metadataStickColumnClicked,
+  nonStickedDisplayedValidationColumns,
+  nonStickedVisibleMetadataDescriptors,
+  offsets,
+  onAddMetadataClicked,
+  onBodyScroll,
+  onDeleteAllTasksClicked,
+  onDeleteMetadataClicked,
+  onDescriptionChanged,
+  onEditMetadataClicked,
+  onInputKeyUp,
+  onMetadataFieldChanged,
+  onMinimizeColumnToggled,
+  onSelectColumn,
+  onSortByFieldClicked,
+  onSortByMetadataClicked,
+  onSortByTaskTypeClicked,
+  onTaskSelected,
+  onTaskUnselected,
+  getValidationStyle,
+  isMetadataColumnEditAllowed,
+  isValidResolution,
+  selectTaskFromQuery,
+  setScrollPosition,
+  showFieldHeaderMenu,
+  showHeaderMenu,
+  showMetadataHeaderMenu,
+  stickColumnClicked,
+  stickedColumns,
+  stickedDisplayedValidationColumns,
+  stickedVisibleMetadataDescriptors,
+  toggleColumnSelector
+} = useEntityList({
+  type: 'episode',
+  props,
+  emit,
+  entities: computed(() => props.displayedEpisodes),
+  filledColumns: episodeFilledColumns,
+  metadataDescriptors: episodeMetadataDescriptors,
+  metadataDisplayHeaders: { estimation: true, timeSpent: true, status: true },
+  isEmptyList
+})
 
-    displayedValidationColumns() {
-      return this.validationColumns.filter(columnId => {
-        return (
-          this.episodeFilledColumns[columnId] &&
-          (!this.hiddenColumns[columnId] || this.displaySettings.showInfos)
-        )
-      })
-    },
+// Functions
+// --------------------------------------------------------------------------
 
-    metadataDescriptors() {
-      return this.episodeMetadataDescriptors
-    },
+const isSelected = (lineIndex, columnIndex) =>
+  episodeSelectionGrid.value.has(`${lineIndex}-${columnIndex}`)
 
-    localStorageStickKey() {
-      return `stick-episodes-${this.currentProduction?.id}`
-    }
-  },
+const taskHref = taskId =>
+  getTaskHref(
+    router,
+    taskMap.value.get(taskId),
+    currentProduction.value,
+    isTVShow.value,
+    currentEpisode.value,
+    taskTypeMap.value
+  )
 
-  methods: {
-    ...mapActions(['setEpisodeSelection']),
+const episodePath = episodeId => ({
+  name: 'episode',
+  params: { production_id: currentProduction.value?.id, episode_id: episodeId }
+})
 
-    isSelected(lineIndex, columnIndex) {
-      return this.episodeSelectionGrid.has(`${lineIndex}-${columnIndex}`)
-    },
-
-    taskHref(taskId) {
-      return getTaskHref(
-        this.$router,
-        this.taskMap.get(taskId),
-        this.currentProduction,
-        this.isTVShow,
-        this.currentEpisode,
-        this.taskTypeMap
-      )
-    },
-
-    episodePath(episodeId) {
-      return this.getPath('episode', episodeId)
-    },
-
-    getPath(section, episodeId) {
-      const route = {
-        name: section,
-        params: {
-          production_id: this.currentProduction?.id
-        }
-      }
-      if (episodeId) {
-        route.params.episode_id = episodeId
-      }
-      return route
-    },
-
-    onEpisodeStatusChanged(episode, status) {
-      this.$emit('field-changed', {
-        entry: episode,
-        fieldName: 'status',
-        value: status
-      })
-    }
-  },
-
-  watch: {
-    displayedEpisodes() {
-      this.$options.lineIndex = {}
-    },
-
-    validationColumns() {
-      this.initHiddenColumns(this.validationColumns, this.hiddenColumns)
-    },
-
-    stickedColumns() {
-      this.updateOffsets()
-    },
-
-    isLoading() {
-      this.updateOffsets()
-    }
-  }
+const onEpisodeStatusChanged = (episode, status) => {
+  emit('field-changed', { entry: episode, fieldName: 'status', value: status })
 }
+
+// The pages drive the list through a ref.
+defineExpose({ selectTaskFromQuery, setScrollPosition })
 </script>
 
 <style lang="scss" scoped>
-.dark {
-  th .input-editor,
-  td .select select,
-  td .input-editor {
-    color: $white;
-
-    option {
-      background: $dark-grey-light;
-      color: $white;
-    }
-
-    &:focus,
-    &:active,
-    &:hover {
-      background: $dark-grey-light;
-    }
-  }
-}
-
 .project {
   min-width: 60px;
   width: 60px;
@@ -896,10 +807,6 @@ span.thumbnail-empty {
   background: #f3f3f3;
 }
 
-.info {
-  margin-top: 2em;
-}
-
 .datatable-row th.name {
   font-size: 1.1em;
   padding: 6px;
@@ -907,7 +814,7 @@ span.thumbnail-empty {
 
 th .input-editor,
 td .input-editor {
-  color: $grey-strong;
+  color: var(--text);
   height: 100%;
   padding: 0.5rem;
   width: 100%;
@@ -915,11 +822,15 @@ td .input-editor {
   border: 1px solid transparent;
   z-index: 100;
 
+  option {
+    background: var(--background-alt-2);
+    color: var(--text);
+  }
+
   &:active,
   &:focus,
   &:hover {
-    background: transparent;
-    background: white;
+    background: var(--background-alt-2);
   }
 
   &:active,
@@ -936,16 +847,6 @@ td .input-editor {
   }
 }
 
-input[type='number']::-webkit-outer-spin-button,
-input[type='number']::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-input[type='number'] {
-  -moz-appearance: textfield;
-}
-
 // Metadata cell CSS
 
 td.metadata-descriptor {
@@ -954,7 +855,7 @@ td.metadata-descriptor {
 }
 
 td .select {
-  color: $grey-strong;
+  color: var(--text);
   margin: 0;
   height: 100%;
   width: 100%;
@@ -973,21 +874,25 @@ td .select {
   }
 
   select {
-    color: $grey-strong;
+    color: var(--text);
     height: 100%;
     width: 100%;
     background: transparent;
     border-radius: 0;
     border: 1px solid transparent;
 
+    option {
+      background: var(--background-alt-2);
+      color: var(--text);
+    }
+
     &:focus {
       border: 1px solid $green;
-      background: white;
+      background: var(--background-alt-2);
     }
 
     &:hover {
-      background: transparent;
-      background: white;
+      background: var(--background-alt-2);
       border: 1px solid $light-green;
     }
   }

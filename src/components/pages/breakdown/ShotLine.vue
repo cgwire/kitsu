@@ -285,14 +285,14 @@ import { CopyIcon } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 
+import { ASSET_DRAG_TYPE, isAssetReadyFor } from '@/lib/casting'
 import {
   getDescriptorChecklistValues,
   getDescriptorChoicesOptions,
   getMetadataChecklistValues,
   getMetadataEventValue,
   getMetadataFieldValue
-} from '@/composables/descriptors'
-import { ASSET_DRAG_TYPE, isAssetReadyFor } from '@/lib/casting'
+} from '@/lib/descriptors'
 import { renderMarkdown } from '@/lib/render'
 
 import AssetBlock from '@/components/pages/breakdown/AssetBlock.vue'

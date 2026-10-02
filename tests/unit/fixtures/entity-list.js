@@ -1,4 +1,6 @@
 import { flushPromises, shallowMount } from '@vue/test-utils'
+import { createI18n } from 'vue-i18n'
+import { createMemoryHistory, createRouter } from 'vue-router'
 
 import resizableColumn from '@/directives/resizable-column'
 
@@ -99,12 +101,29 @@ const buildStore = getters => ({
   dispatch: vi.fn()
 })
 
+// The store is both mocked for the Options API lists and provided for the
+// script setup ones: useStore() injects it under the 'store' key.
 export const mountEntityList = async (component, { getters, props }) => {
+  const store = buildStore(getters)
+  const router = createRouter({
+    history: createMemoryHistory(),
+    routes: [{ path: '/', component: { template: '<div />' } }]
+  })
+  // The task links resolve named routes the test router does not know.
+  router.resolve = () => ({ href: '' })
+  const i18n = createI18n({
+    legacy: false,
+    locale: 'en',
+    messages: { en: {} },
+    missingWarn: false,
+    fallbackWarn: false
+  })
   const wrapper = shallowMount(component, {
     global: {
       // No task in the rows: task links never resolve a route.
-      mocks: { $router: {}, $store: buildStore(getters) },
-      plugins: [resizableColumn],
+      mocks: { $router: {}, $store: store, $t: key => key },
+      plugins: [resizableColumn, router, i18n],
+      provide: { store },
       stubs: { RouterLink: true }
     },
     props: {

@@ -92,8 +92,13 @@
 import { computed } from 'vue'
 import { useStore } from 'vuex'
 
+import {
+  getDescriptorChecklistValues,
+  getDescriptorChoicesOptions,
+  getMetadataChecklistValues,
+  isSupervisorInDepartments
+} from '@/lib/descriptors'
 import { sortPeople } from '@/lib/sorting'
-import { descriptorMixin } from '@/components/mixins/descriptors'
 
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
@@ -140,24 +145,13 @@ const props = defineProps({
 
 const emit = defineEmits(['enter', 'update:model-value'])
 
-const {
-  getDescriptorChecklistValues,
-  getMetadataChecklistValues,
-  getDescriptorChoicesOptions,
-  isSupervisorInDepartments
-} = descriptorMixin.methods
-
 const descriptorChecklistValues = computed(() => {
   return getDescriptorChecklistValues(props.descriptor)
 })
 
-const metadataChecklistValues = computed(() => {
-  return getMetadataChecklistValues.call(
-    { getMetadataFieldValue, getDescriptorChecklistValues },
-    props.descriptor,
-    props.entity
-  )
-})
+const metadataChecklistValues = computed(() =>
+  getMetadataChecklistValues(props.descriptor, props.entity)
+)
 
 // Resolved against the edited entity's own production when it carries
 // project context (Edit*Modal.vue). BuildFilterModal.vue passes entity={}
@@ -183,33 +177,13 @@ const isEntitySupervisor = computed(() =>
 const isEditable = computed(() => {
   return Boolean(
     isEntityManager.value ||
-    isSupervisorInDepartments.call(
-      {
-        isCurrentUserSupervisor: isEntitySupervisor.value,
-        user: user.value
-      },
+    isSupervisorInDepartments(
+      user.value,
+      isEntitySupervisor.value,
       props.descriptor.departments
     )
   )
 })
-
-const getMetadataFieldValue = (descriptor, entity) => {
-  if (
-    entity.data &&
-    descriptor.field_name in entity.data &&
-    entity.data[descriptor.field_name] != null
-  ) {
-    return entity.data[descriptor.field_name]
-  } else if (
-    entity.entity_data &&
-    descriptor.field_name in entity.entity_data &&
-    entity.entity_data[descriptor.field_name] != null
-  ) {
-    return entity.entity_data[descriptor.field_name]
-  } else {
-    return ''
-  }
-}
 
 const updateValue = value => {
   emit('update:model-value', value)
@@ -220,11 +194,7 @@ const onEnter = () => {
 }
 
 const onMetadataCheckboxChanged = (option, value) => {
-  const values = getMetadataChecklistValues.call(
-    { getMetadataFieldValue, getDescriptorChecklistValues },
-    props.descriptor,
-    props.entity
-  )
+  const values = getMetadataChecklistValues(props.descriptor, props.entity)
   values[option] = value
   updateValue(JSON.stringify(values))
 }

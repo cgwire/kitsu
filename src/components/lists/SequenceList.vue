@@ -139,7 +139,6 @@
             <th
               scope="col"
               class="time-spent"
-              ref="th-spent"
               v-if="
                 !isCurrentUserClient &&
                 displaySettings.showInfos &&
@@ -153,7 +152,6 @@
               scope="col"
               class="estimation"
               :title="$t('main.estimation')"
-              ref="th-spent"
               v-if="
                 !isCurrentUserClient &&
                 displaySettings.showInfos &&
@@ -181,7 +179,7 @@
                 ) in nonStickedDisplayedValidationColumns"
               />
             </template>
-            <th scope="col" class="actions" ref="actionsSection">
+            <th scope="col" class="actions">
               <button-simple
                 :class="{
                   'is-small': true,
@@ -268,8 +266,8 @@
               <!-- Metadata stick -->
               <template v-if="displaySettings.showInfos && !isLoading">
                 <td
-                  :ref="`editor-${i}-${j}`"
                   class="metadata-descriptor datatable-row-header"
+                  @keyup.ctrl="onInputKeyUp"
                   :title="
                     sequence.data ? sequence.data[descriptor.field_name] : ''
                   "
@@ -360,10 +358,7 @@
                         event
                       )
                   "
-                  @keyup.ctrl="
-                    event =>
-                      onInputKeyUp(event, getIndex(i, k), descriptorLength + 3)
-                  "
+                  @keyup.ctrl="onInputKeyUp"
                   v-if="isCurrentUserManager"
                 />
 
@@ -381,6 +376,7 @@
               <template v-if="displaySettings.showInfos">
                 <td
                   class="metadata-descriptor"
+                  @keyup.ctrl="onInputKeyUp"
                   :title="
                     sequence.data ? sequence.data[descriptor.field_name] : ''
                   "
@@ -511,264 +507,200 @@
   </div>
 </template>
 
-<script>
-import { mapGetters, mapActions } from 'vuex'
+<script setup>
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
+import { useEntityList } from '@/composables/entityList'
+import { useFormat } from '@/composables/format'
+import { getMetadataFieldValue } from '@/lib/descriptors'
 import { getEntityPath, getTaskHref } from '@/lib/path'
-import { descriptorMixin } from '@/components/mixins/descriptors'
-import { domMixin } from '@/components/mixins/dom'
-import { entityListMixin } from '@/components/mixins/entity_list'
-import { formatListMixin } from '@/components/mixins/format'
-import { selectionListMixin } from '@/components/mixins/selection'
 
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+/* eslint-disable no-unused-vars */
 import DescriptionCell from '@/components/cells/DescriptionCell.vue'
-import EmptyList from '@/components/widgets/EmptyList.vue'
-import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import MetadataHeader from '@/components/cells/MetadataHeader.vue'
 import MetadataInput from '@/components/cells/MetadataInput.vue'
 import RowActionsCell from '@/components/cells/RowActionsCell.vue'
-import SortableFieldHeader from '@/components/widgets/SortableFieldHeader.vue'
-import TableMetadataHeaderMenu from '@/components/widgets/TableMetadataHeaderMenu.vue'
-import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu.vue'
-import TableHeaderMenu from '@/components/widgets/TableHeaderMenu.vue'
-import TableInfo from '@/components/widgets/TableInfo.vue'
 import ValidationCell from '@/components/cells/ValidationCell.vue'
 import ValidationHeader from '@/components/cells/ValidationHeader.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import EmptyList from '@/components/widgets/EmptyList.vue'
+import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
+import SortableFieldHeader from '@/components/widgets/SortableFieldHeader.vue'
+import TableHeaderMenu from '@/components/widgets/TableHeaderMenu.vue'
+import TableInfo from '@/components/widgets/TableInfo.vue'
+import TableMetadataHeaderMenu from '@/components/widgets/TableMetadataHeaderMenu.vue'
+import TableMetadataSelectorMenu from '@/components/widgets/TableMetadataSelectorMenu.vue'
+/* eslint-enable no-unused-vars */
 
-export default {
-  name: 'sequence-list',
+const router = useRouter()
+const store = useStore()
+const { formatDuration, isDurationInHours } = useFormat()
 
-  mixins: [
-    descriptorMixin,
-    domMixin,
-    formatListMixin,
-    entityListMixin,
-    selectionListMixin
-  ],
+// Props / Emits
+// --------------------------------------------------------------------------
 
-  props: {
-    displaySettings: {
-      type: Object,
-      default: () => ({})
-    },
-    displayedSequences: {
-      type: Array,
-      default: () => []
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    validationColumns: {
-      type: Array,
-      default: () => []
-    },
-    departmentFilter: {
-      type: Array,
-      default: () => []
-    }
-  },
+const props = defineProps({
+  displaySettings: { type: Object, default: () => ({}) },
+  displayedSequences: { type: Array, default: () => [] },
+  isError: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  validationColumns: { type: Array, default: () => [] },
+  departmentFilter: { type: Array, default: () => [] }
+})
 
-  emits: [
-    'add-sequences',
-    'create-tasks',
-    'delete-clicked',
-    'edit-clicked',
-    'metadata-changed'
-  ],
+const emit = defineEmits([
+  'add-metadata',
+  'add-sequences',
+  'change-sort',
+  'create-tasks',
+  'delete-all-tasks',
+  'delete-clicked',
+  'delete-metadata',
+  'edit-clicked',
+  'edit-metadata',
+  'field-changed',
+  'keep-task-panel-open',
+  'metadata-changed',
+  'scroll'
+])
 
-  data() {
-    return {
-      type: 'sequence',
-      hiddenColumns: {},
-      lastFieldHeaderMenuDisplayed: null,
-      lastFieldHeaderMenuLabel: null,
-      lastHeaderMenuDisplayed: null,
-      lastMetadataHeaderMenuDisplayed: null,
-      lastHeaderMenuDisplayedIndexInGrid: null,
-      lastSelectedSequence: null,
-      lastSelection: null,
-      metadataDisplayHeaders: {
-        estimation: true,
-        timeSpent: true
-      },
-      offsets: {},
-      stickedColumns: {},
-      domEvents: [
-        ['mousemove', this.onMouseMove],
-        ['touchmove', this.onMouseMove],
-        ['mouseup', this.stopBrowsing],
-        ['mouseleave', this.stopBrowsing],
-        ['touchend', this.stopBrowsing],
-        ['touchcancel', this.stopBrowsing],
-        ['keyup', this.stopBrowsing]
-      ]
-    }
-  },
+// Computed
+// --------------------------------------------------------------------------
 
-  components: {
-    ButtonSimple,
-    DescriptionCell,
-    EmptyList,
-    EntityThumbnail,
-    MetadataHeader,
-    MetadataInput,
-    RowActionsCell,
-    SortableFieldHeader,
-    TableHeaderMenu,
-    TableMetadataHeaderMenu,
-    TableMetadataSelectorMenu,
-    TableInfo,
-    ValidationCell,
-    ValidationHeader
-  },
+const currentEpisode = computed(() => store.getters.currentEpisode)
+const currentProduction = computed(() => store.getters.currentProduction)
+const displayedSequencesEstimation = computed(
+  () => store.getters.displayedSequencesEstimation
+)
+const displayedSequencesLength = computed(
+  () => store.getters.displayedSequencesLength
+)
+const displayedSequencesTimeSpent = computed(
+  () => store.getters.displayedSequencesTimeSpent
+)
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+// Production-scoped: effective role on the current production (global
+// admins/managers still pass, but a per-project override wins).
+const isCurrentUserManager = computed(
+  () => store.getters.isCurrentUserProductionManager
+)
+const isCurrentUserSupervisor = computed(
+  () => store.getters.isCurrentUserProductionSupervisor
+)
+const isSequenceDescription = computed(
+  () => store.getters.isSequenceDescription
+)
+const isSequenceEstimation = computed(() => store.getters.isSequenceEstimation)
+const isSequenceResolution = computed(() => store.getters.isSequenceResolution)
+const isSequenceTime = computed(() => store.getters.isSequenceTime)
+const isTVShow = computed(() => store.getters.isTVShow)
+const sequenceFilledColumns = computed(
+  () => store.getters.sequenceFilledColumns
+)
+const sequenceMetadataDescriptors = computed(
+  () => store.getters.sequenceMetadataDescriptors
+)
+const sequenceSearchText = computed(() => store.getters.sequenceSearchText)
+const sequenceSelectionGrid = computed(
+  () => store.getters.sequenceSelectionGrid
+)
+const taskMap = computed(() => store.getters.taskMap)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
-  computed: {
-    ...mapGetters([
-      'currentEpisode',
-      'currentProduction',
-      'currentSequence',
-      'displayedSequencesEstimation',
-      'displayedSequencesLength',
-      'displayedSequencesTimeSpent',
-      'displaySettings.bigThumbnails',
-      'isCurrentUserAdmin',
-      'isCurrentUserClient',
-      'isSingleSequence',
-      'isTVShow',
-      'isSequenceDescription',
-      'isSequenceEstimation',
-      'isSequenceResolution',
-      'isSequenceTime',
-      'nbSelectedTasks',
-      'selectedTasks',
-      'sequenceMap',
-      'sequenceFilledColumns',
-      'sequenceMetadataDescriptors',
-      'sequences',
-      'sequenceSearchText',
-      'sequenceSelectionGrid',
-      'sequences',
-      'taskMap',
-      'taskTypeMap',
-      'user'
-    ]),
+const isEmptyList = computed(
+  () =>
+    props.displayedSequences &&
+    props.displayedSequences.length === 0 &&
+    !props.isLoading &&
+    !props.isError &&
+    (!sequenceSearchText.value || sequenceSearchText.value.length === 0)
+)
 
-    // Production-scoped: effective role on the current production (global
-    // admins/managers still pass, but a per-project override wins).
-    ...mapGetters({
-      isCurrentUserManager: 'isCurrentUserProductionManager',
-      isCurrentUserSupervisor: 'isCurrentUserProductionSupervisor'
-    }),
+const isListVisible = computed(
+  () => !props.isLoading && !props.isError && displayedSequencesLength.value > 0
+)
 
-    isEmptyList() {
-      return (
-        this.displayedSequences &&
-        this.displayedSequences.length === 0 &&
-        !this.isLoading &&
-        !this.isError &&
-        (!this.sequenceSearchText || this.sequenceSearchText.length === 0)
-      )
-    },
+const {
+  columnSelectorDisplayed,
+  hiddenColumns,
+  isEmptyTask,
+  lastHeaderMenuDisplayed,
+  lastMetadataHeaderMenuDisplayed,
+  metadataDisplayHeaders,
+  metadataStickColumnClicked,
+  nonStickedDisplayedValidationColumns,
+  nonStickedVisibleMetadataDescriptors,
+  offsets,
+  onAddMetadataClicked,
+  onBodyScroll,
+  onDeleteAllTasksClicked,
+  onDeleteMetadataClicked,
+  onDescriptionChanged,
+  onEditMetadataClicked,
+  onInputKeyUp,
+  onMetadataFieldChanged,
+  onMinimizeColumnToggled,
+  onSelectColumn,
+  onSortByFieldClicked,
+  onSortByMetadataClicked,
+  onSortByTaskTypeClicked,
+  onTaskSelected,
+  onTaskUnselected,
+  getValidationStyle,
+  isValidResolution,
+  selectTaskFromQuery,
+  setScrollPosition,
+  showFieldHeaderMenu,
+  showHeaderMenu,
+  showMetadataHeaderMenu,
+  startBrowsing,
+  stickColumnClicked,
+  stickedColumns,
+  stickedDisplayedValidationColumns,
+  stickedVisibleMetadataDescriptors,
+  toggleColumnSelector
+} = useEntityList({
+  type: 'sequence',
+  props,
+  emit,
+  entities: computed(() => props.displayedSequences),
+  filledColumns: sequenceFilledColumns,
+  metadataDescriptors: sequenceMetadataDescriptors,
+  metadataDisplayHeaders: { estimation: true, timeSpent: true },
+  isEmptyList
+})
 
-    isListVisible() {
-      return (
-        !this.isLoading && !this.isError && this.displayedSequencesLength > 0
-      )
-    },
+// Functions
+// --------------------------------------------------------------------------
 
-    displayedValidationColumns() {
-      return this.validationColumns.filter(columnId => {
-        return (
-          this.sequenceFilledColumns[columnId] &&
-          (!this.hiddenColumns[columnId] || this.displaySettings.showInfos)
-        )
-      })
-    },
+const isSelected = (lineIndex, columnIndex) =>
+  sequenceSelectionGrid.value.has(`${lineIndex}-${columnIndex}`)
 
-    metadataDescriptors() {
-      return this.sequenceMetadataDescriptors
-    },
+const taskHref = taskId =>
+  getTaskHref(
+    router,
+    taskMap.value.get(taskId),
+    currentProduction.value,
+    isTVShow.value,
+    currentEpisode.value,
+    taskTypeMap.value
+  )
 
-    localStorageStickKey() {
-      return `stick-sequences-${this.currentProduction?.id}`
-    }
-  },
+const sequencePath = sequenceId =>
+  getEntityPath(
+    sequenceId,
+    currentProduction.value?.id,
+    'sequence',
+    currentEpisode.value ? currentEpisode.value.id : null
+  )
 
-  methods: {
-    ...mapActions(['setSequenceSelection']),
-
-    isSelected(lineIndex, columnIndex) {
-      return this.sequenceSelectionGrid.has(`${lineIndex}-${columnIndex}`)
-    },
-
-    taskHref(taskId) {
-      return getTaskHref(
-        this.$router,
-        this.taskMap.get(taskId),
-        this.currentProduction,
-        this.isTVShow,
-        this.currentEpisode,
-        this.taskTypeMap
-      )
-    },
-
-    sequencePath(sequenceId) {
-      return this.getPath('sequence', sequenceId)
-    },
-
-    getPath(section, sequenceId) {
-      const productionId = this.currentProduction?.id
-      const episodeId = this.currentEpisode ? this.currentEpisode.id : null
-      return getEntityPath(sequenceId, productionId, section, episodeId)
-    }
-  },
-
-  watch: {
-    displayedSequences() {
-      this.$options.lineIndex = {}
-    },
-
-    validationColumns() {
-      this.initHiddenColumns(this.validationColumns, this.hiddenColumns)
-    },
-
-    stickedColumns() {
-      this.updateOffsets()
-    },
-
-    isLoading() {
-      this.updateOffsets()
-    }
-  }
-}
+// The pages drive the list through a ref.
+defineExpose({ selectTaskFromQuery, setScrollPosition })
 </script>
 
 <style lang="scss" scoped>
-.dark {
-  th .input-editor,
-  td .select select,
-  td .input-editor {
-    color: $white;
-
-    option {
-      background: $dark-grey-light;
-      color: $white;
-    }
-
-    &:focus,
-    &:active,
-    &:hover {
-      background: $dark-grey-light;
-    }
-  }
-}
-
 .datatable-wrapper {
   min-height: 40px;
 }
@@ -844,10 +776,6 @@ span.thumbnail-empty {
   background: #f3f3f3;
 }
 
-.info {
-  margin-top: 2em;
-}
-
 .datatable-row th.name {
   font-size: 1.1em;
   padding: 6px;
@@ -855,7 +783,7 @@ span.thumbnail-empty {
 
 th .input-editor,
 td .input-editor {
-  color: $grey-strong;
+  color: var(--text);
   height: 100%;
   padding: 0.5rem;
   width: 100%;
@@ -863,11 +791,15 @@ td .input-editor {
   border: 1px solid transparent;
   z-index: 100;
 
+  option {
+    background: var(--background-alt-2);
+    color: var(--text);
+  }
+
   &:active,
   &:focus,
   &:hover {
-    background: transparent;
-    background: white;
+    background: var(--background-alt-2);
   }
 
   &:active,
@@ -884,61 +816,11 @@ td .input-editor {
   }
 }
 
-input[type='number']::-webkit-outer-spin-button,
-input[type='number']::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-input[type='number'] {
-  -moz-appearance: textfield;
-}
-
 // Metadata cell CSS
 
 td.metadata-descriptor {
   height: 3.1rem;
   padding: 0;
-}
-
-td .select {
-  color: $grey-strong;
-  margin: 0;
-  height: 100%;
-  width: 100%;
-  border: 1px solid transparent;
-
-  &::after {
-    border-color: transparent;
-  }
-
-  &:active,
-  &:focus,
-  &:hover {
-    &::after {
-      border-color: $green;
-    }
-  }
-
-  select {
-    color: $grey-strong;
-    height: 100%;
-    width: 100%;
-    background: transparent;
-    border-radius: 0;
-    border: 1px solid transparent;
-
-    &:focus {
-      border: 1px solid $green;
-      background: white;
-    }
-
-    &:hover {
-      background: transparent;
-      background: white;
-      border: 1px solid $light-green;
-    }
-  }
 }
 
 .metadata-value {

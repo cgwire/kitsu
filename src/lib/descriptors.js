@@ -1,9 +1,5 @@
 /*
  * Pure helpers to read and format metadata descriptors.
- *
- * The legacy `descriptorMixin` in `src/components/mixins/descriptors.js`
- * still exists for components that haven't been migrated to
- * `<script setup>` yet. New code should import from here.
  */
 
 import { sortByName } from '@/lib/sorting'
@@ -83,6 +79,33 @@ export const isSupervisorInDepartments = (
     (user.departments.length === 0 ||
       user.departments.some(department => departments.includes(department)))
   )
+}
+
+/*
+ * Value an input event sets on a metadata field, undefined when the event
+ * must be ignored: an invalid input, or a browser undo / redo, which is
+ * reverted to the stored value.
+ */
+export const getMetadataEventValue = (descriptor, entry, event) => {
+  if (typeof event === 'string') return event
+  if (['historyUndo', 'historyRedo'].includes(event.inputType)) {
+    // The browser rewrote the field on its own: its undo stack belongs to
+    // the frame, not to the focused element, so Ctrl+Z anywhere on the
+    // page replays the last edited cell. Put the stored value back instead
+    // of pushing this one onto every selected entry.
+    event.target.value = getMetadataFieldValue(descriptor, entry)
+    return undefined
+  }
+  if (!event.target.validity.valid) return undefined
+  if (descriptor.data_type === 'boolean') {
+    return event.target.checked ? 'true' : 'false'
+  }
+  if (descriptor.data_type === 'number') {
+    return !isNaN(event.target.valueAsNumber)
+      ? event.target.valueAsNumber
+      : null
+  }
+  return event.target.value
 }
 
 // CSV exports list the descriptor columns by name, in the header and in the
