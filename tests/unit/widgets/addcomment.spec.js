@@ -1,4 +1,4 @@
-import { reactive } from 'vue'
+import { nextTick, reactive } from 'vue'
 import { shallowMount } from '@vue/test-utils'
 import { createStore } from 'vuex'
 import { createRouter, createWebHistory } from 'vue-router'
@@ -170,6 +170,19 @@ describe('AddComment', () => {
       expect(draftComment.checklist).toEqual([])
       expect(draftComment.link).toBeNull()
       expect(draftComment.nextRevision).toBeUndefined()
+    })
+
+    // Zou keeps a null checklist on the comments that predate the column.
+    it('setValue reads a null checklist as an empty one', async () => {
+      await wrapper.vm.setValue({
+        text: 'Client note',
+        checklist: null,
+        attachment_files: []
+      })
+      await nextTick()
+
+      expect(draftComment.text).toBe('Client note')
+      expect(draftComment.checklist).toEqual([])
     })
   })
 

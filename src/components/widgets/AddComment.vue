@@ -925,7 +925,7 @@ const removeTask = entry => {
 }
 
 const setValue = async comment => {
-  checklistItems.value = JSON.parse(JSON.stringify(comment.checklist))
+  checklistItems.value = JSON.parse(JSON.stringify(comment.checklist || []))
   text.value = comment.text
 
   // duplicate attachment files, one download at a time
