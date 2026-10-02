@@ -8,7 +8,7 @@
               ref="edit-search-field"
               :can-save="true"
               @change="onSearchChange"
-              @enter="applySearch(searchField.getValue())"
+              @enter="applySearch"
               @save="saveSearchQuery"
               placeholder="ex: e01 edit=wip"
             />
@@ -223,6 +223,7 @@
     />
 
     <add-thumbnails-modal
+      ref="add-thumbnails-modal"
       active
       entity-type="Edit"
       :parent="isTVShow ? 'edits_tvshow' : 'edits'"
@@ -299,12 +300,14 @@ const type = 'edit'
 // State
 // --------------------------------------------------------------------------
 
+const addThumbnailsModalRef = useTemplateRef('add-thumbnails-modal')
 const importModalRef = useTemplateRef('import-modal')
 const listRef = useTemplateRef('edit-list')
 const searchFieldRef = useTemplateRef('edit-search-field')
 
 const historyEdit = ref({})
 const initialLoading = ref(true)
+const optionalColumns = ref(['Description'])
 
 // Computed
 // --------------------------------------------------------------------------
@@ -418,6 +421,7 @@ const {
   selectedDepartment,
   setScrollPosition,
   setSearchInUrl,
+  showAddThumbnailsModal,
   showCreateTasksModal,
   showImportModal,
   uploadImportFile
@@ -426,11 +430,12 @@ const {
   pageName: 'Edits',
   listRef,
   searchFieldRef,
+  addThumbnailsModalRef,
   importModalRef,
   reset,
   loadEntities: () => store.dispatch('loadEdits'),
   dataMatchers,
-  optionalColumns: ref(['Description']),
+  optionalColumns,
   canCancel: true,
   modals: { isEditHistoryDisplayed: false }
 })

@@ -21,6 +21,7 @@ import '@/lib/auth'
 
 import { useDesktopNotifications } from '@/composables/desktopNotifications'
 import NotificationsPage from '@/components/pages/Notifications.vue'
+import BooleanField from '@/components/widgets/BooleanField.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
 const ButtonSimpleStub = {
@@ -158,6 +159,43 @@ describe('Notifications.vue', () => {
       await remountWith({ notifications: () => [notification] })
 
       expect(wrapper.findComponent(TaskTypeName).props('taskType')).toBeNull()
+    })
+  })
+
+  describe('read toggle', () => {
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    it('logs a read status that fails to save', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const error = new Error('Request has been terminated')
+      const notification = {
+        id: 'notification-1',
+        author_id: 'person-1',
+        created_at: '2026-09-21T10:00:00',
+        notification_type: 'comment',
+        project_id: 'production-1',
+        read: false,
+        task_id: 'task-1',
+        task_type_id: 'task-type-1'
+      }
+      wrapper.unmount()
+      let actions
+      ;({ store, actions } = makeStore({
+        notifications: () => [notification]
+      }))
+      actions.toggleNotificationReadStatus.mockRejectedValueOnce(error)
+      wrapper = mountPage(store)
+      await flushPromises()
+
+      wrapper.findComponent(BooleanField).vm.$emit('click', true)
+      await flushPromises()
+
+      expect(actions.toggleNotificationReadStatus).toHaveBeenCalled()
+      expect(consoleError).toHaveBeenCalledWith(error)
     })
   })
 

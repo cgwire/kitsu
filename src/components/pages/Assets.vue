@@ -229,6 +229,7 @@
     />
 
     <add-thumbnails-modal
+      ref="add-thumbnails-modal"
       active
       entity-type="Asset"
       parent="assets"
@@ -298,6 +299,7 @@ const type = 'asset'
 // State
 // --------------------------------------------------------------------------
 
+const addThumbnailsModalRef = useTemplateRef('add-thumbnails-modal')
 const editAssetModalRef = useTemplateRef('edit-asset-modal')
 const importModalRef = useTemplateRef('import-modal')
 const listRef = useTemplateRef('asset-list')
@@ -409,6 +411,7 @@ const {
   deleteAllTasksLockText,
   deleteAllTasksText,
   deleteText,
+  departmentFilter,
   descriptorToEdit,
   displaySettings,
   entityToEdit: assetToEdit,
@@ -444,6 +447,7 @@ const {
   selectableDepartments,
   selectedDepartment,
   setScrollPosition,
+  showAddThumbnailsModal,
   showCreateTasksModal,
   showImportModal,
   uploadImportFile
@@ -452,6 +456,7 @@ const {
   pageName: 'Assets',
   listRef,
   searchFieldRef,
+  addThumbnailsModalRef,
   importModalRef,
   reset,
   loadEntities: () => store.dispatch('loadAssets'),

@@ -8,6 +8,7 @@ vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@sentry/vue', () => ({ captureException: vi.fn() }))
 vi.mock('@/store/api/tasks', () => ({
   default: {
+    pinComment: vi.fn(),
     updatePreviewAnnotation: vi.fn(),
     unassignPersonFromTasks: vi.fn(() => Promise.resolve()),
     createEntityTasks: vi.fn(() =>
@@ -370,6 +371,34 @@ describe('Tasks store', () => {
         error,
         expect.anything()
       )
+    })
+  })
+
+  describe('pinComment action', () => {
+    const pinAndSave = async comment => {
+      const state = { taskComments: { 'task-1': [comment] } }
+      const commit = (type, payload) =>
+        tasksStore.mutations[type](state, payload)
+      await tasksStore.actions.pinComment({ commit }, comment)
+    }
+
+    test('keeps the pin once saved', async () => {
+      const comment = { id: 'comment-1', object_id: 'task-1', pinned: false }
+      tasksApi.pinComment.mockResolvedValueOnce({})
+
+      await pinAndSave(comment)
+
+      expect(comment.pinned).toBe(true)
+    })
+
+    test('restores the pin and rethrows when the save fails', async () => {
+      const comment = { id: 'comment-1', object_id: 'task-1', pinned: false }
+      const error = new Error('Request has been terminated')
+      tasksApi.pinComment.mockRejectedValueOnce(error)
+
+      await expect(pinAndSave(comment)).rejects.toBe(error)
+
+      expect(comment.pinned).toBe(false)
     })
   })
 

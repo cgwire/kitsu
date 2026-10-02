@@ -51,6 +51,7 @@
           class="download-button"
           :href="downloadPath"
           :title="$t('playlists.actions.download_file')"
+          download
           v-if="!isCurrentUserArtist"
         >
           <download-icon class="icon is-small" />

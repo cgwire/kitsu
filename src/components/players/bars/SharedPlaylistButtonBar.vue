@@ -47,7 +47,7 @@
       >
         {{ currentTimeFormatted }}
       </span>
-      <span class="flexrow-item time-indicator">/</span>
+      <span class="flexrow-item time-indicator"> / </span>
       <span
         class="flexrow-item time-indicator"
         :title="$t('playlists.actions.max_duration')"
@@ -55,10 +55,10 @@
         {{ maxDurationFormatted }}
       </span>
       <span
-        class="flexrow-item frame-counter mr05 nowrap"
+        class="flexrow-item frame-counter nowrap"
         :title="$t('playlists.actions.frame_number')"
       >
-        {{ currentFrameDisplay }} / {{ nbFramesDisplay }}
+        ({{ currentFrameDisplay }} / {{ nbFramesDisplay }})
       </span>
     </div>
 
@@ -208,6 +208,7 @@ const volume = defineModel('volume', { type: Number, default: 100 })
   width: 100%;
 }
 
+.frame-counter,
 .time-indicator {
   color: rgba(244, 245, 250, 0.6);
   font-variant-numeric: tabular-nums;

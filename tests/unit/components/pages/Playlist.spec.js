@@ -5,10 +5,10 @@ import { createStore } from 'vuex'
 
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }))
-const routeHolder = vi.hoisted(() => ({ route: null }))
+const routeHolder = vi.hoisted(() => ({ route: null, router: null }))
 vi.mock('vue-router', () => ({
   useRoute: () => routeHolder.route,
-  useRouter: () => ({ push: vi.fn() })
+  useRouter: () => routeHolder.router
 }))
 
 import '@/lib/auth'
@@ -29,6 +29,7 @@ afterEach(() => {
 beforeEach(() => {
   localStorage.removeItem('playlist-sort')
   routeHolder.route = reactive({ params: {}, query: {}, fullPath: '/' })
+  routeHolder.router = { push: vi.fn() }
 })
 
 // The page mounted last, for the actions that leave it during its first run.
@@ -589,6 +590,59 @@ describe('Playlist page, silent lock', () => {
     onPlaylistUpdate({ project_id: 'p1', playlist_id: 'pl-1' })
 
     expect(actions.refreshPlaylist).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('Playlist page, unreadable playlist', () => {
+  // Playlist events reach every member of the production. A client can no
+  // longer read a playlist made internal: its refetch resolves to null, and
+  // the store drops it from the list.
+  // An empty playlist opens the addition panel, which holds the updates back.
+  const shots = [{ id: 's1' }]
+  const updateOpenPlaylist = async refreshPlaylist => {
+    const { wrapper, socket } = await openPlaylist(
+      { shots },
+      { actions: { refreshPlaylist } }
+    )
+    await flushPromises()
+    routeHolder.router.push.mockClear()
+    const onPlaylistUpdate = socket.on.mock.calls.find(
+      ([name]) => name === 'playlist:update'
+    )[1]
+    await onPlaylistUpdate({ project_id: 'p1', playlist_id: 'pl-1' })
+    await flushPromises()
+    return wrapper
+  }
+
+  it('leaves the open playlist once it left the list', async () => {
+    const wrapper = await updateOpenPlaylist(
+      vi.fn(({ getters }) => {
+        getters.playlistMap.delete('pl-1')
+        return Promise.resolve(null)
+      })
+    )
+
+    expect(routeHolder.router.push).toHaveBeenCalled()
+    expect(wrapper.vm.currentPlaylist.id).toBe('pl-1')
+  })
+
+  it('stays on the open playlist when the refresh fails', async () => {
+    const wrapper = await updateOpenPlaylist(
+      vi.fn(() => Promise.resolve(null))
+    )
+
+    expect(routeHolder.router.push).not.toHaveBeenCalled()
+    expect(wrapper.vm.currentPlaylist.id).toBe('pl-1')
+  })
+
+  it('shows the refreshed playlist', async () => {
+    const refreshed = { id: 'pl-1', name: 'Renamed', project_id: 'p1', shots }
+    const wrapper = await updateOpenPlaylist(
+      vi.fn(() => Promise.resolve(refreshed))
+    )
+
+    const player = wrapper.findComponent(PlaylistPlayer)
+    expect(player.props('playlist').name).toBe('Renamed')
   })
 })
 

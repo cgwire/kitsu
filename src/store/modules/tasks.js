@@ -948,7 +948,11 @@ const actions = {
 
   pinComment({ commit }, comment) {
     commit(PIN_COMMENT, comment)
-    return tasksApi.pinComment(comment)
+    return tasksApi.pinComment(comment).catch(err => {
+      // PIN_COMMENT toggles: re-committing restores the previous state.
+      commit(PIN_COMMENT, comment)
+      throw err
+    })
   },
 
   toggleCommentForClient({ commit }, comment) {

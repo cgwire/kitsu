@@ -1554,12 +1554,17 @@ const SOCKET_EVENTS = {
       const playlist = await store.dispatch('refreshPlaylist', {
         id: eventData.playlist_id
       })
-      if (eventData.playlist_id === currentPlaylist.value.id) {
-        currentPlaylist.value = playlist
-        nextTick(() => {
-          rebuildCurrentEntities()
-        })
+      if (eventData.playlist_id !== currentPlaylist.value.id) return
+      if (!playlist) {
+        // Gone from the list once unreadable (made internal for a client, or
+        // deleted); a failed refresh keeps it on screen.
+        if (!playlistMap.value.get(eventData.playlist_id)) goFirstPlaylist()
+        return
       }
+      currentPlaylist.value = playlist
+      nextTick(() => {
+        rebuildCurrentEntities()
+      })
     }
   },
 

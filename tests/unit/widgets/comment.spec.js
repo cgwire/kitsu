@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils'
-import { createRouter, createWebHistory } from 'vue-router'
+import { RouterLink, createRouter, createWebHistory } from 'vue-router'
 import { createStore } from 'vuex'
 
 // The component imports bare `moment` without the timezone plugin loaded in
@@ -60,6 +60,7 @@ const task = {
 const makeStore = ({ isAdmin = false, user = { id: 'person-1' } } = {}) =>
   createStore({
     getters: {
+      canValidatePreviewFiles: () => () => false,
       dateFormat: () => 'dd/MM/yyyy',
       departmentMap: () => new Map(),
       isCurrentUserAdmin: () => isAdmin,
@@ -78,13 +79,23 @@ const makeStore = ({ isAdmin = false, user = { id: 'person-1' } } = {}) =>
 
 const mountComment = ({
   comment = makeComment(),
+  isActionError = false,
   isEditable = true,
   storeOptions,
-  attachTo
+  attachTo,
+  urlPrefix = ''
 } = {}) =>
   shallowMount(Comment, {
     attachTo,
-    props: { comment, isEditable, task, taskTypes: [], team: [] },
+    props: {
+      comment,
+      isActionError,
+      isEditable,
+      task,
+      taskTypes: [],
+      team: [],
+      urlPrefix
+    },
     global: {
       plugins: [i18n, makeStore(storeOptions), router],
       stubs: {
@@ -143,6 +154,22 @@ describe('Comment', () => {
         .join(' ')
       expect(linkText).not.toContain('voice.wav')
       expect(linkText).not.toContain('clip.mp4')
+    })
+  })
+
+  describe('action error', () => {
+    test('stays hidden while the last action succeeded', () => {
+      const wrapper = mountComment()
+      expect(wrapper.find('.like-button').exists()).toBe(true)
+      expect(wrapper.find('.action-error').exists()).toBe(false)
+    })
+
+    // Same look as the errors of the comment form: italic, right aligned.
+    test('tells that the last action was not saved', () => {
+      const wrapper = mountComment({ isActionError: true })
+      const error = wrapper.find('.action-error')
+      expect(error.classes()).toContain('has-text-right')
+      expect(error.find('em').text()).toBe('Could not save. Please try again.')
     })
   })
 
@@ -225,6 +252,26 @@ describe('Comment', () => {
       const wrapper = mountWithReply('person-2', { user: null })
       expect(wrapper.text()).toContain('A reply')
       expect(wrapper.find('.reply-delete').exists()).toBe(false)
+    })
+  })
+
+  describe('revision badge', () => {
+    const comment = makeComment({
+      previews: [{ id: 'preview-1', revision: 1 }]
+    })
+
+    test('links to the preview of the revision', () => {
+      const wrapper = mountComment({ comment })
+      expect(wrapper.findComponent(RouterLink).exists()).toBe(true)
+    })
+
+    test('shows the revision without a link to shared playlist guests', () => {
+      const wrapper = mountComment({
+        comment,
+        urlPrefix: '/api/shared/playlists/token-1'
+      })
+      expect(wrapper.findComponent(RouterLink).exists()).toBe(false)
+      expect(wrapper.find('.round-name.revision').text()).toContain('1')
     })
   })
 })

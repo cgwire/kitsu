@@ -760,11 +760,13 @@ const onCalendarDatesChanged = async ({ start, end }) => {
 }
 
 const onTimeSpentChange = timeSpentInfo => {
-  store.dispatch('setTimeSpent', {
-    ...timeSpentInfo,
-    personId: person.value.id,
-    date: selectedDate.value
-  })
+  store
+    .dispatch('setTimeSpent', {
+      ...timeSpentInfo,
+      personId: person.value.id,
+      date: selectedDate.value
+    })
+    .catch(console.error)
 }
 
 const onDateChanged = async date => {

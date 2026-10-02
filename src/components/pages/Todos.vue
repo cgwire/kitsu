@@ -130,6 +130,7 @@
           ref="day-off-list"
           :days-off="daysOff"
           :day-off-error="dayOffError"
+          :is-error="isDaysOffLoadingError"
           @set-day-off="onSetDayOff"
           @unset-day-off="onUnsetDayOff"
           v-if="isActiveTab('daysoff')"
@@ -204,6 +205,7 @@ const currentFilter = ref('all_tasks')
 const currentSort = ref('priority')
 const currentSection = ref('todos')
 const daysOff = ref([])
+const isDaysOffLoadingError = ref(false)
 const dayOffError = ref(false)
 const productionId = ref(undefined)
 const calendarTimeSpents = ref([])
@@ -417,9 +419,15 @@ const loadData = async (forced = false) => {
   })
   resizeHeaders()
 
-  daysOff.value = await store.dispatch('loadAggregatedPersonDaysOff', {
-    personId: user.value.id
-  })
+  isDaysOffLoadingError.value = false
+  // A failed days off load must not skip the URL search applied on mount.
+  daysOff.value = await store
+    .dispatch('loadAggregatedPersonDaysOff', { personId: user.value.id })
+    .catch(err => {
+      console.error(err)
+      isDaysOffLoadingError.value = true
+      return []
+    })
 }
 
 const loadTimeSpents = () =>
@@ -578,11 +586,13 @@ const onUnsetDayOff = async dayOff => {
 }
 
 const onTimeSpentChange = timeSpentInfo => {
-  store.dispatch('setTimeSpent', {
-    ...timeSpentInfo,
-    personId: user.value.id,
-    date: selectedDate.value
-  })
+  store
+    .dispatch('setTimeSpent', {
+      ...timeSpentInfo,
+      personId: user.value.id,
+      date: selectedDate.value
+    })
+    .catch(console.error)
 }
 
 const onAssignation = async eventData => {

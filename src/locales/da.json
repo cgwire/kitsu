@@ -110,6 +110,7 @@
       "comment_from_client": "Kommentar fra klient",
       "edit_title": "Rediger kommentar",
       "empty_text": "Denne kommentar er tom",
+      "action_error": "Kunne ikke gemme. Prøv venligst igen.",
       "edit_error": "Der opstod en fejl under redigering af kommentaren. Kontakt venligst vores supportteam.",
       "error": "Der opstod en fejl under afsendelse af kommentaren",
       "no_file_attached": "Intet preview vedhæftet",

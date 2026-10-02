@@ -666,7 +666,9 @@ const onNotificationSelected = (event, notification) => {
 
 const toggleNotificationRead = (notification, value) => {
   if (value !== notification.read) {
-    store.dispatch('toggleNotificationReadStatus', notification)
+    store
+      .dispatch('toggleNotificationReadStatus', notification)
+      .catch(console.error)
   }
 }
 

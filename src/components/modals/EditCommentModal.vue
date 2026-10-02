@@ -303,7 +303,7 @@ const reset = () => {
     form.value = {
       text: props.commentToEdit.text,
       task_status_id: props.commentToEdit.task_status_id,
-      checklist: [...props.commentToEdit.checklist],
+      checklist: [...(props.commentToEdit.checklist || [])],
       attachment_files: [...props.commentToEdit.attachment_files],
       link: props.commentToEdit.links?.[0]
     }

@@ -383,6 +383,7 @@ export const useEntityPage = ({
   }
 
   const showAddThumbnailsModal = () => {
+    errors.addThumbnails = false
     modals.isAddThumbnailsDisplayed = true
   }
 
@@ -648,7 +649,7 @@ export const useEntityPage = ({
   // Thumbnails
   // --------------------------------------------------------------------------
 
-  const confirmAddThumbnails = async forms => {
+  const confirmAddThumbnails = forms => {
     const addPreview = async form => {
       addThumbnailsModalRef.value?.markLoading(form.task.entity_id)
       const { preview } = await store.dispatch('commentTaskWithPreview', {
@@ -664,10 +665,13 @@ export const useEntityPage = ({
       })
       addThumbnailsModalRef.value?.markUploaded(form.task.entity_id)
     }
-    loading.addThumbnails = true
-    await func.runPromiseMapAsSeries(forms, addPreview)
-    loading.addThumbnails = false
-    modals.isAddThumbnailsDisplayed = false
+    return runAction(
+      'addThumbnails',
+      () => func.runPromiseMapAsSeries(forms, addPreview),
+      () => {
+        modals.isAddThumbnailsDisplayed = false
+      }
+    )
   }
 
   const onRestoreClicked = entity => {

@@ -110,6 +110,7 @@
       "comment_from_client": "客户留言",
       "edit_title": "编辑评论",
       "empty_text": "此条评论为空",
+      "action_error": "无法保存。请重试。",
       "edit_error": "编辑评论时发生错误。请联系我们的支持团队。",
       "error": "发布评论时出现错误",
       "no_file_attached": "未附加预览",

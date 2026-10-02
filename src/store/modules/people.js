@@ -126,6 +126,12 @@ const cache = {
   guests: []
 }
 
+// The timesheet sliders save on every wheel notch. The writes of a task,
+// person and day go one at a time, and a write waiting for its turn keeps only
+// the last value set: concurrent writes could land out of order, and Zou
+// answers 404 to a write whose row a concurrent delete removed.
+const timeSpentWrites = new Map()
+
 const initialState = {
   organisation: {
     name: 'Kitsu',
@@ -545,14 +551,28 @@ const actions = {
     commit(REMOVE_PERSON_TASKS_SEARCH_END, { searchQuery })
   },
 
-  async setTimeSpent({ commit }, { personId, taskId, date, duration }) {
-    const timeSpent = await peopleApi.setTimeSpent(
-      taskId,
-      personId,
-      date,
-      duration
-    )
-    commit(SET_TIME_SPENT, timeSpent)
+  setTimeSpent({ commit }, { personId, taskId, date, duration }) {
+    const key = `${taskId}/${personId}/${date}`
+    const last = timeSpentWrites.get(key)
+    if (last && !last.isSent) {
+      last.duration = duration
+      return last.promise
+    }
+    const write = { duration, isSent: false }
+    const previous = last?.promise.catch(() => {}) ?? Promise.resolve()
+    write.promise = previous
+      .then(() => {
+        write.isSent = true
+        return peopleApi.setTimeSpent(taskId, personId, date, write.duration)
+      })
+      .then(timeSpent => {
+        commit(SET_TIME_SPENT, timeSpent)
+      })
+      .finally(() => {
+        if (timeSpentWrites.get(key) === write) timeSpentWrites.delete(key)
+      })
+    timeSpentWrites.set(key, write)
+    return write.promise
   },
 
   setDayOff(_, { id, personId, date, end_date, description }) {

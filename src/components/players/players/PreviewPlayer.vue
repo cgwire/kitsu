@@ -370,6 +370,7 @@
             }"
             :href="originalDlPath"
             :title="$t('playlists.actions.download_file')"
+            download
             v-if="
               !isCurrentUserArtist ||
               currentProduction?.is_preview_download_allowed

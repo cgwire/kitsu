@@ -147,9 +147,22 @@ const actions = {
   // A live event refetches a playlist. A new one joins the list only when it
   // matches the scope the list was loaded for, an updated one is refreshed
   // only while listed: the list may have been replaced during the fetch.
+  // Events reach every member of the production, so a client is refused the
+  // internal playlists (403), and a deleted one is gone (404): it resolves to
+  // null and leaves the list.
   async refreshPlaylist({ commit, state, rootGetters }, { id, scope = null }) {
     const currentProduction = rootGetters.currentProduction
-    const playlist = await playlistsApi.getPlaylist(currentProduction, { id })
+    let playlist
+    try {
+      playlist = await playlistsApi.getPlaylist(currentProduction, { id })
+    } catch (err) {
+      const isUnreadable = [403, 404].includes(err?.status)
+      if (!isUnreadable) console.error(err)
+      if (isUnreadable && state.playlistMap.get(id)) {
+        commit(DELETE_PLAYLIST_END, { id })
+      }
+      return null
+    }
     const isListed = scope
       ? isPlaylistInScope(playlist, scope)
       : Boolean(state.playlistMap.get(playlist.id))

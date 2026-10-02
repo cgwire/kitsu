@@ -110,6 +110,7 @@
       "comment_from_client": "Commentaire du client",
       "edit_title": "Modifier le commentaire",
       "empty_text": "Ce commentaire est vide",
+      "action_error": "Impossible d'enregistrer. Veuillez réessayer.",
       "edit_error": "Une erreur est survenue en éditant le commentaire. Veuillez contacter notre support.",
       "error": "Une erreur est survenue en postant le commentaire",
       "no_file_attached": "Aucune preview attachée",

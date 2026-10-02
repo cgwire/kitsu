@@ -352,6 +352,7 @@
                     :comment="comment"
                     :fps="currentFps"
                     :frame="currentFrame"
+                    :is-action-error="comment.id === failedActionCommentId"
                     :is-change="isStatusChange(index)"
                     :is-checkable="
                       (user && user.id === comment.person?.id) ||
@@ -558,6 +559,7 @@ const task = ref(null)
 const taskComments = ref([])
 const taskPreviews = ref([])
 const commentToEdit = ref(null)
+const failedActionCommentId = ref(null)
 const selectedPreviewId = ref(null)
 const previewForms = ref([])
 const currentFrame = ref(0)
@@ -1337,14 +1339,22 @@ const isStatusChange = index => {
   )
 }
 
-const onAckComment = comment => store.dispatch('ackComment', comment)
+const runCommentAction = (action, comment) => {
+  failedActionCommentId.value = null
+  store.dispatch(action, comment).catch(err => {
+    console.error(err)
+    failedActionCommentId.value = comment.id
+  })
+}
+
+const onAckComment = comment => runCommentAction('ackComment', comment)
 
 const onDuplicateComment = comment => addCommentRef.value.setValue(comment)
 
-const onPinComment = comment => store.dispatch('pinComment', comment)
+const onPinComment = comment => runCommentAction('pinComment', comment)
 
 const onToggleForClient = comment =>
-  store.dispatch('toggleCommentForClient', comment)
+  runCommentAction('toggleCommentForClient', comment)
 
 const onEditComment = comment => {
   commentToEdit.value = comment
@@ -1416,12 +1426,12 @@ const setPreview = () => {
       previewId,
       frame
     })
-    .then(() => {
-      loading.value.setPreview = false
-    })
     .catch(err => {
       console.error(err)
       errors.value.setPreview = true
+    })
+    .finally(() => {
+      loading.value.setPreview = false
     })
 }
 
@@ -1581,9 +1591,9 @@ const timeCodeClicked = ({ versionRevision, frame }) => {
 const toggleSubscribe = () => {
   if (task.value && !isAssigned.value) {
     if (task.value.is_subscribed) {
-      store.dispatch('unsubscribeFromTask', task.value.id)
+      store.dispatch('unsubscribeFromTask', task.value.id).catch(console.error)
     } else {
-      store.dispatch('subscribeToTask', task.value.id)
+      store.dispatch('subscribeToTask', task.value.id).catch(console.error)
     }
   }
 }
@@ -1668,6 +1678,7 @@ const onPreviewFileUpdate = eventData => {
           target.status = preview.status
         }
       })
+      .catch(console.error)
   }
 }
 
@@ -1757,6 +1768,7 @@ const onAnnotationUpdate = eventData => {
           })
         }
       })
+      .catch(console.error)
   }
 }
 
@@ -1777,6 +1789,7 @@ const socketEvents = {
 // --------------------------------------------------------------------------
 watch(route, () => {
   if (task.value && route.params.task_id !== task.value.id) {
+    failedActionCommentId.value = null
     loadTaskData()
   }
   if (route.params.preview_id !== selectedPreviewId.value) {

@@ -56,7 +56,7 @@
 
     <div
       class="has-text-centered mt2 mb1 strong"
-      v-if="sortedDaysOff.length === 0 && !isLoading"
+      v-if="sortedDaysOff.length === 0 && !isLoading && !isError"
     >
       <p>{{ $t('days_off.no_days_off') }}</p>
     </div>
@@ -68,7 +68,7 @@
       :with-thumbnail="false"
     />
 
-    <p class="has-text-centered footer-info" v-if="!isLoading">
+    <p class="has-text-centered footer-info" v-if="!isLoading && !isError">
       {{ sortedDaysOff.length }}
       {{ $t('days_off.nb_days_off', { count: sortedDaysOff.length }) }}
     </p>

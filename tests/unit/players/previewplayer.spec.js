@@ -180,6 +180,17 @@ describe('PreviewPlayer.vue', () => {
       wrapper = mountPlayer({ props: { task: null } })
       expect(wrapper.find('.preview-player').exists()).toBe(true)
     })
+
+    // A plain link navigates the tab: the browser fires beforeunload, which
+    // closes the socket in Firefox and asks about unsaved annotations.
+    it('downloads the original without leaving the page', () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => {})
+      wrapper = mountPlayer()
+      const link = wrapper.get(
+        'a[href="/api/pictures/originals/preview-files/preview-1/download"]'
+      )
+      expect(link.attributes('download')).toBe('')
+    })
   })
 
   describe('mounted hook', () => {

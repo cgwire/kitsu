@@ -3,10 +3,16 @@ import { flushPromises } from '@vue/test-utils'
 vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 
-import Edits from '@/components/pages/Edits.vue'
+import ImportModal from '@/components/modals/ImportModal.vue'
 import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
+import Edits from '@/components/pages/Edits.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 
-import { mountEntityPage, production } from '../../fixtures/entity-page'
+import {
+  buildAddThumbnailsModalStub,
+  mountEntityPage,
+  production
+} from '../../fixtures/entity-page'
 
 // Two edits with their tasks in the store: the page decides on mount
 // whether their scope (episode) is the displayed one.
@@ -15,11 +21,12 @@ const editMap = new Map([
   ['edit-2', { id: 'edit-2', project_id: production.id, validations: new Map() }]
 ])
 
-const mountPage = async ({ getters = {}, actions = {} } = {}) => {
+const mountPage = async ({ getters = {}, actions = {}, stubs = {} } = {}) => {
   const page = await mountEntityPage(Edits, {
     listName: 'EditList',
     getters: { editMap, editValidationColumns: ['task-type-1'], ...getters },
-    actions
+    actions,
+    stubs
   })
   await flushPromises()
   return page
@@ -122,5 +129,55 @@ describe('Edits page, CSV import', () => {
     expect(modal.importError).toBe(null)
     expect(modal.active).toBe(false)
     expect(dispatched('loadEdits')).toHaveLength(1)
+  })
+
+  test('offers the description as an optional column', async () => {
+    const { wrapper } = await mountPage()
+
+    expect(wrapper.findComponent(ImportModal).props('optionalColumns')).toEqual(
+      ['Description']
+    )
+    expect(wrapper.findComponent(ImportRenderModal).props('columns')).toContain(
+      'Description'
+    )
+  })
+})
+
+describe('Edits page, search', () => {
+  test('applies the search on Enter', async () => {
+    const { wrapper, searchField, dispatched } = await mountPage()
+    searchField.value = 'e01'
+
+    await wrapper.findComponent({ name: 'SearchField' }).vm.$emit('enter', 'e01')
+
+    expect(dispatched('setEditSearch')).toContainEqual(['setEditSearch', 'e01'])
+  })
+})
+
+describe('Edits page, thumbnails import', () => {
+  test('opens the modal and marks each edit while its preview uploads', async () => {
+    const modalStub = buildAddThumbnailsModalStub()
+    const { wrapper } = await mountPage({
+      getters: { isCurrentUserProductionManager: true },
+      actions: {
+        commentTaskWithPreview: () => ({ preview: { id: 'preview-1' } })
+      },
+      stubs: { AddThumbnailsModal: modalStub }
+    })
+    const modal = () => wrapper.findComponent({ name: 'AddThumbnailsModal' })
+
+    await wrapper
+      .findAllComponents(ButtonSimple)
+      .find(button => button.props('icon') === 'import-files')
+      .vm.$emit('click')
+    expect(modal().exists()).toBe(true)
+
+    await modal().vm.$emit('confirm', [
+      { task: { id: 'task-1', entity_id: 'edit-1' } }
+    ])
+    await flushPromises()
+
+    expect(modalStub.methods.markLoading).toHaveBeenCalledWith('edit-1')
+    expect(modalStub.methods.markUploaded).toHaveBeenCalledWith('edit-1')
   })
 })

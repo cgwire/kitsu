@@ -10,6 +10,7 @@
       <a
         :href="previewDlPath"
         :title="$t('playlists.actions.download_file')"
+        download
         v-if="previewFileId"
       >
         <download-icon />

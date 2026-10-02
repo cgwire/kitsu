@@ -110,6 +110,7 @@
       "comment_from_client": "Hozzászólás a megrendelőtől",
       "edit_title": "Hozzászólás szerkesztése",
       "empty_text": "Ez a hozzászólás üres",
+      "action_error": "Nem sikerült menteni. Kérlek próbáld újra.",
       "edit_error": "Hiba történt a hozzászólás szerkesztésekor. Kérlek keresd fel a támogató csapatot.",
       "error": "Hiba történt a hozzászólás küldésekor",
       "no_file_attached": "Nincs csatolmány",

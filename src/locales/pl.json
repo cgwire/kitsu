@@ -263,6 +263,7 @@
       "edit_title": "Edytuj komentarz",
       "edited_by": "Edytowane przez {name}",
       "empty_text": "Ten komentarz jest pusty",
+      "action_error": "Nie udało się zapisać. Spróbuj ponownie.",
       "edit_error": "Wystąpił błąd podczas edycji komentarza. Skontaktuj się z naszym zespołem wsparcia.",
       "error": "Wystąpił błąd podczas dodawania komentarza",
       "max_retakes_error": "Nie możesz już dodawać poprawek do tego zadania.",

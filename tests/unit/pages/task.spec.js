@@ -1,7 +1,7 @@
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { createStore } from 'vuex'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // jsdom has no layout engine, and the page scrolls its column on mount.
 window.scrollTo = vi.fn()
@@ -19,6 +19,7 @@ import Task from '@/components/pages/Task.vue'
 import AddComment from '@/components/widgets/AddComment.vue'
 import Comment from '@/components/widgets/Comment.vue'
 import PreviewPlayer from '@/components/players/players/PreviewPlayer.vue'
+import SubscribeButton from '@/components/widgets/SubscribeButton.vue'
 import { DEFAULT_FPS } from '@/lib/video'
 import shotsStore from '@/store/modules/shots'
 
@@ -69,7 +70,8 @@ const mountPage = async ({
   comments = [],
   previews = [],
   // Leave the task load hanging: the page then mounts with no task at all.
-  pendingTaskLoad = false
+  pendingTaskLoad = false,
+  stubs = {}
 } = {}) => {
   const dispatched = []
   const socket = { on: vi.fn(), off: vi.fn() }
@@ -153,7 +155,8 @@ const mountPage = async ({
           template: '<a :data-task="to?.params?.task_id"><slot /></a>'
         },
         // Provided by the animxyz plugin, which the specs do not install.
-        XyzTransitionGroup: { template: '<div><slot /></div>' }
+        XyzTransitionGroup: { template: '<div><slot /></div>' },
+        ...stubs
       },
       directives: { xyz: {} },
       plugins: [
@@ -430,6 +433,100 @@ describe('Task.vue comment events', () => {
   })
 })
 
+describe('Task.vue comment actions', () => {
+  const comments = [
+    { id: 'comment-1', text: 'v1' },
+    { id: 'comment-2', text: 'v2' }
+  ]
+
+  const emitOn = (wrapper, comment, event) =>
+    wrapper
+      .findAllComponents(Comment)
+      .find(component => component.props('comment').id === comment.id)
+      .vm.$emit(event, comment)
+
+  const failAck = async (wrapper, store, comment) => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    store.dispatch.mockImplementationOnce(() =>
+      Promise.reject(new Error('Request has been terminated'))
+    )
+    emitOn(wrapper, comment, 'ack-comment')
+    await flushPromises()
+  }
+
+  const actionErrors = wrapper =>
+    wrapper
+      .findAllComponents(Comment)
+      .map(component => component.props('isActionError'))
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it.each([
+    ['ack-comment', 'ackComment'],
+    ['pin-comment', 'pinComment'],
+    ['toggle-for-client', 'toggleCommentForClient']
+  ])('logs a failed %s', async (event, action) => {
+    const consoleError = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {})
+    const error = new Error('Request has been terminated')
+    const { wrapper, store } = await mountPage({ comments })
+    store.dispatch.mockImplementation(type =>
+      type === action ? Promise.reject(error) : Promise.resolve()
+    )
+
+    emitOn(wrapper, comments[0], event)
+    await flushPromises()
+
+    expect(store.dispatch).toHaveBeenCalledWith(action, comments[0])
+    expect(consoleError).toHaveBeenCalledWith(error)
+  })
+
+  it('flags the comment whose action failed', async () => {
+    const { wrapper, store } = await mountPage({ comments })
+    await failAck(wrapper, store, comments[1])
+    expect(actionErrors(wrapper)).toEqual([false, true])
+  })
+
+  it('clears the flag on the next action', async () => {
+    const { wrapper, store } = await mountPage({ comments })
+    await failAck(wrapper, store, comments[1])
+
+    emitOn(wrapper, comments[0], 'pin-comment')
+    await flushPromises()
+
+    expect(actionErrors(wrapper)).toEqual([false, false])
+  })
+
+  it('clears the flag when the page shows another task', async () => {
+    const task = buildTask()
+    const otherTask = buildTask({ id: 'task-2' })
+    const { wrapper, store, router } = await mountPage({
+      task,
+      comments,
+      // The stubbed getter hands the same comments to the other task.
+      getterOverrides: {
+        taskMap: () =>
+          new Map([
+            [task.id, task],
+            [otherTask.id, otherTask]
+          ])
+      }
+    })
+    await failAck(wrapper, store, comments[1])
+
+    await router.push({
+      name: 'task',
+      params: { ...TASK_ROUTE_PARAMS, task_id: otherTask.id }
+    })
+    await flushPromises()
+
+    expect(actionErrors(wrapper)).toEqual([false, false])
+  })
+})
+
 describe('Task.vue navigation', () => {
   const taskTypes = [
     { id: 'tt-layout', name: 'Layout', for_entity: 'Shot', priority: 1 },
@@ -699,6 +796,30 @@ describe('Task.vue preview-file:update', () => {
     await flushPromises()
   }
 
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('logs a refresh that fails', async () => {
+    const consoleError = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {})
+    const error = new Error('Request has been terminated')
+    const comment = {
+      id: 'comment-1',
+      text: 'v1',
+      previews: [{ id: 'preview-1', revision: 1, status: 'processing' }]
+    }
+    const { socket, store } = await mountPage({ comments: [comment] })
+    store.dispatch = vi.fn(type =>
+      type === 'refreshPreview' ? Promise.reject(error) : Promise.resolve()
+    )
+
+    await emitPreviewFileUpdate(socket, { preview_file_id: 'preview-1' })
+
+    expect(consoleError).toHaveBeenCalledWith(error)
+  })
+
   it('updates a preview that is not first in the comment, a second or third bulk-upload image', async () => {
     // A comment carrying several previews of the same revision (the
     // bulk-upload case): only previews[0] used to be looked up, so a
@@ -750,5 +871,92 @@ describe('Task.vue preview-file:update', () => {
       'refreshPreview',
       expect.anything()
     )
+  })
+})
+
+describe('Task.vue failed requests', () => {
+  const previews = [{ id: 'preview-1', revision: 1, extension: 'mp4' }]
+  // The shallow stub carries none of the player members the page reads.
+  const PlayerStub = {
+    props: ['fps', 'previews', 'readOnly'],
+    template: '<div />',
+    data: () => ({
+      currentPreview: { id: 'preview-1', task_id: TASK_ID },
+      notSaved: false
+    }),
+    methods: { isValidPreviewModification: () => true }
+  }
+  const error = new Error('Request has been terminated')
+
+  const failOn = (store, action) => {
+    store.dispatch.mockImplementation(type =>
+      type === action ? Promise.reject(error) : Promise.resolve()
+    )
+  }
+
+  let consoleError
+
+  beforeEach(() => {
+    consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('logs an annotation refresh that fails', async () => {
+    const { socket, store } = await mountPage({
+      previews,
+      stubs: { PreviewPlayer: PlayerStub }
+    })
+    failOn(store, 'refreshPreview')
+    const [, onAnnotationUpdate] = socket.on.mock.calls.find(
+      ([event]) => event === 'preview-file:annotation-update'
+    )
+
+    onAnnotationUpdate({
+      preview_file_id: 'preview-1',
+      updated_at: '2026-10-01T10:00:00'
+    })
+    await flushPromises()
+
+    expect(store.dispatch).toHaveBeenCalledWith('refreshPreview', {
+      previewId: 'preview-1',
+      taskId: TASK_ID
+    })
+    expect(consoleError).toHaveBeenCalledWith(error)
+  })
+
+  it('stops the set preview spinner when the request fails', async () => {
+    const { wrapper, store } = await mountPage({
+      previews,
+      getterOverrides: { isCurrentUserProductionManager: () => true },
+      stubs: { PreviewPlayer: PlayerStub }
+    })
+    failOn(store, 'setPreview')
+    const findButton = () =>
+      wrapper
+        .findAll('.set-main-preview button')
+        .find(button => button.text().includes('tasks.set_preview'))
+
+    await findButton().trigger('click')
+    await flushPromises()
+
+    expect(findButton().classes()).not.toContain('is-loading')
+    expect(wrapper.find('.set-main-preview .error').text()).toBe(
+      'tasks.set_preview_error'
+    )
+    expect(consoleError).toHaveBeenCalledWith(error)
+  })
+
+  it('logs a subscription that fails', async () => {
+    const { wrapper, store } = await mountPage()
+    failOn(store, 'subscribeToTask')
+
+    wrapper.findComponent(SubscribeButton).vm.$emit('click')
+    await flushPromises()
+
+    expect(store.dispatch).toHaveBeenCalledWith('subscribeToTask', TASK_ID)
+    expect(consoleError).toHaveBeenCalledWith(error)
   })
 })

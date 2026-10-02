@@ -112,7 +112,7 @@
     />
 
     <div class="center" :style="{ height: defaultHeight + 'px' }" v-if="isFile">
-      <a class="button mt2" :href="originalDlPath" :title="fileTitle">
+      <a class="button mt2" :href="originalDlPath" :title="fileTitle" download>
         <download-icon class="icon" />
         <span class="text" :title="fileTitle">
           {{ $t('tasks.download_pdf_file', { extension }) }}

@@ -1,8 +1,8 @@
 import { nextTick } from 'vue'
-import { shallowMount } from '@vue/test-utils'
+import { flushPromises, shallowMount } from '@vue/test-utils'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { createStore } from 'vuex'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 vi.mock('vue-i18n', async importOriginal => ({
@@ -13,6 +13,7 @@ vi.mock('vue-i18n', async importOriginal => ({
 // Pre-load the real store to avoid circular-import race from child components.
 import '@/lib/auth'
 
+import TimesheetList from '@/components/lists/TimesheetList.vue'
 import Todos from '@/components/pages/Todos.vue'
 
 const feedbackStatus = { id: 'status-1', is_feedback_request: true }
@@ -52,7 +53,27 @@ const SearchFieldStub = {
   }
 }
 
-const mountPage = async todos => {
+const TodosListStub = {
+  template: '<div />',
+  methods: {
+    resizeHeaders: () => {},
+    setScrollPosition: () => {}
+  }
+}
+
+const DayOffListStub = {
+  props: ['daysOff', 'dayOffError', 'isError'],
+  template: '<div />',
+  methods: {
+    closeSetDayOffModal: () => {},
+    closeUnsetDayOffModal: () => {}
+  }
+}
+
+const mountPage = async (
+  todos,
+  { actions = {}, errorHandler, query = {} } = {}
+) => {
   const store = createStore({
     getters: {
       displayedDoneTasks: () => [],
@@ -80,15 +101,18 @@ const mountPage = async todos => {
       loadAggregatedPersonDaysOff: vi.fn(() => []),
       loadDoneTasks: vi.fn(),
       loadTodos: vi.fn(),
-      setTodosSearch: vi.fn()
+      setTodosSearch: vi.fn(),
+      ...actions
     }
   })
   const router = createRouter({
     history: createWebHashHistory(),
     routes: [{ path: '/', component: { template: '<div />' } }]
   })
+  await router.push({ path: '/', query })
   const wrapper = shallowMount(Todos, {
     global: {
+      config: { errorHandler },
       plugins: [
         store,
         router,
@@ -99,7 +123,11 @@ const mountPage = async todos => {
           }
         }
       ],
-      stubs: { SearchField: SearchFieldStub }
+      stubs: {
+        DayOffList: DayOffListStub,
+        SearchField: SearchFieldStub,
+        TodosList: TodosListStub
+      }
     }
   })
   await nextTick()
@@ -131,6 +159,104 @@ describe('Todos page', () => {
     it('keeps a task whose status is missing from the map', async () => {
       const wrapper = await mountPage([wipTask, unknownStatusTask])
       expect(wrapper.vm.notPendingTasks).toEqual([wipTask, unknownStatusTask])
+      wrapper.unmount()
+    })
+  })
+
+  describe('days off', () => {
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    // The Vue error handler reports to Sentry, and the search setup of the
+    // page runs after the days off load.
+    it('finishes its setup when the days off are refused', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const error = new Error('403 Forbidden')
+      const errorHandler = vi.fn()
+      const setTodosSearch = vi.fn()
+      const wrapper = await mountPage([], {
+        actions: {
+          loadAggregatedPersonDaysOff: () => Promise.reject(error),
+          setTodosSearch
+        },
+        errorHandler
+      })
+      await flushPromises()
+
+      expect(errorHandler).not.toHaveBeenCalled()
+      expect(consoleError).toHaveBeenCalledWith(error)
+      expect(setTodosSearch).toHaveBeenCalled()
+      expect(wrapper.vm.daysOff).toEqual([])
+      wrapper.unmount()
+    })
+
+    it('shows the load error in the day off tab', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const wrapper = await mountPage([], {
+        actions: {
+          loadAggregatedPersonDaysOff: () =>
+            Promise.reject(new Error('403 Forbidden'))
+        },
+        query: { section: 'daysoff' }
+      })
+      await flushPromises()
+
+      expect(wrapper.findComponent(DayOffListStub).props('isError')).toBe(true)
+      wrapper.unmount()
+    })
+
+    it('clears the load error once the days off load again', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const dayOff = {
+        id: 'day-off-1',
+        date: '2026-10-01',
+        end_date: '2026-10-01'
+      }
+      const loadAggregatedPersonDaysOff = vi
+        .fn()
+        .mockRejectedValueOnce(new Error('403 Forbidden'))
+        .mockResolvedValue([dayOff])
+      const wrapper = await mountPage([], {
+        actions: { loadAggregatedPersonDaysOff, setDayOff: vi.fn() },
+        query: { section: 'daysoff' }
+      })
+      await flushPromises()
+      const dayOffList = wrapper.findComponent(DayOffListStub)
+
+      dayOffList.vm.$emit('set-day-off', dayOff)
+      await flushPromises()
+
+      expect(dayOffList.props('isError')).toBe(false)
+      expect(dayOffList.props('daysOff')).toEqual([dayOff])
+      wrapper.unmount()
+    })
+  })
+
+  describe('time spent', () => {
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    it('logs a time spent that fails to save', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const error = new Error('404 Not Found')
+      const wrapper = await mountPage([], {
+        actions: { setTimeSpent: () => Promise.reject(error) },
+        query: { section: 'timesheets' }
+      })
+      await flushPromises()
+
+      wrapper
+        .findComponent(TimesheetList)
+        .vm.$emit('time-spent-change', { taskId: 'task-1', duration: 2 })
+      await flushPromises()
+
+      expect(consoleError).toHaveBeenCalledWith(error)
       wrapper.unmount()
     })
   })

@@ -205,8 +205,12 @@ const addTaskInformation = form => {
   return form
 }
 
+// After a failed upload, confirming again skips the files already sent.
 const confirm = () => {
-  emit('confirm', validForms.value.map(addTaskInformation))
+  const remainingForms = validForms.value.filter(
+    form => !uploaded.value[entityMap.value[slugifyFilename(form)].id]
+  )
+  emit('confirm', remainingForms.map(addTaskInformation))
 }
 
 const addEntityToEntityMap = entity => {
@@ -242,6 +246,18 @@ watch(
     if (active) reset()
   }
 )
+
+watch(
+  () => props.isLoading,
+  isLoading => {
+    if (!isLoading) loading.value = {}
+  }
+)
+
+// The files sent for a task type are still to send for another one.
+watch(taskTypeId, () => {
+  uploaded.value = {}
+})
 
 onMounted(reset)
 
