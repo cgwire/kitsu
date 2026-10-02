@@ -1573,6 +1573,7 @@
     },
     "statistics": {
       "count": "Conteggi",
+      "bars": "Barre in pila",
       "count_mode": "Conteggio",
       "display_mode": "Visualizzazione",
       "frames": "Fotogrammi",

@@ -1573,6 +1573,7 @@
     },
     "statistics": {
       "count": "شمارش",
+      "bars": "میله‌های انباشته",
       "count_mode": "شمارش",
       "display_mode": "حالت نمایش",
       "frames": "فریم ها",

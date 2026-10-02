@@ -1573,6 +1573,7 @@
     },
     "statistics": {
       "count": "Conteos",
+      "bars": "Barras apiladas",
       "count_mode": "Conteo",
       "display_mode": "Visualización",
       "frames": "Fotogramas",

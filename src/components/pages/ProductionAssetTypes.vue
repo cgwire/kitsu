@@ -94,7 +94,8 @@ const hiddenTaskTypeIds = ref(parseIds(route.query.hiddenTaskTypes))
 
 const displayModeOptions = [
   { label: 'pie', value: 'pie' },
-  { label: 'count', value: 'count' }
+  { label: 'count', value: 'count' },
+  { label: 'bars', value: 'bars' }
 ]
 
 // Computed

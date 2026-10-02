@@ -1573,6 +1573,7 @@
     },
     "statistics": {
       "count": "Darab",
+      "bars": "Halmozott sávok",
       "count_mode": "Darab",
       "display_mode": "Megjelenítés",
       "frames": "Kocka",

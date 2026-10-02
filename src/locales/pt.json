@@ -1573,6 +1573,7 @@
     },
     "statistics": {
       "count": "Contagem",
+      "bars": "Barras empilhadas",
       "count_mode": "Modo de Contagem",
       "display_mode": "Modo de Exibição",
       "frames": "Frames",

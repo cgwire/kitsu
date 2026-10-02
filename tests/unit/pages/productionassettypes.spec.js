@@ -244,6 +244,14 @@ describe('ProductionAssetTypes', () => {
     )
   })
 
+  it('offers the stacked bars as a display mode', async () => {
+    await mountPage()
+    expect(wrapper.findComponent(Combobox).props('options')).toContainEqual({
+      label: 'bars',
+      value: 'bars'
+    })
+  })
+
   it('remembers the display mode between visits', async () => {
     await mountPage()
     expect(listProps().displayMode).toBe('pie')

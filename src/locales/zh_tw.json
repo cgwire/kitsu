@@ -1573,6 +1573,7 @@
     },
     "statistics": {
       "count": "計數",
+      "bars": "堆疊長條圖",
       "count_mode": "計數",
       "display_mode": "顯示",
       "frames": "幀數",

@@ -1573,6 +1573,7 @@
     },
     "statistics": {
       "count": "カウント",
+      "bars": "積み上げ棒グラフ",
       "count_mode": "カウント",
       "display_mode": "表示",
       "frames": "フレーム",

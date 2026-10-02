@@ -1573,6 +1573,7 @@
     },
     "statistics": {
       "count": "计数",
+      "bars": "堆叠条形图",
       "count_mode": "计数",
       "display_mode": "显示",
       "frames": "帧数",

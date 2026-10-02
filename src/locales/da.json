@@ -1573,6 +1573,7 @@
     },
     "statistics": {
       "count": "Antal",
+      "bars": "Stablede søjler",
       "count_mode": "Antal",
       "display_mode": "Visning",
       "frames": "Frames",

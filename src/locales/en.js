@@ -2060,6 +2060,7 @@ export default {
 
   statistics: {
     all: 'All',
+    bars: 'Stacked bars',
     count: 'Counts',
     count_mode: 'Count',
     data_mode: 'Data',

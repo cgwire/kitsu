@@ -1573,6 +1573,7 @@
     },
     "statistics": {
       "count": "Anzahl",
+      "bars": "Gestapelte Balken",
       "count_mode": "Zählmodus",
       "display_mode": "Anzeigemodus",
       "frames": "Einzelbilder",

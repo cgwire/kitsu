@@ -1984,6 +1984,7 @@
     "statistics": {
       "all": "Wszystkie",
       "count": "Liczby",
+      "bars": "Słupki skumulowane",
       "count_mode": "Liczba",
       "data_mode": "Dane",
       "display_mode": "Wyświetlanie",

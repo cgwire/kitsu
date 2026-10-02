@@ -18,6 +18,7 @@
         {{ label }}
       </span>
     </div>
+    <stats-bar :data="selectedData" v-else-if="displayMode === 'bars'" />
     <div v-else>
       <div :key="data[0]" v-for="data in selectedData">
         <template v-if="data[0]">
@@ -50,6 +51,8 @@
  * [['name', count, 'color'], ...  ]
  */
 import { computed } from 'vue'
+
+import StatsBar from '@/components/widgets/StatsBar.vue'
 
 // Chart.js outlines the slices with 2px by default, heavy on a 50px pie.
 const PIE_DATASET = { borderWidth: 1 }

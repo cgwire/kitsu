@@ -1573,6 +1573,7 @@
     },
     "statistics": {
       "count": "카운트",
+      "bars": "누적 막대",
       "count_mode": "카운트",
       "display_mode": "디스플레이",
       "frames": "프레임",
