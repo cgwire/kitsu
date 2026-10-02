@@ -4,14 +4,13 @@
       <route-tabs :active-tab="activeTab" :tabs="tabs" />
 
       <div class="flexrow filters">
-        <div class="flexrow-item" v-if="activeTab === 'tasktypes'">
-          <combobox-task-type
-            class="flexrow-item"
-            :label="$t('quota.type_label')"
-            :task-type-list="taskTypeList"
-            v-model="params.taskTypeId"
-          />
-        </div>
+        <combobox-task-type
+          class="flexrow-item"
+          :label="$t('quota.type_label')"
+          :task-type-list="taskTypeList"
+          v-model="params.taskTypeId"
+          v-if="activeTab === 'tasktypes'"
+        />
         <people-field
           class="person-field flexrow-item"
           :clearable="false"
@@ -57,6 +56,22 @@
           :text="$t(`quota.explanation_${params.computeMode}`)"
         />
         <div class="filler"></div>
+        <template v-if="activeTab === 'tasktypes'">
+          <combobox-department
+            class="flexrow-item"
+            all-departments-label
+            :label="$t('main.department')"
+            v-model="params.departmentId"
+          />
+          <combobox-styled
+            class="flexrow-item"
+            :label="$t('people.fields.role')"
+            locale-key-prefix="people.role."
+            open-left
+            :options="roleOptions"
+            v-model="params.role"
+          />
+        </template>
         <button-simple
           class="flexrow-item"
           :title="$t('quota.export_quotas')"
@@ -94,6 +109,8 @@
         :month="currentMonth"
         :count-mode="params.countMode"
         :compute-mode="params.computeMode"
+        :department-id="params.departmentId"
+        :role="params.role"
         :search-text="searchText"
         :max-quota="maxQuota"
       />
@@ -126,6 +143,7 @@ import { useStore } from 'vuex'
 
 import csv from '@/lib/csv'
 import { episodifyRoute as addEpisodeToRoute } from '@/lib/path'
+import { roleOptions } from '@/lib/people'
 import preferences from '@/lib/preferences'
 import { sortPeople } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
@@ -136,6 +154,8 @@ import Quota from '@/components/pages/quota/Quota.vue'
 import PeopleQuotaInfo from '@/components/sides/PeopleQuotaInfo.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import InfoQuestionMark from '@/components/widgets/InfoQuestionMark.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
@@ -167,7 +187,9 @@ const monthString = ref(`${moment().month() + 1}`)
 const params = ref({
   countMode: 'frames',
   computeMode: 'weighted',
+  departmentId: '',
   person: null,
+  role: 'all',
   taskTypeId: ''
 })
 const personShots = ref([])
@@ -348,6 +370,8 @@ const initParams = () => {
       query.computeMode ||
       savedParams.computeMode ||
       computeModeOptions.value[0].value,
+    departmentId: query.department || savedParams.departmentId || '',
+    role: query.role || savedParams.role || 'all',
     taskTypeId: query.taskTypeId,
     person: query.personId ? personMap.get(query.personId) : null
   }
@@ -370,6 +394,14 @@ const getQuery = () => {
     tab: activeTab.value || 'tasktypes',
     taskTypeId:
       activeTab.value === 'tasktypes' ? params.value.taskTypeId : undefined,
+    department:
+      activeTab.value === 'tasktypes'
+        ? params.value.departmentId || undefined
+        : undefined,
+    role:
+      activeTab.value === 'tasktypes' && params.value.role !== 'all'
+        ? params.value.role
+        : undefined,
     personId: personId || undefined
   }
 }
@@ -389,6 +421,10 @@ const throttledResetRouteQuery = () => {
     silent = false
   }, 100)
 }
+
+// the role filter reads the roles held in the production
+const loadTeamRoles = () =>
+  store.dispatch('loadProductionTeam').catch(console.error)
 
 const reloadShots = async () => {
   await store.dispatch('loadShots')
@@ -436,7 +472,7 @@ watch(monthString, () => {
 })
 
 watch(
-  () => params.value.countMode,
+  () => [params.value.countMode, params.value.departmentId, params.value.role],
   () => resetRouteQuery()
 )
 
@@ -462,6 +498,7 @@ watch(currentProduction, () => {
   // The params of the production left must neither be saved under this
   // one nor written into its URL.
   initParams()
+  loadTeamRoles()
   reloadShots()
 })
 
@@ -490,6 +527,7 @@ onMounted(() => {
   // production watcher starts from the params of that production.
   if (route.params.production_id !== currentProduction.value.id) return
   initParams()
+  loadTeamRoles()
   resetRouteQuery()
   loadRoute()
 })
@@ -511,6 +549,27 @@ useHead({
   .field {
     padding-bottom: 0;
     margin-bottom: 0;
+  }
+
+  // the export button renders 32px tall: stretch it to the controls and
+  // sit it on the row's bottom edge, under the labels (as on Timesheets)
+  > .button {
+    align-self: flex-end;
+    height: 42px;
+  }
+
+  // the department combo's control renders 38px tall against 42px for
+  // the Bulma selects, and its label carries a 5px padding-top
+  :deep(.department-combo) {
+    display: flex;
+    flex-direction: column;
+    height: 42px;
+    justify-content: center;
+  }
+
+  :deep(.department-combo .label) {
+    margin-bottom: 5px;
+    padding-top: 0;
   }
 }
 

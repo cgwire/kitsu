@@ -11,11 +11,12 @@ const createStatusEntry = taskStatus => ({
   color: taskStatus.color,
   count: 0,
   frames: 0,
-  drawings: 0
+  drawings: 0,
+  is_done: !!taskStatus.is_done
 })
 
 // Get all data displayed in statistics (needed by the stat cell widget).
-// Data follow this format: [[task-status-1-name, value], ...]
+// Data follow this format: [[task-status-1-name, value, color, isDone], ...]
 // Set count data or frames data depending on data type.
 export const getChartData = (
   mainStats,
@@ -30,7 +31,7 @@ export const getChartData = (
     .map(taskStatusId => {
       const data = statusData[taskStatusId]
       const color = data.is_default ? DEFAULT_STATUS_COLOR : data.color
-      return [data.name, data[valueField], color]
+      return [data.name, data[valueField], color, !!data.is_done]
     })
     .sort(_sortData)
 }
@@ -67,6 +68,15 @@ export const getRetakeChartData = (
     ['other', statusData.other?.[valueField] || 0, RETAKE_CHART_COLORS.other],
     ['done', statusData.done?.[valueField] || 0, RETAKE_CHART_COLORS.done]
   ]
+}
+
+// Share of the chart data value held by the done statuses, between 0 and 1.
+export const getDoneRatio = chartData => {
+  const total = chartData.reduce((sum, row) => sum + (row[1] || 0), 0)
+  const done = chartData
+    .filter(row => row[3])
+    .reduce((sum, row) => sum + (row[1] || 0), 0)
+  return total > 0 ? done / total : 0
 }
 
 // Get all colors displayed in statistics (needed by the stat cell widget).
@@ -125,6 +135,16 @@ export const computeStats = (entities, idField, taskStatusMap, taskMap) => {
   })
   return results
 }
+
+// Count the entities of each group. Canceled ones are left out, as in
+// computeStats.
+export const countEntities = (entities, idField) =>
+  entities.reduce((counts, entity) => {
+    if (!entity.canceled) {
+      counts[entity[idField]] = (counts[entity[idField]] || 0) + 1
+    }
+    return counts
+  }, {})
 
 // Add to result map, statistic for given task (add 1 for task status matching
 // given task).
@@ -214,6 +234,23 @@ export const aggregateStats = (mainStats, entryIds) => {
     })
   })
   return result
+}
+
+// Drop the given columns of an entry and rebuild its "all" column from the
+// remaining ones.
+export const omitStatsColumns = (entryStats, hiddenColumnIds) => {
+  const columnIds = Object.keys(entryStats).filter(
+    id => id !== 'all' && !hiddenColumnIds.includes(id)
+  )
+  // aggregateStats sums entries: each kept column is given to it as an entry
+  // holding a single "all" column.
+  const columns = Object.fromEntries(
+    columnIds.map(id => [id, { all: entryStats[id] }])
+  )
+  return {
+    ...Object.fromEntries(columnIds.map(id => [id, entryStats[id]])),
+    all: aggregateStats(columns, columnIds).all || {}
+  }
 }
 
 // Same as aggregateStats for retake stats (retake / done / other buckets).

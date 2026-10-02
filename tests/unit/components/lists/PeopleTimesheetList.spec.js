@@ -77,4 +77,23 @@ describe('lists/PeopleTimesheetList', () => {
       ).toEqual(labels)
     }
   )
+
+  // the totals open the grid, next to the names, so that they stay in view
+  // while the periods scroll
+  test('the totals lead the rows and the columns', () => {
+    const wrapper = mountList({ detailLevel: 'month', year: 2025, month: 1 })
+
+    const headers = wrapper.findAll('thead th').map(th => th.classes())
+    expect(headers[0]).toContain('name')
+    expect(headers[1]).toContain('total')
+
+    const rows = wrapper.findAll('tbody tr')
+    expect(rows[0].classes()).toContain('total-row')
+    expect(rows[0].findAll('th, td')[1].classes()).toContain('total')
+    expect(rows[0].findAll('th, td')[1].text()).toBe('2')
+
+    const personCells = rows[1].findAll('th, td')
+    expect(personCells[1].classes()).toContain('total')
+    expect(personCells[1].text()).toBe('2')
+  })
 })

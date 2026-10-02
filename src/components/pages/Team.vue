@@ -2,27 +2,41 @@
   <page-layout>
     <template #main>
       <div class="people flexcolumn">
-        <div
-          class="flexrow mt2 add-people"
-          v-if="isCurrentUserProductionManager"
-        >
-          <people-field
-            ref="peopleFieldRef"
-            class="flexrow-item add-people-field"
-            :people="unlistedPeople"
-            :placeholder="$t('people.add_member_to_team')"
-            v-model="person"
+        <div class="flexrow mt2 add-people">
+          <template v-if="isCurrentUserProductionManager">
+            <people-field
+              ref="peopleFieldRef"
+              class="flexrow-item add-people-field"
+              :people="unlistedPeople"
+              :placeholder="$t('people.add_member_to_team')"
+              v-model="person"
+            />
+            <button
+              class="button flexrow-item"
+              @click="addPerson"
+              :disabled="!person"
+            >
+              {{ $t('main.add') }}
+            </button>
+          </template>
+          <div class="filler"></div>
+          <combobox-department
+            class="flexrow-item"
+            all-departments-label
+            :label="$t('main.department')"
+            v-model="departmentId"
           />
-          <button
-            class="button flexrow-item"
-            @click="addPerson"
-            :disabled="!person"
-          >
-            {{ $t('main.add') }}
-          </button>
+          <combobox-styled
+            class="flexrow-item"
+            :label="$t('people.fields.role')"
+            locale-key-prefix="people.role."
+            open-left
+            :options="roleOptions"
+            v-model="role"
+          />
         </div>
         <production-team-list
-          :entries="teamPersons"
+          :entries="filteredTeam"
           :project-roles="projectRoles"
           @update-role="updateRole"
         />
@@ -102,8 +116,10 @@
 import { useHead } from '@unhead/vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
+import { filterPeople, roleOptions } from '@/lib/people'
 import { sortPeople } from '@/lib/sorting'
 
 /* eslint-disable no-unused-vars */
@@ -112,6 +128,7 @@ import ProductionTeamList from '@/components/lists/ProductionTeamList.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
@@ -119,6 +136,8 @@ import PeopleName from '@/components/widgets/PeopleName.vue'
 
 // Composables
 const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
 const store = useStore()
 
 // State
@@ -153,6 +172,26 @@ const teamPersons = computed(() =>
   )
 )
 
+// the filters live in the query so that a reload or a shared link keeps
+// them; defaults stay out of the URL
+const departmentId = computed({
+  get: () => route.query.department ?? '',
+  set: value => pushQuery('department', value)
+})
+
+const role = computed({
+  get: () => route.query.role ?? 'all',
+  set: value => pushQuery('role', value === 'all' ? '' : value)
+})
+
+const filteredTeam = computed(() =>
+  filterPeople(teamPersons.value, {
+    departmentId: departmentId.value,
+    role: role.value,
+    projectRoles: projectRoles.value
+  })
+)
+
 const unlistedPeople = computed(() =>
   activePeople.value.filter(
     p => !currentProduction.value?.team.includes(p.id) && p.active
@@ -160,6 +199,9 @@ const unlistedPeople = computed(() =>
 )
 
 // Functions
+const pushQuery = (key, value) =>
+  router.push({ query: { ...route.query, [key]: value || undefined } })
+
 const addPersonToTeam = personToAdd =>
   store.dispatch('addPersonToTeam', personToAdd)
 

@@ -205,6 +205,7 @@ import { useStore } from 'vuex'
 
 import { buildNameIndex, indexSearch } from '@/lib/indexing'
 import { episodifyRoute as addEpisodeToRoute } from '@/lib/path'
+import { filterPeople } from '@/lib/people'
 import { sortTaskTypes } from '@/lib/sorting'
 import {
   getDayRange,
@@ -224,10 +225,12 @@ const store = useStore()
 const props = defineProps({
   computeMode: { type: String, required: true },
   countMode: { type: String, required: true },
+  departmentId: { type: String, default: '' },
   detailLevel: { type: String, required: true },
   maxQuota: { type: [Number, String], default: 0 },
   month: { type: Number, default: 0 },
   personId: { type: String, default: null },
+  role: { type: String, default: 'all' },
   searchText: { type: String, default: '' },
   taskTypeId: { type: String, default: null },
   year: { type: Number, default: 0 }
@@ -254,6 +257,7 @@ const currentEpisode = computed(() => store.getters.currentEpisode)
 const currentProduction = computed(() => store.getters.currentProduction)
 const isShotsLoading = computed(() => store.getters.isShotsLoading)
 const personMap = computed(() => store.getters.personMap)
+const productionTeamRoles = computed(() => store.getters.productionTeamRoles)
 const shotMap = computed(() => store.getters.shotMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
@@ -267,11 +271,19 @@ const dayRange = computed(() =>
 
 const weekRange = computed(() => getWeekRange(props.year, currentYear))
 
+// The total row goes with the first filter: it sums everybody.
 const filteredPersonIds = computed(() => {
-  if (props.searchText.length === 0) return personIds.value
-  return indexSearch(personIndex, props.searchText.split(' ')).map(
-    person => person.id
-  )
+  const isFiltered =
+    props.searchText.length > 0 || props.departmentId || props.role !== 'all'
+  if (!isFiltered) return personIds.value
+  const searched = props.searchText.length
+    ? indexSearch(personIndex, props.searchText.split(' '))
+    : personIds.value.map(personId => personMap.value.get(personId))
+  return filterPeople(searched.filter(Boolean), {
+    departmentId: props.departmentId,
+    role: props.role,
+    projectRoles: productionTeamRoles.value
+  }).map(person => person.id)
 })
 
 const entryIds = computed(() => {

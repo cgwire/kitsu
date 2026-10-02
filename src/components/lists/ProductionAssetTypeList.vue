@@ -1,7 +1,7 @@
 <template>
   <div class="data-list">
-    <div class="datatable-wrapper" ref="body" @scroll.passive="onBodyScroll">
-      <table class="datatable">
+    <div class="datatable-wrapper">
+      <table class="datatable datatable--cards">
         <thead class="datatable-head">
           <tr>
             <th scope="col" class="name datatable-row-header">
@@ -41,12 +41,17 @@
           </tr>
         </thead>
         <tbody class="datatable-body" v-if="!isLoading">
-          <tr class="all-line datatable-row" v-if="showAll && !isEmptyList">
-            <th scope="row" class="name datatable-row-header">
+          <tr class="all-line datatable-row" v-if="entries.length > 0">
+            <th scope="row" class="name datatable-row-header card-head">
               {{ $t('asset_types.all_asset_types') }}
+              <span class="asset-count">
+                {{ totalAssetCount }}
+                {{ $t('assets.number', { count: totalAssetCount }) }}
+              </span>
             </th>
 
             <stats-cell
+              :data-label="$t('main.all')"
               :colors="chartColors('all', 'all')"
               :data="chartData('all', 'all')"
               :display-mode="displayMode"
@@ -55,6 +60,7 @@
             <stats-cell
               :style="getValidationStyle(columnId)"
               :key="'all-' + columnId"
+              :data-label="taskTypeMap.get(columnId)?.name"
               :colors="chartColors('all', columnId)"
               :data="chartData('all', columnId)"
               :display-mode="displayMode"
@@ -65,11 +71,18 @@
           </tr>
 
           <tr class="datatable-row" :key="entry.id" v-for="entry in entries">
-            <td class="name datatable-row-header">
-              {{ entry.name }}
+            <td class="name datatable-row-header card-head">
+              <router-link :to="assetsPath(entry)">
+                {{ entry.name }}
+              </router-link>
+              <span class="asset-count">
+                {{ assetCount(entry.id) }}
+                {{ $t('assets.number', { count: assetCount(entry.id) }) }}
+              </span>
             </td>
 
             <stats-cell
+              :data-label="$t('main.all')"
               :colors="chartColors(entry.id, 'all')"
               :data="chartData(entry.id, 'all')"
               :display-mode="displayMode"
@@ -83,6 +96,7 @@
             >
               <stats-cell
                 :key="entry.id + columnId"
+                :data-label="taskTypeMap.get(columnId)?.name"
                 :style="getValidationStyle(columnId)"
                 :colors="chartColors(entry.id, columnId)"
                 :data="chartData(entry.id, columnId)"
@@ -113,12 +127,15 @@
       v-if="isEmptyList"
     />
 
+    <p class="has-text-centered all-hidden" v-if="isAllHidden">
+      {{ $t('asset_types.all_hidden') }}
+    </p>
     <p
       class="has-text-centered nb-asset-types"
-      v-if="!isEmptyList && !isLoading"
+      v-else-if="!isEmptyList && !isLoading"
     >
-      {{ displayedAssetTypesLength }}
-      {{ $t('asset_types.number', { count: displayedAssetTypesLength }) }}
+      {{ entries.length }}
+      {{ $t('asset_types.number', { count: entries.length }) }}
     </p>
   </div>
 </template>
@@ -126,11 +143,12 @@
 <script setup>
 // Imports
 // --------------------------------------------------------------------------
-import { computed, useTemplateRef } from 'vue'
+import { computed } from 'vue'
 import { useStore } from 'vuex'
 
 import emptyAssetIllustration from '@/assets/illustrations/empty_asset.png'
 import colors from '@/lib/colors'
+import { getEntitiesPath } from '@/lib/path'
 import { getChartColors, getChartData } from '@/lib/stats'
 
 import StatsCell from '@/components/cells/StatsCell.vue'
@@ -142,29 +160,20 @@ const store = useStore()
 // Props / Emits
 // --------------------------------------------------------------------------
 const props = defineProps({
+  assetCounts: { type: Object, default: () => ({}) },
   assetTypeStats: { type: Object, default: () => ({}) },
   displayMode: { type: String, default: 'pie' },
   entries: { type: Array, default: () => [] },
   isError: { type: Boolean, default: false },
+  isFiltered: { type: Boolean, default: false },
   isLoading: { type: Boolean, default: false },
-  showAll: { type: Boolean, default: false },
   validationColumns: { type: Array, default: () => [] }
 })
 
-const emit = defineEmits(['scroll'])
-
-// State
-// --------------------------------------------------------------------------
-const bodyRef = useTemplateRef('body')
-
 // Computed
 // --------------------------------------------------------------------------
-const assetTypeSearchText = computed(() => store.getters.assetTypeSearchText)
 const currentEpisode = computed(() => store.getters.currentEpisode)
 const currentProduction = computed(() => store.getters.currentProduction)
-const displayedAssetTypesLength = computed(
-  () => store.getters.displayedAssetTypesLength
-)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 const isTVShow = computed(() => store.getters.isTVShow)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
@@ -174,11 +183,25 @@ const isEmptyList = computed(
     props.entries.length === 0 &&
     !props.isLoading &&
     !props.isError &&
-    !assetTypeSearchText.value
+    !props.isFiltered
+)
+
+const isAllHidden = computed(
+  () =>
+    props.isFiltered &&
+    props.entries.length === 0 &&
+    !props.isLoading &&
+    !props.isError
+)
+
+const totalAssetCount = computed(() =>
+  props.entries.reduce((total, entry) => total + assetCount(entry.id), 0)
 )
 
 // Functions
 // --------------------------------------------------------------------------
+const assetCount = entryId => props.assetCounts[entryId] || 0
+
 const chartColors = (entryId, columnId) =>
   getChartColors(props.assetTypeStats, entryId, columnId)
 
@@ -209,15 +232,14 @@ const taskTypePath = taskTypeId => {
   }
 }
 
-const onBodyScroll = event => {
-  emit('scroll', event.target.scrollTop)
-}
-
-const setScrollPosition = scrollPosition => {
-  if (bodyRef.value) bodyRef.value.scrollTop = scrollPosition
-}
-
-defineExpose({ setScrollPosition })
+const assetsPath = assetType => ({
+  ...getEntitiesPath(
+    currentProduction.value?.id,
+    'assets',
+    isTVShow.value ? currentEpisode.value?.id : null
+  ),
+  query: { search: `type=[${assetType.name}]` }
+})
 </script>
 
 <style lang="scss" scoped>
@@ -236,6 +258,13 @@ td.name {
   font-size: 1.2em;
 }
 
+.asset-count {
+  display: block;
+  color: var(--text-alt);
+  font-size: 0.8rem;
+  font-weight: normal;
+}
+
 .validation {
   min-width: 170px;
   max-width: 170px;
@@ -249,5 +278,44 @@ td.name {
 
 th.actions {
   padding: 0.4em;
+}
+
+@media screen and (max-width: 768px) {
+  .data-list {
+    margin-top: 1em;
+  }
+
+  .datatable-wrapper {
+    background: transparent;
+    border: 0;
+    overflow-x: visible;
+  }
+
+  // The global card layout only styles td: the total row is headed by a th.
+  .all-line th.card-head {
+    background: transparent;
+    border: 0;
+    display: block;
+    min-width: 0;
+    order: -1;
+    padding: 0.75em 0 1em;
+    position: static;
+    width: auto;
+
+    &::after {
+      display: none;
+    }
+  }
+
+  // The task type tint of the desktop columns is an inline style.
+  .datatable-body td.validation {
+    border-left: 0 !important;
+  }
+
+  // Same width on every line, so the bars and tiles of a card compare.
+  .validation :deep(.stats-bar),
+  .validation :deep(.stats-heat) {
+    flex: 0 0 55%;
+  }
 }
 </style>

@@ -473,6 +473,52 @@ describe('Assets store', () => {
 
       expect(taskMap.get('t1').data).toEqual({ revision_note: 'keep me' })
     })
+
+    test('lists the asset types the loaded assets use', () => {
+      const state = { assetSearchText: '' }
+      assetsStore.mutations.LOAD_ASSETS_END(state, {
+        production: { id: 'p1' },
+        assets: [
+          {
+            id: 'a1',
+            name: 'A1',
+            asset_type_id: 'type1',
+            asset_type_name: 'Char',
+            tasks: []
+          }
+        ],
+        userFilters: {},
+        userFilterGroups: {},
+        personMap: new Map(),
+        taskMap: new Map(),
+        taskTypeMap: new Map()
+      })
+
+      const names = assetsStore.getters
+        .usedAssetTypes(state)
+        .map(assetType => assetType.name)
+      expect(names).toEqual(['Char'])
+      expect(state.displayedAssetTypes).toBeUndefined()
+    })
+  })
+
+  describe('COMPUTE_ASSET_TYPE_STATS', () => {
+    test('counts the assets of each type along with the task stats', () => {
+      assetsStore.cache.assets = [
+        { id: 'a1', asset_type_id: 'chars', tasks: [] },
+        { id: 'a2', asset_type_id: 'chars', tasks: [] },
+        { id: 'a3', asset_type_id: 'props', tasks: [], canceled: true }
+      ]
+      const state = {}
+      assetsStore.mutations.COMPUTE_ASSET_TYPE_STATS(state, {
+        taskStatusMap: new Map(),
+        taskMap: new Map()
+      })
+      expect(state.assetTypeAssetCounts).toEqual({ chars: 2 })
+      expect(assetsStore.getters.assetTypeAssetCounts(state)).toEqual({
+        chars: 2
+      })
+    })
   })
 
   describe('getAssetsCsvLines', () => {

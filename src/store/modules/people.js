@@ -4,9 +4,8 @@ import { populateTask, setTasksEntityPreview } from '@/lib/models'
 import { sortTasks, sortPeople, sortByName } from '@/lib/sorting'
 import { indexSearch, buildTaskIndex, buildPeopleIndex } from '@/lib/indexing'
 import { applyFilters, getFilters, getKeyWords } from '@/lib/filtering'
-import { getMonthsBetween } from '@/lib/time'
+import { getDayOffRange, getMonthsBetween, range } from '@/lib/time'
 import auth from '@/lib/auth'
-import { getDayOffRange } from '@/lib/time'
 
 import taskStatusStore from '@/store/modules/taskstatus'
 import taskStore from '@/store/modules/tasks'
@@ -276,6 +275,27 @@ const getters = {
   daysOff: state => state.daysOff,
 
   userLimit: state => state.userLimit
+}
+
+// The failed requests are logged and the days off of the others merged, a
+// day off spanning two periods coming back once per period.
+const settleDaysOff = async requests => {
+  const results = await Promise.allSettled(requests)
+  const failures = results
+    .filter(({ status }) => status === 'rejected')
+    .map(({ reason }) => reason)
+  failures.forEach(reason => console.error(reason))
+  const daysOffById = new Map(
+    results
+      .filter(({ status }) => status === 'fulfilled')
+      .flatMap(({ value }) => value)
+      .map(dayOff => [dayOff.id, dayOff])
+  )
+  return {
+    daysOff: [...daysOffById.values()],
+    failures,
+    allFailed: failures.length > 0 && failures.length === results.length
+  }
 }
 
 const actions = {
@@ -589,58 +609,45 @@ const actions = {
     commit(SET_PERSON_TASKS_SCROLL_POSITION, scrollPosition)
   },
 
+  // The studio-wide day off listing is admin-only on Zou: the year and
+  // month routes scope the persons to the ones the caller may read. The
+  // days off only tint the overtime cells: the grid stands without them.
   async loadTimesheets(
-    { commit },
+    { commit, getters },
     { detailLevel, year, month, productionId, studioId }
   ) {
     const monthString = String(month).padStart(2, '0')
-    let getTableFn
-    switch (detailLevel) {
-      case 'day':
-        getTableFn = peopleApi.getDayTable
-        break
-      case 'week':
-        getTableFn = peopleApi.getWeekTable
-        break
-      case 'year':
-        getTableFn = peopleApi.getYearTable
-        break
-      default:
-        getTableFn = peopleApi.getMonthTable
-    }
+    const getTableFn = {
+      day: peopleApi.getDayTable,
+      week: peopleApi.getWeekTable,
+      year: peopleApi.getYearTable,
+      month: peopleApi.getMonthTable
+    }[detailLevel]
     const table = await getTableFn(year, monthString, productionId, studioId)
-    // ponytail: zou only lists day offs per month or in full; the full list
-    // is fetched for the other levels, add a range endpoint if it grows
-    const dayOffs = await peopleApi.getDaysOff(
-      detailLevel === 'day' ? year : undefined,
-      detailLevel === 'day' ? monthString : undefined
-    )
-    commit(PEOPLE_SET_DAY_OFFS, dayOffs)
     commit(PEOPLE_TIMESHEET_LOADED, table)
+    const years =
+      detailLevel === 'year'
+        ? range(getters.firstTimesheetYear, new Date().getFullYear())
+        : [year]
+    const { daysOff } = await settleDaysOff(
+      detailLevel === 'day'
+        ? [peopleApi.getDaysOff(year, monthString)]
+        : years.map(columnYear => peopleApi.getDaysOff(columnYear))
+    )
+    commit(PEOPLE_SET_DAY_OFFS, daysOff)
   },
 
   // Month by month: Zou keeps the studio-wide listing for the admins, the
   // month route scopes the persons to the ones the caller may read. A
   // failed month only loses its own days off.
   async loadDaysOff({ commit }, { startDate, endDate }) {
-    const results = await Promise.allSettled(
+    const { daysOff, failures, allFailed } = await settleDaysOff(
       getMonthsBetween(startDate, endDate).map(({ year, month }) =>
         peopleApi.getDaysOff(year, String(month).padStart(2, '0'))
       )
     )
-    const failures = results.filter(({ status }) => status === 'rejected')
-    if (failures.length > 0 && failures.length === results.length) {
-      throw failures[0].reason
-    }
-    failures.forEach(({ reason }) => console.error(reason))
-    // a day off spanning two months comes back once per month
-    const daysOffById = new Map(
-      results
-        .filter(({ status }) => status === 'fulfilled')
-        .flatMap(({ value }) => value)
-        .map(dayOff => [dayOff.id, dayOff])
-    )
-    commit(PEOPLE_SET_DAYS_OFF, [...daysOffById.values()])
+    if (allFailed) throw failures[0]
+    commit(PEOPLE_SET_DAYS_OFF, daysOff)
   },
 
   loadProductionDaysOff({ rootGetters }, { startDate, endDate }) {

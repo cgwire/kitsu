@@ -4,9 +4,12 @@ import {
   aggregateRetakeStats,
   aggregateStats,
   computeStats,
+  countEntities,
   getChartData,
   getChartColors,
-  getPercentage
+  getDoneRatio,
+  getPercentage,
+  omitStatsColumns
 } from '@/lib/stats'
 
 const taskMap = new Map(Object.entries({
@@ -92,46 +95,79 @@ const taskStatusMap = new Map(Object.entries({
 const expectedStatResult = {
   all: {
     all: {
-      'task-status-1': { name: 'wip', color: 'blue', count: 4, frames: 29, drawings: 40 },
-      'task-status-2': { name: 'retake', color: 'red', count: 2, frames: 9, drawings: 20 }
+      'task-status-1': { name: 'wip', color: 'blue', count: 4, frames: 29, drawings: 40, is_done: false },
+      'task-status-2': { name: 'retake', color: 'red', count: 2, frames: 9, drawings: 20, is_done: false }
     },
     'task-type-1': {
-      'task-status-1': { name: 'wip', color: 'blue', count: 2, frames: 14, drawings: 20 },
-      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 5, drawings: 10 }
+      'task-status-1': { name: 'wip', color: 'blue', count: 2, frames: 14, drawings: 20, is_done: false },
+      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 5, drawings: 10, is_done: false }
     },
     'task-type-2': {
-      'task-status-1': { name: 'wip', color: 'blue', count: 2, frames: 15, drawings: 20 },
-      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 4, drawings: 10 }
+      'task-status-1': { name: 'wip', color: 'blue', count: 2, frames: 15, drawings: 20, is_done: false },
+      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 4, drawings: 10, is_done: false }
     }
   },
   'sequence-1': {
     all: {
-      'task-status-1': { name: 'wip', color: 'blue', count: 3, frames: 25, drawings: 30 },
-      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 5, drawings: 10 }
+      'task-status-1': { name: 'wip', color: 'blue', count: 3, frames: 25, drawings: 30, is_done: false },
+      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 5, drawings: 10, is_done: false }
     },
     'task-type-1': {
-      'task-status-1': { name: 'wip', color: 'blue', count: 1, frames: 10, drawings: 10 },
-      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 5, drawings: 10 }
+      'task-status-1': { name: 'wip', color: 'blue', count: 1, frames: 10, drawings: 10, is_done: false },
+      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 5, drawings: 10, is_done: false }
     },
     'task-type-2': {
-      'task-status-1': { name: 'wip', color: 'blue', count: 2, frames: 15, drawings: 20 },
+      'task-status-1': { name: 'wip', color: 'blue', count: 2, frames: 15, drawings: 20, is_done: false },
     }
   },
   'sequence-2': {
     all: {
-      'task-status-1': { name: 'wip', color: 'blue', count: 1, frames: 4, drawings: 10 },
-      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 4, drawings: 10 }
+      'task-status-1': { name: 'wip', color: 'blue', count: 1, frames: 4, drawings: 10, is_done: false },
+      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 4, drawings: 10, is_done: false }
     },
     'task-type-1': {
-      'task-status-1': { name: 'wip', color: 'blue', count: 1, frames: 4, drawings: 10 }
+      'task-status-1': { name: 'wip', color: 'blue', count: 1, frames: 4, drawings: 10, is_done: false }
     },
     'task-type-2': {
-      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 4, drawings: 10  }
+      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 4, drawings: 10, is_done: false }
     }
   }
 }
 
 describe('lib/stats', () => {
+  it('omitStatsColumns - drops the columns and rebuilds the all column', () => {
+    const entry = (count, frames) => ({
+      done: { name: 'done', color: 'green', count, frames, drawings: 0 }
+    })
+    const entryStats = {
+      all: entry(3, 30),
+      'task-type-1': entry(1, 10),
+      'task-type-2': entry(2, 20)
+    }
+    expect(omitStatsColumns(entryStats, ['task-type-2'])).toEqual({
+      all: entry(1, 10),
+      'task-type-1': entry(1, 10)
+    })
+    expect(omitStatsColumns(entryStats, [])).toEqual(entryStats)
+    expect(omitStatsColumns(entryStats, ['task-type-1', 'task-type-2'])).toEqual(
+      { all: {} }
+    )
+    expect(entryStats.all.done.count).toBe(3)
+  })
+
+  it('countEntities - counts the entities of each group, canceled ones aside', () => {
+    const assets = [
+      { id: 'asset-1', asset_type_id: 'chars' },
+      { id: 'asset-2', asset_type_id: 'chars' },
+      { id: 'asset-3', asset_type_id: 'chars', canceled: true },
+      { id: 'asset-4', asset_type_id: 'props' }
+    ]
+    expect(countEntities(assets, 'asset_type_id')).toEqual({
+      chars: 2,
+      props: 1
+    })
+  })
+
   it('computeStats - empty list', () => {
     const shots = []
     const stats = computeStats(shots, 'sequence_id', taskStatusMap, taskMap)
@@ -167,9 +203,61 @@ describe('lib/stats', () => {
     const sequence = { id: 'sequence-1' }
     const taskType = taskTypeMap.get('task-type-1')
     let data = getChartData(expectedStatResult, sequence.id, taskType.id)
-    expect(data).toEqual([['retake', 1, 'red'], ['wip', 1, 'blue']])
+    expect(data).toEqual([
+      ['retake', 1, 'red', false],
+      ['wip', 1, 'blue', false]
+    ])
     data = getChartData(expectedStatResult, 'all', 'all')
-    expect(data).toEqual([['retake', 2, 'red'], ['wip', 4, 'blue']])
+    expect(data).toEqual([
+      ['retake', 2, 'red', false],
+      ['wip', 4, 'blue', false]
+    ])
+  })
+
+  it('getChartData - flags the rows of done statuses', () => {
+    const shots = [{ id: 'shot-1', sequence_id: 'sequence-1', tasks: ['t1', 't2'] }]
+    const tasks = new Map([
+      ['t1', { task_status_id: 'task-status-3', task_type_id: 'task-type-1' }],
+      ['t2', { task_status_id: 'task-status-1', task_type_id: 'task-type-1' }]
+    ])
+    const stats = computeStats(shots, 'sequence_id', taskStatusMap, tasks)
+    expect(getChartData(stats, 'sequence-1', 'all')).toEqual([
+      ['done', 1, 'green', true],
+      ['wip', 1, 'blue', false]
+    ])
+  })
+
+  // The flag decides, not the name: a studio names its final status freely.
+  it('getChartData - trusts the is_done flag over the status name', () => {
+    const statuses = new Map([
+      ['s1', { id: 's1', short_name: 'approved', color: 'green', is_done: true }],
+      ['s2', { id: 's2', short_name: 'done', color: 'grey', is_done: false }]
+    ])
+    const shots = [{ id: 'shot-1', sequence_id: 'sequence-1', tasks: ['t1', 't2'] }]
+    const tasks = new Map([
+      ['t1', { task_status_id: 's1', task_type_id: 'task-type-1' }],
+      ['t2', { task_status_id: 's2', task_type_id: 'task-type-1' }]
+    ])
+    const data = getChartData(
+      computeStats(shots, 'sequence_id', statuses, tasks),
+      'sequence-1',
+      'all'
+    )
+    expect(data).toEqual([
+      ['approved', 1, 'green', true],
+      ['done', 1, 'grey', false]
+    ])
+    expect(getDoneRatio(data)).toBe(0.5)
+  })
+
+  it('getDoneRatio', () => {
+    const rows = [
+      ['done', 3, 'green', true],
+      ['wip', 1, 'blue', false]
+    ]
+    expect(getDoneRatio(rows)).toBe(0.75)
+    expect(getDoneRatio([['wip', 2, 'blue', false]])).toBe(0)
+    expect(getDoneRatio([])).toBe(0)
   })
 
   it('getChartColors', () => {

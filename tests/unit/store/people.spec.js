@@ -10,6 +10,10 @@ vi.mock('@/store/api/people', () => ({
   default: {
     deleteOrganisationLogo: vi.fn(),
     getDaysOff: vi.fn(),
+    getDayTable: vi.fn(),
+    getMonthTable: vi.fn(),
+    getWeekTable: vi.fn(),
+    getYearTable: vi.fn(),
     postOrganisationLogo: vi.fn(),
     setTimeSpent: vi.fn()
   }
@@ -439,5 +443,55 @@ describe('People store setTimeSpent action', () => {
     first.resolve({ task_id: 'task-3', duration: 60 })
     second.resolve({ task_id: 'task-4', duration: 120 })
     await Promise.all(writes)
+  })
+})
+
+describe('People store loadTimesheets action', () => {
+  const table = { 3: { 'person-1': 120 } }
+  const load = (detailLevel, getters = {}) => {
+    const commit = vi.fn()
+    const context = { commit, getters: { firstTimesheetYear: 2024, ...getters } }
+    const payload = { detailLevel, year: 2026, month: 3 }
+    return store.actions.loadTimesheets(context, payload).then(() => commit)
+  }
+
+  beforeEach(() => {
+    peopleApi.getDaysOff.mockReset()
+    peopleApi.getMonthTable.mockResolvedValue(table)
+    peopleApi.getYearTable.mockResolvedValue(table)
+  })
+
+  // The studio-wide day off listing is admin-only on Zou: the year route is
+  // scoped to the persons the caller may read.
+  test('reads the days off of the year at the month level', async () => {
+    peopleApi.getDaysOff.mockResolvedValue([])
+
+    await load('month')
+
+    expect(peopleApi.getDaysOff.mock.calls).toEqual([[2026]])
+  })
+
+  test('reads the days off of every column year at the year level', async () => {
+    vi.useFakeTimers().setSystemTime(new Date('2026-10-01'))
+    peopleApi.getDaysOff.mockResolvedValue([])
+
+    await load('year')
+
+    expect(peopleApi.getDaysOff.mock.calls).toEqual([[2024], [2025], [2026]])
+    vi.useRealTimers()
+  })
+
+  // The days off only tint the overtime cells: the grid stands without them.
+  test('shows the grid when the days off are refused', async () => {
+    const error = new Error('403')
+    peopleApi.getDaysOff.mockRejectedValue(error)
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const commit = await load('month')
+
+    expect(commit).toHaveBeenCalledWith('PEOPLE_TIMESHEET_LOADED', table)
+    expect(commit).toHaveBeenCalledWith('PEOPLE_SET_DAY_OFFS', [])
+    expect(consoleError).toHaveBeenCalledWith(error)
+    consoleError.mockRestore()
   })
 })

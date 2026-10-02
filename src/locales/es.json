@@ -42,6 +42,7 @@
     },
     "asset_types": {
       "all_asset_types": "Todos los tipos de recurso",
+      "all_hidden": "Todos los tipos de recurso están ocultos.",
       "create_error": "Se ha producido un error al guardar este tipo de recurso. ¿Está seguro de que no hay otro tipo de recurso con un nombre similar?",
       "delete_text": "¿Está seguro de que desea eliminar {name} de su base de datos?",
       "delete_error": "Se ha producido un error al eliminar este tipo de recurso. Es probable que haya datos vinculados a él. ¿Está seguro de que este tipo de recurso no tiene ningún recurso asociado?",
@@ -1572,10 +1573,12 @@
     },
     "statistics": {
       "count": "Conteos",
+      "bars": "Barras apiladas",
       "count_mode": "Conteo",
       "display_mode": "Visualización",
       "frames": "Fotogramas",
       "pie": "Gráficos circulares",
+      "heatmap": "Mapa de calor",
       "shots": "Tomas",
       "data_mode": "Datos",
       "retakes": "Retomas",

@@ -69,7 +69,7 @@ export const buildAddThumbnailsModalStub = () => ({
 
 export const mountEntityPage = async (
   page,
-  { listName, getters = {}, actions = {}, query = {}, stubs = {} }
+  { listName, getters = {}, actions = {}, props = {}, query = {}, stubs = {} }
 ) => {
   const store = buildStore(getters, actions)
   const router = createRouter({
@@ -92,6 +92,7 @@ export const mountEntityPage = async (
     methods: { setScrollPosition: vi.fn(), selectTaskFromQuery: vi.fn() }
   }
   const wrapper = shallowMount(page, {
+    props,
     global: {
       mocks: { $store: store, $t: key => key },
       plugins: [router, i18n],

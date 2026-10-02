@@ -42,6 +42,7 @@
     },
     "asset_types": {
       "all_asset_types": "모든 어셋 종류",
+      "all_hidden": "모든 어셋 종류가 숨겨져 있습니다.",
       "create_error": "이 어셋 종류를 저장하는 동안 오류가 발생했습니다. 비슷한 이름의 어셋 종류가 없는 것이 확실합니까?",
       "delete_text": "데이터베이스에서 {name}을(를) 정말로 제거하시겠습니까?",
       "delete_error": "이 어셋 종류를 삭제하는 동안 오류가 발생했습니다. 아마도 관련 데이터가 있을 것입니다. 이 어셋 종류에 연결된 어셋이 없습니까?",
@@ -1572,10 +1573,12 @@
     },
     "statistics": {
       "count": "카운트",
+      "bars": "누적 막대",
       "count_mode": "카운트",
       "display_mode": "디스플레이",
       "frames": "프레임",
       "pie": "파이 차트",
+      "heatmap": "히트맵",
       "shots": "샷",
       "data_mode": "데이터",
       "retakes": "재촬영",

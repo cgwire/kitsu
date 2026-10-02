@@ -42,6 +42,7 @@
     },
     "asset_types": {
       "all_asset_types": "所有资产种类",
+      "all_hidden": "所有资产种类均已隐藏。",
       "create_error": "保存此资产类型时出错。您确定没有相同名称的资产类型吗？",
       "delete_text": "您确定要从您的数据库移除{name}吗？",
       "delete_error": "删除此资产类型时出现错误。很可能存在有链接至此的数据。您确定没有资产链接至此资产类型吗？",
@@ -1572,10 +1573,12 @@
     },
     "statistics": {
       "count": "计数",
+      "bars": "堆叠条形图",
       "count_mode": "计数",
       "display_mode": "显示",
       "frames": "帧数",
       "pie": "饼图",
+      "heatmap": "热力图",
       "shots": "镜头",
       "data_mode": "数据",
       "retakes": "返修",
