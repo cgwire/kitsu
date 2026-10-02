@@ -62,6 +62,7 @@ const buildSearchFieldStub = () => {
 // entities the page marks while their previews upload.
 export const buildAddThumbnailsModalStub = () => ({
   name: 'AddThumbnailsModal',
+  props: { isError: Boolean, isLoading: Boolean },
   template: '<div />',
   methods: { markLoading: vi.fn(), markUploaded: vi.fn() }
 })

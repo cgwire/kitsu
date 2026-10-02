@@ -174,4 +174,30 @@ describe('Shots page, thumbnails import', () => {
     expect(modalStub.methods.markLoading).toHaveBeenCalledWith('shot-1')
     expect(modalStub.methods.markUploaded).toHaveBeenCalledWith('shot-1')
   })
+
+  test('shows a failed upload and clears it when the modal opens again', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { wrapper } = await mountPage({
+      actions: {
+        commentTaskWithPreview: () => Promise.reject(new Error('down'))
+      },
+      stubs: { AddThumbnailsModal: buildAddThumbnailsModalStub() }
+    })
+    const modal = () => wrapper.findComponent({ name: 'AddThumbnailsModal' })
+    const importButton = wrapper
+      .findAllComponents(ButtonSimple)
+      .find(button => button.props('icon') === 'import-files')
+
+    await importButton.vm.$emit('click')
+    await modal().vm.$emit('confirm', [
+      { task: { id: 'task-1', entity_id: 'shot-1' } }
+    ])
+    await flushPromises()
+    expect(modal().props('isError')).toBe(true)
+    expect(modal().props('isLoading')).toBe(false)
+
+    await modal().vm.$emit('cancel')
+    await importButton.vm.$emit('click')
+    expect(modal().props('isError')).toBe(false)
+  })
 })
