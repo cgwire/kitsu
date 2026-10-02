@@ -58,6 +58,14 @@ const buildSearchFieldStub = () => {
   }
 }
 
+// The thumbnails modal is driven through a ref too: its stub records the
+// entities the page marks while their previews upload.
+export const buildAddThumbnailsModalStub = () => ({
+  name: 'AddThumbnailsModal',
+  template: '<div />',
+  methods: { markLoading: vi.fn(), markUploaded: vi.fn() }
+})
+
 export const mountEntityPage = async (
   page,
   { listName, getters = {}, actions = {}, query = {}, stubs = {} }

@@ -5,8 +5,13 @@ vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import Assets from '@/components/pages/Assets.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 
-import { mountEntityPage, production } from '../../fixtures/entity-page'
+import {
+  buildAddThumbnailsModalStub,
+  mountEntityPage,
+  production
+} from '../../fixtures/entity-page'
 
 // Two assets with their tasks in the store: the page decides on mount
 // whether their scope (episode) is the displayed one.
@@ -101,5 +106,34 @@ describe('Assets page, restore', () => {
     await flushPromises()
 
     expect(modal().props('isError')).toBe(true)
+  })
+})
+
+describe('Assets page, thumbnails import', () => {
+  test('opens the modal and marks each asset while its preview uploads', async () => {
+    const modalStub = buildAddThumbnailsModalStub()
+    const { wrapper } = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters: { isCurrentUserProductionManager: true },
+      actions: {
+        commentTaskWithPreview: () => ({ preview: { id: 'preview-1' } })
+      },
+      stubs: { AddThumbnailsModal: modalStub }
+    })
+    const modal = () => wrapper.findComponent({ name: 'AddThumbnailsModal' })
+
+    await wrapper
+      .findAllComponents(ButtonSimple)
+      .find(button => button.props('icon') === 'import-files')
+      .vm.$emit('click')
+    expect(modal().exists()).toBe(true)
+
+    await modal().vm.$emit('confirm', [
+      { task: { id: 'task-1', entity_id: 'asset-1' } }
+    ])
+    await flushPromises()
+
+    expect(modalStub.methods.markLoading).toHaveBeenCalledWith('asset-1')
+    expect(modalStub.methods.markUploaded).toHaveBeenCalledWith('asset-1')
   })
 })

@@ -272,6 +272,7 @@
     />
 
     <add-thumbnails-modal
+      ref="add-thumbnails-modal"
       active
       entity-type="Shot"
       parent="shots"
@@ -353,6 +354,7 @@ const shotMap = shotStore.cache.shotMap
 // State
 // --------------------------------------------------------------------------
 
+const addThumbnailsModalRef = useTemplateRef('add-thumbnails-modal')
 const importModalRef = useTemplateRef('import-modal')
 const listRef = useTemplateRef('shot-list')
 const searchFieldRef = useTemplateRef('shot-search-field')
@@ -492,6 +494,7 @@ const {
   selectableDepartments,
   selectedDepartment,
   setScrollPosition,
+  showAddThumbnailsModal,
   showCreateTasksModal,
   showImportModal,
   uploadImportFile
@@ -500,6 +503,7 @@ const {
   pageName: 'Shots',
   listRef,
   searchFieldRef,
+  addThumbnailsModalRef,
   importModalRef,
   reset,
   loadEntities: () => store.dispatch('loadShots'),

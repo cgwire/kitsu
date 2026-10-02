@@ -8,7 +8,11 @@ import Shots from '@/components/pages/Shots.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import shotStore from '@/store/modules/shots'
 
-import { mountEntityPage, production } from '../../fixtures/entity-page'
+import {
+  buildAddThumbnailsModalStub,
+  mountEntityPage,
+  production
+} from '../../fixtures/entity-page'
 
 // Two shots with their tasks in the cache: the page decides on mount
 // whether their scope (episode) is the displayed one.
@@ -24,7 +28,7 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
-const mountPage = async ({ getters = {}, actions = {} } = {}) => {
+const mountPage = async ({ getters = {}, actions = {}, stubs = {} } = {}) => {
   const page = await mountEntityPage(Shots, {
     listName: 'ShotList',
     getters: {
@@ -32,7 +36,8 @@ const mountPage = async ({ getters = {}, actions = {} } = {}) => {
       isCurrentUserProductionManager: true,
       ...getters
     },
-    actions
+    actions,
+    stubs
   })
   await flushPromises()
   return page
@@ -141,5 +146,32 @@ describe('Shots page, EDL import', () => {
     expect(modal().props('active')).toBe(true)
     expect(modal().props('isError')).toBe(false)
     expect(modal().props('importError')).toBe(null)
+  })
+})
+
+describe('Shots page, thumbnails import', () => {
+  test('opens the modal and marks each shot while its preview uploads', async () => {
+    const modalStub = buildAddThumbnailsModalStub()
+    const { wrapper } = await mountPage({
+      actions: {
+        commentTaskWithPreview: () => ({ preview: { id: 'preview-1' } })
+      },
+      stubs: { AddThumbnailsModal: modalStub }
+    })
+    const modal = () => wrapper.findComponent({ name: 'AddThumbnailsModal' })
+
+    await wrapper
+      .findAllComponents(ButtonSimple)
+      .find(button => button.props('icon') === 'import-files')
+      .vm.$emit('click')
+    expect(modal().exists()).toBe(true)
+
+    await modal().vm.$emit('confirm', [
+      { task: { id: 'task-1', entity_id: 'shot-1' } }
+    ])
+    await flushPromises()
+
+    expect(modalStub.methods.markLoading).toHaveBeenCalledWith('shot-1')
+    expect(modalStub.methods.markUploaded).toHaveBeenCalledWith('shot-1')
   })
 })
