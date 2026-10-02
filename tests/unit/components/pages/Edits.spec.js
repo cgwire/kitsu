@@ -3,8 +3,9 @@ import { flushPromises } from '@vue/test-utils'
 vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 
-import Edits from '@/components/pages/Edits.vue'
+import ImportModal from '@/components/modals/ImportModal.vue'
 import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
+import Edits from '@/components/pages/Edits.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 
 import {
@@ -128,6 +129,17 @@ describe('Edits page, CSV import', () => {
     expect(modal.importError).toBe(null)
     expect(modal.active).toBe(false)
     expect(dispatched('loadEdits')).toHaveLength(1)
+  })
+
+  test('offers the description as an optional column', async () => {
+    const { wrapper } = await mountPage()
+
+    expect(wrapper.findComponent(ImportModal).props('optionalColumns')).toEqual(
+      ['Description']
+    )
+    expect(wrapper.findComponent(ImportRenderModal).props('columns')).toContain(
+      'Description'
+    )
   })
 })
 

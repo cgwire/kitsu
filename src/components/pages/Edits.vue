@@ -307,6 +307,7 @@ const searchFieldRef = useTemplateRef('edit-search-field')
 
 const historyEdit = ref({})
 const initialLoading = ref(true)
+const optionalColumns = ref(['Description'])
 
 // Computed
 // --------------------------------------------------------------------------
@@ -434,7 +435,7 @@ const {
   reset,
   loadEntities: () => store.dispatch('loadEdits'),
   dataMatchers,
-  optionalColumns: ref(['Description']),
+  optionalColumns,
   canCancel: true,
   modals: { isEditHistoryDisplayed: false }
 })
