@@ -2,13 +2,13 @@
   <div class="asset-types page fixed-page">
     <div class="asset-type-list-header page-header flexrow">
       <combobox-visible-options
-        class="flexrow-item"
+        class="flexrow-item options-filter"
         :label="$t('asset_types.title')"
         :options="assetTypeOptions"
         v-model:hidden="hiddenAssetTypeIds"
       />
       <combobox-task-type-options
-        class="flexrow-item"
+        class="flexrow-item options-filter"
         :label="$t('task_types.title')"
         :task-types="columnTaskTypes"
         v-model:hidden="hiddenTaskTypeIds"
@@ -28,7 +28,7 @@
         @click="reset"
       />
       <button-simple
-        class="flexrow-item"
+        class="flexrow-item export-button"
         icon="download"
         :title="$t('main.csv.export_file')"
         @click="exportStatisticsToCsv"
@@ -229,3 +229,46 @@ useHead({
   })
 })
 </script>
+
+<style lang="scss" scoped>
+// The filters carry a label above them, so the row is aligned on its bottom.
+// Its controls differ in height (select 42px, option combos 40px, buttons
+// 32px): the bottom margins centre them all on the select.
+.asset-type-list-header {
+  align-items: flex-end;
+
+  .options-filter {
+    margin-bottom: 1px;
+  }
+
+  .button {
+    margin-bottom: 5px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .asset-type-list-header {
+    flex-wrap: wrap;
+    margin-top: 1em;
+    row-gap: 0.5em;
+  }
+
+  // Mobile is read-only.
+  .export-button {
+    display: none;
+  }
+
+  // Tighter gaps leave room for the reload button next to the filters. When
+  // longer labels still wrap it under them, it stays on the right edge.
+  .asset-type-list-header {
+    .flexrow-item {
+      margin-right: 0.5em;
+    }
+
+    .button {
+      margin-left: auto;
+      margin-right: 0;
+    }
+  }
+}
+</style>

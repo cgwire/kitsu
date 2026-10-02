@@ -1,7 +1,7 @@
 <template>
   <div class="data-list">
     <div class="datatable-wrapper">
-      <table class="datatable">
+      <table class="datatable datatable--cards">
         <thead class="datatable-head">
           <tr>
             <th scope="col" class="name datatable-row-header">
@@ -42,7 +42,7 @@
         </thead>
         <tbody class="datatable-body" v-if="!isLoading">
           <tr class="all-line datatable-row" v-if="entries.length > 0">
-            <th scope="row" class="name datatable-row-header">
+            <th scope="row" class="name datatable-row-header card-head">
               {{ $t('asset_types.all_asset_types') }}
               <span class="asset-count">
                 {{ totalAssetCount }}
@@ -51,6 +51,7 @@
             </th>
 
             <stats-cell
+              :data-label="$t('main.all')"
               :colors="chartColors('all', 'all')"
               :data="chartData('all', 'all')"
               :display-mode="displayMode"
@@ -59,6 +60,7 @@
             <stats-cell
               :style="getValidationStyle(columnId)"
               :key="'all-' + columnId"
+              :data-label="taskTypeMap.get(columnId)?.name"
               :colors="chartColors('all', columnId)"
               :data="chartData('all', columnId)"
               :display-mode="displayMode"
@@ -69,7 +71,7 @@
           </tr>
 
           <tr class="datatable-row" :key="entry.id" v-for="entry in entries">
-            <td class="name datatable-row-header">
+            <td class="name datatable-row-header card-head">
               <router-link :to="assetsPath(entry)">
                 {{ entry.name }}
               </router-link>
@@ -80,6 +82,7 @@
             </td>
 
             <stats-cell
+              :data-label="$t('main.all')"
               :colors="chartColors(entry.id, 'all')"
               :data="chartData(entry.id, 'all')"
               :display-mode="displayMode"
@@ -93,6 +96,7 @@
             >
               <stats-cell
                 :key="entry.id + columnId"
+                :data-label="taskTypeMap.get(columnId)?.name"
                 :style="getValidationStyle(columnId)"
                 :colors="chartColors(entry.id, columnId)"
                 :data="chartData(entry.id, columnId)"
@@ -274,5 +278,44 @@ td.name {
 
 th.actions {
   padding: 0.4em;
+}
+
+@media screen and (max-width: 768px) {
+  .data-list {
+    margin-top: 1em;
+  }
+
+  .datatable-wrapper {
+    background: transparent;
+    border: 0;
+    overflow-x: visible;
+  }
+
+  // The global card layout only styles td: the total row is headed by a th.
+  .all-line th.card-head {
+    background: transparent;
+    border: 0;
+    display: block;
+    min-width: 0;
+    order: -1;
+    padding: 0.75em 0 1em;
+    position: static;
+    width: auto;
+
+    &::after {
+      display: none;
+    }
+  }
+
+  // The task type tint of the desktop columns is an inline style.
+  .datatable-body td.validation {
+    border-left: 0 !important;
+  }
+
+  // Same width on every line, so the bars and tiles of a card compare.
+  .validation :deep(.stats-bar),
+  .validation :deep(.stats-heat) {
+    flex: 0 0 55%;
+  }
 }
 </style>

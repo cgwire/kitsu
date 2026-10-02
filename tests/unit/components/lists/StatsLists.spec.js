@@ -135,6 +135,50 @@ describe('lists/ProductionAssetTypeList', () => {
     )
   })
 
+  describe('card layout on mobile', () => {
+    const status = { done: { name: 'done', color: 'green', count: 1 } }
+    const mountCards = () =>
+      mountAssetTypes(
+        {
+          validationColumns: ['modeling'],
+          assetTypeStats: {
+            all: { all: status, modeling: status },
+            chars: { all: status, modeling: status }
+          }
+        },
+        {
+          taskTypeMap: () =>
+            new Map([
+              ['modeling', { id: 'modeling', name: 'Modeling', color: '#ff0000' }]
+            ])
+        }
+      )
+
+    test('opts into the shared card layout', () => {
+      expect(mountCards().find('table').classes()).toContain('datatable--cards')
+    })
+
+    test('heads each card with its name cell, the total row included', () => {
+      const wrapper = mountCards()
+      expect(wrapper.findAll('td.name.card-head')).toHaveLength(2)
+      expect(wrapper.find('.all-line th.name').classes()).toContain('card-head')
+    })
+
+    test('labels each stat with its column', () => {
+      const labels = row =>
+        row.findAll('stats-cell-stub').map(cell => cell.attributes('data-label'))
+      const rows = mountCards().findAll('.datatable-row')
+      expect(labels(rows[0])).toEqual(['main.all', 'Modeling'])
+      expect(labels(rows[1])).toEqual(['main.all', 'Modeling'])
+    })
+
+    // An unlabelled cell is hidden on a card: no empty line for a missing stat.
+    test('leaves the cells without stats unlabelled', () => {
+      const props = mountCards().findAll('.datatable-row')[2]
+      expect(props.findAll('td[data-label]')).toHaveLength(0)
+    })
+  })
+
   test('counts the displayed asset types', () => {
     const wrapper = mountAssetTypes()
     expect(wrapper.find('.nb-asset-types').text()).toBe('2 asset_types.number')

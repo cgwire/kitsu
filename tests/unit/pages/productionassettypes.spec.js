@@ -237,6 +237,13 @@ describe('ProductionAssetTypes', () => {
     ])
   })
 
+  // Mobile is read-only: the page hides the export through this class.
+  it('marks the export button as such', async () => {
+    await mountPage()
+    expect(findButton('download').classes()).toContain('export-button')
+    expect(findButton('refresh').classes()).not.toContain('export-button')
+  })
+
   it('names the export button', async () => {
     await mountPage()
     expect(findButton('download').attributes('title')).toBe(
