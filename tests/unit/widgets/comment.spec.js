@@ -21,6 +21,7 @@ import i18n from '@/lib/i18n'
 
 import Comment from '@/components/widgets/Comment.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import PeopleName from '@/components/widgets/PeopleName.vue'
 
 import './setup'
 
@@ -60,6 +61,7 @@ const task = {
 // to survive that too.
 const makeStore = ({
   isAdmin = false,
+  isClient = false,
   persons = [],
   user = { id: 'person-1' }
 } = {}) =>
@@ -70,7 +72,7 @@ const makeStore = ({
       departmentMap: () => new Map(),
       isCurrentUserAdmin: () => isAdmin,
       isCurrentUserArtist: () => false,
-      isCurrentUserClient: () => false,
+      isCurrentUserClient: () => isClient,
       isCurrentUserManager: () => false,
       currentUserRoleForProduction: () => () => null,
       personMap: () =>
@@ -294,6 +296,65 @@ describe('Comment', () => {
     test('stay inert for an anonymous guest', () => {
       const wrapper = mountComment({ comment, storeOptions: { user: null } })
       expect(avatarLinks(wrapper)).toEqual([false, false])
+    })
+  })
+
+  // Zou hands the client the internal comments that carry a preview, emptied
+  // of their text, for the revisions they hold.
+  describe('internal comment shown to a client', () => {
+    const persons = [{ id: 'person-3', full_name: 'Eddie Editor' }]
+    const internal = makeComment({
+      text: '',
+      person_id: 'person-2',
+      person: { id: 'person-2', role: 'supervisor' },
+      editor_id: 'person-3',
+      previews: [{ id: 'preview-1', revision: 1 }]
+    })
+
+    const shownPeople = wrapper => ({
+      avatar: wrapper.findComponent(PeopleAvatar).exists(),
+      name: wrapper.findComponent(PeopleName).exists(),
+      editor: wrapper.find('.edited-text').exists()
+    })
+
+    test('keeps who wrote and edited it from the client', () => {
+      const wrapper = mountComment({
+        comment: internal,
+        storeOptions: { isClient: true, persons }
+      })
+      expect(shownPeople(wrapper)).toEqual({
+        avatar: false,
+        name: false,
+        editor: false
+      })
+    })
+
+    test.each([
+      ['flagged for the client', { for_client: true }],
+      ['written by a client', { person: { id: 'person-2', role: 'client' } }]
+    ])('names the people of a comment %s', (_, overrides) => {
+      const wrapper = mountComment({
+        comment: { ...internal, ...overrides },
+        storeOptions: { isClient: true, persons }
+      })
+      expect(shownPeople(wrapper)).toEqual({
+        avatar: true,
+        name: true,
+        editor: true
+      })
+      expect(wrapper.find('.edited-text').text()).toBe('Edited by Eddie Editor')
+    })
+
+    test('names them to the studio', () => {
+      const wrapper = mountComment({
+        comment: internal,
+        storeOptions: { persons }
+      })
+      expect(shownPeople(wrapper)).toEqual({
+        avatar: true,
+        name: true,
+        editor: true
+      })
     })
   })
 
