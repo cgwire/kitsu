@@ -37,6 +37,21 @@ describe('ComboboxOptions', () => {
     expect(list.attributes('aria-multiselectable')).toBe('true')
   })
 
+  it('renders an option through the option slot instead of its label', async () => {
+    wrapper = shallowMount(ComboboxOptions, {
+      props: { title: 'Display options', options, modelValue: {} },
+      slots: {
+        option: `<template #option="{ option }">
+          <b class="custom">{{ option.value }}</b>
+        </template>`
+      }
+    })
+    await wrapper.find('.flexrow').trigger('click')
+    const line = wrapper.find('.option-line')
+    expect(line.find('.custom').text()).toBe('showInfos')
+    expect(line.text()).not.toContain('Show infos')
+  })
+
   it('marks the checked option as aria-selected', async () => {
     const trigger = wrapper.find('.flexrow')
     await trigger.trigger('click')
