@@ -283,6 +283,7 @@
     },
     "episodes": {
       "all_episodes": "Tutti",
+      "all_hidden": "Tutti gli episodi sono nascosti.",
       "edit_error": "Si è verificato un errore durante il salvataggio dell'episodio. Sei sicuro che non esista un episodio con un nome simile?",
       "delete_error": "Si è verificato un errore durante l'eliminazione di questo episodio. Potrebbero esserci dati attualmente collegati. Sei sicuro che questo episodio non abbia sequenze collegate?",
       "delete_text": "Sei sicuro di voler rimuovere {name} dal tuo database? Verranno eliminati anche tutti gli shot e le anteprime associati. Conferma digitando il nome dell'episodio qui sotto.",
@@ -1389,6 +1390,7 @@
       "library_title": "Libreria dei tipi di task"
     },
     "sequences": {
+      "all_hidden": "Tutte le sequenze sono nascoste.",
       "all_sequences": "Tutte le sequenze",
       "edit_error": "Si è verificato un errore durante il salvataggio di questa sequenza. Sei sicuro che non esista già una sequenza con un nome simile?",
       "delete_text": "Sei sicuro di voler rimuovere {name} dal database? Verranno eliminati anche tutti gli shot e le anteprime collegati. Conferma digitando il nome della sequenza qui sotto.",

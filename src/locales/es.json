@@ -283,6 +283,7 @@
     },
     "episodes": {
       "all_episodes": "Todos",
+      "all_hidden": "Todos los episodios están ocultos.",
       "edit_error": "Se ha producido un error al guardar este episodio. ¿Está seguro de que no hay otro episodio con un nombre similar?",
       "delete_error": "Se ha producido un error al eliminar este episodio. Es probable que haya datos vinculados a él. ¿Está seguro de que este episodio no tiene una secuencia asociada?",
       "delete_text": "¿Está seguro de que desea eliminar {name} de su base de datos? Se eliminarán todas las tomas y vistas previas relacionadas. Confirme escribiendo el nombre del episodio a continuación.",
@@ -1389,6 +1390,7 @@
       "library_title": "Biblioteca de tipos de tarea"
     },
     "sequences": {
+      "all_hidden": "Todas las secuencias están ocultas.",
       "all_sequences": "Todas las secuencias",
       "edit_error": "Se ha producido un error al guardar la secuencia. ¿Está seguro que no hay otra secuencia con un nombre similar?",
       "delete_text": "¿Está seguro de que desea eliminar {name} de su base de datos? Se eliminarán todas las tomas y vistas previas relacionadas. Confirme escribiendo el nombre de la secuencia a continuación.",

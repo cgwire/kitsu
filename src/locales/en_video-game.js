@@ -61,6 +61,7 @@ export default {
   },
 
   episodes: {
+    all_hidden: 'All chapters are hidden.',
     edit_error: 'An error occurred while saving this chapter. Are you sure there is no chapter with similar name?',
     delete_error: 'An error occurred while deleting this chapter. There are probably data linked to it. Are you sure this chapter has no level linked to it?',
     delete_text: 'Are you sure you want to remove {name} from your database? All related maps and previews will be deleted. Please confirm by typing the chapter name below.',
@@ -145,6 +146,7 @@ export default {
   },
 
   sequences: {
+    all_hidden: 'All levels are hidden.',
     all_sequences: 'All levels',
     edit_error: 'An error occurred while saving this level. Are you sure there is no level with a similar name?',
     delete_text: 'Are you sure you want to remove {name} from your database? All related maps and previews will be deleted. Please confirm by typing the level name below.',

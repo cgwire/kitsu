@@ -283,6 +283,7 @@
     },
     "episodes": {
       "all_episodes": "Mind",
+      "all_hidden": "Minden epizód el van rejtve.",
       "edit_error": "Hiba történt az epizód mentése közben. Biztos, hogy nincs megegyező nevű epizód?",
       "delete_error": "Hiba történt az epizód törlésekor. Valószínűleg adat hivatkozik rá. Biztos, hogy nem kapcsolódik szekvencia az epizódhoz?",
       "delete_text": "Biztosan törölni akarod {name}-t az adatbázisból? Minden hozzá tartozó shot és előnézet törlésre kerül. Kérlek erősítsd meg az epizód nevének begépelésével.",
@@ -1389,6 +1390,7 @@
       "select_task_type": "Válassz egy feladat típust..."
     },
     "sequences": {
+      "all_hidden": "Minden szekvencia el van rejtve.",
       "all_sequences": "Minden szekvencia",
       "edit_error": "Hiba történt a szekvencia mentésekor. Biztosan nincs azonos nevű szekvencia?",
       "delete_text": "Biztosan törölni akarod {name}-t az adatbázisból? Minden hozzá tartozó shot és előnézet törlésre kerül. Kérlek erősítsd meg a szekvencia nevének begépelésével.",

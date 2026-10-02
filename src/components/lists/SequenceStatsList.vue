@@ -1,7 +1,7 @@
 <template>
   <div class="data-list">
-    <div class="datatable-wrapper" ref="body" @scroll.passive="onBodyScroll">
-      <table class="datatable">
+    <div class="datatable-wrapper">
+      <table class="datatable datatable--cards">
         <thead class="datatable-head">
           <tr>
             <th scope="col" class="name datatable-row-header">
@@ -41,12 +41,17 @@
           </tr>
         </thead>
         <tbody class="datatable-body" v-if="!isLoading">
-          <tr class="all-line datatable-row" v-if="showAll && !isEmptyList">
-            <th scope="row" class="name datatable-row-header">
+          <tr class="all-line datatable-row" v-if="entryStats.length > 0">
+            <th scope="row" class="name datatable-row-header card-head">
               {{ $t('sequences.all_sequences') }}
+              <span class="shot-count">
+                {{ totalShotCount }}
+                {{ $t('shots.number', { count: totalShotCount }) }}
+              </span>
             </th>
 
             <stats-cell
+              :data-label="$t('main.all')"
               :colors="chartColors('all', 'all')"
               :data="chartData('all', 'all')"
               :frames-data="chartData('all', 'all', 'frames')"
@@ -58,6 +63,7 @@
             <stats-cell
               :style="getValidationStyle(columnId)"
               :key="'all-' + columnId"
+              :data-label="taskTypeMap.get(columnId)?.name"
               :colors="chartColors('all', columnId)"
               :data="chartData('all', columnId)"
               :frames-data="chartData('all', columnId, 'frames')"
@@ -71,11 +77,18 @@
           </tr>
 
           <tr class="datatable-row" :key="entry.id" v-for="entry in entryStats">
-            <td class="name datatable-row-header">
-              {{ entry.name }}
+            <td class="name datatable-row-header card-head">
+              <router-link :to="shotsPath(entry)">
+                {{ entry.name }}
+              </router-link>
+              <span class="shot-count">
+                {{ shotCount(entry.id) }}
+                {{ $t('shots.number', { count: shotCount(entry.id) }) }}
+              </span>
             </td>
 
             <stats-cell
+              :data-label="$t('main.all')"
               :colors="chartColors(entry.id, 'all')"
               :data="chartData(entry.id, 'all')"
               :frames-data="chartData(entry.id, 'all', 'frames')"
@@ -92,6 +105,7 @@
             >
               <stats-cell
                 :key="entry.id + columnId"
+                :data-label="taskTypeMap.get(columnId)?.name"
                 :style="getValidationStyle(columnId)"
                 :colors="chartColors(entry.id, columnId)"
                 :data="chartData(entry.id, columnId)"
@@ -124,9 +138,15 @@
       v-if="isEmptyList"
     />
 
-    <p class="has-text-centered nb-sequences" v-if="!isEmptyList && !isLoading">
-      {{ displayedSequencesLength }}
-      {{ $t('sequences.number', { count: displayedSequencesLength }) }}
+    <p class="has-text-centered all-hidden" v-if="isAllHidden">
+      {{ $t('sequences.all_hidden') }}
+    </p>
+    <p
+      class="has-text-centered nb-sequences"
+      v-else-if="!isEmptyList && !isLoading"
+    >
+      {{ sequenceCount }}
+      {{ $t('sequences.number', { count: sequenceCount }) }}
     </p>
   </div>
 </template>
@@ -134,10 +154,11 @@
 <script setup>
 // Imports
 // --------------------------------------------------------------------------
-import { computed, useTemplateRef } from 'vue'
+import { computed } from 'vue'
 import { useStore } from 'vuex'
 
 import colors from '@/lib/colors'
+import { getEntitiesPath } from '@/lib/path'
 import { getChartColors, getChartData } from '@/lib/stats'
 
 import StatsCell from '@/components/cells/StatsCell.vue'
@@ -153,25 +174,17 @@ const props = defineProps({
   displayMode: { type: String, default: 'pie' },
   entries: { type: Array, default: () => [] },
   isError: { type: Boolean, default: false },
+  isFiltered: { type: Boolean, default: false },
   isLoading: { type: Boolean, default: false },
   sequenceStats: { type: Object, default: () => ({}) },
-  showAll: { type: Boolean, default: false },
+  shotCounts: { type: Object, default: () => ({}) },
   validationColumns: { type: Array, default: () => [] }
 })
-
-const emit = defineEmits(['scroll'])
-
-// State
-// --------------------------------------------------------------------------
-const bodyRef = useTemplateRef('body')
 
 // Computed
 // --------------------------------------------------------------------------
 const currentEpisode = computed(() => store.getters.currentEpisode)
 const currentProduction = computed(() => store.getters.currentProduction)
-const displayedSequencesLength = computed(
-  () => store.getters.displayedSequencesLength
-)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 const isTVShow = computed(() => store.getters.isTVShow)
 const sequenceSearchText = computed(() => store.getters.sequenceSearchText)
@@ -186,11 +199,30 @@ const isEmptyList = computed(
     props.entries.length === 0 &&
     !props.isLoading &&
     !props.isError &&
+    !props.isFiltered &&
     !sequenceSearchText.value
+)
+
+const isAllHidden = computed(
+  () =>
+    props.isFiltered &&
+    props.entries.length === 0 &&
+    !props.isLoading &&
+    !props.isError
+)
+
+const sequenceCount = computed(
+  () => props.entries.filter(entry => !entry.canceled).length
+)
+
+const totalShotCount = computed(() =>
+  entryStats.value.reduce((total, entry) => total + shotCount(entry.id), 0)
 )
 
 // Functions
 // --------------------------------------------------------------------------
+const shotCount = entryId => props.shotCounts[entryId] || 0
+
 const chartColors = (entryId, columnId) =>
   getChartColors(props.sequenceStats, entryId, columnId)
 
@@ -228,15 +260,14 @@ const taskTypePath = taskTypeId => {
   }
 }
 
-const onBodyScroll = event => {
-  emit('scroll', event.target.scrollTop)
-}
-
-const setScrollPosition = scrollPosition => {
-  if (bodyRef.value) bodyRef.value.scrollTop = scrollPosition
-}
-
-defineExpose({ setScrollPosition })
+const shotsPath = sequence => ({
+  ...getEntitiesPath(
+    currentProduction.value?.id,
+    'shots',
+    isTVShow.value ? currentEpisode.value?.id : null
+  ),
+  query: { search: sequence.name }
+})
 </script>
 
 <style lang="scss" scoped>
@@ -255,6 +286,23 @@ td.name {
   font-size: 1.2em;
 }
 
+// Row titles are links: keep the text colour of the row instead of the grey
+// of plain links, which reads as dimmed in dark mode.
+.name a {
+  color: inherit;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.shot-count {
+  display: block;
+  color: var(--text-alt);
+  font-size: 0.8rem;
+  font-weight: normal;
+}
+
 .validation {
   min-width: 170px;
   max-width: 170px;
@@ -269,5 +317,33 @@ th.actions {
 .actions {
   width: 100%;
   min-width: 150px;
+}
+
+@media screen and (max-width: 768px) {
+  .data-list {
+    margin-top: 1em;
+  }
+
+  .datatable-wrapper {
+    background: transparent;
+    border: 0;
+    overflow-x: visible;
+  }
+
+  // The global card layout only styles td: the total row is headed by a th.
+  .all-line th.card-head {
+    background: transparent;
+    border: 0;
+    display: block;
+    min-width: 0;
+    order: -1;
+    padding: 0.75em 0 1em;
+    position: static;
+    width: auto;
+
+    &::after {
+      display: none;
+    }
+  }
 }
 </style>

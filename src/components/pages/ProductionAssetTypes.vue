@@ -17,7 +17,7 @@
         class="mb0 flexrow-item"
         :label="$t('statistics.display_mode')"
         locale-key-prefix="statistics."
-        :options="displayModeOptions"
+        :options="STATS_DISPLAY_MODE_OPTIONS"
         v-model="displayMode"
       />
       <span class="filler"></span>
@@ -39,7 +39,7 @@
       :entries="displayedAssetTypes"
       :is-loading="isAssetsLoading || initialLoading"
       :is-error="isAssetsLoadingError"
-      :is-filtered="displayedAssetTypes.length < usedAssetTypes.length"
+      :is-filtered="isFiltered"
       :validation-columns="displayedColumns"
       :asset-type-stats="displayedStats"
       :asset-counts="assetTypeAssetCounts"
@@ -55,12 +55,13 @@ import { useHead } from '@unhead/vue'
 import moment from 'moment'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
+import {
+  STATS_DISPLAY_MODE_OPTIONS,
+  useStatsPage
+} from '@/composables/statsPage'
 import csv from '@/lib/csv'
-import preferences from '@/lib/preferences'
-import { aggregateStats, omitStatsColumns } from '@/lib/stats'
 import stringHelpers from '@/lib/string'
 
 import ProductionAssetTypeList from '@/components/lists/ProductionAssetTypeList.vue'
@@ -70,34 +71,11 @@ import ComboboxTaskTypeOptions from '@/components/widgets/ComboboxTaskTypeOption
 import ComboboxVisibleOptions from '@/components/widgets/ComboboxVisibleOptions.vue'
 
 const { t } = useI18n()
-const route = useRoute()
-const router = useRouter()
 const store = useStore()
 
 // State
 // --------------------------------------------------------------------------
-const DISPLAY_MODE_PREFERENCE = 'stats:asset-type-display-mode'
-
-// A query param repeated in the URL reaches the page as an array of values.
-const parseIds = queryValue =>
-  [queryValue]
-    .flat()
-    .filter(Boolean)
-    .flatMap(value => value.split(','))
-
-const displayMode = ref(
-  preferences.getPreference(DISPLAY_MODE_PREFERENCE) || 'pie'
-)
 const initialLoading = ref(true)
-const hiddenAssetTypeIds = ref(parseIds(route.query.hiddenAssetTypes))
-const hiddenTaskTypeIds = ref(parseIds(route.query.hiddenTaskTypes))
-
-const displayModeOptions = [
-  { label: 'pie', value: 'pie' },
-  { label: 'count', value: 'count' },
-  { label: 'bars', value: 'bars' },
-  { label: 'heatmap', value: 'heatmap' }
-]
 
 // Computed
 // --------------------------------------------------------------------------
@@ -116,41 +94,24 @@ const taskStatusMap = computed(() => store.getters.taskStatusMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 const usedAssetTypes = computed(() => store.getters.usedAssetTypes)
 
-const assetTypeOptions = computed(() =>
-  usedAssetTypes.value.map(({ id, name }) => ({ label: name, value: id }))
-)
-
-const columnTaskTypes = computed(() =>
-  assetValidationColumns.value
-    .map(id => taskTypeMap.value.get(id))
-    .filter(Boolean)
-)
-
-const displayedAssetTypes = computed(() =>
-  usedAssetTypes.value.filter(
-    assetType => !hiddenAssetTypeIds.value.includes(assetType.id)
-  )
-)
-
-const displayedColumns = computed(() =>
-  assetValidationColumns.value.filter(
-    id => !hiddenTaskTypeIds.value.includes(id)
-  )
-)
-
-// Totals only cover what is displayed: the "all" column of an asset type sums
-// its visible task types, the "all" entry sums the visible asset types. The
-// table and the CSV export both read these stats.
-const displayedStats = computed(() => {
-  const stats = assetTypeStats.value
-  const ids = displayedAssetTypes.value
-    .map(assetType => assetType.id)
-    .filter(id => stats[id])
-  const entries = Object.fromEntries(
-    ids.map(id => [id, omitStatsColumns(stats[id], hiddenTaskTypeIds.value)])
-  )
-  return { ...entries, all: { all: {}, ...aggregateStats(entries, ids) } }
+const {
+  columnTaskTypes,
+  displayMode,
+  displayedColumns,
+  displayedRows: displayedAssetTypes,
+  getDisplayedStats,
+  hiddenColumnIds: hiddenTaskTypeIds,
+  hiddenRowIds: hiddenAssetTypeIds,
+  isFiltered,
+  rowOptions: assetTypeOptions
+} = useStatsPage({
+  preferenceKey: 'stats:asset-type-display-mode',
+  rowsParam: 'hiddenAssetTypes',
+  rows: usedAssetTypes,
+  columnIds: assetValidationColumns
 })
+
+const displayedStats = computed(() => getDisplayedStats(assetTypeStats.value))
 
 // Functions
 // --------------------------------------------------------------------------
@@ -189,20 +150,6 @@ watch(currentProduction, () => {
 
 watch(currentEpisode, () => {
   if (isTVShow.value) reset()
-})
-
-watch([hiddenAssetTypeIds, hiddenTaskTypeIds], () => {
-  router.replace({
-    query: {
-      ...route.query,
-      hiddenAssetTypes: hiddenAssetTypeIds.value.join(',') || undefined,
-      hiddenTaskTypes: hiddenTaskTypeIds.value.join(',') || undefined
-    }
-  })
-})
-
-watch(displayMode, () => {
-  preferences.setPreference(DISPLAY_MODE_PREFERENCE, displayMode.value)
 })
 
 // Lifecycle

@@ -283,6 +283,7 @@
     },
     "episodes": {
       "all_episodes": "Tous les épisodes",
+      "all_hidden": "Tous les épisodes sont masqués.",
       "edit_error": "Une erreur est survenue en enregistrant l'épisode. Êtes-vous sûr qu'aucun épisode n'existe avec un nom similaire ?",
       "delete_error": "Une erreur s'est produite lors de la suppression de cet épisode. Il se peut que des données existantes soient actuellement liées à cet épisode. Êtes-vous sûr que cet épisode n'est pas lié à une séquence ?",
       "delete_text": "Êtes-vous sûr de vouloir supprimer {name} de votre base de données ? Tous les plans et previews associés seront également supprimés. Veuillez confirmer en tapant le nom de l'épisode ci-dessous.",
@@ -1389,6 +1390,7 @@
       "library_title": "Bibliothèque de types de tâche"
     },
     "sequences": {
+      "all_hidden": "Toutes les séquences sont masquées.",
       "all_sequences": "Toutes les séquences",
       "edit_error": "Une erreur est survenue en enregistrant la séquence. Êtes-vous sûr qu'aucune séquence n'existe avec un nom similaire ?",
       "delete_text": "Êtes-vous sûr de vouloir supprimer {name} de votre base de données ? Tous les plans et previews associés seront également supprimés. Veuillez confirmer en tapant le nom de la séquence ci-dessous.",

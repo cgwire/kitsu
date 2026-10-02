@@ -583,6 +583,7 @@ export default {
 
   episodes: {
     all_episodes: 'All',
+    all_hidden: 'All episodes are hidden.',
     edit_error: 'An error occurred while saving this episode. Are you sure there is no episode with similar name?',
     delete_error: 'An error occurred while deleting this episode. There may be existing data currently linked to it. Are you sure this episode has no sequence linked to it?',
     delete_text: 'Are you sure you want to remove {name} from your database? All related shots and previews will also be deleted. Please confirm by typing the episode name below.',
@@ -1825,6 +1826,7 @@ export default {
   },
 
   sequences: {
+    all_hidden: 'All sequences are hidden.',
     all_sequences: 'All sequences',
     edit_error: 'An error occurred while saving this sequence. Are you sure there is no sequence with a similar name?',
     delete_text: 'Are you sure you want to remove {name} from your database? All related shots and previews will also be deleted. Please confirm by typing the sequence name below.',
