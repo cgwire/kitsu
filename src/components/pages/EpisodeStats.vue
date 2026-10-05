@@ -95,11 +95,7 @@ import {
 } from '@/composables/statsPage'
 import csv from '@/lib/csv'
 import preferences from '@/lib/preferences'
-import {
-  aggregateRetakeStats,
-  omitRetakeStatsColumns,
-  omitStatsColumns
-} from '@/lib/stats'
+import { aggregateRetakeStats, omitRetakeStatsColumns } from '@/lib/stats'
 import stringHelpers from '@/lib/string'
 
 import EpisodeStatsList from '@/components/lists/EpisodeStatsList.vue'
@@ -184,23 +180,11 @@ const {
   columnIds: episodeValidationColumns
 })
 
-// The server totals an episode by counting each shot once, which is not the
-// sum of its task type columns: its "all" column is kept as long as every
-// column is displayed, and rebuilt from the visible ones otherwise.
-const omitWhenHidden = omitColumns => (entryStats, hiddenColumnIds) =>
-  hiddenColumnIds.length > 0
-    ? omitColumns(entryStats, hiddenColumnIds)
-    : entryStats
-
-const displayedStats = computed(() =>
-  getDisplayedStats(episodeStats.value, {
-    omitColumns: omitWhenHidden(omitStatsColumns)
-  })
-)
+const displayedStats = computed(() => getDisplayedStats(episodeStats.value))
 
 const displayedRetakeStats = computed(() =>
   getDisplayedStats(episodeRetakeStats.value, {
-    omitColumns: omitWhenHidden(omitRetakeStatsColumns),
+    omitColumns: omitRetakeStatsColumns,
     aggregate: aggregateRetakeStats
   })
 )
