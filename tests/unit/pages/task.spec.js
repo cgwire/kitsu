@@ -129,6 +129,7 @@ const mountPage = async ({
       taskMetadataDescriptors: () => [],
       taskStatusForCurrentUser: () => null,
       taskTypeMap: () => new Map([[taskType.id, taskType]]),
+      teamRolesForProduction: () => () => ({}),
       user: () => ({ id: 'user-1', departments: [] }),
       ...getterOverrides
     }
@@ -316,6 +317,32 @@ describe('Task.vue', () => {
         'for-client': false,
         'from-client': false,
         'own-for-client': false
+      })
+    })
+
+    // Zou reads the role the author holds on the production of the task,
+    // which the team of that production carries.
+    it('reads the role of the author from the production of the task', async () => {
+      const teamRoles = {
+        'production-1': { 'author-1': 'client', 'author-2': 'user' }
+      }
+      const { wrapper, store } = await mountPage({
+        task: buildTask({ assignees: ['user-1'] }),
+        comments: [
+          { id: 'from-client', person: { id: 'author-1', role: 'user' } },
+          { id: 'from-artist', person: { id: 'author-2', role: 'client' } }
+        ],
+        getterOverrides: {
+          teamRolesForProduction: () => id => teamRoles[id] || {}
+        }
+      })
+      expect(store.dispatch).toHaveBeenCalledWith(
+        'loadTeamRolesOnce',
+        'production-1'
+      )
+      expect(replyable(wrapper)).toEqual({
+        'from-client': false,
+        'from-artist': true
       })
     })
 

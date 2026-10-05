@@ -938,6 +938,11 @@ const isMentioned = computed(() => {
   )
 })
 
+// The roles the comment authors hold on the production of the task.
+const teamRoles = computed(() =>
+  store.getters.teamRolesForProduction(task.value?.project_id)
+)
+
 const isDepartmentSupervisor = computed(() => {
   if (!isCurrentUserSupervisor.value) return false
   if (user.value.departments.length === 0) return true
@@ -1334,11 +1339,12 @@ const canReplyTo = comment => {
   if (isCurrentUserClient.value) {
     return (
       isAuthor ||
-      (isClientThread(comment) && (isAssigned.value || isMentioned.value))
+      (isClientThread(comment, teamRoles.value) &&
+        (isAssigned.value || isMentioned.value))
     )
   }
   return (
-    !isClientThread(comment) &&
+    !isClientThread(comment, teamRoles.value) &&
     (isAuthor ||
       isAssigned.value ||
       isMentioned.value ||
@@ -1816,6 +1822,15 @@ watch(route, () => {
 watch(currentProduction, () => {
   loadTaskData()
 })
+
+watch(
+  () => task.value?.project_id,
+  productionId => {
+    if (productionId) {
+      store.dispatch('loadTeamRolesOnce', productionId).catch(console.error)
+    }
+  }
+)
 
 watch(selectedPreviewId, () => {
   if (task.value && selectedPreviewId.value) {

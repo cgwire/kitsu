@@ -29,13 +29,15 @@
       />
       <text-field
         :label="$t('shots.fields.frame_in')"
-        v-model="form.frameIn"
+        :model-value="form.frameIn"
         type="number"
+        @update:model-value="onFrameBoundChanged('frameIn', $event)"
       />
       <text-field
         :label="$t('shots.fields.frame_out')"
-        v-model="form.frameOut"
+        :model-value="form.frameOut"
         type="number"
+        @update:model-value="onFrameBoundChanged('frameOut', $event)"
         @enter="runConfirmation"
       />
       <text-field
@@ -172,10 +174,13 @@ const resetForm = () => {
   }
 }
 
-const updateNbFramesFromRange = () => {
+// Only a bound typed by the user recounts the frames: the stored count can
+// differ from the range on purpose, and opening the modal must not alter it.
+const onFrameBoundChanged = (field, value) => {
+  form.value[field] = value
   // sanitizeInteger reads an empty field as 0, which is a valid frame in.
   const bounds = [form.value.frameIn, form.value.frameOut]
-  if (bounds.some(value => value === '' || value == null)) return
+  if (bounds.some(bound => bound === '' || bound == null)) return
   const frameIn = sanitizeInteger(form.value.frameIn)
   const frameOut = sanitizeInteger(form.value.frameOut)
   if (frameOut >= frameIn) {
@@ -198,8 +203,6 @@ watch(
   }
 )
 
-watch(() => form.value.frameIn, updateNbFramesFromRange)
-watch(() => form.value.frameOut, updateNbFramesFromRange)
 watch(() => props.shotToEdit, resetForm)
 
 onMounted(resetForm)

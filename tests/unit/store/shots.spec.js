@@ -755,6 +755,11 @@ describe('Shots store, EDIT_SHOT_END', () => {
   test('keeps the frame in column hidden without a frame in', () => {
     expect(editShot({ handle_in: 12 }).isFrameIn).toBe(false)
   })
+
+  // The edit modal sends its untouched frame in field as an empty string.
+  test('keeps the frame in column hidden for an empty frame in', () => {
+    expect(editShot({ frame_in: '' }).isFrameIn).toBe(false)
+  })
 })
 
 // The task panel's preview player trims shots from pages that never load the

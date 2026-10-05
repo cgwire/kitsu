@@ -700,6 +700,11 @@ const isCommentingAllowed = computed(
 
 const isConceptTask = computed(() => props.entityType === 'Concept')
 
+// The roles the comment authors hold on the production of the task.
+const teamRoles = computed(() =>
+  store.getters.teamRolesForProduction(props.task?.project_id)
+)
+
 const isDepartmentSupervisor = computed(() =>
   isSupervisorInDepartments(
     user.value,
@@ -854,6 +859,9 @@ const loadTaskData = () => {
   if (props.task) {
     loading.task = true
     errors.task = false
+    store
+      .dispatch('loadTeamRolesOnce', props.task.project_id)
+      .catch(console.error)
     store
       .dispatch('loadTaskComments', {
         taskId: props.task.id,
@@ -1235,11 +1243,12 @@ const canReplyTo = comment => {
     return (
       isAuthor ||
       isClientFromSameStudio(comment.person) ||
-      (isClientThread(comment) && (isAssigned.value || isMentioned.value))
+      (isClientThread(comment, teamRoles.value) &&
+        (isAssigned.value || isMentioned.value))
     )
   }
   return (
-    !isClientThread(comment) &&
+    !isClientThread(comment, teamRoles.value) &&
     (isAuthor ||
       isAssigned.value ||
       isMentioned.value ||

@@ -63,6 +63,7 @@ const makeStore = ({
   isAdmin = false,
   isClient = false,
   persons = [],
+  teamRoles = {},
   user = { id: 'person-1' }
 } = {}) =>
   createStore({
@@ -83,6 +84,8 @@ const makeStore = ({
       productionDepartmentIds: () => [],
       taskTypeMap: () =>
         new Map([['task-type-1', { id: 'task-type-1', for_entity: 'Asset' }]]),
+      teamRolesForProduction: () => productionId =>
+        teamRoles[productionId] || {},
       use12HourClock: () => false,
       user: () => user
     }
@@ -343,6 +346,34 @@ describe('Comment', () => {
         editor: true
       })
       expect(wrapper.find('.edited-text').text()).toBe('Edited by Eddie Editor')
+    })
+
+    // A person can be a client on this production only.
+    test('names the people of a comment written by a client of the production', () => {
+      const wrapper = mountComment({
+        comment: { ...internal, person: { id: 'person-2', role: 'user' } },
+        storeOptions: {
+          isClient: true,
+          persons,
+          teamRoles: { 'production-1': { 'person-2': 'client' } }
+        }
+      })
+      expect(shownPeople(wrapper)).toEqual({
+        avatar: true,
+        name: true,
+        editor: true
+      })
+    })
+
+    // The guests of a shared playlist only know the people of its comments:
+    // the editor has no name to show there.
+    test('keeps the editor out of a shared playlist', () => {
+      const wrapper = mountComment({
+        comment: { ...internal, for_client: true },
+        storeOptions: { user: null },
+        urlPrefix: '/api/shared/playlists/token-1'
+      })
+      expect(wrapper.find('.edited-text').exists()).toBe(false)
     })
 
     test('names them to the studio', () => {
