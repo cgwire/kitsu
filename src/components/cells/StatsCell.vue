@@ -140,8 +140,10 @@ const percent = value => {
     order: 2;
   }
 
-  .datatable--cards td.validation > .tag,
-  .datatable--cards .heat-cell > .tag {
+  // .datatable is repeated to outweigh the tag margins of the global card
+  // layout.
+  .datatable.datatable--cards td.validation > .tag,
+  .datatable.datatable--cards .heat-cell > .tag {
     margin: 0 auto 0 0.5em;
     order: 1;
   }

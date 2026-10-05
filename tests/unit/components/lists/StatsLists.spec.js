@@ -218,7 +218,7 @@ describe('lists/SequenceStatsList', () => {
     expect(nameLink(mountSequences()).props('to')).toEqual({
       name: 'shots',
       params: { production_id: 'production-1' },
-      query: { search: 'SQ01' }
+      query: { search: '"SQ01"' }
     })
   })
 
@@ -230,7 +230,7 @@ describe('lists/SequenceStatsList', () => {
     expect(nameLink(wrapper).props('to')).toEqual({
       name: 'episode-shots',
       params: { production_id: 'production-1', episode_id: 'episode-1' },
-      query: { search: 'SQ01' }
+      query: { search: '"SQ01"' }
     })
   })
 
@@ -247,6 +247,16 @@ describe('lists/SequenceStatsList', () => {
     expect(mountSequences().find('.nb-sequences').text()).toBe(
       '2 sequences.number'
     )
+  })
+
+  // A search drops the sequences without matching shots from the rows.
+  test('counts the sequences left by a search', () => {
+    const wrapper = mountSequences(
+      { sequenceStats: { all: { all: status }, sq01: { all: status } } },
+      { sequenceSearchText: () => 'layout=wip' }
+    )
+    expect(wrapper.findAll('td.name')).toHaveLength(1)
+    expect(wrapper.find('.nb-sequences').text()).toBe('1 sequences.number')
   })
 
   test('says that every sequence is hidden rather than that there is none', () => {
@@ -442,6 +452,23 @@ describe('lists/EpisodeStatsList expander', () => {
     expect(takeRows(wrapper)).toHaveLength(2)
 
     await expander.trigger('click')
+    expect(takeRows(wrapper)).toHaveLength(0)
+  })
+
+  // Hiding every task type an episode has retakes for empties its total.
+  test('expands an episode without retake total into no take row', async () => {
+    const wrapper = mountEpisodes({
+      dataMode: 'retakes',
+      episodeRetakeStats: { 'episode-1': { all: {} } }
+    })
+    await wrapper.find('td.expander[role="button"]').trigger('click')
+    expect(takeRows(wrapper)).toHaveLength(0)
+  })
+
+  test('offers no expander outside the retakes mode', async () => {
+    const wrapper = mountEpisodes({ dataMode: 'status' })
+    expect(wrapper.find('td.expander[role="button"]').exists()).toBe(false)
+    await wrapper.find('td.expander').trigger('click')
     expect(takeRows(wrapper)).toHaveLength(0)
   })
 

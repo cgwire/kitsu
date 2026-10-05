@@ -178,44 +178,16 @@ useHead({
 </script>
 
 <style lang="scss" scoped>
-// The filters carry a label above them, so the row is aligned on its bottom.
-// Its controls differ in height (select 42px, option combos 40px, buttons
-// 32px): the bottom margins centre them all on the select.
+@use '@/styles/stats.scss' as stats;
+
 .asset-type-list-header {
-  align-items: flex-end;
-
-  .options-filter {
-    margin-bottom: 1px;
-  }
-
-  .button {
-    margin-bottom: 5px;
-  }
+  @include stats.page-header;
 }
 
 @media screen and (max-width: 768px) {
-  .asset-type-list-header {
-    flex-wrap: wrap;
-    margin-top: 1em;
-    row-gap: 0.5em;
-  }
-
   // Mobile is read-only.
   .export-button {
     display: none;
-  }
-
-  // Tighter gaps leave room for the reload button next to the filters. When
-  // longer labels still wrap it under them, it stays on the right edge.
-  .asset-type-list-header {
-    .flexrow-item {
-      margin-right: 0.5em;
-    }
-
-    .button {
-      margin-left: auto;
-      margin-right: 0;
-    }
   }
 }
 </style>

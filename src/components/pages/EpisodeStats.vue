@@ -95,11 +95,7 @@ import {
 } from '@/composables/statsPage'
 import csv from '@/lib/csv'
 import preferences from '@/lib/preferences'
-import {
-  aggregateRetakeStats,
-  omitRetakeStatsColumns,
-  omitStatsColumns
-} from '@/lib/stats'
+import { aggregateRetakeStats, omitRetakeStatsColumns } from '@/lib/stats'
 import stringHelpers from '@/lib/string'
 
 import EpisodeStatsList from '@/components/lists/EpisodeStatsList.vue'
@@ -184,25 +180,16 @@ const {
   columnIds: episodeValidationColumns
 })
 
-// The server totals an episode by counting each shot once, which is not the
-// sum of its task type columns: its "all" column is kept as long as every
-// column is displayed, and rebuilt from the visible ones otherwise.
-const omitWhenHidden = omitColumns => (entryStats, hiddenColumnIds) =>
-  hiddenColumnIds.length > 0
-    ? omitColumns(entryStats, hiddenColumnIds)
-    : entryStats
+const displayedStats = computed(() => getDisplayedStats(episodeStats.value))
 
-const displayedStats = computed(() =>
-  getDisplayedStats(episodeStats.value, {
-    omitColumns: omitWhenHidden(omitStatsColumns)
-  })
-)
-
+// The list and the export only read the retake stats in the retakes mode.
 const displayedRetakeStats = computed(() =>
-  getDisplayedStats(episodeRetakeStats.value, {
-    omitColumns: omitWhenHidden(omitRetakeStatsColumns),
-    aggregate: aggregateRetakeStats
-  })
+  isRetakeDataMode.value
+    ? getDisplayedStats(episodeRetakeStats.value, {
+        omitColumns: omitRetakeStatsColumns,
+        aggregate: aggregateRetakeStats
+      })
+    : {}
 )
 
 // Functions
@@ -295,50 +282,17 @@ useHead({
 </script>
 
 <style lang="scss" scoped>
-// The filters carry a label above them, so the row is aligned on its bottom.
-// Its controls differ in height (select 42px, option combos 40px, buttons
-// 32px): the bottom margins centre them all on the select.
+@use '@/styles/stats.scss' as stats;
+
 .episode-list-header {
-  align-items: flex-end;
   // Nine controls do not fit on one line below a wide desktop.
   flex-wrap: wrap;
   row-gap: 0.5em;
 
-  .options-filter {
-    margin-bottom: 1px;
-  }
-
-  .button {
-    margin-bottom: 5px;
-  }
+  @include stats.page-header($with-search: true);
 }
 
 @media screen and (max-width: 768px) {
-  .episode-list-header {
-    margin-top: 1em;
-
-    .flexrow-item {
-      margin-right: 0.5em;
-    }
-
-    // The search field takes the first line: detach it from the filters.
-    .search-field {
-      margin-bottom: 0.5em;
-      margin-right: 0;
-    }
-
-    // The two option filters share a line, the comboboxes wrap after them.
-    .options-filter {
-      flex: 1 1 40%;
-    }
-
-    // When the buttons wrap under the filters, they stay on the right edge.
-    .button {
-      margin-left: auto;
-      margin-right: 0;
-    }
-  }
-
   // Mobile is read-only.
   .export-button {
     display: none;

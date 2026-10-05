@@ -26,17 +26,16 @@ const retake = (retakes, done, max) => ({
   done: { count: done, frames: 0, drawings: 0 },
   other: { count: 0, frames: 0, drawings: 0 }
 })
-// The server totals a shot once whatever its task types: its "all" is not the
-// sum of the columns.
+// As on the server, an "all" column sums the task type columns.
 const episodeStats = {
-  all: { all: status(7), layout: status(5), anim: status(4) },
-  e01: { all: status(2), layout: status(1), anim: status(2) },
-  e02: { all: status(5), layout: status(4), anim: status(2) }
+  all: { all: status(9), layout: status(5), anim: status(4) },
+  e01: { all: status(3), layout: status(1), anim: status(2) },
+  e02: { all: status(6), layout: status(4), anim: status(2) }
 }
 const episodeRetakeStats = {
-  all: { all: retake(4, 4, 2), layout: retake(3, 3, 1), anim: retake(3, 3, 2) },
-  e01: { all: retake(1, 1, 1), layout: retake(1, 1, 1), anim: retake(1, 1, 1) },
-  e02: { all: retake(3, 3, 2), layout: retake(2, 2, 1), anim: retake(2, 2, 2) }
+  all: { all: retake(6, 6, 2), layout: retake(3, 3, 1), anim: retake(3, 3, 2) },
+  e01: { all: retake(2, 2, 1), layout: retake(1, 1, 1), anim: retake(1, 1, 1) },
+  e02: { all: retake(4, 4, 2), layout: retake(2, 2, 1), anim: retake(2, 2, 2) }
 }
 const e01 = { id: 'e01', name: 'E01', status: 'running' }
 const e02 = { id: 'e02', name: 'E02', status: 'complete' }
@@ -152,8 +151,8 @@ describe('EpisodeStats page', () => {
     expect(listProps().entries).toEqual([e01])
     expect(listProps().isFiltered).toBe(true)
     expect(Object.keys(listProps().episodeStats).sort()).toEqual(['all', 'e01'])
-    expect(listProps().episodeStats.all.all.done.count).toBe(2)
-    expect(listProps().episodeRetakeStats.all.all.retake.count).toBe(1)
+    expect(listProps().episodeStats.all.all.done.count).toBe(3)
+    expect(listProps().episodeRetakeStats.all.all.retake.count).toBe(2)
     expect(replace).toHaveBeenCalledWith({ query: { hiddenEpisodes: 'e02' } })
   })
 
@@ -167,11 +166,14 @@ describe('EpisodeStats page', () => {
     expect(listProps().validationColumns).toEqual(['layout', 'anim'])
   })
 
-  // The totals of the server are kept as long as every column is displayed.
-  test('keeps the totals of the server while no task type is hidden', async () => {
+  test('totals every task type while none is hidden', async () => {
     await mountPage()
-    expect(listProps().episodeStats.e01).toBe(episodeStats.e01)
-    expect(listProps().episodeRetakeStats.e01).toBe(episodeRetakeStats.e01)
+    expect(listProps().episodeStats.e01.all).toEqual(episodeStats.e01.all)
+    expect(listProps().episodeRetakeStats.e01.all).toMatchObject({
+      max_retake_count: 1,
+      retake: { count: 2 },
+      done: { count: 2 }
+    })
   })
 
   test('takes a hidden task type out of the columns and of the totals', async () => {
@@ -187,6 +189,30 @@ describe('EpisodeStats page', () => {
       max_retake_count: 1,
       retake: { count: 1 }
     })
+  })
+
+  // The page is reused from a production to the next: the new URL starts
+  // without any filter.
+  test('follows the hidden ids of the URL when the route changes', async () => {
+    await mountPage({
+      query: { hiddenEpisodes: 'e01', hiddenTaskTypes: 'anim' }
+    })
+    await router.push({ path: '/productions/production-2/episode-stats' })
+    await flushPromises()
+    expect(episodeFilter().props('hidden')).toEqual([])
+    expect(taskTypeFilter().props('hidden')).toEqual([])
+    expect(listProps().entries).toEqual([e01])
+    expect(listProps().validationColumns).toEqual(['layout', 'anim'])
+  })
+
+  test('builds the retake stats in the retakes mode only', async () => {
+    await mountPage()
+    expect(Object.keys(listProps().episodeRetakeStats)).toContain('e01')
+    await combobox('statistics.data_mode').vm.$emit(
+      'update:model-value',
+      'status'
+    )
+    expect(listProps().episodeRetakeStats).toEqual({})
   })
 
   test('exports the displayed episodes and task types, in the current data mode', async () => {

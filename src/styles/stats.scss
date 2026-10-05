@@ -1,0 +1,113 @@
+// Styles shared by the statistics pages and by their lists.
+
+// Header of a statistics page. The filters carry a label above them, so the
+// row is aligned on its bottom. Its controls differ in height (select 42px,
+// option combos 40px, buttons 32px): the bottom margins centre them all on
+// the select.
+@mixin page-header($with-search: false) {
+  align-items: flex-end;
+
+  .options-filter {
+    margin-bottom: 1px;
+  }
+
+  .button {
+    margin-bottom: 5px;
+  }
+
+  @media screen and (max-width: 768px) {
+    flex-wrap: wrap;
+    margin-top: 1em;
+    row-gap: 0.5em;
+
+    .flexrow-item {
+      margin-right: 0.5em;
+    }
+
+    @if $with-search {
+      // The search field takes the first line: detach it from the filters.
+      .search-field {
+        margin-bottom: 0.5em;
+        margin-right: 0;
+      }
+
+      // The two option filters share a line, the comboboxes wrap after them.
+      .options-filter {
+        flex: 1 1 40%;
+      }
+    }
+
+    // When the buttons wrap under the filters, they stay on the right edge.
+    .button {
+      margin-left: auto;
+      margin-right: 0;
+    }
+  }
+}
+
+// Table of a statistics page: a name column followed by one stats column per
+// task type.
+@mixin list {
+  .datatable-body tr:first-child th,
+  .datatable-body tr:first-child td {
+    border-top: 0;
+  }
+
+  .name {
+    font-weight: bold;
+  }
+
+  td.name {
+    font-size: 1.2em;
+  }
+
+  // Row titles are links: keep the text colour of the row instead of the grey
+  // of plain links, which reads as dimmed in dark mode.
+  .name a {
+    color: inherit;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .validation {
+    min-width: 170px;
+    max-width: 170px;
+    width: 170px;
+    word-wrap: break-word;
+  }
+
+  th.actions {
+    padding: 0.4em;
+  }
+
+  @media screen and (max-width: 768px) {
+    .data-list {
+      margin-top: 1em;
+    }
+
+    .datatable-wrapper {
+      background: transparent;
+      border: 0;
+      overflow-x: visible;
+    }
+
+    // The global card layout only styles td: a total row headed by a th
+    // needs the same treatment.
+    .all-line th.card-head {
+      background: transparent;
+      border: 0;
+      display: block;
+      min-width: 0;
+      order: -1;
+      padding: 0.75em 0 1em;
+      position: static;
+      width: auto;
+
+      &::after {
+        display: none;
+      }
+    }
+  }
+}

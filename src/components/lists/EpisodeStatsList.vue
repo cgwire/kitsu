@@ -81,14 +81,12 @@
                 tabindex="0"
                 @click="toggleExpanded(entry.id)"
                 @keydown.enter.prevent="toggleExpanded(entry.id)"
+                v-if="isRetakes"
               >
-                <chevron-right-icon
-                  v-if="isRetakes && expanded[entry.id] !== true"
-                />
-                <chevron-down-icon
-                  v-if="isRetakes && expanded[entry.id] === true"
-                />
+                <chevron-down-icon v-if="expanded[entry.id]" />
+                <chevron-right-icon v-else />
               </td>
+              <td class="expander" v-else></td>
 
               <td class="name datatable-row-header card-head">
                 <router-link :to="shotsPath(entry)">
@@ -159,12 +157,12 @@
                     :data-label="taskTypeMap.get(columnId)?.name"
                     :style="getValidationStyle(columnId)"
                     :colors="chartColors(entry.id, columnId)"
-                    :data="chartTakeData(entry.id, columnId, takeNumber)"
+                    :data="chartData(entry.id, columnId, 'count', takeNumber)"
                     :frames-data="
-                      chartTakeData(entry.id, columnId, takeNumber, 'frames')
+                      chartData(entry.id, columnId, 'frames', takeNumber)
                     "
                     :drawings-data="
-                      chartTakeData(entry.id, columnId, takeNumber, 'drawings')
+                      chartData(entry.id, columnId, 'drawings', takeNumber)
                     "
                     :count-mode="countMode"
                     :display-mode="displayMode"
@@ -271,7 +269,6 @@ const props = defineProps({
 // --------------------------------------------------------------------------
 const expanded = ref({})
 
-const retakeColors = ['#ff3860', '#6f727a', '#22d160']
 const takeLabelColors = ['#FB8C00', '#EF6C00', '#d35400', '#e74c3c', '#c0392b']
 
 // Computed
@@ -305,9 +302,15 @@ const isRetakes = computed(() => props.dataMode === 'retakes')
 // --------------------------------------------------------------------------
 // The status stats come from the server without the done flag of their
 // statuses: the status map provides it.
-const chartData = (entryId, columnId, dataType = 'count') =>
+const chartData = (entryId, columnId, dataType = 'count', takeNumber = null) =>
   isRetakes.value
-    ? getRetakeChartData(props.episodeRetakeStats, entryId, columnId, dataType)
+    ? getRetakeChartData(
+        props.episodeRetakeStats,
+        entryId,
+        columnId,
+        dataType,
+        takeNumber
+      )
     : getChartData(
         props.episodeStats,
         entryId,
@@ -317,19 +320,7 @@ const chartData = (entryId, columnId, dataType = 'count') =>
       )
 
 const chartColors = (entryId, columnId) =>
-  isRetakes.value
-    ? retakeColors
-    : chartData(entryId, columnId).map(data => data[2])
-
-const chartTakeData = (entryId, columnId, takeNumber, dataType = 'count') => {
-  const take = props.episodeRetakeStats[entryId][columnId].evolution[takeNumber]
-  // Order matters: it matches retakeColors.
-  return [
-    ['retake', take.retake[dataType], retakeColors[0], false],
-    ['other', take.other[dataType], retakeColors[1], false],
-    ['done', take.done[dataType], retakeColors[2], true]
-  ]
-}
+  chartData(entryId, columnId).map(data => data[2])
 
 const chartRetakeMaxCount = (entryId, columnId) =>
   getChartRetakeCount(props.episodeRetakeStats, entryId, columnId)
@@ -384,29 +375,13 @@ watch(isRetakes, () => {
 </script>
 
 <style lang="scss" scoped>
-.datatable-body tr:first-child th,
-.datatable-body tr:first-child td {
-  border-top: 0;
-}
+@use '@/styles/stats.scss' as stats;
+
+@include stats.list;
 
 .name {
   min-width: 100px;
   width: 100px;
-  font-weight: bold;
-}
-
-td.name {
-  font-size: 1.2em;
-}
-
-// Row titles are links: keep the text colour of the row instead of the grey
-// of plain links, which reads as dimmed in dark mode.
-.name a {
-  color: inherit;
-
-  &:hover {
-    text-decoration: underline;
-  }
 }
 
 // Take rows detail the episode above them: indented, and tagged like the
@@ -445,17 +420,13 @@ td.take-name {
 }
 
 .expander {
-  cursor: pointer;
   min-width: 10px;
   width: 10px;
   padding-top: 10px;
-}
 
-.validation {
-  min-width: 170px;
-  max-width: 170px;
-  width: 170px;
-  word-wrap: break-word;
+  &[role='button'] {
+    cursor: pointer;
+  }
 }
 
 .actions {
@@ -463,21 +434,7 @@ td.take-name {
   width: 150px;
 }
 
-th.actions {
-  padding: 0.4em;
-}
-
 @media screen and (max-width: 768px) {
-  .data-list {
-    margin-top: 1em;
-  }
-
-  .datatable-wrapper {
-    background: transparent;
-    border: 0;
-    overflow-x: visible;
-  }
-
   // The expander sits in the top right corner of the card of its episode.
   .datatable-body .datatable-row {
     position: relative;

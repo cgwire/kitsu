@@ -70,6 +70,16 @@ export const useStatsPage = ({ preferenceKey, rowsParam, rows, columnIds }) => {
     return { ...entries, all: { all: {}, ...aggregate(entries, ids) } }
   }
 
+  // The page is reused when the route changes under it (another production
+  // or episode): the hidden ids keep following the URL after the setup.
+  watch(
+    () => route.query,
+    query => {
+      hiddenRowIds.value = parseIds(query[rowsParam])
+      hiddenColumnIds.value = parseIds(query.hiddenTaskTypes)
+    }
+  )
+
   watch([hiddenRowIds, hiddenColumnIds], () => {
     router.replace({
       query: {
