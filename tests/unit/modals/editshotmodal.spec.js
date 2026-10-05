@@ -87,6 +87,32 @@ describe('modals/EditShotModal', () => {
     expect(confirmForm(wrapper).nb_frames).toBe(1)
   })
 
+  // The stored count can differ from the range on purpose (handles, legacy
+  // data): only an edit of a bound recomputes it.
+  it('keeps the stored frame count when the modal opens', async () => {
+    const wrapper = mountModal({
+      ...shot,
+      nb_frames: 120,
+      data: { frame_in: 0, frame_out: 0 }
+    })
+    await nextTick()
+    expect(confirmForm(wrapper).nb_frames).toBe(120)
+  })
+
+  it('keeps the stored frame count when it is handed another shot', async () => {
+    const wrapper = mountModal()
+    await wrapper.setProps({
+      shotToEdit: {
+        ...shot,
+        id: 'sh-2',
+        nb_frames: 90,
+        data: { frame_in: 10, frame_out: 20 }
+      }
+    })
+    await nextTick()
+    expect(confirmForm(wrapper).nb_frames).toBe(90)
+  })
+
   it('keeps the frame count while a bound is empty', async () => {
     const wrapper = mountModal({ ...shot, nb_frames: 24, data: {} })
     await nextTick()
