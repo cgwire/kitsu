@@ -1,7 +1,16 @@
 <template>
   <div class="fixed-page columns">
     <div class="column main-column">
-      <div class="concepts page">
+      <div class="concepts page" @dragover="onFileDragover">
+        <div
+          class="drop-mask"
+          @drop="onFileDrop"
+          @dragover="onFileDragover"
+          @dragleave="onFileDragLeave"
+          v-if="isDraggingFile"
+        >
+          {{ $t('concepts.drop_new_concepts') }}
+        </div>
         <div class="page-header">
           <div class="filters">
             <combobox-status
@@ -33,20 +42,7 @@
           :is-error="errors.loadingConcepts"
           v-if="loading.loadingConcepts || errors.loadingConcepts"
         />
-        <div
-          class="concept-list pb1"
-          @dragover="onFileDragover"
-          v-else-if="filteredConcepts?.length"
-        >
-          <div
-            class="drop-mask"
-            @drop="onFileDrop"
-            @dragover="onFileDragover"
-            @dragleave="onFileDragLeave"
-            v-if="isDraggingFile"
-          >
-            {{ $t('concepts.drop_new_concepts') }}
-          </div>
+        <div class="concept-list pb1" v-else-if="filteredConcepts.length">
           <ul class="items">
             <li
               class="item"
@@ -54,17 +50,14 @@
                 'selected-item': isSelected(concept)
               }"
               :key="concept.id"
-              role="button"
-              tabindex="0"
-              @click="
-                onSelectConcept(concept, $event.ctrlKey || $event.metaKey)
-              "
-              @keydown.enter.prevent="
-                onSelectConcept(concept, $event.ctrlKey || $event.metaKey)
-              "
               v-for="concept in filteredConcepts"
             >
-              <concept-card :concept="concept" />
+              <concept-card
+                :concept="concept"
+                @click="
+                  onSelectConcept(concept, $event.ctrlKey || $event.metaKey)
+                "
+              />
             </li>
           </ul>
         </div>
@@ -75,7 +68,6 @@
         </div>
         <div class="footer mb2">
           <button-simple
-            class="upload-button"
             :disabled="loading.loadingConcepts"
             :text="$t('concepts.add_new_concept')"
             @click="openAddConceptModal"
@@ -192,9 +184,7 @@ const filteredConcepts = computed(() =>
 )
 
 const publishers = computed(() => {
-  const personIds = new Set(
-    filteredConcepts.value.map(concept => concept.created_by)
-  )
+  const personIds = new Set(concepts.value.map(concept => concept.created_by))
   return sortPeople(
     [...personIds]
       .map(personId => personMap.value.get(personId))
@@ -226,6 +216,7 @@ const taskStatusList = computed(() => [
 // --------------------------------------------------------------------------
 const refreshConcepts = async () => {
   loading.loadingConcepts = true
+  errors.loadingConcepts = false
   try {
     await store.dispatch('loadAssets', { all: true })
     await store.dispatch('loadConcepts')
@@ -260,6 +251,7 @@ const onSelectConcept = (concept, isMultipleSelection = false) => {
 }
 
 const openAddConceptModal = () => {
+  errors.addingConcept = false
   modals.addConcept = true
 }
 
@@ -269,6 +261,7 @@ const closeAddConceptModal = () => {
 
 const confirmAddConceptModal = async forms => {
   loading.addingConcept = true
+  errors.addingConcept = false
   try {
     await store.dispatch('newConcepts', forms)
     closeAddConceptModal()
@@ -288,7 +281,7 @@ const reset = () => {
 const onFileDrop = async event => {
   pauseEvent(event)
   const droppedFiles = event.dataTransfer.files
-  modals.addConcept = true
+  openAddConceptModal()
   isDraggingFile.value = false
   await nextTick()
   addPreviewModalRef.value.setFiles(droppedFiles)
@@ -308,7 +301,10 @@ const onTaskStatusChanged = eventData => {
     concept => concept.tasks[0].id === eventData.task_id
   )
   if (concept) {
-    concept.tasks[0].task_status_id = eventData.new_task_status_id
+    store.commit('UPDATE_TASK', {
+      task: concept.tasks[0],
+      taskStatusId: eventData.new_task_status_id
+    })
   }
 }
 
@@ -347,6 +343,7 @@ useHead({
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
 }
 
 .filters {
@@ -371,7 +368,6 @@ useHead({
 .concept-list {
   flex: 1;
   margin: 0 auto;
-  position: relative;
   overflow-y: auto;
 }
 
@@ -429,7 +425,7 @@ useHead({
 }
 
 .drop-mask {
-  background: rgba(0.1, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.5);
   border-radius: 0.5em;
   color: white;
   font-size: 2em;
