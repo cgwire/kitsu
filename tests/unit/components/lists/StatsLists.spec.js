@@ -445,6 +445,16 @@ describe('lists/EpisodeStatsList expander', () => {
     expect(takeRows(wrapper)).toHaveLength(0)
   })
 
+  // Hiding every task type an episode has retakes for empties its total.
+  test('expands an episode without retake total into no take row', async () => {
+    const wrapper = mountEpisodes({
+      dataMode: 'retakes',
+      episodeRetakeStats: { 'episode-1': { all: {} } }
+    })
+    await wrapper.find('td.expander[role="button"]').trigger('click')
+    expect(takeRows(wrapper)).toHaveLength(0)
+  })
+
   // Same tag as the "Take N" label of the cells, redder as the takes add up.
   test('tags each take row with its number', async () => {
     const wrapper = mountEpisodes({ dataMode: 'retakes' })

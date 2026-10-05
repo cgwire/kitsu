@@ -94,11 +94,10 @@ export const getChartColors = (mainStats, entry, column) => {
   return getChartData(mainStats, entry, column).map(entry => entry[2])
 }
 
-// Extract max retake count info from retake statistics.
-export const getChartRetakeCount = (mainStats, entryId, columnId) => {
-  if (!mainStats[entryId] || !mainStats[entryId][columnId]) return -1
-  return mainStats[entryId][columnId].max_retake_count
-}
+// Extract max retake count info from retake statistics. A column rebuilt
+// from no visible task type is empty: it counts as a missing one.
+export const getChartRetakeCount = (mainStats, entryId, columnId) =>
+  mainStats[entryId]?.[columnId]?.max_retake_count ?? -1
 
 // Build a map containing all stats of a production or episode:
 //
