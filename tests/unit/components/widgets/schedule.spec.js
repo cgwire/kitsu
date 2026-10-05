@@ -27,6 +27,8 @@ vi.mock('vue-i18n', () => ({
   useI18n: () => ({ t: key => key })
 }))
 
+import { parseSimpleDate } from '@/lib/time'
+
 import Schedule from '@/components/widgets/Schedule.vue'
 
 const person = {
@@ -223,5 +225,55 @@ describe('Schedule widget - dragging a collapsed root row bar', () => {
     expect(wrapper.emitted('root-element-selected')).toBeTruthy()
 
     wrapper.unmount()
+  })
+})
+
+// The Today buttons of the schedule pages call scrollToToday.
+describe('Schedule widget - today', () => {
+  // the pages pass the UTC midnight of each day, as parseSimpleDate builds it
+  const range = {
+    startDate: parseSimpleDate('2026-08-01'),
+    endDate: parseSimpleDate('2026-10-31')
+  }
+
+  const showTodayOn = day => {
+    vi.setSystemTime(new Date(`${day}T15:00:00`))
+    const wrapper = mountSchedule(range)
+    wrapper.vm.scrollToToday()
+    vi.advanceTimersByTime(20)
+    const shown = {
+      scrollLeft: wrapper.find('.timeline-content-wrapper').element.scrollLeft,
+      marker: wrapper.find('.timeline-position.today').element.style.display
+    }
+    wrapper.unmount()
+    return shown
+  }
+
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('scrolls to today and marks it, on the last day of the range too', () => {
+    const middle = showTodayOn('2026-09-15')
+    const lastDay = showTodayOn('2026-10-31')
+
+    expect(middle.scrollLeft).toBeGreaterThan(0)
+    expect(middle.marker).toBe('block')
+    expect(lastDay.scrollLeft).toBeGreaterThan(middle.scrollLeft)
+    expect(lastDay.marker).toBe('block')
+  })
+
+  // Doing nothing there made the button look broken.
+  it('goes to the range end closest to a today out of the range', () => {
+    const before = showTodayOn('2026-07-01')
+    const after = showTodayOn('2026-12-15')
+
+    expect(before.scrollLeft).toBe(showTodayOn('2026-08-01').scrollLeft)
+    expect(after.scrollLeft).toBe(showTodayOn('2026-10-31').scrollLeft)
+    expect([before.marker, after.marker]).toEqual(['none', 'none'])
   })
 })
