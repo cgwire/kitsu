@@ -89,7 +89,23 @@
     />
 
     <div class="column side-column">
-      <task-info entity-type="Concept" :task="currentTask" with-actions />
+      <task-info entity-type="Concept" :task="currentTask" with-actions>
+        <template #selection>
+          <ul class="selected-concepts">
+            <li
+              class="selected-concept"
+              :key="concept.id"
+              v-for="concept in selectedConcepts.values()"
+            >
+              <concept-card
+                compact
+                :concept="concept"
+                @click="onSelectConcept(concept, true)"
+              />
+            </li>
+          </ul>
+        </template>
+      </task-info>
     </div>
   </div>
 </template>
@@ -396,6 +412,20 @@ useHead({
       border-color: var(--background-selected);
     }
   }
+}
+
+.selected-concepts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  list-style: none;
+  margin: 1em 0 0;
+}
+
+.selected-concept {
+  background-color: var(--background);
+  border-radius: 1em;
+  cursor: pointer;
 }
 
 .page-header {

@@ -35,6 +35,7 @@ const mountPage = async ({
   concepts = [],
   dispatch = vi.fn(() => Promise.resolve()),
   people = [],
+  selection = [],
   stubs = {}
 } = {}) => {
   const handlers = {}
@@ -51,7 +52,8 @@ const mountPage = async ({
       currentProduction: state => state.production,
       isTVShow: () => true,
       personMap: () => new Map(people.map(person => [person.id, person])),
-      selectedConcepts: () => new Map(),
+      selectedConcepts: () =>
+        new Map(selection.map(concept => [concept.id, concept])),
       taskStatusMap: () => new Map()
     }
   })
@@ -120,6 +122,45 @@ describe('Concepts page', () => {
     })
 
     expect(wrapper.find('.item').attributes('tabindex')).toBeUndefined()
+  })
+
+  describe('multiple selection', () => {
+    const stubs = {
+      TaskInfo: { template: '<div class="panel"><slot name="selection" /></div>' }
+    }
+
+    test('shows the selected concepts in the side panel', async () => {
+      const concepts = [buildConcept('concept-1'), buildConcept('concept-2')]
+      const { wrapper } = await mountPage({
+        concepts,
+        selection: concepts,
+        stubs
+      })
+
+      const cards = wrapper.find('.panel').findAllComponents(ConceptCard)
+      expect(cards.map(card => card.props('concept'))).toEqual(concepts)
+      expect(cards.every(card => card.props('compact'))).toBe(true)
+    })
+
+    test('drops from the selection the concept clicked in the panel', async () => {
+      const concepts = [buildConcept('concept-1'), buildConcept('concept-2')]
+      const { dispatch, wrapper } = await mountPage({
+        concepts,
+        selection: concepts,
+        stubs
+      })
+
+      wrapper
+        .find('.panel')
+        .findAllComponents(ConceptCard)[0]
+        .vm.$emit('click', {})
+      await flushPromises()
+
+      expect(dispatch).toHaveBeenCalledWith(
+        'addSelectedConcepts',
+        new Map([['concept-2', concepts[1]]])
+      )
+    })
   })
 
   test('accepts dropped files when there is no concept yet', async () => {
