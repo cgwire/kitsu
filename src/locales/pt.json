@@ -283,6 +283,7 @@
     },
     "episodes": {
       "all_episodes": "Todos os episódios",
+      "all_hidden": "Todos os episódios estão ocultos.",
       "edit_error": "Ocorreu um erro ao salvar este episódio. Tem certeza de que não há episódio com nome semelhante?",
       "delete_error": "Ocorreu um erro ao excluir este episódio. Provavelmente há dados vinculados a ele. Tem certeza que este episódio não tem nenhuma sequência ligada a ele?",
       "delete_text": "Tem certeza de que deseja remover {name} de seu banco de dados? Todos os shots e visualizações relacionados serão excluídos. Por favor, confirme digitando o nome do episódio abaixo.",
@@ -1389,6 +1390,7 @@
       "library_title": "Biblioteca de tipos de tarefas"
     },
     "sequences": {
+      "all_hidden": "Todas as sequencias estão ocultas.",
       "all_sequences": "Todas as sequencias",
       "edit_error": "Ocorreu um erro ao salvar esta sequência. Tem certeza de que não há nenhuma sequência com nome semelhante?",
       "delete_text": "Tem certeza de que deseja remover {name} de seu banco de dados? Todos os shots e visualizações relacionados serão excluídos. Confirme digitando o nome da sequência abaixo.",

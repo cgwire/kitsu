@@ -283,6 +283,7 @@
     },
     "episodes": {
       "all_episodes": "Alle Episoden",
+      "all_hidden": "Alle Episoden sind ausgeblendet.",
       "edit_error": "Beim speichern dieser Episode ist ein Fehler aufgetreten. Sind Sie sicher, dass keine Episode mit gleichem Namen vorhanden ist?",
       "delete_error": "Beim Löschen dieser Episode ist ein Fehler aufgetreten. Wahrscheinlich sind damit Daten verknüpft. Bist du sicher, dass diese Episode keine Sequenz hat, die mit ihr verbunden ist?",
       "delete_text": "Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten? Alle zugehörigen Shots und Vorschauen werden ebenfalls gelöscht. Bitte bestätigen Sie, indem Sie unten den Episodennamen eingeben.",
@@ -1389,6 +1390,7 @@
       "library_title": "Aufgabentyp-Bibliothek"
     },
     "sequences": {
+      "all_hidden": "Alle Sequenzen sind ausgeblendet.",
       "all_sequences": "Alle Sequenzen",
       "edit_error": "Beim Speichern dieser Sequenz ist ein Fehler aufgetreten. Sind Sie sicher, dass es keine Sequenz mit einem ähnlichen Namen gibt?",
       "delete_text": "Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten? Alle zugehörigen Shots und Vorschauen werden ebenfalls gelöscht. Bitte bestätigen Sie, indem Sie unten den Sequenznamen eingeben.",

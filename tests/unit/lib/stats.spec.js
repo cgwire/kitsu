@@ -9,6 +9,8 @@ import {
   getChartColors,
   getDoneRatio,
   getPercentage,
+  getRetakeChartData,
+  omitRetakeStatsColumns,
   omitStatsColumns
 } from '@/lib/stats'
 
@@ -248,6 +250,68 @@ describe('lib/stats', () => {
       ['done', 1, 'grey', false]
     ])
     expect(getDoneRatio(data)).toBe(0.5)
+  })
+
+  // The stats computed by the server carry no flag: the statuses do.
+  it('getChartData - reads the done flag from the statuses when the stats lack it', () => {
+    const stats = {
+      'episode-1': {
+        all: {
+          'task-status-3': { name: 'done', color: 'green', count: 2 },
+          'task-status-1': { name: 'wip', color: 'blue', count: 1 }
+        }
+      }
+    }
+    expect(
+      getChartData(stats, 'episode-1', 'all', 'count', taskStatusMap)
+    ).toEqual([
+      ['done', 2, 'green', true],
+      ['wip', 1, 'blue', false]
+    ])
+  })
+
+  it('getRetakeChartData - flags the done row', () => {
+    const stats = {
+      'episode-1': {
+        all: {
+          max_retake_count: 1,
+          retake: { count: 1 },
+          other: { count: 2 },
+          done: { count: 3 }
+        }
+      }
+    }
+    const data = getRetakeChartData(stats, 'episode-1', 'all')
+    expect(data.map(row => [row[0], row[1], row[3]])).toEqual([
+      ['retake', 1, false],
+      ['other', 2, false],
+      ['done', 3, true]
+    ])
+    expect(getDoneRatio(data)).toBe(0.5)
+  })
+
+  it('omitRetakeStatsColumns - drops the columns and rebuilds the all column', () => {
+    const column = (retake, done, max) => ({
+      max_retake_count: max,
+      evolution: {},
+      retake: { count: retake, frames: 0, drawings: 0 },
+      done: { count: done, frames: 0, drawings: 0 },
+      other: { count: 0, frames: 0, drawings: 0 }
+    })
+    const entryStats = {
+      all: column(9, 9, 3),
+      layout: column(1, 2, 1),
+      anim: column(3, 4, 2),
+      compo: column(5, 6, 3)
+    }
+    const result = omitRetakeStatsColumns(entryStats, ['compo'])
+    expect(Object.keys(result).sort()).toEqual(['all', 'anim', 'layout'])
+    expect(result.layout).toBe(entryStats.layout)
+    expect(result.all).toMatchObject({
+      max_retake_count: 2,
+      retake: { count: 4 },
+      done: { count: 6 }
+    })
   })
 
   it('getDoneRatio', () => {

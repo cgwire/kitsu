@@ -258,6 +258,16 @@ td.name {
   font-size: 1.2em;
 }
 
+// Row titles are links: keep the text colour of the row instead of the grey
+// of plain links, which reads as dimmed in dark mode.
+.name a {
+  color: inherit;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
 .asset-count {
   display: block;
   color: var(--text-alt);
@@ -305,17 +315,6 @@ th.actions {
     &::after {
       display: none;
     }
-  }
-
-  // The task type tint of the desktop columns is an inline style.
-  .datatable-body td.validation {
-    border-left: 0 !important;
-  }
-
-  // Same width on every line, so the bars and tiles of a card compare.
-  .validation :deep(.stats-bar),
-  .validation :deep(.stats-heat) {
-    flex: 0 0 55%;
   }
 }
 </style>

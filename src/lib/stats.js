@@ -18,11 +18,14 @@ const createStatusEntry = taskStatus => ({
 // Get all data displayed in statistics (needed by the stat cell widget).
 // Data follow this format: [[task-status-1-name, value, color, isDone], ...]
 // Set count data or frames data depending on data type.
+// The stats computed by the server carry no done flag: give the task status
+// map to read it from the statuses.
 export const getChartData = (
   mainStats,
   entryId,
   columnId,
-  dataType = 'count'
+  dataType = 'count',
+  taskStatusMap = null
 ) => {
   if (!mainStats[entryId] || !mainStats[entryId][columnId]) return []
   const statusData = mainStats[entryId][columnId]
@@ -31,7 +34,8 @@ export const getChartData = (
     .map(taskStatusId => {
       const data = statusData[taskStatusId]
       const color = data.is_default ? DEFAULT_STATUS_COLOR : data.color
-      return [data.name, data[valueField], color, !!data.is_done]
+      const isDone = data.is_done ?? taskStatusMap?.get(taskStatusId)?.is_done
+      return [data.name, data[valueField], color, !!isDone]
     })
     .sort(_sortData)
 }
@@ -63,10 +67,16 @@ export const getRetakeChartData = (
     [
       'retake',
       statusData.retake?.[valueField] || 0,
-      RETAKE_CHART_COLORS.retake
+      RETAKE_CHART_COLORS.retake,
+      false
     ],
-    ['other', statusData.other?.[valueField] || 0, RETAKE_CHART_COLORS.other],
-    ['done', statusData.done?.[valueField] || 0, RETAKE_CHART_COLORS.done]
+    [
+      'other',
+      statusData.other?.[valueField] || 0,
+      RETAKE_CHART_COLORS.other,
+      false
+    ],
+    ['done', statusData.done?.[valueField] || 0, RETAKE_CHART_COLORS.done, true]
   ]
 }
 
@@ -238,20 +248,28 @@ export const aggregateStats = (mainStats, entryIds) => {
 
 // Drop the given columns of an entry and rebuild its "all" column from the
 // remaining ones.
-export const omitStatsColumns = (entryStats, hiddenColumnIds) => {
+export const omitStatsColumns = (
+  entryStats,
+  hiddenColumnIds,
+  aggregate = aggregateStats
+) => {
   const columnIds = Object.keys(entryStats).filter(
     id => id !== 'all' && !hiddenColumnIds.includes(id)
   )
-  // aggregateStats sums entries: each kept column is given to it as an entry
+  // The aggregate sums entries: each kept column is given to it as an entry
   // holding a single "all" column.
   const columns = Object.fromEntries(
     columnIds.map(id => [id, { all: entryStats[id] }])
   )
   return {
     ...Object.fromEntries(columnIds.map(id => [id, entryStats[id]])),
-    all: aggregateStats(columns, columnIds).all || {}
+    all: aggregate(columns, columnIds).all || {}
   }
 }
+
+// Same as omitStatsColumns for retake stats.
+export const omitRetakeStatsColumns = (entryStats, hiddenColumnIds) =>
+  omitStatsColumns(entryStats, hiddenColumnIds, aggregateRetakeStats)
 
 // Same as aggregateStats for retake stats (retake / done / other buckets).
 export const aggregateRetakeStats = (retakeStats, entryIds) => {

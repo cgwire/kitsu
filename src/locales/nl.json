@@ -283,6 +283,7 @@
     },
     "episodes": {
       "all_episodes": "Alle afleveringen",
+      "all_hidden": "Alle afleveringen zijn verborgen.",
       "edit_error": "Er is een fout opgetreden tijdens het opslaan van de aflevering. Weet je zeker dat er geen aflevering bestaat met dezelfde naam?",
       "delete_error": "Er is een fout opgetreden tijdens het verwijderen van deze aflevering. Waarschijnlijk is er nog data aan gekoppeld. Weet je zeker dat er geen sequentie aan deze aflevering is gekoppeld?",
       "delete_text": "Weet je zeker dat je {name} wilt verwijderen uit de database? Alle gerelateerde shots en previews worden verwijderd. Bevestig met het typen van de aflevering naam hieronder.",
@@ -1389,6 +1390,7 @@
       "library_title": "Taaktype Bibliotheek"
     },
     "sequences": {
+      "all_hidden": "Alle sequenties zijn verborgen.",
       "all_sequences": "Alle sequenties",
       "edit_error": "Er is een fout opgetreden bij het opslaan van deze sequentie. Weet je zeker dat er geen sequentie is met een vergelijkbare naam?",
       "delete_text": "Weet je zeker dat je {name} uit de database wilt verwijderen? Alle gerelateerde opnamen en previews worden verwijderd. Bevestig door de naam van de sequentie hieronder te typen.",
