@@ -422,7 +422,8 @@
               v-if="
                 comment.editor_id &&
                 comment.editor_id !== comment.person_id &&
-                !isAuthorHidden
+                !isAuthorHidden &&
+                !urlPrefix
               "
             >
               {{

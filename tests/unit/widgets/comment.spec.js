@@ -345,6 +345,17 @@ describe('Comment', () => {
       expect(wrapper.find('.edited-text').text()).toBe('Edited by Eddie Editor')
     })
 
+    // The guests of a shared playlist only know the people of its comments:
+    // the editor has no name to show there.
+    test('keeps the editor out of a shared playlist', () => {
+      const wrapper = mountComment({
+        comment: { ...internal, for_client: true },
+        storeOptions: { user: null },
+        urlPrefix: '/api/shared/playlists/token-1'
+      })
+      expect(wrapper.find('.edited-text').exists()).toBe(false)
+    })
+
     test('names them to the studio', () => {
       const wrapper = mountComment({
         comment: internal,
