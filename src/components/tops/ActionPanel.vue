@@ -150,6 +150,27 @@
         </div>
 
         <div
+          class="menu-item ml05"
+          :class="{
+            active: selectedBar === 'move-concepts'
+          }"
+          :title="$t('concepts.folders.move')"
+          role="button"
+          tabindex="0"
+          @click="selectBar('move-concepts')"
+          @keydown.enter.prevent="selectBar('move-concepts')"
+          @keydown.space.prevent="selectBar('move-concepts')"
+          v-if="
+            isCurrentViewConcept &&
+            (isCurrentUserManager || isCurrentUserSupervisor) &&
+            nbSelectedConcepts > 0 &&
+            conceptFolders.length > 0
+          "
+        >
+          <folder-input-icon />
+        </div>
+
+        <div
           class="menu-separator"
           v-if="!isEntitySelection && isTaskSelection && nbSelectedTasks > 1"
         ></div>
@@ -639,6 +660,26 @@
           </ul>
         </div>
 
+        <div
+          class="flexrow-item is-wide"
+          v-if="selectedBar === 'move-concepts'"
+        >
+          <h3 class="mb05">{{ $t('concepts.folders.move') }}</h3>
+          <ul class="concept-folders mb05">
+            <li
+              :key="folder.id ?? 'none'"
+              role="button"
+              tabindex="0"
+              @click="onMoveConcepts(folder)"
+              @keydown.enter.prevent="onMoveConcepts(folder)"
+              @keydown.space.prevent="onMoveConcepts(folder)"
+              v-for="folder in conceptFolderTargets"
+            >
+              <concept-folder-tile :name="folder.name" />
+            </li>
+          </ul>
+        </div>
+
         <div class="flexrow-item is-wide" v-if="selectedBar === 'delete-tasks'">
           <delete-entities
             :error-text="$t('tasks.delete_for_selection_error')"
@@ -896,6 +937,7 @@
 /* eslint-disable no-unused-vars */
 import {
   CheckSquareIcon,
+  FolderInputIcon,
   LinkIcon,
   PlayCircleIcon,
   XIcon
@@ -924,6 +966,7 @@ import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxModel from '@/components/widgets/ComboboxModel.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import ConceptFolderTile from '@/components/widgets/ConceptFolderTile.vue'
 import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
@@ -998,6 +1041,7 @@ let linkQueue = Promise.resolve()
 // --------------------------------------------------------------------------
 
 const assetsByType = computed(() => store.getters.assetsByType)
+const conceptFolders = computed(() => store.getters.conceptFolders)
 const currentProduction = computed(() => store.getters.currentProduction)
 const isCurrentUserArtist = computed(() => store.getters.isCurrentUserArtist)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
@@ -1113,6 +1157,17 @@ const isConceptPublisher = computed(
       concept => concept.created_by === user.value.id
     )
 )
+
+// Where the selection can go: out of its folder when a concept sits in
+// one, and to every folder that does not already hold it all.
+const conceptFolderTargets = computed(() => [
+  ...(selectedConceptList.value.some(concept => concept.parent_id)
+    ? [{ id: null, name: t('concepts.folders.none') }]
+    : []),
+  ...conceptFolders.value.filter(folder =>
+    selectedConceptList.value.some(concept => concept.parent_id !== folder.id)
+  )
+])
 
 // The assets at least one selected concept is linked to.
 const conceptLinkedEntities = computed(() =>
@@ -1442,7 +1497,7 @@ const autoChooseSelectBar = () => {
   } else if (isCurrentViewEdit.value && nbSelectedEdits.value > 0) {
     selectedBar.value = 'delete-edits'
   } else if (isCurrentViewConcept.value && nbSelectedConcepts.value > 1) {
-    if (selectedBar.value !== 'edit-concepts') {
+    if (!['edit-concepts', 'move-concepts'].includes(selectedBar.value)) {
       selectedBar.value = 'delete-concepts'
     }
   } else {
@@ -1526,6 +1581,18 @@ const onSelectLink = link =>
     selectedConceptList.value.filter(concept => !isLinkedTo(concept, link)),
     links => [...new Set([...links, link.id])]
   )
+
+const onMoveConcepts = async folder => {
+  try {
+    await store.dispatch('moveConcepts', {
+      conceptIds: selectedConceptList.value.map(concept => concept.id),
+      folderId: folder.id
+    })
+    clearSelection()
+  } catch (err) {
+    console.error(err)
+  }
+}
 
 const onEntitySearchChange = searchQuery => {
   store.dispatch('setAssetSearch', searchQuery)
@@ -1798,5 +1865,13 @@ onBeforeUnmount(() => {
       border-color: $light-grey;
     }
   }
+}
+
+.concept-folders {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  list-style: none;
+  margin-left: 0;
 }
 </style>

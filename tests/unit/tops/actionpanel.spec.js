@@ -9,6 +9,7 @@ vi.mock('@/store', () => ({ default: {} }))
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }))
 
 import ActionPanel from '@/components/tops/ActionPanel.vue'
+import ConceptFolderTile from '@/components/widgets/ConceptFolderTile.vue'
 import assetsStore from '@/store/modules/assets'
 
 const assets = [
@@ -25,7 +26,12 @@ const buildConcept = (id, links = []) => ({
 const toSelection = concepts =>
   new Map(concepts.map(concept => [concept.id, concept]))
 
-const mountPanel = async concepts => {
+const folders = [
+  { id: 'folder-1', name: 'Characters' },
+  { id: 'folder-2', name: 'Sets' }
+]
+
+const mountPanel = async (concepts, { role = 'manager' } = {}) => {
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [
@@ -47,7 +53,8 @@ const mountPanel = async concepts => {
     getters: {
       assetsByType: () => [assets],
       currentProduction: () => ({ id: 'production-1' }),
-      currentUserRoleForProduction: () => () => 'manager',
+      conceptFolders: () => folders,
+      currentUserRoleForProduction: () => () => role,
       getCustomActionsByType: () => () => [],
       isCurrentUserAdmin: () => false,
       isCurrentUserArtist: () => false,
@@ -207,5 +214,75 @@ describe('ActionPanel, concept links', () => {
     await flushPromises()
 
     expect(wrapper.find('.concept-links').exists()).toBe(true)
+  })
+})
+
+describe('ActionPanel, concept folders', () => {
+  const openFolders = wrapper =>
+    wrapper.find('[title="concepts.folders.move"]').trigger('click')
+
+  // The targets wear the folder tile of the concepts page, not the tag of
+  // the linked assets.
+  const folderTiles = wrapper =>
+    wrapper
+      .find('.concept-folders')
+      .findAllComponents(ConceptFolderTile)
+      .map(tile => tile.props('name'))
+
+  const clickFolder = (wrapper, name) =>
+    wrapper
+      .findAll('.concept-folders [role="button"]')
+      [folderTiles(wrapper).indexOf(name)].trigger('click')
+
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  test('moves the selected concepts to the picked folder', async () => {
+    const { store, wrapper } = await mountPanel([
+      buildConcept('concept-1'),
+      buildConcept('concept-2')
+    ])
+    await openFolders(wrapper)
+
+    await clickFolder(wrapper, 'Sets')
+    await flushPromises()
+
+    expect(store.dispatch).toHaveBeenCalledWith('moveConcepts', {
+      conceptIds: ['concept-1', 'concept-2'],
+      folderId: 'folder-2'
+    })
+    expect(store.dispatch).toHaveBeenCalledWith('clearSelectedConcepts')
+  })
+
+  test('offers the way out of a folder to the concepts sorted in one', async () => {
+    const sorted = { ...buildConcept('concept-1'), parent_id: 'folder-1' }
+    const { store, wrapper } = await mountPanel([sorted])
+    await openFolders(wrapper)
+    expect(folderTiles(wrapper)).toEqual(['concepts.folders.none', 'Sets'])
+
+    await clickFolder(wrapper, 'concepts.folders.none')
+    await flushPromises()
+
+    expect(store.dispatch).toHaveBeenCalledWith('moveConcepts', {
+      conceptIds: ['concept-1'],
+      folderId: null
+    })
+  })
+
+  test('offers only the folders to the unsorted concepts', async () => {
+    const { wrapper } = await mountPanel([buildConcept('concept-1')])
+    await openFolders(wrapper)
+
+    expect(folderTiles(wrapper)).toEqual(['Characters', 'Sets'])
+  })
+
+  test('keeps the folders away from a publisher', async () => {
+    const { wrapper } = await mountPanel([buildConcept('concept-1')], {
+      role: 'user'
+    })
+
+    expect(wrapper.find('[title="concepts.folders.move"]').exists()).toBe(false)
+    expect(wrapper.find('[title="menu.edit_concepts"]').exists()).toBe(true)
   })
 })
