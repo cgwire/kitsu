@@ -73,7 +73,13 @@
         <template v-else>
           <div class="folder-bar">
             <nav class="folder-path">
-              <router-link :to="{ query: {} }">
+              <router-link
+                :class="{ 'drop-target': dropTargetId === ROOT }"
+                :to="{ query: {} }"
+                @dragover="onFolderDragOver(null, $event)"
+                @dragleave="onFolderDragLeave"
+                @drop="onFolderDrop(null, $event)"
+              >
                 {{ $t('concepts.title') }}
               </router-link>
               <span>/</span>
@@ -102,10 +108,17 @@
             v-if="filteredConcepts.length || shownFolders.length"
           >
             <ul class="folders" v-if="shownFolders.length">
-              <li :key="folder.id" v-for="folder in shownFolders">
+              <li
+                :key="folder.id"
+                @dragover="onFolderDragOver(folder.id, $event)"
+                @dragleave="onFolderDragLeave"
+                @drop="onFolderDrop(folder.id, $event)"
+                v-for="folder in shownFolders"
+              >
                 <router-link :to="{ query: { folder: folder.id } }">
                   <concept-folder-tile
                     :count="nbConceptsByFolder.get(folder.id) ?? 0"
+                    :highlighted="dropTargetId === folder.id"
                     :name="folder.name"
                   />
                 </router-link>
@@ -117,7 +130,10 @@
                 :class="{
                   'selected-item': isSelected(concept)
                 }"
+                :draggable="isFolderManager"
                 :key="concept.id"
+                @dragstart="onConceptDragStart(concept, $event)"
+                @dragend="onConceptDragEnd"
                 v-for="concept in filteredConcepts"
               >
                 <concept-card
@@ -251,6 +267,10 @@ const socket = getCurrentInstance().appContext.config.globalProperties.$socket
 // --------------------------------------------------------------------------
 const addPreviewModalRef = useTemplateRef('add-preview-modal')
 
+// The concepts of a card drag, read on the folder the drag ends on: the
+// drag data is not readable before the drop.
+const draggedConceptIds = ref([])
+const dropTargetId = ref(null)
 const folderToEdit = ref(null)
 const isDraggingFile = ref(false)
 
@@ -280,6 +300,7 @@ const modals = reactive({
 })
 
 const NO_LINK = 'none'
+const ROOT = 'root'
 const imgExtensions = files.IMG_EXTENSIONS_STRING
 const sortByOptions = ['created_at', 'updated_at', 'last_comment_date'].map(
   name => ({ label: name, value: name })
@@ -568,8 +589,53 @@ const onFileDrop = async event => {
 }
 
 const onFileDragover = event => {
+  if (draggedConceptIds.value.length) return
   pauseEvent(event)
   isDraggingFile.value = true
+}
+
+// A card outside the selection goes alone, and becomes the selection.
+const onConceptDragStart = (concept, event) => {
+  draggedConceptIds.value = isSelected(concept)
+    ? [...selectedConcepts.value.keys()]
+    : [concept.id]
+  if (!isSelected(concept)) onSelectConcept(concept)
+  event.dataTransfer.effectAllowed = 'move'
+  // Firefox starts no drag without data.
+  event.dataTransfer.setData('text/plain', draggedConceptIds.value.join(','))
+}
+
+const onConceptDragEnd = () => {
+  draggedConceptIds.value = []
+  dropTargetId.value = null
+}
+
+const onFolderDragOver = (folderId, event) => {
+  if (!draggedConceptIds.value.length) return
+  pauseEvent(event)
+  event.dataTransfer.dropEffect = 'move'
+  dropTargetId.value = folderId ?? ROOT
+}
+
+const onFolderDragLeave = event => {
+  // Entering a child of the target fires a leave on the target itself.
+  if (!event.currentTarget.contains(event.relatedTarget)) {
+    dropTargetId.value = null
+  }
+}
+
+const onFolderDrop = async (folderId, event) => {
+  const conceptIds = draggedConceptIds.value
+  if (!conceptIds.length) return
+  pauseEvent(event)
+  onConceptDragEnd()
+  if (folderId === (currentFolder.value?.id ?? null)) return
+  try {
+    await store.dispatch('moveConcepts', { conceptIds, folderId })
+    clearSelection()
+  } catch (err) {
+    console.error(err)
+  }
 }
 
 const onFileDragLeave = () => {
@@ -719,6 +785,11 @@ useHead({
   .current-folder {
     color: var(--text-strong);
     font-weight: 600;
+  }
+
+  .drop-target {
+    color: var(--text-selected);
+    text-decoration: underline;
   }
 }
 

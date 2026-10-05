@@ -209,7 +209,7 @@ describe('Concepts page', () => {
       expect(shownConcepts(wrapper)).toEqual(['concept-root'])
       const tiles = wrapper.findAllComponents(ConceptFolderTile)
       expect(tiles.map(tile => tile.props())).toEqual([
-        { count: 1, name: 'Sets' }
+        { count: 1, highlighted: false, name: 'Sets' }
       ])
     })
 
@@ -377,6 +377,100 @@ describe('Concepts page', () => {
       })
       expect(folder.wrapper.find('.rename-folder').exists()).toBe(false)
       expect(folder.wrapper.find('.delete-folder').exists()).toBe(false)
+    })
+  })
+
+  describe('drag and drop to a folder', () => {
+    const folders = [{ id: 'folder-1', name: 'Sets' }]
+    const stubs = {
+      RouterLink: { props: ['to'], template: '<a><slot /></a>' }
+    }
+    const dataTransfer = () => ({ setData: vi.fn(), types: ['text/plain'] })
+
+    const mountWithCards = (options = {}) =>
+      mountPage({
+        concepts: [buildConcept('concept-1'), buildConcept('concept-2')],
+        folders,
+        stubs,
+        ...options
+      })
+
+    const dragCardTo = async (wrapper, cardIndex, target) => {
+      const transfer = dataTransfer()
+      await wrapper
+        .findAll('.item')
+        [cardIndex].trigger('dragstart', { dataTransfer: transfer })
+      await target.trigger('dragover', { dataTransfer: transfer })
+      await target.trigger('drop', { dataTransfer: transfer })
+      await flushPromises()
+    }
+
+    test('lets managers drag the cards', async () => {
+      const manager = await mountWithCards()
+      expect(manager.wrapper.find('.item').attributes('draggable')).toBe(
+        'true'
+      )
+
+      const artist = await mountWithCards({ isManager: false })
+      expect(artist.wrapper.find('.item').attributes('draggable')).toBe(
+        'false'
+      )
+    })
+
+    test('moves the dragged selection to the folder it is dropped on', async () => {
+      const concepts = [buildConcept('concept-1'), buildConcept('concept-2')]
+      const { dispatch, wrapper } = await mountWithCards({
+        concepts,
+        selection: concepts
+      })
+
+      await dragCardTo(wrapper, 0, wrapper.find('.folders li'))
+
+      expect(dispatch).toHaveBeenCalledWith('moveConcepts', {
+        conceptIds: ['concept-1', 'concept-2'],
+        folderId: 'folder-1'
+      })
+      expect(dispatch).toHaveBeenCalledWith('clearSelectedConcepts')
+    })
+
+    test('drags a card outside the selection on its own', async () => {
+      const concepts = [buildConcept('concept-1'), buildConcept('concept-2')]
+      const { dispatch, wrapper } = await mountWithCards({
+        concepts,
+        selection: [concepts[1]]
+      })
+
+      await dragCardTo(wrapper, 0, wrapper.find('.folders li'))
+
+      expect(dispatch).toHaveBeenCalledWith('moveConcepts', {
+        conceptIds: ['concept-1'],
+        folderId: 'folder-1'
+      })
+    })
+
+    test('moves a card dropped on the Concepts root out of its folder', async () => {
+      const concept = { ...buildConcept('concept-1'), parent_id: 'folder-1' }
+      const { dispatch, wrapper } = await mountWithCards({
+        concepts: [concept],
+        query: { folder: 'folder-1' }
+      })
+
+      await dragCardTo(wrapper, 0, wrapper.find('.folder-path a'))
+
+      expect(dispatch).toHaveBeenCalledWith('moveConcepts', {
+        conceptIds: ['concept-1'],
+        folderId: null
+      })
+    })
+
+    test('keeps the file drop zone out of a card drag', async () => {
+      const { wrapper } = await mountWithCards()
+      const transfer = dataTransfer()
+
+      await wrapper.find('.item').trigger('dragstart', { dataTransfer: transfer })
+      await wrapper.find('.concepts').trigger('dragover', { dataTransfer: transfer })
+
+      expect(wrapper.find('.drop-mask').exists()).toBe(false)
     })
   })
 

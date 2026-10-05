@@ -1,5 +1,5 @@
 <template>
-  <span class="folder">
+  <span class="folder" :class="{ highlighted }">
     <folder-icon :size="20" />
     <span class="folder-name">{{ name }}</span>
     <span class="folder-count" v-if="count !== null">{{ count }}</span>
@@ -11,6 +11,7 @@ import { FolderIcon } from 'lucide-vue-next'
 
 defineProps({
   count: { type: Number, default: null },
+  highlighted: { type: Boolean, default: false },
   name: { type: String, required: true }
 })
 </script>
@@ -27,8 +28,13 @@ defineProps({
   cursor: pointer;
   padding: 0.6em 1em;
 
-  &:hover {
+  &:hover,
+  &.highlighted {
     background: var(--background-selectable);
+  }
+
+  &.highlighted {
+    border-color: var(--background-selected);
   }
 }
 
