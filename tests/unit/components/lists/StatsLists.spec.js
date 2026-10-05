@@ -465,6 +465,13 @@ describe('lists/EpisodeStatsList expander', () => {
     expect(takeRows(wrapper)).toHaveLength(0)
   })
 
+  test('offers no expander outside the retakes mode', async () => {
+    const wrapper = mountEpisodes({ dataMode: 'status' })
+    expect(wrapper.find('td.expander[role="button"]').exists()).toBe(false)
+    await wrapper.find('td.expander').trigger('click')
+    expect(takeRows(wrapper)).toHaveLength(0)
+  })
+
   // Same tag as the "Take N" label of the cells, redder as the takes add up.
   test('tags each take row with its number', async () => {
     const wrapper = mountEpisodes({ dataMode: 'retakes' })

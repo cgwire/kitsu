@@ -81,14 +81,12 @@
                 tabindex="0"
                 @click="toggleExpanded(entry.id)"
                 @keydown.enter.prevent="toggleExpanded(entry.id)"
+                v-if="isRetakes"
               >
-                <chevron-right-icon
-                  v-if="isRetakes && expanded[entry.id] !== true"
-                />
-                <chevron-down-icon
-                  v-if="isRetakes && expanded[entry.id] === true"
-                />
+                <chevron-down-icon v-if="expanded[entry.id]" />
+                <chevron-right-icon v-else />
               </td>
+              <td class="expander" v-else></td>
 
               <td class="name datatable-row-header card-head">
                 <router-link :to="shotsPath(entry)">
@@ -445,10 +443,13 @@ td.take-name {
 }
 
 .expander {
-  cursor: pointer;
   min-width: 10px;
   width: 10px;
   padding-top: 10px;
+
+  &[role='button'] {
+    cursor: pointer;
+  }
 }
 
 .validation {
