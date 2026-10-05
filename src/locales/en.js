@@ -329,6 +329,7 @@ export default {
   concepts: {
     actions: {
       empty: 'No links',
+      remove_link: 'Remove link',
       title: 'Links to Concepts'
     },
     add_concept: 'Add files for new concepts',

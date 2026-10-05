@@ -2026,6 +2026,7 @@
     "concepts": {
       "actions": {
         "empty": "Sin enlaces",
+        "remove_link": "Quitar el enlace",
         "title": "Enlaces a conceptos"
       },
       "add_concept": "Añadir archivos para nuevos conceptos",

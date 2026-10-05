@@ -2026,6 +2026,7 @@
     "concepts": {
       "actions": {
         "empty": "링크 없음",
+        "remove_link": "링크 제거",
         "title": "개념에 대한 링크"
       },
       "add_concept": "새로운 개념에 대한 파일 추가",

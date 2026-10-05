@@ -1875,6 +1875,7 @@
     "concepts": {
       "actions": {
         "empty": "Nincs hivatkozás",
+        "remove_link": "Hivatkozás eltávolítása",
         "title": "Hivatkozások a koncepciókhoz"
       },
       "add_concept": "File-ok hozzáadása új koncepciókhoz",

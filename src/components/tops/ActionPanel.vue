@@ -649,6 +649,7 @@
                 class="tag"
                 role="button"
                 tabindex="0"
+                :title="$t('concepts.actions.remove_link')"
                 @click="onRemoveLink(entity)"
                 @keydown.enter.prevent="onRemoveLink(entity)"
                 @keydown.space.prevent="onRemoveLink(entity)"

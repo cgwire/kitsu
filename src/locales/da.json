@@ -2026,6 +2026,7 @@
     "concepts": {
       "actions": {
         "empty": "Ingen links",
+        "remove_link": "Fjern link",
         "title": "Links til Koncepter"
       },
       "add_concept": "Tilføj filer til nye koncepter",

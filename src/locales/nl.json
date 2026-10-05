@@ -2026,6 +2026,7 @@
     "concepts": {
       "actions": {
         "empty": "Geen links",
+        "remove_link": "Koppeling verwijderen",
         "title": "Koppelingen naar concepten"
       },
       "add_concept": "Bestanden toevoegen voor nieuwe concepten",

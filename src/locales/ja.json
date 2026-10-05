@@ -2026,6 +2026,7 @@
     "concepts": {
       "actions": {
         "empty": "リンクなし",
+        "remove_link": "リンクを削除",
         "title": "コンセプトへのリンク"
       },
       "add_concept": "新しいコンセプト用のファイルを追加",

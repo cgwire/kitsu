@@ -2026,6 +2026,7 @@
     "concepts": {
       "actions": {
         "empty": "无链接",
+        "remove_link": "移除链接",
         "title": "概念链接"
       },
       "add_concept": "为新概念添加文件",

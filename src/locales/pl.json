@@ -318,6 +318,7 @@
     "concepts": {
       "actions": {
         "empty": "Brak powiązań",
+        "remove_link": "Usuń powiązanie",
         "title": "Powiązania z konceptami"
       },
       "add_concept": "Dodaj pliki nowych konceptów",

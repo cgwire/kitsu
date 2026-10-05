@@ -123,6 +123,9 @@ describe('ActionPanel, concept links', () => {
     await openLinks(wrapper)
 
     expect(linkedTags(wrapper)).toEqual(['Tree (1/2)', 'Rock'])
+    expect(
+      wrapper.find('.action-bar .tag').attributes('title')
+    ).toBe('concepts.actions.remove_link')
   })
 
   test('links an asset to every selected concept missing it', async () => {
