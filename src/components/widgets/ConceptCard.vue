@@ -3,8 +3,8 @@
     class="concept-item"
     role="button"
     tabindex="0"
-    @click="$emit('click')"
-    @keydown.enter.prevent="$emit('click')"
+    @click="$emit('click', $event)"
+    @keydown.enter.prevent="$emit('click', $event)"
   >
     <entity-preview
       :entity="concept"
@@ -49,20 +49,21 @@
 </template>
 
 <script setup>
+// Imports
+// --------------------------------------------------------------------------
 import { computed } from 'vue'
 import { useStore } from 'vuex'
-import { getEntityPath } from '@/lib/path'
 
-import assetsStore from '@/store/modules/assets.js'
+import { getEntityPath } from '@/lib/path'
+import assetsStore from '@/store/modules/assets'
+
 import EntityPreview from '@/components/widgets/EntityPreview.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 
 const store = useStore()
-const currentProduction = computed(() => store.getters.currentProduction)
-const isTVShow = computed(() => store.getters.isTVShow)
-const personMap = computed(() => store.getters.personMap)
-const taskStatusMap = computed(() => store.getters.taskStatusMap)
 
+// Props / Emits
+// --------------------------------------------------------------------------
 const props = defineProps({
   concept: {
     type: Object,
@@ -72,24 +73,27 @@ const props = defineProps({
 
 defineEmits(['click'])
 
-const assetMap = computed(() => {
-  return assetsStore.cache.assetMap
-})
+// Computed
+// --------------------------------------------------------------------------
+const currentProduction = computed(() => store.getters.currentProduction)
+const isTVShow = computed(() => store.getters.isTVShow)
+const personMap = computed(() => store.getters.personMap)
+const taskStatusMap = computed(() => store.getters.taskStatusMap)
 
-const linkedEntities = computed(() => {
-  return props.concept.entity_concept_links
-    .map(id => assetMap.value.get(id))
+const linkedEntities = computed(() =>
+  props.concept.entity_concept_links
+    .map(id => assetsStore.cache.assetMap.get(id))
     .filter(Boolean)
-})
+)
 
-const hasTask = computed(() => {
-  return props.concept.tasks?.length
-})
+const hasTask = computed(() => props.concept.tasks?.length)
 
-const taskStatus = computed(() => {
-  return taskStatusMap.value.get(props.concept.tasks[0].task_status_id)
-})
+const taskStatus = computed(() =>
+  taskStatusMap.value.get(props.concept.tasks[0].task_status_id)
+)
 
+// Functions
+// --------------------------------------------------------------------------
 const entityPath = (entity, section) => {
   const episodeId = isTVShow.value ? entity.episode_id || 'main' : null
   return getEntityPath(
