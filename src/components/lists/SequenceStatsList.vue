@@ -260,13 +260,14 @@ const taskTypePath = taskTypeId => {
   }
 }
 
+// Quoted, a name made of several words is searched as a whole.
 const shotsPath = sequence => ({
   ...getEntitiesPath(
     currentProduction.value?.id,
     'shots',
     isTVShow.value ? currentEpisode.value?.id : null
   ),
-  query: { search: sequence.name }
+  query: { search: `"${sequence.name}"` }
 })
 </script>
 

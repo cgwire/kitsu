@@ -218,7 +218,7 @@ describe('lists/SequenceStatsList', () => {
     expect(nameLink(mountSequences()).props('to')).toEqual({
       name: 'shots',
       params: { production_id: 'production-1' },
-      query: { search: 'SQ01' }
+      query: { search: '"SQ01"' }
     })
   })
 
@@ -230,7 +230,7 @@ describe('lists/SequenceStatsList', () => {
     expect(nameLink(wrapper).props('to')).toEqual({
       name: 'episode-shots',
       params: { production_id: 'production-1', episode_id: 'episode-1' },
-      query: { search: 'SQ01' }
+      query: { search: '"SQ01"' }
     })
   })
 
