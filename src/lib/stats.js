@@ -52,32 +52,24 @@ const _sortData = (a, b) => {
   }
 }
 
+// Give a take number to read the stats the column had at that take instead
+// of its current ones.
 export const getRetakeChartData = (
   mainStats,
   entryId,
   columnId,
-  dataType = 'count'
+  dataType = 'count',
+  takeNumber = null
 ) => {
-  if (!mainStats[entryId] || !mainStats[entryId][columnId]) return []
-  const statusData = { ...mainStats[entryId][columnId] }
-  delete statusData.evolution
-  delete statusData.max_retake_count
-  const valueField = dataType
-  return [
-    [
-      'retake',
-      statusData.retake?.[valueField] || 0,
-      RETAKE_CHART_COLORS.retake,
-      false
-    ],
-    [
-      'other',
-      statusData.other?.[valueField] || 0,
-      RETAKE_CHART_COLORS.other,
-      false
-    ],
-    ['done', statusData.done?.[valueField] || 0, RETAKE_CHART_COLORS.done, true]
-  ]
+  const column = mainStats[entryId]?.[columnId]
+  if (!column) return []
+  const statusData = takeNumber ? column.evolution[takeNumber] : column
+  return ['retake', 'other', 'done'].map(name => [
+    name,
+    statusData[name]?.[dataType] || 0,
+    RETAKE_CHART_COLORS[name],
+    name === 'done'
+  ])
 }
 
 // Share of the chart data value held by the done statuses, between 0 and 1.

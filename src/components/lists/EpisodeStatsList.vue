@@ -157,12 +157,12 @@
                     :data-label="taskTypeMap.get(columnId)?.name"
                     :style="getValidationStyle(columnId)"
                     :colors="chartColors(entry.id, columnId)"
-                    :data="chartTakeData(entry.id, columnId, takeNumber)"
+                    :data="chartData(entry.id, columnId, 'count', takeNumber)"
                     :frames-data="
-                      chartTakeData(entry.id, columnId, takeNumber, 'frames')
+                      chartData(entry.id, columnId, 'frames', takeNumber)
                     "
                     :drawings-data="
-                      chartTakeData(entry.id, columnId, takeNumber, 'drawings')
+                      chartData(entry.id, columnId, 'drawings', takeNumber)
                     "
                     :count-mode="countMode"
                     :display-mode="displayMode"
@@ -269,7 +269,6 @@ const props = defineProps({
 // --------------------------------------------------------------------------
 const expanded = ref({})
 
-const retakeColors = ['#ff3860', '#6f727a', '#22d160']
 const takeLabelColors = ['#FB8C00', '#EF6C00', '#d35400', '#e74c3c', '#c0392b']
 
 // Computed
@@ -303,9 +302,15 @@ const isRetakes = computed(() => props.dataMode === 'retakes')
 // --------------------------------------------------------------------------
 // The status stats come from the server without the done flag of their
 // statuses: the status map provides it.
-const chartData = (entryId, columnId, dataType = 'count') =>
+const chartData = (entryId, columnId, dataType = 'count', takeNumber = null) =>
   isRetakes.value
-    ? getRetakeChartData(props.episodeRetakeStats, entryId, columnId, dataType)
+    ? getRetakeChartData(
+        props.episodeRetakeStats,
+        entryId,
+        columnId,
+        dataType,
+        takeNumber
+      )
     : getChartData(
         props.episodeStats,
         entryId,
@@ -315,19 +320,7 @@ const chartData = (entryId, columnId, dataType = 'count') =>
       )
 
 const chartColors = (entryId, columnId) =>
-  isRetakes.value
-    ? retakeColors
-    : chartData(entryId, columnId).map(data => data[2])
-
-const chartTakeData = (entryId, columnId, takeNumber, dataType = 'count') => {
-  const take = props.episodeRetakeStats[entryId][columnId].evolution[takeNumber]
-  // Order matters: it matches retakeColors.
-  return [
-    ['retake', take.retake[dataType], retakeColors[0], false],
-    ['other', take.other[dataType], retakeColors[1], false],
-    ['done', take.done[dataType], retakeColors[2], true]
-  ]
-}
+  chartData(entryId, columnId).map(data => data[2])
 
 const chartRetakeMaxCount = (entryId, columnId) =>
   getChartRetakeCount(props.episodeRetakeStats, entryId, columnId)

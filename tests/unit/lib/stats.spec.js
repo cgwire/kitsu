@@ -270,6 +270,28 @@ describe('lib/stats', () => {
     ])
   })
 
+  it('getRetakeChartData - reads the stats of a take when given its number', () => {
+    const stats = {
+      'episode-1': {
+        layout: {
+          max_retake_count: 1,
+          evolution: {
+            1: { retake: { count: 4 }, other: { count: 5 }, done: { count: 6 } }
+          },
+          retake: { count: 1 },
+          other: { count: 2 },
+          done: { count: 3 }
+        }
+      }
+    }
+    const data = getRetakeChartData(stats, 'episode-1', 'layout', 'count', 1)
+    expect(data.map(row => [row[0], row[1], row[3]])).toEqual([
+      ['retake', 4, false],
+      ['other', 5, false],
+      ['done', 6, true]
+    ])
+  })
+
   it('getRetakeChartData - flags the done row', () => {
     const stats = {
       'episode-1': {
