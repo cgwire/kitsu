@@ -143,7 +143,7 @@
           v-if="
             isCurrentViewConcept &&
             (isCurrentUserManager || isConceptPublisher) &&
-            isTaskSelection
+            nbSelectedConcepts > 0
           "
         >
           <link-icon />
@@ -633,7 +633,7 @@
                 @keydown.space.prevent="onRemoveLink(entity)"
                 v-for="entity in conceptLinkedEntities"
               >
-                {{ entity.name }}
+                {{ getLinkLabel(entity) }}
               </li>
             </template>
           </ul>
@@ -914,6 +914,7 @@ import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { intersection } from '@/lib/array'
+import func from '@/lib/func'
 import assetsStore from '@/store/modules/assets.js'
 
 import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
@@ -990,6 +991,8 @@ const errors = reactive({
 })
 
 const currentHost = window.location.host
+
+let linkQueue = Promise.resolve()
 
 // Computed
 // --------------------------------------------------------------------------
@@ -1101,16 +1104,25 @@ const currentEntityType = computed(() => {
   return 'episode'
 })
 
-const currentConcept = computed(
-  () => selectedConcepts.value.values().next().value
-)
+const selectedConceptList = computed(() => [...selectedConcepts.value.values()])
 
 const isConceptPublisher = computed(
-  () => currentConcept.value?.created_by === user.value.id
+  () =>
+    selectedConceptList.value.length > 0 &&
+    selectedConceptList.value.every(
+      concept => concept.created_by === user.value.id
+    )
 )
 
+// The assets at least one selected concept is linked to.
 const conceptLinkedEntities = computed(() =>
-  (currentConcept.value?.entity_concept_links ?? [])
+  [
+    ...new Set(
+      selectedConceptList.value.flatMap(
+        concept => concept.entity_concept_links ?? []
+      )
+    )
+  ]
     .map(id => assetsStore.cache.assetMap.get(id))
     .filter(Boolean)
 )
@@ -1121,10 +1133,7 @@ const availableLinksByType = computed(() =>
     .map(assets => ({
       type: assets[0].asset_type_name,
       links: assets
-        .filter(
-          asset =>
-            !conceptLinkedEntities.value.some(entity => entity.id === asset.id)
-        )
+        .filter(asset => nbLinkedConcepts(asset) < nbSelectedConcepts.value)
         .map(asset => ({ id: asset.id, name: asset.name }))
     }))
 )
@@ -1433,7 +1442,9 @@ const autoChooseSelectBar = () => {
   } else if (isCurrentViewEdit.value && nbSelectedEdits.value > 0) {
     selectedBar.value = 'delete-edits'
   } else if (isCurrentViewConcept.value && nbSelectedConcepts.value > 1) {
-    selectedBar.value = 'delete-concepts'
+    if (selectedBar.value !== 'edit-concepts') {
+      selectedBar.value = 'delete-concepts'
+    }
   } else {
     if (nbSelectedTasks.value === 1) selectedBar.value = ''
     const lastSelection = localStorage.getItem(
@@ -1476,22 +1487,45 @@ const getSelectionCustomActions = () => {
   )
 }
 
-const editConceptLinks = entityConceptLinks => {
-  store.dispatch('editConcept', {
-    id: currentConcept.value.id,
-    entity_concept_links: entityConceptLinks
-  })
+const isLinkedTo = (concept, entity) =>
+  (concept.entity_concept_links ?? []).includes(entity.id)
+
+const nbLinkedConcepts = entity =>
+  selectedConceptList.value.filter(concept => isLinkedTo(concept, entity))
+    .length
+
+const getLinkLabel = entity => {
+  const count = nbLinkedConcepts(entity)
+  const total = nbSelectedConcepts.value
+  return count < total ? `${entity.name} (${count}/${total})` : entity.name
 }
 
-const onRemoveLink = link => {
+// A request sends the whole link list of a concept: they all go through one
+// queue, so each one builds on the answer to the previous one.
+const editConceptLinks = (concepts, getLinks) => {
+  linkQueue = linkQueue
+    .then(() =>
+      func.runPromiseMapAsSeries(concepts, concept =>
+        store.dispatch('editConcept', {
+          id: concept.id,
+          entity_concept_links: getLinks(concept.entity_concept_links ?? [])
+        })
+      )
+    )
+    .catch(console.error)
+}
+
+const onRemoveLink = link =>
   editConceptLinks(
-    currentConcept.value.entity_concept_links.filter(id => id !== link.id)
+    selectedConceptList.value.filter(concept => isLinkedTo(concept, link)),
+    links => links.filter(id => id !== link.id)
   )
-}
 
-const onSelectLink = link => {
-  editConceptLinks([...currentConcept.value.entity_concept_links, link.id])
-}
+const onSelectLink = link =>
+  editConceptLinks(
+    selectedConceptList.value.filter(concept => !isLinkedTo(concept, link)),
+    links => [...new Set([...links, link.id])]
+  )
 
 const onEntitySearchChange = searchQuery => {
   store.dispatch('setAssetSearch', searchQuery)
