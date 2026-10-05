@@ -56,6 +56,9 @@ export const useFormat = () => {
   const isDurationInHours = computed(
     () => organisation.value.format_duration_in_hours
   )
+  const durationUnit = computed(() =>
+    isDurationInHours.value ? t('schedule.hours') : t('schedule.md')
+  )
 
   const dateFormat = computed(() => store.getters.dateFormat)
   const use12HourClock = computed(() => store.getters.use12HourClock)
@@ -83,6 +86,7 @@ export const useFormat = () => {
   return {
     organisation,
     isDurationInHours,
+    durationUnit,
     dateFormat,
     use12HourClock,
     formatBoolean,
