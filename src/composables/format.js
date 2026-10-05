@@ -1,9 +1,7 @@
 /*
- * Composition API counterpart of `src/components/mixins/format.js`.
- * New `<script setup>` components should use `useFormat()` (or the
- * pure-function named exports below). The legacy mixin stays in place
- * so existing Options API components keep working — they can migrate
- * one by one to this composable.
+ * Formatting helpers: `useFormat()` for the ones that follow the user and
+ * organisation settings, the pure-function named exports below for the
+ * others.
  */
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -56,14 +54,16 @@ export const useFormat = () => {
   const isDurationInHours = computed(
     () => organisation.value.format_duration_in_hours
   )
+  const durationUnit = computed(() =>
+    isDurationInHours.value ? t('schedule.hours') : t('schedule.md')
+  )
 
   const dateFormat = computed(() => store.getters.dateFormat)
   const use12HourClock = computed(() => store.getters.use12HourClock)
 
   const formatBoolean = value => (value ? t('main.yes') : t('main.no'))
 
-  // unlike the pure export above, this one applies the user preferences,
-  // matching the legacy mixin's formatDate
+  // unlike the pure export above, this one applies the user preferences
   const formatDate = date =>
     libFormatDate(date, dateFormat.value, use12HourClock.value)
 
@@ -83,6 +83,7 @@ export const useFormat = () => {
   return {
     organisation,
     isDurationInHours,
+    durationUnit,
     dateFormat,
     use12HourClock,
     formatBoolean,

@@ -245,7 +245,11 @@ const mutations = {
   [SET_SCHEDULE_VERSION](state, version) {
     const index = state.scheduleVersions.findIndex(v => v.id === version.id)
     if (index !== -1) {
-      state.scheduleVersions[index] = version
+      // an update only carries the edited fields
+      state.scheduleVersions[index] = {
+        ...state.scheduleVersions[index],
+        ...version
+      }
     } else {
       state.scheduleVersions.push(version)
     }

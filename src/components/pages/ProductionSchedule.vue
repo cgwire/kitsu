@@ -534,12 +534,13 @@
   />
 </template>
 
-<script>
+<script setup>
 /*
  * Page to manage the schedule of the big steps of the production. It allows
  * to set milestones too.
  */
 
+import { useHead } from '@unhead/vue'
 import {
   ChevronDownIcon,
   ChevronRightIcon,
@@ -550,11 +551,42 @@ import {
 } from 'lucide-vue-next'
 import moment from 'moment-timezone'
 import { firstBy } from 'thenby'
-import { mapGetters, mapActions } from 'vuex'
+import {
+  computed,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  useTemplateRef,
+  watch
+} from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
+import { useFormat } from '@/composables/format'
 import colors from '@/lib/colors'
 import { downloadBlob } from '@/lib/download'
 import { getTaskTypeSchedulePath } from '@/lib/path'
+import {
+  DEFAULT_MODE,
+  DEFAULT_VERSION,
+  DEFAULT_ZOOM,
+  formatHiddenTaskTypeIds,
+  getMaxDate,
+  getMinDate,
+  getScheduleRouteChange,
+  getTaskTypeFilterOptions,
+  getTaskTypeFilterTitle,
+  getTaskTypeVisibilityMap,
+  getTaskUpdate,
+  getVersionedTaskUpdate,
+  isTaskTypeFilterShown,
+  parseHiddenTaskTypeIds,
+  refreshRawDates,
+  removeHiddenTaskTypes,
+  setTaskTypeVisibility,
+  widenParents
+} from '@/lib/productionSchedule'
 import {
   sortByName,
   sortPeople,
@@ -570,25 +602,6 @@ import {
   parseDate,
   parseSimpleDate
 } from '@/lib/time'
-
-import { formatListMixin } from '@/components/mixins/format'
-
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
-import Checkbox from '@/components/widgets/Checkbox.vue'
-import Combobox from '@/components/widgets/Combobox.vue'
-import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
-import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
-import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
-import ConfirmModal from '@/components/modals/ConfirmModal.vue'
-import DateField from '@/components/widgets/DateField.vue'
-import EditScheduleVersionModal from '@/components/modals/EditScheduleVersionModal.vue'
-import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
-import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
-import PeopleName from '@/components/widgets/PeopleName.vue'
-import Schedule from '@/components/widgets/Schedule.vue'
-import Spinner from '@/components/widgets/Spinner.vue'
-import TextField from '@/components/widgets/TextField.vue'
-
 import assetStore from '@/store/modules/assets'
 import assetTypeStore from '@/store/modules/assettypes'
 import editStore from '@/store/modules/edits'
@@ -597,2327 +610,2215 @@ import sequenceStore from '@/store/modules/sequences'
 import shotStore from '@/store/modules/shots'
 import taskTypeStore from '@/store/modules/tasktypes'
 
-export const DEFAULT_MODE = 'prev'
-export const DEFAULT_VERSION = 'ref'
-export const DEFAULT_ZOOM = 1
+import ConfirmModal from '@/components/modals/ConfirmModal.vue'
+import EditScheduleVersionModal from '@/components/modals/EditScheduleVersionModal.vue'
+import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import Checkbox from '@/components/widgets/Checkbox.vue'
+import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
+import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import DateField from '@/components/widgets/DateField.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import PeopleName from '@/components/widgets/PeopleName.vue'
+import Schedule from '@/components/widgets/Schedule.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
+import TextField from '@/components/widgets/TextField.vue'
 
-// A query param repeated in the URL reaches the page as an array of values.
-export const parseHiddenTaskTypeIds = (queryValue, taskTypeMap) =>
-  [queryValue]
-    .flat()
-    .filter(Boolean)
-    .flatMap(value => value.split(','))
-    .filter(id => taskTypeMap.has(id))
+// Composables
+// --------------------------------------------------------------------------
+const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
+const store = useStore()
+const { durationUnit, formatDuration } = useFormat()
 
-export default {
-  name: 'production-schedule',
+// State
+// --------------------------------------------------------------------------
+const assignments = ref({
+  assigned: false,
+  entityTypes: null,
+  excludes: [],
+  forcedDailyQuota: null,
+  loading: false,
+  saving: false,
+  startDate: null,
+  endDate: null,
+  task: {},
+  type: null,
+  unassign: false
+})
+const availableTaskTypes = ref([])
+const daysOffByPerson = ref({})
+const daysOffRangeKey = ref(null)
+const draggedEntities = ref([])
+const endDate = ref(moment().add(6, 'months').endOf('day'))
+const entityType = ref(null)
+const expandAll = ref(false)
+const hiddenTaskTypeIds = ref([])
+const isSidePanelOpen = ref(false)
+const resetTimeout = ref(null)
+const scheduleItems = ref([])
+const startDate = ref(moment().startOf('day'))
+const selectedStartDate = ref(null)
+const selectedEndDate = ref(null)
+const selectedTaskType = ref(null)
+const zoomLevel = ref(DEFAULT_ZOOM)
+const mode = ref(DEFAULT_MODE)
+const scheduleVersionToEdit = ref({})
+const version = ref(DEFAULT_VERSION)
+const loading = ref({
+  schedule: false,
+  delete: false,
+  editScheduleVersion: false,
+  applyScheduleVersion: false,
+  expandSchedule: false,
+  exportSchedule: false
+})
+const errors = ref({
+  editScheduleVersion: false,
+  deleteScheduleVersion: false,
+  applyScheduleVersion: false
+})
+const modals = ref({
+  editScheduleVersion: false,
+  deleteScheduleVersion: false,
+  applyScheduleVersion: false,
+  confirmChildMove: false
+})
+const pendingParentChange = ref(null)
+const scheduleRef = useTemplateRef('schedule')
 
-  mixins: [formatListMixin],
+// Computed
+// --------------------------------------------------------------------------
+const currentEpisode = computed(() => store.getters.currentEpisode)
+const currentProduction = computed(() => store.getters.currentProduction)
+const isTVShow = computed(() => store.getters.isTVShow)
+const organisation = computed(() => store.getters.organisation)
+const personMap = computed(() => store.getters.personMap)
+const productionAssetTypes = computed(() => store.getters.productionAssetTypes)
+const scheduleVersions = computed(() => store.getters.scheduleVersions)
+const user = computed(() => store.getters.user)
+const isCurrentUserManager = computed(
+  () => store.getters.isCurrentUserProductionManager
+)
+const isCurrentUserSupervisor = computed(
+  () => store.getters.isCurrentUserProductionSupervisor
+)
 
-  components: {
-    ButtonSimple,
-    Checkbox,
-    ChevronDownIcon,
-    ChevronRightIcon,
-    Combobox,
-    ComboboxNumber,
-    ComboboxOptions,
-    ComboboxTaskType,
-    ConfirmModal,
-    DateField,
-    EditScheduleVersionModal,
-    GripVerticalIcon,
-    HardDeleteModal,
-    ListRestartIcon,
-    PeopleAvatar,
-    PeopleName,
-    Schedule,
-    Spinner,
-    TrashIcon,
-    TextField,
-    XIcon
-  },
+const zoomOptions = computed(() => [
+  { label: t('main.week'), value: 0 },
+  { label: '1', value: 1 },
+  { label: '2', value: 2 },
+  { label: '3', value: 3 }
+])
 
-  data() {
-    return {
-      assignments: {
-        assigned: false,
-        entityTypes: null,
-        excludes: [],
-        forcedDailyQuota: null,
-        loading: false,
-        saving: false,
-        startDate: null,
-        endDate: null,
-        task: {},
-        type: null,
-        unassign: false
-      },
-      availableTaskTypes: [],
-      daysOffByPerson: {},
-      daysOffRangeKey: null,
-      draggedEntities: [],
-      endDate: moment().add(6, 'months').endOf('day'),
-      entityType: null,
-      expandAll: false,
-      hiddenTaskTypeIds: [],
-      isSidePanelOpen: false,
-      resetTimeout: null,
-      scheduleItems: [],
-      startDate: moment().startOf('day'),
-      selectedStartDate: null,
-      selectedEndDate: null,
-      selectedTaskType: null,
-      zoomLevel: DEFAULT_ZOOM,
-      zoomOptions: [
-        { label: this.$t('main.week'), value: 0 },
-        { label: '1', value: 1 },
-        { label: '2', value: 2 },
-        { label: '3', value: 3 }
-      ],
-      mode: DEFAULT_MODE,
-      modeOptions: [
-        { label: this.$t('schedule.mode_prev'), value: 'prev' },
-        { label: this.$t('schedule.mode_real'), value: 'real' }
-      ],
-      scheduleVersionToEdit: {},
-      version: DEFAULT_VERSION,
-      loading: {
-        schedule: false,
-        delete: false,
-        editScheduleVersion: false,
-        applyScheduleVersion: false,
-        expandSchedule: false,
-        exportSchedule: false
-      },
-      errors: {
-        editScheduleVersion: false,
-        deleteScheduleVersion: false,
-        applyScheduleVersion: false
-      },
-      modals: {
-        editScheduleVersion: false,
-        deleteScheduleVersion: false,
-        applyScheduleVersion: false,
-        confirmChildMove: false
-      },
-      pendingParentChange: null
+const modeOptions = computed(() => [
+  { label: t('schedule.mode_prev'), value: 'prev' },
+  { label: t('schedule.mode_real'), value: 'real' }
+])
+
+const estimatedDailyQuota = computed(() => {
+  const rangeStartDate = parseSimpleDate(assignments.value.startDate)
+  const rangeEndDate = parseSimpleDate(assignments.value.endDate)
+  const nbDays = getBusinessDays(rangeStartDate, rangeEndDate)
+  const nbEntities = draggedEntities.value.reduce(
+    (sum, entity) => sum + (entity.children?.length ?? 0),
+    0
+  )
+  const nbAssignees = availablePersons.value.length
+
+  return nbDays && nbAssignees ? nbEntities / nbDays / nbAssignees : 0
+})
+
+const assetTypeMap = computed(() => {
+  return assetTypeStore.cache.assetTypeMap
+})
+
+const availablePersons = computed(() => {
+  const taskType = taskTypeMap.value.get(selectedTaskType.value.task_type_id)
+  return team.value.filter(
+    person =>
+      !assignments.value.excludes.includes(person.id) &&
+      person.role !== 'client' &&
+      (['admin', 'manager'].includes(person.role) ||
+        !person.departments.length ||
+        person.departments.includes(taskType?.department_id) ||
+        // an out-of-department person already assigned to the edited
+        // task stays listed: saveTask replaces the full assignee list,
+        // so hiding them here would silently unassign them
+        assignments.value.task?.assignees?.includes(person.id))
+  )
+})
+
+const currentVersion = computed(() => {
+  return scheduleVersions.value.find(
+    scheduleVersion => scheduleVersion.id === version.value
+  )
+})
+
+const hasDraggedEntities = computed(() => {
+  return draggedEntities.value.some(entity => entity.children.length)
+})
+
+const isLockedSchedule = computed(() => {
+  return (
+    mode.value === 'real' ||
+    currentVersion.value?.locked ||
+    !isCurrentUserManager.value
+  )
+})
+
+// Concrete episode id for scoping (null for feature films or the 'all'/'main' pseudo-episodes).
+const currentEpisodeId = computed(() => {
+  const id = currentEpisode.value?.id
+  return isTVShow.value && id && !['all', 'main'].includes(id) ? id : null
+})
+
+// The 'all' pseudo-episode displays the production-wide planning: one row
+// per episode with its own dates, instead of the per-episode entity /
+// assignee / task tree.
+const isAllEpisodes = computed(() => {
+  return isTVShow.value && currentEpisode.value?.id === 'all'
+})
+
+// The 'main' pseudo-episode scopes the planning to the main pack: the
+// assets attached to no episode.
+const isMainPack = computed(() => {
+  return isTVShow.value && currentEpisode.value?.id === 'main'
+})
+
+// Episode id the drill-down links point at. The main pack is a valid route
+// scope, unlike the schedule-items endpoints which only accept a real
+// episode.
+const linkedEpisodeId = computed(() => {
+  return isMainPack.value ? 'main' : currentEpisodeId.value
+})
+
+const taskTypeMap = computed(() => {
+  return taskTypeStore.cache.taskTypeMap
+})
+
+const team = computed(() => {
+  return sortPeople(
+    currentProduction.value?.team
+      .map(personId => personMap.value.get(personId))
+      .filter(person => person && !person.is_bot) ?? []
+  )
+})
+
+const isVersioned = computed(() => {
+  return mode.value === 'prev' && version.value !== 'ref'
+})
+
+const versionOptions = computed(() => {
+  const options = scheduleVersions.value
+    .filter(scheduleVersion => !scheduleVersion.canceled)
+    .sort(firstBy('created_at'))
+    .map(scheduleVersion => ({
+      label: scheduleVersion.locked
+        ? `${scheduleVersion.name} (${t('schedule.versions.locked')})`
+        : scheduleVersion.name,
+      value: scheduleVersion.id
+    }))
+
+  const fromScheduleVersion = scheduleVersions.value.find(
+    scheduleVersion =>
+      scheduleVersion.id === currentProduction.value.from_schedule_version_id
+  )
+  const referenceVersion = {
+    label: fromScheduleVersion
+      ? `${t('schedule.versions.reference')} (${t('schedule.versions.from')} ${fromScheduleVersion.name})`
+      : t('schedule.versions.reference'),
+    value: DEFAULT_VERSION,
+    separator: true
+  }
+
+  return [referenceVersion, ...options]
+})
+
+// Task type rows in scope. The main pack only holds assets: the other
+// entities (shots, sequences, episodes, edits) all belong to an episode.
+const scopedScheduleItems = computed(() => {
+  return isMainPack.value
+    ? scheduleItems.value.filter(item => item.for_entity === 'Asset')
+    : scheduleItems.value
+})
+
+const availableEntityTypes = computed(() => {
+  const types = new Set()
+  scopedScheduleItems.value.forEach(item => {
+    const taskType = taskTypeMap.value.get(item.task_type_id)
+    if (taskType?.for_entity) {
+      types.add(taskType.for_entity)
     }
-  },
-
-  mounted() {
-    this.reset()
-  },
-
-  beforeUnmount() {
-    if (this.resetTimeout) clearTimeout(this.resetTimeout)
-  },
-
-  computed: {
-    ...mapGetters([
-      'currentEpisode',
-      'currentProduction',
-      'isTVShow',
-      'organisation',
-      'personMap',
-      'productionAssetTypes',
-      'scheduleVersions',
-      'user'
-    ]),
-    ...mapGetters({
-      isCurrentUserManager: 'isCurrentUserProductionManager',
-      isCurrentUserSupervisor: 'isCurrentUserProductionSupervisor'
-    }),
-
-    estimatedDailyQuota() {
-      const startDate = parseSimpleDate(this.assignments.startDate)
-      const endDate = parseSimpleDate(this.assignments.endDate)
-      const nbDays = getBusinessDays(startDate, endDate)
-      const nbEntities = this.draggedEntities.reduce(
-        (sum, entity) => sum + (entity.children?.length ?? 0),
-        0
-      )
-      const nbAssignees = this.availablePersons.length
-
-      return nbDays && nbAssignees ? nbEntities / nbDays / nbAssignees : 0
-    },
-
-    assetTypeMap() {
-      return assetTypeStore.cache.assetTypeMap
-    },
-
-    availablePersons() {
-      const taskType = this.taskTypeMap.get(this.selectedTaskType.task_type_id)
-      return this.team.filter(
-        person =>
-          !this.assignments.excludes.includes(person.id) &&
-          person.role !== 'client' &&
-          (['admin', 'manager'].includes(person.role) ||
-            !person.departments.length ||
-            person.departments.includes(taskType?.department_id) ||
-            // an out-of-department person already assigned to the edited
-            // task stays listed: saveTask replaces the full assignee list,
-            // so hiding them here would silently unassign them
-            this.assignments.task?.assignees?.includes(person.id))
-      )
-    },
-
-    currentVersion() {
-      return this.scheduleVersions.find(version => version.id === this.version)
-    },
-
-    hasDraggedEntities() {
-      return this.draggedEntities.some(entity => entity.children.length)
-    },
-
-    isLockedSchedule() {
-      return (
-        this.mode === 'real' ||
-        this.currentVersion?.locked ||
-        !this.isCurrentUserManager
-      )
-    },
-
-    // Concrete episode id for scoping (null for feature films or the 'all'/'main' pseudo-episodes).
-    currentEpisodeId() {
-      const id = this.currentEpisode?.id
-      return this.isTVShow && id && !['all', 'main'].includes(id) ? id : null
-    },
-
-    // The 'all' pseudo-episode displays the production-wide planning: one row
-    // per episode with its own dates, instead of the per-episode entity /
-    // assignee / task tree.
-    isAllEpisodes() {
-      return this.isTVShow && this.currentEpisode?.id === 'all'
-    },
-
-    // The 'main' pseudo-episode scopes the planning to the main pack: the
-    // assets attached to no episode.
-    isMainPack() {
-      return this.isTVShow && this.currentEpisode?.id === 'main'
-    },
-
-    // Episode id the drill-down links point at. The main pack is a valid route
-    // scope, unlike the schedule-items endpoints which only accept a real
-    // episode.
-    linkedEpisodeId() {
-      return this.isMainPack ? 'main' : this.currentEpisodeId
-    },
-
-    taskTypeMap() {
-      return taskTypeStore.cache.taskTypeMap
-    },
-
-    team() {
-      return sortPeople(
-        this.currentProduction?.team
-          .map(personId => this.personMap.get(personId))
-          .filter(person => person && !person.is_bot) ?? []
-      )
-    },
-
-    isVersioned() {
-      return this.mode === 'prev' && this.version !== 'ref'
-    },
-
-    versionOptions() {
-      const options = this.scheduleVersions
-        .filter(version => !version.canceled)
-        .sort(firstBy('created_at'))
-        .map(version => ({
-          label: version.locked
-            ? `${version.name} (${this.$t('schedule.versions.locked')})`
-            : version.name,
-          value: version.id
-        }))
-
-      const fromScheduleVersion = this.scheduleVersions.find(
-        version =>
-          version.id === this.currentProduction.from_schedule_version_id
-      )
-      const referenceVersion = {
-        label: fromScheduleVersion
-          ? `${this.$t('schedule.versions.reference')} (${this.$t('schedule.versions.from')} ${fromScheduleVersion.name})`
-          : this.$t('schedule.versions.reference'),
-        value: DEFAULT_VERSION,
-        separator: true
-      }
-
-      return [referenceVersion, ...options]
-    },
-
-    // Task type rows in scope. The main pack only holds assets: the other
-    // entities (shots, sequences, episodes, edits) all belong to an episode.
-    scopedScheduleItems() {
-      return this.isMainPack
-        ? this.scheduleItems.filter(item => item.for_entity === 'Asset')
-        : this.scheduleItems
-    },
-
-    availableEntityTypes() {
-      const types = new Set()
-      this.scopedScheduleItems.forEach(item => {
-        const taskType = this.taskTypeMap.get(item.task_type_id)
-        if (taskType?.for_entity) {
-          types.add(taskType.for_entity)
-        }
-      })
-      return Array.from(types).sort()
-    },
-
-    entityTypeOptions() {
-      const options = [{ label: this.$t('main.all'), value: null }]
-      this.availableEntityTypes.forEach(type => {
-        options.push({ label: type, value: type })
-      })
-      return options
-    },
-
-    entityFilteredScheduleItems() {
-      if (!this.entityType) {
-        return this.scopedScheduleItems
-      }
-      return this.scopedScheduleItems.filter(item => {
-        const taskType = this.taskTypeMap.get(item.task_type_id)
-        return taskType && taskType.for_entity === this.entityType
-      })
-    },
-
-    // Named and ordered like the rows they toggle: two entities can share a
-    // task type name, the bare name would list two identical options.
-    taskTypeFilterOptions() {
-      return this.entityFilteredScheduleItems.map(item => ({
-        label: item.name,
-        value: item.task_type_id
-      }))
-    },
-
-    // A single option is nothing to choose from, unless it is the hidden one:
-    // dropping the filter there would leave no way to bring the row back.
-    hasTaskTypeFilter() {
-      return (
-        this.taskTypeFilterOptions.length > 1 ||
-        this.filteredScheduleItems.length <
-          this.entityFilteredScheduleItems.length
-      )
-    },
-
-    taskTypeFilterTitle() {
-      const total = this.taskTypeFilterOptions.length
-      const visible = this.filteredScheduleItems.length
-      return visible === total ? this.$t('main.all') : `(${visible}/${total})`
-    },
-
-    taskTypeVisibilityMap() {
-      return this.taskTypeFilterOptions.reduce((map, option) => {
-        map[option.value] = !this.hiddenTaskTypeIds.includes(option.value)
-        return map
-      }, {})
-    },
-
-    filteredScheduleItems() {
-      if (!this.hiddenTaskTypeIds.length) {
-        return this.entityFilteredScheduleItems
-      }
-      return this.entityFilteredScheduleItems.filter(
-        item => !this.hiddenTaskTypeIds.includes(item.task_type_id)
-      )
-    }
-  },
-
-  methods: {
-    ...mapActions([
-      'applyScheduleVersionToProduction',
-      'assignSelectedTasks',
-      'createScheduleVersion',
-      'createScheduleVersionedTask',
-      'deleteScheduleVersion',
-      'editProduction',
-      'loadAssets',
-      'loadAssetTypeScheduleItems',
-      'loadEdits',
-      'loadEditScheduleItems',
-      'loadEpisodeScheduleItems',
-      'loadEpisodes',
-      'loadProductionDaysOff',
-      'loadScheduleItems',
-      'loadScheduleVersions',
-      'loadSequences',
-      'loadSequenceScheduleItems',
-      'loadShots',
-      'loadTasks',
-      'loadTasksFromScheduleVersion',
-      'saveScheduleItem',
-      'unassignPersonFromTask',
-      'unassignSelectedTasks',
-      'updateScheduleVersion',
-      'updateScheduleVersionedTask',
-      'updateTask'
-    ]),
-
-    updateRoute({ mode, type, version, zoom, hiddenTypes }) {
-      const query = { ...this.$route.query }
-
-      if (mode !== undefined) {
-        query.mode = mode || undefined
-      }
-      if (type !== undefined) {
-        query.type = type || undefined
-      }
-      if (version !== undefined) {
-        query.version = version || undefined
-      }
-      if (zoom !== undefined) {
-        query.zoom = String(zoom)
-      }
-      if (hiddenTypes !== undefined) {
-        query.hiddenTypes = hiddenTypes || undefined
-      }
-
-      if (JSON.stringify(query) !== JSON.stringify(this.$route.query)) {
-        // the page never reads the history back, and the task type checkboxes
-        // stay open: one entry per click would take as many Back presses
-        if (hiddenTypes !== undefined) {
-          this.$router.replace({ query })
-        } else {
-          this.$router.push({ query })
-        }
-      }
-    },
-
-    async loadData() {
-      const production = this.currentProduction
-      this.loading.schedule = true
-      this.availableTaskTypes = []
-
-      try {
-        await this.loadScheduleVersions(production)
-
-        const items = await this.loadScheduleItems(production)
-        // A production switched during the fetches runs its own load.
-        if (this.currentProduction?.id !== production.id) return
-        const scheduleStartDate = parseDate(this.selectedStartDate)
-        const scheduleEndDate = parseDate(this.selectedEndDate)
-        const scheduleItems = items.map(item => {
-          const taskType = this.taskTypeMap.get(item.task_type_id)
-          if (!taskType) return null
-          let startDate, endDate
-          if (item.start_date) {
-            startDate = parseDate(item.start_date)
-          } else {
-            startDate = moment()
-          }
-          if (startDate.isSameOrAfter(scheduleEndDate)) {
-            startDate = scheduleEndDate.clone().add(-1, 'days')
-          }
-
-          if (startDate.isBefore(scheduleStartDate)) {
-            startDate = scheduleStartDate.clone()
-          }
-
-          if (item.end_date) {
-            endDate = parseDate(item.end_date)
-          } else {
-            endDate = startDate.clone().add(1, 'days')
-          }
-          if (endDate.isSameOrAfter(scheduleEndDate)) {
-            endDate = scheduleEndDate.clone()
-          }
-
-          const path = getTaskTypeSchedulePath(
-            taskType.id,
-            this.currentProduction.id,
-            this.linkedEpisodeId,
-            taskType.for_entity
-          )
-
-          return {
-            ...item,
-            color: taskType.color,
-            for_entity: taskType.for_entity,
-            name: `${taskType.for_entity} / ${taskType.name}`,
-            priority: taskType.priority,
-            startDate,
-            endDate,
-            editable: this.isInDepartment(taskType) && !this.isLockedSchedule,
-            expanded: false,
-            loading: false,
-            route: path,
-            children: []
-          }
-        })
-        this.scheduleItems = sortTaskTypeScheduleItems(
-          scheduleItems.filter(Boolean),
-          this.currentProduction,
-          this.taskTypeMap
-        )
-
-        this.availableTaskTypes = this.scopedScheduleItems.map(item => ({
-          ...this.taskTypeMap.get(item.task_type_id),
-          name: item.name
-        }))
-      } catch (err) {
-        console.error(err)
-      } finally {
-        if (this.currentProduction?.id === production.id) {
-          this.loading.schedule = false
-        }
-      }
-    },
-
-    reset() {
-      // Debounce: cross-prod navigation triggers two close currentEpisode changes (transient 'main' then 'all').
-      if (this.resetTimeout) clearTimeout(this.resetTimeout)
-      this.resetTimeout = setTimeout(() => {
-        this.resetTimeout = null
-        this.loadSchedule()
-      }, 50)
-    },
-
-    async loadSchedule() {
-      this.closeSidePanel()
-
-      if (this.currentProduction.start_date) {
-        this.startDate = parseDate(this.currentProduction.start_date)
-      }
-      if (this.currentProduction.end_date) {
-        this.endDate = parseDate(this.currentProduction.end_date)
-      }
-      this.selectedStartDate = this.startDate.toDate()
-      this.selectedEndDate = this.endDate.toDate()
-
-      await this.loadData()
-
-      const mode = this.$route.query.mode
-      const type = this.$route.query.type
-      const version = this.$route.query.version
-      const zoom = Number(this.$route.query.zoom)
-      const hiddenTypes = this.$route.query.hiddenTypes
-
-      this.mode = this.modeOptions.map(o => o.value).includes(mode)
-        ? mode
-        : DEFAULT_MODE
-      this.entityType = this.entityTypeOptions.map(o => o.value).includes(type)
-        ? type
-        : null
-      this.version = this.versionOptions.map(o => o.value).includes(version)
-        ? version
-        : DEFAULT_VERSION
-      this.zoomLevel = this.zoomOptions.map(o => o.value).includes(zoom)
-        ? zoom
-        : DEFAULT_ZOOM
-      this.hiddenTaskTypeIds = parseHiddenTaskTypeIds(
-        hiddenTypes,
-        this.taskTypeMap
-      )
-
-      // loadData computed the editable flags with the default mode/version,
-      // before the query params were applied
-      this.refreshScheduleItemsEditable()
-    },
-
-    refreshScheduleItemsEditable() {
-      this.scheduleItems.forEach(item => {
-        const taskType = this.taskTypeMap.get(item.task_type_id)
-        item.editable = this.isInDepartment(taskType) && !this.isLockedSchedule
-      })
-    },
-
-    convertScheduleItems(taskTypeElement, scheduleItems) {
-      return scheduleItems.map(item => {
-        let startDate
-        if (item.start_date) {
-          startDate = parseDate(item.start_date)
-        } else {
-          startDate = moment()
-        }
-        if (startDate.isBefore(this.startDate)) {
-          startDate = this.startDate.clone()
-        }
-        if (startDate.isAfter(this.endDate)) {
-          startDate = this.endDate.clone()
-        }
-        let endDate
-        if (item.end_date) {
-          endDate = parseDate(item.end_date)
-        } else {
-          endDate = startDate.clone().add(1, 'days')
-        }
-        if (endDate.isBefore(startDate)) {
-          endDate = startDate.clone().add(1, 'days')
-        }
-        if (endDate.isAfter(this.endDate)) {
-          endDate = this.endDate.clone()
-        }
-        const scheduleItem = {
-          ...item,
-          startDate,
-          endDate,
-          expanded: false,
-          loading: false,
-          editable:
-            this.isInDepartment(this.taskTypeMap.get(item.task_type_id)) &&
-            !this.isLockedSchedule,
-          children: [],
-          parentElement: taskTypeElement
-        }
-        return scheduleItem
-      })
-    },
-
-    buildTaskFilters(taskType) {
-      const filters = {
-        project_id: this.currentProduction.id,
-        task_type_id: taskType.task_type_id,
-        relations: 'true'
-      }
-      // /tasks?episode_id= only filters shot tasks (shot → sequence → episode);
-      // asset tasks are scoped client-side via the episode-scoped assetMap.
-      if (this.currentEpisodeId && taskType.for_entity === 'Shot') {
-        filters.episode_id = this.currentEpisodeId
-      }
-      return filters
-    },
-
-    // The plain /assets endpoint rejects episode_id=main (only its with-tasks
-    // variant maps it to source_id IS NULL), so the main pack loads every asset
-    // with no episode filter and keeps the right ones client-side. A real
-    // episode is scoped server-side, so nothing to load wide.
-    loadScopedAssets() {
-      return this.loadAssets({
-        all: this.isMainPack,
-        withShared: false,
-        withTasks: false
-      })
-    },
-
-    // Whether an asset falls in the current scope: for the main pack, only the
-    // assets attached to no episode (source_id null); otherwise the assetMap is
-    // already scoped and every asset it holds belongs.
-    assetInScope(asset) {
-      return !this.isMainPack || !asset.source_id
-    },
-
-    expandTaskTypeElement(
-      taskTypeElement,
-      refreshScheduleCallBack = null,
-      expanded = false,
-      resetAssignments = true
-    ) {
-      return this.isAllEpisodes
-        ? this.expandEpisodeRows(
-            taskTypeElement,
-            refreshScheduleCallBack,
-            expanded
-          )
-        : this.expandTaskTypeDrillDown(
-            taskTypeElement,
-            refreshScheduleCallBack,
-            expanded,
-            resetAssignments
-          )
-    },
-
-    // The production-wide planning stops at the episode level: one row per
-    // episode, with no entity, assignee or task row to load below it.
-    async expandEpisodeRows(
-      taskTypeElement,
-      refreshScheduleCallBack = null,
-      expanded = false
-    ) {
-      taskTypeElement.expanded = expanded || !taskTypeElement.expanded
-
-      if (taskTypeElement.expanded) {
-        try {
-          taskTypeElement.loading = true
-          taskTypeElement.children = []
-
-          // The episodes endpoint aggregates a task type schedule per episode,
-          // whatever the entity it applies to.
-          const scheduleItems = await this.loadEpisodeScheduleItems({
-            production: this.currentProduction,
-            taskType: this.taskTypeMap.get(taskTypeElement.task_type_id)
-          })
-          taskTypeElement.children = sortByName(
-            this.convertScheduleItems(taskTypeElement, scheduleItems)
-          )
-        } catch (err) {
-          console.error(err)
-          taskTypeElement.children = []
-        } finally {
-          taskTypeElement.loading = false
-        }
-
-        if (refreshScheduleCallBack) {
-          refreshScheduleCallBack(taskTypeElement)
-        }
-      }
-    },
-
-    async expandTaskTypeDrillDown(
-      taskTypeElement,
-      refreshScheduleCallBack = null,
-      expanded = false,
-      resetAssignments = true
-    ) {
-      taskTypeElement.expanded = expanded || !taskTypeElement.expanded
-
-      if (taskTypeElement.expanded) {
-        // unversioned task list shared with the side panel to avoid a reload
-        let rawTasks = null
-        try {
-          taskTypeElement.loading = true
-
-          this.selectedTaskType = taskTypeElement
-          this.assignments.loading = resetAssignments
-
-          taskTypeElement.children = []
-          taskTypeElement.people = {}
-          taskTypeElement.entitiesByType = {}
-
-          // one row per asset type (Asset), sequence (Shot/Sequence),
-          // episode (Episode) or edit (Edit)
-          const scheduleItemLoaders = {
-            Asset: this.loadAssetTypeScheduleItems,
-            Shot: this.loadSequenceScheduleItems,
-            Sequence: this.loadSequenceScheduleItems,
-            Episode: this.loadEpisodeScheduleItems,
-            Edit: this.loadEditScheduleItems
-          }
-          const loadScheduleItems =
-            scheduleItemLoaders[taskTypeElement.for_entity] ??
-            this.loadAssetTypeScheduleItems
-          const parameters = {
-            production: this.currentProduction,
-            taskType: this.taskTypeMap.get(taskTypeElement.task_type_id),
-            episodeId: this.currentEpisodeId
-          }
-          const scheduleItems = await loadScheduleItems(parameters)
-
-          let children = this.convertScheduleItems(
-            taskTypeElement,
-            scheduleItems
-          )
-          const childrenById = new Map(
-            children.map(child => [child.object_id, child])
-          )
-
-          // load entities (scoped to the current episode for TV shows) that
-          // back the row grouping, the entity name and the episode filter
-          if (taskTypeElement.for_entity === 'Asset') {
-            await this.loadScopedAssets()
-          } else if (taskTypeElement.for_entity === 'Shot') {
-            await this.loadShots()
-          } else if (taskTypeElement.for_entity === 'Sequence') {
-            await this.loadSequences()
-          } else if (taskTypeElement.for_entity === 'Episode') {
-            await this.loadEpisodes()
-          } else if (taskTypeElement.for_entity === 'Edit') {
-            await this.loadEdits()
-          }
-
-          let tasks = await this.loadTasks(
-            this.buildTaskFilters(taskTypeElement)
-          )
-          rawTasks = tasks
-
-          // Update tasks for versioned schedules
-          if (this.isVersioned) {
-            const taskType = this.taskTypeMap.get(taskTypeElement.task_type_id)
-            const versionedTasks = await this.loadTasksFromScheduleVersion({
-              version: { id: this.version },
-              taskType
-            })
-            const versionedTaskMap = new Map(
-              versionedTasks.map(versionedTask => [
-                versionedTask.task_id,
-                versionedTask
-              ])
-            )
-            tasks = tasks
-              .map(task => {
-                const versioned = versionedTaskMap.get(task.id)
-                if (!versioned?.start_date) {
-                  return null
-                }
-                return {
-                  ...task,
-                  versionedTaskId: versioned.id,
-                  start_date: versioned.start_date,
-                  due_date: versioned.due_date,
-                  estimation: versioned.estimation,
-                  assignees: versioned.assignees
-                }
-              })
-              .filter(Boolean)
-          }
-
-          // days off only depend on the production and the date range:
-          // reuse them across expands
-          const daysOffKey = `${this.currentProduction.id}_${this.startDate.format('YYYY-MM-DD')}_${this.endDate.format('YYYY-MM-DD')}`
-          if (this.daysOffRangeKey !== daysOffKey) {
-            this.daysOffByPerson = await this.loadProductionDaysOff({
-              startDate: this.startDate.format('YYYY-MM-DD'),
-              endDate: this.endDate.format('YYYY-MM-DD')
-            }).catch(
-              () => ({}) // fallback if not allowed to fetch days off
-            )
-            this.daysOffRangeKey = daysOffKey
-          }
-
-          // Read the entity maps fresh from the store cache. They are plain,
-          // non-reactive Maps replaced on each episode-scoped load, so a cached
-          // computed would keep returning the first episode's Map and empty the
-          // drill-down after switching episode.
-          const assetMap = assetStore.cache.assetMap
-          const shotMap = shotStore.cache.shotMap
-          const sequenceMap = sequenceStore.cache.sequenceMap
-          const episodeMap = episodeStore.cache.episodeMap
-          const editMap = editStore.cache.editMap
-
-          // group tasks by entity type and assignee
-          const tasksByType = {}
-          const people = {}
-          tasks.forEach(task => {
-            if (!task.start_date) {
-              return
-            }
-
-            // link entity to task; skip tasks whose entity is not in the
-            // current episode (loadTasks is not episode-scoped, but the entity
-            // maps are for TV shows). Sequence/Episode/Edit task types group
-            // under their own entity id.
-            if (taskTypeElement.for_entity === 'Asset') {
-              task.entity = assetMap.get(task.entity_id)
-              if (!task.entity || !this.assetInScope(task.entity)) return
-              task.entity_type_id = task.entity.asset_type_id
-            } else if (taskTypeElement.for_entity === 'Shot') {
-              task.entity = shotMap.get(task.entity_id)
-              if (!task.entity) return
-              task.entity_type_id = task.entity.sequence_id
-            } else if (taskTypeElement.for_entity === 'Sequence') {
-              task.entity = sequenceMap.get(task.entity_id)
-              if (!task.entity) return
-              task.entity_type_id = task.entity_id
-            } else if (taskTypeElement.for_entity === 'Episode') {
-              task.entity = episodeMap.get(task.entity_id)
-              if (!task.entity) return
-              task.entity_type_id = task.entity_id
-            } else if (taskTypeElement.for_entity === 'Edit') {
-              task.entity = editMap.get(task.entity_id)
-              if (!task.entity) return
-              task.entity_type_id = task.entity_id
-            } else {
-              // unknown for_entity: the task will be dropped by the
-              // childrenById guard below
-              task.entity_type_id = taskTypeElement.for_entity
-            }
-            if (task.entity?.canceled) {
-              return
-            }
-
-            if (!tasksByType[task.entity_type_id]) {
-              tasksByType[task.entity_type_id] = {}
-            }
-
-            if (!task.assignees.length) {
-              task.assignees = ['unassigned']
-            }
-
-            task.assignees.forEach(assigneeId => {
-              const entityTypeItem = childrenById.get(task.entity_type_id)
-              if (!entityTypeItem) return
-
-              // populate task with start and end dates
-
-              let startDate
-              if (this.mode === 'real') {
-                if (!task.real_start_date) {
-                  return
-                }
-                startDate = parseDate(task.real_start_date)
-              } else {
-                startDate = parseDate(task.start_date)
-              }
-              if (startDate.isAfter(this.endDate)) {
-                return
-              }
-              if (startDate.isBefore(entityTypeItem.startDate)) {
-                entityTypeItem.startDate = startDate.clone()
-              }
-              task.startDate = startDate
-
-              let endDate
-              if (this.mode === 'real') {
-                endDate = task.done_date
-                  ? parseDate(task.done_date)
-                  : moment.tz()
-              } else if (task.due_date) {
-                endDate = parseDate(task.due_date)
-              } else if (task.end_date) {
-                endDate = parseDate(task.end_date)
-              } else if (task.estimation) {
-                endDate = addBusinessDays(
-                  task.startDate,
-                  Math.ceil(minutesToDays(this.organisation, task.estimation)) -
-                    1,
-                  this.daysOffByPerson[assigneeId]
-                )
-              }
-              if (!endDate || endDate.isBefore(startDate)) {
-                const nbDays = startDate.isoWeekday() === 5 ? 3 : 1
-                endDate = startDate.clone().add(nbDays, 'days')
-              }
-              if (endDate.isBefore(this.startDate)) {
-                return
-              }
-              if (endDate.isAfter(entityTypeItem.endDate)) {
-                entityTypeItem.endDate = endDate.clone()
-              }
-              task.endDate = endDate
-
-              if (!tasksByType[task.entity_type_id][assigneeId]) {
-                tasksByType[task.entity_type_id][assigneeId] = []
-                people[assigneeId] =
-                  assigneeId !== 'unassigned'
-                    ? {
-                        ...this.personMap.get(assigneeId),
-                        daysOff: this.daysOffByPerson[assigneeId]
-                      }
-                    : {
-                        id: assigneeId,
-                        avatar: false,
-                        color: '#888',
-                        full_name: this.$t('main.unassigned')
-                      }
-              }
-
-              task.editable = !this.isLockedSchedule
-              task.unresizable = false
-              task.parentElement = entityTypeItem
-
-              tasksByType[task.entity_type_id][assigneeId].push(task)
-            })
-          })
-
-          if (taskTypeElement.for_entity === 'Asset') {
-            // drop the asset type rows with no asset in the current scope (the
-            // main pack keeps only the asset types with an episode-less asset)
-            const scopedAssetTypeIds = this.isMainPack
-              ? new Set(
-                  [...assetMap.values()]
-                    .filter(asset => this.assetInScope(asset))
-                    .map(asset => asset.asset_type_id)
-                )
-              : null
-            // filtering following custom asset types workflow
-            children = children.filter(item => {
-              const assetType = this.assetTypeMap.get(item.object_id)
-              return (
-                assetType &&
-                (!assetType.task_types.length ||
-                  assetType.task_types.includes(
-                    taskTypeElement.task_type_id
-                  )) &&
-                (!scopedAssetTypeIds || scopedAssetTypeIds.has(item.object_id))
-              )
-            })
-          } else if (
-            ['Shot', 'Sequence'].includes(taskTypeElement.for_entity) &&
-            this.currentEpisodeId
-          ) {
-            // keep only the sequences of the current episode
-            children = children.filter(item => {
-              const sequence = sequenceMap.get(item.object_id)
-              return sequence && sequence.episode_id === this.currentEpisodeId
-            })
-          } else if (
-            taskTypeElement.for_entity === 'Edit' &&
-            this.currentEpisodeId
-          ) {
-            // keep only the edits of the current episode
-            children = children.filter(item => {
-              const edit = editMap.get(item.object_id)
-              return edit && edit.episode_id === this.currentEpisodeId
-            })
-          }
-
-          // sort grouped tasks
-          const sortEntitiesByUserName = ([keyA], [keyB]) => {
-            if (keyA === 'unassigned') return 1
-            if (keyB === 'unassigned') return -1
-            return people[keyA].full_name.localeCompare(people[keyB].full_name)
-          }
-          const sortTasksByEntityName = (a, b) =>
-            a.entity?.name.localeCompare(b.entity?.name, undefined, {
-              numeric: true
-            })
-          children.forEach(child => {
-            const items = tasksByType[child.object_id] || {}
-            const sortedChildren = new Map(
-              Object.entries(items)
-                .sort(sortEntitiesByUserName)
-                .map(([key, tasks]) => [key, tasks.sort(sortTasksByEntityName)])
-            )
-
-            child.children = sortedChildren
-          })
-
-          taskTypeElement.children = sortByName(children)
-          taskTypeElement.people = people
-
-          // group all assigned entities by type
-          taskTypeElement.entitiesByType = Object.fromEntries(
-            Object.entries(tasksByType).map(([entityTypeId, byAssignee]) => [
-              entityTypeId,
-              Object.entries(byAssignee)
-                .flatMap(([assignee, items]) =>
-                  assignee !== 'unassigned'
-                    ? items.map(item => item.entity_id)
-                    : undefined
-                )
-                .filter(Boolean)
-            ])
-          )
-        } catch (err) {
-          console.error(err)
-          taskTypeElement.children = []
-          taskTypeElement.people = {}
-        } finally {
-          taskTypeElement.loading = false
-        }
-
-        if (refreshScheduleCallBack) {
-          refreshScheduleCallBack(taskTypeElement)
-        }
-
-        this.selectTaskTypeElement(
-          taskTypeElement,
-          null,
-          resetAssignments,
-          rawTasks
-        )
-      }
-    },
-
-    filteredAssignments(items) {
-      return this.assignments.assigned
-        ? items
-        : items.filter(item => !item.assigned)
-    },
-
-    saveTaskChanged(task) {
-      if (this.isVersioned) {
-        return this.updateScheduleVersionedTask({
-          id: task.versionedTaskId,
-          estimation: task.estimation,
-          startDate: task.startDate.format('YYYY-MM-DD'),
-          dueDate: task.endDate.format('YYYY-MM-DD'),
-          // 'unassigned' is the local row placeholder, not a person id: the
-          // API rejects it and drops the whole update
-          assignees: task.assignees.filter(id => id !== 'unassigned')
-        })
+  })
+  return Array.from(types).sort()
+})
+
+const entityTypeOptions = computed(() => {
+  const options = [{ label: t('main.all'), value: null }]
+  availableEntityTypes.value.forEach(type => {
+    options.push({ label: type, value: type })
+  })
+  return options
+})
+
+const entityFilteredScheduleItems = computed(() => {
+  if (!entityType.value) {
+    return scopedScheduleItems.value
+  }
+  return scopedScheduleItems.value.filter(item => {
+    const taskType = taskTypeMap.value.get(item.task_type_id)
+    return taskType && taskType.for_entity === entityType.value
+  })
+})
+
+const taskTypeFilterOptions = computed(() => {
+  return getTaskTypeFilterOptions(entityFilteredScheduleItems.value)
+})
+
+const hasTaskTypeFilter = computed(() => {
+  return isTaskTypeFilterShown(
+    taskTypeFilterOptions.value.length,
+    filteredScheduleItems.value.length,
+    entityFilteredScheduleItems.value.length
+  )
+})
+
+const taskTypeFilterTitle = computed(() => {
+  return getTaskTypeFilterTitle(
+    filteredScheduleItems.value.length,
+    taskTypeFilterOptions.value.length,
+    t('main.all')
+  )
+})
+
+const taskTypeVisibilityMap = computed(() => {
+  return getTaskTypeVisibilityMap(
+    taskTypeFilterOptions.value,
+    hiddenTaskTypeIds.value
+  )
+})
+
+const filteredScheduleItems = computed(() => {
+  return removeHiddenTaskTypes(
+    entityFilteredScheduleItems.value,
+    hiddenTaskTypeIds.value
+  )
+})
+
+// Functions
+// --------------------------------------------------------------------------
+
+const updateRoute = changes => {
+  const change = getScheduleRouteChange(route.query, changes)
+  if (change?.isReplace) {
+    router.replace({ query: change.query })
+  } else if (change) {
+    router.push({ query: change.query })
+  }
+}
+
+const loadData = async () => {
+  const production = currentProduction.value
+  loading.value.schedule = true
+  availableTaskTypes.value = []
+
+  try {
+    await store.dispatch('loadScheduleVersions', production)
+
+    const items = await store.dispatch('loadScheduleItems', production)
+    // A production switched during the fetches runs its own load.
+    if (currentProduction.value?.id !== production.id) return
+    const scheduleStartDate = parseDate(selectedStartDate.value)
+    const scheduleEndDate = parseDate(selectedEndDate.value)
+    const rows = items.map(item => {
+      const taskType = taskTypeMap.value.get(item.task_type_id)
+      if (!taskType) return null
+      let rowStartDate, rowEndDate
+      if (item.start_date) {
+        rowStartDate = parseDate(item.start_date)
       } else {
-        return this.updateTask({
-          taskId: task.id,
-          data: {
-            estimation: task.estimation,
-            start_date: task.startDate.format('YYYY-MM-DD'),
-            due_date: task.endDate.format('YYYY-MM-DD')
-          }
-        })
+        rowStartDate = moment()
       }
-    },
-
-    async onScheduleItemChanged(item) {
-      if (item.type === 'Task') {
-        // update dates with weekends and days off
-        const daysOff = item.assignees
-          .flatMap(assigneeId => this.daysOffByPerson[assigneeId])
-          .filter(Boolean)
-        item.startDate = addBusinessDays(item.startDate, 0, daysOff)
-        item.endDate = addBusinessDays(
-          item.startDate,
-          Math.ceil(minutesToDays(this.organisation, item.estimation)) - 1,
-          daysOff
-        )
-        // update parents
-        if (item.startDate.isBefore(item.parentElement.startDate)) {
-          item.parentElement.startDate = item.startDate.clone()
-          this.updateScheduleItem(item.parentElement)
-          if (
-            item.parentElement.startDate.isBefore(
-              item.parentElement.parentElement.startDate
-            )
-          ) {
-            item.parentElement.parentElement.startDate =
-              item.parentElement.startDate.clone()
-            this.updateScheduleItem(item.parentElement.parentElement)
-          }
-        }
-        if (item.endDate.isAfter(item.parentElement.endDate)) {
-          item.parentElement.endDate = item.endDate.clone()
-          this.updateScheduleItem(item.parentElement)
-          if (
-            item.parentElement.endDate.isAfter(
-              item.parentElement.parentElement.endDate
-            )
-          ) {
-            item.parentElement.parentElement.endDate =
-              item.parentElement.endDate.clone()
-            this.updateScheduleItem(item.parentElement.parentElement)
-          }
-        }
-        await this.saveTaskChanged(item)
-        return
+      if (rowStartDate.isSameOrAfter(scheduleEndDate)) {
+        rowStartDate = scheduleEndDate.clone().add(-1, 'days')
       }
 
-      if (item.startDate && item.endDate && item.parentElement) {
-        item.parentElement.startDate = this.getMinDate(item.parentElement)
-        item.parentElement.endDate = this.getMaxDate(item.parentElement)
-        if (!this.isVersioned) {
-          this.saveScheduleItem(item.parentElement)
-        }
-      } else if (!item.parentElement) {
-        if (!Array.isArray(item.children)) {
-          await this.updateScheduleItem(item)
-          return
-        }
-        const affected = item.children.filter(
-          child =>
-            child._dragOrigStartDate &&
-            child._dragOrigEndDate &&
-            (!child.startDate.isSame(child._dragOrigStartDate) ||
-              !child.endDate.isSame(child._dragOrigEndDate))
-        )
-        if (!affected.length) {
-          await this.updateScheduleItem(item)
-          return
-        }
-        this.pendingParentChange = { item, affected }
-        this.modals.confirmChildMove = true
-        return
+      if (rowStartDate.isBefore(scheduleStartDate)) {
+        rowStartDate = scheduleStartDate.clone()
       }
 
-      await this.updateScheduleItem(item)
-    },
-
-    async updateScheduleItem(item) {
-      const scheduleItem = this.scheduleItems.find(
-        scheduleItem => scheduleItem === item
-      )
-      if (scheduleItem) {
-        scheduleItem.startDate = item.startDate
-        scheduleItem.start_date = item.startDate.format('YYYY-MM-DD')
-        scheduleItem.endDate = item.endDate
-        scheduleItem.end_date = item.endDate.format('YYYY-MM-DD')
-      }
-      if (!this.isVersioned) {
-        await this.saveScheduleItem(item)
-      }
-    },
-
-    async confirmChildMove() {
-      const { item, affected } = this.pendingParentChange
-      try {
-        await Promise.all(
-          [item, ...affected].map(element => this.updateScheduleItem(element))
-        )
-      } finally {
-        this.pendingParentChange = null
-        this.modals.confirmChildMove = false
-      }
-    },
-
-    cancelChildMove() {
-      const { item, affected } = this.pendingParentChange
-      item.startDate = item._dragOrigStartDate.clone()
-      item.endDate = item._dragOrigEndDate.clone()
-      if (item._dragOrigEstimation !== undefined) {
-        item.estimation = item._dragOrigEstimation
-      }
-      affected.forEach(child => {
-        child.startDate = child._dragOrigStartDate.clone()
-        child.endDate = child._dragOrigEndDate.clone()
-      })
-      this.pendingParentChange = null
-      this.modals.confirmChildMove = false
-    },
-
-    getMinDate(parentElement) {
-      let minDate = this.endDate.clone()
-      parentElement.children.forEach(item => {
-        if (item.startDate && item.startDate.isBefore(minDate)) {
-          minDate = item.startDate
-        }
-      })
-      return minDate.clone()
-    },
-
-    getMaxDate(parentElement) {
-      let maxDate = this.startDate.clone()
-      parentElement.children.forEach(item => {
-        if (item.endDate && item.endDate.isAfter(maxDate)) {
-          maxDate = item.endDate
-        }
-      })
-      return maxDate.clone()
-    },
-
-    isInDepartment(taskType) {
-      if (this.isCurrentUserManager) {
-        return true
-      } else if (this.isCurrentUserSupervisor) {
-        if (this.user.departments.length === 0) {
-          return true
-        } else {
-          return (
-            taskType?.department_id &&
-            this.user.departments.includes(taskType.department_id)
-          )
-        }
+      if (item.end_date) {
+        rowEndDate = parseDate(item.end_date)
       } else {
-        return false
+        rowEndDate = rowStartDate.clone().add(1, 'days')
       }
-    },
+      if (rowEndDate.isSameOrAfter(scheduleEndDate)) {
+        rowEndDate = scheduleEndDate.clone()
+      }
 
-    scrollScheduleToToday() {
-      this.$refs.schedule?.scrollToToday()
-    },
+      const path = getTaskTypeSchedulePath(
+        taskType.id,
+        currentProduction.value.id,
+        linkedEpisodeId.value,
+        taskType.for_entity
+      )
 
-    resetSidePanel() {
-      this.assignments = {
-        ...this.assignments,
-        entityTypes: null,
-        excludes: [],
-        forcedDailyQuota: null,
+      return {
+        ...item,
+        color: taskType.color,
+        for_entity: taskType.for_entity,
+        name: `${taskType.for_entity} / ${taskType.name}`,
+        priority: taskType.priority,
+        startDate: rowStartDate,
+        endDate: rowEndDate,
+        editable: isInDepartment(taskType) && !isLockedSchedule.value,
+        expanded: false,
         loading: false,
-        saving: false,
-        startDate: null,
-        endDate: null,
-        task: {},
-        type: null,
-        unassign: false
+        route: path,
+        children: []
       }
-    },
+    })
+    scheduleItems.value = sortTaskTypeScheduleItems(
+      rows.filter(Boolean),
+      currentProduction.value,
+      taskTypeMap.value
+    )
 
-    toggleSidePanel() {
-      if (this.isSidePanelOpen && this.assignments.type === 'task') {
-        this.assignments.type = null
-        this.isSidePanelOpen = false
-      }
+    availableTaskTypes.value = scopedScheduleItems.value.map(item => ({
+      ...taskTypeMap.value.get(item.task_type_id),
+      name: item.name
+    }))
+  } catch (err) {
+    console.error(err)
+  } finally {
+    if (currentProduction.value?.id === production.id) {
+      loading.value.schedule = false
+    }
+  }
+}
 
-      this.isSidePanelOpen = !this.isSidePanelOpen
+const reset = () => {
+  // Debounce: cross-prod navigation triggers two close currentEpisode changes (transient 'main' then 'all').
+  if (resetTimeout.value) clearTimeout(resetTimeout.value)
+  resetTimeout.value = setTimeout(() => {
+    resetTimeout.value = null
+    loadSchedule()
+  }, 50)
+}
 
-      // expanding a row selects it, and Expand all or the export expand the
-      // filtered out rows too: the panel would open on a row out of sight
-      if (
-        this.isSidePanelOpen &&
-        !this.filteredScheduleItems.includes(this.selectedTaskType)
-      ) {
-        this.selectedTaskType = null
-      }
+const loadSchedule = async () => {
+  closeSidePanel()
 
-      if (
-        this.isSidePanelOpen &&
-        this.assignments.type !== 'task' &&
-        !this.assignments.entityTypes &&
-        this.selectedTaskType
-      ) {
-        this.selectTaskTypeElement(this.selectedTaskType)
-      }
-    },
+  if (currentProduction.value.start_date) {
+    startDate.value = parseDate(currentProduction.value.start_date)
+  }
+  if (currentProduction.value.end_date) {
+    endDate.value = parseDate(currentProduction.value.end_date)
+  }
+  selectedStartDate.value = startDate.value.toDate()
+  selectedEndDate.value = endDate.value.toDate()
 
-    selectParentElement(element) {
-      if (!element.expanded) {
-        this.expandTaskTypeElement(element, () => {
-          this.$refs.schedule?.refreshItemPositions(element)
-        })
-      } else {
-        this.selectTaskTypeElement(element)
-      }
-    },
+  await loadData()
 
-    onSelectTaskType(taskTypeId) {
-      this.selectedTaskType = this.scheduleItems.find(
-        item => item.task_type_id === taskTypeId
+  const queryMode = route.query.mode
+  const queryType = route.query.type
+  const queryVersion = route.query.version
+  const queryZoom = Number(route.query.zoom)
+  const queryHiddenTypes = route.query.hiddenTypes
+
+  mode.value = modeOptions.value.map(o => o.value).includes(queryMode)
+    ? queryMode
+    : DEFAULT_MODE
+  entityType.value = entityTypeOptions.value
+    .map(o => o.value)
+    .includes(queryType)
+    ? queryType
+    : null
+  version.value = versionOptions.value.map(o => o.value).includes(queryVersion)
+    ? queryVersion
+    : DEFAULT_VERSION
+  zoomLevel.value = zoomOptions.value.map(o => o.value).includes(queryZoom)
+    ? queryZoom
+    : DEFAULT_ZOOM
+  hiddenTaskTypeIds.value = parseHiddenTaskTypeIds(
+    queryHiddenTypes,
+    taskTypeMap.value
+  )
+
+  // loadData computed the editable flags with the default mode/version,
+  // before the query params were applied
+  refreshScheduleItemsEditable()
+}
+
+const refreshScheduleItemsEditable = () => {
+  scheduleItems.value.forEach(item => {
+    const taskType = taskTypeMap.value.get(item.task_type_id)
+    item.editable = isInDepartment(taskType) && !isLockedSchedule.value
+  })
+}
+
+const convertScheduleItems = (taskTypeElement, items) => {
+  return items.map(item => {
+    let itemStartDate
+    if (item.start_date) {
+      itemStartDate = parseDate(item.start_date)
+    } else {
+      itemStartDate = moment()
+    }
+    if (itemStartDate.isBefore(startDate.value)) {
+      itemStartDate = startDate.value.clone()
+    }
+    if (itemStartDate.isAfter(endDate.value)) {
+      itemStartDate = endDate.value.clone()
+    }
+    let itemEndDate
+    if (item.end_date) {
+      itemEndDate = parseDate(item.end_date)
+    } else {
+      itemEndDate = itemStartDate.clone().add(1, 'days')
+    }
+    if (itemEndDate.isBefore(itemStartDate)) {
+      itemEndDate = itemStartDate.clone().add(1, 'days')
+    }
+    if (itemEndDate.isAfter(endDate.value)) {
+      itemEndDate = endDate.value.clone()
+    }
+    const scheduleItem = {
+      ...item,
+      startDate: itemStartDate,
+      endDate: itemEndDate,
+      expanded: false,
+      loading: false,
+      editable:
+        isInDepartment(taskTypeMap.value.get(item.task_type_id)) &&
+        !isLockedSchedule.value,
+      children: [],
+      parentElement: taskTypeElement
+    }
+    return scheduleItem
+  })
+}
+
+const buildTaskFilters = taskType => {
+  const filters = {
+    project_id: currentProduction.value.id,
+    task_type_id: taskType.task_type_id,
+    relations: 'true'
+  }
+  // /tasks?episode_id= only filters shot tasks (shot → sequence → episode);
+  // asset tasks are scoped client-side via the episode-scoped assetMap.
+  if (currentEpisodeId.value && taskType.for_entity === 'Shot') {
+    filters.episode_id = currentEpisodeId.value
+  }
+  return filters
+}
+
+// The plain /assets endpoint rejects episode_id=main (only its with-tasks
+// variant maps it to source_id IS NULL), so the main pack loads every asset
+// with no episode filter and keeps the right ones client-side. A real
+// episode is scoped server-side, so nothing to load wide.
+const loadScopedAssets = () => {
+  return store.dispatch('loadAssets', {
+    all: isMainPack.value,
+    withShared: false,
+    withTasks: false
+  })
+}
+
+// Whether an asset falls in the current scope: for the main pack, only the
+// assets attached to no episode (source_id null); otherwise the assetMap is
+// already scoped and every asset it holds belongs.
+const assetInScope = asset => {
+  return !isMainPack.value || !asset.source_id
+}
+
+const expandTaskTypeElement = (
+  taskTypeElement,
+  refreshScheduleCallBack = null,
+  expanded = false,
+  resetAssignments = true
+) => {
+  return isAllEpisodes.value
+    ? expandEpisodeRows(taskTypeElement, refreshScheduleCallBack, expanded)
+    : expandTaskTypeDrillDown(
+        taskTypeElement,
+        refreshScheduleCallBack,
+        expanded,
+        resetAssignments
       )
-      // clear the filters hiding the selected row, or the expand below would
-      // fill the panel while the schedule shows nothing
-      const query = {}
-      if (
-        this.entityType &&
-        this.selectedTaskType &&
-        this.selectedTaskType.for_entity !== this.entityType
-      ) {
-        this.entityType = null
-        query.type = null
-      }
-      if (this.hiddenTaskTypeIds.includes(taskTypeId)) {
-        this.hiddenTaskTypeIds = this.hiddenTaskTypeIds.filter(
-          id => id !== taskTypeId
-        )
-        query.hiddenTypes = this.hiddenTaskTypeIds.join(',') || null
-      }
-      this.updateRoute(query)
-      // refresh schedule
-      this.expandTaskTypeElement(
-        this.selectedTaskType,
-        () => {
-          this.$refs.schedule?.refreshItemPositions(this.selectedTaskType)
-        },
-        true,
-        false
+}
+
+// The production-wide planning stops at the episode level: one row per
+// episode, with no entity, assignee or task row to load below it.
+const expandEpisodeRows = async (
+  taskTypeElement,
+  refreshScheduleCallBack = null,
+  expanded = false
+) => {
+  taskTypeElement.expanded = expanded || !taskTypeElement.expanded
+
+  if (taskTypeElement.expanded) {
+    try {
+      taskTypeElement.loading = true
+      taskTypeElement.children = []
+
+      // The episodes endpoint aggregates a task type schedule per episode,
+      // whatever the entity it applies to.
+      const episodeRows = await store.dispatch('loadEpisodeScheduleItems', {
+        production: currentProduction.value,
+        taskType: taskTypeMap.value.get(taskTypeElement.task_type_id)
+      })
+      taskTypeElement.children = sortByName(
+        convertScheduleItems(taskTypeElement, episodeRows)
       )
-    },
+    } catch (err) {
+      console.error(err)
+      taskTypeElement.children = []
+    } finally {
+      taskTypeElement.loading = false
+    }
 
-    async selectTaskTypeElement(
-      taskType,
-      selectedEntityType = undefined,
-      resetAssignments = true,
-      preloadedTasks = null
-    ) {
-      // No assignment panel on the production-wide planning.
-      if (this.isAllEpisodes) {
-        return
+    if (refreshScheduleCallBack) {
+      refreshScheduleCallBack(taskTypeElement)
+    }
+  }
+}
+
+const expandTaskTypeDrillDown = async (
+  taskTypeElement,
+  refreshScheduleCallBack = null,
+  expanded = false,
+  resetAssignments = true
+) => {
+  taskTypeElement.expanded = expanded || !taskTypeElement.expanded
+
+  if (taskTypeElement.expanded) {
+    // unversioned task list shared with the side panel to avoid a reload
+    let rawTasks = null
+    try {
+      taskTypeElement.loading = true
+
+      selectedTaskType.value = taskTypeElement
+      assignments.value.loading = resetAssignments
+
+      taskTypeElement.children = []
+      taskTypeElement.people = {}
+      taskTypeElement.entitiesByType = {}
+
+      // one row per asset type (Asset), sequence (Shot/Sequence),
+      // episode (Episode) or edit (Edit)
+      const scheduleItemLoaders = {
+        Asset: payload => store.dispatch('loadAssetTypeScheduleItems', payload),
+        Shot: payload => store.dispatch('loadSequenceScheduleItems', payload),
+        Sequence: payload =>
+          store.dispatch('loadSequenceScheduleItems', payload),
+        Episode: payload => store.dispatch('loadEpisodeScheduleItems', payload),
+        Edit: payload => store.dispatch('loadEditScheduleItems', payload)
+      }
+      const loadEntityRows =
+        scheduleItemLoaders[taskTypeElement.for_entity] ??
+        (payload => store.dispatch('loadAssetTypeScheduleItems', payload))
+      const parameters = {
+        production: currentProduction.value,
+        taskType: taskTypeMap.value.get(taskTypeElement.task_type_id),
+        episodeId: currentEpisodeId.value
+      }
+      const entityRows = await loadEntityRows(parameters)
+
+      let children = convertScheduleItems(taskTypeElement, entityRows)
+      const childrenById = new Map(
+        children.map(child => [child.object_id, child])
+      )
+
+      // load entities (scoped to the current episode for TV shows) that
+      // back the row grouping, the entity name and the episode filter
+      if (taskTypeElement.for_entity === 'Asset') {
+        await loadScopedAssets()
+      } else if (taskTypeElement.for_entity === 'Shot') {
+        await store.dispatch('loadShots')
+      } else if (taskTypeElement.for_entity === 'Sequence') {
+        await store.dispatch('loadSequences')
+      } else if (taskTypeElement.for_entity === 'Episode') {
+        await store.dispatch('loadEpisodes')
+      } else if (taskTypeElement.for_entity === 'Edit') {
+        await store.dispatch('loadEdits')
       }
 
-      this.selectedTaskType = taskType
+      let tasks = await store.dispatch(
+        'loadTasks',
+        buildTaskFilters(taskTypeElement)
+      )
+      rawTasks = tasks
 
-      if (resetAssignments) {
-        this.resetSidePanel()
-      }
-
-      this.assignments.loading = true
-
-      // when called from expandTaskTypeElement, the tasks and entities were
-      // just loaded: reuse them instead of refetching everything
-      const tasks =
-        preloadedTasks ??
-        (await this.loadTasks(this.buildTaskFilters(this.selectedTaskType)))
-      const taskEntityIds = new Set(tasks.map(task => task.entity_id))
-
-      // load entity types
-      if (taskType.for_entity === 'Asset') {
-        if (!preloadedTasks) {
-          await this.loadScopedAssets()
-        }
-
-        this.assignments.entityTypes = this.productionAssetTypes
-          .filter(assetType => {
-            // filtering following custom asset types workflow
-            return (
-              !assetType.task_types.length ||
-              assetType.task_types.includes(taskType.task_type_id)
-            )
-          })
-          .map(assetType => {
-            return {
-              id: assetType.id,
-              name: assetType.name,
-              for_entity: taskType.for_entity,
-              expanded: assetType.id === selectedEntityType?.object_id,
-              entity_type_id: assetType.id,
-              children: assetStore.cache.assets
-                .filter(
-                  asset =>
-                    asset.asset_type_id === assetType.id &&
-                    !asset.canceled &&
-                    !asset.shared &&
-                    this.assetInScope(asset) &&
-                    taskEntityIds.has(asset.id)
-                )
-                .map(asset => ({
-                  ...asset,
-                  assigned: taskType.entitiesByType[assetType.id]?.includes(
-                    asset.id
-                  )
-                }))
-            }
-          })
-      } else if (taskType.for_entity === 'Shot') {
-        if (!preloadedTasks) {
-          await this.loadShots()
-        }
-
-        const shotsBySequence = shotStore.cache.shots
-          .filter(shot => taskEntityIds.has(shot.id))
-          .reduce((acc, shot) => {
-            if (!acc[shot.parent_id]) {
-              acc[shot.parent_id] = []
-            }
-            shot.assigned = taskType.entitiesByType[shot.parent_id]?.includes(
-              shot.id
-            )
-            acc[shot.parent_id].push(shot)
-            return acc
-          }, {})
-
-        this.assignments.entityTypes = Object.keys(shotsBySequence).map(
-          sequenceId => {
-            const shots = shotsBySequence[sequenceId]
-            return {
-              id: sequenceId,
-              name: shots[0].sequence_name,
-              for_entity: taskType.for_entity,
-              expanded: sequenceId === selectedEntityType?.object_id,
-              children: shots
-            }
-          }
-        )
-      } else if (taskType.for_entity === 'Sequence') {
-        if (!preloadedTasks) {
-          await this.loadSequences()
-        }
-
-        // sequences are the assignable entities, grouped by episode
-        const sequencesByEpisode = [...sequenceStore.cache.sequenceMap.values()]
-          .filter(
-            sequence =>
-              !sequence.canceled &&
-              (!this.currentEpisodeId ||
-                sequence.episode_id === this.currentEpisodeId) &&
-              taskEntityIds.has(sequence.id)
-          )
-          .reduce((acc, sequence) => {
-            const groupId = sequence.episode_id || taskType.for_entity
-            if (!acc[groupId]) {
-              acc[groupId] = []
-            }
-            sequence.assigned = taskType.entitiesByType?.[
-              sequence.id
-            ]?.includes(sequence.id)
-            acc[groupId].push(sequence)
-            return acc
-          }, {})
-
-        this.assignments.entityTypes = Object.keys(sequencesByEpisode).map(
-          groupId => {
-            const sequences = sequencesByEpisode[groupId]
-            return {
-              id: groupId,
-              name: sequences[0].episode_name || this.currentProduction.name,
-              for_entity: taskType.for_entity,
-              expanded: groupId === selectedEntityType?.object_id,
-              children: sequences
-            }
-          }
-        )
-      } else if (taskType.for_entity === 'Episode') {
-        if (!preloadedTasks) {
-          await this.loadEpisodes()
-        }
-
-        // episodes are the assignable entities, under a single production group
-        const episodes = [...episodeStore.cache.episodeMap.values()]
-          .filter(
-            episode =>
-              !episode.canceled &&
-              !['all', 'main'].includes(episode.id) &&
-              (!this.currentEpisodeId ||
-                episode.id === this.currentEpisodeId) &&
-              taskEntityIds.has(episode.id)
-          )
-          .map(episode => ({
-            ...episode,
-            assigned: taskType.entitiesByType?.[episode.id]?.includes(
-              episode.id
-            )
-          }))
-
-        this.assignments.entityTypes = [
+      // Update tasks for versioned schedules
+      if (isVersioned.value) {
+        const taskType = taskTypeMap.value.get(taskTypeElement.task_type_id)
+        const versionedTasks = await store.dispatch(
+          'loadTasksFromScheduleVersion',
           {
-            id: taskType.for_entity,
-            name: this.currentProduction.name,
-            for_entity: taskType.for_entity,
-            expanded: true,
-            children: episodes
-          }
-        ]
-      } else if (taskType.for_entity === 'Edit') {
-        if (!preloadedTasks) {
-          await this.loadEdits()
-        }
-
-        // edits are the assignable entities, grouped by episode
-        const editsByEpisode = [...editStore.cache.editMap.values()]
-          .filter(
-            edit =>
-              !edit.canceled &&
-              (!this.currentEpisodeId ||
-                edit.episode_id === this.currentEpisodeId) &&
-              taskEntityIds.has(edit.id)
-          )
-          .reduce((acc, edit) => {
-            const groupId = edit.episode_id || taskType.for_entity
-            if (!acc[groupId]) {
-              acc[groupId] = []
-            }
-            edit.assigned = taskType.entitiesByType?.[edit.id]?.includes(
-              edit.id
-            )
-            acc[groupId].push(edit)
-            return acc
-          }, {})
-
-        this.assignments.entityTypes = Object.keys(editsByEpisode).map(
-          groupId => {
-            const edits = editsByEpisode[groupId]
-            return {
-              id: groupId,
-              name: edits[0].episode_name || this.currentProduction.name,
-              for_entity: taskType.for_entity,
-              expanded: groupId === selectedEntityType?.object_id,
-              children: edits
-            }
+            version: { id: version.value },
+            taskType
           }
         )
-      }
-      this.assignments.loading = false
-    },
-
-    selectTaskElement(taskType, entityType, task, selection) {
-      if (selection.length !== 1) {
-        this.closeSidePanel()
-        return
-      }
-
-      this.resetSidePanel()
-
-      this.isSidePanelOpen = true
-      this.selectedTaskType = taskType
-      this.draggedEntities = [{ ...entityType, children: [{ ...task.entity }] }]
-
-      this.assignments.type = 'task'
-
-      const start_date = taskType.start_date
-      const end_date = parseDate(start_date).isAfter(taskType.end_date)
-        ? start_date
-        : taskType.end_date
-      this.assignments.startDate = start_date
-      this.assignments.endDate = end_date
-      this.assignments.task = {
-        ...task,
-        estimation: minutesToDays(this.organisation, task.estimation),
-        startDate: task.startDate.format('YYYY-MM-DD'),
-        endDate: task.endDate.format('YYYY-MM-DD')
-      }
-      this.assignments.excludes = this.team
-        .filter(person => !task.assignees.includes(person.id))
-        .map(person => person.id)
-      this.assignments.unassign = true
-    },
-
-    closeSidePanel() {
-      this.isSidePanelOpen = false
-      this.resetSidePanel()
-    },
-
-    // explicit close (close button, task cancel): also drop the schedule
-    // selection, or the bar keeps its ring and its resize handles swallow
-    // the next click. closeSidePanel alone must not do it: it also runs
-    // when a multi-selection starts and would clear it.
-    unselectAndCloseSidePanel() {
-      this.$refs.schedule?.resetSelection()
-      this.closeSidePanel()
-    },
-
-    onAssignmentItemSelected(item) {
-      const today = moment().utc().toDate()
-      this.assignments.type = 'entity'
-      this.assignments.startDate = item.start_date || today
-      this.assignments.endDate = item.end_date || today
-
-      // copy: filtering item.children in place permanently dropped the
-      // assigned entities from the side panel list
-      this.draggedEntities = [
-        { ...item, children: this.filteredAssignments(item.children) }
-      ]
-    },
-
-    onAssignmentItemDragStart(event, item, type) {
-      event.stopPropagation()
-      event.dataTransfer.dropEffect = 'move'
-      event.dataTransfer.effectAllowed = 'move'
-      event.dataTransfer.setData(`task-type-${type.task_type_id}`, true) // use for hack on drag over (must be lowercase)
-      event.dataTransfer.setData('taskTypeId', type.task_type_id)
-      event.dataTransfer.setData('entityId', item.id)
-
-      this.draggedEntities = [
-        { ...item, children: this.filteredAssignments(item.children) }
-      ]
-    },
-
-    onScheduleItemDropped(event, item) {
-      this.assignments.type = 'entity'
-      const start_date = event.start_date || item.start_date
-      const end_date = parseDate(start_date).isAfter(item.end_date)
-        ? start_date
-        : item.end_date
-      this.assignments.startDate = start_date
-      this.assignments.endDate = end_date
-    },
-
-    removeFromAssignments(person) {
-      this.assignments.excludes.push(person.id)
-    },
-
-    submitAssignments() {
-      if (this.assignments.type === 'entity') {
-        this.saveAssignments()
-      } else if (this.assignments.type === 'task') {
-        this.saveTask()
-      }
-    },
-
-    async saveAssignments() {
-      this.assignments.saving = true
-
-      // load tasks
-      const tasks = await this.loadTasks(
-        this.buildTaskFilters(this.selectedTaskType)
-      )
-      // first task per entity, preserving the find() first-match behavior
-      const taskByEntityId = new Map()
-      tasks.forEach(task => {
-        if (!taskByEntityId.has(task.entity_id)) {
-          taskByEntityId.set(task.entity_id, task)
-        }
-      })
-
-      // a zero or empty quota would make taskEstimation infinite and hang
-      // the distribution loop in addBusinessDays
-      const dailyQuota =
-        parseFloat(this.assignments.forcedDailyQuota) ||
-        this.estimatedDailyQuota
-      if (dailyQuota <= 0) {
-        this.assignments.saving = false
-        return
-      }
-      const taskEstimation = 1 / dailyQuota
-
-      // versioned tasks all belong to the selected task type: load them once
-      // instead of once per entity
-      let versionedTaskByTaskId = null
-      if (this.isVersioned) {
-        const versionedTasks = await this.loadTasksFromScheduleVersion({
-          version: { id: this.version },
-          taskType: { id: this.selectedTaskType.task_type_id }
-        })
-        versionedTaskByTaskId = new Map(
+        const versionedTaskMap = new Map(
           versionedTasks.map(versionedTask => [
             versionedTask.task_id,
             versionedTask
           ])
         )
-      }
-
-      // assign each selected entity to each selected assignee
-      for (const taskType of this.draggedEntities) {
-        const startDate = parseDate(this.assignments.startDate)
-        const endDate = parseDate(this.assignments.endDate)
-
-        // accumulated during the distribution loop, flushed as one
-        // clear-assignation request plus one assign request per assignee
-        const taskIdsToUnassign = []
-        const taskIdsByAssignee = new Map()
-        const taskUpdates = []
-
-        let cumulatedTasks = 0
-        let nextAssigneeIndex = 0
-        let nextStartDate = startDate.clone()
-
-        // distribute the task assignments according to the daily quotas, the task type duration and people's availability.
-        for (const entity of taskType.children) {
-          const task = taskByEntityId.get(entity.id)
-          if (!task) {
-            continue // no task found for this entity
-          }
-
-          let versionedTask
-          if (this.isVersioned) {
-            versionedTask = versionedTaskByTaskId.get(task.id) ?? {
-              taskId: task.id,
-              version: this.version,
-              assignees: []
+        tasks = tasks
+          .map(task => {
+            const versioned = versionedTaskMap.get(task.id)
+            if (!versioned?.start_date) {
+              return null
             }
-            task.versionedTaskId = versionedTask.id
-          }
-
-          if (this.assignments.unassign) {
-            if (this.isVersioned) {
-              versionedTask.assignees = []
-            } else {
-              taskIdsToUnassign.push(task.id)
+            return {
+              ...task,
+              versionedTaskId: versioned.id,
+              start_date: versioned.start_date,
+              due_date: versioned.due_date,
+              estimation: versioned.estimation,
+              assignees: versioned.assignees
             }
-          }
-
-          cumulatedTasks++
-
-          let taskStartDate = nextStartDate
-          let taskEndDate = null
-          while (nextAssigneeIndex < this.availablePersons.length) {
-            const taskAssignee = this.availablePersons[nextAssigneeIndex]
-
-            taskStartDate = addBusinessDays(
-              taskStartDate,
-              0,
-              this.daysOffByPerson[taskAssignee.id]
-            )
-
-            const { due_date } = getDatesFromStartDate(
-              this.organisation,
-              startDate,
-              taskEndDate,
-              cumulatedTasks * taskEstimation,
-              this.daysOffByPerson[taskAssignee.id]
-            )
-            taskEndDate = parseDate(due_date)
-
-            if (taskEndDate.isAfter(endDate)) {
-              // try to assign the task to the next available person
-              nextAssigneeIndex++
-              cumulatedTasks = 1
-              taskStartDate = startDate.clone()
-              taskEndDate = null
-            } else {
-              if (this.isVersioned) {
-                versionedTask.startDate = taskStartDate.format('YYYY-MM-DD')
-                versionedTask.dueDate = taskEndDate.format('YYYY-MM-DD')
-                versionedTask.estimation = daysToMinutes(
-                  this.organisation,
-                  taskEstimation
-                )
-                versionedTask.assignees.push(taskAssignee.id)
-
-                // save versioned task
-                if (!versionedTask.id) {
-                  const createdTask =
-                    await this.createScheduleVersionedTask(versionedTask)
-                  // keep the created id: without it the task edits right
-                  // after an assignment would post duplicates
-                  versionedTask.id = createdTask.id
-                  task.versionedTaskId = createdTask.id
-                } else {
-                  await this.updateScheduleVersionedTask(versionedTask)
-                }
-              } else {
-                // assignation to the current assignee is batched after the loop
-                if (!taskIdsByAssignee.has(taskAssignee.id)) {
-                  taskIdsByAssignee.set(taskAssignee.id, [])
-                }
-                taskIdsByAssignee.get(taskAssignee.id).push(task.id)
-                // task dates & estimation are flushed in batches after the loop
-                taskUpdates.push({
-                  taskId: task.id,
-                  data: {
-                    estimation: daysToMinutes(
-                      this.organisation,
-                      taskEstimation
-                    ),
-                    start_date: taskStartDate.format('YYYY-MM-DD'),
-                    due_date: taskEndDate.format('YYYY-MM-DD')
-                  }
-                })
-              }
-              // set next start date
-              if ((cumulatedTasks * taskEstimation) % 1 !== 0) {
-                nextStartDate = taskEndDate.clone()
-              } else {
-                nextStartDate = taskEndDate.clone().add(1, 'days')
-              }
-              break // jump to next task
-            }
-          }
-        }
-
-        // Chunks of 5 keep the server load reasonable; a bulk endpoint in
-        // zou would replace this.
-        for (let i = 0; i < taskUpdates.length; i += 5) {
-          await Promise.all(
-            taskUpdates.slice(i, i + 5).map(update => this.updateTask(update))
-          )
-        }
-
-        // unassign first so batched assignations are not cleared right after
-        if (taskIdsToUnassign.length > 0) {
-          await this.unassignSelectedTasks({ taskIds: taskIdsToUnassign })
-        }
-        // Sequence the per-assignee requests instead of firing them at once.
-        for (const [personId, taskIds] of taskIdsByAssignee) {
-          await this.assignSelectedTasks({ personId, taskIds })
-        }
-
-        // refresh schedule
-        this.expandTaskTypeElement(
-          this.selectedTaskType,
-          () => {
-            this.$refs.schedule?.refreshItemPositions(this.selectedTaskType)
-          },
-          true,
-          false
-        )
-      }
-
-      this.assignments.saving = false
-    },
-
-    async saveTask() {
-      this.assignments.saving = true
-      try {
-        const task = {
-          ...this.assignments.task,
-          startDate: parseDate(this.assignments.task.startDate),
-          endDate: parseDate(this.assignments.task.endDate),
-          estimation: daysToMinutes(
-            this.organisation,
-            this.assignments.task.estimation
-          ),
-          assignees: this.availablePersons.map(person => person.id)
-        }
-        // update task and assignments
-        await this.onScheduleItemChanged(task)
-        if (!this.isVersioned) {
-          // One task update carrying the full assignee list replaces the
-          // unassign request plus one assign request per person.
-          await this.updateTask({
-            taskId: task.id,
-            data: { assignees: task.assignees }
           })
-        }
-        // refresh task in side panel
-        this.assignments.task.startDate = task.startDate.format('YYYY-MM-DD')
-        this.assignments.task.endDate = task.endDate.format('YYYY-MM-DD')
-        // refresh schedule
-        this.expandTaskTypeElement(
-          this.selectedTaskType,
-          () => {
-            this.$refs.schedule?.refreshItemPositions(this.selectedTaskType)
-          },
-          true,
-          false
-        )
-      } catch (err) {
-        console.error(err)
-      } finally {
-        this.assignments.saving = false
-      }
-    },
-
-    async onScheduleExpandAll() {
-      if (this.loading.expandSchedule) return
-
-      this.loading.expandSchedule = true
-      if (!this.expandAll) {
-        await this.expandAllScheduleItems()
-      } else {
-        this.collapseAllScheduleItems()
-      }
-      this.expandAll = !this.expandAll
-      this.loading.expandSchedule = false
-    },
-
-    async onScheduleItemAssigned(task, personId) {
-      // update task to refresh the schedule
-      task.assignees.push(personId)
-      task.parentElement.children.get(personId).push(task)
-
-      // save change
-      if (this.isVersioned) {
-        return this.updateScheduleVersionedTask({
-          id: task.versionedTaskId,
-          assignees: task.assignees
-        })
-      } else {
-        await this.assignSelectedTasks({
-          personId,
-          taskIds: [task.id]
-        })
-      }
-    },
-
-    async onScheduleItemUnassigned(task, personId) {
-      // update task to refresh the schedule
-      task.assignees = task.assignees.filter(id => id !== personId)
-      const tasks = task.parentElement.children.get(personId)
-      // guard: splice(-1, 1) on a miss would silently drop another task's bar
-      const taskIndex = tasks?.indexOf(task) ?? -1
-      if (taskIndex !== -1) {
-        tasks.splice(taskIndex, 1)
+          .filter(Boolean)
       }
 
-      // save change
-      if (this.isVersioned) {
-        return this.updateScheduleVersionedTask({
-          id: task.versionedTaskId,
-          assignees: task.assignees
-        })
-      } else if (personId !== 'unassigned') {
-        // 'unassigned' is a local placeholder, not a person known to the API
-        await this.unassignPersonFromTask({
-          person: { id: personId },
-          task
-        })
+      // days off only depend on the production and the date range:
+      // reuse them across expands
+      const daysOffKey = `${currentProduction.value.id}_${startDate.value.format('YYYY-MM-DD')}_${endDate.value.format('YYYY-MM-DD')}`
+      if (daysOffRangeKey.value !== daysOffKey) {
+        daysOffByPerson.value = await store
+          .dispatch('loadProductionDaysOff', {
+            startDate: startDate.value.format('YYYY-MM-DD'),
+            endDate: endDate.value.format('YYYY-MM-DD')
+          })
+          .catch(
+            () => ({}) // fallback if not allowed to fetch days off
+          )
+        daysOffRangeKey.value = daysOffKey
       }
-    },
 
-    onZoomLevelChanged(zoom) {
-      this.updateRoute({ zoom })
-    },
+      // Read the entity maps fresh from the store cache. They are plain,
+      // non-reactive Maps replaced on each episode-scoped load, so a cached
+      // computed would keep returning the first episode's Map and empty the
+      // drill-down after switching episode.
+      const assetMap = assetStore.cache.assetMap
+      const shotMap = shotStore.cache.shotMap
+      const sequenceMap = sequenceStore.cache.sequenceMap
+      const episodeMap = episodeStore.cache.episodeMap
+      const editMap = editStore.cache.editMap
 
-    onEntityTypeChanged(type) {
-      this.updateRoute({ type })
-    },
-
-    // One id at a time: the options only cover the current entity filter, and
-    // rebuilding the list from them would show the types hidden in the others.
-    onTaskTypeVisibilityChanged({ key, value }) {
-      this.hiddenTaskTypeIds = value
-        ? this.hiddenTaskTypeIds.filter(id => id !== key)
-        : [...this.hiddenTaskTypeIds, key]
-      this.updateRoute({
-        hiddenTypes: this.hiddenTaskTypeIds.join(',') || null
-      })
-
-      if (!value) {
-        // a hidden row leaves the schedule with its tasks still selected: the
-        // next drag would move them out of sight
-        this.$refs.schedule?.resetSelection()
-        // the side panel would keep editing a task type no longer displayed
-        if (this.selectedTaskType?.task_type_id === key) {
-          this.closeSidePanel()
-        }
-      }
-    },
-
-    onModeChanged(mode) {
-      this.updateRoute({ mode })
-      this.refreshScheduleItemsEditable()
-      this.closeSidePanel()
-      this.refreshSchedule()
-    },
-
-    onVersionChanged(version) {
-      this.updateRoute({ version })
-      this.refreshScheduleItemsEditable()
-      this.closeSidePanel()
-      this.refreshSchedule()
-    },
-
-    refreshSchedule() {
-      // scopedScheduleItems, not scheduleItems: under the main pack only the
-      // Asset rows are in scope, and drilling an Edit / Shot / Sequence /
-      // Episode row would forward episode_id=main to an endpoint that rejects
-      // it. Same array reference in every other mode.
-      this.scopedScheduleItems.forEach(item => {
-        if (!item.expanded) {
+      // group tasks by entity type and assignee
+      const tasksByType = {}
+      const people = {}
+      tasks.forEach(task => {
+        if (!task.start_date) {
           return
         }
-        // refresh schedule
-        this.expandTaskTypeElement(
-          item,
-          () => {
-            this.$refs.schedule?.refreshItemPositions(item)
-          },
-          true,
-          false
+
+        // link entity to task; skip tasks whose entity is not in the
+        // current episode (loadTasks is not episode-scoped, but the entity
+        // maps are for TV shows). Sequence/Episode/Edit task types group
+        // under their own entity id.
+        if (taskTypeElement.for_entity === 'Asset') {
+          task.entity = assetMap.get(task.entity_id)
+          if (!task.entity || !assetInScope(task.entity)) return
+          task.entity_type_id = task.entity.asset_type_id
+        } else if (taskTypeElement.for_entity === 'Shot') {
+          task.entity = shotMap.get(task.entity_id)
+          if (!task.entity) return
+          task.entity_type_id = task.entity.sequence_id
+        } else if (taskTypeElement.for_entity === 'Sequence') {
+          task.entity = sequenceMap.get(task.entity_id)
+          if (!task.entity) return
+          task.entity_type_id = task.entity_id
+        } else if (taskTypeElement.for_entity === 'Episode') {
+          task.entity = episodeMap.get(task.entity_id)
+          if (!task.entity) return
+          task.entity_type_id = task.entity_id
+        } else if (taskTypeElement.for_entity === 'Edit') {
+          task.entity = editMap.get(task.entity_id)
+          if (!task.entity) return
+          task.entity_type_id = task.entity_id
+        } else {
+          // unknown for_entity: the task will be dropped by the
+          // childrenById guard below
+          task.entity_type_id = taskTypeElement.for_entity
+        }
+        if (task.entity?.canceled) {
+          return
+        }
+
+        if (!tasksByType[task.entity_type_id]) {
+          tasksByType[task.entity_type_id] = {}
+        }
+
+        if (!task.assignees.length) {
+          task.assignees = ['unassigned']
+        }
+
+        task.assignees.forEach(assigneeId => {
+          const entityTypeItem = childrenById.get(task.entity_type_id)
+          if (!entityTypeItem) return
+
+          // populate task with start and end dates
+
+          let taskStartDate
+          if (mode.value === 'real') {
+            if (!task.real_start_date) {
+              return
+            }
+            taskStartDate = parseDate(task.real_start_date)
+          } else {
+            taskStartDate = parseDate(task.start_date)
+          }
+          if (taskStartDate.isAfter(endDate.value)) {
+            return
+          }
+          if (taskStartDate.isBefore(entityTypeItem.startDate)) {
+            entityTypeItem.startDate = taskStartDate.clone()
+          }
+          task.startDate = taskStartDate
+
+          let taskEndDate
+          if (mode.value === 'real') {
+            taskEndDate = task.done_date
+              ? parseDate(task.done_date)
+              : moment.tz()
+          } else if (task.due_date) {
+            taskEndDate = parseDate(task.due_date)
+          } else if (task.end_date) {
+            taskEndDate = parseDate(task.end_date)
+          } else if (task.estimation) {
+            taskEndDate = addBusinessDays(
+              task.startDate,
+              Math.ceil(minutesToDays(organisation.value, task.estimation)) - 1,
+              daysOffByPerson.value[assigneeId]
+            )
+          }
+          if (!taskEndDate || taskEndDate.isBefore(taskStartDate)) {
+            const nbDays = taskStartDate.isoWeekday() === 5 ? 3 : 1
+            taskEndDate = taskStartDate.clone().add(nbDays, 'days')
+          }
+          if (taskEndDate.isBefore(startDate.value)) {
+            return
+          }
+          if (taskEndDate.isAfter(entityTypeItem.endDate)) {
+            entityTypeItem.endDate = taskEndDate.clone()
+          }
+          task.endDate = taskEndDate
+
+          if (!tasksByType[task.entity_type_id][assigneeId]) {
+            tasksByType[task.entity_type_id][assigneeId] = []
+            people[assigneeId] =
+              assigneeId !== 'unassigned'
+                ? {
+                    ...personMap.value.get(assigneeId),
+                    daysOff: daysOffByPerson.value[assigneeId]
+                  }
+                : {
+                    id: assigneeId,
+                    avatar: false,
+                    color: '#888',
+                    full_name: t('main.unassigned')
+                  }
+          }
+
+          task.editable = !isLockedSchedule.value
+          task.unresizable = false
+          task.parentElement = entityTypeItem
+
+          tasksByType[task.entity_type_id][assigneeId].push(task)
+        })
+      })
+
+      if (taskTypeElement.for_entity === 'Asset') {
+        // drop the asset type rows with no asset in the current scope (the
+        // main pack keeps only the asset types with an episode-less asset)
+        const scopedAssetTypeIds = isMainPack.value
+          ? new Set(
+              [...assetMap.values()]
+                .filter(asset => assetInScope(asset))
+                .map(asset => asset.asset_type_id)
+            )
+          : null
+        // filtering following custom asset types workflow
+        children = children.filter(item => {
+          const assetType = assetTypeMap.value.get(item.object_id)
+          return (
+            assetType &&
+            (!assetType.task_types.length ||
+              assetType.task_types.includes(taskTypeElement.task_type_id)) &&
+            (!scopedAssetTypeIds || scopedAssetTypeIds.has(item.object_id))
+          )
+        })
+      } else if (
+        ['Shot', 'Sequence'].includes(taskTypeElement.for_entity) &&
+        currentEpisodeId.value
+      ) {
+        // keep only the sequences of the current episode
+        children = children.filter(item => {
+          const sequence = sequenceMap.get(item.object_id)
+          return sequence && sequence.episode_id === currentEpisodeId.value
+        })
+      } else if (
+        taskTypeElement.for_entity === 'Edit' &&
+        currentEpisodeId.value
+      ) {
+        // keep only the edits of the current episode
+        children = children.filter(item => {
+          const edit = editMap.get(item.object_id)
+          return edit && edit.episode_id === currentEpisodeId.value
+        })
+      }
+
+      // sort grouped tasks
+      const sortEntitiesByUserName = ([keyA], [keyB]) => {
+        if (keyA === 'unassigned') return 1
+        if (keyB === 'unassigned') return -1
+        return people[keyA].full_name.localeCompare(people[keyB].full_name)
+      }
+      const sortTasksByEntityName = (a, b) =>
+        a.entity?.name.localeCompare(b.entity?.name, undefined, {
+          numeric: true
+        })
+      children.forEach(child => {
+        const items = tasksByType[child.object_id] || {}
+        const sortedChildren = new Map(
+          Object.entries(items)
+            .sort(sortEntitiesByUserName)
+            .map(([key, tasks]) => [key, tasks.sort(sortTasksByEntityName)])
+        )
+
+        child.children = sortedChildren
+      })
+
+      taskTypeElement.children = sortByName(children)
+      taskTypeElement.people = people
+
+      // group all assigned entities by type
+      taskTypeElement.entitiesByType = Object.fromEntries(
+        Object.entries(tasksByType).map(([entityTypeId, byAssignee]) => [
+          entityTypeId,
+          Object.entries(byAssignee)
+            .flatMap(([assignee, items]) =>
+              assignee !== 'unassigned'
+                ? items.map(item => item.entity_id)
+                : undefined
+            )
+            .filter(Boolean)
+        ])
+      )
+    } catch (err) {
+      console.error(err)
+      taskTypeElement.children = []
+      taskTypeElement.people = {}
+    } finally {
+      taskTypeElement.loading = false
+    }
+
+    if (refreshScheduleCallBack) {
+      refreshScheduleCallBack(taskTypeElement)
+    }
+
+    selectTaskTypeElement(taskTypeElement, null, resetAssignments, rawTasks)
+  }
+}
+
+const filteredAssignments = items => {
+  return assignments.value.assigned
+    ? items
+    : items.filter(item => !item.assigned)
+}
+
+const saveTaskChanged = task => {
+  return isVersioned.value
+    ? store.dispatch(
+        'updateScheduleVersionedTask',
+        getVersionedTaskUpdate(task)
+      )
+    : store.dispatch('updateTask', getTaskUpdate(task))
+}
+
+const onScheduleItemChanged = async item => {
+  if (item.type === 'Task') {
+    // update dates with weekends and days off
+    const daysOff = item.assignees
+      .flatMap(assigneeId => daysOffByPerson.value[assigneeId])
+      .filter(Boolean)
+    item.startDate = addBusinessDays(item.startDate, 0, daysOff)
+    item.endDate = addBusinessDays(
+      item.startDate,
+      Math.ceil(minutesToDays(organisation.value, item.estimation)) - 1,
+      daysOff
+    )
+    widenScheduleItemParents(item)
+    await saveTaskChanged(item)
+    return
+  }
+
+  if (item.startDate && item.endDate && item.parentElement) {
+    if (currentEpisodeId.value || isMainPack.value) {
+      // the view only holds the rows of one episode, while the task
+      // type bar spans the production: they can widen it, not shrink it
+      widenScheduleItemParents(item)
+    } else {
+      item.parentElement.startDate = getMinDate(
+        item.parentElement,
+        endDate.value
+      )
+      item.parentElement.endDate = getMaxDate(
+        item.parentElement,
+        startDate.value
+      )
+      updateScheduleItem(item.parentElement)
+    }
+  } else if (!item.parentElement) {
+    if (!Array.isArray(item.children)) {
+      await updateScheduleItem(item)
+      return
+    }
+    const affected = item.children.filter(
+      child =>
+        child._dragOrigStartDate &&
+        child._dragOrigEndDate &&
+        (!child.startDate.isSame(child._dragOrigStartDate) ||
+          !child.endDate.isSame(child._dragOrigEndDate))
+    )
+    if (!affected.length) {
+      await updateScheduleItem(item)
+      return
+    }
+    pendingParentChange.value = { item, affected }
+    modals.value.confirmChildMove = true
+    return
+  }
+
+  await updateScheduleItem(item)
+}
+
+// save each widened bar once, with both its dates
+const widenScheduleItemParents = item => {
+  widenParents(item).forEach(parent => {
+    updateScheduleItem(parent)
+  })
+}
+
+const updateScheduleItem = async item => {
+  refreshRawDates(item)
+  if (!isVersioned.value) {
+    await store.dispatch('saveScheduleItem', item)
+  }
+}
+
+const confirmChildMove = async () => {
+  const { item, affected } = pendingParentChange.value
+  try {
+    await Promise.all(
+      [item, ...affected].map(element => updateScheduleItem(element))
+    )
+  } finally {
+    pendingParentChange.value = null
+    modals.value.confirmChildMove = false
+  }
+}
+
+const cancelChildMove = () => {
+  const { item, affected } = pendingParentChange.value
+  item.startDate = item._dragOrigStartDate.clone()
+  item.endDate = item._dragOrigEndDate.clone()
+  if (item._dragOrigEstimation !== undefined) {
+    item.estimation = item._dragOrigEstimation
+  }
+  affected.forEach(child => {
+    child.startDate = child._dragOrigStartDate.clone()
+    child.endDate = child._dragOrigEndDate.clone()
+  })
+  pendingParentChange.value = null
+  modals.value.confirmChildMove = false
+}
+
+const isInDepartment = taskType => {
+  if (isCurrentUserManager.value) {
+    return true
+  } else if (isCurrentUserSupervisor.value) {
+    if (user.value.departments.length === 0) {
+      return true
+    } else {
+      return (
+        taskType?.department_id &&
+        user.value.departments.includes(taskType.department_id)
+      )
+    }
+  } else {
+    return false
+  }
+}
+
+const scrollScheduleToToday = () => {
+  scheduleRef.value?.scrollToToday()
+}
+
+const resetSidePanel = () => {
+  assignments.value = {
+    ...assignments.value,
+    entityTypes: null,
+    excludes: [],
+    forcedDailyQuota: null,
+    loading: false,
+    saving: false,
+    startDate: null,
+    endDate: null,
+    task: {},
+    type: null,
+    unassign: false
+  }
+}
+
+const toggleSidePanel = () => {
+  if (isSidePanelOpen.value && assignments.value.type === 'task') {
+    assignments.value.type = null
+    isSidePanelOpen.value = false
+  }
+
+  isSidePanelOpen.value = !isSidePanelOpen.value
+
+  // expanding a row selects it, and Expand all or the export expand the
+  // filtered out rows too: the panel would open on a row out of sight
+  if (
+    isSidePanelOpen.value &&
+    !filteredScheduleItems.value.includes(selectedTaskType.value)
+  ) {
+    selectedTaskType.value = null
+  }
+
+  if (
+    isSidePanelOpen.value &&
+    assignments.value.type !== 'task' &&
+    !assignments.value.entityTypes &&
+    selectedTaskType.value
+  ) {
+    selectTaskTypeElement(selectedTaskType.value)
+  }
+}
+
+const selectParentElement = element => {
+  if (!element.expanded) {
+    expandTaskTypeElement(element, () => {
+      scheduleRef.value?.refreshItemPositions(element)
+    })
+  } else {
+    selectTaskTypeElement(element)
+  }
+}
+
+const onSelectTaskType = taskTypeId => {
+  selectedTaskType.value = scheduleItems.value.find(
+    item => item.task_type_id === taskTypeId
+  )
+  // clear the filters hiding the selected row, or the expand below would
+  // fill the panel while the schedule shows nothing
+  const query = {}
+  if (
+    entityType.value &&
+    selectedTaskType.value &&
+    selectedTaskType.value.for_entity !== entityType.value
+  ) {
+    entityType.value = null
+    query.type = null
+  }
+  if (hiddenTaskTypeIds.value.includes(taskTypeId)) {
+    hiddenTaskTypeIds.value = setTaskTypeVisibility(
+      hiddenTaskTypeIds.value,
+      taskTypeId,
+      true
+    )
+    query.hiddenTypes = formatHiddenTaskTypeIds(hiddenTaskTypeIds.value)
+  }
+  updateRoute(query)
+  // refresh schedule
+  expandTaskTypeElement(
+    selectedTaskType.value,
+    () => {
+      scheduleRef.value?.refreshItemPositions(selectedTaskType.value)
+    },
+    true,
+    false
+  )
+}
+
+const selectTaskTypeElement = async (
+  taskType,
+  selectedEntityType = undefined,
+  resetAssignments = true,
+  preloadedTasks = null
+) => {
+  // No assignment panel on the production-wide planning.
+  if (isAllEpisodes.value) {
+    return
+  }
+
+  selectedTaskType.value = taskType
+
+  if (resetAssignments) {
+    resetSidePanel()
+  }
+
+  assignments.value.loading = true
+
+  // when called from expandTaskTypeElement, the tasks and entities were
+  // just loaded: reuse them instead of refetching everything
+  const tasks =
+    preloadedTasks ??
+    (await store.dispatch(
+      'loadTasks',
+      buildTaskFilters(selectedTaskType.value)
+    ))
+  const taskEntityIds = new Set(tasks.map(task => task.entity_id))
+
+  // load entity types
+  if (taskType.for_entity === 'Asset') {
+    if (!preloadedTasks) {
+      await loadScopedAssets()
+    }
+
+    assignments.value.entityTypes = productionAssetTypes.value
+      .filter(assetType => {
+        // filtering following custom asset types workflow
+        return (
+          !assetType.task_types.length ||
+          assetType.task_types.includes(taskType.task_type_id)
         )
       })
-    },
-
-    openEditScheduleVersion(scheduleVersion = {}) {
-      this.scheduleVersionToEdit = scheduleVersion
-      this.modals.editScheduleVersion = true
-    },
-
-    openDeleteScheduleVersion(versionId) {
-      this.scheduleVersionToEdit = this.scheduleVersions.find(
-        ({ id }) => id === versionId
-      )
-      this.modals.deleteScheduleVersion = true
-    },
-
-    async editVersion(version) {
-      this.loading.editScheduleVersion = true
-      this.errors.editScheduleVersion = false
-      try {
-        if (!version.id) {
-          const newVersion = await this.createScheduleVersion({
-            production: this.currentProduction,
-            version
-          })
-          this.version = newVersion.id
-          this.onVersionChanged(this.version)
-        } else {
-          await this.updateScheduleVersion(version)
+      .map(assetType => {
+        return {
+          id: assetType.id,
+          name: assetType.name,
+          for_entity: taskType.for_entity,
+          expanded: assetType.id === selectedEntityType?.object_id,
+          entity_type_id: assetType.id,
+          children: assetStore.cache.assets
+            .filter(
+              asset =>
+                asset.asset_type_id === assetType.id &&
+                !asset.canceled &&
+                !asset.shared &&
+                assetInScope(asset) &&
+                taskEntityIds.has(asset.id)
+            )
+            .map(asset => ({
+              ...asset,
+              assigned: taskType.entitiesByType[assetType.id]?.includes(
+                asset.id
+              )
+            }))
         }
-        this.modals.editScheduleVersion = false
-        this.scheduleVersionToEdit = {}
-      } catch (err) {
-        console.error(err)
-        this.errors.editScheduleVersion = true
-      } finally {
-        this.loading.editScheduleVersion = false
-      }
-    },
-
-    async deleteVersion(version) {
-      this.loading.delete = true
-      this.errors.deleteScheduleVersion = false
-      try {
-        await this.deleteScheduleVersion(version)
-        if (this.version === version.id) {
-          this.version = DEFAULT_VERSION
-          this.onVersionChanged(this.version)
-        }
-        this.modals.deleteScheduleVersion = false
-        this.scheduleVersionToEdit = {}
-      } catch (err) {
-        console.error(err)
-        this.errors.deleteScheduleVersion = true
-      } finally {
-        this.loading.delete = false
-      }
-    },
-
-    async applyToProduction() {
-      this.loading.applyScheduleVersion = true
-      this.errors.applyScheduleVersion = false
-      try {
-        await this.applyScheduleVersionToProduction(this.version)
-        this.modals.applyScheduleVersion = false
-      } catch (err) {
-        console.error(err)
-        this.errors.applyScheduleVersion = true
-      } finally {
-        this.loading.applyScheduleVersion = false
-      }
-      // refresh version list
-      await this.loadScheduleVersions(this.currentProduction)
-    },
-
-    async expandAllScheduleItems() {
-      // scopedScheduleItems keeps the main pack to its in-scope Asset rows:
-      // drilling an out-of-scope row would forward episode_id=main to an
-      // endpoint that rejects it. Same array reference in every other mode.
-      // run sequentially to avoid overloading the server
-      for (const element of this.scopedScheduleItems) {
-        if (!element.expanded) {
-          await this.expandTaskTypeElement(
-            element,
-            () => {
-              this.$refs.schedule?.refreshItemPositions(element)
-            },
-            true,
-            false
-          )
-        }
-      }
-    },
-
-    collapseAllScheduleItems() {
-      this.scheduleItems.forEach(element => {
-        element.expanded = false
       })
-    },
+  } else if (taskType.for_entity === 'Shot') {
+    if (!preloadedTasks) {
+      await store.dispatch('loadShots')
+    }
 
-    async exportSchedule(expandAll = true) {
-      this.loading.exportSchedule = true
-
-      try {
-        if (expandAll) {
-          await this.expandAllScheduleItems()
+    const shotsBySequence = shotStore.cache.shots
+      .filter(shot => taskEntityIds.has(shot.id))
+      .reduce((acc, shot) => {
+        if (!acc[shot.parent_id]) {
+          acc[shot.parent_id] = []
         }
+        shot.assigned = taskType.entitiesByType[shot.parent_id]?.includes(
+          shot.id
+        )
+        acc[shot.parent_id].push(shot)
+        return acc
+      }, {})
 
-        const data = this.$refs.schedule?.exportData()
+    assignments.value.entityTypes = Object.keys(shotsBySequence).map(
+      sequenceId => {
+        const shots = shotsBySequence[sequenceId]
+        return {
+          id: sequenceId,
+          name: shots[0].sequence_name,
+          for_entity: taskType.for_entity,
+          expanded: sequenceId === selectedEntityType?.object_id,
+          children: shots
+        }
+      }
+    )
+  } else if (taskType.for_entity === 'Sequence') {
+    if (!preloadedTasks) {
+      await store.dispatch('loadSequences')
+    }
 
-        const ExcelJS = (await import('exceljs')).default
-        const workbook = new ExcelJS.Workbook()
-        const sheet = workbook.addWorksheet(this.$t('schedule.title'))
+    // sequences are the assignable entities, grouped by episode
+    const sequencesByEpisode = [...sequenceStore.cache.sequenceMap.values()]
+      .filter(
+        sequence =>
+          !sequence.canceled &&
+          (!currentEpisodeId.value ||
+            sequence.episode_id === currentEpisodeId.value) &&
+          taskEntityIds.has(sequence.id)
+      )
+      .reduce((acc, sequence) => {
+        const groupId = sequence.episode_id || taskType.for_entity
+        if (!acc[groupId]) {
+          acc[groupId] = []
+        }
+        sequence.assigned = taskType.entitiesByType?.[sequence.id]?.includes(
+          sequence.id
+        )
+        acc[groupId].push(sequence)
+        return acc
+      }, {})
 
-        // init header
-        const header = ['', 'Task Type', 'Entity', 'Assignee', 'Description']
-        const dates = data.header.map(item => item.format('YYYY-MM-DD'))
-        const headerRow = sheet.addRow([...header, ...dates])
+    assignments.value.entityTypes = Object.keys(sequencesByEpisode).map(
+      groupId => {
+        const sequences = sequencesByEpisode[groupId]
+        return {
+          id: groupId,
+          name: sequences[0].episode_name || currentProduction.value.name,
+          for_entity: taskType.for_entity,
+          expanded: groupId === selectedEntityType?.object_id,
+          children: sequences
+        }
+      }
+    )
+  } else if (taskType.for_entity === 'Episode') {
+    if (!preloadedTasks) {
+      await store.dispatch('loadEpisodes')
+    }
 
-        headerRow.font = { bold: true }
-        headerRow.eachCell(cell => {
+    // episodes are the assignable entities, under a single production group
+    const episodes = [...episodeStore.cache.episodeMap.values()]
+      .filter(
+        episode =>
+          !episode.canceled &&
+          !['all', 'main'].includes(episode.id) &&
+          (!currentEpisodeId.value || episode.id === currentEpisodeId.value) &&
+          taskEntityIds.has(episode.id)
+      )
+      .map(episode => ({
+        ...episode,
+        assigned: taskType.entitiesByType?.[episode.id]?.includes(episode.id)
+      }))
+
+    assignments.value.entityTypes = [
+      {
+        id: taskType.for_entity,
+        name: currentProduction.value.name,
+        for_entity: taskType.for_entity,
+        expanded: true,
+        children: episodes
+      }
+    ]
+  } else if (taskType.for_entity === 'Edit') {
+    if (!preloadedTasks) {
+      await store.dispatch('loadEdits')
+    }
+
+    // edits are the assignable entities, grouped by episode
+    const editsByEpisode = [...editStore.cache.editMap.values()]
+      .filter(
+        edit =>
+          !edit.canceled &&
+          (!currentEpisodeId.value ||
+            edit.episode_id === currentEpisodeId.value) &&
+          taskEntityIds.has(edit.id)
+      )
+      .reduce((acc, edit) => {
+        const groupId = edit.episode_id || taskType.for_entity
+        if (!acc[groupId]) {
+          acc[groupId] = []
+        }
+        edit.assigned = taskType.entitiesByType?.[edit.id]?.includes(edit.id)
+        acc[groupId].push(edit)
+        return acc
+      }, {})
+
+    assignments.value.entityTypes = Object.keys(editsByEpisode).map(groupId => {
+      const edits = editsByEpisode[groupId]
+      return {
+        id: groupId,
+        name: edits[0].episode_name || currentProduction.value.name,
+        for_entity: taskType.for_entity,
+        expanded: groupId === selectedEntityType?.object_id,
+        children: edits
+      }
+    })
+  }
+  assignments.value.loading = false
+}
+
+const selectTaskElement = (taskType, entityTypeRow, task, selection) => {
+  if (selection.length !== 1) {
+    closeSidePanel()
+    return
+  }
+
+  resetSidePanel()
+
+  isSidePanelOpen.value = true
+  selectedTaskType.value = taskType
+  draggedEntities.value = [{ ...entityTypeRow, children: [{ ...task.entity }] }]
+
+  assignments.value.type = 'task'
+
+  const start_date = taskType.start_date
+  const end_date = parseDate(start_date).isAfter(taskType.end_date)
+    ? start_date
+    : taskType.end_date
+  assignments.value.startDate = start_date
+  assignments.value.endDate = end_date
+  assignments.value.task = {
+    ...task,
+    estimation: minutesToDays(organisation.value, task.estimation),
+    startDate: task.startDate.format('YYYY-MM-DD'),
+    endDate: task.endDate.format('YYYY-MM-DD')
+  }
+  assignments.value.excludes = team.value
+    .filter(person => !task.assignees.includes(person.id))
+    .map(person => person.id)
+  assignments.value.unassign = true
+}
+
+const closeSidePanel = () => {
+  isSidePanelOpen.value = false
+  resetSidePanel()
+}
+
+// explicit close (close button, task cancel): also drop the schedule
+// selection, or the bar keeps its ring and its resize handles swallow
+// the next click. closeSidePanel alone must not do it: it also runs
+// when a multi-selection starts and would clear it.
+const unselectAndCloseSidePanel = () => {
+  scheduleRef.value?.resetSelection()
+  closeSidePanel()
+}
+
+const onAssignmentItemSelected = item => {
+  const today = moment().utc().toDate()
+  assignments.value.type = 'entity'
+  assignments.value.startDate = item.start_date || today
+  assignments.value.endDate = item.end_date || today
+
+  // copy: filtering item.children in place permanently dropped the
+  // assigned entities from the side panel list
+  draggedEntities.value = [
+    { ...item, children: filteredAssignments(item.children) }
+  ]
+}
+
+const onAssignmentItemDragStart = (event, item, type) => {
+  event.stopPropagation()
+  event.dataTransfer.dropEffect = 'move'
+  event.dataTransfer.effectAllowed = 'move'
+  event.dataTransfer.setData(`task-type-${type.task_type_id}`, true) // use for hack on drag over (must be lowercase)
+  event.dataTransfer.setData('taskTypeId', type.task_type_id)
+  event.dataTransfer.setData('entityId', item.id)
+
+  draggedEntities.value = [
+    { ...item, children: filteredAssignments(item.children) }
+  ]
+}
+
+const onScheduleItemDropped = (event, item) => {
+  assignments.value.type = 'entity'
+  const start_date = event.start_date || item.start_date
+  const end_date = parseDate(start_date).isAfter(item.end_date)
+    ? start_date
+    : item.end_date
+  assignments.value.startDate = start_date
+  assignments.value.endDate = end_date
+}
+
+const removeFromAssignments = person => {
+  assignments.value.excludes.push(person.id)
+}
+
+const submitAssignments = () => {
+  if (assignments.value.type === 'entity') {
+    saveAssignments()
+  } else if (assignments.value.type === 'task') {
+    saveTask()
+  }
+}
+
+const saveAssignments = async () => {
+  assignments.value.saving = true
+
+  // load tasks
+  const tasks = await store.dispatch(
+    'loadTasks',
+    buildTaskFilters(selectedTaskType.value)
+  )
+  // first task per entity, preserving the find() first-match behavior
+  const taskByEntityId = new Map()
+  tasks.forEach(task => {
+    if (!taskByEntityId.has(task.entity_id)) {
+      taskByEntityId.set(task.entity_id, task)
+    }
+  })
+
+  // a zero or empty quota would make taskEstimation infinite and hang
+  // the distribution loop in addBusinessDays
+  const dailyQuota =
+    parseFloat(assignments.value.forcedDailyQuota) || estimatedDailyQuota.value
+  if (dailyQuota <= 0) {
+    assignments.value.saving = false
+    return
+  }
+  const taskEstimation = 1 / dailyQuota
+
+  // versioned tasks all belong to the selected task type: load them once
+  // instead of once per entity
+  let versionedTaskByTaskId = null
+  if (isVersioned.value) {
+    const versionedTasks = await store.dispatch(
+      'loadTasksFromScheduleVersion',
+      {
+        version: { id: version.value },
+        taskType: { id: selectedTaskType.value.task_type_id }
+      }
+    )
+    versionedTaskByTaskId = new Map(
+      versionedTasks.map(versionedTask => [
+        versionedTask.task_id,
+        versionedTask
+      ])
+    )
+  }
+
+  // assign each selected entity to each selected assignee
+  for (const taskType of draggedEntities.value) {
+    const rangeStartDate = parseDate(assignments.value.startDate)
+    const rangeEndDate = parseDate(assignments.value.endDate)
+
+    // accumulated during the distribution loop, flushed as one
+    // clear-assignation request plus one assign request per assignee
+    const taskIdsToUnassign = []
+    const taskIdsByAssignee = new Map()
+    const taskUpdates = []
+
+    let cumulatedTasks = 0
+    let nextAssigneeIndex = 0
+    let nextStartDate = rangeStartDate.clone()
+
+    // distribute the task assignments according to the daily quotas, the task type duration and people's availability.
+    for (const entity of taskType.children) {
+      const task = taskByEntityId.get(entity.id)
+      if (!task) {
+        continue // no task found for this entity
+      }
+
+      let versionedTask
+      if (isVersioned.value) {
+        versionedTask = versionedTaskByTaskId.get(task.id) ?? {
+          taskId: task.id,
+          version: version.value,
+          assignees: []
+        }
+        task.versionedTaskId = versionedTask.id
+      }
+
+      if (assignments.value.unassign) {
+        if (isVersioned.value) {
+          versionedTask.assignees = []
+        } else {
+          taskIdsToUnassign.push(task.id)
+        }
+      }
+
+      cumulatedTasks++
+
+      let taskStartDate = nextStartDate
+      let taskEndDate = null
+      while (nextAssigneeIndex < availablePersons.value.length) {
+        const taskAssignee = availablePersons.value[nextAssigneeIndex]
+
+        taskStartDate = addBusinessDays(
+          taskStartDate,
+          0,
+          daysOffByPerson.value[taskAssignee.id]
+        )
+
+        const { due_date } = getDatesFromStartDate(
+          organisation.value,
+          rangeStartDate,
+          taskEndDate,
+          cumulatedTasks * taskEstimation,
+          daysOffByPerson.value[taskAssignee.id]
+        )
+        taskEndDate = parseDate(due_date)
+
+        if (taskEndDate.isAfter(rangeEndDate)) {
+          // try to assign the task to the next available person
+          nextAssigneeIndex++
+          cumulatedTasks = 1
+          taskStartDate = rangeStartDate.clone()
+          taskEndDate = null
+        } else {
+          if (isVersioned.value) {
+            versionedTask.startDate = taskStartDate.format('YYYY-MM-DD')
+            versionedTask.dueDate = taskEndDate.format('YYYY-MM-DD')
+            versionedTask.estimation = daysToMinutes(
+              organisation.value,
+              taskEstimation
+            )
+            versionedTask.assignees.push(taskAssignee.id)
+
+            // save versioned task
+            if (!versionedTask.id) {
+              const createdTask = await store.dispatch(
+                'createScheduleVersionedTask',
+                versionedTask
+              )
+              // keep the created id: without it the task edits right
+              // after an assignment would post duplicates
+              versionedTask.id = createdTask.id
+              task.versionedTaskId = createdTask.id
+            } else {
+              await store.dispatch('updateScheduleVersionedTask', versionedTask)
+            }
+          } else {
+            // assignation to the current assignee is batched after the loop
+            if (!taskIdsByAssignee.has(taskAssignee.id)) {
+              taskIdsByAssignee.set(taskAssignee.id, [])
+            }
+            taskIdsByAssignee.get(taskAssignee.id).push(task.id)
+            // task dates & estimation are flushed in batches after the loop
+            taskUpdates.push({
+              taskId: task.id,
+              data: {
+                estimation: daysToMinutes(organisation.value, taskEstimation),
+                start_date: taskStartDate.format('YYYY-MM-DD'),
+                due_date: taskEndDate.format('YYYY-MM-DD')
+              }
+            })
+          }
+          // set next start date
+          if ((cumulatedTasks * taskEstimation) % 1 !== 0) {
+            nextStartDate = taskEndDate.clone()
+          } else {
+            nextStartDate = taskEndDate.clone().add(1, 'days')
+          }
+          break // jump to next task
+        }
+      }
+    }
+
+    // Chunks of 5 keep the server load reasonable; a bulk endpoint in
+    // zou would replace this.
+    for (let i = 0; i < taskUpdates.length; i += 5) {
+      await Promise.all(
+        taskUpdates
+          .slice(i, i + 5)
+          .map(update => store.dispatch('updateTask', update))
+      )
+    }
+
+    // unassign first so batched assignations are not cleared right after
+    if (taskIdsToUnassign.length > 0) {
+      await store.dispatch('unassignSelectedTasks', {
+        taskIds: taskIdsToUnassign
+      })
+    }
+    // Sequence the per-assignee requests instead of firing them at once.
+    for (const [personId, taskIds] of taskIdsByAssignee) {
+      await store.dispatch('assignSelectedTasks', { personId, taskIds })
+    }
+
+    // refresh schedule
+    expandTaskTypeElement(
+      selectedTaskType.value,
+      () => {
+        scheduleRef.value?.refreshItemPositions(selectedTaskType.value)
+      },
+      true,
+      false
+    )
+  }
+
+  assignments.value.saving = false
+}
+
+const saveTask = async () => {
+  assignments.value.saving = true
+  try {
+    const task = {
+      ...assignments.value.task,
+      startDate: parseDate(assignments.value.task.startDate),
+      endDate: parseDate(assignments.value.task.endDate),
+      estimation: daysToMinutes(
+        organisation.value,
+        assignments.value.task.estimation
+      ),
+      assignees: availablePersons.value.map(person => person.id)
+    }
+    // update task and assignments
+    await onScheduleItemChanged(task)
+    if (!isVersioned.value) {
+      // One task update carrying the full assignee list replaces the
+      // unassign request plus one assign request per person.
+      await store.dispatch('updateTask', {
+        taskId: task.id,
+        data: { assignees: task.assignees }
+      })
+    }
+    // refresh task in side panel
+    assignments.value.task.startDate = task.startDate.format('YYYY-MM-DD')
+    assignments.value.task.endDate = task.endDate.format('YYYY-MM-DD')
+    // refresh schedule
+    expandTaskTypeElement(
+      selectedTaskType.value,
+      () => {
+        scheduleRef.value?.refreshItemPositions(selectedTaskType.value)
+      },
+      true,
+      false
+    )
+  } catch (err) {
+    console.error(err)
+  } finally {
+    assignments.value.saving = false
+  }
+}
+
+const onScheduleExpandAll = async () => {
+  if (loading.value.expandSchedule) return
+
+  loading.value.expandSchedule = true
+  if (!expandAll.value) {
+    await expandAllScheduleItems()
+  } else {
+    collapseAllScheduleItems()
+  }
+  expandAll.value = !expandAll.value
+  loading.value.expandSchedule = false
+}
+
+const onScheduleItemAssigned = async (task, personId) => {
+  // update task to refresh the schedule
+  task.assignees.push(personId)
+  task.parentElement.children.get(personId).push(task)
+
+  // save change
+  if (isVersioned.value) {
+    return store.dispatch('updateScheduleVersionedTask', {
+      id: task.versionedTaskId,
+      assignees: task.assignees
+    })
+  } else {
+    await store.dispatch('assignSelectedTasks', {
+      personId,
+      taskIds: [task.id]
+    })
+  }
+}
+
+const onScheduleItemUnassigned = async (task, personId) => {
+  // update task to refresh the schedule
+  task.assignees = task.assignees.filter(id => id !== personId)
+  const tasks = task.parentElement.children.get(personId)
+  // guard: splice(-1, 1) on a miss would silently drop another task's bar
+  const taskIndex = tasks?.indexOf(task) ?? -1
+  if (taskIndex !== -1) {
+    tasks.splice(taskIndex, 1)
+  }
+
+  // save change
+  if (isVersioned.value) {
+    return store.dispatch('updateScheduleVersionedTask', {
+      id: task.versionedTaskId,
+      assignees: task.assignees
+    })
+  } else if (personId !== 'unassigned') {
+    // 'unassigned' is a local placeholder, not a person known to the API
+    await store.dispatch('unassignPersonFromTask', {
+      person: { id: personId },
+      task
+    })
+  }
+}
+
+const onZoomLevelChanged = zoom => {
+  updateRoute({ zoom })
+}
+
+const onEntityTypeChanged = type => {
+  updateRoute({ type })
+}
+
+const onTaskTypeVisibilityChanged = ({ key, value }) => {
+  hiddenTaskTypeIds.value = setTaskTypeVisibility(
+    hiddenTaskTypeIds.value,
+    key,
+    value
+  )
+  updateRoute({
+    hiddenTypes: formatHiddenTaskTypeIds(hiddenTaskTypeIds.value)
+  })
+
+  if (!value) {
+    // a hidden row leaves the schedule with its tasks still selected: the
+    // next drag would move them out of sight
+    scheduleRef.value?.resetSelection()
+    // the side panel would keep editing a task type no longer displayed
+    if (selectedTaskType.value?.task_type_id === key) {
+      closeSidePanel()
+    }
+  }
+}
+
+const onModeChanged = newMode => {
+  updateRoute({ mode: newMode })
+  refreshScheduleItemsEditable()
+  closeSidePanel()
+  refreshSchedule()
+}
+
+const onVersionChanged = versionId => {
+  updateRoute({ version: versionId })
+  refreshScheduleItemsEditable()
+  closeSidePanel()
+  refreshSchedule()
+}
+
+const refreshSchedule = () => {
+  // scopedScheduleItems, not scheduleItems: under the main pack only the
+  // Asset rows are in scope, and drilling an Edit / Shot / Sequence /
+  // Episode row would forward episode_id=main to an endpoint that rejects
+  // it. Same array reference in every other mode.
+  scopedScheduleItems.value.forEach(item => {
+    if (!item.expanded) {
+      return
+    }
+    // refresh schedule
+    expandTaskTypeElement(
+      item,
+      () => {
+        scheduleRef.value?.refreshItemPositions(item)
+      },
+      true,
+      false
+    )
+  })
+}
+
+const openEditScheduleVersion = (scheduleVersion = {}) => {
+  scheduleVersionToEdit.value = scheduleVersion
+  modals.value.editScheduleVersion = true
+}
+
+const openDeleteScheduleVersion = versionId => {
+  scheduleVersionToEdit.value = scheduleVersions.value.find(
+    ({ id }) => id === versionId
+  )
+  modals.value.deleteScheduleVersion = true
+}
+
+const editVersion = async scheduleVersion => {
+  loading.value.editScheduleVersion = true
+  errors.value.editScheduleVersion = false
+  try {
+    if (!scheduleVersion.id) {
+      const newVersion = await store.dispatch('createScheduleVersion', {
+        production: currentProduction.value,
+        version: scheduleVersion
+      })
+      version.value = newVersion.id
+      onVersionChanged(version.value)
+    } else {
+      await store.dispatch('updateScheduleVersion', scheduleVersion)
+    }
+    modals.value.editScheduleVersion = false
+    scheduleVersionToEdit.value = {}
+  } catch (err) {
+    console.error(err)
+    errors.value.editScheduleVersion = true
+  } finally {
+    loading.value.editScheduleVersion = false
+  }
+}
+
+const deleteVersion = async scheduleVersion => {
+  loading.value.delete = true
+  errors.value.deleteScheduleVersion = false
+  try {
+    await store.dispatch('deleteScheduleVersion', scheduleVersion)
+    if (version.value === scheduleVersion.id) {
+      version.value = DEFAULT_VERSION
+      onVersionChanged(version.value)
+    }
+    modals.value.deleteScheduleVersion = false
+    scheduleVersionToEdit.value = {}
+  } catch (err) {
+    console.error(err)
+    errors.value.deleteScheduleVersion = true
+  } finally {
+    loading.value.delete = false
+  }
+}
+
+const applyToProduction = async () => {
+  let isApplied = false
+  loading.value.applyScheduleVersion = true
+  errors.value.applyScheduleVersion = false
+  try {
+    await store.dispatch('applyScheduleVersionToProduction', version.value)
+    modals.value.applyScheduleVersion = false
+    isApplied = true
+  } catch (err) {
+    console.error(err)
+    errors.value.applyScheduleVersion = true
+  } finally {
+    loading.value.applyScheduleVersion = false
+  }
+  // refresh version list
+  await store.dispatch('loadScheduleVersions', currentProduction.value)
+  if (isApplied) {
+    // the applied version is locked now: rebuild the rows built while it
+    // was open, the expanded ones included, read-only
+    unselectAndCloseSidePanel()
+    refreshScheduleItemsEditable()
+    refreshSchedule()
+  }
+}
+
+const expandAllScheduleItems = async () => {
+  // scopedScheduleItems keeps the main pack to its in-scope Asset rows:
+  // drilling an out-of-scope row would forward episode_id=main to an
+  // endpoint that rejects it. Same array reference in every other mode.
+  // run sequentially to avoid overloading the server
+  for (const element of scopedScheduleItems.value) {
+    if (!element.expanded) {
+      await expandTaskTypeElement(
+        element,
+        () => {
+          scheduleRef.value?.refreshItemPositions(element)
+        },
+        true,
+        false
+      )
+    }
+  }
+}
+
+const collapseAllScheduleItems = () => {
+  scheduleItems.value.forEach(element => {
+    element.expanded = false
+  })
+}
+
+const exportSchedule = async (withAllRows = true) => {
+  loading.value.exportSchedule = true
+
+  try {
+    if (withAllRows) {
+      await expandAllScheduleItems()
+    }
+
+    const data = scheduleRef.value?.exportData()
+
+    const ExcelJS = (await import('exceljs')).default
+    const workbook = new ExcelJS.Workbook()
+    const sheet = workbook.addWorksheet(t('schedule.title'))
+
+    // init header
+    const header = ['', 'Task Type', 'Entity', 'Assignee', 'Description']
+    const dates = data.header.map(item => item.format('YYYY-MM-DD'))
+    const headerRow = sheet.addRow([...header, ...dates])
+
+    headerRow.font = { bold: true }
+    headerRow.eachCell(cell => {
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFDDDDDD' } // grey light
+      }
+      cell.border = {
+        bottom: { style: 'thin' }
+      }
+    })
+    const datesColumn = header.length + 1
+
+    // level 1: Task Types
+    let startRowLevel1 = 2
+    let endRowLevel1 = null
+    data.hierarchy.forEach(item => {
+      endRowLevel1 = startRowLevel1
+
+      // ExcelJS expects 8-digit ARGB values, 6-digit hex shifts the
+      // channels and renders wrong colors
+      const lightened = colors.lightenColor(item.color, 0.2).hex()
+      const color = `FF${item.color.slice(1)}`.toUpperCase()
+      const color2 = `FF${lightened.slice(1)}`.toUpperCase()
+
+      const row = sheet.addRow([null, item.name])
+      row.getCell(1).fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: color }
+      }
+      row.getCell(2).alignment = { vertical: 'top' }
+      row.getCell(2).note =
+        `${item.name}\n${item.start_date} - ${item.end_date}`
+      row.height = 30
+
+      // fill timebar
+      const start = dates.indexOf(item.start_date)
+      const end = dates.indexOf(item.end_date)
+      for (let i = start; i > -1 && i <= end; i++) {
+        const cell = row.getCell(5 + i)
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: color }
+        }
+      }
+
+      endRowLevel1++
+
+      // level 2: Entity Types
+      let startRowLevel2 = endRowLevel1
+      let endRowLevel2 = null
+      item.children.forEach(type => {
+        endRowLevel2 = startRowLevel2
+
+        const row = sheet.addRow([null, null, type.name, ''])
+        row.getCell(3).alignment = { vertical: 'top' }
+        row.getCell(3).note =
+          `${type.name}\n${type.start_date} - ${type.end_date}`
+
+        // fill timebar
+        const start = dates.indexOf(type.start_date)
+        const end = dates.indexOf(type.end_date)
+        for (let i = start; i > -1 && i <= end; i++) {
+          const cell = row.getCell(datesColumn + i)
           cell.fill = {
             type: 'pattern',
             pattern: 'solid',
-            fgColor: { argb: 'FFDDDDDD' } // grey light
+            fgColor: { argb: color2 }
           }
-          cell.border = {
-            bottom: { style: 'thin' }
-          }
-        })
-        const datesColumn = header.length + 1
+        }
 
-        // level 1: Task Types
-        let startRowLevel1 = 2
-        let endRowLevel1 = null
-        data.hierarchy.forEach(item => {
-          endRowLevel1 = startRowLevel1
+        endRowLevel1++
+        endRowLevel2++
 
-          // ExcelJS expects 8-digit ARGB values, 6-digit hex shifts the
-          // channels and renders wrong colors
-          const lightened = colors.lightenColor(item.color, 0.2).hex()
-          const color = `FF${item.color.slice(1)}`.toUpperCase()
-          const color2 = `FF${lightened.slice(1)}`.toUpperCase()
+        // level 3: Persons
+        let startRowLevel3 = endRowLevel2
+        let endRowLevel3 = null
+        type.children.forEach((tasks, assigneeId) => {
+          endRowLevel3 = startRowLevel3
+          const isAssigned = assigneeId !== 'unassigned'
 
-          const row = sheet.addRow([null, item.name])
-          row.getCell(1).fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: color }
-          }
-          row.getCell(2).alignment = { vertical: 'top' }
-          row.getCell(2).note =
-            `${item.name}\n${item.start_date} - ${item.end_date}`
-          row.height = 30
+          const assignee = isAssigned
+            ? personMap.value.get(assigneeId)
+            : {
+                id: assigneeId,
+                avatar: false,
+                color: '#888',
+                full_name: t('main.unassigned')
+              }
 
-          // fill timebar
-          const start = dates.indexOf(item.start_date)
-          const end = dates.indexOf(item.end_date)
-          for (let i = start; i > -1 && i <= end; i++) {
-            const cell = row.getCell(5 + i)
-            cell.fill = {
-              type: 'pattern',
-              pattern: 'solid',
-              fgColor: { argb: color }
-            }
-          }
+          const row = sheet.addRow([
+            null,
+            null,
+            null,
+            assignee.full_name,
+            isAssigned ? t('days_off.title') : null
+          ])
+          row.getCell(4).alignment = { vertical: 'top' }
+          row.getCell(5).alignment = { vertical: 'middle' }
 
-          endRowLevel1++
-
-          // level 2: Entity Types
-          let startRowLevel2 = endRowLevel1
-          let endRowLevel2 = null
-          item.children.forEach(type => {
-            endRowLevel2 = startRowLevel2
-
-            const row = sheet.addRow([null, null, type.name, ''])
-            row.getCell(3).alignment = { vertical: 'top' }
-            row.getCell(3).note =
-              `${type.name}\n${type.start_date} - ${type.end_date}`
-
-            // fill timebar
-            const start = dates.indexOf(type.start_date)
-            const end = dates.indexOf(type.end_date)
-            for (let i = start; i > -1 && i <= end; i++) {
-              const cell = row.getCell(datesColumn + i)
+          // fill days off
+          const daysOff = getDayOffRange(daysOffByPerson.value[assigneeId])
+          daysOff.forEach(dayOff => {
+            const index = dates.findIndex(date => date === dayOff.date)
+            if (index !== -1) {
+              const cell = row.getCell(datesColumn + index)
+              cell.note = `${t('days_off.title')}\n${dayOff.description}`
               cell.fill = {
                 type: 'pattern',
                 pattern: 'solid',
-                fgColor: { argb: color2 }
+                fgColor: { argb: 'FFAAAAAA' } // grey dark
+              }
+            }
+          })
+
+          endRowLevel1++
+          endRowLevel2++
+          endRowLevel3++
+
+          // level 4: Tasks
+          tasks.forEach(task => {
+            const duration =
+              mode.value === 'real'
+                ? formatDuration(task.duration)
+                : formatDuration(task.estimation)
+
+            const row = sheet.addRow([
+              null,
+              null,
+              null,
+              null,
+              `${task.entity.name} (${duration}${durationUnit.value})`
+            ])
+
+            // fill task timebar
+            const start_date = task.startDate.format('YYYY-MM-DD')
+            const end_date = task.endDate.format('YYYY-MM-DD')
+            const startIndex = dates.indexOf(start_date)
+            const endIndex = dates.indexOf(end_date)
+            for (let i = startIndex; i > -1 && i <= endIndex; i++) {
+              const cell = row.getCell(datesColumn + i)
+              cell.note = `${task.entity.name}\n${start_date} - ${end_date}\n${duration} ${durationUnit.value}`
+              cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: color }
               }
             }
 
             endRowLevel1++
             endRowLevel2++
-
-            // level 3: Persons
-            let startRowLevel3 = endRowLevel2
-            let endRowLevel3 = null
-            type.children.forEach((tasks, assigneeId) => {
-              endRowLevel3 = startRowLevel3
-              const isAssigned = assigneeId !== 'unassigned'
-
-              const assignee = isAssigned
-                ? this.personMap.get(assigneeId)
-                : {
-                    id: assigneeId,
-                    avatar: false,
-                    color: '#888',
-                    full_name: this.$t('main.unassigned')
-                  }
-
-              const row = sheet.addRow([
-                null,
-                null,
-                null,
-                assignee.full_name,
-                isAssigned ? this.$t('days_off.title') : null
-              ])
-              row.getCell(4).alignment = { vertical: 'top' }
-              row.getCell(5).alignment = { vertical: 'middle' }
-
-              // fill days off
-              const daysOff = getDayOffRange(this.daysOffByPerson[assigneeId])
-              daysOff.forEach(dayOff => {
-                const index = dates.findIndex(date => date === dayOff.date)
-                if (index !== -1) {
-                  const cell = row.getCell(datesColumn + index)
-                  cell.note = `${this.$t('days_off.title')}\n${dayOff.description}`
-                  cell.fill = {
-                    type: 'pattern',
-                    pattern: 'solid',
-                    fgColor: { argb: 'FFAAAAAA' } // grey dark
-                  }
-                }
-              })
-
-              endRowLevel1++
-              endRowLevel2++
-              endRowLevel3++
-
-              // level 4: Tasks
-              tasks.forEach(task => {
-                const duration =
-                  this.mode === 'real'
-                    ? this.formatDuration(task.duration)
-                    : this.formatDuration(task.estimation)
-
-                const row = sheet.addRow([
-                  null,
-                  null,
-                  null,
-                  null,
-                  `${task.entity.name} (${duration}${this.durationUnit})`
-                ])
-
-                // fill task timebar
-                const start_date = task.startDate.format('YYYY-MM-DD')
-                const end_date = task.endDate.format('YYYY-MM-DD')
-                const startIndex = dates.indexOf(start_date)
-                const endIndex = dates.indexOf(end_date)
-                for (let i = startIndex; i > -1 && i <= endIndex; i++) {
-                  const cell = row.getCell(datesColumn + i)
-                  cell.note = `${task.entity.name}\n${start_date} - ${end_date}\n${duration} ${this.durationUnit}`
-                  cell.fill = {
-                    type: 'pattern',
-                    pattern: 'solid',
-                    fgColor: { argb: color }
-                  }
-                }
-
-                endRowLevel1++
-                endRowLevel2++
-                endRowLevel3++
-              })
-
-              // group cells of level 3
-              sheet.mergeCells(startRowLevel3, 4, endRowLevel3 - 1, 4)
-
-              startRowLevel3 = endRowLevel3
-            })
-
-            // group cells of level 2
-            sheet.mergeCells(startRowLevel2, 3, endRowLevel2 - 1, 3)
-
-            startRowLevel2 = endRowLevel2
+            endRowLevel3++
           })
 
-          // group cells of level 1
-          sheet.mergeCells(startRowLevel1, 1, endRowLevel1 - 1, 1)
-          sheet.mergeCells(startRowLevel1, 2, endRowLevel1 - 1, 2)
+          // group cells of level 3
+          sheet.mergeCells(startRowLevel3, 4, endRowLevel3 - 1, 4)
 
-          // stylize borders
-          sheet.getRow(endRowLevel1 - 1).border = {
-            bottom: {
-              style: 'medium',
-              color: { argb: color }
-            }
-          }
-
-          startRowLevel1 = endRowLevel1
+          startRowLevel3 = endRowLevel3
         })
 
-        // customize columns size
-        sheet.getColumn(1).width = 5
-        for (let i = 0; i < dates.length; i++) {
-          sheet.getColumn(header.length + 1 + i).width = 10
+        // group cells of level 2
+        sheet.mergeCells(startRowLevel2, 3, endRowLevel2 - 1, 3)
+
+        startRowLevel2 = endRowLevel2
+      })
+
+      // group cells of level 1
+      sheet.mergeCells(startRowLevel1, 1, endRowLevel1 - 1, 1)
+      sheet.mergeCells(startRowLevel1, 2, endRowLevel1 - 1, 2)
+
+      // stylize borders
+      sheet.getRow(endRowLevel1 - 1).border = {
+        bottom: {
+          style: 'medium',
+          color: { argb: color }
         }
-        const ajustColumnWidth = (
-          columnIndex,
-          minWidth = 10,
-          maxWidth = 100
-        ) => {
-          const column = sheet.getColumn(columnIndex)
-          let maxLength = minWidth
-          column.eachCell({ includeEmpty: false }, cell => {
-            const cellValue = cell.value ? cell.value.toString() : ''
-            if (cellValue.length > maxLength) {
-              maxLength = cellValue.length
-            }
-          })
-          column.width = Math.min(maxLength, maxWidth)
+      }
+
+      startRowLevel1 = endRowLevel1
+    })
+
+    // customize columns size
+    sheet.getColumn(1).width = 5
+    for (let i = 0; i < dates.length; i++) {
+      sheet.getColumn(header.length + 1 + i).width = 10
+    }
+    const ajustColumnWidth = (columnIndex, minWidth = 10, maxWidth = 100) => {
+      const column = sheet.getColumn(columnIndex)
+      let maxLength = minWidth
+      column.eachCell({ includeEmpty: false }, cell => {
+        const cellValue = cell.value ? cell.value.toString() : ''
+        if (cellValue.length > maxLength) {
+          maxLength = cellValue.length
         }
-        ajustColumnWidth(2) // task type
-        ajustColumnWidth(3) // entity
-        ajustColumnWidth(4) // assignee
-        ajustColumnWidth(5) // description
-
-        // generate an XLSX file
-        const buffer = await workbook.xlsx.writeBuffer()
-        const filename = `Kitsu - ${this.currentProduction.name} - ${this.$t('schedule.title')}`
-        const mode = this.modeOptions.find(
-          ({ value }) => value === this.mode
-        )?.label
-        const version = this.versionOptions.find(
-          ({ value }) => value === this.version
-        )?.label
-        const release = this.isVersioned ? `${mode} - ${version}` : mode
-        downloadBlob(new Blob([buffer]), `${filename} (${release}).xlsx`)
-      } catch (err) {
-        console.error(err)
-        alert(this.$t('schedule.export_error'))
-      } finally {
-        this.loading.exportSchedule = false
-      }
+      })
+      column.width = Math.min(maxLength, maxWidth)
     }
-  },
+    ajustColumnWidth(2) // task type
+    ajustColumnWidth(3) // entity
+    ajustColumnWidth(4) // assignee
+    ajustColumnWidth(5) // description
 
-  watch: {
-    selectedStartDate() {
-      this.startDate = parseDate(this.selectedStartDate)
-      const start_date = this.startDate.format('YYYY-MM-DD')
-      if (
-        this.currentProduction.start_date &&
-        this.currentProduction.start_date !== start_date
-      ) {
-        this.editProduction({
-          id: this.currentProduction.id,
-          start_date
-        })
-      }
-    },
-
-    selectedEndDate() {
-      this.endDate = parseDate(this.selectedEndDate)
-      const end_date = this.endDate.format('YYYY-MM-DD')
-      if (
-        this.currentProduction.end_date &&
-        this.currentProduction.end_date !== end_date
-      ) {
-        this.editProduction({
-          id: this.currentProduction.id,
-          end_date
-        })
-      }
-    },
-
-    currentProduction(value) {
-      if (!value) return
-      this.reset()
-    },
-
-    currentEpisode(value) {
-      if (!value) return
-      if (this.isTVShow) this.reset()
-    }
-  },
-
-  head() {
-    const context =
-      this.isTVShow && this.currentEpisode?.name
-        ? `${this.currentProduction.name} | ${this.currentEpisode.name}`
-        : this.currentProduction.name
-    return {
-      title: `${context} | ${this.$t('schedule.title')} - Kitsu`
-    }
+    // generate an XLSX file
+    const buffer = await workbook.xlsx.writeBuffer()
+    const filename = `Kitsu - ${currentProduction.value.name} - ${t('schedule.title')}`
+    const modeLabel = modeOptions.value.find(
+      ({ value }) => value === mode.value
+    )?.label
+    const versionLabel = versionOptions.value.find(
+      ({ value }) => value === version.value
+    )?.label
+    const release = isVersioned.value
+      ? `${modeLabel} - ${versionLabel}`
+      : modeLabel
+    downloadBlob(new Blob([buffer]), `${filename} (${release}).xlsx`)
+  } catch (err) {
+    console.error(err)
+    alert(t('schedule.export_error'))
+  } finally {
+    loading.value.exportSchedule = false
   }
 }
+
+// Watchers
+// --------------------------------------------------------------------------
+
+watch(selectedStartDate, () => {
+  startDate.value = parseDate(selectedStartDate.value)
+  const start_date = startDate.value.format('YYYY-MM-DD')
+  if (
+    currentProduction.value.start_date &&
+    currentProduction.value.start_date !== start_date
+  ) {
+    store.dispatch('editProduction', {
+      id: currentProduction.value.id,
+      start_date
+    })
+  }
+})
+
+watch(selectedEndDate, () => {
+  endDate.value = parseDate(selectedEndDate.value)
+  const end_date = endDate.value.format('YYYY-MM-DD')
+  if (
+    currentProduction.value.end_date &&
+    currentProduction.value.end_date !== end_date
+  ) {
+    store.dispatch('editProduction', {
+      id: currentProduction.value.id,
+      end_date
+    })
+  }
+})
+
+watch(currentProduction, value => {
+  if (!value) return
+  reset()
+})
+
+watch(currentEpisode, value => {
+  if (!value) return
+  if (isTVShow.value) reset()
+})
+
+// Lifecycle
+// --------------------------------------------------------------------------
+onMounted(() => {
+  reset()
+})
+
+onBeforeUnmount(() => {
+  if (resetTimeout.value) clearTimeout(resetTimeout.value)
+})
+
+// Head
+// --------------------------------------------------------------------------
+useHead({
+  title: computed(() => {
+    const context =
+      isTVShow.value && currentEpisode.value?.name
+        ? `${currentProduction.value.name} | ${currentEpisode.value.name}`
+        : currentProduction.value.name
+    return `${context} | ${t('schedule.title')} - Kitsu`
+  })
+})
 </script>
 
 <style lang="scss" scoped>

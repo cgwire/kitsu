@@ -238,9 +238,12 @@ const taskTypeTabs = computed(() =>
 
 const isEmpty = list => !list || list.length === 0
 
+// The loaded items also hold the entity bars of each task type: keep the
+// task type bar, the one attached to no entity.
 const getScheduleItemForTaskType = taskType =>
   currentScheduleItems.value.find(
-    scheduleItem => scheduleItem.task_type_id === taskType.id
+    scheduleItem =>
+      scheduleItem.task_type_id === taskType.id && !scheduleItem.object_id
   ) || {
     start_date: formatFullDate(moment()),
     end_date: formatFullDate(moment())

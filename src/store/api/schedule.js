@@ -126,8 +126,7 @@ export default {
   createScheduleVersion(production, version) {
     const data = {
       project_id: production.id,
-      name: version.name,
-      from: version.from
+      name: version.name
     }
     return client.ppost(`/api/data/production-schedule-versions/`, data)
   },

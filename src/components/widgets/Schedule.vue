@@ -1303,12 +1303,10 @@ const timelinePositionStyle = computed(() => {
 
 const timelineTodayPositionStyle = computed(() => {
   const today = moment().utc(true)
-  const isVisible =
-    today.isAfter(props.startDate) && today.isBefore(props.endDate)
   return {
     width: `${cellWidth.value}px`,
     left: `${getTimebarLeft({ startDate: today }) - 3}px`,
-    display: isVisible ? 'block' : 'none'
+    display: isInRange(today) ? 'block' : 'none'
   }
 })
 
@@ -2023,18 +2021,20 @@ const scrollScheduleTop = event => {
 }
 
 const scrollToToday = () => {
-  const today = moment()
-  scrollToDate(today)
+  scrollToDate(moment().utc(true))
 }
 
+// A date out of the range goes to the range end closest to it: doing nothing
+// made the Today button look broken.
 const scrollToDate = date => {
   setTimeout(() => {
-    if (
-      scheduleRef.value &&
-      date.isAfter(props.startDate) &&
-      date.isBefore(props.endDate)
-    ) {
-      const datePosition = getTimebarLeft({ startDate: date }) - 5
+    if (scheduleRef.value) {
+      const target = isInRange(date)
+        ? date
+        : date.isBefore(props.startDate)
+          ? props.startDate
+          : props.endDate
+      const datePosition = getTimebarLeft({ startDate: target }) - 5
       const newLeft = datePosition - (scheduleRef.value.offsetWidth / 2 - 300)
       timelineContentWrapperRef.value.scrollLeft = newLeft
       if (timelineHeaderRef.value) {
@@ -2167,6 +2167,16 @@ const dateDiff = (startDate, endDate, unit = 'days') => {
   const first = start.clone().utc().startOf('day')
   const last = end.clone().utc().endOf('day')
   return last.diff(first, unit)
+}
+
+// Whether the date falls on one of the days the timeline lists, the last one
+// included
+const isInRange = date => {
+  const day = toRaw(date).clone().utc().startOf('day')
+  return (
+    day.isSameOrAfter(toRaw(props.startDate).clone().utc().startOf('day')) &&
+    day.isSameOrBefore(toRaw(props.endDate).clone().utc().startOf('day'))
+  )
 }
 
 // Styles

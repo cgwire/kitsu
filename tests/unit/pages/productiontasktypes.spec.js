@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }))
 
+import ProductionTaskType from '@/components/pages/production/ProductionTaskType.vue'
 import ProductionTaskTypes from '@/components/pages/production/ProductionTaskTypes.vue'
 import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
 import SettingImporter from '@/components/widgets/SettingImporter.vue'
@@ -25,12 +26,25 @@ const newShotTaskType = {
 }
 const taskTypes = [assetTaskType, ...shotTaskTypes, newShotTaskType]
 
+// Renders the rows the shallow mount would otherwise drop with the list.
+const DraggableStub = {
+  props: { modelValue: { type: Array, default: () => [] } },
+  template: `<div>
+    <slot
+      name="item"
+      :element="element"
+      :key="index"
+      v-for="(element, index) in modelValue"
+    />
+  </div>`
+}
+
 const router = createRouter({
   history: createWebHashHistory(),
   routes: [{ path: '/settings', component: { template: '<div />' } }]
 })
 
-const mountComponent = async (productionType = 'short') => {
+const mountComponent = async (productionType = 'short', scheduleItems = []) => {
   const currentProduction = {
     id: 'production-1',
     production_type: productionType,
@@ -39,7 +53,7 @@ const mountComponent = async (productionType = 'short') => {
   const store = createStore({
     getters: {
       currentProduction: () => currentProduction,
-      currentScheduleItems: () => [],
+      currentScheduleItems: () => scheduleItems,
       getProductionTaskTypes: () => () => [],
       isTVShow: () => productionType === 'tvshow',
       productionAssetTaskTypes: () => [assetTaskType],
@@ -55,7 +69,11 @@ const mountComponent = async (productionType = 'short') => {
   await router.push('/settings?section=shots')
   await router.isReady()
   const wrapper = shallowMount(ProductionTaskTypes, {
-    global: { plugins: [store, router], mocks: { $t: key => key } }
+    global: {
+      plugins: [store, router],
+      mocks: { $t: key => key },
+      stubs: { draggable: DraggableStub }
+    }
   })
   await flushPromises()
   return { store, wrapper }
@@ -92,5 +110,30 @@ describe('ProductionTaskTypes', () => {
       taskTypeId: newShotTaskType.id,
       priority: 3
     })
+  })
+
+  // The loaded items mix the task type bars with their entity bars: the row
+  // must get the task type bar, or removing the task type deletes an entity
+  // bar and leaves the task type bar behind.
+  it('hands each task type row its own bar, not an entity bar', async () => {
+    const sequenceBar = {
+      id: 'sequence-bar',
+      task_type_id: 'shot-1',
+      object_id: 'sequence-1'
+    }
+    const taskTypeBar = {
+      id: 'task-type-bar',
+      task_type_id: 'shot-1',
+      object_id: null
+    }
+    const { wrapper } = await mountComponent('short', [
+      sequenceBar,
+      taskTypeBar
+    ])
+
+    const row = wrapper
+      .findAllComponents(ProductionTaskType)
+      .find(component => component.props('taskType').id === 'shot-1')
+    expect(row.props('scheduleItem')).toEqual(taskTypeBar)
   })
 })

@@ -18,6 +18,7 @@ import editsApi from '@/store/api/edits'
 import entitiesApi from '@/store/api/entities'
 import newsApi from '@/store/api/news'
 import peopleApi from '@/store/api/people'
+import scheduleApi from '@/store/api/schedule'
 import shotsApi from '@/store/api/shots'
 import taskTypesApi from '@/store/api/tasktypes'
 
@@ -160,5 +161,19 @@ describe('store/api endpoints', () => {
         '/api/data/task-types/task-type-1?force=true'
       )
     })
+  })
+
+  // The copy source goes through its own action once the version exists:
+  // the creation only carries the production and the name.
+  test('creates a schedule version with the production and the name', () => {
+    scheduleApi.createScheduleVersion(
+      { id: 'p1' },
+      { name: 'Plan B', version: 'ref' }
+    )
+
+    expect(client.ppost).toHaveBeenCalledTimes(1)
+    const [path, data] = client.ppost.mock.calls[0]
+    expect(path).toBe('/api/data/production-schedule-versions/')
+    expect(data).toStrictEqual({ project_id: 'p1', name: 'Plan B' })
   })
 })
