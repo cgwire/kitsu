@@ -66,9 +66,9 @@ const initialState = {
   productionStatus: [],
   productionStatusMap: new Map(),
   currentProduction: null,
-  // personId -> explicit project role, null or absent means the person
-  // inherits their global role
-  currentTeamRoles: {},
+  // productionId -> personId -> explicit project role, null or absent means
+  // the person inherits their global role
+  teamRoles: {},
   productionAvatarFormData: null,
 
   isProductionsLoading: false,
@@ -224,7 +224,10 @@ const getters = {
   openProductions: state => state.openProductions,
   productionStatus: state => state.productionStatus,
 
-  productionTeamRoles: state => state.currentTeamRoles,
+  productionTeamRoles: state =>
+    state.teamRoles[state.currentProduction?.id] || {},
+  teamRolesForProduction: state => productionId =>
+    state.teamRoles[productionId] || {},
 
   productionAvatarFormData: state => state.productionAvatarFormData,
 
@@ -547,9 +550,19 @@ const actions = {
   },
 
   async loadProductionTeam({ commit, state }) {
-    const team = await productionsApi.getTeam(state.currentProduction.id)
-    commit(TEAM_ROLES_LOADED, team)
+    const productionId = state.currentProduction.id
+    const team = await productionsApi.getTeam(productionId)
+    commit(TEAM_ROLES_LOADED, { productionId, team })
     return team
+  },
+
+  // For the pages that read the roles without listing the team, such as the
+  // comments of a task. A role changed meanwhile waits for the next reload:
+  // zou stays the gate.
+  async loadTeamRolesOnce({ commit, state }, productionId) {
+    if (!productionId || state.teamRoles[productionId]) return
+    const team = await productionsApi.getTeam(productionId)
+    commit(TEAM_ROLES_LOADED, { productionId, team })
   },
 
   async setTeamMemberRole({ commit, state, rootState }, { personId, role }) {
@@ -1101,7 +1114,6 @@ const mutations = {
   [SET_CURRENT_PRODUCTION](state, productionId) {
     const production = state.productionMap.get(productionId)
     state.currentProduction = production
-    state.currentTeamRoles = {}
   },
 
   [TEAM_ADD_PERSON](state, personId) {
@@ -1110,19 +1122,26 @@ const mutations = {
 
   [TEAM_REMOVE_PERSON](state, personId) {
     removeFromIdList(state.currentProduction, 'team', personId)
-    delete state.currentTeamRoles[personId]
+    delete state.teamRoles[state.currentProduction.id]?.[personId]
   },
 
-  [TEAM_ROLES_LOADED](state, team) {
-    state.currentTeamRoles = Object.fromEntries(
-      team.map(member => [member.id, member.project_role])
-    )
+  [TEAM_ROLES_LOADED](state, { productionId, team }) {
+    state.teamRoles = {
+      ...state.teamRoles,
+      [productionId]: Object.fromEntries(
+        team.map(member => [member.id, member.project_role])
+      )
+    }
   },
 
   [TEAM_MEMBER_ROLE_UPDATED](state, link) {
-    state.currentTeamRoles = {
-      ...state.currentTeamRoles,
-      [link.person_id]: link.role
+    const productionId = state.currentProduction.id
+    state.teamRoles = {
+      ...state.teamRoles,
+      [productionId]: {
+        ...state.teamRoles[productionId],
+        [link.person_id]: link.role
+      }
     }
   },
 

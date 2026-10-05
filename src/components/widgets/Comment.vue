@@ -763,7 +763,12 @@ const isAvatarLink = computed(
 // Zou hands the client the internal comments that carry a preview, emptied
 // of their text, for the revisions they hold: who wrote them stays internal.
 const isAuthorHidden = computed(
-  () => isCurrentUserClient.value && !isClientThread(props.comment)
+  () =>
+    isCurrentUserClient.value &&
+    !isClientThread(
+      props.comment,
+      store.getters.teamRolesForProduction(props.task?.project_id)
+    )
 )
 
 const isPreviewBound = computed(() => {

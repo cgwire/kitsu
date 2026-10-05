@@ -240,6 +240,26 @@ describe('Productions store', () => {
       ])
     })
 
+    describe('team roles', () => {
+      const state = {
+        currentProduction: { id: 'production-1' },
+        teamRoles: { 'production-1': { 123: 'supervisor' } }
+      }
+
+      test('productionTeamRoles lists those of the current production', () => {
+        expect(store.getters.productionTeamRoles(state)).toEqual({
+          123: 'supervisor'
+        })
+      })
+
+      test('teamRolesForProduction lists those of given production', () => {
+        const teamRolesFor = store.getters.teamRolesForProduction(state)
+        expect(teamRolesFor('production-1')).toEqual({ 123: 'supervisor' })
+        expect(teamRolesFor('production-2')).toEqual({})
+        expect(teamRolesFor(undefined)).toEqual({})
+      })
+    })
+
     test('productionAssetTypeOptions', () => {
       const fakeGetters = {
         productionAssetTypes: rootState.assetTypes.assetTypes
@@ -639,6 +659,51 @@ describe('Productions store', () => {
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(1, TEAM_ADD_PERSON, '456')
       expect(productionApi.addPersonToTeam).toBeCalledTimes(1)
+    })
+
+    describe('team roles', () => {
+      const team = [{ id: '456', project_role: 'client' }]
+
+      beforeEach(() => {
+        productionApi.getTeam = vi.fn(() => Promise.resolve(team))
+      })
+
+      test('loadProductionTeam loads those of the current production', async () => {
+        const commit = vi.fn()
+        const state = { currentProduction: { id: '123' }, teamRoles: {} }
+        await store.actions.loadProductionTeam({ commit, state })
+        expect(productionApi.getTeam).toHaveBeenCalledWith('123')
+        expect(commit).toHaveBeenCalledWith('TEAM_ROLES_LOADED', {
+          productionId: '123',
+          team
+        })
+      })
+
+      test('loadTeamRolesOnce loads those of given production', async () => {
+        const commit = vi.fn()
+        const state = { currentProduction: { id: '123' }, teamRoles: {} }
+        await store.actions.loadTeamRolesOnce({ commit, state }, '789')
+        expect(productionApi.getTeam).toHaveBeenCalledWith('789')
+        expect(commit).toHaveBeenCalledWith('TEAM_ROLES_LOADED', {
+          productionId: '789',
+          team
+        })
+      })
+
+      test('loadTeamRolesOnce asks nothing without a production', async () => {
+        const commit = vi.fn()
+        await store.actions.loadTeamRolesOnce({ commit, state: { teamRoles: {} } })
+        expect(productionApi.getTeam).not.toHaveBeenCalled()
+      })
+
+      // Every task opened asks for them.
+      test('loadTeamRolesOnce keeps the roles it already holds', async () => {
+        const commit = vi.fn()
+        const state = { teamRoles: { 789: {} } }
+        await store.actions.loadTeamRolesOnce({ commit, state }, '789')
+        expect(productionApi.getTeam).not.toHaveBeenCalled()
+        expect(commit).not.toHaveBeenCalled()
+      })
     })
 
     test('removePersonFromTeam', () => {
@@ -1093,34 +1158,55 @@ describe('Productions store', () => {
 
     test('TEAM_REMOVE_PERSON', () => {
       state.currentProduction = {
+        id: 'production-1',
         team: [123]
       }
-      state.currentTeamRoles = { 123: 'manager' }
+      state.teamRoles = { 'production-1': { 123: 'manager' } }
       store.mutations.TEAM_REMOVE_PERSON(state, 123)
       expect(state.currentProduction.team).toHaveLength(0)
-      expect(state.currentTeamRoles[123]).toBeUndefined()
+      expect(state.teamRoles['production-1'][123]).toBeUndefined()
     })
 
+    // The roles are kept per production: the comments of a task read those
+    // of its production, which is not always the current one.
     test('TEAM_ROLES_LOADED', () => {
-      store.mutations.TEAM_ROLES_LOADED(state, [
-        { id: 123, project_role: 'supervisor' },
-        { id: 456, project_role: null }
-      ])
-      expect(state.currentTeamRoles).toEqual({ 123: 'supervisor', 456: null })
+      state.teamRoles = { 'production-2': { 789: 'client' } }
+      store.mutations.TEAM_ROLES_LOADED(state, {
+        productionId: 'production-1',
+        team: [
+          { id: 123, project_role: 'supervisor' },
+          { id: 456, project_role: null }
+        ]
+      })
+      expect(state.teamRoles).toEqual({
+        'production-1': { 123: 'supervisor', 456: null },
+        'production-2': { 789: 'client' }
+      })
+    })
+
+    test('RESET_ALL forgets the team roles', () => {
+      store.mutations.RESET_ALL(state)
+      store.mutations.TEAM_ROLES_LOADED(state, {
+        productionId: 'production-1',
+        team: [{ id: 123, project_role: 'supervisor' }]
+      })
+      store.mutations.RESET_ALL(state)
+      expect(state.teamRoles).toEqual({})
     })
 
     test('TEAM_MEMBER_ROLE_UPDATED', () => {
-      state.currentTeamRoles = { 123: 'supervisor' }
+      state.currentProduction = { id: 'production-1' }
+      state.teamRoles = { 'production-1': { 123: 'supervisor' } }
       store.mutations.TEAM_MEMBER_ROLE_UPDATED(state, {
         person_id: 123,
         role: 'manager'
       })
-      expect(state.currentTeamRoles[123]).toEqual('manager')
+      expect(state.teamRoles['production-1'][123]).toEqual('manager')
       store.mutations.TEAM_MEMBER_ROLE_UPDATED(state, {
         person_id: 123,
         role: null
       })
-      expect(state.currentTeamRoles[123]).toBeNull()
+      expect(state.teamRoles['production-1'][123]).toBeNull()
     })
 
     test('PRODUCTION_ADD_ASSET_TYPE', () => {
