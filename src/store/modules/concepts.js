@@ -64,8 +64,8 @@ const actions = {
       const concepts = await conceptsApi.getConcepts(production)
       commit(LOAD_CONCEPTS_END, { concepts })
     } catch (err) {
-      console.error(err)
       commit(LOAD_CONCEPTS_ERROR)
+      throw err
     }
   },
 
