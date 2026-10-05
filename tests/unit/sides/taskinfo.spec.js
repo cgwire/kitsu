@@ -14,8 +14,10 @@ import '@/lib/auth'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 import ActionPanel from '@/components/tops/ActionPanel.vue'
 import PreviewPlayer from '@/components/players/players/PreviewPlayer.vue'
+import EditCommentModal from '@/components/modals/EditCommentModal.vue'
 import AddComment from '@/components/widgets/AddComment.vue'
 import Comment from '@/components/widgets/Comment.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
 import { DEFAULT_FPS } from '@/lib/video'
 import shotStore from '@/store/modules/shots'
 
@@ -201,6 +203,28 @@ describe('TaskInfo.vue', () => {
         taskId: 'task-2',
         entityId: ENTITY_ID
       })
+    })
+  })
+
+  describe('task loading failure', () => {
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    it('stops the spinner and reports the error', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { wrapper, store } = await mountPanel({ props: { silent: true } })
+      store.dispatch.mockImplementation(type =>
+        type === 'loadTaskComments'
+          ? Promise.reject(new Error('Request has been terminated'))
+          : Promise.resolve()
+      )
+
+      await wrapper.setProps({ silent: false })
+      await flushPromises()
+
+      expect(wrapper.findComponent(Spinner).exists()).toBe(false)
+      expect(wrapper.find('.no-comment').text()).toBe('main.loading_error')
     })
   })
 
@@ -684,6 +708,25 @@ describe('TaskInfo.vue', () => {
 
       expect(store.dispatch).toHaveBeenCalledWith(action, comments[0])
       expect(consoleError).toHaveBeenCalledWith(error)
+    })
+
+    it('leaves the edited comment it is handed untouched', async () => {
+      const { wrapper, store } = await mountPanel({ comments })
+      const edited = {
+        id: 'comment-1',
+        text: 'Retake the pose',
+        attachmentFilesToDelete: [],
+        newAttachmentFiles: []
+      }
+
+      wrapper.findComponent(EditCommentModal).vm.$emit('confirm', edited)
+      await flushPromises()
+
+      expect(edited).toHaveProperty('newAttachmentFiles')
+      expect(store.dispatch).toHaveBeenCalledWith('editTaskComment', {
+        taskId: TASK_ID,
+        comment: { id: 'comment-1', text: 'Retake the pose' }
+      })
     })
 
     it('flags the comment whose action failed', async () => {

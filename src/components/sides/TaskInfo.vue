@@ -170,10 +170,7 @@
                   />
                 </template>
 
-                <div
-                  class="no-preview"
-                  v-if="!taskPreviews || taskPreviews.length === 0"
-                >
+                <div class="no-preview" v-else>
                   <em>{{ $t('tasks.no_preview') }}</em>
                 </div>
               </div>
@@ -214,7 +211,10 @@
                 <div
                   class="comments"
                   v-if="
-                    taskComments && taskComments.length > 0 && !loading.task
+                    taskComments &&
+                    taskComments.length > 0 &&
+                    !loading.task &&
+                    !errors.task
                   "
                 >
                   <XyzTransitionGroup
@@ -262,7 +262,11 @@
                 </div>
                 <div class="no-comment" v-else-if="!loading.task">
                   <em>
-                    {{ $t('tasks.no_comment') }}
+                    {{
+                      errors.task
+                        ? $t('main.loading_error')
+                        : $t('tasks.no_comment')
+                    }}
                   </em>
                 </div>
               </div>
@@ -290,7 +294,6 @@
           :active="modals.addExtraPreview"
           :is-loading="loading.addExtraPreview"
           :is-error="errors.addExtraPreview"
-          :form-data="addExtraPreviewFormData"
           message=""
           @cancel="onCloseExtraPreview"
           @confirm="createExtraPreview"
@@ -374,6 +377,7 @@
 
 <script setup>
 // Imports
+// --------------------------------------------------------------------------
 import { CornerRightUpIcon, XIcon } from 'lucide-vue-next'
 import moment from 'moment'
 import {
@@ -419,7 +423,6 @@ import EditCommentModal from '@/components/modals/EditCommentModal.vue'
 import MoveCommentModal from '@/components/modals/MoveCommentModal.vue'
 import PreviewPlayer from '@/components/players/players/PreviewPlayer.vue'
 import ActionPanel from '@/components/tops/ActionPanel.vue'
-// eslint-disable-next-line no-unused-vars
 import AddComment from '@/components/widgets/AddComment.vue'
 import ComboboxActions from '@/components/widgets/ComboboxActions.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
@@ -430,7 +433,6 @@ import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
 const DEFAULT_PANEL_WIDTH = 400
 
-// Composables
 const { t } = useI18n()
 const route = useRoute()
 const store = useStore()
@@ -440,6 +442,7 @@ const instance = getCurrentInstance()
 const socket = instance.appContext.config.globalProperties.$socket
 
 // Props / Emits
+// --------------------------------------------------------------------------
 const props = defineProps({
   currentFrame: {
     type: Number,
@@ -475,7 +478,7 @@ const props = defineProps({
   },
   task: {
     type: Object,
-    default: () => {}
+    default: null
   },
   withActions: {
     type: Boolean,
@@ -494,6 +497,7 @@ const props = defineProps({
 const emit = defineEmits(['comment-added', 'task-removed', 'time-code-clicked'])
 
 // State
+// --------------------------------------------------------------------------
 const draftComment = reactive({})
 // Only the root panel provides the draft: nested TaskInfo instances inject
 // it so the comment draft survives switching between panels.
@@ -501,7 +505,6 @@ if (props.root) {
   provide('draftComment', draftComment)
 }
 
-const addExtraPreviewFormData = ref(null)
 const animOn = ref(false)
 const previewForms = ref([])
 const currentFrameRaw = ref(0)
@@ -514,8 +517,8 @@ const isExtraWide = ref(false)
 const taskComments = ref([])
 const taskPreviews = ref([])
 
-// Extend-drag bookkeeping, read only inside event handlers
 let currentExtraPreviewId = null
+// Extend-drag bookkeeping, read only inside event handlers
 let lastWidth = 0
 let lastWidthX = 0
 
@@ -559,6 +562,7 @@ const previewPlayerRef = useTemplateRef('preview-player')
 const sideWrapperRef = useTemplateRef('side-wrapper')
 
 // Computed
+// --------------------------------------------------------------------------
 const currentEpisode = computed(() => store.getters.currentEpisode)
 const currentProduction = computed(() => store.getters.currentProduction)
 const isCurrentUserArtist = computed(() => store.getters.isCurrentUserArtist)
@@ -847,6 +851,7 @@ const selectedTasksToDisplay = computed(() =>
 )
 
 // Functions
+// --------------------------------------------------------------------------
 const getTaskEntity = task => {
   if (!task?.entity_type_name || !task?.entity?.id) return null
   return getEntityMap(task.entity_type_name)?.get(task.entity.id) || null
@@ -873,6 +878,7 @@ const loadTaskData = () => {
       })
       .catch(err => {
         console.error(err)
+        loading.task = false
         errors.task = true
       })
   }
@@ -974,7 +980,7 @@ const createExtraPreview = forms => {
   errors.addExtraPreview = false
   loading.addExtraPreview = true
   const comment = taskComments.value.find(comment =>
-    comment.previews.find(preview => preview.id === currentPreviewId.value)
+    comment.previews.some(preview => preview.id === currentPreviewId.value)
   )
   store
     .dispatch('addCommentExtraPreview', {
@@ -1094,11 +1100,7 @@ const onPreviewChanged = previewId => {
   )
 }
 
-const changeCurrentPreview = previewFile => {
-  currentPreviewIndex.value = taskPreviews.value.findIndex(
-    p => p.id === previewFile.id
-  )
-}
+const changeCurrentPreview = previewFile => onPreviewChanged(previewFile.id)
 
 const setCurrentPreviewAsEntityThumbnail = frame => {
   const previewId = previewPlayerRef.value.currentPreview.id
@@ -1167,15 +1169,15 @@ const onCancelMoveComment = () => {
   modals.moveComment = false
 }
 
-const confirmEditTaskComment = comment => {
+const confirmEditTaskComment = ({
+  attachmentFilesToDelete,
+  newAttachmentFiles,
+  ...comment
+}) => {
   loading.editComment = true
   errors.editComment = false
-  const attachmentFilesToDelete = comment.attachmentFilesToDelete || []
-  const newAttachmentFiles = comment.newAttachmentFiles || []
-  delete comment.attachmentFilesToDelete
-  delete comment.newAttachmentFiles
   func
-    .runPromiseMapAsSeries(attachmentFilesToDelete, attachment =>
+    .runPromiseMapAsSeries(attachmentFilesToDelete || [], attachment =>
       store.dispatch('deleteAttachment', {
         attachment,
         comment: commentToEdit.value
@@ -1184,7 +1186,7 @@ const confirmEditTaskComment = comment => {
     .then(() =>
       store.dispatch('addAttachmentToComment', {
         comment: commentToEdit.value,
-        files: newAttachmentFiles
+        files: newAttachmentFiles || []
       })
     )
     .then(() =>
@@ -1264,7 +1266,7 @@ const saveComment = async comment => {
     })
   } catch (err) {
     console.error(err)
-    await loadTaskData()
+    loadTaskData()
   }
 }
 
@@ -1298,9 +1300,9 @@ const confirmDeleteTaskPreview = () => {
   loading.deleteExtraPreview = true
   errors.deleteExtraPreview = false
   const previewId = currentExtraPreviewId
-  const comment = getCurrentTaskComments().find(comment => {
-    return comment.previews.findIndex(p => p.id === previewId) >= 0
-  })
+  const comment = getCurrentTaskComments().find(comment =>
+    comment.previews.some(p => p.id === previewId)
+  )
 
   previewPlayerRef.value.displayFirst()
   store
@@ -1396,9 +1398,8 @@ const onExportClick = () => {
     t('comments.fields.revision'),
     t('comments.fields.attachments')
   ]
-  const commentLines = []
-  getCurrentTaskComments().forEach(comment => {
-    commentLines.push([
+  const commentLines = getCurrentTaskComments().flatMap(comment => [
+    [
       formatDate(comment.created_at),
       comment.task_status?.name || '',
       comment.person?.name || '',
@@ -1428,27 +1429,23 @@ const onExportClick = () => {
             .map(attachment => getDownloadAttachmentPath(attachment, true))
             .join('\n')
         : ''
+    ],
+    ...(comment.replies || []).map(reply => [
+      formatDate(reply.date),
+      t('main.reply'),
+      reply.person?.name || '',
+      reply.text,
+      null,
+      null,
+      null,
+      comment.attachment_files
+        ? comment.attachment_files
+            .filter(attachment => attachment.reply_id === reply.id)
+            .map(attachment => getDownloadAttachmentPath(attachment, true))
+            .join('\n')
+        : ''
     ])
-    if (comment.replies) {
-      comment.replies.forEach(reply =>
-        commentLines.push([
-          formatDate(reply.date),
-          t('main.reply'),
-          reply.person?.name || '',
-          reply.text,
-          null,
-          null,
-          null,
-          comment.attachment_files
-            ? comment.attachment_files
-                .filter(attachment => attachment.reply_id === reply.id)
-                .map(attachment => getDownloadAttachmentPath(attachment, true))
-                .join('\n')
-            : ''
-        ])
-      )
-    }
-  })
+  ])
   csv.buildCsvFile(name, [headers, ...commentLines])
 }
 
@@ -1463,9 +1460,7 @@ const onExtendDown = event => {
 
 const onExtendMove = event => {
   const diff = lastWidthX - getClientX(event)
-  let panelWidth = Math.max(lastWidth + diff, DEFAULT_PANEL_WIDTH)
-  if (panelWidth > 900) panelWidth = 900
-  setWidth(panelWidth)
+  setWidth(Math.min(Math.max(lastWidth + diff, DEFAULT_PANEL_WIDTH), 900))
   refreshPreviewPlay()
 }
 
@@ -1517,7 +1512,7 @@ const removeTaskFromSelection = task => {
     task
   }
   store.dispatch('removeSelectedTask', { task: data }) // remove list selection
-  store.dispatch('removeSelectedTask', { task }) // remove
+  store.dispatch('removeSelectedTask', { task })
   emit('task-removed', task)
 }
 
@@ -1683,6 +1678,7 @@ const socketEvents = [
 ]
 
 // Watchers
+// --------------------------------------------------------------------------
 watch(
   () => props.task,
   () => {
@@ -1713,6 +1709,7 @@ watch(
 )
 
 // Lifecycle
+// --------------------------------------------------------------------------
 onMounted(() => {
   if (sideColumnParent.value) {
     const panelWidth = preferences.getIntPreference(
@@ -1738,7 +1735,6 @@ defineExpose({
 <style lang="scss" scoped>
 .dark {
   .add-comment,
-  .comment,
   .no-comment {
     background: var(--background-alt);
     border-color: $dark-grey;
@@ -1753,17 +1749,13 @@ defineExpose({
     padding: 0.5em;
   }
 
-  .side {
-    background: var(--background);
-  }
-
   .task-info {
     color: white;
   }
 }
 
 .side {
-  background: #f8f8f8;
+  background: var(--background-page);
   flex: 1;
   min-height: 100%;
   overflow: auto;
@@ -1799,7 +1791,7 @@ defineExpose({
 }
 
 .no-comment {
-  background: white;
+  background: var(--background-block);
   padding: 1em;
   border-radius: 5px;
   box-shadow: 0 0 6px #e0e0e0;
@@ -1808,14 +1800,6 @@ defineExpose({
 .task-columns {
   display: flex;
   flex-direction: column;
-}
-
-.comment {
-  border-top: 1px solid $white-grey;
-  border-bottom: 1px solid $white-grey;
-  border-right: 1px solid $white-grey;
-  margin-top: 0.1em;
-  box-shadow: 0 0 6px #e0e0e0;
 }
 
 .comments {
@@ -1830,12 +1814,7 @@ defineExpose({
   border-radius: 5px;
 }
 
-.selected-task-line {
-  color: $grey;
-  font-weight: bold;
-  margin-bottom: 0.5em;
-}
-
+.selected-task-line,
 .entity-line {
   color: $grey;
   font-weight: bold;
@@ -1870,9 +1849,6 @@ defineExpose({
   flex-direction: column;
   padding: 0 1em 1em 1em;
   position: relative;
-  bottom: 0;
-  right: 0;
-  left: 0;
 }
 
 .no-selection-separator {
