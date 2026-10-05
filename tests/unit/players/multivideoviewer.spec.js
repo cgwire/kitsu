@@ -52,6 +52,7 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
     vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(
       fakeContext
     )
+    vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {})
     fakeContext.drawImage.mockClear()
     HTMLMediaElement.prototype.load = vi.fn()
     installRvfcMock()
@@ -276,6 +277,8 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
       const { wrapper, player } = await mountSeekingViewer()
       wrapper.vm.setCurrentFrame(20)
       wrapper.vm.pause()
+      expect(player.pause).toHaveBeenCalledOnce()
+      expect(player.pause.mock.contexts[0]).toBe(player)
       expect(player.currentTime).toBeCloseTo(20 / 25)
       player.currentTime = 0.4
       player.seeking = false
