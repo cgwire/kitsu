@@ -879,7 +879,7 @@
       "created_at": "創建於：",
       "delete_text": "您確定要從您的資料庫移除{name}嗎？",
       "delete_error": "刪除此播放列表時出現錯誤。",
-      "edit_error": "儲存此播放列表時發生錯誤。",
+      "edit_error": "儲存此播放列表時發生錯誤。您確定沒有名稱相似的播放列表嗎？",
       "download_zip": "下載 .zip",
       "failed": "失敗",
       "for_client": "客戶",

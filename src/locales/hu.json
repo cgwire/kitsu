@@ -879,7 +879,7 @@
       "created_at": "Létrehozva:",
       "delete_text": "Biztosan törölni akarod {name}-t az adatbázisból?",
       "delete_error": "Hiba történt a lejátszási lista törlésekor.",
-      "edit_error": "Hiba történt a lejátszólista mentésekor.",
+      "edit_error": "Hiba történt a lejátszólista mentésekor. Biztos, hogy nincs hasonló nevű lejátszólista?",
       "download_zip": ".zip letöltése",
       "failed": "Sikertelen",
       "for_client": "A megrendelő",
