@@ -32,7 +32,6 @@ src/
     sides/          # Sidebar components
     tops/           # Topbar components
     widgets/        # Reusable UI widgets (Combobox*, DateField, etc.)
-    mixins/         # Legacy Options API mixins still being migrated to composables
   composables/
     players/        # Player-specific composables (annotation, comparison, playlistComparison, ...)
                     # Generic ones (modal, combobox, ...) stay at the root
@@ -49,7 +48,7 @@ src/
 
 ### Composition API (`<script setup>`)
 
-All new and refactored components use `<script setup>`. When converting from Options API:
+All components use `<script setup>`:
 
 ```vue
 <script setup>
@@ -82,9 +81,10 @@ A `<script setup>` component exposes nothing through a template ref (≠ Options
 - Fix: grep both ref styles and add the members to `defineExpose`.
 - If the parent only *wrote* state, prefer a watcher on the child's props and delete the ref access.
 
-#### Known eslint gotcha
+#### Template bindings and ESLint
 
-The eslint config does not detect template usage of component imports in `<script setup>`. Wrap those imports in `eslint-disable no-unused-vars` / `eslint-enable` comments (see `AddMetadataModal.vue` for the pattern).
+- ESLint sees the components a template uses: their imports need no `eslint-disable no-unused-vars` comment (older files still carry some).
+- `vue/no-undef-properties` is on: a name the template reads and the `<script setup>` does not define fails the lint.
 
 ### Script setup organization
 
@@ -347,13 +347,13 @@ This keeps auth/error handling, retries and store updates centralised. If you fi
 
 ## Migration status
 
-The codebase is migrating from Options API to Composition API. Many components (especially pages and modals) still use Options API with mixins. When touching these files, convert them to `<script setup>` (see the `composition-api-migration` skill).
+The Composition API migration is done: every component uses `<script setup>`, and no mixin is left. Only the Storybook samples of `src/stories/` stay on the Options API (ESLint ignores them).
 
-The `modalMixin` migration is done (the mixin has been removed). When converting a modal:
+When writing a modal:
 1. Use `BaseModal` component if possible (handles markup + Escape key)
 2. Otherwise use `useModal(toRef(props, 'active'), emit)` directly
 
-Vue/Vuex/vue-router/vue-i18n are **deliberately pinned** to their current majors until the Composition API migration finishes. Do not propose major upgrades (Pinia, router majors) as fixes, and don't frame the pins as tech debt. A Vuex → Pinia migration is planned afterwards.
+Vue/Vuex/vue-router/vue-i18n stay **deliberately pinned** to their current majors until the Vuex → Pinia migration, the next step. Do not propose major upgrades (Pinia, router majors) as fixes, and don't frame the pins as tech debt.
 
 ## PR body format
 
