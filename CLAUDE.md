@@ -1,4 +1,4 @@
-# Kitsu — CLAUDE.md
+# CLAUDE.md for Kitsu
 
 Kitsu is a production tracking web application for animation studios, built by CGWire.
 
@@ -14,10 +14,10 @@ Kitsu is a production tracking web application for animation studios, built by C
 | Default branch | `main` |
 | Dev server | `npm run dev` |
 | Tests | `npm run test:unit` (vitest) |
-| Lint | `npm run lint` (eslint + prettier, auto-run on commit via husky + lint-staged) |
+| Lint | `npm run lint` (src) and `npm run lint:test` (tests): ESLint, with Prettier as a rule. Staged `.js`/`.vue` files are linted on commit (husky + lint-staged) |
 | Build | `npm run build` |
-| Commit style | `[scope] Short description` (e.g. `[widgets] Convert Combobox to composition API`) |
-| PR format | C4 contract — `**Problem**` / `**Solution**` bold two-paragraph body (see below) |
+| Commit style | `[scope] Short description` (e.g. `[widgets] Convert Combobox to composition API`). Comment, lint and dead-code cleanups take `[qa]`, whatever the area |
+| PR format | C4 contract: `**Problem**` / `**Solution**` bold two-paragraph body (see below) |
 
 ## Architecture
 
@@ -25,11 +25,13 @@ Kitsu is a production tracking web application for animation studios, built by C
 src/
   components/
     cells/          # Table cell components (RowActionsCell, etc.)
+    layouts/        # Page layouts (PageLayout, PageLeftSideLayout)
     lists/          # List/table components (StudioList, etc.)
     modals/         # Modal dialogs (BaseModal, EditStudiosModal, etc.)
     pages/          # Page-level components (Studios, etc.)
     players/        # Preview/playlist player components (annotations, bars, viewers, ...)
     sides/          # Sidebar components
+    spinners/       # Loading spinners
     tops/           # Topbar components
     widgets/        # Reusable UI widgets (Combobox*, DateField, etc.)
   composables/
@@ -52,9 +54,9 @@ All components use `<script setup>`:
 
 ```vue
 <script setup>
+import { useHead } from '@unhead/vue'
 import { ref, computed, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useHead } from '@unhead/vue'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
@@ -65,8 +67,9 @@ const store = useStore()
 // Vuex getters → computed
 const studios = computed(() => store.getters.studios)
 
-// Vuex actions → store.dispatch
-await store.dispatch('loadStudios')
+// Vuex actions → store.dispatch (a top-level await would make the
+// component async, which needs a <Suspense>)
+onMounted(() => store.dispatch('loadStudios'))
 
 // head() → useHead with reactive computed
 useHead({ title: computed(() => `${t('studios.title')} - Kitsu`) })
@@ -126,9 +129,9 @@ Underline every section title with a dashed line padded to the 80-column limit:
 
 Within `<script setup>`, sort imports **alphabetically by source path** within each of these blocks (separate blocks with a blank line):
 
-1. Third-party packages (`vue`, `vue-i18n`, `vuex`, `vue-router`, `lucide-vue-next`, `moment`, …) — alphabetical by package name.
-2. Project libs and composables (`@/lib/...`, `@/composables/...`, `@/store/...`).
-3. Vue components (`@/components/...`) — alphabetical by path; named imports alphabetical too.
+1. Third-party packages, alphabetical by package name (`@unhead/vue`, `lucide-vue-next`, `moment`, `vue`, `vue-i18n`, `vue-router`, `vuex`, …).
+2. Project libs and composables (`@/composables/...`, `@/lib/...`, `@/store/...`).
+3. Vue components (`@/components/...`), alphabetical by path; named imports alphabetical too.
 
 The same rule applies in `.js` files.
 
@@ -194,11 +197,11 @@ defineEmits(['delete-clicked', 'edit-clicked'])
 
 ## Composables
 
-Composables live in `src/composables/`. Existing ones:
+Composables live in `src/composables/`, the player ones in `src/composables/players/`. A few shared ones:
 
 ### `useModal(active, emit)`
 
-Handles Escape key to close modal, manages event listener lifecycle. (It replaced the legacy `modalMixin`, now removed.)
+Handles Escape key to close modal, manages event listener lifecycle.
 
 ```js
 import { toRef } from 'vue'
@@ -212,6 +215,10 @@ useModal(toRef(props, 'active'), emit)
 ### `useCombobox(emit)`
 
 Shared toggle/select logic for custom combobox components.
+
+### `useFormat()`
+
+Formatting that follows the user and organization settings: dates, durations and their unit, priorities. `src/composables/format.js` also exports pure helpers for the rest.
 
 ### `BaseModal` component
 
@@ -231,12 +238,15 @@ Shared toggle/select logic for custom combobox components.
 - Pluralization with pipe format (`"studio | studios"`): pass a **named object**, `$t('key', { count })`. Every locale uses vue-i18n's DEFAULT plural resolver, so keep the **same number of `|` segments as en.js** and don't add a language's extra grammatical plural forms.
 - For animation/VFX domain terms (shot, frame, onion skin, edit/montage, …), align translations with Blender's official terminology (`blender/blender-translations` `po/<lang>.po`, or the translated manual at `docs.blender.org/manual/<lang>/`).
 
-```js
-// In template. Plural takes an object, never a bare number
-{{ $t('studios.number', { count: entries.length }) }}
+```vue
+<template>
+  <!-- Plural takes an object, never a bare number -->
+  {{ $t('studios.number', { count: entries.length }) }}
+</template>
 
-// In script setup
-t('studios.title')
+<script setup>
+const title = computed(() => t('studios.title'))
+</script>
 ```
 
 ### Two legacy-mode traps
@@ -258,12 +268,12 @@ $t('logs.nb_events', { count: 5 }) // "5 events listed"
 
 `en.js` is the English source of truth. Two **partial overlays** are merged on top of it for specific production types:
 
-- `en_nft.js` — NFT productions: remaps the *shot* concept to **NFT** (`shot/shots/Shot/Shots → NFT/NFTs`). Sequence, episode, asset and edit are unchanged.
-- `en_video-game.js` — video-game productions: `shot → map`, `sequence → level`, `episode → chapter` (asset and edit unchanged).
+- `en_nft.js` (NFT productions): remaps the *shot* concept to **NFT** (`shot/shots/Shot/Shots → NFT/NFTs`). Sequence, episode, asset and edit are unchanged.
+- `en_video-game.js` (video-game productions): `shot → map`, `sequence → level`, `episode → chapter` (asset and edit unchanged).
 
 Rules:
 
-- These files contain **only** the keys whose wording differs from `en.js` — never copy a key whose value is identical to the base.
+- These files contain **only** the keys whose wording differs from `en.js`: never copy a key whose value is identical to the base.
 - Key names must **mirror `en.js` exactly**. When a key is renamed in `en.js` (e.g. `creation_explaination → creation_explanation`), rename it in the overlays too: a stale key becomes a dead override and the new base key then leaks untranslated vocabulary (English "shot" showing in an NFT/map UI).
 - When a key is **added** to `en.js` whose value mentions a remapped word (shot / sequence / episode), add the matching override to the relevant overlay.
 - Only English has these overlays. The other locales (`fr.json`, …) translate `en.js` and have no production-type variant.
@@ -302,12 +312,13 @@ Beware: global `.datatable-row` styles in `App.vue` paint backgrounds on `td` di
 Desktop-first approach. The primary users are on large screens; tablet (768px-1024px) is the secondary target for production managers on the studio floor; mobile is occasional.
 
 Breakpoints used in the project:
-- `768px` — primary mobile/tablet breakpoint
-- `1000px` — secondary desktop breakpoint
+
+- `768px`: primary mobile/tablet breakpoint
+- `1000px`: secondary desktop breakpoint
 
 **Mobile (≤768px) is read-only and card-based:**
 
-1. **Read-only**: hide all editing affordances — page-header action buttons (new, export), in-row edit/delete actions, any "click to edit" hint. Keep detail navigation (router-links on names).
+1. **Read-only**: hide all editing affordances, that is page-header action buttons (new, export), in-row edit/delete actions and any "click to edit" hint. Keep detail navigation (router-links on names).
 2. **Cards over rows**: render list entries as cards, not table rows, via pure CSS (table + `display: block` overrides on `tr`/`td`, hidden `<thead>`, badges for compact attributes). Don't duplicate markup with a separate mobile view.
 
 Apply with a `@media (max-width: 768px)` block: `:deep()` on the page header and `:deep(.actions) { display: none }` on rows, then flip the table to a flex card layout.
@@ -317,6 +328,7 @@ Apply with a `@media (max-width: 768px)` block: `:deep()` on the page header and
 Store modules are in `src/store/modules/`. API client functions are in `src/store/api/`.
 
 Pattern:
+
 - API module exports functions that call `client.pget/ppost/pput/pdel`
 - Store actions call the API, then commit mutations
 - Mutations update state and maintain caches (often a `Map` outside reactive state)
@@ -331,7 +343,7 @@ Components must never call `fetch()` (or any HTTP client) directly. All network 
 1. an API method in `src/store/api/<entity>.js` using the shared `client.*` helpers (`pget`, `ppost`, `pput`, `pdel`),
 2. a Vuex action in `src/store/modules/<entity>.js` that wraps it and commits the resulting mutations.
 
-This keeps auth/error handling, retries and store updates centralised. If you find yourself reaching for `fetch` in a `.vue` file, add the missing API method and action instead.
+This keeps auth/error handling, retries and store updates centralized. If you find yourself reaching for `fetch` in a `.vue` file, add the missing API method and action instead.
 
 ## Testing
 
@@ -342,7 +354,7 @@ This keeps auth/error handling, retries and store updates centralised. If you fi
 - **Use jsdom only when a spec needs the DOM**: its setup is the largest share of suite time. A spec that mounts nothing and never touches `document`/`window` starts with `// @vitest-environment node` on line 1. Test a `ref`/`computed`/`watch`-only composable inside an `effectScope()`, not a mounted host.
   - Node 22 and 24 lack DOM globals Node 26 has, such as `Storage`: a node spec can pass on Node 26 (locally or on the `current` CI job), then fail on 22 and 24. `localStorage`/`sessionStorage` are plain objects from `tests/storage.setup.js`: spy on the global, never on `Storage.prototype`. Stub any other DOM global on `globalThis`.
   - Vitest matches the pragma anywhere in the file: never quote it elsewhere in a spec.
-- A green unit test is NOT proof a UI/player bug is fixed — reproduce against the running dev app (localhost:8080) before claiming success.
+- A green unit test is NOT proof a UI/player bug is fixed: reproduce against the running dev app (localhost:8080) before claiming success.
 - **Strict Red/Green TDD Cycle:** To prevent shallow or fake tests, you must write the test or assertion first, run `npx vitest run <file>` to verify that it **fails (Red)**, write the minimal code to make it **pass (Green)**, and then refactor. Never mock internal module logic that can be tested through public component interfaces.
 
 ## Migration status
@@ -350,6 +362,7 @@ This keeps auth/error handling, retries and store updates centralised. If you fi
 The Composition API migration is done: every component uses `<script setup>`, and no mixin is left. Only the Storybook samples of `src/stories/` stay on the Options API (ESLint ignores them).
 
 When writing a modal:
+
 1. Use `BaseModal` component if possible (handles markup + Escape key)
 2. Otherwise use `useModal(toRef(props, 'active'), emit)` directly
 
@@ -369,12 +382,12 @@ Bold headers, no `## Problems` / `## Solutions` sections (harmonized across cgwi
 
 ## Key dependencies
 
-- **fabric.js** v7 (official npm package) — annotation canvas, wrapped by `src/composables/players/annotation.js` and `src/components/players/annotations/AnnotationCanvas.vue`
-- **fabricjs-psbrush** (cgwire fork) — pressure-sensitive brush on top of fabric
-- **socket.io-client** — real-time events via `vue-websocket-next`
-- **moment / moment-timezone** — date handling (used throughout schedule and timesheet components)
-- **vue-multiselect** — people/entity selection dropdowns
+- **fabric.js** v7 (official npm package): annotation canvas, wrapped by `src/composables/players/annotation.js` and `src/components/players/annotations/AnnotationCanvas.vue`
+- **fabricjs-psbrush** (cgwire fork): pressure-sensitive brush on top of fabric
+- **socket.io-client**: real-time events via `vue-websocket-next`
+- **moment / moment-timezone**: date handling (used throughout schedule and timesheet components)
+- **vue-multiselect**: people/entity selection dropdowns
 
 ## AI features
 
-Kitsu integrates AI **without forcing**: no dedicated AI styling, opt-in activation (disabled by default on self-hosted), no anthropomorphization, full transparency on models and data flows, and features only built for validated studio pain points. Before adding or reviewing any AI feature, read the full charter and its merge checklist: [`docs/ai-integration-charter.md`](./docs/ai-integration-charter.md).
+Kitsu integrates AI **without forcing**: no dedicated AI styling, opt-in activation (disabled by default on self-hosted), no anthropomorphization, full transparency on models and data flows, and features only built for validated studio pain points. Check every AI feature against these rules before adding or reviewing it.
