@@ -66,7 +66,8 @@ const mountPanel = async ({
   getterOverrides = {},
   stubs = {},
   comments = [],
-  previews = []
+  previews = [],
+  slots = {}
 } = {}) => {
   const socket = { on: vi.fn(), off: vi.fn() }
 
@@ -122,6 +123,7 @@ const mountPanel = async ({
 
   const wrapper = shallowMount(TaskInfo, {
     props: { task, ...props },
+    slots,
     global: {
       stubs: {
         // reset() runs after every load; the default stub has no such method
@@ -225,6 +227,34 @@ describe('TaskInfo.vue', () => {
 
       expect(wrapper.findComponent(Spinner).exists()).toBe(false)
       expect(wrapper.find('.no-comment').text()).toBe('main.loading_error')
+    })
+  })
+
+  describe('entity selection', () => {
+    const selectedConcepts = () =>
+      new Map([
+        ['concept-1', { id: 'concept-1', full_name: 'Concept' }],
+        ['concept-2', { id: 'concept-2', full_name: 'Concept' }]
+      ])
+
+    it('counts the selected entities', async () => {
+      const { wrapper } = await mountPanel({
+        task: null,
+        props: { entityType: 'Concept' },
+        getterOverrides: { selectedConcepts }
+      })
+      expect(wrapper.find('h2').text()).toBe('tasks.selected_entities (2)')
+    })
+
+    it('lets the parent describe the selection', async () => {
+      const { wrapper } = await mountPanel({
+        task: null,
+        props: { entityType: 'Concept' },
+        getterOverrides: { selectedConcepts },
+        slots: { selection: '<div class="custom-selection" />' }
+      })
+      expect(wrapper.find('.custom-selection').exists()).toBe(true)
+      expect(wrapper.find('.entity-line').exists()).toBe(false)
     })
   })
 

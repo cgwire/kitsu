@@ -343,18 +343,23 @@
         />
       </div>
       <div class="side task-info pa1" v-else-if="nbSelectedEntities > 0">
-        <h2 class="title mt2">{{ $t('tasks.selected_entities') }}</h2>
-        <div class="pa2 mt1">
-          <div
-            class="entity-line"
-            :key="entity.id"
-            v-for="entity in Array.from(selectedEntities.values())"
-          >
-            <span :class="{ canceled: entity.canceled }">{{
-              entity.full_name
-            }}</span>
+        <h2 class="title mt2">
+          {{ $t('tasks.selected_entities') }}
+          ({{ nbSelectedEntities }})
+        </h2>
+        <slot name="selection">
+          <div class="pa2 mt1">
+            <div
+              class="entity-line"
+              :key="entity.id"
+              v-for="entity in Array.from(selectedEntities.values())"
+            >
+              <span :class="{ canceled: entity.canceled }">{{
+                entity.full_name
+              }}</span>
+            </div>
           </div>
-        </div>
+        </slot>
       </div>
 
       <div class="side task-info empty" v-else>
