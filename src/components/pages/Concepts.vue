@@ -2,15 +2,6 @@
   <div class="fixed-page columns">
     <div class="column main-column">
       <div class="concepts page" @dragover="onFileDragover">
-        <div
-          class="drop-mask"
-          @drop="onFileDrop"
-          @dragover="onFileDragover"
-          @dragleave="onFileDragLeave"
-          v-if="isDraggingFile"
-        >
-          {{ $t('concepts.drop_new_concepts') }}
-        </div>
         <div class="page-header">
           <div class="filters">
             <combobox-status
@@ -56,13 +47,6 @@
               :options="sortByOptions"
               v-model="filters.sortBy"
             />
-            <button-simple
-              class="new-folder"
-              icon="plus"
-              :text="$t('concepts.folders.new')"
-              @click="openFolderModal(null)"
-              v-if="isFolderManager && !currentFolder"
-            />
           </div>
         </div>
         <table-info
@@ -70,7 +54,16 @@
           :is-error="errors.loadingConcepts"
           v-if="loading.loadingConcepts || errors.loadingConcepts"
         />
-        <template v-else>
+        <div class="concept-panel" v-else>
+          <div
+            class="drop-mask"
+            @drop="onFileDrop"
+            @dragover="onFileDragover"
+            @dragleave="onFileDragLeave"
+            v-if="isDraggingFile"
+          >
+            {{ $t('concepts.drop_new_concepts') }}
+          </div>
           <div class="folder-bar">
             <nav class="folder-path">
               <router-link
@@ -88,6 +81,13 @@
               </span>
             </nav>
             <span class="filler"></span>
+            <button-simple
+              class="new-folder"
+              icon="plus"
+              :text="$t('concepts.folders.new')"
+              @click="openFolderModal(null)"
+              v-if="isFolderManager && !currentFolder"
+            />
             <template v-if="isFolderManager && currentFolder">
               <button-simple
                 class="rename-folder"
@@ -102,6 +102,12 @@
                 @click="openDeleteFolderModal"
               />
             </template>
+            <button-simple
+              class="add-concepts"
+              icon="image"
+              :text="$t('concepts.add_new_concept')"
+              @click="openAddConceptModal"
+            />
           </div>
           <div
             class="concept-list pb1"
@@ -127,9 +133,6 @@
             <ul class="items" v-if="filteredConcepts.length">
               <li
                 class="item"
-                :class="{
-                  'selected-item': isSelected(concept)
-                }"
                 :draggable="isFolderManager"
                 :key="concept.id"
                 @dragstart="onConceptDragStart(concept, $event)"
@@ -138,6 +141,7 @@
               >
                 <concept-card
                   :concept="concept"
+                  :selected="isSelected(concept)"
                   @click="
                     onSelectConcept(concept, $event.ctrlKey || $event.metaKey)
                   "
@@ -145,7 +149,15 @@
               </li>
             </ul>
           </div>
-          <div class="has-text-centered mb1 mt1 empty-concepts" v-else>
+          <div
+            class="empty-concepts"
+            role="button"
+            tabindex="0"
+            @click="openAddConceptModal"
+            @keydown.enter.prevent="openAddConceptModal"
+            v-else
+          >
+            <image-icon :size="48" />
             <strong>
               {{
                 currentFolder
@@ -153,14 +165,8 @@
                   : $t('concepts.empty')
               }}
             </strong>
+            <span>{{ $t('concepts.drop_new_concepts') }}</span>
           </div>
-        </template>
-        <div class="footer mb2">
-          <button-simple
-            :disabled="loading.loadingConcepts"
-            :text="$t('concepts.add_new_concept')"
-            @click="openAddConceptModal"
-          />
         </div>
       </div>
     </div>
@@ -200,11 +206,7 @@
       <task-info entity-type="Concept" :task="currentTask" with-actions>
         <template #selection>
           <ul class="selected-concepts">
-            <li
-              class="selected-concept"
-              :key="concept.id"
-              v-for="concept in selectedConcepts.values()"
-            >
+            <li :key="concept.id" v-for="concept in selectedConcepts.values()">
               <concept-card
                 compact
                 :concept="concept"
@@ -222,6 +224,7 @@
 // Imports
 // --------------------------------------------------------------------------
 import { useHead } from '@unhead/vue'
+import { ImageIcon } from 'lucide-vue-next'
 import { firstBy } from 'thenby'
 import {
   computed,
@@ -705,14 +708,18 @@ useHead({
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  position: relative;
+  // the global .page gutter (2em) is wide for a panel layout
+  padding-left: 16px;
+  padding-right: 16px;
 }
 
 .filters {
   display: flex;
   align-items: flex-end;
+  background: var(--background-panel);
+  border-radius: 12px;
   gap: 0 20px;
-  padding: 10px;
+  padding: 6px 14px 0;
 
   .field {
     margin-bottom: 1em;
@@ -721,69 +728,88 @@ useHead({
       padding-top: 5px;
     }
   }
+
+  // inline-block leaves a 1px line gap under the status box, which lifts
+  // its label above the other labels of the row (measured 2026-10-06)
+  :deep(.status-combo) {
+    display: block;
+  }
 }
 
 .asset-filter {
   width: 200px;
 }
 
-// Sits on the baseline of the fields, which carry this bottom margin.
-.new-folder {
-  margin-bottom: 1em;
-  margin-left: auto;
+.add-concepts {
+  background: var(--purple);
+  border: 0;
+  border-radius: 10px;
+  color: var(--text-strong);
+  transition: background 150ms ease-out;
+
+  // background-selected is the same purple as the resting state in both
+  // themes: the hover goes one step lighter instead
+  &:hover {
+    background: var(--background-selectable);
+    color: var(--text-strong);
+  }
+}
+
+.concept-panel {
+  background: var(--background-panel);
+  border-radius: 12px;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  margin: 10px 0 0;
+  min-height: 0;
+  position: relative;
 }
 
 .concept-list {
   flex: 1;
-  margin: 0 auto;
   overflow-y: auto;
+  // 10px here plus the 4px ring room of the lists below: the cards and the
+  // folders line up on the 14px gutter of the path above
+  padding: 0 10px;
 }
 
 .items {
-  cursor: pointer;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   list-style: none;
   margin: 0;
-
-  .item {
-    display: flex;
-    flex-direction: column;
-    background-color: var(--background);
-    border-radius: 1em;
-
-    border: 5px solid transparent;
-    transition: border-color 0.2s ease-in-out;
-
-    &:hover {
-      border-color: var(--background-selectable);
-    }
-
-    &.selected-item {
-      border-color: var(--background-selected);
-    }
-  }
+  // room for the selection ring and the hover lift of the cards
+  padding: 4px;
 }
 
 .folder-bar {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 0 10px 10px;
+  padding: 10px 14px;
 }
 
 .folder-path {
+  align-items: baseline;
+  color: var(--text-alt);
   display: flex;
-  gap: 0.5em;
   font-size: 1.1em;
+  gap: 0.5em;
 
   a {
-    color: var(--text);
+    color: var(--text-alt);
+
+    &:hover {
+      color: var(--text);
+      text-decoration: underline;
+    }
   }
 
   .current-folder {
     color: var(--text-strong);
+    font-size: 1.25em;
     font-weight: 600;
   }
 
@@ -799,53 +825,32 @@ useHead({
   gap: 10px;
   list-style: none;
   margin: 0 0 20px;
+  padding: 0 4px;
 }
 
 .selected-concepts {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
   gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   list-style: none;
   margin: 1em 0 0;
-}
-
-.selected-concept {
-  background-color: var(--background);
-  border-radius: 1em;
-  cursor: pointer;
+  padding: 4px;
 }
 
 .page-header {
   margin-top: 0;
-  padding: 0;
-}
-
-.footer {
-  background: transparent;
-  position: sticky;
-  bottom: 0;
-  display: flex;
-  justify-content: center;
-  padding: 5px;
-
-  .button {
-    border-radius: 10px;
-    font-size: 1.2em;
-    height: 50px;
-    transition: background-color 0.1s ease-in-out;
-    width: 100%;
-
-    &:hover {
-      background-color: var(--background-hover);
-    }
-  }
+  padding: 10px 0 0;
 }
 
 .drop-mask {
-  background: rgba(0, 0, 0, 0.5);
-  border-radius: 0.5em;
-  color: white;
-  font-size: 2em;
+  // the mask paints over the panels, so a plain page color + opacity
+  // keeps the layout readable underneath
+  background: rgba(var(--background-selectable-rgb), 0.6);
+  border: 3px dashed var(--background-selected);
+  border-radius: 12px;
+  color: var(--text-strong);
+  font-size: 1.5em;
+  font-weight: 600;
   position: absolute;
   top: 0;
   left: 0;
@@ -858,6 +863,34 @@ useHead({
 }
 
 .empty-concepts {
+  align-items: center;
+  border: 2px dashed var(--border-alt);
+  border-radius: 12px;
+  color: var(--text-alt);
+  cursor: pointer;
+  display: flex;
   flex: 1;
+  flex-direction: column;
+  gap: 0.5em;
+  justify-content: center;
+  margin: 0 14px 14px;
+  outline: none;
+  padding: 2em;
+  text-align: center;
+  transition:
+    background 150ms ease-out,
+    border-color 150ms ease-out;
+
+  strong {
+    color: var(--text);
+  }
+
+  // background-hover jumps too far from the panel in dark mode: a faint
+  // border wash and the stronger dashes are enough
+  &:hover,
+  &:focus-visible {
+    background: rgba(var(--border-rgb), 0.15);
+    border-color: var(--text-alt);
+  }
 }
 </style>

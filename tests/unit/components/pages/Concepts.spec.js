@@ -156,6 +156,18 @@ describe('Concepts page', () => {
       expect(cards.every(card => card.props('compact'))).toBe(true)
     })
 
+    test('marks the selected cards in the list', async () => {
+      const concepts = [buildConcept('concept-1'), buildConcept('concept-2')]
+      const { wrapper } = await mountPage({
+        concepts,
+        selection: [concepts[1]],
+        stubs
+      })
+
+      const cards = wrapper.find('.items').findAllComponents(ConceptCard)
+      expect(cards.map(card => card.props('selected'))).toEqual([false, true])
+    })
+
     test('drops from the selection the concept clicked in the panel', async () => {
       const concepts = [buildConcept('concept-1'), buildConcept('concept-2')]
       const { dispatch, wrapper } = await mountPage({
@@ -293,10 +305,9 @@ describe('Concepts page', () => {
       })
     })
 
-    test('offers the new folder after the filters and the sort, at the root only', async () => {
+    test('offers the new folder in the folder bar, at the root only', async () => {
       const root = await mountPage({ folders, stubs })
-      const controls = root.wrapper.find('.filters').element.children
-      expect(controls[controls.length - 1].classList).toContain('new-folder')
+      expect(root.wrapper.find('.folder-bar .new-folder').exists()).toBe(true)
       // The sort sits with the filters: nothing pushes it to the right.
       expect(root.wrapper.find('.filters .right').exists()).toBe(false)
 
@@ -605,6 +616,19 @@ describe('Concepts page', () => {
     await wrapper.find('.empty-concepts').trigger('dragover')
 
     expect(wrapper.find('.drop-mask').exists()).toBe(true)
+  })
+
+  test('offers the concept upload in the folder bar and in the empty state', async () => {
+    const { wrapper } = await mountPage()
+    const modal = wrapper.findComponent(AddPreviewModal)
+
+    expect(wrapper.find('.footer').exists()).toBe(false)
+    await wrapper.find('.folder-bar .add-concepts').trigger('click')
+    expect(modal.props('active')).toBe(true)
+
+    await modal.vm.$emit('cancel')
+    await wrapper.find('.empty-concepts').trigger('click')
+    expect(modal.props('active')).toBe(true)
   })
 
   test('clears the loading error when a reload succeeds', async () => {

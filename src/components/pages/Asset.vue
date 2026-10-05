@@ -389,10 +389,9 @@
           />
           <div class="concept-list mt1" v-if="filteredLinkedConcepts.length">
             <concept-card
-              class="concept"
-              :class="{ selected: currentConcept?.id === concept.id }"
               :key="'concept-' + concept.id"
               :concept="concept"
+              :selected="currentConcept?.id === concept.id"
               @click="selectConcept(concept)"
               v-for="concept in filteredLinkedConcepts"
             />
@@ -923,10 +922,11 @@ h2.subtitle {
 
 .concept-list {
   color: var(--text);
-  display: flex;
-  flex-wrap: wrap;
-  padding-bottom: 1em;
-  gap: 10px;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  // room for the selection ring and the hover lift of the cards
+  padding: 4px 4px 1em;
 }
 
 .casting-card {
@@ -1166,19 +1166,6 @@ h2.subtitle {
 
 .news-column {
   max-height: 85%;
-}
-
-.concept {
-  border: 5px solid transparent;
-  cursor: pointer;
-  transition: border 0.2s linear;
-  &:hover {
-    border: 5px solid var(--background-selectable);
-  }
-}
-
-.selected {
-  border: 5px solid var(--background-selected);
 }
 
 .drawer-close,
