@@ -423,6 +423,22 @@ describe('ProductionSchedule page', () => {
     })
   })
 
+  describe('drill-down', () => {
+    it('loads the days off of the schedule range when a row expands', async () => {
+      const { storeActions, wrapper } = await mountPage()
+
+      findSchedule(wrapper).vm.$emit('root-element-expanded', rowsOf(wrapper)[0])
+      await waitForLoad()
+
+      expect(payloadsOf(storeActions.loadProductionDaysOff)).toEqual([
+        { startDate: '2026-01-01', endDate: '2026-12-31' }
+      ])
+      expect(rowsOf(wrapper)[0].children.map(row => row.name)).toEqual([
+        'Props'
+      ])
+    })
+  })
+
   describe('route', () => {
     it('pushes a history entry when the mode changes', async () => {
       const { router, wrapper } = await mountPage()
