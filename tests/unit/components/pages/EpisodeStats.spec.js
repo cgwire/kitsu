@@ -189,6 +189,20 @@ describe('EpisodeStats page', () => {
     })
   })
 
+  // The page is reused from a production to the next: the new URL starts
+  // without any filter.
+  test('follows the hidden ids of the URL when the route changes', async () => {
+    await mountPage({
+      query: { hiddenEpisodes: 'e01', hiddenTaskTypes: 'anim' }
+    })
+    await router.push({ path: '/productions/production-2/episode-stats' })
+    await flushPromises()
+    expect(episodeFilter().props('hidden')).toEqual([])
+    expect(taskTypeFilter().props('hidden')).toEqual([])
+    expect(listProps().entries).toEqual([e01])
+    expect(listProps().validationColumns).toEqual(['layout', 'anim'])
+  })
+
   test('exports the displayed episodes and task types, in the current data mode', async () => {
     const generateRetakeStatReports = vi
       .spyOn(csv, 'generateRetakeStatReports')
