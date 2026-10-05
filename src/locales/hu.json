@@ -1895,6 +1895,18 @@
         "publisher": "Közzétette",
         "updated_at": "Frissítés dátuma"
       },
+      "folders": {
+        "delete": "Mappa törlése",
+        "delete_error": "Hiba történt a mappa törlése közben.",
+        "delete_text": "Biztosan törli a(z) {name} mappát? A koncepciói megmaradnak, és visszakerülnek a gyökérbe.",
+        "edit_error": "Hiba történt a mappa mentése közben. Lehet, hogy egy másik mappa már ezt a nevet viseli.",
+        "empty": "Ez a mappa üres",
+        "move": "Áthelyezés mappába",
+        "name": "Mappa neve",
+        "new": "Új mappa",
+        "none": "Nincs mappa",
+        "rename": "Mappa átnevezése"
+      },
       "multiple_delete_error": "Hiba történt egy koncepció törlésekor. Valószínűleg adat hivatkozik rá. Biztos, hogy nincs feladat rendelve a kiválasztott koncepcióhoz?",
       "no_concept_selected": "Nincs koncepció kijelölve",
       "title": "Koncepciók"

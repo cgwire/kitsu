@@ -2024,15 +2024,19 @@
       "send_error": "Er is een fout opgetreden bij het verzenden van het bericht."
     },
     "concepts": {
-      "add_links": "Koppelingen naar assets toevoegen",
-      "add_new_concept": "Nieuwe concepten toevoegen",
+      "actions": {
+        "empty": "Geen links",
+        "title": "Koppelingen naar concepten"
+      },
       "add_concept": "Bestanden toevoegen voor nieuwe concepten",
       "add_concept_error": "Er is een fout opgetreden tijdens het toevoegen van concepten.",
+      "add_links": "Koppelingen naar assets toevoegen",
+      "add_new_concept": "Nieuwe concepten toevoegen",
       "delete_for_selection": "Verwijder het geselecteerde concept | Verwijder de {nbSelectedConcepts} geselecteerde concepten",
+      "delete_for_selection_hard_lock_text": "WISSEN",
+      "delete_for_selection_hard_text": "Weet je zeker dat je de geselecteerde concepten definitief wilt verwijderen? Alle gerelateerde taken, opmerkingen en voorvertoningen worden ook verwijderd. Bevestig dit door hieronder 'WISSEN' te typen.",
+      "drop_new_concepts": "Drop hier nieuwe conceptbestanden",
       "empty": "Er zijn geen concepten voor deze productie",
-      "multiple_delete_error": "Er is een fout opgetreden bij het verwijderen van een concept. Er kunnen bestaande gegevens aan gekoppeld zijn. Weet je zeker dat er geen taak is gekoppeld aan een geselecteerd concept?",
-      "no_concept_selected": "Geen concept geselecteerd",
-      "title": "Concepten",
       "fields": {
         "asset": "Asset",
         "asset_type": "Assettype",
@@ -2042,13 +2046,21 @@
         "publisher": "Gepubliceerd door",
         "updated_at": "Bijwerkdatum"
       },
-      "actions": {
-        "title": "Koppelingen naar concepten",
-        "empty": "Geen links"
+      "folders": {
+        "delete": "Map verwijderen",
+        "delete_error": "Er is een fout opgetreden bij het verwijderen van deze map.",
+        "delete_text": "Weet je zeker dat je de map {name} wilt verwijderen? De concepten blijven behouden en gaan terug naar de hoofdmap.",
+        "edit_error": "Er is een fout opgetreden bij het opslaan van deze map. Mogelijk heeft een andere map deze naam al.",
+        "empty": "Deze map is leeg",
+        "move": "Verplaatsen naar een map",
+        "name": "Mapnaam",
+        "new": "Nieuwe map",
+        "none": "Geen map",
+        "rename": "Map hernoemen"
       },
-      "delete_for_selection_hard_text": "Weet je zeker dat je de geselecteerde concepten definitief wilt verwijderen? Alle gerelateerde taken, opmerkingen en voorvertoningen worden ook verwijderd. Bevestig dit door hieronder 'WISSEN' te typen.",
-      "delete_for_selection_hard_lock_text": "WISSEN",
-      "drop_new_concepts": "Drop hier nieuwe conceptbestanden"
+      "multiple_delete_error": "Er is een fout opgetreden bij het verwijderen van een concept. Er kunnen bestaande gegevens aan gekoppeld zijn. Weet je zeker dat er geen taak is gekoppeld aan een geselecteerd concept?",
+      "no_concept_selected": "Geen concept geselecteerd",
+      "title": "Concepten"
     },
     "intro": {
       "join_discord": "Word lid van de community-Discord",

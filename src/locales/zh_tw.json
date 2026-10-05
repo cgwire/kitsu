@@ -2024,15 +2024,19 @@
       "send_error": "傳送訊息時出現錯誤。"
     },
     "concepts": {
-      "add_links": "新增連結至資產",
-      "add_new_concept": "新增概念",
+      "actions": {
+        "empty": "無連結",
+        "title": "概念連結"
+      },
       "add_concept": "為新概念新增檔案",
       "add_concept_error": "新增概念時發生錯誤。",
+      "add_links": "新增連結至資產",
+      "add_new_concept": "新增概念",
       "delete_for_selection": "刪除選取的概念 | 刪除 {nbSelectedConcepts} 選取的概念",
+      "delete_for_selection_hard_lock_text": "刪除",
+      "delete_for_selection_hard_text": "您確定要永久移除選取的概念嗎？所有相關的任務、註解和預覽也會被刪除。請在下方輸入「刪除」確認。",
+      "drop_new_concepts": "在此丟入新的概念檔案",
       "empty": "本製作沒有任何概念",
-      "multiple_delete_error": "刪除概念時發生錯誤。目前可能有現有資料與它連結。您確定沒有任務連結到選取的概念嗎？",
-      "no_concept_selected": "未選擇概念",
-      "title": "概念",
       "fields": {
         "asset": "資產",
         "asset_type": "資產類型",
@@ -2042,13 +2046,21 @@
         "publisher": "發表者",
         "updated_at": "更新日期"
       },
-      "actions": {
-        "title": "概念連結",
-        "empty": "無連結"
+      "folders": {
+        "delete": "刪除資料夾",
+        "delete_error": "刪除此資料夾時發生錯誤。",
+        "delete_text": "確定要刪除資料夾 {name} 嗎？其中的概念將保留並回到根目錄。",
+        "edit_error": "儲存此資料夾時發生錯誤。可能已有其他資料夾使用此名稱。",
+        "empty": "此資料夾是空的",
+        "move": "移動到資料夾",
+        "name": "資料夾名稱",
+        "new": "新增資料夾",
+        "none": "無資料夾",
+        "rename": "重新命名資料夾"
       },
-      "delete_for_selection_hard_text": "您確定要永久移除選取的概念嗎？所有相關的任務、註解和預覽也會被刪除。請在下方輸入「刪除」確認。",
-      "delete_for_selection_hard_lock_text": "刪除",
-      "drop_new_concepts": "在此丟入新的概念檔案"
+      "multiple_delete_error": "刪除概念時發生錯誤。目前可能有現有資料與它連結。您確定沒有任務連結到選取的概念嗎？",
+      "no_concept_selected": "未選擇概念",
+      "title": "概念"
     },
     "intro": {
       "join_discord": "加入社群 Discord",

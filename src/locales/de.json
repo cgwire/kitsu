@@ -2024,15 +2024,19 @@
       "send_error": "Beim Senden der Nachricht ist ein Fehler aufgetreten."
     },
     "concepts": {
-      "add_links": "Links zu Assets hinzufügen",
-      "add_new_concept": "Neue Konzepte hinzufügen",
+      "actions": {
+        "empty": "Keine Links",
+        "title": "Links zu Konzepten"
+      },
       "add_concept": "Dateien für neue Konzepte hinzufügen",
       "add_concept_error": "Beim Hinzufügen von Konzepten ist ein Fehler aufgetreten.",
+      "add_links": "Links zu Assets hinzufügen",
+      "add_new_concept": "Neue Konzepte hinzufügen",
       "delete_for_selection": "Löschen des ausgewählten Konzepts | Löschen der {nbSelectedConcepts} ausgewählten Konzepte",
+      "delete_for_selection_hard_lock_text": "LÖSCHEN",
+      "delete_for_selection_hard_text": "Sind Sie sicher, dass Sie die ausgewählten Konzepte dauerhaft entfernen möchten? Alle zugehörigen Aufgaben, Kommentare und Vorschauen werden ebenfalls gelöscht. Bitte bestätigen Sie, indem Sie unten \"LÖSCHEN\" eingeben.",
+      "drop_new_concepts": "Neue Konzeptdateien hier ablegen",
       "empty": "Für diese Produktion gibt es keine Konzepte",
-      "multiple_delete_error": "Beim Löschen eines Konzepts ist ein Fehler aufgetreten. Möglicherweise sind bereits Daten mit diesem Konzept verknüpft. Sind Sie sicher, dass mit dem ausgewählten Konzept keine Aufgabe verknüpft ist?",
-      "no_concept_selected": "Kein Konzept ausgewählt",
-      "title": "Konzepte",
       "fields": {
         "asset": "Asset",
         "asset_type": "Asset-Typ",
@@ -2042,13 +2046,21 @@
         "publisher": "Veröffentlicht von",
         "updated_at": "Datum der Aktualisierung"
       },
-      "actions": {
-        "title": "Links zu Konzepten",
-        "empty": "Keine Links"
+      "folders": {
+        "delete": "Ordner löschen",
+        "delete_error": "Beim Löschen dieses Ordners ist ein Fehler aufgetreten.",
+        "delete_text": "Möchten Sie den Ordner {name} wirklich löschen? Seine Konzepte bleiben erhalten und kehren auf die oberste Ebene zurück.",
+        "edit_error": "Beim Speichern dieses Ordners ist ein Fehler aufgetreten. Möglicherweise trägt bereits ein anderer Ordner diesen Namen.",
+        "empty": "Dieser Ordner ist leer",
+        "move": "In einen Ordner verschieben",
+        "name": "Ordnername",
+        "new": "Neuer Ordner",
+        "none": "Kein Ordner",
+        "rename": "Ordner umbenennen"
       },
-      "delete_for_selection_hard_text": "Sind Sie sicher, dass Sie die ausgewählten Konzepte dauerhaft entfernen möchten? Alle zugehörigen Aufgaben, Kommentare und Vorschauen werden ebenfalls gelöscht. Bitte bestätigen Sie, indem Sie unten \"LÖSCHEN\" eingeben.",
-      "delete_for_selection_hard_lock_text": "LÖSCHEN",
-      "drop_new_concepts": "Neue Konzeptdateien hier ablegen"
+      "multiple_delete_error": "Beim Löschen eines Konzepts ist ein Fehler aufgetreten. Möglicherweise sind bereits Daten mit diesem Konzept verknüpft. Sind Sie sicher, dass mit dem ausgewählten Konzept keine Aufgabe verknüpft ist?",
+      "no_concept_selected": "Kein Konzept ausgewählt",
+      "title": "Konzepte"
     },
     "intro": {
       "join_discord": "Treten Sie dem Community-Discord bei",

@@ -2024,15 +2024,19 @@
       "send_error": "Se ha producido un error al enviar el mensaje."
     },
     "concepts": {
-      "add_links": "Añadir enlaces a activos",
-      "add_new_concept": "Añadir nuevos conceptos",
+      "actions": {
+        "empty": "Sin enlaces",
+        "title": "Enlaces a conceptos"
+      },
       "add_concept": "Añadir archivos para nuevos conceptos",
       "add_concept_error": "Se ha producido un error al añadir conceptos.",
+      "add_links": "Añadir enlaces a activos",
+      "add_new_concept": "Añadir nuevos conceptos",
       "delete_for_selection": "Borrar el concepto seleccionado | Borrar los {nbSelectedConcepts} conceptos seleccionados",
+      "delete_for_selection_hard_lock_text": "BORRAR",
+      "delete_for_selection_hard_text": "¿Está seguro de que desea eliminar definitivamente los conceptos seleccionados? También se eliminarán todas las tareas, comentarios y vistas previas relacionadas. Confírmelo escribiendo \"BORRAR\" a continuación.",
+      "drop_new_concepts": "Suelte aquí los archivos de nuevos conceptos",
       "empty": "No hay conceptos para esta producción",
-      "multiple_delete_error": "Se ha producido un error al eliminar un concepto. Es posible que existan datos vinculados a él. ¿Está seguro de que no hay ninguna tarea vinculada al concepto seleccionado?",
-      "no_concept_selected": "No se ha seleccionado ningún concepto",
-      "title": "Conceptos",
       "fields": {
         "asset": "Recurso",
         "asset_type": "Tipo de recurso",
@@ -2042,13 +2046,21 @@
         "publisher": "Publicado por",
         "updated_at": "Fecha de actualización"
       },
-      "actions": {
-        "title": "Enlaces a conceptos",
-        "empty": "Sin enlaces"
+      "folders": {
+        "delete": "Eliminar carpeta",
+        "delete_error": "Se produjo un error al eliminar esta carpeta.",
+        "delete_text": "¿Seguro que quieres eliminar la carpeta {name}? Sus conceptos se conservan y vuelven a la raíz.",
+        "edit_error": "Se produjo un error al guardar esta carpeta. Puede que otra carpeta ya tenga este nombre.",
+        "empty": "Esta carpeta está vacía",
+        "move": "Mover a una carpeta",
+        "name": "Nombre de la carpeta",
+        "new": "Nueva carpeta",
+        "none": "Sin carpeta",
+        "rename": "Renombrar carpeta"
       },
-      "delete_for_selection_hard_text": "¿Está seguro de que desea eliminar definitivamente los conceptos seleccionados? También se eliminarán todas las tareas, comentarios y vistas previas relacionadas. Confírmelo escribiendo \"BORRAR\" a continuación.",
-      "delete_for_selection_hard_lock_text": "BORRAR",
-      "drop_new_concepts": "Suelte aquí los archivos de nuevos conceptos"
+      "multiple_delete_error": "Se ha producido un error al eliminar un concepto. Es posible que existan datos vinculados a él. ¿Está seguro de que no hay ninguna tarea vinculada al concepto seleccionado?",
+      "no_concept_selected": "No se ha seleccionado ningún concepto",
+      "title": "Conceptos"
     },
     "intro": {
       "join_discord": "Únete al Discord de la comunidad",

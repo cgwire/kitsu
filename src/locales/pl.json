@@ -316,18 +316,19 @@
       }
     },
     "concepts": {
-      "add_links": "Dodaj powiązania z assetami",
-      "add_new_concept": "Dodaj nowe koncepty",
+      "actions": {
+        "empty": "Brak powiązań",
+        "title": "Powiązania z konceptami"
+      },
       "add_concept": "Dodaj pliki nowych konceptów",
       "add_concept_error": "Wystąpił błąd podczas dodawania konceptów.",
+      "add_links": "Dodaj powiązania z assetami",
+      "add_new_concept": "Dodaj nowe koncepty",
       "delete_for_selection": "Usuń wybrany koncept | Usuń wybrane koncepty ({nbSelectedConcepts})",
-      "delete_for_selection_hard_text": "Czy na pewno chcesz trwale usunąć wybrane koncepty? Wszystkie powiązane zadania, komentarze i podglądy również zostaną usunięte. Potwierdź, wpisując poniżej 'DELETE'.",
       "delete_for_selection_hard_lock_text": "DELETE",
+      "delete_for_selection_hard_text": "Czy na pewno chcesz trwale usunąć wybrane koncepty? Wszystkie powiązane zadania, komentarze i podglądy również zostaną usunięte. Potwierdź, wpisując poniżej 'DELETE'.",
       "drop_new_concepts": "Upuść tutaj pliki nowych konceptów",
       "empty": "Brak konceptów dla tej produkcji",
-      "multiple_delete_error": "Wystąpił błąd podczas usuwania konceptu. Mogą istnieć dane obecnie z nim powiązane. Czy na pewno żadne zadanie nie jest powiązane z którymś z wybranych konceptów?",
-      "no_concept_selected": "Nie wybrano konceptu",
-      "title": "Koncepty",
       "fields": {
         "asset": "Asset",
         "asset_type": "Typ assetu",
@@ -337,10 +338,21 @@
         "publisher": "Opublikowane przez",
         "updated_at": "Data aktualizacji"
       },
-      "actions": {
-        "title": "Powiązania z konceptami",
-        "empty": "Brak powiązań"
-      }
+      "folders": {
+        "delete": "Usuń folder",
+        "delete_error": "Wystąpił błąd podczas usuwania tego folderu.",
+        "delete_text": "Czy na pewno chcesz usunąć folder {name}? Jego koncepty zostaną zachowane i wrócą do katalogu głównego.",
+        "edit_error": "Wystąpił błąd podczas zapisywania tego folderu. Być może inny folder ma już tę nazwę.",
+        "empty": "Ten folder jest pusty",
+        "move": "Przenieś do folderu",
+        "name": "Nazwa folderu",
+        "new": "Nowy folder",
+        "none": "Brak folderu",
+        "rename": "Zmień nazwę folderu"
+      },
+      "multiple_delete_error": "Wystąpił błąd podczas usuwania konceptu. Mogą istnieć dane obecnie z nim powiązane. Czy na pewno żadne zadanie nie jest powiązane z którymś z wybranych konceptów?",
+      "no_concept_selected": "Nie wybrano konceptu",
+      "title": "Koncepty"
     },
     "custom_actions": {
       "create_error": "Wystąpił błąd podczas zapisywania tej akcji niestandardowej. Czy na pewno nie istnieje inna akcja o tej samej nazwie?",

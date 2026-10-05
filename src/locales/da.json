@@ -2024,15 +2024,19 @@
       "send_error": "Der opstod en fejl under afsendelse af beskeden."
     },
     "concepts": {
-      "add_links": "Tilføj links til assets",
-      "add_new_concept": "Tilføj nye koncepter",
+      "actions": {
+        "empty": "Ingen links",
+        "title": "Links til Koncepter"
+      },
       "add_concept": "Tilføj filer til nye koncepter",
       "add_concept_error": "Der opstod en fejl under tilføjelse af koncepter.",
+      "add_links": "Tilføj links til assets",
+      "add_new_concept": "Tilføj nye koncepter",
       "delete_for_selection": "Slet det valgte koncept | Slet de {nbSelectedConcepts} valgte koncepter",
+      "delete_for_selection_hard_lock_text": "SLET",
+      "delete_for_selection_hard_text": "Er du sikker på, at du vil fjerne de valgte koncepter permanent? Alle relaterede opgaver, kommentarer og previews vil også blive slettet. Bekræft venligst ved at skrive 'SLET' nedenfor.",
+      "drop_new_concepts": "Læg nye konceptfiler her",
       "empty": "Der er ingen koncepter for denne produktion",
-      "multiple_delete_error": "Der opstod en fejl under sletning af et koncept. Der kan være eksisterende data knyttet til det. Er du sikker på, at der ikke er nogen opgaver knyttet til det valgte koncept?",
-      "no_concept_selected": "Intet koncept valgt",
-      "title": "Koncepter",
       "fields": {
         "asset": "Asset",
         "asset_type": "Asset-type",
@@ -2042,13 +2046,21 @@
         "publisher": "Publiceret af",
         "updated_at": "Opdateringsdato"
       },
-      "actions": {
-        "title": "Links til Koncepter",
-        "empty": "Ingen links"
+      "folders": {
+        "delete": "Slet mappe",
+        "delete_error": "Der opstod en fejl under sletning af denne mappe.",
+        "delete_text": "Er du sikker på, at du vil slette mappen {name}? Dens koncepter bevares og flyttes tilbage til roden.",
+        "edit_error": "Der opstod en fejl under lagring af denne mappe. En anden mappe har måske allerede dette navn.",
+        "empty": "Denne mappe er tom",
+        "move": "Flyt til en mappe",
+        "name": "Mappenavn",
+        "new": "Ny mappe",
+        "none": "Ingen mappe",
+        "rename": "Omdøb mappe"
       },
-      "delete_for_selection_hard_text": "Er du sikker på, at du vil fjerne de valgte koncepter permanent? Alle relaterede opgaver, kommentarer og previews vil også blive slettet. Bekræft venligst ved at skrive 'SLET' nedenfor.",
-      "delete_for_selection_hard_lock_text": "SLET",
-      "drop_new_concepts": "Læg nye konceptfiler her"
+      "multiple_delete_error": "Der opstod en fejl under sletning af et koncept. Der kan være eksisterende data knyttet til det. Er du sikker på, at der ikke er nogen opgaver knyttet til det valgte koncept?",
+      "no_concept_selected": "Intet koncept valgt",
+      "title": "Koncepter"
     },
     "intro": {
       "join_discord": "Deltag i fællesskabets Discord",

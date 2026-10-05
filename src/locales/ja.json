@@ -2024,15 +2024,19 @@
       "send_error": "メッセージの送信中にエラーが発生しました。"
     },
     "concepts": {
-      "add_links": "アセットにリンクを追加",
-      "add_new_concept": "コンセプトを作成",
+      "actions": {
+        "empty": "リンクなし",
+        "title": "コンセプトへのリンク"
+      },
       "add_concept": "新しいコンセプト用のファイルを追加",
       "add_concept_error": "コンセプトの追加中にエラーが発生しました。",
+      "add_links": "アセットにリンクを追加",
+      "add_new_concept": "コンセプトを作成",
       "delete_for_selection": "選択したコンセプトを削除 | {nbSelectedConcepts} 件のコンセプトを削除",
+      "delete_for_selection_hard_lock_text": "削除",
+      "delete_for_selection_hard_text": "選択したコンセプトを完全に削除してもよろしいですか？関連するすべてのタスク、コメント、プレビューも削除されます。下に「削除」と入力して確認してください。",
+      "drop_new_concepts": "新しいコンセプトファイルをここにドロップする",
       "empty": "このプロダクションにはコンセプトがありません",
-      "multiple_delete_error": "コンセプトの削除中にエラーが発生しました。関連データが存在する可能性があります。選択したコンセプトにリンクされたタスクがないことを確認してください。",
-      "no_concept_selected": "コンセプトが選択されていません",
-      "title": "コンセプト",
       "fields": {
         "asset": "アセット",
         "asset_type": "アセットタイプ",
@@ -2042,13 +2046,21 @@
         "publisher": "公開者",
         "updated_at": "更新日"
       },
-      "actions": {
-        "title": "コンセプトへのリンク",
-        "empty": "リンクなし"
+      "folders": {
+        "delete": "フォルダを削除",
+        "delete_error": "このフォルダの削除中にエラーが発生しました。",
+        "delete_text": "フォルダ {name} を削除してもよろしいですか？コンセプトは保持され、ルートに戻ります。",
+        "edit_error": "このフォルダの保存中にエラーが発生しました。同じ名前のフォルダが既に存在する可能性があります。",
+        "empty": "このフォルダは空です",
+        "move": "フォルダに移動",
+        "name": "フォルダ名",
+        "new": "新規フォルダ",
+        "none": "フォルダなし",
+        "rename": "フォルダ名を変更"
       },
-      "delete_for_selection_hard_text": "選択したコンセプトを完全に削除してもよろしいですか？関連するすべてのタスク、コメント、プレビューも削除されます。下に「削除」と入力して確認してください。",
-      "delete_for_selection_hard_lock_text": "削除",
-      "drop_new_concepts": "新しいコンセプトファイルをここにドロップする"
+      "multiple_delete_error": "コンセプトの削除中にエラーが発生しました。関連データが存在する可能性があります。選択したコンセプトにリンクされたタスクがないことを確認してください。",
+      "no_concept_selected": "コンセプトが選択されていません",
+      "title": "コンセプト"
     },
     "intro": {
       "join_discord": "コミュニティのDiscordに参加する",

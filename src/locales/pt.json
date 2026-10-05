@@ -2024,15 +2024,19 @@
       "send_error": "Ocorreu um erro ao enviar a mensagem."
     },
     "concepts": {
-      "add_links": "Adicionar links aos ativos",
-      "add_new_concept": "Adicionar novos conceitos",
+      "actions": {
+        "empty": "Sem links",
+        "title": "Links para conceitos"
+      },
       "add_concept": "Adicionar arquivos para novos conceitos",
       "add_concept_error": "Ocorreu um erro ao adicionar conceitos.",
+      "add_links": "Adicionar links aos ativos",
+      "add_new_concept": "Adicionar novos conceitos",
       "delete_for_selection": "Excluir o conceito selecionado | Excluir os {nbSelectedConcepts} conceitos selecionados",
+      "delete_for_selection_hard_lock_text": "EXCLUIR",
+      "delete_for_selection_hard_text": "Tem certeza de que deseja remover permanentemente os conceitos selecionados? Todas as tarefas, comentários e visualizações relacionadas também serão excluídos. Confirme digitando \"EXCLUIR\" abaixo.",
+      "drop_new_concepts": "Envie novos arquivos de conceito aqui",
       "empty": "Não há conceitos para essa produção",
-      "multiple_delete_error": "Ocorreu um erro ao excluir um conceito. Pode haver dados existentes vinculados a ele. Tem certeza de que não há nenhuma tarefa vinculada a um conceito selecionado?",
-      "no_concept_selected": "Nenhum conceito selecionado",
-      "title": "Conceitos",
       "fields": {
         "asset": "Asset",
         "asset_type": "Tipo de Asset",
@@ -2042,13 +2046,21 @@
         "publisher": "Publicado por",
         "updated_at": "Data de atualização"
       },
-      "actions": {
-        "title": "Links para conceitos",
-        "empty": "Sem links"
+      "folders": {
+        "delete": "Excluir pasta",
+        "delete_error": "Ocorreu um erro ao excluir esta pasta.",
+        "delete_text": "Tem certeza de que deseja excluir a pasta {name}? Seus conceitos são mantidos e voltam para a raiz.",
+        "edit_error": "Ocorreu um erro ao salvar esta pasta. Talvez outra pasta já tenha este nome.",
+        "empty": "Esta pasta está vazia",
+        "move": "Mover para uma pasta",
+        "name": "Nome da pasta",
+        "new": "Nova pasta",
+        "none": "Sem pasta",
+        "rename": "Renomear pasta"
       },
-      "delete_for_selection_hard_text": "Tem certeza de que deseja remover permanentemente os conceitos selecionados? Todas as tarefas, comentários e visualizações relacionadas também serão excluídos. Confirme digitando \"EXCLUIR\" abaixo.",
-      "delete_for_selection_hard_lock_text": "EXCLUIR",
-      "drop_new_concepts": "Envie novos arquivos de conceito aqui"
+      "multiple_delete_error": "Ocorreu um erro ao excluir um conceito. Pode haver dados existentes vinculados a ele. Tem certeza de que não há nenhuma tarefa vinculada a um conceito selecionado?",
+      "no_concept_selected": "Nenhum conceito selecionado",
+      "title": "Conceitos"
     },
     "intro": {
       "join_discord": "Junte-se ao Discord da comunidade",
