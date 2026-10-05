@@ -205,6 +205,16 @@ describe('EpisodeStats page', () => {
     expect(listProps().validationColumns).toEqual(['layout', 'anim'])
   })
 
+  test('builds the retake stats in the retakes mode only', async () => {
+    await mountPage()
+    expect(Object.keys(listProps().episodeRetakeStats)).toContain('e01')
+    await combobox('statistics.data_mode').vm.$emit(
+      'update:model-value',
+      'status'
+    )
+    expect(listProps().episodeRetakeStats).toEqual({})
+  })
+
   test('exports the displayed episodes and task types, in the current data mode', async () => {
     const generateRetakeStatReports = vi
       .spyOn(csv, 'generateRetakeStatReports')

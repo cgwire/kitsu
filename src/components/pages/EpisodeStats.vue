@@ -182,11 +182,14 @@ const {
 
 const displayedStats = computed(() => getDisplayedStats(episodeStats.value))
 
+// The list and the export only read the retake stats in the retakes mode.
 const displayedRetakeStats = computed(() =>
-  getDisplayedStats(episodeRetakeStats.value, {
-    omitColumns: omitRetakeStatsColumns,
-    aggregate: aggregateRetakeStats
-  })
+  isRetakeDataMode.value
+    ? getDisplayedStats(episodeRetakeStats.value, {
+        omitColumns: omitRetakeStatsColumns,
+        aggregate: aggregateRetakeStats
+      })
+    : {}
 )
 
 // Functions
