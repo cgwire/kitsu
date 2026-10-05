@@ -51,11 +51,17 @@
               </multiselect>
             </span>
             <combobox
-              class="right"
               :label="$t('main.sorted_by')"
               locale-key-prefix="concepts.fields."
               :options="sortByOptions"
               v-model="filters.sortBy"
+            />
+            <button-simple
+              class="new-folder"
+              icon="plus"
+              :text="$t('concepts.folders.new')"
+              @click="openFolderModal(null)"
+              v-if="isFolderManager && !currentFolder"
             />
           </div>
         </div>
@@ -64,30 +70,75 @@
           :is-error="errors.loadingConcepts"
           v-if="loading.loadingConcepts || errors.loadingConcepts"
         />
-        <div class="concept-list pb1" v-else-if="filteredConcepts.length">
-          <ul class="items">
-            <li
-              class="item"
-              :class="{
-                'selected-item': isSelected(concept)
-              }"
-              :key="concept.id"
-              v-for="concept in filteredConcepts"
-            >
-              <concept-card
-                :concept="concept"
-                @click="
-                  onSelectConcept(concept, $event.ctrlKey || $event.metaKey)
-                "
+        <template v-else>
+          <div class="folder-bar">
+            <nav class="folder-path">
+              <router-link :to="{ query: {} }">
+                {{ $t('concepts.title') }}
+              </router-link>
+              <span>/</span>
+              <span class="current-folder" v-if="currentFolder">
+                {{ currentFolder.name }}
+              </span>
+            </nav>
+            <span class="filler"></span>
+            <template v-if="isFolderManager && currentFolder">
+              <button-simple
+                class="rename-folder"
+                icon="edit"
+                :title="$t('concepts.folders.rename')"
+                @click="openFolderModal(currentFolder)"
               />
-            </li>
-          </ul>
-        </div>
-        <div class="has-text-centered mb1 mt1 empty-concepts" v-else>
-          <strong>
-            {{ $t('concepts.empty') }}
-          </strong>
-        </div>
+              <button-simple
+                class="delete-folder"
+                icon="trash"
+                :title="$t('concepts.folders.delete')"
+                @click="openDeleteFolderModal"
+              />
+            </template>
+          </div>
+          <div
+            class="concept-list pb1"
+            v-if="filteredConcepts.length || shownFolders.length"
+          >
+            <ul class="folders" v-if="shownFolders.length">
+              <li :key="folder.id" v-for="folder in shownFolders">
+                <router-link :to="{ query: { folder: folder.id } }">
+                  <concept-folder-tile
+                    :count="nbConceptsByFolder.get(folder.id) ?? 0"
+                    :name="folder.name"
+                  />
+                </router-link>
+              </li>
+            </ul>
+            <ul class="items" v-if="filteredConcepts.length">
+              <li
+                class="item"
+                :class="{
+                  'selected-item': isSelected(concept)
+                }"
+                :key="concept.id"
+                v-for="concept in filteredConcepts"
+              >
+                <concept-card
+                  :concept="concept"
+                  @click="
+                    onSelectConcept(concept, $event.ctrlKey || $event.metaKey)
+                  "
+                />
+              </li>
+            </ul>
+          </div>
+          <div class="has-text-centered mb1 mt1 empty-concepts" v-else>
+            <strong>
+              {{
+                currentFolder
+                  ? $t('concepts.folders.empty')
+                  : $t('concepts.empty')
+              }}
+            </strong>
+          </div>
+        </template>
         <div class="footer mb2">
           <button-simple
             :disabled="loading.loadingConcepts"
@@ -108,6 +159,25 @@
       message=""
       @cancel="closeAddConceptModal"
       @confirm="confirmAddConceptModal"
+    />
+
+    <edit-concept-folder-modal
+      :active="modals.editFolder"
+      :folder-to-edit="folderToEdit"
+      :is-error="errors.editingFolder"
+      :is-loading="loading.editingFolder"
+      @cancel="modals.editFolder = false"
+      @confirm="confirmFolderModal"
+    />
+
+    <delete-modal
+      :active="modals.deleteFolder"
+      :error-text="$t('concepts.folders.delete_error')"
+      :is-error="errors.deletingFolder"
+      :is-loading="loading.deletingFolder"
+      :text="deleteFolderText"
+      @cancel="modals.deleteFolder = false"
+      @confirm="confirmDeleteFolder"
     />
 
     <div class="column side-column">
@@ -150,7 +220,7 @@ import {
 } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Multiselect from 'vue-multiselect'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { pauseEvent } from '@/composables/dom'
@@ -159,16 +229,20 @@ import { sortAssets, sortByName, sortPeople } from '@/lib/sorting'
 import assetsStore from '@/store/modules/assets'
 
 import AddPreviewModal from '@/components/modals/AddPreviewModal.vue'
+import DeleteModal from '@/components/modals/DeleteModal.vue'
+import EditConceptFolderModal from '@/components/modals/EditConceptFolderModal.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ConceptCard from '@/components/widgets/ConceptCard.vue'
+import ConceptFolderTile from '@/components/widgets/ConceptFolderTile.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
 const { t } = useI18n()
 const route = useRoute()
+const router = useRouter()
 const store = useStore()
 
 const socket = getCurrentInstance().appContext.config.globalProperties.$socket
@@ -177,10 +251,13 @@ const socket = getCurrentInstance().appContext.config.globalProperties.$socket
 // --------------------------------------------------------------------------
 const addPreviewModalRef = useTemplateRef('add-preview-modal')
 
+const folderToEdit = ref(null)
 const isDraggingFile = ref(false)
 
 const errors = reactive({
   addingConcept: false,
+  deletingFolder: false,
+  editingFolder: false,
   loadingConcepts: false
 })
 const filters = reactive({
@@ -192,10 +269,14 @@ const filters = reactive({
 })
 const loading = reactive({
   addingConcept: false,
+  deletingFolder: false,
+  editingFolder: false,
   loadingConcepts: false
 })
 const modals = reactive({
-  addConcept: false
+  addConcept: false,
+  deleteFolder: false,
+  editFolder: false
 })
 
 const NO_LINK = 'none'
@@ -206,6 +287,7 @@ const sortByOptions = ['created_at', 'updated_at', 'last_comment_date'].map(
 
 // Computed
 // --------------------------------------------------------------------------
+const conceptFolders = computed(() => store.getters.conceptFolders)
 const concepts = computed(() => store.getters.concepts)
 const currentProduction = computed(() => store.getters.currentProduction)
 const personMap = computed(() => store.getters.personMap)
@@ -256,7 +338,29 @@ const selectedAssetOption = computed(() =>
   assetOptions.value.find(option => option.id === filters.assetId)
 )
 
-const filteredConcepts = computed(() =>
+const isFolderManager = computed(
+  () =>
+    store.getters.isCurrentUserManager || store.getters.isCurrentUserSupervisor
+)
+
+// A folder id the production does not carry (deleted folder, old link)
+// shows the root.
+const currentFolder = computed(
+  () =>
+    conceptFolders.value.find(folder => folder.id === route.query.folder) ??
+    null
+)
+
+const shownFolders = computed(() =>
+  currentFolder.value ? [] : conceptFolders.value
+)
+
+const deleteFolderText = computed(() =>
+  t('concepts.folders.delete_text', { name: currentFolder.value?.name })
+)
+
+// The concepts the filters keep, whatever their folder.
+const matchingConcepts = computed(() =>
   concepts.value
     .filter(isLinkedToFilteredType)
     .filter(isLinkedToFilteredAsset)
@@ -269,7 +373,22 @@ const filteredConcepts = computed(() =>
       concept =>
         !filters.publisher || concept.created_by === filters.publisher.id
     )
+)
+
+const filteredConcepts = computed(() =>
+  matchingConcepts.value
+    .filter(
+      concept => getFolderId(concept) === (currentFolder.value?.id ?? null)
+    )
     .sort(firstBy(filters.sortBy, -1).thenBy('created_at', -1))
+)
+
+const nbConceptsByFolder = computed(() =>
+  matchingConcepts.value.reduce(
+    (counts, concept) =>
+      counts.set(concept.parent_id, (counts.get(concept.parent_id) ?? 0) + 1),
+    new Map()
+  )
 )
 
 const publishers = computed(() => {
@@ -321,12 +440,19 @@ const isLinkedToFilteredAsset = concept => {
   return getLinks(concept).includes(filters.assetId)
 }
 
+// A concept whose folder is gone stays reachable from the root.
+const getFolderId = concept =>
+  conceptFolders.value.some(folder => folder.id === concept.parent_id)
+    ? concept.parent_id
+    : null
+
 const refreshConcepts = async () => {
   loading.loadingConcepts = true
   errors.loadingConcepts = false
   try {
     await store.dispatch('loadAssets', { all: true })
     await store.dispatch('loadConcepts')
+    await store.dispatch('loadConceptFolders')
   } catch (err) {
     console.error(err)
     errors.loadingConcepts = true
@@ -370,7 +496,10 @@ const confirmAddConceptModal = async forms => {
   loading.addingConcept = true
   errors.addingConcept = false
   try {
-    await store.dispatch('newConcepts', forms)
+    await store.dispatch('newConcepts', {
+      forms,
+      parentId: currentFolder.value?.id ?? null
+    })
     closeAddConceptModal()
   } catch (err) {
     console.error(err)
@@ -379,9 +508,53 @@ const confirmAddConceptModal = async forms => {
   loading.addingConcept = false
 }
 
-const reset = () => {
+const openFolderModal = folder => {
+  folderToEdit.value = folder
+  errors.editingFolder = false
+  modals.editFolder = true
+}
+
+const confirmFolderModal = async name => {
+  loading.editingFolder = true
+  errors.editingFolder = false
+  try {
+    await (folderToEdit.value
+      ? store.dispatch('editConceptFolder', { id: folderToEdit.value.id, name })
+      : store.dispatch('newConceptFolder', name))
+    modals.editFolder = false
+  } catch (err) {
+    console.error(err)
+    errors.editingFolder = true
+  }
+  loading.editingFolder = false
+}
+
+const openDeleteFolderModal = () => {
+  errors.deletingFolder = false
+  modals.deleteFolder = true
+}
+
+const confirmDeleteFolder = async () => {
+  loading.deletingFolder = true
+  errors.deletingFolder = false
+  try {
+    await store.dispatch('deleteConceptFolder', currentFolder.value)
+    modals.deleteFolder = false
+    router.push({ query: {} })
+  } catch (err) {
+    console.error(err)
+    errors.deletingFolder = true
+  }
+  loading.deletingFolder = false
+}
+
+const clearSelection = () => {
   store.dispatch('clearSelectedConcepts')
   store.dispatch('clearSelectedTasks')
+}
+
+const reset = () => {
+  clearSelection()
   refreshConcepts()
 }
 
@@ -425,6 +598,9 @@ watch(
   },
   { immediate: true }
 )
+
+// The selection of a folder is out of sight in another one.
+watch(() => currentFolder.value?.id, clearSelection)
 
 // A filter whose value is no longer offered would hide every concept.
 watch(assetTypeOptions, options => {
@@ -479,14 +655,16 @@ useHead({
       padding-top: 5px;
     }
   }
-
-  .right {
-    margin-left: auto;
-  }
 }
 
 .asset-filter {
   width: 200px;
+}
+
+// Sits on the baseline of the fields, which carry this bottom margin.
+.new-folder {
+  margin-bottom: 1em;
+  margin-left: auto;
 }
 
 .concept-list {
@@ -520,6 +698,36 @@ useHead({
       border-color: var(--background-selected);
     }
   }
+}
+
+.folder-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 10px 10px;
+}
+
+.folder-path {
+  display: flex;
+  gap: 0.5em;
+  font-size: 1.1em;
+
+  a {
+    color: var(--text);
+  }
+
+  .current-folder {
+    color: var(--text-strong);
+    font-weight: 600;
+  }
+}
+
+.folders {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  list-style: none;
+  margin: 0 0 20px;
 }
 
 .selected-concepts {

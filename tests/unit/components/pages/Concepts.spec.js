@@ -10,9 +10,13 @@ vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }))
 
 import assetsStore from '@/store/modules/assets'
 
+import AddPreviewModal from '@/components/modals/AddPreviewModal.vue'
+import DeleteModal from '@/components/modals/DeleteModal.vue'
+import EditConceptFolderModal from '@/components/modals/EditConceptFolderModal.vue'
 import Concepts from '@/components/pages/Concepts.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ConceptCard from '@/components/widgets/ConceptCard.vue'
+import ConceptFolderTile from '@/components/widgets/ConceptFolderTile.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
@@ -38,7 +42,10 @@ const buildConcept = (id, createdBy = 'person-1', links = []) => ({
 const mountPage = async ({
   concepts = [],
   dispatch = vi.fn(() => Promise.resolve()),
+  folders = [],
+  isManager = true,
   people = [],
+  query = {},
   selection = [],
   stubs = {}
 } = {}) => {
@@ -53,6 +60,9 @@ const mountPage = async ({
     state: { production: { id: 'production-1', name: 'Wing It' } },
     getters: {
       concepts: () => concepts,
+      conceptFolders: () => folders,
+      isCurrentUserManager: () => isManager,
+      isCurrentUserSupervisor: () => false,
       currentProduction: state => state.production,
       isTVShow: () => true,
       personMap: () => new Map(people.map(person => [person.id, person])),
@@ -63,7 +73,7 @@ const mountPage = async ({
   })
   store.dispatch = dispatch
   store.commit = vi.fn()
-  await router.push('/productions/production-1/concepts')
+  await router.push({ path: '/productions/production-1/concepts', query })
   await router.isReady()
   const wrapper = shallowMount(Concepts, {
     global: {
@@ -164,6 +174,209 @@ describe('Concepts page', () => {
         'addSelectedConcepts',
         new Map([['concept-2', concepts[1]]])
       )
+    })
+  })
+
+  describe('folders', () => {
+    const folders = [{ id: 'folder-1', name: 'Sets' }]
+    const buildConcepts = () => [
+      buildConcept('concept-root'),
+      { ...buildConcept('concept-set', 'person-2'), parent_id: 'folder-1' }
+    ]
+    const stubs = {
+      RouterLink: { props: ['to'], template: '<a><slot /></a>' }
+    }
+    const openFolder = { query: { folder: 'folder-1' } }
+
+    const shownConcepts = wrapper =>
+      wrapper
+        .findAllComponents(ConceptCard)
+        .map(card => card.props('concept').id)
+
+    test('loads the folders of the production', async () => {
+      const { dispatch } = await mountPage()
+
+      expect(dispatch).toHaveBeenCalledWith('loadConceptFolders')
+    })
+
+    test('shows the folders and the unsorted concepts at the root', async () => {
+      const { wrapper } = await mountPage({
+        concepts: buildConcepts(),
+        folders,
+        stubs
+      })
+
+      expect(shownConcepts(wrapper)).toEqual(['concept-root'])
+      const tiles = wrapper.findAllComponents(ConceptFolderTile)
+      expect(tiles.map(tile => tile.props())).toEqual([
+        { count: 1, name: 'Sets' }
+      ])
+    })
+
+    test('shows the folders even without any unsorted concept', async () => {
+      const { wrapper } = await mountPage({
+        concepts: [buildConcepts()[1]],
+        folders,
+        stubs
+      })
+
+      expect(wrapper.findAllComponents(ConceptFolderTile)).toHaveLength(1)
+      expect(wrapper.find('.empty-concepts').exists()).toBe(false)
+    })
+
+    test('keeps the root of the path on display outside any folder', async () => {
+      const { wrapper } = await mountPage({ isManager: false, stubs })
+
+      expect(wrapper.find('.folder-path').text()).toBe('concepts.title/')
+    })
+
+    test('shows the concepts of the open folder', async () => {
+      const { wrapper } = await mountPage({
+        concepts: buildConcepts(),
+        folders,
+        stubs,
+        ...openFolder
+      })
+
+      expect(shownConcepts(wrapper)).toEqual(['concept-set'])
+      expect(wrapper.findComponent(ConceptFolderTile).exists()).toBe(false)
+      expect(wrapper.find('.folder-path').text()).toBe('concepts.title/Sets')
+    })
+
+    test('counts in a folder the concepts matching the filters', async () => {
+      const people = [{ id: 'person-1' }, { id: 'person-2' }]
+      const { wrapper } = await mountPage({
+        concepts: buildConcepts(),
+        folders,
+        people,
+        stubs
+      })
+
+      wrapper
+        .findComponent(PeopleField)
+        .vm.$emit('update:modelValue', people[0])
+      await flushPromises()
+
+      expect(wrapper.findComponent(ConceptFolderTile).props('count')).toBe(0)
+    })
+
+    test('drops the selection when another folder opens', async () => {
+      const { dispatch, wrapper } = await mountPage({
+        concepts: buildConcepts(),
+        folders,
+        stubs
+      })
+      dispatch.mockClear()
+
+      await router.push(openFolder)
+      await flushPromises()
+
+      expect(dispatch).toHaveBeenCalledWith('clearSelectedConcepts')
+      expect(shownConcepts(wrapper)).toEqual(['concept-set'])
+    })
+
+    test('adds the new concepts to the open folder', async () => {
+      const { dispatch, wrapper } = await mountPage({
+        concepts: buildConcepts(),
+        folders,
+        stubs,
+        ...openFolder
+      })
+      const forms = [new FormData()]
+
+      wrapper.findComponent(AddPreviewModal).vm.$emit('confirm', forms)
+      await flushPromises()
+
+      expect(dispatch).toHaveBeenCalledWith('newConcepts', {
+        forms,
+        parentId: 'folder-1'
+      })
+    })
+
+    test('offers the new folder after the filters and the sort, at the root only', async () => {
+      const root = await mountPage({ folders, stubs })
+      const controls = root.wrapper.find('.filters').element.children
+      expect(controls[controls.length - 1].classList).toContain('new-folder')
+      // The sort sits with the filters: nothing pushes it to the right.
+      expect(root.wrapper.find('.filters .right').exists()).toBe(false)
+
+      const folder = await mountPage({ folders, stubs, ...openFolder })
+      expect(folder.wrapper.find('.new-folder').exists()).toBe(false)
+    })
+
+    test('creates a folder', async () => {
+      const { dispatch, wrapper } = await mountPage({ folders, stubs })
+      const modal = wrapper.findComponent(EditConceptFolderModal)
+
+      await wrapper.find('.new-folder').trigger('click')
+      expect(modal.props('active')).toBe(true)
+      modal.vm.$emit('confirm', 'Characters')
+      await flushPromises()
+
+      expect(dispatch).toHaveBeenCalledWith('newConceptFolder', 'Characters')
+      expect(modal.props('active')).toBe(false)
+    })
+
+    test('renames the open folder', async () => {
+      const { dispatch, wrapper } = await mountPage({
+        folders,
+        stubs,
+        ...openFolder
+      })
+      const modal = wrapper.findComponent(EditConceptFolderModal)
+
+      await wrapper.find('.rename-folder').trigger('click')
+      expect(modal.props('folderToEdit')).toEqual(folders[0])
+      modal.vm.$emit('confirm', 'Environments')
+      await flushPromises()
+
+      expect(dispatch).toHaveBeenCalledWith('editConceptFolder', {
+        id: 'folder-1',
+        name: 'Environments'
+      })
+    })
+
+    test('keeps the modal open when a folder cannot be saved', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { dispatch, wrapper } = await mountPage({ folders, stubs })
+      const modal = wrapper.findComponent(EditConceptFolderModal)
+      await wrapper.find('.new-folder').trigger('click')
+      dispatch.mockRejectedValueOnce(new Error('network'))
+
+      modal.vm.$emit('confirm', 'Characters')
+      await flushPromises()
+
+      expect(modal.props('active')).toBe(true)
+      expect(modal.props('isError')).toBe(true)
+    })
+
+    test('deletes the open folder and goes back to the root', async () => {
+      const { dispatch, wrapper } = await mountPage({
+        folders,
+        stubs,
+        ...openFolder
+      })
+
+      await wrapper.find('.delete-folder').trigger('click')
+      wrapper.findComponent(DeleteModal).vm.$emit('confirm')
+      await flushPromises()
+
+      expect(dispatch).toHaveBeenCalledWith('deleteConceptFolder', folders[0])
+      expect(router.currentRoute.value.query.folder).toBeUndefined()
+    })
+
+    test('leaves the folder management to managers and supervisors', async () => {
+      const root = await mountPage({ folders, isManager: false, stubs })
+      expect(root.wrapper.find('.new-folder').exists()).toBe(false)
+
+      const folder = await mountPage({
+        folders,
+        isManager: false,
+        stubs,
+        ...openFolder
+      })
+      expect(folder.wrapper.find('.rename-folder').exists()).toBe(false)
+      expect(folder.wrapper.find('.delete-folder').exists()).toBe(false)
     })
   })
 
