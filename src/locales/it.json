@@ -2034,11 +2034,13 @@
       "no_concept_selected": "Nessun concept selezionato",
       "title": "Concept",
       "fields": {
-        "entity_type": "Tipo di entità",
+        "asset": "Asset",
+        "asset_type": "Tipo di asset",
         "created_at": "Data di creazione",
-        "updated_at": "Data di aggiornamento",
+        "entity_type": "Tipo di entità",
         "last_comment_date": "Ultimo commento",
-        "publisher": "Pubblicato da"
+        "publisher": "Pubblicato da",
+        "updated_at": "Data di aggiornamento"
       },
       "actions": {
         "title": "Link ai concept",

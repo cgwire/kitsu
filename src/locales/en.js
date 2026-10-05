@@ -340,11 +340,13 @@ export default {
     no_concept_selected: 'No concept selected',
     title: 'Concepts',
     fields: {
-      entity_type: 'Entity type',
+      asset: 'Asset',
+      asset_type: 'Asset type',
       created_at: 'Creation date',
-      updated_at: 'Update date',
+      entity_type: 'Entity type',
       last_comment_date: 'Last comment',
-      publisher: 'Published by'
+      publisher: 'Published by',
+      updated_at: 'Update date'
     },
     actions: {
       title: 'Links to Concepts',

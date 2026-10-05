@@ -329,11 +329,13 @@
       "no_concept_selected": "Nie wybrano konceptu",
       "title": "Koncepty",
       "fields": {
-        "entity_type": "Typ obiektu",
+        "asset": "Asset",
+        "asset_type": "Typ assetu",
         "created_at": "Data utworzenia",
-        "updated_at": "Data aktualizacji",
+        "entity_type": "Typ obiektu",
         "last_comment_date": "Ostatni komentarz",
-        "publisher": "Opublikowane przez"
+        "publisher": "Opublikowane przez",
+        "updated_at": "Data aktualizacji"
       },
       "actions": {
         "title": "Powiązania z konceptami",

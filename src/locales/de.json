@@ -2034,11 +2034,13 @@
       "no_concept_selected": "Kein Konzept ausgewählt",
       "title": "Konzepte",
       "fields": {
-        "entity_type": "Entitätstyp",
+        "asset": "Asset",
+        "asset_type": "Asset-Typ",
         "created_at": "Datum der Erstellung",
-        "updated_at": "Datum der Aktualisierung",
+        "entity_type": "Entitätstyp",
         "last_comment_date": "Letzter Kommentar",
-        "publisher": "Veröffentlicht von"
+        "publisher": "Veröffentlicht von",
+        "updated_at": "Datum der Aktualisierung"
       },
       "actions": {
         "title": "Links zu Konzepten",

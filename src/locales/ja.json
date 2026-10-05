@@ -2034,11 +2034,13 @@
       "no_concept_selected": "コンセプトが選択されていません",
       "title": "コンセプト",
       "fields": {
-        "entity_type": "エンティティタイプ",
+        "asset": "アセット",
+        "asset_type": "アセットタイプ",
         "created_at": "作成日",
-        "updated_at": "更新日",
+        "entity_type": "エンティティタイプ",
         "last_comment_date": "最終コメント",
-        "publisher": "公開者"
+        "publisher": "公開者",
+        "updated_at": "更新日"
       },
       "actions": {
         "title": "コンセプトへのリンク",

@@ -2034,11 +2034,13 @@
       "no_concept_selected": "未选择概念",
       "title": "概念",
       "fields": {
-        "entity_type": "实体类型",
+        "asset": "资产",
+        "asset_type": "资产类别",
         "created_at": "创建日期",
-        "updated_at": "更新日期",
+        "entity_type": "实体类型",
         "last_comment_date": "最后评论",
-        "publisher": "发布者"
+        "publisher": "发布者",
+        "updated_at": "更新日期"
       },
       "actions": {
         "title": "概念链接",

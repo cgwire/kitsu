@@ -2034,11 +2034,13 @@
       "no_concept_selected": "선택한 개념 없음",
       "title": "개념",
       "fields": {
-        "entity_type": "엔티티 유형",
+        "asset": "어셋",
+        "asset_type": "어셋 종류",
         "created_at": "생성 날짜",
-        "updated_at": "업데이트 날짜",
+        "entity_type": "엔티티 유형",
         "last_comment_date": "마지막 댓글",
-        "publisher": "게시자"
+        "publisher": "게시자",
+        "updated_at": "업데이트 날짜"
       },
       "actions": {
         "title": "개념에 대한 링크",

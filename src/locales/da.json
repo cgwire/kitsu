@@ -2034,11 +2034,13 @@
       "no_concept_selected": "Intet koncept valgt",
       "title": "Koncepter",
       "fields": {
-        "entity_type": "Enhedstype",
+        "asset": "Asset",
+        "asset_type": "Asset-type",
         "created_at": "Oprettelsesdato",
-        "updated_at": "Opdateringsdato",
+        "entity_type": "Enhedstype",
         "last_comment_date": "Sidste kommentar",
-        "publisher": "Publiceret af"
+        "publisher": "Publiceret af",
+        "updated_at": "Opdateringsdato"
       },
       "actions": {
         "title": "Links til Koncepter",

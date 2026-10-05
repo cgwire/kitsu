@@ -1887,6 +1887,8 @@
       "drop_new_concepts": "Húzd ide az új koncepció file-okat",
       "empty": "Nincs koncepció ebben a produkcióban",
       "fields": {
+        "asset": "Asset",
+        "asset_type": "Asset típus",
         "created_at": "Létrehozás dátuma",
         "entity_type": "Elem típusa",
         "last_comment_date": "Utolsó hozzászólás",

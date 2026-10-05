@@ -8,7 +8,10 @@ vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }))
 
+import assetsStore from '@/store/modules/assets'
+
 import Concepts from '@/components/pages/Concepts.vue'
+import Combobox from '@/components/widgets/Combobox.vue'
 import ConceptCard from '@/components/widgets/ConceptCard.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
@@ -24,10 +27,11 @@ const router = createRouter({
   ]
 })
 
-const buildConcept = (id, createdBy = 'person-1') => ({
+const buildConcept = (id, createdBy = 'person-1', links = []) => ({
   id,
   created_at: '2026-09-01',
   created_by: createdBy,
+  entity_concept_links: links,
   tasks: [{ id: `task-${id}`, task_status_id: 'status-todo' }]
 })
 
@@ -160,6 +164,131 @@ describe('Concepts page', () => {
         'addSelectedConcepts',
         new Map([['concept-2', concepts[1]]])
       )
+    })
+  })
+
+  describe('asset filters', () => {
+    const buildAsset = (id, name, type) => ({
+      id,
+      name,
+      full_name: `${type} / ${name}`,
+      asset_type_id: `type-${type}`,
+      asset_type_name: type
+    })
+    const assets = [
+      buildAsset('asset-tree', 'Tree', 'Props'),
+      buildAsset('asset-rock', 'Rock', 'Props'),
+      buildAsset('asset-hall', 'Hall', 'Sets'),
+      buildAsset('asset-unused', 'Unused', 'Characters')
+    ]
+
+    // The automatic stub does not carry the props vue-multiselect declares
+    // through a mixin.
+    const AssetFilter = {
+      name: 'AssetFilter',
+      props: ['modelValue', 'options'],
+      template: '<div />'
+    }
+
+    const mountWithLinks = () =>
+      mountPage({
+        concepts: [
+          buildConcept('concept-tree', 'person-1', ['asset-tree']),
+          buildConcept('concept-both', 'person-1', ['asset-rock', 'asset-hall']),
+          buildConcept('concept-free')
+        ],
+        stubs: { 'vue-multiselect': AssetFilter }
+      })
+
+    const typeFilter = wrapper =>
+      wrapper
+        .findAllComponents(Combobox)
+        .find(
+          combobox => combobox.props('label') === 'concepts.fields.asset_type'
+        )
+    const assetFilter = wrapper => wrapper.findComponent(AssetFilter)
+
+    const pick = async (filter, value) => {
+      filter.vm.$emit('update:modelValue', value)
+      await flushPromises()
+    }
+    const shownConcepts = wrapper =>
+      wrapper
+        .findAllComponents(ConceptCard)
+        .map(card => card.props('concept').id)
+        .sort()
+    const optionNames = filter =>
+      filter.props('options').map(option => option.label ?? option.name)
+
+    beforeEach(() => {
+      assets.forEach(asset => assetsStore.cache.assetMap.set(asset.id, asset))
+    })
+
+    afterEach(() => {
+      assetsStore.cache.assetMap.clear()
+    })
+
+    test('offers the types and the assets a concept is linked to', async () => {
+      const { wrapper } = await mountWithLinks()
+
+      expect(optionNames(typeFilter(wrapper))).toEqual([
+        'main.all',
+        'Props',
+        'Sets'
+      ])
+      expect(optionNames(assetFilter(wrapper))).toEqual([
+        'main.all',
+        'concepts.actions.empty',
+        'Props / Rock',
+        'Props / Tree',
+        'Sets / Hall'
+      ])
+    })
+
+    test('keeps the concepts linked to an asset of the chosen type', async () => {
+      const { wrapper } = await mountWithLinks()
+
+      await pick(typeFilter(wrapper), 'type-Sets')
+
+      expect(shownConcepts(wrapper)).toEqual(['concept-both'])
+    })
+
+    test('keeps the concepts linked to the chosen asset', async () => {
+      const { wrapper } = await mountWithLinks()
+
+      await pick(assetFilter(wrapper), { id: 'asset-tree' })
+
+      expect(shownConcepts(wrapper)).toEqual(['concept-tree'])
+    })
+
+    test('keeps the concepts without any link', async () => {
+      const { wrapper } = await mountWithLinks()
+
+      await pick(assetFilter(wrapper), { id: 'none' })
+
+      expect(shownConcepts(wrapper)).toEqual(['concept-free'])
+    })
+
+    test('narrows the assets to the chosen type', async () => {
+      const { wrapper } = await mountWithLinks()
+
+      await pick(typeFilter(wrapper), 'type-Props')
+
+      expect(optionNames(assetFilter(wrapper))).toEqual([
+        'main.all',
+        'Rock',
+        'Tree'
+      ])
+    })
+
+    test('drops the chosen asset when the type changes to another one', async () => {
+      const { wrapper } = await mountWithLinks()
+      await pick(assetFilter(wrapper), { id: 'asset-hall' })
+
+      await pick(typeFilter(wrapper), 'type-Props')
+
+      expect(assetFilter(wrapper).props('modelValue').id).toBe('')
+      expect(shownConcepts(wrapper)).toEqual(['concept-both', 'concept-tree'])
     })
   })
 

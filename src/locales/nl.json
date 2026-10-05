@@ -2034,11 +2034,13 @@
       "no_concept_selected": "Geen concept geselecteerd",
       "title": "Concepten",
       "fields": {
-        "entity_type": "Type entiteit",
+        "asset": "Asset",
+        "asset_type": "Assettype",
         "created_at": "Aanmaakdatum",
-        "updated_at": "Bijwerkdatum",
+        "entity_type": "Type entiteit",
         "last_comment_date": "Laatste opmerking",
-        "publisher": "Gepubliceerd door"
+        "publisher": "Gepubliceerd door",
+        "updated_at": "Bijwerkdatum"
       },
       "actions": {
         "title": "Koppelingen naar concepten",

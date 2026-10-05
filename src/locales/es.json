@@ -2034,11 +2034,13 @@
       "no_concept_selected": "No se ha seleccionado ningún concepto",
       "title": "Conceptos",
       "fields": {
-        "entity_type": "Tipo de entidad",
+        "asset": "Recurso",
+        "asset_type": "Tipo de recurso",
         "created_at": "Fecha de creación",
-        "updated_at": "Fecha de actualización",
+        "entity_type": "Tipo de entidad",
         "last_comment_date": "Último comentario",
-        "publisher": "Publicado por"
+        "publisher": "Publicado por",
+        "updated_at": "Fecha de actualización"
       },
       "actions": {
         "title": "Enlaces a conceptos",

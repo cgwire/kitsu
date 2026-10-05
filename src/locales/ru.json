@@ -2034,11 +2034,13 @@
       "no_concept_selected": "Концепт не выбран",
       "title": "Концепты",
       "fields": {
-        "entity_type": "Тип объекта",
+        "asset": "Ассет",
+        "asset_type": "Тип ассета",
         "created_at": "Дата создания",
-        "updated_at": "Дата обновления",
+        "entity_type": "Тип объекта",
         "last_comment_date": "Последний комментарий",
-        "publisher": "Опубликовал"
+        "publisher": "Опубликовал",
+        "updated_at": "Дата обновления"
       },
       "actions": {
         "title": "Связи с концептами",

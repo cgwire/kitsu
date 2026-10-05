@@ -2034,11 +2034,13 @@
       "no_concept_selected": "هیچ کانسپتی انتخاب نشده است",
       "title": "کانسپت ها",
       "fields": {
-        "entity_type": "نوع موجودیت",
+        "asset": "منبع",
+        "asset_type": "نوع منبع",
         "created_at": "تاریخ ایجاد",
-        "updated_at": "تاریخ به روز رسانی",
+        "entity_type": "نوع موجودیت",
         "last_comment_date": "آخرین نظر",
-        "publisher": "انتشار توسط"
+        "publisher": "انتشار توسط",
+        "updated_at": "تاریخ به روز رسانی"
       },
       "actions": {
         "title": "لینک به کانسپت ها",

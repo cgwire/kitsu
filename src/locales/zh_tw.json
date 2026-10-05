@@ -2034,11 +2034,13 @@
       "no_concept_selected": "未選擇概念",
       "title": "概念",
       "fields": {
-        "entity_type": "實體類型",
+        "asset": "資產",
+        "asset_type": "資產類型",
         "created_at": "建立日期",
-        "updated_at": "更新日期",
+        "entity_type": "實體類型",
         "last_comment_date": "最後評論",
-        "publisher": "發表者"
+        "publisher": "發表者",
+        "updated_at": "更新日期"
       },
       "actions": {
         "title": "概念連結",

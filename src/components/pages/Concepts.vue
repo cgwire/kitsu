@@ -29,6 +29,28 @@
               />
             </span>
             <combobox
+              :label="$t('concepts.fields.asset_type')"
+              :options="assetTypeOptions"
+              v-model="filters.assetTypeId"
+            />
+            <span class="field">
+              <label class="label">
+                {{ $t('concepts.fields.asset') }}
+              </label>
+              <multiselect
+                class="asset-filter"
+                label="name"
+                track-by="id"
+                :allow-empty="false"
+                :model-value="selectedAssetOption"
+                :options="assetOptions"
+                :show-labels="false"
+                @update:model-value="filters.assetId = $event.id"
+              >
+                <template #noResult></template>
+              </multiselect>
+            </span>
+            <combobox
               class="right"
               :label="$t('main.sorted_by')"
               locale-key-prefix="concepts.fields."
@@ -127,12 +149,14 @@ import {
   watch
 } from 'vue'
 import { useI18n } from 'vue-i18n'
+import Multiselect from 'vue-multiselect'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { pauseEvent } from '@/composables/dom'
 import files from '@/lib/files'
-import { sortByName, sortPeople } from '@/lib/sorting'
+import { sortAssets, sortByName, sortPeople } from '@/lib/sorting'
+import assetsStore from '@/store/modules/assets'
 
 import AddPreviewModal from '@/components/modals/AddPreviewModal.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
@@ -160,6 +184,8 @@ const errors = reactive({
   loadingConcepts: false
 })
 const filters = reactive({
+  assetId: '',
+  assetTypeId: '',
   publisher: null,
   sortBy: 'created_at',
   taskStatusId: null
@@ -172,6 +198,7 @@ const modals = reactive({
   addConcept: false
 })
 
+const NO_LINK = 'none'
 const imgExtensions = files.IMG_EXTENSIONS_STRING
 const sortByOptions = ['created_at', 'updated_at', 'last_comment_date'].map(
   name => ({ label: name, value: name })
@@ -185,8 +212,54 @@ const personMap = computed(() => store.getters.personMap)
 const selectedConcepts = computed(() => store.getters.selectedConcepts)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
 
+// The assets at least one concept is linked to. The asset cache is not
+// reactive: it is read here, behind the concepts loaded after the assets.
+const linkedAssets = computed(() =>
+  sortAssets(
+    [...new Set(concepts.value.flatMap(getLinks))]
+      .map(assetId => assetsStore.cache.assetMap.get(assetId))
+      .filter(Boolean)
+  )
+)
+
+const assetTypeOptions = computed(() => [
+  { label: t('main.all'), value: '' },
+  ...sortByName(
+    [...new Set(linkedAssets.value.map(asset => asset.asset_type_id))].map(
+      id => ({
+        id,
+        name: linkedAssets.value.find(asset => asset.asset_type_id === id)
+          .asset_type_name
+      })
+    )
+  ).map(type => ({ label: type.name, value: type.id }))
+])
+
+// Without a type, the full name tells two assets of the same name apart.
+const assetOptions = computed(() => [
+  { id: '', name: t('main.all') },
+  ...(filters.assetTypeId || concepts.value.every(hasLinks)
+    ? []
+    : [{ id: NO_LINK, name: t('concepts.actions.empty') }]),
+  ...linkedAssets.value
+    .filter(
+      asset =>
+        !filters.assetTypeId || asset.asset_type_id === filters.assetTypeId
+    )
+    .map(asset => ({
+      id: asset.id,
+      name: filters.assetTypeId ? asset.name : asset.full_name
+    }))
+])
+
+const selectedAssetOption = computed(() =>
+  assetOptions.value.find(option => option.id === filters.assetId)
+)
+
 const filteredConcepts = computed(() =>
   concepts.value
+    .filter(isLinkedToFilteredType)
+    .filter(isLinkedToFilteredAsset)
     .filter(
       concept =>
         !filters.taskStatusId ||
@@ -230,6 +303,24 @@ const taskStatusList = computed(() => [
 
 // Functions
 // --------------------------------------------------------------------------
+const getLinks = concept => concept.entity_concept_links ?? []
+
+const hasLinks = concept => getLinks(concept).length > 0
+
+const isLinkedToFilteredType = concept =>
+  !filters.assetTypeId ||
+  getLinks(concept).some(
+    assetId =>
+      assetsStore.cache.assetMap.get(assetId)?.asset_type_id ===
+      filters.assetTypeId
+  )
+
+const isLinkedToFilteredAsset = concept => {
+  if (!filters.assetId) return true
+  if (filters.assetId === NO_LINK) return !hasLinks(concept)
+  return getLinks(concept).includes(filters.assetId)
+}
+
 const refreshConcepts = async () => {
   loading.loadingConcepts = true
   errors.loadingConcepts = false
@@ -335,6 +426,19 @@ watch(
   { immediate: true }
 )
 
+// A filter whose value is no longer offered would hide every concept.
+watch(assetTypeOptions, options => {
+  if (!options.some(option => option.value === filters.assetTypeId)) {
+    filters.assetTypeId = ''
+  }
+})
+
+watch(assetOptions, options => {
+  if (!options.some(option => option.id === filters.assetId)) {
+    filters.assetId = ''
+  }
+})
+
 // Lifecycle
 // --------------------------------------------------------------------------
 onMounted(() => {
@@ -379,6 +483,10 @@ useHead({
   .right {
     margin-left: auto;
   }
+}
+
+.asset-filter {
+  width: 200px;
 }
 
 .concept-list {
