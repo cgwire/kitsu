@@ -1,7 +1,7 @@
 import './polyfills'
 
 import { createApp, defineAsyncComponent } from 'vue'
-import { createHead, VueHeadMixin } from '@unhead/vue/client'
+import { createHead } from '@unhead/vue/client'
 import { sync } from 'vuex-router-sync'
 
 import 'bulma/css/bulma.css'
@@ -24,7 +24,6 @@ const head = createHead()
 
 app.use(i18n)
 app.use(head)
-app.mixin(VueHeadMixin)
 app.use(router)
 app.use(store)
 app.use(resizableColumn)
