@@ -249,6 +249,16 @@ describe('lists/SequenceStatsList', () => {
     )
   })
 
+  // A search drops the sequences without matching shots from the rows.
+  test('counts the sequences left by a search', () => {
+    const wrapper = mountSequences(
+      { sequenceStats: { all: { all: status }, sq01: { all: status } } },
+      { sequenceSearchText: () => 'layout=wip' }
+    )
+    expect(wrapper.findAll('td.name')).toHaveLength(1)
+    expect(wrapper.find('.nb-sequences').text()).toBe('1 sequences.number')
+  })
+
   test('says that every sequence is hidden rather than that there is none', () => {
     const wrapper = mountSequences({ entries: [], isFiltered: true })
     expect(wrapper.findComponent(EmptyList).exists()).toBe(false)

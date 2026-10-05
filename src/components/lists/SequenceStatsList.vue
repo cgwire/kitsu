@@ -145,8 +145,8 @@
       class="has-text-centered nb-sequences"
       v-else-if="!isEmptyList && !isLoading"
     >
-      {{ sequenceCount }}
-      {{ $t('sequences.number', { count: sequenceCount }) }}
+      {{ entryStats.length }}
+      {{ $t('sequences.number', { count: entryStats.length }) }}
     </p>
   </div>
 </template>
@@ -209,10 +209,6 @@ const isAllHidden = computed(
     props.entries.length === 0 &&
     !props.isLoading &&
     !props.isError
-)
-
-const sequenceCount = computed(
-  () => props.entries.filter(entry => !entry.canceled).length
 )
 
 const totalShotCount = computed(() =>
