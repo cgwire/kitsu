@@ -1,524 +1,676 @@
+import { flushPromises, shallowMount } from '@vue/test-utils'
 import moment from 'moment-timezone'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { createMemoryHistory, createRouter } from 'vue-router'
+import { createStore } from 'vuex'
 
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
+vi.mock('vue-i18n', async importOriginal => ({
+  ...(await importOriginal()),
+  useI18n: () => ({ t: key => key })
+}))
 
 // Pre-load the real store to avoid circular-import race from child components.
 import '@/lib/auth'
 
-import ProductionSchedule, {
-  parseHiddenTaskTypeIds
-} from '@/components/pages/ProductionSchedule.vue'
+import assetTypeStore from '@/store/modules/assettypes'
+import taskTypeStore from '@/store/modules/tasktypes'
 
-const {
-  applyToProduction,
-  getMaxDate,
-  getMinDate,
-  onScheduleItemChanged,
-  onSelectTaskType,
-  onTaskTypeVisibilityChanged,
-  saveTaskChanged,
-  toggleSidePanel,
-  updateRoute,
-  updateScheduleItem,
-  widenScheduleItemParents
-} = ProductionSchedule.methods
-const {
-  filteredScheduleItems,
-  hasTaskTypeFilter,
-  taskTypeFilterOptions,
-  taskTypeFilterTitle,
-  taskTypeVisibilityMap
-} = ProductionSchedule.computed
+import ConfirmModal from '@/components/modals/ConfirmModal.vue'
+import ProductionSchedule from '@/components/pages/ProductionSchedule.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 
-const buildTask = assignees => ({
-  id: 'task-1',
-  versionedTaskId: 'link-1',
-  estimation: 480,
-  assignees,
-  startDate: moment.utc('2026-09-21'),
-  endDate: moment.utc('2026-09-22')
-})
+// The page is driven through what it renders and what it calls: the
+// schedule widget events, the comboboxes, the buttons and the modals, the
+// route and the store actions. None of these tests reaches its internals.
 
-describe('ProductionSchedule saveTaskChanged', () => {
-  it('drops the unassigned placeholder from the versioned task link', async () => {
-    const updateScheduleVersionedTask = vi.fn().mockResolvedValue()
-    // the drill-down groups unassigned tasks under a local 'unassigned' row
-    // that is not a person id known to the API
-    const task = buildTask(['unassigned'])
+const taskTypes = [
+  {
+    id: 'tt-modeling',
+    name: 'Modeling',
+    for_entity: 'Asset',
+    color: '#111111',
+    priority: 1
+  },
+  {
+    id: 'tt-layout',
+    name: 'Layout',
+    for_entity: 'Shot',
+    color: '#222222',
+    priority: 1
+  },
+  {
+    id: 'tt-animation',
+    name: 'Animation',
+    for_entity: 'Shot',
+    color: '#333333',
+    priority: 2
+  }
+]
 
-    await saveTaskChanged.call(
-      { isVersioned: true, updateScheduleVersionedTask },
-      task
-    )
+const production = {
+  id: 'production-1',
+  name: 'Wing It',
+  start_date: '2026-01-01',
+  end_date: '2026-12-31',
+  team: [],
+  from_schedule_version_id: null
+}
 
-    expect(updateScheduleVersionedTask).toHaveBeenCalledWith({
-      id: 'link-1',
-      estimation: 480,
-      startDate: '2026-09-21',
-      dueDate: '2026-09-22',
-      assignees: []
-    })
-  })
+const unlockedVersion = {
+  id: 'version-1',
+  name: 'Plan B',
+  created_at: '2026-09-01T10:00:00',
+  locked: false,
+  canceled: false
+}
 
-  it('keeps the real assignees of the versioned task link', async () => {
-    const updateScheduleVersionedTask = vi.fn().mockResolvedValue()
-    const task = buildTask(['person-1', 'person-2'])
-
-    await saveTaskChanged.call(
-      { isVersioned: true, updateScheduleVersionedTask },
-      task
-    )
-
-    expect(updateScheduleVersionedTask).toHaveBeenCalledWith(
-      expect.objectContaining({ assignees: ['person-1', 'person-2'] })
-    )
-  })
-})
-
-describe('ProductionSchedule task type filter', () => {
-  const modelingItem = {
+const buildTaskTypeBars = () => [
+  {
+    id: 'bar-modeling',
     task_type_id: 'tt-modeling',
-    name: 'Asset / Modeling',
-    for_entity: 'Asset'
-  }
-  const layoutItem = {
+    object_id: null,
+    start_date: '2026-02-01',
+    end_date: '2026-03-01'
+  },
+  {
+    id: 'bar-layout',
     task_type_id: 'tt-layout',
-    name: 'Shot / Layout',
-    for_entity: 'Shot'
-  }
-  const animationItem = {
+    object_id: null,
+    start_date: '2026-03-01',
+    end_date: '2026-04-01'
+  },
+  {
+    id: 'bar-animation',
     task_type_id: 'tt-animation',
-    name: 'Shot / Animation',
-    for_entity: 'Shot'
+    object_id: null,
+    start_date: '2026-04-01',
+    end_date: '2026-06-01'
   }
+]
 
-  const buildPage = (overrides = {}) => ({
-    $refs: { schedule: { resetSelection: vi.fn() } },
-    $t: key => key,
-    closeSidePanel: vi.fn(),
-    entityFilteredScheduleItems: [modelingItem, layoutItem, animationItem],
-    entityType: null,
-    expandTaskTypeElement: vi.fn(),
-    hiddenTaskTypeIds: [],
-    scheduleItems: [modelingItem, layoutItem, animationItem],
-    selectedTaskType: null,
-    updateRoute: vi.fn(),
-    ...overrides
+const buildAssetTypeBars = () => [
+  {
+    id: 'bar-props',
+    task_type_id: 'tt-modeling',
+    object_id: 'asset-type-props',
+    name: 'Props',
+    start_date: '2026-02-01',
+    end_date: '2026-02-20'
+  }
+]
+
+const day = date => moment.utc(date)
+const format = date => date.format('YYYY-MM-DD')
+
+// The page loads after a debounce of its own.
+const waitForLoad = async () => {
+  await new Promise(resolve => setTimeout(resolve, 60))
+  await flushPromises()
+}
+
+// Unmounted after each test, a failed one included
+let mountedPage = null
+
+const mountPage = async ({
+  actions = {},
+  getters = {},
+  query = {},
+  versions = []
+} = {}) => {
+  const storeActions = {
+    applyScheduleVersionToProduction: vi.fn(),
+    editProduction: vi.fn(),
+    loadAssetTypeScheduleItems: vi.fn(() => buildAssetTypeBars()),
+    loadAssets: vi.fn(),
+    loadProductionDaysOff: vi.fn(() => ({})),
+    loadScheduleItems: vi.fn(() => buildTaskTypeBars()),
+    loadScheduleVersions: vi.fn(({ state }) => state.scheduleVersions),
+    loadSequenceScheduleItems: vi.fn(() => []),
+    loadShots: vi.fn(),
+    loadTasks: vi.fn(() => []),
+    loadTasksFromScheduleVersion: vi.fn(() => []),
+    saveScheduleItem: vi.fn(),
+    updateScheduleVersionedTask: vi.fn(),
+    updateTask: vi.fn(),
+    ...actions
+  }
+  const store = createStore({
+    state: { scheduleVersions: versions },
+    mutations: {
+      SET_VERSIONS(state, scheduleVersions) {
+        state.scheduleVersions = scheduleVersions
+      }
+    },
+    getters: {
+      currentEpisode: () => null,
+      currentProduction: () => production,
+      dateFormat: () => 'YYYY-MM-DD',
+      isCurrentUserProductionManager: () => true,
+      isCurrentUserProductionSupervisor: () => false,
+      isTVShow: () => false,
+      organisation: () => ({
+        hours_by_day: 8,
+        format_duration_in_hours: false
+      }),
+      personMap: () => new Map(),
+      productionAssetTypes: () => [],
+      scheduleVersions: state => state.scheduleVersions,
+      use12HourClock: () => false,
+      user: () => ({ id: 'manager-1', departments: [] }),
+      ...getters
+    },
+    actions: storeActions
+  })
+  const router = createRouter({
+    history: createMemoryHistory(),
+    routes: [{ path: '/schedule', component: { template: '<div />' } }]
+  })
+  await router.push({ path: '/schedule', query })
+  await router.isReady()
+
+  const scheduleWidget = {
+    name: 'Schedule',
+    props: { hierarchy: { type: Array, default: () => [] } },
+    template: '<div />',
+    methods: {
+      exportData: vi.fn(),
+      refreshItemPositions: vi.fn(),
+      resetSelection: vi.fn(),
+      scrollToToday: vi.fn()
+    }
+  }
+  const wrapper = shallowMount(ProductionSchedule, {
+    global: {
+      plugins: [store, router],
+      mocks: { $t: key => key },
+      stubs: { Schedule: scheduleWidget }
+    }
+  })
+  mountedPage = wrapper
+  await waitForLoad()
+  return { router, scheduleWidget, storeActions, wrapper }
+}
+
+const findSchedule = wrapper => wrapper.findComponent({ name: 'Schedule' })
+const rowsOf = wrapper => findSchedule(wrapper).props('hierarchy')
+const rowNames = wrapper => rowsOf(wrapper).map(row => row.name)
+const payloadsOf = action => action.mock.calls.map(([, payload]) => payload)
+
+const findButton = (wrapper, text) =>
+  wrapper
+    .findAllComponents(ButtonSimple)
+    .find(button => button.props('text') === text)
+
+const findCombobox = (wrapper, label) =>
+  wrapper
+    .findAllComponents(Combobox)
+    .find(combobox => combobox.props('label') === label)
+
+const setTaskTypeVisible = async (wrapper, taskTypeId, value) => {
+  wrapper
+    .findComponent(ComboboxOptions)
+    .vm.$emit('change', { key: taskTypeId, value })
+  await flushPromises()
+}
+
+const toggleSidePanel = async wrapper => {
+  findButton(wrapper, 'menu.assign_tasks').vm.$emit('click')
+  await flushPromises()
+}
+
+const closeSidePanel = async wrapper => {
+  await wrapper.find('.side-column .close-button').trigger('click')
+  await flushPromises()
+}
+
+const pickTaskType = async (wrapper, taskTypeId) => {
+  wrapper
+    .findComponent(ComboboxTaskType)
+    .vm.$emit('update:model-value', taskTypeId)
+  await flushPromises()
+}
+
+const changeItem = async (wrapper, item) => {
+  findSchedule(wrapper).vm.$emit('item-changed', item)
+  await flushPromises()
+}
+
+describe('ProductionSchedule page', () => {
+  beforeEach(() => {
+    taskTypes.forEach(taskType => {
+      taskTypeStore.cache.taskTypeMap.set(taskType.id, taskType)
+    })
+    assetTypeStore.cache.assetTypeMap.set('asset-type-props', {
+      id: 'asset-type-props',
+      name: 'Props',
+      task_types: []
+    })
   })
 
-  it('removes the hidden types from the rows of the entity filter', () => {
-    const page = buildPage({
-      entityFilteredScheduleItems: [layoutItem, animationItem],
-      hiddenTaskTypeIds: ['tt-modeling', 'tt-animation']
-    })
-
-    expect(filteredScheduleItems.call(page)).toEqual([layoutItem])
+  afterEach(() => {
+    mountedPage?.unmount()
+    mountedPage = null
+    taskTypeStore.cache.taskTypeMap.clear()
+    assetTypeStore.cache.assetTypeMap.clear()
+    vi.restoreAllMocks()
   })
 
-  it('ticks the visible types of the current view', () => {
-    const page = buildPage({
-      hiddenTaskTypeIds: ['tt-modeling', 'tt-animation'],
-      taskTypeFilterOptions: [
-        { label: 'Shot / Layout', value: 'tt-layout' },
-        { label: 'Shot / Animation', value: 'tt-animation' }
-      ]
+  describe('task type filter', () => {
+    it('hides a type and keeps the types hidden outside the entity filter', async () => {
+      const { router, wrapper } = await mountPage({
+        query: { type: 'Shot', hiddenTypes: 'tt-modeling' }
+      })
+      const push = vi.spyOn(router, 'push')
+      const replace = vi.spyOn(router, 'replace')
+
+      expect(rowNames(wrapper)).toEqual(['Shot / Layout', 'Shot / Animation'])
+
+      await setTaskTypeVisible(wrapper, 'tt-animation', false)
+
+      expect(rowNames(wrapper)).toEqual(['Shot / Layout'])
+      expect(router.currentRoute.value.query.hiddenTypes).toBe(
+        'tt-modeling,tt-animation'
+      )
+      // one history entry per ticked checkbox would take as many Back presses
+      expect(replace).toHaveBeenCalledTimes(1)
+      expect(push).not.toHaveBeenCalled()
     })
 
-    expect(taskTypeVisibilityMap.call(page)).toEqual({
-      'tt-layout': true,
-      'tt-animation': false
-    })
-  })
+    it('clears the query param once every type is shown again', async () => {
+      const { router, wrapper } = await mountPage({
+        query: { hiddenTypes: 'tt-animation' }
+      })
 
-  // The rows are named '<entity> / <task type>', and two entities can share a
-  // task type name: the bare name leaves two identical options.
-  it('names the options after the schedule rows, in their order', () => {
-    const options = taskTypeFilterOptions.call(buildPage())
+      expect(rowNames(wrapper)).toEqual(['Asset / Modeling', 'Shot / Layout'])
 
-    expect(options).toEqual([
-      { label: 'Asset / Modeling', value: 'tt-modeling' },
-      { label: 'Shot / Layout', value: 'tt-layout' },
-      { label: 'Shot / Animation', value: 'tt-animation' }
-    ])
-  })
+      await setTaskTypeVisible(wrapper, 'tt-animation', true)
 
-  it('keeps the types hidden outside the current entity filter', () => {
-    const page = buildPage({
-      entityType: 'Shot',
-      entityFilteredScheduleItems: [layoutItem, animationItem],
-      hiddenTaskTypeIds: ['tt-modeling']
+      expect(rowNames(wrapper)).toHaveLength(3)
+      expect(router.currentRoute.value.query.hiddenTypes).toBeUndefined()
     })
 
-    onTaskTypeVisibilityChanged.call(page, {
-      key: 'tt-animation',
-      value: false
+    // Hidden rows leave the schedule while their tasks stay selected: the
+    // next drag would move them out of sight.
+    it('drops the selection when a type is hidden', async () => {
+      const { scheduleWidget, wrapper } = await mountPage()
+      await toggleSidePanel(wrapper)
+      await pickTaskType(wrapper, 'tt-layout')
+
+      await setTaskTypeVisible(wrapper, 'tt-animation', false)
+
+      expect(scheduleWidget.methods.resetSelection).toHaveBeenCalled()
+      expect(wrapper.find('.side-column').exists()).toBe(true)
+
+      await setTaskTypeVisible(wrapper, 'tt-layout', false)
+
+      expect(wrapper.find('.side-column').exists()).toBe(false)
     })
 
-    expect(page.hiddenTaskTypeIds).toEqual(['tt-modeling', 'tt-animation'])
-    expect(page.updateRoute).toHaveBeenCalledWith({
-      hiddenTypes: 'tt-modeling,tt-animation'
-    })
-  })
+    it('ticks and counts the visible types of the current view', async () => {
+      const { wrapper } = await mountPage({
+        query: { hiddenTypes: 'tt-animation' }
+      })
+      const filter = wrapper.findComponent(ComboboxOptions)
 
-  it('clears the query param once every type is shown again', () => {
-    const page = buildPage({ hiddenTaskTypeIds: ['tt-animation'] })
-
-    onTaskTypeVisibilityChanged.call(page, {
-      key: 'tt-animation',
-      value: true
-    })
-
-    expect(page.hiddenTaskTypeIds).toEqual([])
-    expect(page.updateRoute).toHaveBeenCalledWith({ hiddenTypes: null })
-  })
-
-  // Hidden rows leave the schedule while their tasks stay selected: the next
-  // drag would move them out of sight.
-  it('drops the schedule selection when a type is hidden', () => {
-    const page = buildPage({ selectedTaskType: layoutItem })
-
-    onTaskTypeVisibilityChanged.call(page, { key: 'tt-animation', value: false })
-
-    expect(page.$refs.schedule.resetSelection).toHaveBeenCalled()
-    expect(page.closeSidePanel).not.toHaveBeenCalled()
-
-    onTaskTypeVisibilityChanged.call(page, { key: 'tt-layout', value: false })
-
-    expect(page.closeSidePanel).toHaveBeenCalled()
-  })
-
-  // Without it the last visible type can be hidden from another entity view,
-  // and the filter disappears with no way to bring the row back.
-  it('stays on screen while a type of the current view is hidden', () => {
-    const page = buildPage({
-      entityFilteredScheduleItems: [modelingItem],
-      filteredScheduleItems: [],
-      hiddenTaskTypeIds: ['tt-modeling'],
-      taskTypeFilterOptions: [
-        { label: 'Asset / Modeling', value: 'tt-modeling' }
-      ]
-    })
-
-    expect(hasTaskTypeFilter.call(page)).toBe(true)
-  })
-
-  it('hides itself when a single type is left to choose from', () => {
-    const page = buildPage({
-      entityFilteredScheduleItems: [modelingItem],
-      filteredScheduleItems: [modelingItem],
-      taskTypeFilterOptions: [
-        { label: 'Asset / Modeling', value: 'tt-modeling' }
-      ]
-    })
-
-    expect(hasTaskTypeFilter.call(page)).toBe(false)
-  })
-
-  it('counts the visible types in its title', () => {
-    const page = buildPage({
-      filteredScheduleItems: [modelingItem],
-      taskTypeFilterOptions: [
+      expect(filter.props('options')).toEqual([
         { label: 'Asset / Modeling', value: 'tt-modeling' },
         { label: 'Shot / Layout', value: 'tt-layout' },
         { label: 'Shot / Animation', value: 'tt-animation' }
-      ]
+      ])
+      expect(filter.props('modelValue')).toEqual({
+        'tt-modeling': true,
+        'tt-layout': true,
+        'tt-animation': false
+      })
+      expect(filter.props('title')).toBe('(2/3)')
+
+      await setTaskTypeVisible(wrapper, 'tt-animation', true)
+
+      expect(wrapper.findComponent(ComboboxOptions).props('title')).toBe(
+        'main.all'
+      )
     })
 
-    expect(taskTypeFilterTitle.call(page)).toBe('(1/3)')
+    // Without it the only type of an entity view, once hidden, would leave
+    // no way to bring its row back.
+    it('stays on screen while the only type of the view is hidden', async () => {
+      const { wrapper } = await mountPage({
+        query: { type: 'Asset', hiddenTypes: 'tt-modeling' }
+      })
 
-    page.filteredScheduleItems = page.entityFilteredScheduleItems
-
-    expect(taskTypeFilterTitle.call(page)).toBe('main.all')
-  })
-
-  // The side panel lists every task type of the production: picking a hidden
-  // one used to fill the panel while the schedule showed nothing.
-  it('shows a hidden type again when the side panel selects it', () => {
-    const page = buildPage({ hiddenTaskTypeIds: ['tt-animation'] })
-
-    onSelectTaskType.call(page, 'tt-animation')
-
-    expect(page.hiddenTaskTypeIds).toEqual([])
-    expect(page.updateRoute).toHaveBeenCalledWith({ hiddenTypes: null })
-    expect(page.expandTaskTypeElement).toHaveBeenCalled()
-  })
-
-  it('clears the entity filter and the task type filter at once', () => {
-    const page = buildPage({
-      entityType: 'Asset',
-      hiddenTaskTypeIds: ['tt-animation']
+      expect(rowNames(wrapper)).toEqual([])
+      expect(wrapper.findComponent(ComboboxOptions).exists()).toBe(true)
     })
 
-    onSelectTaskType.call(page, 'tt-animation')
+    it('hides itself when a single type is left to choose from', async () => {
+      const { wrapper } = await mountPage({ query: { type: 'Asset' } })
 
-    expect(page.entityType).toBeNull()
-    expect(page.updateRoute).toHaveBeenCalledTimes(1)
-    expect(page.updateRoute).toHaveBeenCalledWith({
-      type: null,
-      hiddenTypes: null
+      expect(rowNames(wrapper)).toEqual(['Asset / Modeling'])
+      expect(findCombobox(wrapper, 'schedule.mode')).toBeDefined()
+      expect(wrapper.findComponent(ComboboxOptions).exists()).toBe(false)
     })
   })
 
-  // Expanding a row selects it, and Expand all or the export expand the
-  // hidden rows too: the last one would open the panel on a row out of sight.
-  it('opens the side panel empty when its row is hidden', () => {
-    const page = buildPage({
-      assignments: { type: null, entityTypes: null },
-      filteredScheduleItems: [modelingItem, layoutItem],
-      isSidePanelOpen: false,
-      selectedTaskType: animationItem,
-      selectTaskTypeElement: vi.fn()
+  describe('side panel', () => {
+    // The side panel lists every task type of the production: picking a
+    // hidden one used to fill the panel while the schedule showed nothing.
+    it('shows a hidden type again when the panel picks it', async () => {
+      const { router, storeActions, wrapper } = await mountPage({
+        query: { hiddenTypes: 'tt-animation' }
+      })
+      await toggleSidePanel(wrapper)
+
+      await pickTaskType(wrapper, 'tt-animation')
+
+      expect(rowNames(wrapper)).toContain('Shot / Animation')
+      expect(router.currentRoute.value.query.hiddenTypes).toBeUndefined()
+      expect(storeActions.loadSequenceScheduleItems).toHaveBeenCalled()
     })
 
-    toggleSidePanel.call(page)
+    it('clears the entity filter and the task type filter at once', async () => {
+      const { router, wrapper } = await mountPage({
+        query: { type: 'Asset', hiddenTypes: 'tt-animation' }
+      })
+      await toggleSidePanel(wrapper)
+      const push = vi.spyOn(router, 'push')
+      const replace = vi.spyOn(router, 'replace')
 
-    expect(page.isSidePanelOpen).toBe(true)
-    expect(page.selectedTaskType).toBeNull()
-    expect(page.selectTaskTypeElement).not.toHaveBeenCalled()
-  })
+      await pickTaskType(wrapper, 'tt-animation')
 
-  it('opens the side panel on its row when the row is shown', () => {
-    const page = buildPage({
-      assignments: { type: null, entityTypes: null },
-      filteredScheduleItems: [modelingItem, layoutItem],
-      isSidePanelOpen: false,
-      selectedTaskType: layoutItem,
-      selectTaskTypeElement: vi.fn()
+      expect(router.currentRoute.value.query.type).toBeUndefined()
+      expect(router.currentRoute.value.query.hiddenTypes).toBeUndefined()
+      expect(replace).toHaveBeenCalledTimes(1)
+      expect(push).not.toHaveBeenCalled()
     })
 
-    toggleSidePanel.call(page)
+    // Expanding a row selects it, and Expand all or the export expand the
+    // hidden rows too: the last one would open the panel on a row out of
+    // sight.
+    it('opens empty when the row of its task type is hidden', async () => {
+      const { storeActions, wrapper } = await mountPage()
+      await toggleSidePanel(wrapper)
+      await pickTaskType(wrapper, 'tt-animation')
+      await closeSidePanel(wrapper)
+      await setTaskTypeVisible(wrapper, 'tt-animation', false)
+      const taskLoads = storeActions.loadTasks.mock.calls.length
 
-    expect(page.selectTaskTypeElement).toHaveBeenCalledWith(layoutItem)
-  })
-})
+      await toggleSidePanel(wrapper)
 
-describe('ProductionSchedule hiddenTypes query param', () => {
-  const taskTypeMap = new Map([
-    ['tt-modeling', { id: 'tt-modeling' }],
-    ['tt-animation', { id: 'tt-animation' }]
-  ])
-
-  it('reads the comma separated list', () => {
-    expect(
-      parseHiddenTaskTypeIds('tt-modeling,tt-animation', taskTypeMap)
-    ).toEqual(['tt-modeling', 'tt-animation'])
-  })
-
-  it('drops the types the production no longer has', () => {
-    expect(parseHiddenTaskTypeIds('tt-modeling,tt-gone', taskTypeMap)).toEqual([
-      'tt-modeling'
-    ])
-  })
-
-  // A param repeated in the URL reaches the page as an array: splitting it
-  // threw and left the schedule editable in its read-only mode.
-  it('reads the param repeated in the URL', () => {
-    expect(
-      parseHiddenTaskTypeIds(['tt-modeling', 'tt-animation'], taskTypeMap)
-    ).toEqual(['tt-modeling', 'tt-animation'])
-  })
-
-  it('reads an empty query', () => {
-    expect(parseHiddenTaskTypeIds(undefined, taskTypeMap)).toEqual([])
-  })
-
-  const buildRoutedPage = () => ({
-    $route: { query: { zoom: '1' } },
-    $router: { push: vi.fn(), replace: vi.fn() }
-  })
-
-  // The page never reads the history back: one entry per ticked checkbox
-  // would only take as many Back presses to leave it.
-  it('replaces the history entry when the hidden types change', () => {
-    const page = buildRoutedPage()
-
-    updateRoute.call(page, { hiddenTypes: 'tt-modeling' })
-
-    expect(page.$router.replace).toHaveBeenCalledWith({
-      query: { zoom: '1', hiddenTypes: 'tt-modeling' }
+      expect(wrapper.find('.side-column').exists()).toBe(true)
+      expect(
+        wrapper.findComponent(ComboboxTaskType).props('modelValue')
+      ).toBeFalsy()
+      expect(storeActions.loadTasks).toHaveBeenCalledTimes(taskLoads)
     })
-    expect(page.$router.push).not.toHaveBeenCalled()
-  })
 
-  it('pushes a history entry for the other settings', () => {
-    const page = buildRoutedPage()
+    it('opens on the row of its task type when the row is shown', async () => {
+      const { storeActions, wrapper } = await mountPage()
+      await toggleSidePanel(wrapper)
+      await pickTaskType(wrapper, 'tt-layout')
+      await closeSidePanel(wrapper)
+      const taskLoads = storeActions.loadTasks.mock.calls.length
 
-    updateRoute.call(page, { mode: 'real' })
+      await toggleSidePanel(wrapper)
 
-    expect(page.$router.push).toHaveBeenCalledWith({
-      query: { zoom: '1', mode: 'real' }
+      expect(wrapper.findComponent(ComboboxTaskType).props('modelValue')).toBe(
+        'tt-layout'
+      )
+      expect(storeActions.loadTasks).toHaveBeenCalledTimes(taskLoads + 1)
     })
-    expect(page.$router.replace).not.toHaveBeenCalled()
-  })
-})
-
-// The Excel export and the side panel date ranges read the raw start_date /
-// end_date strings, while a drag moves the startDate / endDate moments.
-describe('ProductionSchedule bar date strings', () => {
-  const buildPage = (overrides = {}) => ({
-    currentEpisodeId: null,
-    isMainPack: false,
-    isVersioned: false,
-    scheduleItems: [],
-    startDate: moment.utc('2026-01-01'),
-    endDate: moment.utc('2026-12-31'),
-    saveScheduleItem: vi.fn().mockResolvedValue(),
-    getMinDate,
-    getMaxDate,
-    updateScheduleItem,
-    widenScheduleItemParents,
-    ...overrides
   })
 
-  const buildBar = (start, end) => ({
-    start_date: '2026-03-01',
-    end_date: '2026-03-02',
-    startDate: moment.utc(start),
-    endDate: moment.utc(end)
-  })
+  describe('route', () => {
+    it('pushes a history entry when the mode changes', async () => {
+      const { router, wrapper } = await mountPage()
+      const push = vi.spyOn(router, 'push')
+      const replace = vi.spyOn(router, 'replace')
 
-  it('refreshes the raw dates of an entity bar after a drag', async () => {
-    const page = buildPage()
-    const entityBar = buildBar('2026-10-01', '2026-10-05')
+      findCombobox(wrapper, 'schedule.mode').vm.$emit(
+        'update:model-value',
+        'real'
+      )
+      await flushPromises()
 
-    await updateScheduleItem.call(page, entityBar)
-
-    expect(entityBar.start_date).toBe('2026-10-01')
-    expect(entityBar.end_date).toBe('2026-10-05')
-    expect(page.saveScheduleItem).toHaveBeenCalledWith(entityBar)
-  })
-
-  it('refreshes the raw dates of the task type bar an entity drag resizes', async () => {
-    const page = buildPage()
-    const taskTypeBar = buildBar('2026-03-01', '2026-03-02')
-    const movedBar = buildBar('2026-04-01', '2026-04-10')
-    const otherBar = buildBar('2026-05-01', '2026-05-20')
-    taskTypeBar.children = [movedBar, otherBar]
-    movedBar.parentElement = taskTypeBar
-    otherBar.parentElement = taskTypeBar
-
-    await onScheduleItemChanged.call(page, movedBar)
-
-    expect(taskTypeBar.start_date).toBe('2026-04-01')
-    expect(taskTypeBar.end_date).toBe('2026-05-20')
-    expect(page.saveScheduleItem).toHaveBeenCalledWith(taskTypeBar)
-  })
-
-  // An episode view only holds the sequences and edits of that episode,
-  // and the main pack view its asset types, while the task type bar spans
-  // the whole production: their dates can widen it, never shrink it.
-  it.each([
-    ['an episode', { currentEpisodeId: 'episode-3' }],
-    ['the main pack', { isMainPack: true }]
-  ])('never shrinks the task type bar from %s view', async (_, scope) => {
-    const page = buildPage(scope)
-    const taskTypeBar = buildBar('2026-02-01', '2026-11-30')
-    const movedBar = buildBar('2026-05-01', '2026-05-10')
-    taskTypeBar.children = [movedBar]
-    movedBar.parentElement = taskTypeBar
-
-    await onScheduleItemChanged.call(page, movedBar)
-
-    expect(taskTypeBar.startDate.format('YYYY-MM-DD')).toBe('2026-02-01')
-    expect(taskTypeBar.endDate.format('YYYY-MM-DD')).toBe('2026-11-30')
-    expect(page.saveScheduleItem).not.toHaveBeenCalledWith(taskTypeBar)
-    expect(page.saveScheduleItem).toHaveBeenCalledWith(movedBar)
-  })
-
-  it('widens the task type bar from an episode view', async () => {
-    const page = buildPage({ currentEpisodeId: 'episode-3' })
-    const taskTypeBar = buildBar('2026-02-01', '2026-06-30')
-    const movedBar = buildBar('2026-06-20', '2026-07-15')
-    taskTypeBar.children = [movedBar]
-    movedBar.parentElement = taskTypeBar
-
-    await onScheduleItemChanged.call(page, movedBar)
-
-    expect(taskTypeBar.startDate.format('YYYY-MM-DD')).toBe('2026-02-01')
-    expect(taskTypeBar.end_date).toBe('2026-07-15')
-    expect(page.saveScheduleItem).toHaveBeenCalledWith(taskTypeBar)
-  })
-
-  // A task stretching past both ends of its bars must save each bar once
-  // with its two new dates: two requests racing could keep a stale end.
-  it('saves each widened parent of a task once', async () => {
-    const page = buildPage({
-      daysOffByPerson: {},
-      organisation: { hours_by_day: 8 },
-      saveTaskChanged: vi.fn().mockResolvedValue()
+      expect(router.currentRoute.value.query.mode).toBe('real')
+      expect(push).toHaveBeenCalledTimes(1)
+      expect(replace).not.toHaveBeenCalled()
     })
-    const taskTypeBar = buildBar('2026-01-06', '2026-01-15')
-    const entityBar = buildBar('2026-01-07', '2026-01-14')
-    entityBar.parentElement = taskTypeBar
-    // Monday 5 to Friday 16: ten working days
-    const task = {
+  })
+
+  describe('bar and task changes', () => {
+    const buildBar = (start, end) => ({
+      start_date: '2026-03-01',
+      end_date: '2026-03-02',
+      startDate: day(start),
+      endDate: day(end)
+    })
+
+    // Monday 9 February, one working day
+    const buildVersionedTask = (assignees, parentElement) => ({
       type: 'Task',
-      assignees: [],
-      estimation: 10 * 8 * 60,
-      startDate: moment.utc('2026-01-05'),
-      endDate: moment.utc('2026-01-16'),
-      parentElement: entityBar
+      id: 'task-1',
+      versionedTaskId: 'link-1',
+      estimation: 8 * 60,
+      assignees,
+      startDate: day('2026-02-09'),
+      endDate: day('2026-02-09'),
+      parentElement
+    })
+
+    // The drill-down groups unassigned tasks under a local 'unassigned' row
+    // that is not a person id known to the API.
+    it('drops the unassigned placeholder when a task of a version moves', async () => {
+      const { storeActions, wrapper } = await mountPage({
+        query: { version: unlockedVersion.id },
+        versions: [unlockedVersion]
+      })
+      const entityBar = buildBar('2026-02-02', '2026-02-27')
+      entityBar.parentElement = rowsOf(wrapper)[0]
+
+      await changeItem(wrapper, buildVersionedTask(['unassigned'], entityBar))
+      await changeItem(wrapper, buildVersionedTask(['person-1'], entityBar))
+
+      expect(payloadsOf(storeActions.updateScheduleVersionedTask)).toEqual([
+        {
+          id: 'link-1',
+          estimation: 480,
+          startDate: '2026-02-09',
+          dueDate: '2026-02-09',
+          assignees: []
+        },
+        {
+          id: 'link-1',
+          estimation: 480,
+          startDate: '2026-02-09',
+          dueDate: '2026-02-09',
+          assignees: ['person-1']
+        }
+      ])
+      expect(storeActions.updateTask).not.toHaveBeenCalled()
+    })
+
+    // The Excel export and the side panel date ranges read the raw
+    // start_date / end_date strings, while a drag moves the moments.
+    it('saves a moved entity bar and its task type bar with their raw dates', async () => {
+      const { storeActions, wrapper } = await mountPage()
+      const taskTypeBar = rowsOf(wrapper)[0]
+      const movedBar = buildBar('2026-04-01', '2026-04-10')
+      const otherBar = buildBar('2026-05-01', '2026-05-20')
+      taskTypeBar.children = [movedBar, otherBar]
+      movedBar.parentElement = taskTypeBar
+      otherBar.parentElement = taskTypeBar
+
+      await changeItem(wrapper, movedBar)
+
+      const saved = payloadsOf(storeActions.saveScheduleItem)
+      expect(saved.map(bar => [bar.start_date, bar.end_date])).toEqual([
+        ['2026-04-01', '2026-05-20'],
+        ['2026-04-01', '2026-04-10']
+      ])
+      expect(saved[0].id).toBe('bar-modeling')
+    })
+
+    // An episode view only holds the sequences and edits of that episode,
+    // and the main pack view its asset types, while the task type bar spans
+    // the whole production: their dates can widen it, never shrink it.
+    it.each([
+      ['an episode', { id: 'episode-3', name: 'E03' }],
+      ['the main pack', { id: 'main', name: 'Main Pack' }]
+    ])('never shrinks the task type bar from %s view', async (_, episode) => {
+      const { storeActions, wrapper } = await mountPage({
+        getters: {
+          currentEpisode: () => episode,
+          isTVShow: () => true
+        }
+      })
+      const taskTypeBar = rowsOf(wrapper)[0]
+      const movedBar = buildBar('2026-02-10', '2026-02-20')
+      taskTypeBar.children = [movedBar]
+      movedBar.parentElement = taskTypeBar
+
+      await changeItem(wrapper, movedBar)
+
+      expect(format(taskTypeBar.startDate)).toBe('2026-02-01')
+      expect(format(taskTypeBar.endDate)).toBe('2026-03-01')
+      expect(payloadsOf(storeActions.saveScheduleItem)).toEqual([movedBar])
+
+      movedBar.endDate = day('2026-03-15')
+      await changeItem(wrapper, movedBar)
+
+      expect(format(taskTypeBar.startDate)).toBe('2026-02-01')
+      expect(taskTypeBar.end_date).toBe('2026-03-15')
+      expect(payloadsOf(storeActions.saveScheduleItem)[1].id).toBe(
+        'bar-modeling'
+      )
+    })
+
+    // A task stretching past both ends of its bars must save each bar once
+    // with its two new dates: two requests racing could keep a stale end.
+    it('saves each bar a task widens once', async () => {
+      const { storeActions, wrapper } = await mountPage()
+      const taskTypeBar = buildBar('2026-01-06', '2026-01-15')
+      const entityBar = buildBar('2026-01-07', '2026-01-14')
+      entityBar.parentElement = taskTypeBar
+      // Monday 5 to Friday 16: ten working days
+      const task = {
+        type: 'Task',
+        id: 'task-1',
+        assignees: [],
+        estimation: 10 * 8 * 60,
+        startDate: day('2026-01-05'),
+        endDate: day('2026-01-16'),
+        parentElement: entityBar
+      }
+
+      await changeItem(wrapper, task)
+
+      expect(payloadsOf(storeActions.saveScheduleItem)).toEqual([
+        entityBar,
+        taskTypeBar
+      ])
+      expect(
+        [entityBar, taskTypeBar].map(bar => [bar.start_date, bar.end_date])
+      ).toEqual([
+        ['2026-01-05', '2026-01-16'],
+        ['2026-01-05', '2026-01-16']
+      ])
+      expect(payloadsOf(storeActions.updateTask)).toEqual([
+        {
+          taskId: 'task-1',
+          data: {
+            estimation: 4800,
+            start_date: '2026-01-05',
+            due_date: '2026-01-16'
+          }
+        }
+      ])
+    })
+  })
+
+  // Applying a version locks it: the rows built while it was open must be
+  // rebuilt read-only, once the version list says it is locked.
+  describe('apply to production', () => {
+    const applyVersion = async wrapper => {
+      findButton(wrapper, 'schedule.apply_to_prod').vm.$emit('click')
+      await flushPromises()
+      wrapper.findComponent(ConfirmModal).vm.$emit('confirm')
+      await waitForLoad()
     }
 
-    await onScheduleItemChanged.call(page, task)
+    const expandFirstRow = async wrapper => {
+      findSchedule(wrapper).vm.$emit('root-element-expanded', rowsOf(wrapper)[0])
+      await waitForLoad()
+    }
 
-    expect(page.saveScheduleItem).toHaveBeenCalledTimes(2)
-    expect(page.saveScheduleItem).toHaveBeenCalledWith(entityBar)
-    expect(page.saveScheduleItem).toHaveBeenCalledWith(taskTypeBar)
-    expect([entityBar.start_date, entityBar.end_date]).toEqual([
-      '2026-01-05',
-      '2026-01-16'
-    ])
-    expect([taskTypeBar.start_date, taskTypeBar.end_date]).toEqual([
-      '2026-01-05',
-      '2026-01-16'
-    ])
-  })
-})
+    // The apply locks the version on the server only: the page learns it
+    // from the version list it reloads afterwards.
+    it('rebuilds the rows read-only once the version is applied', async () => {
+      let isLockedOnServer = false
+      const { scheduleWidget, storeActions, wrapper } = await mountPage({
+        actions: {
+          applyScheduleVersionToProduction: vi.fn(() => {
+            isLockedOnServer = true
+          }),
+          loadScheduleVersions: vi.fn(({ commit, state }) => {
+            if (isLockedOnServer) {
+              commit(
+                'SET_VERSIONS',
+                state.scheduleVersions.map(version => ({
+                  ...version,
+                  locked: true
+                }))
+              )
+            }
+            return state.scheduleVersions
+          })
+        },
+        query: { version: unlockedVersion.id },
+        versions: [unlockedVersion]
+      })
+      await expandFirstRow(wrapper)
+      await toggleSidePanel(wrapper)
+      await pickTaskType(wrapper, 'tt-layout')
+      const selectionResets =
+        scheduleWidget.methods.resetSelection.mock.calls.length
+      expect(rowsOf(wrapper).every(row => row.editable)).toBe(true)
+      expect(rowsOf(wrapper)[0].children[0].editable).toBe(true)
 
-// Applying a version locks it: the rows built while it was open must be
-// rebuilt read-only, once the version list says it is locked.
-describe('ProductionSchedule apply to production', () => {
-  const buildPage = applyResult => ({
-    currentProduction: { id: 'p1' },
-    errors: { applyScheduleVersion: false },
-    loading: { applyScheduleVersion: false },
-    modals: { applyScheduleVersion: true },
-    version: 'v1',
-    applyScheduleVersionToProduction: vi.fn(() => applyResult),
-    loadScheduleVersions: vi.fn().mockResolvedValue([]),
-    refreshSchedule: vi.fn(),
-    refreshScheduleItemsEditable: vi.fn(),
-    unselectAndCloseSidePanel: vi.fn()
-  })
+      await applyVersion(wrapper)
 
-  it('rebuilds the rows read-only once the version is applied', async () => {
-    const page = buildPage(Promise.resolve())
+      expect(payloadsOf(storeActions.applyScheduleVersionToProduction)).toEqual(
+        [unlockedVersion.id]
+      )
+      expect(rowsOf(wrapper).some(row => row.editable)).toBe(false)
+      expect(storeActions.loadAssetTypeScheduleItems).toHaveBeenCalledTimes(2)
+      expect(rowsOf(wrapper)[0].children[0].editable).toBe(false)
+      // the side panel leaves with the selection it worked on
+      expect(scheduleWidget.methods.resetSelection).toHaveBeenCalledTimes(
+        selectionResets + 1
+      )
+    })
 
-    await applyToProduction.call(page)
+    it('leaves the rows editable when the apply fails', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { storeActions, wrapper } = await mountPage({
+        actions: {
+          applyScheduleVersionToProduction: vi.fn(() =>
+            Promise.reject(new Error('refused'))
+          )
+        },
+        query: { version: unlockedVersion.id },
+        versions: [unlockedVersion]
+      })
+      await expandFirstRow(wrapper)
 
-    expect(page.refreshScheduleItemsEditable).toHaveBeenCalled()
-    expect(page.refreshSchedule).toHaveBeenCalled()
-    expect(page.unselectAndCloseSidePanel).toHaveBeenCalled()
-    const versionsLoadedAt =
-      page.loadScheduleVersions.mock.invocationCallOrder[0]
-    expect(
-      page.refreshScheduleItemsEditable.mock.invocationCallOrder[0]
-    ).toBeGreaterThan(versionsLoadedAt)
-    expect(page.refreshSchedule.mock.invocationCallOrder[0]).toBeGreaterThan(
-      versionsLoadedAt
-    )
-  })
+      await applyVersion(wrapper)
 
-  it('leaves the rows alone when the apply fails', async () => {
-    const page = buildPage(Promise.reject(new Error('refused')))
-    vi.spyOn(console, 'error').mockImplementation(() => {})
-
-    await applyToProduction.call(page)
-
-    expect(page.errors.applyScheduleVersion).toBe(true)
-    expect(page.refreshSchedule).not.toHaveBeenCalled()
-    expect(page.refreshScheduleItemsEditable).not.toHaveBeenCalled()
+      expect(wrapper.findComponent(ConfirmModal).props('isError')).toBe(true)
+      expect(rowsOf(wrapper).every(row => row.editable)).toBe(true)
+      expect(storeActions.loadAssetTypeScheduleItems).toHaveBeenCalledTimes(1)
+    })
   })
 })

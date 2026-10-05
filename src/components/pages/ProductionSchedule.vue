@@ -556,6 +556,26 @@ import colors from '@/lib/colors'
 import { downloadBlob } from '@/lib/download'
 import { getTaskTypeSchedulePath } from '@/lib/path'
 import {
+  DEFAULT_MODE,
+  DEFAULT_VERSION,
+  DEFAULT_ZOOM,
+  formatHiddenTaskTypeIds,
+  getMaxDate,
+  getMinDate,
+  getScheduleRouteChange,
+  getTaskTypeFilterOptions,
+  getTaskTypeFilterTitle,
+  getTaskTypeVisibilityMap,
+  getTaskUpdate,
+  getVersionedTaskUpdate,
+  isTaskTypeFilterShown,
+  parseHiddenTaskTypeIds,
+  refreshRawDates,
+  removeHiddenTaskTypes,
+  setTaskTypeVisibility,
+  widenParents
+} from '@/lib/productionSchedule'
+import {
   sortByName,
   sortPeople,
   sortTaskTypeScheduleItems
@@ -596,18 +616,6 @@ import episodeStore from '@/store/modules/episodes'
 import sequenceStore from '@/store/modules/sequences'
 import shotStore from '@/store/modules/shots'
 import taskTypeStore from '@/store/modules/tasktypes'
-
-export const DEFAULT_MODE = 'prev'
-export const DEFAULT_VERSION = 'ref'
-export const DEFAULT_ZOOM = 1
-
-// A query param repeated in the URL reaches the page as an array of values.
-export const parseHiddenTaskTypeIds = (queryValue, taskTypeMap) =>
-  [queryValue]
-    .flat()
-    .filter(Boolean)
-    .flatMap(value => value.split(','))
-    .filter(id => taskTypeMap.has(id))
 
 export default {
   name: 'production-schedule',
@@ -883,44 +891,37 @@ export default {
       })
     },
 
-    // Named and ordered like the rows they toggle: two entities can share a
-    // task type name, the bare name would list two identical options.
     taskTypeFilterOptions() {
-      return this.entityFilteredScheduleItems.map(item => ({
-        label: item.name,
-        value: item.task_type_id
-      }))
+      return getTaskTypeFilterOptions(this.entityFilteredScheduleItems)
     },
 
-    // A single option is nothing to choose from, unless it is the hidden one:
-    // dropping the filter there would leave no way to bring the row back.
     hasTaskTypeFilter() {
-      return (
-        this.taskTypeFilterOptions.length > 1 ||
-        this.filteredScheduleItems.length <
-          this.entityFilteredScheduleItems.length
+      return isTaskTypeFilterShown(
+        this.taskTypeFilterOptions.length,
+        this.filteredScheduleItems.length,
+        this.entityFilteredScheduleItems.length
       )
     },
 
     taskTypeFilterTitle() {
-      const total = this.taskTypeFilterOptions.length
-      const visible = this.filteredScheduleItems.length
-      return visible === total ? this.$t('main.all') : `(${visible}/${total})`
+      return getTaskTypeFilterTitle(
+        this.filteredScheduleItems.length,
+        this.taskTypeFilterOptions.length,
+        this.$t('main.all')
+      )
     },
 
     taskTypeVisibilityMap() {
-      return this.taskTypeFilterOptions.reduce((map, option) => {
-        map[option.value] = !this.hiddenTaskTypeIds.includes(option.value)
-        return map
-      }, {})
+      return getTaskTypeVisibilityMap(
+        this.taskTypeFilterOptions,
+        this.hiddenTaskTypeIds
+      )
     },
 
     filteredScheduleItems() {
-      if (!this.hiddenTaskTypeIds.length) {
-        return this.entityFilteredScheduleItems
-      }
-      return this.entityFilteredScheduleItems.filter(
-        item => !this.hiddenTaskTypeIds.includes(item.task_type_id)
+      return removeHiddenTaskTypes(
+        this.entityFilteredScheduleItems,
+        this.hiddenTaskTypeIds
       )
     }
   },
@@ -955,33 +956,12 @@ export default {
       'updateTask'
     ]),
 
-    updateRoute({ mode, type, version, zoom, hiddenTypes }) {
-      const query = { ...this.$route.query }
-
-      if (mode !== undefined) {
-        query.mode = mode || undefined
-      }
-      if (type !== undefined) {
-        query.type = type || undefined
-      }
-      if (version !== undefined) {
-        query.version = version || undefined
-      }
-      if (zoom !== undefined) {
-        query.zoom = String(zoom)
-      }
-      if (hiddenTypes !== undefined) {
-        query.hiddenTypes = hiddenTypes || undefined
-      }
-
-      if (JSON.stringify(query) !== JSON.stringify(this.$route.query)) {
-        // the page never reads the history back, and the task type checkboxes
-        // stay open: one entry per click would take as many Back presses
-        if (hiddenTypes !== undefined) {
-          this.$router.replace({ query })
-        } else {
-          this.$router.push({ query })
-        }
+    updateRoute(changes) {
+      const change = getScheduleRouteChange(this.$route.query, changes)
+      if (change?.isReplace) {
+        this.$router.replace({ query: change.query })
+      } else if (change) {
+        this.$router.push({ query: change.query })
       }
     },
 
@@ -1607,26 +1587,9 @@ export default {
     },
 
     saveTaskChanged(task) {
-      if (this.isVersioned) {
-        return this.updateScheduleVersionedTask({
-          id: task.versionedTaskId,
-          estimation: task.estimation,
-          startDate: task.startDate.format('YYYY-MM-DD'),
-          dueDate: task.endDate.format('YYYY-MM-DD'),
-          // 'unassigned' is the local row placeholder, not a person id: the
-          // API rejects it and drops the whole update
-          assignees: task.assignees.filter(id => id !== 'unassigned')
-        })
-      } else {
-        return this.updateTask({
-          taskId: task.id,
-          data: {
-            estimation: task.estimation,
-            start_date: task.startDate.format('YYYY-MM-DD'),
-            due_date: task.endDate.format('YYYY-MM-DD')
-          }
-        })
-      }
+      return this.isVersioned
+        ? this.updateScheduleVersionedTask(getVersionedTaskUpdate(task))
+        : this.updateTask(getTaskUpdate(task))
     },
 
     async onScheduleItemChanged(item) {
@@ -1652,8 +1615,14 @@ export default {
           // type bar spans the production: they can widen it, not shrink it
           this.widenScheduleItemParents(item)
         } else {
-          item.parentElement.startDate = this.getMinDate(item.parentElement)
-          item.parentElement.endDate = this.getMaxDate(item.parentElement)
+          item.parentElement.startDate = getMinDate(
+            item.parentElement,
+            this.endDate
+          )
+          item.parentElement.endDate = getMaxDate(
+            item.parentElement,
+            this.startDate
+          )
           this.updateScheduleItem(item.parentElement)
         }
       } else if (!item.parentElement) {
@@ -1680,38 +1649,15 @@ export default {
       await this.updateScheduleItem(item)
     },
 
-    // Widen the bars above a moved one so they still enclose it, and save
-    // each widened bar once, with both its dates.
+    // save each widened bar once, with both its dates
     widenScheduleItemParents(item) {
-      const widenedParents = []
-      let child = item
-      let parent = item.parentElement
-      let isWidened = true
-      while (parent && isWidened) {
-        isWidened = false
-        if (child.startDate.isBefore(parent.startDate)) {
-          parent.startDate = child.startDate.clone()
-          isWidened = true
-        }
-        if (child.endDate.isAfter(parent.endDate)) {
-          parent.endDate = child.endDate.clone()
-          isWidened = true
-        }
-        if (isWidened) {
-          widenedParents.push(parent)
-        }
-        child = parent
-        parent = parent.parentElement
-      }
-      widenedParents.forEach(widenedParent => {
-        this.updateScheduleItem(widenedParent)
+      widenParents(item).forEach(parent => {
+        this.updateScheduleItem(parent)
       })
     },
 
     async updateScheduleItem(item) {
-      // the raw strings feed the Excel export and the side panel ranges
-      item.start_date = item.startDate.format('YYYY-MM-DD')
-      item.end_date = item.endDate.format('YYYY-MM-DD')
+      refreshRawDates(item)
       if (!this.isVersioned) {
         await this.saveScheduleItem(item)
       }
@@ -1742,26 +1688,6 @@ export default {
       })
       this.pendingParentChange = null
       this.modals.confirmChildMove = false
-    },
-
-    getMinDate(parentElement) {
-      let minDate = this.endDate.clone()
-      parentElement.children.forEach(item => {
-        if (item.startDate && item.startDate.isBefore(minDate)) {
-          minDate = item.startDate
-        }
-      })
-      return minDate.clone()
-    },
-
-    getMaxDate(parentElement) {
-      let maxDate = this.startDate.clone()
-      parentElement.children.forEach(item => {
-        if (item.endDate && item.endDate.isAfter(maxDate)) {
-          maxDate = item.endDate
-        }
-      })
-      return maxDate.clone()
     },
 
     isInDepartment(taskType) {
@@ -1854,10 +1780,12 @@ export default {
         query.type = null
       }
       if (this.hiddenTaskTypeIds.includes(taskTypeId)) {
-        this.hiddenTaskTypeIds = this.hiddenTaskTypeIds.filter(
-          id => id !== taskTypeId
+        this.hiddenTaskTypeIds = setTaskTypeVisibility(
+          this.hiddenTaskTypeIds,
+          taskTypeId,
+          true
         )
-        query.hiddenTypes = this.hiddenTaskTypeIds.join(',') || null
+        query.hiddenTypes = formatHiddenTaskTypeIds(this.hiddenTaskTypeIds)
       }
       this.updateRoute(query)
       // refresh schedule
@@ -2469,14 +2397,14 @@ export default {
       this.updateRoute({ type })
     },
 
-    // One id at a time: the options only cover the current entity filter, and
-    // rebuilding the list from them would show the types hidden in the others.
     onTaskTypeVisibilityChanged({ key, value }) {
-      this.hiddenTaskTypeIds = value
-        ? this.hiddenTaskTypeIds.filter(id => id !== key)
-        : [...this.hiddenTaskTypeIds, key]
+      this.hiddenTaskTypeIds = setTaskTypeVisibility(
+        this.hiddenTaskTypeIds,
+        key,
+        value
+      )
       this.updateRoute({
-        hiddenTypes: this.hiddenTaskTypeIds.join(',') || null
+        hiddenTypes: formatHiddenTaskTypeIds(this.hiddenTaskTypeIds)
       })
 
       if (!value) {
