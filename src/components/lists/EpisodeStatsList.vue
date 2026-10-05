@@ -375,29 +375,13 @@ watch(isRetakes, () => {
 </script>
 
 <style lang="scss" scoped>
-.datatable-body tr:first-child th,
-.datatable-body tr:first-child td {
-  border-top: 0;
-}
+@use '@/styles/stats.scss' as stats;
+
+@include stats.list;
 
 .name {
   min-width: 100px;
   width: 100px;
-  font-weight: bold;
-}
-
-td.name {
-  font-size: 1.2em;
-}
-
-// Row titles are links: keep the text colour of the row instead of the grey
-// of plain links, which reads as dimmed in dark mode.
-.name a {
-  color: inherit;
-
-  &:hover {
-    text-decoration: underline;
-  }
 }
 
 // Take rows detail the episode above them: indented, and tagged like the
@@ -445,33 +429,12 @@ td.take-name {
   }
 }
 
-.validation {
-  min-width: 170px;
-  max-width: 170px;
-  width: 170px;
-  word-wrap: break-word;
-}
-
 .actions {
   min-width: 150px;
   width: 150px;
 }
 
-th.actions {
-  padding: 0.4em;
-}
-
 @media screen and (max-width: 768px) {
-  .data-list {
-    margin-top: 1em;
-  }
-
-  .datatable-wrapper {
-    background: transparent;
-    border: 0;
-    overflow-x: visible;
-  }
-
   // The expander sits in the top right corner of the card of its episode.
   .datatable-body .datatable-row {
     position: relative;

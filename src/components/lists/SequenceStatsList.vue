@@ -268,29 +268,13 @@ const shotsPath = sequence => ({
 </script>
 
 <style lang="scss" scoped>
-.datatable-body tr:first-child th,
-.datatable-body tr:first-child td {
-  border-top: 0;
-}
+@use '@/styles/stats.scss' as stats;
+
+@include stats.list;
 
 .name {
   min-width: 150px;
   width: 150px;
-  font-weight: bold;
-}
-
-td.name {
-  font-size: 1.2em;
-}
-
-// Row titles are links: keep the text colour of the row instead of the grey
-// of plain links, which reads as dimmed in dark mode.
-.name a {
-  color: inherit;
-
-  &:hover {
-    text-decoration: underline;
-  }
 }
 
 .shot-count {
@@ -300,47 +284,8 @@ td.name {
   font-weight: normal;
 }
 
-.validation {
-  min-width: 170px;
-  max-width: 170px;
-  width: 170px;
-  word-wrap: break-word;
-}
-
-th.actions {
-  padding: 0.4em;
-}
-
 .actions {
   width: 100%;
   min-width: 150px;
-}
-
-@media screen and (max-width: 768px) {
-  .data-list {
-    margin-top: 1em;
-  }
-
-  .datatable-wrapper {
-    background: transparent;
-    border: 0;
-    overflow-x: visible;
-  }
-
-  // The global card layout only styles td: the total row is headed by a th.
-  .all-line th.card-head {
-    background: transparent;
-    border: 0;
-    display: block;
-    min-width: 0;
-    order: -1;
-    padding: 0.75em 0 1em;
-    position: static;
-    width: auto;
-
-    &::after {
-      display: none;
-    }
-  }
 }
 </style>

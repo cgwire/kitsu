@@ -288,50 +288,13 @@ useHead({
 </script>
 
 <style lang="scss" scoped>
-// The filters carry a label above them, so the row is aligned on its bottom.
-// Its controls differ in height (select 42px, option combos 40px, buttons
-// 32px): the bottom margins centre them all on the select.
+@use '@/styles/stats.scss' as stats;
+
 .sequence-list-header {
-  align-items: flex-end;
-
-  .options-filter {
-    margin-bottom: 1px;
-  }
-
-  .button {
-    margin-bottom: 5px;
-  }
+  @include stats.page-header($with-search: true);
 }
 
 @media screen and (max-width: 768px) {
-  .sequence-list-header {
-    flex-wrap: wrap;
-    margin-top: 1em;
-    row-gap: 0.5em;
-
-    .flexrow-item {
-      margin-right: 0.5em;
-    }
-
-    // The search field takes the first line: detach it from the filters.
-    .search-field {
-      margin-bottom: 0.5em;
-      margin-right: 0;
-    }
-
-    // The two option filters share a line, which sends Display to the next
-    // one, next to Count.
-    .options-filter {
-      flex: 1 1 40%;
-    }
-
-    // When the buttons wrap under the filters, they stay on the right edge.
-    .button {
-      margin-left: auto;
-      margin-right: 0;
-    }
-  }
-
   // Mobile is read-only.
   .export-button {
     display: none;
