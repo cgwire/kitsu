@@ -322,6 +322,7 @@ describe('People store loadDaysOff action', () => {
   test('rejects when every month fails', async () => {
     peopleApi.getDaysOff.mockRejectedValue(new Error('403'))
     const commit = vi.fn()
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
 
     await expect(
       store.actions.loadDaysOff(
@@ -330,6 +331,8 @@ describe('People store loadDaysOff action', () => {
       )
     ).rejects.toThrow('403')
     expect(commit).not.toHaveBeenCalled()
+    expect(consoleError).toHaveBeenCalledTimes(3)
+    consoleError.mockRestore()
   })
 })
 

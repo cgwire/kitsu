@@ -880,7 +880,7 @@
       "created_at": "Criado em:",
       "delete_text": "Tem certeza de que deseja remover {name} de seu banco de dados?",
       "delete_error": "Um erro ocorreu ao deletar a playlist.",
-      "edit_error": "Um erro ocorreu ao salvar a playlist.",
+      "edit_error": "Um erro ocorreu ao salvar a playlist. Tem certeza de que não há nenhuma playlist com nome semelhante?",
       "download_zip": "Baixar .zip",
       "failed": "Falhou",
       "for_client": "O cliente",

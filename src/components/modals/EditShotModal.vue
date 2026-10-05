@@ -151,8 +151,8 @@ const resetForm = () => {
       name: props.shotToEdit.name,
       description: props.shotToEdit.description,
       nb_frames: props.shotToEdit.nb_frames,
-      frameIn: shotData.frame_in || '',
-      frameOut: shotData.frame_out || '',
+      frameIn: shotData.frame_in ?? '',
+      frameOut: shotData.frame_out ?? '',
       fps: shotData.fps || '',
       max_retakes: parseInt(shotData.max_retakes) || '',
       resolution: shotData.resolution || '',
@@ -173,9 +173,12 @@ const resetForm = () => {
 }
 
 const updateNbFramesFromRange = () => {
+  // sanitizeInteger reads an empty field as 0, which is a valid frame in.
+  const bounds = [form.value.frameIn, form.value.frameOut]
+  if (bounds.some(value => value === '' || value == null)) return
   const frameIn = sanitizeInteger(form.value.frameIn)
   const frameOut = sanitizeInteger(form.value.frameOut)
-  if (frameIn && frameOut && frameOut > frameIn) {
+  if (frameOut >= frameIn) {
     form.value.nb_frames = frameOut - frameIn + 1
   }
 }

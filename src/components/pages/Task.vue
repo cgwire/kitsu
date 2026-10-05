@@ -367,13 +367,7 @@
                     :is-pinnable="
                       isDepartmentSupervisor || isCurrentUserManager
                     "
-                    :is-replyable="
-                      (user && user.id === comment.person?.id) ||
-                      isAssigned ||
-                      isMentioned ||
-                      isDepartmentSupervisor ||
-                      isCurrentUserManager
-                    "
+                    :is-replyable="canReplyTo(comment)"
                     :revision="currentRevision"
                     :task="task"
                     :team="currentTeam"
@@ -500,6 +494,7 @@ import {
   ImageIcon
 } from 'lucide-vue-next'
 
+import { isClientThread } from '@/lib/comments'
 import drafts from '@/lib/drafts'
 import func from '@/lib/func'
 import { getTaskEntityPath, getTaskEntitiesPath } from '@/lib/path'
@@ -1328,6 +1323,27 @@ const confirmDeleteTaskComment = () => {
       loading.value.deleteComment = false
       errors.value.deleteComment = true
     })
+}
+
+// The client is shown who answers the threads it sees: there, the production
+// managers answer for the studio, and the client once mentioned. The other
+// threads reach the client emptied of their text, so only the studio answers.
+const canReplyTo = comment => {
+  if (isCurrentUserManager.value) return true
+  const isAuthor = Boolean(user.value) && user.value.id === comment.person?.id
+  if (isCurrentUserClient.value) {
+    return (
+      isAuthor ||
+      (isClientThread(comment) && (isAssigned.value || isMentioned.value))
+    )
+  }
+  return (
+    !isClientThread(comment) &&
+    (isAuthor ||
+      isAssigned.value ||
+      isMentioned.value ||
+      isDepartmentSupervisor.value)
+  )
 }
 
 const isStatusChange = index => {

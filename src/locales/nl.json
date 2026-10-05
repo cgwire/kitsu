@@ -880,7 +880,7 @@
       "created_at": "Gecreëerd op:",
       "delete_text": "Weet je zeker dat je {name} uit de database wilt verwijderen?",
       "delete_error": "Er is een fout opgetreden tijdens het verwijderen van de playlist.",
-      "edit_error": "Er is een fout opgetreden tijdens het opslaan van de playlist.",
+      "edit_error": "Er is een fout opgetreden tijdens het opslaan van de playlist. Weet je zeker dat er geen playlist met een vergelijkbare naam bestaat?",
       "download_zip": "Download .zip",
       "failed": "Mislukt",
       "for_client": "De klant",

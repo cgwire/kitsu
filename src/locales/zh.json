@@ -880,7 +880,7 @@
       "created_at": "创建于：",
       "delete_text": "您确定要从您的数据库移除{name}吗？",
       "delete_error": "删除此播放列表时出现错误。",
-      "edit_error": "保存此播放列表时发生错误。",
+      "edit_error": "保存此播放列表时发生错误。您确定没有名称相似的播放列表吗？",
       "download_zip": "下载 .zip",
       "failed": "失败",
       "for_client": "客户",

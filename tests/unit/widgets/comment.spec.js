@@ -20,6 +20,8 @@ vi.mock('moment', async () => {
 import i18n from '@/lib/i18n'
 
 import Comment from '@/components/widgets/Comment.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import PeopleName from '@/components/widgets/PeopleName.vue'
 
 import './setup'
 
@@ -57,7 +59,12 @@ const task = {
 
 // user is null for the anonymous guests of a shared playlist, so the guard has
 // to survive that too.
-const makeStore = ({ isAdmin = false, user = { id: 'person-1' } } = {}) =>
+const makeStore = ({
+  isAdmin = false,
+  isClient = false,
+  persons = [],
+  user = { id: 'person-1' }
+} = {}) =>
   createStore({
     getters: {
       canValidatePreviewFiles: () => () => false,
@@ -65,10 +72,14 @@ const makeStore = ({ isAdmin = false, user = { id: 'person-1' } } = {}) =>
       departmentMap: () => new Map(),
       isCurrentUserAdmin: () => isAdmin,
       isCurrentUserArtist: () => false,
-      isCurrentUserClient: () => false,
+      isCurrentUserClient: () => isClient,
       isCurrentUserManager: () => false,
       currentUserRoleForProduction: () => () => null,
-      personMap: () => new Map([['person-1', { id: 'person-1' }]]),
+      personMap: () =>
+        new Map([
+          ['person-1', { id: 'person-1' }],
+          ...persons.map(person => [person.id, person])
+        ]),
       productionDepartmentIds: () => [],
       taskTypeMap: () =>
         new Map([['task-type-1', { id: 'task-type-1', for_entity: 'Asset' }]]),
@@ -79,6 +90,7 @@ const makeStore = ({ isAdmin = false, user = { id: 'person-1' } } = {}) =>
 
 const mountComment = ({
   comment = makeComment(),
+  isAcknowledgeable,
   isActionError = false,
   isEditable = true,
   storeOptions,
@@ -89,6 +101,7 @@ const mountComment = ({
     attachTo,
     props: {
       comment,
+      isAcknowledgeable,
       isActionError,
       isEditable,
       task,
@@ -255,6 +268,96 @@ describe('Comment', () => {
     })
   })
 
+  describe('avatar links', () => {
+    const comment = makeComment({
+      replies: [
+        {
+          id: 'reply-1',
+          text: 'A reply',
+          mentions: [],
+          department_mentions: [],
+          person_id: 'person-2',
+          person: { id: 'person-2', role: 'user' },
+          date: '2026-06-06T11:00:00'
+        }
+      ]
+    })
+
+    const avatarLinks = wrapper =>
+      wrapper
+        .findAllComponents(PeopleAvatar)
+        .map(avatar => avatar.props('isLink'))
+
+    test('lead to the page of the author and of the repliers', () => {
+      expect(avatarLinks(mountComment({ comment }))).toEqual([true, true])
+    })
+
+    // The person page sits behind the login.
+    test('stay inert for an anonymous guest', () => {
+      const wrapper = mountComment({ comment, storeOptions: { user: null } })
+      expect(avatarLinks(wrapper)).toEqual([false, false])
+    })
+  })
+
+  // Zou hands the client the internal comments that carry a preview, emptied
+  // of their text, for the revisions they hold.
+  describe('internal comment shown to a client', () => {
+    const persons = [{ id: 'person-3', full_name: 'Eddie Editor' }]
+    const internal = makeComment({
+      text: '',
+      person_id: 'person-2',
+      person: { id: 'person-2', role: 'supervisor' },
+      editor_id: 'person-3',
+      previews: [{ id: 'preview-1', revision: 1 }]
+    })
+
+    const shownPeople = wrapper => ({
+      avatar: wrapper.findComponent(PeopleAvatar).exists(),
+      name: wrapper.findComponent(PeopleName).exists(),
+      editor: wrapper.find('.edited-text').exists()
+    })
+
+    test('keeps who wrote and edited it from the client', () => {
+      const wrapper = mountComment({
+        comment: internal,
+        storeOptions: { isClient: true, persons }
+      })
+      expect(shownPeople(wrapper)).toEqual({
+        avatar: false,
+        name: false,
+        editor: false
+      })
+    })
+
+    test.each([
+      ['flagged for the client', { for_client: true }],
+      ['written by a client', { person: { id: 'person-2', role: 'client' } }]
+    ])('names the people of a comment %s', (_, overrides) => {
+      const wrapper = mountComment({
+        comment: { ...internal, ...overrides },
+        storeOptions: { isClient: true, persons }
+      })
+      expect(shownPeople(wrapper)).toEqual({
+        avatar: true,
+        name: true,
+        editor: true
+      })
+      expect(wrapper.find('.edited-text').text()).toBe('Edited by Eddie Editor')
+    })
+
+    test('names them to the studio', () => {
+      const wrapper = mountComment({
+        comment: internal,
+        storeOptions: { persons }
+      })
+      expect(shownPeople(wrapper)).toEqual({
+        avatar: true,
+        name: true,
+        editor: true
+      })
+    })
+  })
+
   describe('revision badge', () => {
     const comment = makeComment({
       previews: [{ id: 'preview-1', revision: 1 }]
@@ -272,6 +375,39 @@ describe('Comment', () => {
       })
       expect(wrapper.findComponent(RouterLink).exists()).toBe(false)
       expect(wrapper.find('.round-name.revision').text()).toContain('1')
+    })
+  })
+
+  describe('acknowledgment button', () => {
+    test('shows the thumbs up with its counter', () => {
+      const wrapper = mountComment({
+        comment: makeComment({ acknowledgements: ['person-1', 'person-2'] })
+      })
+      expect(wrapper.find('.like-button').text()).toBe('2')
+    })
+
+    test('stays hidden when the comment cannot be acknowledged', () => {
+      const wrapper = mountComment({ isAcknowledgeable: false })
+      expect(wrapper.find('.like-button').exists()).toBe(false)
+    })
+
+    test('names the people who acknowledged the comment in a tooltip', () => {
+      const wrapper = mountComment({
+        comment: makeComment({ acknowledgements: ['person-2'] }),
+        storeOptions: { persons: [{ id: 'person-2', name: 'Sam Supervisor' }] }
+      })
+      expect(wrapper.find('[title="Sam Supervisor"]').exists()).toBe(true)
+    })
+
+    // A shared playlist guest gets the acknowledgments back when editing a
+    // comment, although the button is hidden.
+    test('keeps their names out when the comment cannot be acknowledged', () => {
+      const wrapper = mountComment({
+        comment: makeComment({ acknowledgements: ['person-2'] }),
+        isAcknowledgeable: false,
+        storeOptions: { persons: [{ id: 'person-2', name: 'Sam Supervisor' }] }
+      })
+      expect(wrapper.html()).not.toContain('Sam Supervisor')
     })
   })
 })

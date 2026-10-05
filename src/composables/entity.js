@@ -36,9 +36,8 @@ export const getEntityMap = entityType => {
 }
 
 /**
- * Composable mirroring src/components/mixins/entity.js for pages that use
- * `<script setup>`. Intentionally narrow: only the parts the entity pages
- * (Edit, Asset, Shot, Sequence, Episode) need.
+ * Shared logic of the entity pages (Edit, Asset, Shot, Sequence, Episode).
+ * Intentionally narrow: only the parts these pages need.
  *
  * @param {Object} options
  * @param {string} options.type - lowercase entity type (e.g. 'edit').
@@ -49,7 +48,7 @@ export const getEntityMap = entityType => {
  *   full list of entities (computed from store or page state). Caller
  *   passes a ref/computed.
  * @param {Function} options.init - reset/reload callback fired when the
- *   route params change (mirrors the mixin's `$route` watcher).
+ *   route params change.
  */
 export const useEntity = ({ type, currentEntity, entityList, init }) => {
   const route = useRoute()
