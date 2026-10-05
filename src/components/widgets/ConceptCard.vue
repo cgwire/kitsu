@@ -8,10 +8,10 @@
   >
     <entity-preview
       :entity="concept"
-      :empty-height="200"
-      :empty-width="300"
-      :height="200"
-      :width="300"
+      :empty-height="previewSize.height"
+      :empty-width="previewSize.width"
+      :height="previewSize.height"
+      :width="previewSize.width"
       is-rounded-top-border
     />
     <div class="description">
@@ -65,6 +65,10 @@ const store = useStore()
 // Props / Emits
 // --------------------------------------------------------------------------
 const props = defineProps({
+  compact: {
+    type: Boolean,
+    default: false
+  },
   concept: {
     type: Object,
     required: true
@@ -79,6 +83,10 @@ const currentProduction = computed(() => store.getters.currentProduction)
 const isTVShow = computed(() => store.getters.isTVShow)
 const personMap = computed(() => store.getters.personMap)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
+
+const previewSize = computed(() =>
+  props.compact ? { width: 150, height: 100 } : { width: 300, height: 200 }
+)
 
 const linkedEntities = computed(() =>
   props.concept.entity_concept_links

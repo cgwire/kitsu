@@ -7,10 +7,12 @@ import { createStore } from 'vuex'
 vi.mock('@/store', () => ({ default: {} }))
 
 import ConceptCard from '@/components/widgets/ConceptCard.vue'
+import EntityPreview from '@/components/widgets/EntityPreview.vue'
 
-const mountCard = () =>
+const mountCard = (props = {}) =>
   shallowMount(ConceptCard, {
     props: {
+      ...props,
       concept: {
         id: 'concept-1',
         created_by: 'person-1',
@@ -41,5 +43,13 @@ describe('ConceptCard', () => {
     await wrapper.trigger('click', { ctrlKey: true })
 
     expect(wrapper.emitted('click')[0][0].ctrlKey).toBe(true)
+  })
+
+  test('halves its preview when compact', () => {
+    const preview = mountCard({ compact: true }).findComponent(EntityPreview)
+
+    expect([preview.props('width'), preview.props('height')]).toEqual([
+      150, 100
+    ])
   })
 })
