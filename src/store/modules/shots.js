@@ -1212,8 +1212,9 @@ const mutations = {
     if (!newShot.data) newShot.data = {}
     if (newShot.data.fps && !state.isFps) state.isFps = true
     if (newShot.nb_frames && !state.isFrames) state.isFrames = true
-    if (newShot.data.frame_in != null && !state.isFrameIn)
-      state.isFrameIn = true
+    // 0 is a frame in, the empty field of the edit modal is not.
+    const frameIn = newShot.data.frame_in
+    if (frameIn != null && frameIn !== '') state.isFrameIn = true
     if (newShot.data.frame_out && !state.isFrameOut) state.isFrameOut = true
     if (newShot.data.resolution && !state.isResolution) {
       state.isResolution = true
