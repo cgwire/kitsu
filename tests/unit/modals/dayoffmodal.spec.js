@@ -62,6 +62,15 @@ describe('DayOffModal', () => {
     expect(fieldDates(wrapper)).toEqual([date, endDate])
   })
 
+  // Zou refuses a day off without a start, while an empty end makes a day
+  // off of the start day alone: the API sends the start as the end
+  it('keeps the start date required', () => {
+    const [startField, endField] = mountModal().findAllComponents(DateField)
+
+    expect(startField.props('canDelete')).toBe(false)
+    expect(endField.props('canDelete')).toBe(true)
+  })
+
   // The Days off tab hands the same day off again when the edit of a row
   // opens after a cancel
   it('resets the form each time it opens', async () => {

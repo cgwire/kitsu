@@ -145,6 +145,32 @@ describe('store/api endpoints', () => {
     })
   })
 
+  // The end field of the day-off form can be cleared: the day off then ends
+  // on its start day
+  describe('people day offs', () => {
+    test('creates a day off of its start day when the end is empty', () => {
+      peopleApi.createDayOff('person-1', '2026-10-22', null, null)
+
+      expect(client.ppost).toHaveBeenCalledWith('/api/data/day-offs', {
+        person_id: 'person-1',
+        date: '2026-10-22',
+        end_date: '2026-10-22',
+        description: null
+      })
+    })
+
+    test('updates a day off to its start day when the end is empty', () => {
+      peopleApi.updateDayOff('day-off-1', 'person-1', '2026-10-22', null, null)
+
+      expect(client.pput).toHaveBeenCalledWith('/api/data/day-offs/day-off-1', {
+        person_id: 'person-1',
+        date: '2026-10-22',
+        end_date: '2026-10-22',
+        description: null
+      })
+    })
+  })
+
   describe('tasktypes deleteTaskType', () => {
     // Without force Zou refuses a task type still attached to schedule
     // items or productions, and says so: that answer drives the second,

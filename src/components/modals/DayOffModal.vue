@@ -9,6 +9,7 @@
           <date-field
             utc
             week-days-disabled
+            :can-delete="false"
             :model-value="form.startDate"
             @update:model-value="onStartDateChange"
           />
