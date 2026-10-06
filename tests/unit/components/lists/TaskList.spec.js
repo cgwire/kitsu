@@ -27,7 +27,10 @@ const task = {
   retake_count: 0
 }
 
-const mountList = config =>
+const mountList = (
+  config,
+  { getters = {}, actions = {}, props = {} } = {}
+) =>
   shallowMount(TaskList, {
     global: {
       config,
@@ -48,17 +51,19 @@ const mountList = config =>
             taskMap: () => new Map(),
             taskTypeMap: () => new Map(),
             use12HourClock: () => false,
-            user: () => ({ id: 'user-1', departments: [] })
+            user: () => ({ id: 'user-1', departments: [] }),
+            ...getters
           },
           actions: {
             addSelectedTask: () => {},
             clearSelectedTasks: () => {},
-            removeSelectedTask: () => {}
+            removeSelectedTask: () => {},
+            ...actions
           }
         })
       ]
     },
-    props: { entityType: 'Asset', tasks: [task] }
+    props: { entityType: 'Asset', tasks: [task], ...props }
   })
 
 // The click target when the pointer is on the drawn line of an icon
@@ -91,6 +96,35 @@ describe('lists/TaskList', () => {
 
     expect(errorHandler).not.toHaveBeenCalled()
     expect(wrapper.emitted('task-selected')).toBeUndefined()
+
+    wrapper.unmount()
+  })
+
+  // 2.05 hours make 122.99999999999999 minutes in floats.
+  test('saves an estimation typed in hours in whole minutes', async () => {
+    const updateTask = vi.fn()
+    const wrapper = mountList(undefined, {
+      getters: {
+        isCurrentUserProductionManager: () => true,
+        organisation: () => ({
+          hours_by_day: 8,
+          format_duration_in_hours: true
+        }),
+        taskMap: () => new Map([[task.id, task]])
+      },
+      actions: { updateTask },
+      // the task type page passes the dates of the production
+      props: { disabledDates: {} }
+    })
+    await wrapper.find('tbody td.name').trigger('click')
+    const input = wrapper.find('tbody td.estimation input')
+
+    // setValue fires the change event the list saves on
+    await input.setValue('2.05')
+
+    expect(updateTask.mock.calls.map(([, payload]) => payload)).toEqual([
+      { taskId: 'task-1', data: { estimation: 123 } }
+    ])
 
     wrapper.unmount()
   })

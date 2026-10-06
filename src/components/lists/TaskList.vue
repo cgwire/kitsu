@@ -456,7 +456,7 @@ import {
 } from '@/lib/descriptors'
 import { getTaskHref } from '@/lib/path'
 import {
-  daysToMinutes,
+  durationToMinutes,
   formatSimpleDate,
   getDatesFromStartDate,
   getDatesFromEndDate,
@@ -484,8 +484,7 @@ import ValidationTag from '@/components/widgets/ValidationTag.vue'
 const { t } = useI18n()
 const router = useRouter()
 const store = useStore()
-const { formatDuration, formatDisplayDate, isDurationInHours, organisation } =
-  useFormat()
+const { formatDuration, formatDisplayDate, organisation } = useFormat()
 
 // Props / Emits
 const props = defineProps({
@@ -741,9 +740,7 @@ const applyToSelection = buildData => {
 }
 
 const updateEstimation = duration => {
-  const estimation = isDurationInHours.value
-    ? duration * 60
-    : daysToMinutes(organisation.value, duration)
+  const estimation = durationToMinutes(organisation.value, duration)
 
   updateTasksEstimation({ estimation })
 }

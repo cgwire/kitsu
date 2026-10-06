@@ -383,12 +383,20 @@ export const getDayOffRange = (daysOff = []) => {
   }, [])
 }
 
+// Float arithmetic leaves a whole number of minutes or days a hair off
+// (3 days of 7.6 hours make 1367.9999999999998 minutes, and 1368 minutes
+// 3.0000000000000004 days): a floor or a day count then lands one off.
+const snapToWhole = value => {
+  const whole = Math.round(value)
+  return Math.abs(value - whole) < 1e-6 ? whole : value
+}
+
 export const daysToMinutes = (organisation, days = 0) => {
-  return Math.floor(days * organisation.hours_by_day * 60)
+  return Math.floor(snapToWhole(days * organisation.hours_by_day * 60))
 }
 
 export const minutesToDays = (organisation, minutes = 0) => {
-  return minutes / 60 / organisation.hours_by_day
+  return snapToWhole(minutes / 60 / organisation.hours_by_day)
 }
 
 export const hoursToDays = (organisation, hours = 0) => {
@@ -405,6 +413,6 @@ export const minutesToDuration = (organisation, minutes = 0) => {
 
 export const durationToMinutes = (organisation, duration = 0) => {
   return organisation.format_duration_in_hours
-    ? duration * 60
+    ? snapToWhole(duration * 60)
     : daysToMinutes(organisation, duration)
 }

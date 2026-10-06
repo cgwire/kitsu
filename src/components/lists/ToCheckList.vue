@@ -229,7 +229,7 @@ import { useFormat } from '@/composables/format'
 import { useTaskHelpers } from '@/composables/tasks'
 import { getTaskEntityPath } from '@/lib/path'
 import {
-  daysToMinutes,
+  durationToMinutes,
   formatSimpleDate,
   getDatesFromEndDate,
   getDatesFromStartDate,
@@ -380,9 +380,7 @@ const updateSelectedTasks = buildData => {
 }
 
 const updateEstimation = duration => {
-  const estimation = organisation.value.format_duration_in_hours
-    ? duration * 60
-    : daysToMinutes(organisation.value, duration)
+  const estimation = durationToMinutes(organisation.value, duration)
 
   updateSelectedTasks(task => {
     if (!task.start_date) {

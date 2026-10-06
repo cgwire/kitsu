@@ -1218,6 +1218,38 @@ describe('ProductionSchedule page', () => {
       ])
     })
 
+    // 1 / (3 / 17) is 5.666666666666666 days, a minute short of 2720 once
+    // rounded down.
+    it('saves the estimation of the quota in whole minutes', async () => {
+      const { storeActions, wrapper } = await mountAssignments({ nbAssets: 3 })
+      await selectProps(wrapper)
+      // Monday 6 to Tuesday 28 April: 17 working days
+      await setRange(wrapper, '2026-04-06', '2026-04-28')
+      const [, removeBob] = wrapper
+        .find('.side-column table.assignees')
+        .findAllComponents(ButtonSimple)
+      removeBob.vm.$emit('click')
+      await flushPromises()
+
+      await apply(wrapper)
+
+      const estimation = 2720
+      expect(payloadsOf(storeActions.updateTask)).toEqual([
+        {
+          taskId: 'task-asset-1',
+          data: { estimation, start_date: '2026-04-06', due_date: '2026-04-13' }
+        },
+        {
+          taskId: 'task-asset-2',
+          data: { estimation, start_date: '2026-04-13', due_date: '2026-04-21' }
+        },
+        {
+          taskId: 'task-asset-3',
+          data: { estimation, start_date: '2026-04-21', due_date: '2026-04-28' }
+        }
+      ])
+    })
+
     it.each([
       ['the reference', {}],
       ['a version', versionOptions]
