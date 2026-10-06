@@ -879,4 +879,42 @@ describe('Breakdown page, asset creation', () => {
     expect(modal.vm.form.name).toBe('Hero')
     vi.restoreAllMocks()
   })
+
+  // A creation sent again after a failure shows its success alone.
+  test('clears a past error on a new confirm and stay', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const newAsset = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('down'))
+      .mockResolvedValueOnce()
+    const { modal } = await mountCreation(newAsset)
+
+    modal.vm.$emit('confirm-and-stay', { name: 'Hero' })
+    await flushPromises()
+    modal.vm.$emit('confirm-and-stay', { name: 'Hero' })
+    await flushPromises()
+
+    expect(modal.props('isSuccess')).toBe(true)
+    expect(modal.props('isError')).toBe(false)
+    vi.restoreAllMocks()
+  })
+
+  // A plain confirm that fails after a confirm and stay shows its error alone.
+  test('clears a past success when a plain confirm fails', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const newAsset = vi
+      .fn()
+      .mockResolvedValueOnce()
+      .mockRejectedValueOnce(new Error('down'))
+    const { modal } = await mountCreation(newAsset)
+
+    modal.vm.$emit('confirm-and-stay', { name: 'Hero' })
+    await flushPromises()
+    modal.vm.$emit('confirm', { name: 'Villain' })
+    await flushPromises()
+
+    expect(modal.props('isError')).toBe(true)
+    expect(modal.props('isSuccess')).toBe(false)
+    vi.restoreAllMocks()
+  })
 })

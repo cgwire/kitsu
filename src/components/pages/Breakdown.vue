@@ -1217,6 +1217,7 @@ const toggleColumnSelector = () => {
 const confirmNewAssetStay = async form => {
   loading.stay = true
   success.edit = false
+  errors.edit = false
   try {
     await store.dispatch('newAsset', form)
     // The modal stays open: a new object resets its form for the next asset.
@@ -1233,6 +1234,7 @@ const confirmNewAssetStay = async form => {
 
 const confirmNewAsset = async form => {
   loading.edit = true
+  success.edit = false
   errors.edit = false
   try {
     await store.dispatch('newAsset', form)
