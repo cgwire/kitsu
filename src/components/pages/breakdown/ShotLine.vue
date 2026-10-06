@@ -95,7 +95,7 @@
       <input
         class="input-editor"
         step="1"
-        :value="entity.nb_frames"
+        v-number-value="entity.nb_frames"
         type="number"
         min="0"
         @input="event => onNbFramesChanged(entity, event)"
@@ -114,7 +114,9 @@
         step="1"
         type="number"
         min="0"
-        :value="getMetadataFieldValue({ field_name: 'frame_in' }, entity)"
+        v-number-value="
+          getMetadataFieldValue({ field_name: 'frame_in' }, entity)
+        "
         @input="
           event =>
             onMetadataFieldChanged(
@@ -140,7 +142,9 @@
         step="1"
         type="number"
         min="0"
-        :value="getMetadataFieldValue({ field_name: 'frame_out' }, entity)"
+        v-number-value="
+          getMetadataFieldValue({ field_name: 'frame_out' }, entity)
+        "
         @input="
           event =>
             onMetadataFieldChanged(
@@ -285,6 +289,7 @@ import { CopyIcon } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 
+import vNumberValue from '@/directives/number-value'
 import { ASSET_DRAG_TYPE, isAssetReadyFor } from '@/lib/casting'
 import {
   getDescriptorChecklistValues,

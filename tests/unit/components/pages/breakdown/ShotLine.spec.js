@@ -1,5 +1,6 @@
 import { shallowMount } from '@vue/test-utils'
 import { vi } from 'vitest'
+import { markRaw } from 'vue'
 import { createStore } from 'vuex'
 
 vi.mock('@/store', () => ({ default: {} }))
@@ -7,6 +8,8 @@ vi.mock('@/store', () => ({ default: {} }))
 import { ASSET_DRAG_TYPE } from '@/lib/casting'
 
 import ShotLine from '@/components/pages/breakdown/ShotLine.vue'
+
+import { useNumberField } from '../../../fixtures/number-input'
 
 const link = assetId => ({ id: `link-${assetId}`, asset_id: assetId })
 const assets = new Map([
@@ -16,7 +19,7 @@ const assets = new Map([
 ])
 const priorities = { layout: 1, animation: 2 }
 
-const mountLine = props => {
+const mountLine = (props, getters = {}) => {
   const store = createStore({
     getters: {
       assetMap: () => assets,
@@ -31,7 +34,8 @@ const mountLine = props => {
       isFrameOut: () => false,
       isFrames: () => false,
       isShowInfosBreakdown: () => false,
-      user: () => ({ departments: [] })
+      user: () => ({ departments: [] }),
+      ...getters
     }
   })
   return shallowMount(ShotLine, {
@@ -141,5 +145,47 @@ describe('ShotLine, asset drop', () => {
     await wrapper.find('.shot').trigger('drop', dragged('asset-9'))
 
     expect(wrapper.emitted('drop-asset')).toBeUndefined()
+  })
+})
+
+describe('ShotLine, number cells', () => {
+  // The breakdown saves each key into the shot of the line without rendering
+  // it again: a click on the line, which selects it, does.
+  const mountNumberLine = () =>
+    mountLine(
+      {
+        entity: markRaw({ id: 'shot-b', nb_frames: null, data: {} }),
+        metadataDisplayHeaders: { frames: true, frameIn: true, frameOut: true },
+        onMetadataChanged: ({ entry, descriptor, value }) => {
+          entry.data[descriptor.field_name] = value
+        }
+      },
+      {
+        isFrameIn: () => true,
+        isFrameOut: () => true,
+        isFrames: () => true,
+        isShowInfosBreakdown: () => true,
+        selectedAssets: () => new Map(),
+        selectedEdits: () => new Map(),
+        selectedShots: () => new Map()
+      }
+    )
+
+  const savedValues = wrapper =>
+    wrapper.emitted('metadata-changed').map(([{ value }]) => value)
+
+  // Written back from the number saved, "12.0" turned into "12": typing
+  // 12.05 with a click in between saved 125.
+  test('keeps the zero typed after the decimal point of a frame in', async () => {
+    const wrapper = mountNumberLine()
+    const field = useNumberField(
+      wrapper.findAll('.frames-column input')[1].element
+    )
+    await field.type('12.0')
+
+    await wrapper.setProps({ selection: new Set(['shot-b']) })
+
+    expect(await field.type('5')).toEqual(['12.05'])
+    expect(savedValues(wrapper)).toEqual([1, 12, 12])
   })
 })
