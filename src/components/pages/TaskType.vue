@@ -1776,12 +1776,15 @@ const expandPersonElement = personElement => {
 
 // Import
 
+// Close leaves the error of the last save: opening drops it.
 const onAddMetadataClicked = () => {
+  errors.addMetadata = false
   descriptorToEdit.value = {}
   modals.isAddMetadataDisplayed = true
 }
 
 const onEditMetadataClicked = descriptorId => {
+  errors.addMetadata = false
   descriptorToEdit.value = currentProduction.value.descriptors.find(
     descriptor => descriptor.id === descriptorId
   )

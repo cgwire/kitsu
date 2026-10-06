@@ -13,8 +13,11 @@ vi.mock('vue-i18n', async importOriginal => ({
 import '@/lib/auth'
 import assetStore from '@/store/modules/assets'
 
+import TaskList from '@/components/lists/TaskList.vue'
+import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
 import TaskType from '@/components/pages/TaskType.vue'
 import EstimationHelper from '@/components/pages/tasktype/EstimationHelper.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 
 const SearchFieldStub = {
   template: '<div />',
@@ -138,6 +141,68 @@ describe('TaskType page', () => {
       }
     })
     wrapper.unmount()
+  })
+
+  // Zou refuses a column named like another one of the task type: a close
+  // keeps the error, the next opening drops it.
+  describe('metadata column modal', () => {
+    const descriptor = { id: 'descriptor-1', name: 'Difficulty' }
+    // unmounted after each test, a failed one included
+    let wrapper = null
+
+    afterEach(() => {
+      wrapper?.unmount()
+      wrapper = null
+      vi.restoreAllMocks()
+    })
+
+    it.each([
+      [
+        'a new column',
+        () =>
+          wrapper
+            .findAllComponents(ButtonSimple)
+            .find(button => button.props('icon') === 'plus')
+            .vm.$emit('click')
+      ],
+      [
+        'a column edit',
+        () =>
+          wrapper
+            .findComponent(TaskList)
+            .vm.$emit('edit-metadata', descriptor.id)
+      ]
+    ])('opens %s without the error of a refused column', async (_, open) => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      // the data load the page starts 100 ms after mounting is not under test
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      const page = await mountPage({
+        section: 'tasks',
+        actions: {
+          addMetadataDescriptor: vi.fn(() => Promise.reject(new Error('taken')))
+        },
+        getters: {
+          currentProduction: () => ({
+            id: 'production-1',
+            name: 'Production',
+            descriptors: [descriptor]
+          })
+        }
+      })
+      wrapper = page.wrapper
+      const modal = () => wrapper.findComponent(AddMetadataModal)
+
+      await open()
+      await modal().vm.$emit('confirm', { name: 'Complexity' })
+      await flushPromises()
+      expect(modal().props('isError')).toBe(true)
+
+      await modal().vm.$emit('cancel')
+      await open()
+
+      expect(modal().props('active')).toBe(true)
+      expect(modal().props('isError')).toBe(false)
+    })
   })
 
   // The timesheet stores a day logged with its preset in whole minutes, 498
