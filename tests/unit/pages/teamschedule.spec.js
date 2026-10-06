@@ -297,6 +297,32 @@ describe('TeamSchedule page', () => {
     })
   })
 
+  // The date fields of the page are utc ones: they hold a day at UTC
+  // midnight. At 00:30 local time, east of UTC, the UTC day is still the
+  // day before.
+  describe('default range', () => {
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['Date'] })
+      vi.setSystemTime(new Date(2026, 9, 6, 0, 30))
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('runs from the local day when nobody has dates', async () => {
+      const { wrapper } = await mountPage()
+      await flushPromises()
+
+      const fields = wrapper.findAllComponents({ name: 'DateField' })
+      expect(fields.map(field => field.props('modelValue'))).toEqual([
+        new Date('2026-10-06T00:00:00.000Z'),
+        new Date('2027-01-06T00:00:00.000Z')
+      ])
+      wrapper.unmount()
+    })
+  })
+
   describe('department filter', () => {
     const departmentCombo = wrapper =>
       wrapper.findComponent({ name: 'ComboboxDepartment' })

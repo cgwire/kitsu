@@ -287,6 +287,7 @@ import {
   addBusinessDays,
   getFirstStartDate,
   getLastEndDate,
+  getUserDay,
   minutesToDays,
   parseSimpleDate
 } from '@/lib/time'
@@ -530,8 +531,8 @@ const init = async () => {
     loading.schedule = false
     return
   }
-  startDate.value = moment()
-  endDate.value = moment().add(3, 'months')
+  startDate.value = getUserDay()
+  endDate.value = getUserDay().add(3, 'months')
   Object.values(personDates.value).forEach(dates => {
     if (dates.startDate?.isBefore(startDate.value)) {
       startDate.value = dates.startDate.clone()

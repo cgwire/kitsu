@@ -1418,6 +1418,8 @@
       "apply_to_prod_confirm": "Er du sikker på, at du vil anvende denne version af tidsplanen på den aktuelle produktion? Dette vil tilsidesætte de aktuelle opgaveværdier.",
       "apply_to_prod_error": "Der opstod en fejl under anvendelse af versionen af tidsplanen på den aktuelle produktion.",
       "assign": "Tildel til:",
+      "assign_error": "Opgaverne kunne ikke tildeles. Prøv venligst igen.",
+      "assign_no_fit": "{count} opgave passede ikke ind i datointervallet. | {count} opgaver passede ikke ind i datointervallet.",
       "confirm_move_children": "Flytning af denne bjælke vil beskære eller flytte {count} under-element, så det passer til de nye grænser. Fortsæt? | Flytning af denne bjælke vil beskære eller flytte {count} under-elementer, så de passer til de nye grænser. Fortsæt?",
       "create_version": "Opret version af tidsplan",
       "delete_version": "Slet version af tidsplan",

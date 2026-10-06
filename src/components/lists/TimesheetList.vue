@@ -190,7 +190,7 @@
     <day-off-modal
       :active="modals.setDayOff"
       :day-off-to-edit="{
-        date: selectedDate
+        date: getUserDay(selectedDate).toDate()
       }"
       :is-error="isDayOffError"
       :error-text="dayOffTextError"
@@ -226,6 +226,7 @@ import { useStore } from 'vuex'
 
 import { PAGE_SIZE } from '@/lib/pagination'
 import { getTaskEntityPath } from '@/lib/path'
+import { getUserDay } from '@/lib/time'
 
 import ProductionNameCell from '@/components/cells/ProductionNameCell.vue'
 import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'

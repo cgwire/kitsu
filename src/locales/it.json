@@ -1418,6 +1418,8 @@
       "apply_to_prod_confirm": "Sei sicuro di voler applicare questa versione della pianificazione alla produzione corrente? I valori attuali dei task verranno sovrascritti.",
       "apply_to_prod_error": "Si è verificato un errore durante l'applicazione della versione della pianificazione alla produzione corrente.",
       "assign": "Assegna a:",
+      "assign_error": "Impossibile assegnare i task. Riprova.",
+      "assign_no_fit": "{count} task non è rientrato nell'intervallo di date. | {count} task non sono rientrati nell'intervallo di date.",
       "confirm_move_children": "Spostare questa barra ritaglierà o sposterà {count} sotto-elemento per adattarlo ai nuovi limiti. Vuoi continuare? | Spostare questa barra ritaglierà o sposterà {count} sotto-elementi per adattarli ai nuovi limiti. Vuoi continuare?",
       "create_version": "Crea una versione della pianificazione",
       "delete_version": "Elimina la versione della pianificazione",

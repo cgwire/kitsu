@@ -1,9 +1,13 @@
 // @vitest-environment node
 
+import { execFileSync } from 'node:child_process'
+import process from 'node:process'
+
 import moment from 'moment-timezone'
 import {
   addBusinessDays,
   daysToMinutes,
+  durationToMinutes,
   formatDate,
   formatDisplayDate,
   formatDuration,
@@ -28,6 +32,7 @@ import {
   getWeekRange,
   hoursToDays,
   minutesToDays,
+  minutesToDuration,
   monthToString,
   parseDate,
   parseSimpleDate,
@@ -416,6 +421,26 @@ describe('time', () => {
     expect(hoursToDays({ hours_by_day: 7 }, 21)).toEqual(3)
     expect(hoursToDays({ hours_by_day: 7 }, undefined)).toEqual(0)
   })
+  test('minutesToDuration', () => {
+    const hoursOrganisation = {
+      format_duration_in_hours: true,
+      hours_by_day: 7
+    }
+    expect(minutesToDuration({ hours_by_day: 7 }, 8 * 7 * 60)).toEqual(8)
+    expect(minutesToDuration(hoursOrganisation, 8 * 7 * 60)).toEqual(56)
+    expect(minutesToDuration(hoursOrganisation, 90)).toEqual(1.5)
+    expect(minutesToDuration(hoursOrganisation, undefined)).toEqual(0)
+  })
+  test('durationToMinutes', () => {
+    const hoursOrganisation = {
+      format_duration_in_hours: true,
+      hours_by_day: 7
+    }
+    expect(durationToMinutes({ hours_by_day: 7 }, 8)).toEqual(8 * 7 * 60)
+    expect(durationToMinutes(hoursOrganisation, 8)).toEqual(8 * 60)
+    expect(durationToMinutes(hoursOrganisation, 1.5)).toEqual(90)
+    expect(durationToMinutes(hoursOrganisation, undefined)).toEqual(0)
+  })
 
   test('formatDuration', () => {
     const organisation = { hours_by_day: 8 }
@@ -454,6 +479,76 @@ describe('time', () => {
       { id: 'off-2', date: '2023-05-02', end_date: '2023-05-03' },
       { id: 'off-2', date: '2023-05-03', end_date: '2023-05-03' }
     ])
+  })
+})
+
+describe('getDayOffRange across DST changes', () => {
+  // Vitest runs the specs in worker threads, where assigning process.env.TZ
+  // leaves the timezone unchanged: expand the ranges in a process started in
+  // the timezone instead.
+  const expandIn = (timeZone, daysOff) => {
+    const time = new URL('../../../src/lib/time.js', import.meta.url)
+    const script = `
+      import { getDayOffRange } from ${JSON.stringify(time.href)}
+      console.log(JSON.stringify({
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        dates: getDayOffRange(${JSON.stringify(daysOff)}).map(({ date }) => date)
+      }))
+    `
+    const output = execFileSync(
+      process.execPath,
+      ['--input-type=module', '--eval', script],
+      { encoding: 'utf8', env: { ...process.env, TZ: timeZone } }
+    )
+    return JSON.parse(output)
+  }
+
+  test('keeps every day off in Europe/Budapest', () => {
+    // DST starts on 2026-03-29 and ends on 2026-10-25
+    const daysOff = [
+      { date: '2026-03-27', end_date: '2026-04-02' },
+      { date: '2026-10-23', end_date: '2026-10-27' }
+    ]
+    expect(expandIn('Europe/Budapest', daysOff)).toEqual({
+      timeZone: 'Europe/Budapest',
+      dates: [
+        '2026-03-27',
+        '2026-03-28',
+        '2026-03-29',
+        '2026-03-30',
+        '2026-03-31',
+        '2026-04-01',
+        '2026-04-02',
+        '2026-10-23',
+        '2026-10-24',
+        '2026-10-25',
+        '2026-10-26',
+        '2026-10-27'
+      ]
+    })
+  })
+
+  test('keeps every day off in America/New_York', () => {
+    // DST starts on 2026-03-08 and ends on 2026-11-01
+    const daysOff = [
+      { date: '2026-03-06', end_date: '2026-03-10' },
+      { date: '2026-10-30', end_date: '2026-11-03' }
+    ]
+    expect(expandIn('America/New_York', daysOff)).toEqual({
+      timeZone: 'America/New_York',
+      dates: [
+        '2026-03-06',
+        '2026-03-07',
+        '2026-03-08',
+        '2026-03-09',
+        '2026-03-10',
+        '2026-10-30',
+        '2026-10-31',
+        '2026-11-01',
+        '2026-11-02',
+        '2026-11-03'
+      ]
+    })
   })
 })
 

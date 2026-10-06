@@ -1834,6 +1834,8 @@
       "apply_to_prod_confirm": "Czy na pewno chcesz zastosować tę wersję harmonogramu do bieżącej produkcji? Spowoduje to nadpisanie bieżących wartości zadań.",
       "apply_to_prod_error": "Wystąpił błąd podczas stosowania wersji harmonogramu do bieżącej produkcji.",
       "assign": "Przypisz do:",
+      "assign_error": "Nie udało się przypisać zadań. Spróbuj ponownie.",
+      "assign_no_fit": "{count} zadanie nie zmieściło się w zakresie dat. | {count} zadań nie zmieściło się w zakresie dat.",
       "confirm_move_children": "Przesunięcie tego paska przytnie lub przesunie {count} podelement, aby zmieścił się w nowych granicach. Kontynuować? | Przesunięcie tego paska przytnie lub przesunie {count} podelementów, aby zmieściły się w nowych granicach. Kontynuować?",
       "create_version": "Utwórz wersję harmonogramu",
       "delete_version": "Usuń wersję harmonogramu",

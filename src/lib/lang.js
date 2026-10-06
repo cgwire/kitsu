@@ -20,7 +20,11 @@ import 'moment/locale/zh-tw'
 
 import i18n, { loadLocaleMessages } from '@/lib/i18n'
 
-// Importing a locale file activates it; default back to English.
+// The dates sent to the API are formatted with moment, and Zou rejects the
+// Persian digits of the fa locale: print Latin ones (Persian ones still parse).
+moment.updateLocale('fa', { postformat: string => string })
+
+// Importing or updating a locale activates it; default back to English.
 moment.locale('en')
 
 const LOCALE_MAP = {

@@ -170,6 +170,58 @@ describe('PreviewPlayer.vue', () => {
     })
   })
 
+  // The trim belongs to the shot, not to a revision: an end handle left at
+  // the clip end must not pin the length of the revision on screen.
+  describe('trim handles', () => {
+    // 250 frames at 25 fps.
+    const mountTrimmable = async data => {
+      wrapper = mountPlayer({
+        props: { previews: [moviePreview], readOnly: false },
+        getterOverrides: {
+          canEditShotTrim: () => () => true,
+          shotMap: () =>
+            new Map([[task.entity_id, { id: task.entity_id, data }]])
+        }
+      })
+      await nextTick()
+    }
+
+    const savedData = () =>
+      wrapper.vm.$store.dispatch.mock.calls.find(
+        ([action]) => action === 'editShot'
+      )?.[1].data
+
+    const dragHandle = (event, frameNumber) =>
+      wrapper
+        .findComponent({ name: 'VideoProgress' })
+        .vm.$emit(event, { frameNumber, save: true })
+
+    it('leaves the end untrimmed when only the start handle moves', async () => {
+      await mountTrimmable({ fps: 25 })
+      dragHandle('handle-in-changed', 5)
+      expect(savedData()).toEqual({ fps: 25, handle_in: 5 })
+    })
+
+    it('clears the end trim when its handle goes back to the clip end', async () => {
+      await mountTrimmable({ handle_in: 5, handle_out: 200 })
+      dragHandle('handle-out-changed', 250)
+      expect(savedData()).toEqual({ handle_in: 5, handle_out: null })
+    })
+
+    it('saves an end handle moved inside the clip', async () => {
+      await mountTrimmable({})
+      dragHandle('handle-out-changed', 200)
+      expect(savedData()).toEqual({ handle_out: 200 })
+    })
+
+    // A trim set on a longer revision lies past the end of this one.
+    it('keeps an end trim set on a longer revision when the start handle moves', async () => {
+      await mountTrimmable({ handle_out: 300 })
+      dragHandle('handle-in-changed', 5)
+      expect(savedData()).toEqual({ handle_in: 5, handle_out: 300 })
+    })
+  })
+
   describe('render', () => {
     // The Task page mounts the player with its task still null when a
     // comment lands before the task is loaded, and TaskInfo drops its task

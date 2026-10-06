@@ -78,10 +78,12 @@ export default {
     if (playlist.for_client !== undefined) {
       data.for_client = playlist.for_client
     }
+    // Zou serves an entry whose preview is gone without preview_file_id, and
+    // drops the saved entries that lack the key.
     if (playlist.shots)
       data.shots = playlist.shots.map(shot => ({
         entity_id: shot.entity_id,
-        preview_file_id: shot.preview_file_id
+        preview_file_id: shot.preview_file_id ?? null
       }))
     if (playlist.for_entity) data.for_entity = playlist.for_entity
     data.task_type_id = playlist.task_type_id || null

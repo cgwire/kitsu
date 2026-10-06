@@ -116,7 +116,10 @@
                 placeholder="0"
                 @input="
                   $emit('estimation-changed', {
-                    days: $event.target.valueAsNumber || 0,
+                    estimation: durationToMinutes(
+                      organisation,
+                      $event.target.valueAsNumber || 0
+                    ),
                     item: rootElement,
                     daysOff: rootElement.daysOff
                   })
@@ -866,6 +869,7 @@ import colors from '@/lib/colors'
 import {
   addBusinessDays,
   daysToMinutes,
+  durationToMinutes,
   formatDisplayDate,
   formatFullDate,
   getBusinessDays,
@@ -1464,23 +1468,26 @@ const startMoveTracking = () => {
 }
 
 const onChildEstimationChanged = (event, childElement, rootElement) => {
-  const estimation = event.target.valueAsNumber || 0
+  const estimation = durationToMinutes(
+    organisation.value,
+    event.target.valueAsNumber || 0
+  )
   if (props.isEstimationLinked) {
-    childElement.man_days = daysToMinutes(organisation.value, estimation)
-    childElement.estimation = childElement.man_days
+    childElement.man_days = estimation
+    childElement.estimation = estimation
     refreshManDays(rootElement)
 
     if (estimation > 0) {
       childElement.endDate = addBusinessDays(
         childElement.startDate,
-        estimation - 1,
+        minutesToDays(organisation.value, estimation) - 1,
         rootElement.daysOff
       )
     }
   }
   emit('estimation-changed', {
     taskId: childElement.id,
-    days: estimation,
+    estimation,
     item: childElement,
     daysOff: rootElement.daysOff
   })

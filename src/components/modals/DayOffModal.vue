@@ -57,9 +57,10 @@
 
 <script setup>
 import { AlertTriangleIcon } from 'lucide-vue-next'
-import moment from 'moment-timezone'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+
+import { getUserDay } from '@/lib/time'
 
 import BaseModal from '@/components/modals/BaseModal.vue'
 import DateField from '@/components/widgets/DateField.vue'
@@ -107,7 +108,7 @@ const confirm = () => {
 }
 
 const resetForm = () => {
-  const today = moment().utc().toDate()
+  const today = getUserDay().toDate()
   form.value = {
     startDate: props.dayOffToEdit?.date || today,
     endDate: props.dayOffToEdit?.end_date || props.dayOffToEdit?.date || today,

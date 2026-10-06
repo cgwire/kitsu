@@ -1418,6 +1418,8 @@
       "apply_to_prod_confirm": "Tem certeza de que deseja aplicar essa versão de programação à produção atual? Isso substituirá os valores atuais da tarefa.",
       "apply_to_prod_error": "Ocorreu um erro ao aplicar a versão de programação à produção atual.",
       "assign": "Atribuir a:",
+      "assign_error": "Não foi possível atribuir as tarefas. Tente novamente.",
+      "assign_no_fit": "{count} tarefa não coube no intervalo de datas. | {count} tarefas não couberam no intervalo de datas.",
       "confirm_move_children": "Mover esta barra vai cortar ou ajustar {count} subitem para caber nos novos limites. Continuar? | Mover esta barra vai cortar ou ajustar {count} subitens para caberem nos novos limites. Continuar?",
       "create_version": "Criar versão da programação",
       "delete_version": "Excluir versão da programação",

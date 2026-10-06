@@ -7,7 +7,8 @@ vi.mock('@/store/api/client', () => ({
     pdel: vi.fn(),
     pget: vi.fn(),
     ppost: vi.fn(),
-    ppostImport: vi.fn()
+    ppostImport: vi.fn(),
+    pput: vi.fn()
   }
 }))
 
@@ -18,6 +19,7 @@ import editsApi from '@/store/api/edits'
 import entitiesApi from '@/store/api/entities'
 import newsApi from '@/store/api/news'
 import peopleApi from '@/store/api/people'
+import playlistsApi from '@/store/api/playlists'
 import scheduleApi from '@/store/api/schedule'
 import shotsApi from '@/store/api/shots'
 import taskTypesApi from '@/store/api/tasktypes'
@@ -28,6 +30,7 @@ describe('store/api endpoints', () => {
     client.pget.mockClear()
     client.ppost.mockClear()
     client.ppostImport.mockClear()
+    client.pput.mockClear()
   })
 
   // Zou answers an import only once every row is processed: the imports
@@ -175,5 +178,25 @@ describe('store/api endpoints', () => {
     const [path, data] = client.ppost.mock.calls[0]
     expect(path).toBe('/api/data/production-schedule-versions/')
     expect(data).toStrictEqual({ project_id: 'p1', name: 'Plan B' })
+  })
+
+  // Zou serves an entry whose preview is gone without preview_file_id, and
+  // keeps only the saved entries that hold the key: a playlist save erased
+  // every such entry.
+  test('keeps the entries without a preview when saving a playlist', () => {
+    playlistsApi.updatePlaylist({
+      id: 'pl-1',
+      shots: [
+        { entity_id: 'shot-1', preview_file_id: 'preview-1' },
+        { entity_id: 'shot-2' }
+      ]
+    })
+
+    const [path, data] = client.pput.mock.calls[0]
+    expect(path).toBe('/api/data/playlists/pl-1')
+    expect(JSON.parse(JSON.stringify(data)).shots).toEqual([
+      { entity_id: 'shot-1', preview_file_id: 'preview-1' },
+      { entity_id: 'shot-2', preview_file_id: null }
+    ])
   })
 })

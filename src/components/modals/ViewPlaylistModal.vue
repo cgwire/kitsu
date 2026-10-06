@@ -237,7 +237,6 @@ const convertEntityToPlaylistFormat = entityInfo => {
   previewFileEntityMap.set(playlistEntity.preview_file_id, playlistEntity)
   const previews = playlistEntity.preview_file_previews || []
   previews.forEach(preview => {
-    preview.duration = entity.preview_file_duration
     previewFileMap.set(preview.id, preview)
   })
   return playlistEntity

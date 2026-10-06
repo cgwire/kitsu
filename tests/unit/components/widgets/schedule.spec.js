@@ -2,6 +2,10 @@ import { mount } from '@vue/test-utils'
 import moment from 'moment'
 import { vi } from 'vitest'
 
+const { organisation } = vi.hoisted(() => ({
+  organisation: { hours_by_day: 8, format_duration_in_hours: false }
+}))
+
 vi.mock('vuex', () => ({
   useStore: () => ({
     getters: {
@@ -15,7 +19,7 @@ vi.mock('vuex', () => ({
       isDarkTheme: false,
       milestones: [],
       openProductions: [{ id: 'production-1', team: ['person-1'] }],
-      organisation: { hours_by_day: 8 },
+      organisation,
       taskMap: new Map(),
       taskStatuses: []
     },
@@ -276,4 +280,54 @@ describe('Schedule widget - today', () => {
     expect(after.scrollLeft).toBe(showTodayOn('2026-10-31').scrollLeft)
     expect([before.marker, after.marker]).toEqual(['none', 'none'])
   })
+})
+
+// The task type, entity and person schedules estimate each task in a field
+// next to its name.
+describe('Schedule widget - estimation field', () => {
+  // Monday 31 August, one working day
+  const buildTaskElement = () => ({
+    id: 'task-1',
+    name: 'Characters / Cat',
+    editable: true,
+    estimation: 8 * 60,
+    man_days: 8 * 60,
+    startDate: moment('2026-08-31'),
+    endDate: moment('2026-08-31'),
+    children: []
+  })
+
+  afterEach(() => {
+    organisation.format_duration_in_hours = false
+  })
+
+  // The value is shown in the unit printed next to it: a typed one is read
+  // in that unit too.
+  it.each([
+    ['hours', true, '8', '16'],
+    ['days', false, '1', '2']
+  ])(
+    'reads the estimation typed in %s',
+    async (_, isDurationInHours, shown, typed) => {
+      organisation.format_duration_in_hours = isDurationInHours
+      const task = buildTaskElement()
+      const wrapper = mountSchedule({
+        hierarchy: [{ ...person, editable: false, children: [task] }],
+        isEstimationLinked: true
+      })
+      const input = wrapper.find('.man-days-unit-wrapper input')
+
+      expect(input.element.value).toBe(shown)
+
+      await input.setValue(typed)
+
+      expect(wrapper.emitted('estimation-changed')).toEqual([
+        [{ taskId: 'task-1', estimation: 16 * 60, item: task, daysOff: [] }]
+      ])
+      expect([task.estimation, task.man_days]).toEqual([16 * 60, 16 * 60])
+      expect(task.endDate.format('YYYY-MM-DD')).toBe('2026-09-01')
+      expect(input.element.value).toBe(typed)
+      wrapper.unmount()
+    }
+  )
 })

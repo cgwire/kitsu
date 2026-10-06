@@ -955,11 +955,45 @@ const onLoadMoreClicked = async () => {
 
 // Playlist build
 
+// Zou serves an entry whose preview is unset or deleted without any. Pin it
+// to a preview of its entity that no other entry holds: the entry then
+// plays, and its edits find the stored row. A playlist of a task type takes
+// the latest preview of that type, as for an added entity; another one, the
+// main preview first.
+const pinEntriesWithoutPreview = entries => {
+  const taskTypeId = currentPlaylist.value?.task_type_id
+  const isHeld = (entityId, previewFileId) =>
+    entries.some(
+      e =>
+        (e.entity_id || e.id) === entityId &&
+        e.preview_file_id === previewFileId
+    )
+  entries
+    .filter(entry => !entry.preview_file_id)
+    .forEach(entry => {
+      const entityId = entry.entity_id || entry.id
+      const previewFiles = entry.preview_files || {}
+      const files = taskTypeId
+        ? previewFiles[taskTypeId] || []
+        : Object.values(previewFiles).flat()
+      const mainId = taskTypeId
+        ? null
+        : getCachedEntity(entityId)?.preview_file_id
+      const previewFile = [files.find(f => f.id === mainId), ...files].find(
+        f => f && !isHeld(entityId, f.id)
+      )
+      if (previewFile) {
+        store.commit('PIN_PLAYLIST_ENTRY', { entry, previewFile })
+      }
+    })
+}
+
 const rebuildCurrentEntities = () => {
   currentEntitiesMap.value = {}
   currentEntitiesList.value = []
   previewFileMap.value = new Map()
   previewFileEntityMap.value = new Map()
+  pinEntriesWithoutPreview(currentPlaylist.value?.shots || [])
   const entities = (currentPlaylist.value?.shots || [])
     .map(entity => convertEntityToPlaylistFormat(entity))
     .filter(Boolean)
@@ -1007,7 +1041,9 @@ const convertEntityToPlaylistFormat = entityInfo => {
       parseFloat(currentProduction.value?.fps) ||
       25,
     preview_files: entityInfo.preview_files,
-    preview_file_id: entityInfo.preview_file_id || entity.preview_file_id,
+    // The pin of the stored row, even unset: the edits of the entry find
+    // the row by it.
+    preview_file_id: entityInfo.preview_file_id,
     preview_file_extension:
       entityInfo.preview_file_extension || entity.preview_file_extension,
     preview_file_revision:

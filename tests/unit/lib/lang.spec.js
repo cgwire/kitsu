@@ -50,6 +50,18 @@ describe('lang', () => {
     lang.setLocale('fr_FR')
     expect(localeCode.value).toEqual('fr')
   })
+
+  // Dates formatted with moment go to the API, which rejects Persian digits.
+  test('setLocale keeps Latin digits in Persian dates', async () => {
+    await lang.setLocale('fa_IR')
+    const date = moment.utc('2026-08-05T09:30:00')
+    expect(moment.locale()).toEqual('fa')
+    expect(date.format('YYYY-MM-DD')).toEqual('2026-08-05')
+    expect(date.format('D MMMM YYYY HH:mm')).toEqual('5 اوت 2026 09:30')
+    const parsed = moment.utc('۲۰۲۶-۰۸-۰۵', 'YYYY-MM-DD')
+    expect(parsed.format('YYYY-MM-DD')).toEqual('2026-08-05')
+    await lang.setLocale('en_US')
+  })
 })
 
 describe('timezone', () => {

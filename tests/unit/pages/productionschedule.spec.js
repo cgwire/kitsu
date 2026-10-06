@@ -13,6 +13,7 @@ vi.mock('vue-i18n', async importOriginal => ({
 // Pre-load the real store to avoid circular-import race from child components.
 import '@/lib/auth'
 
+import assetStore from '@/store/modules/assets'
 import assetTypeStore from '@/store/modules/assettypes'
 import taskTypeStore from '@/store/modules/tasktypes'
 
@@ -22,6 +23,8 @@ import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import DateField from '@/components/widgets/DateField.vue'
+import TextField from '@/components/widgets/TextField.vue'
 
 // The page is driven through what it renders and what it calls: the
 // schedule widget events, the comboboxes, the buttons and the modals, the
@@ -103,6 +106,31 @@ const buildAssetTypeBars = () => [
   }
 ]
 
+const people = [
+  {
+    id: 'person-1',
+    active: true,
+    departments: [],
+    first_name: 'Alice',
+    full_name: 'Alice Smith',
+    role: 'user'
+  },
+  {
+    id: 'person-2',
+    active: true,
+    departments: [],
+    first_name: 'Bob',
+    full_name: 'Bob Jones',
+    role: 'user'
+  }
+]
+
+const propAssets = [
+  { id: 'asset-1', name: 'Chair', asset_type_id: 'asset-type-props' },
+  { id: 'asset-2', name: 'Table', asset_type_id: 'asset-type-props' },
+  { id: 'asset-3', name: 'Lamp', asset_type_id: 'asset-type-props' }
+]
+
 const day = date => moment.utc(date)
 const format = date => date.format('YYYY-MM-DD')
 
@@ -123,6 +151,8 @@ const mountPage = async ({
 } = {}) => {
   const storeActions = {
     applyScheduleVersionToProduction: vi.fn(),
+    assignSelectedTasks: vi.fn(),
+    createScheduleVersionedTask: vi.fn(() => ({ id: 'versioned-task-1' })),
     editProduction: vi.fn(),
     loadAssetTypeScheduleItems: vi.fn(() => buildAssetTypeBars()),
     loadAssets: vi.fn(),
@@ -134,6 +164,7 @@ const mountPage = async ({
     loadTasks: vi.fn(() => []),
     loadTasksFromScheduleVersion: vi.fn(() => []),
     saveScheduleItem: vi.fn(),
+    unassignSelectedTasks: vi.fn(),
     updateScheduleVersionedTask: vi.fn(),
     updateTask: vi.fn(),
     ...actions
@@ -186,7 +217,10 @@ const mountPage = async ({
   const wrapper = shallowMount(ProductionSchedule, {
     global: {
       plugins: [store, router],
-      mocks: { $t: key => key },
+      // the values show, so a test can read the count of a plural message
+      mocks: {
+        $t: (key, values) => (values ? `${key} ${JSON.stringify(values)}` : key)
+      },
       stubs: { Schedule: scheduleWidget }
     }
   })
@@ -209,6 +243,11 @@ const findCombobox = (wrapper, label) =>
   wrapper
     .findAllComponents(Combobox)
     .find(combobox => combobox.props('label') === label)
+
+const findTextField = (wrapper, label) =>
+  wrapper
+    .findAllComponents(TextField)
+    .find(field => field.props('label') === label)
 
 const setTaskTypeVisible = async (wrapper, taskTypeId, value) => {
   wrapper
@@ -239,6 +278,18 @@ const changeItem = async (wrapper, item) => {
   await flushPromises()
 }
 
+// A click on a task bar opens the side panel on it, in task edit mode.
+const selectTask = async (wrapper, entityTypeRow, task) => {
+  findSchedule(wrapper).vm.$emit(
+    'task-selected',
+    rowsOf(wrapper)[0],
+    entityTypeRow,
+    task,
+    [task]
+  )
+  await flushPromises()
+}
+
 describe('ProductionSchedule page', () => {
   beforeEach(() => {
     taskTypes.forEach(taskType => {
@@ -256,7 +307,9 @@ describe('ProductionSchedule page', () => {
     mountedPage = null
     taskTypeStore.cache.taskTypeMap.clear()
     assetTypeStore.cache.assetTypeMap.clear()
+    assetStore.cache.assets = []
     vi.restoreAllMocks()
+    vi.useRealTimers()
   })
 
   describe('task type filter', () => {
@@ -421,6 +474,53 @@ describe('ProductionSchedule page', () => {
       )
       expect(storeActions.loadTasks).toHaveBeenCalledTimes(taskLoads + 1)
     })
+
+    // The estimation of a task is shown and typed in the unit printed next
+    // to it, the one the organisation displays durations in.
+    it.each([
+      ['hours', true, 'schedule.hours', 8, 16],
+      ['days', false, 'schedule.md', 1, 2]
+    ])(
+      'edits the estimation of a task in %s',
+      async (_, isDurationInHours, unit, shown, typed) => {
+        const { storeActions, wrapper } = await mountPage({
+          getters: {
+            organisation: () => ({
+              hours_by_day: 8,
+              format_duration_in_hours: isDurationInHours
+            })
+          }
+        })
+        // Monday 9 February, one working day
+        const task = {
+          type: 'Task',
+          id: 'task-1',
+          entity: { id: 'asset-1', name: 'Cat' },
+          estimation: 8 * 60,
+          assignees: [],
+          startDate: day('2026-02-09'),
+          endDate: day('2026-02-09')
+        }
+        await selectTask(wrapper, buildAssetTypeBars()[0], task)
+        const field = findTextField(wrapper, 'main.estimation')
+
+        expect(field.props('unitLabel')).toBe(unit)
+        expect(field.props('modelValue')).toBe(shown)
+
+        field.vm.$emit('update:model-value', typed)
+        await wrapper.find('.side-column form').trigger('submit')
+        await flushPromises()
+
+        expect(payloadsOf(storeActions.updateTask)[0]).toEqual({
+          taskId: 'task-1',
+          data: {
+            estimation: 16 * 60,
+            start_date: '2026-02-09',
+            due_date: '2026-02-10'
+          }
+        })
+      }
+    )
   })
 
   describe('drill-down', () => {
@@ -454,6 +554,78 @@ describe('ProductionSchedule page', () => {
       expect(router.currentRoute.value.query.mode).toBe('real')
       expect(push).toHaveBeenCalledTimes(1)
       expect(replace).not.toHaveBeenCalled()
+    })
+  })
+
+  // The date fields of the page are utc ones: they hold a day at UTC
+  // midnight. At 00:30 local time, east of UTC, the UTC day is still the
+  // day before.
+  describe('default dates', () => {
+    const today = new Date('2026-10-06T00:00:00.000Z')
+    const fieldDates = parent =>
+      parent
+        .findAllComponents({ name: 'DateField' })
+        .map(field => field.props('modelValue'))
+
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['Date'] })
+      vi.setSystemTime(new Date(2026, 9, 6, 0, 30))
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+      assetStore.cache.assets = []
+      assetStore.cache.assetMap.clear()
+    })
+
+    it('dates an assignment from the panel on the local day', async () => {
+      const asset = {
+        id: 'asset-1',
+        name: 'Chair',
+        asset_type_id: 'asset-type-props'
+      }
+      assetStore.cache.assets = [asset]
+      assetStore.cache.assetMap.set(asset.id, asset)
+      const { wrapper } = await mountPage({
+        actions: {
+          loadTasks: vi.fn(() => [
+            {
+              id: 'task-1',
+              entity_id: 'asset-1',
+              task_type_id: 'tt-modeling',
+              assignees: []
+            }
+          ])
+        },
+        getters: {
+          productionAssetTypes: () => [
+            { id: 'asset-type-props', name: 'Props', task_types: [] }
+          ]
+        }
+      })
+      await toggleSidePanel(wrapper)
+      await pickTaskType(wrapper, 'tt-modeling')
+
+      await wrapper.find('.side-column .assignment-item').trigger('click')
+
+      expect(fieldDates(wrapper.find('.side-column'))).toEqual([today, today])
+    })
+
+    it('ranges a production without dates from the local day', async () => {
+      const { wrapper } = await mountPage({
+        getters: {
+          currentProduction: () => ({
+            ...production,
+            start_date: null,
+            end_date: null
+          })
+        }
+      })
+
+      expect(fieldDates(wrapper.find('.project-dates'))).toEqual([
+        today,
+        new Date('2027-04-06T23:59:59.999Z')
+      ])
     })
   })
 
@@ -688,5 +860,438 @@ describe('ProductionSchedule page', () => {
       expect(rowsOf(wrapper).every(row => row.editable)).toBe(true)
       expect(storeActions.loadAssetTypeScheduleItems).toHaveBeenCalledTimes(1)
     })
+  })
+
+  // The side panel assigns the props of the Modeling row to a team of two.
+  describe('task assignments', () => {
+    const versionOptions = {
+      query: { version: unlockedVersion.id },
+      versions: [unlockedVersion]
+    }
+
+    const mountAssignments = ({
+      actions = {},
+      nbAssets = 2,
+      ...options
+    } = {}) => {
+      const assets = propAssets.slice(0, nbAssets)
+      assetStore.cache.assets = assets
+      return mountPage({
+        ...options,
+        actions: {
+          loadTasks: vi.fn(() =>
+            assets.map(asset => ({
+              id: `task-${asset.id}`,
+              entity_id: asset.id,
+              assignees: []
+            }))
+          ),
+          ...actions
+        },
+        getters: {
+          currentProduction: () => ({
+            ...production,
+            team: people.map(person => person.id)
+          }),
+          personMap: () => new Map(people.map(person => [person.id, person])),
+          productionAssetTypes: () => [
+            { id: 'asset-type-props', name: 'Props', task_types: [] }
+          ]
+        }
+      })
+    }
+
+    const selectProps = async wrapper => {
+      await toggleSidePanel(wrapper)
+      await pickTaskType(wrapper, 'tt-modeling')
+      await wrapper.find('.side-column .assignment-item').trigger('click')
+    }
+
+    // Monday 6 to Wednesday 8 April: three working days. A null start keeps
+    // the one the panel opened with.
+    const setRange = async (
+      wrapper,
+      startDate = '2026-04-06',
+      endDate = '2026-04-08'
+    ) => {
+      const [startField, endField] = wrapper
+        .find('.side-column form')
+        .findAllComponents(DateField)
+      if (startDate) startField.vm.$emit('update:model-value', startDate)
+      endField.vm.$emit('update:model-value', endDate)
+      await flushPromises()
+    }
+
+    const forceQuota = async (wrapper, quota) => {
+      wrapper
+        .find('.side-column form')
+        .findComponent(TextField)
+        .vm.$emit('update:model-value', quota)
+      await flushPromises()
+    }
+
+    const apply = async wrapper => {
+      await wrapper.find('.side-column form').trigger('submit')
+      await flushPromises()
+    }
+
+    const panelText = wrapper => wrapper.find('.side-column').text()
+
+    const writesOf = storeActions =>
+      [
+        'assignSelectedTasks',
+        'createScheduleVersionedTask',
+        'unassignSelectedTasks',
+        'updateScheduleVersionedTask',
+        'updateTask'
+      ].filter(action => storeActions[action].mock.calls.length)
+
+    // A refused request left the Apply button spinning for good, with no
+    // word of the failure.
+    it.each([
+      ['the reference', {}, 'updateTask'],
+      ['a version', versionOptions, 'createScheduleVersionedTask']
+    ])(
+      'stops the spinner and tells when a save of %s fails',
+      async (_, options, saveAction) => {
+        const error = new Error('Bad request')
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const { wrapper } = await mountAssignments({
+          ...options,
+          actions: { [saveAction]: vi.fn(() => Promise.reject(error)) }
+        })
+        await selectProps(wrapper)
+        await setRange(wrapper)
+
+        await apply(wrapper)
+
+        expect(findButton(wrapper, 'main.apply').props('isLoading')).toBe(
+          false
+        )
+        expect(panelText(wrapper)).toContain('schedule.assign_error')
+        expect(consoleError).toHaveBeenCalledWith(error)
+      }
+    )
+
+    it('clears the error when Apply runs again', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { storeActions, wrapper } = await mountAssignments({
+        actions: {
+          updateTask: vi.fn().mockRejectedValueOnce(new Error('Bad request'))
+        }
+      })
+      await selectProps(wrapper)
+      await setRange(wrapper)
+      await apply(wrapper)
+      expect(panelText(wrapper)).toContain('schedule.assign_error')
+
+      await apply(wrapper)
+
+      expect(panelText(wrapper)).not.toContain('schedule.assign_error')
+      expect(payloadsOf(storeActions.assignSelectedTasks)).toEqual([
+        { personId: 'person-1', taskIds: ['task-asset-1'] },
+        { personId: 'person-2', taskIds: ['task-asset-2'] }
+      ])
+    })
+
+    // The panel moved on to a task while the run waited on its requests:
+    // the failure of the run showed under the task, and stopped the
+    // spinner of the task save.
+    it('keeps a failed run out of the task the panel moved on to', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const saves = []
+      const { wrapper } = await mountAssignments({
+        actions: {
+          updateTask: vi.fn(
+            () => new Promise((_resolve, reject) => saves.push(reject))
+          )
+        }
+      })
+      await selectProps(wrapper)
+      await setRange(wrapper)
+      await apply(wrapper)
+      const runSaves = [...saves]
+      const task = {
+        id: 'task-asset-1',
+        type: 'Task',
+        assignees: ['person-1'],
+        entity: propAssets[0],
+        estimation: 480,
+        startDate: day('2026-04-06'),
+        endDate: day('2026-04-06')
+      }
+      findSchedule(wrapper).vm.$emit(
+        'task-selected',
+        rowsOf(wrapper)[0],
+        { id: 'asset-type-props', name: 'Props' },
+        task,
+        [task]
+      )
+      await flushPromises()
+      await apply(wrapper)
+
+      runSaves.forEach(reject => reject(new Error('Bad request')))
+      await flushPromises()
+
+      expect(panelText(wrapper)).toContain('schedule.edit_task')
+      expect(panelText(wrapper)).not.toContain('schedule.assign_error')
+      expect(findButton(wrapper, 'main.apply').props('isLoading')).toBe(true)
+    })
+
+    const goBack = wrapper =>
+      wrapper.find('.side-column button.is-link').trigger('click')
+
+    const panelReuses = [
+      [
+        'a new selection',
+        async wrapper => {
+          await goBack(wrapper)
+          await wrapper.find('.side-column .assignment-item').trigger('click')
+        }
+      ],
+      [
+        'a drop on the schedule',
+        async wrapper => {
+          await goBack(wrapper)
+          findSchedule(wrapper).vm.$emit(
+            'item-drop',
+            { start_date: '2026-04-06' },
+            { start_date: '2026-04-06', end_date: '2026-04-08' }
+          )
+          await flushPromises()
+        }
+      ],
+      ['another task type', wrapper => pickTaskType(wrapper, 'tt-layout')],
+      [
+        'a task edit',
+        async wrapper => {
+          const task = {
+            id: 'task-asset-1',
+            assignees: [],
+            entity: propAssets[0],
+            estimation: 480,
+            startDate: day('2026-04-06'),
+            endDate: day('2026-04-06')
+          }
+          findSchedule(wrapper).vm.$emit(
+            'task-selected',
+            rowsOf(wrapper)[0],
+            { id: 'asset-type-props', name: 'Props' },
+            task,
+            [task]
+          )
+          await flushPromises()
+        }
+      ]
+    ]
+
+    it.each(panelReuses)(
+      'clears the error when the panel goes on with %s',
+      async (_, reuse) => {
+        vi.spyOn(console, 'error').mockImplementation(() => {})
+        const { wrapper } = await mountAssignments({
+          actions: {
+            updateTask: vi.fn(() => Promise.reject(new Error('Bad request')))
+          }
+        })
+        await selectProps(wrapper)
+        await setRange(wrapper)
+        await apply(wrapper)
+        expect(panelText(wrapper)).toContain('schedule.assign_error')
+
+        await reuse(wrapper)
+
+        expect(wrapper.find('.side-column form').exists()).toBe(true)
+        expect(panelText(wrapper)).not.toContain('schedule.assign_error')
+      }
+    )
+
+    // Each task goes to a single person, but the auto quota shared every
+    // task among the whole team: with fewer entities than people, no task
+    // fitted the range and Apply did nothing.
+    it('fits the task of a single entity to one person', async () => {
+      const { storeActions, wrapper } = await mountAssignments({ nbAssets: 1 })
+      await selectProps(wrapper)
+      await setRange(wrapper)
+
+      expect(panelText(wrapper)).toContain(
+        'schedule.estimated_daily_quotas 0.33'
+      )
+
+      await apply(wrapper)
+
+      expect(payloadsOf(storeActions.updateTask)).toEqual([
+        {
+          taskId: 'task-asset-1',
+          data: {
+            estimation: 3 * 8 * 60,
+            start_date: '2026-04-06',
+            due_date: '2026-04-08'
+          }
+        }
+      ])
+      expect(payloadsOf(storeActions.assignSelectedTasks)).toEqual([
+        { personId: 'person-1', taskIds: ['task-asset-1'] }
+      ])
+      expect(panelText(wrapper)).not.toContain('schedule.assign_no_fit')
+    })
+
+    // The panel opens on today at the current time: the day count left
+    // that first day out once the end date was picked.
+    it('counts the first day of a range that starts now', async () => {
+      vi.useFakeTimers({ toFake: ['Date'] })
+      vi.setSystemTime(new Date('2026-04-06T10:30:00Z'))
+      const { storeActions, wrapper } = await mountAssignments()
+      await selectProps(wrapper)
+      await setRange(wrapper, null, '2026-04-07')
+
+      expect(panelText(wrapper)).toContain(
+        'schedule.estimated_daily_quotas 0.50'
+      )
+
+      await apply(wrapper)
+
+      const twoDays = {
+        estimation: 2 * 8 * 60,
+        start_date: '2026-04-06',
+        due_date: '2026-04-07'
+      }
+      expect(payloadsOf(storeActions.updateTask)).toEqual([
+        { taskId: 'task-asset-1', data: twoDays },
+        { taskId: 'task-asset-2', data: twoDays }
+      ])
+    })
+
+    // 1 / (1 / 49) is 49.00000000000001 days: rounded up, the task outlasted
+    // the range by a day and fitted nobody.
+    it('fits a task as long as the range', async () => {
+      const { storeActions, wrapper } = await mountAssignments({ nbAssets: 1 })
+      await selectProps(wrapper)
+      // Monday 6 April to Thursday 11 June: 49 working days
+      await setRange(wrapper, '2026-04-06', '2026-06-11')
+
+      await apply(wrapper)
+
+      expect(payloadsOf(storeActions.updateTask)).toEqual([
+        {
+          taskId: 'task-asset-1',
+          data: {
+            estimation: 49 * 8 * 60,
+            start_date: '2026-04-06',
+            due_date: '2026-06-11'
+          }
+        }
+      ])
+      expect(panelText(wrapper)).not.toContain('schedule.assign_no_fit')
+    })
+
+    // The same noise ended the first task of 49 days a day late and pushed
+    // the second one out of the range.
+    it('chains tasks of whole days for one person', async () => {
+      const { storeActions, wrapper } = await mountAssignments()
+      await selectProps(wrapper)
+      // Monday 6 April to Wednesday 19 August: 98 working days
+      await setRange(wrapper, '2026-04-06', '2026-08-19')
+      const [, removeBob] = wrapper
+        .find('.side-column table.assignees')
+        .findAllComponents(ButtonSimple)
+      removeBob.vm.$emit('click')
+      await flushPromises()
+
+      await apply(wrapper)
+
+      const estimation = 49 * 8 * 60
+      expect(payloadsOf(storeActions.updateTask)).toEqual([
+        {
+          taskId: 'task-asset-1',
+          data: { estimation, start_date: '2026-04-06', due_date: '2026-06-11' }
+        },
+        {
+          taskId: 'task-asset-2',
+          data: { estimation, start_date: '2026-06-12', due_date: '2026-08-19' }
+        }
+      ])
+      expect(payloadsOf(storeActions.assignSelectedTasks)).toEqual([
+        { personId: 'person-1', taskIds: ['task-asset-1', 'task-asset-2'] }
+      ])
+    })
+
+    it.each([
+      ['the reference', {}],
+      ['a version', versionOptions]
+    ])(
+      'tells how many tasks do not fit the range in %s',
+      async (_, options) => {
+        const { storeActions, wrapper } = await mountAssignments(options)
+        await selectProps(wrapper)
+        await setRange(wrapper)
+        await forceQuota(wrapper, '0.01')
+
+        await apply(wrapper)
+
+        expect(panelText(wrapper)).toContain(
+          'schedule.assign_no_fit {"count":2}'
+        )
+        expect(writesOf(storeActions)).toEqual([])
+      }
+    )
+
+    it.each([
+      ['the reference', {}],
+      ['a version', versionOptions]
+    ])(
+      'tells that no task fits a range without a working day in %s',
+      async (_, options) => {
+        const { storeActions, wrapper } = await mountAssignments(options)
+        await selectProps(wrapper)
+        // Saturday 11 and Sunday 12 April
+        await setRange(wrapper, '2026-04-11', '2026-04-12')
+        expect(panelText(wrapper)).toContain(
+          'schedule.estimated_daily_quotas 0.00'
+        )
+
+        await apply(wrapper)
+
+        expect(panelText(wrapper)).toContain(
+          'schedule.assign_no_fit {"count":2}'
+        )
+        expect(writesOf(storeActions)).toEqual([])
+      }
+    )
+
+    // Two days per task: one task per person in three days
+    it('assigns the tasks that fit and tells how many did not', async () => {
+      const { storeActions, wrapper } = await mountAssignments({ nbAssets: 3 })
+      await selectProps(wrapper)
+      await setRange(wrapper)
+      await forceQuota(wrapper, '0.5')
+
+      await apply(wrapper)
+
+      expect(payloadsOf(storeActions.assignSelectedTasks)).toEqual([
+        { personId: 'person-1', taskIds: ['task-asset-1'] },
+        { personId: 'person-2', taskIds: ['task-asset-2'] }
+      ])
+      expect(panelText(wrapper)).toContain('schedule.assign_no_fit {"count":1}')
+    })
+
+    it.each(panelReuses)(
+      'clears the no-fit message when the panel goes on with %s',
+      async (_, reuse) => {
+        const { wrapper } = await mountAssignments()
+        await selectProps(wrapper)
+        await setRange(wrapper)
+        await forceQuota(wrapper, '0.01')
+        await apply(wrapper)
+        expect(panelText(wrapper)).toContain('schedule.assign_no_fit')
+
+        await reuse(wrapper)
+
+        expect(wrapper.find('.side-column form').exists()).toBe(true)
+        expect(panelText(wrapper)).not.toContain('schedule.assign_no_fit')
+      }
+    )
   })
 })

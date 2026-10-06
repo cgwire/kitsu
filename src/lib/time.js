@@ -56,6 +56,24 @@ export const formatSimpleDate = date => {
   else return ''
 }
 
+// A utc date field holds a day as the Date at UTC midnight of that day, the
+// way parseDate reads it back, while its date picker works in local time.
+export const utcDayToLocalDate = date => {
+  if (!date) return null
+  const day = moment.utc(date)
+  return new Date(day.year(), day.month(), day.date())
+}
+
+export const localDayToUtcDate = date => {
+  if (!date) return null
+  return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+}
+
+// The day a date (now by default) falls on for the user, at UTC midnight
+// like a utc date field holds it: moment works in the time zone of the user
+// profile.
+export const getUserDay = date => moment(date).utc(true).startOf('day')
+
 export const formatTimeOfDay = (
   date,
   use12HourClock = false,
@@ -350,6 +368,8 @@ export const removeBusinessDays = (
 
 export const getDayOffRange = (daysOff = []) => {
   return daysOff.reduce((range, dayOff) => {
+    // 'YYYY-MM-DD' parses as UTC midnight, so step in UTC: a local day step
+    // shifts the UTC time by an hour across a DST change.
     const startDate = new Date(dayOff.date)
     const endDate = new Date(dayOff.end_date || dayOff.date)
     while (startDate <= endDate) {
@@ -357,7 +377,7 @@ export const getDayOffRange = (daysOff = []) => {
         ...dayOff,
         date: startDate.toISOString().slice(0, 10)
       })
-      startDate.setDate(startDate.getDate() + 1)
+      startDate.setUTCDate(startDate.getUTCDate() + 1)
     }
     return range
   }, [])
@@ -373,4 +393,18 @@ export const minutesToDays = (organisation, minutes = 0) => {
 
 export const hoursToDays = (organisation, hours = 0) => {
   return hours / organisation.hours_by_day
+}
+
+// Estimations are stored in minutes, and shown and typed in the unit the
+// organisation displays durations in: hours or days.
+export const minutesToDuration = (organisation, minutes = 0) => {
+  return organisation.format_duration_in_hours
+    ? minutes / 60
+    : minutesToDays(organisation, minutes)
+}
+
+export const durationToMinutes = (organisation, duration = 0) => {
+  return organisation.format_duration_in_hours
+    ? duration * 60
+    : daysToMinutes(organisation, duration)
 }

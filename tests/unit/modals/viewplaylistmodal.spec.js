@@ -28,6 +28,8 @@ vi.mock('@/components/players/players/PlaylistPlayer.vue', () => ({
   default: { name: 'PlaylistPlayer', props: ['canSave'], render: () => null }
 }))
 
+import shotStore from '@/store/modules/shots'
+
 import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal.vue'
 import EditPlaylistModal from '@/components/modals/EditPlaylistModal.vue'
 
@@ -85,6 +87,10 @@ describe('ViewPlaylistModal', () => {
       global: { plugins: [store, i18n] },
       props: { active: false }
     })
+  })
+
+  afterEach(() => {
+    shotStore.cache.shotMap.delete('shot-1')
   })
 
   it('keeps the selected task type when saving a playlist from a selection', async () => {
@@ -159,6 +165,25 @@ describe('ViewPlaylistModal', () => {
     expect(editPlaylistPayload.data.shots).toEqual([
       { entity_id: 'shot-1', preview_file_id: 'pf-compo' }
     ])
+  })
+
+  // The cached shot has no preview duration: copying it onto the
+  // sub-previews of a multi-file revision erased the durations Zou sends.
+  it('keeps the duration of each sub-preview', async () => {
+    shotStore.cache.shotMap.set('shot-1', { id: 'shot-1', name: 'SH01' })
+    tempEntities = [
+      {
+        id: 'shot-1',
+        preview_file_id: 'pf-1',
+        preview_file_duration: 2,
+        preview_file_previews: [{ id: 'pf-1-b', duration: 3.5 }],
+        preview_files: { 'tt-anim': [{ id: 'pf-1' }] }
+      }
+    ]
+    await wrapper.setProps({ active: true })
+    await new Promise(resolve => setTimeout(resolve))
+
+    expect(tempEntities[0].preview_file_previews[0].duration).toBe(3.5)
   })
 
   it.each([

@@ -217,4 +217,75 @@ describe('Playlists store', () => {
       expect(mutations).not.toContain('EDIT_TASK_STATUS_END')
     })
   })
+
+  describe('Mutations', () => {
+    // Zou drops the pin of an entry whose preview is gone, and the page then
+    // shows the entity's main preview: the row holds no preview to match.
+    test('CHANGE_PLAYLIST_PREVIEW re-pins an entry whose pin was dropped', () => {
+      const row = { entity_id: 'shot-1', preview_files: {} }
+      const playlist = { shots: [row] }
+      const state = {
+        playlistEntryMap: new Map([['shot-1-undefined', row]])
+      }
+
+      store.mutations.CHANGE_PLAYLIST_PREVIEW(state, {
+        playlist,
+        entityId: 'shot-1',
+        previewFileId: 'preview-2',
+        previousPreviewFileId: 'preview-main'
+      })
+
+      expect(row.preview_file_id).toBe('preview-2')
+      expect([...state.playlistEntryMap.keys()]).toEqual(['shot-1-preview-2'])
+    })
+
+    test('CHANGE_PLAYLIST_PREVIEW leaves a pinned row of the same entity alone', () => {
+      const pinned = { entity_id: 'shot-1', preview_file_id: 'preview-1' }
+      const playlist = { shots: [pinned] }
+      const state = {
+        playlistEntryMap: new Map([['shot-1-preview-1', pinned]])
+      }
+
+      store.mutations.CHANGE_PLAYLIST_PREVIEW(state, {
+        playlist,
+        entityId: 'shot-1',
+        previewFileId: 'preview-2',
+        previousPreviewFileId: 'preview-main'
+      })
+
+      expect(pinned.preview_file_id).toBe('preview-1')
+      expect([...state.playlistEntryMap.keys()]).toEqual(['shot-1-preview-1'])
+    })
+
+    test('PIN_PLAYLIST_ENTRY pins an entry with the fields of its preview', () => {
+      const entry = { id: 'shot-1', entity_id: 'shot-1', preview_file_id: null }
+      const state = {
+        playlistEntryMap: new Map([['shot-1-null', entry]]),
+        previewFileEntityMap: new Map()
+      }
+      const previewFile = {
+        id: 'preview-1',
+        task_id: 'task-1',
+        extension: 'mp4',
+        revision: 2,
+        width: 1920,
+        height: 1080,
+        duration: 2.76,
+        previews: []
+      }
+
+      store.mutations.PIN_PLAYLIST_ENTRY(state, { entry, previewFile })
+
+      expect(entry).toMatchObject({
+        preview_file_id: 'preview-1',
+        preview_file_task_id: 'task-1',
+        preview_file_extension: 'mp4',
+        preview_file_revision: 2,
+        preview_file_duration: 2.76,
+        preview_file_previews: []
+      })
+      expect([...state.playlistEntryMap.keys()]).toEqual(['shot-1-preview-1'])
+      expect(state.previewFileEntityMap.get('preview-1')).toBe(entry)
+    })
+  })
 })
