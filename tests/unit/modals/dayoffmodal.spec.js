@@ -8,6 +8,7 @@ vi.mock('vue-i18n', async importOriginal => ({
 
 import DayOffModal from '@/components/modals/DayOffModal.vue'
 import DateField from '@/components/widgets/DateField.vue'
+import TextField from '@/components/widgets/TextField.vue'
 
 const mountModal = props =>
   mount(DayOffModal, {
@@ -59,6 +60,31 @@ describe('DayOffModal', () => {
     })
 
     expect(fieldDates(wrapper)).toEqual([date, endDate])
+  })
+
+  // The Days off tab hands the same day off again when the edit of a row
+  // opens after a cancel
+  it('resets the form each time it opens', async () => {
+    const date = utcDay('2026-08-03')
+    const endDate = utcDay('2026-08-05')
+    const wrapper = mountModal({
+      dayOffToEdit: {
+        id: 'day-off-1',
+        date,
+        end_date: endDate,
+        description: 'Holidays'
+      }
+    })
+
+    await pickDate(wrapper, 0, '2026-08-10')
+    await wrapper.findComponent(TextField).vm.$emit('update:model-value', 'Trip')
+    await wrapper.setProps({ active: false })
+    await wrapper.setProps({ active: true })
+
+    expect(fieldDates(wrapper)).toEqual([date, endDate])
+    expect(wrapper.findComponent(TextField).props('modelValue')).toBe(
+      'Holidays'
+    )
   })
 
   describe('picked dates', () => {

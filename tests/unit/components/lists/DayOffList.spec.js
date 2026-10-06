@@ -62,6 +62,32 @@ describe('DayOffList', () => {
     })
   })
 
+  // A row hands the same day off on each edit: the dates picked before a
+  // cancel must not come back, since a confirm would save them
+  it('reopens the edit form on the stored dates after a cancel', async () => {
+    const wrapper = mountListWithForm({
+      daysOff: [{ id: 'day-off-1', date: '2026-08-03', end_date: '2026-08-05' }]
+    })
+    const modal = wrapper.findComponent(DayOffModal)
+    const editButton = wrapper.find('.actions button')
+
+    await editButton.trigger('click')
+    await modal
+      .findComponent(DateField)
+      .vm.$emit('update:model-value', new Date('2026-08-10T00:00:00.000Z'))
+    await modal.find('.button.is-link').trigger('click')
+    expect(modal.props('active')).toBe(false)
+    await editButton.trigger('click')
+    await modal.find('form').trigger('submit')
+
+    expect(wrapper.emitted('set-day-off')).toHaveLength(1)
+    expect(wrapper.emitted('set-day-off')[0][0]).toMatchObject({
+      id: 'day-off-1',
+      date: new Date('2026-08-03T00:00:00.000Z'),
+      end_date: new Date('2026-08-05T00:00:00.000Z')
+    })
+  })
+
   // The rows hold their days at UTC midnight for the utc date fields of the
   // form: west of UTC, that instant still falls on the day before.
   describe('delete confirmation', () => {

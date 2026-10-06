@@ -139,7 +139,15 @@ const onEndDateChange = date => {
 
 // Watchers
 
-watch(() => props.dayOffToEdit, resetForm, { immediate: true })
+// Reset on each opening: the Days off tab hands the same day off again when
+// a row is edited after a cancel.
+watch(
+  () => props.active,
+  isActive => {
+    if (isActive) resetForm()
+  },
+  { immediate: true }
+)
 </script>
 
 <style lang="scss" scoped>
