@@ -225,6 +225,10 @@ const actions = {
   loadTaskComments({ commit, dispatch }, { taskId, entityId }) {
     return tasksApi.getTaskComments(taskId).then(comments => {
       commit(LOAD_TASK_COMMENTS_END, { comments, taskId })
+      dispatch(
+        'registerPreviewFileStatuses',
+        comments.flatMap(comment => comment.previews || [])
+      )
       return dispatch('loadTaskEntityPreviewFiles', entityId)
     })
   },
@@ -536,7 +540,7 @@ const actions = {
   },
 
   commentTaskWithPreview(
-    { commit, state },
+    { commit, dispatch, state },
     {
       taskId,
       taskStatusId,
@@ -595,6 +599,9 @@ const actions = {
             commentId: newComment.id,
             comment: newComment
           })
+          // Zou may still build its files: the status goes to the store the
+          // thumbnails read before any of them shows the preview.
+          dispatch('registerPreviewFileStatuses', [preview])
           // Create the remaining previews if there are some.
           if (previewForms.length > 1) {
             const addPreview = form => {
@@ -621,6 +628,7 @@ const actions = {
                     commentId: newComment.id,
                     comment: newComment
                   })
+                  dispatch('registerPreviewFileStatuses', [preview])
                   return preview
                 })
             }
@@ -647,7 +655,7 @@ const actions = {
   },
 
   addCommentExtraPreview(
-    { commit, getters, state },
+    { commit, dispatch, getters, state },
     { taskId, commentId, previewId }
   ) {
     const addPreview = form => {
@@ -672,6 +680,7 @@ const actions = {
             commentId,
             comment
           })
+          dispatch('registerPreviewFileStatuses', [preview])
           return preview
         })
     }

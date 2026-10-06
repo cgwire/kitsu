@@ -8,6 +8,11 @@ vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@sentry/vue', () => ({ captureException: vi.fn() }))
 vi.mock('@/store/api/tasks', () => ({
   default: {
+    addExtraPreview: vi.fn(),
+    addPreview: vi.fn(),
+    commentTask: vi.fn(),
+    getTaskComments: vi.fn(),
+    uploadPreview: vi.fn(),
     pinComment: vi.fn(),
     updatePreviewAnnotation: vi.fn(),
     unassignPersonFromTasks: vi.fn(() => Promise.resolve()),
@@ -515,6 +520,108 @@ describe('Tasks store', () => {
       })
       expect(task.entity_preview_file_id).toEqual('preview-1')
     })
+  })
+})
+
+// Zou builds the files of an uploaded preview in a job: the store of the
+// preview statuses learns each preview the task panels upload or list.
+describe('Tasks store, preview file statuses', () => {
+  const form = name => new Map([['file', { name }]])
+  const upload = preview => ({
+    request: { on: vi.fn() },
+    promise: Promise.resolve(preview)
+  })
+  const registerCalls = dispatch =>
+    dispatch.mock.calls
+      .map((call, index) => [...call, dispatch.mock.invocationCallOrder[index]])
+      .filter(([action]) => action === 'registerPreviewFileStatuses')
+  const commitOrders = (commit, type) =>
+    commit.mock.calls
+      .map((call, index) => [call[0], commit.mock.invocationCallOrder[index]])
+      .filter(([name]) => name === type)
+      .map(([, order]) => order)
+
+  test('commentTaskWithPreview registers the status of each uploaded preview', async () => {
+    tasksApi.commentTask.mockResolvedValue({ id: 'comment-1' })
+    tasksApi.addPreview.mockResolvedValue({ id: 'preview-1' })
+    tasksApi.addExtraPreview.mockResolvedValue({ id: 'preview-2' })
+    const uploaded = [
+      { id: 'preview-1', revision: 1, status: 'processing' },
+      { id: 'preview-2', revision: 1, status: 'processing' }
+    ]
+    tasksApi.uploadPreview
+      .mockReturnValueOnce(upload(uploaded[0]))
+      .mockReturnValueOnce(upload(uploaded[1]))
+    const commit = vi.fn()
+    const dispatch = vi.fn()
+
+    await tasksStore.actions.commentTaskWithPreview(
+      {
+        commit,
+        dispatch,
+        state: { previewForms: [form('a.png'), form('b.png')] }
+      },
+      { taskId: 'task-1', taskStatusId: 'status-1', comment: '' }
+    )
+
+    const registers = registerCalls(dispatch)
+    expect(registers.map(([, previews]) => previews)).toEqual([
+      [uploaded[0]],
+      [uploaded[1]]
+    ])
+    // A ready status known before must reach the copy ADD_PREVIEW_END makes.
+    const additions = commitOrders(commit, 'ADD_PREVIEW_END')
+    expect(registers[0][2]).toBeGreaterThan(additions[0])
+    expect(registers[1][2]).toBeGreaterThan(additions[1])
+  })
+
+  test('addCommentExtraPreview registers the status of each uploaded preview', async () => {
+    tasksApi.addExtraPreview.mockResolvedValue({ id: 'preview-3' })
+    const uploaded = { id: 'preview-3', revision: 2, status: 'processing' }
+    tasksApi.uploadPreview.mockReturnValueOnce(upload(uploaded))
+    const commit = vi.fn()
+    const dispatch = vi.fn()
+
+    await tasksStore.actions.addCommentExtraPreview(
+      {
+        commit,
+        dispatch,
+        getters: { getTaskComment: () => ({ id: 'comment-1' }) },
+        state: { previewForms: [form('c.png')] }
+      },
+      { taskId: 'task-1', commentId: 'comment-1', previewId: 'preview-1' }
+    )
+
+    const registers = registerCalls(dispatch)
+    expect(registers.map(([, previews]) => previews)).toEqual([[uploaded]])
+    expect(registers[0][2]).toBeGreaterThan(
+      commitOrders(commit, 'ADD_PREVIEW_END')[0]
+    )
+  })
+
+  test('loadTaskComments registers the statuses of the comment previews', async () => {
+    const previews = [
+      { id: 'preview-1', status: 'processing' },
+      { id: 'preview-2', status: 'ready' }
+    ]
+    tasksApi.getTaskComments.mockResolvedValue([
+      { id: 'comment-1', previews },
+      { id: 'comment-2', previews: [] },
+      { id: 'comment-3' }
+    ])
+    const commit = vi.fn()
+    const dispatch = vi.fn(() => Promise.resolve())
+
+    await tasksStore.actions.loadTaskComments(
+      { commit, dispatch },
+      { taskId: 'task-1', entityId: 'entity-1' }
+    )
+
+    const registers = registerCalls(dispatch)
+    expect(registers.map(([, registered]) => registered)).toEqual([previews])
+    expect(registers[0][2]).toBeGreaterThan(
+      commitOrders(commit, 'LOAD_TASK_COMMENTS_END')[0]
+    )
   })
 })
 
