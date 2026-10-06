@@ -701,9 +701,16 @@ const actions = {
     })
   },
 
-  setPreview({ commit, state }, { taskId, entityId, previewId, frame }) {
+  setPreview(
+    { commit, dispatch, state },
+    { taskId, entityId, previewId, frame }
+  ) {
     const taskMap = state.taskMap
     return tasksApi.setPreview(entityId, previewId, frame).then(entity => {
+      // Zou may still build the files of the new main preview.
+      dispatch('registerPreviewFileStatuses', [
+        { id: previewId, status: entity?.preview_file_status }
+      ])
       const task = taskMap.get(taskId)
       if (task && task.entity_preview_file_id === previewId) {
         commit(SET_PREVIEW, { taskId, entityId, previewId, taskMap })
@@ -719,10 +726,13 @@ const actions = {
     })
   },
 
-  setLastTaskPreview({ commit, state }, taskId) {
+  setLastTaskPreview({ commit, dispatch, state }, taskId) {
     const taskMap = state.taskMap
     return tasksApi.setLastTaskPreviewAsEntityThumbnail(taskId).then(entity => {
       if (!entity) return
+      dispatch('registerPreviewFileStatuses', [
+        { id: entity.preview_file_id, status: entity.preview_file_status }
+      ])
       commit(SET_PREVIEW, {
         taskId,
         entityId: entity.id,
@@ -732,10 +742,17 @@ const actions = {
     })
   },
 
-  setTasksMainPreview({ commit, state }, taskIds) {
+  setTasksMainPreview({ commit, dispatch, state }, taskIds) {
     if (taskIds.length === 0) return Promise.resolve()
     const taskMap = state.taskMap
     return tasksApi.setTasksMainPreview(taskIds).then(entities => {
+      dispatch(
+        'registerPreviewFileStatuses',
+        entities.map(entity => ({
+          id: entity.preview_file_id,
+          status: entity.preview_file_status
+        }))
+      )
       // The route returns a flat entity list; match each back to its task
       // through the entity id. Tasks without a preview are skipped server-side.
       const entityMap = new Map(entities.map(entity => [entity.id, entity]))

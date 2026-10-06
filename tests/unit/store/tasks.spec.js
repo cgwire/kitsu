@@ -13,6 +13,8 @@ vi.mock('@/store/api/tasks', () => ({
     commentTask: vi.fn(),
     getTaskComments: vi.fn(),
     uploadPreview: vi.fn(),
+    setLastTaskPreviewAsEntityThumbnail: vi.fn(),
+    setPreview: vi.fn(),
     pinComment: vi.fn(),
     updatePreviewAnnotation: vi.fn(),
     unassignPersonFromTasks: vi.fn(() => Promise.resolve()),
@@ -299,7 +301,7 @@ describe('Tasks store', () => {
         ])
       }
       await tasksStore.actions.setTasksMainPreview(
-        { commit, state },
+        { commit, dispatch: vi.fn(), state },
         ['task-1', 'task-2']
       )
       expect(tasksApi.setTasksMainPreview).toHaveBeenCalledWith([
@@ -688,6 +690,73 @@ describe('Tasks store, preview copies', () => {
     })
 
     expect([head.status, head.previews[0].status]).toEqual(['ready', 'ready'])
+  })
+})
+
+// Zou answers a new main preview with its status, which can still be
+// processing: the thumbnails must know it before they show the preview.
+describe('Tasks store, new main previews', () => {
+  const entity = {
+    id: 'entity-1',
+    preview_file_id: 'preview-1',
+    preview_file_status: 'processing'
+  }
+  const taskMap = new Map([
+    [
+      'task-1',
+      {
+        id: 'task-1',
+        entity: { id: 'entity-1' },
+        entity_preview_file_id: 'preview-1'
+      }
+    ]
+  ])
+  const expectRegisteredFirst = (commit, dispatch) => {
+    expect(dispatch).toHaveBeenCalledWith('registerPreviewFileStatuses', [
+      { id: 'preview-1', status: 'processing' }
+    ])
+    expect(dispatch.mock.invocationCallOrder[0]).toBeLessThan(
+      commit.mock.invocationCallOrder[0]
+    )
+  }
+
+  test('setPreview registers the status Zou answers before showing it', async () => {
+    tasksApi.setPreview.mockResolvedValue(entity)
+    const commit = vi.fn()
+    const dispatch = vi.fn()
+
+    await tasksStore.actions.setPreview(
+      { commit, dispatch, state: { taskMap } },
+      { taskId: 'task-1', entityId: 'entity-1', previewId: 'preview-1' }
+    )
+
+    expectRegisteredFirst(commit, dispatch)
+  })
+
+  test('setLastTaskPreview registers the status Zou answers before showing it', async () => {
+    tasksApi.setLastTaskPreviewAsEntityThumbnail.mockResolvedValue(entity)
+    const commit = vi.fn()
+    const dispatch = vi.fn()
+
+    await tasksStore.actions.setLastTaskPreview(
+      { commit, dispatch, state: { taskMap } },
+      'task-1'
+    )
+
+    expectRegisteredFirst(commit, dispatch)
+  })
+
+  test('setTasksMainPreview registers the status of each new main preview', async () => {
+    tasksApi.setTasksMainPreview.mockResolvedValueOnce([entity])
+    const commit = vi.fn()
+    const dispatch = vi.fn()
+
+    await tasksStore.actions.setTasksMainPreview(
+      { commit, dispatch, state: { taskMap } },
+      ['task-1']
+    )
+
+    expectRegisteredFirst(commit, dispatch)
   })
 })
 
