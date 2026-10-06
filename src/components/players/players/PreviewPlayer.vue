@@ -1393,26 +1393,31 @@ const resetHandles = () => {
   handleOut.value = outFrame > 0 ? outFrame : nbFrames.value
 }
 
+// Only the moved handle is saved: the other one shows either the clip
+// bound of the revision on screen, or a trim set on another revision.
+const saveHandles = handles => {
+  saveTrimmedShot(handles).catch(err => {
+    console.error(err)
+    resetHandles()
+  })
+}
+
 const onHandleInChanged = ({ frameNumber, save }) => {
   if (areHandlesReadOnly.value) return
   handleIn.value = frameNumber
-  if (save) saveHandles()
+  if (save) saveHandles({ handle_in: frameNumber })
 }
 
 const onHandleOutChanged = ({ frameNumber, save }) => {
   if (areHandlesReadOnly.value) return
   handleOut.value = frameNumber
-  if (save) saveHandles()
-}
-
-const saveHandles = () => {
-  saveTrimmedShot({
-    ...(handleIn.value >= 0 && { handle_in: handleIn.value }),
-    ...(handleOut.value >= 0 && { handle_out: handleOut.value })
-  }).catch(err => {
-    console.error(err)
-    resetHandles()
-  })
+  // An end handle at the clip end is no trim: saving that frame would
+  // stop a longer revision at the length of the one on screen.
+  if (save) {
+    saveHandles({
+      handle_out: frameNumber < nbFrames.value ? frameNumber : null
+    })
+  }
 }
 
 // Playback respects the trim like PlaylistPlayer: start on handle-in,

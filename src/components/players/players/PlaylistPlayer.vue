@@ -2509,29 +2509,29 @@ const onProgressChanged = (frame, updatePlaylistProgress = true) => {
   }
 }
 
+// Only the moved handle is saved: the other one shows either the clip
+// bound of the revision on screen, or a trim set on another revision.
+const _saveHandles = handles => {
+  const shot = shotMap.value.get(currentEntity.value?.id)
+  if (!shot) return
+  store.dispatch('editShot', {
+    id: shot.id,
+    data: { ...shot.data, ...handles }
+  })
+}
+
 const onHandleInChanged = ({ frameNumber: f, save }) => {
   handleIn.value = f
-  if (save) _saveHandles()
+  if (save) _saveHandles({ handle_in: f })
   updateRoomStatus()
 }
 
 const onHandleOutChanged = ({ frameNumber: f, save }) => {
   handleOut.value = f
-  if (save) _saveHandles()
+  // An end handle at the clip end is no trim: saving that frame would
+  // stop a longer revision at the length of the one on screen.
+  if (save) _saveHandles({ handle_out: f < nbFrames.value ? f : null })
   updateRoomStatus()
-}
-
-const _saveHandles = () => {
-  const shot = shotMap.value.get(currentEntity.value?.id)
-  if (!shot) return
-  store.dispatch('editShot', {
-    id: shot.id,
-    data: {
-      ...shot.data,
-      handle_in: handleIn.value,
-      handle_out: handleOut.value
-    }
-  })
 }
 
 const onPreviousFrameClicked = () => {

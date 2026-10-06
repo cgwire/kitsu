@@ -34,7 +34,11 @@ const withMethods = (names, values = {}) => ({
   }
 })
 
-const mountPlayer = () => {
+const mountPlayer = ({
+  playlistProp = playlist,
+  entities = [entity],
+  shotMap = new Map()
+} = {}) => {
   const store = createStore({
     getters: {
       currentProduction: () => ({ id: 'production-1', fps: '25' }),
@@ -56,7 +60,7 @@ const mountPlayer = () => {
       productionEpisodeTaskTypes: () => [],
       productionSequenceTaskTypes: () => [],
       productionShotTaskTypes: () => [],
-      shotMap: () => new Map(),
+      shotMap: () => shotMap,
       taskMap: () => new Map(),
       taskStatusMap: () => new Map(),
       taskTypeMap: () => new Map(),
@@ -69,7 +73,7 @@ const mountPlayer = () => {
   store.$socket = { on: vi.fn(), off: vi.fn(), emit: vi.fn() }
 
   return shallowMount(PlaylistPlayer, {
-    props: { playlist, entities: [entity] },
+    props: { playlist: playlistProp, entities },
     global: {
       plugins: [store],
       // The mount hooks drive the viewers through their template refs; the
@@ -152,6 +156,74 @@ describe('PlaylistPlayer.vue', () => {
       expect(zip.attributes('target')).toBe('_blank')
       expect(zip.attributes('rel')).toBe('noopener noreferrer')
       expect(zip.attributes('download')).toBeUndefined()
+    })
+  })
+
+  // The trim belongs to the shot, not to a revision: an end handle left at
+  // the clip end must not pin the length of the revision on screen, or a
+  // longer revision would stop at that length.
+  describe('trim handles', () => {
+    // 69 frames at 25 fps.
+    const movie = {
+      id: 'shot-1',
+      preview_file_id: 'preview-1',
+      preview_file_extension: 'mp4',
+      preview_file_duration: 2.76
+    }
+
+    // The handles are set once the movie metadata gives the duration.
+    const mountShotPlayer = async data => {
+      wrapper = mountPlayer({
+        playlistProp: { ...playlist, for_entity: 'shot' },
+        entities: [movie],
+        shotMap: new Map([['shot-1', { id: 'shot-1', data }]])
+      })
+      await flushPromises()
+      wrapper
+        .findComponent({ ref: 'raw-player' })
+        .vm.$emit('max-duration-update', movie.preview_file_duration)
+      await flushPromises()
+    }
+
+    const savedData = () =>
+      wrapper.vm.$store.dispatch.mock.calls.find(
+        ([action]) => action === 'editShot'
+      )?.[1].data
+
+    const dragHandle = (event, frameNumber) =>
+      wrapper
+        .findComponent({ ref: 'video-progress' })
+        .vm.$emit(event, { frameNumber, save: true })
+
+    it('leaves the end untrimmed when only the start handle moves', async () => {
+      await mountShotPlayer({ fps: 25 })
+      dragHandle('handle-in-changed', 5)
+      expect(savedData()).toEqual({ fps: 25, handle_in: 5 })
+    })
+
+    it('clears the end trim when its handle goes back to the clip end', async () => {
+      await mountShotPlayer({ handle_in: 5, handle_out: 60 })
+      dragHandle('handle-out-changed', 69)
+      expect(savedData()).toEqual({ handle_in: 5, handle_out: null })
+    })
+
+    it('saves an end handle moved inside the clip', async () => {
+      await mountShotPlayer({})
+      dragHandle('handle-out-changed', 60)
+      expect(savedData()).toEqual({ handle_out: 60 })
+    })
+
+    it('keeps an end trim when the start handle moves', async () => {
+      await mountShotPlayer({ handle_out: 60 })
+      dragHandle('handle-in-changed', 5)
+      expect(savedData()).toEqual({ handle_in: 5, handle_out: 60 })
+    })
+
+    // A trim set on a longer revision lies past the end of this one.
+    it('keeps an end trim set on a longer revision when the start handle moves', async () => {
+      await mountShotPlayer({ handle_out: 80 })
+      dragHandle('handle-in-changed', 5)
+      expect(savedData()).toEqual({ handle_in: 5, handle_out: 80 })
     })
   })
 })
