@@ -17,6 +17,7 @@ export const useNumberField = input => {
   const getValue = () => valueProperty.get.call(input)
   const setValue = value => valueProperty.set.call(input, value)
   let text = getValue()
+  let isSelected = false
 
   Object.defineProperty(input, 'value', {
     configurable: true,
@@ -50,13 +51,18 @@ export const useNumberField = input => {
 
   return {
     text: () => text,
+    // The next key typed replaces the text.
+    select: () => {
+      isSelected = true
+    },
     // Types the keys one by one, the field focused, and returns the text
     // shown after each key.
     type: async keys => {
       input.focus()
       const steps = []
       for (const key of keys) {
-        await enter(text + key)
+        await enter(isSelected ? key : text + key)
+        isSelected = false
         steps.push(text)
       }
       return steps
