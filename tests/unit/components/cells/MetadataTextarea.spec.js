@@ -93,6 +93,14 @@ describe('cells/MetadataTextarea', () => {
     ])
   })
 
+  test('opens a long text at its start, for reading', async () => {
+    mountCell({ modelValue: 'Snowy downfall\nLight wind\n'.repeat(20) })
+    await openAt({ top: 310, bottom: 422, left: 329, right: 448 })
+    expect(document.activeElement).toBe(editor())
+    expect(editor().selectionStart).toBe(0)
+    expect(editor().selectionEnd).toBe(0)
+  })
+
   test('saves the edit on a click outside the popup', async () => {
     mountCell()
     await openAt({ top: 807, bottom: 919, left: 329, right: 448 })

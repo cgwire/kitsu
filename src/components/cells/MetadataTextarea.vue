@@ -61,7 +61,12 @@ const onOpen = event => {
     { width: window.innerWidth, height: window.innerHeight }
   )
   isOpen.value = true
-  nextTick(() => editorRef.value?.focus())
+  nextTick(() => {
+    // Vue set the value with the caret at its end, where the focus would
+    // scroll: the text opens at its start.
+    editorRef.value?.setSelectionRange(0, 0)
+    editorRef.value?.focus()
+  })
 }
 
 const onClose = () => {
