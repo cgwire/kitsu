@@ -106,7 +106,7 @@
               <button-simple
                 icon="edit"
                 :title="$t('assets.edit_title')"
-                @click="modals.edit = true"
+                @click="showEditModal"
                 v-if="isCurrentUserManager"
               />
             </div>
@@ -746,6 +746,12 @@ const shotPath = shot => ({
   },
   query: { section: 'casting' }
 })
+
+// Close leaves the error of the last save: opening drops it.
+const showEditModal = () => {
+  errors.edit = false
+  modals.edit = true
+}
 
 const confirmEditAsset = async form => {
   const data = { ...form, id: currentAsset.value.id }
