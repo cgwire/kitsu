@@ -10,6 +10,7 @@ import {
   getDoneRatio,
   getPercentage,
   getRetakeChartData,
+  getStatusColor,
   omitRetakeStatsColumns,
   omitStatsColumns
 } from '@/lib/stats'
@@ -392,6 +393,13 @@ describe('lib/stats', () => {
     expect(getPercentage(1, 3)).toEqual('33.33')
     expect(getPercentage(0, 0)).toEqual('0.00')
     expect(getPercentage(0, 100)).toEqual('0.00')
+  })
+
+  it('getStatusColor', () => {
+    expect(getStatusColor({ color: '#f5f5f5', is_default: true })).toEqual(
+      '#6F727A'
+    )
+    expect(getStatusColor({ color: 'blue', is_default: false })).toEqual('blue')
   })
 
   it('aggregateStats', () => {

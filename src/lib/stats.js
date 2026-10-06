@@ -6,6 +6,11 @@ const RETAKE_CHART_COLORS = {
 
 const DEFAULT_STATUS_COLOR = '#6F727A'
 
+// Out of the box the default status is near white, unreadable on a light
+// background: it is drawn grey.
+export const getStatusColor = taskStatus =>
+  taskStatus.is_default ? DEFAULT_STATUS_COLOR : taskStatus.color
+
 const createStatusEntry = taskStatus => ({
   name: taskStatus.short_name,
   color: taskStatus.color,
