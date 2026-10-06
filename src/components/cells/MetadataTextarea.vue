@@ -28,6 +28,8 @@
 <script setup>
 import { nextTick, ref } from 'vue'
 
+import { getPopupStyle } from '@/lib/popup'
+
 const props = defineProps({
   modelValue: { type: String, default: '' },
   editable: { type: Boolean, default: false }
@@ -40,15 +42,15 @@ const editorRef = ref(null)
 const popupStyle = ref({})
 
 const WIDTH = 300
+// The popup with its editor at the default 8em height.
+const HEIGHT = 120
 
 const onOpen = event => {
-  const rect = event.currentTarget.getBoundingClientRect()
-  const left = Math.min(rect.left, window.innerWidth - WIDTH - 8)
-  popupStyle.value = {
-    top: `${rect.bottom + 4}px`,
-    left: `${Math.max(8, left)}px`,
-    width: `${WIDTH}px`
-  }
+  popupStyle.value = getPopupStyle(
+    event.currentTarget.getBoundingClientRect(),
+    { width: WIDTH, height: HEIGHT },
+    { width: window.innerWidth, height: window.innerHeight }
+  )
   isOpen.value = true
   nextTick(() => editorRef.value?.focus())
 }
@@ -91,6 +93,8 @@ const onClose = () => {
   border: 1px solid $green;
   border-radius: 8px;
   box-shadow: 0 2px 8px var(--box-shadow);
+  display: flex;
+  flex-direction: column;
   padding: 0.4rem;
   position: fixed;
   z-index: 1201;
@@ -102,8 +106,10 @@ const onClose = () => {
   box-sizing: border-box;
   color: var(--text);
   font-size: 0.95em;
+  height: 8em;
   line-height: 1.5em;
-  min-height: 8em;
+  // Shrinks to the popup max height, the text then scrolls inside.
+  min-height: 0;
   resize: vertical;
   width: 100%;
 

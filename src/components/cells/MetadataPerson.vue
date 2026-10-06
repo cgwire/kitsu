@@ -38,6 +38,8 @@
 <script setup>
 import { nextTick, ref } from 'vue'
 
+import { getPopupStyle } from '@/lib/popup'
+
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 
@@ -54,16 +56,16 @@ const fieldRef = ref(null)
 const popupStyle = ref({})
 
 const WIDTH = 280
+// The people field input only: its option list opens on the side with room.
+const HEIGHT = 42
 
 const onOpen = event => {
   if (!props.editable) return
-  const rect = event.currentTarget.getBoundingClientRect()
-  const left = Math.min(rect.left, window.innerWidth - WIDTH - 8)
-  popupStyle.value = {
-    top: `${rect.bottom + 4}px`,
-    left: `${Math.max(8, left)}px`,
-    width: `${WIDTH}px`
-  }
+  popupStyle.value = getPopupStyle(
+    event.currentTarget.getBoundingClientRect(),
+    { width: WIDTH, height: HEIGHT },
+    { width: window.innerWidth, height: window.innerHeight }
+  )
   isOpen.value = true
   nextTick(() => fieldRef.value?.focus())
 }
