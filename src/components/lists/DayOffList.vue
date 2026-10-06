@@ -6,7 +6,7 @@
         class="flexrow-item"
         :text="$t('days_off.add')"
         icon="plus"
-        @click="openSetDayOffModal"
+        @click="openSetDayOffModal()"
       />
     </div>
     <div class="datatable-wrapper" v-if="sortedDaysOff.length > 0">
@@ -106,7 +106,7 @@
 import moment from 'moment-timezone'
 import { computed, reactive, ref } from 'vue'
 
-import { formatSimpleDate } from '@/lib/time'
+import { formatSimpleDate, getUserDay } from '@/lib/time'
 
 import DayOffModal from '@/components/modals/DayOffModal.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
@@ -169,7 +169,7 @@ const sortedDaysOff = computed(() =>
 // Functions
 // --------------------------------------------------------------------------
 const openSetDayOffModal = (dayOff = null) => {
-  dayOffToEdit.value = dayOff || { date: new Date() }
+  dayOffToEdit.value = dayOff || { date: getUserDay().toDate() }
   modals.setDayOff = true
 }
 
