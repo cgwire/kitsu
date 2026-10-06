@@ -45,6 +45,22 @@ describe('lib/sorting', () => {
     expect(results.map(entry => entry.id)).toEqual([2, 1])
   })
 
+  // A checklist cell can hold a value written for another type of column:
+  // "null" or text from a CSV import, "true" left by a boolean column.
+  it('sortByMetadata ranks a checklist cell of another type as unticked', () => {
+    const entries = [
+      { id: 1, data: { steps: 'Model' } },
+      { id: 2, data: { steps: '{"Model":true,"Rig":false}' } },
+      { id: 3, data: { steps: 'null' } },
+      { id: 4, data: { steps: { Model: true, Rig: true } } },
+      { id: 5, data: { steps: 'true' } }
+    ]
+    const results = [...entries].sort(
+      sortByMetadata({ column: 'steps', data_type: 'checklist' })
+    )
+    expect(results.slice(0, 2).map(entry => entry.id)).toEqual([4, 2])
+  })
+
   it('sortByName', () => {
     const entries = [
       { name: 'Zou', id: 3 },
