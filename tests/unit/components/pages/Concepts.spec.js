@@ -1,4 +1,8 @@
-import { flushPromises, shallowMount } from '@vue/test-utils'
+import {
+  enableAutoUnmount,
+  flushPromises,
+  shallowMount
+} from '@vue/test-utils'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { createStore } from 'vuex'
 
@@ -15,6 +19,7 @@ import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditConceptFolderModal from '@/components/modals/EditConceptFolderModal.vue'
 import Concepts from '@/components/pages/Concepts.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ConceptCard from '@/components/widgets/ConceptCard.vue'
 import ConceptFolderTile from '@/components/widgets/ConceptFolderTile.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
@@ -57,7 +62,11 @@ const mountPage = async ({
     off: vi.fn()
   }
   const store = createStore({
-    state: { production: { id: 'production-1', name: 'Wing It' } },
+    state: {
+      production: { id: 'production-1', name: 'Wing It' },
+      selection,
+      shownPreview: ''
+    },
     getters: {
       concepts: () => concepts,
       conceptFolders: () => folders,
@@ -66,8 +75,9 @@ const mountPage = async ({
       currentProduction: state => state.production,
       isTVShow: () => true,
       personMap: () => new Map(people.map(person => [person.id, person])),
-      selectedConcepts: () =>
-        new Map(selection.map(concept => [concept.id, concept])),
+      previewFileIdToShow: state => state.shownPreview,
+      selectedConcepts: state =>
+        new Map(state.selection.map(concept => [concept.id, concept])),
       taskStatusMap: () => new Map()
     }
   })
@@ -86,6 +96,10 @@ const mountPage = async ({
   await flushPromises()
   return { dispatch, handlers, store, wrapper }
 }
+
+// The page follows the query and writes to it: pages left mounted by the
+// previous tests would fight the one under test over the shared router.
+enableAutoUnmount(afterEach)
 
 describe('Concepts page', () => {
   // The concepts route carries no episode: moving the store to the all
@@ -634,6 +648,137 @@ describe('Concepts page', () => {
     await wrapper.find('.empty-concepts').trigger('dragover')
 
     expect(wrapper.find('.drop-mask').exists()).toBe(true)
+  })
+
+  // A link to the page carries what the user was looking at.
+  describe('query', () => {
+    const stubs = {
+      RouterLink: { props: ['to'], template: '<a><slot /></a>' }
+    }
+    const people = [{ id: 'person-2', name: 'Ada' }]
+    const folders = [{ id: 'folder-1', name: 'Sets' }]
+    const query = () => router.currentRoute.value.query
+    const sortFilter = wrapper =>
+      wrapper
+        .findAllComponents(Combobox)
+        .find(combobox => combobox.props('label') === 'main.sorted_by')
+
+    test('restores the filters', async () => {
+      const { wrapper } = await mountPage({
+        concepts: [buildConcept('concept-1', 'person-2')],
+        people,
+        query: { publisher: 'person-2', sort: 'updated_at', status: 'status-1' }
+      })
+
+      expect(wrapper.findComponent(ComboboxStatus).props('modelValue')).toBe(
+        'status-1'
+      )
+      expect(wrapper.findComponent(PeopleField).props('modelValue')).toEqual(
+        people[0]
+      )
+      expect(sortFilter(wrapper).props('modelValue')).toBe('updated_at')
+    })
+
+    test('follows the filters, defaults left out', async () => {
+      const { wrapper } = await mountPage({
+        concepts: [buildConcept('concept-1', 'person-2')],
+        people
+      })
+
+      wrapper.findComponent(ComboboxStatus).vm.$emit('update:modelValue', 's-1')
+      wrapper.findComponent(PeopleField).vm.$emit('update:modelValue', people[0])
+      await flushPromises()
+      expect(query()).toEqual({ publisher: 'person-2', status: 's-1' })
+
+      sortFilter(wrapper).vm.$emit('update:modelValue', 'updated_at')
+      wrapper.findComponent(ComboboxStatus).vm.$emit('update:modelValue', null)
+      await flushPromises()
+      expect(query()).toEqual({ publisher: 'person-2', sort: 'updated_at' })
+    })
+
+    test('keeps the filters but not the concept when opening a folder', async () => {
+      const { wrapper } = await mountPage({
+        concepts: [buildConcept('concept-1')],
+        folders,
+        query: { 'concept-id': 'concept-1', status: 'status-1' },
+        stubs
+      })
+
+      const targets = wrapper
+        .findAllComponents(stubs.RouterLink)
+        .map(link => link.props('to').query)
+      expect(targets).toContainEqual({ folder: 'folder-1', status: 'status-1' })
+      expect(targets).toContainEqual({ status: 'status-1' })
+    })
+
+    test('follows the single selection', async () => {
+      const concepts = [buildConcept('concept-1'), buildConcept('concept-2')]
+      const { store } = await mountPage({ concepts })
+
+      store.state.selection = [concepts[0]]
+      await flushPromises()
+      expect(query()['concept-id']).toBe('concept-1')
+
+      store.state.selection = concepts
+      await flushPromises()
+      expect(query()['concept-id']).toBeUndefined()
+    })
+
+    test('selects the concept of a link', async () => {
+      const concepts = [buildConcept('concept-1'), buildConcept('concept-2')]
+      const { dispatch } = await mountPage({
+        concepts,
+        query: { 'concept-id': 'concept-2' }
+      })
+
+      expect(dispatch).toHaveBeenCalledWith(
+        'addSelectedConcepts',
+        new Map([['concept-2', concepts[1]]])
+      )
+    })
+
+    test('opens the folder of the concept of a link', async () => {
+      await mountPage({
+        concepts: [{ ...buildConcept('concept-1'), parent_id: 'folder-1' }],
+        folders,
+        query: { 'concept-id': 'concept-1' }
+      })
+
+      expect(query()).toEqual({ 'concept-id': 'concept-1', folder: 'folder-1' })
+    })
+
+    test('forgets a concept that no longer exists', async () => {
+      const { dispatch } = await mountPage({
+        concepts: [buildConcept('concept-1')],
+        query: { 'concept-id': 'gone', 'concept-preview': 'gone' }
+      })
+
+      expect(query()).toEqual({})
+      expect(dispatch).not.toHaveBeenCalledWith(
+        'addSelectedConcepts',
+        expect.anything()
+      )
+    })
+
+    test('shows the concept of a link in full screen and follows the browsing', async () => {
+      const concepts = [
+        { ...buildConcept('concept-1'), preview_file_id: 'preview-1' },
+        { ...buildConcept('concept-2'), preview_file_id: 'preview-2' }
+      ]
+      const { store } = await mountPage({
+        concepts,
+        query: { 'concept-preview': 'concept-1' }
+      })
+      expect(store.commit).toHaveBeenCalledWith('SHOW_PREVIEW_FILE', 'preview-1')
+
+      store.state.shownPreview = 'preview-2'
+      await flushPromises()
+      expect(query()['concept-preview']).toBe('concept-2')
+
+      store.state.shownPreview = ''
+      await flushPromises()
+      expect(query()['concept-preview']).toBeUndefined()
+    })
   })
 
   // The full screen preview modal browses these with the arrow keys.

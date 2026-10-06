@@ -77,7 +77,7 @@
             <nav class="folder-path">
               <router-link
                 :class="{ 'drop-target': dropTargetId === ROOT }"
-                :to="{ query: {} }"
+                :to="{ query: folderQuery(null) }"
                 @dragover="onFolderDragOver(null, $event)"
                 @dragleave="onFolderDragLeave"
                 @drop="onFolderDrop(null, $event)"
@@ -130,7 +130,7 @@
                 @drop="onFolderDrop(folder.id, $event)"
                 v-for="folder in shownFolders"
               >
-                <router-link :to="{ query: { folder: folder.id } }">
+                <router-link :to="{ query: folderQuery(folder.id) }">
                   <concept-folder-tile
                     :count="nbConceptsByFolder.get(folder.id) ?? 0"
                     :highlighted="dropTargetId === folder.id"
@@ -280,9 +280,24 @@ const store = useStore()
 
 const socket = getCurrentInstance().appContext.config.globalProperties.$socket
 
+const DEFAULT_SORT = 'created_at'
+// The parameters a change of folder rewrites: the folder and the concepts
+// it held.
+const FOLDER_PARAMS = ['concept-id', 'concept-preview', 'folder']
+const NO_LINK = 'none'
+const ROOT = 'root'
+const imgExtensions = files.IMG_EXTENSIONS_STRING
+const sortByOptions = [DEFAULT_SORT, 'updated_at', 'last_comment_date'].map(
+  name => ({ label: name, value: name })
+)
+
 // State
 // --------------------------------------------------------------------------
 const addPreviewModalRef = useTemplateRef('add-preview-modal')
+
+// Query updates wait for each other: two of them in the same tick would
+// both start from the same query and the last one would drop the first.
+let queryUpdates = Promise.resolve()
 
 // The concepts of a card drag, read on the folder the drag ends on: the
 // drag data is not readable before the drop.
@@ -298,12 +313,13 @@ const errors = reactive({
   editingFolder: false,
   loadingConcepts: false
 })
+// The query carries the filters, so a link opens the page as it was shared.
 const filters = reactive({
-  assetId: '',
-  assetTypeId: '',
-  publisher: null,
-  sortBy: 'created_at',
-  taskStatusId: null
+  assetId: route.query.asset ?? '',
+  assetTypeId: route.query['asset-type'] ?? '',
+  publisher: store.getters.personMap.get(route.query.publisher) ?? null,
+  sortBy: route.query.sort ?? DEFAULT_SORT,
+  taskStatusId: route.query.status ?? null
 })
 const loading = reactive({
   addingConcept: false,
@@ -317,17 +333,11 @@ const modals = reactive({
   editFolder: false
 })
 
-const NO_LINK = 'none'
-const ROOT = 'root'
-const imgExtensions = files.IMG_EXTENSIONS_STRING
-const sortByOptions = ['created_at', 'updated_at', 'last_comment_date'].map(
-  name => ({ label: name, value: name })
-)
-
 // Computed
 // --------------------------------------------------------------------------
 const conceptFolders = computed(() => store.getters.conceptFolders)
 const concepts = computed(() => store.getters.concepts)
+const previewFileIdToShow = computed(() => store.getters.previewFileIdToShow)
 const currentProduction = computed(() => store.getters.currentProduction)
 const personMap = computed(() => store.getters.personMap)
 const selectedConcepts = computed(() => store.getters.selectedConcepts)
@@ -441,6 +451,12 @@ const publishers = computed(() => {
 
 const isDrawerOpen = computed(() => selectedConcepts.value.size > 0)
 
+const singleSelectedId = computed(() =>
+  selectedConcepts.value.size === 1
+    ? selectedConcepts.value.keys().next().value
+    : null
+)
+
 const currentConcept = computed(() =>
   selectedConcepts.value.size === 1
     ? selectedConcepts.value.values().next().value
@@ -486,6 +502,55 @@ const getFolderId = concept =>
   conceptFolders.value.some(folder => folder.id === concept.parent_id)
     ? concept.parent_id
     : null
+
+const setQuery = patch => {
+  queryUpdates = queryUpdates.then(() => {
+    const query = Object.fromEntries(
+      Object.entries({ ...route.query, ...patch }).filter(([, value]) => value)
+    )
+    return router.replace({ query })
+  })
+}
+
+// Changing folder leaves the concept behind, not the filters.
+const folderQuery = folderId => {
+  const query = Object.fromEntries(
+    Object.entries(route.query).filter(([key]) => !FOLDER_PARAMS.includes(key))
+  )
+  return folderId ? { ...query, folder: folderId } : query
+}
+
+// A link may name the concept of the side panel (concept-id) and the one
+// shown in full screen (concept-preview): both wait for the concepts, then
+// for the folder that holds them.
+const applyConceptQuery = () => {
+  if (loading.loadingConcepts || errors.loadingConcepts) return
+  const params = ['concept-id', 'concept-preview']
+  const [selected, previewed] = params.map(param =>
+    concepts.value.find(concept => concept.id === route.query[param])
+  )
+  const unknownParams = params.filter(
+    (param, index) => route.query[param] && ![selected, previewed][index]
+  )
+  if (unknownParams.length) {
+    setQuery(Object.fromEntries(unknownParams.map(param => [param, ''])))
+  }
+  const located = previewed ?? selected
+  if (!located) return
+  if (getFolderId(located) !== (currentFolder.value?.id ?? null)) {
+    setQuery({ folder: getFolderId(located) ?? '' })
+    return
+  }
+  if (selected && singleSelectedId.value !== selected.id) {
+    onSelectConcept(selected)
+  }
+  if (
+    previewed?.preview_file_id &&
+    previewFileIdToShow.value !== previewed.preview_file_id
+  ) {
+    store.commit('SHOW_PREVIEW_FILE', previewed.preview_file_id)
+  }
+}
 
 const refreshConcepts = async () => {
   loading.loadingConcepts = true
@@ -581,7 +646,7 @@ const confirmDeleteFolder = async () => {
   try {
     await store.dispatch('deleteConceptFolder', currentFolder.value)
     modals.deleteFolder = false
-    router.push({ query: {} })
+    router.push({ query: folderQuery(null) })
   } catch (err) {
     console.error(err)
     errors.deletingFolder = true
@@ -688,15 +753,61 @@ watch(
 // The selection of a folder is out of sight in another one.
 watch(() => currentFolder.value?.id, clearSelection)
 
+watch(
+  filters,
+  () =>
+    setQuery({
+      asset: filters.assetId,
+      'asset-type': filters.assetTypeId,
+      publisher: filters.publisher?.id,
+      sort: filters.sortBy === DEFAULT_SORT ? '' : filters.sortBy,
+      status: filters.taskStatusId
+    }),
+  { deep: true }
+)
+
+// Declared after the folder watcher: opening the folder of a linked concept
+// clears the selection first, then selects the concept.
+watch(
+  [
+    () => route.query['concept-id'],
+    () => route.query['concept-preview'],
+    () => currentFolder.value?.id,
+    () => loading.loadingConcepts
+  ],
+  applyConceptQuery
+)
+
+// Only a selection that ends removes its parameter: an empty selection must
+// leave the concept of a link alone until the concepts are loaded.
+watch(singleSelectedId, (selectedId, previousId) => {
+  if (selectedId || previousId) setQuery({ 'concept-id': selectedId })
+})
+
+watch(previewFileIdToShow, (previewFileId, previousId) => {
+  const previewed = concepts.value.find(
+    concept => previewFileId && concept.preview_file_id === previewFileId
+  )
+  if (previewed || previousId) setQuery({ 'concept-preview': previewed?.id })
+})
+
 // A filter whose value is no longer offered would hide every concept.
+// Not while loading: the options are empty then, and the filters of a link
+// would be dropped before the concepts that offer them arrive.
 watch(assetTypeOptions, options => {
-  if (!options.some(option => option.value === filters.assetTypeId)) {
+  if (
+    !loading.loadingConcepts &&
+    !options.some(option => option.value === filters.assetTypeId)
+  ) {
     filters.assetTypeId = ''
   }
 })
 
 watch(assetOptions, options => {
-  if (!options.some(option => option.id === filters.assetId)) {
+  if (
+    !loading.loadingConcepts &&
+    !options.some(option => option.id === filters.assetId)
+  ) {
     filters.assetId = ''
   }
 })
