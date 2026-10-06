@@ -9,6 +9,7 @@ vi.mock('vue-i18n', async importOriginal => ({
 
 import DayOffList from '@/components/lists/DayOffList.vue'
 import DayOffModal from '@/components/modals/DayOffModal.vue'
+import DeleteModal from '@/components/modals/DeleteModal.vue'
 import DateField from '@/components/widgets/DateField.vue'
 
 const mountList = props =>
@@ -59,6 +60,41 @@ describe('DayOffList', () => {
       date: new Date('2026-08-03T00:00:00.000Z'),
       end_date: new Date('2026-08-05T00:00:00.000Z')
     })
+  })
+
+  // The rows hold their days at UTC midnight for the utc date fields of the
+  // form: west of UTC, that instant still falls on the day before.
+  describe('delete confirmation', () => {
+    afterEach(() => moment.tz.setDefault())
+
+    it.each(['America/New_York', 'Asia/Tokyo'])(
+      'names the stored days in %s',
+      async timezone => {
+        moment.tz.setDefault(timezone)
+        const wrapper = mount(DayOffList, {
+          props: {
+            daysOff: [
+              { id: 'day-off-1', date: '2026-10-12', end_date: '2026-10-13' }
+            ]
+          },
+          global: {
+            mocks: {
+              $t: (key, params = {}) =>
+                [key, ...Object.values(params)].join(' ')
+            },
+            stubs: { DayOffModal: true, DeleteModal: true }
+          }
+        })
+
+        await wrapper.findAll('.actions button')[1].trigger('click')
+
+        const modal = wrapper.findComponent(DeleteModal)
+        expect(modal.props('active')).toBe(true)
+        expect(modal.props('text')).toBe(
+          'days_off.confirm_unset_day_offs 2026-10-12 2026-10-13'
+        )
+      }
+    )
   })
 
   // The form has utc date fields: they hold a day at UTC midnight. Kitsu

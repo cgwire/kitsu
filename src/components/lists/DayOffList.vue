@@ -90,8 +90,8 @@
       :active="modals.unsetDayOff"
       :text="
         $t('days_off.confirm_unset_day_offs', {
-          start: formatSimpleDate(dayOffToEdit?.date),
-          end: formatSimpleDate(dayOffToEdit?.end_date)
+          start: formatUtcDay(dayOffToEdit?.date),
+          end: formatUtcDay(dayOffToEdit?.end_date)
         })
       "
       :is-error="isDayOffError"
@@ -106,7 +106,7 @@
 import moment from 'moment-timezone'
 import { computed, reactive, ref } from 'vue'
 
-import { formatSimpleDate, getUserDay } from '@/lib/time'
+import { getUserDay } from '@/lib/time'
 
 import DayOffModal from '@/components/modals/DayOffModal.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
@@ -168,6 +168,10 @@ const sortedDaysOff = computed(() =>
 
 // Functions
 // --------------------------------------------------------------------------
+// The rows hold their days at UTC midnight, as the utc date fields of the
+// form do: the user time zone would name the day before west of UTC.
+const formatUtcDay = date => (date ? moment.utc(date).format('YYYY-MM-DD') : '')
+
 const openSetDayOffModal = (dayOff = null) => {
   dayOffToEdit.value = dayOff || { date: getUserDay().toDate() }
   modals.setDayOff = true
