@@ -1,6 +1,7 @@
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import process from 'node:process'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { reactive } from 'vue'
 import { createStore } from 'vuex'
 
 vi.mock('vue-i18n', async importOriginal => ({
@@ -35,10 +36,12 @@ const withMethods = (names, values = {}) => ({
   }
 })
 
+// Without previewFileStatusMap, the store keeps no preview status.
 const mountPlayer = ({
   playlistProp = playlist,
   entities = [entity],
   canEditShotTrim = () => true,
+  previewFileStatusMap,
   shotMap = new Map(),
   taskMap = new Map()
 } = {}) => {
@@ -58,6 +61,7 @@ const mountPlayer = ({
       organisation: () => ({}),
       personMap: () => new Map(),
       previewFileMap: () => new Map(),
+      previewFileStatusMap: () => previewFileStatusMap,
       productionAssetTaskTypes: () => [],
       productionBackgrounds: () => [],
       productionEditTaskTypes: () => [],
@@ -109,13 +113,13 @@ const mountPlayer = ({
             getVideoRatio: () => 1
           }
         ),
-        MultiPictureViewer: withMethods(
-          ['resetPanZoom', 'resumePanZoom', 'setPanZoom'],
-          {
+        MultiPictureViewer: {
+          ...withMethods(['resetPanZoom', 'resumePanZoom', 'setPanZoom'], {
             getNaturalDimensions: () => ({ width: 1920, height: 1080 }),
             getPictureElement: () => null
-          }
-        ),
+          }),
+          props: { previews: Array }
+        },
         ObjectViewer: withMethods(['pause', 'play'], {
           getAnimations: () => []
         }),
@@ -291,6 +295,95 @@ describe('PlaylistPlayer.vue', () => {
       process.off('unhandledRejection', onRejection)
 
       expect(rejections).toEqual([])
+    })
+  })
+
+  // Zou builds the files of an uploaded preview in a job, and its picture
+  // routes answer 404 until the preview file is ready.
+  describe('previews being processed', () => {
+    const picture = {
+      id: 'shot-2',
+      preview_file_id: 'preview-2',
+      preview_file_extension: 'png'
+    }
+
+    const pictureWithExtra = {
+      ...picture,
+      preview_file_previews: [{ id: 'preview-3', extension: 'png' }]
+    }
+
+    const viewerStatuses = () =>
+      wrapper
+        .findComponent({ ref: 'picture-player' })
+        .props('previews')
+        .map(({ status }) => status)
+
+    it('registers the statuses of the revisions its entries can play', async () => {
+      const subPreview = { id: 'preview-3', status: 'processing' }
+      const revision = {
+        id: 'preview-2',
+        status: 'processing',
+        previews: [subPreview]
+      }
+      const olderRevision = { id: 'preview-4', status: 'ready', previews: [] }
+      const otherTaskRevision = { id: 'preview-5', status: 'broken' }
+      wrapper = mountPlayer({
+        entities: [
+          {
+            ...picture,
+            preview_files: {
+              'task-type-1': [revision, olderRevision],
+              'task-type-2': [otherTaskRevision]
+            }
+          },
+          entity
+        ]
+      })
+      await flushPromises()
+      expect(wrapper.vm.$store.dispatch).toHaveBeenCalledWith(
+        'registerPreviewFileStatuses',
+        [revision, subPreview, olderRevision, otherTaskRevision]
+      )
+    })
+
+    // The playlist page pushes an added entry into the list it handed over.
+    it('registers the revisions of an entry added to the playlist', async () => {
+      const entities = reactive([entity])
+      wrapper = mountPlayer({ entities })
+      await flushPromises()
+      const revision = { id: 'preview-2', status: 'processing', previews: [] }
+      entities.push({ ...picture, preview_files: { 'task-type-1': [revision] } })
+      await flushPromises()
+      expect(wrapper.vm.$store.dispatch).toHaveBeenCalledWith(
+        'registerPreviewFileStatuses',
+        [revision]
+      )
+    })
+
+    it('gives the picture viewers the status the registry knows', async () => {
+      const previewFileStatusMap = reactive(
+        new Map([
+          ['preview-2', 'processing'],
+          ['preview-3', 'processing']
+        ])
+      )
+      wrapper = mountPlayer({
+        entities: [pictureWithExtra],
+        previewFileStatusMap
+      })
+      await flushPromises()
+      expect(viewerStatuses()).toEqual(['processing', 'processing'])
+
+      previewFileStatusMap.set('preview-2', 'ready')
+      await flushPromises()
+      expect(viewerStatuses()).toEqual(['ready', 'processing'])
+    })
+
+    // The viewers take a preview without a status as ready.
+    it('gives the picture viewers no status without a registry', async () => {
+      wrapper = mountPlayer({ entities: [pictureWithExtra] })
+      await flushPromises()
+      expect(viewerStatuses()).toEqual([undefined, undefined])
     })
   })
 })
