@@ -56,6 +56,19 @@ export const formatSimpleDate = date => {
   else return ''
 }
 
+// A utc date field holds a day as the Date at UTC midnight of that day, the
+// way parseDate reads it back, while its date picker works in local time.
+export const utcDayToLocalDate = date => {
+  if (!date) return null
+  const day = moment.utc(date)
+  return new Date(day.year(), day.month(), day.date())
+}
+
+export const localDayToUtcDate = date => {
+  if (!date) return null
+  return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+}
+
 export const formatTimeOfDay = (
   date,
   use12HourClock = false,
