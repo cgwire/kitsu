@@ -2090,6 +2090,8 @@ const removeFromAssignments = person => {
 }
 
 const submitAssignments = () => {
+  // Enter in a field submits the form while the Apply button spins
+  if (assignments.value.saving) return
   if (assignments.value.type === 'entity') {
     saveAssignments()
   } else if (assignments.value.type === 'task') {

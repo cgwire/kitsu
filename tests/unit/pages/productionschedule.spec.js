@@ -1354,6 +1354,75 @@ describe('ProductionSchedule page', () => {
       expect(taskStartField.props('modelValue')).toBe('2026-04-13')
     })
 
+    // Answers the held requests one by one, the requests they lead to
+    // included.
+    const releaseAll = async requests => {
+      while (requests.length) {
+        requests.shift()({ id: 'versioned-task-1' })
+        await flushPromises()
+      }
+    }
+
+    // The Apply button spins while the panel saves, but Enter in a field of
+    // the form still submitted it: a second run sent its writes again,
+    // interleaved with the first.
+    it.each([
+      ['the reference', {}, 'updateTask'],
+      ['a version', versionOptions, 'createScheduleVersionedTask']
+    ])(
+      'ignores Apply while a run of %s is saving',
+      async (_, options, writeAction) => {
+        const writes = []
+        const { storeActions, wrapper } = await mountAssignments({
+          ...options,
+          actions: {
+            [writeAction]: vi.fn(
+              () => new Promise(resolve => writes.push(resolve))
+            )
+          }
+        })
+        await selectProps(wrapper)
+        await setRange(wrapper)
+        await apply(wrapper)
+
+        await apply(wrapper)
+        expect(findButton(wrapper, 'main.apply').props('isLoading')).toBe(true)
+        await releaseAll(writes)
+
+        expect(
+          payloadsOf(storeActions[writeAction]).map(payload => payload.taskId)
+        ).toEqual(['task-asset-1', 'task-asset-2'])
+        expect(findButton(wrapper, 'main.apply').props('isLoading')).toBe(false)
+      }
+    )
+
+    it.each([
+      ['the reference', {}, 'updateTask', 2],
+      ['a version', versionOptions, 'updateScheduleVersionedTask', 1]
+    ])(
+      'ignores Apply while a task edit of %s is saving',
+      async (_, options, saveAction, nbSaves) => {
+        const saves = []
+        const { storeActions, wrapper } = await mountAssignments({
+          ...options,
+          actions: {
+            [saveAction]: vi.fn(
+              () => new Promise(resolve => saves.push(resolve))
+            )
+          }
+        })
+        await editTask(wrapper, buildChairTask())
+        await apply(wrapper)
+
+        await apply(wrapper)
+        expect(findButton(wrapper, 'main.apply').props('isLoading')).toBe(true)
+        await releaseAll(saves)
+
+        expect(storeActions[saveAction]).toHaveBeenCalledTimes(nbSaves)
+        expect(findButton(wrapper, 'main.apply').props('isLoading')).toBe(false)
+      }
+    )
+
     // Each task goes to a single person, but the auto quota shared every
     // task among the whole team: with fewer entities than people, no task
     // fitted the range and Apply did nothing.
