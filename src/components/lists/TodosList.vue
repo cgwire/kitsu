@@ -135,7 +135,7 @@
                 step="any"
                 type="number"
                 :value="formatDuration(entry.estimation, false)"
-                @change="updateEstimation($event.target.value)"
+                @change="updateEstimation($event.target, entry)"
                 v-if="isEditable && selectionGrid[entry.id]"
               />
               <template v-else>
@@ -550,8 +550,15 @@ const isTaskChanged = (task, data) => {
   )
 }
 
-const updateEstimation = duration => {
-  const estimation = durationToMinutes(organisation.value, duration)
+// "1." left in the field is no number and reads as an emptied field, which
+// saved an estimation of 0: the stored one comes back instead. An emptied
+// field still saves 0.
+const updateEstimation = (input, entry) => {
+  if (input.validity.badInput) {
+    input.value = formatDuration(entry.estimation, false)
+    return
+  }
+  const estimation = durationToMinutes(organisation.value, input.value)
 
   updateTasksEstimation({ estimation })
 }

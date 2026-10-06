@@ -24,6 +24,7 @@ const task = {
   entity: { id: 'asset-1' },
   assignees: [],
   difficulty: 3,
+  estimation: 240,
   retake_count: 0
 }
 
@@ -65,6 +66,17 @@ const mountList = (
     },
     props: { entityType: 'Asset', tasks: [task], ...props }
   })
+
+// What a browser reports once "1." is left in a number field: no number, so
+// an empty value with a bad input
+const leaveInvalidEntry = async input => {
+  input.element.value = '1.'
+  Object.defineProperty(input.element, 'validity', {
+    configurable: true,
+    value: { badInput: true }
+  })
+  await input.trigger('change')
+}
 
 // The click target when the pointer is on the drawn line of an icon
 const appendIconStroke = cell => {
@@ -127,5 +139,47 @@ describe('lists/TaskList', () => {
     ])
 
     wrapper.unmount()
+  })
+
+  describe('estimation field', () => {
+    const mountEditableList = updateTask =>
+      mountList(undefined, {
+        getters: {
+          isCurrentUserProductionManager: () => true,
+          taskMap: () => new Map([[task.id, task]])
+        },
+        actions: { updateTask },
+        props: { disabledDates: {} }
+      })
+
+    // It read as an emptied field and saved 0 for every selected task.
+    test('ignores an entry that is no number', async () => {
+      const updateTask = vi.fn()
+      const wrapper = mountEditableList(updateTask)
+      await wrapper.find('tbody td.name').trigger('click')
+      const input = wrapper.find('tbody td.estimation input')
+
+      await leaveInvalidEntry(input)
+
+      expect(updateTask).not.toHaveBeenCalled()
+      // the half day stored comes back
+      expect(input.element.value).toBe('0.5')
+
+      wrapper.unmount()
+    })
+
+    test('saves 0 for an emptied field', async () => {
+      const updateTask = vi.fn()
+      const wrapper = mountEditableList(updateTask)
+      await wrapper.find('tbody td.name').trigger('click')
+
+      await wrapper.find('tbody td.estimation input').setValue('')
+
+      expect(updateTask.mock.calls.map(([, payload]) => payload)).toEqual([
+        { taskId: 'task-1', data: { estimation: 0 } }
+      ])
+
+      wrapper.unmount()
+    })
   })
 })

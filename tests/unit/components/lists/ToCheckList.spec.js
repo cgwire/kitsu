@@ -15,7 +15,8 @@ const task = {
   task_type_id: 'task-type-1',
   entity_type_name: 'Shot',
   full_entity_name: 'SQ010 / SH0010',
-  assignees: []
+  assignees: [],
+  estimation: 240
 }
 
 const mountList = ({ getters = {}, actions = {} } = {}) =>
@@ -49,6 +50,17 @@ const mountList = ({ getters = {}, actions = {} } = {}) =>
     props: { tasks: [task] }
   })
 
+// What a browser reports once "1." is left in a number field: no number, so
+// an empty value with a bad input
+const leaveInvalidEntry = async input => {
+  input.element.value = '1.'
+  Object.defineProperty(input.element, 'validity', {
+    configurable: true,
+    value: { badInput: true }
+  })
+  await input.trigger('change')
+}
+
 describe('lists/ToCheckList', () => {
   // 2.05 hours make 122.99999999999999 minutes in floats.
   test('saves an estimation typed in hours in whole minutes', async () => {
@@ -75,5 +87,46 @@ describe('lists/ToCheckList', () => {
     ])
 
     wrapper.unmount()
+  })
+
+  describe('estimation field', () => {
+    const mountEditableList = updateTask =>
+      mountList({
+        getters: {
+          isCurrentUserManager: () => true,
+          taskMap: () => new Map([[task.id, task]])
+        },
+        actions: { updateTask }
+      })
+
+    // It read as an emptied field and saved 0 for every selected task.
+    test('ignores an entry that is no number', async () => {
+      const updateTask = vi.fn()
+      const wrapper = mountEditableList(updateTask)
+      await wrapper.find('tbody td.duration').trigger('click')
+      const input = wrapper.find('tbody td.estimation input')
+
+      await leaveInvalidEntry(input)
+
+      expect(updateTask).not.toHaveBeenCalled()
+      // the half day stored comes back
+      expect(input.element.value).toBe('0.5')
+
+      wrapper.unmount()
+    })
+
+    test('saves 0 for an emptied field', async () => {
+      const updateTask = vi.fn()
+      const wrapper = mountEditableList(updateTask)
+      await wrapper.find('tbody td.duration').trigger('click')
+
+      await wrapper.find('tbody td.estimation input').setValue('')
+
+      expect(updateTask.mock.calls.map(([, payload]) => payload)).toEqual([
+        { taskId: 'task-1', data: { estimation: 0 } }
+      ])
+
+      wrapper.unmount()
+    })
   })
 })
