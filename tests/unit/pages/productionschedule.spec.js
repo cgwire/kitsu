@@ -20,6 +20,7 @@ import taskTypeStore from '@/store/modules/tasktypes'
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 import ProductionSchedule from '@/components/pages/ProductionSchedule.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import Checkbox from '@/components/widgets/Checkbox.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
@@ -977,6 +978,14 @@ describe('ProductionSchedule page', () => {
       await flushPromises()
     }
 
+    const overrideAssignments = async wrapper => {
+      wrapper
+        .find('.side-column form')
+        .findComponent(Checkbox)
+        .vm.$emit('update:model-value', true)
+      await flushPromises()
+    }
+
     const apply = async wrapper => {
       await wrapper.find('.side-column form').trigger('submit')
       await flushPromises()
@@ -1354,6 +1363,80 @@ describe('ProductionSchedule page', () => {
         { personId: 'person-2', taskIds: ['task-asset-2'] }
       ])
       expect(panelText(wrapper)).toContain('schedule.assign_no_fit {"count":1}')
+    })
+
+    // The override cleared the assignees of every selected task before the
+    // distribution: a task that then fit nobody was left with no assignee.
+    it.each([
+      ['the reference', {}],
+      ['a version', versionOptions]
+    ])(
+      'keeps the assignees of the tasks that do not fit in %s',
+      async (_, options) => {
+        const { storeActions, wrapper } = await mountAssignments(options)
+        await selectProps(wrapper)
+        await setRange(wrapper)
+        await forceQuota(wrapper, '0.01')
+        await overrideAssignments(wrapper)
+
+        await apply(wrapper)
+
+        expect(panelText(wrapper)).toContain(
+          'schedule.assign_no_fit {"count":2}'
+        )
+        expect(writesOf(storeActions)).toEqual([])
+      }
+    )
+
+    it('overrides the assignees of the tasks that fit only', async () => {
+      const { storeActions, wrapper } = await mountAssignments({ nbAssets: 3 })
+      await selectProps(wrapper)
+      await setRange(wrapper)
+      await forceQuota(wrapper, '0.5')
+      await overrideAssignments(wrapper)
+
+      await apply(wrapper)
+
+      expect(payloadsOf(storeActions.unassignSelectedTasks)).toEqual([
+        { taskIds: ['task-asset-1', 'task-asset-2'] }
+      ])
+      expect(payloadsOf(storeActions.assignSelectedTasks)).toEqual([
+        { personId: 'person-1', taskIds: ['task-asset-1'] },
+        { personId: 'person-2', taskIds: ['task-asset-2'] }
+      ])
+    })
+
+    it('overrides the assignees of the tasks that fit only in a version', async () => {
+      const { storeActions, wrapper } = await mountAssignments({
+        ...versionOptions,
+        nbAssets: 3,
+        actions: {
+          loadTasksFromScheduleVersion: vi.fn(() =>
+            propAssets.map(asset => ({
+              id: `link-${asset.id}`,
+              task_id: `task-${asset.id}`,
+              assignees: ['person-3']
+            }))
+          )
+        }
+      })
+      await selectProps(wrapper)
+      await setRange(wrapper)
+      await forceQuota(wrapper, '0.5')
+      await overrideAssignments(wrapper)
+
+      await apply(wrapper)
+
+      expect(
+        payloadsOf(storeActions.updateScheduleVersionedTask).map(link => [
+          link.id,
+          link.assignees
+        ])
+      ).toEqual([
+        ['link-asset-1', ['person-1']],
+        ['link-asset-2', ['person-2']]
+      ])
+      expect(storeActions.createScheduleVersionedTask).not.toHaveBeenCalled()
     })
 
     it.each(panelReuses)(

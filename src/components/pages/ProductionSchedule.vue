@@ -2185,14 +2185,6 @@ const distributeAssignments = async () => {
         task.versionedTaskId = versionedTask.id
       }
 
-      if (assignments.value.unassign) {
-        if (isVersioned.value) {
-          versionedTask.assignees = []
-        } else {
-          taskIdsToUnassign.push(task.id)
-        }
-      }
-
       cumulatedTasks++
 
       let taskStartDate = nextStartDate
@@ -2226,6 +2218,15 @@ const distributeAssignments = async () => {
           taskStartDate = rangeStartDate.clone()
           taskEndDate = null
         } else {
+          // override once the task fits: one that fits nobody keeps its
+          // assignees
+          if (assignments.value.unassign) {
+            if (isVersioned.value) {
+              versionedTask.assignees = []
+            } else {
+              taskIdsToUnassign.push(task.id)
+            }
+          }
           if (isVersioned.value) {
             versionedTask.startDate = taskStartDate.format('YYYY-MM-DD')
             versionedTask.dueDate = taskEndDate.format('YYYY-MM-DD')
