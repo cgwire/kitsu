@@ -1,4 +1,4 @@
-import { mount } from '@vue/test-utils'
+import { flushPromises, mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
 
 import PreviewModal from '@/components/modals/PreviewModal.vue'
@@ -12,6 +12,29 @@ describe('PreviewModal', () => {
       'a[href="/api/pictures/originals/preview-files/preview-1/download"]'
     )
     expect(link.attributes('download')).toBe('')
+    wrapper.unmount()
+  })
+
+  // Its buttons sit out of .modal-content: the trap must hold the whole root.
+  it('keeps Tab on its buttons', async () => {
+    const wrapper = mount(PreviewModal, {
+      props: { active: true, previewFileId: 'preview-1' },
+      attachTo: document.body
+    })
+    await flushPromises()
+    const pressTab = shiftKey => {
+      const event = new KeyboardEvent('keydown', {
+        key: 'Tab',
+        shiftKey,
+        cancelable: true
+      })
+      window.dispatchEvent(event)
+    }
+
+    pressTab(true)
+    expect(document.activeElement).toBe(wrapper.get('[role="button"]').element)
+    pressTab(false)
+    expect(document.activeElement).toBe(wrapper.get('a[download]').element)
     wrapper.unmount()
   })
 

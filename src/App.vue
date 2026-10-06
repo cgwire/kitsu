@@ -641,6 +641,12 @@ onMounted(async () => {
   outline: 2px solid var(--text-selected);
   outline-offset: 1px;
 }
+// useModal focuses the dialog itself when it opens: a frame around the
+// whole dialog would only be noise.
+.modal:focus,
+.modal-content:focus {
+  outline: none;
+}
 ::-moz-focus-inner {
   border: 0;
 }
