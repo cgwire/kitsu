@@ -289,6 +289,7 @@ import { useStore } from 'vuex'
 import { pauseEvent } from '@/composables/dom'
 import files from '@/lib/files'
 import func from '@/lib/func'
+import { isPreviewFileStatus } from '@/lib/preview'
 import { sortAssets, sortByName, sortPeople } from '@/lib/sorting'
 import assetsStore from '@/store/modules/assets'
 
@@ -795,14 +796,19 @@ const refreshConceptPreview = concept => {
   store.dispatch('refreshConceptPreview', concept).catch(console.error)
 }
 
-// The update announcing the stored variants carries no status.
 const onPreviewFileUpdate = eventData => {
   const concept = concepts.value.find(
     concept =>
       concept.preview_file_id === eventData.preview_file_id &&
       concept.preview_file_status === 'processing'
   )
-  if (concept) refreshConceptPreview(concept)
+  if (concept && isPreviewFileStatus(eventData.status)) {
+    store.commit('UPDATE_CONCEPT_PREVIEW_STATUS', {
+      conceptId: concept.id,
+      previewFileId: eventData.preview_file_id,
+      status: eventData.status
+    })
+  }
 }
 
 // Zou does not send again the events emitted while the socket was down.
