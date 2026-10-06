@@ -1,4 +1,4 @@
-import { shallowMount } from '@vue/test-utils'
+import { RouterLinkStub, shallowMount } from '@vue/test-utils'
 import { createStore } from 'vuex'
 
 // Importing the card transitively pulls in the root store
@@ -30,12 +30,13 @@ const mountCard = (props = {}, links = []) =>
           getters: {
             currentProduction: () => ({ id: 'production-1' }),
             isTVShow: () => false,
-            personMap: () => new Map(),
+            personMap: () => new Map([['person-1', { id: 'person-1' }]]),
             taskStatusMap: () =>
               new Map([['status-todo', { color: '#999', short_name: 'todo' }]])
           }
         })
-      ]
+      ],
+      stubs: { RouterLink: RouterLinkStub }
     }
   })
 
