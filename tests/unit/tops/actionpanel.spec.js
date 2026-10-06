@@ -60,6 +60,16 @@ const mountPanel = async (
         path: '/productions/:production_id/shots',
         name: 'shots',
         component: { template: '<div />' }
+      },
+      {
+        path: '/productions/:production_id/shots/:shot_id',
+        name: 'shot',
+        component: { template: '<div />' }
+      },
+      {
+        path: '/productions/:production_id/edits/:edit_id',
+        name: 'edit',
+        component: { template: '<div />' }
       }
     ]
   })
@@ -393,6 +403,22 @@ describe('ActionPanel, opened on a task selection', () => {
       wrapper.findAll('.action-bar .confirm-button').map(button => button.text())
     ).toEqual(['tasks.change_priority'])
   })
+
+  // Without episodes, these pages carry no episode in their route.
+  test.each([
+    ['shot', '/productions/production-1/shots/shot-1'],
+    ['edit', '/productions/production-1/edits/edit-1']
+  ])(
+    'clears the task selection on an Escape on the %s page',
+    async (name, path) => {
+      const { store } = await mountPanel([], { path, tasks: [task] })
+      store.commit = vi.fn()
+
+      pressEscape(document.body)
+
+      expect(store.commit).toHaveBeenCalledWith('CLEAR_SELECTED_TASKS')
+    }
+  )
 })
 
 describe('ActionPanel, concept folders', () => {

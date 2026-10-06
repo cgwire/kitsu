@@ -1260,6 +1260,7 @@ const isHidden = computed(
       nbSelectedConcepts.value === 0) ||
     !(
       isCurrentViewEntity.value ||
+      isCurrentViewSingleEntity.value ||
       isCurrentViewTodos.value ||
       isCurrentViewConcept.value
     )
