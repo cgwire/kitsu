@@ -1419,6 +1419,7 @@
       "apply_to_prod_error": "将计划版本应用到当前生产时发生错误。",
       "assign": "指派给",
       "assign_error": "无法分配任务。请重试。",
+      "assign_no_fit": "{count} 个任务无法排入日期范围。 | {count} 个任务无法排入日期范围。",
       "confirm_move_children": "移动此条将裁剪或移动 {count} 个子项以适应新范围。是否继续？| 移动此条将裁剪或移动 {count} 个子项以适应新范围。是否继续？",
       "create_version": "创建时间表版本",
       "delete_version": "删除计划版本",

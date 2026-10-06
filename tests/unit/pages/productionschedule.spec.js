@@ -127,7 +127,8 @@ const people = [
 
 const propAssets = [
   { id: 'asset-1', name: 'Chair', asset_type_id: 'asset-type-props' },
-  { id: 'asset-2', name: 'Table', asset_type_id: 'asset-type-props' }
+  { id: 'asset-2', name: 'Table', asset_type_id: 'asset-type-props' },
+  { id: 'asset-3', name: 'Lamp', asset_type_id: 'asset-type-props' }
 ]
 
 const day = date => moment.utc(date)
@@ -216,7 +217,10 @@ const mountPage = async ({
   const wrapper = shallowMount(ProductionSchedule, {
     global: {
       plugins: [store, router],
-      mocks: { $t: key => key },
+      // the values show, so a test can read the count of a plural message
+      mocks: {
+        $t: (key, values) => (values ? `${key} ${JSON.stringify(values)}` : key)
+      },
       stubs: { Schedule: scheduleWidget }
     }
   })
@@ -305,6 +309,7 @@ describe('ProductionSchedule page', () => {
     assetTypeStore.cache.assetTypeMap.clear()
     assetStore.cache.assets = []
     vi.restoreAllMocks()
+    vi.useRealTimers()
   })
 
   describe('task type filter', () => {
@@ -902,7 +907,8 @@ describe('ProductionSchedule page', () => {
       await wrapper.find('.side-column .assignment-item').trigger('click')
     }
 
-    // Monday 6 to Wednesday 8 April: three working days
+    // Monday 6 to Wednesday 8 April: three working days. A null start keeps
+    // the one the panel opened with.
     const setRange = async (
       wrapper,
       startDate = '2026-04-06',
@@ -911,8 +917,16 @@ describe('ProductionSchedule page', () => {
       const [startField, endField] = wrapper
         .find('.side-column form')
         .findAllComponents(DateField)
-      startField.vm.$emit('update:model-value', startDate)
+      if (startDate) startField.vm.$emit('update:model-value', startDate)
       endField.vm.$emit('update:model-value', endDate)
+      await flushPromises()
+    }
+
+    const forceQuota = async (wrapper, quota) => {
+      wrapper
+        .find('.side-column form')
+        .findComponent(TextField)
+        .vm.$emit('update:model-value', quota)
       await flushPromises()
     }
 
@@ -922,6 +936,15 @@ describe('ProductionSchedule page', () => {
     }
 
     const panelText = wrapper => wrapper.find('.side-column').text()
+
+    const writesOf = storeActions =>
+      [
+        'assignSelectedTasks',
+        'createScheduleVersionedTask',
+        'unassignSelectedTasks',
+        'updateScheduleVersionedTask',
+        'updateTask'
+      ].filter(action => storeActions[action].mock.calls.length)
 
     // A refused request left the Apply button spinning for good, with no
     // word of the failure.
@@ -1020,7 +1043,7 @@ describe('ProductionSchedule page', () => {
     const goBack = wrapper =>
       wrapper.find('.side-column button.is-link').trigger('click')
 
-    it.each([
+    const panelReuses = [
       [
         'a new selection',
         async wrapper => {
@@ -1062,22 +1085,213 @@ describe('ProductionSchedule page', () => {
           await flushPromises()
         }
       ]
-    ])('clears the error when the panel goes on with %s', async (_, reuse) => {
-      vi.spyOn(console, 'error').mockImplementation(() => {})
-      const { wrapper } = await mountAssignments({
-        actions: {
-          updateTask: vi.fn(() => Promise.reject(new Error('Bad request')))
-        }
-      })
+    ]
+
+    it.each(panelReuses)(
+      'clears the error when the panel goes on with %s',
+      async (_, reuse) => {
+        vi.spyOn(console, 'error').mockImplementation(() => {})
+        const { wrapper } = await mountAssignments({
+          actions: {
+            updateTask: vi.fn(() => Promise.reject(new Error('Bad request')))
+          }
+        })
+        await selectProps(wrapper)
+        await setRange(wrapper)
+        await apply(wrapper)
+        expect(panelText(wrapper)).toContain('schedule.assign_error')
+
+        await reuse(wrapper)
+
+        expect(wrapper.find('.side-column form').exists()).toBe(true)
+        expect(panelText(wrapper)).not.toContain('schedule.assign_error')
+      }
+    )
+
+    // Each task goes to a single person, but the auto quota shared every
+    // task among the whole team: with fewer entities than people, no task
+    // fitted the range and Apply did nothing.
+    it('fits the task of a single entity to one person', async () => {
+      const { storeActions, wrapper } = await mountAssignments({ nbAssets: 1 })
       await selectProps(wrapper)
       await setRange(wrapper)
+
+      expect(panelText(wrapper)).toContain(
+        'schedule.estimated_daily_quotas 0.33'
+      )
+
       await apply(wrapper)
-      expect(panelText(wrapper)).toContain('schedule.assign_error')
 
-      await reuse(wrapper)
-
-      expect(wrapper.find('.side-column form').exists()).toBe(true)
-      expect(panelText(wrapper)).not.toContain('schedule.assign_error')
+      expect(payloadsOf(storeActions.updateTask)).toEqual([
+        {
+          taskId: 'task-asset-1',
+          data: {
+            estimation: 3 * 8 * 60,
+            start_date: '2026-04-06',
+            due_date: '2026-04-08'
+          }
+        }
+      ])
+      expect(payloadsOf(storeActions.assignSelectedTasks)).toEqual([
+        { personId: 'person-1', taskIds: ['task-asset-1'] }
+      ])
+      expect(panelText(wrapper)).not.toContain('schedule.assign_no_fit')
     })
+
+    // The panel opens on today at the current time: the day count left
+    // that first day out once the end date was picked.
+    it('counts the first day of a range that starts now', async () => {
+      vi.useFakeTimers({ toFake: ['Date'] })
+      vi.setSystemTime(new Date('2026-04-06T10:30:00Z'))
+      const { storeActions, wrapper } = await mountAssignments()
+      await selectProps(wrapper)
+      await setRange(wrapper, null, '2026-04-07')
+
+      expect(panelText(wrapper)).toContain(
+        'schedule.estimated_daily_quotas 0.50'
+      )
+
+      await apply(wrapper)
+
+      const twoDays = {
+        estimation: 2 * 8 * 60,
+        start_date: '2026-04-06',
+        due_date: '2026-04-07'
+      }
+      expect(payloadsOf(storeActions.updateTask)).toEqual([
+        { taskId: 'task-asset-1', data: twoDays },
+        { taskId: 'task-asset-2', data: twoDays }
+      ])
+    })
+
+    // 1 / (1 / 49) is 49.00000000000001 days: rounded up, the task outlasted
+    // the range by a day and fitted nobody.
+    it('fits a task as long as the range', async () => {
+      const { storeActions, wrapper } = await mountAssignments({ nbAssets: 1 })
+      await selectProps(wrapper)
+      // Monday 6 April to Thursday 11 June: 49 working days
+      await setRange(wrapper, '2026-04-06', '2026-06-11')
+
+      await apply(wrapper)
+
+      expect(payloadsOf(storeActions.updateTask)).toEqual([
+        {
+          taskId: 'task-asset-1',
+          data: {
+            estimation: 49 * 8 * 60,
+            start_date: '2026-04-06',
+            due_date: '2026-06-11'
+          }
+        }
+      ])
+      expect(panelText(wrapper)).not.toContain('schedule.assign_no_fit')
+    })
+
+    // The same noise ended the first task of 49 days a day late and pushed
+    // the second one out of the range.
+    it('chains tasks of whole days for one person', async () => {
+      const { storeActions, wrapper } = await mountAssignments()
+      await selectProps(wrapper)
+      // Monday 6 April to Wednesday 19 August: 98 working days
+      await setRange(wrapper, '2026-04-06', '2026-08-19')
+      const [, removeBob] = wrapper
+        .find('.side-column table.assignees')
+        .findAllComponents(ButtonSimple)
+      removeBob.vm.$emit('click')
+      await flushPromises()
+
+      await apply(wrapper)
+
+      const estimation = 49 * 8 * 60
+      expect(payloadsOf(storeActions.updateTask)).toEqual([
+        {
+          taskId: 'task-asset-1',
+          data: { estimation, start_date: '2026-04-06', due_date: '2026-06-11' }
+        },
+        {
+          taskId: 'task-asset-2',
+          data: { estimation, start_date: '2026-06-12', due_date: '2026-08-19' }
+        }
+      ])
+      expect(payloadsOf(storeActions.assignSelectedTasks)).toEqual([
+        { personId: 'person-1', taskIds: ['task-asset-1', 'task-asset-2'] }
+      ])
+    })
+
+    it.each([
+      ['the reference', {}],
+      ['a version', versionOptions]
+    ])(
+      'tells how many tasks do not fit the range in %s',
+      async (_, options) => {
+        const { storeActions, wrapper } = await mountAssignments(options)
+        await selectProps(wrapper)
+        await setRange(wrapper)
+        await forceQuota(wrapper, '0.01')
+
+        await apply(wrapper)
+
+        expect(panelText(wrapper)).toContain(
+          'schedule.assign_no_fit {"count":2}'
+        )
+        expect(writesOf(storeActions)).toEqual([])
+      }
+    )
+
+    it.each([
+      ['the reference', {}],
+      ['a version', versionOptions]
+    ])(
+      'tells that no task fits a range without a working day in %s',
+      async (_, options) => {
+        const { storeActions, wrapper } = await mountAssignments(options)
+        await selectProps(wrapper)
+        // Saturday 11 and Sunday 12 April
+        await setRange(wrapper, '2026-04-11', '2026-04-12')
+        expect(panelText(wrapper)).toContain(
+          'schedule.estimated_daily_quotas 0.00'
+        )
+
+        await apply(wrapper)
+
+        expect(panelText(wrapper)).toContain(
+          'schedule.assign_no_fit {"count":2}'
+        )
+        expect(writesOf(storeActions)).toEqual([])
+      }
+    )
+
+    // Two days per task: one task per person in three days
+    it('assigns the tasks that fit and tells how many did not', async () => {
+      const { storeActions, wrapper } = await mountAssignments({ nbAssets: 3 })
+      await selectProps(wrapper)
+      await setRange(wrapper)
+      await forceQuota(wrapper, '0.5')
+
+      await apply(wrapper)
+
+      expect(payloadsOf(storeActions.assignSelectedTasks)).toEqual([
+        { personId: 'person-1', taskIds: ['task-asset-1'] },
+        { personId: 'person-2', taskIds: ['task-asset-2'] }
+      ])
+      expect(panelText(wrapper)).toContain('schedule.assign_no_fit {"count":1}')
+    })
+
+    it.each(panelReuses)(
+      'clears the no-fit message when the panel goes on with %s',
+      async (_, reuse) => {
+        const { wrapper } = await mountAssignments()
+        await selectProps(wrapper)
+        await setRange(wrapper)
+        await forceQuota(wrapper, '0.01')
+        await apply(wrapper)
+        expect(panelText(wrapper)).toContain('schedule.assign_no_fit')
+
+        await reuse(wrapper)
+
+        expect(wrapper.find('.side-column form').exists()).toBe(true)
+        expect(panelText(wrapper)).not.toContain('schedule.assign_no_fit')
+      }
+    )
   })
 })

@@ -1904,6 +1904,8 @@ export default {
     apply_to_prod_error: 'An error occurred while applying the schedule version to the current production.',
     assign: 'Assign to:',
     assign_error: 'Could not assign the tasks. Please try again.',
+    assign_no_fit:
+      '{count} task could not fit in the date range. | {count} tasks could not fit in the date range.',
     confirm_move_children:
       'Moving this bar will clip or snap {count} sub-item to fit the new bounds. Continue? | Moving this bar will clip or snap {count} sub-items to fit the new bounds. Continue?',
     create_version: 'Create schedule version',

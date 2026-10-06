@@ -1419,6 +1419,7 @@
       "apply_to_prod_error": "Er is een fout opgetreden tijdens het toepassen van de versie van de planning op de huidige productie.",
       "assign": "Toewijzen aan:",
       "assign_error": "Kon de taken niet toewijzen. Probeer het opnieuw.",
+      "assign_no_fit": "{count} taak paste niet in het datumbereik. | {count} taken pasten niet in het datumbereik.",
       "confirm_move_children": "Het verplaatsen van deze balk zal {count} subitem bijsnijden of verschuiven om binnen de nieuwe grenzen te passen. Doorgaan? | Het verplaatsen van deze balk zal {count} subitems bijsnijden of verschuiven om binnen de nieuwe grenzen te passen. Doorgaan?",
       "create_version": "Schemaversie maken",
       "delete_version": "Planningsversie verwijderen",

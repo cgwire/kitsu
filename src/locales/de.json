@@ -1419,6 +1419,7 @@
       "apply_to_prod_error": "Bei der Anwendung der Planversion auf die aktuelle Produktion ist ein Fehler aufgetreten.",
       "assign": "Zuweisen an:",
       "assign_error": "Die Aufgaben konnten nicht zugewiesen werden. Bitte versuchen Sie es erneut.",
+      "assign_no_fit": "{count} Aufgabe passte nicht in den Zeitraum. | {count} Aufgaben passten nicht in den Zeitraum.",
       "confirm_move_children": "Das Verschieben dieses Balkens wird {count} Unterelement zuschneiden oder verschieben, damit es in die neuen Grenzen passt. Fortfahren? | Das Verschieben dieses Balkens wird {count} Unterelemente zuschneiden oder verschieben, damit sie in die neuen Grenzen passen. Fortfahren?",
       "create_version": "Version des Zeitplans erstellen",
       "delete_version": "Planversion löschen",

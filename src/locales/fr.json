@@ -1419,6 +1419,7 @@
       "apply_to_prod_error": "Une erreur s'est produite lors de l'application de la version du planning à la production en cours.",
       "assign": "Assigner à :",
       "assign_error": "Impossible d'assigner les tâches. Veuillez réessayer.",
+      "assign_no_fit": "{count} tâche ne tient pas dans la plage de dates. | {count} tâches ne tiennent pas dans la plage de dates.",
       "confirm_move_children": "Déplacer cette barre va rogner ou déplacer {count} sous-élément pour tenir dans les nouvelles bornes. Continuer ? | Déplacer cette barre va rogner ou déplacer {count} sous-éléments pour tenir dans les nouvelles bornes. Continuer ?",
       "create_version": "Créer une version du planning",
       "delete_version": "Supprimer la version du planning",

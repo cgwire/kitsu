@@ -446,6 +446,18 @@
             <p class="error has-text-right mt2" v-if="assignments.isError">
               <em>{{ $t('schedule.assign_error') }}</em>
             </p>
+            <p
+              class="error has-text-right mt2"
+              v-else-if="assignments.nbUnfitTasks"
+            >
+              <em>
+                {{
+                  $t('schedule.assign_no_fit', {
+                    count: assignments.nbUnfitTasks
+                  })
+                }}
+              </em>
+            </p>
             <div class="mt2 has-text-right">
               <template v-if="assignments.type === 'entity'">
                 <button-simple
@@ -649,6 +661,7 @@ const assignments = ref({
   forcedDailyQuota: null,
   isError: false,
   loading: false,
+  nbUnfitTasks: 0,
   saving: false,
   startDate: null,
   endDate: null,
@@ -729,12 +742,18 @@ const modeOptions = computed(() => [
 const estimatedDailyQuota = computed(() => {
   const rangeStartDate = parseSimpleDate(assignments.value.startDate)
   const rangeEndDate = parseSimpleDate(assignments.value.endDate)
-  const nbDays = getBusinessDays(rangeStartDate, rangeEndDate)
+  // whole days: a start at the current time would leave its own day out
+  const nbDays = getBusinessDays(
+    rangeStartDate.startOf('day'),
+    rangeEndDate.startOf('day')
+  )
   const nbEntities = draggedEntities.value.reduce(
     (sum, entity) => sum + (entity.children?.length ?? 0),
     0
   )
-  const nbAssignees = availablePersons.value.length
+  // a task goes to a single person: no more people than entities share
+  // the work
+  const nbAssignees = Math.min(availablePersons.value.length, nbEntities)
 
   return nbDays && nbAssignees ? nbEntities / nbDays / nbAssignees : 0
 })
@@ -1679,6 +1698,7 @@ const resetSidePanel = () => {
     forcedDailyQuota: null,
     isError: false,
     loading: false,
+    nbUnfitTasks: 0,
     saving: false,
     startDate: null,
     endDate: null,
@@ -1690,6 +1710,7 @@ const resetSidePanel = () => {
 
 const clearAssignmentMessages = () => {
   assignments.value.isError = false
+  assignments.value.nbUnfitTasks = 0
 }
 
 const toggleSidePanel = () => {
@@ -2069,7 +2090,7 @@ const saveAssignments = async () => {
   panel.saving = true
   clearAssignmentMessages()
   try {
-    await distributeAssignments()
+    panel.nbUnfitTasks = await distributeAssignments()
   } catch (err) {
     console.error(err)
     panel.isError = true
@@ -2093,11 +2114,13 @@ const distributeAssignments = async () => {
   })
 
   // a zero or empty quota would make taskEstimation infinite and hang
-  // the distribution loop in addBusinessDays
+  // the distribution loop in addBusinessDays: no task fits
   const dailyQuota =
     parseFloat(assignments.value.forcedDailyQuota) || estimatedDailyQuota.value
   if (dailyQuota <= 0) {
-    return
+    return draggedEntities.value
+      .flatMap(entityType => entityType.children)
+      .filter(entity => taskByEntityId.has(entity.id)).length
   }
   const taskEstimation = 1 / dailyQuota
 
@@ -2119,6 +2142,8 @@ const distributeAssignments = async () => {
       ])
     )
   }
+
+  let nbUnfitTasks = 0
 
   // assign each selected entity to each selected assignee
   for (const taskType of draggedEntities.value) {
@@ -2166,6 +2191,10 @@ const distributeAssignments = async () => {
       let taskEndDate = null
       while (nextAssigneeIndex < availablePersons.value.length) {
         const taskAssignee = availablePersons.value[nextAssigneeIndex]
+        // round off the float noise: 1 / (1 / 49) is 49.00000000000001,
+        // which would end a task of whole days a day late
+        const cumulatedEstimation =
+          Math.round(cumulatedTasks * taskEstimation * 1e6) / 1e6
 
         taskStartDate = addBusinessDays(
           taskStartDate,
@@ -2177,7 +2206,7 @@ const distributeAssignments = async () => {
           organisation.value,
           rangeStartDate,
           taskEndDate,
-          cumulatedTasks * taskEstimation,
+          cumulatedEstimation,
           daysOffByPerson.value[taskAssignee.id]
         )
         taskEndDate = parseDate(due_date)
@@ -2228,13 +2257,17 @@ const distributeAssignments = async () => {
             })
           }
           // set next start date
-          if ((cumulatedTasks * taskEstimation) % 1 !== 0) {
+          if (cumulatedEstimation % 1 !== 0) {
             nextStartDate = taskEndDate.clone()
           } else {
             nextStartDate = taskEndDate.clone().add(1, 'days')
           }
           break // jump to next task
         }
+      }
+      // the loop ran out of people: the task fits nobody's range
+      if (nextAssigneeIndex === availablePersons.value.length) {
+        nbUnfitTasks++
       }
     }
 
@@ -2269,6 +2302,8 @@ const distributeAssignments = async () => {
       false
     )
   }
+
+  return nbUnfitTasks
 }
 
 const saveTask = async () => {
