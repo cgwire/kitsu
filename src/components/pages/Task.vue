@@ -1503,12 +1503,17 @@ const onPreviewAdded = eventData => {
       preview: {
         id: previewId,
         revision,
-        extension: extensionName
+        extension: extensionName,
+        status: eventData.status
       },
       taskId,
       commentId,
       comment
     })
+    // Zou may still build its files, or have announced them built before.
+    store.dispatch('registerPreviewFileStatuses', [
+      { id: previewId, status: eventData.status }
+    ])
     reset({ keepPreviewFiles: true })
   }
 }

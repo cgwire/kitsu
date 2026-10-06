@@ -907,6 +907,50 @@ describe('Task.vue metadata values', () => {
   })
 })
 
+// Zou may still build the files of a preview another user adds.
+describe('Task.vue preview-file:add-file', () => {
+  it('keeps the status of a preview another user adds', async () => {
+    const comment = { id: 'comment-1', previews: [] }
+    const { socket, store } = await mountPage({
+      getterOverrides: { getTaskComment: () => () => comment }
+    })
+    const [, onPreviewAdded] = socket.on.mock.calls.find(
+      ([event]) => event === 'preview-file:add-file'
+    )
+
+    onPreviewAdded({
+      task_id: TASK_ID,
+      comment_id: 'comment-1',
+      preview_file_id: 'preview-2',
+      revision: 2,
+      extension: 'png',
+      status: 'processing'
+    })
+
+    expect(store.commit).toHaveBeenCalledWith(
+      'ADD_PREVIEW_END',
+      expect.objectContaining({
+        preview: expect.objectContaining({
+          id: 'preview-2',
+          status: 'processing'
+        })
+      })
+    )
+    expect(store.dispatch).toHaveBeenCalledWith('registerPreviewFileStatuses', [
+      { id: 'preview-2', status: 'processing' }
+    ])
+    // A ready status the store learnt first must reach the copy
+    // ADD_PREVIEW_END makes.
+    const callOrder = (mock, name) =>
+      mock.mock.invocationCallOrder[
+        mock.mock.calls.findIndex(([type]) => type === name)
+      ]
+    expect(
+      callOrder(store.dispatch, 'registerPreviewFileStatuses')
+    ).toBeGreaterThan(callOrder(store.commit, 'ADD_PREVIEW_END'))
+  })
+})
+
 describe('Task.vue preview-file:update', () => {
   const emitPreviewFileUpdate = async (socket, eventData) => {
     const [, onPreviewFileUpdate] = socket.on.mock.calls.find(
