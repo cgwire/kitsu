@@ -1719,8 +1719,10 @@ const clearAssignmentMessages = () => {
 }
 
 const toggleSidePanel = () => {
+  // the task form leaves out everyone but the assignees of the task and
+  // turns Override on: the assign mode starts afresh, on the same task type
   if (isSidePanelOpen.value && assignments.value.type === 'task') {
-    assignments.value.type = null
+    resetSidePanel()
     isSidePanelOpen.value = false
   }
 
@@ -2361,8 +2363,7 @@ const saveTask = async () => {
     )
   } catch (err) {
     console.error(err)
-    // Assign tasks can switch the same panel to the assign mode meanwhile
-    if (panel.type === 'task') panel.isError = true
+    panel.isError = true
   } finally {
     panel.saving = false
   }

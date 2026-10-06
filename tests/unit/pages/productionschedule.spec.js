@@ -25,6 +25,7 @@ import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DateField from '@/components/widgets/DateField.vue'
+import PeopleName from '@/components/widgets/PeopleName.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
 // The page is driven through what it renders and what it calls: the
@@ -1298,9 +1299,8 @@ describe('ProductionSchedule page', () => {
       expect(findButton(wrapper, 'main.apply').props('isLoading')).toBe(true)
     })
 
-    // Once a save went through, Assign tasks keeps the panel and only
-    // switches its mode: a later save failing then showed as an assignment
-    // error.
+    // A task save that failed once Assign tasks had replaced the task form
+    // showed as an assignment error.
     it('keeps a failed task save out of the assign mode the panel went on to', async () => {
       vi.spyOn(console, 'error').mockImplementation(() => {})
       const saves = []
@@ -1328,6 +1328,60 @@ describe('ProductionSchedule page', () => {
       expect(wrapper.find('.side-column form').exists()).toBe(true)
       expect(panelText(wrapper)).not.toContain('schedule.assign_error')
       expect(findButton(wrapper, 'main.apply').props('isLoading')).toBe(false)
+    })
+
+    // After a saved task edit, Assign tasks kept the state of the task form:
+    // only the assignees of that task listed, and Override on. The next run
+    // then cleared the assignees of the tasks it gave them.
+    it('starts Assign tasks from a clean panel after a task edit', async () => {
+      const { storeActions, wrapper } = await mountAssignments()
+      await editTask(wrapper, buildChairTask())
+      await apply(wrapper)
+
+      await toggleSidePanel(wrapper)
+      await wrapper.find('.side-column .assignment-item').trigger('click')
+
+      expect(
+        wrapper.findComponent(ComboboxTaskType).props('modelValue')
+      ).toBe('tt-modeling')
+      expect(
+        wrapper
+          .find('.side-column table.assignees')
+          .findAllComponents(PeopleName)
+          .map(name => name.props('person').id)
+      ).toEqual(['person-1', 'person-2'])
+      expect(
+        wrapper.find('.side-column form').findComponent(Checkbox).props()
+      ).toMatchObject({ disabled: false, modelValue: false })
+
+      await setRange(wrapper)
+      await apply(wrapper)
+
+      expect(storeActions.unassignSelectedTasks).not.toHaveBeenCalled()
+      expect(payloadsOf(storeActions.assignSelectedTasks)).toEqual([
+        { personId: 'person-1', taskIds: ['task-asset-1'] },
+        { personId: 'person-2', taskIds: ['task-asset-2'] }
+      ])
+    })
+
+    // With the row of the edited task hidden, the panel dropped its task
+    // type but kept listing its entity types: a click on one broke it.
+    it('opens Assign tasks empty after a task edit once its row is hidden', async () => {
+      const { wrapper } = await mountAssignments()
+      await editTask(wrapper, buildChairTask())
+      await apply(wrapper)
+      findCombobox(wrapper, 'main.entities').vm.$emit(
+        'update:model-value',
+        'Shot'
+      )
+      await flushPromises()
+
+      await toggleSidePanel(wrapper)
+
+      expect(
+        wrapper.findComponent(ComboboxTaskType).props('modelValue')
+      ).toBeFalsy()
+      expect(wrapper.findAll('.side-column .assignment-item')).toHaveLength(0)
     })
 
     // The save of a task wrote its dates into the form of the task the
