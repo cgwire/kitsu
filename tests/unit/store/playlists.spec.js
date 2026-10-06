@@ -217,4 +217,44 @@ describe('Playlists store', () => {
       expect(mutations).not.toContain('EDIT_TASK_STATUS_END')
     })
   })
+
+  describe('Mutations', () => {
+    // Zou drops the pin of an entry whose preview is gone, and the page then
+    // shows the entity's main preview: the row holds no preview to match.
+    test('CHANGE_PLAYLIST_PREVIEW re-pins an entry whose pin was dropped', () => {
+      const row = { entity_id: 'shot-1', preview_files: {} }
+      const playlist = { shots: [row] }
+      const state = {
+        playlistEntryMap: new Map([['shot-1-undefined', row]])
+      }
+
+      store.mutations.CHANGE_PLAYLIST_PREVIEW(state, {
+        playlist,
+        entityId: 'shot-1',
+        previewFileId: 'preview-2',
+        previousPreviewFileId: 'preview-main'
+      })
+
+      expect(row.preview_file_id).toBe('preview-2')
+      expect([...state.playlistEntryMap.keys()]).toEqual(['shot-1-preview-2'])
+    })
+
+    test('CHANGE_PLAYLIST_PREVIEW leaves a pinned row of the same entity alone', () => {
+      const pinned = { entity_id: 'shot-1', preview_file_id: 'preview-1' }
+      const playlist = { shots: [pinned] }
+      const state = {
+        playlistEntryMap: new Map([['shot-1-preview-1', pinned]])
+      }
+
+      store.mutations.CHANGE_PLAYLIST_PREVIEW(state, {
+        playlist,
+        entityId: 'shot-1',
+        previewFileId: 'preview-2',
+        previousPreviewFileId: 'preview-main'
+      })
+
+      expect(pinned.preview_file_id).toBe('preview-1')
+      expect([...state.playlistEntryMap.keys()]).toEqual(['shot-1-preview-1'])
+    })
+  })
 })

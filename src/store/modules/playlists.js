@@ -586,8 +586,18 @@ const mutations = {
         e => e.id === entityId && e.preview_file_id === previousPreviewFileId
       )
     }
+    // Zou drops the pin of an entry whose preview is gone, and the page then
+    // shows the entity's main preview, which the row does not hold.
+    if (!entityToChange) {
+      entityToChange = playlist.shots.find(
+        e => (e.entity_id || e.id) === entityId && !e.preview_file_id
+      )
+    }
     state.playlistEntryMap.delete(`${entityId}-${previousPreviewFileId}`)
     if (entityToChange) {
+      state.playlistEntryMap.delete(
+        `${entityId}-${entityToChange.preview_file_id}`
+      )
       state.playlistEntryMap.set(`${entityId}-${previewFileId}`, entityToChange)
       entityToChange.preview_file_id = previewFileId
     }
