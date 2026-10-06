@@ -45,7 +45,7 @@ const intensity = computed(() => 0.1 + 0.7 * ratio.value)
 <style lang="scss" scoped>
 .stats-heat {
   border-radius: 4px;
-  color: var(--text);
+  color: var(--text-strong);
   font-weight: bold;
   padding: 0.6em 0;
   position: relative;
@@ -67,5 +67,11 @@ const intensity = computed(() => 0.1 + 0.7 * ratio.value)
 
 .share {
   position: relative;
+}
+
+// The light text of the dark theme needs a deeper green to stay readable on a
+// full tile.
+.dark .stats-heat::before {
+  background: $dark-green;
 }
 </style>
