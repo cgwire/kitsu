@@ -65,12 +65,19 @@ const getters = {
 }
 
 const actions = {
-  async loadConcepts({ commit, rootGetters }) {
+  async loadConcepts({ commit, dispatch, rootGetters }) {
     commit(LOAD_CONCEPTS_START)
     try {
       const production = rootGetters.currentProduction
       const concepts = await conceptsApi.getConcepts(production)
       commit(LOAD_CONCEPTS_END, { concepts })
+      // The variants may have been stored after the list was read: the event
+      // announcing them then matched no card.
+      concepts
+        .filter(concept => concept.preview_file_status === 'processing')
+        .forEach(concept => {
+          dispatch('refreshConceptPreview', concept).catch(console.error)
+        })
     } catch (err) {
       commit(LOAD_CONCEPTS_ERROR)
       throw err

@@ -235,6 +235,61 @@ describe('Concepts store', () => {
       expect(console.error).toHaveBeenCalledWith(error)
     })
 
+    // The variants may be stored between the list query and the listing,
+    // and the event announcing them then matches no card.
+    test('loadConcepts reads again the previews the list shows processing', async () => {
+      const concepts = [
+        { id: 'concept-1', preview_file_status: 'processing' },
+        { id: 'concept-2', preview_file_status: 'ready' },
+        { id: 'concept-3' }
+      ]
+      vi.spyOn(conceptsApi, 'getConcepts').mockResolvedValue(concepts)
+      const commit = vi.fn()
+      const dispatch = vi.fn(() => Promise.resolve())
+
+      await store.actions.loadConcepts({ commit, dispatch, rootGetters })
+
+      expect(dispatch.mock.calls).toEqual([
+        ['refreshConceptPreview', concepts[0]]
+      ])
+      expect(dispatch.mock.invocationCallOrder[0]).toBeGreaterThan(
+        commit.mock.invocationCallOrder[
+          commit.mock.calls.findIndex(([type]) => type === 'LOAD_CONCEPTS_END')
+        ]
+      )
+    })
+
+    // The page waits for loadConcepts before showing the list.
+    test('loadConcepts lists the concepts without waiting for the status reads', async () => {
+      vi.spyOn(conceptsApi, 'getConcepts').mockResolvedValue([
+        { id: 'concept-1', preview_file_status: 'processing' }
+      ])
+      const commit = vi.fn()
+      const dispatch = vi.fn(() => new Promise(() => {}))
+
+      await store.actions.loadConcepts({ commit, dispatch, rootGetters })
+
+      expect(commit).toHaveBeenCalledWith('LOAD_CONCEPTS_END', {
+        concepts: [{ id: 'concept-1', preview_file_status: 'processing' }]
+      })
+    })
+
+    test('loadConcepts keeps the list when a status read fails', async () => {
+      const error = new Error('Request has been terminated')
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      vi.spyOn(conceptsApi, 'getConcepts').mockResolvedValue([
+        { id: 'concept-1', preview_file_status: 'processing' }
+      ])
+      const commit = vi.fn()
+      const dispatch = vi.fn(() => Promise.reject(error))
+
+      await store.actions.loadConcepts({ commit, dispatch, rootGetters })
+      await new Promise(resolve => setTimeout(resolve))
+
+      expect(commit).not.toHaveBeenCalledWith('LOAD_CONCEPTS_ERROR')
+      expect(console.error).toHaveBeenCalledWith(error)
+    })
+
     test('newConcept leaves a ready preview alone', async () => {
       const { dispatch } = await runNewConcept('ready')
 
