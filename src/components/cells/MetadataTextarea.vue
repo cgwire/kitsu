@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="cellRef"
     class="metadata-textarea"
     role="button"
     tabindex="0"
@@ -11,13 +12,20 @@
     <teleport to=".theme">
       <template v-if="isOpen">
         <div class="metadata-textarea-mask" @click="onClose"></div>
-        <div class="metadata-textarea-popup" :style="popupStyle">
+        <!-- Tab leaves it like a click outside. A click in the padding keeps
+             the focus in the editor. -->
+        <div
+          class="metadata-textarea-popup"
+          :style="popupStyle"
+          @keydown.esc="onClose"
+          @keydown.tab="onClose"
+          @mousedown.self.prevent
+        >
           <textarea
             ref="editorRef"
             class="metadata-textarea-editor"
             :value="modelValue"
             :readonly="!editable"
-            @keyup.esc="onClose"
           />
         </div>
       </template>
@@ -38,6 +46,7 @@ const props = defineProps({
 const emit = defineEmits(['update:model-value'])
 
 const isOpen = ref(false)
+const cellRef = ref(null)
 const editorRef = ref(null)
 const popupStyle = ref({})
 
@@ -59,6 +68,9 @@ const onClose = () => {
   if (!isOpen.value) return
   const value = editorRef.value?.value ?? ''
   isOpen.value = false
+  // Before Tab moves the focus, so it goes on from the cell. A clipped cell
+  // stays where it is.
+  cellRef.value?.focus({ preventScroll: true })
   if (props.editable && value !== props.modelValue) {
     emit('update:model-value', value)
   }

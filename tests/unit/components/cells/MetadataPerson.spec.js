@@ -56,11 +56,24 @@ describe('cells/MetadataPerson', () => {
       global: {
         plugins: [createStore({ getters: { isDarkTheme: () => false } })],
         stubs: { RouterLink: true }
-      }
+      },
+      attachTo: document.body
     })
+    // A mouse click focuses the cell before it opens the popup.
+    wrapper.find('.display').element.focus()
     await wrapper.find('.display').trigger('click')
     await flushPromises()
     return findPopup() && popupRect()
+  }
+
+  // keydown then keyup, both bubbling up to the window
+  const pressKey = async (target, key, options = {}) => {
+    const init = { key, bubbles: true, cancelable: true, ...options }
+    const keydown = new KeyboardEvent('keydown', init)
+    target.dispatchEvent(keydown)
+    target.dispatchEvent(new KeyboardEvent('keyup', init))
+    await flushPromises()
+    return keydown
   }
 
   // The people list next to the picker, on the side its class tells, at its
@@ -210,6 +223,58 @@ describe('cells/MetadataPerson', () => {
     it('does not open when not editable', async () => {
       await open({ anchor: { top: 806.8, height: 112 }, editable: false })
       expect(findPopup()).toBeNull()
+    })
+  })
+
+  describe('keyboard', () => {
+    const anchor = { top: 309.8, height: 112 }
+    const findInput = () => document.querySelector('.multiselect__input')
+    const findDisplay = () => wrapper.find('.display').element
+
+    it('closes the popup on Escape, not only the people list', async () => {
+      await open({ anchor })
+      await pressKey(findInput(), 'Escape')
+      expect(findPopup()).toBeNull()
+      expect(document.querySelector('.metadata-person-mask')).toBeNull()
+      expect(wrapper.emitted('select')).toBeUndefined()
+    })
+
+    it.each([
+      ['Tab', {}],
+      ['Shift+Tab', { shiftKey: true }]
+    ])('closes on %s like a click outside', async (_, options) => {
+      await open({ anchor })
+      const tab = await pressKey(findInput(), 'Tab', options)
+      expect(findPopup()).toBeNull()
+      expect(wrapper.emitted('select')).toBeUndefined()
+      // The browser then moves the focus on from the cell.
+      expect(tab.defaultPrevented).toBe(false)
+      expect(document.activeElement).toBe(findDisplay())
+    })
+
+    it.each([
+      ['Escape', () => pressKey(findInput(), 'Escape')],
+      [
+        'a pick',
+        () => {
+          wrapper
+            .findComponent(PeopleField)
+            .vm.$emit('update:model-value', people[0])
+          return flushPromises()
+        }
+      ],
+      [
+        'a click outside',
+        () => {
+          document.querySelector('.metadata-person-mask').click()
+          return flushPromises()
+        }
+      ]
+    ])('gives the focus back to the cell on %s', async (_, close) => {
+      await open({ anchor })
+      await close()
+      expect(findPopup()).toBeNull()
+      expect(document.activeElement).toBe(findDisplay())
     })
   })
 })

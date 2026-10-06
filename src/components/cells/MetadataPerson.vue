@@ -1,6 +1,7 @@
 <template>
   <div class="metadata-person-cell">
     <span
+      ref="displayRef"
       class="display"
       :class="{ clickable: editable }"
       role="button"
@@ -21,7 +22,14 @@
     <teleport to=".theme">
       <template v-if="isOpen">
         <div class="metadata-person-mask" @click="onClose"></div>
-        <div class="metadata-person-popup" :style="popupStyle">
+        <!-- Tab leaves it like a click outside. Captured: the people field
+             stops the propagation of Tab. -->
+        <div
+          class="metadata-person-popup"
+          :style="popupStyle"
+          @keydown.esc="onClose"
+          @keydown.tab.capture="onClose"
+        >
           <people-field
             ref="fieldRef"
             wide
@@ -59,6 +67,7 @@ const FIELD_HEIGHT = 42
 const LIST_HEIGHT = 300
 
 const isOpen = ref(false)
+const displayRef = ref(null)
 const fieldRef = ref(null)
 const popupStyle = ref({})
 const listDirection = ref('')
@@ -82,11 +91,14 @@ const onOpen = event => {
 
 const onSelect = person => {
   emit('select', person?.id ?? '')
-  isOpen.value = false
+  onClose()
 }
 
 const onClose = () => {
   isOpen.value = false
+  // Before Tab moves the focus, so it goes on from the cell. A clipped cell
+  // stays where it is.
+  displayRef.value?.focus({ preventScroll: true })
 }
 </script>
 

@@ -25,13 +25,16 @@ describe('cells/MetadataTextarea', () => {
 
   const mountCell = (props = {}) => {
     wrapper = mount(MetadataTextarea, {
-      props: { modelValue: 'Snowy downfall', editable: true, ...props }
+      props: { modelValue: 'Snowy downfall', editable: true, ...props },
+      attachTo: document.body
     })
   }
 
-  // jsdom lays nothing out: the cell gets the rect of a laid out one.
+  // jsdom lays nothing out: the cell gets the rect of a laid out one. A
+  // mouse click focuses the cell before it opens the popup.
   const openAt = async rect => {
     vi.spyOn(wrapper.element, 'getBoundingClientRect').mockReturnValue(rect)
+    wrapper.element.focus()
     await wrapper.trigger('click')
     await nextTick()
   }
@@ -39,10 +42,19 @@ describe('cells/MetadataTextarea', () => {
   const popup = () => document.querySelector('.metadata-textarea-popup')
   const editor = () => document.querySelector('.metadata-textarea-editor')
 
+  // keydown then keyup, both bubbling up to the window
+  const pressKey = async (target, key, options = {}) => {
+    const init = { key, bubbles: true, cancelable: true, ...options }
+    const keydown = new KeyboardEvent('keydown', init)
+    target.dispatchEvent(keydown)
+    target.dispatchEvent(new KeyboardEvent('keyup', init))
+    await nextTick()
+    return keydown
+  }
+
   const typeAndPressEscape = async text => {
     editor().value = text
-    editor().dispatchEvent(new KeyboardEvent('keyup', { key: 'Escape' }))
-    await nextTick()
+    await pressKey(editor(), 'Escape')
   }
 
   test('opens above a last row cell, not past the window bottom', async () => {
@@ -100,5 +112,54 @@ describe('cells/MetadataTextarea', () => {
     await typeAndPressEscape('Snowy downfall, light wind')
     expect(popup()).toBeNull()
     expect(wrapper.emitted('update:model-value')).toBeUndefined()
+  })
+
+  describe('keyboard', () => {
+    const rect = { top: 310, bottom: 422, left: 329, right: 448 }
+
+    test('keeps the editor focus on a click in the popup padding', async () => {
+      mountCell()
+      await openAt(rect)
+      const mousedown = new MouseEvent('mousedown', {
+        bubbles: true,
+        cancelable: true
+      })
+      popup().dispatchEvent(mousedown)
+      expect(mousedown.defaultPrevented).toBe(true)
+    })
+
+    test.each([
+      ['Tab', {}],
+      ['Shift+Tab', { shiftKey: true }]
+    ])('saves and closes on %s like a click outside', async (_, options) => {
+      mountCell()
+      await openAt(rect)
+      editor().value = 'Snowy downfall, light wind'
+      const tab = await pressKey(editor(), 'Tab', options)
+      expect(popup()).toBeNull()
+      expect(wrapper.emitted('update:model-value')).toEqual([
+        ['Snowy downfall, light wind']
+      ])
+      // The browser then moves the focus on from the cell.
+      expect(tab.defaultPrevented).toBe(false)
+      expect(document.activeElement).toBe(wrapper.element)
+    })
+
+    test.each([
+      ['Escape', () => pressKey(editor(), 'Escape')],
+      [
+        'a click outside',
+        () => {
+          document.querySelector('.metadata-textarea-mask').click()
+          return nextTick()
+        }
+      ]
+    ])('gives the focus back to the cell on %s', async (_, close) => {
+      mountCell()
+      await openAt(rect)
+      await close()
+      expect(popup()).toBeNull()
+      expect(document.activeElement).toBe(wrapper.element)
+    })
   })
 })
