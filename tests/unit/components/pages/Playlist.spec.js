@@ -13,7 +13,9 @@ vi.mock('vue-router', () => ({
 
 import '@/lib/auth'
 import editStore from '@/store/modules/edits'
+import playlistStore from '@/store/modules/playlists'
 import sequenceStore from '@/store/modules/sequences'
+import shotStore from '@/store/modules/shots'
 
 import Playlist from '@/components/pages/Playlist.vue'
 import PlaylistPlayer from '@/components/players/players/PlaylistPlayer.vue'
@@ -41,6 +43,7 @@ const mountPage = async ({
   state = {},
   actions = {},
   getters = {},
+  mutations = {},
   query = {},
   params = {}
 } = {}) => {
@@ -111,7 +114,8 @@ const mountPage = async ({
       DELETE_PLAYLIST_END: () => {},
       LOAD_PLAYLISTS_END: (state, playlists) => {
         state.playlists = playlists
-      }
+      },
+      ...mutations
     },
     actions: storeActions
   })
@@ -662,5 +666,124 @@ describe('Playlist page, sequence playlist', () => {
     const [entity] = wrapper.findComponent(PlaylistPlayer).props('entities')
     expect(entity.parent_name).toBe('E01')
     expect(sequence.episode_name).toBeUndefined()
+  })
+})
+
+// Zou serves an entry whose preview is unset or deleted without any: the page
+// pins it to a preview of its own, so that it plays and that the edits of
+// that entry find its stored row.
+describe('Playlist page, entries without preview', () => {
+  const shot = { id: 's1', name: 'SH01', preview_file_id: 'pf-1' }
+  const file = (id, revision, duration) => ({
+    id,
+    revision,
+    duration,
+    extension: 'mp4',
+    task_id: 't1',
+    previews: []
+  })
+  const pinnedOn = previewFile => ({
+    id: 's1',
+    entity_id: 's1',
+    preview_file_id: previewFile.id,
+    preview_file_extension: 'mp4',
+    preview_file_duration: previewFile.duration
+  })
+
+  beforeEach(() => shotStore.cache.shotMap.set(shot.id, shot))
+  afterEach(() => shotStore.cache.shotMap.delete(shot.id))
+
+  // The preview files of one task type, or of each task type.
+  const openEntries = async (entries, previewFiles, playlistFields = {}) => {
+    const pinState = { playlistEntryMap: new Map(), previewFileEntityMap: new Map() }
+    const shots = entries.map(entry => ({
+      ...entry,
+      preview_files: Array.isArray(previewFiles)
+        ? { tt: previewFiles }
+        : previewFiles
+    }))
+    const { wrapper } = await openPlaylist(
+      { for_entity: 'shot', shots, ...playlistFields },
+      {
+        mutations: {
+          PIN_PLAYLIST_ENTRY: (state, payload) =>
+            playlistStore.mutations.PIN_PLAYLIST_ENTRY(pinState, payload)
+        }
+      }
+    )
+    await flushPromises()
+    return wrapper.findComponent(PlaylistPlayer).props('entities')
+  }
+
+  it('plays an entry without preview on the main preview of its shot', async () => {
+    const [entity] = await openEntries(
+      [{ id: 's1', entity_id: 's1' }],
+      [file('pf-2', 2, 3), file('pf-1', 1, 2)]
+    )
+
+    expect(entity).toMatchObject({
+      preview_file_id: 'pf-1',
+      preview_file_extension: 'mp4',
+      preview_file_duration: 2
+    })
+  })
+
+  it('gives a second entry of the shot a revision of its own', async () => {
+    const files = [file('pf-2', 2, 3), file('pf-1', 1, 2)]
+    const entities = await openEntries(
+      [pinnedOn(files[1]), { id: 's1', entity_id: 's1' }],
+      files
+    )
+
+    expect(entities.map(e => e.preview_file_id)).toEqual(['pf-1', 'pf-2'])
+  })
+
+  it('shows no preview when every revision has its entry', async () => {
+    const files = [file('pf-1', 1, 2)]
+    const entities = await openEntries(
+      [pinnedOn(files[0]), { id: 's1', entity_id: 's1' }],
+      files
+    )
+
+    expect(entities.map(e => e.preview_file_id)).toEqual(['pf-1', undefined])
+  })
+
+  // As for an entity added to it, a playlist of a task type takes the
+  // latest preview of that type, and no other.
+  it('pins an entry of a task type playlist on its latest preview of that type', async () => {
+    const [entity] = await openEntries(
+      [{ id: 's1', entity_id: 's1' }],
+      {
+        'tt-compo': [file('pf-1', 1, 2)],
+        'tt-anim': [file('pf-a2', 2, 3), file('pf-a1', 1, 2)]
+      },
+      { task_type_id: 'tt-anim' }
+    )
+
+    expect(entity.preview_file_id).toBe('pf-a2')
+  })
+
+  it('leaves an entry of a task type playlist without preview when that type has none', async () => {
+    const [entity] = await openEntries(
+      [{ id: 's1', entity_id: 's1' }],
+      { 'tt-compo': [file('pf-1', 1, 2)] },
+      { task_type_id: 'tt-anim' }
+    )
+
+    expect(entity.preview_file_id).toBeUndefined()
+  })
+
+  // Its edits find the stored row by that id: Zou leaves the key out on a
+  // load, and serves an empty string for an added asset without preview.
+  it('keeps the unset preview id of the stored row', async () => {
+    const entities = await openEntries(
+      [
+        { id: 's1', entity_id: 's1' },
+        { id: 's1', entity_id: 's1', preview_file_id: '' }
+      ],
+      []
+    )
+
+    expect(entities.map(e => e.preview_file_id)).toEqual([undefined, ''])
   })
 })

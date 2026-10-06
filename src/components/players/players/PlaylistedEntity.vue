@@ -105,6 +105,12 @@ import Combobox from '@/components/widgets/Combobox.vue'
 import LightEntityThumbnail from '@/components/widgets/LightEntityThumbnail.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
+// The strings a drag carries for an entry without preview.
+const UNSET_PREVIEW_FILE_IDS = new Map([
+  ['null', null],
+  ['undefined', undefined]
+])
+
 const store = useStore()
 
 const props = defineProps({
@@ -160,18 +166,18 @@ const previewFileOptions = computed(() => {
   }))
 })
 
+// A revision another entry of the entity holds is left out: the playlist
+// would hold the same revision of the entity twice.
+const isFreePreviewFile = previewFile =>
+  !playlistEntryMap.value?.has(`${props.entity.id}-${previewFile.id}`) ||
+  previewFile.id === props.entity.preview_file_id
+
 const previewFiles = computed(() => {
   if (props.readOnly) return {}
   return Object.fromEntries(
     Object.entries(props.entity.preview_files).map(([taskTypeId, files]) => [
       taskTypeId,
-      files.filter(previewFile => {
-        return (
-          !playlistEntryMap.value?.has(
-            `${props.entity.id}-${previewFile.id}`
-          ) || previewFile.id === props.entity.preview_file_id
-        )
-      })
+      files.filter(isFreePreviewFile)
     ])
   )
 })
@@ -262,6 +268,9 @@ const onDropped = event => {
   // browser's default open-file action over the app.
   event.preventDefault()
   dropAreaRef.value.style.width = '15px'
+  // An entry without preview drags its unset id as a string, while the
+  // entities dragged from the addition panel carry none.
+  const dragged = event.dataTransfer.getData('previewFileId')
   emit('entity-dropped', {
     before: {
       entity_id: props.entity.id,
@@ -269,7 +278,9 @@ const onDropped = event => {
     },
     after: {
       entity_id: event.dataTransfer.getData('entityId'),
-      preview_file_id: event.dataTransfer.getData('previewFileId')
+      preview_file_id: UNSET_PREVIEW_FILE_IDS.has(dragged)
+        ? UNSET_PREVIEW_FILE_IDS.get(dragged)
+        : dragged
     }
   })
 }
@@ -278,8 +289,10 @@ watch(taskTypeId, () => {
   // Set current preview was last preview selected. If there is no preview
   // matching this task type, it selects the first preview available for
   // this task type.
-  const files = props.entity.preview_files[taskTypeId.value]
-  if (files && files.length > 0) {
+  const files = (props.entity.preview_files[taskTypeId.value] || []).filter(
+    isFreePreviewFile
+  )
+  if (files.length > 0) {
     const isPreviewFile = files.some(previewFile => {
       return previewFile.id === props.entity.preview_file_id
     })

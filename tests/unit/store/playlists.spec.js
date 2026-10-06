@@ -256,5 +256,36 @@ describe('Playlists store', () => {
       expect(pinned.preview_file_id).toBe('preview-1')
       expect([...state.playlistEntryMap.keys()]).toEqual(['shot-1-preview-1'])
     })
+
+    test('PIN_PLAYLIST_ENTRY pins an entry with the fields of its preview', () => {
+      const entry = { id: 'shot-1', entity_id: 'shot-1', preview_file_id: null }
+      const state = {
+        playlistEntryMap: new Map([['shot-1-null', entry]]),
+        previewFileEntityMap: new Map()
+      }
+      const previewFile = {
+        id: 'preview-1',
+        task_id: 'task-1',
+        extension: 'mp4',
+        revision: 2,
+        width: 1920,
+        height: 1080,
+        duration: 2.76,
+        previews: []
+      }
+
+      store.mutations.PIN_PLAYLIST_ENTRY(state, { entry, previewFile })
+
+      expect(entry).toMatchObject({
+        preview_file_id: 'preview-1',
+        preview_file_task_id: 'task-1',
+        preview_file_extension: 'mp4',
+        preview_file_revision: 2,
+        preview_file_duration: 2.76,
+        preview_file_previews: []
+      })
+      expect([...state.playlistEntryMap.keys()]).toEqual(['shot-1-preview-1'])
+      expect(state.previewFileEntityMap.get('preview-1')).toBe(entry)
+    })
   })
 })
