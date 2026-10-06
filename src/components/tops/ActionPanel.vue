@@ -150,7 +150,7 @@
         </div>
 
         <div
-          class="menu-item ml05"
+          class="menu-item"
           :class="{
             active: selectedBar === 'move-concepts'
           }"

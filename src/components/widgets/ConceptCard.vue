@@ -292,6 +292,13 @@ const entityPath = (entity, section) => {
   }
 }
 
+// narrow columns on mobile: a 200px preview would crop too much
+@media (max-width: 768px) {
+  .concept-item :deep(.preview-wrapper) {
+    height: 120px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .concept-item {
     transition: none;

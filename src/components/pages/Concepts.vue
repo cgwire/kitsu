@@ -3,7 +3,7 @@
     <div class="column main-column">
       <div class="concepts page" @dragover="onFileDragover">
         <div class="page-header">
-          <div class="filters">
+          <div class="filters" :class="{ folded: !showExtraFilters }">
             <combobox-status
               :label="$t('main.status')"
               :task-status-list="taskStatusList"
@@ -20,11 +20,12 @@
               />
             </span>
             <combobox
+              class="extra-filter"
               :label="$t('concepts.fields.asset_type')"
               :options="assetTypeOptions"
               v-model="filters.assetTypeId"
             />
-            <span class="field">
+            <span class="field extra-filter">
               <label class="label">
                 {{ $t('concepts.fields.asset') }}
               </label>
@@ -42,10 +43,18 @@
               </multiselect>
             </span>
             <combobox
+              class="extra-filter"
               :label="$t('main.sorted_by')"
               locale-key-prefix="concepts.fields."
               :options="sortByOptions"
               v-model="filters.sortBy"
+            />
+            <button-simple
+              class="filters-toggle"
+              icon="funnel"
+              :active="showExtraFilters"
+              :title="$t('main.more_filters')"
+              @click="showExtraFilters = !showExtraFilters"
             />
           </div>
         </div>
@@ -202,7 +211,12 @@
       @confirm="confirmDeleteFolder"
     />
 
-    <div class="column side-column">
+    <div
+      class="drawer-backdrop"
+      :class="{ 'is-open': isDrawerOpen }"
+      @click="clearSelection"
+    ></div>
+    <div class="column side-column" :class="{ 'is-open': isDrawerOpen }">
       <task-info entity-type="Concept" :task="currentTask" with-actions>
         <template #selection>
           <ul class="selected-concepts">
@@ -273,6 +287,7 @@ const addPreviewModalRef = useTemplateRef('add-preview-modal')
 // The concepts of a card drag, read on the folder the drag ends on: the
 // drag data is not readable before the drop.
 const draggedConceptIds = ref([])
+const showExtraFilters = ref(false)
 const dropTargetId = ref(null)
 const folderToEdit = ref(null)
 const isDraggingFile = ref(false)
@@ -423,6 +438,8 @@ const publishers = computed(() => {
       .filter(Boolean)
   )
 })
+
+const isDrawerOpen = computed(() => selectedConcepts.value.size > 0)
 
 const currentConcept = computed(() =>
   selectedConcepts.value.size === 1
@@ -729,6 +746,12 @@ useHead({
     }
   }
 
+  // every filter fits on one row on desktop: the toggle only serves the
+  // wrapping layouts below
+  .filters-toggle {
+    display: none;
+  }
+
   // inline-block leaves a 1px line gap under the status box, which lifts
   // its label above the other labels of the row (measured 2026-10-06)
   :deep(.status-combo) {
@@ -741,17 +764,18 @@ useHead({
 }
 
 .add-concepts {
-  background: var(--purple);
+  // the --purple token is a pale lavender in light theme, which reads
+  // badly under dark text: the button keeps a saturated purple with white
+  // text in both themes
+  background: $dark-purple;
   border: 0;
   border-radius: 10px;
-  color: var(--text-strong);
+  color: $white;
   transition: background 150ms ease-out;
 
-  // background-selected is the same purple as the resting state in both
-  // themes: the hover goes one step lighter instead
   &:hover {
-    background: var(--background-selectable);
-    color: var(--text-strong);
+    background: $purple-strong;
+    color: $white;
   }
 }
 
@@ -761,7 +785,8 @@ useHead({
   display: flex;
   flex: 1;
   flex-direction: column;
-  margin: 10px 0 0;
+  // closes the page with the same gap as the top
+  margin: 10px 0 10px;
   min-height: 0;
   position: relative;
 }
@@ -891,6 +916,117 @@ useHead({
   &:focus-visible {
     background: rgba(var(--border-rgb), 0.15);
     border-color: var(--text-alt);
+  }
+}
+
+.drawer-backdrop {
+  display: none;
+}
+
+@media (max-width: 1000px) {
+  .filters {
+    flex-wrap: wrap;
+    gap: 0 12px;
+
+    .filters-toggle {
+      display: inline-flex;
+      margin-bottom: 1em;
+      margin-left: auto;
+    }
+
+    &.folded .extra-filter {
+      display: none;
+    }
+  }
+
+  // Under 1000px the side panel slides in from the right over the page,
+  // like the Asset page drawers. The backdrop catches outside taps.
+  .side-column {
+    background: var(--background);
+    bottom: 0;
+    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    margin-top: 0 !important;
+    max-width: min(100vw, 420px) !important;
+    // TaskInfo writes its resizable panel width inline on the side column.
+    min-width: 0 !important;
+    overflow-y: auto;
+    position: fixed;
+    right: 0;
+    top: 60px;
+    transform: translateX(100%);
+    transition: transform 0.25s ease;
+    width: min(100vw, 420px) !important;
+    z-index: 250;
+
+    &.is-open {
+      transform: translateX(0);
+    }
+  }
+
+  .drawer-backdrop {
+    background: rgba(0, 0, 0, 0.4);
+    bottom: 0;
+    display: block;
+    left: 0;
+    opacity: 0;
+    pointer-events: none;
+    position: fixed;
+    right: 0;
+    top: 0;
+    transition: opacity 0.25s ease;
+    z-index: 249;
+
+    &.is-open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
+}
+
+// Mobile is read-only: no upload, no folder management, no drag.
+@media (max-width: 768px) {
+  .concepts {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .filters {
+    padding: 6px 10px 0;
+  }
+
+  .folder-bar {
+    padding: 10px;
+  }
+
+  .add-concepts,
+  .new-folder,
+  .rename-folder,
+  .delete-folder {
+    display: none;
+  }
+
+  .items {
+    gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+
+  .empty-concepts {
+    cursor: default;
+    margin: 0 10px 10px;
+    pointer-events: none;
+
+    span {
+      display: none;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .side-column,
+  .drawer-backdrop {
+    transition: none;
   }
 }
 </style>

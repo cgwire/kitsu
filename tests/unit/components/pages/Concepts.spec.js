@@ -156,6 +156,24 @@ describe('Concepts page', () => {
       expect(cards.every(card => card.props('compact'))).toBe(true)
     })
 
+    test('opens the side drawer on a selection and closes it on demand', async () => {
+      const concepts = [buildConcept('concept-1')]
+      const closed = await mountPage({ concepts, stubs })
+      expect(closed.wrapper.find('.side-column').classes()).not.toContain(
+        'is-open'
+      )
+
+      const { dispatch, wrapper } = await mountPage({
+        concepts,
+        selection: concepts,
+        stubs
+      })
+      expect(wrapper.find('.side-column').classes()).toContain('is-open')
+
+      await wrapper.find('.drawer-backdrop').trigger('click')
+      expect(dispatch).toHaveBeenCalledWith('clearSelectedConcepts')
+    })
+
     test('marks the selected cards in the list', async () => {
       const concepts = [buildConcept('concept-1'), buildConcept('concept-2')]
       const { wrapper } = await mountPage({
@@ -616,6 +634,17 @@ describe('Concepts page', () => {
     await wrapper.find('.empty-concepts').trigger('dragover')
 
     expect(wrapper.find('.drop-mask').exists()).toBe(true)
+  })
+
+  test('folds the extra filters until asked for more', async () => {
+    const { wrapper } = await mountPage()
+    const filters = wrapper.find('.filters')
+
+    expect(filters.classes()).toContain('folded')
+    expect(filters.findAll('.extra-filter')).toHaveLength(3)
+
+    await filters.find('.filters-toggle').trigger('click')
+    expect(filters.classes()).not.toContain('folded')
   })
 
   test('offers the concept upload in the folder bar and in the empty state', async () => {
