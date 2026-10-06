@@ -233,7 +233,7 @@
         <hr />
         <li>
           <a
-            href="https://www.youtube.com/playlist?list=PLp_1gB5ZBHXqnQgZ4TCrAt7smxesaDo29"
+            href="https://www.youtube.com/playlist?list=PLEkjmylVJeIU"
             target="_blank"
           >
             {{ $t('main.tutorials') }}
