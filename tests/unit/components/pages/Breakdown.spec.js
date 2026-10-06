@@ -917,4 +917,48 @@ describe('Breakdown page, asset creation', () => {
     expect(modal.props('isSuccess')).toBe(false)
     vi.restoreAllMocks()
   })
+
+  // The + button of the asset column is the only way to open the modal.
+  const clickNewAsset = wrapper =>
+    wrapper
+      .findAllComponents({ name: 'ButtonSimple' })
+      .find(button => button.props('icon') === 'plus')
+      .vm.$emit('click')
+
+  // Close keeps the messages of the last creation: opening drops them.
+  test('opens without the error of a past failed creation', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { wrapper, modal } = await mountCreation(
+      vi.fn(() => Promise.reject(new Error('down')))
+    )
+
+    modal.vm.$emit('confirm-and-stay', { name: 'Hero' })
+    await flushPromises()
+    expect(modal.props('isError')).toBe(true)
+
+    modal.vm.$emit('cancel')
+    await nextTick()
+    clickNewAsset(wrapper)
+    await nextTick()
+
+    expect(modal.props('active')).toBe(true)
+    expect(modal.props('isError')).toBe(false)
+    vi.restoreAllMocks()
+  })
+
+  test('opens without the success of a past confirm and stay', async () => {
+    const { wrapper, modal } = await mountCreation()
+
+    modal.vm.$emit('confirm-and-stay', { name: 'Hero' })
+    await flushPromises()
+    expect(modal.props('isSuccess')).toBe(true)
+
+    modal.vm.$emit('cancel')
+    await nextTick()
+    clickNewAsset(wrapper)
+    await nextTick()
+
+    expect(modal.props('active')).toBe(true)
+    expect(modal.props('isSuccess')).toBe(false)
+  })
 })

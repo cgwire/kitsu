@@ -75,6 +75,28 @@ describe('Episodes page', () => {
     expect(modal.props('episodeToEdit')).toEqual(episode)
   })
 
+  // Close keeps the error of a failed save: the next edit opens without it.
+  test('opens the next episode without the error of a failed edit', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { wrapper } = await mountPage({
+      actions: { editEpisode: () => Promise.reject(new Error('down')) }
+    })
+    const list = wrapper.findComponent({ name: 'EpisodeList' })
+    const modal = () => wrapper.findComponent(EditEpisodeModal)
+
+    await list.vm.$emit('edit-clicked', { id: 'episode-1', name: 'E01' })
+    await modal().vm.$emit('confirm', { id: 'episode-1', name: 'E02' })
+    await flushPromises()
+    expect(modal().props('isError')).toBe(true)
+
+    await modal().vm.$emit('cancel')
+    await list.vm.$emit('edit-clicked', { id: 'episode-2', name: 'E03' })
+
+    expect(modal().props('active')).toBe(true)
+    expect(modal().props('isError')).toBe(false)
+    vi.restoreAllMocks()
+  })
+
   // The hard delete modal, which asks for the name, replaced the plain one.
   test('opens one delete modal on the episode of the list', async () => {
     const { wrapper } = await mountPage({})

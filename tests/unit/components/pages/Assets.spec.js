@@ -4,6 +4,7 @@ vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 
 import DeleteModal from '@/components/modals/DeleteModal.vue'
+import EditAssetModal from '@/components/modals/EditAssetModal.vue'
 import Assets from '@/components/pages/Assets.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
@@ -157,5 +158,57 @@ describe('Assets page, department filter', () => {
     expect(
       wrapper.findComponent({ name: 'AssetList' }).props('departmentFilter')
     ).toEqual(['department-1'])
+  })
+})
+
+describe('Assets page, edit modal messages', () => {
+  afterEach(() => vi.restoreAllMocks())
+
+  // The real modal: a confirm and stay calls its focusName.
+  const mountModal = async actions => {
+    const { wrapper } = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters: { isCurrentUserProductionManager: true },
+      actions,
+      stubs: { EditAssetModal: false }
+    })
+    const newButton = wrapper
+      .findAllComponents(ButtonSimple)
+      .find(button => button.props('icon') === 'plus')
+    return { newButton, modal: () => wrapper.findComponent(EditAssetModal) }
+  }
+
+  // Close keeps the messages of the last save: opening drops them.
+  test('opens without the error of a past failed creation', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { newButton, modal } = await mountModal({
+      newAsset: () => Promise.reject(new Error('down'))
+    })
+
+    await newButton.vm.$emit('click')
+    await modal().vm.$emit('confirm', { name: 'Hero' })
+    await flushPromises()
+    expect(modal().props('isError')).toBe(true)
+
+    await modal().vm.$emit('cancel')
+    await newButton.vm.$emit('click')
+
+    expect(modal().props('active')).toBe(true)
+    expect(modal().props('isError')).toBe(false)
+  })
+
+  test('opens without the success of a past confirm and stay', async () => {
+    const { newButton, modal } = await mountModal()
+
+    await newButton.vm.$emit('click')
+    await modal().vm.$emit('confirm-and-stay', { name: 'Hero' })
+    await flushPromises()
+    expect(modal().props('isSuccess')).toBe(true)
+
+    await modal().vm.$emit('cancel')
+    await newButton.vm.$emit('click')
+
+    expect(modal().props('active')).toBe(true)
+    expect(modal().props('isSuccess')).toBe(false)
   })
 })

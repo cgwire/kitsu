@@ -279,7 +279,7 @@
             class="flexrow-item"
             :title="$t('assets.new_asset')"
             icon="plus"
-            @click="modals.isNewDisplayed = true"
+            @click="showNewModal"
             v-if="!isOnlyCurrentEpisode"
           />
           <span class="filler"></span>
@@ -1212,6 +1212,13 @@ const toggleTextMode = () => {
 
 const toggleColumnSelector = () => {
   columnSelectorDisplayed.value = !columnSelectorDisplayed.value
+}
+
+// Close leaves the messages of the last creation: opening drops them.
+const showNewModal = () => {
+  errors.edit = false
+  success.edit = false
+  modals.isNewDisplayed = true
 }
 
 const confirmNewAssetStay = async form => {

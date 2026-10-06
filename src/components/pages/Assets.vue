@@ -255,7 +255,6 @@ import {
   nextTick,
   onBeforeUnmount,
   onMounted,
-  reactive,
   ref,
   useTemplateRef,
   watch
@@ -307,8 +306,6 @@ const searchFieldRef = useTemplateRef('asset-search-field')
 
 const initialLoading = ref(true)
 const optionalColumns = ref(['Description', 'Ready for', 'Resolution'])
-
-const success = reactive({ edit: false })
 
 let resetTimeout = null
 
@@ -450,6 +447,7 @@ const {
   showAddThumbnailsModal,
   showCreateTasksModal,
   showImportModal,
+  success,
   uploadImportFile
 } = useEntityPage({
   type,
