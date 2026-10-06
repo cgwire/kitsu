@@ -108,6 +108,9 @@ export const useModal = (active, emit, containerRef = null) => {
   const onKeyDown = event => {
     if (!isTop()) return
     if (event.key === 'Escape') {
+      // Tells isFreeEscape the key is taken: a page listener added after
+      // this one finds the modal closed.
+      event.preventDefault()
       emit('cancel')
     } else if (event.key === 'Tab') {
       trapFocus(event)

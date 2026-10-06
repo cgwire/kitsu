@@ -58,6 +58,20 @@ describe('composables/modal', () => {
     wrapper.unmount()
   })
 
+  // A window listener added before the modal opened sees the modal open. One
+  // added after it sees it closed: it needs the mark to leave the key alone.
+  it('takes the Escape it cancels on', () => {
+    const wrapper = createModalWrapper(true)
+    const escape = new KeyboardEvent('keydown', {
+      key: 'Escape',
+      cancelable: true
+    })
+    window.dispatchEvent(escape)
+    expect(wrapper.vm.emit).toHaveBeenCalledWith('cancel')
+    expect(escape.defaultPrevented).toBe(true)
+    wrapper.unmount()
+  })
+
   it('does not emit cancel on other keys', () => {
     const wrapper = createModalWrapper(true)
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }))

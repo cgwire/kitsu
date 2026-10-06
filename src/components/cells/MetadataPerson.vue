@@ -23,11 +23,12 @@
       <template v-if="isOpen">
         <div class="metadata-person-mask" @click="onClose"></div>
         <!-- Tab leaves it like a click outside. Captured: the people field
-             stops the propagation of Tab. -->
+             stops the propagation of Tab. Escape tells isFreeEscape the key
+             is taken: the page listeners run once the popup is gone. -->
         <div
           class="metadata-person-popup"
           :style="popupStyle"
-          @keydown.esc="onClose"
+          @keydown.esc.prevent="onClose"
           @keydown.tab.capture="onClose"
         >
           <people-field

@@ -153,6 +153,15 @@ describe('cells/MetadataTextarea', () => {
       expect(document.activeElement).toBe(wrapper.element)
     })
 
+    test('takes the Escape it closes on, even from an empty editor', async () => {
+      mountCell({ modelValue: '' })
+      await openAt(rect)
+      const escape = await pressKey(editor(), 'Escape')
+      expect(popup()).toBeNull()
+      // The page listeners run once the popup is gone: the mark tells them.
+      expect(escape.defaultPrevented).toBe(true)
+    })
+
     test.each([
       ['Escape', () => pressKey(editor(), 'Escape')],
       [

@@ -31,6 +31,13 @@ const folders = [
   { id: 'folder-2', name: 'Sets' }
 ]
 
+// A panel listens to the window keys: unmount every panel after its test.
+const mountedPanels = []
+
+afterEach(() => {
+  mountedPanels.splice(0).forEach(wrapper => wrapper.unmount())
+})
+
 const mountPanel = async (concepts, { role = 'manager' } = {}) => {
   const router = createRouter({
     history: createMemoryHistory(),
@@ -81,6 +88,7 @@ const mountPanel = async (concepts, { role = 'manager' } = {}) => {
     global: { plugins: [router, store] }
   })
   await flushPromises()
+  mountedPanels.push(wrapper)
   return { store, wrapper }
 }
 
@@ -217,6 +225,96 @@ describe('ActionPanel, concept links', () => {
     await flushPromises()
 
     expect(wrapper.find('.concept-links').exists()).toBe(true)
+  })
+})
+
+describe('ActionPanel, Escape', () => {
+  const concept = buildConcept('concept-1')
+  const pageElements = []
+  let store
+
+  const addToPage = (tag, className = '') => {
+    const element = document.createElement(tag)
+    element.className = className
+    document.body.appendChild(element)
+    pageElements.push(element)
+    return element
+  }
+
+  const pressEscape = target =>
+    target.dispatchEvent(
+      new KeyboardEvent('keydown', {
+        key: 'Escape',
+        keyCode: 27,
+        bubbles: true,
+        cancelable: true
+      })
+    )
+
+  beforeEach(async () => {
+    localStorage.clear()
+    ;({ store } = await mountPanel([concept]))
+    // The panel listens to Escape once its selection changed under it.
+    store.state.selectedConcepts = toSelection([
+      concept,
+      buildConcept('concept-2')
+    ])
+    await flushPromises()
+    store.state.selectedConcepts = toSelection([concept])
+    await flushPromises()
+    store.commit = vi.fn()
+  })
+
+  afterEach(() => {
+    pageElements.splice(0).forEach(element => element.remove())
+  })
+
+  test('clears the task selection on an Escape on the page', () => {
+    pressEscape(addToPage('a'))
+
+    expect(store.commit).toHaveBeenCalledWith('CLEAR_SELECTED_TASKS')
+  })
+
+  test('clears the task selection on an Escape from an empty field', () => {
+    // The comment box of the task panel takes the focus by itself.
+    pressEscape(addToPage('textarea'))
+
+    expect(store.commit).toHaveBeenCalledWith('CLEAR_SELECTED_TASKS')
+  })
+
+  test('clears the task selection on an Escape from a checkbox', () => {
+    const checkbox = addToPage('input')
+    checkbox.type = 'checkbox'
+
+    pressEscape(checkbox)
+
+    expect(store.commit).toHaveBeenCalledWith('CLEAR_SELECTED_TASKS')
+  })
+
+  test('keeps the selection on an Escape typed in a field holding text', () => {
+    const textarea = addToPage('textarea')
+    textarea.value = 'Draft comment'
+
+    pressEscape(textarea)
+
+    expect(store.commit).not.toHaveBeenCalled()
+  })
+
+  test('keeps the selection on an Escape a list took to close', () => {
+    const combobox = addToPage('div')
+    combobox.addEventListener('keydown', event => event.preventDefault())
+
+    pressEscape(combobox)
+
+    expect(store.commit).not.toHaveBeenCalled()
+  })
+
+  test('keeps the selection on an Escape that closes a modal', () => {
+    addToPage('div', 'modal is-active')
+
+    pressEscape(document.body)
+
+    expect(store.commit).not.toHaveBeenCalled()
   })
 })
 

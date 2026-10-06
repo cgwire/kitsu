@@ -958,6 +958,7 @@ import { useStore } from 'vuex'
 
 import { intersection } from '@/lib/array'
 import func from '@/lib/func'
+import { isFreeEscape } from '@/lib/keyboard'
 import assetsStore from '@/store/modules/assets.js'
 
 import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
@@ -1467,9 +1468,7 @@ const runCustomAction = () => {
 }
 
 const onKeyDown = event => {
-  if (event.keyCode === 27 && !modals.playlist) {
-    store.commit('CLEAR_SELECTED_TASKS')
-  }
+  if (isFreeEscape(event)) store.commit('CLEAR_SELECTED_TASKS')
 }
 
 const clearSelection = () => {

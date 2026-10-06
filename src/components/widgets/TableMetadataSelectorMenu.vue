@@ -207,7 +207,12 @@ const positionMenu = () => {
 const closeMenu = () => emit('update:is-open', false)
 
 const onKeyEscape = event => {
-  if (event.key === 'Escape' && props.isOpen) closeMenu()
+  if (event.key === 'Escape' && props.isOpen) {
+    // Tells isFreeEscape the key is taken: the menu is closed by the time
+    // the page listener runs.
+    event.preventDefault()
+    closeMenu()
+  }
 }
 
 const setMetadataDisplayValue = (metadataName, isSelected) => {

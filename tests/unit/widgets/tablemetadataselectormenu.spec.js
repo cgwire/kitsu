@@ -105,4 +105,32 @@ describe('TableMetadataSelectorMenu', () => {
     expect(menu().style.top).toBe('528px')
     expect(menu().style.maxHeight).toBe('64px')
   })
+
+  const pressEscape = () => {
+    const event = new KeyboardEvent('keydown', {
+      key: 'Escape',
+      bubbles: true,
+      cancelable: true
+    })
+    document.body.dispatchEvent(event)
+    return event
+  }
+
+  // Closed before the page sees the key, the menu leaves only that mark: the
+  // action panel would clear the task selection on it too.
+  test('takes the Escape it closes on', async () => {
+    await openMenu({ hostTop: 219 })
+
+    const escape = pressEscape()
+
+    expect(wrapper.emitted('update:is-open')).toEqual([[false]])
+    expect(escape.defaultPrevented).toBe(true)
+  })
+
+  test('leaves the Escape to the page once closed', async () => {
+    await openMenu({ hostTop: 219 })
+    await wrapper.setProps({ isOpen: false })
+
+    expect(pressEscape().defaultPrevented).toBe(false)
+  })
 })

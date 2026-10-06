@@ -239,6 +239,15 @@ describe('cells/MetadataPerson', () => {
       expect(wrapper.emitted('select')).toBeUndefined()
     })
 
+    it('takes the Escape it closes on, from its empty search field', async () => {
+      await open({ anchor })
+      expect(findInput().value).toBe('')
+      const escape = await pressKey(findInput(), 'Escape')
+      expect(findPopup()).toBeNull()
+      // The page listeners run once the popup is gone: the mark tells them.
+      expect(escape.defaultPrevented).toBe(true)
+    })
+
     it.each([
       ['Tab', {}],
       ['Shift+Tab', { shiftKey: true }]

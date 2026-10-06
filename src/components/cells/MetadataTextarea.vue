@@ -13,11 +13,12 @@
       <template v-if="isOpen">
         <div class="metadata-textarea-mask" @click="onClose"></div>
         <!-- Tab leaves it like a click outside. A click in the padding keeps
-             the focus in the editor. -->
+             the focus in the editor. Escape tells isFreeEscape the key is
+             taken: the page listeners run once the popup is gone. -->
         <div
           class="metadata-textarea-popup"
           :style="popupStyle"
-          @keydown.esc="onClose"
+          @keydown.esc.prevent="onClose"
           @keydown.tab="onClose"
           @mousedown.self.prevent
         >
