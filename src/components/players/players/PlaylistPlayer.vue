@@ -460,6 +460,7 @@
           : -1
       "
       :preview-id="currentPreview ? currentPreview.id : ''"
+      :read-only="areHandlesReadOnly"
       @start-scrub="onScrubStart"
       @end-scrub="onScrubEnd"
       @progress-changed="onProgressChanged"
@@ -1294,6 +1295,12 @@ const isCurrentTaskSupervisor = computed(() =>
     ? store.getters.currentUserRoleForProduction(task.value.project_id) ===
       'supervisor'
     : isCurrentUserSupervisor.value
+)
+
+// Zou refuses the trim to artists, clients and department supervisors: their
+// handles stay visible but frozen, as in the preview player.
+const areHandlesReadOnly = computed(
+  () => !store.getters.canEditShotTrim(task.value)
 )
 
 const currentPreview = computed(() => {
@@ -2514,19 +2521,24 @@ const onProgressChanged = (frame, updatePlaylistProgress = true) => {
 const _saveHandles = handles => {
   const shot = shotMap.value.get(currentEntity.value?.id)
   if (!shot) return
-  store.dispatch('editShot', {
-    id: shot.id,
-    data: { ...shot.data, ...handles }
-  })
+  store
+    .dispatch('editShot', {
+      id: shot.id,
+      data: { ...shot.data, ...handles }
+    })
+    .catch(console.error)
 }
 
+// The progress bar still ends a drag started before the handles froze.
 const onHandleInChanged = ({ frameNumber: f, save }) => {
+  if (areHandlesReadOnly.value) return
   handleIn.value = f
   if (save) _saveHandles({ handle_in: f })
   updateRoomStatus()
 }
 
 const onHandleOutChanged = ({ frameNumber: f, save }) => {
+  if (areHandlesReadOnly.value) return
   handleOut.value = f
   // An end handle at the clip end is no trim: saving that frame would
   // stop a longer revision at the length of the one on screen.

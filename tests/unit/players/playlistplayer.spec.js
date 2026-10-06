@@ -1,4 +1,5 @@
 import { flushPromises, shallowMount } from '@vue/test-utils'
+import process from 'node:process'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createStore } from 'vuex'
 
@@ -37,10 +38,13 @@ const withMethods = (names, values = {}) => ({
 const mountPlayer = ({
   playlistProp = playlist,
   entities = [entity],
-  shotMap = new Map()
+  canEditShotTrim = () => true,
+  shotMap = new Map(),
+  taskMap = new Map()
 } = {}) => {
   const store = createStore({
     getters: {
+      canEditShotTrim: () => canEditShotTrim,
       currentProduction: () => ({ id: 'production-1', fps: '25' }),
       currentUserRoleForProduction: () => () => 'manager',
       dateFormat: () => 'yyyy-MM-dd',
@@ -61,7 +65,7 @@ const mountPlayer = ({
       productionSequenceTaskTypes: () => [],
       productionShotTaskTypes: () => [],
       shotMap: () => shotMap,
-      taskMap: () => new Map(),
+      taskMap: () => taskMap,
       taskStatusMap: () => new Map(),
       taskTypeMap: () => new Map(),
       use12HourClock: () => false,
@@ -118,7 +122,10 @@ const mountPlayer = ({
         PictureViewer: withMethods(['setPanZoom']),
         SoundViewer: withMethods(['pause', 'play', 'redraw']),
         TaskInfo: withMethods(['focusCommentTextarea']),
-        VideoProgress: withMethods(['updateProgressBar'])
+        VideoProgress: {
+          ...withMethods(['updateProgressBar']),
+          props: { handleIn: Number, handleOut: Number, readOnly: Boolean }
+        }
       }
     }
   })
@@ -130,6 +137,7 @@ describe('PlaylistPlayer.vue', () => {
   afterEach(() => {
     wrapper?.unmount()
     wrapper = null
+    vi.restoreAllMocks()
   })
 
   // A plain link navigates the tab: the browser fires beforeunload, which
@@ -168,15 +176,17 @@ describe('PlaylistPlayer.vue', () => {
       id: 'shot-1',
       preview_file_id: 'preview-1',
       preview_file_extension: 'mp4',
-      preview_file_duration: 2.76
+      preview_file_duration: 2.76,
+      preview_file_task_id: 'task-1'
     }
 
     // The handles are set once the movie metadata gives the duration.
-    const mountShotPlayer = async data => {
+    const mountShotPlayer = async (data, options = {}) => {
       wrapper = mountPlayer({
         playlistProp: { ...playlist, for_entity: 'shot' },
         entities: [movie],
-        shotMap: new Map([['shot-1', { id: 'shot-1', data }]])
+        shotMap: new Map([['shot-1', { id: 'shot-1', data }]]),
+        ...options
       })
       await flushPromises()
       wrapper
@@ -190,10 +200,10 @@ describe('PlaylistPlayer.vue', () => {
         ([action]) => action === 'editShot'
       )?.[1].data
 
+    const progressBar = () => wrapper.findComponent({ ref: 'video-progress' })
+
     const dragHandle = (event, frameNumber) =>
-      wrapper
-        .findComponent({ ref: 'video-progress' })
-        .vm.$emit(event, { frameNumber, save: true })
+      progressBar().vm.$emit(event, { frameNumber, save: true })
 
     it('leaves the end untrimmed when only the start handle moves', async () => {
       await mountShotPlayer({ fps: 25 })
@@ -224,6 +234,63 @@ describe('PlaylistPlayer.vue', () => {
       await mountShotPlayer({ handle_out: 80 })
       dragHandle('handle-in-changed', 5)
       expect(savedData()).toEqual({ handle_in: 5, handle_out: 80 })
+    })
+
+    // Zou lets admins, and the managers and department-less supervisors of
+    // the production team, trim a shot.
+    it.each([
+      ['editable for a user who may trim the shot', true],
+      ['frozen for a user Zou refuses the trim to', false]
+    ])('keeps the handles %s', async (_, isAllowed) => {
+      await mountShotPlayer({}, { canEditShotTrim: () => isAllowed })
+      expect(progressBar().props('readOnly')).toBe(!isAllowed)
+    })
+
+    // The bar still ends a drag started before the handles froze.
+    it.each([
+      ['start', 'handle-in-changed', 5, 'handleIn', 0],
+      ['end', 'handle-out-changed', 60, 'handleOut', 69]
+    ])(
+      'ignores the %s handle moved by a user Zou refuses the trim to',
+      async (_, event, frameNumber, prop, value) => {
+        await mountShotPlayer({}, { canEditShotTrim: () => false })
+        dragHandle(event, frameNumber)
+        await flushPromises()
+        expect(savedData()).toBeUndefined()
+        expect(progressBar().props(prop)).toBe(value)
+      }
+    )
+
+    // A temporary playlist can mix shots of several productions.
+    it('checks the trim right on the task of the shot on screen', async () => {
+      const task = { id: 'task-1', project_id: 'production-2' }
+      const canEditShotTrim = vi.fn(() => true)
+      await mountShotPlayer(
+        {},
+        { canEditShotTrim, taskMap: new Map([[task.id, task]]) }
+      )
+      expect(canEditShotTrim).toHaveBeenCalledWith(task)
+    })
+
+    it('keeps a failed save from going unhandled', async () => {
+      const rejections = []
+      const onRejection = reason => rejections.push(reason)
+      process.on('unhandledRejection', onRejection)
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      await mountShotPlayer({})
+      // Not a vi.fn: it handles the promises it returns, to record how they
+      // settle, so a rejection from it never counts as unhandled.
+      wrapper.vm.$store.dispatch = action =>
+        action === 'editShot'
+          ? Promise.reject(new Error('forbidden'))
+          : Promise.resolve()
+
+      dragHandle('handle-in-changed', 5)
+      // Node reports a rejected promise once the microtask queue drained.
+      await new Promise(resolve => setTimeout(resolve))
+      process.off('unhandledRejection', onRejection)
+
+      expect(rejections).toEqual([])
     })
   })
 })
