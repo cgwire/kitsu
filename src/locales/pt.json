@@ -2063,7 +2063,8 @@
       },
       "multiple_delete_error": "Ocorreu um erro ao excluir um conceito. Pode haver dados existentes vinculados a ele. Tem certeza de que não há nenhuma tarefa vinculada a um conceito selecionado?",
       "no_concept_selected": "Nenhum conceito selecionado",
-      "title": "Conceitos"
+      "title": "Conceitos",
+      "uploading": "Enviando conceitos"
     },
     "intro": {
       "join_discord": "Junte-se ao Discord da comunidade",

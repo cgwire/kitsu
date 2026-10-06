@@ -2063,7 +2063,8 @@
       },
       "multiple_delete_error": "Beim Löschen eines Konzepts ist ein Fehler aufgetreten. Möglicherweise sind bereits Daten mit diesem Konzept verknüpft. Sind Sie sicher, dass mit dem ausgewählten Konzept keine Aufgabe verknüpft ist?",
       "no_concept_selected": "Kein Konzept ausgewählt",
-      "title": "Konzepte"
+      "title": "Konzepte",
+      "uploading": "Konzepte werden hochgeladen"
     },
     "intro": {
       "join_discord": "Treten Sie dem Community-Discord bei",

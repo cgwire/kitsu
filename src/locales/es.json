@@ -2063,7 +2063,8 @@
       },
       "multiple_delete_error": "Se ha producido un error al eliminar un concepto. Es posible que existan datos vinculados a él. ¿Está seguro de que no hay ninguna tarea vinculada al concepto seleccionado?",
       "no_concept_selected": "No se ha seleccionado ningún concepto",
-      "title": "Conceptos"
+      "title": "Conceptos",
+      "uploading": "Subiendo conceptos"
     },
     "intro": {
       "join_discord": "Únete al Discord de la comunidad",

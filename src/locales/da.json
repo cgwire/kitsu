@@ -2063,7 +2063,8 @@
       },
       "multiple_delete_error": "Der opstod en fejl under sletning af et koncept. Der kan være eksisterende data knyttet til det. Er du sikker på, at der ikke er nogen opgaver knyttet til det valgte koncept?",
       "no_concept_selected": "Intet koncept valgt",
-      "title": "Koncepter"
+      "title": "Koncepter",
+      "uploading": "Uploader koncepter"
     },
     "intro": {
       "join_discord": "Deltag i fællesskabets Discord",

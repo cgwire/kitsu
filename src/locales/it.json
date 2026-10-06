@@ -2063,7 +2063,8 @@
       },
       "multiple_delete_error": "Si è verificato un errore durante l'eliminazione di un concept. Potrebbero esserci dati esistenti attualmente collegati. Sei sicuro che nessun task sia collegato a un concept selezionato?",
       "no_concept_selected": "Nessun concept selezionato",
-      "title": "Concept"
+      "title": "Concept",
+      "uploading": "Caricamento dei concept"
     },
     "intro": {
       "join_discord": "Unisciti al Discord della community",

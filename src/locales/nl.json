@@ -2063,7 +2063,8 @@
       },
       "multiple_delete_error": "Er is een fout opgetreden bij het verwijderen van een concept. Er kunnen bestaande gegevens aan gekoppeld zijn. Weet je zeker dat er geen taak is gekoppeld aan een geselecteerd concept?",
       "no_concept_selected": "Geen concept geselecteerd",
-      "title": "Concepten"
+      "title": "Concepten",
+      "uploading": "Concepten uploaden"
     },
     "intro": {
       "join_discord": "Word lid van de community-Discord",

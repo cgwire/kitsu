@@ -2063,7 +2063,8 @@
       },
       "multiple_delete_error": "删除概念时发生错误。当前可能有与之链接的现有数据。您确定没有任务链接到选定的概念吗？",
       "no_concept_selected": "未选择概念",
-      "title": "概念"
+      "title": "概念",
+      "uploading": "正在上传概念图"
     },
     "intro": {
       "join_discord": "加入社区 Discord",

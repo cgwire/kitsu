@@ -2063,7 +2063,8 @@
       },
       "multiple_delete_error": "개념을 삭제하는 동안 오류가 발생했습니다. 현재 연결된 기존 데이터가 있을 수 있습니다. 선택한 개념에 연결된 작업이 없는 것이 확실합니까?",
       "no_concept_selected": "선택한 개념 없음",
-      "title": "개념"
+      "title": "개념",
+      "uploading": "컨셉 업로드 중"
     },
     "intro": {
       "join_discord": "커뮤니티 Discord에 참여하기",

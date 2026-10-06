@@ -2063,7 +2063,8 @@
       },
       "multiple_delete_error": "刪除概念時發生錯誤。目前可能有現有資料與它連結。您確定沒有任務連結到選取的概念嗎？",
       "no_concept_selected": "未選擇概念",
-      "title": "概念"
+      "title": "概念",
+      "uploading": "正在上傳概念圖"
     },
     "intro": {
       "join_discord": "加入社群 Discord",

@@ -364,7 +364,8 @@ export default {
     },
     multiple_delete_error: 'An error occurred while deleting a concept. There may be existing data currently linked to it. Are you sure there is no task linked to a selected concept?',
     no_concept_selected: 'No concept selected',
-    title: 'Concepts'
+    title: 'Concepts',
+    uploading: 'Uploading concepts'
   },
 
   custom_actions: {

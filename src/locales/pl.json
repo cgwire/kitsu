@@ -353,7 +353,8 @@
       },
       "multiple_delete_error": "Wystąpił błąd podczas usuwania konceptu. Mogą istnieć dane obecnie z nim powiązane. Czy na pewno żadne zadanie nie jest powiązane z którymś z wybranych konceptów?",
       "no_concept_selected": "Nie wybrano konceptu",
-      "title": "Koncepty"
+      "title": "Koncepty",
+      "uploading": "Przesyłanie konceptów"
     },
     "custom_actions": {
       "create_error": "Wystąpił błąd podczas zapisywania tej akcji niestandardowej. Czy na pewno nie istnieje inna akcja o tej samej nazwie?",

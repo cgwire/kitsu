@@ -65,7 +65,8 @@ const mountPage = async ({
     state: {
       production: { id: 'production-1', name: 'Wing It' },
       selection,
-      shownPreview: ''
+      shownPreview: '',
+      uploadProgress: {}
     },
     getters: {
       concepts: () => concepts,
@@ -76,6 +77,7 @@ const mountPage = async ({
       isTVShow: () => true,
       personMap: () => new Map(people.map(person => [person.id, person])),
       previewFileIdToShow: state => state.shownPreview,
+      uploadProgress: state => state.uploadProgress,
       selectedConcepts: state =>
         new Map(state.selection.map(concept => [concept.id, concept])),
       taskStatusMap: () => new Map()
@@ -331,8 +333,8 @@ describe('Concepts page', () => {
       wrapper.findComponent(AddPreviewModal).vm.$emit('confirm', forms)
       await flushPromises()
 
-      expect(dispatch).toHaveBeenCalledWith('newConcepts', {
-        forms,
+      expect(dispatch).toHaveBeenCalledWith('newConcept', {
+        form: forms[0],
         parentId: 'folder-1'
       })
     })
@@ -650,6 +652,85 @@ describe('Concepts page', () => {
     expect(wrapper.find('.drop-mask').exists()).toBe(true)
   })
 
+  describe('upload', () => {
+    // Resolved by hand to watch the page between two files.
+    const mountUploading = async () => {
+      const pending = []
+      const dispatch = vi.fn(action =>
+        action === 'newConcept'
+          ? new Promise((resolve, reject) => pending.push({ resolve, reject }))
+          : Promise.resolve()
+      )
+      const page = await mountPage({ dispatch })
+      const modal = page.wrapper.findComponent(AddPreviewModal)
+      await page.wrapper.find('.add-concepts').trigger('click')
+      modal.vm.$emit('confirm', [buildForm('a.png'), buildForm('b.png')])
+      await flushPromises()
+      return { ...page, modal, pending }
+    }
+    const buildForm = name => {
+      const form = new FormData()
+      form.append('file', new File(['pixels'], name))
+      return form
+    }
+    const barWidth = wrapper =>
+      wrapper.find('.upload-bar .fill').attributes('style')
+    const isAddDisabled = wrapper =>
+      wrapper.findComponent('.add-concepts').props('disabled')
+    const settle = async (upload, outcome = 'resolve') => {
+      upload[outcome](new Error('offline'))
+      await flushPromises()
+    }
+
+    test('closes the modal and reports the progress file by file', async () => {
+      const { modal, pending, store, wrapper } = await mountUploading()
+      const status = () => wrapper.find('.upload-status')
+
+      expect(modal.props('active')).toBe(false)
+      expect(status().text()).toContain('0 / 2')
+      expect(status().find('.upload-file').text()).toBe('a.png')
+      expect(barWidth(wrapper)).toContain('width: 0%')
+      expect(isAddDisabled(wrapper)).toBe(true)
+
+      // The bar follows the bytes of the file being sent, and never steps
+      // back when the store forgets them at the end of that file.
+      store.state.uploadProgress = { 'a.png': 50 }
+      await flushPromises()
+      expect(barWidth(wrapper)).toContain('width: 25%')
+      store.state.uploadProgress = {}
+      await flushPromises()
+      expect(barWidth(wrapper)).toContain('width: 25%')
+
+      // One file at a time: the second waits for the first.
+      expect(pending).toHaveLength(1)
+      await settle(pending[0])
+      expect(status().text()).toContain('1 / 2')
+      expect(status().find('.upload-file').text()).toBe('b.png')
+      expect(barWidth(wrapper)).toContain('width: 50%')
+
+      await settle(pending[1])
+      expect(status().exists()).toBe(false)
+      expect(isAddDisabled(wrapper)).toBe(false)
+    })
+
+    test('tells how far a failed upload went, until dismissed', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { pending, wrapper } = await mountUploading()
+
+      await settle(pending[0])
+      await settle(pending[1], 'reject')
+
+      const status = wrapper.find('.upload-status')
+      expect(status.classes()).toContain('is-error')
+      expect(status.text()).toContain('concepts.add_concept_error')
+      expect(status.text()).toContain('1 / 2')
+      expect(isAddDisabled(wrapper)).toBe(false)
+
+      await status.find('.dismiss-upload').trigger('click')
+      expect(wrapper.find('.upload-status').exists()).toBe(false)
+    })
+  })
+
   // A link to the page carries what the user was looking at.
   describe('query', () => {
     const stubs = {
@@ -860,17 +941,23 @@ describe('Concepts page', () => {
 
   test('clears the upload error when a retry succeeds', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
-    const { dispatch, wrapper } = await mountPage()
+    let isOffline = true
+    const dispatch = vi.fn(action =>
+      isOffline && action === 'newConcept'
+        ? Promise.reject(new Error('network'))
+        : Promise.resolve()
+    )
+    const { wrapper } = await mountPage({ dispatch })
     const modal = wrapper.findComponent({ name: 'AddPreviewModal' })
-    dispatch.mockRejectedValueOnce(new Error('network'))
-    modal.vm.$emit('confirm', [])
+    modal.vm.$emit('confirm', [new FormData()])
     await flushPromises()
-    expect(modal.props('isError')).toBe(true)
+    expect(wrapper.find('.upload-status').classes()).toContain('is-error')
 
-    modal.vm.$emit('confirm', [])
+    isOffline = false
+    modal.vm.$emit('confirm', [new FormData()])
     await flushPromises()
 
-    expect(modal.props('isError')).toBe(false)
+    expect(wrapper.find('.upload-status').exists()).toBe(false)
   })
 
   test('keeps every publisher selectable once one is picked', async () => {
