@@ -1418,6 +1418,7 @@
       "apply_to_prod_confirm": "您確定要將此排程版本套用至目前的生產嗎？這將會覆寫目前的任務值。",
       "apply_to_prod_error": "將時間表版本套用至目前生產時發生錯誤。",
       "assign": "指派給",
+      "assign_error": "無法分配任務。請再試一次。",
       "confirm_move_children": "移動此條將裁剪或移動 {count} 個子項目以符合新範圍。是否繼續？| 移動此條將裁剪或移動 {count} 個子項目以符合新範圍。是否繼續？",
       "create_version": "建立排程版本",
       "delete_version": "刪除排程版本",

@@ -23,6 +23,7 @@ import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import DateField from '@/components/widgets/DateField.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
 // The page is driven through what it renders and what it calls: the
@@ -105,6 +106,30 @@ const buildAssetTypeBars = () => [
   }
 ]
 
+const people = [
+  {
+    id: 'person-1',
+    active: true,
+    departments: [],
+    first_name: 'Alice',
+    full_name: 'Alice Smith',
+    role: 'user'
+  },
+  {
+    id: 'person-2',
+    active: true,
+    departments: [],
+    first_name: 'Bob',
+    full_name: 'Bob Jones',
+    role: 'user'
+  }
+]
+
+const propAssets = [
+  { id: 'asset-1', name: 'Chair', asset_type_id: 'asset-type-props' },
+  { id: 'asset-2', name: 'Table', asset_type_id: 'asset-type-props' }
+]
+
 const day = date => moment.utc(date)
 const format = date => date.format('YYYY-MM-DD')
 
@@ -125,6 +150,8 @@ const mountPage = async ({
 } = {}) => {
   const storeActions = {
     applyScheduleVersionToProduction: vi.fn(),
+    assignSelectedTasks: vi.fn(),
+    createScheduleVersionedTask: vi.fn(() => ({ id: 'versioned-task-1' })),
     editProduction: vi.fn(),
     loadAssetTypeScheduleItems: vi.fn(() => buildAssetTypeBars()),
     loadAssets: vi.fn(),
@@ -136,6 +163,7 @@ const mountPage = async ({
     loadTasks: vi.fn(() => []),
     loadTasksFromScheduleVersion: vi.fn(() => []),
     saveScheduleItem: vi.fn(),
+    unassignSelectedTasks: vi.fn(),
     updateScheduleVersionedTask: vi.fn(),
     updateTask: vi.fn(),
     ...actions
@@ -275,6 +303,7 @@ describe('ProductionSchedule page', () => {
     mountedPage = null
     taskTypeStore.cache.taskTypeMap.clear()
     assetTypeStore.cache.assetTypeMap.clear()
+    assetStore.cache.assets = []
     vi.restoreAllMocks()
   })
 
@@ -825,6 +854,230 @@ describe('ProductionSchedule page', () => {
       expect(wrapper.findComponent(ConfirmModal).props('isError')).toBe(true)
       expect(rowsOf(wrapper).every(row => row.editable)).toBe(true)
       expect(storeActions.loadAssetTypeScheduleItems).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  // The side panel assigns the props of the Modeling row to a team of two.
+  describe('task assignments', () => {
+    const versionOptions = {
+      query: { version: unlockedVersion.id },
+      versions: [unlockedVersion]
+    }
+
+    const mountAssignments = ({
+      actions = {},
+      nbAssets = 2,
+      ...options
+    } = {}) => {
+      const assets = propAssets.slice(0, nbAssets)
+      assetStore.cache.assets = assets
+      return mountPage({
+        ...options,
+        actions: {
+          loadTasks: vi.fn(() =>
+            assets.map(asset => ({
+              id: `task-${asset.id}`,
+              entity_id: asset.id,
+              assignees: []
+            }))
+          ),
+          ...actions
+        },
+        getters: {
+          currentProduction: () => ({
+            ...production,
+            team: people.map(person => person.id)
+          }),
+          personMap: () => new Map(people.map(person => [person.id, person])),
+          productionAssetTypes: () => [
+            { id: 'asset-type-props', name: 'Props', task_types: [] }
+          ]
+        }
+      })
+    }
+
+    const selectProps = async wrapper => {
+      await toggleSidePanel(wrapper)
+      await pickTaskType(wrapper, 'tt-modeling')
+      await wrapper.find('.side-column .assignment-item').trigger('click')
+    }
+
+    // Monday 6 to Wednesday 8 April: three working days
+    const setRange = async (
+      wrapper,
+      startDate = '2026-04-06',
+      endDate = '2026-04-08'
+    ) => {
+      const [startField, endField] = wrapper
+        .find('.side-column form')
+        .findAllComponents(DateField)
+      startField.vm.$emit('update:model-value', startDate)
+      endField.vm.$emit('update:model-value', endDate)
+      await flushPromises()
+    }
+
+    const apply = async wrapper => {
+      await wrapper.find('.side-column form').trigger('submit')
+      await flushPromises()
+    }
+
+    const panelText = wrapper => wrapper.find('.side-column').text()
+
+    // A refused request left the Apply button spinning for good, with no
+    // word of the failure.
+    it.each([
+      ['the reference', {}, 'updateTask'],
+      ['a version', versionOptions, 'createScheduleVersionedTask']
+    ])(
+      'stops the spinner and tells when a save of %s fails',
+      async (_, options, saveAction) => {
+        const error = new Error('Bad request')
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const { wrapper } = await mountAssignments({
+          ...options,
+          actions: { [saveAction]: vi.fn(() => Promise.reject(error)) }
+        })
+        await selectProps(wrapper)
+        await setRange(wrapper)
+
+        await apply(wrapper)
+
+        expect(findButton(wrapper, 'main.apply').props('isLoading')).toBe(
+          false
+        )
+        expect(panelText(wrapper)).toContain('schedule.assign_error')
+        expect(consoleError).toHaveBeenCalledWith(error)
+      }
+    )
+
+    it('clears the error when Apply runs again', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { storeActions, wrapper } = await mountAssignments({
+        actions: {
+          updateTask: vi.fn().mockRejectedValueOnce(new Error('Bad request'))
+        }
+      })
+      await selectProps(wrapper)
+      await setRange(wrapper)
+      await apply(wrapper)
+      expect(panelText(wrapper)).toContain('schedule.assign_error')
+
+      await apply(wrapper)
+
+      expect(panelText(wrapper)).not.toContain('schedule.assign_error')
+      expect(payloadsOf(storeActions.assignSelectedTasks)).toEqual([
+        { personId: 'person-1', taskIds: ['task-asset-1'] },
+        { personId: 'person-2', taskIds: ['task-asset-2'] }
+      ])
+    })
+
+    // The panel moved on to a task while the run waited on its requests:
+    // the failure of the run showed under the task, and stopped the
+    // spinner of the task save.
+    it('keeps a failed run out of the task the panel moved on to', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const saves = []
+      const { wrapper } = await mountAssignments({
+        actions: {
+          updateTask: vi.fn(
+            () => new Promise((_resolve, reject) => saves.push(reject))
+          )
+        }
+      })
+      await selectProps(wrapper)
+      await setRange(wrapper)
+      await apply(wrapper)
+      const runSaves = [...saves]
+      const task = {
+        id: 'task-asset-1',
+        type: 'Task',
+        assignees: ['person-1'],
+        entity: propAssets[0],
+        estimation: 480,
+        startDate: day('2026-04-06'),
+        endDate: day('2026-04-06')
+      }
+      findSchedule(wrapper).vm.$emit(
+        'task-selected',
+        rowsOf(wrapper)[0],
+        { id: 'asset-type-props', name: 'Props' },
+        task,
+        [task]
+      )
+      await flushPromises()
+      await apply(wrapper)
+
+      runSaves.forEach(reject => reject(new Error('Bad request')))
+      await flushPromises()
+
+      expect(panelText(wrapper)).toContain('schedule.edit_task')
+      expect(panelText(wrapper)).not.toContain('schedule.assign_error')
+      expect(findButton(wrapper, 'main.apply').props('isLoading')).toBe(true)
+    })
+
+    const goBack = wrapper =>
+      wrapper.find('.side-column button.is-link').trigger('click')
+
+    it.each([
+      [
+        'a new selection',
+        async wrapper => {
+          await goBack(wrapper)
+          await wrapper.find('.side-column .assignment-item').trigger('click')
+        }
+      ],
+      [
+        'a drop on the schedule',
+        async wrapper => {
+          await goBack(wrapper)
+          findSchedule(wrapper).vm.$emit(
+            'item-drop',
+            { start_date: '2026-04-06' },
+            { start_date: '2026-04-06', end_date: '2026-04-08' }
+          )
+          await flushPromises()
+        }
+      ],
+      ['another task type', wrapper => pickTaskType(wrapper, 'tt-layout')],
+      [
+        'a task edit',
+        async wrapper => {
+          const task = {
+            id: 'task-asset-1',
+            assignees: [],
+            entity: propAssets[0],
+            estimation: 480,
+            startDate: day('2026-04-06'),
+            endDate: day('2026-04-06')
+          }
+          findSchedule(wrapper).vm.$emit(
+            'task-selected',
+            rowsOf(wrapper)[0],
+            { id: 'asset-type-props', name: 'Props' },
+            task,
+            [task]
+          )
+          await flushPromises()
+        }
+      ]
+    ])('clears the error when the panel goes on with %s', async (_, reuse) => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { wrapper } = await mountAssignments({
+        actions: {
+          updateTask: vi.fn(() => Promise.reject(new Error('Bad request')))
+        }
+      })
+      await selectProps(wrapper)
+      await setRange(wrapper)
+      await apply(wrapper)
+      expect(panelText(wrapper)).toContain('schedule.assign_error')
+
+      await reuse(wrapper)
+
+      expect(wrapper.find('.side-column form').exists()).toBe(true)
+      expect(panelText(wrapper)).not.toContain('schedule.assign_error')
     })
   })
 })

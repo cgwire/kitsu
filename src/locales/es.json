@@ -1418,6 +1418,7 @@
       "apply_to_prod_confirm": "¿Está seguro de que desea aplicar esta versión del programa a la producción actual? Esto anulará los valores de la tarea actual.",
       "apply_to_prod_error": "Se ha producido un error al aplicar la versión del programa a la producción actual.",
       "assign": "Asignar a:",
+      "assign_error": "No se han podido asignar las tareas. Por favor, inténtalo de nuevo.",
       "confirm_move_children": "Mover esta barra recortará o ajustará {count} subelemento para adaptarlo a los nuevos límites. ¿Continuar? | Mover esta barra recortará o ajustará {count} subelementos para adaptarlos a los nuevos límites. ¿Continuar?",
       "create_version": "Crear versión de la agenda",
       "delete_version": "Borrar la versión del calendario",

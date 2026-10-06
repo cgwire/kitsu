@@ -1418,6 +1418,7 @@
       "apply_to_prod_confirm": "Êtes-vous sûr de vouloir appliquer cette version du planning à la production actuelle ? Cela remplacera les valeurs actuelles des tâches.",
       "apply_to_prod_error": "Une erreur s'est produite lors de l'application de la version du planning à la production en cours.",
       "assign": "Assigner à :",
+      "assign_error": "Impossible d'assigner les tâches. Veuillez réessayer.",
       "confirm_move_children": "Déplacer cette barre va rogner ou déplacer {count} sous-élément pour tenir dans les nouvelles bornes. Continuer ? | Déplacer cette barre va rogner ou déplacer {count} sous-éléments pour tenir dans les nouvelles bornes. Continuer ?",
       "create_version": "Créer une version du planning",
       "delete_version": "Supprimer la version du planning",

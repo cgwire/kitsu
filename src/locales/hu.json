@@ -1418,6 +1418,7 @@
       "apply_to_prod_confirm": "Biztosan alkalmazni akarod ezt az időbeosztás-verziót a jelenlegi produkcióra? Ez felülírja a jelenlegi feladatértékeket.",
       "apply_to_prod_error": "Hiba történt az időbeosztás-verzió jelenlegi produkcióra való alkalmazásakor.",
       "assign": "Kiosztva:",
+      "assign_error": "Nem sikerült kiosztani a feladatokat. Kérlek próbáld újra.",
       "confirm_move_children": "A sáv mozgatása levágja vagy elmozdítja {count} alelemet, hogy az új határok közé férjen. Folytatod? | A sáv mozgatása levágja vagy elmozdítja {count} alelemet, hogy az új határok közé férjenek. Folytatod?",
       "create_version": "Időbeosztás-verzió létrehozása",
       "delete_version": "Időbeosztás-verzió törlése",

@@ -443,6 +443,9 @@
                 v-model="assignments.task.estimation"
               />
             </div>
+            <p class="error has-text-right mt2" v-if="assignments.isError">
+              <em>{{ $t('schedule.assign_error') }}</em>
+            </p>
             <div class="mt2 has-text-right">
               <template v-if="assignments.type === 'entity'">
                 <button-simple
@@ -644,6 +647,7 @@ const assignments = ref({
   entityTypes: null,
   excludes: [],
   forcedDailyQuota: null,
+  isError: false,
   loading: false,
   saving: false,
   startDate: null,
@@ -1673,6 +1677,7 @@ const resetSidePanel = () => {
     entityTypes: null,
     excludes: [],
     forcedDailyQuota: null,
+    isError: false,
     loading: false,
     saving: false,
     startDate: null,
@@ -1681,6 +1686,10 @@ const resetSidePanel = () => {
     type: null,
     unassign: false
   }
+}
+
+const clearAssignmentMessages = () => {
+  assignments.value.isError = false
 }
 
 const toggleSidePanel = () => {
@@ -1721,6 +1730,7 @@ const selectParentElement = element => {
 }
 
 const onSelectTaskType = taskTypeId => {
+  clearAssignmentMessages()
   selectedTaskType.value = scheduleItems.value.find(
     item => item.task_type_id === taskTypeId
   )
@@ -2013,6 +2023,7 @@ const onAssignmentItemSelected = item => {
   draggedEntities.value = [
     { ...item, children: filteredAssignments(item.children) }
   ]
+  clearAssignmentMessages()
 }
 
 const onAssignmentItemDragStart = (event, item, type) => {
@@ -2029,6 +2040,7 @@ const onAssignmentItemDragStart = (event, item, type) => {
 }
 
 const onScheduleItemDropped = (event, item) => {
+  clearAssignmentMessages()
   assignments.value.type = 'entity'
   const start_date = event.start_date || item.start_date
   const end_date = parseDate(start_date).isAfter(item.end_date)
@@ -2051,8 +2063,22 @@ const submitAssignments = () => {
 }
 
 const saveAssignments = async () => {
-  assignments.value.saving = true
+  // the panel can move on to a task during the run: report to the one
+  // that started it
+  const panel = assignments.value
+  panel.saving = true
+  clearAssignmentMessages()
+  try {
+    await distributeAssignments()
+  } catch (err) {
+    console.error(err)
+    panel.isError = true
+  } finally {
+    panel.saving = false
+  }
+}
 
+const distributeAssignments = async () => {
   // load tasks
   const tasks = await store.dispatch(
     'loadTasks',
@@ -2071,7 +2097,6 @@ const saveAssignments = async () => {
   const dailyQuota =
     parseFloat(assignments.value.forcedDailyQuota) || estimatedDailyQuota.value
   if (dailyQuota <= 0) {
-    assignments.value.saving = false
     return
   }
   const taskEstimation = 1 / dailyQuota
@@ -2244,8 +2269,6 @@ const saveAssignments = async () => {
       false
     )
   }
-
-  assignments.value.saving = false
 }
 
 const saveTask = async () => {
