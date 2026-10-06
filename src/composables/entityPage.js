@@ -475,12 +475,15 @@ export const useEntityPage = ({
   // Metadata descriptors
   // --------------------------------------------------------------------------
 
+  // Close leaves the error of the last save: opening drops it.
   const onAddMetadataClicked = () => {
+    errors.addMetadata = false
     descriptorToEdit.value = {}
     modals.isAddMetadataDisplayed = true
   }
 
   const onEditMetadataClicked = descriptorId => {
+    errors.addMetadata = false
     descriptorToEdit.value = currentProduction.value.descriptors.find(
       descriptor => descriptor.id === descriptorId
     )
@@ -494,6 +497,7 @@ export const useEntityPage = ({
 
   const confirmAddMetadata = async form => {
     loading.addMetadata = true
+    errors.addMetadata = false
     try {
       await store.dispatch('addMetadataDescriptor', {
         ...form,
