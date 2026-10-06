@@ -1182,8 +1182,12 @@ onBeforeUnmount(() => {
   border-left: 1px solid $white-grey;
   border-bottom: 1px solid $white-grey;
   border-bottom-left-radius: 10px;
+  // Not 100vh: on mobile it counts the height under the browser toolbars,
+  // while % of a fixed box is the visible window.
+  max-height: calc(100% - 60px);
   max-width: 360px;
   min-width: 220px;
+  overflow-y: auto;
   padding: 10px;
   position: fixed;
   right: 0;
