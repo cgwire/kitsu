@@ -7,7 +7,7 @@
       class="combo"
       :class="{
         thin,
-        reversed: isReversed,
+        above: isAbove,
         open: showList,
         shy
       }"
@@ -20,6 +20,7 @@
         tabindex="0"
         aria-haspopup="listbox"
         :aria-expanded="showList"
+        :aria-controls="showList ? listId : undefined"
         :aria-activedescendant="
           activeIndex > -1 ? optionId(activeIndex) : undefined
         "
@@ -31,13 +32,21 @@
         </div>
         <chevron-down-icon class="down-icon" />
       </div>
+    </div>
+    <!-- Out of the list cells and modals, which clip their overflow. -->
+    <teleport to=".theme" v-if="showList">
+      <div class="c-mask is-active" @click="toggleList"></div>
       <div
+        :id="listId"
         class="select-input"
+        :class="{ above: isAbove, shy }"
+        :style="listStyle"
         ref="listRef"
         role="listbox"
         aria-multiselectable="true"
-        v-if="showList"
       >
+        <!-- mousedown.prevent keeps the focus and the keys on the combo. Set
+             on the options only: a press on the scrollbar stays native. -->
         <div
           :id="optionId(index)"
           :key="option.id"
@@ -45,6 +54,7 @@
           role="option"
           :aria-selected="isChecked(option)"
           @click="!disabled && selectOption(option)"
+          @mousedown.prevent
           v-for="(option, index) in optionList"
         >
           <input
@@ -56,24 +66,18 @@
           {{ getOptionLabel(option) }}
         </div>
       </div>
-    </div>
-    <div
-      class="c-mask"
-      :class="{
-        'is-active': showList
-      }"
-      @click="toggleList"
-    ></div>
+    </teleport>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { ChevronDownIcon } from 'lucide-vue-next'
+import { computed, nextTick, onBeforeUnmount, ref, useId, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
-import { sortByValue } from '@/lib/sorting'
 import { useComboboxKeyboard } from '@/composables/comboboxKeyboard'
+import { getPopupStyle } from '@/lib/popup'
+import { sortByValue } from '@/lib/sorting'
 
 const { t } = useI18n()
 
@@ -98,10 +102,6 @@ const props = defineProps({
     default: '',
     type: String
   },
-  isReversed: {
-    default: false,
-    type: Boolean
-  },
   shy: {
     default: false,
     type: Boolean
@@ -119,8 +119,11 @@ const props = defineProps({
 const emit = defineEmits(['change', 'update:model-value'])
 
 const showList = ref(false)
+const isAbove = ref(false)
+const listStyle = ref({})
 const selectRef = ref(null)
-let lastScrollPosition = 0
+const listRef = ref(null)
+const listId = useId()
 
 const selectedValues = computed(() => {
   const optionValues = props.options.map(option => option.value)
@@ -129,13 +132,7 @@ const selectedValues = computed(() => {
     .filter(value => value && optionValues.includes(value))
 })
 
-const optionList = computed(() => {
-  const sortedOptions = sortByValue([...props.options])
-  if (props.isReversed) {
-    sortedOptions.reverse()
-  }
-  return sortedOptions
-})
+const optionList = computed(() => sortByValue([...props.options]))
 
 const renderedValue = computed(() => {
   return [...selectedValues.value].sort().join(', ')
@@ -157,16 +154,54 @@ const selectOption = option => {
   emit('change', value)
 }
 
+// Placed once rendered: its size depends on its options.
+const placeList = () => {
+  if (!listRef.value || !selectRef.value) return
+  const { width, height } = listRef.value.getBoundingClientRect()
+  const { bottom, left, maxHeight, top } = getPopupStyle(
+    selectRef.value.getBoundingClientRect(),
+    { width, height },
+    { width: window.innerWidth, height: window.innerHeight },
+    -1 // drawn attached to the combo, over its border
+  )
+  isAbove.value = bottom !== undefined
+  listStyle.value = {
+    bottom,
+    left,
+    // Also capped at the list height: it overrides the CSS max height.
+    maxHeight: `${Math.min(parseFloat(maxHeight), height)}px`,
+    top
+  }
+}
+
 const toggleList = () => {
-  if (showList.value) {
-    lastScrollPosition = selectRef.value.scrollTop
-  }
+  isAbove.value = false
+  listStyle.value = {}
   showList.value = !showList.value
-  if (showList.value) {
-    nextTick(() => {
-      selectRef.value?.scrollTo?.({ top: lastScrollPosition, left: 0 })
-    })
-  }
+  if (showList.value) nextTick(placeList)
+}
+
+const closeList = () => {
+  if (showList.value) toggleList()
+}
+
+// Drawn over the page, the list neither follows its combo nor hides with
+// the modal around it: it closes on any Escape and when the page under it
+// scrolls or resizes.
+const onWindowKeydown = event => {
+  if (event.key === 'Escape') closeList()
+}
+
+const onWindowScroll = event => {
+  if (event.target.contains?.(selectRef.value)) closeList()
+}
+
+const listenToWindow = isListening => {
+  const method = isListening ? 'addEventListener' : 'removeEventListener'
+  window[method]('keydown', onWindowKeydown)
+  window[method]('resize', closeList)
+  // Captured: the scroll of an element does not bubble.
+  window[method]('scroll', onWindowScroll, true)
 }
 
 const getOptionLabel = option => {
@@ -180,7 +215,6 @@ const isChecked = option => {
   return selectedValues.value.includes(option.value)
 }
 
-const listRef = ref(null)
 const { activeIndex, onKeydown, optionId } = useComboboxKeyboard({
   isOpen: showList,
   toggle: toggleList,
@@ -191,20 +225,9 @@ const { activeIndex, onKeydown, optionId } = useComboboxKeyboard({
   listRef
 })
 
-watch(showList, () => {
-  if (showList.value && props.isReversed) {
-    nextTick(() => {
-      if (!selectRef.value?.children) return
-      let list = null
-      for (const child of selectRef.value.children) {
-        if (child.className !== 'flexrow') {
-          list = child
-        }
-      }
-      list?.scrollTo?.({ top: optionList.value.length * 60 })
-    })
-  }
-})
+watch(showList, listenToWindow)
+
+onBeforeUnmount(() => listenToWindow(false))
 </script>
 
 <style lang="scss" scoped>
@@ -296,15 +319,19 @@ watch(showList, () => {
   border: 1px solid $light-grey-light;
   border-bottom-left-radius: 1em;
   border-bottom-right-radius: 1em;
-  left: 0;
-  margin-left: -1px;
+  cursor: pointer;
   max-height: 180px;
   overflow-x: hidden;
   overflow-y: auto;
-  position: absolute;
+  position: fixed;
   min-width: 150px;
-  top: 38px;
+  user-select: none;
   z-index: 2000;
+
+  // The text color of the list cells, where shy combos are drawn.
+  &.shy {
+    color: var(--text);
+  }
 
   .option-line {
     padding-right: 27px;
@@ -312,8 +339,9 @@ watch(showList, () => {
   }
 }
 
+// Over the modals (Bulma: 1986), under the list.
 .c-mask {
-  z-index: 199;
+  z-index: 1999;
 }
 
 .field .label {
@@ -324,13 +352,9 @@ watch(showList, () => {
   height: 30px;
   padding: 3px 0 3px 10px;
   margin-bottom: 3px;
-
-  .select-input {
-    top: 29px;
-  }
 }
 
-.reversed {
+.above {
   &.open {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
@@ -338,13 +362,11 @@ watch(showList, () => {
     border-bottom-right-radius: 1em;
   }
 
-  .select-input {
+  &.select-input {
     border-top-left-radius: 1em;
     border-top-right-radius: 1em;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
-    height: 180px;
-    top: -180px;
   }
 }
 </style>

@@ -40,6 +40,17 @@ describe('lib/popup', () => {
       })
     })
 
+    test('keeps the given gap to the anchor', () => {
+      // The tag list overlaps the 1 px border of its combo.
+      const list = { width: 172, height: 180 }
+      expect(
+        getPopupStyle({ top: 300, bottom: 340, left: 573 }, list, viewport, -1)
+      ).toMatchObject({ top: '339px', maxHeight: '615px' })
+      expect(
+        getPopupStyle({ top: 872, bottom: 912, left: 573 }, list, viewport, -1)
+      ).toMatchObject({ bottom: '89px', maxHeight: '865px' })
+    })
+
     test('opens above a row clipped by the bottom of the window', () => {
       const anchor = { top: 891, bottom: 1003, left: 329 }
       expect(getPopupStyle(anchor, popup, viewport)).toMatchObject({

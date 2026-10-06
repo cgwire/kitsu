@@ -5,16 +5,21 @@ const VIEWPORT_MARGIN = 8
 // the viewport: below the anchor when the popup height fits there, else above
 // it when it fits there, else on the side with more room. The room is the
 // height left on that side: the style max height bounds the popup to it,
-// resized content included.
-export const getPopupPlacement = (anchor, popup, viewport) => {
+// resized content included. A negative gap overlaps the anchor edge.
+export const getPopupPlacement = (
+  anchor,
+  popup,
+  viewport,
+  gap = ANCHOR_GAP
+) => {
   const left = Math.max(
     VIEWPORT_MARGIN,
     Math.min(anchor.left, viewport.width - popup.width - VIEWPORT_MARGIN)
   )
   // Clamped for an anchor that sticks out of the viewport.
-  const belowTop = Math.max(anchor.bottom + ANCHOR_GAP, VIEWPORT_MARGIN)
+  const belowTop = Math.max(anchor.bottom + gap, VIEWPORT_MARGIN)
   const aboveBottom = Math.min(
-    anchor.top - ANCHOR_GAP,
+    anchor.top - gap,
     viewport.height - VIEWPORT_MARGIN
   )
   const roomBelow = viewport.height - VIEWPORT_MARGIN - belowTop
@@ -40,5 +45,5 @@ export const getPopupPlacement = (anchor, popup, viewport) => {
   }
 }
 
-export const getPopupStyle = (anchor, popup, viewport) =>
-  getPopupPlacement(anchor, popup, viewport).style
+export const getPopupStyle = (anchor, popup, viewport, gap) =>
+  getPopupPlacement(anchor, popup, viewport, gap).style
