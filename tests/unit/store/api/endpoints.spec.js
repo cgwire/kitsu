@@ -171,6 +171,34 @@ describe('store/api endpoints', () => {
     })
   })
 
+  describe('people setTimeSpent', () => {
+    const path =
+      '/api/actions/tasks/task-1/time-spents/2026-10-06/persons/person-1'
+
+    // The hours_by_day preset of 8.2 made 491.99999999999994 minutes
+    test('sends the minutes without float noise', () => {
+      peopleApi.setTimeSpent('task-1', 'person-1', '2026-10-06', 8.2)
+
+      expect(client.ppost).toHaveBeenCalledWith(path, { duration: 492 })
+    })
+
+    // As estimations typed in hours, hours that make no whole number of
+    // minutes keep their fraction: the preset of 7.33 hours by day then
+    // reads back as 7.33.
+    test('keeps a fraction of a minute', () => {
+      peopleApi.setTimeSpent('task-1', 'person-1', '2026-10-06', 7.33)
+
+      expect(client.ppost).toHaveBeenCalledWith(path, { duration: 439.8 })
+    })
+
+    test('deletes the time spent of zero hours', () => {
+      peopleApi.setTimeSpent('task-1', 'person-1', '2026-10-06', 0)
+
+      expect(client.pdel).toHaveBeenCalledWith(path)
+      expect(client.ppost).not.toHaveBeenCalled()
+    })
+  })
+
   describe('tasktypes deleteTaskType', () => {
     // Without force Zou refuses a task type still attached to schedule
     // items or productions, and says so: that answer drives the second,

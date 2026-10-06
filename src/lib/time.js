@@ -403,6 +403,10 @@ export const hoursToDays = (organisation, hours = 0) => {
   return hours / organisation.hours_by_day
 }
 
+export const hoursToMinutes = (hours = 0) => {
+  return snapToWhole(hours * 60)
+}
+
 // Estimations are stored in minutes, and typed in the unit the organisation
 // displays durations in: hours or days.
 export const durationToMinutes = (organisation, duration = 0) => {

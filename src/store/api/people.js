@@ -1,5 +1,6 @@
 import client from '@/store/api/client'
 import { buildQueryString } from '@/lib/query'
+import { hoursToMinutes } from '@/lib/time'
 
 const toBool = value => value === true || value === 'true'
 
@@ -343,8 +344,9 @@ export default {
   setTimeSpent(taskId, personId, date, hours) {
     // Date is a string with following format: YYYYY-MM-DD.
     const url = `/api/actions/tasks/${taskId}/time-spents/${date}/persons/${personId}`
-    if (hours > 0) {
-      return client.ppost(url, { duration: hours * 60 })
+    const duration = hoursToMinutes(hours)
+    if (duration > 0) {
+      return client.ppost(url, { duration })
     } else {
       return client.pdel(url)
     }

@@ -31,6 +31,7 @@ import {
   getStartDateFromString,
   getWeekRange,
   hoursToDays,
+  hoursToMinutes,
   minutesToDays,
   monthToString,
   parseDate,
@@ -440,6 +441,16 @@ describe('time', () => {
     expect(hoursToDays({ hours_by_day: 8 }, 16)).toEqual(2)
     expect(hoursToDays({ hours_by_day: 7 }, 21)).toEqual(3)
     expect(hoursToDays({ hours_by_day: 7 }, undefined)).toEqual(0)
+  })
+  test('hoursToMinutes', () => {
+    expect(hoursToMinutes(1.5)).toEqual(90)
+    expect(hoursToMinutes(undefined)).toEqual(0)
+    // 8.2 hours make 491.99999999999994 minutes in floats, 8.3 hours
+    // 498.00000000000006
+    expect(hoursToMinutes(8.2)).toEqual(492)
+    expect(hoursToMinutes(8.3)).toEqual(498)
+    // A fraction of a minute is no float noise
+    expect(hoursToMinutes(7.33)).toEqual(7.33 * 60)
   })
   test('durationToMinutes', () => {
     const hoursOrganisation = {

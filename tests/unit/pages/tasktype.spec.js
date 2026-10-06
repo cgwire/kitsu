@@ -1,5 +1,5 @@
 import { flushPromises, shallowMount } from '@vue/test-utils'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { createStore } from 'vuex'
 
@@ -11,6 +11,7 @@ vi.mock('vue-i18n', async importOriginal => ({
 
 // Pre-load the real store to avoid circular-import race from child components.
 import '@/lib/auth'
+import assetStore from '@/store/modules/assets'
 
 import TaskType from '@/components/pages/TaskType.vue'
 import EstimationHelper from '@/components/pages/tasktype/EstimationHelper.vue'
@@ -18,7 +19,19 @@ import EstimationHelper from '@/components/pages/tasktype/EstimationHelper.vue'
 const SearchFieldStub = {
   template: '<div />',
   methods: {
+    focus: () => {},
+    getValue: () => '',
     setValue: () => {}
+  }
+}
+
+const ScheduleStub = {
+  name: 'Schedule',
+  props: { hierarchy: { type: Array, default: () => [] } },
+  template: '<div />',
+  methods: {
+    scrollToDate: () => {},
+    scrollToToday: () => {}
   }
 }
 
@@ -30,11 +43,16 @@ const task = {
   due_date: '2026-08-31T00:00:00'
 }
 
-const mountPage = async () => {
+const mountPage = async ({
+  actions = {},
+  getters = {},
+  section = 'estimation'
+} = {}) => {
   const storeActions = {
     clearSelectedTasks: vi.fn(),
     initTaskType: vi.fn(() => Promise.resolve()),
-    updateTask: vi.fn(() => Promise.resolve())
+    updateTask: vi.fn(() => Promise.resolve()),
+    ...actions
   }
   const store = createStore({
     getters: {
@@ -57,7 +75,8 @@ const mountPage = async () => {
       taskMap: () => new Map([[task.id, task]]),
       taskMetadataDescriptors: () => [],
       taskSearchQueries: () => [],
-      user: () => ({ id: 'manager-1', departments: [] })
+      user: () => ({ id: 'manager-1', departments: [] }),
+      ...getters
     },
     actions: storeActions
   })
@@ -65,13 +84,13 @@ const mountPage = async () => {
     history: createWebHashHistory(),
     routes: [
       {
-        path: '/productions/:production_id/assets/task-types/:task_type_id/estimation',
+        path: '/productions/:production_id/assets/task-types/:task_type_id/:section',
         component: { template: '<div />' }
       }
     ]
   })
   await router.push(
-    '/productions/production-1/assets/task-types/task-type-1/estimation'
+    `/productions/production-1/assets/task-types/task-type-1/${section}`
   )
   const wrapper = shallowMount(TaskType, {
     global: {
@@ -85,7 +104,7 @@ const mountPage = async () => {
           }
         }
       ],
-      stubs: { SearchField: SearchFieldStub }
+      stubs: { Schedule: ScheduleStub, SearchField: SearchFieldStub }
     }
   })
   await flushPromises()
@@ -119,5 +138,113 @@ describe('TaskType page', () => {
       }
     })
     wrapper.unmount()
+  })
+
+  // The timesheet stores a day logged with its preset in whole minutes, 498
+  // for 8.3 hours by day, while 8.3 * 60 makes 498.00000000000006. What it
+  // stored before keeps its float noise: 491.99999999999994 for 8.2 hours.
+  describe('schedule timesheets', () => {
+    const scheduleTask = {
+      id: 'task-2',
+      assignees: ['person-1'],
+      entity_id: 'asset-1',
+      entity_name: 'Chair',
+      estimation: 0,
+      start_date: '2026-10-05T00:00:00',
+      due_date: '2026-10-09T00:00:00',
+      task_status_id: 'status-1',
+      task_type_id: 'task-type-1'
+    }
+    const person = {
+      id: 'person-1',
+      first_name: 'Alice',
+      last_name: 'Smith',
+      full_name: 'Alice Smith'
+    }
+    // unmounted after each test, a failed one included
+    let wrapper = null
+
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      assetStore.cache.assetMap.set('asset-1', {
+        id: 'asset-1',
+        tasks: [scheduleTask.id]
+      })
+      localStorage.setItem(
+        'tasktype:data_display',
+        JSON.stringify({ timesheets: true })
+      )
+    })
+
+    afterEach(() => {
+      wrapper?.unmount()
+      wrapper = null
+      assetStore.cache.assetMap.delete('asset-1')
+      localStorage.removeItem('tasktype:data_display')
+    })
+
+    it.each([
+      [8.3, 498],
+      [8.2, 491.99999999999994]
+    ])(
+      'merges two full days in a row of %s hours',
+      async (hoursByDay, minutes) => {
+        const timeSpent = date => ({
+          id: `time-spent-${date}`,
+          date,
+          duration: minutes,
+          person_id: person.id,
+          task_id: scheduleTask.id
+        })
+        const page = await mountPage({
+          section: 'schedule',
+          actions: {
+            loadProductionDaysOff: vi.fn(() => ({})),
+            loadProductionTimeSpents: vi.fn(() => ({
+              [person.id]: [timeSpent('2026-10-06'), timeSpent('2026-10-05')]
+            })),
+            loadScheduleItems: vi.fn(() => [
+              {
+                id: 'schedule-item-1',
+                task_type_id: 'task-type-1',
+                start_date: '2026-10-01',
+                end_date: '2026-10-30'
+              }
+            ]),
+            saveScheduleItem: vi.fn()
+          },
+          getters: {
+            assetValidationColumns: () => [],
+            currentProduction: () => ({
+              id: 'production-1',
+              name: 'Production',
+              start_date: '2026-01-01',
+              end_date: '2026-12-31',
+              team: [person.id]
+            }),
+            organisation: () => ({ hours_by_day: hoursByDay }),
+            personMap: () => new Map([[person.id, person]]),
+            taskMap: () => new Map([[scheduleTask.id, scheduleTask]]),
+            user: () => ({
+              id: 'manager-1',
+              departments: [],
+              full_name: 'Manager'
+            })
+          }
+        })
+        wrapper = page.wrapper
+        // the data load starts 100 ms after mounting, the schedule dates
+        // follow 200 ms after it
+        await vi.advanceTimersByTimeAsync(400)
+        await flushPromises()
+
+        const [personRow] = wrapper
+          .findComponent({ name: 'Schedule' })
+          .props('hierarchy')
+        expect(
+          personRow.timesheet.map(({ date, duration }) => [date, duration])
+        ).toEqual([['2026-10-05', minutes * 2]])
+      }
+    )
   })
 })
