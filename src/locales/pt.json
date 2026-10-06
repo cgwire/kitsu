@@ -1464,6 +1464,7 @@
       "no_entity": "Nenhuma entidade atribuível",
       "overall_man_days": "Jornadas necessárias",
       "reset_list": "Redefinir lista",
+      "save_task_error": "Não foi possível salvar a tarefa. Tente novamente.",
       "select_task_type": "Selecione um tipo de tarefa",
       "show_assigned": "Mostrar entidades atribuídas",
       "title": "Cronograma",

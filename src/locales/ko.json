@@ -1464,6 +1464,7 @@
       "no_entity": "할당 가능한 엔티티 없음",
       "overall_man_days": "맨데이",
       "reset_list": "목록 초기화",
+      "save_task_error": "작업을 저장할 수 없습니다. 다시 시도해 주세요.",
       "select_task_type": "작업 유형 선택",
       "show_assigned": "할당된 엔티티 표시",
       "title": "일정",

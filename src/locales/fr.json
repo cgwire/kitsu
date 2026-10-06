@@ -1464,6 +1464,7 @@
       "no_entity": "Pas d'entité assignable",
       "overall_man_days": "Jours-Homme",
       "reset_list": "Réinitialiser la liste",
+      "save_task_error": "Impossible d'enregistrer la tâche. Veuillez réessayer.",
       "select_task_type": "Sélectionner un type de tâche",
       "show_assigned": "Afficher les entités assignées",
       "title": "Planning",

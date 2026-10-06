@@ -1464,6 +1464,7 @@
       "no_entity": "Geen toewijsbare entiteit",
       "overall_man_days": "Mandagen",
       "reset_list": "Lijst resetten",
+      "save_task_error": "Kon de taak niet opslaan. Probeer het opnieuw.",
       "select_task_type": "Selecteer een taaktype...",
       "show_assigned": "Toegewezen entiteiten weergeven",
       "title": "Planning",

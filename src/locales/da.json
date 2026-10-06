@@ -1464,6 +1464,7 @@
       "no_entity": "Ingen enhed at tildele",
       "overall_man_days": "Person-dage",
       "reset_list": "Nulstil listen",
+      "save_task_error": "Opgaven kunne ikke gemmes. Prøv venligst igen.",
       "select_task_type": "Vælg en opgavetype",
       "show_assigned": "Vis tildelte enheder",
       "title": "Tidsplan",

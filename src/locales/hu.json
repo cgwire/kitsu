@@ -1464,6 +1464,7 @@
       "no_entity": "Nincs kiosztható elem",
       "overall_man_days": "Munkanap",
       "reset_list": "Lista visszaállítása",
+      "save_task_error": "Nem sikerült menteni a feladatot. Kérlek próbáld újra.",
       "select_task_type": "Válassz feladat típust",
       "show_assigned": "Kiosztott elemek megjelenítése",
       "title": "Időbeosztás",

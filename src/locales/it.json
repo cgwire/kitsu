@@ -1464,6 +1464,7 @@
       "no_entity": "Nessuna entità assegnabile",
       "overall_man_days": "Giorni-persona",
       "reset_list": "Reimposta la lista",
+      "save_task_error": "Impossibile salvare il task. Riprova.",
       "select_task_type": "Seleziona un tipo di task",
       "show_assigned": "Mostra le entità assegnate",
       "title": "Pianificazione",

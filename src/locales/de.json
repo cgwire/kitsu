@@ -1464,6 +1464,7 @@
       "no_entity": "Keine zuweisbare Entität",
       "overall_man_days": "Personentage",
       "reset_list": "Liste zurücksetzen",
+      "save_task_error": "Die Aufgabe konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
       "select_task_type": "Wählen Sie einen Aufgabentyp...",
       "show_assigned": "Zugeordnete Einheiten anzeigen",
       "title": "Zeitplan",

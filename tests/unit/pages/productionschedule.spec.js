@@ -1164,6 +1164,196 @@ describe('ProductionSchedule page', () => {
       }
     )
 
+    // The bars of the tasks show once the Modeling row is expanded.
+    const editTask = async (wrapper, task) => {
+      const modelingRow = rowsOf(wrapper)[0]
+      if (!modelingRow.expanded) {
+        findSchedule(wrapper).vm.$emit('root-element-expanded', modelingRow)
+        await waitForLoad()
+      }
+      await selectTask(wrapper, { id: 'asset-type-props', name: 'Props' }, task)
+    }
+
+    // One working day, assigned to Alice: Chair on Monday 6 April, Table on
+    // Monday 13 April
+    const buildTask = (asset, date) => ({
+      id: `task-${asset.id}`,
+      type: 'Task',
+      assignees: ['person-1'],
+      entity: asset,
+      estimation: 480,
+      startDate: day(date),
+      endDate: day(date)
+    })
+    const buildChairTask = () => buildTask(propAssets[0], '2026-04-06')
+    const buildTableTask = () => buildTask(propAssets[1], '2026-04-13')
+
+    // A refused task save only reached the console: the panel kept the
+    // typed values as if they were saved.
+    it.each([
+      ['the reference', {}, 'updateTask'],
+      ['a version', versionOptions, 'updateScheduleVersionedTask']
+    ])(
+      'stops the spinner and tells when a task edit of %s fails',
+      async (_, options, saveAction) => {
+        const error = new Error('Bad request')
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const { wrapper } = await mountAssignments({
+          ...options,
+          actions: { [saveAction]: vi.fn(() => Promise.reject(error)) }
+        })
+        await editTask(wrapper, buildChairTask())
+
+        await apply(wrapper)
+
+        expect(findButton(wrapper, 'main.apply').props('isLoading')).toBe(false)
+        expect(panelText(wrapper)).toContain('schedule.save_task_error')
+        expect(panelText(wrapper)).not.toContain('schedule.assign_error')
+        expect(consoleError).toHaveBeenCalledWith(error)
+      }
+    )
+
+    it('clears the task error when Apply runs again', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { storeActions, wrapper } = await mountAssignments({
+        actions: {
+          updateTask: vi.fn().mockRejectedValueOnce(new Error('Bad request'))
+        }
+      })
+      await editTask(wrapper, buildChairTask())
+      await apply(wrapper)
+      expect(panelText(wrapper)).toContain('schedule.save_task_error')
+
+      await apply(wrapper)
+
+      expect(panelText(wrapper)).not.toContain('schedule.save_task_error')
+      expect(payloadsOf(storeActions.updateTask).slice(1)).toEqual([
+        {
+          taskId: 'task-asset-1',
+          data: {
+            estimation: 480,
+            start_date: '2026-04-06',
+            due_date: '2026-04-06'
+          }
+        },
+        { taskId: 'task-asset-1', data: { assignees: ['person-1'] } }
+      ])
+    })
+
+    it.each([
+      ['another task', wrapper => editTask(wrapper, buildTableTask())],
+      ['another task type', wrapper => pickTaskType(wrapper, 'tt-layout')],
+      [
+        'the assign mode',
+        async wrapper => {
+          await toggleSidePanel(wrapper)
+          await wrapper.find('.side-column .assignment-item').trigger('click')
+        }
+      ]
+    ])(
+      'clears the task error when the panel goes on with %s',
+      async (_, reuse) => {
+        vi.spyOn(console, 'error').mockImplementation(() => {})
+        const { wrapper } = await mountAssignments({
+          actions: {
+            updateTask: vi.fn(() => Promise.reject(new Error('Bad request')))
+          }
+        })
+        await editTask(wrapper, buildChairTask())
+        await apply(wrapper)
+        expect(panelText(wrapper)).toContain('schedule.save_task_error')
+
+        await reuse(wrapper)
+
+        expect(wrapper.find('.side-column form').exists()).toBe(true)
+        expect(panelText(wrapper)).not.toContain('schedule.save_task_error')
+        expect(panelText(wrapper)).not.toContain('schedule.assign_error')
+      }
+    )
+
+    // The panel moved on to another task while the save waited on its
+    // request: the end of the save stopped the spinner of the next one.
+    it('keeps a failed task save out of the task the panel moved on to', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const saves = []
+      const { wrapper } = await mountAssignments({
+        actions: {
+          updateTask: vi.fn(
+            () => new Promise((_resolve, reject) => saves.push(reject))
+          )
+        }
+      })
+      await editTask(wrapper, buildChairTask())
+      await apply(wrapper)
+      const chairSaves = [...saves]
+      await editTask(wrapper, buildTableTask())
+      await apply(wrapper)
+
+      chairSaves.forEach(reject => reject(new Error('Bad request')))
+      await flushPromises()
+
+      expect(panelText(wrapper)).not.toContain('schedule.save_task_error')
+      expect(findButton(wrapper, 'main.apply').props('isLoading')).toBe(true)
+    })
+
+    // Once a save went through, Assign tasks keeps the panel and only
+    // switches its mode: a later save failing then showed as an assignment
+    // error.
+    it('keeps a failed task save out of the assign mode the panel went on to', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const saves = []
+      const { wrapper } = await mountAssignments({
+        actions: {
+          updateTask: vi
+            .fn()
+            .mockResolvedValueOnce()
+            .mockResolvedValueOnce()
+            .mockImplementation(
+              () => new Promise((_resolve, reject) => saves.push(reject))
+            )
+        }
+      })
+      await editTask(wrapper, buildChairTask())
+      await apply(wrapper)
+      await apply(wrapper)
+      await toggleSidePanel(wrapper)
+      await wrapper.find('.side-column .assignment-item').trigger('click')
+
+      saves.forEach(reject => reject(new Error('Bad request')))
+      await flushPromises()
+
+      expect(wrapper.find('.side-column h2').text()).toBe('menu.assign_tasks')
+      expect(wrapper.find('.side-column form').exists()).toBe(true)
+      expect(panelText(wrapper)).not.toContain('schedule.assign_error')
+      expect(findButton(wrapper, 'main.apply').props('isLoading')).toBe(false)
+    })
+
+    // The save of a task wrote its dates into the form of the task the
+    // panel had moved on to.
+    it('keeps the dates of a task save out of the task the panel moved on to', async () => {
+      const saves = []
+      const { wrapper } = await mountAssignments({
+        actions: {
+          updateTask: vi.fn(() => new Promise(resolve => saves.push(resolve)))
+        }
+      })
+      await editTask(wrapper, buildChairTask())
+      await apply(wrapper)
+      await editTask(wrapper, buildTableTask())
+
+      while (saves.length) {
+        saves.shift()()
+        await flushPromises()
+      }
+
+      const [, , taskStartField] = wrapper
+        .find('.side-column form')
+        .findAllComponents(DateField)
+      expect(taskStartField.props('modelValue')).toBe('2026-04-13')
+    })
+
     // Each task goes to a single person, but the auto quota shared every
     // task among the whole team: with fewer entities than people, no task
     // fitted the range and Apply did nothing.

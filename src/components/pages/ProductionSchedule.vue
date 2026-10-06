@@ -444,7 +444,13 @@
               />
             </div>
             <p class="error has-text-right mt2" v-if="assignments.isError">
-              <em>{{ $t('schedule.assign_error') }}</em>
+              <em>
+                {{
+                  assignments.type === 'task'
+                    ? $t('schedule.save_task_error')
+                    : $t('schedule.assign_error')
+                }}
+              </em>
             </p>
             <p
               class="error has-text-right mt2"
@@ -2316,7 +2322,11 @@ const distributeAssignments = async () => {
 }
 
 const saveTask = async () => {
-  assignments.value.saving = true
+  // the panel can move on to another task during the save: report to the
+  // one that started it
+  const panel = assignments.value
+  panel.saving = true
+  clearAssignmentMessages()
   try {
     const task = {
       ...assignments.value.task,
@@ -2336,8 +2346,8 @@ const saveTask = async () => {
       })
     }
     // refresh task in side panel
-    assignments.value.task.startDate = task.startDate.format('YYYY-MM-DD')
-    assignments.value.task.endDate = task.endDate.format('YYYY-MM-DD')
+    panel.task.startDate = task.startDate.format('YYYY-MM-DD')
+    panel.task.endDate = task.endDate.format('YYYY-MM-DD')
     // refresh schedule
     expandTaskTypeElement(
       selectedTaskType.value,
@@ -2349,8 +2359,10 @@ const saveTask = async () => {
     )
   } catch (err) {
     console.error(err)
+    // Assign tasks can switch the same panel to the assign mode meanwhile
+    if (panel.type === 'task') panel.isError = true
   } finally {
-    assignments.value.saving = false
+    panel.saving = false
   }
 }
 

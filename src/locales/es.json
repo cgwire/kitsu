@@ -1464,6 +1464,7 @@
       "no_entity": "Ninguna entidad asignable",
       "overall_man_days": "Días-persona",
       "reset_list": "Restablecer lista",
+      "save_task_error": "No se ha podido guardar la tarea. Por favor, inténtalo de nuevo.",
       "select_task_type": "Seleccione un tipo de tarea",
       "show_assigned": "Mostrar entidades asignadas",
       "title": "Calendario",
