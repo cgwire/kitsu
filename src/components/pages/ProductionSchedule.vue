@@ -485,7 +485,7 @@
               </template>
               <template v-if="assignments.type === 'task'">
                 <button-simple
-                  :disabled="!assignments.task.estimation"
+                  :disabled="!getTaskEstimation(assignments.task)"
                   :is-loading="assignments.saving"
                   is-primary
                   :text="$t('main.apply')"
@@ -2029,7 +2029,8 @@ const selectTaskElement = (taskType, entityTypeRow, task, selection) => {
   assignments.value.unassign = true
 }
 
-// Left as shown, the rounded estimation keeps the minutes it stands for.
+// Left as shown, the rounded estimation keeps the minutes it stands for,
+// even when they round to 0.
 const getTaskEstimation = ({ estimation, estimationMinutes }) =>
   estimation === formatDuration(estimationMinutes, false)
     ? estimationMinutes
@@ -2352,6 +2353,7 @@ const saveTask = async () => {
     // refresh task in side panel
     panel.task.startDate = task.startDate.format('YYYY-MM-DD')
     panel.task.endDate = task.endDate.format('YYYY-MM-DD')
+    panel.task.estimationMinutes = task.estimation
     // refresh schedule
     expandTaskTypeElement(
       selectedTaskType.value,

@@ -570,6 +570,87 @@ describe('ProductionSchedule page', () => {
         expect(field.element.value).toBe(shown)
       }
     )
+
+    // Rounded to 0.01, an estimation under 0.005 showed as 0, which left
+    // Apply disabled: the dates and assignees of the task could not be saved.
+    it.each([
+      ['days', false, 2],
+      ['hours', true, 0.1]
+    ])(
+      'applies a task whose estimation rounds to 0 in %s',
+      async (_, isDurationInHours, minutes) => {
+        const { storeActions, wrapper } = await mountPage({
+          getters: {
+            organisation: () => ({
+              hours_by_day: 8,
+              format_duration_in_hours: isDurationInHours
+            })
+          },
+          stubs: { TextField: false }
+        })
+        const task = {
+          type: 'Task',
+          id: 'task-1',
+          entity: { id: 'asset-1', name: 'Cat' },
+          estimation: minutes,
+          assignees: [],
+          startDate: day('2026-02-09'),
+          endDate: day('2026-02-09')
+        }
+        await selectTask(wrapper, buildAssetTypeBars()[0], task)
+
+        expect(findButton(wrapper, 'main.apply').props('disabled')).toBe(false)
+        wrapper.find('.side-column form').element.requestSubmit()
+        await flushPromises()
+
+        expect(payloadsOf(storeActions.updateTask)[0]).toEqual({
+          taskId: 'task-1',
+          data: {
+            estimation: minutes,
+            start_date: '2026-02-09',
+            due_date: '2026-02-09'
+          }
+        })
+        const field = wrapper.find('.side-column .estimation input')
+        expect(field.element.value).toBe('0')
+      }
+    )
+
+    // A 0 typed once the task is saved stands for no estimation, not for
+    // the minutes the task had before that save.
+    it('disables Apply for a cleared estimation and for a 0 typed after a save', async () => {
+      const { storeActions, wrapper } = await mountPage()
+      const task = {
+        type: 'Task',
+        id: 'task-1',
+        entity: { id: 'asset-1', name: 'Cat' },
+        estimation: 2,
+        assignees: [],
+        startDate: day('2026-02-09'),
+        endDate: day('2026-02-09')
+      }
+      await selectTask(wrapper, buildAssetTypeBars()[0], task)
+      const typeEstimation = async value => {
+        findTextField(wrapper, 'main.estimation').vm.$emit(
+          'update:model-value',
+          value
+        )
+        await flushPromises()
+      }
+      const isApplyDisabled = () =>
+        findButton(wrapper, 'main.apply').props('disabled')
+
+      await typeEstimation(null)
+      expect(isApplyDisabled()).toBe(true)
+
+      await typeEstimation(1)
+      await wrapper.find('.side-column form').trigger('submit')
+      await flushPromises()
+      expect(payloadsOf(storeActions.updateTask)[0].data.estimation).toBe(480)
+
+      await typeEstimation(0)
+      expect(isApplyDisabled()).toBe(true)
+    })
   })
 
   describe('drill-down', () => {
