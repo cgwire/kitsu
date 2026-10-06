@@ -361,6 +361,7 @@ export const useEntityPage = ({
   // --------------------------------------------------------------------------
 
   const showImportModal = () => {
+    errors.importing = false
     modals.isImportDisplayed = true
   }
 
@@ -377,6 +378,7 @@ export const useEntityPage = ({
   }
 
   const showCreateTasksModal = () => {
+    errors.creatingTasks = false
     modals.isCreateTasksDisplayed = true
   }
 
@@ -424,6 +426,7 @@ export const useEntityPage = ({
   }
 
   const onDeleteClicked = entity => {
+    errors.del = false
     entityToDelete.value = entity
     modals.isDeleteDisplayed = true
   }
@@ -491,6 +494,7 @@ export const useEntityPage = ({
   }
 
   const onDeleteMetadataClicked = descriptorId => {
+    errors.deleteMetadata = false
     descriptorIdToDelete.value = descriptorId
     modals.isDeleteMetadataDisplayed = true
   }
@@ -533,6 +537,7 @@ export const useEntityPage = ({
   // --------------------------------------------------------------------------
 
   const onDeleteAllTasksClicked = taskTypeId => {
+    errors.deleteAllTasks = false
     const taskType = taskTypeMap.value.get(taskTypeId)
     taskTypeForTaskDeletion.value = taskType
     deleteAllTasksLockText.value = taskType.name
@@ -684,6 +689,7 @@ export const useEntityPage = ({
   }
 
   const onRestoreClicked = entity => {
+    errors.restore = false
     entityToRestore.value = entity
     modals.isRestoreDisplayed = true
   }

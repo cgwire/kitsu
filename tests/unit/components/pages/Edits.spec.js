@@ -3,6 +3,9 @@ import { flushPromises } from '@vue/test-utils'
 vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 
+import CreateTasksModal from '@/components/modals/CreateTasksModal.vue'
+import DeleteModal from '@/components/modals/DeleteModal.vue'
+import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
 import ImportModal from '@/components/modals/ImportModal.vue'
 import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
 import Edits from '@/components/pages/Edits.vue'
@@ -140,6 +143,134 @@ describe('Edits page, CSV import', () => {
     expect(wrapper.findComponent(ImportRenderModal).props('columns')).toContain(
       'Description'
     )
+  })
+})
+
+// The modals cannot reset the error of a failed confirm, and a close keeps
+// it: the next opening drops it.
+describe('Edits page, past confirmation errors', () => {
+  afterEach(() => vi.restoreAllMocks())
+
+  const edit = { id: 'edit-1', name: 'E01' }
+  const taskType = { id: 'task-type-1', name: 'Compositing' }
+
+  // The three delete modals of the page differ by their error text.
+  const deleteModal = errorText => wrapper =>
+    wrapper
+      .findAllComponents(DeleteModal)
+      .find(modal => modal.props('errorText') === errorText)
+
+  test.each([
+    {
+      modal: 'the delete modal',
+      action: 'deleteEdit',
+      event: ['delete-clicked', edit],
+      find: deleteModal('edits.delete_error'),
+      confirm: []
+    },
+    {
+      modal: 'the restore modal',
+      action: 'restoreEdit',
+      event: ['restore-clicked', edit],
+      find: deleteModal('edits.restore_error'),
+      confirm: []
+    },
+    {
+      modal: 'the column delete modal',
+      action: 'deleteMetadataDescriptor',
+      event: ['delete-metadata', 'descriptor-1'],
+      find: deleteModal('productions.metadata.delete_error'),
+      confirm: []
+    },
+    {
+      modal: 'the task delete modal',
+      action: 'deleteAllEditTasks',
+      event: ['delete-all-tasks', taskType.id],
+      find: wrapper => wrapper.findComponent(HardDeleteModal),
+      confirm: [false]
+    },
+    {
+      modal: 'the task creation modal',
+      action: 'createTasks',
+      event: ['create-tasks'],
+      find: wrapper => wrapper.findComponent(CreateTasksModal),
+      confirm: [{ form: { task_type_id: taskType.id }, selectionOnly: false }]
+    }
+  ])(
+    'opens $modal without the error of a past failure',
+    async ({ action, event, find, confirm }) => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { wrapper } = await mountPage({
+        getters: { taskTypeMap: new Map([[taskType.id, taskType]]) },
+        actions: { [action]: () => Promise.reject(new Error('down')) }
+      })
+      const list = wrapper.findComponent({ name: 'EditList' })
+      const modal = () => find(wrapper)
+
+      await list.vm.$emit(...event)
+      await modal().vm.$emit('confirm', ...confirm)
+      await flushPromises()
+      expect(modal().props('isError')).toBe(true)
+
+      await modal().vm.$emit('cancel')
+      await list.vm.$emit(...event)
+
+      expect(modal().props('active')).toBe(true)
+      expect(modal().props('isError')).toBe(false)
+    }
+  )
+
+  // A delete still running at the close fails after it: the next opening
+  // drops that error too.
+  test('opens the delete modal without the error of a delete that failed after a close', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    let refuse = null
+    const { wrapper } = await mountPage({
+      actions: {
+        deleteEdit: () => new Promise((resolve, reject) => (refuse = reject))
+      }
+    })
+    const list = wrapper.findComponent({ name: 'EditList' })
+    const modal = () => deleteModal('edits.delete_error')(wrapper)
+
+    await list.vm.$emit('delete-clicked', edit)
+    await modal().vm.$emit('confirm')
+    await modal().vm.$emit('cancel')
+    refuse(new Error('down'))
+    await flushPromises()
+    expect(modal().props('active')).toBe(false)
+    expect(modal().props('isError')).toBe(true)
+
+    await list.vm.$emit('delete-clicked', edit)
+
+    expect(modal().props('active')).toBe(true)
+    expect(modal().props('isError')).toBe(false)
+  })
+
+  test('opens the import without the error of a past upload', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { wrapper } = await mountPage({
+      getters: { isCurrentUserProductionManager: true },
+      actions: { uploadEditFile: () => Promise.reject(new Error('down')) }
+    })
+    const importButton = wrapper
+      .findAllComponents(ButtonSimple)
+      .find(button => button.props('icon') === 'import')
+    const importModal = () => wrapper.findComponent(ImportModal)
+    const renderModal = () => wrapper.findComponent(ImportRenderModal)
+
+    await importButton.vm.$emit('click')
+    await importModal().vm.$emit('confirm', 'Name\nE01', 'text')
+    await flushPromises()
+    await renderModal().vm.$emit('confirm', [['Name'], ['E01']], false)
+    await flushPromises()
+    expect(renderModal().props('isError')).toBe(true)
+
+    await renderModal().vm.$emit('cancel')
+    await importButton.vm.$emit('click')
+
+    expect(importModal().props('active')).toBe(true)
+    expect(importModal().props('isError')).toBe(false)
   })
 })
 
