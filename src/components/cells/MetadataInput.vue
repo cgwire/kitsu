@@ -56,7 +56,7 @@
       step="any"
       @keydown="onNumberFieldKeyDown"
       @input="event => onMetadataFieldChanged(entity, descriptor, event)"
-      :value="getMetadataFieldValue(descriptor, entity)"
+      v-number-value="getMetadataFieldValue(descriptor, entity)"
       v-else-if="descriptor.data_type === 'number'"
     />
     <!-- date input -->
@@ -164,6 +164,7 @@ import { computed } from 'vue'
 import { useStore } from 'vuex'
 
 import { useFormat } from '@/composables/format'
+import vNumberValue from '@/directives/number-value'
 import {
   getDescriptorChecklistValues,
   getDescriptorChoicesOptions,

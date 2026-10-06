@@ -16,6 +16,7 @@ import {
   stubResizeObserver,
   taskTypeId
 } from '../../fixtures/entity-list'
+import { useNumberField } from '../../fixtures/number-input'
 
 describe('lists/ShotList sticky columns', () => {
   const mountList = displaySettings =>
@@ -73,6 +74,73 @@ describe('lists/ShotList sticky columns', () => {
 
     expect(stickyLeft(wrapper, 'metadata-header-stub')).toBe('250px')
     expect(stickyLeft(wrapper, 'validation-header-stub')).toBe('370px')
+
+    wrapper.unmount()
+  })
+})
+
+describe('lists/ShotList number cells', () => {
+  // The shots page saves each key: the new value comes back to the list at
+  // once.
+  const mountList = async () => {
+    let wrapper
+    const update = changes => {
+      const [[shot]] = wrapper.props('displayedShots')
+      return wrapper.setProps({ displayedShots: [[{ ...shot, ...changes }]] })
+    }
+    wrapper = await mountEntityList(ShotList, {
+      getters: {
+        currentProduction: production,
+        displayedShotsCount: 1,
+        isCurrentUserProductionManager: true,
+        isFps: true,
+        isFrameIn: true
+      },
+      props: {
+        displayedShots: [
+          [{ id: 'shot-1', name: 'Shot 1', data: {}, validations: new Map() }]
+        ],
+        onMetadataChanged: ({ entry, descriptor, value }) =>
+          update({ data: { ...entry.data, [descriptor.field_name]: value } })
+      }
+    })
+    return wrapper
+  }
+
+  const savedValues = wrapper =>
+    wrapper.emitted('metadata-changed').map(([{ value }]) => value)
+
+  // Written back from the number saved, "25.0" turned into "25": typing
+  // 25.05 key by key saved 255.
+  test('keeps the zero typed after the decimal point of an FPS', async () => {
+    const wrapper = await mountList()
+    const field = useNumberField(wrapper.find('td.fps input').element)
+
+    expect(await field.type('25.05')).toEqual([
+      '2',
+      '25',
+      '25.',
+      '25.0',
+      '25.05'
+    ])
+    expect(savedValues(wrapper)).toEqual([2, 25, 25, 25.05])
+
+    wrapper.unmount()
+  })
+
+  // 12.05 is no frame: it stays as typed, unsaved, instead of saving 125.
+  test('keeps a decimal point typed in a frame in', async () => {
+    const wrapper = await mountList()
+    const field = useNumberField(wrapper.find('td.framein input').element)
+
+    expect(await field.type('12.05')).toEqual([
+      '1',
+      '12',
+      '12.',
+      '12.0',
+      '12.05'
+    ])
+    expect(savedValues(wrapper)).toEqual([1, 12, 12])
 
     wrapper.unmount()
   })

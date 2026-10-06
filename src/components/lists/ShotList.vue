@@ -493,7 +493,7 @@
                 <input
                   class="input-editor"
                   step="1"
-                  :value="shot.nb_frames"
+                  v-number-value="shot.nb_frames"
                   type="number"
                   min="0"
                   @input="event => onNbFramesChanged(shot, event.target.value)"
@@ -529,7 +529,7 @@
                   step="1"
                   type="number"
                   min="0"
-                  :value="
+                  v-number-value="
                     getMetadataFieldValue({ field_name: 'frame_in' }, shot)
                   "
                   @input="
@@ -572,7 +572,7 @@
                   step="1"
                   type="number"
                   min="0"
-                  :value="
+                  v-number-value="
                     getMetadataFieldValue({ field_name: 'frame_out' }, shot)
                   "
                   @keydown="onNumberFieldKeyDown"
@@ -606,7 +606,9 @@
                   max="1000"
                   step="0.001"
                   type="number"
-                  :value="getMetadataFieldValue({ field_name: 'fps' }, shot)"
+                  v-number-value="
+                    getMetadataFieldValue({ field_name: 'fps' }, shot)
+                  "
                   @keydown="onNumberFieldKeyDown"
                   @input="
                     event =>
@@ -636,7 +638,7 @@
                   class="input-editor"
                   type="number"
                   step="1"
-                  :value="
+                  v-number-value="
                     getMetadataFieldValue({ field_name: 'max_retakes' }, shot)
                   "
                   @keydown="onNumberFieldKeyDown"
@@ -821,6 +823,7 @@ import { useStore } from 'vuex'
 
 import { useEntityList } from '@/composables/entityList'
 import { sanitizeIntegerLight, useFormat } from '@/composables/format'
+import vNumberValue from '@/directives/number-value'
 import { getMetadataFieldValue } from '@/lib/descriptors'
 import { getTaskHref } from '@/lib/path'
 import { range } from '@/lib/time'

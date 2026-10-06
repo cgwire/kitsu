@@ -56,6 +56,8 @@
 <script setup>
 import { ref, useId } from 'vue'
 
+import { isNumberTyped } from '@/lib/number'
+
 const props = defineProps({
   autocomplete: {
     type: String
@@ -152,10 +154,7 @@ const getInputValue = () => {
 const getFieldValue = () => {
   const input = inputRef.value
   const isTyped =
-    props.type === 'number' &&
-    input &&
-    !/^0\d/.test(input.value) &&
-    getInputValue() === props.modelValue
+    props.type === 'number' && input && isNumberTyped(input, props.modelValue)
   return isTyped ? input.value : props.modelValue
 }
 
