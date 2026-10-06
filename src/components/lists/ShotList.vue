@@ -496,7 +496,7 @@
                   v-number-value="shot.nb_frames"
                   type="number"
                   min="0"
-                  @input="event => onNbFramesChanged(shot, event.target.value)"
+                  @input="event => onNbFramesChanged(shot, event.target)"
                   @keydown="onNumberFieldKeyDown"
                   @keyup.ctrl="onInputKeyUp"
                   v-if="isCurrentUserManager"
@@ -822,9 +822,10 @@ import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { useEntityList } from '@/composables/entityList'
-import { sanitizeIntegerLight, useFormat } from '@/composables/format'
+import { useFormat } from '@/composables/format'
 import vNumberValue from '@/directives/number-value'
 import { getMetadataFieldValue } from '@/lib/descriptors'
+import { readNumberInput } from '@/lib/number'
 import { getTaskHref } from '@/lib/path'
 import { range } from '@/lib/time'
 import { formatToTimecode } from '@/lib/video'
@@ -1106,17 +1107,14 @@ const shotPath = shotId => {
 }
 
 // A change on a selected line applies to every selected line.
-const onNbFramesChanged = (entry, value) => {
+const onNbFramesChanged = (entry, input) => {
+  const value = readNumberInput(input)
+  if (value === undefined) return
   const shotsToChange = selectedShots.value.has(entry.id)
     ? selectedShots.value
     : [entry]
-  const cleanValue = sanitizeIntegerLight(value)
   shotsToChange.forEach(shot => {
-    emit('field-changed', {
-      entry: shot,
-      fieldName: 'nb_frames',
-      value: cleanValue
-    })
+    emit('field-changed', { entry: shot, fieldName: 'nb_frames', value })
   })
 }
 

@@ -298,6 +298,7 @@ import {
   getMetadataEventValue,
   getMetadataFieldValue
 } from '@/lib/descriptors'
+import { readNumberInput } from '@/lib/number'
 import { renderMarkdown } from '@/lib/render'
 
 import AssetBlock from '@/components/pages/breakdown/AssetBlock.vue'
@@ -421,8 +422,10 @@ const emitFieldChanged = (entry, fieldName, value) =>
 const onDescriptionChanged = (entity, event) =>
   emitFieldChanged(entity, 'description', event.target.value)
 
-const onNbFramesChanged = (entity, event) =>
-  emitFieldChanged(entity, 'nb_frames', event.target.value)
+const onNbFramesChanged = (entity, event) => {
+  const value = readNumberInput(event.target)
+  if (value !== undefined) emitFieldChanged(entity, 'nb_frames', value)
+}
 
 const onStandbyChanged = (entity, event) =>
   emitFieldChanged(entity, 'is_casting_standby', event.target.checked)

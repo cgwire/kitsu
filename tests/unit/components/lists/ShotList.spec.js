@@ -94,12 +94,15 @@ describe('lists/ShotList number cells', () => {
         displayedShotsCount: 1,
         isCurrentUserProductionManager: true,
         isFps: true,
-        isFrameIn: true
+        isFrameIn: true,
+        isFrames: true
       },
       props: {
         displayedShots: [
           [{ id: 'shot-1', name: 'Shot 1', data: {}, validations: new Map() }]
         ],
+        onFieldChanged: ({ fieldName, value }) =>
+          update({ [fieldName]: value }),
         onMetadataChanged: ({ entry, descriptor, value }) =>
           update({ data: { ...entry.data, [descriptor.field_name]: value } })
       }
@@ -107,8 +110,8 @@ describe('lists/ShotList number cells', () => {
     return wrapper
   }
 
-  const savedValues = wrapper =>
-    wrapper.emitted('metadata-changed').map(([{ value }]) => value)
+  const savedValues = (wrapper, event = 'metadata-changed') =>
+    wrapper.emitted(event).map(([{ value }]) => value)
 
   // Written back from the number saved, "25.0" turned into "25": typing
   // 25.05 key by key saved 255.
@@ -141,6 +144,29 @@ describe('lists/ShotList number cells', () => {
       '12.05'
     ])
     expect(savedValues(wrapper)).toEqual([1, 12, 12])
+
+    wrapper.unmount()
+  })
+
+  // Read digit by digit, "12." saved no frame count and 12.5 saved 125.
+  test('saves no frame count for an entry that is no whole number', async () => {
+    const wrapper = await mountList()
+    const field = useNumberField(wrapper.find('td.frames input').element)
+
+    expect(await field.type('12.5')).toEqual(['1', '12', '12.', '12.5'])
+    expect(savedValues(wrapper, 'field-changed')).toEqual([1, 12])
+
+    wrapper.unmount()
+  })
+
+  test('saves no frame count for an emptied field', async () => {
+    const wrapper = await mountList()
+    const field = useNumberField(wrapper.find('td.frames input').element)
+    await field.type('12')
+
+    await field.clear()
+
+    expect(savedValues(wrapper, 'field-changed')).toEqual([1, 12, null])
 
     wrapper.unmount()
   })

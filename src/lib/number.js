@@ -13,3 +13,11 @@ export const isNumberTyped = (input, value) => {
   const number = value === '' || value == null ? null : Number(value)
   return !/^0\d/.test(input.value) && typed === number
 }
+
+// The number a number input holds: null when it is empty, undefined while
+// its entry is invalid ("12." or 12.5 in a whole number field), so that the
+// entry is not saved.
+export const readNumberInput = input => {
+  if (!input.validity.valid) return undefined
+  return Number.isNaN(input.valueAsNumber) ? null : input.valueAsNumber
+}

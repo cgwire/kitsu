@@ -156,6 +156,9 @@ describe('ShotLine, number cells', () => {
       {
         entity: markRaw({ id: 'shot-b', nb_frames: null, data: {} }),
         metadataDisplayHeaders: { frames: true, frameIn: true, frameOut: true },
+        onFieldChanged: ({ entry, fieldName, value }) => {
+          entry[fieldName] = value
+        },
         onMetadataChanged: ({ entry, descriptor, value }) => {
           entry.data[descriptor.field_name] = value
         }
@@ -171,8 +174,8 @@ describe('ShotLine, number cells', () => {
       }
     )
 
-  const savedValues = wrapper =>
-    wrapper.emitted('metadata-changed').map(([{ value }]) => value)
+  const savedValues = (wrapper, event = 'metadata-changed') =>
+    wrapper.emitted(event).map(([{ value }]) => value)
 
   // Written back from the number saved, "12.0" turned into "12": typing
   // 12.05 with a click in between saved 125.
@@ -187,5 +190,28 @@ describe('ShotLine, number cells', () => {
 
     expect(await field.type('5')).toEqual(['12.05'])
     expect(savedValues(wrapper)).toEqual([1, 12, 12])
+  })
+
+  // Sent as typed, "12." saved no frame count.
+  test('saves no frame count for an entry that is no whole number', async () => {
+    const wrapper = mountNumberLine()
+    const field = useNumberField(
+      wrapper.findAll('.frames-column input')[0].element
+    )
+
+    expect(await field.type('12.5')).toEqual(['1', '12', '12.', '12.5'])
+    expect(savedValues(wrapper, 'field-changed')).toEqual([1, 12])
+  })
+
+  test('saves no frame count for an emptied field', async () => {
+    const wrapper = mountNumberLine()
+    const field = useNumberField(
+      wrapper.findAll('.frames-column input')[0].element
+    )
+    await field.type('12')
+
+    await field.clear()
+
+    expect(savedValues(wrapper, 'field-changed')).toEqual([1, 12, null])
   })
 })

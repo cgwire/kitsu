@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { formatAmount, isNumberTyped } from '@/lib/number'
+import { formatAmount, isNumberTyped, readNumberInput } from '@/lib/number'
 
 describe('lib/number', () => {
   it('groups thousands by clock preference', () => {
@@ -31,6 +31,28 @@ describe('lib/number', () => {
     it('does not count a leading zero', () => {
       expect(isNumberTyped(field('05', 5), 5)).toBe(false)
       expect(isNumberTyped(field('0.5', 0.5), 0.5)).toBe(true)
+    })
+  })
+
+  describe('readNumberInput', () => {
+    const input = (valueAsNumber, valid = true) => ({
+      validity: { valid },
+      valueAsNumber
+    })
+
+    it('reads the number of a valid entry', () => {
+      expect(readNumberInput(input(12))).toBe(12)
+      expect(readNumberInput(input(0))).toBe(0)
+    })
+
+    it('reads an emptied field as an empty value', () => {
+      expect(readNumberInput(input(NaN))).toBe(null)
+    })
+
+    // "12." or 12.5 in a whole number field: nothing to save.
+    it('reads no value from an invalid entry', () => {
+      expect(readNumberInput(input(NaN, false))).toBe(undefined)
+      expect(readNumberInput(input(12.5, false))).toBe(undefined)
     })
   })
 })
