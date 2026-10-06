@@ -37,29 +37,35 @@
     v-else
   >
     <template v-if="!cover">
-      <img
-        class="thumbnail-picture"
-        loading="lazy"
-        :key="thumbnailKey"
-        :src="thumbnailPath"
-        :style="{
-          width: 'auto',
-          'max-height': `${emptyHeight}px`
-        }"
-        :width="width || ''"
-        alt=""
-      />
-      <a
-        class="view-icon"
-        role="button"
-        tabindex="0"
-        v-if="!noPreview"
-        @click.stop="onPictureClicked()"
-        @keydown.enter.stop.prevent="onPictureClicked()"
-        @keydown.space.stop.prevent="onPictureClicked()"
-      >
-        <eye-icon :size="18" />
-      </a>
+      <span class="thumbnail-processing" v-if="isProcessing"></span>
+      <span class="preview-broken" v-else-if="isBroken">
+        {{ $t('preview.broken') }}
+      </span>
+      <template v-else>
+        <img
+          class="thumbnail-picture"
+          loading="lazy"
+          :key="thumbnailKey"
+          :src="thumbnailPath"
+          :style="{
+            width: 'auto',
+            'max-height': `${emptyHeight}px`
+          }"
+          :width="width || ''"
+          alt=""
+        />
+        <a
+          class="view-icon"
+          role="button"
+          tabindex="0"
+          v-if="!noPreview"
+          @click.stop="onPictureClicked()"
+          @keydown.enter.stop.prevent="onPictureClicked()"
+          @keydown.space.stop.prevent="onPictureClicked()"
+        >
+          <eye-icon :size="18" />
+        </a>
+      </template>
     </template>
   </div>
 </template>
@@ -103,6 +109,10 @@ const props = defineProps({
     default: null,
     type: String
   },
+  previewFileStatus: {
+    default: 'ready',
+    type: String
+  },
   isRoundedTopBorder: {
     default: false,
     type: Boolean
@@ -124,6 +134,14 @@ const buttonPlayRef = ref(null)
 const isMovie = computed(() => {
   return props.entity.preview_file_extension === 'mp4'
 })
+
+// The server builds the variants in the background: asking for a picture
+// that is not stored yet would only draw a broken image.
+const isProcessing = computed(() => props.previewFileStatus === 'processing')
+
+const isBroken = computed(() =>
+  ['broken', 'missing'].includes(props.previewFileStatus)
+)
 
 const thumbnailPath = computed(() => {
   const previewFileId = props.previewFileId || props.entity.preview_file_id
@@ -211,6 +229,66 @@ const onVideoClicked = () => {
 
   &:hover .view-icon {
     display: block;
+  }
+
+  .thumbnail-processing,
+  .preview-broken {
+    // longhand: the background shorthand would drop the shimmer gradient
+    background-color: var(--background-tag);
+    height: 100%;
+    width: 100%;
+  }
+
+  .preview-broken {
+    align-items: center;
+    color: var(--text-strong);
+    display: flex;
+    font-size: 0.85em;
+    justify-content: center;
+    padding: 0 1em;
+    text-align: center;
+  }
+}
+
+// The variants are still being built: a slow shimmer reads as "on its
+// way", where the plain empty block reads as "no preview at all".
+.thumbnail-processing {
+  background-image: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0) 35%,
+    rgba(255, 255, 255, 0.65) 50%,
+    rgba(255, 255, 255, 0) 65%
+  );
+  background-repeat: no-repeat;
+  background-size: 250% 100%;
+  animation: thumbnail-processing-shimmer 1.6s ease-in-out infinite;
+}
+
+.dark .thumbnail-processing {
+  background-image: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0) 35%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0) 65%
+  );
+}
+
+@keyframes thumbnail-processing-shimmer {
+  from {
+    background-position: 175% 0;
+  }
+  to {
+    background-position: -75% 0;
+  }
+}
+
+// The dark rule outranks a lone class, and its gradient left still would
+// draw a band on the placeholder.
+@media (prefers-reduced-motion: reduce) {
+  .thumbnail-processing,
+  .dark .thumbnail-processing {
+    animation: none;
+    background-image: none;
   }
 }
 

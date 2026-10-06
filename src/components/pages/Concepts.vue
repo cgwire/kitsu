@@ -791,6 +791,27 @@ const onTaskStatusChanged = eventData => {
   }
 }
 
+const refreshConceptPreview = concept => {
+  store.dispatch('refreshConceptPreview', concept).catch(console.error)
+}
+
+// The update announcing the stored variants carries no status.
+const onPreviewFileUpdate = eventData => {
+  const concept = concepts.value.find(
+    concept =>
+      concept.preview_file_id === eventData.preview_file_id &&
+      concept.preview_file_status === 'processing'
+  )
+  if (concept) refreshConceptPreview(concept)
+}
+
+// Zou does not send again the events emitted while the socket was down.
+const onSocketConnect = () => {
+  concepts.value
+    .filter(concept => concept.preview_file_status === 'processing')
+    .forEach(refreshConceptPreview)
+}
+
 // Watchers
 // --------------------------------------------------------------------------
 watch(
@@ -894,10 +915,14 @@ watch(
 // --------------------------------------------------------------------------
 onMounted(() => {
   socket.on('task:status-changed', onTaskStatusChanged)
+  socket.on('preview-file:update', onPreviewFileUpdate)
+  socket.on('connect', onSocketConnect)
 })
 
 onBeforeUnmount(() => {
   socket.off('task:status-changed', onTaskStatusChanged)
+  socket.off('preview-file:update', onPreviewFileUpdate)
+  socket.off('connect', onSocketConnect)
   store.commit('SET_PREVIEW_FILES_TO_BROWSE', [])
 })
 

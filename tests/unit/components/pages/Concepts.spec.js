@@ -96,7 +96,7 @@ const mountPage = async ({
     }
   })
   await flushPromises()
-  return { dispatch, handlers, store, wrapper }
+  return { dispatch, handlers, socket, store, wrapper }
 }
 
 // The page follows the query and writes to it: pages left mounted by the
@@ -1003,5 +1003,113 @@ describe('Concepts page', () => {
       wrapper.findComponent({ name: 'AddPreviewModal' }).props('active')
     ).toBe(true)
     expect(setFiles).toHaveBeenCalledWith(files)
+  })
+
+  // Zou builds the variants of an uploaded picture in the background, then
+  // announces them with an update that carries no status.
+  describe('preview status', () => {
+    const buildPreviewConcept = (id, status) => ({
+      ...buildConcept(id),
+      preview_file_id: `preview-${id}`,
+      preview_file_status: status
+    })
+
+    const updatePreview = (handlers, previewFileId) =>
+      handlers['preview-file:update']({
+        preview_file_id: previewFileId,
+        project_id: 'production-1'
+      })
+
+    test('reads again the processing preview the server updated', async () => {
+      const concepts = [
+        buildPreviewConcept('concept-1', 'processing'),
+        buildPreviewConcept('concept-2', 'processing')
+      ]
+      const { dispatch, handlers } = await mountPage({ concepts })
+
+      updatePreview(handlers, 'preview-concept-2')
+
+      expect(dispatch).toHaveBeenCalledWith('refreshConceptPreview', concepts[1])
+      expect(dispatch).not.toHaveBeenCalledWith(
+        'refreshConceptPreview',
+        concepts[0]
+      )
+    })
+
+    // The job may end while another folder is open.
+    test('reads again a processing preview out of the open folder', async () => {
+      const concept = {
+        ...buildPreviewConcept('concept-1', 'processing'),
+        parent_id: 'folder-1'
+      }
+      const { dispatch, handlers } = await mountPage({
+        concepts: [concept],
+        folders: [{ id: 'folder-1', name: 'Sets' }]
+      })
+
+      updatePreview(handlers, 'preview-concept-1')
+
+      expect(dispatch).toHaveBeenCalledWith('refreshConceptPreview', concept)
+    })
+
+    test('leaves alone the updates of a preview already shown', async () => {
+      const { dispatch, handlers } = await mountPage({
+        concepts: [buildPreviewConcept('concept-1', 'ready')]
+      })
+
+      updatePreview(handlers, 'preview-concept-1')
+
+      expect(dispatch).not.toHaveBeenCalledWith(
+        'refreshConceptPreview',
+        expect.anything()
+      )
+    })
+
+    test('logs a status read that fails', async () => {
+      const error = new Error('Request has been terminated')
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { handlers } = await mountPage({
+        concepts: [buildPreviewConcept('concept-1', 'processing')],
+        dispatch: vi.fn(action =>
+          action === 'refreshConceptPreview'
+            ? Promise.reject(error)
+            : Promise.resolve()
+        )
+      })
+
+      updatePreview(handlers, 'preview-concept-1')
+      await flushPromises()
+
+      expect(console.error).toHaveBeenCalledWith(error)
+    })
+
+    // Zou does not send again the events emitted while the socket was down.
+    test('reads again the processing previews once the socket reconnects', async () => {
+      const concepts = [
+        buildPreviewConcept('concept-1', 'processing'),
+        buildPreviewConcept('concept-2', 'ready')
+      ]
+      const { dispatch, handlers } = await mountPage({ concepts })
+
+      handlers.connect()
+
+      expect(dispatch).toHaveBeenCalledWith('refreshConceptPreview', concepts[0])
+      expect(dispatch).not.toHaveBeenCalledWith(
+        'refreshConceptPreview',
+        concepts[1]
+      )
+    })
+
+    test('stops listening to the socket once closed', async () => {
+      const { handlers, socket, wrapper } = await mountPage()
+
+      wrapper.unmount()
+
+      expect(socket.off).toHaveBeenCalledWith(
+        'preview-file:update',
+        handlers['preview-file:update']
+      )
+      expect(socket.off).toHaveBeenCalledWith('connect', handlers.connect)
+    })
   })
 })

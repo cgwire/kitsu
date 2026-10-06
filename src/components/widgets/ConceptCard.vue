@@ -10,6 +10,7 @@
     <entity-preview
       :entity="concept"
       :height="previewSize.height"
+      :preview-file-status="concept.preview_file_status"
       :width="previewSize.width"
       is-rounded-top-border
     />

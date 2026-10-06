@@ -31,4 +31,33 @@ describe('EntityPreview', () => {
     const { wrapper } = mountPreview({ noPreview: true })
     expect(wrapper.find('.view-icon').exists()).toBe(false)
   })
+
+  // Zou builds the variants of an uploaded picture in the background, and
+  // its picture routes answer 404 until they are stored.
+  test('waits for the variants of a processing preview', () => {
+    const { wrapper } = mountPreview({ previewFileStatus: 'processing' })
+    expect(wrapper.find('img').exists()).toBe(false)
+    expect(wrapper.find('.thumbnail-processing').exists()).toBe(true)
+    expect(wrapper.find('.view-icon').exists()).toBe(false)
+  })
+
+  test('shows the picture once the preview is ready', async () => {
+    const { wrapper } = mountPreview({ previewFileStatus: 'processing' })
+    expect(wrapper.find('img').exists()).toBe(false)
+
+    await wrapper.setProps({ previewFileStatus: 'ready' })
+
+    expect(wrapper.find('.thumbnail-processing').exists()).toBe(false)
+    expect(wrapper.find('img').attributes('src')).toBe(
+      '/api/pictures/previews/preview-files/preview-1.png'
+    )
+    expect(wrapper.find('.view-icon').exists()).toBe(true)
+  })
+
+  test.each(['broken', 'missing'])('tells a %s preview apart', status => {
+    const { wrapper } = mountPreview({ previewFileStatus: status })
+    expect(wrapper.find('img').exists()).toBe(false)
+    expect(wrapper.find('.view-icon').exists()).toBe(false)
+    expect(wrapper.find('.preview-broken').text()).toBe('preview.broken')
+  })
 })

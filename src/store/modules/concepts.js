@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { sortByName } from '@/lib/sorting'
 import conceptsApi from '@/store/api/concepts'
 import entitiesApi from '@/store/api/entities'
+import tasksApi from '@/store/api/tasks'
 
 import {
   LOAD_CONCEPTS_START,
@@ -19,6 +20,7 @@ import {
   EDIT_CONCEPT_FOLDER_END,
   DELETE_CONCEPT_FOLDER_END,
   MOVE_CONCEPTS_END,
+  UPDATE_CONCEPT_PREVIEW_STATUS,
   RESET_ALL
 } from '@/store/mutation-types'
 
@@ -119,10 +121,25 @@ const actions = {
 
     concept.tasks = [task]
     concept.preview_file_id = preview.id
+    concept.preview_file_status = preview.status
     helpers.populateConcept(concept)
 
     commit(EDIT_CONCEPT_END, concept)
+    // The variants may have been stored before the concept was listed: the
+    // event announcing them then matched no card.
+    if (concept.preview_file_status === 'processing') {
+      dispatch('refreshConceptPreview', concept).catch(console.error)
+    }
     return concept
+  },
+
+  async refreshConceptPreview({ commit }, concept) {
+    const preview = await tasksApi.getPreviewFile(concept.preview_file_id)
+    commit(UPDATE_CONCEPT_PREVIEW_STATUS, {
+      conceptId: concept.id,
+      previewFileId: preview.id,
+      status: preview.status
+    })
   },
 
   async editConcept({ commit }, data) {
@@ -303,6 +320,18 @@ const mutations = {
       .forEach(concept => {
         concept.parent_id = folderId
       })
+  },
+
+  [UPDATE_CONCEPT_PREVIEW_STATUS](state, { conceptId, previewFileId, status }) {
+    const concept = state.conceptMap.get(conceptId)
+    // Two reads can cross: the answer sent before the variants were stored
+    // must not undo the one sent after.
+    if (
+      concept?.preview_file_id === previewFileId &&
+      concept.preview_file_status === 'processing'
+    ) {
+      concept.preview_file_status = status
+    }
   },
 
   [RESET_ALL](state) {
