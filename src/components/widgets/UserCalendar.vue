@@ -106,6 +106,7 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import multiMonthPlugin from '@fullcalendar/multimonth'
 
 import { localeCode } from '@/lib/lang'
+import { getStatusColor } from '@/lib/stats'
 import { getDayOffRange } from '@/lib/time'
 
 import Spinner from '@/components/widgets/Spinner.vue'
@@ -113,7 +114,6 @@ import Spinner from '@/components/widgets/Spinner.vue'
 const { t } = useI18n()
 const store = useStore()
 
-const isDarkTheme = computed(() => store.getters.isDarkTheme)
 const productionMap = computed(() => store.getters.productionMap)
 const taskMap = computed(() => store.getters.taskMap)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
@@ -351,14 +351,6 @@ const onEventClicked = event => {
     currentTask.value = task
     store.dispatch('clearSelectedTasks')
     store.dispatch('addSelectedTasks', [{ task }])
-  }
-}
-
-const getStatusColor = status => {
-  if (status.name === 'Todo' && isDarkTheme.value) {
-    return '#5F626A'
-  } else {
-    return status.color
   }
 }
 
