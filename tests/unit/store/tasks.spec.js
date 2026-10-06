@@ -625,6 +625,72 @@ describe('Tasks store, preview file statuses', () => {
   })
 })
 
+// The players draw copies of the comment previews: they follow the status
+// Zou announces for each preview file.
+describe('Tasks store, preview copies', () => {
+  const buildPreviews = status => {
+    const head = {
+      id: 'preview-1',
+      status,
+      previews: [
+        { id: 'preview-1', status },
+        { id: 'preview-2', status: 'processing' }
+      ]
+    }
+    return { head, state: { taskPreviews: { 'task-1': [head] } } }
+  }
+
+  test('SET_PREVIEW_FILE_STATUS settles every copy of the preview', () => {
+    const { head, state } = buildPreviews('processing')
+
+    tasksStore.mutations.SET_PREVIEW_FILE_STATUS(state, {
+      previewFileId: 'preview-1',
+      status: 'ready'
+    })
+
+    expect([
+      head.status,
+      head.previews[0].status,
+      head.previews[1].status
+    ]).toEqual(['ready', 'ready', 'processing'])
+  })
+
+  // DELETE_TASK_END leaves the entry of the task, set to undefined.
+  test('SET_PREVIEW_FILE_STATUS skips a task deleted meanwhile', () => {
+    const { head, state } = buildPreviews('processing')
+    state.taskPreviews['task-0'] = undefined
+
+    tasksStore.mutations.SET_PREVIEW_FILE_STATUS(state, {
+      previewFileId: 'preview-1',
+      status: 'ready'
+    })
+
+    expect(head.status).toBe('ready')
+  })
+
+  test('SET_PREVIEW_FILE_STATUS keeps a ready copy against a late processing status', () => {
+    const { head, state } = buildPreviews('ready')
+
+    tasksStore.mutations.SET_PREVIEW_FILE_STATUS(state, {
+      previewFileId: 'preview-1',
+      status: 'processing'
+    })
+
+    expect([head.status, head.previews[0].status]).toEqual(['ready', 'ready'])
+  })
+
+  test('UPDATE_PREVIEW_ANNOTATION keeps a ready copy when an older answer says processing', () => {
+    const { head, state } = buildPreviews('ready')
+
+    tasksStore.mutations.UPDATE_PREVIEW_ANNOTATION(state, {
+      taskId: 'task-1',
+      preview: { id: 'preview-1', status: 'processing' }
+    })
+
+    expect([head.status, head.previews[0].status]).toEqual(['ready', 'ready'])
+  })
+})
+
 describe('Tasks store, DELETE_TASK_END', () => {
   const task = { id: 't1', entity_id: 'e1', task_type_id: 'tt1' }
   const buildState = () => ({

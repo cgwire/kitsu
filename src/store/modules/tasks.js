@@ -15,6 +15,7 @@ import {
   setTasksEntityPreview
 } from '@/lib/models'
 import func from '@/lib/func'
+import { latestPreviewFileStatus } from '@/lib/preview'
 
 import assetStore from '@/store/modules/assets'
 import editStore from '@/store/modules/edits'
@@ -64,6 +65,7 @@ import {
   UNASSIGN_TASK,
   UNASSIGN_TASKS,
   SET_PREVIEW,
+  SET_PREVIEW_FILE_STATUS,
   SET_IS_SHOW_ASSIGNATIONS,
   SET_IS_SHOW_INFOS,
   SET_IS_SHOW_INFOS_BREAKDOWN,
@@ -1288,14 +1290,18 @@ const mutations = {
             if (annotations) {
               subPreview.annotations = annotations
             }
-            subPreview.status = preview.status
+            // An older answer must not undo a status announced since.
+            subPreview.status = latestPreviewFileStatus(
+              subPreview.status,
+              preview.status
+            )
           }
         })
         if (p.id === preview.id) {
           if (annotations) {
             p.annotations = annotations
           }
-          p.status = preview.status
+          p.status = latestPreviewFileStatus(p.status, preview.status)
         }
       })
     }
@@ -1462,6 +1468,18 @@ const mutations = {
   // all, including the my-checks tasks held in component state.
   [SET_PREVIEW](state, { entityId, previewId }) {
     setTasksEntityPreview(state.taskMap, entityId, previewId)
+  },
+
+  // The players draw the copies LOAD_TASK_COMMENTS_END and ADD_PREVIEW_END
+  // make of the comment previews: they follow the status Zou announces.
+  [SET_PREVIEW_FILE_STATUS](state, { previewFileId, status }) {
+    Object.values(state.taskPreviews)
+      .flatMap(previews => previews || [])
+      .flatMap(preview => [preview, ...(preview.previews || [])])
+      .filter(preview => preview.id === previewFileId)
+      .forEach(preview => {
+        preview.status = latestPreviewFileStatus(preview.status, status)
+      })
   },
 
   [SET_IS_BIG_THUMBNAILS](state, isBigThumbnails) {
