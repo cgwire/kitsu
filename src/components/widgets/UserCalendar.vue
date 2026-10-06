@@ -67,9 +67,9 @@
           <span class="event-thumbnail">
             <img
               loading="lazy"
-              :src="`/api/pictures/previews/preview-files/${event.extendedProps.previewFileId}.png`"
+              :src="event.extendedProps.previewPath"
               alt=""
-              v-if="event.extendedProps.previewFileId"
+              v-if="event.extendedProps.previewPath"
             />
           </span>
           <span
@@ -106,6 +106,7 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import multiMonthPlugin from '@fullcalendar/multimonth'
 
 import { localeCode } from '@/lib/lang'
+import { hasPreviewFilePicture } from '@/lib/preview'
 import { getStatusColor } from '@/lib/stats'
 import { getDayOffRange } from '@/lib/time'
 
@@ -114,6 +115,7 @@ import Spinner from '@/components/widgets/Spinner.vue'
 const { t } = useI18n()
 const store = useStore()
 
+const previewFileStatusMap = computed(() => store.getters.previewFileStatusMap)
 const productionMap = computed(() => store.getters.productionMap)
 const taskMap = computed(() => store.getters.taskMap)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
@@ -278,6 +280,23 @@ const calendarOptions = ref({
   datesSet: onDatesSet
 })
 
+const previewFileStatuses = computed(() =>
+  props.tasks.map(task =>
+    previewFileStatusMap.value?.get(task.entity_preview_file_id)
+  )
+)
+
+// Zou answers 404 for the picture of a preview file until a job has built
+// it. Once ready, a new URL gets past any 404 kept for the plain one.
+const getPreviewPath = previewFileId => {
+  const status = previewFileStatusMap.value?.get(previewFileId)
+  if (!previewFileId || !hasPreviewFilePicture(status)) {
+    return null
+  }
+  const path = `/api/pictures/previews/preview-files/${previewFileId}.png`
+  return status === 'ready' ? `${path}?ready` : path
+}
+
 const resetEvents = () => {
   if (!calendarRef.value) {
     return
@@ -313,7 +332,7 @@ const resetEvents = () => {
         borderColor: 'transparent',
         backgroundColor: 'transparent',
         extendedProps: {
-          previewFileId: task.entity_preview_file_id,
+          previewPath: getPreviewPath(task.entity_preview_file_id),
           taskStatus,
           taskId: task.id,
           title: task.full_entity_name.split(' / '),
@@ -385,7 +404,7 @@ onBeforeUnmount(() => {
 })
 
 watch(
-  () => props.tasks,
+  [() => props.tasks, previewFileStatuses],
   () => {
     resetEvents()
   },

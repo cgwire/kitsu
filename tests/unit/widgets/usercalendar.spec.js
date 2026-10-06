@@ -1,4 +1,5 @@
 import { flushPromises, mount } from '@vue/test-utils'
+import { reactive } from 'vue'
 import { createStore } from 'vuex'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
@@ -30,7 +31,12 @@ const toDateKey = date =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-` +
   `${String(date.getDate()).padStart(2, '0')}`
 
-const mountCalendar = async taskStatus => {
+const previewPath = '/api/pictures/previews/preview-files/preview-1.png'
+
+const mountCalendar = async (
+  taskStatus,
+  { task: taskOverrides = {}, previewFileStatusMap } = {}
+) => {
   const today = toDateKey(new Date())
   const task = {
     id: 'task-1',
@@ -40,10 +46,12 @@ const mountCalendar = async taskStatus => {
     start_date: today,
     due_date: today,
     full_entity_name: 'Prod / SH010',
-    entity_preview_file_id: null
+    entity_preview_file_id: null,
+    ...taskOverrides
   }
   const store = createStore({
     getters: {
+      previewFileStatusMap: () => previewFileStatusMap,
       productionMap: () => new Map(),
       taskMap: () => new Map([[task.id, task]]),
       taskStatusMap: () => new Map([[taskStatus.id, taskStatus]]),
@@ -88,6 +96,49 @@ describe('UserCalendar', () => {
     const dot = wrapper.find('.status-dot')
     expect(dot.exists()).toBe(true)
     expect(dot.element.style.background).toBe('rgb(50, 115, 220)')
+    wrapper.unmount()
+  })
+
+  it('draws no picture for an entity without preview', async () => {
+    const wrapper = await mountCalendar(todoStatus)
+    expect(wrapper.find('.event-thumbnail').exists()).toBe(true)
+    expect(wrapper.find('.event-thumbnail img').exists()).toBe(false)
+    wrapper.unmount()
+  })
+
+  it('draws a preview the registry does not know under its usual URL', async () => {
+    const wrapper = await mountCalendar(todoStatus, {
+      task: { entity_preview_file_id: 'preview-1' },
+      previewFileStatusMap: reactive(new Map())
+    })
+    expect(wrapper.find('.event-thumbnail img').attributes('src')).toBe(
+      previewPath
+    )
+    wrapper.unmount()
+  })
+
+  it('waits for a processing preview before drawing it', async () => {
+    const wrapper = await mountCalendar(todoStatus, {
+      task: { entity_preview_file_id: 'preview-1' },
+      previewFileStatusMap: reactive(new Map([['preview-1', 'processing']]))
+    })
+    expect(wrapper.find('.event-thumbnail').exists()).toBe(true)
+    expect(wrapper.find('.event-thumbnail img').exists()).toBe(false)
+    wrapper.unmount()
+  })
+
+  // A new URL: the plain one may have got a 404 while Zou built the picture.
+  it('draws the preview once the registry knows it ready', async () => {
+    const previewFileStatusMap = reactive(new Map([['preview-1', 'processing']]))
+    const wrapper = await mountCalendar(todoStatus, {
+      task: { entity_preview_file_id: 'preview-1' },
+      previewFileStatusMap
+    })
+    previewFileStatusMap.set('preview-1', 'ready')
+    await flushPromises()
+    expect(wrapper.find('.event-thumbnail img').attributes('src')).toBe(
+      `${previewPath}?ready`
+    )
     wrapper.unmount()
   })
 })
