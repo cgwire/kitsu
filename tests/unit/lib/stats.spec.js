@@ -97,41 +97,41 @@ const taskStatusMap = new Map(Object.entries({
 const expectedStatResult = {
   all: {
     all: {
-      'task-status-1': { name: 'wip', color: 'blue', count: 4, frames: 29, drawings: 40, is_done: false },
-      'task-status-2': { name: 'retake', color: 'red', count: 2, frames: 9, drawings: 20, is_done: false }
+      'task-status-1': { name: 'wip', color: 'blue', count: 4, frames: 29, drawings: 40, is_done: false, is_default: false },
+      'task-status-2': { name: 'retake', color: 'red', count: 2, frames: 9, drawings: 20, is_done: false, is_default: false }
     },
     'task-type-1': {
-      'task-status-1': { name: 'wip', color: 'blue', count: 2, frames: 14, drawings: 20, is_done: false },
-      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 5, drawings: 10, is_done: false }
+      'task-status-1': { name: 'wip', color: 'blue', count: 2, frames: 14, drawings: 20, is_done: false, is_default: false },
+      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 5, drawings: 10, is_done: false, is_default: false }
     },
     'task-type-2': {
-      'task-status-1': { name: 'wip', color: 'blue', count: 2, frames: 15, drawings: 20, is_done: false },
-      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 4, drawings: 10, is_done: false }
+      'task-status-1': { name: 'wip', color: 'blue', count: 2, frames: 15, drawings: 20, is_done: false, is_default: false },
+      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 4, drawings: 10, is_done: false, is_default: false }
     }
   },
   'sequence-1': {
     all: {
-      'task-status-1': { name: 'wip', color: 'blue', count: 3, frames: 25, drawings: 30, is_done: false },
-      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 5, drawings: 10, is_done: false }
+      'task-status-1': { name: 'wip', color: 'blue', count: 3, frames: 25, drawings: 30, is_done: false, is_default: false },
+      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 5, drawings: 10, is_done: false, is_default: false }
     },
     'task-type-1': {
-      'task-status-1': { name: 'wip', color: 'blue', count: 1, frames: 10, drawings: 10, is_done: false },
-      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 5, drawings: 10, is_done: false }
+      'task-status-1': { name: 'wip', color: 'blue', count: 1, frames: 10, drawings: 10, is_done: false, is_default: false },
+      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 5, drawings: 10, is_done: false, is_default: false }
     },
     'task-type-2': {
-      'task-status-1': { name: 'wip', color: 'blue', count: 2, frames: 15, drawings: 20, is_done: false },
+      'task-status-1': { name: 'wip', color: 'blue', count: 2, frames: 15, drawings: 20, is_done: false, is_default: false },
     }
   },
   'sequence-2': {
     all: {
-      'task-status-1': { name: 'wip', color: 'blue', count: 1, frames: 4, drawings: 10, is_done: false },
-      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 4, drawings: 10, is_done: false }
+      'task-status-1': { name: 'wip', color: 'blue', count: 1, frames: 4, drawings: 10, is_done: false, is_default: false },
+      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 4, drawings: 10, is_done: false, is_default: false }
     },
     'task-type-1': {
-      'task-status-1': { name: 'wip', color: 'blue', count: 1, frames: 4, drawings: 10, is_done: false }
+      'task-status-1': { name: 'wip', color: 'blue', count: 1, frames: 4, drawings: 10, is_done: false, is_default: false }
     },
     'task-type-2': {
-      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 4, drawings: 10, is_done: false }
+      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 4, drawings: 10, is_done: false, is_default: false }
     }
   }
 }
@@ -267,6 +267,38 @@ describe('lib/stats', () => {
     ).toEqual([
       ['done', 2, 'green', true],
       ['wip', 1, 'blue', false]
+    ])
+  })
+
+  // Out of the box the default status is near white, unreadable on a light
+  // background.
+  it('getChartData - draws the default status in grey', () => {
+    const statuses = new Map([
+      ['s1', { id: 's1', short_name: 'todo', color: '#f5f5f5', is_default: true }],
+      ['s2', { id: 's2', short_name: 'wip', color: 'blue' }]
+    ])
+    const shots = [{ id: 'shot-1', sequence_id: 'sequence-1', tasks: ['t1', 't2'] }]
+    const tasks = new Map([
+      ['t1', { task_status_id: 's1', task_type_id: 'task-type-1' }],
+      ['t2', { task_status_id: 's2', task_type_id: 'task-type-1' }]
+    ])
+    const stats = computeStats(shots, 'sequence_id', statuses, tasks)
+    expect(getChartData(stats, 'sequence-1', 'task-type-1')).toEqual([
+      ['todo', 1, '#6F727A', false],
+      ['wip', 1, 'blue', false]
+    ])
+    expect(getChartColors(stats, 'all', 'all')).toEqual(['#6F727A', 'blue'])
+  })
+
+  it('getChartData - reads the default flag from the statuses when the stats lack it', () => {
+    const statuses = new Map([
+      ['s1', { id: 's1', short_name: 'todo', color: '#f5f5f5', is_default: true }]
+    ])
+    const stats = {
+      'episode-1': { all: { s1: { name: 'todo', color: '#f5f5f5', count: 2 } } }
+    }
+    expect(getChartData(stats, 'episode-1', 'all', 'count', statuses)).toEqual([
+      ['todo', 2, '#6F727A', false]
     ])
   })
 

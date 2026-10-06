@@ -12,14 +12,15 @@ const createStatusEntry = taskStatus => ({
   count: 0,
   frames: 0,
   drawings: 0,
-  is_done: !!taskStatus.is_done
+  is_done: !!taskStatus.is_done,
+  is_default: !!taskStatus.is_default
 })
 
 // Get all data displayed in statistics (needed by the stat cell widget).
 // Data follow this format: [[task-status-1-name, value, color, isDone], ...]
 // Set count data or frames data depending on data type.
-// The stats computed by the server carry no done flag: give the task status
-// map to read it from the statuses.
+// The stats computed by the server carry no done or default flag: give the
+// task status map to read them from the statuses.
 export const getChartData = (
   mainStats,
   entryId,
@@ -33,8 +34,10 @@ export const getChartData = (
   return Object.keys(statusData)
     .map(taskStatusId => {
       const data = statusData[taskStatusId]
-      const color = data.is_default ? DEFAULT_STATUS_COLOR : data.color
-      const isDone = data.is_done ?? taskStatusMap?.get(taskStatusId)?.is_done
+      const taskStatus = taskStatusMap?.get(taskStatusId)
+      const isDefault = data.is_default ?? taskStatus?.is_default
+      const color = isDefault ? DEFAULT_STATUS_COLOR : data.color
+      const isDone = data.is_done ?? taskStatus?.is_done
       return [data.name, data[valueField], color, !!isDone]
     })
     .sort(_sortData)
