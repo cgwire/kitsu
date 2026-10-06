@@ -1,0 +1,2 @@
+import{E as e,i as t,l as n}from"./vue-vendor-DBqm0Nnt.js";import{t as r}from"./colors-EywbEJWH.js";n();var i=()=>{let n=t(),i=e(()=>n.getters.isDarkTheme);return{backgroundColor:e=>(!e||e.name===`Todo`)&&!i.value?`#ECECEC`:(!e||e.name===`Todo`)&&i.value?`#5F626A`:i.value?r.darkenColor(e.color):e.color,color:e=>!e||e.name!==`Todo`||i.value?`white`:`#333`,isDarkTheme:i}};export{i as t};
+//# sourceMappingURL=taskStatus-B07NgMWa.js.map

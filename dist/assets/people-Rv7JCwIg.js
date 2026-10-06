@@ -1,0 +1,2 @@
+var e=(e,t={})=>e.role!==`admin`&&t[e.id]||e.role,t=(t,{departmentId:n=``,role:r=`all`,projectRoles:i={}})=>t.filter(t=>(r===`all`||e(t,i)===r)&&(!n||t.departments?.includes(n))),n=[`all`,`admin`,`manager`,`supervisor`,`user`,`vendor`].map(e=>({label:e,value:e}));export{e as n,n as r,t};
+//# sourceMappingURL=people-Rv7JCwIg.js.map

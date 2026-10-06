@@ -1,0 +1,2 @@
+import{A as e,P as t,l as n,tt as r}from"./vue-vendor-DBqm0Nnt.js";import{t as i}from"./_plugin-vue_export-helper-BDNMzG2s.js";import{t as a}from"./BooleanRep-DiFy-jV7.js";n();var o={class:`has-text-centered`},s=i({__name:`BooleanCell`,props:{value:{type:Boolean,default:!1}},setup(n){return(i,s)=>(r(),e(`td`,o,[t(a,{value:n.value},null,8,[`value`])]))}},[[`__scopeId`,`data-v-4d234e26`]]);export{s as t};
+//# sourceMappingURL=BooleanCell-Dcl8ALc4.js.map
