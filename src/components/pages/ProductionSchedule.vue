@@ -598,6 +598,7 @@ import {
   getBusinessDays,
   getDatesFromStartDate,
   getDayOffRange,
+  getUserDay,
   minutesToDays,
   parseDate,
   parseSimpleDate
@@ -653,14 +654,14 @@ const availableTaskTypes = ref([])
 const daysOffByPerson = ref({})
 const daysOffRangeKey = ref(null)
 const draggedEntities = ref([])
-const endDate = ref(moment().add(6, 'months').endOf('day'))
+const endDate = ref(getUserDay().add(6, 'months').endOf('day'))
 const entityType = ref(null)
 const expandAll = ref(false)
 const hiddenTaskTypeIds = ref([])
 const isSidePanelOpen = ref(false)
 const resetTimeout = ref(null)
 const scheduleItems = ref([])
-const startDate = ref(moment().startOf('day'))
+const startDate = ref(getUserDay())
 const selectedStartDate = ref(null)
 const selectedEndDate = ref(null)
 const selectedTaskType = ref(null)
@@ -2000,7 +2001,7 @@ const unselectAndCloseSidePanel = () => {
 }
 
 const onAssignmentItemSelected = item => {
-  const today = moment().utc().toDate()
+  const today = getUserDay().toDate()
   assignments.value.type = 'entity'
   assignments.value.startDate = item.start_date || today
   assignments.value.endDate = item.end_date || today

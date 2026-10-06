@@ -13,6 +13,7 @@ vi.mock('vue-i18n', async importOriginal => ({
 // Pre-load the real store to avoid circular-import race from child components.
 import '@/lib/auth'
 
+import assetStore from '@/store/modules/assets'
 import assetTypeStore from '@/store/modules/assettypes'
 import taskTypeStore from '@/store/modules/tasktypes'
 
@@ -454,6 +455,78 @@ describe('ProductionSchedule page', () => {
       expect(router.currentRoute.value.query.mode).toBe('real')
       expect(push).toHaveBeenCalledTimes(1)
       expect(replace).not.toHaveBeenCalled()
+    })
+  })
+
+  // The date fields of the page are utc ones: they hold a day at UTC
+  // midnight. At 00:30 local time, east of UTC, the UTC day is still the
+  // day before.
+  describe('default dates', () => {
+    const today = new Date('2026-10-06T00:00:00.000Z')
+    const fieldDates = parent =>
+      parent
+        .findAllComponents({ name: 'DateField' })
+        .map(field => field.props('modelValue'))
+
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['Date'] })
+      vi.setSystemTime(new Date(2026, 9, 6, 0, 30))
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+      assetStore.cache.assets = []
+      assetStore.cache.assetMap.clear()
+    })
+
+    it('dates an assignment from the panel on the local day', async () => {
+      const asset = {
+        id: 'asset-1',
+        name: 'Chair',
+        asset_type_id: 'asset-type-props'
+      }
+      assetStore.cache.assets = [asset]
+      assetStore.cache.assetMap.set(asset.id, asset)
+      const { wrapper } = await mountPage({
+        actions: {
+          loadTasks: vi.fn(() => [
+            {
+              id: 'task-1',
+              entity_id: 'asset-1',
+              task_type_id: 'tt-modeling',
+              assignees: []
+            }
+          ])
+        },
+        getters: {
+          productionAssetTypes: () => [
+            { id: 'asset-type-props', name: 'Props', task_types: [] }
+          ]
+        }
+      })
+      await toggleSidePanel(wrapper)
+      await pickTaskType(wrapper, 'tt-modeling')
+
+      await wrapper.find('.side-column .assignment-item').trigger('click')
+
+      expect(fieldDates(wrapper.find('.side-column'))).toEqual([today, today])
+    })
+
+    it('ranges a production without dates from the local day', async () => {
+      const { wrapper } = await mountPage({
+        getters: {
+          currentProduction: () => ({
+            ...production,
+            start_date: null,
+            end_date: null
+          })
+        }
+      })
+
+      expect(fieldDates(wrapper.find('.project-dates'))).toEqual([
+        today,
+        new Date('2027-04-06T23:59:59.999Z')
+      ])
     })
   })
 

@@ -69,6 +69,11 @@ export const localDayToUtcDate = date => {
   return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
 }
 
+// The day a date (now by default) falls on for the user, at UTC midnight
+// like a utc date field holds it: moment works in the time zone of the user
+// profile.
+export const getUserDay = date => moment(date).utc(true).startOf('day')
+
 export const formatTimeOfDay = (
   date,
   use12HourClock = false,

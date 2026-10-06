@@ -77,3 +77,45 @@ describe('utc date field days', () => {
     })
   })
 })
+
+// Kitsu makes the time zone of the user profile the moment default one
+const userDayIn = (timeZone, profileTimeZone) =>
+  runIn(
+    timeZone,
+    `
+    import moment from 'moment-timezone'
+    import { getUserDay } from ${time}
+    if (${JSON.stringify(profileTimeZone)}) {
+      moment.tz.setDefault(${JSON.stringify(profileTimeZone)})
+    }
+    const at = new Date('2026-10-05T22:30:00Z')
+    console.log(JSON.stringify(getUserDay(at).toISOString()))
+  `
+  )
+
+// The schedules and the utc date fields hold a day at UTC midnight, but
+// today is the day of the user, not the UTC one: 2026-10-05 at 22:30 UTC is
+// already 2026-10-06 east of UTC.
+describe('user day', () => {
+  test.each([
+    { timeZone: 'UTC', profile: null, day: '2026-10-05T00:00:00.000Z' },
+    {
+      timeZone: 'Europe/Budapest',
+      profile: null,
+      day: '2026-10-06T00:00:00.000Z'
+    },
+    {
+      timeZone: 'America/New_York',
+      profile: null,
+      day: '2026-10-05T00:00:00.000Z'
+    },
+    { timeZone: 'Asia/Tokyo', profile: null, day: '2026-10-06T00:00:00.000Z' },
+    {
+      timeZone: 'America/New_York',
+      profile: 'Europe/Paris',
+      day: '2026-10-06T00:00:00.000Z'
+    }
+  ])('is $day in $timeZone, profile $profile', ({ timeZone, profile, day }) => {
+    expect(userDayIn(timeZone, profile)).toBe(day)
+  })
+})
