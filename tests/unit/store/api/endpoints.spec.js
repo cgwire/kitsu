@@ -20,6 +20,7 @@ import entitiesApi from '@/store/api/entities'
 import newsApi from '@/store/api/news'
 import peopleApi from '@/store/api/people'
 import playlistsApi from '@/store/api/playlists'
+import previewsApi from '@/store/api/previews'
 import scheduleApi from '@/store/api/schedule'
 import shotsApi from '@/store/api/shots'
 import taskTypesApi from '@/store/api/tasktypes'
@@ -252,5 +253,15 @@ describe('store/api endpoints', () => {
       { entity_id: 'shot-1', preview_file_id: 'preview-1' },
       { entity_id: 'shot-2', preview_file_id: null }
     ])
+  })
+
+  // The list route of Zou filters on a JSON list of ids.
+  test('reads the statuses of several preview files in one request', () => {
+    previewsApi.getPreviewFileStatuses(['p1', 'p2'])
+
+    expect(client.pget).toHaveBeenCalledWith(
+      `/api/data/preview-files?id=${encodeURIComponent('["p1","p2"]')}` +
+        '&fields=id,status'
+    )
   })
 })

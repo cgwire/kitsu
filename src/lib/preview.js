@@ -1,10 +1,10 @@
 /*
- * Preview-extension type checks. Shared across the player components
- * (PreviewPlayer, PlaylistPlayer, PictureViewer, PreviewViewer, etc.)
- * so the canonical list of accepted extensions for each preview kind
- * lives in a single place.
+ * Preview-extension type checks and preview file statuses. Shared across
+ * the player components (PreviewPlayer, PlaylistPlayer, PictureViewer,
+ * PreviewViewer, etc.) and the thumbnails, so the canonical list of
+ * accepted extensions for each preview kind lives in a single place.
  *
- * Each helper takes a bare extension string (e.g. 'mp4', 'png') and
+ * Each type check takes a bare extension string (e.g. 'mp4', 'png') and
  * returns a boolean — no entity / preview-file unwrapping. Callers
  * derive the extension from their own state.
  */
@@ -25,6 +25,23 @@ export const isPdfPreview = extension => extension === 'pdf'
 export const isMarkdownPreview = extension => extension === 'md'
 
 export const isDiffPreview = extension => extension === 'diff'
+
+// Statuses Zou stores for a preview file. Its picture and movie routes
+// answer 404 until a job has built the files of a processing one.
+const PREVIEW_FILE_STATUSES = ['broken', 'missing', 'processing', 'ready']
+
+export const isPreviewFileStatus = status =>
+  PREVIEW_FILE_STATUSES.includes(status)
+
+export const hasPreviewFilePicture = status =>
+  !['broken', 'missing', 'processing'].includes(status)
+
+// A preview file leaves 'processing' once: a processing status read before
+// that move must not undo it.
+export const latestPreviewFileStatus = (olderStatus, newerStatus) =>
+  newerStatus === 'processing' && olderStatus && olderStatus !== 'processing'
+    ? olderStatus
+    : newerStatus || olderStatus
 
 export const isFilePreview = extension =>
   !isMoviePreview(extension) &&

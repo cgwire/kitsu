@@ -21,6 +21,7 @@ import news from '@/store/modules/news'
 import notifications from '@/store/modules/notifications'
 import people from '@/store/modules/people'
 import playlists from '@/store/modules/playlists'
+import previews from '@/store/modules/previews'
 import productions from '@/store/modules/productions'
 import schedule from '@/store/modules/schedule'
 import sequences from '@/store/modules/sequences'
@@ -52,6 +53,7 @@ const modules = {
   main,
   people,
   playlists,
+  previews,
   productions,
   projectTemplates,
   news,
