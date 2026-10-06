@@ -32,6 +32,8 @@ import preferences from '@/lib/preferences'
 
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditAssetModal from '@/components/modals/EditAssetModal.vue'
+import ImportModal from '@/components/modals/ImportModal.vue'
+import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
 import Breakdown from '@/components/pages/Breakdown.vue'
 
 const production = { id: 'p1', production_type: 'tvshow' }
@@ -296,6 +298,106 @@ describe('Breakdown page, removeOneAssetFromSelection', () => {
     expect(wrapper.findComponent(DeleteModal).props('isError')).toBe(true)
     expect(wrapper.vm.saveErrors).toEqual({ 'shot-a': true })
     vi.restoreAllMocks()
+  })
+
+  // Close keeps the error of a refused removal: the next confirmation opens
+  // without it.
+  test('opens the confirmation without the error of a past removal', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { wrapper } = mountPage({
+      state: {
+        currentEpisode: { id: 'all' },
+        casting: { 'episode-a': [{ asset_id: 'asset-1', nb_occurences: 1 }] }
+      },
+      actions: { castAsset: vi.fn(() => Promise.reject(new Error('down'))) }
+    })
+    // The end of the load resets the selection.
+    await flushPromises()
+    const modal = wrapper.findComponent(DeleteModal)
+    wrapper.vm.selection = new Set(['episode-a'])
+
+    await wrapper.vm.removeOneAssetFromSelection('asset-1')
+    modal.vm.$emit('confirm')
+    await flushPromises()
+    expect(modal.props('isError')).toBe(true)
+
+    modal.vm.$emit('cancel')
+    await wrapper.vm.removeOneAssetFromSelection('asset-1')
+    await nextTick()
+
+    expect(modal.props('active')).toBe(true)
+    expect(modal.props('isError')).toBe(false)
+    // Its undo step would answer the ctrl + z of a later test.
+    wrapper.unmount()
+    vi.restoreAllMocks()
+  })
+
+  // A removal that needs no confirmation fails with the modal closed: the
+  // next confirmation opens without its error.
+  test('opens the confirmation without the error of an unconfirmed removal', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const castAsset = vi
+      .fn(() => Promise.resolve())
+      .mockImplementationOnce(() => Promise.reject(new Error('down')))
+    const { wrapper } = mountPage({
+      state: {
+        currentEpisode: { id: 'all' },
+        casting: {
+          'episode-a': [{ asset_id: 'asset-1', nb_occurences: 2 }],
+          'episode-b': [{ asset_id: 'asset-1', nb_occurences: 1 }]
+        }
+      },
+      actions: { castAsset }
+    })
+    // The end of the load resets the selection.
+    await flushPromises()
+    const modal = wrapper.findComponent(DeleteModal)
+
+    wrapper.vm.selection = new Set(['episode-a'])
+    await wrapper.vm.removeOneAssetFromSelection('asset-1')
+    expect(wrapper.vm.saveErrors).toEqual({ 'episode-a': true })
+    expect(modal.props('active')).toBe(false)
+    wrapper.vm.selection = new Set(['episode-b'])
+    await wrapper.vm.removeOneAssetFromSelection('asset-1')
+    await nextTick()
+
+    expect(modal.props('active')).toBe(true)
+    expect(modal.props('isError')).toBe(false)
+    wrapper.unmount()
+    vi.restoreAllMocks()
+  })
+})
+
+describe('Breakdown page, CSV import', () => {
+  // Close keeps the error of a failed upload: the next import opens without
+  // it.
+  test('opens the import without the error of a past upload', async () => {
+    const { wrapper } = mountPage({
+      actions: {
+        uploadCastingFile: vi.fn(() => Promise.reject(new Error('down')))
+      }
+    })
+    await flushPromises()
+    const importButton = wrapper
+      .findAllComponents({ name: 'ButtonSimple' })
+      .find(button => button.props('icon') === 'import')
+    const importModal = wrapper.findComponent(ImportModal)
+    const renderModal = wrapper.findComponent(ImportRenderModal)
+
+    importButton.vm.$emit('click')
+    importModal.vm.$emit('confirm', 'Name\nHero', 'text')
+    await flushPromises()
+    renderModal.vm.$emit('confirm', [['Name'], ['Hero']])
+    await flushPromises()
+    expect(renderModal.props('isError')).toBe(true)
+
+    renderModal.vm.$emit('cancel')
+    importButton.vm.$emit('click')
+    await nextTick()
+
+    expect(importModal.props('active')).toBe(true)
+    expect(importModal.props('isError')).toBe(false)
+    wrapper.unmount()
   })
 })
 

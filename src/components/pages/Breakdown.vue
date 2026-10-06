@@ -1038,6 +1038,7 @@ const removeOneAssetFromSelection = async assetId => {
       entityId: toConfirm.entityId,
       nbOccurences: 1
     }
+    errors.remove = false
     modals.isRemoveConfirmationDisplayed = true
   }
   const removals = castings
@@ -1069,6 +1070,7 @@ const fillAssetList = async () => {
 }
 
 const showImportModal = () => {
+  errors.importing = false
   modals.importing = true
 }
 
