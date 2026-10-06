@@ -29,13 +29,15 @@
 <script setup>
 import { computed } from 'vue'
 
+import { usePreviewFileStatus } from '@/composables/previewFileStatus'
+
 const props = defineProps({
   previewFileId: {
     type: String
   },
   previewFileStatus: {
     type: String,
-    default: 'ready'
+    default: null
   },
   extension: {
     type: String
@@ -72,13 +74,15 @@ const props = defineProps({
   }
 })
 
-// The server builds the variants in the background: asking for a picture
-// that is not stored yet would only draw a broken image.
-const isProcessing = computed(() => props.previewFileStatus === 'processing')
+const { isBroken, isProcessing, reloadQuery } = usePreviewFileStatus(
+  () => props.previewFileId,
+  () => props.previewFileStatus
+)
 
 const isPreviewWithThumbnail = computed(() => {
   return (
     !isProcessing.value &&
+    !isBroken.value &&
     props.previewFileId &&
     (!props.extension || ['mp4', 'png'].includes(props.extension))
   )
@@ -86,7 +90,8 @@ const isPreviewWithThumbnail = computed(() => {
 
 const thumbnailUrl = computed(() => {
   const base = props.urlPrefix || '/api'
-  return `${base}/pictures/${props.type}/preview-files/${props.previewFileId}.png`
+  const fileName = `${props.previewFileId}.png${reloadQuery.value}`
+  return `${base}/pictures/${props.type}/preview-files/${fileName}`
 })
 </script>
 

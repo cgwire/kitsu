@@ -1,5 +1,8 @@
 <template>
-  <div class="preview-wrapper preview-video" v-if="isMovie && showMovie">
+  <div
+    class="preview-wrapper preview-video"
+    v-if="isPlayableMovie && showMovie"
+  >
     <video-viewer
       ref="videoViewerRef"
       :is-repeating="true"
@@ -32,7 +35,7 @@
       height: emptyHeight ? `${emptyHeight}px` : undefined,
       'border-top-left-radius': isRoundedTopBorder ? '10px' : undefined,
       'border-top-right-radius': isRoundedTopBorder ? '10px' : undefined,
-      'background-image': cover ? `url(${thumbnailPath})` : undefined
+      'background-image': coverImage
     }"
     v-else
   >
@@ -75,6 +78,8 @@ import { ref, computed } from 'vue'
 import { useStore } from 'vuex'
 import { EyeIcon } from 'lucide-vue-next'
 
+import { usePreviewFileStatus } from '@/composables/previewFileStatus'
+
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import VideoViewer from '@/components/players/viewers/VideoViewer.vue'
 
@@ -110,7 +115,7 @@ const props = defineProps({
     type: String
   },
   previewFileStatus: {
-    default: 'ready',
+    default: null,
     type: String
   },
   isRoundedTopBorder: {
@@ -135,29 +140,37 @@ const isMovie = computed(() => {
   return props.entity.preview_file_extension === 'mp4'
 })
 
-// The server builds the variants in the background: asking for a picture
-// that is not stored yet would only draw a broken image.
-const isProcessing = computed(() => props.previewFileStatus === 'processing')
+const previewFileId = computed(
+  () => props.previewFileId || props.entity.preview_file_id
+)
 
-const isBroken = computed(() =>
-  ['broken', 'missing'].includes(props.previewFileStatus)
+const { isBroken, isProcessing, reloadQuery } = usePreviewFileStatus(
+  previewFileId,
+  () => props.previewFileStatus
+)
+
+// A movie still processing has no file to play yet: it waits like a picture.
+const isPlayableMovie = computed(
+  () => isMovie.value && !isProcessing.value && !isBroken.value
 )
 
 const thumbnailPath = computed(() => {
-  const previewFileId = props.previewFileId || props.entity.preview_file_id
-  return `/api/pictures/previews/preview-files/${previewFileId}.png`
+  const fileName = `${previewFileId.value}.png${reloadQuery.value}`
+  return `/api/pictures/previews/preview-files/${fileName}`
 })
 
-const thumbnailKey = computed(() => {
-  const previewFileId = props.previewFileId || props.entity.preview_file_id
-  return `preview-${previewFileId}`
-})
+const thumbnailKey = computed(() => `preview-${previewFileId.value}`)
+
+const coverImage = computed(() =>
+  props.cover && !isProcessing.value && !isBroken.value
+    ? `url(${thumbnailPath.value})`
+    : undefined
+)
 
 const onPictureClicked = () => {
   if (props.noPreview) return
-  const previewFileId = props.previewFileId || props.entity.preview_file_id
-  if (previewFileId) {
-    store.commit('SHOW_PREVIEW_FILE', previewFileId)
+  if (previewFileId.value) {
+    store.commit('SHOW_PREVIEW_FILE', previewFileId.value)
   }
 }
 

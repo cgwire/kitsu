@@ -1,4 +1,5 @@
 import { shallowMount } from '@vue/test-utils'
+import { nextTick, reactive } from 'vue'
 import { createStore } from 'vuex'
 
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
@@ -12,6 +13,20 @@ const mountThumbnail = props => {
     props: { entity, ...props },
     global: { plugins: [store] }
   })
+}
+
+// The socket keeps in the store the statuses Zou announces.
+const mountWithStatuses = (statuses, props) => {
+  const statusMap = reactive(new Map(statuses))
+  const store = createStore({
+    getters: { previewFileStatusMap: () => statusMap }
+  })
+  store.commit = vi.fn()
+  const wrapper = shallowMount(EntityThumbnail, {
+    props: { entity, ...props },
+    global: { plugins: [store] }
+  })
+  return { statusMap, wrapper }
 }
 
 describe('EntityThumbnail', () => {
@@ -45,5 +60,37 @@ describe('EntityThumbnail', () => {
     // A picture the browser tried while it was missing must not be
     // served from the cache.
     expect(img.attributes('src')).toContain('?t=')
+  })
+
+  test('waits for a preview the store knows processing', () => {
+    const { wrapper } = mountWithStatuses([['preview-1', 'processing']])
+    expect(wrapper.find('img').exists()).toBe(false)
+    expect(wrapper.find('.thumbnail-processing').exists()).toBe(true)
+  })
+
+  // The picture may have been asked for before the store knew the preview.
+  test('asks again for the picture once the store knows it ready', async () => {
+    const { statusMap, wrapper } = mountWithStatuses([])
+    expect(wrapper.find('img').attributes('src')).not.toContain('?t=')
+
+    statusMap.set('preview-1', 'ready')
+    await nextTick()
+
+    expect(wrapper.find('img').attributes('src')).toContain('?t=')
+  })
+
+  test('takes the ready status the store knows over a processing one given', () => {
+    const { wrapper } = mountWithStatuses([['preview-1', 'ready']], {
+      previewFileStatus: 'processing'
+    })
+    expect(wrapper.find('img').exists()).toBe(true)
+  })
+
+  test('leaves a broken preview empty, its reason in the title', () => {
+    const { wrapper } = mountWithStatuses([['preview-1', 'broken']])
+    expect(wrapper.find('img').exists()).toBe(false)
+    expect(wrapper.find('.thumbnail-empty').attributes('title')).toBe(
+      'preview.broken'
+    )
   })
 })
