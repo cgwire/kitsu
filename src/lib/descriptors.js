@@ -52,12 +52,22 @@ export const getDescriptorChecklistValues = descriptor => {
 }
 
 export const getMetadataChecklistValues = (descriptor, entity) => {
-  let values
-  try {
-    values = JSON.parse(getMetadataFieldValue(descriptor, entity))
-  } catch {
-    values = {}
+  let stored = getMetadataFieldValue(descriptor, entity)
+  if (typeof stored === 'string') {
+    try {
+      stored = JSON.parse(stored)
+    } catch {
+      stored = null
+    }
   }
+  // A value written for another type of column ("true" left by a boolean
+  // one, a number from a CSV import) reads as an empty checklist. Callers
+  // tick an option on the result: a stored object is copied, so the store
+  // keeps its value until the save.
+  const values =
+    stored && typeof stored === 'object' && !Array.isArray(stored)
+      ? { ...stored }
+      : {}
   getDescriptorChecklistValues(descriptor).forEach(option => {
     if (!(option.text in values)) {
       values[option.text] = option.checked
