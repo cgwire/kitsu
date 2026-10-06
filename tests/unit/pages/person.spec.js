@@ -112,4 +112,26 @@ describe('Person page', () => {
       wrapper.unmount()
     })
   })
+
+  describe('days off', () => {
+    // The timesheet clears the error of a refused confirm each time it opens
+    // a day-off form
+    it('lets the timesheet clear a refused day off error', async () => {
+      const message = 'Day off already exists for this period'
+      const wrapper = await mountPage({
+        actions: { setDayOff: () => Promise.reject({ body: { message } }) },
+        query: { section: 'timesheets' }
+      })
+      const timesheetList = wrapper.findComponent(TimesheetList)
+
+      timesheetList.vm.$emit('set-day-off', { date: '2026-10-01' })
+      await flushPromises()
+      expect(timesheetList.props('dayOffError')).toBe(message)
+      timesheetList.vm.$emit('update:day-off-error', false)
+      await flushPromises()
+
+      expect(timesheetList.props('dayOffError')).toBe(false)
+      wrapper.unmount()
+    })
+  })
 })

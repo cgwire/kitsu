@@ -5,6 +5,7 @@ import { createStore } from 'vuex'
 
 import TimesheetList from '@/components/lists/TimesheetList.vue'
 import DayOffModal from '@/components/modals/DayOffModal.vue'
+import DeleteModal from '@/components/modals/DeleteModal.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import DateField from '@/components/widgets/DateField.vue'
 
@@ -116,6 +117,55 @@ describe('lists/TimesheetList', () => {
 
       expect(modal.props('active')).toBe(true)
       expect(fieldDates(modal)).toEqual([day, day])
+    })
+  })
+
+  // The page keeps the error of a refused confirm until a new confirm:
+  // every form opened after a cancel showed it.
+  describe('day-off error', () => {
+    const error = 'Day off already exists for this period'
+
+    // Bound with v-model, as the pages do. The day off covers 2026-08-05.
+    const mountListWithError = dayOffError => {
+      const wrapper = mountListWithForm({
+        initialDate: '2026-08-04',
+        daysOff: [
+          { id: 'day-off-1', date: '2026-08-05', end_date: '2026-08-05' }
+        ],
+        dayOffError,
+        'onUpdate:dayOffError': value =>
+          wrapper.setProps({ dayOffError: value })
+      })
+      return wrapper
+    }
+
+    it('opens the day off form again without the error', async () => {
+      const wrapper = mountListWithError(false)
+      const modal = wrapper.findComponent(DayOffModal)
+
+      await openDayOffModal(wrapper)
+      await modal.find('form').trigger('submit')
+      await wrapper.setProps({ dayOffError: error })
+      expect(modal.find('.is-danger').text()).toBe(error)
+      await modal.find('.button.is-link').trigger('click')
+      expect(modal.props('active')).toBe(false)
+      await openDayOffModal(wrapper)
+
+      expect(modal.props('active')).toBe(true)
+      expect(modal.find('.is-danger').exists()).toBe(false)
+    })
+
+    it('opens the delete confirmation without the error', async () => {
+      const wrapper = mountListWithError(error)
+
+      await wrapper
+        .findComponent(DateField)
+        .vm.$emit('update:model-value', moment('2026-08-05').toDate())
+      await openDayOffModal(wrapper)
+
+      const modal = wrapper.findComponent(DeleteModal)
+      expect(modal.props('active')).toBe(true)
+      expect(modal.find('p.is-danger').exists()).toBe(false)
     })
   })
 })

@@ -233,6 +233,33 @@ describe('Todos page', () => {
       expect(dayOffList.props('daysOff')).toEqual([dayOff])
       wrapper.unmount()
     })
+
+    // The lists clear the error of a refused confirm each time they open a
+    // day-off form
+    it.each([
+      ['daysoff', DayOffListStub],
+      ['timesheets', TimesheetList]
+    ])(
+      'lets the %s list clear a refused day off error',
+      async (section, list) => {
+        const message = 'Day off already exists for this period'
+        const wrapper = await mountPage([], {
+          actions: { setDayOff: () => Promise.reject({ body: { message } }) },
+          query: { section }
+        })
+        await flushPromises()
+        const dayOffList = wrapper.findComponent(list)
+
+        dayOffList.vm.$emit('set-day-off', { date: '2026-10-01' })
+        await flushPromises()
+        expect(dayOffList.props('dayOffError')).toBe(message)
+        dayOffList.vm.$emit('update:day-off-error', false)
+        await nextTick()
+
+        expect(dayOffList.props('dayOffError')).toBe(false)
+        wrapper.unmount()
+      }
+    )
   })
 
   describe('time spent', () => {

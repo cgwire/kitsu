@@ -114,7 +114,7 @@
             :is-loading="isTasksLoading"
             :is-error="isTasksLoadingError"
             :days-off="daysOff"
-            :day-off-error="dayOffError"
+            v-model:day-off-error="dayOffError"
             :time-spent-map="personTimeSpentMap"
             :time-spent-total="personTimeSpentTotal"
             :hide-day-off="!(isCurrentUserAdmin || user.id === person.id)"

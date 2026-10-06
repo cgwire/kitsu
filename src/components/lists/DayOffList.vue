@@ -134,7 +134,11 @@ const props = defineProps({
   }
 })
 
-defineEmits(['set-day-off', 'unset-day-off'])
+const emit = defineEmits([
+  'set-day-off',
+  'unset-day-off',
+  'update:day-off-error'
+])
 
 // State
 // --------------------------------------------------------------------------
@@ -172,12 +176,15 @@ const sortedDaysOff = computed(() =>
 // form do: the user time zone would name the day before west of UTC.
 const formatUtcDay = date => (date ? moment.utc(date).format('YYYY-MM-DD') : '')
 
+// The page keeps the error of a refused confirm: each form opens without it.
 const openSetDayOffModal = (dayOff = null) => {
+  emit('update:day-off-error', false)
   dayOffToEdit.value = dayOff || { date: getUserDay().toDate() }
   modals.setDayOff = true
 }
 
 const openUnsetDayOffModal = dayOff => {
+  emit('update:day-off-error', false)
   dayOffToEdit.value = dayOff
   modals.unsetDayOff = true
 }

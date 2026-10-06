@@ -294,7 +294,8 @@ const emit = defineEmits([
   'date-changed',
   'set-day-off',
   'time-spent-change',
-  'unset-day-off'
+  'unset-day-off',
+  'update:day-off-error'
 ])
 
 // State
@@ -366,7 +367,9 @@ const onSliderChange = valueInfo => {
 
 const entityPath = entity => getTaskEntityPath(entity, entity.episode_id)
 
+// The page keeps the error of a refused confirm: each form opens without it.
 const toggleDayOff = () => {
+  emit('update:day-off-error', false)
   if (personIsDayOff.value) {
     modals.unsetDayOff = true
   } else {

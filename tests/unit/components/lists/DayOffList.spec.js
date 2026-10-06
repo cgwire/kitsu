@@ -88,6 +88,67 @@ describe('DayOffList', () => {
     })
   })
 
+  // The page keeps the error of a refused confirm until a new confirm:
+  // every form opened after a cancel showed it.
+  describe('day-off error', () => {
+    const error = 'Day off already exists for this period'
+
+    // Bound with v-model, as the page does
+    const mountListWithError = () => {
+      const wrapper = mountListWithForm({
+        daysOff: [
+          { id: 'day-off-1', date: '2026-08-03', end_date: '2026-08-05' }
+        ],
+        dayOffError: false,
+        'onUpdate:dayOffError': dayOffError => wrapper.setProps({ dayOffError })
+      })
+      return wrapper
+    }
+
+    const refuseAdd = async wrapper => {
+      const modal = wrapper.findComponent(DayOffModal)
+      await clickAdd(wrapper)
+      await modal.find('form').trigger('submit')
+      await wrapper.setProps({ dayOffError: error })
+      expect(modal.find('.is-danger').text()).toBe(error)
+      await modal.find('.button.is-link').trigger('click')
+      expect(modal.props('active')).toBe(false)
+    }
+
+    it('opens the add form again without the error', async () => {
+      const wrapper = mountListWithError()
+      const modal = wrapper.findComponent(DayOffModal)
+
+      await refuseAdd(wrapper)
+      await clickAdd(wrapper)
+
+      expect(modal.props('active')).toBe(true)
+      expect(modal.find('.is-danger').exists()).toBe(false)
+    })
+
+    it('opens the edit form without the error', async () => {
+      const wrapper = mountListWithError()
+      const modal = wrapper.findComponent(DayOffModal)
+
+      await refuseAdd(wrapper)
+      await wrapper.find('.actions button').trigger('click')
+
+      expect(modal.props('active')).toBe(true)
+      expect(modal.find('.is-danger').exists()).toBe(false)
+    })
+
+    it('opens the delete confirmation without the error', async () => {
+      const wrapper = mountListWithError()
+
+      await refuseAdd(wrapper)
+      await wrapper.findAll('.actions button')[1].trigger('click')
+
+      const modal = wrapper.findComponent(DeleteModal)
+      expect(modal.props('active')).toBe(true)
+      expect(modal.props('isError')).toBe(false)
+    })
+  })
+
   // The rows hold their days at UTC midnight for the utc date fields of the
   // form: west of UTC, that instant still falls on the day before.
   describe('delete confirmation', () => {
