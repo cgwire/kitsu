@@ -195,13 +195,13 @@ watch(
 <style lang="scss" scoped>
 .dark {
   table .thumbnail-picture.thumbnail-empty {
-    background: $dark-grey-lighter;
+    background-color: $dark-grey-lighter;
     border-color: $dark-grey-light;
   }
 
   .thumbnail-picture,
   span.thumbnail-empty {
-    background: $dark-grey-light;
+    background-color: $dark-grey-light;
     border-color: $dark-grey;
   }
 }
@@ -211,8 +211,9 @@ watch(
   margin: 0;
 }
 
+// The background longhands leave the processing shimmer gradient alone.
 span.thumbnail-empty {
-  background: $white-grey;
+  background-color: $white-grey;
   display: block;
   margin: 0;
 }
@@ -223,7 +224,7 @@ span.thumbnail-empty {
 }
 
 table .thumbnail-picture.thumbnail-empty {
-  background: $white-grey;
+  background-color: $white-grey;
   border: 1px solid $light-grey;
   margin: 0;
 }
@@ -279,7 +280,8 @@ table .thumbnail-picture {
 
 // Respect a reader who asked the system for less movement.
 @media (prefers-reduced-motion: reduce) {
-  .thumbnail-processing {
+  .thumbnail-processing,
+  .dark .thumbnail-processing {
     animation: none;
     background-image: none;
     opacity: 0.6;

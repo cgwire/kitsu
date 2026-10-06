@@ -1253,7 +1253,7 @@ span.thumbnail-empty {
   display: block;
   width: 50px;
   height: 30px;
-  background: #f3f3f3;
+  background-color: #f3f3f3;
 }
 
 .datatable-row th.name {
