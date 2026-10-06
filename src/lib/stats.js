@@ -98,6 +98,29 @@ export const roundPercent = ratio => {
   return percent
 }
 
+// Below this share, the slice of a 50px pie hardly shows past its white
+// outline.
+const PIE_MIN_SHARE = 0.03
+
+// Values to draw a pie with: a status under the minimum share is drawn
+// larger, or a single shot left in retake vanishes from a full pie. The
+// statuses raised share one minimum share of extra room at most, so a few
+// stragglers barely shrink the other slices.
+export const getPieChartData = chartData => {
+  const total = chartData.reduce((sum, row) => sum + (row[1] || 0), 0)
+  const minValue = total * PIE_MIN_SHARE
+  const isSmall = row => row[1] > 0 && row[1] < minValue
+  const extra = chartData
+    .filter(isSmall)
+    .reduce((sum, row) => sum + minValue - row[1], 0)
+  const scale = extra > minValue ? minValue / extra : 1
+  return chartData.map(row =>
+    isSmall(row)
+      ? [row[0], row[1] + (minValue - row[1]) * scale, ...row.slice(2)]
+      : row
+  )
+}
+
 // Get all colors displayed in statistics (needed by the stat cell widget).
 export const getChartColors = (mainStats, entry, column) => {
   return getChartData(mainStats, entry, column).map(entry => entry[2])

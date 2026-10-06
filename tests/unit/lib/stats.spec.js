@@ -9,6 +9,7 @@ import {
   getChartColors,
   getDoneRatio,
   getPercentage,
+  getPieChartData,
   getRetakeChartData,
   getStatusColor,
   omitRetakeStatsColumns,
@@ -390,6 +391,51 @@ describe('lib/stats', () => {
   it('roundPercent reads 0 and 100 only for an empty and a full share', () => {
     expect(roundPercent(249 / 250)).toBe(99)
     expect(roundPercent(1 / 250)).toBe(1)
+  })
+
+  it('getPieChartData draws a small share at the minimum share', () => {
+    const rows = [
+      ['retake', 1, 'red', false],
+      ['other', 0, 'grey', false],
+      ['done', 249, 'green', true]
+    ]
+    expect(getPieChartData(rows)).toEqual([
+      ['retake', 7.5, 'red', false],
+      ['other', 0, 'grey', false],
+      ['done', 249, 'green', true]
+    ])
+  })
+
+  it('getPieChartData gives the small shares one minimum share of room', () => {
+    // Raised to 3% each, 8 stragglers would draw the done slice at 80%.
+    const rows = [
+      ...Array.from({ length: 8 }, (_, i) => [`wip${i}`, 1, 'blue', false]),
+      ['done', 992, 'green', true]
+    ]
+    const drawn = getPieChartData(rows)
+    expect(drawn.reduce((sum, row) => sum + row[1], 0)).toBeCloseTo(1030)
+    expect(drawn[8]).toEqual(['done', 992, 'green', true])
+  })
+
+  it('getPieChartData keeps the small shares in order', () => {
+    const rows = [
+      ['hold', 2, 'grey', false],
+      ['ready', 4, 'orange', false],
+      ['wfa', 10, 'purple', false],
+      ['done', 584, 'green', true]
+    ]
+    const [hold, ready, wfa] = getPieChartData(rows).map(row => row[1])
+    expect(hold).toBeLessThan(ready)
+    expect(ready).toBeLessThan(wfa)
+  })
+
+  it('getPieChartData keeps the shares large enough to see', () => {
+    const rows = [
+      ['done', 3, 'green', true],
+      ['wip', 1, 'blue', false]
+    ]
+    expect(getPieChartData(rows)).toEqual(rows)
+    expect(getPieChartData([])).toEqual([])
   })
 
   it('getChartColors', () => {
