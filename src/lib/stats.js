@@ -89,6 +89,15 @@ export const getDoneRatio = chartData => {
   return total > 0 ? done / total : 0
 }
 
+// Share as a whole percentage, where only an empty share reads 0 and only a
+// full one 100: a single shot left in retake must not show as complete.
+export const roundPercent = ratio => {
+  const percent = Math.round(ratio * 100)
+  if (ratio > 0 && percent === 0) return 1
+  if (ratio < 1 && percent === 100) return 99
+  return percent
+}
+
 // Get all colors displayed in statistics (needed by the stat cell widget).
 export const getChartColors = (mainStats, entry, column) => {
   return getChartData(mainStats, entry, column).map(entry => entry[2])

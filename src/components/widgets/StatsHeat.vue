@@ -5,7 +5,7 @@
     :title="`${done} / ${total}`"
     v-if="total > 0"
   >
-    <span class="share">{{ Math.round(ratio * 100) }}%</span>
+    <span class="share">{{ roundPercent(ratio) }}%</span>
   </div>
 </template>
 
@@ -19,7 +19,7 @@
 // --------------------------------------------------------------------------
 import { computed } from 'vue'
 
-import { getDoneRatio } from '@/lib/stats'
+import { getDoneRatio, roundPercent } from '@/lib/stats'
 
 // Props / Emits
 // --------------------------------------------------------------------------

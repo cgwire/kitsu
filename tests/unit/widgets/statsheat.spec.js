@@ -16,6 +16,19 @@ describe('StatsHeat', () => {
     expect(wrapper.find('.stats-heat').text()).toBe('75%')
   })
 
+  it('reads 100% and 0% only for a full and an empty share', () => {
+    const almostDone = mountHeat([
+      ['done', 249, 'green', true],
+      ['retake', 1, 'red', false]
+    ])
+    const barelyStarted = mountHeat([
+      ['done', 1, 'green', true],
+      ['wip', 249, 'blue', false]
+    ])
+    expect(almostDone.find('.stats-heat').text()).toBe('99%')
+    expect(barelyStarted.find('.stats-heat').text()).toBe('1%')
+  })
+
   it('gets more intense as the done share grows', () => {
     const none = heat(mountHeat([['wip', 4, 'blue', false]]))
     const half = heat(

@@ -23,7 +23,7 @@
 // --------------------------------------------------------------------------
 import { computed } from 'vue'
 
-import { getDoneRatio } from '@/lib/stats'
+import { getDoneRatio, roundPercent } from '@/lib/stats'
 
 // Props / Emits
 // --------------------------------------------------------------------------
@@ -43,7 +43,7 @@ const segments = computed(() =>
     .map(([name, value, color]) => ({
       value,
       color,
-      title: `${name}: ${value} (${Math.round((value / total.value) * 100)}%)`
+      title: `${name}: ${value} (${roundPercent(value / total.value)}%)`
     }))
 )
 
@@ -51,7 +51,7 @@ const summary = computed(() =>
   segments.value.map(segment => segment.title).join(', ')
 )
 
-const donePercent = computed(() => Math.round(getDoneRatio(props.data) * 100))
+const donePercent = computed(() => roundPercent(getDoneRatio(props.data)))
 </script>
 
 <style lang="scss" scoped>

@@ -12,7 +12,8 @@ import {
   getRetakeChartData,
   getStatusColor,
   omitRetakeStatsColumns,
-  omitStatsColumns
+  omitStatsColumns,
+  roundPercent
 } from '@/lib/stats'
 
 const taskMap = new Map(Object.entries({
@@ -377,6 +378,18 @@ describe('lib/stats', () => {
     expect(getDoneRatio(rows)).toBe(0.75)
     expect(getDoneRatio([['wip', 2, 'blue', false]])).toBe(0)
     expect(getDoneRatio([])).toBe(0)
+  })
+
+  it('roundPercent', () => {
+    expect(roundPercent(0)).toBe(0)
+    expect(roundPercent(0.334)).toBe(33)
+    expect(roundPercent(0.75)).toBe(75)
+    expect(roundPercent(1)).toBe(100)
+  })
+
+  it('roundPercent reads 0 and 100 only for an empty and a full share', () => {
+    expect(roundPercent(249 / 250)).toBe(99)
+    expect(roundPercent(1 / 250)).toBe(1)
   })
 
   it('getChartColors', () => {
