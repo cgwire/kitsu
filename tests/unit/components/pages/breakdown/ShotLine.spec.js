@@ -151,7 +151,7 @@ describe('ShotLine, asset drop', () => {
 describe('ShotLine, number cells', () => {
   // The breakdown saves each key into the shot of the line without rendering
   // it again: a click on the line, which selects it, does.
-  const mountNumberLine = () =>
+  const mountNumberLine = props =>
     mountLine(
       {
         entity: markRaw({ id: 'shot-b', nb_frames: null, data: {} }),
@@ -161,7 +161,8 @@ describe('ShotLine, number cells', () => {
         },
         onMetadataChanged: ({ entry, descriptor, value }) => {
           entry.data[descriptor.field_name] = value
-        }
+        },
+        ...props
       },
       {
         isFrameIn: () => true,
@@ -213,5 +214,41 @@ describe('ShotLine, number cells', () => {
     await field.clear()
 
     expect(savedValues(wrapper, 'field-changed')).toEqual([1, 12, null])
+  })
+
+  describe('metadata columns', () => {
+    const descriptor = (field_name, data_type) => ({
+      id: field_name,
+      field_name,
+      data_type,
+      choices: [],
+      departments: []
+    })
+    const mountColumnsLine = () =>
+      mountNumberLine({
+        metadataDescriptors: [
+          descriptor('drawings', 'number'),
+          descriptor('brief', 'string')
+        ]
+      })
+
+    // Read as a number from a text field, each key saved no value.
+    test('saves the number typed in a number column', async () => {
+      const wrapper = mountColumnsLine()
+      const field = useNumberField(
+        wrapper.findAll('.metadata-descriptor input')[0].element
+      )
+
+      expect(await field.type('2.05')).toEqual(['2', '2.', '2.0', '2.05'])
+      expect(savedValues(wrapper)).toEqual([2, 2, 2.05])
+    })
+
+    test('saves the text typed in a text column', async () => {
+      const wrapper = mountColumnsLine()
+
+      await wrapper.findAll('.metadata-descriptor input')[1].setValue('Run')
+
+      expect(savedValues(wrapper)).toEqual(['Run'])
+    })
   })
 })

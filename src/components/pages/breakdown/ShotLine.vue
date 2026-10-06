@@ -177,9 +177,21 @@
       >
         <input
           class="input-editor"
+          type="number"
+          step="any"
+          @input="event => onMetadataFieldChanged(entity, descriptor, event)"
+          v-number-value="getMetadataFieldValue(descriptor, entity)"
+          v-if="
+            descriptor.choices.length === 0 &&
+            descriptor.data_type === 'number' &&
+            canEditDescriptor(descriptor)
+          "
+        />
+        <input
+          class="input-editor"
           @input="event => onMetadataFieldChanged(entity, descriptor, event)"
           :value="getMetadataFieldValue(descriptor, entity)"
-          v-if="
+          v-else-if="
             descriptor.choices.length === 0 && canEditDescriptor(descriptor)
           "
         />
