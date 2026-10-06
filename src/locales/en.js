@@ -921,6 +921,7 @@ export default {
     move_action_bar: 'Move action bar',
     nb_drawings: 'drawing | drawings',
     nb_frames: 'frame | frames',
+    next: 'Next',
     no: 'No',
     no_estimation: 'No estimation',
     no_results: 'No results',
@@ -932,6 +933,7 @@ export default {
     people: 'People',
     preview_3d_not_supported:
       '3D previews are not supported in this browser (WebGL2 is required). Please update it to its latest version.',
+    previous: 'Previous',
     profile: 'Profile',
     production: 'Production',
     record_audio: 'Record audio',

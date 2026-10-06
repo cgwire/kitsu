@@ -701,6 +701,23 @@ watch(assetOptions, options => {
   }
 })
 
+// The full screen preview modal walks through the shown pictures with the
+// arrow keys. Movies play in their card and never reach the modal.
+watch(
+  filteredConcepts,
+  concepts =>
+    store.commit(
+      'SET_PREVIEW_FILES_TO_BROWSE',
+      concepts
+        .filter(
+          concept =>
+            concept.preview_file_id && concept.preview_file_extension !== 'mp4'
+        )
+        .map(concept => concept.preview_file_id)
+    ),
+  { immediate: true }
+)
+
 // Lifecycle
 // --------------------------------------------------------------------------
 onMounted(() => {
@@ -709,6 +726,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   socket.off('task:status-changed', onTaskStatusChanged)
+  store.commit('SET_PREVIEW_FILES_TO_BROWSE', [])
 })
 
 // Head

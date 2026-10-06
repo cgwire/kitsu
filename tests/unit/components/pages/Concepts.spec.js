@@ -636,6 +636,41 @@ describe('Concepts page', () => {
     expect(wrapper.find('.drop-mask').exists()).toBe(true)
   })
 
+  // The full screen preview modal browses these with the arrow keys.
+  test('hands the shown previews over to the preview modal, in order', async () => {
+    const { store, wrapper } = await mountPage({
+      concepts: [
+        {
+          ...buildConcept('concept-old'),
+          created_at: '2026-01-01',
+          preview_file_id: 'preview-concept-old'
+        },
+        {
+          ...buildConcept('concept-new'),
+          created_at: '2026-02-01',
+          preview_file_id: 'preview-concept-new'
+        },
+        // Movies play in their card: the modal only shows pictures.
+        {
+          ...buildConcept('concept-movie'),
+          preview_file_extension: 'mp4',
+          preview_file_id: 'preview-concept-movie'
+        }
+      ]
+    })
+
+    expect(store.commit).toHaveBeenCalledWith('SET_PREVIEW_FILES_TO_BROWSE', [
+      'preview-concept-new',
+      'preview-concept-old'
+    ])
+
+    wrapper.unmount()
+    expect(store.commit).toHaveBeenLastCalledWith(
+      'SET_PREVIEW_FILES_TO_BROWSE',
+      []
+    )
+  })
+
   test('folds the extra filters until asked for more', async () => {
     const { wrapper } = await mountPage()
     const filters = wrapper.find('.filters')
