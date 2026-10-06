@@ -32,7 +32,6 @@ import {
   getWeekRange,
   hoursToDays,
   minutesToDays,
-  minutesToDuration,
   monthToString,
   parseDate,
   parseSimpleDate,
@@ -441,16 +440,6 @@ describe('time', () => {
     expect(hoursToDays({ hours_by_day: 8 }, 16)).toEqual(2)
     expect(hoursToDays({ hours_by_day: 7 }, 21)).toEqual(3)
     expect(hoursToDays({ hours_by_day: 7 }, undefined)).toEqual(0)
-  })
-  test('minutesToDuration', () => {
-    const hoursOrganisation = {
-      format_duration_in_hours: true,
-      hours_by_day: 7
-    }
-    expect(minutesToDuration({ hours_by_day: 7 }, 8 * 7 * 60)).toEqual(8)
-    expect(minutesToDuration(hoursOrganisation, 8 * 7 * 60)).toEqual(56)
-    expect(minutesToDuration(hoursOrganisation, 90)).toEqual(1.5)
-    expect(minutesToDuration(hoursOrganisation, undefined)).toEqual(0)
   })
   test('durationToMinutes', () => {
     const hoursOrganisation = {

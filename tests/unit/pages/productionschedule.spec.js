@@ -147,6 +147,7 @@ const mountPage = async ({
   actions = {},
   getters = {},
   query = {},
+  stubs = {},
   versions = []
 } = {}) => {
   const storeActions = {
@@ -221,7 +222,7 @@ const mountPage = async ({
       mocks: {
         $t: (key, values) => (values ? `${key} ${JSON.stringify(values)}` : key)
       },
-      stubs: { Schedule: scheduleWidget }
+      stubs: { Schedule: scheduleWidget, ...stubs }
     }
   })
   mountedPage = wrapper
@@ -519,6 +520,52 @@ describe('ProductionSchedule page', () => {
             due_date: '2026-02-10'
           }
         })
+      }
+    )
+
+    // The field takes 0.01 steps: an estimation shown with more decimals
+    // failed the form validation, and Apply did nothing.
+    it.each([
+      ['days', false, 500, '1.04', '2026-02-10'],
+      ['hours', true, 50, '0.83', '2026-02-09']
+    ])(
+      'applies a task whose estimation has more decimals in %s',
+      async (_, isDurationInHours, minutes, shown, dueDate) => {
+        const { storeActions, wrapper } = await mountPage({
+          getters: {
+            organisation: () => ({
+              hours_by_day: 8,
+              format_duration_in_hours: isDurationInHours
+            })
+          },
+          stubs: { TextField: false }
+        })
+        const task = {
+          type: 'Task',
+          id: 'task-1',
+          entity: { id: 'asset-1', name: 'Cat' },
+          estimation: minutes,
+          assignees: [],
+          startDate: day('2026-02-09'),
+          endDate: day('2026-02-09')
+        }
+        await selectTask(wrapper, buildAssetTypeBars()[0], task)
+
+        // what a click on Apply does, validation included
+        wrapper.find('.side-column form').element.requestSubmit()
+        await flushPromises()
+
+        // the estimation left as shown keeps its minutes
+        expect(payloadsOf(storeActions.updateTask)[0]).toEqual({
+          taskId: 'task-1',
+          data: {
+            estimation: minutes,
+            start_date: '2026-02-09',
+            due_date: dueDate
+          }
+        })
+        const field = wrapper.find('.side-column .estimation input')
+        expect(field.element.value).toBe(shown)
       }
     )
   })

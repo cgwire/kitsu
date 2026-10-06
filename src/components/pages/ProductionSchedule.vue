@@ -616,7 +616,6 @@ import {
   getDayOffRange,
   getUserDay,
   minutesToDays,
-  minutesToDuration,
   parseDate,
   parseSimpleDate
 } from '@/lib/time'
@@ -2009,7 +2008,10 @@ const selectTaskElement = (taskType, entityTypeRow, task, selection) => {
   assignments.value.endDate = end_date
   assignments.value.task = {
     ...task,
-    estimation: minutesToDuration(organisation.value, task.estimation),
+    // rounded like any estimation shown: the 0.01 steps of the field
+    // refused more decimals, which blocked Apply
+    estimation: formatDuration(task.estimation, false),
+    estimationMinutes: task.estimation,
     startDate: task.startDate.format('YYYY-MM-DD'),
     endDate: task.endDate.format('YYYY-MM-DD')
   }
@@ -2018,6 +2020,12 @@ const selectTaskElement = (taskType, entityTypeRow, task, selection) => {
     .map(person => person.id)
   assignments.value.unassign = true
 }
+
+// Left as shown, the rounded estimation keeps the minutes it stands for.
+const getTaskEstimation = ({ estimation, estimationMinutes }) =>
+  estimation === formatDuration(estimationMinutes, false)
+    ? estimationMinutes
+    : durationToMinutes(organisation.value, estimation)
 
 const closeSidePanel = () => {
   isSidePanelOpen.value = false
@@ -2313,10 +2321,7 @@ const saveTask = async () => {
       ...assignments.value.task,
       startDate: parseDate(assignments.value.task.startDate),
       endDate: parseDate(assignments.value.task.endDate),
-      estimation: durationToMinutes(
-        organisation.value,
-        assignments.value.task.estimation
-      ),
+      estimation: getTaskEstimation(assignments.value.task),
       assignees: availablePersons.value.map(person => person.id)
     }
     // update task and assignments
