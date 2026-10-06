@@ -1650,6 +1650,9 @@ watch(
 
 onMounted(() => {
   customAction.value = customActions.value[0] ?? {}
+  // The task panel shows this one with its selection already made: the
+  // watchers only see the changes that follow.
+  autoChooseSelectBar()
 })
 
 onBeforeUnmount(() => {
