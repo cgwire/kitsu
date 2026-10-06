@@ -8,6 +8,7 @@
       :empty-height="200"
       :empty-width="300"
       :height="200"
+      :preview-file-status="previewFile.status"
       :width="300"
       is-rounded-top-border
       show-movie
