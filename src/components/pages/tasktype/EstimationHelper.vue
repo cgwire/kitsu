@@ -244,7 +244,7 @@ import {
 import { getEntityMap } from '@/composables/entity'
 import { useFormat } from '@/composables/format'
 import { isSupervisorInDepartments } from '@/lib/descriptors'
-import { minutesToDays, range } from '@/lib/time'
+import { durationToMinutes, minutesToDays, range } from '@/lib/time'
 import { frameToSeconds } from '@/lib/video'
 
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
@@ -353,18 +353,21 @@ const getSeconds = task => {
 const estimationUpdated = (event, task) => {
   const value = event.target.value
   if (value) {
-    saveEstimations(parseFloat(value), task)
+    saveEstimations(
+      durationToMinutes(organisation.value, parseFloat(value)),
+      task
+    )
   }
 }
 
-const saveEstimations = (days, task) => {
+const saveEstimations = (estimation, task) => {
   const selection = Object.keys(selectionGrid.value)
   if (selection.length > 1) {
     selection.forEach(taskId => {
-      emit('estimation-changed', { taskId, days })
+      emit('estimation-changed', { taskId, estimation })
     })
   } else {
-    emit('estimation-changed', { taskId: task.id, days })
+    emit('estimation-changed', { taskId: task.id, estimation })
   }
 }
 

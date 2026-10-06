@@ -449,7 +449,6 @@ import { sortByMetadata, sortByName, sortPeople } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
 import {
   addBusinessDays,
-  daysToMinutes,
   formatSimpleDate,
   getDatesFromStartDate,
   minutesToDays,
@@ -1294,8 +1293,7 @@ const onExportClick = () => {
   csv.buildCsvFile(name, taskLines)
 }
 
-const updateEstimation = ({ taskId, days, item, daysOff }) => {
-  const estimation = daysToMinutes(organisation.value, days)
+const updateEstimation = ({ taskId, estimation, item, daysOff }) => {
   const task = taskMap.value.get(taskId)
   let data = { estimation }
   if (task.start_date) {
