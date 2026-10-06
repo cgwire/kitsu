@@ -2024,29 +2024,44 @@
       "send_error": "메시지를 보내는 동안 오류가 발생했습니다."
     },
     "concepts": {
-      "add_links": "에셋에 링크 추가",
-      "add_new_concept": "새로운 개념 추가",
+      "actions": {
+        "empty": "링크 없음",
+        "remove_link": "링크 제거",
+        "title": "개념에 대한 링크"
+      },
       "add_concept": "새로운 개념에 대한 파일 추가",
       "add_concept_error": "개념을 추가하는 동안 오류가 발생했습니다.",
+      "add_links": "에셋에 링크 추가",
+      "add_new_concept": "새로운 개념 추가",
       "delete_for_selection": "선택한 개념 삭제하기 | {nbSelectedConcepts} 선택한 개념 삭제하기",
+      "delete_for_selection_hard_lock_text": "삭제",
+      "delete_for_selection_hard_text": "선택한 컨셉을 영구적으로 제거하시겠습니까? 관련 작업, 댓글, 미리보기도 모두 삭제됩니다. 아래에 '삭제'를 입력하여 확인해주세요.",
+      "drop_new_concepts": "새로운 컨셉 파일을 여기에 드롭하세요.",
       "empty": "이 프로덕션에는 컨셉이 없습니다.",
+      "fields": {
+        "asset": "어셋",
+        "asset_type": "어셋 종류",
+        "created_at": "생성 날짜",
+        "entity_type": "엔티티 유형",
+        "last_comment_date": "마지막 댓글",
+        "publisher": "게시자",
+        "updated_at": "업데이트 날짜"
+      },
+      "folders": {
+        "delete": "폴더 삭제",
+        "delete_error": "이 폴더를 삭제하는 중 오류가 발생했습니다.",
+        "delete_text": "{name} 폴더를 삭제하시겠습니까? 폴더의 개념은 유지되며 루트로 돌아갑니다.",
+        "edit_error": "이 폴더를 저장하는 중 오류가 발생했습니다. 다른 폴더가 이미 이 이름을 사용하고 있을 수 있습니다.",
+        "empty": "이 폴더는 비어 있습니다",
+        "move": "폴더로 이동",
+        "name": "폴더 이름",
+        "new": "새 폴더",
+        "none": "폴더 없음",
+        "rename": "폴더 이름 바꾸기"
+      },
       "multiple_delete_error": "개념을 삭제하는 동안 오류가 발생했습니다. 현재 연결된 기존 데이터가 있을 수 있습니다. 선택한 개념에 연결된 작업이 없는 것이 확실합니까?",
       "no_concept_selected": "선택한 개념 없음",
-      "title": "개념",
-      "fields": {
-        "entity_type": "엔티티 유형",
-        "created_at": "생성 날짜",
-        "updated_at": "업데이트 날짜",
-        "last_comment_date": "마지막 댓글",
-        "publisher": "게시자"
-      },
-      "actions": {
-        "title": "개념에 대한 링크",
-        "empty": "링크 없음"
-      },
-      "delete_for_selection_hard_text": "선택한 컨셉을 영구적으로 제거하시겠습니까? 관련 작업, 댓글, 미리보기도 모두 삭제됩니다. 아래에 '삭제'를 입력하여 확인해주세요.",
-      "delete_for_selection_hard_lock_text": "삭제",
-      "drop_new_concepts": "새로운 컨셉 파일을 여기에 드롭하세요."
+      "title": "개념"
     },
     "intro": {
       "join_discord": "커뮤니티 Discord에 참여하기",

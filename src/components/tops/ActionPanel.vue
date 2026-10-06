@@ -143,10 +143,31 @@
           v-if="
             isCurrentViewConcept &&
             (isCurrentUserManager || isConceptPublisher) &&
-            isTaskSelection
+            nbSelectedConcepts > 0
           "
         >
           <link-icon />
+        </div>
+
+        <div
+          class="menu-item"
+          :class="{
+            active: selectedBar === 'move-concepts'
+          }"
+          :title="$t('concepts.folders.move')"
+          role="button"
+          tabindex="0"
+          @click="selectBar('move-concepts')"
+          @keydown.enter.prevent="selectBar('move-concepts')"
+          @keydown.space.prevent="selectBar('move-concepts')"
+          v-if="
+            isCurrentViewConcept &&
+            (isCurrentUserManager || isCurrentUserSupervisor) &&
+            nbSelectedConcepts > 0 &&
+            conceptFolders.length > 0
+          "
+        >
+          <folder-input-icon />
         </div>
 
         <div
@@ -628,14 +649,35 @@
                 class="tag"
                 role="button"
                 tabindex="0"
+                :title="$t('concepts.actions.remove_link')"
                 @click="onRemoveLink(entity)"
                 @keydown.enter.prevent="onRemoveLink(entity)"
                 @keydown.space.prevent="onRemoveLink(entity)"
                 v-for="entity in conceptLinkedEntities"
               >
-                {{ entity.name }}
+                {{ getLinkLabel(entity) }}
               </li>
             </template>
+          </ul>
+        </div>
+
+        <div
+          class="flexrow-item is-wide"
+          v-if="selectedBar === 'move-concepts'"
+        >
+          <h3 class="mb05">{{ $t('concepts.folders.move') }}</h3>
+          <ul class="concept-folders mb05">
+            <li
+              :key="folder.id ?? 'none'"
+              role="button"
+              tabindex="0"
+              @click="onMoveConcepts(folder)"
+              @keydown.enter.prevent="onMoveConcepts(folder)"
+              @keydown.space.prevent="onMoveConcepts(folder)"
+              v-for="folder in conceptFolderTargets"
+            >
+              <concept-folder-tile :name="folder.name" />
+            </li>
           </ul>
         </div>
 
@@ -896,6 +938,7 @@
 /* eslint-disable no-unused-vars */
 import {
   CheckSquareIcon,
+  FolderInputIcon,
   LinkIcon,
   PlayCircleIcon,
   XIcon
@@ -914,6 +957,7 @@ import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { intersection } from '@/lib/array'
+import func from '@/lib/func'
 import assetsStore from '@/store/modules/assets.js'
 
 import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
@@ -923,6 +967,7 @@ import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxModel from '@/components/widgets/ComboboxModel.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import ConceptFolderTile from '@/components/widgets/ConceptFolderTile.vue'
 import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
@@ -991,10 +1036,13 @@ const errors = reactive({
 
 const currentHost = window.location.host
 
+let linkQueue = Promise.resolve()
+
 // Computed
 // --------------------------------------------------------------------------
 
 const assetsByType = computed(() => store.getters.assetsByType)
+const conceptFolders = computed(() => store.getters.conceptFolders)
 const currentProduction = computed(() => store.getters.currentProduction)
 const isCurrentUserArtist = computed(() => store.getters.isCurrentUserArtist)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
@@ -1101,16 +1149,36 @@ const currentEntityType = computed(() => {
   return 'episode'
 })
 
-const currentConcept = computed(
-  () => selectedConcepts.value.values().next().value
-)
+const selectedConceptList = computed(() => [...selectedConcepts.value.values()])
 
 const isConceptPublisher = computed(
-  () => currentConcept.value?.created_by === user.value.id
+  () =>
+    selectedConceptList.value.length > 0 &&
+    selectedConceptList.value.every(
+      concept => concept.created_by === user.value.id
+    )
 )
 
+// Where the selection can go: out of its folder when a concept sits in
+// one, and to every folder that does not already hold it all.
+const conceptFolderTargets = computed(() => [
+  ...(selectedConceptList.value.some(concept => concept.parent_id)
+    ? [{ id: null, name: t('concepts.folders.none') }]
+    : []),
+  ...conceptFolders.value.filter(folder =>
+    selectedConceptList.value.some(concept => concept.parent_id !== folder.id)
+  )
+])
+
+// The assets at least one selected concept is linked to.
 const conceptLinkedEntities = computed(() =>
-  (currentConcept.value?.entity_concept_links ?? [])
+  [
+    ...new Set(
+      selectedConceptList.value.flatMap(
+        concept => concept.entity_concept_links ?? []
+      )
+    )
+  ]
     .map(id => assetsStore.cache.assetMap.get(id))
     .filter(Boolean)
 )
@@ -1121,10 +1189,7 @@ const availableLinksByType = computed(() =>
     .map(assets => ({
       type: assets[0].asset_type_name,
       links: assets
-        .filter(
-          asset =>
-            !conceptLinkedEntities.value.some(entity => entity.id === asset.id)
-        )
+        .filter(asset => nbLinkedConcepts(asset) < nbSelectedConcepts.value)
         .map(asset => ({ id: asset.id, name: asset.name }))
     }))
 )
@@ -1433,7 +1498,9 @@ const autoChooseSelectBar = () => {
   } else if (isCurrentViewEdit.value && nbSelectedEdits.value > 0) {
     selectedBar.value = 'delete-edits'
   } else if (isCurrentViewConcept.value && nbSelectedConcepts.value > 1) {
-    selectedBar.value = 'delete-concepts'
+    if (!['edit-concepts', 'move-concepts'].includes(selectedBar.value)) {
+      selectedBar.value = 'delete-concepts'
+    }
   } else {
     if (nbSelectedTasks.value === 1) selectedBar.value = ''
     const lastSelection = localStorage.getItem(
@@ -1476,21 +1543,56 @@ const getSelectionCustomActions = () => {
   )
 }
 
-const editConceptLinks = entityConceptLinks => {
-  store.dispatch('editConcept', {
-    id: currentConcept.value.id,
-    entity_concept_links: entityConceptLinks
-  })
+const isLinkedTo = (concept, entity) =>
+  (concept.entity_concept_links ?? []).includes(entity.id)
+
+const nbLinkedConcepts = entity =>
+  selectedConceptList.value.filter(concept => isLinkedTo(concept, entity))
+    .length
+
+const getLinkLabel = entity => {
+  const count = nbLinkedConcepts(entity)
+  const total = nbSelectedConcepts.value
+  return count < total ? `${entity.name} (${count}/${total})` : entity.name
 }
 
-const onRemoveLink = link => {
+// A request sends the whole link list of a concept: they all go through one
+// queue, so each one builds on the answer to the previous one.
+const editConceptLinks = (concepts, getLinks) => {
+  linkQueue = linkQueue
+    .then(() =>
+      func.runPromiseMapAsSeries(concepts, concept =>
+        store.dispatch('editConcept', {
+          id: concept.id,
+          entity_concept_links: getLinks(concept.entity_concept_links ?? [])
+        })
+      )
+    )
+    .catch(console.error)
+}
+
+const onRemoveLink = link =>
   editConceptLinks(
-    currentConcept.value.entity_concept_links.filter(id => id !== link.id)
+    selectedConceptList.value.filter(concept => isLinkedTo(concept, link)),
+    links => links.filter(id => id !== link.id)
   )
-}
 
-const onSelectLink = link => {
-  editConceptLinks([...currentConcept.value.entity_concept_links, link.id])
+const onSelectLink = link =>
+  editConceptLinks(
+    selectedConceptList.value.filter(concept => !isLinkedTo(concept, link)),
+    links => [...new Set([...links, link.id])]
+  )
+
+const onMoveConcepts = async folder => {
+  try {
+    await store.dispatch('moveConcepts', {
+      conceptIds: selectedConceptList.value.map(concept => concept.id),
+      folderId: folder.id
+    })
+    clearSelection()
+  } catch (err) {
+    console.error(err)
+  }
 }
 
 const onEntitySearchChange = searchQuery => {
@@ -1764,5 +1866,13 @@ onBeforeUnmount(() => {
       border-color: $light-grey;
     }
   }
+}
+
+.concept-folders {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  list-style: none;
+  margin-left: 0;
 }
 </style>

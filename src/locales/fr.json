@@ -2024,29 +2024,44 @@
       "send_error": "Une erreur est survenue en envoyant le message."
     },
     "concepts": {
-      "add_links": "Ajouter des liens vers les assets",
-      "add_new_concept": "Ajouter de nouveaux concepts",
+      "actions": {
+        "empty": "Aucun lien",
+        "remove_link": "Retirer le lien",
+        "title": "Liens vers les concepts"
+      },
       "add_concept": "Ajouter des fichiers pour les nouveaux concepts",
       "add_concept_error": "Une erreur s'est produite lors de l'ajout de concepts.",
+      "add_links": "Ajouter des liens vers les assets",
+      "add_new_concept": "Ajouter de nouveaux concepts",
       "delete_for_selection": "Supprimer le concept sélectionné | Supprimer les {nbSelectedConcepts} concepts sélectionnés",
+      "delete_for_selection_hard_lock_text": "SUPPRIMER",
+      "delete_for_selection_hard_text": "Êtes-vous sûr de vouloir supprimer définitivement les concepts sélectionnés ? Toutes les tâches, commentaires et previews associés seront également supprimés. Veuillez confirmer en tapant \"SUPPRIMER\" ci-dessous.",
+      "drop_new_concepts": "Déposez ici de nouveaux fichiers de concepts",
       "empty": "Il n'y a pas de concept pour cette production",
+      "fields": {
+        "asset": "Asset",
+        "asset_type": "Type d'asset",
+        "created_at": "Date de création",
+        "entity_type": "Type d'entité",
+        "last_comment_date": "Dernier commentaire",
+        "publisher": "Publié par",
+        "updated_at": "Date de mise à jour"
+      },
+      "folders": {
+        "delete": "Supprimer le dossier",
+        "delete_error": "Une erreur est survenue lors de la suppression de ce dossier.",
+        "delete_text": "Êtes-vous sûr de vouloir supprimer le dossier {name} ? Ses concepts sont conservés et reviennent à la racine.",
+        "edit_error": "Une erreur est survenue lors de l'enregistrement de ce dossier. Un autre dossier porte peut-être déjà ce nom.",
+        "empty": "Ce dossier est vide",
+        "move": "Déplacer vers un dossier",
+        "name": "Nom du dossier",
+        "new": "Nouveau dossier",
+        "none": "Aucun dossier",
+        "rename": "Renommer le dossier"
+      },
       "multiple_delete_error": "Une erreur s'est produite lors de la suppression d'un concept. Il se peut que des données existantes soient actuellement liées à ce concept. Êtes-vous sûr qu'aucune tâche n'est liée au concept sélectionné ?",
       "no_concept_selected": "Aucun concept sélectionné",
-      "title": "Concepts",
-      "fields": {
-        "entity_type": "Type d'entité",
-        "created_at": "Date de création",
-        "updated_at": "Date de mise à jour",
-        "last_comment_date": "Dernier commentaire",
-        "publisher": "Publié par"
-      },
-      "actions": {
-        "title": "Liens vers les concepts",
-        "empty": "Aucun lien"
-      },
-      "delete_for_selection_hard_text": "Êtes-vous sûr de vouloir supprimer définitivement les concepts sélectionnés ? Toutes les tâches, commentaires et previews associés seront également supprimés. Veuillez confirmer en tapant \"SUPPRIMER\" ci-dessous.",
-      "delete_for_selection_hard_lock_text": "SUPPRIMER",
-      "drop_new_concepts": "Déposez ici de nouveaux fichiers de concepts"
+      "title": "Concepts"
     },
     "intro": {
       "join_discord": "Rejoignez le Discord de la communauté",

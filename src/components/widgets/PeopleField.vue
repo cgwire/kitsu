@@ -16,7 +16,7 @@
         :show-labels="false"
         :show-no-options="false"
         :show-no-results="false"
-        track-by="name"
+        track-by="id"
         @remove="onSelect"
         @search-change="onSearchChange"
         @select="onSelect"
@@ -43,8 +43,10 @@
 </template>
 
 <script setup>
-import { computed, ref, watch, onMounted } from 'vue'
+// Imports
+// --------------------------------------------------------------------------
 import { XIcon } from 'lucide-vue-next'
+import { computed, onMounted, ref, watch } from 'vue'
 import Multiselect from 'vue-multiselect'
 import 'vue-multiselect/dist/vue-multiselect.min.css'
 
@@ -52,6 +54,8 @@ import { buildNameIndex, buildPeopleIndex, indexSearch } from '@/lib/indexing'
 
 import AssignationItem from '@/components/widgets/AssignationItem.vue'
 
+// Props / Emits
+// --------------------------------------------------------------------------
 const props = defineProps({
   clearable: {
     type: Boolean,
@@ -67,7 +71,7 @@ const props = defineProps({
   },
   modelValue: {
     type: [Object, Array],
-    default: () => {}
+    default: null
   },
   multiple: {
     type: Boolean,
@@ -98,30 +102,25 @@ const props = defineProps({
 
 const emit = defineEmits(['select', 'update:model-value'])
 
-const multiselectRef = ref(null)
-const index = ref(null)
-const item = ref(null)
-const items = ref([])
-const search = ref('')
-
+// State
+// --------------------------------------------------------------------------
 const buildIndex = people =>
   props.searchEmail ? buildPeopleIndex(people) : buildNameIndex(people)
 
+const multiselectRef = ref(null)
+const index = ref(buildIndex(props.people))
+const item = ref(null)
+const items = ref(props.people)
+const search = ref('')
+
+// Computed
+// --------------------------------------------------------------------------
 const hasSelection = computed(() =>
   Array.isArray(item.value) ? item.value.length > 0 : Boolean(item.value)
 )
 
-items.value = props.people
-index.value = buildIndex(props.people)
-
-onMounted(() => {
-  items.value = props.people
-  item.value = props.modelValue
-  setTimeout(() => {
-    item.value = props.modelValue
-  }, 10)
-})
-
+// Functions
+// --------------------------------------------------------------------------
 const onSearchChange = s => {
   items.value = s?.length ? (indexSearch(index.value, [s]) ?? []) : props.people
   search.value = s
@@ -141,6 +140,8 @@ const focus = () => {
   multiselectRef.value.$el.focus()
 }
 
+// Watchers
+// --------------------------------------------------------------------------
 watch(
   () => props.people,
   () => {
@@ -161,6 +162,16 @@ watch(
     item.value = props.modelValue
   }
 )
+
+// Lifecycle
+// --------------------------------------------------------------------------
+onMounted(() => {
+  items.value = props.people
+  item.value = props.modelValue
+  setTimeout(() => {
+    item.value = props.modelValue
+  }, 10)
+})
 
 defineExpose({ clear, focus })
 </script>

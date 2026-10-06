@@ -2024,29 +2024,44 @@
       "send_error": "发送信息时出现错误。"
     },
     "concepts": {
-      "add_links": "添加资产链接",
-      "add_new_concept": "添加新概念",
+      "actions": {
+        "empty": "无链接",
+        "remove_link": "移除链接",
+        "title": "概念链接"
+      },
       "add_concept": "为新概念添加文件",
       "add_concept_error": "添加概念时发生错误。",
+      "add_links": "添加资产链接",
+      "add_new_concept": "添加新概念",
       "delete_for_selection": "删除所选概念 | 删除 {nbSelectedConcepts} 个所选概念",
+      "delete_for_selection_hard_lock_text": "删除",
+      "delete_for_selection_hard_text": "您确定要永久删除所选概念吗？所有相关任务、注释和预览也将被删除。请在下面输入 \"删除 \"确认。",
+      "drop_new_concepts": "在此投放新概念文件",
       "empty": "本作品没有概念",
+      "fields": {
+        "asset": "资产",
+        "asset_type": "资产类别",
+        "created_at": "创建日期",
+        "entity_type": "实体类型",
+        "last_comment_date": "最后评论",
+        "publisher": "发布者",
+        "updated_at": "更新日期"
+      },
+      "folders": {
+        "delete": "删除文件夹",
+        "delete_error": "删除此文件夹时出错。",
+        "delete_text": "确定要删除文件夹 {name} 吗？其中的概念将保留并回到根目录。",
+        "edit_error": "保存此文件夹时出错。可能已有其他文件夹使用此名称。",
+        "empty": "此文件夹为空",
+        "move": "移动到文件夹",
+        "name": "文件夹名称",
+        "new": "新建文件夹",
+        "none": "无文件夹",
+        "rename": "重命名文件夹"
+      },
       "multiple_delete_error": "删除概念时发生错误。当前可能有与之链接的现有数据。您确定没有任务链接到选定的概念吗？",
       "no_concept_selected": "未选择概念",
-      "title": "概念",
-      "fields": {
-        "entity_type": "实体类型",
-        "created_at": "创建日期",
-        "updated_at": "更新日期",
-        "last_comment_date": "最后评论",
-        "publisher": "发布者"
-      },
-      "actions": {
-        "title": "概念链接",
-        "empty": "无链接"
-      },
-      "delete_for_selection_hard_text": "您确定要永久删除所选概念吗？所有相关任务、注释和预览也将被删除。请在下面输入 \"删除 \"确认。",
-      "delete_for_selection_hard_lock_text": "删除",
-      "drop_new_concepts": "在此投放新概念文件"
+      "title": "概念"
     },
     "intro": {
       "join_discord": "加入社区 Discord",

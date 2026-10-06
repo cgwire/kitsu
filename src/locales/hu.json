@@ -1875,6 +1875,7 @@
     "concepts": {
       "actions": {
         "empty": "Nincs hivatkozás",
+        "remove_link": "Hivatkozás eltávolítása",
         "title": "Hivatkozások a koncepciókhoz"
       },
       "add_concept": "File-ok hozzáadása új koncepciókhoz",
@@ -1887,11 +1888,25 @@
       "drop_new_concepts": "Húzd ide az új koncepció file-okat",
       "empty": "Nincs koncepció ebben a produkcióban",
       "fields": {
+        "asset": "Asset",
+        "asset_type": "Asset típus",
         "created_at": "Létrehozás dátuma",
         "entity_type": "Elem típusa",
         "last_comment_date": "Utolsó hozzászólás",
         "publisher": "Közzétette",
         "updated_at": "Frissítés dátuma"
+      },
+      "folders": {
+        "delete": "Mappa törlése",
+        "delete_error": "Hiba történt a mappa törlése közben.",
+        "delete_text": "Biztosan törli a(z) {name} mappát? A koncepciói megmaradnak, és visszakerülnek a gyökérbe.",
+        "edit_error": "Hiba történt a mappa mentése közben. Lehet, hogy egy másik mappa már ezt a nevet viseli.",
+        "empty": "Ez a mappa üres",
+        "move": "Áthelyezés mappába",
+        "name": "Mappa neve",
+        "new": "Új mappa",
+        "none": "Nincs mappa",
+        "rename": "Mappa átnevezése"
       },
       "multiple_delete_error": "Hiba történt egy koncepció törlésekor. Valószínűleg adat hivatkozik rá. Biztos, hogy nincs feladat rendelve a kiválasztott koncepcióhoz?",
       "no_concept_selected": "Nincs koncepció kijelölve",

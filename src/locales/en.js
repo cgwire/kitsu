@@ -327,29 +327,44 @@ export default {
   },
 
   concepts: {
-    add_links: 'Add links to assets',
-    add_new_concept: 'Add new concepts',
+    actions: {
+      empty: 'No links',
+      remove_link: 'Remove link',
+      title: 'Links to Concepts'
+    },
     add_concept: 'Add files for new concepts',
     add_concept_error: 'An error occurred while adding concepts.',
+    add_links: 'Add links to assets',
+    add_new_concept: 'Add new concepts',
     delete_for_selection: 'Delete the selected concept | Delete the {nbSelectedConcepts} selected concepts',
-    delete_for_selection_hard_text: 'Are you sure you want to permanently remove the selected concepts? All related tasks, comments and previews will also be deleted. Please confirm by typing \'DELETE\' below.',
     delete_for_selection_hard_lock_text: 'DELETE',
+    delete_for_selection_hard_text: 'Are you sure you want to permanently remove the selected concepts? All related tasks, comments and previews will also be deleted. Please confirm by typing \'DELETE\' below.',
     drop_new_concepts: 'Drop new concept files here',
     empty: 'There are no concepts for this production',
+    fields: {
+      asset: 'Asset',
+      asset_type: 'Asset type',
+      created_at: 'Creation date',
+      entity_type: 'Entity type',
+      last_comment_date: 'Last comment',
+      publisher: 'Published by',
+      updated_at: 'Update date'
+    },
+    folders: {
+      delete: 'Delete folder',
+      delete_error: 'An error occurred while deleting this folder.',
+      delete_text: 'Are you sure you want to delete the folder {name}? Its concepts are kept and go back to the root.',
+      edit_error: 'An error occurred while saving this folder. Another folder may already have this name.',
+      empty: 'This folder is empty',
+      move: 'Move to a folder',
+      name: 'Folder name',
+      new: 'New folder',
+      none: 'No folder',
+      rename: 'Rename folder'
+    },
     multiple_delete_error: 'An error occurred while deleting a concept. There may be existing data currently linked to it. Are you sure there is no task linked to a selected concept?',
     no_concept_selected: 'No concept selected',
-    title: 'Concepts',
-    fields: {
-      entity_type: 'Entity type',
-      created_at: 'Creation date',
-      updated_at: 'Update date',
-      last_comment_date: 'Last comment',
-      publisher: 'Published by'
-    },
-    actions: {
-      title: 'Links to Concepts',
-      empty: 'No links'
-    }
+    title: 'Concepts'
   },
 
   custom_actions: {

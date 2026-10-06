@@ -2024,29 +2024,44 @@
       "send_error": "Si è verificato un errore durante l'invio del messaggio."
     },
     "concepts": {
-      "add_links": "Aggiungi link agli asset",
-      "add_new_concept": "Aggiungi nuovi concept",
+      "actions": {
+        "empty": "Nessun link",
+        "remove_link": "Rimuovi il collegamento",
+        "title": "Link ai concept"
+      },
       "add_concept": "Aggiungi file per i nuovi concept",
       "add_concept_error": "Si è verificato un errore durante l'aggiunta dei concept.",
+      "add_links": "Aggiungi link agli asset",
+      "add_new_concept": "Aggiungi nuovi concept",
       "delete_for_selection": "Elimina il concept selezionato | Elimina i {nbSelectedConcepts} concept selezionati",
+      "delete_for_selection_hard_lock_text": "ELIMINA",
+      "delete_for_selection_hard_text": "Sei sicuro di voler rimuovere definitivamente i concept selezionati? Anche tutti i task, i commenti e le anteprime associati verranno eliminati. Conferma digitando \"ELIMINA\" qui sotto.",
+      "drop_new_concepts": "Trascina qui i file dei nuovi concept",
       "empty": "Non ci sono concept per questa produzione",
+      "fields": {
+        "asset": "Asset",
+        "asset_type": "Tipo di asset",
+        "created_at": "Data di creazione",
+        "entity_type": "Tipo di entità",
+        "last_comment_date": "Ultimo commento",
+        "publisher": "Pubblicato da",
+        "updated_at": "Data di aggiornamento"
+      },
+      "folders": {
+        "delete": "Elimina cartella",
+        "delete_error": "Si è verificato un errore durante l'eliminazione di questa cartella.",
+        "delete_text": "Vuoi davvero eliminare la cartella {name}? I suoi concept vengono conservati e tornano alla radice.",
+        "edit_error": "Si è verificato un errore durante il salvataggio di questa cartella. Un'altra cartella potrebbe avere già questo nome.",
+        "empty": "Questa cartella è vuota",
+        "move": "Sposta in una cartella",
+        "name": "Nome della cartella",
+        "new": "Nuova cartella",
+        "none": "Nessuna cartella",
+        "rename": "Rinomina cartella"
+      },
       "multiple_delete_error": "Si è verificato un errore durante l'eliminazione di un concept. Potrebbero esserci dati esistenti attualmente collegati. Sei sicuro che nessun task sia collegato a un concept selezionato?",
       "no_concept_selected": "Nessun concept selezionato",
-      "title": "Concept",
-      "fields": {
-        "entity_type": "Tipo di entità",
-        "created_at": "Data di creazione",
-        "updated_at": "Data di aggiornamento",
-        "last_comment_date": "Ultimo commento",
-        "publisher": "Pubblicato da"
-      },
-      "actions": {
-        "title": "Link ai concept",
-        "empty": "Nessun link"
-      },
-      "delete_for_selection_hard_text": "Sei sicuro di voler rimuovere definitivamente i concept selezionati? Anche tutti i task, i commenti e le anteprime associati verranno eliminati. Conferma digitando \"ELIMINA\" qui sotto.",
-      "delete_for_selection_hard_lock_text": "ELIMINA",
-      "drop_new_concepts": "Trascina qui i file dei nuovi concept"
+      "title": "Concept"
     },
     "intro": {
       "join_discord": "Unisciti al Discord della community",
