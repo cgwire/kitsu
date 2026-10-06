@@ -595,11 +595,13 @@ import {
 import {
   addBusinessDays,
   daysToMinutes,
+  durationToMinutes,
   getBusinessDays,
   getDatesFromStartDate,
   getDayOffRange,
   getUserDay,
   minutesToDays,
+  minutesToDuration,
   parseDate,
   parseSimpleDate
 } from '@/lib/time'
@@ -1976,7 +1978,7 @@ const selectTaskElement = (taskType, entityTypeRow, task, selection) => {
   assignments.value.endDate = end_date
   assignments.value.task = {
     ...task,
-    estimation: minutesToDays(organisation.value, task.estimation),
+    estimation: minutesToDuration(organisation.value, task.estimation),
     startDate: task.startDate.format('YYYY-MM-DD'),
     endDate: task.endDate.format('YYYY-MM-DD')
   }
@@ -2253,7 +2255,7 @@ const saveTask = async () => {
       ...assignments.value.task,
       startDate: parseDate(assignments.value.task.startDate),
       endDate: parseDate(assignments.value.task.endDate),
-      estimation: daysToMinutes(
+      estimation: durationToMinutes(
         organisation.value,
         assignments.value.task.estimation
       ),

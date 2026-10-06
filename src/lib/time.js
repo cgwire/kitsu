@@ -394,3 +394,17 @@ export const minutesToDays = (organisation, minutes = 0) => {
 export const hoursToDays = (organisation, hours = 0) => {
   return hours / organisation.hours_by_day
 }
+
+// Estimations are stored in minutes, and shown and typed in the unit the
+// organisation displays durations in: hours or days.
+export const minutesToDuration = (organisation, minutes = 0) => {
+  return organisation.format_duration_in_hours
+    ? minutes / 60
+    : minutesToDays(organisation, minutes)
+}
+
+export const durationToMinutes = (organisation, duration = 0) => {
+  return organisation.format_duration_in_hours
+    ? duration * 60
+    : daysToMinutes(organisation, duration)
+}

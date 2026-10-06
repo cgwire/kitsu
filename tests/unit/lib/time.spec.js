@@ -7,6 +7,7 @@ import moment from 'moment-timezone'
 import {
   addBusinessDays,
   daysToMinutes,
+  durationToMinutes,
   formatDate,
   formatDisplayDate,
   formatDuration,
@@ -31,6 +32,7 @@ import {
   getWeekRange,
   hoursToDays,
   minutesToDays,
+  minutesToDuration,
   monthToString,
   parseDate,
   parseSimpleDate,
@@ -418,6 +420,26 @@ describe('time', () => {
     expect(hoursToDays({ hours_by_day: 8 }, 16)).toEqual(2)
     expect(hoursToDays({ hours_by_day: 7 }, 21)).toEqual(3)
     expect(hoursToDays({ hours_by_day: 7 }, undefined)).toEqual(0)
+  })
+  test('minutesToDuration', () => {
+    const hoursOrganisation = {
+      format_duration_in_hours: true,
+      hours_by_day: 7
+    }
+    expect(minutesToDuration({ hours_by_day: 7 }, 8 * 7 * 60)).toEqual(8)
+    expect(minutesToDuration(hoursOrganisation, 8 * 7 * 60)).toEqual(56)
+    expect(minutesToDuration(hoursOrganisation, 90)).toEqual(1.5)
+    expect(minutesToDuration(hoursOrganisation, undefined)).toEqual(0)
+  })
+  test('durationToMinutes', () => {
+    const hoursOrganisation = {
+      format_duration_in_hours: true,
+      hours_by_day: 7
+    }
+    expect(durationToMinutes({ hours_by_day: 7 }, 8)).toEqual(8 * 7 * 60)
+    expect(durationToMinutes(hoursOrganisation, 8)).toEqual(8 * 60)
+    expect(durationToMinutes(hoursOrganisation, 1.5)).toEqual(90)
+    expect(durationToMinutes(hoursOrganisation, undefined)).toEqual(0)
   })
 
   test('formatDuration', () => {

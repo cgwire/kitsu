@@ -23,6 +23,7 @@ import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import TextField from '@/components/widgets/TextField.vue'
 
 // The page is driven through what it renders and what it calls: the
 // schedule widget events, the comboboxes, the buttons and the modals, the
@@ -211,6 +212,11 @@ const findCombobox = (wrapper, label) =>
     .findAllComponents(Combobox)
     .find(combobox => combobox.props('label') === label)
 
+const findTextField = (wrapper, label) =>
+  wrapper
+    .findAllComponents(TextField)
+    .find(field => field.props('label') === label)
+
 const setTaskTypeVisible = async (wrapper, taskTypeId, value) => {
   wrapper
     .findComponent(ComboboxOptions)
@@ -237,6 +243,18 @@ const pickTaskType = async (wrapper, taskTypeId) => {
 
 const changeItem = async (wrapper, item) => {
   findSchedule(wrapper).vm.$emit('item-changed', item)
+  await flushPromises()
+}
+
+// A click on a task bar opens the side panel on it, in task edit mode.
+const selectTask = async (wrapper, entityTypeRow, task) => {
+  findSchedule(wrapper).vm.$emit(
+    'task-selected',
+    rowsOf(wrapper)[0],
+    entityTypeRow,
+    task,
+    [task]
+  )
   await flushPromises()
 }
 
@@ -422,6 +440,53 @@ describe('ProductionSchedule page', () => {
       )
       expect(storeActions.loadTasks).toHaveBeenCalledTimes(taskLoads + 1)
     })
+
+    // The estimation of a task is shown and typed in the unit printed next
+    // to it, the one the organisation displays durations in.
+    it.each([
+      ['hours', true, 'schedule.hours', 8, 16],
+      ['days', false, 'schedule.md', 1, 2]
+    ])(
+      'edits the estimation of a task in %s',
+      async (_, isDurationInHours, unit, shown, typed) => {
+        const { storeActions, wrapper } = await mountPage({
+          getters: {
+            organisation: () => ({
+              hours_by_day: 8,
+              format_duration_in_hours: isDurationInHours
+            })
+          }
+        })
+        // Monday 9 February, one working day
+        const task = {
+          type: 'Task',
+          id: 'task-1',
+          entity: { id: 'asset-1', name: 'Cat' },
+          estimation: 8 * 60,
+          assignees: [],
+          startDate: day('2026-02-09'),
+          endDate: day('2026-02-09')
+        }
+        await selectTask(wrapper, buildAssetTypeBars()[0], task)
+        const field = findTextField(wrapper, 'main.estimation')
+
+        expect(field.props('unitLabel')).toBe(unit)
+        expect(field.props('modelValue')).toBe(shown)
+
+        field.vm.$emit('update:model-value', typed)
+        await wrapper.find('.side-column form').trigger('submit')
+        await flushPromises()
+
+        expect(payloadsOf(storeActions.updateTask)[0]).toEqual({
+          taskId: 'task-1',
+          data: {
+            estimation: 16 * 60,
+            start_date: '2026-02-09',
+            due_date: '2026-02-10'
+          }
+        })
+      }
+    )
   })
 
   describe('drill-down', () => {
