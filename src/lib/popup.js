@@ -1,11 +1,12 @@
 const ANCHOR_GAP = 4
 const VIEWPORT_MARGIN = 8
 
-// Style of a fixed popup opened from an anchor (a list cell), kept inside the
-// viewport: below the anchor when the popup height fits there, else above it
-// when it fits there, else on the side with more room. The max height bounds
-// the popup to the room on its side, resized content included.
-export const getPopupStyle = (anchor, popup, viewport) => {
+// Placement of a fixed popup opened from an anchor (a list cell), kept inside
+// the viewport: below the anchor when the popup height fits there, else above
+// it when it fits there, else on the side with more room. The room is the
+// height left on that side: the style max height bounds the popup to it,
+// resized content included.
+export const getPopupPlacement = (anchor, popup, viewport) => {
   const left = Math.max(
     VIEWPORT_MARGIN,
     Math.min(anchor.left, viewport.width - popup.width - VIEWPORT_MARGIN)
@@ -21,14 +22,23 @@ export const getPopupStyle = (anchor, popup, viewport) => {
   const isBelow =
     roomBelow >= popup.height ||
     (roomAbove < popup.height && roomBelow >= roomAbove)
-  const style = { left: `${left}px`, width: `${popup.width}px` }
-  if (isBelow) {
-    return { ...style, top: `${belowTop}px`, maxHeight: `${roomBelow}px` }
-  }
-  // Pinned by its bottom edge: the real height may differ from the given one.
+  const room = isBelow ? roomBelow : roomAbove
+  // Above, pinned by its bottom edge: the real height may differ from the
+  // given one.
+  const position = isBelow
+    ? { top: `${belowTop}px` }
+    : { bottom: `${viewport.height - aboveBottom}px` }
   return {
-    ...style,
-    bottom: `${viewport.height - aboveBottom}px`,
-    maxHeight: `${roomAbove}px`
+    isBelow,
+    room,
+    style: {
+      left: `${left}px`,
+      width: `${popup.width}px`,
+      ...position,
+      maxHeight: `${room}px`
+    }
   }
 }
+
+export const getPopupStyle = (anchor, popup, viewport) =>
+  getPopupPlacement(anchor, popup, viewport).style

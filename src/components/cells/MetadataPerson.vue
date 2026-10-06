@@ -25,6 +25,8 @@
           <people-field
             ref="fieldRef"
             wide
+            :list-max-height="listMaxHeight"
+            :open-direction="listDirection"
             :people="people"
             :model-value="person"
             @update:model-value="onSelect"
@@ -38,7 +40,7 @@
 <script setup>
 import { nextTick, ref } from 'vue'
 
-import { getPopupStyle } from '@/lib/popup'
+import { getPopupPlacement } from '@/lib/popup'
 
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
@@ -51,21 +53,29 @@ const props = defineProps({
 
 const emit = defineEmits(['select'])
 
+const WIDTH = 280
+// The people field and its list, at the PeopleField default max height.
+const FIELD_HEIGHT = 42
+const LIST_HEIGHT = 300
+
 const isOpen = ref(false)
 const fieldRef = ref(null)
 const popupStyle = ref({})
-
-const WIDTH = 280
-// The people field input only: its option list opens on the side with room.
-const HEIGHT = 42
+const listDirection = ref('')
+const listMaxHeight = ref(LIST_HEIGHT)
 
 const onOpen = event => {
   if (!props.editable) return
-  popupStyle.value = getPopupStyle(
+  const { isBelow, room, style } = getPopupPlacement(
     event.currentTarget.getBoundingClientRect(),
-    { width: WIDTH, height: HEIGHT },
+    { width: WIDTH, height: FIELD_HEIGHT + LIST_HEIGHT },
     { width: window.innerWidth, height: window.innerHeight }
   )
+  popupStyle.value = style
+  // Away from the cell: the second click of a double click then lands on the
+  // mask, not on an option that would replace or clear the person.
+  listDirection.value = isBelow ? 'below' : 'above'
+  listMaxHeight.value = Math.min(LIST_HEIGHT, room - FIELD_HEIGHT)
   isOpen.value = true
   nextTick(() => fieldRef.value?.focus())
 }

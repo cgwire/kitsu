@@ -10,8 +10,10 @@
         :allow-empty="clearable"
         :disabled="disabled"
         :internal-search="false"
+        :max-height="listMaxHeight"
         :options="items"
         :multiple="multiple"
+        :open-direction="openDirection"
         :placeholder="placeholder || $t('people.select_person')"
         :show-labels="false"
         :show-no-options="false"
@@ -69,6 +71,11 @@ const props = defineProps({
     type: String,
     default: null
   },
+  // Max height of the people list, in px.
+  listMaxHeight: {
+    type: Number,
+    default: 300
+  },
   modelValue: {
     type: [Object, Array],
     default: null
@@ -76,6 +83,12 @@ const props = defineProps({
   multiple: {
     type: Boolean,
     default: false
+  },
+  // Side the people list opens on, 'above' or 'below'. Empty: the side with
+  // room when the field gets the focus.
+  openDirection: {
+    type: String,
+    default: ''
   },
   people: {
     type: Array,

@@ -63,6 +63,22 @@ describe('cells/MetadataPerson', () => {
     return findPopup() && popupRect()
   }
 
+  // The people list next to the picker, on the side its class tells, at its
+  // max height (the most options it shows).
+  const listRect = () => {
+    const picker = popupRect()
+    const height = parseFloat(
+      document.querySelector('.multiselect__content-wrapper').style.maxHeight
+    )
+    const isAbove = findMultiselect().classList.contains('multiselect--above')
+    return toRect({
+      top: isAbove ? picker.top - height : picker.bottom,
+      left: picker.left,
+      width: POPUP_WIDTH,
+      height
+    })
+  }
+
   const expectInViewport = rect => {
     expect(rect.top).toBeGreaterThanOrEqual(MARGIN - EPSILON)
     expect(rect.left).toBeGreaterThanOrEqual(MARGIN - EPSILON)
@@ -110,7 +126,7 @@ describe('cells/MetadataPerson', () => {
   })
 
   describe('placement', () => {
-    it('opens below the cell when the room below holds the picker', async () => {
+    it('opens below the cell when the picker and its list fit there', async () => {
       const popup = await open({ anchor: { top: 309.8, height: 112 } })
       expect(popup.top).toBeCloseTo(anchorRect.bottom + 4)
       expectInViewport(popup)
@@ -144,6 +160,32 @@ describe('cells/MetadataPerson', () => {
       })
       expect(popup.left).toBe(1912 - POPUP_WIDTH - MARGIN)
     })
+  })
+
+  describe('people list', () => {
+    // Cells measured in Chromium, Shots list unless told otherwise. A list
+    // over the cell takes the second click of a double click on an option,
+    // which replaces or clears the person.
+    it.each([
+      ['last row at 1366x768', 1366, 768, { top: 592.8 }],
+      ['last row at 1366x600', 1366, 600, { top: 424.8 }],
+      ['last Assets row at 1912x962', 1912, 962, { top: 792.8, left: 629 }],
+      ['first row at 1366x600', 1366, 600, { top: 309.8 }],
+      // The list scrolled by 82 px: no side holds the picker and its list.
+      ['second row at 1366x768', 1366, 768, { top: 340 }],
+      ['last row at 1912x962', 1912, 962, { top: 806.8 }],
+      ['first row at 1912x962', 1912, 962, { top: 309.8 }]
+    ])(
+      'opens off the cell and in the window: %s',
+      async (_, width, height, anchor) => {
+        await open({ anchor: { height: 112, ...anchor }, width, height })
+        const list = listRect()
+        expect(
+          list.bottom <= anchorRect.top || list.top >= anchorRect.bottom
+        ).toBe(true)
+        expectInViewport(list)
+      }
+    )
   })
 
   describe('selection', () => {

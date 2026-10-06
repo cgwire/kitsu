@@ -1,6 +1,6 @@
 // @vitest-environment node
 
-import { getPopupStyle } from '@/lib/popup'
+import { getPopupPlacement, getPopupStyle } from '@/lib/popup'
 
 // The reporter's window and the long-text popup (cgwire/kitsu#2244)
 const viewport = { width: 1912, height: 962 }
@@ -100,6 +100,35 @@ describe('lib/popup', () => {
         expect(box.top).toBeGreaterThanOrEqual(8)
         expect(box.bottom).toBeLessThanOrEqual(viewportHeight - 8)
         expect(box.bottom > visibleTop && box.top < visibleBottom).toBe(false)
+      })
+    })
+  })
+
+  describe('getPopupPlacement', () => {
+    test('tells the side of the popup and the room left there', () => {
+      expect(
+        getPopupPlacement({ top: 310, bottom: 422, left: 329 }, popup, viewport)
+      ).toEqual({
+        isBelow: true,
+        room: 528,
+        style: {
+          left: '329px',
+          width: '300px',
+          top: '426px',
+          maxHeight: '528px'
+        }
+      })
+      expect(
+        getPopupPlacement({ top: 807, bottom: 919, left: 329 }, popup, viewport)
+      ).toEqual({
+        isBelow: false,
+        room: 795,
+        style: {
+          left: '329px',
+          width: '300px',
+          bottom: '159px',
+          maxHeight: '795px'
+        }
       })
     })
   })
