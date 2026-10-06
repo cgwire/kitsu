@@ -384,7 +384,7 @@ Bold headers, no `## Problems` / `## Solutions` sections (harmonized across cgwi
 
 - **fabric.js** v7 (official npm package): annotation canvas, wrapped by `src/composables/players/annotation.js` and `src/components/players/annotations/AnnotationCanvas.vue`
 - **fabricjs-psbrush** (cgwire fork): pressure-sensitive brush on top of fabric
-- **socket.io-client**: real-time events via `vue-websocket-next`
+- **socket.io-client**: real-time events, through the `$socket` global property that `src/main.js` sets
 - **moment / moment-timezone**: date handling (used throughout schedule and timesheet components)
 - **vue-multiselect**: people/entity selection dropdowns
 

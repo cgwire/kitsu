@@ -14,7 +14,6 @@ import store from '@/store'
 import { setupChunkErrorHandler } from '@/lib/chunk-error'
 
 import vAutosize from '@/directives/autosize'
-import VueWebsocket from 'vue-websocket-next'
 import IO from 'socket.io-client'
 import VueAnimXYZ from '@animxyz/vue3'
 import '@animxyz/core'
@@ -27,7 +26,7 @@ app.use(head)
 app.use(router)
 app.use(store)
 app.use(resizableColumn)
-app.use(VueWebsocket.default || VueWebsocket, IO, '/events')
+app.config.globalProperties.$socket = IO('/events')
 app.directive('autosize', vAutosize)
 app.use(VueAnimXYZ)
 
