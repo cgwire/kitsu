@@ -31,6 +31,7 @@ vi.mock('@/lib/preferences', () => ({
 import preferences from '@/lib/preferences'
 
 import DeleteModal from '@/components/modals/DeleteModal.vue'
+import EditAssetModal from '@/components/modals/EditAssetModal.vue'
 import Breakdown from '@/components/pages/Breakdown.vue'
 
 const production = { id: 'p1', production_type: 'tvshow' }
@@ -822,5 +823,60 @@ describe('Breakdown page, asset search', () => {
   afterEach(() => {
     delete HTMLElement.prototype.scrollHeight
     delete HTMLElement.prototype.clientHeight
+  })
+})
+
+describe('Breakdown page, asset creation', () => {
+  // The real modal: the page resets its form by handing it a new asset.
+  const mountCreation = async (newAsset = vi.fn(() => Promise.resolve())) => {
+    const mounted = mountPage({
+      actions: { newAsset },
+      getters: {
+        assetCreated: () => '',
+        openProductions: () => [production],
+        productionAssetTypeOptions: () => [
+          { label: 'Characters', value: 'type-1' }
+        ]
+      },
+      stubs: { EditAssetModal: false }
+    })
+    await flushPromises()
+    mounted.wrapper.vm.modals.isNewDisplayed = true
+    await nextTick()
+    const modal = mounted.wrapper.findComponent(EditAssetModal)
+    modal.vm.form.name = 'Hero'
+    modal.vm.form.description = 'The main character'
+    modal.vm.form.data = { resolution: '4K' }
+    return { ...mounted, modal }
+  }
+
+  // The modal stays open for the next asset: it must not start from the
+  // name, description and metadata of the one just created.
+  test('clears the asset form after a confirm and stay', async () => {
+    const { actions, modal } = await mountCreation()
+
+    modal.vm.$emit('confirm-and-stay', { name: 'Hero' })
+    await flushPromises()
+
+    expect(actions.newAsset).toHaveBeenCalledTimes(1)
+    expect(modal.props('isSuccess')).toBe(true)
+    expect(modal.vm.form.name).toBe('')
+    expect(modal.vm.form.description).toBe('')
+    expect(modal.vm.form.data).toEqual({})
+  })
+
+  // A failed creation keeps what was typed, to fix and send again.
+  test('keeps the asset form when the creation fails', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { modal } = await mountCreation(
+      vi.fn(() => Promise.reject(new Error('down')))
+    )
+
+    modal.vm.$emit('confirm-and-stay', { name: 'Hero' })
+    await flushPromises()
+
+    expect(modal.props('isError')).toBe(true)
+    expect(modal.vm.form.name).toBe('Hero')
+    vi.restoreAllMocks()
   })
 })

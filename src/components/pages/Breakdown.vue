@@ -401,7 +401,7 @@
     <edit-asset-modal
       ref="edit-asset-modal"
       :active="modals.isNewDisplayed"
-      :asset-to-edit="{}"
+      :asset-to-edit="assetToEdit"
       :is-error="errors.edit"
       :is-loading="loading.edit"
       :is-loading-stay="loading.stay"
@@ -512,6 +512,7 @@ const editAssetModalRef = useTemplateRef('edit-asset-modal')
 const importModalRef = useTemplateRef('import-modal')
 const searchFieldRef = useTemplateRef('search-field')
 
+const assetToEdit = ref({})
 const assetTypeId = ref('')
 const castedAssetSearch = ref('')
 const castingType = ref('shot')
@@ -1218,6 +1219,8 @@ const confirmNewAssetStay = async form => {
   success.edit = false
   try {
     await store.dispatch('newAsset', form)
+    // The modal stays open: a new object resets its form for the next asset.
+    assetToEdit.value = {}
     editAssetModalRef.value.focusName()
     success.edit = true
   } catch (err) {
