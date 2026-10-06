@@ -140,11 +140,13 @@ const onEndDateChange = date => {
 
 // Watchers
 
-// Reset on each opening: the Days off tab hands the same day off again when
-// a row is edited after a cancel.
+// Reset on each opening, and when another day off comes in while open: the
+// Days off tab hands the same day off again when a row is edited after a
+// cancel, and Shift+Tab reaches its add button behind the open form. Both
+// lists hand a stable day off, so a list update keeps the picks.
 watch(
-  () => props.active,
-  isActive => {
+  [() => props.active, () => props.dayOffToEdit],
+  ([isActive]) => {
     if (isActive) resetForm()
   },
   { immediate: true }

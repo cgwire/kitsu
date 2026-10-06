@@ -175,5 +175,31 @@ describe('DayOffList', () => {
 
       expect(fieldDates(modal)).toEqual([today, today])
     })
+
+    // Shift+Tab reaches the add button behind the open edit form: its new
+    // day off replaces the edited one, or a confirm would add a day off on
+    // the period of the edited one, which Zou refuses.
+    it('turns an open edit form into the new day off', async () => {
+      const wrapper = mountListWithForm({
+        daysOff: [
+          {
+            id: 'day-off-1',
+            date: '2026-08-03',
+            end_date: '2026-08-05',
+            description: 'Trip'
+          }
+        ]
+      })
+      const modal = wrapper.findComponent(DayOffModal)
+
+      await wrapper.find('.actions button').trigger('click')
+      await clickAdd(wrapper)
+      await modal.find('form').trigger('submit')
+
+      expect(fieldDates(modal)).toEqual([today, today])
+      expect(wrapper.emitted('set-day-off')).toStrictEqual([
+        [{ date: today, end_date: today, description: null }]
+      ])
+    })
   })
 })
