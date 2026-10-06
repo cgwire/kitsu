@@ -740,10 +740,10 @@ const applyToSelection = buildData => {
 }
 
 // "1." left in the field is no number and reads as an emptied field, which
-// saved an estimation of 0: the stored one comes back instead. An emptied
-// field still saves 0.
+// saved an estimation of 0, and a negative number saved a negative one: the
+// stored one comes back instead. An emptied field still saves 0.
 const updateEstimation = (input, task) => {
-  if (input.validity.badInput) {
+  if (input.validity.badInput || input.valueAsNumber < 0) {
     input.value = formatDuration(task.estimation, false)
     return
   }

@@ -115,6 +115,22 @@ describe('lists/ToCheckList', () => {
       wrapper.unmount()
     })
 
+    // A valid number, it saved -480 minutes for every selected task.
+    test('ignores a negative entry', async () => {
+      const updateTask = vi.fn()
+      const wrapper = mountEditableList(updateTask)
+      await wrapper.find('tbody td.duration').trigger('click')
+      const input = wrapper.find('tbody td.estimation input')
+
+      await input.setValue('-1')
+
+      expect(updateTask).not.toHaveBeenCalled()
+      // the half day stored comes back
+      expect(input.element.value).toBe('0.5')
+
+      wrapper.unmount()
+    })
+
     test('saves 0 for an emptied field', async () => {
       const updateTask = vi.fn()
       const wrapper = mountEditableList(updateTask)

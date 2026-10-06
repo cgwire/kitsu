@@ -1469,10 +1469,13 @@ const getEstimationValue = element =>
     ? estimationDraft.value.text
     : formatDuration(element.man_days, false)
 
-// The minutes typed, or null while the number is being typed ("1.")
+// The minutes typed, or null while the number is being typed ("1.") and
+// for a negative number
 const readEstimation = (event, element) => {
   estimationDraft.value = { id: element.id, text: event.target.value }
-  if (event.target.validity.badInput) return null
+  if (event.target.validity.badInput || event.target.valueAsNumber < 0) {
+    return null
+  }
   return durationToMinutes(organisation.value, event.target.valueAsNumber || 0)
 }
 

@@ -413,6 +413,25 @@ describe('Schedule widget - estimation field', () => {
     wrapper.unmount()
   })
 
+  // A valid number, it saved -480 minutes.
+  it('ignores a negative entry', async () => {
+    const task = buildTaskElement()
+    const wrapper = mountSchedule({
+      hierarchy: reactive([{ ...person, editable: false, children: [task] }]),
+      isEstimationLinked: true
+    })
+    const input = wrapper.find('.man-days-unit-wrapper input')
+
+    expect(await typeKeys(input, '-1')).toBe('-1')
+    expect(wrapper.emitted('estimation-changed')).toBeUndefined()
+    expect([task.estimation, task.man_days]).toEqual([8 * 60, 8 * 60])
+    await input.trigger('blur')
+
+    // the day stored comes back
+    expect(input.element.value).toBe('1')
+    wrapper.unmount()
+  })
+
   it('shows the estimation in its format once the field is left', async () => {
     const task = buildTaskElement()
     const wrapper = mountSchedule({

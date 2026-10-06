@@ -551,10 +551,10 @@ const isTaskChanged = (task, data) => {
 }
 
 // "1." left in the field is no number and reads as an emptied field, which
-// saved an estimation of 0: the stored one comes back instead. An emptied
-// field still saves 0.
+// saved an estimation of 0, and a negative number saved a negative one: the
+// stored one comes back instead. An emptied field still saves 0.
 const updateEstimation = (input, entry) => {
-  if (input.validity.badInput) {
+  if (input.validity.badInput || input.valueAsNumber < 0) {
     input.value = formatDuration(entry.estimation, false)
     return
   }
