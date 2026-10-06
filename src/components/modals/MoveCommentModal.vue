@@ -32,10 +32,8 @@
 </template>
 
 <script setup>
-import { computed, ref, toRef, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useStore } from 'vuex'
-
-import { useModal } from '@/composables/modal'
 
 import BaseModal from '@/components/modals/BaseModal.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
@@ -51,8 +49,6 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['cancel', 'confirm'])
-
-useModal(toRef(props, 'active'), emit)
 
 const targetTaskTypeId = ref('')
 
