@@ -192,7 +192,7 @@ const { activeIndex, onKeydown, optionId } = useComboboxKeyboard({
 })
 
 watch(showList, () => {
-  if (showList.value) {
+  if (showList.value && props.isReversed) {
     nextTick(() => {
       if (!selectRef.value?.children) return
       let list = null

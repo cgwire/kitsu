@@ -1,4 +1,4 @@
-import { shallowMount } from '@vue/test-utils'
+import { flushPromises, shallowMount } from '@vue/test-utils'
 
 import i18n from '@/lib/i18n'
 import ComboboxTag from '@/components/widgets/ComboboxTag.vue'
@@ -141,5 +141,32 @@ describe('ComboboxTag', () => {
     expect(wrapper.find('.select-input').exists()).toBe(true)
     await trigger.trigger('keydown', { key: 'Escape' })
     expect(wrapper.find('.select-input').exists()).toBe(false)
+  })
+
+  describe('scroll on open', () => {
+    beforeEach(() => {
+      // jsdom does not scroll elements: scrollTo only records the position.
+      HTMLElement.prototype.scrollTo = function ({ top }) {
+        this.scrollTop = top
+      }
+    })
+
+    afterEach(() => {
+      delete HTMLElement.prototype.scrollTo
+    })
+
+    it('opens the list at its first option', async () => {
+      const tags = ['anim', 'cloth', 'crowd', 'fx', 'hair', 'layout', 'rig']
+      const w = shallowMount(ComboboxTag, {
+        props: {
+          options: tags.map(tag => ({ label: tag, value: tag })),
+          modelValue: 'fx'
+        },
+        global: { plugins: [i18n] }
+      })
+      await w.find('.flexrow').trigger('click')
+      await flushPromises()
+      expect(w.find('.select-input').element.scrollTop).toBe(0)
+    })
   })
 })
