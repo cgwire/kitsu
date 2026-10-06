@@ -106,6 +106,7 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import multiMonthPlugin from '@fullcalendar/multimonth'
 
 import { localeCode } from '@/lib/lang'
+import { getDayOffRange } from '@/lib/time'
 
 import Spinner from '@/components/widgets/Spinner.vue'
 
@@ -326,21 +327,18 @@ const resetEvents = () => {
 
   props.daysOff.forEach(dayOff => {
     const description = getDayOffInfo(dayOff)
-    const startDate = new Date(dayOff.date)
-    const endDate = new Date(dayOff.end_date)
-    while (startDate <= endDate) {
+    getDayOffRange([dayOff]).forEach(({ date }) => {
       calendarApi.addEvent({
         title: t('timesheets.day_off'),
         display: 'background',
-        start: startDate.toISOString().slice(0, 10),
+        start: date,
         backgroundColor: 'var(--calendar-day-off)',
         extendedProps: {
           isOff: true,
           description
         }
       })
-      startDate.setDate(startDate.getDate() + 1)
-    }
+    })
   })
 }
 

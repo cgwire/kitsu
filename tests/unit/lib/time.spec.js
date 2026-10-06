@@ -1,5 +1,8 @@
 // @vitest-environment node
 
+import { execFileSync } from 'node:child_process'
+import process from 'node:process'
+
 import moment from 'moment-timezone'
 import {
   addBusinessDays,
@@ -454,6 +457,76 @@ describe('time', () => {
       { id: 'off-2', date: '2023-05-02', end_date: '2023-05-03' },
       { id: 'off-2', date: '2023-05-03', end_date: '2023-05-03' }
     ])
+  })
+})
+
+describe('getDayOffRange across DST changes', () => {
+  // Vitest runs the specs in worker threads, where assigning process.env.TZ
+  // leaves the timezone unchanged: expand the ranges in a process started in
+  // the timezone instead.
+  const expandIn = (timeZone, daysOff) => {
+    const time = new URL('../../../src/lib/time.js', import.meta.url)
+    const script = `
+      import { getDayOffRange } from ${JSON.stringify(time.href)}
+      console.log(JSON.stringify({
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        dates: getDayOffRange(${JSON.stringify(daysOff)}).map(({ date }) => date)
+      }))
+    `
+    const output = execFileSync(
+      process.execPath,
+      ['--input-type=module', '--eval', script],
+      { encoding: 'utf8', env: { ...process.env, TZ: timeZone } }
+    )
+    return JSON.parse(output)
+  }
+
+  test('keeps every day off in Europe/Budapest', () => {
+    // DST starts on 2026-03-29 and ends on 2026-10-25
+    const daysOff = [
+      { date: '2026-03-27', end_date: '2026-04-02' },
+      { date: '2026-10-23', end_date: '2026-10-27' }
+    ]
+    expect(expandIn('Europe/Budapest', daysOff)).toEqual({
+      timeZone: 'Europe/Budapest',
+      dates: [
+        '2026-03-27',
+        '2026-03-28',
+        '2026-03-29',
+        '2026-03-30',
+        '2026-03-31',
+        '2026-04-01',
+        '2026-04-02',
+        '2026-10-23',
+        '2026-10-24',
+        '2026-10-25',
+        '2026-10-26',
+        '2026-10-27'
+      ]
+    })
+  })
+
+  test('keeps every day off in America/New_York', () => {
+    // DST starts on 2026-03-08 and ends on 2026-11-01
+    const daysOff = [
+      { date: '2026-03-06', end_date: '2026-03-10' },
+      { date: '2026-10-30', end_date: '2026-11-03' }
+    ]
+    expect(expandIn('America/New_York', daysOff)).toEqual({
+      timeZone: 'America/New_York',
+      dates: [
+        '2026-03-06',
+        '2026-03-07',
+        '2026-03-08',
+        '2026-03-09',
+        '2026-03-10',
+        '2026-10-30',
+        '2026-10-31',
+        '2026-11-01',
+        '2026-11-02',
+        '2026-11-03'
+      ]
+    })
   })
 })
 

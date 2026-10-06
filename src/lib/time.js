@@ -350,6 +350,8 @@ export const removeBusinessDays = (
 
 export const getDayOffRange = (daysOff = []) => {
   return daysOff.reduce((range, dayOff) => {
+    // 'YYYY-MM-DD' parses as UTC midnight, so step in UTC: a local day step
+    // shifts the UTC time by an hour across a DST change.
     const startDate = new Date(dayOff.date)
     const endDate = new Date(dayOff.end_date || dayOff.date)
     while (startDate <= endDate) {
@@ -357,7 +359,7 @@ export const getDayOffRange = (daysOff = []) => {
         ...dayOff,
         date: startDate.toISOString().slice(0, 10)
       })
-      startDate.setDate(startDate.getDate() + 1)
+      startDate.setUTCDate(startDate.getUTCDate() + 1)
     }
     return range
   }, [])
