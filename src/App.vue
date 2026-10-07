@@ -14,7 +14,9 @@
       v-if="previewFileIdToShow"
       active
       :preview-file-id="previewFileIdToShow"
+      :preview-file-ids="previewFileIdsToBrowse"
       @cancel="hidePreviewFile"
+      @change="showPreviewFile"
     />
   </div>
 </template>
@@ -74,6 +76,9 @@ const isSavingCommentPreview = computed(
 const mainConfig = computed(() => store.getters.mainConfig)
 const personMap = computed(() => store.getters.personMap)
 const previewFileIdToShow = computed(() => store.getters.previewFileIdToShow)
+const previewFileIdsToBrowse = computed(
+  () => store.getters.previewFileIdsToBrowse
+)
 const productionMap = computed(() => store.getters.productionMap)
 const shotsLoadingKey = computed(() => store.getters.shotsLoadingKey)
 const isAssetsLoading = computed(() => store.getters.isAssetsLoading)
@@ -91,6 +96,10 @@ const user = computed(() => store.getters.user)
 
 const hidePreviewFile = () => {
   store.commit('HIDE_PREVIEW_FILE')
+}
+
+const showPreviewFile = previewFileId => {
+  store.commit('SHOW_PREVIEW_FILE', previewFileId)
 }
 
 const onAssignation = (eventData, assign = true) => {

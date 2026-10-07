@@ -450,6 +450,7 @@
       "history": "historik",
       "info": "Information",
       "or": "eller",
+      "next": "Næste",
       "no": "Nej",
       "loading": "Indlæser...",
       "loading_data": "Indlæser data",
@@ -462,6 +463,7 @@
       "nb_frames": "frame | frames",
       "person": "Person",
       "preview_3d_not_supported": "3D-previews understøttes ikke i denne browser (WebGL2 er påkrævet). Opdater den venligst til nyeste version.",
+      "previous": "Forrige",
       "profile": "Profil",
       "production": "Produktion",
       "remove": "Fjern",
@@ -2063,7 +2065,8 @@
       },
       "multiple_delete_error": "Der opstod en fejl under sletning af et koncept. Der kan være eksisterende data knyttet til det. Er du sikker på, at der ikke er nogen opgaver knyttet til det valgte koncept?",
       "no_concept_selected": "Intet koncept valgt",
-      "title": "Koncepter"
+      "title": "Koncepter",
+      "uploading": "Uploader koncepter"
     },
     "intro": {
       "join_discord": "Deltag i fællesskabets Discord",

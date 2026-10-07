@@ -1,6 +1,5 @@
 import { v4 as uuidv4 } from 'uuid'
 
-import func from '@/lib/func'
 import { sortByName } from '@/lib/sorting'
 import conceptsApi from '@/store/api/concepts'
 import entitiesApi from '@/store/api/entities'
@@ -83,14 +82,6 @@ const actions = {
     } catch (err) {
       console.error(err)
     }
-  },
-
-  async newConcepts({ dispatch }, { forms, parentId = null }) {
-    // Each concept creation is several requests (entity, task, preview):
-    // run them one file at a time to avoid hammering the server.
-    return func.runPromiseMapAsSeries(forms, form =>
-      dispatch('newConcept', { form, parentId })
-    )
   },
 
   async newConcept(

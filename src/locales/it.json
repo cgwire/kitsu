@@ -452,6 +452,7 @@
       "history": "cronologia",
       "info": "Informazioni",
       "or": "o",
+      "next": "Successivo",
       "no": "No",
       "loading": "Caricamento...",
       "loading_data": "Caricamento dei dati",
@@ -464,6 +465,7 @@
       "nb_frames": "fotogramma | fotogrammi",
       "person": "Persona",
       "preview_3d_not_supported": "Le anteprime 3D non sono supportate da questo browser (è richiesto WebGL2). Aggiornalo all'ultima versione.",
+      "previous": "Precedente",
       "profile": "Profilo",
       "production": "Produzione",
       "remove": "Rimuovi",
@@ -2063,7 +2065,8 @@
       },
       "multiple_delete_error": "Si è verificato un errore durante l'eliminazione di un concept. Potrebbero esserci dati esistenti attualmente collegati. Sei sicuro che nessun task sia collegato a un concept selezionato?",
       "no_concept_selected": "Nessun concept selezionato",
-      "title": "Concept"
+      "title": "Concept",
+      "uploading": "Caricamento dei concept"
     },
     "intro": {
       "join_discord": "Unisciti al Discord della community",

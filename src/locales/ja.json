@@ -450,6 +450,7 @@
       "history": "履歴",
       "info": "情報",
       "or": "または",
+      "next": "次へ",
       "no": "いいえ",
       "loading": "読み込み中…",
       "loading_data": "データを読み込み中",
@@ -462,6 +463,7 @@
       "nb_frames": "フレーム | フレーム",
       "person": "ユーザー",
       "preview_3d_not_supported": "このブラウザでは3Dプレビューに対応していません（WebGL2が必要です）。ブラウザを最新バージョンに更新してください。",
+      "previous": "前へ",
       "profile": "プロフィール",
       "production": "プロダクション",
       "remove": "削除",
@@ -2063,7 +2065,8 @@
       },
       "multiple_delete_error": "コンセプトの削除中にエラーが発生しました。関連データが存在する可能性があります。選択したコンセプトにリンクされたタスクがないことを確認してください。",
       "no_concept_selected": "コンセプトが選択されていません",
-      "title": "コンセプト"
+      "title": "コンセプト",
+      "uploading": "コンセプトをアップロード中"
     },
     "intro": {
       "join_discord": "コミュニティのDiscordに参加する",

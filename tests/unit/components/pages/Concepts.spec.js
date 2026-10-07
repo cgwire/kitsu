@@ -1,4 +1,8 @@
-import { flushPromises, shallowMount } from '@vue/test-utils'
+import {
+  enableAutoUnmount,
+  flushPromises,
+  shallowMount
+} from '@vue/test-utils'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { createStore } from 'vuex'
 
@@ -15,6 +19,7 @@ import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditConceptFolderModal from '@/components/modals/EditConceptFolderModal.vue'
 import Concepts from '@/components/pages/Concepts.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ConceptCard from '@/components/widgets/ConceptCard.vue'
 import ConceptFolderTile from '@/components/widgets/ConceptFolderTile.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
@@ -57,7 +62,12 @@ const mountPage = async ({
     off: vi.fn()
   }
   const store = createStore({
-    state: { production: { id: 'production-1', name: 'Wing It' } },
+    state: {
+      production: { id: 'production-1', name: 'Wing It' },
+      selection,
+      shownPreview: '',
+      uploadProgress: {}
+    },
     getters: {
       concepts: () => concepts,
       conceptFolders: () => folders,
@@ -66,8 +76,10 @@ const mountPage = async ({
       currentProduction: state => state.production,
       isTVShow: () => true,
       personMap: () => new Map(people.map(person => [person.id, person])),
-      selectedConcepts: () =>
-        new Map(selection.map(concept => [concept.id, concept])),
+      previewFileIdToShow: state => state.shownPreview,
+      uploadProgress: state => state.uploadProgress,
+      selectedConcepts: state =>
+        new Map(state.selection.map(concept => [concept.id, concept])),
       taskStatusMap: () => new Map()
     }
   })
@@ -86,6 +98,10 @@ const mountPage = async ({
   await flushPromises()
   return { dispatch, handlers, store, wrapper }
 }
+
+// The page follows the query and writes to it: pages left mounted by the
+// previous tests would fight the one under test over the shared router.
+enableAutoUnmount(afterEach)
 
 describe('Concepts page', () => {
   // The concepts route carries no episode: moving the store to the all
@@ -317,8 +333,8 @@ describe('Concepts page', () => {
       wrapper.findComponent(AddPreviewModal).vm.$emit('confirm', forms)
       await flushPromises()
 
-      expect(dispatch).toHaveBeenCalledWith('newConcepts', {
-        forms,
+      expect(dispatch).toHaveBeenCalledWith('newConcept', {
+        form: forms[0],
         parentId: 'folder-1'
       })
     })
@@ -636,6 +652,251 @@ describe('Concepts page', () => {
     expect(wrapper.find('.drop-mask').exists()).toBe(true)
   })
 
+  describe('upload', () => {
+    // Resolved by hand to watch the page between two files.
+    const mountUploading = async () => {
+      const pending = []
+      const dispatch = vi.fn(action =>
+        action === 'newConcept'
+          ? new Promise((resolve, reject) => pending.push({ resolve, reject }))
+          : Promise.resolve()
+      )
+      const page = await mountPage({ dispatch })
+      const modal = page.wrapper.findComponent(AddPreviewModal)
+      await page.wrapper.find('.add-concepts').trigger('click')
+      modal.vm.$emit('confirm', [buildForm('a.png'), buildForm('b.png')])
+      await flushPromises()
+      return { ...page, modal, pending }
+    }
+    const buildForm = name => {
+      const form = new FormData()
+      form.append('file', new File(['pixels'], name))
+      return form
+    }
+    const barWidth = wrapper =>
+      wrapper.find('.upload-bar .fill').attributes('style')
+    const isAddDisabled = wrapper =>
+      wrapper.findComponent('.add-concepts').props('disabled')
+    const settle = async (upload, outcome = 'resolve') => {
+      upload[outcome](new Error('offline'))
+      await flushPromises()
+    }
+
+    test('closes the modal and reports the progress file by file', async () => {
+      const { modal, pending, store, wrapper } = await mountUploading()
+      const status = () => wrapper.find('.upload-status')
+
+      expect(modal.props('active')).toBe(false)
+      expect(status().text()).toContain('0 / 2')
+      expect(status().find('.upload-file').text()).toBe('a.png')
+      expect(barWidth(wrapper)).toContain('width: 0%')
+      expect(isAddDisabled(wrapper)).toBe(true)
+
+      // The bar follows the bytes of the file being sent, and never steps
+      // back when the store forgets them at the end of that file.
+      store.state.uploadProgress = { 'a.png': 50 }
+      await flushPromises()
+      expect(barWidth(wrapper)).toContain('width: 25%')
+      store.state.uploadProgress = {}
+      await flushPromises()
+      expect(barWidth(wrapper)).toContain('width: 25%')
+
+      // One file at a time: the second waits for the first.
+      expect(pending).toHaveLength(1)
+      await settle(pending[0])
+      expect(status().text()).toContain('1 / 2')
+      expect(status().find('.upload-file').text()).toBe('b.png')
+      expect(barWidth(wrapper)).toContain('width: 50%')
+
+      await settle(pending[1])
+      expect(status().exists()).toBe(false)
+      expect(isAddDisabled(wrapper)).toBe(false)
+    })
+
+    test('tells how far a failed upload went, until dismissed', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { pending, wrapper } = await mountUploading()
+
+      await settle(pending[0])
+      await settle(pending[1], 'reject')
+
+      const status = wrapper.find('.upload-status')
+      expect(status.classes()).toContain('is-error')
+      expect(status.text()).toContain('concepts.add_concept_error')
+      expect(status.text()).toContain('1 / 2')
+      expect(isAddDisabled(wrapper)).toBe(false)
+
+      await status.find('.dismiss-upload').trigger('click')
+      expect(wrapper.find('.upload-status').exists()).toBe(false)
+    })
+  })
+
+  // A link to the page carries what the user was looking at.
+  describe('query', () => {
+    const stubs = {
+      RouterLink: { props: ['to'], template: '<a><slot /></a>' }
+    }
+    const people = [{ id: 'person-2', name: 'Ada' }]
+    const folders = [{ id: 'folder-1', name: 'Sets' }]
+    const query = () => router.currentRoute.value.query
+    const sortFilter = wrapper =>
+      wrapper
+        .findAllComponents(Combobox)
+        .find(combobox => combobox.props('label') === 'main.sorted_by')
+
+    test('restores the filters', async () => {
+      const { wrapper } = await mountPage({
+        concepts: [buildConcept('concept-1', 'person-2')],
+        people,
+        query: { publisher: 'person-2', sort: 'updated_at', status: 'status-1' }
+      })
+
+      expect(wrapper.findComponent(ComboboxStatus).props('modelValue')).toBe(
+        'status-1'
+      )
+      expect(wrapper.findComponent(PeopleField).props('modelValue')).toEqual(
+        people[0]
+      )
+      expect(sortFilter(wrapper).props('modelValue')).toBe('updated_at')
+    })
+
+    test('follows the filters, defaults left out', async () => {
+      const { wrapper } = await mountPage({
+        concepts: [buildConcept('concept-1', 'person-2')],
+        people
+      })
+
+      wrapper.findComponent(ComboboxStatus).vm.$emit('update:modelValue', 's-1')
+      wrapper.findComponent(PeopleField).vm.$emit('update:modelValue', people[0])
+      await flushPromises()
+      expect(query()).toEqual({ publisher: 'person-2', status: 's-1' })
+
+      sortFilter(wrapper).vm.$emit('update:modelValue', 'updated_at')
+      wrapper.findComponent(ComboboxStatus).vm.$emit('update:modelValue', null)
+      await flushPromises()
+      expect(query()).toEqual({ publisher: 'person-2', sort: 'updated_at' })
+    })
+
+    test('keeps the filters but not the concept when opening a folder', async () => {
+      const { wrapper } = await mountPage({
+        concepts: [buildConcept('concept-1')],
+        folders,
+        query: { 'concept-id': 'concept-1', status: 'status-1' },
+        stubs
+      })
+
+      const targets = wrapper
+        .findAllComponents(stubs.RouterLink)
+        .map(link => link.props('to').query)
+      expect(targets).toContainEqual({ folder: 'folder-1', status: 'status-1' })
+      expect(targets).toContainEqual({ status: 'status-1' })
+    })
+
+    test('follows the single selection', async () => {
+      const concepts = [buildConcept('concept-1'), buildConcept('concept-2')]
+      const { store } = await mountPage({ concepts })
+
+      store.state.selection = [concepts[0]]
+      await flushPromises()
+      expect(query()['concept-id']).toBe('concept-1')
+
+      store.state.selection = concepts
+      await flushPromises()
+      expect(query()['concept-id']).toBeUndefined()
+    })
+
+    test('selects the concept of a link', async () => {
+      const concepts = [buildConcept('concept-1'), buildConcept('concept-2')]
+      const { dispatch } = await mountPage({
+        concepts,
+        query: { 'concept-id': 'concept-2' }
+      })
+
+      expect(dispatch).toHaveBeenCalledWith(
+        'addSelectedConcepts',
+        new Map([['concept-2', concepts[1]]])
+      )
+    })
+
+    test('opens the folder of the concept of a link', async () => {
+      await mountPage({
+        concepts: [{ ...buildConcept('concept-1'), parent_id: 'folder-1' }],
+        folders,
+        query: { 'concept-id': 'concept-1' }
+      })
+
+      expect(query()).toEqual({ 'concept-id': 'concept-1', folder: 'folder-1' })
+    })
+
+    test('forgets a concept that no longer exists', async () => {
+      const { dispatch } = await mountPage({
+        concepts: [buildConcept('concept-1')],
+        query: { 'concept-id': 'gone', 'concept-preview': 'gone' }
+      })
+
+      expect(query()).toEqual({})
+      expect(dispatch).not.toHaveBeenCalledWith(
+        'addSelectedConcepts',
+        expect.anything()
+      )
+    })
+
+    test('shows the concept of a link in full screen and follows the browsing', async () => {
+      const concepts = [
+        { ...buildConcept('concept-1'), preview_file_id: 'preview-1' },
+        { ...buildConcept('concept-2'), preview_file_id: 'preview-2' }
+      ]
+      const { store } = await mountPage({
+        concepts,
+        query: { 'concept-preview': 'concept-1' }
+      })
+      expect(store.commit).toHaveBeenCalledWith('SHOW_PREVIEW_FILE', 'preview-1')
+
+      store.state.shownPreview = 'preview-2'
+      await flushPromises()
+      expect(query()['concept-preview']).toBe('concept-2')
+
+      store.state.shownPreview = ''
+      await flushPromises()
+      expect(query()['concept-preview']).toBeUndefined()
+    })
+  })
+
+  // The full screen preview modal browses these with the arrow keys.
+  test('hands the shown previews over to the preview modal, in order', async () => {
+    const { store, wrapper } = await mountPage({
+      concepts: [
+        {
+          ...buildConcept('concept-old'),
+          created_at: '2026-01-01',
+          preview_file_id: 'preview-concept-old'
+        },
+        {
+          ...buildConcept('concept-new'),
+          created_at: '2026-02-01',
+          preview_file_id: 'preview-concept-new'
+        },
+        // Movies play in their card: the modal only shows pictures.
+        {
+          ...buildConcept('concept-movie'),
+          preview_file_extension: 'mp4',
+          preview_file_id: 'preview-concept-movie'
+        }
+      ]
+    })
+
+    expect(store.commit).toHaveBeenCalledWith('SET_PREVIEW_FILES_TO_BROWSE', [
+      'preview-concept-new',
+      'preview-concept-old'
+    ])
+
+    wrapper.unmount()
+    expect(store.commit).toHaveBeenLastCalledWith(
+      'SET_PREVIEW_FILES_TO_BROWSE',
+      []
+    )
+  })
+
   test('folds the extra filters until asked for more', async () => {
     const { wrapper } = await mountPage()
     const filters = wrapper.find('.filters')
@@ -680,17 +941,23 @@ describe('Concepts page', () => {
 
   test('clears the upload error when a retry succeeds', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
-    const { dispatch, wrapper } = await mountPage()
+    let isOffline = true
+    const dispatch = vi.fn(action =>
+      isOffline && action === 'newConcept'
+        ? Promise.reject(new Error('network'))
+        : Promise.resolve()
+    )
+    const { wrapper } = await mountPage({ dispatch })
     const modal = wrapper.findComponent({ name: 'AddPreviewModal' })
-    dispatch.mockRejectedValueOnce(new Error('network'))
-    modal.vm.$emit('confirm', [])
+    modal.vm.$emit('confirm', [new FormData()])
     await flushPromises()
-    expect(modal.props('isError')).toBe(true)
+    expect(wrapper.find('.upload-status').classes()).toContain('is-error')
 
-    modal.vm.$emit('confirm', [])
+    isOffline = false
+    modal.vm.$emit('confirm', [new FormData()])
     await flushPromises()
 
-    expect(modal.props('isError')).toBe(false)
+    expect(wrapper.find('.upload-status').exists()).toBe(false)
   })
 
   test('keeps every publisher selectable once one is picked', async () => {

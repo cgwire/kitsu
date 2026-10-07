@@ -77,7 +77,7 @@
             <nav class="folder-path">
               <router-link
                 :class="{ 'drop-target': dropTargetId === ROOT }"
-                :to="{ query: {} }"
+                :to="{ query: folderQuery(null) }"
                 @dragover="onFolderDragOver(null, $event)"
                 @dragleave="onFolderDragLeave"
                 @drop="onFolderDrop(null, $event)"
@@ -114,8 +114,40 @@
             <button-simple
               class="add-concepts"
               icon="image"
+              :disabled="isUploading"
               :text="$t('concepts.add_new_concept')"
               @click="openAddConceptModal"
+            />
+          </div>
+          <div
+            class="upload-status"
+            :class="{ 'is-error': upload.isError }"
+            role="status"
+            v-if="upload.total"
+          >
+            <span>
+              {{
+                upload.isError
+                  ? $t('concepts.add_concept_error')
+                  : $t('concepts.uploading')
+              }}
+            </span>
+            <span class="upload-file" :title="upload.fileName">
+              {{ upload.fileName }}
+            </span>
+            <div class="upload-bar">
+              <div class="fill" :style="{ width: `${uploadPercent}%` }"></div>
+            </div>
+            <span class="upload-count">
+              {{ upload.done }} / {{ upload.total }}
+            </span>
+            <button-simple
+              class="dismiss-upload"
+              icon="remove"
+              is-thin
+              :title="$t('main.close')"
+              @click="upload.total = 0"
+              v-if="upload.isError"
             />
           </div>
           <div
@@ -130,7 +162,7 @@
                 @drop="onFolderDrop(folder.id, $event)"
                 v-for="folder in shownFolders"
               >
-                <router-link :to="{ query: { folder: folder.id } }">
+                <router-link :to="{ query: folderQuery(folder.id) }">
                   <concept-folder-tile
                     :count="nbConceptsByFolder.get(folder.id) ?? 0"
                     :highlighted="dropTargetId === folder.id"
@@ -185,8 +217,6 @@
       :active="modals.addConcept"
       :extensions="imgExtensions"
       is-concept
-      :is-error="errors.addingConcept"
-      :is-loading="loading.addingConcept"
       message=""
       @cancel="closeAddConceptModal"
       @confirm="confirmAddConceptModal"
@@ -258,6 +288,7 @@ import { useStore } from 'vuex'
 
 import { pauseEvent } from '@/composables/dom'
 import files from '@/lib/files'
+import func from '@/lib/func'
 import { sortAssets, sortByName, sortPeople } from '@/lib/sorting'
 import assetsStore from '@/store/modules/assets'
 
@@ -280,9 +311,24 @@ const store = useStore()
 
 const socket = getCurrentInstance().appContext.config.globalProperties.$socket
 
+const DEFAULT_SORT = 'created_at'
+// The parameters a change of folder rewrites: the folder and the concepts
+// it held.
+const FOLDER_PARAMS = ['concept-id', 'concept-preview', 'folder']
+const NO_LINK = 'none'
+const ROOT = 'root'
+const imgExtensions = files.IMG_EXTENSIONS_STRING
+const sortByOptions = [DEFAULT_SORT, 'updated_at', 'last_comment_date'].map(
+  name => ({ label: name, value: name })
+)
+
 // State
 // --------------------------------------------------------------------------
 const addPreviewModalRef = useTemplateRef('add-preview-modal')
+
+// Query updates wait for each other: two of them in the same tick would
+// both start from the same query and the last one would drop the first.
+let queryUpdates = Promise.resolve()
 
 // The concepts of a card drag, read on the folder the drag ends on: the
 // drag data is not readable before the drop.
@@ -293,23 +339,31 @@ const folderToEdit = ref(null)
 const isDraggingFile = ref(false)
 
 const errors = reactive({
-  addingConcept: false,
   deletingFolder: false,
   editingFolder: false,
   loadingConcepts: false
 })
+// The query carries the filters, so a link opens the page as it was shared.
 const filters = reactive({
-  assetId: '',
-  assetTypeId: '',
-  publisher: null,
-  sortBy: 'created_at',
-  taskStatusId: null
+  assetId: route.query.asset ?? '',
+  assetTypeId: route.query['asset-type'] ?? '',
+  publisher: store.getters.personMap.get(route.query.publisher) ?? null,
+  sortBy: route.query.sort ?? DEFAULT_SORT,
+  taskStatusId: route.query.status ?? null
 })
 const loading = reactive({
-  addingConcept: false,
   deletingFolder: false,
   editingFolder: false,
   loadingConcepts: false
+})
+// The files of the last upload: sent one at a time, the cards land in the
+// grid as they go.
+const upload = reactive({
+  done: 0,
+  fileName: '',
+  filePercent: 0,
+  isError: false,
+  total: 0
 })
 const modals = reactive({
   addConcept: false,
@@ -317,17 +371,11 @@ const modals = reactive({
   editFolder: false
 })
 
-const NO_LINK = 'none'
-const ROOT = 'root'
-const imgExtensions = files.IMG_EXTENSIONS_STRING
-const sortByOptions = ['created_at', 'updated_at', 'last_comment_date'].map(
-  name => ({ label: name, value: name })
-)
-
 // Computed
 // --------------------------------------------------------------------------
 const conceptFolders = computed(() => store.getters.conceptFolders)
 const concepts = computed(() => store.getters.concepts)
+const previewFileIdToShow = computed(() => store.getters.previewFileIdToShow)
 const currentProduction = computed(() => store.getters.currentProduction)
 const personMap = computed(() => store.getters.personMap)
 const selectedConcepts = computed(() => store.getters.selectedConcepts)
@@ -440,6 +488,19 @@ const publishers = computed(() => {
 })
 
 const isDrawerOpen = computed(() => selectedConcepts.value.size > 0)
+const isUploading = computed(
+  () => upload.done < upload.total && !upload.isError
+)
+const uploadProgress = computed(() => store.getters.uploadProgress)
+const uploadPercent = computed(
+  () => ((upload.done + upload.filePercent / 100) / upload.total) * 100
+)
+
+const singleSelectedId = computed(() =>
+  selectedConcepts.value.size === 1
+    ? selectedConcepts.value.keys().next().value
+    : null
+)
 
 const currentConcept = computed(() =>
   selectedConcepts.value.size === 1
@@ -487,6 +548,55 @@ const getFolderId = concept =>
     ? concept.parent_id
     : null
 
+const setQuery = patch => {
+  queryUpdates = queryUpdates.then(() => {
+    const query = Object.fromEntries(
+      Object.entries({ ...route.query, ...patch }).filter(([, value]) => value)
+    )
+    return router.replace({ query })
+  })
+}
+
+// Changing folder leaves the concept behind, not the filters.
+const folderQuery = folderId => {
+  const query = Object.fromEntries(
+    Object.entries(route.query).filter(([key]) => !FOLDER_PARAMS.includes(key))
+  )
+  return folderId ? { ...query, folder: folderId } : query
+}
+
+// A link may name the concept of the side panel (concept-id) and the one
+// shown in full screen (concept-preview): both wait for the concepts, then
+// for the folder that holds them.
+const applyConceptQuery = () => {
+  if (loading.loadingConcepts || errors.loadingConcepts) return
+  const params = ['concept-id', 'concept-preview']
+  const [selected, previewed] = params.map(param =>
+    concepts.value.find(concept => concept.id === route.query[param])
+  )
+  const unknownParams = params.filter(
+    (param, index) => route.query[param] && ![selected, previewed][index]
+  )
+  if (unknownParams.length) {
+    setQuery(Object.fromEntries(unknownParams.map(param => [param, ''])))
+  }
+  const located = previewed ?? selected
+  if (!located) return
+  if (getFolderId(located) !== (currentFolder.value?.id ?? null)) {
+    setQuery({ folder: getFolderId(located) ?? '' })
+    return
+  }
+  if (selected && singleSelectedId.value !== selected.id) {
+    onSelectConcept(selected)
+  }
+  if (
+    previewed?.preview_file_id &&
+    previewFileIdToShow.value !== previewed.preview_file_id
+  ) {
+    store.commit('SHOW_PREVIEW_FILE', previewed.preview_file_id)
+  }
+}
+
 const refreshConcepts = async () => {
   loading.loadingConcepts = true
   errors.loadingConcepts = false
@@ -524,9 +634,9 @@ const onSelectConcept = (concept, isMultipleSelection = false) => {
   }
 }
 
+// One upload at a time: the modal stays shut while files are being sent.
 const openAddConceptModal = () => {
-  errors.addingConcept = false
-  modals.addConcept = true
+  modals.addConcept = !isUploading.value
 }
 
 const closeAddConceptModal = () => {
@@ -534,19 +644,25 @@ const closeAddConceptModal = () => {
 }
 
 const confirmAddConceptModal = async forms => {
-  loading.addingConcept = true
-  errors.addingConcept = false
+  closeAddConceptModal()
+  Object.assign(upload, { done: 0, isError: false, total: forms.length })
+  const parentId = currentFolder.value?.id ?? null
   try {
-    await store.dispatch('newConcepts', {
-      forms,
-      parentId: currentFolder.value?.id ?? null
+    // Each concept creation is several requests (entity, task, preview):
+    // one file at a time avoids hammering the server.
+    await func.runPromiseMapAsSeries(forms, async form => {
+      Object.assign(upload, {
+        fileName: form.get('file')?.name ?? '',
+        filePercent: 0
+      })
+      await store.dispatch('newConcept', { form, parentId })
+      Object.assign(upload, { done: upload.done + 1, filePercent: 0 })
     })
-    closeAddConceptModal()
+    upload.total = 0
   } catch (err) {
     console.error(err)
-    errors.addingConcept = true
+    upload.isError = true
   }
-  loading.addingConcept = false
 }
 
 const openFolderModal = folder => {
@@ -581,7 +697,7 @@ const confirmDeleteFolder = async () => {
   try {
     await store.dispatch('deleteConceptFolder', currentFolder.value)
     modals.deleteFolder = false
-    router.push({ query: {} })
+    router.push({ query: folderQuery(null) })
   } catch (err) {
     console.error(err)
     errors.deletingFolder = true
@@ -602,8 +718,9 @@ const reset = () => {
 const onFileDrop = async event => {
   pauseEvent(event)
   const droppedFiles = event.dataTransfer.files
-  openAddConceptModal()
   isDraggingFile.value = false
+  if (isUploading.value) return
+  openAddConceptModal()
   await nextTick()
   addPreviewModalRef.value.setFiles(droppedFiles)
 }
@@ -688,18 +805,90 @@ watch(
 // The selection of a folder is out of sight in another one.
 watch(() => currentFolder.value?.id, clearSelection)
 
+watch(
+  filters,
+  () =>
+    setQuery({
+      asset: filters.assetId,
+      'asset-type': filters.assetTypeId,
+      publisher: filters.publisher?.id,
+      sort: filters.sortBy === DEFAULT_SORT ? '' : filters.sortBy,
+      status: filters.taskStatusId
+    }),
+  { deep: true }
+)
+
+// Declared after the folder watcher: opening the folder of a linked concept
+// clears the selection first, then selects the concept.
+watch(
+  [
+    () => route.query['concept-id'],
+    () => route.query['concept-preview'],
+    () => currentFolder.value?.id,
+    () => loading.loadingConcepts
+  ],
+  applyConceptQuery
+)
+
+// The store forgets the bytes of a file once it is sent, before the concept
+// is counted as done: only a higher value moves the bar, never a lower one.
+watch(
+  () => uploadProgress.value?.[upload.fileName] ?? 0,
+  percent => {
+    upload.filePercent = Math.max(upload.filePercent, percent)
+  }
+)
+
+// Only a selection that ends removes its parameter: an empty selection must
+// leave the concept of a link alone until the concepts are loaded.
+watch(singleSelectedId, (selectedId, previousId) => {
+  if (selectedId || previousId) setQuery({ 'concept-id': selectedId })
+})
+
+watch(previewFileIdToShow, (previewFileId, previousId) => {
+  const previewed = concepts.value.find(
+    concept => previewFileId && concept.preview_file_id === previewFileId
+  )
+  if (previewed || previousId) setQuery({ 'concept-preview': previewed?.id })
+})
+
 // A filter whose value is no longer offered would hide every concept.
+// Not while loading: the options are empty then, and the filters of a link
+// would be dropped before the concepts that offer them arrive.
 watch(assetTypeOptions, options => {
-  if (!options.some(option => option.value === filters.assetTypeId)) {
+  if (
+    !loading.loadingConcepts &&
+    !options.some(option => option.value === filters.assetTypeId)
+  ) {
     filters.assetTypeId = ''
   }
 })
 
 watch(assetOptions, options => {
-  if (!options.some(option => option.id === filters.assetId)) {
+  if (
+    !loading.loadingConcepts &&
+    !options.some(option => option.id === filters.assetId)
+  ) {
     filters.assetId = ''
   }
 })
+
+// The full screen preview modal walks through the shown pictures with the
+// arrow keys. Movies play in their card and never reach the modal.
+watch(
+  filteredConcepts,
+  concepts =>
+    store.commit(
+      'SET_PREVIEW_FILES_TO_BROWSE',
+      concepts
+        .filter(
+          concept =>
+            concept.preview_file_id && concept.preview_file_extension !== 'mp4'
+        )
+        .map(concept => concept.preview_file_id)
+    ),
+  { immediate: true }
+)
 
 // Lifecycle
 // --------------------------------------------------------------------------
@@ -709,6 +898,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   socket.off('task:status-changed', onTaskStatusChanged)
+  store.commit('SET_PREVIEW_FILES_TO_BROWSE', [])
 })
 
 // Head
@@ -841,6 +1031,56 @@ useHead({
   .drop-target {
     color: var(--text-selected);
     text-decoration: underline;
+  }
+}
+
+.upload-status {
+  align-items: center;
+  background: var(--background-alt-2);
+  border-radius: 10px;
+  color: var(--text);
+  display: flex;
+  gap: 12px;
+  margin: 0 14px 10px;
+  padding: 8px 12px;
+
+  // same bar as the previews of the comment form
+  .upload-bar {
+    background: rgba(var(--border-rgb), 0.5);
+    border-radius: 5px;
+    flex: 1;
+    height: 5px;
+    min-width: 60px;
+    overflow: hidden;
+  }
+
+  .fill {
+    background: $light-green;
+    height: 100%;
+    transition: width 200ms linear;
+  }
+
+  // also the file that failed, when the upload stops on an error
+  .upload-file {
+    color: var(--text-strong);
+    font-weight: 600;
+    max-width: 30%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .upload-count {
+    color: var(--text-alt);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &.is-error {
+    color: $red;
+
+    .fill {
+      background: $red;
+    }
   }
 }
 

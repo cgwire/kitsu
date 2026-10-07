@@ -14,4 +14,64 @@ describe('PreviewModal', () => {
     expect(link.attributes('download')).toBe('')
     wrapper.unmount()
   })
+
+  describe('browsing', () => {
+    const mountModal = previewFileId =>
+      mount(PreviewModal, {
+        props: {
+          active: true,
+          previewFileId,
+          previewFileIds: ['preview-1', 'preview-2', 'preview-3']
+        }
+      })
+
+    const press = key => window.dispatchEvent(new KeyboardEvent('keydown', { key }))
+
+    it('moves to the sibling previews with the arrow keys', () => {
+      const wrapper = mountModal('preview-2')
+
+      press('ArrowRight')
+      press('ArrowLeft')
+
+      expect(wrapper.emitted('change')).toEqual([['preview-3'], ['preview-1']])
+      wrapper.unmount()
+    })
+
+    it('stops at both ends of the list', () => {
+      const first = mountModal('preview-1')
+      press('ArrowLeft')
+      expect(first.emitted('change')).toBeUndefined()
+      expect(first.find('.previous').exists()).toBe(false)
+      expect(first.find('.next').exists()).toBe(true)
+      first.unmount()
+
+      const last = mountModal('preview-3')
+      press('ArrowRight')
+      expect(last.emitted('change')).toBeUndefined()
+      expect(last.find('.next').exists()).toBe(false)
+      last.unmount()
+    })
+
+    it('moves with the side buttons without closing', async () => {
+      const wrapper = mountModal('preview-2')
+
+      await wrapper.find('.next').trigger('click')
+
+      expect(wrapper.emitted('change')).toEqual([['preview-3']])
+      expect(wrapper.emitted('cancel')).toBeUndefined()
+      wrapper.unmount()
+    })
+
+    it('offers nothing to browse for a lone preview', () => {
+      const wrapper = mount(PreviewModal, {
+        props: { active: true, previewFileId: 'preview-1' }
+      })
+
+      press('ArrowRight')
+
+      expect(wrapper.emitted('change')).toBeUndefined()
+      expect(wrapper.find('.next').exists()).toBe(false)
+      wrapper.unmount()
+    })
+  })
 })
