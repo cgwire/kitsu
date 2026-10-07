@@ -21,6 +21,7 @@ import newsApi from '@/store/api/news'
 import peopleApi from '@/store/api/people'
 import playlistsApi from '@/store/api/playlists'
 import previewsApi from '@/store/api/previews'
+import projectTemplatesApi from '@/store/api/projecttemplates'
 import scheduleApi from '@/store/api/schedule'
 import shotsApi from '@/store/api/shots'
 import taskTypesApi from '@/store/api/tasktypes'
@@ -197,6 +198,27 @@ describe('store/api endpoints', () => {
 
       expect(client.pdel).toHaveBeenCalledWith(path)
       expect(client.ppost).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('project templates editProjectTemplate', () => {
+    // The video tab of a template edits its movie bitrates with the other
+    // settings: left out of the payload, they were never saved.
+    test('sends the movie bitrates of the template', () => {
+      projectTemplatesApi.editProjectTemplate({
+        id: 'template-1',
+        name: 'Feature',
+        hd_bitrate_compression: 20,
+        ld_bitrate_compression: null
+      })
+
+      expect(client.pput).toHaveBeenCalledWith(
+        '/api/data/project-templates/template-1',
+        expect.objectContaining({
+          hd_bitrate_compression: 20,
+          ld_bitrate_compression: null
+        })
+      )
     })
   })
 

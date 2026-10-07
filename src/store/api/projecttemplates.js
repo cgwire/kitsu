@@ -44,7 +44,9 @@ export default {
       is_preview_download_allowed: template.is_preview_download_allowed,
       is_set_preview_automated: template.is_set_preview_automated,
       is_publish_default_for_artists: template.is_publish_default_for_artists,
-      is_single_preview_per_revision: template.is_single_preview_per_revision
+      is_single_preview_per_revision: template.is_single_preview_per_revision,
+      hd_bitrate_compression: template.hd_bitrate_compression,
+      ld_bitrate_compression: template.ld_bitrate_compression
     }
     return client.pput(`/api/data/project-templates/${template.id}`, data)
   },
