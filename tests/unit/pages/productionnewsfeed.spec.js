@@ -63,6 +63,9 @@ const mountPage = async path => {
     modules: {
       news: { ...newsModule, state: () => ({ newsList: [], newsTotal: 0 }) }
     },
+    actions: {
+      loadTask: (_, { taskId }) => ({ id: taskId })
+    },
     getters: {
       currentProduction: () => production,
       dateFormat: () => 'YYYY-MM-DD',
@@ -214,6 +217,54 @@ describe('pages/ProductionNewsFeed', () => {
       expect(rejections).toEqual([])
       expect(consoleError.mock.calls).toEqual([[error], [error]])
       expect(store.getters.newsList).toHaveLength(2)
+    })
+  })
+
+  describe('Escape', () => {
+    const feedPath = `/productions/${production.id}/news-feed`
+    let modal = null
+
+    afterEach(() => {
+      modal?.remove()
+      modal = null
+    })
+
+    const openDrawer = async wrapper => {
+      wrapper.findAllComponents(NewsRow)[0].vm.$emit('select', newsList[0])
+      await flushPromises()
+    }
+
+    const isDrawerOpen = wrapper =>
+      wrapper.find('.side-column').classes().includes('is-open')
+
+    const pressEscape = async () => {
+      window.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Escape', cancelable: true })
+      )
+      await flushPromises()
+    }
+
+    it('closes the task drawer', async () => {
+      const { wrapper } = await mountPage(feedPath)
+      await openDrawer(wrapper)
+      expect(isDrawerOpen(wrapper)).toBe(true)
+
+      await pressEscape()
+
+      expect(isDrawerOpen(wrapper)).toBe(false)
+    })
+
+    // A modal opened from the drawer's task closes on the same Escape.
+    it('keeps the task drawer open when the Escape closes a modal', async () => {
+      const { wrapper } = await mountPage(feedPath)
+      await openDrawer(wrapper)
+      modal = document.createElement('div')
+      modal.className = 'modal is-active'
+      document.body.appendChild(modal)
+
+      await pressEscape()
+
+      expect(isDrawerOpen(wrapper)).toBe(true)
     })
   })
 })
