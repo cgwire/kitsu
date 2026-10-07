@@ -1593,7 +1593,8 @@
       "all": "Tous",
       "only_running": "En cours",
       "episode_status": "Statut de l'épisode",
-      "drawings": "Dessins"
+      "drawings": "Dessins",
+      "validated": "validé"
     },
     "tasks": {
       "add_preview": "Attacher des fichiers pour une nouvelle version",

@@ -2097,7 +2097,8 @@ export default {
     pie: 'Pie charts',
     retakes: 'Retakes',
     status: 'Status',
-    shots: 'Shots'
+    shots: 'Shots',
+    validated: 'validated'
   },
 
   tasks: {

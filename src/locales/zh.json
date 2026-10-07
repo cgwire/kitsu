@@ -1593,7 +1593,8 @@
       "all": "全部",
       "only_running": "仅进行中",
       "episode_status": "剧集状态",
-      "drawings": "画稿"
+      "drawings": "画稿",
+      "validated": "已验证"
     },
     "tasks": {
       "add_preview": "为新预览修订版添加文件",

@@ -36,8 +36,10 @@ describe('StatsBar', () => {
     )
   })
 
-  it('writes the share of done statuses next to the bar', () => {
-    expect(mountBar().find('.done-share').text()).toBe('75%')
+  it('writes the share of done statuses under the bar, as validated', () => {
+    const share = mountBar().find('.done-share')
+    expect(share.find('.done-value').text()).toBe('75%')
+    expect(share.text()).toBe('75% statistics.validated')
   })
 
   it('reads 100% and 0% only for a full and an empty share', () => {
@@ -47,7 +49,7 @@ describe('StatsBar', () => {
         ['retake', 1, 'red', false]
       ]
     })
-    expect(wrapper.find('.done-share').text()).toBe('99%')
+    expect(wrapper.find('.done-value').text()).toBe('99%')
     expect(
       wrapper.findAll('.segment').map(segment => segment.attributes('title'))
     ).toEqual(['done: 249 (99%)', 'retake: 1 (1%)'])

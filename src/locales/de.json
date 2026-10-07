@@ -1593,7 +1593,8 @@
       "all": "Alle",
       "only_running": "Nur laufend",
       "episode_status": "Status der Episode",
-      "drawings": "Zeichnungen"
+      "drawings": "Zeichnungen",
+      "validated": "validiert"
     },
     "tasks": {
       "add_preview": "Vorschau hinzufügen",

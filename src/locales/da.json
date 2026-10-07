@@ -1593,7 +1593,8 @@
       "all": "Alle",
       "only_running": "Kun igangværende",
       "episode_status": "Episodestatus",
-      "drawings": "Tegninger"
+      "drawings": "Tegninger",
+      "validated": "valideret"
     },
     "tasks": {
       "add_preview": "Tilføj filer til en ny preview-revision",

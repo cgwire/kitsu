@@ -1593,7 +1593,8 @@
       "all": "Alles",
       "only_running": "Alleen lopend",
       "episode_status": "Aflevering status",
-      "drawings": "Tekeningen"
+      "drawings": "Tekeningen",
+      "validated": "gevalideerd"
     },
     "tasks": {
       "add_preview": "Bestanden toevoegen voor een nieuwe previewrevisie",

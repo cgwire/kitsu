@@ -1,4 +1,4 @@
-import { shallowMount } from '@vue/test-utils'
+import { mount, shallowMount } from '@vue/test-utils'
 
 import StatsCell from '@/components/cells/StatsCell.vue'
 import StatsBar from '@/components/widgets/StatsBar.vue'
@@ -16,8 +16,8 @@ const data = [
   ['wip', 1, '#3273dc', false]
 ]
 
-const mountCell = (props = {}) =>
-  shallowMount(StatsCell, {
+const mountCell = (props = {}, mountFn = shallowMount) =>
+  mountFn(StatsCell, {
     props: { colors: ['#22d160', '#3273dc'], data, ...props },
     global: { components: { PieChart }, stubs: { PieChart } }
   })
@@ -74,4 +74,21 @@ describe('cells/StatsCell', () => {
     expect(wrapper.findComponent(StatsHeat).props('data')).toEqual(data)
     expect(wrapper.findComponent(PieChart).exists()).toBe(false)
   })
+
+  test.each(['bars', 'heatmap'])(
+    'names the done share as validated in %s mode',
+    displayMode => {
+      const wrapper = mountCell({ displayMode }, mount)
+      expect(wrapper.text()).toContain('statistics.validated')
+    }
+  )
+
+  // The count mode writes the share of every status, the pie none.
+  test.each(['count', 'pie'])(
+    'writes no validated share in %s mode',
+    displayMode => {
+      const wrapper = mountCell({ displayMode }, mount)
+      expect(wrapper.text()).not.toContain('statistics.validated')
+    }
+  )
 })

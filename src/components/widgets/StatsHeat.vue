@@ -5,14 +5,16 @@
     :title="`${done} / ${total}`"
     v-if="total > 0"
   >
-    <span class="share">{{ roundPercent(ratio) }}%</span>
+    <span class="share">{{ roundPercent(ratio) }}% </span>
+    <span class="share-label">{{ $t('statistics.validated') }}</span>
   </div>
 </template>
 
 <script setup>
 /**
  * Progress of a statistics cell as a heatmap tile: the share of done statuses,
- * on a background that gets more intense as that share grows.
+ * written as the validated share, on a background that gets more intense as
+ * that share grows.
  * Data format: [['name', value, 'color', isDone], ...]
  */
 // Imports
@@ -47,7 +49,7 @@ const intensity = computed(() => 0.1 + 0.7 * ratio.value)
   border-radius: 4px;
   color: var(--text-strong);
   font-weight: bold;
-  padding: 0.6em 0;
+  padding: 0.35em 0;
   position: relative;
   text-align: center;
 
@@ -65,8 +67,16 @@ const intensity = computed(() => 0.1 + 0.7 * ratio.value)
   }
 }
 
-.share {
+.share,
+.share-label {
+  display: block;
   position: relative;
+}
+
+.share-label {
+  font-size: 0.8rem;
+  font-weight: normal;
+  line-height: 1.2;
 }
 
 // The light text of the dark theme needs a deeper green to stay readable on a

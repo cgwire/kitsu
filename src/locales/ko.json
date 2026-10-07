@@ -1593,7 +1593,8 @@
       "all": "모두",
       "only_running": "진행 중만",
       "episode_status": "에피소드 상태",
-      "drawings": "도면"
+      "drawings": "도면",
+      "validated": "승인됨"
     },
     "tasks": {
       "add_preview": "새 미리 보기 리비전을 위한 파일 추가",

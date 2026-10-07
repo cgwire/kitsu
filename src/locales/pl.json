@@ -2019,7 +2019,8 @@
       "heatmap": "Mapa cieplna",
       "retakes": "Poprawki",
       "status": "Status",
-      "shots": "Ujęcia"
+      "shots": "Ujęcia",
+      "validated": "zatwierdzone"
     },
     "tasks": {
       "all": "Wszystkie zadania",

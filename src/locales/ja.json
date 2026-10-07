@@ -1593,7 +1593,8 @@
       "all": "すべて",
       "only_running": "実行中のみ",
       "episode_status": "エピソードステータス",
-      "drawings": "枚数"
+      "drawings": "枚数",
+      "validated": "承認済み"
     },
     "tasks": {
       "add_preview": "新しいリビジョンにプレビューを追加",

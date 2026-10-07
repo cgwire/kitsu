@@ -1593,7 +1593,8 @@
       "all": "全部",
       "only_running": "僅運行",
       "episode_status": "集數狀態",
-      "drawings": "繪圖"
+      "drawings": "繪圖",
+      "validated": "已驗證"
     },
     "tasks": {
       "add_preview": "新增檔案以建立新的預覽修訂版",

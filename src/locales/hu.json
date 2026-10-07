@@ -1593,7 +1593,8 @@
       "all": "Mind",
       "drawings": "Rajzok",
       "episode_status": "Epizód állapot",
-      "only_running": "Csak folyamatban lévő"
+      "only_running": "Csak folyamatban lévő",
+      "validated": "érvényesítve"
     },
     "tasks": {
       "add_preview": "Előnézet hozzáadása",
