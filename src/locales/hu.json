@@ -2108,7 +2108,7 @@
     },
     "preview": {
       "broken": "Ez az előnézet hibás.",
-      "processing": "Video feldolgozás folyamatban..."
+      "processing": "Ez az előnézet feldolgozás alatt áll..."
     },
     "bots": {
       "active_bots": "aktív bot | aktív bot",

@@ -2082,7 +2082,7 @@
     },
     "preview": {
       "broken": "Deze preview is kapot.",
-      "processing": "Video wordt verwerkt..."
+      "processing": "Deze preview wordt verwerkt..."
     },
     "studios": {
       "create_error": "Er is een fout opgetreden tijdens het opslaan van deze studio. Weet u zeker dat er geen studio is met een vergelijkbare naam?",

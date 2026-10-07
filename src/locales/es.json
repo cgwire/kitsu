@@ -2082,7 +2082,7 @@
     },
     "preview": {
       "broken": "Esta vista previa está rota.",
-      "processing": "Procesamiento de vídeo en curso..."
+      "processing": "Esta vista previa se está procesando..."
     },
     "studios": {
       "create_error": "Se ha producido un error al guardar este estudio. ¿Está seguro de que no hay ningún estudio con un nombre similar?",

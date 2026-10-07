@@ -2082,7 +2082,7 @@
     },
     "preview": {
       "broken": "Diese Vorschau ist fehlerhaft.",
-      "processing": "Videobearbeitung im Gange..."
+      "processing": "Diese Vorschau wird verarbeitet..."
     },
     "studios": {
       "create_error": "Beim Speichern dieses Studios ist ein Fehler aufgetreten. Sind Sie sicher, dass es kein Studio mit einem ähnlichen Namen gibt?",

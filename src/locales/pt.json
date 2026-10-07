@@ -2082,7 +2082,7 @@
     },
     "preview": {
       "broken": "Esta visualização não está funcionando.",
-      "processing": "Processamento de vídeo em andamento..."
+      "processing": "Esta visualização está sendo processada..."
     },
     "studios": {
       "create_error": "Ocorreu um erro ao salvar este estúdio. Tem certeza de que não há nenhum estúdio com um nome semelhante?",

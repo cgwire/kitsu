@@ -2082,7 +2082,7 @@
     },
     "preview": {
       "broken": "这个预览坏了。",
-      "processing": "视频处理中..."
+      "processing": "这个预览正在处理中..."
     },
     "studios": {
       "create_error": "保存此工作室时发生错误。您确定没有名称相似的工作室吗？",

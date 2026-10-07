@@ -2294,7 +2294,7 @@ export default {
 
   preview: {
     broken: 'This preview is broken.',
-    processing: 'Video processing in progress...'
+    processing: 'This preview is being processed...'
   },
 
   search: {

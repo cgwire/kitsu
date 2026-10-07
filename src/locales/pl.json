@@ -2214,7 +2214,7 @@
     },
     "preview": {
       "broken": "Ten podgląd jest uszkodzony.",
-      "processing": "Trwa przetwarzanie wideo..."
+      "processing": "Ten podgląd jest przetwarzany..."
     },
     "search": {
       "limit": "Maksymalna liczba wyników:",

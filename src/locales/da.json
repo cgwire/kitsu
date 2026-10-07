@@ -2082,7 +2082,7 @@
     },
     "preview": {
       "broken": "Dette preview er ødelagt.",
-      "processing": "Videobehandling i gang..."
+      "processing": "Dette preview er ved at blive behandlet..."
     },
     "studios": {
       "create_error": "Der opstod en fejl under gemning af dette studio. Er du sikker på, at der ikke allerede findes et studio med et lignende navn?",
