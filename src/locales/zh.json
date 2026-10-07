@@ -1,5 +1,15 @@
 {
   "default": {
+    "app_login": {
+      "authorize": "授权",
+      "consent": "此计算机上的一个应用程序想以 {full_name} 的身份连接到 Kitsu。",
+      "consent_named": "此计算机上一个自称为 \"{app_name}\" 的应用程序想以 {full_name} 的身份连接到 Kitsu。",
+      "error": "应用程序登录失败。请从应用程序重新开始。",
+      "error_2fa_setup": "请先在 Kitsu 中设置双重身份验证，然后从应用程序重新开始登录。",
+      "invalid_request": "此登录链接无效。请从应用程序重新开始登录。",
+      "title": "应用程序登录",
+      "warning": "仅当您亲自从应用程序发起此登录时才授权。该应用程序将以您的权限访问 Kitsu。"
+    },
     "assets": {
       "cast_in": "已分配到",
       "delete_error": "删除此资产时出现错误。很可能存在有链接至此的数据。您确定没有任务链接至此资产类型吗？",

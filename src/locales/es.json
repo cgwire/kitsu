@@ -1,5 +1,15 @@
 {
   "default": {
+    "app_login": {
+      "authorize": "Autorizar",
+      "consent": "Una aplicación de este equipo quiere conectarse a Kitsu como {full_name}.",
+      "consent_named": "Una aplicación de este equipo, que se hace llamar \"{app_name}\", quiere conectarse a Kitsu como {full_name}.",
+      "error": "El inicio de sesión de la aplicación ha fallado. Vuelve a iniciarlo desde la aplicación.",
+      "error_2fa_setup": "Configura primero la autenticación de dos factores en Kitsu y luego vuelve a iniciar sesión desde la aplicación.",
+      "invalid_request": "Este enlace de inicio de sesión no es válido. Vuelve a iniciar sesión desde la aplicación.",
+      "title": "Inicio de sesión de aplicación",
+      "warning": "Autoriza solo si has iniciado tú mismo este inicio de sesión desde la aplicación. Accederá a Kitsu con tus permisos."
+    },
     "assets": {
       "cast_in": "Aparece en",
       "delete_error": "Se ha producido un error al eliminar este recurso. Es probable que tenga datos vinculados. ¿Está seguro de que el tipo de recurso no tiene ninguna tarea asociada?",

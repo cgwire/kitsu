@@ -15,6 +15,7 @@ import Login from '@/components/pages/Login.vue'
 import Main from '@/components/Main.vue'
 
 const AllTasks = () => import('@/components/pages/AllTasks.vue')
+const AppLogin = () => import('@/components/pages/AppLogin.vue')
 const SharedPlaylist = () => import('@/components/pages/SharedPlaylist.vue')
 const Asset = () => import('@/components/pages/Asset.vue')
 const AssetLibrary = () => import('@/components/pages/AssetLibrary.vue')
@@ -927,6 +928,17 @@ export const routes = [
     name: 'login-2fa',
     beforeEnter: (to, from) => {
       if (!store.getters.user) return { name: 'login' }
+    }
+  },
+  {
+    path: '/app-login',
+    component: AppLogin,
+    name: 'app-login',
+    beforeEnter: async (to, from) => {
+      const redirect = await auth.requireAuth(to, from)
+      if (redirect) return redirect
+      lang.setLocale(userStore.state.user.locale)
+      store.commit('DATA_LOADING_END')
     }
   },
   {

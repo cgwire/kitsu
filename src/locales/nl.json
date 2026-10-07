@@ -1,5 +1,15 @@
 {
   "default": {
+    "app_login": {
+      "authorize": "Autoriseren",
+      "consent": "Een applicatie op deze computer wil verbinding maken met Kitsu als {full_name}.",
+      "consent_named": "Een applicatie op deze computer, die zichzelf \"{app_name}\" noemt, wil verbinding maken met Kitsu als {full_name}.",
+      "error": "Het inloggen van de applicatie is mislukt. Start het opnieuw vanuit de applicatie.",
+      "error_2fa_setup": "Stel eerst tweestapsverificatie in Kitsu in en start daarna het inloggen opnieuw vanuit de applicatie.",
+      "invalid_request": "Deze inloglink is ongeldig. Start het inloggen opnieuw vanuit de applicatie.",
+      "title": "Inloggen van applicatie",
+      "warning": "Autoriseer alleen als je dit inloggen zelf vanuit de applicatie hebt gestart. De applicatie krijgt toegang tot Kitsu met jouw rechten."
+    },
     "assets": {
       "cast_in": "Opgenomen in",
       "delete_error": "Er is een fout opgetreden bij het verwijderen van deze asset. Er is waarschijnlijk data aan gekoppeld. Weet je zeker dat er geen taak aan dit assettype is gekoppeld?",

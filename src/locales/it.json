@@ -1,5 +1,15 @@
 {
   "default": {
+    "app_login": {
+      "authorize": "Autorizza",
+      "consent": "Un'applicazione su questo computer vuole connettersi a Kitsu come {full_name}.",
+      "consent_named": "Un'applicazione su questo computer, che si presenta come \"{app_name}\", vuole connettersi a Kitsu come {full_name}.",
+      "error": "L'accesso dell'applicazione non è riuscito. Riavvialo dall'applicazione.",
+      "error_2fa_setup": "Configura prima l'autenticazione a due fattori in Kitsu, poi riavvia l'accesso dall'applicazione.",
+      "invalid_request": "Questo link di accesso non è valido. Riavvia l'accesso dall'applicazione.",
+      "title": "Accesso dell'applicazione",
+      "warning": "Autorizza solo se hai avviato tu stesso questo accesso dall'applicazione. Accederà a Kitsu con i tuoi permessi."
+    },
     "assets": {
       "cast_in": "Presente in",
       "delete_error": "Si è verificato un errore durante l'eliminazione di questo asset. Potrebbero esserci dati esistenti attualmente collegati. Sei sicuro che a questo tipo di asset non sia collegato nessun task?",

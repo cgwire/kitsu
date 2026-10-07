@@ -50,9 +50,11 @@ vi.mock('@/components/pages/Login.vue', () => ({ default: {} }))
 
 import auth from '@/lib/auth'
 import init from '@/lib/init'
+import store from '@/store'
 import taskTypeStore from '@/store/modules/tasktypes'
 import { routes } from '@/router/routes'
 
+const appLoginRoute = routes.find(route => route.name === 'app-login')
 const homeRoute = routes.find(route => route.name === 'home')
 const mainRoute = routes.find(route => route.path === '/')
 
@@ -220,6 +222,15 @@ describe('router/routes', () => {
       init.mockResolvedValue(true)
       const result = await homeRoute.beforeEnter({}, {})
       expect(result).toEqual({ name: 'open-productions' })
+    })
+  })
+
+  describe('app login guard', () => {
+    test('shows the page without loading the app data', async () => {
+      const result = await appLoginRoute.beforeEnter({}, {})
+      expect(result).toBeUndefined()
+      expect(init).not.toHaveBeenCalled()
+      expect(store.commit).toHaveBeenCalledWith('DATA_LOADING_END')
     })
   })
 })
