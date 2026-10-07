@@ -12,7 +12,10 @@ const h = vi.hoisted(() => ({
 // Stub everything the route guards touch so importing the route table does
 // not drag the real store, auth flow or page components into jsdom.
 vi.mock('@/lib/auth', () => ({
-  default: { requireAuth: () => Promise.resolve() }
+  default: { popSSORedirect: vi.fn(), requireAuth: () => Promise.resolve() }
+}))
+vi.mock('bowser', () => ({
+  default: { getParser: () => ({ satisfies: () => true }) }
 }))
 vi.mock('@/lib/init', () => ({ default: vi.fn() }))
 vi.mock('@/lib/lang', () => ({ default: { setLocale: vi.fn() } }))
@@ -45,10 +48,12 @@ vi.mock('@/store/modules/user', () => ({
 vi.mock('@/components/Main.vue', () => ({ default: {} }))
 vi.mock('@/components/pages/Login.vue', () => ({ default: {} }))
 
+import auth from '@/lib/auth'
 import init from '@/lib/init'
 import taskTypeStore from '@/store/modules/tasktypes'
 import { routes } from '@/router/routes'
 
+const homeRoute = routes.find(route => route.name === 'home')
 const mainRoute = routes.find(route => route.path === '/')
 
 // The admin-only pages: removing the requiresAdmin flag from any of them
@@ -192,6 +197,29 @@ describe('router/routes', () => {
       init.mockResolvedValue(false)
       const result = await runGuard({ matched: [{ meta: {} }] })
       expect(result).toBe(false)
+    })
+  })
+
+  describe('home guard', () => {
+    beforeEach(() => {
+      vi.stubGlobal('window', { navigator: { userAgent: '' } })
+    })
+
+    afterEach(() => {
+      vi.unstubAllGlobals()
+    })
+
+    test('goes to the page saved before an SSO login', async () => {
+      auth.popSSORedirect.mockReturnValueOnce('/app-login?port=1234')
+      const result = await homeRoute.beforeEnter({}, {})
+      expect(result).toBe('/app-login?port=1234')
+      expect(init).not.toHaveBeenCalled()
+    })
+
+    test('goes to the default page without a saved redirect', async () => {
+      init.mockResolvedValue(true)
+      const result = await homeRoute.beforeEnter({}, {})
+      expect(result).toEqual({ name: 'open-productions' })
     })
   })
 })

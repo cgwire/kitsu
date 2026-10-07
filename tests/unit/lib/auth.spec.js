@@ -80,4 +80,30 @@ describe('auth', () => {
       ])
     })
   })
+
+  describe('SSO redirect', () => {
+    beforeEach(() => {
+      sessionStorage.clear()
+    })
+
+    test('restores a saved internal path once', () => {
+      auth.saveSSORedirect('/app-login?port=1234&state=s')
+      expect(auth.popSSORedirect()).toBe('/app-login?port=1234&state=s')
+      expect(auth.popSSORedirect()).toBeUndefined()
+    })
+
+    test.each([undefined, '', 'https://evil.com', '//evil.com/path'])(
+      'ignores %s',
+      path => {
+        auth.saveSSORedirect(path)
+        expect(auth.popSSORedirect()).toBeUndefined()
+      }
+    )
+
+    test('ignores a tampered stored value', () => {
+      sessionStorage.setItem('sso-redirect', '//evil.com')
+      expect(auth.popSSORedirect()).toBeUndefined()
+      expect(sessionStorage.getItem('sso-redirect')).toBeNull()
+    })
+  })
 })

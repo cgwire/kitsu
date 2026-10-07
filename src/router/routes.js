@@ -113,6 +113,9 @@ export const routes = [
       const redirect = await auth.requireAuth(to, from)
       if (redirect) return redirect
 
+      const ssoRedirect = auth.popSSORedirect()
+      if (ssoRedirect) return ssoRedirect
+
       timezone.setTimezone()
       lang.setLocale(userStore.state.user.locale)
       sentry.setContext(peopleStore.state.organisation, userStore.state.user)

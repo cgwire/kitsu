@@ -13,6 +13,11 @@ import {
 
 let channel
 const AUTHENTICATED_REQUEST_TIMEOUT_MS = 20000
+const SSO_REDIRECT_KEY = 'sso-redirect'
+
+// A path starting with // would be read as another host.
+const isInternalPath = path =>
+  typeof path === 'string' && path.startsWith('/') && !path.startsWith('//')
 
 const auth = {
   async logIn(payload) {
@@ -142,6 +147,18 @@ const auth = {
         query: { redirect: to.fullPath }
       }
     }
+  },
+
+  // SSO logins leave the app and come back on the home page, which drops
+  // the redirect query of the login page.
+  saveSSORedirect(path) {
+    if (isInternalPath(path)) sessionStorage.setItem(SSO_REDIRECT_KEY, path)
+  },
+
+  popSSORedirect() {
+    const path = sessionStorage.getItem(SSO_REDIRECT_KEY)
+    sessionStorage.removeItem(SSO_REDIRECT_KEY)
+    return isInternalPath(path) ? path : undefined
   },
 
   isPasswordValid(password, password2) {
