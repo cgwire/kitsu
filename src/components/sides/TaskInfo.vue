@@ -1016,13 +1016,14 @@ const onPreviewAdded = eventData => {
   const revision = eventData.revision
   const extension = eventData.extension
   const comment = store.getters.getTaskComment(taskId, commentId)
+  // The comment reloaded on 'comment:update' already lists the preview: the
+  // task previews tell whether the player has it.
+  const isAlreadyAdded = store.getters
+    .getTaskPreviews(taskId)
+    .some(preview => preview.previews?.some(({ id }) => id === previewId))
 
   if (props.task) {
-    if (
-      taskId === props.task.id &&
-      comment &&
-      (comment.previews.length === 0 || comment.previews[0].id !== previewId)
-    ) {
+    if (taskId === props.task.id && comment && !isAlreadyAdded) {
       store.commit('ADD_PREVIEW_END', {
         preview: {
           id: previewId,

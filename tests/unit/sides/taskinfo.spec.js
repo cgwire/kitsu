@@ -803,15 +803,10 @@ describe('TaskInfo.vue', () => {
 
   // Zou may still build the files of a preview another user adds.
   describe('preview-file:add-file', () => {
-    it('keeps the status of a preview another user adds', async () => {
-      const comment = { id: 'comment-1', previews: [] }
-      const { socket, store } = await mountPanel({
-        getterOverrides: { getTaskComment: () => () => comment }
-      })
+    const emitPreviewAdded = socket => {
       const [, onPreviewAdded] = socket.on.mock.calls.find(
         ([event]) => event === 'preview-file:add-file'
       )
-
       onPreviewAdded({
         task_id: TASK_ID,
         comment_id: 'comment-1',
@@ -820,6 +815,15 @@ describe('TaskInfo.vue', () => {
         extension: 'png',
         status: 'processing'
       })
+    }
+
+    it('keeps the status of a preview another user adds', async () => {
+      const comment = { id: 'comment-1', previews: [] }
+      const { socket, store } = await mountPanel({
+        getterOverrides: { getTaskComment: () => () => comment }
+      })
+
+      emitPreviewAdded(socket)
 
       expect(store.commit).toHaveBeenCalledWith(
         'ADD_PREVIEW_END',
@@ -843,6 +847,51 @@ describe('TaskInfo.vue', () => {
       expect(
         callOrder(store.dispatch, 'registerPreviewFileStatuses')
       ).toBeGreaterThan(callOrder(store.commit, 'ADD_PREVIEW_END'))
+    })
+
+    // Zou announces the new preview with 'comment:update' before
+    // 'preview-file:add-file': the comment reloaded in between lists it
+    // by its bare ID.
+    it('adds a preview its reloaded comment already lists', async () => {
+      const comment = { id: 'comment-1', previews: [{ id: 'preview-2' }] }
+      const { socket, store } = await mountPanel({
+        getterOverrides: { getTaskComment: () => () => comment }
+      })
+
+      emitPreviewAdded(socket)
+
+      expect(store.commit).toHaveBeenCalledWith(
+        'ADD_PREVIEW_END',
+        expect.objectContaining({
+          preview: expect.objectContaining({ id: 'preview-2', revision: 2 })
+        })
+      )
+    })
+
+    // The uploader's session adds its previews itself, the event can come
+    // after.
+    it('skips a preview the task previews already hold', async () => {
+      const head = {
+        id: 'preview-1',
+        revision: 2,
+        previews: [{ id: 'preview-1' }, { id: 'preview-2' }]
+      }
+      const comment = { id: 'comment-1', previews: [head] }
+      const { socket, store } = await mountPanel({
+        previews: [head],
+        getterOverrides: { getTaskComment: () => () => comment }
+      })
+
+      emitPreviewAdded(socket)
+
+      expect(store.commit).not.toHaveBeenCalledWith(
+        'ADD_PREVIEW_END',
+        expect.anything()
+      )
+      expect(store.dispatch).not.toHaveBeenCalledWith(
+        'registerPreviewFileStatuses',
+        expect.anything()
+      )
     })
   })
 
