@@ -1694,9 +1694,6 @@ const loadAnnotation = annotation => {
     }
     annotation = getAnnotation(currentTimeVal)
     if (!annotation) {
-      if (!isMovie.value) {
-        console.warn('Annotations are malformed or empty.')
-      }
       if (isComparing.value && !isComparisonOverlay.value) {
         loadComparisonAnnotation(currentTimeVal)
       }

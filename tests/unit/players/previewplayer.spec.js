@@ -227,8 +227,6 @@ describe('PreviewPlayer.vue', () => {
     // comment lands before the task is loaded, and TaskInfo drops its task
     // when the notification is toggled off.
     it('renders without a task', () => {
-      // A picture preview has no annotation for the player to load.
-      vi.spyOn(console, 'warn').mockImplementation(() => {})
       wrapper = mountPlayer({ props: { task: null } })
       expect(wrapper.find('.preview-player').exists()).toBe(true)
     })
@@ -236,7 +234,6 @@ describe('PreviewPlayer.vue', () => {
     // A plain link navigates the tab: the browser fires beforeunload, which
     // closes the socket in Firefox and asks about unsaved annotations.
     it('downloads the original without leaving the page', () => {
-      vi.spyOn(console, 'warn').mockImplementation(() => {})
       wrapper = mountPlayer()
       const link = wrapper.get(
         'a[href="/api/pictures/originals/preview-files/preview-1/download"]'
@@ -249,7 +246,6 @@ describe('PreviewPlayer.vue', () => {
     // Vue mounts a comment node in place of a tree whose render threw and
     // still runs the mounted hook: every template ref is null in there.
     it('does not fail a second time after a failed render', () => {
-      vi.spyOn(console, 'warn').mockImplementation(() => {})
       const errorHandler = vi.fn()
       const mountFailing = () =>
         mountPlayer({
@@ -279,7 +275,6 @@ describe('PreviewPlayer.vue', () => {
       const onRejection = reason => rejections.push(reason)
       process.on('unhandledRejection', onRejection)
 
-      vi.spyOn(console, 'warn').mockImplementation(() => {})
       wrapper = mountPlayer()
       await nextTick()
       wrapper.findComponent({ name: 'BrowsingBar' }).vm.$emit('current-index-clicked')
@@ -299,7 +294,6 @@ describe('PreviewPlayer.vue', () => {
     // render that threw on update keeps the player mounted with every
     // template ref null.
     it('does nothing after a failed render', async () => {
-      vi.spyOn(console, 'warn').mockImplementation(() => {})
       const errorHandler = vi.fn()
       let isRenderFailing = false
       wrapper = mountPlayer({
