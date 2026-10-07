@@ -63,6 +63,7 @@ const mountPage = async ({
   }
   const store = createStore({
     state: {
+      previewFileStatuses: new Map(),
       production: { id: 'production-1', name: 'Wing It' },
       selection,
       shownPreview: '',
@@ -77,6 +78,7 @@ const mountPage = async ({
       isTVShow: () => true,
       personMap: () => new Map(people.map(person => [person.id, person])),
       previewFileIdToShow: state => state.shownPreview,
+      previewFileStatusMap: state => state.previewFileStatuses,
       uploadProgress: state => state.uploadProgress,
       selectedConcepts: state =>
         new Map(state.selection.map(concept => [concept.id, concept])),
@@ -860,6 +862,25 @@ describe('Concepts page', () => {
       await flushPromises()
       expect(query()['concept-preview']).toBeUndefined()
     })
+
+    test('leaves a linked picture still being processed out of full screen', async () => {
+      const { store } = await mountPage({
+        concepts: [
+          {
+            ...buildConcept('concept-1'),
+            preview_file_id: 'preview-1',
+            preview_file_status: 'processing'
+          }
+        ],
+        query: { 'concept-preview': 'concept-1' }
+      })
+
+      expect(store.commit).not.toHaveBeenCalledWith(
+        'SHOW_PREVIEW_FILE',
+        expect.anything()
+      )
+      expect(query()['concept-preview']).toBeUndefined()
+    })
   })
 
   // The full screen preview modal browses these with the arrow keys.
@@ -894,6 +915,46 @@ describe('Concepts page', () => {
     expect(store.commit).toHaveBeenLastCalledWith(
       'SET_PREVIEW_FILES_TO_BROWSE',
       []
+    )
+  })
+
+  // Zou answers 404 for the picture of a preview it is still processing.
+  test('hands over only the pictures Zou can send', async () => {
+    const { store } = await mountPage({
+      concepts: ['ready', 'processing', 'broken', 'missing'].map(status => ({
+        ...buildConcept(`concept-${status}`),
+        preview_file_id: `preview-${status}`,
+        preview_file_status: status
+      }))
+    })
+
+    expect(store.commit).toHaveBeenLastCalledWith(
+      'SET_PREVIEW_FILES_TO_BROWSE',
+      ['preview-ready']
+    )
+  })
+
+  test('hands over a picture once Zou announces it ready', async () => {
+    const { store } = await mountPage({
+      concepts: [
+        {
+          ...buildConcept('concept-1'),
+          preview_file_id: 'preview-1',
+          preview_file_status: 'processing'
+        }
+      ]
+    })
+    expect(store.commit).toHaveBeenLastCalledWith(
+      'SET_PREVIEW_FILES_TO_BROWSE',
+      []
+    )
+
+    store.state.previewFileStatuses.set('preview-1', 'ready')
+    await flushPromises()
+
+    expect(store.commit).toHaveBeenLastCalledWith(
+      'SET_PREVIEW_FILES_TO_BROWSE',
+      ['preview-1']
     )
   })
 

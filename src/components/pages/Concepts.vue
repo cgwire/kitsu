@@ -289,7 +289,11 @@ import { useStore } from 'vuex'
 import { pauseEvent } from '@/composables/dom'
 import files from '@/lib/files'
 import func from '@/lib/func'
-import { isPreviewFileStatus } from '@/lib/preview'
+import {
+  hasPreviewFilePicture,
+  isPreviewFileStatus,
+  latestPreviewFileStatus
+} from '@/lib/preview'
 import { sortAssets, sortByName, sortPeople } from '@/lib/sorting'
 import assetsStore from '@/store/modules/assets'
 
@@ -377,6 +381,7 @@ const modals = reactive({
 const conceptFolders = computed(() => store.getters.conceptFolders)
 const concepts = computed(() => store.getters.concepts)
 const previewFileIdToShow = computed(() => store.getters.previewFileIdToShow)
+const previewFileStatusMap = computed(() => store.getters.previewFileStatusMap)
 const currentProduction = computed(() => store.getters.currentProduction)
 const personMap = computed(() => store.getters.personMap)
 const selectedConcepts = computed(() => store.getters.selectedConcepts)
@@ -549,6 +554,18 @@ const getFolderId = concept =>
     ? concept.parent_id
     : null
 
+// The full screen preview modal shows pictures only: movies play in their
+// card. Zou answers 404 for the picture of a preview it is still processing.
+const hasBrowsablePicture = concept =>
+  Boolean(concept.preview_file_id) &&
+  concept.preview_file_extension !== 'mp4' &&
+  hasPreviewFilePicture(
+    latestPreviewFileStatus(
+      concept.preview_file_status,
+      previewFileStatusMap.value?.get(concept.preview_file_id)
+    )
+  )
+
 const setQuery = patch => {
   queryUpdates = queryUpdates.then(() => {
     const query = Object.fromEntries(
@@ -572,9 +589,10 @@ const folderQuery = folderId => {
 const applyConceptQuery = () => {
   if (loading.loadingConcepts || errors.loadingConcepts) return
   const params = ['concept-id', 'concept-preview']
-  const [selected, previewed] = params.map(param =>
+  const [selected, linked] = params.map(param =>
     concepts.value.find(concept => concept.id === route.query[param])
   )
+  const previewed = linked && hasBrowsablePicture(linked) ? linked : undefined
   const unknownParams = params.filter(
     (param, index) => route.query[param] && ![selected, previewed][index]
   )
@@ -901,19 +919,13 @@ watch(assetOptions, options => {
 })
 
 // The full screen preview modal walks through the shown pictures with the
-// arrow keys. Movies play in their card and never reach the modal.
+// arrow keys.
 watch(
-  filteredConcepts,
-  concepts =>
-    store.commit(
-      'SET_PREVIEW_FILES_TO_BROWSE',
-      concepts
-        .filter(
-          concept =>
-            concept.preview_file_id && concept.preview_file_extension !== 'mp4'
-        )
-        .map(concept => concept.preview_file_id)
-    ),
+  () =>
+    filteredConcepts.value
+      .filter(hasBrowsablePicture)
+      .map(concept => concept.preview_file_id),
+  previewFileIds => store.commit('SET_PREVIEW_FILES_TO_BROWSE', previewFileIds),
   { immediate: true }
 )
 
