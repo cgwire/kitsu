@@ -20,10 +20,12 @@ import taskTypeStore from '@/store/modules/tasktypes'
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 import ProductionSchedule from '@/components/pages/ProductionSchedule.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import Checkbox from '@/components/widgets/Checkbox.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DateField from '@/components/widgets/DateField.vue'
+import PeopleName from '@/components/widgets/PeopleName.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
 // The page is driven through what it renders and what it calls: the
@@ -147,6 +149,7 @@ const mountPage = async ({
   actions = {},
   getters = {},
   query = {},
+  stubs = {},
   versions = []
 } = {}) => {
   const storeActions = {
@@ -221,7 +224,7 @@ const mountPage = async ({
       mocks: {
         $t: (key, values) => (values ? `${key} ${JSON.stringify(values)}` : key)
       },
-      stubs: { Schedule: scheduleWidget }
+      stubs: { Schedule: scheduleWidget, ...stubs }
     }
   })
   mountedPage = wrapper
@@ -521,6 +524,133 @@ describe('ProductionSchedule page', () => {
         })
       }
     )
+
+    // The field takes 0.01 steps: an estimation shown with more decimals
+    // failed the form validation, and Apply did nothing.
+    it.each([
+      ['days', false, 500, '1.04', '2026-02-10'],
+      ['hours', true, 50, '0.83', '2026-02-09']
+    ])(
+      'applies a task whose estimation has more decimals in %s',
+      async (_, isDurationInHours, minutes, shown, dueDate) => {
+        const { storeActions, wrapper } = await mountPage({
+          getters: {
+            organisation: () => ({
+              hours_by_day: 8,
+              format_duration_in_hours: isDurationInHours
+            })
+          },
+          stubs: { TextField: false }
+        })
+        const task = {
+          type: 'Task',
+          id: 'task-1',
+          entity: { id: 'asset-1', name: 'Cat' },
+          estimation: minutes,
+          assignees: [],
+          startDate: day('2026-02-09'),
+          endDate: day('2026-02-09')
+        }
+        await selectTask(wrapper, buildAssetTypeBars()[0], task)
+
+        // what a click on Apply does, validation included
+        wrapper.find('.side-column form').element.requestSubmit()
+        await flushPromises()
+
+        // the estimation left as shown keeps its minutes
+        expect(payloadsOf(storeActions.updateTask)[0]).toEqual({
+          taskId: 'task-1',
+          data: {
+            estimation: minutes,
+            start_date: '2026-02-09',
+            due_date: dueDate
+          }
+        })
+        const field = wrapper.find('.side-column .estimation input')
+        expect(field.element.value).toBe(shown)
+      }
+    )
+
+    // Rounded to 0.01, an estimation under 0.005 showed as 0, which left
+    // Apply disabled: the dates and assignees of the task could not be saved.
+    it.each([
+      ['days', false, 2],
+      ['hours', true, 0.1]
+    ])(
+      'applies a task whose estimation rounds to 0 in %s',
+      async (_, isDurationInHours, minutes) => {
+        const { storeActions, wrapper } = await mountPage({
+          getters: {
+            organisation: () => ({
+              hours_by_day: 8,
+              format_duration_in_hours: isDurationInHours
+            })
+          },
+          stubs: { TextField: false }
+        })
+        const task = {
+          type: 'Task',
+          id: 'task-1',
+          entity: { id: 'asset-1', name: 'Cat' },
+          estimation: minutes,
+          assignees: [],
+          startDate: day('2026-02-09'),
+          endDate: day('2026-02-09')
+        }
+        await selectTask(wrapper, buildAssetTypeBars()[0], task)
+
+        expect(findButton(wrapper, 'main.apply').props('disabled')).toBe(false)
+        wrapper.find('.side-column form').element.requestSubmit()
+        await flushPromises()
+
+        expect(payloadsOf(storeActions.updateTask)[0]).toEqual({
+          taskId: 'task-1',
+          data: {
+            estimation: minutes,
+            start_date: '2026-02-09',
+            due_date: '2026-02-09'
+          }
+        })
+        const field = wrapper.find('.side-column .estimation input')
+        expect(field.element.value).toBe('0')
+      }
+    )
+
+    // A 0 typed once the task is saved stands for no estimation, not for
+    // the minutes the task had before that save.
+    it('disables Apply for a cleared estimation and for a 0 typed after a save', async () => {
+      const { storeActions, wrapper } = await mountPage()
+      const task = {
+        type: 'Task',
+        id: 'task-1',
+        entity: { id: 'asset-1', name: 'Cat' },
+        estimation: 2,
+        assignees: [],
+        startDate: day('2026-02-09'),
+        endDate: day('2026-02-09')
+      }
+      await selectTask(wrapper, buildAssetTypeBars()[0], task)
+      const typeEstimation = async value => {
+        findTextField(wrapper, 'main.estimation').vm.$emit(
+          'update:model-value',
+          value
+        )
+        await flushPromises()
+      }
+      const isApplyDisabled = () =>
+        findButton(wrapper, 'main.apply').props('disabled')
+
+      await typeEstimation(null)
+      expect(isApplyDisabled()).toBe(true)
+
+      await typeEstimation(1)
+      await wrapper.find('.side-column form').trigger('submit')
+      await flushPromises()
+      expect(payloadsOf(storeActions.updateTask)[0].data.estimation).toBe(480)
+
+      await typeEstimation(0)
+      expect(isApplyDisabled()).toBe(true)
+    })
   })
 
   describe('drill-down', () => {
@@ -930,6 +1060,14 @@ describe('ProductionSchedule page', () => {
       await flushPromises()
     }
 
+    const overrideAssignments = async wrapper => {
+      wrapper
+        .find('.side-column form')
+        .findComponent(Checkbox)
+        .vm.$emit('update:model-value', true)
+      await flushPromises()
+    }
+
     const apply = async wrapper => {
       await wrapper.find('.side-column form').trigger('submit')
       await flushPromises()
@@ -1108,6 +1246,318 @@ describe('ProductionSchedule page', () => {
       }
     )
 
+    // The bars of the tasks show once the Modeling row is expanded.
+    const editTask = async (wrapper, task) => {
+      const modelingRow = rowsOf(wrapper)[0]
+      if (!modelingRow.expanded) {
+        findSchedule(wrapper).vm.$emit('root-element-expanded', modelingRow)
+        await waitForLoad()
+      }
+      await selectTask(wrapper, { id: 'asset-type-props', name: 'Props' }, task)
+    }
+
+    // One working day, assigned to Alice: Chair on Monday 6 April, Table on
+    // Monday 13 April
+    const buildTask = (asset, date) => ({
+      id: `task-${asset.id}`,
+      type: 'Task',
+      assignees: ['person-1'],
+      entity: asset,
+      estimation: 480,
+      startDate: day(date),
+      endDate: day(date)
+    })
+    const buildChairTask = () => buildTask(propAssets[0], '2026-04-06')
+    const buildTableTask = () => buildTask(propAssets[1], '2026-04-13')
+
+    // A refused task save only reached the console: the panel kept the
+    // typed values as if they were saved.
+    it.each([
+      ['the reference', {}, 'updateTask'],
+      ['a version', versionOptions, 'updateScheduleVersionedTask']
+    ])(
+      'stops the spinner and tells when a task edit of %s fails',
+      async (_, options, saveAction) => {
+        const error = new Error('Bad request')
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const { wrapper } = await mountAssignments({
+          ...options,
+          actions: { [saveAction]: vi.fn(() => Promise.reject(error)) }
+        })
+        await editTask(wrapper, buildChairTask())
+
+        await apply(wrapper)
+
+        expect(findButton(wrapper, 'main.apply').props('isLoading')).toBe(false)
+        expect(panelText(wrapper)).toContain('schedule.save_task_error')
+        expect(panelText(wrapper)).not.toContain('schedule.assign_error')
+        expect(consoleError).toHaveBeenCalledWith(error)
+      }
+    )
+
+    it('clears the task error when Apply runs again', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { storeActions, wrapper } = await mountAssignments({
+        actions: {
+          updateTask: vi.fn().mockRejectedValueOnce(new Error('Bad request'))
+        }
+      })
+      await editTask(wrapper, buildChairTask())
+      await apply(wrapper)
+      expect(panelText(wrapper)).toContain('schedule.save_task_error')
+
+      await apply(wrapper)
+
+      expect(panelText(wrapper)).not.toContain('schedule.save_task_error')
+      expect(payloadsOf(storeActions.updateTask).slice(1)).toEqual([
+        {
+          taskId: 'task-asset-1',
+          data: {
+            estimation: 480,
+            start_date: '2026-04-06',
+            due_date: '2026-04-06'
+          }
+        },
+        { taskId: 'task-asset-1', data: { assignees: ['person-1'] } }
+      ])
+    })
+
+    it.each([
+      ['another task', wrapper => editTask(wrapper, buildTableTask())],
+      ['another task type', wrapper => pickTaskType(wrapper, 'tt-layout')],
+      [
+        'the assign mode',
+        async wrapper => {
+          await toggleSidePanel(wrapper)
+          await wrapper.find('.side-column .assignment-item').trigger('click')
+        }
+      ]
+    ])(
+      'clears the task error when the panel goes on with %s',
+      async (_, reuse) => {
+        vi.spyOn(console, 'error').mockImplementation(() => {})
+        const { wrapper } = await mountAssignments({
+          actions: {
+            updateTask: vi.fn(() => Promise.reject(new Error('Bad request')))
+          }
+        })
+        await editTask(wrapper, buildChairTask())
+        await apply(wrapper)
+        expect(panelText(wrapper)).toContain('schedule.save_task_error')
+
+        await reuse(wrapper)
+
+        expect(wrapper.find('.side-column form').exists()).toBe(true)
+        expect(panelText(wrapper)).not.toContain('schedule.save_task_error')
+        expect(panelText(wrapper)).not.toContain('schedule.assign_error')
+      }
+    )
+
+    // The panel moved on to another task while the save waited on its
+    // request: the end of the save stopped the spinner of the next one.
+    it('keeps a failed task save out of the task the panel moved on to', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const saves = []
+      const { wrapper } = await mountAssignments({
+        actions: {
+          updateTask: vi.fn(
+            () => new Promise((_resolve, reject) => saves.push(reject))
+          )
+        }
+      })
+      await editTask(wrapper, buildChairTask())
+      await apply(wrapper)
+      const chairSaves = [...saves]
+      await editTask(wrapper, buildTableTask())
+      await apply(wrapper)
+
+      chairSaves.forEach(reject => reject(new Error('Bad request')))
+      await flushPromises()
+
+      expect(panelText(wrapper)).not.toContain('schedule.save_task_error')
+      expect(findButton(wrapper, 'main.apply').props('isLoading')).toBe(true)
+    })
+
+    // A task save that failed once Assign tasks had replaced the task form
+    // showed as an assignment error.
+    it('keeps a failed task save out of the assign mode the panel went on to', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const saves = []
+      const { wrapper } = await mountAssignments({
+        actions: {
+          updateTask: vi
+            .fn()
+            .mockResolvedValueOnce()
+            .mockResolvedValueOnce()
+            .mockImplementation(
+              () => new Promise((_resolve, reject) => saves.push(reject))
+            )
+        }
+      })
+      await editTask(wrapper, buildChairTask())
+      await apply(wrapper)
+      await apply(wrapper)
+      await toggleSidePanel(wrapper)
+      await wrapper.find('.side-column .assignment-item').trigger('click')
+
+      saves.forEach(reject => reject(new Error('Bad request')))
+      await flushPromises()
+
+      expect(wrapper.find('.side-column h2').text()).toBe('menu.assign_tasks')
+      expect(wrapper.find('.side-column form').exists()).toBe(true)
+      expect(panelText(wrapper)).not.toContain('schedule.assign_error')
+      expect(findButton(wrapper, 'main.apply').props('isLoading')).toBe(false)
+    })
+
+    // After a saved task edit, Assign tasks kept the state of the task form:
+    // only the assignees of that task listed, and Override on. The next run
+    // then cleared the assignees of the tasks it gave them.
+    it('starts Assign tasks from a clean panel after a task edit', async () => {
+      const { storeActions, wrapper } = await mountAssignments()
+      await editTask(wrapper, buildChairTask())
+      await apply(wrapper)
+
+      await toggleSidePanel(wrapper)
+      await wrapper.find('.side-column .assignment-item').trigger('click')
+
+      expect(
+        wrapper.findComponent(ComboboxTaskType).props('modelValue')
+      ).toBe('tt-modeling')
+      expect(
+        wrapper
+          .find('.side-column table.assignees')
+          .findAllComponents(PeopleName)
+          .map(name => name.props('person').id)
+      ).toEqual(['person-1', 'person-2'])
+      expect(
+        wrapper.find('.side-column form').findComponent(Checkbox).props()
+      ).toMatchObject({ disabled: false, modelValue: false })
+
+      await setRange(wrapper)
+      await apply(wrapper)
+
+      expect(storeActions.unassignSelectedTasks).not.toHaveBeenCalled()
+      expect(payloadsOf(storeActions.assignSelectedTasks)).toEqual([
+        { personId: 'person-1', taskIds: ['task-asset-1'] },
+        { personId: 'person-2', taskIds: ['task-asset-2'] }
+      ])
+    })
+
+    // With the row of the edited task hidden, the panel dropped its task
+    // type but kept listing its entity types: a click on one broke it.
+    it('opens Assign tasks empty after a task edit once its row is hidden', async () => {
+      const { wrapper } = await mountAssignments()
+      await editTask(wrapper, buildChairTask())
+      await apply(wrapper)
+      findCombobox(wrapper, 'main.entities').vm.$emit(
+        'update:model-value',
+        'Shot'
+      )
+      await flushPromises()
+
+      await toggleSidePanel(wrapper)
+
+      expect(
+        wrapper.findComponent(ComboboxTaskType).props('modelValue')
+      ).toBeFalsy()
+      expect(wrapper.findAll('.side-column .assignment-item')).toHaveLength(0)
+    })
+
+    // The save of a task wrote its dates into the form of the task the
+    // panel had moved on to.
+    it('keeps the dates of a task save out of the task the panel moved on to', async () => {
+      const saves = []
+      const { wrapper } = await mountAssignments({
+        actions: {
+          updateTask: vi.fn(() => new Promise(resolve => saves.push(resolve)))
+        }
+      })
+      await editTask(wrapper, buildChairTask())
+      await apply(wrapper)
+      await editTask(wrapper, buildTableTask())
+
+      while (saves.length) {
+        saves.shift()()
+        await flushPromises()
+      }
+
+      const [, , taskStartField] = wrapper
+        .find('.side-column form')
+        .findAllComponents(DateField)
+      expect(taskStartField.props('modelValue')).toBe('2026-04-13')
+    })
+
+    // Answers the held requests one by one, the requests they lead to
+    // included.
+    const releaseAll = async requests => {
+      while (requests.length) {
+        requests.shift()({ id: 'versioned-task-1' })
+        await flushPromises()
+      }
+    }
+
+    // The Apply button spins while the panel saves, but Enter in a field of
+    // the form still submitted it: a second run sent its writes again,
+    // interleaved with the first.
+    it.each([
+      ['the reference', {}, 'updateTask'],
+      ['a version', versionOptions, 'createScheduleVersionedTask']
+    ])(
+      'ignores Apply while a run of %s is saving',
+      async (_, options, writeAction) => {
+        const writes = []
+        const { storeActions, wrapper } = await mountAssignments({
+          ...options,
+          actions: {
+            [writeAction]: vi.fn(
+              () => new Promise(resolve => writes.push(resolve))
+            )
+          }
+        })
+        await selectProps(wrapper)
+        await setRange(wrapper)
+        await apply(wrapper)
+
+        await apply(wrapper)
+        expect(findButton(wrapper, 'main.apply').props('isLoading')).toBe(true)
+        await releaseAll(writes)
+
+        expect(
+          payloadsOf(storeActions[writeAction]).map(payload => payload.taskId)
+        ).toEqual(['task-asset-1', 'task-asset-2'])
+        expect(findButton(wrapper, 'main.apply').props('isLoading')).toBe(false)
+      }
+    )
+
+    it.each([
+      ['the reference', {}, 'updateTask', 2],
+      ['a version', versionOptions, 'updateScheduleVersionedTask', 1]
+    ])(
+      'ignores Apply while a task edit of %s is saving',
+      async (_, options, saveAction, nbSaves) => {
+        const saves = []
+        const { storeActions, wrapper } = await mountAssignments({
+          ...options,
+          actions: {
+            [saveAction]: vi.fn(
+              () => new Promise(resolve => saves.push(resolve))
+            )
+          }
+        })
+        await editTask(wrapper, buildChairTask())
+        await apply(wrapper)
+
+        await apply(wrapper)
+        expect(findButton(wrapper, 'main.apply').props('isLoading')).toBe(true)
+        await releaseAll(saves)
+
+        expect(storeActions[saveAction]).toHaveBeenCalledTimes(nbSaves)
+        expect(findButton(wrapper, 'main.apply').props('isLoading')).toBe(false)
+      }
+    )
+
     // Each task goes to a single person, but the auto quota shared every
     // task among the whole team: with fewer entities than people, no task
     // fitted the range and Apply did nothing.
@@ -1218,6 +1668,38 @@ describe('ProductionSchedule page', () => {
       ])
     })
 
+    // 1 / (3 / 17) is 5.666666666666666 days, a minute short of 2720 once
+    // rounded down.
+    it('saves the estimation of the quota in whole minutes', async () => {
+      const { storeActions, wrapper } = await mountAssignments({ nbAssets: 3 })
+      await selectProps(wrapper)
+      // Monday 6 to Tuesday 28 April: 17 working days
+      await setRange(wrapper, '2026-04-06', '2026-04-28')
+      const [, removeBob] = wrapper
+        .find('.side-column table.assignees')
+        .findAllComponents(ButtonSimple)
+      removeBob.vm.$emit('click')
+      await flushPromises()
+
+      await apply(wrapper)
+
+      const estimation = 2720
+      expect(payloadsOf(storeActions.updateTask)).toEqual([
+        {
+          taskId: 'task-asset-1',
+          data: { estimation, start_date: '2026-04-06', due_date: '2026-04-13' }
+        },
+        {
+          taskId: 'task-asset-2',
+          data: { estimation, start_date: '2026-04-13', due_date: '2026-04-21' }
+        },
+        {
+          taskId: 'task-asset-3',
+          data: { estimation, start_date: '2026-04-21', due_date: '2026-04-28' }
+        }
+      ])
+    })
+
     it.each([
       ['the reference', {}],
       ['a version', versionOptions]
@@ -1275,6 +1757,80 @@ describe('ProductionSchedule page', () => {
         { personId: 'person-2', taskIds: ['task-asset-2'] }
       ])
       expect(panelText(wrapper)).toContain('schedule.assign_no_fit {"count":1}')
+    })
+
+    // The override cleared the assignees of every selected task before the
+    // distribution: a task that then fit nobody was left with no assignee.
+    it.each([
+      ['the reference', {}],
+      ['a version', versionOptions]
+    ])(
+      'keeps the assignees of the tasks that do not fit in %s',
+      async (_, options) => {
+        const { storeActions, wrapper } = await mountAssignments(options)
+        await selectProps(wrapper)
+        await setRange(wrapper)
+        await forceQuota(wrapper, '0.01')
+        await overrideAssignments(wrapper)
+
+        await apply(wrapper)
+
+        expect(panelText(wrapper)).toContain(
+          'schedule.assign_no_fit {"count":2}'
+        )
+        expect(writesOf(storeActions)).toEqual([])
+      }
+    )
+
+    it('overrides the assignees of the tasks that fit only', async () => {
+      const { storeActions, wrapper } = await mountAssignments({ nbAssets: 3 })
+      await selectProps(wrapper)
+      await setRange(wrapper)
+      await forceQuota(wrapper, '0.5')
+      await overrideAssignments(wrapper)
+
+      await apply(wrapper)
+
+      expect(payloadsOf(storeActions.unassignSelectedTasks)).toEqual([
+        { taskIds: ['task-asset-1', 'task-asset-2'] }
+      ])
+      expect(payloadsOf(storeActions.assignSelectedTasks)).toEqual([
+        { personId: 'person-1', taskIds: ['task-asset-1'] },
+        { personId: 'person-2', taskIds: ['task-asset-2'] }
+      ])
+    })
+
+    it('overrides the assignees of the tasks that fit only in a version', async () => {
+      const { storeActions, wrapper } = await mountAssignments({
+        ...versionOptions,
+        nbAssets: 3,
+        actions: {
+          loadTasksFromScheduleVersion: vi.fn(() =>
+            propAssets.map(asset => ({
+              id: `link-${asset.id}`,
+              task_id: `task-${asset.id}`,
+              assignees: ['person-3']
+            }))
+          )
+        }
+      })
+      await selectProps(wrapper)
+      await setRange(wrapper)
+      await forceQuota(wrapper, '0.5')
+      await overrideAssignments(wrapper)
+
+      await apply(wrapper)
+
+      expect(
+        payloadsOf(storeActions.updateScheduleVersionedTask).map(link => [
+          link.id,
+          link.assignees
+        ])
+      ).toEqual([
+        ['link-asset-1', ['person-1']],
+        ['link-asset-2', ['person-2']]
+      ])
+      expect(storeActions.createScheduleVersionedTask).not.toHaveBeenCalled()
     })
 
     it.each(panelReuses)(

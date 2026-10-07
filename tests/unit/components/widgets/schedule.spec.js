@@ -1,6 +1,7 @@
 import { mount } from '@vue/test-utils'
 import moment from 'moment'
 import { vi } from 'vitest'
+import { nextTick, reactive } from 'vue'
 
 const { organisation } = vi.hoisted(() => ({
   organisation: { hours_by_day: 8, format_duration_in_hours: false }
@@ -330,4 +331,120 @@ describe('Schedule widget - estimation field', () => {
       wrapper.unmount()
     }
   )
+
+  // Types into a number field key by key the way a browser does: the field
+  // keeps the text typed, which reads as an empty value with a bad input
+  // while it is no number yet ("1."), and a value the page sets replaces
+  // that text.
+  const typeKeys = async (input, keys) => {
+    const field = input.element
+    const { get, set } = Object.getOwnPropertyDescriptor(
+      HTMLInputElement.prototype,
+      'value'
+    )
+    let text = ''
+    let written
+    Object.defineProperty(field, 'value', {
+      configurable: true,
+      get: () => get.call(field),
+      set: value => {
+        written = String(value)
+        set.call(field, value)
+      }
+    })
+    for (const key of keys) {
+      text += key
+      set.call(field, text)
+      const badInput = get.call(field) === '' && text !== ''
+      Object.defineProperty(field, 'validity', {
+        configurable: true,
+        value: { badInput }
+      })
+      written = null
+      field.dispatchEvent(new Event('input'))
+      await nextTick()
+      if (written !== null) text = written
+    }
+    delete field.value
+    delete field.validity
+    return text
+  }
+
+  const typedEstimations = wrapper =>
+    wrapper.emitted('estimation-changed').map(([{ estimation }]) => estimation)
+
+  // The pages hand reactive rows over: each estimation typed re-renders the
+  // field, which wrote "1." and "1.0" back as 0 and 1, so typing 1.05 gave 5.
+  it.each([
+    ['days', false, [480, 480, 504]],
+    ['hours', true, [60, 60, 63]]
+  ])(
+    'keeps the decimals typed key by key in %s',
+    async (_, isDurationInHours, estimations) => {
+      organisation.format_duration_in_hours = isDurationInHours
+      const task = buildTaskElement()
+      const wrapper = mountSchedule({
+        hierarchy: reactive([{ ...person, editable: false, children: [task] }]),
+        isEstimationLinked: true
+      })
+      const input = wrapper.find('.man-days-unit-wrapper input')
+
+      expect(await typeKeys(input, '1.05')).toBe('1.05')
+      expect(typedEstimations(wrapper)).toEqual(estimations)
+      expect(task.estimation).toBe(estimations[2])
+      wrapper.unmount()
+    }
+  )
+
+  it('keeps the decimals typed key by key in the root field', async () => {
+    const rootElement = { ...person, man_days: 0, children: [] }
+    const wrapper = mountSchedule({
+      hierarchy: reactive([rootElement]),
+      // a page that applies the estimation to the row, dates included
+      onEstimationChanged: ({ estimation, item }) => {
+        item.man_days = estimation
+        item.endDate = item.startDate.clone()
+      }
+    })
+    const input = wrapper.find('.man-day-input')
+
+    expect(await typeKeys(input, '1.05')).toBe('1.05')
+    expect(typedEstimations(wrapper)).toEqual([480, 480, 504])
+    wrapper.unmount()
+  })
+
+  // A valid number, it saved -480 minutes.
+  it('ignores a negative entry', async () => {
+    const task = buildTaskElement()
+    const wrapper = mountSchedule({
+      hierarchy: reactive([{ ...person, editable: false, children: [task] }]),
+      isEstimationLinked: true
+    })
+    const input = wrapper.find('.man-days-unit-wrapper input')
+
+    expect(await typeKeys(input, '-1')).toBe('-1')
+    expect(wrapper.emitted('estimation-changed')).toBeUndefined()
+    expect([task.estimation, task.man_days]).toEqual([8 * 60, 8 * 60])
+    await input.trigger('blur')
+
+    // the day stored comes back
+    expect(input.element.value).toBe('1')
+    wrapper.unmount()
+  })
+
+  it('shows the estimation in its format once the field is left', async () => {
+    const task = buildTaskElement()
+    const wrapper = mountSchedule({
+      hierarchy: reactive([{ ...person, editable: false, children: [task] }]),
+      isEstimationLinked: true
+    })
+    const input = wrapper.find('.man-days-unit-wrapper input')
+
+    expect(await typeKeys(input, '1.50')).toBe('1.50')
+    await input.trigger('blur')
+
+    expect(input.element.value).toBe('1.5')
+    expect(typedEstimations(wrapper)).toEqual([480, 720, 720])
+    wrapper.unmount()
+  })
 })

@@ -1464,6 +1464,7 @@
       "no_entity": "Ingen enhed at tildele",
       "overall_man_days": "Person-dage",
       "reset_list": "Nulstil listen",
+      "save_task_error": "Opgaven kunne ikke gemmes. Prøv venligst igen.",
       "select_task_type": "Vælg en opgavetype",
       "show_assigned": "Vis tildelte enheder",
       "title": "Tidsplan",
@@ -2081,7 +2082,7 @@
     },
     "preview": {
       "broken": "Dette preview er ødelagt.",
-      "processing": "Videobehandling i gang..."
+      "processing": "Dette preview er ved at blive behandlet..."
     },
     "studios": {
       "create_error": "Der opstod en fejl under gemning af dette studio. Er du sikker på, at der ikke allerede findes et studio med et lignende navn?",

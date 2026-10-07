@@ -135,7 +135,7 @@
                 step="any"
                 type="number"
                 :value="formatDuration(entry.estimation, false)"
-                @change="updateEstimation($event.target.value)"
+                @change="updateEstimation($event.target, entry)"
                 v-if="isEditable && selectionGrid[entry.id]"
               />
               <template v-else>
@@ -319,7 +319,7 @@ import {
 } from '@/lib/descriptors'
 import { getTaskEntityPath } from '@/lib/path'
 import {
-  daysToMinutes,
+  durationToMinutes,
   formatSimpleDate,
   getDatesFromEndDate,
   getDatesFromStartDate,
@@ -550,10 +550,15 @@ const isTaskChanged = (task, data) => {
   )
 }
 
-const updateEstimation = duration => {
-  const estimation = organisation.value.format_duration_in_hours
-    ? duration * 60
-    : daysToMinutes(organisation.value, duration)
+// "1." left in the field is no number and reads as an emptied field, which
+// saved an estimation of 0, and a negative number saved a negative one: the
+// stored one comes back instead. An emptied field still saves 0.
+const updateEstimation = (input, entry) => {
+  if (input.validity.badInput || input.valueAsNumber < 0) {
+    input.value = formatDuration(entry.estimation, false)
+    return
+  }
+  const estimation = durationToMinutes(organisation.value, input.value)
 
   updateTasksEstimation({ estimation })
 }

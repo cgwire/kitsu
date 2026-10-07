@@ -7,8 +7,9 @@
         height="50px"
         :legend="false"
         :colors="colors"
-        :data="selectedData"
+        :data="pieData"
         :dataset="PIE_DATASET"
+        :library="pieLibrary"
       />
       <span
         class="tag flexrow-item"
@@ -62,6 +63,8 @@
  */
 import { computed } from 'vue'
 
+import { getPieChartData } from '@/lib/stats'
+
 import StatsBar from '@/components/widgets/StatsBar.vue'
 import StatsHeat from '@/components/widgets/StatsHeat.vue'
 
@@ -84,6 +87,21 @@ const selectedData = computed(() => {
   if (props.countMode === 'drawings') return props.drawingsData
   return props.data
 })
+
+const pieData = computed(() => getPieChartData(selectedData.value))
+
+// The pie draws the small shares larger than they are: its tooltip gives the
+// real value.
+const pieLibrary = {
+  plugins: {
+    tooltip: {
+      callbacks: {
+        label: context =>
+          String(selectedData.value[context.dataIndex]?.[1] ?? 0)
+      }
+    }
+  }
+}
 
 const total = computed(() =>
   selectedData.value.reduce((acc, entry) => acc + (entry[1] || 0), 0)

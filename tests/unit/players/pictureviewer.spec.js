@@ -1,5 +1,6 @@
 import { mount } from '@vue/test-utils'
 import process from 'node:process'
+import { nextTick, reactive } from 'vue'
 
 import PictureViewer from '@/components/players/viewers/PictureViewer.vue'
 
@@ -38,5 +39,24 @@ describe('players/PictureViewer', () => {
     process.off('unhandledRejection', onRejection)
 
     expect(rejections).toEqual([])
+  })
+
+  // Zou builds the variants of an uploaded picture in the background, and
+  // the side panels flip the status of the preview in place, under its id.
+  test('loads the picture of a preview that turns ready', async () => {
+    const processingPreview = reactive({
+      ...preview('preview-1'),
+      status: 'processing'
+    })
+    const wrapper = mount(PictureViewer, {
+      props: { preview: processingPreview }
+    })
+    const picture = '/api/pictures/previews/preview-files/preview-1.png'
+    expect(wrapper.find(`img[src="${picture}"]`).exists()).toBe(false)
+
+    processingPreview.status = 'ready'
+    await nextTick()
+
+    expect(wrapper.find(`img[src="${picture}"]`).exists()).toBe(true)
   })
 })

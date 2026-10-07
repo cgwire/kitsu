@@ -32,7 +32,7 @@
         :required="required"
         :step="type === 'number' ? step || 'any' : undefined"
         :type="type"
-        :value="modelValue"
+        :value="getFieldValue()"
         @input="updateValue()"
         @keyup.enter="emitEnter()"
       />
@@ -55,6 +55,8 @@
 
 <script setup>
 import { ref, useId } from 'vue'
+
+import { isNumberTyped } from '@/lib/number'
 
 const props = defineProps({
   autocomplete: {
@@ -144,6 +146,16 @@ const getInputValue = () => {
     }
     return input.value
   }
+}
+
+// A number field keeps the text typed while it reads as the model value,
+// as v-model does: written back from the number, "2.0" turned into "2", and
+// typing 5 next gave 25. A leading zero is still dropped.
+const getFieldValue = () => {
+  const input = inputRef.value
+  const isTyped =
+    props.type === 'number' && input && isNumberTyped(input, props.modelValue)
+  return isTyped ? input.value : props.modelValue
 }
 
 const emitEnter = () => {

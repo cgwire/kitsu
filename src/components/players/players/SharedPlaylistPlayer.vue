@@ -1192,7 +1192,9 @@ onBeforeUnmount(() => {
   }
 
   :deep(span.thumbnail-empty) {
-    background: #000;
+    background-color: #000;
+    // a black box in both themes: the dark shimmer band suits it
+    --thumbnail-shimmer: rgba(255, 255, 255, 0.12);
   }
 }
 

@@ -1,4 +1,4 @@
-import { shallowMount } from '@vue/test-utils'
+import { RouterLinkStub, shallowMount } from '@vue/test-utils'
 import { createStore } from 'vuex'
 
 // Importing the card transitively pulls in the root store
@@ -13,7 +13,7 @@ import EntityPreview from '@/components/widgets/EntityPreview.vue'
 
 const asset = (id, name) => [id, { id, name, episode_id: null }]
 
-const mountCard = (props = {}, links = []) =>
+const mountCard = (props = {}, links = [], concept = {}) =>
   shallowMount(ConceptCard, {
     props: {
       ...props,
@@ -21,7 +21,8 @@ const mountCard = (props = {}, links = []) =>
         id: 'concept-1',
         created_by: 'person-1',
         entity_concept_links: links,
-        tasks: [{ id: 'task-1', task_status_id: 'status-todo' }]
+        tasks: [{ id: 'task-1', task_status_id: 'status-todo' }],
+        ...concept
       }
     },
     global: {
@@ -30,12 +31,13 @@ const mountCard = (props = {}, links = []) =>
           getters: {
             currentProduction: () => ({ id: 'production-1' }),
             isTVShow: () => false,
-            personMap: () => new Map(),
+            personMap: () => new Map([['person-1', { id: 'person-1' }]]),
             taskStatusMap: () =>
               new Map([['status-todo', { color: '#999', short_name: 'todo' }]])
           }
         })
-      ]
+      ],
+      stubs: { RouterLink: RouterLinkStub }
     }
   })
 
@@ -85,5 +87,13 @@ describe('ConceptCard', () => {
     expect([preview.props('width'), preview.props('height')]).toEqual([
       150, 100
     ])
+  })
+
+  test('hands the preview status over to its preview', () => {
+    const preview = mountCard({}, [], {
+      preview_file_status: 'processing'
+    }).findComponent(EntityPreview)
+
+    expect(preview.props('previewFileStatus')).toBe('processing')
   })
 })

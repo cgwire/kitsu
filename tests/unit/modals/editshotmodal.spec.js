@@ -17,16 +17,16 @@ const i18n = createI18n({
   fallbackWarn: false
 })
 
-const store = createStore({
-  getters: {
-    currentProduction: () => ({ id: 'p1' }),
-    isPaperProduction: () => false,
-    openProductions: () => [{ id: 'p1' }],
-    sequenceOptions: () => [],
-    sequences: () => [{ id: 'sq-1', name: 'SQ01' }],
-    shotMetadataDescriptors: () => []
-  }
-})
+const getters = {
+  currentProduction: () => ({ id: 'p1' }),
+  isPaperProduction: () => false,
+  openProductions: () => [{ id: 'p1' }],
+  sequenceOptions: () => [],
+  sequences: () => [{ id: 'sq-1', name: 'SQ01' }],
+  shotMetadataDescriptors: () => []
+}
+
+const store = createStore({ getters })
 
 // A shot starting at frame 0 is a real case: the frame in must survive the
 // edit form instead of reading as an empty field.
@@ -122,5 +122,44 @@ describe('modals/EditShotModal', () => {
     )
     await nextTick()
     expect(confirmForm(wrapper).nb_frames).toBe(24)
+  })
+
+  // The real MetadataField, fed back by the v-model of the modal form.
+  it('sends every checklist option ticked in the form', async () => {
+    const checklist = {
+      id: 'descriptor-1',
+      name: 'Steps',
+      entity_type: 'Shot',
+      field_name: 'steps',
+      data_type: 'checklist',
+      choices: ['[ ] Layout', '[ ] Lighting'],
+      departments: []
+    }
+    const checklistStore = createStore({
+      getters: {
+        ...getters,
+        isCurrentUserAdmin: () => true,
+        shotMetadataDescriptors: () => [checklist]
+      }
+    })
+    const wrapper = shallowMount(EditShotModal, {
+      global: {
+        plugins: [checklistStore, i18n],
+        renderStubDefaultSlot: true,
+        stubs: { MetadataField: false }
+      },
+      props: { active: true, shotToEdit: shot }
+    })
+    await nextTick()
+    const boxes = wrapper.findAll('input[type="checkbox"]')
+    expect(boxes).toHaveLength(2)
+
+    await boxes[0].setValue(true)
+    await boxes[1].setValue(true)
+
+    expect(JSON.parse(confirmForm(wrapper).data.steps)).toEqual({
+      Layout: true,
+      Lighting: true
+    })
   })
 })

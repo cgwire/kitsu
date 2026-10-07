@@ -1952,6 +1952,7 @@ export default {
     no_entity: 'No assignable entity',
     overall_man_days: 'Person-days',
     reset_list: 'Reset list',
+    save_task_error: 'Could not save the task. Please try again.',
     select_task_type: 'Select a task type',
     show_assigned: 'Show assigned entities',
     title: 'Schedule',
@@ -2293,7 +2294,7 @@ export default {
 
   preview: {
     broken: 'This preview is broken.',
-    processing: 'Video processing in progress...'
+    processing: 'This preview is being processed...'
   },
 
   search: {

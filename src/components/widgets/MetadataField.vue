@@ -96,7 +96,8 @@ import {
   getDescriptorChecklistValues,
   getDescriptorChoicesOptions,
   getMetadataChecklistValues,
-  isSupervisorInDepartments
+  isSupervisorInDepartments,
+  parseMetadataChecklistValues
 } from '@/lib/descriptors'
 import { sortPeople } from '@/lib/sorting'
 
@@ -149,8 +150,12 @@ const descriptorChecklistValues = computed(() => {
   return getDescriptorChecklistValues(props.descriptor)
 })
 
+// The form value holds the ticks not saved yet: the stored entity only
+// seeds a form without a value for this field.
 const metadataChecklistValues = computed(() =>
-  getMetadataChecklistValues(props.descriptor, props.entity)
+  props.modelValue
+    ? parseMetadataChecklistValues(props.descriptor, props.modelValue)
+    : getMetadataChecklistValues(props.descriptor, props.entity)
 )
 
 // Resolved against the edited entity's own production when it carries
@@ -194,9 +199,9 @@ const onEnter = () => {
 }
 
 const onMetadataCheckboxChanged = (option, value) => {
-  const values = getMetadataChecklistValues(props.descriptor, props.entity)
-  values[option] = value
-  updateValue(JSON.stringify(values))
+  updateValue(
+    JSON.stringify({ ...metadataChecklistValues.value, [option]: value })
+  )
 }
 </script>
 

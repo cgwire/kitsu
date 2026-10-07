@@ -72,6 +72,7 @@
               <entity-thumbnail
                 class="preview-thumbnail"
                 :preview-file-id="previewFile.id"
+                :preview-file-status="previewFile.status"
                 :empty-width="60"
                 :width="60"
                 :empty-height="40"
@@ -229,6 +230,9 @@ const reset = async () => {
       'getEntityPreviewFiles',
       props.entity.id
     )
+    // The store reads again the ones still processing when the socket
+    // reconnects, in case it missed the end of their job.
+    store.dispatch('registerPreviewFileStatuses', previewFiles.value)
   } catch (err) {
     console.error(err)
     previewFiles.value = []

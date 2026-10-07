@@ -9,9 +9,12 @@ import {
   getChartColors,
   getDoneRatio,
   getPercentage,
+  getPieChartData,
   getRetakeChartData,
+  getStatusColor,
   omitRetakeStatsColumns,
-  omitStatsColumns
+  omitStatsColumns,
+  roundPercent
 } from '@/lib/stats'
 
 const taskMap = new Map(Object.entries({
@@ -97,41 +100,41 @@ const taskStatusMap = new Map(Object.entries({
 const expectedStatResult = {
   all: {
     all: {
-      'task-status-1': { name: 'wip', color: 'blue', count: 4, frames: 29, drawings: 40, is_done: false },
-      'task-status-2': { name: 'retake', color: 'red', count: 2, frames: 9, drawings: 20, is_done: false }
+      'task-status-1': { name: 'wip', color: 'blue', count: 4, frames: 29, drawings: 40, is_done: false, is_default: false },
+      'task-status-2': { name: 'retake', color: 'red', count: 2, frames: 9, drawings: 20, is_done: false, is_default: false }
     },
     'task-type-1': {
-      'task-status-1': { name: 'wip', color: 'blue', count: 2, frames: 14, drawings: 20, is_done: false },
-      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 5, drawings: 10, is_done: false }
+      'task-status-1': { name: 'wip', color: 'blue', count: 2, frames: 14, drawings: 20, is_done: false, is_default: false },
+      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 5, drawings: 10, is_done: false, is_default: false }
     },
     'task-type-2': {
-      'task-status-1': { name: 'wip', color: 'blue', count: 2, frames: 15, drawings: 20, is_done: false },
-      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 4, drawings: 10, is_done: false }
+      'task-status-1': { name: 'wip', color: 'blue', count: 2, frames: 15, drawings: 20, is_done: false, is_default: false },
+      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 4, drawings: 10, is_done: false, is_default: false }
     }
   },
   'sequence-1': {
     all: {
-      'task-status-1': { name: 'wip', color: 'blue', count: 3, frames: 25, drawings: 30, is_done: false },
-      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 5, drawings: 10, is_done: false }
+      'task-status-1': { name: 'wip', color: 'blue', count: 3, frames: 25, drawings: 30, is_done: false, is_default: false },
+      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 5, drawings: 10, is_done: false, is_default: false }
     },
     'task-type-1': {
-      'task-status-1': { name: 'wip', color: 'blue', count: 1, frames: 10, drawings: 10, is_done: false },
-      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 5, drawings: 10, is_done: false }
+      'task-status-1': { name: 'wip', color: 'blue', count: 1, frames: 10, drawings: 10, is_done: false, is_default: false },
+      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 5, drawings: 10, is_done: false, is_default: false }
     },
     'task-type-2': {
-      'task-status-1': { name: 'wip', color: 'blue', count: 2, frames: 15, drawings: 20, is_done: false },
+      'task-status-1': { name: 'wip', color: 'blue', count: 2, frames: 15, drawings: 20, is_done: false, is_default: false },
     }
   },
   'sequence-2': {
     all: {
-      'task-status-1': { name: 'wip', color: 'blue', count: 1, frames: 4, drawings: 10, is_done: false },
-      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 4, drawings: 10, is_done: false }
+      'task-status-1': { name: 'wip', color: 'blue', count: 1, frames: 4, drawings: 10, is_done: false, is_default: false },
+      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 4, drawings: 10, is_done: false, is_default: false }
     },
     'task-type-1': {
-      'task-status-1': { name: 'wip', color: 'blue', count: 1, frames: 4, drawings: 10, is_done: false }
+      'task-status-1': { name: 'wip', color: 'blue', count: 1, frames: 4, drawings: 10, is_done: false, is_default: false }
     },
     'task-type-2': {
-      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 4, drawings: 10, is_done: false }
+      'task-status-2': { name: 'retake', color: 'red', count: 1, frames: 4, drawings: 10, is_done: false, is_default: false }
     }
   }
 }
@@ -270,6 +273,38 @@ describe('lib/stats', () => {
     ])
   })
 
+  // Out of the box the default status is near white, unreadable on a light
+  // background.
+  it('getChartData - draws the default status in grey', () => {
+    const statuses = new Map([
+      ['s1', { id: 's1', short_name: 'todo', color: '#f5f5f5', is_default: true }],
+      ['s2', { id: 's2', short_name: 'wip', color: 'blue' }]
+    ])
+    const shots = [{ id: 'shot-1', sequence_id: 'sequence-1', tasks: ['t1', 't2'] }]
+    const tasks = new Map([
+      ['t1', { task_status_id: 's1', task_type_id: 'task-type-1' }],
+      ['t2', { task_status_id: 's2', task_type_id: 'task-type-1' }]
+    ])
+    const stats = computeStats(shots, 'sequence_id', statuses, tasks)
+    expect(getChartData(stats, 'sequence-1', 'task-type-1')).toEqual([
+      ['todo', 1, '#6F727A', false],
+      ['wip', 1, 'blue', false]
+    ])
+    expect(getChartColors(stats, 'all', 'all')).toEqual(['#6F727A', 'blue'])
+  })
+
+  it('getChartData - reads the default flag from the statuses when the stats lack it', () => {
+    const statuses = new Map([
+      ['s1', { id: 's1', short_name: 'todo', color: '#f5f5f5', is_default: true }]
+    ])
+    const stats = {
+      'episode-1': { all: { s1: { name: 'todo', color: '#f5f5f5', count: 2 } } }
+    }
+    expect(getChartData(stats, 'episode-1', 'all', 'count', statuses)).toEqual([
+      ['todo', 2, '#6F727A', false]
+    ])
+  })
+
   it('getRetakeChartData - reads the stats of a take when given its number', () => {
     const stats = {
       'episode-1': {
@@ -346,6 +381,63 @@ describe('lib/stats', () => {
     expect(getDoneRatio([])).toBe(0)
   })
 
+  it('roundPercent', () => {
+    expect(roundPercent(0)).toBe(0)
+    expect(roundPercent(0.334)).toBe(33)
+    expect(roundPercent(0.75)).toBe(75)
+    expect(roundPercent(1)).toBe(100)
+  })
+
+  it('roundPercent reads 0 and 100 only for an empty and a full share', () => {
+    expect(roundPercent(249 / 250)).toBe(99)
+    expect(roundPercent(1 / 250)).toBe(1)
+  })
+
+  it('getPieChartData draws a small share at the minimum share', () => {
+    const rows = [
+      ['retake', 1, 'red', false],
+      ['other', 0, 'grey', false],
+      ['done', 249, 'green', true]
+    ]
+    expect(getPieChartData(rows)).toEqual([
+      ['retake', 7.5, 'red', false],
+      ['other', 0, 'grey', false],
+      ['done', 249, 'green', true]
+    ])
+  })
+
+  it('getPieChartData gives the small shares one minimum share of room', () => {
+    // Raised to 3% each, 8 stragglers would draw the done slice at 80%.
+    const rows = [
+      ...Array.from({ length: 8 }, (_, i) => [`wip${i}`, 1, 'blue', false]),
+      ['done', 992, 'green', true]
+    ]
+    const drawn = getPieChartData(rows)
+    expect(drawn.reduce((sum, row) => sum + row[1], 0)).toBeCloseTo(1030)
+    expect(drawn[8]).toEqual(['done', 992, 'green', true])
+  })
+
+  it('getPieChartData keeps the small shares in order', () => {
+    const rows = [
+      ['hold', 2, 'grey', false],
+      ['ready', 4, 'orange', false],
+      ['wfa', 10, 'purple', false],
+      ['done', 584, 'green', true]
+    ]
+    const [hold, ready, wfa] = getPieChartData(rows).map(row => row[1])
+    expect(hold).toBeLessThan(ready)
+    expect(ready).toBeLessThan(wfa)
+  })
+
+  it('getPieChartData keeps the shares large enough to see', () => {
+    const rows = [
+      ['done', 3, 'green', true],
+      ['wip', 1, 'blue', false]
+    ]
+    expect(getPieChartData(rows)).toEqual(rows)
+    expect(getPieChartData([])).toEqual([])
+  })
+
   it('getChartColors', () => {
     const sequence = { id: 'sequence-1' }
     const taskType = taskTypeMap.get('task-type-1')
@@ -360,6 +452,13 @@ describe('lib/stats', () => {
     expect(getPercentage(1, 3)).toEqual('33.33')
     expect(getPercentage(0, 0)).toEqual('0.00')
     expect(getPercentage(0, 100)).toEqual('0.00')
+  })
+
+  it('getStatusColor', () => {
+    expect(getStatusColor({ color: '#f5f5f5', is_default: true })).toEqual(
+      '#6F727A'
+    )
+    expect(getStatusColor({ color: 'blue', is_default: false })).toEqual('blue')
   })
 
   it('aggregateStats', () => {

@@ -7,7 +7,7 @@ import StatsHeat from '@/components/widgets/StatsHeat.vue'
 // The real pie-chart is registered globally by main.js.
 const PieChart = {
   name: 'PieChart',
-  props: { data: Array, colors: Array, dataset: Object },
+  props: { data: Array, colors: Array, dataset: Object, library: Object },
   template: '<div />'
 }
 
@@ -28,6 +28,25 @@ describe('cells/StatsCell', () => {
     const pie = wrapper.findComponent(PieChart)
     expect(pie.props('data')).toEqual(data)
     expect(pie.props('dataset')).toEqual({ borderWidth: 1 })
+  })
+
+  // One shot left in retake out of 250 would be thinner than the outline of
+  // its slice.
+  test('draws a small share large enough to see, with its real value on hover', () => {
+    const wrapper = mountCell({
+      displayMode: 'pie',
+      data: [
+        ['retake', 1, '#ff3860', false],
+        ['done', 249, '#22d160', true]
+      ]
+    })
+    const pie = wrapper.findComponent(PieChart)
+    expect(pie.props('data')).toEqual([
+      ['retake', 7.5, '#ff3860', false],
+      ['done', 249, '#22d160', true]
+    ])
+    const { label } = pie.props('library').plugins.tooltip.callbacks
+    expect([0, 1].map(dataIndex => label({ dataIndex }))).toEqual(['1', '249'])
   })
 
   test('draws a stacked bar of the counted data in bars mode', () => {

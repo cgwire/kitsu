@@ -138,6 +138,10 @@ const thousandsSeparator = /\d/.test(groupingChar) ? undefined : groupingChar
 const decimalSeparator = (1.1).toLocaleString()[1]
 
 const round1 = value => Math.round(value * 10) / 10
+// float errors leave a whole value a hair above itself (1 / (1 / 49) is
+// 49.00000000000001): rounding up must not take it to the next one
+const roundUp = value => Math.ceil(value - 1e-9)
+const ceil1 = value => roundUp(value * 10) / 10
 const toDays = minutes => round1(hoursToDays(organisation.value, minutes / 60))
 
 // the last day the chart displays: the deadline, or the last activity
@@ -213,14 +217,21 @@ const projectionSeries = computed(() => {
   const convert = value =>
     estimationMode.value ? toDays(value) : Math.round(value)
   const data = { [today]: convert(remaining) }
-  const zeroDate = moment(today)
-    .add(Math.ceil(remaining / velocity), 'days')
-    .format('YYYY-MM-DD')
-  if (zeroDate <= chartEnd.value) {
-    data[zeroDate] = 0
+  // day counts, not dates: past the year 9999, a date sorts before 2026
+  const daysToZero = roundUp(remaining / velocity)
+  const daysToEnd = moment(chartEnd.value).diff(today, 'days')
+  if (daysToZero <= daysToEnd) {
+    data[moment(today).add(daysToZero, 'days').format('YYYY-MM-DD')] = 0
   } else {
-    const daysToEnd = moment(chartEnd.value).diff(today, 'days')
-    data[chartEnd.value] = convert(remaining - velocity * daysToEnd)
+    // rounded up, so a fraction of a task still open at the deadline does
+    // not draw a late forecast on time, but never above today's value
+    const left = remaining - velocity * daysToEnd
+    data[chartEnd.value] = Math.min(
+      data[today],
+      estimationMode.value
+        ? ceil1(hoursToDays(organisation.value, left / 60))
+        : roundUp(left)
+    )
   }
   return data
 })

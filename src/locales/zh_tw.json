@@ -1464,6 +1464,7 @@
       "no_entity": "無可指派的實體",
       "overall_man_days": "人日",
       "reset_list": "重設清單",
+      "save_task_error": "無法儲存任務。請再試一次。",
       "select_task_type": "選擇任務類型",
       "show_assigned": "顯示指定的實體",
       "title": "時間表",
@@ -2081,7 +2082,7 @@
     },
     "preview": {
       "broken": "此預覽已損壞。",
-      "processing": "視訊處理中..."
+      "processing": "此預覽正在處理中..."
     },
     "studios": {
       "create_error": "儲存此工作室時發生錯誤。您確定沒有名稱相似的工作室嗎？",

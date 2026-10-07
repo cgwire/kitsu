@@ -201,7 +201,7 @@ Composables live in `src/composables/`, the player ones in `src/composables/play
 
 ### `useModal(active, emit)`
 
-Handles Escape key to close modal, manages event listener lifecycle.
+Handles Escape, moves the focus into the dialog when it opens, keeps Tab and Shift+Tab inside it and gives the focus back to the opener on close or unmount. Only the top open modal answers the keyboard. The dialog is the optional third argument (`BaseModal` passes its `.modal-content`), else the component root element: keep the template on a single root, since a top-level comment makes it a fragment in dev builds and turns the trap off.
 
 ```js
 import { toRef } from 'vue'
@@ -384,7 +384,7 @@ Bold headers, no `## Problems` / `## Solutions` sections (harmonized across cgwi
 
 - **fabric.js** v7 (official npm package): annotation canvas, wrapped by `src/composables/players/annotation.js` and `src/components/players/annotations/AnnotationCanvas.vue`
 - **fabricjs-psbrush** (cgwire fork): pressure-sensitive brush on top of fabric
-- **socket.io-client**: real-time events via `vue-websocket-next`
+- **socket.io-client**: real-time events, through the `$socket` global property that `src/main.js` sets
 - **moment / moment-timezone**: date handling (used throughout schedule and timesheet components)
 - **vue-multiselect**: people/entity selection dropdowns
 

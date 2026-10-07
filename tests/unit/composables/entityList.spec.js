@@ -84,6 +84,53 @@ describe('entity list header menus', () => {
     // The other menus close.
     expect(menus.headerMenu.classList).toContain('hidden')
   })
+
+  // The lists render their header menus as components.
+  const HeaderMenu = { template: '<div class="header-menu hidden" />' }
+
+  const MenuHost = {
+    ...Host,
+    components: { HeaderMenu },
+    template: `
+      <div>
+        <header-menu ref="headerMenu" />
+        <header-menu ref="headerMetadataMenu" />
+        <header-menu ref="headerFieldMenu" />
+      </div>
+    `
+  }
+
+  const pressEscape = () => {
+    const event = new KeyboardEvent('keydown', {
+      key: 'Escape',
+      bubbles: true,
+      cancelable: true
+    })
+    document.body.dispatchEvent(event)
+    return event
+  }
+
+  // Hidden before the page sees the key, the menu leaves only that mark: the
+  // action panel would clear the task selection on it too.
+  test('takes the Escape that closes a header menu', async () => {
+    const wrapper = await mountEntityList(MenuHost, {
+      getters: { currentProduction: production }
+    })
+    const menus = wrapper
+      .findAllComponents(HeaderMenu)
+      .map(menu => menu.element)
+    menus.forEach(menu => menu.classList.add('hidden'))
+    menus[1].classList.remove('hidden')
+
+    const escape = pressEscape()
+
+    expect(menus[1].classList).toContain('hidden')
+    expect(escape.defaultPrevented).toBe(true)
+    // No menu left open: the next Escape is the page's.
+    expect(pressEscape().defaultPrevented).toBe(false)
+
+    wrapper.unmount()
+  })
 })
 
 const header = width => ({ getBoundingClientRect: () => ({ width }) })

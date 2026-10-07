@@ -444,7 +444,13 @@
               />
             </div>
             <p class="error has-text-right mt2" v-if="assignments.isError">
-              <em>{{ $t('schedule.assign_error') }}</em>
+              <em>
+                {{
+                  assignments.type === 'task'
+                    ? $t('schedule.save_task_error')
+                    : $t('schedule.assign_error')
+                }}
+              </em>
             </p>
             <p
               class="error has-text-right mt2"
@@ -479,7 +485,7 @@
               </template>
               <template v-if="assignments.type === 'task'">
                 <button-simple
-                  :disabled="!assignments.task.estimation"
+                  :disabled="!getTaskEstimation(assignments.task)"
                   :is-loading="assignments.saving"
                   is-primary
                   :text="$t('main.apply')"
@@ -616,7 +622,6 @@ import {
   getDayOffRange,
   getUserDay,
   minutesToDays,
-  minutesToDuration,
   parseDate,
   parseSimpleDate
 } from '@/lib/time'
@@ -1714,8 +1719,10 @@ const clearAssignmentMessages = () => {
 }
 
 const toggleSidePanel = () => {
+  // the task form leaves out everyone but the assignees of the task and
+  // turns Override on: the assign mode starts afresh, on the same task type
   if (isSidePanelOpen.value && assignments.value.type === 'task') {
-    assignments.value.type = null
+    resetSidePanel()
     isSidePanelOpen.value = false
   }
 
@@ -2009,7 +2016,10 @@ const selectTaskElement = (taskType, entityTypeRow, task, selection) => {
   assignments.value.endDate = end_date
   assignments.value.task = {
     ...task,
-    estimation: minutesToDuration(organisation.value, task.estimation),
+    // rounded like any estimation shown: the 0.01 steps of the field
+    // refused more decimals, which blocked Apply
+    estimation: formatDuration(task.estimation, false),
+    estimationMinutes: task.estimation,
     startDate: task.startDate.format('YYYY-MM-DD'),
     endDate: task.endDate.format('YYYY-MM-DD')
   }
@@ -2018,6 +2028,13 @@ const selectTaskElement = (taskType, entityTypeRow, task, selection) => {
     .map(person => person.id)
   assignments.value.unassign = true
 }
+
+// Left as shown, the rounded estimation keeps the minutes it stands for,
+// even when they round to 0.
+const getTaskEstimation = ({ estimation, estimationMinutes }) =>
+  estimation === formatDuration(estimationMinutes, false)
+    ? estimationMinutes
+    : durationToMinutes(organisation.value, estimation)
 
 const closeSidePanel = () => {
   isSidePanelOpen.value = false
@@ -2076,6 +2093,8 @@ const removeFromAssignments = person => {
 }
 
 const submitAssignments = () => {
+  // Enter in a field submits the form while the Apply button spins
+  if (assignments.value.saving) return
   if (assignments.value.type === 'entity') {
     saveAssignments()
   } else if (assignments.value.type === 'task') {
@@ -2177,14 +2196,6 @@ const distributeAssignments = async () => {
         task.versionedTaskId = versionedTask.id
       }
 
-      if (assignments.value.unassign) {
-        if (isVersioned.value) {
-          versionedTask.assignees = []
-        } else {
-          taskIdsToUnassign.push(task.id)
-        }
-      }
-
       cumulatedTasks++
 
       let taskStartDate = nextStartDate
@@ -2218,6 +2229,15 @@ const distributeAssignments = async () => {
           taskStartDate = rangeStartDate.clone()
           taskEndDate = null
         } else {
+          // override once the task fits: one that fits nobody keeps its
+          // assignees
+          if (assignments.value.unassign) {
+            if (isVersioned.value) {
+              versionedTask.assignees = []
+            } else {
+              taskIdsToUnassign.push(task.id)
+            }
+          }
           if (isVersioned.value) {
             versionedTask.startDate = taskStartDate.format('YYYY-MM-DD')
             versionedTask.dueDate = taskEndDate.format('YYYY-MM-DD')
@@ -2307,16 +2327,17 @@ const distributeAssignments = async () => {
 }
 
 const saveTask = async () => {
-  assignments.value.saving = true
+  // the panel can move on to another task during the save: report to the
+  // one that started it
+  const panel = assignments.value
+  panel.saving = true
+  clearAssignmentMessages()
   try {
     const task = {
       ...assignments.value.task,
       startDate: parseDate(assignments.value.task.startDate),
       endDate: parseDate(assignments.value.task.endDate),
-      estimation: durationToMinutes(
-        organisation.value,
-        assignments.value.task.estimation
-      ),
+      estimation: getTaskEstimation(assignments.value.task),
       assignees: availablePersons.value.map(person => person.id)
     }
     // update task and assignments
@@ -2330,8 +2351,9 @@ const saveTask = async () => {
       })
     }
     // refresh task in side panel
-    assignments.value.task.startDate = task.startDate.format('YYYY-MM-DD')
-    assignments.value.task.endDate = task.endDate.format('YYYY-MM-DD')
+    panel.task.startDate = task.startDate.format('YYYY-MM-DD')
+    panel.task.endDate = task.endDate.format('YYYY-MM-DD')
+    panel.task.estimationMinutes = task.estimation
     // refresh schedule
     expandTaskTypeElement(
       selectedTaskType.value,
@@ -2343,8 +2365,9 @@ const saveTask = async () => {
     )
   } catch (err) {
     console.error(err)
+    panel.isError = true
   } finally {
-    assignments.value.saving = false
+    panel.saving = false
   }
 }
 

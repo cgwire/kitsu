@@ -9,8 +9,9 @@
           <date-field
             utc
             week-days-disabled
-            @update:model-value="validateDates"
-            v-model="form.startDate"
+            :can-delete="false"
+            :model-value="form.startDate"
+            @update:model-value="onStartDateChange"
           />
         </div>
         <div class="flexrow-item">
@@ -20,8 +21,8 @@
           <date-field
             utc
             week-days-disabled
-            @update:model-value="validateDates"
-            v-model="form.endDate"
+            :model-value="form.endDate"
+            @update:model-value="onEndDateChange"
           />
         </div>
       </div>
@@ -60,7 +61,7 @@ import { AlertTriangleIcon } from 'lucide-vue-next'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import { getUserDay } from '@/lib/time'
+import { getUserDay, utcDayToLocalDate } from '@/lib/time'
 
 import BaseModal from '@/components/modals/BaseModal.vue'
 import DateField from '@/components/widgets/DateField.vue'
@@ -116,19 +117,40 @@ const resetForm = () => {
   }
 }
 
-const validateDates = () => {
-  if (
-    form.value.startDate &&
-    form.value.endDate &&
-    form.value.startDate > form.value.endDate
-  ) {
-    form.value.endDate = form.value.startDate
+// Compare the days the utc fields show, whatever the time or the type (Date
+// or 'YYYY-MM-DD' string) of their values.
+const isBeforeDay = (date, otherDate) =>
+  utcDayToLocalDate(date) < utcDayToLocalDate(otherDate)
+
+// The picked date wins and the other one follows, as for the start and due
+// dates of a task: Zou refuses a day off that ends before it starts.
+const onStartDateChange = date => {
+  form.value.startDate = date
+  if (date && form.value.endDate && isBeforeDay(form.value.endDate, date)) {
+    form.value.endDate = date
+  }
+}
+
+const onEndDateChange = date => {
+  form.value.endDate = date
+  if (date && form.value.startDate && isBeforeDay(date, form.value.startDate)) {
+    form.value.startDate = date
   }
 }
 
 // Watchers
 
-watch(() => props.dayOffToEdit, resetForm, { immediate: true })
+// Reset on each opening, and when another day off comes in while open: the
+// Days off tab hands the same day off again when a row is edited after a
+// cancel, and Shift+Tab reaches its add button behind the open form. Both
+// lists hand a stable day off, so a list update keeps the picks.
+watch(
+  [() => props.active, () => props.dayOffToEdit],
+  ([isActive]) => {
+    if (isActive) resetForm()
+  },
+  { immediate: true }
+)
 </script>
 
 <style lang="scss" scoped>

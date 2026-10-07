@@ -24,10 +24,14 @@ const task = {
   entity: { id: 'asset-1' },
   assignees: [],
   difficulty: 3,
+  estimation: 240,
   retake_count: 0
 }
 
-const mountList = config =>
+const mountList = (
+  config,
+  { getters = {}, actions = {}, props = {} } = {}
+) =>
   shallowMount(TaskList, {
     global: {
       config,
@@ -48,18 +52,31 @@ const mountList = config =>
             taskMap: () => new Map(),
             taskTypeMap: () => new Map(),
             use12HourClock: () => false,
-            user: () => ({ id: 'user-1', departments: [] })
+            user: () => ({ id: 'user-1', departments: [] }),
+            ...getters
           },
           actions: {
             addSelectedTask: () => {},
             clearSelectedTasks: () => {},
-            removeSelectedTask: () => {}
+            removeSelectedTask: () => {},
+            ...actions
           }
         })
       ]
     },
-    props: { entityType: 'Asset', tasks: [task] }
+    props: { entityType: 'Asset', tasks: [task], ...props }
   })
+
+// What a browser reports once "1." is left in a number field: no number, so
+// an empty value with a bad input
+const leaveInvalidEntry = async input => {
+  input.element.value = '1.'
+  Object.defineProperty(input.element, 'validity', {
+    configurable: true,
+    value: { badInput: true }
+  })
+  await input.trigger('change')
+}
 
 // The click target when the pointer is on the drawn line of an icon
 const appendIconStroke = cell => {
@@ -93,5 +110,92 @@ describe('lists/TaskList', () => {
     expect(wrapper.emitted('task-selected')).toBeUndefined()
 
     wrapper.unmount()
+  })
+
+  // 2.05 hours make 122.99999999999999 minutes in floats.
+  test('saves an estimation typed in hours in whole minutes', async () => {
+    const updateTask = vi.fn()
+    const wrapper = mountList(undefined, {
+      getters: {
+        isCurrentUserProductionManager: () => true,
+        organisation: () => ({
+          hours_by_day: 8,
+          format_duration_in_hours: true
+        }),
+        taskMap: () => new Map([[task.id, task]])
+      },
+      actions: { updateTask },
+      // the task type page passes the dates of the production
+      props: { disabledDates: {} }
+    })
+    await wrapper.find('tbody td.name').trigger('click')
+    const input = wrapper.find('tbody td.estimation input')
+
+    // setValue fires the change event the list saves on
+    await input.setValue('2.05')
+
+    expect(updateTask.mock.calls.map(([, payload]) => payload)).toEqual([
+      { taskId: 'task-1', data: { estimation: 123 } }
+    ])
+
+    wrapper.unmount()
+  })
+
+  describe('estimation field', () => {
+    const mountEditableList = updateTask =>
+      mountList(undefined, {
+        getters: {
+          isCurrentUserProductionManager: () => true,
+          taskMap: () => new Map([[task.id, task]])
+        },
+        actions: { updateTask },
+        props: { disabledDates: {} }
+      })
+
+    // It read as an emptied field and saved 0 for every selected task.
+    test('ignores an entry that is no number', async () => {
+      const updateTask = vi.fn()
+      const wrapper = mountEditableList(updateTask)
+      await wrapper.find('tbody td.name').trigger('click')
+      const input = wrapper.find('tbody td.estimation input')
+
+      await leaveInvalidEntry(input)
+
+      expect(updateTask).not.toHaveBeenCalled()
+      // the half day stored comes back
+      expect(input.element.value).toBe('0.5')
+
+      wrapper.unmount()
+    })
+
+    // A valid number, it saved -480 minutes for every selected task.
+    test('ignores a negative entry', async () => {
+      const updateTask = vi.fn()
+      const wrapper = mountEditableList(updateTask)
+      await wrapper.find('tbody td.name').trigger('click')
+      const input = wrapper.find('tbody td.estimation input')
+
+      await input.setValue('-1')
+
+      expect(updateTask).not.toHaveBeenCalled()
+      // the half day stored comes back
+      expect(input.element.value).toBe('0.5')
+
+      wrapper.unmount()
+    })
+
+    test('saves 0 for an emptied field', async () => {
+      const updateTask = vi.fn()
+      const wrapper = mountEditableList(updateTask)
+      await wrapper.find('tbody td.name').trigger('click')
+
+      await wrapper.find('tbody td.estimation input').setValue('')
+
+      expect(updateTask.mock.calls.map(([, payload]) => payload)).toEqual([
+        { taskId: 'task-1', data: { estimation: 0 } }
+      ])
+
+      wrapper.unmount()
+    })
   })
 })

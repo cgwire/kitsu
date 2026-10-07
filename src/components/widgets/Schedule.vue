@@ -114,20 +114,12 @@
                 type="number"
                 step="any"
                 placeholder="0"
-                @input="
-                  $emit('estimation-changed', {
-                    estimation: durationToMinutes(
-                      organisation,
-                      $event.target.valueAsNumber || 0
-                    ),
-                    item: rootElement,
-                    daysOff: rootElement.daysOff
-                  })
-                "
+                @blur="estimationDraft = null"
+                @input="onRootEstimationChanged($event, rootElement)"
                 v-if="
                   !rootElement.avatar && rootElement.editable && !hideManDays
                 "
-                :value="formatDuration(rootElement.man_days, false)"
+                :value="getEstimationValue(rootElement)"
               />
               <span
                 class="man-days-unit flexrow-item"
@@ -227,6 +219,7 @@
                         min="0"
                         placeholder="0"
                         step="any"
+                        @blur="estimationDraft = null"
                         @input="
                           onChildEstimationChanged(
                             $event,
@@ -234,7 +227,7 @@
                             rootElement
                           )
                         "
-                        :value="formatDuration(childElement.man_days, false)"
+                        :value="getEstimationValue(childElement)"
                       />
                       {{ durationUnit }}
                     </span>
@@ -1106,6 +1099,10 @@ const saveMilestone = milestone => {
 
 // Data
 const currentElement = ref(null)
+// The text typed in an estimation field, shown as typed until the field is
+// left: rendered back from the estimation, "1." (no number yet) and "1.0"
+// (read as 1) lost their decimal point.
+const estimationDraft = ref(null)
 const selection = ref([])
 const isBrowsingX = ref(false)
 const isBrowsingY = ref(false)
@@ -1467,11 +1464,34 @@ const startMoveTracking = () => {
   addEvents(moveEvents)
 }
 
+const getEstimationValue = element =>
+  estimationDraft.value?.id === element.id
+    ? estimationDraft.value.text
+    : formatDuration(element.man_days, false)
+
+// The minutes typed, or null while the number is being typed ("1.") and
+// for a negative number
+const readEstimation = (event, element) => {
+  estimationDraft.value = { id: element.id, text: event.target.value }
+  if (event.target.validity.badInput || event.target.valueAsNumber < 0) {
+    return null
+  }
+  return durationToMinutes(organisation.value, event.target.valueAsNumber || 0)
+}
+
+const onRootEstimationChanged = (event, rootElement) => {
+  const estimation = readEstimation(event, rootElement)
+  if (estimation === null) return
+  emit('estimation-changed', {
+    estimation,
+    item: rootElement,
+    daysOff: rootElement.daysOff
+  })
+}
+
 const onChildEstimationChanged = (event, childElement, rootElement) => {
-  const estimation = durationToMinutes(
-    organisation.value,
-    event.target.valueAsNumber || 0
-  )
+  const estimation = readEstimation(event, childElement)
+  if (estimation === null) return
   if (props.isEstimationLinked) {
     childElement.man_days = estimation
     childElement.estimation = estimation

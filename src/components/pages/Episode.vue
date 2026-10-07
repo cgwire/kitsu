@@ -90,7 +90,7 @@
               <button-simple
                 icon="edit"
                 :title="$t('episodes.edit_title')"
-                @click="modals.edit = true"
+                @click="showEditModal"
                 v-if="isCurrentUserManager"
               />
             </div>
@@ -519,6 +519,12 @@ const assetPath = asset =>
     },
     currentEpisode.value.id
   )
+
+// Close leaves the error of the last save: opening drops it.
+const showEditModal = () => {
+  errors.edit = false
+  modals.edit = true
+}
 
 const confirmEditEpisode = async form => {
   loading.edit = true

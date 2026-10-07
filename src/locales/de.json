@@ -1464,6 +1464,7 @@
       "no_entity": "Keine zuweisbare Entität",
       "overall_man_days": "Personentage",
       "reset_list": "Liste zurücksetzen",
+      "save_task_error": "Die Aufgabe konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
       "select_task_type": "Wählen Sie einen Aufgabentyp...",
       "show_assigned": "Zugeordnete Einheiten anzeigen",
       "title": "Zeitplan",
@@ -2081,7 +2082,7 @@
     },
     "preview": {
       "broken": "Diese Vorschau ist fehlerhaft.",
-      "processing": "Videobearbeitung im Gange..."
+      "processing": "Diese Vorschau wird verarbeitet..."
     },
     "studios": {
       "create_error": "Beim Speichern dieses Studios ist ein Fehler aufgetreten. Sind Sie sicher, dass es kein Studio mit einem ähnlichen Namen gibt?",

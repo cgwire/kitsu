@@ -350,9 +350,12 @@ const getSeconds = task => {
   return frameToSeconds(shot.nb_frames, currentProduction.value, shot)
 }
 
+// A negative number is ignored: the stored estimation comes back.
 const estimationUpdated = (event, task) => {
   const value = event.target.value
-  if (value) {
+  if (event.target.valueAsNumber < 0) {
+    event.target.value = formatDuration(task.estimation, false)
+  } else if (value) {
     saveEstimations(
       durationToMinutes(organisation.value, parseFloat(value)),
       task

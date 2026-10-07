@@ -95,7 +95,7 @@
               <button-simple
                 icon="edit"
                 :title="$t('sequences.edit_title')"
-                @click="modals.edit = true"
+                @click="showEditModal"
                 v-if="isCurrentUserManager"
               />
             </div>
@@ -524,6 +524,12 @@ const assetPath = asset =>
     },
     isTVShow.value ? currentEpisode.value?.id || 'main' : null
   )
+
+// Close leaves the error of the last save: opening drops it.
+const showEditModal = () => {
+  errors.edit = false
+  modals.edit = true
+}
 
 const confirmEditSequence = async form => {
   loading.edit = true

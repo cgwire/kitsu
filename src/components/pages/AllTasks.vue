@@ -128,6 +128,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { sortPeople } from '@/lib/sorting'
+import { getStatusColor } from '@/lib/stats'
 
 import PageLayout from '@/components/layouts/PageLayout.vue'
 import AllTaskList from '@/components/lists/AllTaskList.vue'
@@ -255,7 +256,7 @@ const statusStatsList = computed(() =>
       if (!taskStatus) return null
       return {
         name: taskStatus.short_name.toUpperCase(),
-        color: taskStatus.color,
+        color: getStatusColor(taskStatus),
         value: stat.amount
       }
     })

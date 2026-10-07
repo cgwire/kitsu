@@ -1881,6 +1881,7 @@
       "no_entity": "Brak obiektów do przypisania",
       "overall_man_days": "Osobodni",
       "reset_list": "Zresetuj listę",
+      "save_task_error": "Nie udało się zapisać zadania. Spróbuj ponownie.",
       "select_task_type": "Wybierz typ zadania",
       "show_assigned": "Pokaż przypisane obiekty",
       "title": "Harmonogram",
@@ -2213,7 +2214,7 @@
     },
     "preview": {
       "broken": "Ten podgląd jest uszkodzony.",
-      "processing": "Trwa przetwarzanie wideo..."
+      "processing": "Ten podgląd jest przetwarzany..."
     },
     "search": {
       "limit": "Maksymalna liczba wyników:",

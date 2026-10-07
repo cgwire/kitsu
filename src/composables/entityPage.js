@@ -134,6 +134,8 @@ export const useEntityPage = ({
   const errors = reactive({ ...ERRORS, ...extraErrors })
   const loading = reactive({ ...LOADING, ...extraLoading })
   const modals = reactive({ ...MODALS, ...extraModals })
+  // Only the asset modal reads it: the other edit modals close on success.
+  const success = reactive({ edit: false })
 
   // Computed
   // --------------------------------------------------------------------------
@@ -359,6 +361,7 @@ export const useEntityPage = ({
   // --------------------------------------------------------------------------
 
   const showImportModal = () => {
+    errors.importing = false
     modals.isImportDisplayed = true
   }
 
@@ -375,6 +378,7 @@ export const useEntityPage = ({
   }
 
   const showCreateTasksModal = () => {
+    errors.creatingTasks = false
     modals.isCreateTasksDisplayed = true
   }
 
@@ -413,12 +417,16 @@ export const useEntityPage = ({
     }
   }
 
+  // Close leaves the messages of the last save: opening drops them.
   const openEditModal = (entity = {}) => {
+    errors.edit = false
+    success.edit = false
     entityToEdit.value = entity
     modals.isNewDisplayed = true
   }
 
   const onDeleteClicked = entity => {
+    errors.del = false
     entityToDelete.value = entity
     modals.isDeleteDisplayed = true
   }
@@ -470,12 +478,15 @@ export const useEntityPage = ({
   // Metadata descriptors
   // --------------------------------------------------------------------------
 
+  // Close leaves the error of the last save: opening drops it.
   const onAddMetadataClicked = () => {
+    errors.addMetadata = false
     descriptorToEdit.value = {}
     modals.isAddMetadataDisplayed = true
   }
 
   const onEditMetadataClicked = descriptorId => {
+    errors.addMetadata = false
     descriptorToEdit.value = currentProduction.value.descriptors.find(
       descriptor => descriptor.id === descriptorId
     )
@@ -483,12 +494,14 @@ export const useEntityPage = ({
   }
 
   const onDeleteMetadataClicked = descriptorId => {
+    errors.deleteMetadata = false
     descriptorIdToDelete.value = descriptorId
     modals.isDeleteMetadataDisplayed = true
   }
 
   const confirmAddMetadata = async form => {
     loading.addMetadata = true
+    errors.addMetadata = false
     try {
       await store.dispatch('addMetadataDescriptor', {
         ...form,
@@ -524,6 +537,7 @@ export const useEntityPage = ({
   // --------------------------------------------------------------------------
 
   const onDeleteAllTasksClicked = taskTypeId => {
+    errors.deleteAllTasks = false
     const taskType = taskTypeMap.value.get(taskTypeId)
     taskTypeForTaskDeletion.value = taskType
     deleteAllTasksLockText.value = taskType.name
@@ -675,6 +689,7 @@ export const useEntityPage = ({
   }
 
   const onRestoreClicked = entity => {
+    errors.restore = false
     entityToRestore.value = entity
     modals.isRestoreDisplayed = true
   }
@@ -760,6 +775,7 @@ export const useEntityPage = ({
     modals,
     parsedCSV,
     selectedDepartment,
+    success,
     taskTypeForTaskDeletion,
 
     deleteAllTasksText,

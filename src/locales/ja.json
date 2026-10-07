@@ -1464,6 +1464,7 @@
       "no_entity": "アサイン可能なエンティティがありません",
       "overall_man_days": "人日",
       "reset_list": "リストをリセット",
+      "save_task_error": "タスクを保存できませんでした。もう一度お試しください。",
       "select_task_type": "タスクタイプを選択",
       "show_assigned": "アサインされたエンティティの表示",
       "title": "スケジュール",
@@ -2081,7 +2082,7 @@
     },
     "preview": {
       "broken": "このプレビューは破損しています。",
-      "processing": "動画処理中…"
+      "processing": "このプレビューは処理中です…"
     },
     "studios": {
       "create_error": "スタジオの保存中にエラーが発生しました。類似の名前のスタジオがないか確認してください。",

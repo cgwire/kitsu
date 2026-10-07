@@ -1,5 +1,7 @@
 import { flushPromises, shallowMount } from '@vue/test-utils'
+import process from 'node:process'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { reactive } from 'vue'
 import { createStore } from 'vuex'
 
 vi.mock('vue-i18n', async importOriginal => ({
@@ -34,13 +36,18 @@ const withMethods = (names, values = {}) => ({
   }
 })
 
+// Without previewFileStatusMap, the store keeps no preview status.
 const mountPlayer = ({
   playlistProp = playlist,
   entities = [entity],
-  shotMap = new Map()
+  canEditShotTrim = () => true,
+  previewFileStatusMap,
+  shotMap = new Map(),
+  taskMap = new Map()
 } = {}) => {
   const store = createStore({
     getters: {
+      canEditShotTrim: () => canEditShotTrim,
       currentProduction: () => ({ id: 'production-1', fps: '25' }),
       currentUserRoleForProduction: () => () => 'manager',
       dateFormat: () => 'yyyy-MM-dd',
@@ -54,6 +61,7 @@ const mountPlayer = ({
       organisation: () => ({}),
       personMap: () => new Map(),
       previewFileMap: () => new Map(),
+      previewFileStatusMap: () => previewFileStatusMap,
       productionAssetTaskTypes: () => [],
       productionBackgrounds: () => [],
       productionEditTaskTypes: () => [],
@@ -61,7 +69,7 @@ const mountPlayer = ({
       productionSequenceTaskTypes: () => [],
       productionShotTaskTypes: () => [],
       shotMap: () => shotMap,
-      taskMap: () => new Map(),
+      taskMap: () => taskMap,
       taskStatusMap: () => new Map(),
       taskTypeMap: () => new Map(),
       use12HourClock: () => false,
@@ -105,20 +113,23 @@ const mountPlayer = ({
             getVideoRatio: () => 1
           }
         ),
-        MultiPictureViewer: withMethods(
-          ['resetPanZoom', 'resumePanZoom', 'setPanZoom'],
-          {
+        MultiPictureViewer: {
+          ...withMethods(['resetPanZoom', 'resumePanZoom', 'setPanZoom'], {
             getNaturalDimensions: () => ({ width: 1920, height: 1080 }),
             getPictureElement: () => null
-          }
-        ),
+          }),
+          props: { previews: Array }
+        },
         ObjectViewer: withMethods(['pause', 'play'], {
           getAnimations: () => []
         }),
         PictureViewer: withMethods(['setPanZoom']),
         SoundViewer: withMethods(['pause', 'play', 'redraw']),
         TaskInfo: withMethods(['focusCommentTextarea']),
-        VideoProgress: withMethods(['updateProgressBar'])
+        VideoProgress: {
+          ...withMethods(['updateProgressBar']),
+          props: { handleIn: Number, handleOut: Number, readOnly: Boolean }
+        }
       }
     }
   })
@@ -130,6 +141,7 @@ describe('PlaylistPlayer.vue', () => {
   afterEach(() => {
     wrapper?.unmount()
     wrapper = null
+    vi.restoreAllMocks()
   })
 
   // A plain link navigates the tab: the browser fires beforeunload, which
@@ -168,15 +180,17 @@ describe('PlaylistPlayer.vue', () => {
       id: 'shot-1',
       preview_file_id: 'preview-1',
       preview_file_extension: 'mp4',
-      preview_file_duration: 2.76
+      preview_file_duration: 2.76,
+      preview_file_task_id: 'task-1'
     }
 
     // The handles are set once the movie metadata gives the duration.
-    const mountShotPlayer = async data => {
+    const mountShotPlayer = async (data, options = {}) => {
       wrapper = mountPlayer({
         playlistProp: { ...playlist, for_entity: 'shot' },
         entities: [movie],
-        shotMap: new Map([['shot-1', { id: 'shot-1', data }]])
+        shotMap: new Map([['shot-1', { id: 'shot-1', data }]]),
+        ...options
       })
       await flushPromises()
       wrapper
@@ -190,10 +204,10 @@ describe('PlaylistPlayer.vue', () => {
         ([action]) => action === 'editShot'
       )?.[1].data
 
+    const progressBar = () => wrapper.findComponent({ ref: 'video-progress' })
+
     const dragHandle = (event, frameNumber) =>
-      wrapper
-        .findComponent({ ref: 'video-progress' })
-        .vm.$emit(event, { frameNumber, save: true })
+      progressBar().vm.$emit(event, { frameNumber, save: true })
 
     it('leaves the end untrimmed when only the start handle moves', async () => {
       await mountShotPlayer({ fps: 25 })
@@ -224,6 +238,152 @@ describe('PlaylistPlayer.vue', () => {
       await mountShotPlayer({ handle_out: 80 })
       dragHandle('handle-in-changed', 5)
       expect(savedData()).toEqual({ handle_in: 5, handle_out: 80 })
+    })
+
+    // Zou lets admins, and the managers and department-less supervisors of
+    // the production team, trim a shot.
+    it.each([
+      ['editable for a user who may trim the shot', true],
+      ['frozen for a user Zou refuses the trim to', false]
+    ])('keeps the handles %s', async (_, isAllowed) => {
+      await mountShotPlayer({}, { canEditShotTrim: () => isAllowed })
+      expect(progressBar().props('readOnly')).toBe(!isAllowed)
+    })
+
+    // The bar still ends a drag started before the handles froze.
+    it.each([
+      ['start', 'handle-in-changed', 5, 'handleIn', 0],
+      ['end', 'handle-out-changed', 60, 'handleOut', 69]
+    ])(
+      'ignores the %s handle moved by a user Zou refuses the trim to',
+      async (_, event, frameNumber, prop, value) => {
+        await mountShotPlayer({}, { canEditShotTrim: () => false })
+        dragHandle(event, frameNumber)
+        await flushPromises()
+        expect(savedData()).toBeUndefined()
+        expect(progressBar().props(prop)).toBe(value)
+      }
+    )
+
+    // A temporary playlist can mix shots of several productions.
+    it('checks the trim right on the task of the shot on screen', async () => {
+      const task = { id: 'task-1', project_id: 'production-2' }
+      const canEditShotTrim = vi.fn(() => true)
+      await mountShotPlayer(
+        {},
+        { canEditShotTrim, taskMap: new Map([[task.id, task]]) }
+      )
+      expect(canEditShotTrim).toHaveBeenCalledWith(task)
+    })
+
+    it('keeps a failed save from going unhandled', async () => {
+      const rejections = []
+      const onRejection = reason => rejections.push(reason)
+      process.on('unhandledRejection', onRejection)
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      await mountShotPlayer({})
+      // Not a vi.fn: it handles the promises it returns, to record how they
+      // settle, so a rejection from it never counts as unhandled.
+      wrapper.vm.$store.dispatch = action =>
+        action === 'editShot'
+          ? Promise.reject(new Error('forbidden'))
+          : Promise.resolve()
+
+      dragHandle('handle-in-changed', 5)
+      // Node reports a rejected promise once the microtask queue drained.
+      await new Promise(resolve => setTimeout(resolve))
+      process.off('unhandledRejection', onRejection)
+
+      expect(rejections).toEqual([])
+    })
+  })
+
+  // Zou builds the files of an uploaded preview in a job, and its picture
+  // routes answer 404 until the preview file is ready.
+  describe('previews being processed', () => {
+    const picture = {
+      id: 'shot-2',
+      preview_file_id: 'preview-2',
+      preview_file_extension: 'png'
+    }
+
+    const pictureWithExtra = {
+      ...picture,
+      preview_file_previews: [{ id: 'preview-3', extension: 'png' }]
+    }
+
+    const viewerStatuses = () =>
+      wrapper
+        .findComponent({ ref: 'picture-player' })
+        .props('previews')
+        .map(({ status }) => status)
+
+    it('registers the statuses of the revisions its entries can play', async () => {
+      const subPreview = { id: 'preview-3', status: 'processing' }
+      const revision = {
+        id: 'preview-2',
+        status: 'processing',
+        previews: [subPreview]
+      }
+      const olderRevision = { id: 'preview-4', status: 'ready', previews: [] }
+      const otherTaskRevision = { id: 'preview-5', status: 'broken' }
+      wrapper = mountPlayer({
+        entities: [
+          {
+            ...picture,
+            preview_files: {
+              'task-type-1': [revision, olderRevision],
+              'task-type-2': [otherTaskRevision]
+            }
+          },
+          entity
+        ]
+      })
+      await flushPromises()
+      expect(wrapper.vm.$store.dispatch).toHaveBeenCalledWith(
+        'registerPreviewFileStatuses',
+        [revision, subPreview, olderRevision, otherTaskRevision]
+      )
+    })
+
+    // The playlist page pushes an added entry into the list it handed over.
+    it('registers the revisions of an entry added to the playlist', async () => {
+      const entities = reactive([entity])
+      wrapper = mountPlayer({ entities })
+      await flushPromises()
+      const revision = { id: 'preview-2', status: 'processing', previews: [] }
+      entities.push({ ...picture, preview_files: { 'task-type-1': [revision] } })
+      await flushPromises()
+      expect(wrapper.vm.$store.dispatch).toHaveBeenCalledWith(
+        'registerPreviewFileStatuses',
+        [revision]
+      )
+    })
+
+    it('gives the picture viewers the status the registry knows', async () => {
+      const previewFileStatusMap = reactive(
+        new Map([
+          ['preview-2', 'processing'],
+          ['preview-3', 'processing']
+        ])
+      )
+      wrapper = mountPlayer({
+        entities: [pictureWithExtra],
+        previewFileStatusMap
+      })
+      await flushPromises()
+      expect(viewerStatuses()).toEqual(['processing', 'processing'])
+
+      previewFileStatusMap.set('preview-2', 'ready')
+      await flushPromises()
+      expect(viewerStatuses()).toEqual(['ready', 'processing'])
+    })
+
+    // The viewers take a preview without a status as ready.
+    it('gives the picture viewers no status without a registry', async () => {
+      wrapper = mountPlayer({ entities: [pictureWithExtra] })
+      await flushPromises()
+      expect(viewerStatuses()).toEqual([undefined, undefined])
     })
   })
 })

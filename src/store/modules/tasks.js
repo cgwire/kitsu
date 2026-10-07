@@ -15,6 +15,7 @@ import {
   setTasksEntityPreview
 } from '@/lib/models'
 import func from '@/lib/func'
+import { latestPreviewFileStatus } from '@/lib/preview'
 
 import assetStore from '@/store/modules/assets'
 import editStore from '@/store/modules/edits'
@@ -64,6 +65,7 @@ import {
   UNASSIGN_TASK,
   UNASSIGN_TASKS,
   SET_PREVIEW,
+  SET_PREVIEW_FILE_STATUS,
   SET_IS_SHOW_ASSIGNATIONS,
   SET_IS_SHOW_INFOS,
   SET_IS_SHOW_INFOS_BREAKDOWN,
@@ -225,6 +227,10 @@ const actions = {
   loadTaskComments({ commit, dispatch }, { taskId, entityId }) {
     return tasksApi.getTaskComments(taskId).then(comments => {
       commit(LOAD_TASK_COMMENTS_END, { comments, taskId })
+      dispatch(
+        'registerPreviewFileStatuses',
+        comments.flatMap(comment => comment.previews || [])
+      )
       return dispatch('loadTaskEntityPreviewFiles', entityId)
     })
   },
@@ -237,10 +243,21 @@ const actions = {
     })
   },
 
-  loadComment({ commit }, { commentId }) {
+  loadComment({ commit, state }, { commentId }) {
     return tasksApi.getTaskComment({ id: commentId }).then(comment => {
-      // The API returns a list of preview IDs instead of objects.
-      comment.previews = comment.previews.map(id => ({ id }))
+      // The API returns a list of preview IDs instead of objects: keep the
+      // previews the store holds, a bare ID has no revision to show.
+      const taskId = comment.object_id
+      const storedComment = state.taskComments[taskId]?.find(
+        ({ id }) => id === comment.id
+      )
+      const knownPreviews = [
+        ...(storedComment?.previews || []),
+        ...(state.taskPreviews[taskId] || []).flatMap(p => p.previews || [])
+      ].filter(preview => preview.revision !== undefined)
+      comment.previews = comment.previews.map(
+        id => knownPreviews.find(preview => preview.id === id) || { id }
+      )
       commit(NEW_TASK_COMMENT_END, { comment })
       return comment
     })
@@ -536,7 +553,7 @@ const actions = {
   },
 
   commentTaskWithPreview(
-    { commit, state },
+    { commit, dispatch, state },
     {
       taskId,
       taskStatusId,
@@ -595,6 +612,9 @@ const actions = {
             commentId: newComment.id,
             comment: newComment
           })
+          // Zou may still build its files: the status goes to the store the
+          // thumbnails read before any of them shows the preview.
+          dispatch('registerPreviewFileStatuses', [preview])
           // Create the remaining previews if there are some.
           if (previewForms.length > 1) {
             const addPreview = form => {
@@ -621,6 +641,7 @@ const actions = {
                     commentId: newComment.id,
                     comment: newComment
                   })
+                  dispatch('registerPreviewFileStatuses', [preview])
                   return preview
                 })
             }
@@ -647,7 +668,7 @@ const actions = {
   },
 
   addCommentExtraPreview(
-    { commit, getters, state },
+    { commit, dispatch, getters, state },
     { taskId, commentId, previewId }
   ) {
     const addPreview = form => {
@@ -672,6 +693,7 @@ const actions = {
             commentId,
             comment
           })
+          dispatch('registerPreviewFileStatuses', [preview])
           return preview
         })
     }
@@ -690,9 +712,16 @@ const actions = {
     })
   },
 
-  setPreview({ commit, state }, { taskId, entityId, previewId, frame }) {
+  setPreview(
+    { commit, dispatch, state },
+    { taskId, entityId, previewId, frame }
+  ) {
     const taskMap = state.taskMap
     return tasksApi.setPreview(entityId, previewId, frame).then(entity => {
+      // Zou may still build the files of the new main preview.
+      dispatch('registerPreviewFileStatuses', [
+        { id: previewId, status: entity?.preview_file_status }
+      ])
       const task = taskMap.get(taskId)
       if (task && task.entity_preview_file_id === previewId) {
         commit(SET_PREVIEW, { taskId, entityId, previewId, taskMap })
@@ -708,10 +737,13 @@ const actions = {
     })
   },
 
-  setLastTaskPreview({ commit, state }, taskId) {
+  setLastTaskPreview({ commit, dispatch, state }, taskId) {
     const taskMap = state.taskMap
     return tasksApi.setLastTaskPreviewAsEntityThumbnail(taskId).then(entity => {
       if (!entity) return
+      dispatch('registerPreviewFileStatuses', [
+        { id: entity.preview_file_id, status: entity.preview_file_status }
+      ])
       commit(SET_PREVIEW, {
         taskId,
         entityId: entity.id,
@@ -721,10 +753,17 @@ const actions = {
     })
   },
 
-  setTasksMainPreview({ commit, state }, taskIds) {
+  setTasksMainPreview({ commit, dispatch, state }, taskIds) {
     if (taskIds.length === 0) return Promise.resolve()
     const taskMap = state.taskMap
     return tasksApi.setTasksMainPreview(taskIds).then(entities => {
+      dispatch(
+        'registerPreviewFileStatuses',
+        entities.map(entity => ({
+          id: entity.preview_file_id,
+          status: entity.preview_file_status
+        }))
+      )
       // The route returns a flat entity list; match each back to its task
       // through the entity id. Tasks without a preview are skipped server-side.
       const entityMap = new Map(entities.map(entity => [entity.id, entity]))
@@ -1279,14 +1318,18 @@ const mutations = {
             if (annotations) {
               subPreview.annotations = annotations
             }
-            subPreview.status = preview.status
+            // An older answer must not undo a status announced since.
+            subPreview.status = latestPreviewFileStatus(
+              subPreview.status,
+              preview.status
+            )
           }
         })
         if (p.id === preview.id) {
           if (annotations) {
             p.annotations = annotations
           }
-          p.status = preview.status
+          p.status = latestPreviewFileStatus(p.status, preview.status)
         }
       })
     }
@@ -1453,6 +1496,18 @@ const mutations = {
   // all, including the my-checks tasks held in component state.
   [SET_PREVIEW](state, { entityId, previewId }) {
     setTasksEntityPreview(state.taskMap, entityId, previewId)
+  },
+
+  // The players draw the copies LOAD_TASK_COMMENTS_END and ADD_PREVIEW_END
+  // make of the comment previews: they follow the status Zou announces.
+  [SET_PREVIEW_FILE_STATUS](state, { previewFileId, status }) {
+    Object.values(state.taskPreviews)
+      .flatMap(previews => previews || [])
+      .flatMap(preview => [preview, ...(preview.previews || [])])
+      .filter(preview => preview.id === previewFileId)
+      .forEach(preview => {
+        preview.status = latestPreviewFileStatus(preview.status, status)
+      })
   },
 
   [SET_IS_BIG_THUMBNAILS](state, isBigThumbnails) {

@@ -1504,9 +1504,10 @@ const loadTimesheets = async (personIds, startDate, endDate) => {
       entry.endDate = parseDate(entry.date)
     })
 
-    // merge consecutive timesheet entries with duration >= one organisation day
+    // merge consecutive timesheet entries with duration >= one organisation
+    // day, counted in days: 8.3 * 60 makes 498.00000000000006 minutes, over
+    // the 498 the timesheet stores for a day of 8.3 hours
     const mergedTimesheet = []
-    const oneDay = organisation.value.hours_by_day * 60
     for (const entry of timesheet) {
       const previous = mergedTimesheet.length
         ? mergedTimesheet[mergedTimesheet.length - 1]
@@ -1515,7 +1516,7 @@ const loadTimesheets = async (personIds, startDate, endDate) => {
         previous &&
         previous.task_id === entry.task_id &&
         (previous.date === entry.date ||
-          (previous.duration >= oneDay &&
+          (minutesToDays(organisation.value, previous.duration) >= 1 &&
             entry.startDate.diff(previous.startDate, 'days') === 1))
       ) {
         // merge with previous
@@ -1775,12 +1776,15 @@ const expandPersonElement = personElement => {
 
 // Import
 
+// Close leaves the error of the last save: opening drops it.
 const onAddMetadataClicked = () => {
+  errors.addMetadata = false
   descriptorToEdit.value = {}
   modals.isAddMetadataDisplayed = true
 }
 
 const onEditMetadataClicked = descriptorId => {
+  errors.addMetadata = false
   descriptorToEdit.value = currentProduction.value.descriptors.find(
     descriptor => descriptor.id === descriptorId
   )

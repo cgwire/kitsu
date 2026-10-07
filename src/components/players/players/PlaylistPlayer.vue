@@ -460,6 +460,7 @@
           : -1
       "
       :preview-id="currentPreview ? currentPreview.id : ''"
+      :read-only="areHandlesReadOnly"
       @start-scrub="onScrubStart"
       @end-scrub="onScrubEnd"
       @progress-changed="onProgressChanged"
@@ -1216,6 +1217,7 @@ const isCurrentUserSupervisor = computed(
 const organisation = computed(() => store.getters.organisation)
 const personMap = computed(() => store.getters.personMap)
 const previewFileMap = computed(() => store.getters.previewFileMap)
+const previewFileStatusMap = computed(() => store.getters.previewFileStatusMap)
 const productionAssetTaskTypes = computed(
   () => store.getters.productionAssetTaskTypes
 )
@@ -1296,6 +1298,12 @@ const isCurrentTaskSupervisor = computed(() =>
     : isCurrentUserSupervisor.value
 )
 
+// Zou refuses the trim to artists, clients and department supervisors: their
+// handles stay visible but frozen, as in the preview player.
+const areHandlesReadOnly = computed(
+  () => !store.getters.canEditShotTrim(task.value)
+)
+
 const currentPreview = computed(() => {
   const entity = currentEntity.value
   if (!entity) return null
@@ -1354,6 +1362,8 @@ const nextEntityHandleIn = computed(
 // `entry` is the rank of the playlist entry, `position` the rank of the
 // preview inside it. The couple identifies a viewer: the preview file id
 // can't, the same entity repeated in a playlist may point at the same one.
+// The statuses come from the registry: the socket turns a processing
+// preview ready there, never in the playlist payload.
 const picturePreviews = computed(() =>
   entityList.value.flatMap((e, entry) => [
     {
@@ -1362,6 +1372,7 @@ const picturePreviews = computed(() =>
       width: e.preview_file_width,
       extension: e.preview_file_extension,
       revision: e.preview_file_revision,
+      status: previewFileStatusMap.value?.get(e.preview_file_id),
       entry,
       position: 1
     },
@@ -1371,10 +1382,21 @@ const picturePreviews = computed(() =>
       width: p.width,
       extension: p.extension,
       revision: p.revision,
+      status: previewFileStatusMap.value?.get(p.id),
       entry,
       position: index + 2
     }))
   ])
+)
+
+// Every revision the entries can play, with the status the playlist was
+// read with: the processing ones join the registry the socket keeps.
+const entryPreviewFiles = computed(() =>
+  entityList.value.flatMap(entity =>
+    Object.values(entity.preview_files || {})
+      .flat()
+      .flatMap(previewFile => [previewFile, ...(previewFile.previews || [])])
+  )
 )
 
 const currentPreviewPath = computed(() => {
@@ -2514,19 +2536,24 @@ const onProgressChanged = (frame, updatePlaylistProgress = true) => {
 const _saveHandles = handles => {
   const shot = shotMap.value.get(currentEntity.value?.id)
   if (!shot) return
-  store.dispatch('editShot', {
-    id: shot.id,
-    data: { ...shot.data, ...handles }
-  })
+  store
+    .dispatch('editShot', {
+      id: shot.id,
+      data: { ...shot.data, ...handles }
+    })
+    .catch(console.error)
 }
 
+// The progress bar still ends a drag started before the handles froze.
 const onHandleInChanged = ({ frameNumber: f, save }) => {
+  if (areHandlesReadOnly.value) return
   handleIn.value = f
   if (save) _saveHandles({ handle_in: f })
   updateRoomStatus()
 }
 
 const onHandleOutChanged = ({ frameNumber: f, save }) => {
+  if (areHandlesReadOnly.value) return
   handleOut.value = f
   // An end handle at the clip end is no trim: saving that frame would
   // stop a longer revision at the length of the one on screen.
@@ -4669,6 +4696,10 @@ watch(
 watch(
   () => entityList.value,
   () => startProgressiveRender()
+)
+
+watch(entryPreviewFiles, previewFiles =>
+  store.dispatch('registerPreviewFileStatuses', previewFiles)
 )
 
 // Lazy-load annotations for the current preview at every transition (entity

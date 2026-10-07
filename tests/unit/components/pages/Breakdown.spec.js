@@ -31,6 +31,9 @@ vi.mock('@/lib/preferences', () => ({
 import preferences from '@/lib/preferences'
 
 import DeleteModal from '@/components/modals/DeleteModal.vue'
+import EditAssetModal from '@/components/modals/EditAssetModal.vue'
+import ImportModal from '@/components/modals/ImportModal.vue'
+import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
 import Breakdown from '@/components/pages/Breakdown.vue'
 
 const production = { id: 'p1', production_type: 'tvshow' }
@@ -295,6 +298,106 @@ describe('Breakdown page, removeOneAssetFromSelection', () => {
     expect(wrapper.findComponent(DeleteModal).props('isError')).toBe(true)
     expect(wrapper.vm.saveErrors).toEqual({ 'shot-a': true })
     vi.restoreAllMocks()
+  })
+
+  // Close keeps the error of a refused removal: the next confirmation opens
+  // without it.
+  test('opens the confirmation without the error of a past removal', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { wrapper } = mountPage({
+      state: {
+        currentEpisode: { id: 'all' },
+        casting: { 'episode-a': [{ asset_id: 'asset-1', nb_occurences: 1 }] }
+      },
+      actions: { castAsset: vi.fn(() => Promise.reject(new Error('down'))) }
+    })
+    // The end of the load resets the selection.
+    await flushPromises()
+    const modal = wrapper.findComponent(DeleteModal)
+    wrapper.vm.selection = new Set(['episode-a'])
+
+    await wrapper.vm.removeOneAssetFromSelection('asset-1')
+    modal.vm.$emit('confirm')
+    await flushPromises()
+    expect(modal.props('isError')).toBe(true)
+
+    modal.vm.$emit('cancel')
+    await wrapper.vm.removeOneAssetFromSelection('asset-1')
+    await nextTick()
+
+    expect(modal.props('active')).toBe(true)
+    expect(modal.props('isError')).toBe(false)
+    // Its undo step would answer the ctrl + z of a later test.
+    wrapper.unmount()
+    vi.restoreAllMocks()
+  })
+
+  // A removal that needs no confirmation fails with the modal closed: the
+  // next confirmation opens without its error.
+  test('opens the confirmation without the error of an unconfirmed removal', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const castAsset = vi
+      .fn(() => Promise.resolve())
+      .mockImplementationOnce(() => Promise.reject(new Error('down')))
+    const { wrapper } = mountPage({
+      state: {
+        currentEpisode: { id: 'all' },
+        casting: {
+          'episode-a': [{ asset_id: 'asset-1', nb_occurences: 2 }],
+          'episode-b': [{ asset_id: 'asset-1', nb_occurences: 1 }]
+        }
+      },
+      actions: { castAsset }
+    })
+    // The end of the load resets the selection.
+    await flushPromises()
+    const modal = wrapper.findComponent(DeleteModal)
+
+    wrapper.vm.selection = new Set(['episode-a'])
+    await wrapper.vm.removeOneAssetFromSelection('asset-1')
+    expect(wrapper.vm.saveErrors).toEqual({ 'episode-a': true })
+    expect(modal.props('active')).toBe(false)
+    wrapper.vm.selection = new Set(['episode-b'])
+    await wrapper.vm.removeOneAssetFromSelection('asset-1')
+    await nextTick()
+
+    expect(modal.props('active')).toBe(true)
+    expect(modal.props('isError')).toBe(false)
+    wrapper.unmount()
+    vi.restoreAllMocks()
+  })
+})
+
+describe('Breakdown page, CSV import', () => {
+  // Close keeps the error of a failed upload: the next import opens without
+  // it.
+  test('opens the import without the error of a past upload', async () => {
+    const { wrapper } = mountPage({
+      actions: {
+        uploadCastingFile: vi.fn(() => Promise.reject(new Error('down')))
+      }
+    })
+    await flushPromises()
+    const importButton = wrapper
+      .findAllComponents({ name: 'ButtonSimple' })
+      .find(button => button.props('icon') === 'import')
+    const importModal = wrapper.findComponent(ImportModal)
+    const renderModal = wrapper.findComponent(ImportRenderModal)
+
+    importButton.vm.$emit('click')
+    importModal.vm.$emit('confirm', 'Name\nHero', 'text')
+    await flushPromises()
+    renderModal.vm.$emit('confirm', [['Name'], ['Hero']])
+    await flushPromises()
+    expect(renderModal.props('isError')).toBe(true)
+
+    renderModal.vm.$emit('cancel')
+    importButton.vm.$emit('click')
+    await nextTick()
+
+    expect(importModal.props('active')).toBe(true)
+    expect(importModal.props('isError')).toBe(false)
+    wrapper.unmount()
   })
 })
 
@@ -822,5 +925,142 @@ describe('Breakdown page, asset search', () => {
   afterEach(() => {
     delete HTMLElement.prototype.scrollHeight
     delete HTMLElement.prototype.clientHeight
+  })
+})
+
+describe('Breakdown page, asset creation', () => {
+  // The real modal: the page resets its form by handing it a new asset.
+  const mountCreation = async (newAsset = vi.fn(() => Promise.resolve())) => {
+    const mounted = mountPage({
+      actions: { newAsset },
+      getters: {
+        assetCreated: () => '',
+        openProductions: () => [production],
+        productionAssetTypeOptions: () => [
+          { label: 'Characters', value: 'type-1' }
+        ]
+      },
+      stubs: { EditAssetModal: false }
+    })
+    await flushPromises()
+    mounted.wrapper.vm.modals.isNewDisplayed = true
+    await nextTick()
+    const modal = mounted.wrapper.findComponent(EditAssetModal)
+    modal.vm.form.name = 'Hero'
+    modal.vm.form.description = 'The main character'
+    modal.vm.form.data = { resolution: '4K' }
+    return { ...mounted, modal }
+  }
+
+  // The modal stays open for the next asset: it must not start from the
+  // name, description and metadata of the one just created.
+  test('clears the asset form after a confirm and stay', async () => {
+    const { actions, modal } = await mountCreation()
+
+    modal.vm.$emit('confirm-and-stay', { name: 'Hero' })
+    await flushPromises()
+
+    expect(actions.newAsset).toHaveBeenCalledTimes(1)
+    expect(modal.props('isSuccess')).toBe(true)
+    expect(modal.vm.form.name).toBe('')
+    expect(modal.vm.form.description).toBe('')
+    expect(modal.vm.form.data).toEqual({})
+  })
+
+  // A failed creation keeps what was typed, to fix and send again.
+  test('keeps the asset form when the creation fails', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { modal } = await mountCreation(
+      vi.fn(() => Promise.reject(new Error('down')))
+    )
+
+    modal.vm.$emit('confirm-and-stay', { name: 'Hero' })
+    await flushPromises()
+
+    expect(modal.props('isError')).toBe(true)
+    expect(modal.vm.form.name).toBe('Hero')
+    vi.restoreAllMocks()
+  })
+
+  // A creation sent again after a failure shows its success alone.
+  test('clears a past error on a new confirm and stay', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const newAsset = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('down'))
+      .mockResolvedValueOnce()
+    const { modal } = await mountCreation(newAsset)
+
+    modal.vm.$emit('confirm-and-stay', { name: 'Hero' })
+    await flushPromises()
+    modal.vm.$emit('confirm-and-stay', { name: 'Hero' })
+    await flushPromises()
+
+    expect(modal.props('isSuccess')).toBe(true)
+    expect(modal.props('isError')).toBe(false)
+    vi.restoreAllMocks()
+  })
+
+  // A plain confirm that fails after a confirm and stay shows its error alone.
+  test('clears a past success when a plain confirm fails', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const newAsset = vi
+      .fn()
+      .mockResolvedValueOnce()
+      .mockRejectedValueOnce(new Error('down'))
+    const { modal } = await mountCreation(newAsset)
+
+    modal.vm.$emit('confirm-and-stay', { name: 'Hero' })
+    await flushPromises()
+    modal.vm.$emit('confirm', { name: 'Villain' })
+    await flushPromises()
+
+    expect(modal.props('isError')).toBe(true)
+    expect(modal.props('isSuccess')).toBe(false)
+    vi.restoreAllMocks()
+  })
+
+  // The + button of the asset column is the only way to open the modal.
+  const clickNewAsset = wrapper =>
+    wrapper
+      .findAllComponents({ name: 'ButtonSimple' })
+      .find(button => button.props('icon') === 'plus')
+      .vm.$emit('click')
+
+  // Close keeps the messages of the last creation: opening drops them.
+  test('opens without the error of a past failed creation', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { wrapper, modal } = await mountCreation(
+      vi.fn(() => Promise.reject(new Error('down')))
+    )
+
+    modal.vm.$emit('confirm-and-stay', { name: 'Hero' })
+    await flushPromises()
+    expect(modal.props('isError')).toBe(true)
+
+    modal.vm.$emit('cancel')
+    await nextTick()
+    clickNewAsset(wrapper)
+    await nextTick()
+
+    expect(modal.props('active')).toBe(true)
+    expect(modal.props('isError')).toBe(false)
+    vi.restoreAllMocks()
+  })
+
+  test('opens without the success of a past confirm and stay', async () => {
+    const { wrapper, modal } = await mountCreation()
+
+    modal.vm.$emit('confirm-and-stay', { name: 'Hero' })
+    await flushPromises()
+    expect(modal.props('isSuccess')).toBe(true)
+
+    modal.vm.$emit('cancel')
+    await nextTick()
+    clickNewAsset(wrapper)
+    await nextTick()
+
+    expect(modal.props('active')).toBe(true)
+    expect(modal.props('isSuccess')).toBe(false)
   })
 })

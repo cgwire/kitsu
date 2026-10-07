@@ -1464,6 +1464,7 @@
       "no_entity": "Nenhuma entidade atribuível",
       "overall_man_days": "Jornadas necessárias",
       "reset_list": "Redefinir lista",
+      "save_task_error": "Não foi possível salvar a tarefa. Tente novamente.",
       "select_task_type": "Selecione um tipo de tarefa",
       "show_assigned": "Mostrar entidades atribuídas",
       "title": "Cronograma",
@@ -2081,7 +2082,7 @@
     },
     "preview": {
       "broken": "Esta visualização não está funcionando.",
-      "processing": "Processamento de vídeo em andamento..."
+      "processing": "Esta visualização está sendo processada..."
     },
     "studios": {
       "create_error": "Ocorreu um erro ao salvar este estúdio. Tem certeza de que não há nenhum estúdio com um nome semelhante?",

@@ -90,6 +90,7 @@ import { useStore } from 'vuex'
 import draggable from 'vuedraggable'
 
 const SIDE_PAD = 8
+const MENU_MAX_HEIGHT = 400
 const MENU_WIDTH = 200
 
 const { t } = useI18n()
@@ -173,7 +174,11 @@ const isColumnVisible = name => props.modelValue?.[name] !== false
 const positionMenu = () => {
   if (!props.isOpen) return
   if (!hostRef.value) {
-    menuStyle.value = { top: '5rem', right: `${SIDE_PAD}px` }
+    menuStyle.value = {
+      top: '5rem',
+      right: `${SIDE_PAD}px`,
+      maxHeight: `${MENU_MAX_HEIGHT}px`
+    }
     return
   }
   const rect = hostRef.value.getBoundingClientRect()
@@ -186,13 +191,28 @@ const positionMenu = () => {
     Math.max(SIDE_PAD, rect.top + topOffset),
     window.innerHeight - SIDE_PAD - 64
   )
-  menuStyle.value = { top: `${topPx}px`, right: `${rightPx}px` }
+  // The menu is its own scroll box: past the window bottom, its last entries
+  // could never be scrolled into view.
+  const maxHeightPx = Math.min(
+    MENU_MAX_HEIGHT,
+    window.innerHeight - SIDE_PAD - topPx
+  )
+  menuStyle.value = {
+    top: `${topPx}px`,
+    right: `${rightPx}px`,
+    maxHeight: `${maxHeightPx}px`
+  }
 }
 
 const closeMenu = () => emit('update:is-open', false)
 
 const onKeyEscape = event => {
-  if (event.key === 'Escape' && props.isOpen) closeMenu()
+  if (event.key === 'Escape' && props.isOpen) {
+    // Tells isFreeEscape the key is taken: the menu is closed by the time
+    // the page listener runs.
+    event.preventDefault()
+    closeMenu()
+  }
 }
 
 const setMetadataDisplayValue = (metadataName, isSelected) => {
@@ -278,7 +298,6 @@ onBeforeUnmount(() => {
   border-bottom-right-radius: 10px;
   box-shadow: 0 2px 6px var(--box-shadow);
   color: var(--text);
-  max-height: 400px;
   overflow: auto;
   position: fixed;
   text-align: left;

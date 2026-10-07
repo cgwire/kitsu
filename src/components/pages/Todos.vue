@@ -114,7 +114,7 @@
           :is-loading="loading.timesheets || isTodosLoading"
           :is-error="isTodosLoadingError"
           :days-off="daysOff"
-          :day-off-error="dayOffError"
+          v-model:day-off-error="dayOffError"
           :time-spent-map="timeSpentMap"
           :time-spent-total="timeSpentTotal"
           :hide-done="loggableDoneTasks.length === 0"
@@ -129,7 +129,7 @@
         <day-off-list
           ref="day-off-list"
           :days-off="daysOff"
-          :day-off-error="dayOffError"
+          v-model:day-off-error="dayOffError"
           :is-error="isDaysOffLoadingError"
           @set-day-off="onSetDayOff"
           @unset-day-off="onUnsetDayOff"

@@ -31,6 +31,7 @@ import crisp from '@/lib/crisp'
 import { isNewShotInLoadedScope } from '@/lib/episodes'
 import i18n from '@/lib/i18n'
 import localPreferences from '@/lib/preferences'
+import { isPreviewFileStatus } from '@/lib/preview'
 import sentry from '@/lib/sentry'
 import assetsStore from '@/store/modules/assets.js'
 import editStore from '@/store/modules/edits.js'
@@ -352,14 +353,33 @@ const socketEvents = {
     }
   },
 
-  // Emitted by Zou when a production has "set preview automatically"
-  // enabled: reflect the new entity thumbnail without a manual refresh.
+  // Zou builds the files of an uploaded preview in a job: its routes answer
+  // 404 until this event tells it ready.
+  'preview-file:update': eventData => {
+    if (isPreviewFileStatus(eventData.status)) {
+      store.commit('SET_PREVIEW_FILE_STATUS', {
+        previewFileId: eventData.preview_file_id,
+        status: eventData.status
+      })
+    }
+  },
+
+  // Sent for every new main preview, set by hand or by the job: its status
+  // goes first, so the thumbnails do not ask for a picture still processing.
   'preview-file:set-main': eventData => {
+    store.dispatch('registerPreviewFileStatuses', [
+      { id: eventData.preview_file_id, status: eventData.preview_file_status }
+    ])
     store.commit('SET_PREVIEW', {
       entityId: eventData.entity_id,
       previewId: eventData.preview_file_id,
       taskMap: taskMap.value
     })
+  },
+
+  // Zou does not send again the events emitted while the socket was down.
+  connect: () => {
+    store.dispatch('refreshProcessingPreviewFiles').catch(console.error)
   },
 
   'task:delete': eventData => {
@@ -620,6 +640,12 @@ onMounted(async () => {
 :focus-visible {
   outline: 2px solid var(--text-selected);
   outline-offset: 1px;
+}
+// useModal focuses the dialog itself when it opens: a frame around the
+// whole dialog would only be noise.
+.modal:focus,
+.modal-content:focus {
+  outline: none;
 }
 ::-moz-focus-inner {
   border: 0;

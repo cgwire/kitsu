@@ -8,7 +8,7 @@ import App from '@/App.vue'
 
 let wrapper = null
 
-const mountApp = async ({ actions, getters }) => {
+const mountApp = async ({ actions, getters, mutations }) => {
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [{ path: '/', component: { template: '<div />' } }]
@@ -19,7 +19,7 @@ const mountApp = async ({ actions, getters }) => {
   const store = createStore({
     actions: { setMainConfig: () => ({}), ...actions },
     getters,
-    mutations: { TOGGLE_DARK_THEME: () => {} }
+    mutations: { TOGGLE_DARK_THEME: () => {}, ...mutations }
   })
 
   const socket = { on: vi.fn() }
@@ -74,6 +74,81 @@ describe('App', () => {
 
       expect(rejections).toEqual([])
       expect(consoleError).toHaveBeenCalledWith(error)
+    })
+
+    // Zou builds the files of an uploaded preview in a job, and announces
+    // the statuses of the preview file on the socket.
+    describe('preview file statuses', () => {
+      const getters = { taskMap: () => new Map() }
+
+      it('keeps the status a preview file update announces', async () => {
+        const setStatus = vi.fn()
+        const { socket } = await mountApp({
+          getters,
+          mutations: { SET_PREVIEW_FILE_STATUS: setStatus }
+        })
+
+        emitSocketEvent(socket, 'preview-file:update', {
+          preview_file_id: 'p1',
+          status: 'ready'
+        })
+
+        expect(setStatus).toHaveBeenCalledWith(expect.anything(), {
+          previewFileId: 'p1',
+          status: 'ready'
+        })
+      })
+
+      it('ignores a preview file update without a status code', async () => {
+        const setStatus = vi.fn()
+        const { socket } = await mountApp({
+          getters,
+          mutations: { SET_PREVIEW_FILE_STATUS: setStatus }
+        })
+
+        emitSocketEvent(socket, 'preview-file:update', { preview_file_id: 'p1' })
+        emitSocketEvent(socket, 'preview-file:update', {
+          preview_file_id: 'p1',
+          status: 'Ready'
+        })
+
+        expect(setStatus).not.toHaveBeenCalled()
+      })
+
+      it('registers the status of a new main preview before showing it', async () => {
+        const register = vi.fn()
+        const setPreview = vi.fn()
+        const { socket } = await mountApp({
+          actions: { registerPreviewFileStatuses: register },
+          getters,
+          mutations: { SET_PREVIEW: setPreview }
+        })
+
+        emitSocketEvent(socket, 'preview-file:set-main', {
+          entity_id: 'e1',
+          preview_file_id: 'p1',
+          preview_file_status: 'processing'
+        })
+
+        expect(register).toHaveBeenCalledWith(expect.anything(), [
+          { id: 'p1', status: 'processing' }
+        ])
+        expect(register.mock.invocationCallOrder[0]).toBeLessThan(
+          setPreview.mock.invocationCallOrder[0]
+        )
+      })
+
+      it('reads again the statuses still processing once the socket reconnects', async () => {
+        const refresh = vi.fn(() => Promise.resolve())
+        const { socket } = await mountApp({
+          actions: { refreshProcessingPreviewFiles: refresh },
+          getters
+        })
+
+        emitSocketEvent(socket, 'connect')
+
+        expect(refresh).toHaveBeenCalled()
+      })
     })
   })
 })

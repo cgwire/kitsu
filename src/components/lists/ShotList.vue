@@ -493,10 +493,10 @@
                 <input
                   class="input-editor"
                   step="1"
-                  :value="shot.nb_frames"
+                  v-number-value="shot.nb_frames"
                   type="number"
                   min="0"
-                  @input="event => onNbFramesChanged(shot, event.target.value)"
+                  @input="event => onNbFramesChanged(shot, event.target)"
                   @keydown="onNumberFieldKeyDown"
                   @keyup.ctrl="onInputKeyUp"
                   v-if="isCurrentUserManager"
@@ -529,7 +529,7 @@
                   step="1"
                   type="number"
                   min="0"
-                  :value="
+                  v-number-value="
                     getMetadataFieldValue({ field_name: 'frame_in' }, shot)
                   "
                   @input="
@@ -572,7 +572,7 @@
                   step="1"
                   type="number"
                   min="0"
-                  :value="
+                  v-number-value="
                     getMetadataFieldValue({ field_name: 'frame_out' }, shot)
                   "
                   @keydown="onNumberFieldKeyDown"
@@ -606,7 +606,9 @@
                   max="1000"
                   step="0.001"
                   type="number"
-                  :value="getMetadataFieldValue({ field_name: 'fps' }, shot)"
+                  v-number-value="
+                    getMetadataFieldValue({ field_name: 'fps' }, shot)
+                  "
                   @keydown="onNumberFieldKeyDown"
                   @input="
                     event =>
@@ -636,7 +638,7 @@
                   class="input-editor"
                   type="number"
                   step="1"
-                  :value="
+                  v-number-value="
                     getMetadataFieldValue({ field_name: 'max_retakes' }, shot)
                   "
                   @keydown="onNumberFieldKeyDown"
@@ -820,8 +822,10 @@ import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { useEntityList } from '@/composables/entityList'
-import { sanitizeIntegerLight, useFormat } from '@/composables/format'
+import { useFormat } from '@/composables/format'
+import vNumberValue from '@/directives/number-value'
 import { getMetadataFieldValue } from '@/lib/descriptors'
+import { readNumberInput } from '@/lib/number'
 import { getTaskHref } from '@/lib/path'
 import { range } from '@/lib/time'
 import { formatToTimecode } from '@/lib/video'
@@ -1103,17 +1107,14 @@ const shotPath = shotId => {
 }
 
 // A change on a selected line applies to every selected line.
-const onNbFramesChanged = (entry, value) => {
+const onNbFramesChanged = (entry, input) => {
+  const value = readNumberInput(input)
+  if (value === undefined) return
   const shotsToChange = selectedShots.value.has(entry.id)
     ? selectedShots.value
     : [entry]
-  const cleanValue = sanitizeIntegerLight(value)
   shotsToChange.forEach(shot => {
-    emit('field-changed', {
-      entry: shot,
-      fieldName: 'nb_frames',
-      value: cleanValue
-    })
+    emit('field-changed', { entry: shot, fieldName: 'nb_frames', value })
   })
 }
 
@@ -1252,7 +1253,7 @@ span.thumbnail-empty {
   display: block;
   width: 50px;
   height: 30px;
-  background: #f3f3f3;
+  background-color: #f3f3f3;
 }
 
 .datatable-row th.name {

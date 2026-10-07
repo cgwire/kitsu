@@ -66,4 +66,17 @@ describe('EstimationHelper', () => {
       wrapper.unmount()
     }
   )
+
+  // A valid number, it saved -480 minutes for every selected task.
+  it('ignores a negative entry', async () => {
+    const wrapper = mountHelper(false)
+    const input = wrapper.find('td.estimation input')
+
+    await input.setValue('-1')
+
+    expect(wrapper.emitted('estimation-changed')).toBeUndefined()
+    // the day stored comes back
+    expect(input.element.value).toBe('1')
+    wrapper.unmount()
+  })
 })

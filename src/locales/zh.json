@@ -1464,6 +1464,7 @@
       "no_entity": "无可指派实体",
       "overall_man_days": "人-天",
       "reset_list": "重置列表",
+      "save_task_error": "无法保存任务。请重试。",
       "select_task_type": "选择任务类型",
       "show_assigned": "显示分配的实体",
       "title": "日程计划",
@@ -2081,7 +2082,7 @@
     },
     "preview": {
       "broken": "这个预览坏了。",
-      "processing": "视频处理中..."
+      "processing": "这个预览正在处理中..."
     },
     "studios": {
       "create_error": "保存此工作室时发生错误。您确定没有名称相似的工作室吗？",

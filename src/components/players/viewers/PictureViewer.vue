@@ -441,6 +441,10 @@ watch(
   }
 )
 
+// A preview whose variants were being built turns ready in place, under
+// the same id: the watcher above never runs for it.
+watch(isAvailable, setPicturePath)
+
 // Re-bind panzoom whenever the visible image changes (mode toggle,
 // preview swap, gif/png switch). Otherwise the single instance would
 // stay bound to the previous img and lose sync with the displayed

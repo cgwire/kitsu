@@ -374,6 +374,8 @@ onMounted(() => {
 .thumbnail-wrapper {
   position: relative;
   cursor: pointer;
+  // the box is black in both themes: the dark shimmer band suits it
+  --thumbnail-shimmer: rgba(255, 255, 255, 0.12);
 
   :deep(.thumbnail-picture) {
     background-color: #000;

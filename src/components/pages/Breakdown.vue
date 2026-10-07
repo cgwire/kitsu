@@ -279,7 +279,7 @@
             class="flexrow-item"
             :title="$t('assets.new_asset')"
             icon="plus"
-            @click="modals.isNewDisplayed = true"
+            @click="showNewModal"
             v-if="!isOnlyCurrentEpisode"
           />
           <span class="filler"></span>
@@ -401,7 +401,7 @@
     <edit-asset-modal
       ref="edit-asset-modal"
       :active="modals.isNewDisplayed"
-      :asset-to-edit="{}"
+      :asset-to-edit="assetToEdit"
       :is-error="errors.edit"
       :is-loading="loading.edit"
       :is-loading-stay="loading.stay"
@@ -512,6 +512,7 @@ const editAssetModalRef = useTemplateRef('edit-asset-modal')
 const importModalRef = useTemplateRef('import-modal')
 const searchFieldRef = useTemplateRef('search-field')
 
+const assetToEdit = ref({})
 const assetTypeId = ref('')
 const castedAssetSearch = ref('')
 const castingType = ref('shot')
@@ -1037,6 +1038,7 @@ const removeOneAssetFromSelection = async assetId => {
       entityId: toConfirm.entityId,
       nbOccurences: 1
     }
+    errors.remove = false
     modals.isRemoveConfirmationDisplayed = true
   }
   const removals = castings
@@ -1068,6 +1070,7 @@ const fillAssetList = async () => {
 }
 
 const showImportModal = () => {
+  errors.importing = false
   modals.importing = true
 }
 
@@ -1213,11 +1216,21 @@ const toggleColumnSelector = () => {
   columnSelectorDisplayed.value = !columnSelectorDisplayed.value
 }
 
+// Close leaves the messages of the last creation: opening drops them.
+const showNewModal = () => {
+  errors.edit = false
+  success.edit = false
+  modals.isNewDisplayed = true
+}
+
 const confirmNewAssetStay = async form => {
   loading.stay = true
   success.edit = false
+  errors.edit = false
   try {
     await store.dispatch('newAsset', form)
+    // The modal stays open: a new object resets its form for the next asset.
+    assetToEdit.value = {}
     editAssetModalRef.value.focusName()
     success.edit = true
   } catch (err) {
@@ -1230,6 +1243,7 @@ const confirmNewAssetStay = async form => {
 
 const confirmNewAsset = async form => {
   loading.edit = true
+  success.edit = false
   errors.edit = false
   try {
     await store.dispatch('newAsset', form)

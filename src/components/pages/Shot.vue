@@ -90,7 +90,7 @@
               <button-simple
                 icon="edit"
                 :title="$t('shots.edit_title')"
-                @click="modals.edit = true"
+                @click="showEditModal"
                 v-if="isCurrentUserManager"
               />
             </div>
@@ -563,6 +563,12 @@ const assetPath = asset => {
     },
     episodeId
   )
+}
+
+// Close leaves the error of the last save: opening drops it.
+const showEditModal = () => {
+  errors.edit = false
+  modals.edit = true
 }
 
 // the modal edits the shot data fields as flat form fields

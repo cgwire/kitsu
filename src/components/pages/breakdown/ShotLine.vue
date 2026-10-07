@@ -95,7 +95,7 @@
       <input
         class="input-editor"
         step="1"
-        :value="entity.nb_frames"
+        v-number-value="entity.nb_frames"
         type="number"
         min="0"
         @input="event => onNbFramesChanged(entity, event)"
@@ -114,7 +114,9 @@
         step="1"
         type="number"
         min="0"
-        :value="getMetadataFieldValue({ field_name: 'frame_in' }, entity)"
+        v-number-value="
+          getMetadataFieldValue({ field_name: 'frame_in' }, entity)
+        "
         @input="
           event =>
             onMetadataFieldChanged(
@@ -140,7 +142,9 @@
         step="1"
         type="number"
         min="0"
-        :value="getMetadataFieldValue({ field_name: 'frame_out' }, entity)"
+        v-number-value="
+          getMetadataFieldValue({ field_name: 'frame_out' }, entity)
+        "
         @input="
           event =>
             onMetadataFieldChanged(
@@ -173,9 +177,21 @@
       >
         <input
           class="input-editor"
+          type="number"
+          step="any"
+          @input="event => onMetadataFieldChanged(entity, descriptor, event)"
+          v-number-value="getMetadataFieldValue(descriptor, entity)"
+          v-if="
+            descriptor.choices.length === 0 &&
+            descriptor.data_type === 'number' &&
+            canEditDescriptor(descriptor)
+          "
+        />
+        <input
+          class="input-editor"
           @input="event => onMetadataFieldChanged(entity, descriptor, event)"
           :value="getMetadataFieldValue(descriptor, entity)"
-          v-if="
+          v-else-if="
             descriptor.choices.length === 0 && canEditDescriptor(descriptor)
           "
         />
@@ -285,6 +301,7 @@ import { CopyIcon } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { useStore } from 'vuex'
 
+import vNumberValue from '@/directives/number-value'
 import { ASSET_DRAG_TYPE, isAssetReadyFor } from '@/lib/casting'
 import {
   getDescriptorChecklistValues,
@@ -293,6 +310,7 @@ import {
   getMetadataEventValue,
   getMetadataFieldValue
 } from '@/lib/descriptors'
+import { readNumberInput } from '@/lib/number'
 import { renderMarkdown } from '@/lib/render'
 
 import AssetBlock from '@/components/pages/breakdown/AssetBlock.vue'
@@ -416,8 +434,10 @@ const emitFieldChanged = (entry, fieldName, value) =>
 const onDescriptionChanged = (entity, event) =>
   emitFieldChanged(entity, 'description', event.target.value)
 
-const onNbFramesChanged = (entity, event) =>
-  emitFieldChanged(entity, 'nb_frames', event.target.value)
+const onNbFramesChanged = (entity, event) => {
+  const value = readNumberInput(event.target)
+  if (value !== undefined) emitFieldChanged(entity, 'nb_frames', value)
+}
 
 const onStandbyChanged = (entity, event) =>
   emitFieldChanged(entity, 'is_casting_standby', event.target.checked)

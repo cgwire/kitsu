@@ -3,6 +3,7 @@ import { flushPromises } from '@vue/test-utils'
 vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 
+import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditEpisodeModal from '@/components/modals/EditEpisodeModal.vue'
 import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
@@ -73,6 +74,89 @@ describe('Episodes page', () => {
     const modal = wrapper.findComponent(EditEpisodeModal)
     expect(modal.props('active')).toBe(true)
     expect(modal.props('episodeToEdit')).toEqual(episode)
+  })
+
+  // Close keeps the error of a failed save: the next edit opens without it.
+  test('opens the next episode without the error of a failed edit', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { wrapper } = await mountPage({
+      actions: { editEpisode: () => Promise.reject(new Error('down')) }
+    })
+    const list = wrapper.findComponent({ name: 'EpisodeList' })
+    const modal = () => wrapper.findComponent(EditEpisodeModal)
+
+    await list.vm.$emit('edit-clicked', { id: 'episode-1', name: 'E01' })
+    await modal().vm.$emit('confirm', { id: 'episode-1', name: 'E02' })
+    await flushPromises()
+    expect(modal().props('isError')).toBe(true)
+
+    await modal().vm.$emit('cancel')
+    await list.vm.$emit('edit-clicked', { id: 'episode-2', name: 'E03' })
+
+    expect(modal().props('active')).toBe(true)
+    expect(modal().props('isError')).toBe(false)
+    vi.restoreAllMocks()
+  })
+
+  // Zou refuses a column named like another one of the same type.
+  describe('metadata column modal', () => {
+    const descriptor = { id: 'descriptor-1', name: 'Difficulty' }
+
+    const mountColumnModal = async addMetadataDescriptor => {
+      const { wrapper } = await mountPage({
+        actions: { addMetadataDescriptor },
+        getters: {
+          currentProduction: { ...production, descriptors: [descriptor] }
+        }
+      })
+      const list = wrapper.findComponent({ name: 'EpisodeList' })
+      return { list, modal: () => wrapper.findComponent(AddMetadataModal) }
+    }
+
+    test.each([
+      ['a new column', 'add-metadata'],
+      ['a column edit', 'edit-metadata', descriptor.id]
+    ])(
+      'opens %s without the error of a refused column',
+      async (_, event, descriptorId) => {
+        vi.spyOn(console, 'error').mockImplementation(() => {})
+        const { list, modal } = await mountColumnModal(() =>
+          Promise.reject(new Error('taken'))
+        )
+
+        await list.vm.$emit(event, descriptorId)
+        await modal().vm.$emit('confirm', { name: 'Complexity' })
+        await flushPromises()
+        expect(modal().props('isError')).toBe(true)
+
+        await modal().vm.$emit('cancel')
+        await list.vm.$emit(event, descriptorId)
+
+        expect(modal().props('active')).toBe(true)
+        expect(modal().props('isError')).toBe(false)
+        vi.restoreAllMocks()
+      }
+    )
+
+    test('drops the error of a refused column on the next save', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { list, modal } = await mountColumnModal(
+        vi
+          .fn()
+          .mockRejectedValueOnce(new Error('taken'))
+          .mockResolvedValueOnce()
+      )
+
+      await list.vm.$emit('add-metadata')
+      await modal().vm.$emit('confirm', { name: 'Difficulty' })
+      await flushPromises()
+      await modal().vm.$emit('confirm', { name: 'Complexity' })
+      await flushPromises()
+
+      expect(modal().props('active')).toBe(false)
+      expect(modal().props('isError')).toBe(false)
+      vi.restoreAllMocks()
+    })
   })
 
   // The hard delete modal, which asks for the name, replaced the plain one.

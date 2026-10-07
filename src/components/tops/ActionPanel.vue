@@ -958,6 +958,7 @@ import { useStore } from 'vuex'
 
 import { intersection } from '@/lib/array'
 import func from '@/lib/func'
+import { isFreeEscape } from '@/lib/keyboard'
 import assetsStore from '@/store/modules/assets.js'
 
 import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
@@ -1259,6 +1260,7 @@ const isHidden = computed(
       nbSelectedConcepts.value === 0) ||
     !(
       isCurrentViewEntity.value ||
+      isCurrentViewSingleEntity.value ||
       isCurrentViewTodos.value ||
       isCurrentViewConcept.value
     )
@@ -1467,9 +1469,7 @@ const runCustomAction = () => {
 }
 
 const onKeyDown = event => {
-  if (event.keyCode === 27 && !modals.playlist) {
-    store.commit('CLEAR_SELECTED_TASKS')
-  }
+  if (isFreeEscape(event)) store.commit('CLEAR_SELECTED_TASKS')
 }
 
 const clearSelection = () => {
@@ -1651,6 +1651,9 @@ watch(
 
 onMounted(() => {
   customAction.value = customActions.value[0] ?? {}
+  // The task panel shows this one with its selection already made: the
+  // watchers only see the changes that follow.
+  autoChooseSelectBar()
 })
 
 onBeforeUnmount(() => {

@@ -9,6 +9,17 @@
     v-if="isProcessing"
   />
 
+  <span
+    class="thumbnail-picture thumbnail-empty"
+    :style="{
+      width: emptyWidth + 'px',
+      'min-width': emptyWidth + 'px',
+      height: emptyHeight + 'px'
+    }"
+    :title="$t('preview.broken')"
+    v-else-if="isBroken"
+  />
+
   <a
     class="thumbnail-wrapper thumbnail-picture"
     target="_blank"
@@ -59,8 +70,10 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { computed, watch } from 'vue'
 import { useStore } from 'vuex'
+
+import { usePreviewFileStatus } from '@/composables/previewFileStatus'
 
 const store = useStore()
 
@@ -107,7 +120,7 @@ const props = defineProps({
   },
   previewFileStatus: {
     type: String,
-    default: 'ready'
+    default: null
   },
   withLink: {
     default: true,
@@ -115,16 +128,16 @@ const props = defineProps({
   }
 })
 
-const timer = ref('')
+const previewFileId = computed(
+  () => props.previewFileId || props.entity?.preview_file_id
+)
 
-const isPreview = computed(() => {
-  const previewFileId = props.previewFileId || props.entity?.preview_file_id
-  return previewFileId?.length > 0
-})
+const { isBroken, isProcessing, reload, reloadQuery } = usePreviewFileStatus(
+  previewFileId,
+  () => props.previewFileStatus
+)
 
-// The server builds the variants in the background: asking for a picture
-// that is not stored yet would only draw a broken image.
-const isProcessing = computed(() => props.previewFileStatus === 'processing')
+const isPreview = computed(() => previewFileId.value?.length > 0)
 
 const imgStyle = computed(() => {
   const style = {}
@@ -149,64 +162,32 @@ const imgStyle = computed(() => {
 })
 
 const thumbnailPath = computed(() => {
-  const previewFileId = props.previewFileId || props.entity.preview_file_id
-
-  if (props.square) {
-    return (
-      '/api/pictures/thumbnails-square/preview-files/' + previewFileId + '.png'
-    )
-  } else {
-    if (props.width && props.width > 150) {
-      return (
-        '/api/pictures/previews/preview-files/' +
-        previewFileId +
-        '.png' +
-        timer.value
-      )
-    } else {
-      return (
-        '/api/pictures/thumbnails/preview-files/' +
-        previewFileId +
-        '.png' +
-        timer.value
-      )
-    }
-  }
+  const variant = props.square
+    ? 'thumbnails-square'
+    : props.width && props.width > 150
+      ? 'previews'
+      : 'thumbnails'
+  const fileName = `${previewFileId.value}.png${reloadQuery.value}`
+  return `/api/pictures/${variant}/preview-files/${fileName}`
 })
 
-const thumbnailKey = computed(() => {
-  const previewFileId = props.previewFileId || props.entity.preview_file_id
-  return `thumbnail-${previewFileId}`
-})
+const thumbnailKey = computed(() => `thumbnail-${previewFileId.value}`)
 
 const onClicked = () => {
   if (props.noPreview) return
-  const previewFileId = props.previewFileId || props.entity.preview_file_id
-  store.commit('SHOW_PREVIEW_FILE', previewFileId)
+  store.commit('SHOW_PREVIEW_FILE', previewFileId.value)
 }
 
-watch(
-  () => props.previewFileId,
-  () => {
-    timer.value = '?t=' + new Date().valueOf()
-  }
-)
+watch(() => props.previewFileId, reload)
 
-watch(
-  () => props.entity?.preview_file_id,
-  () => {
-    timer.value = '?t=' + new Date().valueOf()
-  }
-)
+watch(() => props.entity?.preview_file_id, reload)
 
 watch(
   () => props.previewFileStatus,
   (status, previousStatus) => {
     // The browser may have cached the 404 it got while the variants were
     // being built.
-    if (previousStatus === 'processing' && status === 'ready') {
-      timer.value = '?t=' + new Date().valueOf()
-    }
+    if (previousStatus === 'processing' && status === 'ready') reload()
   }
 )
 </script>
@@ -214,13 +195,13 @@ watch(
 <style lang="scss" scoped>
 .dark {
   table .thumbnail-picture.thumbnail-empty {
-    background: $dark-grey-lighter;
+    background-color: $dark-grey-lighter;
     border-color: $dark-grey-light;
   }
 
   .thumbnail-picture,
   span.thumbnail-empty {
-    background: $dark-grey-light;
+    background-color: $dark-grey-light;
     border-color: $dark-grey;
   }
 }
@@ -230,8 +211,9 @@ watch(
   margin: 0;
 }
 
+// The background longhands leave the processing shimmer gradient alone.
 span.thumbnail-empty {
-  background: $white-grey;
+  background-color: $white-grey;
   display: block;
   margin: 0;
 }
@@ -242,7 +224,7 @@ span.thumbnail-empty {
 }
 
 table .thumbnail-picture.thumbnail-empty {
-  background: $white-grey;
+  background-color: $white-grey;
   border: 1px solid $light-grey;
   margin: 0;
 }
@@ -298,7 +280,8 @@ table .thumbnail-picture {
 
 // Respect a reader who asked the system for less movement.
 @media (prefers-reduced-motion: reduce) {
-  .thumbnail-processing {
+  .thumbnail-processing,
+  .dark .thumbnail-processing {
     animation: none;
     background-image: none;
     opacity: 0.6;

@@ -189,9 +189,7 @@
 
     <day-off-modal
       :active="modals.setDayOff"
-      :day-off-to-edit="{
-        date: getUserDay(selectedDate).toDate()
-      }"
+      :day-off-to-edit="dayOffToEdit"
       :is-error="isDayOffError"
       :error-text="dayOffTextError"
       @confirm="
@@ -296,13 +294,15 @@ const emit = defineEmits([
   'date-changed',
   'set-day-off',
   'time-spent-change',
-  'unset-day-off'
+  'unset-day-off',
+  'update:day-off-error'
 ])
 
 // State
 // --------------------------------------------------------------------------
 const colNamePosX = ref('')
 const colTypePosX = ref('')
+const dayOffToEdit = ref(null)
 const disabledDates = ref({})
 const page = ref(1)
 const selectedDate = ref(
@@ -367,10 +367,13 @@ const onSliderChange = valueInfo => {
 
 const entityPath = entity => getTaskEntityPath(entity, entity.episode_id)
 
+// The page keeps the error of a refused confirm: each form opens without it.
 const toggleDayOff = () => {
+  emit('update:day-off-error', false)
   if (personIsDayOff.value) {
     modals.unsetDayOff = true
   } else {
+    dayOffToEdit.value = { date: getUserDay(selectedDate.value).toDate() }
     modals.setDayOff = true
   }
 }

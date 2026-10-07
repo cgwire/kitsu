@@ -114,6 +114,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { useTime } from '@/composables/time'
+import { isFreeEscape } from '@/lib/keyboard'
 import {
   formatFullDateWithRevertedTimezone,
   formatSimpleDate
@@ -319,7 +320,7 @@ const onBodyScroll = event => {
 }
 
 const onKeyDown = event => {
-  if (event.key === 'Escape' && isDrawerOpen.value) {
+  if (isFreeEscape(event) && isDrawerOpen.value) {
     closeTask()
     return
   }

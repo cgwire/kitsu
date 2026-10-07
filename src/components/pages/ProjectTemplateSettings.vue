@@ -855,7 +855,9 @@ const persistDescriptors = async () => {
   await loadTemplateData()
 }
 
+// Close leaves the error of the last save: opening drops it.
 const openAddDescriptor = () => {
+  errors.saveDescriptor = false
   descriptorToEditIndex.value = -1
   descriptorToEdit.value = {
     name: '',
@@ -870,6 +872,7 @@ const openAddDescriptor = () => {
 const openEditDescriptor = index => {
   const d = descriptors.value[index]
   if (!d) return
+  errors.saveDescriptor = false
   descriptorToEditIndex.value = index
   descriptorToEdit.value = {
     id: `template-descriptor-${index}`,

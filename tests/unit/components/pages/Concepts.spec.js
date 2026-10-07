@@ -63,6 +63,7 @@ const mountPage = async ({
   }
   const store = createStore({
     state: {
+      previewFileStatuses: new Map(),
       production: { id: 'production-1', name: 'Wing It' },
       selection,
       shownPreview: '',
@@ -77,6 +78,7 @@ const mountPage = async ({
       isTVShow: () => true,
       personMap: () => new Map(people.map(person => [person.id, person])),
       previewFileIdToShow: state => state.shownPreview,
+      previewFileStatusMap: state => state.previewFileStatuses,
       uploadProgress: state => state.uploadProgress,
       selectedConcepts: state =>
         new Map(state.selection.map(concept => [concept.id, concept])),
@@ -96,7 +98,7 @@ const mountPage = async ({
     }
   })
   await flushPromises()
-  return { dispatch, handlers, store, wrapper }
+  return { dispatch, handlers, socket, store, wrapper }
 }
 
 // The page follows the query and writes to it: pages left mounted by the
@@ -777,6 +779,30 @@ describe('Concepts page', () => {
       expect(query()).toEqual({ publisher: 'person-2', sort: 'updated_at' })
     })
 
+    // Each update waits for the previous one: a failed one must not stop
+    // the next ones.
+    test('keeps following the filters after a failed query update', async () => {
+      const { wrapper } = await mountPage({
+        concepts: [buildConcept('concept-1')]
+      })
+      const error = new Error('Navigation failed')
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const replace = vi.spyOn(router, 'replace').mockRejectedValueOnce(error)
+      const statusFilter = wrapper.findComponent(ComboboxStatus)
+
+      statusFilter.vm.$emit('update:modelValue', 's-1')
+      await flushPromises()
+      statusFilter.vm.$emit('update:modelValue', 's-2')
+      await flushPromises()
+
+      expect(consoleError).toHaveBeenCalledWith(error)
+      expect(query()).toEqual({ status: 's-2' })
+      replace.mockRestore()
+      consoleError.mockRestore()
+    })
+
     test('keeps the filters but not the concept when opening a folder', async () => {
       const { wrapper } = await mountPage({
         concepts: [buildConcept('concept-1')],
@@ -860,6 +886,25 @@ describe('Concepts page', () => {
       await flushPromises()
       expect(query()['concept-preview']).toBeUndefined()
     })
+
+    test('leaves a linked picture still being processed out of full screen', async () => {
+      const { store } = await mountPage({
+        concepts: [
+          {
+            ...buildConcept('concept-1'),
+            preview_file_id: 'preview-1',
+            preview_file_status: 'processing'
+          }
+        ],
+        query: { 'concept-preview': 'concept-1' }
+      })
+
+      expect(store.commit).not.toHaveBeenCalledWith(
+        'SHOW_PREVIEW_FILE',
+        expect.anything()
+      )
+      expect(query()['concept-preview']).toBeUndefined()
+    })
   })
 
   // The full screen preview modal browses these with the arrow keys.
@@ -894,6 +939,46 @@ describe('Concepts page', () => {
     expect(store.commit).toHaveBeenLastCalledWith(
       'SET_PREVIEW_FILES_TO_BROWSE',
       []
+    )
+  })
+
+  // Zou answers 404 for the picture of a preview it is still processing.
+  test('hands over only the pictures Zou can send', async () => {
+    const { store } = await mountPage({
+      concepts: ['ready', 'processing', 'broken', 'missing'].map(status => ({
+        ...buildConcept(`concept-${status}`),
+        preview_file_id: `preview-${status}`,
+        preview_file_status: status
+      }))
+    })
+
+    expect(store.commit).toHaveBeenLastCalledWith(
+      'SET_PREVIEW_FILES_TO_BROWSE',
+      ['preview-ready']
+    )
+  })
+
+  test('hands over a picture once Zou announces it ready', async () => {
+    const { store } = await mountPage({
+      concepts: [
+        {
+          ...buildConcept('concept-1'),
+          preview_file_id: 'preview-1',
+          preview_file_status: 'processing'
+        }
+      ]
+    })
+    expect(store.commit).toHaveBeenLastCalledWith(
+      'SET_PREVIEW_FILES_TO_BROWSE',
+      []
+    )
+
+    store.state.previewFileStatuses.set('preview-1', 'ready')
+    await flushPromises()
+
+    expect(store.commit).toHaveBeenLastCalledWith(
+      'SET_PREVIEW_FILES_TO_BROWSE',
+      ['preview-1']
     )
   })
 
@@ -1003,5 +1088,152 @@ describe('Concepts page', () => {
       wrapper.findComponent({ name: 'AddPreviewModal' }).props('active')
     ).toBe(true)
     expect(setFiles).toHaveBeenCalledWith(files)
+  })
+
+  // Zou builds the variants of an uploaded picture in the background, then
+  // announces the status it sets.
+  describe('preview status', () => {
+    const buildPreviewConcept = (id, status) => ({
+      ...buildConcept(id),
+      preview_file_id: `preview-${id}`,
+      preview_file_status: status
+    })
+
+    const updatePreview = (handlers, previewFileId, status) =>
+      handlers['preview-file:update']({
+        preview_file_id: previewFileId,
+        project_id: 'production-1',
+        status
+      })
+
+    const getStatusCommits = store =>
+      store.commit.mock.calls.filter(
+        ([type]) => type === 'UPDATE_CONCEPT_PREVIEW_STATUS'
+      )
+
+    test('stores the status announced for a processing preview', async () => {
+      const concepts = [
+        buildPreviewConcept('concept-1', 'processing'),
+        buildPreviewConcept('concept-2', 'processing')
+      ]
+      const { dispatch, handlers, store } = await mountPage({ concepts })
+
+      updatePreview(handlers, 'preview-concept-2', 'ready')
+
+      expect(getStatusCommits(store)).toEqual([
+        [
+          'UPDATE_CONCEPT_PREVIEW_STATUS',
+          {
+            conceptId: 'concept-2',
+            previewFileId: 'preview-concept-2',
+            status: 'ready'
+          }
+        ]
+      ])
+      expect(dispatch).not.toHaveBeenCalledWith(
+        'refreshConceptPreview',
+        expect.anything()
+      )
+    })
+
+    // The job may end while another folder is open.
+    test('stores the status of a processing preview out of the open folder', async () => {
+      const concept = {
+        ...buildPreviewConcept('concept-1', 'processing'),
+        parent_id: 'folder-1'
+      }
+      const { handlers, store } = await mountPage({
+        concepts: [concept],
+        folders: [{ id: 'folder-1', name: 'Sets' }]
+      })
+
+      updatePreview(handlers, 'preview-concept-1', 'broken')
+
+      expect(getStatusCommits(store)).toEqual([
+        [
+          'UPDATE_CONCEPT_PREVIEW_STATUS',
+          {
+            conceptId: 'concept-1',
+            previewFileId: 'preview-concept-1',
+            status: 'broken'
+          }
+        ]
+      ])
+    })
+
+    test('leaves alone the updates of a preview already shown', async () => {
+      const { dispatch, handlers, store } = await mountPage({
+        concepts: [buildPreviewConcept('concept-1', 'ready')]
+      })
+
+      updatePreview(handlers, 'preview-concept-1', 'processing')
+
+      expect(getStatusCommits(store)).toEqual([])
+      expect(dispatch).not.toHaveBeenCalledWith(
+        'refreshConceptPreview',
+        expect.anything()
+      )
+    })
+
+    test('ignores an update that carries no status', async () => {
+      const { dispatch, handlers, store } = await mountPage({
+        concepts: [buildPreviewConcept('concept-1', 'processing')]
+      })
+
+      updatePreview(handlers, 'preview-concept-1')
+
+      expect(getStatusCommits(store)).toEqual([])
+      expect(dispatch).not.toHaveBeenCalledWith(
+        'refreshConceptPreview',
+        expect.anything()
+      )
+    })
+
+    test('logs a status read that fails', async () => {
+      const error = new Error('Request has been terminated')
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { handlers } = await mountPage({
+        concepts: [buildPreviewConcept('concept-1', 'processing')],
+        dispatch: vi.fn(action =>
+          action === 'refreshConceptPreview'
+            ? Promise.reject(error)
+            : Promise.resolve()
+        )
+      })
+
+      handlers.connect()
+      await flushPromises()
+
+      expect(console.error).toHaveBeenCalledWith(error)
+    })
+
+    // Zou does not send again the events emitted while the socket was down.
+    test('reads again the processing previews once the socket reconnects', async () => {
+      const concepts = [
+        buildPreviewConcept('concept-1', 'processing'),
+        buildPreviewConcept('concept-2', 'ready')
+      ]
+      const { dispatch, handlers } = await mountPage({ concepts })
+
+      handlers.connect()
+
+      expect(dispatch).toHaveBeenCalledWith('refreshConceptPreview', concepts[0])
+      expect(dispatch).not.toHaveBeenCalledWith(
+        'refreshConceptPreview',
+        concepts[1]
+      )
+    })
+
+    test('stops listening to the socket once closed', async () => {
+      const { handlers, socket, wrapper } = await mountPage()
+
+      wrapper.unmount()
+
+      expect(socket.off).toHaveBeenCalledWith(
+        'preview-file:update',
+        handlers['preview-file:update']
+      )
+      expect(socket.off).toHaveBeenCalledWith('connect', handlers.connect)
+    })
   })
 })

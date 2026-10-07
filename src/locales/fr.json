@@ -1464,6 +1464,7 @@
       "no_entity": "Pas d'entité assignable",
       "overall_man_days": "Jours-Homme",
       "reset_list": "Réinitialiser la liste",
+      "save_task_error": "Impossible d'enregistrer la tâche. Veuillez réessayer.",
       "select_task_type": "Sélectionner un type de tâche",
       "show_assigned": "Afficher les entités assignées",
       "title": "Planning",
@@ -2081,7 +2082,7 @@
     },
     "preview": {
       "broken": "Cette preview est cassée.",
-      "processing": "Traitement vidéo en cours..."
+      "processing": "Cette preview est en cours de traitement..."
     },
     "studios": {
       "create_error": "Une erreur s'est produite lors de l'enregistrement de ce studio. Êtes-vous sûr qu'il n'existe pas de studio portant un nom similaire ?",

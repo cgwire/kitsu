@@ -8,6 +8,14 @@ vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@sentry/vue', () => ({ captureException: vi.fn() }))
 vi.mock('@/store/api/tasks', () => ({
   default: {
+    addExtraPreview: vi.fn(),
+    addPreview: vi.fn(),
+    commentTask: vi.fn(),
+    getTaskComment: vi.fn(),
+    getTaskComments: vi.fn(),
+    uploadPreview: vi.fn(),
+    setLastTaskPreviewAsEntityThumbnail: vi.fn(),
+    setPreview: vi.fn(),
     pinComment: vi.fn(),
     updatePreviewAnnotation: vi.fn(),
     unassignPersonFromTasks: vi.fn(() => Promise.resolve()),
@@ -294,7 +302,7 @@ describe('Tasks store', () => {
         ])
       }
       await tasksStore.actions.setTasksMainPreview(
-        { commit, state },
+        { commit, dispatch: vi.fn(), state },
         ['task-1', 'task-2']
       )
       expect(tasksApi.setTasksMainPreview).toHaveBeenCalledWith([
@@ -515,6 +523,304 @@ describe('Tasks store', () => {
       })
       expect(task.entity_preview_file_id).toEqual('preview-1')
     })
+  })
+})
+
+// Zou builds the files of an uploaded preview in a job: the store of the
+// preview statuses learns each preview the task panels upload or list.
+describe('Tasks store, preview file statuses', () => {
+  const form = name => new Map([['file', { name }]])
+  const upload = preview => ({
+    request: { on: vi.fn() },
+    promise: Promise.resolve(preview)
+  })
+  const registerCalls = dispatch =>
+    dispatch.mock.calls
+      .map((call, index) => [...call, dispatch.mock.invocationCallOrder[index]])
+      .filter(([action]) => action === 'registerPreviewFileStatuses')
+  const commitOrders = (commit, type) =>
+    commit.mock.calls
+      .map((call, index) => [call[0], commit.mock.invocationCallOrder[index]])
+      .filter(([name]) => name === type)
+      .map(([, order]) => order)
+
+  test('commentTaskWithPreview registers the status of each uploaded preview', async () => {
+    tasksApi.commentTask.mockResolvedValue({ id: 'comment-1' })
+    tasksApi.addPreview.mockResolvedValue({ id: 'preview-1' })
+    tasksApi.addExtraPreview.mockResolvedValue({ id: 'preview-2' })
+    const uploaded = [
+      { id: 'preview-1', revision: 1, status: 'processing' },
+      { id: 'preview-2', revision: 1, status: 'processing' }
+    ]
+    tasksApi.uploadPreview
+      .mockReturnValueOnce(upload(uploaded[0]))
+      .mockReturnValueOnce(upload(uploaded[1]))
+    const commit = vi.fn()
+    const dispatch = vi.fn()
+
+    await tasksStore.actions.commentTaskWithPreview(
+      {
+        commit,
+        dispatch,
+        state: { previewForms: [form('a.png'), form('b.png')] }
+      },
+      { taskId: 'task-1', taskStatusId: 'status-1', comment: '' }
+    )
+
+    const registers = registerCalls(dispatch)
+    expect(registers.map(([, previews]) => previews)).toEqual([
+      [uploaded[0]],
+      [uploaded[1]]
+    ])
+    // A ready status known before must reach the copy ADD_PREVIEW_END makes.
+    const additions = commitOrders(commit, 'ADD_PREVIEW_END')
+    expect(registers[0][2]).toBeGreaterThan(additions[0])
+    expect(registers[1][2]).toBeGreaterThan(additions[1])
+  })
+
+  test('addCommentExtraPreview registers the status of each uploaded preview', async () => {
+    tasksApi.addExtraPreview.mockResolvedValue({ id: 'preview-3' })
+    const uploaded = { id: 'preview-3', revision: 2, status: 'processing' }
+    tasksApi.uploadPreview.mockReturnValueOnce(upload(uploaded))
+    const commit = vi.fn()
+    const dispatch = vi.fn()
+
+    await tasksStore.actions.addCommentExtraPreview(
+      {
+        commit,
+        dispatch,
+        getters: { getTaskComment: () => ({ id: 'comment-1' }) },
+        state: { previewForms: [form('c.png')] }
+      },
+      { taskId: 'task-1', commentId: 'comment-1', previewId: 'preview-1' }
+    )
+
+    const registers = registerCalls(dispatch)
+    expect(registers.map(([, previews]) => previews)).toEqual([[uploaded]])
+    expect(registers[0][2]).toBeGreaterThan(
+      commitOrders(commit, 'ADD_PREVIEW_END')[0]
+    )
+  })
+
+  test('loadTaskComments registers the statuses of the comment previews', async () => {
+    const previews = [
+      { id: 'preview-1', status: 'processing' },
+      { id: 'preview-2', status: 'ready' }
+    ]
+    tasksApi.getTaskComments.mockResolvedValue([
+      { id: 'comment-1', previews },
+      { id: 'comment-2', previews: [] },
+      { id: 'comment-3' }
+    ])
+    const commit = vi.fn()
+    const dispatch = vi.fn(() => Promise.resolve())
+
+    await tasksStore.actions.loadTaskComments(
+      { commit, dispatch },
+      { taskId: 'task-1', entityId: 'entity-1' }
+    )
+
+    const registers = registerCalls(dispatch)
+    expect(registers.map(([, registered]) => registered)).toEqual([previews])
+    expect(registers[0][2]).toBeGreaterThan(
+      commitOrders(commit, 'LOAD_TASK_COMMENTS_END')[0]
+    )
+  })
+})
+
+// The players draw copies of the comment previews: they follow the status
+// Zou announces for each preview file.
+describe('Tasks store, preview copies', () => {
+  const buildPreviews = status => {
+    const head = {
+      id: 'preview-1',
+      status,
+      previews: [
+        { id: 'preview-1', status },
+        { id: 'preview-2', status: 'processing' }
+      ]
+    }
+    return { head, state: { taskPreviews: { 'task-1': [head] } } }
+  }
+
+  test('SET_PREVIEW_FILE_STATUS settles every copy of the preview', () => {
+    const { head, state } = buildPreviews('processing')
+
+    tasksStore.mutations.SET_PREVIEW_FILE_STATUS(state, {
+      previewFileId: 'preview-1',
+      status: 'ready'
+    })
+
+    expect([
+      head.status,
+      head.previews[0].status,
+      head.previews[1].status
+    ]).toEqual(['ready', 'ready', 'processing'])
+  })
+
+  // DELETE_TASK_END leaves the entry of the task, set to undefined.
+  test('SET_PREVIEW_FILE_STATUS skips a task deleted meanwhile', () => {
+    const { head, state } = buildPreviews('processing')
+    state.taskPreviews['task-0'] = undefined
+
+    tasksStore.mutations.SET_PREVIEW_FILE_STATUS(state, {
+      previewFileId: 'preview-1',
+      status: 'ready'
+    })
+
+    expect(head.status).toBe('ready')
+  })
+
+  test('SET_PREVIEW_FILE_STATUS keeps a ready copy against a late processing status', () => {
+    const { head, state } = buildPreviews('ready')
+
+    tasksStore.mutations.SET_PREVIEW_FILE_STATUS(state, {
+      previewFileId: 'preview-1',
+      status: 'processing'
+    })
+
+    expect([head.status, head.previews[0].status]).toEqual(['ready', 'ready'])
+  })
+
+  test('UPDATE_PREVIEW_ANNOTATION keeps a ready copy when an older answer says processing', () => {
+    const { head, state } = buildPreviews('ready')
+
+    tasksStore.mutations.UPDATE_PREVIEW_ANNOTATION(state, {
+      taskId: 'task-1',
+      preview: { id: 'preview-1', status: 'processing' }
+    })
+
+    expect([head.status, head.previews[0].status]).toEqual(['ready', 'ready'])
+  })
+})
+
+// Zou lists the previews of a single comment by their IDs: a reload must keep
+// what the store holds of them, the revision number the comment shows first.
+describe('Tasks store, comment reloads', () => {
+  const reloadComment = async (state, previewIds) => {
+    tasksApi.getTaskComment.mockResolvedValue({
+      id: 'comment-1',
+      object_id: 'task-1',
+      previews: previewIds
+    })
+    const commit = vi.fn()
+
+    await tasksStore.actions.loadComment(
+      { commit, state },
+      { commentId: 'comment-1' }
+    )
+
+    const [, { comment }] = commit.mock.calls.find(
+      ([type]) => type === 'NEW_TASK_COMMENT_END'
+    )
+    return comment
+  }
+
+  // A comment of a todo task, loaded without the task previews.
+  test('loadComment keeps the previews the comment holds', async () => {
+    const preview = {
+      id: 'preview-1',
+      revision: 1,
+      validation_status: 'validated'
+    }
+    const state = {
+      taskComments: { 'task-1': [{ id: 'comment-1', previews: [preview] }] },
+      taskPreviews: {}
+    }
+
+    const comment = await reloadComment(state, ['preview-1', 'preview-2'])
+
+    expect(comment.previews[0]).toBe(preview)
+    expect(comment.previews[1]).toEqual({ id: 'preview-2' })
+  })
+
+  // A preview another user adds to a revision stays a bare ID in the
+  // comment, ADD_PREVIEW_END only puts it in the task previews.
+  test('loadComment takes a preview the comment lists bare from the task previews', async () => {
+    const copy = { id: 'preview-2', revision: 1, extension: 'png' }
+    const head = {
+      id: 'preview-1',
+      revision: 1,
+      previews: [{ id: 'preview-1', revision: 1 }, copy]
+    }
+    const state = {
+      taskComments: {
+        'task-1': [{ id: 'comment-1', previews: [head, { id: 'preview-2' }] }]
+      },
+      taskPreviews: { 'task-1': [head] }
+    }
+
+    const comment = await reloadComment(state, ['preview-1', 'preview-2'])
+
+    expect(comment.previews[0]).toBe(head)
+    expect(comment.previews[1]).toBe(copy)
+  })
+})
+
+// Zou answers a new main preview with its status, which can still be
+// processing: the thumbnails must know it before they show the preview.
+describe('Tasks store, new main previews', () => {
+  const entity = {
+    id: 'entity-1',
+    preview_file_id: 'preview-1',
+    preview_file_status: 'processing'
+  }
+  const taskMap = new Map([
+    [
+      'task-1',
+      {
+        id: 'task-1',
+        entity: { id: 'entity-1' },
+        entity_preview_file_id: 'preview-1'
+      }
+    ]
+  ])
+  const expectRegisteredFirst = (commit, dispatch) => {
+    expect(dispatch).toHaveBeenCalledWith('registerPreviewFileStatuses', [
+      { id: 'preview-1', status: 'processing' }
+    ])
+    expect(dispatch.mock.invocationCallOrder[0]).toBeLessThan(
+      commit.mock.invocationCallOrder[0]
+    )
+  }
+
+  test('setPreview registers the status Zou answers before showing it', async () => {
+    tasksApi.setPreview.mockResolvedValue(entity)
+    const commit = vi.fn()
+    const dispatch = vi.fn()
+
+    await tasksStore.actions.setPreview(
+      { commit, dispatch, state: { taskMap } },
+      { taskId: 'task-1', entityId: 'entity-1', previewId: 'preview-1' }
+    )
+
+    expectRegisteredFirst(commit, dispatch)
+  })
+
+  test('setLastTaskPreview registers the status Zou answers before showing it', async () => {
+    tasksApi.setLastTaskPreviewAsEntityThumbnail.mockResolvedValue(entity)
+    const commit = vi.fn()
+    const dispatch = vi.fn()
+
+    await tasksStore.actions.setLastTaskPreview(
+      { commit, dispatch, state: { taskMap } },
+      'task-1'
+    )
+
+    expectRegisteredFirst(commit, dispatch)
+  })
+
+  test('setTasksMainPreview registers the status of each new main preview', async () => {
+    tasksApi.setTasksMainPreview.mockResolvedValueOnce([entity])
+    const commit = vi.fn()
+    const dispatch = vi.fn()
+
+    await tasksStore.actions.setTasksMainPreview(
+      { commit, dispatch, state: { taskMap } },
+      ['task-1']
+    )
+
+    expectRegisteredFirst(commit, dispatch)
   })
 })
 

@@ -502,7 +502,17 @@ export const useEntityList = ({
   }
 
   const onHeaderMenuDocumentKeyDown = event => {
-    if (event.key === 'Escape') hideHeaderMenus(getMenus())
+    if (event.key !== 'Escape') return
+    const menus = getMenus()
+    const isMenuOpen = Object.values(menus).some(
+      menuEl => menuEl && !menuEl.classList.contains('hidden')
+    )
+    if (isMenuOpen) {
+      // Tells isFreeEscape the key is taken: the menus are hidden by the
+      // time the page listener runs.
+      event.preventDefault()
+      hideHeaderMenus(menus)
+    }
   }
 
   const onSortByFieldClicked = () => {

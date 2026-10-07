@@ -23,15 +23,31 @@ const buildConcept = (id, links = []) => ({
   entity_concept_links: links
 })
 
-const toSelection = concepts =>
-  new Map(concepts.map(concept => [concept.id, concept]))
+const toSelection = items => new Map(items.map(item => [item.id, item]))
 
 const folders = [
   { id: 'folder-1', name: 'Characters' },
   { id: 'folder-2', name: 'Sets' }
 ]
 
-const mountPanel = async (concepts, { role = 'manager' } = {}) => {
+// A panel listens to the window keys: unmount every panel after its test.
+const mountedPanels = []
+
+afterEach(() => {
+  mountedPanels
+    .splice(0)
+    .filter(wrapper => wrapper.exists())
+    .forEach(wrapper => wrapper.unmount())
+})
+
+const mountPanel = async (
+  concepts,
+  {
+    path = '/productions/production-1/concepts',
+    role = 'manager',
+    tasks = []
+  } = {}
+) => {
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [
@@ -39,16 +55,33 @@ const mountPanel = async (concepts, { role = 'manager' } = {}) => {
         path: '/productions/:production_id/concepts',
         name: 'concepts',
         component: { template: '<div />' }
+      },
+      {
+        path: '/productions/:production_id/shots',
+        name: 'shots',
+        component: { template: '<div />' }
+      },
+      {
+        path: '/productions/:production_id/shots/:shot_id',
+        name: 'shot',
+        component: { template: '<div />' }
+      },
+      {
+        path: '/productions/:production_id/edits/:edit_id',
+        name: 'edit',
+        component: { template: '<div />' }
       }
     ]
   })
-  await router.push('/productions/production-1/concepts')
+  await router.push(path)
   await router.isReady()
 
   const store = createStore({
     state: {
-      nbSelectedTasks: concepts.length === 1 ? 1 : 0,
-      selectedConcepts: toSelection(concepts)
+      // A concept selected alone comes with its task.
+      nbSelectedTasks: concepts.length === 1 ? 1 : tasks.length,
+      selectedConcepts: toSelection(concepts),
+      selectedTasks: toSelection(tasks)
     },
     getters: {
       assetsByType: () => [assets],
@@ -67,7 +100,7 @@ const mountPanel = async (concepts, { role = 'manager' } = {}) => {
       selectedConcepts: state => state.selectedConcepts,
       selectedEdits: () => new Map(),
       selectedShots: () => new Map(),
-      selectedTasks: () => new Map(),
+      selectedTasks: state => state.selectedTasks,
       taskMap: () => new Map(),
       taskStatusForCurrentUser: () => [],
       taskTypeMap: () => new Map(),
@@ -81,6 +114,7 @@ const mountPanel = async (concepts, { role = 'manager' } = {}) => {
     global: { plugins: [router, store] }
   })
   await flushPromises()
+  mountedPanels.push(wrapper)
   return { store, wrapper }
 }
 
@@ -95,6 +129,16 @@ const clickTag = (wrapper, selector, name) =>
     .findAll(selector)
     .find(tag => tag.text().startsWith(name))
     .trigger('click')
+
+const pressEscape = target =>
+  target.dispatchEvent(
+    new KeyboardEvent('keydown', {
+      key: 'Escape',
+      keyCode: 27,
+      bubbles: true,
+      cancelable: true
+    })
+  )
 
 describe('ActionPanel, concept links', () => {
   beforeEach(() => {
@@ -218,6 +262,163 @@ describe('ActionPanel, concept links', () => {
 
     expect(wrapper.find('.concept-links').exists()).toBe(true)
   })
+})
+
+describe('ActionPanel, Escape', () => {
+  const concept = buildConcept('concept-1')
+  const pageElements = []
+  let store
+  let wrapper
+
+  const addToPage = (tag, className = '') => {
+    const element = document.createElement(tag)
+    element.className = className
+    document.body.appendChild(element)
+    pageElements.push(element)
+    return element
+  }
+
+  beforeEach(async () => {
+    localStorage.clear()
+    ;({ store, wrapper } = await mountPanel([concept]))
+    store.commit = vi.fn()
+  })
+
+  afterEach(() => {
+    pageElements.splice(0).forEach(element => element.remove())
+  })
+
+  test('clears the task selection on an Escape on the page', () => {
+    pressEscape(addToPage('a'))
+
+    expect(store.commit).toHaveBeenCalledWith('CLEAR_SELECTED_TASKS')
+  })
+
+  test('clears the task selection on an Escape from an empty field', () => {
+    // The comment box of the task panel takes the focus by itself.
+    pressEscape(addToPage('textarea'))
+
+    expect(store.commit).toHaveBeenCalledWith('CLEAR_SELECTED_TASKS')
+  })
+
+  test('clears the task selection on an Escape from a checkbox', () => {
+    const checkbox = addToPage('input')
+    checkbox.type = 'checkbox'
+
+    pressEscape(checkbox)
+
+    expect(store.commit).toHaveBeenCalledWith('CLEAR_SELECTED_TASKS')
+  })
+
+  test('keeps the selection on an Escape typed in a field holding text', () => {
+    const textarea = addToPage('textarea')
+    textarea.value = 'Draft comment'
+
+    pressEscape(textarea)
+
+    expect(store.commit).not.toHaveBeenCalled()
+  })
+
+  test('keeps the selection on an Escape a list took to close', () => {
+    const combobox = addToPage('div')
+    combobox.addEventListener('keydown', event => event.preventDefault())
+
+    pressEscape(combobox)
+
+    expect(store.commit).not.toHaveBeenCalled()
+  })
+
+  test('keeps the selection on an Escape that closes a modal', () => {
+    addToPage('div', 'modal is-active')
+
+    pressEscape(document.body)
+
+    expect(store.commit).not.toHaveBeenCalled()
+  })
+
+  test('clears the selection once per Escape after selection changes', async () => {
+    store.state.selectedConcepts = toSelection([
+      concept,
+      buildConcept('concept-2')
+    ])
+    await flushPromises()
+    store.state.selectedConcepts = toSelection([concept])
+    await flushPromises()
+
+    pressEscape(document.body)
+
+    expect(store.commit).toHaveBeenCalledTimes(1)
+  })
+
+  test('stops listening once the selection is gone', async () => {
+    store.state.nbSelectedTasks = 0
+    store.state.selectedConcepts = toSelection([])
+    await flushPromises()
+
+    pressEscape(document.body)
+
+    expect(store.commit).not.toHaveBeenCalled()
+  })
+
+  test('stops listening once closed', () => {
+    wrapper.unmount()
+
+    pressEscape(document.body)
+
+    expect(store.commit).not.toHaveBeenCalled()
+  })
+})
+
+// The task panel shows the action panel once something is selected: it
+// opens with its selection already made.
+describe('ActionPanel, opened on a task selection', () => {
+  const task = {
+    id: 'task-1',
+    project_id: 'production-1',
+    task_type_id: 'task-type-1'
+  }
+
+  const mountOnShots = () =>
+    mountPanel([], { path: '/productions/production-1/shots', tasks: [task] })
+
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  test('clears the task selection on an Escape on the page', async () => {
+    const { store } = await mountOnShots()
+    store.commit = vi.fn()
+
+    pressEscape(document.body)
+
+    expect(store.commit).toHaveBeenCalledWith('CLEAR_SELECTED_TASKS')
+  })
+
+  test('opens the bar used last', async () => {
+    localStorage.setItem('entities--selected-bar', 'priorities')
+
+    const { wrapper } = await mountOnShots()
+
+    expect(
+      wrapper.findAll('.action-bar .confirm-button').map(button => button.text())
+    ).toEqual(['tasks.change_priority'])
+  })
+
+  // Without episodes, these pages carry no episode in their route.
+  test.each([
+    ['shot', '/productions/production-1/shots/shot-1'],
+    ['edit', '/productions/production-1/edits/edit-1']
+  ])(
+    'clears the task selection on an Escape on the %s page',
+    async (name, path) => {
+      const { store } = await mountPanel([], { path, tasks: [task] })
+      store.commit = vi.fn()
+
+      pressEscape(document.body)
+
+      expect(store.commit).toHaveBeenCalledWith('CLEAR_SELECTED_TASKS')
+    }
+  )
 })
 
 describe('ActionPanel, concept folders', () => {

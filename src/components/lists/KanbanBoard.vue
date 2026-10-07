@@ -68,13 +68,10 @@
           >
             <div
               class="ui-droppable"
-              :class="{ 'has-preview': task.entity_preview_file_id }"
+              :class="{ 'has-preview': hasCardPicture(task) }"
               :style="getCardStyle(task)"
             >
-              <div
-                class="preview-placeholder"
-                v-if="!task.entity_preview_file_id"
-              >
+              <div class="preview-placeholder" v-if="!hasCardPicture(task)">
                 <image-icon :size="18" />
               </div>
               <div class="avatars">
@@ -160,6 +157,7 @@ import { useStore } from 'vuex'
 import { getClientX } from '@/composables/dom'
 import { formatPrioritySymbol, useFormat } from '@/composables/format'
 import { useTaskHelpers } from '@/composables/tasks'
+import { hasPreviewFilePicture } from '@/lib/preview'
 
 import AddPreviewModal from '@/components/modals/AddPreviewModal.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
@@ -238,6 +236,7 @@ let proxyRotation = 0
 // Computed
 // --------------------------------------------------------------------------
 const isDarkTheme = computed(() => store.getters.isDarkTheme)
+const previewFileStatusMap = computed(() => store.getters.previewFileStatusMap)
 const productionMap = computed(() => store.getters.productionMap)
 const selectedTasks = computed(() => store.getters.selectedTasks)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
@@ -291,12 +290,23 @@ const checkColumnIsDroppable = taskStatus => {
   )
 }
 
+const hasCardPicture = task =>
+  Boolean(task.entity_preview_file_id) &&
+  hasPreviewFilePicture(
+    previewFileStatusMap.value?.get(task.entity_preview_file_id)
+  )
+
+// The browser never asks again for a CSS background under the same URL: a
+// card painted while its preview was processing would keep its 404.
 const getCardStyle = task => {
-  if (!task.entity_preview_file_id) {
+  if (!hasCardPicture(task)) {
     return null
   }
+  const previewFileId = task.entity_preview_file_id
+  const readyQuery =
+    previewFileStatusMap.value?.get(previewFileId) === 'ready' ? '?ready' : ''
   return {
-    backgroundImage: `url(/api/pictures/previews/preview-files/${task.entity_preview_file_id}.png)`
+    backgroundImage: `url(/api/pictures/previews/preview-files/${previewFileId}.png${readyQuery})`
   }
 }
 

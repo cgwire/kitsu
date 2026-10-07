@@ -263,6 +263,7 @@ const setupEntities = entities => {
 const onSaveClicked = () => {
   playlistToEdit.value = { for_entity: currentEntityType.value }
   editSuccess.value = false
+  errors.value.edit = false
   createdPlaylist.value = null
   modals.value.edit = true
 }

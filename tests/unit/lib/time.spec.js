@@ -31,8 +31,8 @@ import {
   getStartDateFromString,
   getWeekRange,
   hoursToDays,
+  hoursToMinutes,
   minutesToDays,
-  minutesToDuration,
   monthToString,
   parseDate,
   parseSimpleDate,
@@ -284,6 +284,12 @@ describe('time', () => {
       start_date: '2019-10-01',
       due_date: '2019-10-09'
     })
+    // three days of 7.6 hours
+    const threeDays = minutesToDays({ hours_by_day: 7.6 }, 1368)
+    expect(getDatesFromStartDate({}, startDate, null, threeDays)).toEqual({
+      start_date: '2019-10-01',
+      due_date: '2019-10-03'
+    })
   })
   test('getDatesFromEndDate', () => {
     const startDate = parseSimpleDate('2019-10-01')
@@ -410,26 +416,41 @@ describe('time', () => {
     expect(daysToMinutes({ hours_by_day: 8 }, 8)).toEqual(8 * 8 * 60)
     expect(daysToMinutes({ hours_by_day: 7 }, 8)).toEqual(8 * 7 * 60)
     expect(daysToMinutes({ hours_by_day: 7 }, undefined)).toEqual(0)
+    expect(daysToMinutes({ hours_by_day: 8 }, 1.5)).toEqual(720)
+    expect(daysToMinutes({ hours_by_day: 8 }, 1.01)).toEqual(484)
+    // Float products fall just under the whole minute: 3 days of 7.6 hours
+    // make 1367.9999999999998 minutes, and 1 / quota gives 3 days as
+    // 2.9999999999999996.
+    expect(daysToMinutes({ hours_by_day: 7.6 }, 3)).toEqual(1368)
+    expect(daysToMinutes({ hours_by_day: 8 }, 2.9999999999999996)).toEqual(
+      1440
+    )
   })
   test('minutesToDays', () => {
     expect(minutesToDays({ hours_by_day: 8 }, 8 * 8 * 60)).toEqual(8)
     expect(minutesToDays({ hours_by_day: 7 }, 8 * 7 * 60)).toEqual(8)
     expect(minutesToDays({ hours_by_day: 7 }, undefined)).toEqual(0)
+    expect(minutesToDays({ hours_by_day: 8 }, 720)).toEqual(1.5)
+    expect(minutesToDays({ hours_by_day: 8 }, 500)).toEqual(500 / 60 / 8)
+    // Whole days divide with float noise above them, 3.0000000000000004 for
+    // 1368 minutes of 7.6 hours, which a day count rounds up a day too far.
+    expect(minutesToDays({ hours_by_day: 7.6 }, 1368)).toEqual(3)
+    expect(minutesToDays({ hours_by_day: 7.8 }, 6084)).toEqual(13)
   })
   test('hoursToDays', () => {
     expect(hoursToDays({ hours_by_day: 8 }, 16)).toEqual(2)
     expect(hoursToDays({ hours_by_day: 7 }, 21)).toEqual(3)
     expect(hoursToDays({ hours_by_day: 7 }, undefined)).toEqual(0)
   })
-  test('minutesToDuration', () => {
-    const hoursOrganisation = {
-      format_duration_in_hours: true,
-      hours_by_day: 7
-    }
-    expect(minutesToDuration({ hours_by_day: 7 }, 8 * 7 * 60)).toEqual(8)
-    expect(minutesToDuration(hoursOrganisation, 8 * 7 * 60)).toEqual(56)
-    expect(minutesToDuration(hoursOrganisation, 90)).toEqual(1.5)
-    expect(minutesToDuration(hoursOrganisation, undefined)).toEqual(0)
+  test('hoursToMinutes', () => {
+    expect(hoursToMinutes(1.5)).toEqual(90)
+    expect(hoursToMinutes(undefined)).toEqual(0)
+    // 8.2 hours make 491.99999999999994 minutes in floats, 8.3 hours
+    // 498.00000000000006
+    expect(hoursToMinutes(8.2)).toEqual(492)
+    expect(hoursToMinutes(8.3)).toEqual(498)
+    // A fraction of a minute is no float noise
+    expect(hoursToMinutes(7.33)).toEqual(7.33 * 60)
   })
   test('durationToMinutes', () => {
     const hoursOrganisation = {
@@ -440,6 +461,9 @@ describe('time', () => {
     expect(durationToMinutes(hoursOrganisation, 8)).toEqual(8 * 60)
     expect(durationToMinutes(hoursOrganisation, 1.5)).toEqual(90)
     expect(durationToMinutes(hoursOrganisation, undefined)).toEqual(0)
+    expect(durationToMinutes(hoursOrganisation, 0.34)).toEqual(0.34 * 60)
+    // 2.05 hours make 122.99999999999999 minutes in floats
+    expect(durationToMinutes(hoursOrganisation, 2.05)).toEqual(123)
   })
 
   test('formatDuration', () => {

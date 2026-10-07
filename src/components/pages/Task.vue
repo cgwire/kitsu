@@ -1491,24 +1491,28 @@ const onPreviewAdded = eventData => {
   const revision = eventData.revision
   const extensionName = eventData.extension
   const comment = store.getters.getTaskComment(taskId, commentId)
+  // The comment reloaded on 'comment:update' already lists the preview: the
+  // task previews tell whether the player has it.
+  const isAlreadyAdded = store.getters
+    .getTaskPreviews(taskId)
+    .some(preview => preview.previews?.some(({ id }) => id === previewId))
 
-  if (
-    task.value &&
-    comment &&
-    comment.previews &&
-    (comment.previews.length === 0 || comment.previews[0].id !== previewId) &&
-    taskId === task.value.id
-  ) {
+  if (task.value && comment && !isAlreadyAdded && taskId === task.value.id) {
     store.commit('ADD_PREVIEW_END', {
       preview: {
         id: previewId,
         revision,
-        extension: extensionName
+        extension: extensionName,
+        status: eventData.status
       },
       taskId,
       commentId,
       comment
     })
+    // Zou may still build its files, or have announced them built before.
+    store.dispatch('registerPreviewFileStatuses', [
+      { id: previewId, status: eventData.status }
+    ])
     reset({ keepPreviewFiles: true })
   }
 }

@@ -6,20 +6,26 @@ const RETAKE_CHART_COLORS = {
 
 const DEFAULT_STATUS_COLOR = '#6F727A'
 
+// Out of the box the default status is near white, unreadable on a light
+// background: it is drawn grey.
+export const getStatusColor = taskStatus =>
+  taskStatus.is_default ? DEFAULT_STATUS_COLOR : taskStatus.color
+
 const createStatusEntry = taskStatus => ({
   name: taskStatus.short_name,
   color: taskStatus.color,
   count: 0,
   frames: 0,
   drawings: 0,
-  is_done: !!taskStatus.is_done
+  is_done: !!taskStatus.is_done,
+  is_default: !!taskStatus.is_default
 })
 
 // Get all data displayed in statistics (needed by the stat cell widget).
 // Data follow this format: [[task-status-1-name, value, color, isDone], ...]
 // Set count data or frames data depending on data type.
-// The stats computed by the server carry no done flag: give the task status
-// map to read it from the statuses.
+// The stats computed by the server carry no done or default flag: give the
+// task status map to read them from the statuses.
 export const getChartData = (
   mainStats,
   entryId,
@@ -33,8 +39,10 @@ export const getChartData = (
   return Object.keys(statusData)
     .map(taskStatusId => {
       const data = statusData[taskStatusId]
-      const color = data.is_default ? DEFAULT_STATUS_COLOR : data.color
-      const isDone = data.is_done ?? taskStatusMap?.get(taskStatusId)?.is_done
+      const taskStatus = taskStatusMap?.get(taskStatusId)
+      const isDefault = data.is_default ?? taskStatus?.is_default
+      const color = isDefault ? DEFAULT_STATUS_COLOR : data.color
+      const isDone = data.is_done ?? taskStatus?.is_done
       return [data.name, data[valueField], color, !!isDone]
     })
     .sort(_sortData)
@@ -79,6 +87,38 @@ export const getDoneRatio = chartData => {
     .filter(row => row[3])
     .reduce((sum, row) => sum + (row[1] || 0), 0)
   return total > 0 ? done / total : 0
+}
+
+// Share as a whole percentage, where only an empty share reads 0 and only a
+// full one 100: a single shot left in retake must not show as complete.
+export const roundPercent = ratio => {
+  const percent = Math.round(ratio * 100)
+  if (ratio > 0 && percent === 0) return 1
+  if (ratio < 1 && percent === 100) return 99
+  return percent
+}
+
+// Below this share, the slice of a 50px pie hardly shows past its white
+// outline.
+const PIE_MIN_SHARE = 0.03
+
+// Values to draw a pie with: a status under the minimum share is drawn
+// larger, or a single shot left in retake vanishes from a full pie. The
+// statuses raised share one minimum share of extra room at most, so a few
+// stragglers barely shrink the other slices.
+export const getPieChartData = chartData => {
+  const total = chartData.reduce((sum, row) => sum + (row[1] || 0), 0)
+  const minValue = total * PIE_MIN_SHARE
+  const isSmall = row => row[1] > 0 && row[1] < minValue
+  const extra = chartData
+    .filter(isSmall)
+    .reduce((sum, row) => sum + minValue - row[1], 0)
+  const scale = extra > minValue ? minValue / extra : 1
+  return chartData.map(row =>
+    isSmall(row)
+      ? [row[0], row[1] + (minValue - row[1]) * scale, ...row.slice(2)]
+      : row
+  )
 }
 
 // Get all colors displayed in statistics (needed by the stat cell widget).
