@@ -3,10 +3,16 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import { createStore } from 'vuex'
 import { describe, expect, it, vi } from 'vitest'
 
-vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }))
+// Shows the interpolated values next to the key.
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: (key, params) => (params ? `${key} ${JSON.stringify(params)}` : key)
+  })
+}))
 
 import ProductionTaskType from '@/components/pages/production/ProductionTaskType.vue'
 import ProductionTaskTypes from '@/components/pages/production/ProductionTaskTypes.vue'
+import InfoQuestionMark from '@/components/widgets/InfoQuestionMark.vue'
 import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
 import SettingImporter from '@/components/widgets/SettingImporter.vue'
 
@@ -56,6 +62,11 @@ const mountComponent = async (productionType = 'short', scheduleItems = []) => {
       currentScheduleItems: () => scheduleItems,
       getProductionTaskTypes: () => () => [],
       isTVShow: () => productionType === 'tvshow',
+      // An instance whose MOVIE_HIGHDEF_BITRATE is above the usual 28.
+      movieBitrateDefaults: () => ({
+        hd_bitrate_compression: 40,
+        ld_bitrate_compression: 8
+      }),
       productionAssetTaskTypes: () => [assetTaskType],
       productionEditTaskTypes: () => [],
       productionEpisodeTaskTypes: () => [],
@@ -135,5 +146,19 @@ describe('ProductionTaskTypes', () => {
       .findAllComponents(ProductionTaskType)
       .find(component => component.props('taskType').id === 'shot-1')
     expect(row.props('scheduleItem')).toEqual(taskTypeBar)
+  })
+
+  it('explains the bitrate columns and gives their maximum', async () => {
+    const { wrapper } = await mountComponent()
+    const help = maximum =>
+      `productions.video.task_type_bitrates\n\n${maximum}\n\n` +
+      'productions.video.next_uploads_only'
+
+    expect(
+      wrapper.findAllComponents(InfoQuestionMark).map(item => item.props('text'))
+    ).toEqual([
+      help('productions.video.bitrate_max {"value":40}'),
+      help('productions.video.task_type_ld_bitrate_max')
+    ])
   })
 })

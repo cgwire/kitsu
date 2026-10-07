@@ -1,5 +1,6 @@
 import client from '@/store/api/client'
 import crisp from '@/lib/crisp'
+import { getMovieBitrateDefaults } from '@/lib/productions'
 import {
   USER_LOGIN,
   TOGGLE_DARK_THEME,
@@ -42,6 +43,7 @@ const getters = {
   lastProductionScreen: state => state.lastProductionScreen,
   lastProductionViewed: state => state.lastProductionViewed,
   mainConfig: state => state.mainConfig,
+  movieBitrateDefaults: state => getMovieBitrateDefaults(state.mainConfig),
   previewFileIdToShow: state => state.previewFileIdToShow,
   previewFileIdsToBrowse: state => state.previewFileIdsToBrowse
 }

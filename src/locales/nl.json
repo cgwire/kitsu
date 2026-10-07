@@ -1203,6 +1203,19 @@
         "sequences": "Sequenties"
       },
       "video": {
+        "bitrate_default": "Standaard: {value} Mbit/s",
+        "bitrate_default_max": "Standaard en maximum: {value} Mbit/s",
+        "bitrate_explanation": "Een hogere bitrate zorgt voor een scherper beeld, maar ook voor zwaardere bestanden die langzamer laden.",
+        "bitrate_max": "Maximum: {value} Mbit/s",
+        "bitrate_size": "Ongeveer {size} MB per minuut",
+        "bitrates": "Bitrates",
+        "hd_bitrate_description": "Versie in volledige resolutie, afgespeeld in HD-modus en gebruikt voor downloads.",
+        "ld_bitrate_description": "Lichtere versie, 1280 pixels breed, afgespeeld in LD-modus.",
+        "ld_bitrate_max": "Maximum: {value} Mbit/s (HD-bitrate)",
+        "next_uploads_only": "Wijzigingen gelden alleen voor nieuwe uploads: bestaande previews worden niet opnieuw gecodeerd.",
+        "restore_default": "Standaard herstellen",
+        "task_type_bitrates": "Laat leeg om de bitrates van het tabblad Video te gebruiken.",
+        "task_type_ld_bitrate_max": "Maximum: de HD-bitrate van het taaktype",
         "title": "Video"
       },
       "hide_stats": "Verberg statistieken",
@@ -1593,7 +1606,8 @@
       "all": "Alles",
       "only_running": "Alleen lopend",
       "episode_status": "Aflevering status",
-      "drawings": "Tekeningen"
+      "drawings": "Tekeningen",
+      "validated": "gevalideerd"
     },
     "tasks": {
       "add_preview": "Bestanden toevoegen voor een nieuwe previewrevisie",

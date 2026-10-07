@@ -8,12 +8,13 @@ const heat = wrapper =>
   Number(wrapper.find('.stats-heat').element.style.getPropertyValue('--heat'))
 
 describe('StatsHeat', () => {
-  it('writes the share of done statuses', () => {
+  it('writes the share of done statuses, as validated', () => {
     const wrapper = mountHeat([
       ['done', 3, 'green', true],
       ['wip', 1, 'blue', false]
     ])
-    expect(wrapper.find('.stats-heat').text()).toBe('75%')
+    expect(wrapper.find('.share').text()).toBe('75%')
+    expect(wrapper.find('.stats-heat').text()).toBe('75% statistics.validated')
   })
 
   it('reads 100% and 0% only for a full and an empty share', () => {
@@ -25,8 +26,8 @@ describe('StatsHeat', () => {
       ['done', 1, 'green', true],
       ['wip', 249, 'blue', false]
     ])
-    expect(almostDone.find('.stats-heat').text()).toBe('99%')
-    expect(barelyStarted.find('.stats-heat').text()).toBe('1%')
+    expect(almostDone.find('.share').text()).toBe('99%')
+    expect(barelyStarted.find('.share').text()).toBe('1%')
   })
 
   it('gets more intense as the done share grows', () => {

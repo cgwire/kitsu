@@ -1203,6 +1203,19 @@
         "sequences": "シーケンス"
       },
       "video": {
+        "bitrate_default": "デフォルト: {value} Mbit/s",
+        "bitrate_default_max": "デフォルトおよび最大: {value} Mbit/s",
+        "bitrate_explanation": "ビットレートが高いほど映像は鮮明になりますが、ファイルサイズが大きくなり、読み込みが遅くなります。",
+        "bitrate_max": "最大: {value} Mbit/s",
+        "bitrate_size": "1分あたり約 {size} MB",
+        "bitrates": "ビットレート",
+        "hd_bitrate_description": "フル解像度のバージョンです。HDモードで再生され、ダウンロードにも使用されます。",
+        "ld_bitrate_description": "幅1280ピクセルの軽量バージョンです。LDモードで再生されます。",
+        "ld_bitrate_max": "最大: {value} Mbit/s (HDビットレート)",
+        "next_uploads_only": "変更は今後のアップロードにのみ適用されます。既存のプレビューは再エンコードされません。",
+        "restore_default": "デフォルトに戻す",
+        "task_type_bitrates": "空欄のままにすると「動画」タブのビットレートが使用されます。",
+        "task_type_ld_bitrate_max": "最大: タスクタイプのHDビットレート",
         "title": "動画"
       },
       "hide_stats": "統計を隠す",
@@ -1593,7 +1606,8 @@
       "all": "すべて",
       "only_running": "実行中のみ",
       "episode_status": "エピソードステータス",
-      "drawings": "枚数"
+      "drawings": "枚数",
+      "validated": "承認済み"
     },
     "tasks": {
       "add_preview": "新しいリビジョンにプレビューを追加",

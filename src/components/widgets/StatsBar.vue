@@ -1,5 +1,5 @@
 <template>
-  <div class="stats-bar flexrow" v-if="segments.length > 0">
+  <div class="stats-bar" v-if="segments.length > 0">
     <div class="bar" role="img" :aria-label="summary">
       <span
         class="segment"
@@ -9,14 +9,17 @@
         v-for="(segment, index) in segments"
       ></span>
     </div>
-    <span class="done-share">{{ donePercent }}%</span>
+    <span class="done-share">
+      <span class="done-value">{{ donePercent }}%</span>
+      {{ $t('statistics.validated') }}
+    </span>
   </div>
 </template>
 
 <script setup>
 /**
  * Status split of a statistics cell as a 100% stacked bar, with the share of
- * done statuses written next to it.
+ * done statuses written under it as the validated share.
  * Data format: [['name', value, 'color', isDone], ...]
  */
 // Imports
@@ -55,9 +58,15 @@ const donePercent = computed(() => roundPercent(getDoneRatio(props.data)))
 </script>
 
 <style lang="scss" scoped>
+// The share takes a line of its own: the bar spans the whole cell.
+.stats-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .bar {
   display: flex;
-  flex: 1;
   gap: 2px;
   height: 12px;
   border-radius: 4px;
@@ -71,9 +80,13 @@ const donePercent = computed(() => roundPercent(getDoneRatio(props.data)))
 
 .done-share {
   color: var(--text);
-  font-size: 0.9em;
-  margin-left: 0.5em;
-  min-width: 2.8em;
+  font-size: 0.8rem;
   text-align: right;
+}
+
+// Right-aligned shares line up from row to row.
+.done-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: bold;
 }
 </style>

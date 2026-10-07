@@ -1203,6 +1203,19 @@
         "sequences": "Sequences"
       },
       "video": {
+        "bitrate_default": "Standard: {value} Mbit/s",
+        "bitrate_default_max": "Standard og maksimum: {value} Mbit/s",
+        "bitrate_explanation": "En højere bitrate giver et skarpere billede, men større filer, der tager længere tid at indlæse.",
+        "bitrate_max": "Maksimum: {value} Mbit/s",
+        "bitrate_size": "Ca. {size} MB pr. minut",
+        "bitrates": "Bitrater",
+        "hd_bitrate_description": "Version i fuld opløsning, der afspilles i HD-tilstand og bruges til downloads.",
+        "ld_bitrate_description": "Lettere version, 1280 pixels bred, der afspilles i LD-tilstand.",
+        "ld_bitrate_max": "Maksimum: {value} Mbit/s (HD-bitrate)",
+        "next_uploads_only": "Ændringerne gælder kun for kommende uploads: eksisterende previews bliver ikke kodet igen.",
+        "restore_default": "Gendan standard",
+        "task_type_bitrates": "Lad feltet stå tomt for at bruge bitraten fra fanen Video.",
+        "task_type_ld_bitrate_max": "Maksimum: opgavetypens HD-bitrate",
         "title": "Video"
       },
       "hide_stats": "Skjul statistikker",
@@ -1593,7 +1606,8 @@
       "all": "Alle",
       "only_running": "Kun igangværende",
       "episode_status": "Episodestatus",
-      "drawings": "Tegninger"
+      "drawings": "Tegninger",
+      "validated": "valideret"
     },
     "tasks": {
       "add_preview": "Tilføj filer til en ny preview-revision",

@@ -1588,6 +1588,19 @@ export default {
     },
 
     video: {
+      bitrate_default: 'Default: {value} Mbit/s',
+      bitrate_default_max: 'Default and maximum: {value} Mbit/s',
+      bitrate_explanation: 'A higher bitrate gives a sharper image but heavier files that are slower to load.',
+      bitrate_max: 'Maximum: {value} Mbit/s',
+      bitrate_size: 'About {size} MB per minute',
+      bitrates: 'Bitrates',
+      hd_bitrate_description: 'Full-resolution version, played in HD mode and used for downloads.',
+      ld_bitrate_description: 'Lighter version, 1280 pixels wide, played in LD mode.',
+      ld_bitrate_max: 'Maximum: {value} Mbit/s (HD bitrate)',
+      next_uploads_only: 'Changes apply to the next uploads only: existing previews are not re-encoded.',
+      restore_default: 'Restore default',
+      task_type_bitrates: 'Leave empty to use the bitrates of the Video tab.',
+      task_type_ld_bitrate_max: 'Maximum: the HD bitrate of the task type',
       title: 'Video'
     },
     parameters: {
@@ -2097,7 +2110,8 @@ export default {
     pie: 'Pie charts',
     retakes: 'Retakes',
     status: 'Status',
-    shots: 'Shots'
+    shots: 'Shots',
+    validated: 'validated'
   },
 
   tasks: {

@@ -284,20 +284,26 @@
               <p class="field-error" v-if="resolutionError">
                 {{ resolutionError }}
               </p>
-              <text-field
-                type="number"
-                :min="1"
-                :max="MAX_MOVIE_BITRATE"
+              <h3 class="section-title">
+                {{ $t('productions.video.bitrates') }}
+              </h3>
+              <p class="explanation mb1">
+                {{ $t('productions.video.bitrate_explanation') }}
+              </p>
+              <movie-bitrate-field
+                :default-value="bitrateDefaults.hd_bitrate_compression"
+                :description="$t('productions.video.hd_bitrate_description')"
                 :label="$t('productions.fields.hd_bitrate_compression')"
-                placeholder="28"
+                :max="bitrateDefaults.hd_bitrate_compression"
                 v-model="params.hd_bitrate_compression"
               />
-              <text-field
-                type="number"
-                :min="1"
-                :max="params.hd_bitrate_compression || MAX_MOVIE_BITRATE"
+              <movie-bitrate-field
+                :ceiling="bitrateDefaults.hd_bitrate_compression"
+                :default-value="bitrateDefaults.ld_bitrate_compression"
+                :description="$t('productions.video.ld_bitrate_description')"
+                is-low-definition
                 :label="$t('productions.fields.ld_bitrate_compression')"
-                placeholder="6"
+                :max="ldBitrateCeiling"
                 v-model="params.ld_bitrate_compression"
               />
               <p v-if="errors.parameters" class="error mt1">
@@ -452,6 +458,7 @@ import AssetTypeSettings from '@/components/pages/production/AssetTypeSettings.v
 import BackgroundSettings from '@/components/pages/production/BackgroundSettings.vue'
 import RowActionsCell from '@/components/cells/RowActionsCell.vue'
 import BoardSettings from '@/components/pages/production/BoardSettings.vue'
+import MovieBitrateField from '@/components/pages/production/MovieBitrateField.vue'
 import StatusAutomationSettings from '@/components/pages/production/StatusAutomationSettings.vue'
 import Checkbox from '@/components/widgets/Checkbox.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
@@ -462,9 +469,9 @@ import TextField from '@/components/widgets/TextField.vue'
 
 import {
   HOME_PAGE_OPTIONS,
-  MAX_MOVIE_BITRATE,
   PRODUCTION_STYLE_OPTIONS,
   PRODUCTION_TYPE_OPTIONS,
+  clampBitrate,
   clampBitrates
 } from '@/lib/productions'
 
@@ -569,6 +576,15 @@ const allAutomations = computed(() => store.getters.statusAutomations || [])
 const allBackgrounds = computed(() => store.getters.backgrounds || [])
 const departmentMap = computed(() => store.getters.departmentMap || new Map())
 const taskTypeMap = computed(() => store.getters.taskTypeMap || new Map())
+const bitrateDefaults = computed(() => store.getters.movieBitrateDefaults)
+
+const ldBitrateCeiling = computed(
+  () =>
+    clampBitrate(
+      params.value.hd_bitrate_compression,
+      bitrateDefaults.value.hd_bitrate_compression
+    ) ?? bitrateDefaults.value.hd_bitrate_compression
+)
 
 const isActiveTab = tab => activeTab.value === tab
 
@@ -653,7 +669,18 @@ const saveParameters = async () => {
   if (ratioError.value || resolutionError.value) return
   loading.parameters = true
   errors.parameters = false
-  const bitrates = clampBitrates(params.value)
+  const max = bitrateDefaults.value.hd_bitrate_compression
+  const bitrates = clampBitrates(params.value, { max })
+  // No form submit makes the browser check these fields: show each bitrate
+  // rounded and within bounds. The low definition one goes under the high
+  // definition one in the payload only: a save in the middle of typing the
+  // high definition one must not lower it for good.
+  Object.keys(bitrates).forEach(key => {
+    const bitrate = clampBitrate(params.value[key], max)
+    if (bitrate !== null && bitrate !== params.value[key]) {
+      params.value[key] = bitrate
+    }
+  })
   try {
     await store.dispatch('editProjectTemplate', {
       id: templateId.value,

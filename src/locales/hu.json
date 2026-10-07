@@ -1186,6 +1186,19 @@
         "shots": "Shot-ok"
       },
       "video": {
+        "bitrate_default": "Alapértelmezett: {value} Mbit/s",
+        "bitrate_default_max": "Alapértelmezett és maximum: {value} Mbit/s",
+        "bitrate_explanation": "A magasabb bitráta élesebb képet ad, de a fájlok nagyobbak lesznek, és lassabban töltődnek be.",
+        "bitrate_max": "Maximum: {value} Mbit/s",
+        "bitrate_size": "Körülbelül {size} MB percenként",
+        "bitrates": "Bitráták",
+        "hd_bitrate_description": "Teljes felbontású változat: HD módban ez kerül lejátszásra, és ez tölthető le.",
+        "ld_bitrate_description": "Kisebb méretű, 1280 pixel széles változat: LD módban ez kerül lejátszásra.",
+        "ld_bitrate_max": "Maximum: {value} Mbit/s (HD-bitráta)",
+        "next_uploads_only": "A változtatások csak a következő feltöltéseket érintik: a meglévő előnézetek nem kerülnek újrakódolásra.",
+        "restore_default": "Alapértelmezett érték visszaállítása",
+        "task_type_bitrates": "Hagyd üresen a Videó fülön beállított bitráták használatához.",
+        "task_type_ld_bitrate_max": "Maximum: a feladattípus HD-bitrátája",
         "title": "Videó"
       },
       "hide_stats": "Statisztika elrejtése",
@@ -1593,7 +1606,8 @@
       "all": "Mind",
       "drawings": "Rajzok",
       "episode_status": "Epizód állapot",
-      "only_running": "Csak folyamatban lévő"
+      "only_running": "Csak folyamatban lévő",
+      "validated": "érvényesítve"
     },
     "tasks": {
       "add_preview": "Előnézet hozzáadása",

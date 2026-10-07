@@ -39,6 +39,8 @@ defineProps({
     font-weight: normal;
     padding: 0.5em;
     position: absolute;
+    text-transform: none;
+    white-space: normal;
     width: max-content;
     max-width: 500px;
     z-index: 300;
