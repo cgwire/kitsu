@@ -567,12 +567,16 @@ const hasBrowsablePicture = concept =>
   )
 
 const setQuery = patch => {
-  queryUpdates = queryUpdates.then(() => {
-    const query = Object.fromEntries(
-      Object.entries({ ...route.query, ...patch }).filter(([, value]) => value)
-    )
-    return router.replace({ query })
-  })
+  queryUpdates = queryUpdates
+    .then(() => {
+      const query = Object.fromEntries(
+        Object.entries({ ...route.query, ...patch }).filter(
+          ([, value]) => value
+        )
+      )
+      return router.replace({ query })
+    })
+    .catch(console.error)
 }
 
 // Changing folder leaves the concept behind, not the filters.

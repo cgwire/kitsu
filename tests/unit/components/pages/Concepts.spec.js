@@ -779,6 +779,30 @@ describe('Concepts page', () => {
       expect(query()).toEqual({ publisher: 'person-2', sort: 'updated_at' })
     })
 
+    // Each update waits for the previous one: a failed one must not stop
+    // the next ones.
+    test('keeps following the filters after a failed query update', async () => {
+      const { wrapper } = await mountPage({
+        concepts: [buildConcept('concept-1')]
+      })
+      const error = new Error('Navigation failed')
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const replace = vi.spyOn(router, 'replace').mockRejectedValueOnce(error)
+      const statusFilter = wrapper.findComponent(ComboboxStatus)
+
+      statusFilter.vm.$emit('update:modelValue', 's-1')
+      await flushPromises()
+      statusFilter.vm.$emit('update:modelValue', 's-2')
+      await flushPromises()
+
+      expect(consoleError).toHaveBeenCalledWith(error)
+      expect(query()).toEqual({ status: 's-2' })
+      replace.mockRestore()
+      consoleError.mockRestore()
+    })
+
     test('keeps the filters but not the concept when opening a folder', async () => {
       const { wrapper } = await mountPage({
         concepts: [buildConcept('concept-1')],
