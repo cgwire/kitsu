@@ -66,6 +66,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
+import { isFreeEscape } from '@/lib/keyboard'
 import { getBusinessDays, monthToString } from '@/lib/time'
 import {
   convertHours,
@@ -177,7 +178,7 @@ const closeRoute = computed(() => {
 // Functions
 // --------------------------------------------------------------------------
 const onKeyDown = event => {
-  if (event.key === 'Escape') router.push(closeRoute.value)
+  if (isFreeEscape(event)) router.push(closeRoute.value)
 }
 
 // Lifecycle
