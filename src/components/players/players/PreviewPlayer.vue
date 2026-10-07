@@ -4,6 +4,7 @@
       <div class="flexrow filler">
         <div
           class="preview-container filler"
+          :class="{ 'touch-navigation': isTouchNavigationEnabled }"
           :style="{ cursor: annotationCursor || null }"
           ref="preview-container"
         >
@@ -475,6 +476,7 @@ import { useAnnotationCursor } from '@/composables/players/annotationCursor'
 import { useComparison } from '@/composables/players/comparison'
 import { useOnionSkin } from '@/composables/players/onionSkin'
 import { usePreviewShortcuts } from '@/composables/players/previewShortcuts'
+import { useTouchNavigation } from '@/composables/players/touchNavigation'
 import { usePlayerTransport } from '@/composables/players/transport'
 import { useTrimmedShot } from '@/composables/players/trimmedShot'
 import func from '@/lib/func'
@@ -699,6 +701,21 @@ const { panzoomTransform, onPanzoomChanged, resetPanzoomTransform } =
 // Wheel keeps zooming regardless (the overlay forwards wheel to the
 // media via the wheelTarget prop).
 const isOverlayInteractive = computed(() => !isAltHeld.value)
+
+// Fingers pan and zoom the media, over the annotations too: the stylus
+// and the mouse annotate.
+const isTouchNavigationEnabled = computed(
+  () => isMovie.value || isPicture.value
+)
+
+useTouchNavigation({
+  container: previewContainer,
+  surfaces: () => [canvasWrapper.value, mainMediaElement.value?.parentElement],
+  isEnabled: isTouchNavigationEnabled,
+  panBy: (dx, dy) => previewViewer.value?.panBy(dx, dy),
+  zoomAt: (clientX, clientY, ratio) =>
+    previewViewer.value?.zoomAt(clientX, clientY, ratio)
+})
 
 // Annotation composable
 // Callbacks are wrapped in closures so they can reference functions defined later.
@@ -2859,6 +2876,12 @@ defineExpose({
   // would otherwise let Chrome's two-finger swipe navigate back / forward
   // and drop any unsaved comment — issue #1700.
   overscroll-behavior-x: contain;
+
+  // The fingers navigate the media there: the page must not scroll or
+  // zoom under them.
+  &.touch-navigation {
+    touch-action: none;
+  }
 }
 
 .viewers {

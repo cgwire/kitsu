@@ -42,6 +42,7 @@ import {
   createFrameRenderer,
   supportsVideoFrameCallback
 } from '@/lib/players/frameRenderer'
+import { panPanzoomBy, zoomPanzoomAt } from '@/lib/players/panzoom'
 import { swallowBrowserZoom } from '@/lib/players/wheel'
 import { DEFAULT_FPS, formatFrame } from '@/lib/video'
 
@@ -518,6 +519,11 @@ const setPanZoom = (x, y, scale) => {
   })
 }
 
+const panBy = (dx, dy) => panPanzoomBy(panzoomInstance, dx, dy)
+
+const zoomAt = (clientX, clientY, ratio) =>
+  zoomPanzoomAt(panzoomInstance, displayCanvas.value, clientX, clientY, ratio)
+
 const emitPanZoom = () => {
   if (panzoomSilent || !panzoomInstance) return
   const { x, y, scale } = panzoomInstance.getTransform()
@@ -762,6 +768,8 @@ defineExpose({
   goNextFrame,
   resetPanZoom,
   setPanZoom,
+  panBy,
+  zoomAt,
   pausePanZoom,
   resumePanZoom,
   setSpeed,

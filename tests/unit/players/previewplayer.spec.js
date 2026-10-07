@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils'
 import process from 'node:process'
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
-import { nextTick } from 'vue'
+import { nextTick, ref } from 'vue'
 import { createStore } from 'vuex'
 
 vi.mock('vue-i18n', async importOriginal => ({
@@ -32,6 +32,7 @@ const preview = {
 
 // One set of spies shared by the main and the comparison viewer stubs.
 const viewer = {
+  panBy: vi.fn(),
   pause: vi.fn(),
   play: vi.fn(),
   resetZoom: vi.fn(),
@@ -39,7 +40,8 @@ const viewer = {
   resumeZoom: vi.fn(),
   setCurrentFrame: vi.fn(),
   setCurrentTimeRaw: vi.fn(),
-  setVolume: vi.fn()
+  setVolume: vi.fn(),
+  zoomAt: vi.fn()
 }
 
 const moviePreview = {
@@ -51,7 +53,12 @@ const moviePreview = {
   duration: 10
 }
 
-const mountPlayer = ({ props = {}, getterOverrides = {}, config = {} } = {}) => {
+const mountPlayer = ({
+  props = {},
+  getterOverrides = {},
+  config = {},
+  stubs = {}
+} = {}) => {
   const store = createStore({
     getters: {
       assetMap: () => new Map(),
@@ -89,11 +96,26 @@ const mountPlayer = ({ props = {}, getterOverrides = {}, config = {} } = {}) => 
           name: 'VideoProgress',
           template: '<div />',
           methods: { updateProgressBar: () => {} }
-        }
+        },
+        ...stubs
       },
       plugins: [store]
     }
   })
+}
+
+const pointer = (target, type, { id, x, y }) => {
+  const event = new MouseEvent(type, {
+    bubbles: true,
+    cancelable: true,
+    clientX: x,
+    clientY: y
+  })
+  Object.defineProperties(event, {
+    pointerId: { value: id },
+    pointerType: { value: 'touch' }
+  })
+  target.dispatchEvent(event)
 }
 
 describe('PreviewPlayer.vue', () => {
@@ -128,6 +150,35 @@ describe('PreviewPlayer.vue', () => {
     wrapper = null
     vi.restoreAllMocks()
     Object.values(viewer).forEach(spy => spy.mockClear())
+  })
+
+  describe('finger navigation', () => {
+    // Fingers on the annotations move the media of the main viewer: the
+    // comparison viewer only mirrors it.
+    it('zooms the main viewer with a pinch on the annotations', async () => {
+      wrapper = mountPlayer({
+        stubs: {
+          AnnotationCanvas: {
+            name: 'AnnotationCanvas',
+            template: '<div ref="overlay"><canvas /></div>',
+            setup: () => ({ overlay: ref(null) })
+          }
+        }
+      })
+      await nextTick()
+      const upper = wrapper
+        .findComponent({ ref: 'main-annotation-canvas' })
+        .find('canvas').element
+
+      pointer(upper, 'pointerdown', { id: 1, x: 100, y: 100 })
+      pointer(upper, 'pointerdown', { id: 2, x: 200, y: 100 })
+      pointer(upper, 'pointermove', { id: 2, x: 300, y: 100 })
+
+      expect(viewer.zoomAt.mock.calls).toEqual([[200, 100, 2]])
+      expect(viewer.zoomAt.mock.contexts.map(vm => vm.$attrs.name)).toEqual([
+        'main'
+      ])
+    })
   })
 
   describe('movie playback', () => {

@@ -102,6 +102,8 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
       'resetPanZoom',
       'resumePanZoom',
       'setPanZoom',
+      'panBy',
+      'zoomAt',
       'getDisplaySurface'
     ]
     exposed.forEach(name => {

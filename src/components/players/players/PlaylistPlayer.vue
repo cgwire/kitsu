@@ -109,7 +109,8 @@
           filler: true,
           flexrow: true,
           'video-container': true,
-          'flexrow-reverse': !isComparisonOverlay
+          'flexrow-reverse': !isComparisonOverlay,
+          'touch-navigation': isTouchNavigationEnabled
         }"
         :style="{ cursor: annotationCursor || null }"
         ref="video-container"
@@ -955,6 +956,7 @@ import { useMediaKind } from '@/composables/players/mediaKind'
 import { useOnionSkin } from '@/composables/players/onionSkin'
 import { usePlaylistComparison } from '@/composables/players/playlistComparison'
 import { usePreviewShortcuts } from '@/composables/players/previewShortcuts'
+import { useTouchNavigation } from '@/composables/players/touchNavigation'
 import { usePlayerTransport } from '@/composables/players/transport'
 import { usePreviewRoom } from '@/composables/previewRoom'
 import { isValidRoomId } from '@/lib/players/events'
@@ -1904,6 +1906,30 @@ const isScrubbing = ref(false)
 const isOverlayInteractive = computed(
   () => !isAltHeld.value && !isScrubbing.value
 )
+
+// Fingers pan and zoom the media, over the annotations too: the stylus
+// and the mouse annotate.
+const isTouchNavigationEnabled = computed(
+  () => isCurrentPreviewMovie.value || isCurrentPreviewPicture.value
+)
+
+const getMainViewer = () => {
+  if (isCurrentPreviewMovie.value) return rawPlayer.value
+  if (isCurrentPreviewPicture.value) return picturePlayer.value
+  return null
+}
+
+useTouchNavigation({
+  container: videoContainer,
+  surfaces: () => [
+    mainAnnotationCanvas.value?.overlay,
+    mainMediaElement.value?.parentElement
+  ],
+  isEnabled: isTouchNavigationEnabled,
+  panBy: (dx, dy) => getMainViewer()?.panBy(dx, dy),
+  zoomAt: (clientX, clientY, ratio) =>
+    getMainViewer()?.zoomAt(clientX, clientY, ratio)
+})
 
 const { cursor: annotationCursor } = useAnnotationCursor({
   isAltHeld,
@@ -5123,6 +5149,12 @@ const playerProxy = {
   // would otherwise let Chrome's two-finger swipe navigate back / forward
   // and drop any unsaved comment — issue #1700.
   overscroll-behavior-x: contain;
+
+  // The fingers navigate the media there: the page must not scroll or
+  // zoom under them.
+  &.touch-navigation {
+    touch-action: none;
+  }
 }
 
 .main-content-anchor,

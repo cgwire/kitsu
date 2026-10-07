@@ -53,6 +53,7 @@ import {
 } from 'vue'
 import { useStore } from 'vuex'
 
+import { panPanzoomBy, zoomPanzoomAt } from '@/lib/players/panzoom'
 import { swallowBrowserZoom } from '@/lib/players/wheel'
 import {
   DEFAULT_FPS,
@@ -761,6 +762,24 @@ const setPanZoom = (x, y, scale) => {
   })
 }
 
+const panBy = (dx, dy) => {
+  panzoomInstances.forEach(panzoomInstance => {
+    panPanzoomBy(panzoomInstance, dx, dy)
+  })
+}
+
+const zoomAt = (clientX, clientY, ratio) => {
+  panzoomInstances.forEach(panzoomInstance => {
+    zoomPanzoomAt(
+      panzoomInstance,
+      displayCanvasRef.value,
+      clientX,
+      clientY,
+      ratio
+    )
+  })
+}
+
 const setVolume = volume => {
   if (currentPlayer.value) currentPlayer.value.volume = volume / 100
   if (nextPlayer.value) nextPlayer.value.volume = volume / 100
@@ -918,6 +937,8 @@ defineExpose({
   resetPanZoom,
   resumePanZoom,
   setPanZoom,
+  panBy,
+  zoomAt,
   getDisplaySurface
 })
 </script>
