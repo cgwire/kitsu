@@ -95,4 +95,47 @@ describe('TextField', () => {
       wrapper.unmount()
     })
   })
+
+  describe('description', () => {
+    it('shows the description under the field and reads it with the field', () => {
+      const wrapper = mount(TextField, {
+        props: { label: 'Bitrate', description: 'Full-resolution version.' }
+      })
+      const description = wrapper.find('.help')
+
+      expect(description.text()).toBe('Full-resolution version.')
+      expect(wrapper.find('input').attributes('aria-describedby')).toBe(
+        description.attributes('id')
+      )
+      wrapper.unmount()
+    })
+
+    it('reads both the description and the error of an errored field', () => {
+      const wrapper = mount(TextField, {
+        props: {
+          description: 'Full-resolution version.',
+          errored: true,
+          errorText: 'Too high'
+        }
+      })
+
+      expect(
+        wrapper.find('input').attributes('aria-describedby').split(' ')
+      ).toEqual([
+        wrapper.find('.help').attributes('id'),
+        wrapper.find('.error').attributes('id')
+      ])
+      wrapper.unmount()
+    })
+
+    it('describes nothing without a description or an error', () => {
+      const wrapper = mount(TextField)
+
+      expect(wrapper.find('.help').exists()).toBe(false)
+      expect(
+        wrapper.find('input').attributes('aria-describedby')
+      ).toBeUndefined()
+      wrapper.unmount()
+    })
+  })
 })

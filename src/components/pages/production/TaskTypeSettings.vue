@@ -30,10 +30,22 @@
               <th class="th-grab"></th>
               <th>{{ $t('task_types.fields.name') }}</th>
               <th class="th-bitrate">
-                {{ $t('productions.fields.hd_bitrate_short') }}
+                <span class="th-bitrate-label">
+                  {{ $t('productions.fields.hd_bitrate_short') }}
+                  <info-question-mark
+                    position="left"
+                    :text="$t('productions.video.task_type_bitrates')"
+                  />
+                </span>
               </th>
               <th class="th-bitrate">
-                {{ $t('productions.fields.ld_bitrate_short') }}
+                <span class="th-bitrate-label">
+                  {{ $t('productions.fields.ld_bitrate_short') }}
+                  <info-question-mark
+                    position="left"
+                    :text="$t('productions.video.task_type_bitrates')"
+                  />
+                </span>
               </th>
               <th></th>
             </tr>
@@ -57,12 +69,10 @@
                     type="number"
                     min="1"
                     :max="bitrateCeiling(taskType, key)"
-                    :placeholder="defaultBitrates[key] || ''"
+                    :placeholder="inheritedBitrate(taskType, key)"
                     :title="$t(`productions.fields.${key}`)"
                     :value="taskType[key] ?? ''"
-                    @change="
-                      onBitrateChange(taskType, key, $event.target.value)
-                    "
+                    @change="onBitrateChange(taskType, key, $event.target)"
                   />
                 </td>
                 <td class="remove">
@@ -100,13 +110,10 @@ import { useStore } from 'vuex'
 import draggable from 'vuedraggable'
 import { GripVerticalIcon } from 'lucide-vue-next'
 
-import {
-  MAX_MOVIE_BITRATE,
-  clampBitrates,
-  parseBitrate
-} from '@/lib/productions'
+import { clampBitrates } from '@/lib/productions'
 import { sortByName } from '@/lib/sorting'
 
+import InfoQuestionMark from '@/components/widgets/InfoQuestionMark.vue'
 import SettingImporter from '@/components/widgets/SettingImporter.vue'
 import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
@@ -156,6 +163,7 @@ const entityTabs = computed(() => [
 ])
 
 const linkedIds = computed(() => new Set(props.taskTypes.map(tt => tt.id)))
+const bitrateDefaults = computed(() => store.getters.movieBitrateDefaults)
 
 const taskTypesForEntity = computed(() =>
   props.taskTypes.filter(
@@ -209,16 +217,29 @@ const onImportFromProduction = async productionId => {
 
 const bitrateCeiling = (taskType, key) =>
   key === 'hd_bitrate_compression'
-    ? MAX_MOVIE_BITRATE
+    ? bitrateDefaults.value.hd_bitrate_compression
     : taskType.hd_bitrate_compression ||
       props.defaultBitrates.hd_bitrate_compression ||
-      MAX_MOVIE_BITRATE
+      bitrateDefaults.value.hd_bitrate_compression
 
-const onBitrateChange = (taskType, key, value) => {
-  const bitrates = clampBitrates(
-    { ...taskType, [key]: value },
-    parseBitrate(props.defaultBitrates.hd_bitrate_compression)
+// The bitrate a task type gets while its own is empty: Zou encodes the low
+// definition version within the high definition bitrate.
+const inheritedBitrate = (taskType, key) =>
+  Math.min(
+    props.defaultBitrates[key] || bitrateDefaults.value[key],
+    bitrateCeiling(taskType, key)
   )
+
+const onBitrateChange = (taskType, key, input) => {
+  const bitrates = clampBitrates(
+    { ...taskType, [key]: input.value },
+    {
+      inheritedHd: props.defaultBitrates.hd_bitrate_compression,
+      max: bitrateDefaults.value.hd_bitrate_compression
+    }
+  )
+  // A change event skips the checks of the browser: show what is saved.
+  input.value = bitrates[key] ?? ''
   emit('bitrates-changed', { taskTypeId: taskType.id, ...bitrates })
 }
 
@@ -293,6 +314,21 @@ const onReorder = () => {
 .th-bitrate {
   min-width: 120px;
   white-space: nowrap;
+  // A sticky header cell is its own stacking context: without a z-index, the
+  // inputs of the rows (positioned, later in the page) cover its tooltip.
+  z-index: 2;
+
+  // The tooltip opens over the next columns: narrow, it stays within the tab
+  // on a tablet.
+  :deep(.question-text) {
+    max-width: 320px;
+  }
+}
+
+.th-bitrate-label {
+  align-items: center;
+  display: flex;
+  gap: 0.3em;
 }
 
 .task-type {

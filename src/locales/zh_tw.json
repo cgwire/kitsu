@@ -1203,6 +1203,15 @@
         "sequences": "序列"
       },
       "video": {
+        "bitrate_default": "預設值：{value} Mbit/s",
+        "bitrate_explanation": "位元率越高，畫面越清晰，但檔案也越大，載入越慢。",
+        "bitrate_size": "每分鐘約 {size} MB",
+        "bitrates": "位元率",
+        "hd_bitrate_description": "完整解析度版本，在 HD 模式下播放，也用於下載。",
+        "ld_bitrate_description": "寬度為 1280 像素的輕量版本，在 LD 模式下播放。",
+        "next_uploads_only": "變更僅適用於之後的上傳，現有預覽不會重新編碼。",
+        "restore_default": "還原預設值",
+        "task_type_bitrates": "留空以使用「影片」分頁中的位元率。",
         "title": "影片"
       },
       "hide_stats": "隱藏統計",

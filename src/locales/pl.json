@@ -1532,6 +1532,15 @@
         "sequences": "Sekwencje"
       },
       "video": {
+        "bitrate_default": "Domyślnie: {value} Mbit/s",
+        "bitrate_explanation": "Wyższa przepływność daje ostrzejszy obraz, ale większe pliki, które wolniej się wczytują.",
+        "bitrate_size": "Około {size} MB na minutę",
+        "bitrates": "Przepływności",
+        "hd_bitrate_description": "Wersja w pełnej rozdzielczości, odtwarzana w trybie HD i używana przy pobieraniu.",
+        "ld_bitrate_description": "Lżejsza wersja o szerokości 1280 pikseli, odtwarzana w trybie LD.",
+        "next_uploads_only": "Zmiany dotyczą tylko nowo przesyłanych plików: istniejące podglądy nie są ponownie kodowane.",
+        "restore_default": "Przywróć wartość domyślną",
+        "task_type_bitrates": "Pozostaw puste, aby użyć przepływności z karty Wideo.",
         "title": "Wideo"
       },
       "parameters": {

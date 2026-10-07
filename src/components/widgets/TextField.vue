@@ -21,7 +21,7 @@
             : 'input flexrow-item' + inputClass
         "
         :autocomplete="autocomplete"
-        :aria-describedby="errored ? errorId : undefined"
+        :aria-describedby="describedBy"
         :aria-invalid="errored"
         :disabled="disabled"
         :maxlength="maxlength"
@@ -47,6 +47,9 @@
         {{ unitLabel }}
       </span>
     </p>
+    <p class="help" :id="descriptionId" v-if="description">
+      {{ description }}
+    </p>
     <p class="error" :id="errorId" v-if="errored">
       {{ errorText }}
     </p>
@@ -54,12 +57,16 @@
 </template>
 
 <script setup>
-import { ref, useId } from 'vue'
+import { computed, ref, useId } from 'vue'
 
 import { isNumberTyped } from '@/lib/number'
 
 const props = defineProps({
   autocomplete: {
+    type: String
+  },
+  description: {
+    default: '',
     type: String
   },
   disabled: {
@@ -133,8 +140,16 @@ const props = defineProps({
 const emit = defineEmits(['enter', 'update:model-value'])
 
 const fieldId = useId()
+const descriptionId = `${fieldId}-description`
 const errorId = `${fieldId}-error`
 const inputRef = ref(null)
+
+const describedBy = computed(
+  () =>
+    [props.description && descriptionId, props.errored && errorId]
+      .filter(Boolean)
+      .join(' ') || undefined
+)
 
 const getInputValue = () => {
   const input = inputRef.value
@@ -214,6 +229,12 @@ input.input.thin {
 
 .unit {
   margin-left: 0.5rem;
+}
+
+.help {
+  color: var(--text-alt);
+  font-size: 0.9em;
+  margin-top: 0.4em;
 }
 
 .input:invalid,

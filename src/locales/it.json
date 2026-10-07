@@ -1203,6 +1203,15 @@
         "sequences": "Sequenze"
       },
       "video": {
+        "bitrate_default": "Predefinito: {value} Mbit/s",
+        "bitrate_explanation": "Un bitrate più alto dà un'immagine più nitida, ma file più pesanti e più lenti da caricare.",
+        "bitrate_size": "Circa {size} MB al minuto",
+        "bitrates": "Bitrate",
+        "hd_bitrate_description": "Versione a piena risoluzione, riprodotta in modalità HD e usata per i download.",
+        "ld_bitrate_description": "Versione più leggera, larga 1280 pixel, riprodotta in modalità LD.",
+        "next_uploads_only": "Le modifiche si applicano solo ai prossimi caricamenti: le anteprime esistenti non vengono ricodificate.",
+        "restore_default": "Ripristina il valore predefinito",
+        "task_type_bitrates": "Lascia vuoto per usare i bitrate della scheda Video.",
         "title": "Video"
       },
       "hide_stats": "Nascondi statistiche",
