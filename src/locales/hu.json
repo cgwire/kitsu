@@ -1916,7 +1916,7 @@
       "multiple_delete_error": "Hiba történt egy koncepció törlésekor. Valószínűleg adat hivatkozik rá. Biztos, hogy nincs feladat rendelve a kiválasztott koncepcióhoz?",
       "no_concept_selected": "Nincs koncepció kijelölve",
       "title": "Koncepciók",
-      "uploading": "Konceptek feltöltése"
+      "uploading": "Koncepciók feltöltése"
     },
     "board": {
       "empty": "Nincs megjeleníthető elem a táblán: nincs folyamatban lévő feladatod, a keresésed nem adott találatot, vagy nincs feladat állapot engedélyezve a szerepedhez a produkció beállításaiban.",
