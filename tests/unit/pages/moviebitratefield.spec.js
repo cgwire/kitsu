@@ -25,15 +25,64 @@ const mountField = ({ attachTo, ...props } = {}) => {
 
 const restoreButton = wrapper => wrapper.find('.restore-button')
 
+// As in a browser: typing, then leaving the field.
+const leaveWith = async (wrapper, value) => {
+  const input = wrapper.find('input')
+  input.element.value = value
+  await input.trigger('input')
+  await input.trigger('change')
+  return [wrapper.emitted('update:modelValue').at(-1)[0], input.element.value]
+}
+
 describe('MovieBitrateField', () => {
-  it('takes whole Mbit/s between 1 and the instance ceiling', () => {
+  // Leaving the field brings the value within the bounds: the browser has
+  // nothing to refuse on save.
+  it('never flags a typed bitrate as invalid', () => {
     const wrapper = mountField({ max: 40 })
+    const input = wrapper.find('input').element
+    const isValid = value => {
+      input.value = value
+      return input.checkValidity()
+    }
+
+    expect(['41', '0', '12.5'].map(isValid)).toEqual([true, true, true])
+    wrapper.unmount()
+  })
+
+  it('brings a bitrate out of bounds within them when leaving the field', async () => {
+    const wrapper = mountField({ max: 40 })
+
+    expect(await leaveWith(wrapper, '45')).toEqual([40, '40'])
+    expect(await leaveWith(wrapper, '0')).toEqual([1, '1'])
+    expect(await leaveWith(wrapper, '12.5')).toEqual([13, '13'])
+    wrapper.unmount()
+  })
+
+  // The save lowers it under the high definition bitrate: the order of the
+  // edits does not matter.
+  it('keeps a low definition bitrate above the high definition one', async () => {
+    const wrapper = mountField({
+      ceiling: 28,
+      defaultValue: 6,
+      isLowDefinition: true,
+      max: 10
+    })
+
+    expect(await leaveWith(wrapper, '15')).toEqual([15, '15'])
+    expect(await leaveWith(wrapper, '45')).toEqual([28, '28'])
+    wrapper.unmount()
+  })
+
+  it('leaves an emptied field empty when leaving it', async () => {
+    const wrapper = mountField({ modelValue: 12 })
     const input = wrapper.find('input')
 
-    expect(input.attributes('step')).toBe('1')
-    expect(input.attributes('min')).toBe('1')
-    expect(input.attributes('max')).toBe('40')
-    expect(input.attributes('placeholder')).toBe('28')
+    input.element.value = ''
+    await input.trigger('input')
+    await input.trigger('change')
+
+    expect(wrapper.emitted('update:modelValue')).toEqual([[null]])
+    expect(input.element.value).toBe('')
     wrapper.unmount()
   })
 
@@ -44,12 +93,39 @@ describe('MovieBitrateField', () => {
     wrapper.unmount()
   })
 
-  it('reminds the default even once the value is changed', () => {
+  // The high definition bitrate defaults to the instance ceiling.
+  it('reminds the default and the maximum as one figure when they match', () => {
     const wrapper = mountField({ modelValue: 12 })
 
     expect(wrapper.text()).toContain(
-      'productions.video.bitrate_default {"value":28}'
+      'productions.video.bitrate_default_max {"value":28}'
     )
+    expect(wrapper.text()).not.toContain('productions.video.bitrate_default {')
+    expect(wrapper.text()).not.toContain('productions.video.bitrate_max')
+    wrapper.unmount()
+  })
+
+  it('gives a maximum above the default apart', () => {
+    const wrapper = mountField({ defaultValue: 20, max: 28 })
+
+    expect(wrapper.text()).toContain(
+      'productions.video.bitrate_default {"value":20}'
+    )
+    expect(wrapper.text()).toContain('productions.video.bitrate_max {"value":28}')
+    wrapper.unmount()
+  })
+
+  // Even when the high definition bitrate is lower than the default.
+  it('says the maximum of the low definition is the high definition bitrate', () => {
+    const wrapper = mountField({ defaultValue: 6, isLowDefinition: true, max: 4 })
+
+    expect(wrapper.text()).toContain(
+      'productions.video.bitrate_default {"value":4}'
+    )
+    expect(wrapper.text()).toContain(
+      'productions.video.ld_bitrate_max {"value":4}'
+    )
+    expect(wrapper.text()).not.toContain('bitrate_default_max')
     wrapper.unmount()
   })
 
@@ -129,7 +205,11 @@ describe('MovieBitrateField', () => {
 
   // The low definition field: its default sits under the ceiling.
   it('falls back on, reminds and restores the default, not the ceiling', async () => {
-    const wrapper = mountField({ defaultValue: 6, max: 28 })
+    const wrapper = mountField({
+      defaultValue: 6,
+      isLowDefinition: true,
+      max: 28
+    })
     expect(wrapper.text()).toContain(
       'productions.video.bitrate_default {"value":6}'
     )
@@ -150,7 +230,12 @@ describe('MovieBitrateField', () => {
   // Zou encodes an unset low definition bitrate at the high definition one
   // when that one is lower.
   it('caps the default of the low definition at the high definition', async () => {
-    const wrapper = mountField({ defaultValue: 6, max: 4, modelValue: 3 })
+    const wrapper = mountField({
+      defaultValue: 6,
+      isLowDefinition: true,
+      max: 4,
+      modelValue: 3
+    })
     expect(wrapper.text()).toContain(
       'productions.video.bitrate_default {"value":4}'
     )

@@ -3,7 +3,12 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import { createStore } from 'vuex'
 import { describe, expect, it, vi } from 'vitest'
 
-vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }))
+// Shows the interpolated values next to the key.
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: (key, params) => (params ? `${key} ${JSON.stringify(params)}` : key)
+  })
+}))
 
 import ProductionTaskType from '@/components/pages/production/ProductionTaskType.vue'
 import ProductionTaskTypes from '@/components/pages/production/ProductionTaskTypes.vue'
@@ -57,6 +62,11 @@ const mountComponent = async (productionType = 'short', scheduleItems = []) => {
       currentScheduleItems: () => scheduleItems,
       getProductionTaskTypes: () => () => [],
       isTVShow: () => productionType === 'tvshow',
+      // An instance whose MOVIE_HIGHDEF_BITRATE is above the usual 28.
+      movieBitrateDefaults: () => ({
+        hd_bitrate_compression: 40,
+        ld_bitrate_compression: 8
+      }),
       productionAssetTaskTypes: () => [assetTaskType],
       productionEditTaskTypes: () => [],
       productionEpisodeTaskTypes: () => [],
@@ -138,13 +148,17 @@ describe('ProductionTaskTypes', () => {
     expect(row.props('scheduleItem')).toEqual(taskTypeBar)
   })
 
-  it('explains the bitrate columns', async () => {
+  it('explains the bitrate columns and gives their maximum', async () => {
     const { wrapper } = await mountComponent()
-    const help =
-      'productions.video.task_type_bitrates\n\nproductions.video.next_uploads_only'
+    const help = maximum =>
+      `productions.video.task_type_bitrates\n\n${maximum}\n\n` +
+      'productions.video.next_uploads_only'
 
     expect(
       wrapper.findAllComponents(InfoQuestionMark).map(item => item.props('text'))
-    ).toEqual([help, help])
+    ).toEqual([
+      help('productions.video.bitrate_max {"value":40}'),
+      help('productions.video.task_type_ld_bitrate_max')
+    ])
   })
 })

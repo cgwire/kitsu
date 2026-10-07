@@ -114,12 +114,15 @@ describe('ProjectTemplateSettings page, video tab', () => {
     expect(hd.props()).toMatchObject({
       description: 'productions.video.hd_bitrate_description',
       defaultValue: 40,
+      isLowDefinition: false,
       max: 40,
       modelValue: 28
     })
     expect(ld.props()).toMatchObject({
+      ceiling: 40,
       description: 'productions.video.ld_bitrate_description',
       defaultValue: 8,
+      isLowDefinition: true,
       max: 28,
       modelValue: 6
     })

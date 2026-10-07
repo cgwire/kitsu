@@ -1204,14 +1204,18 @@
       },
       "video": {
         "bitrate_default": "默认值：{value} Mbit/s",
+        "bitrate_default_max": "默认值和最大值：{value} Mbit/s",
         "bitrate_explanation": "码率越高，画面越清晰，但文件也越大，加载越慢。",
+        "bitrate_max": "最大值：{value} Mbit/s",
         "bitrate_size": "每分钟约 {size} MB",
         "bitrates": "码率",
         "hd_bitrate_description": "全分辨率版本，在 HD 模式下播放，也用于下载。",
         "ld_bitrate_description": "宽度为 1280 像素的轻量版本，在 LD 模式下播放。",
+        "ld_bitrate_max": "最大值：{value} Mbit/s (HD 码率)",
         "next_uploads_only": "更改仅适用于之后的上传，现有预览不会重新编码。",
         "restore_default": "恢复默认值",
         "task_type_bitrates": "留空则使用“视频”标签页中的码率。",
+        "task_type_ld_bitrate_max": "最大值：该任务类型的 HD 码率",
         "title": "视频"
       },
       "hide_stats": "隐藏统计",

@@ -298,8 +298,10 @@
                 v-model="params.hd_bitrate_compression"
               />
               <movie-bitrate-field
+                :ceiling="bitrateDefaults.hd_bitrate_compression"
                 :default-value="bitrateDefaults.ld_bitrate_compression"
                 :description="$t('productions.video.ld_bitrate_description')"
+                is-low-definition
                 :label="$t('productions.fields.ld_bitrate_compression')"
                 :max="ldBitrateCeiling"
                 v-model="params.ld_bitrate_compression"

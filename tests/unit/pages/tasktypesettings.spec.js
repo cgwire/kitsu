@@ -3,7 +3,12 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import { createStore } from 'vuex'
 import { describe, expect, it, vi } from 'vitest'
 
-vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }))
+// Shows the interpolated values next to the key.
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: (key, params) => (params ? `${key} ${JSON.stringify(params)}` : key)
+  })
+}))
 
 import TaskTypeSettings from '@/components/pages/production/TaskTypeSettings.vue'
 import InfoQuestionMark from '@/components/widgets/InfoQuestionMark.vue'
@@ -62,14 +67,16 @@ const bitrateInputs = wrapper => {
 }
 
 describe('TaskTypeSettings', () => {
-  it('explains the bitrate columns', async () => {
+  it('explains the bitrate columns and gives their maximum', async () => {
     const wrapper = await mountSettings()
 
     expect(
       wrapper.findAllComponents(InfoQuestionMark).map(help => help.props('text'))
     ).toEqual([
-      'productions.video.task_type_bitrates',
-      'productions.video.task_type_bitrates'
+      'productions.video.task_type_bitrates\n\n' +
+        'productions.video.bitrate_max {"value":40}',
+      'productions.video.task_type_bitrates\n\n' +
+        'productions.video.task_type_ld_bitrate_max'
     ])
   })
 

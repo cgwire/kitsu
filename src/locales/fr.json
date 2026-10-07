@@ -1127,14 +1127,18 @@
       },
       "video": {
         "bitrate_default": "Par défaut : {value} Mbit/s",
+        "bitrate_default_max": "Par défaut et maximum : {value} Mbit/s",
         "bitrate_explanation": "Un débit plus élevé donne une image plus nette, mais des fichiers plus lourds et plus longs à charger.",
+        "bitrate_max": "Maximum : {value} Mbit/s",
         "bitrate_size": "Environ {size} Mo par minute",
         "bitrates": "Débits",
         "hd_bitrate_description": "Version en pleine résolution, lue en mode haute définition et utilisée pour les téléchargements.",
         "ld_bitrate_description": "Version plus légère, de 1280 pixels de large, lue en mode basse définition.",
+        "ld_bitrate_max": "Maximum : {value} Mbit/s (débit HD)",
         "next_uploads_only": "Les modifications ne s'appliquent qu'aux prochains envois : les previews existantes ne sont pas réencodées.",
         "restore_default": "Rétablir la valeur par défaut",
         "task_type_bitrates": "Laissez vide pour utiliser les débits de l'onglet Vidéo.",
+        "task_type_ld_bitrate_max": "Maximum : le débit HD du type de tâche",
         "title": "Vidéo"
       },
       "parameters": {

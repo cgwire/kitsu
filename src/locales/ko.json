@@ -1204,14 +1204,18 @@
       },
       "video": {
         "bitrate_default": "기본값: {value}Mbit/s",
+        "bitrate_default_max": "기본값 및 최댓값: {value}Mbit/s",
         "bitrate_explanation": "비트레이트가 높을수록 화질이 선명해지지만, 파일 크기가 커져 로드 속도가 느려집니다.",
+        "bitrate_max": "최댓값: {value}Mbit/s",
         "bitrate_size": "분당 약 {size}MB",
         "bitrates": "비트레이트",
         "hd_bitrate_description": "전체 해상도 버전으로, HD 모드에서 재생되며 다운로드에도 사용됩니다.",
         "ld_bitrate_description": "가로 1280픽셀의 가벼운 버전으로, LD 모드에서 재생됩니다.",
+        "ld_bitrate_max": "최댓값: {value}Mbit/s (HD 비트레이트)",
         "next_uploads_only": "변경 사항은 이후 업로드에만 적용되며, 기존 미리 보기는 다시 인코딩되지 않습니다.",
         "restore_default": "기본값 복원",
         "task_type_bitrates": "동영상 탭의 비트레이트를 사용하려면 비워 두세요.",
+        "task_type_ld_bitrate_max": "최댓값: 작업 유형의 HD 비트레이트",
         "title": "동영상"
       },
       "hide_stats": "통계 숨기기",

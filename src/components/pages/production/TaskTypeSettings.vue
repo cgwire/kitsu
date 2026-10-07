@@ -32,19 +32,13 @@
               <th class="th-bitrate">
                 <span class="th-bitrate-label">
                   {{ $t('productions.fields.hd_bitrate_short') }}
-                  <info-question-mark
-                    position="left"
-                    :text="$t('productions.video.task_type_bitrates')"
-                  />
+                  <info-question-mark position="left" :text="bitrateHelp.hd" />
                 </span>
               </th>
               <th class="th-bitrate">
                 <span class="th-bitrate-label">
                   {{ $t('productions.fields.ld_bitrate_short') }}
-                  <info-question-mark
-                    position="left"
-                    :text="$t('productions.video.task_type_bitrates')"
-                  />
+                  <info-question-mark position="left" :text="bitrateHelp.ld" />
                 </span>
               </th>
               <th></th>
@@ -164,6 +158,20 @@ const entityTabs = computed(() => [
 
 const linkedIds = computed(() => new Set(props.taskTypes.map(tt => tt.id)))
 const bitrateDefaults = computed(() => store.getters.movieBitrateDefaults)
+
+// The low definition bitrate of a row stays within its high definition one.
+const bitrateHelp = computed(() => {
+  const help = maximum =>
+    `${t('productions.video.task_type_bitrates')}\n\n${maximum}`
+  return {
+    hd: help(
+      t('productions.video.bitrate_max', {
+        value: bitrateDefaults.value.hd_bitrate_compression
+      })
+    ),
+    ld: help(t('productions.video.task_type_ld_bitrate_max'))
+  }
+})
 
 const taskTypesForEntity = computed(() =>
   props.taskTypes.filter(

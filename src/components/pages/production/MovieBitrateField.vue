@@ -5,19 +5,30 @@
       type="number"
       :description="description"
       :label="label"
-      :max="max"
-      :min="MIN_MOVIE_BITRATE"
       :placeholder="defaultBitrate"
-      :step="1"
       v-model="bitrate"
+      @change="onChange"
     />
     <p class="bitrate-info">
       <span class="bitrate-size">
         {{ $t('productions.video.bitrate_size', { size }) }}
       </span>
-      <span>
-        {{ $t('productions.video.bitrate_default', { value: defaultBitrate }) }}
+      <span v-if="isDefaultMax">
+        {{ $t('productions.video.bitrate_default_max', { value: max }) }}
       </span>
+      <template v-else>
+        <span>
+          {{
+            $t('productions.video.bitrate_default', { value: defaultBitrate })
+          }}
+        </span>
+        <span v-if="isLowDefinition">
+          {{ $t('productions.video.ld_bitrate_max', { value: max }) }}
+        </span>
+        <span v-else>
+          {{ $t('productions.video.bitrate_max', { value: max }) }}
+        </span>
+      </template>
       <button
         class="button is-link restore-button"
         type="button"
@@ -36,7 +47,6 @@
 import { computed, ref } from 'vue'
 
 import {
-  MIN_MOVIE_BITRATE,
   clampBitrate,
   getMovieMegabytesPerMinute,
   parseBitrate
@@ -47,8 +57,15 @@ import TextField from '@/components/widgets/TextField.vue'
 // Props
 // --------------------------------------------------------------------------
 const props = defineProps({
+  // The highest value the field keeps once left, when above max: the low
+  // definition field takes up to the instance ceiling and leaves the save
+  // to lower it under the high definition bitrate, whatever the order of
+  // the edits.
+  ceiling: { type: Number, default: null },
   defaultValue: { type: Number, required: true },
   description: { type: String, default: '' },
+  // Its maximum is then the high definition bitrate.
+  isLowDefinition: { type: Boolean, default: false },
   label: { type: String, default: '' },
   // The instance high definition bitrate, or the high definition bitrate
   // of the form for the low definition field.
@@ -73,6 +90,12 @@ const effectiveBitrate = computed(
 
 const size = computed(() => getMovieMegabytesPerMinute(effectiveBitrate.value))
 
+// The high definition bitrate defaults to the instance ceiling: one figure
+// says both.
+const isDefaultMax = computed(
+  () => !props.isLowDefinition && defaultBitrate.value === props.max
+)
+
 const isModified = computed(() => {
   const value = parseBitrate(bitrate.value)
   return value !== null && value !== defaultBitrate.value
@@ -80,6 +103,15 @@ const isModified = computed(() => {
 
 // Functions
 // --------------------------------------------------------------------------
+// The field takes any number and leaving it brings the value within the
+// bounds, as the task type rows do: no browser error on save.
+const onChange = () => {
+  const value = clampBitrate(bitrate.value, props.ceiling ?? props.max)
+  if (value !== null && value !== bitrate.value) {
+    bitrate.value = value
+  }
+}
+
 // An empty field follows the default, even once the default changes. The
 // button hides itself once clicked: the focus goes to the field instead of
 // falling back on the page.

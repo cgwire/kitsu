@@ -64,13 +64,16 @@ describe('ProductionVideoSettings', () => {
       label: 'productions.fields.hd_bitrate_compression',
       description: 'productions.video.hd_bitrate_description',
       defaultValue: 40,
+      isLowDefinition: false,
       max: 40,
       modelValue: 28
     })
     expect(ld.props()).toMatchObject({
       label: 'productions.fields.ld_bitrate_compression',
+      ceiling: 40,
       description: 'productions.video.ld_bitrate_description',
       defaultValue: 8,
+      isLowDefinition: true,
       modelValue: 6
     })
   })

@@ -1204,14 +1204,18 @@
       },
       "video": {
         "bitrate_default": "پیش‌فرض: {value} Mbit/s",
+        "bitrate_default_max": "پیش‌فرض و حداکثر: {value} Mbit/s",
         "bitrate_explanation": "نرخ بیت بالاتر تصویر واضح‌تری می‌دهد، اما فایل‌ها را سنگین‌تر و بارگذاری آن‌ها را کندتر می‌کند.",
+        "bitrate_max": "حداکثر: {value} Mbit/s",
         "bitrate_size": "حدود {size} مگابایت برای هر دقیقه ویدیو",
         "bitrates": "نرخ‌های بیت",
         "hd_bitrate_description": "نسخه‌ای با وضوح کامل که در حالت HD پخش می‌شود و برای دانلود به کار می‌رود.",
         "ld_bitrate_description": "نسخه‌ای سبک‌تر با پهنای ۱۲۸۰ پیکسل که در حالت LD پخش می‌شود.",
+        "ld_bitrate_max": "حداکثر: {value} Mbit/s (نرخ بیت HD)",
         "next_uploads_only": "تغییرات فقط روی آپلودهای بعدی اعمال می‌شوند: پیش‌نمایش‌های موجود دوباره کدگذاری نمی‌شوند.",
         "restore_default": "بازیابی مقدار پیش‌فرض",
         "task_type_bitrates": "برای استفاده از نرخ بیت تنظیم‌شده در تب «ویدیو»، خالی بگذارید.",
+        "task_type_ld_bitrate_max": "حداکثر: نرخ بیت HD نوع وظیفه",
         "title": "ویدیو"
       },
       "hide_stats": "پنهان کردن آمار",

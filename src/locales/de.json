@@ -1204,14 +1204,18 @@
       },
       "video": {
         "bitrate_default": "Standard: {value} Mbit/s",
+        "bitrate_default_max": "Standard und Maximum: {value} Mbit/s",
         "bitrate_explanation": "Eine höhere Bitrate sorgt für ein schärferes Bild, aber auch für größere Dateien, die langsamer geladen werden.",
+        "bitrate_max": "Maximum: {value} Mbit/s",
         "bitrate_size": "Etwa {size} MB pro Minute",
         "bitrates": "Bitraten",
         "hd_bitrate_description": "Version in voller Auflösung, die im HD-Modus abgespielt und für Downloads verwendet wird.",
         "ld_bitrate_description": "Kleinere, 1280 Pixel breite Version, die im LD-Modus abgespielt wird.",
+        "ld_bitrate_max": "Maximum: {value} Mbit/s (HD-Bitrate)",
         "next_uploads_only": "Änderungen gelten nur für künftig hochgeladene Videos: Vorhandene Vorschauen werden nicht neu enkodiert.",
         "restore_default": "Standard wiederherstellen",
         "task_type_bitrates": "Leer lassen, um die Bitraten der Registerkarte „Video“ zu verwenden.",
+        "task_type_ld_bitrate_max": "Maximum: die HD-Bitrate des Aufgabentyps",
         "title": "Video"
       },
       "hide_stats": "Statistiken ausblenden",
