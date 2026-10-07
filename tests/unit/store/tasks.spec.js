@@ -11,6 +11,7 @@ vi.mock('@/store/api/tasks', () => ({
     addExtraPreview: vi.fn(),
     addPreview: vi.fn(),
     commentTask: vi.fn(),
+    getTaskComment: vi.fn(),
     getTaskComments: vi.fn(),
     uploadPreview: vi.fn(),
     setLastTaskPreviewAsEntityThumbnail: vi.fn(),
@@ -690,6 +691,69 @@ describe('Tasks store, preview copies', () => {
     })
 
     expect([head.status, head.previews[0].status]).toEqual(['ready', 'ready'])
+  })
+})
+
+// Zou lists the previews of a single comment by their IDs: a reload must keep
+// what the store holds of them, the revision number the comment shows first.
+describe('Tasks store, comment reloads', () => {
+  const reloadComment = async (state, previewIds) => {
+    tasksApi.getTaskComment.mockResolvedValue({
+      id: 'comment-1',
+      object_id: 'task-1',
+      previews: previewIds
+    })
+    const commit = vi.fn()
+
+    await tasksStore.actions.loadComment(
+      { commit, state },
+      { commentId: 'comment-1' }
+    )
+
+    const [, { comment }] = commit.mock.calls.find(
+      ([type]) => type === 'NEW_TASK_COMMENT_END'
+    )
+    return comment
+  }
+
+  // A comment of a todo task, loaded without the task previews.
+  test('loadComment keeps the previews the comment holds', async () => {
+    const preview = {
+      id: 'preview-1',
+      revision: 1,
+      validation_status: 'validated'
+    }
+    const state = {
+      taskComments: { 'task-1': [{ id: 'comment-1', previews: [preview] }] },
+      taskPreviews: {}
+    }
+
+    const comment = await reloadComment(state, ['preview-1', 'preview-2'])
+
+    expect(comment.previews[0]).toBe(preview)
+    expect(comment.previews[1]).toEqual({ id: 'preview-2' })
+  })
+
+  // A preview another user adds to a revision stays a bare ID in the
+  // comment, ADD_PREVIEW_END only puts it in the task previews.
+  test('loadComment takes a preview the comment lists bare from the task previews', async () => {
+    const copy = { id: 'preview-2', revision: 1, extension: 'png' }
+    const head = {
+      id: 'preview-1',
+      revision: 1,
+      previews: [{ id: 'preview-1', revision: 1 }, copy]
+    }
+    const state = {
+      taskComments: {
+        'task-1': [{ id: 'comment-1', previews: [head, { id: 'preview-2' }] }]
+      },
+      taskPreviews: { 'task-1': [head] }
+    }
+
+    const comment = await reloadComment(state, ['preview-1', 'preview-2'])
+
+    expect(comment.previews[0]).toBe(head)
+    expect(comment.previews[1]).toBe(copy)
   })
 })
 

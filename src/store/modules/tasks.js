@@ -243,10 +243,21 @@ const actions = {
     })
   },
 
-  loadComment({ commit }, { commentId }) {
+  loadComment({ commit, state }, { commentId }) {
     return tasksApi.getTaskComment({ id: commentId }).then(comment => {
-      // The API returns a list of preview IDs instead of objects.
-      comment.previews = comment.previews.map(id => ({ id }))
+      // The API returns a list of preview IDs instead of objects: keep the
+      // previews the store holds, a bare ID has no revision to show.
+      const taskId = comment.object_id
+      const storedComment = state.taskComments[taskId]?.find(
+        ({ id }) => id === comment.id
+      )
+      const knownPreviews = [
+        ...(storedComment?.previews || []),
+        ...(state.taskPreviews[taskId] || []).flatMap(p => p.previews || [])
+      ].filter(preview => preview.revision !== undefined)
+      comment.previews = comment.previews.map(
+        id => knownPreviews.find(preview => preview.id === id) || { id }
+      )
       commit(NEW_TASK_COMMENT_END, { comment })
       return comment
     })
