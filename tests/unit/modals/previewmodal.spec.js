@@ -1,5 +1,5 @@
 import { flushPromises, mount } from '@vue/test-utils'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import PreviewModal from '@/components/modals/PreviewModal.vue'
 
@@ -95,6 +95,44 @@ describe('PreviewModal', () => {
       expect(wrapper.emitted('change')).toBeUndefined()
       expect(wrapper.find('.next').exists()).toBe(false)
       wrapper.unmount()
+    })
+
+    // Alt and Cmd arrows go back and forth in the browser history.
+    it('leaves the modified arrows alone', () => {
+      const wrapper = mountModal('preview-2')
+      const modifiers = ['altKey', 'ctrlKey', 'metaKey', 'shiftKey']
+
+      modifiers.forEach(modifier => {
+        window.dispatchEvent(
+          new KeyboardEvent('keydown', { key: 'ArrowRight', [modifier]: true })
+        )
+      })
+
+      expect(wrapper.emitted('change')).toBeUndefined()
+      wrapper.unmount()
+    })
+
+    // A key event goes from the focused element up to the window, where the
+    // players of the page behind listen to the arrows.
+    it('keeps its arrows from the page behind', () => {
+      const pageListener = vi.fn()
+      window.addEventListener('keydown', pageListener)
+      const wrapper = mountModal('preview-3')
+      const pressOnPage = options =>
+        document.body.dispatchEvent(
+          new KeyboardEvent('keydown', { bubbles: true, ...options })
+        )
+
+      pressOnPage({ key: 'ArrowLeft' })
+      pressOnPage({ key: 'ArrowRight' })
+      expect(wrapper.emitted('change')).toEqual([['preview-2']])
+      expect(pageListener).not.toHaveBeenCalled()
+
+      pressOnPage({ key: 'ArrowLeft', altKey: true })
+      expect(pageListener).toHaveBeenCalledTimes(1)
+
+      wrapper.unmount()
+      window.removeEventListener('keydown', pageListener)
     })
   })
 })

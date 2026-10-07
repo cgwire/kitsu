@@ -114,14 +114,20 @@ const previewDlPath = computed(
   () => `/api/pictures/originals/preview-files/${props.previewFileId}/download`
 )
 
+// Listening on capture stops the arrows before the page behind, whose
+// players step a frame on them. Alt and Cmd arrows go back and forth in the
+// browser history: the modified arrows are left alone.
 const onKeyDown = event => {
-  if (!props.active) return
+  if (!props.active || event.defaultPrevented) return
+  if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
   const targetId = { ArrowLeft: previousId, ArrowRight: nextId }[event.key]
-  if (targetId?.value) emit('change', targetId.value)
+  if (!targetId) return
+  event.stopPropagation()
+  if (targetId.value) emit('change', targetId.value)
 }
 
-onMounted(() => window.addEventListener('keydown', onKeyDown))
-onBeforeUnmount(() => window.removeEventListener('keydown', onKeyDown))
+onMounted(() => window.addEventListener('keydown', onKeyDown, true))
+onBeforeUnmount(() => window.removeEventListener('keydown', onKeyDown, true))
 </script>
 
 <style lang="scss" scoped>
