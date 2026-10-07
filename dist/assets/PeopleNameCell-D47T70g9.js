@@ -1,0 +1,2 @@
+import{F as e,O as t,j as n,nt as r,u as i}from"./vue-vendor-15NSOsgB.js";import{t as a}from"./_plugin-vue_export-helper-BDNMzG2s.js";import{i as o,r as s}from"./index-CG3z50or.js";i();var c={scope:`row`},l={class:`flexrow`},u=a({__name:`PeopleNameCell`,props:{person:{type:Object,required:!0}},setup(i){return(a,u)=>(r(),n(`td`,c,[t(`div`,l,[e(o,{person:i.person},null,8,[`person`]),e(s,{"with-link":``,person:i.person},null,8,[`person`])])]))}},[[`__scopeId`,`data-v-eb27d442`]]);export{u as t};
+//# sourceMappingURL=PeopleNameCell-D47T70g9.js.map

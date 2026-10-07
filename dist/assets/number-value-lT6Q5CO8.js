@@ -1,0 +1,2 @@
+import{n as e}from"./number-tr_0gELt.js";var t=e=>document.activeElement===e&&!e.validity.valid,n=(n,{value:r})=>{!e(n,r)&&!t(n)&&(n.value=r??``)},r={mounted:n,updated:n};export{r as t};
+//# sourceMappingURL=number-value-lT6Q5CO8.js.map

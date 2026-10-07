@@ -1,0 +1,2 @@
+var e=[`button`,`checkbox`,`color`,`file`,`image`,`radio`,`range`,`reset`,`submit`],t=[`.modal.is-active`,`.c-mask.is-active`,`[role="combobox"][aria-expanded="true"]`].join(`, `),n=t=>t.tagName===`TEXTAREA`||t.tagName===`INPUT`&&!e.includes(t.type),r=e=>e.isContentEditable?e.textContent!==``:n(e)&&!e.readOnly&&e.value!==``,i=e=>e.key===`Escape`&&!e.repeat&&!e.defaultPrevented&&!r(e.target)&&!document.querySelector(t);export{i as t};
+//# sourceMappingURL=keyboard-Dob8TX_X.js.map

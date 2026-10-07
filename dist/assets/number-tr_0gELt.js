@@ -1,0 +1,2 @@
+var e=(e,t=!1)=>Math.round(e).toLocaleString(t?`en-US`:`fr-FR`),t=(e,t)=>{let n=Number.isNaN(e.valueAsNumber)?null:e.valueAsNumber,r=t===``||t==null?null:Number(t);return!/^0\d/.test(e.value)&&n===r},n=e=>{if(e.validity.valid)return Number.isNaN(e.valueAsNumber)?null:e.valueAsNumber};export{t as n,n as r,e as t};
+//# sourceMappingURL=number-tr_0gELt.js.map

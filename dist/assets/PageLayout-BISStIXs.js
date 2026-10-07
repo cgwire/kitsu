@@ -1,0 +1,2 @@
+import{A as e,O as t,at as n,j as r,nt as i,u as a}from"./vue-vendor-15NSOsgB.js";a();var o={class:`columns fixed-page`},s={class:`column main-column`},c={key:0,class:`column side-column`},l={__name:`PageLayout`,props:{side:{type:Boolean,default:!0}},setup(a){return(l,u)=>(i(),r(`div`,o,[t(`div`,s,[n(l.$slots,`main`)]),a.side?(i(),r(`div`,c,[n(l.$slots,`side`)])):e(``,!0)]))}};export{l as t};
+//# sourceMappingURL=PageLayout-BISStIXs.js.map
