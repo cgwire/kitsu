@@ -516,6 +516,29 @@ const actions = {
     })
   },
 
+  // Zou announces the update of a production to every user. One the store
+  // misses joins it once the user enters its team or it reopens: the
+  // listing tells, where a read would refuse the users out of its team.
+  async loadProductionIfOpen({ dispatch, state }, productionId) {
+    const listed = await productionsApi.getListedProduction(productionId)
+    const status = state.productionStatusMap.get(listed?.project_status_id)
+    if (status?.name === OPEN_STATUS_NAME) {
+      await dispatch('loadProduction', productionId)
+    }
+  },
+
+  // Zou announces a new production to every user, and refuses its read to
+  // those out of its team. Anyone but an admin looks for it first among the
+  // productions of their teams, closed ones included: getListedProduction
+  // holds their open ones only.
+  async loadProductionIfShared({ dispatch, rootGetters }, productionId) {
+    if (!rootGetters.isCurrentUserAdmin) {
+      const productions = await productionsApi.getProductions()
+      if (!productions.some(({ id }) => id === productionId)) return
+    }
+    await dispatch('loadProduction', productionId)
+  },
+
   async newProduction({ commit }, data) {
     // Zou copies the all-projects metadata columns (Project descriptors)
     // onto the new production at creation, no client-side copy needed.

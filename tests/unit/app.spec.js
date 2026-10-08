@@ -156,27 +156,45 @@ describe('App', () => {
     })
 
     // Zou announces a new production to every user, those out of its team
-    // included.
+    // included, and refuses them its read.
     describe('new productions', () => {
       const getters = { productionMap: () => new Map() }
+
+      it('checks whether a new production is shared with the user', async () => {
+        const loadProduction = vi.fn(() => Promise.resolve())
+        const loadProductionIfShared = vi.fn(() => Promise.resolve())
+        const { socket } = await mountApp({
+          actions: { loadProduction, loadProductionIfShared },
+          getters
+        })
+
+        emitSocketEvent(socket, 'project:new', { project_id: 'prod-2' })
+        await flushPromises()
+
+        expect(loadProductionIfShared).toHaveBeenCalledWith(
+          expect.anything(),
+          'prod-2'
+        )
+        expect(loadProduction).not.toHaveBeenCalled()
+      })
 
       it('logs a failed load of a new production', async () => {
         const consoleError = vi
           .spyOn(console, 'error')
           .mockImplementation(() => {})
-        const refusal = Object.assign(new Error('HTTP 403'), { status: 403 })
-        errors.markRequestFailure(refusal)
+        const failure = new Error('Request has been terminated')
+        errors.markRequestFailure(failure)
 
         const rejections = await recordUnhandledRejections(async () => {
           const { socket } = await mountApp({
-            actions: { loadProduction: () => Promise.reject(refusal) },
+            actions: { loadProductionIfShared: () => Promise.reject(failure) },
             getters
           })
           emitSocketEvent(socket, 'project:new', { project_id: 'prod-2' })
         })
 
         expect(rejections).toEqual([])
-        expect(consoleError).toHaveBeenCalledWith(refusal)
+        expect(consoleError).toHaveBeenCalledWith(failure)
       })
 
       it('leaves a bug in the load of a new production to Sentry', async () => {
@@ -187,7 +205,7 @@ describe('App', () => {
 
         const rejections = await recordUnhandledRejections(async () => {
           const { socket } = await mountApp({
-            actions: { loadProduction: () => Promise.reject(bug) },
+            actions: { loadProductionIfShared: () => Promise.reject(bug) },
             getters
           })
           emitSocketEvent(socket, 'project:new', { project_id: 'prod-2' })
@@ -295,6 +313,63 @@ describe('App', () => {
 
         expect(rejections).toEqual([bug])
         expect(removeProduction).not.toHaveBeenCalled()
+        expect(consoleError).not.toHaveBeenCalledWith(bug)
+      })
+
+      // Zou announces the update of every production to every user: one
+      // missing from the store may have just opened to them.
+      it('checks whether a production missing from the store opened to the user', async () => {
+        const loadProductionIfOpen = vi.fn(() => Promise.resolve())
+        const loadOpenProductions = vi.fn(() => Promise.resolve())
+        const { socket } = await mountApp({
+          actions: { loadOpenProductions, loadProductionIfOpen },
+          getters
+        })
+
+        emitSocketEvent(socket, 'project:update', { project_id: 'prod-2' })
+        await flushPromises()
+
+        expect(loadProductionIfOpen).toHaveBeenCalledWith(
+          expect.anything(),
+          'prod-2'
+        )
+        expect(loadOpenProductions).not.toHaveBeenCalled()
+      })
+
+      it('logs a failed check of a production missing from the store', async () => {
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const failure = new Error('Request has been terminated')
+        errors.markRequestFailure(failure)
+
+        const rejections = await recordUnhandledRejections(async () => {
+          const { socket } = await mountApp({
+            actions: { loadProductionIfOpen: () => Promise.reject(failure) },
+            getters
+          })
+          emitSocketEvent(socket, 'project:update', { project_id: 'prod-2' })
+        })
+
+        expect(rejections).toEqual([])
+        expect(consoleError).toHaveBeenCalledWith(failure)
+      })
+
+      it('leaves a bug in the check of a production missing from the store to Sentry', async () => {
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const bug = new TypeError('Cannot read properties of undefined')
+
+        const rejections = await recordUnhandledRejections(async () => {
+          const { socket } = await mountApp({
+            actions: { loadProductionIfOpen: () => Promise.reject(bug) },
+            getters
+          })
+          emitSocketEvent(socket, 'project:update', { project_id: 'prod-2' })
+        })
+
+        expect(rejections).toEqual([bug])
         expect(consoleError).not.toHaveBeenCalledWith(bug)
       })
 

@@ -11,6 +11,15 @@ export default {
     return client.getModel('projects', productionId)
   },
 
+  // The listing holds the open productions of the user's teams, all of them
+  // for an admin: unlike a read, it answers another with none rather than a
+  // refusal.
+  getListedProduction(productionId) {
+    return client
+      .pget(`/api/data/projects?id=${productionId}`)
+      .then(([production]) => production)
+  },
+
   getOpenProductions() {
     return client.pget('/api/data/projects/open')
   },

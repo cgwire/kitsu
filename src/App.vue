@@ -181,7 +181,7 @@ const socketEvents = {
   'project:new': eventData => {
     if (!productionMap.value.get(eventData.project_id)) {
       store
-        .dispatch('loadProduction', eventData.project_id)
+        .dispatch('loadProductionIfShared', eventData.project_id)
         .catch(errors.logRequestFailure)
     }
   },
@@ -207,7 +207,9 @@ const socketEvents = {
           }
         })
     } else {
-      store.dispatch('loadOpenProductions')
+      store
+        .dispatch('loadProductionIfOpen', productionId)
+        .catch(errors.logRequestFailure)
     }
   },
 

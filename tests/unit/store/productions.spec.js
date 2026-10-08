@@ -1371,6 +1371,31 @@ describe('Productions store', () => {
   })
 
   describe('API', () => {
+    // Unlike a read, the listing answers a production out of the user's
+    // teams with none rather than a refusal.
+    describe('getListedProduction', () => {
+      let pget
+
+      afterEach(() => {
+        pget.mockRestore()
+      })
+
+      test('reads the listing filtered on the production', async () => {
+        pget = vi.spyOn(client, 'pget').mockResolvedValue([{ id: '1' }])
+
+        const production = await productionApi.getListedProduction('1')
+
+        expect(pget).toHaveBeenCalledWith('/api/data/projects?id=1')
+        expect(production).toEqual({ id: '1' })
+      })
+
+      test('resolves to nothing when the listing leaves it out', async () => {
+        pget = vi.spyOn(client, 'pget').mockResolvedValue([])
+
+        expect(await productionApi.getListedProduction('1')).toBeUndefined()
+      })
+    })
+
     describe('updateProduction', () => {
       let pput
 
@@ -1827,5 +1852,159 @@ describe('Productions store, production status', () => {
 
     expect(state.openProductions).toHaveLength(1)
     expect(state.openProductions[0]).toBe(production)
+  })
+})
+
+// Zou announces the update of a production to every user: one missing from
+// the store joins it once the user enters its team, or once it reopens.
+describe('Productions store, production opened to the user', () => {
+  const state = {
+    productionStatusMap: new Map([
+      ['status-open', { id: 'status-open', name: 'Open' }],
+      ['status-closed', { id: 'status-closed', name: 'Closed' }]
+    ])
+  }
+  let getListedProduction
+
+  beforeEach(() => {
+    getListedProduction = vi.spyOn(productionApi, 'getListedProduction')
+  })
+
+  afterEach(() => {
+    getListedProduction.mockRestore()
+  })
+
+  test('loads a production the user lists', async () => {
+    getListedProduction.mockResolvedValue({
+      id: 'production-1',
+      project_status_id: 'status-open'
+    })
+    const dispatch = vi.fn()
+
+    await store.actions.loadProductionIfOpen({ dispatch, state }, 'production-1')
+
+    expect(getListedProduction).toHaveBeenCalledWith('production-1')
+    expect(dispatch).toHaveBeenCalledWith('loadProduction', 'production-1')
+  })
+
+  test('leaves out a production the user does not list', async () => {
+    getListedProduction.mockResolvedValue(undefined)
+    const dispatch = vi.fn()
+
+    await store.actions.loadProductionIfOpen({ dispatch, state }, 'production-1')
+
+    expect(dispatch).not.toHaveBeenCalled()
+  })
+
+  // Admins list every production, the closed ones too.
+  test('leaves out a closed production', async () => {
+    getListedProduction.mockResolvedValue({
+      id: 'production-1',
+      project_status_id: 'status-closed'
+    })
+    const dispatch = vi.fn()
+
+    await store.actions.loadProductionIfOpen({ dispatch, state }, 'production-1')
+
+    expect(dispatch).not.toHaveBeenCalled()
+  })
+
+  test('fails with the load of the production', async () => {
+    getListedProduction.mockResolvedValue({
+      id: 'production-1',
+      project_status_id: 'status-open'
+    })
+    const failure = new Error('Request has been terminated')
+    const dispatch = () => Promise.reject(failure)
+
+    await expect(
+      store.actions.loadProductionIfOpen({ dispatch, state }, 'production-1')
+    ).rejects.toBe(failure)
+  })
+})
+
+// Zou announces a new production to every user, and refuses its read to
+// those out of its team, whatever its status.
+describe('Productions store, new production shared with the user', () => {
+  const admin = { isCurrentUserAdmin: true }
+  const nonAdmin = { isCurrentUserAdmin: false }
+  let getProductions
+
+  beforeEach(() => {
+    getProductions = vi.spyOn(productionApi, 'getProductions')
+  })
+
+  afterEach(() => {
+    getProductions.mockRestore()
+  })
+
+  test('loads it for an admin, who reads every production', async () => {
+    const dispatch = vi.fn()
+
+    await store.actions.loadProductionIfShared(
+      { dispatch, rootGetters: admin },
+      'production-1'
+    )
+
+    expect(getProductions).not.toHaveBeenCalled()
+    expect(dispatch).toHaveBeenCalledWith('loadProduction', 'production-1')
+  })
+
+  // Unlike the listing filtered on it, the productions of the user's teams
+  // hold the closed ones too.
+  test('loads it for a member of its team, even closed', async () => {
+    getProductions.mockResolvedValue([
+      { id: 'production-2', project_status_id: 'status-open' },
+      { id: 'production-1', project_status_id: 'status-closed' }
+    ])
+    const dispatch = vi.fn()
+
+    await store.actions.loadProductionIfShared(
+      { dispatch, rootGetters: nonAdmin },
+      'production-1'
+    )
+
+    expect(dispatch).toHaveBeenCalledWith('loadProduction', 'production-1')
+  })
+
+  test('leaves it out for a user out of its team', async () => {
+    getProductions.mockResolvedValue([
+      { id: 'production-2', project_status_id: 'status-open' }
+    ])
+    const dispatch = vi.fn()
+
+    await store.actions.loadProductionIfShared(
+      { dispatch, rootGetters: nonAdmin },
+      'production-1'
+    )
+
+    expect(getProductions).toHaveBeenCalledTimes(1)
+    expect(dispatch).not.toHaveBeenCalled()
+  })
+
+  test('fails with the listing of the productions', async () => {
+    const failure = new Error('Request has been terminated')
+    getProductions.mockRejectedValue(failure)
+    const dispatch = vi.fn()
+
+    await expect(
+      store.actions.loadProductionIfShared(
+        { dispatch, rootGetters: nonAdmin },
+        'production-1'
+      )
+    ).rejects.toBe(failure)
+    expect(dispatch).not.toHaveBeenCalled()
+  })
+
+  test('fails with the load of the production', async () => {
+    const failure = new Error('Request has been terminated')
+    const dispatch = () => Promise.reject(failure)
+
+    await expect(
+      store.actions.loadProductionIfShared(
+        { dispatch, rootGetters: admin },
+        'production-1'
+      )
+    ).rejects.toBe(failure)
   })
 })
