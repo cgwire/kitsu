@@ -97,8 +97,19 @@ const onWheel = event => {
 
 // Watchers
 // --------------------------------------------------------------------------
+watch(
+  () => props.duration,
+  duration => {
+    value.value = duration
+  }
+)
+
+// The prop sync above also moves value: only user edits are emitted, or a
+// day change would save the previous day's duration on the new day.
 watch(value, v => {
-  emit('change', { taskId: props.taskId, duration: v })
+  if (v !== props.duration) {
+    emit('change', { taskId: props.taskId, duration: v })
+  }
 })
 </script>
 
