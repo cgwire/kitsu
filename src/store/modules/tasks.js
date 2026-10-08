@@ -51,7 +51,6 @@ import {
   REMOVE_TASK_COMMENT,
   ADD_REPLY_TO_COMMENT,
   REMOVE_REPLY_FROM_COMMENT,
-  PREVIEW_FILE_SELECTED,
   ADD_PREVIEW_START,
   ADD_PREVIEW_END,
   CHANGE_PREVIEW_END,
@@ -108,7 +107,6 @@ const initialState = {
   isShowInfos: true,
 
   isSavingCommentPreview: false,
-  previewForms: [],
 
   uploadProgress: {}
 }
@@ -118,6 +116,10 @@ const state = {
 }
 
 const helpers = {
+  getFileNames(forms) {
+    return forms.map(form => form.get('file').name)
+  },
+
   getPerson(personId) {
     return personStore.getters.getPerson(personStore.state)(personId)
   },
@@ -162,7 +164,6 @@ const getters = {
   isShowAssignations: state => state.isShowAssignations,
   isShowInfos: state => state.isShowInfos,
   taskEntityPreviews: state => state.taskEntityPreviews,
-  previewForms: state => state.previewForms,
   isSavingCommentPreview: state => state.isSavingCommentPreview,
   uploadProgress: state => state.uploadProgress
 }
@@ -553,14 +554,14 @@ const actions = {
   },
 
   commentTaskWithPreview(
-    { commit, dispatch, state },
+    { commit, dispatch },
     {
       taskId,
       taskStatusId,
       attachment,
       checklist,
       comment,
-      form,
+      forms,
       revision,
       links,
       forClient
@@ -575,7 +576,7 @@ const actions = {
       links,
       forClient
     }
-    const previewForms = [...state.previewForms]
+    const [mainForm, ...extraForms] = forms
     commit(ADD_PREVIEW_START)
     let newComment
     locks[taskId] = true
@@ -594,13 +595,15 @@ const actions = {
         })
         // Create the main preview entry.
         .then(preview => {
-          if (!form) form = previewForms[0]
-          const { request, promise } = tasksApi.uploadPreview(preview.id, form)
+          const { request, promise } = tasksApi.uploadPreview(
+            preview.id,
+            mainForm
+          )
           request.on('progress', e => {
             commit(SET_UPLOAD_PROGRESS, {
               previewId: preview.id,
               percent: e.percent,
-              name: form.get('file').name
+              name: mainForm.get('file').name
             })
           })
           return promise
@@ -616,7 +619,7 @@ const actions = {
           // thumbnails read before any of them shows the preview.
           dispatch('registerPreviewFileStatuses', [preview])
           // Create the remaining previews if there are some.
-          if (previewForms.length > 1) {
+          if (extraForms.length > 0) {
             const addPreview = form => {
               return tasksApi
                 .addExtraPreview(preview.id, taskId, newComment.id)
@@ -645,9 +648,8 @@ const actions = {
                   return preview
                 })
             }
-            const remainingPreviews = previewForms.slice(1)
             // run promises in sequence
-            return remainingPreviews.reduce(
+            return extraForms.reduce(
               (accumulatorPromise, form) =>
                 accumulatorPromise.then(() => addPreview(form)),
               Promise.resolve()
@@ -658,7 +660,7 @@ const actions = {
         })
         .then(preview => {
           commit(NEW_TASK_COMMENT_END, { comment: newComment, taskId })
-          commit(CLEAR_UPLOAD_PROGRESS)
+          commit(CLEAR_UPLOAD_PROGRESS, helpers.getFileNames(forms))
           return { newComment, preview }
         })
         .finally(() => {
@@ -668,9 +670,11 @@ const actions = {
   },
 
   addCommentExtraPreview(
-    { commit, dispatch, getters, state },
-    { taskId, commentId, previewId }
+    { commit, dispatch, getters },
+    { taskId, commentId, previewId, forms }
   ) {
+    // A retry starts the bars of its files from zero.
+    commit(CLEAR_UPLOAD_PROGRESS, helpers.getFileNames(forms))
     const addPreview = form => {
       return tasksApi
         .addExtraPreview(previewId, taskId, commentId)
@@ -698,11 +702,16 @@ const actions = {
         })
     }
     // run promises in sequence
-    return state.previewForms.reduce(
-      (accumulatorPromise, form) =>
-        accumulatorPromise.then(() => addPreview(form)),
-      Promise.resolve()
-    )
+    return forms
+      .reduce(
+        (accumulatorPromise, form) =>
+          accumulatorPromise.then(() => addPreview(form)),
+        Promise.resolve()
+      )
+      .then(preview => {
+        commit(CLEAR_UPLOAD_PROGRESS, helpers.getFileNames(forms))
+        return preview
+      })
   },
 
   deleteTaskPreview({ commit }, { taskId, commentId, previewId }) {
@@ -921,10 +930,6 @@ const actions = {
 
   setSmallThumbnails({ commit }) {
     commit(SET_IS_BIG_THUMBNAILS, false)
-  },
-
-  loadPreviewFileFormData({ commit }, previewForms) {
-    commit(PREVIEW_FILE_SELECTED, previewForms)
   },
 
   addSelectedTask({ commit }, task) {
@@ -1235,10 +1240,6 @@ const mutations = {
         enriched
       ])
     }
-  },
-
-  [PREVIEW_FILE_SELECTED](state, forms) {
-    state.previewForms = forms
   },
 
   [ADD_PREVIEW_START](state) {
@@ -1692,8 +1693,14 @@ const mutations = {
     state.uploadProgress[name] = percent
   },
 
-  [CLEAR_UPLOAD_PROGRESS](state) {
-    state.uploadProgress = {}
+  // Given file names, only theirs: the comment box and the extra preview
+  // modal upload at the same time.
+  [CLEAR_UPLOAD_PROGRESS](state, names) {
+    if (names) {
+      names.forEach(name => delete state.uploadProgress[name])
+    } else {
+      state.uploadProgress = {}
+    }
   },
 
   [ADD_ANNOTATION](state, { annotations, annotation }) {

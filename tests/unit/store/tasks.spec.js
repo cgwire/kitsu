@@ -559,12 +559,13 @@ describe('Tasks store, preview file statuses', () => {
     const dispatch = vi.fn()
 
     await tasksStore.actions.commentTaskWithPreview(
+      { commit, dispatch },
       {
-        commit,
-        dispatch,
-        state: { previewForms: [form('a.png'), form('b.png')] }
-      },
-      { taskId: 'task-1', taskStatusId: 'status-1', comment: '' }
+        taskId: 'task-1',
+        taskStatusId: 'status-1',
+        comment: '',
+        forms: [form('a.png'), form('b.png')]
+      }
     )
 
     const registers = registerCalls(dispatch)
@@ -589,10 +590,14 @@ describe('Tasks store, preview file statuses', () => {
       {
         commit,
         dispatch,
-        getters: { getTaskComment: () => ({ id: 'comment-1' }) },
-        state: { previewForms: [form('c.png')] }
+        getters: { getTaskComment: () => ({ id: 'comment-1' }) }
       },
-      { taskId: 'task-1', commentId: 'comment-1', previewId: 'preview-1' }
+      {
+        taskId: 'task-1',
+        commentId: 'comment-1',
+        previewId: 'preview-1',
+        forms: [form('c.png')]
+      }
     )
 
     const registers = registerCalls(dispatch)
@@ -625,6 +630,173 @@ describe('Tasks store, preview file statuses', () => {
     expect(registers[0][2]).toBeGreaterThan(
       commitOrders(commit, 'LOAD_TASK_COMMENTS_END')[0]
     )
+  })
+})
+
+// The caller hands over the files to upload: no other panel can change them
+// while a long upload runs.
+describe('Tasks store, preview uploads', () => {
+  const form = name => new Map([['file', { name }]])
+  const uploadedFiles = () =>
+    tasksApi.uploadPreview.mock.calls.map(([previewId, form]) => [
+      previewId,
+      form?.get('file').name
+    ])
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    tasksApi.commentTask.mockResolvedValue({ id: 'comment-1' })
+    tasksApi.addPreview.mockResolvedValue({ id: 'preview-1' })
+    tasksApi.uploadPreview.mockImplementation(previewId => ({
+      request: { on: vi.fn() },
+      promise: Promise.resolve({ id: previewId, revision: 1 })
+    }))
+  })
+
+  test('commentTaskWithPreview uploads the first form as the main preview, the others as extras', async () => {
+    tasksApi.addExtraPreview
+      .mockResolvedValueOnce({ id: 'preview-2' })
+      .mockResolvedValueOnce({ id: 'preview-3' })
+
+    await tasksStore.actions.commentTaskWithPreview(
+      { commit: vi.fn(), dispatch: vi.fn() },
+      {
+        taskId: 'task-1',
+        taskStatusId: 'status-1',
+        comment: '',
+        forms: [form('a.png'), form('b.png'), form('c.png')]
+      }
+    )
+
+    expect(uploadedFiles()).toEqual([
+      ['preview-1', 'a.png'],
+      ['preview-2', 'b.png'],
+      ['preview-3', 'c.png']
+    ])
+    expect(tasksApi.addExtraPreview.mock.calls).toEqual([
+      ['preview-1', 'task-1', 'comment-1'],
+      ['preview-1', 'task-1', 'comment-1']
+    ])
+  })
+
+  test('commentTaskWithPreview adds no extra preview to a single form', async () => {
+    await tasksStore.actions.commentTaskWithPreview(
+      { commit: vi.fn(), dispatch: vi.fn() },
+      {
+        taskId: 'task-1',
+        taskStatusId: 'status-1',
+        comment: '',
+        forms: [form('thumbnail.png')]
+      }
+    )
+
+    expect(uploadedFiles()).toEqual([['preview-1', 'thumbnail.png']])
+    expect(tasksApi.addExtraPreview).not.toHaveBeenCalled()
+  })
+
+  test('commentTaskWithPreview reports the progress under the uploaded file name', async () => {
+    const commit = vi.fn()
+
+    await tasksStore.actions.commentTaskWithPreview(
+      { commit, dispatch: vi.fn() },
+      {
+        taskId: 'task-1',
+        taskStatusId: 'status-1',
+        comment: '',
+        forms: [form('a.png')]
+      }
+    )
+    const { request } = tasksApi.uploadPreview.mock.results[0].value
+    const [event, onProgress] = request.on.mock.calls[0]
+    onProgress({ direction: 'download', percent: 100 })
+
+    expect(event).toBe('progress')
+    expect(commit).toHaveBeenCalledWith('SET_UPLOAD_PROGRESS', {
+      previewId: 'preview-1',
+      percent: 100,
+      name: 'a.png'
+    })
+  })
+
+  // The comment box and the extra preview modal upload at the same time:
+  // each clears the progress of its own files only.
+  test('CLEAR_UPLOAD_PROGRESS of given files keeps the progress of the others', () => {
+    const state = { uploadProgress: { 'a.png': 40, 'b.png': 100 } }
+
+    tasksStore.mutations.CLEAR_UPLOAD_PROGRESS(state, ['b.png'])
+
+    expect(state.uploadProgress).toEqual({ 'a.png': 40 })
+  })
+
+  test('commentTaskWithPreview clears the progress of its files once done', async () => {
+    const commit = vi.fn()
+
+    await tasksStore.actions.commentTaskWithPreview(
+      { commit, dispatch: vi.fn() },
+      {
+        taskId: 'task-1',
+        taskStatusId: 'status-1',
+        comment: '',
+        forms: [form('a.png')]
+      }
+    )
+
+    expect(commit).toHaveBeenCalledWith('CLEAR_UPLOAD_PROGRESS', ['a.png'])
+    expect(commit).not.toHaveBeenCalledWith('CLEAR_UPLOAD_PROGRESS')
+  })
+
+  // A retry starts the bars of its files from zero.
+  test('addCommentExtraPreview clears the progress of its files first and last', async () => {
+    const commit = vi.fn()
+    tasksApi.addExtraPreview.mockResolvedValueOnce({ id: 'preview-2' })
+
+    await tasksStore.actions.addCommentExtraPreview(
+      {
+        commit,
+        dispatch: vi.fn(),
+        getters: { getTaskComment: () => ({ id: 'comment-1' }) }
+      },
+      {
+        taskId: 'task-1',
+        commentId: 'comment-1',
+        previewId: 'preview-1',
+        forms: [form('b.png')]
+      }
+    )
+
+    const clears = commit.mock.calls.filter(
+      ([type]) => type === 'CLEAR_UPLOAD_PROGRESS'
+    )
+    expect(commit.mock.calls[0]).toEqual(['CLEAR_UPLOAD_PROGRESS', ['b.png']])
+    expect(clears).toEqual([
+      ['CLEAR_UPLOAD_PROGRESS', ['b.png']],
+      ['CLEAR_UPLOAD_PROGRESS', ['b.png']]
+    ])
+  })
+
+  test('addCommentExtraPreview uploads the forms it is handed', async () => {
+    tasksApi.addExtraPreview
+      .mockResolvedValueOnce({ id: 'preview-2' })
+      .mockResolvedValueOnce({ id: 'preview-3' })
+
+    await tasksStore.actions.addCommentExtraPreview(
+      {
+        commit: vi.fn(),
+        dispatch: vi.fn(),
+        getters: { getTaskComment: () => ({ id: 'comment-1' }) }
+      },
+      {
+        taskId: 'task-1',
+        commentId: 'comment-1',
+        previewId: 'preview-1',
+        forms: [form('b.png'), form('c.png')]
+      }
+    )
+
+    expect(uploadedFiles()).toEqual([
+      ['preview-2', 'b.png'],
+      ['preview-3', 'c.png']
+    ])
   })
 })
 

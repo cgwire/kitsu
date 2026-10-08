@@ -670,7 +670,7 @@ export const useEntityPage = ({
         taskId: form.task.id,
         commentText: '',
         taskStatusId: form.task.task_status_id,
-        form
+        forms: [form]
       })
       await store.dispatch('setPreview', {
         taskId: form.task.id,

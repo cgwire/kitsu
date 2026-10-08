@@ -422,6 +422,7 @@
         :is-error="errors.addExtraPreview"
         :form-data="addExtraPreviewFormData"
         message=""
+        :upload-progress="uploadProgress"
         :title="
           task
             ? `${task.entity_name} / ${taskTypeMap.get(task.task_type_id)?.name || ''}`
@@ -626,6 +627,7 @@ const taskMetadataDescriptors = computed(
   () => store.getters.taskMetadataDescriptors
 )
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
+const uploadProgress = computed(() => store.getters.uploadProgress)
 const user = computed(() => store.getters.user)
 const organisation = computed(() => store.getters.organisation)
 const isCurrentUserManager = computed(
@@ -1116,9 +1118,11 @@ const resetPreview = (changeRoute = true) => {
 }
 
 const clearPreviewFiles = () => {
+  store.commit(
+    'CLEAR_UPLOAD_PROGRESS',
+    previewForms.value.map(form => form.get('file').name)
+  )
   previewForms.value = []
-  store.dispatch('loadPreviewFileFormData', previewForms.value)
-  store.commit('CLEAR_UPLOAD_PROGRESS')
 }
 
 const reset = ({ keepPreviewFiles = false } = {}) => {
@@ -1224,6 +1228,7 @@ const postComment = (
     attachment,
     checklist,
     comment,
+    forms: previewForms.value,
     links: link ? [link] : null,
     revision,
     forClient
@@ -1400,11 +1405,9 @@ const onCancelDeleteComment = () => {
 // --------------------------------------------------------------------------
 const selectFile = forms => {
   previewForms.value = previewForms.value.concat(forms)
-  store.dispatch('loadPreviewFileFormData', previewForms.value)
 }
 
 const createExtraPreview = forms => {
-  selectFile(forms)
   errors.value.addExtraPreview = false
   loading.value.addExtraPreview = true
   const comment = getCurrentTaskComments().find(item =>
@@ -1414,13 +1417,13 @@ const createExtraPreview = forms => {
     .dispatch('addCommentExtraPreview', {
       taskId: task.value.id,
       commentId: comment?.id,
-      previewId: currentPreviewId.value
+      previewId: currentPreviewId.value,
+      forms
     })
     .then(() => {
       loading.value.addExtraPreview = false
       modals.value.addExtraPreview = false
       addExtraPreviewModalRef.value.reset()
-      clearPreviewFiles()
       setTimeout(() => {
         previewPlayerRef.value.displayLast()
       }, 0)
@@ -1518,7 +1521,6 @@ const onPreviewAdded = eventData => {
 }
 
 const onAddExtraPreviewClicked = () => {
-  clearPreviewFiles()
   modals.value.addExtraPreview = true
 }
 
@@ -1557,7 +1559,6 @@ const onPreviewsOrderChanged = () => {
 
 const onPreviewFormRemoved = previewForm => {
   previewForms.value = previewForms.value.filter(f => f !== previewForm)
-  store.dispatch('loadPreviewFileFormData', previewForms.value)
 }
 
 const changeCurrentPreview = preview => {

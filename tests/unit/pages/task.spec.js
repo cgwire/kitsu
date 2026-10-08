@@ -647,6 +647,162 @@ describe('Task.vue comment actions', () => {
   })
 })
 
+describe('Task.vue publishing', () => {
+  const previewForm = name => {
+    const form = new FormData()
+    form.append('file', new File(['frame'], name))
+    return form
+  }
+
+  const mountCommentingPage = async (options = {}) => {
+    const reset = vi.fn()
+    const mounted = await mountPage({
+      ...options,
+      getterOverrides: {
+        isCurrentUserProductionManager: () => true,
+        ...options.getterOverrides
+      },
+      stubs: {
+        AddComment: {
+          props: ['previewForms'],
+          template: '<div />',
+          methods: { focus: () => {}, reset }
+        }
+      }
+    })
+    return { ...mounted, reset }
+  }
+
+  const commentBox = wrapper => wrapper.findComponent(AddComment)
+
+  it('publishes the files of its comment box with the comment', async () => {
+    const { wrapper, store } = await mountCommentingPage()
+    const form = previewForm('sh010.mp4')
+
+    commentBox(wrapper).vm.$emit('file-drop', [form])
+    commentBox(wrapper).vm.$emit('add-comment', 'Done', [], [], 'status-1')
+    await flushPromises()
+
+    expect(store.dispatch).toHaveBeenCalledWith(
+      'commentTaskWithPreview',
+      expect.objectContaining({ taskId: TASK_ID, forms: [form] })
+    )
+  })
+
+  // The extra preview modal may upload at the same time.
+  it('clears the progress of the published files only', async () => {
+    const { wrapper, store } = await mountCommentingPage()
+
+    commentBox(wrapper).vm.$emit('file-drop', [previewForm('sh010.mp4')])
+    commentBox(wrapper).vm.$emit('add-comment', 'Done', [], [], 'status-1')
+    await flushPromises()
+
+    expect(store.commit).toHaveBeenCalledWith('CLEAR_UPLOAD_PROGRESS', [
+      'sh010.mp4'
+    ])
+    expect(store.commit).not.toHaveBeenCalledWith('CLEAR_UPLOAD_PROGRESS')
+  })
+
+  // The extra preview modal uploads its own files: the comment box keeps
+  // what it holds, and a refused file never lands in it.
+  describe('beside an extra preview', () => {
+    const extraModal = wrapper =>
+      wrapper.findComponent({ ref: 'add-extra-preview-modal' })
+    const boxFiles = wrapper =>
+      commentBox(wrapper)
+        .props('previewForms')
+        .map(form => form.get('file').name)
+
+    let consoleError = null
+
+    afterEach(() => {
+      consoleError?.mockRestore()
+      consoleError = null
+      vi.useRealTimers()
+    })
+
+    it('keeps the comment box files when the modal opens', async () => {
+      const previews = [
+        { id: 'preview-1', revision: 1, extension: 'mp4', previews: [] }
+      ]
+      const { wrapper, store } = await mountCommentingPage({ previews })
+      const form = previewForm('sh010.mp4')
+      commentBox(wrapper).vm.$emit('file-drop', [form])
+      store.commit.mockClear()
+
+      wrapper.findComponent(PreviewPlayer).vm.$emit('add-extra-preview')
+      await flushPromises()
+
+      expect(boxFiles(wrapper)).toEqual(['sh010.mp4'])
+      // The bars of a publication in progress keep their values.
+      expect(store.commit).not.toHaveBeenCalledWith('CLEAR_UPLOAD_PROGRESS')
+    })
+
+    it('shows its upload progress in the modal', async () => {
+      const uploadProgress = { 'sh010-alt.png': 30 }
+      const { wrapper } = await mountCommentingPage({
+        getterOverrides: { uploadProgress: () => uploadProgress }
+      })
+
+      expect(extraModal(wrapper).vm.$attrs['upload-progress']).toEqual(
+        uploadProgress
+      )
+    })
+
+    it('keeps the comment box files once the extra preview is added', async () => {
+      const { wrapper, store } = await mountCommentingPage()
+      // The end of the upload then refreshes a player this page lacks.
+      vi.useFakeTimers({ toFake: ['setTimeout'] })
+      const form = previewForm('sh010.mp4')
+      commentBox(wrapper).vm.$emit('file-drop', [form])
+      store.commit.mockClear()
+
+      extraModal(wrapper).vm.$emit('confirm', [previewForm('sh010-alt.png')])
+      await flushPromises()
+
+      expect(boxFiles(wrapper)).toEqual(['sh010.mp4'])
+      // The upload clears the progress of its own files.
+      expect(store.commit).not.toHaveBeenCalledWith('CLEAR_UPLOAD_PROGRESS')
+    })
+
+    it('keeps a refused extra preview out of the comment box', async () => {
+      const { wrapper, store } = await mountCommentingPage()
+      const refusal = new Error('Request Entity Too Large')
+      store.dispatch.mockImplementation(type =>
+        type === 'addCommentExtraPreview'
+          ? Promise.reject(refusal)
+          : Promise.resolve()
+      )
+      consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+
+      extraModal(wrapper).vm.$emit('confirm', [previewForm('sh010-alt.png')])
+      await flushPromises()
+
+      expect(boxFiles(wrapper)).toEqual([])
+      expect(consoleError).toHaveBeenCalledWith(refusal)
+    })
+  })
+
+  it('uploads the files of the extra preview modal', async () => {
+    const { wrapper, store } = await mountCommentingPage()
+    // Left pending: the end of the upload only refreshes the player.
+    store.dispatch.mockImplementation(() => new Promise(() => {}))
+    const form = previewForm('sh010-alt.png')
+
+    wrapper
+      .findComponent({ ref: 'add-extra-preview-modal' })
+      .vm.$emit('confirm', [form])
+    await flushPromises()
+
+    expect(store.dispatch).toHaveBeenCalledWith(
+      'addCommentExtraPreview',
+      expect.objectContaining({ taskId: TASK_ID, forms: [form] })
+    )
+  })
+})
+
 describe('Task.vue navigation', () => {
   const taskTypes = [
     { id: 'tt-layout', name: 'Layout', for_entity: 'Shot', priority: 1 },

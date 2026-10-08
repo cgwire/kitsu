@@ -295,6 +295,7 @@
           :is-loading="loading.addExtraPreview"
           :is-error="errors.addExtraPreview"
           message=""
+          :upload-progress="uploadProgress"
           @cancel="onCloseExtraPreview"
           @confirm="createExtraPreview"
         />
@@ -599,6 +600,7 @@ const shotMap = computed(() => store.getters.shotMap)
 const taskEntityPreviews = computed(() => store.getters.taskEntityPreviews)
 const taskMap = computed(() => store.getters.taskMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
+const uploadProgress = computed(() => store.getters.uploadProgress)
 const user = computed(() => store.getters.user)
 
 const sideColumnParent = computed(() => {
@@ -910,6 +912,7 @@ const postComment = (
       attachment,
       checklist,
       comment,
+      forms: previewForms.value,
       links: link ? [link] : null,
       revision,
       forClient
@@ -966,22 +969,21 @@ const focusCommentTextarea = () => {
 
 const selectFile = forms => {
   previewForms.value = previewForms.value.concat(forms)
-  store.dispatch('loadPreviewFileFormData', previewForms.value)
 }
 
 const onPreviewFormRemoved = previewForm => {
   previewForms.value = previewForms.value.filter(f => f !== previewForm)
-  store.dispatch('loadPreviewFileFormData', previewForms.value)
 }
 
 const clearPreviewFiles = () => {
+  store.commit(
+    'CLEAR_UPLOAD_PROGRESS',
+    previewForms.value.map(form => form.get('file').name)
+  )
   previewForms.value = []
-  store.dispatch('loadPreviewFileFormData', previewForms.value)
-  store.commit('CLEAR_UPLOAD_PROGRESS')
 }
 
 const createExtraPreview = forms => {
-  selectFile(forms)
   errors.addExtraPreview = false
   loading.addExtraPreview = true
   const comment = taskComments.value.find(comment =>
@@ -991,12 +993,13 @@ const createExtraPreview = forms => {
     .dispatch('addCommentExtraPreview', {
       taskId: props.task.id,
       commentId: comment?.id,
-      previewId: currentPreviewId.value
+      previewId: currentPreviewId.value,
+      forms
     })
     .then(() => {
       loading.addExtraPreview = false
       addExtraPreviewModalRef.value.reset()
-      reset()
+      reset({ keepPreviewFiles: true })
       setTimeout(() => {
         previewPlayerRef.value?.displayLast()
       }, 0)
@@ -1075,7 +1078,6 @@ const onAddPreviewClicked = () => {
 }
 
 const onAddExtraPreview = () => {
-  clearPreviewFiles()
   modals.addExtraPreview = true
 }
 
