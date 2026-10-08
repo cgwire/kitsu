@@ -16,8 +16,6 @@ import {
   LOAD_PRODUCTIONS_START,
   LOAD_PRODUCTIONS_ERROR,
   LOAD_PRODUCTIONS_END,
-  LOAD_OPEN_PRODUCTIONS_START,
-  LOAD_OPEN_PRODUCTIONS_ERROR,
   LOAD_OPEN_PRODUCTIONS_END,
   LOAD_PRODUCTION_STATUS_START,
   LOAD_PRODUCTION_STATUS_ERROR,
@@ -78,7 +76,6 @@ const initialState = {
 
   isProductionsLoading: false,
   isProductionsLoadingError: false,
-  isOpenProductionsLoading: false,
 
   lastProductionRoute: { name: 'open-productions' }
 }
@@ -253,7 +250,6 @@ const getters = {
 
   isProductionsLoading: state => state.isProductionsLoading,
   isProductionsLoadingError: state => state.isProductionsLoadingError,
-  isOpenProductionsLoading: state => state.isOpenProductionsLoading,
 
   assetsPath: (state, getters, rootState, rootGetters) =>
     helpers.getSectionPath(getters, rootGetters, 'assets'),
@@ -483,16 +479,6 @@ const actions = {
       commit(LOAD_PRODUCTION_STATUS_END, productionStatus)
     } catch (err) {
       commit(LOAD_PRODUCTION_STATUS_ERROR)
-    }
-  },
-
-  async loadOpenProductions({ commit }) {
-    commit(LOAD_OPEN_PRODUCTIONS_START)
-    try {
-      const productions = await productionsApi.getOpenProductions()
-      commit(LOAD_OPEN_PRODUCTIONS_END, productions)
-    } catch (err) {
-      commit(LOAD_OPEN_PRODUCTIONS_ERROR)
     }
   },
 
@@ -1029,15 +1015,7 @@ const mutations = {
     })
   },
 
-  [LOAD_OPEN_PRODUCTIONS_START](state) {
-    state.isOpenProductionsLoading = true
-    state.openProductions = []
-  },
-  [LOAD_OPEN_PRODUCTIONS_ERROR](state) {
-    state.isOpenProductionsLoading = false
-  },
   [LOAD_OPEN_PRODUCTIONS_END](state, productions) {
-    state.isOpenProductionsLoading = false
     // The map keeps its objects, the current production among them: a
     // known open production takes the listed fields, a closed one, absent
     // from this listing, stays as it was loaded.

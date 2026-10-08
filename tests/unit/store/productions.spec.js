@@ -21,8 +21,6 @@ import {
   LOAD_BACKGROUNDS_END,
   LOAD_BACKGROUNDS_START,
   LOAD_OPEN_PRODUCTIONS_END,
-  LOAD_OPEN_PRODUCTIONS_ERROR,
-  LOAD_OPEN_PRODUCTIONS_START,
   LOAD_PRODUCTION_STATUS_END,
   LOAD_PRODUCTION_STATUS_ERROR,
   LOAD_PRODUCTION_STATUS_START,
@@ -295,24 +293,6 @@ describe('Productions store', () => {
       expect(mockCommit).toBeCalledTimes(2)
       expect(mockCommit).toHaveBeenNthCalledWith(1, LOAD_PRODUCTION_STATUS_START)
       expect(mockCommit).toHaveBeenNthCalledWith(2, LOAD_PRODUCTION_STATUS_END, 123)
-    })
-
-    test('loadOpenProductions', async () => {
-      let mockCommit = vi.fn()
-      productionApi.getOpenProductions = vi.fn(() => Promise.reject())
-      await store.actions.loadOpenProductions({ commit: mockCommit, state: null })
-      expect(productionApi.getOpenProductions).toBeCalledTimes(1)
-      expect(mockCommit).toBeCalledTimes(2)
-      expect(mockCommit).toHaveBeenNthCalledWith(1, LOAD_OPEN_PRODUCTIONS_START)
-      expect(mockCommit).toHaveBeenNthCalledWith(2, LOAD_OPEN_PRODUCTIONS_ERROR)
-
-      mockCommit = vi.fn()
-      productionApi.getOpenProductions = vi.fn(() => Promise.resolve(123))
-      await store.actions.loadOpenProductions({ commit: mockCommit, state: null })
-      expect(productionApi.getOpenProductions).toBeCalledTimes(1)
-      expect(mockCommit).toBeCalledTimes(2)
-      expect(mockCommit).toHaveBeenNthCalledWith(1, LOAD_OPEN_PRODUCTIONS_START)
-      expect(mockCommit).toHaveBeenNthCalledWith(2, LOAD_OPEN_PRODUCTIONS_END, 123)
     })
 
     test('loadProductions', async () => {
@@ -1076,29 +1056,6 @@ describe('Productions store', () => {
 
         expect(state.isProductionsLoading).toBe(false)
         expect(state.isProductionsLoadingError).toBe(false)
-      })
-    })
-
-    describe('open productions loading flag', () => {
-      test('START shows the loading state and drops the list', () => {
-        state.isOpenProductionsLoading = false
-        state.openProductions = [{ id: 'production-1', name: 'caminandes' }]
-
-        store.mutations.LOAD_OPEN_PRODUCTIONS_START(state)
-
-        expect(state.isOpenProductionsLoading).toBe(true)
-        expect(state.openProductions).toEqual([])
-      })
-
-      test('ERROR and END clear it', () => {
-        state.isOpenProductionsLoading = true
-        store.mutations.LOAD_OPEN_PRODUCTIONS_ERROR(state)
-        expect(state.isOpenProductionsLoading).toBe(false)
-
-        state.currentProduction = null
-        state.isOpenProductionsLoading = true
-        store.mutations.LOAD_OPEN_PRODUCTIONS_END(state, [])
-        expect(state.isOpenProductionsLoading).toBe(false)
       })
     })
 

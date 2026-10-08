@@ -317,25 +317,6 @@ describe('Todos page', () => {
       )
       wrapper.unmount()
     })
-
-    // The production of a new assignation joins the open ones through the
-    // project:update Zou sends once it adds the user to the team.
-    it('leaves the open productions alone', async () => {
-      const socket = { on: vi.fn(), off: vi.fn() }
-      const loadOpenProductions = vi.fn()
-      const wrapper = await mountPage([], {
-        actions: { loadOpenProductions },
-        socket
-      })
-      await flushPromises()
-      vi.useFakeTimers()
-
-      emitAssignations(socket, 1)
-      await vi.advanceTimersByTimeAsync(500)
-
-      expect(loadOpenProductions).not.toHaveBeenCalled()
-      wrapper.unmount()
-    })
   })
 
   describe('time spent', () => {

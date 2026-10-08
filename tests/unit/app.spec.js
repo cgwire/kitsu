@@ -320,9 +320,8 @@ describe('App', () => {
       // missing from the store may have just opened to them.
       it('checks whether a production missing from the store opened to the user', async () => {
         const loadProductionIfOpen = vi.fn(() => Promise.resolve())
-        const loadOpenProductions = vi.fn(() => Promise.resolve())
         const { socket } = await mountApp({
-          actions: { loadOpenProductions, loadProductionIfOpen },
+          actions: { loadProductionIfOpen },
           getters
         })
 
@@ -333,7 +332,6 @@ describe('App', () => {
           expect.anything(),
           'prod-2'
         )
-        expect(loadOpenProductions).not.toHaveBeenCalled()
       })
 
       it('logs a failed check of a production missing from the store', async () => {

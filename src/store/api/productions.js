@@ -20,10 +20,6 @@ export default {
       .then(([production]) => production)
   },
 
-  getOpenProductions() {
-    return client.pget('/api/data/projects/open')
-  },
-
   getProductionStatus() {
     return client.pget('/api/data/project-status')
   },
