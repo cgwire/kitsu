@@ -53,6 +53,7 @@ import {
   REMOVE_REPLY_FROM_COMMENT,
   ADD_PREVIEW_START,
   ADD_PREVIEW_END,
+  ADD_PREVIEW_ERROR,
   CHANGE_PREVIEW_END,
   UPDATE_PREVIEW_ANNOTATION,
   UPDATE_PREVIEW_VALIDATION_STATUS,
@@ -663,6 +664,10 @@ const actions = {
           commit(CLEAR_UPLOAD_PROGRESS, helpers.getFileNames(forms))
           return { newComment, preview }
         })
+        .catch(err => {
+          commit(ADD_PREVIEW_ERROR)
+          throw err
+        })
         .finally(() => {
           locks[taskId] = false
         })
@@ -1244,6 +1249,10 @@ const mutations = {
 
   [ADD_PREVIEW_START](state) {
     state.isSavingCommentPreview = true
+  },
+
+  [ADD_PREVIEW_ERROR](state) {
+    state.isSavingCommentPreview = false
   },
 
   [ADD_PREVIEW_END](state, { preview, taskId, commentId, comment }) {

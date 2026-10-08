@@ -800,6 +800,49 @@ describe('Tasks store, preview uploads', () => {
   })
 })
 
+// The comment events wait while a comment with previews is saved: a failed
+// save must not keep them out for the rest of the session.
+describe('Tasks store, failed preview publications', () => {
+  const error = new Error('down')
+  const failedUpload = () => ({
+    request: { on: vi.fn() },
+    promise: Promise.reject(error)
+  })
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    tasksApi.commentTask.mockResolvedValue({ id: 'comment-1' })
+    tasksApi.addPreview.mockResolvedValue({ id: 'preview-1' })
+  })
+
+  test.each([
+    ['comment', () => tasksApi.commentTask.mockRejectedValueOnce(error)],
+    ['preview entry', () => tasksApi.addPreview.mockRejectedValueOnce(error)],
+    ['upload', () => tasksApi.uploadPreview.mockImplementationOnce(failedUpload)]
+  ])(
+    'commentTaskWithPreview lets the comment events in again when the %s fails',
+    async (step, fail) => {
+      fail()
+      const state = { isSavingCommentPreview: false }
+      const commit = (type, payload) =>
+        tasksStore.mutations[type](state, payload)
+
+      await expect(
+        tasksStore.actions.commentTaskWithPreview(
+          { commit, dispatch: vi.fn() },
+          {
+            taskId: 'task-1',
+            taskStatusId: 'status-1',
+            comment: '',
+            forms: [new Map([['file', { name: 'a.png' }]])]
+          }
+        )
+      ).rejects.toBe(error)
+      expect(state.isSavingCommentPreview).toBe(false)
+    }
+  )
+})
+
 // The players draw copies of the comment previews: they follow the status
 // Zou announces for each preview file.
 describe('Tasks store, preview copies', () => {
