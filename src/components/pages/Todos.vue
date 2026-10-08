@@ -83,6 +83,7 @@
         </div>
 
         <todos-list
+          :editable="false"
           ref="todo-list"
           class="todos-panel"
           :empty-text="$t('people.no_task_assigned')"
@@ -95,6 +96,7 @@
         />
 
         <todos-list
+          :editable="false"
           class="todos-panel"
           :empty-text="$t('people.no_task_pending')"
           :with-illustration="false"
@@ -107,6 +109,7 @@
         />
 
         <todos-list
+          :editable="false"
           ref="done-list"
           class="done-list todos-panel"
           done

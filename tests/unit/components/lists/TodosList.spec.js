@@ -235,6 +235,32 @@ describe('lists/TodosList', () => {
     wrapper.unmount()
   })
 
+  // My tasks shows the list read-only, the person page keeps the editors
+  test('shows no editor when not editable', async () => {
+    const wrapper = mountList(
+      { isLoading: true, tasks: [], editable: false },
+      undefined,
+      {
+        getters: {
+          isCurrentUserManager: () => true,
+          taskMap: () => new Map([[task.id, task]])
+        }
+      }
+    )
+    await wrapper.setProps({ isLoading: false, tasks: [task] })
+    await wrapper.find('tbody td.duration').trigger('click')
+
+    expect(wrapper.find('tbody td.estimation input').exists()).toBe(false)
+    expect(wrapper.find('tbody td.start-date date-field-stub').exists()).toBe(
+      false
+    )
+    expect(wrapper.find('tbody td.due-date date-field-stub').exists()).toBe(
+      false
+    )
+
+    wrapper.unmount()
+  })
+
   describe('estimation field', () => {
     const mountEditableList = updateTask =>
       mountLoadedList(undefined, {
