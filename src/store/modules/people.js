@@ -196,6 +196,13 @@ const state = {
   ...initialState
 }
 
+// The list lives out of the reactive state: without the version read, Vuex
+// would keep the first value of the list getters for the life of the store.
+const readPeople = state => {
+  state.personMapVersion // eslint-disable-line no-unused-expressions
+  return cache.people
+}
+
 const getters = {
   organisation: state => state.organisation,
   // floor of the timesheet year selectors: nothing was tracked before the
@@ -224,11 +231,11 @@ const getters = {
     return `/api/pictures/thumbnails/organisations/${id}.png?t=${timestamp}`
   },
 
-  people: state => cache.people,
-  peopleWithoutBot: state => cache.people.filter(person => !person.is_bot),
-  activePeople: state => cache.people.filter(person => person.active),
+  people: state => readPeople(state),
+  peopleWithoutBot: state => readPeople(state).filter(person => !person.is_bot),
+  activePeople: state => readPeople(state).filter(person => person.active),
   activePeopleWithoutBot: state =>
-    cache.people.filter(person => person.active && !person.is_bot),
+    readPeople(state).filter(person => person.active && !person.is_bot),
   displayedPeople: state => state.displayedPeople,
   peopleIndex: state => cache.peopleIndex,
   personMap: state => {
@@ -779,12 +786,8 @@ const mutations = {
 
   [DELETE_PEOPLE_END](state, person) {
     if (person) {
-      const personToDeleteIndex = cache.people.findIndex(
-        ({ id }) => id === person.id
-      )
-      if (personToDeleteIndex >= 0) {
-        cache.people.splice(personToDeleteIndex, 1)
-      }
+      // A new list: readers of the same array would miss the deletion.
+      cache.people = cache.people.filter(({ id }) => id !== person.id)
       cache.personMap.delete(person.id)
     }
     state.personMapVersion++
