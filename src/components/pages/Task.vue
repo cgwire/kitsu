@@ -1222,8 +1222,9 @@ const postComment = (
   link = undefined,
   forClient = false
 ) => {
+  const taskId = task.value.id
   const params = {
-    taskId: task.value.id,
+    taskId,
     taskStatusId,
     attachment,
     checklist,
@@ -1241,9 +1242,13 @@ const postComment = (
   store
     .dispatch(action, params)
     .then(() => {
-      drafts.clearTaskDraft(task.value.id)
-      addCommentRef.value?.reset()
-      reset()
+      drafts.clearTaskDraft(taskId)
+      // A long upload may end once the page shows another task, whose
+      // comment box holds a comment still to publish.
+      if (route.params.task_id === taskId) {
+        addCommentRef.value?.reset()
+        reset()
+      }
       loading.value.addComment = false
     })
     .catch(err => {

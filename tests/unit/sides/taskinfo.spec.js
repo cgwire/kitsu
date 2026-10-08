@@ -18,6 +18,7 @@ import EditCommentModal from '@/components/modals/EditCommentModal.vue'
 import AddComment from '@/components/widgets/AddComment.vue'
 import Comment from '@/components/widgets/Comment.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
+import drafts from '@/lib/drafts'
 import { DEFAULT_FPS } from '@/lib/video'
 import shotStore from '@/store/modules/shots'
 
@@ -956,6 +957,54 @@ describe('TaskInfo.vue', () => {
         'addCommentExtraPreview',
         expect.objectContaining({ taskId: TASK_ID, forms: [form] })
       )
+    })
+
+    describe('once the upload ends', () => {
+      afterEach(() => localStorage.clear())
+
+      it('empties the comment box of the published task', async () => {
+        const { wrapper, reset } = await mountCommentingPanel()
+        drafts.setTaskDraft(TASK_ID, { text: 'Done' })
+
+        commentBox(wrapper).vm.$emit('file-drop', [previewForm('sh010.mp4')])
+        await publish(wrapper)
+
+        expect(commentBox(wrapper).props('previewForms')).toEqual([])
+        expect(reset).toHaveBeenCalled()
+        expect(drafts.getTaskDraft(TASK_ID)).toBeNull()
+      })
+
+      it('leaves alone the comment box of the task shown since', async () => {
+        const { wrapper, store, reset } = await mountCommentingPanel()
+        let endUpload
+        store.dispatch.mockImplementation(type =>
+          type === 'commentTaskWithPreview'
+            ? new Promise(resolve => {
+                endUpload = resolve
+              })
+            : Promise.resolve()
+        )
+        const otherTask = buildTask({ id: 'task-2' })
+        drafts.setTaskDraft(TASK_ID, { text: 'Done' })
+        drafts.setTaskDraft(otherTask.id, { text: 'Lighting fixed' })
+
+        commentBox(wrapper).vm.$emit('file-drop', [previewForm('sh010.mp4')])
+        await publish(wrapper)
+        await wrapper.setProps({ task: otherTask })
+        await flushPromises()
+        const otherForm = previewForm('sh020.mp4')
+        commentBox(wrapper).vm.$emit('file-drop', [otherForm])
+        endUpload()
+        await flushPromises()
+
+        expect(commentBox(wrapper).props('previewForms')).toEqual([otherForm])
+        expect(reset).not.toHaveBeenCalled()
+        expect(drafts.getTaskDraft(TASK_ID)).toBeNull()
+        expect(drafts.getTaskDraft(otherTask.id)).toEqual({
+          text: 'Lighting fixed',
+          checklist: []
+        })
+      })
     })
   })
 

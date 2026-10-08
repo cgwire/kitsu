@@ -20,6 +20,7 @@ import AddComment from '@/components/widgets/AddComment.vue'
 import Comment from '@/components/widgets/Comment.vue'
 import PreviewPlayer from '@/components/players/players/PreviewPlayer.vue'
 import SubscribeButton from '@/components/widgets/SubscribeButton.vue'
+import drafts from '@/lib/drafts'
 import { DEFAULT_FPS } from '@/lib/video'
 import shotsStore from '@/store/modules/shots'
 
@@ -800,6 +801,71 @@ describe('Task.vue publishing', () => {
       'addCommentExtraPreview',
       expect.objectContaining({ taskId: TASK_ID, forms: [form] })
     )
+  })
+
+  describe('once the upload ends', () => {
+    const publish = async wrapper => {
+      commentBox(wrapper).vm.$emit('file-drop', [previewForm('sh010.mp4')])
+      commentBox(wrapper).vm.$emit('add-comment', 'Done', [], [], 'status-1')
+      await flushPromises()
+    }
+
+    afterEach(() => localStorage.clear())
+
+    it('empties the comment box of the published task', async () => {
+      const { wrapper, reset } = await mountCommentingPage()
+      drafts.setTaskDraft(TASK_ID, { text: 'Done' })
+
+      await publish(wrapper)
+
+      expect(commentBox(wrapper).props('previewForms')).toEqual([])
+      expect(reset).toHaveBeenCalled()
+      expect(drafts.getTaskDraft(TASK_ID)).toBeNull()
+    })
+
+    it('leaves alone the comment box of the task shown since', async () => {
+      const task = buildTask()
+      const otherTask = buildTask({ id: 'task-2' })
+      const { wrapper, store, router, reset } = await mountCommentingPage({
+        task,
+        getterOverrides: {
+          taskMap: () =>
+            new Map([
+              [task.id, task],
+              [otherTask.id, otherTask]
+            ])
+        }
+      })
+      let endUpload
+      store.dispatch.mockImplementation(type =>
+        type === 'commentTaskWithPreview'
+          ? new Promise(resolve => {
+              endUpload = resolve
+            })
+          : Promise.resolve()
+      )
+      drafts.setTaskDraft(task.id, { text: 'Done' })
+      drafts.setTaskDraft(otherTask.id, { text: 'Lighting fixed' })
+
+      await publish(wrapper)
+      await router.push({
+        name: 'task',
+        params: { ...TASK_ROUTE_PARAMS, task_id: otherTask.id }
+      })
+      await flushPromises()
+      const otherForm = previewForm('sh020.mp4')
+      commentBox(wrapper).vm.$emit('file-drop', [otherForm])
+      endUpload()
+      await flushPromises()
+
+      expect(commentBox(wrapper).props('previewForms')).toEqual([otherForm])
+      expect(reset).not.toHaveBeenCalled()
+      expect(drafts.getTaskDraft(task.id)).toBeNull()
+      expect(drafts.getTaskDraft(otherTask.id)).toEqual({
+        text: 'Lighting fixed',
+        checklist: []
+      })
+    })
   })
 })
 

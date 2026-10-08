@@ -906,8 +906,9 @@ const postComment = (
 ) => {
   animOn.value = true
   nextTick(() => {
+    const taskId = props.task.id
     const params = {
-      taskId: props.task.id,
+      taskId,
       taskStatusId,
       attachment,
       checklist,
@@ -925,9 +926,13 @@ const postComment = (
     store
       .dispatch(action, params)
       .then(() => {
-        drafts.clearTaskDraft(props.task.id)
-        addCommentRef.value?.reset()
-        reset()
+        drafts.clearTaskDraft(taskId)
+        // A long upload may end once the panel shows another task, whose
+        // comment box holds a comment still to publish.
+        if (props.task?.id === taskId) {
+          addCommentRef.value?.reset()
+          reset()
+        }
         loading.addComment = false
         emit('comment-added')
       })
