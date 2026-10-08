@@ -12,7 +12,7 @@
         <div
           class="todos-filters"
           :class="{
-            'is-attached': isActiveTab('timesheets'),
+            'is-attached': isActiveTab('timesheets') || isActiveTab('calendar'),
             collapsed: isPhone && areFiltersFolded
           }"
           v-show="!isActiveTab('daysoff')"
@@ -846,7 +846,8 @@ useHead({ title: computed(() => `${t('tasks.my_tasks')} - Kitsu`) })
     border-radius: 12px 12px 0 0;
     margin-bottom: 0;
 
-    & ~ .user-timesheet :deep(.timesheet-header) {
+    & ~ .user-timesheet :deep(.timesheet-header),
+    & ~ .calendar-panel :deep(.calendar-toolbar) {
       border-radius: 0 0 12px 12px;
       border-top: 1px solid rgba(var(--skeleton-rgb), 0.25);
     }

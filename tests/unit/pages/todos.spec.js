@@ -141,6 +141,16 @@ const mountPage = async (
 }
 
 describe('Todos page', () => {
+  // The filters and the header of the tab below form one panel
+  it.each(['timesheets', 'calendar'])(
+    'attaches the filters to the header of the %s tab',
+    async section => {
+      const wrapper = await mountPage([], { query: { section } })
+      expect(wrapper.find('.todos-filters').classes()).toContain('is-attached')
+      wrapper.unmount()
+    }
+  )
+
   describe('on a phone', () => {
     const mockPhone = matches =>
       vi.stubGlobal(
