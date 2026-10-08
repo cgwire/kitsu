@@ -1015,7 +1015,9 @@ const mutations = {
 
   [DELETE_TASK_END](state, task) {
     const episode = cache.episodeMap.get(task.entity_id)
-    if (episode) {
+    // loadEpisodes fills the map without tasks, unlike
+    // loadEpisodesWithTasks.
+    if (episode?.tasks) {
       const validations = new Map(episode.validations)
       validations.delete(task.task_type_id)
       delete episode.validations
