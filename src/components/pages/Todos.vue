@@ -160,18 +160,26 @@
 
         <productivity-chart
           class="productivity-panel"
+          :count-mode="productivityCountMode"
           :is-error="isProductivityLoadingError"
           :is-loading="isProductivityLoading"
+          :is-paper="isPaper"
           :level="productivityLevel"
+          :metric="productivityMetric"
           :month="productivityMonth"
           :production-id="productionId"
+          :quota-mode="productivityQuotaMode"
+          :quotas="productivityQuotas"
           :selected-index="productivityPeriod"
           :task-type-id="taskTypeId"
           :time-spents="productivityTimeSpents"
           :year="productivityYear"
           @column-selected="onProductivityColumnSelected"
+          @count-mode-changed="onProductivityCountModeChanged"
           @level-changed="onProductivityLevelChanged"
+          @metric-changed="onProductivityMetricChanged"
           @period-changed="onProductivityPeriodChanged"
+          @quota-mode-changed="onProductivityQuotaModeChanged"
           v-if="isActiveTab('productivity')"
         />
 
@@ -216,6 +224,17 @@
       class="column side-column productivity-side-column"
       v-if="isActiveTab('productivity') && productivityPeriod"
     >
+      <people-quota-info
+        :close-route="productivityCloseRoute"
+        :count-mode="productivityCountMode"
+        :is-loading="isProductivityInfoLoading"
+        :is-loading-error="isProductivityInfoLoadingError"
+        :level="productivityLevel"
+        :person="user"
+        :shots="productivityQuotaShots"
+        v-bind="productivityPeriodParams"
+        v-if="isQuotasMetric"
+      />
       <people-timesheet-info
         :close-route="productivityCloseRoute"
         :day-offs="productivityDaysOff"
@@ -225,6 +244,7 @@
         :person="user"
         :tasks="productivityTasks"
         v-bind="productivityPeriodParams"
+        v-else
       />
     </div>
   </div>
@@ -260,6 +280,7 @@ import DayOffList from '@/components/lists/DayOffList.vue'
 import KanbanBoard from '@/components/lists/KanbanBoard.vue'
 import TimesheetList from '@/components/lists/TimesheetList.vue'
 import TodosList from '@/components/lists/TodosList.vue'
+import PeopleQuotaInfo from '@/components/sides/PeopleQuotaInfo.vue'
 import PeopleTimesheetInfo from '@/components/sides/PeopleTimesheetInfo.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
@@ -296,6 +317,8 @@ const sortOptions = [
   'last_comment_date'
 ].map(name => ({ label: name, value: name }))
 const productivityLevels = ['day', 'week', 'month']
+const productivityMetrics = ['time', 'quotas']
+const quotaModes = ['weighted', 'feedback', 'weighteddone', 'done']
 
 // The URL wins over the filters picked last time, kept in the local storage.
 const FILTERS_PREFERENCE = 'todos:filters'
@@ -326,6 +349,8 @@ const productivityAggregatedTasks = ref([])
 const productivityDaysOff = ref([])
 const isProductivityInfoLoading = ref(false)
 const isProductivityInfoLoadingError = ref(false)
+const productivityQuotas = ref([])
+const productivityQuotaShots = ref([])
 const loading = reactive({
   doneTasks: false,
   timesheets: false,
@@ -471,6 +496,38 @@ const productivityLevel = computed(() =>
 const productivityYear = computed(() => queryNumber('year', today.year))
 const productivityMonth = computed(() => queryNumber('month', today.month))
 const productivityPeriod = computed(() => queryNumber('period', 0))
+
+const queryOption = (key, options) =>
+  options.includes(route.query[key]) ? route.query[key] : options[0]
+
+const productivityMetric = computed(() =>
+  queryOption('metric', productivityMetrics)
+)
+const isQuotasMetric = computed(() => productivityMetric.value === 'quotas')
+const productivityQuotaMode = computed(() =>
+  queryOption('quotaMode', quotaModes)
+)
+
+const isPaper = computed(
+  () => selectedProduction.value?.production_style === '2dpaper'
+)
+
+// the count modes the chart offers for this kind of production
+const productivityCountMode = computed(() =>
+  queryOption(
+    'countMode',
+    isPaper.value ? ['drawings', 'count'] : ['frames', 'seconds', 'count']
+  )
+)
+
+// an assets only production has no shot to count
+const quotaProductionIds = computed(() =>
+  selectedProduction.value
+    ? [selectedProduction.value.id]
+    : openProductions.value
+        .filter(production => production.production_type !== 'assets')
+        .map(production => production.id)
+)
 
 // the column index is a day of the month, an ISO week or a month
 const productivityPeriodParams = computed(() => {
@@ -759,11 +816,20 @@ const onProductivityPeriodChanged = ({ year, month }) => {
   })
 }
 
+const onProductivityMetricChanged = metric => setProductivityQuery({ metric })
+
+const onProductivityQuotaModeChanged = quotaMode =>
+  router.replace({ query: { ...route.query, quotaMode } })
+
+const onProductivityCountModeChanged = countMode =>
+  router.replace({ query: { ...route.query, countMode } })
+
 const onProductivityColumnSelected = index =>
   router.push({ query: { ...route.query, period: `${index}` } })
 
 const getProductivityKey = () =>
   JSON.stringify([
+    productivityMetric.value,
     productivityLevel.value,
     productivityYear.value,
     productivityMonth.value
@@ -795,12 +861,79 @@ const loadProductivity = async () => {
   isProductivityLoading.value = false
 }
 
+const getProductivityQuotasKey = () =>
+  JSON.stringify([
+    productivityMetric.value,
+    productivityQuotaMode.value,
+    quotaProductionIds.value
+  ])
+
+const loadProductivityQuotas = async () => {
+  const key = getProductivityQuotasKey()
+  isProductivityLoading.value = true
+  isProductivityLoadingError.value = false
+  let quotas = []
+  let isError = false
+  try {
+    quotas = await Promise.all(
+      quotaProductionIds.value.map(productionId =>
+        store.dispatch('loadPersonQuotas', {
+          productionId,
+          personId: user.value.id,
+          computeMode: productivityQuotaMode.value
+        })
+      )
+    )
+  } catch (err) {
+    console.error(err)
+    isError = true
+  }
+  if (key !== getProductivityQuotasKey()) return
+  productivityQuotas.value = quotas
+  isProductivityLoadingError.value = isError
+  isProductivityLoading.value = false
+}
+
 const getProductivityInfoKey = () =>
   JSON.stringify([
+    productivityMetric.value,
+    productivityQuotaMode.value,
+    taskTypeId.value,
     productivityLevel.value,
     productivityPeriodParams.value,
-    productionId.value
+    productionId.value,
+    quotaProductionIds.value
   ])
+
+// the shots of the productions the chart counts, not of every production
+const loadProductivityQuotaInfo = async () => {
+  const key = getProductivityInfoKey()
+  isProductivityInfoLoading.value = true
+  isProductivityInfoLoadingError.value = false
+  productivityQuotaShots.value = []
+  const isStale = () => key !== getProductivityInfoKey()
+  try {
+    const shotLists = await Promise.all(
+      quotaProductionIds.value.map(productionId =>
+        store.dispatch('getPersonQuotaShots', {
+          productionId,
+          personId: user.value.id,
+          taskTypeId: taskTypeId.value || undefined,
+          detailLevel: productivityLevel.value,
+          ...productivityPeriodParams.value,
+          computeMode: productivityQuotaMode.value
+        })
+      )
+    )
+    if (isStale()) return
+    productivityQuotaShots.value = shotLists.flat()
+  } catch (err) {
+    console.error(err)
+    if (isStale()) return
+    isProductivityInfoLoadingError.value = true
+  }
+  isProductivityInfoLoading.value = false
+}
 
 const loadProductivityInfo = async () => {
   const key = getProductivityInfoKey()
@@ -909,9 +1042,33 @@ watch(productionId, () => {
 watch(() => [route.query.section, route.query.day], updateActiveTab)
 
 watch(
-  [currentSection, productivityLevel, productivityYear, productivityMonth],
+  [
+    currentSection,
+    productivityMetric,
+    productivityLevel,
+    productivityYear,
+    productivityMonth
+  ],
   () => {
-    if (isActiveTab('productivity')) loadProductivity()
+    if (isActiveTab('productivity') && !isQuotasMetric.value) {
+      loadProductivity()
+    }
+  }
+)
+
+// The person quotas cover every period: the chart picks the columns of the
+// view, year and month from the loaded answers.
+watch(
+  [
+    currentSection,
+    productivityMetric,
+    productivityQuotaMode,
+    () => quotaProductionIds.value.join()
+  ],
+  () => {
+    if (isActiveTab('productivity') && isQuotasMetric.value) {
+      loadProductivityQuotas()
+    }
   }
 )
 
@@ -922,11 +1079,16 @@ watch(
     productivityYear,
     productivityMonth,
     productivityPeriod,
-    productionId
+    productionId,
+    () => quotaProductionIds.value.join(),
+    productivityMetric,
+    productivityQuotaMode,
+    taskTypeId
   ],
   () => {
     if (isActiveTab('productivity') && productivityPeriod.value) {
-      loadProductivityInfo()
+      if (isQuotasMetric.value) loadProductivityQuotaInfo()
+      else loadProductivityInfo()
     }
   }
 )
@@ -1059,6 +1221,43 @@ useHead({ title: computed(() => `${t('tasks.my_tasks')} - Kitsu`) })
 .productivity-side-column {
   background: transparent;
   padding: 1em 1em 1em 0;
+
+  // the quota panel takes the card look of the time spent one here, and
+  // keeps its plain look on the Quota page
+  :deep(.people-quota-info) {
+    background: var(--background-panel);
+    border-left: 0;
+    border-radius: 12px;
+    color: var(--text);
+    height: auto;
+    min-height: 100%;
+    padding: 1.5em 1.5em 1em;
+    position: relative;
+
+    > .flexrow {
+      margin-right: 1em;
+    }
+
+    .title {
+      font-size: 1.5rem;
+    }
+
+    .close {
+      position: absolute;
+      right: 0.75em;
+      top: 0.75em;
+    }
+
+    .close-button {
+      height: 26px;
+      padding-top: 5px;
+      width: 26px;
+
+      &:hover {
+        background: rgba(var(--skeleton-rgb), 0.25);
+      }
+    }
+  }
 }
 
 .todos-panel {

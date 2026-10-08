@@ -1,31 +1,55 @@
 <template>
   <div class="productivity-chart">
     <div class="productivity-toolbar">
-      <div class="productivity-toolbar-group">
-        <button-simple
-          :data-level="option.value"
-          :is-on="level === option.value"
-          :key="option.value"
-          :text="option.label"
-          @click="emit('level-changed', option.value)"
-          v-for="option in levelOptions"
-        />
-      </div>
-      <div class="productivity-toolbar-group">
+      <combobox-styled
+        class="metric-combobox"
+        :label="$t('statistics.data_mode')"
+        :model-value="metric"
+        :options="metricOptions"
+        @update:model-value="emit('metric-changed', $event)"
+      />
+      <combobox-styled
+        class="level-combobox"
+        :label="$t('quota.detail_label')"
+        :model-value="level"
+        :options="levelOptions"
+        @update:model-value="emit('level-changed', $event)"
+      />
+      <combobox-styled
+        class="month-combobox"
+        :label="$t('quota.month_label')"
+        :model-value="`${month}`"
+        :options="monthOptions"
+        @update:model-value="onMonthChanged"
+        v-if="level === 'day'"
+      />
+      <combobox-styled
+        class="year-combobox"
+        :label="$t('quota.year_label')"
+        :model-value="`${year}`"
+        :options="yearOptions"
+        @update:model-value="onYearChanged"
+      />
+      <template v-if="isQuotas">
         <combobox-styled
-          class="month-combobox"
-          :model-value="`${month}`"
-          :options="monthOptions"
-          @update:model-value="onMonthChanged"
-          v-if="level === 'day'"
+          class="count-mode-combobox"
+          :label="$t('quota.count_label')"
+          :model-value="countMode"
+          :options="countModeOptions"
+          @update:model-value="emit('count-mode-changed', $event)"
         />
         <combobox-styled
-          class="year-combobox"
-          :model-value="`${year}`"
-          :options="yearOptions"
-          @update:model-value="onYearChanged"
+          class="quota-mode-combobox"
+          :label="$t('quota.compute_mode')"
+          :model-value="quotaMode"
+          :options="quotaModeOptions"
+          @update:model-value="emit('quota-mode-changed', $event)"
         />
-      </div>
+        <info-question-mark
+          class="quota-mode-info"
+          :text="$t(`quota.explanation_${quotaMode}`)"
+        />
+      </template>
       <span class="productivity-total">{{ totalLabel }}</span>
     </div>
     <div class="productivity-body">
@@ -33,7 +57,12 @@
       <div class="loading-error" v-else-if="isError">
         {{ $t('main.loading_error') }}
       </div>
-      <div class="chart-wrapper" :class="{ week: level === 'week' }" v-else>
+      <div
+        class="chart-wrapper"
+        :class="{ week: level === 'week' }"
+        ref="chartWrapperRef"
+        v-else
+      >
         <div class="chart-inner">
           <column-chart
             height="100%"
@@ -51,13 +80,14 @@
 <script setup>
 // Imports
 // --------------------------------------------------------------------------
-import { computed } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { useChartTheme } from '@/composables/chartTheme'
 import { monthToString, range } from '@/lib/time'
 import {
   formatTimesheetValue,
+  getQuotaColumnTotals,
   getTimeSpentColumnTotals,
   getTimesheetColumns,
   isCurrentTimesheetColumn,
@@ -65,8 +95,8 @@ import {
   today
 } from '@/lib/timesheet'
 
-import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import InfoQuestionMark from '@/components/widgets/InfoQuestionMark.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 
 // Composables
@@ -85,13 +115,49 @@ const props = defineProps({
   taskTypeId: { type: String, default: null },
   selectedIndex: { type: Number, default: 0 },
   isLoading: { type: Boolean, default: false },
-  isError: { type: Boolean, default: false }
+  isError: { type: Boolean, default: false },
+  metric: { type: String, default: 'time' },
+  quotaMode: { type: String, default: 'weighted' },
+  countMode: { type: String, default: 'frames' },
+  quotas: { type: Array, default: () => [] },
+  isPaper: { type: Boolean, default: false }
 })
 
-const emit = defineEmits(['column-selected', 'level-changed', 'period-changed'])
+const emit = defineEmits([
+  'column-selected',
+  'count-mode-changed',
+  'level-changed',
+  'metric-changed',
+  'period-changed',
+  'quota-mode-changed'
+])
+
+// State
+// --------------------------------------------------------------------------
+const chartWrapperRef = ref(null)
 
 // Computed
 // --------------------------------------------------------------------------
+const isQuotas = computed(() => props.metric === 'quotas')
+
+const metricOptions = computed(() => [
+  { label: t('main.timeSpent'), value: 'time' },
+  { label: t('quota.title'), value: 'quotas' }
+])
+
+const quotaModeOptions = computed(() => [
+  { label: t('quota.weighted'), value: 'weighted' },
+  { label: t('quota.feedback_date'), value: 'feedback' },
+  { label: t('quota.weighted_done'), value: 'weighteddone' },
+  { label: t('quota.done_date'), value: 'done' }
+])
+
+const countModeOptions = computed(() =>
+  (props.isPaper ? ['drawings', 'count'] : ['frames', 'seconds', 'count']).map(
+    value => ({ label: t(`quota.${value}`), value })
+  )
+)
+
 const levelOptions = computed(() =>
   ['day', 'week', 'month'].map(value => ({ label: t(`main.${value}`), value }))
 )
@@ -120,25 +186,37 @@ const columns = computed(() =>
   })
 )
 
-// minutes per column
+// hours per column in the time metric, count units in the quotas one
 const totals = computed(() =>
-  getTimeSpentColumnTotals(props.timeSpents, props.level, columns.value, {
-    productionId: props.productionId,
-    taskTypeId: props.taskTypeId
-  })
+  isQuotas.value
+    ? getQuotaColumnTotals(props.quotas, props.level, columns.value, {
+        year: props.year,
+        month: props.month,
+        taskTypeId: props.taskTypeId,
+        countMode: props.countMode
+      })
+    : getTimeSpentColumnTotals(props.timeSpents, props.level, columns.value, {
+        productionId: props.productionId,
+        taskTypeId: props.taskTypeId
+      }).map(minutes => minutes / 60)
 )
 
-const totalHours = computed(
-  () => totals.value.reduce((sum, total) => sum + total, 0) / 60
+const total = computed(() =>
+  totals.value.reduce((sum, value) => sum + value, 0)
 )
 
-const totalLabel = computed(
-  () =>
-    `${formatTimesheetValue(totalHours.value, 'hour')} ` +
-    t('main.hours_spent', { count: totalHours.value })
+const totalLabel = computed(() =>
+  isQuotas.value
+    ? `${roundValue(total.value)} ${unitLabel.value}`
+    : `${formatTimesheetValue(total.value, 'hour')} ` +
+      t('main.hours_spent', { count: total.value })
 )
 
-const seriesName = computed(() => t('main.hours_spent', { count: 2 }))
+const unitLabel = computed(() => t(`quota.${props.countMode}`))
+
+const seriesName = computed(() =>
+  isQuotas.value ? unitLabel.value : t('main.hours_spent', { count: 2 })
+)
 
 const chartData = computed(() => [
   {
@@ -146,7 +224,7 @@ const chartData = computed(() => [
     color: '#00b242',
     data: columns.value.map((index, position) => [
       timesheetColumnLabel(props.level, index),
-      round(totals.value[position] / 60)
+      roundValue(totals.value[position])
     ]),
     dataset: {
       backgroundColor: props.selectedIndex
@@ -195,7 +273,10 @@ const chartLibrary = computed(() => ({
 
 // Functions
 // --------------------------------------------------------------------------
-const round = value => Math.round(value * 10) / 10
+const roundValue = value =>
+  isQuotas.value && props.countMode === 'frames'
+    ? Math.round(value)
+    : Math.round(value * 10) / 10
 
 const isCurrentColumn = index =>
   isCurrentTimesheetColumn(props.level, index, {
@@ -210,6 +291,30 @@ const onMonthChanged = month => {
 const onYearChanged = year => {
   emit('period-changed', { year: Number(year), month: props.month })
 }
+
+// on a phone the 53 weeks scroll sideways: open on the latest ones
+const scrollToLatestWeeks = () => {
+  const wrapper = chartWrapperRef.value
+  if (
+    props.level === 'week' &&
+    wrapper &&
+    wrapper.scrollWidth > wrapper.clientWidth
+  ) {
+    wrapper.scrollLeft = wrapper.scrollWidth
+  }
+}
+
+// Watchers
+// --------------------------------------------------------------------------
+watch(
+  () => [props.level, props.year, props.isLoading, props.isError],
+  scrollToLatestWeeks,
+  { flush: 'post' }
+)
+
+// Lifecycle
+// --------------------------------------------------------------------------
+onMounted(scrollToLatestWeeks)
 </script>
 
 <style lang="scss" scoped>
@@ -231,15 +336,17 @@ const onYearChanged = year => {
 }
 
 .productivity-toolbar {
-  align-items: center;
+  // the combos carry their label above them: line them up on the fields
+  align-items: flex-end;
   display: flex;
-  gap: 1em;
+  flex-wrap: wrap;
+  gap: 0.75em 1em;
 }
 
-.productivity-toolbar-group {
-  align-items: center;
-  display: flex;
-  gap: 0.5em;
+.quota-mode-info,
+.productivity-total {
+  // centred on the combo fields rather than on field plus label
+  margin-bottom: 0.6em;
 }
 
 .productivity-total {
@@ -247,6 +354,7 @@ const onYearChanged = year => {
   font-size: 0.85rem;
   font-weight: 700;
   margin-left: auto;
+  white-space: nowrap;
 }
 
 .productivity-body {
@@ -277,7 +385,6 @@ const onYearChanged = year => {
 
 @media screen and (max-width: 768px) {
   .productivity-toolbar {
-    flex-wrap: wrap;
     gap: 0.5em;
     padding: 0.5em;
   }

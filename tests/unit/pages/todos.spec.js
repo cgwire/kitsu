@@ -17,6 +17,7 @@ import '@/lib/auth'
 import { today } from '@/lib/timesheet'
 
 import TimesheetList from '@/components/lists/TimesheetList.vue'
+import PeopleQuotaInfo from '@/components/sides/PeopleQuotaInfo.vue'
 import PeopleTimesheetInfo from '@/components/sides/PeopleTimesheetInfo.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
@@ -725,6 +726,285 @@ describe('Todos page', () => {
         year: '2026'
       })
       wrapper.unmount()
+    })
+
+    describe('quotas', () => {
+      const shotsProduction = { id: 'prod-1', production_type: 'short' }
+      const assetsProduction = { id: 'prod-2', production_type: 'assets' }
+      const paperProduction = {
+        id: 'prod-3',
+        production_type: 'tvshow',
+        production_style: '2dpaper'
+      }
+      const productions = [shotsProduction, assetsProduction, paperProduction]
+      const productionGetters = {
+        openProductions: () => productions,
+        productionMap: () => new Map(productions.map(p => [p.id, p]))
+      }
+      const mountQuotas = (query = {}, actions = {}) =>
+        mountProductivity(
+          { metric: 'quotas', ...query },
+          {
+            actions: {
+              getPersonQuotaShots: vi.fn(() => []),
+              loadPersonQuotas: vi.fn((_, { productionId }) => ({
+                productionId
+              })),
+              ...actions
+            },
+            getters: productionGetters
+          }
+        )
+
+      it('loads the quotas of every open production with shots', async () => {
+        const loadPersonQuotas = vi.fn((_, { productionId }) => ({
+          productionId
+        }))
+        const wrapper = await mountQuotas(
+          { quotaMode: 'done' },
+          { loadPersonQuotas }
+        )
+        await flushPromises()
+        expect(loadPersonQuotas.mock.calls.map(call => call[1])).toEqual([
+          { productionId: 'prod-1', personId: 'user-1', computeMode: 'done' },
+          { productionId: 'prod-3', personId: 'user-1', computeMode: 'done' }
+        ])
+        const chart = wrapper.findComponent(ProductivityChart)
+        expect(chart.props()).toMatchObject({
+          metric: 'quotas',
+          quotaMode: 'done',
+          countMode: 'frames',
+          isPaper: false,
+          isLoading: false,
+          quotas: [{ productionId: 'prod-1' }, { productionId: 'prod-3' }]
+        })
+        wrapper.unmount()
+      })
+
+      it('loads the quotas of the filtered production only', async () => {
+        const loadPersonQuotas = vi.fn(() => ({}))
+        const wrapper = await mountQuotas(
+          { productionId: 'prod-3' },
+          { loadPersonQuotas }
+        )
+        await flushPromises()
+        expect(loadPersonQuotas.mock.calls.map(call => call[1])).toEqual([
+          {
+            productionId: 'prod-3',
+            personId: 'user-1',
+            computeMode: 'weighted'
+          }
+        ])
+        // a paper production counts drawings
+        expect(wrapper.findComponent(ProductivityChart).props()).toMatchObject(
+          { isPaper: true, countMode: 'drawings', quotas: [{}] }
+        )
+        wrapper.unmount()
+      })
+
+      it('does not load the quotas in the time metric', async () => {
+        const loadPersonQuotas = vi.fn(() => ({}))
+        const wrapper = await mountQuotas({ metric: 'time' }, { loadPersonQuotas })
+        await flushPromises()
+        expect(loadPersonQuotas).not.toHaveBeenCalled()
+        wrapper.unmount()
+      })
+
+      it('keeps the quotas of the latest load', async () => {
+        let resolveFirst
+        const loadPersonQuotas = vi
+          .fn()
+          .mockImplementationOnce(
+            () => new Promise(resolve => (resolveFirst = resolve))
+          )
+          .mockResolvedValue({ mode: 'done' })
+        const wrapper = await mountQuotas(
+          { productionId: 'prod-1' },
+          { loadPersonQuotas }
+        )
+        await flushPromises()
+        wrapper
+          .findComponent(ProductivityChart)
+          .vm.$emit('quota-mode-changed', 'done')
+        await flushPromises()
+        resolveFirst({ mode: 'weighted' })
+        await flushPromises()
+        const chart = wrapper.findComponent(ProductivityChart)
+        expect(chart.props('quotas')).toEqual([{ mode: 'done' }])
+        expect(chart.props('isLoading')).toBe(false)
+        wrapper.unmount()
+      })
+
+      it('keeps the loaded quotas when the period changes', async () => {
+        const loadPersonQuotas = vi.fn(() => ({}))
+        const wrapper = await mountQuotas(
+          { view: 'day', year: '2026', month: '2' },
+          { loadPersonQuotas }
+        )
+        await flushPromises()
+        expect(loadPersonQuotas).toHaveBeenCalledTimes(2)
+        const chart = wrapper.findComponent(ProductivityChart)
+        chart.vm.$emit('period-changed', { year: 2025, month: 3 })
+        await flushPromises()
+        chart.vm.$emit('level-changed', 'week')
+        await flushPromises()
+        expect(wrapper.vm.$route.query).toMatchObject({
+          year: '2025',
+          view: 'week'
+        })
+        expect(loadPersonQuotas).toHaveBeenCalledTimes(2)
+        expect(chart.props('quotas')).toEqual([{}, {}])
+        wrapper.unmount()
+      })
+
+      it('drops the quotas answered after a switch to the time metric', async () => {
+        let resolveQuotas
+        const loadPersonQuotas = vi.fn(
+          () => new Promise(resolve => (resolveQuotas = resolve))
+        )
+        const loadUserTimeSpentsByPeriod = vi.fn(() => [{ duration: 60 }])
+        const wrapper = await mountQuotas(
+          { productionId: 'prod-1' },
+          { loadPersonQuotas, loadUserTimeSpentsByPeriod }
+        )
+        await flushPromises()
+        const chart = wrapper.findComponent(ProductivityChart)
+        chart.vm.$emit('metric-changed', 'time')
+        await flushPromises()
+        resolveQuotas({ mode: 'late' })
+        await flushPromises()
+        expect(chart.props()).toMatchObject({
+          metric: 'time',
+          isLoading: false,
+          quotas: [],
+          timeSpents: [{ duration: 60 }]
+        })
+        wrapper.unmount()
+      })
+
+      it('writes the metric and the modes in the URL', async () => {
+        const wrapper = await mountProductivity({
+          view: 'day',
+          period: '5'
+        })
+        await flushPromises()
+        const chart = () => wrapper.findComponent(ProductivityChart)
+        expect(chart().props('metric')).toBe('time')
+        chart().vm.$emit('metric-changed', 'quotas')
+        await flushPromises()
+        expect(wrapper.vm.$route.query.metric).toBe('quotas')
+        expect(wrapper.vm.$route.query.period).toBeUndefined()
+        chart().vm.$emit('quota-mode-changed', 'feedback')
+        await flushPromises()
+        chart().vm.$emit('count-mode-changed', 'seconds')
+        await flushPromises()
+        expect(wrapper.vm.$route.query).toMatchObject({
+          metric: 'quotas',
+          quotaMode: 'feedback',
+          countMode: 'seconds'
+        })
+        expect(chart().props()).toMatchObject({
+          metric: 'quotas',
+          quotaMode: 'feedback',
+          countMode: 'seconds'
+        })
+        wrapper.unmount()
+      })
+
+      it('opens the quota panel on the clicked column', async () => {
+        const getPersonQuotaShots = vi.fn((_, { productionId }) => [
+          { id: `shot-${productionId}`, weight: 1 }
+        ])
+        const wrapper = await mountQuotas(
+          {
+            view: 'day',
+            year: '2026',
+            month: '2',
+            taskTypeId: 'type-1',
+            countMode: 'seconds',
+            quotaMode: 'feedback'
+          },
+          { getPersonQuotaShots }
+        )
+        await flushPromises()
+        wrapper.findComponent(ProductivityChart).vm.$emit('column-selected', 5)
+        await flushPromises()
+        expect(wrapper.findComponent(PeopleTimesheetInfo).exists()).toBe(false)
+        // one call per production the chart counts, assets only ones aside
+        const params = {
+          personId: 'user-1',
+          taskTypeId: 'type-1',
+          detailLevel: 'day',
+          year: 2026,
+          month: 2,
+          day: 5,
+          computeMode: 'feedback'
+        }
+        expect(getPersonQuotaShots.mock.calls.map(call => call[1])).toEqual([
+          { productionId: 'prod-1', ...params },
+          { productionId: 'prod-3', ...params }
+        ])
+        const panel = wrapper.findComponent(PeopleQuotaInfo)
+        expect(panel.props()).toMatchObject({
+          level: 'day',
+          year: 2026,
+          month: 2,
+          day: 5,
+          countMode: 'seconds',
+          isLoading: false,
+          shots: [
+            { id: 'shot-prod-1', weight: 1 },
+            { id: 'shot-prod-3', weight: 1 }
+          ]
+        })
+        expect(panel.props('closeRoute').query.period).toBeUndefined()
+        wrapper.unmount()
+      })
+
+      it('loads the panel shots of the filtered production', async () => {
+        const getPersonQuotaShots = vi.fn(() => [])
+        const wrapper = await mountQuotas(
+          { view: 'week', year: '2026', period: '12', productionId: 'prod-1' },
+          { getPersonQuotaShots }
+        )
+        await flushPromises()
+        expect(getPersonQuotaShots.mock.calls[0][1]).toMatchObject({
+          productionId: 'prod-1',
+          detailLevel: 'week',
+          year: 2026,
+          week: 12
+        })
+        wrapper.unmount()
+      })
+
+      it('keeps the panel shots of the latest period', async () => {
+        let resolveFirst
+        const getPersonQuotaShots = vi
+          .fn()
+          .mockImplementationOnce(
+            () => new Promise(resolve => (resolveFirst = resolve))
+          )
+          .mockResolvedValue([{ id: 'shot-2' }])
+        const wrapper = await mountQuotas(
+          {
+            view: 'day',
+            year: '2026',
+            month: '2',
+            period: '3',
+            productionId: 'prod-1'
+          },
+          { getPersonQuotaShots }
+        )
+        await flushPromises()
+        wrapper.findComponent(ProductivityChart).vm.$emit('column-selected', 4)
+        await flushPromises()
+        resolveFirst([{ id: 'shot-1' }])
+        await flushPromises()
+        const panel = wrapper.findComponent(PeopleQuotaInfo)
+        expect(panel.props('shots')).toEqual([{ id: 'shot-2' }])
+        expect(panel.props('isLoading')).toBe(false)
+        wrapper.unmount()
+      })
     })
   })
 })
