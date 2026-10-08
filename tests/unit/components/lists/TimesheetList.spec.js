@@ -168,4 +168,34 @@ describe('lists/TimesheetList', () => {
       expect(modal.find('p.is-danger').exists()).toBe(false)
     })
   })
+
+  describe('task order', () => {
+    const tasks = ['task-1', 'task-2', 'task-3'].map(id => ({
+      id,
+      project_id: 'production-1'
+    }))
+    const rowTaskIds = wrapper =>
+      wrapper
+        .findAllComponents({ name: 'TimeSliderCell' })
+        .map(cell => cell.props('taskId'))
+
+    it('puts the tasks with time spent first', () => {
+      const wrapper = mountList({
+        tasks,
+        timeSpentMap: { 'task-3': { duration: 120 }, 'task-2': { duration: 0 } }
+      })
+      expect(rowTaskIds(wrapper)).toEqual(['task-3', 'task-1', 'task-2'])
+    })
+
+    it('keeps the order while the time is being logged', async () => {
+      const timeSpentMap = {}
+      const wrapper = mountList({ tasks, timeSpentMap })
+      timeSpentMap['task-2'] = { duration: 60 }
+      await wrapper.setProps({ timeSpentTotal: 1 })
+      expect(rowTaskIds(wrapper)).toEqual(['task-1', 'task-2', 'task-3'])
+
+      await wrapper.setProps({ timeSpentMap: { ...timeSpentMap } })
+      expect(rowTaskIds(wrapper)).toEqual(['task-2', 'task-1', 'task-3'])
+    })
+  })
 })
