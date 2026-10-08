@@ -72,7 +72,12 @@ const DayOffListStub = {
 
 const mountPage = async (
   todos,
-  { actions = {}, errorHandler, query = {} } = {}
+  {
+    actions = {},
+    errorHandler,
+    query = {},
+    socket = { on: vi.fn(), off: vi.fn() }
+  } = {}
 ) => {
   const store = createStore({
     getters: {
@@ -118,7 +123,7 @@ const mountPage = async (
         router,
         {
           install: app => {
-            app.config.globalProperties.$socket = { on: vi.fn(), off: vi.fn() }
+            app.config.globalProperties.$socket = socket
             app.config.globalProperties.$t = key => key
           }
         }
@@ -260,6 +265,77 @@ describe('Todos page', () => {
         wrapper.unmount()
       }
     )
+  })
+
+  // Zou sends one event per task assigned to the user.
+  describe('assignations', () => {
+    const emitAssignations = (socket, count) => {
+      const [, onAssignation] = socket.on.mock.calls.find(
+        ([event]) => event === 'task:assign'
+      )
+      Array.from({ length: count }, (_, index) =>
+        onAssignation({ person_id: 'user-1', task_id: `task-${index}` })
+      )
+    }
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('drops the reload once the page is left', async () => {
+      const socket = { on: vi.fn(), off: vi.fn() }
+      const loadTodos = vi.fn()
+      const wrapper = await mountPage([], { actions: { loadTodos }, socket })
+      await flushPromises()
+      loadTodos.mockClear()
+      vi.useFakeTimers()
+
+      emitAssignations(socket, 1)
+      wrapper.unmount()
+      await vi.advanceTimersByTimeAsync(500)
+
+      expect(loadTodos).not.toHaveBeenCalled()
+    })
+
+    it('reloads the tasks once after a burst of assignations', async () => {
+      const socket = { on: vi.fn(), off: vi.fn() }
+      const loadTodos = vi.fn()
+      const wrapper = await mountPage([], { actions: { loadTodos }, socket })
+      await flushPromises()
+      loadTodos.mockClear()
+      vi.useFakeTimers()
+
+      emitAssignations(socket, 10)
+      await vi.advanceTimersByTimeAsync(499)
+      expect(loadTodos).not.toHaveBeenCalled()
+      await vi.advanceTimersByTimeAsync(1)
+
+      expect(loadTodos).toHaveBeenCalledTimes(1)
+      expect(loadTodos).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ forced: true })
+      )
+      wrapper.unmount()
+    })
+
+    // The production of a new assignation joins the open ones through the
+    // project:update Zou sends once it adds the user to the team.
+    it('leaves the open productions alone', async () => {
+      const socket = { on: vi.fn(), off: vi.fn() }
+      const loadOpenProductions = vi.fn()
+      const wrapper = await mountPage([], {
+        actions: { loadOpenProductions },
+        socket
+      })
+      await flushPromises()
+      vi.useFakeTimers()
+
+      emitAssignations(socket, 1)
+      await vi.advanceTimersByTimeAsync(500)
+
+      expect(loadOpenProductions).not.toHaveBeenCalled()
+      wrapper.unmount()
+    })
   })
 
   describe('time spent', () => {
