@@ -35,7 +35,7 @@ describe('DayOffList', () => {
     const wrapper = mountList({ daysOff: [] })
 
     expect(wrapper.text()).toContain('days_off.no_days_off')
-    expect(wrapper.find('.footer-info').exists()).toBe(true)
+    expect(wrapper.find('.header .day-off-total').exists()).toBe(true)
     expect(wrapper.text()).not.toContain('main.loading_error')
   })
 
@@ -44,7 +44,7 @@ describe('DayOffList', () => {
 
     expect(wrapper.text()).toContain('main.loading_error')
     expect(wrapper.text()).not.toContain('days_off.no_days_off')
-    expect(wrapper.find('.footer-info').exists()).toBe(false)
+    expect(wrapper.find('.header .day-off-total').exists()).toBe(false)
   })
 
   it('opens the edit form on the day off of the row', async () => {

@@ -216,4 +216,10 @@ watch(
     width: 18px;
   }
 }
+
+@media screen and (max-width: 768px) {
+  .day-off-count {
+    display: none;
+  }
+}
 </style>

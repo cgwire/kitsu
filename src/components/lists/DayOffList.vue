@@ -1,6 +1,10 @@
 <template>
   <div class="day-off-list data-list">
     <div class="flexrow header">
+      <span class="day-off-total" v-if="!isLoading && !isError">
+        {{ sortedDaysOff.length }}
+        {{ $t('days_off.nb_days_off', { count: sortedDaysOff.length }) }}
+      </span>
       <div class="filler"></div>
       <button-simple
         class="flexrow-item"
@@ -67,11 +71,6 @@
       :cells="1"
       :with-thumbnail="false"
     />
-
-    <p class="has-text-centered footer-info" v-if="!isLoading && !isError">
-      {{ sortedDaysOff.length }}
-      {{ $t('days_off.nb_days_off', { count: sortedDaysOff.length }) }}
-    </p>
 
     <day-off-modal
       :active="modals.setDayOff"
@@ -231,19 +230,24 @@ defineExpose({ closeSetDayOffModal, closeUnsetDayOffModal })
 </script>
 
 <style lang="scss" scoped>
-.day-off-list {
-  max-width: 800px;
+.header {
+  align-items: center;
+  background: var(--background-panel);
+  border-radius: 12px;
+  margin: 0.5em 0 1em;
+  min-height: 3.5em;
+  padding: 0.5em 1em 0.5em 1.25em;
 }
 
-.header {
-  margin-top: 0.5em;
-  margin-bottom: 1em;
+.day-off-total {
+  color: var(--text-strong);
+  font-weight: 600;
 }
 
 .day-off-group {
   background: var(--background-panel);
   border-radius: 12px;
-  margin-bottom: 1.5em;
+  margin-bottom: 1em;
   padding: 0.5em 12px 12px;
 }
 
@@ -267,6 +271,8 @@ defineExpose({ closeSetDayOffModal, closeUnsetDayOffModal })
   display: flex;
   flex-direction: column;
   gap: 0.75em;
+  // the global list margin pushed the cards right of their title
+  margin: 0;
 }
 
 .day-off-card {
@@ -377,9 +383,24 @@ defineExpose({ closeSetDayOffModal, closeUnsetDayOffModal })
 }
 
 @media (max-width: 768px) {
-  .header,
+  // no hover on a phone: the actions show at once
   .day-off-card .actions {
-    display: none;
+    opacity: 1;
+  }
+
+  .header {
+    padding-left: 1em;
+    padding-right: 0.5em;
+  }
+
+  .day-off-group {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+
+  .day-off-card {
+    gap: 0.75em;
+    padding: 0.6em 0.75em;
   }
 }
 </style>
