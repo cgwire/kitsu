@@ -772,6 +772,8 @@
       "invite_link_error": "Beim Erstellen des Einladungslinks ist ein Fehler aufgetreten.",
       "new_person": "Einen neuen Mitarbeiter hinzufügen",
       "no_task_assigned": "Es gibt keine laufenden Aufgaben, die Ihnen zugeordnet sind.",
+      "no_task_done": "Du hast noch keine freigegebenen Aufgaben",
+      "no_task_pending": "Keine Aufgabe wartet auf Feedback",
       "persons": "Person | Personen",
       "project_role": "Projektrolle",
       "running_tasks": "Laufende Aufgaben",

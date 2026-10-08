@@ -772,6 +772,8 @@
       "invite_link_error": "招待リンクの生成中にエラーが発生しました",
       "new_person": "ユーザーを作成",
       "no_task_assigned": "アサインされているタスクはありません",
+      "no_task_done": "承認済みのタスクはまだありません",
+      "no_task_pending": "フィードバック待ちのタスクはありません",
       "persons": "ユーザー | ユーザー",
       "project_role": "プロダクションロール",
       "running_tasks": "実行中のタスク",

@@ -772,6 +772,8 @@
       "invite_link_error": "生成邀请链接时发生错误",
       "new_person": "添加新用户",
       "no_task_assigned": "没有分配给您正在执行的任务",
+      "no_task_done": "您还没有已通过的任务",
+      "no_task_pending": "没有等待反馈的任务",
       "persons": "用户 | 用户",
       "project_role": "项目角色",
       "running_tasks": "在执行任务",

@@ -772,6 +772,8 @@
       "invite_link_error": "Hiba történt a meghívó link generálásakor",
       "new_person": "Felhasználó hozzáadása",
       "no_task_assigned": "Nincs neked kiosztott folyamatban lévő feladat",
+      "no_task_done": "Még nincs jóváhagyott feladatod",
+      "no_task_pending": "Egy feladat sem vár visszajelzésre",
       "persons": "felhasználó | felhasználó",
       "project_role": "Projektszerep",
       "running_tasks": "Folyamatban lévő feladatok",

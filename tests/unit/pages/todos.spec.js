@@ -15,6 +15,8 @@ vi.mock('vue-i18n', async importOriginal => ({
 import '@/lib/auth'
 
 import TimesheetList from '@/components/lists/TimesheetList.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import Todos from '@/components/pages/Todos.vue'
@@ -139,6 +141,60 @@ const mountPage = async (
 }
 
 describe('Todos page', () => {
+  describe('on a phone', () => {
+    const mockPhone = matches =>
+      vi.stubGlobal(
+        'matchMedia',
+        vi.fn(() => ({
+          matches,
+          addEventListener: () => {},
+          removeEventListener: () => {}
+        }))
+      )
+
+    afterEach(() => vi.unstubAllGlobals())
+
+    it('hides the pending and validated tabs', async () => {
+      mockPhone(true)
+      const wrapper = await mountPage([])
+      const names = wrapper
+        .findComponent(RouteSectionTabs)
+        .props('tabs')
+        .map(tab => tab.name)
+      expect(names).not.toContain('pending')
+      expect(names).not.toContain('done')
+      expect(names).toContain('timesheets')
+      wrapper.unmount()
+    })
+
+    it('keeps every tab on a large screen', async () => {
+      mockPhone(false)
+      const wrapper = await mountPage([])
+      const names = wrapper
+        .findComponent(RouteSectionTabs)
+        .props('tabs')
+        .map(tab => tab.name)
+      expect(names).toContain('pending')
+      expect(names).toContain('done')
+      wrapper.unmount()
+    })
+
+    // the funnel toggle of the other pages, next to the search
+    it('folds the filters until the funnel opens them', async () => {
+      mockPhone(true)
+      const wrapper = await mountPage([])
+      const filters = wrapper.find('.todos-filters')
+      const toggle = wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.classes('filters-toggle'))
+      expect(filters.classes()).toContain('collapsed')
+      expect(toggle.props('icon')).toBe('funnel')
+      await toggle.vm.$emit('click')
+      expect(filters.classes()).not.toContain('collapsed')
+      wrapper.unmount()
+    })
+  })
+
   // The page keeps the picked filters in the local storage
   afterEach(() => localStorage.removeItem('todos:filters'))
 

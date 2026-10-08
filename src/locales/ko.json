@@ -772,6 +772,8 @@
       "invite_link_error": "초대 링크를 생성하는 도중 오류가 발생했습니다.",
       "new_person": "새 사용자 추가",
       "no_task_assigned": "어떤 실행 중인 작업도 귀하에게 할당되지 않았습니다.",
+      "no_task_done": "아직 승인된 작업이 없습니다",
+      "no_task_pending": "피드백을 기다리는 작업이 없습니다",
       "persons": "사용자 | 사용자들",
       "project_role": "프로젝트 역할",
       "running_tasks": "작업 실행",

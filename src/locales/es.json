@@ -772,6 +772,8 @@
       "invite_link_error": "Se ha producido un error al generar el enlace de invitación",
       "new_person": "Añadir un usuario nuevo",
       "no_task_assigned": "No hay tareas en ejecución asignadas a usted",
+      "no_task_done": "Todavía no tienes tareas validadas",
+      "no_task_pending": "Ninguna tarea está esperando una revisión",
       "persons": "usuario | usuarios",
       "project_role": "Rol de proyecto",
       "running_tasks": "Tareas en ejecución",

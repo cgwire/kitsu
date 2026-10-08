@@ -772,6 +772,8 @@
       "invite_link_error": "Si è verificato un errore durante la generazione del link di invito",
       "new_person": "Aggiungi un nuovo utente",
       "no_task_assigned": "Non ci sono task in corso assegnati a te",
+      "no_task_done": "Non hai ancora attività validate",
+      "no_task_pending": "Nessuna attività è in attesa di un feedback",
       "persons": "utente | utenti",
       "project_role": "Ruolo di progetto",
       "running_tasks": "Task in corso",

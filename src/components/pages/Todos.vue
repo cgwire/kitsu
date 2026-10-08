@@ -11,7 +11,10 @@
 
         <div
           class="todos-filters"
-          :class="{ 'is-attached': isActiveTab('timesheets') }"
+          :class="{
+            'is-attached': isActiveTab('timesheets'),
+            collapsed: isPhone && areFiltersFolded
+          }"
           v-show="!isActiveTab('daysoff')"
         >
           <div class="flexrow">
@@ -26,22 +29,33 @@
               />
             </div>
 
+            <button-simple
+              class="flexrow-item filters-toggle"
+              icon="funnel"
+              :aria-expanded="`${!areFiltersFolded}`"
+              :is-on="!areFiltersFolded"
+              :title="
+                $t(areFiltersFolded ? 'main.more_filters' : 'main.less_filters')
+              "
+              @click="areFiltersFolded = !areFiltersFolded"
+            />
+
             <combobox-production
-              class="flexrow-item production-field"
+              class="flexrow-item production-field collapsible"
               :label="$t('main.production')"
               :production-list="productionList"
               v-model="productionId"
             />
 
             <combobox-task-type
-              class="flexrow-item task-type-field"
+              class="flexrow-item task-type-field collapsible"
               :label="$t('tasks.fields.task_type')"
               :task-type-list="taskTypeList"
               v-model="taskTypeId"
             />
 
             <combobox-styled
-              class="flexrow-item"
+              class="flexrow-item collapsible"
               :label="$t('tasks.fields.due_date')"
               :options="filterOptions"
               locale-key-prefix="tasks."
@@ -51,7 +65,7 @@
             <span class="filler"></span>
 
             <combobox-styled
-              class="flexrow-item"
+              class="flexrow-item collapsible"
               open-left
               :label="$t('main.sorted_by')"
               :options="sortOptions"
@@ -59,7 +73,7 @@
               v-model="currentSort"
             />
           </div>
-          <div class="query-list">
+          <div class="query-list collapsible">
             <search-query-list
               :queries="todoSearchQueries"
               type="todo"
@@ -82,7 +96,8 @@
 
         <todos-list
           class="todos-panel"
-          :empty-text="$t('people.no_task_assigned')"
+          :empty-text="$t('people.no_task_pending')"
+          :with-illustration="false"
           :is-loading="isTodosLoading"
           :is-error="isTodosLoadingError"
           :tasks="pendingTasks"
@@ -95,6 +110,8 @@
           ref="done-list"
           class="done-list todos-panel"
           done
+          :empty-text="$t('people.no_task_done')"
+          :with-illustration="false"
           :is-loading="loading.doneTasks || isTodosLoading"
           :is-error="isTodosLoadingError"
           :selection-grid="doneSelectionGrid"
@@ -102,25 +119,27 @@
           v-if="isActiveTab('done')"
         />
 
-        <kanban-board
-          :is-loading="isTodosLoading"
-          :is-error="isTodosLoadingError"
-          :production="selectedProduction"
-          :statuses="boardStatuses"
-          :tasks="boardTasks"
-          :user="user"
-          v-if="isActiveTab('board')"
-        />
+        <div class="todos-panel board-panel" v-if="isActiveTab('board')">
+          <kanban-board
+            :is-loading="isTodosLoading"
+            :is-error="isTodosLoadingError"
+            :production="selectedProduction"
+            :statuses="boardStatuses"
+            :tasks="boardTasks"
+            :user="user"
+          />
+        </div>
 
-        <user-calendar
-          :days-off="daysOff"
-          :is-loading="isTodosLoading"
-          :tasks="sortedTasks"
-          :time-spents="calendarTimeSpents"
-          @dates-changed="onCalendarDatesChanged"
-          @time-clicked="onCalendarTimeClicked"
-          v-if="isActiveTab('calendar')"
-        />
+        <div class="calendar-panel" v-if="isActiveTab('calendar')">
+          <user-calendar
+            :days-off="daysOff"
+            :is-loading="isTodosLoading"
+            :tasks="sortedTasks"
+            :time-spents="calendarTimeSpents"
+            @dates-changed="onCalendarDatesChanged"
+            @time-clicked="onCalendarTimeClicked"
+          />
+        </div>
 
         <timesheet-list
           ref="timesheet-list"
@@ -191,6 +210,7 @@ import KanbanBoard from '@/components/lists/KanbanBoard.vue'
 import TimesheetList from '@/components/lists/TimesheetList.vue'
 import TodosList from '@/components/lists/TodosList.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
@@ -237,6 +257,10 @@ const currentSection = ref('todos')
 const daysOff = ref([])
 const isDaysOffLoadingError = ref(false)
 const dayOffError = ref(false)
+// Phones get neither the pending nor the validated tab, and fold the filters
+const phoneQuery = window.matchMedia?.('(max-width: 768px)')
+const isPhone = ref(Boolean(phoneQuery?.matches))
+const areFiltersFolded = ref(true)
 const productionId = ref(undefined)
 const taskTypeId = ref(route.query.taskTypeId ?? storedFilters.taskTypeId ?? '')
 const calendarTimeSpents = ref([])
@@ -321,16 +345,20 @@ const todoTabs = computed(() => {
       label: t('tasks.calendar'),
       name: 'calendar'
     },
-    {
-      label: `${t('tasks.pending')} (${pendingTasks.value.length})`,
-      name: 'pending'
-    },
-    {
-      label: `${t('tasks.validated')} (${
-        loading.doneTasks ? '…' : sortedDoneTasks.value.length
-      })`,
-      name: 'done'
-    },
+    isPhone.value
+      ? undefined
+      : {
+          label: `${t('tasks.pending')} (${pendingTasks.value.length})`,
+          name: 'pending'
+        },
+    isPhone.value
+      ? undefined
+      : {
+          label: `${t('tasks.validated')} (${
+            loading.doneTasks ? '…' : sortedDoneTasks.value.length
+          })`,
+          name: 'done'
+        },
     {
       label: t('timesheets.timelog_title'),
       name: 'timesheets'
@@ -370,6 +398,10 @@ const loggableDoneTasks = computed(() =>
 // Functions
 // --------------------------------------------------------------------------
 const isActiveTab = tab => currentSection.value === tab
+
+const onPhoneChange = event => {
+  isPhone.value = event.matches
+}
 
 const isPending = task =>
   taskStatusMap.value.get(task.task_status_id)?.is_feedback_request
@@ -503,7 +535,9 @@ const updateActiveTab = () => {
     'timesheets'
   ]
   const section = route.query.section
-  currentSection.value = availableSections.includes(section) ? section : 'todos'
+  const isHiddenOnPhone = isPhone.value && ['pending', 'done'].includes(section)
+  currentSection.value =
+    availableSections.includes(section) && !isHiddenOnPhone ? section : 'todos'
 
   const day = route.query.day
   if (
@@ -702,6 +736,7 @@ watch(
 // Lifecycle
 // --------------------------------------------------------------------------
 onMounted(async () => {
+  phoneQuery?.addEventListener?.('change', onPhoneChange)
   socket.on('task:assign', onAssignation)
   socket.on('task:unassign', onAssignation)
   if (!route.query.productionId && storedFilters.productionId) {
@@ -717,6 +752,7 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  phoneQuery?.removeEventListener?.('change', onPhoneChange)
   socket.off('task:assign', onAssignation)
   socket.off('task:unassign', onAssignation)
 })
@@ -775,6 +811,10 @@ useHead({ title: computed(() => `${t('tasks.my_tasks')} - Kitsu`) })
   }
 }
 
+.filters-toggle {
+  display: none;
+}
+
 .todos-filters {
   margin: 0.5em 0 1em;
   padding: 1em 1em 0.5em;
@@ -822,20 +862,158 @@ useHead({ title: computed(() => `${t('tasks.my_tasks')} - Kitsu`) })
     margin-bottom: 0;
   }
 
+  // margin-top auto keeps the task count at the bottom of the panel
   :deep(.footer-info) {
-    margin: 0.75em 0 0;
+    margin: auto 0 0;
+    padding-top: 0.75em;
   }
+}
+
+.board-panel,
+.calendar-panel {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  margin-bottom: 1em;
+  min-height: 0;
+}
+
+// The calendar keeps its content height in a flex panel and the day rows
+// shrink: it must fill the panel as it filled the page before.
+.calendar-panel :deep(.user-calendar) {
+  flex: 1;
+  margin-top: 0;
+  max-height: none;
+  min-height: 0;
+}
+
+.dark .calendar-panel :deep(.calendar-toolbar),
+.dark .calendar-panel :deep(.calendar-body),
+.dark .day-off-list :deep(.header),
+.dark .day-off-list :deep(.day-off-group) {
+  background: #2a2d33;
+}
+
+// The lanes share the panel color: in light theme they would melt into it
+.board-panel :deep(.board-column:not(.droppable)) {
+  background: var(--background);
+}
+
+.dark .board-panel :deep(.board-column:not(.droppable)) {
+  background: var(--background-panel);
 }
 
 .data-list {
   margin-top: 0;
 }
 
-.done-list {
-  margin-top: 2em;
-}
-
 .field {
   margin-bottom: 0;
+}
+
+@media screen and (max-width: 768px) {
+  // The page grows with its cards: at a fixed height, the list panel
+  // overflows it and its bottom margin never shows.
+  .todos.page {
+    height: auto;
+    min-height: 100%;
+  }
+
+  // the funnel of the other pages, next to the search
+  .filters-toggle {
+    align-self: flex-end;
+    display: flex;
+    flex: none;
+    height: 42px;
+    margin-left: auto;
+    margin-right: 0;
+  }
+
+  .todos-filters.collapsed .collapsible {
+    display: none;
+  }
+
+  .todos-filters {
+    padding: 0.75em;
+
+    > .flexrow {
+      align-items: flex-end;
+      flex-wrap: wrap;
+      row-gap: 0.5em;
+    }
+
+    .filler {
+      display: none;
+    }
+  }
+
+  // the gap left of the funnel, which margin-left: auto pushes right
+  .search-field-column {
+    flex: 1;
+    margin-right: 0.75em;
+    min-width: 0;
+  }
+
+  // the 200px input pushed the save icon out of the box, under the funnel
+  .search-field-column :deep(.search-field-wrapper) {
+    margin-right: 0;
+    max-width: none;
+
+    .search-field {
+      flex: 1;
+      min-width: 0;
+      width: auto;
+    }
+  }
+
+  // like the task lists: a flexible height clips the panel bottom margin
+  .user-timesheet {
+    flex: none;
+    margin-bottom: 1em;
+    min-height: auto;
+  }
+
+  .todos-panel {
+    flex: none;
+    margin-bottom: 1em;
+    min-height: auto;
+    padding: 0.5em;
+  }
+
+  // A flexible height loops on a phone: the page scrollbar comes and goes,
+  // the grid resizes and the overflow with it.
+  .calendar-panel {
+    flex: none;
+    height: 85vh;
+  }
+
+  // A fixed height keeps the cards scrolling inside their lanes, and the
+  // sideways scrollbar of the lanes in view.
+  .board-panel.todos-panel {
+    flex: none;
+    height: 75vh;
+  }
+
+  // smaller cards: a lane shows several tasks at once
+  .board-panel :deep(.board-card .ui-droppable) {
+    min-height: 110px;
+  }
+
+  // one lane per screen, the next one peeking: drag and drop does not start
+  // from a touch, so the board is read-only there anyway
+  .board-panel :deep(.board-column) {
+    max-width: 75vw;
+    min-width: 75vw;
+    width: 75vw;
+  }
+
+  // the tabs still scroll sideways, without a bar eating their height
+  .section-tabs.tabs {
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
 }
 </style>

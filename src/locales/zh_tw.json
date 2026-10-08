@@ -772,6 +772,8 @@
       "invite_link_error": "產生邀請連結時發生錯誤",
       "new_person": "新增新用戶",
       "no_task_assigned": "沒有分配給您正在執行的任務",
+      "no_task_done": "您還沒有已通過的任務",
+      "no_task_pending": "沒有等待回饋的任務",
       "persons": "用戶 | 用戶",
       "project_role": "專案角色",
       "running_tasks": "在執行任務",

@@ -772,6 +772,8 @@
       "invite_link_error": "Der opstod en fejl under generering af invitationslinket",
       "new_person": "Opret en ny bruger",
       "no_task_assigned": "Der er ingen igangværende opgaver tildelt til dig",
+      "no_task_done": "Du har endnu ingen godkendte opgaver",
+      "no_task_pending": "Ingen opgaver venter på feedback",
       "persons": "bruger | brugere",
       "project_role": "Projektrolle",
       "running_tasks": "Igangværende opgaver",

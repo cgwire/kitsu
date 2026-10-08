@@ -244,4 +244,31 @@ describe('lists/TimesheetList', () => {
       expect(weekTotal(wrapper)).toBe('timesheets.week_total:9')
     })
   })
+
+  // Phones get read-only cards from the global datatable--cards rule
+  describe('cards on mobile', () => {
+    const tasks = [{ id: 'task-1', project_id: 'production-1' }]
+    const cell = (wrapper, name) =>
+      wrapper.find(`.datatable-body tr.datatable-row > .${name}`)
+
+    it('opts the table into the card layout', () => {
+      const wrapper = mountList({ tasks, timeSpentMap: {} })
+      expect(wrapper.find('table').classes()).toContain('datatable--cards')
+      expect(cell(wrapper, 'name').classes()).toContain('card-head')
+    })
+
+    it('labels the production, task type and time spent lines', () => {
+      const wrapper = mountList({ tasks, timeSpentMap: {} })
+      expect(cell(wrapper, 'production').attributes('data-label')).toBe(
+        'main.production'
+      )
+      expect(cell(wrapper, 'type').attributes('data-label')).toBe(
+        'tasks.fields.task_type'
+      )
+      expect(cell(wrapper, 'time-spent').attributes('data-label')).toBe(
+        'timesheets.time_spents'
+      )
+    })
+
+  })
 })

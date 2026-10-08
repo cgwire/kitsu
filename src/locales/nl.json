@@ -772,6 +772,8 @@
       "invite_link_error": "Er is een fout opgetreden tijdens het genereren van de uitnodigingslink",
       "new_person": "Voeg een nieuwe gebruiker toe",
       "no_task_assigned": "Er zijn geen lopende taken aan jou toegewezen",
+      "no_task_done": "Je hebt nog geen goedgekeurde taken",
+      "no_task_pending": "Er wacht geen taak op feedback",
       "persons": "persoon | personen",
       "project_role": "Projectrol",
       "running_tasks": "Lopende taken",

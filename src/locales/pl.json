@@ -1139,6 +1139,8 @@
       "invite_link_error": "Wystąpił błąd podczas generowania linku zaproszenia",
       "new_person": "Dodaj nowego użytkownika",
       "no_task_assigned": "Nie masz przypisanych żadnych bieżących zadań",
+      "no_task_done": "Nie masz jeszcze zatwierdzonych zadań",
+      "no_task_pending": "Żadne zadanie nie czeka na opinię",
       "persons": "użytkownik | użytkowników",
       "project_role": "Rola projektu",
       "seats_remaining": "brak wolnych miejsc | pozostało {count} miejsce | pozostało miejsc: {count}",

@@ -1,7 +1,7 @@
 <template>
   <div class="data-list task-list">
     <div class="datatable-wrapper" ref="body" @scroll.passive="onBodyScroll">
-      <table class="datatable" v-if="!isLoading">
+      <table class="datatable datatable--cards" v-if="!isLoading">
         <thead class="datatable-head" id="datatable-todos" v-columns-resizable>
           <tr>
             <th
@@ -86,6 +86,7 @@
             <td
               class="production datatable-row-header datatable-row-header--nobd"
               scope="row"
+              :data-label="$t('main.production')"
             >
               <production-name-cell
                 :is-tooltip="true"
@@ -100,9 +101,10 @@
               :task-type="getTaskType(entry)"
               :style="{ left: colTypePosX }"
               :is-link="false"
+              :data-label="$t('tasks.fields.task_type')"
             />
             <td
-              class="name datatable-row-header"
+              class="name datatable-row-header card-head"
               :style="{ left: colNamePosX }"
             >
               <div class="flexrow">
@@ -128,7 +130,10 @@
               :entry="{ description: entry.entity_description }"
               v-if="isDescriptionPresent"
             />
-            <td class="estimation number-cell">
+            <td
+              class="estimation number-cell"
+              :data-label="entry.estimation ? $t('main.estimation') : null"
+            >
               <input
                 class="input"
                 min="0"
@@ -158,7 +163,10 @@
                 {{ formatDisplayDate(entry.start_date) }}
               </template>
             </td>
-            <td class="due-date">
+            <td
+              class="due-date"
+              :data-label="entry.due_date ? $t('tasks.fields.due_date') : null"
+            >
               <date-field
                 class="flexrow-item"
                 :min-date="disabledDates"
@@ -239,13 +247,18 @@
               :row-x="i"
               :selected="selectionGrid[entry.id]"
               :task-test="entry"
+              :data-label="$t('tasks.fields.task_status')"
             />
             <last-comment-cell
               class="last-comment"
               :task="entry"
               v-if="!done"
             />
-            <td class="end-date" v-else>
+            <td
+              class="end-date"
+              :data-label="entry.end_date ? $t('tasks.fields.end_date') : null"
+              v-else
+            >
               {{ formatDisplayDate(entry.end_date) }}
             </td>
           </tr>
@@ -262,9 +275,10 @@
 
     <div
       class="has-text-centered empty-list"
+      :class="{ 'empty-state': !withIllustration }"
       v-if="tasks.length === 0 && !isLoading"
     >
-      <p>
+      <p v-if="withIllustration">
         <img src="../../assets/illustrations/empty_todo.png" alt="" />
       </p>
       <p>
@@ -291,8 +305,7 @@
           : $t('main.days_estimated', {
               count: formatDuration(timeEstimated, false)
             })
-      }}
-      )
+      }})
     </p>
   </div>
 </template>
@@ -365,6 +378,10 @@ const props = defineProps({
   emptyText: {
     type: String,
     default: ''
+  },
+  withIllustration: {
+    type: Boolean,
+    default: true
   },
   disabledDates: {
     type: Object,
@@ -806,6 +823,13 @@ td.end-date {
   padding: 0;
 }
 
+// the empty state of the admin pages: a plain message, without picture
+.empty-state {
+  color: var(--text-alt);
+  font-size: 1.1em;
+  margin-top: 3em;
+}
+
 .empty-list img {
   max-width: 80vh;
   -webkit-filter: brightness(103%);
@@ -837,5 +861,65 @@ input[type='number'] {
 
 .error {
   color: $red;
+}
+
+@media screen and (max-width: 768px) {
+  // the page scrolls on a phone, not the list: the filters leave it too
+  // little height for a single card
+  .datatable-wrapper {
+    background: transparent;
+    border: 0;
+    overflow: visible;
+  }
+
+  .empty-state {
+    margin: 1.5em 0;
+  }
+
+  // The production avatar opens the card head, left of the thumbnail: the
+  // card wraps as a row, every other line takes the full width.
+  // the global card rule also names :hover and :last-child, which a bare
+  // row selector loses against: the tapped and the last card stacked again
+  .datatable--cards .datatable-row,
+  .datatable--cards .datatable-row:last-child,
+  .datatable--cards .datatable-row:hover {
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .datatable--cards .datatable-body td[data-label] {
+    flex: 1 0 100%;
+  }
+
+  .datatable--cards .datatable-body td.production {
+    display: block;
+    flex: none;
+    order: -2;
+    padding-right: 0.75em;
+
+    &::before {
+      display: none;
+    }
+  }
+
+  .datatable--cards .datatable-body td.card-head {
+    flex: 1;
+    min-width: 0;
+  }
+
+  // status right under the task type: the other lines come after it
+  .datatable-body td.estimation,
+  .datatable-body td.due-date,
+  .datatable-body td.end-date {
+    order: 1;
+  }
+
+  // read-only cards: no inline editor, even on a selected row
+  .estimation .input,
+  .start-date :deep(.datepicker),
+  .due-date :deep(.datepicker) {
+    display: none;
+  }
 }
 </style>

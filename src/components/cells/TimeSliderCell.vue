@@ -11,7 +11,7 @@
         :value="value"
         @change="onInputChange"
       />
-      <span class="flexrow-item">
+      <span class="flexrow-item slider-item">
         <vue-slider
           ref="slider"
           class="slider"
