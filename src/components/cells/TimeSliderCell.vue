@@ -134,7 +134,15 @@ watch(value, v => {
   font-size: 1.5em;
   font-variant-numeric: tabular-nums;
   font-weight: bold;
+  -moz-appearance: textfield;
+  padding: 6px 8px;
   width: 70px;
+
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
 
   &:hover,
   &:focus {
