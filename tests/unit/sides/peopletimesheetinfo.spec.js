@@ -51,6 +51,14 @@ describe('sides/PeopleTimesheetInfo', () => {
     expect(push).toHaveBeenCalledTimes(1)
   })
 
+  test('takes its level and close route from its props', async () => {
+    const closeRoute = { query: { section: 'productivity' } }
+    await wrapper.setProps({ level: 'week', week: 41, closeRoute })
+    expect(wrapper.find('.info-date').text()).toContain('41')
+    pressEscape()
+    expect(push).toHaveBeenCalledWith(closeRoute)
+  })
+
   test('stays open when the Escape closes a modal', () => {
     modal = document.createElement('div')
     modal.className = 'modal is-active'

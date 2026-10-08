@@ -1,7 +1,7 @@
 <template>
   <div class="people-timesheet-info">
     <div class="close">
-      <router-link class="close-button" :to="closeRoute">
+      <router-link class="close-button" :to="closeTarget">
         <x-icon :size="16" />
       </router-link>
     </div>
@@ -12,16 +12,16 @@
     </div>
 
     <div class="info-date">
-      <template v-if="level === 'year'">{{ year }}</template>
-      <template v-else-if="level === 'month'">
+      <template v-if="currentLevel === 'year'">{{ year }}</template>
+      <template v-else-if="currentLevel === 'month'">
         {{ monthString }} {{ year }}
       </template>
-      <template v-else-if="level === 'week'">
+      <template v-else-if="currentLevel === 'week'">
         {{ $t('main.week') }} {{ week }}
       </template>
       <template v-else>{{ day }} {{ monthString }} {{ year }}</template>
     </div>
-    <div class="info-range" v-if="level === 'week'">
+    <div class="info-range" v-if="currentLevel === 'week'">
       {{ weekDays }} {{ year }}
     </div>
 
@@ -39,7 +39,7 @@
           $t(totalKey, { count: total })
         }}</span>
       </div>
-      <div class="info-stat" v-if="level !== 'day'">
+      <div class="info-stat" v-if="currentLevel !== 'day'">
         <span class="info-stat-value">{{ dayOffCount }}</span>
         <span class="info-stat-label">
           {{ $t('days_off.nb_days_off', { count: dayOffCount }) }}
@@ -96,7 +96,9 @@ const props = defineProps({
   tasks: { type: Array, default: () => [] },
   dayOffs: { type: Array, default: () => [] },
   unit: { type: String, default: 'hour' },
-  dailyRate: { type: Number, default: 0 }
+  dailyRate: { type: Number, default: 0 },
+  level: { type: String, default: '' },
+  closeRoute: { type: Object, default: null }
 })
 
 // Computed
@@ -105,7 +107,7 @@ const organisation = computed(() => store.getters.organisation)
 const use12HourClock = computed(() => store.getters.use12HourClock)
 
 // the panel only shows on the `timesheets-<level>-person` routes
-const level = computed(() => route.name.split('-')[1])
+const currentLevel = computed(() => props.level || route.name.split('-')[1])
 
 const convert = hours =>
   convertHours(hours, props.unit, organisation.value, props.dailyRate)
@@ -128,7 +130,7 @@ const totalKey = computed(
 
 const monthString = computed(() => monthToString(props.month))
 
-const period = computed(() => getTimesheetPeriod(level.value, props))
+const period = computed(() => getTimesheetPeriod(currentLevel.value, props))
 
 const weekDays = computed(() => {
   const { start, end } = period.value
@@ -160,25 +162,29 @@ const expectedTitle = computed(() => {
   return `${format(expected.value)} ${t(key, { count: expected.value })}`
 })
 
-const closeRoute = computed(() => {
+const timesheetsCloseRoute = computed(() => {
   const { year, month, week, day } = props
   const params = {
     year: { year },
     month: { year, month },
     week: { year, week },
     day: { year, month, day }
-  }[level.value]
+  }[currentLevel.value]
   return {
-    name: `timesheets-${level.value}`,
+    name: `timesheets-${currentLevel.value}`,
     params,
     query: route.query
   }
 })
 
+const closeTarget = computed(
+  () => props.closeRoute || timesheetsCloseRoute.value
+)
+
 // Functions
 // --------------------------------------------------------------------------
 const onKeyDown = event => {
-  if (isFreeEscape(event)) router.push(closeRoute.value)
+  if (isFreeEscape(event)) router.push(closeTarget.value)
 }
 
 // Lifecycle
