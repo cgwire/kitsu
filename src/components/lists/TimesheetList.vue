@@ -527,7 +527,7 @@ onMounted(() => {
 
 .timesheet-header {
   align-items: center;
-  background: var(--background-panel);
+  background: var(--background-panel-raised);
   border-radius: 12px;
   display: flex;
   flex-wrap: wrap;
@@ -537,7 +537,7 @@ onMounted(() => {
 }
 
 .timesheet-panel {
-  background: var(--background-panel);
+  background: var(--background-panel-raised);
   border-radius: 12px;
   display: flex;
   flex-direction: column;
@@ -561,17 +561,9 @@ onMounted(() => {
   }
 }
 
-// softer than the near-black strong text of the light theme
 .timesheet-header,
 .timesheet-panel {
-  --text-strong: #46494f;
-}
-
-// the panel token is near the page background in dark theme
-.dark .timesheet-header,
-.dark .timesheet-panel {
-  --text-strong: #fefefe;
-  background: #2a2d33;
+  --text-strong: var(--text-panel);
 }
 
 // the dark background of the date field
