@@ -77,11 +77,7 @@
       :day-off-to-edit="dayOffToEdit"
       :is-error="isDayOffError"
       :error-text="dayOffTextError"
-      @confirm="
-        dayOff => {
-          $emit('set-day-off', dayOff)
-        }
-      "
+      @confirm="$emit('set-day-off', $event)"
       @cancel="closeSetDayOffModal"
     />
 
@@ -169,11 +165,6 @@ const sortedDaysOff = computed(() =>
     })
 )
 
-const formatCardDay = date => {
-  const day = moment.utc(date)
-  return day.format(day.year() === moment().year() ? 'ddd D MMM' : 'll')
-}
-
 const groups = computed(() => {
   const today = getUserDay().toDate()
   const cards = sortedDaysOff.value.map(dayOff => ({
@@ -203,6 +194,11 @@ const groups = computed(() => {
 // The rows hold their days at UTC midnight, as the utc date fields of the
 // form do: the user time zone would name the day before west of UTC.
 const formatUtcDay = date => (date ? moment.utc(date).format('YYYY-MM-DD') : '')
+
+const formatCardDay = date => {
+  const day = moment.utc(date)
+  return day.format(day.year() === moment().year() ? 'ddd D MMM' : 'll')
+}
 
 // The page keeps the error of a refused confirm: each form opens without it.
 const openSetDayOffModal = (dayOff = null) => {

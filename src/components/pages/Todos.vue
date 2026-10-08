@@ -793,19 +793,12 @@ useHead({ title: computed(() => `${t('tasks.my_tasks')} - Kitsu`) })
   margin-bottom: 1em;
 }
 
-// the label metrics of the production combobox, to share its row
 .search-field-column {
   margin: 0 1em 0 0;
-
-  .label {
-    margin-bottom: 5px;
-    padding-top: 0;
-  }
 }
 
 .query-list {
   margin-top: 0.5em;
-  margin-bottom: 1em;
 }
 
 .todos-filters,
@@ -829,10 +822,6 @@ useHead({ title: computed(() => `${t('tasks.my_tasks')} - Kitsu`) })
   margin: 0 0 1em;
   padding: 1em;
 
-  .query-list {
-    margin-bottom: 0;
-  }
-
   .search-field-wrapper {
     background: var(--background);
   }
@@ -844,8 +833,9 @@ useHead({ title: computed(() => `${t('tasks.my_tasks')} - Kitsu`) })
     background: $dark-grey-light;
   }
 
-  // the label metrics of the production combobox: the task type one pads
-  // its label and pushes its box 3px lower than the rest of the row
+  // the label metrics of the production combobox, to share its row: the task
+  // type one pads its label and pushes its box 3px lower than the rest
+  .search-field-column .label,
   .task-type-field :deep(.label) {
     margin-bottom: 5px;
     padding-top: 0;
@@ -1011,7 +1001,6 @@ useHead({ title: computed(() => `${t('tasks.my_tasks')} - Kitsu`) })
   // A fixed height keeps the cards scrolling inside their lanes, and the
   // sideways scrollbar of the lanes in view.
   .board-panel.todos-panel {
-    flex: none;
     height: 75vh;
   }
 

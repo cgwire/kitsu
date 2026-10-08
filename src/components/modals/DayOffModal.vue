@@ -75,7 +75,7 @@ import TextField from '@/components/widgets/TextField.vue'
 const { t } = useI18n()
 
 // Props / Emits
-
+// --------------------------------------------------------------------------
 const props = defineProps({
   active: { type: Boolean, default: false },
   dayOffToEdit: { type: Object, default: () => ({}) },
@@ -87,7 +87,7 @@ const props = defineProps({
 const emit = defineEmits(['cancel', 'confirm'])
 
 // State
-
+// --------------------------------------------------------------------------
 const form = ref({
   startDate: null,
   endDate: null,
@@ -95,14 +95,12 @@ const form = ref({
 })
 
 // Computed
-
+// --------------------------------------------------------------------------
 const isEditing = computed(() => Boolean(props.dayOffToEdit?.id))
 
 const modalTitle = computed(() =>
   isEditing.value ? t('days_off.edit') : t('days_off.add')
 )
-
-// Functions
 
 const nbDays = computed(() =>
   form.value.startDate && form.value.endDate
@@ -113,6 +111,8 @@ const nbDays = computed(() =>
     : null
 )
 
+// Functions
+// --------------------------------------------------------------------------
 const confirm = () => {
   emit('confirm', {
     ...props.dayOffToEdit,
@@ -153,7 +153,7 @@ const onEndDateChange = date => {
 }
 
 // Watchers
-
+// --------------------------------------------------------------------------
 // Reset on each opening, and when another day off comes in while open: the
 // Days off tab hands the same day off again when a row is edited after a
 // cancel, and Shift+Tab reaches its add button behind the open form. Both

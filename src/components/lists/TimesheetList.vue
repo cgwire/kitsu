@@ -121,7 +121,7 @@
             </tr>
           </tbody>
           <tbody class="datatable-body" v-if="!isLoading && !hideDone">
-            <tr v-if="!hideDone" class="datatable-type-header">
+            <tr class="datatable-type-header">
               <th colspan="4" scope="rowgroup">
                 <div class="datatable-row-header">
                   <page-subtitle :text="$t('timesheets.done_tasks')" />
@@ -204,11 +204,7 @@
       :day-off-to-edit="dayOffToEdit"
       :is-error="isDayOffError"
       :error-text="dayOffTextError"
-      @confirm="
-        dayOff => {
-          $emit('set-day-off', dayOff)
-        }
-      "
+      @confirm="$emit('set-day-off', $event)"
       @cancel="closeSetDayOffModal"
     />
 
@@ -491,10 +487,6 @@ onMounted(() => {
 
 .datatable-body .datatable-row-header {
   z-index: 7; // <th> must be over the .vue-slider (z-index: 5) and .vue-slider-dot (z-index: 6)
-
-  &.time-spent {
-    z-index: 5; // <th> must be under <td> on vertical scroll
-  }
 }
 
 :deep(.vue-slider-dot:hover) {
@@ -533,17 +525,6 @@ onMounted(() => {
 .day-off-cell {
   color: var(--text-alt);
   font-style: italic;
-}
-
-td.name {
-  font-weight: bold;
-}
-
-.thumbnail {
-  min-width: 60px;
-  max-width: 60px;
-  width: 60px;
-  padding: 0;
 }
 
 .timesheet-header {
@@ -588,18 +569,14 @@ td.name {
   --text-strong: #46494f;
 }
 
-.dark .timesheet-header,
-.dark .timesheet-panel {
-  --text-strong: #fefefe;
-}
-
 // the panel token is near the page background in dark theme
 .dark .timesheet-header,
 .dark .timesheet-panel {
+  --text-strong: #fefefe;
   background: #2a2d33;
 }
 
-// the dark background of the filter comboboxes
+// the dark background of the date field
 .dark .timesheet-header :deep(.dp--input) {
   background: $dark-grey-light;
 }
@@ -665,6 +642,7 @@ td.name {
 
   .datatable--cards .datatable-body th.card-head {
     display: block;
+    flex: 1;
     order: -1;
     padding: 0.75em 0 1em;
   }
@@ -711,11 +689,6 @@ td.name {
     &::before {
       display: none;
     }
-  }
-
-  .datatable--cards .datatable-body th.card-head {
-    flex: 1;
-    min-width: 0;
   }
 
   .datatable--cards .datatable-type-header {

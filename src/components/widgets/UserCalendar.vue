@@ -147,20 +147,19 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick, onBeforeUnmount, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useStore } from 'vuex'
+import allLocales from '@fullcalendar/core/locales-all'
+import dayGridPlugin from '@fullcalendar/daygrid'
+import listPlugin from '@fullcalendar/list'
+import multiMonthPlugin from '@fullcalendar/multimonth'
+import FullCalendar from '@fullcalendar/vue3'
 import {
   BriefcaseIcon,
   ChevronLeftIcon,
   ChevronRightIcon
 } from 'lucide-vue-next'
-
-import FullCalendar from '@fullcalendar/vue3'
-import allLocales from '@fullcalendar/core/locales-all'
-import dayGridPlugin from '@fullcalendar/daygrid'
-import listPlugin from '@fullcalendar/list'
-import multiMonthPlugin from '@fullcalendar/multimonth'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useStore } from 'vuex'
 
 import { localeCode } from '@/lib/lang'
 import { hasPreviewFilePicture } from '@/lib/preview'
@@ -172,12 +171,8 @@ import Spinner from '@/components/widgets/Spinner.vue'
 const { t } = useI18n()
 const store = useStore()
 
-const previewFileStatusMap = computed(() => store.getters.previewFileStatusMap)
-const productionMap = computed(() => store.getters.productionMap)
-const taskMap = computed(() => store.getters.taskMap)
-const taskStatusMap = computed(() => store.getters.taskStatusMap)
-const taskTypeMap = computed(() => store.getters.taskTypeMap)
-
+// Props / Emits
+// --------------------------------------------------------------------------
 const props = defineProps({
   tasks: {
     type: Array,
@@ -199,9 +194,32 @@ const props = defineProps({
 
 const emit = defineEmits(['dates-changed', 'time-clicked'])
 
+// State
+// --------------------------------------------------------------------------
 const currentTask = ref(null)
 const calendarRef = ref(null)
 const rootRef = ref(null)
+const weekRows = ref([])
+const currentRange = ref(null)
+const currentViewType = ref('')
+const periodTotal = ref('')
+const title = ref('')
+
+// a month grid leaves a few pixels per event on a phone: the list reads
+const isPhone = Boolean(window.matchMedia?.('(max-width: 768px)').matches)
+
+const calendarOptions = ref({
+  plugins: [dayGridPlugin, listPlugin, multiMonthPlugin],
+  headerToolbar: false,
+  initialView: isPhone ? 'listWeek' : 'dayGridMonth',
+  firstDay: 1,
+  locales: allLocales,
+  locale: localeCode.value,
+  // day numbers and week-view day headers open the timesheet of that day
+  navLinks: true,
+  navLinkDayClick: date => emit('time-clicked', toDateKey(date)),
+  datesSet: info => onDatesSet(info)
+})
 
 // FullCalendar only tracks window resizes: when the task side panel opens,
 // the container shrinks and the grid keeps its stale width (the calendar
@@ -211,15 +229,13 @@ const resizeObserver = new ResizeObserver(() => {
   computeWeekRows()
 })
 
-const toDateKey = date =>
-  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-` +
-  `${String(date.getDate()).padStart(2, '0')}`
-
-// time spent durations are stored in minutes
-const formatHours = minutes => {
-  const hours = minutes / 60
-  return `${Number.isInteger(hours) ? hours : hours.toFixed(1)}h`
-}
+// Computed
+// --------------------------------------------------------------------------
+const previewFileStatusMap = computed(() => store.getters.previewFileStatusMap)
+const productionMap = computed(() => store.getters.productionMap)
+const taskMap = computed(() => store.getters.taskMap)
+const taskStatusMap = computed(() => store.getters.taskStatusMap)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
 const timeByDay = computed(() => {
   const byDay = new Map()
@@ -230,21 +246,12 @@ const timeByDay = computed(() => {
   return byDay
 })
 
-const weekRows = ref([])
-const currentRange = ref(null)
-const currentViewType = ref('')
-const periodTotal = ref('')
-const title = ref('')
-
 // multiMonthYear stays wired up, only its button is left out for now
 const views = computed(() => [
   { type: 'listWeek', label: t('main.list') },
   { type: 'dayGridMonth', label: t('main.month') },
   { type: 'dayGridWeek', label: t('main.week') }
 ])
-
-// a month grid leaves a few pixels per event on a phone: the list reads
-const isPhone = Boolean(window.matchMedia?.('(max-width: 768px)').matches)
 
 const isTodayInView = computed(() => {
   const today = toDateKey(new Date())
@@ -254,6 +261,24 @@ const isTodayInView = computed(() => {
     today < currentRange.value.end
   )
 })
+
+const previewFileStatuses = computed(() =>
+  props.tasks.map(task =>
+    previewFileStatusMap.value?.get(task.entity_preview_file_id)
+  )
+)
+
+// Functions
+// --------------------------------------------------------------------------
+const toDateKey = date =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-` +
+  `${String(date.getDate()).padStart(2, '0')}`
+
+// time spent durations are stored in minutes
+const formatHours = minutes => {
+  const hours = minutes / 60
+  return `${Number.isInteger(hours) ? hours : hours.toFixed(1)}h`
+}
 
 const getApi = () => calendarRef.value.getApi()
 
@@ -302,22 +327,19 @@ const computeWeekRows = () => {
   weekRows.value = cells
 }
 
-const refreshMonthTotal = () => {
+const refreshPeriodTotal = () => {
   const range = currentRange.value
-  let total = 0
-  if (range) {
-    timeByDay.value.forEach((minutes, date) => {
-      if (date >= range.start && date < range.end) {
-        total += minutes
-      }
-    })
-  }
+  const total = range
+    ? Array.from(timeByDay.value)
+        .filter(([date]) => date >= range.start && date < range.end)
+        .reduce((sum, [, minutes]) => sum + minutes, 0)
+    : 0
   periodTotal.value = total ? formatHours(total) : ''
 }
 
 const refreshTimeDisplays = () => {
   computeWeekRows()
-  refreshMonthTotal()
+  refreshPeriodTotal()
 }
 
 const onDatesSet = info => {
@@ -338,25 +360,6 @@ const onDatesSet = info => {
   nextTick(refreshTimeDisplays)
 }
 
-const calendarOptions = ref({
-  plugins: [dayGridPlugin, listPlugin, multiMonthPlugin],
-  headerToolbar: false,
-  initialView: isPhone ? 'listWeek' : 'dayGridMonth',
-  firstDay: 1,
-  locales: allLocales,
-  locale: localeCode.value,
-  // day numbers and week-view day headers open the timesheet of that day
-  navLinks: true,
-  navLinkDayClick: date => emit('time-clicked', toDateKey(date)),
-  datesSet: onDatesSet
-})
-
-const previewFileStatuses = computed(() =>
-  props.tasks.map(task =>
-    previewFileStatusMap.value?.get(task.entity_preview_file_id)
-  )
-)
-
 // Zou answers 404 for the picture of a preview file until a job has built
 // it. Once ready, a new URL gets past any 404 kept for the plain one.
 const getPreviewPath = previewFileId => {
@@ -368,11 +371,17 @@ const getPreviewPath = previewFileId => {
   return status === 'ready' ? `${path}?ready` : path
 }
 
+const getDayOffInfo = dayOff => {
+  const { description, date, end_date } = dayOff
+  const period = end_date && date !== end_date ? `${date} - ${end_date}` : date
+  return `${description || t('timesheets.day_off')} (${period})`
+}
+
 const resetEvents = () => {
   if (!calendarRef.value) {
     return
   }
-  const calendarApi = calendarRef.value.getApi()
+  const calendarApi = getApi()
   calendarApi.removeAllEvents()
 
   calendarApi.addEvent({
@@ -391,13 +400,12 @@ const resetEvents = () => {
       const production = productionMap.value.get(task.project_id)
       const taskType = taskTypeMap.value.get(task.task_type_id)
       const taskStatus = taskStatusMap.value.get(task.task_status_id)
-      const start = task.start_date
       const end = new Date(task.due_date)
       end.setDate(end.getDate() + 1)
-      const event = {
+      calendarApi.addEvent({
         title: task.full_entity_name,
         allDay: true,
-        start,
+        start: task.start_date,
         end,
         // the tinted chip in the eventContent slot paints itself
         borderColor: 'transparent',
@@ -411,8 +419,7 @@ const resetEvents = () => {
           typeColor: taskType.color,
           typeName: taskType.name
         }
-      }
-      calendarApi.addEvent(event)
+      })
     })
 
   props.daysOff.forEach(dayOff => {
@@ -451,16 +458,8 @@ const getEventTooltip = event => {
     .join(' · ')
 }
 
-const getDayOffInfo = dayOff => {
-  const { description, date, end_date } = dayOff
-  const period = end_date && date !== end_date ? `${date} - ${end_date}` : date
-  return `${description || t('timesheets.day_off')} (${period})`
-}
-
-onMounted(() => {
-  resetEvents()
-})
-
+// Watchers
+// --------------------------------------------------------------------------
 // the root div sits behind a v-else on isLoading, so it can appear after
 // mount: observe whenever the element actually exists
 watch(rootRef, el => {
@@ -470,30 +469,18 @@ watch(rootRef, el => {
   }
 })
 
-onBeforeUnmount(() => {
-  resizeObserver.disconnect()
+watch([() => props.tasks, previewFileStatuses], () => resetEvents(), {
+  deep: true
 })
 
 watch(
-  [() => props.tasks, previewFileStatuses],
-  () => {
-    resetEvents()
-  },
-  { deep: true }
-)
-
-watch(
   () => props.daysOff,
-  () => {
-    resetEvents()
-  }
+  () => resetEvents()
 )
 
 watch(
   () => props.timeSpents,
-  () => {
-    nextTick(refreshTimeDisplays)
-  }
+  () => nextTick(refreshTimeDisplays)
 )
 
 watch(localeCode, code => {
@@ -501,10 +488,20 @@ watch(localeCode, code => {
   calendarRef.value?.getApi().setOption('locale', code)
   title.value = calendarRef.value?.getApi().view.title || ''
 })
+
+// Lifecycle
+// --------------------------------------------------------------------------
+onMounted(resetEvents)
+
+onBeforeUnmount(() => {
+  resizeObserver.disconnect()
+})
 </script>
 
 <style lang="scss" scoped>
 .user-calendar {
+  display: flex;
+  flex-direction: column;
   width: 100%;
   max-height: 80%;
   // local theme-aware palette, consumed by FullCalendar through the
@@ -516,11 +513,6 @@ watch(localeCode, code => {
 .dark .user-calendar {
   --calendar-weekend: rgba(0, 0, 0, 0.16);
   --calendar-day-off: rgba(255, 200, 80, 0.09);
-}
-
-.user-calendar {
-  display: flex;
-  flex-direction: column;
 }
 
 // the week totals and the grid share one panel
@@ -675,7 +667,6 @@ watch(localeCode, code => {
   --fc-bg-event-opacity: 1;
 }
 
-// the grid becomes a panel surface, like the kanban board columns
 // the grid stands out from the panel that holds it
 :deep(.fc-view-harness) {
   background: var(--background);
