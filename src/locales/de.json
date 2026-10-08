@@ -2126,6 +2126,9 @@
     },
     "days_off": {
       "title": "Freie Tage",
+      "upcoming": "Bevorstehend",
+      "past": "Vergangen",
+      "nb_days": "{count} Tag | {count} Tage",
       "period": "Zeitraum",
       "description": "Beschreibung",
       "updated_at": "Datum der Aktualisierung",

@@ -2292,6 +2292,9 @@
     },
     "days_off": {
       "title": "Dni wolne",
+      "upcoming": "Nadchodzące",
+      "past": "Minione",
+      "nb_days": "{count} dzień | {count} dni",
       "period": "Okres",
       "description": "Opis",
       "updated_at": "Data aktualizacji",
