@@ -2,6 +2,7 @@
 
 import {
   getProductivityRange,
+  getQuotaColumnTotals,
   getTimeSpentColumnTotals
 } from '@/lib/timesheet'
 
@@ -69,6 +70,63 @@ describe('lib/timesheet', () => {
         { date: '2026-10-05', duration: 45 }
       ]
       expect(getTimeSpentColumnTotals(longRows, 'day', [5])).toEqual([60])
+    })
+  })
+
+  describe('getQuotaColumnTotals', () => {
+    const opts = { year: 2026, month: 10, countMode: 'weighted' }
+    const quota = (level, key, values) => ({
+      [key]: { [level]: { weighted: values } }
+    })
+
+    test('reads zero padded days of the month', () => {
+      const quotas = [quota('day', 'total', { '2026-10-02': 5, '2026-10-12': 3 })]
+      expect(getQuotaColumnTotals(quotas, 'day', [1, 2, 12], opts)).toEqual([
+        0, 5, 3
+      ])
+    })
+
+    test('reads weeks without padding', () => {
+      const quotas = [quota('week', 'total', { '2026-5': 7, '2026-41': 2 })]
+      expect(getQuotaColumnTotals(quotas, 'week', [5, 41], opts)).toEqual([
+        7, 2
+      ])
+    })
+
+    test('reads zero padded months', () => {
+      const quotas = [quota('month', 'total', { '2026-03': 4, '2026-10': 6 })]
+      expect(getQuotaColumnTotals(quotas, 'month', [3, 10], opts)).toEqual([
+        4, 6
+      ])
+    })
+
+    test('sums the responses of several productions', () => {
+      const quotas = [
+        quota('month', 'total', { '2026-10': 6 }),
+        quota('month', 'total', { '2026-10': 1 })
+      ]
+      expect(getQuotaColumnTotals(quotas, 'month', [10], opts)).toEqual([7])
+    })
+
+    test('picks the task type key over the total', () => {
+      const quotas = [
+        {
+          total: { month: { weighted: { '2026-10': 9 } } },
+          tt1: { month: { weighted: { '2026-10': 4 } } }
+        }
+      ]
+      expect(
+        getQuotaColumnTotals(quotas, 'month', [10], { ...opts, taskTypeId: 'tt1' })
+      ).toEqual([4])
+      expect(getQuotaColumnTotals(quotas, 'month', [10], opts)).toEqual([9])
+    })
+
+    test('gives 0 for missing keys', () => {
+      const quotas = [{}, { total: {} }, { total: { month: {} } }]
+      expect(getQuotaColumnTotals(quotas, 'month', [10], opts)).toEqual([0])
+      expect(
+        getQuotaColumnTotals(quotas, 'month', [10], { ...opts, taskTypeId: 'x' })
+      ).toEqual([0])
     })
   })
 })

@@ -116,3 +116,26 @@ export const getTimeSpentColumnTotals = (
     }, new Map())
   return columns.map(index => totals.get(index) || 0)
 }
+
+const quotaKey = (level, index, { year, month }) =>
+  ({
+    day: `${year}-${String(month).padStart(2, '0')}-${String(index).padStart(2, '0')}`,
+    week: `${year}-${index}`,
+    month: `${year}-${String(index).padStart(2, '0')}`
+  })[level]
+
+export const getQuotaColumnTotals = (
+  quotas,
+  level,
+  columns,
+  { year, month, taskTypeId, countMode }
+) =>
+  columns.map(index => {
+    const key = quotaKey(level, index, { year, month })
+    return quotas.reduce(
+      (sum, quota) =>
+        sum +
+        (quota?.[taskTypeId || 'total']?.[level]?.[countMode]?.[key] || 0),
+      0
+    )
+  })

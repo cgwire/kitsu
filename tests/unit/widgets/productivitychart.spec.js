@@ -1,9 +1,11 @@
 import { mount } from '@vue/test-utils'
+import { nextTick } from 'vue'
 import { createStore } from 'vuex'
 
 import i18n from '@/lib/i18n'
 import { today } from '@/lib/timesheet'
 
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import ProductivityChart from '@/components/widgets/ProductivityChart.vue'
 
 import './setup'
@@ -103,16 +105,35 @@ describe('ProductivityChart', () => {
     expect(series(wrapper).dataset.backgroundColor).toBe('#00b242')
   })
 
-  it('emits the level of a clicked level button', async () => {
+  it('emits the level picked in the level combobox', async () => {
     const wrapper = mountChart()
-    await wrapper.find('[data-level="week"]').trigger('click')
+    await wrapper
+      .findComponent('.level-combobox')
+      .vm.$emit('update:modelValue', 'week')
     expect(wrapper.emitted('level-changed')).toEqual([['week']])
   })
 
-  it('marks the current level button', () => {
+  it('shows the current level in the level combobox', () => {
     const wrapper = mountChart({ level: 'month' })
-    expect(wrapper.find('[data-level="month"]').classes()).toContain('is-on')
-    expect(wrapper.find('[data-level="day"]').classes()).not.toContain('is-on')
+    expect(wrapper.findComponent('.level-combobox').props('modelValue')).toBe(
+      'month'
+    )
+  })
+
+  // the same order as the Quota page filters
+  it('lays the combos out as on the Quota page', () => {
+    const wrapper = mountChart({ metric: 'quotas' })
+    const classes = wrapper
+      .findAllComponents(ComboboxStyled)
+      .map(combo => combo.classes().find(name => name.endsWith('-combobox')))
+    expect(classes).toEqual([
+      'metric-combobox',
+      'level-combobox',
+      'month-combobox',
+      'year-combobox',
+      'count-mode-combobox',
+      'quota-mode-combobox'
+    ])
   })
 
   it('shows the month selector in the day level only', () => {
@@ -147,9 +168,170 @@ describe('ProductivityChart', () => {
     expect(wrapper.emitted('period-changed')).toEqual([[{ year, month: 7 }]])
   })
 
+  describe('week level scroll', () => {
+    // jsdom lays nothing out: the wrapper overflows as on a phone
+    const layout = (scrollWidth, clientWidth) => {
+      vi.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockReturnValue(
+        scrollWidth
+      )
+      vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(
+        clientWidth
+      )
+    }
+    const scrollLeft = wrapper =>
+      wrapper.find('.chart-wrapper').element.scrollLeft
+
+    afterEach(() => vi.restoreAllMocks())
+
+    it('opens on the latest weeks when the chart overflows', async () => {
+      layout(900, 300)
+      const wrapper = mountChart({ level: 'week' })
+      await nextTick()
+      expect(scrollLeft(wrapper)).toBe(900)
+    })
+
+    it('scrolls once the loaded chart shows up', async () => {
+      layout(900, 300)
+      const wrapper = mountChart({ level: 'day', isLoading: true })
+      await wrapper.setProps({ level: 'week' })
+      expect(wrapper.find('.chart-wrapper').exists()).toBe(false)
+      await wrapper.setProps({ isLoading: false })
+      expect(scrollLeft(wrapper)).toBe(900)
+    })
+
+    it('leaves the other levels and a fitting chart alone', async () => {
+      layout(900, 300)
+      const dayWrapper = mountChart({ level: 'day' })
+      await nextTick()
+      expect(scrollLeft(dayWrapper)).toBe(0)
+      layout(300, 300)
+      const fittingWrapper = mountChart({ level: 'week' })
+      await nextTick()
+      expect(scrollLeft(fittingWrapper)).toBe(0)
+    })
+  })
+
   it('shows a spinner while loading', () => {
     const wrapper = mountChart({ isLoading: true })
     expect(chart(wrapper).exists()).toBe(false)
     expect(wrapper.find('.spinner').exists()).toBe(true)
+  })
+
+  describe('quotas metric', () => {
+    const quotas = [
+      {
+        total: {
+          day: {
+            frames: { [`${year}-03-03`]: 12.4, [`${year}-03-05`]: 3 },
+            seconds: { [`${year}-03-03`]: 0.52 }
+          }
+        },
+        t1: { day: { frames: { [`${year}-03-03`]: 4 } } }
+      },
+      { total: { day: { frames: { [`${year}-03-03`]: 2 } } } }
+    ]
+    const mountQuotas = props =>
+      mountChart({ metric: 'quotas', quotas, ...props })
+
+    it('emits the metric picked in the metric combobox', async () => {
+      const wrapper = mountChart()
+      await wrapper
+        .findComponent('.metric-combobox')
+        .vm.$emit('update:modelValue', 'quotas')
+      expect(wrapper.emitted('metric-changed')).toEqual([['quotas']])
+    })
+
+    it('shows the current metric in the metric combobox', () => {
+      const wrapper = mountQuotas()
+      expect(
+        wrapper.findComponent('.metric-combobox').props('modelValue')
+      ).toBe('quotas')
+    })
+
+    it('shows the quota combos in the quotas metric only', () => {
+      const timeWrapper = mountChart()
+      expect(timeWrapper.find('.quota-mode-combobox').exists()).toBe(false)
+      expect(timeWrapper.find('.count-mode-combobox').exists()).toBe(false)
+      const wrapper = mountQuotas()
+      expect(wrapper.find('.quota-mode-combobox').exists()).toBe(true)
+      expect(wrapper.find('.count-mode-combobox').exists()).toBe(true)
+    })
+
+    it('emits the new compute mode', async () => {
+      const wrapper = mountQuotas()
+      wrapper
+        .findComponent('.quota-mode-combobox')
+        .vm.$emit('update:model-value', 'done')
+      await wrapper.vm.$nextTick()
+      expect(wrapper.emitted('quota-mode-changed')).toEqual([['done']])
+    })
+
+    it('emits the new count mode', async () => {
+      const wrapper = mountQuotas()
+      wrapper
+        .findComponent('.count-mode-combobox')
+        .vm.$emit('update:model-value', 'seconds')
+      await wrapper.vm.$nextTick()
+      expect(wrapper.emitted('count-mode-changed')).toEqual([['seconds']])
+    })
+
+    it('offers the four compute modes', () => {
+      const options = mountQuotas()
+        .findComponent('.quota-mode-combobox')
+        .props('options')
+      expect(options.map(({ value }) => value)).toEqual([
+        'weighted',
+        'feedback',
+        'weighteddone',
+        'done'
+      ])
+    })
+
+    it('offers frames, seconds and count outside paper productions', () => {
+      const options = mountQuotas()
+        .findComponent('.count-mode-combobox')
+        .props('options')
+      expect(options.map(({ value }) => value)).toEqual([
+        'frames',
+        'seconds',
+        'count'
+      ])
+    })
+
+    it('offers drawings and count in paper productions', () => {
+      const options = mountQuotas({ isPaper: true, countMode: 'drawings' })
+        .findComponent('.count-mode-combobox')
+        .props('options')
+      expect(options.map(({ value }) => value)).toEqual(['drawings', 'count'])
+    })
+
+    it('reads the bars from the quotas, frames rounded to units', () => {
+      const { data } = series(mountQuotas())
+      expect(data).toHaveLength(31)
+      expect(data[0]).toEqual(['1', 0])
+      expect(data[2]).toEqual(['3', 14])
+      expect(data[4]).toEqual(['5', 3])
+    })
+
+    it('rounds seconds to one decimal', () => {
+      const { data } = series(mountQuotas({ countMode: 'seconds' }))
+      expect(data[2]).toEqual(['3', 0.5])
+    })
+
+    it('filters the quotas by task type', () => {
+      const { data } = series(mountQuotas({ taskTypeId: 't1' }))
+      expect(data[2]).toEqual(['3', 4])
+      expect(data[4]).toEqual(['5', 0])
+    })
+
+    it('shows the total with the count unit', () => {
+      const wrapper = mountQuotas()
+      expect(wrapper.find('.productivity-total').text()).toBe('17 Frames')
+      expect(series(wrapper).name).toBe('Frames')
+    })
+
+    it('keeps the chart colour', () => {
+      expect(series(mountQuotas()).color).toBe('#00b242')
+    })
   })
 })
