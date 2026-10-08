@@ -2115,6 +2115,9 @@
     },
     "days_off": {
       "title": "Vrije dagen",
+      "upcoming": "Gepland",
+      "past": "Afgelopen",
+      "nb_days": "{count} dag | {count} dagen",
       "period": "Periode",
       "description": "Beschrijving",
       "updated_at": "Bijwerkdatum",

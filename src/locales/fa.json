@@ -2115,6 +2115,9 @@
     },
     "days_off": {
       "title": "روزهای تعطیل",
+      "upcoming": "پیش رو",
+      "past": "گذشته",
+      "nb_days": "{count} روز | {count} روز",
       "period": "دوره",
       "description": "توضیحات",
       "updated_at": "تاریخ به روز رسانی",

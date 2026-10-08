@@ -2115,6 +2115,9 @@
     },
     "days_off": {
       "title": "Giorni di ferie",
+      "upcoming": "In arrivo",
+      "past": "Passati",
+      "nb_days": "{count} giorno | {count} giorni",
       "period": "Periodo",
       "description": "Descrizione",
       "updated_at": "Data di aggiornamento",

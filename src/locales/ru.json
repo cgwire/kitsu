@@ -2115,6 +2115,9 @@
     },
     "days_off": {
       "title": "Выходные дни",
+      "upcoming": "Предстоящие",
+      "past": "Прошедшие",
+      "nb_days": "{count} день | {count} дн.",
       "period": "Период",
       "description": "Описание",
       "updated_at": "Дата обновления",

@@ -2115,6 +2115,9 @@
     },
     "days_off": {
       "title": "休日",
+      "upcoming": "予定",
+      "past": "過去",
+      "nb_days": "{count} 日 | {count} 日",
       "period": "期間",
       "description": "説明",
       "updated_at": "更新日",

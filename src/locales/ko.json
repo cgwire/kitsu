@@ -2115,6 +2115,9 @@
     },
     "days_off": {
       "title": "휴무일",
+      "upcoming": "예정",
+      "past": "지난",
+      "nb_days": "{count}일 | {count}일",
       "period": "기간",
       "description": "설명",
       "updated_at": "업데이트 날짜",

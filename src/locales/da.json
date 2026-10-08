@@ -2115,6 +2115,9 @@
     },
     "days_off": {
       "title": "Fridage",
+      "upcoming": "Kommende",
+      "past": "Tidligere",
+      "nb_days": "{count} dag | {count} dage",
       "period": "Periode",
       "description": "Beskrivelse",
       "updated_at": "Opdateringsdato",

@@ -2115,6 +2115,9 @@
     },
     "days_off": {
       "title": "Dias de folga",
+      "upcoming": "Próximos",
+      "past": "Passados",
+      "nb_days": "{count} dia | {count} dias",
       "period": "Período",
       "description": "Descrição",
       "updated_at": "Data de atualização",

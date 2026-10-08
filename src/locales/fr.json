@@ -2115,6 +2115,9 @@
     },
     "days_off": {
       "title": "Jours de congé",
+      "upcoming": "À venir",
+      "past": "Passés",
+      "nb_days": "{count} jour | {count} jours",
       "period": "Période",
       "description": "Description",
       "updated_at": "Date de mise à jour",

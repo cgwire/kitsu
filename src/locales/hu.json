@@ -2148,6 +2148,9 @@
     },
     "days_off": {
       "add": "Szabadnap hozzáadása",
+      "upcoming": "Közelgő",
+      "past": "Korábbi",
+      "nb_days": "{count} nap | {count} nap",
       "confirm_day_offs": "Ezeknek a szabadnapoknak a beállítása kitörli az érintett napokra beírt összes munkaórát. Biztosan folytatod?",
       "confirm_unset_day_offs": "Jelenleg szabadnapok vannak beállítva {start} és {end} között. Biztosan eltávolítod ezt az időszakot?",
       "delete": "Szabadnap törlése",

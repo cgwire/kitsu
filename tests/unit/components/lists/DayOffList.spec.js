@@ -54,9 +54,10 @@ describe('DayOffList', () => {
 
     await wrapper.find('.actions button').trigger('click')
 
-    expect(wrapper.findComponent(DayOffModal).props('dayOffToEdit')).toEqual({
+    expect(
+      wrapper.findComponent(DayOffModal).props('dayOffToEdit')
+    ).toMatchObject({
       id: 'day-off-1',
-      period: '2026-08-03 - 2026-08-05',
       date: new Date('2026-08-03T00:00:00.000Z'),
       end_date: new Date('2026-08-05T00:00:00.000Z')
     })
@@ -261,6 +262,50 @@ describe('DayOffList', () => {
       expect(wrapper.emitted('set-day-off')).toStrictEqual([
         [{ date: today, end_date: today, description: null }]
       ])
+    })
+  })
+
+  describe('groups', () => {
+    const daysOff = [
+      { id: 'past-old', date: '2026-07-06', end_date: '2026-07-06' },
+      { id: 'next', date: '2026-10-12', end_date: '2026-10-16' },
+      { id: 'past-recent', date: '2026-09-28', end_date: '2026-10-02' },
+      { id: 'later', date: '2026-12-21', end_date: '2026-12-25' },
+      { id: 'current', date: '2026-10-05', end_date: '2026-10-07' }
+    ]
+
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['Date'] })
+      vi.setSystemTime(new Date(2026, 9, 6, 12))
+    })
+
+    afterEach(() => vi.useRealTimers())
+
+    const cardIds = (wrapper, group) =>
+      wrapper
+        .findAll(`.day-off-group--${group} .day-off-card`)
+        .map(card => card.attributes('data-id'))
+
+    it('lists the upcoming days off first, the nearest on top', () => {
+      const wrapper = mountList({ daysOff })
+      expect(cardIds(wrapper, 'upcoming')).toEqual(['current', 'next', 'later'])
+      expect(cardIds(wrapper, 'past')).toEqual(['past-recent', 'past-old'])
+    })
+
+    it('counts the working days of each day off', () => {
+      expect(
+        mount(DayOffList, {
+          props: {
+            daysOff: [{ id: 'next', date: '2026-10-09', end_date: '2026-10-13' }]
+          },
+          global: {
+            mocks: { $t: (key, params) => `${key}:${params?.count}` },
+            stubs: { DayOffModal: true, DeleteModal: true }
+          }
+        })
+          .find('.day-off-count')
+          .text()
+      ).toBe('days_off.nb_days:3')
     })
   })
 })

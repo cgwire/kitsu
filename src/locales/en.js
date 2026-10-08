@@ -2377,7 +2377,10 @@ export default {
     delete: 'Delete day off',
     confirm_day_offs: 'Setting these days off will erase all time filled for the affected days. Are you sure you want to continue?',
     confirm_unset_day_offs: 'Days off are currently applied from {start} to {end}. Are you sure you want to remove this period?',
-    error_days_off: 'An error occurred while updating days off.'
+    error_days_off: 'An error occurred while updating days off.',
+    upcoming: 'Upcoming',
+    past: 'Past',
+    nb_days: '{count} day | {count} days'
   },
 
   library: {
