@@ -157,6 +157,27 @@ describe('store/api/client', () => {
     })
   })
 
+  // Without an answer, only a file the server got whole may still be
+  // processed there.
+  test.each([
+    ['before its file left', [['upload', 40]], false],
+    ['once its file left', [['upload', 40], ['upload', 100]], true],
+    ['after a download progress', [['download', 100]], false]
+  ])(
+    'an upload cut %s tells whether the file left',
+    async (_, events, isBodySent) => {
+      h.error = new Error('Request has been terminated')
+      const { request, promise } = client.ppostFile('/api/pictures/p1', {})
+      const [, onProgress] = request.on.mock.calls.find(
+        ([event]) => event === 'progress'
+      )
+      events.forEach(([direction, percent]) =>
+        onProgress({ direction, percent })
+      )
+      await expect(promise).rejects.toMatchObject({ isBodySent })
+    }
+  )
+
   test('getText resolves with the response text', async () => {
     h.response = { text: 'plain content' }
     await expect(client.getText('/api/foo.txt')).resolves.toEqual(

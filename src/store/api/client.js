@@ -187,13 +187,19 @@ const client = {
 
   ppostFile(path, data) {
     const startedAt = Date.now()
+    let isBodySent = false
     const request = superagent
       .post(path)
       .send(data)
-      .on('progress', e => e)
-    const promise = request
-      .then(handleResponse)
-      .catch(err => handleError(err, 'POST', path, startedAt))
+      .on('progress', e => {
+        if (e.direction === 'upload' && e.percent === 100) isBodySent = true
+      })
+    const promise = request.then(handleResponse).catch(err => {
+      // Without an answer, only a file the server got whole may still be
+      // processed there.
+      err.isBodySent = isBodySent
+      return handleError(err, 'POST', path, startedAt)
+    })
     return { request, promise }
   },
 
