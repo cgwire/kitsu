@@ -59,12 +59,19 @@ const props = defineProps({
 // Computed
 // --------------------------------------------------------------------------
 const currentProduction = computed(() => store.getters.currentProduction)
+const productionMap = computed(() => store.getters.productionMap)
 
 // Functions
 // --------------------------------------------------------------------------
+
+// On My tasks the shots span several productions, and the current one is
+// whichever was opened last.
+const getShotProduction = shot =>
+  productionMap.value?.get(shot.project_id) || currentProduction.value
+
 const getQuota = shot =>
   props.countMode === 'seconds'
-    ? frameToSeconds(shot.nb_frames, currentProduction.value, shot)
+    ? frameToSeconds(shot.nb_frames, getShotProduction(shot), shot)
     : shot.nb_frames
 </script>
 
