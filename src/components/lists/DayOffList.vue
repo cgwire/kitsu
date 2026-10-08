@@ -34,14 +34,16 @@
             <span class="day-off-tile-day">{{ dayOff.day }}</span>
           </div>
           <div class="day-off-main">
-            <p class="day-off-period">{{ dayOff.period }}</p>
+            <p class="day-off-period">
+              {{ dayOff.period }}
+              <span class="day-off-count">
+                {{ $t('days_off.nb_days', { count: dayOff.nbDays }) }}
+              </span>
+            </p>
             <p class="day-off-description" v-if="dayOff.description">
               {{ dayOff.description }}
             </p>
           </div>
-          <span class="day-off-count">
-            {{ $t('days_off.nb_days', { count: dayOff.nbDays }) }}
-          </span>
           <div class="actions">
             <button-simple
               @click="openSetDayOffModal(dayOff)"
@@ -263,9 +265,9 @@ defineExpose({ closeSetDayOffModal, closeUnsetDayOffModal })
 }
 
 .day-off-cards {
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: 0.75em;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   // the global list margin pushed the cards right of their title
   margin: 0;
 }
@@ -282,6 +284,7 @@ defineExpose({ closeSetDayOffModal, closeUnsetDayOffModal })
     0 2px 8px rgba(0, 0, 0, 0.06);
   display: flex;
   gap: 1em;
+  min-width: 0;
   padding: 0.75em 1em;
 
   .day-off-group--past & {
@@ -353,10 +356,11 @@ defineExpose({ closeSetDayOffModal, closeUnsetDayOffModal })
   background: rgba(var(--skeleton-rgb), 0.25);
   border-radius: 999px;
   color: var(--text-strong);
-  flex-shrink: 0;
   font-size: 0.8rem;
   font-weight: 600;
+  margin-left: 0.5em;
   padding: 0.15em 0.75em;
+  white-space: nowrap;
 }
 
 .actions {
@@ -386,6 +390,10 @@ defineExpose({ closeSetDayOffModal, closeUnsetDayOffModal })
   .header,
   .day-off-group {
     padding: 0.5em;
+  }
+
+  .day-off-cards {
+    grid-template-columns: 1fr;
   }
 
   .day-off-card {

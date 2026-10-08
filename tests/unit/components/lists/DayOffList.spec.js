@@ -303,7 +303,7 @@ describe('DayOffList', () => {
             stubs: { DayOffModal: true, DeleteModal: true }
           }
         })
-          .find('.day-off-count')
+          .find('.day-off-period .day-off-count')
           .text()
       ).toBe('days_off.nb_days:3')
     })
