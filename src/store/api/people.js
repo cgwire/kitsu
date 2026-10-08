@@ -497,9 +497,7 @@ export default {
   ) {
     let path = `/api/data/persons/${personId}/quota-shots/`
 
-    if (detailLevel === 'year') {
-      path += `year/${year}`
-    } else if (detailLevel === 'month') {
+    if (detailLevel === 'month') {
       path += `month/${year}/${month}`
     } else if (detailLevel === 'week') {
       path += `week/${year}/${week}`
@@ -507,18 +505,12 @@ export default {
       path += `day/${year}/${month}/${day}`
     }
 
-    if (productionId) {
-      path += `?project_id=${productionId}`
+    const params = {
+      project_id: productionId,
+      task_type_id: taskTypeId,
+      count_mode: computeMode
     }
-
-    if (taskTypeId) {
-      if (!productionId) path += '?'
-      else path += '&'
-      path += `&task_type_id=${taskTypeId}`
-    }
-    path += `&count_mode=${computeMode}`
-
-    return client.pget(path)
+    return client.pget(buildQueryString(path, params))
   },
 
   getContext() {

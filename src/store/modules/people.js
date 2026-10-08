@@ -1,4 +1,5 @@
 import peopleApi from '@/store/api/people'
+import shotsApi from '@/store/api/shots'
 import colors from '@/lib/colors'
 import { populateTask, setTasksEntityPreview } from '@/lib/models'
 import { sortTasks, sortPeople, sortByName } from '@/lib/sorting'
@@ -689,13 +690,26 @@ const actions = {
     commit(REMOVE_PEOPLE_SEARCH_END, { searchQuery })
   },
 
+  loadPersonQuotas(_, { productionId, personId, computeMode }) {
+    return shotsApi.getPersonQuotas(productionId, personId, computeMode)
+  },
+
   getPersonQuotaShots(
-    { rootGetters },
-    { taskTypeId, detailLevel, personId, year, month, week, day, computeMode }
+    _,
+    {
+      productionId,
+      taskTypeId,
+      detailLevel,
+      personId,
+      year,
+      month,
+      week,
+      day,
+      computeMode
+    }
   ) {
-    const production = rootGetters.currentProduction
     return peopleApi.getPersonQuotaShots(
-      production.id,
+      productionId,
       taskTypeId,
       personId,
       detailLevel,
