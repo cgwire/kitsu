@@ -235,8 +235,7 @@ defineExpose({ closeSetDayOffModal, closeUnsetDayOffModal })
   background: var(--background-panel);
   border-radius: 12px;
   margin: 0.5em 0 1em;
-  min-height: 3.5em;
-  padding: 0.5em 1em 0.5em 1.25em;
+  padding: 1em;
 }
 
 .day-off-total {
@@ -248,7 +247,7 @@ defineExpose({ closeSetDayOffModal, closeUnsetDayOffModal })
   background: var(--background-panel);
   border-radius: 12px;
   margin-bottom: 1em;
-  padding: 0.5em 12px 12px;
+  padding: 1em;
 }
 
 .day-off-group-title {
@@ -258,7 +257,7 @@ defineExpose({ closeSetDayOffModal, closeUnsetDayOffModal })
   font-size: 0.9rem;
   font-weight: 600;
   gap: 0.5em;
-  padding: 0.25em 0 0.75em;
+  padding: 0 0 0.75em;
 }
 
 .day-off-group-count {
@@ -388,14 +387,9 @@ defineExpose({ closeSetDayOffModal, closeUnsetDayOffModal })
     opacity: 1;
   }
 
-  .header {
-    padding-left: 1em;
-    padding-right: 0.5em;
-  }
-
+  .header,
   .day-off-group {
-    padding-left: 0.5em;
-    padding-right: 0.5em;
+    padding: 0.5em;
   }
 
   .day-off-card {

@@ -554,7 +554,7 @@ td.name {
   flex-wrap: wrap;
   gap: 0.5em 1em;
   margin-bottom: 1em;
-  padding: 0.75em 1em;
+  padding: 1em;
 }
 
 .timesheet-panel {
@@ -634,8 +634,11 @@ td.name {
   }
 
   // the page scrolls on a phone, not the list
+  .timesheet-header {
+    padding: 0.5em;
+  }
+
   .timesheet-panel {
-    margin-bottom: 1em;
     padding: 0.5em;
 
     .datatable-wrapper {
