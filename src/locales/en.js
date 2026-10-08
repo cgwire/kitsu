@@ -918,6 +918,7 @@ export default {
     },
     less_filters: 'Fewer filters',
     link: 'Link',
+    list: 'List',
     load_more: 'Load more',
     loading: 'Loading...',
     loading_data: 'Loading data',

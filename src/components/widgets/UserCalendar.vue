@@ -2,95 +2,147 @@
   <div class="loading-wrapper" v-if="isLoading">
     <spinner />
   </div>
-  <div class="user-calendar mt1" ref="rootRef" v-else>
-    <div class="week-rail" v-if="weekRows.length">
-      <div
-        class="week-total"
-        :class="{ attached: row.attached, 'attached-next': row.attachedNext }"
-        :key="`${row.top}-${row.label}`"
-        :style="{ top: `${row.top}px`, height: `${row.height}px` }"
-        v-for="row in weekRows"
-      >
-        {{ row.label }}
+  <div class="user-calendar mt1" v-else>
+    <div class="calendar-toolbar">
+      <div class="calendar-toolbar-group">
+        <button
+          class="calendar-button calendar-nav-button"
+          data-action="prev"
+          type="button"
+          :aria-label="t('main.previous')"
+          @click="getApi().prev()"
+        >
+          <chevron-left-icon :size="18" />
+        </button>
+        <button
+          class="calendar-button calendar-nav-button"
+          data-action="next"
+          type="button"
+          :aria-label="t('main.next')"
+          @click="getApi().next()"
+        >
+          <chevron-right-icon :size="18" />
+        </button>
+        <button
+          class="calendar-button"
+          data-action="today"
+          type="button"
+          :disabled="isTodayInView"
+          @click="getApi().today()"
+        >
+          {{ t('schedule.today') }}
+        </button>
+      </div>
+      <h2 class="calendar-title">{{ title }}</h2>
+      <div class="calendar-toolbar-group">
+        <span class="calendar-total" v-if="periodTotal">
+          {{ periodTotal }}
+        </span>
+        <div class="calendar-segmented">
+          <button
+            class="calendar-button"
+            :class="{ active: currentViewType === view.type }"
+            :data-action="view.type"
+            :key="view.type"
+            type="button"
+            @click="getApi().changeView(view.type)"
+            v-for="view in views"
+          >
+            {{ view.label }}
+          </button>
+        </div>
       </div>
     </div>
-    <full-calendar
-      ref="calendarRef"
-      class="app-calendar"
-      :options="calendarOptions"
-    >
-      <template #dayCellContent="arg">
-        <span class="day-cell-content">
-          <span>{{ arg.dayNumberText }}</span>
-          <span
-            class="day-hours"
-            role="button"
-            tabindex="0"
-            @click.stop="emit('time-clicked', toDateKey(arg.date))"
-            @keydown.enter.stop.prevent="
-              emit('time-clicked', toDateKey(arg.date))
-            "
-            v-if="timeByDay.get(toDateKey(arg.date))"
-          >
-            {{ formatHours(timeByDay.get(toDateKey(arg.date))) }}
-          </span>
-        </span>
-      </template>
-      <template #eventContent="{ event }">
+    <div class="calendar-body" ref="rootRef">
+      <div class="week-rail" v-if="weekRows.length">
         <div
-          class="calendar-day-off"
-          v-if="event.extendedProps.isOff"
-          :title="event.extendedProps.description"
+          class="week-total"
+          :class="{ attached: row.attached, 'attached-next': row.attachedNext }"
+          :key="`${row.top}-${row.label}`"
+          :style="{ top: `${row.top}px`, height: `${row.height}px` }"
+          v-for="row in weekRows"
         >
-          <span class="calendar-day-off-title" v-if="event.title">
-            <briefcase-icon :size="14" />
-            {{ event.title }}
-          </span>
+          {{ row.label }}
         </div>
-        <div
-          class="calendar-event"
-          :class="{
-            selected: currentTask?.id === event.extendedProps.taskId
-          }"
-          :style="{
-            background: `${event.extendedProps.typeColor}26`,
-            '--event-color': event.extendedProps.typeColor
-          }"
-          :title="getEventTooltip(event)"
-          role="button"
-          tabindex="0"
-          @click="onEventClicked(event)"
-          @keydown.enter.prevent="onEventClicked(event)"
-          @keydown.space.prevent="onEventClicked(event)"
-          v-else
-        >
-          <span class="event-thumbnail">
-            <img
-              loading="lazy"
-              :src="event.extendedProps.previewPath"
-              alt=""
-              v-if="event.extendedProps.previewPath"
-            />
-          </span>
-          <span
-            class="status-dot"
-            :style="{
-              background: getStatusColor(event.extendedProps.taskStatus)
-            }"
-            :title="event.extendedProps.taskStatus.name"
-          ></span>
-          <div class="event-title">
-            <span class="ellipsis">{{ event.extendedProps.title[0] }}</span>
-            <span class="ellipsis" v-if="event.extendedProps.title[1]">
-              / {{ event.extendedProps.title[1] }}
+      </div>
+      <full-calendar
+        ref="calendarRef"
+        class="app-calendar"
+        :options="calendarOptions"
+      >
+        <template #dayCellContent="arg">
+          <span class="day-cell-content">
+            <span>{{ arg.dayNumberText }}</span>
+            <span
+              class="day-hours"
+              role="button"
+              tabindex="0"
+              @click.stop="emit('time-clicked', toDateKey(arg.date))"
+              @keydown.enter.stop.prevent="
+                emit('time-clicked', toDateKey(arg.date))
+              "
+              v-if="timeByDay.get(toDateKey(arg.date))"
+            >
+              {{ formatHours(timeByDay.get(toDateKey(arg.date))) }}
             </span>
-            <span class="ellipsis" v-if="event.extendedProps.title[2]">
-              / {{ event.extendedProps.title[2] }}
+          </span>
+        </template>
+        <template #eventContent="{ event }">
+          <div
+            class="calendar-day-off"
+            v-if="event.extendedProps.isOff"
+            :title="event.extendedProps.description"
+          >
+            <span class="calendar-day-off-title" v-if="event.title">
+              <briefcase-icon :size="14" />
+              {{ event.title }}
             </span>
           </div>
-        </div>
-      </template>
-    </full-calendar>
+          <div
+            class="calendar-event"
+            :class="{
+              selected: currentTask?.id === event.extendedProps.taskId
+            }"
+            :style="{
+              background: `${event.extendedProps.typeColor}26`,
+              '--event-color': event.extendedProps.typeColor
+            }"
+            :title="getEventTooltip(event)"
+            role="button"
+            tabindex="0"
+            @click="onEventClicked(event)"
+            @keydown.enter.prevent="onEventClicked(event)"
+            @keydown.space.prevent="onEventClicked(event)"
+            v-else
+          >
+            <span class="event-thumbnail">
+              <img
+                loading="lazy"
+                :src="event.extendedProps.previewPath"
+                alt=""
+                v-if="event.extendedProps.previewPath"
+              />
+            </span>
+            <span
+              class="status-dot"
+              :style="{
+                background: getStatusColor(event.extendedProps.taskStatus)
+              }"
+              :title="event.extendedProps.taskStatus.name"
+            ></span>
+            <div class="event-title">
+              <span class="ellipsis">{{ event.extendedProps.title[0] }}</span>
+              <span class="ellipsis" v-if="event.extendedProps.title[1]">
+                / {{ event.extendedProps.title[1] }}
+              </span>
+              <span class="ellipsis" v-if="event.extendedProps.title[2]">
+                / {{ event.extendedProps.title[2] }}
+              </span>
+            </div>
+          </div>
+        </template>
+      </full-calendar>
+    </div>
   </div>
 </template>
 
@@ -98,11 +150,16 @@
 import { ref, computed, watch, nextTick, onBeforeUnmount, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
-import { BriefcaseIcon } from 'lucide-vue-next'
+import {
+  BriefcaseIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon
+} from 'lucide-vue-next'
 
 import FullCalendar from '@fullcalendar/vue3'
 import allLocales from '@fullcalendar/core/locales-all'
 import dayGridPlugin from '@fullcalendar/daygrid'
+import listPlugin from '@fullcalendar/list'
 import multiMonthPlugin from '@fullcalendar/multimonth'
 
 import { localeCode } from '@/lib/lang'
@@ -175,7 +232,30 @@ const timeByDay = computed(() => {
 
 const weekRows = ref([])
 const currentRange = ref(null)
-const currentViewType = ref('dayGridMonth')
+const currentViewType = ref('')
+const periodTotal = ref('')
+const title = ref('')
+
+// multiMonthYear stays wired up, only its button is left out for now
+const views = computed(() => [
+  { type: 'listWeek', label: t('main.list') },
+  { type: 'dayGridMonth', label: t('main.month') },
+  { type: 'dayGridWeek', label: t('main.week') }
+])
+
+// a month grid leaves a few pixels per event on a phone: the list reads
+const isPhone = Boolean(window.matchMedia?.('(max-width: 768px)').matches)
+
+const isTodayInView = computed(() => {
+  const today = toDateKey(new Date())
+  return Boolean(
+    currentRange.value &&
+    today >= currentRange.value.start &&
+    today < currentRange.value.end
+  )
+})
+
+const getApi = () => calendarRef.value.getApi()
 
 // the dedicated week column lives outside the FullCalendar table, so its
 // cells are aligned by measuring the rendered week rows
@@ -189,7 +269,7 @@ const computeWeekRows = () => {
     weekRows.value = []
     return
   }
-  const rootRect = rootRef.value.getBoundingClientRect()
+  const rootRect = calendarRef.value.$el.getBoundingClientRect()
   const rows = rootRef.value.querySelectorAll('.fc-daygrid-body tbody tr')
   const cells = []
   Array.from(rows).forEach(row => {
@@ -232,9 +312,7 @@ const refreshMonthTotal = () => {
       }
     })
   }
-  calendarOptions.value.customButtons = {
-    monthTotal: { text: total ? formatHours(total) : '', click: () => {} }
-  }
+  periodTotal.value = total ? formatHours(total) : ''
 }
 
 const refreshTimeDisplays = () => {
@@ -244,6 +322,7 @@ const refreshTimeDisplays = () => {
 
 const onDatesSet = info => {
   currentViewType.value = info.view.type
+  title.value = info.view.title
   // currentStart/currentEnd cover the actual month or week, without the
   // leading and trailing days of the neighbour months
   currentRange.value = {
@@ -260,17 +339,9 @@ const onDatesSet = info => {
 }
 
 const calendarOptions = ref({
-  plugins: [dayGridPlugin, multiMonthPlugin],
-  customButtons: {
-    monthTotal: { text: '', click: () => {} }
-  },
-  headerToolbar: {
-    left: 'prev,next today',
-    center: 'title',
-    // multiMonthYear stays wired up, only its button is hidden for now
-    right: 'monthTotal dayGridMonth,dayGridWeek'
-  },
-  initialView: 'dayGridMonth',
+  plugins: [dayGridPlugin, listPlugin, multiMonthPlugin],
+  headerToolbar: false,
+  initialView: isPhone ? 'listWeek' : 'dayGridMonth',
   firstDay: 1,
   locales: allLocales,
   locale: localeCode.value,
@@ -428,6 +499,7 @@ watch(
 watch(localeCode, code => {
   calendarOptions.value.locale = code
   calendarRef.value?.getApi().setOption('locale', code)
+  title.value = calendarRef.value?.getApi().view.title || ''
 })
 </script>
 
@@ -448,7 +520,18 @@ watch(localeCode, code => {
 
 .user-calendar {
   display: flex;
+  flex-direction: column;
+}
+
+// the week totals and the grid share one panel
+.calendar-body {
+  background: var(--background-panel);
+  border-radius: 12px;
+  display: flex;
+  flex: 1;
   gap: 8px;
+  min-height: 0;
+  padding: 1em;
 }
 
 .app-calendar {
@@ -465,7 +548,7 @@ watch(localeCode, code => {
 
 .week-total {
   align-items: center;
-  background: var(--background-panel);
+  background: var(--background);
   border-radius: 8px;
   color: var(--text);
   display: flex;
@@ -593,9 +676,10 @@ watch(localeCode, code => {
 }
 
 // the grid becomes a panel surface, like the kanban board columns
+// the grid stands out from the panel that holds it
 :deep(.fc-view-harness) {
-  background: var(--background-panel);
-  border-radius: 12px;
+  background: var(--background);
+  border-radius: 10px;
   overflow: hidden;
 }
 
@@ -683,113 +767,130 @@ watch(localeCode, code => {
   padding-bottom: 3px;
 }
 
-:deep(.fc-toolbar-chunk) {
-  h2 {
-    text-decoration: none;
-    border-bottom: none;
+.calendar-toolbar {
+  align-items: center;
+  background: var(--background-panel);
+  border-radius: 12px;
+  display: flex;
+  gap: 1em;
+  justify-content: space-between;
+  margin-bottom: 1em;
+  padding: 0.75em 1em;
+}
+
+.calendar-toolbar-group {
+  align-items: center;
+  display: flex;
+  gap: 0.5em;
+}
+
+.calendar-title {
+  border: none;
+  color: var(--text-strong);
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin: 0;
+  text-transform: capitalize;
+}
+
+.calendar-total {
+  color: var(--text-strong);
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-right: 0.5em;
+}
+
+.calendar-button {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.35em 0.9em;
+  text-transform: capitalize;
+
+  &:hover:not(:disabled) {
+    background: var(--background-selectable);
   }
 
-  .fc-button-active,
-  .fc-button-primary:not(:disabled).fc-button-active,
-  .fc-button {
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    outline: none;
-    text-transform: capitalize;
-
-    &:not(:disabled):active,
-    &:not(:disabled):focus {
-      outline: none;
-      box-shadow: none;
-      border: 1px solid var(--border);
-    }
-
-    &:not(:disabled):active:focus {
-      box-shadow: none;
-      background: var(--background-selectable);
-    }
-
-    &:hover {
-      color: var(--text);
-      background: var(--background-selectable);
-      border: 1px solid var(--border);
-    }
+  &:disabled {
+    cursor: default;
+    opacity: 0.5;
   }
 
-  .fc-button-primary:not(:disabled).fc-button-active {
+  &.active {
     background: var(--background-selected);
   }
 
-  .fc-button-primary:disabled {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text);
+  &:focus-visible {
+    box-shadow: 0 0 0 3px var(--background-selectable);
+    outline: none;
   }
 }
 
-:deep(.fc-header-toolbar) {
-  margin-bottom: 1em;
+// ghost chevrons: plain icon buttons, the border only weighs them down
+.calendar-nav-button {
+  border: none;
+  padding: 0.35em 0.5em;
+}
 
-  .fc-toolbar-title {
-    color: var(--text-strong);
-    font-size: 1.25rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: capitalize;
+// segmented group: round the outer corners only
+.calendar-segmented {
+  display: flex;
+
+  .calendar-button {
+    border-radius: 0;
   }
 
-  .fc-button {
-    font-size: 0.85rem;
-    font-weight: 600;
-    padding: 0.35em 0.9em;
+  .calendar-button:first-child {
+    border-radius: 8px 0 0 8px;
   }
 
-  // ghost chevrons: plain icon buttons, the border only weighs them down
-  .fc-prev-button,
-  .fc-next-button {
-    border: none;
-    padding: 0.35em 0.5em;
+  .calendar-button:last-child {
+    border-left: none;
+    border-radius: 0 8px 8px 0;
+  }
+}
 
-    &:hover,
-    &:not(:disabled):active,
-    &:not(:disabled):focus {
-      border: none;
-    }
+@media screen and (max-width: 768px) {
+  .calendar-toolbar {
+    column-gap: 0.5em;
+    flex-wrap: wrap;
+    padding: 0.5em;
+    row-gap: 0.5em;
   }
 
-  // plain text, not a button: fc customButtons is just the vehicle to get
-  // the period total into the toolbar
-  .fc-monthTotal-button {
-    background: transparent;
-    border: none;
-    color: var(--text-strong);
-    cursor: default;
-    font-weight: 700;
-    pointer-events: none;
-
-    &:hover,
-    &:not(:disabled):active,
-    &:not(:disabled):focus {
-      background: transparent;
-      border: none;
-    }
+  .calendar-title {
+    font-size: 1.1rem;
+    order: -1;
+    text-align: center;
+    width: 100%;
   }
 
-  // segmented groups: round the outer corners only
-  .fc-button-group {
-    .fc-button {
-      border-radius: 0;
-    }
+  // navigation on the left, total and views on the right
+  .calendar-toolbar-group:last-child {
+    margin-left: auto;
+  }
 
-    .fc-button:first-child {
-      border-radius: 8px 0 0 8px;
-    }
+  // the grid needs every pixel of a phone: the week totals stay on desktop
+  .week-rail {
+    display: none;
+  }
 
-    .fc-button:last-child {
-      border-radius: 0 8px 8px 0;
-    }
+  .calendar-body {
+    padding: 0.5em;
+  }
+
+  // the bars are a few dozen pixels wide: the text gets their whole width
+  // and the day off label, which wraps over the bars below, goes
+  :deep(.event-thumbnail),
+  :deep(.calendar-day-off-title) {
+    display: none;
   }
 }
 </style>
