@@ -334,6 +334,15 @@ Pattern:
 
 When editing/adding items, re-sort the list to maintain order (some mutations miss this).
 
+### Getters over the module cache
+
+Big lists and maps live in a module-level `cache` object, out of the reactive state. Vuex wraps every getter in a `computed`, and a getter that reads only `cache` depends on nothing that ever changes: it runs once per tab and keeps its first value.
+
+- A getter over `cache` also reads a reactive value of the state that changes with that data (`readPeople` in `people.js` reads `personMapVersion`), and returns a new value when the data changes. One that hands back the same `Map` object notifies no `computed`.
+- A `computed` over such a `Map` freezes the same way: read the `Map` in an event handler instead (`onSearchTyped` in `Edits.vue`).
+- Mutate a cached `Map` in place (`clear()`, then `set()`), never reassign it: consumers keep the instance of their first read.
+- Test such a getter with a real `createStore` and a `computed` over it: a mutation-only test passes on a frozen getter.
+
 ### No direct `fetch` from components
 
 Components must never call `fetch()` (or any HTTP client) directly. All network calls go through:
