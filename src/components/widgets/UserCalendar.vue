@@ -775,7 +775,7 @@ watch(localeCode, code => {
   gap: 1em;
   justify-content: space-between;
   margin-bottom: 1em;
-  padding: 0.75em 1em;
+  padding: 1em;
 }
 
 .calendar-toolbar-group {

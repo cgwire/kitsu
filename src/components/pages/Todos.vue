@@ -779,8 +779,18 @@ useHead({ title: computed(() => `${t('tasks.my_tasks')} - Kitsu`) })
   flex-direction: column;
 }
 
+// tighter than the global .page: the panels carry their own padding
+.todos.page {
+  padding: 66px 1em 1em;
+}
+
 .section-tabs {
   min-height: 36px;
+}
+
+// beats the 1.5rem of Bulma's .tabs:not(:last-child)
+.section-tabs.tabs {
+  margin-bottom: 1em;
 }
 
 // the label metrics of the production combobox, to share its row
@@ -816,8 +826,8 @@ useHead({ title: computed(() => `${t('tasks.my_tasks')} - Kitsu`) })
 }
 
 .todos-filters {
-  margin: 0.5em 0 1em;
-  padding: 1em 1em 0.5em;
+  margin: 0 0 1em;
+  padding: 1em;
 
   .query-list {
     margin-bottom: 0;
@@ -875,7 +885,6 @@ useHead({ title: computed(() => `${t('tasks.my_tasks')} - Kitsu`) })
   display: flex;
   flex: 1;
   flex-direction: column;
-  margin-bottom: 1em;
   min-height: 0;
 }
 
@@ -912,12 +921,24 @@ useHead({ title: computed(() => `${t('tasks.my_tasks')} - Kitsu`) })
   margin-bottom: 0;
 }
 
+// A bit more air at the top of the panels under the header ones
+@media screen and (min-width: 769px) {
+  .todos-panel,
+  .user-timesheet :deep(.timesheet-panel),
+  .calendar-panel :deep(.calendar-body),
+  .day-off-list :deep(.day-off-group) {
+    padding-top: 1.25em;
+  }
+}
+
 @media screen and (max-width: 768px) {
   // The page grows with its cards: at a fixed height, the list panel
   // overflows it and its bottom margin never shows.
   .todos.page {
     height: auto;
     min-height: 100%;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
   }
 
   // the funnel of the other pages, next to the search
@@ -935,7 +956,7 @@ useHead({ title: computed(() => `${t('tasks.my_tasks')} - Kitsu`) })
   }
 
   .todos-filters {
-    padding: 0.75em;
+    padding: 0.5em;
 
     > .flexrow {
       align-items: flex-end;
@@ -967,16 +988,15 @@ useHead({ title: computed(() => `${t('tasks.my_tasks')} - Kitsu`) })
     }
   }
 
-  // like the task lists: a flexible height clips the panel bottom margin
+  // like the task lists: a flexible height would clip the page bottom
+  // padding under the panel
   .user-timesheet {
     flex: none;
-    margin-bottom: 1em;
     min-height: auto;
   }
 
   .todos-panel {
     flex: none;
-    margin-bottom: 1em;
     min-height: auto;
     padding: 0.5em;
   }
