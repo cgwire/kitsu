@@ -11,7 +11,7 @@
 
         <div
           class="todos-filters"
-          :class="{ 'is-panel': isActiveTab('timesheets') }"
+          :class="{ 'is-attached': isActiveTab('timesheets') }"
           v-show="!isActiveTab('daysoff')"
         >
           <div class="flexrow">
@@ -67,6 +67,7 @@
 
         <todos-list
           ref="todo-list"
+          class="todos-panel"
           :empty-text="$t('people.no_task_assigned')"
           :is-loading="isTodosLoading"
           :is-error="isTodosLoadingError"
@@ -76,8 +77,8 @@
           v-if="isActiveTab('todos')"
         />
 
-        <div v-if="isActiveTab('pending')">&nbsp;</div>
         <todos-list
+          class="todos-panel"
           :empty-text="$t('people.no_task_assigned')"
           :is-loading="isTodosLoading"
           :is-error="isTodosLoadingError"
@@ -87,10 +88,9 @@
           v-if="isActiveTab('pending')"
         />
 
-        <div v-if="isActiveTab('done')">&nbsp;</div>
         <todos-list
           ref="done-list"
-          class="done-list"
+          class="done-list todos-panel"
           done
           :is-loading="loading.doneTasks || isTodosLoading"
           :is-error="isTodosLoadingError"
@@ -717,14 +717,22 @@ useHead({ title: computed(() => `${t('tasks.my_tasks')} - Kitsu`) })
   margin-bottom: 1em;
 }
 
-// On the timesheet tab, the filters and the timesheet header form one panel.
-.todos-filters.is-panel {
+.todos-filters,
+.todos-panel {
   background: var(--background-panel);
-  border-radius: 12px 12px 0 0;
-  margin-top: 0.5em;
-  padding: 1em 1em 0.5em;
+  border-radius: 12px;
   // softer than the near-black strong text of the light theme
   --text-strong: #46494f;
+
+  .dark & {
+    background: #2a2d33;
+    --text-strong: #fefefe;
+  }
+}
+
+.todos-filters {
+  margin: 0.5em 0 1em;
+  padding: 1em 1em 0.5em;
 
   .query-list {
     margin-bottom: 0;
@@ -732,11 +740,6 @@ useHead({ title: computed(() => `${t('tasks.my_tasks')} - Kitsu`) })
 
   .search-field-wrapper {
     background: var(--background);
-  }
-
-  .dark & {
-    background: #2a2d33;
-    --text-strong: #fefefe;
   }
 
   // the dark background of the comboboxes next to it
@@ -753,9 +756,29 @@ useHead({ title: computed(() => `${t('tasks.my_tasks')} - Kitsu`) })
     padding-top: 0;
   }
 
-  & ~ .user-timesheet :deep(.timesheet-header) {
-    border-radius: 0 0 12px 12px;
-    border-top: 1px solid rgba(var(--skeleton-rgb), 0.25);
+  // On the timesheet tab, the filters and the timesheet header form one panel.
+  &.is-attached {
+    border-radius: 12px 12px 0 0;
+    margin-bottom: 0;
+
+    & ~ .user-timesheet :deep(.timesheet-header) {
+      border-radius: 0 0 12px 12px;
+      border-top: 1px solid rgba(var(--skeleton-rgb), 0.25);
+    }
+  }
+}
+
+.todos-panel {
+  padding: 1em;
+
+  // overflow: auto clips the rows and the sticky head to the corners
+  :deep(.datatable-wrapper) {
+    border-radius: 10px;
+    margin-bottom: 0;
+  }
+
+  :deep(.footer-info) {
+    margin: 0.75em 0 0;
   }
 }
 
