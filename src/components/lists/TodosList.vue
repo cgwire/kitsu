@@ -72,7 +72,7 @@
         </thead>
         <tbody class="datatable-body" v-if="tasks.length > 0">
           <tr
-            :key="entry + '-' + i"
+            :key="entry.id"
             class="datatable-row datatable-row--selectable"
             :class="{
               selected: selectionGrid[entry.id]
@@ -153,7 +153,6 @@
             <td class="start-date">
               <date-field
                 class="flexrow-item"
-                :min-date="disabledDates"
                 :model-value="getDate(entry.start_date)"
                 :with-margin="false"
                 @update:model-value="updateStartDate"
@@ -169,7 +168,6 @@
             >
               <date-field
                 class="flexrow-item"
-                :min-date="disabledDates"
                 :model-value="getDate(entry.due_date)"
                 :with-margin="false"
                 @update:model-value="updateDueDate"
@@ -382,10 +380,6 @@ const props = defineProps({
   withIllustration: {
     type: Boolean,
     default: true
-  },
-  disabledDates: {
-    type: Object,
-    default: () => {}
   }
 })
 

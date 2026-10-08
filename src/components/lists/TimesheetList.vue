@@ -232,7 +232,7 @@ import { useStore } from 'vuex'
 
 import { PAGE_SIZE } from '@/lib/pagination'
 import { getTaskEntityPath } from '@/lib/path'
-import { getUserDay } from '@/lib/time'
+import { formatDayOffLabel, getUserDay } from '@/lib/time'
 
 import ProductionNameCell from '@/components/cells/ProductionNameCell.vue'
 import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
@@ -366,11 +366,9 @@ const weekTimeSpentTotal = computed(() =>
     : otherDaysDuration.value / 60 + props.timeSpentTotal
 )
 
-const dayOffInfo = computed(() => {
-  const { description, date, end_date } = personDayOff.value
-  const period = end_date && date !== end_date ? `${date} - ${end_date}` : date
-  return `${description || t('timesheets.day_off')} (${period})`
-})
+const dayOffInfo = computed(() =>
+  formatDayOffLabel(personDayOff.value, t('timesheets.day_off'))
+)
 
 const isDayOffError = computed(() => Boolean(props.dayOffError))
 

@@ -164,7 +164,7 @@ import { useStore } from 'vuex'
 import { localeCode } from '@/lib/lang'
 import { hasPreviewFilePicture } from '@/lib/preview'
 import { getStatusColor } from '@/lib/stats'
-import { getDayOffRange } from '@/lib/time'
+import { formatDayOffLabel, getDayOffRange } from '@/lib/time'
 
 import Spinner from '@/components/widgets/Spinner.vue'
 
@@ -371,12 +371,6 @@ const getPreviewPath = previewFileId => {
   return status === 'ready' ? `${path}?ready` : path
 }
 
-const getDayOffInfo = dayOff => {
-  const { description, date, end_date } = dayOff
-  const period = end_date && date !== end_date ? `${date} - ${end_date}` : date
-  return `${description || t('timesheets.day_off')} (${period})`
-}
-
 const resetEvents = () => {
   if (!calendarRef.value) {
     return
@@ -423,7 +417,7 @@ const resetEvents = () => {
     })
 
   props.daysOff.forEach(dayOff => {
-    const description = getDayOffInfo(dayOff)
+    const description = formatDayOffLabel(dayOff, t('timesheets.day_off'))
     getDayOffRange([dayOff]).forEach(({ date }) => {
       calendarApi.addEvent({
         title: t('timesheets.day_off'),
