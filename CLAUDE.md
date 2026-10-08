@@ -249,9 +249,9 @@ const title = computed(() => t('studios.title'))
 </script>
 ```
 
-### Plural calls and the legacy-mode trap
+### Plural calls
 
-vue-i18n is configured in **legacy mode** (`src/lib/i18n.js`, deprecated in v11, removed in v12). Pass plurals as `{ count }`: that key drives both branch selection and `{count}` interpolation, so the object form is right whether or not the message embeds the number (vue-i18n 9 ignored a bare number, so older code never relies on `$t(key, 3)`).
+vue-i18n runs in **Composition mode** (`src/lib/i18n.js`, `legacy: false`): the global locale is a ref (`i18n.global.locale.value`), and `$t` reaches templates through the default `globalInjection`. Pass plurals as `{ count }`: that key drives both branch selection and `{count}` interpolation, so the object form is right whether or not the message embeds the number (vue-i18n 9 ignored a bare number, so older code never relies on `$t(key, 3)`).
 
 ```js
 $t('studios.number', { count: 5 }) // "studios", message has no {count}
@@ -260,7 +260,7 @@ $t('logs.nb_events', { count: 5 }) // "5 events listed"
 
 `count` must be a **number**: `{ count: '5' }` renders the singular. Note also that the default resolver splits on `count > 1`, so a fractional count below 1 stays singular while 0 goes plural.
 
-The legacy mode also costs a silent failure, visible only in the rendered string. **`t()` from `useI18n` returns `''` during setup.** The `useI18n()` bridge only resolves in `onBeforeMount`, so a `t()` call at setup top level silently returns `''`. Always call `t()` inside a `computed` or a handler (template `$t()` is unaffected). The `$t` test mock hides the bug; to test real translations, see `tests/unit/pages/wrongbrowser.spec.js`.
+To test real translations rather than the global `$t` mock, mount with the app's i18n plugin, as `tests/unit/lib/i18n.spec.js` does.
 
 ### Production-type terminology overlays
 

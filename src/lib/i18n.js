@@ -3,11 +3,11 @@ import { createI18n } from 'vue-i18n'
 import locales, { localeLoaders } from '@/locales'
 
 const i18n = createI18n({
-  legacy: true,
+  legacy: false,
   locale: 'en',
   fallbackLocale: 'en',
   messages: locales,
-  warnHtmlInMessage: 'off'
+  warnHtmlMessage: false
 })
 
 const loadedLocales = new Set(Object.keys(locales))

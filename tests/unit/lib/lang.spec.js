@@ -27,7 +27,7 @@ describe('lang', () => {
   test('setLocale', async () => {
     await lang.setLocale('french')
     expect(moment.locale()).toEqual('fr')
-    expect(i18n.global.locale).toEqual('fr')
+    expect(i18n.global.locale.value).toEqual('fr')
     // The lazily loaded chunk registered actual French messages.
     expect(i18n.global.t('assets.cast_in', {}, { locale: 'fr' })).toEqual('Présent dans')
   })
@@ -36,7 +36,7 @@ describe('lang', () => {
     const first = lang.setLocale('fr_FR')
     const second = lang.setLocale('de_DE')
     await Promise.all([first, second])
-    expect(i18n.global.locale).toEqual('de')
+    expect(i18n.global.locale.value).toEqual('de')
   })
 
   test('localeCode tracks the active language with an Intl-safe code', () => {

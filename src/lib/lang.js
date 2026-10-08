@@ -59,7 +59,7 @@ export default {
     pendingLanguage = language
     return loadLocaleMessages(language).then(() => {
       if (pendingLanguage === language) {
-        i18n.global.locale = language
+        i18n.global.locale.value = language
       }
     })
   }
