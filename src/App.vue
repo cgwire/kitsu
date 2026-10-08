@@ -180,9 +180,9 @@ const setupAuthChannel = () => {
 const socketEvents = {
   'project:new': eventData => {
     if (!productionMap.value.get(eventData.project_id)) {
-      store.dispatch('loadProduction', eventData.project_id).catch(err => {
-        console.error(err)
-      })
+      store
+        .dispatch('loadProduction', eventData.project_id)
+        .catch(errors.logRequestFailure)
     }
   },
 
@@ -194,10 +194,17 @@ const socketEvents = {
         .then(() => {
           // Zou also announces a team role change as a project update,
           // possibly one changing the role of the user.
-          store.dispatch('reloadTeamRoles', productionId).catch(console.error)
+          store
+            .dispatch('reloadTeamRoles', productionId)
+            .catch(errors.logRequestFailure)
         })
-        .catch(() => {
-          store.commit('REMOVE_PRODUCTION', { id: productionId })
+        .catch(err => {
+          // Deleted, or no longer shared with the user.
+          if ([403, 404].includes(err?.status)) {
+            store.commit('REMOVE_PRODUCTION', { id: productionId })
+          } else {
+            errors.logRequestFailure(err)
+          }
         })
     } else {
       store.dispatch('loadOpenProductions')

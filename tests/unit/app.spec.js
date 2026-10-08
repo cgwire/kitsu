@@ -155,6 +155,49 @@ describe('App', () => {
       })
     })
 
+    // Zou announces a new production to every user, those out of its team
+    // included.
+    describe('new productions', () => {
+      const getters = { productionMap: () => new Map() }
+
+      it('logs a failed load of a new production', async () => {
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const refusal = Object.assign(new Error('HTTP 403'), { status: 403 })
+        errors.markRequestFailure(refusal)
+
+        const rejections = await recordUnhandledRejections(async () => {
+          const { socket } = await mountApp({
+            actions: { loadProduction: () => Promise.reject(refusal) },
+            getters
+          })
+          emitSocketEvent(socket, 'project:new', { project_id: 'prod-2' })
+        })
+
+        expect(rejections).toEqual([])
+        expect(consoleError).toHaveBeenCalledWith(refusal)
+      })
+
+      it('leaves a bug in the load of a new production to Sentry', async () => {
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const bug = new TypeError('Cannot read properties of undefined')
+
+        const rejections = await recordUnhandledRejections(async () => {
+          const { socket } = await mountApp({
+            actions: { loadProduction: () => Promise.reject(bug) },
+            getters
+          })
+          emitSocketEvent(socket, 'project:new', { project_id: 'prod-2' })
+        })
+
+        expect(rejections).toEqual([bug])
+        expect(consoleError).not.toHaveBeenCalledWith(bug)
+      })
+    })
+
     // Zou announces a team role change as a project update, and the role
     // of the user on a production decides what its pages show.
     describe('production updates', () => {
@@ -175,25 +218,108 @@ describe('App', () => {
         expect(reloadTeamRoles).toHaveBeenCalledWith(expect.anything(), 'prod-1')
       })
 
-      it('removes a production it can no longer read, roles untouched', async () => {
-        const reloadTeamRoles = vi.fn(() => Promise.resolve())
+      // Deleted, or no longer shared with the user.
+      it.each([403, 404])(
+        'removes a production its reload gets a %i for, roles untouched',
+        async status => {
+          const reloadTeamRoles = vi.fn(() => Promise.resolve())
+          const removeProduction = vi.fn()
+          const refusal = Object.assign(new Error(`HTTP ${status}`), { status })
+          errors.markRequestFailure(refusal)
+          const { socket } = await mountApp({
+            actions: {
+              loadProduction: () => Promise.reject(refusal),
+              reloadTeamRoles
+            },
+            getters,
+            mutations: { REMOVE_PRODUCTION: removeProduction }
+          })
+
+          emitSocketEvent(socket, 'project:update', { project_id: 'prod-1' })
+          await flushPromises()
+
+          expect(removeProduction).toHaveBeenCalledWith(expect.anything(), {
+            id: 'prod-1'
+          })
+          expect(reloadTeamRoles).not.toHaveBeenCalled()
+        }
+      )
+
+      // The user keeps access: the API client reports the failure.
+      it.each([
+        ['a server error', { status: 500 }],
+        ['no response', {}]
+      ])(
+        'keeps a production its reload gets %s for',
+        async (_label, failureFields) => {
+          const consoleError = vi
+            .spyOn(console, 'error')
+            .mockImplementation(() => {})
+          const removeProduction = vi.fn()
+          const failure = Object.assign(
+            new Error('Request has been terminated'),
+            failureFields
+          )
+          errors.markRequestFailure(failure)
+
+          const rejections = await recordUnhandledRejections(async () => {
+            const { socket } = await mountApp({
+              actions: { loadProduction: () => Promise.reject(failure) },
+              getters,
+              mutations: { REMOVE_PRODUCTION: removeProduction }
+            })
+            emitSocketEvent(socket, 'project:update', { project_id: 'prod-1' })
+          })
+
+          expect(rejections).toEqual([])
+          expect(removeProduction).not.toHaveBeenCalled()
+          expect(consoleError).toHaveBeenCalledWith(failure)
+        }
+      )
+
+      it('keeps a production its reload hits a bug for, left to Sentry', async () => {
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
         const removeProduction = vi.fn()
-        const { socket } = await mountApp({
-          actions: {
-            loadProduction: () => Promise.reject(new Error('HTTP 403')),
-            reloadTeamRoles
-          },
-          getters,
-          mutations: { REMOVE_PRODUCTION: removeProduction }
+        const bug = new TypeError('Cannot read properties of undefined')
+
+        const rejections = await recordUnhandledRejections(async () => {
+          const { socket } = await mountApp({
+            actions: { loadProduction: () => Promise.reject(bug) },
+            getters,
+            mutations: { REMOVE_PRODUCTION: removeProduction }
+          })
+          emitSocketEvent(socket, 'project:update', { project_id: 'prod-1' })
         })
 
-        emitSocketEvent(socket, 'project:update', { project_id: 'prod-1' })
-        await flushPromises()
+        expect(rejections).toEqual([bug])
+        expect(removeProduction).not.toHaveBeenCalled()
+        expect(consoleError).not.toHaveBeenCalledWith(bug)
+      })
 
-        expect(removeProduction).toHaveBeenCalledWith(expect.anything(), {
-          id: 'prod-1'
+      it('leaves a bug in the team roles reload to Sentry', async () => {
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const removeProduction = vi.fn()
+        const bug = new TypeError('team.find is not a function')
+
+        const rejections = await recordUnhandledRejections(async () => {
+          const { socket } = await mountApp({
+            actions: {
+              loadProduction: () => Promise.resolve(),
+              reloadTeamRoles: () => Promise.reject(bug)
+            },
+            getters,
+            mutations: { REMOVE_PRODUCTION: removeProduction }
+          })
+          emitSocketEvent(socket, 'project:update', { project_id: 'prod-1' })
         })
-        expect(reloadTeamRoles).not.toHaveBeenCalled()
+
+        expect(rejections).toEqual([bug])
+        expect(removeProduction).not.toHaveBeenCalled()
+        expect(consoleError).not.toHaveBeenCalledWith(bug)
       })
 
       it('logs a failed team roles reload', async () => {
@@ -204,7 +330,8 @@ describe('App', () => {
           .spyOn(console, 'error')
           .mockImplementation(() => {})
         const removeProduction = vi.fn()
-        const error = new Error('HTTP 500')
+        const error = Object.assign(new Error('HTTP 500'), { status: 500 })
+        errors.markRequestFailure(error)
 
         const { socket } = await mountApp({
           actions: {
