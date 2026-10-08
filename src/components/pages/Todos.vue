@@ -1,5 +1,8 @@
 <template>
-  <div class="columns fixed-page">
+  <div
+    class="columns fixed-page"
+    :class="{ 'is-productivity': isActiveTab('productivity') }"
+  >
     <div class="column main-column">
       <div class="todos page">
         <route-section-tabs
@@ -12,13 +15,19 @@
         <div
           class="todos-filters"
           :class="{
-            'is-attached': isActiveTab('timesheets') || isActiveTab('calendar'),
+            'is-attached':
+              isActiveTab('timesheets') ||
+              isActiveTab('calendar') ||
+              isActiveTab('productivity'),
             collapsed: isPhone && areFiltersFolded
           }"
           v-show="!isActiveTab('daysoff')"
         >
           <div class="flexrow">
-            <div class="field flexrow-item search-field-column">
+            <div
+              class="field flexrow-item search-field-column"
+              v-show="!isActiveTab('productivity')"
+            >
               <label class="label">{{ $t('main.search_query') }}</label>
               <search-field
                 ref="todos-search-field"
@@ -60,6 +69,7 @@
               :options="filterOptions"
               locale-key-prefix="tasks."
               v-model="currentFilter"
+              v-show="!isActiveTab('productivity')"
             />
 
             <span class="filler"></span>
@@ -71,9 +81,13 @@
               :options="sortOptions"
               locale-key-prefix="tasks.fields."
               v-model="currentSort"
+              v-show="!isActiveTab('productivity')"
             />
           </div>
-          <div class="query-list collapsible">
+          <div
+            class="query-list collapsible"
+            v-show="!isActiveTab('productivity')"
+          >
             <search-query-list
               :queries="todoSearchQueries"
               type="todo"
@@ -144,6 +158,23 @@
           />
         </div>
 
+        <productivity-chart
+          class="productivity-panel"
+          :is-error="isProductivityLoadingError"
+          :is-loading="isProductivityLoading"
+          :level="productivityLevel"
+          :month="productivityMonth"
+          :production-id="productionId"
+          :selected-index="productivityPeriod"
+          :task-type-id="taskTypeId"
+          :time-spents="productivityTimeSpents"
+          :year="productivityYear"
+          @column-selected="onProductivityColumnSelected"
+          @level-changed="onProductivityLevelChanged"
+          @period-changed="onProductivityPeriodChanged"
+          v-if="isActiveTab('productivity')"
+        />
+
         <timesheet-list
           ref="timesheet-list"
           :initial-date="selectedDate"
@@ -180,6 +211,22 @@
     <div class="column side-column" v-if="nbSelectedTasks > 0">
       <task-info :task="selectedTasks.values().next().value" with-actions />
     </div>
+
+    <div
+      class="column side-column productivity-side-column"
+      v-if="isActiveTab('productivity') && productivityPeriod"
+    >
+      <people-timesheet-info
+        :close-route="productivityCloseRoute"
+        :day-offs="productivityDaysOff"
+        :is-loading="isProductivityInfoLoading"
+        :is-loading-error="isProductivityInfoLoadingError"
+        :level="productivityLevel"
+        :person="user"
+        :tasks="productivityTasks"
+        v-bind="productivityPeriodParams"
+      />
+    </div>
   </div>
 </template>
 
@@ -207,16 +254,19 @@ import preferences from '@/lib/preferences'
 import { getTaskStatusPriorityOfProd } from '@/lib/productions'
 import { sortByName } from '@/lib/sorting'
 import { parseDate } from '@/lib/time'
+import { getProductivityRange, today } from '@/lib/timesheet'
 
 import DayOffList from '@/components/lists/DayOffList.vue'
 import KanbanBoard from '@/components/lists/KanbanBoard.vue'
 import TimesheetList from '@/components/lists/TimesheetList.vue'
 import TodosList from '@/components/lists/TodosList.vue'
+import PeopleTimesheetInfo from '@/components/sides/PeopleTimesheetInfo.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import ProductivityChart from '@/components/widgets/ProductivityChart.vue'
 import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
@@ -245,6 +295,7 @@ const sortOptions = [
   'estimation',
   'last_comment_date'
 ].map(name => ({ label: name, value: name }))
+const productivityLevels = ['day', 'week', 'month']
 
 // The URL wins over the filters picked last time, kept in the local storage.
 const FILTERS_PREFERENCE = 'todos:filters'
@@ -268,6 +319,13 @@ const productionId = ref(undefined)
 const taskTypeId = ref(route.query.taskTypeId ?? storedFilters.taskTypeId ?? '')
 const calendarTimeSpents = ref([])
 const selectedDate = ref(moment().format('YYYY-MM-DD'))
+const productivityTimeSpents = ref([])
+const isProductivityLoading = ref(false)
+const isProductivityLoadingError = ref(false)
+const productivityAggregatedTasks = ref([])
+const productivityDaysOff = ref([])
+const isProductivityInfoLoading = ref(false)
+const isProductivityInfoLoadingError = ref(false)
 const loading = reactive({
   doneTasks: false,
   timesheets: false,
@@ -348,6 +406,10 @@ const todoTabs = computed(() => {
       label: t('tasks.calendar'),
       name: 'calendar'
     },
+    {
+      label: t('main.productivity'),
+      name: 'productivity'
+    },
     isPhone.value
       ? undefined
       : {
@@ -397,6 +459,39 @@ const loggableTodos = computed(() => sortedTasks.value.filter(isLoggable))
 const loggableDoneTasks = computed(() =>
   sortedDoneTasks.value.filter(isLoggable)
 )
+
+const queryNumber = (key, defaultValue) => {
+  const value = Number(route.query[key])
+  return Number.isInteger(value) && value > 0 ? value : defaultValue
+}
+
+const productivityLevel = computed(() =>
+  productivityLevels.includes(route.query.view) ? route.query.view : 'day'
+)
+const productivityYear = computed(() => queryNumber('year', today.year))
+const productivityMonth = computed(() => queryNumber('month', today.month))
+const productivityPeriod = computed(() => queryNumber('period', 0))
+
+// the column index is a day of the month, an ISO week or a month
+const productivityPeriodParams = computed(() => {
+  const year = productivityYear.value
+  const period = productivityPeriod.value
+  return {
+    day: { year, month: productivityMonth.value, day: period },
+    week: { year, week: period },
+    month: { year, month: period }
+  }[productivityLevel.value]
+})
+
+const productivityTasks = computed(() =>
+  productivityAggregatedTasks.value.filter(
+    task => !taskTypeId.value || task.task_type_id === taskTypeId.value
+  )
+)
+
+const productivityCloseRoute = computed(() => ({
+  query: { ...route.query, period: undefined }
+}))
 
 // Functions
 // --------------------------------------------------------------------------
@@ -535,6 +630,7 @@ const updateActiveTab = () => {
     'daysoff',
     'done',
     'pending',
+    'productivity',
     'timesheets'
   ]
   const section = route.query.section
@@ -638,17 +734,101 @@ const onCalendarTimeClicked = date => {
 const onCalendarDatesChanged = async ({ start, end }) => {
   try {
     calendarTimeSpents.value = await store.dispatch(
-      'loadPersonTimeSpentsByPeriod',
-      {
-        personId: user.value.id,
-        startDate: start,
-        endDate: end
-      }
+      'loadUserTimeSpentsByPeriod',
+      { startDate: start, endDate: end }
     )
   } catch (err) {
     console.error(err)
     calendarTimeSpents.value = []
   }
+}
+
+// a new view, year or month shows other columns: the selected one goes
+const setProductivityQuery = query =>
+  router.replace({ query: { ...route.query, ...query, period: undefined } })
+
+const onProductivityLevelChanged = level =>
+  setProductivityQuery({ view: level })
+
+// the chart offers the months up to today in the current year only
+const onProductivityPeriodChanged = ({ year, month }) => {
+  const isFuture = year === today.year && month > today.month
+  setProductivityQuery({
+    year: `${year}`,
+    month: `${isFuture ? today.month : month}`
+  })
+}
+
+const onProductivityColumnSelected = index =>
+  router.push({ query: { ...route.query, period: `${index}` } })
+
+const getProductivityKey = () =>
+  JSON.stringify([
+    productivityLevel.value,
+    productivityYear.value,
+    productivityMonth.value
+  ])
+
+// A quicker answer for a later view or period may have landed first: the
+// loads drop an answer whose key no longer matches the current one.
+const loadProductivity = async () => {
+  const key = getProductivityKey()
+  isProductivityLoading.value = true
+  isProductivityLoadingError.value = false
+  let timeSpents = []
+  let isError = false
+  try {
+    timeSpents = await store.dispatch(
+      'loadUserTimeSpentsByPeriod',
+      getProductivityRange(productivityLevel.value, {
+        year: productivityYear.value,
+        month: productivityMonth.value
+      })
+    )
+  } catch (err) {
+    console.error(err)
+    isError = true
+  }
+  if (key !== getProductivityKey()) return
+  productivityTimeSpents.value = timeSpents
+  isProductivityLoadingError.value = isError
+  isProductivityLoading.value = false
+}
+
+const getProductivityInfoKey = () =>
+  JSON.stringify([
+    productivityLevel.value,
+    productivityPeriodParams.value,
+    productionId.value
+  ])
+
+const loadProductivityInfo = async () => {
+  const key = getProductivityInfoKey()
+  isProductivityInfoLoading.value = true
+  isProductivityInfoLoadingError.value = false
+  productivityAggregatedTasks.value = []
+  const period = {
+    personId: user.value.id,
+    detailLevel: productivityLevel.value,
+    ...productivityPeriodParams.value
+  }
+  const isStale = () => key !== getProductivityInfoKey()
+  try {
+    const tasks = await store.dispatch('loadAggregatedPersonTimeSpents', {
+      ...period,
+      productionId: productionId.value
+    })
+    if (isStale()) return
+    productivityAggregatedTasks.value = tasks.filter(task => task.duration > 0)
+    const daysOff = await store.dispatch('loadAggregatedPersonDaysOff', period)
+    if (isStale()) return
+    productivityDaysOff.value = daysOff
+  } catch (err) {
+    console.error(err)
+    if (isStale()) return
+    isProductivityInfoLoadingError.value = true
+  }
+  isProductivityInfoLoading.value = false
 }
 
 const onSetDayOff = async dayOff => {
@@ -727,6 +907,29 @@ watch(productionId, () => {
 })
 
 watch(() => [route.query.section, route.query.day], updateActiveTab)
+
+watch(
+  [currentSection, productivityLevel, productivityYear, productivityMonth],
+  () => {
+    if (isActiveTab('productivity')) loadProductivity()
+  }
+)
+
+watch(
+  [
+    currentSection,
+    productivityLevel,
+    productivityYear,
+    productivityMonth,
+    productivityPeriod,
+    productionId
+  ],
+  () => {
+    if (isActiveTab('productivity') && productivityPeriod.value) {
+      loadProductivityInfo()
+    }
+  }
+)
 
 watch(
   () => route.query.search,
@@ -844,11 +1047,18 @@ useHead({ title: computed(() => `${t('tasks.my_tasks')} - Kitsu`) })
     margin-bottom: 0;
 
     & ~ .user-timesheet :deep(.timesheet-header),
-    & ~ .calendar-panel :deep(.calendar-toolbar) {
+    & ~ .calendar-panel :deep(.calendar-toolbar),
+    & ~ .productivity-panel :deep(.productivity-toolbar) {
       border-radius: 0 0 12px 12px;
       border-top: 1px solid rgba(var(--skeleton-rgb), 0.25);
     }
   }
+}
+
+// the same air around the period panel as on the Timesheets page
+.productivity-side-column {
+  background: transparent;
+  padding: 1em 1em 1em 0;
 }
 
 .todos-panel {
@@ -919,6 +1129,24 @@ useHead({ title: computed(() => `${t('tasks.my_tasks')} - Kitsu`) })
 }
 
 @media screen and (max-width: 768px) {
+  // the period panel stacks under the chart, and the page scrolls as a whole
+  .columns.is-productivity {
+    flex-direction: column;
+    overflow-y: auto;
+
+    .column {
+      flex: none;
+      overflow-y: visible;
+    }
+
+    .productivity-side-column {
+      margin-top: 0;
+      max-width: none;
+      padding: 0.5em;
+      width: 100%;
+    }
+  }
+
   // The page grows with its cards: at a fixed height, the list panel
   // overflows it and its bottom margin never shows.
   .todos.page {

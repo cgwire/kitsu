@@ -938,6 +938,7 @@ export default {
     previous: 'Previous',
     profile: 'Profile',
     production: 'Production',
+    productivity: 'Productivity',
     record_audio: 'Record audio',
     record_video: 'Record video',
     recording: {

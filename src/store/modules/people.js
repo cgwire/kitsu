@@ -504,6 +504,10 @@ const actions = {
     return peopleApi.getTimeSpentsByPeriod(personId, startDate, endDate)
   },
 
+  loadUserTimeSpentsByPeriod({}, { startDate, endDate }) {
+    return peopleApi.getUserTimeSpentsByPeriod(startDate, endDate)
+  },
+
   loadProductionTimeSpents({ rootGetters }, { taskType, startDate, endDate }) {
     return peopleApi.getProjectTimeSpentsByTaskType(
       rootGetters.currentProduction.id,
