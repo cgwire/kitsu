@@ -14,6 +14,7 @@ import {
   removeModelFromList,
   setTasksEntityPreview
 } from '@/lib/models'
+import errors from '@/lib/errors'
 import func from '@/lib/func'
 import { latestPreviewFileStatus } from '@/lib/preview'
 
@@ -54,6 +55,7 @@ import {
   ADD_PREVIEW_START,
   ADD_PREVIEW_END,
   ADD_PREVIEW_ERROR,
+  REMOVE_FAILED_COMMENT,
   CHANGE_PREVIEW_END,
   UPDATE_PREVIEW_ANNOTATION,
   UPDATE_PREVIEW_VALIDATION_STATUS,
@@ -144,6 +146,13 @@ const helpers = {
     comment.replies?.forEach(reply => {
       reply.person = helpers.resolveAuthor(reply.person_id, reply.person)
     })
+  },
+
+  // Zou or the proxy refused the request (4xx, 500), or never got its whole
+  // file: nothing of it goes on. After a proxy error (502 and up) or a
+  // connection lost once the file left, Zou may still process the file.
+  hasFailedForGood(err) {
+    return err?.status ? err.status <= 500 : err?.isBodySent === false
   }
 }
 
@@ -580,6 +589,7 @@ const actions = {
     const [mainForm, ...extraForms] = forms
     commit(ADD_PREVIEW_START)
     let newComment
+    let mainPreview
     locks[taskId] = true
     return (
       tasksApi
@@ -596,6 +606,7 @@ const actions = {
         })
         // Create the main preview entry.
         .then(preview => {
+          mainPreview = preview
           const { request, promise } = tasksApi.uploadPreview(
             preview.id,
             mainForm
@@ -664,8 +675,19 @@ const actions = {
           commit(CLEAR_UPLOAD_PROGRESS, helpers.getFileNames(forms))
           return { newComment, preview }
         })
-        .catch(err => {
+        .catch(async err => {
           commit(ADD_PREVIEW_ERROR)
+          // Zou keeps the comment, its status change and its notifications,
+          // while the comment box keeps everything to publish again.
+          if (newComment && helpers.hasFailedForGood(err)) {
+            await tasksApi.deleteTaskComment(taskId, newComment.id).then(() => {
+              commit(REMOVE_FAILED_COMMENT, {
+                taskId,
+                commentId: newComment.id,
+                previewId: mainPreview?.id
+              })
+            }, errors.logRequestFailure)
+          }
           throw err
         })
         .finally(() => {
@@ -692,7 +714,15 @@ const actions = {
               name: form.get('file').name
             })
           })
-          return promise
+          return promise.catch(async err => {
+            // Left without its file, the preview shows as processing for good.
+            if (helpers.hasFailedForGood(err)) {
+              await tasksApi
+                .deletePreview(taskId, commentId, preview.id)
+                .catch(errors.logRequestFailure)
+            }
+            throw err
+          })
         })
         .then(preview => {
           const comment = getters.getTaskComment(taskId, commentId)
@@ -1290,6 +1320,21 @@ const mutations = {
         comment.preview = newPreview
         comment.previews = [newPreview]
       }
+    }
+  },
+
+  // The comment events may have stored the comment of a failed publication,
+  // and its main preview may be listed already.
+  [REMOVE_FAILED_COMMENT](state, { taskId, commentId, previewId }) {
+    if (state.taskComments[taskId]) {
+      state.taskComments[taskId] = state.taskComments[taskId].filter(
+        ({ id }) => id !== commentId
+      )
+    }
+    if (state.taskPreviews[taskId]) {
+      state.taskPreviews[taskId] = state.taskPreviews[taskId].filter(
+        ({ id }) => id !== previewId
+      )
     }
   },
 

@@ -11,6 +11,8 @@ vi.mock('@/store/api/tasks', () => ({
     addExtraPreview: vi.fn(),
     addPreview: vi.fn(),
     commentTask: vi.fn(),
+    deletePreview: vi.fn(),
+    deleteTaskComment: vi.fn(),
     getTaskComment: vi.fn(),
     getTaskComments: vi.fn(),
     uploadPreview: vi.fn(),
@@ -35,6 +37,7 @@ vi.mock('@/store/api/tasks', () => ({
 
 import * as Sentry from '@sentry/vue'
 
+import errors from '@/lib/errors'
 import tasksApi from '@/store/api/tasks'
 import tasksStore from '@/store/modules/tasks'
 import peopleStore from '@/store/modules/people'
@@ -841,6 +844,215 @@ describe('Tasks store, failed preview publications', () => {
       expect(state.isSavingCommentPreview).toBe(false)
     }
   )
+})
+
+// Zou keeps the comment of a failed publication: its status change and its
+// notifications announce a preview that never comes, and publishing again
+// adds a second comment. Kitsu removes it once Zou is known to process
+// nothing more of the upload.
+describe('Tasks store, rolled back preview publications', () => {
+  const form = name => new Map([['file', { name }]])
+  const refusal = status => Object.assign(new Error(`${status}`), { status })
+  const cut = isBodySent =>
+    Object.assign(new Error('Request has been terminated'), { isBodySent })
+  const upload = preview => () => ({
+    request: { on: vi.fn() },
+    promise: Promise.resolve(preview)
+  })
+  const failedUpload = failure => () => ({
+    request: { on: vi.fn() },
+    promise: Promise.reject(failure)
+  })
+  let state
+
+  // The board publishes on tasks whose comments were never loaded.
+  const publish = (forms = [form('a.mov')]) =>
+    tasksStore.actions.commentTaskWithPreview(
+      {
+        commit: (type, payload) => tasksStore.mutations[type](state, payload),
+        dispatch: vi.fn()
+      },
+      { taskId: 'task-1', taskStatusId: 'status-1', comment: 'Take 2', forms }
+    )
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    state = { isSavingCommentPreview: false, taskComments: {}, taskPreviews: {} }
+    tasksApi.commentTask.mockResolvedValue({ id: 'comment-1', previews: [] })
+    tasksApi.addPreview.mockResolvedValue({ id: 'preview-1' })
+    tasksApi.deleteTaskComment.mockResolvedValue('')
+    tasksApi.deletePreview.mockResolvedValue('')
+  })
+
+  test.each([
+    ['Zou refuses the file', refusal(400)],
+    ['the user may not publish', refusal(403)],
+    ['the proxy refuses a file too big', refusal(413)],
+    ['Zou fails to read the file', refusal(500)],
+    ['the connection drops before the file left', cut(false)]
+  ])('commentTaskWithPreview removes the comment when %s', async (_, err) => {
+    tasksApi.uploadPreview.mockImplementationOnce(failedUpload(err))
+
+    await expect(publish()).rejects.toBe(err)
+    expect(tasksApi.deleteTaskComment.mock.calls).toEqual([
+      ['task-1', 'comment-1']
+    ])
+    expect(state.isSavingCommentPreview).toBe(false)
+  })
+
+  test.each([
+    ['the proxy answers 502', refusal(502)],
+    ['the proxy answers 503', refusal(503)],
+    ['the proxy times out', Object.assign(refusal(504), { isTimeout: true })],
+    ['the connection drops once the file left', cut(true)]
+  ])(
+    'commentTaskWithPreview keeps the comment when %s: Zou may still process the file',
+    async (_, err) => {
+      tasksApi.uploadPreview.mockImplementationOnce(failedUpload(err))
+
+      await expect(publish()).rejects.toBe(err)
+      expect(tasksApi.deleteTaskComment).not.toHaveBeenCalled()
+    }
+  )
+
+  test('commentTaskWithPreview removes the comment when Zou refuses its preview entry', async () => {
+    const err = refusal(400)
+    tasksApi.addPreview.mockRejectedValueOnce(err)
+
+    await expect(publish()).rejects.toBe(err)
+    expect(tasksApi.deleteTaskComment.mock.calls).toEqual([
+      ['task-1', 'comment-1']
+    ])
+  })
+
+  test('commentTaskWithPreview keeps the comment when its preview entry gets no answer', async () => {
+    const err = new Error('Request has been terminated')
+    tasksApi.addPreview.mockRejectedValueOnce(err)
+
+    await expect(publish()).rejects.toBe(err)
+    expect(tasksApi.deleteTaskComment).not.toHaveBeenCalled()
+  })
+
+  test('commentTaskWithPreview has nothing to remove when Zou refuses the comment', async () => {
+    const err = refusal(400)
+    tasksApi.commentTask.mockRejectedValueOnce(err)
+
+    await expect(publish()).rejects.toBe(err)
+    expect(tasksApi.deleteTaskComment).not.toHaveBeenCalled()
+  })
+
+  // The comment box keeps every file of a failed publication: the artist
+  // publishes them all again.
+  test('commentTaskWithPreview removes the whole publication when Zou refuses an extra file', async () => {
+    const err = refusal(413)
+    tasksApi.addExtraPreview.mockResolvedValueOnce({ id: 'preview-2' })
+    tasksApi.uploadPreview
+      .mockImplementationOnce(upload({ id: 'preview-1', revision: 3 }))
+      .mockImplementationOnce(failedUpload(err))
+
+    await expect(publish([form('a.mov'), form('b.png')])).rejects.toBe(err)
+    expect(tasksApi.deleteTaskComment.mock.calls).toEqual([
+      ['task-1', 'comment-1']
+    ])
+  })
+
+  test('commentTaskWithPreview drops the comment and the revision Zou removed', async () => {
+    const earlierComment = { id: 'comment-0', previews: [{ id: 'preview-0' }] }
+    const earlierRevision = { id: 'preview-0', revision: 2, previews: [] }
+    state.taskComments['task-1'] = [
+      // Stored by a comment event while the extra file was uploaded.
+      { id: 'comment-1', previews: [{ id: 'preview-1' }, { id: 'preview-2' }] },
+      earlierComment
+    ]
+    state.taskPreviews['task-1'] = [earlierRevision]
+    tasksApi.addExtraPreview.mockResolvedValueOnce({ id: 'preview-2' })
+    tasksApi.uploadPreview
+      .mockImplementationOnce(upload({ id: 'preview-1', revision: 3 }))
+      .mockImplementationOnce(failedUpload(refusal(413)))
+
+    await expect(publish([form('a.mov'), form('b.png')])).rejects.toThrow()
+    expect(state.taskComments['task-1']).toEqual([earlierComment])
+    expect(state.taskPreviews['task-1']).toEqual([earlierRevision])
+  })
+
+  test('commentTaskWithPreview fails once the comment is removed', async () => {
+    let endRemoval
+    tasksApi.deleteTaskComment.mockReturnValueOnce(
+      new Promise(resolve => {
+        endRemoval = resolve
+      })
+    )
+    tasksApi.uploadPreview.mockImplementationOnce(failedUpload(refusal(400)))
+    let isSettled = false
+
+    const publication = publish()
+      .catch(() => {})
+      .finally(() => {
+        isSettled = true
+      })
+    await vi.waitFor(() => expect(tasksApi.deleteTaskComment).toHaveBeenCalled())
+    await new Promise(resolve => setTimeout(resolve))
+    expect(isSettled).toBe(false)
+    endRemoval('')
+    await publication
+    expect(isSettled).toBe(true)
+  })
+
+  test('commentTaskWithPreview still fails with the upload error when the removal fails', async () => {
+    const err = refusal(400)
+    const removalError = refusal(500)
+    // As the API client marks every failure it reports.
+    errors.markRequestFailure(removalError)
+    tasksApi.deleteTaskComment.mockRejectedValueOnce(removalError)
+    tasksApi.uploadPreview.mockImplementationOnce(failedUpload(err))
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const storedComment = { id: 'comment-1', previews: [] }
+    state.taskComments['task-1'] = [storedComment]
+
+    await expect(publish()).rejects.toBe(err)
+    expect(consoleError).toHaveBeenCalledWith(removalError)
+    expect(state.taskComments['task-1']).toEqual([storedComment])
+    expect(state.isSavingCommentPreview).toBe(false)
+    consoleError.mockRestore()
+  })
+
+  // The comment was published before: it keeps the previews Zou got.
+  describe('addCommentExtraPreview', () => {
+    const addExtras = forms =>
+      tasksStore.actions.addCommentExtraPreview(
+        {
+          commit: vi.fn(),
+          dispatch: vi.fn(),
+          getters: { getTaskComment: () => ({ id: 'comment-1' }) }
+        },
+        { taskId: 'task-1', commentId: 'comment-1', previewId: 'preview-1', forms }
+      )
+
+    test('removes the preview whose file Zou refused, not the comment', async () => {
+      const err = refusal(413)
+      tasksApi.addExtraPreview
+        .mockResolvedValueOnce({ id: 'preview-2' })
+        .mockResolvedValueOnce({ id: 'preview-3' })
+      tasksApi.uploadPreview
+        .mockImplementationOnce(upload({ id: 'preview-2', revision: 1 }))
+        .mockImplementationOnce(failedUpload(err))
+
+      await expect(addExtras([form('b.png'), form('c.png')])).rejects.toBe(err)
+      expect(tasksApi.deletePreview.mock.calls).toEqual([
+        ['task-1', 'comment-1', 'preview-3']
+      ])
+      expect(tasksApi.deleteTaskComment).not.toHaveBeenCalled()
+    })
+
+    test('keeps the preview when Zou may still process its file', async () => {
+      const err = cut(true)
+      tasksApi.addExtraPreview.mockResolvedValueOnce({ id: 'preview-2' })
+      tasksApi.uploadPreview.mockImplementationOnce(failedUpload(err))
+
+      await expect(addExtras([form('b.png')])).rejects.toBe(err)
+      expect(tasksApi.deletePreview).not.toHaveBeenCalled()
+    })
+  })
 })
 
 // The players draw copies of the comment previews: they follow the status
