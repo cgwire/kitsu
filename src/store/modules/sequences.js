@@ -253,7 +253,6 @@ const getters = {
   isSequenceResolution: state => state.isSequenceResolution,
   isSequenceTime: state => state.isSequenceTime,
 
-  sequences: state => cache.sequences,
   sequenceMap: state => cache.sequenceMap,
   sequenceRetakeStats: state => state.sequenceRetakeStats,
   sequenceStats: state => state.sequenceStats,

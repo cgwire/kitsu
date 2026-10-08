@@ -237,7 +237,6 @@ const getters = {
   activePeopleWithoutBot: state =>
     readPeople(state).filter(person => person.active && !person.is_bot),
   displayedPeople: state => state.displayedPeople,
-  peopleIndex: state => cache.peopleIndex,
   personMap: state => {
     // Access personMapVersion to trigger reactivity when the map changes.
     state.personMapVersion // eslint-disable-line no-unused-expressions

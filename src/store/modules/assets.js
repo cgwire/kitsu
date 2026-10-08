@@ -344,7 +344,6 @@ const state = {
 }
 
 const getters = {
-  assets: state => cache.assets,
   assetMap: state => cache.assetMap,
   assetSearchText: state => state.assetSearchText,
   assetSearchQueries: state => state.assetSearchQueries,

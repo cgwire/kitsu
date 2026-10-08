@@ -337,7 +337,6 @@ const state = {
 }
 
 const getters = {
-  shots: state => cache.shots,
   shotValidationColumns: state => state.shotValidationColumns,
 
   shotSearchQueries: state => state.shotSearchQueries,

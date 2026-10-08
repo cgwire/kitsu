@@ -294,7 +294,6 @@ const state = {
 }
 
 const getters = {
-  edits: state => cache.edits,
   editValidationColumns: state => state.editValidationColumns,
 
   editSearchQueries: state => state.editSearchQueries,
