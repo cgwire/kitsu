@@ -381,23 +381,6 @@ const getters = {
   shotsCsvFormData: state => state.shotsCsvFormData,
   shotListScrollPosition: state => state.shotListScrollPosition,
 
-  shotsByEpisode: state => {
-    const shotsBySequence = []
-    let sequenceShots = []
-    let previousShot = null
-
-    Array.from(cache.shotMap.values()).forEach(shot => {
-      if (previousShot && shot.sequence_name !== previousShot.sequence_name) {
-        shotsBySequence.push(sequenceShots.slice(0))
-        sequenceShots = []
-      }
-      sequenceShots.push(shot)
-      previousShot = shot
-    })
-    shotsBySequence.push(sortShots(sequenceShots))
-
-    return shotsBySequence
-  },
   selectedShots: state => state.selectedShots
 }
 
