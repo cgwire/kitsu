@@ -64,6 +64,20 @@ const scrubEvent = event => {
   return event
 }
 
+// Code that Kitsu did not ship, like the DevTools console, an extension or
+// an in-app browser, fails with no frame from its bundles. The Sentry chunk
+// does not count: its fetch wrapper sits in the stack of every fetch call.
+const isKitsuFrame = ({ filename }) =>
+  filename?.startsWith(`${location.origin}/assets/`) &&
+  !filename.startsWith(`${location.origin}/assets/sentry-`)
+
+const isForeignError = event => {
+  const frames = (event.exception?.values || []).flatMap(
+    value => value.stacktrace?.frames || []
+  )
+  return frames.length > 0 && !frames.some(isKitsuFrame)
+}
+
 const ID_RGX = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi
 const DATE_RGX = /\d{4}-\d{2}-\d{2}/g
 const SESSION_CHECK_TIMEOUT = 20000
@@ -149,6 +163,7 @@ export default {
         if (hint.originalException && isChunkError(hint.originalException)) {
           return null
         }
+        if (isForeignError(event)) return null
         return scrubEvent(event)
       },
       beforeSendTransaction(event) {

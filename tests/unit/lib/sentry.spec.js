@@ -252,6 +252,59 @@ describe('lib/sentry', () => {
     )
   })
 
+  // Sentry names each frame after the URL of its script.
+  describe('beforeSend on code Kitsu did not ship', () => {
+    const ORIGIN = 'https://kitsu.example.com'
+    const SENTRY_CHUNK = `${ORIGIN}/assets/sentry--xX5E6yu.js`
+    const errorEvent = (...filenames) => ({
+      exception: {
+        values: [
+          {
+            type: 'TypeError',
+            value: 'Failed to fetch',
+            stacktrace: { frames: filenames.map(filename => ({ filename })) }
+          }
+        ]
+      }
+    })
+    let beforeSend
+
+    beforeEach(() => {
+      vi.stubGlobal('location', { origin: ORIGIN })
+      sentry.init({}, {}, { dsn: 'https://key@sentry.example.com/1' })
+      beforeSend = h.init.mock.calls[0][0].beforeSend
+    })
+
+    afterEach(() => {
+      vi.unstubAllGlobals()
+    })
+
+    // The Sentry wrapper of fetch shows in the stack of every fetch call.
+    test('drops a fetch failure of code evaluated in the page', () => {
+      expect(beforeSend(errorEvent('<anonymous>', SENTRY_CHUNK), {})).toBeNull()
+    })
+
+    test('drops the errors of scripts from outside the bundles', () => {
+      // An in-app browser script, WebKit's media controls, an extension.
+      const pageScript = errorEvent(`${ORIGIN}/productions/1/shots`)
+      const browserScript = errorEvent('undefined')
+      const extension = errorEvent('chrome-extension://abc/assets/index-1.js')
+      expect(beforeSend(pageScript, {})).toBeNull()
+      expect(beforeSend(browserScript, {})).toBeNull()
+      expect(beforeSend(extension, {})).toBeNull()
+    })
+
+    test('keeps an error with a frame from the Kitsu bundles', () => {
+      const event = errorEvent(`${ORIGIN}/assets/index-B1x2.js`, SENTRY_CHUNK)
+      expect(beforeSend(event, {})).toBe(event)
+    })
+
+    test('keeps an error without a stack', () => {
+      const event = { exception: { values: [{ type: 'Error', value: 'x' }] } }
+      expect(beforeSend(event, {})).toBe(event)
+    })
+  })
+
   // Each test takes a fresh route: the reporter reports a route once per
   // session, whatever the ids in its path.
   describe('reportApiError', () => {
