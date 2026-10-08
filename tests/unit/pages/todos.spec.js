@@ -1,3 +1,4 @@
+import moment from 'moment-timezone'
 import { nextTick } from 'vue'
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import { createRouter, createWebHashHistory } from 'vue-router'
@@ -14,6 +15,8 @@ vi.mock('vue-i18n', async importOriginal => ({
 import '@/lib/auth'
 
 import TimesheetList from '@/components/lists/TimesheetList.vue'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import Todos from '@/components/pages/Todos.vue'
 
 const feedbackStatus = { id: 'status-1', is_feedback_request: true }
@@ -72,7 +75,7 @@ const DayOffListStub = {
 
 const mountPage = async (
   todos,
-  { actions = {}, errorHandler, query = {} } = {}
+  { actions = {}, errorHandler, getters = {}, query = {} } = {}
 ) => {
   const store = createStore({
     getters: {
@@ -94,7 +97,8 @@ const mountPage = async (
       todoListScrollPosition: () => 0,
       todoSearchQueries: () => [],
       todoSelectionGrid: () => ({}),
-      user: () => ({ id: 'user-1' })
+      user: () => ({ id: 'user-1' }),
+      ...getters
     },
     actions: {
       clearSelectedTasks: vi.fn(),
@@ -135,6 +139,66 @@ const mountPage = async (
 }
 
 describe('Todos page', () => {
+  describe('due date filter', () => {
+    const dueOn = (id, date) => ({
+      ...wipTask,
+      id,
+      due_date: date.format('YYYY-MM-DD')
+    })
+    const thisWeekTask = dueOn('task-6', moment().startOf('week').add(1, 'day'))
+    const lastWeekTask = dueOn(
+      'task-7',
+      moment().startOf('week').subtract(1, 'week').add(1, 'day')
+    )
+
+    it('keeps the tasks due last week', async () => {
+      const wrapper = await mountPage([thisWeekTask, lastWeekTask])
+      const combo = wrapper
+        .findAllComponents(ComboboxStyled)
+        .find(c => c.props('label') === 'tasks.fields.due_date')
+      expect(combo.props('options').map(option => option.value)).toContain(
+        'due_previous_week'
+      )
+      await combo.vm.$emit('update:modelValue', 'due_previous_week')
+      expect(wrapper.vm.notPendingTasks).toEqual([lastWeekTask])
+      wrapper.unmount()
+    })
+  })
+
+  describe('task type filter', () => {
+    const modeling = { id: 'type-1', name: 'Modeling' }
+    const rigging = { id: 'type-2', name: 'Rigging' }
+    const layout = { id: 'type-3', name: 'Layout' }
+    const modelingTask = { ...wipTask, id: 'task-4', task_type_id: 'type-1' }
+    const riggingTask = { ...wipTask, id: 'task-5', task_type_id: 'type-2' }
+    const taskTypeMap = new Map(
+      [modeling, rigging, layout].map(taskType => [taskType.id, taskType])
+    )
+
+    it('offers the task types of the tasks only', async () => {
+      const wrapper = await mountPage([modelingTask, riggingTask], {
+        getters: { taskTypeMap: () => taskTypeMap }
+      })
+      const ids = wrapper
+        .findComponent(ComboboxTaskType)
+        .props('taskTypeList')
+        .map(taskType => taskType.id)
+      expect(ids).toEqual(['', 'type-1', 'type-2'])
+      wrapper.unmount()
+    })
+
+    it('keeps the tasks of the picked task type', async () => {
+      const wrapper = await mountPage([modelingTask, riggingTask], {
+        getters: { taskTypeMap: () => taskTypeMap }
+      })
+      await wrapper
+        .findComponent(ComboboxTaskType)
+        .vm.$emit('update:modelValue', 'type-2')
+      expect(wrapper.vm.notPendingTasks).toEqual([riggingTask])
+      wrapper.unmount()
+    })
+  })
+
   describe('pendingTasks', () => {
     it('keeps the tasks waiting for a feedback', async () => {
       const wrapper = await mountPage([pendingTask, wipTask])

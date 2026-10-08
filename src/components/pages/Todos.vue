@@ -25,15 +25,22 @@
             v-model="productionId"
           />
 
-          <span class="filler"></span>
+          <combobox-task-type
+            class="flexrow-item"
+            :label="$t('tasks.fields.task_type')"
+            :task-type-list="taskTypeList"
+            v-model="taskTypeId"
+          />
 
           <combobox-styled
             class="flexrow-item"
-            :label="$t('main.show')"
+            :label="$t('tasks.fields.due_date')"
             :options="filterOptions"
             locale-key-prefix="tasks."
             v-model="currentFilter"
           />
+
+          <span class="filler"></span>
 
           <combobox-styled
             class="flexrow-item"
@@ -166,6 +173,7 @@ import { useStore } from 'vuex'
 
 import { useBoardStatuses } from '@/composables/board'
 import { getTaskStatusPriorityOfProd } from '@/lib/productions'
+import { sortByName } from '@/lib/sorting'
 import { parseDate } from '@/lib/time'
 
 import DayOffList from '@/components/lists/DayOffList.vue'
@@ -175,6 +183,7 @@ import TodosList from '@/components/lists/TodosList.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
@@ -188,10 +197,12 @@ const socket = getCurrentInstance().appContext.config.globalProperties.$socket
 
 // State
 // --------------------------------------------------------------------------
-const filterOptions = ['all_tasks', 'due_this_week'].map(name => ({
-  label: name,
-  value: name
-}))
+const filterOptions = ['all_tasks', 'due_this_week', 'due_previous_week'].map(
+  name => ({
+    label: name,
+    value: name
+  })
+)
 const sortOptions = [
   'entity_name',
   'priority',
@@ -209,6 +220,7 @@ const daysOff = ref([])
 const isDaysOffLoadingError = ref(false)
 const dayOffError = ref(false)
 const productionId = ref(undefined)
+const taskTypeId = ref('')
 const calendarTimeSpents = ref([])
 const selectedDate = ref(moment().format('YYYY-MM-DD'))
 const loading = reactive({
@@ -312,6 +324,25 @@ const todoTabs = computed(() => {
   ].filter(Boolean)
 })
 
+const taskTypeList = computed(() => {
+  const taskTypeIds = new Set(
+    displayedTodos.value
+      .concat(displayedDoneTasks.value)
+      .filter(
+        task => !productionId.value || task.project_id === productionId.value
+      )
+      .map(task => task.task_type_id)
+  )
+  return [
+    { id: '', color: '#999', name: t('main.all') },
+    ...sortByName(
+      [...taskTypeIds]
+        .map(taskTypeId => taskTypeMap.value.get(taskTypeId))
+        .filter(Boolean)
+    )
+  ]
+})
+
 const loggableTodos = computed(() => sortedTasks.value.filter(isLoggable))
 
 const loggableDoneTasks = computed(() =>
@@ -329,9 +360,11 @@ const isLoggable = task =>
   taskTypeMap.value.get(task.task_type_id)?.allow_timelog
 
 const filterAndSortTasks = tasks => {
-  const filtered = productionId.value
-    ? tasks.filter(task => task.project_id === productionId.value)
-    : tasks
+  const filtered = tasks.filter(
+    task =>
+      (!productionId.value || task.project_id === productionId.value) &&
+      (!taskTypeId.value || task.task_type_id === taskTypeId.value)
+  )
   return sortTasks(filtered, currentFilter.value, currentSort.value)
 }
 
@@ -340,8 +373,9 @@ const sortTasks = (tasks, filter, sort) => {
     filter === 'all_tasks'
       ? [...tasks]
       : tasks.filter(task => {
-          const dueDate = parseDate(task.due_date)
-          return moment().startOf('week').isSame(dueDate, 'week')
+          const week = moment().startOf('week')
+          if (filter === 'due_previous_week') week.subtract(1, 'week')
+          return week.isSame(parseDate(task.due_date), 'week')
         })
 
   const byDate = field => (a, b) => {
