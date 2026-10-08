@@ -139,6 +139,76 @@ const mountPage = async (
 }
 
 describe('Todos page', () => {
+  // The page keeps the picked filters in the local storage
+  afterEach(() => localStorage.removeItem('todos:filters'))
+
+  describe('filters in the URL', () => {
+    const combo = (wrapper, label) =>
+      wrapper
+        .findAllComponents(ComboboxStyled)
+        .find(c => c.props('label') === label)
+
+    it('reads the filters from the URL', async () => {
+      const wrapper = await mountPage([], {
+        query: { taskTypeId: 'type-2', due: 'due_previous_week', sort: 'due_date' }
+      })
+      expect(wrapper.findComponent(ComboboxTaskType).props('modelValue')).toBe(
+        'type-2'
+      )
+      expect(combo(wrapper, 'tasks.fields.due_date').props('modelValue')).toBe(
+        'due_previous_week'
+      )
+      expect(combo(wrapper, 'main.sorted_by').props('modelValue')).toBe(
+        'due_date'
+      )
+      wrapper.unmount()
+    })
+
+    it('falls back on the filters picked last time', async () => {
+      localStorage.setItem(
+        'todos:filters',
+        JSON.stringify({ taskTypeId: 'type-3', due: 'due_this_week' })
+      )
+      const wrapper = await mountPage([], { query: { due: 'all_tasks' } })
+      expect(wrapper.findComponent(ComboboxTaskType).props('modelValue')).toBe(
+        'type-3'
+      )
+      expect(combo(wrapper, 'tasks.fields.due_date').props('modelValue')).toBe(
+        'all_tasks'
+      )
+      wrapper.unmount()
+    })
+
+    it('writes the picked filters in the URL', async () => {
+      const wrapper = await mountPage([])
+      // the page ends its setup with a search navigation
+      await flushPromises()
+      await wrapper
+        .findComponent(ComboboxTaskType)
+        .vm.$emit('update:modelValue', 'type-1')
+      await combo(wrapper, 'tasks.fields.due_date').vm.$emit(
+        'update:modelValue',
+        'due_this_week'
+      )
+      await combo(wrapper, 'main.sorted_by').vm.$emit(
+        'update:modelValue',
+        'entity_name'
+      )
+      await flushPromises()
+      expect(wrapper.vm.$route.query).toMatchObject({
+        taskTypeId: 'type-1',
+        due: 'due_this_week',
+        sort: 'entity_name'
+      })
+      expect(JSON.parse(localStorage.getItem('todos:filters'))).toMatchObject({
+        taskTypeId: 'type-1',
+        due: 'due_this_week',
+        sort: 'entity_name'
+      })
+      wrapper.unmount()
+    })
+  })
+
   describe('due date filter', () => {
     const dueOn = (id, date) => ({
       ...wipTask,

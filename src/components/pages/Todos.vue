@@ -178,6 +178,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { useBoardStatuses } from '@/composables/board'
+import preferences from '@/lib/preferences'
 import { getTaskStatusPriorityOfProd } from '@/lib/productions'
 import { sortByName } from '@/lib/sorting'
 import { parseDate } from '@/lib/time'
@@ -219,14 +220,22 @@ const sortOptions = [
   'last_comment_date'
 ].map(name => ({ label: name, value: name }))
 
-const currentFilter = ref('all_tasks')
-const currentSort = ref('priority')
+// The URL wins over the filters picked last time, kept in the local storage.
+const FILTERS_PREFERENCE = 'todos:filters'
+const storedFilters = preferences.getObjectPreference(FILTERS_PREFERENCE) || {}
+const pickFilter = (key, options, defaultValue) =>
+  [route.query[key], storedFilters[key]].find(value =>
+    options.some(option => option.value === value)
+  ) ?? defaultValue
+
+const currentFilter = ref(pickFilter('due', filterOptions, 'all_tasks'))
+const currentSort = ref(pickFilter('sort', sortOptions, 'priority'))
 const currentSection = ref('todos')
 const daysOff = ref([])
 const isDaysOffLoadingError = ref(false)
 const dayOffError = ref(false)
 const productionId = ref(undefined)
-const taskTypeId = ref('')
+const taskTypeId = ref(route.query.taskTypeId ?? storedFilters.taskTypeId ?? '')
 const calendarTimeSpents = ref([])
 const selectedDate = ref(moment().format('YYYY-MM-DD'))
 const loading = reactive({
@@ -643,9 +652,31 @@ const onAssignation = async eventData => {
   }
 }
 
+const saveFilters = () => {
+  preferences.setObjectPreference(FILTERS_PREFERENCE, {
+    productionId: productionId.value,
+    taskTypeId: taskTypeId.value,
+    due: currentFilter.value,
+    sort: currentSort.value
+  })
+}
+
 // Watchers
 // --------------------------------------------------------------------------
+watch([taskTypeId, currentFilter, currentSort], () => {
+  saveFilters()
+  router.replace({
+    query: {
+      ...route.query,
+      taskTypeId: taskTypeId.value || undefined,
+      due: currentFilter.value,
+      sort: currentSort.value
+    }
+  })
+})
+
 watch(productionId, () => {
+  saveFilters()
   router.push({
     query: {
       ...route.query,
@@ -670,6 +701,11 @@ watch(
 onMounted(async () => {
   socket.on('task:assign', onAssignation)
   socket.on('task:unassign', onAssignation)
+  if (!route.query.productionId && storedFilters.productionId) {
+    await router.replace({
+      query: { ...route.query, productionId: storedFilters.productionId }
+    })
+  }
   updateActiveTab()
   await nextTick()
   await loadData()
