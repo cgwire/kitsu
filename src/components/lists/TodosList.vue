@@ -430,12 +430,10 @@ const metadataDescriptorsMap = computed(() => {
         descriptor.departments.includes(department)
       )
       if (isUserDepartment) {
-        // group them by field_name if they have the same field_name
         if (!(descriptor.field_name in descriptorsMap)) {
           descriptorsMap[descriptor.field_name] = {}
         }
         const descriptorFieldNameEntry = descriptorsMap[descriptor.field_name]
-        // group them by entity_type if the have the same entity_type
         if (!(descriptor.entity_type in descriptorFieldNameEntry)) {
           descriptorFieldNameEntry[descriptor.entity_type] = {}
         }
@@ -538,7 +536,6 @@ const mergeMetadataDescriptors = descriptors => {
     field_name: descriptors[firstKeyEntityType][firstKeyProjectId].field_name,
     name: descriptors[firstKeyEntityType][firstKeyProjectId].name
   }
-  // merge departments
   Object.keys(descriptors).forEach(entityType =>
     Object.keys(descriptors[entityType]).forEach(projectId => {
       mergedDescriptors.departments = [
@@ -730,7 +727,6 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
-.datatable-body tr:first-child th,
 .datatable-body tr:first-child td {
   border-top: 0;
 }
@@ -747,11 +743,6 @@ thead .name {
 .description {
   width: 200px;
   min-width: 200px;
-}
-
-.description li {
-  list-style-type: disc;
-  margin-left: 2em;
 }
 
 .name a {
@@ -816,13 +807,6 @@ td.end-date {
   color: $grey;
 }
 
-.thumbnail {
-  min-width: 60px;
-  max-width: 60px;
-  width: 60px;
-  padding: 0;
-}
-
 // the empty state of the admin pages: a plain message, without picture
 .empty-state {
   color: var(--text-alt);
@@ -836,7 +820,6 @@ td.end-date {
 }
 
 .entity-name {
-  color: var(--text);
   font-weight: bold;
 }
 
@@ -857,10 +840,6 @@ input[type='number']::-webkit-inner-spin-button {
 
 input[type='number'] {
   -moz-appearance: textfield;
-}
-
-.error {
-  color: $red;
 }
 
 @media screen and (max-width: 768px) {
