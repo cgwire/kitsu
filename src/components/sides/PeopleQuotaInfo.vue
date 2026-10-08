@@ -1,7 +1,7 @@
 <template>
   <div class="people-quota-info">
     <div class="close">
-      <router-link class="close-button" :to="closeRoute">
+      <router-link class="close-button" :to="closeTarget">
         <x-icon />
       </router-link>
     </div>
@@ -35,10 +35,11 @@
 // --------------------------------------------------------------------------
 import { XIcon } from 'lucide-vue-next'
 import moment from 'moment-timezone'
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, onBeforeUnmount, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
+import { isFreeEscape } from '@/lib/keyboard'
 import { monthToString } from '@/lib/time'
 
 import QuotaShotList from '@/components/lists/QuotaShotList.vue'
@@ -46,6 +47,7 @@ import PageTitle from '@/components/widgets/PageTitle.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 
 const route = useRoute()
+const router = useRouter()
 const store = useStore()
 
 // Props
@@ -59,7 +61,9 @@ const props = defineProps({
   countMode: { type: String, default: 'frames' },
   isLoading: { type: Boolean, default: false },
   isLoadingError: { type: Boolean, default: false },
-  shots: { type: Array, default: () => [] }
+  shots: { type: Array, default: () => [] },
+  level: { type: String, default: '' },
+  closeRoute: { type: Object, default: null }
 })
 
 // Computed
@@ -67,19 +71,24 @@ const props = defineProps({
 const currentEpisode = computed(() => store.getters.currentEpisode)
 const currentProduction = computed(() => store.getters.currentProduction)
 
+// 4 January always falls in ISO week 1, unlike the locale week 1
 const weekStart = computed(() =>
-  moment().day('Monday').year(props.year).week(props.week)
+  moment({ year: props.year, month: 0, day: 4 })
+    .isoWeek(props.week)
+    .startOf('isoWeek')
 )
 const startDay = computed(() => weekStart.value.date())
 const endDay = computed(() => weekStart.value.clone().add(6, 'days').date())
 const weekMonth = computed(() => weekStart.value.format('MMM'))
 const monthString = computed(() => monthToString(props.month))
 
-const isMonthInfo = computed(() => route.path.includes('month'))
-const isWeekInfo = computed(() => route.path.includes('week'))
-const isDayInfo = computed(() => route.path.includes('day'))
+const isLevel = name =>
+  props.level ? props.level === name : route.path.includes(name)
+const isMonthInfo = computed(() => isLevel('month'))
+const isWeekInfo = computed(() => isLevel('week'))
+const isDayInfo = computed(() => isLevel('day'))
 
-const closeRoute = computed(() => {
+const quotaCloseRoute = computed(() => {
   if (!currentProduction.value) return {}
   let target = {
     name: 'quota',
@@ -100,6 +109,24 @@ const closeRoute = computed(() => {
     target.params.episode_id = currentEpisode.value.id
   }
   return { ...target, query: route.query }
+})
+
+const closeTarget = computed(() => props.closeRoute || quotaCloseRoute.value)
+
+// Functions
+// --------------------------------------------------------------------------
+const onKeyDown = event => {
+  if (isFreeEscape(event)) router.push(closeTarget.value)
+}
+
+// Lifecycle
+// --------------------------------------------------------------------------
+onMounted(() => {
+  window.addEventListener('keydown', onKeyDown)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKeyDown)
 })
 </script>
 
