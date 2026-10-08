@@ -68,3 +68,51 @@ export const getTimesheetPeriod = (level, { year, month, week, day }) => {
     level === 'week' ? start.clone().add(6, 'days') : start.clone().endOf(level)
   return { start, end }
 }
+
+const DATE_FORMAT = 'YYYY-MM-DD'
+
+// The rows of one request cover every column of the view: the week view
+// runs from the Monday of ISO week 1 to the Sunday of the last ISO week.
+// Jan 4 always falls in the first ISO week and Dec 28 in the last.
+export const getProductivityRange = (level, { year, month }) => {
+  const start = {
+    day: moment({ year, month: month - 1 }),
+    week: moment({ year, month: 0, day: 4 }).startOf('isoWeek'),
+    month: moment({ year })
+  }[level]
+  const end = {
+    day: start.clone().endOf('month'),
+    week: moment({ year, month: 11, day: 28 }).endOf('isoWeek'),
+    month: start.clone().endOf('year')
+  }[level]
+  return {
+    startDate: start.format(DATE_FORMAT),
+    endDate: end.format(DATE_FORMAT)
+  }
+}
+
+// Zou sends either 'YYYY-MM-DD' or a full timestamp: keep the date part.
+const columnIndex = (level, date) => {
+  const day = moment(date.slice(0, 10), DATE_FORMAT)
+  return { day: day.date(), week: day.isoWeek(), month: day.month() + 1 }[level]
+}
+
+export const getTimeSpentColumnTotals = (
+  rows,
+  level,
+  columns,
+  { productionId, taskTypeId } = {}
+) => {
+  const totals = rows
+    .filter(
+      row =>
+        (!productionId || row.project_id === productionId) &&
+        (!taskTypeId || row.task_type_id === taskTypeId)
+    )
+    .reduce((acc, row) => {
+      const index = columnIndex(level, row.date)
+      acc.set(index, (acc.get(index) || 0) + row.duration)
+      return acc
+    }, new Map())
+  return columns.map(index => totals.get(index) || 0)
+}

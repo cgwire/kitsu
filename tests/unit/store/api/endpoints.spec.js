@@ -35,6 +35,15 @@ describe('store/api endpoints', () => {
     client.pput.mockClear()
   })
 
+  describe('user time spents', () => {
+    test('asks for a period of the current user', () => {
+      peopleApi.getUserTimeSpentsByPeriod('2026-10-01', '2026-10-31')
+      expect(client.pget).toHaveBeenCalledWith(
+        '/api/data/user/time-spents?start_date=2026-10-01&end_date=2026-10-31'
+      )
+    })
+  })
+
   // Zou answers an import only once every row is processed: the imports
   // must not go through the 60s response timeout of regular requests.
   describe('imports', () => {

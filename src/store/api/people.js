@@ -247,6 +247,12 @@ export default {
     return client.pget(`/api/data/user/time-spents/${date}`)
   },
 
+  getUserTimeSpentsByPeriod(startDate, endDate) {
+    return client.pget(
+      `/api/data/user/time-spents?start_date=${startDate}&end_date=${endDate}`
+    )
+  },
+
   getPersonTasks(personId) {
     return client.pget(`/api/data/persons/${personId}/tasks`)
   },
