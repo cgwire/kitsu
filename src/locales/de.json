@@ -1824,6 +1824,7 @@
       "hours": "Stunden",
       "month": "Monat",
       "time_spents": "Zeitaufwand (Stunden)",
+      "week_total": "Woche: {hours} Stunden",
       "timelog_title": "Zeiterfassung",
       "title": "Stundenzettel",
       "year": "Jahr",

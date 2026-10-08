@@ -109,6 +109,7 @@
           <timesheet-list
             ref="timesheet-list"
             :initial-date="selectedDate"
+            :person-id="person?.id"
             :tasks="loggablePersonTasks"
             :done-tasks="loggableDoneTasks"
             :is-loading="isTasksLoading"

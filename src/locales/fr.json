@@ -1824,6 +1824,7 @@
       "hours": "heures",
       "month": "Mois",
       "time_spents": "Temps passé (heures)",
+      "week_total": "Semaine : {hours} heures",
       "timelog_title": "Saisie des temps",
       "title": "Feuilles de temps",
       "year": "Année",

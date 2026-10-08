@@ -15,6 +15,12 @@
         {{ timeSpentTotal }} {{ $t('timesheets.hours') }}
       </div>
       <div class="filler"></div>
+      <div
+        class="flexrow-item week-time-spent-total"
+        v-if="weekTimeSpentTotal !== null"
+      >
+        {{ $t('timesheets.week_total', { hours: weekTimeSpentTotal }) }}
+      </div>
       <button-simple
         class="flexrow-item"
         :text="$t('timesheets.day_off')"
@@ -287,6 +293,10 @@ const props = defineProps({
   initialDate: {
     default: null,
     type: String
+  },
+  personId: {
+    default: null,
+    type: String
   }
 })
 
@@ -305,6 +315,7 @@ const colTypePosX = ref('')
 const dayOffToEdit = ref(null)
 const disabledDates = ref({})
 const filledTaskIds = ref(new Set())
+const otherDaysDuration = ref(null)
 const page = ref(1)
 const selectedDate = ref(
   props.initialDate
@@ -346,6 +357,13 @@ const displayedTasks = computed(() =>
   sortedTasks.value.slice(0, page.value * (PAGE_SIZE / 2))
 )
 
+// The selected day comes from the live total, so the edits show at once.
+const weekTimeSpentTotal = computed(() =>
+  otherDaysDuration.value === null
+    ? null
+    : otherDaysDuration.value / 60 + props.timeSpentTotal
+)
+
 const dayOffInfo = computed(() => {
   const { description, date, end_date } = personDayOff.value
   const period = end_date && date !== end_date ? `${date} - ${end_date}` : date
@@ -370,6 +388,23 @@ const onBodyScroll = event => {
 
 const onSliderChange = valueInfo => {
   emit('time-spent-change', valueInfo)
+}
+
+const loadWeekTimeSpents = async () => {
+  otherDaysDuration.value = null
+  if (props.personId) {
+    const day = moment(selectedDate.value).format('YYYY-MM-DD')
+    const timeSpents = await store.dispatch('loadPersonTimeSpentsByPeriod', {
+      personId: props.personId,
+      startDate: moment(day).startOf('isoWeek').format('YYYY-MM-DD'),
+      endDate: moment(day).endOf('isoWeek').format('YYYY-MM-DD')
+    })
+    // A quicker answer for a later day may have landed first.
+    if (day !== moment(selectedDate.value).format('YYYY-MM-DD')) return
+    otherDaysDuration.value = (timeSpents || [])
+      .filter(timeSpent => timeSpent.date.slice(0, 10) !== day)
+      .reduce((total, timeSpent) => total + timeSpent.duration, 0)
+  }
 }
 
 const entityPath = entity => getTaskEntityPath(entity, entity.episode_id)
@@ -415,6 +450,12 @@ watch(
 watch(selectedDate, () => {
   emit('date-changed', selectedDate.value)
 })
+
+watch(
+  [selectedDate, () => props.personId],
+  () => loadWeekTimeSpents().catch(console.error),
+  { immediate: true }
+)
 
 // Lifecycle
 // --------------------------------------------------------------------------
@@ -508,5 +549,10 @@ td.name {
 .time-spent-total {
   font-size: 1.6em;
   line-height: 1.7em;
+}
+
+.week-time-spent-total {
+  color: var(--text-alt);
+  font-size: 1.2em;
 }
 </style>
