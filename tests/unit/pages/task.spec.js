@@ -24,6 +24,8 @@ import drafts from '@/lib/drafts'
 import { DEFAULT_FPS } from '@/lib/video'
 import shotsStore from '@/store/modules/shots'
 
+import { recordUnhandledRejections } from '../fixtures/unhandled-rejections'
+
 // The ten events the page used to declare through the `socket` component
 // option, which `<script setup>` cannot express.
 const SOCKET_EVENTS = [
@@ -551,6 +553,53 @@ describe('Task.vue comment events', () => {
     await emitCommentNew(socket, TASK_ID)
 
     expect(wrapper.findComponent(PreviewPlayer).exists()).toBe(false)
+  })
+
+  // App.vue reloads the comment of a task the event names. Older Zou
+  // versions leave the task out of the preview events.
+  describe('comment:update', () => {
+    const emitCommentUpdate = (socket, eventData) => {
+      const [, onCommentUpdate] = socket.on.mock.calls.find(
+        ([event]) => event === 'comment:update'
+      )
+      onCommentUpdate(eventData)
+    }
+    const reloads = store =>
+      store.dispatch.mock.calls.filter(([type]) => type === 'loadComment')
+
+    it('reloads a comment it shows when the event names no task', async () => {
+      const { socket, store } = await mountPage({ comments: [comment] })
+      emitCommentUpdate(socket, { comment_id: comment.id })
+      expect(reloads(store)).toEqual([
+        ['loadComment', { commentId: comment.id }]
+      ])
+    })
+
+    it('leaves to App.vue a comment whose task the event names', async () => {
+      const { socket, store } = await mountPage({ comments: [comment] })
+      emitCommentUpdate(socket, { comment_id: comment.id, task_id: TASK_ID })
+      expect(reloads(store)).toEqual([])
+    })
+
+    it('leaves alone the comments it does not show', async () => {
+      const { socket, store } = await mountPage({ comments: [comment] })
+      emitCommentUpdate(socket, { comment_id: 'comment-of-another-task' })
+      expect(reloads(store)).toEqual([])
+    })
+
+    it('leaves a bug in the reload to Sentry', async () => {
+      const bug = new TypeError('Cannot read properties of undefined')
+      const { socket, store } = await mountPage({ comments: [comment] })
+      store.dispatch.mockImplementation(type =>
+        type === 'loadComment' ? Promise.reject(bug) : Promise.resolve()
+      )
+
+      const rejections = await recordUnhandledRejections(() =>
+        emitCommentUpdate(socket, { comment_id: comment.id })
+      )
+
+      expect(rejections).toEqual([bug])
+    })
   })
 })
 

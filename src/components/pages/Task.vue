@@ -497,6 +497,7 @@ import {
 
 import { isClientThread } from '@/lib/comments'
 import drafts from '@/lib/drafts'
+import { logRequestFailure } from '@/lib/errors'
 import func from '@/lib/func'
 import { getTaskEntityPath, getTaskEntitiesPath } from '@/lib/path'
 import { formatRevision } from '@/lib/preview'
@@ -1731,12 +1732,18 @@ const onCommentNew = eventData => {
   }, 1000)
 }
 
+// App.vue reloads the comment when the event names its task. Older Zou
+// versions leave the task out of the preview events: the page then reloads
+// the comments it shows.
 const onCommentUpdate = eventData => {
   const commentId = eventData.comment_id
-  if (!taskComments.value.some(({ id }) => id === commentId)) {
+  if (
+    eventData.task_id ||
+    !taskComments.value.some(({ id }) => id === commentId)
+  ) {
     return
   }
-  store.dispatch('loadComment', { commentId }).catch(console.error)
+  store.dispatch('loadComment', { commentId }).catch(logRequestFailure)
 }
 
 const onCommentReply = eventData => {

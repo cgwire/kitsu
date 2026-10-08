@@ -8,6 +8,8 @@ import errors from '@/lib/errors'
 
 import App from '@/App.vue'
 
+import { recordUnhandledRejections } from './fixtures/unhandled-rejections'
+
 let wrapper = null
 
 const mountApp = async ({ actions, getters, mutations }) => {
@@ -353,35 +355,129 @@ describe('App', () => {
       it.each(reloads)(
         'leaves a bug in the reload after $event to Sentry',
         async ({ event, eventData, action, getters }) => {
-          // Vitest fails the run on any unhandled rejection: take its
-          // listeners over while one is expected.
-          const vitestListeners = process.listeners('unhandledRejection')
-          process.removeAllListeners('unhandledRejection')
-          const rejections = []
-          process.on('unhandledRejection', reason => rejections.push(reason))
           const consoleError = vi
             .spyOn(console, 'error')
             .mockImplementation(() => {})
           const bug = new TypeError('Cannot read properties of undefined')
 
-          try {
+          const rejections = await recordUnhandledRejections(async () => {
             const { socket } = await mountApp({
               actions: { [action]: () => Promise.reject(bug) },
               getters
             })
             emitSocketEvent(socket, event, eventData)
-            await new Promise(resolve => setTimeout(resolve))
-          } finally {
-            process.removeAllListeners('unhandledRejection')
-            vitestListeners.forEach(listener =>
-              process.on('unhandledRejection', listener)
-            )
-          }
+          })
 
           expect(rejections).toEqual([bug])
           expect(consoleError).not.toHaveBeenCalledWith(bug)
         }
       )
+    })
+
+    // Zou names the task of a comment update: App.vue reloads the comment
+    // for the panels that hold the comments of that task.
+    describe('comment updates', () => {
+      const comment = { id: 'comment-1' }
+      const getters = {
+        isPublishingComment: () => () => false,
+        taskComments: () => ({ 'task-1': [comment] }),
+        taskMap: () => new Map([['task-1', { id: 'task-1' }]])
+      }
+      const updateOf = commentId => ({
+        comment_id: commentId,
+        task_id: 'task-1'
+      })
+      const isPosted = commentId => commentId === 'comment-new'
+
+      it('reloads an updated comment of a task whose comments are loaded', async () => {
+        const loadComment = vi.fn(() => Promise.resolve())
+        const { socket } = await mountApp({ actions: { loadComment }, getters })
+
+        emitSocketEvent(socket, 'comment:update', updateOf('comment-1'))
+
+        expect(loadComment).toHaveBeenCalledWith(expect.anything(), {
+          commentId: 'comment-1'
+        })
+      })
+
+      // A list holds no comment, and a client may not read every comment of
+      // the tasks it lists.
+      it('leaves alone the comments of a task that is only listed', async () => {
+        const loadComment = vi.fn(() => Promise.resolve())
+        const { socket } = await mountApp({
+          actions: { loadComment },
+          getters: { ...getters, taskComments: () => ({}) }
+        })
+
+        emitSocketEvent(socket, 'comment:update', updateOf('comment-1'))
+
+        expect(loadComment).not.toHaveBeenCalled()
+      })
+
+      // The comment the user posts with a preview joins the store once the
+      // previews are uploaded: reloaded before, it would list them with no
+      // revision.
+      it('waits for the comment the user is posting with a preview', async () => {
+        const loadComment = vi.fn(() => Promise.resolve())
+        const { socket } = await mountApp({
+          actions: { loadComment },
+          getters: { ...getters, isPublishingComment: () => isPosted }
+        })
+
+        emitSocketEvent(socket, 'comment:update', updateOf('comment-new'))
+
+        expect(loadComment).not.toHaveBeenCalled()
+      })
+
+      it('reloads the other comments during an upload', async () => {
+        const loadComment = vi.fn(() => Promise.resolve())
+        const { socket } = await mountApp({
+          actions: { loadComment },
+          getters: { ...getters, isPublishingComment: () => isPosted }
+        })
+
+        emitSocketEvent(socket, 'comment:update', updateOf('comment-1'))
+
+        expect(loadComment).toHaveBeenCalled()
+      })
+
+      // A manager may have turned the client visibility off.
+      it('blanks a comment the user can no longer read', async () => {
+        const refusal = { status: 403 }
+        errors.markRequestFailure(refusal)
+        const blank = vi.fn()
+        const { socket } = await mountApp({
+          actions: { loadComment: () => Promise.reject(refusal) },
+          getters,
+          mutations: { BLANK_COMMENT_CONTENT: blank }
+        })
+
+        emitSocketEvent(socket, 'comment:update', updateOf('comment-1'))
+        await flushPromises()
+
+        expect(blank).toHaveBeenCalledWith(expect.anything(), {
+          taskId: 'task-1',
+          commentId: 'comment-1'
+        })
+      })
+
+      it('leaves a bug in the reload to Sentry', async () => {
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const bug = new TypeError('Cannot read properties of undefined')
+
+        const rejections = await recordUnhandledRejections(async () => {
+          const { socket } = await mountApp({
+            actions: { loadComment: () => Promise.reject(bug) },
+            getters
+          })
+          emitSocketEvent(socket, 'comment:update', updateOf('comment-1'))
+        })
+
+        expect(rejections).toEqual([bug])
+        expect(consoleError).not.toHaveBeenCalledWith(bug)
+      })
     })
   })
 })

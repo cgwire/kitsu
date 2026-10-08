@@ -22,6 +22,8 @@ import drafts from '@/lib/drafts'
 import { DEFAULT_FPS } from '@/lib/video'
 import shotStore from '@/store/modules/shots'
 
+import { recordUnhandledRejections } from '../fixtures/unhandled-rejections'
+
 // The eleven events the panel declares through its socketEvents table.
 const SOCKET_EVENTS = [
   'preview-file:add-file',
@@ -1099,6 +1101,68 @@ describe('TaskInfo.vue', () => {
         'registerPreviewFileStatuses',
         expect.anything()
       )
+    })
+  })
+
+  // Zou sends every comment update to every open tab, whatever the
+  // production. App.vue reloads the comment of a task the event names;
+  // older Zou versions leave the task out of the preview events.
+  describe('comment:update', () => {
+    const shownComment = { id: 'comment-1', previews: [] }
+    const emitCommentUpdate = (socket, eventData) => {
+      const [, onRemoteCommentUpdate] = socket.on.mock.calls.find(
+        ([event]) => event === 'comment:update'
+      )
+      onRemoteCommentUpdate(eventData)
+    }
+    const reloads = store =>
+      store.dispatch.mock.calls.filter(([type]) => type === 'loadComment')
+
+    it('reloads a comment it shows when the event names no task', async () => {
+      const { socket, store } = await mountPanel({ comments: [shownComment] })
+      emitCommentUpdate(socket, { comment_id: shownComment.id })
+      expect(reloads(store)).toEqual([
+        ['loadComment', { commentId: shownComment.id }]
+      ])
+    })
+
+    // An artist may not read the comments of the other productions.
+    it('leaves alone the comments it does not show', async () => {
+      const { socket, store } = await mountPanel({ comments: [shownComment] })
+      emitCommentUpdate(socket, { comment_id: 'comment-of-another-task' })
+      expect(reloads(store)).toEqual([])
+    })
+
+    it('leaves to App.vue a comment whose task the event names', async () => {
+      const { socket, store } = await mountPanel({ comments: [shownComment] })
+      emitCommentUpdate(socket, {
+        comment_id: shownComment.id,
+        task_id: TASK_ID
+      })
+      expect(reloads(store)).toEqual([])
+    })
+
+    it('waits for the end of the preview upload of the user', async () => {
+      const { socket, store } = await mountPanel({
+        comments: [shownComment],
+        getterOverrides: { isSavingCommentPreview: () => true }
+      })
+      emitCommentUpdate(socket, { comment_id: shownComment.id })
+      expect(reloads(store)).toEqual([])
+    })
+
+    it('leaves a bug in the reload to Sentry', async () => {
+      const bug = new TypeError('Cannot read properties of undefined')
+      const { socket, store } = await mountPanel({ comments: [shownComment] })
+      store.dispatch.mockImplementation(type =>
+        type === 'loadComment' ? Promise.reject(bug) : Promise.resolve()
+      )
+
+      const rejections = await recordUnhandledRejections(() =>
+        emitCommentUpdate(socket, { comment_id: shownComment.id })
+      )
+
+      expect(rejections).toEqual([bug])
     })
   })
 

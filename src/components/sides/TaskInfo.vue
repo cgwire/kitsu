@@ -409,6 +409,7 @@ import { isClientThread } from '@/lib/comments'
 import csv from '@/lib/csv'
 import { isSupervisorInDepartments } from '@/lib/descriptors'
 import drafts from '@/lib/drafts'
+import { logRequestFailure } from '@/lib/errors'
 import func from '@/lib/func'
 import {
   getDownloadAttachmentPath,
@@ -1589,15 +1590,19 @@ const onRemoteCommentNew = eventData => {
   }, 1000)
 }
 
+// App.vue reloads the comment when the event names its task. Older Zou
+// versions leave the task out of the preview events: the panel then
+// reloads the comments it shows.
 const onRemoteCommentUpdate = eventData => {
   const commentId = eventData.comment_id
   if (
+    eventData.task_id ||
     store.getters.isSavingCommentPreview ||
-    (!props.task && !taskComments.value.some(({ id }) => id === commentId))
+    !taskComments.value.some(({ id }) => id === commentId)
   ) {
     return
   }
-  store.dispatch('loadComment', { commentId }).catch(console.error)
+  store.dispatch('loadComment', { commentId }).catch(logRequestFailure)
 }
 
 const onRemoteCommentAck = eventData => onRemoteAcknowledge(eventData, 'ack')

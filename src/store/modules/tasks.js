@@ -91,6 +91,8 @@ import {
 } from '@/store/mutation-types'
 
 const locks = {}
+// The comments a publication creates, until their last file is up.
+const publishingCommentIds = new Set()
 
 const cache = {}
 
@@ -165,6 +167,9 @@ const getters = {
   getTaskComment: state => (taskId, commentId) => {
     return state.taskComments[taskId]?.find(comment => comment.id === commentId)
   },
+  // Read at call time: a publication joins its comment to the store once its
+  // last file is up.
+  isPublishingComment: () => commentId => publishingCommentIds.has(commentId),
 
   selectedTasks: state => state.selectedTasks,
   nbSelectedTasks: state => state.nbSelectedTasks,
@@ -597,6 +602,7 @@ const actions = {
         // Create the comment entry.
         .then(comment => {
           newComment = comment
+          publishingCommentIds.add(comment.id)
           const previewData = {
             taskId,
             commentId: newComment.id,
@@ -692,6 +698,7 @@ const actions = {
         })
         .finally(() => {
           locks[taskId] = false
+          publishingCommentIds.delete(newComment?.id)
         })
     )
   },

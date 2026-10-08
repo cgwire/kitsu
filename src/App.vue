@@ -524,8 +524,12 @@ const socketEvents = {
   'comment:update': eventData => {
     const commentId = eventData.comment_id
     const taskId = eventData.task_id
-    const task = taskId ? taskMap.value.get(taskId) : null
-    if (!task && !taskComments.value[taskId]) return
+    // A list holds no comment, and a client may not read every comment of
+    // the tasks it lists.
+    if (!taskComments.value[taskId]) return
+    // The comment the user posts with previews joins the store once its last
+    // file is up: reloaded before, it would list them with no revision.
+    if (store.getters.isPublishingComment(commentId)) return
     store.dispatch('loadComment', { commentId }).catch(err => {
       // A manager may have just flipped for_client off — the client
       // loses access and gets a 403. Keep the row but blank its
@@ -533,7 +537,7 @@ const socketEvents = {
       if (err?.status === 403 || err?.body?.status === 403) {
         store.commit('BLANK_COMMENT_CONTENT', { taskId, commentId })
       } else {
-        console.error(err)
+        errors.logRequestFailure(err)
       }
     })
   },

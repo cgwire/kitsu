@@ -1281,3 +1281,84 @@ describe('Tasks store, DELETE_TASK_END', () => {
     expect(state.nbSelectedValidations).toBe(1)
   })
 })
+
+// App.vue leaves alone the events of the comment a publication creates until
+// it joins the store, once its last file is up.
+describe('Tasks store, publication in progress', () => {
+  const form = name => new Map([['file', { name }]])
+  const isPublishing = commentId =>
+    tasksStore.getters.isPublishingComment()(commentId)
+
+  const publish = state =>
+    tasksStore.actions.commentTaskWithPreview(
+      {
+        commit: (type, payload) => tasksStore.mutations[type](state, payload),
+        dispatch: vi.fn()
+      },
+      {
+        taskId: 'task-1',
+        taskStatusId: 'status-1',
+        comment: 'Take 3',
+        forms: [form('a.mov'), form('b.png')]
+      }
+    )
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  test('commentTaskWithPreview marks its comment until its last file is up', async () => {
+    const state = {
+      isSavingCommentPreview: false,
+      taskComments: {},
+      taskPreviews: {},
+      taskMap: new Map(),
+      uploadProgress: {}
+    }
+    let endExtraUpload
+    tasksApi.commentTask.mockResolvedValueOnce({
+      id: 'comment-1',
+      previews: [],
+      person: { id: 'person-1', first_name: 'Ada', last_name: 'Lee' }
+    })
+    tasksApi.addPreview.mockResolvedValueOnce({ id: 'preview-1' })
+    tasksApi.addExtraPreview.mockResolvedValueOnce({ id: 'preview-2' })
+    tasksApi.uploadPreview
+      .mockImplementationOnce(() => ({
+        request: { on: vi.fn() },
+        promise: Promise.resolve({ id: 'preview-1', revision: 3 })
+      }))
+      .mockImplementationOnce(() => ({
+        request: { on: vi.fn() },
+        promise: new Promise(resolve => {
+          endExtraUpload = resolve
+        })
+      }))
+
+    const publication = publish(state)
+    await vi.waitFor(() =>
+      expect(tasksApi.uploadPreview).toHaveBeenCalledTimes(2)
+    )
+    expect(isPublishing('comment-1')).toBe(true)
+    expect(isPublishing('comment-2')).toBe(false)
+
+    endExtraUpload({ id: 'preview-2', revision: 3 })
+    await publication
+    expect(isPublishing('comment-1')).toBe(false)
+  })
+
+  test('commentTaskWithPreview releases its comment when it fails', async () => {
+    const state = { isSavingCommentPreview: false, taskComments: {} }
+    // A proxy error: Zou may still process the file, the comment stays.
+    const err = Object.assign(new Error('502'), { status: 502 })
+    tasksApi.commentTask.mockResolvedValueOnce({ id: 'comment-1', previews: [] })
+    tasksApi.addPreview.mockResolvedValueOnce({ id: 'preview-1' })
+    tasksApi.uploadPreview.mockImplementationOnce(() => ({
+      request: { on: vi.fn() },
+      promise: Promise.reject(err)
+    }))
+
+    await expect(publish(state)).rejects.toBe(err)
+    expect(isPublishing('comment-1')).toBe(false)
+  })
+})
