@@ -8,10 +8,10 @@ export function setErrorReporter(reporter) {
   errorReporter = reporter
 }
 
-function reportError(err, method, path) {
+function reportError(err, request) {
   // Reporting must never change how a request fails.
   Promise.resolve()
-    .then(() => errorReporter?.(err, { method, path }))
+    .then(() => errorReporter?.(err, request))
     .catch(console.error)
 }
 
@@ -19,7 +19,7 @@ function handleResponse(res) {
   return res?.body
 }
 
-function handleError(err, method, path) {
+function handleError(err, method, path, startedAt) {
   if (err?.response?.status === 401) {
     errors.backToLogin()
     // Return a pending promise to freeze the chain until the redirect happens.
@@ -28,7 +28,8 @@ function handleError(err, method, path) {
   err.body = err?.response?.body || ''
   // No answer in time: the server may still be processing the request.
   err.isTimeout = Boolean(err.timeout) || err.status === 504
-  reportError(err, method, path)
+  errors.markRequestFailure(err)
+  reportError(err, { method, path, duration: Date.now() - startedAt })
   throw err
 }
 
@@ -79,7 +80,7 @@ function decodeCompactTask(row, taskFields) {
   return task
 }
 
-async function handleNdjsonResponse(response) {
+async function handleNdjsonResponse(response, onReadFailure) {
   let header = null
   let entityFields = null
   const entities = []
@@ -104,7 +105,7 @@ async function handleNdjsonResponse(response) {
   const decoder = new TextDecoder()
   let buffer = ''
   for (;;) {
-    const { done, value } = await reader.read()
+    const { done, value } = await reader.read().catch(onReadFailure)
     if (done) break
     buffer += decoder.decode(value, { stream: true })
     const lines = buffer.split('\n')
@@ -117,11 +118,12 @@ async function handleNdjsonResponse(response) {
 
 const client = {
   request(method, path, data, timeout = REQUEST_TIMEOUT) {
+    const startedAt = Date.now()
     return superagent(method, path)
       .timeout(timeout)
       .send(data)
       .then(handleResponse)
-      .catch(err => handleError(err, method, path))
+      .catch(err => handleError(err, method, path, startedAt))
   },
 
   pget(path) {
@@ -135,6 +137,7 @@ const client = {
   // rejecting the parameters, proxy in between — falls back to the
   // legacy plain JSON request.
   pgetNdjson(path) {
+    const startedAt = Date.now()
     const separator = path.includes('?') ? '&' : '?'
     const streamPath = `${path}${separator}stream=true&compact=true`
     // Not AbortSignal.timeout(): it needs Safari 15.4+ (above the browser
@@ -144,6 +147,12 @@ const client = {
       () => controller.abort(),
       REQUEST_TIMEOUT.deadline
     )
+    // A body cut on the way is a failed request; a line that does not
+    // decode stays a bug.
+    const onReadFailure = err => {
+      if (controller.signal.aborted) err.timeout = REQUEST_TIMEOUT.deadline
+      return handleError(err, 'GET', streamPath, startedAt)
+    }
     return fetch(streamPath, {
       headers: { Accept: 'application/x-ndjson' },
       signal: controller.signal
@@ -161,7 +170,7 @@ const client = {
             // with the error shape the stores already handle.
             return client.pget(path)
           }
-          return handleNdjsonResponse(response)
+          return handleNdjsonResponse(response, onReadFailure)
         },
         () => client.pget(path)
       )
@@ -177,13 +186,14 @@ const client = {
   },
 
   ppostFile(path, data) {
+    const startedAt = Date.now()
     const request = superagent
       .post(path)
       .send(data)
       .on('progress', e => e)
     const promise = request
       .then(handleResponse)
-      .catch(err => handleError(err, 'POST', path))
+      .catch(err => handleError(err, 'POST', path, startedAt))
     return { request, promise }
   },
 
@@ -196,17 +206,19 @@ const client = {
   },
 
   getText(path) {
+    const startedAt = Date.now()
     return superagent('GET', path)
       .timeout(REQUEST_TIMEOUT)
       .then(res => res.text)
-      .catch(err => handleError(err, 'GET', path))
+      .catch(err => handleError(err, 'GET', path, startedAt))
   },
 
   getBlob(path) {
+    const startedAt = Date.now()
     return superagent('GET', path)
       .responseType('blob')
       .then(res => res.body)
-      .catch(err => handleError(err, 'GET', path))
+      .catch(err => handleError(err, 'GET', path, startedAt))
   },
 
   getConfig() {

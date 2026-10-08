@@ -51,7 +51,7 @@ vi.mock('superagent', () => {
 })
 
 vi.mock('@/lib/errors', () => ({
-  default: { backToLogin: vi.fn() }
+  default: { backToLogin: vi.fn(), markRequestFailure: vi.fn() }
 }))
 
 import client, { buildQuery, setErrorReporter } from '@/store/api/client'
@@ -290,6 +290,88 @@ describe('store/api/client', () => {
       expect(outcome).toBe('pending')
       expect(errors.backToLogin).toHaveBeenCalled()
     })
+
+    describe('once the answer streams', () => {
+      const PATH = '/api/data/shots/with-tasks'
+      const STREAM_PATH = `${PATH}?stream=true&compact=true`
+      const header = '{"compact":true,"shot_fields":["id"],"task_fields":[]}\n'
+
+      // A first chunk, then what the second read meets.
+      const streaming = second => ({
+        ok: true,
+        status: 200,
+        headers: { get: () => 'application/x-ndjson' },
+        body: new ReadableStream({
+          start(controller) {
+            controller.enqueue(new TextEncoder().encode(header))
+          },
+          pull: second
+        })
+      })
+
+      let reporter
+
+      beforeEach(() => {
+        reporter = vi.fn()
+        setErrorReporter(reporter)
+      })
+
+      afterEach(() => {
+        setErrorReporter(null)
+        vi.useRealTimers()
+      })
+
+      test('reports a body cut on the way as a failed request', async () => {
+        const cut = new TypeError('network error')
+        vi.stubGlobal(
+          'fetch',
+          vi.fn(async () => streaming(controller => controller.error(cut)))
+        )
+        await expect(client.pgetNdjson(PATH)).rejects.toBe(cut)
+        await new Promise(resolve => setTimeout(resolve))
+        expect(errors.markRequestFailure).toHaveBeenCalledWith(cut)
+        expect(reporter).toHaveBeenCalledWith(cut, {
+          method: 'GET',
+          path: STREAM_PATH,
+          duration: expect.any(Number)
+        })
+      })
+
+      test('reports a body stopped by the deadline as a timeout', async () => {
+        vi.useFakeTimers()
+        vi.stubGlobal(
+          'fetch',
+          vi.fn(async (url, { signal }) =>
+            streaming(controller => {
+              signal.addEventListener('abort', () =>
+                controller.error(new DOMException('Aborted', 'AbortError'))
+              )
+            })
+          )
+        )
+        const failure = client.pgetNdjson(PATH).catch(err => err)
+        await vi.advanceTimersByTimeAsync(300000)
+        expect(await failure).toMatchObject({ timeout: 300000, isTimeout: true })
+        expect(errors.markRequestFailure).toHaveBeenCalled()
+      })
+
+      // A line that does not decode is a bug, not a failed request.
+      test('leaves a line that does not decode as a bug', async () => {
+        vi.stubGlobal(
+          'fetch',
+          vi.fn(async () =>
+            streaming(controller => {
+              controller.enqueue(new TextEncoder().encode('{not json\n'))
+              controller.close()
+            })
+          )
+        )
+        await expect(client.pgetNdjson(PATH)).rejects.toThrow(SyntaxError)
+        await new Promise(resolve => setTimeout(resolve))
+        expect(errors.markRequestFailure).not.toHaveBeenCalled()
+        expect(reporter).not.toHaveBeenCalled()
+      })
+    })
   })
 
   // The reporter hears of a failure even when the caller catches it, so a
@@ -312,12 +394,46 @@ describe('store/api/client', () => {
       await client.getText('/api/d.txt').catch(() => {})
       await client.getBlob('/api/e.png').catch(() => {})
       await settle()
+      const duration = expect.any(Number)
       expect(reporter.mock.calls).toEqual([
-        [refusal, { method: 'GET', path: '/api/data/a' }],
-        [refusal, { method: 'PUT', path: '/api/data/b' }],
-        [refusal, { method: 'POST', path: '/api/data/c' }],
-        [refusal, { method: 'GET', path: '/api/d.txt' }],
-        [refusal, { method: 'GET', path: '/api/e.png' }]
+        [refusal, { method: 'GET', path: '/api/data/a', duration }],
+        [refusal, { method: 'PUT', path: '/api/data/b', duration }],
+        [refusal, { method: 'POST', path: '/api/data/c', duration }],
+        [refusal, { method: 'GET', path: '/api/d.txt', duration }],
+        [refusal, { method: 'GET', path: '/api/e.png', duration }]
+      ])
+    })
+
+    test('tells how long the failed request ran', async () => {
+      const reporter = vi.fn()
+      setErrorReporter(reporter)
+      h.error = refusal
+      const now = vi
+        .spyOn(Date, 'now')
+        .mockReturnValueOnce(1000)
+        .mockReturnValueOnce(61000)
+      await client.pget('/api/data/a').catch(() => {})
+      await settle()
+      now.mockRestore()
+      expect(reporter).toHaveBeenCalledWith(refusal, {
+        method: 'GET',
+        path: '/api/data/a',
+        duration: 60000
+      })
+    })
+
+    // Sentry leaves out the raw error of a failure the reporter heard of.
+    test('marks every failure the reporter hears of', async () => {
+      h.error = refusal
+      await client.pget('/api/data/a').catch(() => {})
+      await client.ppostFile('/api/data/c', {}).promise.catch(() => {})
+      await client.getText('/api/d.txt').catch(() => {})
+      await client.getBlob('/api/e.png').catch(() => {})
+      expect(errors.markRequestFailure.mock.calls).toEqual([
+        [refusal],
+        [refusal],
+        [refusal],
+        [refusal]
       ])
     })
 
@@ -328,6 +444,7 @@ describe('store/api/client', () => {
       client.pget('/api/data/foo')
       await settle()
       expect(reporter).not.toHaveBeenCalled()
+      expect(errors.markRequestFailure).not.toHaveBeenCalled()
     })
 
     test('a failing reporter leaves the request failure as it was', async () => {

@@ -3,6 +3,7 @@ import superagent from 'superagent'
 
 import { name, version } from '@/../package.json'
 import { isChunkError } from '@/lib/chunk-error'
+import errors from '@/lib/errors'
 import { setErrorReporter } from '@/store/api/client'
 
 // The guest share URL carries its access token in the path, and so do the
@@ -80,22 +81,35 @@ const isForeignError = event => {
 
 const ID_RGX = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi
 const DATE_RGX = /\d{4}-\d{2}-\d{2}/g
+const NUMBER_RGX = /\/\d+(?=\/|$)/g
+// The names people give to their files and to the metadata columns of all
+// the productions.
+const NAME_RGX =
+  /(\/(?:attachment-files\/[^/]+\/file|metadata-descriptors\/all-projects)\/)[^/]+/g
 const SESSION_CHECK_TIMEOUT = 20000
 
 let userId = null
+let isPageHidden = false
 const reportedRoutes = new Set()
 
 const isOwnData = path =>
   path.startsWith('/api/data/user/') || Boolean(userId && path.includes(userId))
 
-// A refused write, a refused read of the user's own data, and a rejected
-// payload point at a bug. Other refused reads are expected, like an access
-// lost meanwhile, and the 2FA setup gate refuses everything on purpose.
-const isWorthReporting = (err, method, path) => {
-  if (err?.body?.two_factor_authentication_required) return false
-  if (err?.status === 400 || err?.status === 422) return true
-  return err?.status === 403 && (method !== 'GET' || isOwnData(path))
+// The status of the answer, or why there was none.
+const getFailureKind = err => {
+  if (err?.status) return err.status
+  return err?.timeout ? 'timeout' : 'no response'
 }
+
+// The API client reported the failure as a warning named after its route,
+// and the raw error, grouped by the superagent stack, would only repeat it.
+// A deliberate capture brings its own context: it stays.
+const isReportedRequestFailure = (event, hint) =>
+  errors.isRequestFailure(hint.originalException) &&
+  (event.exception?.values || []).some(
+    ({ mechanism }) =>
+      mechanism?.handled === false || mechanism?.type?.startsWith('auto.')
+  )
 
 // Refused on their own data, the user either lost the session cookie to
 // another login, or Zou refused the right session. Not through the API
@@ -117,30 +131,49 @@ const getSessionOwner = async () => {
   }
 }
 
-// One warning per route and session, whatever the ids in the path.
-export const reportApiError = async (err, { method, path }) => {
-  if (!isWorthReporting(err, method, path)) return
+// One warning per kind of failure, route and session, whatever the ids,
+// dates and numbers in the path. The 2FA setup gate refuses everything on
+// purpose.
+export const reportApiError = async (err, { method, path, duration }) => {
+  if (err?.body?.two_factor_authentication_required) return
+  const kind = getFailureKind(err)
   const cleanPath = scrubSharedToken(path.split('?')[0])
-  const route = cleanPath.replace(ID_RGX, ':id').replace(DATE_RGX, ':date')
-  const key = `${err.status} ${method} ${route}`
+  const route = cleanPath
+    .replace(ID_RGX, ':id')
+    .replace(DATE_RGX, ':date')
+    .replace(NUMBER_RGX, '/:n')
+    .replace(NAME_RGX, '$1:name')
+  const key = `${kind} ${method} ${route}`
   if (reportedRoutes.has(key)) return
   reportedRoutes.add(key)
   // Sentry records the breadcrumb of the request once the microtasks of its
   // response have run: capture in a later task to keep it.
   await new Promise(resolve => setTimeout(resolve))
+  // Leaving the page cuts the requests still running.
+  if (kind === 'no response' && isPageHidden) return
   const identity =
     err.status === 403 && isOwnData(path) ? await getSessionOwner() : null
-  Sentry.captureMessage(`API ${err.status} on ${method} ${route}`, {
+  Sentry.captureMessage(`API ${kind} on ${method} ${route}`, {
     level: 'warning',
     fingerprint: ['api-error', key],
     tags: {
-      'api.status': err.status,
+      'api.status': kind,
       'api.method': method,
       'api.route': route,
+      // A browser that knows it is offline tells a lost connection apart
+      // from a server that stopped answering.
+      ...(kind === 'no response' && {
+        'api.online': String(navigator.onLine)
+      }),
       ...(identity && { 'api.identity': identity.result })
     },
     contexts: {
-      api: { path: cleanPath, message: err.body?.message },
+      api: {
+        path: cleanPath,
+        // A proxy answers with an HTML page, which becomes the message.
+        message: (err.body?.message || err.message)?.slice(0, 300),
+        duration_ms: duration
+      },
       ...(identity && { identity })
     }
   })
@@ -163,6 +196,7 @@ export default {
         if (hint.originalException && isChunkError(hint.originalException)) {
           return null
         }
+        if (isReportedRequestFailure(event, hint)) return null
         if (isForeignError(event)) return null
         return scrubEvent(event)
       },
@@ -177,6 +211,12 @@ export default {
       }
     })
     setErrorReporter(reportApiError)
+    window.addEventListener('pagehide', () => {
+      isPageHidden = true
+    })
+    window.addEventListener('pageshow', () => {
+      isPageHidden = false
+    })
   },
 
   setContext(organisation, user) {

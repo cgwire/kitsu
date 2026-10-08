@@ -34,6 +34,7 @@ vi.mock('@/store/api/client', () => {
   return { setErrorReporter: h.setErrorReporter }
 })
 
+import errors from '@/lib/errors'
 import sentry, { reportApiError, scrubSharedToken } from '@/lib/sentry'
 
 const OWN_ID = '11111111-1111-4111-8111-111111111111'
@@ -41,10 +42,22 @@ const OTHER_ID = '22222222-2222-4222-8222-222222222222'
 const THIRD_ID = '33333333-3333-4333-8333-333333333333'
 
 describe('lib/sentry', () => {
+  let pageListeners
+
   beforeEach(() => {
     vi.clearAllMocks()
+    pageListeners = {}
+    vi.stubGlobal('window', {
+      addEventListener: (name, listener) => {
+        pageListeners[name] = listener
+      }
+    })
     h.authenticated = async () => ({ body: { user: { id: OWN_ID } } })
     sentry.setContext({ name: 'Studio' }, { id: OWN_ID, role: 'user' })
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
   })
 
   test('init hands the API error reporter to the client', () => {
@@ -305,13 +318,80 @@ describe('lib/sentry', () => {
     })
   })
 
+  // The reporter sent the failure as a warning named after its route: the
+  // raw error, grouped by the superagent stack whatever the route, would
+  // only repeat it.
+  describe('beforeSend on a failed request', () => {
+    const errorEvent = mechanism => ({
+      exception: {
+        values: [
+          { type: 'Error', value: 'Request has been terminated', mechanism }
+        ]
+      }
+    })
+    const uncaught = {
+      type: 'auto.browser.global_handlers.onunhandledrejection',
+      handled: false
+    }
+    let beforeSend
+
+    beforeEach(() => {
+      sentry.init({}, {}, { dsn: 'https://key@sentry.example.com/1' })
+      beforeSend = h.init.mock.calls[0][0].beforeSend
+    })
+
+    test('drops the uncaught rejection of a failure the reporter heard of', () => {
+      const failure = new Error('Request has been terminated')
+      errors.markRequestFailure(failure)
+      const event = errorEvent(uncaught)
+      expect(beforeSend(event, { originalException: failure })).toBeNull()
+    })
+
+    test('drops the capture of the Vue error handler', () => {
+      const failure = new Error('Request has been terminated')
+      errors.markRequestFailure(failure)
+      const event = errorEvent({
+        type: 'auto.function.vue.error_handler',
+        handled: true
+      })
+      expect(beforeSend(event, { originalException: failure })).toBeNull()
+    })
+
+    // The router capture of a failed navigation guard.
+    test('drops a capture marked as unhandled', () => {
+      const failure = new Error('Request has been terminated')
+      errors.markRequestFailure(failure)
+      const event = errorEvent({ type: 'generic', handled: false })
+      expect(beforeSend(event, { originalException: failure })).toBeNull()
+    })
+
+    test('keeps an explicit capture, sent with its own context', () => {
+      const failure = new Error('Request has been terminated')
+      errors.markRequestFailure(failure)
+      const event = errorEvent({ type: 'generic', handled: true })
+      expect(beforeSend(event, { originalException: failure })).toBe(event)
+    })
+
+    test('keeps an uncaught bug', () => {
+      const event = errorEvent(uncaught)
+      const bug = new TypeError('Cannot read properties of undefined')
+      expect(beforeSend(event, { originalException: bug })).toBe(event)
+    })
+  })
+
   // Each test takes a fresh route: the reporter reports a route once per
   // session, whatever the ids in its path.
   describe('reportApiError', () => {
     let routeCount = 0
     const nextRoute = () => `/api/data/check-${routeCount++}`
     const report = (status, method, path, body = { message: 'Nope' }) =>
-      reportApiError({ status, body }, { method, path })
+      reportApiError({ status, body }, { method, path, duration: 120 })
+    const noAnswer = {
+      crossDomain: true,
+      body: '',
+      message:
+        'Request has been terminated\nPossible causes: the network is offline'
+    }
 
     // Sentry records the breadcrumb of a request once the microtasks of its
     // response have run: a capture among them would leave it out.
@@ -336,14 +416,21 @@ describe('lib/sentry', () => {
           'api.route': `${route}/:id/team`
         },
         contexts: {
-          api: { path: `${route}/${OTHER_ID}/team`, message: 'Nope' }
+          api: {
+            path: `${route}/${OTHER_ID}/team`,
+            message: 'Nope',
+            duration_ms: 120
+          }
         }
       })
     })
 
-    test('leaves out a refused read of the data of somebody else', async () => {
-      await report(403, 'GET', `${nextRoute()}/${OTHER_ID}/day-offs/`)
-      expect(h.captureMessage).not.toHaveBeenCalled()
+    test('reports a refused read of the data of somebody else, no session check', async () => {
+      const route = nextRoute()
+      await report(403, 'GET', `${route}/${OTHER_ID}/day-offs/`)
+      const [message, context] = h.captureMessage.mock.calls[0]
+      expect(message).toBe(`API 403 on GET ${route}/:id/day-offs/`)
+      expect(context.tags['api.identity']).toBeUndefined()
     })
 
     test("reports a refused read of the user's own data, with the session owner", async () => {
@@ -405,11 +492,90 @@ describe('lib/sentry', () => {
       expect(h.captureMessage).toHaveBeenCalledTimes(2)
     })
 
-    test('leaves out the other failures', async () => {
-      await report(404, 'GET', nextRoute())
-      await report(500, 'PUT', nextRoute())
-      await report(undefined, 'POST', nextRoute())
-      expect(h.captureMessage).not.toHaveBeenCalled()
+    test('reports the missing records and the server errors', async () => {
+      const routes = [nextRoute(), nextRoute(), nextRoute()]
+      await report(404, 'GET', routes[0])
+      await report(500, 'PUT', routes[1])
+      await report(502, 'GET', routes[2], '')
+      expect(h.captureMessage.mock.calls.map(([message]) => message)).toEqual([
+        `API 404 on GET ${routes[0]}`,
+        `API 500 on PUT ${routes[1]}`,
+        `API 502 on GET ${routes[2]}`
+      ])
+    })
+
+    // A proxy answers with an HTML page, which superagent makes the message.
+    test('keeps the message of the failure short', async () => {
+      const failure = { status: 502, body: {}, message: 'x'.repeat(1000) }
+      await reportApiError(failure, { method: 'GET', path: nextRoute() })
+      const [, context] = h.captureMessage.mock.calls[0]
+      expect(context.contexts.api.message).toHaveLength(300)
+    })
+
+    test('reports a request that timed out', async () => {
+      const route = nextRoute()
+      const failure = {
+        timeout: 60000,
+        body: '',
+        message: 'Response timeout of 60000ms exceeded'
+      }
+      await reportApiError(failure, {
+        method: 'GET',
+        path: route,
+        duration: 60004
+      })
+      expect(h.captureMessage).toHaveBeenCalledWith(
+        `API timeout on GET ${route}`,
+        {
+          level: 'warning',
+          fingerprint: ['api-error', `timeout GET ${route}`],
+          tags: {
+            'api.status': 'timeout',
+            'api.method': 'GET',
+            'api.route': route
+          },
+          contexts: {
+            api: {
+              path: route,
+              message: 'Response timeout of 60000ms exceeded',
+              duration_ms: 60004
+            }
+          }
+        }
+      )
+    })
+
+    // A browser that knows it is offline tells a lost connection apart from
+    // a server that stopped answering.
+    test('reports a request left without an answer, with the network state', async () => {
+      vi.stubGlobal('navigator', { onLine: false })
+      const route = nextRoute()
+      await reportApiError(noAnswer, {
+        method: 'GET',
+        path: route,
+        duration: 35
+      })
+      expect(h.captureMessage).toHaveBeenCalledWith(
+        `API no response on GET ${route}`,
+        expect.objectContaining({
+          fingerprint: ['api-error', `no response GET ${route}`],
+          tags: expect.objectContaining({
+            'api.status': 'no response',
+            'api.online': 'false'
+          })
+        })
+      )
+    })
+
+    // Leaving the page cuts the requests still running.
+    test('leaves out a request cut by the page going away', async () => {
+      sentry.init({}, {}, { dsn: 'https://key@sentry.example.com/1' })
+      pageListeners.pagehide()
+      await reportApiError(noAnswer, { method: 'GET', path: nextRoute() })
+      // Back from the back-forward cache.
+      pageListeners.pageshow()
+      await reportApiError(noAnswer, { method: 'GET', path: nextRoute() })
+      expect(h.captureMessage).toHaveBeenCalledTimes(1)
     })
 
     test('leaves out the refusals of the 2FA setup gate', async () => {
@@ -453,6 +619,39 @@ describe('lib/sentry', () => {
         '/api/shared/playlists/[token]/guest'
       )
       expect(h.captureMessage.mock.calls[1][0]).toMatch(/\/:date$/)
+    })
+
+    // The period routes of the timesheets and quotas: one issue, whatever
+    // the day browsed.
+    test('strips the numbers from the route', async () => {
+      const route = nextRoute()
+      await report(500, 'GET', `${route}/${OTHER_ID}/day/2026/10/9`)
+      await report(500, 'GET', `${route}/${OTHER_ID}/day/2026/10/10`)
+      expect(h.captureMessage).toHaveBeenCalledTimes(1)
+      expect(h.captureMessage.mock.calls[0][0]).toBe(
+        `API 500 on GET ${route}/:id/day/:n/:n/:n`
+      )
+    })
+
+    // The names people give to their files and to the metadata columns of
+    // all the productions: one issue, whatever the name.
+    test('strips the names from the route', async () => {
+      const files = `/api/data/attachment-files/${OTHER_ID}/file`
+      const columns = '/api/data/metadata-descriptors/all-projects'
+      await report(404, 'GET', `${files}/Notes for Jane.pdf`)
+      await report(404, 'GET', `${files}/2026-10-09 retakes.mov`)
+      await report(500, 'PUT', `${columns}/difficulty`)
+      await report(500, 'DELETE', `${columns}/lens?entity_type=Project`)
+      const fileRoute = '/api/data/attachment-files/:id/file/:name'
+      expect(h.captureMessage.mock.calls.map(([message]) => message)).toEqual([
+        `API 404 on GET ${fileRoute}`,
+        `API 500 on PUT ${columns}/:name`,
+        `API 500 on DELETE ${columns}/:name`
+      ])
+      expect(h.captureMessage.mock.calls[0][1]).toMatchObject({
+        fingerprint: ['api-error', `404 GET ${fileRoute}`],
+        tags: { 'api.route': fileRoute }
+      })
     })
   })
 })
