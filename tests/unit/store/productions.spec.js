@@ -704,6 +704,50 @@ describe('Productions store', () => {
         expect(productionApi.getTeam).not.toHaveBeenCalled()
         expect(commit).not.toHaveBeenCalled()
       })
+
+      // Someone else may have changed the role of the user.
+      describe('reloadTeamRoles', () => {
+        const rootState = { user: { user: { id: '456' } } }
+
+        const reload = async members => {
+          productionApi.getTeam = vi.fn(() => Promise.resolve(members))
+          const commit = vi.fn()
+          await store.actions.reloadTeamRoles({ commit, rootState }, '789')
+          return commit
+        }
+
+        test('reloads them with the role of the user', async () => {
+          const members = [
+            { id: '123', project_role: 'manager' },
+            { id: '456', project_role: 'client' }
+          ]
+          const commit = await reload(members)
+          expect(productionApi.getTeam).toHaveBeenCalledWith('789')
+          expect(commit.mock.calls).toEqual([
+            ['TEAM_ROLES_LOADED', { productionId: '789', team: members }],
+            ['SET_USER_PROJECT_ROLE', { projectId: '789', role: 'client' }]
+          ])
+        })
+
+        test('gives the user back the global role', async () => {
+          const commit = await reload([
+            { id: '123', project_role: 'manager' },
+            { id: '456', project_role: null }
+          ])
+          expect(commit).toHaveBeenLastCalledWith('SET_USER_PROJECT_ROLE', {
+            projectId: '789',
+            role: null
+          })
+        })
+
+        test('gives the global role to a user out of the team', async () => {
+          const commit = await reload([{ id: '123', project_role: 'manager' }])
+          expect(commit).toHaveBeenLastCalledWith('SET_USER_PROJECT_ROLE', {
+            projectId: '789',
+            role: null
+          })
+        })
+      })
     })
 
     test('removePersonFromTeam', () => {

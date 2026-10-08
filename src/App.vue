@@ -186,10 +186,18 @@ const socketEvents = {
   },
 
   'project:update': eventData => {
-    if (productionMap.value.get(eventData.project_id)) {
-      store.dispatch('loadProduction', eventData.project_id).catch(() => {
-        store.commit('REMOVE_PRODUCTION', { id: eventData.project_id })
-      })
+    const productionId = eventData.project_id
+    if (productionMap.value.get(productionId)) {
+      store
+        .dispatch('loadProduction', productionId)
+        .then(() => {
+          // Zou also announces a team role change as a project update,
+          // possibly one changing the role of the user.
+          store.dispatch('reloadTeamRoles', productionId).catch(console.error)
+        })
+        .catch(() => {
+          store.commit('REMOVE_PRODUCTION', { id: productionId })
+        })
     } else {
       store.dispatch('loadOpenProductions')
     }

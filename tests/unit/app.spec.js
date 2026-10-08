@@ -150,5 +150,74 @@ describe('App', () => {
         expect(refresh).toHaveBeenCalled()
       })
     })
+
+    // Zou announces a team role change as a project update, and the role
+    // of the user on a production decides what its pages show.
+    describe('production updates', () => {
+      const getters = {
+        productionMap: () => new Map([['prod-1', { id: 'prod-1' }]])
+      }
+
+      it('reloads the team roles once the production is reloaded', async () => {
+        const reloadTeamRoles = vi.fn(() => Promise.resolve())
+        const { socket } = await mountApp({
+          actions: { loadProduction: () => Promise.resolve(), reloadTeamRoles },
+          getters
+        })
+
+        emitSocketEvent(socket, 'project:update', { project_id: 'prod-1' })
+        await flushPromises()
+
+        expect(reloadTeamRoles).toHaveBeenCalledWith(expect.anything(), 'prod-1')
+      })
+
+      it('removes a production it can no longer read, roles untouched', async () => {
+        const reloadTeamRoles = vi.fn(() => Promise.resolve())
+        const removeProduction = vi.fn()
+        const { socket } = await mountApp({
+          actions: {
+            loadProduction: () => Promise.reject(new Error('HTTP 403')),
+            reloadTeamRoles
+          },
+          getters,
+          mutations: { REMOVE_PRODUCTION: removeProduction }
+        })
+
+        emitSocketEvent(socket, 'project:update', { project_id: 'prod-1' })
+        await flushPromises()
+
+        expect(removeProduction).toHaveBeenCalledWith(expect.anything(), {
+          id: 'prod-1'
+        })
+        expect(reloadTeamRoles).not.toHaveBeenCalled()
+      })
+
+      it('logs a failed team roles reload', async () => {
+        const rejections = []
+        const onRejection = reason => rejections.push(reason)
+        process.on('unhandledRejection', onRejection)
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const removeProduction = vi.fn()
+        const error = new Error('HTTP 500')
+
+        const { socket } = await mountApp({
+          actions: {
+            loadProduction: () => Promise.resolve(),
+            reloadTeamRoles: () => Promise.reject(error)
+          },
+          getters,
+          mutations: { REMOVE_PRODUCTION: removeProduction }
+        })
+        emitSocketEvent(socket, 'project:update', { project_id: 'prod-1' })
+        await new Promise(resolve => setTimeout(resolve))
+        process.off('unhandledRejection', onRejection)
+
+        expect(rejections).toEqual([])
+        expect(consoleError).toHaveBeenCalledWith(error)
+        expect(removeProduction).not.toHaveBeenCalled()
+      })
+    })
   })
 })

@@ -565,6 +565,17 @@ const actions = {
     commit(TEAM_ROLES_LOADED, { productionId, team })
   },
 
+  async reloadTeamRoles({ commit, rootState }, productionId) {
+    const team = await productionsApi.getTeam(productionId)
+    commit(TEAM_ROLES_LOADED, { productionId, team })
+    const userId = rootState.user.user?.id
+    const member = team.find(person => person.id === userId)
+    commit(SET_USER_PROJECT_ROLE, {
+      projectId: productionId,
+      role: member?.project_role ?? null
+    })
+  },
+
   async setTeamMemberRole({ commit, state, rootState }, { personId, role }) {
     const link = await productionsApi.updateTeamMemberRole(
       state.currentProduction.id,
