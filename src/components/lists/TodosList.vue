@@ -380,6 +380,10 @@ const props = defineProps({
   withIllustration: {
     type: Boolean,
     default: true
+  },
+  editable: {
+    type: Boolean,
+    default: true
   }
 })
 
@@ -409,7 +413,9 @@ const taskMap = computed(() => store.getters.taskMap)
 const user = computed(() => store.getters.user)
 
 const isEditable = computed(
-  () => isCurrentUserManager.value || isCurrentUserSupervisor.value
+  () =>
+    props.editable &&
+    (isCurrentUserManager.value || isCurrentUserSupervisor.value)
 )
 
 const isDescriptionPresent = computed(() =>
