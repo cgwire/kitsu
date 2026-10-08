@@ -277,12 +277,11 @@ const getters = {
     return getters.getProductionBackgrounds(state.currentProduction?.id)
   },
 
-  getProductionBackgrounds: (state, rootState) => id => {
-    const production = state.productionMap.get(id)
-    const backgrounds = production?.preview_background_files
-      ?.map(id => rootState.backgroundMap.get(id))
-      .filter(Boolean)
-    return backgrounds ? sortByName(backgrounds) : []
+  getProductionBackgrounds: (state, getters, rootState) => id => {
+    const ids = state.productionMap.get(id)?.preview_background_files || []
+    return rootState.backgrounds.backgrounds.filter(background =>
+      ids.includes(background.id)
+    )
   },
 
   productionTaskStatuses: (state, getters, rootState) => {

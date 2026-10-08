@@ -1,7 +1,11 @@
 // @vitest-environment node
 
+import { computed, effectScope } from 'vue'
+import { createStore } from 'vuex'
+
 import store from '@/store/modules/productions'
 import assetTypeStore from '@/store/modules/assettypes'
+import backgroundStore from '@/store/modules/backgrounds'
 import taskStatusStore from '@/store/modules/taskstatus'
 import taskTypeStore from '@/store/modules/tasktypes'
 
@@ -14,6 +18,8 @@ import {
   CLEAR_ASSETS,
   CLEAR_EDITS,
   CLEAR_SHOTS,
+  LOAD_BACKGROUNDS_END,
+  LOAD_BACKGROUNDS_START,
   LOAD_OPEN_PRODUCTIONS_END,
   LOAD_OPEN_PRODUCTIONS_ERROR,
   LOAD_OPEN_PRODUCTIONS_START,
@@ -1516,6 +1522,82 @@ describe('Productions store, production paths', () => {
     ).toEqual({
       name: 'episode-stats',
       params: { production_id: 'production-id' }
+    })
+  })
+})
+
+describe('Productions store, production backgrounds', () => {
+  const background = (id, name) => ({ id, name, extension: 'hdr' })
+
+  let vuexStore
+  let scope
+
+  const loadBackgrounds = () =>
+    vuexStore.commit(LOAD_BACKGROUNDS_END, [
+      background('background-2', 'Studio'),
+      background('background-1', 'Forest'),
+      background('background-3', 'Attic')
+    ])
+
+  beforeEach(() => {
+    vuexStore = createStore({
+      modules: {
+        productions: {
+          state: {
+            currentProduction: null,
+            openProductions: [],
+            productionMap: new Map()
+          },
+          getters: store.getters,
+          mutations: store.mutations
+        },
+        backgrounds: {
+          state: { backgrounds: [] },
+          getters: backgroundStore.getters,
+          mutations: backgroundStore.mutations
+        }
+      }
+    })
+    vuexStore.commit(LOAD_BACKGROUNDS_START)
+    vuexStore.commit(LOAD_OPEN_PRODUCTIONS_END, [
+      {
+        id: 'production-1',
+        name: 'Caminandes',
+        preview_background_files: ['background-2', 'unknown', 'background-1']
+      }
+    ])
+    scope = effectScope()
+  })
+
+  afterEach(() => {
+    scope.stop()
+  })
+
+  test('list the backgrounds of a production by name', () => {
+    loadBackgrounds()
+    const names = list => list.map(({ name }) => name)
+    expect(names(vuexStore.getters.productionBackgrounds)).toEqual([
+      'Forest',
+      'Studio'
+    ])
+    expect(
+      names(vuexStore.getters.getProductionBackgrounds('production-1'))
+    ).toEqual(['Forest', 'Studio'])
+    expect(vuexStore.getters.getProductionBackgrounds('production-2')).toEqual(
+      []
+    )
+  })
+
+  test('follow a load of the background list', () => {
+    scope.run(() => {
+      const names = computed(() =>
+        vuexStore.getters.productionBackgrounds.map(({ name }) => name)
+      )
+      expect(names.value).toEqual([])
+
+      loadBackgrounds()
+
+      expect(names.value).toEqual(['Forest', 'Studio'])
     })
   })
 })
