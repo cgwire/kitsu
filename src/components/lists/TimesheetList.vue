@@ -23,6 +23,7 @@
         v-if="!hideDayOff"
       />
       <info-question-mark
+        class="day-off-info"
         position="right"
         :text="dayOffInfo"
         v-if="personIsDayOff"
@@ -31,7 +32,7 @@
 
     <div class="timesheet-panel">
       <div class="datatable-wrapper" ref="body" @scroll.passive="onBodyScroll">
-        <table class="datatable">
+        <table class="datatable datatable--cards">
           <thead class="datatable-head">
             <tr>
               <th
@@ -70,6 +71,7 @@
               <th
                 class="production datatable-row-header datatable-row-header--nobd"
                 scope="row"
+                :data-label="$t('main.production')"
               >
                 <production-name-cell
                   :entry="productionMap.get(task.project_id)"
@@ -81,10 +83,11 @@
                 :production-id="task.project_id"
                 :task-type="taskTypeMap.get(task.task_type_id)"
                 :style="{ left: colTypePosX }"
+                :data-label="$t('tasks.fields.task_type')"
               />
 
               <th
-                class="name datatable-row-header"
+                class="name datatable-row-header card-head"
                 :style="{ left: colNamePosX }"
               >
                 <router-link :to="entityPath(task)">
@@ -108,6 +111,7 @@
                     : 0
                 "
                 :task-id="task.id"
+                :data-label="$t('timesheets.time_spents')"
                 @change="onSliderChange"
                 v-if="!personIsDayOff"
               />
@@ -132,6 +136,7 @@
               <th
                 class="production datatable-row-header datatable-row-header--nobd"
                 scope="row"
+                :data-label="$t('main.production')"
               >
                 <production-name-cell
                   :entry="productionMap.get(task.project_id)"
@@ -150,10 +155,11 @@
                     : 'Asset'
                 }"
                 :style="{ left: colTypePosX }"
+                :data-label="$t('tasks.fields.task_type')"
               />
 
               <th
-                class="name datatable-row-header"
+                class="name datatable-row-header card-head"
                 :style="{ left: colNamePosX }"
               >
                 <router-link :to="entityPath(task)">
@@ -168,6 +174,7 @@
                     : 0
                 "
                 :task-id="task.id"
+                :data-label="$t('timesheets.time_spents')"
                 @change="onSliderChange"
                 v-if="!personIsDayOff"
               />
@@ -274,7 +281,7 @@ const props = defineProps({
     type: [String, Boolean]
   },
   timeSpentMap: {
-    default: () => {},
+    default: () => ({}),
     type: Object
   },
   timeSpentTotal: {
@@ -558,6 +565,12 @@ td.name {
   min-height: 0;
   padding: 1em;
 
+  // the sticky shadow of the last head cell overflows the table by 11px and
+  // brings a useless horizontal scrollbar
+  .datatable-head th.time-spent::after {
+    display: none;
+  }
+
   // overflow: auto clips the rows and the sticky head to the corners
   .datatable-wrapper {
     border-radius: 10px;
@@ -611,5 +624,149 @@ td.name {
   font-weight: 600;
   padding: 0.25em 0.9em;
   white-space: nowrap;
+}
+
+@media screen and (max-width: 768px) {
+  // the Day off button takes the place of the week total
+  .day-off-info,
+  .week-time-spent-total {
+    display: none;
+  }
+
+  // the page scrolls on a phone, not the list
+  .timesheet-panel {
+    margin-bottom: 1em;
+    padding: 0.5em;
+
+    .datatable-wrapper {
+      background: transparent;
+      border: 0;
+      overflow: visible;
+    }
+  }
+
+  // The global card rule styles td cells only: these rows open on th ones.
+  .datatable--cards .datatable-body th {
+    background: transparent !important;
+    border: 0;
+    left: auto !important;
+    max-width: none;
+    min-width: 0;
+    position: static;
+    width: auto;
+
+    &::after {
+      display: none;
+    }
+  }
+
+  .datatable--cards .datatable-body th.card-head {
+    display: block;
+    order: -1;
+    padding: 0.75em 0 1em;
+  }
+
+  .datatable--cards .datatable-body th[data-label] {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    padding: 0.25em 0;
+
+    &::before {
+      color: var(--text-alt);
+      content: attr(data-label);
+      font-size: 0.8em;
+      font-weight: normal;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+  }
+
+  // The production avatar opens the card head, left of the thumbnail: the
+  // card wraps as a row, every other line takes the full width.
+  // the global card rule also names :hover and :last-child, which a bare
+  // row selector loses against: the tapped and the last card stacked again
+  .datatable--cards .datatable-row,
+  .datatable--cards .datatable-row:last-child,
+  .datatable--cards .datatable-row:hover {
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .datatable--cards .datatable-body td[data-label],
+  .datatable--cards .datatable-body th[data-label] {
+    flex: 1 0 100%;
+  }
+
+  .datatable--cards .datatable-body th.production {
+    display: block;
+    flex: none;
+    order: -2;
+    padding-right: 0.75em;
+
+    &::before {
+      display: none;
+    }
+  }
+
+  .datatable--cards .datatable-body th.card-head {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .datatable--cards .datatable-type-header {
+    display: block;
+
+    th {
+      display: block;
+      padding: 1em 0 0.5em;
+    }
+  }
+
+  // Time logging stays possible on a phone: the label faces the field, the
+  // slider takes the line below.
+  .datatable--cards .datatable-body td.time-spent {
+    flex-wrap: wrap;
+    row-gap: 0.5em;
+
+    &::before {
+      flex: 1 1 auto;
+      text-align: left;
+    }
+
+    > :deep(.flexrow) {
+      display: contents;
+    }
+
+    // no hover on a phone: the field shows its border at once
+    // flexrow-item gives it a 1em right margin: flush with the card instead
+    :deep(input.value) {
+      border-color: var(--border);
+      margin-right: 0;
+      order: 1;
+    }
+
+    // a flex basis too wide for the first line sends the slider to the
+    // second one
+    // the marks hang under the rail, out of the flow: the bottom padding
+    // keeps them inside the card
+    :deep(.slider-item) {
+      flex: 1 0 100%;
+      order: 2;
+      // the slider pads itself for its dot: no side padding on top of it
+      padding: 0 0 1.5em;
+    }
+
+    // the slider is 400px wide inline on desktop
+    :deep(.slider) {
+      width: 100% !important;
+    }
+
+    // the slider and the field are enough on a phone
+    :deep(.button) {
+      display: none;
+    }
+  }
 }
 </style>
