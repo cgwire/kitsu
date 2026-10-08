@@ -304,6 +304,7 @@ const colNamePosX = ref('')
 const colTypePosX = ref('')
 const dayOffToEdit = ref(null)
 const disabledDates = ref({})
+const filledTaskIds = ref(new Set())
 const page = ref(1)
 const selectedDate = ref(
   props.initialDate
@@ -335,8 +336,14 @@ const personDayOff = computed(() => {
 
 const personIsDayOff = computed(() => Boolean(personDayOff.value))
 
+const sortedTasks = computed(() =>
+  [...props.tasks].sort(
+    (a, b) => filledTaskIds.value.has(b.id) - filledTaskIds.value.has(a.id)
+  )
+)
+
 const displayedTasks = computed(() =>
-  props.tasks.slice(0, page.value * (PAGE_SIZE / 2))
+  sortedTasks.value.slice(0, page.value * (PAGE_SIZE / 2))
 )
 
 const dayOffInfo = computed(() => {
@@ -391,6 +398,20 @@ defineExpose({ closeSetDayOffModal, closeUnsetDayOffModal })
 
 // Watchers
 // --------------------------------------------------------------------------
+// The stores replace the map on each load and mutate it on each edit: the
+// filled rows move up on a load only, never under the cursor.
+watch(
+  () => props.timeSpentMap,
+  timeSpentMap => {
+    filledTaskIds.value = new Set(
+      Object.keys(timeSpentMap || {}).filter(
+        taskId => timeSpentMap[taskId].duration > 0
+      )
+    )
+  },
+  { immediate: true }
+)
+
 watch(selectedDate, () => {
   emit('date-changed', selectedDate.value)
 })
