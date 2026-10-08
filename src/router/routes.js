@@ -170,7 +170,7 @@ export const routes = [
           if (!ready) return false
         } catch {
           store.commit('DATA_LOADING_END')
-          return { name: 'server-down' }
+          return { name: 'server-down', query: { redirect: to.fullPath } }
         }
       } else {
         store.commit('DATA_LOADING_END')

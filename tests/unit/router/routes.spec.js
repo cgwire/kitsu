@@ -185,11 +185,18 @@ describe('router/routes', () => {
       expect(result).toEqual({ name: 'not-found' })
     })
 
-    test('redirects to server-down when the initial load fails', async () => {
+    // The server-down page opens the requested page once the server answers.
+    test('redirects to server-down with the requested page when the initial load fails', async () => {
       taskTypeStore.state.taskTypes = []
       init.mockRejectedValue(new Error('api down'))
-      const result = await runGuard({ matched: [{ meta: {} }] })
-      expect(result).toEqual({ name: 'server-down' })
+      const result = await runGuard({
+        fullPath: '/productions/production-1/assets?search=hero',
+        matched: [{ meta: {} }]
+      })
+      expect(result).toEqual({
+        name: 'server-down',
+        query: { redirect: '/productions/production-1/assets?search=hero' }
+      })
     })
 
     test('aborts the navigation when the initial load ends on the 2FA redirect', async () => {
