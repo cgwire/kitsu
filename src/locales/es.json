@@ -1598,6 +1598,7 @@
       "show_timecode": "Mostrar entrada y salida como códigos de tiempo"
     },
     "server_down": {
+      "retrying": "Kitsu sigue intentándolo y le devolverá a su página en cuanto el API responda.",
       "text": "Póngase en contacto con el servicio de asistencia técnica de su proveedor, su administrador de sistemas o su departamento de TI para entender qué es lo que está fallando.",
       "title": "Kitsu encontró un error al intentar alcanzar el API de datos."
     },

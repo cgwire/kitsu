@@ -118,4 +118,195 @@ describe('pages/ServerDown', () => {
     await flushPromises()
     expect(router.currentRoute.value.fullPath).toBe(TARGET)
   })
+
+  test('tells that Kitsu keeps trying to reach the server', async () => {
+    auth.isServerLoggedIn.mockRejectedValue(new Error('unreachable'))
+    await mountPage()
+    expect(wrapper.text()).toContain('server_down.retrying')
+  })
+
+  describe('while the server stays down', () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+      auth.isServerLoggedIn.mockRejectedValue(new Error('unreachable'))
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    // Quick checks catch a restart, then one a minute is enough.
+    test('checks again later, less and less often', async () => {
+      await mountPage()
+      await flushPromises()
+      const delays = [5000, 10000, 20000, 40000, 60000, 60000]
+      for (const [index, delay] of delays.entries()) {
+        await vi.advanceTimersByTimeAsync(delay - 1)
+        expect(auth.isServerLoggedIn).toHaveBeenCalledTimes(index + 1)
+        await vi.advanceTimersByTimeAsync(1)
+        expect(auth.isServerLoggedIn).toHaveBeenCalledTimes(index + 2)
+      }
+    })
+
+    test('starts a new outage with quick checks again', async () => {
+      await mountPage()
+      await flushPromises()
+      await vi.advanceTimersByTimeAsync(5000 + 10000)
+      expect(auth.isServerLoggedIn).toHaveBeenCalledTimes(3)
+      wrapper.unmount()
+      await mountPage()
+      await flushPromises()
+      expect(auth.isServerLoggedIn).toHaveBeenCalledTimes(4)
+      await vi.advanceTimersByTimeAsync(5000)
+      expect(auth.isServerLoggedIn).toHaveBeenCalledTimes(5)
+    })
+
+    test('opens the requested page once the server answers again', async () => {
+      const router = await mountPage()
+      await flushPromises()
+      auth.isServerLoggedIn.mockResolvedValue()
+      await vi.advanceTimersByTimeAsync(5000)
+      await flushPromises()
+      expect(router.currentRoute.value.fullPath).toBe(TARGET)
+    })
+
+    test('checks at once when the browser goes back online', async () => {
+      await mountPage()
+      await flushPromises()
+      window.dispatchEvent(new Event('online'))
+      await flushPromises()
+      expect(auth.isServerLoggedIn).toHaveBeenCalledTimes(2)
+    })
+
+    test('checks at once when the tab shows again', async () => {
+      const visibility = vi.spyOn(document, 'visibilityState', 'get')
+      await mountPage()
+      await flushPromises()
+      visibility.mockReturnValue('hidden')
+      document.dispatchEvent(new Event('visibilitychange'))
+      await flushPromises()
+      expect(auth.isServerLoggedIn).toHaveBeenCalledTimes(1)
+      visibility.mockReturnValue('visible')
+      document.dispatchEvent(new Event('visibilitychange'))
+      await flushPromises()
+      expect(auth.isServerLoggedIn).toHaveBeenCalledTimes(2)
+      visibility.mockRestore()
+    })
+
+    // A check can last until its 20 s timeout.
+    test('never runs two checks at once', async () => {
+      await mountPage()
+      await flushPromises()
+      let fail
+      auth.isServerLoggedIn.mockReturnValueOnce(
+        new Promise((resolve, reject) => {
+          fail = reject
+        })
+      )
+      window.dispatchEvent(new Event('online'))
+      await vi.advanceTimersByTimeAsync(5000)
+      window.dispatchEvent(new Event('online'))
+      await flushPromises()
+      expect(auth.isServerLoggedIn).toHaveBeenCalledTimes(2)
+      fail(new Error('unreachable'))
+      await vi.advanceTimersByTimeAsync(10000)
+      expect(auth.isServerLoggedIn).toHaveBeenCalledTimes(3)
+    })
+
+    test('stops checking once the page is gone', async () => {
+      await mountPage()
+      await flushPromises()
+      wrapper.unmount()
+      wrapper = null
+      await vi.advanceTimersByTimeAsync(60000)
+      window.dispatchEvent(new Event('online'))
+      document.dispatchEvent(new Event('visibilitychange'))
+      await flushPromises()
+      expect(auth.isServerLoggedIn).toHaveBeenCalledTimes(1)
+    })
+
+    test('plans no check once the page is gone during one', async () => {
+      let fail
+      auth.isServerLoggedIn.mockReturnValueOnce(
+        new Promise((resolve, reject) => {
+          fail = reject
+        })
+      )
+      await mountPage()
+      wrapper.unmount()
+      wrapper = null
+      fail(new Error('unreachable'))
+      await vi.advanceTimersByTimeAsync(60000)
+      expect(auth.isServerLoggedIn).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  // The / guard sends back to this page when the server went down again.
+  describe('when the redirect comes back to the page', () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+      auth.isServerLoggedIn.mockResolvedValue()
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    test('checks again from the copy of its loading screen', async () => {
+      let closeGuard
+      await mountPage({
+        beforeEnter: () =>
+          new Promise(resolve => {
+            closeGuard = resolve
+          })
+      })
+      await flushPromises()
+      await swapForLoadingScreen()
+      closeGuard({ name: 'server-down', query: { redirect: TARGET } })
+      await flushPromises()
+      expect(auth.isServerLoggedIn).toHaveBeenCalledTimes(1)
+      // Down again: no new redirect left pending for the next test.
+      auth.isServerLoggedIn.mockRejectedValue(new Error('unreachable'))
+      await vi.advanceTimersByTimeAsync(5000)
+      expect(auth.isServerLoggedIn).toHaveBeenCalledTimes(2)
+    })
+
+    // The server answers but the app data does not load: each redirect
+    // brings a new copy, which must not start the delays over.
+    test('waits longer after each redirect the guard sends back', async () => {
+      let closeGuard
+      await mountPage({
+        beforeEnter: () =>
+          new Promise(resolve => {
+            closeGuard = resolve
+          })
+      })
+      const sendBack = async () => {
+        await swapForLoadingScreen()
+        closeGuard({ name: 'server-down', query: { redirect: TARGET } })
+        await flushPromises()
+      }
+      await flushPromises()
+      await sendBack()
+      await vi.advanceTimersByTimeAsync(5000)
+      expect(auth.isServerLoggedIn).toHaveBeenCalledTimes(2)
+      await sendBack()
+      // Down again: no new redirect left pending for the next test.
+      auth.isServerLoggedIn.mockRejectedValue(new Error('unreachable'))
+      await vi.advanceTimersByTimeAsync(9999)
+      expect(auth.isServerLoggedIn).toHaveBeenCalledTimes(2)
+      await vi.advanceTimersByTimeAsync(1)
+      expect(auth.isServerLoggedIn).toHaveBeenCalledTimes(3)
+    })
+
+    test('checks again when the page stayed mounted', async () => {
+      await mountPage({
+        beforeEnter: () => ({ name: 'server-down', query: { redirect: TARGET } })
+      })
+      await flushPromises()
+      expect(auth.isServerLoggedIn).toHaveBeenCalledTimes(1)
+      await vi.advanceTimersByTimeAsync(5000)
+      expect(auth.isServerLoggedIn).toHaveBeenCalledTimes(2)
+    })
+  })
 })
