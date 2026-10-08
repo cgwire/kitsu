@@ -803,15 +803,9 @@ useHead({ title: computed(() => `${t('tasks.my_tasks')} - Kitsu`) })
 
 .todos-filters,
 .todos-panel {
-  background: var(--background-panel);
+  background: var(--background-panel-raised);
   border-radius: 12px;
-  // softer than the near-black strong text of the light theme
-  --text-strong: #46494f;
-
-  .dark & {
-    background: #2a2d33;
-    --text-strong: #fefefe;
-  }
+  --text-strong: var(--text-panel);
 }
 
 .filters-toggle {
@@ -887,11 +881,11 @@ useHead({ title: computed(() => `${t('tasks.my_tasks')} - Kitsu`) })
   min-height: 0;
 }
 
-.dark .calendar-panel :deep(.calendar-toolbar),
-.dark .calendar-panel :deep(.calendar-body),
-.dark .day-off-list :deep(.header),
-.dark .day-off-list :deep(.day-off-group) {
-  background: #2a2d33;
+.calendar-panel :deep(.calendar-toolbar),
+.calendar-panel :deep(.calendar-body),
+.day-off-list :deep(.header),
+.day-off-list :deep(.day-off-group) {
+  background: var(--background-panel-raised);
 }
 
 // The lanes share the panel color: in light theme they would melt into it
