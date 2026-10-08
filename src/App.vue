@@ -29,6 +29,7 @@ import { useStore } from 'vuex'
 import auth from '@/lib/auth'
 import crisp from '@/lib/crisp'
 import { isNewShotInLoadedScope } from '@/lib/episodes'
+import errors from '@/lib/errors'
 import i18n from '@/lib/i18n'
 import localPreferences from '@/lib/preferences'
 import { isPreviewFileStatus } from '@/lib/preview'
@@ -399,12 +400,16 @@ const socketEvents = {
 
   'department:new': eventData => {
     if (!departmentMap.value.get(eventData.department_id)) {
-      store.dispatch('loadDepartment', eventData.department_id)
+      store
+        .dispatch('loadDepartment', eventData.department_id)
+        .catch(errors.logRequestFailure)
     }
   },
 
   'department:update': eventData => {
-    store.dispatch('loadDepartment', eventData.department_id)
+    store
+      .dispatch('loadDepartment', eventData.department_id)
+      .catch(errors.logRequestFailure)
   },
 
   'department:delete': eventData => {
@@ -415,7 +420,9 @@ const socketEvents = {
 
   'task-type:new': eventData => {
     if (!taskTypeMap.value.get(eventData.task_type_id)) {
-      store.dispatch('loadTaskType', eventData.task_type_id)
+      store
+        .dispatch('loadTaskType', eventData.task_type_id)
+        .catch(errors.logRequestFailure)
     }
   },
 
@@ -427,13 +434,17 @@ const socketEvents = {
 
   'task-status:new': eventData => {
     if (!taskStatusMap.value.get(eventData.task_status_id)) {
-      store.dispatch('loadTaskStatus', eventData.task_status_id)
+      store
+        .dispatch('loadTaskStatus', eventData.task_status_id)
+        .catch(errors.logRequestFailure)
     }
   },
 
   'task-status:update': eventData => {
     if (taskStatusMap.value.get(eventData.task_status_id)) {
-      store.dispatch('loadTaskStatus', eventData.task_status_id)
+      store
+        .dispatch('loadTaskStatus', eventData.task_status_id)
+        .catch(errors.logRequestFailure)
     }
   },
 
@@ -445,13 +456,17 @@ const socketEvents = {
 
   'asset-type:new': eventData => {
     if (!assetTypeMap.value.get(eventData.asset_type_id)) {
-      store.dispatch('loadAssetType', eventData.asset_type_id)
+      store
+        .dispatch('loadAssetType', eventData.asset_type_id)
+        .catch(errors.logRequestFailure)
     }
   },
 
   'asset-type:update': eventData => {
     if (assetTypeMap.value.get(eventData.asset_type_id)) {
-      store.dispatch('loadAssetType', eventData.asset_type_id)
+      store
+        .dispatch('loadAssetType', eventData.asset_type_id)
+        .catch(errors.logRequestFailure)
     }
   },
 
@@ -463,13 +478,17 @@ const socketEvents = {
 
   'person:new': eventData => {
     if (!personMap.value.get(eventData.person_id)) {
-      store.dispatch('loadPerson', eventData.person_id)
+      store
+        .dispatch('loadPerson', eventData.person_id)
+        .catch(errors.logRequestFailure)
     }
   },
 
   'person:update': eventData => {
     if (personMap.value.get(eventData.person_id)) {
-      store.dispatch('loadPerson', eventData.person_id)
+      store
+        .dispatch('loadPerson', eventData.person_id)
+        .catch(errors.logRequestFailure)
     }
   },
 
@@ -561,19 +580,17 @@ const socketEvents = {
 
   'metadata-descriptor:new': eventData => {
     if (currentProduction.value?.id === eventData.project_id) {
-      store.dispatch(
-        'refreshMetadataDescriptor',
-        eventData.metadata_descriptor_id
-      )
+      store
+        .dispatch('refreshMetadataDescriptor', eventData.metadata_descriptor_id)
+        .catch(errors.logRequestFailure)
     }
   },
 
   'metadata-descriptor:update': eventData => {
     if (currentProduction.value?.id === eventData.project_id) {
-      store.dispatch(
-        'refreshMetadataDescriptor',
-        eventData.metadata_descriptor_id
-      )
+      store
+        .dispatch('refreshMetadataDescriptor', eventData.metadata_descriptor_id)
+        .catch(errors.logRequestFailure)
     }
   },
 
@@ -585,7 +602,7 @@ const socketEvents = {
 
   'organisation:update': () => {
     if (isCurrentUserAdmin.value) {
-      store.dispatch('getOrganisation')
+      store.dispatch('getOrganisation').catch(errors.logRequestFailure)
     }
   }
 }

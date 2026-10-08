@@ -4,6 +4,8 @@ import { createMemoryHistory, createRouter } from 'vue-router'
 import { createStore } from 'vuex'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import errors from '@/lib/errors'
+
 import App from '@/App.vue'
 
 let wrapper = null
@@ -218,6 +220,168 @@ describe('App', () => {
         expect(consoleError).toHaveBeenCalledWith(error)
         expect(removeProduction).not.toHaveBeenCalled()
       })
+    })
+
+    // The record may be deleted, or the network down, by the time it
+    // reloads: the API client reports the failed request, the handler only
+    // logs it. Anything else is a bug, left to Sentry.
+    describe('reference reloads', () => {
+      const emptyMap = () => new Map()
+      const mapWith = id => () => new Map([[id, { id }]])
+      const currentProduction = () => ({ id: 'prod-1' })
+
+      const reloads = [
+        {
+          event: 'department:new',
+          eventData: { department_id: 'department-1' },
+          action: 'loadDepartment',
+          payload: 'department-1',
+          getters: { departmentMap: emptyMap }
+        },
+        {
+          event: 'department:update',
+          eventData: { department_id: 'department-1' },
+          action: 'loadDepartment',
+          payload: 'department-1',
+          getters: {}
+        },
+        {
+          event: 'task-type:new',
+          eventData: { task_type_id: 'task-type-1' },
+          action: 'loadTaskType',
+          payload: 'task-type-1',
+          getters: { taskTypeMap: emptyMap }
+        },
+        {
+          event: 'task-status:new',
+          eventData: { task_status_id: 'task-status-1' },
+          action: 'loadTaskStatus',
+          payload: 'task-status-1',
+          getters: { taskStatusMap: emptyMap }
+        },
+        {
+          event: 'task-status:update',
+          eventData: { task_status_id: 'task-status-1' },
+          action: 'loadTaskStatus',
+          payload: 'task-status-1',
+          getters: { taskStatusMap: mapWith('task-status-1') }
+        },
+        {
+          event: 'asset-type:new',
+          eventData: { asset_type_id: 'asset-type-1' },
+          action: 'loadAssetType',
+          payload: 'asset-type-1',
+          getters: { assetTypeMap: emptyMap }
+        },
+        {
+          event: 'asset-type:update',
+          eventData: { asset_type_id: 'asset-type-1' },
+          action: 'loadAssetType',
+          payload: 'asset-type-1',
+          getters: { assetTypeMap: mapWith('asset-type-1') }
+        },
+        {
+          event: 'person:new',
+          eventData: { person_id: 'person-1' },
+          action: 'loadPerson',
+          payload: 'person-1',
+          getters: { personMap: emptyMap }
+        },
+        {
+          event: 'person:update',
+          eventData: { person_id: 'person-1' },
+          action: 'loadPerson',
+          payload: 'person-1',
+          getters: { personMap: mapWith('person-1') }
+        },
+        {
+          event: 'metadata-descriptor:new',
+          eventData: {
+            project_id: 'prod-1',
+            metadata_descriptor_id: 'descriptor-1'
+          },
+          action: 'refreshMetadataDescriptor',
+          payload: 'descriptor-1',
+          getters: { currentProduction }
+        },
+        {
+          event: 'metadata-descriptor:update',
+          eventData: {
+            project_id: 'prod-1',
+            metadata_descriptor_id: 'descriptor-1'
+          },
+          action: 'refreshMetadataDescriptor',
+          payload: 'descriptor-1',
+          getters: { currentProduction }
+        },
+        {
+          event: 'organisation:update',
+          eventData: {},
+          action: 'getOrganisation',
+          payload: undefined,
+          getters: { isCurrentUserAdmin: () => true }
+        }
+      ]
+
+      it.each(reloads)(
+        'logs a failed reload after $event',
+        async ({ event, eventData, action, payload, getters }) => {
+          const rejections = []
+          const onRejection = reason => rejections.push(reason)
+          process.on('unhandledRejection', onRejection)
+          const consoleError = vi
+            .spyOn(console, 'error')
+            .mockImplementation(() => {})
+          const error = new Error('Request has been terminated')
+          errors.markRequestFailure(error)
+          const reload = vi.fn(() => Promise.reject(error))
+
+          const { socket } = await mountApp({
+            actions: { [action]: reload },
+            getters
+          })
+          emitSocketEvent(socket, event, eventData)
+          await new Promise(resolve => setTimeout(resolve))
+          process.off('unhandledRejection', onRejection)
+
+          expect(reload).toHaveBeenCalledWith(expect.anything(), payload)
+          expect(rejections).toEqual([])
+          expect(consoleError).toHaveBeenCalledWith(error)
+        }
+      )
+
+      it.each(reloads)(
+        'leaves a bug in the reload after $event to Sentry',
+        async ({ event, eventData, action, getters }) => {
+          // Vitest fails the run on any unhandled rejection: take its
+          // listeners over while one is expected.
+          const vitestListeners = process.listeners('unhandledRejection')
+          process.removeAllListeners('unhandledRejection')
+          const rejections = []
+          process.on('unhandledRejection', reason => rejections.push(reason))
+          const consoleError = vi
+            .spyOn(console, 'error')
+            .mockImplementation(() => {})
+          const bug = new TypeError('Cannot read properties of undefined')
+
+          try {
+            const { socket } = await mountApp({
+              actions: { [action]: () => Promise.reject(bug) },
+              getters
+            })
+            emitSocketEvent(socket, event, eventData)
+            await new Promise(resolve => setTimeout(resolve))
+          } finally {
+            process.removeAllListeners('unhandledRejection')
+            vitestListeners.forEach(listener =>
+              process.on('unhandledRejection', listener)
+            )
+          }
+
+          expect(rejections).toEqual([bug])
+          expect(consoleError).not.toHaveBeenCalledWith(bug)
+        }
+      )
     })
   })
 })
