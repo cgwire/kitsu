@@ -378,7 +378,6 @@ const getters = {
   isShotsLoadingError: state => state.isShotsLoadingError,
   shotCreated: state => state.shotCreated,
 
-  isLongShotList: state => cache.shotMap.size > 500,
   shotsCsvFormData: state => state.shotsCsvFormData,
   shotListScrollPosition: state => state.shotListScrollPosition,
 
