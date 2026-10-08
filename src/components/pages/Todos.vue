@@ -15,13 +15,16 @@
           v-show="!isActiveTab('daysoff')"
         >
           <div class="flexrow">
-            <search-field
-              ref="todos-search-field"
-              class="flexrow-item search-field"
-              :can-save="true"
-              @change="onSearchChange"
-              @save="saveSearchQuery"
-            />
+            <div class="field flexrow-item search-field-column">
+              <label class="label">{{ $t('main.search_query') }}</label>
+              <search-field
+                ref="todos-search-field"
+                class="search-field"
+                :can-save="true"
+                @change="onSearchChange"
+                @save="saveSearchQuery"
+              />
+            </div>
 
             <combobox-production
               class="flexrow-item production-field"
@@ -744,8 +747,14 @@ useHead({ title: computed(() => `${t('tasks.my_tasks')} - Kitsu`) })
   min-height: 36px;
 }
 
-.search-field {
-  margin: 25px 2em 5px 0;
+// the label metrics of the production combobox, to share its row
+.search-field-column {
+  margin: 0 1em 0 0;
+
+  .label {
+    margin-bottom: 5px;
+    padding-top: 0;
+  }
 }
 
 .query-list {
