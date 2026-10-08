@@ -2360,6 +2360,7 @@ export default {
     timelog_title: 'Timelog',
     title: 'Timesheets',
     unit: 'Unit',
+    week_total: 'Week: {hours} hours',
     with_time_logged: 'With time logged',
     year: 'Year'
   },

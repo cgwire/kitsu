@@ -1813,6 +1813,7 @@
       "hours": "ore",
       "month": "Mese",
       "time_spents": "Tempo impiegato (ore)",
+      "week_total": "Settimana: {hours} ore",
       "timelog_title": "Registro ore",
       "title": "Timesheet",
       "year": "Anno",

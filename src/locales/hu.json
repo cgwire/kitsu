@@ -1813,6 +1813,7 @@
       "hours": "óra",
       "month": "Hónap",
       "time_spents": "Eltöltött idő (óra)",
+      "week_total": "Hét: {hours} óra",
       "timelog_title": "Munkaidő-napló",
       "title": "Időtáblák",
       "year": "Év",

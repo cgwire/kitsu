@@ -1813,6 +1813,7 @@
       "hours": "uren",
       "month": "Maand",
       "time_spents": "Bestede tijd (uren)",
+      "week_total": "Week: {hours} uur",
       "timelog_title": "Tijdlog",
       "title": "Urenstaten",
       "year": "Jaar",

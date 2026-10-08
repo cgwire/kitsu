@@ -2274,6 +2274,7 @@
       "month": "Miesiąc",
       "off": "Wolne",
       "time_spents": "Czas pracy (godziny)",
+      "week_total": "Tydzień: {hours} godz.",
       "timelog_title": "Rejestr czasu",
       "title": "Ewidencja czasu pracy",
       "unit": "Jednostka",

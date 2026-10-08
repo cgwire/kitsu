@@ -1813,6 +1813,7 @@
       "hours": "ساعت",
       "month": "ماه",
       "time_spents": "زمان صرف شده ( ساعت )",
+      "week_total": "هفته: {hours} ساعت",
       "timelog_title": "زمان‌نگار",
       "title": "برگه‌های زمانی",
       "year": "سال",

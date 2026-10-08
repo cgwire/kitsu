@@ -1813,6 +1813,7 @@
       "hours": "Horas",
       "month": "Mês",
       "time_spents": "Tempo gasto (horas)",
+      "week_total": "Semana: {hours} horas",
       "timelog_title": "Registro de tempo",
       "title": "Quadro de Horários",
       "year": "Ano",

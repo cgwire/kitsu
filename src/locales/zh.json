@@ -1813,6 +1813,7 @@
       "hours": "小时",
       "month": "月",
       "time_spents": "已用时长(小时)",
+      "week_total": "本周：{hours} 小时",
       "timelog_title": "时间日志",
       "title": "时间表",
       "year": "年",

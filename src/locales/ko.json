@@ -1813,6 +1813,7 @@
       "hours": "시간",
       "month": "월",
       "time_spents": "소요된 시간 (시간 단위)",
+      "week_total": "주: {hours}시간",
       "timelog_title": "타임로그",
       "title": "시간표",
       "year": "년",

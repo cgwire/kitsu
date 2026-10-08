@@ -1813,6 +1813,7 @@
       "hours": "часы",
       "month": "Месяц",
       "time_spents": "Потраченное время (часы)",
+      "week_total": "Неделя: {hours} ч",
       "timelog_title": "Учет времени",
       "title": "Табели",
       "year": "Год",

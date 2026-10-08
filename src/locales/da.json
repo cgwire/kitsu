@@ -1813,6 +1813,7 @@
       "hours": "timer",
       "month": "Måned",
       "time_spents": "Tid brugt (timer)",
+      "week_total": "Uge: {hours} timer",
       "timelog_title": "Tidslog",
       "title": "Tidsregistreringer",
       "year": "År",

@@ -1,4 +1,4 @@
-import { mount, shallowMount } from '@vue/test-utils'
+import { flushPromises, mount, shallowMount } from '@vue/test-utils'
 import moment from 'moment-timezone'
 import { vi } from 'vitest'
 import { createStore } from 'vuex'
@@ -11,8 +11,9 @@ import DateField from '@/components/widgets/DateField.vue'
 
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }))
 
-const createListStore = () =>
+const createListStore = (actions = {}) =>
   createStore({
+    actions,
     getters: {
       isCurrentUserArtist: () => false,
       organisation: () => ({ hours_by_day: 8 }),
@@ -196,6 +197,51 @@ describe('lists/TimesheetList', () => {
 
       await wrapper.setProps({ timeSpentMap: { ...timeSpentMap } })
       expect(rowTaskIds(wrapper)).toEqual(['task-2', 'task-1', 'task-3'])
+    })
+  })
+
+  describe('week total', () => {
+    const timeSpents = [
+      { date: '2026-08-03', duration: 120 },
+      { date: '2026-08-04', duration: 180 },
+      { date: '2026-08-05', duration: 60 }
+    ]
+
+    const mountWeekList = () => {
+      const loadPersonTimeSpentsByPeriod = vi.fn(() => timeSpents)
+      const store = createListStore({ loadPersonTimeSpentsByPeriod })
+      const wrapper = shallowMount(TimesheetList, {
+        global: {
+          mocks: {
+            $t: (key, params) => (params ? `${key}:${params.hours}` : key)
+          },
+          plugins: [store],
+          stubs: { RouterLink: true }
+        },
+        props: {
+          initialDate: '2026-08-05',
+          personId: 'person-1',
+          timeSpentTotal: 2
+        }
+      })
+      return { loadPersonTimeSpentsByPeriod, wrapper }
+    }
+
+    const weekTotal = wrapper => wrapper.find('.week-time-spent-total').text()
+
+    it('adds the live day total to the other days of the week', async () => {
+      const { loadPersonTimeSpentsByPeriod, wrapper } = mountWeekList()
+      await flushPromises()
+
+      expect(loadPersonTimeSpentsByPeriod.mock.calls[0][1]).toEqual({
+        personId: 'person-1',
+        startDate: '2026-08-03',
+        endDate: '2026-08-09'
+      })
+      expect(weekTotal(wrapper)).toBe('timesheets.week_total:7')
+
+      await wrapper.setProps({ timeSpentTotal: 4 })
+      expect(weekTotal(wrapper)).toBe('timesheets.week_total:9')
     })
   })
 })

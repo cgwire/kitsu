@@ -1813,6 +1813,7 @@
       "hours": "時間",
       "month": "月",
       "time_spents": "作業時間",
+      "week_total": "週: {hours} 時間",
       "timelog_title": "タイムログ",
       "title": "タイムシート",
       "year": "年",
