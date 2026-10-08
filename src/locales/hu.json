@@ -618,6 +618,7 @@
         "timelog": "Munkaidő-napló"
       },
       "link": "Hivatkozás",
+      "list": "Lista",
       "load_more": "Több betöltése",
       "month": "Hónap",
       "move_action_bar": "Műveletsáv mozgatása",
