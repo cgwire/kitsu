@@ -1227,6 +1227,15 @@ useHead({ title: computed(() => `${t('tasks.my_tasks')} - Kitsu`) })
   // the quota panel takes the card look of the time spent one here, and
   // keeps its plain look on the Quota page
   :deep(.people-quota-info) {
+    // rounded like the task list of the time spent panel; a collapsed
+    // table ignores the radius
+    .details.table {
+      border-collapse: separate;
+      border-radius: 10px;
+      border-spacing: 0;
+      overflow: hidden;
+    }
+
     background: var(--background-panel);
     border-left: 0;
     border-radius: 12px;
