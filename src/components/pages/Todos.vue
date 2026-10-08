@@ -1166,6 +1166,8 @@ useHead({ title: computed(() => `${t('tasks.my_tasks')} - Kitsu`) })
 }
 
 .query-list {
+  // the global rule leaves 2em under the list, inside the filters panel
+  margin-bottom: 0;
   margin-top: 0.5em;
 }
 
