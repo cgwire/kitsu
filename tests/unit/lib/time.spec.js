@@ -10,6 +10,7 @@ import {
   durationToMinutes,
   formatDate,
   formatDisplayDate,
+  formatDayOffLabel,
   formatDuration,
   formatFullDate,
   formatFullDateWithRevertedTimezone,
@@ -619,5 +620,28 @@ describe('getMonthsBetween', () => {
         moment.utc('2026-12-09')
       ).map(({ month }) => month)
     ).toEqual([9, 10, 11, 12])
+  })
+})
+
+describe('formatDayOffLabel', () => {
+  it('labels a day off with its description and period', () => {
+    expect(
+      formatDayOffLabel(
+        { description: 'Holidays', date: '2026-10-09', end_date: '2026-10-13' },
+        'Day off'
+      )
+    ).toBe('Holidays (2026-10-09 - 2026-10-13)')
+  })
+
+  it('falls back to the default text and a single date', () => {
+    expect(
+      formatDayOffLabel(
+        { date: '2026-10-09', end_date: '2026-10-09' },
+        'Day off'
+      )
+    ).toBe('Day off (2026-10-09)')
+    expect(formatDayOffLabel({ date: '2026-10-09' }, 'Day off')).toBe(
+      'Day off (2026-10-09)'
+    )
   })
 })

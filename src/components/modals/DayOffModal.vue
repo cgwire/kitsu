@@ -45,11 +45,7 @@
         {{ errorText || $t('days_off.error_days_off') }}
       </p>
       <p class="has-text-right mt2">
-        <button
-          type="submit"
-          class="button is-primary"
-          :class="{ 'is-loading': isLoading }"
-        >
+        <button type="submit" class="button is-primary">
           {{ $t('main.confirmation') }}
         </button>
         <button type="button" class="button is-link" @click="$emit('cancel')">
@@ -80,8 +76,7 @@ const props = defineProps({
   active: { type: Boolean, default: false },
   dayOffToEdit: { type: Object, default: () => ({}) },
   errorText: { type: String, default: '' },
-  isError: { type: Boolean, default: false },
-  isLoading: { type: Boolean, default: false }
+  isError: { type: Boolean, default: false }
 })
 
 const emit = defineEmits(['cancel', 'confirm'])
