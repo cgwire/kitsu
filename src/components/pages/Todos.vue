@@ -9,54 +9,60 @@
           :tabs="todoTabs"
         />
 
-        <div class="flexrow" v-show="!isActiveTab('daysoff')">
-          <search-field
-            ref="todos-search-field"
-            class="flexrow-item search-field"
-            :can-save="true"
-            @change="onSearchChange"
-            @save="saveSearchQuery"
-          />
+        <div
+          class="todos-filters"
+          :class="{ 'is-panel': isActiveTab('timesheets') }"
+          v-show="!isActiveTab('daysoff')"
+        >
+          <div class="flexrow">
+            <search-field
+              ref="todos-search-field"
+              class="flexrow-item search-field"
+              :can-save="true"
+              @change="onSearchChange"
+              @save="saveSearchQuery"
+            />
 
-          <combobox-production
-            class="flexrow-item production-field"
-            :label="$t('main.production')"
-            :production-list="productionList"
-            v-model="productionId"
-          />
+            <combobox-production
+              class="flexrow-item production-field"
+              :label="$t('main.production')"
+              :production-list="productionList"
+              v-model="productionId"
+            />
 
-          <combobox-task-type
-            class="flexrow-item"
-            :label="$t('tasks.fields.task_type')"
-            :task-type-list="taskTypeList"
-            v-model="taskTypeId"
-          />
+            <combobox-task-type
+              class="flexrow-item task-type-field"
+              :label="$t('tasks.fields.task_type')"
+              :task-type-list="taskTypeList"
+              v-model="taskTypeId"
+            />
 
-          <combobox-styled
-            class="flexrow-item"
-            :label="$t('tasks.fields.due_date')"
-            :options="filterOptions"
-            locale-key-prefix="tasks."
-            v-model="currentFilter"
-          />
+            <combobox-styled
+              class="flexrow-item"
+              :label="$t('tasks.fields.due_date')"
+              :options="filterOptions"
+              locale-key-prefix="tasks."
+              v-model="currentFilter"
+            />
 
-          <span class="filler"></span>
+            <span class="filler"></span>
 
-          <combobox-styled
-            class="flexrow-item"
-            open-left
-            :label="$t('main.sorted_by')"
-            :options="sortOptions"
-            locale-key-prefix="tasks.fields."
-            v-model="currentSort"
-          />
-        </div>
-        <div class="query-list" v-if="!isActiveTab('daysoff')">
-          <search-query-list
-            :queries="todoSearchQueries"
-            type="todo"
-            @remove-search="removeSearchQuery"
-          />
+            <combobox-styled
+              class="flexrow-item"
+              open-left
+              :label="$t('main.sorted_by')"
+              :options="sortOptions"
+              locale-key-prefix="tasks.fields."
+              v-model="currentSort"
+            />
+          </div>
+          <div class="query-list">
+            <search-query-list
+              :queries="todoSearchQueries"
+              type="todo"
+              @remove-search="removeSearchQuery"
+            />
+          </div>
         </div>
 
         <todos-list
@@ -709,6 +715,48 @@ useHead({ title: computed(() => `${t('tasks.my_tasks')} - Kitsu`) })
 .query-list {
   margin-top: 0.5em;
   margin-bottom: 1em;
+}
+
+// On the timesheet tab, the filters and the timesheet header form one panel.
+.todos-filters.is-panel {
+  background: var(--background-panel);
+  border-radius: 12px 12px 0 0;
+  margin-top: 0.5em;
+  padding: 1em 1em 0.5em;
+  // softer than the near-black strong text of the light theme
+  --text-strong: #46494f;
+
+  .query-list {
+    margin-bottom: 0;
+  }
+
+  .search-field-wrapper {
+    background: var(--background);
+  }
+
+  .dark & {
+    background: #2a2d33;
+    --text-strong: #fefefe;
+  }
+
+  // the dark background of the comboboxes next to it
+  .dark & .search-field-wrapper,
+  .dark & :deep(.task-type-combo),
+  .dark & :deep(.selected-task-type-line) {
+    background: $dark-grey-light;
+  }
+
+  // the label metrics of the production combobox: the task type one pads
+  // its label and pushes its box 3px lower than the rest of the row
+  .task-type-field :deep(.label) {
+    margin-bottom: 5px;
+    padding-top: 0;
+  }
+
+  & ~ .user-timesheet :deep(.timesheet-header) {
+    border-radius: 0 0 12px 12px;
+    border-top: 1px solid rgba(var(--skeleton-rgb), 0.25);
+  }
 }
 
 .data-list {

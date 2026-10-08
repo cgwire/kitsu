@@ -11,7 +11,7 @@
         :value="value"
         @change="onInputChange"
       />
-      <span class="flexrow-item" @wheel.prevent="onWheel">
+      <span class="flexrow-item">
         <vue-slider
           ref="slider"
           class="slider"
@@ -96,11 +96,6 @@ const onDragEnd = () => {
 
 // The slider rejects values off its 0.25 interval or out of its range.
 const toSliderValue = v => Math.min(12, Math.max(0, Math.round(v * 4) / 4))
-
-const onWheel = event => {
-  const step = event.deltaY < 0 ? 0.25 : -0.25
-  value.value = toSliderValue(value.value + step)
-}
 
 const onInputChange = event => {
   value.value = toSliderValue(Number(event.target.value) || 0)
