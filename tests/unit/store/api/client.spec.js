@@ -1,5 +1,6 @@
 // @vitest-environment node
 
+import process from 'node:process'
 import { vi } from 'vitest'
 
 // Fake superagent: every call returns a thenable request that resolves with
@@ -53,7 +54,7 @@ vi.mock('@/lib/errors', () => ({
   default: { backToLogin: vi.fn() }
 }))
 
-import client, { buildQuery } from '@/store/api/client'
+import client, { buildQuery, setErrorReporter } from '@/store/api/client'
 import errors from '@/lib/errors'
 
 describe('store/api/client', () => {
@@ -288,6 +289,70 @@ describe('store/api/client', () => {
       ])
       expect(outcome).toBe('pending')
       expect(errors.backToLogin).toHaveBeenCalled()
+    })
+  })
+
+  // The reporter hears of a failure even when the caller catches it, so a
+  // page that keeps working after a refusal does not hide it.
+  describe('error reporter', () => {
+    const refusal = { status: 403, response: { status: 403, body: {} } }
+    const settle = () => new Promise(resolve => setTimeout(resolve))
+
+    afterEach(() => {
+      setErrorReporter(null)
+    })
+
+    test('hears of every failed request with its method and path', async () => {
+      const reporter = vi.fn()
+      setErrorReporter(reporter)
+      h.error = refusal
+      await client.pget('/api/data/a').catch(() => {})
+      await client.pput('/api/data/b', {}).catch(() => {})
+      await client.ppostFile('/api/data/c', {}).promise.catch(() => {})
+      await client.getText('/api/d.txt').catch(() => {})
+      await client.getBlob('/api/e.png').catch(() => {})
+      await settle()
+      expect(reporter.mock.calls).toEqual([
+        [refusal, { method: 'GET', path: '/api/data/a' }],
+        [refusal, { method: 'PUT', path: '/api/data/b' }],
+        [refusal, { method: 'POST', path: '/api/data/c' }],
+        [refusal, { method: 'GET', path: '/api/d.txt' }],
+        [refusal, { method: 'GET', path: '/api/e.png' }]
+      ])
+    })
+
+    test('never hears of a 401, which sends back to login', async () => {
+      const reporter = vi.fn()
+      setErrorReporter(reporter)
+      h.error = { response: { status: 401 } }
+      client.pget('/api/data/foo')
+      await settle()
+      expect(reporter).not.toHaveBeenCalled()
+    })
+
+    test('a failing reporter leaves the request failure as it was', async () => {
+      const rejections = []
+      const onRejection = reason => rejections.push(reason)
+      process.on('unhandledRejection', onRejection)
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      h.error = refusal
+
+      setErrorReporter(() => {
+        throw new Error('reporter bug')
+      })
+      await expect(client.pget('/api/data/foo')).rejects.toBe(refusal)
+      setErrorReporter(async () => {
+        throw new Error('reporter bug')
+      })
+      await expect(client.pget('/api/data/foo')).rejects.toBe(refusal)
+      await settle()
+      process.off('unhandledRejection', onRejection)
+
+      expect(rejections).toEqual([])
+      expect(consoleError).toHaveBeenCalledTimes(2)
+      consoleError.mockRestore()
     })
   })
 

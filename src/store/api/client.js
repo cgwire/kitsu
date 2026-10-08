@@ -1,11 +1,25 @@
 import superagent from 'superagent'
 import errors from '@/lib/errors'
 
+// Hears of every failed request, whether the caller catches it or not.
+let errorReporter = null
+
+export function setErrorReporter(reporter) {
+  errorReporter = reporter
+}
+
+function reportError(err, method, path) {
+  // Reporting must never change how a request fails.
+  Promise.resolve()
+    .then(() => errorReporter?.(err, { method, path }))
+    .catch(console.error)
+}
+
 function handleResponse(res) {
   return res?.body
 }
 
-function handleError(err) {
+function handleError(err, method, path) {
   if (err?.response?.status === 401) {
     errors.backToLogin()
     // Return a pending promise to freeze the chain until the redirect happens.
@@ -14,6 +28,7 @@ function handleError(err) {
   err.body = err?.response?.body || ''
   // No answer in time: the server may still be processing the request.
   err.isTimeout = Boolean(err.timeout) || err.status === 504
+  reportError(err, method, path)
   throw err
 }
 
@@ -106,7 +121,7 @@ const client = {
       .timeout(timeout)
       .send(data)
       .then(handleResponse)
-      .catch(handleError)
+      .catch(err => handleError(err, method, path))
   },
 
   pget(path) {
@@ -166,7 +181,9 @@ const client = {
       .post(path)
       .send(data)
       .on('progress', e => e)
-    const promise = request.then(handleResponse).catch(handleError)
+    const promise = request
+      .then(handleResponse)
+      .catch(err => handleError(err, 'POST', path))
     return { request, promise }
   },
 
@@ -182,14 +199,14 @@ const client = {
     return superagent('GET', path)
       .timeout(REQUEST_TIMEOUT)
       .then(res => res.text)
-      .catch(handleError)
+      .catch(err => handleError(err, 'GET', path))
   },
 
   getBlob(path) {
     return superagent('GET', path)
       .responseType('blob')
       .then(res => res.body)
-      .catch(handleError)
+      .catch(err => handleError(err, 'GET', path))
   },
 
   getConfig() {
