@@ -1673,3 +1673,159 @@ describe('Productions store, closed production', () => {
     expect(listed.description).toBe('New brief')
   })
 })
+
+describe('Productions store, production status', () => {
+  const makeState = ({ open = [], others = [] } = {}) => ({
+    productions: [],
+    openProductions: [...open],
+    productionMap: new Map([...open, ...others].map(p => [p.id, p])),
+    productionStatusMap: new Map(
+      [
+        { id: 'status-open', name: 'Open' },
+        { id: 'status-active', name: 'Active' },
+        { id: 'status-closed', name: 'Closed' }
+      ].map(status => [status.id, status])
+    )
+  })
+
+  // The context loads the statuses once: one created later through the API
+  // is missing from the map. A read of the production serves its name.
+  test('adds a production with a status created after the context', () => {
+    const state = makeState()
+
+    store.mutations.ADD_PRODUCTION(state, {
+      id: 'production-1',
+      name: 'Forest',
+      project_status_id: 'status-new',
+      project_status_name: 'Bidding'
+    })
+
+    expect(state.productionMap.get('production-1').project_status_name).toBe(
+      'Bidding'
+    )
+    expect(state.openProductions).toEqual([])
+  })
+
+  test('updates a production to a status created after the context', () => {
+    const production = {
+      id: 'production-1',
+      name: 'Forest',
+      project_status_id: 'status-open',
+      project_status_name: 'Open'
+    }
+    const state = makeState({ open: [production] })
+
+    store.mutations.UPDATE_PRODUCTION(state, {
+      id: 'production-1',
+      project_status_id: 'status-new',
+      project_status_name: 'Bidding'
+    })
+
+    expect(production.project_status_name).toBe('Bidding')
+    expect(state.openProductions).toEqual([])
+  })
+
+  // An edit answers with the status id only.
+  test('keeps through an edit the status name a read served', () => {
+    const production = {
+      id: 'production-1',
+      name: 'Forest',
+      project_status_id: 'status-new',
+      project_status_name: 'Bidding'
+    }
+    const state = makeState({ others: [production] })
+
+    store.mutations.UPDATE_PRODUCTION(state, {
+      id: 'production-1',
+      name: 'Forest 2',
+      project_status_id: 'status-new'
+    })
+
+    expect(production.name).toBe('Forest 2')
+    expect(production.project_status_name).toBe('Bidding')
+  })
+
+  test('forgets the status name when an edit moves to an unknown status', () => {
+    const production = {
+      id: 'production-1',
+      name: 'Forest',
+      project_status_id: 'status-open',
+      project_status_name: 'Open'
+    }
+    const state = makeState({ open: [production] })
+
+    store.mutations.UPDATE_PRODUCTION(state, {
+      id: 'production-1',
+      project_status_id: 'status-new'
+    })
+
+    expect(production.project_status_name).toBeUndefined()
+    expect(state.openProductions).toEqual([])
+  })
+
+  // The user context lists the Open productions only, though some Zou
+  // routes also count Active and open: a reload would drop the others.
+  test('adds an Active production to the map only', () => {
+    const state = makeState()
+
+    store.mutations.ADD_PRODUCTION(state, {
+      id: 'production-1',
+      name: 'Forest',
+      project_status_id: 'status-active'
+    })
+
+    expect(state.productionMap.has('production-1')).toBe(true)
+    expect(state.openProductions).toEqual([])
+  })
+
+  test('removes a production switched to Active from the open ones', () => {
+    const production = {
+      id: 'production-1',
+      name: 'Forest',
+      project_status_id: 'status-open'
+    }
+    const state = makeState({ open: [production] })
+
+    store.mutations.UPDATE_PRODUCTION(state, {
+      id: 'production-1',
+      project_status_id: 'status-active'
+    })
+
+    expect(state.openProductions).toEqual([])
+  })
+
+  // Only the productions page, the timesheets and the logs load the
+  // all-productions listing.
+  test('removes a production closed live from the open ones', () => {
+    const production = {
+      id: 'production-1',
+      name: 'Forest',
+      project_status_id: 'status-open'
+    }
+    const state = makeState({ open: [production] })
+
+    store.mutations.UPDATE_PRODUCTION(state, {
+      id: 'production-1',
+      project_status_id: 'status-closed'
+    })
+
+    expect(state.openProductions).toEqual([])
+  })
+
+  test('adds a production reopened live to the open ones', () => {
+    const production = {
+      id: 'production-1',
+      name: 'Forest',
+      project_status_id: 'status-closed'
+    }
+    const state = makeState({ others: [production] })
+
+    store.mutations.UPDATE_PRODUCTION(state, {
+      id: 'production-1',
+      project_status_id: 'status-open'
+    })
+
+    expect(state.openProductions).toHaveLength(1)
+    expect(state.openProductions[0]).toBe(production)
+  })
+})

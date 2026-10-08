@@ -59,6 +59,11 @@ import {
 const taskTypesCache = taskTypeStore.cache
 const taskStatusCache = taskStatusStore.cache
 
+// The user context lists the productions of this status only, though some
+// zou routes also count Active and open: the open ones stay those a reload
+// shows.
+const OPEN_STATUS_NAME = 'Open'
+
 const initialState = {
   productions: [],
   productionMap: new Map(),
@@ -155,6 +160,21 @@ const entityMetadataDescriptors = entityType => (state, getters) => {
       }
     })
   }
+}
+
+// A read of the production serves its status name, an edit does not: the
+// name stored for the same status stays, else the map gives it. The context
+// loads the statuses once: one created later through the API is missing
+// from the map.
+const setProductionStatusName = (state, production) => {
+  const stored = state.productionMap.get(production.id)
+  const storedName =
+    stored?.project_status_id === production.project_status_id
+      ? stored.project_status_name
+      : undefined
+  production.project_status_name ??=
+    storedName ??
+    state.productionStatusMap.get(production.project_status_id)?.name
 }
 
 /**
@@ -1028,15 +1048,11 @@ const mutations = {
   },
 
   [ADD_PRODUCTION](state, production) {
-    const productionStatus = state.productionStatusMap.get(
-      production.project_status_id
-    )
-    production.project_status_name = productionStatus.name
+    setProductionStatusName(state, production)
     state.productions.push(production)
     state.productionMap.set(production.id, production)
     // A closed production loaded for a link joins the map, not the open ones.
-    // The status names are the ones zou counts as open.
-    if (['Active', 'open', 'Open'].includes(production.project_status_name)) {
+    if (production.project_status_name === OPEN_STATUS_NAME) {
       state.openProductions.push(production)
       state.openProductions = sortByName(state.openProductions)
     }
@@ -1050,15 +1066,7 @@ const mutations = {
     const openProduction = state.openProductions.find(
       ({ id }) => id === production.id
     )
-    const productionStatus = state.productionStatusMap.get(
-      production.project_status_id
-    )
-
-    // status changed
-    const isStatusChanged =
-      previousProduction &&
-      previousProduction.project_status_id !== productionStatus.id
-    production.project_status_name = productionStatus.name
+    setProductionStatusName(state, production)
 
     // The response of an edit carries no relations, and the all-productions
     // copy lists the Project descriptors only: the whole record is the
@@ -1080,16 +1088,12 @@ const mutations = {
     if (!state.productionMap.has(production.id)) {
       state.productionMap.set(production.id, production)
     }
-    if (isStatusChanged) {
-      const known = state.productionMap.get(production.id)
-      if (production.project_status_name === 'Open') {
-        state.openProductions.push(known)
-      } else {
-        state.openProductions = removeModelFromList(
-          state.openProductions,
-          known
-        )
-      }
+    const known = state.productionMap.get(production.id)
+    const isOpen = production.project_status_name === OPEN_STATUS_NAME
+    if (isOpen && !openProduction) {
+      state.openProductions.push(known)
+    } else if (!isOpen && openProduction) {
+      state.openProductions = removeModelFromList(state.openProductions, known)
     }
     state.productions = sortProductions(state.productions)
     state.openProductions = sortByName(state.openProductions)
