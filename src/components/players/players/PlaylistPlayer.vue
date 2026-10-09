@@ -3378,13 +3378,19 @@ const extractFrame = (canvas, frame) => {
   context.drawImage(video, 0, 0, canvas.width, canvas.height)
 }
 
+// Resolves false once the player is closed: no video is left to read the
+// frame from, and the snapshots are of no use anymore.
 const extractVideoFrame = (canvas, f) => {
   return new Promise(resolve => {
+    if (!rawPlayer.value) {
+      resolve(false)
+      return
+    }
     rawPlayer.value.setCurrentFrame(f)
     nextTick(() => {
       setTimeout(() => {
-        extractFrame(canvas, f)
-        resolve()
+        if (rawPlayer.value) extractFrame(canvas, f)
+        resolve(Boolean(rawPlayer.value))
       }, 500)
     })
   })
@@ -3440,13 +3446,14 @@ const extractVideoAnnotationSnapshots = async ({ withLabel = false } = {}) => {
     const frame = Math.round(
       roundToFrame(ann.time, fps.value) / frameDuration.value
     )
-    await extractVideoFrame(canvas, frame)
+    if (!(await extractVideoFrame(canvas, frame))) return []
     await copyAnnotationCanvas(canvas, ann)
     if (withLabel) drawSnapshotTitle(canvas, snapshotTitle({ revision, frame }))
     files.push(
       await getFileFromCanvas(canvas, snapshotFilename({ revision, frame }))
     )
   }
+  if (!rawPlayer.value) return []
   rawPlayer.value.setCurrentFrame(cur - 1)
   nextTick(() => {
     clearCanvas()
@@ -3489,6 +3496,8 @@ const extractPicturePreviewSnapshots = async ({ withLabel = false } = {}) => {
     // composite would then capture an empty canvas and the resulting
     // PNG would come out without any annotation.
     await new Promise(resolve => setTimeout(resolve, 500))
+    // Closed meanwhile, like in extractVideoFrame
+    if (!picturePlayer.value) return []
     const canvas = document.getElementById('annotation-snapshot')
     extractPicture(canvas)
     await compositeLiveAnnotationsOntoCanvas(canvas)

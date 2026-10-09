@@ -1791,13 +1791,19 @@ const getFileFromCanvas = (canvas, filename) => {
   })
 }
 
+// Resolves false once the player is closed: no viewer is left to read the
+// frame from, and the snapshots are of no use anymore.
 const extractVideoFrame = (canvas, frame) => {
   return new Promise(resolve => {
+    if (!previewViewer.value) {
+      resolve(false)
+      return
+    }
     setCurrentFrame(frame)
     nextTick(() => {
       setTimeout(() => {
-        previewViewer.value.extractFrame(canvas, frame)
-        resolve()
+        previewViewer.value?.extractFrame(canvas, frame)
+        resolve(Boolean(previewViewer.value))
       }, RESIZE_DELAY)
     })
   })
@@ -1839,13 +1845,14 @@ const extractVideoAnnotationSnapshots = async ({ withLabel = false } = {}) => {
     const frame = Math.round(
       roundToFrame(annotation.time, fps.value) / frameDuration.value
     )
-    await extractVideoFrame(canvas, frame)
+    if (!(await extractVideoFrame(canvas, frame))) return []
     await copyAnnotationCanvas(canvas, annotation)
     if (withLabel) drawSnapshotTitle(canvas, snapshotTitle({ revision, frame }))
     files.push(
       await getFileFromCanvas(canvas, snapshotFilename({ revision, frame }))
     )
   }
+  if (!previewViewer.value) return []
   // currentFrame is 0-based here (unlike PlaylistPlayer's 1-based label
   // this restore was copied from): no -1, or the playhead steps back.
   previewViewer.value.setCurrentFrame(cur)
@@ -1882,6 +1889,8 @@ const extractPicturePreviewSnapshots = async ({ withLabel = false } = {}) => {
     // capture an empty live canvas, producing a PNG without any
     // annotation.
     await new Promise(resolve => setTimeout(resolve, 500))
+    // Closed meanwhile, like in extractVideoFrame
+    if (!previewViewer.value) return []
     const canvas = document.getElementById('annotation-snapshot')
     previewViewer.value.extractPicture(canvas)
     await compositeLiveAnnotationsOntoCanvas(canvas)

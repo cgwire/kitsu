@@ -1662,7 +1662,8 @@ export const useAnnotation = ({
   const compositeLiveAnnotationsOntoCanvas = canvas => {
     return new Promise(resolve => {
       const live = fabricCanvas.value
-      if (!live) return resolve()
+      // A closed player leaves its disposed canvas here: fabric throws on it.
+      if (!isFabricReady(live)) return resolve()
       const source = live.toCanvasElement(canvas.width / live.getWidth())
       const context = canvas.getContext('2d')
       context.drawImage(source, 0, 0, canvas.width, canvas.height)

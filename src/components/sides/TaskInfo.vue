@@ -1392,8 +1392,9 @@ const extractAnnotationSnapshots = async (withLabel = false) => {
   const files = await previewPlayer.extractAnnotationSnapshots({
     withLabel
   })
-  addCommentRef.value.hideAnnotationLoading()
-  addCommentRef.value.setAnnotationSnapshots(files)
+  // The panel may have closed during the extraction.
+  addCommentRef.value?.hideAnnotationLoading()
+  addCommentRef.value?.setAnnotationSnapshots(files)
   return files
 }
 

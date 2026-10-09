@@ -1444,3 +1444,48 @@ describe('Task.vue failed requests', () => {
     expect(consoleError).toHaveBeenCalledWith(error)
   })
 })
+
+// The player takes a while over the snapshots, and the page can be left
+// meanwhile: its comment box is gone when they come back.
+describe('Task.vue annotation snapshots', () => {
+  it('drops the snapshots that come back once the page is left', async () => {
+    let returnSnapshots = null
+    const { wrapper } = await mountPage({
+      previews: [{ id: 'preview-1', revision: 1, extension: 'mp4' }],
+      getterOverrides: { isCurrentUserProductionManager: () => true },
+      stubs: {
+        AddComment: {
+          template: '<div />',
+          methods: {
+            focus: () => {},
+            hideAnnotationLoading: () => {},
+            reset: () => {},
+            setAnnotationSnapshots: () => {},
+            showAnnotationLoading: () => {}
+          }
+        },
+        PreviewPlayer: {
+          props: ['fps', 'previews', 'readOnly'],
+          template: '<div />',
+          methods: {
+            extractAnnotationSnapshots: () =>
+              new Promise(resolve => {
+                returnSnapshots = resolve
+              })
+          }
+        }
+      }
+    })
+    const errorHandler = vi.fn()
+    wrapper.vm.$.appContext.config.errorHandler = errorHandler
+
+    wrapper
+      .findComponent(AddComment)
+      .vm.$emit('annotation-snapshots-requested')
+    wrapper.unmount()
+    returnSnapshots([])
+    await flushPromises()
+
+    expect(errorHandler).not.toHaveBeenCalled()
+  })
+})

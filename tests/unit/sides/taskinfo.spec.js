@@ -1276,6 +1276,50 @@ describe('TaskInfo.vue', () => {
       vi.restoreAllMocks()
     })
 
+    // The player takes a while over the snapshots, and the panel can close
+    // meanwhile: its comment box is gone when they come back.
+    it('drops the snapshots that come back once the panel is closed', async () => {
+      let returnSnapshots = null
+      const { wrapper } = await mountPanel({
+        previews,
+        // A manager comments on every task the panel shows.
+        getterOverrides: {
+          currentUserRoleForProduction: () => () => 'manager'
+        },
+        stubs: {
+          AddComment: {
+            template: '<div />',
+            methods: {
+              hideAnnotationLoading: () => {},
+              setAnnotationSnapshots: () => {},
+              showAnnotationLoading: () => {}
+            }
+          },
+          PreviewPlayer: {
+            ...PlayerStub,
+            methods: {
+              ...PlayerStub.methods,
+              extractAnnotationSnapshots: () =>
+                new Promise(resolve => {
+                  returnSnapshots = resolve
+                })
+            }
+          }
+        }
+      })
+      const errorHandler = vi.fn()
+      wrapper.vm.$.appContext.config.errorHandler = errorHandler
+
+      wrapper
+        .findComponent(AddComment)
+        .vm.$emit('annotation-snapshots-requested')
+      wrapper.unmount()
+      returnSnapshots([])
+      await flushPromises()
+
+      expect(errorHandler).not.toHaveBeenCalled()
+    })
+
     it('logs an annotation refresh that fails', async () => {
       const consoleError = vi
         .spyOn(console, 'error')

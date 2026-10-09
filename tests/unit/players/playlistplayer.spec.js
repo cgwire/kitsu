@@ -144,6 +144,76 @@ describe('PlaylistPlayer.vue', () => {
     vi.restoreAllMocks()
   })
 
+  // The comment box waits for the snapshots, and each of them waits 500 ms
+  // for its frame or picture: the player can close in between.
+  describe('annotation snapshots', () => {
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it.each([
+      [
+        'video',
+        {
+          ...entity,
+          preview_file_extension: 'mp4',
+          preview_file_annotations: [{ time: 1, drawing: { objects: [] } }]
+        }
+      ],
+      ['picture', { ...entity, preview_file_extension: 'png' }]
+    ])('drops the %s snapshots of a closed player', async (_, shown) => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      wrapper = mountPlayer({ entities: [shown] })
+      await flushPromises()
+
+      const snapshots = wrapper.vm.extractAnnotationSnapshots()
+      wrapper.unmount()
+      wrapper = null
+      await vi.advanceTimersByTimeAsync(500)
+
+      await expect(snapshots).resolves.toEqual([])
+    })
+
+    // After its frame is read, a snapshot is composited and encoded: the
+    // next frame, or the restore of the user's frame, comes after.
+    it.each([1, 2])(
+      'drops the video snapshots of a player closed after frame 1 of %i',
+      async count => {
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+        // jsdom draws and encodes nothing
+        const snapshotCanvas = document.createElement('canvas')
+        snapshotCanvas.toBlob = callback => callback(new Blob())
+        vi.spyOn(document, 'getElementById').mockReturnValue(snapshotCanvas)
+        const getContext = vi
+          .spyOn(HTMLCanvasElement.prototype, 'getContext')
+          .mockReturnValue({ clearRect: () => {}, drawImage: () => {} })
+        const annotations = Array.from({ length: count }, (_, index) => ({
+          time: index + 1,
+          drawing: { objects: [] }
+        }))
+        wrapper = mountPlayer({
+          entities: [
+            {
+              ...entity,
+              preview_file_extension: 'mp4',
+              preview_file_annotations: annotations
+            }
+          ]
+        })
+        await flushPromises()
+
+        const snapshots = wrapper.vm.extractAnnotationSnapshots()
+        await vi.advanceTimersByTimeAsync(550)
+        expect(getContext).toHaveBeenCalled()
+        wrapper.unmount()
+        wrapper = null
+        await vi.advanceTimersByTimeAsync(600)
+
+        await expect(snapshots).resolves.toEqual([])
+      }
+    )
+  })
+
   // A plain link navigates the tab: the browser fires beforeunload, which
   // closes the socket in Firefox and asks about unsaved annotations.
   describe('downloads', () => {

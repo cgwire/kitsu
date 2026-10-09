@@ -1602,8 +1602,9 @@ const extractAnnotationSnapshots = async (withLabel = false) => {
   const files = await previewPlayerRef.value.extractAnnotationSnapshots({
     withLabel
   })
-  addCommentRef.value.setAnnotationSnapshots(files)
-  addCommentRef.value.hideAnnotationLoading()
+  // The page may have been left during the extraction.
+  addCommentRef.value?.setAnnotationSnapshots(files)
+  addCommentRef.value?.hideAnnotationLoading()
   return files
 }
 
