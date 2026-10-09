@@ -36,11 +36,14 @@ vi.mock('@/store/api/tasks', () => ({
 }))
 
 import * as Sentry from '@sentry/vue'
+import { createStore } from 'vuex'
 
 import errors from '@/lib/errors'
 import tasksApi from '@/store/api/tasks'
 import tasksStore from '@/store/modules/tasks'
 import peopleStore from '@/store/modules/people'
+import taskStatusStore from '@/store/modules/taskstatus'
+import userStore from '@/store/modules/user'
 
 describe('Tasks store', () => {
   describe('Comment author resolution', () => {
@@ -1360,5 +1363,362 @@ describe('Tasks store, publication in progress', () => {
 
     await expect(publish(state)).rejects.toBe(err)
     expect(isPublishing('comment-1')).toBe(false)
+  })
+})
+
+// Someone else's comment joins the store through loadComment. Named by its
+// comment:new event, it moves its task as an own comment does. The reload of
+// an edited comment never does: an old comment would roll the status back.
+describe('Tasks store, comments of other users', () => {
+  const statuses = [
+    { id: 'status-todo', name: 'Todo', short_name: 'todo', color: '#f5f5f5' },
+    {
+      id: 'status-wip',
+      name: 'Work In Progress',
+      short_name: 'wip',
+      color: '#3273dc'
+    }
+  ]
+  const buildTask = () => ({
+    id: 'task-1',
+    entity_name: 'Chair',
+    entity_type_name: 'Asset',
+    last_comment: { text: 'Take 1' },
+    last_comment_date: '2026-10-09T10:00:00',
+    task_status_id: 'status-todo',
+    task_status_short_name: 'todo'
+  })
+  let vuexStore
+  let todo
+  let personTask
+
+  const reload = (comment, payload = {}) => {
+    tasksApi.getTaskComment.mockResolvedValueOnce({
+      id: 'comment-9',
+      object_id: 'task-1',
+      person_id: 'person-1',
+      previews: [],
+      task_status_id: 'status-wip',
+      text: 'Lighting fixed',
+      created_at: '2026-10-09T11:00:00',
+      ...comment
+    })
+    return vuexStore.dispatch('loadComment', {
+      commentId: 'comment-9',
+      ...payload
+    })
+  }
+
+  const search = (type, text) => {
+    vuexStore.commit(type, text)
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    statuses.forEach(status =>
+      taskStatusStore.cache.taskStatusMap.set(status.id, status)
+    )
+    vuexStore = createStore({
+      modules: {
+        people: { ...peopleStore, state: { ...peopleStore.state } },
+        tasks: {
+          ...tasksStore,
+          state: {
+            ...tasksStore.state,
+            taskComments: {},
+            taskMap: new Map(),
+            taskPreviews: {}
+          }
+        },
+        user: { ...userStore, state: { ...userStore.state } }
+      }
+    })
+    // The person page and the todo list load their own copies.
+    todo = buildTask()
+    personTask = buildTask()
+    const loaded = { userFilters: {}, taskTypeMap: new Map() }
+    vuexStore.commit('LOAD_PERSON_TASKS_END', {
+      ...loaded,
+      personId: 'person-2',
+      tasks: [personTask]
+    })
+    vuexStore.commit('USER_LOAD_TODOS_END', { ...loaded, tasks: [todo] })
+    vuexStore.commit('REGISTER_USER_TASKS', { tasks: [todo] })
+  })
+
+  afterEach(() => {
+    taskStatusStore.cache.taskStatusMap.clear()
+  })
+
+  test('a new comment moves the todo and the person task', async () => {
+    await reload({}, { taskId: 'task-1' })
+
+    ;[todo, personTask].forEach(task => {
+      expect(task).toMatchObject({
+        last_comment: expect.objectContaining({ text: 'Lighting fixed' }),
+        task_status_id: 'status-wip',
+        task_status_short_name: 'wip'
+      })
+    })
+    expect(todo.last_comment_date).toBe('2026-10-09T11:00:00')
+    expect(personTask.last_comment_date).toBe('2026-10-09T11:00:00')
+    search('SET_TODOS_SEARCH', 'wip')
+    search('SET_PERSON_TASKS_SEARCH', 'wip')
+    expect(vuexStore.getters.displayedTodos).toEqual([todo])
+    expect(vuexStore.getters.displayedPersonTasks).toEqual([personTask])
+  })
+
+  test('an edited comment leaves the tasks as they are', async () => {
+    await reload({})
+
+    ;[todo, personTask].forEach(task => {
+      expect(task).toMatchObject({
+        last_comment: { text: 'Take 1' },
+        task_status_id: 'status-todo'
+      })
+    })
+  })
+
+  // Moved to another task before the reload answers: the comment goes with
+  // it and moves nothing here.
+  test('a comment moved again meanwhile leaves the task alone', async () => {
+    await reload({ object_id: 'task-2' }, { taskId: 'task-1' })
+
+    expect(todo).toMatchObject({
+      last_comment: { text: 'Take 1' },
+      task_status_id: 'status-todo'
+    })
+    expect(vuexStore.getters.getTaskComments('task-1')).toEqual([])
+    expect(vuexStore.getters.getTaskComments('task-2')).toHaveLength(1)
+  })
+
+  // As in zou: a comment posted with an older date than the last one leaves
+  // the status of the task alone.
+  test('an older comment leaves the tasks as they are', async () => {
+    await reload({ created_at: '2026-10-08T09:00:00' }, { taskId: 'task-1' })
+
+    ;[todo, personTask].forEach(task => {
+      expect(task).toMatchObject({
+        last_comment: { text: 'Take 1' },
+        task_status_id: 'status-todo'
+      })
+    })
+  })
+
+  // A status created after the context is missing from the store: the
+  // commit must not stop halfway through the modules.
+  test('a comment with a status the store lacks still loads', async () => {
+    await expect(
+      reload({ task_status_id: 'status-new' }, { taskId: 'task-1' })
+    ).resolves.toMatchObject({ id: 'comment-9' })
+    expect(vuexStore.getters.getTaskComments('task-1')).toHaveLength(1)
+  })
+
+  // Zou names no task in a comment deletion, then resets the task and
+  // announces it with a task:update, whose reload carries no last comment.
+  describe('deleted comments', () => {
+    const take1 = {
+      id: 'comment-1',
+      object_id: 'task-1',
+      person_id: 'person-1',
+      person: { id: 'person-1', first_name: 'Ann' },
+      task_status_id: 'status-todo',
+      text: 'Take 1',
+      created_at: '2026-10-09T10:00:00'
+    }
+
+    const deleteComment = (commentId, comments) => {
+      tasksApi.getTaskComments.mockResolvedValueOnce(comments)
+      return vuexStore.dispatch('reloadTaskLastComment', { commentId })
+    }
+
+    // The task Zou reset, as GET /api/data/tasks/:id/full gives it.
+    const reloadTask = fields => {
+      vuexStore.commit('LOAD_TASK_END', {
+        id: 'task-1',
+        project: { name: 'Mushroom' },
+        entity: { name: 'Chair' },
+        entity_type: { name: 'Asset' },
+        ...fields
+      })
+    }
+
+    // clearAllMocks keeps the answers a failed test left queued.
+    beforeEach(() => {
+      tasksApi.getTaskComments.mockReset()
+    })
+
+    // The last comment Zou lists with the todos has no id: only the task the
+    // deletion names finds it.
+    test('a deletion naming its task replaces the listed last comment', async () => {
+      tasksApi.getTaskComments.mockResolvedValueOnce([
+        { ...take1, id: 'comment-0', text: 'Take 0' }
+      ])
+
+      await vuexStore.dispatch('reloadTaskLastComment', {
+        commentId: 'comment-1',
+        taskId: 'task-1'
+      })
+
+      expect(tasksApi.getTaskComments).toHaveBeenCalledWith('task-1')
+      ;[todo, personTask].forEach(task => {
+        expect(task.last_comment).toMatchObject({ text: 'Take 0' })
+      })
+    })
+
+    test('a deleted comment moves the todo and the person task back', async () => {
+      await reload({}, { taskId: 'task-1' })
+
+      await deleteComment('comment-9', [take1])
+      reloadTask({
+        task_status_id: 'status-todo',
+        last_comment_date: '2026-10-09T10:00:00'
+      })
+
+      expect(tasksApi.getTaskComments).toHaveBeenCalledWith('task-1')
+      expect(todo.last_comment.person).toMatchObject({ initials: 'A' })
+      ;[todo, personTask].forEach(task => {
+        expect(task).toMatchObject({
+          last_comment: expect.objectContaining({ text: 'Take 1' }),
+          last_comment_date: '2026-10-09T10:00:00',
+          task_status_id: 'status-todo',
+          task_status_name: 'Todo',
+          task_status_short_name: 'todo',
+          task_status_color: '#f5f5f5'
+        })
+      })
+      search('SET_TODOS_SEARCH', 'todo')
+      search('SET_PERSON_TASKS_SEARCH', 'todo')
+      expect(vuexStore.getters.displayedTodos).toEqual([todo])
+      expect(vuexStore.getters.displayedPersonTasks).toEqual([personTask])
+    })
+
+    // An artist reads no comment of a client, while Zou counts them in the
+    // status it gives the task back: the status comes with the reload. The
+    // asset page loaded its own copy of the task after the todos.
+    test('the reload of a task moves the todo and the person task', () => {
+      vuexStore.commit('NEW_TASK_END', { task: { id: 'task-1' } })
+
+      reloadTask({
+        task_status_id: 'status-wip',
+        last_comment_date: '2026-10-09T11:00:00'
+      })
+
+      ;[todo, personTask].forEach(task => {
+        expect(task).toMatchObject({
+          last_comment_date: '2026-10-09T11:00:00',
+          task_status_id: 'status-wip',
+          task_status_name: 'Work In Progress',
+          task_status_short_name: 'wip',
+          task_status_color: '#3273dc'
+        })
+      })
+      search('SET_TODOS_SEARCH', 'wip')
+      search('SET_PERSON_TASKS_SEARCH', 'wip')
+      expect(vuexStore.getters.displayedTodos).toEqual([todo])
+      expect(vuexStore.getters.displayedPersonTasks).toEqual([personTask])
+    })
+
+    // The commit must not stop halfway through the modules.
+    test('the reload of a task with a status the store lacks loads', () => {
+      reloadTask({ task_status_id: 'status-new' })
+
+      expect(vuexStore.getters.taskMap.get('task-1').task_status_id).toBe(
+        'status-new'
+      )
+      expect(personTask.task_status_id).toBe('status-todo')
+    })
+
+    // Zou lists the last comment of a todo with no id: a panel loaded the
+    // comments of the task.
+    test('a deleted comment a panel loaded finds its task', async () => {
+      const take0 = {
+        ...take1,
+        id: 'comment-0',
+        text: 'Take 0',
+        created_at: '2026-10-09T09:00:00'
+      }
+      vuexStore.commit('LOAD_TASK_COMMENTS_END', {
+        taskId: 'task-1',
+        comments: [take1, take0]
+      })
+
+      await deleteComment('comment-1', [take0])
+
+      expect(todo.last_comment).toMatchObject({ text: 'Take 0' })
+      expect(personTask.last_comment).toMatchObject({ text: 'Take 0' })
+    })
+
+    test('a task left without comments shows none', async () => {
+      await reload({}, { taskId: 'task-1' })
+
+      await deleteComment('comment-9', [])
+
+      expect(todo.last_comment).toEqual({})
+      expect(personTask.last_comment).toEqual({})
+    })
+
+    // The tab that deleted the comment dropped it from the comments it holds.
+    test('a deleted comment the lists still show finds its task', async () => {
+      vuexStore.commit('LOAD_TASK_COMMENTS_END', {
+        taskId: 'task-1',
+        comments: [take1]
+      })
+      await reload({}, { taskId: 'task-1' })
+      vuexStore.commit('DELETE_COMMENT_END', {
+        taskId: 'task-1',
+        commentId: 'comment-9',
+        taskStatusMap: taskStatusStore.cache.taskStatusMap,
+        todoStatus: statuses[0]
+      })
+      expect(vuexStore.getters.getTaskComments('task-1')).toEqual([take1])
+
+      await deleteComment('comment-9', [take1])
+
+      expect(todo.last_comment).toMatchObject({ text: 'Take 1' })
+      expect(personTask.last_comment).toMatchObject({ text: 'Take 1' })
+    })
+
+    test('a comment posted during the reload stays the last one', async () => {
+      await reload({}, { taskId: 'task-1' })
+      let answer
+      tasksApi.getTaskComments.mockReturnValueOnce(
+        new Promise(resolve => {
+          answer = resolve
+        })
+      )
+      const deletion = vuexStore.dispatch('reloadTaskLastComment', {
+        commentId: 'comment-9'
+      })
+
+      await reload(
+        {
+          id: 'comment-10',
+          text: 'Shading fixed',
+          created_at: '2026-10-09T12:00:00'
+        },
+        { taskId: 'task-1' }
+      )
+      answer([take1])
+      await deletion
+
+      expect(todo.last_comment).toMatchObject({ text: 'Shading fixed' })
+      expect(personTask.last_comment).toMatchObject({ text: 'Shading fixed' })
+    })
+
+    // A panel holds the comments of a task no list shows.
+    test('the comment of a task no list holds sends no request', async () => {
+      await reload({ id: 'comment-5', object_id: 'task-2' })
+      expect(vuexStore.getters.getTaskComments('task-2')).toHaveLength(1)
+
+      await vuexStore.dispatch('reloadTaskLastComment', {
+        commentId: 'comment-5'
+      })
+      await vuexStore.dispatch('reloadTaskLastComment', {
+        commentId: 'comment-unknown'
+      })
+
+      expect(tasksApi.getTaskComments).not.toHaveBeenCalled()
+    })
   })
 })

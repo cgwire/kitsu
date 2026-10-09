@@ -14,6 +14,7 @@ import {
   removeModelFromList,
   setTasksEntityPreview
 } from '@/lib/models'
+import { isLatestTaskComment } from '@/lib/comments'
 import errors from '@/lib/errors'
 import func from '@/lib/func'
 import { latestPreviewFileStatus } from '@/lib/preview'
@@ -46,6 +47,7 @@ import {
   DELETE_TASK_END,
   EDIT_COMMENT_END,
   DELETE_COMMENT_END,
+  SET_TASK_LAST_COMMENT,
   MOVE_COMMENT_END,
   PIN_COMMENT,
   ACK_COMMENT,
@@ -259,24 +261,57 @@ const actions = {
     })
   },
 
-  loadComment({ commit, state }, { commentId }) {
+  // Given its task, as Zou names it for a new comment, the comment also moves
+  // the task. The reload of an edit leaves it: an old comment would roll the
+  // status back.
+  loadComment({ commit, state }, { commentId, taskId = undefined }) {
     return tasksApi.getTaskComment({ id: commentId }).then(comment => {
       // The API returns a list of preview IDs instead of objects: keep the
       // previews the store holds, a bare ID has no revision to show.
-      const taskId = comment.object_id
-      const storedComment = state.taskComments[taskId]?.find(
+      const commentTaskId = comment.object_id
+      const storedComment = state.taskComments[commentTaskId]?.find(
         ({ id }) => id === comment.id
       )
       const knownPreviews = [
         ...(storedComment?.previews || []),
-        ...(state.taskPreviews[taskId] || []).flatMap(p => p.previews || [])
+        ...(state.taskPreviews[commentTaskId] || []).flatMap(
+          p => p.previews || []
+        )
       ].filter(preview => preview.revision !== undefined)
       comment.previews = comment.previews.map(
         id => knownPreviews.find(preview => preview.id === id) || { id }
       )
-      commit(NEW_TASK_COMMENT_END, { comment })
+      // Moved to another task meanwhile, the comment leaves that one alone.
+      commit(NEW_TASK_COMMENT_END, {
+        comment,
+        taskId: taskId === commentTaskId ? taskId : undefined
+      })
       return comment
     })
+  },
+
+  // The todos and the person tasks show the last comment of a task, which
+  // the reload of the task Zou resets after a deletion lacks. Older Zou
+  // versions name no task in the deletion: it is then the one whose stored
+  // comments, or listed last comment, hold the deleted one.
+  async reloadTaskLastComment(
+    { commit, state, rootState },
+    { commentId, taskId = undefined }
+  ) {
+    const isDeleted = comment => comment?.id === commentId
+    const listedTasks = [
+      ...rootState.user.todos,
+      ...rootState.people.personTasks
+    ]
+    taskId ??=
+      Object.keys(state.taskComments).find(id =>
+        state.taskComments[id]?.some(isDeleted)
+      ) ?? listedTasks.find(task => isDeleted(task.last_comment))?.id
+    if (!listedTasks.some(task => task.id === taskId)) return
+    // Zou lists them newest first.
+    const [comment] = await tasksApi.getTaskComments(taskId)
+    if (comment) helpers.enrichCommentAuthors(comment)
+    commit(SET_TASK_LAST_COMMENT, { taskId, commentId, comment })
   },
 
   addAttachmentToComment({ commit }, { comment, files }) {
@@ -1184,10 +1219,11 @@ const mutations = {
     }
     state.taskComments[taskId] = sortComments(state.taskComments[taskId])
 
-    if (task) {
+    if (task && isLatestTaskComment(task, comment)) {
       Object.assign(task, {
         task_status_id: comment.task_status_id,
-        last_comment: comment
+        last_comment: comment,
+        last_comment_date: comment.created_at || task.last_comment_date
       })
     }
   },

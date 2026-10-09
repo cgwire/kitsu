@@ -96,6 +96,13 @@ const user = computed(() => store.getters.user)
 // Functions
 // --------------------------------------------------------------------------
 
+// A production page replaces the task map: the todos and the person tasks it
+// held are then found in their own lists.
+const getHeldTask = taskId =>
+  taskMap.value.get(taskId) ||
+  todoMap.value.get(taskId) ||
+  store.state.people?.personTasks.find(({ id }) => id === taskId)
+
 const hidePreviewFile = () => {
   store.commit('HIDE_PREVIEW_FILE')
 }
@@ -514,13 +521,15 @@ const socketEvents = {
 
   'comment:new': eventData => {
     const commentId = eventData.comment_id
-    const task = taskMap.value.get(eventData.task_id)
+    const task = getHeldTask(eventData.task_id)
     if (!isSavingCommentPreview.value && task) {
       if (
         taskComments.value[eventData.task_id] ||
         todoMap.value.get(eventData.task_id)
       ) {
-        store.dispatch('loadComment', { commentId }).catch(console.error)
+        store
+          .dispatch('loadComment', { commentId, taskId: eventData.task_id })
+          .catch(errors.logRequestFailure)
       } else {
         store.commit('UPDATE_TASK', {
           task,
@@ -551,8 +560,19 @@ const socketEvents = {
     })
   },
 
+  // The task:update of the reset that follows a comment deletion reloads a
+  // task without its last comment.
+  'comment:delete': eventData => {
+    store
+      .dispatch('reloadTaskLastComment', {
+        commentId: eventData.comment_id,
+        taskId: eventData.task_id
+      })
+      .catch(errors.logRequestFailure)
+  },
+
   'task:update': eventData => {
-    if (taskMap.value.get(eventData.task_id)) {
+    if (getHeldTask(eventData.task_id)) {
       nextTick(() => {
         store
           .dispatch('loadTask', { taskId: eventData.task_id })

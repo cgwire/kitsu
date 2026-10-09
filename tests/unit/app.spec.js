@@ -80,6 +80,25 @@ describe('App', () => {
       expect(consoleError).toHaveBeenCalledWith(error)
     })
 
+    // A production page replaces the task map, which then lacks the todos.
+    it('reloads a todo missing from the task map after a task update', async () => {
+      const loadTask = vi.fn(() => Promise.resolve())
+      const { socket } = await mountApp({
+        actions: { loadTask },
+        getters: {
+          taskMap: () => new Map(),
+          todoMap: () => new Map([['task-1', { id: 'task-1' }]])
+        }
+      })
+
+      emitSocketEvent(socket, 'task:update', { task_id: 'task-1' })
+      await flushPromises()
+
+      expect(loadTask).toHaveBeenCalledWith(expect.anything(), {
+        taskId: 'task-1'
+      })
+    })
+
     // Zou builds the files of an uploaded preview in a job, and announces
     // the statuses of the preview file on the socket.
     describe('preview file statuses', () => {
@@ -574,6 +593,68 @@ describe('App', () => {
       )
     })
 
+    // Someone else's comment moves the task it names, its todo included.
+    describe('new comments', () => {
+      const task = { id: 'task-1' }
+      const getters = {
+        isSavingCommentPreview: () => false,
+        taskComments: () => ({}),
+        taskMap: () => new Map([['task-1', task]]),
+        todoMap: () => new Map([['task-1', task]])
+      }
+      const newComment = {
+        comment_id: 'comment-9',
+        task_id: 'task-1',
+        task_status_id: 'status-wip'
+      }
+
+      it('reloads a new comment of a todo with its task', async () => {
+        const loadComment = vi.fn(() => Promise.resolve())
+        const { socket } = await mountApp({ actions: { loadComment }, getters })
+
+        emitSocketEvent(socket, 'comment:new', newComment)
+
+        expect(loadComment).toHaveBeenCalledWith(expect.anything(), {
+          commentId: 'comment-9',
+          taskId: 'task-1'
+        })
+      })
+
+      // A production page replaces the task map, which then lacks the todos.
+      it('reloads a new comment of a todo missing from the task map', async () => {
+        const loadComment = vi.fn(() => Promise.resolve())
+        const { socket } = await mountApp({
+          actions: { loadComment },
+          getters: { ...getters, taskMap: () => new Map() }
+        })
+
+        emitSocketEvent(socket, 'comment:new', newComment)
+
+        expect(loadComment).toHaveBeenCalledWith(expect.anything(), {
+          commentId: 'comment-9',
+          taskId: 'task-1'
+        })
+      })
+
+      it('leaves a bug in the reload to Sentry', async () => {
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const bug = new TypeError('Cannot read properties of undefined')
+
+        const rejections = await recordUnhandledRejections(async () => {
+          const { socket } = await mountApp({
+            actions: { loadComment: () => Promise.reject(bug) },
+            getters
+          })
+          emitSocketEvent(socket, 'comment:new', newComment)
+        })
+
+        expect(rejections).toEqual([bug])
+        expect(consoleError).not.toHaveBeenCalledWith(bug)
+      })
+    })
+
     // Zou names the task of a comment update: App.vue reloads the comment
     // for the panels that hold the comments of that task.
     describe('comment updates', () => {
@@ -673,6 +754,82 @@ describe('App', () => {
             getters
           })
           emitSocketEvent(socket, 'comment:update', updateOf('comment-1'))
+        })
+
+        expect(rejections).toEqual([bug])
+        expect(consoleError).not.toHaveBeenCalledWith(bug)
+      })
+    })
+
+    // Zou names no task in a comment deletion: the store finds the task whose
+    // last comment the todos and the person tasks show.
+    describe('comment deletions', () => {
+      const deletion = { comment_id: 'comment-9', project_id: 'production-1' }
+
+      it('reloads the last comment of the task of a deleted comment', async () => {
+        const reloadTaskLastComment = vi.fn(() => Promise.resolve())
+        const { socket } = await mountApp({
+          actions: { reloadTaskLastComment },
+          getters: {}
+        })
+
+        emitSocketEvent(socket, 'comment:delete', deletion)
+
+        expect(reloadTaskLastComment).toHaveBeenCalledWith(expect.anything(), {
+          commentId: 'comment-9'
+        })
+      })
+
+      it('reloads the last comment of the task Zou names', async () => {
+        const reloadTaskLastComment = vi.fn(() => Promise.resolve())
+        const { socket } = await mountApp({
+          actions: { reloadTaskLastComment },
+          getters: {}
+        })
+
+        emitSocketEvent(socket, 'comment:delete', {
+          ...deletion,
+          task_id: 'task-1'
+        })
+
+        expect(reloadTaskLastComment).toHaveBeenCalledWith(expect.anything(), {
+          commentId: 'comment-9',
+          taskId: 'task-1'
+        })
+      })
+
+      // The task may be deleted, or out of reach, by the time it reloads.
+      it('logs a failed reload', async () => {
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const refusal = Object.assign(new Error('HTTP 404'), { status: 404 })
+        errors.markRequestFailure(refusal)
+
+        const rejections = await recordUnhandledRejections(async () => {
+          const { socket } = await mountApp({
+            actions: { reloadTaskLastComment: () => Promise.reject(refusal) },
+            getters: {}
+          })
+          emitSocketEvent(socket, 'comment:delete', deletion)
+        })
+
+        expect(rejections).toEqual([])
+        expect(consoleError).toHaveBeenCalledWith(refusal)
+      })
+
+      it('leaves a bug in the reload to Sentry', async () => {
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const bug = new TypeError('Cannot read properties of undefined')
+
+        const rejections = await recordUnhandledRejections(async () => {
+          const { socket } = await mountApp({
+            actions: { reloadTaskLastComment: () => Promise.reject(bug) },
+            getters: {}
+          })
+          emitSocketEvent(socket, 'comment:delete', deletion)
         })
 
         expect(rejections).toEqual([bug])

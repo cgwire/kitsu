@@ -1,5 +1,6 @@
 import peopleApi from '@/store/api/people'
 import colors from '@/lib/colors'
+import { isLatestTaskComment, isPostedSince } from '@/lib/comments'
 import { populateTask, setTasksEntityPreview } from '@/lib/models'
 import { sortTasks, sortPeople, sortByName } from '@/lib/sorting'
 import { indexSearch, buildTaskIndex, buildPeopleIndex } from '@/lib/indexing'
@@ -31,7 +32,9 @@ import {
   SET_PERSON_TASKS_SEARCH,
   SAVE_PERSON_TASKS_SEARCH_END,
   REMOVE_PERSON_TASKS_SEARCH_END,
+  LOAD_TASK_END,
   NEW_TASK_COMMENT_END,
+  SET_TASK_LAST_COMMENT,
   ADD_SELECTED_TASK,
   REMOVE_SELECTED_TASK,
   CLEAR_SELECTED_TASKS,
@@ -948,18 +951,47 @@ const mutations = {
 
   [NEW_TASK_COMMENT_END](state, { comment, taskId }) {
     const task = state.personTasks.find(task => task.id === taskId)
+    // A status created after the context is missing from the store.
+    const taskStatus = helpers.getTaskStatus(comment.task_status_id)
 
-    if (task) {
-      const taskStatus = helpers.getTaskStatus(comment.task_status_id)
-
+    if (task && taskStatus && isLatestTaskComment(task, comment)) {
       Object.assign(task, {
         task_status_id: taskStatus.id,
         task_status_name: taskStatus.name,
         task_status_short_name: taskStatus.short_name,
-        task_status_color: taskStatus.color
+        task_status_color: taskStatus.color,
+        last_comment: comment,
+        last_comment_date: comment.created_at || task.last_comment_date
       })
 
       cache.personTasksIndex = buildTaskIndex(state.personTasks)
+    }
+  },
+
+  // A task reloads on each update Zou announces, the reset that follows a
+  // comment deletion included: the person task takes its status and last
+  // comment date.
+  [LOAD_TASK_END](state, loadedTask) {
+    const task = state.personTasks.find(task => task.id === loadedTask.id)
+    const taskStatus = helpers.getTaskStatus(loadedTask.task_status_id)
+
+    if (task && taskStatus) {
+      Object.assign(task, {
+        task_status_id: taskStatus.id,
+        task_status_name: taskStatus.name,
+        task_status_short_name: taskStatus.short_name,
+        task_status_color: taskStatus.color,
+        last_comment_date: loadedTask.last_comment_date
+      })
+
+      cache.personTasksIndex = buildTaskIndex(state.personTasks)
+    }
+  },
+
+  [SET_TASK_LAST_COMMENT](state, { taskId, commentId, comment }) {
+    const task = state.personTasks.find(task => task.id === taskId)
+    if (task && !isPostedSince(task.last_comment, comment, commentId)) {
+      task.last_comment = comment || {}
     }
   },
 
