@@ -254,6 +254,7 @@
       v-if="isActiveTab('productivity') && productivityPeriod"
     >
       <people-quota-info
+        :with-person="false"
         :close-route="productivityCloseRoute"
         :count-mode="productivityCountMode"
         :is-loading="isProductivityInfoLoading"
@@ -265,6 +266,7 @@
         v-if="isQuotasMetric"
       />
       <people-timesheet-info
+        :with-person="false"
         :close-route="productivityCloseRoute"
         :day-offs="productivityDaysOff"
         :is-loading="isProductivityInfoLoading"
