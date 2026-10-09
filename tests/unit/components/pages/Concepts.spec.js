@@ -12,6 +12,7 @@ vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }))
 
+import { markRequestFailure } from '@/lib/errors'
 import assetsStore from '@/store/modules/assets'
 
 import AddPreviewModal from '@/components/modals/AddPreviewModal.vue'
@@ -46,6 +47,13 @@ const buildConcept = (id, createdBy = 'person-1', links = []) => ({
 
 // A concept whose creation stopped after the entity has no task.
 const buildTasklessConcept = id => ({ ...buildConcept(id), tasks: [] })
+
+// The API client reports the failures of its requests, and marks them.
+const buildRequestFailure = message => {
+  const failure = new Error(message)
+  markRequestFailure(failure)
+  return failure
+}
 
 const mountPage = async ({
   concepts = [],
@@ -706,7 +714,7 @@ describe('Concepts page', () => {
     const isAddDisabled = wrapper =>
       wrapper.findComponent('.add-concepts').props('disabled')
     const settle = async (upload, outcome = 'resolve') => {
-      upload[outcome](new Error('offline'))
+      upload[outcome](buildRequestFailure('offline'))
       await flushPromises()
     }
 
@@ -756,6 +764,24 @@ describe('Concepts page', () => {
 
       await status.find('.dismiss-upload').trigger('click')
       expect(wrapper.find('.upload-status').exists()).toBe(false)
+    })
+
+    // Sentry reports what reaches the error handler of the app.
+    test('leaves a bug of the upload to Sentry', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const { pending, wrapper } = await mountUploading()
+      const errorHandler = vi.fn()
+      wrapper.vm.$.appContext.config.errorHandler = errorHandler
+      const bug = new TypeError("Cannot read properties of undefined (reading 'id')")
+
+      pending[0].reject(bug)
+      await flushPromises()
+
+      expect(wrapper.find('.upload-status').classes()).toContain('is-error')
+      expect(errorHandler.mock.calls.map(([error]) => error)).toEqual([bug])
+      expect(consoleError).not.toHaveBeenCalledWith(bug)
     })
   })
 
@@ -1055,7 +1081,7 @@ describe('Concepts page', () => {
     let isOffline = true
     const dispatch = vi.fn(action =>
       isOffline && action === 'newConcept'
-        ? Promise.reject(new Error('network'))
+        ? Promise.reject(buildRequestFailure('network'))
         : Promise.resolve()
     )
     const { wrapper } = await mountPage({ dispatch })

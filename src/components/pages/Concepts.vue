@@ -287,6 +287,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { pauseEvent } from '@/composables/dom'
+import { logRequestFailure } from '@/lib/errors'
 import files from '@/lib/files'
 import func from '@/lib/func'
 import {
@@ -683,8 +684,8 @@ const confirmAddConceptModal = async forms => {
     })
     upload.total = 0
   } catch (err) {
-    console.error(err)
     upload.isError = true
+    logRequestFailure(err)
   }
 }
 
