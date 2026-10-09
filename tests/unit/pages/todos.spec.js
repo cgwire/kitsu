@@ -84,7 +84,14 @@ const DayOffListStub = {
 
 const mountPage = async (
   todos,
-  { actions = {}, errorHandler, getters = {}, query = {} } = {}
+  {
+    actions = {},
+    errorHandler,
+    getters = {},
+    onRouter = () => {},
+    props = {},
+    query = {}
+  } = {}
 ) => {
   const store = createStore({
     getters: {
@@ -123,7 +130,9 @@ const mountPage = async (
     routes: [{ path: '/', component: { template: '<div />' } }]
   })
   await router.push({ path: '/', query })
+  onRouter(router)
   const wrapper = shallowMount(Todos, {
+    props,
     global: {
       config: { errorHandler },
       plugins: [
@@ -152,7 +161,10 @@ describe('Todos page', () => {
   it.each(['timesheets', 'calendar', 'productivity'])(
     'attaches the filters to the header of the %s tab',
     async section => {
-      const wrapper = await mountPage([], { query: { section } })
+      const wrapper = await mountPage([], {
+        props: { withProductivity: true },
+        query: { section }
+      })
       expect(wrapper.find('.todos-filters').classes()).toContain('is-attached')
       wrapper.unmount()
     }
@@ -240,7 +252,10 @@ describe('Todos page', () => {
   })
 
   // The page keeps the picked filters in the local storage
-  afterEach(() => localStorage.removeItem('todos:filters'))
+  afterEach(() => {
+    localStorage.removeItem('todos:filters')
+    localStorage.removeItem('todos:section')
+  })
 
   describe('filters in the URL', () => {
     const combo = (wrapper, label) =>
@@ -543,6 +558,7 @@ describe('Todos page', () => {
     const mountProductivity = (query = {}, options = {}) =>
       mountPage([], {
         ...options,
+        props: { withProductivity: true },
         actions: {
           loadAggregatedPersonTimeSpents: vi.fn(() => []),
           loadUserTimeSpentsByPeriod: vi.fn(() => []),
@@ -1033,6 +1049,125 @@ describe('Todos page', () => {
         expect(panel.props('isLoading')).toBe(false)
         wrapper.unmount()
       })
+    })
+  })
+
+  // The productivity tab stays hidden until studios ask for it
+  it('hides the productivity tab by default', async () => {
+    const loadUserTimeSpentsByPeriod = vi.fn(() => [])
+    const wrapper = await mountPage([], {
+      actions: { loadUserTimeSpentsByPeriod },
+      query: { section: 'productivity' }
+    })
+    await flushPromises()
+    expect(loadUserTimeSpentsByPeriod).not.toHaveBeenCalled()
+    expect(wrapper.findComponent(ProductivityChart).exists()).toBe(false)
+    const names = wrapper
+      .findComponent(RouteSectionTabs)
+      .props('tabs')
+      .map(tab => tab.name)
+    expect(names).not.toContain('productivity')
+    expect(wrapper.findComponent(RouteSectionTabs).props('activeTab')).toBe(
+      'todos'
+    )
+    expect(wrapper.find('.columns').classes()).not.toContain('is-productivity')
+    wrapper.unmount()
+  })
+
+  describe('last tab', () => {
+    afterEach(() => vi.unstubAllGlobals())
+
+    const activeTab = wrapper =>
+      wrapper.findComponent(RouteSectionTabs).props('activeTab')
+
+    it('opens the tab picked last time', async () => {
+      localStorage.setItem('todos:section', 'calendar')
+      const wrapper = await mountPage([])
+      await flushPromises()
+      expect(activeTab(wrapper)).toBe('calendar')
+      expect(wrapper.vm.$route.query.section).toBe('calendar')
+      wrapper.unmount()
+    })
+
+    it('restores the tab without a new history entry', async () => {
+      localStorage.setItem('todos:section', 'calendar')
+      let replace
+      const wrapper = await mountPage([], {
+        onRouter: router => {
+          replace = vi.spyOn(router, 'replace')
+        }
+      })
+      await flushPromises()
+      expect(
+        replace.mock.calls.some(([to]) => to.query?.section === 'calendar')
+      ).toBe(true)
+      wrapper.unmount()
+    })
+
+    it('keeps the restored tab next to the stored production', async () => {
+      localStorage.setItem('todos:section', 'timesheets')
+      localStorage.setItem(
+        'todos:filters',
+        JSON.stringify({ productionId: 'prod-1' })
+      )
+      const wrapper = await mountPage([], {
+        getters: { openProductions: () => [{ id: 'prod-1' }] }
+      })
+      await flushPromises()
+      expect(activeTab(wrapper)).toBe('timesheets')
+      expect(wrapper.vm.$route.query).toMatchObject({
+        productionId: 'prod-1',
+        section: 'timesheets'
+      })
+      wrapper.unmount()
+    })
+
+    it('lets the URL beat the stored tab', async () => {
+      localStorage.setItem('todos:section', 'calendar')
+      const wrapper = await mountPage([], { query: { section: 'daysoff' } })
+      await flushPromises()
+      expect(activeTab(wrapper)).toBe('daysoff')
+      expect(wrapper.vm.$route.query.section).toBe('daysoff')
+      wrapper.unmount()
+    })
+
+    it.each(['productivity', 'unknown'])(
+      'falls back on the tasks tab for a stored %s tab',
+      async section => {
+        localStorage.setItem('todos:section', section)
+        const wrapper = await mountPage([])
+        await flushPromises()
+        expect(activeTab(wrapper)).toBe('todos')
+        wrapper.unmount()
+      }
+    )
+
+    it('falls back on the tasks tab for a stored tab hidden on phones', async () => {
+      vi.stubGlobal(
+        'matchMedia',
+        vi.fn(() => ({
+          matches: true,
+          addEventListener: () => {},
+          removeEventListener: () => {}
+        }))
+      )
+      localStorage.setItem('todos:section', 'done')
+      const wrapper = await mountPage([])
+      await flushPromises()
+      expect(activeTab(wrapper)).toBe('todos')
+      wrapper.unmount()
+    })
+
+    it('stores the tab opened from the URL', async () => {
+      const wrapper = await mountPage([], { query: { section: 'calendar' } })
+      await flushPromises()
+      expect(localStorage.getItem('todos:section')).toBe('calendar')
+      await wrapper.vm.$router.push({
+        query: { ...wrapper.vm.$route.query, section: 'daysoff' }
+      })
+      await flushPromises()
+      expect(localStorage.getItem('todos:section')).toBe('daysoff')
+      wrapper.unmount()
     })
   })
 })
