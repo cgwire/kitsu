@@ -216,6 +216,14 @@ describe('useProductivity', () => {
       productivity.onProductivityColumnSelected(7)
       expect(router.push).toHaveBeenCalledWith({ query: { period: '7' } })
     })
+
+    test('closes the period when its column is clicked again', () => {
+      const { productivity } = run({ isActive: false, query: { period: '7' } })
+      productivity.onProductivityColumnSelected(7)
+      expect(router.push).toHaveBeenCalledWith({
+        query: { period: undefined }
+      })
+    })
   })
 
   describe('time spents', () => {
