@@ -1,7 +1,16 @@
 import { shallowMount } from '@vue/test-utils'
 import process from 'node:process'
-import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
-import { nextTick, ref } from 'vue'
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi
+} from 'vitest'
+import { markRaw, nextTick, ref } from 'vue'
 import { createStore } from 'vuex'
 
 vi.mock('vue-i18n', async importOriginal => ({
@@ -83,9 +92,11 @@ const annotatedPreview = {
 // handlers with on() and off().
 const createFakeCanvas = () => {
   const handlers = {}
+  const objects = []
   return {
     width: 800,
     height: 600,
+    _objects: objects,
     contextContainer: {},
     freeDrawingBrush: { pressureManager: {} },
     add: vi.fn(),
@@ -94,7 +105,7 @@ const createFakeCanvas = () => {
     fire: (event, options) =>
       (handlers[event] || []).forEach(handler => handler(options)),
     getActiveObject: vi.fn(),
-    getObjects: () => [],
+    getObjects: () => objects,
     off: (event, handler) => {
       handlers[event] = (handlers[event] || []).filter(h => h !== handler)
     },
@@ -106,10 +117,12 @@ const createFakeCanvas = () => {
   }
 }
 
+// Raw like the canvas AnnotationCanvas exposes: a reactive proxy would fail
+// the identity checks of the composable.
 const annotationCanvasStub = canvas => ({
   name: 'AnnotationCanvas',
   template: '<div />',
-  setup: () => ({ canvas, overlay: ref(null) })
+  setup: () => ({ canvas: markRaw(canvas), overlay: ref(null) })
 })
 
 const mountPlayer = ({
@@ -430,6 +443,82 @@ describe('PreviewPlayer.vue', () => {
       await vi.advanceTimersByTimeAsync(200)
 
       expect(canvas.add).not.toHaveBeenCalled()
+    })
+  })
+
+  // fabric disposes a text still in editing without the object:modified of
+  // a regular exit, and the typing only reaches the save 400 ms after the
+  // last keystroke: closing the player right after typing lost it.
+  describe('text annotation in editing', () => {
+    // Like fabric, a regular exit fires object:modified only for a text
+    // that differs from the one the editing started with.
+    const createEditingText = (canvas, textBeforeEdit) => ({
+      id: 'text-1',
+      canvas,
+      isEditing: true,
+      text: textBeforeEdit,
+      _textBeforeEdit: textBeforeEdit,
+      set(key, value) {
+        this[key] = value
+      },
+      toJSON() {
+        return { type: 'i-text', text: this.text }
+      },
+      exitEditing() {
+        this.isEditing = false
+        if (this.text !== this._textBeforeEdit) {
+          canvas.fire('object:modified', { target: this })
+        }
+      }
+    })
+
+    const mountWithText = async textBeforeEdit => {
+      const canvas = createFakeCanvas()
+      const text = createEditingText(canvas, textBeforeEdit)
+      canvas.getActiveObject.mockReturnValue(text)
+      const player = mountPlayer({
+        props: { readOnly: false },
+        stubs: { AnnotationCanvas: annotationCanvasStub(canvas) }
+      })
+      await nextTick()
+      const type = value => {
+        text.text = value
+        canvas.fire('text:changed', { target: text })
+      }
+      return { player, type }
+    }
+
+    const savedTexts = player =>
+      (player.emitted('annotation-changed') || []).flatMap(([{ updates }]) =>
+        updates.flatMap(({ drawing }) => drawing.objects.map(({ text }) => text))
+      )
+
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('saves the text typed right before the player closes', async () => {
+      const { player, type } = await mountWithText('Type...')
+
+      type('Fix the hand')
+      player.unmount()
+
+      expect(savedTexts(player)).toEqual(['Fix the hand'])
+    })
+
+    it('saves a text typed back to its start right before closing', async () => {
+      const { player, type } = await mountWithText('Fix hand')
+      type('Fix hand now')
+      await vi.advanceTimersByTimeAsync(400)
+
+      type('Fix hand')
+      player.unmount()
+
+      expect(savedTexts(player)).toEqual(['Fix hand'])
     })
   })
 

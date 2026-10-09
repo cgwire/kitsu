@@ -27,4 +27,19 @@ describe('func', () => {
 
     expect(fn).not.toHaveBeenCalled()
   })
+
+  test('debounce flush runs the pending call once, at once', () => {
+    vi.useFakeTimers()
+    const fn = vi.fn()
+    const debounced = func.debounce(fn, 100)
+
+    debounced('first')
+    debounced('last')
+    debounced.flush()
+    expect(fn.mock.calls).toEqual([['last']])
+    vi.advanceTimersByTime(100)
+    debounced.flush()
+
+    expect(fn).toHaveBeenCalledTimes(1)
+  })
 })

@@ -14,7 +14,7 @@ import {
 import { PSStroke } from 'fabricjs-psbrush'
 import moment from 'moment'
 import { v4 as uuidv4 } from 'uuid'
-import { markRaw, ref, watch } from 'vue'
+import { markRaw, onBeforeUnmount, ref, watch } from 'vue'
 
 import { useDrawingTools } from '@/composables/players/drawingTools'
 import {
@@ -1772,6 +1772,13 @@ export const useAnnotation = ({
       { immediate: true, flush: 'sync' }
     )
   }
+
+  // fabric disposes a text still in editing without the object:modified of
+  // a regular exit, which a text typed back to its start skips anyway: the
+  // last keystrokes only reach the updates through this debounce. Run it
+  // while the canvas is alive, before the unmount hook of the player, which
+  // then saves the text.
+  onBeforeUnmount(() => onTextChangedDebounced.flush())
 
   return {
     // State
