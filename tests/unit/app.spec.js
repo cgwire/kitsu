@@ -1,10 +1,12 @@
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import process from 'node:process'
+import { ref } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { createStore } from 'vuex'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import errors from '@/lib/errors'
+import i18n, { loadLocaleMessages } from '@/lib/i18n'
 
 import App from '@/App.vue'
 
@@ -1023,6 +1025,51 @@ describe('App', () => {
         expect(rejections).toEqual([bug])
         expect(consoleError).not.toHaveBeenCalledWith(bug)
       })
+    })
+  })
+
+  // English speakers read the vocabulary of the production type: the
+  // overlays rename the shots to NFTs or to maps.
+  describe('English overlays', () => {
+    afterEach(() => {
+      i18n.global.locale.value = 'en'
+      i18n.global.fallbackWarn = true
+    })
+
+    it('follows the type of the current production', async () => {
+      const production = ref({ id: 'production-1', production_style: 'nft' })
+      await mountApp({
+        getters: {
+          currentProduction: () => production.value,
+          user: () => ({ id: 'user-1', locale: 'en_US' })
+        }
+      })
+
+      expect(i18n.global.locale.value).toBe('en_nft')
+      expect(i18n.global.fallbackWarn).toBe(false)
+
+      production.value = { id: 'production-2', production_style: '2d' }
+      await flushPromises()
+
+      expect(i18n.global.locale.value).toBe('en')
+      expect(i18n.global.fallbackWarn).toBe(true)
+    })
+
+    it('leaves the language of a user who reads another one', async () => {
+      await loadLocaleMessages('fr')
+      i18n.global.locale.value = 'fr'
+
+      await mountApp({
+        getters: {
+          currentProduction: () => ({
+            id: 'production-1',
+            production_style: 'nft'
+          }),
+          user: () => ({ id: 'user-1', locale: 'fr_FR' })
+        }
+      })
+
+      expect(i18n.global.locale.value).toBe('fr')
     })
   })
 })
