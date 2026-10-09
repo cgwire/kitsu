@@ -335,6 +335,105 @@ describe('PlaylistPlayer.vue', () => {
     })
   })
 
+  // The player lays itself out, or turns the pencil back on, a little after
+  // what asked for it: once closed, it has nothing left to work on.
+  describe('timers of a closed player', () => {
+    const picture = {
+      id: 'shot-2',
+      preview_file_id: 'preview-2',
+      preview_file_extension: 'png'
+    }
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    const mountWithFakeTimers = async (entities, stubs) => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      wrapper = mountPlayer({ entities, stubs })
+      await flushPromises()
+      return vi.getTimerCount()
+    }
+
+    const findButton = title =>
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(button => button.attributes('title') === title)
+
+    // Checks that a timer was set, then that the closing cleared it.
+    const expectClearedOnClose = pending => {
+      expect(vi.getTimerCount()).toBeGreaterThan(pending)
+      wrapper.unmount()
+      wrapper = null
+      expect(vi.getTimerCount()).toBe(0)
+    }
+
+    it('clears the layout after a window resize', async () => {
+      const pending = await mountWithFakeTimers()
+      window.dispatchEvent(new Event('resize'))
+      expectClearedOnClose(pending)
+    })
+
+    it('clears the layout after a full screen change', async () => {
+      const pending = await mountWithFakeTimers([picture])
+      // jsdom has no full screen
+      Object.defineProperty(document, 'fullscreen', {
+        configurable: true,
+        value: true
+      })
+      wrapper.element.dispatchEvent(new Event('fullscreenchange'))
+      await flushPromises()
+      delete document.fullscreen
+      expectClearedOnClose(pending)
+    })
+
+    it('clears the layout after the shot list toggle', async () => {
+      const pending = await mountWithFakeTimers()
+      findButton('playlists.actions.entity_list').vm.$emit('click')
+      await flushPromises()
+      expectClearedOnClose(pending)
+    })
+
+    // Enough of a fabric canvas for the pencil: the annotation composable
+    // wires its handlers with on() and off().
+    const AnnotationCanvas = {
+      name: 'AnnotationCanvas',
+      template: '<div />',
+      setup: () => ({
+        canvas: markRaw({
+          contextContainer: {},
+          freeDrawingBrush: { pressureManager: {} },
+          add: () => {},
+          clear: () => {},
+          discardActiveObject: () => {},
+          getActiveObject: () => null,
+          getObjects: () => [],
+          off: () => {},
+          on: () => {},
+          remove: () => {},
+          renderAll: () => {},
+          requestRenderAll: () => {}
+        }),
+        overlay: ref(null)
+      })
+    }
+
+    it('clears the pencil restore after a move to a picture', async () => {
+      await mountWithFakeTimers(
+        [picture, { ...picture, id: 'shot-3', preview_file_id: 'preview-3' }],
+        { AnnotationCanvas }
+      )
+      wrapper
+        .findComponent({ name: 'PlayerAnnotationBar' })
+        .vm.$emit('pencil-annotate-clicked')
+      await flushPromises()
+      const pending = vi.getTimerCount()
+      findButton('playlists.actions.next_shot').vm.$emit('click')
+      await flushPromises()
+      expectClearedOnClose(pending)
+    })
+  })
+
   // A plain link navigates the tab: the browser fires beforeunload, which
   // closes the socket in Firefox and asks about unsaved annotations.
   describe('downloads', () => {

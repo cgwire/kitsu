@@ -1117,6 +1117,7 @@ let playLoop = null
 let lastResizeCall = 0
 let playingPictureTimeout = null
 let autoHideTimer = null
+const playerTimeouts = new Set()
 let wavesurfer = null
 // Annotation painted by the show-annotations-while-playing path; reset
 // wherever the canvas is cleared outside that path.
@@ -1785,7 +1786,7 @@ const { fullScreen, toggle: toggleFullScreen } = useFullScreen({
   container,
   onChange: () => {
     resetHeight()
-    setTimeout(() => {
+    setPlayerTimeout(() => {
       if (isCurrentPreviewPicture.value) {
         triggerResize()
         resetHeight()
@@ -1966,6 +1967,17 @@ const isDefaultBackground = background => {
 
 const triggerResize = () => {
   window.dispatchEvent(new Event('resize'))
+}
+
+// Timeouts for the work the player does on itself a little later, like a
+// new layout: a closed player has nothing left to work on, so the unmount
+// clears them.
+const setPlayerTimeout = (callback, delay) => {
+  const timeout = setTimeout(() => {
+    playerTimeouts.delete(timeout)
+    callback()
+  }, delay)
+  playerTimeouts.add(timeout)
 }
 
 const displayBars = () => {
@@ -2350,7 +2362,7 @@ const playEntity = (entityIndex, updateFullPlaylist = true, frame = -1) => {
     const ann = getAnnotation(0)
     if (!isPlaying.value) loadAnnotation(ann)
     if (wasDrawing) {
-      setTimeout(() => {
+      setPlayerTimeout(() => {
         isDrawing.value = true
         setAnnotationDrawingMode(true)
       }, 100)
@@ -4477,7 +4489,7 @@ const onWindowResize = () => {
   const now = new Date().getTime()
   if (now - lastResizeCall > 100) {
     lastResizeCall = now
-    setTimeout(() => {
+    setPlayerTimeout(() => {
       resetHeight()
       resizeAnnotations()
     }, 200)
@@ -4639,7 +4651,7 @@ watch(playingEntityIndex, () => {
 
 watch(fullScreen, () => {
   resetHeight()
-  setTimeout(() => {
+  setPlayerTimeout(() => {
     if (isCurrentPreviewPicture.value) {
       triggerResize()
       resetHeight()
@@ -4841,7 +4853,7 @@ watch(
 
 watch(isEntitiesHidden, () => {
   nextTick(() => {
-    setTimeout(() => triggerResize(), RESIZE_DELAY)
+    setPlayerTimeout(() => triggerResize(), RESIZE_DELAY)
   })
 })
 
@@ -4963,6 +4975,7 @@ onBeforeUnmount(() => {
   cancelProgressiveRender()
   _stopPlaylistProgressUpdateLoop()
   if (playingPictureTimeout) clearTimeout(playingPictureTimeout)
+  playerTimeouts.forEach(clearTimeout)
   window.removeEventListener('keydown', onKeyDown)
   window.removeEventListener('resize', onWindowResize)
   window.removeEventListener('beforeunload', onWindowsClosed)
