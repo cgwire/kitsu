@@ -2854,11 +2854,13 @@ th.validation-cell {
       justify-content: space-between;
       text-align: right;
 
+      // the label must not inherit the bold of a header cell
       &::before {
         color: var(--text-alt);
         content: attr(data-label);
         flex-shrink: 0;
         font-size: 0.8em;
+        font-weight: normal;
         letter-spacing: 0.06em;
         text-transform: uppercase;
       }

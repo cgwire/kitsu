@@ -61,9 +61,15 @@ const onBackgroundClicked = () => {
 }
 
 @media screen and (max-width: 768px) {
+  // Centred on the screen; the max height keeps a tall dialog clear of
+  // the 60px topbar, since centring then leaves 70px above it.
+  .modal {
+    align-items: center;
+  }
+
   .modal-content {
     margin: 0 0.5em;
-    max-height: calc(100vh - 40px);
+    max-height: calc(100vh - 140px);
   }
 
   .box {

@@ -1,7 +1,10 @@
 <template>
-  <div class="columns fixed-page">
+  <div
+    class="columns fixed-page"
+    :class="{ 'is-productivity': isActiveTab('productivity') }"
+  >
     <div class="column main-column">
-      <div class="person page" v-if="person">
+      <div class="person page task-page" v-if="person">
         <div class="flexrow page-header">
           <div class="flexrow-item">
             <people-avatar
@@ -24,47 +27,106 @@
             :tabs="todoTabs"
           />
 
-          <div class="flexrow">
-            <search-field
-              ref="person-tasks-search-field"
-              class="search-field flexrow-item"
-              can-save
-              @change="onSearchChange"
-              @save="saveSearchQuery"
-            />
-            <combobox-production
-              class="flexrow-item production-field"
-              :label="$t('main.production')"
-              :production-list="productionList"
-              v-model="productionId"
-            />
-            <span class="filler"></span>
-            <combobox-number
-              class="flexrow-item zoom-level mb0"
-              :label="$t('schedule.zoom_level')"
-              :options="zoomOptions"
-              v-model="zoomLevel"
-              v-if="isActiveTab('schedule')"
-            />
-            <combobox
-              class="flexrow-item"
-              :label="$t('main.sorted_by')"
-              :options="sortOptions"
-              locale-key-prefix="tasks.fields."
-              v-model="currentSort"
-            />
-          </div>
+          <div
+            class="todos-filters"
+            :class="{
+              'is-attached':
+                isTimelogShown ||
+                isActiveTab('calendar') ||
+                isActiveTab('productivity'),
+              'is-schedule': isActiveTab('schedule'),
+              collapsed:
+                isPhone && areFiltersFolded && !isActiveTab('productivity')
+            }"
+          >
+            <div class="flexrow">
+              <div
+                class="field flexrow-item search-field-column"
+                v-show="!isActiveTab('productivity')"
+              >
+                <label class="label">{{ $t('main.search_query') }}</label>
+                <search-field
+                  ref="person-tasks-search-field"
+                  class="search-field"
+                  can-save
+                  :focus-options="{ preventScroll: true }"
+                  @change="onSearchChange"
+                  @save="saveSearchQuery"
+                />
+              </div>
 
-          <div class="query-list" v-if="!isActiveTab('calendar')">
-            <search-query-list
-              :queries="personTaskSearchQueries"
-              type="person"
-              @remove-search="removeSearchQuery"
-            />
+              <button-simple
+                class="flexrow-item filters-toggle"
+                icon="funnel"
+                :aria-expanded="`${!areFiltersFolded}`"
+                :is-on="!areFiltersFolded"
+                :title="
+                  $t(
+                    areFiltersFolded ? 'main.more_filters' : 'main.less_filters'
+                  )
+                "
+                @click="areFiltersFolded = !areFiltersFolded"
+                v-if="!isActiveTab('productivity')"
+              />
+
+              <combobox-production
+                class="flexrow-item production-field collapsible"
+                :label="$t('main.production')"
+                :production-list="productionList"
+                v-model="productionId"
+              />
+
+              <combobox-task-type
+                class="flexrow-item task-type-field collapsible"
+                :label="$t('tasks.fields.task_type')"
+                :task-type-list="taskTypeList"
+                v-model="taskTypeId"
+              />
+
+              <combobox-styled
+                class="flexrow-item collapsible"
+                :label="$t('tasks.fields.due_date')"
+                :options="filterOptions"
+                locale-key-prefix="tasks."
+                v-model="currentFilter"
+                v-show="!isActiveTab('productivity')"
+              />
+
+              <span class="filler"></span>
+
+              <combobox-number
+                class="flexrow-item zoom-level collapsible"
+                :label="$t('schedule.zoom_level')"
+                :options="zoomOptions"
+                v-model="zoomLevel"
+                v-if="isActiveTab('schedule')"
+              />
+
+              <combobox-styled
+                class="flexrow-item collapsible"
+                open-left
+                :label="$t('main.sorted_by')"
+                :options="sortOptions"
+                locale-key-prefix="tasks.fields."
+                v-model="currentSort"
+                v-show="!isActiveTab('productivity')"
+              />
+            </div>
+            <div
+              class="query-list collapsible"
+              v-show="!isActiveTab('productivity')"
+            >
+              <search-query-list
+                :queries="personTaskSearchQueries"
+                type="person"
+                @remove-search="removeSearchQuery"
+              />
+            </div>
           </div>
 
           <todos-list
             ref="task-list"
+            class="todos-panel"
             :empty-text="$t('people.no_task_assigned')"
             :is-loading="isTasksLoading"
             :is-error="isTasksLoadingError"
@@ -76,6 +138,7 @@
 
           <todos-list
             ref="done-list"
+            class="done-list todos-panel"
             done
             :empty-text="$t('people.no_task_assigned')"
             :is-loading="isDoneTasksLoading"
@@ -85,30 +148,57 @@
             v-else-if="isActiveTab('done')"
           />
 
-          <kanban-board
-            :is-loading="isTasksLoading"
-            :is-error="isTasksLoadingError"
-            :production="selectedProduction"
-            :statuses="boardStatuses"
-            :tasks="boardTasks"
-            :user="user"
-            v-else-if="isActiveTab('board')"
-          />
+          <div class="todos-panel board-panel" v-else-if="isActiveTab('board')">
+            <kanban-board
+              :is-loading="isTasksLoading"
+              :is-error="isTasksLoadingError"
+              :production="selectedProduction"
+              :statuses="boardStatuses"
+              :tasks="sortedAllTasks"
+              :user="user"
+            />
+          </div>
 
-          <user-calendar
-            class="calendar"
-            :is-loading="isTasksLoading"
-            :days-off="daysOff"
-            :tasks="sortedAllTasks"
-            :time-spents="calendarTimeSpents"
-            @dates-changed="onCalendarDatesChanged"
-            @time-clicked="onCalendarTimeClicked"
-            v-else-if="isActiveTab('calendar')"
+          <div class="calendar-panel" v-else-if="isActiveTab('calendar')">
+            <user-calendar
+              :is-loading="isTasksLoading"
+              :days-off="daysOff"
+              :tasks="sortedAllTasks"
+              :time-spents="calendarTimeSpents"
+              @dates-changed="onCalendarDatesChanged"
+              @time-clicked="onCalendarTimeClicked"
+            />
+          </div>
+
+          <productivity-chart
+            class="productivity-panel"
+            :count-mode="productivityCountMode"
+            :is-error="isProductivityLoadingError"
+            :is-loading="isProductivityLoading"
+            :is-paper="isPaper"
+            :level="productivityLevel"
+            :metric="productivityMetric"
+            :month="productivityMonth"
+            :production-id="productionId"
+            :quota-mode="productivityQuotaMode"
+            :quotas="productivityQuotas"
+            :selected-index="productivityPeriod"
+            :task-type-id="taskTypeId"
+            :time-spents="productivityTimeSpents"
+            :year="productivityYear"
+            @column-selected="onProductivityColumnSelected"
+            @count-mode-changed="onProductivityCountModeChanged"
+            @level-changed="onProductivityLevelChanged"
+            @metric-changed="onProductivityMetricChanged"
+            @period-changed="onProductivityPeriodChanged"
+            @quota-mode-changed="onProductivityQuotaModeChanged"
+            v-else-if="isActiveTab('productivity')"
           />
 
           <timesheet-list
             ref="timesheet-list"
             :initial-date="selectedDate"
+            :person-id="person?.id"
             :tasks="loggablePersonTasks"
             :done-tasks="loggableDoneTasks"
             :is-loading="isTasksLoading"
@@ -122,13 +212,13 @@
             @time-spent-change="onTimeSpentChange"
             @set-day-off="onSetDayOff"
             @unset-day-off="onUnsetDayOff"
-            v-else-if="
-              isActiveTab('timesheets') &&
-              (isCurrentUserManager || user.id === person.id)
-            "
+            v-else-if="isTimelogShown"
           />
 
-          <template v-else-if="isActiveTab('schedule')">
+          <div
+            class="todos-panel schedule-panel"
+            v-else-if="isActiveTab('schedule')"
+          >
             <schedule
               ref="schedule-widget"
               :days-off="daysOff"
@@ -149,12 +239,44 @@
             <div class="has-text-centered" v-else>
               {{ $t('main.empty_schedule') }}
             </div>
-          </template>
+          </div>
         </template>
       </div>
     </div>
+
     <div class="column side-column" v-if="nbSelectedTasks === 1">
       <task-info :task="selectedTasks.values().next().value" />
+    </div>
+
+    <div
+      ref="productivity-side-column"
+      class="column side-column productivity-side-column"
+      v-if="isActiveTab('productivity') && productivityPeriod"
+    >
+      <people-quota-info
+        :with-person="false"
+        :close-route="productivityCloseRoute"
+        :count-mode="productivityCountMode"
+        :is-loading="isProductivityInfoLoading"
+        :is-loading-error="isProductivityInfoLoadingError"
+        :level="productivityLevel"
+        :person="person"
+        :shots="productivityQuotaShots"
+        v-bind="productivityPeriodParams"
+        v-if="isQuotasMetric"
+      />
+      <people-timesheet-info
+        :with-person="false"
+        :close-route="productivityCloseRoute"
+        :day-offs="productivityDaysOff"
+        :is-loading="isProductivityInfoLoading"
+        :is-loading-error="isProductivityInfoLoadingError"
+        :level="productivityLevel"
+        :person="person"
+        :tasks="productivityTasks"
+        v-bind="productivityPeriodParams"
+        v-else
+      />
     </div>
   </div>
 </template>
@@ -162,7 +284,6 @@
 <script setup>
 import { useHead } from '@unhead/vue'
 import moment from 'moment-timezone'
-import { firstBy } from 'thenby'
 import {
   computed,
   getCurrentInstance,
@@ -180,7 +301,10 @@ import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { useBoardStatuses } from '@/composables/board'
+import { useProductivity } from '@/composables/productivity'
+import { useTaskFilters } from '@/composables/taskFilters'
 import colors from '@/lib/colors'
+import preferences from '@/lib/preferences'
 import {
   addBusinessDays,
   getFirstStartDate,
@@ -192,11 +316,16 @@ import {
 import KanbanBoard from '@/components/lists/KanbanBoard.vue'
 import TimesheetList from '@/components/lists/TimesheetList.vue'
 import TodosList from '@/components/lists/TodosList.vue'
+import PeopleQuotaInfo from '@/components/sides/PeopleQuotaInfo.vue'
+import PeopleTimesheetInfo from '@/components/sides/PeopleTimesheetInfo.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
-import Combobox from '@/components/widgets/Combobox.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import ProductivityChart from '@/components/widgets/ProductivityChart.vue'
 import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
 import Schedule from '@/components/widgets/Schedule.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
@@ -212,19 +341,9 @@ const socket = getCurrentInstance().appContext.config.globalProperties.$socket
 
 // State
 // --------------------------------------------------------------------------
-const sortOptions = [
-  'entity_name',
-  'priority',
-  'task_status_short_name',
-  'start_date',
-  'due_date',
-  'estimation',
-  'last_comment_date'
-].map(name => ({ label: name, value: name }))
-
+const SECTION_STORAGE_KEY = 'person:section'
 const activeTab = ref('todos')
 const calendarTimeSpents = ref([])
-const currentSort = ref('entity_name')
 const daysOff = ref([])
 const dayOffError = ref(false)
 const init = ref(false)
@@ -233,6 +352,9 @@ const isDoneTasksLoadingError = ref(false)
 const isTasksLoading = ref(false)
 const isTasksLoadingError = ref(false)
 const person = ref(null)
+const phoneQuery = window.matchMedia?.('(max-width: 768px)')
+const isPhone = ref(Boolean(phoneQuery?.matches))
+const areFiltersFolded = ref(true)
 const productionId = ref(undefined)
 const selectedDate = ref(moment().format('YYYY-MM-DD'))
 const zoomLevel = ref(1)
@@ -276,6 +398,25 @@ const selectedTasks = computed(() => store.getters.selectedTasks)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 const user = computed(() => store.getters.user)
 
+const {
+  currentFilter,
+  currentSort,
+  filterAndSortTasks,
+  filterOptions,
+  saveFilters,
+  sortOptions,
+  storedFilters,
+  taskTypeId,
+  taskTypeList
+} = useTaskFilters({
+  storageKey: 'person:filters',
+  productionId,
+  tasks: computed(() =>
+    displayedPersonTasks.value.concat(displayedPersonDoneTasks.value)
+  ),
+  defaultSort: 'entity_name'
+})
+
 const zoomOptions = computed(() => [
   { label: t('main.week'), value: 0 },
   { label: '1', value: 1 },
@@ -289,18 +430,33 @@ const isCurrentUserAllowed = computed(
     !(isCurrentUserClient.value || isCurrentUserVendor.value)
 )
 
+const isTimelogShown = computed(
+  () =>
+    isActiveTab('timesheets') &&
+    (isCurrentUserManager.value || user.value.id === person.value?.id)
+)
+
+// the route param, not the person: the tab is picked before the person loads
+const canSeeProductivity = computed(
+  () =>
+    isCurrentUserAdmin.value ||
+    isCurrentUserManager.value ||
+    isCurrentUserSupervisor.value ||
+    user.value.id === route.params.person_id
+)
+
 const sortedTasks = computed(() =>
-  sortAndFilterTasks(displayedPersonTasks.value)
+  filterAndSortTasks(displayedPersonTasks.value)
 )
 
 const sortedDoneTasks = computed(() =>
-  sortAndFilterTasks(displayedPersonDoneTasks.value)
+  filterAndSortTasks(displayedPersonDoneTasks.value)
 )
 
 const sortedAllTasks = computed(() =>
-  // reuse the two cached computeds: they already carry the production
-  // filter, only the merged sort remains to do
-  sortTasks([...sortedTasks.value, ...sortedDoneTasks.value])
+  filterAndSortTasks(
+    displayedPersonTasks.value.concat(displayedPersonDoneTasks.value)
+  )
 )
 
 const loggablePersonTasks = computed(() => sortedTasks.value.filter(isLoggable))
@@ -357,14 +513,6 @@ const scheduleItems = computed(() => {
   return rootElements
 })
 
-const boardTasks = computed(() =>
-  selectedProduction.value
-    ? sortedAllTasks.value.filter(
-        task => task.project_id === selectedProduction.value.id
-      )
-    : sortedAllTasks.value
-)
-
 const productionList = computed(() => [
   { name: t('main.all') },
   ...userOpenProductions.value
@@ -388,6 +536,54 @@ const { boardStatuses, getBoardStatusesByProduction } = useBoardStatuses(
   selectedProduction
 )
 
+const {
+  isPaper,
+  isProductivityInfoLoading,
+  isProductivityInfoLoadingError,
+  isProductivityLoading,
+  isProductivityLoadingError,
+  isQuotasMetric,
+  onProductivityColumnSelected,
+  onProductivityCountModeChanged,
+  onProductivityLevelChanged,
+  onProductivityMetricChanged,
+  onProductivityPeriodChanged,
+  onProductivityQuotaModeChanged,
+  productivityCloseRoute,
+  productivityCountMode,
+  productivityDaysOff,
+  productivityLevel,
+  productivityMetric,
+  productivityMonth,
+  productivityPeriod,
+  productivityPeriodParams,
+  productivityQuotaMode,
+  productivityQuotas,
+  productivityQuotaShots,
+  productivityTasks,
+  productivityTimeSpents,
+  productivityYear
+} = useProductivity({
+  personId: computed(() => person.value?.id),
+  productionId,
+  taskTypeId,
+  openProductions: userOpenProductions,
+  isActive: computed(
+    () =>
+      init.value &&
+      activeTab.value === 'productivity' &&
+      !person.value?.is_bot &&
+      isCurrentUserAllowed.value
+  ),
+  sideColumn: useTemplateRef('productivity-side-column'),
+  loadTimeSpents: ({ startDate, endDate }) =>
+    store.dispatch('loadPersonTimeSpentsByPeriod', {
+      personId: person.value.id,
+      startDate,
+      endDate
+    })
+})
+
 const todoTabs = computed(() => {
   const hasAvailableBoard = openProductions.value.some(
     production => getBoardStatusesByProduction(production).length
@@ -407,16 +603,26 @@ const todoTabs = computed(() => {
       label: t('tasks.calendar'),
       name: 'calendar'
     },
+    canSeeProductivity.value
+      ? {
+          label: t('main.productivity'),
+          name: 'productivity'
+        }
+      : undefined,
     {
       label: t('schedule.title'),
       name: 'schedule'
     },
-    {
-      label: `${t('tasks.validated')} (${
-        isDoneTasksLoading.value ? '…' : displayedPersonDoneTasks.value.length
-      })`,
-      name: 'done'
-    },
+    isPhone.value
+      ? undefined
+      : {
+          label: `${t('tasks.validated')} (${
+            isDoneTasksLoading.value
+              ? '…'
+              : displayedPersonDoneTasks.value.length
+          })`,
+          name: 'done'
+        },
     {
       label: t('timesheets.timelog_title'),
       name: 'timesheets'
@@ -428,62 +634,28 @@ const todoTabs = computed(() => {
 // --------------------------------------------------------------------------
 const isActiveTab = tab => init.value && activeTab.value === tab
 
+const onPhoneChange = event => {
+  isPhone.value = event.matches
+  updateActiveTab()
+}
+
+// the stored filters are shared by every person page
+const dropUnknownTaskType = () => {
+  const areTasksLoaded =
+    person.value &&
+    !person.value.is_bot &&
+    isCurrentUserAllowed.value &&
+    !isTasksLoadingError.value
+  if (
+    areTasksLoaded &&
+    !taskTypeList.value.some(({ id }) => id === taskTypeId.value)
+  ) {
+    taskTypeId.value = ''
+  }
+}
+
 const isLoggable = task =>
   taskTypeMap.value.get(task.task_type_id)?.allow_timelog
-
-const sortAndFilterTasks = tasks => {
-  const sorted = sortTasks([...tasks])
-  return productionId.value
-    ? sorted.filter(task => task.project_id === productionId.value)
-    : sorted
-}
-
-const sortTasks = tasks => {
-  const byDate = field => (a, b) => {
-    if (!a[field]) return 1
-    if (!b[field]) return -1
-    return a[field].localeCompare(b[field])
-  }
-
-  if (currentSort.value === 'entity_name') {
-    return tasks.sort(
-      firstBy('project_name')
-        .thenBy('task_type_name')
-        .thenBy('full_entity_name')
-    )
-  }
-  if (currentSort.value === 'priority') {
-    return tasks.sort(
-      firstBy('priority', -1)
-        .thenBy(byDate('due_date'))
-        .thenBy('project_name')
-        .thenBy('task_type_name')
-        .thenBy('entity_name')
-    )
-  }
-  if (currentSort.value === 'due_date') {
-    return tasks.sort(
-      firstBy(byDate('due_date'))
-        .thenBy('project_name')
-        .thenBy('task_type_name')
-        .thenBy('entity_name')
-    )
-  }
-  if (currentSort.value === 'start_date') {
-    return tasks.sort(
-      firstBy(byDate('start_date'))
-        .thenBy('project_name')
-        .thenBy('task_type_name')
-        .thenBy('entity_name')
-    )
-  }
-  return tasks.sort(
-    firstBy(currentSort.value, -1)
-      .thenBy('project_name')
-      .thenBy('task_type_name')
-      .thenBy('entity_name')
-  )
-}
 
 const buildProjectScheduleItem = project => ({
   ...project,
@@ -693,7 +865,7 @@ const removeSearchQuery = searchQuery => {
 const setPersonTasksScrollPosition = position =>
   store.dispatch('setPersonTasksScrollPosition', position)
 
-const updateActiveTab = () => {
+const isAvailableSection = section => {
   const availableSections = [
     'board',
     'calendar',
@@ -701,8 +873,21 @@ const updateActiveTab = () => {
     'schedule',
     'timesheets'
   ]
-  const section = route.query.section
-  activeTab.value = availableSections.includes(section) ? section : 'todos'
+  if (canSeeProductivity.value) availableSections.push('productivity')
+  const isHiddenOnPhone = isPhone.value && section === 'done'
+  return availableSections.includes(section) && !isHiddenOnPhone
+}
+
+const updateActiveTab = () => {
+  const urlSection = route.query.section
+  const storedSection = preferences.getPreference(SECTION_STORAGE_KEY)
+  const restoredSection =
+    !urlSection && isAvailableSection(storedSection) ? storedSection : null
+  const section = urlSection || restoredSection
+  activeTab.value = isAvailableSection(section) ? section : 'todos'
+  if (urlSection) {
+    preferences.setPreference(SECTION_STORAGE_KEY, activeTab.value)
+  }
 
   const day = route.query.day
   if (
@@ -721,8 +906,12 @@ const updateActiveTab = () => {
   )
   if (currentProduction) {
     productionId.value = currentProduction.id
-  } else {
-    router.push({
+  }
+  store.dispatch('clearSelectedTasks')
+
+  if (!currentProduction || restoredSection) {
+    // A restored tab is not a navigation of the user: no history entry
+    return router[restoredSection ? 'replace' : 'push']({
       query: {
         ...route.query,
         productionId: productionId.value,
@@ -730,8 +919,6 @@ const updateActiveTab = () => {
       }
     })
   }
-
-  store.dispatch('clearSelectedTasks')
 }
 
 const onCalendarTimeClicked = date => {
@@ -818,7 +1005,7 @@ watch(
   personId => {
     updateActiveTab()
     if (person.value && person.value.id !== personId) {
-      loadPerson(personId)
+      loadPerson(personId).then(dropUnknownTaskType)
     }
   }
 )
@@ -840,6 +1027,7 @@ watch(activeTab, () => {
 })
 
 watch(productionId, () => {
+  saveFilters()
   router.push({
     query: {
       ...route.query,
@@ -855,13 +1043,25 @@ watch(zoomLevel, () => {
 // Lifecycle
 // --------------------------------------------------------------------------
 onMounted(async () => {
+  phoneQuery?.addEventListener?.('change', onPhoneChange)
   socket.on('task:assign', onAssignation)
   socket.on('task:unassign', onAssignation)
 
   productionId.value = route.query.productionId || undefined
 
-  updateActiveTab()
+  // a later navigation built on the old query would drop the restored tab
+  await updateActiveTab()
   await loadPerson(route.params.person_id)
+  // the stored production only applies when the person works on it
+  if (
+    !productionId.value &&
+    userOpenProductions.value.some(
+      ({ id }) => id === storedFilters.productionId
+    )
+  ) {
+    productionId.value = storedFilters.productionId
+  }
+  dropUnknownTaskType()
   setSearchFromUrl()
   onSearchChange()
 
@@ -871,6 +1071,7 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  phoneQuery?.removeEventListener?.('change', onPhoneChange)
   socket.off('task:assign', onAssignation)
   socket.off('task:unassign', onAssignation)
 })
@@ -889,26 +1090,7 @@ useHead({ title: computed(() => `${person.value?.name || '...'} - Kitsu`) })
 </script>
 
 <style lang="scss" scoped>
-.page {
-  overflow: hidden;
-}
-
-.search-field {
-  margin: 25px 2em 5px 0;
-}
-
-.query-list {
-  margin-top: 0.5em;
-}
-
-.data-list {
-  margin-top: 0;
-}
-
-.person {
-  display: flex;
-  flex-direction: column;
-}
+@use '@/styles/task-panels.scss' as panels;
 
 .columns {
   display: flex;
@@ -917,28 +1099,62 @@ useHead({ title: computed(() => `${person.value?.name || '...'} - Kitsu`) })
 }
 
 .column {
-  overflow-y: auto;
   padding: 0;
+  overflow-y: auto;
 }
 
-.zoom-level {
-  margin-top: -0.5em;
-}
-
-.field {
-  margin-bottom: 0;
-}
-
-.tabs {
-  min-height: 30px;
-}
+@include panels.task-panels;
 
 .page-header {
   margin-top: 0.5em;
 }
 
-.calendar {
+// the label and control metrics of the styled comboboxes of the row, whose
+// box sits 1px under the label margin
+.zoom-level {
+  :deep(.label) {
+    margin-bottom: calc(0.5em + 1px);
+    padding-top: 0;
+  }
+
+  :deep(.select),
+  :deep(.select-input) {
+    height: 40px;
+  }
+}
+
+// the zoom field of the schedule tab no longer fits the row there; the row
+// of the other tabs still does, and wrapping would break it before
+@media screen and (max-width: 1000px) {
+  .todos-filters.is-schedule > .flexrow {
+    flex-wrap: wrap;
+    row-gap: 0.5em;
+  }
+}
+
+// The schedule positions its grid absolutely: it takes the panel height
+.schedule-panel {
+  display: flex;
   flex: 1;
-  overflow: auto;
+  flex-direction: column;
+  min-height: 0;
+
+  :deep(.schedule-wrapper) {
+    flex: 1;
+    height: auto;
+    min-height: 0;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .page-header {
+    margin-top: 0;
+  }
+
+  // the page grows with its content there: a flexible height would be 0
+  .schedule-panel {
+    flex: none;
+    height: 75vh;
+  }
 }
 </style>

@@ -1,7 +1,10 @@
 <template>
-  <div class="columns fixed-page">
+  <div
+    class="columns fixed-page"
+    :class="{ 'is-productivity': isActiveTab('productivity') }"
+  >
     <div class="column main-column">
-      <div class="todos page">
+      <div class="todos page task-page">
         <route-section-tabs
           class="section-tabs mt05"
           :active-tab="currentSection"
@@ -9,51 +12,95 @@
           :tabs="todoTabs"
         />
 
-        <div class="flexrow" v-show="!isActiveTab('daysoff')">
-          <search-field
-            ref="todos-search-field"
-            class="flexrow-item search-field"
-            :can-save="true"
-            @change="onSearchChange"
-            @save="saveSearchQuery"
-          />
+        <div
+          class="todos-filters"
+          :class="{
+            'is-attached':
+              isActiveTab('timesheets') ||
+              isActiveTab('calendar') ||
+              isActiveTab('productivity'),
+            collapsed: isPhone && areFiltersFolded
+          }"
+          v-show="!isActiveTab('daysoff')"
+        >
+          <div class="flexrow">
+            <div
+              class="field flexrow-item search-field-column"
+              v-show="!isActiveTab('productivity')"
+            >
+              <label class="label">{{ $t('main.search_query') }}</label>
+              <search-field
+                ref="todos-search-field"
+                class="search-field"
+                :can-save="true"
+                :focus-options="{ preventScroll: true }"
+                @change="onSearchChange"
+                @save="saveSearchQuery"
+              />
+            </div>
 
-          <combobox-production
-            class="flexrow-item production-field"
-            :label="$t('main.production')"
-            :production-list="productionList"
-            v-model="productionId"
-          />
+            <button-simple
+              class="flexrow-item filters-toggle"
+              icon="funnel"
+              :aria-expanded="`${!areFiltersFolded}`"
+              :is-on="!areFiltersFolded"
+              :title="
+                $t(areFiltersFolded ? 'main.more_filters' : 'main.less_filters')
+              "
+              @click="areFiltersFolded = !areFiltersFolded"
+            />
 
-          <span class="filler"></span>
+            <combobox-production
+              class="flexrow-item production-field collapsible"
+              :label="$t('main.production')"
+              :production-list="productionList"
+              v-model="productionId"
+            />
 
-          <combobox-styled
-            class="flexrow-item"
-            :label="$t('main.show')"
-            :options="filterOptions"
-            locale-key-prefix="tasks."
-            v-model="currentFilter"
-          />
+            <combobox-task-type
+              class="flexrow-item task-type-field collapsible"
+              :label="$t('tasks.fields.task_type')"
+              :task-type-list="taskTypeList"
+              v-model="taskTypeId"
+            />
 
-          <combobox-styled
-            class="flexrow-item"
-            open-left
-            :label="$t('main.sorted_by')"
-            :options="sortOptions"
-            locale-key-prefix="tasks.fields."
-            v-model="currentSort"
-          />
-        </div>
-        <div class="query-list" v-if="!isActiveTab('daysoff')">
-          <search-query-list
-            :queries="todoSearchQueries"
-            type="todo"
-            @remove-search="removeSearchQuery"
-          />
+            <combobox-styled
+              class="flexrow-item collapsible"
+              :label="$t('tasks.fields.due_date')"
+              :options="filterOptions"
+              locale-key-prefix="tasks."
+              v-model="currentFilter"
+              v-show="!isActiveTab('productivity')"
+            />
+
+            <span class="filler"></span>
+
+            <combobox-styled
+              class="flexrow-item collapsible"
+              open-left
+              :label="$t('main.sorted_by')"
+              :options="sortOptions"
+              locale-key-prefix="tasks.fields."
+              v-model="currentSort"
+              v-show="!isActiveTab('productivity')"
+            />
+          </div>
+          <div
+            class="query-list collapsible"
+            v-show="!isActiveTab('productivity')"
+          >
+            <search-query-list
+              :queries="todoSearchQueries"
+              type="todo"
+              @remove-search="removeSearchQuery"
+            />
+          </div>
         </div>
 
         <todos-list
+          :editable="false"
           ref="todo-list"
+          class="todos-panel"
           :empty-text="$t('people.no_task_assigned')"
           :is-loading="isTodosLoading"
           :is-error="isTodosLoadingError"
@@ -63,9 +110,11 @@
           v-if="isActiveTab('todos')"
         />
 
-        <div v-if="isActiveTab('pending')">&nbsp;</div>
         <todos-list
-          :empty-text="$t('people.no_task_assigned')"
+          :editable="false"
+          class="todos-panel"
+          :empty-text="$t('people.no_task_pending')"
+          :with-illustration="false"
           :is-loading="isTodosLoading"
           :is-error="isTodosLoadingError"
           :tasks="pendingTasks"
@@ -74,11 +123,13 @@
           v-if="isActiveTab('pending')"
         />
 
-        <div v-if="isActiveTab('done')">&nbsp;</div>
         <todos-list
+          :editable="false"
           ref="done-list"
-          class="done-list"
+          class="done-list todos-panel"
           done
+          :empty-text="$t('people.no_task_done')"
+          :with-illustration="false"
           :is-loading="loading.doneTasks || isTodosLoading"
           :is-error="isTodosLoadingError"
           :selection-grid="doneSelectionGrid"
@@ -86,29 +137,57 @@
           v-if="isActiveTab('done')"
         />
 
-        <kanban-board
-          :is-loading="isTodosLoading"
-          :is-error="isTodosLoadingError"
-          :production="selectedProduction"
-          :statuses="boardStatuses"
-          :tasks="boardTasks"
-          :user="user"
-          v-if="isActiveTab('board')"
-        />
+        <div class="todos-panel board-panel" v-if="isActiveTab('board')">
+          <kanban-board
+            :is-loading="isTodosLoading"
+            :is-error="isTodosLoadingError"
+            :production="selectedProduction"
+            :statuses="boardStatuses"
+            :tasks="boardTasks"
+            :user="user"
+          />
+        </div>
 
-        <user-calendar
-          :days-off="daysOff"
-          :is-loading="isTodosLoading"
-          :tasks="sortedTasks"
-          :time-spents="calendarTimeSpents"
-          @dates-changed="onCalendarDatesChanged"
-          @time-clicked="onCalendarTimeClicked"
-          v-if="isActiveTab('calendar')"
+        <div class="calendar-panel" v-if="isActiveTab('calendar')">
+          <user-calendar
+            :days-off="daysOff"
+            :is-loading="isTodosLoading"
+            :tasks="sortedTasks"
+            :time-spents="calendarTimeSpents"
+            @dates-changed="onCalendarDatesChanged"
+            @time-clicked="onCalendarTimeClicked"
+          />
+        </div>
+
+        <productivity-chart
+          class="productivity-panel"
+          :count-mode="productivityCountMode"
+          :is-error="isProductivityLoadingError"
+          :is-loading="isProductivityLoading"
+          :is-paper="isPaper"
+          :level="productivityLevel"
+          :metric="productivityMetric"
+          :month="productivityMonth"
+          :production-id="productionId"
+          :quota-mode="productivityQuotaMode"
+          :quotas="productivityQuotas"
+          :selected-index="productivityPeriod"
+          :task-type-id="taskTypeId"
+          :time-spents="productivityTimeSpents"
+          :year="productivityYear"
+          @column-selected="onProductivityColumnSelected"
+          @count-mode-changed="onProductivityCountModeChanged"
+          @level-changed="onProductivityLevelChanged"
+          @metric-changed="onProductivityMetricChanged"
+          @period-changed="onProductivityPeriodChanged"
+          @quota-mode-changed="onProductivityQuotaModeChanged"
+          v-if="isActiveTab('productivity')"
         />
 
         <timesheet-list
           ref="timesheet-list"
           :initial-date="selectedDate"
+          :person-id="user.id"
           :tasks="loggableTodos"
           :done-tasks="loggableDoneTasks"
           :is-loading="loading.timesheets || isTodosLoading"
@@ -141,13 +220,43 @@
     <div class="column side-column" v-if="nbSelectedTasks > 0">
       <task-info :task="selectedTasks.values().next().value" with-actions />
     </div>
+
+    <div
+      ref="productivity-side-column"
+      class="column side-column productivity-side-column"
+      v-if="isActiveTab('productivity') && productivityPeriod"
+    >
+      <people-quota-info
+        :with-person="false"
+        :close-route="productivityCloseRoute"
+        :count-mode="productivityCountMode"
+        :is-loading="isProductivityInfoLoading"
+        :is-loading-error="isProductivityInfoLoadingError"
+        :level="productivityLevel"
+        :person="user"
+        :shots="productivityQuotaShots"
+        v-bind="productivityPeriodParams"
+        v-if="isQuotasMetric"
+      />
+      <people-timesheet-info
+        :with-person="false"
+        :close-route="productivityCloseRoute"
+        :day-offs="productivityDaysOff"
+        :is-loading="isProductivityInfoLoading"
+        :is-loading-error="isProductivityInfoLoadingError"
+        :level="productivityLevel"
+        :person="user"
+        :tasks="productivityTasks"
+        v-bind="productivityPeriodParams"
+        v-else
+      />
+    </div>
   </div>
 </template>
 
 <script setup>
 import { useHead } from '@unhead/vue'
 import moment from 'moment-timezone'
-import { firstBy } from 'thenby'
 import {
   computed,
   getCurrentInstance,
@@ -164,16 +273,22 @@ import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { useBoardStatuses } from '@/composables/board'
-import { getTaskStatusPriorityOfProd } from '@/lib/productions'
-import { parseDate } from '@/lib/time'
+import { useProductivity } from '@/composables/productivity'
+import { useTaskFilters } from '@/composables/taskFilters'
+import preferences from '@/lib/preferences'
 
 import DayOffList from '@/components/lists/DayOffList.vue'
 import KanbanBoard from '@/components/lists/KanbanBoard.vue'
 import TimesheetList from '@/components/lists/TimesheetList.vue'
 import TodosList from '@/components/lists/TodosList.vue'
+import PeopleQuotaInfo from '@/components/sides/PeopleQuotaInfo.vue'
+import PeopleTimesheetInfo from '@/components/sides/PeopleTimesheetInfo.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import ProductivityChart from '@/components/widgets/ProductivityChart.vue'
 import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
@@ -185,29 +300,43 @@ const router = useRouter()
 const store = useStore()
 const socket = getCurrentInstance().appContext.config.globalProperties.$socket
 
+// Props
+// --------------------------------------------------------------------------
+const props = defineProps({
+  // ponytail: the productivity tab stays hidden until studios ask for it,
+  // its code is kept to bring it back by flipping this default
+  withProductivity: { type: Boolean, default: false }
+})
+
 // State
 // --------------------------------------------------------------------------
-const filterOptions = ['all_tasks', 'due_this_week'].map(name => ({
-  label: name,
-  value: name
-}))
-const sortOptions = [
-  'entity_name',
-  'priority',
-  'task_status_short_name',
-  'start_date',
-  'due_date',
-  'estimation',
-  'last_comment_date'
-].map(name => ({ label: name, value: name }))
-
-const currentFilter = ref('all_tasks')
-const currentSort = ref('priority')
+const SECTION_STORAGE_KEY = 'todos:section'
 const currentSection = ref('todos')
 const daysOff = ref([])
 const isDaysOffLoadingError = ref(false)
 const dayOffError = ref(false)
+// Phones get neither the pending nor the validated tab, and fold the filters
+const phoneQuery = window.matchMedia?.('(max-width: 768px)')
+const isPhone = ref(Boolean(phoneQuery?.matches))
+const areFiltersFolded = ref(true)
 const productionId = ref(undefined)
+const {
+  currentFilter,
+  currentSort,
+  filterAndSortTasks,
+  filterOptions,
+  saveFilters,
+  sortOptions,
+  storedFilters,
+  taskTypeId,
+  taskTypeList
+} = useTaskFilters({
+  storageKey: 'todos:filters',
+  productionId,
+  tasks: computed(() =>
+    store.getters.displayedTodos.concat(store.getters.displayedDoneTasks)
+  )
+})
 const calendarTimeSpents = ref([])
 const selectedDate = ref(moment().format('YYYY-MM-DD'))
 const loading = reactive({
@@ -271,6 +400,43 @@ const { boardStatuses, getBoardStatusesByProduction } = useBoardStatuses(
   selectedProduction
 )
 
+const {
+  isPaper,
+  isProductivityInfoLoading,
+  isProductivityInfoLoadingError,
+  isProductivityLoading,
+  isProductivityLoadingError,
+  isQuotasMetric,
+  onProductivityColumnSelected,
+  onProductivityCountModeChanged,
+  onProductivityLevelChanged,
+  onProductivityMetricChanged,
+  onProductivityPeriodChanged,
+  onProductivityQuotaModeChanged,
+  productivityCloseRoute,
+  productivityCountMode,
+  productivityDaysOff,
+  productivityLevel,
+  productivityMetric,
+  productivityMonth,
+  productivityPeriod,
+  productivityPeriodParams,
+  productivityQuotaMode,
+  productivityQuotas,
+  productivityQuotaShots,
+  productivityTasks,
+  productivityTimeSpents,
+  productivityYear
+} = useProductivity({
+  personId: computed(() => user.value.id),
+  productionId,
+  taskTypeId,
+  openProductions,
+  isActive: computed(() => currentSection.value === 'productivity'),
+  sideColumn: useTemplateRef('productivity-side-column'),
+  loadTimeSpents: range => store.dispatch('loadUserTimeSpentsByPeriod', range)
+})
+
 const todoTabs = computed(() => {
   const hasAvailableBoard = openProductions.value.some(
     production => getBoardStatusesByProduction(production).length
@@ -290,16 +456,26 @@ const todoTabs = computed(() => {
       label: t('tasks.calendar'),
       name: 'calendar'
     },
-    {
-      label: `${t('tasks.pending')} (${pendingTasks.value.length})`,
-      name: 'pending'
-    },
-    {
-      label: `${t('tasks.validated')} (${
-        loading.doneTasks ? '…' : sortedDoneTasks.value.length
-      })`,
-      name: 'done'
-    },
+    props.withProductivity
+      ? {
+          label: t('main.productivity'),
+          name: 'productivity'
+        }
+      : undefined,
+    isPhone.value
+      ? undefined
+      : {
+          label: `${t('tasks.pending')} (${pendingTasks.value.length})`,
+          name: 'pending'
+        },
+    isPhone.value
+      ? undefined
+      : {
+          label: `${t('tasks.validated')} (${
+            loading.doneTasks ? '…' : sortedDoneTasks.value.length
+          })`,
+          name: 'done'
+        },
     {
       label: t('timesheets.timelog_title'),
       name: 'timesheets'
@@ -321,89 +497,16 @@ const loggableDoneTasks = computed(() =>
 // --------------------------------------------------------------------------
 const isActiveTab = tab => currentSection.value === tab
 
+const onPhoneChange = event => {
+  isPhone.value = event.matches
+  updateActiveTab()
+}
+
 const isPending = task =>
   taskStatusMap.value.get(task.task_status_id)?.is_feedback_request
 
 const isLoggable = task =>
   taskTypeMap.value.get(task.task_type_id)?.allow_timelog
-
-const filterAndSortTasks = tasks => {
-  const filtered = productionId.value
-    ? tasks.filter(task => task.project_id === productionId.value)
-    : tasks
-  return sortTasks(filtered, currentFilter.value, currentSort.value)
-}
-
-const sortTasks = (tasks, filter, sort) => {
-  const filtered =
-    filter === 'all_tasks'
-      ? [...tasks]
-      : tasks.filter(task => {
-          const dueDate = parseDate(task.due_date)
-          return moment().startOf('week').isSame(dueDate, 'week')
-        })
-
-  const byDate = field => (a, b) => {
-    if (!a[field]) return 1
-    if (!b[field]) return -1
-    return a[field].localeCompare(b[field])
-  }
-
-  if (sort === 'entity_name') {
-    return filtered.sort(
-      firstBy('project_name')
-        .thenBy('task_type_name')
-        .thenBy('full_entity_name')
-    )
-  }
-  if (sort === 'priority') {
-    return filtered.sort(
-      firstBy('priority', -1)
-        .thenBy(byDate('due_date'))
-        .thenBy('project_name')
-        .thenBy('task_type_name')
-        .thenBy('entity_name')
-    )
-  }
-  if (sort === 'due_date') {
-    return filtered.sort(
-      firstBy(byDate('due_date'))
-        .thenBy('project_name')
-        .thenBy('task_type_name')
-        .thenBy('entity_name')
-    )
-  }
-  if (sort === 'start_date') {
-    return filtered.sort(
-      firstBy(byDate('start_date'))
-        .thenBy('project_name')
-        .thenBy('task_type_name')
-        .thenBy('entity_name')
-    )
-  }
-  if (sort === 'task_status_short_name') {
-    // Follow the task status order from the studio / production
-    // settings instead of sorting short names alphabetically.
-    const statusPriority = task =>
-      getTaskStatusPriorityOfProd(
-        taskStatusMap.value.get(task.task_status_id),
-        productionMap.value.get(task.project_id)
-      )
-    return filtered.sort(
-      firstBy((a, b) => statusPriority(a) - statusPriority(b))
-        .thenBy('task_status_short_name')
-        .thenBy('project_name')
-        .thenBy('task_type_name')
-        .thenBy('entity_name')
-    )
-  }
-  return filtered.sort(
-    firstBy(sort, -1)
-      .thenBy('project_name')
-      .thenBy('task_type_name')
-      .thenBy('entity_name')
-  )
-}
 
 const loadData = async (forced = false) => {
   loading.doneTasks = true
@@ -440,7 +543,7 @@ const resizeHeaders = () => {
   })
 }
 
-const updateActiveTab = () => {
+const isAvailableSection = section => {
   const availableSections = [
     'board',
     'calendar',
@@ -449,8 +552,21 @@ const updateActiveTab = () => {
     'pending',
     'timesheets'
   ]
-  const section = route.query.section
-  currentSection.value = availableSections.includes(section) ? section : 'todos'
+  if (props.withProductivity) availableSections.push('productivity')
+  const isHiddenOnPhone = isPhone.value && ['pending', 'done'].includes(section)
+  return availableSections.includes(section) && !isHiddenOnPhone
+}
+
+const updateActiveTab = () => {
+  const urlSection = route.query.section
+  const storedSection = preferences.getPreference(SECTION_STORAGE_KEY)
+  const restoredSection =
+    !urlSection && isAvailableSection(storedSection) ? storedSection : null
+  const section = urlSection || restoredSection
+  currentSection.value = isAvailableSection(section) ? section : 'todos'
+  if (urlSection) {
+    preferences.setPreference(SECTION_STORAGE_KEY, currentSection.value)
+  }
 
   const day = route.query.day
   if (
@@ -467,8 +583,12 @@ const updateActiveTab = () => {
   )
   if (currentProduction) {
     productionId.value = currentProduction.id
-  } else {
-    router.push({
+  }
+  store.dispatch('clearSelectedTasks')
+
+  if (!currentProduction || restoredSection) {
+    // A restored tab is not a navigation of the user: no history entry
+    return router[restoredSection ? 'replace' : 'push']({
       query: {
         ...route.query,
         productionId: productionId.value,
@@ -476,8 +596,6 @@ const updateActiveTab = () => {
       }
     })
   }
-
-  store.dispatch('clearSelectedTasks')
 }
 
 const setSearchFromUrl = () => {
@@ -548,12 +666,8 @@ const onCalendarTimeClicked = date => {
 const onCalendarDatesChanged = async ({ start, end }) => {
   try {
     calendarTimeSpents.value = await store.dispatch(
-      'loadPersonTimeSpentsByPeriod',
-      {
-        personId: user.value.id,
-        startDate: start,
-        endDate: end
-      }
+      'loadUserTimeSpentsByPeriod',
+      { startDate: start, endDate: end }
     )
   } catch (err) {
     console.error(err)
@@ -605,6 +719,7 @@ const onAssignation = async eventData => {
 // Watchers
 // --------------------------------------------------------------------------
 watch(productionId, () => {
+  saveFilters()
   router.push({
     query: {
       ...route.query,
@@ -627,9 +742,16 @@ watch(
 // Lifecycle
 // --------------------------------------------------------------------------
 onMounted(async () => {
+  phoneQuery?.addEventListener?.('change', onPhoneChange)
   socket.on('task:assign', onAssignation)
   socket.on('task:unassign', onAssignation)
-  updateActiveTab()
+  if (!route.query.productionId && storedFilters.productionId) {
+    await router.replace({
+      query: { ...route.query, productionId: storedFilters.productionId }
+    })
+  }
+  // a later navigation built on the old query would drop the restored tab
+  await updateActiveTab()
   await nextTick()
   await loadData()
   setSearchFromUrl()
@@ -637,6 +759,7 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  phoneQuery?.removeEventListener?.('change', onPhoneChange)
   socket.off('task:assign', onAssignation)
   socket.off('task:unassign', onAssignation)
 })
@@ -647,6 +770,8 @@ useHead({ title: computed(() => `${t('tasks.my_tasks')} - Kitsu`) })
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/task-panels.scss' as panels;
+
 .columns {
   display: flex;
   flex-direction: row;
@@ -658,33 +783,5 @@ useHead({ title: computed(() => `${t('tasks.my_tasks')} - Kitsu`) })
   overflow-y: auto;
 }
 
-.todos {
-  display: flex;
-  flex-direction: column;
-}
-
-.section-tabs {
-  min-height: 36px;
-}
-
-.search-field {
-  margin: 25px 2em 5px 0;
-}
-
-.query-list {
-  margin-top: 0.5em;
-  margin-bottom: 1em;
-}
-
-.data-list {
-  margin-top: 0;
-}
-
-.done-list {
-  margin-top: 2em;
-}
-
-.field {
-  margin-bottom: 0;
-}
+@include panels.task-panels;
 </style>

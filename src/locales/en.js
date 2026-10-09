@@ -918,6 +918,7 @@ export default {
     },
     less_filters: 'Fewer filters',
     link: 'Link',
+    list: 'List',
     load_more: 'Load more',
     loading: 'Loading...',
     loading_data: 'Loading data',
@@ -948,6 +949,7 @@ export default {
     previous: 'Previous',
     profile: 'Profile',
     production: 'Production',
+    productivity: 'Productivity',
     record_audio: 'Record audio',
     record_video: 'Record video',
     recording: {
@@ -1191,6 +1193,8 @@ export default {
     invite_link_error: 'An error occurred while generating the invitation link',
     new_person: 'Add a new user',
     no_task_assigned: 'There are no running tasks assigned to you',
+    no_task_done: 'You have no validated task yet',
+    no_task_pending: 'No task is waiting for a feedback',
     persons: 'user | users',
     project_role: 'Project role',
     seats_remaining: 'no seats remaining | {count} seat remaining | {count} seats remaining',
@@ -2371,6 +2375,7 @@ export default {
     timelog_title: 'Timelog',
     title: 'Timesheets',
     unit: 'Unit',
+    week_total: 'Week: {hours} hours',
     with_time_logged: 'With time logged',
     year: 'Year'
   },
@@ -2388,7 +2393,10 @@ export default {
     delete: 'Delete day off',
     confirm_day_offs: 'Setting these days off will erase all time filled for the affected days. Are you sure you want to continue?',
     confirm_unset_day_offs: 'Days off are currently applied from {start} to {end}. Are you sure you want to remove this period?',
-    error_days_off: 'An error occurred while updating days off.'
+    error_days_off: 'An error occurred while updating days off.',
+    upcoming: 'Upcoming',
+    past: 'Past',
+    nb_days: '{count} day | {count} days'
   },
 
   library: {

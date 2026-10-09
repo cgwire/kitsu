@@ -12,6 +12,7 @@ vi.mock('@/store/api/people', () => ({
     getDaysOff: vi.fn(),
     getDayTable: vi.fn(),
     getMonthTable: vi.fn(),
+    getPersonQuotaShots: vi.fn(),
     getWeekTable: vi.fn(),
     getYearTable: vi.fn(),
     postOrganisationLogo: vi.fn(),
@@ -496,5 +497,33 @@ describe('People store loadTimesheets action', () => {
     expect(commit).toHaveBeenCalledWith('PEOPLE_SET_DAY_OFFS', [])
     expect(consoleError).toHaveBeenCalledWith(error)
     consoleError.mockRestore()
+  })
+})
+
+describe('People store getPersonQuotaShots action', () => {
+  test('forwards the production of the payload', () => {
+    store.actions.getPersonQuotaShots(
+      {},
+      {
+        productionId: 'p1',
+        taskTypeId: 'tt1',
+        detailLevel: 'month',
+        personId: 'u1',
+        year: 2026,
+        month: 10,
+        computeMode: 'raw'
+      }
+    )
+    expect(peopleApi.getPersonQuotaShots).toHaveBeenCalledWith(
+      'p1',
+      'tt1',
+      'u1',
+      'month',
+      2026,
+      10,
+      undefined,
+      undefined,
+      'raw'
+    )
   })
 })

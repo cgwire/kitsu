@@ -1,3 +1,4 @@
+import moment from 'moment-timezone'
 import { nextTick } from 'vue'
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import { createRouter, createWebHashHistory } from 'vue-router'
@@ -13,7 +14,17 @@ vi.mock('vue-i18n', async importOriginal => ({
 // Pre-load the real store to avoid circular-import race from child components.
 import '@/lib/auth'
 
+import { today } from '@/lib/timesheet'
+
 import TimesheetList from '@/components/lists/TimesheetList.vue'
+import PeopleQuotaInfo from '@/components/sides/PeopleQuotaInfo.vue'
+import PeopleTimesheetInfo from '@/components/sides/PeopleTimesheetInfo.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import ProductivityChart from '@/components/widgets/ProductivityChart.vue'
+import UserCalendar from '@/components/widgets/UserCalendar.vue'
 import Todos from '@/components/pages/Todos.vue'
 
 const feedbackStatus = { id: 'status-1', is_feedback_request: true }
@@ -46,6 +57,7 @@ const taskStatusMap = new Map([
 ])
 
 const SearchFieldStub = {
+  props: ['focusOptions'],
   template: '<div />',
   methods: {
     getValue: () => '',
@@ -72,7 +84,14 @@ const DayOffListStub = {
 
 const mountPage = async (
   todos,
-  { actions = {}, errorHandler, query = {} } = {}
+  {
+    actions = {},
+    errorHandler,
+    getters = {},
+    onRouter = () => {},
+    props = {},
+    query = {}
+  } = {}
 ) => {
   const store = createStore({
     getters: {
@@ -94,7 +113,8 @@ const mountPage = async (
       todoListScrollPosition: () => 0,
       todoSearchQueries: () => [],
       todoSelectionGrid: () => ({}),
-      user: () => ({ id: 'user-1' })
+      user: () => ({ id: 'user-1' }),
+      ...getters
     },
     actions: {
       clearSelectedTasks: vi.fn(),
@@ -110,7 +130,9 @@ const mountPage = async (
     routes: [{ path: '/', component: { template: '<div />' } }]
   })
   await router.push({ path: '/', query })
+  onRouter(router)
   const wrapper = shallowMount(Todos, {
+    props,
     global: {
       config: { errorHandler },
       plugins: [
@@ -135,6 +157,233 @@ const mountPage = async (
 }
 
 describe('Todos page', () => {
+  // The filters and the header of the tab below form one panel
+  it.each(['timesheets', 'calendar', 'productivity'])(
+    'attaches the filters to the header of the %s tab',
+    async section => {
+      const wrapper = await mountPage([], {
+        props: { withProductivity: true },
+        query: { section }
+      })
+      expect(wrapper.find('.todos-filters').classes()).toContain('is-attached')
+      wrapper.unmount()
+    }
+  )
+
+  // the autofocus would scroll a phone page down to the search
+  it('focuses the search without scrolling the page', async () => {
+    const wrapper = await mountPage([])
+    expect(wrapper.findComponent(SearchFieldStub).props('focusOptions')).toEqual(
+      { preventScroll: true }
+    )
+    wrapper.unmount()
+  })
+
+  describe('on a phone', () => {
+    const mockPhone = matches =>
+      vi.stubGlobal(
+        'matchMedia',
+        vi.fn(() => ({
+          matches,
+          addEventListener: () => {},
+          removeEventListener: () => {}
+        }))
+      )
+
+    afterEach(() => vi.unstubAllGlobals())
+
+    it('hides the pending and validated tabs', async () => {
+      mockPhone(true)
+      const wrapper = await mountPage([])
+      const names = wrapper
+        .findComponent(RouteSectionTabs)
+        .props('tabs')
+        .map(tab => tab.name)
+      expect(names).not.toContain('pending')
+      expect(names).not.toContain('done')
+      expect(names).toContain('timesheets')
+      wrapper.unmount()
+    })
+
+    it('leaves the validated tab when the screen shrinks', async () => {
+      let onChange
+      vi.stubGlobal(
+        'matchMedia',
+        vi.fn(() => ({
+          matches: false,
+          addEventListener: (_, listener) => (onChange = listener),
+          removeEventListener: () => {}
+        }))
+      )
+      const wrapper = await mountPage([], { query: { section: 'done' } })
+      expect(wrapper.vm.currentSection).toBe('done')
+      onChange({ matches: true })
+      await nextTick()
+      expect(wrapper.vm.currentSection).toBe('todos')
+      wrapper.unmount()
+    })
+
+    it('keeps every tab on a large screen', async () => {
+      mockPhone(false)
+      const wrapper = await mountPage([])
+      const names = wrapper
+        .findComponent(RouteSectionTabs)
+        .props('tabs')
+        .map(tab => tab.name)
+      expect(names).toContain('pending')
+      expect(names).toContain('done')
+      wrapper.unmount()
+    })
+
+    // the funnel toggle of the other pages, next to the search
+    it('folds the filters until the funnel opens them', async () => {
+      mockPhone(true)
+      const wrapper = await mountPage([])
+      const filters = wrapper.find('.todos-filters')
+      const toggle = wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.classes('filters-toggle'))
+      expect(filters.classes()).toContain('collapsed')
+      expect(toggle.props('icon')).toBe('funnel')
+      await toggle.vm.$emit('click')
+      expect(filters.classes()).not.toContain('collapsed')
+      wrapper.unmount()
+    })
+  })
+
+  // The page keeps the picked filters in the local storage
+  afterEach(() => {
+    localStorage.removeItem('todos:filters')
+    localStorage.removeItem('todos:section')
+  })
+
+  describe('filters in the URL', () => {
+    const combo = (wrapper, label) =>
+      wrapper
+        .findAllComponents(ComboboxStyled)
+        .find(c => c.props('label') === label)
+
+    it('reads the filters from the URL', async () => {
+      const wrapper = await mountPage([], {
+        query: { taskTypeId: 'type-2', due: 'due_previous_week', sort: 'due_date' }
+      })
+      expect(wrapper.findComponent(ComboboxTaskType).props('modelValue')).toBe(
+        'type-2'
+      )
+      expect(combo(wrapper, 'tasks.fields.due_date').props('modelValue')).toBe(
+        'due_previous_week'
+      )
+      expect(combo(wrapper, 'main.sorted_by').props('modelValue')).toBe(
+        'due_date'
+      )
+      wrapper.unmount()
+    })
+
+    it('falls back on the filters picked last time', async () => {
+      localStorage.setItem(
+        'todos:filters',
+        JSON.stringify({ taskTypeId: 'type-3', due: 'due_this_week' })
+      )
+      const wrapper = await mountPage([], { query: { due: 'all_tasks' } })
+      expect(wrapper.findComponent(ComboboxTaskType).props('modelValue')).toBe(
+        'type-3'
+      )
+      expect(combo(wrapper, 'tasks.fields.due_date').props('modelValue')).toBe(
+        'all_tasks'
+      )
+      wrapper.unmount()
+    })
+
+    it('writes the picked filters in the URL', async () => {
+      const wrapper = await mountPage([])
+      // the page ends its setup with a search navigation
+      await flushPromises()
+      await wrapper
+        .findComponent(ComboboxTaskType)
+        .vm.$emit('update:modelValue', 'type-1')
+      await combo(wrapper, 'tasks.fields.due_date').vm.$emit(
+        'update:modelValue',
+        'due_this_week'
+      )
+      await combo(wrapper, 'main.sorted_by').vm.$emit(
+        'update:modelValue',
+        'entity_name'
+      )
+      await flushPromises()
+      expect(wrapper.vm.$route.query).toMatchObject({
+        taskTypeId: 'type-1',
+        due: 'due_this_week',
+        sort: 'entity_name'
+      })
+      expect(JSON.parse(localStorage.getItem('todos:filters'))).toMatchObject({
+        taskTypeId: 'type-1',
+        due: 'due_this_week',
+        sort: 'entity_name'
+      })
+      wrapper.unmount()
+    })
+  })
+
+  describe('due date filter', () => {
+    const dueOn = (id, date) => ({
+      ...wipTask,
+      id,
+      due_date: date.format('YYYY-MM-DD')
+    })
+    const thisWeekTask = dueOn('task-6', moment().startOf('week').add(1, 'day'))
+    const lastWeekTask = dueOn(
+      'task-7',
+      moment().startOf('week').subtract(1, 'week').add(1, 'day')
+    )
+
+    it('keeps the tasks due last week', async () => {
+      const wrapper = await mountPage([thisWeekTask, lastWeekTask])
+      const combo = wrapper
+        .findAllComponents(ComboboxStyled)
+        .find(c => c.props('label') === 'tasks.fields.due_date')
+      expect(combo.props('options').map(option => option.value)).toContain(
+        'due_previous_week'
+      )
+      await combo.vm.$emit('update:modelValue', 'due_previous_week')
+      expect(wrapper.vm.notPendingTasks).toEqual([lastWeekTask])
+      wrapper.unmount()
+    })
+  })
+
+  describe('task type filter', () => {
+    const modeling = { id: 'type-1', name: 'Modeling' }
+    const rigging = { id: 'type-2', name: 'Rigging' }
+    const layout = { id: 'type-3', name: 'Layout' }
+    const modelingTask = { ...wipTask, id: 'task-4', task_type_id: 'type-1' }
+    const riggingTask = { ...wipTask, id: 'task-5', task_type_id: 'type-2' }
+    const taskTypeMap = new Map(
+      [modeling, rigging, layout].map(taskType => [taskType.id, taskType])
+    )
+
+    it('offers the task types of the tasks only', async () => {
+      const wrapper = await mountPage([modelingTask, riggingTask], {
+        getters: { taskTypeMap: () => taskTypeMap }
+      })
+      const ids = wrapper
+        .findComponent(ComboboxTaskType)
+        .props('taskTypeList')
+        .map(taskType => taskType.id)
+      expect(ids).toEqual(['', 'type-1', 'type-2'])
+      wrapper.unmount()
+    })
+
+    it('keeps the tasks of the picked task type', async () => {
+      const wrapper = await mountPage([modelingTask, riggingTask], {
+        getters: { taskTypeMap: () => taskTypeMap }
+      })
+      await wrapper
+        .findComponent(ComboboxTaskType)
+        .vm.$emit('update:modelValue', 'type-2')
+      expect(wrapper.vm.notPendingTasks).toEqual([riggingTask])
+      wrapper.unmount()
+    })
+  })
+
   describe('pendingTasks', () => {
     it('keeps the tasks waiting for a feedback', async () => {
       const wrapper = await mountPage([pendingTask, wipTask])
@@ -284,6 +533,640 @@ describe('Todos page', () => {
       await flushPromises()
 
       expect(consoleError).toHaveBeenCalledWith(error)
+      wrapper.unmount()
+    })
+  })
+
+  it('loads the calendar time spents from the user route', async () => {
+    const loadUserTimeSpentsByPeriod = vi.fn(() => [])
+    const wrapper = await mountPage([], {
+      actions: { loadUserTimeSpentsByPeriod },
+      query: { section: 'calendar' }
+    })
+    wrapper
+      .findComponent(UserCalendar)
+      .vm.$emit('dates-changed', { start: '2026-10-01', end: '2026-10-31' })
+    await flushPromises()
+    expect(loadUserTimeSpentsByPeriod.mock.calls[0][1]).toEqual({
+      startDate: '2026-10-01',
+      endDate: '2026-10-31'
+    })
+    wrapper.unmount()
+  })
+
+  describe('productivity tab', () => {
+    const mountProductivity = (query = {}, options = {}) =>
+      mountPage([], {
+        ...options,
+        props: { withProductivity: true },
+        actions: {
+          loadAggregatedPersonTimeSpents: vi.fn(() => []),
+          loadUserTimeSpentsByPeriod: vi.fn(() => []),
+          ...options.actions
+        },
+        query: { section: 'productivity', ...query }
+      })
+
+    it('is a tab of the page', async () => {
+      const wrapper = await mountProductivity()
+      const names = wrapper
+        .findComponent(RouteSectionTabs)
+        .props('tabs')
+        .map(tab => tab.name)
+      expect(names).toContain('productivity')
+      expect(wrapper.vm.currentSection).toBe('productivity')
+      expect(wrapper.findComponent(ProductivityChart).exists()).toBe(true)
+      wrapper.unmount()
+    })
+
+    it('loads the time spents of the period of the URL', async () => {
+      const loadUserTimeSpentsByPeriod = vi.fn(() => [{ duration: 60 }])
+      const wrapper = await mountProductivity(
+        { view: 'day', year: '2026', month: '2' },
+        { actions: { loadUserTimeSpentsByPeriod } }
+      )
+      await flushPromises()
+      expect(loadUserTimeSpentsByPeriod.mock.calls[0][1]).toEqual({
+        startDate: '2026-02-01',
+        endDate: '2026-02-28'
+      })
+      const chart = wrapper.findComponent(ProductivityChart)
+      expect(chart.props()).toMatchObject({
+        level: 'day',
+        year: 2026,
+        month: 2,
+        timeSpents: [{ duration: 60 }]
+      })
+      wrapper.unmount()
+    })
+
+    it('hides the filters that do not apply', async () => {
+      const wrapper = await mountProductivity()
+      expect(wrapper.find('.search-field-column').isVisible()).toBe(false)
+      expect(wrapper.find('.query-list').isVisible()).toBe(false)
+      const combos = wrapper.findAllComponents(ComboboxStyled)
+      expect(combos.every(combo => !combo.isVisible())).toBe(true)
+      expect(wrapper.findComponent(ComboboxTaskType).isVisible()).toBe(true)
+      wrapper.unmount()
+    })
+
+    it('drops the selected period when the view changes', async () => {
+      const wrapper = await mountProductivity({ view: 'day', period: '5' })
+      await flushPromises()
+      wrapper.findComponent(ProductivityChart).vm.$emit('level-changed', 'week')
+      await flushPromises()
+      expect(wrapper.vm.$route.query.view).toBe('week')
+      expect(wrapper.vm.$route.query.period).toBeUndefined()
+      wrapper.unmount()
+    })
+
+    it('keeps the month up to today in the current year', async () => {
+      const wrapper = await mountProductivity({
+        year: String(today.year - 1),
+        month: '12',
+        period: '3'
+      })
+      await flushPromises()
+      wrapper
+        .findComponent(ProductivityChart)
+        .vm.$emit('period-changed', { year: today.year, month: 12 })
+      await flushPromises()
+      expect(wrapper.vm.$route.query).toMatchObject({
+        year: String(today.year),
+        month: String(today.month)
+      })
+      expect(wrapper.vm.$route.query.period).toBeUndefined()
+      wrapper.unmount()
+    })
+
+    it('opens the person panel on the clicked column', async () => {
+      const loadAggregatedPersonTimeSpents = vi.fn(() => [
+        { id: 'task-1', duration: 60, task_type_id: 'type-1' },
+        { id: 'task-2', duration: 0, task_type_id: 'type-1' },
+        { id: 'task-3', duration: 30, task_type_id: 'type-2' }
+      ])
+      const wrapper = await mountProductivity(
+        { view: 'day', year: '2026', month: '2', taskTypeId: 'type-1' },
+        { actions: { loadAggregatedPersonTimeSpents } }
+      )
+      await flushPromises()
+      expect(wrapper.findComponent(PeopleTimesheetInfo).exists()).toBe(false)
+
+      wrapper.findComponent(ProductivityChart).vm.$emit('column-selected', 5)
+      await flushPromises()
+
+      expect(wrapper.vm.$route.query.period).toBe('5')
+      expect(loadAggregatedPersonTimeSpents.mock.calls[0][1]).toMatchObject({
+        personId: 'user-1',
+        detailLevel: 'day',
+        year: 2026,
+        month: 2,
+        day: 5
+      })
+      const panel = wrapper.findComponent(PeopleTimesheetInfo)
+      expect(panel.props()).toMatchObject({
+        level: 'day',
+        year: 2026,
+        month: 2,
+        day: 5,
+        tasks: [{ id: 'task-1', duration: 60, task_type_id: 'type-1' }]
+      })
+      expect(wrapper.findComponent(ProductivityChart).props('selectedIndex')).toBe(
+        5
+      )
+      wrapper.unmount()
+    })
+
+    it('passes the week of a week column to the panel', async () => {
+      const loadAggregatedPersonDaysOff = vi.fn(() => [])
+      const wrapper = await mountProductivity(
+        { view: 'week', year: '2026', period: '12' },
+        { actions: { loadAggregatedPersonDaysOff } }
+      )
+      await flushPromises()
+      expect(wrapper.findComponent(PeopleTimesheetInfo).props()).toMatchObject(
+        { level: 'week', year: 2026, week: 12 }
+      )
+      expect(loadAggregatedPersonDaysOff).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ detailLevel: 'week', year: 2026, week: 12 })
+      )
+      wrapper.unmount()
+    })
+
+    // the phone stacking of the side column applies to this tab only
+    it.each([
+      ['productivity', true],
+      ['todos', false],
+      ['calendar', false]
+    ])('marks the page of the %s tab: %s', async (section, expected) => {
+      const wrapper = await mountProductivity({ section })
+      expect(wrapper.find('.columns').classes('is-productivity')).toBe(
+        expected
+      )
+      wrapper.unmount()
+    })
+
+    it('keeps the rows of the latest load', async () => {
+      let resolveFirst
+      const loadUserTimeSpentsByPeriod = vi
+        .fn()
+        .mockImplementationOnce(
+          () => new Promise(resolve => (resolveFirst = resolve))
+        )
+        .mockResolvedValue([{ duration: 120 }])
+      const wrapper = await mountProductivity(
+        { view: 'day', year: '2026', month: '2' },
+        { actions: { loadUserTimeSpentsByPeriod } }
+      )
+      await flushPromises()
+      wrapper.findComponent(ProductivityChart).vm.$emit('level-changed', 'week')
+      await flushPromises()
+      resolveFirst([{ duration: 60 }])
+      await flushPromises()
+      const chart = wrapper.findComponent(ProductivityChart)
+      expect(chart.props('timeSpents')).toEqual([{ duration: 120 }])
+      expect(chart.props('isLoading')).toBe(false)
+      wrapper.unmount()
+    })
+
+    it('keeps the panel tasks of the latest period', async () => {
+      let resolveFirst
+      const loadAggregatedPersonTimeSpents = vi
+        .fn()
+        .mockImplementationOnce(
+          () => new Promise(resolve => (resolveFirst = resolve))
+        )
+        .mockResolvedValue([{ id: 'task-2', duration: 30 }])
+      const wrapper = await mountProductivity(
+        { view: 'day', year: '2026', month: '2', period: '3' },
+        { actions: { loadAggregatedPersonTimeSpents } }
+      )
+      await flushPromises()
+      wrapper.findComponent(ProductivityChart).vm.$emit('column-selected', 4)
+      await flushPromises()
+      resolveFirst([{ id: 'task-1', duration: 60 }])
+      await flushPromises()
+      const panel = wrapper.findComponent(PeopleTimesheetInfo)
+      expect(panel.props('tasks')).toEqual([{ id: 'task-2', duration: 30 }])
+      expect(panel.props('isLoading')).toBe(false)
+      wrapper.unmount()
+    })
+
+    it('closes the panel by dropping the period', async () => {
+      const wrapper = await mountProductivity({
+        view: 'month',
+        year: '2026',
+        period: '4'
+      })
+      await flushPromises()
+      const panel = wrapper.findComponent(PeopleTimesheetInfo)
+      expect(panel.props('month')).toBe(4)
+      const closeRoute = panel.props('closeRoute')
+      expect(closeRoute.query.period).toBeUndefined()
+      expect(closeRoute.query).toMatchObject({
+        section: 'productivity',
+        view: 'month',
+        year: '2026'
+      })
+      wrapper.unmount()
+    })
+
+    describe('quotas', () => {
+      const shotsProduction = { id: 'prod-1', production_type: 'short' }
+      const assetsProduction = { id: 'prod-2', production_type: 'assets' }
+      const paperProduction = {
+        id: 'prod-3',
+        production_type: 'tvshow',
+        production_style: '2dpaper'
+      }
+      const productions = [shotsProduction, assetsProduction, paperProduction]
+      const productionGetters = {
+        openProductions: () => productions,
+        productionMap: () => new Map(productions.map(p => [p.id, p]))
+      }
+      const mountQuotas = (query = {}, actions = {}) =>
+        mountProductivity(
+          { metric: 'quotas', ...query },
+          {
+            actions: {
+              getPersonQuotaShots: vi.fn(() => []),
+              loadPersonQuotas: vi.fn((_, { productionId }) => ({
+                productionId
+              })),
+              ...actions
+            },
+            getters: productionGetters
+          }
+        )
+
+      it('loads the quotas of every open production with shots', async () => {
+        const loadPersonQuotas = vi.fn((_, { productionId }) => ({
+          productionId
+        }))
+        const wrapper = await mountQuotas(
+          { quotaMode: 'done' },
+          { loadPersonQuotas }
+        )
+        await flushPromises()
+        expect(loadPersonQuotas.mock.calls.map(call => call[1])).toEqual([
+          { productionId: 'prod-1', personId: 'user-1', computeMode: 'done' },
+          { productionId: 'prod-3', personId: 'user-1', computeMode: 'done' }
+        ])
+        const chart = wrapper.findComponent(ProductivityChart)
+        expect(chart.props()).toMatchObject({
+          metric: 'quotas',
+          quotaMode: 'done',
+          countMode: 'frames',
+          isPaper: false,
+          isLoading: false,
+          quotas: [{ productionId: 'prod-1' }, { productionId: 'prod-3' }]
+        })
+        wrapper.unmount()
+      })
+
+      it('loads the quotas of the filtered production only', async () => {
+        const loadPersonQuotas = vi.fn(() => ({}))
+        const wrapper = await mountQuotas(
+          { productionId: 'prod-3' },
+          { loadPersonQuotas }
+        )
+        await flushPromises()
+        expect(loadPersonQuotas.mock.calls.map(call => call[1])).toEqual([
+          {
+            productionId: 'prod-3',
+            personId: 'user-1',
+            computeMode: 'weighted'
+          }
+        ])
+        // a paper production counts drawings
+        expect(wrapper.findComponent(ProductivityChart).props()).toMatchObject(
+          { isPaper: true, countMode: 'drawings', quotas: [{}] }
+        )
+        wrapper.unmount()
+      })
+
+      it('does not load the quotas in the time metric', async () => {
+        const loadPersonQuotas = vi.fn(() => ({}))
+        const wrapper = await mountQuotas({ metric: 'time' }, { loadPersonQuotas })
+        await flushPromises()
+        expect(loadPersonQuotas).not.toHaveBeenCalled()
+        wrapper.unmount()
+      })
+
+      it('keeps the quotas of the latest load', async () => {
+        let resolveFirst
+        const loadPersonQuotas = vi
+          .fn()
+          .mockImplementationOnce(
+            () => new Promise(resolve => (resolveFirst = resolve))
+          )
+          .mockResolvedValue({ mode: 'done' })
+        const wrapper = await mountQuotas(
+          { productionId: 'prod-1' },
+          { loadPersonQuotas }
+        )
+        await flushPromises()
+        wrapper
+          .findComponent(ProductivityChart)
+          .vm.$emit('quota-mode-changed', 'done')
+        await flushPromises()
+        resolveFirst({ mode: 'weighted' })
+        await flushPromises()
+        const chart = wrapper.findComponent(ProductivityChart)
+        expect(chart.props('quotas')).toEqual([{ mode: 'done' }])
+        expect(chart.props('isLoading')).toBe(false)
+        wrapper.unmount()
+      })
+
+      it('keeps the loaded quotas when the period changes', async () => {
+        const loadPersonQuotas = vi.fn(() => ({}))
+        const wrapper = await mountQuotas(
+          { view: 'day', year: '2026', month: '2' },
+          { loadPersonQuotas }
+        )
+        await flushPromises()
+        expect(loadPersonQuotas).toHaveBeenCalledTimes(2)
+        const chart = wrapper.findComponent(ProductivityChart)
+        chart.vm.$emit('period-changed', { year: 2025, month: 3 })
+        await flushPromises()
+        chart.vm.$emit('level-changed', 'week')
+        await flushPromises()
+        expect(wrapper.vm.$route.query).toMatchObject({
+          year: '2025',
+          view: 'week'
+        })
+        expect(loadPersonQuotas).toHaveBeenCalledTimes(2)
+        expect(chart.props('quotas')).toEqual([{}, {}])
+        wrapper.unmount()
+      })
+
+      it('drops the quotas answered after a switch to the time metric', async () => {
+        let resolveQuotas
+        const loadPersonQuotas = vi.fn(
+          () => new Promise(resolve => (resolveQuotas = resolve))
+        )
+        const loadUserTimeSpentsByPeriod = vi.fn(() => [{ duration: 60 }])
+        const wrapper = await mountQuotas(
+          { productionId: 'prod-1' },
+          { loadPersonQuotas, loadUserTimeSpentsByPeriod }
+        )
+        await flushPromises()
+        const chart = wrapper.findComponent(ProductivityChart)
+        chart.vm.$emit('metric-changed', 'time')
+        await flushPromises()
+        resolveQuotas({ mode: 'late' })
+        await flushPromises()
+        expect(chart.props()).toMatchObject({
+          metric: 'time',
+          isLoading: false,
+          quotas: [],
+          timeSpents: [{ duration: 60 }]
+        })
+        wrapper.unmount()
+      })
+
+      it('writes the metric and the modes in the URL', async () => {
+        const wrapper = await mountProductivity({
+          view: 'day',
+          period: '5'
+        })
+        await flushPromises()
+        const chart = () => wrapper.findComponent(ProductivityChart)
+        expect(chart().props('metric')).toBe('time')
+        chart().vm.$emit('metric-changed', 'quotas')
+        await flushPromises()
+        expect(wrapper.vm.$route.query.metric).toBe('quotas')
+        expect(wrapper.vm.$route.query.period).toBeUndefined()
+        chart().vm.$emit('quota-mode-changed', 'feedback')
+        await flushPromises()
+        chart().vm.$emit('count-mode-changed', 'seconds')
+        await flushPromises()
+        expect(wrapper.vm.$route.query).toMatchObject({
+          metric: 'quotas',
+          quotaMode: 'feedback',
+          countMode: 'seconds'
+        })
+        expect(chart().props()).toMatchObject({
+          metric: 'quotas',
+          quotaMode: 'feedback',
+          countMode: 'seconds'
+        })
+        wrapper.unmount()
+      })
+
+      it('opens the quota panel on the clicked column', async () => {
+        const getPersonQuotaShots = vi.fn((_, { productionId }) => [
+          { id: `shot-${productionId}`, weight: 1 }
+        ])
+        const wrapper = await mountQuotas(
+          {
+            view: 'day',
+            year: '2026',
+            month: '2',
+            taskTypeId: 'type-1',
+            countMode: 'seconds',
+            quotaMode: 'feedback'
+          },
+          { getPersonQuotaShots }
+        )
+        await flushPromises()
+        wrapper.findComponent(ProductivityChart).vm.$emit('column-selected', 5)
+        await flushPromises()
+        expect(wrapper.findComponent(PeopleTimesheetInfo).exists()).toBe(false)
+        // one call per production the chart counts, assets only ones aside
+        const params = {
+          personId: 'user-1',
+          taskTypeId: 'type-1',
+          detailLevel: 'day',
+          year: 2026,
+          month: 2,
+          day: 5,
+          computeMode: 'feedback'
+        }
+        expect(getPersonQuotaShots.mock.calls.map(call => call[1])).toEqual([
+          { productionId: 'prod-1', ...params },
+          { productionId: 'prod-3', ...params }
+        ])
+        const panel = wrapper.findComponent(PeopleQuotaInfo)
+        expect(panel.props()).toMatchObject({
+          level: 'day',
+          year: 2026,
+          month: 2,
+          day: 5,
+          countMode: 'seconds',
+          isLoading: false,
+          shots: [
+            { id: 'shot-prod-1', weight: 1 },
+            { id: 'shot-prod-3', weight: 1 }
+          ]
+        })
+        expect(panel.props('closeRoute').query.period).toBeUndefined()
+        wrapper.unmount()
+      })
+
+      it('loads the panel shots of the filtered production', async () => {
+        const getPersonQuotaShots = vi.fn(() => [])
+        const wrapper = await mountQuotas(
+          { view: 'week', year: '2026', period: '12', productionId: 'prod-1' },
+          { getPersonQuotaShots }
+        )
+        await flushPromises()
+        expect(getPersonQuotaShots.mock.calls[0][1]).toMatchObject({
+          productionId: 'prod-1',
+          detailLevel: 'week',
+          year: 2026,
+          week: 12
+        })
+        wrapper.unmount()
+      })
+
+      it('keeps the panel shots of the latest period', async () => {
+        let resolveFirst
+        const getPersonQuotaShots = vi
+          .fn()
+          .mockImplementationOnce(
+            () => new Promise(resolve => (resolveFirst = resolve))
+          )
+          .mockResolvedValue([{ id: 'shot-2' }])
+        const wrapper = await mountQuotas(
+          {
+            view: 'day',
+            year: '2026',
+            month: '2',
+            period: '3',
+            productionId: 'prod-1'
+          },
+          { getPersonQuotaShots }
+        )
+        await flushPromises()
+        wrapper.findComponent(ProductivityChart).vm.$emit('column-selected', 4)
+        await flushPromises()
+        resolveFirst([{ id: 'shot-1' }])
+        await flushPromises()
+        const panel = wrapper.findComponent(PeopleQuotaInfo)
+        expect(panel.props('shots')).toEqual([{ id: 'shot-2' }])
+        expect(panel.props('isLoading')).toBe(false)
+        wrapper.unmount()
+      })
+    })
+  })
+
+  // The productivity tab stays hidden until studios ask for it
+  it('hides the productivity tab by default', async () => {
+    const loadUserTimeSpentsByPeriod = vi.fn(() => [])
+    const wrapper = await mountPage([], {
+      actions: { loadUserTimeSpentsByPeriod },
+      query: { section: 'productivity' }
+    })
+    await flushPromises()
+    expect(loadUserTimeSpentsByPeriod).not.toHaveBeenCalled()
+    expect(wrapper.findComponent(ProductivityChart).exists()).toBe(false)
+    const names = wrapper
+      .findComponent(RouteSectionTabs)
+      .props('tabs')
+      .map(tab => tab.name)
+    expect(names).not.toContain('productivity')
+    expect(wrapper.findComponent(RouteSectionTabs).props('activeTab')).toBe(
+      'todos'
+    )
+    expect(wrapper.find('.columns').classes()).not.toContain('is-productivity')
+    wrapper.unmount()
+  })
+
+  describe('last tab', () => {
+    afterEach(() => vi.unstubAllGlobals())
+
+    const activeTab = wrapper =>
+      wrapper.findComponent(RouteSectionTabs).props('activeTab')
+
+    it('opens the tab picked last time', async () => {
+      localStorage.setItem('todos:section', 'calendar')
+      const wrapper = await mountPage([])
+      await flushPromises()
+      expect(activeTab(wrapper)).toBe('calendar')
+      expect(wrapper.vm.$route.query.section).toBe('calendar')
+      wrapper.unmount()
+    })
+
+    it('restores the tab without a new history entry', async () => {
+      localStorage.setItem('todos:section', 'calendar')
+      let replace
+      const wrapper = await mountPage([], {
+        onRouter: router => {
+          replace = vi.spyOn(router, 'replace')
+        }
+      })
+      await flushPromises()
+      expect(
+        replace.mock.calls.some(([to]) => to.query?.section === 'calendar')
+      ).toBe(true)
+      wrapper.unmount()
+    })
+
+    it('keeps the restored tab next to the stored production', async () => {
+      localStorage.setItem('todos:section', 'timesheets')
+      localStorage.setItem(
+        'todos:filters',
+        JSON.stringify({ productionId: 'prod-1' })
+      )
+      const wrapper = await mountPage([], {
+        getters: { openProductions: () => [{ id: 'prod-1' }] }
+      })
+      await flushPromises()
+      expect(activeTab(wrapper)).toBe('timesheets')
+      expect(wrapper.vm.$route.query).toMatchObject({
+        productionId: 'prod-1',
+        section: 'timesheets'
+      })
+      wrapper.unmount()
+    })
+
+    it('lets the URL beat the stored tab', async () => {
+      localStorage.setItem('todos:section', 'calendar')
+      const wrapper = await mountPage([], { query: { section: 'daysoff' } })
+      await flushPromises()
+      expect(activeTab(wrapper)).toBe('daysoff')
+      expect(wrapper.vm.$route.query.section).toBe('daysoff')
+      wrapper.unmount()
+    })
+
+    it.each(['productivity', 'unknown'])(
+      'falls back on the tasks tab for a stored %s tab',
+      async section => {
+        localStorage.setItem('todos:section', section)
+        const wrapper = await mountPage([])
+        await flushPromises()
+        expect(activeTab(wrapper)).toBe('todos')
+        wrapper.unmount()
+      }
+    )
+
+    it('falls back on the tasks tab for a stored tab hidden on phones', async () => {
+      vi.stubGlobal(
+        'matchMedia',
+        vi.fn(() => ({
+          matches: true,
+          addEventListener: () => {},
+          removeEventListener: () => {}
+        }))
+      )
+      localStorage.setItem('todos:section', 'done')
+      const wrapper = await mountPage([])
+      await flushPromises()
+      expect(activeTab(wrapper)).toBe('todos')
+      wrapper.unmount()
+    })
+
+    it('stores the tab opened from the URL', async () => {
+      const wrapper = await mountPage([], { query: { section: 'calendar' } })
+      await flushPromises()
+      expect(localStorage.getItem('todos:section')).toBe('calendar')
+      await wrapper.vm.$router.push({
+        query: { ...wrapper.vm.$route.query, section: 'daysoff' }
+      })
+      await flushPromises()
+      expect(localStorage.getItem('todos:section')).toBe('daysoff')
       wrapper.unmount()
     })
   })
