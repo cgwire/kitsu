@@ -8,6 +8,8 @@ import auth from '@/lib/auth'
 
 import ServerDown from '@/components/pages/ServerDown.vue'
 
+import { recordUnhandledRejections } from '../fixtures/unhandled-rejections'
+
 const TARGET = '/productions/production-1/sequences'
 
 const Page = { template: '<div />' }
@@ -307,6 +309,82 @@ describe('pages/ServerDown', () => {
       expect(auth.isServerLoggedIn).toHaveBeenCalledTimes(1)
       await vi.advanceTimersByTimeAsync(5000)
       expect(auth.isServerLoggedIn).toHaveBeenCalledTimes(2)
+    })
+  })
+
+  // The server answers, but a guard throws on the redirect: a bug, which the
+  // router reports, and which another redirect would only run again.
+  describe('when the redirect hits a bug', () => {
+    const bug = new TypeError("Cannot read properties of null (reading 'forEach')")
+
+    beforeEach(() => {
+      vi.useFakeTimers()
+      auth.isServerLoggedIn.mockResolvedValue()
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    // The copy of the loading screen plans a check in case the guard sends
+    // back here, then the guard throws.
+    const failRedirect = async () => {
+      let failGuard
+      let textBeforeBug
+      const reportError = vi.fn()
+      const rejections = await recordUnhandledRejections(async () => {
+        const router = await mountPage({
+          beforeEnter: () =>
+            new Promise((resolve, reject) => {
+              failGuard = reject
+            })
+        })
+        router.onError(reportError)
+        await flushPromises()
+        await swapForLoadingScreen()
+        textBeforeBug = wrapper.text()
+        failGuard(bug)
+        await flushPromises()
+      })
+      return { rejections, reportError, textBeforeBug }
+    }
+
+    // Sentry captures the error the router reports, then skips the same
+    // error once left unhandled.
+    test('leaves the bug to Sentry once', async () => {
+      const { rejections, reportError } = await failRedirect()
+      expect(reportError).toHaveBeenCalledTimes(1)
+      expect(reportError.mock.calls[0][0]).toBe(bug)
+      expect(rejections).toHaveLength(1)
+      expect(rejections[0]).toBe(bug)
+    })
+
+    test('stops checking the server', async () => {
+      await failRedirect()
+      expect(vi.getTimerCount()).toBe(1)
+      await vi.advanceTimersByTimeAsync(60000)
+      window.dispatchEvent(new Event('online'))
+      await flushPromises()
+      expect(auth.isServerLoggedIn).toHaveBeenCalledTimes(1)
+    })
+
+    test('stops telling that Kitsu keeps trying', async () => {
+      const { textBeforeBug } = await failRedirect()
+      expect(textBeforeBug).toContain('server_down.retrying')
+      expect(wrapper.text()).toContain('server_down.title')
+      expect(wrapper.text()).not.toContain('server_down.retrying')
+    })
+
+    test('checks again on the next outage', async () => {
+      await failRedirect()
+      wrapper.unmount()
+      auth.isServerLoggedIn.mockRejectedValue(new Error('unreachable'))
+      await mountPage()
+      await flushPromises()
+      expect(wrapper.text()).toContain('server_down.retrying')
+      expect(auth.isServerLoggedIn).toHaveBeenCalledTimes(2)
+      await vi.advanceTimersByTimeAsync(5000)
+      expect(auth.isServerLoggedIn).toHaveBeenCalledTimes(3)
     })
   })
 })

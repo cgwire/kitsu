@@ -1,6 +1,7 @@
 import Bowser from 'bowser'
 
 import auth from '@/lib/auth'
+import errors from '@/lib/errors'
 import init from '@/lib/init'
 import lang from '@/lib/lang'
 import sentry from '@/lib/sentry'
@@ -125,7 +126,11 @@ export const routes = [
         try {
           const ready = await init()
           if (!ready) return false
-        } catch {
+        } catch (err) {
+          // The server-down page loads the app again once the server answers,
+          // where a bug would fail again on each check: it fails the
+          // navigation instead, which Sentry reports.
+          if (!errors.isRequestFailure(err)) throw err
           return { name: 'server-down' }
         }
       } else {
@@ -168,8 +173,10 @@ export const routes = [
           const ready = await init()
           store.commit('DATA_LOADING_END')
           if (!ready) return false
-        } catch {
+        } catch (err) {
           store.commit('DATA_LOADING_END')
+          // As in the home guard: a bug fails the navigation.
+          if (!errors.isRequestFailure(err)) throw err
           return { name: 'server-down', query: { redirect: to.fullPath } }
         }
       } else {

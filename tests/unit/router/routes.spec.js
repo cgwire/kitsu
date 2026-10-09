@@ -49,6 +49,7 @@ vi.mock('@/components/Main.vue', () => ({ default: {} }))
 vi.mock('@/components/pages/Login.vue', () => ({ default: {} }))
 
 import auth from '@/lib/auth'
+import { markRequestFailure } from '@/lib/errors'
 import init from '@/lib/init'
 import store from '@/store'
 import taskTypeStore from '@/store/modules/tasktypes'
@@ -57,6 +58,16 @@ import { routes } from '@/router/routes'
 const appLoginRoute = routes.find(route => route.name === 'app-login')
 const homeRoute = routes.find(route => route.name === 'home')
 const mainRoute = routes.find(route => route.path === '/')
+
+// The API client marks the failures of its requests.
+const buildRequestFailure = () => {
+  const failure = new Error('api down')
+  markRequestFailure(failure)
+  return failure
+}
+
+const buildBug = () =>
+  new TypeError("Cannot read properties of null (reading 'forEach')")
 
 // The admin-only pages: removing the requiresAdmin flag from any of them
 // would silently expose the page to every logged-in user.
@@ -188,7 +199,7 @@ describe('router/routes', () => {
     // The server-down page opens the requested page once the server answers.
     test('redirects to server-down with the requested page when the initial load fails', async () => {
       taskTypeStore.state.taskTypes = []
-      init.mockRejectedValue(new Error('api down'))
+      init.mockRejectedValue(buildRequestFailure())
       const result = await runGuard({
         fullPath: '/productions/production-1/assets?search=hero',
         matched: [{ meta: {} }]
@@ -197,6 +208,18 @@ describe('router/routes', () => {
         name: 'server-down',
         query: { redirect: '/productions/production-1/assets?search=hero' }
       })
+    })
+
+    // Sentry reports the errors of the guards. The server-down page would
+    // load the app again on each of its checks, and fail again.
+    test('leaves a bug of the initial load to Sentry', async () => {
+      taskTypeStore.state.taskTypes = []
+      const bug = buildBug()
+      init.mockRejectedValue(bug)
+      await expect(
+        runGuard({ fullPath: '/productions', matched: [{ meta: {} }] })
+      ).rejects.toBe(bug)
+      expect(store.commit).toHaveBeenCalledWith('DATA_LOADING_END')
     })
 
     test('aborts the navigation when the initial load ends on the 2FA redirect', async () => {
@@ -229,6 +252,18 @@ describe('router/routes', () => {
       init.mockResolvedValue(true)
       const result = await homeRoute.beforeEnter({}, {})
       expect(result).toEqual({ name: 'open-productions' })
+    })
+
+    test('redirects to server-down when the initial load fails', async () => {
+      init.mockRejectedValue(buildRequestFailure())
+      const result = await homeRoute.beforeEnter({}, {})
+      expect(result).toEqual({ name: 'server-down' })
+    })
+
+    test('leaves a bug of the initial load to Sentry', async () => {
+      const bug = buildBug()
+      init.mockRejectedValue(bug)
+      await expect(homeRoute.beforeEnter({}, {})).rejects.toBe(bug)
     })
   })
 

@@ -7,13 +7,15 @@
     <p>
       {{ $t('server_down.text') }}
     </p>
-    <p class="retrying">
+    <p class="retrying" v-if="isRetrying">
       {{ $t('server_down.retrying') }}
     </p>
   </div>
 </template>
 
 <script>
+import { ref } from 'vue'
+
 // Quick checks catch a short outage, like a restart, then one a minute is
 // enough.
 const FIRST_RETRY_DELAY = 5000
@@ -23,6 +25,9 @@ const MAX_RETRY_DELAY = 60000
 // checks keep slowing down while the / guard sends back here.
 let isRedirecting = false
 let retryDelay = FIRST_RETRY_DELAY
+// A redirect that throws, on a bug in a guard for instance, would throw again
+// after the next check. A ref: the copy on screen drops its retrying line.
+const isRetrying = ref(true)
 </script>
 
 <script setup>
@@ -55,6 +60,7 @@ const scheduleCheck = () => {
 }
 
 const checkServer = async () => {
+  if (!isRetrying.value) return
   // The redirect runs the / guard, whose loading screen mounts this page
   // again while the navigation waits: a check from that copy would push the
   // redirect anew and restart the guard. Check later, in case the guard
@@ -79,6 +85,9 @@ const checkServer = async () => {
   isRedirecting = true
   try {
     await router.push(route.query.redirect || '/')
+  } catch (err) {
+    isRetrying.value = false
+    throw err
   } finally {
     isRedirecting = false
   }
@@ -101,7 +110,10 @@ const onVisibilityChange = () => {
 
 onMounted(() => {
   // A copy mounted during a redirect goes on with the same outage.
-  if (!isRedirecting) retryDelay = FIRST_RETRY_DELAY
+  if (!isRedirecting) {
+    retryDelay = FIRST_RETRY_DELAY
+    isRetrying.value = true
+  }
   window.addEventListener('online', checkServerNow)
   document.addEventListener('visibilitychange', onVisibilityChange)
   checkServer()
