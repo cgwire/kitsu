@@ -139,7 +139,12 @@ export const useProductivity = ({
     router.replace({ query: { ...route.query, countMode } })
 
   // the side column stacks under the chart on a phone, out of view
+  // a second click on the selected column closes its period
   const onProductivityColumnSelected = async index => {
+    if (index === productivityPeriod.value) {
+      await router.push(productivityCloseRoute.value)
+      return
+    }
     await router.push({ query: { ...route.query, period: `${index}` } })
     if (globalThis.matchMedia?.('(max-width: 768px)').matches) {
       await nextTick()
