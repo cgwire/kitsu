@@ -318,6 +318,7 @@ export const getFilters = ({
   entryIndex,
   assetTypes = [],
   taskTypes = [],
+  readyForTaskTypes = taskTypes,
   taskStatuses = [],
   descriptors = [],
   departments = [],
@@ -334,7 +335,7 @@ export const getFilters = ({
     ...getDepartmentFilters(departments, query),
     ...(getThumbnailFilters(query) || []),
     ...getPriorityFilter(taskTypes, query),
-    ...getReadyForFilter(taskTypes, query),
+    ...getReadyForFilter(readyForTaskTypes, query),
     ...getAssetsReadyFilter(taskTypes, query),
     ...getExcludingFilters(entryIndex, query)
   ]
