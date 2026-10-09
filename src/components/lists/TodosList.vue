@@ -855,6 +855,12 @@ input[type='number'] {
     margin: 1.5em 0;
   }
 
+  // the status wrapper pads itself inline: its tag stopped 6px short of the
+  // other card values
+  .datatable--cards .datatable-body td.status :deep(.status-wrapper) {
+    padding-right: 0 !important;
+  }
+
   // The production avatar opens the card head, left of the thumbnail: the
   // card wraps as a row, every other line takes the full width.
   // the global card rule also names :hover and :last-child, which a bare
