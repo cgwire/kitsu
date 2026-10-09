@@ -3,9 +3,8 @@ import { config, mount } from '@vue/test-utils'
 import i18n from '@/lib/i18n'
 import WrongBrowser from '@/components/pages/WrongBrowser.vue'
 
-// Mount with the app's real legacy-mode i18n: the useI18n bridge resolves its
-// composer in onBeforeMount only, which a $t mock would mask (and the mock
-// collides with the legacy mixin on script setup components).
+// Mount with the app's real i18n: the global $t mock would mask the actual
+// rendered strings.
 const mountPage = () => {
   const globalT = config.global.mocks.$t
   delete config.global.mocks.$t

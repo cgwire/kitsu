@@ -21,7 +21,6 @@ const { name, version } = Bowser.getParser(
 const detected = [name, version?.split('.')[0]].filter(Boolean).join(' ')
 
 // Computed
-// Keep t() in a computed: the legacy vue-i18n bridge returns '' during setup.
 const outdatedText = computed(() =>
   t('wrong_browser.outdated', {
     browser: detected || t('main.unknown')

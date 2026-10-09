@@ -609,11 +609,11 @@ watch(
     if (userLocale !== 'en') return
     const variant = currentProduction.value?.production_style
     if (['nft', 'video-game'].includes(variant)) {
-      i18n.global.silentFallbackWarn = true
-      i18n.global.locale = `en_${variant}`
+      i18n.global.fallbackWarn = false
+      i18n.global.locale.value = `en_${variant}`
     } else {
-      i18n.global.silentFallbackWarn = false
-      i18n.global.locale = 'en'
+      i18n.global.fallbackWarn = true
+      i18n.global.locale.value = 'en'
     }
   },
   { immediate: true }
