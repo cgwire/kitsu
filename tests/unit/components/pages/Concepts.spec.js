@@ -44,6 +44,9 @@ const buildConcept = (id, createdBy = 'person-1', links = []) => ({
   tasks: [{ id: `task-${id}`, task_status_id: 'status-todo' }]
 })
 
+// A concept whose creation stopped after the entity has no task.
+const buildTasklessConcept = id => ({ ...buildConcept(id), tasks: [] })
+
 const mountPage = async ({
   concepts = [],
   dispatch = vi.fn(() => Promise.resolve()),
@@ -132,6 +135,29 @@ describe('Concepts page', () => {
       task: concept.tasks[0],
       taskStatusId: 'status-done'
     })
+  })
+
+  // Zou sends the status changes of every task of the studio.
+  test('follows the status changes past a concept without task', async () => {
+    const concept = buildConcept('concept-1')
+    const { handlers, store } = await mountPage({
+      concepts: [buildTasklessConcept('concept-0'), concept]
+    })
+
+    handlers['task:status-changed']({
+      task_id: 'task-shot-1',
+      new_task_status_id: 'status-done'
+    })
+    handlers['task:status-changed']({
+      task_id: 'task-concept-1',
+      new_task_status_id: 'status-done'
+    })
+
+    expect(
+      store.commit.mock.calls.filter(([type]) => type === 'UPDATE_TASK')
+    ).toEqual([
+      ['UPDATE_TASK', { task: concept.tasks[0], taskStatusId: 'status-done' }]
+    ])
   })
 
   test('selects the concept whose card is clicked', async () => {
@@ -1061,6 +1087,19 @@ describe('Concepts page', () => {
 
     expect(wrapper.findAll('.item')).toHaveLength(1)
     expect(field.props('people')).toHaveLength(2)
+  })
+
+  test('leaves a concept without task out of a status filter', async () => {
+    const { wrapper } = await mountPage({
+      concepts: [buildTasklessConcept('concept-0'), buildConcept('concept-1')],
+      query: { status: 'status-todo' }
+    })
+
+    expect(
+      wrapper
+        .findAllComponents(ConceptCard)
+        .map(card => card.props('concept').id)
+    ).toEqual(['concept-1'])
   })
 
   test('opens the upload modal with the dropped files', async () => {

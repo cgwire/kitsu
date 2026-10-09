@@ -460,7 +460,7 @@ const matchingConcepts = computed(() =>
     .filter(
       concept =>
         !filters.taskStatusId ||
-        concept.tasks[0].task_status_id === filters.taskStatusId
+        concept.tasks[0]?.task_status_id === filters.taskStatusId
     )
     .filter(
       concept =>
@@ -804,7 +804,7 @@ const onFileDragLeave = () => {
 
 const onTaskStatusChanged = eventData => {
   const concept = concepts.value.find(
-    concept => concept.tasks[0].id === eventData.task_id
+    concept => concept.tasks[0]?.id === eventData.task_id
   )
   if (concept) {
     store.commit('UPDATE_TASK', {
