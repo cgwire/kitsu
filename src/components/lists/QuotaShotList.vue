@@ -20,7 +20,7 @@
         <tr :key="`shot-quota-${shot.id}`" v-for="shot in shots">
           <td>{{ shot.full_name }}</td>
           <td>{{ getQuota(shot) }}</td>
-          <td>{{ shot.weight }}</td>
+          <td>{{ getWeight(shot) }}</td>
         </tr>
       </tbody>
     </table>
@@ -73,6 +73,10 @@ const getQuota = shot =>
   props.countMode === 'seconds'
     ? frameToSeconds(shot.nb_frames, getShotProduction(shot), shot)
     : shot.nb_frames
+
+// the weights add up float errors, such as 1.1800000000000002
+const getWeight = shot =>
+  shot.weight == null ? '' : Math.round(shot.weight * 100) / 100
 </script>
 
 <style lang="scss" scoped>

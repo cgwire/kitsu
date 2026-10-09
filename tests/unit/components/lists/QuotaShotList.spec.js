@@ -53,4 +53,18 @@ describe('lists/QuotaShotList', () => {
     )
     expect(secondsCells(withoutProduction)).toEqual(['1'])
   })
+
+  test('rounds the weights to two decimals', () => {
+    const wrapper = mountList(
+      [
+        { id: 'shot-1', project_id: 'prod-24', weight: 1.1800000000000002 },
+        { id: 'shot-2', project_id: 'prod-24', weight: 1 },
+        { id: 'shot-3', project_id: 'prod-24', weight: 0.125 }
+      ],
+      productions[0]
+    )
+    expect(
+      wrapper.findAll('tbody tr').map(row => row.findAll('td')[2].text())
+    ).toEqual(['1.18', '1', '0.13'])
+  })
 })
