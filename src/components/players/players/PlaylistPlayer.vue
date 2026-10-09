@@ -3831,6 +3831,12 @@ const moveSelectedEntity = (entityToMove, toMoveIndex, targetIndex) => {
   }
 }
 
+// On a phone the keyboard resizes the player as a note is typed: the note
+// stays and only the overlay follows the media. AnnotationCanvas resizes
+// the canvas once the typing ends, which reloads the annotations.
+const isTypingNote = () =>
+  Boolean(fabricCanvas.value?.getActiveObject()?.isEditing)
+
 const resetHeight = () => {
   nextTick(() => {
     let height = window.innerHeight - 90
@@ -3860,7 +3866,8 @@ const resetHeight = () => {
       rawPlayerComparison.value.resetHeight(height)
     }
     nextTick(() => {
-      resetCanvas()
+      if (isTypingNote()) resetCanvasSize()
+      else resetCanvas()
       updateProgressBar()
     })
   })
@@ -4360,6 +4367,7 @@ const resetCanvasVisibility = () => {
 }
 
 const resizeAnnotations = () => {
+  if (isTypingNote()) return
   resetCanvas().then(() => {
     reloadAnnotations()
     loadAnnotation()

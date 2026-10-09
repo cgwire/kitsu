@@ -485,6 +485,28 @@ describe('PreviewPlayer.vue', () => {
 
       expect(canvas.add).not.toHaveBeenCalled()
     })
+
+    // On a phone the keyboard resizes the player as it opens: the reload
+    // ended the typing of the note at once.
+    it('leaves a note being typed through a resize', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      const canvas = createFakeCanvas()
+      wrapper = mountPlayer({
+        props: { previews: [annotatedPreview] },
+        stubs: { AnnotationCanvas: annotationCanvasStub(canvas) }
+      })
+      // Lets the resizes of the mount run first.
+      await vi.advanceTimersByTimeAsync(1000)
+      canvas.getActiveObject.mockReturnValue({ isEditing: true })
+      canvas.clear.mockClear()
+      viewer.resize.mockClear()
+
+      onResize([])
+      await vi.advanceTimersByTimeAsync(200)
+
+      expect(canvas.clear).not.toHaveBeenCalled()
+      expect(viewer.resize).toHaveBeenCalled()
+    })
   })
 
   // The comparison canvas realigns 500 ms after the media of the comparison

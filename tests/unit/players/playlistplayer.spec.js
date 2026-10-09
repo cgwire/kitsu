@@ -165,6 +165,14 @@ const createFakeCanvas = () => {
   }
 }
 
+// The canvas raw, as AnnotationCanvas exposes it, and the overlay the
+// fingers land on.
+const annotationCanvasStub = canvas => ({
+  name: 'AnnotationCanvas',
+  template: '<div ref="overlay"><canvas /></div>',
+  setup: () => ({ canvas: markRaw(canvas), overlay: ref(null) })
+})
+
 const pointer = (target, type, { id, x, y }) =>
   target.dispatchEvent(
     new PointerEvent(type, {
@@ -513,16 +521,7 @@ describe('PlaylistPlayer.vue', () => {
     ])('hands a finger on the annotations to the %s', async (tool, click) => {
       wrapper = mountPlayer({
         entities: [{ ...entity, preview_file_extension: 'mp4' }],
-        stubs: {
-          AnnotationCanvas: {
-            name: 'AnnotationCanvas',
-            template: '<div ref="overlay"><canvas /></div>',
-            setup: () => ({
-              canvas: markRaw(createFakeCanvas()),
-              overlay: ref(null)
-            })
-          }
-        }
+        stubs: { AnnotationCanvas: annotationCanvasStub(createFakeCanvas()) }
       })
       await flushPromises()
       wrapper.findComponent({ name: 'PlayerAnnotationBar' }).vm.$emit(click)
@@ -541,6 +540,64 @@ describe('PlaylistPlayer.vue', () => {
       vi.advanceTimersByTime(300)
 
       expect(heard).toEqual(['touch'])
+    })
+  })
+
+  // On a phone the keyboard resizes the player as it opens: the canvas
+  // reset ended the typing of the note at once.
+  describe('window resize', () => {
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    const mountPicture = async () => {
+      const canvas = createFakeCanvas()
+      wrapper = mountPlayer({
+        entities: [{ ...entity, preview_file_extension: 'png' }],
+        stubs: { AnnotationCanvas: annotationCanvasStub(canvas) }
+      })
+      await flushPromises()
+      // A 1920 x 1080 picture in an 800 x 450 player.
+      const videoContainer = wrapper.find('.video-container').element
+      const size = { width: 800, height: 450 }
+      Object.defineProperties(videoContainer, {
+        offsetWidth: { get: () => size.width },
+        offsetHeight: { get: () => size.height }
+      })
+      const anchor = wrapper.find('.main-content-anchor').element
+      return { canvas, size, anchor }
+    }
+
+    // The player handles one resize per 100 ms.
+    const resize = async () => {
+      window.dispatchEvent(new Event('resize'))
+      await vi.advanceTimersByTimeAsync(200)
+      await flushPromises()
+    }
+
+    it('leaves a note being typed', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
+      const { canvas } = await mountPicture()
+      canvas.getActiveObject.mockReturnValue({ isEditing: true })
+      canvas.clear.mockClear()
+
+      await resize()
+
+      expect(canvas.clear).not.toHaveBeenCalled()
+    })
+
+    it('keeps the overlay on the picture while a note is typed', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
+      const { canvas, size, anchor } = await mountPicture()
+      await resize()
+      const before = anchor.style.width
+      canvas.getActiveObject.mockReturnValue({ isEditing: true })
+      size.height = 225
+
+      await vi.advanceTimersByTimeAsync(200)
+      await resize()
+
+      expect([before, anchor.style.width]).toEqual(['800px', '400px'])
     })
   })
 })

@@ -25,7 +25,15 @@
 import { Canvas, StaticCanvas } from 'fabric'
 import { PSBrush } from 'fabricjs-psbrush'
 import moment from 'moment'
-import { computed, markRaw, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import {
+  computed,
+  markRaw,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch
+} from 'vue'
 import { useStore } from 'vuex'
 
 import { lockBrushToFirstPointer } from '@/lib/players/annotation'
@@ -60,6 +68,9 @@ const clip = ref(null)
 const fabricCanvas = ref(null)
 const hoverInfo = ref(null)
 const overlay = ref(null)
+// The media's size over the canvas's while a note is typed: the canvas
+// keeps its size until the typing ends.
+const typingScale = ref({ x: 1, y: 1 })
 
 let resizeObserver = null
 
@@ -76,10 +87,13 @@ const clipStyle = computed(() => ({
 
 const overlayStyle = computed(() => {
   const { x, y, scale } = props.panzoomTransform
+  const { x: typingX, y: typingY } = typingScale.value
+  const typing =
+    typingX !== 1 || typingY !== 1 ? ` scale(${typingX}, ${typingY})` : ''
   return {
     cursor: props.cursor || null,
     pointerEvents: props.interactive ? 'auto' : 'none',
-    transform: `translate(${x}px, ${y}px) scale(${scale})`
+    transform: `translate(${x}px, ${y}px) scale(${scale})${typing}`
   }
 })
 
@@ -96,20 +110,28 @@ const updateBounds = () => {
     height: mediaRect.height
   }
   const canvas = fabricCanvas.value
-  if (
+  const isResized =
     canvas &&
     (canvas.width !== mediaRect.width || canvas.height !== mediaRect.height)
-  ) {
-    // A text note still in editing must exit before the dimensions change:
-    // exiting fires object:modified, whose serialization pairs the live
-    // coordinates with the current canvas box. Exited here it saves
-    // correctly; exited later (fabric does it from the clear() the resized
-    // reload triggers) the coordinates would belong to the old box and the
-    // stored note would drift by the resize ratio.
-    const active = canvas.getActiveObject?.()
-    if (active?.isEditing) active.exitEditing()
-    canvas.setDimensions({ width: mediaRect.width, height: mediaRect.height })
-    emit('resized', { width: mediaRect.width, height: mediaRect.height })
+  if (isResized && canvas.getActiveObject?.()?.isEditing) {
+    // A note being typed keeps the canvas box until it is done: on a phone
+    // the keyboard resizes the player as it opens, and ending the typing
+    // there closed the keyboard at once. Its serialization pairs its
+    // coordinates with the canvas box, so the box must not change under
+    // it. The overlay follows the media meanwhile.
+    typingScale.value = {
+      x: mediaRect.width / canvas.width,
+      y: mediaRect.height / canvas.height
+    }
+  } else {
+    typingScale.value = { x: 1, y: 1 }
+    if (isResized) {
+      canvas.setDimensions({
+        width: mediaRect.width,
+        height: mediaRect.height
+      })
+      emit('resized', { width: mediaRect.width, height: mediaRect.height })
+    }
   }
   // Refresh fabric's cached canvas offset. setDimensions doesn't
   // always trigger it on its own, and a stale offset shifts pointer
@@ -166,6 +188,9 @@ const createFabric = () => {
     canvas.freeDrawingBrush = brush
     canvas.on('mouse:over', onObjectHover)
     canvas.on('mouse:out', onObjectHoverEnd)
+    // The end of the typing saves the note in the box it was typed in
+    // (object:modified comes right after): resize afterwards.
+    canvas.on('text:editing:exited', () => nextTick(updateBounds))
   }
   fabricCanvas.value = markRaw(canvas)
 }

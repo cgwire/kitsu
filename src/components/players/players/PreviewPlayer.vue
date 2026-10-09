@@ -723,6 +723,7 @@ const annotation = useAnnotation({
 })
 
 const {
+  fabricCanvas,
   notSaved,
   pencilColor,
   pencilWidth,
@@ -2039,6 +2040,10 @@ const resetPlayerPositions = () => {
 // objects (async PSStroke deserialization).
 const onContainerResized = func.debounce(() => {
   resetPlayerPositions()
+  // On a phone the keyboard resizes the player as a note is typed: the
+  // reload would end the typing. AnnotationCanvas resizes the canvas once
+  // the note is done.
+  if (fabricCanvas.value?.getActiveObject()?.isEditing) return
   if (isPicture.value || isMovie.value) loadAnnotation()
 }, 200)
 
