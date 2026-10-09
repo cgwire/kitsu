@@ -42,6 +42,8 @@ const preview = {
 // One set of spies shared by the main and the comparison viewer stubs.
 const viewer = {
   extractFrame: vi.fn(),
+  goNextFrame: vi.fn(),
+  goPreviousFrame: vi.fn(),
   panBy: vi.fn(),
   pause: vi.fn(),
   play: vi.fn(),
@@ -337,6 +339,93 @@ describe('PreviewPlayer.vue', () => {
         120 / 30 + 0.001,
         6
       )
+    })
+  })
+
+  // The arrows, Home and End wipe the canvas, then the frame the movie goes
+  // to reloads its drawing. A picture has no frame to go to, and a movie
+  // stops at its ends: nothing reloaded the drawing there.
+  describe('arrow, Home and End keys', () => {
+    const press = key =>
+      window.dispatchEvent(new KeyboardEvent('keydown', { key }))
+
+    // 250 frames at 25 fps for the movie.
+    const mountOnFrame = async (shown, frame = 0) => {
+      const canvas = createFakeCanvas()
+      wrapper = mountPlayer({
+        props: { previews: [shown] },
+        stubs: { AnnotationCanvas: annotationCanvasStub(canvas) }
+      })
+      await nextTick()
+      if (frame > 0) {
+        wrapper
+          .findAllComponents({ name: 'PreviewViewer' })[0]
+          .vm.$emit('frame-update', frame)
+        await flushPromises()
+      }
+      canvas.clear.mockClear()
+      return canvas
+    }
+
+    it.each(['ArrowLeft', 'ArrowRight'])(
+      'keeps the drawing of a picture on %s',
+      async key => {
+        const canvas = await mountOnFrame(annotatedPreview)
+
+        press(key)
+
+        expect(canvas.clear).not.toHaveBeenCalled()
+      }
+    )
+
+    it.each([
+      ['first', 0, 'ArrowLeft'],
+      ['last', 249, 'ArrowRight']
+    ])('keeps the drawing of the %s frame of a movie', async (_, frame, key) => {
+      const canvas = await mountOnFrame(moviePreview, frame)
+
+      press(key)
+
+      expect(canvas.clear).not.toHaveBeenCalled()
+    })
+
+    it.each([
+      ['ArrowLeft', 'goPreviousFrame'],
+      ['ArrowRight', 'goNextFrame']
+    ])('steps a movie one frame on %s', async (key, step) => {
+      const canvas = await mountOnFrame(moviePreview, 100)
+
+      press(key)
+
+      expect(viewer[step]).toHaveBeenCalledTimes(1)
+      expect(canvas.clear).toHaveBeenCalled()
+    })
+
+    it.each([
+      ['first', 'Home', 0],
+      ['last', 'End', 249]
+    ])(
+      'keeps the drawing of the %s frame of a movie on %s',
+      async (_, key, frame) => {
+        const canvas = await mountOnFrame(moviePreview, frame)
+
+        press(key)
+
+        expect(canvas.clear).not.toHaveBeenCalled()
+      }
+    )
+
+    it.each([
+      ['Home', 0],
+      ['End', 249]
+    ])('takes a movie to its first or last frame on %s', async (key, frame) => {
+      const canvas = await mountOnFrame(moviePreview, 100)
+      viewer.setCurrentFrame.mockClear()
+
+      press(key)
+
+      expect(viewer.setCurrentFrame).toHaveBeenCalledWith(frame)
+      expect(canvas.clear).toHaveBeenCalled()
     })
   })
 

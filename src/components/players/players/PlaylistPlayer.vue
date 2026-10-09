@@ -2465,8 +2465,8 @@ const goPreviousFrame = () => {
 }
 
 const goNextFrame = () => {
-  clearCanvas()
   if (isFullMode.value) {
+    clearCanvas()
     let nextFrameTime =
       fullPlaylistPlayer.value.currentTime + frameDuration.value
     const nextFrame = Math.round(nextFrameTime * fps.value)
@@ -2481,7 +2481,10 @@ const goNextFrame = () => {
     const nextFrameTime =
       rawPlayer.value.getCurrentTimeRaw() + frameDuration.value + 0.0001
     const nextFrame = Math.round(nextFrameTime * fps.value)
+    // On the last frame the movie does not move and no frame reloads the
+    // drawing: the canvas keeps it.
     if (nextFrame >= nbFrames.value) return
+    clearCanvas()
     rawPlayer.value.goNextFrame()
     if (isComparing.value) syncComparisonPlayer()
     const time = rawPlayer.value.getCurrentTime()

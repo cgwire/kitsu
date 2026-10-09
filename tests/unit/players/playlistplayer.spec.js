@@ -714,6 +714,55 @@ describe('PlaylistPlayer.vue', () => {
 
   // On a phone the keyboard resizes the player as it opens: the canvas
   // reset ended the typing of the note at once.
+  // The right arrow wipes the canvas, then the frame the movie steps to
+  // reloads its drawing. The movie stops at its last frame: nothing reloaded
+  // the drawing there.
+  describe('right arrow', () => {
+    // 69 frames at 25 fps.
+    const mountOnFrame = async frame => {
+      const canvas = createFakeCanvas()
+      wrapper = mountPlayer({
+        entities: [
+          {
+            ...entity,
+            preview_file_extension: 'mp4',
+            preview_file_duration: 2.76
+          }
+        ],
+        stubs: { AnnotationCanvas: annotationCanvasStub(canvas) }
+      })
+      await flushPromises()
+      const rawPlayer = wrapper.findComponent({ ref: 'raw-player' })
+      rawPlayer.vm.getCurrentTimeRaw = () => frame * 0.04
+      canvas.clear.mockClear()
+      return { canvas, rawPlayer }
+    }
+
+    const press = () =>
+      window.dispatchEvent(
+        new KeyboardEvent('keydown', { code: 'ArrowRight', key: 'ArrowRight' })
+      )
+
+    it('keeps the drawing of the last frame', async () => {
+      const { canvas } = await mountOnFrame(68)
+
+      press()
+
+      expect(canvas.clear).not.toHaveBeenCalled()
+    })
+
+    it('steps a movie one frame', async () => {
+      const { canvas, rawPlayer } = await mountOnFrame(10)
+      const goNextFrame = vi.fn()
+      rawPlayer.vm.goNextFrame = goNextFrame
+
+      press()
+
+      expect(goNextFrame).toHaveBeenCalledTimes(1)
+      expect(canvas.clear).toHaveBeenCalled()
+    })
+  })
+
   describe('window resize', () => {
     afterEach(() => {
       vi.useRealTimers()

@@ -1263,27 +1263,31 @@ const pause = () => {
   }
 }
 
+// Past the ends of a movie, or on a picture, the viewer does not move and
+// no frame reloads the drawing: the canvas keeps it.
 const goPreviousFrame = () => {
+  if (currentFrame.value <= 0) return
   clearCanvas()
   previewViewer.value.goPreviousFrame()
   syncComparisonViewer()
 }
 
 const goNextFrame = () => {
+  if (currentFrame.value >= nbFrames.value - 1) return
   clearCanvas()
   previewViewer.value.goNextFrame()
   syncComparisonViewer()
 }
 
 const goToFirstFrame = () => {
-  if (!isMovie.value) return
+  if (!isMovie.value || currentFrame.value <= 0) return
   clearCanvas()
   setCurrentFrame(0)
   syncComparisonViewer()
 }
 
 const goToLastFrame = () => {
-  if (!isMovie.value) return
+  if (!isMovie.value || currentFrame.value >= nbFrames.value - 1) return
   clearCanvas()
   setCurrentFrame(nbFrames.value - 1)
   syncComparisonViewer()
