@@ -53,6 +53,65 @@ const moviePreview = {
   duration: 10
 }
 
+const annotatedPreview = {
+  ...preview,
+  annotations: [
+    {
+      time: 0,
+      width: 800,
+      height: 600,
+      drawing: {
+        objects: [
+          {
+            id: 'stroke-1',
+            type: 'path',
+            path: 'M 0 0 L 10 10',
+            left: 100,
+            top: 50,
+            scaleX: 1,
+            scaleY: 1,
+            stroke: '#ff0000',
+            strokeWidth: 2
+          }
+        ]
+      }
+    }
+  ]
+}
+
+// Enough of a fabric canvas for the annotation composable, which wires its
+// handlers with on() and off().
+const createFakeCanvas = () => {
+  const handlers = {}
+  return {
+    width: 800,
+    height: 600,
+    contextContainer: {},
+    freeDrawingBrush: { pressureManager: {} },
+    add: vi.fn(),
+    clear: vi.fn(),
+    discardActiveObject: vi.fn(),
+    fire: (event, options) =>
+      (handlers[event] || []).forEach(handler => handler(options)),
+    getActiveObject: vi.fn(),
+    getObjects: () => [],
+    off: (event, handler) => {
+      handlers[event] = (handlers[event] || []).filter(h => h !== handler)
+    },
+    on: (event, handler) => {
+      handlers[event] = [...(handlers[event] || []), handler]
+    },
+    remove: vi.fn(),
+    requestRenderAll: vi.fn()
+  }
+}
+
+const annotationCanvasStub = canvas => ({
+  name: 'AnnotationCanvas',
+  template: '<div />',
+  setup: () => ({ canvas, overlay: ref(null) })
+})
+
 const mountPlayer = ({
   props = {},
   getterOverrides = {},
@@ -120,12 +179,18 @@ const pointer = (target, type, { id, x, y }) => {
 
 describe('PreviewPlayer.vue', () => {
   let wrapper = null
+  // callback of the last resize observer created
+  let onResize = null
 
   beforeAll(() => {
     // jsdom has no ResizeObserver: mirror the browser check on the target.
     vi.stubGlobal(
       'ResizeObserver',
       class {
+        constructor(callback) {
+          onResize = callback
+        }
+
         observe(target) {
           if (!(target instanceof Element)) {
             throw new TypeError(
@@ -337,6 +402,34 @@ describe('PreviewPlayer.vue', () => {
       process.off('unhandledRejection', onRejection)
 
       expect(rejections).toEqual([])
+    })
+  })
+
+  // The resize observer reports the size of the container as soon as it
+  // observes it, then at each resize: a player closed within the 200 ms of
+  // the debounce still reloaded the annotation of its frame.
+  describe('container resize', () => {
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('drops the annotation reload of a closed player', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      const canvas = createFakeCanvas()
+      wrapper = mountPlayer({
+        props: { previews: [annotatedPreview] },
+        stubs: { AnnotationCanvas: annotationCanvasStub(canvas) }
+      })
+      await nextTick()
+      expect(canvas.add).toHaveBeenCalled()
+      canvas.add.mockClear()
+
+      onResize([])
+      wrapper.unmount()
+      wrapper = null
+      await vi.advanceTimersByTimeAsync(200)
+
+      expect(canvas.add).not.toHaveBeenCalled()
     })
   })
 

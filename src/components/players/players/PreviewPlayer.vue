@@ -2011,6 +2011,14 @@ const resetPlayerPositions = () => {
   resetPanzoomTransform()
 }
 
+// Debounced: a live window resize (or the fullscreen transition) fires
+// this continuously, and each tick cleared and rebuilt the annotation
+// objects (async PSStroke deserialization).
+const onContainerResized = func.debounce(() => {
+  resetPlayerPositions()
+  if (isPicture.value || isMovie.value) loadAnnotation()
+}, 200)
+
 const onPreviewLoaded = () => {
   if (isMovie.value) {
     movieDimensions.value = {
@@ -2554,13 +2562,6 @@ onMounted(() => {
   // viewer's transform through the panzoom-changed sync.
   previewViewer.value?.resumeZoom()
 
-  // Debounced: a live window resize (or the fullscreen transition) fires
-  // this continuously, and each tick cleared and rebuilt the annotation
-  // objects (async PSStroke deserialization).
-  const onContainerResized = func.debounce(() => {
-    resetPlayerPositions()
-    if (isPicture.value || isMovie.value) loadAnnotation()
-  }, 200)
   containerResizeObserver = new ResizeObserver(onContainerResized)
   containerResizeObserver.observe(container.value)
 
@@ -2588,6 +2589,7 @@ onBeforeUnmount(() => {
   document.removeEventListener('mouseup', onScrubEnd)
   containerResizeObserver?.disconnect()
   containerResizeObserver = null
+  onContainerResized.cancel()
 })
 
 // Player API (passed to TaskInfo via :player prop)
