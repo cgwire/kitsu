@@ -4,7 +4,7 @@
     :class="{ 'is-productivity': isActiveTab('productivity') }"
   >
     <div class="column main-column">
-      <div class="todos page">
+      <div class="todos page task-page">
         <route-section-tabs
           class="section-tabs mt05"
           :active-tab="currentSection"
@@ -222,6 +222,7 @@
     </div>
 
     <div
+      ref="productivity-side-column"
       class="column side-column productivity-side-column"
       v-if="isActiveTab('productivity') && productivityPeriod"
     >
@@ -254,7 +255,6 @@
 <script setup>
 import { useHead } from '@unhead/vue'
 import moment from 'moment-timezone'
-import { firstBy } from 'thenby'
 import {
   computed,
   getCurrentInstance,
@@ -271,11 +271,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { useBoardStatuses } from '@/composables/board'
-import preferences from '@/lib/preferences'
-import { getTaskStatusPriorityOfProd } from '@/lib/productions'
-import { sortByName } from '@/lib/sorting'
-import { parseDate } from '@/lib/time'
-import { getProductivityRange, today } from '@/lib/timesheet'
+import { useProductivity } from '@/composables/productivity'
+import { useTaskFilters } from '@/composables/taskFilters'
 
 import DayOffList from '@/components/lists/DayOffList.vue'
 import KanbanBoard from '@/components/lists/KanbanBoard.vue'
@@ -302,35 +299,6 @@ const socket = getCurrentInstance().appContext.config.globalProperties.$socket
 
 // State
 // --------------------------------------------------------------------------
-const filterOptions = ['all_tasks', 'due_this_week', 'due_previous_week'].map(
-  name => ({
-    label: name,
-    value: name
-  })
-)
-const sortOptions = [
-  'entity_name',
-  'priority',
-  'task_status_short_name',
-  'start_date',
-  'due_date',
-  'estimation',
-  'last_comment_date'
-].map(name => ({ label: name, value: name }))
-const productivityLevels = ['day', 'week', 'month']
-const productivityMetrics = ['time', 'quotas']
-const quotaModes = ['weighted', 'feedback', 'weighteddone', 'done']
-
-// The URL wins over the filters picked last time, kept in the local storage.
-const FILTERS_PREFERENCE = 'todos:filters'
-const storedFilters = preferences.getObjectPreference(FILTERS_PREFERENCE) || {}
-const pickFilter = (key, options, defaultValue) =>
-  [route.query[key], storedFilters[key]].find(value =>
-    options.some(option => option.value === value)
-  ) ?? defaultValue
-
-const currentFilter = ref(pickFilter('due', filterOptions, 'all_tasks'))
-const currentSort = ref(pickFilter('sort', sortOptions, 'priority'))
 const currentSection = ref('todos')
 const daysOff = ref([])
 const isDaysOffLoadingError = ref(false)
@@ -340,18 +308,25 @@ const phoneQuery = window.matchMedia?.('(max-width: 768px)')
 const isPhone = ref(Boolean(phoneQuery?.matches))
 const areFiltersFolded = ref(true)
 const productionId = ref(undefined)
-const taskTypeId = ref(route.query.taskTypeId ?? storedFilters.taskTypeId ?? '')
+const {
+  currentFilter,
+  currentSort,
+  filterAndSortTasks,
+  filterOptions,
+  saveFilters,
+  sortOptions,
+  storedFilters,
+  taskTypeId,
+  taskTypeList
+} = useTaskFilters({
+  storageKey: 'todos:filters',
+  productionId,
+  tasks: computed(() =>
+    store.getters.displayedTodos.concat(store.getters.displayedDoneTasks)
+  )
+})
 const calendarTimeSpents = ref([])
 const selectedDate = ref(moment().format('YYYY-MM-DD'))
-const productivityTimeSpents = ref([])
-const isProductivityLoading = ref(false)
-const isProductivityLoadingError = ref(false)
-const productivityAggregatedTasks = ref([])
-const productivityDaysOff = ref([])
-const isProductivityInfoLoading = ref(false)
-const isProductivityInfoLoadingError = ref(false)
-const productivityQuotas = ref([])
-const productivityQuotaShots = ref([])
 const loading = reactive({
   doneTasks: false,
   timesheets: false,
@@ -413,6 +388,43 @@ const { boardStatuses, getBoardStatusesByProduction } = useBoardStatuses(
   selectedProduction
 )
 
+const {
+  isPaper,
+  isProductivityInfoLoading,
+  isProductivityInfoLoadingError,
+  isProductivityLoading,
+  isProductivityLoadingError,
+  isQuotasMetric,
+  onProductivityColumnSelected,
+  onProductivityCountModeChanged,
+  onProductivityLevelChanged,
+  onProductivityMetricChanged,
+  onProductivityPeriodChanged,
+  onProductivityQuotaModeChanged,
+  productivityCloseRoute,
+  productivityCountMode,
+  productivityDaysOff,
+  productivityLevel,
+  productivityMetric,
+  productivityMonth,
+  productivityPeriod,
+  productivityPeriodParams,
+  productivityQuotaMode,
+  productivityQuotas,
+  productivityQuotaShots,
+  productivityTasks,
+  productivityTimeSpents,
+  productivityYear
+} = useProductivity({
+  personId: computed(() => user.value.id),
+  productionId,
+  taskTypeId,
+  openProductions,
+  isActive: computed(() => currentSection.value === 'productivity'),
+  sideColumn: useTemplateRef('productivity-side-column'),
+  loadTimeSpents: range => store.dispatch('loadUserTimeSpentsByPeriod', range)
+})
+
 const todoTabs = computed(() => {
   const hasAvailableBoard = openProductions.value.some(
     production => getBoardStatusesByProduction(production).length
@@ -461,95 +473,11 @@ const todoTabs = computed(() => {
   ].filter(Boolean)
 })
 
-const taskTypeList = computed(() => {
-  const taskTypeIds = new Set(
-    displayedTodos.value
-      .concat(displayedDoneTasks.value)
-      .filter(
-        task => !productionId.value || task.project_id === productionId.value
-      )
-      .map(task => task.task_type_id)
-  )
-  return [
-    { id: '', color: '#999', name: t('main.all') },
-    ...sortByName(
-      [...taskTypeIds]
-        .map(taskTypeId => taskTypeMap.value.get(taskTypeId))
-        .filter(Boolean)
-    )
-  ]
-})
-
 const loggableTodos = computed(() => sortedTasks.value.filter(isLoggable))
 
 const loggableDoneTasks = computed(() =>
   sortedDoneTasks.value.filter(isLoggable)
 )
-
-const queryNumber = (key, defaultValue) => {
-  const value = Number(route.query[key])
-  return Number.isInteger(value) && value > 0 ? value : defaultValue
-}
-
-const productivityLevel = computed(() =>
-  productivityLevels.includes(route.query.view) ? route.query.view : 'day'
-)
-const productivityYear = computed(() => queryNumber('year', today.year))
-const productivityMonth = computed(() => queryNumber('month', today.month))
-const productivityPeriod = computed(() => queryNumber('period', 0))
-
-const queryOption = (key, options) =>
-  options.includes(route.query[key]) ? route.query[key] : options[0]
-
-const productivityMetric = computed(() =>
-  queryOption('metric', productivityMetrics)
-)
-const isQuotasMetric = computed(() => productivityMetric.value === 'quotas')
-const productivityQuotaMode = computed(() =>
-  queryOption('quotaMode', quotaModes)
-)
-
-const isPaper = computed(
-  () => selectedProduction.value?.production_style === '2dpaper'
-)
-
-// the count modes the chart offers for this kind of production
-const productivityCountMode = computed(() =>
-  queryOption(
-    'countMode',
-    isPaper.value ? ['drawings', 'count'] : ['frames', 'seconds', 'count']
-  )
-)
-
-// an assets only production has no shot to count
-const quotaProductionIds = computed(() =>
-  selectedProduction.value
-    ? [selectedProduction.value.id]
-    : openProductions.value
-        .filter(production => production.production_type !== 'assets')
-        .map(production => production.id)
-)
-
-// the column index is a day of the month, an ISO week or a month
-const productivityPeriodParams = computed(() => {
-  const year = productivityYear.value
-  const period = productivityPeriod.value
-  return {
-    day: { year, month: productivityMonth.value, day: period },
-    week: { year, week: period },
-    month: { year, month: period }
-  }[productivityLevel.value]
-})
-
-const productivityTasks = computed(() =>
-  productivityAggregatedTasks.value.filter(
-    task => !taskTypeId.value || task.task_type_id === taskTypeId.value
-  )
-)
-
-const productivityCloseRoute = computed(() => ({
-  query: { ...route.query, period: undefined }
-}))
 
 // Functions
 // --------------------------------------------------------------------------
@@ -557,6 +485,7 @@ const isActiveTab = tab => currentSection.value === tab
 
 const onPhoneChange = event => {
   isPhone.value = event.matches
+  updateActiveTab()
 }
 
 const isPending = task =>
@@ -564,87 +493,6 @@ const isPending = task =>
 
 const isLoggable = task =>
   taskTypeMap.value.get(task.task_type_id)?.allow_timelog
-
-const filterAndSortTasks = tasks => {
-  const filtered = tasks.filter(
-    task =>
-      (!productionId.value || task.project_id === productionId.value) &&
-      (!taskTypeId.value || task.task_type_id === taskTypeId.value)
-  )
-  return sortTasks(filtered, currentFilter.value, currentSort.value)
-}
-
-const sortTasks = (tasks, filter, sort) => {
-  const filtered =
-    filter === 'all_tasks'
-      ? [...tasks]
-      : tasks.filter(task => {
-          const week = moment().startOf('week')
-          if (filter === 'due_previous_week') week.subtract(1, 'week')
-          return week.isSame(parseDate(task.due_date), 'week')
-        })
-
-  const byDate = field => (a, b) => {
-    if (!a[field]) return 1
-    if (!b[field]) return -1
-    return a[field].localeCompare(b[field])
-  }
-
-  if (sort === 'entity_name') {
-    return filtered.sort(
-      firstBy('project_name')
-        .thenBy('task_type_name')
-        .thenBy('full_entity_name')
-    )
-  }
-  if (sort === 'priority') {
-    return filtered.sort(
-      firstBy('priority', -1)
-        .thenBy(byDate('due_date'))
-        .thenBy('project_name')
-        .thenBy('task_type_name')
-        .thenBy('entity_name')
-    )
-  }
-  if (sort === 'due_date') {
-    return filtered.sort(
-      firstBy(byDate('due_date'))
-        .thenBy('project_name')
-        .thenBy('task_type_name')
-        .thenBy('entity_name')
-    )
-  }
-  if (sort === 'start_date') {
-    return filtered.sort(
-      firstBy(byDate('start_date'))
-        .thenBy('project_name')
-        .thenBy('task_type_name')
-        .thenBy('entity_name')
-    )
-  }
-  if (sort === 'task_status_short_name') {
-    // Follow the task status order from the studio / production
-    // settings instead of sorting short names alphabetically.
-    const statusPriority = task =>
-      getTaskStatusPriorityOfProd(
-        taskStatusMap.value.get(task.task_status_id),
-        productionMap.value.get(task.project_id)
-      )
-    return filtered.sort(
-      firstBy((a, b) => statusPriority(a) - statusPriority(b))
-        .thenBy('task_status_short_name')
-        .thenBy('project_name')
-        .thenBy('task_type_name')
-        .thenBy('entity_name')
-    )
-  }
-  return filtered.sort(
-    firstBy(sort, -1)
-      .thenBy('project_name')
-      .thenBy('task_type_name')
-      .thenBy('entity_name')
-  )
-}
 
 const loadData = async (forced = false) => {
   loading.doneTasks = true
@@ -801,170 +649,6 @@ const onCalendarDatesChanged = async ({ start, end }) => {
   }
 }
 
-// a new view, year or month shows other columns: the selected one goes
-const setProductivityQuery = query =>
-  router.replace({ query: { ...route.query, ...query, period: undefined } })
-
-const onProductivityLevelChanged = level =>
-  setProductivityQuery({ view: level })
-
-// the chart offers the months up to today in the current year only
-const onProductivityPeriodChanged = ({ year, month }) => {
-  const isFuture = year === today.year && month > today.month
-  setProductivityQuery({
-    year: `${year}`,
-    month: `${isFuture ? today.month : month}`
-  })
-}
-
-const onProductivityMetricChanged = metric => setProductivityQuery({ metric })
-
-const onProductivityQuotaModeChanged = quotaMode =>
-  router.replace({ query: { ...route.query, quotaMode } })
-
-const onProductivityCountModeChanged = countMode =>
-  router.replace({ query: { ...route.query, countMode } })
-
-const onProductivityColumnSelected = index =>
-  router.push({ query: { ...route.query, period: `${index}` } })
-
-const getProductivityKey = () =>
-  JSON.stringify([
-    productivityMetric.value,
-    productivityLevel.value,
-    productivityYear.value,
-    productivityMonth.value
-  ])
-
-// A quicker answer for a later view or period may have landed first: the
-// loads drop an answer whose key no longer matches the current one.
-const loadProductivity = async () => {
-  const key = getProductivityKey()
-  isProductivityLoading.value = true
-  isProductivityLoadingError.value = false
-  let timeSpents = []
-  let isError = false
-  try {
-    timeSpents = await store.dispatch(
-      'loadUserTimeSpentsByPeriod',
-      getProductivityRange(productivityLevel.value, {
-        year: productivityYear.value,
-        month: productivityMonth.value
-      })
-    )
-  } catch (err) {
-    console.error(err)
-    isError = true
-  }
-  if (key !== getProductivityKey()) return
-  productivityTimeSpents.value = timeSpents
-  isProductivityLoadingError.value = isError
-  isProductivityLoading.value = false
-}
-
-const getProductivityQuotasKey = () =>
-  JSON.stringify([
-    productivityMetric.value,
-    productivityQuotaMode.value,
-    quotaProductionIds.value
-  ])
-
-const loadProductivityQuotas = async () => {
-  const key = getProductivityQuotasKey()
-  isProductivityLoading.value = true
-  isProductivityLoadingError.value = false
-  let quotas = []
-  let isError = false
-  try {
-    quotas = await Promise.all(
-      quotaProductionIds.value.map(productionId =>
-        store.dispatch('loadPersonQuotas', {
-          productionId,
-          personId: user.value.id,
-          computeMode: productivityQuotaMode.value
-        })
-      )
-    )
-  } catch (err) {
-    console.error(err)
-    isError = true
-  }
-  if (key !== getProductivityQuotasKey()) return
-  productivityQuotas.value = quotas
-  isProductivityLoadingError.value = isError
-  isProductivityLoading.value = false
-}
-
-const getProductivityInfoKey = () =>
-  JSON.stringify([
-    productivityMetric.value,
-    productivityQuotaMode.value,
-    taskTypeId.value,
-    productivityLevel.value,
-    productivityPeriodParams.value,
-    productionId.value,
-    quotaProductionIds.value
-  ])
-
-// the shots of the productions the chart counts, not of every production
-const loadProductivityQuotaInfo = async () => {
-  const key = getProductivityInfoKey()
-  isProductivityInfoLoading.value = true
-  isProductivityInfoLoadingError.value = false
-  productivityQuotaShots.value = []
-  const isStale = () => key !== getProductivityInfoKey()
-  try {
-    const shotLists = await Promise.all(
-      quotaProductionIds.value.map(productionId =>
-        store.dispatch('getPersonQuotaShots', {
-          productionId,
-          personId: user.value.id,
-          taskTypeId: taskTypeId.value || undefined,
-          detailLevel: productivityLevel.value,
-          ...productivityPeriodParams.value,
-          computeMode: productivityQuotaMode.value
-        })
-      )
-    )
-    if (isStale()) return
-    productivityQuotaShots.value = shotLists.flat()
-  } catch (err) {
-    console.error(err)
-    if (isStale()) return
-    isProductivityInfoLoadingError.value = true
-  }
-  isProductivityInfoLoading.value = false
-}
-
-const loadProductivityInfo = async () => {
-  const key = getProductivityInfoKey()
-  isProductivityInfoLoading.value = true
-  isProductivityInfoLoadingError.value = false
-  productivityAggregatedTasks.value = []
-  const period = {
-    personId: user.value.id,
-    detailLevel: productivityLevel.value,
-    ...productivityPeriodParams.value
-  }
-  const isStale = () => key !== getProductivityInfoKey()
-  try {
-    const tasks = await store.dispatch('loadAggregatedPersonTimeSpents', {
-      ...period,
-      productionId: productionId.value
-    })
-    if (isStale()) return
-    productivityAggregatedTasks.value = tasks.filter(task => task.duration > 0)
-    const daysOff = await store.dispatch('loadAggregatedPersonDaysOff', period)
-    if (isStale()) return
-    productivityDaysOff.value = daysOff
-  } catch (err) {
-    console.error(err)
-    if (isStale()) return
-    isProductivityInfoLoadingError.value = true
-  }
-  isProductivityInfoLoading.value = false
-}
-
 const onSetDayOff = async dayOff => {
   dayOffError.value = false
   try {
@@ -1006,29 +690,8 @@ const onAssignation = async eventData => {
   }
 }
 
-const saveFilters = () => {
-  preferences.setObjectPreference(FILTERS_PREFERENCE, {
-    productionId: productionId.value,
-    taskTypeId: taskTypeId.value,
-    due: currentFilter.value,
-    sort: currentSort.value
-  })
-}
-
 // Watchers
 // --------------------------------------------------------------------------
-watch([taskTypeId, currentFilter, currentSort], () => {
-  saveFilters()
-  router.replace({
-    query: {
-      ...route.query,
-      taskTypeId: taskTypeId.value || undefined,
-      due: currentFilter.value,
-      sort: currentSort.value
-    }
-  })
-})
-
 watch(productionId, () => {
   saveFilters()
   router.push({
@@ -1041,58 +704,6 @@ watch(productionId, () => {
 })
 
 watch(() => [route.query.section, route.query.day], updateActiveTab)
-
-watch(
-  [
-    currentSection,
-    productivityMetric,
-    productivityLevel,
-    productivityYear,
-    productivityMonth
-  ],
-  () => {
-    if (isActiveTab('productivity') && !isQuotasMetric.value) {
-      loadProductivity()
-    }
-  }
-)
-
-// The person quotas cover every period: the chart picks the columns of the
-// view, year and month from the loaded answers.
-watch(
-  [
-    currentSection,
-    productivityMetric,
-    productivityQuotaMode,
-    () => quotaProductionIds.value.join()
-  ],
-  () => {
-    if (isActiveTab('productivity') && isQuotasMetric.value) {
-      loadProductivityQuotas()
-    }
-  }
-)
-
-watch(
-  [
-    currentSection,
-    productivityLevel,
-    productivityYear,
-    productivityMonth,
-    productivityPeriod,
-    productionId,
-    () => quotaProductionIds.value.join(),
-    productivityMetric,
-    productivityQuotaMode,
-    taskTypeId
-  ],
-  () => {
-    if (isActiveTab('productivity') && productivityPeriod.value) {
-      if (isQuotasMetric.value) loadProductivityQuotaInfo()
-      else loadProductivityInfo()
-    }
-  }
-)
 
 watch(
   () => route.query.search,
@@ -1132,6 +743,8 @@ useHead({ title: computed(() => `${t('tasks.my_tasks')} - Kitsu`) })
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/task-panels.scss' as panels;
+
 .columns {
   display: flex;
   flex-direction: row;
@@ -1143,323 +756,5 @@ useHead({ title: computed(() => `${t('tasks.my_tasks')} - Kitsu`) })
   overflow-y: auto;
 }
 
-.todos {
-  display: flex;
-  flex-direction: column;
-}
-
-// tighter than the global .page: the panels carry their own padding
-.todos.page {
-  padding: 66px 1em 1em;
-}
-
-.section-tabs {
-  min-height: 36px;
-}
-
-// beats the 1.5rem of Bulma's .tabs:not(:last-child)
-.section-tabs.tabs {
-  margin-bottom: 1em;
-}
-
-.search-field-column {
-  margin: 0 1em 0 0;
-}
-
-.query-list {
-  // the global rule leaves 2em under the list, inside the filters panel
-  margin-bottom: 0;
-  margin-top: 0.5em;
-}
-
-.todos-filters,
-.todos-panel {
-  background: var(--background-panel-raised);
-  border-radius: 12px;
-  --text-strong: var(--text-panel);
-}
-
-.filters-toggle {
-  display: none;
-}
-
-.todos-filters {
-  margin: 0 0 1em;
-  padding: 1em;
-
-  .search-field-wrapper {
-    background: var(--background);
-  }
-
-  // the dark background of the comboboxes next to it
-  .dark & .search-field-wrapper,
-  .dark & :deep(.task-type-combo),
-  .dark & :deep(.selected-task-type-line) {
-    background: $dark-grey-light;
-  }
-
-  // the label metrics of the production combobox, to share its row: the task
-  // type one pads its label and pushes its box 3px lower than the rest
-  .search-field-column .label,
-  .task-type-field :deep(.label) {
-    margin-bottom: 5px;
-    padding-top: 0;
-  }
-
-  // On the timesheet tab, the filters and the timesheet header form one panel.
-  &.is-attached {
-    border-radius: 12px 12px 0 0;
-    margin-bottom: 0;
-
-    & ~ .user-timesheet :deep(.timesheet-header),
-    & ~ .calendar-panel :deep(.calendar-toolbar),
-    & ~ .productivity-panel :deep(.productivity-toolbar) {
-      border-radius: 0 0 12px 12px;
-      border-top: 1px solid rgba(var(--skeleton-rgb), 0.25);
-    }
-  }
-}
-
-// the same air around the period panel as on the Timesheets page
-.productivity-side-column {
-  background: transparent;
-  padding: 1em 1em 1em 0;
-
-  // the quota panel takes the card look of the time spent one here, and
-  // keeps its plain look on the Quota page
-  :deep(.people-quota-info) {
-    // rounded like the task list of the time spent panel; a collapsed
-    // table ignores the radius
-    .details.table {
-      border-collapse: separate;
-      border-radius: 10px;
-      border-spacing: 0;
-      overflow: hidden;
-    }
-
-    background: var(--background-panel);
-    border-left: 0;
-    border-radius: 12px;
-    color: var(--text);
-    height: auto;
-    min-height: 100%;
-    padding: 1.5em 1.5em 1em;
-    position: relative;
-
-    > .flexrow {
-      margin-right: 1em;
-    }
-
-    .title {
-      font-size: 1.5rem;
-    }
-
-    .close {
-      position: absolute;
-      right: 0.75em;
-      top: 0.75em;
-    }
-
-    .close-button {
-      height: 26px;
-      padding-top: 5px;
-      width: 26px;
-
-      &:hover {
-        background: rgba(var(--skeleton-rgb), 0.25);
-      }
-    }
-  }
-}
-
-.todos-panel {
-  padding: 1em;
-
-  // overflow: auto clips the rows and the sticky head to the corners
-  :deep(.datatable-wrapper) {
-    border-radius: 10px;
-    margin-bottom: 0;
-  }
-
-  // margin-top auto keeps the task count at the bottom of the panel
-  :deep(.footer-info) {
-    margin: auto 0 0;
-    padding-top: 0.75em;
-  }
-}
-
-.board-panel,
-.calendar-panel {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-height: 0;
-}
-
-// The calendar keeps its content height in a flex panel and the day rows
-// shrink: it must fill the panel as it filled the page before.
-.calendar-panel :deep(.user-calendar) {
-  flex: 1;
-  margin-top: 0;
-  max-height: none;
-  min-height: 0;
-}
-
-.calendar-panel :deep(.calendar-toolbar),
-.calendar-panel :deep(.calendar-body),
-.day-off-list :deep(.header),
-.day-off-list :deep(.day-off-group) {
-  background: var(--background-panel-raised);
-}
-
-// The lanes share the panel color: in light theme they would melt into it
-.board-panel :deep(.board-column:not(.droppable)) {
-  background: var(--background);
-}
-
-.dark .board-panel :deep(.board-column:not(.droppable)) {
-  background: var(--background-panel);
-}
-
-.data-list {
-  margin-top: 0;
-}
-
-.field {
-  margin-bottom: 0;
-}
-
-// A bit more air at the top of the panels under the header ones
-@media screen and (min-width: 769px) {
-  .todos-panel,
-  .user-timesheet :deep(.timesheet-panel),
-  .calendar-panel :deep(.calendar-body),
-  .day-off-list :deep(.day-off-group) {
-    padding-top: 1.25em;
-  }
-}
-
-@media screen and (max-width: 768px) {
-  // the period panel stacks under the chart, and the page scrolls as a whole
-  .columns.is-productivity {
-    flex-direction: column;
-    overflow-y: auto;
-
-    .column {
-      flex: none;
-      overflow-y: visible;
-    }
-
-    .productivity-side-column {
-      margin-top: 0;
-      max-width: none;
-      padding: 0.5em;
-      width: 100%;
-    }
-  }
-
-  // The page grows with its cards: at a fixed height, the list panel
-  // overflows it and its bottom margin never shows.
-  .todos.page {
-    height: auto;
-    min-height: 100%;
-    padding-left: 0.5em;
-    padding-right: 0.5em;
-  }
-
-  // the funnel of the other pages, next to the search
-  .filters-toggle {
-    align-self: flex-end;
-    display: flex;
-    flex: none;
-    height: 42px;
-    margin-left: auto;
-    margin-right: 0;
-  }
-
-  .todos-filters.collapsed .collapsible {
-    display: none;
-  }
-
-  .todos-filters {
-    padding: 0.5em;
-
-    > .flexrow {
-      align-items: flex-end;
-      flex-wrap: wrap;
-      row-gap: 0.5em;
-    }
-
-    .filler {
-      display: none;
-    }
-  }
-
-  // the gap left of the funnel, which margin-left: auto pushes right
-  .search-field-column {
-    flex: 1;
-    margin-right: 0.75em;
-    min-width: 0;
-  }
-
-  // the 200px input pushed the save icon out of the box, under the funnel
-  .search-field-column :deep(.search-field-wrapper) {
-    margin-right: 0;
-    max-width: none;
-
-    .search-field {
-      flex: 1;
-      min-width: 0;
-      width: auto;
-    }
-  }
-
-  // like the task lists: a flexible height would clip the page bottom
-  // padding under the panel
-  .user-timesheet {
-    flex: none;
-    min-height: auto;
-  }
-
-  .todos-panel {
-    flex: none;
-    min-height: auto;
-    padding: 0.5em;
-  }
-
-  // A flexible height loops on a phone: the page scrollbar comes and goes,
-  // the grid resizes and the overflow with it.
-  .calendar-panel {
-    flex: none;
-    height: 85vh;
-  }
-
-  // A fixed height keeps the cards scrolling inside their lanes, and the
-  // sideways scrollbar of the lanes in view.
-  .board-panel.todos-panel {
-    height: 75vh;
-  }
-
-  // smaller cards: a lane shows several tasks at once
-  .board-panel :deep(.board-card .ui-droppable) {
-    min-height: 110px;
-  }
-
-  // one lane per screen, the next one peeking: drag and drop does not start
-  // from a touch, so the board is read-only there anyway
-  .board-panel :deep(.board-column) {
-    max-width: 75vw;
-    min-width: 75vw;
-    width: 75vw;
-  }
-
-  // the tabs still scroll sideways, without a bar eating their height
-  .section-tabs.tabs {
-    scrollbar-width: none;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
-  }
-}
+@include panels.task-panels;
 </style>

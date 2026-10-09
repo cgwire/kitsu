@@ -193,6 +193,24 @@ describe('Todos page', () => {
       wrapper.unmount()
     })
 
+    it('leaves the validated tab when the screen shrinks', async () => {
+      let onChange
+      vi.stubGlobal(
+        'matchMedia',
+        vi.fn(() => ({
+          matches: false,
+          addEventListener: (_, listener) => (onChange = listener),
+          removeEventListener: () => {}
+        }))
+      )
+      const wrapper = await mountPage([], { query: { section: 'done' } })
+      expect(wrapper.vm.currentSection).toBe('done')
+      onChange({ matches: true })
+      await nextTick()
+      expect(wrapper.vm.currentSection).toBe('todos')
+      wrapper.unmount()
+    })
+
     it('keeps every tab on a large screen', async () => {
       mockPhone(false)
       const wrapper = await mountPage([])
