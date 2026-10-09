@@ -249,9 +249,18 @@ const title = computed(() => t('studios.title'))
 </script>
 ```
 
+### Composition mode
+
+vue-i18n runs in **Composition mode** (`src/lib/i18n.js`, `legacy: false`): the global locale is a ref (`i18n.global.locale.value`), and `$t` reaches templates through the default `globalInjection`. `vite.config.js` compiles out its legacy API and the global registration of `<i18n-t>`, `<i18n-d>`, `<i18n-n>` and `v-t`, all unused. Two calls go wrong without a warning:
+
+- **A `t()` at setup top level does not follow a locale change.** It resolves once, in the language of that moment. Call `t()` inside a `computed` or a handler (template `$t()` is unaffected).
+- **A string second argument is a default message, not a locale.** `t('assets.cast_in', 'fr')` returns "Cast in" to an English user. Pass the locale as an option: `t(key, {}, { locale: 'fr' })`.
+
+To test real translations rather than the global `$t` mock, mount with `mountWithI18n` from `tests/unit/fixtures/i18n.js`.
+
 ### Plural calls
 
-vue-i18n runs in **Composition mode** (`src/lib/i18n.js`, `legacy: false`): the global locale is a ref (`i18n.global.locale.value`), and `$t` reaches templates through the default `globalInjection`. Pass plurals as `{ count }`: that key drives both branch selection and `{count}` interpolation, so the object form is right whether or not the message embeds the number (vue-i18n 9 ignored a bare number, so older code never relies on `$t(key, 3)`).
+Pass plurals as `{ count }`: that key drives both branch selection and `{count}` interpolation, so the object form is right whether or not the message embeds the number (vue-i18n 9 ignored a bare number, so older code never relies on `$t(key, 3)`).
 
 ```js
 $t('studios.number', { count: 5 }) // "studios", message has no {count}
@@ -259,8 +268,6 @@ $t('logs.nb_events', { count: 5 }) // "5 events listed"
 ```
 
 `count` must be a **number**: `{ count: '5' }` renders the singular. An integer count is singular at 1 only, so 0 goes plural, in every locale. A decimal count follows the grammar of its language through `Intl.PluralRules`: "0.5 days" in English, but "0,5 jour" and "1,5 jour" in French. vue-i18n 11 alone makes every decimal plural: `src/lib/i18n.js` registers this rule for every locale, a locale added to `src/locales/index.js` included.
-
-To test real translations rather than the global `$t` mock, mount with the app's i18n plugin, as `tests/unit/lib/i18n.spec.js` does.
 
 ### Production-type terminology overlays
 
