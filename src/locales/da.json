@@ -1,5 +1,15 @@
 {
   "default": {
+    "app_login": {
+      "authorize": "Godkend",
+      "consent": "Et program på denne computer vil oprette forbindelse til Kitsu som {full_name}.",
+      "consent_named": "Et program på denne computer, som kalder sig \"{app_name}\", vil oprette forbindelse til Kitsu som {full_name}.",
+      "error": "Programlogin mislykkedes. Start det igen fra programmet.",
+      "error_2fa_setup": "Opsæt totrinsgodkendelse i Kitsu først, og start derefter login igen fra programmet.",
+      "invalid_request": "Dette loginlink er ugyldigt. Start login igen fra programmet.",
+      "title": "Programlogin",
+      "warning": "Godkend kun, hvis du selv har startet dette login fra programmet. Det får adgang til Kitsu med dine rettigheder."
+    },
     "assets": {
       "cast_in": "Castet i",
       "delete_error": "Der opstod en fejl under sletning af denne asset. Der kan være eksisterende data, der er knyttet til den. Er du sikker på, at denne asset-type ikke har nogen opgave knyttet til den?",

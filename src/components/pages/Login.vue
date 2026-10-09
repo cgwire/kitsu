@@ -19,14 +19,22 @@
         <form v-if="!(isMissingOTP || isWrongOTP)">
           <div class="field" v-if="mainConfig?.saml_enabled">
             <p class="control">
-              <a class="button is-fullwidth" href="/api/auth/saml/login">
+              <a
+                class="button is-fullwidth"
+                href="/api/auth/saml/login"
+                @click="saveSSORedirect"
+              >
                 {{ loginSAMLButtonInfo }}
               </a>
             </p>
           </div>
           <div class="field" v-if="mainConfig?.oidc_enabled">
             <p class="control">
-              <a class="button is-fullwidth" href="/api/auth/oidc/login">
+              <a
+                class="button is-fullwidth"
+                href="/api/auth/oidc/login"
+                @click="saveSSORedirect"
+              >
                 {{ loginOIDCButtonInfo }}
               </a>
             </p>
@@ -124,6 +132,8 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
+import auth from '@/lib/auth'
+
 import TwoFactorAuthentication from '@/components/widgets/TwoFactorAuthentication.vue'
 
 // Composables
@@ -220,6 +230,10 @@ const confirmLogIn = async twoFactorPayload => {
       console.error(err)
     }
   }
+}
+
+const saveSSORedirect = () => {
+  auth.saveSSORedirect(route.query.redirect)
 }
 
 const changedTwoFA = () => {

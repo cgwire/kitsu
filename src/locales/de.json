@@ -1,5 +1,15 @@
 {
   "default": {
+    "app_login": {
+      "authorize": "Autorisieren",
+      "consent": "Eine Anwendung auf diesem Computer möchte sich als {full_name} mit Kitsu verbinden.",
+      "consent_named": "Eine Anwendung auf diesem Computer, die sich \"{app_name}\" nennt, möchte sich als {full_name} mit Kitsu verbinden.",
+      "error": "Die Anmeldung der Anwendung ist fehlgeschlagen. Bitte starte sie erneut in der Anwendung.",
+      "error_2fa_setup": "Richte zuerst die Zwei-Faktor-Authentifizierung in Kitsu ein und starte dann die Anmeldung erneut in der Anwendung.",
+      "invalid_request": "Dieser Anmeldelink ist ungültig. Bitte starte die Anmeldung erneut in der Anwendung.",
+      "title": "Anmeldung der Anwendung",
+      "warning": "Autorisiere nur, wenn du diese Anmeldung selbst in der Anwendung gestartet hast. Sie greift mit deinen Berechtigungen auf Kitsu zu."
+    },
     "assets": {
       "cast_in": "Gecastet in",
       "delete_error": "Beim Löschen dieses Assets ist ein Fehler aufgetreten. Wahrscheinlich sind damit Daten verknüpft. Sind Sie sicher, dass dieser Asset-Typ keine Aufgabe hat, die mit ihm verbunden ist?",

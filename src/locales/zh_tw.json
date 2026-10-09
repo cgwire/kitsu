@@ -1,5 +1,15 @@
 {
   "default": {
+    "app_login": {
+      "authorize": "授權",
+      "consent": "此電腦上的一個應用程式想以 {full_name} 的身分連線到 Kitsu。",
+      "consent_named": "此電腦上一個自稱為 \"{app_name}\" 的應用程式想以 {full_name} 的身分連線到 Kitsu。",
+      "error": "應用程式登入失敗。請從應用程式重新開始。",
+      "error_2fa_setup": "請先在 Kitsu 中設定雙重驗證，然後從應用程式重新開始登入。",
+      "invalid_request": "此登入連結無效。請從應用程式重新開始登入。",
+      "title": "應用程式登入",
+      "warning": "僅當您親自從應用程式發起此登入時才授權。該應用程式將以您的權限存取 Kitsu。"
+    },
     "assets": {
       "cast_in": "角色分配",
       "delete_error": "刪除此資產時出現錯誤。很可能存在有連接至此的數據。您確定沒有任務連接至此資產類型嗎？",

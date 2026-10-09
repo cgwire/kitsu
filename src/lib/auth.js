@@ -13,6 +13,11 @@ import {
 
 let channel
 const AUTHENTICATED_REQUEST_TIMEOUT_MS = 20000
+const SSO_REDIRECT_KEY = 'sso-redirect'
+
+// A path starting with // would be read as another host.
+const isInternalPath = path =>
+  typeof path === 'string' && path.startsWith('/') && !path.startsWith('//')
 
 const auth = {
   async logIn(payload) {
@@ -142,6 +147,44 @@ const auth = {
         query: { redirect: to.fullPath }
       }
     }
+  },
+
+  // SSO logins leave the app and come back on the home page, which drops
+  // the redirect query of the login page.
+  saveSSORedirect(path) {
+    if (isInternalPath(path)) sessionStorage.setItem(SSO_REDIRECT_KEY, path)
+  },
+
+  popSSORedirect() {
+    const path = sessionStorage.getItem(SSO_REDIRECT_KEY)
+    sessionStorage.removeItem(SSO_REDIRECT_KEY)
+    return isInternalPath(path) ? path : undefined
+  },
+
+  // Null unless the query can build a safe loopback callback. The app name
+  // is a label the app picked itself, not a verified identity.
+  parseAppLoginQuery({ port, code_challenge, state, app_name }) {
+    const portNumber = Number(port)
+    const isValid =
+      /^\d+$/.test(port) &&
+      portNumber >= 1024 &&
+      portNumber <= 65535 &&
+      /^[A-Za-z0-9_-]{43}$/.test(code_challenge) &&
+      typeof state === 'string' &&
+      state.length > 0
+    if (!isValid) return null
+    return {
+      port: portNumber,
+      codeChallenge: code_challenge,
+      state,
+      appName: typeof app_name === 'string' ? app_name.slice(0, 50) : ''
+    }
+  },
+
+  createAppLoginCode(codeChallenge) {
+    return client.ppost('/api/auth/app-login/code', {
+      code_challenge: codeChallenge
+    })
   },
 
   isPasswordValid(password, password2) {

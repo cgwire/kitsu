@@ -1,5 +1,16 @@
 export default {
 
+  app_login: {
+    authorize: 'Authorize',
+    consent: 'An application on this computer wants to connect to Kitsu as {full_name}.',
+    consent_named: 'An application on this computer, which calls itself "{app_name}", wants to connect to Kitsu as {full_name}.',
+    error: 'The application login failed. Please start it again from the application.',
+    error_2fa_setup: 'Set up two-factor authentication in Kitsu first, then start the login again from the application.',
+    invalid_request: 'This login link is invalid. Please start the login again from the application.',
+    title: 'Application login',
+    warning: 'Only authorize it if you started this login from the application yourself. It will access Kitsu with your permissions.'
+  },
+
   assets: {
     cast_in: 'Cast in',
     casted_in_shots: 'Cast in {nbShots} shots',

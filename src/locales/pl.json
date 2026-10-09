@@ -1,5 +1,15 @@
 {
   "default": {
+    "app_login": {
+      "authorize": "Autoryzuj",
+      "consent": "Aplikacja na tym komputerze chce połączyć się z Kitsu jako {full_name}.",
+      "consent_named": "Aplikacja na tym komputerze, która przedstawia się jako \"{app_name}\", chce połączyć się z Kitsu jako {full_name}.",
+      "error": "Logowanie aplikacji nie powiodło się. Uruchom je ponownie z aplikacji.",
+      "error_2fa_setup": "Najpierw skonfiguruj uwierzytelnianie dwuskładnikowe w Kitsu, a następnie ponownie uruchom logowanie z aplikacji.",
+      "invalid_request": "Ten link logowania jest nieprawidłowy. Uruchom logowanie ponownie z aplikacji.",
+      "title": "Logowanie aplikacji",
+      "warning": "Autoryzuj tylko wtedy, gdy samodzielnie uruchomiłeś to logowanie z aplikacji. Aplikacja uzyska dostęp do Kitsu z Twoimi uprawnieniami."
+    },
     "assets": {
       "cast_in": "Występuje w",
       "casted_in_shots": "Występuje w {nbShots} ujęciach",

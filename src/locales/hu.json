@@ -1,5 +1,15 @@
 {
   "default": {
+    "app_login": {
+      "authorize": "Engedélyezés",
+      "consent": "Egy alkalmazás ezen a számítógépen {full_name} nevében szeretne csatlakozni a Kitsuhoz.",
+      "consent_named": "Egy alkalmazás ezen a számítógépen, amely \"{app_name}\" néven mutatkozik be, {full_name} nevében szeretne csatlakozni a Kitsuhoz.",
+      "error": "Az alkalmazás bejelentkezése sikertelen. Indítsd újra az alkalmazásból.",
+      "error_2fa_setup": "Először állítsd be a kétfaktoros hitelesítést a Kitsuban, majd indítsd újra a bejelentkezést az alkalmazásból.",
+      "invalid_request": "Ez a bejelentkezési hivatkozás érvénytelen. Indítsd újra a bejelentkezést az alkalmazásból.",
+      "title": "Alkalmazás bejelentkezése",
+      "warning": "Csak akkor engedélyezd, ha te magad indítottad ezt a bejelentkezést az alkalmazásból. Az alkalmazás a te jogosultságaiddal fér hozzá a Kitsuhoz."
+    },
     "assets": {
       "cast_in": "Szerepel:",
       "delete_error": "Hiba történt az asset törlésekor. Valószínűleg adat hivatkozik rá. Biztos vagy benne, hogy ehhez az asset típushoz nem tartozik feladat?",

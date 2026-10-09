@@ -1,5 +1,15 @@
 {
   "default": {
+    "app_login": {
+      "authorize": "Autorizar",
+      "consent": "Um aplicativo neste computador quer se conectar ao Kitsu como {full_name}.",
+      "consent_named": "Um aplicativo neste computador, que se apresenta como \"{app_name}\", quer se conectar ao Kitsu como {full_name}.",
+      "error": "O login do aplicativo falhou. Inicie-o novamente a partir do aplicativo.",
+      "error_2fa_setup": "Configure primeiro a autenticação de dois fatores no Kitsu e depois inicie o login novamente a partir do aplicativo.",
+      "invalid_request": "Este link de login é inválido. Inicie o login novamente a partir do aplicativo.",
+      "title": "Login de aplicativo",
+      "warning": "Autorize apenas se você mesmo iniciou este login a partir do aplicativo. Ele acessará o Kitsu com as suas permissões."
+    },
     "assets": {
       "cast_in": "Distribuído em",
       "delete_error": "Ocorreu um erro ao excluir este asset. Provavelmente há dados vinculados a ele. Tem certeza de que este tipo de asset não possui nenhuma tarefa vinculada a ele?",
