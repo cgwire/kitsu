@@ -19,7 +19,8 @@ const ColumnChart = {
 
 const store = createStore({
   getters: {
-    isDarkTheme: () => false
+    isDarkTheme: () => false,
+    organisation: () => ({ hours_by_day: 7 })
   }
 })
 
@@ -93,16 +94,91 @@ describe('ProductivityChart', () => {
     expect(wrapper.emitted('column-selected')).toBeUndefined()
   })
 
-  it('paints the selected bar apart from the others', () => {
+  it('ignores a click on the average line', () => {
+    const wrapper = mountChart()
+    chart(wrapper)
+      .props('library')
+      .onClick({}, [{ datasetIndex: 1, index: 2 }])
+    expect(wrapper.emitted('column-selected')).toBeUndefined()
+  })
+
+  // before the first layout the chart has no area to lay a gradient on
+  const barColor = (wrapper, dataIndex) =>
+    series(wrapper).dataset.backgroundColor({
+      chart: { chartArea: null },
+      dataIndex
+    })
+
+  it('fades the bars around the selected one', () => {
     const wrapper = mountChart({ selectedIndex: 3 })
-    const colors = series(wrapper).dataset.backgroundColor
-    expect(colors[2]).toBe('#00b242')
-    expect(colors[0]).toBe('rgba(0, 178, 66, 0.55)')
+    expect(barColor(wrapper, 2)).toBe('#00b242')
+    expect(barColor(wrapper, 0)).toBe('rgba(0, 178, 66, 0.25)')
+  })
+
+  // the colours are functions: without a new dataset the chart keeps the
+  // previous selection painted
+  it('repaints the bars when the selection moves', async () => {
+    const wrapper = mountChart({ selectedIndex: 3 })
+    const before = series(wrapper).dataset
+    await wrapper.setProps({ selectedIndex: 5 })
+    expect(series(wrapper).dataset).not.toBe(before)
+    expect(barColor(wrapper, 2)).toBe('rgba(0, 178, 66, 0.25)')
+    expect(barColor(wrapper, 4)).toBe('#00b242')
   })
 
   it('paints every bar alike without a selection', () => {
     const wrapper = mountChart()
-    expect(series(wrapper).dataset.backgroundColor).toBe('#00b242')
+    expect(barColor(wrapper, 0)).toBe('#00b242')
+    expect(barColor(wrapper, 2)).toBe('#00b242')
+  })
+
+  // the studio hours per day, over the working days of each column
+  const targetLine = wrapper => chart(wrapper).props('data')[1]
+
+  it('draws the studio hours per working day as a dashed line', () => {
+    const wrapper = mountChart()
+    const line = targetLine(wrapper)
+    expect(line.dataset.type).toBe('line')
+    // one dashed stroke, bridged over the weekends
+    expect(line.dataset.borderDash).toBeTruthy()
+    expect(line.dataset.spanGaps).toBe(true)
+    expect(line.dataset.stepped).toBeFalsy()
+    const target = day =>
+      line.data.find(([label]) => label === `${day}`)[1]
+    // weekends have no target
+    const weekday = day =>
+      ![0, 6].includes(new Date(Date.UTC(year, 2, day)).getUTCDay())
+    ;[1, 2, 3, 4, 5, 6, 7].forEach(day => {
+      expect(target(day)).toBe(weekday(day) ? 7 : null)
+    })
+    expect(wrapper.find('.productivity-average').exists()).toBe(true)
+  })
+
+  it('sets a week target of five working days', () => {
+    const line = targetLine(mountChart({ level: 'week' }))
+    expect(line.data[0][1]).toBe(35)
+  })
+
+  it('draws no target line in the month view', () => {
+    const wrapper = mountChart({ level: 'month' })
+    expect(chart(wrapper).props('data')).toHaveLength(1)
+  })
+
+  it('names the week in the tooltip title', () => {
+    const { title } = chart(mountChart({ level: 'week' })).props('library')
+      .plugins.tooltip.callbacks
+    expect(title([{ label: '41' }])).toBe('Week 41')
+  })
+
+  it('keeps the plain label in the day tooltip title', () => {
+    const { title } = chart(mountChart()).props('library').plugins.tooltip
+      .callbacks
+    expect(title([{ label: '3' }])).toBe('3')
+  })
+
+  it('draws no target line for the quotas', () => {
+    const wrapper = mountChart({ metric: 'quotas', quotas: [] })
+    expect(chart(wrapper).props('data')).toHaveLength(1)
   })
 
   it('emits the level picked in the level combobox', async () => {
