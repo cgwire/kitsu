@@ -717,7 +717,8 @@ describe('Task.vue publishing', () => {
           props: ['previewForms'],
           template: '<div />',
           methods: { focus: () => {}, reset }
-        }
+        },
+        ...options.stubs
       }
     })
     return { ...mounted, reset }
@@ -801,8 +802,6 @@ describe('Task.vue publishing', () => {
 
     it('keeps the comment box files once the extra preview is added', async () => {
       const { wrapper, store } = await mountCommentingPage()
-      // The end of the upload then refreshes a player this page lacks.
-      vi.useFakeTimers({ toFake: ['setTimeout'] })
       const form = previewForm('sh010.mp4')
       commentBox(wrapper).vm.$emit('file-drop', [form])
       store.commit.mockClear()
@@ -832,6 +831,127 @@ describe('Task.vue publishing', () => {
 
       expect(boxFiles(wrapper)).toEqual([])
       expect(consoleError).toHaveBeenCalledWith(refusal)
+    })
+
+    // The upload can end once the page shows a task without previews, and
+    // so without a player.
+    it('adds an extra preview once the page left its player', async () => {
+      const task = buildTask()
+      const otherTask = buildTask({ id: 'task-2' })
+      const previews = [
+        { id: 'preview-1', revision: 1, extension: 'mp4', previews: [] }
+      ]
+      const { wrapper, store, router } = await mountCommentingPage({
+        task,
+        getterOverrides: {
+          getTaskPreviews: () => taskId =>
+            taskId === task.id ? previews : [],
+          taskMap: () =>
+            new Map([
+              [task.id, task],
+              [otherTask.id, otherTask]
+            ])
+        }
+      })
+      vi.useFakeTimers({ toFake: ['setTimeout'] })
+      let endUpload
+      store.dispatch.mockImplementation(type =>
+        type === 'addCommentExtraPreview'
+          ? new Promise(resolve => {
+              endUpload = resolve
+            })
+          : Promise.resolve()
+      )
+
+      extraModal(wrapper).vm.$emit('confirm', [previewForm('sh010-alt.png')])
+      await router.push({
+        name: 'task',
+        params: { ...TASK_ROUTE_PARAMS, task_id: otherTask.id }
+      })
+      await flushPromises()
+      expect(wrapper.findComponent(PreviewPlayer).exists()).toBe(false)
+      endUpload()
+      await flushPromises()
+
+      expect(() => vi.runAllTimers()).not.toThrow()
+    })
+
+    // The upload ends on the task it went to: a task the page moved on to
+    // meanwhile keeps the revision its player shows.
+    describe('once the extra preview is uploaded', () => {
+      const previews = [
+        { id: 'preview-1', revision: 1, extension: 'mp4', previews: [] }
+      ]
+      const playerWithLast = displayLast => ({
+        props: ['fps', 'previews', 'readOnly'],
+        template: '<div />',
+        data: () => ({
+          currentPreview: { id: 'preview-1', task_id: TASK_ID },
+          notSaved: false
+        }),
+        methods: {
+          displayFirst: () => {},
+          displayLast,
+          focus: () => {},
+          isValidPreviewModification: () => true,
+          setCurrentFrame: () => {}
+        }
+      })
+
+      it('shows the last revision of the task', async () => {
+        const displayLast = vi.fn()
+        const { wrapper } = await mountCommentingPage({
+          previews,
+          stubs: { PreviewPlayer: playerWithLast(displayLast) }
+        })
+        vi.useFakeTimers({ toFake: ['setTimeout'] })
+
+        extraModal(wrapper).vm.$emit('confirm', [previewForm('sh010-alt.png')])
+        await flushPromises()
+        vi.runAllTimers()
+
+        expect(displayLast).toHaveBeenCalledTimes(1)
+      })
+
+      it('leaves the player of the task the page moved on to', async () => {
+        const task = buildTask()
+        const otherTask = buildTask({ id: 'task-2' })
+        const displayLast = vi.fn()
+        const { wrapper, store, router } = await mountCommentingPage({
+          task,
+          previews,
+          getterOverrides: {
+            taskMap: () =>
+              new Map([
+                [task.id, task],
+                [otherTask.id, otherTask]
+              ])
+          },
+          stubs: { PreviewPlayer: playerWithLast(displayLast) }
+        })
+        vi.useFakeTimers({ toFake: ['setTimeout'] })
+        let endUpload
+        store.dispatch.mockImplementation(type =>
+          type === 'addCommentExtraPreview'
+            ? new Promise(resolve => {
+                endUpload = resolve
+              })
+            : Promise.resolve()
+        )
+
+        extraModal(wrapper).vm.$emit('confirm', [previewForm('sh010-alt.png')])
+        await router.push({
+          name: 'task',
+          params: { ...TASK_ROUTE_PARAMS, task_id: otherTask.id }
+        })
+        await flushPromises()
+        expect(wrapper.findComponent(PreviewPlayer).exists()).toBe(true)
+        endUpload()
+        await flushPromises()
+        vi.runAllTimers()
+
+        expect(displayLast).not.toHaveBeenCalled()
+      })
     })
   })
 

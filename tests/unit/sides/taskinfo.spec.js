@@ -813,7 +813,8 @@ describe('TaskInfo.vue', () => {
 
     const mountCommentingPanel = async ({
       previews = [],
-      getterOverrides = {}
+      getterOverrides = {},
+      stubs = {}
     } = {}) => {
       const reset = vi.fn()
       const mounted = await mountPanel({
@@ -828,7 +829,8 @@ describe('TaskInfo.vue', () => {
             props: ['previewForms'],
             template: '<div />',
             methods: { focus: () => {}, reset }
-          }
+          },
+          ...stubs
         }
       })
       return { ...mounted, reset }
@@ -882,6 +884,7 @@ describe('TaskInfo.vue', () => {
       afterEach(() => {
         consoleError?.mockRestore()
         consoleError = null
+        vi.useRealTimers()
       })
 
       it('keeps the comment box files when the modal opens', async () => {
@@ -943,6 +946,65 @@ describe('TaskInfo.vue', () => {
 
         expect(boxFiles(wrapper)).toEqual([])
         expect(consoleError).toHaveBeenCalledWith(refusal)
+      })
+
+      // The upload ends on the task it went to: a task the panel moved on
+      // to meanwhile keeps the revision its player shows.
+      describe('once it is uploaded', () => {
+        const previews = [
+          { id: 'preview-1', revision: 1, extension: 'mp4', previews: [] }
+        ]
+        const playerWithLast = displayLast => ({
+          props: ['fps', 'previews', 'readOnly'],
+          template: '<div />',
+          methods: { displayLast, focus: () => {}, setCurrentFrame: () => {} }
+        })
+
+        it('shows the last revision of the task', async () => {
+          const displayLast = vi.fn()
+          const { wrapper } = await mountCommentingPanel({
+            previews,
+            stubs: { PreviewPlayer: playerWithLast(displayLast) }
+          })
+          vi.useFakeTimers({ toFake: ['setTimeout'] })
+
+          extraModal(wrapper).vm.$emit('confirm', [
+            previewForm('sh010-alt.png')
+          ])
+          await flushPromises()
+          vi.runAllTimers()
+
+          expect(displayLast).toHaveBeenCalledTimes(1)
+        })
+
+        it('leaves the player of the task the panel moved on to', async () => {
+          const displayLast = vi.fn()
+          const { wrapper, store } = await mountCommentingPanel({
+            previews,
+            stubs: { PreviewPlayer: playerWithLast(displayLast) }
+          })
+          vi.useFakeTimers({ toFake: ['setTimeout'] })
+          let endUpload
+          store.dispatch.mockImplementation(type =>
+            type === 'addCommentExtraPreview'
+              ? new Promise(resolve => {
+                  endUpload = resolve
+                })
+              : Promise.resolve()
+          )
+
+          extraModal(wrapper).vm.$emit('confirm', [
+            previewForm('sh010-alt.png')
+          ])
+          await wrapper.setProps({ task: buildTask({ id: 'task-2' }) })
+          await flushPromises()
+          expect(wrapper.findComponent(PreviewPlayer).exists()).toBe(true)
+          endUpload()
+          await flushPromises()
+          vi.runAllTimers()
+
+          expect(displayLast).not.toHaveBeenCalled()
+        })
       })
     })
 

@@ -995,9 +995,10 @@ const createExtraPreview = forms => {
   const comment = taskComments.value.find(comment =>
     comment.previews.some(preview => preview.id === currentPreviewId.value)
   )
+  const taskId = props.task.id
   store
     .dispatch('addCommentExtraPreview', {
-      taskId: props.task.id,
+      taskId,
       commentId: comment?.id,
       previewId: currentPreviewId.value,
       forms
@@ -1007,7 +1008,9 @@ const createExtraPreview = forms => {
       addExtraPreviewModalRef.value.reset()
       reset({ keepPreviewFiles: true })
       setTimeout(() => {
-        previewPlayerRef.value?.displayLast()
+        // The panel may have moved on to another task, with or without a
+        // player.
+        if (props.task?.id === taskId) previewPlayerRef.value?.displayLast()
       }, 0)
       modals.addExtraPreview = false
     })

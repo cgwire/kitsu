@@ -1419,9 +1419,10 @@ const createExtraPreview = forms => {
   const comment = getCurrentTaskComments().find(item =>
     item.previews.find(preview => preview.id === currentPreviewId.value)
   )
+  const taskId = task.value.id
   store
     .dispatch('addCommentExtraPreview', {
-      taskId: task.value.id,
+      taskId,
       commentId: comment?.id,
       previewId: currentPreviewId.value,
       forms
@@ -1431,7 +1432,9 @@ const createExtraPreview = forms => {
       modals.value.addExtraPreview = false
       addExtraPreviewModalRef.value.reset()
       setTimeout(() => {
-        previewPlayerRef.value.displayLast()
+        // The page may have moved on to another task, with or without a
+        // player.
+        if (task.value?.id === taskId) previewPlayerRef.value?.displayLast()
       }, 0)
     })
     .catch(err => {
