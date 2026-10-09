@@ -6,7 +6,7 @@
       </router-link>
     </div>
 
-    <div class="flexrow">
+    <div class="flexrow" v-if="withPerson">
       <people-avatar class="flexrow-item" :person="person" :is-lazy="false" />
       <page-title class="flexrow-item" :text="person.full_name" />
     </div>
@@ -53,6 +53,7 @@ const store = useStore()
 // Props
 // --------------------------------------------------------------------------
 const props = defineProps({
+  withPerson: { type: Boolean, default: true },
   person: { type: Object, default: () => ({}) },
   year: { type: Number, default: 0 },
   month: { type: Number, default: 0 },

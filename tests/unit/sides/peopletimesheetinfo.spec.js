@@ -66,4 +66,13 @@ describe('sides/PeopleTimesheetInfo', () => {
     pressEscape()
     expect(push).not.toHaveBeenCalled()
   })
+
+  // on the person page the person is already in the page header
+  test('leaves the person out when asked to', async () => {
+    expect(wrapper.findComponent({ name: 'PeopleAvatar' }).exists()).toBe(true)
+    await wrapper.setProps({ withPerson: false })
+    expect(wrapper.findComponent({ name: 'PeopleAvatar' }).exists()).toBe(
+      false
+    )
+  })
 })

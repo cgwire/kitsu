@@ -87,4 +87,16 @@ describe('sides/PeopleQuotaInfo', () => {
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
     expect(push).not.toHaveBeenCalled()
   })
+
+  // on the person page the person is already in the page header
+  test('leaves the person out when asked to', () => {
+    expect(mountPanel().findComponent({ name: 'PeopleAvatar' }).exists()).toBe(
+      true
+    )
+    expect(
+      mountPanel({ withPerson: false })
+        .findComponent({ name: 'PeopleAvatar' })
+        .exists()
+    ).toBe(false)
+  })
 })
