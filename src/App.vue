@@ -31,6 +31,7 @@ import crisp from '@/lib/crisp'
 import { isNewShotInLoadedScope } from '@/lib/episodes'
 import errors from '@/lib/errors'
 import i18n from '@/lib/i18n'
+import { getProductionRole } from '@/lib/people'
 import localPreferences from '@/lib/preferences'
 import { isPreviewFileStatus } from '@/lib/preview'
 import sentry from '@/lib/sentry'
@@ -125,6 +126,31 @@ const onAssignation = (eventData, assign = true) => {
   } else {
     store.commit('UNASSIGN_TASKS', taskIds)
   }
+}
+
+// As Zou's check_comment_access: an admin, a supervisor or a manager of the
+// production reads every comment; a client, the comments flagged for it and
+// those of clients, only its own on a production that isolates them; anyone
+// else, every comment but those of clients. Older Zou versions leave the
+// author and the flag out of the events, and Zou reads a null flag as false.
+const isUnreadableComment = eventData => {
+  if (!('person_id' in eventData) || user.value.role === 'admin') return false
+  const projectId = eventData.project_id
+  const role = store.getters.currentUserRoleForProduction(projectId)
+  if (['manager', 'supervisor'].includes(role)) return false
+  const author = personMap.value.get(eventData.person_id)
+  const isClientAuthor = author
+    ? getProductionRole(
+        author,
+        store.getters.teamRolesForProduction(projectId)
+      ) === 'client'
+    : undefined
+  if (role !== 'client') return isClientAuthor === true
+  if (eventData.for_client) return false
+  if (productionMap.value.get(projectId)?.is_clients_isolated) {
+    return eventData.person_id !== user.value.id
+  }
+  return isClientAuthor === false
 }
 
 const setupDarkTheme = () => {
@@ -524,8 +550,9 @@ const socketEvents = {
     const task = getHeldTask(eventData.task_id)
     if (!isSavingCommentPreview.value && task) {
       if (
-        taskComments.value[eventData.task_id] ||
-        todoMap.value.get(eventData.task_id)
+        !isUnreadableComment(eventData) &&
+        (taskComments.value[eventData.task_id] ||
+          todoMap.value.get(eventData.task_id))
       ) {
         store
           .dispatch('loadComment', { commentId, taskId: eventData.task_id })
@@ -548,6 +575,11 @@ const socketEvents = {
     // The comment the user posts with previews joins the store once its last
     // file is up: reloaded before, it would list them with no revision.
     if (store.getters.isPublishingComment(commentId)) return
+    // A comment the user holds is reloaded even so: a 403 blanks it below.
+    const isStored = taskComments.value[taskId].some(
+      ({ id }) => id === commentId
+    )
+    if (!isStored && isUnreadableComment(eventData)) return
     store.dispatch('loadComment', { commentId }).catch(err => {
       // A manager may have just flipped for_client off — the client
       // loses access and gets a 403. Keep the row but blank its

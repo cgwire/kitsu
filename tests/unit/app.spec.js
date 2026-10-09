@@ -655,6 +655,194 @@ describe('App', () => {
       })
     })
 
+    // As Zou's check_comment_access: an admin, a supervisor or a manager of
+    // the production reads every comment; a client, the comments flagged for
+    // it and those of clients, only its own on a production that isolates
+    // them; anyone else, every comment but those of clients. The reload of
+    // any other answers 403.
+    describe('comments the user cannot read', () => {
+      const artist = { id: 'person-artist', role: 'user' }
+      const otherClient = { id: 'person-client', role: 'client' }
+      const me = { id: 'person-me', role: 'client' }
+      const task = { id: 'task-1' }
+      const readerGetters = ({
+        role = 'client',
+        globalRole = role,
+        isolated = false,
+        comments = []
+      } = {}) => ({
+        currentUserRoleForProduction: () => () => role,
+        // The page has no production: the route role is the global one.
+        isCurrentUserClient: () => globalRole === 'client',
+        isPublishingComment: () => () => false,
+        isSavingCommentPreview: () => false,
+        personMap: () =>
+          new Map([artist, otherClient, me].map(person => [person.id, person])),
+        productionMap: () =>
+          new Map([
+            ['production-1', { id: 'production-1', is_clients_isolated: isolated }]
+          ]),
+        taskComments: () => ({ 'task-1': comments }),
+        taskMap: () => new Map([['task-1', task]]),
+        teamRolesForProduction: () => () => ({}),
+        todoMap: () => new Map(),
+        user: () => ({ ...me, role: globalRole })
+      })
+      const eventBy = (personId, extra = {}) => ({
+        comment_id: 'comment-9',
+        task_id: 'task-1',
+        project_id: 'production-1',
+        person_id: personId,
+        for_client: false,
+        task_status_id: 'status-wip',
+        ...extra
+      })
+      const mountReader = async getters => {
+        const loadComment = vi.fn(() => Promise.resolve())
+        const updateTask = vi.fn()
+        const { socket } = await mountApp({
+          actions: { loadComment },
+          getters,
+          mutations: { UPDATE_TASK: updateTask }
+        })
+        return { socket, loadComment, updateTask }
+      }
+
+      it('leaves alone the update of an internal comment', async () => {
+        const { socket, loadComment } = await mountReader(readerGetters())
+
+        emitSocketEvent(socket, 'comment:update', eventBy(artist.id))
+
+        expect(loadComment).not.toHaveBeenCalled()
+      })
+
+      it('moves only the status of the task for a new internal comment', async () => {
+        const { socket, loadComment, updateTask } = await mountReader(
+          readerGetters()
+        )
+
+        emitSocketEvent(socket, 'comment:new', eventBy(artist.id))
+
+        expect(loadComment).not.toHaveBeenCalled()
+        expect(updateTask).toHaveBeenCalledWith(expect.anything(), {
+          task,
+          taskStatusId: 'status-wip'
+        })
+      })
+
+      it('reloads the comments flagged for it and those of clients', async () => {
+        const { socket, loadComment } = await mountReader(readerGetters())
+
+        emitSocketEvent(
+          socket,
+          'comment:update',
+          eventBy(artist.id, { for_client: true })
+        )
+        emitSocketEvent(socket, 'comment:update', eventBy(otherClient.id))
+
+        expect(loadComment).toHaveBeenCalledTimes(2)
+      })
+
+      it('leaves alone the comments of other clients on an isolating production', async () => {
+        const { socket, loadComment } = await mountReader(
+          readerGetters({ isolated: true })
+        )
+
+        emitSocketEvent(socket, 'comment:update', eventBy(otherClient.id))
+        emitSocketEvent(socket, 'comment:update', eventBy(me.id))
+
+        expect(loadComment).toHaveBeenCalledTimes(1)
+      })
+
+      // A manager may have turned the flag off: the reload blanks the comment.
+      it('reloads a comment it holds and may no longer read', async () => {
+        const { socket, loadComment } = await mountReader(
+          readerGetters({ comments: [{ id: 'comment-9' }] })
+        )
+
+        emitSocketEvent(socket, 'comment:update', eventBy(artist.id))
+
+        expect(loadComment).toHaveBeenCalled()
+      })
+
+      // Zou reads a null flag, left by older rows, as false.
+      it('leaves alone an internal comment whose flag is null', async () => {
+        const { socket, loadComment } = await mountReader(readerGetters())
+
+        emitSocketEvent(
+          socket,
+          'comment:update',
+          eventBy(artist.id, { for_client: null })
+        )
+
+        expect(loadComment).not.toHaveBeenCalled()
+      })
+
+      it('reloads when Zou leaves the author out of the event', async () => {
+        const { socket, loadComment } = await mountReader(readerGetters())
+        const event = eventBy(artist.id)
+        delete event.person_id
+        delete event.for_client
+
+        emitSocketEvent(socket, 'comment:update', event)
+
+        expect(loadComment).toHaveBeenCalled()
+      })
+
+      // Zou checks the role on the production of the task, not on the page.
+      it('reads every comment as a supervisor of the production', async () => {
+        const { socket, loadComment } = await mountReader(
+          readerGetters({ role: 'supervisor', globalRole: 'client' })
+        )
+
+        emitSocketEvent(socket, 'comment:update', eventBy(artist.id))
+
+        expect(loadComment).toHaveBeenCalled()
+      })
+
+      it('reads the comments of clients as a supervisor', async () => {
+        const { socket, loadComment } = await mountReader(
+          readerGetters({ role: 'supervisor' })
+        )
+
+        emitSocketEvent(socket, 'comment:update', eventBy(otherClient.id))
+
+        expect(loadComment).toHaveBeenCalled()
+      })
+
+      it('reads every comment as an admin', async () => {
+        const { socket, loadComment } = await mountReader(
+          readerGetters({ globalRole: 'admin' })
+        )
+
+        emitSocketEvent(socket, 'comment:update', eventBy(artist.id))
+
+        expect(loadComment).toHaveBeenCalled()
+      })
+
+      it('leaves the comments of clients alone for an artist', async () => {
+        const { socket, loadComment, updateTask } = await mountReader(
+          readerGetters({ role: 'user' })
+        )
+
+        emitSocketEvent(socket, 'comment:new', eventBy(otherClient.id))
+        emitSocketEvent(socket, 'comment:update', eventBy(otherClient.id))
+
+        expect(loadComment).not.toHaveBeenCalled()
+        expect(updateTask).toHaveBeenCalled()
+      })
+
+      it('reads the comments of the studio as an artist', async () => {
+        const { socket, loadComment } = await mountReader(
+          readerGetters({ role: 'user' })
+        )
+
+        emitSocketEvent(socket, 'comment:update', eventBy(artist.id))
+
+        expect(loadComment).toHaveBeenCalled()
+      })
+    })
+
     // Zou names the task of a comment update: App.vue reloads the comment
     // for the panels that hold the comments of that task.
     describe('comment updates', () => {
