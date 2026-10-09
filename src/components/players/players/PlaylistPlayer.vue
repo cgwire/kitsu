@@ -4096,6 +4096,9 @@ const loadWaveForm = () => {
         if (wavesurfer) wavesurfer.destroy()
         configureWaveForm()
         setTimeout(() => {
+          // Destroyed meanwhile: the player closed, or moved on to a
+          // preview that is no movie.
+          if (!wavesurfer) return
           // destroy() aborts the in-flight fetch, rejecting load() with an
           // expected AbortError; real failures already reach the 'error'
           // handler, which load() fires before rejecting.

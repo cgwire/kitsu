@@ -9,6 +9,16 @@ vi.mock('vue-i18n', async importOriginal => ({
   useI18n: () => ({ t: key => key })
 }))
 
+// The real one draws into a laid out container and fetches the movie.
+const waveSurfer = vi.hoisted(() => ({
+  create: vi.fn(() => ({
+    destroy: vi.fn(),
+    load: vi.fn(() => Promise.resolve()),
+    on: vi.fn()
+  }))
+}))
+vi.mock('wavesurfer.js', () => ({ default: waveSurfer }))
+
 // Pre-load the real store to avoid a circular-import race from child components.
 import '@/lib/auth'
 
@@ -263,6 +273,66 @@ describe('PlaylistPlayer.vue', () => {
         await expect(snapshots).resolves.toEqual([])
       }
     )
+  })
+
+  // The waveform loads 100 ms after it is set up for the movie on screen:
+  // the player can close, or move on to a picture, in between.
+  describe('waveform', () => {
+    const movie = { ...entity, preview_file_extension: 'mp4' }
+    const picture = {
+      id: 'shot-2',
+      preview_file_id: 'preview-2',
+      preview_file_extension: 'png'
+    }
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    const showWaveform = async entities => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      // The player sets the waveform up only in a container it finds.
+      vi.spyOn(document, 'getElementById').mockReturnValue(
+        document.createElement('div')
+      )
+      wrapper = mountPlayer({ entities })
+      await flushPromises()
+      wrapper.findComponent({ ref: 'raw-player' }).vm.currentPlayer = {
+        src: '/movie.mp4'
+      }
+      wrapper
+        .findComponent({ name: 'PlayerPlaybackBar' })
+        .vm.$emit('update:isWaveformDisplayed', true)
+      await flushPromises()
+      return waveSurfer.create.mock.results.at(-1).value
+    }
+
+    it('loads the waveform of the movie on screen', async () => {
+      const waveform = await showWaveform([movie])
+      await vi.advanceTimersByTimeAsync(100)
+      expect(waveform.load).toHaveBeenCalledWith('/movie.mp4')
+    })
+
+    it('drops the waveform load of a closed player', async () => {
+      const waveform = await showWaveform([movie])
+      wrapper.unmount()
+      wrapper = null
+      await vi.advanceTimersByTimeAsync(100)
+      expect(waveform.load).not.toHaveBeenCalled()
+    })
+
+    it('drops the waveform load of a movie left for a picture', async () => {
+      const waveform = await showWaveform([movie, picture])
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(
+          button => button.attributes('title') === 'playlists.actions.next_shot'
+        )
+        .vm.$emit('click')
+      await flushPromises()
+      await vi.advanceTimersByTimeAsync(100)
+      expect(waveform.load).not.toHaveBeenCalled()
+    })
   })
 
   // A plain link navigates the tab: the browser fires beforeunload, which
