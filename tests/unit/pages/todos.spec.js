@@ -57,6 +57,7 @@ const taskStatusMap = new Map([
 ])
 
 const SearchFieldStub = {
+  props: ['focusOptions'],
   template: '<div />',
   methods: {
     getValue: () => '',
@@ -156,6 +157,15 @@ describe('Todos page', () => {
       wrapper.unmount()
     }
   )
+
+  // the autofocus would scroll a phone page down to the search
+  it('focuses the search without scrolling the page', async () => {
+    const wrapper = await mountPage([])
+    expect(wrapper.findComponent(SearchFieldStub).props('focusOptions')).toEqual(
+      { preventScroll: true }
+    )
+    wrapper.unmount()
+  })
 
   describe('on a phone', () => {
     const mockPhone = matches =>

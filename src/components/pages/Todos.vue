@@ -33,6 +33,7 @@
                 ref="todos-search-field"
                 class="search-field"
                 :can-save="true"
+                :focus-options="{ preventScroll: true }"
                 @change="onSearchChange"
                 @save="saveSearchQuery"
               />
