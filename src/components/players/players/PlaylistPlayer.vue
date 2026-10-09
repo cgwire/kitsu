@@ -2284,9 +2284,11 @@ const pause = () => {
     const comparisonPlayer = rawPlayerComparison.value
     let currentTimeValue = 0
     if (rawPlayer.value) {
-      currentTimeValue = ceilToFrame(
-        rawPlayer.value.getCurrentTimeRaw(),
-        fps.value
+      // The next frame boundary, but within the last frame: the very end of
+      // the movie holds no drawing.
+      currentTimeValue = Math.min(
+        ceilToFrame(rawPlayer.value.getCurrentTimeRaw(), fps.value),
+        frameStartTime(nbFrames.value - 1, fps.value)
       )
     }
     rawPlayer.value?.pause()
@@ -2519,7 +2521,8 @@ const goPreviousDrawing = () => {
     if (isFullMode.value) {
       setFullPlayerTime(annotationTime / fps.value)
     } else {
-      rawPlayer.value.setCurrentTimeRaw(annotationTime / fps.value)
+      // It seeks with the nudge of setCurrentFrame: an exact seek on the
+      // start of the last frame can land Chromium on the very end.
       onProgressChanged(annotationTime, true)
     }
     if (isComparing.value) syncComparisonPlayer()
@@ -2538,7 +2541,6 @@ const goNextDrawing = () => {
     if (isFullMode.value) {
       setFullPlayerTime(annotationTime / fps.value)
     } else {
-      rawPlayer.value.setCurrentTimeRaw(annotationTime / fps.value)
       onProgressChanged(annotationTime, true)
     }
     if (isComparing.value) syncComparisonPlayer()

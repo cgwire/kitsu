@@ -858,6 +858,59 @@ describe('PlaylistPlayer.vue', () => {
       expect(drawnIds(canvas)).toEqual(['last'])
     })
 
+    // Chromium can land an exact seek on the start of the last frame at the
+    // very end of the movie, whose ended event started the next entry.
+    it.each([
+      ['.', '.', 68],
+      [',', 'End', 30]
+    ])('seeks a drawing like the progress bar on %s', async (key, start, frame) => {
+      await mountShowing({
+        ...movie,
+        preview_file_annotations: [
+          drawingAt(0, 'first'),
+          drawingAt(1.2, 'middle'),
+          drawingAt(2.72, 'last')
+        ]
+      })
+      await press(start)
+      const rawPlayer = wrapper.findComponent({ ref: 'raw-player' }).vm
+      rawPlayer.setCurrentFrame = vi.fn()
+      rawPlayer.setCurrentTimeRaw = vi.fn()
+
+      await press(key)
+
+      expect(rawPlayer.setCurrentFrame).toHaveBeenCalledWith(frame)
+      expect(rawPlayer.setCurrentTimeRaw).not.toHaveBeenCalledWith(frame / 25)
+    })
+
+    // A pause moves the movie to the next frame boundary: past the last
+    // frame, that is the very end of the movie, where no drawing is found.
+    it('shows the drawing of the last frame once paused on it', async () => {
+      const canvas = await mountShowing(movie)
+      const rawPlayer = wrapper.findComponent({ ref: 'raw-player' }).vm
+      let time = 0
+      rawPlayer.getCurrentTime = () => time
+      rawPlayer.getCurrentTimeRaw = () => time
+      rawPlayer.setCurrentTimeRaw = value => {
+        time = value
+      }
+      rawPlayer.isPlaying = true
+      const togglePlayback = () =>
+        window.dispatchEvent(
+          new KeyboardEvent('keydown', { code: 'Space', key: ' ' })
+        )
+      togglePlayback()
+      await flushPromises()
+      // Inside the last frame, from 2.72 to 2.76 s.
+      time = 2.74
+      canvas.add.mockClear()
+
+      togglePlayback()
+      await flushPromises()
+
+      expect(drawnIds(canvas)).toEqual(['last'])
+    })
+
     // As in the preview player: loading the drawing would pause the movie.
     it.each([
       ['Home', 0],

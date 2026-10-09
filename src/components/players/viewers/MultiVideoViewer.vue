@@ -13,7 +13,7 @@
       preload="auto"
       playsinline
       :muted="muted"
-      @ended="$emit('play-next')"
+      @ended="onEnded"
     />
     <video
       ref="player2"
@@ -21,7 +21,7 @@
       preload="auto"
       playsinline
       :muted="muted"
-      @ended="$emit('play-next')"
+      @ended="onEnded"
     />
     <canvas ref="displayCanvas" class="playlist-movie" />
   </div>
@@ -673,6 +673,12 @@ const onSeeked = event => {
   if (pendingSeekTime !== null && event.target === currentPlayer.value) {
     seekNow(pendingSeekTime)
   }
+}
+
+// A seek can land a paused movie on its very end, where the browser fires
+// ended as well: only a playback reaching the end moves on.
+const onEnded = () => {
+  if (isPlaying.value) emit('play-next')
 }
 
 const switchPlayers = () => {
