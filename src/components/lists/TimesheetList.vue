@@ -711,6 +711,8 @@ onMounted(() => {
       border-color: var(--border);
       margin-right: 0;
       order: 1;
+      // the value ends where the other card values end
+      text-align: right;
     }
 
     // a flex basis too wide for the first line sends the slider to the
