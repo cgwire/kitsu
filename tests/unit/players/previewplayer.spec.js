@@ -1,4 +1,4 @@
-import { shallowMount } from '@vue/test-utils'
+import { flushPromises, shallowMount } from '@vue/test-utils'
 import process from 'node:process'
 import {
   afterAll,
@@ -49,6 +49,7 @@ const viewer = {
   resumeZoom: vi.fn(),
   setCurrentFrame: vi.fn(),
   setCurrentTimeRaw: vi.fn(),
+  setPanZoom: vi.fn(),
   setVolume: vi.fn(),
   zoomAt: vi.fn()
 }
@@ -441,6 +442,48 @@ describe('PreviewPlayer.vue', () => {
       wrapper.unmount()
       wrapper = null
       await vi.advanceTimersByTimeAsync(200)
+
+      expect(canvas.add).not.toHaveBeenCalled()
+    })
+  })
+
+  // The comparison canvas realigns 500 ms after the media of the comparison
+  // viewer loads: a player closed in between still reloaded the annotation
+  // of the compared revision.
+  describe('comparison', () => {
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('drops the realign of a closed player', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      const canvas = createFakeCanvas()
+      const comparedPreview = { ...annotatedPreview, id: 'preview-3' }
+      wrapper = mountPlayer({
+        props: {
+          entityPreviewFiles: {
+            [task.task_type_id]: [comparedPreview, preview]
+          },
+          taskTypeMap: new Map([
+            [task.task_type_id, { id: task.task_type_id, name: 'Animation' }]
+          ])
+        },
+        stubs: { AnnotationCanvas: annotationCanvasStub(canvas) }
+      })
+      await nextTick()
+      wrapper
+        .findComponent({ name: 'PlayerComparisonBar' })
+        .vm.$emit('compare-clicked')
+      await flushPromises()
+      expect(canvas.add).toHaveBeenCalled()
+      canvas.add.mockClear()
+
+      wrapper
+        .findAllComponents({ name: 'PreviewViewer' })[1]
+        .vm.$emit('video-loaded')
+      wrapper.unmount()
+      wrapper = null
+      await vi.advanceTimersByTimeAsync(500)
 
       expect(canvas.add).not.toHaveBeenCalled()
     })

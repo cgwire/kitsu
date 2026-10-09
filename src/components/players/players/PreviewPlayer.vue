@@ -1323,6 +1323,11 @@ const realignComparisonCanvas = () => {
   loadComparisonAnnotationAtCurrentFrame()
 }
 
+const realignComparisonCanvasLater = func.debounce(
+  realignComparisonCanvas,
+  RESIZE_DELAY
+)
+
 // Push the main viewer's current transform onto the comparison
 // viewer once its panzoom instance is (re)bound. The comparison
 // binds lazily — on the media's load event after a revision swap —
@@ -1361,7 +1366,7 @@ const onComparisonVideoLoaded = () => {
   // Draw once after RESIZE_DELAY rather than on nextTick: painting before
   // the transition settles places the annotation at a mid-transition
   // position, so it visibly jumps when corrected.
-  setTimeout(realignComparisonCanvas, RESIZE_DELAY)
+  realignComparisonCanvasLater()
 }
 
 const onComparisonCanvasResized = () => {
@@ -2590,6 +2595,7 @@ onBeforeUnmount(() => {
   containerResizeObserver?.disconnect()
   containerResizeObserver = null
   onContainerResized.cancel()
+  realignComparisonCanvasLater.cancel()
 })
 
 // Player API (passed to TaskInfo via :player prop)
