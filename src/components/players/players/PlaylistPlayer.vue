@@ -2496,6 +2496,16 @@ const goNextFrame = () => {
   }
 }
 
+// Like a click on the progress bar, which also shows the drawing of the
+// frame reached. A playing movie only jumps, as in the preview player:
+// loading the drawing would pause it. A picture and the movie of the full
+// mode stay as they are.
+const goToFrame = frame => {
+  if (!isCurrentPreviewMovie.value || isFullMode.value) return
+  if (isPlaying.value) rawPlayer.value?.setCurrentFrame(frame)
+  else onProgressChanged(frame)
+}
+
 const goPreviousDrawing = () => {
   try {
     clearCanvas()
@@ -4482,9 +4492,9 @@ const onKeyDown = event => {
       onNextFrameClicked()
     }
   } else if (event.code === 'Home') {
-    rawPlayer.value?.setCurrentFrame(0)
+    goToFrame(0)
   } else if (event.code === 'End') {
-    rawPlayer.value?.setCurrentFrame(nbFrames.value - 1)
+    goToFrame(nbFrames.value - 1)
   }
 }
 

@@ -763,6 +763,127 @@ describe('PlaylistPlayer.vue', () => {
     })
   })
 
+  // Home and End moved the movie without its annotations: the drawing of
+  // the frame left stayed on the one reached.
+  describe('Home and End keys', () => {
+    const drawingAt = (time, id) => ({
+      time,
+      drawing: {
+        objects: [
+          {
+            id,
+            type: 'path',
+            path: 'M 0 0 L 10 10',
+            left: 100,
+            top: 50,
+            scaleX: 1,
+            scaleY: 1,
+            stroke: '#ff0000',
+            strokeWidth: 2,
+            canvasWidth: 800,
+            canvasHeight: 600
+          }
+        ]
+      }
+    })
+
+    // 69 frames at 25 fps, drawn on the first and on the last one.
+    const movie = {
+      ...entity,
+      preview_file_extension: 'mp4',
+      preview_file_duration: 2.76,
+      preview_file_annotations: [drawingAt(0, 'first'), drawingAt(2.72, 'last')]
+    }
+
+    const mountShowing = async shown => {
+      const canvas = createFakeCanvas()
+      wrapper = mountPlayer({
+        entities: [shown],
+        stubs: { AnnotationCanvas: annotationCanvasStub(canvas) }
+      })
+      await flushPromises()
+      return canvas
+    }
+
+    const press = async code => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { code, key: code }))
+      await flushPromises()
+    }
+
+    const drawnIds = canvas => canvas.add.mock.calls.map(([object]) => object.id)
+
+    it('shows the drawing of the last frame on End', async () => {
+      const canvas = await mountShowing(movie)
+      canvas.add.mockClear()
+      canvas.clear.mockClear()
+
+      await press('End')
+
+      expect(canvas.clear).toHaveBeenCalled()
+      expect(drawnIds(canvas)).toEqual(['last'])
+    })
+
+    it('shows the drawing of the first frame on Home', async () => {
+      const canvas = await mountShowing(movie)
+      await press('End')
+      canvas.add.mockClear()
+      canvas.clear.mockClear()
+
+      await press('Home')
+
+      expect(canvas.clear).toHaveBeenCalled()
+      expect(drawnIds(canvas)).toEqual(['first'])
+    })
+
+    // As in the preview player: loading the drawing would pause the movie.
+    it.each([
+      ['Home', 0],
+      ['End', 68]
+    ])('keeps a movie playing on %s', async (key, frame) => {
+      await mountShowing(movie)
+      const rawPlayer = wrapper.findComponent({ ref: 'raw-player' }).vm
+      rawPlayer.isPlaying = true
+      rawPlayer.pause = vi.fn()
+      rawPlayer.setCurrentFrame = vi.fn()
+      window.dispatchEvent(
+        new KeyboardEvent('keydown', { code: 'Space', key: ' ' })
+      )
+      await flushPromises()
+
+      await press(key)
+
+      expect(rawPlayer.setCurrentFrame).toHaveBeenCalledWith(frame)
+      expect(rawPlayer.pause).not.toHaveBeenCalled()
+    })
+
+    it.each(['Home', 'End'])('leaves a picture as it is on %s', async key => {
+      const canvas = await mountShowing({
+        ...entity,
+        preview_file_extension: 'png',
+        preview_file_annotations: [drawingAt(0, 'picture')]
+      })
+      canvas.clear.mockClear()
+
+      await press(key)
+
+      expect(canvas.clear).not.toHaveBeenCalled()
+    })
+
+    // The built movie of the playlist plays instead of the one of the entry.
+    it.each(['Home', 'End'])('leaves the full mode as it is on %s', async key => {
+      // jsdom plays no media
+      vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {})
+      const canvas = await mountShowing(movie)
+      wrapper.vm.isFullMode = true
+      await flushPromises()
+      canvas.clear.mockClear()
+
+      await press(key)
+
+      expect(canvas.clear).not.toHaveBeenCalled()
+    })
+  })
+
   describe('window resize', () => {
     afterEach(() => {
       vi.useRealTimers()
