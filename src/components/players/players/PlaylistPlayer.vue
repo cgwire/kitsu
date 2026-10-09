@@ -2508,9 +2508,10 @@ const goToFrame = frame => {
 
 const goPreviousDrawing = () => {
   try {
-    clearCanvas()
     const previous = getPreviousAnnotationTime(currentTimeRaw.value)
+    // Without a drawing to go to, the one on screen stays.
     if (!previous) return
+    clearCanvas()
     // Seek by the annotation's time, not its stored frame: .frame can be
     // stale (off by one, or a zero-padded string) and lands on the wrong
     // frame. See PreviewPlayer.jumpToAnnotationFrame.
@@ -2529,9 +2530,9 @@ const goPreviousDrawing = () => {
 
 const goNextDrawing = () => {
   try {
-    clearCanvas()
     const next = getNextAnnotationTime(currentTimeRaw.value)
     if (!next) return
+    clearCanvas()
     // Seek by time, not the stale .frame — see goPreviousDrawing.
     const annotationTime = Math.round(next.time / frameDuration.value)
     if (isFullMode.value) {

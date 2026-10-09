@@ -764,8 +764,9 @@ describe('PlaylistPlayer.vue', () => {
   })
 
   // Home and End moved the movie without its annotations: the drawing of
-  // the frame left stayed on the one reached.
-  describe('Home and End keys', () => {
+  // the frame left stayed on the one reached. The drawing keys (, and .)
+  // wiped the canvas even with no drawing to go to.
+  describe('frame keys', () => {
     const drawingAt = (time, id) => ({
       time,
       drawing: {
@@ -833,6 +834,28 @@ describe('PlaylistPlayer.vue', () => {
 
       expect(canvas.clear).toHaveBeenCalled()
       expect(drawnIds(canvas)).toEqual(['first'])
+    })
+
+    it.each([
+      [',', 'Home'],
+      ['.', 'End']
+    ])('keeps the drawing with no other one to go to on %s', async (key, start) => {
+      const canvas = await mountShowing(movie)
+      await press(start)
+      canvas.clear.mockClear()
+
+      await press(key)
+
+      expect(canvas.clear).not.toHaveBeenCalled()
+    })
+
+    it('takes a movie to its next drawing on .', async () => {
+      const canvas = await mountShowing(movie)
+      canvas.add.mockClear()
+
+      await press('.')
+
+      expect(drawnIds(canvas)).toEqual(['last'])
     })
 
     // As in the preview player: loading the drawing would pause the movie.

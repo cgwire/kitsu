@@ -340,12 +340,42 @@ describe('PreviewPlayer.vue', () => {
         6
       )
     })
+
+    // The playback wipes the canvas, and the movie stops on the frame it
+    // shows: no frame change reloaded its drawing.
+    it('shows the drawing of the frame a movie stops on', async () => {
+      const [drawing] = annotatedPreview.annotations
+      const canvas = createFakeCanvas()
+      wrapper = mountPlayer({
+        props: {
+          previews: [{ ...moviePreview, annotations: [{ ...drawing, time: 4 }] }]
+        },
+        stubs: { AnnotationCanvas: annotationCanvasStub(canvas) }
+      })
+      await nextTick()
+      const togglePlayback = () =>
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }))
+      togglePlayback()
+      wrapper
+        .findAllComponents({ name: 'PreviewViewer' })[0]
+        .vm.$emit('frame-update', 100)
+      await flushPromises()
+      canvas.add.mockClear()
+
+      togglePlayback()
+      await flushPromises()
+
+      expect(canvas.add.mock.calls.map(([object]) => object.id)).toEqual([
+        'stroke-1'
+      ])
+    })
   })
 
-  // The arrows, Home and End wipe the canvas, then the frame the movie goes
-  // to reloads its drawing. A picture has no frame to go to, and a movie
-  // stops at its ends: nothing reloaded the drawing there.
-  describe('arrow, Home and End keys', () => {
+  // The arrows, Home, End and the drawing keys (, and .) wipe the canvas,
+  // then the frame the movie goes to reloads its drawing. A picture has no
+  // frame to go to, and a movie stops at its ends: nothing reloaded the
+  // drawing there.
+  describe('frame keys', () => {
     const press = key =>
       window.dispatchEvent(new KeyboardEvent('keydown', { key }))
 
@@ -367,7 +397,7 @@ describe('PreviewPlayer.vue', () => {
       return canvas
     }
 
-    it.each(['ArrowLeft', 'ArrowRight'])(
+    it.each(['ArrowLeft', 'ArrowRight', ',', '.'])(
       'keeps the drawing of a picture on %s',
       async key => {
         const canvas = await mountOnFrame(annotatedPreview)
@@ -425,6 +455,20 @@ describe('PreviewPlayer.vue', () => {
       press(key)
 
       expect(viewer.setCurrentFrame).toHaveBeenCalledWith(frame)
+      expect(canvas.clear).toHaveBeenCalled()
+    })
+
+    it('takes a movie to its next drawing on .', async () => {
+      const [drawing] = annotatedPreview.annotations
+      const canvas = await mountOnFrame({
+        ...moviePreview,
+        annotations: [{ ...drawing, time: 4 }]
+      })
+      viewer.setCurrentFrame.mockClear()
+
+      press('.')
+
+      expect(viewer.setCurrentFrame).toHaveBeenCalledWith(100)
       expect(canvas.clear).toHaveBeenCalled()
     })
   })

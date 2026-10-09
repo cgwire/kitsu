@@ -1256,6 +1256,9 @@ const pause = () => {
     } else {
       if (previewViewer.value) previewViewer.value.pause()
       if (comparisonViewer.value) comparisonViewer.value.pause()
+      // The playback wiped the canvas, and the movie stops on the frame it
+      // shows: no frame change reloads its drawing.
+      loadAnnotation()
       nextTick(() => {
         syncComparisonViewer()
       })
@@ -1309,6 +1312,9 @@ const jumpToAnnotationFrame = annotation => {
     // string), which landed 1-2 frames past the drawing and lost the
     // next step.
     const frame = Math.round(annotation.time / frameDuration.value)
+    // On the frame on screen (always frame 0 on a picture), setCurrentFrame
+    // reloads nothing after a wipe: its drawing is shown already.
+    if (frame === currentFrame.value) return
     clearCanvas()
     setCurrentFrame(frame)
     syncComparisonViewer()
