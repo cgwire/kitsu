@@ -274,6 +274,7 @@ import { useBoardStatuses } from '@/composables/board'
 import { useProductivity } from '@/composables/productivity'
 import { useTaskFilters } from '@/composables/taskFilters'
 import func from '@/lib/func'
+import preferences from '@/lib/preferences'
 
 import DayOffList from '@/components/lists/DayOffList.vue'
 import KanbanBoard from '@/components/lists/KanbanBoard.vue'
@@ -298,8 +299,17 @@ const router = useRouter()
 const store = useStore()
 const socket = getCurrentInstance().appContext.config.globalProperties.$socket
 
+// Props
+// --------------------------------------------------------------------------
+const props = defineProps({
+  // ponytail: the productivity tab stays hidden until studios ask for it,
+  // its code is kept to bring it back by flipping this default
+  withProductivity: { type: Boolean, default: false }
+})
+
 // State
 // --------------------------------------------------------------------------
+const SECTION_STORAGE_KEY = 'todos:section'
 const currentSection = ref('todos')
 const daysOff = ref([])
 const isDaysOffLoadingError = ref(false)
@@ -445,10 +455,12 @@ const todoTabs = computed(() => {
       label: t('tasks.calendar'),
       name: 'calendar'
     },
-    {
-      label: t('main.productivity'),
-      name: 'productivity'
-    },
+    props.withProductivity
+      ? {
+          label: t('main.productivity'),
+          name: 'productivity'
+        }
+      : undefined,
     isPhone.value
       ? undefined
       : {
@@ -530,20 +542,30 @@ const resizeHeaders = () => {
   })
 }
 
-const updateActiveTab = () => {
+const isAvailableSection = section => {
   const availableSections = [
     'board',
     'calendar',
     'daysoff',
     'done',
     'pending',
-    'productivity',
     'timesheets'
   ]
-  const section = route.query.section
+  if (props.withProductivity) availableSections.push('productivity')
   const isHiddenOnPhone = isPhone.value && ['pending', 'done'].includes(section)
-  currentSection.value =
-    availableSections.includes(section) && !isHiddenOnPhone ? section : 'todos'
+  return availableSections.includes(section) && !isHiddenOnPhone
+}
+
+const updateActiveTab = () => {
+  const urlSection = route.query.section
+  const storedSection = preferences.getPreference(SECTION_STORAGE_KEY)
+  const restoredSection =
+    !urlSection && isAvailableSection(storedSection) ? storedSection : null
+  const section = urlSection || restoredSection
+  currentSection.value = isAvailableSection(section) ? section : 'todos'
+  if (urlSection) {
+    preferences.setPreference(SECTION_STORAGE_KEY, currentSection.value)
+  }
 
   const day = route.query.day
   if (
@@ -560,8 +582,12 @@ const updateActiveTab = () => {
   )
   if (currentProduction) {
     productionId.value = currentProduction.id
-  } else {
-    router.push({
+  }
+  store.dispatch('clearSelectedTasks')
+
+  if (!currentProduction || restoredSection) {
+    // A restored tab is not a navigation of the user: no history entry
+    return router[restoredSection ? 'replace' : 'push']({
       query: {
         ...route.query,
         productionId: productionId.value,
@@ -569,8 +595,6 @@ const updateActiveTab = () => {
       }
     })
   }
-
-  store.dispatch('clearSelectedTasks')
 }
 
 const setSearchFromUrl = () => {
@@ -727,7 +751,8 @@ onMounted(async () => {
       query: { ...route.query, productionId: storedFilters.productionId }
     })
   }
-  updateActiveTab()
+  // a later navigation built on the old query would drop the restored tab
+  await updateActiveTab()
   await nextTick()
   await loadData()
   setSearchFromUrl()
