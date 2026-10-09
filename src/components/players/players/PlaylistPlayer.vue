@@ -1907,10 +1907,18 @@ const isOverlayInteractive = computed(
   () => !isAltHeld.value && !isScrubbing.value
 )
 
-// Fingers pan and zoom the media, over the annotations too: the stylus
-// and the mouse annotate.
+// Two fingers pan and zoom the media, over the annotations too. One finger
+// uses the annotation tool turned on (the laser draws), or pans when none
+// is.
 const isTouchNavigationEnabled = computed(
   () => isCurrentPreviewMovie.value || isCurrentPreviewPicture.value
+)
+const isAnnotationToolOn = computed(
+  () =>
+    isDrawing.value ||
+    isShapeMode.value ||
+    isEraserModeOn.value ||
+    isTyping.value
 )
 
 const getMainViewer = () => {
@@ -1925,6 +1933,8 @@ useTouchNavigation({
     mainAnnotationCanvas.value?.overlay,
     mainMediaElement.value?.parentElement
   ],
+  overlay: () => mainAnnotationCanvas.value?.overlay,
+  isAnnotating: isAnnotationToolOn,
   isEnabled: isTouchNavigationEnabled,
   panBy: (dx, dy) => getMainViewer()?.panBy(dx, dy),
   zoomAt: (clientX, clientY, ratio) =>

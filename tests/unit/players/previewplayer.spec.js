@@ -259,6 +259,45 @@ describe('PreviewPlayer.vue', () => {
         'main'
       ])
     })
+
+    it.each([
+      ['pencil', 'pencil-annotate-clicked'],
+      ['eraser', 'erase-clicked'],
+      ['shape', 'shape-mode-clicked'],
+      ['text', 'type-clicked']
+    ])('hands a finger on the annotations to the %s', async (tool, click) => {
+      wrapper = mountPlayer({
+        stubs: {
+          AnnotationCanvas: {
+            name: 'AnnotationCanvas',
+            template: '<div ref="overlay"><canvas /></div>',
+            setup: () => ({
+              canvas: markRaw(createFakeCanvas()),
+              overlay: ref(null)
+            })
+          }
+        }
+      })
+      await nextTick()
+      wrapper.findComponent({ name: 'PlayerAnnotationBar' }).vm.$emit(click)
+      await nextTick()
+      const upper = wrapper
+        .findComponent({ ref: 'main-annotation-canvas' })
+        .find('canvas').element
+      const heard = []
+      upper.addEventListener('pointerdown', event =>
+        heard.push(event.pointerType)
+      )
+
+      vi.useFakeTimers()
+      pointer(upper, 'pointerdown', { id: 1, x: 100, y: 100 })
+      pointer(upper, 'pointermove', { id: 1, x: 105, y: 100 })
+      vi.advanceTimersByTime(300)
+      vi.useRealTimers()
+
+      expect(heard).toEqual(['touch'])
+      expect(viewer.panBy).not.toHaveBeenCalled()
+    })
   })
 
   describe('movie playback', () => {

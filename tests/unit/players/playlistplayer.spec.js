@@ -1,7 +1,7 @@
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import process from 'node:process'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { reactive } from 'vue'
+import { markRaw, reactive, ref } from 'vue'
 import { createStore } from 'vuex'
 
 vi.mock('vue-i18n', async importOriginal => ({
@@ -43,7 +43,8 @@ const mountPlayer = ({
   canEditShotTrim = () => true,
   previewFileStatusMap,
   shotMap = new Map(),
-  taskMap = new Map()
+  taskMap = new Map(),
+  stubs = {}
 } = {}) => {
   const store = createStore({
     getters: {
@@ -129,11 +130,53 @@ const mountPlayer = ({
         VideoProgress: {
           ...withMethods(['updateProgressBar']),
           props: { handleIn: Number, handleOut: Number, readOnly: Boolean }
-        }
+        },
+        ...stubs
       }
     }
   })
 }
+
+// Enough of a fabric canvas for the annotation composable, which wires its
+// handlers with on() and off().
+const createFakeCanvas = () => {
+  const handlers = {}
+  return {
+    width: 800,
+    height: 600,
+    contextContainer: {},
+    freeDrawingBrush: { pressureManager: {} },
+    add: vi.fn(),
+    clear: vi.fn(),
+    discardActiveObject: vi.fn(),
+    fire: (event, options) =>
+      (handlers[event] || []).forEach(handler => handler(options)),
+    getActiveObject: vi.fn(),
+    getObjects: () => [],
+    off: (event, handler) => {
+      handlers[event] = (handlers[event] || []).filter(h => h !== handler)
+    },
+    on: (event, handler) => {
+      handlers[event] = [...(handlers[event] || []), handler]
+    },
+    remove: vi.fn(),
+    renderAll: vi.fn(),
+    requestRenderAll: vi.fn()
+  }
+}
+
+const pointer = (target, type, { id, x, y }) =>
+  target.dispatchEvent(
+    new PointerEvent(type, {
+      bubbles: true,
+      cancelable: true,
+      clientX: x,
+      clientY: y,
+      pointerId: id,
+      pointerType: 'touch',
+      isPrimary: true
+    })
+  )
 
 describe('PlaylistPlayer.vue', () => {
   let wrapper = null
@@ -454,6 +497,50 @@ describe('PlaylistPlayer.vue', () => {
       wrapper = mountPlayer({ entities: [pictureWithExtra] })
       await flushPromises()
       expect(viewerStatuses()).toEqual([undefined, undefined])
+    })
+  })
+
+  describe('finger gestures', () => {
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it.each([
+      ['pencil', 'pencil-annotate-clicked'],
+      ['eraser', 'erase-clicked'],
+      ['shape', 'shape-mode-clicked'],
+      ['text', 'type-clicked']
+    ])('hands a finger on the annotations to the %s', async (tool, click) => {
+      wrapper = mountPlayer({
+        entities: [{ ...entity, preview_file_extension: 'mp4' }],
+        stubs: {
+          AnnotationCanvas: {
+            name: 'AnnotationCanvas',
+            template: '<div ref="overlay"><canvas /></div>',
+            setup: () => ({
+              canvas: markRaw(createFakeCanvas()),
+              overlay: ref(null)
+            })
+          }
+        }
+      })
+      await flushPromises()
+      wrapper.findComponent({ name: 'PlayerAnnotationBar' }).vm.$emit(click)
+      await flushPromises()
+      const upper = wrapper
+        .findComponent({ ref: 'main-annotation-canvas' })
+        .find('canvas').element
+      const heard = []
+      upper.addEventListener('pointerdown', event =>
+        heard.push(event.pointerType)
+      )
+
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      pointer(upper, 'pointerdown', { id: 1, x: 100, y: 100 })
+      pointer(upper, 'pointermove', { id: 1, x: 105, y: 100 })
+      vi.advanceTimersByTime(300)
+
+      expect(heard).toEqual(['touch'])
     })
   })
 })

@@ -702,21 +702,6 @@ const { panzoomTransform, onPanzoomChanged, resetPanzoomTransform } =
 // media via the wheelTarget prop).
 const isOverlayInteractive = computed(() => !isAltHeld.value)
 
-// Fingers pan and zoom the media, over the annotations too: the stylus
-// and the mouse annotate.
-const isTouchNavigationEnabled = computed(
-  () => isMovie.value || isPicture.value
-)
-
-useTouchNavigation({
-  container: previewContainer,
-  surfaces: () => [canvasWrapper.value, mainMediaElement.value?.parentElement],
-  isEnabled: isTouchNavigationEnabled,
-  panBy: (dx, dy) => previewViewer.value?.panBy(dx, dy),
-  zoomAt: (clientX, clientY, ratio) =>
-    previewViewer.value?.zoomAt(clientX, clientY, ratio)
-})
-
 // Annotation composable
 // Callbacks are wrapped in closures so they can reference functions defined later.
 
@@ -781,6 +766,30 @@ const {
   restoreFailedAnnotations,
   toggleShapeMode
 } = annotation
+
+// Two fingers pan and zoom the media, over the annotations too. One finger
+// uses the annotation tool turned on, or pans when none is.
+const isTouchNavigationEnabled = computed(
+  () => isMovie.value || isPicture.value
+)
+const isAnnotationToolOn = computed(
+  () =>
+    isDrawing.value ||
+    isShapeMode.value ||
+    isEraserModeOn.value ||
+    isTyping.value
+)
+
+useTouchNavigation({
+  container: previewContainer,
+  surfaces: () => [canvasWrapper.value, mainMediaElement.value?.parentElement],
+  overlay: canvasWrapper,
+  isAnnotating: isAnnotationToolOn,
+  isEnabled: isTouchNavigationEnabled,
+  panBy: (dx, dy) => previewViewer.value?.panBy(dx, dy),
+  zoomAt: (clientX, clientY, ratio) =>
+    previewViewer.value?.zoomAt(clientX, clientY, ratio)
+})
 
 // Onion skin: ghost the annotations of nearby frames. Persisted like the
 // other player preferences.
