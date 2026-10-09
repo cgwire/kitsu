@@ -235,7 +235,7 @@ Formatting that follows the user and organization settings: dates, durations and
 
 - `src/locales/en.js` is the **source of truth**. Add the key there, then translate it into **every** `<lang>.json` in the same change: vue-i18n falls back to `en`, so a key missing from a locale renders in English without warning. The JSON files nest their messages under a top-level `default` key. `tests/unit/locales/parity.spec.js` fails on any drift, in either direction. POEditor was dropped (2026-05): non-English locales are LLM-translated directly in the JSON files.
 - Use `$t()` (or `t()` in `<script setup>`), never `$tc()` (removed in vue-i18n 11).
-- Pluralization with pipe format (`"studio | studios"`): pass a **named object**, `$t('key', { count })`. Every locale uses vue-i18n's DEFAULT plural resolver, so keep the **same number of `|` segments as en.js** and don't add a language's extra grammatical plural forms.
+- Pluralization with pipe format (`"studio | studios"`): pass a **named object**, `$t('key', { count })`. Every locale picks between the singular and the plural only (`src/lib/i18n.js`, see below), so keep the **same number of `|` segments as en.js** and don't add a language's extra grammatical plural forms.
 - For animation/VFX domain terms (shot, frame, onion skin, edit/montage, …), align translations with Blender's official terminology (`blender/blender-translations` `po/<lang>.po`, or the translated manual at `docs.blender.org/manual/<lang>/`).
 
 ```vue
@@ -258,7 +258,7 @@ $t('studios.number', { count: 5 }) // "studios", message has no {count}
 $t('logs.nb_events', { count: 5 }) // "5 events listed"
 ```
 
-`count` must be a **number**: `{ count: '5' }` renders the singular. Note also that the default resolver splits on `count > 1`, so a fractional count below 1 stays singular while 0 goes plural.
+`count` must be a **number**: `{ count: '5' }` renders the singular. An integer count is singular at 1 only, so 0 goes plural, in every locale. A decimal count follows the grammar of its language through `Intl.PluralRules`: "0.5 days" in English, but "0,5 jour" and "1,5 jour" in French. vue-i18n 11 alone makes every decimal plural: `src/lib/i18n.js` registers this rule for every locale, a locale added to `src/locales/index.js` included.
 
 To test real translations rather than the global `$t` mock, mount with the app's i18n plugin, as `tests/unit/lib/i18n.spec.js` does.
 
