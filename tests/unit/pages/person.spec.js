@@ -54,6 +54,7 @@ const TodosListStub = {
 const mountPage = async ({
   actions = {},
   getters = {},
+  onRouter = () => {},
   query = {},
   tasks = []
 } = {}) => {
@@ -100,6 +101,7 @@ const mountPage = async ({
     routes: [{ path: '/people/:person_id', component: { template: '<div />' } }]
   })
   await router.push({ path: `/people/${person.id}`, query })
+  onRouter(router)
   const wrapper = shallowMount(Person, {
     global: {
       plugins: [
@@ -129,7 +131,10 @@ const combo = (wrapper, label) =>
   wrapper.findAllComponents(ComboboxStyled).find(c => c.props('label') === label)
 
 describe('Person page', () => {
-  afterEach(() => localStorage.removeItem('person:filters'))
+  afterEach(() => {
+    localStorage.removeItem('person:filters')
+    localStorage.removeItem('person:section')
+  })
 
   describe('filters panel', () => {
     it('labels the search and folds the filters behind a funnel', async () => {
@@ -202,6 +207,28 @@ describe('Person page', () => {
         )
 
       afterEach(() => vi.unstubAllGlobals())
+
+      // The productivity tab has nothing to fold
+      it('keeps the filters shown on the productivity tab', async () => {
+        mockPhone(true)
+        const wrapper = await mountPage({
+          actions: { loadPersonTimeSpentsByPeriod: vi.fn(() => []) },
+          query: { section: 'productivity' }
+        })
+        expect(wrapper.find('.todos-filters').classes()).not.toContain(
+          'collapsed'
+        )
+        expect(wrapper.find('.filters-toggle').exists()).toBe(false)
+        wrapper.unmount()
+      })
+
+      it('folds the filters of the tasks tab', async () => {
+        mockPhone(true)
+        const wrapper = await mountPage()
+        expect(wrapper.find('.todos-filters').classes()).toContain('collapsed')
+        expect(wrapper.find('.filters-toggle').exists()).toBe(true)
+        wrapper.unmount()
+      })
 
       it('hides the validated tab', async () => {
         mockPhone(true)
@@ -676,6 +703,92 @@ describe('Person page', () => {
       await flushPromises()
 
       expect(timesheetList.props('dayOffError')).toBe(false)
+      wrapper.unmount()
+    })
+  })
+
+  describe('last tab', () => {
+    afterEach(() => vi.unstubAllGlobals())
+
+    const activeTab = wrapper =>
+      wrapper.findComponent(RouteSectionTabs).props('activeTab')
+
+    it('opens the tab picked last time', async () => {
+      localStorage.setItem('person:section', 'schedule')
+      let replace
+      const wrapper = await mountPage({
+        onRouter: router => {
+          replace = vi.spyOn(router, 'replace')
+        }
+      })
+      expect(activeTab(wrapper)).toBe('schedule')
+      expect(wrapper.vm.$route.query.section).toBe('schedule')
+      expect(
+        replace.mock.calls.some(([to]) => to.query?.section === 'schedule')
+      ).toBe(true)
+      wrapper.unmount()
+    })
+
+    it('keeps the restored tab next to the stored production', async () => {
+      const production = { id: 'prod-1', name: 'Prod', team: [person.id] }
+      localStorage.setItem('person:section', 'calendar')
+      localStorage.setItem(
+        'person:filters',
+        JSON.stringify({ productionId: production.id })
+      )
+      const wrapper = await mountPage({
+        getters: {
+          openProductions: () => [production],
+          productionMap: () => new Map([[production.id, production]])
+        }
+      })
+      expect(activeTab(wrapper)).toBe('calendar')
+      expect(wrapper.vm.$route.query).toMatchObject({
+        productionId: production.id,
+        section: 'calendar'
+      })
+      wrapper.unmount()
+    })
+
+    it('lets the URL beat the stored tab', async () => {
+      localStorage.setItem('person:section', 'schedule')
+      const wrapper = await mountPage({ query: { section: 'calendar' } })
+      expect(activeTab(wrapper)).toBe('calendar')
+      expect(wrapper.vm.$route.query.section).toBe('calendar')
+      wrapper.unmount()
+    })
+
+    it('falls back on the tasks tab for a stored productivity tab out of reach', async () => {
+      localStorage.setItem('person:section', 'productivity')
+      const wrapper = await mountPage({ getters: { user: () => otherUser } })
+      expect(activeTab(wrapper)).toBe('todos')
+      wrapper.unmount()
+    })
+
+    it('falls back on the tasks tab for a stored tab hidden on phones', async () => {
+      vi.stubGlobal(
+        'matchMedia',
+        vi.fn(() => ({
+          matches: true,
+          addEventListener: () => {},
+          removeEventListener: () => {}
+        }))
+      )
+      localStorage.setItem('person:section', 'done')
+      const wrapper = await mountPage()
+      expect(activeTab(wrapper)).toBe('todos')
+      wrapper.unmount()
+    })
+
+    it('stores the tab opened from the URL', async () => {
+      const wrapper = await mountPage({ query: { section: 'calendar' } })
+      expect(localStorage.getItem('person:section')).toBe('calendar')
+      expect(localStorage.getItem('todos:section')).toBeNull()
+      await wrapper.vm.$router.push({
+        query: { ...wrapper.vm.$route.query, section: 'schedule' }
+      })
+      await flushPromises()
+      expect(localStorage.getItem('person:section')).toBe('schedule')
       wrapper.unmount()
     })
   })

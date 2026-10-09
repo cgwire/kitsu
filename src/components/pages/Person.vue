@@ -35,7 +35,8 @@
                 isActiveTab('calendar') ||
                 isActiveTab('productivity'),
               'is-schedule': isActiveTab('schedule'),
-              collapsed: isPhone && areFiltersFolded
+              collapsed:
+                isPhone && areFiltersFolded && !isActiveTab('productivity')
             }"
           >
             <div class="flexrow">
@@ -65,6 +66,7 @@
                   )
                 "
                 @click="areFiltersFolded = !areFiltersFolded"
+                v-if="!isActiveTab('productivity')"
               />
 
               <combobox-production
@@ -300,6 +302,7 @@ import { useBoardStatuses } from '@/composables/board'
 import { useProductivity } from '@/composables/productivity'
 import { useTaskFilters } from '@/composables/taskFilters'
 import colors from '@/lib/colors'
+import preferences from '@/lib/preferences'
 import {
   addBusinessDays,
   getFirstStartDate,
@@ -336,6 +339,7 @@ const socket = getCurrentInstance().appContext.config.globalProperties.$socket
 
 // State
 // --------------------------------------------------------------------------
+const SECTION_STORAGE_KEY = 'person:section'
 const activeTab = ref('todos')
 const calendarTimeSpents = ref([])
 const daysOff = ref([])
@@ -859,7 +863,7 @@ const removeSearchQuery = searchQuery => {
 const setPersonTasksScrollPosition = position =>
   store.dispatch('setPersonTasksScrollPosition', position)
 
-const updateActiveTab = () => {
+const isAvailableSection = section => {
   const availableSections = [
     'board',
     'calendar',
@@ -868,10 +872,20 @@ const updateActiveTab = () => {
     'timesheets'
   ]
   if (canSeeProductivity.value) availableSections.push('productivity')
-  const section = route.query.section
   const isHiddenOnPhone = isPhone.value && section === 'done'
-  activeTab.value =
-    availableSections.includes(section) && !isHiddenOnPhone ? section : 'todos'
+  return availableSections.includes(section) && !isHiddenOnPhone
+}
+
+const updateActiveTab = () => {
+  const urlSection = route.query.section
+  const storedSection = preferences.getPreference(SECTION_STORAGE_KEY)
+  const restoredSection =
+    !urlSection && isAvailableSection(storedSection) ? storedSection : null
+  const section = urlSection || restoredSection
+  activeTab.value = isAvailableSection(section) ? section : 'todos'
+  if (urlSection) {
+    preferences.setPreference(SECTION_STORAGE_KEY, activeTab.value)
+  }
 
   const day = route.query.day
   if (
@@ -890,8 +904,12 @@ const updateActiveTab = () => {
   )
   if (currentProduction) {
     productionId.value = currentProduction.id
-  } else {
-    router.push({
+  }
+  store.dispatch('clearSelectedTasks')
+
+  if (!currentProduction || restoredSection) {
+    // A restored tab is not a navigation of the user: no history entry
+    return router[restoredSection ? 'replace' : 'push']({
       query: {
         ...route.query,
         productionId: productionId.value,
@@ -899,8 +917,6 @@ const updateActiveTab = () => {
       }
     })
   }
-
-  store.dispatch('clearSelectedTasks')
 }
 
 const onCalendarTimeClicked = date => {
@@ -1031,7 +1047,8 @@ onMounted(async () => {
 
   productionId.value = route.query.productionId || undefined
 
-  updateActiveTab()
+  // a later navigation built on the old query would drop the restored tab
+  await updateActiveTab()
   await loadPerson(route.params.person_id)
   // the stored production only applies when the person works on it
   if (
