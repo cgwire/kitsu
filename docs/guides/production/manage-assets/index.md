@@ -6,6 +6,8 @@ published_at: 2026-09-10
 
 # Managing Assets
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/k7qMBnzXwc8?si=Svjv3YM1J-PMfxFY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
 <!-- #region body -->
 <!-- #region intro -->
 
@@ -257,6 +259,14 @@ There are specific rules around who can import assets into the asset library, de
 Hover over the asset you wish to remove in your production's asset list and click the `Delete` icon:  
 
 ![delete asset button](/guides/production/manage-assets/images/0.png)
+
+This action will first archive the asset. 
+
+If you want to unarchive an asset, simply click the `Restore` button:
+
+![unarchive asset button](/guides/production/manage-assets/images/1.png)
+
+To permanently delete an asset, press the `Delete` icon a second time.
 
 ## Using The "Ready For" Asset State
 

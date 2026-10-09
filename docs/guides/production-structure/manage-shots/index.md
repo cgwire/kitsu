@@ -284,4 +284,8 @@ Hover over the shot row you wish to remove in the list and click the `Delete` ic
 
 This will archive / close the shot. To permanently delete it, click the `Delete` icon again.
 
+If you want to unarchive a shot, simply click the `Restore` button:
+
+![unarchive shot button](/guides/production-structure/manage-shots/images/4.png)
+
 <!-- #endregion body -->
