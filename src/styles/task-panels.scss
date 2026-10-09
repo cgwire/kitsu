@@ -194,9 +194,11 @@
       }
     }
 
-    // the gap left of the funnel, which margin-left: auto pushes right
+    // the gap left of the funnel, which margin-left: auto pushes right. The
+    // search keeps its line with the funnel: unfolded, the other filters
+    // would share it and squeeze the search.
     .search-field-column {
-      flex: 1;
+      flex: 1 1 calc(100% - 60px);
       margin-right: 0.75em;
       min-width: 0;
     }
