@@ -652,7 +652,7 @@ const filteredLinkedConcepts = computed(() =>
   currentConceptStatus.value
     ? linkedConcepts.value.filter(
         concept =>
-          concept.tasks[0].task_status_id === currentConceptStatus.value
+          concept.tasks[0]?.task_status_id === currentConceptStatus.value
       )
     : linkedConcepts.value
 )

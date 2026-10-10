@@ -11,6 +11,12 @@ export default defineConfig({
       }
     })
   ],
+  // vue-i18n runs in composition mode, without its <i18n-*> components or
+  // v-t: compile its legacy API and its full install out of the bundle.
+  define: {
+    __VUE_I18N_LEGACY_API__: false,
+    __VUE_I18N_FULL_INSTALL__: false
+  },
   build: {
     sourcemap: true,
     target: 'es2020',

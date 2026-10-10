@@ -1598,6 +1598,7 @@
       "show_timecode": "Toon in en uit als tijdcodes"
     },
     "server_down": {
+      "retrying": "Kitsu blijft het proberen en brengt je terug naar je pagina zodra de API antwoordt.",
       "text": "Neem contact op met ons ondersteuningsteam of je systeembeheerder om te begrijpen wat er mis gaat.",
       "title": "Kitsu heeft een fout aangetroffen bij het bereiken van de gegevens-API"
     },

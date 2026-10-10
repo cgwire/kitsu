@@ -12,6 +12,7 @@ vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }))
 
+import { markRequestFailure } from '@/lib/errors'
 import assetsStore from '@/store/modules/assets'
 
 import AddPreviewModal from '@/components/modals/AddPreviewModal.vue'
@@ -43,6 +44,16 @@ const buildConcept = (id, createdBy = 'person-1', links = []) => ({
   entity_concept_links: links,
   tasks: [{ id: `task-${id}`, task_status_id: 'status-todo' }]
 })
+
+// A concept whose creation stopped after the entity has no task.
+const buildTasklessConcept = id => ({ ...buildConcept(id), tasks: [] })
+
+// The API client reports the failures of its requests, and marks them.
+const buildRequestFailure = message => {
+  const failure = new Error(message)
+  markRequestFailure(failure)
+  return failure
+}
 
 const mountPage = async ({
   concepts = [],
@@ -132,6 +143,29 @@ describe('Concepts page', () => {
       task: concept.tasks[0],
       taskStatusId: 'status-done'
     })
+  })
+
+  // Zou sends the status changes of every task of the studio.
+  test('follows the status changes past a concept without task', async () => {
+    const concept = buildConcept('concept-1')
+    const { handlers, store } = await mountPage({
+      concepts: [buildTasklessConcept('concept-0'), concept]
+    })
+
+    handlers['task:status-changed']({
+      task_id: 'task-shot-1',
+      new_task_status_id: 'status-done'
+    })
+    handlers['task:status-changed']({
+      task_id: 'task-concept-1',
+      new_task_status_id: 'status-done'
+    })
+
+    expect(
+      store.commit.mock.calls.filter(([type]) => type === 'UPDATE_TASK')
+    ).toEqual([
+      ['UPDATE_TASK', { task: concept.tasks[0], taskStatusId: 'status-done' }]
+    ])
   })
 
   test('selects the concept whose card is clicked', async () => {
@@ -680,7 +714,7 @@ describe('Concepts page', () => {
     const isAddDisabled = wrapper =>
       wrapper.findComponent('.add-concepts').props('disabled')
     const settle = async (upload, outcome = 'resolve') => {
-      upload[outcome](new Error('offline'))
+      upload[outcome](buildRequestFailure('offline'))
       await flushPromises()
     }
 
@@ -730,6 +764,24 @@ describe('Concepts page', () => {
 
       await status.find('.dismiss-upload').trigger('click')
       expect(wrapper.find('.upload-status').exists()).toBe(false)
+    })
+
+    // Sentry reports what reaches the error handler of the app.
+    test('leaves a bug of the upload to Sentry', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const { pending, wrapper } = await mountUploading()
+      const errorHandler = vi.fn()
+      wrapper.vm.$.appContext.config.errorHandler = errorHandler
+      const bug = new TypeError("Cannot read properties of undefined (reading 'id')")
+
+      pending[0].reject(bug)
+      await flushPromises()
+
+      expect(wrapper.find('.upload-status').classes()).toContain('is-error')
+      expect(errorHandler.mock.calls.map(([error]) => error)).toEqual([bug])
+      expect(consoleError).not.toHaveBeenCalledWith(bug)
     })
   })
 
@@ -1029,7 +1081,7 @@ describe('Concepts page', () => {
     let isOffline = true
     const dispatch = vi.fn(action =>
       isOffline && action === 'newConcept'
-        ? Promise.reject(new Error('network'))
+        ? Promise.reject(buildRequestFailure('network'))
         : Promise.resolve()
     )
     const { wrapper } = await mountPage({ dispatch })
@@ -1061,6 +1113,19 @@ describe('Concepts page', () => {
 
     expect(wrapper.findAll('.item')).toHaveLength(1)
     expect(field.props('people')).toHaveLength(2)
+  })
+
+  test('leaves a concept without task out of a status filter', async () => {
+    const { wrapper } = await mountPage({
+      concepts: [buildTasklessConcept('concept-0'), buildConcept('concept-1')],
+      query: { status: 'status-todo' }
+    })
+
+    expect(
+      wrapper
+        .findAllComponents(ConceptCard)
+        .map(card => card.props('concept').id)
+    ).toEqual(['concept-1'])
   })
 
   test('opens the upload modal with the dropped files', async () => {

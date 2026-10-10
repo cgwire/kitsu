@@ -1598,6 +1598,7 @@
       "show_timecode": "Afficher les entrées et sorties sous forme de timecodes"
     },
     "server_down": {
+      "retrying": "Kitsu continue d'essayer et vous ramènera à votre page dès que l'API répondra.",
       "text": "Veuillez contacter notre équipe d'assistance ou votre administrateur système pour comprendre ce qui ne va pas.",
       "title": "Kitsu a rencontré une erreur lors de l'accès à son API de données."
     },

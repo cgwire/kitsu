@@ -141,29 +141,17 @@ const actions = {
 
   loadTaskTypes({ commit, state }) {
     commit(LOAD_TASK_TYPES_START)
-    return taskTypesApi
-      .getTaskTypes()
-      .then(taskTypes => {
-        commit(LOAD_TASK_TYPES_END, taskTypes)
-        Promise.resolve(taskTypes)
-      })
-      .catch(err => {
-        console.error(err)
-        Promise.reject(err)
-      })
+    return taskTypesApi.getTaskTypes().then(taskTypes => {
+      commit(LOAD_TASK_TYPES_END, taskTypes)
+      return taskTypes
+    })
   },
 
   loadTaskType({ commit, state }, taskTypeId) {
-    return taskTypesApi
-      .getTaskType(taskTypeId)
-      .then(taskType => {
-        commit(EDIT_TASK_TYPE_END, taskType)
-        Promise.resolve(taskType)
-      })
-      .catch(err => {
-        console.error(err)
-        Promise.reject(err)
-      })
+    return taskTypesApi.getTaskType(taskTypeId).then(taskType => {
+      commit(EDIT_TASK_TYPE_END, taskType)
+      return taskType
+    })
   },
 
   newTaskType({ commit, state }, data) {

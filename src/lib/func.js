@@ -7,9 +7,21 @@ export default {
 
   debounce(fn, delay) {
     let timeout = null
-    return function (...args) {
+    let pendingCall = null
+    const debounced = function (...args) {
       clearTimeout(timeout)
-      timeout = setTimeout(() => fn.apply(this, args), delay)
+      pendingCall = () => fn.apply(this, args)
+      timeout = setTimeout(debounced.flush, delay)
     }
+    debounced.cancel = () => {
+      clearTimeout(timeout)
+      pendingCall = null
+    }
+    debounced.flush = () => {
+      const call = pendingCall
+      debounced.cancel()
+      call?.()
+    }
+    return debounced
   }
 }

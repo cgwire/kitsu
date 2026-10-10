@@ -1,5 +1,6 @@
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { ref } from 'vue'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { createStore } from 'vuex'
 
@@ -49,7 +50,8 @@ const task = {
 const mountPage = async ({
   actions = {},
   getters = {},
-  section = 'estimation'
+  section = 'estimation',
+  socket = { on: vi.fn(), off: vi.fn() }
 } = {}) => {
   const storeActions = {
     clearSelectedTasks: vi.fn(),
@@ -102,7 +104,7 @@ const mountPage = async ({
         router,
         {
           install: app => {
-            app.config.globalProperties.$socket = { on: vi.fn(), off: vi.fn() }
+            app.config.globalProperties.$socket = socket
             app.config.globalProperties.$t = key => key
           }
         }
@@ -205,9 +207,6 @@ describe('TaskType page', () => {
     })
   })
 
-  // The timesheet stores a day logged with its preset in whole minutes, 498
-  // for 8.3 hours by day, while 8.3 * 60 makes 498.00000000000006. What it
-  // stored before keeps its float noise: 491.99999999999994 for 8.2 hours.
   describe('schedule timesheets', () => {
     const scheduleTask = {
       id: 'task-2',
@@ -248,6 +247,57 @@ describe('TaskType page', () => {
       localStorage.removeItem('tasktype:data_display')
     })
 
+    // the data load starts 100 ms after mounting, the schedule dates follow
+    // 200 ms after it
+    const mountSchedule = async ({
+      actions = {},
+      getters = {},
+      socket
+    } = {}) => {
+      const page = await mountPage({
+        section: 'schedule',
+        socket,
+        actions: {
+          loadProductionDaysOff: vi.fn(() => ({})),
+          loadProductionTimeSpents: vi.fn(() => ({})),
+          loadScheduleItems: vi.fn(() => [
+            {
+              id: 'schedule-item-1',
+              task_type_id: 'task-type-1',
+              start_date: '2026-10-01',
+              end_date: '2026-10-30'
+            }
+          ]),
+          saveScheduleItem: vi.fn(),
+          ...actions
+        },
+        getters: {
+          assetValidationColumns: () => [],
+          currentProduction: () => ({
+            id: 'production-1',
+            name: 'Production',
+            start_date: '2026-01-01',
+            end_date: '2026-12-31',
+            team: [person.id]
+          }),
+          personMap: () => new Map([[person.id, person]]),
+          taskMap: () => new Map([[scheduleTask.id, scheduleTask]]),
+          user: () => ({
+            id: 'manager-1',
+            departments: [],
+            full_name: 'Manager'
+          }),
+          ...getters
+        }
+      })
+      wrapper = page.wrapper
+      await vi.advanceTimersByTimeAsync(400)
+      await flushPromises()
+    }
+
+    // The timesheet stores a day logged with its preset in whole minutes, 498
+    // for 8.3 hours by day, while 8.3 * 60 makes 498.00000000000006. What it
+    // stored before keeps its float noise: 491.99999999999994 for 8.2 hours.
     it.each([
       [8.3, 498],
       [8.2, 491.99999999999994]
@@ -261,47 +311,14 @@ describe('TaskType page', () => {
           person_id: person.id,
           task_id: scheduleTask.id
         })
-        const page = await mountPage({
-          section: 'schedule',
+        await mountSchedule({
           actions: {
-            loadProductionDaysOff: vi.fn(() => ({})),
             loadProductionTimeSpents: vi.fn(() => ({
               [person.id]: [timeSpent('2026-10-06'), timeSpent('2026-10-05')]
-            })),
-            loadScheduleItems: vi.fn(() => [
-              {
-                id: 'schedule-item-1',
-                task_type_id: 'task-type-1',
-                start_date: '2026-10-01',
-                end_date: '2026-10-30'
-              }
-            ]),
-            saveScheduleItem: vi.fn()
+            }))
           },
-          getters: {
-            assetValidationColumns: () => [],
-            currentProduction: () => ({
-              id: 'production-1',
-              name: 'Production',
-              start_date: '2026-01-01',
-              end_date: '2026-12-31',
-              team: [person.id]
-            }),
-            organisation: () => ({ hours_by_day: hoursByDay }),
-            personMap: () => new Map([[person.id, person]]),
-            taskMap: () => new Map([[scheduleTask.id, scheduleTask]]),
-            user: () => ({
-              id: 'manager-1',
-              departments: [],
-              full_name: 'Manager'
-            })
-          }
+          getters: { organisation: () => ({ hours_by_day: hoursByDay }) }
         })
-        wrapper = page.wrapper
-        // the data load starts 100 ms after mounting, the schedule dates
-        // follow 200 ms after it
-        await vi.advanceTimersByTimeAsync(400)
-        await flushPromises()
 
         const [personRow] = wrapper
           .findComponent({ name: 'Schedule' })
@@ -311,5 +328,34 @@ describe('TaskType page', () => {
         ).toEqual([['2026-10-05', minutes * 2]])
       }
     )
+
+    // The store's task type follows the route: a rebuild fired once the page
+    // was left asked for the time spents of an undefined task type.
+    it('drops a remote update rebuild once the page is left', async () => {
+      const socket = { on: vi.fn(), off: vi.fn() }
+      const loadProductionTimeSpents = vi.fn(() => ({}))
+      const taskType = ref({
+        id: 'task-type-1',
+        name: 'Modeling',
+        for_entity: 'Asset'
+      })
+      await mountSchedule({
+        actions: { loadProductionTimeSpents },
+        getters: { currentTaskType: () => taskType.value },
+        socket
+      })
+      const [, onTaskUpdate] = socket.on.mock.calls.find(
+        ([event]) => event === 'task:update'
+      )
+      loadProductionTimeSpents.mockClear()
+
+      onTaskUpdate({ task_id: scheduleTask.id })
+      wrapper.unmount()
+      wrapper = null
+      taskType.value = {}
+      await vi.advanceTimersByTimeAsync(400)
+
+      expect(loadProductionTimeSpents).not.toHaveBeenCalled()
+    })
   })
 })

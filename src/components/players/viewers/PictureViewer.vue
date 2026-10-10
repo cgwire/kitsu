@@ -38,6 +38,7 @@
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import createPanzoom from 'panzoom'
 
+import { panPanzoomBy, zoomPanzoomAt } from '@/lib/players/panzoom'
 import { swallowBrowserZoom } from '@/lib/players/wheel'
 import { isPicturePreview } from '@/lib/preview'
 
@@ -367,6 +368,11 @@ const setPanZoom = (x, y, scale) => {
   })
 }
 
+const panBy = (dx, dy) => panPanzoomBy(panzoomInstance, dx, dy)
+
+const zoomAt = (clientX, clientY, ratio) =>
+  zoomPanzoomAt(panzoomInstance, visibleImage.value, clientX, clientY, ratio)
+
 // Direct accessor so consumers can read the visible <img> without
 // going through Vue's exposed-ref auto-unwrap, which has been
 // returning the wrong element in MultiPictureViewer's nested setup.
@@ -486,12 +492,14 @@ defineExpose({
   getDimensions,
   getNaturalDimensions,
   getPictureElement,
+  panBy,
   pausePanZoom,
   resetPanZoom,
   resetPicture,
   resumePanZoom,
   setPanZoom,
-  visibleImage
+  visibleImage,
+  zoomAt
 })
 </script>
 

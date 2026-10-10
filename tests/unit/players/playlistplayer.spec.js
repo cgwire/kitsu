@@ -1,13 +1,23 @@
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import process from 'node:process'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { reactive } from 'vue'
+import { markRaw, reactive, ref } from 'vue'
 import { createStore } from 'vuex'
 
 vi.mock('vue-i18n', async importOriginal => ({
   ...(await importOriginal()),
   useI18n: () => ({ t: key => key })
 }))
+
+// The real one draws into a laid out container and fetches the movie.
+const waveSurfer = vi.hoisted(() => ({
+  create: vi.fn(() => ({
+    destroy: vi.fn(),
+    load: vi.fn(() => Promise.resolve()),
+    on: vi.fn()
+  }))
+}))
+vi.mock('wavesurfer.js', () => ({ default: waveSurfer }))
 
 // Pre-load the real store to avoid a circular-import race from child components.
 import '@/lib/auth'
@@ -43,7 +53,8 @@ const mountPlayer = ({
   canEditShotTrim = () => true,
   previewFileStatusMap,
   shotMap = new Map(),
-  taskMap = new Map()
+  taskMap = new Map(),
+  stubs = {}
 } = {}) => {
   const store = createStore({
     getters: {
@@ -129,11 +140,61 @@ const mountPlayer = ({
         VideoProgress: {
           ...withMethods(['updateProgressBar']),
           props: { handleIn: Number, handleOut: Number, readOnly: Boolean }
-        }
+        },
+        ...stubs
       }
     }
   })
 }
+
+// Enough of a fabric canvas for the annotation composable, which wires its
+// handlers with on() and off().
+const createFakeCanvas = () => {
+  const handlers = {}
+  return {
+    width: 800,
+    height: 600,
+    contextContainer: {},
+    freeDrawingBrush: { pressureManager: {} },
+    add: vi.fn(),
+    clear: vi.fn(),
+    discardActiveObject: vi.fn(),
+    fire: (event, options) =>
+      (handlers[event] || []).forEach(handler => handler(options)),
+    getActiveObject: vi.fn(),
+    getObjects: () => [],
+    off: (event, handler) => {
+      handlers[event] = (handlers[event] || []).filter(h => h !== handler)
+    },
+    on: (event, handler) => {
+      handlers[event] = [...(handlers[event] || []), handler]
+    },
+    remove: vi.fn(),
+    renderAll: vi.fn(),
+    requestRenderAll: vi.fn()
+  }
+}
+
+// The canvas raw, as AnnotationCanvas exposes it, and the overlay the
+// fingers land on.
+const annotationCanvasStub = canvas => ({
+  name: 'AnnotationCanvas',
+  template: '<div ref="overlay"><canvas /></div>',
+  setup: () => ({ canvas: markRaw(canvas), overlay: ref(null) })
+})
+
+const pointer = (target, type, { id, x, y }) =>
+  target.dispatchEvent(
+    new PointerEvent(type, {
+      bubbles: true,
+      cancelable: true,
+      clientX: x,
+      clientY: y,
+      pointerId: id,
+      pointerType: 'touch',
+      isPrimary: true
+    })
+  )
 
 describe('PlaylistPlayer.vue', () => {
   let wrapper = null
@@ -142,6 +203,235 @@ describe('PlaylistPlayer.vue', () => {
     wrapper?.unmount()
     wrapper = null
     vi.restoreAllMocks()
+  })
+
+  // The comment box waits for the snapshots, and each of them waits 500 ms
+  // for its frame or picture: the player can close in between.
+  describe('annotation snapshots', () => {
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it.each([
+      [
+        'video',
+        {
+          ...entity,
+          preview_file_extension: 'mp4',
+          preview_file_annotations: [{ time: 1, drawing: { objects: [] } }]
+        }
+      ],
+      ['picture', { ...entity, preview_file_extension: 'png' }]
+    ])('drops the %s snapshots of a closed player', async (_, shown) => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      wrapper = mountPlayer({ entities: [shown] })
+      await flushPromises()
+
+      const snapshots = wrapper.vm.extractAnnotationSnapshots()
+      wrapper.unmount()
+      wrapper = null
+      await vi.advanceTimersByTimeAsync(500)
+
+      await expect(snapshots).resolves.toEqual([])
+    })
+
+    // After its frame is read, a snapshot is composited and encoded: the
+    // next frame, or the restore of the user's frame, comes after.
+    it.each([1, 2])(
+      'drops the video snapshots of a player closed after frame 1 of %i',
+      async count => {
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+        // jsdom draws and encodes nothing
+        const snapshotCanvas = document.createElement('canvas')
+        snapshotCanvas.toBlob = callback => callback(new Blob())
+        vi.spyOn(document, 'getElementById').mockReturnValue(snapshotCanvas)
+        const getContext = vi
+          .spyOn(HTMLCanvasElement.prototype, 'getContext')
+          .mockReturnValue({ clearRect: () => {}, drawImage: () => {} })
+        const annotations = Array.from({ length: count }, (_, index) => ({
+          time: index + 1,
+          drawing: { objects: [] }
+        }))
+        wrapper = mountPlayer({
+          entities: [
+            {
+              ...entity,
+              preview_file_extension: 'mp4',
+              preview_file_annotations: annotations
+            }
+          ]
+        })
+        await flushPromises()
+
+        const snapshots = wrapper.vm.extractAnnotationSnapshots()
+        await vi.advanceTimersByTimeAsync(550)
+        expect(getContext).toHaveBeenCalled()
+        wrapper.unmount()
+        wrapper = null
+        await vi.advanceTimersByTimeAsync(600)
+
+        await expect(snapshots).resolves.toEqual([])
+      }
+    )
+  })
+
+  // The waveform loads 100 ms after it is set up for the movie on screen:
+  // the player can close, or move on to a picture, in between.
+  describe('waveform', () => {
+    const movie = { ...entity, preview_file_extension: 'mp4' }
+    const picture = {
+      id: 'shot-2',
+      preview_file_id: 'preview-2',
+      preview_file_extension: 'png'
+    }
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    const showWaveform = async entities => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      // The player sets the waveform up only in a container it finds.
+      vi.spyOn(document, 'getElementById').mockReturnValue(
+        document.createElement('div')
+      )
+      wrapper = mountPlayer({ entities })
+      await flushPromises()
+      wrapper.findComponent({ ref: 'raw-player' }).vm.currentPlayer = {
+        src: '/movie.mp4'
+      }
+      wrapper
+        .findComponent({ name: 'PlayerPlaybackBar' })
+        .vm.$emit('update:isWaveformDisplayed', true)
+      await flushPromises()
+      return waveSurfer.create.mock.results.at(-1).value
+    }
+
+    it('loads the waveform of the movie on screen', async () => {
+      const waveform = await showWaveform([movie])
+      await vi.advanceTimersByTimeAsync(100)
+      expect(waveform.load).toHaveBeenCalledWith('/movie.mp4')
+    })
+
+    it('drops the waveform load of a closed player', async () => {
+      const waveform = await showWaveform([movie])
+      wrapper.unmount()
+      wrapper = null
+      await vi.advanceTimersByTimeAsync(100)
+      expect(waveform.load).not.toHaveBeenCalled()
+    })
+
+    it('drops the waveform load of a movie left for a picture', async () => {
+      const waveform = await showWaveform([movie, picture])
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(
+          button => button.attributes('title') === 'playlists.actions.next_shot'
+        )
+        .vm.$emit('click')
+      await flushPromises()
+      await vi.advanceTimersByTimeAsync(100)
+      expect(waveform.load).not.toHaveBeenCalled()
+    })
+  })
+
+  // The player lays itself out, or turns the pencil back on, a little after
+  // what asked for it: once closed, it has nothing left to work on.
+  describe('timers of a closed player', () => {
+    const picture = {
+      id: 'shot-2',
+      preview_file_id: 'preview-2',
+      preview_file_extension: 'png'
+    }
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    const mountWithFakeTimers = async (entities, stubs) => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      wrapper = mountPlayer({ entities, stubs })
+      await flushPromises()
+      return vi.getTimerCount()
+    }
+
+    const findButton = title =>
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(button => button.attributes('title') === title)
+
+    // Checks that a timer was set, then that the closing cleared it.
+    const expectClearedOnClose = pending => {
+      expect(vi.getTimerCount()).toBeGreaterThan(pending)
+      wrapper.unmount()
+      wrapper = null
+      expect(vi.getTimerCount()).toBe(0)
+    }
+
+    it('clears the layout after a window resize', async () => {
+      const pending = await mountWithFakeTimers()
+      window.dispatchEvent(new Event('resize'))
+      expectClearedOnClose(pending)
+    })
+
+    it('clears the layout after a full screen change', async () => {
+      const pending = await mountWithFakeTimers([picture])
+      // jsdom has no full screen
+      Object.defineProperty(document, 'fullscreen', {
+        configurable: true,
+        value: true
+      })
+      wrapper.element.dispatchEvent(new Event('fullscreenchange'))
+      await flushPromises()
+      delete document.fullscreen
+      expectClearedOnClose(pending)
+    })
+
+    it('clears the layout after the shot list toggle', async () => {
+      const pending = await mountWithFakeTimers()
+      findButton('playlists.actions.entity_list').vm.$emit('click')
+      await flushPromises()
+      expectClearedOnClose(pending)
+    })
+
+    // Enough of a fabric canvas for the pencil: the annotation composable
+    // wires its handlers with on() and off().
+    const AnnotationCanvas = {
+      name: 'AnnotationCanvas',
+      template: '<div />',
+      setup: () => ({
+        canvas: markRaw({
+          contextContainer: {},
+          freeDrawingBrush: { pressureManager: {} },
+          add: () => {},
+          clear: () => {},
+          discardActiveObject: () => {},
+          getActiveObject: () => null,
+          getObjects: () => [],
+          off: () => {},
+          on: () => {},
+          remove: () => {},
+          renderAll: () => {},
+          requestRenderAll: () => {}
+        }),
+        overlay: ref(null)
+      })
+    }
+
+    it('clears the pencil restore after a move to a picture', async () => {
+      await mountWithFakeTimers(
+        [picture, { ...picture, id: 'shot-3', preview_file_id: 'preview-3' }],
+        { AnnotationCanvas }
+      )
+      wrapper
+        .findComponent({ name: 'PlayerAnnotationBar' })
+        .vm.$emit('pencil-annotate-clicked')
+      await flushPromises()
+      const pending = vi.getTimerCount()
+      findButton('playlists.actions.next_shot').vm.$emit('click')
+      await flushPromises()
+      expectClearedOnClose(pending)
+    })
   })
 
   // A plain link navigates the tab: the browser fires beforeunload, which
@@ -384,6 +674,345 @@ describe('PlaylistPlayer.vue', () => {
       wrapper = mountPlayer({ entities: [pictureWithExtra] })
       await flushPromises()
       expect(viewerStatuses()).toEqual([undefined, undefined])
+    })
+  })
+
+  describe('finger gestures', () => {
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it.each([
+      ['pencil', 'pencil-annotate-clicked'],
+      ['eraser', 'erase-clicked'],
+      ['shape', 'shape-mode-clicked'],
+      ['text', 'type-clicked']
+    ])('hands a finger on the annotations to the %s', async (tool, click) => {
+      wrapper = mountPlayer({
+        entities: [{ ...entity, preview_file_extension: 'mp4' }],
+        stubs: { AnnotationCanvas: annotationCanvasStub(createFakeCanvas()) }
+      })
+      await flushPromises()
+      wrapper.findComponent({ name: 'PlayerAnnotationBar' }).vm.$emit(click)
+      await flushPromises()
+      const upper = wrapper
+        .findComponent({ ref: 'main-annotation-canvas' })
+        .find('canvas').element
+      const heard = []
+      upper.addEventListener('pointerdown', event =>
+        heard.push(event.pointerType)
+      )
+
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      pointer(upper, 'pointerdown', { id: 1, x: 100, y: 100 })
+      pointer(upper, 'pointermove', { id: 1, x: 105, y: 100 })
+      vi.advanceTimersByTime(300)
+
+      expect(heard).toEqual(['touch'])
+    })
+  })
+
+  // On a phone the keyboard resizes the player as it opens: the canvas
+  // reset ended the typing of the note at once.
+  // The right arrow wipes the canvas, then the frame the movie steps to
+  // reloads its drawing. The movie stops at its last frame: nothing reloaded
+  // the drawing there.
+  describe('right arrow', () => {
+    // 69 frames at 25 fps.
+    const mountOnFrame = async frame => {
+      const canvas = createFakeCanvas()
+      wrapper = mountPlayer({
+        entities: [
+          {
+            ...entity,
+            preview_file_extension: 'mp4',
+            preview_file_duration: 2.76
+          }
+        ],
+        stubs: { AnnotationCanvas: annotationCanvasStub(canvas) }
+      })
+      await flushPromises()
+      const rawPlayer = wrapper.findComponent({ ref: 'raw-player' })
+      rawPlayer.vm.getCurrentTimeRaw = () => frame * 0.04
+      canvas.clear.mockClear()
+      return { canvas, rawPlayer }
+    }
+
+    const press = () =>
+      window.dispatchEvent(
+        new KeyboardEvent('keydown', { code: 'ArrowRight', key: 'ArrowRight' })
+      )
+
+    it('keeps the drawing of the last frame', async () => {
+      const { canvas } = await mountOnFrame(68)
+
+      press()
+
+      expect(canvas.clear).not.toHaveBeenCalled()
+    })
+
+    it('steps a movie one frame', async () => {
+      const { canvas, rawPlayer } = await mountOnFrame(10)
+      const goNextFrame = vi.fn()
+      rawPlayer.vm.goNextFrame = goNextFrame
+
+      press()
+
+      expect(goNextFrame).toHaveBeenCalledTimes(1)
+      expect(canvas.clear).toHaveBeenCalled()
+    })
+  })
+
+  // Home and End moved the movie without its annotations: the drawing of
+  // the frame left stayed on the one reached. The drawing keys (, and .)
+  // wiped the canvas even with no drawing to go to.
+  describe('frame keys', () => {
+    const drawingAt = (time, id) => ({
+      time,
+      drawing: {
+        objects: [
+          {
+            id,
+            type: 'path',
+            path: 'M 0 0 L 10 10',
+            left: 100,
+            top: 50,
+            scaleX: 1,
+            scaleY: 1,
+            stroke: '#ff0000',
+            strokeWidth: 2,
+            canvasWidth: 800,
+            canvasHeight: 600
+          }
+        ]
+      }
+    })
+
+    // 69 frames at 25 fps, drawn on the first and on the last one.
+    const movie = {
+      ...entity,
+      preview_file_extension: 'mp4',
+      preview_file_duration: 2.76,
+      preview_file_annotations: [drawingAt(0, 'first'), drawingAt(2.72, 'last')]
+    }
+
+    const mountShowing = async shown => {
+      const canvas = createFakeCanvas()
+      wrapper = mountPlayer({
+        entities: [shown],
+        stubs: { AnnotationCanvas: annotationCanvasStub(canvas) }
+      })
+      await flushPromises()
+      return canvas
+    }
+
+    const press = async code => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { code, key: code }))
+      await flushPromises()
+    }
+
+    const drawnIds = canvas => canvas.add.mock.calls.map(([object]) => object.id)
+
+    it('shows the drawing of the last frame on End', async () => {
+      const canvas = await mountShowing(movie)
+      canvas.add.mockClear()
+      canvas.clear.mockClear()
+
+      await press('End')
+
+      expect(canvas.clear).toHaveBeenCalled()
+      expect(drawnIds(canvas)).toEqual(['last'])
+    })
+
+    it('shows the drawing of the first frame on Home', async () => {
+      const canvas = await mountShowing(movie)
+      await press('End')
+      canvas.add.mockClear()
+      canvas.clear.mockClear()
+
+      await press('Home')
+
+      expect(canvas.clear).toHaveBeenCalled()
+      expect(drawnIds(canvas)).toEqual(['first'])
+    })
+
+    it.each([
+      [',', 'Home'],
+      ['.', 'End']
+    ])('keeps the drawing with no other one to go to on %s', async (key, start) => {
+      const canvas = await mountShowing(movie)
+      await press(start)
+      canvas.clear.mockClear()
+
+      await press(key)
+
+      expect(canvas.clear).not.toHaveBeenCalled()
+    })
+
+    it('takes a movie to its next drawing on .', async () => {
+      const canvas = await mountShowing(movie)
+      canvas.add.mockClear()
+
+      await press('.')
+
+      expect(drawnIds(canvas)).toEqual(['last'])
+    })
+
+    // Chromium can land an exact seek on the start of the last frame at the
+    // very end of the movie, whose ended event started the next entry.
+    it.each([
+      ['.', '.', 68],
+      [',', 'End', 30]
+    ])('seeks a drawing like the progress bar on %s', async (key, start, frame) => {
+      await mountShowing({
+        ...movie,
+        preview_file_annotations: [
+          drawingAt(0, 'first'),
+          drawingAt(1.2, 'middle'),
+          drawingAt(2.72, 'last')
+        ]
+      })
+      await press(start)
+      const rawPlayer = wrapper.findComponent({ ref: 'raw-player' }).vm
+      rawPlayer.setCurrentFrame = vi.fn()
+      rawPlayer.setCurrentTimeRaw = vi.fn()
+
+      await press(key)
+
+      expect(rawPlayer.setCurrentFrame).toHaveBeenCalledWith(frame)
+      expect(rawPlayer.setCurrentTimeRaw).not.toHaveBeenCalledWith(frame / 25)
+    })
+
+    // A pause moves the movie to the next frame boundary: past the last
+    // frame, that is the very end of the movie, where no drawing is found.
+    it('shows the drawing of the last frame once paused on it', async () => {
+      const canvas = await mountShowing(movie)
+      const rawPlayer = wrapper.findComponent({ ref: 'raw-player' }).vm
+      let time = 0
+      rawPlayer.getCurrentTime = () => time
+      rawPlayer.getCurrentTimeRaw = () => time
+      rawPlayer.setCurrentTimeRaw = value => {
+        time = value
+      }
+      rawPlayer.isPlaying = true
+      const togglePlayback = () =>
+        window.dispatchEvent(
+          new KeyboardEvent('keydown', { code: 'Space', key: ' ' })
+        )
+      togglePlayback()
+      await flushPromises()
+      // Inside the last frame, from 2.72 to 2.76 s.
+      time = 2.74
+      canvas.add.mockClear()
+
+      togglePlayback()
+      await flushPromises()
+
+      expect(drawnIds(canvas)).toEqual(['last'])
+    })
+
+    // As in the preview player: loading the drawing would pause the movie.
+    it.each([
+      ['Home', 0],
+      ['End', 68]
+    ])('keeps a movie playing on %s', async (key, frame) => {
+      await mountShowing(movie)
+      const rawPlayer = wrapper.findComponent({ ref: 'raw-player' }).vm
+      rawPlayer.isPlaying = true
+      rawPlayer.pause = vi.fn()
+      rawPlayer.setCurrentFrame = vi.fn()
+      window.dispatchEvent(
+        new KeyboardEvent('keydown', { code: 'Space', key: ' ' })
+      )
+      await flushPromises()
+
+      await press(key)
+
+      expect(rawPlayer.setCurrentFrame).toHaveBeenCalledWith(frame)
+      expect(rawPlayer.pause).not.toHaveBeenCalled()
+    })
+
+    it.each(['Home', 'End'])('leaves a picture as it is on %s', async key => {
+      const canvas = await mountShowing({
+        ...entity,
+        preview_file_extension: 'png',
+        preview_file_annotations: [drawingAt(0, 'picture')]
+      })
+      canvas.clear.mockClear()
+
+      await press(key)
+
+      expect(canvas.clear).not.toHaveBeenCalled()
+    })
+
+    // The built movie of the playlist plays instead of the one of the entry.
+    it.each(['Home', 'End'])('leaves the full mode as it is on %s', async key => {
+      // jsdom plays no media
+      vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {})
+      const canvas = await mountShowing(movie)
+      wrapper.vm.isFullMode = true
+      await flushPromises()
+      canvas.clear.mockClear()
+
+      await press(key)
+
+      expect(canvas.clear).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('window resize', () => {
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    const mountPicture = async () => {
+      const canvas = createFakeCanvas()
+      wrapper = mountPlayer({
+        entities: [{ ...entity, preview_file_extension: 'png' }],
+        stubs: { AnnotationCanvas: annotationCanvasStub(canvas) }
+      })
+      await flushPromises()
+      // A 1920 x 1080 picture in an 800 x 450 player.
+      const videoContainer = wrapper.find('.video-container').element
+      const size = { width: 800, height: 450 }
+      Object.defineProperties(videoContainer, {
+        offsetWidth: { get: () => size.width },
+        offsetHeight: { get: () => size.height }
+      })
+      const anchor = wrapper.find('.main-content-anchor').element
+      return { canvas, size, anchor }
+    }
+
+    // The player handles one resize per 100 ms.
+    const resize = async () => {
+      window.dispatchEvent(new Event('resize'))
+      await vi.advanceTimersByTimeAsync(200)
+      await flushPromises()
+    }
+
+    it('leaves a note being typed', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
+      const { canvas } = await mountPicture()
+      canvas.getActiveObject.mockReturnValue({ isEditing: true })
+      canvas.clear.mockClear()
+
+      await resize()
+
+      expect(canvas.clear).not.toHaveBeenCalled()
+    })
+
+    it('keeps the overlay on the picture while a note is typed', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'Date'] })
+      const { canvas, size, anchor } = await mountPicture()
+      await resize()
+      const before = anchor.style.width
+      canvas.getActiveObject.mockReturnValue({ isEditing: true })
+      size.height = 225
+
+      await vi.advanceTimersByTimeAsync(200)
+      await resize()
+
+      expect([before, anchor.style.width]).toEqual(['800px', '400px'])
     })
   })
 })

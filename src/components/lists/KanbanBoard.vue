@@ -529,14 +529,14 @@ const closeAddPreviewModal = () => {
 const confirmAddPreviewModal = async forms => {
   loading.addPreview = true
   errors.addPreview = false
-  store.dispatch('loadPreviewFileFormData', forms)
   try {
     // keep the modal (and the pending ghost) up until the upload went
     // through, so a failure does not silently drop the move
     await store.dispatch('commentTaskWithPreview', {
       comment: '',
       taskId: form.taskId,
-      taskStatusId: form.taskStatusId
+      taskStatusId: form.taskStatusId,
+      forms
     })
     closeAddPreviewModal()
   } catch (err) {

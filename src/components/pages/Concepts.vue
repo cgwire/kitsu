@@ -287,6 +287,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { pauseEvent } from '@/composables/dom'
+import { logRequestFailure } from '@/lib/errors'
 import files from '@/lib/files'
 import func from '@/lib/func'
 import {
@@ -460,7 +461,7 @@ const matchingConcepts = computed(() =>
     .filter(
       concept =>
         !filters.taskStatusId ||
-        concept.tasks[0].task_status_id === filters.taskStatusId
+        concept.tasks[0]?.task_status_id === filters.taskStatusId
     )
     .filter(
       concept =>
@@ -683,8 +684,8 @@ const confirmAddConceptModal = async forms => {
     })
     upload.total = 0
   } catch (err) {
-    console.error(err)
     upload.isError = true
+    logRequestFailure(err)
   }
 }
 
@@ -804,7 +805,7 @@ const onFileDragLeave = () => {
 
 const onTaskStatusChanged = eventData => {
   const concept = concepts.value.find(
-    concept => concept.tasks[0].id === eventData.task_id
+    concept => concept.tasks[0]?.id === eventData.task_id
   )
   if (concept) {
     store.commit('UPDATE_TASK', {

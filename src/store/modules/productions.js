@@ -16,8 +16,6 @@ import {
   LOAD_PRODUCTIONS_START,
   LOAD_PRODUCTIONS_ERROR,
   LOAD_PRODUCTIONS_END,
-  LOAD_OPEN_PRODUCTIONS_START,
-  LOAD_OPEN_PRODUCTIONS_ERROR,
   LOAD_OPEN_PRODUCTIONS_END,
   LOAD_PRODUCTION_STATUS_START,
   LOAD_PRODUCTION_STATUS_ERROR,
@@ -59,6 +57,11 @@ import {
 const taskTypesCache = taskTypeStore.cache
 const taskStatusCache = taskStatusStore.cache
 
+// The user context lists the productions of this status only, though some
+// zou routes also count Active and open: the open ones stay those a reload
+// shows.
+const OPEN_STATUS_NAME = 'Open'
+
 const initialState = {
   productions: [],
   productionMap: new Map(),
@@ -73,7 +76,6 @@ const initialState = {
 
   isProductionsLoading: false,
   isProductionsLoadingError: false,
-  isOpenProductionsLoading: false,
 
   lastProductionRoute: { name: 'open-productions' }
 }
@@ -157,6 +159,21 @@ const entityMetadataDescriptors = entityType => (state, getters) => {
   }
 }
 
+// A read of the production serves its status name, an edit does not: the
+// name stored for the same status stays, else the map gives it. The context
+// loads the statuses once: one created later through the API is missing
+// from the map.
+const setProductionStatusName = (state, production) => {
+  const stored = state.productionMap.get(production.id)
+  const storedName =
+    stored?.project_status_id === production.project_status_id
+      ? stored.project_status_name
+      : undefined
+  production.project_status_name ??=
+    storedName ??
+    state.productionStatusMap.get(production.project_status_id)?.name
+}
+
 /**
  * The same project often exists as multiple object references (e.g. open list
  * vs all productions). Metadata must be updated on every copy.
@@ -233,7 +250,6 @@ const getters = {
 
   isProductionsLoading: state => state.isProductionsLoading,
   isProductionsLoadingError: state => state.isProductionsLoadingError,
-  isOpenProductionsLoading: state => state.isOpenProductionsLoading,
 
   assetsPath: (state, getters, rootState, rootGetters) =>
     helpers.getSectionPath(getters, rootGetters, 'assets'),
@@ -277,12 +293,11 @@ const getters = {
     return getters.getProductionBackgrounds(state.currentProduction?.id)
   },
 
-  getProductionBackgrounds: (state, rootState) => id => {
-    const production = state.productionMap.get(id)
-    const backgrounds = production?.preview_background_files
-      ?.map(id => rootState.backgroundMap.get(id))
-      .filter(Boolean)
-    return backgrounds ? sortByName(backgrounds) : []
+  getProductionBackgrounds: (state, getters, rootState) => id => {
+    const ids = state.productionMap.get(id)?.preview_background_files || []
+    return rootState.backgrounds.backgrounds.filter(background =>
+      ids.includes(background.id)
+    )
   },
 
   productionTaskStatuses: (state, getters, rootState) => {
@@ -467,16 +482,6 @@ const actions = {
     }
   },
 
-  async loadOpenProductions({ commit }) {
-    commit(LOAD_OPEN_PRODUCTIONS_START)
-    try {
-      const productions = await productionsApi.getOpenProductions()
-      commit(LOAD_OPEN_PRODUCTIONS_END, productions)
-    } catch (err) {
-      commit(LOAD_OPEN_PRODUCTIONS_ERROR)
-    }
-  },
-
   async loadProductions({ commit }) {
     commit(LOAD_PRODUCTIONS_START)
     try {
@@ -495,6 +500,29 @@ const actions = {
         commit(ADD_PRODUCTION, production)
       }
     })
+  },
+
+  // Zou announces the update of a production to every user. One the store
+  // misses joins it once the user enters its team or it reopens: the
+  // listing tells, where a read would refuse the users out of its team.
+  async loadProductionIfOpen({ dispatch, state }, productionId) {
+    const listed = await productionsApi.getListedProduction(productionId)
+    const status = state.productionStatusMap.get(listed?.project_status_id)
+    if (status?.name === OPEN_STATUS_NAME) {
+      await dispatch('loadProduction', productionId)
+    }
+  },
+
+  // Zou announces a new production to every user, and refuses its read to
+  // those out of its team. Anyone but an admin looks for it first among the
+  // productions of their teams, closed ones included: getListedProduction
+  // holds their open ones only.
+  async loadProductionIfShared({ dispatch, rootGetters }, productionId) {
+    if (!rootGetters.isCurrentUserAdmin) {
+      const productions = await productionsApi.getProductions()
+      if (!productions.some(({ id }) => id === productionId)) return
+    }
+    await dispatch('loadProduction', productionId)
   },
 
   async newProduction({ commit }, data) {
@@ -563,6 +591,17 @@ const actions = {
     if (!productionId || state.teamRoles[productionId]) return
     const team = await productionsApi.getTeam(productionId)
     commit(TEAM_ROLES_LOADED, { productionId, team })
+  },
+
+  async reloadTeamRoles({ commit, rootState }, productionId) {
+    const team = await productionsApi.getTeam(productionId)
+    commit(TEAM_ROLES_LOADED, { productionId, team })
+    const userId = rootState.user.user?.id
+    const member = team.find(person => person.id === userId)
+    commit(SET_USER_PROJECT_ROLE, {
+      projectId: productionId,
+      role: member?.project_role ?? null
+    })
   },
 
   async setTeamMemberRole({ commit, state, rootState }, { personId, role }) {
@@ -976,15 +1015,7 @@ const mutations = {
     })
   },
 
-  [LOAD_OPEN_PRODUCTIONS_START](state) {
-    state.isOpenProductionsLoading = true
-    state.openProductions = []
-  },
-  [LOAD_OPEN_PRODUCTIONS_ERROR](state) {
-    state.isOpenProductionsLoading = false
-  },
   [LOAD_OPEN_PRODUCTIONS_END](state, productions) {
-    state.isOpenProductionsLoading = false
     // The map keeps its objects, the current production among them: a
     // known open production takes the listed fields, a closed one, absent
     // from this listing, stays as it was loaded.
@@ -1018,15 +1049,11 @@ const mutations = {
   },
 
   [ADD_PRODUCTION](state, production) {
-    const productionStatus = state.productionStatusMap.get(
-      production.project_status_id
-    )
-    production.project_status_name = productionStatus.name
+    setProductionStatusName(state, production)
     state.productions.push(production)
     state.productionMap.set(production.id, production)
     // A closed production loaded for a link joins the map, not the open ones.
-    // The status names are the ones zou counts as open.
-    if (['Active', 'open', 'Open'].includes(production.project_status_name)) {
+    if (production.project_status_name === OPEN_STATUS_NAME) {
       state.openProductions.push(production)
       state.openProductions = sortByName(state.openProductions)
     }
@@ -1040,15 +1067,7 @@ const mutations = {
     const openProduction = state.openProductions.find(
       ({ id }) => id === production.id
     )
-    const productionStatus = state.productionStatusMap.get(
-      production.project_status_id
-    )
-
-    // status changed
-    const isStatusChanged =
-      previousProduction &&
-      previousProduction.project_status_id !== productionStatus.id
-    production.project_status_name = productionStatus.name
+    setProductionStatusName(state, production)
 
     // The response of an edit carries no relations, and the all-productions
     // copy lists the Project descriptors only: the whole record is the
@@ -1070,16 +1089,12 @@ const mutations = {
     if (!state.productionMap.has(production.id)) {
       state.productionMap.set(production.id, production)
     }
-    if (isStatusChanged) {
-      const known = state.productionMap.get(production.id)
-      if (production.project_status_name === 'Open') {
-        state.openProductions.push(known)
-      } else {
-        state.openProductions = removeModelFromList(
-          state.openProductions,
-          known
-        )
-      }
+    const known = state.productionMap.get(production.id)
+    const isOpen = production.project_status_name === OPEN_STATUS_NAME
+    if (isOpen && !openProduction) {
+      state.openProductions.push(known)
+    } else if (!isOpen && openProduction) {
+      state.openProductions = removeModelFromList(state.openProductions, known)
     }
     state.productions = sortProductions(state.productions)
     state.openProductions = sortByName(state.openProductions)

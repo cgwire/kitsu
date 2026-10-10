@@ -811,4 +811,26 @@ describe('TeamSchedule page', () => {
       expect(socket.off).toHaveBeenCalledWith('preview-file:set-main', handler)
     })
   })
+
+  describe('unassigned tasks', () => {
+    it('rounds the person days of an estimation', async () => {
+      const loadOpenTasks = vi.fn(() => ({
+        data: [{ id: 'task-1', estimation: 160 }],
+        is_more: false,
+        stats: { total: 1 }
+      }))
+      const { wrapper } = await mountPage({
+        getters: { organisation: () => ({ hours_by_day: 8 }) },
+        actions: { loadOpenTasks },
+        renderStubDefaultSlot: true
+      })
+
+      wrapper.vm.toggleTaskSidePanel()
+      await flushPromises()
+
+      // 160 minutes are a third of an 8 hour day
+      expect(wrapper.find('.task-item em').text()).toBe('0.33 main.man_days')
+      wrapper.unmount()
+    })
+  })
 })

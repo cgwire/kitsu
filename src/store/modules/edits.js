@@ -294,7 +294,6 @@ const state = {
 }
 
 const getters = {
-  edits: state => cache.edits,
   editValidationColumns: state => state.editValidationColumns,
 
   editSearchQueries: state => state.editSearchQueries,
@@ -321,7 +320,6 @@ const getters = {
   editsLoadingKey: state => state.editsLoadingKey,
   editCreated: state => state.editCreated,
 
-  isLongEditList: state => cache.editMap.size > 500,
   editsCsvFormData: state => state.editsCsvFormData,
   editListScrollPosition: state => state.editListScrollPosition,
 

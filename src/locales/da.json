@@ -1598,6 +1598,7 @@
       "show_timecode": "Vis ind og ud som tidskoder"
     },
     "server_down": {
+      "retrying": "Kitsu bliver ved med at prøve og fører dig tilbage til din side, så snart API'et svarer.",
       "text": "Kontakt venligst vores supportteam eller din systemadministrator for at forstå, hvad der går galt.",
       "title": "Kitsu stødte på en fejl under forbindelsen til sin data-API."
     },

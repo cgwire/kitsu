@@ -275,6 +275,25 @@ describe('Edits page, past confirmation errors', () => {
 })
 
 describe('Edits page, search', () => {
+  const searchesFor = (dispatched, query) =>
+    dispatched('setEditSearch').filter(([, search]) => search === query)
+
+  const mountLongList = () =>
+    mountPage({
+      getters: {
+        editMap: new Map(
+          Array.from({ length: 501 }, (_, index) => [
+            `edit-${index}`,
+            {
+              id: `edit-${index}`,
+              project_id: production.id,
+              validations: new Map()
+            }
+          ])
+        )
+      }
+    })
+
   test('applies the search on Enter', async () => {
     const { wrapper, searchField, dispatched } = await mountPage()
     searchField.value = 'e01'
@@ -282,6 +301,46 @@ describe('Edits page, search', () => {
     await wrapper.findComponent({ name: 'SearchField' }).vm.$emit('enter', 'e01')
 
     expect(dispatched('setEditSearch')).toContainEqual(['setEditSearch', 'e01'])
+  })
+
+  test('searches a short list as it is typed', async () => {
+    const { wrapper, searchField, dispatched } = await mountPage()
+    searchField.value = 'e01'
+
+    wrapper.findComponent({ name: 'SearchField' }).vm.$emit('change', 'e01')
+    await flushPromises()
+
+    expect(searchesFor(dispatched, 'e01')).not.toHaveLength(0)
+  })
+
+  // Like the shot list: searching a long list on every key is too slow.
+  test('searches a long list on Enter only', async () => {
+    const { wrapper, router, searchField, dispatched } = await mountLongList()
+    const field = wrapper.findComponent({ name: 'SearchField' })
+    searchField.value = 'e01'
+
+    field.vm.$emit('change', 'e01')
+    await flushPromises()
+
+    expect(searchesFor(dispatched, 'e01')).toHaveLength(0)
+    expect(router.currentRoute.value.query.search).toBeUndefined()
+
+    field.vm.$emit('enter', 'e01')
+    await flushPromises()
+
+    expect(searchesFor(dispatched, 'e01')).not.toHaveLength(0)
+    expect(router.currentRoute.value.query.search).toBe('e01')
+  })
+
+  test('clears the search of a long list as it is typed', async () => {
+    const { wrapper, searchField, dispatched } = await mountLongList()
+    const clearsAtMount = searchesFor(dispatched, '').length
+    searchField.value = ''
+
+    wrapper.findComponent({ name: 'SearchField' }).vm.$emit('change', '')
+    await flushPromises()
+
+    expect(searchesFor(dispatched, '').length).toBeGreaterThan(clearsAtMount)
   })
 })
 

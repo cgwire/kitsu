@@ -1575,6 +1575,43 @@ describe('composables/annotation', () => {
       ).resolves.toBeUndefined()
       wrapper.unmount()
     })
+
+    // A player closed during a snapshot extraction disposes its fabric
+    // canvas, which the composable still holds: toCanvasElement threw inside
+    // the promise, and the extraction never settled.
+    it('copies nothing once the player closed during the wait', async () => {
+      vi.useFakeTimers()
+      try {
+        const toCanvasElement = vi.fn(() => {
+          throw new TypeError(
+            "Cannot set properties of undefined (setting 'ctx')"
+          )
+        })
+        const canvas = createFakeCanvas({ toCanvasElement })
+        const { api, wrapper } = mountAnnotation({ canvas })
+        const drawImage = vi.fn()
+        const target = {
+          width: 100,
+          height: 100,
+          getContext: () => ({ drawImage })
+        }
+
+        const copy = api.copyAnnotationCanvas(target, {
+          time: 1,
+          drawing: { objects: [] }
+        })
+        // What fabric's dispose leaves: no lower canvas behind the context.
+        canvas.contextContainer = undefined
+        vi.advanceTimersByTime(100)
+
+        await expect(copy).resolves.toBeUndefined()
+        expect(toCanvasElement).not.toHaveBeenCalled()
+        expect(drawImage).not.toHaveBeenCalled()
+        wrapper.unmount()
+      } finally {
+        vi.useRealTimers()
+      }
+    })
   })
 
   describe('Fabric v6 regressions', () => {

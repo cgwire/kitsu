@@ -237,16 +237,18 @@ const helpers = {
     }
   ) {
     const taskMap = tasksStore.state.taskMap
-    const taskTypes = Array.from(taskTypeMap.values()).filter(
-      taskType => taskType.for_entity === 'Asset'
-    )
+    const taskTypes = Array.from(taskTypeMap.values())
     const taskStatuses = Array.from(taskStatusMap.values())
     const query = assetSearch
     const keywords = getKeyWords(query) || []
     const filters = getFilters({
       entryIndex: cache.assetIndex,
       assetTypes: state.assetTypes,
-      taskTypes,
+      taskTypes: taskTypes.filter(taskType => taskType.for_entity === 'Asset'),
+      // An asset is ready for a shot task type.
+      readyForTaskTypes: taskTypes.filter(
+        taskType => taskType.for_entity === 'Shot'
+      ),
       taskStatuses,
       descriptors: production?.descriptors || [],
       persons,
@@ -344,7 +346,6 @@ const state = {
 }
 
 const getters = {
-  assets: state => cache.assets,
   assetMap: state => cache.assetMap,
   assetSearchText: state => state.assetSearchText,
   assetSearchQueries: state => state.assetSearchQueries,

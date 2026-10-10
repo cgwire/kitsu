@@ -534,3 +534,56 @@ describe('Episodes store, UPDATE_EPISODE', () => {
     expect(labels.value).toEqual(['E01 new'])
   })
 })
+
+describe('Episodes store, DELETE_TASK_END', () => {
+  afterEach(() => {
+    episodesStore.cache.episodeMap.clear()
+  })
+
+  // The topbar and the task page load the plain list, whose rows carry no
+  // tasks: deleting a task of one of them threw, and the modules after this
+  // one kept the task.
+  test('leaves an episode loaded without its tasks unchanged', () => {
+    episodesStore.mutations.LOAD_EPISODES_END(
+      {
+        episodes: [],
+        displayedEpisodes: [],
+        isEpisodeListLoaded: false,
+        currentEpisode: null
+      },
+      {
+        episodes: [{ id: 'ep-plain', name: 'E01', status: 'running' }],
+        routeEpisodeId: 'ep-plain'
+      }
+    )
+
+    episodesStore.mutations.DELETE_TASK_END(
+      {},
+      { id: 't1', entity_id: 'ep-plain', task_type_id: 'tt1' }
+    )
+
+    const episode = episodesStore.cache.episodeMap.get('ep-plain')
+    expect(episode.tasks).toBeUndefined()
+    expect(episode.validations).toBeUndefined()
+  })
+
+  test('removes the task of an episode loaded with its tasks', () => {
+    episodesStore.cache.episodeMap.set('ep-full', {
+      id: 'ep-full',
+      tasks: ['t1', 't2'],
+      validations: new Map([
+        ['tt1', 't1'],
+        ['tt2', 't2']
+      ])
+    })
+
+    episodesStore.mutations.DELETE_TASK_END(
+      {},
+      { id: 't1', entity_id: 'ep-full', task_type_id: 'tt1' }
+    )
+
+    const episode = episodesStore.cache.episodeMap.get('ep-full')
+    expect(episode.tasks).toEqual(['t2'])
+    expect([...episode.validations]).toEqual([['tt2', 't2']])
+  })
+})

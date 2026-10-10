@@ -164,6 +164,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { useBoardStatuses } from '@/composables/board'
+import func from '@/lib/func'
 import { getTaskStatusPriorityOfProd } from '@/lib/productions'
 import { parseDate } from '@/lib/time'
 
@@ -595,11 +596,13 @@ const onTimeSpentChange = timeSpentInfo => {
     .catch(console.error)
 }
 
-const onAssignation = async eventData => {
-  if (user.value.id === eventData.person_id) {
-    await store.dispatch('loadOpenProductions')
-    await loadData(true)
-  }
+// Zou sends one event per assigned task: a bulk assignation reloads the tasks
+// once. The production of a new assignation joins the open ones through the
+// project:update Zou sends once it adds the user to the team.
+const reloadAfterAssignations = func.debounce(() => loadData(true), 500)
+
+const onAssignation = eventData => {
+  if (user.value.id === eventData.person_id) reloadAfterAssignations()
 }
 
 // Watchers
@@ -639,6 +642,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   socket.off('task:assign', onAssignation)
   socket.off('task:unassign', onAssignation)
+  reloadAfterAssignations.cancel()
 })
 
 // Head

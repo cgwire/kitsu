@@ -20,8 +20,11 @@ import AddComment from '@/components/widgets/AddComment.vue'
 import Comment from '@/components/widgets/Comment.vue'
 import PreviewPlayer from '@/components/players/players/PreviewPlayer.vue'
 import SubscribeButton from '@/components/widgets/SubscribeButton.vue'
+import drafts from '@/lib/drafts'
 import { DEFAULT_FPS } from '@/lib/video'
 import shotsStore from '@/store/modules/shots'
+
+import { recordUnhandledRejections } from '../fixtures/unhandled-rejections'
 
 // The ten events the page used to declare through the `socket` component
 // option, which `<script setup>` cannot express.
@@ -551,6 +554,53 @@ describe('Task.vue comment events', () => {
 
     expect(wrapper.findComponent(PreviewPlayer).exists()).toBe(false)
   })
+
+  // App.vue reloads the comment of a task the event names. Older Zou
+  // versions leave the task out of the preview events.
+  describe('comment:update', () => {
+    const emitCommentUpdate = (socket, eventData) => {
+      const [, onCommentUpdate] = socket.on.mock.calls.find(
+        ([event]) => event === 'comment:update'
+      )
+      onCommentUpdate(eventData)
+    }
+    const reloads = store =>
+      store.dispatch.mock.calls.filter(([type]) => type === 'loadComment')
+
+    it('reloads a comment it shows when the event names no task', async () => {
+      const { socket, store } = await mountPage({ comments: [comment] })
+      emitCommentUpdate(socket, { comment_id: comment.id })
+      expect(reloads(store)).toEqual([
+        ['loadComment', { commentId: comment.id }]
+      ])
+    })
+
+    it('leaves to App.vue a comment whose task the event names', async () => {
+      const { socket, store } = await mountPage({ comments: [comment] })
+      emitCommentUpdate(socket, { comment_id: comment.id, task_id: TASK_ID })
+      expect(reloads(store)).toEqual([])
+    })
+
+    it('leaves alone the comments it does not show', async () => {
+      const { socket, store } = await mountPage({ comments: [comment] })
+      emitCommentUpdate(socket, { comment_id: 'comment-of-another-task' })
+      expect(reloads(store)).toEqual([])
+    })
+
+    it('leaves a bug in the reload to Sentry', async () => {
+      const bug = new TypeError('Cannot read properties of undefined')
+      const { socket, store } = await mountPage({ comments: [comment] })
+      store.dispatch.mockImplementation(type =>
+        type === 'loadComment' ? Promise.reject(bug) : Promise.resolve()
+      )
+
+      const rejections = await recordUnhandledRejections(() =>
+        emitCommentUpdate(socket, { comment_id: comment.id })
+      )
+
+      expect(rejections).toEqual([bug])
+    })
+  })
 })
 
 describe('Task.vue comment actions', () => {
@@ -644,6 +694,347 @@ describe('Task.vue comment actions', () => {
     await flushPromises()
 
     expect(actionErrors(wrapper)).toEqual([false, false])
+  })
+})
+
+describe('Task.vue publishing', () => {
+  const previewForm = name => {
+    const form = new FormData()
+    form.append('file', new File(['frame'], name))
+    return form
+  }
+
+  const mountCommentingPage = async (options = {}) => {
+    const reset = vi.fn()
+    const mounted = await mountPage({
+      ...options,
+      getterOverrides: {
+        isCurrentUserProductionManager: () => true,
+        ...options.getterOverrides
+      },
+      stubs: {
+        AddComment: {
+          props: ['previewForms'],
+          template: '<div />',
+          methods: { focus: () => {}, reset }
+        },
+        ...options.stubs
+      }
+    })
+    return { ...mounted, reset }
+  }
+
+  const commentBox = wrapper => wrapper.findComponent(AddComment)
+
+  it('publishes the files of its comment box with the comment', async () => {
+    const { wrapper, store } = await mountCommentingPage()
+    const form = previewForm('sh010.mp4')
+
+    commentBox(wrapper).vm.$emit('file-drop', [form])
+    commentBox(wrapper).vm.$emit('add-comment', 'Done', [], [], 'status-1')
+    await flushPromises()
+
+    expect(store.dispatch).toHaveBeenCalledWith(
+      'commentTaskWithPreview',
+      expect.objectContaining({ taskId: TASK_ID, forms: [form] })
+    )
+  })
+
+  // The extra preview modal may upload at the same time.
+  it('clears the progress of the published files only', async () => {
+    const { wrapper, store } = await mountCommentingPage()
+
+    commentBox(wrapper).vm.$emit('file-drop', [previewForm('sh010.mp4')])
+    commentBox(wrapper).vm.$emit('add-comment', 'Done', [], [], 'status-1')
+    await flushPromises()
+
+    expect(store.commit).toHaveBeenCalledWith('CLEAR_UPLOAD_PROGRESS', [
+      'sh010.mp4'
+    ])
+    expect(store.commit).not.toHaveBeenCalledWith('CLEAR_UPLOAD_PROGRESS')
+  })
+
+  // The extra preview modal uploads its own files: the comment box keeps
+  // what it holds, and a refused file never lands in it.
+  describe('beside an extra preview', () => {
+    const extraModal = wrapper =>
+      wrapper.findComponent({ ref: 'add-extra-preview-modal' })
+    const boxFiles = wrapper =>
+      commentBox(wrapper)
+        .props('previewForms')
+        .map(form => form.get('file').name)
+
+    let consoleError = null
+
+    afterEach(() => {
+      consoleError?.mockRestore()
+      consoleError = null
+      vi.useRealTimers()
+    })
+
+    it('keeps the comment box files when the modal opens', async () => {
+      const previews = [
+        { id: 'preview-1', revision: 1, extension: 'mp4', previews: [] }
+      ]
+      const { wrapper, store } = await mountCommentingPage({ previews })
+      const form = previewForm('sh010.mp4')
+      commentBox(wrapper).vm.$emit('file-drop', [form])
+      store.commit.mockClear()
+
+      wrapper.findComponent(PreviewPlayer).vm.$emit('add-extra-preview')
+      await flushPromises()
+
+      expect(boxFiles(wrapper)).toEqual(['sh010.mp4'])
+      // The bars of a publication in progress keep their values.
+      expect(store.commit).not.toHaveBeenCalledWith('CLEAR_UPLOAD_PROGRESS')
+    })
+
+    it('shows its upload progress in the modal', async () => {
+      const uploadProgress = { 'sh010-alt.png': 30 }
+      const { wrapper } = await mountCommentingPage({
+        getterOverrides: { uploadProgress: () => uploadProgress }
+      })
+
+      expect(extraModal(wrapper).vm.$attrs['upload-progress']).toEqual(
+        uploadProgress
+      )
+    })
+
+    it('keeps the comment box files once the extra preview is added', async () => {
+      const { wrapper, store } = await mountCommentingPage()
+      const form = previewForm('sh010.mp4')
+      commentBox(wrapper).vm.$emit('file-drop', [form])
+      store.commit.mockClear()
+
+      extraModal(wrapper).vm.$emit('confirm', [previewForm('sh010-alt.png')])
+      await flushPromises()
+
+      expect(boxFiles(wrapper)).toEqual(['sh010.mp4'])
+      // The upload clears the progress of its own files.
+      expect(store.commit).not.toHaveBeenCalledWith('CLEAR_UPLOAD_PROGRESS')
+    })
+
+    it('keeps a refused extra preview out of the comment box', async () => {
+      const { wrapper, store } = await mountCommentingPage()
+      const refusal = new Error('Request Entity Too Large')
+      store.dispatch.mockImplementation(type =>
+        type === 'addCommentExtraPreview'
+          ? Promise.reject(refusal)
+          : Promise.resolve()
+      )
+      consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+
+      extraModal(wrapper).vm.$emit('confirm', [previewForm('sh010-alt.png')])
+      await flushPromises()
+
+      expect(boxFiles(wrapper)).toEqual([])
+      expect(consoleError).toHaveBeenCalledWith(refusal)
+    })
+
+    // The upload can end once the page shows a task without previews, and
+    // so without a player.
+    it('adds an extra preview once the page left its player', async () => {
+      const task = buildTask()
+      const otherTask = buildTask({ id: 'task-2' })
+      const previews = [
+        { id: 'preview-1', revision: 1, extension: 'mp4', previews: [] }
+      ]
+      const { wrapper, store, router } = await mountCommentingPage({
+        task,
+        getterOverrides: {
+          getTaskPreviews: () => taskId =>
+            taskId === task.id ? previews : [],
+          taskMap: () =>
+            new Map([
+              [task.id, task],
+              [otherTask.id, otherTask]
+            ])
+        }
+      })
+      vi.useFakeTimers({ toFake: ['setTimeout'] })
+      let endUpload
+      store.dispatch.mockImplementation(type =>
+        type === 'addCommentExtraPreview'
+          ? new Promise(resolve => {
+              endUpload = resolve
+            })
+          : Promise.resolve()
+      )
+
+      extraModal(wrapper).vm.$emit('confirm', [previewForm('sh010-alt.png')])
+      await router.push({
+        name: 'task',
+        params: { ...TASK_ROUTE_PARAMS, task_id: otherTask.id }
+      })
+      await flushPromises()
+      expect(wrapper.findComponent(PreviewPlayer).exists()).toBe(false)
+      endUpload()
+      await flushPromises()
+
+      expect(() => vi.runAllTimers()).not.toThrow()
+    })
+
+    // The upload ends on the task it went to: a task the page moved on to
+    // meanwhile keeps the revision its player shows.
+    describe('once the extra preview is uploaded', () => {
+      const previews = [
+        { id: 'preview-1', revision: 1, extension: 'mp4', previews: [] }
+      ]
+      const playerWithLast = displayLast => ({
+        props: ['fps', 'previews', 'readOnly'],
+        template: '<div />',
+        data: () => ({
+          currentPreview: { id: 'preview-1', task_id: TASK_ID },
+          notSaved: false
+        }),
+        methods: {
+          displayFirst: () => {},
+          displayLast,
+          focus: () => {},
+          isValidPreviewModification: () => true,
+          setCurrentFrame: () => {}
+        }
+      })
+
+      it('shows the last revision of the task', async () => {
+        const displayLast = vi.fn()
+        const { wrapper } = await mountCommentingPage({
+          previews,
+          stubs: { PreviewPlayer: playerWithLast(displayLast) }
+        })
+        vi.useFakeTimers({ toFake: ['setTimeout'] })
+
+        extraModal(wrapper).vm.$emit('confirm', [previewForm('sh010-alt.png')])
+        await flushPromises()
+        vi.runAllTimers()
+
+        expect(displayLast).toHaveBeenCalledTimes(1)
+      })
+
+      it('leaves the player of the task the page moved on to', async () => {
+        const task = buildTask()
+        const otherTask = buildTask({ id: 'task-2' })
+        const displayLast = vi.fn()
+        const { wrapper, store, router } = await mountCommentingPage({
+          task,
+          previews,
+          getterOverrides: {
+            taskMap: () =>
+              new Map([
+                [task.id, task],
+                [otherTask.id, otherTask]
+              ])
+          },
+          stubs: { PreviewPlayer: playerWithLast(displayLast) }
+        })
+        vi.useFakeTimers({ toFake: ['setTimeout'] })
+        let endUpload
+        store.dispatch.mockImplementation(type =>
+          type === 'addCommentExtraPreview'
+            ? new Promise(resolve => {
+                endUpload = resolve
+              })
+            : Promise.resolve()
+        )
+
+        extraModal(wrapper).vm.$emit('confirm', [previewForm('sh010-alt.png')])
+        await router.push({
+          name: 'task',
+          params: { ...TASK_ROUTE_PARAMS, task_id: otherTask.id }
+        })
+        await flushPromises()
+        expect(wrapper.findComponent(PreviewPlayer).exists()).toBe(true)
+        endUpload()
+        await flushPromises()
+        vi.runAllTimers()
+
+        expect(displayLast).not.toHaveBeenCalled()
+      })
+    })
+  })
+
+  it('uploads the files of the extra preview modal', async () => {
+    const { wrapper, store } = await mountCommentingPage()
+    // Left pending: the end of the upload only refreshes the player.
+    store.dispatch.mockImplementation(() => new Promise(() => {}))
+    const form = previewForm('sh010-alt.png')
+
+    wrapper
+      .findComponent({ ref: 'add-extra-preview-modal' })
+      .vm.$emit('confirm', [form])
+    await flushPromises()
+
+    expect(store.dispatch).toHaveBeenCalledWith(
+      'addCommentExtraPreview',
+      expect.objectContaining({ taskId: TASK_ID, forms: [form] })
+    )
+  })
+
+  describe('once the upload ends', () => {
+    const publish = async wrapper => {
+      commentBox(wrapper).vm.$emit('file-drop', [previewForm('sh010.mp4')])
+      commentBox(wrapper).vm.$emit('add-comment', 'Done', [], [], 'status-1')
+      await flushPromises()
+    }
+
+    afterEach(() => localStorage.clear())
+
+    it('empties the comment box of the published task', async () => {
+      const { wrapper, reset } = await mountCommentingPage()
+      drafts.setTaskDraft(TASK_ID, { text: 'Done' })
+
+      await publish(wrapper)
+
+      expect(commentBox(wrapper).props('previewForms')).toEqual([])
+      expect(reset).toHaveBeenCalled()
+      expect(drafts.getTaskDraft(TASK_ID)).toBeNull()
+    })
+
+    it('leaves alone the comment box of the task shown since', async () => {
+      const task = buildTask()
+      const otherTask = buildTask({ id: 'task-2' })
+      const { wrapper, store, router, reset } = await mountCommentingPage({
+        task,
+        getterOverrides: {
+          taskMap: () =>
+            new Map([
+              [task.id, task],
+              [otherTask.id, otherTask]
+            ])
+        }
+      })
+      let endUpload
+      store.dispatch.mockImplementation(type =>
+        type === 'commentTaskWithPreview'
+          ? new Promise(resolve => {
+              endUpload = resolve
+            })
+          : Promise.resolve()
+      )
+      drafts.setTaskDraft(task.id, { text: 'Done' })
+      drafts.setTaskDraft(otherTask.id, { text: 'Lighting fixed' })
+
+      await publish(wrapper)
+      await router.push({
+        name: 'task',
+        params: { ...TASK_ROUTE_PARAMS, task_id: otherTask.id }
+      })
+      await flushPromises()
+      const otherForm = previewForm('sh020.mp4')
+      commentBox(wrapper).vm.$emit('file-drop', [otherForm])
+      endUpload()
+      await flushPromises()
+
+      expect(commentBox(wrapper).props('previewForms')).toEqual([otherForm])
+      expect(reset).not.toHaveBeenCalled()
+      expect(drafts.getTaskDraft(task.id)).toBeNull()
+      expect(drafts.getTaskDraft(otherTask.id)).toEqual({
+        text: 'Lighting fixed',
+        checklist: []
+      })
+    })
   })
 })
 
@@ -1171,5 +1562,50 @@ describe('Task.vue failed requests', () => {
 
     expect(store.dispatch).toHaveBeenCalledWith('subscribeToTask', TASK_ID)
     expect(consoleError).toHaveBeenCalledWith(error)
+  })
+})
+
+// The player takes a while over the snapshots, and the page can be left
+// meanwhile: its comment box is gone when they come back.
+describe('Task.vue annotation snapshots', () => {
+  it('drops the snapshots that come back once the page is left', async () => {
+    let returnSnapshots = null
+    const { wrapper } = await mountPage({
+      previews: [{ id: 'preview-1', revision: 1, extension: 'mp4' }],
+      getterOverrides: { isCurrentUserProductionManager: () => true },
+      stubs: {
+        AddComment: {
+          template: '<div />',
+          methods: {
+            focus: () => {},
+            hideAnnotationLoading: () => {},
+            reset: () => {},
+            setAnnotationSnapshots: () => {},
+            showAnnotationLoading: () => {}
+          }
+        },
+        PreviewPlayer: {
+          props: ['fps', 'previews', 'readOnly'],
+          template: '<div />',
+          methods: {
+            extractAnnotationSnapshots: () =>
+              new Promise(resolve => {
+                returnSnapshots = resolve
+              })
+          }
+        }
+      }
+    })
+    const errorHandler = vi.fn()
+    wrapper.vm.$.appContext.config.errorHandler = errorHandler
+
+    wrapper
+      .findComponent(AddComment)
+      .vm.$emit('annotation-snapshots-requested')
+    wrapper.unmount()
+    returnSnapshots([])
+    await flushPromises()
+
+    expect(errorHandler).not.toHaveBeenCalled()
   })
 })

@@ -7,8 +7,8 @@
             <search-field
               ref="edit-search-field"
               :can-save="true"
-              @change="onSearchChange"
-              @enter="applySearch"
+              @change="onSearchTyped"
+              @enter="onSearchChange"
               @save="saveSearchQuery"
               placeholder="ex: e01 edit=wip"
             />
@@ -333,7 +333,6 @@ const isEditEstimation = computed(() => store.getters.isEditEstimation)
 const isEditsLoading = computed(() => store.getters.isEditsLoading)
 const isEditsLoadingError = computed(() => store.getters.isEditsLoadingError)
 const isEditTime = computed(() => store.getters.isEditTime)
-const isLongEditList = computed(() => store.getters.isLongEditList)
 const isTVShow = computed(() => store.getters.isTVShow)
 const selectedTasks = computed(() => store.getters.selectedTasks)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
@@ -467,12 +466,19 @@ const onExportClick = () =>
     currentEpisode.value?.name
   )
 
-// A long list is only filtered through the URL, by the route watcher.
+// The edit map is not reactive: its size is read as the search is typed.
+// Like the shot list, a long list is only searched on Enter.
+const onSearchTyped = () => {
+  if (editMap.value.size <= 500 || searchFieldRef.value?.getValue() === '') {
+    onSearchChange()
+  }
+}
+
 const onSearchChange = (clearSelectionAfter = true) => {
   if (!searchFieldRef.value) return
   const searchQuery = searchFieldRef.value.getValue() || ''
   setSearchInUrl()
-  if (searchQuery.length !== 1 && !isLongEditList.value) {
+  if (searchQuery.length !== 1) {
     applySearch(searchQuery)
   }
   if (clearSelectionAfter) clearSelection()
