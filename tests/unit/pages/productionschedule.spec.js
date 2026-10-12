@@ -2076,4 +2076,19 @@ describe('ProductionSchedule page', () => {
       }
     )
   })
+
+  describe('expand all', () => {
+    // Expand all drills every task type: the shot list (9.5 MB on a large
+    // production) was reloaded once per shot task type.
+    it('loads the entities of a kind once', async () => {
+      const { storeActions, wrapper } = await mountPage()
+      findSchedule(wrapper).vm.$emit('expand-all')
+      await waitForLoad()
+
+      expect(rowsOf(wrapper).every(row => row.expanded)).toBe(true)
+      expect(storeActions.loadTasks).toHaveBeenCalledTimes(3)
+      expect(storeActions.loadShots).toHaveBeenCalledTimes(1)
+      expect(storeActions.loadAssets).toHaveBeenCalledTimes(1)
+    })
+  })
 })

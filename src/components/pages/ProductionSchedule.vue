@@ -677,6 +677,8 @@ const assignments = ref({
 const availableTaskTypes = ref([])
 const daysOffByPerson = ref({})
 const daysOffRangeKey = ref(null)
+// production, episode and entity kind already loaded, see loadEntities
+const loadedEntityKeys = new Set()
 const draggedEntities = ref([])
 const endDate = ref(getUserDay().add(6, 'months').endOf('day'))
 const entityType = ref(null)
@@ -961,6 +963,7 @@ const loadData = async () => {
   const production = currentProduction.value
   loading.value.schedule = true
   availableTaskTypes.value = []
+  loadedEntityKeys.clear()
 
   try {
     await store.dispatch('loadScheduleVersions', production)
@@ -1170,6 +1173,27 @@ const loadScopedAssets = () => {
   })
 }
 
+// The entities behind the rows are the same for every task type of a kind:
+// expand all reloaded the whole shot list (9.5 MB on a large production)
+// once per shot task type. Load each kind once per production and episode;
+// loadData starts afresh.
+const entityLoaders = {
+  Asset: () => loadScopedAssets(),
+  Shot: () => store.dispatch('loadShots'),
+  Sequence: () => store.dispatch('loadSequences'),
+  Episode: () => store.dispatch('loadEpisodes'),
+  Edit: () => store.dispatch('loadEdits')
+}
+
+const loadEntities = async forEntity => {
+  const loader = entityLoaders[forEntity]
+  if (!loader) return
+  const key = `${currentProduction.value.id}_${currentEpisodeId.value}_${forEntity}`
+  if (loadedEntityKeys.has(key)) return
+  await loader()
+  loadedEntityKeys.add(key)
+}
+
 // Whether an asset falls in the current scope: for the main pack, only the
 // assets attached to no episode; otherwise the assetMap is already scoped
 // and every asset it holds belongs. The store may hand over the list of the
@@ -1181,19 +1205,6 @@ const assetInScope = asset => {
     !asset.shared &&
     (!isMainPack.value || !(asset.episode_id || asset.source_id))
   )
-}
-
-// Loads the entities, scoped to the current episode for TV shows, that the
-// rows of a task type stand for.
-const loadTaskTypeEntities = forEntity => {
-  const loaders = {
-    Asset: loadScopedAssets,
-    Shot: () => store.dispatch('loadShots'),
-    Sequence: () => store.dispatch('loadSequences'),
-    Episode: () => store.dispatch('loadEpisodes'),
-    Edit: () => store.dispatch('loadEdits')
-  }
-  return loaders[forEntity]?.()
 }
 
 const expandTaskTypeElement = (
@@ -1298,7 +1309,7 @@ const expandTaskTypeDrillDown = async (
 
       // load entities (scoped to the current episode for TV shows) that
       // back the row grouping, the entity name and the episode filter
-      await loadTaskTypeEntities(taskTypeElement.for_entity)
+      await loadEntities(taskTypeElement.for_entity)
       if (isStaleSchedule(generation)) return
 
       let tasks = await store.dispatch(
@@ -1847,7 +1858,7 @@ const selectTaskTypeElement = async (
     ))
   if (isStaleSchedule(generation)) return
   if (!preloadedTasks) {
-    await loadTaskTypeEntities(taskType.for_entity)
+    await loadEntities(taskType.for_entity)
     if (isStaleSchedule(generation)) return
   }
   const taskEntityIds = new Set(tasks.map(task => task.entity_id))
