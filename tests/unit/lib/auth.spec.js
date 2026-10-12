@@ -8,7 +8,7 @@ vi.mock('@/store', () => ({
     state: { user: { user: null, isAuthenticated: false } }
   }
 }))
-vi.mock('superagent', () => ({ default: { get: vi.fn() } }))
+vi.mock('superagent', () => ({ default: { get: vi.fn(), post: vi.fn() } }))
 
 import superagent from 'superagent'
 
@@ -104,6 +104,20 @@ describe('auth', () => {
       sessionStorage.setItem('sso-redirect', '//evil.com')
       expect(auth.popSSORedirect()).toBeUndefined()
       expect(sessionStorage.getItem('sso-redirect')).toBeNull()
+    })
+
+    // An SSO login given up for a password one left its path behind: the
+    // next visit of the home page jumped to it.
+    test('forgets the path of an SSO login given up for a password', async () => {
+      superagent.post.mockReturnValue({
+        send: () =>
+          Promise.resolve({ body: { login: true, user: { id: 'user-1' } } })
+      })
+      auth.saveSSORedirect('/productions/production-1/shots')
+
+      await auth.logIn({ email: 'user@studio.com', password: 'secret' })
+
+      expect(auth.popSSORedirect()).toBeUndefined()
     })
   })
 })

@@ -14,6 +14,8 @@ import {
   removeModelFromList,
   setTasksEntityPreview
 } from '@/lib/models'
+import { isLatestTaskComment } from '@/lib/comments'
+import errors from '@/lib/errors'
 import func from '@/lib/func'
 import { latestPreviewFileStatus } from '@/lib/preview'
 
@@ -45,15 +47,17 @@ import {
   DELETE_TASK_END,
   EDIT_COMMENT_END,
   DELETE_COMMENT_END,
+  SET_TASK_LAST_COMMENT,
   MOVE_COMMENT_END,
   PIN_COMMENT,
   ACK_COMMENT,
   REMOVE_TASK_COMMENT,
   ADD_REPLY_TO_COMMENT,
   REMOVE_REPLY_FROM_COMMENT,
-  PREVIEW_FILE_SELECTED,
   ADD_PREVIEW_START,
   ADD_PREVIEW_END,
+  ADD_PREVIEW_ERROR,
+  REMOVE_FAILED_COMMENT,
   CHANGE_PREVIEW_END,
   UPDATE_PREVIEW_ANNOTATION,
   UPDATE_PREVIEW_VALIDATION_STATUS,
@@ -89,6 +93,8 @@ import {
 } from '@/store/mutation-types'
 
 const locks = {}
+// The comments a publication creates, until their last file is up.
+const publishingCommentIds = new Set()
 
 const cache = {}
 
@@ -108,7 +114,6 @@ const initialState = {
   isShowInfos: true,
 
   isSavingCommentPreview: false,
-  previewForms: [],
 
   uploadProgress: {}
 }
@@ -118,6 +123,10 @@ const state = {
 }
 
 const helpers = {
+  getFileNames(forms) {
+    return forms.map(form => form.get('file').name)
+  },
+
   getPerson(personId) {
     return personStore.getters.getPerson(personStore.state)(personId)
   },
@@ -141,6 +150,13 @@ const helpers = {
     comment.replies?.forEach(reply => {
       reply.person = helpers.resolveAuthor(reply.person_id, reply.person)
     })
+  },
+
+  // Zou or the proxy refused the request (4xx, 500), or never got its whole
+  // file: nothing of it goes on. After a proxy error (502 and up) or a
+  // connection lost once the file left, Zou may still process the file.
+  hasFailedForGood(err) {
+    return err?.status ? err.status <= 500 : err?.isBodySent === false
   }
 }
 
@@ -153,6 +169,9 @@ const getters = {
   getTaskComment: state => (taskId, commentId) => {
     return state.taskComments[taskId]?.find(comment => comment.id === commentId)
   },
+  // Read at call time: a publication joins its comment to the store once its
+  // last file is up.
+  isPublishingComment: () => commentId => publishingCommentIds.has(commentId),
 
   selectedTasks: state => state.selectedTasks,
   nbSelectedTasks: state => state.nbSelectedTasks,
@@ -162,7 +181,6 @@ const getters = {
   isShowAssignations: state => state.isShowAssignations,
   isShowInfos: state => state.isShowInfos,
   taskEntityPreviews: state => state.taskEntityPreviews,
-  previewForms: state => state.previewForms,
   isSavingCommentPreview: state => state.isSavingCommentPreview,
   uploadProgress: state => state.uploadProgress
 }
@@ -243,24 +261,57 @@ const actions = {
     })
   },
 
-  loadComment({ commit, state }, { commentId }) {
+  // Given its task, as Zou names it for a new comment, the comment also moves
+  // the task. The reload of an edit leaves it: an old comment would roll the
+  // status back.
+  loadComment({ commit, state }, { commentId, taskId = undefined }) {
     return tasksApi.getTaskComment({ id: commentId }).then(comment => {
       // The API returns a list of preview IDs instead of objects: keep the
       // previews the store holds, a bare ID has no revision to show.
-      const taskId = comment.object_id
-      const storedComment = state.taskComments[taskId]?.find(
+      const commentTaskId = comment.object_id
+      const storedComment = state.taskComments[commentTaskId]?.find(
         ({ id }) => id === comment.id
       )
       const knownPreviews = [
         ...(storedComment?.previews || []),
-        ...(state.taskPreviews[taskId] || []).flatMap(p => p.previews || [])
+        ...(state.taskPreviews[commentTaskId] || []).flatMap(
+          p => p.previews || []
+        )
       ].filter(preview => preview.revision !== undefined)
       comment.previews = comment.previews.map(
         id => knownPreviews.find(preview => preview.id === id) || { id }
       )
-      commit(NEW_TASK_COMMENT_END, { comment })
+      // Moved to another task meanwhile, the comment leaves that one alone.
+      commit(NEW_TASK_COMMENT_END, {
+        comment,
+        taskId: taskId === commentTaskId ? taskId : undefined
+      })
       return comment
     })
+  },
+
+  // The todos and the person tasks show the last comment of a task, which
+  // the reload of the task Zou resets after a deletion lacks. Older Zou
+  // versions name no task in the deletion: it is then the one whose stored
+  // comments, or listed last comment, hold the deleted one.
+  async reloadTaskLastComment(
+    { commit, state, rootState },
+    { commentId, taskId = undefined }
+  ) {
+    const isDeleted = comment => comment?.id === commentId
+    const listedTasks = [
+      ...rootState.user.todos,
+      ...rootState.people.personTasks
+    ]
+    taskId ??=
+      Object.keys(state.taskComments).find(id =>
+        state.taskComments[id]?.some(isDeleted)
+      ) ?? listedTasks.find(task => isDeleted(task.last_comment))?.id
+    if (!listedTasks.some(task => task.id === taskId)) return
+    // Zou lists them newest first.
+    const [comment] = await tasksApi.getTaskComments(taskId)
+    if (comment) helpers.enrichCommentAuthors(comment)
+    commit(SET_TASK_LAST_COMMENT, { taskId, commentId, comment })
   },
 
   addAttachmentToComment({ commit }, { comment, files }) {
@@ -553,14 +604,14 @@ const actions = {
   },
 
   commentTaskWithPreview(
-    { commit, dispatch, state },
+    { commit, dispatch },
     {
       taskId,
       taskStatusId,
       attachment,
       checklist,
       comment,
-      form,
+      forms,
       revision,
       links,
       forClient
@@ -575,9 +626,10 @@ const actions = {
       links,
       forClient
     }
-    const previewForms = [...state.previewForms]
+    const [mainForm, ...extraForms] = forms
     commit(ADD_PREVIEW_START)
     let newComment
+    let mainPreview
     locks[taskId] = true
     return (
       tasksApi
@@ -585,6 +637,7 @@ const actions = {
         // Create the comment entry.
         .then(comment => {
           newComment = comment
+          publishingCommentIds.add(comment.id)
           const previewData = {
             taskId,
             commentId: newComment.id,
@@ -594,13 +647,16 @@ const actions = {
         })
         // Create the main preview entry.
         .then(preview => {
-          if (!form) form = previewForms[0]
-          const { request, promise } = tasksApi.uploadPreview(preview.id, form)
+          mainPreview = preview
+          const { request, promise } = tasksApi.uploadPreview(
+            preview.id,
+            mainForm
+          )
           request.on('progress', e => {
             commit(SET_UPLOAD_PROGRESS, {
               previewId: preview.id,
               percent: e.percent,
-              name: form.get('file').name
+              name: mainForm.get('file').name
             })
           })
           return promise
@@ -616,7 +672,7 @@ const actions = {
           // thumbnails read before any of them shows the preview.
           dispatch('registerPreviewFileStatuses', [preview])
           // Create the remaining previews if there are some.
-          if (previewForms.length > 1) {
+          if (extraForms.length > 0) {
             const addPreview = form => {
               return tasksApi
                 .addExtraPreview(preview.id, taskId, newComment.id)
@@ -645,9 +701,8 @@ const actions = {
                   return preview
                 })
             }
-            const remainingPreviews = previewForms.slice(1)
             // run promises in sequence
-            return remainingPreviews.reduce(
+            return extraForms.reduce(
               (accumulatorPromise, form) =>
                 accumulatorPromise.then(() => addPreview(form)),
               Promise.resolve()
@@ -658,19 +713,37 @@ const actions = {
         })
         .then(preview => {
           commit(NEW_TASK_COMMENT_END, { comment: newComment, taskId })
-          commit(CLEAR_UPLOAD_PROGRESS)
+          commit(CLEAR_UPLOAD_PROGRESS, helpers.getFileNames(forms))
           return { newComment, preview }
+        })
+        .catch(async err => {
+          commit(ADD_PREVIEW_ERROR)
+          // Zou keeps the comment, its status change and its notifications,
+          // while the comment box keeps everything to publish again.
+          if (newComment && helpers.hasFailedForGood(err)) {
+            await tasksApi.deleteTaskComment(taskId, newComment.id).then(() => {
+              commit(REMOVE_FAILED_COMMENT, {
+                taskId,
+                commentId: newComment.id,
+                previewId: mainPreview?.id
+              })
+            }, errors.logRequestFailure)
+          }
+          throw err
         })
         .finally(() => {
           locks[taskId] = false
+          publishingCommentIds.delete(newComment?.id)
         })
     )
   },
 
   addCommentExtraPreview(
-    { commit, dispatch, getters, state },
-    { taskId, commentId, previewId }
+    { commit, dispatch, getters },
+    { taskId, commentId, previewId, forms }
   ) {
+    // A retry starts the bars of its files from zero.
+    commit(CLEAR_UPLOAD_PROGRESS, helpers.getFileNames(forms))
     const addPreview = form => {
       return tasksApi
         .addExtraPreview(previewId, taskId, commentId)
@@ -683,7 +756,15 @@ const actions = {
               name: form.get('file').name
             })
           })
-          return promise
+          return promise.catch(async err => {
+            // Left without its file, the preview shows as processing for good.
+            if (helpers.hasFailedForGood(err)) {
+              await tasksApi
+                .deletePreview(taskId, commentId, preview.id)
+                .catch(errors.logRequestFailure)
+            }
+            throw err
+          })
         })
         .then(preview => {
           const comment = getters.getTaskComment(taskId, commentId)
@@ -698,11 +779,16 @@ const actions = {
         })
     }
     // run promises in sequence
-    return state.previewForms.reduce(
-      (accumulatorPromise, form) =>
-        accumulatorPromise.then(() => addPreview(form)),
-      Promise.resolve()
-    )
+    return forms
+      .reduce(
+        (accumulatorPromise, form) =>
+          accumulatorPromise.then(() => addPreview(form)),
+        Promise.resolve()
+      )
+      .then(preview => {
+        commit(CLEAR_UPLOAD_PROGRESS, helpers.getFileNames(forms))
+        return preview
+      })
   },
 
   deleteTaskPreview({ commit }, { taskId, commentId, previewId }) {
@@ -923,10 +1009,6 @@ const actions = {
     commit(SET_IS_BIG_THUMBNAILS, false)
   },
 
-  loadPreviewFileFormData({ commit }, previewForms) {
-    commit(PREVIEW_FILE_SELECTED, previewForms)
-  },
-
   addSelectedTask({ commit }, task) {
     commit(ADD_SELECTED_TASK, task)
   },
@@ -1137,10 +1219,11 @@ const mutations = {
     }
     state.taskComments[taskId] = sortComments(state.taskComments[taskId])
 
-    if (task) {
+    if (task && isLatestTaskComment(task, comment)) {
       Object.assign(task, {
         task_status_id: comment.task_status_id,
-        last_comment: comment
+        last_comment: comment,
+        last_comment_date: comment.created_at || task.last_comment_date
       })
     }
   },
@@ -1237,12 +1320,12 @@ const mutations = {
     }
   },
 
-  [PREVIEW_FILE_SELECTED](state, forms) {
-    state.previewForms = forms
-  },
-
   [ADD_PREVIEW_START](state) {
     state.isSavingCommentPreview = true
+  },
+
+  [ADD_PREVIEW_ERROR](state) {
+    state.isSavingCommentPreview = false
   },
 
   [ADD_PREVIEW_END](state, { preview, taskId, commentId, comment }) {
@@ -1280,6 +1363,21 @@ const mutations = {
         comment.preview = newPreview
         comment.previews = [newPreview]
       }
+    }
+  },
+
+  // The comment events may have stored the comment of a failed publication,
+  // and its main preview may be listed already.
+  [REMOVE_FAILED_COMMENT](state, { taskId, commentId, previewId }) {
+    if (state.taskComments[taskId]) {
+      state.taskComments[taskId] = state.taskComments[taskId].filter(
+        ({ id }) => id !== commentId
+      )
+    }
+    if (state.taskPreviews[taskId]) {
+      state.taskPreviews[taskId] = state.taskPreviews[taskId].filter(
+        ({ id }) => id !== previewId
+      )
     }
   },
 
@@ -1692,8 +1790,14 @@ const mutations = {
     state.uploadProgress[name] = percent
   },
 
-  [CLEAR_UPLOAD_PROGRESS](state) {
-    state.uploadProgress = {}
+  // Given file names, only theirs: the comment box and the extra preview
+  // modal upload at the same time.
+  [CLEAR_UPLOAD_PROGRESS](state, names) {
+    if (names) {
+      names.forEach(name => delete state.uploadProgress[name])
+    } else {
+      state.uploadProgress = {}
+    }
   },
 
   [ADD_ANNOTATION](state, { annotations, annotation }) {

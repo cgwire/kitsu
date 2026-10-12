@@ -33,7 +33,7 @@ const makeFormWithFile = name => {
 }
 
 describe('AddComment', () => {
-  let store, wrapper, draftComment
+  let store, wrapper, draftComment, clearedProgress
 
   const taskStatusList = [
     {
@@ -66,6 +66,7 @@ describe('AddComment', () => {
 
   beforeEach(async () => {
     draftComment = makeDraftComment()
+    clearedProgress = []
 
     store = createStore({
       strict: true,
@@ -99,7 +100,7 @@ describe('AddComment', () => {
         uploadProgress: () => ({})
       },
       mutations: {
-        CLEAR_UPLOAD_PROGRESS: () => {}
+        CLEAR_UPLOAD_PROGRESS: (state, names) => clearedProgress.push(names)
       }
     })
 
@@ -156,6 +157,15 @@ describe('AddComment', () => {
     const postButton = wrapper.find('.post-button')
     await postButton.trigger('click')
     expect(wrapper.emitted('add-comment')).toBeTruthy()
+  })
+
+  // The extra preview modal of the panel may upload at the same time.
+  it('clears the progress of its own files only when it publishes', async () => {
+    await wrapper.setProps({ previewForms: [makeFormWithFile('sh010.mp4')] })
+
+    await wrapper.find('.post-button').trigger('click')
+
+    expect(clearedProgress).toEqual([['sh010.mp4']])
   })
 
   describe('exposed methods', () => {

@@ -2,6 +2,7 @@ import peopleApi from '@/store/api/people'
 import peopleStore from '@/store/modules/people'
 import taskStatusStore from '@/store/modules/taskstatus'
 import auth from '@/lib/auth'
+import { isLatestTaskComment, isPostedSince } from '@/lib/comments'
 import { sortTasks, sortByName } from '@/lib/sorting'
 import { indexSearch, buildTaskIndex } from '@/lib/indexing'
 import { getKeyWords } from '@/lib/filtering'
@@ -53,7 +54,9 @@ import {
   CHANGE_AVATAR_FILE,
   CLEAR_AVATAR,
   EDIT_PEOPLE_END,
+  LOAD_TASK_END,
   NEW_TASK_COMMENT_END,
+  SET_TASK_LAST_COMMENT,
   SET_TODO_LIST_SCROLL_POSITION,
   SAVE_ASSET_SEARCH_END,
   SAVE_SHOT_SEARCH_END,
@@ -695,18 +698,45 @@ const mutations = {
 
   [NEW_TASK_COMMENT_END](state, { comment, taskId }) {
     const task = state.todos.find(task => task.id === taskId)
+    // A status created after the context is missing from the store.
+    const taskStatus = helpers.getTaskStatus(comment.task_status_id)
 
-    if (task) {
-      const taskStatus = helpers.getTaskStatus(comment.task_status_id)
-
+    if (task && taskStatus && isLatestTaskComment(task, comment)) {
       Object.assign(task, {
         task_status_id: taskStatus.id,
         task_status_name: taskStatus.name,
         task_status_short_name: taskStatus.short_name,
         task_status_color: taskStatus.color,
-        last_comment: comment
+        last_comment: comment,
+        last_comment_date: comment.created_at || task.last_comment_date
       })
       cache.todosIndex = buildTaskIndex(state.todos)
+    }
+  },
+
+  // A task reloads on each update Zou announces, the reset that follows a
+  // comment deletion included: the todo takes its status and last comment
+  // date.
+  [LOAD_TASK_END](state, loadedTask) {
+    const task = state.todos.find(task => task.id === loadedTask.id)
+    const taskStatus = helpers.getTaskStatus(loadedTask.task_status_id)
+
+    if (task && taskStatus) {
+      Object.assign(task, {
+        task_status_id: taskStatus.id,
+        task_status_name: taskStatus.name,
+        task_status_short_name: taskStatus.short_name,
+        task_status_color: taskStatus.color,
+        last_comment_date: loadedTask.last_comment_date
+      })
+      cache.todosIndex = buildTaskIndex(state.todos)
+    }
+  },
+
+  [SET_TASK_LAST_COMMENT](state, { taskId, commentId, comment }) {
+    const task = state.todos.find(task => task.id === taskId)
+    if (task && !isPostedSince(task.last_comment, comment, commentId)) {
+      task.last_comment = comment || {}
     }
   },
 

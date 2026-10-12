@@ -68,6 +68,8 @@ const auth = {
       throw err
     }
 
+    // The path an SSO login given up on the way left for the home page.
+    sessionStorage.removeItem(SSO_REDIRECT_KEY)
     store.commit(DATA_LOADING_START)
     return user
   },

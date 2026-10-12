@@ -22,7 +22,10 @@ const socketMock = { on: vi.fn(), off: vi.fn() }
 import '@/lib/auth'
 
 import { useDesktopNotifications } from '@/composables/desktopNotifications'
+import errors from '@/lib/errors'
 import Topbar from '@/components/tops/Topbar.vue'
+
+import { recordUnhandledRejections } from '../../fixtures/unhandled-rejections'
 
 // A memory history keeps each test's navigation out of the jsdom URL shared by
 // the whole file: with a hash history, installing the next router replays the
@@ -905,18 +908,48 @@ describe('Topbar.vue', () => {
         wrapper.unmount()
       })
 
-      // Deleted, or not shared with the user: there is nothing to show.
-      it('leaves a production that fails to load', async () => {
+      // Deleted, not shared with the user or out of reach: the page would
+      // show the production of the store under the route of this one.
+      it.each([
+        ['missing', { status: 404 }],
+        ['out of reach', {}]
+      ])(
+        'leaves a production that fails to load, %s',
+        async (_label, failureFields) => {
+          const consoleError = vi
+            .spyOn(console, 'error')
+            .mockImplementation(() => {})
+          const { wrapper, actions, replaceSpy } = mountOnClosed()
+          const failure = Object.assign(new Error('Failed'), failureFields)
+          errors.markRequestFailure(failure)
+          actions.loadProduction.mockRejectedValueOnce(failure)
+
+          wrapper.vm.setProductionFromRoute()
+          await flushPromises()
+
+          expect(replaceSpy).toHaveBeenCalledWith({ name: 'open-productions' })
+          expect(consoleError).toHaveBeenCalledWith(failure)
+          consoleError.mockRestore()
+          wrapper.unmount()
+        }
+      )
+
+      it('leaves a production whose load hits a bug, left to Sentry', async () => {
         const consoleError = vi
           .spyOn(console, 'error')
           .mockImplementation(() => {})
         const { wrapper, actions, replaceSpy } = mountOnClosed()
-        actions.loadProduction.mockRejectedValueOnce(new Error('Not found'))
+        const bug = new TypeError('Cannot read properties of undefined')
+        actions.loadProduction.mockRejectedValueOnce(bug)
 
-        wrapper.vm.setProductionFromRoute()
-        await flushPromises()
+        const rejections = await recordUnhandledRejections(async () => {
+          wrapper.vm.setProductionFromRoute()
+          await flushPromises()
+        })
 
+        expect(rejections).toEqual([bug])
         expect(replaceSpy).toHaveBeenCalledWith({ name: 'open-productions' })
+        expect(consoleError).not.toHaveBeenCalledWith(bug)
         consoleError.mockRestore()
         wrapper.unmount()
       })
@@ -938,7 +971,9 @@ describe('Topbar.vue', () => {
         wrapper.vm.setProductionFromRoute()
         route.params.production_id = 'production-1'
         wrapper.vm.setProductionFromRoute()
-        failLoad(new Error('Not found'))
+        const missing = Object.assign(new Error('Not found'), { status: 404 })
+        errors.markRequestFailure(missing)
+        failLoad(missing)
         await flushPromises()
 
         expect(replaceSpy).not.toHaveBeenCalledWith({

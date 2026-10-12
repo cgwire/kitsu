@@ -1598,6 +1598,7 @@
       "wrong_file_duration": "Az egyik feltöltött videófájl hossza nem egyezik a jelenlegi shot várt hosszával."
     },
     "server_down": {
+      "retrying": "Kitsu tovább próbálkozik, és visszavisz az oldaladra, amint az API válaszol.",
       "text": "Kérlek vedd fel a kapcsolatot a támogató csapatunkkal vagy a rendszergazdáddal, hogy kiderüljön, mi a probléma.",
       "title": "Kitsu hibába ütközött az adat API elérésekor."
     },

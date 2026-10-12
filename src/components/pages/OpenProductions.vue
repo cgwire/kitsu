@@ -58,12 +58,9 @@
         </div>
       </div>
     </div>
-    <div class="has-text-centered" v-if="isOpenProductionsLoading">
-      <spinner />
-    </div>
     <div
       class="flexrow open-productions-header"
-      v-if="!isOpenProductionsLoading && openProductions.length > 0"
+      v-if="openProductions.length > 0"
     >
       <img class="logo" src="../../assets/kitsu.png" width="23" alt="" />
       <h1 class="title filler">
@@ -77,10 +74,7 @@
         {{ $t('productions.home.create_new') }}
       </button>
     </div>
-    <div
-      class="open-productions-box"
-      v-if="!isOpenProductionsLoading && openProductions.length > 0"
-    >
+    <div class="open-productions-box" v-if="openProductions.length > 0">
       <div class="flexrow search-area" v-if="openProductions.length > 6">
         <search-field
           ref="searchField"
@@ -173,7 +167,6 @@ import { buildNameIndex } from '@/lib/indexing'
 import preferences from '@/lib/preferences'
 
 import SearchField from '@/components/widgets/SearchField.vue'
-import Spinner from '@/components/widgets/Spinner.vue'
 
 // Composables
 // --------------------------------------------------------------------------
@@ -199,9 +192,6 @@ let productionIndex = {}
 const isCurrentUserAdmin = computed(() => store.getters.isCurrentUserAdmin)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
-const isOpenProductionsLoading = computed(
-  () => store.getters.isOpenProductionsLoading
-)
 const lastProductionScreen = computed(() => store.getters.lastProductionScreen)
 const mainConfig = computed(() => store.getters.mainConfig)
 const openProductions = computed(() => store.getters.openProductions)

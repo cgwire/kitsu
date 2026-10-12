@@ -1,5 +1,6 @@
 // @vitest-environment node
 
+import process from 'node:process'
 import { createStore } from 'vuex'
 
 import store from '@/store/modules/tasktypes'
@@ -126,12 +127,61 @@ describe('Task types store', () => {
       expect(commit).toHaveBeenCalledWith('EDIT_TASK_TYPE_END', taskType)
     })
 
+    test('loadTaskType resolves with the task type', async () => {
+      const taskType = { id: 'task-type-9', name: 'Rigging' }
+      vi.spyOn(taskTypesApi, 'getTaskType').mockResolvedValue(taskType)
+      await expect(
+        store.actions.loadTaskType({ commit: vi.fn() }, 'task-type-9')
+      ).resolves.toEqual(taskType)
+    })
+
+    // The callers log the failure: a rejection dropped by the action would
+    // surface as an unhandled one.
+    test('loadTaskType rejects with the API error', async () => {
+      const rejections = []
+      const onRejection = reason => rejections.push(reason)
+      process.on('unhandledRejection', onRejection)
+      const error = new Error('Request has been terminated')
+      vi.spyOn(taskTypesApi, 'getTaskType').mockRejectedValue(error)
+
+      await expect(
+        store.actions.loadTaskType({ commit: vi.fn() }, 'task-type-9')
+      ).rejects.toBe(error)
+      await new Promise(resolve => setTimeout(resolve))
+      process.off('unhandledRejection', onRejection)
+
+      expect(rejections).toEqual([])
+    })
+
     test('loadTaskTypes', async () => {
       vi.spyOn(taskTypesApi, 'getTaskTypes').mockResolvedValue([...taskTypes])
       const commit = vi.fn()
       await store.actions.loadTaskTypes({ commit })
       expect(commit).toHaveBeenCalledWith('LOAD_TASK_TYPES_START')
       expect(commit).toHaveBeenCalledWith('LOAD_TASK_TYPES_END', taskTypes)
+    })
+
+    test('loadTaskTypes resolves with the task types', async () => {
+      vi.spyOn(taskTypesApi, 'getTaskTypes').mockResolvedValue([...taskTypes])
+      await expect(
+        store.actions.loadTaskTypes({ commit: vi.fn() })
+      ).resolves.toEqual(taskTypes)
+    })
+
+    test('loadTaskTypes rejects with the API error', async () => {
+      const rejections = []
+      const onRejection = reason => rejections.push(reason)
+      process.on('unhandledRejection', onRejection)
+      const error = new Error('Request has been terminated')
+      vi.spyOn(taskTypesApi, 'getTaskTypes').mockRejectedValue(error)
+
+      await expect(
+        store.actions.loadTaskTypes({ commit: vi.fn() })
+      ).rejects.toBe(error)
+      await new Promise(resolve => setTimeout(resolve))
+      process.off('unhandledRejection', onRejection)
+
+      expect(rejections).toEqual([])
     })
 
     test('newTaskType', async () => {

@@ -138,6 +138,34 @@ describe('Assets page, thumbnails import', () => {
     expect(modalStub.methods.markLoading).toHaveBeenCalledWith('asset-1')
     expect(modalStub.methods.markUploaded).toHaveBeenCalledWith('asset-1')
   })
+
+  test('uploads each thumbnail as the only file of its comment', async () => {
+    const commentTaskWithPreview = vi.fn(() => ({
+      preview: { id: 'preview-1' }
+    }))
+    const { wrapper } = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters: { isCurrentUserProductionManager: true },
+      actions: { commentTaskWithPreview },
+      stubs: { AddThumbnailsModal: buildAddThumbnailsModalStub() }
+    })
+    const form = {
+      task: { id: 'task-1', entity_id: 'asset-1', task_status_id: 'status-1' }
+    }
+
+    await wrapper
+      .findAllComponents(ButtonSimple)
+      .find(button => button.props('icon') === 'import-files')
+      .vm.$emit('click')
+    await wrapper
+      .findComponent({ name: 'AddThumbnailsModal' })
+      .vm.$emit('confirm', [form])
+    await flushPromises()
+
+    expect(commentTaskWithPreview).toHaveBeenCalledWith(
+      expect.objectContaining({ taskId: 'task-1', forms: [form] })
+    )
+  })
 })
 
 describe('Assets page, department filter', () => {

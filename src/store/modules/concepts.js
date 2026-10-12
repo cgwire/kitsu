@@ -122,7 +122,7 @@ const actions = {
     const { preview } = await dispatch('commentTaskWithPreview', {
       taskId: task.id,
       taskStatusId: task.task_status_id,
-      form
+      forms: [form]
     })
     await dispatch('setLastTaskPreview', task.id)
 

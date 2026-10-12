@@ -1598,6 +1598,7 @@
       "show_timecode": "以時間碼顯示進出"
     },
     "server_down": {
+      "retrying": "Kitsu會持續重試，API一旦回應，就會將您帶回原來的頁面。",
       "text": "請聯絡我們的支援團隊或您的系統管理員，以了解出了什麼問題。",
       "title": "Kitsu在訪問其數據API時出現錯誤。"
     },

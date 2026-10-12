@@ -36,6 +36,8 @@ import Episode from '@/components/pages/Episode.vue'
 import Sequence from '@/components/pages/Sequence.vue'
 import Shot from '@/components/pages/Shot.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
+import ConceptCard from '@/components/widgets/ConceptCard.vue'
 
 const production = { id: 'production-1' }
 
@@ -93,7 +95,8 @@ const mountPage = async (
   page,
   entityParam,
   currentProduction,
-  actions = {}
+  actions = {},
+  getters = {}
 ) => {
   routeHolder.route = reactive({
     params: { production_id: production.id, [entityParam]: 'entity-1' },
@@ -125,7 +128,8 @@ const mountPage = async (
       taskMap: () => new Map(),
       taskStatusMap: () => new Map(),
       taskTypeMap: () => new Map(),
-      user: () => ({ departments: [] })
+      user: () => ({ departments: [] }),
+      ...getters
     },
     actions: {
       clearSelectedTasks: vi.fn(),
@@ -244,3 +248,48 @@ describe.each(pages)(
     })
   }
 )
+
+describe('Asset page, concepts', () => {
+  afterEach(() => {
+    assetStore.cache.assetMap.clear()
+  })
+
+  // A concept whose creation stopped after the entity has no task.
+  test('leaves a concept without task out of a status filter', async () => {
+    assetStore.cache.assetMap.set('entity-1', {
+      id: 'entity-1',
+      name: 'Tree',
+      tasks: []
+    })
+    const buildConcept = (id, tasks) => ({
+      id,
+      entity_concept_links: [],
+      tasks
+    })
+    const { wrapper } = await mountPage(
+      Asset,
+      'asset_id',
+      production,
+      {},
+      {
+        linkedConcepts: () => [
+          buildConcept('concept-0', []),
+          buildConcept('concept-1', [
+            { id: 'task-1', task_status_id: 'status-todo' }
+          ])
+        ]
+      }
+    )
+    const concepts = wrapper.find('.concepts')
+
+    await concepts
+      .findComponent(ComboboxStatus)
+      .vm.$emit('update:modelValue', 'status-todo')
+
+    expect(
+      concepts
+        .findAllComponents(ConceptCard)
+        .map(card => card.props('concept').id)
+    ).toEqual(['concept-1'])
+  })
+})

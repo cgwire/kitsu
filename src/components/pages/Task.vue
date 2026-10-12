@@ -422,6 +422,7 @@
         :is-error="errors.addExtraPreview"
         :form-data="addExtraPreviewFormData"
         message=""
+        :upload-progress="uploadProgress"
         :title="
           task
             ? `${task.entity_name} / ${taskTypeMap.get(task.task_type_id)?.name || ''}`
@@ -496,6 +497,7 @@ import {
 
 import { isClientThread } from '@/lib/comments'
 import drafts from '@/lib/drafts'
+import { logRequestFailure } from '@/lib/errors'
 import func from '@/lib/func'
 import { getTaskEntityPath, getTaskEntitiesPath } from '@/lib/path'
 import { formatRevision } from '@/lib/preview'
@@ -626,6 +628,7 @@ const taskMetadataDescriptors = computed(
   () => store.getters.taskMetadataDescriptors
 )
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
+const uploadProgress = computed(() => store.getters.uploadProgress)
 const user = computed(() => store.getters.user)
 const organisation = computed(() => store.getters.organisation)
 const isCurrentUserManager = computed(
@@ -1116,9 +1119,11 @@ const resetPreview = (changeRoute = true) => {
 }
 
 const clearPreviewFiles = () => {
+  store.commit(
+    'CLEAR_UPLOAD_PROGRESS',
+    previewForms.value.map(form => form.get('file').name)
+  )
   previewForms.value = []
-  store.dispatch('loadPreviewFileFormData', previewForms.value)
-  store.commit('CLEAR_UPLOAD_PROGRESS')
 }
 
 const reset = ({ keepPreviewFiles = false } = {}) => {
@@ -1218,12 +1223,14 @@ const postComment = (
   link = undefined,
   forClient = false
 ) => {
+  const taskId = task.value.id
   const params = {
-    taskId: task.value.id,
+    taskId,
     taskStatusId,
     attachment,
     checklist,
     comment,
+    forms: previewForms.value,
     links: link ? [link] : null,
     revision,
     forClient
@@ -1236,9 +1243,13 @@ const postComment = (
   store
     .dispatch(action, params)
     .then(() => {
-      drafts.clearTaskDraft(task.value.id)
-      addCommentRef.value?.reset()
-      reset()
+      drafts.clearTaskDraft(taskId)
+      // A long upload may end once the page shows another task, whose
+      // comment box holds a comment still to publish.
+      if (route.params.task_id === taskId) {
+        addCommentRef.value?.reset()
+        reset()
+      }
       loading.value.addComment = false
     })
     .catch(err => {
@@ -1400,29 +1411,30 @@ const onCancelDeleteComment = () => {
 // --------------------------------------------------------------------------
 const selectFile = forms => {
   previewForms.value = previewForms.value.concat(forms)
-  store.dispatch('loadPreviewFileFormData', previewForms.value)
 }
 
 const createExtraPreview = forms => {
-  selectFile(forms)
   errors.value.addExtraPreview = false
   loading.value.addExtraPreview = true
   const comment = getCurrentTaskComments().find(item =>
     item.previews.find(preview => preview.id === currentPreviewId.value)
   )
+  const taskId = task.value.id
   store
     .dispatch('addCommentExtraPreview', {
-      taskId: task.value.id,
+      taskId,
       commentId: comment?.id,
-      previewId: currentPreviewId.value
+      previewId: currentPreviewId.value,
+      forms
     })
     .then(() => {
       loading.value.addExtraPreview = false
       modals.value.addExtraPreview = false
       addExtraPreviewModalRef.value.reset()
-      clearPreviewFiles()
       setTimeout(() => {
-        previewPlayerRef.value.displayLast()
+        // The page may have moved on to another task, with or without a
+        // player.
+        if (task.value?.id === taskId) previewPlayerRef.value?.displayLast()
       }, 0)
     })
     .catch(err => {
@@ -1518,7 +1530,6 @@ const onPreviewAdded = eventData => {
 }
 
 const onAddExtraPreviewClicked = () => {
-  clearPreviewFiles()
   modals.value.addExtraPreview = true
 }
 
@@ -1557,7 +1568,6 @@ const onPreviewsOrderChanged = () => {
 
 const onPreviewFormRemoved = previewForm => {
   previewForms.value = previewForms.value.filter(f => f !== previewForm)
-  store.dispatch('loadPreviewFileFormData', previewForms.value)
 }
 
 const changeCurrentPreview = preview => {
@@ -1595,8 +1605,9 @@ const extractAnnotationSnapshots = async (withLabel = false) => {
   const files = await previewPlayerRef.value.extractAnnotationSnapshots({
     withLabel
   })
-  addCommentRef.value.setAnnotationSnapshots(files)
-  addCommentRef.value.hideAnnotationLoading()
+  // The page may have been left during the extraction.
+  addCommentRef.value?.setAnnotationSnapshots(files)
+  addCommentRef.value?.hideAnnotationLoading()
   return files
 }
 
@@ -1725,12 +1736,18 @@ const onCommentNew = eventData => {
   }, 1000)
 }
 
+// App.vue reloads the comment when the event names its task. Older Zou
+// versions leave the task out of the preview events: the page then reloads
+// the comments it shows.
 const onCommentUpdate = eventData => {
   const commentId = eventData.comment_id
-  if (!taskComments.value.some(({ id }) => id === commentId)) {
+  if (
+    eventData.task_id ||
+    !taskComments.value.some(({ id }) => id === commentId)
+  ) {
     return
   }
-  store.dispatch('loadComment', { commentId }).catch(console.error)
+  store.dispatch('loadComment', { commentId }).catch(logRequestFailure)
 }
 
 const onCommentReply = eventData => {

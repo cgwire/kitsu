@@ -253,7 +253,6 @@ const getters = {
   isSequenceResolution: state => state.isSequenceResolution,
   isSequenceTime: state => state.isSequenceTime,
 
-  sequences: state => cache.sequences,
   sequenceMap: state => cache.sequenceMap,
   sequenceRetakeStats: state => state.sequenceRetakeStats,
   sequenceStats: state => state.sequenceStats,
@@ -1119,7 +1118,9 @@ const mutations = {
 
   [DELETE_TASK_END](state, task) {
     const sequence = cache.sequenceMap.get(task.entity_id)
-    if (sequence) {
+    // loadSequences fills the map without tasks, unlike
+    // loadSequencesWithTasks.
+    if (sequence?.tasks) {
       const validations = new Map(sequence.validations)
       validations.delete(task.task_type_id)
       delete sequence.validations

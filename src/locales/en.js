@@ -2102,6 +2102,7 @@ export default {
   },
 
   server_down: {
+    retrying: 'Kitsu keeps trying and will take you back to your page as soon as the API answers.',
     text: 'Please contact our support team or your system administrator to understand what is going wrong.',
     title: 'Kitsu encountered an error while reaching its data API'
   },

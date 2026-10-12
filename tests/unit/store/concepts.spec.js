@@ -140,6 +140,39 @@ describe('Concepts store', () => {
         })
       )
     })
+
+    test('newConcept uploads its picture as the only file of the comment', async () => {
+      vi.spyOn(conceptsApi, 'newConcept').mockResolvedValue({
+        id: 'concept-3',
+        project_id: 'production-1'
+      })
+      const form = new Map([['file', { name: 'hero.png' }]])
+      const dispatch = vi.fn(action =>
+        Promise.resolve(
+          action === 'commentTaskWithPreview'
+            ? { preview: { id: 'preview-1' } }
+            : { id: 'task-1', task_status_id: 'status-1' }
+        )
+      )
+
+      await store.actions.newConcept(
+        {
+          commit: vi.fn(),
+          dispatch,
+          rootGetters: {
+            ...rootGetters,
+            taskTypes: [{ id: 'task-type-1', for_entity: 'Concept' }]
+          }
+        },
+        { form }
+      )
+
+      expect(dispatch).toHaveBeenCalledWith('commentTaskWithPreview', {
+        taskId: 'task-1',
+        taskStatusId: 'status-1',
+        forms: [form]
+      })
+    })
   })
 
   // Zou builds the variants of an uploaded picture in the background: the

@@ -66,6 +66,14 @@
                 >x</span
               >
             </p>
+            <div class="progress-wrapper" v-if="isLoading && uploadProgress">
+              <div
+                class="progress"
+                :style="{
+                  width: (uploadProgress[form.get('file').name] || 0) + '%'
+                }"
+              ></div>
+            </div>
             <img alt="uploaded file" :src="getURL(form)" v-if="isImage(form)" />
             <video
               :src="getURL(form)"
@@ -155,7 +163,9 @@ const props = defineProps({
   isLoading: { type: Boolean, default: false },
   isMultiple: { type: Boolean, default: true },
   message: { type: String, default: 'tasks.revision_preview_file' },
-  title: { type: String, default: '' }
+  title: { type: String, default: '' },
+  // By file name, for the uploads no other part of the page shows.
+  uploadProgress: { type: Object, default: null }
 })
 
 const emit = defineEmits(['cancel', 'confirm', 'fileselected'])
@@ -311,6 +321,18 @@ h3.subtitle {
 .preview-name span {
   cursor: pointer;
   float: right;
+}
+
+.progress-wrapper {
+  border-radius: 5px;
+  background: var(--background-alt);
+  height: 5px;
+  margin-bottom: 1em;
+}
+
+.progress {
+  height: 5px;
+  background-color: $light-green;
 }
 
 .message-body {

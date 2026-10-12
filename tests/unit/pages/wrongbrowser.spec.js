@@ -1,19 +1,8 @@
-import { config, mount } from '@vue/test-utils'
-
-import i18n from '@/lib/i18n'
 import WrongBrowser from '@/components/pages/WrongBrowser.vue'
 
-// Mount with the app's real i18n: the global $t mock would mask the actual
-// rendered strings.
-const mountPage = () => {
-  const globalT = config.global.mocks.$t
-  delete config.global.mocks.$t
-  try {
-    return mount(WrongBrowser, { global: { plugins: [i18n] } })
-  } finally {
-    config.global.mocks.$t = globalT
-  }
-}
+import { mountWithI18n } from '../fixtures/i18n'
+
+const mountPage = () => mountWithI18n(WrongBrowser)
 
 const setUserAgent = value =>
   Object.defineProperty(window.navigator, 'userAgent', {

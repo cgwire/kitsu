@@ -661,7 +661,6 @@ const playlists = computed(() => store.getters.playlists)
 const playlistsPath = computed(() => store.getters.playlistsPath)
 const productionTaskTypes = computed(() => store.getters.productionTaskTypes)
 const shotSearchText = computed(() => store.getters.shotSearchText)
-const shotsByEpisode = computed(() => store.getters.shotsByEpisode)
 const shotsLoadingKey = computed(() => store.getters.shotsLoadingKey)
 const taskMap = computed(() => store.getters.taskMap)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
@@ -1242,13 +1241,13 @@ const addAllPending = () =>
 const addDailyPending = () =>
   addWithLoading('addDaily', () => getPendingEntities(true))
 
-const addEpisodePending = () =>
-  addWithLoading('addEpisode', () => sortShots(shotsByEpisode.value.flat()))
+// The shot map is not reactive: it is read on each click.
+const getLoadedShots = () =>
+  sortShots(Array.from(shotStore.cache.shotMap.values()))
 
-const addMovie = () =>
-  addWithLoading('addMovie', () =>
-    sortShots(Array.from(shotStore.cache.shotMap.values()))
-  )
+const addEpisodePending = () => addWithLoading('addEpisode', getLoadedShots)
+
+const addMovie = () => addWithLoading('addMovie', getLoadedShots)
 
 // Save data
 

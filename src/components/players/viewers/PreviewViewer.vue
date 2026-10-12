@@ -441,6 +441,18 @@ const setPanZoom = (x, y, scale) => {
   if (videoViewer.value) videoViewer.value.setPanZoom(x, y, scale)
 }
 
+// Both viewers stay mounted: the gestures go to the one on screen.
+const getMediaViewer = () => {
+  if (isMovie.value) return videoViewer.value
+  if (isPicture.value) return pictureViewer.value
+  return null
+}
+
+const panBy = (dx, dy) => getMediaViewer()?.panBy(dx, dy)
+
+const zoomAt = (clientX, clientY, ratio) =>
+  getMediaViewer()?.zoomAt(clientX, clientY, ratio)
+
 const pauseZoom = () => {
   if (pictureViewer.value) pictureViewer.value.pausePanZoom()
   if (videoViewer.value) videoViewer.value.pausePanZoom()
@@ -498,6 +510,8 @@ defineExpose({
   extractPicture,
   resetZoom,
   setPanZoom,
+  panBy,
+  zoomAt,
   pauseZoom,
   resumeZoom,
   setSpeed,

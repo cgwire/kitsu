@@ -329,6 +329,7 @@ import { useStore } from 'vuex'
 
 import { version as kitsuVersion } from '@/../package.json'
 import { useDesktopNotifications } from '@/composables/desktopNotifications'
+import errors from '@/lib/errors'
 import {
   buildDesktopNotificationPayload,
   buildTestNotificationPayload
@@ -686,10 +687,11 @@ const loadProductionFromRoute = async productionId => {
   try {
     await store.dispatch('loadProduction', productionId)
   } catch (err) {
-    // Deleted, or not shared with the user.
-    console.error(err)
-    // The user may have moved to another page during the load.
+    // Deleted, not shared with the user or out of reach: the page would show
+    // the production of the store under the route of this one. The user may
+    // have moved to another page during the load.
     if (route.params.production_id === productionId) leaveToOpenProductions()
+    errors.logRequestFailure(err)
     return
   } finally {
     pendingProductionIds.delete(productionId)

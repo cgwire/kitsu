@@ -45,7 +45,8 @@ const mountPage = async ({
   getters = {},
   mutations = {},
   query = {},
-  params = {}
+  params = {},
+  stubs = {}
 } = {}) => {
   Object.assign(routeHolder.route, { query, params })
   const resolved = () => vi.fn(() => Promise.resolve())
@@ -102,7 +103,6 @@ const mountPage = async ({
       playlistsPath: () => ({ name: 'playlists' }),
       productionTaskTypes: () => [],
       shotSearchText: () => '',
-      shotsByEpisode: () => [],
       shotsLoadingKey: fromState('shotsLoadingKey'),
       taskMap: () => new Map(),
       taskStatusMap: () => new Map(),
@@ -125,7 +125,7 @@ const mountPage = async ({
       plugins: [store],
       config: { globalProperties: { $socket: socket } },
       mocks: { $t: key => key },
-      stubs: { RouterLink: true }
+      stubs: { RouterLink: true, ...stubs }
     }
   })
   mountedWrapper = wrapper
@@ -518,6 +518,68 @@ describe('Playlist page, addition buttons', () => {
     )
     pending.release([])
     await flushPromises()
+  })
+
+  describe('loaded shots', () => {
+    const shot = (id, name) => ({ id, name, sequence_name: 'SQ01' })
+    const fillShotMap = shots => {
+      shotStore.cache.shotMap.clear()
+      shots.forEach(entry => shotStore.cache.shotMap.set(entry.id, entry))
+    }
+    // The page scrolls the player to the end after an addition.
+    const playerStub = {
+      template: '<div />',
+      methods: { scrollToRight: () => {} }
+    }
+    const openWithButton = async (label, state) => {
+      const { wrapper, actions } = await openPlaylist(
+        {},
+        { state, stubs: { PlaylistPlayer: playerStub } }
+      )
+      await flushPromises()
+      const click = async () => {
+        await wrapper
+          .findAll('button')
+          .find(b => b.text() === label)
+          .trigger('click')
+        await flushPromises()
+      }
+      const addedIds = () =>
+        actions.addEntitiesToPlaylist.mock.calls.map(
+          ([, { entityIds }]) => entityIds
+        )
+      return { click, addedIds }
+    }
+
+    afterEach(() => shotStore.cache.shotMap.clear())
+
+    // The shot map is reloaded in place for each episode: the button adds
+    // the shots of the episode shown, not those of its first click.
+    it('adds the shots of the episode loaded at the time of each click', async () => {
+      fillShotMap([shot('e1-20', 'SH020'), shot('e1-10', 'SH010')])
+      const { click, addedIds } = await openWithButton(
+        'playlists.add_episode',
+        { isTVShow: true }
+      )
+
+      await click()
+      fillShotMap([shot('e2-10', 'SH010')])
+      await click()
+
+      expect(addedIds()).toEqual([['e1-10', 'e1-20'], ['e2-10']])
+    })
+
+    it('adds the shots of the movie', async () => {
+      fillShotMap([shot('s-20', 'SH020'), shot('s-10', 'SH010')])
+      const { click, addedIds } = await openWithButton(
+        'playlists.add_movie',
+        { isTVShow: false }
+      )
+
+      await click()
+
+      expect(addedIds()).toEqual([['s-10', 's-20']])
+    })
   })
 })
 

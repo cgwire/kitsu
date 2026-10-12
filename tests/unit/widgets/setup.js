@@ -1,8 +1,8 @@
 import { config } from '@vue/test-utils'
 
-// Components using useI18n() from the Composition API need the real vue-i18n
-// plugin. The global $t mock from unit.setup.js conflicts with it, so we
-// remove it for these tests and restore it afterwards.
+// For the specs that mount with the real vue-i18n plugin: the global $t mock
+// from unit.setup.js would shadow the $t the plugin injects, so remove it for
+// these tests and restore it afterwards.
 const savedMocks = { ...config.global.mocks }
 
 beforeAll(() => {

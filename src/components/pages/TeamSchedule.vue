@@ -633,7 +633,9 @@ const loadUnassignedTasks = async (more = false) => {
         ]
           .filter(Boolean)
           .join(' / '),
-        man_days: minutesToDays(organisation.value, task.estimation),
+        man_days:
+          Math.round(minutesToDays(organisation.value, task.estimation) * 100) /
+          100,
         department: departmentMap.value.get(
           taskTypeMap.value.get(task.task_type_id)?.department_id
         ),

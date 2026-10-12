@@ -431,6 +431,62 @@ describe('Assets store', () => {
     })
   })
 
+  describe('SET_ASSET_SEARCH ready for filter', () => {
+    const makeAsset = (id, readyFor) => ({
+      id,
+      name: id,
+      asset_type_name: 'Char',
+      canceled: false,
+      ready_for: readyFor,
+      timeSpent: 0,
+      estimation: 0,
+      tasks: [],
+      validations: new Map(),
+      data: {}
+    })
+
+    const taskTypeMap = new Map(
+      [
+        { id: 'tt-modeling', name: 'Modeling', for_entity: 'Asset' },
+        { id: 'tt-lighting', name: 'Lighting', for_entity: 'Shot' },
+        { id: 'tt-animation', name: 'Animation', for_entity: 'Shot' }
+      ].map(taskType => [taskType.id, taskType])
+    )
+
+    beforeEach(() => {
+      assetsStore.cache.assets = [
+        makeAsset('a1', 'tt-lighting'),
+        makeAsset('a2', 'tt-animation'),
+        // Zou serializes an unset ready_for with str(None).
+        makeAsset('a3', 'None')
+      ]
+      assetsStore.cache.assetIndex = {}
+      assetsStore.cache.result = []
+    })
+
+    // An asset is ready for a shot task type, while the task status filters
+    // of the page only resolve asset task types.
+    test('keeps the assets ready for the given shot task type', () => {
+      const state = {
+        assetSorting: [],
+        assetTypes: [],
+        displayedAssets: [],
+        displayedAssetsTimeSpent: 0,
+        displayedAssetsEstimation: 0
+      }
+
+      assetsStore.mutations.SET_ASSET_SEARCH(state, {
+        assetSearch: 'readyfor=[lighting]',
+        production: { id: 'p1', descriptors: [] },
+        taskStatusMap: new Map(),
+        taskTypeMap,
+        persons: []
+      })
+
+      expect(state.displayedAssets.map(asset => asset.id)).toEqual(['a1'])
+    })
+  })
+
   describe('LOAD_ASSETS_END', () => {
     test('keeps the task own metadata (task descriptors) on reload', () => {
       taskStatusStore.cache.taskStatusMap = new Map([

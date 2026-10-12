@@ -1,5 +1,7 @@
 vi.mock('@/store', () => ({ default: {} }))
 
+import { flushPromises } from '@vue/test-utils'
+
 import Quota from '@/components/pages/quota/Quota.vue'
 
 import { mountEntityPage } from '../../../fixtures/entity-page'
@@ -26,7 +28,8 @@ const periods = () =>
     ])
   )
 
-const mountQuota = async props => {
+// Each compute mode gives a quota to everybody, unless the test says who.
+const mountQuota = async (props, peopleByMode = {}) => {
   const { wrapper } = await mountEntityPage(Quota, {
     listName: 'PeopleAvatar',
     props: {
@@ -46,10 +49,12 @@ const mountQuota = async props => {
       ])
     },
     actions: {
-      computeQuota: () =>
-        Object.fromEntries(
-          [...people.map(({ id }) => id), 'total'].map(id => [id, periods()])
+      computeQuota: ({ computeMode }) => {
+        const ids = peopleByMode[computeMode] ?? people.map(({ id }) => id)
+        return Object.fromEntries(
+          [...ids, 'total'].map(id => [id, periods()])
         )
+      }
     }
   })
   return wrapper
@@ -78,5 +83,34 @@ describe('Quota list', () => {
     const wrapper = await mountQuota({ role: 'supervisor' })
 
     expect(listedNames(wrapper)).toEqual(['Cat'])
+  })
+
+  test('searches the people of the reloaded quotas', async () => {
+    const wrapper = await mountQuota(
+      { computeMode: 'done', searchText: 'a' },
+      { done: ['ann', 'bob'], weighted: ['bob', 'cat'] }
+    )
+    expect(listedNames(wrapper)).toEqual(['Ann'])
+
+    await wrapper.setProps({ computeMode: 'weighted' })
+    await flushPromises()
+
+    expect(listedNames(wrapper)).toEqual(['Cat'])
+  })
+
+  test('keeps the name order during a search', async () => {
+    const wrapper = await mountQuota(
+      { searchText: 'a' },
+      { weighted: ['cat', 'bob', 'ann'] }
+    )
+
+    expect(listedNames(wrapper)).toEqual(['Ann', 'Cat'])
+  })
+
+  test('lists nobody for a search without a name word', async () => {
+    const wrapper = await mountQuota({ searchText: 'x=1' })
+
+    expect(wrapper.find('.datatable-body').exists()).toBe(true)
+    expect(listedNames(wrapper)).toEqual([])
   })
 })

@@ -93,6 +93,8 @@ describe('players/VideoViewer (canvas pipeline)', () => {
       'goNextFrame',
       'resetPanZoom',
       'setPanZoom',
+      'panBy',
+      'zoomAt',
       'pausePanZoom',
       'resumePanZoom',
       'setSpeed',

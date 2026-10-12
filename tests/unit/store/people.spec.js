@@ -1,6 +1,8 @@
 // @vitest-environment node
 
 import { vi } from 'vitest'
+import { computed, effectScope } from 'vue'
+import { createStore } from 'vuex'
 
 // Importing the people module transitively pulls in the root store
 // (lib/models → timezone → @/store); stub it so no Vuex store is built.
@@ -158,6 +160,119 @@ describe('People store', () => {
       expect(doneTask.task_status_short_name).toEqual('done')
       store.mutations.SET_PERSON_TASKS_SEARCH(state, 'done')
       expect(state.displayedPersonDoneTasks).toEqual([doneTask])
+    })
+  })
+
+  // Vuex keeps a getter's value until one of its reactive reads changes, and
+  // the people list lives out of the state: a mutation-only test cannot see
+  // a getter stuck on its first read.
+  describe('List getters', () => {
+    const person = (id, extra = {}) => ({
+      id,
+      first_name: id,
+      last_name: 'Doe',
+      email: `${id}@example.com`,
+      active: true,
+      is_bot: false,
+      ...extra
+    })
+
+    let vuexStore
+    let scope
+
+    beforeEach(() => {
+      store.cache.people = []
+      store.cache.peopleIndex = {}
+      store.cache.personMap = new Map()
+      store.cache.guests = []
+      vuexStore = createStore({
+        state: { ...store.state },
+        getters: store.getters,
+        mutations: store.mutations
+      })
+      vuexStore.commit('LOAD_PEOPLE_END', {
+        people: [
+          person('alice'),
+          person('bob'),
+          person('robot', { is_bot: true })
+        ],
+        userFilters: {}
+      })
+      scope = effectScope()
+    })
+
+    afterEach(() => {
+      scope.stop()
+    })
+
+    // The Team page offers the active people out of the team: a person
+    // created on the People page after a first visit has to be offered too.
+    test('activePeople follows a person created after a first read', () => {
+      scope.run(() => {
+        const team = ['alice']
+        const activePeople = computed(() => vuexStore.getters.activePeople)
+        const unlisted = computed(() =>
+          activePeople.value
+            .filter(({ id }) => !team.includes(id))
+            .map(({ id }) => id)
+        )
+        expect(unlisted.value).toEqual(['bob', 'robot'])
+
+        vuexStore.commit('EDIT_PEOPLE_END', person('carol'))
+
+        expect(unlisted.value).toEqual(['bob', 'carol', 'robot'])
+      })
+    })
+
+    test('the list getters follow a creation, an archive, a deletion, and a reload', () => {
+      scope.run(() => {
+        const ids = getter =>
+          computed(() => vuexStore.getters[getter].map(({ id }) => id))
+        const people = ids('people')
+        const peopleWithoutBot = ids('peopleWithoutBot')
+        const activePeople = ids('activePeople')
+        const activePeopleWithoutBot = ids('activePeopleWithoutBot')
+        expect(people.value).toEqual(['alice', 'bob', 'robot'])
+        expect(peopleWithoutBot.value).toEqual(['alice', 'bob'])
+        expect(activePeople.value).toEqual(['alice', 'bob', 'robot'])
+        expect(activePeopleWithoutBot.value).toEqual(['alice', 'bob'])
+
+        vuexStore.commit('EDIT_PEOPLE_END', person('carol'))
+        expect(people.value).toEqual(['alice', 'bob', 'carol', 'robot'])
+        expect(peopleWithoutBot.value).toEqual(['alice', 'bob', 'carol'])
+        expect(activePeopleWithoutBot.value).toEqual(['alice', 'bob', 'carol'])
+
+        vuexStore.commit('EDIT_PEOPLE_END', person('bob', { active: false }))
+        expect(people.value).toEqual(['alice', 'carol', 'robot', 'bob'])
+        expect(activePeople.value).toEqual(['alice', 'carol', 'robot'])
+        expect(activePeopleWithoutBot.value).toEqual(['alice', 'carol'])
+
+        vuexStore.commit('DELETE_PEOPLE_END', person('carol'))
+        expect(people.value).toEqual(['alice', 'robot', 'bob'])
+        expect(peopleWithoutBot.value).toEqual(['alice', 'bob'])
+        expect(activePeopleWithoutBot.value).toEqual(['alice'])
+
+        vuexStore.commit('LOAD_PEOPLE_END', {
+          people: [person('alice'), person('dan')],
+          userFilters: {}
+        })
+        expect(people.value).toEqual(['alice', 'dan'])
+        expect(activePeople.value).toEqual(['alice', 'dan'])
+      })
+    })
+
+    // The People, Bots and Team Schedule pages list the displayed people.
+    test('displayedPeople follows a deletion', () => {
+      scope.run(() => {
+        const displayedPeople = computed(() =>
+          vuexStore.getters.displayedPeople.map(({ id }) => id)
+        )
+        expect(displayedPeople.value).toEqual(['alice', 'bob', 'robot'])
+
+        vuexStore.commit('DELETE_PEOPLE_END', person('bob'))
+
+        expect(displayedPeople.value).toEqual(['alice', 'robot'])
+      })
     })
   })
 

@@ -295,6 +295,7 @@
           :is-loading="loading.addExtraPreview"
           :is-error="errors.addExtraPreview"
           message=""
+          :upload-progress="uploadProgress"
           @cancel="onCloseExtraPreview"
           @confirm="createExtraPreview"
         />
@@ -408,6 +409,7 @@ import { isClientThread } from '@/lib/comments'
 import csv from '@/lib/csv'
 import { isSupervisorInDepartments } from '@/lib/descriptors'
 import drafts from '@/lib/drafts'
+import { logRequestFailure } from '@/lib/errors'
 import func from '@/lib/func'
 import {
   getDownloadAttachmentPath,
@@ -599,6 +601,7 @@ const shotMap = computed(() => store.getters.shotMap)
 const taskEntityPreviews = computed(() => store.getters.taskEntityPreviews)
 const taskMap = computed(() => store.getters.taskMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
+const uploadProgress = computed(() => store.getters.uploadProgress)
 const user = computed(() => store.getters.user)
 
 const sideColumnParent = computed(() => {
@@ -904,12 +907,14 @@ const postComment = (
 ) => {
   animOn.value = true
   nextTick(() => {
+    const taskId = props.task.id
     const params = {
-      taskId: props.task.id,
+      taskId,
       taskStatusId,
       attachment,
       checklist,
       comment,
+      forms: previewForms.value,
       links: link ? [link] : null,
       revision,
       forClient
@@ -922,9 +927,13 @@ const postComment = (
     store
       .dispatch(action, params)
       .then(() => {
-        drafts.clearTaskDraft(props.task.id)
-        addCommentRef.value?.reset()
-        reset()
+        drafts.clearTaskDraft(taskId)
+        // A long upload may end once the panel shows another task, whose
+        // comment box holds a comment still to publish.
+        if (props.task?.id === taskId) {
+          addCommentRef.value?.reset()
+          reset()
+        }
         loading.addComment = false
         emit('comment-added')
       })
@@ -966,39 +975,42 @@ const focusCommentTextarea = () => {
 
 const selectFile = forms => {
   previewForms.value = previewForms.value.concat(forms)
-  store.dispatch('loadPreviewFileFormData', previewForms.value)
 }
 
 const onPreviewFormRemoved = previewForm => {
   previewForms.value = previewForms.value.filter(f => f !== previewForm)
-  store.dispatch('loadPreviewFileFormData', previewForms.value)
 }
 
 const clearPreviewFiles = () => {
+  store.commit(
+    'CLEAR_UPLOAD_PROGRESS',
+    previewForms.value.map(form => form.get('file').name)
+  )
   previewForms.value = []
-  store.dispatch('loadPreviewFileFormData', previewForms.value)
-  store.commit('CLEAR_UPLOAD_PROGRESS')
 }
 
 const createExtraPreview = forms => {
-  selectFile(forms)
   errors.addExtraPreview = false
   loading.addExtraPreview = true
   const comment = taskComments.value.find(comment =>
     comment.previews.some(preview => preview.id === currentPreviewId.value)
   )
+  const taskId = props.task.id
   store
     .dispatch('addCommentExtraPreview', {
-      taskId: props.task.id,
+      taskId,
       commentId: comment?.id,
-      previewId: currentPreviewId.value
+      previewId: currentPreviewId.value,
+      forms
     })
     .then(() => {
       loading.addExtraPreview = false
       addExtraPreviewModalRef.value.reset()
-      reset()
+      reset({ keepPreviewFiles: true })
       setTimeout(() => {
-        previewPlayerRef.value?.displayLast()
+        // The panel may have moved on to another task, with or without a
+        // player.
+        if (props.task?.id === taskId) previewPlayerRef.value?.displayLast()
       }, 0)
       modals.addExtraPreview = false
     })
@@ -1075,7 +1087,6 @@ const onAddPreviewClicked = () => {
 }
 
 const onAddExtraPreview = () => {
-  clearPreviewFiles()
   modals.addExtraPreview = true
 }
 
@@ -1384,8 +1395,9 @@ const extractAnnotationSnapshots = async (withLabel = false) => {
   const files = await previewPlayer.extractAnnotationSnapshots({
     withLabel
   })
-  addCommentRef.value.hideAnnotationLoading()
-  addCommentRef.value.setAnnotationSnapshots(files)
+  // The panel may have closed during the extraction.
+  addCommentRef.value?.hideAnnotationLoading()
+  addCommentRef.value?.setAnnotationSnapshots(files)
   return files
 }
 
@@ -1582,15 +1594,19 @@ const onRemoteCommentNew = eventData => {
   }, 1000)
 }
 
+// App.vue reloads the comment when the event names its task. Older Zou
+// versions leave the task out of the preview events: the panel then
+// reloads the comments it shows.
 const onRemoteCommentUpdate = eventData => {
   const commentId = eventData.comment_id
   if (
+    eventData.task_id ||
     store.getters.isSavingCommentPreview ||
-    (!props.task && !taskComments.value.some(({ id }) => id === commentId))
+    !taskComments.value.some(({ id }) => id === commentId)
   ) {
     return
   }
-  store.dispatch('loadComment', { commentId }).catch(console.error)
+  store.dispatch('loadComment', { commentId }).catch(logRequestFailure)
 }
 
 const onRemoteCommentAck = eventData => onRemoteAcknowledge(eventData, 'ack')

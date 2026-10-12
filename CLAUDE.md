@@ -235,7 +235,7 @@ Formatting that follows the user and organization settings: dates, durations and
 
 - `src/locales/en.js` is the **source of truth**. Add the key there, then translate it into **every** `<lang>.json` in the same change: vue-i18n falls back to `en`, so a key missing from a locale renders in English without warning. The JSON files nest their messages under a top-level `default` key. `tests/unit/locales/parity.spec.js` fails on any drift, in either direction. POEditor was dropped (2026-05): non-English locales are LLM-translated directly in the JSON files.
 - Use `$t()` (or `t()` in `<script setup>`), never `$tc()` (removed in vue-i18n 11).
-- Pluralization with pipe format (`"studio | studios"`): pass a **named object**, `$t('key', { count })`. Every locale uses vue-i18n's DEFAULT plural resolver, so keep the **same number of `|` segments as en.js** and don't add a language's extra grammatical plural forms.
+- Pluralization with pipe format (`"studio | studios"`): pass a **named object**, `$t('key', { count })`. Every locale picks between the singular and the plural only (`src/lib/i18n.js`, see below), so keep the **same number of `|` segments as en.js** and don't add a language's extra grammatical plural forms.
 - For animation/VFX domain terms (shot, frame, onion skin, edit/montage, …), align translations with Blender's official terminology (`blender/blender-translations` `po/<lang>.po`, or the translated manual at `docs.blender.org/manual/<lang>/`).
 
 ```vue
@@ -249,18 +249,25 @@ const title = computed(() => t('studios.title'))
 </script>
 ```
 
+### Composition mode
+
+vue-i18n runs in **Composition mode** (`src/lib/i18n.js`, `legacy: false`): the global locale is a ref (`i18n.global.locale.value`), and `$t` reaches templates through the default `globalInjection`. `vite.config.js` compiles out its legacy API and the global registration of `<i18n-t>`, `<i18n-d>`, `<i18n-n>` and `v-t`, all unused. Two calls go wrong without a warning:
+
+- **A `t()` at setup top level does not follow a locale change.** It resolves once, in the language of that moment. Call `t()` inside a `computed` or a handler (template `$t()` is unaffected).
+- **A string second argument is a default message, not a locale.** `t('assets.cast_in', 'fr')` returns "Cast in" to an English user. Pass the locale as an option: `t(key, {}, { locale: 'fr' })`.
+
+To test real translations rather than the global `$t` mock, mount with `mountWithI18n` from `tests/unit/fixtures/i18n.js`.
+
 ### Plural calls
 
-vue-i18n runs in **Composition mode** (`src/lib/i18n.js`, `legacy: false`): the global locale is a ref (`i18n.global.locale.value`), and `$t` reaches templates through the default `globalInjection`. Pass plurals as `{ count }`: that key drives both branch selection and `{count}` interpolation, so the object form is right whether or not the message embeds the number (vue-i18n 9 ignored a bare number, so older code never relies on `$t(key, 3)`).
+Pass plurals as `{ count }`: that key drives both branch selection and `{count}` interpolation, so the object form is right whether or not the message embeds the number (vue-i18n 9 ignored a bare number, so older code never relies on `$t(key, 3)`).
 
 ```js
 $t('studios.number', { count: 5 }) // "studios", message has no {count}
 $t('logs.nb_events', { count: 5 }) // "5 events listed"
 ```
 
-`count` must be a **number**: `{ count: '5' }` renders the singular. Note also that the default resolver splits on `count > 1`, so a fractional count below 1 stays singular while 0 goes plural.
-
-To test real translations rather than the global `$t` mock, mount with the app's i18n plugin, as `tests/unit/lib/i18n.spec.js` does.
+`count` must be a **number**: `{ count: '5' }` renders the singular. An integer count is singular at 1 only, so 0 goes plural, in every locale. A decimal count follows the grammar of its language through `Intl.PluralRules`: "0.5 days" in English, but "0,5 jour" and "1,5 jour" in French. vue-i18n 11 alone makes every decimal plural: `src/lib/i18n.js` registers this rule for every locale, a locale added to `src/locales/index.js` included.
 
 ### Production-type terminology overlays
 
@@ -333,6 +340,15 @@ Pattern:
 - Use `sortByName()` from `@/lib/sorting` after loading collections
 
 When editing/adding items, re-sort the list to maintain order (some mutations miss this).
+
+### Getters over the module cache
+
+Big lists and maps live in a module-level `cache` object, out of the reactive state. Vuex wraps every getter in a `computed`, and a getter that reads only `cache` depends on nothing that ever changes: it runs once per tab and keeps its first value.
+
+- A getter over `cache` also reads a reactive value of the state that changes with that data (`readPeople` in `people.js` reads `personMapVersion`), and returns a new value when the data changes. One that hands back the same `Map` object notifies no `computed`.
+- A `computed` over such a `Map` freezes the same way: read the `Map` in an event handler instead (`onSearchTyped` in `Edits.vue`).
+- Mutate a cached `Map` in place (`clear()`, then `set()`), never reassign it: consumers keep the instance of their first read.
+- Test such a getter with a real `createStore` and a `computed` over it: a mutation-only test passes on a frozen getter.
 
 ### No direct `fetch` from components
 

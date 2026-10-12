@@ -118,7 +118,6 @@ const currentProduction = computed(() => store.getters.currentProduction)
 const isPaperProduction = computed(() => store.getters.isPaperProduction)
 const openProductions = computed(() => store.getters.openProductions)
 const sequenceOptions = computed(() => store.getters.sequenceOptions)
-const sequences = computed(() => store.getters.sequences)
 const shotMetadataDescriptors = computed(
   () => store.getters.shotMetadataDescriptors
 )
@@ -164,8 +163,8 @@ const resetForm = () => {
     if (openProductions.value.length > 0) {
       form.value.project_id = currentProduction.value?.id || ''
     }
-    if (sequences.value.length > 0) {
-      form.value.sequence_id = sequences.value[0].id
+    if (sequenceOptions.value.length > 0) {
+      form.value.sequence_id = sequenceOptions.value[0].value
     }
     form.value.name = ''
     form.value.description = ''
@@ -192,14 +191,13 @@ watch(
   () => props.active,
   active => {
     resetForm()
-    if (sequences.value.length === 0) {
+    if (!active) return
+    if (sequenceOptions.value.length === 0) {
       store.dispatch('loadSequences')
     }
-    if (active) {
-      setTimeout(() => {
-        nameField.value?.focus()
-      }, 100)
-    }
+    setTimeout(() => {
+      nameField.value?.focus()
+    }, 100)
   }
 )
 

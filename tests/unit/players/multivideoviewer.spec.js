@@ -102,6 +102,8 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
       'resetPanZoom',
       'resumePanZoom',
       'setPanZoom',
+      'panBy',
+      'zoomAt',
       'getDisplaySurface'
     ]
     exposed.forEach(name => {
@@ -334,5 +336,36 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
     expect(player.currentTime).toBeCloseTo(120 / 30 + 0.001, 6)
     expect(wrapper.emitted('repeat')).toHaveLength(1)
     wrapper.unmount()
+  })
+
+  describe('end of a movie', () => {
+    const mountLoaded = async () => {
+      vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
+      const wrapper = mountViewer()
+      wrapper.vm.loadEntity(0)
+      await wrapper.vm.$nextTick()
+      return { wrapper, player: wrapper.vm.currentPlayer }
+    }
+
+    it('plays the next entry when the playback ends', async () => {
+      const { wrapper, player } = await mountLoaded()
+      wrapper.vm.play()
+
+      player.dispatchEvent(new Event('ended'))
+
+      expect(wrapper.emitted('play-next')).toHaveLength(1)
+      wrapper.unmount()
+    })
+
+    // A seek can land a paused movie on its very end, and the browser then
+    // fires ended: the playlist started the next entry.
+    it('stays on a paused movie that ends', async () => {
+      const { wrapper, player } = await mountLoaded()
+
+      player.dispatchEvent(new Event('ended'))
+
+      expect(wrapper.emitted('play-next')).toBeUndefined()
+      wrapper.unmount()
+    })
   })
 })

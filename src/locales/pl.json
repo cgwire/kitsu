@@ -2024,6 +2024,7 @@
       }
     },
     "server_down": {
+      "retrying": "Kitsu wciąż próbuje i przeniesie cię z powrotem na twoją stronę, gdy tylko API odpowie.",
       "text": "Skontaktuj się z naszym zespołem wsparcia lub administratorem systemu, aby ustalić przyczynę problemu.",
       "title": "Kitsu napotkał błąd podczas łączenia się ze swoim API danych"
     },

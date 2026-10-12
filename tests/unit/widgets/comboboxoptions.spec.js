@@ -2,8 +2,6 @@ import { flushPromises, shallowMount } from '@vue/test-utils'
 
 import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
 
-import './setup'
-
 describe('ComboboxOptions', () => {
   const options = [
     { label: 'Show infos', value: 'showInfos' },

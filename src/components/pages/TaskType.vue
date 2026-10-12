@@ -1949,8 +1949,7 @@ const resetScheduleScroll = () => {
 const resetScheduleItemsDebounced = func.debounce(resetScheduleItems, 400)
 
 // Same bursts, and this is the heavier half: onSearchChange walks every
-// entity, re-sorts the tasks and rebuilds the search index. The field is
-// read again on fire, as the page may have been left in the meantime.
+// entity, re-sorts the tasks and rebuilds the search index.
 const refreshTasksDebounced = func.debounce(() => {
   if (searchFieldRef.value) onSearchChange(searchFieldRef.value.getValue())
 }, 400)
@@ -2137,6 +2136,8 @@ onMounted(() => {
 onBeforeUnmount(() => {
   store.dispatch('clearSelectedTasks')
   socket.off('task:update', onRemoteTaskUpdate)
+  resetScheduleItemsDebounced.cancel()
+  refreshTasksDebounced.cancel()
 })
 
 // Head

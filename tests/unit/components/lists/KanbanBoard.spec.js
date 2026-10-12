@@ -1,9 +1,10 @@
-import { shallowMount } from '@vue/test-utils'
+import { flushPromises, shallowMount } from '@vue/test-utils'
 import { vi } from 'vitest'
 import { nextTick, reactive } from 'vue'
 import { createStore } from 'vuex'
 
 import KanbanBoard from '@/components/lists/KanbanBoard.vue'
+import AddPreviewModal from '@/components/modals/AddPreviewModal.vue'
 
 vi.mock('vue-i18n', async importOriginal => ({
   ...(await importOriginal()),
@@ -31,7 +32,11 @@ const task = {
   priority: 0
 }
 
-const mountBoard = ({ getters = {}, tasks = [task] } = {}) =>
+const mountBoard = ({
+  getters = {},
+  statuses = [taskStatus],
+  tasks = [task]
+} = {}) =>
   shallowMount(KanbanBoard, {
     global: {
       plugins: [
@@ -51,7 +56,7 @@ const mountBoard = ({ getters = {}, tasks = [task] } = {}) =>
       ]
     },
     props: {
-      statuses: [taskStatus],
+      statuses,
       tasks,
       user: { role: 'admin' }
     }
@@ -122,6 +127,61 @@ describe('lists/KanbanBoard', () => {
       expect(card.element.style.backgroundImage).toBe(
         'url("/api/pictures/previews/preview-files/preview-file-1.png")'
       )
+
+      wrapper.unmount()
+    })
+  })
+
+  describe('move to a feedback request status', () => {
+    const feedbackStatus = {
+      ...taskStatus,
+      id: 'task-status-2',
+      name: 'WFA',
+      short_name: 'wfa',
+      is_feedback_request: true
+    }
+
+    const buildDataTransfer = () => {
+      const data = {}
+      return {
+        getData: key => data[key],
+        setData: (key, value) => {
+          data[key] = value
+        },
+        setDragImage: () => {}
+      }
+    }
+
+    beforeEach(() => {
+      // Reduced motion: jsdom cannot lay out the tilted drag proxy.
+      vi.stubGlobal('matchMedia', () => ({ matches: true }))
+    })
+
+    afterEach(() => {
+      vi.unstubAllGlobals()
+    })
+
+    test('publishes the files of the preview modal with the move', async () => {
+      const wrapper = mountBoard({ statuses: [taskStatus, feedbackStatus] })
+      const store = wrapper.vm.$store
+      store.dispatch = vi.fn(() => Promise.resolve())
+      const dataTransfer = buildDataTransfer()
+      const form = new FormData()
+      form.append('file', new File(['frame'], 'sh010.mp4'))
+
+      await wrapper.find('.board-card').trigger('dragstart', { dataTransfer })
+      await wrapper
+        .find('[data-status-id="task-status-2"]')
+        .trigger('drop', { dataTransfer })
+      await wrapper.findComponent(AddPreviewModal).vm.$emit('confirm', [form])
+      await flushPromises()
+
+      expect(store.dispatch).toHaveBeenCalledWith('commentTaskWithPreview', {
+        comment: '',
+        taskId: 'task-1',
+        taskStatusId: 'task-status-2',
+        forms: [form]
+      })
 
       wrapper.unmount()
     })

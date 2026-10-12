@@ -5,8 +5,8 @@ vi.mock('@/composables/modal', () => ({ useModal: () => {} }))
 import AddPreviewModal from '@/components/modals/AddPreviewModal.vue'
 import FileUploadZone from '@/components/widgets/FileUploadZone.vue'
 
-const mountModal = () =>
-  shallowMount(AddPreviewModal, { props: { active: true } })
+const mountModal = (props = {}) =>
+  shallowMount(AddPreviewModal, { props: { active: true, ...props } })
 
 const selectFile = async wrapper => {
   const form = new FormData()
@@ -44,5 +44,27 @@ describe('modals/AddPreviewModal', () => {
     await selectFile(wrapper)
 
     expect(wrapper.find('h3').text()).toBe('comments.selected_files')
+  })
+
+  // The extra preview modal is the only place showing its uploads.
+  describe('upload progress', () => {
+    const uploadProgress = { 'concept.png': 40 }
+
+    it('shows the progress of each file while it uploads', async () => {
+      const wrapper = mountModal({ uploadProgress })
+      await selectFile(wrapper)
+      await wrapper.setProps({ isLoading: true })
+
+      expect(wrapper.find('.progress').attributes('style')).toContain(
+        'width: 40%'
+      )
+    })
+
+    it('shows no progress before the upload starts', async () => {
+      const wrapper = mountModal({ uploadProgress })
+      await selectFile(wrapper)
+
+      expect(wrapper.find('.progress').exists()).toBe(false)
+    })
   })
 })

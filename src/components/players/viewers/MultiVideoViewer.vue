@@ -13,7 +13,7 @@
       preload="auto"
       playsinline
       :muted="muted"
-      @ended="$emit('play-next')"
+      @ended="onEnded"
     />
     <video
       ref="player2"
@@ -21,7 +21,7 @@
       preload="auto"
       playsinline
       :muted="muted"
-      @ended="$emit('play-next')"
+      @ended="onEnded"
     />
     <canvas ref="displayCanvas" class="playlist-movie" />
   </div>
@@ -53,6 +53,7 @@ import {
 } from 'vue'
 import { useStore } from 'vuex'
 
+import { panPanzoomBy, zoomPanzoomAt } from '@/lib/players/panzoom'
 import { swallowBrowserZoom } from '@/lib/players/wheel'
 import {
   DEFAULT_FPS,
@@ -674,6 +675,12 @@ const onSeeked = event => {
   }
 }
 
+// A seek can land a paused movie on its very end, where the browser fires
+// ended as well: only a playback reaching the end moves on.
+const onEnded = () => {
+  if (isPlaying.value) emit('play-next')
+}
+
 const switchPlayers = () => {
   pendingSeekTime = null
   const nextIndex = getNextIndex(currentIndex.value)
@@ -758,6 +765,24 @@ const setPanZoom = (x, y, scale) => {
   })
   nextTick(() => {
     silent = false
+  })
+}
+
+const panBy = (dx, dy) => {
+  panzoomInstances.forEach(panzoomInstance => {
+    panPanzoomBy(panzoomInstance, dx, dy)
+  })
+}
+
+const zoomAt = (clientX, clientY, ratio) => {
+  panzoomInstances.forEach(panzoomInstance => {
+    zoomPanzoomAt(
+      panzoomInstance,
+      displayCanvasRef.value,
+      clientX,
+      clientY,
+      ratio
+    )
   })
 }
 
@@ -918,6 +943,8 @@ defineExpose({
   resetPanZoom,
   resumePanZoom,
   setPanZoom,
+  panBy,
+  zoomAt,
   getDisplaySurface
 })
 </script>
