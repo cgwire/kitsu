@@ -12,6 +12,7 @@ import resizableColumn from '@/directives/resizable-column'
 import router from '@/router'
 import store from '@/store'
 import { setupChunkErrorHandler } from '@/lib/chunk-error'
+import { followLostRedirects } from '@/lib/navigation-failure'
 
 import vAutosize from '@/directives/autosize'
 import IO from 'socket.io-client'
@@ -74,5 +75,6 @@ window.addEventListener('unhandledrejection', event => {
 })
 
 setupChunkErrorHandler(router)
+followLostRedirects(router)
 
 app.mount('#app')

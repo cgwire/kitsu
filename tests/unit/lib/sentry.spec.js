@@ -379,6 +379,126 @@ describe('lib/sentry', () => {
     })
   })
 
+  // The navigation failures taken for errors come to the router capture
+  // with no message.
+  describe('navigation failures', () => {
+    const NativeError = Error
+    // vue-router builds a failure as an error with a type and two routes.
+    const navigationFailure = (type, from, to) =>
+      Object.assign(new NativeError(), { type, from, to })
+    const routerEvent = () => ({
+      tags: { 'kitsu.org': 'Studio' },
+      exception: {
+        values: [
+          {
+            type: 'Error',
+            value: 'No error message',
+            mechanism: { type: 'generic', handled: false }
+          }
+        ]
+      }
+    })
+    let nameEvent
+
+    beforeEach(() => {
+      sentry.init({}, {}, { dsn: 'https://key@sentry.example.com/1' })
+      const { integrations } = h.init.mock.calls[0][0]
+      const { preprocessEvent } = integrations.find(
+        integration => integration?.name === 'NavigationFailure'
+      )
+      nameEvent = error => {
+        const event = routerEvent()
+        preprocessEvent(event, { originalException: error })
+        return event
+      }
+    })
+
+    test('names a redirect after its routes and the script', () => {
+      const failure = navigationFailure(
+        2,
+        { name: 'episode-playlist', path: `/productions/${OTHER_ID}` },
+        { name: 'login', query: { redirect: `/productions/${OTHER_ID}` } }
+      )
+      vi.stubGlobal('Error', function new_constructor(message) {
+        return new NativeError(message)
+      })
+      const event = nameEvent(failure)
+      vi.unstubAllGlobals()
+      expect(event.exception.values).toEqual([
+        {
+          type: 'NavigationFailure',
+          value: 'redirect from episode-playlist to login (window.Error replaced)',
+          mechanism: { type: 'generic', handled: false }
+        }
+      ])
+      expect(event.tags).toEqual({
+        'kitsu.org': 'Studio',
+        'kitsu.navigation_failure': 'redirect',
+        'kitsu.error_constructor': 'new_constructor'
+      })
+      expect(event.fingerprint).toEqual([
+        'navigation-failure',
+        'redirect',
+        'login'
+      ])
+    })
+
+    test('tags a replacement without a name', () => {
+      const failure = navigationFailure(2, { name: 'home' }, { name: 'login' })
+      vi.stubGlobal('Error', function (message) {
+        return new NativeError(message)
+      })
+      const event = nameEvent(failure)
+      vi.unstubAllGlobals()
+      expect(event.tags['kitsu.error_constructor']).toBe('(anonymous)')
+    })
+
+    // Aborts and cancels can target any route: one issue for each kind.
+    test('groups the aborts whatever their target', () => {
+      const failure = navigationFailure(4, { path: '/' }, { name: 'todos' })
+      const event = nameEvent(failure)
+      expect(event.exception.values[0].value).toBe('abort from / to todos')
+      expect(event.fingerprint).toEqual(['navigation-failure', 'abort'])
+    })
+
+    // Should one reach Sentry another way, window.Error is not to blame.
+    test('names a failure that came with window.Error intact', () => {
+      const failure = navigationFailure(8, { name: 'shots' }, { name: 'assets' })
+      const event = nameEvent(failure)
+      expect(event.exception.values[0].value).toBe('cancel from shots to assets')
+      expect(event.tags['kitsu.error_constructor']).toBe('Error')
+      expect(event.fingerprint).toEqual(['navigation-failure', 'cancel'])
+    })
+
+    // A guard can also redirect to a path, like the page saved before an
+    // SSO login.
+    test('names a route without a name by the pattern of its path', () => {
+      const failure = navigationFailure(
+        2,
+        { path: `/productions/${OTHER_ID}/shots` },
+        '/timesheets/month/2026/10?search=jane'
+      )
+      const event = nameEvent(failure)
+      expect(event.exception.values[0].value).toBe(
+        'redirect from /productions/:id/shots to /timesheets/month/:n/:n'
+      )
+      expect(event.fingerprint).toEqual([
+        'navigation-failure',
+        'redirect',
+        '/timesheets/month/:n/:n'
+      ])
+    })
+
+    test('leaves the other errors as they are', () => {
+      const errors = [
+        Object.assign(new NativeError('x'), { type: 2 }),
+        navigationFailure(2, undefined, { name: 'login' }),
+        navigationFailure(2, { name: 'home' }, undefined)
+      ]
+      expect(errors.map(nameEvent)).toEqual(errors.map(routerEvent))
+    })
+  })
+
   // Each test takes a fresh route: the reporter reports a route once per
   // session, whatever the ids in its path.
   describe('reportApiError', () => {

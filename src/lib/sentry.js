@@ -4,6 +4,7 @@ import superagent from 'superagent'
 import { name, version } from '@/../package.json'
 import { isChunkError } from '@/lib/chunk-error'
 import errors from '@/lib/errors'
+import { getNavigationFailureKind } from '@/lib/navigation-failure'
 import { setErrorReporter } from '@/store/api/client'
 
 // The guest share URL carries its access token in the path, and so do the
@@ -111,6 +112,52 @@ const isReportedRequestFailure = (event, hint) =>
       mechanism?.handled === false || mechanism?.type?.startsWith('auto.')
   )
 
+const getPathPattern = path =>
+  path
+    .replace(ID_RGX, ':id')
+    .replace(DATE_RGX, ':date')
+    .replace(NUMBER_RGX, '/:n')
+    .replace(NAME_RGX, '$1:name')
+
+const getRouteLabel = route => {
+  if (route?.name) return String(route.name)
+  const path = typeof route === 'string' ? route : route?.path || ''
+  return getPathPattern(path.split(/[?#]/)[0])
+}
+
+const nameNavigationFailure = (event, failure, kind) => {
+  const source = getRouteLabel(failure.from)
+  const target = getRouteLabel(failure.to)
+  const cause = failure instanceof Error ? '' : ' (window.Error replaced)'
+  const values = event.exception?.values || []
+  const exception = values[values.length - 1]
+  if (exception) {
+    exception.type = 'NavigationFailure'
+    exception.value = `${kind} from ${source} to ${target}${cause}`
+  }
+  event.tags = {
+    ...event.tags,
+    'kitsu.navigation_failure': kind,
+    'kitsu.error_constructor': Error.name || '(anonymous)'
+  }
+  // A guard redirects to a few routes, but aborts and cancels can target any.
+  event.fingerprint =
+    kind === 'redirect'
+      ? ['navigation-failure', kind, target]
+      : ['navigation-failure', kind]
+}
+
+// The navigation failures taken for errors come to the router capture with
+// no message, all in one issue. Naming them before the event processors run
+// lets Dedupe tell a repeat of the same failure from a different one.
+const navigationFailureIntegration = {
+  name: 'NavigationFailure',
+  preprocessEvent(event, hint) {
+    const kind = getNavigationFailureKind(hint.originalException)
+    if (kind) nameNavigationFailure(event, hint.originalException, kind)
+  }
+}
+
 // Refused on their own data, the user either lost the session cookie to
 // another login, or Zou refused the right session. Not through the API
 // client, where a 401 sends back to the login page.
@@ -138,11 +185,7 @@ export const reportApiError = async (err, { method, path, duration }) => {
   if (err?.body?.two_factor_authentication_required) return
   const kind = getFailureKind(err)
   const cleanPath = scrubSharedToken(path.split('?')[0])
-  const route = cleanPath
-    .replace(ID_RGX, ':id')
-    .replace(DATE_RGX, ':date')
-    .replace(NUMBER_RGX, '/:n')
-    .replace(NAME_RGX, '$1:name')
+  const route = getPathPattern(cleanPath)
   const key = `${kind} ${method} ${route}`
   if (reportedRoutes.has(key)) return
   reportedRoutes.add(key)
@@ -189,7 +232,8 @@ export default {
       integrations: [
         Sentry.browserTracingIntegration({
           router
-        })
+        }),
+        navigationFailureIntegration
       ],
       tracesSampleRate: sampleRate, // capture Trace for % of transactions for performance monitoring
       beforeSend(event, hint) {
