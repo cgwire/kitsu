@@ -1,7 +1,7 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { reactive } from 'vue'
 import { createStore } from 'vuex'
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 
 vi.mock('vue-i18n', async importOriginal => ({
   ...(await importOriginal()),
@@ -140,5 +140,60 @@ describe('UserCalendar', () => {
       `${previewPath}?ready`
     )
     wrapper.unmount()
+  })
+
+  describe('toolbar', () => {
+    const title = wrapper => wrapper.find('.calendar-title').text()
+    const button = (wrapper, name) =>
+      wrapper.find(`.calendar-toolbar [data-action="${name}"]`)
+
+    it('replaces the toolbar of FullCalendar', async () => {
+      const wrapper = await mountCalendar(todoStatus)
+      expect(wrapper.find('.fc-header-toolbar').exists()).toBe(false)
+      expect(title(wrapper)).not.toBe('')
+      wrapper.unmount()
+    })
+
+    it('moves to the next month and back to today', async () => {
+      const wrapper = await mountCalendar(todoStatus)
+      const currentTitle = title(wrapper)
+      expect(button(wrapper, 'today').attributes('disabled')).toBeDefined()
+
+      await button(wrapper, 'next').trigger('click')
+      await flushPromises()
+      expect(title(wrapper)).not.toBe(currentTitle)
+      expect(button(wrapper, 'today').attributes('disabled')).toBeUndefined()
+
+      await button(wrapper, 'today').trigger('click')
+      await flushPromises()
+      expect(title(wrapper)).toBe(currentTitle)
+      wrapper.unmount()
+    })
+
+    it('switches to the week view', async () => {
+      const wrapper = await mountCalendar(todoStatus)
+      await button(wrapper, 'dayGridWeek').trigger('click')
+      await flushPromises()
+      expect(button(wrapper, 'dayGridWeek').classes()).toContain('active')
+      expect(button(wrapper, 'dayGridMonth').classes()).not.toContain('active')
+      wrapper.unmount()
+    })
+  })
+
+  describe('on a phone', () => {
+    afterEach(() => vi.unstubAllGlobals())
+
+    it('opens on the list view', async () => {
+      vi.stubGlobal(
+        'matchMedia',
+        vi.fn(() => ({ matches: true }))
+      )
+      const wrapper = await mountCalendar(todoStatus)
+      const listButton = wrapper.find(
+        '.calendar-toolbar [data-action="listWeek"]'
+      )
+      expect(listButton.classes()).toContain('active')
+      wrapper.unmount()
+    })
   })
 })

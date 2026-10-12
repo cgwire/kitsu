@@ -97,6 +97,70 @@ describe('lists/TodosList', () => {
     localStorage.clear()
   })
 
+  // Phones get read-only cards from the global datatable--cards rule
+  describe('cards on mobile', () => {
+    const cell = (wrapper, name) =>
+      wrapper.find(`.datatable-body tr > .${name}`)
+
+    test('opts the table into the card layout', async () => {
+      const wrapper = await mountLoadedList()
+      expect(wrapper.find('table').classes()).toContain('datatable--cards')
+      expect(cell(wrapper, 'name').classes()).toContain('card-head')
+      wrapper.unmount()
+    })
+
+    test('labels the cells that carry a value', async () => {
+      const wrapper = await mountLoadedList()
+      expect(cell(wrapper, 'production').attributes('data-label')).toBe(
+        'main.production'
+      )
+      expect(cell(wrapper, 'type').attributes('data-label')).toBe(
+        'tasks.fields.task_type'
+      )
+      expect(cell(wrapper, 'status').attributes('data-label')).toBe(
+        'tasks.fields.task_status'
+      )
+      expect(cell(wrapper, 'due-date').attributes('data-label')).toBe(
+        'tasks.fields.due_date'
+      )
+      expect(cell(wrapper, 'estimation').attributes('data-label')).toBe(
+        'main.estimation'
+      )
+      wrapper.unmount()
+    })
+
+    test('labels the end date of a done task', async () => {
+      const wrapper = mountList({ done: true, isLoading: true, tasks: [] })
+      await wrapper.setProps({
+        isLoading: false,
+        tasks: [{ ...task, end_date: '2026-10-02' }]
+      })
+      expect(cell(wrapper, 'end-date').attributes('data-label')).toBe(
+        'tasks.fields.end_date'
+      )
+      wrapper.unmount()
+    })
+
+    test('leaves the empty and secondary cells out of the card', async () => {
+      const wrapper = await mountLoadedList()
+      ;['start-date', 'duration', 'last-comment'].forEach(name => {
+        expect(cell(wrapper, name).attributes('data-label')).toBeUndefined()
+      })
+      wrapper.unmount()
+    })
+  })
+
+  test('can show the empty message without the illustration', () => {
+    const wrapper = mountList({
+      emptyText: 'Nothing waiting',
+      tasks: [],
+      withIllustration: false
+    })
+    expect(wrapper.find('.empty-list').text()).toBe('Nothing waiting')
+    expect(wrapper.find('.empty-list img').exists()).toBe(false)
+    wrapper.unmount()
+  })
+
   test('lets the user resize the entity column once the tasks load', async () => {
     const wrapper = await mountLoadedList()
 
@@ -167,6 +231,32 @@ describe('lists/TodosList', () => {
     expect(updateTask.mock.calls.map(([, payload]) => payload)).toEqual([
       { taskId: 'task-1', data: { estimation: 123 } }
     ])
+
+    wrapper.unmount()
+  })
+
+  // My tasks shows the list read-only, the person page keeps the editors
+  test('shows no editor when not editable', async () => {
+    const wrapper = mountList(
+      { isLoading: true, tasks: [], editable: false },
+      undefined,
+      {
+        getters: {
+          isCurrentUserManager: () => true,
+          taskMap: () => new Map([[task.id, task]])
+        }
+      }
+    )
+    await wrapper.setProps({ isLoading: false, tasks: [task] })
+    await wrapper.find('tbody td.duration').trigger('click')
+
+    expect(wrapper.find('tbody td.estimation input').exists()).toBe(false)
+    expect(wrapper.find('tbody td.start-date date-field-stub').exists()).toBe(
+      false
+    )
+    expect(wrapper.find('tbody td.due-date date-field-stub').exists()).toBe(
+      false
+    )
 
     wrapper.unmount()
   })

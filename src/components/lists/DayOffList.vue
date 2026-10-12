@@ -1,6 +1,10 @@
 <template>
   <div class="day-off-list data-list">
     <div class="flexrow header">
+      <span class="day-off-total" v-if="!isLoading && !isError">
+        {{ sortedDaysOff.length }}
+        {{ $t('days_off.nb_days_off', { count: sortedDaysOff.length }) }}
+      </span>
       <div class="filler"></div>
       <button-simple
         class="flexrow-item"
@@ -9,50 +13,52 @@
         @click="openSetDayOffModal()"
       />
     </div>
-    <div class="datatable-wrapper" v-if="sortedDaysOff.length > 0">
-      <table class="datatable">
-        <thead class="datatable-head">
-          <tr>
-            <th class="datatable-row-header datatable-row-header--nobd period">
-              {{ $t('days_off.period') }}
-            </th>
-            <th
-              class="datatable-row-header datatable-row-header--nobd description"
-            >
-              {{ $t('days_off.description') }}
-            </th>
-            <th class="datatable-row-header datatable-row-header--nobd"></th>
-          </tr>
-        </thead>
-        <tbody class="datatable-body" v-if="sortedDaysOff.length && !isLoading">
-          <tr
-            class="datatable-row"
-            :key="dayOff.id"
-            v-for="dayOff in sortedDaysOff"
-          >
-            <td class="period">{{ dayOff.period }}</td>
-            <td class="description">{{ dayOff.description }}</td>
-            <td class="actions">
-              <button-simple
-                @click="openSetDayOffModal(dayOff)"
-                :title="$t('days_off.edit')"
-                icon="edit"
-              />
-              <button-simple
-                @click="openUnsetDayOffModal(dayOff)"
-                :title="$t('days_off.delete')"
-                icon="trash"
-              />
-            </td>
-          </tr>
-        </tbody>
-        <tbody class="datatable-body" v-else-if="!isLoading">
-          <tr class="datatable-row">
-            <td class="datatable-row-header" colspan="4"></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <section
+      :class="`day-off-group day-off-group--${group.key}`"
+      :key="group.key"
+      v-for="group in groups"
+    >
+      <h3 class="day-off-group-title">
+        {{ $t(`days_off.${group.key}`) }}
+        <span class="day-off-group-count">{{ group.daysOff.length }}</span>
+      </h3>
+      <ul class="day-off-cards">
+        <li
+          class="day-off-card"
+          :data-id="dayOff.id"
+          :key="dayOff.id"
+          v-for="dayOff in group.daysOff"
+        >
+          <div class="day-off-tile">
+            <span class="day-off-tile-month">{{ dayOff.month }}</span>
+            <span class="day-off-tile-day">{{ dayOff.day }}</span>
+          </div>
+          <div class="day-off-main">
+            <p class="day-off-period">
+              {{ dayOff.period }}
+              <span class="day-off-count">
+                {{ $t('days_off.nb_days', { count: dayOff.nbDays }) }}
+              </span>
+            </p>
+            <p class="day-off-description" v-if="dayOff.description">
+              {{ dayOff.description }}
+            </p>
+          </div>
+          <div class="actions">
+            <button-simple
+              @click="openSetDayOffModal(dayOff)"
+              :title="$t('days_off.edit')"
+              icon="edit"
+            />
+            <button-simple
+              @click="openUnsetDayOffModal(dayOff)"
+              :title="$t('days_off.delete')"
+              icon="trash"
+            />
+          </div>
+        </li>
+      </ul>
+    </section>
 
     <div
       class="has-text-centered mt2 mb1 strong"
@@ -68,21 +74,12 @@
       :with-thumbnail="false"
     />
 
-    <p class="has-text-centered footer-info" v-if="!isLoading && !isError">
-      {{ sortedDaysOff.length }}
-      {{ $t('days_off.nb_days_off', { count: sortedDaysOff.length }) }}
-    </p>
-
     <day-off-modal
       :active="modals.setDayOff"
       :day-off-to-edit="dayOffToEdit"
       :is-error="isDayOffError"
       :error-text="dayOffTextError"
-      @confirm="
-        dayOff => {
-          $emit('set-day-off', dayOff)
-        }
-      "
+      @confirm="$emit('set-day-off', $event)"
       @cancel="closeSetDayOffModal"
     />
 
@@ -106,7 +103,7 @@
 import moment from 'moment-timezone'
 import { computed, reactive, ref } from 'vue'
 
-import { getUserDay } from '@/lib/time'
+import { getBusinessDays, getUserDay } from '@/lib/time'
 
 import DayOffModal from '@/components/modals/DayOffModal.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
@@ -159,22 +156,51 @@ const dayOffTextError = computed(() =>
 const sortedDaysOff = computed(() =>
   [...props.daysOff]
     .sort((a, b) => b.date.localeCompare(a.date))
-    .map(dayOff => ({
-      ...dayOff,
-      period:
-        dayOff.date !== dayOff.end_date
-          ? `${dayOff.date} - ${dayOff.end_date}`
-          : dayOff.date,
-      date: moment.utc(dayOff.date).toDate(),
-      end_date: moment.utc(dayOff.end_date || dayOff.date).toDate()
-    }))
+    .map(dayOff => {
+      const start = moment.utc(dayOff.date)
+      const end = moment.utc(dayOff.end_date || dayOff.date)
+      return {
+        ...dayOff,
+        date: start.toDate(),
+        end_date: end.toDate()
+      }
+    })
 )
+
+const groups = computed(() => {
+  const today = getUserDay().toDate()
+  const cards = sortedDaysOff.value.map(dayOff => ({
+    ...dayOff,
+    day: moment.utc(dayOff.date).format('D'),
+    month: moment.utc(dayOff.date).format('MMM'),
+    nbDays: getBusinessDays(
+      moment.utc(dayOff.date),
+      moment.utc(dayOff.end_date)
+    ),
+    period:
+      dayOff.date.getTime() === dayOff.end_date.getTime()
+        ? formatCardDay(dayOff.date)
+        : `${formatCardDay(dayOff.date)} → ${formatCardDay(dayOff.end_date)}`
+  }))
+  return [
+    {
+      key: 'upcoming',
+      daysOff: cards.filter(dayOff => dayOff.end_date >= today).reverse()
+    },
+    { key: 'past', daysOff: cards.filter(dayOff => dayOff.end_date < today) }
+  ].filter(group => group.daysOff.length > 0)
+})
 
 // Functions
 // --------------------------------------------------------------------------
 // The rows hold their days at UTC midnight, as the utc date fields of the
 // form do: the user time zone would name the day before west of UTC.
 const formatUtcDay = date => (date ? moment.utc(date).format('YYYY-MM-DD') : '')
+
+const formatCardDay = date => {
+  const day = moment.utc(date)
+  return day.format(day.year() === moment().year() ? 'ddd D MMM' : 'll')
+}
 
 // The page keeps the error of a refused confirm: each form opens without it.
 const openSetDayOffModal = (dayOff = null) => {
@@ -202,34 +228,177 @@ defineExpose({ closeSetDayOffModal, closeUnsetDayOffModal })
 </script>
 
 <style lang="scss" scoped>
-.day-off-list {
-  max-width: 800px;
-}
-
 .header {
-  margin-top: 0.5em;
-  margin-bottom: 0.5em;
+  align-items: center;
+  background: var(--background-panel);
+  border-radius: 12px;
+  margin: 0.5em 0 1em;
+  padding: 1em;
 }
 
-.datatable-body tr:first-child th,
-.datatable-body tr:first-child td {
-  border-top: none;
+.day-off-total {
+  color: var(--text-strong);
+  font-weight: 600;
 }
 
-.period {
-  width: 230px;
-  min-width: 200px;
+.day-off-group {
+  background: var(--background-panel);
+  border-radius: 12px;
+  margin-bottom: 1em;
+  padding: 1em;
 }
 
-.description {
-  width: 100%;
-  min-width: 200px;
+.day-off-group-title {
+  align-items: center;
+  color: var(--text-strong);
+  display: flex;
+  font-size: 0.9rem;
+  font-weight: 600;
+  gap: 0.5em;
+  padding: 0 0 0.75em;
+}
+
+.day-off-group-count {
+  color: var(--text);
+  font-size: 0.75rem;
+  opacity: 0.6;
+}
+
+.day-off-cards {
+  display: grid;
+  gap: 0.75em;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  // the global list margin pushed the cards right of their title
+  margin: 0;
+}
+
+.day-off-card {
+  align-items: center;
+  // background-alt-2 is white in light theme: the cards must stand out
+  // from the panel, which sits close to background-alt there
+  background: var(--background-alt-2);
+  border: 1px solid transparent;
+  border-radius: 10px;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.06);
+  display: flex;
+  gap: 1em;
+  min-width: 0;
+  padding: 0.75em 1em;
+
+  .day-off-group--past & {
+    opacity: 0.6;
+  }
+
+  .actions {
+    opacity: 0;
+    transition: opacity 150ms ease-out;
+  }
+
+  &:hover .actions,
+  &:focus-within .actions {
+    opacity: 1;
+  }
+}
+
+// background-alt-2 is a flat light grey in dark theme: one step above the
+// panel reads better
+.dark .day-off-card {
+  background: var(--background);
+}
+
+.day-off-tile {
+  align-items: center;
+  background: rgba($purple-strong, 0.15);
+  border-radius: 8px;
+  color: var(--text-strong);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  justify-content: center;
+  height: 52px;
+  line-height: 1.1;
+  width: 52px;
+}
+
+.day-off-tile-month {
+  font-size: 0.7rem;
+  font-weight: 600;
+  opacity: 0.7;
+  text-transform: uppercase;
+}
+
+.day-off-tile-day {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.day-off-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.day-off-period {
+  color: var(--text-strong);
+  font-weight: 600;
+}
+
+.day-off-description {
+  color: var(--text);
+  opacity: 0.7;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.day-off-count {
+  background: rgba(var(--skeleton-rgb), 0.25);
+  border-radius: 999px;
+  color: var(--text-strong);
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-left: 0.5em;
+  padding: 0.15em 0.75em;
+  white-space: nowrap;
 }
 
 .actions {
   display: flex;
-  flex-wrap: nowrap;
+  flex-shrink: 0;
   gap: 0.5em;
-  min-width: auto;
+}
+
+@media (hover: none) {
+  .day-off-card .actions {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .day-off-card .actions {
+    transition: none;
+  }
+}
+
+@media (max-width: 768px) {
+  // no hover on a phone: the actions show at once
+  .day-off-card .actions {
+    opacity: 1;
+  }
+
+  .header,
+  .day-off-group {
+    padding: 0.5em;
+  }
+
+  .day-off-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .day-off-card {
+    gap: 0.75em;
+    padding: 0.6em 0.75em;
+  }
 }
 </style>

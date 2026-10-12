@@ -1,10 +1,17 @@
 <template>
   <td>
     <div class="flexrow">
-      <span class="value flexrow-item">
-        {{ value }}
-      </span>
-      <span class="flexrow-item" @wheel.prevent="onWheel">
+      <input
+        class="value flexrow-item"
+        type="number"
+        :aria-label="$t('timesheets.time_spents')"
+        :max="12"
+        :min="0"
+        :step="0.25"
+        :value="value"
+        @change="onInputChange"
+      />
+      <span class="flexrow-item slider-item">
         <vue-slider
           ref="slider"
           class="slider"
@@ -87,28 +94,55 @@ const onDragEnd = () => {
   sliderRef.value?.blur()
 }
 
-const onWheel = event => {
-  const step = event.deltaY < 0 ? 0.25 : -0.25
-  value.value = Math.min(
-    12,
-    Math.max(0, Math.round((value.value + step) * 4) / 4)
-  )
+// The slider rejects values off its 0.25 interval or out of its range.
+const toSliderValue = v => Math.min(12, Math.max(0, Math.round(v * 4) / 4))
+
+const onInputChange = event => {
+  value.value = toSliderValue(Number(event.target.value) || 0)
+  event.target.value = value.value
 }
 
 // Watchers
 // --------------------------------------------------------------------------
+watch(
+  () => props.duration,
+  duration => {
+    value.value = duration
+  }
+)
+
+// The prop sync above also moves value: only user edits are emitted, or a
+// day change would save the previous day's duration on the new day.
 watch(value, v => {
-  emit('change', { taskId: props.taskId, duration: v })
+  if (v !== props.duration) {
+    emit('change', { taskId: props.taskId, duration: v })
+  }
 })
 </script>
 
 <style lang="scss" scoped>
 .value {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
   color: var(--text-strong);
   font-size: 1.5em;
   font-variant-numeric: tabular-nums;
   font-weight: bold;
-  width: 40px;
+  -moz-appearance: textfield;
+  padding: 6px 8px;
+  width: 70px;
+
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  &:hover,
+  &:focus {
+    border-color: var(--border);
+  }
 }
 
 .slider {

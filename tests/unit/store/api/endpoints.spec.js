@@ -35,6 +35,43 @@ describe('store/api endpoints', () => {
     client.pput.mockClear()
   })
 
+  describe('user time spents', () => {
+    test('asks for a period of the current user', () => {
+      peopleApi.getUserTimeSpentsByPeriod('2026-10-01', '2026-10-31')
+      expect(client.pget).toHaveBeenCalledWith(
+        '/api/data/user/time-spents?start_date=2026-10-01&end_date=2026-10-31'
+      )
+    })
+  })
+
+  describe('person quotas', () => {
+    test('asks for the quotas of a person in a production', () => {
+      shotsApi.getPersonQuotas('p1', 'u1', 'weighted')
+      expect(client.pget).toHaveBeenCalledWith(
+        '/api/data/projects/p1/quotas/persons/u1?count_mode=weighted'
+      )
+    })
+
+    test('joins the shots params with a single ampersand', () => {
+      peopleApi.getPersonQuotaShots(
+        'p1', 'tt1', 'u1', 'week', 2026, 10, 41, 8, 'raw'
+      )
+      expect(client.pget).toHaveBeenCalledWith(
+        '/api/data/persons/u1/quota-shots/week/2026/41' +
+          '?project_id=p1&task_type_id=tt1&count_mode=raw'
+      )
+    })
+
+    test('leaves out the empty production and task type', () => {
+      peopleApi.getPersonQuotaShots(
+        null, null, 'u1', 'day', 2026, 10, 41, 8, 'raw'
+      )
+      expect(client.pget).toHaveBeenCalledWith(
+        '/api/data/persons/u1/quota-shots/day/2026/10/8?count_mode=raw'
+      )
+    })
+  })
+
   // Zou answers an import only once every row is processed: the imports
   // must not go through the 60s response timeout of regular requests.
   describe('imports', () => {

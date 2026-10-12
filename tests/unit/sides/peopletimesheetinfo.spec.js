@@ -51,11 +51,28 @@ describe('sides/PeopleTimesheetInfo', () => {
     expect(push).toHaveBeenCalledTimes(1)
   })
 
+  test('takes its level and close route from its props', async () => {
+    const closeRoute = { query: { section: 'productivity' } }
+    await wrapper.setProps({ level: 'week', week: 41, closeRoute })
+    expect(wrapper.find('.info-date').text()).toContain('41')
+    pressEscape()
+    expect(push).toHaveBeenCalledWith(closeRoute)
+  })
+
   test('stays open when the Escape closes a modal', () => {
     modal = document.createElement('div')
     modal.className = 'modal is-active'
     document.body.appendChild(modal)
     pressEscape()
     expect(push).not.toHaveBeenCalled()
+  })
+
+  // on the person page the person is already in the page header
+  test('leaves the person out when asked to', async () => {
+    expect(wrapper.findComponent({ name: 'PeopleAvatar' }).exists()).toBe(true)
+    await wrapper.setProps({ withPerson: false })
+    expect(wrapper.findComponent({ name: 'PeopleAvatar' }).exists()).toBe(
+      false
+    )
   })
 })

@@ -307,6 +307,7 @@ const loadRoute = async () => {
   if (route.path.includes('person')) {
     isPersonShotsLoading.value = true
     personShots.value = await store.dispatch('getPersonQuotaShots', {
+      productionId: currentProduction.value.id,
       personId: currentPerson.value.id,
       detailLevel,
       taskTypeId: params.value.taskTypeId,

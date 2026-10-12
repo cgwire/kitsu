@@ -179,4 +179,16 @@ describe('DayOffModal', () => {
       ])
     })
   })
+
+  it('counts the working days of the picked range', async () => {
+    const wrapper = mount(DayOffModal, {
+      props: { active: true },
+      global: {
+        mocks: { $t: (key, params) => `${key}:${params?.count}` },
+        stubs: { DateField: true, TextField: true }
+      }
+    })
+    await pickDate(wrapper, 1, '2026-10-13')
+    expect(wrapper.find('.day-off-count').text()).toBe('days_off.nb_days:6')
+  })
 })
