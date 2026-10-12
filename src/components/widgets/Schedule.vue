@@ -547,226 +547,39 @@
                     {{ $t(`schedule.drop_forbidden_${dropTarget.forbidden}`) }}
                   </span>
                 </div>
-                <div
-                  class="entity-line child-line"
-                  :class="{ multiline }"
+                <schedule-entity-row
                   :key="`entity-line-${childElement.id}`"
-                  :style="{
-                    ...(multiline && timelineMultilineStyle(childElement)),
-                    ...(subchildren && timelineSubchildrenStyle(childElement))
-                  }"
                   v-for="childElement in rootElement.children"
-                  v-show="!rootElement.loading"
-                >
-                  <template v-if="withStatuses">
-                    <span
-                      class="status-date status-date-wip"
-                      :class="{
-                        'status-date-gap':
-                          childElement.real_start_date.slice(0, 10) ===
-                            childElement.end_date?.slice(0, 10) ||
-                          childElement.real_start_date.slice(0, 10) ===
-                            childElement.done_date?.slice(0, 10)
-                      }"
-                      :style="dateStatusStyle(childElement.real_start_date)"
-                      :title="statuses.wip.name"
-                      v-if="childElement.real_start_date"
-                    >
-                    </span>
-                    <span
-                      class="status-date status-date-wfa"
-                      :class="{
-                        'status-date-gap':
-                          childElement.end_date.slice(0, 10) ===
-                            childElement.real_start_date?.slice(0, 10) ||
-                          childElement.end_date.slice(0, 10) ===
-                            childElement.done_date?.slice(0, 10)
-                      }"
-                      :style="dateStatusStyle(childElement.end_date)"
-                      :title="statuses.wfa.name"
-                      v-if="childElement.end_date"
-                    >
-                    </span>
-                    <span
-                      class="status-date status-date-done"
-                      :class="{
-                        'status-date-gap':
-                          childElement.done_date.slice(0, 10) ===
-                            childElement.real_start_date?.slice(0, 10) ||
-                          childElement.done_date.slice(0, 10) ===
-                            childElement.end_date?.slice(0, 10)
-                      }"
-                      :style="dateStatusStyle(childElement.done_date)"
-                      :title="statuses.done.name"
-                      v-if="childElement.done_date"
-                    >
-                    </span>
-                  </template>
-
-                  <template v-if="withTimesheets && rootElement.timesheet">
-                    <div
-                      class="timesheet"
-                      :style="
-                        timesheetStyle(
-                          timesheet,
-                          childElement,
-                          rootElement,
-                          withEstimations
-                        )
-                      "
-                      :title="`${formatDuration(timesheet.duration)} ${isDurationInHours ? $t('main.hours_spent', { count: formatDuration(timesheet.duration, false) }) : $t('main.days_spent', { count: formatDuration(timesheet.duration, false) })}`"
-                      :key="timesheet.id"
-                      v-for="timesheet in taskTimesheets(
+                  :root-element="rootElement"
+                  :child-element="childElement"
+                  :multiline="multiline"
+                  :subchildren="subchildren"
+                  :reassignable="reassignable"
+                  :with-estimations="withEstimations"
+                  :with-ghosts="withGhosts"
+                  :with-statuses="withStatuses"
+                  :with-timesheets="withTimesheets"
+                  :selected-key="selectedKeyOf(rowItems(childElement))"
+                  :with-handles="rowHasHandles(rowItems(childElement))"
+                  @bar-down="moveTimebar"
+                  @left-handle-down="moveTimebarLeftSide"
+                  @right-handle-down="moveTimebarRightSide"
+                  @bar-click="onChildBarClick(rootElement, childElement)"
+                  @bar-enter="$emit('item-selected', rootElement, childElement)"
+                  @task-click="
+                    task => onTaskBarClick(rootElement, childElement, task)
+                  "
+                  @task-enter="
+                    task =>
+                      $emit(
+                        'task-selected',
                         rootElement,
-                        childElement.id
-                      )"
-                    ></div>
-                  </template>
-
-                  <div
-                    class="timebar timebar-ghost timebar-ghost-before"
-                    :title="`${childElement.previousElement.name} (${displayDate(childElement.previousElement.startDate)} - ${displayDate(childElement.previousElement.endDate)})`"
-                    :class="{
-                      'with-timesheets': withTimesheets
-                    }"
-                    :style="
-                      timebarChildStyle(
-                        childElement.previousElement,
-                        rootElement,
-                        multiline,
-                        50
-                      )
-                    "
-                    v-if="withGhosts && childElement.previousElement"
-                  ></div>
-
-                  <div
-                    class="timebar timebar-ghost timebar-ghost-after"
-                    :title="`${childElement.nextElement.name} (${displayDate(childElement.nextElement.startDate)} - ${displayDate(childElement.nextElement.endDate)})`"
-                    :class="{
-                      'with-timesheets': withTimesheets
-                    }"
-                    :style="
-                      timebarChildStyle(
-                        childElement.nextElement,
-                        rootElement,
-                        multiline,
-                        50
-                      )
-                    "
-                    v-if="withGhosts && childElement.nextElement"
-                  ></div>
-
-                  <div
-                    class="timebar"
-                    :class="{
-                      selected: isSelected(childElement),
-                      'timebar-subchildren': subchildren,
-                      'with-timesheets': withTimesheets,
-                      invalid: isOverlapping(childElement)
-                    }"
-                    :title="`${multiline && childElement.project_name ? `${childElement.project_name} - ` : ''}${childElement.name} (${displayDate(childElement.startDate)} - ${displayDate(childElement.endDate)})`"
-                    :style="
-                      timebarChildStyle(
                         childElement,
-                        rootElement,
-                        multiline,
-                        withTimesheets && 25,
-                        isDarkTheme ? 'black' : 'white'
+                        task,
+                        selection
                       )
-                    "
-                    v-show="subchildren || isVisible(childElement)"
-                    role="button"
-                    tabindex="0"
-                    @click="onChildBarClick(rootElement, childElement)"
-                    @keydown.enter.prevent="
-                      $emit('item-selected', rootElement, childElement)
-                    "
-                    v-if="withEstimations"
-                  >
-                    <div
-                      class="timebar-left-hand"
-                      @mousedown="moveTimebarLeftSide(childElement, $event)"
-                      @touchstart="moveTimebarLeftSide(childElement, $event)"
-                      v-if="
-                        !isChangeDates &&
-                        selection.length === 1 &&
-                        isSelected(childElement) &&
-                        childElement.editable &&
-                        !childElement.unresizable
-                      "
-                    ></div>
-                    <div
-                      class="timebar-center"
-                      :class="{
-                        ellipsis: multiline || subchildren,
-                        'has-text-centered': subchildren
-                      }"
-                      @mousedown="moveTimebar(childElement, $event)"
-                      @touchstart="moveTimebar(childElement, $event)"
-                    >
-                      <template v-if="multiline && childElement.project_name">
-                        <b>{{ childElement.project_name }}</b>
-                        <br />
-                      </template>
-                      <template v-if="multiline || subchildren">
-                        {{ childElement.name }}
-                      </template>
-                    </div>
-                    <div
-                      class="timebar-right-hand"
-                      @mousedown="moveTimebarRightSide(childElement, $event)"
-                      @touchstart="moveTimebarRightSide(childElement, $event)"
-                      v-if="
-                        !isChangeDates &&
-                        selection.length === 1 &&
-                        isSelected(childElement) &&
-                        childElement.editable &&
-                        !childElement.unresizable
-                      "
-                    ></div>
-                  </div>
-
-                  <div
-                    v-if="subchildren && childElement.children.size"
-                    class="subchildren"
-                  >
-                    <schedule-person-row
-                      :key="personId"
-                      v-for="[personId, subchild] in childElement.children"
-                      :person-id="personId"
-                      :tasks="subchild"
-                      :root-element="rootElement"
-                      :child-element="childElement"
-                      :days-off-range="
-                        cachedDayOffRange(rootElement.people[personId].daysOff)
-                      "
-                      :reassignable="reassignable"
-                      :selected-key="selectedKeyOf(subchild)"
-                      :with-handles="rowHasHandles(subchild)"
-                      :bar-style="timebarSubchildStyle"
-                      :bar-title="timebarSubchildTitle"
-                      :day-off-style="dayOffStyle"
-                      :nb-lines="getNbLines"
-                      @bar-down="moveTimebar"
-                      @left-handle-down="moveTimebarLeftSide"
-                      @right-handle-down="moveTimebarRightSide"
-                      @bar-click="
-                        task => onTaskBarClick(rootElement, childElement, task)
-                      "
-                      @bar-enter="
-                        task =>
-                          $emit(
-                            'task-selected',
-                            rootElement,
-                            childElement,
-                            task,
-                            selection
-                          )
-                      "
-                    />
-                  </div>
-                </div>
+                  "
+                />
               </div>
             </div>
           </div>
@@ -796,6 +609,7 @@ import {
   nextTick,
   onBeforeUnmount,
   onMounted,
+  provide,
   reactive,
   ref,
   toRaw,
@@ -829,7 +643,7 @@ import {
 } from '@/lib/time'
 
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
-import SchedulePersonRow from '@/components/widgets/SchedulePersonRow.vue'
+import ScheduleEntityRow from '@/components/widgets/ScheduleEntityRow.vue'
 import EditMilestoneModal from '@/components/modals/EditMilestoneModal.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import ProductionName from '@/components/widgets/ProductionName.vue'
@@ -1885,9 +1699,9 @@ const selectedIds = computed(() => new Set(selection.value.map(({ id }) => id)))
 
 const isSelected = item => selectedIds.value.has(item.id)
 
-// A person row gets the selection as the ids of its own tasks and shows the
-// resize handles only when it holds the single selected one: the rows of
-// the other people then never update on a selection or a drag.
+// A row gets the selection as the ids of its own items and shows the resize
+// handles only when it holds the single selected one: the other rows then
+// never update on a selection or a drag.
 const selectedKeyOf = tasks =>
   tasks
     .filter(isSelected)
@@ -1896,6 +1710,12 @@ const selectedKeyOf = tasks =>
 
 const rowHasHandles = tasks =>
   !isChangeDates.value && selection.value.length === 1 && tasks.some(isSelected)
+
+// the entity and, per person, its tasks
+const rowItems = childElement =>
+  childElement.children instanceof Map
+    ? [childElement, ...Array.from(childElement.children.values()).flat()]
+    : [childElement]
 
 const addToSelection = itemToAdd => {
   selection.value.push(itemToAdd)
@@ -2387,6 +2207,29 @@ const onTaskBarClick = (rootElement, childElement, task) => {
   if (consumeDragClick()) return
   emit('task-selected', rootElement, childElement, task, selection.value)
 }
+
+// The entity rows read the widget state (zoom, dates, selection) through
+// these helpers rather than through a dozen function props.
+provide('scheduleRowHelpers', {
+  cachedDayOffRange,
+  dateStatusStyle,
+  dayOffStyle,
+  displayDate,
+  formatDuration,
+  getNbLines,
+  isDarkTheme,
+  isDurationInHours,
+  isOverlapping,
+  isVisible,
+  statuses,
+  taskTimesheets,
+  timebarChildStyle,
+  timebarSubchildStyle,
+  timebarSubchildTitle,
+  timelineMultilineStyle,
+  timelineSubchildrenStyle,
+  timesheetStyle
+})
 
 const getTimebarLeft = timeElement => {
   const startDate = timeElement.startDate || props.startDate
@@ -3046,7 +2889,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
   }
 }
 
-.status-date {
+.schedule-wrapper :deep(.status-date) {
   position: absolute;
   top: 2px;
   width: 4px;
@@ -3056,27 +2899,25 @@ const setItemPositions = (items, unitOfTime = 'days') => {
   .dark & {
     box-shadow: $grey 0 0 1px 1px;
   }
+}
 
-  &-wip {
-    background-color: blue;
-    text-align: left;
-
-    &.status-date-gap {
-      transform: translateX(calc(-100% - 2px));
-    }
-  }
-  &-wfa {
-    background-color: purple;
-    text-align: center;
-  }
-  &-done {
-    background-color: green;
-    text-align: right;
-
-    &.status-date-gap {
-      transform: translateX(calc(100% + 2px));
-    }
-  }
+.schedule-wrapper :deep(.status-date-wip) {
+  background-color: blue;
+  text-align: left;
+}
+.schedule-wrapper :deep(.status-date-wip.status-date-gap) {
+  transform: translateX(calc(-100% - 2px));
+}
+.schedule-wrapper :deep(.status-date-wfa) {
+  background-color: purple;
+  text-align: center;
+}
+.schedule-wrapper :deep(.status-date-done) {
+  background-color: green;
+  text-align: right;
+}
+.schedule-wrapper :deep(.status-date-done.status-date-gap) {
+  transform: translateX(calc(100% + 2px));
 }
 
 .entity-name-list {
@@ -3261,7 +3102,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
           position: absolute;
           width: auto;
 
-          .timebar {
+          :deep(.timebar) {
             display: flex;
             align-items: center;
             height: calc(100% - 3px);
@@ -3299,7 +3140,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
           }
         }
 
-        .subchildren .subchild :deep(.timebar) {
+        :deep(.subchildren .subchild .timebar) {
           position: absolute;
           color: var(--text-strong);
           height: 34px;
@@ -3318,7 +3159,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
         &.child-line {
           padding: 0;
 
-          &.multiline .timebar {
+          &.multiline :deep(.timebar) {
             top: 0;
             font-size: 0.8em;
           }
@@ -3371,7 +3212,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
             right: -12px;
           }
 
-          .timesheet {
+          :deep(.timesheet) {
             position: absolute;
             height: 6px;
             border-radius: 2px;
@@ -3831,7 +3672,7 @@ input[type='number'] {
   }
 }
 
-.subchildren {
+.schedule-wrapper :deep(.subchildren) {
   margin-top: 7px;
 }
 
@@ -3848,15 +3689,15 @@ input[type='number'] {
   color: var(--text);
 }
 
-.subchild {
+.schedule-wrapper :deep(.subchild) {
   position: relative;
 }
 
-.subchild + .subchild {
+.schedule-wrapper :deep(.subchild + .subchild) {
   margin-top: 10px;
 }
 
-.subchild,
+.schedule-wrapper :deep(.subchild),
 .subchild-label {
   box-shadow: 0 0 1px 0 $dark-grey-lighter;
 
@@ -3866,45 +3707,39 @@ input[type='number'] {
 }
 
 .subchild-label:nth-child(even),
-.subchild:nth-child(odd) {
+.schedule-wrapper :deep(.subchild:nth-child(odd)) {
   background-color: rgba(0, 0, 0, 0.15);
 }
 
 .subchild-label:nth-child(odd),
-.subchild:nth-child(even) {
+.schedule-wrapper :deep(.subchild:nth-child(even)) {
   background-color: rgba(0, 0, 0, 0.05);
 }
 
-.subchild {
-  :deep(.day-off) {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: -1px;
+.schedule-wrapper :deep(.subchild .day-off) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: -1px;
 
-    .day-off-icon {
-      position: initial;
-    }
+  .day-off-icon {
+    position: initial;
   }
+}
 
-  &:nth-child(odd) {
-    :deep(.day-off) {
-      background-color: #c4c4c4;
+.schedule-wrapper :deep(.subchild:nth-child(odd) .day-off) {
+  background-color: #c4c4c4;
 
-      .dark & {
-        background-color: #515357;
-      }
-    }
+  .dark & {
+    background-color: #515357;
   }
+}
 
-  &:nth-child(even) {
-    :deep(.day-off) {
-      background-color: #e2e2e2;
+.schedule-wrapper :deep(.subchild:nth-child(even) .day-off) {
+  background-color: #e2e2e2;
 
-      .dark & {
-        background-color: #414349;
-      }
-    }
+  .dark & {
+    background-color: #414349;
   }
 }
 @media screen and (max-width: 768px) {

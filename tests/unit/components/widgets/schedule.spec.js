@@ -694,15 +694,24 @@ describe('Schedule widget - person rows', () => {
     const bars = wrapper.findAll('.subchild .timebar-center')
 
     // the widget renders on the mousedown (selection, drag flag) and on
-    // the mouseup (drag flag); the row follows its selection, then shows
-    // its handles once the mouse is up
+    // the mouseup (drag flag); the entity row and the person row holding
+    // the task follow their selection, then show the handles once the
+    // mouse is up
     await selectBar(wrapper, bars[0])
-    expect(counts).toEqual({ Schedule: 2, SchedulePersonRow: 2 })
+    expect(counts).toEqual({
+      Schedule: 2,
+      ScheduleEntityRow: 2,
+      SchedulePersonRow: 2
+    })
 
     reset()
     await selectBar(wrapper, bars[1])
-    // the row losing the selection, then the row gaining it twice
-    expect(counts).toEqual({ Schedule: 2, SchedulePersonRow: 3 })
+    // the rows losing the selection, then the rows gaining it twice
+    expect(counts).toEqual({
+      Schedule: 2,
+      ScheduleEntityRow: 3,
+      SchedulePersonRow: 3
+    })
     wrapper.unmount()
   })
 
@@ -761,6 +770,116 @@ describe('Schedule widget - person rows', () => {
 
     expect(translate).not.toHaveBeenCalledWith(
       'schedule.milestone.add_milestone'
+    )
+    wrapper.unmount()
+  })
+})
+
+describe('Schedule widget - entity rows', () => {
+  let rafSpy
+
+  beforeEach(() => {
+    rafSpy = vi
+      .spyOn(window, 'requestAnimationFrame')
+      .mockImplementation(callback => {
+        callback()
+        return 0
+      })
+  })
+
+  afterEach(() => {
+    rafSpy.mockRestore()
+  })
+
+  const buildEntityHierarchy = (nbEntities = 3) => {
+    const root = {
+      id: 'tt-1',
+      task_type_id: 'tt-1',
+      name: 'Shot / Animation',
+      color: '#4a90e2',
+      editable: true,
+      expanded: true,
+      loading: false,
+      man_days: 0,
+      daysOff: [],
+      startDate: moment('2026-08-03'),
+      endDate: moment('2026-10-23'),
+      children: []
+    }
+    for (let e = 0; e < nbEntities; e++) {
+      root.children.push({
+        id: `seq-${e}`,
+        object_id: `seq-${e}`,
+        name: `SEQ${e}`,
+        color: '#4a90e2',
+        editable: true,
+        unresizable: false,
+        expanded: true,
+        loading: false,
+        man_days: 0,
+        startDate: moment('2026-08-10').add(e * 7, 'days'),
+        endDate: moment('2026-08-14').add(e * 7, 'days'),
+        parentElement: root
+      })
+    }
+    return reactive([root])
+  }
+
+  const mountCounted = hierarchy => {
+    const counts = {}
+    const mixin = {
+      updated() {
+        const name = this.$options.__name
+        if (name) counts[name] = (counts[name] || 0) + 1
+      }
+    }
+    const reset = () => Object.keys(counts).forEach(key => delete counts[key])
+    const wrapper = mountSchedule(
+      { hierarchy, clipChildren: true, isEstimationLinked: true },
+      {
+        attachTo: document.body,
+        global: { stubs: { RouterLink: true }, mixins: [mixin] }
+      }
+    )
+    return { wrapper, counts, reset }
+  }
+
+  it('updates only the row holding the item on a move frame', async () => {
+    const { wrapper, counts, reset } = mountCounted(buildEntityHierarchy())
+    const bar = wrapper.find('.child-line .timebar-center')
+    await selectBar(wrapper, bar)
+    await bar.trigger('mousedown', { clientX: 300 })
+    await nextTick()
+
+    reset()
+    document.dispatchEvent(
+      new MouseEvent('mousemove', { bubbles: true, clientX: 360 })
+    )
+    await nextTick()
+
+    expect(counts).toEqual({ ScheduleEntityRow: 1 })
+    document.dispatchEvent(
+      new MouseEvent('mouseup', { bubbles: true, clientX: 360 })
+    )
+    wrapper.unmount()
+  })
+
+  it('updates only the row holding the item on a resize frame', async () => {
+    const { wrapper, counts, reset } = mountCounted(buildEntityHierarchy())
+    await selectBar(wrapper, wrapper.find('.child-line .timebar-center'))
+    const handle = wrapper.find('.child-line .timebar-right-hand')
+    await handle.trigger('mousedown', { clientX: 300 })
+    await nextTick()
+
+    reset()
+    document.dispatchEvent(
+      new MouseEvent('mousemove', { bubbles: true, clientX: 360 })
+    )
+    await nextTick()
+
+    expect(counts).toEqual({ ScheduleEntityRow: 1 })
+    document.dispatchEvent(
+      new MouseEvent('mouseup', { bubbles: true, clientX: 360 })
     )
     wrapper.unmount()
   })
