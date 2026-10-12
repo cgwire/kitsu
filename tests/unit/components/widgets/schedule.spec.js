@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils'
 import moment from 'moment'
 import { vi } from 'vitest'
-import { nextTick, reactive } from 'vue'
+import { isReactive, nextTick, reactive } from 'vue'
 
 const { organisation } = vi.hoisted(() => ({
   organisation: { hours_by_day: 8, format_duration_in_hours: false }
@@ -28,8 +28,9 @@ vi.mock('vuex', () => ({
   })
 }))
 
+const { translate } = vi.hoisted(() => ({ translate: vi.fn(key => key) }))
 vi.mock('vue-i18n', () => ({
-  useI18n: () => ({ t: key => key })
+  useI18n: () => ({ t: translate })
 }))
 
 import { parseSimpleDate } from '@/lib/time'
@@ -519,6 +520,248 @@ describe('Schedule widget - estimation field', () => {
 
     expect(input.element.value).toBe('1.5')
     expect(typedEstimations(wrapper)).toEqual([480, 720, 720])
+    wrapper.unmount()
+  })
+})
+
+// Production schedule shape: a task type row, entity rows below it, and one
+// person row per assignee holding the task bars.
+const buildSubchildrenHierarchy = (nbEntities = 3) => {
+  const root = {
+    id: 'tt-1',
+    task_type_id: 'tt-1',
+    name: 'Shot / Animation',
+    color: '#4a90e2',
+    editable: true,
+    expanded: true,
+    loading: false,
+    man_days: 0,
+    daysOff: [],
+    startDate: moment('2026-08-03'),
+    endDate: moment('2026-10-23'),
+    people: { 'person-1': { ...person, daysOff: [] } },
+    children: []
+  }
+  for (let e = 0; e < nbEntities; e++) {
+    const child = {
+      id: `seq-${e}`,
+      object_id: `seq-${e}`,
+      name: `SEQ${e}`,
+      color: '#4a90e2',
+      editable: true,
+      expanded: true,
+      loading: false,
+      startDate: moment('2026-08-03'),
+      endDate: moment('2026-10-23'),
+      parentElement: root,
+      children: new Map()
+    }
+    const task = {
+      id: `task-${e}`,
+      type: 'Task',
+      entity_id: `shot-${e}`,
+      entity: { name: `SH${e}` },
+      assignees: ['person-1'],
+      startDate: moment('2026-08-10').add(e * 7, 'days'),
+      endDate: moment('2026-08-14').add(e * 7, 'days'),
+      editable: true,
+      unresizable: false,
+      line: 0,
+      parentElement: child
+    }
+    child.children.set('person-1', [task])
+    root.children.push(child)
+  }
+  return reactive([root])
+}
+
+const mountSubchildren = (hierarchy, props = {}) =>
+  mountSchedule(
+    {
+      startDate: moment('2026-08-01'),
+      endDate: moment('2026-10-31'),
+      hierarchy,
+      reassignable: true,
+      subchildren: true,
+      clipChildren: true,
+      isEstimationLinked: true,
+      ...props
+    },
+    { attachTo: document.body }
+  )
+
+const selectBar = async (wrapper, bar) => {
+  await bar.trigger('mousedown', { clientX: 300 })
+  document.dispatchEvent(
+    new MouseEvent('mouseup', { bubbles: true, clientX: 300 })
+  )
+  await nextTick()
+}
+
+const dragFrom = async (wrapper, handle, fromX, toX) => {
+  await handle.trigger('mousedown', { clientX: fromX })
+  document.dispatchEvent(
+    new MouseEvent('mousemove', { bubbles: true, clientX: toX })
+  )
+  await nextTick()
+}
+
+describe('Schedule widget - person rows', () => {
+  let rafSpy
+
+  beforeEach(() => {
+    rafSpy = vi
+      .spyOn(window, 'requestAnimationFrame')
+      .mockImplementation(callback => {
+        callback()
+        return 0
+      })
+  })
+
+  afterEach(() => {
+    rafSpy.mockRestore()
+  })
+
+  it('keeps the selection instance while a bar is resized', async () => {
+    const hierarchy = buildSubchildrenHierarchy()
+    const wrapper = mountSubchildren(hierarchy)
+    const bar = wrapper.find('.subchild .timebar-center')
+    await selectBar(wrapper, bar)
+    const selection = wrapper.vm.selection
+    const task = hierarchy[0].children[0].children.get('person-1')[0]
+
+    await dragFrom(wrapper, wrapper.find('.subchild .timebar-right-hand'), 300, 360)
+
+    // sanity check: the resize happened
+    expect(task.endDate.isSame(moment('2026-08-14'))).toBe(false)
+    expect(wrapper.vm.selection).toBe(selection)
+    wrapper.unmount()
+  })
+
+  it('formats the bar titles from raw moment objects', async () => {
+    const hierarchy = buildSubchildrenHierarchy()
+    const wrapper = mountSubchildren(hierarchy)
+    const format = vi.spyOn(moment.fn, 'format')
+    const task = hierarchy[0].children[0].children.get('person-1')[0]
+
+    task.startDate = task.startDate.clone().add(1, 'days')
+    await nextTick()
+
+    // a moment read through the reactive hierarchy pays a proxy trap per
+    // internal property access, on every bar at every render
+    expect(format).toHaveBeenCalled()
+    expect(format.mock.contexts.some(isReactive)).toBe(false)
+    format.mockRestore()
+    wrapper.unmount()
+  })
+
+  // Only the person row holding the task may update: the other rows are
+  // their own components and nothing of theirs changed.
+  const countUpdates = () => {
+    const counts = {}
+    const mixin = {
+      updated() {
+        const name = this.$options.__name
+        if (name) counts[name] = (counts[name] || 0) + 1
+      }
+    }
+    const reset = () => Object.keys(counts).forEach(key => delete counts[key])
+    return { counts, mixin, reset }
+  }
+
+  const mountCounted = hierarchy => {
+    const { counts, mixin, reset } = countUpdates()
+    const wrapper = mountSchedule(
+      {
+        startDate: moment('2026-08-01'),
+        endDate: moment('2026-10-31'),
+        hierarchy,
+        reassignable: true,
+        subchildren: true,
+        clipChildren: true,
+        isEstimationLinked: true
+      },
+      {
+        attachTo: document.body,
+        global: { stubs: { RouterLink: true }, mixins: [mixin] }
+      }
+    )
+    return { wrapper, counts, reset }
+  }
+
+  it('updates only the row holding the task on a selection', async () => {
+    const { wrapper, counts, reset } = mountCounted(buildSubchildrenHierarchy())
+    const bars = wrapper.findAll('.subchild .timebar-center')
+
+    // the widget renders on the mousedown (selection, drag flag) and on
+    // the mouseup (drag flag); the row follows its selection, then shows
+    // its handles once the mouse is up
+    await selectBar(wrapper, bars[0])
+    expect(counts).toEqual({ Schedule: 2, SchedulePersonRow: 2 })
+
+    reset()
+    await selectBar(wrapper, bars[1])
+    // the row losing the selection, then the row gaining it twice
+    expect(counts).toEqual({ Schedule: 2, SchedulePersonRow: 3 })
+    wrapper.unmount()
+  })
+
+  it('updates only the row holding the task on a move frame', async () => {
+    const { wrapper, counts, reset } = mountCounted(buildSubchildrenHierarchy())
+    const bar = wrapper.find('.subchild .timebar-center')
+    await selectBar(wrapper, bar)
+    await bar.trigger('mousedown', { clientX: 300 })
+    await nextTick()
+
+    reset()
+    document.dispatchEvent(
+      new MouseEvent('mousemove', { bubbles: true, clientX: 360 })
+    )
+    await nextTick()
+
+    expect(counts).toEqual({ SchedulePersonRow: 1 })
+    document.dispatchEvent(
+      new MouseEvent('mouseup', { bubbles: true, clientX: 360 })
+    )
+    wrapper.unmount()
+  })
+
+  it('updates only the row holding the task on a resize frame', async () => {
+    const { wrapper, counts, reset } = mountCounted(buildSubchildrenHierarchy())
+    await selectBar(wrapper, wrapper.find('.subchild .timebar-center'))
+    const handle = wrapper.find('.subchild .timebar-right-hand')
+    await handle.trigger('mousedown', { clientX: 300 })
+    await nextTick()
+
+    reset()
+    document.dispatchEvent(
+      new MouseEvent('mousemove', { bubbles: true, clientX: 360 })
+    )
+    await nextTick()
+
+    expect(counts).toEqual({ SchedulePersonRow: 1 })
+    document.dispatchEvent(
+      new MouseEvent('mouseup', { bubbles: true, clientX: 360 })
+    )
+    wrapper.unmount()
+  })
+
+  it('does not translate the day titles again on a widget render', async () => {
+    const hierarchy = buildSubchildrenHierarchy()
+    const wrapper = mountSubchildren(hierarchy, { withMilestones: true })
+    expect(wrapper.find('.add-milestone').attributes('title')).toMatch(
+      /^schedule\.milestone\.add_milestone \d{4}-\d{2}-\d{2}$/
+    )
+    translate.mockClear()
+
+    // a line change re-renders the widget: 365 day cells must not each
+    // call t() and format a date again (69 % of a drag frame in Firefox)
+    hierarchy[0].children[0].children.get('person-1')[0].line = 1
+    await nextTick()
+
+    expect(translate).not.toHaveBeenCalledWith(
+      'schedule.milestone.add_milestone'
+    )
     wrapper.unmount()
   })
 })
