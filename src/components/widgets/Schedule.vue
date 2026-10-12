@@ -731,83 +731,40 @@
                     v-if="subchildren && childElement.children.size"
                     class="subchildren"
                   >
-                    <div
+                    <schedule-person-row
                       :key="personId"
                       v-for="[personId, subchild] in childElement.children"
-                      :style="{
-                        height: `${40 * getNbLines(subchild)}px`
-                      }"
-                      class="subchild"
-                      :class="{ 'drop-item-target': reassignable }"
-                      :data-entity-type-id="childElement.object_id"
-                      :data-person-id="personId"
-                    >
-                      <div
-                        class="day-off"
-                        :key="`dayoff-${dayOff.id}-${index}`"
-                        :style="dayOffStyle(dayOff)"
-                        :title="dayOff.description"
-                        v-for="(dayOff, index) in cachedDayOffRange(
-                          rootElement.people[personId].daysOff
-                        )"
-                      >
-                        <briefcase-icon class="day-off-icon" :size="14" />
-                      </div>
-                      <div
-                        class="timebar"
-                        :class="{ selected: isSelected(task) }"
-                        :key="index"
-                        :style="timebarSubchildStyle(task, rootElement)"
-                        :title="timebarSubchildTitle(task)"
-                        v-for="(task, index) in subchild"
-                      >
-                        <div
-                          class="timebar-left-hand"
-                          @mousedown="moveTimebarLeftSide(task, $event)"
-                          @touchstart="moveTimebarLeftSide(task, $event)"
-                          v-if="
-                            !isChangeDates &&
-                            selection.length === 1 &&
-                            isSelected(task) &&
-                            task.editable &&
-                            !task.unresizable
-                          "
-                        ></div>
-                        <div
-                          class="timebar-center ellipsis"
-                          role="button"
-                          tabindex="0"
-                          @mousedown="moveTimebar(task, $event)"
-                          @touchstart="moveTimebar(task, $event)"
-                          @click="
-                            onTaskBarClick(rootElement, childElement, task)
-                          "
-                          @keydown.enter.prevent="
-                            $emit(
-                              'task-selected',
-                              rootElement,
-                              childElement,
-                              task,
-                              selection
-                            )
-                          "
-                        >
-                          {{ task.entity.name }}
-                        </div>
-                        <div
-                          class="timebar-right-hand"
-                          @mousedown="moveTimebarRightSide(task, $event)"
-                          @touchstart="moveTimebarRightSide(task, $event)"
-                          v-if="
-                            !isChangeDates &&
-                            selection.length === 1 &&
-                            isSelected(task) &&
-                            task.editable &&
-                            !task.unresizable
-                          "
-                        ></div>
-                      </div>
-                    </div>
+                      :person-id="personId"
+                      :tasks="subchild"
+                      :root-element="rootElement"
+                      :child-element="childElement"
+                      :days-off-range="
+                        cachedDayOffRange(rootElement.people[personId].daysOff)
+                      "
+                      :reassignable="reassignable"
+                      :selected-key="selectedKeyOf(subchild)"
+                      :with-handles="rowHasHandles(subchild)"
+                      :bar-style="timebarSubchildStyle"
+                      :bar-title="timebarSubchildTitle"
+                      :day-off-style="dayOffStyle"
+                      :nb-lines="getNbLines"
+                      @bar-down="moveTimebar"
+                      @left-handle-down="moveTimebarLeftSide"
+                      @right-handle-down="moveTimebarRightSide"
+                      @bar-click="
+                        task => onTaskBarClick(rootElement, childElement, task)
+                      "
+                      @bar-enter="
+                        task =>
+                          $emit(
+                            'task-selected',
+                            rootElement,
+                            childElement,
+                            task,
+                            selection
+                          )
+                      "
+                    />
                   </div>
                 </div>
               </div>
@@ -872,6 +829,7 @@ import {
 } from '@/lib/time'
 
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
+import SchedulePersonRow from '@/components/widgets/SchedulePersonRow.vue'
 import EditMilestoneModal from '@/components/modals/EditMilestoneModal.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import ProductionName from '@/components/widgets/ProductionName.vue'
@@ -1773,7 +1731,7 @@ const changeStartDate = event => {
     updateItemEstimation(currentElement.value)
     propagateClipToChildren(currentElement.value)
     refreshItemPositionsDuringDrag([currentElement.value.parentElement])
-    resetSelection([currentElement.value])
+    selectAlone(currentElement.value)
   }
 }
 
@@ -1828,7 +1786,7 @@ const changeEndDate = event => {
     updateItemEstimation(currentElement.value)
     propagateClipToChildren(currentElement.value)
     refreshItemPositionsDuringDrag([currentElement.value.parentElement])
-    resetSelection([currentElement.value])
+    selectAlone(currentElement.value)
   }
 }
 
@@ -1927,6 +1885,18 @@ const selectedIds = computed(() => new Set(selection.value.map(({ id }) => id)))
 
 const isSelected = item => selectedIds.value.has(item.id)
 
+// A person row gets the selection as the ids of its own tasks and shows the
+// resize handles only when it holds the single selected one: the rows of
+// the other people then never update on a selection or a drag.
+const selectedKeyOf = tasks =>
+  tasks
+    .filter(isSelected)
+    .map(({ id }) => id)
+    .join(',')
+
+const rowHasHandles = tasks =>
+  !isChangeDates.value && selection.value.length === 1 && tasks.some(isSelected)
+
 const addToSelection = itemToAdd => {
   selection.value.push(itemToAdd)
 }
@@ -1937,6 +1907,14 @@ const removeFromSelection = itemToRemove => {
 
 const resetSelection = value => {
   selection.value = value || []
+}
+
+// Called on every resize frame: replacing an identical selection would
+// recompute selectedIds and re-render every bar for nothing.
+const selectAlone = item => {
+  if (selection.value.length !== 1 || selection.value[0] !== item) {
+    resetSelection([item])
+  }
 }
 
 const moveTimebar = (timeElement, event) => {
@@ -2166,8 +2144,11 @@ const stopBrowsing = event => {
 // the template iterates day-off ranges for each root and person row on every
 // render: expand each daysOff array once and reuse it
 const dayOffRangeCache = new WeakMap()
+// A fresh [] per render would change the days-off prop of every person row
+// and update them all on each schedule render.
+const NO_DAY_OFF = []
 const cachedDayOffRange = daysOff => {
-  if (!daysOff?.length) return []
+  if (!daysOff?.length) return NO_DAY_OFF
   let range = dayOffRangeCache.get(daysOff)
   if (!range) {
     range = getDayOffRange(daysOff)
@@ -2351,9 +2332,12 @@ const timesheetStyle = (
   }
 }
 
-const timebarSubchildStyle = (timeElement, rootElement) => {
+const timebarSubchildStyle = (
+  timeElement,
+  rootElement,
+  selected = isSelected(timeElement)
+) => {
   const color = timeElement.color || rootElement.color
-  const selected = isSelected(timeElement)
   return {
     left: `${getTimebarLeft(timeElement)}px`,
     width: `${getTimebarWidth(timeElement)}px`,
@@ -2368,7 +2352,10 @@ const timebarSubchildStyle = (timeElement, rootElement) => {
   }
 }
 
-const timebarSubchildTitle = task => {
+// Reads the raw task: formatting a moment through the reactive proxy pays a
+// trap per internal property access, on every bar at every render.
+const timebarSubchildTitle = reactiveTask => {
+  const task = toRaw(reactiveTask)
   const name = task.entity.name
   const startDate = task.startDate.format('YYYY-MM-DD')
   const endDate = task.endDate.format('YYYY-MM-DD')
@@ -2549,9 +2536,11 @@ const milestoneLineStyle = milestone => {
   }
 }
 
-const addMilestoneTitle = day => {
-  return `${t('schedule.milestone.add_milestone')} ${day.format('YYYY-MM-DD')}`
-}
+// The header renders this title for every day of the range on each widget
+// render (a drag frame included): translate once and reuse the day text
+// daysAvailable already formatted.
+const addMilestoneLabel = computed(() => t('schedule.milestone.add_milestone'))
+const addMilestoneTitle = day => `${addMilestoneLabel.value} ${day.text}`
 
 const getDropForbiddenReason = (item, person) => {
   // person may be any root element (e.g. a task type row on the production
@@ -2981,7 +2970,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
     .timeline-content-wrapper {
       .timeline-content {
         .entity-line.child-line {
-          .timebar {
+          :deep(.timebar) {
             color: $dark-grey;
           }
         }
@@ -3283,7 +3272,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
           }
         }
 
-        .timebar {
+        :deep(.timebar) {
           position: absolute;
           top: 0;
           height: 14px;
@@ -3310,7 +3299,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
           }
         }
 
-        .subchildren .subchild .timebar {
+        .subchildren .subchild :deep(.timebar) {
           position: absolute;
           color: var(--text-strong);
           height: 34px;
@@ -3334,7 +3323,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
             font-size: 0.8em;
           }
 
-          .timebar {
+          :deep(.timebar) {
             position: relative;
             overflow: initial;
             background: rgba(0, 0, 50, 0.2);
@@ -3368,17 +3357,17 @@ const setItemPositions = (items, unitOfTime = 'days') => {
             }
           }
 
-          .timebar-left-hand,
-          .timebar-right-hand {
+          :deep(.timebar-left-hand),
+          :deep(.timebar-right-hand) {
             position: absolute;
             top: 0;
             bottom: 0;
             width: 20px;
           }
-          .timebar-left-hand {
+          :deep(.timebar-left-hand) {
             left: -12px;
           }
-          .timebar-right-hand {
+          :deep(.timebar-right-hand) {
             right: -12px;
           }
 
@@ -3775,7 +3764,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
   }
 }
 
-.day-off {
+.schedule-wrapper :deep(.day-off) {
   position: absolute;
   width: 19px;
   height: 100%;
@@ -3837,7 +3826,7 @@ input[type='number'] {
 .droppable {
   background-color: rgba(var(--background-selectable-rgb), 0.5) !important;
 
-  * {
+  :deep(*) {
     pointer-events: none;
   }
 }
@@ -3887,7 +3876,7 @@ input[type='number'] {
 }
 
 .subchild {
-  .day-off {
+  :deep(.day-off) {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3899,7 +3888,7 @@ input[type='number'] {
   }
 
   &:nth-child(odd) {
-    .day-off {
+    :deep(.day-off) {
       background-color: #c4c4c4;
 
       .dark & {
@@ -3909,7 +3898,7 @@ input[type='number'] {
   }
 
   &:nth-child(even) {
-    .day-off {
+    :deep(.day-off) {
       background-color: #e2e2e2;
 
       .dark & {
