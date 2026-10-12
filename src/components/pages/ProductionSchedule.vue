@@ -677,6 +677,8 @@ const assignments = ref({
 const availableTaskTypes = ref([])
 const daysOffByPerson = ref({})
 const daysOffRangeKey = ref(null)
+// production, episode and entity kind already loaded, see loadEntities
+const loadedEntityKeys = new Set()
 const draggedEntities = ref([])
 const endDate = ref(getUserDay().add(6, 'months').endOf('day'))
 const entityType = ref(null)
@@ -956,6 +958,7 @@ const loadData = async () => {
   const production = currentProduction.value
   loading.value.schedule = true
   availableTaskTypes.value = []
+  loadedEntityKeys.clear()
 
   try {
     await store.dispatch('loadScheduleVersions', production)
@@ -1160,6 +1163,27 @@ const loadScopedAssets = () => {
   })
 }
 
+// The entities behind the rows are the same for every task type of a kind:
+// expand all reloaded the whole shot list (9.5 MB on a large production)
+// once per shot task type. Load each kind once per production and episode;
+// loadData starts afresh.
+const entityLoaders = {
+  Asset: () => loadScopedAssets(),
+  Shot: () => store.dispatch('loadShots'),
+  Sequence: () => store.dispatch('loadSequences'),
+  Episode: () => store.dispatch('loadEpisodes'),
+  Edit: () => store.dispatch('loadEdits')
+}
+
+const loadEntities = async forEntity => {
+  const loader = entityLoaders[forEntity]
+  if (!loader) return
+  const key = `${currentProduction.value.id}_${currentEpisodeId.value}_${forEntity}`
+  if (loadedEntityKeys.has(key)) return
+  await loader()
+  loadedEntityKeys.add(key)
+}
+
 // Whether an asset falls in the current scope: for the main pack, only the
 // assets attached to no episode (source_id null); otherwise the assetMap is
 // already scoped and every asset it holds belongs.
@@ -1267,17 +1291,7 @@ const expandTaskTypeDrillDown = async (
 
       // load entities (scoped to the current episode for TV shows) that
       // back the row grouping, the entity name and the episode filter
-      if (taskTypeElement.for_entity === 'Asset') {
-        await loadScopedAssets()
-      } else if (taskTypeElement.for_entity === 'Shot') {
-        await store.dispatch('loadShots')
-      } else if (taskTypeElement.for_entity === 'Sequence') {
-        await store.dispatch('loadSequences')
-      } else if (taskTypeElement.for_entity === 'Episode') {
-        await store.dispatch('loadEpisodes')
-      } else if (taskTypeElement.for_entity === 'Edit') {
-        await store.dispatch('loadEdits')
-      }
+      await loadEntities(taskTypeElement.for_entity)
 
       let tasks = await store.dispatch(
         'loadTasks',
@@ -1825,7 +1839,7 @@ const selectTaskTypeElement = async (
   // load entity types
   if (taskType.for_entity === 'Asset') {
     if (!preloadedTasks) {
-      await loadScopedAssets()
+      await loadEntities(taskType.for_entity)
     }
 
     assignments.value.entityTypes = productionAssetTypes.value
@@ -1862,7 +1876,7 @@ const selectTaskTypeElement = async (
       })
   } else if (taskType.for_entity === 'Shot') {
     if (!preloadedTasks) {
-      await store.dispatch('loadShots')
+      await loadEntities(taskType.for_entity)
     }
 
     const shotsBySequence = shotStore.cache.shots
@@ -1892,7 +1906,7 @@ const selectTaskTypeElement = async (
     )
   } else if (taskType.for_entity === 'Sequence') {
     if (!preloadedTasks) {
-      await store.dispatch('loadSequences')
+      await loadEntities(taskType.for_entity)
     }
 
     // sequences are the assignable entities, grouped by episode
@@ -1930,7 +1944,7 @@ const selectTaskTypeElement = async (
     )
   } else if (taskType.for_entity === 'Episode') {
     if (!preloadedTasks) {
-      await store.dispatch('loadEpisodes')
+      await loadEntities(taskType.for_entity)
     }
 
     // episodes are the assignable entities, under a single production group
@@ -1958,7 +1972,7 @@ const selectTaskTypeElement = async (
     ]
   } else if (taskType.for_entity === 'Edit') {
     if (!preloadedTasks) {
-      await store.dispatch('loadEdits')
+      await loadEntities(taskType.for_entity)
     }
 
     // edits are the assignable entities, grouped by episode
