@@ -320,6 +320,27 @@ describe('Episodes store', () => {
     })
   })
 
+  describe('EDIT_EPISODE_END', () => {
+    // A metadata cell sends only its own field: the other fields must stay.
+    test('merges the edited metadata into the existing data', () => {
+      const state = { episodes: [], displayedEpisodes: [] }
+      episodesStore.mutations.LOAD_EPISODES_END(state, {
+        episodes: [
+          { id: 'episode-1', name: 'E01', data: { start: 'A', end: 'B' } }
+        ],
+        routeEpisodeId: 'episode-1'
+      })
+      state.displayedEpisodes = [...state.episodes]
+      episodesStore.mutations.EDIT_EPISODE_END(state, {
+        id: 'episode-1',
+        data: { start: 'C' }
+      })
+      const expected = { start: 'C', end: 'B' }
+      expect(state.episodes[0].data).toEqual(expected)
+      expect(state.displayedEpisodes[0].data).toEqual(expected)
+    })
+  })
+
   describe('REMOVE_EPISODE', () => {
     // The topbar validates route episodes against the episodes getter: a
     // deleted episode must leave that list too, not only the map.
