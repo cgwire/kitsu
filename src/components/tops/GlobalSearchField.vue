@@ -152,6 +152,7 @@ import {
 } from 'vue'
 import { useStore } from 'vuex'
 
+import { isSearchShortcut } from '@/lib/keyboard'
 import { getEntityPath, getPersonPath } from '@/lib/path'
 import peopleStore from '@/store/modules/people'
 
@@ -229,11 +230,7 @@ const onBlur = event => {
 }
 
 const onKeyDown = event => {
-  if (
-    (event.ctrlKey || event.metaKey) &&
-    event.altKey &&
-    event.code === 'KeyF'
-  ) {
+  if (isSearchShortcut(event)) {
     searchInput.value?.focus()
   } else if (isSearchActive.value && event.key === 'ArrowDown') {
     selectNext()
