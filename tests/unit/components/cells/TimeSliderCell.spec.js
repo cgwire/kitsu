@@ -5,8 +5,9 @@ import { createStore } from 'vuex'
 import TimeSliderCell from '@/components/cells/TimeSliderCell.vue'
 
 describe('TimeSliderCell', () => {
-  const mountCell = props =>
+  const mountCell = (props, options = {}) =>
     shallowMount(TimeSliderCell, {
+      ...options,
       global: {
         plugins: [createStore({ getters: { organisation: () => ({}) } })]
       },
@@ -44,5 +45,20 @@ describe('TimeSliderCell', () => {
       [{ taskId: 'task-1', duration: 12 }]
     ])
     expect(wrapper.find('input.value').element.value).toBe('12')
+  })
+
+  // Firefox steps a focused number field on each wheel notch
+  test('keeps the wheel from changing the typed duration', () => {
+    const wrapper = mountCell({ duration: 4 }, { attachTo: document.body })
+    const input = wrapper.find('input.value').element
+    const wheel = () => {
+      const event = new WheelEvent('wheel', { deltaY: -100, cancelable: true })
+      input.dispatchEvent(event)
+      return event
+    }
+    expect(wheel().defaultPrevented).toBe(false)
+    input.focus()
+    expect(wheel().defaultPrevented).toBe(true)
+    wrapper.unmount()
   })
 })

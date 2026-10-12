@@ -10,6 +10,7 @@
         :step="0.25"
         :value="value"
         @change="onInputChange"
+        @wheel="onInputWheel"
       />
       <span class="flexrow-item slider-item">
         <vue-slider
@@ -100,6 +101,12 @@ const toSliderValue = v => Math.min(12, Math.max(0, Math.round(v * 4) / 4))
 const onInputChange = event => {
   value.value = toSliderValue(Number(event.target.value) || 0)
   event.target.value = value.value
+}
+
+// Firefox steps a focused number field on each wheel notch: block that
+// only, so the page still scrolls over an unfocused field.
+const onInputWheel = event => {
+  if (event.target === document.activeElement) event.preventDefault()
 }
 
 // Watchers
