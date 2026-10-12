@@ -1,4 +1,4 @@
-import { isFreeEscape } from '@/lib/keyboard'
+import { isFreeEscape, isSearchShortcut } from '@/lib/keyboard'
 
 describe('lib/keyboard', () => {
   describe('isFreeEscape', () => {
@@ -146,6 +146,38 @@ describe('lib/keyboard', () => {
 
       combobox.setAttribute('aria-expanded', 'true')
       expect(isFreeFrom(document.body)).toBe(false)
+    })
+  })
+
+  describe('isSearchShortcut', () => {
+    const shortcut = init =>
+      isSearchShortcut(
+        new KeyboardEvent('keydown', { ctrlKey: true, altKey: true, ...init })
+      )
+
+    it('matches ctrl+alt+f on a QWERTY or AZERTY layout', () => {
+      expect(shortcut({ key: 'f', code: 'KeyF' })).toBe(true)
+    })
+
+    it('matches the f of a layout that puts it on another key', () => {
+      // bépo types its f on the physical slash key
+      expect(shortcut({ key: 'f', code: 'Slash' })).toBe(true)
+    })
+
+    it('matches cmd+alt+f on macOS, where alt turns the key into ƒ', () => {
+      expect(
+        shortcut({ ctrlKey: false, metaKey: true, key: 'ƒ', code: 'KeyF' })
+      ).toBe(true)
+    })
+
+    it('ignores f without both modifiers', () => {
+      expect(shortcut({ altKey: false, key: 'f', code: 'KeyF' })).toBe(false)
+      expect(shortcut({ ctrlKey: false, key: 'f', code: 'KeyF' })).toBe(false)
+    })
+
+    it('ignores another letter typed on the physical F key', () => {
+      // bépo types its e on the physical F key
+      expect(shortcut({ key: 'e', code: 'KeyF' })).toBe(false)
     })
   })
 })

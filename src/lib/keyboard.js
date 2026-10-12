@@ -43,3 +43,12 @@ export const isFreeEscape = event =>
   !event.defaultPrevented &&
   !isHoldingText(event.target) &&
   !document.querySelector(OPEN_LAYER_SELECTOR)
+
+// Ctrl+Alt+F, or Cmd+Alt+F on macOS. The f is read from the typed key so that
+// layouts placing it elsewhere (bépo) work, falling back to the physical key
+// when Alt turns it into another character, like the ƒ of macOS.
+export const isSearchShortcut = event =>
+  (event.ctrlKey || event.metaKey) &&
+  event.altKey &&
+  (event.key.toLowerCase() === 'f' ||
+    (event.code === 'KeyF' && !/^[a-z]$/i.test(event.key)))
