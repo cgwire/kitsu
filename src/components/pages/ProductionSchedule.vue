@@ -547,6 +547,7 @@ import { useFormat } from '@/composables/format'
 import colors from '@/lib/colors'
 import { downloadBlob } from '@/lib/download'
 import { getTaskTypeSchedulePath } from '@/lib/path'
+import preferences from '@/lib/preferences'
 import {
   DEFAULT_MODE,
   DEFAULT_VERSION,
@@ -615,6 +616,9 @@ const route = useRoute()
 const router = useRouter()
 const store = useStore()
 const { durationUnit, formatDuration } = useFormat()
+
+const ZOOM_STORAGE_KEY = 'schedule:zoom'
+const ENTITY_TYPE_STORAGE_KEY = 'schedule:type'
 
 // State
 // --------------------------------------------------------------------------
@@ -957,6 +961,19 @@ const filteredScheduleItems = computed(() => {
 // Functions
 // --------------------------------------------------------------------------
 
+// the task types differ per production, their filter is stored by one
+const hiddenTypesStorageKey = () =>
+  `schedule:hiddenTypes:${currentProduction.value.id}`
+
+const saveFilterPreferences = () => {
+  preferences.setPreference(ZOOM_STORAGE_KEY, zoomLevel.value)
+  preferences.setPreference(ENTITY_TYPE_STORAGE_KEY, entityType.value ?? '')
+  preferences.setPreference(
+    hiddenTypesStorageKey(),
+    formatHiddenTaskTypeIds(hiddenTaskTypeIds.value) ?? ''
+  )
+}
+
 const updateRoute = changes => {
   const change = getScheduleRouteChange(route.query, changes)
   if (change?.isReplace) {
@@ -1070,11 +1087,14 @@ const loadSchedule = async () => {
 
   await loadData()
 
+  // the query wins over the filters of the last visit
+  const stored = key => preferences.getPreference(key) ?? undefined
   const queryMode = route.query.mode
-  const queryType = route.query.type
+  const queryType = route.query.type ?? stored(ENTITY_TYPE_STORAGE_KEY)
   const queryVersion = route.query.version
-  const queryZoom = Number(route.query.zoom)
-  const queryHiddenTypes = route.query.hiddenTypes
+  const queryZoom = Number(route.query.zoom ?? stored(ZOOM_STORAGE_KEY))
+  const queryHiddenTypes =
+    route.query.hiddenTypes ?? stored(hiddenTypesStorageKey())
 
   mode.value = modeOptions.value.map(o => o.value).includes(queryMode)
     ? queryMode
@@ -1812,6 +1832,7 @@ const onSelectTaskType = taskTypeId => {
     query.hiddenTypes = formatHiddenTaskTypeIds(hiddenTaskTypeIds.value)
   }
   updateRoute(query)
+  saveFilterPreferences()
   // refresh schedule
   expandTaskTypeElement(
     selectedTaskType.value,
@@ -2469,10 +2490,12 @@ const onScheduleItemUnassigned = async (task, personId) => {
 
 const onZoomLevelChanged = zoom => {
   updateRoute({ zoom })
+  saveFilterPreferences()
 }
 
 const onEntityTypeChanged = type => {
   updateRoute({ type })
+  saveFilterPreferences()
 }
 
 const onTaskTypeVisibilityChanged = ({ key, value }) => {
@@ -2484,6 +2507,7 @@ const onTaskTypeVisibilityChanged = ({ key, value }) => {
   updateRoute({
     hiddenTypes: formatHiddenTaskTypeIds(hiddenTaskTypeIds.value)
   })
+  saveFilterPreferences()
 
   if (!value) {
     // a hidden row leaves the schedule with its tasks still selected: the
