@@ -1,5 +1,5 @@
 <template>
-  <div class="production-settings fixed-page">
+  <div class="production-settings fixed-page" ref="page">
     <div class="wrapper">
       <div class="tabs">
         <ul>
@@ -222,12 +222,13 @@
 
 <script setup>
 import draggable from 'vuedraggable'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useHead } from '@unhead/vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
+import { useFieldCommitOnLeave } from '@/composables/fieldCommit'
 import { sortTaskStatuses } from '@/lib/sorting'
 
 import { GripVerticalIcon } from 'lucide-vue-next'
@@ -349,6 +350,12 @@ useHead({
     () => `${currentProduction.value?.name} | ${t('settings.title')} - Kitsu`
   )
 })
+
+// The task type bitrates read the current production when they save.
+useFieldCommitOnLeave(
+  useTemplateRef('page'),
+  (to, from) => to.params.production_id !== from.params.production_id
+)
 
 onMounted(() => {
   if (!isCurrentUserProductionManager.value) {

@@ -9,6 +9,7 @@ import RowActionsCell from '@/components/cells/RowActionsCell.vue'
 import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
 import ProjectTemplateSettings from '@/components/pages/ProjectTemplateSettings.vue'
 import MovieBitrateField from '@/components/pages/production/MovieBitrateField.vue'
+import TaskTypeSettings from '@/components/pages/production/TaskTypeSettings.vue'
 
 import { mountEntityPage } from '../../fixtures/entity-page'
 
@@ -201,5 +202,68 @@ describe('ProjectTemplateSettings page, video tab', () => {
     expect(hd.props('modelValue')).toBe('')
     expect(ld.props('modelValue')).toBe('')
     vi.clearAllTimers()
+  })
+})
+
+// A bitrate field saves on its way out of the page, so the answer can come
+// back once the route shows no template anymore.
+describe('ProjectTemplateSettings page, task type bitrates', () => {
+  const template = { id: 'template-1', name: 'Feature', metadata_descriptors: [] }
+
+  const mountPage = async addTaskTypeToTemplate => {
+    const page = await mountEntityPage(ProjectTemplateSettings, {
+      query: { tab: 'taskTypes' },
+      getters: { movieBitrateDefaults },
+      actions: {
+        loadProjectTemplate: () => template,
+        loadTemplateTaskTypes: () => [],
+        loadTemplateTaskStatuses: () => [],
+        loadTemplateAssetTypes: () => [],
+        loadTemplateStatusAutomations: () => [],
+        loadTemplateBackgrounds: () => [],
+        addTaskTypeToTemplate
+      }
+    })
+    page.router.addRoute({
+      path: '/project-templates/:template_id',
+      component: { template: '<div />' }
+    })
+    await page.router.push('/project-templates/template-1')
+    page.store.dispatch.mockClear()
+    return page
+  }
+
+  const changeBitrate = wrapper =>
+    wrapper.findComponent(TaskTypeSettings).vm.$emit('bitrates-changed', {
+      taskTypeId: 'task-type-1',
+      hd_bitrate_compression: 20
+    })
+
+  it('reloads the template once a bitrate is saved', async () => {
+    const { wrapper, dispatched } = await mountPage(() => {})
+
+    await changeBitrate(wrapper)
+    await flushPromises()
+
+    expect(dispatched('loadProjectTemplate')).toEqual([
+      ['loadProjectTemplate', 'template-1']
+    ])
+  })
+
+  it('reloads no template once the page is left', async () => {
+    let answer
+    const { wrapper, router, dispatched } = await mountPage(
+      () => new Promise(resolve => (answer = resolve))
+    )
+
+    await changeBitrate(wrapper)
+    await router.push('/')
+    answer()
+    await flushPromises()
+
+    expect(dispatched('addTaskTypeToTemplate')[0][1]).toMatchObject({
+      templateId: 'template-1'
+    })
+    expect(dispatched('loadProjectTemplate')).toEqual([])
   })
 })

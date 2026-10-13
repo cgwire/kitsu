@@ -649,16 +649,18 @@ const actions = {
     { commit, state },
     { taskTypeId, priority = null, ...bitrates }
   ) {
+    // A settings field saves on its way out of the page: the next production
+    // is current by the time the answer comes back.
+    const production = state.currentProduction
     commit(PRODUCTION_ADD_TASK_TYPE, taskTypeId)
     return productionsApi
-      .addTaskTypeToProduction(
-        state.currentProduction.id,
-        taskTypeId,
-        priority,
-        bitrates
-      )
+      .addTaskTypeToProduction(production.id, taskTypeId, priority, bitrates)
       .then(() => {
-        commit(PRODUCTION_SET_TASK_TYPE_LINK, { taskTypeId, ...bitrates })
+        commit(PRODUCTION_SET_TASK_TYPE_LINK, {
+          production,
+          taskTypeId,
+          ...bitrates
+        })
       })
   },
 
@@ -1200,8 +1202,7 @@ const mutations = {
     addToIdList(state.currentProduction, 'task_types', taskTypeId)
   },
 
-  [PRODUCTION_SET_TASK_TYPE_LINK](state, { taskTypeId, ...link }) {
-    const production = state.currentProduction
+  [PRODUCTION_SET_TASK_TYPE_LINK](state, { production, taskTypeId, ...link }) {
     if (!production.task_type_links) production.task_type_links = {}
     production.task_type_links[taskTypeId] = {
       ...production.task_type_links[taskTypeId],
