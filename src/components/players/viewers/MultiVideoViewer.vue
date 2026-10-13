@@ -899,6 +899,9 @@ onBeforeUnmount(() => {
   containerResizeObserver?.disconnect()
   player1Ref.value?.removeEventListener('loadedmetadata', emitLoadedEvent)
   player1Ref.value?.removeEventListener('loadedmetadata', setupPanZoom)
+  // The decoders keep loading once closed, and this one restarts the loop.
+  player1Ref.value?.removeEventListener('loadedmetadata', updateMaxDuration)
+  player2Ref.value?.removeEventListener('loadedmetadata', updateMaxDuration)
 
   unbindLoadingHandlers(player1Ref.value)
   unbindLoadingHandlers(player2Ref.value)
