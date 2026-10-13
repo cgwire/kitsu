@@ -1,89 +1,48 @@
 <template>
   <div class="columns fixed-page">
     <div class="column main-column">
-      <div class="flexrow project-dates">
-        <div class="flexrow-item">
-          <date-field
-            :can-delete="false"
-            :label="$t('main.start_date')"
-            utc
-            v-model="selectedStartDate"
+      <div class="schedule-toolbar">
+        <div class="toolbar-row">
+          <combobox
+            class="flexrow-item"
+            :label="$t('schedule.mode')"
+            v-model="mode"
+            :options="modeOptions"
+            @update:model-value="onModeChanged"
           />
-        </div>
-        <div class="flexrow-item">
-          <date-field
-            :can-delete="false"
-            :label="$t('main.end_date')"
-            utc
-            v-model="selectedEndDate"
-          />
-        </div>
-        <combobox-number
-          class="flexrow-item zoom-level nowrap"
-          :label="$t('schedule.zoom_level')"
-          :options="zoomOptions"
-          v-model="zoomLevel"
-          @update:model-value="onZoomLevelChanged"
-        />
-        <combobox
-          class="flexrow-item"
-          :label="$t('main.entities')"
-          v-model="entityType"
-          :options="entityTypeOptions"
-          @update:model-value="onEntityTypeChanged"
-          v-if="availableEntityTypes.length > 1"
-        />
-        <div class="flexrow-item" v-if="hasTaskTypeFilter">
-          <label class="label">{{ $t('task_types.title') }}</label>
-          <combobox-options
-            :title="taskTypeFilterTitle"
-            :options="taskTypeFilterOptions"
-            :model-value="taskTypeVisibilityMap"
-            @change="onTaskTypeVisibilityChanged"
-          />
-        </div>
-        <combobox
-          class="flexrow-item ml1"
-          :label="$t('schedule.mode')"
-          v-model="mode"
-          :options="modeOptions"
-          @update:model-value="onModeChanged"
-        />
-        <div class="flexrow-item ml1" v-if="mode === 'prev'">
-          <label class="label">
-            {{ $t('schedule.version') }}
-          </label>
-          <div class="flexrow">
-            <combobox
-              class="flexrow-item"
-              v-model="version"
-              :options="versionOptions"
-              @update:model-value="onVersionChanged"
-            />
-            <button-simple
-              class="ml05"
-              icon="calendar-plus"
-              :title="$t('schedule.new_version')"
-              @click="openEditScheduleVersion()"
-            />
-            <button-simple
-              class="ml05"
-              :disabled="version === 'ref'"
-              icon="pencil"
-              :title="$t('schedule.edit_version')"
-              @click="openEditScheduleVersion(currentVersion)"
-            />
-            <button-simple
-              class="ml05"
-              :disabled="version === 'ref'"
-              icon="trash"
-              :title="$t('schedule.delete_version')"
-              @click="openDeleteScheduleVersion(version)"
-            />
+          <div class="flexrow-item" v-if="mode === 'prev'">
+            <label class="label">
+              {{ $t('schedule.version') }}
+            </label>
+            <div class="flexrow">
+              <combobox
+                class="flexrow-item"
+                v-model="version"
+                :options="versionOptions"
+                @update:model-value="onVersionChanged"
+              />
+              <button-simple
+                class="ml05"
+                icon="calendar-plus"
+                :title="$t('schedule.new_version')"
+                @click="openEditScheduleVersion()"
+              />
+              <button-simple
+                class="ml05"
+                :disabled="version === 'ref'"
+                icon="pencil"
+                :title="$t('schedule.edit_version')"
+                @click="openEditScheduleVersion(currentVersion)"
+              />
+              <button-simple
+                class="ml05"
+                :disabled="version === 'ref'"
+                icon="trash"
+                :title="$t('schedule.delete_version')"
+                @click="openDeleteScheduleVersion(version)"
+              />
+            </div>
           </div>
-        </div>
-        <div class="filler"></div>
-        <div class="flexrow" style="margin-top: 23px">
           <button-simple
             class="flexrow-item"
             :disabled="loading.exportSchedule || loading.expandSchedule"
@@ -100,6 +59,61 @@
             @click="modals.applyScheduleVersion = true"
             v-if="!isTVShow && mode === 'prev'"
           />
+          <div class="filler"></div>
+          <combobox-number
+            class="flexrow-item zoom-level nowrap"
+            :label="$t('schedule.zoom_level')"
+            :options="zoomOptions"
+            v-model="zoomLevel"
+            @update:model-value="onZoomLevelChanged"
+          />
+          <combobox
+            class="flexrow-item"
+            :label="$t('main.entities')"
+            v-model="entityType"
+            :options="entityTypeOptions"
+            @update:model-value="onEntityTypeChanged"
+            v-if="availableEntityTypes.length > 1"
+          />
+          <div class="flexrow-item" v-if="hasTaskTypeFilter">
+            <label class="label">{{ $t('task_types.title') }}</label>
+            <combobox-options
+              :title="taskTypeFilterTitle"
+              :options="taskTypeFilterOptions"
+              :model-value="taskTypeVisibilityMap"
+              @change="onTaskTypeVisibilityChanged"
+            />
+          </div>
+          <button-simple
+            class="flexrow-item toggle-filters"
+            :active="showMoreFilters"
+            :icon="showMoreFilters ? 'minus' : 'plus'"
+            :title="
+              showMoreFilters
+                ? $t('main.less_filters')
+                : $t('main.more_filters')
+            "
+            @click="showMoreFilters = !showMoreFilters"
+          />
+        </div>
+        <div class="toolbar-row" v-show="showMoreFilters">
+          <div class="flexrow-item">
+            <date-field
+              :can-delete="false"
+              :label="$t('main.start_date')"
+              utc
+              v-model="selectedStartDate"
+            />
+          </div>
+          <div class="flexrow-item">
+            <date-field
+              :can-delete="false"
+              :label="$t('main.end_date')"
+              utc
+              v-model="selectedEndDate"
+            />
+          </div>
+          <div class="filler"></div>
           <button-simple
             class="flexrow-item"
             icon="clock"
@@ -695,6 +709,7 @@ const zoomLevel = ref(DEFAULT_ZOOM)
 const mode = ref(DEFAULT_MODE)
 const scheduleVersionToEdit = ref({})
 const version = ref(DEFAULT_VERSION)
+const showMoreFilters = ref(false)
 const loading = ref({
   schedule: false,
   delete: false,
@@ -2935,27 +2950,76 @@ useHead({
 </script>
 
 <style lang="scss" scoped>
-.dark {
-  .project-dates {
-    color: $white-grey;
-    border-bottom: 1px solid $grey;
-  }
+.dark .schedule-toolbar {
+  color: $white-grey;
 }
 
-.project-dates {
-  border-bottom: 1px solid $white-grey;
-  padding-bottom: 1em;
+.schedule-toolbar {
+  background: var(--background-panel);
+  border-radius: 12px;
+  margin-bottom: 1em;
+  padding: 0.5em 1em 1em;
 
   .field {
     padding-bottom: 0;
     margin-bottom: 0;
   }
+
+  // Every control sits on the row bottom at the select height: the date
+  // inputs (40px), the options combo (39.6px plus 1px of margin), the
+  // buttons (32px) and the zoom number box (35px around a 42px select)
+  // each deviate on their own, and so do their label margins.
+  :deep(.label) {
+    margin-bottom: 5px;
+    padding-top: 0;
+  }
+
+  :deep(.combo) {
+    align-items: center;
+    display: inline-flex;
+    height: 42px;
+    margin-top: 0;
+  }
+
+  :deep(.button) {
+    height: 42px;
+  }
+
+  .zoom-level :deep(.control),
+  .zoom-level :deep(.select) {
+    height: 42px;
+  }
+}
+
+// #app .dp--input sets the height globally; the id outranks the scope
+#app .schedule-toolbar :deep(.dp--input) {
+  height: 42px;
+}
+
+// the picker's dark input (#26292f) vanishes on the #25282e panel
+.dark .schedule-toolbar :deep(.dp--input) {
+  background: var(--background);
+}
+
+.toolbar-row {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  row-gap: 0.5em;
+
+  & + & {
+    margin-top: 0.75em;
+  }
+
+  > :last-child {
+    margin-right: 0;
+  }
 }
 
 .fixed-page {
   padding: 1em;
-  padding-top: 90px;
-  padding-left: 2em;
+  // the 60px topbar, then the same 1em as the sides
+  padding-top: calc(60px + 1em);
 }
 
 .main-column {
@@ -2963,10 +3027,6 @@ useHead({
   border: 0;
   overflow: hidden;
   flex-direction: column;
-}
-
-.zoom-level {
-  margin-top: -10px;
 }
 
 .ml2 {

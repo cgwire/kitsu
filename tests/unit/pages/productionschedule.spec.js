@@ -916,6 +916,19 @@ describe('ProductionSchedule page', () => {
   // The date fields of the page are utc ones: they hold a day at UTC
   // midnight. At 00:30 local time, east of UTC, the UTC day is still the
   // day before.
+  describe('toolbar', () => {
+    it('hides the date row until the more filters button is clicked', async () => {
+      const { wrapper } = await mountPage()
+      const rows = wrapper.findAll('.toolbar-row')
+      expect(rows).toHaveLength(2)
+      // the page is not attached to the document: read the v-show style
+      expect(rows[1].attributes('style')).toContain('display: none')
+
+      await wrapper.find('.toggle-filters').trigger('click')
+      expect(rows[1].attributes('style') ?? '').not.toContain('display: none')
+    })
+  })
+
   describe('default dates', () => {
     const today = new Date('2026-10-06T00:00:00.000Z')
     const fieldDates = parent =>
@@ -978,7 +991,7 @@ describe('ProductionSchedule page', () => {
         }
       })
 
-      expect(fieldDates(wrapper.find('.project-dates'))).toEqual([
+      expect(fieldDates(wrapper.find('.schedule-toolbar'))).toEqual([
         today,
         new Date('2027-04-06T23:59:59.999Z')
       ])
