@@ -145,6 +145,24 @@ describe('TaskType page', () => {
     wrapper.unmount()
   })
 
+  // A task deleted elsewhere while its field holds a typed value: the field
+  // fires its change when its row goes away.
+  it('skips the estimation of a task that left the task map', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    const { storeActions, wrapper } = await mountPage()
+    const errorHandler = vi.fn()
+    wrapper.vm.$.appContext.config.errorHandler = errorHandler
+
+    wrapper
+      .findComponent(EstimationHelper)
+      .vm.$emit('estimation-changed', { taskId: 'task-9', estimation: 16 * 60 })
+    await flushPromises()
+
+    expect(errorHandler).not.toHaveBeenCalled()
+    expect(storeActions.updateTask).not.toHaveBeenCalled()
+    wrapper.unmount()
+  })
+
   // Zou refuses a column named like another one of the task type: a close
   // keeps the error, the next opening drops it.
   describe('metadata column modal', () => {

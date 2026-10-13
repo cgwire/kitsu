@@ -197,5 +197,35 @@ describe('lists/TaskList', () => {
 
       wrapper.unmount()
     })
+
+    // A task deleted elsewhere leaves the task map, not the selection.
+    test('skips a selected task that left the task map', async () => {
+      const deleted = { ...task, id: 'task-2' }
+      const updateTask = vi.fn()
+      const errorHandler = vi.fn()
+      const wrapper = mountList(
+        { errorHandler },
+        {
+          getters: {
+            isCurrentUserProductionManager: () => true,
+            taskMap: () => new Map([[task.id, task]])
+          },
+          actions: { updateTask },
+          props: { disabledDates: {}, tasks: [task, deleted] }
+        }
+      )
+      const names = wrapper.findAll('tbody td.name')
+      await names[0].trigger('click')
+      await names[1].trigger('click', { ctrlKey: true })
+
+      await wrapper.find('tbody td.estimation input').setValue('1')
+
+      expect(errorHandler).not.toHaveBeenCalled()
+      expect(updateTask.mock.calls.map(([, { taskId }]) => taskId)).toEqual([
+        'task-1'
+      ])
+
+      wrapper.unmount()
+    })
   })
 })

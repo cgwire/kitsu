@@ -732,6 +732,7 @@ const getDate = date => (date ? moment(date, 'YYYY-MM-DD').toDate() : null)
 const applyToSelection = buildData => {
   Object.keys(selectionGrid.value).forEach(taskId => {
     const task = taskMap.value.get(taskId)
+    if (!task) return
     const data = buildData(task)
     if (data && isTaskChanged(task, data)) {
       store.dispatch('updateTask', { taskId, data }).catch(console.error)
