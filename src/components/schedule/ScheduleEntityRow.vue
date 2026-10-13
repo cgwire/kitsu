@@ -185,7 +185,7 @@
 <script setup>
 import { computed, inject } from 'vue'
 
-import SchedulePersonRow from '@/components/widgets/SchedulePersonRow.vue'
+import SchedulePersonRow from '@/components/schedule/SchedulePersonRow.vue'
 
 const props = defineProps({
   rootElement: { type: Object, default: () => ({}) },

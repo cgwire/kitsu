@@ -643,7 +643,7 @@ import {
 } from '@/lib/time'
 
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
-import ScheduleEntityRow from '@/components/widgets/ScheduleEntityRow.vue'
+import ScheduleEntityRow from '@/components/schedule/ScheduleEntityRow.vue'
 import EditMilestoneModal from '@/components/modals/EditMilestoneModal.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import ProductionName from '@/components/widgets/ProductionName.vue'
