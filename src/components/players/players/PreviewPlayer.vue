@@ -1123,7 +1123,8 @@ const onSubPreviewsWheel = event => {
 }
 
 const setCurrentFrame = frame => {
-  if (!Number.isFinite(frame)) return
+  // Null once closed: a timecode click moves the frame 20 ms later.
+  if (!Number.isFinite(frame) || !previewViewer.value) return
   if (currentFrame.value !== frame) {
     setVideoFrameContext(frame)
     previewViewer.value.setCurrentFrame(frame)

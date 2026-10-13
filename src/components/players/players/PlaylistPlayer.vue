@@ -3405,7 +3405,7 @@ const onTimeCodeClicked = ({ versionRevision, frame }) => {
   )
   if (!previewFile) return
   onPreviewChanged({ entity: currentEntity.value, previewFile })
-  setTimeout(() => {
+  setPlayerTimeout(() => {
     rawPlayer.value.setCurrentFrame(frame)
     onFrameUpdate(frame)
     syncComparisonPlayer()
@@ -4042,17 +4042,24 @@ const onRemoveBuildJob = job => {
   store.dispatch('removeBuildJob', job)
 }
 
+const onFullPlayerMetadata = () => {
+  playlistDuration.value = entityList.value.reduce(
+    (acc, e) => acc + (e.preview_file_duration || 0),
+    0
+  )
+}
+
+const onFullPlayerEnded = () => {
+  pause()
+}
+
 const configureFullPlayer = () => {
   if (!fullPlaylistPlayer.value) return
-  fullPlaylistPlayer.value.addEventListener('loadedmetadata', () => {
-    playlistDuration.value = entityList.value.reduce(
-      (acc, e) => acc + (e.preview_file_duration || 0),
-      0
-    )
-  })
-  fullPlaylistPlayer.value.addEventListener('ended', () => {
-    pause()
-  })
+  fullPlaylistPlayer.value.addEventListener(
+    'loadedmetadata',
+    onFullPlayerMetadata
+  )
+  fullPlaylistPlayer.value.addEventListener('ended', onFullPlayerEnded)
 }
 
 const onPreviousPreviewClicked = () => {
@@ -5012,6 +5019,12 @@ onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKeyDown)
   window.removeEventListener('resize', onWindowResize)
   window.removeEventListener('beforeunload', onWindowsClosed)
+  // The built movie keeps loading after the close.
+  fullPlaylistPlayer.value?.removeEventListener(
+    'loadedmetadata',
+    onFullPlayerMetadata
+  )
+  fullPlaylistPlayer.value?.removeEventListener('ended', onFullPlayerEnded)
   if (container.value) container.value.onmousemove = null
   videoContainer.value?.removeEventListener(
     'pointerdown',
