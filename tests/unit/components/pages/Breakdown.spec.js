@@ -1064,3 +1064,27 @@ describe('Breakdown page, asset creation', () => {
     expect(modal.props('isSuccess')).toBe(false)
   })
 })
+
+describe('Breakdown page, asset column scroll', () => {
+  // The browser still delivers a scroll queued before the unmount, once the
+  // template refs are null.
+  test('ignores a scroll that reaches the detached asset column', async () => {
+    const displayMoreAssets = vi.fn()
+    const { wrapper } = mountPage({ actions: { displayMoreAssets } })
+    await flushPromises()
+    const errorHandler = vi.fn()
+    wrapper.vm.$.appContext.config.errorHandler = errorHandler
+    const column = wrapper.find('.assets-column').element
+    displayMoreAssets.mockClear()
+    // jsdom has no layout: the column reads as scrolled to its bottom.
+    column.dispatchEvent(new Event('scroll'))
+    expect(displayMoreAssets).toHaveBeenCalledTimes(1)
+    displayMoreAssets.mockClear()
+    wrapper.unmount()
+
+    column.dispatchEvent(new Event('scroll'))
+
+    expect(errorHandler).not.toHaveBeenCalled()
+    expect(displayMoreAssets).not.toHaveBeenCalled()
+  })
+})
