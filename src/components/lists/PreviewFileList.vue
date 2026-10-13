@@ -126,6 +126,7 @@ const formatDate = date =>
   formatDateBase(date, dateFormat.value, use12HourClock.value)
 
 const onBodyScroll = event => {
+  if (!headerWrapper.value) return
   headerWrapper.value.style.left = `-${event.target.scrollLeft}px`
 }
 
