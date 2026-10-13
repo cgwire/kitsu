@@ -35,7 +35,7 @@ vi.mock('vue-i18n', () => ({
 
 import { parseSimpleDate } from '@/lib/time'
 
-import Schedule from '@/components/widgets/Schedule.vue'
+import Schedule from '@/components/schedule/Schedule.vue'
 
 const person = {
   id: 'person-1',
