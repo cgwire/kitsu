@@ -6,7 +6,8 @@
 
 export const DEFAULT_MODE = 'prev'
 export const DEFAULT_VERSION = 'ref'
-export const DEFAULT_ZOOM = 1
+// the week view, see zoomOptions in the page
+export const DEFAULT_ZOOM = 0
 
 // Query params
 // --------------------------------------------------------------------------

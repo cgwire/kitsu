@@ -22,6 +22,7 @@ import ProductionSchedule from '@/components/pages/ProductionSchedule.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Checkbox from '@/components/widgets/Checkbox.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DateField from '@/components/widgets/DateField.vue'
@@ -324,6 +325,7 @@ describe('ProductionSchedule page', () => {
     taskTypeStore.cache.taskTypeMap.clear()
     assetTypeStore.cache.assetTypeMap.clear()
     assetStore.cache.assets = []
+    localStorage.clear()
     vi.restoreAllMocks()
     vi.useRealTimers()
   })
@@ -901,6 +903,46 @@ describe('ProductionSchedule page', () => {
       await toggleSidePanel(wrapper)
 
       expect(wrapper.findAll('.side-column .assignment-item')).toHaveLength(0)
+    })
+  })
+
+  describe('filter preferences', () => {
+    const zoomField = wrapper => wrapper.findComponent(ComboboxNumber)
+    const entityField = wrapper => findCombobox(wrapper, 'main.entities')
+
+    it('opens on the week zoom', async () => {
+      const { wrapper } = await mountPage()
+
+      expect(zoomField(wrapper).props('modelValue')).toBe(0)
+    })
+
+    it('restores the filters of the last visit', async () => {
+      const first = await mountPage()
+      zoomField(first.wrapper).vm.$emit('update:model-value', 2)
+      entityField(first.wrapper).vm.$emit('update:model-value', 'Shot')
+      await setTaskTypeVisible(first.wrapper, 'tt-animation', false)
+      first.wrapper.unmount()
+
+      const { wrapper } = await mountPage()
+
+      expect(zoomField(wrapper).props('modelValue')).toBe(2)
+      expect(entityField(wrapper).props('modelValue')).toBe('Shot')
+      expect(
+        wrapper.findComponent(ComboboxOptions).props('modelValue')
+      ).toMatchObject({ 'tt-animation': false })
+    })
+
+    it('prefers the query to the stored filters', async () => {
+      const first = await mountPage()
+      zoomField(first.wrapper).vm.$emit('update:model-value', 2)
+      entityField(first.wrapper).vm.$emit('update:model-value', 'Shot')
+      await flushPromises()
+      first.wrapper.unmount()
+
+      const { wrapper } = await mountPage({ query: { zoom: '1', type: 'Asset' } })
+
+      expect(zoomField(wrapper).props('modelValue')).toBe(1)
+      expect(entityField(wrapper).props('modelValue')).toBe('Asset')
     })
   })
 
