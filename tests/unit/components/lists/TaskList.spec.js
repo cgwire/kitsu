@@ -271,5 +271,36 @@ describe('lists/TaskList', () => {
 
       wrapper.unmount()
     })
+
+    // Unselecting a row of a multi-selection only hid its field: the value
+    // typed in another row was saved on it too.
+    test('leaves a row unselected with Ctrl out of the edit', async () => {
+      const other = { ...task, id: 'task-2' }
+      const updateTask = vi.fn()
+      const wrapper = mountList(undefined, {
+        getters: {
+          isCurrentUserProductionManager: () => true,
+          taskMap: () =>
+            new Map([
+              [task.id, task],
+              [other.id, other]
+            ])
+        },
+        actions: { updateTask },
+        props: { disabledDates: {}, tasks: [task, other] }
+      })
+      const names = wrapper.findAll('tbody td.name')
+      await names[0].trigger('click')
+      await names[1].trigger('click', { ctrlKey: true })
+      await names[1].trigger('click', { ctrlKey: true })
+
+      await wrapper.find('tbody td.estimation input').setValue('1')
+
+      expect(updateTask.mock.calls.map(([, { taskId }]) => taskId)).toEqual([
+        'task-1'
+      ])
+
+      wrapper.unmount()
+    })
   })
 })

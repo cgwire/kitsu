@@ -917,7 +917,7 @@ const applySelection = (event, index, task) => {
   if (!event.shiftKey) {
     if (isSelected) {
       store.dispatch('removeSelectedTask', { task })
-      selectionGrid.value[task.id] = undefined
+      delete selectionGrid.value[task.id]
     } else {
       store.dispatch('addSelectedTask', { task })
       emit('task-selected', task)
