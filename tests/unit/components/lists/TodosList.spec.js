@@ -3,6 +3,8 @@ import { vi } from 'vitest'
 import { nextTick } from 'vue'
 import { createStore } from 'vuex'
 
+import { trackTaskSelection } from '../../fixtures/task-selection'
+
 import resizableColumn from '@/directives/resizable-column'
 
 import TodosList from '@/components/lists/TodosList.vue'
@@ -212,6 +214,61 @@ describe('lists/TodosList', () => {
     expect(wrapper.emitted('task-selected')).toBeUndefined()
 
     wrapper.unmount()
+  })
+
+  describe('selection', () => {
+    const tasks = ['task-1', 'task-2', 'task-3'].map(id => ({ ...task, id }))
+
+    const mountSelectableList = async ({ actions, getters }) => {
+      const wrapper = mountList({ isLoading: true, tasks: [] }, undefined, {
+        actions,
+        getters
+      })
+      await wrapper.setProps({ isLoading: false, tasks })
+      return wrapper
+    }
+
+    // A Ctrl+click left the row selected, and the edits reached it.
+    test('unselects a row of a multi-selection on Ctrl+click', async () => {
+      const updateTask = vi.fn()
+      const { selected, actions } = trackTaskSelection()
+      const wrapper = await mountSelectableList({
+        actions: { ...actions, updateTask },
+        getters: {
+          isCurrentUserManager: () => true,
+          taskMap: () => new Map(tasks.map(entry => [entry.id, entry]))
+        }
+      })
+      const cells = wrapper.findAll('tbody td.duration')
+      await cells[0].trigger('click')
+      await cells[1].trigger('click', { ctrlKey: true })
+      await cells[2].trigger('click', { ctrlKey: true })
+
+      await cells[1].trigger('click', { ctrlKey: true })
+      await wrapper.find('tbody td.estimation input').setValue('1')
+
+      expect([...selected.keys()]).toEqual(['task-1', 'task-3'])
+      expect(updateTask.mock.calls.map(([, { taskId }]) => taskId)).toEqual([
+        'task-1',
+        'task-3'
+      ])
+
+      wrapper.unmount()
+    })
+
+    test('selects a row of a multi-selection alone on a click', async () => {
+      const { selected, actions } = trackTaskSelection()
+      const wrapper = await mountSelectableList({ actions })
+      const cells = wrapper.findAll('tbody td.duration')
+      await cells[0].trigger('click')
+      await cells[1].trigger('click', { ctrlKey: true })
+
+      await cells[1].trigger('click')
+
+      expect([...selected.keys()]).toEqual(['task-2'])
+
+      wrapper.unmount()
+    })
   })
 
   // 2.05 hours make 122.99999999999999 minutes in floats.

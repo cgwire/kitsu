@@ -3,6 +3,8 @@ import { vi } from 'vitest'
 import { nextTick } from 'vue'
 import { createStore } from 'vuex'
 
+import { trackTaskSelection } from '../../fixtures/task-selection'
+
 import ToCheckList from '@/components/lists/ToCheckList.vue'
 
 vi.mock('vue-i18n', async importOriginal => ({
@@ -69,6 +71,53 @@ const leaveInvalidEntry = async input => {
 }
 
 describe('lists/ToCheckList', () => {
+  describe('selection', () => {
+    const tasks = ['task-1', 'task-2', 'task-3'].map(id => ({ ...task, id }))
+
+    // A Ctrl+click left the row selected, and the edits reached it.
+    test('unselects a row of a multi-selection on Ctrl+click', async () => {
+      const updateTask = vi.fn()
+      const { selected, actions } = trackTaskSelection()
+      const wrapper = mountList({
+        actions: { ...actions, updateTask },
+        getters: {
+          isCurrentUserManager: () => true,
+          taskMap: () => new Map(tasks.map(entry => [entry.id, entry]))
+        },
+        tasks
+      })
+      const cells = wrapper.findAll('tbody td.duration')
+      await cells[0].trigger('click')
+      await cells[1].trigger('click', { ctrlKey: true })
+      await cells[2].trigger('click', { ctrlKey: true })
+
+      await cells[1].trigger('click', { ctrlKey: true })
+      await wrapper.find('tbody td.estimation input').setValue('1')
+
+      expect([...selected.keys()]).toEqual(['task-1', 'task-3'])
+      expect(updateTask.mock.calls.map(([, { taskId }]) => taskId)).toEqual([
+        'task-1',
+        'task-3'
+      ])
+
+      wrapper.unmount()
+    })
+
+    test('selects a row of a multi-selection alone on a click', async () => {
+      const { selected, actions } = trackTaskSelection()
+      const wrapper = mountList({ actions, tasks })
+      const cells = wrapper.findAll('tbody td.duration')
+      await cells[0].trigger('click')
+      await cells[1].trigger('click', { ctrlKey: true })
+
+      await cells[1].trigger('click')
+
+      expect([...selected.keys()]).toEqual(['task-2'])
+
+      wrapper.unmount()
+    })
+  })
+
   // 2.05 hours make 122.99999999999999 minutes in floats.
   test('saves an estimation typed in hours in whole minutes', async () => {
     const updateTask = vi.fn()

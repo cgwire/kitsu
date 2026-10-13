@@ -467,10 +467,12 @@ const selectTask = (event, index, task) => {
   }
 
   if (event && !event.shiftKey) {
-    if (isSelected && !isManySelection) {
+    // A click on a row of a multi-selection selects it alone, a Ctrl+click
+    // unselects it.
+    if (isSelected && (!isManySelection || event.ctrlKey || event.metaKey)) {
       store.dispatch('removeSelectedTask', { task })
-      selectionGrid.value[task.id] = undefined
-    } else if (!isSelected || isManySelection) {
+      delete selectionGrid.value[task.id]
+    } else {
       store.dispatch('addSelectedTask', { task })
       emit('task-selected', task)
       selectionGrid.value[task.id] = true
