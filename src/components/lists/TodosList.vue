@@ -518,13 +518,21 @@ const onKeyDown = event => {
     let index = lastSelection.value ? lastSelection.value : 0
     if ([37, 38].includes(event.keyCode)) {
       index = index - 1 < 0 ? props.tasks.length - 1 : index - 1
-      selectTask({}, index, props.tasks[index])
-      pauseEvent(event)
     } else if ([39, 40].includes(event.keyCode)) {
       index = index + 1 >= props.tasks.length ? 0 : index + 1
-      selectTask({}, index, props.tasks[index])
-      pauseEvent(event)
+    } else {
+      return
     }
+    // A field leaves with the selection of its row, and a field removed while
+    // focused fires its change once the next row is selected: commit first.
+    if (
+      event.target.nodeName === 'INPUT' &&
+      bodyRef.value?.contains(event.target)
+    ) {
+      event.target.blur()
+    }
+    selectTask({}, index, props.tasks[index])
+    pauseEvent(event)
   }
 }
 

@@ -1,5 +1,6 @@
 import { shallowMount } from '@vue/test-utils'
 import { vi } from 'vitest'
+import { nextTick } from 'vue'
 import { createStore } from 'vuex'
 
 import TaskList from '@/components/lists/TaskList.vue'
@@ -30,9 +31,10 @@ const task = {
 
 const mountList = (
   config,
-  { getters = {}, actions = {}, props = {} } = {}
+  { getters = {}, actions = {}, props = {}, attachTo } = {}
 ) =>
   shallowMount(TaskList, {
+    attachTo,
     global: {
       config,
       plugins: [
@@ -193,6 +195,48 @@ describe('lists/TaskList', () => {
 
       expect(updateTask.mock.calls.map(([, payload]) => payload)).toEqual([
         { taskId: 'task-1', data: { estimation: 0 } }
+      ])
+
+      wrapper.unmount()
+    })
+
+    // The field goes away with the selection of its row, and a browser fires
+    // the change of a field removed while focused once the next row is
+    // selected: the typed value was saved on that row.
+    test('saves the value typed before Alt+Down on its own row', async () => {
+      const next = { ...task, id: 'task-2' }
+      const updateTask = vi.fn()
+      const wrapper = mountList(undefined, {
+        getters: {
+          isCurrentUserProductionManager: () => true,
+          taskMap: () =>
+            new Map([
+              [task.id, task],
+              [next.id, next]
+            ])
+        },
+        actions: { updateTask },
+        props: { disabledDates: {}, tasks: [task, next] },
+        attachTo: document.body
+      })
+      await wrapper.find('tbody td.name').trigger('click')
+      const field = wrapper.find('tbody td.estimation input').element
+      field.focus()
+      field.value = '1'
+      // jsdom fires no change on blur, nor on the removal of a focused field
+      field.addEventListener('blur', () =>
+        field.dispatchEvent(new Event('change'))
+      )
+
+      field.dispatchEvent(
+        new KeyboardEvent('keydown', { altKey: true, keyCode: 40, bubbles: true })
+      )
+      const isFocusedAtRemoval = document.activeElement === field
+      await nextTick()
+      if (isFocusedAtRemoval) field.dispatchEvent(new Event('change'))
+
+      expect(updateTask.mock.calls.map(([, { taskId }]) => taskId)).toEqual([
+        'task-1'
       ])
 
       wrapper.unmount()

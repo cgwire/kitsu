@@ -1,5 +1,6 @@
 import { shallowMount } from '@vue/test-utils'
 import { vi } from 'vitest'
+import { nextTick } from 'vue'
 import { createStore } from 'vuex'
 
 import ToCheckList from '@/components/lists/ToCheckList.vue'
@@ -19,8 +20,14 @@ const task = {
   estimation: 240
 }
 
-const mountList = ({ getters = {}, actions = {} } = {}) =>
+const mountList = ({
+  getters = {},
+  actions = {},
+  tasks = [task],
+  attachTo
+} = {}) =>
   shallowMount(ToCheckList, {
+    attachTo,
     global: {
       plugins: [
         createStore({
@@ -47,7 +54,7 @@ const mountList = ({ getters = {}, actions = {} } = {}) =>
       ],
       stubs: { RouterLink: true }
     },
-    props: { tasks: [task] }
+    props: { tasks }
   })
 
 // What a browser reports once "1." is left in a number field: no number, so
@@ -140,6 +147,48 @@ describe('lists/ToCheckList', () => {
 
       expect(updateTask.mock.calls.map(([, payload]) => payload)).toEqual([
         { taskId: 'task-1', data: { estimation: 0 } }
+      ])
+
+      wrapper.unmount()
+    })
+
+    // The field goes away with the selection of its row, and a browser fires
+    // the change of a field removed while focused once the next row is
+    // selected: the typed value was saved on that row.
+    test('saves the value typed before Alt+Down on its own row', async () => {
+      const next = { ...task, id: 'task-2' }
+      const updateTask = vi.fn()
+      const wrapper = mountList({
+        getters: {
+          isCurrentUserManager: () => true,
+          taskMap: () =>
+            new Map([
+              [task.id, task],
+              [next.id, next]
+            ])
+        },
+        actions: { updateTask },
+        tasks: [task, next],
+        attachTo: document.body
+      })
+      await wrapper.find('tbody td.duration').trigger('click')
+      const field = wrapper.find('tbody td.estimation input').element
+      field.focus()
+      field.value = '1'
+      // jsdom fires no change on blur, nor on the removal of a focused field
+      field.addEventListener('blur', () =>
+        field.dispatchEvent(new Event('change'))
+      )
+
+      field.dispatchEvent(
+        new KeyboardEvent('keydown', { altKey: true, keyCode: 40, bubbles: true })
+      )
+      const isFocusedAtRemoval = document.activeElement === field
+      await nextTick()
+      if (isFocusedAtRemoval) field.dispatchEvent(new Event('change'))
+
+      expect(updateTask.mock.calls.map(([, { taskId }]) => taskId)).toEqual([
+        'task-1'
       ])
 
       wrapper.unmount()
