@@ -114,3 +114,21 @@ describe('Quota list', () => {
     expect(listedNames(wrapper)).toEqual([])
   })
 })
+
+// A route change of the page brings a selected cell into view 100 ms later:
+// the page can be left in between.
+describe('Quota scroll to the selection', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  test('drops the scroll of a page left right after a route change', async () => {
+    const wrapper = await mountQuota()
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    await wrapper.vm.$router.push({ path: '/', query: { year: '2025' } })
+    await flushPromises()
+    wrapper.unmount()
+
+    expect(() => vi.advanceTimersByTime(100)).not.toThrow()
+  })
+})
