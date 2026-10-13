@@ -3,6 +3,8 @@ import { vi } from 'vitest'
 import { nextTick } from 'vue'
 import { createStore } from 'vuex'
 
+import { trackTaskSelection } from '../../fixtures/task-selection'
+
 import TaskList from '@/components/lists/TaskList.vue'
 
 vi.mock('@/store', () => ({ default: {} }))
@@ -110,6 +112,24 @@ describe('lists/TaskList', () => {
 
     expect(errorHandler).not.toHaveBeenCalled()
     expect(wrapper.emitted('task-selected')).toBeUndefined()
+
+    wrapper.unmount()
+  })
+
+  // A Shift+click back to a closer row shrank the highlight only: the action
+  // panel still changed the rows left out.
+  test('gives the store only the range of the last Shift+click', async () => {
+    const tasks = ['task-1', 'task-2', 'task-3'].map(id => ({ ...task, id }))
+    const { selected, actions } = trackTaskSelection()
+    const wrapper = mountList(undefined, { actions, props: { tasks } })
+    const names = wrapper.findAll('tbody td.name')
+
+    await names[0].trigger('click')
+    await names[2].trigger('click', { shiftKey: true })
+    await names[1].trigger('click', { shiftKey: true })
+
+    expect(wrapper.findAll('tbody tr.selected')).toHaveLength(2)
+    expect([...selected.keys()]).toEqual(['task-1', 'task-2'])
 
     wrapper.unmount()
   })

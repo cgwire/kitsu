@@ -116,6 +116,23 @@ describe('lists/ToCheckList', () => {
 
       wrapper.unmount()
     })
+
+    // A Shift+click back to a closer row shrank the highlight only: the
+    // action panel still changed the rows left out.
+    test('gives the store only the range of the last Shift+click', async () => {
+      const { selected, actions } = trackTaskSelection()
+      const wrapper = mountList({ actions, tasks })
+      const cells = wrapper.findAll('tbody td.duration')
+
+      await cells[0].trigger('click')
+      await cells[2].trigger('click', { shiftKey: true })
+      await cells[1].trigger('click', { shiftKey: true })
+
+      expect(wrapper.findAll('tbody tr.selected')).toHaveLength(2)
+      expect([...selected.keys()]).toEqual(['task-1', 'task-2'])
+
+      wrapper.unmount()
+    })
   })
 
   // 2.05 hours make 122.99999999999999 minutes in floats.

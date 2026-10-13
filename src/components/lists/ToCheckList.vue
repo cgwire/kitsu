@@ -479,6 +479,8 @@ const selectTask = (event, index, task) => {
       lastSelection.value = index
     }
   } else {
+    // The range replaces the selection, and addSelectedTasks merges.
+    store.dispatch('clearSelectedTasks')
     selectionGrid.value = {}
     const taskIndices =
       lastSelection.value > index
