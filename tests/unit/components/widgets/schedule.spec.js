@@ -283,6 +283,45 @@ describe('Schedule widget - today', () => {
   })
 })
 
+// The browser still delivers a scroll queued before the unmount (the pages
+// scroll the timeline right after loading), once the template refs are null.
+describe('Schedule widget - timeline scroll', () => {
+  const mountCatchingErrors = errors =>
+    mountSchedule(
+      {},
+      {
+        global: {
+          stubs: { RouterLink: true },
+          config: { errorHandler: err => errors.push(err) }
+        }
+      }
+    )
+
+  it('keeps the entity list in line with the timeline', () => {
+    const errors = []
+    const wrapper = mountCatchingErrors(errors)
+    const timeline = wrapper.find('.timeline-content-wrapper').element
+    timeline.scrollTop = 40
+
+    timeline.dispatchEvent(new Event('scroll'))
+
+    expect(wrapper.find('.entities').element.scrollTop).toBe(40)
+    expect(errors).toEqual([])
+    wrapper.unmount()
+  })
+
+  it('ignores a scroll that reaches the detached timeline', () => {
+    const errors = []
+    const wrapper = mountCatchingErrors(errors)
+    const timeline = wrapper.find('.timeline-content-wrapper').element
+    wrapper.unmount()
+
+    timeline.dispatchEvent(new Event('scroll'))
+
+    expect(errors).toEqual([])
+  })
+})
+
 // The task type, entity and person schedules estimate each task in a field
 // next to its name.
 describe('Schedule widget - estimation field', () => {

@@ -2011,7 +2011,7 @@ const moveTimebarRightSide = (timeElement, event) => {
 }
 
 const onTimelineScroll = event => {
-  if (!event?.target) return
+  if (!event?.target || !entityListRef.value) return
   const position = event.target
   const newTop = position.scrollTop
   entityListRef.value.scrollTop = newTop
