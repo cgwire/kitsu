@@ -1683,6 +1683,35 @@ describe('ProductionSchedule page', () => {
       expect(wrapper.find('.side-column h2').text()).toBe('schedule.edit_task')
     })
 
+    const pressEscape = async () => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+      await flushPromises()
+    }
+
+    it('closes the task edit on Escape, with no Cancel button', async () => {
+      const { scheduleWidget, wrapper } = await mountAssignments()
+      await editTask(wrapper, buildChairTask())
+      expect(wrapper.find('.side-column .is-link').exists()).toBe(false)
+      const selectionResets =
+        scheduleWidget.methods.resetSelection.mock.calls.length
+
+      await pressEscape()
+
+      expect(wrapper.find('.side-column').exists()).toBe(false)
+      expect(scheduleWidget.methods.resetSelection).toHaveBeenCalledTimes(
+        selectionResets + 1
+      )
+    })
+
+    it('keeps the batch form on Escape', async () => {
+      const { wrapper } = await mountAssignments()
+      await selectProps(wrapper)
+
+      await pressEscape()
+
+      expect(wrapper.find('.side-column form').exists()).toBe(true)
+    })
+
     it('starts Assign tasks from a clean panel after a task edit', async () => {
       const { storeActions, wrapper } = await mountAssignments()
       await editTask(wrapper, buildChairTask())

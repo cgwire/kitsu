@@ -451,21 +451,14 @@
                 type="submit"
                 v-if="assignments.type === 'entity'"
               />
-              <template v-if="assignments.type === 'task'">
-                <button-simple
-                  :disabled="!getTaskEstimation(assignments.task)"
-                  :is-loading="assignments.saving"
-                  is-primary
-                  :text="$t('main.apply')"
-                  type="submit"
-                />
-                <button
-                  class="button is-link ml05"
-                  @click="unselectAndCloseSidePanel()"
-                >
-                  {{ $t('main.cancel') }}
-                </button>
-              </template>
+              <button-simple
+                :disabled="!getTaskEstimation(assignments.task)"
+                :is-loading="assignments.saving"
+                is-primary
+                :text="$t('main.apply')"
+                type="submit"
+                v-if="assignments.type === 'task'"
+              />
             </div>
           </form>
         </div>
@@ -2110,6 +2103,14 @@ const unselectAndCloseSidePanel = () => {
   closeSidePanel()
 }
 
+// Escape leaves a task edit, like a modal; the batch form stays, it
+// holds a selection worth keeping
+const onKeydown = event => {
+  if (event.key !== 'Escape' || assignments.value.type !== 'task') return
+  if (Object.values(modals.value).some(Boolean)) return
+  unselectAndCloseSidePanel()
+}
+
 const onSelectEntityGroup = groupId => {
   clearAssignmentMessages()
   assignments.value.entityTypeId = groupId
@@ -2937,11 +2938,13 @@ watch(currentEpisode, value => {
 // Lifecycle
 // --------------------------------------------------------------------------
 onMounted(() => {
+  window.addEventListener('keydown', onKeydown)
   reset()
 })
 
 onBeforeUnmount(() => {
   scheduleGeneration++
+  window.removeEventListener('keydown', onKeydown)
   if (resetTimeout.value) clearTimeout(resetTimeout.value)
 })
 
