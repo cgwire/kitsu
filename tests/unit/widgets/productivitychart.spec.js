@@ -1,5 +1,6 @@
 import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
+import { createRouter, createWebHistory } from 'vue-router'
 import { createStore } from 'vuex'
 
 import i18n from '@/lib/i18n'
@@ -22,6 +23,12 @@ const store = createStore({
     isDarkTheme: () => false,
     organisation: () => ({ hours_by_day: 7 })
   }
+})
+
+// The metric combobox resolves the route of its options.
+const router = createRouter({
+  history: createWebHistory(),
+  routes: [{ path: '/:pathMatch(.*)*', component: { template: '<div />' } }]
 })
 
 // March of last year: a full past month of 31 days.
@@ -47,7 +54,7 @@ const mountChart = props =>
       ...props
     },
     global: {
-      plugins: [i18n, store],
+      plugins: [i18n, router, store],
       components: { ColumnChart },
       stubs: { ColumnChart }
     }
@@ -185,7 +192,7 @@ describe('ProductivityChart', () => {
     const wrapper = mountChart()
     await wrapper
       .findComponent('.level-combobox')
-      .vm.$emit('update:modelValue', 'week')
+      .vm.$emit('update:model-value', 'week')
     expect(wrapper.emitted('level-changed')).toEqual([['week']])
   })
 
@@ -313,7 +320,7 @@ describe('ProductivityChart', () => {
       const wrapper = mountChart()
       await wrapper
         .findComponent('.metric-combobox')
-        .vm.$emit('update:modelValue', 'quotas')
+        .vm.$emit('update:model-value', 'quotas')
       expect(wrapper.emitted('metric-changed')).toEqual([['quotas']])
     })
 
