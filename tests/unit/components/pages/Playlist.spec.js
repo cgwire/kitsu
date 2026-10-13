@@ -849,3 +849,54 @@ describe('Playlist page, entries without preview', () => {
     expect(entities.map(e => e.preview_file_id)).toEqual([undefined, ''])
   })
 })
+
+// The browser still delivers a scroll queued before the unmount, or before the
+// spinner replaced the entities to add, once their template ref is null.
+describe('Playlist page, side column scroll', () => {
+  const catchErrors = wrapper => {
+    const errorHandler = vi.fn()
+    wrapper.vm.$.appContext.config.errorHandler = errorHandler
+    return errorHandler
+  }
+
+  it('ignores a scroll that reaches the detached playlist list', async () => {
+    const { wrapper, actions } = await mountPage()
+    await flushPromises()
+    const errorHandler = catchErrors(wrapper)
+    const list = wrapper.find('.playlist-list-column').element
+    actions.loadMorePlaylists.mockClear()
+    wrapper.unmount()
+
+    list.dispatchEvent(new Event('scroll'))
+
+    expect(errorHandler).not.toHaveBeenCalled()
+    expect(actions.loadMorePlaylists).not.toHaveBeenCalled()
+  })
+
+  it('ignores a scroll of the addition panel while its shots load', async () => {
+    const { wrapper, actions } = await openPlaylist(
+      {},
+      { state: { isShotsLoading: true } }
+    )
+    await flushPromises()
+    const errorHandler = catchErrors(wrapper)
+
+    await wrapper.find('.addition-section').trigger('scroll')
+
+    expect(errorHandler).not.toHaveBeenCalled()
+    expect(actions.displayMoreShots).not.toHaveBeenCalled()
+  })
+
+  it('ignores a scroll that reaches the detached addition panel', async () => {
+    const { wrapper, actions } = await openPlaylist()
+    await flushPromises()
+    const errorHandler = catchErrors(wrapper)
+    const panel = wrapper.find('.addition-section').element
+    wrapper.unmount()
+
+    panel.dispatchEvent(new Event('scroll'))
+
+    expect(errorHandler).not.toHaveBeenCalled()
+    expect(actions.displayMoreShots).not.toHaveBeenCalled()
+  })
+})
