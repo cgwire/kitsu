@@ -1484,14 +1484,23 @@
       "tasks": "Tarefas"
     },
     "schedule": {
+      "already_assigned": "Já atribuído",
       "apply_to_prod": "Aplicar à produção",
       "apply_to_prod_confirm": "Tem certeza de que deseja aplicar essa versão do cronograma à produção atual? Isso substituirá os valores atuais da tarefa.",
       "apply_to_prod_error": "Ocorreu um erro ao aplicar a versão do cronograma à produção atual.",
       "assign": "Atribuir a:",
+      "assign_done": "{count} tarefa planejada. | {count} tarefas planejadas.",
       "assign_error": "Não foi possível atribuir as tarefas. Tente novamente.",
+      "assign_help_entity_group": "Escolha uma sequência, um tipo de asset ou um episódio: as suas entidades a planear são listadas abaixo, remova as que quer deixar de fora. O botão ao lado do tipo de tarefa também lista as entidades já atribuídas.",
+      "assign_help_form": "A tarefa de cada entidade é planejada para uma das pessoas atribuídas dentro do período.",
+      "assign_help_task": "Altere a data de início, a estimativa e as pessoas atribuídas à tarefa. A data de fim é deduzida da data de início e da estimativa.",
+      "assign_help_task_type": "Escolha um tipo de tarefa para listar as sequências, planos ou assets com uma tarefa desse tipo ainda não atribuída a ninguém.",
       "assign_no_fit": "{count} tarefa não coube no intervalo de datas. | {count} tarefas não couberam no intervalo de datas.",
+      "batch_schedule": "Planejar tarefas em lote",
       "confirm_move_children": "Mover esta barra vai cortar ou ajustar {count} subitem para caber nos novos limites. Continuar? | Mover esta barra vai cortar ou ajustar {count} subitens para caberem nos novos limites. Continuar?",
       "create_version": "Criar versão do cronograma",
+      "daily_quota": "Tarefas por pessoa por dia",
+      "daily_quota_help": "Vazio: as tarefas são distribuídas uniformemente pelo período, {quota} por pessoa por dia. Um valor menor deixa tarefas fora do período, um maior termina antes.",
       "delete_version": "Excluir versão do cronograma",
       "delete_version_error": "Ocorreu um erro ao excluir essa versão do cronograma. Entre em contato com nossa equipe de suporte.",
       "delete_version_message": "Tem certeza de que deseja excluir a versão do cronograma {name}? Confirme digitando o nome da versão do cronograma abaixo.",
@@ -1504,7 +1513,6 @@
       "edit_version": "Editar versão do cronograma",
       "edit_version_error": "Ocorreu um erro ao salvar a versão do cronograma. Tente novamente.",
       "edit_version_exist": "Já existe uma versão com um nome semelhante.",
-      "estimated_daily_quotas": "Estimativa automática de cotas diárias:",
       "export": "Exportar cronograma",
       "export_error": "Ocorreu um erro durante a exportação de dados.",
       "fields": {
@@ -1514,7 +1522,7 @@
         "locked": "Versão bloqueada"
       },
       "force_unassign": "Substituir atribuições anteriores",
-      "forced_daily_quotas": "Cotas diárias forçadas:",
+      "force_unassign_help": "Remove as pessoas atualmente atribuídas a estas tarefas antes de atribuir as pessoas listadas acima.",
       "hours": "h",
       "md": "md",
       "milestone": {
@@ -1532,6 +1540,7 @@
       "no_entity": "Nenhuma entidade atribuível",
       "reset_list": "Redefinir lista",
       "save_task_error": "Não foi possível salvar a tarefa. Tente novamente.",
+      "select_entity_group": "Selecionar um grupo de entidades",
       "select_task_type": "Selecione um tipo de tarefa",
       "show_assigned": "Mostrar entidades atribuídas",
       "title": "Cronograma",

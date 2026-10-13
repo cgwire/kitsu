@@ -1484,14 +1484,23 @@
       "tasks": "Task"
     },
     "schedule": {
+      "already_assigned": "Già assegnato",
       "apply_to_prod": "Applica alla produzione",
       "apply_to_prod_confirm": "Sei sicuro di voler applicare questa versione della pianificazione alla produzione corrente? I valori attuali dei task verranno sovrascritti.",
       "apply_to_prod_error": "Si è verificato un errore durante l'applicazione della versione della pianificazione alla produzione corrente.",
       "assign": "Assegna a:",
+      "assign_done": "{count} task pianificato. | {count} task pianificati.",
       "assign_error": "Impossibile assegnare i task. Riprova.",
+      "assign_help_entity_group": "Scegli una sequenza, un tipo di asset o un episodio: le sue entità da pianificare sono elencate sotto, rimuovi quelle da escludere. Il pulsante accanto al tipo di attività elenca anche le entità già assegnate.",
+      "assign_help_form": "Il task di ogni entità è pianificato per una delle persone assegnate entro il periodo.",
+      "assign_help_task": "Modifica la data di inizio, la stima e le persone assegnate all'attività. La data di fine è ricavata dalla data di inizio e dalla stima.",
+      "assign_help_task_type": "Scegli un tipo di attività per elencare le sequenze, le inquadrature o gli asset con un'attività di quel tipo non ancora assegnata a nessuno.",
       "assign_no_fit": "{count} task non è rientrato nell'intervallo di date. | {count} task non sono rientrati nell'intervallo di date.",
+      "batch_schedule": "Pianifica task in blocco",
       "confirm_move_children": "Spostare questa barra ritaglierà o sposterà {count} sotto-elemento per adattarlo ai nuovi limiti. Vuoi continuare? | Spostare questa barra ritaglierà o sposterà {count} sotto-elementi per adattarli ai nuovi limiti. Vuoi continuare?",
       "create_version": "Crea una versione della pianificazione",
+      "daily_quota": "Task per persona al giorno",
+      "daily_quota_help": "Vuoto: i task sono distribuiti uniformemente nel periodo, {quota} per persona al giorno. Un valore più basso lascia task fuori dal periodo, uno più alto termina prima.",
       "delete_version": "Elimina la versione della pianificazione",
       "delete_version_error": "Si è verificato un errore durante l'eliminazione di questa versione della pianificazione. Contatta il nostro team di supporto.",
       "delete_version_message": "Sei sicuro di voler eliminare la versione della pianificazione {name}? Conferma digitando qui sotto il nome della versione della pianificazione.",
@@ -1504,7 +1513,6 @@
       "edit_version": "Modifica la versione della pianificazione",
       "edit_version_error": "Si è verificato un errore durante il salvataggio della versione della pianificazione. Riprova.",
       "edit_version_exist": "Esiste già una versione con un nome simile.",
-      "estimated_daily_quotas": "Quote giornaliere stimate automaticamente:",
       "export": "Esporta pianificazione",
       "export_error": "Si è verificato un errore durante l'esportazione dei dati.",
       "fields": {
@@ -1514,7 +1522,7 @@
         "locked": "Versione bloccata"
       },
       "force_unassign": "Sovrascrivi le assegnazioni precedenti",
-      "forced_daily_quotas": "Quote giornaliere forzate:",
+      "force_unassign_help": "Rimuove le persone attualmente assegnate a queste attività prima di assegnare le persone elencate sopra.",
       "hours": "h",
       "md": "gp",
       "milestone": {
@@ -1532,6 +1540,7 @@
       "no_entity": "Nessuna entità assegnabile",
       "reset_list": "Reimposta la lista",
       "save_task_error": "Impossibile salvare il task. Riprova.",
+      "select_entity_group": "Seleziona un gruppo di entità",
       "select_task_type": "Seleziona un tipo di task",
       "show_assigned": "Mostra le entità assegnate",
       "title": "Pianificazione",

@@ -1484,14 +1484,23 @@
       "tasks": "Taken"
     },
     "schedule": {
+      "already_assigned": "Al toegewezen",
       "apply_to_prod": "Toepassen op productie",
       "apply_to_prod_confirm": "Weet je zeker dat je deze planningsversie wilt toepassen op de huidige productie? Dit overschrijft de huidige taakwaarden.",
       "apply_to_prod_error": "Er is een fout opgetreden tijdens het toepassen van de versie van de planning op de huidige productie.",
       "assign": "Toewijzen aan:",
+      "assign_done": "{count} taak gepland. | {count} taken gepland.",
       "assign_error": "Kon de taken niet toewijzen. Probeer het opnieuw.",
+      "assign_help_entity_group": "Kies een sequentie, assettype of aflevering: de te plannen entiteiten staan hieronder, verwijder de entiteiten die u wilt weglaten. De knop naast het taaktype toont ook de al toegewezen entiteiten.",
+      "assign_help_form": "De taak van elke entiteit wordt binnen de periode voor één van de toegewezen personen gepland.",
+      "assign_help_task": "Wijzig de startdatum, de schatting en de toegewezen personen van de taak. De einddatum volgt uit de startdatum en de schatting.",
+      "assign_help_task_type": "Kies een taaktype om de sequenties, shots of assets te tonen met een taak van dat type die nog aan niemand is toegewezen.",
       "assign_no_fit": "{count} taak paste niet in het datumbereik. | {count} taken pasten niet in het datumbereik.",
+      "batch_schedule": "Taken in bulk plannen",
       "confirm_move_children": "Het verplaatsen van deze balk zal {count} subitem bijsnijden of verschuiven om binnen de nieuwe grenzen te passen. Doorgaan? | Het verplaatsen van deze balk zal {count} subitems bijsnijden of verschuiven om binnen de nieuwe grenzen te passen. Doorgaan?",
       "create_version": "Planningsversie maken",
+      "daily_quota": "Taken per persoon per dag",
+      "daily_quota_help": "Leeg: de taken worden gelijkmatig over de periode verdeeld, {quota} per persoon per dag. Een lagere waarde laat taken buiten de periode vallen, een hogere is eerder klaar.",
       "delete_version": "Planningsversie verwijderen",
       "delete_version_error": "Er is een fout opgetreden tijdens het verwijderen van deze planningsversie. Neem contact op met ons ondersteuningsteam.",
       "delete_version_message": "Weet je zeker dat je de planningsversie {name} wilt verwijderen? Bevestig dit door de naam van de planningsversie hieronder in te voeren.",
@@ -1504,7 +1513,6 @@
       "edit_version": "Planningsversie bewerken",
       "edit_version_error": "Er is een fout opgetreden tijdens het opslaan van de planningsversie. Probeer het opnieuw.",
       "edit_version_exist": "Er bestaat al een versie met een vergelijkbare naam.",
-      "estimated_daily_quotas": "Automatisch geschatte dagelijkse quota:",
       "export": "Planning exporteren",
       "export_error": "Er is een fout opgetreden tijdens het exporteren van gegevens.",
       "fields": {
@@ -1514,7 +1522,7 @@
         "locked": "Vergrendelde versie"
       },
       "force_unassign": "Vorige toewijzingen overschrijven",
-      "forced_daily_quotas": "Gedwongen dagelijkse quota:",
+      "force_unassign_help": "Verwijdert de huidige toegewezen personen van deze taken voordat de hierboven vermelde personen worden toegewezen.",
       "hours": "u",
       "md": "md",
       "milestone": {
@@ -1532,6 +1540,7 @@
       "no_entity": "Geen toewijsbare entiteit",
       "reset_list": "Lijst resetten",
       "save_task_error": "Kon de taak niet opslaan. Probeer het opnieuw.",
+      "select_entity_group": "Selecteer een groep entiteiten",
       "select_task_type": "Selecteer een taaktype...",
       "show_assigned": "Toegewezen entiteiten weergeven",
       "title": "Planning",

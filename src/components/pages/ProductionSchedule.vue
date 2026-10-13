@@ -125,7 +125,7 @@
             class="flexrow-item"
             :disabled="isLockedSchedule"
             icon="list"
-            :text="$t('menu.assign_tasks')"
+            :text="$t('schedule.batch_schedule')"
             @click="toggleSidePanel"
             v-if="!isAllEpisodes"
           />
@@ -150,13 +150,12 @@
         @expand-all="onScheduleExpandAll"
         @item-assign="onScheduleItemAssigned"
         @item-changed="onScheduleItemChanged"
-        @item-drop="onScheduleItemDropped"
         @item-selected="selectTaskTypeElement"
         @item-unassign="onScheduleItemUnassigned"
         @root-element-expanded="expandTaskTypeElement"
         @root-element-selected="selectParentElement"
         @task-selected="selectTaskElement"
-        @task-unselected="closeSidePanel()"
+        @task-unselected="onTaskUnselected"
       />
     </div>
 
@@ -165,26 +164,27 @@
       v-if="isSidePanelOpen && !isLockedSchedule && !isAllEpisodes"
     >
       <div class="side">
-        <a
-          class="close-button"
-          role="button"
-          tabindex="0"
-          @click="unselectAndCloseSidePanel"
-          @keydown.enter.prevent="unselectAndCloseSidePanel"
-          @keydown.space.prevent="unselectAndCloseSidePanel"
-        >
-          <x-icon class="align-middle" :size="16" />
-        </a>
-        <h2 class="mt1">
-          {{
-            assignments.type === 'task'
-              ? $t('schedule.edit_task')
-              : $t('menu.assign_tasks')
-          }}
-        </h2>
-        <div class="details">
+        <div class="side-header">
+          <h2>
+            {{
+              assignments.type === 'task'
+                ? $t('schedule.edit_task')
+                : $t('schedule.batch_schedule')
+            }}
+          </h2>
+          <a
+            class="close-button"
+            role="button"
+            tabindex="0"
+            @click="unselectAndCloseSidePanel"
+            @keydown.enter.prevent="unselectAndCloseSidePanel"
+            @keydown.space.prevent="unselectAndCloseSidePanel"
+          >
+            <x-icon class="align-middle" :size="16" />
+          </a>
+        </div>
+        <div class="details" v-if="assignments.type !== 'task'">
           <combobox-task-type
-            class="mb05"
             add-placeholder
             :placeholder="$t('schedule.select_task_type')"
             :label="$t('news.task_type')"
@@ -193,102 +193,35 @@
             @update:model-value="onSelectTaskType"
           />
           <button-simple
-            class="mt2 mb05"
             icon="user-check"
             :is-on="assignments.assigned"
             :title="$t('schedule.show_assigned')"
             @click="assignments.assigned = !assignments.assigned"
-            v-if="
-              !assignments.loading &&
-              assignments.entityTypes?.length &&
-              !assignments.type
-            "
+            v-if="!assignments.loading && assignments.entityTypes?.length"
           />
         </div>
+        <combobox
+          class="mt1"
+          :label="entityGroupLabel"
+          :options="entityGroupOptions"
+          :model-value="assignments.entityTypeId"
+          @update:model-value="onSelectEntityGroup"
+          v-if="
+            !assignments.loading &&
+            assignments.entityTypes &&
+            assignments.type !== 'task'
+          "
+        />
+        <p class="side-help">{{ sideHelp }}</p>
         <div class="mt2" v-if="assignments.loading">
           <spinner class="mauto" :size="20" />
         </div>
-        <ul class="assignments parent mt1" v-else-if="!assignments.type">
-          <li
-            :key="entityType.id"
-            v-for="entityType in assignments.entityTypes"
-          >
-            <div
-              class="assignment-item"
-              draggable="true"
-              role="button"
-              tabindex="0"
-              @dragstart="
-                onAssignmentItemDragStart($event, entityType, selectedTaskType)
-              "
-              @click="onAssignmentItemSelected(entityType)"
-              @keydown.enter.prevent="onAssignmentItemSelected(entityType)"
-            >
-              <grip-vertical-icon class="icon" />
-              <span class="name">
-                {{ entityType.name }}
-                ({{ filteredAssignments(entityType.children).length }})
-              </span>
-              <span
-                class="expand"
-                role="button"
-                tabindex="0"
-                @click.stop="entityType.expanded = !entityType.expanded"
-                @keydown.enter.stop.prevent="
-                  entityType.expanded = !entityType.expanded
-                "
-                @keydown.space.stop.prevent="
-                  entityType.expanded = !entityType.expanded
-                "
-              >
-                <chevron-right-icon v-if="!entityType.expanded" />
-                <chevron-down-icon v-else />
-              </span>
-            </div>
-            <ul class="assignments children" v-if="entityType.expanded">
-              <li
-                :key="child.id"
-                v-for="child in filteredAssignments(entityType.children)"
-              >
-                <div
-                  class="assignment-item"
-                  draggable="true"
-                  role="button"
-                  tabindex="0"
-                  @dragstart="
-                    onAssignmentItemDragStart(
-                      $event,
-                      { ...entityType, children: [child] },
-                      selectedTaskType
-                    )
-                  "
-                  @click="
-                    onAssignmentItemSelected({
-                      ...entityType,
-                      children: [child]
-                    })
-                  "
-                  @keydown.enter.prevent="
-                    onAssignmentItemSelected({
-                      ...entityType,
-                      children: [child]
-                    })
-                  "
-                >
-                  <grip-vertical-icon class="icon" />
-                  <span class="name">{{ child.name }}</span>
-                </div>
-              </li>
-            </ul>
-          </li>
-        </ul>
-        <div class="assignments mt1" v-else>
-          <form class="mt1" @submit.prevent="submitAssignments()">
-            <div class="flexrow">
+        <div class="assignments" v-else-if="assignments.type">
+          <form @submit.prevent="submitAssignments()">
+            <div class="flexrow" v-if="assignments.type === 'entity'">
               <div class="flexrow-item">
                 <date-field
                   :can-delete="false"
-                  :disabled="assignments.type !== 'entity'"
                   :label="$t('main.start_date')"
                   utc
                   v-model="assignments.startDate"
@@ -297,132 +230,151 @@
               <div class="flexrow-item">
                 <date-field
                   :can-delete="false"
-                  :disabled="assignments.type !== 'entity'"
                   :label="$t('main.end_date')"
                   utc
                   v-model="assignments.endDate"
                 />
               </div>
             </div>
-            <div :key="item.id" v-for="item in draggedEntities">
-              <div
-                class="dragged-type"
-                :style="{
-                  background: selectedTaskType.color
-                }"
-              >
-                {{ item.name }}
-              </div>
-              <div v-if="!item.children.length">
-                {{ $t('schedule.no_entity') }}
-              </div>
-              <ul class="dragged-items" v-else>
-                <li
-                  class="dragged-item"
-                  :key="child.id"
-                  :style="{
-                    background: `color-mix(in srgb, ${selectedTaskType.color} 40%, transparent)`,
-                    'border-left': `4px solid ${selectedTaskType.color}`
-                  }"
-                  v-for="child in item.children"
+            <template v-if="assignments.type === 'entity'">
+              <div class="list-header">
+                <span>
+                  {{ $t('main.entities') }} ({{ selectedEntities.length }})
+                </span>
+                <a
+                  class="reset-list"
+                  :title="$t('schedule.reset_list')"
+                  role="button"
+                  tabindex="0"
+                  @click="assignments.entityExcludes = []"
+                  @keydown.enter.prevent="assignments.entityExcludes = []"
+                  @keydown.space.prevent="assignments.entityExcludes = []"
+                  v-if="assignments.entityExcludes.length"
                 >
-                  {{ item.name }} / {{ child.name }}
+                  <list-restart-icon
+                    class="align-middle"
+                    :size="18"
+                    :stroke-width="1.5"
+                  />
+                </a>
+              </div>
+              <ul class="side-list entities">
+                <li
+                  :class="{ assigned: entity.assigned }"
+                  :key="entity.id"
+                  v-for="entity in selectedEntities"
+                >
+                  <span class="name">{{ entity.name }}</span>
+                  <user-check-icon
+                    class="assigned-icon"
+                    :size="14"
+                    v-if="entity.assigned"
+                  >
+                    <title>{{ $t('schedule.already_assigned') }}</title>
+                  </user-check-icon>
+                  <button-simple
+                    class="is-small"
+                    icon="minus"
+                    :title="$t('main.remove')"
+                    type="button"
+                    @click="removeEntity(entity)"
+                  />
+                </li>
+                <li class="empty" v-if="!selectedEntities.length">
+                  {{ $t('schedule.no_entity') }}
                 </li>
               </ul>
-              <hr />
+            </template>
+            <div class="list-header">
+              <span>{{ $t('schedule.assign') }}</span>
+              <a
+                class="reset-list reset-assignees"
+                :title="$t('schedule.reset_list')"
+                role="button"
+                tabindex="0"
+                @click="assignments.excludes = []"
+                @keydown.enter.prevent="assignments.excludes = []"
+                @keydown.space.prevent="assignments.excludes = []"
+                v-if="assignments.excludes.length"
+              >
+                <list-restart-icon
+                  class="align-middle"
+                  :size="18"
+                  :stroke-width="1.5"
+                />
+              </a>
             </div>
-            <table class="assignees">
-              <thead>
-                <tr>
-                  <td>
-                    {{ $t('schedule.assign') }}
-                    <a
-                      class="reset-assignees"
-                      :title="$t('schedule.reset_list')"
-                      role="button"
-                      tabindex="0"
-                      @click="assignments.excludes = []"
-                      @keydown.enter.prevent="assignments.excludes = []"
-                      @keydown.space.prevent="assignments.excludes = []"
-                      v-if="assignments.excludes.length"
-                    >
-                      <list-restart-icon
-                        class="align-middle"
-                        :size="18"
-                        :stroke-width="1.5"
-                      />
-                    </a>
-                  </td>
-                </tr>
-              </thead>
-              <tbody v-if="!availablePersons.length">
-                <tr>
-                  <td class="has-text-centered">
-                    {{ $t('schedule.no_assignee') }}
-                  </td>
-                </tr>
-              </tbody>
-              <tbody v-else>
-                <tr :key="person.id" v-for="person in availablePersons">
-                  <td class="assignee">
-                    <div class="person">
-                      <people-avatar
-                        :is-link="false"
-                        :font-size="14"
-                        :person="person"
-                        :size="28"
-                      />
-                      <people-name :person="person" />
-                    </div>
-                    <button-simple
-                      class="is-small"
-                      icon="minus"
-                      :title="
-                        $t('main.avatar.unassign', {
-                          personName: person.name
-                        })
-                      "
-                      type="button"
-                      @click="removeFromAssignments(person)"
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            <ul class="side-list assignees">
+              <li :key="person.id" v-for="person in availablePersons">
+                <div class="person">
+                  <people-avatar
+                    :is-link="false"
+                    :font-size="14"
+                    :person="person"
+                    :size="28"
+                  />
+                  <people-name :person="person" />
+                </div>
+                <button-simple
+                  class="is-small"
+                  icon="minus"
+                  :title="
+                    $t('main.avatar.unassign', {
+                      personName: person.name
+                    })
+                  "
+                  type="button"
+                  @click="removeFromAssignments(person)"
+                />
+              </li>
+              <li class="empty" v-if="!availablePersons.length">
+                {{ $t('schedule.no_assignee') }}
+              </li>
+            </ul>
             <checkbox
-              class="pa05"
+              class="pa05 mb0 mt1"
               :disabled="!availablePersons.length"
               :label="$t('schedule.force_unassign')"
               :toggle="true"
               v-model="assignments.unassign"
               v-if="assignments.type === 'entity'"
             />
-            <div class="flexrow mt2" v-if="assignments.type === 'entity'">
-              <label class="mr05">
-                {{ $t('schedule.forced_daily_quotas') }}
-              </label>
-              <text-field
-                class="mb0 daily-quotas"
-                input-class=" is-small"
-                :step="0.01"
-                type="number"
-                v-model="assignments.forcedDailyQuota"
-              />
-              <a
-                class="reset-quotas ml05"
-                role="button"
-                tabindex="0"
-                @click="assignments.forcedDailyQuota = null"
-                @keydown.enter.prevent="assignments.forcedDailyQuota = null"
-                @keydown.space.prevent="assignments.forcedDailyQuota = null"
-                v-if="assignments.forcedDailyQuota"
-              >
-                <trash-icon class="align-middle" :size="14" />
-              </a>
-            </div>
-            <div class="mt2" v-if="assignments.type === 'entity'">
-              {{ $t('schedule.estimated_daily_quotas') }}
-              {{ estimatedDailyQuota.toFixed(2) }}
+            <p
+              class="side-help override-help"
+              v-if="assignments.type === 'entity'"
+            >
+              {{ $t('schedule.force_unassign_help') }}
+            </p>
+            <div class="quota" v-if="assignments.type === 'entity'">
+              <div class="list-header">{{ $t('schedule.daily_quota') }}</div>
+              <div class="flexrow">
+                <text-field
+                  class="mb0 daily-quotas"
+                  input-class=" is-small"
+                  :placeholder="estimatedDailyQuota.toFixed(2)"
+                  :step="0.01"
+                  type="number"
+                  v-model="assignments.forcedDailyQuota"
+                />
+                <a
+                  class="reset-quotas ml05"
+                  role="button"
+                  tabindex="0"
+                  @click="assignments.forcedDailyQuota = null"
+                  @keydown.enter.prevent="assignments.forcedDailyQuota = null"
+                  @keydown.space.prevent="assignments.forcedDailyQuota = null"
+                  v-if="assignments.forcedDailyQuota"
+                >
+                  <trash-icon class="align-middle" :size="14" />
+                </a>
+              </div>
+              <p class="side-help">
+                {{
+                  $t('schedule.daily_quota_help', {
+                    quota: estimatedDailyQuota.toFixed(2)
+                  })
+                }}
+              </p>
             </div>
             <div class="flexrow mt2" v-if="assignments.type === 'task'">
               <div class="flexrow-item">
@@ -478,25 +430,27 @@
                 }}
               </em>
             </p>
+            <p
+              class="success has-text-right mt2"
+              v-if="assignments.nbPlannedTasks"
+            >
+              <em>
+                {{
+                  $t('schedule.assign_done', {
+                    count: assignments.nbPlannedTasks
+                  })
+                }}
+              </em>
+            </p>
             <div class="mt2 has-text-right">
-              <template v-if="assignments.type === 'entity'">
-                <button-simple
-                  :disabled="!hasDraggedEntities || !availablePersons.length"
-                  :is-loading="assignments.saving"
-                  is-primary
-                  :text="$t('main.apply')"
-                  type="submit"
-                />
-                <button
-                  class="button is-link ml05"
-                  :disabled="assignments.saving"
-                  :text="$t('main.back')"
-                  type="button"
-                  @click="assignments.type = null"
-                >
-                  {{ $t('main.back') }}
-                </button>
-              </template>
+              <button-simple
+                :disabled="!hasDraggedEntities || !availablePersons.length"
+                :is-loading="assignments.saving"
+                is-primary
+                :text="$t('main.apply')"
+                type="submit"
+                v-if="assignments.type === 'entity'"
+              />
               <template v-if="assignments.type === 'task'">
                 <button-simple
                   :disabled="!getTaskEstimation(assignments.task)"
@@ -577,11 +531,9 @@
 
 import { useHead } from '@unhead/vue'
 import {
-  ChevronDownIcon,
-  ChevronRightIcon,
-  GripVerticalIcon,
   ListRestartIcon,
   TrashIcon,
+  UserCheckIcon,
   XIcon
 } from 'lucide-vue-next'
 import moment from 'moment-timezone'
@@ -675,11 +627,14 @@ const { durationUnit, formatDuration } = useFormat()
 // --------------------------------------------------------------------------
 const assignments = ref({
   assigned: false,
+  entityExcludes: [],
+  entityTypeId: '',
   entityTypes: null,
   excludes: [],
   forcedDailyQuota: null,
   isError: false,
   loading: false,
+  nbPlannedTasks: 0,
   nbUnfitTasks: 0,
   saving: false,
   startDate: null,
@@ -693,7 +648,7 @@ const daysOffByPerson = ref({})
 const daysOffRangeKey = ref(null)
 // production, episode and entity kind already loaded, see loadEntities
 const loadedEntityKeys = new Set()
-const draggedEntities = ref([])
+const taskEntities = ref([])
 const endDate = ref(getUserDay().add(6, 'months').endOf('day'))
 const entityType = ref(null)
 const expandAll = ref(false)
@@ -765,6 +720,55 @@ const modeOptions = computed(() => [
   { label: t('schedule.mode_prev'), value: 'prev' },
   { label: t('schedule.mode_real'), value: 'real' }
 ])
+
+const selectedGroup = computed(() =>
+  assignments.value.entityTypes?.find(
+    group => group.id === assignments.value.entityTypeId
+  )
+)
+
+const selectedEntities = computed(() =>
+  selectedGroup.value
+    ? filteredAssignments(selectedGroup.value.children).filter(
+        entity => !assignments.value.entityExcludes.includes(entity.id)
+      )
+    : []
+)
+
+// what Apply plans: the edited task, or the selected group minus the
+// entities taken out
+const draggedEntities = computed(() => {
+  if (assignments.value.type === 'task') return taskEntities.value
+  return selectedGroup.value
+    ? [{ ...selectedGroup.value, children: selectedEntities.value }]
+    : []
+})
+
+const entityGroupLabel = computed(() => {
+  const forEntity = selectedTaskType.value?.for_entity
+  if (forEntity === 'Asset') return t('asset_types.title')
+  if (forEntity === 'Shot') return t('sequences.title')
+  if (['Sequence', 'Edit'].includes(forEntity)) return t('episodes.title')
+  return t('main.entities')
+})
+
+const entityGroupOptions = computed(() => [
+  { label: t('schedule.select_entity_group'), value: '' },
+  ...(assignments.value.entityTypes ?? []).map(group => ({
+    label: `${group.name} (${filteredAssignments(group.children).length})`,
+    value: group.id
+  }))
+])
+
+const sideHelp = computed(() => {
+  if (assignments.value.type === 'task') return t('schedule.assign_help_task')
+  if (assignments.value.type === 'entity') {
+    return t('schedule.assign_help_form')
+  }
+  return selectedTaskType.value
+    ? t('schedule.assign_help_entity_group')
+    : t('schedule.assign_help_task_type')
+})
 
 const estimatedDailyQuota = computed(() => {
   const rangeStartDate = parseSimpleDate(assignments.value.startDate)
@@ -1748,11 +1752,14 @@ const scrollScheduleToToday = () => {
 const resetSidePanel = () => {
   assignments.value = {
     ...assignments.value,
+    entityExcludes: [],
+    entityTypeId: '',
     entityTypes: null,
     excludes: [],
     forcedDailyQuota: null,
     isError: false,
     loading: false,
+    nbPlannedTasks: 0,
     nbUnfitTasks: 0,
     saving: false,
     startDate: null,
@@ -1765,6 +1772,7 @@ const resetSidePanel = () => {
 
 const clearAssignmentMessages = () => {
   assignments.value.isError = false
+  assignments.value.nbPlannedTasks = 0
   assignments.value.nbUnfitTasks = 0
 }
 
@@ -1933,7 +1941,6 @@ const selectTaskTypeElement = async (
           id: sequenceId,
           name: shots[0].sequence_name,
           for_entity: taskType.for_entity,
-          expanded: sequenceId === selectedEntityType?.object_id,
           children: shots
         }
       }
@@ -1967,7 +1974,6 @@ const selectTaskTypeElement = async (
           id: groupId,
           name: sequences[0].episode_name || currentProduction.value.name,
           for_entity: taskType.for_entity,
-          expanded: groupId === selectedEntityType?.object_id,
           children: sequences
         }
       }
@@ -1992,7 +1998,6 @@ const selectTaskTypeElement = async (
         id: taskType.for_entity,
         name: currentProduction.value.name,
         for_entity: taskType.for_entity,
-        expanded: true,
         children: episodes
       }
     ]
@@ -2022,17 +2027,36 @@ const selectTaskTypeElement = async (
         id: groupId,
         name: edits[0].episode_name || currentProduction.value.name,
         for_entity: taskType.for_entity,
-        expanded: groupId === selectedEntityType?.object_id,
         children: edits
       }
     })
   }
+
+  // keep the group in use, else open on the row the schedule selected
+  if (assignments.value.type !== 'task') {
+    const groups = assignments.value.entityTypes ?? []
+    const groupId = groups.some(
+      group => group.id === assignments.value.entityTypeId
+    )
+      ? assignments.value.entityTypeId
+      : (groups.find(group => group.id === selectedEntityType?.object_id)?.id ??
+        '')
+    if (groupId !== assignments.value.entityTypeId) {
+      onSelectEntityGroup(groupId)
+    }
+  }
   assignments.value.loading = false
+}
+
+// a click outside the bars or a multi-selection ends a task edit: the
+// batch form stays, it is independent from the schedule selection
+const onTaskUnselected = () => {
+  if (assignments.value.type === 'task') closeSidePanel()
 }
 
 const selectTaskElement = (taskType, entityTypeRow, task, selection) => {
   if (selection.length !== 1) {
-    closeSidePanel()
+    onTaskUnselected()
     return
   }
 
@@ -2040,7 +2064,7 @@ const selectTaskElement = (taskType, entityTypeRow, task, selection) => {
 
   isSidePanelOpen.value = true
   selectedTaskType.value = taskType
-  draggedEntities.value = [{ ...entityTypeRow, children: [{ ...task.entity }] }]
+  taskEntities.value = [{ ...entityTypeRow, children: [{ ...task.entity }] }]
 
   assignments.value.type = 'task'
 
@@ -2086,42 +2110,22 @@ const unselectAndCloseSidePanel = () => {
   closeSidePanel()
 }
 
-const onAssignmentItemSelected = item => {
-  const today = getUserDay().toDate()
-  assignments.value.type = 'entity'
-  assignments.value.startDate = item.start_date || today
-  assignments.value.endDate = item.end_date || today
-
-  // copy: filtering item.children in place permanently dropped the
-  // assigned entities from the side panel list
-  draggedEntities.value = [
-    { ...item, children: filteredAssignments(item.children) }
-  ]
+const onSelectEntityGroup = groupId => {
   clearAssignmentMessages()
+  assignments.value.entityTypeId = groupId
+  assignments.value.entityExcludes = []
+  assignments.value.type = groupId ? 'entity' : null
+  if (groupId) {
+    // the bar of the group once its row is loaded, else the task type bar
+    const row = selectedTaskType.value
+    const bar = row.children?.find(child => child.object_id === groupId) ?? row
+    assignments.value.startDate = bar.startDate.format('YYYY-MM-DD')
+    assignments.value.endDate = bar.endDate.format('YYYY-MM-DD')
+  }
 }
 
-const onAssignmentItemDragStart = (event, item, type) => {
-  event.stopPropagation()
-  event.dataTransfer.dropEffect = 'move'
-  event.dataTransfer.effectAllowed = 'move'
-  event.dataTransfer.setData(`task-type-${type.task_type_id}`, true) // use for hack on drag over (must be lowercase)
-  event.dataTransfer.setData('taskTypeId', type.task_type_id)
-  event.dataTransfer.setData('entityId', item.id)
-
-  draggedEntities.value = [
-    { ...item, children: filteredAssignments(item.children) }
-  ]
-}
-
-const onScheduleItemDropped = (event, item) => {
-  clearAssignmentMessages()
-  assignments.value.type = 'entity'
-  const start_date = event.start_date || item.start_date
-  const end_date = parseDate(start_date).isAfter(item.end_date)
-    ? start_date
-    : item.end_date
-  assignments.value.startDate = start_date
-  assignments.value.endDate = end_date
+const removeEntity = entity => {
+  assignments.value.entityExcludes.push(entity.id)
 }
 
 const removeFromAssignments = person => {
@@ -2145,7 +2149,9 @@ const saveAssignments = async () => {
   panel.saving = true
   clearAssignmentMessages()
   try {
-    panel.nbUnfitTasks = await distributeAssignments()
+    const { nbPlannedTasks, nbUnfitTasks } = await distributeAssignments()
+    panel.nbPlannedTasks = nbPlannedTasks
+    panel.nbUnfitTasks = nbUnfitTasks
   } catch (err) {
     console.error(err)
     panel.isError = true
@@ -2173,9 +2179,10 @@ const distributeAssignments = async () => {
   const dailyQuota =
     parseFloat(assignments.value.forcedDailyQuota) || estimatedDailyQuota.value
   if (dailyQuota <= 0) {
-    return draggedEntities.value
+    const nbUnfitTasks = draggedEntities.value
       .flatMap(entityType => entityType.children)
       .filter(entity => taskByEntityId.has(entity.id)).length
+    return { nbPlannedTasks: 0, nbUnfitTasks }
   }
   const taskEstimation = 1 / dailyQuota
 
@@ -2198,6 +2205,7 @@ const distributeAssignments = async () => {
     )
   }
 
+  let nbPlannedTasks = 0
   let nbUnfitTasks = 0
 
   // assign each selected entity to each selected assignee
@@ -2327,6 +2335,7 @@ const distributeAssignments = async () => {
       }
     }
 
+    nbPlannedTasks += taskUpdates.length
     // Chunks of 5 keep the server load reasonable; a bulk endpoint in
     // zou would replace this.
     for (let i = 0; i < taskUpdates.length; i += 5) {
@@ -2359,7 +2368,7 @@ const distributeAssignments = async () => {
     )
   }
 
-  return nbUnfitTasks
+  return { nbPlannedTasks, nbUnfitTasks }
 }
 
 const saveTask = async () => {
@@ -3034,140 +3043,145 @@ useHead({
 }
 
 .side-column {
-  position: relative;
-  top: -30px;
-  right: -14px;
-  height: calc(100% + 44px);
   margin-top: 0;
-  padding: 0 1em 1em 1em;
-  background: var(--background-alt);
-  min-height: 100%;
+  padding: 0 0 0 1em;
+
+  .side {
+    background: var(--background-panel);
+    border-radius: 12px;
+    height: 100%;
+    overflow-y: auto;
+    padding: 1em;
+  }
+
+  .side-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1em;
+
+    h2 {
+      border: none;
+      color: var(--text-strong);
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      margin: 0;
+      text-transform: capitalize;
+    }
+  }
 
   .close-button {
-    position: absolute;
-    right: 1em;
+    color: var(--text);
+    opacity: 0.6;
+
+    &:hover {
+      opacity: 1;
+    }
   }
 
   .details {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    align-items: flex-end;
+    gap: 0.5em;
+
+    > :first-child {
+      flex: 1;
+      margin-bottom: 0;
+    }
+
+    :deep(.button) {
+      height: 42px;
+    }
+  }
+
+  .side-help {
+    color: var(--text);
+    font-size: 0.9em;
+    line-height: 1.4;
+    margin: 0.75em 0 1em;
+
+    &.override-help {
+      margin: 0.25em 0 1em 0.5em;
+    }
   }
 }
 
-.assignments {
-  list-style-type: none;
-  margin-left: 0;
+// the page background App.vue gives every side column
+.dark .side-column {
+  background: transparent;
+}
 
-  .assignment-item {
+.assignments {
+  .list-header {
     display: flex;
     align-items: center;
-    justify-content: center;
-    background: var(--background-selectable);
-    border: 1px solid $grey;
-    margin-top: -1px;
-    padding: 1em 1em 1em 0.5em;
-    cursor: pointer;
-
-    .icon {
-      color: $grey;
-      margin-right: 0.5em;
-      cursor: grab;
-    }
-
-    .name {
-      flex: 1;
-    }
-
-    .expand {
-      cursor: pointer;
-      opacity: 0.5;
-      height: 24px;
-
-      &:hover {
-        opacity: 1;
-      }
-    }
-  }
-
-  // odd/event items background
-  &.parent {
-    $alt-background: color-mix(
-      in srgb,
-      var(--background-selectable) 70%,
-      white 30%
-    );
-    > li:nth-child(odd) {
-      > .assignment-item {
-        background: $alt-background;
-      }
-      .assignments.children {
-        > li:nth-child(even) > .assignment-item {
-          background: $alt-background;
-        }
-      }
-    }
-    > li:nth-child(even) {
-      .assignments.children {
-        > li:nth-child(odd) > .assignment-item {
-          background: $alt-background;
-        }
-      }
-    }
-  }
-
-  &.children {
-    margin-left: 2em;
-  }
-
-  .dragged-type {
-    font-size: 12px;
+    justify-content: space-between;
+    color: var(--text);
+    font-size: 0.8em;
     font-weight: 600;
-    padding: 5px;
-    margin-bottom: 1em;
-    border-radius: 0.2em;
-    text-align: center;
-  }
+    letter-spacing: 0.05em;
+    margin: 1em 0 0.4em;
+    text-transform: uppercase;
 
-  .dragged-items {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5em;
-    list-style: none;
-    margin: 0;
-  }
-
-  .dragged-item {
-    padding: 0 0.7em;
-    border-radius: 0.2em;
-  }
-
-  .assignees {
-    .reset-assignees {
-      position: absolute;
-      right: 1.5em;
+    .reset-list {
       opacity: 0.5;
 
       &:hover {
         opacity: 1;
       }
     }
-    td {
-      padding: 0.5em;
-    }
-    tbody {
-      background: var(--background);
+  }
 
-      tr {
-        border: 1px solid var(--border);
+  // same height for the entities and the assignees, whatever their count
+  .side-list {
+    height: 150px;
+    overflow-y: auto;
+    // --border is the dark panel background itself, invisible on the panel
+    border: 1px solid var(--border-alt);
+    border-radius: 10px;
+    list-style-type: none;
+    margin: 0;
+    padding: 0.4em;
+
+    li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--background-block);
+      border-radius: 10px;
+      color: var(--text-strong);
+      padding: 0.3em 0.4em 0.3em 0.75em;
+
+      & + li {
+        margin-top: 0.3em;
+      }
+
+      &.empty {
+        background: none;
+        color: var(--text);
+        justify-content: center;
+        padding: 1em;
+      }
+
+      .name {
+        flex: 1;
+      }
+
+      // shown on demand: fainter than the entities still to plan
+      &.assigned {
+        background: transparent;
+        border: 1px dashed var(--border-alt);
+        color: var(--text);
+      }
+
+      .assigned-icon {
+        color: $green;
+        flex: none;
+        margin-right: 0.6em;
       }
     }
-    .assignee {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+
     .person {
       display: flex;
       align-items: center;
@@ -3175,8 +3189,12 @@ useHead({
     }
   }
 
+  .quota {
+    margin-top: 1.5em;
+  }
+
   .daily-quotas {
-    width: 50px;
+    width: 80px;
   }
   .reset-quotas {
     opacity: 0.5;

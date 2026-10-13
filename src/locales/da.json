@@ -1484,14 +1484,23 @@
       "tasks": "Opgaver"
     },
     "schedule": {
+      "already_assigned": "Allerede tildelt",
       "apply_to_prod": "Anvend til produktion",
       "apply_to_prod_confirm": "Er du sikker på, at du vil anvende denne version af tidsplanen på den aktuelle produktion? Dette vil tilsidesætte de aktuelle opgaveværdier.",
       "apply_to_prod_error": "Der opstod en fejl under anvendelse af versionen af tidsplanen på den aktuelle produktion.",
       "assign": "Tildel til:",
+      "assign_done": "{count} opgave planlagt. | {count} opgaver planlagt.",
       "assign_error": "Opgaverne kunne ikke tildeles. Prøv venligst igen.",
+      "assign_help_entity_group": "Vælg en sekvens, en assettype eller en episode: dens enheder til planlægning vises nedenfor, fjern dem, der skal udelades. Knappen ved siden af opgavetypen viser også de allerede tildelte enheder.",
+      "assign_help_form": "Hver enheds opgave planlægges for én af de tildelte personer inden for perioden.",
+      "assign_help_task": "Ændr startdato, estimat og tildelte personer for opgaven. Slutdatoen udledes af startdatoen og estimatet.",
+      "assign_help_task_type": "Vælg en opgavetype for at vise de sekvenser, shots eller assets, der har en opgave af den type, som endnu ikke er tildelt nogen.",
       "assign_no_fit": "{count} opgave passede ikke ind i datointervallet. | {count} opgaver passede ikke ind i datointervallet.",
+      "batch_schedule": "Planlæg opgaver samlet",
       "confirm_move_children": "Flytning af denne bjælke vil beskære eller flytte {count} under-element, så det passer til de nye grænser. Fortsæt? | Flytning af denne bjælke vil beskære eller flytte {count} under-elementer, så de passer til de nye grænser. Fortsæt?",
       "create_version": "Opret version af tidsplan",
+      "daily_quota": "Opgaver pr. person pr. dag",
+      "daily_quota_help": "Tom: opgaverne fordeles jævnt over perioden, {quota} pr. person pr. dag. En lavere værdi lader opgaver falde uden for perioden, en højere afslutter tidligere.",
       "delete_version": "Slet version af tidsplan",
       "delete_version_error": "Der opstod en fejl under sletning af denne version af tidsplanen. Kontakt venligst vores supportteam.",
       "delete_version_message": "Er du sikker på, at du vil slette versionen {name} af tidsplanen? Bekræft venligst ved at skrive versionens navn nedenfor.",
@@ -1504,7 +1513,6 @@
       "edit_version": "Rediger version af tidsplan",
       "edit_version_error": "Der opstod en fejl under gemning af versionen af tidsplanen. Prøv venligst igen.",
       "edit_version_exist": "Der findes allerede en version med et lignende navn.",
-      "estimated_daily_quotas": "Automatisk estimerede daglige kvoter:",
       "export": "Eksportér tidsplan",
       "export_error": "Der opstod en fejl under eksport af data.",
       "fields": {
@@ -1514,7 +1522,7 @@
         "locked": "Låst version"
       },
       "force_unassign": "Tilsidesæt tidligere tildelinger",
-      "forced_daily_quotas": "Tvungne daglige kvoter:",
+      "force_unassign_help": "Fjerner de nuværende tildelte personer fra disse opgaver, før personerne ovenfor tildeles.",
       "hours": "t",
       "md": "pd",
       "milestone": {
@@ -1532,6 +1540,7 @@
       "no_entity": "Ingen enhed at tildele",
       "reset_list": "Nulstil listen",
       "save_task_error": "Opgaven kunne ikke gemmes. Prøv venligst igen.",
+      "select_entity_group": "Vælg en gruppe af enheder",
       "select_task_type": "Vælg en opgavetype",
       "show_assigned": "Vis tildelte enheder",
       "title": "Tidsplan",

@@ -1484,14 +1484,23 @@
       "tasks": "작업"
     },
     "schedule": {
+      "already_assigned": "이미 할당됨",
       "apply_to_prod": "프로덕션에 적용",
       "apply_to_prod_confirm": "이 일정 버전을 현재 프로덕션에 적용하시겠습니까? 현재 작업 값을 덮어씁니다.",
       "apply_to_prod_error": "현재 프로덕션에 일정 버전을 적용하는 동안 오류가 발생했습니다.",
       "assign": "할당 대상:",
+      "assign_done": "{count}개 작업을 계획했습니다. | {count}개 작업을 계획했습니다.",
       "assign_error": "작업을 할당할 수 없습니다. 다시 시도해 주세요.",
+      "assign_help_entity_group": "시퀀스, 에셋 유형 또는 에피소드를 선택하세요. 계획할 엔티티가 아래에 표시되며, 제외할 항목은 제거하세요. 작업 유형 옆의 버튼은 이미 배정된 엔티티도 함께 표시합니다.",
+      "assign_help_form": "각 엔티티의 작업은 기간 내에서 담당자 중 한 명에게 계획됩니다.",
+      "assign_help_task": "작업의 시작일, 예상 시간, 담당자를 변경하세요. 종료일은 시작일과 예상 시간으로 결정됩니다.",
+      "assign_help_task_type": "작업 유형을 선택하면 해당 유형의 작업이 아직 아무에게도 배정되지 않은 시퀀스, 샷 또는 에셋이 표시됩니다.",
       "assign_no_fit": "{count}개의 작업이 날짜 범위에 맞지 않았습니다. | {count}개의 작업이 날짜 범위에 맞지 않았습니다.",
+      "batch_schedule": "작업 일괄 일정 지정",
       "confirm_move_children": "이 바를 이동하면 {count}개의 하위 항목이 새 범위에 맞게 잘리거나 조정됩니다. 계속하시겠습니까? | 이 바를 이동하면 {count}개의 하위 항목이 새 범위에 맞게 잘리거나 조정됩니다. 계속하시겠습니까?",
       "create_version": "일정 버전 만들기",
+      "daily_quota": "담당자 1인당 하루 작업 수",
+      "daily_quota_help": "비워 두면 기간에 균등하게 배분합니다(1인당 하루 {quota}개). 더 작은 값은 일부 작업을 기간 밖에 남기고, 더 큰 값은 더 일찍 끝납니다.",
       "delete_version": "일정 버전 삭제",
       "delete_version_error": "이 일정 버전을 삭제하는 동안 오류가 발생했습니다. 지원팀에 문의하세요.",
       "delete_version_message": "일정 버전 {name}을 삭제하시겠습니까? 아래에 일정 버전 이름을 입력하여 확인해 주세요.",
@@ -1504,7 +1513,6 @@
       "edit_version": "일정 버전 편집",
       "edit_version_error": "일정 버전을 저장하는 동안 오류가 발생했습니다. 다시 시도해 주세요.",
       "edit_version_exist": "비슷한 이름의 버전이 이미 존재합니다.",
-      "estimated_daily_quotas": "자동 예상 일일 할당량:",
       "export": "일정 내보내기",
       "export_error": "데이터를 내보내는 동안 오류가 발생했습니다.",
       "fields": {
@@ -1514,7 +1522,7 @@
         "locked": "잠긴 버전"
       },
       "force_unassign": "이전 할당 재정의",
-      "forced_daily_quotas": "일일 강제 할당량:",
+      "force_unassign_help": "위에 표시된 사람을 배정하기 전에 이 작업들의 현재 담당자를 해제합니다.",
       "hours": "시간",
       "md": "인일",
       "milestone": {
@@ -1532,6 +1540,7 @@
       "no_entity": "할당 가능한 엔티티 없음",
       "reset_list": "목록 초기화",
       "save_task_error": "작업을 저장할 수 없습니다. 다시 시도해 주세요.",
+      "select_entity_group": "엔티티 그룹 선택",
       "select_task_type": "작업 유형 선택",
       "show_assigned": "할당된 엔티티 표시",
       "title": "일정",

@@ -1484,14 +1484,23 @@
       "tasks": "任务"
     },
     "schedule": {
+      "already_assigned": "已分配",
       "apply_to_prod": "应用于制作",
       "apply_to_prod_confirm": "您确定要将此计划版本应用到当前制作中吗？这将覆盖当前任务值。",
       "apply_to_prod_error": "将计划版本应用到当前制作时发生错误。",
       "assign": "指派给",
+      "assign_done": "已计划 {count} 个任务。 | 已计划 {count} 个任务。",
       "assign_error": "无法分配任务。请重试。",
+      "assign_help_entity_group": "选择一个序列、资产类型或剧集：待排期的实体会列在下方，移除不需要的实体。任务类型旁的按钮还会列出已分配的实体。",
+      "assign_help_form": "每个实体的任务会在日期范围内安排给其中一位负责人。",
+      "assign_help_task": "修改任务的开始日期、预估和负责人。结束日期由开始日期和预估得出。",
+      "assign_help_task_type": "选择一个任务类型，列出该类型任务尚未分配给任何人的序列、镜头或资产。",
       "assign_no_fit": "{count} 个任务无法排入日期范围。 | {count} 个任务无法排入日期范围。",
+      "batch_schedule": "批量排期任务",
       "confirm_move_children": "移动此条将裁剪或移动 {count} 个子项以适应新范围。是否继续？| 移动此条将裁剪或移动 {count} 个子项以适应新范围。是否继续？",
       "create_version": "创建日程计划版本",
+      "daily_quota": "每人每天的任务数",
+      "daily_quota_help": "留空则在日期范围内平均分配，每人每天 {quota} 个。较小的值会使部分任务超出范围，较大的值会更早完成。",
       "delete_version": "删除计划版本",
       "delete_version_error": "删除此计划表版本时发生错误。请联系我们的支持团队。",
       "delete_version_message": "您确定要删除计划表版本 {name}？请在下面输入计划表版本名称确认。",
@@ -1504,7 +1513,6 @@
       "edit_version": "编辑日程计划版本",
       "edit_version_error": "保存计划版本时发生错误。请重试。",
       "edit_version_exist": "已有名称相似的版本。",
-      "estimated_daily_quotas": "自动估算每日配额：",
       "export": "导出日程计划",
       "export_error": "导出数据时发生错误。",
       "fields": {
@@ -1514,7 +1522,7 @@
         "locked": "锁定版本"
       },
       "force_unassign": "覆盖以前的分配",
-      "forced_daily_quotas": "强制每日配额：",
+      "force_unassign_help": "在分配上方列出的人员之前，先移除这些任务当前的负责人。",
       "hours": "小时",
       "md": "人天",
       "milestone": {
@@ -1532,6 +1540,7 @@
       "no_entity": "无可指派实体",
       "reset_list": "重置列表",
       "save_task_error": "无法保存任务。请重试。",
+      "select_entity_group": "选择一组实体",
       "select_task_type": "选择任务类型",
       "show_assigned": "显示分配的实体",
       "title": "日程计划",

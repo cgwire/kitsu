@@ -1985,16 +1985,26 @@ export default {
   },
 
   schedule: {
+    already_assigned: 'Already assigned',
     apply_to_prod: 'Apply to production',
     apply_to_prod_confirm: 'Are you sure you want to apply this schedule version to the current production? This will override the current task values.',
     apply_to_prod_error: 'An error occurred while applying the schedule version to the current production.',
     assign: 'Assign to:',
+    assign_done: '{count} task planned. | {count} tasks planned.',
     assign_error: 'Could not assign the tasks. Please try again.',
+    assign_help_entity_group: 'Pick a sequence, asset type or episode: its entities to plan are listed below, remove the ones to leave out. The button next to the task type also lists the entities already assigned.',
+    assign_help_form: 'The task of each entity is planned for one of the assignees within the date range.',
+    assign_help_task: 'Change the start date, the estimation and the assignees of the task. The end date is set from the start date and the estimation.',
+    assign_help_task_type: 'Pick a task type to list the sequences, shots or assets with a task of that type that nobody is assigned to yet.',
     assign_no_fit:
       '{count} task could not fit in the date range. | {count} tasks could not fit in the date range.',
+    batch_schedule: 'Batch schedule tasks',
     confirm_move_children:
       'Moving this bar will clip or snap {count} sub-item to fit the new bounds. Continue? | Moving this bar will clip or snap {count} sub-items to fit the new bounds. Continue?',
     create_version: 'Create schedule version',
+    daily_quota: 'Tasks per assignee per day',
+    daily_quota_help:
+      'Empty, the tasks are spread evenly over the date range: {quota} per assignee per day. A lower value leaves tasks out of the range, a higher one finishes earlier.',
     delete_version: 'Delete schedule version',
     delete_version_error: 'An error occurred while deleting this schedule version. Please contact our support team.',
     delete_version_message: 'Are you sure you want to delete the schedule version {name}? Please confirm by typing the schedule version name below.',
@@ -2007,7 +2017,6 @@ export default {
     edit_version: 'Edit schedule version',
     edit_version_error: 'An error occurred while saving the schedule version. Please try again.',
     edit_version_exist: 'A version with a similar name already exists.',
-    estimated_daily_quotas: 'Auto-estimated daily quotas:',
     export: 'Export schedule',
     export_error: 'An error occurred while exporting data.',
     fields: {
@@ -2017,7 +2026,7 @@ export default {
       locked: 'Locked version'
     },
     force_unassign: 'Override previous assignments',
-    forced_daily_quotas: 'Forced daily quotas:',
+    force_unassign_help: 'Removes the current assignees of these tasks before assigning the people above.',
     hours: 'h',
     md: 'md',
     milestone: {
@@ -2035,6 +2044,7 @@ export default {
     no_entity: 'No assignable entity',
     reset_list: 'Reset list',
     save_task_error: 'Could not save the task. Please try again.',
+    select_entity_group: 'Select a group of entities',
     select_task_type: 'Select a task type',
     show_assigned: 'Show assigned entities',
     title: 'Schedule',

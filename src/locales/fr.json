@@ -1484,14 +1484,23 @@
       "tasks": "Tâches"
     },
     "schedule": {
+      "already_assigned": "Déjà assigné",
       "apply_to_prod": "Appliquer à la production",
       "apply_to_prod_confirm": "Êtes-vous sûr de vouloir appliquer cette version du planning à la production actuelle ? Cela remplacera les valeurs actuelles des tâches.",
       "apply_to_prod_error": "Une erreur s'est produite lors de l'application de la version du planning à la production en cours.",
       "assign": "Assigner à :",
+      "assign_done": "{count} tâche planifiée. | {count} tâches planifiées.",
       "assign_error": "Impossible d'assigner les tâches. Veuillez réessayer.",
+      "assign_help_entity_group": "Choisissez une séquence, un type d'asset ou un épisode : ses entités à planifier sont listées dessous, retirez celles à laisser de côté. Le bouton à côté du type de tâche liste aussi les entités déjà assignées.",
+      "assign_help_form": "La tâche de chaque entité est planifiée pour l'une des personnes assignées dans la période.",
+      "assign_help_task": "Modifiez la date de début, l'estimation et les personnes assignées à la tâche. La date de fin est déduite de la date de début et de l'estimation.",
+      "assign_help_task_type": "Choisissez un type de tâche pour lister les séquences, plans ou assets ayant une tâche de ce type encore assignée à personne.",
       "assign_no_fit": "{count} tâche ne tient pas dans la plage de dates. | {count} tâches ne tiennent pas dans la plage de dates.",
+      "batch_schedule": "Planifier des tâches en lot",
       "confirm_move_children": "Déplacer cette barre va rogner ou déplacer {count} sous-élément pour tenir dans les nouvelles bornes. Continuer ? | Déplacer cette barre va rogner ou déplacer {count} sous-éléments pour tenir dans les nouvelles bornes. Continuer ?",
       "create_version": "Créer une version du planning",
+      "daily_quota": "Tâches par personne et par jour",
+      "daily_quota_help": "Vide : les tâches sont réparties uniformément sur la période, {quota} par personne et par jour. Une valeur plus basse laisse des tâches hors de la période, une plus haute termine plus tôt.",
       "delete_version": "Supprimer la version du planning",
       "delete_version_error": "Une erreur s'est produite lors de la suppression de cette version du planning. Veuillez contacter notre équipe d'assistance.",
       "delete_version_message": "Êtes-vous sûr de vouloir supprimer la version du planning {name} ? Veuillez confirmer en tapant le nom de la version du planning ci-dessous.",
@@ -1504,7 +1513,6 @@
       "edit_version": "Modifier la version du planning",
       "edit_version_error": "Une erreur s'est produite lors de l'enregistrement de la version du planning. Veuillez réessayer.",
       "edit_version_exist": "Une version portant un nom similaire existe déjà.",
-      "estimated_daily_quotas": "Estimation automatique des quotas journaliers :",
       "export": "Exporter planning",
       "export_error": "Une erreur s'est produite lors de l'exportation des données.",
       "fields": {
@@ -1514,7 +1522,7 @@
         "locked": "Version verrouillée"
       },
       "force_unassign": "Remplacer les assignations précédentes",
-      "forced_daily_quotas": "Quotas journaliers forcés :",
+      "force_unassign_help": "Retire les personnes actuellement assignées à ces tâches avant d'assigner celles listées ci-dessus.",
       "hours": "h",
       "md": "jh",
       "milestone": {
@@ -1532,6 +1540,7 @@
       "no_entity": "Pas d'entité assignable",
       "reset_list": "Réinitialiser la liste",
       "save_task_error": "Impossible d'enregistrer la tâche. Veuillez réessayer.",
+      "select_entity_group": "Sélectionner un groupe d'entités",
       "select_task_type": "Sélectionner un type de tâche",
       "show_assigned": "Afficher les entités assignées",
       "title": "Planning",
