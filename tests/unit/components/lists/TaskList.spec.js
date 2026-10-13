@@ -116,6 +116,37 @@ describe('lists/TaskList', () => {
     wrapper.unmount()
   })
 
+  // It unselected every row, where the other task lists keep that row.
+  test('selects a row of a multi-selection alone on a click', async () => {
+    const tasks = ['task-1', 'task-2'].map(id => ({ ...task, id }))
+    const { selected, actions } = trackTaskSelection()
+    const wrapper = mountList(undefined, { actions, props: { tasks } })
+    const names = wrapper.findAll('tbody td.name')
+    await names[0].trigger('click')
+    await names[1].trigger('click', { ctrlKey: true })
+
+    await names[1].trigger('click')
+
+    expect(wrapper.findAll('tbody tr.selected')).toHaveLength(1)
+    expect([...selected.keys()]).toEqual(['task-2'])
+
+    wrapper.unmount()
+  })
+
+  test('unselects its only selected row on a click', async () => {
+    const { selected, actions } = trackTaskSelection()
+    const wrapper = mountList(undefined, { actions })
+    const name = wrapper.find('tbody td.name')
+    await name.trigger('click')
+
+    await name.trigger('click')
+
+    expect(wrapper.findAll('tbody tr.selected')).toHaveLength(0)
+    expect(selected.size).toBe(0)
+
+    wrapper.unmount()
+  })
+
   // A Shift+click back to a closer row shrank the highlight only: the action
   // panel still changed the rows left out.
   test('gives the store only the range of the last Shift+click', async () => {

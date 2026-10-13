@@ -909,13 +909,16 @@ const selectTaskFromCard = (event, index, task) => {
 
 const applySelection = (event, index, task) => {
   const isSelected = selectionGrid.value[task.id]
+  const isManySelection = Object.keys(selectionGrid.value).length > 1
   if (!(event.ctrlKey || event.metaKey) && !event.shiftKey) {
     store.dispatch('clearSelectedTasks')
     resetSelection()
   }
 
   if (!event.shiftKey) {
-    if (isSelected) {
+    // A click on a row of a multi-selection selects it alone, a Ctrl+click
+    // unselects it.
+    if (isSelected && (!isManySelection || event.ctrlKey || event.metaKey)) {
       store.dispatch('removeSelectedTask', { task })
       delete selectionGrid.value[task.id]
     } else {
