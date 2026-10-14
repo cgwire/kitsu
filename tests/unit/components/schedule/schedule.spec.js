@@ -822,6 +822,83 @@ describe('Schedule widget - dragging an entity bar over its task rows', () => {
   })
 })
 
+describe('Schedule widget - shift drag with tasks', () => {
+  let rafSpy
+
+  beforeEach(() => {
+    rafSpy = vi
+      .spyOn(window, 'requestAnimationFrame')
+      .mockImplementation(callback => {
+        callback()
+        return 0
+      })
+  })
+
+  afterEach(() => {
+    rafSpy.mockRestore()
+  })
+
+  const fmt = date => date.format('YYYY-MM-DD')
+
+  // zoom level 1 is 20px a day: a 200px drag is 10 days
+  const shiftDrag = async (wrapper, bar) => {
+    await bar.trigger('mousedown', { clientX: 300, shiftKey: true })
+    document.dispatchEvent(
+      new MouseEvent('mousemove', { bubbles: true, clientX: 500 })
+    )
+    document.dispatchEvent(
+      new MouseEvent('mouseup', { bubbles: true, clientX: 500 })
+    )
+    await nextTick()
+  }
+
+  it('moves the tasks along with their row', async () => {
+    const hierarchy = buildSubchildrenHierarchy(1)
+    const [root] = hierarchy
+    const [row] = root.children
+    const [task] = row.children.get('person-1')
+    row.endDate = moment('2026-09-30')
+    const wrapper = mountSubchildren(hierarchy)
+
+    const bar = wrapper
+      .findAll('.timebar-center')
+      .find(
+        ({ element }) =>
+          !element.closest('.root-element') && !element.closest('.subchild')
+      )
+    await shiftDrag(wrapper, bar)
+
+    expect(fmt(row.startDate)).toBe('2026-08-13')
+    expect([fmt(task.startDate), fmt(task.endDate)]).toEqual([
+      '2026-08-20',
+      '2026-08-24'
+    ])
+    expect(wrapper.emitted('item-changed').map(([item]) => item.id)).toEqual(
+      ['seq-0']
+    )
+    wrapper.unmount()
+  })
+
+  it('moves the rows and their tasks along with the root bar', async () => {
+    const hierarchy = buildSubchildrenHierarchy(2)
+    const [root] = hierarchy
+    const [first, second] = root.children
+    const [task] = second.children.get('person-1')
+    root.endDate = moment('2026-09-30')
+    const wrapper = mountSubchildren(hierarchy)
+
+    await shiftDrag(wrapper, wrapper.find('.root-element .timebar-center'))
+
+    expect(fmt(root.startDate)).toBe('2026-08-13')
+    expect(fmt(first.startDate)).toBe('2026-08-13')
+    expect([fmt(task.startDate), fmt(task.endDate)]).toEqual([
+      '2026-08-27',
+      '2026-08-31'
+    ])
+    wrapper.unmount()
+  })
+})
+
 describe('Schedule widget - rows without dated tasks', () => {
   const buildRoot = children => ({
     id: 'tt-1',
