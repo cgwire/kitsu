@@ -511,6 +511,8 @@
         count: pendingParentChange ? pendingParentChange.affected.length : 0
       })
     "
+    :is-loading="childMoveProgress !== null"
+    :progress="childMoveProgress"
     @cancel="cancelChildMove"
     @confirm="confirmChildMove"
     v-if="modals.confirmChildMove"
@@ -684,6 +686,8 @@ const modals = ref({
   confirmChildMove: false
 })
 const pendingParentChange = ref(null)
+// percentage of the confirmed move saved so far, null outside a save
+const childMoveProgress = ref(null)
 const scheduleRef = useTemplateRef('schedule')
 
 // Bumped when the production or the episode changes and when the page is
@@ -1711,24 +1715,36 @@ const updateScheduleItem = async item => {
   }
 }
 
+const saveMovedElement = element =>
+  element.type === 'Task'
+    ? saveChangedItem(element)
+    : updateScheduleItem(element)
+
+// a thousand tasks at once would flood the browser's connection pool
+const SAVE_BATCH_SIZE = 10
+
 const confirmChildMove = async () => {
+  if (childMoveProgress.value !== null) return
   const { item, affected } = pendingParentChange.value
+  const elements = [item, ...affected]
+  childMoveProgress.value = 0
   try {
-    await Promise.all([
-      saveChangedItem(item),
-      ...affected.map(element =>
-        element.type === 'Task'
-          ? saveChangedItem(element)
-          : updateScheduleItem(element)
+    for (let start = 0; start < elements.length; start += SAVE_BATCH_SIZE) {
+      const batch = elements.slice(start, start + SAVE_BATCH_SIZE)
+      await Promise.all(batch.map(saveMovedElement))
+      childMoveProgress.value = Math.round(
+        ((start + batch.length) / elements.length) * 100
       )
-    ])
+    }
   } finally {
+    childMoveProgress.value = null
     pendingParentChange.value = null
     modals.value.confirmChildMove = false
   }
 }
 
 const cancelChildMove = () => {
+  if (childMoveProgress.value !== null) return
   const { item, affected } = pendingParentChange.value
   item.startDate = item._dragOrigStartDate.clone()
   item.endDate = item._dragOrigEndDate.clone()

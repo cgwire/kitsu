@@ -9,6 +9,9 @@
     <div class="modal-content">
       <div class="box">
         <p class="text">{{ text }}</p>
+        <div class="progress-wrapper" v-if="progress !== null">
+          <div class="progress" :style="{ width: `${progress}%` }"></div>
+        </div>
         <p class="is-danger has-text-right" v-if="isError">{{ errorText }}</p>
         <p class="has-text-right">
           <a
@@ -47,6 +50,8 @@ const props = defineProps({
   isDanger: { type: Boolean, default: false },
   isError: { type: Boolean, default: false },
   isLoading: { type: Boolean, default: false },
+  // percentage of a long confirmation, null for none
+  progress: { type: Number, default: null },
   text: { type: String, required: true }
 })
 
@@ -61,5 +66,18 @@ useModal(toRef(props, 'active'), emit)
 }
 .modal-content .box p.text {
   margin-bottom: 1em;
+}
+
+// same bar as the file uploads
+.progress-wrapper {
+  border-radius: 5px;
+  background: var(--background-alt);
+  height: 5px;
+  margin-bottom: 1em;
+}
+
+.progress {
+  height: 5px;
+  background-color: $light-green;
 }
 </style>

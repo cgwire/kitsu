@@ -1167,6 +1167,55 @@ describe('ProductionSchedule page', () => {
       ).toContain('2026-02-11')
     })
 
+    // A confirmed move can save a thousand tasks: the modal shows it is
+    // working and how far it got, and ignores a cancel in the meantime.
+    it('reports the progress of a long confirmation', async () => {
+      const resolvers = []
+      const { storeActions, wrapper } = await mountPage({
+        actions: {
+          updateTask: vi.fn(() => new Promise(resolve => resolvers.push(resolve)))
+        }
+      })
+      const taskTypeBar = rowsOf(wrapper)[0]
+      const movedBar = buildBar('2026-02-11', '2026-02-20')
+      taskTypeBar.children = [movedBar]
+      movedBar.parentElement = taskTypeBar
+      const tasks = Array.from({ length: 12 }, (_, index) => ({
+        type: 'Task',
+        id: `task-${index}`,
+        assignees: ['person-1'],
+        estimation: 8 * 60,
+        startDate: day('2026-02-19'),
+        endDate: day('2026-02-19'),
+        _dragOrigStartDate: day('2026-02-09'),
+        _dragOrigEndDate: day('2026-02-09'),
+        parentElement: movedBar
+      }))
+      movedBar.children = new Map([['person-1', tasks]])
+      await changeItem(wrapper, movedBar)
+
+      wrapper.findComponent(ConfirmModal).vm.$emit('confirm')
+      await flushPromises()
+
+      // the bar and the first nine tasks are in flight
+      expect(wrapper.findComponent(ConfirmModal).props('isLoading')).toBe(true)
+      expect(wrapper.findComponent(ConfirmModal).props('progress')).toBe(0)
+      expect(storeActions.updateTask).toHaveBeenCalledTimes(9)
+
+      wrapper.findComponent(ConfirmModal).vm.$emit('cancel')
+      await flushPromises()
+      expect(wrapper.findComponent(ConfirmModal).exists()).toBe(true)
+
+      resolvers.splice(0).forEach(resolve => resolve())
+      await flushPromises()
+      expect(wrapper.findComponent(ConfirmModal).props('progress')).toBe(77)
+      expect(storeActions.updateTask).toHaveBeenCalledTimes(12)
+
+      resolvers.splice(0).forEach(resolve => resolve())
+      await flushPromises()
+      expect(wrapper.findComponent(ConfirmModal).exists()).toBe(false)
+    })
+
     // A task stretching past both ends of its bars must save each bar once
     // with its two new dates: two requests racing could keep a stale end.
     it('saves each bar a task widens once', async () => {
