@@ -17,6 +17,23 @@ const mountBar = (props = {}) =>
   })
 
 describe('players/PlayerComparisonBar', () => {
+  // Opt-in pickers: a consumer that does not bind them gets the task type
+  // alone.
+  describe('revision and mode pickers', () => {
+    const combos = wrapper =>
+      wrapper.findAll('combobox-stub').map(combo => combo.classes().join(' '))
+
+    it('shows them to the consumer binding them', () => {
+      const wrapper = mountBar({ comparisonMode: 'sidebyside', previewToCompareId: null })
+      expect(combos(wrapper)).toHaveLength(3)
+    })
+
+    it('keeps them from a consumer not binding them', () => {
+      const wrapper = mountBar()
+      expect(combos(wrapper)).toHaveLength(1)
+    })
+  })
+
   describe('comparison picture picker', () => {
     // The players send 0 when the compared revision has no previews array.
     it.each([0, 1])(

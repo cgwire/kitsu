@@ -1013,6 +1013,54 @@ describe('PlaylistPlayer.vue', () => {
     })
   })
 
+  describe('client', () => {
+    const zipLink = () =>
+      wrapper.find(
+        '.playlist-header a[href="/api/data/playlists/playlist-1/download/zip"]'
+      )
+
+    it('keeps the task type change and the download menu from a client', async () => {
+      wrapper = mountPlayer({ isClient: true })
+      await flushPromises()
+      expect(
+        wrapper.find('[title="playlists.actions.change_task_type"]').exists()
+      ).toBe(false)
+      expect(wrapper.find('[title="playlists.actions.download"]').exists()).toBe(
+        false
+      )
+    })
+
+    it('keeps the onion skin from a client', async () => {
+      wrapper = mountPlayer({ isClient: true })
+      await flushPromises()
+      const bar = wrapper.findComponent({ name: 'PlayerAnnotationBar' })
+      expect(bar.props('isOnionSkinOn')).toBeUndefined()
+    })
+
+    it('offers the comparison task type alone to a client', async () => {
+      wrapper = mountPlayer({
+        entities: [{ ...entity, preview_file_extension: 'png' }],
+        isClient: true
+      })
+      await flushPromises()
+      const bar = wrapper.findComponent({ name: 'PlayerComparisonBar' })
+      expect(bar.props('previewToCompareId')).toBeUndefined()
+      expect(bar.props('comparisonMode')).toBeUndefined()
+      expect(bar.props('taskTypeId')).not.toBeUndefined()
+    })
+
+    it('offers the playlist zip in the header to a client only', async () => {
+      wrapper = mountPlayer({ isClient: true })
+      await flushPromises()
+      expect(zipLink().attributes('target')).toBe('_blank')
+      wrapper.unmount()
+
+      wrapper = mountPlayer()
+      await flushPromises()
+      expect(zipLink().exists()).toBe(false)
+    })
+  })
+
   describe('comment panel height', () => {
     // The panel is an async component: it mounts after the player has
     // sized its media once, as for a client, who gets it open on load.
