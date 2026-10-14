@@ -47,6 +47,13 @@ export const useTaskListSelection = ({ tasks, body, emit, onSelect }) => {
     lastSelection.value = index >= 0 ? index : null
   }
 
+  const addRow = (index, task) => {
+    store.dispatch('addSelectedTask', { task })
+    emit('task-selected', task)
+    selectionGrid.value[task.id] = true
+    lastSelection.value = index
+  }
+
   const applySelection = (event, index, task) => {
     const isSelected = selectionGrid.value[task.id]
     const isManySelection = Object.keys(selectionGrid.value).length > 1
@@ -62,10 +69,7 @@ export const useTaskListSelection = ({ tasks, body, emit, onSelect }) => {
         store.dispatch('removeSelectedTask', { task })
         delete selectionGrid.value[task.id]
       } else {
-        store.dispatch('addSelectedTask', { task })
-        emit('task-selected', task)
-        selectionGrid.value[task.id] = true
-        lastSelection.value = index
+        addRow(index, task)
       }
     } else {
       // The range replaces the selection, and addSelectedTasks merges.
@@ -104,7 +108,12 @@ export const useTaskListSelection = ({ tasks, body, emit, onSelect }) => {
       ) {
         event.target.blur()
       }
-      applySelection({}, index, list[index])
+      // Alt+Arrow selects the row alone, even the row it comes from in a list
+      // of one task.
+      store.dispatch('clearSelectedTasks')
+      resetSelection()
+      addRow(index, list[index])
+      onSelect?.(list[index])
       pauseEvent(event)
     }
   }

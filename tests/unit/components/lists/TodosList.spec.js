@@ -315,6 +315,26 @@ describe('lists/TodosList', () => {
 
       wrapper.unmount()
     })
+
+    // Alt+Down came back to the only row and unselected it.
+    test('keeps the only row selected on Alt+Down', async () => {
+      const selection = trackTaskSelection()
+      const wrapper = mountList({ isLoading: true, tasks: [] }, undefined, {
+        selection
+      })
+      await wrapper.setProps({ isLoading: false, tasks: [task] })
+      await wrapper.find('tbody td.duration').trigger('click')
+
+      window.dispatchEvent(
+        new KeyboardEvent('keydown', { altKey: true, keyCode: 40 })
+      )
+      await nextTick()
+
+      expect(wrapper.findAll('tbody tr.selected')).toHaveLength(1)
+      expect(selection.selectedIds()).toEqual(['task-1'])
+
+      wrapper.unmount()
+    })
   })
 
   // 2.05 hours make 122.99999999999999 minutes in floats.
