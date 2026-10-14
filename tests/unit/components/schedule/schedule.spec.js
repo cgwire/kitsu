@@ -775,6 +775,82 @@ describe('Schedule widget - person rows', () => {
   })
 })
 
+describe('Schedule widget - rows without dated tasks', () => {
+  const buildRoot = children => ({
+    id: 'tt-1',
+    task_type_id: 'tt-1',
+    name: 'Shot / Animation',
+    color: '#4a90e2',
+    editable: true,
+    expanded: true,
+    loading: false,
+    man_days: 0,
+    daysOff: [],
+    people: {},
+    startDate: moment('2026-08-03'),
+    endDate: moment('2026-10-23'),
+    children
+  })
+  const buildSequence = () => ({
+    id: 'seq-1',
+    object_id: 'seq-1',
+    name: 'SEQ01',
+    color: '#4a90e2',
+    editable: true,
+    expanded: true,
+    loading: false,
+    man_days: 0,
+    startDate: moment('2026-08-10'),
+    endDate: moment('2026-08-14'),
+    children: new Map(),
+    nbUndatedTasks: 0
+  })
+  const mountRows = root =>
+    mountSchedule({ hierarchy: reactive([root]), subchildren: true })
+
+  it('tells that a sequence has no task where its assignees go', () => {
+    const wrapper = mountRows(buildRoot([buildSequence()]))
+
+    const label = wrapper.find('.subchild-label.empty')
+    expect(label.text()).toBe('schedule.no_task')
+    expect(label.find('.plan-entity').exists()).toBe(false)
+    // the label takes the room of one assignee row
+    expect(wrapper.find('.timeline .child-line').attributes('style')).toContain(
+      'height: 92px'
+    )
+  })
+
+  it('offers to plan the tasks a sequence holds without dates', async () => {
+    const root = buildRoot([{ ...buildSequence(), nbUndatedTasks: 3 }])
+    const wrapper = mountSchedule({
+      hierarchy: reactive([root]),
+      subchildren: true,
+      reassignable: true
+    })
+
+    const label = wrapper.find('.subchild-label.empty')
+    expect(label.text()).toContain('schedule.nb_undated_tasks')
+    await label.find('.plan-entity').trigger('click')
+
+    expect(wrapper.emitted('plan-entity')).toEqual([[root, root.children[0]]])
+  })
+
+  it('keeps the planning button off a locked schedule', () => {
+    const wrapper = mountRows(
+      buildRoot([{ ...buildSequence(), nbUndatedTasks: 3 }])
+    )
+
+    expect(wrapper.find('.plan-entity').exists()).toBe(false)
+  })
+
+  it('tells that a task type has no row at all', () => {
+    const wrapper = mountRows(buildRoot([]))
+
+    expect(wrapper.find('.child-empty').text()).toBe('schedule.no_task')
+    expect(wrapper.find('.timeline .child-line.empty').exists()).toBe(true)
+  })
+})
+
 describe('Schedule widget - entity rows', () => {
   let rafSpy
 

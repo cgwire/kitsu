@@ -1503,6 +1503,37 @@ describe('ProductionSchedule page', () => {
       expect(rangeOf(wrapper)).toEqual(['2026-02-01', '2026-02-20'])
     })
 
+    it('counts the tasks without dates on the row', async () => {
+      propAssets.forEach(asset => assetStore.cache.assetMap.set(asset.id, asset))
+      const { wrapper } = await mountAssignments()
+      const modelingRow = rowsOf(wrapper)[0]
+      findSchedule(wrapper).vm.$emit('root-element-expanded', modelingRow)
+      await waitForLoad()
+
+      expect(modelingRow.children[0].nbUndatedTasks).toBe(2)
+      assetStore.cache.assetMap.clear()
+    })
+
+    it('opens the panel on the group a row asks to plan', async () => {
+      const { wrapper } = await mountAssignments()
+      const modelingRow = rowsOf(wrapper)[0]
+      findSchedule(wrapper).vm.$emit('root-element-expanded', modelingRow)
+      await waitForLoad()
+
+      findSchedule(wrapper).vm.$emit(
+        'plan-entity',
+        modelingRow,
+        modelingRow.children[0]
+      )
+      await flushPromises()
+
+      expect(wrapper.find('.side-column form').exists()).toBe(true)
+      expect(
+        wrapper.find('.side-column').findComponent(Combobox).props('modelValue')
+      ).toBe('asset-type-props')
+      expect(wrapper.findAll('.side-list.entities li').length).toBe(2)
+    })
+
     it('marks the entities already assigned in the list', async () => {
       // the row groups dated tasks of mapped assets by assignee
       propAssets.forEach(asset => assetStore.cache.assetMap.set(asset.id, asset))

@@ -156,6 +156,7 @@
         @root-element-selected="selectParentElement"
         @task-selected="selectTaskElement"
         @task-unselected="onTaskUnselected"
+        @plan-entity="onPlanEntity"
       />
     </div>
 
@@ -1414,11 +1415,8 @@ const expandTaskTypeDrillDown = async (
       // group tasks by entity type and assignee
       const tasksByType = {}
       const people = {}
+      const nbUndatedTasksByType = {}
       tasks.forEach(task => {
-        if (!task.start_date) {
-          return
-        }
-
         // link entity to task; skip tasks whose entity is not in the
         // current episode (loadTasks is not episode-scoped, but the entity
         // maps are for TV shows). Sequence/Episode/Edit task types group
@@ -1449,6 +1447,12 @@ const expandTaskTypeDrillDown = async (
           task.entity_type_id = taskTypeElement.for_entity
         }
         if (task.entity?.canceled) {
+          return
+        }
+        // out of the planning, but its row tells how many wait for dates
+        if (!task.start_date) {
+          nbUndatedTasksByType[task.entity_type_id] =
+            (nbUndatedTasksByType[task.entity_type_id] || 0) + 1
           return
         }
 
@@ -1594,6 +1598,7 @@ const expandTaskTypeDrillDown = async (
         )
 
         child.children = sortedChildren
+        child.nbUndatedTasks = nbUndatedTasksByType[child.object_id] || 0
       })
 
       taskTypeElement.children = sortByName(children)
@@ -2060,6 +2065,14 @@ const selectTaskTypeElement = async (
     }
   }
   assignments.value.loading = false
+}
+
+// the "schedule its tasks" button of an empty row: the batch form on
+// that task type, with the row as the group
+const onPlanEntity = (taskType, entityRow) => {
+  if (assignments.value.type === 'task') resetSidePanel()
+  isSidePanelOpen.value = true
+  selectTaskTypeElement(taskType, entityRow)
 }
 
 // a click outside the bars or a multi-selection ends a task edit: the
