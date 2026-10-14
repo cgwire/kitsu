@@ -4,6 +4,7 @@
     :class="{
       dark: true,
       'full-height': !isAddingEntity || isLoading,
+      'movie-full-screen': isMediaFullScreen,
       'playlist-player': true
     }"
     tabindex="-1"
@@ -1143,6 +1144,7 @@ const handleIn = ref(0)
 const handleOut = ref(0)
 const hasActiveShareLinks = ref(false)
 const isAnnotationsDisplayed = ref(true)
+const isBarsHidden = ref(false)
 const isBuildLaunched = ref(false)
 const isCommentsHidden = ref(true)
 const isDlButtonsHidden = ref(true)
@@ -1796,6 +1798,16 @@ const { fullScreen, toggle: toggleFullScreen } = useFullScreen({
   }
 })
 
+// Full screen with the entity strip and the comments folded: the bars
+// auto-hide, and once gone they leave the flow so the media fills the
+// player. They take their room back as soon as they show again.
+const isMovieFullScreen = computed(
+  () => fullScreen.value && isEntitiesHidden.value && isCommentsHidden.value
+)
+const isMediaFullScreen = computed(
+  () => isMovieFullScreen.value && isBarsHidden.value
+)
+
 // Computed — joinedRoom (needed before usePreviewRoom binds it)
 
 const joinedRoom = computed(() => {
@@ -1982,6 +1994,7 @@ const setPlayerTimeout = (callback, delay) => {
 
 const displayBars = () => {
   if (!buttonBar.value) return
+  isBarsHidden.value = false
   if (header.value) header.value.style.opacity = 1
   buttonBar.value.style.opacity = 1
   if (progress.value?.$el) progress.value.$el.style.opacity = 1
@@ -1992,6 +2005,7 @@ const displayBars = () => {
 }
 
 const hideBars = () => {
+  isBarsHidden.value = true
   if (header.value) header.value.style.opacity = 0
   if (buttonBar.value) buttonBar.value.style.opacity = 0
   if (progress.value?.$el) progress.value.$el.style.opacity = 0
@@ -2899,14 +2913,10 @@ const onMouseMove = () => {
   if (buttonBar.value && buttonBar.value.style.opacity !== '1') {
     displayBars()
   }
-  const isMovieFullScreen =
-    fullScreen.value && isEntitiesHidden.value && isCommentsHidden.value
-  if (isMovieFullScreen) {
+  if (isMovieFullScreen.value) {
     if (autoHideTimer) clearTimeout(autoHideTimer)
     autoHideTimer = setTimeout(() => {
-      const stillFullScreen =
-        fullScreen.value && isEntitiesHidden.value && isCommentsHidden.value
-      if (stillFullScreen) hideBars()
+      if (isMovieFullScreen.value) hideBars()
     }, 2000)
   }
 }
@@ -3871,13 +3881,17 @@ const resetHeight = () => {
     if (!props.tempMode) {
       height = container.value ? container.value.offsetHeight : 0
     }
-    height -= header.value ? header.value.offsetHeight : 0
-    if (buttonBar.value) height -= buttonBar.value.offsetHeight
     if (playlistedEntities.value)
       height -= playlistedEntities.value.offsetHeight
-    if (progress.value?.$el) height -= progress.value.$el.offsetHeight
-    if (playlistProgressRef.value?.$el) {
-      height -= playlistProgressRef.value.$el.offsetHeight
+    // Hidden bars leave the flow (see the .movie-full-screen styles), so
+    // they take no height from the media.
+    if (!isMediaFullScreen.value) {
+      height -= header.value ? header.value.offsetHeight : 0
+      if (buttonBar.value) height -= buttonBar.value.offsetHeight
+      if (progress.value?.$el) height -= progress.value.$el.offsetHeight
+      if (playlistProgressRef.value?.$el) {
+        height -= playlistProgressRef.value.$el.offsetHeight
+      }
     }
     if (isWaveformDisplayed.value && isCurrentPreviewMovie.value) height -= 60
 
@@ -4666,6 +4680,7 @@ watch(playingEntityIndex, () => {
 })
 
 watch(fullScreen, () => {
+  if (!fullScreen.value) displayBars()
   resetHeight()
   setPlayerTimeout(() => {
     if (isCurrentPreviewPicture.value) {
@@ -4910,6 +4925,8 @@ watch(volume, () => {
 watch(isCommentsHidden, () => {
   if (isCurrentPreviewSound.value) soundPlayer.value?.redraw()
 })
+
+watch(isMediaFullScreen, () => resetHeight())
 
 watch(speed, () => {
   const rates = [0.25, 0.5, 1, 1.5, 2]
@@ -5263,6 +5280,33 @@ const playerProxy = {
 .playlist-progress,
 .video-progress {
   transition: opacity 0.5s ease;
+}
+
+// The hidden bars stay in the flex column, but the media row leaves the
+// flow and covers the whole player, so the header's auto margin pushes the
+// progress bars and the footer to the bottom edge, over the media.
+.playlist-player.movie-full-screen {
+  background: black;
+  position: relative;
+
+  // z-index 0 keeps the annotation overlay (z-index 500) inside the media
+  // row, under the bars and their docks.
+  > .filler {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  > .playlist-header {
+    margin-bottom: auto;
+  }
+
+  > .playlist-header,
+  > .video-progress,
+  > .playlist-footer {
+    position: relative;
+    z-index: 1;
+  }
 }
 
 .comparison-missing {
