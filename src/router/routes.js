@@ -656,7 +656,8 @@ export const routes = [
       {
         path: 'productions/:production_id/assets/:asset_id',
         component: Asset,
-        name: 'asset'
+        name: 'asset',
+        meta: { forbiddenForClient: true }
       },
 
       {
@@ -668,7 +669,8 @@ export const routes = [
       {
         path: 'productions/:production_id/shots/:shot_id',
         component: Shot,
-        name: 'shot'
+        name: 'shot',
+        meta: { forbiddenForClient: true }
       },
 
       {
@@ -680,7 +682,8 @@ export const routes = [
       {
         path: 'productions/:production_id/edits/:edit_id',
         component: Edit,
-        name: 'edit'
+        name: 'edit',
+        meta: { forbiddenForClient: true }
       },
 
       {
@@ -727,6 +730,7 @@ export const routes = [
         path: 'productions/:production_id/:type/task-types/:task_type_id',
         component: TaskType,
         name: 'task-type',
+        meta: { forbiddenForClient: true },
         children: [
           {
             name: 'task-type-schedule',
@@ -815,7 +819,8 @@ export const routes = [
       {
         path: 'productions/:production_id/episodes/:episode_id/assets/:asset_id',
         component: Asset,
-        name: 'episode-asset'
+        name: 'episode-asset',
+        meta: { forbiddenForClient: true }
       },
 
       {
@@ -827,7 +832,8 @@ export const routes = [
       {
         path: 'productions/:production_id/episodes/:episode_id/shots/:shot_id',
         component: Shot,
-        name: 'episode-shot'
+        name: 'episode-shot',
+        meta: { forbiddenForClient: true }
       },
 
       {
@@ -840,7 +846,8 @@ export const routes = [
       {
         path: 'productions/:production_id/episodes/:episode_id/edits/:edit_id',
         component: Edit,
-        name: 'episode-edit'
+        name: 'episode-edit',
+        meta: { forbiddenForClient: true }
       },
 
       {
@@ -873,6 +880,7 @@ export const routes = [
         path: 'productions/:production_id/episodes/:episode_id/:type/task-types/:task_type_id',
         component: TaskType,
         name: 'episode-task-type',
+        meta: { forbiddenForClient: true },
         children: [
           {
             name: 'episode-task-type-schedule',
