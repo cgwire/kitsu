@@ -1553,12 +1553,20 @@ export default {
     },
 
     home: {
+      all_playlists: 'All playlists',
+      all_stats: 'All statistics',
       create_new: 'Create a new production',
       empty: 'You don\'t have any open productions. How about creating a new one?',
-      no_task: 'You have no task assigned. Consult with your supervisor to see what you can do!',
+      latest_playlists: 'Latest playlists',
+      no_playlist: 'No playlist yet',
       no_prod_for_client: 'You don\'t have access to any productions. Contact your site admin to obtain access.',
+      no_progress: 'No task yet',
+      no_task: 'You have no task assigned. Consult with your supervisor to see what you can do!',
+      progress: 'Progress',
       title: 'My Productions',
-      welcome: 'Welcome to Kitsu'
+      welcome: 'Welcome to Kitsu',
+      welcome_text: 'This is where {studio} shares its work with you. Follow the progress of each production, watch the latest playlists and leave your feedback.',
+      welcome_title: 'Welcome to {studio}',
     },
 
     metadata: {

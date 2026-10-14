@@ -10,7 +10,10 @@ import taskStatusStore from '@/store/modules/taskstatus'
 import taskTypeStore from '@/store/modules/tasktypes'
 
 import client from '@/store/api/client'
+import assetsApi from '@/store/api/assets'
+import playlistsApi from '@/store/api/playlists'
 import productionApi from '@/store/api/productions.js'
+import shotsApi from '@/store/api/shots'
 
 import {
   ADD_METADATA_DESCRIPTOR_END,
@@ -277,6 +280,69 @@ describe('Productions store', () => {
   })
 
   describe('Actions', () => {
+    describe('loadProductionOverview', () => {
+      beforeEach(() => {
+        shotsApi.getShots = vi.fn(() => Promise.resolve([{ id: 'shot-1' }]))
+        assetsApi.getAssets = vi.fn(() => Promise.resolve([{ id: 'asset-1' }]))
+        playlistsApi.getPlaylists = vi.fn(() =>
+          Promise.resolve([{ id: 'playlist-1' }])
+        )
+        shotsApi.getEpisodes = vi.fn(() =>
+          Promise.resolve([{ id: 'episode-1' }])
+        )
+      })
+
+      test('loads the episodes of a tv show only', async () => {
+        const tvshow = { id: 'production-1', production_type: 'tvshow' }
+        const overview = await store.actions.loadProductionOverview({}, tvshow)
+        expect(shotsApi.getEpisodes).toHaveBeenCalledWith(tvshow)
+        expect(overview.episodes).toEqual([{ id: 'episode-1' }])
+        shotsApi.getEpisodes.mockClear()
+        const film = await store.actions.loadProductionOverview(
+          {},
+          { id: 'production-1', production_type: 'featurefilm' }
+        )
+        expect(shotsApi.getEpisodes).not.toHaveBeenCalled()
+        expect(film.episodes).toEqual([])
+      })
+
+      test('loads the entities with their tasks, typed, and the latest playlists', async () => {
+        const production = { id: 'production-1', production_type: 'featurefilm' }
+        const overview = await store.actions.loadProductionOverview(
+          {},
+          production
+        )
+        expect(assetsApi.getAssets).toHaveBeenCalledWith(production, null, true)
+        expect(shotsApi.getShots).toHaveBeenCalledWith(production)
+        expect(playlistsApi.getPlaylists).toHaveBeenCalledWith(
+          production,
+          null,
+          null,
+          'updated_at',
+          1
+        )
+        expect(overview).toEqual({
+          entities: [{ id: 'shot-1' }, { id: 'asset-1', type: 'Asset' }],
+          episodes: [],
+          playlists: [{ id: 'playlist-1' }]
+        })
+      })
+
+      test.each([
+        ['assets', shotsApi, 'getShots'],
+        ['shots', assetsApi, 'getAssets']
+      ])(
+        'skips the entities an %s production has none of',
+        async (productionType, api, method) => {
+          await store.actions.loadProductionOverview(
+            {},
+            { id: 'production-1', production_type: productionType }
+          )
+          expect(api[method]).not.toHaveBeenCalled()
+        }
+      )
+    })
+
     test('loadProductionStatus', async () => {
       let mockCommit = vi.fn()
       productionApi.getProductionStatus = vi.fn(() => Promise.reject())

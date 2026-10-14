@@ -1061,12 +1061,20 @@
       "remove_picture": "Fjern billede",
       "title": "Produktioner",
       "home": {
+        "all_playlists": "Alle playlister",
+        "all_stats": "Alle statistikker",
         "create_new": "Opret en ny produktion",
         "empty": "Du har ingen åbne produktioner. Hvad med at oprette en ny?",
-        "no_task": "Du har ingen opgave tildelt. Rådfør dig med din supervisor for at se, hvad du kan gøre!",
+        "latest_playlists": "Seneste playlister",
+        "no_playlist": "Ingen playliste endnu",
         "no_prod_for_client": "Du har ikke adgang til nogen produktioner. Kontakt din systemadministrator for at få adgang.",
+        "no_progress": "Ingen opgave endnu",
+        "no_task": "Du har ingen opgave tildelt. Rådfør dig med din supervisor for at se, hvad du kan gøre!",
+        "progress": "Fremdrift",
         "title": "Mine Produktioner",
-        "welcome": "Velkommen til Kitsu"
+        "welcome": "Velkommen til Kitsu",
+        "welcome_text": "Her deler {studio} sit arbejde med dig. Følg fremdriften i hver produktion, se de seneste playlister og efterlad din feedback.",
+        "welcome_title": "Velkommen til {studio}"
       },
       "fields": {
         "fps": "FPS",
