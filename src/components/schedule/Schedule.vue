@@ -182,6 +182,33 @@
                     />
                     {{ rootElement.people[personId].full_name }}
                   </div>
+                  <div
+                    class="subchild-label empty"
+                    v-if="!childElement.children.size"
+                  >
+                    <template v-if="childElement.nbUndatedTasks">
+                      {{
+                        $t('schedule.nb_undated_tasks', {
+                          count: childElement.nbUndatedTasks
+                        })
+                      }}
+                      <button
+                        class="button is-small is-link plan-entity"
+                        type="button"
+                        @click="$emit('plan-entity', rootElement, childElement)"
+                        v-if="reassignable"
+                      >
+                        {{ $t(planEntityLabelKey(rootElement)) }}
+                      </button>
+                    </template>
+                    <template v-else>{{ $t('schedule.no_task') }}</template>
+                  </div>
+                </div>
+                <div
+                  class="child child-empty"
+                  v-if="!rootElement.children.length"
+                >
+                  {{ $t('schedule.no_task') }}
                 </div>
               </template>
               <template v-else-if="!multiline">
@@ -515,6 +542,10 @@
                 >
                   <!-- to invert odd/event line color -->
                 </div>
+                <div
+                  class="entity-line child-line empty"
+                  v-if="subchildren && !rootElement.children.length"
+                ></div>
                 <template
                   v-if="
                     dropTarget.rootElementId === rootElement.id &&
@@ -773,7 +804,8 @@ const emit = defineEmits([
   'root-element-selected',
   'scroll',
   'task-selected',
-  'task-unselected'
+  'task-unselected',
+  'plan-entity'
 ])
 
 // Template refs
@@ -2105,11 +2137,11 @@ const timelineMultilineStyle = timeElement => {
 
 const timelineSubchildrenStyle = timeElement => {
   const children = Array.from(timeElement.children.values())
-  const nbLines = children.reduce(
-    (acc, subChildren) => acc + getNbLines(subChildren),
-    0
-  )
-  const marginBottom = children.length * 10
+  // one line for the "no dated task" label of an empty row
+  const nbLines = children.length
+    ? children.reduce((acc, subChildren) => acc + getNbLines(subChildren), 0)
+    : 1
+  const marginBottom = Math.max(children.length, 1) * 10
   return {
     height: `${40 + 40 * nbLines + marginBottom + 2}px`,
     'padding-top': '13px'
@@ -2281,6 +2313,12 @@ const expandRootElement = rootElement => {
     props.multiline || props.subchildren ? refreshItemPositions : undefined
   )
 }
+
+const planEntityLabelKey = rootElement =>
+  ({
+    Asset: 'schedule.plan_asset_type_tasks',
+    Shot: 'schedule.plan_sequence_tasks'
+  })[rootElement.for_entity] ?? 'schedule.plan_entity_tasks'
 
 const childNameStyle = (rootElement, index) => {
   const isOdd = index % 2 === 0
@@ -3703,6 +3741,46 @@ input[type='number'] {
 
   .dark & {
     box-shadow: 0 0 1px 0 $white;
+  }
+}
+
+// where the assignee rows would be: muted, no card (outranks the
+// nth-child stripes below)
+.child > .subchild-label.empty,
+.child-empty {
+  background: none;
+  box-shadow: none;
+  color: var(--text);
+  font-style: italic;
+  font-weight: 400;
+  height: 40px;
+}
+
+// the count above its button, in the 40px of an assignee row
+.child > .subchild-label.empty {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0;
+  line-height: 1.2;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.child-empty {
+  display: flex;
+  align-items: center;
+  padding-left: 15px;
+}
+
+.plan-entity {
+  font-style: normal;
+  height: auto;
+  opacity: 0.7;
+  padding: 0;
+
+  &:hover {
+    opacity: 1;
   }
 }
 
