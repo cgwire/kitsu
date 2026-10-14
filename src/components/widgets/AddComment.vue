@@ -34,7 +34,7 @@
           @click="mode = 'publish'"
           @keydown.enter.prevent="mode = 'publish'"
           @keydown.space.prevent="mode = 'publish'"
-          v-if="!isConcept"
+          v-if="!isConcept && !isCurrentUserClient"
         >
           {{ $t('tasks.publish_revision') }}
         </span>
