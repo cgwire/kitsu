@@ -539,6 +539,7 @@ export default {
       not_assigned_to: 'Not assigned to',
       not_checked: 'Not checked',
       not_equal: 'Not equal',
+      not_in: 'Not in',
       status: 'Task status',
       thumbnail: 'Thumbnail presence',
       title: 'Filter on...',

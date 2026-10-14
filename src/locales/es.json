@@ -224,6 +224,7 @@
         "no_assignation_for": "No existe ninguna asignación para",
         "no_filter": "No hay filtro",
         "not_equal": "No igual",
+        "not_in": "No en",
         "not_assigned_to": "No asignado a",
         "status": "Estado de la tarea",
         "thumbnail": "Presencia de la miniatura",

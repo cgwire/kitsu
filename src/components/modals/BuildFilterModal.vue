@@ -29,14 +29,25 @@
             locale-key-prefix="entities.build_filter."
             :options="operatorOptions"
             :with-margin="false"
+            @update:model-value="onOperatorChanged(assetTypeFilters)"
             v-model="assetTypeFilters.operator"
           />
-          <combobox
-            class="flexrow-item"
-            :options="assetTypeOptions"
-            :with-margin="false"
-            v-model="assetTypeFilters.value"
-          />
+          <div class="flexrow-item flexrow value-column">
+            <combobox
+              class="flexrow-item"
+              :key="`asset-type-value-${index}`"
+              :options="assetTypeOptions"
+              :with-margin="false"
+              v-model="assetTypeFilters.values[index]"
+              v-for="(assetTypeId, index) in assetTypeFilters.values"
+            />
+            <button-simple
+              class="mt05"
+              icon="plus"
+              @click="assetTypeFilters.values.push('-')"
+              v-if="isMultiple(assetTypeFilters.operator)"
+            />
+          </div>
         </div>
 
         <h3 class="subtitle">
@@ -59,7 +70,7 @@
             locale-key-prefix="entities.build_filter."
             :options="taskTypeOperatorOptions"
             :with-margin="false"
-            @update:model-value="onTaskTypeOperatorChanged(taskTypeFilter)"
+            @update:model-value="onOperatorChanged(taskTypeFilter)"
             v-model="taskTypeFilter.operator"
           />
           <div class="flexrow-item flexrow value-column">
@@ -75,7 +86,7 @@
               class="mt05"
               icon="plus"
               @click="addInTaskTypeFilter(taskTypeFilter)"
-              v-if="taskTypeFilter.operator === 'in'"
+              v-if="isMultiple(taskTypeFilter.operator)"
             />
           </div>
           <button-simple
@@ -135,9 +146,7 @@
               locale-key-prefix="entities.build_filter."
               :options="operatorOptions"
               :with-margin="false"
-              @update:model-value="
-                operator => onOperatorChanged(operator, descriptorFilter)
-              "
+              @update:model-value="onOperatorChanged(descriptorFilter)"
               v-model="descriptorFilter.operator"
               v-else
             />
@@ -185,7 +194,7 @@
                 class="mt05"
                 icon="plus"
                 @click="addInDescriptorFilter(descriptorFilter)"
-                v-if="descriptorFilter.operator === 'in'"
+                v-if="isMultiple(descriptorFilter.operator)"
               />
             </div>
             <button-simple
@@ -357,7 +366,8 @@ useModal(toRef(props, 'active'), emit)
 const operatorOptions = [
   { label: 'equal', value: '=' },
   { label: 'not_equal', value: '=-' },
-  { label: 'in', value: 'in' }
+  { label: 'in', value: 'in' },
+  { label: 'not_in', value: 'notin' }
 ]
 const taskTypeOperatorOptions = operatorOptions
 const booleanOptions = [
@@ -381,7 +391,7 @@ const priorityOptions = [
 
 // State
 
-const assetTypeFilters = reactive({ operator: '=', value: '' })
+const assetTypeFilters = reactive({ operator: '=', values: ['-'] })
 const assignation = reactive({
   person: null,
   taskTypeId: '',
@@ -568,23 +578,25 @@ const getDescriptorChoiceOptions = (descriptorId, isChecklist) => {
   }))
 }
 
+const isMultiple = operator => ['in', 'notin'].includes(operator)
+
+const getQueryOperator = operator =>
+  ['=-', 'notin'].includes(operator) ? '=[-' : '=['
+
 const applyAssetTypeChoice = query => {
-  const value = assetTypeFilters.value
-  if (value && value !== '-') {
-    let operator = '=['
-    if (assetTypeFilters.operator === '=-') operator = '=[-'
-    const assetType = assetTypeMap.value.get(value)
-    if (assetType) {
-      query += ` type${operator}${assetType.name}]`
-    }
+  const value = assetTypeFilters.values
+    .map(assetTypeId => assetTypeMap.value.get(assetTypeId)?.name)
+    .filter(Boolean)
+    .join(',')
+  if (value) {
+    query += ` type${getQueryOperator(assetTypeFilters.operator)}${value}]`
   }
   return query
 }
 
 const applyTaskTypeChoice = query => {
   taskTypeFilters.values.forEach(taskTypeFilter => {
-    let operator = '=['
-    if (taskTypeFilter.operator === '=-') operator = '=[-'
+    const operator = getQueryOperator(taskTypeFilter.operator)
     const value = taskTypeFilter.values
       .map(statusId => taskStatusMap.value.get(statusId)?.short_name)
       .filter(Boolean)
@@ -610,7 +622,7 @@ const applyDescriptorChoice = query => {
       value = descriptorFilter.values[0].text
       value += descriptorFilter.values[0].checked ? ':true' : ':false'
     } else {
-      if (descriptorFilter.operator === '=-') operator = '=[-'
+      operator = getQueryOperator(descriptorFilter.operator)
       const values = descriptorFilter.values
       if (values.length === 0 || values[0] === '') {
         const options = getDescriptorChoiceOptions(
@@ -801,23 +813,32 @@ const removeDescriptorFilter = descriptorFilter => {
   )
 }
 
-const onOperatorChanged = (operator, descriptorFilter) => {
-  if (operator !== 'in') {
-    descriptorFilter.values = [descriptorFilter.values[0]]
+const onOperatorChanged = filter => {
+  if (!isMultiple(filter.operator)) {
+    filter.values = [filter.values[0]]
   }
 }
 
 // Helpers to set filters from search query
 
 const setFiltersFromAssetTypeQuery = filter => {
-  assetTypeFilters.operator = filter.excluding ? '=-' : '='
-  assetTypeFilters.value = filter.assetType.id
+  assetTypeFilters.operator = getFilterOperator(
+    filter.excluding,
+    filter.assetTypes.length > 1
+  )
+  assetTypeFilters.values = filter.assetTypes.map(assetType => assetType.id)
+}
+
+const getFilterOperator = (excluding, isMany) => {
+  if (isMany) return excluding ? 'notin' : 'in'
+  return excluding ? '=-' : '='
 }
 
 const setFiltersFromStatusQuery = filter => {
-  let operator = '='
-  if (filter.taskStatuses.length > 1) operator = 'in'
-  else if (filter.excluding) operator = '=-'
+  const operator = getFilterOperator(
+    filter.excluding,
+    filter.taskStatuses.length > 1
+  )
   taskTypeFilters.values.push({
     localId: uuidv4(),
     id: filter.taskType.id,
@@ -827,9 +848,10 @@ const setFiltersFromStatusQuery = filter => {
 }
 
 const setFiltersFromStatusAnyQuery = filter => {
-  let operator = '='
-  if (filter.taskStatuses.length > 1) operator = 'in'
-  else if (filter.excluding) operator = '=-'
+  const operator = getFilterOperator(
+    filter.excluding,
+    filter.taskStatuses.length > 1
+  )
   taskTypeFilters.values.push({
     localId: uuidv4(),
     id: '',
@@ -843,7 +865,7 @@ const setFiltersFromDescriptorQuery = filter => {
   let isChecklist = false
   let values = filter.values
   if (filter.values.length > 1) {
-    operator = 'in'
+    operator = getFilterOperator(filter.excluding, true)
   } else {
     if (filter.values[0].endsWith(':true')) {
       isChecklist = true
@@ -934,12 +956,6 @@ const setFiltersFromCurrentQuery = () => {
   if (filters.union) setUnion()
 }
 
-const onTaskTypeOperatorChanged = taskTypeFilter => {
-  if (taskTypeFilter.operator !== 'in') {
-    taskTypeFilter.values = [taskTypeFilter.values[0]]
-  }
-}
-
 const reset = () => {
   assignation.value = 'nofilter'
   assignation.person = null
@@ -948,7 +964,7 @@ const reset = () => {
   metadataDescriptorFilters.values = []
   taskTypeFilters.values = []
   assetTypeFilters.operator = '='
-  assetTypeFilters.value = '-'
+  assetTypeFilters.values = ['-']
 }
 
 // Watchers

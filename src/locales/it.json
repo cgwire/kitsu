@@ -224,6 +224,7 @@
         "no_assignation_for": "Non esiste alcuna assegnazione per",
         "no_filter": "Nessun filtro",
         "not_equal": "Diverso",
+        "not_in": "Non in",
         "not_assigned_to": "Non assegnato a",
         "status": "Stato del task",
         "thumbnail": "Presenza miniatura",

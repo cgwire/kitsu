@@ -224,6 +224,7 @@
         "no_assignation_for": "不存在分配",
         "no_filter": "无筛选",
         "not_equal": "不等于",
+        "not_in": "不属于",
         "not_assigned_to": "未分配",
         "status": "任务状态",
         "thumbnail": "缩略图",

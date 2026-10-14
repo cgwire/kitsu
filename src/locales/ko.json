@@ -224,6 +224,7 @@
         "no_assignation_for": "할당이 존재하지 않습니다",
         "no_filter": "필터 없음",
         "not_equal": "동등하지 않음",
+        "not_in": "포함 안 함",
         "not_assigned_to": "할당되지 않음",
         "status": "작업 상태",
         "thumbnail": "섬네일 존재 여부",

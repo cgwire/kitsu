@@ -749,8 +749,32 @@ describe('lib/filtering', () => {
       })
       expect(filters).toHaveLength(1)
       expect(filters[0].type).toEqual('assettype')
-      expect(filters[0].assetType.id).toEqual('asset-type-1')
+      expect(filters[0].assetTypes.map(t => t.id)).toEqual(['asset-type-1'])
       expect(filters[0].excluding).toEqual(false)
+    })
+
+    it('type=[-chars,props] in query case', () => {
+      const filters = getFilters({
+        entryIndex,
+        assetTypes,
+        taskTypes,
+        taskStatuses,
+        descriptors,
+        persons,
+        query: 'type=[-chars,props]'
+      })
+      expect(filters).toHaveLength(1)
+      expect(filters[0].assetTypes.map(t => t.id)).toEqual([
+        'asset-type-1',
+        'asset-type-3'
+      ])
+      expect(filters[0].excluding).toEqual(true)
+      const entries = [
+        { id: 'a1', asset_type_id: 'asset-type-1' },
+        { id: 'a2', asset_type_id: 'asset-type-2' },
+        { id: 'a3', asset_type_id: 'asset-type-3' }
+      ]
+      expect(applyFilters(entries, filters, new Map())).toEqual([entries[1]])
     })
 
     it('color=[blue,red] in query case', () => {

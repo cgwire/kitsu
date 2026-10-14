@@ -224,6 +224,7 @@
         "no_assignation_for": "未分配給",
         "no_filter": "無篩選",
         "not_equal": "不等於",
+        "not_in": "不屬於",
         "not_assigned_to": "未分配",
         "status": "任務狀態",
         "thumbnail": "縮略圖",

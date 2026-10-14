@@ -224,6 +224,7 @@
         "no_assignation_for": "未アサイン",
         "no_filter": "フィルターなし",
         "not_equal": "等しくない",
+        "not_in": "含まない",
         "not_assigned_to": "アサイン先ではない",
         "status": "タスクステータス",
         "thumbnail": "サムネイルの有無",
