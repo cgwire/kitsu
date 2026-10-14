@@ -7,6 +7,9 @@ import { trackTaskSelection } from '../../fixtures/task-selection'
 
 import ToCheckList from '@/components/lists/ToCheckList.vue'
 
+// The tasks module of the selection fixture reaches the store index.
+vi.mock('@/store', () => ({ default: {} }))
+
 vi.mock('vue-i18n', async importOriginal => ({
   ...(await importOriginal()),
   useI18n: () => ({ t: key => key })
@@ -25,6 +28,7 @@ const task = {
 const mountList = ({
   getters = {},
   actions = {},
+  selection,
   tasks = [task],
   attachTo
 } = {}) =>
@@ -33,6 +37,8 @@ const mountList = ({
     global: {
       plugins: [
         createStore({
+          state: selection?.state,
+          mutations: selection?.mutations,
           getters: {
             dateFormat: () => 'YYYY-MM-DD',
             isCurrentUserManager: () => false,
@@ -44,12 +50,14 @@ const mountList = ({
             taskMap: () => new Map(),
             taskTypeMap: () => new Map(),
             use12HourClock: () => false,
+            ...selection?.getters,
             ...getters
           },
           actions: {
             addSelectedTask: () => {},
             clearSelectedTasks: () => {},
             removeSelectedTask: () => {},
+            ...selection?.actions,
             ...actions
           }
         })
@@ -77,9 +85,10 @@ describe('lists/ToCheckList', () => {
     // A Ctrl+click left the row selected, and the edits reached it.
     test('unselects a row of a multi-selection on Ctrl+click', async () => {
       const updateTask = vi.fn()
-      const { selected, actions } = trackTaskSelection()
+      const selection = trackTaskSelection()
       const wrapper = mountList({
-        actions: { ...actions, updateTask },
+        selection,
+        actions: { updateTask },
         getters: {
           isCurrentUserManager: () => true,
           taskMap: () => new Map(tasks.map(entry => [entry.id, entry]))
@@ -94,7 +103,7 @@ describe('lists/ToCheckList', () => {
       await cells[1].trigger('click', { ctrlKey: true })
       await wrapper.find('tbody td.estimation input').setValue('1')
 
-      expect([...selected.keys()]).toEqual(['task-1', 'task-3'])
+      expect(selection.selectedIds()).toEqual(['task-1', 'task-3'])
       expect(updateTask.mock.calls.map(([, { taskId }]) => taskId)).toEqual([
         'task-1',
         'task-3'
@@ -104,15 +113,15 @@ describe('lists/ToCheckList', () => {
     })
 
     test('selects a row of a multi-selection alone on a click', async () => {
-      const { selected, actions } = trackTaskSelection()
-      const wrapper = mountList({ actions, tasks })
+      const selection = trackTaskSelection()
+      const wrapper = mountList({ selection, tasks })
       const cells = wrapper.findAll('tbody td.duration')
       await cells[0].trigger('click')
       await cells[1].trigger('click', { ctrlKey: true })
 
       await cells[1].trigger('click')
 
-      expect([...selected.keys()]).toEqual(['task-2'])
+      expect(selection.selectedIds()).toEqual(['task-2'])
 
       wrapper.unmount()
     })
@@ -120,8 +129,8 @@ describe('lists/ToCheckList', () => {
     // A Shift+click back to a closer row shrank the highlight only: the
     // action panel still changed the rows left out.
     test('gives the store only the range of the last Shift+click', async () => {
-      const { selected, actions } = trackTaskSelection()
-      const wrapper = mountList({ actions, tasks })
+      const selection = trackTaskSelection()
+      const wrapper = mountList({ selection, tasks })
       const cells = wrapper.findAll('tbody td.duration')
 
       await cells[0].trigger('click')
@@ -129,7 +138,7 @@ describe('lists/ToCheckList', () => {
       await cells[1].trigger('click', { shiftKey: true })
 
       expect(wrapper.findAll('tbody tr.selected')).toHaveLength(2)
-      expect([...selected.keys()]).toEqual(['task-1', 'task-2'])
+      expect(selection.selectedIds()).toEqual(['task-1', 'task-2'])
 
       wrapper.unmount()
     })

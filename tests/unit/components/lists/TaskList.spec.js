@@ -33,7 +33,7 @@ const task = {
 
 const mountList = (
   config,
-  { getters = {}, actions = {}, props = {}, attachTo } = {}
+  { getters = {}, actions = {}, props = {}, selection, attachTo } = {}
 ) =>
   shallowMount(TaskList, {
     attachTo,
@@ -41,6 +41,8 @@ const mountList = (
       config,
       plugins: [
         createStore({
+          state: selection?.state,
+          mutations: selection?.mutations,
           getters: {
             currentEpisode: () => null,
             currentProduction: () => ({ id: 'production-1' }),
@@ -57,12 +59,14 @@ const mountList = (
             taskTypeMap: () => new Map(),
             use12HourClock: () => false,
             user: () => ({ id: 'user-1', departments: [] }),
+            ...selection?.getters,
             ...getters
           },
           actions: {
             addSelectedTask: () => {},
             clearSelectedTasks: () => {},
             removeSelectedTask: () => {},
+            ...selection?.actions,
             ...actions
           }
         })
@@ -119,8 +123,8 @@ describe('lists/TaskList', () => {
   // It unselected every row, where the other task lists keep that row.
   test('selects a row of a multi-selection alone on a click', async () => {
     const tasks = ['task-1', 'task-2'].map(id => ({ ...task, id }))
-    const { selected, actions } = trackTaskSelection()
-    const wrapper = mountList(undefined, { actions, props: { tasks } })
+    const selection = trackTaskSelection()
+    const wrapper = mountList(undefined, { selection, props: { tasks } })
     const names = wrapper.findAll('tbody td.name')
     await names[0].trigger('click')
     await names[1].trigger('click', { ctrlKey: true })
@@ -128,21 +132,21 @@ describe('lists/TaskList', () => {
     await names[1].trigger('click')
 
     expect(wrapper.findAll('tbody tr.selected')).toHaveLength(1)
-    expect([...selected.keys()]).toEqual(['task-2'])
+    expect(selection.selectedIds()).toEqual(['task-2'])
 
     wrapper.unmount()
   })
 
   test('unselects its only selected row on a click', async () => {
-    const { selected, actions } = trackTaskSelection()
-    const wrapper = mountList(undefined, { actions })
+    const selection = trackTaskSelection()
+    const wrapper = mountList(undefined, { selection })
     const name = wrapper.find('tbody td.name')
     await name.trigger('click')
 
     await name.trigger('click')
 
     expect(wrapper.findAll('tbody tr.selected')).toHaveLength(0)
-    expect(selected.size).toBe(0)
+    expect(selection.selectedIds()).toEqual([])
 
     wrapper.unmount()
   })
@@ -151,8 +155,8 @@ describe('lists/TaskList', () => {
   // panel still changed the rows left out.
   test('gives the store only the range of the last Shift+click', async () => {
     const tasks = ['task-1', 'task-2', 'task-3'].map(id => ({ ...task, id }))
-    const { selected, actions } = trackTaskSelection()
-    const wrapper = mountList(undefined, { actions, props: { tasks } })
+    const selection = trackTaskSelection()
+    const wrapper = mountList(undefined, { selection, props: { tasks } })
     const names = wrapper.findAll('tbody td.name')
 
     await names[0].trigger('click')
@@ -160,7 +164,7 @@ describe('lists/TaskList', () => {
     await names[1].trigger('click', { shiftKey: true })
 
     expect(wrapper.findAll('tbody tr.selected')).toHaveLength(2)
-    expect([...selected.keys()]).toEqual(['task-1', 'task-2'])
+    expect(selection.selectedIds()).toEqual(['task-1', 'task-2'])
 
     wrapper.unmount()
   })
