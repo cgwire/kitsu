@@ -775,6 +775,53 @@ describe('Schedule widget - person rows', () => {
   })
 })
 
+describe('Schedule widget - dragging an entity bar over its task rows', () => {
+  let rafSpy
+
+  beforeEach(() => {
+    rafSpy = vi
+      .spyOn(window, 'requestAnimationFrame')
+      .mockImplementation(callback => {
+        callback()
+        return 0
+      })
+  })
+
+  afterEach(() => {
+    rafSpy.mockRestore()
+  })
+
+  it('keeps moving the bar while the cursor crosses a person row', async () => {
+    const hierarchy = buildSubchildrenHierarchy(1)
+    const [root] = hierarchy
+    const [row] = root.children
+    row.endDate = moment('2026-09-30')
+    const wrapper = mountSubchildren(hierarchy)
+
+    // the entity bar sits between the root bar and the task bars
+    const bar = wrapper
+      .findAll('.timebar-center')
+      .find(
+        ({ element }) =>
+          !element.closest('.root-element') && !element.closest('.subchild')
+      )
+    await bar.trigger('mousedown', { clientX: 300 })
+    // the drag handler is on the document: the event bubbles from the row
+    wrapper
+      .find('.subchild.drop-item-target')
+      .element.dispatchEvent(
+        new MouseEvent('mousemove', { bubbles: true, clientX: 500 })
+      )
+    await nextTick()
+
+    expect(row.startDate.format('YYYY-MM-DD')).toBe('2026-08-13')
+    document.dispatchEvent(
+      new MouseEvent('mouseup', { bubbles: true, clientX: 500 })
+    )
+    wrapper.unmount()
+  })
+})
+
 describe('Schedule widget - rows without dated tasks', () => {
   const buildRoot = children => ({
     id: 'tt-1',
