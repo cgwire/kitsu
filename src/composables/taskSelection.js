@@ -33,6 +33,20 @@ export const useTaskListSelection = ({ tasks, body, emit, onSelect }) => {
     lastSelection.value = null
   }
 
+  // A new sort, a search or a task update hands the list new rows, and the
+  // store selection stays: its tasks still listed stay highlighted, and the
+  // last row clicked keeps its task.
+  const followTasks = (list, previousList) => {
+    const lastTask = previousList?.[lastSelection.value]
+    const selectedTasks = store.getters.selectedTasks
+    selectionGrid.value = {}
+    list.forEach(task => {
+      if (selectedTasks.has(task.id)) selectionGrid.value[task.id] = true
+    })
+    const index = list.findIndex(task => task.id === lastTask?.id)
+    lastSelection.value = index >= 0 ? index : null
+  }
+
   const applySelection = (event, index, task) => {
     const isSelected = selectionGrid.value[task.id]
     const isManySelection = Object.keys(selectionGrid.value).length > 1
@@ -97,7 +111,7 @@ export const useTaskListSelection = ({ tasks, body, emit, onSelect }) => {
 
   // Watchers
   // --------------------------------------------------------------------------
-  watch(tasks, resetSelection)
+  watch(tasks, followTasks)
 
   watch(nbSelectedTasks, () => {
     if (nbSelectedTasks.value === 0) resetSelection()

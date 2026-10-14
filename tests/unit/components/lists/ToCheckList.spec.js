@@ -47,6 +47,7 @@ const mountList = ({
             organisation: () => ({ hours_by_day: 8 }),
             personMap: () => new Map(),
             productionMap: () => new Map(),
+            selectedTasks: () => new Map(),
             taskMap: () => new Map(),
             taskTypeMap: () => new Map(),
             use12HourClock: () => false,
@@ -138,6 +139,25 @@ describe('lists/ToCheckList', () => {
       await cells[1].trigger('click', { shiftKey: true })
 
       expect(wrapper.findAll('tbody tr.selected')).toHaveLength(2)
+      expect(selection.selectedIds()).toEqual(['task-1', 'task-2'])
+
+      wrapper.unmount()
+    })
+
+    // A new sort dropped the highlight but not the store selection: the
+    // action panel changed rows the list no longer showed as selected.
+    test('keeps the selected rows highlighted through a new sort', async () => {
+      const selection = trackTaskSelection()
+      const wrapper = mountList({ selection, tasks })
+      const cells = wrapper.findAll('tbody td.duration')
+      await cells[0].trigger('click')
+      await cells[1].trigger('click', { ctrlKey: true })
+
+      await wrapper.setProps({ tasks: [...tasks].reverse() })
+
+      expect(
+        wrapper.findAll('tbody tr').map(row => row.classes('selected'))
+      ).toEqual([false, true, true])
       expect(selection.selectedIds()).toEqual(['task-1', 'task-2'])
 
       wrapper.unmount()

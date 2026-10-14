@@ -169,6 +169,43 @@ describe('lists/TaskList', () => {
     wrapper.unmount()
   })
 
+  // A new sort dropped the highlight but not the store selection: the action
+  // panel changed rows the list no longer showed as selected.
+  test('keeps the selected rows highlighted through a new sort', async () => {
+    const tasks = ['task-1', 'task-2', 'task-3'].map(id => ({ ...task, id }))
+    const selection = trackTaskSelection()
+    const wrapper = mountList(undefined, { selection, props: { tasks } })
+    const names = wrapper.findAll('tbody td.name')
+    await names[0].trigger('click')
+    await names[1].trigger('click', { ctrlKey: true })
+
+    await wrapper.setProps({ tasks: [...tasks].reverse() })
+
+    expect(
+      wrapper.findAll('tbody tr.task-line').map(row => row.classes('selected'))
+    ).toEqual([false, true, true])
+    expect(selection.selectedIds()).toEqual(['task-1', 'task-2'])
+
+    wrapper.unmount()
+  })
+
+  // A Shift+click extends the selection from the row clicked last.
+  test('extends a Shift+click from the row clicked before a new sort', async () => {
+    const tasks = ['task-1', 'task-2', 'task-3'].map(id => ({ ...task, id }))
+    const selection = trackTaskSelection()
+    const wrapper = mountList(undefined, { selection, props: { tasks } })
+    await wrapper.findAll('tbody td.name')[0].trigger('click')
+
+    await wrapper.setProps({ tasks: [...tasks].reverse() })
+    await wrapper
+      .findAll('tbody td.name')[1]
+      .trigger('click', { shiftKey: true })
+
+    expect(selection.selectedIds()).toEqual(['task-2', 'task-1'])
+
+    wrapper.unmount()
+  })
+
   // 2.05 hours make 122.99999999999999 minutes in floats.
   test('saves an estimation typed in hours in whole minutes', async () => {
     const updateTask = vi.fn()
