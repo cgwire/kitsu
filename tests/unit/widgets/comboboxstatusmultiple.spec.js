@@ -36,9 +36,14 @@ describe('ComboboxStatusMultiple', () => {
     ])
   })
 
-  it('names the selected statuses in the list order', () => {
+  it('names the only selected status', () => {
+    const wrapper = mountWidget({ modelValue: ['status-2'] })
+    expect(combobox(wrapper).props('title')).toBe('wip')
+  })
+
+  it('counts the selected statuses once there are several', () => {
     const wrapper = mountWidget({ modelValue: ['status-3', 'status-2'] })
-    expect(combobox(wrapper).props('title')).toBe('wip, done')
+    expect(combobox(wrapper).props('title')).toBe('(2/3)')
     expect(combobox(wrapper).props('modelValue')).toEqual({
       'status-1': false,
       'status-2': true,

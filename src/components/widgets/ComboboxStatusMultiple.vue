@@ -70,7 +70,9 @@ const title = computed(() => {
   const names = props.taskStatusList
     .filter(({ id }) => props.modelValue.includes(id))
     .map(status => status.short_name)
-  return names.length ? names.join(', ') : t('main.all')
+  if (names.length > 1)
+    return `(${names.length}/${props.taskStatusList.length})`
+  return names[0] ?? t('main.all')
 })
 
 // Functions

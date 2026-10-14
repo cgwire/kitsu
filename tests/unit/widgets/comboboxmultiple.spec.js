@@ -26,9 +26,14 @@ describe('ComboboxMultiple', () => {
     })
   })
 
-  it('names the selected options in the list order', () => {
+  it('names the only selected option', () => {
+    const wrapper = mountWidget({ modelValue: ['sets'] })
+    expect(combobox(wrapper).props('title')).toBe('Sets')
+  })
+
+  it('counts the selected options once there are several', () => {
     const wrapper = mountWidget({ modelValue: ['sets', 'chars'] })
-    expect(combobox(wrapper).props('title')).toBe('Characters, Sets')
+    expect(combobox(wrapper).props('title')).toBe('(2/3)')
   })
 
   it('adds the option the user switches on', async () => {

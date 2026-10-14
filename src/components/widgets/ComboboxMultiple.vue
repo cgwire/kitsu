@@ -46,7 +46,8 @@ const title = computed(() => {
   const labels = props.options
     .filter(({ value }) => props.modelValue.includes(value))
     .map(option => option.label)
-  return labels.length ? labels.join(', ') : t('main.all')
+  if (labels.length > 1) return `(${labels.length}/${props.options.length})`
+  return labels[0] ?? t('main.all')
 })
 
 // Functions
