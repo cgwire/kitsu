@@ -64,7 +64,12 @@
       :is-on="isOnionSkinOn"
       :frames="onionSkinFrames"
       @change="onOnionChange"
-      v-if="isMovie && (!light || fullScreen) && !isConcept"
+      v-if="
+        isOnionSkinOn !== undefined &&
+        isMovie &&
+        (!light || fullScreen) &&
+        !isConcept
+      "
     />
 
     <transition name="slide">
@@ -395,7 +400,8 @@ const isLaserModeOn = defineModel('isLaserModeOn', { default: undefined })
 const isEraserModeOn = defineModel('isEraserModeOn', { default: undefined })
 const isShapeMode = defineModel('isShapeMode', { default: undefined })
 const currentShape = defineModel('currentShape', { default: undefined })
-const isOnionSkinOn = defineModel('isOnionSkinOn', { default: false })
+// Opt-in: the picker shows only to a consumer binding it.
+const isOnionSkinOn = defineModel('isOnionSkinOn', { default: undefined })
 const onionSkinFrames = defineModel('onionSkinFrames', { default: 2 })
 const pictureBackgroundColor = defineModel('pictureBackgroundColor', {
   default: '#000000'
