@@ -150,6 +150,21 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
     wrapper.unmount()
   })
 
+  // A closed viewer keeps its decoders loading: their metadata restarted the
+  // render loop, which never stops on a detached video without rVFC.
+  it('starts no render loop for the metadata of a closed viewer', async () => {
+    const wrapper = mountViewer()
+    wrapper.vm.loadEntity(0)
+    await wrapper.vm.$nextTick()
+    const decoder = wrapper.find('video.playlist-movie-decoder').element
+    wrapper.unmount()
+    const registered = rvfcCallbacks.length
+
+    decoder.dispatchEvent(new Event('loadedmetadata'))
+
+    expect(rvfcCallbacks.length).toBe(registered)
+  })
+
   it('loads the video sub-element of a picture-main revision (#2095)', async () => {
     const store = createStore({
       getters: { currentProduction: () => ({ fps: '25' }) }

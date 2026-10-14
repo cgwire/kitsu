@@ -922,6 +922,7 @@ const loadPlaylistsData = async (force = false) => {
 const onPlaylistListScroll = event => {
   if (isSilentMore) return
   const listEl = playlistListRef.value
+  if (!listEl) return
   const maxHeight = listEl.scrollHeight - listEl.offsetHeight
   if (maxHeight < event.target.scrollTop + 20) {
     onLoadMoreClicked()
@@ -1432,6 +1433,8 @@ const onUpdateToLatestVersion = () =>
 
 const onBodyScroll = event => {
   const content = entityListContentRef.value
+  // The spinner replaces the list while its entities load.
+  if (!content) return
   const maxHeight = content.scrollHeight - content.offsetHeight
   if (maxHeight < event.target.scrollTop) {
     store.dispatch(

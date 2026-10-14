@@ -122,6 +122,7 @@ const mountPage = async (
       loadAggregatedPersonDaysOff: vi.fn(() => []),
       loadDoneTasks: vi.fn(),
       loadTodos: vi.fn(),
+      loadUserTimeSpentsByPeriod: vi.fn(() => []),
       setTodosSearch: vi.fn(),
       ...actions
     }

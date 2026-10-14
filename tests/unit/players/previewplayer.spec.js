@@ -592,6 +592,33 @@ describe('PreviewPlayer.vue', () => {
     })
   })
 
+  // A timecode clicked in the task panel moves the movie to its frame 20 ms
+  // later: the player can close in between.
+  describe('timecode click', () => {
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('drops the frame jump of a closed player', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      wrapper = mountPlayer({
+        props: {
+          previews: [moviePreview],
+          lastPreviewFiles: [moviePreview],
+          readOnly: false
+        }
+      })
+      await nextTick()
+      wrapper
+        .findComponent({ name: 'TaskInfo' })
+        .vm.$emit('time-code-clicked', { versionRevision: '1', frame: 12 })
+      wrapper.unmount()
+      wrapper = null
+
+      expect(() => vi.advanceTimersByTime(20)).not.toThrow()
+    })
+  })
+
   // The resize observer reports the size of the container as soon as it
   // observes it, then at each resize: a player closed within the 200 ms of
   // the debounce still reloaded the annotation of its frame.

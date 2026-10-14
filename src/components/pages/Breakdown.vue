@@ -1049,6 +1049,7 @@ const removeOneAssetFromSelection = async assetId => {
 
 const onAssetListScroll = event => {
   const assetList = assetListRef.value
+  if (!assetList) return
   const maxHeight = assetList.scrollHeight - assetList.offsetHeight
   if (maxHeight < event.target.scrollTop + 100) {
     store.dispatch('displayMoreAssets')

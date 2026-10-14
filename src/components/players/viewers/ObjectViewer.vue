@@ -159,6 +159,8 @@ const createWireframeVariant = model => {
 }
 
 const onModelLoaded = event => {
+  // A model loaded right after the close finds its scene disposed.
+  if (!modelViewer.value) return
   createWireframeVariant(event.target.model)
   if (props.isWireframe) {
     // model-viewer only re-applies a variant when `variantName` changes; a new
@@ -359,6 +361,8 @@ onMounted(async () => {
       return
     }
   }
+  // Closed while the library loaded: nothing would remove the listeners.
+  if (!modelViewer.value) return
   addEventListeners()
 })
 

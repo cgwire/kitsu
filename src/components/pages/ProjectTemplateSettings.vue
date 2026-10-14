@@ -1,5 +1,5 @@
 <template>
-  <div class="project-template-settings fixed-page" v-if="template">
+  <div class="project-template-settings fixed-page" ref="page" v-if="template">
     <div class="wrapper">
       <div class="flexrow back-row">
         <router-link
@@ -447,7 +447,7 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive, watch, onMounted } from 'vue'
+import { ref, computed, reactive, watch, onMounted, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useHead } from '@unhead/vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -467,6 +467,7 @@ import TaskStatusSettings from '@/components/pages/production/TaskStatusSettings
 import TaskTypeSettings from '@/components/pages/production/TaskTypeSettings.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
+import { useFieldCommitOnLeave } from '@/composables/fieldCommit'
 import {
   HOME_PAGE_OPTIONS,
   PRODUCTION_STYLE_OPTIONS,
@@ -683,7 +684,8 @@ const saveParameters = async () => {
   })
   try {
     await store.dispatch('editProjectTemplate', {
-      id: templateId.value,
+      // The route can have left the template by the end of the delay.
+      id: template.value.id,
       name: template.value.name,
       description: template.value.description,
       ...params.value,
@@ -725,12 +727,14 @@ const addTaskType = async taskTypeId => {
 }
 
 const setTaskTypeBitrates = async ({ taskTypeId, ...bitrates }) => {
+  const id = templateId.value
   await store.dispatch('addTaskTypeToTemplate', {
-    templateId: templateId.value,
+    templateId: id,
     taskTypeId,
     ...bitrates
   })
-  await loadTemplateData()
+  // A field saves on its way out of the page, which can be gone by now.
+  if (templateId.value === id) await loadTemplateData()
 }
 
 const removeTaskType = async taskTypeId => {
@@ -949,6 +953,12 @@ const confirmMetadataModal = async form => {
   }
   loading.saveDescriptor = false
 }
+
+// The task type bitrates read the template of the route when they save.
+useFieldCommitOnLeave(
+  useTemplateRef('page'),
+  (to, from) => to.params.template_id !== from.params.template_id
+)
 
 onMounted(async () => {
   if (route.query.tab) {

@@ -430,6 +430,8 @@ watch(
     // Bring a selected cell hidden on the right into view.
     if (document.getElementsByClassName('selected').length === 0) {
       setTimeout(() => {
+        // The page can be left in between.
+        if (!bodyRef.value) return
         bodyRef.value.scrollLeft += 380
       }, 100)
     }

@@ -788,11 +788,41 @@ describe('Productions store', () => {
       )
       expect(mockCommit).toHaveBeenNthCalledWith(
         2, PRODUCTION_SET_TASK_TYPE_LINK,
-        { taskTypeId: '456', hd_bitrate_compression: 20 }
+        {
+          production: state.currentProduction,
+          taskTypeId: '456',
+          hd_bitrate_compression: 20
+        }
       )
       expect(productionApi.addTaskTypeToProduction).toHaveBeenCalledWith(
         '123', '456', 1, { hd_bitrate_compression: 20 }
       )
+    })
+
+    // A bitrate field saves on its way out of the settings of a production:
+    // the next production is current by the time the answer comes back.
+    test('addTaskTypeToProduction updates the production it saves', async () => {
+      let answer
+      productionApi.addTaskTypeToProduction = vi.fn(
+        () => new Promise(resolve => (answer = resolve))
+      )
+      const production = { id: 'a', task_types: [], task_type_links: {} }
+      const nextProduction = { id: 'b', task_types: [], task_type_links: {} }
+      const state = { currentProduction: production }
+      const commit = (type, payload) => store.mutations[type](state, payload)
+
+      const saving = store.actions.addTaskTypeToProduction(
+        { commit, state },
+        { taskTypeId: '456', hd_bitrate_compression: 20 }
+      )
+      state.currentProduction = nextProduction
+      answer()
+      await saving
+
+      expect(production.task_type_links).toEqual({
+        456: { hd_bitrate_compression: 20 }
+      })
+      expect(nextProduction.task_type_links).toEqual({})
     })
 
     test('PRODUCTION_SET_TASK_TYPE_LINK keeps the other link fields', () => {
@@ -803,6 +833,7 @@ describe('Productions store', () => {
         }
       }
       store.mutations[PRODUCTION_SET_TASK_TYPE_LINK](state, {
+        production: state.currentProduction,
         taskTypeId: '456',
         hd_bitrate_compression: 20
       })

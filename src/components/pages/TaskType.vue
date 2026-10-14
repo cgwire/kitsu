@@ -1295,6 +1295,7 @@ const onExportClick = () => {
 
 const updateEstimation = ({ taskId, estimation, item, daysOff }) => {
   const task = taskMap.value.get(taskId)
+  if (!task) return
   let data = { estimation }
   if (task.start_date) {
     const startDate = parseDate(task.start_date)

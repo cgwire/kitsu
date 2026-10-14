@@ -432,6 +432,58 @@ describe('PlaylistPlayer.vue', () => {
       await flushPromises()
       expectClearedOnClose(pending)
     })
+
+    it('clears the frame jump of a clicked timecode', async () => {
+      const shot = {
+        ...entity,
+        preview_file_task_id: 'task-1',
+        preview_files: {
+          'task-type-1': [{ id: 'preview-1', revision: 2, extension: 'mp4' }]
+        }
+      }
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      wrapper = mountPlayer({
+        entities: [shot],
+        taskMap: new Map([['task-1', { id: 'task-1', task_type_id: 'task-type-1' }]]),
+        stubs: {
+          TaskInfo: { name: 'TaskInfo', ...withMethods(['focusCommentTextarea']) }
+        }
+      })
+      await flushPromises()
+      const pending = vi.getTimerCount()
+
+      wrapper
+        .findComponent({ name: 'TaskInfo' })
+        .vm.$emit('time-code-clicked', { versionRevision: '2', frame: 12 })
+      await flushPromises()
+
+      expectClearedOnClose(pending)
+    })
+  })
+
+  // The built movie keeps loading once the player is closed, and its end can
+  // be queued right before the close.
+  it('ignores the end of the built movie once closed', async () => {
+    // jsdom plays no media
+    vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {})
+    wrapper = mountPlayer()
+    await flushPromises()
+    wrapper.vm.isFullMode = true
+    await flushPromises()
+    const builtMovie = wrapper.find('video').element
+    const errors = []
+    const onError = event => {
+      errors.push(event.error)
+      event.preventDefault()
+    }
+    window.addEventListener('error', onError)
+    wrapper.unmount()
+    wrapper = null
+
+    builtMovie.dispatchEvent(new Event('ended'))
+    window.removeEventListener('error', onError)
+
+    expect(errors).toEqual([])
   })
 
   // A plain link navigates the tab: the browser fires beforeunload, which
