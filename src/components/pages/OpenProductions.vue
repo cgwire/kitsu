@@ -1,5 +1,8 @@
 <template>
-  <div class="open-productions page">
+  <div
+    class="open-productions page"
+    :class="{ 'is-client': isCurrentUserClient }"
+  >
     <div
       class="social-contributions"
       v-if="isContributions && !isCurrentUserClient"
@@ -700,6 +703,11 @@ a.secondary:hover {
     padding-top: 3em;
   }
 
+  // Clear the topbar: the client home has no title to push its content down.
+  .page.is-client {
+    padding-top: 4.5em;
+  }
+
   .open-productions-header {
     margin-bottom: 2em;
     h1 {
@@ -713,6 +721,15 @@ a.secondary:hover {
 
   .open-productions-box {
     padding: 1em 0;
+  }
+
+  .open-productions-box.is-client {
+    margin: 1em 0.5em 0;
+  }
+
+  .client-welcome {
+    margin: 1em 0.5em 0;
+    padding: 1.2em 2.5em 1.2em 1.2em;
   }
 
   .open-productions-header,

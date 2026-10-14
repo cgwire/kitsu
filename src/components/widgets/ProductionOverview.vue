@@ -5,16 +5,18 @@
         <template v-if="!production.has_avatar">{{ avatarLetter }}</template>
         <img :src="thumbnailPath" alt="" v-else />
       </div>
-      <h2 class="overview-name">{{ production.name }}</h2>
-      <div class="counts" v-if="!isLoading">
-        <div v-if="nbEpisodes">
-          {{ nbEpisodes }} {{ $t('episodes.number', { count: nbEpisodes }) }}
-        </div>
-        <div v-if="nbShots">
-          {{ nbShots }} {{ $t('shots.number', { count: nbShots }) }}
-        </div>
-        <div v-if="nbAssets">
-          {{ nbAssets }} {{ $t('assets.number', { count: nbAssets }) }}
+      <div class="identity">
+        <h2 class="overview-name">{{ production.name }}</h2>
+        <div class="counts" v-if="!isLoading">
+          <div v-if="nbEpisodes">
+            {{ nbEpisodes }} {{ $t('episodes.number', { count: nbEpisodes }) }}
+          </div>
+          <div v-if="nbShots">
+            {{ nbShots }} {{ $t('shots.number', { count: nbShots }) }}
+          </div>
+          <div v-if="nbAssets">
+            {{ nbAssets }} {{ $t('assets.number', { count: nbAssets }) }}
+          </div>
         </div>
       </div>
     </router-link>
@@ -416,12 +418,35 @@ const playlistPath = playlist =>
     gap: 1em;
   }
 
+  // The production becomes a strip: logo on the left, name and counts next
+  // to it.
   .production {
+    align-items: center;
+    flex-direction: row;
+    gap: 1em;
+    justify-content: flex-start;
+    padding: 1em 1.5em;
+    text-align: left;
     width: 100%;
+
+    .avatar {
+      font-size: 1.8em;
+      height: 64px;
+      margin: 0;
+      width: 64px;
+    }
+
+    .overview-name {
+      margin-top: 0;
+    }
+  }
+
+  .details {
+    padding: 1.2em 1.5em;
   }
 
   .playlist-cards {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   }
 }
 </style>
