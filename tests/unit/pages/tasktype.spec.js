@@ -19,6 +19,7 @@ import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
 import TaskType from '@/components/pages/TaskType.vue'
 import EstimationHelper from '@/components/pages/tasktype/EstimationHelper.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import ComboboxMultiple from '@/components/widgets/ComboboxMultiple.vue'
 import ComboboxStatusMultiple from '@/components/widgets/ComboboxStatusMultiple.vue'
 
 const SearchFieldStub = {
@@ -78,6 +79,7 @@ const mountPage = async ({
       nbSelectedTasks: () => 0,
       organisation: () => ({ hours_by_day: 8 }),
       personMap: () => new Map(),
+      productionAssetTypes: () => [],
       productionTaskStatuses: () => [],
       selectedTasks: () => new Map(),
       taskMap: () => new Map([[task.id, task]]),
@@ -228,7 +230,7 @@ describe('TaskType page', () => {
     })
   })
 
-  describe('task status filter', () => {
+  describe('task filters', () => {
     const TaskListStub = {
       name: 'TaskList',
       props: { tasks: { type: Array, default: () => [] } },
@@ -239,7 +241,8 @@ describe('TaskType page', () => {
       (statusId, index) => ({
         id: `task-${index + 10}`,
         assignees: [],
-        entity_id: 'asset-1',
+        // task-10 on a character, the others on a prop
+        entity_id: index ? 'asset-2' : 'asset-1',
         entity_name: 'Chair',
         task_status_id: statusId,
         task_type_id: 'task-type-1'
@@ -256,6 +259,7 @@ describe('TaskType page', () => {
       wrapper?.unmount()
       wrapper = null
       assetStore.cache.assetMap.delete('asset-1')
+      assetStore.cache.assetMap.delete('asset-2')
     })
 
     // The URL filters are read on the first load only, once the tasks
@@ -269,13 +273,23 @@ describe('TaskType page', () => {
           initTaskType: vi.fn(() => {
             assetStore.cache.assetMap.set('asset-1', {
               id: 'asset-1',
-              tasks: statusTasks.map(t => t.id)
+              asset_type_id: 'chars',
+              tasks: ['task-10']
+            })
+            assetStore.cache.assetMap.set('asset-2', {
+              id: 'asset-2',
+              asset_type_id: 'props',
+              tasks: ['task-11', 'task-12']
             })
           }),
           loadScheduleItems: vi.fn(() => [])
         },
         getters: {
           assetValidationColumns: () => [],
+          productionAssetTypes: () => [
+            { id: 'chars', name: 'Characters' },
+            { id: 'props', name: 'Props' }
+          ],
           taskMap: () => new Map(statusTasks.map(t => [t.id, t])),
           user: () => ({ id: 'manager-1', departments: [], full_name: 'M' })
         }
@@ -298,6 +312,19 @@ describe('TaskType page', () => {
         wrapper.findComponent(ComboboxStatusMultiple).props('modelValue')
       ).toEqual(['status-1', 'status-3'])
       expect(listedTaskIds()).toEqual(['task-10', 'task-12'])
+    })
+
+    it('keeps the tasks of the asset types the URL selects', async () => {
+      await mountTasks('?asset_type_id=props')
+      expect(
+        wrapper.findComponent(ComboboxMultiple).props('modelValue')
+      ).toEqual(['props'])
+      expect(listedTaskIds()).toEqual(['task-11', 'task-12'])
+    })
+
+    it('combines the asset type and status filters', async () => {
+      await mountTasks('?asset_type_id=props&task_status_id=status-1,status-2')
+      expect(listedTaskIds()).toEqual(['task-11'])
     })
 
     it('lists every task again once the selection is emptied', async () => {
