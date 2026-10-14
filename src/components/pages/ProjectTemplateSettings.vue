@@ -684,7 +684,8 @@ const saveParameters = async () => {
   })
   try {
     await store.dispatch('editProjectTemplate', {
-      id: templateId.value,
+      // The route can have left the template by the end of the delay.
+      id: template.value.id,
       name: template.value.name,
       description: template.value.description,
       ...params.value,

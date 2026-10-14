@@ -267,3 +267,51 @@ describe('ProjectTemplateSettings page, task type bitrates', () => {
     expect(dispatched('loadProjectTemplate')).toEqual([])
   })
 })
+
+// The parameters save 800 ms after their last change, and the page can be
+// left in between.
+describe('ProjectTemplateSettings page, parameters autosave', () => {
+  afterEach(() => vi.useRealTimers())
+
+  it('saves on the template typed in once the page is left', async () => {
+    const { wrapper, router, store, dispatched } = await mountEntityPage(
+      ProjectTemplateSettings,
+      {
+        query: { tab: 'video' },
+        getters: { movieBitrateDefaults },
+        actions: {
+          loadProjectTemplate: () => ({
+            id: 'template-1',
+            name: 'Feature',
+            metadata_descriptors: []
+          }),
+          loadTemplateTaskTypes: () => [],
+          loadTemplateTaskStatuses: () => [],
+          loadTemplateAssetTypes: () => [],
+          loadTemplateStatusAutomations: () => [],
+          loadTemplateBackgrounds: () => []
+        }
+      }
+    )
+    router.addRoute({
+      path: '/project-templates/:template_id',
+      component: { template: '<div />' }
+    })
+    await router.push('/project-templates/template-1')
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    store.dispatch.mockClear()
+
+    await wrapper
+      .findComponent(MovieBitrateField)
+      .vm.$emit('update:modelValue', 20)
+    await nextTick()
+    await router.push('/')
+    vi.advanceTimersByTime(800)
+    await nextTick()
+
+    expect(dispatched('editProjectTemplate')[0][1]).toMatchObject({
+      id: 'template-1',
+      hd_bitrate_compression: 20
+    })
+  })
+})
