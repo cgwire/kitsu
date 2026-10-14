@@ -563,6 +563,7 @@ import {
   getTaskUpdate,
   getVersionedTaskUpdate,
   isTaskTypeFilterShown,
+  movedSubItems,
   parseHiddenTaskTypeIds,
   refreshRawDates,
   removeHiddenTaskTypes,
@@ -1649,6 +1650,16 @@ const saveTaskChanged = task => {
 }
 
 const onScheduleItemChanged = async item => {
+  const affected = item.type === 'Task' ? [] : movedSubItems(item)
+  if (affected.length) {
+    pendingParentChange.value = { item, affected }
+    modals.value.confirmChildMove = true
+    return
+  }
+  await saveChangedItem(item)
+}
+
+const saveChangedItem = async item => {
   if (item.type === 'Task') {
     // update dates with weekends and days off
     const daysOff = item.assignees
@@ -1681,25 +1692,6 @@ const onScheduleItemChanged = async item => {
       )
       updateScheduleItem(item.parentElement)
     }
-  } else if (!item.parentElement) {
-    if (!Array.isArray(item.children)) {
-      await updateScheduleItem(item)
-      return
-    }
-    const affected = item.children.filter(
-      child =>
-        child._dragOrigStartDate &&
-        child._dragOrigEndDate &&
-        (!child.startDate.isSame(child._dragOrigStartDate) ||
-          !child.endDate.isSame(child._dragOrigEndDate))
-    )
-    if (!affected.length) {
-      await updateScheduleItem(item)
-      return
-    }
-    pendingParentChange.value = { item, affected }
-    modals.value.confirmChildMove = true
-    return
   }
 
   await updateScheduleItem(item)
@@ -1722,9 +1714,14 @@ const updateScheduleItem = async item => {
 const confirmChildMove = async () => {
   const { item, affected } = pendingParentChange.value
   try {
-    await Promise.all(
-      [item, ...affected].map(element => updateScheduleItem(element))
-    )
+    await Promise.all([
+      saveChangedItem(item),
+      ...affected.map(element =>
+        element.type === 'Task'
+          ? saveChangedItem(element)
+          : updateScheduleItem(element)
+      )
+    ])
   } finally {
     pendingParentChange.value = null
     modals.value.confirmChildMove = false

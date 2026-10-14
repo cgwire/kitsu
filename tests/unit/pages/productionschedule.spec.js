@@ -1123,6 +1123,50 @@ describe('ProductionSchedule page', () => {
       )
     })
 
+    // A shift drag moves the tasks under a bar: the widget stamps where
+    // each one started from, the page asks before saving them all.
+    it('asks before saving the tasks a shift-dragged row carried along', async () => {
+      const { storeActions, wrapper } = await mountPage()
+      const taskTypeBar = rowsOf(wrapper)[0]
+      const movedBar = buildBar('2026-02-11', '2026-02-20')
+      taskTypeBar.children = [movedBar]
+      movedBar.parentElement = taskTypeBar
+      // Monday 9 to Wednesday 11 February, moved by ten days
+      const task = {
+        type: 'Task',
+        id: 'task-1',
+        assignees: ['person-1'],
+        estimation: 3 * 8 * 60,
+        startDate: day('2026-02-19'),
+        endDate: day('2026-02-21'),
+        _dragOrigStartDate: day('2026-02-09'),
+        _dragOrigEndDate: day('2026-02-11'),
+        parentElement: movedBar
+      }
+      movedBar.children = new Map([['person-1', [task]]])
+
+      await changeItem(wrapper, movedBar)
+
+      expect(wrapper.findComponent(ConfirmModal).props('text')).toContain(
+        '"count":1'
+      )
+      expect(storeActions.updateTask).not.toHaveBeenCalled()
+
+      wrapper.findComponent(ConfirmModal).vm.$emit('confirm')
+      await flushPromises()
+
+      expect(wrapper.findComponent(ConfirmModal).exists()).toBe(false)
+      expect(payloadsOf(storeActions.updateTask)).toHaveLength(1)
+      expect(payloadsOf(storeActions.updateTask)[0].data).toMatchObject({
+        start_date: '2026-02-19',
+        due_date: '2026-02-23'
+      })
+      // the page hands the store its reactive proxy of the bar
+      expect(
+        payloadsOf(storeActions.saveScheduleItem).map(bar => bar.start_date)
+      ).toContain('2026-02-11')
+    })
+
     // A task stretching past both ends of its bars must save each bar once
     // with its two new dates: two requests racing could keep a stale end.
     it('saves each bar a task widens once', async () => {
