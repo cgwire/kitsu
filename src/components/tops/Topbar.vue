@@ -1308,6 +1308,14 @@ onBeforeUnmount(() => {
     margin-right: 0;
   }
 
+  .page-title {
+    font-size: 1.1em;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .global-search {
     display: none;
   }
