@@ -310,18 +310,11 @@
 
 <script setup>
 import moment from 'moment-timezone'
-import {
-  computed,
-  onBeforeUnmount,
-  onMounted,
-  ref,
-  useTemplateRef,
-  watch
-} from 'vue'
+import { computed, onMounted, ref, useTemplateRef } from 'vue'
 import { useStore } from 'vuex'
 
-import { pauseEvent } from '@/composables/dom'
 import { useFormat } from '@/composables/format'
+import { useTaskListSelection } from '@/composables/taskSelection'
 import { useTaskHelpers } from '@/composables/tasks'
 import {
   getDescriptorChecklistValues,
@@ -335,8 +328,7 @@ import {
   getDatesFromEndDate,
   getDatesFromStartDate,
   minutesToDays,
-  parseSimpleDate,
-  range
+  parseSimpleDate
 } from '@/lib/time'
 
 import DescriptionCell from '@/components/cells/DescriptionCell.vue'
@@ -393,12 +385,16 @@ const emit = defineEmits(['scroll', 'task-selected'])
 // --------------------------------------------------------------------------
 const colNamePosX = ref('')
 const colTypePosX = ref('')
-const lastSelection = ref(null)
-const selectionGrid = ref({})
 
 const bodyRef = useTemplateRef('body')
 const thProdRef = useTemplateRef('th-prod')
 const thTypeRef = useTemplateRef('th-type')
+
+const { applySelection, selectionGrid } = useTaskListSelection({
+  tasks: () => props.tasks,
+  body: bodyRef,
+  emit
+})
 
 // Computed
 // --------------------------------------------------------------------------
@@ -406,7 +402,6 @@ const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
 const isCurrentUserSupervisor = computed(
   () => store.getters.isCurrentUserSupervisor
 )
-const nbSelectedTasks = computed(() => store.getters.nbSelectedTasks)
 const openProductions = computed(() => store.getters.openProductions)
 const productionMap = computed(() => store.getters.productionMap)
 const taskMap = computed(() => store.getters.taskMap)
@@ -511,29 +506,6 @@ const entityPath = entity => {
     }
   }
   return getTaskEntityPath(entity, episodeId)
-}
-
-const onKeyDown = event => {
-  if (props.tasks.length > 0 && event.altKey) {
-    let index = lastSelection.value ? lastSelection.value : 0
-    if ([37, 38].includes(event.keyCode)) {
-      index = index - 1 < 0 ? props.tasks.length - 1 : index - 1
-    } else if ([39, 40].includes(event.keyCode)) {
-      index = index + 1 >= props.tasks.length ? 0 : index + 1
-    } else {
-      return
-    }
-    // A field leaves with the selection of its row, and a field removed while
-    // focused fires its change once the next row is selected: commit first.
-    if (
-      event.target.nodeName === 'INPUT' &&
-      bodyRef.value?.contains(event.target)
-    ) {
-      event.target.blur()
-    }
-    selectTask({}, index, props.tasks[index])
-    pauseEvent(event)
-  }
 }
 
 const mergeMetadataDescriptors = descriptors => {
@@ -670,71 +642,21 @@ const selectTask = (event, index, task) => {
       ['cell day selected'].includes(event.target.className))
   )
     return
-  const isSelected = selectionGrid.value[task.id]
-  const isManySelection = Object.keys(selectionGrid.value).length > 1
-  if (event && !(event.ctrlKey || event.metaKey) && !event.shiftKey) {
-    store.dispatch('clearSelectedTasks')
-    resetSelection()
-  }
-
-  if (event && !event.shiftKey) {
-    // A click on a row of a multi-selection selects it alone, a Ctrl+click
-    // unselects it.
-    if (isSelected && (!isManySelection || event.ctrlKey || event.metaKey)) {
-      store.dispatch('removeSelectedTask', { task })
-      delete selectionGrid.value[task.id]
-    } else {
-      store.dispatch('addSelectedTask', { task })
-      emit('task-selected', task)
-      selectionGrid.value[task.id] = true
-      lastSelection.value = index
-    }
-  } else {
-    // The range replaces the selection, and addSelectedTasks merges.
-    store.dispatch('clearSelectedTasks')
-    selectionGrid.value = {}
-    const taskIndices =
-      lastSelection.value > index
-        ? range(index, lastSelection.value)
-        : range(lastSelection.value, index)
-    const selection = taskIndices.map(i => ({ task: props.tasks[i] }))
-    selection.forEach(task => {
-      selectionGrid.value[task.task.id] = true
-    })
-    store.dispatch('addSelectedTasks', selection)
-  }
-}
-
-const resetSelection = () => {
-  selectionGrid.value = {}
-  lastSelection.value = null
+  applySelection(event, index, task)
 }
 
 // The parent pages restore the scroll position and trigger header
 // resizes through a template ref.
 defineExpose({ resizeHeaders, setScrollPosition })
 
-// Watchers
-// --------------------------------------------------------------------------
-watch(() => props.tasks, resetSelection)
-
-watch(nbSelectedTasks, () => {
-  if (nbSelectedTasks.value === 0) resetSelection()
-})
-
 // Lifecycle
 // --------------------------------------------------------------------------
 onMounted(() => {
-  window.addEventListener('keydown', onKeyDown, false)
   if (thProdRef.value) {
     colTypePosX.value = thProdRef.value.offsetWidth + 'px'
     colNamePosX.value =
       thProdRef.value.offsetWidth + thTypeRef.value.offsetWidth + 'px'
   }
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('keydown', onKeyDown)
 })
 </script>
 
