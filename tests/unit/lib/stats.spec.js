@@ -3,6 +3,7 @@
 import {
   aggregateRetakeStats,
   aggregateStats,
+  computeDepartmentStats,
   computeStats,
   countEntities,
   getChartData,
@@ -503,5 +504,54 @@ describe('lib/stats', () => {
     expect(aggregated.all.other).toEqual({ count: 33, frames: 330, drawings: 0 })
     const partial = aggregateRetakeStats(retakeStats, ['episode-1'])
     expect(partial.all.retake.count).toEqual(1)
+  })
+})
+
+describe('lib/stats, computeDepartmentStats', () => {
+  const taskTypeMap = new Map([
+    ['tt-layout', { id: 'tt-layout', department_id: 'dep-anim' }],
+    ['tt-anim', { id: 'tt-anim', department_id: 'dep-anim' }],
+    ['tt-compo', { id: 'tt-compo', department_id: 'dep-compo' }],
+    ['tt-loose', { id: 'tt-loose', department_id: null }]
+  ])
+  const taskStatusMap = new Map([
+    [
+      'done',
+      {
+        id: 'done',
+        name: 'Done',
+        short_name: 'DONE',
+        color: '#0f0',
+        is_done: true
+      }
+    ],
+    [
+      'wip',
+      { id: 'wip', name: 'Work in progress', short_name: 'WIP', color: '#00f' }
+    ]
+  ])
+  const task = (task_type_id, task_status_id) => ({ task_type_id, task_status_id })
+  const entities = [
+    { id: 'sh-1', tasks: [task('tt-layout', 'done'), task('tt-anim', 'wip')] },
+    { id: 'sh-2', tasks: [task('tt-layout', 'done'), task('tt-compo', 'wip')] },
+    { id: 'sh-3', canceled: true, tasks: [task('tt-layout', 'wip')] },
+    { id: 'as-1', tasks: [task('tt-loose', 'done'), task('tt-anim', 'unknown')] }
+  ]
+
+  it('folds the tasks of the entities by department, in the chart shape, under the full status names', () => {
+    const stats = computeDepartmentStats(entities, taskTypeMap, taskStatusMap)
+    expect(getChartData(stats, 'all', 'dep-anim')).toEqual([
+      ['Done', 2, '#0f0', true],
+      ['Work in progress', 1, '#00f', false]
+    ])
+    expect(getChartData(stats, 'all', 'dep-compo')).toEqual([
+      ['Work in progress', 1, '#00f', false]
+    ])
+  })
+
+  it('leaves out the canceled entities, the unknown statuses and the task types without department', () => {
+    const stats = computeDepartmentStats(entities, taskTypeMap, taskStatusMap)
+    expect(Object.keys(stats.all).sort()).toEqual(['dep-anim', 'dep-compo'])
+    expect(stats.all['dep-anim'].wip.count).toBe(1)
   })
 })

@@ -487,6 +487,10 @@ const isProductionContext = computed(
 
 const pageTitle = computed(() => {
   if (isProductionContext.value) return ''
+  // The home of a client is the productions of the studio.
+  if (isCurrentUserClient.value && route.name === 'open-productions') {
+    return `${organisation.value.name} ${t('productions.title')}`
+  }
   const titleKey = route.meta?.title
   return titleKey ? t(titleKey) : ''
 })
