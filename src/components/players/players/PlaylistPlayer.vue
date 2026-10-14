@@ -216,7 +216,7 @@
             class="picture-preview"
             :background-color="pictureBackgroundColor"
             :big="true"
-            :default-height="pictureDefaultHeight"
+            :default-height="mediaHeight"
             :full-screen="fullScreen"
             :light="false"
             :margin-bottom="0"
@@ -304,19 +304,19 @@
         <pdf-viewer
           ref="pdf-player"
           :preview="currentPreview"
-          :default-height="pictureDefaultHeight"
+          :default-height="mediaHeight"
           v-if="isCurrentPreviewPdf && !isLoading"
         />
 
         <markdown-viewer
           :preview="currentPreview"
-          :default-height="pictureDefaultHeight"
+          :default-height="mediaHeight"
           v-if="isCurrentPreviewMarkdown && !isLoading"
         />
 
         <diff-viewer
           :preview="currentPreview"
-          :default-height="pictureDefaultHeight"
+          :default-height="mediaHeight"
           v-if="isCurrentPreviewDiff && !isLoading"
         />
 
@@ -354,7 +354,7 @@
           <multi-picture-viewer
             ref="picture-player"
             :background-color="pictureBackgroundColor"
-            :default-height="pictureDefaultHeight"
+            :default-height="mediaHeight"
             :full-screen="fullScreen"
             :light="false"
             :margin-bottom="0"
@@ -427,6 +427,7 @@
         :task="task"
         :player="playerProxy"
         :show-assignees="isCurrentTaskManager || isCurrentTaskSupervisor"
+        :style="{ height: `${mediaHeight}px` }"
         @comment-added="onCommentAdded"
         @time-code-clicked="onTimeCodeClicked"
         v-show="!isCommentsHidden"
@@ -1170,7 +1171,7 @@ const objectModel = ref({
 const onNextTimeUpdateActions = ref([])
 const pencilPalette = ref(['huge', 'big', 'medium', 'small', 'tiny'])
 const pictureBackgroundColor = ref('#000000')
-const pictureDefaultHeight = ref(0)
+const mediaHeight = ref(0)
 const playingEntityIndex = ref(0)
 const playlistDuration = ref(0)
 const playlistProgress = ref(0)
@@ -2795,11 +2796,7 @@ const getPreviousAnnotationTime = time => {
 }
 
 const onCommentClicked = () => {
-  const height = videoContainer.value.offsetHeight
   isCommentsHidden.value = !isCommentsHidden.value
-  if (!isCommentsHidden.value && taskInfoRef.value?.$el) {
-    taskInfoRef.value.$el.style.height = `${height}px`
-  }
   triggerResize()
   nextTick(() => {
     taskInfoRef.value?.focusCommentTextarea()
@@ -3896,13 +3893,12 @@ const resetHeight = () => {
     if (isWaveformDisplayed.value && isCurrentPreviewMovie.value) height -= 60
 
     if (videoContainer.value) videoContainer.value.style.height = `${height}px`
-    if (taskInfoRef.value?.$el && !isCommentsHidden.value) {
-      taskInfoRef.value.$el.style.height = `${height}px`
-    }
     if (fullPlaylistPlayer.value) {
       fullPlaylistPlayer.value.style.height = `${height}px`
     }
-    pictureDefaultHeight.value = height
+    // The comment panel binds this height: it is an async component, so a
+    // DOM write here would miss it on the first sizing.
+    mediaHeight.value = height
     rawPlayer.value?.resetHeight(height)
     if (isComparing.value && rawPlayerComparison.value) {
       rawPlayerComparison.value.resetHeight(height)

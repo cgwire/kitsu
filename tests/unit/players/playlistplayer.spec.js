@@ -1,7 +1,7 @@
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import process from 'node:process'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { markRaw, reactive, ref } from 'vue'
+import { defineAsyncComponent, markRaw, reactive, ref } from 'vue'
 import { createStore } from 'vuex'
 
 vi.mock('vue-i18n', async importOriginal => ({
@@ -51,6 +51,7 @@ const mountPlayer = ({
   playlistProp = playlist,
   entities = [entity],
   canEditShotTrim = () => true,
+  isClient = false,
   previewFileStatusMap,
   shotMap = new Map(),
   taskMap = new Map(),
@@ -66,7 +67,7 @@ const mountPlayer = ({
       episodeMap: () => new Map(),
       isCurrentUserAdmin: () => false,
       isCurrentUserArtist: () => false,
-      isCurrentUserClient: () => false,
+      isCurrentUserClient: () => isClient,
       isCurrentUserManager: () => true,
       isCurrentUserSupervisor: () => false,
       organisation: () => ({}),
@@ -1009,6 +1010,29 @@ describe('PlaylistPlayer.vue', () => {
       await press(key)
 
       expect(canvas.clear).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('comment panel height', () => {
+    // The panel is an async component: it mounts after the player has
+    // sized its media once, as for a client, who gets it open on load.
+    it('sizes a panel that mounts after the media', async () => {
+      wrapper = mountPlayer({
+        isClient: true,
+        stubs: {
+          TaskInfo: defineAsyncComponent(() =>
+            Promise.resolve(withMethods(['focusCommentTextarea']))
+          )
+        }
+      })
+      await flushPromises()
+      await flushPromises()
+
+      const mediaHeight = wrapper.find('.video-container').element.style.height
+      expect(mediaHeight).toMatch(/px$/)
+      expect(wrapper.find('.task-info-column').element.style.height).toBe(
+        mediaHeight
+      )
     })
   })
 
