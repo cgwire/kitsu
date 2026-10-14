@@ -933,6 +933,9 @@ let lastEndDate = null
 // person row the drag started on: a multi-assignee task renders one bar per
 // assignee, so assignees[0] is not necessarily the person being reassigned
 let dragSourcePersonId = null
+// shift held on the mousedown: the rows of a root bar move with it instead
+// of being clipped to its new bounds
+let isShiftDrag = false
 // person row each dragged bar last hopped to during the drag: once the bar
 // left its source row, the source id is gone from assignees and only this
 // map knows which row the next hop must unassign
@@ -1545,6 +1548,7 @@ const changeDates = event => {
         // header entries with the item dates
         currentElement.value.startDate = newStartDate.clone()
         currentElement.value.endDate = newEndDate.clone()
+        propagateClipToChildren(currentElement.value)
       }
     }
   }
@@ -1664,6 +1668,8 @@ const propagateClipToChildren = item => {
   if (item.parentElement || !Array.isArray(item.children)) return
   const newStart = item.startDate
   const newEnd = item.endDate
+  // whole days: a millisecond shift drifts a day across a DST change
+  const shift = newStart.diff(item._dragOrigStartDate, 'days')
   item.children.forEach(child => {
     const origStart = child._dragOrigStartDate
     const origEnd = child._dragOrigEndDate
@@ -1673,7 +1679,10 @@ const propagateClipToChildren = item => {
     child.startDate = origStart.clone()
     child.endDate = origEnd.clone()
 
-    if (origEnd.isSameOrBefore(newStart)) {
+    if (isShiftDrag && isChangeDates.value) {
+      child.startDate.add(shift, 'days')
+      child.endDate.add(shift, 'days')
+    } else if (origEnd.isSameOrBefore(newStart)) {
       // entirely before new start: snap to 1-day bar at start
       child.startDate = newStart.clone()
       child.endDate = newStart.clone().add(1, 'days')
@@ -1787,6 +1796,7 @@ const moveTimebar = (timeElement, event) => {
     lastStartDate = timeElement.startDate.clone()
     lastEndDate = timeElement.endDate.clone()
     initialClientX = getClientX(event)
+    isShiftDrag = event.shiftKey
     dragSourcePersonId =
       event.target.closest?.('[data-person-id]')?.dataset.personId ?? null
     dragPersonByItem.clear()

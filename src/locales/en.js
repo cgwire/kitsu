@@ -2000,7 +2000,7 @@ export default {
       '{count} task could not fit in the date range. | {count} tasks could not fit in the date range.',
     batch_schedule: 'Batch schedule tasks',
     confirm_move_children:
-      'Moving this bar will clip or snap {count} sub-item to fit the new bounds. Continue? | Moving this bar will clip or snap {count} sub-items to fit the new bounds. Continue?',
+      'Moving this bar also changes the dates of {count} sub-item. Continue? | Moving this bar also changes the dates of {count} sub-items. Continue?',
     create_version: 'Create schedule version',
     daily_quota: 'Tasks per assignee per day',
     daily_quota_help:

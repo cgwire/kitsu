@@ -1920,7 +1920,7 @@
       "assign_help_task_type": "Wybierz typ zadania, aby wyświetlić sekwencje, ujęcia lub assety z zadaniem tego typu, które nie jest jeszcze nikomu przypisane.",
       "assign_no_fit": "{count} zadanie nie zmieściło się w zakresie dat. | Zadania, które nie zmieściły się w zakresie dat: {count}.",
       "batch_schedule": "Zaplanuj zadania zbiorczo",
-      "confirm_move_children": "Przesunięcie tego paska przytnie lub przesunie {count} podelement, aby zmieścił się w nowych granicach. Kontynuować? | Przesunięcie tego paska przytnie lub przesunie podelementy ({count}), aby zmieściły się w nowych granicach. Kontynuować?",
+      "confirm_move_children": "Przesunięcie tego paska zmieni także daty {count} podelementu. Kontynuować? | Przesunięcie tego paska zmieni także daty podelementów ({count}). Kontynuować?",
       "create_version": "Utwórz wersję harmonogramu",
       "daily_quota": "Zadania na osobę dziennie",
       "daily_quota_help": "Puste: zadania są rozkładane równomiernie w okresie, {quota} na osobę dziennie. Mniejsza wartość zostawia zadania poza okresem, większa kończy wcześniej.",

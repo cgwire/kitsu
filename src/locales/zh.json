@@ -1497,7 +1497,7 @@
       "assign_help_task_type": "选择一个任务类型，列出该类型任务尚未分配给任何人的序列、镜头或资产。",
       "assign_no_fit": "{count} 个任务无法排入日期范围。 | {count} 个任务无法排入日期范围。",
       "batch_schedule": "批量排期任务",
-      "confirm_move_children": "移动此条将裁剪或移动 {count} 个子项以适应新范围。是否继续？| 移动此条将裁剪或移动 {count} 个子项以适应新范围。是否继续？",
+      "confirm_move_children": "移动此条也会更改 {count} 个子项的日期。是否继续？ | 移动此条也会更改 {count} 个子项的日期。是否继续？",
       "create_version": "创建日程计划版本",
       "daily_quota": "每人每天的任务数",
       "daily_quota_help": "留空则在日期范围内平均分配，每人每天 {quota} 个。较小的值会使部分任务超出范围，较大的值会更早完成。",

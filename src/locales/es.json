@@ -1497,7 +1497,7 @@
       "assign_help_task_type": "Elija un tipo de tarea para listar las secuencias, planos o assets con una tarea de ese tipo aún sin asignar.",
       "assign_no_fit": "{count} tarea no cupo en el rango de fechas. | {count} tareas no cupieron en el rango de fechas.",
       "batch_schedule": "Planificar tareas por lotes",
-      "confirm_move_children": "Mover esta barra recortará o ajustará {count} subelemento para adaptarlo a los nuevos límites. ¿Continuar? | Mover esta barra recortará o ajustará {count} subelementos para adaptarlos a los nuevos límites. ¿Continuar?",
+      "confirm_move_children": "Mover esta barra también cambia las fechas de {count} subelemento. ¿Continuar? | Mover esta barra también cambia las fechas de {count} subelementos. ¿Continuar?",
       "create_version": "Crear versión del calendario",
       "daily_quota": "Tareas por persona y día",
       "daily_quota_help": "Vacío: las tareas se reparten uniformemente en el periodo, {quota} por persona y día. Un valor menor deja tareas fuera del periodo, uno mayor termina antes.",

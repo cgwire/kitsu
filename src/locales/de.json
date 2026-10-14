@@ -1497,7 +1497,7 @@
       "assign_help_task_type": "Wählen Sie einen Aufgabentyp, um die Sequenzen, Shots oder Assets mit einer noch niemandem zugewiesenen Aufgabe dieses Typs aufzulisten.",
       "assign_no_fit": "{count} Aufgabe passte nicht in den Zeitraum. | {count} Aufgaben passten nicht in den Zeitraum.",
       "batch_schedule": "Aufgaben gesammelt planen",
-      "confirm_move_children": "Das Verschieben dieses Balkens wird {count} Unterelement zuschneiden oder verschieben, damit es in die neuen Grenzen passt. Fortfahren? | Das Verschieben dieses Balkens wird {count} Unterelemente zuschneiden oder verschieben, damit sie in die neuen Grenzen passen. Fortfahren?",
+      "confirm_move_children": "Das Verschieben dieses Balkens ändert auch die Daten von {count} Unterelement. Fortfahren? | Das Verschieben dieses Balkens ändert auch die Daten von {count} Unterelementen. Fortfahren?",
       "create_version": "Version des Zeitplans erstellen",
       "daily_quota": "Aufgaben pro Person und Tag",
       "daily_quota_help": "Leer: die Aufgaben werden gleichmäßig über den Zeitraum verteilt, {quota} pro Person und Tag. Ein kleinerer Wert lässt Aufgaben aus dem Zeitraum fallen, ein größerer endet früher.",

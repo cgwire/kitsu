@@ -1497,7 +1497,7 @@
       "assign_help_task_type": "Scegli un tipo di attività per elencare le sequenze, le inquadrature o gli asset con un'attività di quel tipo non ancora assegnata a nessuno.",
       "assign_no_fit": "{count} task non è rientrato nell'intervallo di date. | {count} task non sono rientrati nell'intervallo di date.",
       "batch_schedule": "Pianifica task in blocco",
-      "confirm_move_children": "Spostare questa barra ritaglierà o sposterà {count} sotto-elemento per adattarlo ai nuovi limiti. Vuoi continuare? | Spostare questa barra ritaglierà o sposterà {count} sotto-elementi per adattarli ai nuovi limiti. Vuoi continuare?",
+      "confirm_move_children": "Spostare questa barra cambia anche le date di {count} sottoelemento. Continuare? | Spostare questa barra cambia anche le date di {count} sottoelementi. Continuare?",
       "create_version": "Crea una versione della pianificazione",
       "daily_quota": "Task per persona al giorno",
       "daily_quota_help": "Vuoto: i task sono distribuiti uniformemente nel periodo, {quota} per persona al giorno. Un valore più basso lascia task fuori dal periodo, uno più alto termina prima.",

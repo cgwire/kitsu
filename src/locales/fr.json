@@ -1497,7 +1497,7 @@
       "assign_help_task_type": "Choisissez un type de tâche pour lister les séquences, plans ou assets ayant une tâche de ce type encore assignée à personne.",
       "assign_no_fit": "{count} tâche ne tient pas dans la plage de dates. | {count} tâches ne tiennent pas dans la plage de dates.",
       "batch_schedule": "Planifier des tâches en lot",
-      "confirm_move_children": "Déplacer cette barre va rogner ou déplacer {count} sous-élément pour tenir dans les nouvelles bornes. Continuer ? | Déplacer cette barre va rogner ou déplacer {count} sous-éléments pour tenir dans les nouvelles bornes. Continuer ?",
+      "confirm_move_children": "Déplacer cette barre change aussi les dates de {count} sous-élément. Continuer ? | Déplacer cette barre change aussi les dates de {count} sous-éléments. Continuer ?",
       "create_version": "Créer une version du planning",
       "daily_quota": "Tâches par personne et par jour",
       "daily_quota_help": "Vide : les tâches sont réparties uniformément sur la période, {quota} par personne et par jour. Une valeur plus basse laisse des tâches hors de la période, une plus haute termine plus tôt.",

@@ -1497,7 +1497,7 @@
       "assign_help_task_type": "Escolha um tipo de tarefa para listar as sequências, planos ou assets com uma tarefa desse tipo ainda não atribuída a ninguém.",
       "assign_no_fit": "{count} tarefa não coube no intervalo de datas. | {count} tarefas não couberam no intervalo de datas.",
       "batch_schedule": "Planejar tarefas em lote",
-      "confirm_move_children": "Mover esta barra vai cortar ou ajustar {count} subitem para caber nos novos limites. Continuar? | Mover esta barra vai cortar ou ajustar {count} subitens para caberem nos novos limites. Continuar?",
+      "confirm_move_children": "Mover esta barra também altera as datas de {count} subitem. Continuar? | Mover esta barra também altera as datas de {count} subitens. Continuar?",
       "create_version": "Criar versão do cronograma",
       "daily_quota": "Tarefas por pessoa por dia",
       "daily_quota_help": "Vazio: as tarefas são distribuídas uniformemente pelo período, {quota} por pessoa por dia. Um valor menor deixa tarefas fora do período, um maior termina antes.",

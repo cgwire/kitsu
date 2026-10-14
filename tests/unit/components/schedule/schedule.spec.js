@@ -967,6 +967,72 @@ describe('Schedule widget - entity rows', () => {
     return { wrapper, counts, reset }
   }
 
+  // zoom level 1 is 20px a day: a 200px drag is 10 days
+  const dragRootBar = async (wrapper, toX, options = {}) => {
+    const bar = wrapper.find('.root-element .timebar-center')
+    await bar.trigger('mousedown', { clientX: 300, ...options })
+    document.dispatchEvent(
+      new MouseEvent('mousemove', { bubbles: true, clientX: toX })
+    )
+    document.dispatchEvent(
+      new MouseEvent('mouseup', { bubbles: true, clientX: toX })
+    )
+    await nextTick()
+  }
+
+  it('clips the rows to the moved root bar', async () => {
+    const hierarchy = buildEntityHierarchy(1)
+    const { wrapper } = mountCounted(hierarchy)
+    const [root] = hierarchy
+    const [row] = root.children
+    root.endDate = moment('2026-09-30')
+
+    await dragRootBar(wrapper, 500)
+
+    expect(root.startDate.format('YYYY-MM-DD')).toBe('2026-08-13')
+    expect(row.startDate.format('YYYY-MM-DD')).toBe('2026-08-13')
+    expect(row.endDate.format('YYYY-MM-DD')).toBe('2026-08-14')
+    wrapper.unmount()
+  })
+
+  it('moves the rows along with the root bar on a shift drag', async () => {
+    const hierarchy = buildEntityHierarchy(2)
+    const { wrapper } = mountCounted(hierarchy)
+    const [root] = hierarchy
+    const [first, second] = root.children
+    root.endDate = moment('2026-09-30')
+
+    await dragRootBar(wrapper, 500, { shiftKey: true })
+
+    expect(root.startDate.format('YYYY-MM-DD')).toBe('2026-08-13')
+    expect(first.startDate.format('YYYY-MM-DD')).toBe('2026-08-20')
+    expect(first.endDate.format('YYYY-MM-DD')).toBe('2026-08-24')
+    expect(second.startDate.format('YYYY-MM-DD')).toBe('2026-08-27')
+    expect(wrapper.emitted('item-changed').map(([item]) => item.id)).toEqual(
+      ['tt-1']
+    )
+    wrapper.unmount()
+  })
+
+  it('moves the rows along with the root bar on the week zoom', async () => {
+    const hierarchy = buildEntityHierarchy(1)
+    const [root] = hierarchy
+    const [row] = root.children
+    root.endDate = moment('2026-09-30')
+    const wrapper = mountSchedule(
+      { hierarchy, zoomLevel: 0, clipChildren: true },
+      { attachTo: document.body }
+    )
+
+    // the week zoom is 20px a week
+    await dragRootBar(wrapper, 320, { shiftKey: true })
+
+    expect(root.startDate.format('YYYY-MM-DD')).toBe('2026-08-10')
+    expect(row.startDate.format('YYYY-MM-DD')).toBe('2026-08-17')
+    expect(row.endDate.format('YYYY-MM-DD')).toBe('2026-08-21')
+    wrapper.unmount()
+  })
+
   it('updates only the row holding the item on a move frame', async () => {
     const { wrapper, counts, reset } = mountCounted(buildEntityHierarchy())
     const bar = wrapper.find('.child-line .timebar-center')

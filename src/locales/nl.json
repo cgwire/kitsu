@@ -1497,7 +1497,7 @@
       "assign_help_task_type": "Kies een taaktype om de sequenties, shots of assets te tonen met een taak van dat type die nog aan niemand is toegewezen.",
       "assign_no_fit": "{count} taak paste niet in het datumbereik. | {count} taken pasten niet in het datumbereik.",
       "batch_schedule": "Taken in bulk plannen",
-      "confirm_move_children": "Het verplaatsen van deze balk zal {count} subitem bijsnijden of verschuiven om binnen de nieuwe grenzen te passen. Doorgaan? | Het verplaatsen van deze balk zal {count} subitems bijsnijden of verschuiven om binnen de nieuwe grenzen te passen. Doorgaan?",
+      "confirm_move_children": "Deze balk verplaatsen wijzigt ook de datums van {count} subitem. Doorgaan? | Deze balk verplaatsen wijzigt ook de datums van {count} subitems. Doorgaan?",
       "create_version": "Planningsversie maken",
       "daily_quota": "Taken per persoon per dag",
       "daily_quota_help": "Leeg: de taken worden gelijkmatig over de periode verdeeld, {quota} per persoon per dag. Een lagere waarde laat taken buiten de periode vallen, een hogere is eerder klaar.",

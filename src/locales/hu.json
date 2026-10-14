@@ -1497,7 +1497,7 @@
       "assign_help_task_type": "Válasszon feladattípust azoknak a szekvenciáknak, snitteknek vagy asseteknek a listázásához, amelyek ilyen típusú feladata még nincs senkihez rendelve.",
       "assign_no_fit": "{count} feladat nem fért bele a dátumtartományba. | {count} feladat nem fért bele a dátumtartományba.",
       "batch_schedule": "Feladatok csoportos ütemezése",
-      "confirm_move_children": "A sáv mozgatása levágja vagy elmozdítja {count} alelemet, hogy az új határok közé férjen. Folytatod? | A sáv mozgatása levágja vagy elmozdítja {count} alelemet, hogy az új határok közé férjenek. Folytatod?",
+      "confirm_move_children": "A sáv mozgatása {count} alelem dátumait is módosítja. Folytatja? | A sáv mozgatása {count} alelem dátumait is módosítja. Folytatja?",
       "create_version": "Időbeosztás-verzió létrehozása",
       "daily_quota": "Feladat személyenként és naponta",
       "daily_quota_help": "Üresen a feladatok egyenletesen oszlanak el az időszakban, {quota} személyenként és naponta. Kisebb érték esetén feladatok maradnak ki az időszakból, nagyobb érték esetén korábban végeznek.",

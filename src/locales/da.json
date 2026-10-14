@@ -1497,7 +1497,7 @@
       "assign_help_task_type": "Vælg en opgavetype for at vise de sekvenser, shots eller assets, der har en opgave af den type, som endnu ikke er tildelt nogen.",
       "assign_no_fit": "{count} opgave passede ikke ind i datointervallet. | {count} opgaver passede ikke ind i datointervallet.",
       "batch_schedule": "Planlæg opgaver samlet",
-      "confirm_move_children": "Flytning af denne bjælke vil beskære eller flytte {count} under-element, så det passer til de nye grænser. Fortsæt? | Flytning af denne bjælke vil beskære eller flytte {count} under-elementer, så de passer til de nye grænser. Fortsæt?",
+      "confirm_move_children": "Flytning af denne bjælke ændrer også datoerne for {count} underelement. Fortsæt? | Flytning af denne bjælke ændrer også datoerne for {count} underelementer. Fortsæt?",
       "create_version": "Opret version af tidsplan",
       "daily_quota": "Opgaver pr. person pr. dag",
       "daily_quota_help": "Tom: opgaverne fordeles jævnt over perioden, {quota} pr. person pr. dag. En lavere værdi lader opgaver falde uden for perioden, en højere afslutter tidligere.",

@@ -1497,7 +1497,7 @@
       "assign_help_task_type": "選擇一個任務類型，列出該類型任務尚未指派給任何人的序列、鏡頭或資產。",
       "assign_no_fit": "{count} 個任務無法排入日期範圍。 | {count} 個任務無法排入日期範圍。",
       "batch_schedule": "批次排程任務",
-      "confirm_move_children": "移動此條將裁剪或移動 {count} 個子項目以符合新範圍。是否繼續？| 移動此條將裁剪或移動 {count} 個子項目以符合新範圍。是否繼續？",
+      "confirm_move_children": "移動此條也會變更 {count} 個子項目的日期。要繼續嗎？ | 移動此條也會變更 {count} 個子項目的日期。要繼續嗎？",
       "create_version": "建立排程版本",
       "daily_quota": "每人每天的任務數",
       "daily_quota_help": "留空則在日期範圍內平均分配，每人每天 {quota} 個。較小的值會使部分任務超出範圍，較大的值會更早完成。",
