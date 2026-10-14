@@ -661,6 +661,7 @@ import {
 import moment from 'moment-timezone'
 
 import colors from '@/lib/colors'
+import { subItemsOf } from '@/lib/productionSchedule'
 import {
   addBusinessDays,
   daysToMinutes,
@@ -1655,21 +1656,39 @@ const stampDragOrigin = timeElement => {
   timeElement._dragOrigStartDate = timeElement.startDate.clone()
   timeElement._dragOrigEndDate = timeElement.endDate.clone()
   timeElement._dragOrigEstimation = timeElement.estimation
-  if (!timeElement.parentElement && Array.isArray(timeElement.children)) {
-    timeElement.children.forEach(child => {
-      child._dragOrigStartDate = child.startDate.clone()
-      child._dragOrigEndDate = child.endDate.clone()
-    })
-  }
+  stampSubItems(timeElement)
+}
+
+const stampSubItems = item => {
+  subItemsOf(item).forEach(child => {
+    if (!child.startDate || !child.endDate) return
+    child._dragOrigStartDate = child.startDate.clone()
+    child._dragOrigEndDate = child.endDate.clone()
+    stampSubItems(child)
+  })
+}
+
+// Shift held: everything under the bar moves by the same whole days,
+// recomputed from the stamped origin so a back-drag never drifts (a
+// millisecond shift would also drift a day across a DST change).
+const shiftSubItems = (item, shift) => {
+  subItemsOf(item).forEach(child => {
+    if (!child._dragOrigStartDate) return
+    child.startDate = child._dragOrigStartDate.clone().add(shift, 'days')
+    child.endDate = child._dragOrigEndDate.clone().add(shift, 'days')
+    shiftSubItems(child, shift)
+  })
 }
 
 const propagateClipToChildren = item => {
   if (!props.clipChildren) return
+  if (isShiftDrag && isChangeDates.value) {
+    shiftSubItems(item, item.startDate.diff(item._dragOrigStartDate, 'days'))
+    return
+  }
   if (item.parentElement || !Array.isArray(item.children)) return
   const newStart = item.startDate
   const newEnd = item.endDate
-  // whole days: a millisecond shift drifts a day across a DST change
-  const shift = newStart.diff(item._dragOrigStartDate, 'days')
   item.children.forEach(child => {
     const origStart = child._dragOrigStartDate
     const origEnd = child._dragOrigEndDate
@@ -1679,10 +1698,7 @@ const propagateClipToChildren = item => {
     child.startDate = origStart.clone()
     child.endDate = origEnd.clone()
 
-    if (isShiftDrag && isChangeDates.value) {
-      child.startDate.add(shift, 'days')
-      child.endDate.add(shift, 'days')
-    } else if (origEnd.isSameOrBefore(newStart)) {
+    if (origEnd.isSameOrBefore(newStart)) {
       // entirely before new start: snap to 1-day bar at start
       child.startDate = newStart.clone()
       child.endDate = newStart.clone().add(1, 'days')
