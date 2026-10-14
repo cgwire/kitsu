@@ -1402,8 +1402,12 @@ const changeDates = event => {
       resetDroppableTargets()
     }
     const currentRootElement = currentElement.value.parentElement
+    // only a task can be reassigned: an entity bar dragged over the task
+    // rows below it must keep moving instead of being dropped by the
+    // rights check
     if (
       props.subchildren &&
+      currentElement.value.assignees &&
       target &&
       target.dataset.personId &&
       target.dataset.entityTypeId &&
