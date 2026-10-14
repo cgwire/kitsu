@@ -11,6 +11,13 @@ vi.mock('@/store/api/tasks', () => ({
     addExtraPreview: vi.fn(),
     addPreview: vi.fn(),
     commentTask: vi.fn(),
+    copyLastClientComments: vi.fn((projectId, taskIds) =>
+      Promise.resolve(
+        taskIds
+          .filter(taskId => taskId !== 'task-2')
+          .map(taskId => ({ id: `comment-${taskId}`, object_id: taskId }))
+      )
+    ),
     deletePreview: vi.fn(),
     deleteTaskComment: vi.fn(),
     getTaskComment: vi.fn(),
@@ -273,6 +280,48 @@ describe('Tasks store', () => {
       expect(commit).toHaveBeenCalledTimes(1)
       expect(commit.mock.calls[0][0]).toEqual('EDIT_TASK_END')
       expect(commit.mock.calls[0][1].task.priority).toEqual(2)
+    })
+
+    test('copyLastClientComments sends one request by production', async () => {
+      const commit = vi.fn()
+      const state = {
+        selectedTasks: new Map([
+          ['task-1', true],
+          ['task-2', true],
+          ['task-3', true]
+        ]),
+        taskMap: new Map([
+          ['task-1', { id: 'task-1', project_id: 'production-1' }],
+          ['task-2', { id: 'task-2', project_id: 'production-1' }],
+          ['task-3', { id: 'task-3', project_id: 'production-2' }]
+        ])
+      }
+      const result = await tasksStore.actions.copyLastClientComments(
+        { commit, state },
+        { prefix: 'Client:' }
+      )
+      expect(tasksApi.copyLastClientComments.mock.calls).toEqual([
+        ['production-1', ['task-1', 'task-2'], 'Client:'],
+        ['production-2', ['task-3'], 'Client:']
+      ])
+      expect(commit.mock.calls).toEqual([
+        [
+          'NEW_TASK_COMMENT_END',
+          {
+            comment: { id: 'comment-task-1', object_id: 'task-1' },
+            taskId: 'task-1'
+          }
+        ],
+        [
+          'NEW_TASK_COMMENT_END',
+          {
+            comment: { id: 'comment-task-3', object_id: 'task-3' },
+            taskId: 'task-3'
+          }
+        ]
+      ])
+      // task-2 has no client comment
+      expect(result).toEqual({ nbCopied: 2, nbSkipped: 1 })
     })
 
     test('subscribeToTasks sends one request and commits per task', async () => {

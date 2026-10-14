@@ -85,6 +85,27 @@
         <div
           class="menu-item"
           :class="{
+            active: selectedBar === 'copy-client-comments'
+          }"
+          :title="$t('menu.copy_client_comments')"
+          v-if="
+            isCurrentUserManager &&
+            isTaskSelection &&
+            !isEntitySelection &&
+            !isCurrentViewConcept
+          "
+          role="button"
+          tabindex="0"
+          @click="selectBar('copy-client-comments')"
+          @keydown.enter.prevent="selectBar('copy-client-comments')"
+          @keydown.space.prevent="selectBar('copy-client-comments')"
+        >
+          <message-square-quote-icon />
+        </div>
+
+        <div
+          class="menu-item"
+          :class="{
             active: selectedBar === 'thumbnails'
           }"
           :title="$t('menu.set_thumbnails')"
@@ -509,6 +530,45 @@
           </div>
         </div>
 
+        <div
+          class="flexcolumn is-wide copy-client-comments"
+          v-if="selectedBar === 'copy-client-comments'"
+        >
+          <div class="flexrow-item prefix-field mb05">
+            <input
+              class="comment-text input"
+              type="text"
+              :placeholder="$t('tasks.copy_client_comments_prefix')"
+              v-model="clientCommentsPrefix"
+            />
+          </div>
+          <div class="flexrow-item is-wide">
+            <button
+              class="button confirm-button is-wide"
+              :class="{
+                'is-loading': loading.copyClientComments
+              }"
+              @click="confirmClientCommentsCopy"
+            >
+              {{
+                $t('tasks.copy_client_comments', {
+                  count: nbSelectedTasks,
+                  nbSelectedTasks
+                })
+              }}
+            </button>
+          </div>
+          <p class="result mt05" v-if="clientCommentsCopy">
+            {{ $t('tasks.client_comments_copied', clientCommentsCopy) }}
+          </p>
+          <p
+            class="is-danger has-text-centered mt05"
+            v-if="errors.copyClientComments"
+          >
+            {{ $t('tasks.copy_client_comments_error') }}
+          </p>
+        </div>
+
         <div class="flexrow is-wide" v-if="selectedBar === 'create-tasks'">
           <button
             class="button confirm-button is-wide"
@@ -904,6 +964,7 @@ import {
   EyeIcon,
   FolderInputIcon,
   LinkIcon,
+  MessageSquareQuoteIcon,
   PlayCircleIcon,
   Trash2Icon,
   XIcon
@@ -957,6 +1018,8 @@ const props = defineProps({
 
 const emit = defineEmits(['export-task', 'set-frame-thumbnail'])
 
+const CLIENT_COMMENTS_PREFIX_KEY = 'action-panel:client-comments-prefix'
+
 // State
 // --------------------------------------------------------------------------
 
@@ -966,6 +1029,10 @@ const entitySearchFieldRef = useTemplateRef('entity-search-field')
 const availableTaskStatuses = ref([])
 const customAction = ref({})
 const customActions = ref([])
+const clientCommentsCopy = ref(null)
+const clientCommentsPrefix = ref(
+  localStorage.getItem(CLIENT_COMMENTS_PREFIX_KEY) || ''
+)
 const isMoreActionsOpen = ref(false)
 const moreActionsPosition = ref({})
 const isUseCurrentFrame = ref(false)
@@ -986,6 +1053,7 @@ const loading = reactive({
   changePriority: false,
   changeStatus: false,
   conceptDeletion: false,
+  copyClientComments: false,
   editDeletion: false,
   taskCreation: false,
   taskDeletion: false,
@@ -997,6 +1065,7 @@ const loading = reactive({
 const errors = reactive({
   assetDeletion: false,
   conceptDeletion: false,
+  copyClientComments: false,
   editDeletion: false,
   shotDeletion: false,
   taskAssignation: false,
@@ -1371,6 +1440,22 @@ const confirmPriorityChange = async () => {
     console.error(err)
   }
   loading.changePriority = false
+}
+
+const confirmClientCommentsCopy = async () => {
+  loading.copyClientComments = true
+  errors.copyClientComments = false
+  clientCommentsCopy.value = null
+  localStorage.setItem(CLIENT_COMMENTS_PREFIX_KEY, clientCommentsPrefix.value)
+  try {
+    clientCommentsCopy.value = await store.dispatch('copyLastClientComments', {
+      prefix: clientCommentsPrefix.value
+    })
+  } catch (err) {
+    console.error(err)
+    errors.copyClientComments = true
+  }
+  loading.copyClientComments = false
 }
 
 const confirmTaskCreation = async () => {
@@ -1786,6 +1871,11 @@ onBeforeUnmount(() => {
   height: 43px;
   min-height: 43px;
   padding: 8px;
+}
+
+.prefix-field,
+.prefix-field .input {
+  width: 100%;
 }
 
 .priority-combobox {

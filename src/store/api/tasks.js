@@ -116,6 +116,13 @@ export default {
     )
   },
 
+  copyLastClientComments(projectId, taskIds, prefix) {
+    return client.ppost(
+      `/api/actions/projects/${projectId}/tasks/copy-client-comments`,
+      { task_ids: taskIds, prefix }
+    )
+  },
+
   getTaskComment(data) {
     return client.pget(`/api/data/comments/${data.id}?relations=true`)
   },
