@@ -126,7 +126,7 @@
           class="flexrow-item mr0 global-search"
           v-if="mainConfig.indexer_configured && !isCurrentUserClient"
         />
-        <div class="nav-item">
+        <div class="nav-item" v-if="!isCurrentUserClient">
           <a
             class="changelog-button"
             target="_blank"
