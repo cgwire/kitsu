@@ -10,6 +10,7 @@
       <action-panel
         v-if="
           withActions &&
+          !isCurrentUserClient &&
           (!isConceptTask || selectedConcepts.size > 0) &&
           (nbSelectedEntities > 0 ||
             nbSelectedTasks > 0 ||

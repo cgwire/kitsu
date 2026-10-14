@@ -64,7 +64,7 @@ describe('AddComment', () => {
     project_id: 'production-1'
   }
 
-  beforeEach(async () => {
+  const mountComment = async (getterOverrides = {}) => {
     draftComment = makeDraftComment()
     clearedProgress = []
 
@@ -97,7 +97,8 @@ describe('AddComment', () => {
           new Map([
             ['task-type-1', { id: 'task-type-1', name: 'Animation' }]
           ]),
-        uploadProgress: () => ({})
+        uploadProgress: () => ({}),
+        ...getterOverrides
       },
       mutations: {
         CLEAR_UPLOAD_PROGRESS: (state, names) => clearedProgress.push(names)
@@ -131,7 +132,9 @@ describe('AddComment', () => {
         }
       }
     })
-  })
+  }
+
+  beforeEach(() => mountComment())
 
   it('renders the status tab as active by default', () => {
     const tabs = wrapper.findAll('.tab-row span')
@@ -143,6 +146,13 @@ describe('AddComment', () => {
     const tabs = wrapper.findAll('.tab-row span')
     await tabs[1].trigger('click')
     expect(draftComment.mode).toBe('publish')
+  })
+
+  it('keeps the publish tab from a client', async () => {
+    wrapper.unmount()
+    await mountComment({ isCurrentUserClient: () => true })
+    expect(wrapper.findAll('.tab-row span')).toHaveLength(1)
+    expect(draftComment.mode).toBe('status')
   })
 
   it('has the comment input area in status mode', () => {
