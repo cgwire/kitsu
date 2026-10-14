@@ -421,6 +421,74 @@ describe('ActionPanel, opened on a task selection', () => {
   )
 })
 
+describe('ActionPanel, more actions menu', () => {
+  const task = {
+    id: 'task-1',
+    project_id: 'production-1',
+    task_type_id: 'task-type-1'
+  }
+
+  const mountOnShots = role =>
+    mountPanel([], {
+      path: '/productions/production-1/shots',
+      role,
+      tasks: [task]
+    })
+
+  const moreButton = wrapper => wrapper.find('[title="menu.more_actions"]')
+
+  const openMoreActions = async wrapper => {
+    await moreButton(wrapper).trigger('click')
+    return wrapper.findAll('.more-actions-list [role="option"]')
+  }
+
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  test('moves the secondary actions out of the bar', async () => {
+    const { wrapper } = await mountOnShots('manager')
+
+    expect(wrapper.find('.menu > [title="menu.subscribe"]').exists()).toBe(
+      false
+    )
+    expect(wrapper.find('.menu > [title="menu.delete_tasks"]').exists()).toBe(
+      false
+    )
+    const items = await openMoreActions(wrapper)
+    expect(items.map(item => item.text())).toEqual([
+      'menu.subscribe',
+      'menu.delete_tasks'
+    ])
+  })
+
+  test('keeps the manager actions for managers', async () => {
+    const { wrapper } = await mountOnShots('supervisor')
+
+    const items = await openMoreActions(wrapper)
+    expect(items.map(item => item.text())).toEqual(['menu.subscribe'])
+  })
+
+  test('opens the bar of the chosen action', async () => {
+    const { wrapper } = await mountOnShots('manager')
+
+    const items = await openMoreActions(wrapper)
+    await items[0].trigger('click')
+
+    expect(wrapper.find('.more-actions-list').exists()).toBe(false)
+    expect(moreButton(wrapper).classes()).toContain('active')
+    expect(
+      wrapper.findAll('.action-bar .confirm-button').map(button => button.text())
+    ).toEqual(['tasks.subscribe_to_tasks'])
+  })
+
+  test('hides the menu without any secondary action', async () => {
+    const { wrapper } = await mountPanel([buildConcept('concept-1')])
+
+    expect(moreButton(wrapper).exists()).toBe(false)
+  })
+})
+
 describe('ActionPanel, concept folders', () => {
   const openFolders = wrapper =>
     wrapper.find('[title="concepts.folders.move"]').trigger('click')
