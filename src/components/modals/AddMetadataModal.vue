@@ -131,9 +131,7 @@
             />
             <button
               class="button is-success flexrow-item"
-              :class="{
-                'is-disabled': selectedDepartment === null
-              }"
+              :disabled="selectedDepartment === null"
               @click="addDepartment"
             >
               {{ $t('main.add') }}
