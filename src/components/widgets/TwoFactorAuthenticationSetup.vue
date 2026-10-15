@@ -157,10 +157,8 @@
           <button
             v-if="!user.totp_enabled"
             class="button two-fa-action enable-action"
-            :class="{
-              'is-disabled': twoFAButtonsDisabled,
-              'is-loading': twoFA.loadingAction === 'preEnableTOTP'
-            }"
+            :class="{ 'is-loading': twoFA.loadingAction === 'preEnableTOTP' }"
+            :disabled="twoFAButtonsDisabled"
             @click="preEnableTOTPRequested()"
           >
             {{ $t('profile.two_factor_authentication.totp.button_enable') }}
@@ -168,9 +166,7 @@
           <button
             v-else
             class="button two-fa-action disable-action"
-            :class="{
-              'is-disabled': twoFAButtonsDisabled
-            }"
+            :disabled="twoFAButtonsDisabled"
             @click="disableTOTPRequested()"
           >
             {{ $t('profile.two_factor_authentication.totp.button_disable') }}
@@ -263,9 +259,9 @@
             v-if="!user.email_otp_enabled"
             class="button two-fa-action enable-action"
             :class="{
-              'is-disabled': twoFAButtonsDisabled,
               'is-loading': twoFA.loadingAction === 'preEnableEmailOTP'
             }"
+            :disabled="twoFAButtonsDisabled"
             @click="preEnableEmailOTPRequested()"
           >
             {{
@@ -275,9 +271,7 @@
           <button
             v-else
             class="button two-fa-action disable-action"
-            :class="{
-              'is-disabled': twoFAButtonsDisabled
-            }"
+            :disabled="twoFAButtonsDisabled"
             @click="disableEmailOTPRequested()"
           >
             {{
@@ -356,9 +350,7 @@
         <div v-else class="two-fa-card-actions">
           <button
             class="button two-fa-action enable-action"
-            :class="{
-              'is-disabled': twoFAButtonsDisabled
-            }"
+            :disabled="twoFAButtonsDisabled"
             @click="preRegisterFIDORequested()"
           >
             {{ $t('profile.two_factor_authentication.fido.button_register') }}
@@ -370,9 +362,7 @@
     <button
       v-if="twoFAEnabled && !twoFA.newRecoveryCodesNeedTwoFA"
       class="two-fa-button button save-button"
-      :class="{
-        'is-disabled': twoFAButtonsDisabled
-      }"
+      :disabled="twoFAButtonsDisabled"
       @click="newRecoveryCodesRequested()"
     >
       {{ $t('profile.two_factor_authentication.recovery_codes.button_new') }}
@@ -1004,7 +994,7 @@ onUnmounted(() => {
     border-color: $green;
     color: $white;
 
-    &:hover:not(.is-disabled) {
+    &:hover:not([disabled]) {
       background: $light-green;
       border-color: $light-green;
     }
@@ -1015,7 +1005,7 @@ onUnmounted(() => {
     border-color: $red;
     color: $red;
 
-    &:hover:not(.is-disabled) {
+    &:hover:not([disabled]) {
       background: $red;
       color: $white;
     }
