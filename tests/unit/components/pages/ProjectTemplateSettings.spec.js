@@ -10,6 +10,7 @@ import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
 import ProjectTemplateSettings from '@/components/pages/ProjectTemplateSettings.vue'
 import MovieBitrateField from '@/components/pages/production/MovieBitrateField.vue'
 import TaskTypeSettings from '@/components/pages/production/TaskTypeSettings.vue'
+import TextField from '@/components/widgets/TextField.vue'
 
 import { mountEntityPage } from '../../fixtures/entity-page'
 
@@ -18,6 +19,11 @@ const movieBitrateDefaults = {
   hd_bitrate_compression: 40,
   ld_bitrate_compression: 8
 }
+
+const findTextField = (wrapper, label) =>
+  wrapper
+    .findAllComponents(TextField)
+    .find(field => field.props('label') === label)
 
 // A close keeps the error of a refused save: the next opening drops it.
 describe('ProjectTemplateSettings page, metadata column modal', () => {
@@ -192,10 +198,16 @@ describe('ProjectTemplateSettings page, video tab', () => {
     const { hd, ld } = bitrateFields(wrapper)
     expect(ld.props('max')).toBe(40)
 
-    // The page saves itself once loaded: empty fields stay empty.
+    // A save of another field leaves the empty bitrates empty.
+    await findTextField(wrapper, 'productions.fields.fps').vm.$emit(
+      'update:modelValue',
+      '24'
+    )
+    await nextTick()
     vi.advanceTimersByTime(800)
     await nextTick()
     expect(dispatched('editProjectTemplate').at(-1)[1]).toMatchObject({
+      fps: '24',
       hd_bitrate_compression: null,
       ld_bitrate_compression: null
     })
@@ -273,31 +285,35 @@ describe('ProjectTemplateSettings page, task type bitrates', () => {
 describe('ProjectTemplateSettings page, parameters autosave', () => {
   afterEach(() => vi.useRealTimers())
 
-  it('saves on the template typed in once the page is left', async () => {
-    const { wrapper, router, store, dispatched } = await mountEntityPage(
-      ProjectTemplateSettings,
-      {
-        query: { tab: 'video' },
-        getters: { movieBitrateDefaults },
-        actions: {
-          loadProjectTemplate: () => ({
-            id: 'template-1',
-            name: 'Feature',
-            metadata_descriptors: []
-          }),
-          loadTemplateTaskTypes: () => [],
-          loadTemplateTaskStatuses: () => [],
-          loadTemplateAssetTypes: () => [],
-          loadTemplateStatusAutomations: () => [],
-          loadTemplateBackgrounds: () => []
-        }
+  const mountOnTemplate = async (tab, actions = {}) => {
+    const page = await mountEntityPage(ProjectTemplateSettings, {
+      query: { tab },
+      getters: { movieBitrateDefaults },
+      actions: {
+        loadProjectTemplate: () => ({
+          id: 'template-1',
+          name: 'Feature',
+          metadata_descriptors: []
+        }),
+        loadTemplateTaskTypes: () => [],
+        loadTemplateTaskStatuses: () => [],
+        loadTemplateAssetTypes: () => [],
+        loadTemplateStatusAutomations: () => [],
+        loadTemplateBackgrounds: () => [],
+        ...actions
       }
-    )
-    router.addRoute({
+    })
+    page.router.addRoute({
       path: '/project-templates/:template_id',
       component: { template: '<div />' }
     })
-    await router.push('/project-templates/template-1')
+    await page.router.push('/project-templates/template-1')
+    return page
+  }
+
+  it('saves on the template typed in once the page is left', async () => {
+    const { wrapper, router, store, dispatched } =
+      await mountOnTemplate('video')
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
     store.dispatch.mockClear()
 
@@ -312,6 +328,87 @@ describe('ProjectTemplateSettings page, parameters autosave', () => {
     expect(dispatched('editProjectTemplate')[0][1]).toMatchObject({
       id: 'template-1',
       hd_bitrate_compression: 20
+    })
+  })
+
+  // A load gives the parameters their stored values: nothing to save.
+  it('saves nothing once loaded', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    const { dispatched } = await mountOnTemplate('video')
+
+    vi.advanceTimersByTime(800)
+    await nextTick()
+
+    expect(dispatched('editProjectTemplate')).toEqual([])
+  })
+
+  // The changes made in the other tabs reload the template.
+  it('saves nothing after a reload of the template', async () => {
+    const { wrapper, dispatched } = await mountOnTemplate('taskTypes', {
+      addTaskTypeToTemplate: () => {}
+    })
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+
+    await wrapper.findComponent(TaskTypeSettings).vm.$emit('bitrates-changed', {
+      taskTypeId: 'task-type-1',
+      hd_bitrate_compression: 20
+    })
+    await flushPromises()
+    vi.advanceTimersByTime(800)
+    await nextTick()
+
+    expect(dispatched('loadProjectTemplate')).toHaveLength(2)
+    expect(dispatched('editProjectTemplate')).toEqual([])
+  })
+
+  it('saves a field brought back to its loaded value', async () => {
+    const { wrapper, dispatched } = await mountOnTemplate('video')
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    const fps = findTextField(wrapper, 'productions.fields.fps')
+
+    await fps.vm.$emit('update:modelValue', '24')
+    await nextTick()
+    vi.advanceTimersByTime(800)
+    await flushPromises()
+    await fps.vm.$emit('update:modelValue', '25')
+    await nextTick()
+    vi.advanceTimersByTime(800)
+    await nextTick()
+
+    expect(
+      dispatched('editProjectTemplate').map(([, data]) => data.fps)
+    ).toEqual(['24', '25'])
+  })
+
+  // The values of a refused save are no stored ones: a field changed, then
+  // brought back, still sends them.
+  it('sends the values of a refused save with the next change', async () => {
+    let isRefused = true
+    const { wrapper, dispatched } = await mountOnTemplate('video', {
+      editProjectTemplate: () => {
+        const answer = isRefused ? Promise.reject(new Error()) : undefined
+        isRefused = false
+        return answer
+      }
+    })
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    const fps = findTextField(wrapper, 'productions.fields.fps')
+
+    await fps.vm.$emit('update:modelValue', '24')
+    await nextTick()
+    vi.advanceTimersByTime(800)
+    await flushPromises()
+    const ratio = findTextField(wrapper, 'productions.fields.ratio')
+    await ratio.vm.$emit('update:modelValue', '4:3')
+    await ratio.vm.$emit('update:modelValue', '16:9')
+    await nextTick()
+    vi.advanceTimersByTime(800)
+    await nextTick()
+
+    expect(dispatched('editProjectTemplate')).toHaveLength(2)
+    expect(dispatched('editProjectTemplate')[1][1]).toMatchObject({
+      fps: '24',
+      ratio: '16:9'
     })
   })
 })
