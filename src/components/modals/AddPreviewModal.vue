@@ -116,7 +116,8 @@
               'is-disabled': forms.length === 0
             }"
             role="button"
-            tabindex="0"
+            :aria-disabled="forms.length === 0"
+            :tabindex="forms.length === 0 ? -1 : 0"
             @click="confirm"
             @keydown.enter.prevent="confirm"
             @keydown.space.prevent="confirm"
@@ -186,8 +187,10 @@ const onFileSelected = newForms => {
   emit('fileselected', forms.value)
 }
 
+// The disabled and loading looks only stop the mouse: Enter and Space still
+// reach the button.
 const confirm = () => {
-  if (forms.value.length > 0) emit('confirm', forms.value)
+  if (forms.value.length > 0 && !props.isLoading) emit('confirm', forms.value)
 }
 
 const reset = () => {

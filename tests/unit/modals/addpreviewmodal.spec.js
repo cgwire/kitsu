@@ -30,6 +30,19 @@ describe('modals/AddPreviewModal', () => {
     expect(wrapper.emitted('confirm')).toBeUndefined()
   })
 
+  it('takes the confirm out of the tab order while no file is selected', async () => {
+    const wrapper = mountModal()
+    const confirm = wrapper.find('a.button')
+
+    expect(confirm.attributes('aria-disabled')).toBe('true')
+    expect(confirm.attributes('tabindex')).toBe('-1')
+
+    await selectFile(wrapper)
+
+    expect(confirm.attributes('aria-disabled')).toBe('false')
+    expect(confirm.attributes('tabindex')).toBe('0')
+  })
+
   it('confirms with the selected files', async () => {
     const wrapper = mountModal()
     const form = await selectFile(wrapper)
@@ -37,6 +50,17 @@ describe('modals/AddPreviewModal', () => {
     await wrapper.find('a.button').trigger('click')
 
     expect(wrapper.emitted('confirm')[0]).toEqual([[form]])
+  })
+
+  it('does not confirm again while the files upload', async () => {
+    const wrapper = mountModal()
+    await selectFile(wrapper)
+    await wrapper.setProps({ isLoading: true })
+
+    await wrapper.find('a.button').trigger('keydown', { key: 'Enter' })
+    await wrapper.find('a.button').trigger('keydown', { key: ' ' })
+
+    expect(wrapper.emitted('confirm')).toBeUndefined()
   })
 
   it('translates the title of the selected files', async () => {
