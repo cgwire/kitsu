@@ -85,6 +85,27 @@
         <div
           class="menu-item"
           :class="{
+            active: selectedBar === 'copy-client-comments'
+          }"
+          :title="$t('menu.copy_client_comments')"
+          v-if="
+            isCurrentUserManager &&
+            isTaskSelection &&
+            !isEntitySelection &&
+            !isCurrentViewConcept
+          "
+          role="button"
+          tabindex="0"
+          @click="selectBar('copy-client-comments')"
+          @keydown.enter.prevent="selectBar('copy-client-comments')"
+          @keydown.space.prevent="selectBar('copy-client-comments')"
+        >
+          <message-square-quote-icon />
+        </div>
+
+        <div
+          class="menu-item"
+          :class="{
             active: selectedBar === 'thumbnails'
           }"
           :title="$t('menu.set_thumbnails')"
@@ -101,31 +122,6 @@
             name="add-thumbnail"
             :active="selectedBar === 'thumbnails'"
             :title="$t('menu.set_thumbnails')"
-          />
-        </div>
-
-        <div
-          class="menu-item"
-          :class="{
-            active: selectedBar === 'subscribe'
-          }"
-          :title="$t('menu.subscribe')"
-          v-if="
-            isTaskSelection &&
-            !isCurrentViewSingleEntity &&
-            !isCurrentViewTodos &&
-            !isCurrentViewConcept
-          "
-          role="button"
-          tabindex="0"
-          @click="selectBar('subscribe')"
-          @keydown.enter.prevent="selectBar('subscribe')"
-          @keydown.space.prevent="selectBar('subscribe')"
-        >
-          <kitsu-icon
-            name="watch"
-            :active="selectedBar === 'subscribe'"
-            :title="$t('menu.subscribe')"
           />
         </div>
 
@@ -171,11 +167,6 @@
         </div>
 
         <div
-          class="menu-separator"
-          v-if="!isEntitySelection && isTaskSelection && nbSelectedTasks > 1"
-        ></div>
-
-        <div
           class="menu-item"
           :class="{
             active: selectedBar === 'playlists'
@@ -206,19 +197,6 @@
         </div>
 
         <div
-          v-if="
-            (isCurrentViewAsset ||
-              isCurrentViewShot ||
-              isCurrentViewTaskType) &&
-            !isEntitySelection &&
-            !isCurrentViewSingleEntity &&
-            isTaskSelection &&
-            isCurrentUserManager
-          "
-          class="menu-separator"
-        ></div>
-
-        <div
           class="menu-item"
           :class="{
             active: selectedBar === 'create-tasks'
@@ -238,50 +216,6 @@
           "
         >
           <check-square-icon />
-        </div>
-
-        <div
-          class="menu-item"
-          :class="{
-            active: selectedBar === 'delete-tasks'
-          }"
-          :title="$t('menu.delete_tasks')"
-          role="button"
-          tabindex="0"
-          @click="selectBar('delete-tasks')"
-          @keydown.enter.prevent="selectBar('delete-tasks')"
-          @keydown.space.prevent="selectBar('delete-tasks')"
-          v-if="
-            isCurrentViewEntity &&
-            isCurrentUserManager &&
-            !isEntitySelection &&
-            !isCurrentViewSingleEntity &&
-            isTaskSelection
-          "
-        >
-          <kitsu-icon
-            name="trash"
-            :active="selectedBar === 'delete-tasks'"
-            :title="$t('menu.delete_tasks')"
-          />
-        </div>
-
-        <div class="menu-separator" v-if="isCustomActionAvailable"></div>
-
-        <div
-          class="menu-item"
-          :class="{
-            active: selectedBar === 'custom-actions'
-          }"
-          :title="$t('menu.run_custom_action')"
-          role="button"
-          tabindex="0"
-          @click="selectBar('custom-actions')"
-          @keydown.enter.prevent="selectBar('custom-actions')"
-          @keydown.space.prevent="selectBar('custom-actions')"
-          v-if="isCustomActionAvailable"
-        >
-          <play-circle-icon />
         </div>
 
         <div
@@ -348,6 +282,55 @@
           "
         >
           <kitsu-icon name="trash" :title="$t('menu.delete_concepts')" />
+        </div>
+
+        <div class="more-actions" v-if="moreActions.length">
+          <div
+            class="menu-item"
+            ref="more-actions-button"
+            :class="{ active: isMoreActionSelected }"
+            :title="$t('menu.more_actions')"
+            role="combobox"
+            tabindex="0"
+            aria-haspopup="listbox"
+            :aria-expanded="isMoreActionsOpen"
+            :aria-activedescendant="
+              moreActionIndex > -1 ? moreActionId(moreActionIndex) : undefined
+            "
+            @click="toggleMoreActions"
+            @keydown="onMoreActionsKeydown"
+          >
+            <ellipsis-icon />
+          </div>
+          <div
+            class="more-actions-list"
+            ref="more-actions-list"
+            role="listbox"
+            :style="moreActionsPosition"
+            v-if="isMoreActionsOpen"
+          >
+            <div
+              :id="moreActionId(index)"
+              :key="action.bar"
+              class="more-action flexrow"
+              :class="{
+                active: selectedBar === action.bar,
+                focused: index === moreActionIndex
+              }"
+              role="option"
+              :aria-selected="selectedBar === action.bar"
+              @click="selectMoreAction(action)"
+              v-for="(action, index) in moreActions"
+            >
+              <component :is="action.icon" :size="16" class="flexrow-item" />
+              <span class="flexrow-item">{{ action.label }}</span>
+            </div>
+          </div>
+          <div
+            class="c-mask"
+            :class="{ 'is-active': isMoreActionsOpen }"
+            @click="toggleMoreActions"
+          ></div>
         </div>
 
         <div class="filler"></div>
@@ -545,6 +528,45 @@
               }}
             </button>
           </div>
+        </div>
+
+        <div
+          class="flexcolumn is-wide copy-client-comments"
+          v-if="selectedBar === 'copy-client-comments'"
+        >
+          <div class="flexrow-item prefix-field mb05">
+            <input
+              class="comment-text input"
+              type="text"
+              :placeholder="$t('tasks.copy_client_comments_prefix')"
+              v-model="clientCommentsPrefix"
+            />
+          </div>
+          <div class="flexrow-item is-wide">
+            <button
+              class="button confirm-button is-wide"
+              :class="{
+                'is-loading': loading.copyClientComments
+              }"
+              @click="confirmClientCommentsCopy"
+            >
+              {{
+                $t('tasks.copy_client_comments', {
+                  count: nbSelectedTasks,
+                  nbSelectedTasks
+                })
+              }}
+            </button>
+          </div>
+          <p class="result mt05" v-if="clientCommentsCopy">
+            {{ $t('tasks.client_comments_copied', clientCommentsCopy) }}
+          </p>
+          <p
+            class="is-danger has-text-centered mt05"
+            v-if="errors.copyClientComments"
+          >
+            {{ $t('tasks.copy_client_comments_error') }}
+          </p>
         </div>
 
         <div class="flexrow is-wide" v-if="selectedBar === 'create-tasks'">
@@ -938,9 +960,13 @@
 /* eslint-disable no-unused-vars */
 import {
   CheckSquareIcon,
+  EllipsisIcon,
+  EyeIcon,
   FolderInputIcon,
   LinkIcon,
+  MessageSquareQuoteIcon,
   PlayCircleIcon,
+  Trash2Icon,
   XIcon
 } from 'lucide-vue-next'
 import {
@@ -956,6 +982,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
+import { useComboboxKeyboard } from '@/composables/comboboxKeyboard'
 import { intersection } from '@/lib/array'
 import func from '@/lib/func'
 import { isFreeEscape } from '@/lib/keyboard'
@@ -991,6 +1018,8 @@ const props = defineProps({
 
 const emit = defineEmits(['export-task', 'set-frame-thumbnail'])
 
+const CLIENT_COMMENTS_PREFIX_KEY = 'action-panel:client-comments-prefix'
+
 // State
 // --------------------------------------------------------------------------
 
@@ -1000,6 +1029,12 @@ const entitySearchFieldRef = useTemplateRef('entity-search-field')
 const availableTaskStatuses = ref([])
 const customAction = ref({})
 const customActions = ref([])
+const clientCommentsCopy = ref(null)
+const clientCommentsPrefix = ref(
+  localStorage.getItem(CLIENT_COMMENTS_PREFIX_KEY) || ''
+)
+const isMoreActionsOpen = ref(false)
+const moreActionsPosition = ref({})
 const isUseCurrentFrame = ref(false)
 const person = ref(null)
 const priority = ref('0')
@@ -1018,6 +1053,7 @@ const loading = reactive({
   changePriority: false,
   changeStatus: false,
   conceptDeletion: false,
+  copyClientComments: false,
   editDeletion: false,
   taskCreation: false,
   taskDeletion: false,
@@ -1029,6 +1065,7 @@ const loading = reactive({
 const errors = reactive({
   assetDeletion: false,
   conceptDeletion: false,
+  copyClientComments: false,
   editDeletion: false,
   shotDeletion: false,
   taskAssignation: false,
@@ -1238,6 +1275,43 @@ const isCustomActionAvailable = computed(
     customActions.value.length > 0
 )
 
+// Secondary actions, listed in the more actions menu instead of the bar
+const moreActions = computed(() =>
+  [
+    {
+      bar: 'subscribe',
+      icon: EyeIcon,
+      label: t('menu.subscribe'),
+      isAvailable:
+        isTaskSelection.value &&
+        !isCurrentViewSingleEntity.value &&
+        !isCurrentViewTodos.value &&
+        !isCurrentViewConcept.value
+    },
+    {
+      bar: 'custom-actions',
+      icon: PlayCircleIcon,
+      label: t('menu.run_custom_action'),
+      isAvailable: isCustomActionAvailable.value
+    },
+    {
+      bar: 'delete-tasks',
+      icon: Trash2Icon,
+      label: t('menu.delete_tasks'),
+      isAvailable:
+        isCurrentViewEntity.value &&
+        isCurrentUserManager.value &&
+        !isEntitySelection.value &&
+        !isCurrentViewSingleEntity.value &&
+        isTaskSelection.value
+    }
+  ].filter(action => action.isAvailable)
+)
+
+const isMoreActionSelected = computed(() =>
+  moreActions.value.some(action => action.bar === selectedBar.value)
+)
+
 const allAssetsCanceled = computed(() =>
   Array.from(selectedAssets.value.values()).every(asset => asset.canceled)
 )
@@ -1368,6 +1442,22 @@ const confirmPriorityChange = async () => {
   loading.changePriority = false
 }
 
+const confirmClientCommentsCopy = async () => {
+  loading.copyClientComments = true
+  errors.copyClientComments = false
+  clientCommentsCopy.value = null
+  localStorage.setItem(CLIENT_COMMENTS_PREFIX_KEY, clientCommentsPrefix.value)
+  try {
+    clientCommentsCopy.value = await store.dispatch('copyLastClientComments', {
+      prefix: clientCommentsPrefix.value
+    })
+  } catch (err) {
+    console.error(err)
+    errors.copyClientComments = true
+  }
+  loading.copyClientComments = false
+}
+
 const confirmTaskCreation = async () => {
   const type =
     ['shots', 'assets', 'edits'].find(name => route.path.includes(name)) ||
@@ -1484,6 +1574,37 @@ const selectBar = barName => {
   localStorage.setItem(`${storagePrefix.value}-selected-bar`, barName)
   selectedBar.value = selectedBar.value !== barName ? barName : ''
 }
+
+// The menu bar scrolls horizontally, which clips any absolute child: the
+// list is fixed, under the button and opening leftwards.
+const moreActionsButtonRef = useTemplateRef('more-actions-button')
+const toggleMoreActions = () => {
+  isMoreActionsOpen.value = !isMoreActionsOpen.value
+  if (isMoreActionsOpen.value) {
+    const rect = moreActionsButtonRef.value.getBoundingClientRect()
+    moreActionsPosition.value = {
+      top: `${rect.bottom}px`,
+      right: `${document.documentElement.clientWidth - rect.right}px`
+    }
+  }
+}
+
+const selectMoreAction = action => {
+  isMoreActionsOpen.value = false
+  selectBar(action.bar)
+}
+
+const {
+  activeIndex: moreActionIndex,
+  onKeydown: onMoreActionsKeydown,
+  optionId: moreActionId
+} = useComboboxKeyboard({
+  isOpen: isMoreActionsOpen,
+  toggle: toggleMoreActions,
+  optionsLength: () => moreActions.value.length,
+  onSelect: index => selectMoreAction(moreActions.value[index]),
+  listRef: useTemplateRef('more-actions-list')
+})
 
 const autoChooseSelectBar = () => {
   if (isHidden.value) {
@@ -1752,16 +1873,41 @@ onBeforeUnmount(() => {
   padding: 8px;
 }
 
+.prefix-field,
+.prefix-field .input {
+  width: 100%;
+}
+
 .priority-combobox {
   color: var(--text);
   margin-left: 0.3em;
 }
 
-.menu-separator {
-  padding: 0.2em;
-  border-right: 2px solid $light-grey-light;
-  height: 26px;
-  margin-bottom: 8px;
+.more-actions-list {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  color: var(--text);
+  min-width: 200px;
+  overflow: hidden;
+  position: fixed;
+  z-index: 1001;
+}
+
+.more-action {
+  cursor: pointer;
+  padding: 0.6em 0.8em;
+  white-space: nowrap;
+
+  &:hover,
+  &.focused {
+    background: var(--background-hover);
+  }
+
+  &.active {
+    color: var(--text-selected);
+  }
 }
 
 .is-wide {

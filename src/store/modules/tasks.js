@@ -522,6 +522,32 @@ const actions = {
       })
   },
 
+  // Artists do not see the client comments: the last one of each selected
+  // task is copied into a comment of the current user.
+  async copyLastClientComments({ commit, state }, { prefix }) {
+    const tasks = Array.from(state.selectedTasks.keys())
+      .map(taskId => state.taskMap.get(taskId))
+      .filter(Boolean)
+    const taskIdsByProject = tasks.reduce((result, task) => {
+      result[task.project_id] = [...(result[task.project_id] || []), task.id]
+      return result
+    }, {})
+    const comments = (
+      await Promise.all(
+        Object.entries(taskIdsByProject).map(([projectId, taskIds]) =>
+          tasksApi.copyLastClientComments(projectId, taskIds, prefix)
+        )
+      )
+    ).flat()
+    comments.forEach(comment => {
+      commit(NEW_TASK_COMMENT_END, { comment, taskId: comment.object_id })
+    })
+    return {
+      nbCopied: comments.length,
+      nbSkipped: tasks.length - comments.length
+    }
+  },
+
   async changeSelectedPriorities({ commit, state, rootGetters }, { priority }) {
     const tasksToUpdate = Array.from(state.selectedTasks.keys())
       .map(taskId => state.taskMap.get(taskId))

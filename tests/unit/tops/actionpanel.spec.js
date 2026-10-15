@@ -421,6 +421,157 @@ describe('ActionPanel, opened on a task selection', () => {
   )
 })
 
+describe('ActionPanel, more actions menu', () => {
+  const task = {
+    id: 'task-1',
+    project_id: 'production-1',
+    task_type_id: 'task-type-1'
+  }
+
+  const mountOnShots = role =>
+    mountPanel([], {
+      path: '/productions/production-1/shots',
+      role,
+      tasks: [task]
+    })
+
+  const moreButton = wrapper => wrapper.find('[title="menu.more_actions"]')
+
+  const openMoreActions = async wrapper => {
+    await moreButton(wrapper).trigger('click')
+    return wrapper.findAll('.more-actions-list [role="option"]')
+  }
+
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  test('moves the secondary actions out of the bar', async () => {
+    const { wrapper } = await mountOnShots('manager')
+
+    expect(wrapper.find('.menu > [title="menu.subscribe"]').exists()).toBe(
+      false
+    )
+    expect(wrapper.find('.menu > [title="menu.delete_tasks"]').exists()).toBe(
+      false
+    )
+    const items = await openMoreActions(wrapper)
+    expect(items.map(item => item.text())).toEqual([
+      'menu.subscribe',
+      'menu.delete_tasks'
+    ])
+  })
+
+  test('keeps the manager actions for managers', async () => {
+    const { wrapper } = await mountOnShots('supervisor')
+
+    const items = await openMoreActions(wrapper)
+    expect(items.map(item => item.text())).toEqual(['menu.subscribe'])
+  })
+
+  test('opens the bar of the chosen action', async () => {
+    const { wrapper } = await mountOnShots('manager')
+
+    const items = await openMoreActions(wrapper)
+    await items[0].trigger('click')
+
+    expect(wrapper.find('.more-actions-list').exists()).toBe(false)
+    expect(moreButton(wrapper).classes()).toContain('active')
+    expect(
+      wrapper.findAll('.action-bar .confirm-button').map(button => button.text())
+    ).toEqual(['tasks.subscribe_to_tasks'])
+  })
+
+  test('hides the menu without any secondary action', async () => {
+    const { wrapper } = await mountPanel([buildConcept('concept-1')])
+
+    expect(moreButton(wrapper).exists()).toBe(false)
+  })
+})
+
+describe('ActionPanel, client comments copy', () => {
+  const task = {
+    id: 'task-1',
+    project_id: 'production-1',
+    task_type_id: 'task-type-1'
+  }
+
+  const mountOnShots = role =>
+    mountPanel([], {
+      path: '/productions/production-1/shots',
+      role,
+      tasks: [task]
+    })
+
+  const copyButton = wrapper =>
+    wrapper.find('.menu [title="menu.copy_client_comments"]')
+
+  const openCopyBar = async wrapper => {
+    await copyButton(wrapper).trigger('click')
+    return wrapper.find('.copy-client-comments')
+  }
+
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  test('is a manager action', async () => {
+    const manager = await mountOnShots('manager')
+    expect(copyButton(manager.wrapper).exists()).toBe(true)
+
+    const supervisor = await mountOnShots('supervisor')
+    expect(copyButton(supervisor.wrapper).exists()).toBe(false)
+  })
+
+  test('copies with the typed prefix and tells the result', async () => {
+    const { store, wrapper } = await mountOnShots('manager')
+    store.dispatch = vi.fn(() => Promise.resolve({ nbCopied: 2, nbSkipped: 1 }))
+
+    const bar = await openCopyBar(wrapper)
+    await bar.find('input').setValue('Client:')
+    await bar.find('.confirm-button').trigger('click')
+    await flushPromises()
+
+    expect(store.dispatch).toHaveBeenCalledWith('copyLastClientComments', {
+      prefix: 'Client:'
+    })
+    expect(bar.find('.result').text()).toBe('tasks.client_comments_copied')
+    expect(bar.find('.is-danger').exists()).toBe(false)
+  })
+
+  test('keeps the last prefix for the next copy', async () => {
+    const first = await mountOnShots('manager')
+    first.store.dispatch = vi.fn(() =>
+      Promise.resolve({ nbCopied: 1, nbSkipped: 0 })
+    )
+    const bar = await openCopyBar(first.wrapper)
+    await bar.find('input').setValue('Client:')
+    await bar.find('.confirm-button').trigger('click')
+    await flushPromises()
+
+    // the panel opens again on the bar used last
+    const second = await mountOnShots('manager')
+    const input = second.wrapper.find('.copy-client-comments input')
+    expect(input.element.value).toBe('Client:')
+  })
+
+  test('tells when the copy fails', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { store, wrapper } = await mountOnShots('manager')
+    store.dispatch = vi.fn(() => Promise.reject(new Error('refused')))
+
+    const bar = await openCopyBar(wrapper)
+    await bar.find('.confirm-button').trigger('click')
+    await flushPromises()
+
+    expect(bar.find('.is-danger').text()).toBe(
+      'tasks.copy_client_comments_error'
+    )
+    expect(bar.find('.result').exists()).toBe(false)
+    vi.restoreAllMocks()
+  })
+})
+
 describe('ActionPanel, concept folders', () => {
   const openFolders = wrapper =>
     wrapper.find('[title="concepts.folders.move"]').trigger('click')
