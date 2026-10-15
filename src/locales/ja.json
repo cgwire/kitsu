@@ -233,7 +233,6 @@
         "union_or": "以下のいずれかのフィルターに一致",
         "with_thumbnail": "サムネイルあり",
         "without_thumbnail": "サムネイルなし",
-        "department": "部門",
         "is_assets_ready": "アセットが準備完了",
         "assets_ready": "準備完了",
         "assets_not_ready": "準備未完了",

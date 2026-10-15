@@ -233,7 +233,6 @@
         "union_or": "匹配以下任一过滤器",
         "with_thumbnail": "有缩略图",
         "without_thumbnail": "无缩略图",
-        "department": "部门",
         "is_assets_ready": "资产准备就绪",
         "assets_ready": "已准备",
         "assets_not_ready": "未准备",

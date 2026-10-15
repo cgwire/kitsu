@@ -529,7 +529,6 @@ export default {
       assignation_exists_for: 'Assignments exist for',
       assigned_to: 'Assigned to',
       checked: 'Checked',
-      department: 'Department',
       descriptor: 'Metadata',
       equal: 'Equal',
       in: 'In',
