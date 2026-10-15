@@ -1,4 +1,4 @@
-import { flushPromises, shallowMount } from '@vue/test-utils'
+import { flushPromises, mount, shallowMount } from '@vue/test-utils'
 import process from 'node:process'
 import { ref } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
@@ -9,6 +9,7 @@ import errors from '@/lib/errors'
 import i18n, { loadLocaleMessages } from '@/lib/i18n'
 
 import App from '@/App.vue'
+import MetadataTextarea from '@/components/cells/MetadataTextarea.vue'
 
 import { recordUnhandledRejections } from './fixtures/unhandled-rejections'
 
@@ -1070,6 +1071,81 @@ describe('App', () => {
       })
 
       expect(i18n.global.locale.value).toBe('fr')
+    })
+  })
+
+  describe('top-level page swap', () => {
+    // Vue looks past a single teleport for the node after a page: once the
+    // preview modal had moved past the teleports of the shot cells, the
+    // next page went before a node the leaving page removed.
+    it('shows the next page after a preview over teleported cells', async () => {
+      const LoginPage = { template: '<div class="login-page" />' }
+      const ShotsPage = {
+        components: { MetadataTextarea },
+        template: `
+          <div class="shots-page">
+            <metadata-textarea model-value="Long text" />
+            <metadata-textarea model-value="Long text" />
+          </div>
+        `
+      }
+      const router = createRouter({
+        history: createMemoryHistory(),
+        routes: [
+          { path: '/login', component: LoginPage },
+          { path: '/shots', component: ShotsPage }
+        ]
+      })
+      router.push('/login')
+      await router.isReady()
+      const store = createStore({
+        state: { previewFileId: null },
+        actions: { setMainConfig: () => ({}) },
+        getters: { previewFileIdToShow: state => state.previewFileId },
+        mutations: {
+          HIDE_PREVIEW_FILE: state => {
+            state.previewFileId = null
+          },
+          SHOW_PREVIEW_FILE: (state, previewFileId) => {
+            state.previewFileId = previewFileId
+          },
+          TOGGLE_DARK_THEME: () => {}
+        }
+      })
+      const renderErrors = []
+      const warnings = []
+      wrapper = mount(App, {
+        attachTo: document.body,
+        global: {
+          config: {
+            errorHandler: error => renderErrors.push(error),
+            warnHandler: message => warnings.push(message)
+          },
+          plugins: [
+            router,
+            store,
+            {
+              install: app => {
+                app.config.globalProperties.$socket = { on: vi.fn() }
+              }
+            }
+          ],
+          stubs: { PreviewModal: true }
+        }
+      })
+      await router.push('/shots')
+      await flushPromises()
+      store.commit('SHOW_PREVIEW_FILE', 'preview-1')
+      await flushPromises()
+      store.commit('HIDE_PREVIEW_FILE')
+      await flushPromises()
+
+      await router.push('/login')
+      await flushPromises()
+
+      expect(renderErrors.map(String)).toEqual([])
+      expect(warnings).toEqual([])
+      expect(document.querySelector('.login-page')).not.toBeNull()
     })
   })
 })

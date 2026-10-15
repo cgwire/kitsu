@@ -9,7 +9,7 @@
     @keydown.enter.stop.prevent="onOpen"
   >
     <span class="preview">{{ modelValue }}</span>
-    <teleport to=".theme">
+    <teleport to="#theme-popups">
       <template v-if="isOpen">
         <div class="metadata-textarea-mask" @click="onClose"></div>
         <!-- Tab leaves it like a click outside. A click in the padding keeps

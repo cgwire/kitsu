@@ -18,6 +18,10 @@
       @cancel="hidePreviewFile"
       @change="showPreviewFile"
     />
+
+    <!-- Popups teleport here, not next to the router-view: Vue looks past a
+         single teleport for the node after a page. -->
+    <div id="theme-popups" />
   </div>
 </template>
 
