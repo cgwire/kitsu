@@ -224,6 +224,7 @@
         "no_assignation_for": "Ingen tildeling findes for",
         "no_filter": "Ingen filter",
         "not_equal": "Ikke lig med",
+        "not_in": "Ikke i",
         "not_assigned_to": "Ikke tildelt til",
         "status": "Opgavestatus",
         "thumbnail": "Thumbnail-tilstedeværelse",

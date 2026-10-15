@@ -19,6 +19,8 @@ import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
 import TaskType from '@/components/pages/TaskType.vue'
 import EstimationHelper from '@/components/pages/tasktype/EstimationHelper.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import ComboboxMultiple from '@/components/widgets/ComboboxMultiple.vue'
+import ComboboxStatusMultiple from '@/components/widgets/ComboboxStatusMultiple.vue'
 
 const SearchFieldStub = {
   template: '<div />',
@@ -50,8 +52,10 @@ const task = {
 const mountPage = async ({
   actions = {},
   getters = {},
+  query = '',
   section = 'estimation',
-  socket = { on: vi.fn(), off: vi.fn() }
+  socket = { on: vi.fn(), off: vi.fn() },
+  stubs = {}
 } = {}) => {
   const storeActions = {
     clearSelectedTasks: vi.fn(),
@@ -75,6 +79,7 @@ const mountPage = async ({
       nbSelectedTasks: () => 0,
       organisation: () => ({ hours_by_day: 8 }),
       personMap: () => new Map(),
+      productionAssetTypes: () => [],
       productionTaskStatuses: () => [],
       selectedTasks: () => new Map(),
       taskMap: () => new Map([[task.id, task]]),
@@ -95,7 +100,7 @@ const mountPage = async ({
     ]
   })
   await router.push(
-    `/productions/production-1/assets/task-types/task-type-1/${section}`
+    `/productions/production-1/assets/task-types/task-type-1/${section}${query}`
   )
   const wrapper = shallowMount(TaskType, {
     global: {
@@ -109,7 +114,7 @@ const mountPage = async ({
           }
         }
       ],
-      stubs: { Schedule: ScheduleStub, SearchField: SearchFieldStub }
+      stubs: { Schedule: ScheduleStub, SearchField: SearchFieldStub, ...stubs }
     }
   })
   await flushPromises()
@@ -222,6 +227,114 @@ describe('TaskType page', () => {
 
       expect(modal().props('active')).toBe(true)
       expect(modal().props('isError')).toBe(false)
+    })
+  })
+
+  describe('task filters', () => {
+    const TaskListStub = {
+      name: 'TaskList',
+      props: { tasks: { type: Array, default: () => [] } },
+      template: '<div />',
+      methods: { resetSelection: () => {} }
+    }
+    const statusTasks = ['status-1', 'status-2', 'status-3'].map(
+      (statusId, index) => ({
+        id: `task-${index + 10}`,
+        assignees: [],
+        // task-10 on a character, the others on a prop
+        entity_id: index ? 'asset-2' : 'asset-1',
+        entity_name: 'Chair',
+        task_status_id: statusId,
+        task_type_id: 'task-type-1'
+      })
+    )
+    // unmounted after each test, a failed one included
+    let wrapper = null
+
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    })
+
+    afterEach(() => {
+      wrapper?.unmount()
+      wrapper = null
+      assetStore.cache.assetMap.delete('asset-1')
+      assetStore.cache.assetMap.delete('asset-2')
+    })
+
+    // The URL filters are read on the first load only, once the tasks
+    // arrive: 100 ms after mounting, then 200 ms more.
+    const mountTasks = async query => {
+      const page = await mountPage({
+        section: 'tasks',
+        query,
+        stubs: { TaskList: TaskListStub },
+        actions: {
+          initTaskType: vi.fn(() => {
+            assetStore.cache.assetMap.set('asset-1', {
+              id: 'asset-1',
+              asset_type_id: 'chars',
+              tasks: ['task-10']
+            })
+            assetStore.cache.assetMap.set('asset-2', {
+              id: 'asset-2',
+              asset_type_id: 'props',
+              tasks: ['task-11', 'task-12']
+            })
+          }),
+          loadScheduleItems: vi.fn(() => [])
+        },
+        getters: {
+          assetValidationColumns: () => [],
+          productionAssetTypes: () => [
+            { id: 'chars', name: 'Characters' },
+            { id: 'props', name: 'Props' }
+          ],
+          taskMap: () => new Map(statusTasks.map(t => [t.id, t])),
+          user: () => ({ id: 'manager-1', departments: [], full_name: 'M' })
+        }
+      })
+      wrapper = page.wrapper
+      await vi.advanceTimersByTimeAsync(400)
+      await flushPromises()
+    }
+
+    const listedTaskIds = () =>
+      wrapper
+        .findComponent(TaskListStub)
+        .props('tasks')
+        .map(t => t.id)
+        .sort()
+
+    it('keeps the tasks of every status the URL selects', async () => {
+      await mountTasks('?task_status_id=status-1,status-3')
+      expect(
+        wrapper.findComponent(ComboboxStatusMultiple).props('modelValue')
+      ).toEqual(['status-1', 'status-3'])
+      expect(listedTaskIds()).toEqual(['task-10', 'task-12'])
+    })
+
+    it('keeps the tasks of the asset types the URL selects', async () => {
+      await mountTasks('?asset_type_id=props')
+      expect(
+        wrapper.findComponent(ComboboxMultiple).props('modelValue')
+      ).toEqual(['props'])
+      expect(listedTaskIds()).toEqual(['task-11', 'task-12'])
+    })
+
+    it('combines the asset type and status filters', async () => {
+      await mountTasks('?asset_type_id=props&task_status_id=status-1,status-2')
+      expect(listedTaskIds()).toEqual(['task-11'])
+    })
+
+    it('lists every task again once the selection is emptied', async () => {
+      await mountTasks('?task_status_id=status-2')
+      expect(listedTaskIds()).toEqual(['task-11'])
+      await wrapper
+        .findComponent(ComboboxStatusMultiple)
+        .vm.$emit('update:model-value', [])
+      await flushPromises()
+      expect(listedTaskIds()).toEqual(['task-10', 'task-11', 'task-12'])
     })
   })
 

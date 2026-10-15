@@ -224,6 +224,7 @@
         "no_assignation_for": "Geen toewijzingen bestaan voor",
         "no_filter": "Geen filter",
         "not_equal": "Niet gelijk",
+        "not_in": "Niet in",
         "not_assigned_to": "Niet toegewezen aan",
         "status": "Taak status",
         "thumbnail": "Thumbnail aanwezig",

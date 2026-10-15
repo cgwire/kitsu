@@ -224,6 +224,7 @@
         "no_assignation_for": "Нет назначений для",
         "no_filter": "Нет фильтра",
         "not_equal": "Не равно",
+        "not_in": "Не в",
         "not_assigned_to": "Не назначен",
         "status": "Статус задачи",
         "thumbnail": "Наличие превью",

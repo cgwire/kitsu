@@ -90,12 +90,18 @@
               class="flexrow-item flexrow align-end"
               v-if="isActiveTab('tasks')"
             >
-              <combobox-status
+              <combobox-multiple
+                class="flexrow-item selector"
+                :label="$t('entities.build_filter.asset_type')"
+                :options="assetTypeOptions"
+                v-model="assetTypeIdsFilter"
+                v-if="entityType === 'Asset'"
+              />
+              <combobox-status-multiple
                 class="flexrow-item selector"
                 :label="$t('news.task_status')"
                 :task-status-list="taskStatusList"
-                :with-margin="false"
-                v-model="taskStatusIdFilter"
+                v-model="taskStatusIdsFilter"
               />
               <combobox-styled
                 class="flexrow-item"
@@ -468,7 +474,8 @@ import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxDisplayOptions from '@/components/widgets/ComboboxDisplayOptions.vue'
 import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
-import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
+import ComboboxMultiple from '@/components/widgets/ComboboxMultiple.vue'
+import ComboboxStatusMultiple from '@/components/widgets/ComboboxStatusMultiple.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DateField from '@/components/widgets/DateField.vue'
@@ -568,7 +575,8 @@ const parsedCSV = ref([])
 const priorityFilter = ref('-1')
 const retakeCountFilter = ref('all')
 const tasks = ref([])
-const taskStatusIdFilter = ref(null)
+const assetTypeIdsFilter = ref([])
+const taskStatusIdsFilter = ref([])
 
 // Search index for the supervisor filters, non-reactive by design
 let taskIndex = null
@@ -687,6 +695,7 @@ const isTVShow = computed(() => store.getters.isTVShow)
 const nbSelectedTasks = computed(() => store.getters.nbSelectedTasks)
 const organisation = computed(() => store.getters.organisation)
 const personMap = computed(() => store.getters.personMap)
+const productionAssetTypes = computed(() => store.getters.productionAssetTypes)
 const productionTaskStatuses = computed(
   () => store.getters.productionTaskStatuses
 )
@@ -702,14 +711,16 @@ const entityMap = computed(() => getEntityMap(entityType.value))
 
 const isEpisodesSection = computed(() => route.meta.section === 'episodes')
 
-const taskStatusList = computed(() => [
-  {
-    id: '',
-    color: '#999',
-    short_name: t('news.all')
-  },
-  ...sortByName([...productionTaskStatuses.value])
-])
+const assetTypeOptions = computed(() =>
+  productionAssetTypes.value.map(assetType => ({
+    label: assetType.name,
+    value: assetType.id
+  }))
+)
+
+const taskStatusList = computed(() =>
+  sortByName([...productionTaskStatuses.value])
+)
 
 const displayTaskType = computed(
   () => 'tasktype-' + entityType.value.toLowerCase()
@@ -920,7 +931,10 @@ const initData = force => {
         priorityFilter.value = route.query.priority || '-1'
         difficultyFilter.value = route.query.difficulty || '-1'
         retakeCountFilter.value = route.query.retake_count || 'all'
-        taskStatusIdFilter.value = route.query.task_status_id || ''
+        assetTypeIdsFilter.value =
+          route.query.asset_type_id?.split(',').filter(Boolean) || []
+        taskStatusIdsFilter.value =
+          route.query.task_status_id?.split(',').filter(Boolean) || []
 
         const taskId = route.query.task_id
         const task = taskMap.value.get(taskId)
@@ -1106,9 +1120,14 @@ const onSearchChange = query => {
   } else if (retakeCountFilter.value === 'with_retakes') {
     tasks.value = tasks.value.filter(t => t.retake_count > 0)
   }
-  if (taskStatusIdFilter.value !== null && taskStatusIdFilter.value !== '') {
-    tasks.value = tasks.value.filter(
-      t => t.task_status_id === taskStatusIdFilter.value
+  if (assetTypeIdsFilter.value.length) {
+    tasks.value = tasks.value.filter(t =>
+      assetTypeIdsFilter.value.includes(getEntity(t.entity_id).asset_type_id)
+    )
+  }
+  if (taskStatusIdsFilter.value.length) {
+    tasks.value = tasks.value.filter(t =>
+      taskStatusIdsFilter.value.includes(t.task_status_id)
     )
   }
 }
@@ -1140,7 +1159,8 @@ const updateUrlParams = () => {
       priority: priorityFilter.value,
       difficulty: difficultyFilter.value,
       retake_count: retakeCount === 'all' ? undefined : retakeCount,
-      task_status_id: taskStatusIdFilter.value || null
+      task_status_id: taskStatusIdsFilter.value.join(',') || null,
+      asset_type_id: assetTypeIdsFilter.value.join(',') || null
     }
   })
 }
@@ -2043,7 +2063,8 @@ watch(
     dueDateFilter,
     estimationFilter,
     priorityFilter,
-    taskStatusIdFilter,
+    taskStatusIdsFilter,
+    assetTypeIdsFilter,
     retakeCountFilter
   ],
   () => {

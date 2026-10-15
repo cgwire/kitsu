@@ -224,6 +224,7 @@
         "no_assignation_for": "Keine Zuordnung vorhanden für",
         "no_filter": "Kein Filter",
         "not_equal": "Nicht gleich",
+        "not_in": "Nicht in",
         "not_assigned_to": "Nicht zugeordnet zu",
         "status": "Aufgabenstatus",
         "thumbnail": "Vorhandensein von Miniaturbildern",
