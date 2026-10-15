@@ -616,7 +616,12 @@ const savePerson = async (loadingKey, action, form) => {
   } catch (err) {
     console.error(err)
     const message = err.body?.message ?? ''
-    if (message.includes('domain name')) {
+    // A dotless domain, refused where deliverability is checked, gets a
+    // message about the part after the @-sign.
+    if (
+      message.includes('domain name') ||
+      message.includes('after the @-sign')
+    ) {
       errors.invalidEmailDomain = true
     } else if (message.includes('limit reached')) {
       errors.userLimit = true
