@@ -5,6 +5,7 @@ import { createHead } from '@unhead/vue/client'
 import { sync } from 'vuex-router-sync'
 
 import 'bulma/css/bulma.css'
+import '@/styles/theme.scss'
 
 import App from '@/App.vue'
 import i18n from '@/lib/i18n'
