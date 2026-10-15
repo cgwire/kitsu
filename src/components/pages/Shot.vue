@@ -338,6 +338,11 @@
           :entity="currentShot"
           v-if="currentSection === 'time-logs'"
         />
+
+        <entity-output-files
+          :entity="currentShot"
+          v-if="currentSection === 'output-files'"
+        />
       </div>
     </div>
 
@@ -404,6 +409,7 @@ import EditShotModal from '@/components/modals/EditShotModal.vue'
 import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal.vue'
 import EntityChat from '@/components/pages/entities/EntityChat.vue'
 import EntityNews from '@/components/pages/entities/EntityNews.vue'
+import EntityOutputFiles from '@/components/pages/entities/EntityOutputFiles.vue'
 import EntityPreviewFiles from '@/components/pages/entities/EntityPreviewFiles.vue'
 import EntityTimeLogs from '@/components/pages/entities/EntityTimeLogs.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
@@ -485,7 +491,8 @@ const shotTabs = computed(() => [
   { label: t('main.label.casting'), name: 'casting' },
   { label: t('main.label.schedule'), name: 'schedule' },
   { label: t('main.label.preview_files'), name: 'preview-files' },
-  { label: t('main.label.timelog'), name: 'time-logs' }
+  { label: t('main.label.timelog'), name: 'time-logs' },
+  { label: t('main.label.output_files'), name: 'output-files' }
 ])
 
 const isTaskDrawerOpen = computed(() => Boolean(currentTask.value))

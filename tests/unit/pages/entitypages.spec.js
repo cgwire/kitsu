@@ -35,6 +35,7 @@ import Edit from '@/components/pages/Edit.vue'
 import Episode from '@/components/pages/Episode.vue'
 import Sequence from '@/components/pages/Sequence.vue'
 import Shot from '@/components/pages/Shot.vue'
+import EntityOutputFiles from '@/components/pages/entities/EntityOutputFiles.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ConceptCard from '@/components/widgets/ConceptCard.vue'
@@ -96,11 +97,12 @@ const mountPage = async (
   entityParam,
   currentProduction,
   actions = {},
-  getters = {}
+  getters = {},
+  query = {}
 ) => {
   routeHolder.route = reactive({
     params: { production_id: production.id, [entityParam]: 'entity-1' },
-    query: {},
+    query,
     path: '/'
   })
   const loadAction = vi.fn(() => Promise.resolve())
@@ -245,6 +247,27 @@ describe.each(pages)(
 
       expect(modal().props('active')).toBe(true)
       expect(modal().props('isError')).toBe(false)
+    })
+  }
+)
+
+// Every page whose entity can carry output files lists them in a tab.
+describe.each(pages.filter(({ name }) => ['Asset', 'Edit', 'Shot'].includes(name)))(
+  '$name page, output files',
+  ({ entityMap, entityParam, page }) => {
+    afterEach(() => {
+      entityMap.clear()
+    })
+
+    test('lists the output files of its entity', async () => {
+      entityMap.set('entity-1', { id: 'entity-1', name: 'E01', tasks: [] })
+      const { wrapper } = await mountPage(page, entityParam, production, {}, {}, {
+        section: 'output-files'
+      })
+
+      expect(wrapper.findComponent(EntityOutputFiles).props('entity')).toMatchObject({
+        id: 'entity-1'
+      })
     })
   }
 )
