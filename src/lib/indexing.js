@@ -23,9 +23,9 @@ export const buildNameIndex = (entries, split = true, withEmail = false) => {
         if (split) {
           words = entry.name.toLowerCase().split(' ')
           if (withEmail && entry.email) {
-            words = words
-              .concat(entry.email.toLowerCase().split('@')[0].split('.'))
-              .concat([entry.email.toLowerCase().split('@')[1].split('.')[0]])
+            // Zou can hold an email without a domain, like "jdoe".
+            const [user, domain = ''] = entry.email.toLowerCase().split('@')
+            words = [...words, ...user.split('.'), domain.split('.')[0]]
           }
         } else {
           words = [entry.name]
