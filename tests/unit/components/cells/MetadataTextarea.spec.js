@@ -7,9 +7,10 @@ describe('cells/MetadataTextarea', () => {
   let theme, wrapper
 
   beforeEach(() => {
-    // The popup teleports to the app root that App.vue renders.
+    // The popup teleports to the layer that App.vue renders.
     theme = document.createElement('div')
     theme.className = 'theme'
+    theme.innerHTML = '<div id="theme-popups"></div>'
     document.body.appendChild(theme)
     // The reporter's window (cgwire/kitsu#2244)
     vi.stubGlobal('innerWidth', 1912)

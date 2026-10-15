@@ -63,11 +63,6 @@ describe('BuildFilterModal', () => {
           { id: 'asset-type-1', name: 'chars' },
           { id: 'asset-type-2', name: 'sets' },
           { id: 'asset-type-3', name: 'props' }
-        ],
-        productionAssetTypes: () => [
-          { id: 'asset-type-1', name: 'chars' },
-          { id: 'asset-type-2', name: 'sets' },
-          { id: 'asset-type-3', name: 'props' }
         ]
       },
       mutations: {
@@ -148,7 +143,18 @@ describe('BuildFilterModal', () => {
       strict: true,
       modules: {
         assets: assetStore,
-        productions: { ...productionStoreFixture },
+        // The asset types of the production match the ones of assetStore.
+        productions: {
+          ...productionStoreFixture,
+          getters: {
+            ...productionStoreFixture.getters,
+            productionAssetTypes: () => [
+              { id: 'asset-type-1', name: 'chars' },
+              { id: 'asset-type-2', name: 'sets' },
+              { id: 'asset-type-3', name: 'props' }
+            ]
+          }
+        },
         people: peopleStore,
         shots: shotStore,
         tasks: taskStore

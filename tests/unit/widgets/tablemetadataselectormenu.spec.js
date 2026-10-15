@@ -20,9 +20,10 @@ describe('TableMetadataSelectorMenu', () => {
   }))
 
   beforeEach(() => {
-    // The menu teleports to the app root that App.vue renders.
+    // The menu teleports to the layer that App.vue renders.
     theme = document.createElement('div')
     theme.className = 'theme'
+    theme.innerHTML = '<div id="theme-popups"></div>'
     document.body.appendChild(theme)
     vi.stubGlobal('innerWidth', 1366)
     vi.stubGlobal('innerHeight', 600)

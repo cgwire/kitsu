@@ -1,6 +1,6 @@
 <template>
   <div class="table-metadata-selector-host" ref="hostRef" aria-hidden="true" />
-  <teleport to=".theme">
+  <teleport to="#theme-popups">
     <template v-if="isOpen">
       <div class="column-menu__mask" aria-hidden="true" @click="closeMenu" />
       <div class="column-menu" :style="menuStyle">

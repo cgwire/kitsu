@@ -146,6 +146,29 @@ describe('People page', () => {
     })
   })
 
+  describe('save errors', () => {
+    afterEach(() => vi.restoreAllMocks())
+
+    // Where the instance checks deliverability, Zou refuses a dotless
+    // domain with a message that does not say "domain name".
+    it('flags the email domain when Zou refuses a dotless domain', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { wrapper, actions, submitEdit } = await mountPage()
+      actions.editPerson.mockRejectedValueOnce({
+        body: {
+          message:
+            'The part after the @-sign is not valid. It should have a period.'
+        }
+      })
+
+      await submitEdit({ id: 'person-2', role: 'user' }, { role: 'user' })
+
+      const modal = wrapper.findComponent(EditPersonModal)
+      expect(modal.props('isEmailDomainError')).toBe(true)
+      expect(modal.props('isError')).toBe(false)
+    })
+  })
+
   describe('self role downgrade', () => {
     it('names both the current and the new role', async () => {
       const { submitEdit, downgradeModal } = await mountPage()
