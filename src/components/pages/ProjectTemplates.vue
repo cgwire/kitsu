@@ -227,10 +227,6 @@ onMounted(async () => {
     padding-top: 50px;
   }
 
-  :deep(.page-header .level-right) {
-    display: none;
-  }
-
   .info {
     display: none;
   }

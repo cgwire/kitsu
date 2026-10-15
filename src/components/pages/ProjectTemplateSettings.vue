@@ -1233,11 +1233,6 @@ p {
   }
 
   /* Read-only mobile: hide all add buttons / mutation widgets */
-  /* Parameters: Save button row */
-  .tab .has-text-right {
-    display: none;
-  }
-
   /* Metadata: "Add a metadata" button row + actions column in the table */
   .tab > .flexrow.mt1.mb1 {
     display: none;

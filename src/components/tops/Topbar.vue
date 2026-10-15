@@ -85,7 +85,7 @@
             <chevron-left-icon />
           </router-link>
         </div>
-        <div class="nav-item page-title pl0 ml0" v-if="pageTitle">
+        <div class="nav-item page-title" v-if="pageTitle">
           {{ pageTitle }}
         </div>
       </div>

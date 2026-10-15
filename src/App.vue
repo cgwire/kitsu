@@ -1297,27 +1297,6 @@ input.input:focus {
   border-radius: 2em;
 }
 
-.datepicker {
-  .input {
-    border-radius: 10px;
-
-    &::placeholder {
-      color: $light-grey;
-    }
-
-    &.is-small {
-      font-size: 1em;
-      padding: 0.5em;
-      height: 2.3em;
-      width: 100px;
-    }
-
-    &.invalid {
-      border-color: $red;
-    }
-  }
-}
-
 .button:focus {
   box-shadow: none;
 }
@@ -1555,8 +1534,7 @@ textarea.input:focus {
   min-height: 0;
 }
 
-.page-header,
-.page-header.level {
+.page-header {
   margin-top: 2em;
   margin-bottom: 0;
 }
@@ -2768,17 +2746,6 @@ th.validation-cell {
 
 #app .v3-emoji-picker .v3-footer .v3-tone .v3-icon {
   border-radius: 50%;
-}
-
-@media screen and (max-width: 768px) {
-  .level-left + .level-right {
-    display: flex;
-    justify-content: left;
-  }
-
-  .level-item:not(:last-child) {
-    margin-bottom: 0;
-  }
 }
 
 @media (min-width: 500px) {

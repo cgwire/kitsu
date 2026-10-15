@@ -37,7 +37,6 @@
             :label="$t('project_templates.title')"
             v-model="productionToCreate.project_template_id"
             thin
-            is-inline
           />
         </timeline-item>
         <template v-if="!productionToCreate.project_template_id">
@@ -57,7 +56,6 @@
                 locale-key-prefix="productions.type."
                 v-model="productionToCreate.settings.type"
                 thin
-                is-inline
               />
               <combobox-styled
                 class="flexrow-item"
@@ -66,7 +64,6 @@
                 locale-key-prefix="productions.style."
                 v-model="productionToCreate.settings.style"
                 thin
-                is-inline
               />
             </div>
             <div class="mb1 explanation">

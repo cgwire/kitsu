@@ -21,7 +21,6 @@
             class="flexrow-item"
             style="flex: 0"
             :icon="isListToggled ? 'right' : 'left'"
-            is-small
             @click="isListToggled = !isListToggled"
           />
         </div>
