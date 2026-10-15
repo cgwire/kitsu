@@ -43,7 +43,7 @@ src/
   store/
     api/            # API client modules (studios.js, etc.)
     modules/        # Vuex store modules (studios.js, etc.)
-  styles/           # Global SCSS (shared.scss)
+  styles/           # Shared SCSS partials (stats, task panels)
 ```
 
 ## Component conventions
