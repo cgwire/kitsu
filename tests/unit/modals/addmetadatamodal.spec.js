@@ -66,4 +66,26 @@ describe('modals/AddMetadataModal', () => {
     await addButton.trigger('click')
     expect(wrapper.findAll('.department-element')).toHaveLength(1)
   })
+
+  // The name field confirms on Enter, past the grayed confirm button.
+  it('does not confirm on Enter without a name', async () => {
+    const wrapper = await openModal()
+
+    wrapper.findComponent({ name: 'TextField' }).vm.$emit('enter')
+
+    expect(wrapper.emitted('confirm')).toBeUndefined()
+  })
+
+  it('confirms on Enter once named', async () => {
+    const wrapper = await openModal()
+    const nameField = wrapper.findComponent({ name: 'TextField' })
+
+    await nameField.vm.$emit('update:modelValue', 'Difficulty')
+    nameField.vm.$emit('enter')
+
+    expect(wrapper.emitted('confirm')[0][0]).toMatchObject({
+      name: 'Difficulty',
+      data_type: 'string'
+    })
+  })
 })
