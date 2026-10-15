@@ -4966,6 +4966,8 @@ onMounted(() => {
   room.value.id = props.playlist?.id
   room.value.localId = uuidv4()
   nextTick(() => {
+    // The player can close within the tick it opened in.
+    if (!isMounted) return
     window.addEventListener('keydown', onKeyDown, false)
     window.addEventListener('resize', onWindowResize)
     if (container.value) {
@@ -5010,6 +5012,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  isMounted = false
   if (stopMovieWarmup) stopMovieWarmup()
   endAnnotationSaving()
   cancelProgressiveRender()

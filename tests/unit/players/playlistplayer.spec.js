@@ -486,6 +486,21 @@ describe('PlaylistPlayer.vue', () => {
     expect(errors).toEqual([])
   })
 
+  // The mount hook adds its window and document listeners a tick later:
+  // a player closed within that tick kept them, its Shift+Tab one included.
+  it('adds no page listener once closed in the tick it opened', async () => {
+    wrapper = mountPlayer()
+    const onWindow = vi.spyOn(window, 'addEventListener')
+    const onDocument = vi.spyOn(document, 'addEventListener')
+    wrapper.unmount()
+    wrapper = null
+
+    await flushPromises()
+
+    expect(onWindow).not.toHaveBeenCalled()
+    expect(onDocument).not.toHaveBeenCalled()
+  })
+
   // A plain link navigates the tab: the browser fires beforeunload, which
   // closes the socket in Firefox and asks about unsaved annotations.
   describe('downloads', () => {
