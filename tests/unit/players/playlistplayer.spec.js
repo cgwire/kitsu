@@ -67,6 +67,7 @@ const mountPlayer = ({
   playlistProp = playlist,
   entities = [entity],
   canEditShotTrim = () => true,
+  organisation = {},
   previewFileStatusMap,
   shotMap = new Map(),
   taskMap = new Map(),
@@ -86,7 +87,7 @@ const mountPlayer = ({
       isCurrentUserClient: () => false,
       isCurrentUserManager: () => true,
       isCurrentUserSupervisor: () => false,
-      organisation: () => ({}),
+      organisation: () => organisation,
       personMap: () => new Map(),
       previewFileMap: () => new Map(),
       previewFileStatusMap: () => previewFileStatusMap,
@@ -448,6 +449,63 @@ describe('PlaylistPlayer.vue', () => {
       expect(
         wrapper.find({ ref: 'picture-video-player-comparison' }).exists()
       ).toBe(false)
+    })
+  })
+
+  describe('movie warm-up', () => {
+    const movie = id => ({
+      id,
+      preview_file_id: `${id}-movie`,
+      preview_file_extension: 'mp4'
+    })
+    const original = id =>
+      `/api/movies/originals/preview-files/${id}-movie.mp4`
+    const stubFetch = () =>
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+        arrayBuffer: () => Promise.resolve(new ArrayBuffer(0))
+      })
+    const warmedUrls = fetch => fetch.mock.calls.map(([url]) => url)
+
+    // The originals an HD switch plays were never asked for: the server had
+    // to fetch them from its storage while the playback waited.
+    it('warms the originals from the entity on screen on an HD switch', async () => {
+      const fetch = stubFetch()
+      wrapper = mountPlayer({
+        entities: [movie('shot-1'), movie('shot-2'), movie('shot-3')]
+      })
+      await flushPromises()
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(button => button.attributes('title') === 'playlists.actions.next_shot')
+        .vm.$emit('click')
+      await flushPromises()
+      fetch.mockClear()
+
+      wrapper
+        .findComponent({ name: 'PlayerPlaybackBar' })
+        .vm.$emit('update:isHd', true)
+      await flushPromises()
+
+      expect(warmedUrls(fetch)).toEqual([
+        original('shot-2'),
+        original('shot-3'),
+        original('shot-1')
+      ])
+    })
+
+    it('warms each movie once in a playlist opening in HD', async () => {
+      const fetch = stubFetch()
+      wrapper = mountPlayer({
+        entities: [movie('shot-1'), movie('shot-2'), movie('shot-3')],
+        organisation: { hd_by_default: true }
+      })
+      await flushPromises()
+
+      expect(warmedUrls(fetch)).toEqual([
+        original('shot-1'),
+        original('shot-2'),
+        original('shot-3')
+      ])
     })
   })
 

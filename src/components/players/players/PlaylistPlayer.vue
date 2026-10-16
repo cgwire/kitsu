@@ -1145,6 +1145,8 @@ const currentPreviewIndex = ref(0)
 const currentTime = ref('00:00.000')
 const { currentTimeRaw, isHd, isMuted, isPlaying, isRepeating, speed, volume } =
   usePlayerTransport()
+// Set before the watchers: a quality change warms the movies again.
+isHd.value = Boolean(store.getters.organisation?.hd_by_default)
 const handleIn = ref(0)
 const handleOut = ref(0)
 const hasActiveShareLinks = ref(false)
@@ -1224,7 +1226,6 @@ const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
 const isCurrentUserSupervisor = computed(
   () => store.getters.isCurrentUserSupervisor
 )
-const organisation = computed(() => store.getters.organisation)
 const personMap = computed(() => store.getters.personMap)
 const previewFileMap = computed(() => store.getters.previewFileMap)
 const previewFileStatusMap = computed(() => store.getters.previewFileStatusMap)
@@ -4956,23 +4957,28 @@ watch(speed, () => {
   updateRoomStatus()
 })
 
+watch(isHd, () => warmMovies())
+
 // Lifecycle
 
-// The server fills its movie cache on first read: ask it for the first
-// clips as soon as the list is known, so playback never starts cold.
+// The server fills its movie cache on first read: ask it for the next
+// clips, from the one on screen, as soon as the list or the quality is
+// known, so playback never starts cold.
 let stopMovieWarmup = null
 const warmMovies = () => {
   if (stopMovieWarmup) stopMovieWarmup()
-  stopMovieWarmup = warmPlaylistMovies(entityList.value, {
-    isHd: isHd.value
-  })
+  const index = playingEntityIndex.value
+  const list = entityList.value
+  stopMovieWarmup = warmPlaylistMovies(
+    [...list.slice(index), ...list.slice(0, index)],
+    { isHd: isHd.value }
+  )
 }
 
 onMounted(() => {
   if (isMounted) return
   isScrubbing.value = false
   if (isCurrentUserClient.value) isCommentsHidden.value = false
-  isHd.value = Boolean(organisation.value?.hd_by_default)
   entityList.value = props.entities ? props.entities : []
   warmMovies()
   startProgressiveRender()
