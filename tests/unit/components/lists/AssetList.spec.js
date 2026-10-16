@@ -3,9 +3,13 @@ vi.mock('@/store', () => ({ default: {} }))
 import { flushPromises } from '@vue/test-utils'
 import { reactive } from 'vue'
 
-import AssetList from '@/components/lists/AssetList.vue'
 import assetStore from '@/store/modules/assets'
 import assetTypeStore from '@/store/modules/assettypes'
+
+import ValidationCell from '@/components/cells/ValidationCell.vue'
+import ValidationHeader from '@/components/cells/ValidationHeader.vue'
+import AssetList from '@/components/lists/AssetList.vue'
+import TableHeaderMenu from '@/components/widgets/TableHeaderMenu.vue'
 
 import {
   descriptor,
@@ -119,8 +123,10 @@ describe('lists/AssetList', () => {
   })
 })
 
-describe('lists/AssetList selection from the url', () => {
+describe('lists/AssetList task selection', () => {
   const backgroundsTypeId = 'asset-type-backgrounds'
+  const layout = { id: 'task-type-layout', name: 'Layout', color: '#000' }
+  const color = { id: 'task-type-color', name: 'Color', color: '#000' }
 
   const buildEpisodeAsset = (name, episodeId, assetTypeId) => ({
     id: `asset-${name}`,
@@ -129,7 +135,10 @@ describe('lists/AssetList selection from the url', () => {
     data: {},
     asset_type_id: assetTypeId,
     episode_id: episodeId,
-    validations: new Map([[taskTypeId, `task-${name}`]])
+    validations: new Map([
+      [layout.id, `task-${name}-layout`],
+      [color.id, `task-${name}-color`]
+    ])
   })
 
   // Assets of the first episode cast in the second one sort before its own
@@ -147,9 +156,11 @@ describe('lists/AssetList selection from the url', () => {
 
   let listedAssets = []
 
-  const mountList = async (displayedAssets, taskId) => {
+  // The store result holds every listed asset, the hidden ones included.
+  const mountList = async (displayedAssets, query = {}) => {
     listedAssets = displayedAssets.flat()
     listedAssets.forEach(asset => assetStore.cache.assetMap.set(asset.id, asset))
+    assetStore.cache.result = listedAssets
     const selectionState = { assetSelectionGrid: reactive(new Set()) }
     const wrapper = await mountEntityList(AssetList, {
       getters: {
@@ -158,18 +169,19 @@ describe('lists/AssetList selection from the url', () => {
         currentProduction: production,
         displayedAssetsCount: listedAssets.length,
         isTVShow: true,
-        productionAssetTaskTypes: [{ id: taskTypeId }],
+        productionAssetTaskTypes: [layout, color],
         taskMap: new Map(
-          listedAssets.map(asset => [
-            `task-${asset.name}`,
-            {
-              id: `task-${asset.name}`,
-              entity_id: asset.id,
-              task_type_id: taskTypeId
-            }
-          ])
+          listedAssets.flatMap(asset =>
+            Array.from(asset.validations, ([taskTypeId, taskId]) => [
+              taskId,
+              { id: taskId, entity_id: asset.id, task_type_id: taskTypeId }
+            ])
+          )
         ),
-        taskTypeMap: new Map([[taskTypeId, { id: taskTypeId, color: '#000' }]])
+        taskTypeMap: new Map([
+          [layout.id, layout],
+          [color.id, color]
+        ])
       },
       props: {
         displaySettings: {
@@ -177,40 +189,60 @@ describe('lists/AssetList selection from the url', () => {
           showLinkedAssets: false,
           showSharedAssets: true
         },
-        displayedAssets
+        displayedAssets,
+        validationColumns: [layout.id, color.id]
       },
-      query: { task_id: taskId }
+      query
     })
-    // The real mutation fills the grid the cells read their state from.
+    // The real mutations fill the grid the cells read their state from.
     wrapper.vm.$store.commit.mockImplementation((type, payload) =>
       assetStore.mutations[type]?.(selectionState, payload)
     )
     return wrapper
   }
 
-  const selectedAssetNames = wrapper =>
+  // Opens the header menu of the column, then picks Select column.
+  const selectColumn = async (wrapper, taskType) => {
     wrapper
-      .findAll('tbody tr.datatable-row')
-      .filter(
-        row => row.find('validation-cell-stub').attributes('selected') === 'true'
+      .findAllComponents(ValidationHeader)
+      .find(header => header.props('columnId') === taskType.id)
+      .vm.$emit('show-header-menu', {
+        target: wrapper.find('thead th').element
+      })
+    wrapper.findComponent(TableHeaderMenu).vm.$emit('select-column')
+    await flushPromises()
+  }
+
+  const selectedCells = wrapper =>
+    wrapper
+      .findAllComponents(ValidationCell)
+      .filter(cell => cell.props('selected'))
+      .map(cell => `${cell.props('entity').name} ${cell.props('column').name}`)
+
+  // The tasks the action panel changes.
+  const committedSelection = wrapper =>
+    wrapper.vm.$store.commit.mock.calls
+      .filter(([type]) => type === 'ADD_SELECTED_TASKS')
+      .flatMap(([, selection]) =>
+        selection.map(({ entity, column }) => `${entity.name} ${column.name}`)
       )
-      .map(row => row.find('router-link-stub').attributes('title'))
 
   afterEach(() => {
     listedAssets.forEach(asset => assetStore.cache.assetMap.delete(asset.id))
+    assetStore.cache.result = []
+    localStorage.clear()
   })
 
   test('selects the cell of the task in the url below hidden cast assets', async () => {
-    const wrapper = await mountList(
-      [[...castBackgrounds, ...ownBackgrounds]],
-      'task-E02_BG_21'
-    )
+    const wrapper = await mountList([[...castBackgrounds, ...ownBackgrounds]], {
+      task_id: 'task-E02_BG_21-layout'
+    })
 
     wrapper.vm.selectTaskFromQuery()
     await flushPromises()
 
     expect(wrapper.findAll('tbody tr.datatable-row')).toHaveLength(5)
-    expect(selectedAssetNames(wrapper)).toEqual(['E02_BG_21'])
+    expect(selectedCells(wrapper)).toEqual(['E02_BG_21 Layout'])
 
     wrapper.unmount()
   })
@@ -222,14 +254,30 @@ describe('lists/AssetList selection from the url', () => {
     ]
     const wrapper = await mountList(
       [characters, [...castBackgrounds, ...ownBackgrounds]],
-      'task-E02_BG_21'
+      { task_id: 'task-E02_BG_21-layout' }
     )
 
     wrapper.vm.selectTaskFromQuery()
     await flushPromises()
 
     expect(wrapper.findAll('tbody tr.datatable-row')).toHaveLength(6)
-    expect(selectedAssetNames(wrapper)).toEqual(['E02_BG_21'])
+    expect(selectedCells(wrapper)).toEqual(['E02_BG_21 Layout'])
+
+    wrapper.unmount()
+  })
+
+  test('Select column highlights its own column after a stuck one', async () => {
+    localStorage.setItem(
+      `stick-assets-${production.id}`,
+      JSON.stringify({ [layout.id]: true })
+    )
+    const wrapper = await mountList([ownBackgrounds])
+
+    await selectColumn(wrapper, color)
+
+    const colorCells = ownBackgrounds.map(({ name }) => `${name} Color`)
+    expect(selectedCells(wrapper)).toEqual(colorCells)
+    expect(committedSelection(wrapper)).toEqual(colorCells)
 
     wrapper.unmount()
   })

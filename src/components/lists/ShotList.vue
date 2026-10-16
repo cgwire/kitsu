@@ -98,9 +98,7 @@
                     : '0'
                 "
                 type="shots"
-                @show-header-menu="
-                  event => showHeaderMenu(columnId, columnIndexInGrid, event)
-                "
+                @show-header-menu="event => showHeaderMenu(columnId, event)"
                 is-stick
                 v-for="(
                   columnId, columnIndexInGrid
@@ -252,12 +250,8 @@
                 :column-id="columnId"
                 :validation-style="getValidationStyle(columnId)"
                 type="shots"
-                @show-header-menu="
-                  event => showHeaderMenu(columnId, columnIndexInGrid, event)
-                "
-                v-for="(
-                  columnId, columnIndexInGrid
-                ) in nonStickedDisplayedValidationColumns"
+                @show-header-menu="event => showHeaderMenu(columnId, event)"
+                v-for="columnId in nonStickedDisplayedValidationColumns"
               />
             </template>
 

@@ -207,7 +207,6 @@ export const useEntityList = ({
 
   let lastFieldHeaderMenuDisplayed = null
   let lastFieldHeaderMenuLabel = null
-  let lastHeaderMenuDisplayedIndexInGrid = null
   let lastSelection = null
   let lineIndex = {}
   let lineIndexRef = null
@@ -453,7 +452,7 @@ export const useEntityList = ({
   // Header menus
   // --------------------------------------------------------------------------
 
-  const showHeaderMenu = (columnId, columnIndexInGrid, event) => {
+  const showHeaderMenu = (columnId, event) => {
     showHeaderMenuAt(
       getMenus(),
       'headerMenu',
@@ -463,7 +462,6 @@ export const useEntityList = ({
       lastHeaderMenuDisplayed.value === columnId
     )
     lastHeaderMenuDisplayed.value = columnId
-    lastHeaderMenuDisplayedIndexInGrid = columnIndexInGrid
   }
 
   const showMetadataHeaderMenu = (columnId, event) => {
@@ -590,6 +588,18 @@ export const useEntityList = ({
   // --------------------------------------------------------------------------
 
   const getValidationCell = (x, y) => getRef(`validation-${x}-${y}`)?.[0]
+
+  // Column of a task type in the selection grid, -1 when it is not
+  // displayed: the stuck columns come first.
+  const getColumnIndexInGrid = taskTypeId => {
+    const stickedIndex =
+      stickedDisplayedValidationColumns.value.indexOf(taskTypeId)
+    if (stickedIndex > -1) return stickedIndex
+    const nonStickedIndex =
+      nonStickedDisplayedValidationColumns.value.indexOf(taskTypeId)
+    if (nonStickedIndex === -1) return -1
+    return nonStickedIndex + stickedDisplayedValidationColumns.value.length
+  }
 
   /*
    * Writes the selected task id in the url query string, or removes it
@@ -723,6 +733,7 @@ export const useEntityList = ({
 
   const onSelectColumn = () => {
     const taskTypeId = lastHeaderMenuDisplayed.value
+    const y = getColumnIndexInGrid(taskTypeId)
     const selection = ENTITY_STORES[type].cache.result
       .filter(entity => !entity.canceled)
       .map((entity, i) => ({
@@ -730,7 +741,7 @@ export const useEntityList = ({
         column: taskTypeMap.value.get(taskTypeId),
         task: taskMap.value.get(entity.validations.get(taskTypeId)),
         x: i,
-        y: lastHeaderMenuDisplayedIndexInGrid
+        y
       }))
 
     store.commit('CLEAR_SELECTED_TASKS')
@@ -755,14 +766,7 @@ export const useEntityList = ({
       ? entities.value.flat()
       : entities.value
     const x = list.findIndex(e => e.id === entity.id)
-    let y = stickedDisplayedValidationColumns.value.indexOf(task.task_type_id)
-    if (y === -1) {
-      const nonStickedIndex =
-        nonStickedDisplayedValidationColumns.value.indexOf(task.task_type_id)
-      if (nonStickedIndex > -1) {
-        y = nonStickedIndex + stickedDisplayedValidationColumns.value.length
-      }
-    }
+    const y = getColumnIndexInGrid(task.task_type_id)
     if (y > -1) {
       store.commit('ADD_SELECTED_TASK', {
         task,
