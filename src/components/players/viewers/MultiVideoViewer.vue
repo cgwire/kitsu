@@ -499,8 +499,13 @@ const loadEntity = (index = 0, currentTime = 0, silentLoad = false) => {
       if (!currentPlayer.value.src.endsWith(moviePath)) {
         currentPlayer.value.src = moviePath
       }
-    } else if (currentPlayer.value) {
-      currentPlayer.value.src = ''
+    } else {
+      // Nothing to play: stop the previous movie. Its decoder stays loaded
+      // when that movie comes next, and its end would move the playlist on.
+      player1Ref.value?.pause()
+      player2Ref.value?.pause()
+      isPlaying.value = false
+      if (currentPlayer.value) currentPlayer.value.src = ''
     }
     // The next entity always starts on its main preview: preload index 0.
     const nextMoviePath = nextEntity ? getMoviePath(nextEntity) : ''

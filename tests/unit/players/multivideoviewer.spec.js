@@ -382,5 +382,31 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
       expect(wrapper.emitted('play-next')).toBeUndefined()
       wrapper.unmount()
     })
+
+    // The playlist moves to a 3D model while its movie plays. The movie
+    // comes next again, so its decoder stays loaded: it played on, hidden,
+    // and its end moved the playlist away from the model.
+    it('stops the movie when the playlist moves to an entity without one', async () => {
+      vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
+      const wrapper = mountViewer({
+        entities: [
+          { id: 'e1', preview_file_id: 'p1', preview_file_extension: 'mp4', fps: 25 },
+          { id: 'e2', preview_file_id: 'p2', preview_file_extension: 'glb', fps: 25 }
+        ]
+      })
+      // Back from the model, the movie plays in the decoder that preloaded it.
+      wrapper.vm.loadEntity(1, 0, true)
+      wrapper.vm.loadEntity(0)
+      await wrapper.vm.$nextTick()
+      const player = wrapper.vm.currentPlayer
+      wrapper.vm.play()
+
+      wrapper.vm.loadEntity(1, 0, true)
+      player.dispatchEvent(new Event('ended'))
+
+      expect(HTMLMediaElement.prototype.pause.mock.contexts).toContain(player)
+      expect(wrapper.emitted('play-next')).toBeUndefined()
+      wrapper.unmount()
+    })
   })
 })
