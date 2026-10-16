@@ -178,103 +178,111 @@
           </div>
 
           <div class="task-column comments-column mt1">
-            <div>
-              <div>
-                <add-comment
-                  ref="add-comment"
-                  :team="currentTeam"
-                  :task-types="currentTaskTypes"
-                  :task="task"
-                  :task-status="taskStatuses"
-                  :is-loading="loading.addComment"
-                  :preview-forms="previewForms"
-                  :is-error="errors.addComment"
-                  :is-max-retakes-error="errors.addCommentMaxRetakes"
-                  :fps="currentFps"
-                  :frame="displayedFrame"
-                  :revision="currentRevision"
-                  :is-movie="isMoviePreview"
-                  :is-picture="isPicturePreview"
-                  :is-status-locked="isMentionedOnly"
-                  @add-comment="postComment"
-                  @add-preview="onAddPreviewClicked"
-                  @file-drop="selectFile"
-                  @clear-files="clearPreviewFiles"
-                  @remove-preview="onPreviewFormRemoved"
-                  @annotation-snapshots-requested="extractAnnotationSnapshots"
-                  @annotation-snapshots-with-label-requested="
-                    () => extractAnnotationSnapshots(true)
-                  "
-                  v-if="isCommentingAllowed"
-                />
-
-                <div
-                  class="comments"
-                  v-if="
-                    taskComments &&
-                    taskComments.length > 0 &&
-                    !loading.task &&
-                    !errors.task
-                  "
-                >
-                  <XyzTransitionGroup
-                    appear
-                    v-xyz="{ fade: animOn, up: animOn, 'flip-up': animOn }"
-                  >
-                    <comment
-                      :key="`comment-${comment.id}`"
-                      :comment="comment"
-                      :fps="currentFps"
-                      :frame="displayedFrame"
-                      :is-action-error="comment.id === failedActionCommentId"
-                      :is-change="isStatusChange(index)"
-                      :is-checkable="
-                        (user && user.id === comment.person?.id) ||
-                        (isCurrentUserArtist && isAssigned) ||
-                        isDepartmentSupervisor ||
-                        isCurrentUserManager
-                      "
-                      :is-editable="
-                        (user && user.id === comment.person?.id) ||
-                        isCurrentUserManager
-                      "
-                      :is-pinnable="
-                        isDepartmentSupervisor || isCurrentUserManager
-                      "
-                      :is-replyable="canReplyTo(comment)"
-                      :can-move="isCurrentUserManager"
-                      :revision="currentRevision"
-                      :task="task"
+            <task-detail-extensions :entity-type="entityType" :task="task">
+              <template #default>
+                <div>
+                  <div>
+                    <add-comment
+                      ref="add-comment"
                       :team="currentTeam"
                       :task-types="currentTaskTypes"
-                      @ack-comment="onAckComment"
-                      @duplicate-comment="onDuplicateComment"
-                      @pin-comment="onPinComment"
-                      @edit-comment="onEditComment"
-                      @delete-comment="onDeleteComment"
-                      @move-comment="onMoveComment"
-                      @toggle-for-client="onToggleForClient"
-                      @checklist-updated="saveComment"
-                      @time-code-clicked="timeCodeClicked"
-                      v-for="(comment, index) in taskComments"
+                      :task="task"
+                      :task-status="taskStatuses"
+                      :is-loading="loading.addComment"
+                      :preview-forms="previewForms"
+                      :is-error="errors.addComment"
+                      :is-max-retakes-error="errors.addCommentMaxRetakes"
+                      :fps="currentFps"
+                      :frame="displayedFrame"
+                      :revision="currentRevision"
+                      :is-movie="isMoviePreview"
+                      :is-picture="isPicturePreview"
+                      :is-status-locked="isMentionedOnly"
+                      @add-comment="postComment"
+                      @add-preview="onAddPreviewClicked"
+                      @file-drop="selectFile"
+                      @clear-files="clearPreviewFiles"
+                      @remove-preview="onPreviewFormRemoved"
+                      @annotation-snapshots-requested="
+                        extractAnnotationSnapshots
+                      "
+                      @annotation-snapshots-with-label-requested="
+                        () => extractAnnotationSnapshots(true)
+                      "
+                      v-if="isCommentingAllowed"
                     />
-                  </XyzTransitionGroup>
-                </div>
-                <div class="no-comment" v-else-if="!loading.task">
-                  <em>
-                    {{
-                      errors.task
-                        ? $t('main.loading_error')
-                        : $t('tasks.no_comment')
-                    }}
-                  </em>
-                </div>
-              </div>
-            </div>
 
-            <div class="has-text-centered" v-if="loading.task">
-              <spinner />
-            </div>
+                    <div
+                      class="comments"
+                      v-if="
+                        taskComments &&
+                        taskComments.length > 0 &&
+                        !loading.task &&
+                        !errors.task
+                      "
+                    >
+                      <XyzTransitionGroup
+                        appear
+                        v-xyz="{ fade: animOn, up: animOn, 'flip-up': animOn }"
+                      >
+                        <comment
+                          :key="`comment-${comment.id}`"
+                          :comment="comment"
+                          :fps="currentFps"
+                          :frame="displayedFrame"
+                          :is-action-error="
+                            comment.id === failedActionCommentId
+                          "
+                          :is-change="isStatusChange(index)"
+                          :is-checkable="
+                            (user && user.id === comment.person?.id) ||
+                            (isCurrentUserArtist && isAssigned) ||
+                            isDepartmentSupervisor ||
+                            isCurrentUserManager
+                          "
+                          :is-editable="
+                            (user && user.id === comment.person?.id) ||
+                            isCurrentUserManager
+                          "
+                          :is-pinnable="
+                            isDepartmentSupervisor || isCurrentUserManager
+                          "
+                          :is-replyable="canReplyTo(comment)"
+                          :can-move="isCurrentUserManager"
+                          :revision="currentRevision"
+                          :task="task"
+                          :team="currentTeam"
+                          :task-types="currentTaskTypes"
+                          @ack-comment="onAckComment"
+                          @duplicate-comment="onDuplicateComment"
+                          @pin-comment="onPinComment"
+                          @edit-comment="onEditComment"
+                          @delete-comment="onDeleteComment"
+                          @move-comment="onMoveComment"
+                          @toggle-for-client="onToggleForClient"
+                          @checklist-updated="saveComment"
+                          @time-code-clicked="timeCodeClicked"
+                          v-for="(comment, index) in taskComments"
+                        />
+                      </XyzTransitionGroup>
+                    </div>
+                    <div class="no-comment" v-else-if="!loading.task">
+                      <em>
+                        {{
+                          errors.task
+                            ? $t('main.loading_error')
+                            : $t('tasks.no_comment')
+                        }}
+                      </em>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="has-text-centered" v-if="loading.task">
+                  <spinner />
+                </div>
+              </template>
+            </task-detail-extensions>
           </div>
         </div>
 
@@ -429,6 +437,7 @@ import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditCommentModal from '@/components/modals/EditCommentModal.vue'
 import MoveCommentModal from '@/components/modals/MoveCommentModal.vue'
 import PreviewPlayer from '@/components/players/players/PreviewPlayer.vue'
+import TaskDetailExtensions from '@/components/sides/TaskDetailExtensions.vue'
 import ActionPanel from '@/components/tops/ActionPanel.vue'
 import AddComment from '@/components/widgets/AddComment.vue'
 import ComboboxActions from '@/components/widgets/ComboboxActions.vue'
