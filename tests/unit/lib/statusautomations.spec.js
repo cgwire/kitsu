@@ -5,9 +5,12 @@ import {
   formatTaskStatuses,
   formatTrigger,
   formToPayload,
+  getEntityTypeName,
   getGuardStatusIds,
   getTrigger,
   isFormValid,
+  isGuardChanged,
+  isTriggerChanged,
   isTriggerOrOutputChanged,
   MAX_CONDITIONS,
   validateConditions
@@ -248,6 +251,45 @@ describe('lib/statusautomations', () => {
       payload.in_conditions.conditions[0].task_status_ids.push(NA)
       expect(source.conditions[0].taskStatusIds).toEqual([DONE])
     })
+
+    // Zou keeps the stored trigger when a write leaves it out, even a
+    // malformed one that the form reads as far as it goes.
+    it('leaves out the trigger of an edit that keeps it', () => {
+      const payload = formToPayload(form({ isTriggerChanged: false }), {
+        isEditing: true
+      })
+      expect(payload).not.toHaveProperty('in_conditions')
+      expect(payload.out_task_type_id).toBe(COMPOSITING)
+      expect(payload.archived).toBe(false)
+      expect(
+        formToPayload(form({ isTriggerChanged: true }), { isEditing: true })
+          .in_conditions.conditions
+      ).toHaveLength(2)
+    })
+
+    it('sends the trigger of a new automation', () => {
+      expect(
+        formToPayload(form({ isTriggerChanged: false })).in_conditions.operator
+      ).toBe('and')
+    })
+
+    // As for the trigger: a malformed guard reads as empty, and an edit
+    // that keeps it does not overwrite it.
+    it('leaves out the guard of an edit that keeps it', () => {
+      const guarded = fields =>
+        form({ outOnlyIfTaskStatusIds: [TODO], ...fields })
+      expect(
+        formToPayload(guarded({ isGuardChanged: false }), { isEditing: true })
+      ).not.toHaveProperty('out_only_if_task_status_ids')
+      expect(
+        formToPayload(guarded({ isGuardChanged: true }), { isEditing: true })
+          .out_only_if_task_status_ids
+      ).toEqual([TODO])
+      expect(
+        formToPayload(guarded({ isGuardChanged: false }))
+          .out_only_if_task_status_ids
+      ).toEqual([TODO])
+    })
   })
 
   describe('validateConditions', () => {
@@ -316,10 +358,121 @@ describe('lib/statusautomations', () => {
     it('refuses a form without a condition', () => {
       expect(isFormValid(form({ conditions: [] }))).toBe(false)
     })
+
+    // Zou checks the stored conditions against a new output, and asks for
+    // one only in a trigger the write sends.
+    it('asks for a condition only when the write sends the trigger', () => {
+      const empty = form({ conditions: [] })
+      expect(isFormValid(empty, { isTriggerSent: false })).toBe(true)
+      expect(isFormValid(empty, { isTriggerSent: true })).toBe(false)
+      const conditions = [{ taskTypeId: COMPOSITING, taskStatusIds: [DONE] }]
+      expect(isFormValid(form({ conditions }), { isTriggerSent: false })).toBe(
+        false
+      )
+    })
+  })
+
+  describe('getEntityTypeName', () => {
+    const i18n = {
+      t: key => `[${key}]`,
+      te: key =>
+        [
+          'status_automations.entity_types.asset',
+          'status_automations.entity_types.shot'
+        ].includes(key)
+    }
+
+    it('names an entity type in the locale, whatever its case', () => {
+      expect(getEntityTypeName('shot', i18n)).toBe(
+        '[status_automations.entity_types.shot]'
+      )
+      expect(getEntityTypeName('Asset', i18n)).toBe(
+        '[status_automations.entity_types.asset]'
+      )
+    })
+
+    it('names a row without an entity type as an asset one', () => {
+      expect(getEntityTypeName(null, i18n)).toBe(
+        '[status_automations.entity_types.asset]'
+      )
+    })
+
+    // Zou reads a row naming an asset type, which only a direct API write
+    // stores, as an asset one.
+    it('names a row naming an asset type after it', () => {
+      expect(getEntityTypeName('Props', i18n)).toBe('Props')
+    })
   })
 
   // Zou checks a write only when it changes the trigger, the entity type or
   // the output.
+  describe('isTriggerChanged', () => {
+    it('ignores the order of the statuses and the other fields', () => {
+      expect(
+        isTriggerChanged(
+          form({
+            conditions: [
+              { taskTypeId: LIGHTING, taskStatusIds: [DONE] },
+              { taskTypeId: FX, taskStatusIds: [NA, DONE] }
+            ],
+            outTaskTypeId: FX,
+            outOnlyIfTaskStatusIds: [TODO],
+            importLastRevision: 'true'
+          }),
+          form()
+        )
+      ).toBe(false)
+    })
+
+    it('tells a change of the operator or of the conditions', () => {
+      const changes = [
+        { operator: 'or' },
+        { conditions: [{ taskTypeId: LIGHTING, taskStatusIds: [DONE] }] },
+        {
+          conditions: [
+            { taskTypeId: FX, taskStatusIds: [DONE, NA] },
+            { taskTypeId: LIGHTING, taskStatusIds: [DONE] }
+          ]
+        },
+        {
+          conditions: [
+            { taskTypeId: LIGHTING, taskStatusIds: [DONE, NA] },
+            { taskTypeId: FX, taskStatusIds: [DONE, NA] }
+          ]
+        }
+      ]
+      changes.forEach(fields => {
+        expect(isTriggerChanged(form(fields), form())).toBe(true)
+      })
+    })
+  })
+
+  describe('isGuardChanged', () => {
+    it('ignores the order of the statuses and the other fields', () => {
+      expect(
+        isGuardChanged(
+          form({ outOnlyIfTaskStatusIds: [READY, TODO], operator: 'or' }),
+          form({ outOnlyIfTaskStatusIds: [TODO, READY] })
+        )
+      ).toBe(false)
+    })
+
+    it('tells an added or a removed status', () => {
+      const guarded = form({ outOnlyIfTaskStatusIds: [TODO] })
+      expect(isGuardChanged(guarded, form())).toBe(true)
+      expect(isGuardChanged(form(), guarded)).toBe(true)
+    })
+
+    // Only a direct write stores a guard on a ready for output. The write
+    // sends none, as Zou reads it, which clears it.
+    it('compares the guard the write sends with the stored one', () => {
+      const readyFor = fields => form({ outFieldType: 'ready_for', ...fields })
+      const stored = readyFor({ outOnlyIfTaskStatusIds: [TODO] })
+      expect(isGuardChanged({ ...stored }, stored)).toBe(true)
+      expect(isGuardChanged(readyFor(), readyFor())).toBe(false)
+    })
+  })
+
   describe('isTriggerOrOutputChanged', () => {
     it('ignores the fields Zou does not check a write on', () => {
       const stored = form({ outOnlyIfTaskStatusIds: [TODO, READY] })
@@ -364,6 +517,14 @@ describe('lib/statusautomations', () => {
       changes.forEach(fields => {
         expect(isTriggerOrOutputChanged(form(fields), form())).toBe(true)
       })
+    })
+
+    it('tells a guard the write clears', () => {
+      const stored = form({
+        outFieldType: 'ready_for',
+        outOnlyIfTaskStatusIds: [TODO]
+      })
+      expect(isTriggerOrOutputChanged({ ...stored }, stored)).toBe(true)
     })
   })
 

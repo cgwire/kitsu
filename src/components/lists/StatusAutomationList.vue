@@ -19,6 +19,9 @@
             <th scope="col" class="out-task-status">
               {{ $t('status_automations.fields.out_task_status') }}
             </th>
+            <th scope="col" class="guard">
+              {{ $t('status_automations.fields.out_only_if_task_status_ids') }}
+            </th>
             <th scope="col" class="import-last-revision">
               {{ $t('status_automations.fields.import_last_revision') }}
             </th>
@@ -71,6 +74,31 @@
               :entry="taskStatusMap.get(statusAutomation.out_task_status_id)"
             />
             <td class="name out-task-status" v-else></td>
+            <td
+              class="guard"
+              :class="{
+                'is-empty': getGuardStatuses(statusAutomation).length === 0
+              }"
+            >
+              <template v-if="getGuardStatuses(statusAutomation).length > 0">
+                <span class="mobile-label">
+                  {{
+                    $t('status_automations.fields.out_only_if_task_status_ids')
+                  }}:
+                </span>
+                <span
+                  class="tag"
+                  :key="taskStatus.id"
+                  :style="{
+                    background: backgroundColor(taskStatus),
+                    color: color(taskStatus)
+                  }"
+                  v-for="taskStatus in getGuardStatuses(statusAutomation)"
+                >
+                  {{ taskStatus.short_name }}
+                </span>
+              </template>
+            </td>
             <td class="import-last-revision">
               <span class="mobile-label">
                 {{ $t('status_automations.fields.import_last_revision') }}:
@@ -114,6 +142,9 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
+import { useTaskStatusStyle } from '@/composables/taskStatus'
+import { getGuardStatusIds } from '@/lib/statusautomations'
+
 import RowActionsCell from '@/components/cells/RowActionsCell.vue'
 import TaskStatusCell from '@/components/cells/TaskStatusCell.vue'
 import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
@@ -122,6 +153,7 @@ import TableInfo from '@/components/widgets/TableInfo.vue'
 
 const { t } = useI18n()
 const store = useStore()
+const { backgroundColor, color } = useTaskStatusStyle()
 
 // Props / Emits
 // --------------------------------------------------------------------------
@@ -157,6 +189,15 @@ const statusAutomations = computed(() =>
 // Functions
 // --------------------------------------------------------------------------
 const formatBoolean = value => (value ? t('main.yes') : t('main.no'))
+
+// Called from the template: the task status map is filled in place, so a
+// computed over it would keep its first read.
+const getGuardStatuses = statusAutomation =>
+  statusAutomation.out_field_type === 'status'
+    ? getGuardStatusIds(statusAutomation)
+        .map(taskStatusId => taskStatusMap.value.get(taskStatusId))
+        .filter(Boolean)
+    : []
 </script>
 
 <style lang="scss" scoped>
@@ -176,6 +217,18 @@ td.name {
 
 .conditions {
   min-width: 260px;
+}
+
+.guard {
+  min-width: 150px;
+}
+
+.guard .tag {
+  margin: 0.2em;
+  font-size: 0.8em;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
 .separator {
@@ -235,8 +288,7 @@ td.name {
       'entity entity'
       'conditions conditions'
       'separator separator'
-      'out-type out-status'
-      'revision revision';
+      'out-type out-status';
     align-items: center;
     gap: 0.5em;
     padding: 0.75em;
@@ -285,8 +337,18 @@ td.name {
     justify-self: end;
   }
 
+  // A full row each after the output, so that a card without a guard gets
+  // no empty row, and no extra gap, for it.
+  .guard,
   .import-last-revision {
-    grid-area: revision;
+    grid-column: 1 / -1;
+  }
+
+  td.guard.is-empty {
+    display: none !important;
+  }
+
+  .import-last-revision {
     padding-top: 0.25em !important;
     color: var(--text-alt);
     font-size: 0.9em;

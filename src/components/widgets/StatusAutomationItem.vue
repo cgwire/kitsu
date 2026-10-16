@@ -32,6 +32,20 @@
         v-if="statusAutomation.out_field_type === 'status'"
       />
     </span>
+    <span class="flexrow-item guard" v-if="guardStatuses.length > 0">
+      {{ $t('status_automations.only_from') }}
+      <span
+        class="tag"
+        :key="taskStatus.id"
+        :style="{
+          background: backgroundColor(taskStatus),
+          color: color(taskStatus)
+        }"
+        v-for="taskStatus in guardStatuses"
+      >
+        {{ taskStatus.short_name }}
+      </span>
+    </span>
   </div>
 </template>
 
@@ -40,12 +54,16 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
+import { useTaskStatusStyle } from '@/composables/taskStatus'
+import { getGuardStatusIds } from '@/lib/statusautomations'
+
 import TaskStatusCell from '@/components/cells/TaskStatusCell.vue'
 import StatusAutomationConditions from '@/components/widgets/StatusAutomationConditions.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
 const { t } = useI18n()
 const store = useStore()
+const { backgroundColor, color } = useTaskStatusStyle()
 
 const props = defineProps({
   statusAutomation: {
@@ -56,6 +74,14 @@ const props = defineProps({
 
 const getTaskStatus = computed(() => store.getters.getTaskStatus)
 const getTaskType = computed(() => store.getters.getTaskType)
+
+const guardStatuses = computed(() =>
+  props.statusAutomation.out_field_type === 'status'
+    ? getGuardStatusIds(props.statusAutomation)
+        .map(taskStatusId => getTaskStatus.value(taskStatusId))
+        .filter(Boolean)
+    : []
+)
 
 const entityType = computed(() => {
   const et = props.statusAutomation.entity_type
@@ -89,5 +115,17 @@ const entityType = computed(() => {
 
 .trigger-type {
   min-width: 160px;
+}
+
+.guard {
+  white-space: nowrap;
+}
+
+.guard .tag {
+  margin-left: 0.3em;
+  font-size: 0.8em;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 </style>

@@ -1435,7 +1435,8 @@
         "entities": "Assets, shots, sequences, ..."
       },
       "add_task_status_to_library": "Tilføj en opgavestatus til biblioteket",
-      "add_task_status_placeholder": "+ Tilføj opgavestatus"
+      "add_task_status_placeholder": "+ Tilføj opgavestatus",
+      "remove_status": "Fjern status {name}"
     },
     "task_types": {
       "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database?",
@@ -2019,7 +2020,7 @@
       "edit_title": "Rediger en statusautomatisering",
       "entity_title": "Enhedstype påvirket af triggeren",
       "number": "statusautomatisering | statusautomatiseringer",
-      "in_title": "Status, der udløser en ændring",
+      "in_title": "Udløsende betingelser",
       "out_title": "Ændringen, der vil blive anvendt ved udløsning af triggeren",
       "new_status_automation": "Tilføj statusautomatisering",
       "production_description": "En automatisering ændrer en opgaves status, eller den næste opgave, når en status sættes.",
@@ -2028,7 +2029,6 @@
       "wrong_automation": "I denne produktion bruger hver betingelse en opgavetype, der kommer efter den anvendte opgavetype. Deres statusændringer kører ikke denne automatisering, for at undgå uendelige cyklusser: den har ingen effekt.",
       "fields": {
         "entity_type": "Enhedstype",
-        "in_field_type": "Inputfelttype",
         "in_task_type": "Opgavetype",
         "in_task_status": "Opgavestatus",
         "out_field_type": "Anvendt ændring",
@@ -2036,7 +2036,8 @@
         "out_task_status": "Anvendt opgavestatus",
         "import_last_revision": "Importer Seneste Revision",
         "conditions": "Betingelser",
-        "operator": "Operator"
+        "operator": "Operator",
+        "out_only_if_task_status_ids": "Kun når den anvendte opgave har status"
       },
       "entity_types": {
         "asset": "Asset",
@@ -2055,7 +2056,30 @@
         "or": "eller"
       },
       "guard_only_condition_and": "I denne produktion kommer {taskType} efter den anvendte opgavetype: dens statusændringer kører ikke denne automatisering, men betingelsen skal stadig være opfyldt.",
-      "guard_only_condition_or": "I denne produktion kommer {taskType} efter den anvendte opgavetype: denne betingelse ignoreres."
+      "guard_only_condition_or": "I denne produktion kommer {taskType} efter den anvendte opgavetype: denne betingelse ignoreres.",
+      "trigger_when": "Udløs når",
+      "operators": {
+        "and": "alle følgende betingelser er opfyldt",
+        "or": "en af følgende betingelser er opfyldt"
+      },
+      "add_condition": "+ Tilføj betingelse",
+      "remove_condition": "Fjern betingelse",
+      "remove_condition_on": "Fjern betingelsen for {taskType}",
+      "help": {
+        "and": "Kører, når en statusændring opfylder alle betingelserne. En opgavetype, som enheden ikke har, ignoreres.",
+        "or": "Kører, når en statusændring opfylder en af betingelserne, og ingen af dem var opfyldt før.",
+        "new_comments_only": "Automatiseringer kører, når en ny kommentar ændrer en status, aldrig når en kommentar redigeres eller slettes.",
+        "import_and": "Revisionen kommer fra opgaven for den første betingelse, som enheden har.",
+        "import_or": "Revisionen kommer fra den opgave, hvis statusændring opfyldte betingelserne.",
+        "out_only_if": "Lad feltet være tomt for at anvende ændringen uanset den anvendte opgaves status."
+      },
+      "errors": {
+        "max_conditions": "En automatisering accepterer højst 10 betingelser.",
+        "missing_value": "Vælg en opgavetype og mindst én status.",
+        "same_task_type": "Denne opgavetype bruges allerede af en anden betingelse: tilføj statusserne der.",
+        "output_in_conditions": "Den anvendte opgavetype kan ikke bruges i betingelserne."
+      },
+      "only_from": "kun fra"
     },
     "preview_room": {
       "join_room": "Deltag i gennemgangsrummet",

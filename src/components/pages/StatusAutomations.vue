@@ -49,7 +49,12 @@ import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
 import csv from '@/lib/csv'
-import { formatTrigger, getTrigger } from '@/lib/statusautomations'
+import {
+  formatTaskStatuses,
+  formatTrigger,
+  getGuardStatusIds,
+  getTrigger
+} from '@/lib/statusautomations'
 import stringHelpers from '@/lib/string'
 
 import DeleteModal from '@/components/modals/DeleteModal.vue'
@@ -138,6 +143,7 @@ const onExportClicked = () => {
     t('status_automations.fields.out_field_type'),
     t('status_automations.fields.out_task_type'),
     t('status_automations.fields.out_task_status'),
+    t('status_automations.fields.out_only_if_task_status_ids'),
     t('status_automations.fields.import_last_revision')
   ]
   const entries = [
@@ -156,6 +162,9 @@ const onExportClicked = () => {
       sa.out_field_type === 'status'
         ? taskStatusMap.value.get(sa.out_task_status_id)?.short_name
         : undefined,
+      sa.out_field_type === 'status'
+        ? formatTaskStatuses(getGuardStatusIds(sa), taskStatusMap.value)
+        : '',
       sa.import_last_revision
     ])
   ]

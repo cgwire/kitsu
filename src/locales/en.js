@@ -398,6 +398,7 @@ export default {
   },
 
   status_automations: {
+    add_condition: '+ Add condition',
     add_status_automation_placeholder: '+ Add Status Automation',
     change_ready_for: 'changes "ready for" to',
     change_status: 'changes task status to',
@@ -409,28 +410,38 @@ export default {
     guard_only_condition_and: 'In this production, {taskType} comes after the applied task type: its status changes do not run this automation, but the condition must still be met.',
     guard_only_condition_or: 'In this production, {taskType} comes after the applied task type: this condition is ignored.',
     number: 'status automation | status automations',
-    in_title: 'Status triggering a change',
+    only_from: 'only from',
+    in_title: 'Trigger conditions',
     out_title: 'The change that will be applied on trigger firing',
     new_status_automation: 'Add status automation',
+    remove_condition: 'Remove condition',
+    remove_condition_on: 'Remove the condition on {taskType}',
     production_description: 'An automation changes a task status, or the next task, when a status is set.',
     run_for_selection: 'Run status automation for selected tasks:',
     title: 'Automations',
+    trigger_when: 'Trigger when',
     wrong_automation: 'In this production, every condition uses a task type that comes after the applied task type. Their status changes do not run this automation, to avoid infinite cycles: it has no effect.',
     connectors: {
       and: 'and',
       or: 'or'
     },
+    errors: {
+      max_conditions: 'An automation accepts at most 10 conditions.',
+      missing_value: 'Choose a task type and at least one status.',
+      output_in_conditions: 'The applied task type cannot be used in the conditions.',
+      same_task_type: 'This task type is already used by another condition: add the statuses there.'
+    },
     fields: {
       conditions: 'Conditions',
       entity_type: 'Entity Type',
-      in_field_type: 'Input Field Type',
       in_task_type: 'Task Type',
       in_task_status: 'Task Status',
       out_field_type: 'Applied Change',
       out_task_type: 'Applied Task Type',
       out_task_status: 'Applied Task Status',
       import_last_revision: 'Import Last Revision',
-      operator: 'Operator'
+      operator: 'Operator',
+      out_only_if_task_status_ids: 'Only when the applied task is in'
     },
     entity_types: {
       asset: 'Asset',
@@ -442,6 +453,18 @@ export default {
     field_types: {
       status: 'Status',
       ready_for: 'Ready For'
+    },
+    help: {
+      and: 'Runs when a status change makes all the conditions true. A task type the entity does not have is ignored.',
+      import_and: 'The revision comes from the task of the first condition the entity has.',
+      import_or: 'The revision comes from the task whose status change met the conditions.',
+      new_comments_only: 'Automations run when a new comment changes a status, never when a comment is edited or deleted.',
+      or: 'Runs when a status change makes one of the conditions true and none was true before.',
+      out_only_if: 'Leave empty to apply the change whatever the status of the applied task.'
+    },
+    operators: {
+      and: 'all of the following conditions are met',
+      or: 'any of the following conditions is met'
     }
   },
 
@@ -1889,6 +1912,7 @@ export default {
     name: 'task status',
     number: 'task status | task statuses',
     new_task_status: 'Add a task status',
+    remove_status: 'Remove status {name}',
     production_description: "Only these statuses can be set on this production's tasks.",
     title: 'Task Status',
     help: {

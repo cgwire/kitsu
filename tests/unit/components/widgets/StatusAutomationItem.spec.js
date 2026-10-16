@@ -20,7 +20,8 @@ const statusAutomation = {
   },
   out_field_type: 'status',
   out_task_type_id: 'task-type-compositing',
-  out_task_status_id: 'ready'
+  out_task_status_id: 'ready',
+  out_only_if_task_status_ids: ['todo']
 }
 
 enableAutoUnmount(afterEach)
@@ -50,4 +51,27 @@ describe('StatusAutomationItem', () => {
     expect(conditions.props('statusAutomation')).toEqual(statusAutomation)
   })
 
+  // Two automations that differ by their guard only must look apart.
+  it('shows the statuses the applied task has to be in', () => {
+    const wrapper = mountItem({ statusAutomation })
+    expect(wrapper.find('.guard').text().replace(/\s+/g, ' ')).toBe(
+      'only from todo'
+    )
+    expect(
+      mountItem({
+        statusAutomation: { ...statusAutomation, out_only_if_task_status_ids: [] }
+      })
+        .find('.guard')
+        .exists()
+    ).toBe(false)
+  })
+
+  // Only a direct write stores a guard that is not a list.
+  it('shows a malformed guard as none', () => {
+    const wrapper = mountItem({
+      statusAutomation: { ...statusAutomation, out_only_if_task_status_ids: {} }
+    })
+    expect(wrapper.find('.status-automation').exists()).toBe(true)
+    expect(wrapper.find('.guard').exists()).toBe(false)
+  })
 })

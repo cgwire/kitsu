@@ -1435,7 +1435,8 @@
       "add_task_status_to_library": "Feladat állapot hozzáadása a könyvtárhoz",
       "help": {
         "entities": "Asset-ek, shot-ok, szekvenciák, ..."
-      }
+      },
+      "remove_status": "{name} állapot eltávolítása"
     },
     "task_types": {
       "delete_text": "Biztosan törölni akarod {name}-t az adatbázisból?",
@@ -2368,16 +2369,16 @@
       "fields": {
         "entity_type": "Elem típusa",
         "import_last_revision": "Utolsó revízió importálása",
-        "in_field_type": "Bemeneti mező típusa",
         "in_task_status": "Feladat állapot",
         "in_task_type": "Feladat típus",
         "out_field_type": "Alkalmazott változás",
         "out_task_status": "Alkalmazott feladat állapot",
         "out_task_type": "Alkalmazott feladat típus",
         "conditions": "Feltételek",
-        "operator": "Operátor"
+        "operator": "Operátor",
+        "out_only_if_task_status_ids": "Csak ha az alkalmazott feladat állapota"
       },
-      "in_title": "A változást kiváltó állapot",
+      "in_title": "Indító feltételek",
       "new_status_automation": "Állapot-automatizálás hozzáadása",
       "number": "állapot-automatizálás | állapot-automatizálás",
       "out_title": "A trigger aktiválódásakor alkalmazott változás",
@@ -2390,7 +2391,30 @@
         "or": "vagy"
       },
       "guard_only_condition_and": "Ebben a produkcióban a(z) {taskType} az alkalmazott feladat típus után következik: az állapotváltozásai nem indítják el ezt az automatizálást, de a feltételnek ettől még teljesülnie kell.",
-      "guard_only_condition_or": "Ebben a produkcióban a(z) {taskType} az alkalmazott feladat típus után következik: ez a feltétel figyelmen kívül marad."
+      "guard_only_condition_or": "Ebben a produkcióban a(z) {taskType} az alkalmazott feladat típus után következik: ez a feltétel figyelmen kívül marad.",
+      "trigger_when": "Indítás, ha",
+      "operators": {
+        "and": "az összes alábbi feltétel teljesül",
+        "or": "az alábbi feltételek egyike teljesül"
+      },
+      "add_condition": "+ Feltétel hozzáadása",
+      "remove_condition": "Feltétel eltávolítása",
+      "remove_condition_on": "Feltétel eltávolítása: {taskType}",
+      "help": {
+        "and": "Akkor fut, amikor egy állapotváltozás után minden feltétel teljesül. Az elemnél nem létező feladat típus figyelmen kívül marad.",
+        "or": "Akkor fut, amikor egy állapotváltozás után az egyik feltétel teljesül, miközben előtte egyik sem teljesült.",
+        "new_comments_only": "Az automatizálások akkor futnak le, amikor egy új hozzászólás állapotot módosít, egy hozzászólás szerkesztésekor vagy törlésekor soha.",
+        "import_and": "A revízió az elemnél meglévő első feltétel feladatából származik.",
+        "import_or": "A revízió abból a feladatból származik, amelynek állapotváltozása teljesítette a feltételeket.",
+        "out_only_if": "Hagyd üresen, ha a változást az alkalmazott feladat állapotától függetlenül szeretnéd alkalmazni."
+      },
+      "errors": {
+        "max_conditions": "Egy automatizálás legfeljebb 10 feltételt fogad el.",
+        "missing_value": "Válassz egy feladat típust és legalább egy állapotot.",
+        "same_task_type": "Ezt a feladat típust már egy másik feltétel használja: ott add hozzá az állapotokat.",
+        "output_in_conditions": "Az alkalmazott feladat típus nem használható a feltételekben."
+      },
+      "only_from": "csak innen:"
     },
     "software_licenses": {
       "create_error": "Hiba történt a szoftverlicenc mentésekor.",

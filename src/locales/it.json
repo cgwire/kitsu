@@ -1435,7 +1435,8 @@
         "entities": "Asset, shot, sequenze, ..."
       },
       "add_task_status_to_library": "Aggiungi uno stato del task alla libreria",
-      "add_task_status_placeholder": "+ Aggiungi stato del task"
+      "add_task_status_placeholder": "+ Aggiungi stato del task",
+      "remove_status": "Rimuovi lo stato {name}"
     },
     "task_types": {
       "delete_text": "Sei sicuro di voler rimuovere {name} dal database?",
@@ -2019,7 +2020,7 @@
       "edit_title": "Modifica un'automazione di stato",
       "entity_title": "Tipo di entità interessato dal trigger",
       "number": "automazione di stato | automazioni di stato",
-      "in_title": "Stato che attiva un cambiamento",
+      "in_title": "Condizioni di attivazione",
       "out_title": "Il cambiamento che verrà applicato all'attivazione del trigger",
       "new_status_automation": "Aggiungi un'automazione di stato",
       "production_description": "Un'automazione cambia lo stato di un task, o il task successivo, quando viene impostato uno stato.",
@@ -2028,7 +2029,6 @@
       "wrong_automation": "In questa produzione, ogni condizione usa un tipo di task che viene dopo il tipo di task applicato. I loro cambi di stato non avviano questa automazione, per evitare cicli infiniti: non ha alcun effetto.",
       "fields": {
         "entity_type": "Tipo di entità",
-        "in_field_type": "Tipo di campo di input",
         "in_task_type": "Tipo di task",
         "in_task_status": "Stato del task",
         "out_field_type": "Cambiamento applicato",
@@ -2036,7 +2036,8 @@
         "out_task_status": "Stato del task applicato",
         "import_last_revision": "Importa l'ultima revisione",
         "conditions": "Condizioni",
-        "operator": "Operatore"
+        "operator": "Operatore",
+        "out_only_if_task_status_ids": "Solo se il task applicato è in"
       },
       "entity_types": {
         "asset": "Asset",
@@ -2055,7 +2056,30 @@
         "or": "o"
       },
       "guard_only_condition_and": "In questa produzione, {taskType} viene dopo il tipo di task applicato: i suoi cambi di stato non avviano questa automazione, ma la condizione deve comunque essere soddisfatta.",
-      "guard_only_condition_or": "In questa produzione, {taskType} viene dopo il tipo di task applicato: questa condizione viene ignorata."
+      "guard_only_condition_or": "In questa produzione, {taskType} viene dopo il tipo di task applicato: questa condizione viene ignorata.",
+      "trigger_when": "Attiva quando",
+      "operators": {
+        "and": "tutte le condizioni seguenti sono soddisfatte",
+        "or": "una delle condizioni seguenti è soddisfatta"
+      },
+      "add_condition": "+ Aggiungi una condizione",
+      "remove_condition": "Rimuovi la condizione",
+      "remove_condition_on": "Rimuovi la condizione su {taskType}",
+      "help": {
+        "and": "Viene eseguita quando un cambio di stato soddisfa tutte le condizioni. Un tipo di task che l'entità non ha viene ignorato.",
+        "or": "Viene eseguita quando un cambio di stato soddisfa una delle condizioni e prima nessuna lo era.",
+        "new_comments_only": "Le automazioni vengono eseguite quando un nuovo commento cambia uno stato, mai quando un commento viene modificato o eliminato.",
+        "import_and": "La revisione proviene dal task della prima condizione che l'entità possiede.",
+        "import_or": "La revisione proviene dal task il cui cambio di stato ha soddisfatto le condizioni.",
+        "out_only_if": "Lascia vuoto per applicare la modifica qualunque sia lo stato del task applicato."
+      },
+      "errors": {
+        "max_conditions": "Un'automazione accetta al massimo 10 condizioni.",
+        "missing_value": "Scegli un tipo di task e almeno uno stato.",
+        "same_task_type": "Questo tipo di task è già usato da un'altra condizione: aggiungi lì gli stati.",
+        "output_in_conditions": "Il tipo di task applicato non può essere usato nelle condizioni."
+      },
+      "only_from": "solo da"
     },
     "preview_room": {
       "join_room": "Entra nella stanza di revisione",

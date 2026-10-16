@@ -1435,7 +1435,8 @@
         "entities": "Assets, plans, séquences, ..."
       },
       "add_task_status_to_library": "Ajouter un statut de tâche à la bibliothèque",
-      "add_task_status_placeholder": "+ Ajouter un statut de tâche"
+      "add_task_status_placeholder": "+ Ajouter un statut de tâche",
+      "remove_status": "Retirer le statut {name}"
     },
     "task_types": {
       "delete_text": "Êtes-vous sûr de vouloir supprimer {name} de la base de données ?",
@@ -2019,7 +2020,7 @@
       "edit_title": "Modifier une automatisation",
       "entity_title": "Type d'entité concerné par le déclencheur",
       "number": "automatisation | automatisations",
-      "in_title": "Statut provoquant un changement",
+      "in_title": "Conditions de déclenchement",
       "out_title": "Le changement sera appliqué quand le déclencheur s'activera",
       "new_status_automation": "Ajouter une automatisation",
       "production_description": "Une automatisation change le statut d'une tâche, ou la tâche suivante, quand un statut est appliqué.",
@@ -2028,7 +2029,6 @@
       "wrong_automation": "Dans cette production, chaque condition porte sur un type de tâche qui vient après le type de tâche concerné. Leurs changements de statut ne déclenchent pas cette automatisation, pour éviter les cycles infinis : elle n'a aucun effet.",
       "fields": {
         "entity_type": "Type d'entité",
-        "in_field_type": "Type d'entrée",
         "in_task_type": "Type de tâche",
         "in_task_status": "Statut de tâche",
         "out_field_type": "Changement appliqué",
@@ -2036,7 +2036,8 @@
         "out_task_status": "Statut appliqué",
         "import_last_revision": "Importer la dernière révision",
         "conditions": "Conditions",
-        "operator": "Opérateur"
+        "operator": "Opérateur",
+        "out_only_if_task_status_ids": "Seulement si la tâche concernée est en"
       },
       "entity_types": {
         "asset": "Asset",
@@ -2055,7 +2056,30 @@
         "or": "ou"
       },
       "guard_only_condition_and": "Dans cette production, {taskType} vient après le type de tâche concerné : ses changements de statut ne déclenchent pas cette automatisation, mais la condition doit quand même être remplie.",
-      "guard_only_condition_or": "Dans cette production, {taskType} vient après le type de tâche concerné : cette condition est ignorée."
+      "guard_only_condition_or": "Dans cette production, {taskType} vient après le type de tâche concerné : cette condition est ignorée.",
+      "trigger_when": "Déclencher quand",
+      "operators": {
+        "and": "toutes les conditions suivantes sont remplies",
+        "or": "une des conditions suivantes est remplie"
+      },
+      "add_condition": "+ Ajouter une condition",
+      "remove_condition": "Retirer la condition",
+      "remove_condition_on": "Retirer la condition sur {taskType}",
+      "help": {
+        "and": "S'exécute quand un changement de statut remplit toutes les conditions. Un type de tâche que l'entité n'a pas est ignoré.",
+        "or": "S'exécute quand un changement de statut remplit une des conditions alors qu'aucune ne l'était.",
+        "new_comments_only": "Les automatisations se déclenchent quand un nouveau commentaire change un statut, jamais quand un commentaire est modifié ou supprimé.",
+        "import_and": "La révision vient de la tâche de la première condition que l'entité possède.",
+        "import_or": "La révision vient de la tâche dont le changement de statut a rempli les conditions.",
+        "out_only_if": "Laissez vide pour appliquer le changement quel que soit le statut de la tâche concernée."
+      },
+      "errors": {
+        "max_conditions": "Une automatisation accepte au plus 10 conditions.",
+        "missing_value": "Choisissez un type de tâche et au moins un statut.",
+        "same_task_type": "Ce type de tâche est déjà utilisé par une autre condition : ajoutez-y les statuts.",
+        "output_in_conditions": "Le type de tâche concerné ne peut pas être utilisé dans les conditions."
+      },
+      "only_from": "seulement depuis"
     },
     "preview_room": {
       "join_room": "Rejoindre la session de review",

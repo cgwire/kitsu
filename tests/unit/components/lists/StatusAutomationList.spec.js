@@ -27,12 +27,18 @@ const statusAutomation = {
 enableAutoUnmount(afterEach)
 
 describe('StatusAutomationList', () => {
-  const mountList = props => {
+  const mountList = (props, getters = {}) => {
     const store = createStore({
       getters: {
         getTaskType: () => () => undefined,
-        taskStatusMap: () => new Map(),
-        isStatusAutomationDisabled: () => () => true
+        isDarkTheme: () => false,
+        taskStatusMap: () =>
+          new Map([
+            ['todo', { id: 'todo', name: 'Todo', short_name: 'todo' }],
+            ['ready', { id: 'ready', name: 'Ready', short_name: 'ready' }]
+          ]),
+        isStatusAutomationDisabled: () => () => true,
+        ...getters
       }
     })
     return shallowMountWithI18n(StatusAutomationList, {
@@ -69,5 +75,79 @@ describe('StatusAutomationList', () => {
         'withPriorityWarnings'
       )
     ).toBe(true)
+  })
+
+  it('shows the statuses the applied task has to be in', () => {
+    const wrapper = mountList({
+      entries: [
+        { ...statusAutomation, out_only_if_task_status_ids: ['todo', 'ready'] }
+      ]
+    })
+    expect(
+      wrapper.findAll('th').map(th => th.text())
+    ).toContain('Only when the applied task is in')
+    expect(
+      wrapper.findAll('td.guard .tag').map(tag => tag.text())
+    ).toEqual(['todo', 'ready'])
+  })
+
+  // The cards of the phone layout leave it out.
+  it('marks a guard cell without statuses', () => {
+    const wrapper = mountList({
+      entries: [
+        statusAutomation,
+        {
+          ...statusAutomation,
+          id: 'automation-2',
+          out_only_if_task_status_ids: ['todo']
+        },
+        {
+          ...statusAutomation,
+          id: 'automation-3',
+          out_field_type: 'ready_for',
+          out_only_if_task_status_ids: ['todo']
+        }
+      ]
+    })
+    expect(
+      wrapper.findAll('td.guard').map(cell => cell.classes('is-empty'))
+    ).toEqual([true, false, true])
+  })
+
+  // Only a direct write stores a guard that is not a list.
+  it('shows a malformed guard as none', () => {
+    const wrapper = mountList({
+      entries: [
+        { ...statusAutomation, out_only_if_task_status_ids: {} },
+        {
+          ...statusAutomation,
+          id: 'automation-2',
+          out_only_if_task_status_ids: 'todo'
+        }
+      ]
+    })
+    expect(
+      wrapper.findAll('td.guard').map(cell => cell.classes('is-empty'))
+    ).toEqual([true, true])
+  })
+
+  // The task status map is filled in place: a computed over it would keep
+  // its first read.
+  it('reads the guard statuses again at each render', async () => {
+    const taskStatusMap = new Map()
+    const wrapper = mountList(
+      {
+        entries: [{ ...statusAutomation, out_only_if_task_status_ids: ['wip'] }]
+      },
+      { taskStatusMap: () => taskStatusMap }
+    )
+    expect(wrapper.find('td.guard .tag').exists()).toBe(false)
+
+    taskStatusMap.set('wip', { id: 'wip', name: 'WIP', short_name: 'wip' })
+    await wrapper.setProps({ isLoading: true })
+
+    expect(wrapper.findAll('td.guard .tag').map(tag => tag.text())).toEqual([
+      'wip'
+    ])
   })
 })

@@ -1435,7 +1435,8 @@
         "entities": "Recursos, tomas, secuencias, ..."
       },
       "add_task_status_to_library": "Añadir un estado de tarea a la biblioteca",
-      "add_task_status_placeholder": "+ Añadir estado de la tarea"
+      "add_task_status_placeholder": "+ Añadir estado de la tarea",
+      "remove_status": "Quitar el estado {name}"
     },
     "task_types": {
       "delete_text": "¿Está seguro de que desea eliminar {name} de su base de datos?",
@@ -2019,7 +2020,7 @@
       "edit_title": "Modificar una automatización de estado",
       "entity_title": "Tipo de entidad afectada por el activador",
       "number": "automatización de estado | automatizaciones de estado",
-      "in_title": "Estado que provoca un cambio",
+      "in_title": "Condiciones de activación",
       "out_title": "El cambio que se aplicará al activarse el activador",
       "new_status_automation": "Añadir una automatización de estado",
       "production_description": "Una automatización cambia el estado de una tarea, o la tarea siguiente, cuando se aplica un estado.",
@@ -2028,7 +2029,6 @@
       "wrong_automation": "En esta producción, todas las condiciones usan un tipo de tarea que va después del tipo de tarea aplicado. Sus cambios de estado no ejecutan esta automatización, para evitar ciclos infinitos: no tiene ningún efecto.",
       "fields": {
         "entity_type": "Tipo de entidad",
-        "in_field_type": "Tipo de campo de entrada",
         "in_task_type": "Tipo de tarea",
         "in_task_status": "Estado de la tarea",
         "out_field_type": "Cambio aplicado",
@@ -2036,7 +2036,8 @@
         "out_task_status": "Estado de tarea aplicado",
         "import_last_revision": "Importar última revisión",
         "conditions": "Condiciones",
-        "operator": "Operador"
+        "operator": "Operador",
+        "out_only_if_task_status_ids": "Solo si la tarea aplicada está en"
       },
       "entity_types": {
         "asset": "Recurso",
@@ -2055,7 +2056,30 @@
         "or": "o"
       },
       "guard_only_condition_and": "En esta producción, {taskType} va después del tipo de tarea aplicado: sus cambios de estado no ejecutan esta automatización, pero la condición debe cumplirse igualmente.",
-      "guard_only_condition_or": "En esta producción, {taskType} va después del tipo de tarea aplicado: esta condición se ignora."
+      "guard_only_condition_or": "En esta producción, {taskType} va después del tipo de tarea aplicado: esta condición se ignora.",
+      "trigger_when": "Activar cuando",
+      "operators": {
+        "and": "se cumplan todas las condiciones siguientes",
+        "or": "se cumpla alguna de las condiciones siguientes"
+      },
+      "add_condition": "+ Añadir condición",
+      "remove_condition": "Quitar la condición",
+      "remove_condition_on": "Quitar la condición de {taskType}",
+      "help": {
+        "and": "Se ejecuta cuando un cambio de estado cumple todas las condiciones. Un tipo de tarea que la entidad no tiene se ignora.",
+        "or": "Se ejecuta cuando un cambio de estado cumple una de las condiciones y antes no se cumplía ninguna.",
+        "new_comments_only": "Las automatizaciones se ejecutan cuando un comentario nuevo cambia un estado, nunca al modificar o eliminar un comentario.",
+        "import_and": "La revisión proviene de la tarea de la primera condición que tiene la entidad.",
+        "import_or": "La revisión proviene de la tarea cuyo cambio de estado cumplió las condiciones.",
+        "out_only_if": "Déjelo vacío para aplicar el cambio sea cual sea el estado de la tarea aplicada."
+      },
+      "errors": {
+        "max_conditions": "Una automatización acepta como máximo 10 condiciones.",
+        "missing_value": "Elija un tipo de tarea y al menos un estado.",
+        "same_task_type": "Otra condición ya usa este tipo de tarea: añada los estados allí.",
+        "output_in_conditions": "El tipo de tarea aplicado no puede usarse en las condiciones."
+      },
+      "only_from": "solo desde"
     },
     "preview_room": {
       "join_room": "Unirse a la sala de revisión",

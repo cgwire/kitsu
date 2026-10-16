@@ -44,6 +44,7 @@ const multiConditionAutomation = {
   out_field_type: 'status',
   out_task_type_id: 'task-type-2',
   out_task_status_id: 'task-status-2',
+  out_only_if_task_status_ids: ['task-status-4', 'task-status-2'],
   import_last_revision: true,
   archived: false
 }
@@ -56,14 +57,18 @@ const taskTypeMap = new Map([
 const taskStatusMap = new Map([
   ['task-status-1', { id: 'task-status-1', short_name: 'done' }],
   ['task-status-2', { id: 'task-status-2', short_name: 'ready' }],
-  ['task-status-3', { id: 'task-status-3', short_name: 'na' }]
+  ['task-status-3', { id: 'task-status-3', short_name: 'na' }],
+  ['task-status-4', { id: 'task-status-4', short_name: 'todo' }]
 ])
 
 describe('StatusAutomations page', () => {
-  const mountPage = async (actions = {}) => {
+  const mountPage = async (
+    actions = {},
+    statusAutomations = [statusAutomation, multiConditionAutomation]
+  ) => {
     const store = createStore({
       getters: {
-        statusAutomations: () => [statusAutomation, multiConditionAutomation],
+        statusAutomations: () => statusAutomations,
         archivedStatusAutomations: () => [],
         taskStatusMap: () => taskStatusMap,
         taskTypeMap: () => taskTypeMap
@@ -148,6 +153,7 @@ describe('StatusAutomations page', () => {
         'Applied Change',
         'Applied Task Type',
         'Applied Task Status',
+        'Only when the applied task is in',
         'Import Last Revision'
       ],
       [
@@ -157,6 +163,7 @@ describe('StatusAutomations page', () => {
         'changes task status to',
         'Compositing',
         'ready',
+        '',
         false
       ],
       [
@@ -166,9 +173,25 @@ describe('StatusAutomations page', () => {
         'changes task status to',
         'Compositing',
         'ready',
+        'todo, ready',
         true
       ]
     ])
+    buildCsvFile.mockRestore()
+  })
+
+  // Only a direct write stores a guard that is not a list.
+  it('exports a malformed guard as none', async () => {
+    const buildCsvFile = vi
+      .spyOn(csv, 'buildCsvFile')
+      .mockImplementation(() => {})
+    const wrapper = await mountPage({}, [
+      { ...multiConditionAutomation, out_only_if_task_status_ids: {} }
+    ])
+
+    wrapper.findComponent(ListPageHeader).vm.$emit('export-clicked')
+
+    expect(buildCsvFile.mock.calls[0][1][1][6]).toBe('')
     buildCsvFile.mockRestore()
   })
 })

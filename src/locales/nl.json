@@ -1435,7 +1435,8 @@
         "entities": "Assets, opnamen, sequenties, ..."
       },
       "add_task_status_to_library": "Een taakstatus toevoegen aan de bibliotheek",
-      "add_task_status_placeholder": "+ Taakstatus toevoegen"
+      "add_task_status_placeholder": "+ Taakstatus toevoegen",
+      "remove_status": "Status {name} verwijderen"
     },
     "task_types": {
       "delete_text": "Weet je zeker dat je {name} uit de database wilt verwijderen?",
@@ -2019,7 +2020,7 @@
       "edit_title": "Bewerk een statusautomatisering",
       "entity_title": "Entiteitstype waarop de trigger betrekking heeft",
       "number": "statusautomatisering | statusautomatiseringen",
-      "in_title": "Status die een wijziging triggert",
+      "in_title": "Triggervoorwaarden",
       "out_title": "De wijziging die wordt toegepast bij activatie van de trigger",
       "new_status_automation": "Statusautomatisering toevoegen",
       "production_description": "Een automatisering wijzigt de status van een taak, of de volgende taak, wanneer een status wordt ingesteld.",
@@ -2028,7 +2029,6 @@
       "wrong_automation": "In deze productie gebruikt elke voorwaarde een taaktype dat na het toegepaste taaktype komt. De statuswijzigingen ervan starten deze automatisering niet, om oneindige cycli te vermijden: ze heeft geen effect.",
       "fields": {
         "entity_type": "Entiteitstype",
-        "in_field_type": "Type invoerveld",
         "in_task_type": "Taaktype",
         "in_task_status": "Taakstatus",
         "out_field_type": "Toegepaste wijziging",
@@ -2036,7 +2036,8 @@
         "out_task_status": "Toegepaste taakstatus",
         "import_last_revision": "Laatste revisie importeren",
         "conditions": "Voorwaarden",
-        "operator": "Operator"
+        "operator": "Operator",
+        "out_only_if_task_status_ids": "Alleen als de toegepaste taak de status heeft"
       },
       "entity_types": {
         "asset": "Asset",
@@ -2055,7 +2056,30 @@
         "or": "of"
       },
       "guard_only_condition_and": "In deze productie komt {taskType} na het toegepaste taaktype: de statuswijzigingen ervan starten deze automatisering niet, maar aan de voorwaarde moet nog steeds worden voldaan.",
-      "guard_only_condition_or": "In deze productie komt {taskType} na het toegepaste taaktype: deze voorwaarde wordt genegeerd."
+      "guard_only_condition_or": "In deze productie komt {taskType} na het toegepaste taaktype: deze voorwaarde wordt genegeerd.",
+      "trigger_when": "Uitvoeren wanneer",
+      "operators": {
+        "and": "aan alle volgende voorwaarden is voldaan",
+        "or": "aan een van de volgende voorwaarden is voldaan"
+      },
+      "add_condition": "+ Voorwaarde toevoegen",
+      "remove_condition": "Voorwaarde verwijderen",
+      "remove_condition_on": "Voorwaarde voor {taskType} verwijderen",
+      "help": {
+        "and": "Wordt uitgevoerd wanneer door een statuswijziging aan alle voorwaarden is voldaan. Een taaktype dat de entiteit niet heeft, wordt genegeerd.",
+        "or": "Wordt uitgevoerd wanneer door een statuswijziging aan een van de voorwaarden is voldaan, terwijl daarvoor aan geen enkele was voldaan.",
+        "new_comments_only": "Automatiseringen worden uitgevoerd wanneer een nieuwe opmerking een status wijzigt, nooit bij het bewerken of verwijderen van een opmerking.",
+        "import_and": "De revisie komt van de taak van de eerste voorwaarde die de entiteit heeft.",
+        "import_or": "De revisie komt van de taak waarvan de statuswijziging aan de voorwaarden voldeed.",
+        "out_only_if": "Laat leeg om de wijziging toe te passen, ongeacht de status van de toegepaste taak."
+      },
+      "errors": {
+        "max_conditions": "Een automatisering accepteert maximaal 10 voorwaarden.",
+        "missing_value": "Kies een taaktype en minstens één status.",
+        "same_task_type": "Dit taaktype wordt al door een andere voorwaarde gebruikt: voeg de statussen daar toe.",
+        "output_in_conditions": "Het toegepaste taaktype kan niet in de voorwaarden worden gebruikt."
+      },
+      "only_from": "alleen vanuit"
     },
     "preview_room": {
       "join_room": "Reviewruimte betreden",

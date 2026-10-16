@@ -132,22 +132,24 @@ const rows = [
     },
     form: {
       entityType: 'asset',
-      inFieldType: 'status',
-      inTaskTypeId: 'tt-1',
-      inTaskStatusId: 'ts-1',
+      operator: 'and',
+      conditions: [{ taskTypeId: 'tt-1', taskStatusIds: ['ts-1'] }],
       outFieldType: 'status',
       outTaskTypeId: 'tt-2',
       outTaskStatusId: 'ts-2',
+      outOnlyIfTaskStatusIds: ['ts-3'],
       importLastRevision: 'true'
     },
     payload: {
       entity_type: 'asset',
-      in_field_type: 'status',
-      in_task_type_id: 'tt-1',
-      in_task_status_id: 'ts-1',
+      in_conditions: {
+        operator: 'and',
+        conditions: [{ task_type_id: 'tt-1', task_status_ids: ['ts-1'] }]
+      },
       out_field_type: 'status',
       out_task_type_id: 'tt-2',
       out_task_status_id: 'ts-2',
+      out_only_if_task_status_ids: ['ts-3'],
       import_last_revision: true
     },
     returnsItem: true,

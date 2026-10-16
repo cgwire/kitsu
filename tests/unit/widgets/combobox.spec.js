@@ -112,4 +112,14 @@ describe('Combobox', () => {
     await wrapper.setProps({ withMargin: false })
     expect(wrapper.element.classList.contains('field')).toBe(false)
   })
+
+  // The operator of the automation modal has no label: the sentence it ends
+  // names it.
+  it('names its select without a label', () => {
+    const named = shallowMountWithI18n(Combobox, {
+      props: { options, modelValue: 'a', ariaLabel: 'Trigger when' }
+    })
+    expect(named.find('select').attributes('aria-label')).toBe('Trigger when')
+    expect(wrapper.find('select').attributes('aria-label')).toBeUndefined()
+  })
 })

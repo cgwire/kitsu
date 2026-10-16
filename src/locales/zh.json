@@ -1435,7 +1435,8 @@
         "entities": "资产、镜头、序列..."
       },
       "add_task_status_to_library": "向任务状态库中添加任务状态",
-      "add_task_status_placeholder": "+ 添加任务状态"
+      "add_task_status_placeholder": "+ 添加任务状态",
+      "remove_status": "移除状态 {name}"
     },
     "task_types": {
       "delete_text": "您确定要从您的数据库移除{name}吗？",
@@ -2019,7 +2020,7 @@
       "edit_title": "编辑状态自动化",
       "entity_title": "受触发器影响的实体类型",
       "number": "状态自动化 | 状态自动化",
-      "in_title": "状态触发变化",
+      "in_title": "触发条件",
       "out_title": "将在触发器触发时应用的更改",
       "new_status_automation": "添加状态自动化",
       "production_description": "自动化会在设置某个状态时更改任务状态或下一个任务。",
@@ -2028,7 +2029,6 @@
       "wrong_automation": "在此制作中，每个条件使用的任务类型都位于应用任务类型之后。为避免无限循环，它们的状态变更不会运行此自动化：它不会有任何效果。",
       "fields": {
         "entity_type": "实体类型",
-        "in_field_type": "输入字段类型",
         "in_task_type": "任务类型",
         "in_task_status": "任务状态",
         "out_field_type": "应用的更改",
@@ -2036,7 +2036,8 @@
         "out_task_status": "应用任务状态",
         "import_last_revision": "导入最后修订",
         "conditions": "条件",
-        "operator": "运算符"
+        "operator": "运算符",
+        "out_only_if_task_status_ids": "仅当应用任务处于以下状态时"
       },
       "entity_types": {
         "asset": "资产",
@@ -2055,7 +2056,30 @@
         "or": "或"
       },
       "guard_only_condition_and": "在此制作中，{taskType} 位于应用任务类型之后：它的状态变更不会运行此自动化，但仍需满足该条件。",
-      "guard_only_condition_or": "在此制作中，{taskType} 位于应用任务类型之后：此条件将被忽略。"
+      "guard_only_condition_or": "在此制作中，{taskType} 位于应用任务类型之后：此条件将被忽略。",
+      "trigger_when": "触发时机",
+      "operators": {
+        "and": "满足以下所有条件时",
+        "or": "满足以下任一条件时"
+      },
+      "add_condition": "+ 添加条件",
+      "remove_condition": "移除条件",
+      "remove_condition_on": "移除 {taskType} 的条件",
+      "help": {
+        "and": "当状态变更使所有条件都满足时运行。实体没有的任务类型将被忽略。",
+        "or": "当状态变更使其中一个条件满足、而此前没有任何条件满足时运行。",
+        "new_comments_only": "自动化在新评论更改状态时运行，编辑或删除评论时从不运行。",
+        "import_and": "修订取自实体所具有的第一个条件的任务。",
+        "import_or": "修订取自其状态变更满足条件的任务。",
+        "out_only_if": "留空则无论应用任务处于什么状态都会应用此变更。"
+      },
+      "errors": {
+        "max_conditions": "一个自动化最多接受 10 个条件。",
+        "missing_value": "请选择一个任务类型和至少一个状态。",
+        "same_task_type": "此任务类型已被另一个条件使用：请在那里添加状态。",
+        "output_in_conditions": "应用任务类型不能用于条件。"
+      },
+      "only_from": "仅从"
     },
     "preview_room": {
       "join_room": "加入审核室",

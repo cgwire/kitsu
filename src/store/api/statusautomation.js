@@ -1,3 +1,4 @@
+import { formToPayload } from '@/lib/statusautomations'
 import client from '@/store/api/client'
 
 export default {
@@ -6,34 +7,16 @@ export default {
   },
 
   newStatusAutomation(statusAutomation) {
-    const data = {
-      entity_type: statusAutomation.entityType,
-      in_field_type: statusAutomation.inFieldType,
-      in_task_type_id: statusAutomation.inTaskTypeId,
-      in_task_status_id: statusAutomation.inTaskStatusId,
-      out_field_type: statusAutomation.outFieldType,
-      out_task_type_id: statusAutomation.outTaskTypeId,
-      out_task_status_id: statusAutomation.outTaskStatusId,
-      import_last_revision: statusAutomation.importLastRevision === 'true'
-    }
-    return client.ppost('/api/data/status-automations/', data)
+    return client.ppost(
+      '/api/data/status-automations/',
+      formToPayload(statusAutomation)
+    )
   },
 
   updateStatusAutomation(statusAutomation) {
-    const data = {
-      entity_type: statusAutomation.entityType,
-      in_field_type: statusAutomation.inFieldType,
-      in_task_type_id: statusAutomation.inTaskTypeId,
-      in_task_status_id: statusAutomation.inTaskStatusId,
-      out_field_type: statusAutomation.outFieldType,
-      out_task_type_id: statusAutomation.outTaskTypeId,
-      out_task_status_id: statusAutomation.outTaskStatusId,
-      import_last_revision: statusAutomation.importLastRevision === 'true',
-      archived: statusAutomation.archived === 'true'
-    }
     return client.pput(
       `/api/data/status-automations/${statusAutomation.id}`,
-      data
+      formToPayload(statusAutomation, { isEditing: true })
     )
   },
 

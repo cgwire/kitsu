@@ -71,6 +71,17 @@ export const automationToForm = automation => {
   }
 }
 
+// A row naming an asset type, which only a direct API write stores, is an
+// asset one for Zou, and shows that name.
+export const getEntityTypeName = (entityType, { t, te }) => {
+  const key = `status_automations.entity_types.${(entityType ?? 'asset').toLowerCase()}`
+  return te(key) ? t(key) : entityType
+}
+
+// Only a status change has a guard.
+const getSentGuard = form =>
+  form.outFieldType === 'status' ? form.outOnlyIfTaskStatusIds : []
+
 export const formToPayload = (form, { isEditing = false } = {}) => {
   const isStatusOutput = form.outFieldType === 'status'
   const payload = {
@@ -85,13 +96,17 @@ export const formToPayload = (form, { isEditing = false } = {}) => {
     out_field_type: form.outFieldType,
     out_task_type_id: form.outTaskTypeId,
     out_task_status_id: isStatusOutput ? form.outTaskStatusId : null,
-    out_only_if_task_status_ids: isStatusOutput
-      ? [...form.outOnlyIfTaskStatusIds]
-      : [],
+    out_only_if_task_status_ids: [...getSentGuard(form)],
     import_last_revision: form.importLastRevision === 'true'
   }
   if (isEditing) {
     payload.archived = form.archived === 'true'
+    // Zou keeps the stored trigger and guard when a write leaves them out,
+    // even malformed ones, which the form reads leniently.
+    if (form.isTriggerChanged === false) delete payload.in_conditions
+    if (form.isGuardChanged === false) {
+      delete payload.out_only_if_task_status_ids
+    }
   }
   return payload
 }
@@ -116,28 +131,48 @@ export const validateConditions = form =>
     return firstIndex === index ? null : ERRORS.sameTaskType
   })
 
-export const isFormValid = form =>
-  form.conditions.length > 0 &&
+// As in Zou, a new output is checked against the stored conditions, and a row
+// without any passes: only a trigger the write sends needs one.
+export const isFormValid = (form, { isTriggerSent = true } = {}) =>
+  (!isTriggerSent || form.conditions.length > 0) &&
   validateConditions(form).every(error => error === null)
 
-// Zou checks a write only when it changes the trigger, the entity type or the
-// output, so that a row saved before a rule existed stays editable. The order
-// of the conditions counts, not the order of the statuses.
-const getCheckedFields = form => ({
-  entityType: form.entityType,
+// As in Zou, the order of the conditions counts, not the order of the
+// statuses.
+const getTriggerKey = form => ({
   operator: form.operator,
   conditions: form.conditions.map(condition => [
     condition.taskTypeId,
     [...condition.taskStatusIds].sort()
-  ]),
+  ])
+})
+
+export const isTriggerChanged = (form, storedForm) =>
+  JSON.stringify(getTriggerKey(form)) !==
+  JSON.stringify(getTriggerKey(storedForm))
+
+const getGuardKey = taskStatusIds => [...taskStatusIds].sort()
+
+// The guard the write sends against the stored one, as Zou compares them: a
+// guard stored on a ready for output, which only a direct write can do,
+// reads as changed, and the save clears it.
+export const isGuardChanged = (form, storedForm) =>
+  JSON.stringify(getGuardKey(getSentGuard(form))) !==
+  JSON.stringify(getGuardKey(storedForm.outOnlyIfTaskStatusIds))
+
+// Zou checks a write only when it changes the trigger, the entity type or the
+// output, so that a row saved before a rule existed stays editable.
+const getCheckedFields = form => ({
+  entityType: form.entityType,
+  ...getTriggerKey(form),
   outFieldType: form.outFieldType,
-  outTaskTypeId: form.outTaskTypeId,
-  outOnlyIfTaskStatusIds: [...form.outOnlyIfTaskStatusIds].sort()
+  outTaskTypeId: form.outTaskTypeId
 })
 
 export const isTriggerOrOutputChanged = (form, storedForm) =>
   JSON.stringify(getCheckedFields(form)) !==
-  JSON.stringify(getCheckedFields(storedForm))
+    JSON.stringify(getCheckedFields(storedForm)) ||
+  isGuardChanged(form, storedForm)
 
 export const formatTaskStatuses = (taskStatusIds, taskStatusMap) =>
   (taskStatusIds ?? [])
