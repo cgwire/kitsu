@@ -474,46 +474,46 @@ describe('Settings store modules', () => {
 
   describe('status automations', () => {
     const row = rows.find(({ name }) => name === 'statusautomation')
+    const getters = {
+      currentProduction: () => ({
+        task_types_priority: { 'tt-1': 1, 'tt-2': 2 }
+      })
+    }
 
     test('applies an automation toward a later task type', async () => {
-      const isHigher = vi.fn(() => true)
-      const { store } = await buildStore(row, {
-        getters: { isTaskTypePriorityHigherById: () => isHigher }
-      })
+      const { store } = await buildStore(row, { getters })
 
       expect(
         store.getters.isStatusAutomationDisabled({
           out_field_type: 'status',
           in_task_type_id: 'tt-1',
+          in_task_status_id: 'ts-1',
           out_task_type_id: 'tt-2'
         })
       ).toBe(false)
-      expect(isHigher).toHaveBeenCalledWith('tt-2', 'tt-1')
     })
 
     test('disables an automation toward an earlier task type', async () => {
-      const { store } = await buildStore(row, {
-        getters: { isTaskTypePriorityHigherById: () => () => false }
-      })
+      const { store } = await buildStore(row, { getters })
 
       expect(
         store.getters.isStatusAutomationDisabled({
           out_field_type: 'status',
           in_task_type_id: 'tt-2',
+          in_task_status_id: 'ts-1',
           out_task_type_id: 'tt-1'
         })
       ).toBe(true)
     })
 
     test('never disables a ready for automation', async () => {
-      const { store } = await buildStore(row, {
-        getters: { isTaskTypePriorityHigherById: () => () => false }
-      })
+      const { store } = await buildStore(row, { getters })
 
       expect(
         store.getters.isStatusAutomationDisabled({
           out_field_type: 'ready_for',
           in_task_type_id: 'tt-2',
+          in_task_status_id: 'ts-1',
           out_task_type_id: 'tt-1'
         })
       ).toBe(false)

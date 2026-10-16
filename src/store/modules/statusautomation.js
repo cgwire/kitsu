@@ -1,5 +1,6 @@
 import statusAutomationsApi from '@/store/api/statusautomation'
 import { removeModelFromList } from '@/lib/models'
+import { getProjectTaskTypePriority } from '@/lib/productions'
 
 import {
   LOAD_STATUS_AUTOMATIONS_START,
@@ -26,15 +27,16 @@ const getters = {
     state.statusAutomations.filter(s => s.archived),
   statusAutomationMap: () => cache.statusAutomationMap,
 
-  // Used to know if the automation will apply in the current production.
+  // Zou skips a status automation whose input task type comes strictly after
+  // its output task type in the current production.
   isStatusAutomationDisabled:
     (state, getters, rootState, rootGetters) => statusAutomation => {
+      const getPriority = taskTypeId =>
+        getProjectTaskTypePriority(taskTypeId, rootGetters.currentProduction)
       return (
         statusAutomation.out_field_type !== 'ready_for' &&
-        !rootGetters.isTaskTypePriorityHigherById(
-          statusAutomation.out_task_type_id,
-          statusAutomation.in_task_type_id
-        )
+        getPriority(statusAutomation.in_task_type_id) >
+          getPriority(statusAutomation.out_task_type_id)
       )
     }
 }
