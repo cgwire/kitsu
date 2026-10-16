@@ -387,6 +387,22 @@ const getVideoRatio = () => {
   return videoHeight ? videoWidth / videoHeight : 0
 }
 
+// A viewer left without entities, like a closed comparison, drops its movies:
+// its hidden decoders would go on downloading them, or playing one.
+// Removing the source alone does not stop a download: load() does.
+const releasePlayers = () => {
+  stopRenderLoop()
+  isPlaying.value = false
+  const players = [player1Ref.value, player2Ref.value]
+  players
+    .filter(player => player?.hasAttribute('src'))
+    .forEach(player => {
+      player.pause()
+      player.removeAttribute('src')
+      player.load()
+    })
+}
+
 const clear = () => {
   if (currentPlayer.value) {
     currentPlayer.value.src = ''
@@ -856,6 +872,8 @@ watch(
 
       const entity = props.entities[currentIndex.value]
       if (entity && !entity.preview_file_id) loadNextEntity()
+    } else {
+      releasePlayers()
     }
     setTimeout(() => {
       resetHeight()

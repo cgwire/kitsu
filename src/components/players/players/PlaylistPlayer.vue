@@ -132,7 +132,7 @@
           :style="{
             position: isComparisonOverlay ? 'absolute' : 'relative'
           }"
-          :entities="entityListToCompare"
+          :entities="comparisonViewerEntities"
           :is-hd="isHd"
           :is-repeating="isRepeating"
           :muted="true"
@@ -1506,6 +1506,13 @@ const isMovieComparison = computed(
 
 const isPictureComparison = computed(() =>
   isPicturePreview(currentPreviewToCompare.value?.extension)
+)
+
+// Closed, the comparison viewer gets no entities: hidden, it would go on
+// downloading its movies, and load others on an HD switch or in the next
+// playlist.
+const comparisonViewerEntities = computed(() =>
+  isComparing.value ? entityListToCompare.value : []
 )
 
 // True when the two viewers are laid out side-by-side in the

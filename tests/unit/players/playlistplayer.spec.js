@@ -54,6 +54,7 @@ const mountPlayer = ({
   previewFileStatusMap,
   shotMap = new Map(),
   taskMap = new Map(),
+  taskTypeMap = new Map(),
   stubs = {}
 } = {}) => {
   const store = createStore({
@@ -82,7 +83,7 @@ const mountPlayer = ({
       shotMap: () => shotMap,
       taskMap: () => taskMap,
       taskStatusMap: () => new Map(),
-      taskTypeMap: () => new Map(),
+      taskTypeMap: () => taskTypeMap,
       use12HourClock: () => false,
       user: () => ({ id: 'user-1', timezone: 'Europe/Paris' })
     }
@@ -98,32 +99,35 @@ const mountPlayer = ({
       // The mount hooks drive the viewers through their template refs; the
       // default stubs have none of their methods.
       stubs: {
-        MultiVideoViewer: withMethods(
-          [
-            'clear',
-            'goNextFrame',
-            'goPreviousFrame',
-            'loadEntity',
-            'pause',
-            'play',
-            'playNext',
-            'reloadCurrentEntity',
-            'resetHeight',
-            'resetPanZoom',
-            'resumePanZoom',
-            'setCurrentFrame',
-            'setCurrentTimeRaw',
-            'setPanZoom',
-            'setSpeed',
-            'setVolume'
-          ],
-          {
-            getCurrentTime: () => 0,
-            getCurrentTimeRaw: () => 0,
-            getNaturalDimensions: () => ({ width: 1920, height: 1080 }),
-            getVideoRatio: () => 1
-          }
-        ),
+        MultiVideoViewer: {
+          ...withMethods(
+            [
+              'clear',
+              'goNextFrame',
+              'goPreviousFrame',
+              'loadEntity',
+              'pause',
+              'play',
+              'playNext',
+              'reloadCurrentEntity',
+              'resetHeight',
+              'resetPanZoom',
+              'resumePanZoom',
+              'setCurrentFrame',
+              'setCurrentTimeRaw',
+              'setPanZoom',
+              'setSpeed',
+              'setVolume'
+            ],
+            {
+              getCurrentTime: () => 0,
+              getCurrentTimeRaw: () => 0,
+              getNaturalDimensions: () => ({ width: 1920, height: 1080 }),
+              getVideoRatio: () => 1
+            }
+          ),
+          props: { entities: Array }
+        },
         MultiPictureViewer: {
           ...withMethods(['resetPanZoom', 'resumePanZoom', 'setPanZoom'], {
             getNaturalDimensions: () => ({ width: 1920, height: 1080 }),
@@ -357,6 +361,43 @@ describe('PlaylistPlayer.vue', () => {
     await flushPromises()
 
     expect(pause).toHaveBeenCalled()
+  })
+
+  // Once closed, the comparison viewer kept its movies: it went on
+  // downloading them, and loaded others on an HD switch or in the next
+  // playlist, hidden.
+  it('gives the comparison viewer no movie while the comparison is closed', async () => {
+    const comparedEntity = id => ({
+      id,
+      preview_file_id: `${id}-anim`,
+      preview_file_extension: 'mp4',
+      preview_files: {
+        'tt-anim': [{ id: `${id}-anim`, revision: 1, extension: 'mp4' }],
+        'tt-layout': [{ id: `${id}-layout`, revision: 1, extension: 'mp4' }]
+      }
+    })
+    wrapper = mountPlayer({
+      entities: [comparedEntity('shot-1'), comparedEntity('shot-2')],
+      taskTypeMap: new Map([
+        ['tt-anim', { id: 'tt-anim', name: 'Animation' }],
+        ['tt-layout', { id: 'tt-layout', name: 'Layout' }]
+      ])
+    })
+    await flushPromises()
+    const comparisonViewer = wrapper.findComponent({ ref: 'raw-player-comparison' })
+    const comparisonBar = wrapper.findComponent({ name: 'PlayerComparisonBar' })
+
+    comparisonBar.vm.$emit('compare-clicked')
+    await flushPromises()
+    expect(comparisonViewer.props('entities')).toHaveLength(2)
+
+    comparisonBar.vm.$emit('compare-clicked')
+    await flushPromises()
+    expect(comparisonViewer.props('entities')).toEqual([])
+
+    await wrapper.setProps({ entities: [comparedEntity('shot-3')] })
+    await flushPromises()
+    expect(comparisonViewer.props('entities')).toEqual([])
   })
 
   // The player lays itself out, or turns the pencil back on, a little after

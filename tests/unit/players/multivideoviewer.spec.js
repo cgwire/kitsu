@@ -165,6 +165,29 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
     expect(rvfcCallbacks.length).toBe(registered)
   })
 
+  // A closed comparison empties its viewer: decoders left with their movies
+  // went on downloading them, or playing one, hidden.
+  it('releases its movies when its entities go', async () => {
+    vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
+    const wrapper = mountViewer()
+    wrapper.vm.loadEntity(0)
+    await wrapper.vm.$nextTick()
+    const player = wrapper.vm.currentPlayer
+    wrapper.vm.play()
+    HTMLMediaElement.prototype.pause.mockClear()
+
+    await wrapper.setProps({ entities: [] })
+
+    wrapper.findAll('video.playlist-movie-decoder').forEach(({ element }) => {
+      expect(element.hasAttribute('src')).toBe(false)
+      expect(HTMLMediaElement.prototype.load.mock.contexts).toContain(element)
+    })
+    expect(HTMLMediaElement.prototype.pause.mock.contexts).toContain(player)
+    expect(wrapper.vm.isPlaying).toBe(false)
+    expect(rvfcCancelled).toHaveLength(1)
+    wrapper.unmount()
+  })
+
   it('loads the video sub-element of a picture-main revision (#2095)', async () => {
     const store = createStore({
       getters: { currentProduction: () => ({ fps: '25' }) }
