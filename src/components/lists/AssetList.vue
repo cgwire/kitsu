@@ -405,6 +405,8 @@
                   :minimized="hiddenColumns[columnId]"
                   :is-static="true"
                   :is-assignees="displaySettings.showAssignations"
+                  :selectable="isSelectable(asset, columnId)"
+                  :disabled="!isSelectable(asset, columnId)"
                   :left="
                     offsets['validation-' + j]
                       ? `${offsets['validation-' + j]}px`

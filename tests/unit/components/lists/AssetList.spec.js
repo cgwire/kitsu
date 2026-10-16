@@ -317,6 +317,44 @@ describe('lists/AssetList task selection', () => {
     wrapper.unmount()
   })
 
+  test('grays the stuck cells outside the workflow like the others', async () => {
+    localStorage.setItem(
+      `stick-assets-${production.id}`,
+      JSON.stringify({ [color.id]: true })
+    )
+    assetTypeStore.cache.assetTypeMap.set(charactersTypeId, {
+      id: charactersTypeId,
+      task_types: [layout.id]
+    })
+    const character = buildEpisodeAsset(
+      'E02_CH_01',
+      'episode-2',
+      charactersTypeId,
+      [layout]
+    )
+    const library = {
+      ...buildEpisodeAsset('LIB_BG_01', null, backgroundsTypeId, []),
+      shared: true
+    }
+    const wrapper = await mountList(
+      [[character], [ownBackgrounds[0], library]],
+      {},
+      { showLinkedAssets: true }
+    )
+
+    const grayedCells = wrapper
+      .findAllComponents(ValidationCell)
+      .filter(cell => cell.props('disabled') && !cell.props('selectable'))
+      .map(cell => `${cell.props('entity').name} ${cell.props('column').name}`)
+    expect(grayedCells).toEqual([
+      'E02_CH_01 Color',
+      'LIB_BG_01 Color',
+      'LIB_BG_01 Layout'
+    ])
+
+    wrapper.unmount()
+  })
+
   test('Select column highlights its own column after a stuck one', async () => {
     localStorage.setItem(
       `stick-assets-${production.id}`,
