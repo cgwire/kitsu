@@ -306,4 +306,55 @@ describe('lists/ToCheckList', () => {
       wrapper.unmount()
     })
   })
+
+  describe('card layout', () => {
+    test('opts the table into the mobile cards', () => {
+      const wrapper = mountList()
+      expect(wrapper.find('table').classes()).toContain('datatable--cards')
+      wrapper.unmount()
+    })
+
+    test('heads the card with the production, then the entity', () => {
+      const wrapper = mountList()
+      expect(wrapper.find('tbody td.production').classes()).toContain(
+        'card-head'
+      )
+      expect(wrapper.find('tbody td.name').classes()).toContain('card-head')
+      wrapper.unmount()
+    })
+
+    test('labels the cells that carry a value', () => {
+      const wrapper = mountList()
+      const label = selector =>
+        wrapper.find(`tbody ${selector}`).attributes('data-label')
+      expect(label('.type')).toBe('tasks.fields.task_type')
+      expect(label('td.estimation')).toBe('main.estimation')
+      expect(label('td.duration')).toBe('tasks.fields.duration')
+      expect(label('.status')).toBe('tasks.fields.task_status')
+      wrapper.unmount()
+    })
+
+    test('leaves the cells without value unlabelled', () => {
+      const wrapper = mountList()
+      expect(
+        wrapper.find('tbody td.assignees').attributes('data-label')
+      ).toBeUndefined()
+      expect(
+        wrapper.find('tbody td.due-date').attributes('data-label')
+      ).toBeUndefined()
+      wrapper.unmount()
+    })
+
+    test('keeps the row read-only on a phone', async () => {
+      const matchMedia = window.matchMedia
+      window.matchMedia = query => ({ matches: query === '(max-width: 768px)' })
+      const wrapper = mountList({
+        getters: { isCurrentUserManager: () => true }
+      })
+      await wrapper.find('tbody td.duration').trigger('click')
+      expect(wrapper.find('tbody td.estimation input').exists()).toBe(false)
+      wrapper.unmount()
+      window.matchMedia = matchMedia
+    })
+  })
 })
