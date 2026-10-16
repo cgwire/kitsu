@@ -1888,7 +1888,10 @@
         "title": "활동 로그"
       },
       "logins": {
-        "title": "로그인 로그"
+        "ip_address": "IP 주소",
+        "origin": "출처",
+        "title": "로그인 로그",
+        "user": "사용자"
       }
     },
     "departments": {

@@ -1,7 +1,7 @@
 <template>
   <div class="data-list task-list">
     <div class="datatable-wrapper" ref="body">
-      <table class="datatable" v-if="!isLoading">
+      <table class="datatable datatable--cards" v-if="!isLoading">
         <thead class="datatable-head">
           <tr>
             <th
@@ -61,7 +61,7 @@
             v-for="(entry, i) in tasks"
           >
             <td
-              class="production datatable-row-header datatable-row-header--nobd"
+              class="production datatable-row-header datatable-row-header--nobd card-head"
               scope="row"
             >
               <production-name-cell
@@ -77,9 +77,10 @@
               :task-type="getTaskType(entry)"
               :style="{ left: colTypePosX }"
               :is-link="false"
+              :data-label="$t('tasks.fields.task_type')"
             />
             <td
-              class="name datatable-row-header"
+              class="name datatable-row-header card-head"
               :style="{ left: colNamePosX }"
             >
               <div class="flexrow">
@@ -94,13 +95,24 @@
               </div>
             </td>
 
-            <td class="episode" v-if="isEpisodeVisible">
+            <td
+              class="episode"
+              :data-label="
+                assetEpisodes(entry, false) ? $t('assets.fields.episode') : null
+              "
+              v-if="isEpisodeVisible"
+            >
               <div class="flexrow" :title="assetEpisodes(entry, true)">
                 {{ assetEpisodes(entry, false) }}
               </div>
             </td>
 
-            <td class="assignees">
+            <td
+              class="assignees"
+              :data-label="
+                entry.assignees.length ? $t('tasks.fields.assignees') : null
+              "
+            >
               <div class="avatars">
                 <people-avatar
                   :key="`${entry.id}-${person.id}`"
@@ -111,7 +123,10 @@
                 />
               </div>
             </td>
-            <td class="estimation number-cell">
+            <td
+              class="estimation number-cell"
+              :data-label="$t('main.estimation')"
+            >
               <input
                 class="input"
                 min="0"
@@ -130,10 +145,14 @@
               :class="{
                 error: isEstimationBurned(entry)
               }"
+              :data-label="$t('tasks.fields.duration')"
             >
               {{ formatDuration(entry.duration) }}
             </td>
-            <td class="due-date">
+            <td
+              class="due-date"
+              :data-label="entry.due_date ? $t('tasks.fields.due_date') : null"
+            >
               <date-field
                 class="flexrow-item"
                 :model-value="getDate(entry.due_date)"
@@ -153,6 +172,7 @@
               :selectable="false"
               :selected="selectionGrid[entry.id]"
               :task-test="entry"
+              :data-label="$t('tasks.fields.task_status')"
             />
             <th class="actions"></th>
           </tr>
@@ -301,8 +321,12 @@ const isCurrentUserSupervisor = computed(
 const productionMap = computed(() => store.getters.productionMap)
 const taskMap = computed(() => store.getters.taskMap)
 
+// phones get a read-only list
+const isPhone = Boolean(window.matchMedia?.('(max-width: 768px)').matches)
+
 const isEditable = computed(
-  () => isCurrentUserManager.value || isCurrentUserSupervisor.value
+  () =>
+    !isPhone && (isCurrentUserManager.value || isCurrentUserSupervisor.value)
 )
 
 const isEpisodeVisible = computed(() =>
@@ -557,5 +581,26 @@ input[type='number'] {
 
 .footer-info {
   padding: 0.5em;
+}
+
+@media screen and (max-width: 768px) {
+  .datatable-wrapper {
+    background: transparent;
+    border: 0;
+    overflow-x: visible;
+  }
+
+  // the production avatar tops the entity head
+  .datatable-body td.production.card-head {
+    padding-bottom: 0;
+  }
+
+  .datatable-body th.actions {
+    display: none;
+  }
+
+  .name .flexrow {
+    gap: 0.75em;
+  }
 }
 </style>

@@ -764,7 +764,10 @@
         "title": "Logi aktywności"
       },
       "logins": {
-        "title": "Logi logowań"
+        "ip_address": "Adres IP",
+        "origin": "Źródło",
+        "title": "Logi logowań",
+        "user": "Użytkownik"
       },
       "preview_files": {
         "date": "Data utworzenia",

@@ -798,7 +798,10 @@ export default {
       title: 'Activity Logs'
     },
     logins: {
-      title: 'Login Logs'
+      ip_address: 'IP address',
+      origin: 'Origin',
+      title: 'Login Logs',
+      user: 'User'
     },
     preview_files: {
       date: 'Creation date',

@@ -1888,7 +1888,10 @@
         "title": "Activiteitenlogboeken"
       },
       "logins": {
-        "title": "Inloglogboeken"
+        "ip_address": "IP-adres",
+        "origin": "Herkomst",
+        "title": "Inloglogboeken",
+        "user": "Gebruiker"
       }
     },
     "departments": {

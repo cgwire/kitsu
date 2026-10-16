@@ -1888,7 +1888,10 @@
         "title": "Journaux d'activité"
       },
       "logins": {
-        "title": "Journaux de connexion"
+        "ip_address": "Adresse IP",
+        "origin": "Origine",
+        "title": "Journaux de connexion",
+        "user": "Utilisateur"
       }
     },
     "departments": {

@@ -1888,7 +1888,10 @@
         "title": "لاگ‌های فعالیت"
       },
       "logins": {
-        "title": "لاگ‌های ورود"
+        "ip_address": "نشانی IP",
+        "origin": "مبدأ",
+        "title": "لاگ‌های ورود",
+        "user": "کاربر"
       }
     },
     "departments": {

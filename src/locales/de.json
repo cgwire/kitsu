@@ -1888,7 +1888,10 @@
         "title": "Aktivitätsprotokolle"
       },
       "logins": {
-        "title": "Anmeldeprotokolle"
+        "ip_address": "IP-Adresse",
+        "origin": "Herkunft",
+        "title": "Anmeldeprotokolle",
+        "user": "Benutzer"
       }
     },
     "departments": {

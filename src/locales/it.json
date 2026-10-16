@@ -1888,7 +1888,10 @@
         "title": "Log delle attività"
       },
       "logins": {
-        "title": "Log degli accessi"
+        "ip_address": "Indirizzo IP",
+        "origin": "Origine",
+        "title": "Log degli accessi",
+        "user": "Utente"
       }
     },
     "departments": {
