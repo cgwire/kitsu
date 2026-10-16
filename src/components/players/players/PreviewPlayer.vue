@@ -862,7 +862,6 @@ const {
   isComparisonOverlay,
   overlayOpacity,
   toggleComparison,
-  setDefaultComparisonTaskType,
   setDefaultComparisonPreview,
   goToPreviousComparison,
   goToNextComparison,
@@ -2362,10 +2361,11 @@ watch(currentPreview, (newPreview, oldPreview) => {
       clearCanvas()
     }
   })
-  // Re-pick the default comparison target only on a real revision change;
-  // doing it on every sub-preview step would reset the user's selection.
+  // A real revision change drops the comparison target, as closing does:
+  // kept, it loads its movie in the hidden viewer. Opening the comparison
+  // picks a new one. Sub-preview steps keep the user's selection.
   if (revisionChanged) {
-    setDefaultComparisonTaskType()
+    taskTypeId.value = ''
   }
   isOrdering.value =
     props.previews.length > 1 &&
