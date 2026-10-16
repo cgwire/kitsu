@@ -1888,7 +1888,10 @@
         "title": "Registros de atividade"
       },
       "logins": {
-        "title": "Registros de login"
+        "ip_address": "Endereço IP",
+        "origin": "Origem",
+        "title": "Registros de login",
+        "user": "Usuário"
       }
     },
     "departments": {

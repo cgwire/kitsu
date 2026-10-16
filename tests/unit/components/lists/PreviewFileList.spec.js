@@ -63,3 +63,43 @@ describe('PreviewFileList, body scroll', () => {
     expect(errors).toEqual([])
   })
 })
+
+describe('PreviewFileList, card layout', () => {
+  it('opts both tables into the mobile cards', () => {
+    const wrapper = mountList([])
+    const tables = wrapper.findAll('table')
+    expect(tables).toHaveLength(2)
+    tables.forEach(table =>
+      expect(table.classes()).toContain('datatable--cards')
+    )
+    wrapper.unmount()
+  })
+
+  it('heads the card with the entity', () => {
+    const wrapper = mountList([])
+    expect(wrapper.find('tbody td.entity-name').classes()).toContain(
+      'card-head'
+    )
+    wrapper.unmount()
+  })
+
+  it('labels the value cells', () => {
+    const wrapper = mountList([])
+    const label = selector =>
+      wrapper.find(`tbody ${selector}`).attributes('data-label')
+    expect(label('td.date')).toBe('logs.preview_files.date')
+    expect(label('td.production')).toBe('logs.preview_files.production')
+    expect(label('.task-type')).toBe('logs.preview_files.task_type_id')
+    expect(label('td.revision')).toBe('logs.preview_files.revision')
+    expect(label('td.status')).toBe('logs.preview_files.status')
+    wrapper.unmount()
+  })
+
+  it('leaves the mark broken action off the card', () => {
+    const wrapper = mountList([])
+    expect(
+      wrapper.find('tbody td.end-cell').attributes('data-label')
+    ).toBeUndefined()
+    wrapper.unmount()
+  })
+})

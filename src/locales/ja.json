@@ -1888,7 +1888,10 @@
         "title": "アクティビティログ"
       },
       "logins": {
-        "title": "ログインログ"
+        "ip_address": "IPアドレス",
+        "origin": "送信元",
+        "title": "ログインログ",
+        "user": "ユーザー"
       }
     },
     "departments": {

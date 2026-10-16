@@ -1888,7 +1888,10 @@
         "title": "Aktivitetslogfiler"
       },
       "logins": {
-        "title": "Loginlogfiler"
+        "ip_address": "IP-adresse",
+        "origin": "Oprindelse",
+        "title": "Loginlogfiler",
+        "user": "Bruger"
       }
     },
     "departments": {

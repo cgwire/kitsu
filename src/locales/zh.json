@@ -1888,7 +1888,10 @@
         "title": "活动日志"
       },
       "logins": {
-        "title": "登录日志"
+        "ip_address": "IP 地址",
+        "origin": "来源",
+        "title": "登录日志",
+        "user": "用户"
       }
     },
     "departments": {

@@ -1888,7 +1888,10 @@
         "title": "活動日誌"
       },
       "logins": {
-        "title": "登入日誌"
+        "ip_address": "IP 位址",
+        "origin": "來源",
+        "title": "登入日誌",
+        "user": "使用者"
       }
     },
     "departments": {

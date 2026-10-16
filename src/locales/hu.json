@@ -1888,7 +1888,10 @@
         "title": "Tevékenység naplók"
       },
       "logins": {
-        "title": "Belépési naplók"
+        "ip_address": "IP-cím",
+        "origin": "Forrás",
+        "title": "Belépési naplók",
+        "user": "Felhasználó"
       }
     },
     "departments": {

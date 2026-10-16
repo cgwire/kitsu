@@ -1888,7 +1888,10 @@
         "title": "Registros de actividad"
       },
       "logins": {
-        "title": "Registros de inicio de sesión"
+        "ip_address": "Dirección IP",
+        "origin": "Origen",
+        "title": "Registros de inicio de sesión",
+        "user": "Usuario"
       }
     },
     "departments": {
