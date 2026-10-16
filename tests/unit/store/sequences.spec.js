@@ -1,6 +1,7 @@
 // @vitest-environment node
 
 import { vi } from 'vitest'
+import { computed, reactive } from 'vue'
 
 // Importing the sequences module transitively pulls in the root store
 // (lib/models → timezone → @/store); stub it so no Vuex store is built.
@@ -850,6 +851,21 @@ describe('Sequences store, search index', () => {
     expect(search(state, 'SQ999')).toEqual(['SQ999'])
   })
 
+  test('finds a sequence another user renamed while the search hid it', () => {
+    const state = load([
+      buildSequence('sq-1', 'SQ010'),
+      buildSequence('sq-2', 'SQ020')
+    ])
+    search(state, 'SQ010')
+
+    sequencesStore.mutations.UPDATE_SEQUENCE(
+      state,
+      buildSequence('sq-2', 'SQ999')
+    )
+
+    expect(search(state, 'SQ999')).toEqual(['SQ999'])
+  })
+
   test('finds a sequence another user added', () => {
     const state = load([buildSequence('sq-1', 'SQ010')])
 
@@ -874,5 +890,39 @@ describe('Sequences store, search index', () => {
 
     expect(search(state, 'SQ040')).toEqual(['SQ040'])
     expect(search(state, 'SQ010')).toEqual([])
+  })
+})
+
+describe('Sequences store, UPDATE_SEQUENCE', () => {
+  // The list reads the displayed sequences through the reactive state: a
+  // change made to the raw object of the cache does not reach it.
+  test('shows the new name of a sequence another user renamed', () => {
+    const state = reactive({ sequenceSorting: [] })
+    sequencesStore.mutations.SET_SEQUENCES_WITH_TASKS(state, {
+      episodeMap: new Map(),
+      userFilters: {},
+      personMap: new Map(),
+      production: { id: 'p-update', descriptors: [] },
+      sequences: [
+        { id: 'sq-1', name: 'SQ010', data: {}, tasks: [] },
+        { id: 'sq-2', name: 'SQ020', data: {}, tasks: [] }
+      ],
+      taskMap: new Map(),
+      taskTypeMap: new Map(),
+      taskStatusMap: new Map(),
+      loadingKey: 'p-update/all'
+    })
+    const names = computed(() =>
+      state.displayedSequences.map(({ name }) => name)
+    )
+    expect(names.value).toEqual(['SQ010', 'SQ020'])
+
+    sequencesStore.mutations.UPDATE_SEQUENCE(state, {
+      id: 'sq-2',
+      name: 'SQ999',
+      data: {}
+    })
+
+    expect(names.value).toEqual(['SQ010', 'SQ999'])
   })
 })

@@ -1148,6 +1148,12 @@ const mutations = {
   },
 
   [UPDATE_SEQUENCE](state, sequence) {
+    // The map holds raw objects: assigned through it only, the displayed
+    // list would see no change.
+    const displayedSequence = state.displayedSequences.find(
+      ({ id }) => id === sequence.id
+    )
+    if (displayedSequence) Object.assign(displayedSequence, sequence)
     Object.assign(cache.sequenceMap.get(sequence.id), sequence)
     cache.sequenceIndex = buildSequenceIndex(cache.sequences)
   },
