@@ -1,135 +1,122 @@
 <template>
-  <div
-    :class="{
-      modal: true,
-      'is-active': active
-    }"
-  >
-    <div class="modal-background" @click="$emit('cancel')"></div>
+  <base-modal :active="active" :title="title" @cancel="$emit('cancel')">
+    <form @submit.prevent>
+      <h3 class="subtitle">
+        {{ $t('status_automations.entity_title') }}
+      </h3>
+      <combobox
+        :label="$t('status_automations.fields.entity_type')"
+        :options="entityTypeOptions"
+        locale-key-prefix="status_automations.entity_types."
+        @enter="confirmClicked"
+        v-model="form.entityType"
+        v-if="!isEditing"
+      />
+      <span class="entity-type-name" v-else>
+        {{ $t(`status_automations.entity_types.${form.entityType}`) }}
+      </span>
 
-    <div class="modal-content">
-      <div class="box">
-        <h2 class="title" v-if="isEditing">
-          {{ $t('status_automations.edit_title') }}
-        </h2>
-        <h2 class="title" v-else>
-          {{ $t('status_automations.new_status_automation') }}
-        </h2>
+      <h2 class="subtitle">{{ $t('status_automations.in_title') }}</h2>
 
-        <form @submit.prevent>
-          <h3 class="subtitle">
-            {{ $t('status_automations.entity_title') }}
-          </h3>
-          <combobox
-            :label="$t('status_automations.fields.entity_type')"
-            :options="entityTypeOptions"
-            locale-key-prefix="status_automations.entity_types."
-            @enter="confirmClicked"
-            v-model="form.entityType"
-            v-if="!isEditing"
-          />
-          <span class="entity-type-name" v-else>
-            {{ $t(`status_automations.entity_types.${form.entityType}`) }}
-          </span>
+      <div class="flexrow">
+        <combobox-task-type
+          class="flexrow-item"
+          :label="$t('status_automations.fields.in_task_type')"
+          :task-type-list="inTaskTypeList"
+          v-model="form.inTaskTypeId"
+          @enter="confirmClicked"
+        />
 
-          <h2 class="subtitle">{{ $t('status_automations.in_title') }}</h2>
-
-          <div class="flexrow">
-            <combobox-task-type
-              class="flexrow-item"
-              :label="$t('status_automations.fields.in_task_type')"
-              :task-type-list="inTaskTypeList"
-              v-model="form.inTaskTypeId"
-              @enter="confirmClicked"
-            />
-
-            <combobox-status
-              class="flexrow-item"
-              :label="$t('status_automations.fields.in_task_status')"
-              :task-status-list="taskStatusList"
-              v-model="form.inTaskStatusId"
-              @enter="confirmClicked"
-            />
-          </div>
-
-          <h2 class="subtitle">{{ $t('status_automations.out_title') }}</h2>
-
-          <div class="flexrow">
-            <combobox
-              class="flexrow-item margin-fix"
-              :label="$t('status_automations.fields.out_field_type')"
-              :options="fieldTypeOptions"
-              locale-key-prefix="status_automations.field_types."
-              @enter="confirmClicked"
-              v-model="form.outFieldType"
-              v-if="!isEditing && form.entityType === 'asset'"
-            />
-            <span
-              class="flexrow-item"
-              v-if="isEditing && form.outFieldType === 'ready_for'"
-            >
-              {{ $t('status_automations.field_types.ready_for') }}
-            </span>
-
-            <combobox-task-type
-              class="flexrow-item"
-              :label="$t('status_automations.fields.out_task_type')"
-              :task-type-list="outTaskTypeList"
-              :open-top="true"
-              @enter="confirmClicked"
-              v-model="form.outTaskTypeId"
-            />
-
-            <combobox-status
-              class="flexrow-item"
-              :label="$t('status_automations.fields.out_task_status')"
-              :task-status-list="taskStatusList"
-              :open-top="true"
-              @enter="confirmClicked"
-              v-model="form.outTaskStatusId"
-              v-if="form.outFieldType === 'status'"
-            />
-          </div>
-
-          <combobox-boolean
-            class="mt1"
-            :label="$t('status_automations.fields.import_last_revision')"
-            @enter="confirmClicked"
-            v-model="form.importLastRevision"
-          />
-
-          <combobox-boolean
-            :label="$t('main.archived')"
-            @enter="confirmClicked"
-            v-model="form.archived"
-            v-if="isEditing"
-          />
-        </form>
-
-        <modal-footer
-          :error-text="$t('status_automations.create_error')"
-          :is-error="isError"
-          :is-loading="isLoading"
-          @confirm="confirmClicked"
-          @cancel="$emit('cancel')"
+        <combobox-status
+          class="flexrow-item"
+          :label="$t('status_automations.fields.in_task_status')"
+          :task-status-list="taskStatusList"
+          v-model="form.inTaskStatusId"
+          @enter="confirmClicked"
         />
       </div>
-    </div>
-  </div>
+
+      <h2 class="subtitle">{{ $t('status_automations.out_title') }}</h2>
+
+      <div class="flexrow">
+        <combobox
+          class="flexrow-item margin-fix"
+          :label="$t('status_automations.fields.out_field_type')"
+          :options="fieldTypeOptions"
+          locale-key-prefix="status_automations.field_types."
+          @enter="confirmClicked"
+          v-model="form.outFieldType"
+          v-if="!isEditing && form.entityType === 'asset'"
+        />
+        <span
+          class="flexrow-item"
+          v-if="isEditing && form.outFieldType === 'ready_for'"
+        >
+          {{ $t('status_automations.field_types.ready_for') }}
+        </span>
+
+        <combobox-task-type
+          class="flexrow-item"
+          :label="$t('status_automations.fields.out_task_type')"
+          :task-type-list="outTaskTypeList"
+          :open-top="true"
+          @enter="confirmClicked"
+          v-model="form.outTaskTypeId"
+        />
+
+        <combobox-status
+          class="flexrow-item"
+          :label="$t('status_automations.fields.out_task_status')"
+          :task-status-list="taskStatusList"
+          :open-top="true"
+          @enter="confirmClicked"
+          v-model="form.outTaskStatusId"
+          v-if="form.outFieldType === 'status'"
+        />
+      </div>
+
+      <combobox-boolean
+        class="mt1"
+        :label="$t('status_automations.fields.import_last_revision')"
+        @enter="confirmClicked"
+        v-model="form.importLastRevision"
+      />
+
+      <combobox-boolean
+        :label="$t('main.archived')"
+        @enter="confirmClicked"
+        v-model="form.archived"
+        v-if="isEditing"
+      />
+    </form>
+
+    <modal-footer
+      :error-text="$t('status_automations.create_error')"
+      :is-error="isError"
+      :is-loading="isLoading"
+      @confirm="confirmClicked"
+      @cancel="$emit('cancel')"
+    />
+  </base-modal>
 </template>
 
 <script setup>
-import { computed, reactive, toRef, watch } from 'vue'
+import { computed, reactive, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
-import { useModal } from '@/composables/modal'
-
+import BaseModal from '@/components/modals/BaseModal.vue'
+import ModalFooter from '@/components/modals/ModalFooter.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxBoolean from '@/components/widgets/ComboboxBoolean.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
-import ModalFooter from '@/components/modals/ModalFooter.vue'
 
+const { t } = useI18n()
+const store = useStore()
+
+// Props / Emits
+// --------------------------------------------------------------------------
 const props = defineProps({
   active: { type: Boolean, default: false },
   isError: { type: Boolean, default: false },
@@ -139,11 +126,8 @@ const props = defineProps({
 
 const emit = defineEmits(['cancel', 'confirm'])
 
-const store = useStore()
-useModal(toRef(props, 'active'), emit)
-
 // Constants
-
+// --------------------------------------------------------------------------
 const entityTypeOptions = [
   { label: 'asset', value: 'asset' },
   { label: 'shot', value: 'shot' },
@@ -157,7 +141,7 @@ const fieldTypeOptions = [
 ]
 
 // State
-
+// --------------------------------------------------------------------------
 const form = reactive({
   entityType: 'asset',
   outFieldType: 'status',
@@ -172,7 +156,7 @@ const form = reactive({
 })
 
 // Computed
-
+// --------------------------------------------------------------------------
 const assetTaskTypes = computed(() => store.getters.assetTaskTypes)
 const shotTaskTypes = computed(() => store.getters.shotTaskTypes)
 const sequenceTaskTypes = computed(() => store.getters.sequenceTaskTypes)
@@ -201,8 +185,14 @@ const outTaskTypeList = computed(() =>
 
 const isEditing = computed(() => props.statusAutomationToEdit?.id)
 
-// Functions
+const title = computed(() =>
+  isEditing.value
+    ? t('status_automations.edit_title')
+    : t('status_automations.new_status_automation')
+)
 
+// Functions
+// --------------------------------------------------------------------------
 const setTaskTypes = entityType => {
   const entityTaskTypes = taskTypesByEntityType.value[entityType]
   form.inEntityTaskTypes = entityTaskTypes
@@ -215,47 +205,54 @@ const setTaskTypes = entityType => {
   }
 }
 
+const resetForm = () => {
+  if (!props.statusAutomationToEdit) return
+  const entityType = isEditing.value
+    ? props.statusAutomationToEdit.entity_type
+    : 'asset'
+  const entityTaskTypes =
+    taskTypesByEntityType.value[entityType] ?? assetTaskTypes.value
+  Object.assign(form, {
+    entityType,
+    inEntityTaskTypes: entityTaskTypes,
+    outEntityTaskTypes: entityTaskTypes,
+    inTaskTypeId: isEditing.value
+      ? props.statusAutomationToEdit.in_task_type_id
+      : entityTaskTypes[0]?.id,
+    inTaskStatusId: isEditing.value
+      ? props.statusAutomationToEdit.in_task_status_id
+      : taskStatusList.value[0]?.id,
+    outFieldType: isEditing.value
+      ? props.statusAutomationToEdit.out_field_type
+      : 'status',
+    outTaskTypeId: isEditing.value
+      ? props.statusAutomationToEdit.out_task_type_id
+      : entityTaskTypes[1]?.id,
+    outTaskStatusId: isEditing.value
+      ? props.statusAutomationToEdit.out_task_status_id
+      : taskStatusList.value[1]?.id,
+    importLastRevision: isEditing.value
+      ? String(props.statusAutomationToEdit.import_last_revision === true)
+      : 'false',
+    archived: isEditing.value
+      ? String(props.statusAutomationToEdit.archived === true)
+      : 'false'
+  })
+}
+
 const confirmClicked = () => {
   emit('confirm', { ...form })
 }
 
 // Watchers
+// --------------------------------------------------------------------------
+watch(() => props.statusAutomationToEdit, resetForm)
 
+// The page hands the same row back after a canceled edit.
 watch(
-  () => props.statusAutomationToEdit,
-  () => {
-    if (!props.statusAutomationToEdit) return
-    const entityType = isEditing.value
-      ? props.statusAutomationToEdit.entity_type
-      : 'asset'
-    const entityTaskTypes =
-      taskTypesByEntityType.value[entityType] ?? assetTaskTypes.value
-    Object.assign(form, {
-      entityType,
-      inEntityTaskTypes: entityTaskTypes,
-      outEntityTaskTypes: entityTaskTypes,
-      inTaskTypeId: isEditing.value
-        ? props.statusAutomationToEdit.in_task_type_id
-        : entityTaskTypes[0]?.id,
-      inTaskStatusId: isEditing.value
-        ? props.statusAutomationToEdit.in_task_status_id
-        : taskStatusList.value[0]?.id,
-      outFieldType: isEditing.value
-        ? props.statusAutomationToEdit.out_field_type
-        : 'status',
-      outTaskTypeId: isEditing.value
-        ? props.statusAutomationToEdit.out_task_type_id
-        : entityTaskTypes[1]?.id,
-      outTaskStatusId: isEditing.value
-        ? props.statusAutomationToEdit.out_task_status_id
-        : taskStatusList.value[1]?.id,
-      importLastRevision: isEditing.value
-        ? String(props.statusAutomationToEdit.import_last_revision === true)
-        : 'false',
-      archived: isEditing.value
-        ? String(props.statusAutomationToEdit.archived === true)
-        : 'false'
-    })
+  () => props.active,
+  active => {
+    if (active) resetForm()
   }
 )
 
