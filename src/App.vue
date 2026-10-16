@@ -434,7 +434,9 @@ const socketEvents = {
 
   // Zou does not send again the events emitted while the socket was down.
   connect: () => {
-    store.dispatch('refreshProcessingPreviewFiles').catch(console.error)
+    store
+      .dispatch('refreshProcessingPreviewFiles')
+      .catch(errors.logRequestFailure)
   },
 
   'task:delete': eventData => {
@@ -612,7 +614,7 @@ const socketEvents = {
       nextTick(() => {
         store
           .dispatch('loadTask', { taskId: eventData.task_id })
-          .catch(console.error)
+          .catch(errors.logRequestFailure)
       })
     }
   },

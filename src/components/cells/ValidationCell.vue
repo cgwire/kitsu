@@ -335,10 +335,22 @@ defineExpose({
 }
 
 .disabled {
-  background-color: rgba(0, 0, 0, 0.15) !important;
-
   .tag {
     opacity: 0;
+  }
+
+  &:not(.datatable-row-header) {
+    background-color: rgba(0, 0, 0, 0.15) !important;
+  }
+
+  // A stuck cell keeps the opaque background of its row, which covers the
+  // columns scrolled under it: the gray goes over it. Important against the
+  // background shorthand of the hovered row.
+  &.datatable-row-header {
+    background-image: linear-gradient(
+      rgba(0, 0, 0, 0.15),
+      rgba(0, 0, 0, 0.15)
+    ) !important;
   }
 }
 

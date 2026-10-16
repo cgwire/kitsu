@@ -117,9 +117,7 @@
                 "
                 type="assets"
                 is-stick
-                @show-header-menu="
-                  event => showHeaderMenu(columnId, columnIndexInGrid, event)
-                "
+                @show-header-menu="event => showHeaderMenu(columnId, event)"
                 v-for="(
                   columnId, columnIndexInGrid
                 ) in stickedDisplayedValidationColumns"
@@ -230,14 +228,8 @@
                 :column-id="columnId"
                 :validation-style="getValidationStyle(columnId)"
                 type="assets"
-                @show-header-menu="
-                  event => {
-                    showHeaderMenu(columnId, columnIndexInGrid, event)
-                  }
-                "
-                v-for="(
-                  columnId, columnIndexInGrid
-                ) in nonStickedDisplayedValidationColumns"
+                @show-header-menu="event => showHeaderMenu(columnId, event)"
+                v-for="columnId in nonStickedDisplayedValidationColumns"
               />
             </template>
 
@@ -413,6 +405,8 @@
                   :minimized="hiddenColumns[columnId]"
                   :is-static="true"
                   :is-assignees="displaySettings.showAssignations"
+                  :selectable="isSelectable(asset, columnId)"
+                  :disabled="!isSelectable(asset, columnId)"
                   :left="
                     offsets['validation-' + j]
                       ? `${offsets['validation-' + j]}px`
@@ -781,20 +775,33 @@ const inWorkflowFilledColumns = computed(() =>
   }, {})
 )
 
+// The display settings can hide the library and, in a TV show, the assets
+// of other episodes cast in the current one.
+const isAssetShown = asset => {
+  const { showSharedAssets, showLinkedAssets } = props.displaySettings
+  return (
+    (showSharedAssets || !asset.shared) &&
+    (!isTVShow.value ||
+      showLinkedAssets ||
+      ['all', asset.episode_id || 'main'].includes(currentEpisode.value?.id))
+  )
+}
+
+// Selectable if the cell already holds a task or if the task type is
+// included in the workflow. Cells with existing tasks stay actionable
+// even when a workflow change removed their task type, so they can
+// still be selected and managed instead of freezing.
+const isSelectable = (asset, columnId) => {
+  if (asset.shared) return false
+  if (taskMap.value.get(asset.validations?.get(columnId))) return true
+  return getAllowedTaskTypeIds(asset.asset_type_id).includes(columnId)
+}
+
 // Filter the displayed assets by the display settings.
 const filteredDisplayedAssets = computed(() => {
   const { showSharedAssets, showLinkedAssets } = props.displaySettings
   if (showSharedAssets && showLinkedAssets) return props.displayedAssets
-  const episodeId = currentEpisode.value?.id
-  return props.displayedAssets.map(typeList =>
-    typeList.filter(
-      asset =>
-        (showSharedAssets || !asset.shared) &&
-        (!isTVShow.value ||
-          showLinkedAssets ||
-          ['all', asset.episode_id || 'main'].includes(episodeId))
-    )
-  )
+  return props.displayedAssets.map(typeList => typeList.filter(isAssetShown))
 })
 
 const {
@@ -845,7 +852,9 @@ const {
   type: 'asset',
   props,
   emit,
-  entities: computed(() => props.displayedAssets),
+  entities: filteredDisplayedAssets,
+  isEntityShown: isAssetShown,
+  isCellSelectable: isSelectable,
   filledColumns: inWorkflowFilledColumns,
   metadataDescriptors: assetMetadataDescriptors,
   metadataDisplayHeaders: {
@@ -875,17 +884,10 @@ const assetEpisodes = (asset, full) => {
   return `${mainEpisodeName}, ${listedNames}`
 }
 
-// Selectable if the cell already holds a task or if the task type is
-// included in the workflow. Cells with existing tasks stay actionable
-// even when a workflow change removed their task type, so they can
-// still be selected and managed instead of freezing.
-const isSelectable = (asset, columnId) => {
-  if (asset.shared) return false
-  if (taskMap.value.get(asset.validations?.get(columnId))) return true
-  return getAllowedTaskTypeIds(asset.asset_type_id).includes(columnId)
-}
-
-const getIndex = (i, k) => getEntityLineNumber(props.displayedAssets, i, k)
+// Rows are numbered as rendered, hidden assets left out: the task of the url
+// is looked up in the same rows.
+const getIndex = (i, k) =>
+  getEntityLineNumber(filteredDisplayedAssets.value, i, k)
 
 const isSelected = (indexInGroup, groupIndex, columnIndex) =>
   assetSelectionGrid.value.has(
