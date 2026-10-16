@@ -2,6 +2,7 @@
 
 import { vi } from 'vitest'
 import { computed, reactive } from 'vue'
+import { createStore } from 'vuex'
 
 // Importing the sequences module transitively pulls in the root store
 // (lib/models → timezone → @/store); stub it so no Vuex store is built.
@@ -924,5 +925,25 @@ describe('Sequences store, UPDATE_SEQUENCE', () => {
     })
 
     expect(names.value).toEqual(['SQ010', 'SQ999'])
+  })
+})
+
+describe('Sequences store, production switch', () => {
+  // The back link of a sequence page carries this search: the lists of
+  // another production must not inherit it.
+  test('forgets the search typed in the previous production', () => {
+    const store = createStore({
+      modules: {
+        sequences: {
+          state: { sequenceSearchText: 'SQ01' },
+          getters: sequencesStore.getters,
+          mutations: sequencesStore.mutations
+        }
+      }
+    })
+
+    store.commit('SET_CURRENT_PRODUCTION', 'production-2')
+
+    expect(store.getters.sequenceSearchText).toBe('')
   })
 })

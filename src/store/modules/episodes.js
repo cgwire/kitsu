@@ -36,6 +36,7 @@ import {
   REMOVE_EPISODE_SEARCH,
   REMOVE_SELECTED_TASK,
   SET_CURRENT_EPISODE,
+  SET_CURRENT_PRODUCTION,
   SET_EPISODE_LIST_SCROLL_POSITION,
   SET_EPISODE_SELECTION,
   SET_EPISODE_SEARCH,
@@ -601,6 +602,10 @@ const mutations = {
         state.currentEpisode = cache.episodeMap.get(episodeId)
       }
     }
+  },
+
+  [SET_CURRENT_PRODUCTION](state) {
+    state.episodeSearchText = ''
   },
 
   [SET_EPISODES_WITH_TASKS](

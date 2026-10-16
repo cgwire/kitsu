@@ -719,7 +719,7 @@ const mutations = {
   },
 
   [SET_CURRENT_PRODUCTION](state, production) {
-    state.shotSearchText = ''
+    state.sequenceSearchText = ''
   },
 
   [SET_CURRENT_SEQUENCE](state, sequenceId) {
