@@ -2,6 +2,7 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
 import { createStore } from 'vuex'
 
+import TwoFactorAuthentication from '@/components/widgets/TwoFactorAuthentication.vue'
 import TwoFactorAuthenticationSetup from '@/components/widgets/TwoFactorAuthenticationSetup.vue'
 
 const i18n = createI18n({
@@ -184,6 +185,83 @@ describe('widgets/TwoFactorAuthenticationSetup', () => {
       await button.trigger('click')
 
       expect(request).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  // Zou checks a 2FA code before it removes a key.
+  describe('FIDO key removal', () => {
+    const user = {
+      fido_enabled: true,
+      fido_devices: ['Yubikey', 'Phone'],
+      totp_enabled: true,
+      preferred_two_factor_authentication: 'totp'
+    }
+
+    const findTrash = (wrapper, device) =>
+      wrapper
+        .findAll('ul li')
+        .find(item => item.text() === device)
+        .find('.action-icon')
+
+    const findCodeCheck = wrapper => wrapper.findComponent(TwoFactorAuthentication)
+
+    it('removes a key with the 2FA code typed for it', async () => {
+      const unregisterFIDO = vi.fn()
+      const wrapper = mountSetup(user, { unregisterFIDO })
+
+      await findTrash(wrapper, 'Yubikey').trigger('click')
+      await findTrash(wrapper, 'Yubikey').trigger('click')
+
+      expect(unregisterFIDO).not.toHaveBeenCalled()
+      expect(findCodeCheck(wrapper).props('textValidateButton')).toBe(
+        label('fido.button_unregister')
+      )
+
+      findCodeCheck(wrapper).vm.$emit('validate', { totp: '123456' })
+      await flushPromises()
+
+      expect(unregisterFIDO).toHaveBeenCalledTimes(1)
+      expect(unregisterFIDO.mock.calls[0][1]).toEqual({
+        deviceName: 'Yubikey',
+        twoFactorPayload: { totp: '123456' }
+      })
+      expect(findCodeCheck(wrapper).exists()).toBe(false)
+    })
+
+    it('disables the other actions while the code is asked', async () => {
+      const unregisterFIDO = vi.fn()
+      const wrapper = mountSetup(user, { unregisterFIDO })
+
+      await findTrash(wrapper, 'Yubikey').trigger('click')
+      await findTrash(wrapper, 'Phone').trigger('click')
+
+      expect(actionStates(wrapper)).toEqual([
+        [label('totp.button_disable'), true],
+        [label('email_otp.button_enable'), true],
+        [label('fido.button_register'), true],
+        [label('recovery_codes.button_new'), true]
+      ])
+      const phone = findTrash(wrapper, 'Phone')
+      expect(phone.attributes('aria-disabled')).toBe('true')
+      expect(phone.attributes('tabindex')).toBe('-1')
+
+      findCodeCheck(wrapper).vm.$emit('validate', { totp: '123456' })
+      await flushPromises()
+
+      expect(unregisterFIDO.mock.calls[0][1].deviceName).toBe('Yubikey')
+    })
+
+    it('keeps the key when the removal is canceled', async () => {
+      const unregisterFIDO = vi.fn()
+      const wrapper = mountSetup(user, { unregisterFIDO })
+      await findTrash(wrapper, 'Yubikey').trigger('click')
+
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+      await flushPromises()
+
+      expect(findCodeCheck(wrapper).exists()).toBe(false)
+      expect(findTrash(wrapper, 'Yubikey').attributes('tabindex')).toBe('0')
+      expect(unregisterFIDO).not.toHaveBeenCalled()
     })
   })
 })

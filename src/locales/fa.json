@@ -1313,6 +1313,7 @@
           "button_register": "دستگاه FIDO جدید را ثبت کنید",
           "error_register": "هنگام ثبت نام دستگاه FIDO خطایی روی داد.",
           "error_unregister": "هنگام لغو ثبت دستگاه FIDO خطایی روی داد.",
+          "button_unregister": "اعتبارسنجی و لغو ثبت دستگاه FIDO",
           "description": "از یک کلید سخت‌افزاری (YubiKey) یا یک احرازکننده پلتفرم (Touch ID، Windows Hello) استفاده کنید.",
           "name": "کلید امنیتی"
         },

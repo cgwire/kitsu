@@ -391,13 +391,28 @@
           class="action-icon pull-right"
           :size="15"
           role="button"
-          tabindex="0"
+          :aria-disabled="twoFAButtonsDisabled"
+          :tabindex="twoFAButtonsDisabled ? -1 : 0"
           @click="unregisterFIDORequested(device)"
           @keydown.enter.prevent="unregisterFIDORequested(device)"
           @keydown.space.prevent="unregisterFIDORequested(device)"
         />
       </li>
     </ul>
+
+    <two-factor-authentication
+      v-if="twoFA.FIDOUnregisterDeviceName"
+      :preferred-two-fa="user.preferred_two_factor_authentication"
+      :two-fas-enabled="twoFAsEnabled"
+      :is-loading="twoFA.loadingAction === 'unregisterFIDO'"
+      :email="user.email"
+      :text-validate-button="textValidateTwoFA"
+      :is-disable-button="validateTwoFAIsDisable"
+      :is-wrong-otp="twoFA.error.isWrongOTP"
+      :is-profile="true"
+      @validate="nextWithPayload"
+      @changed-two-fa="changedTwoFA"
+    />
 
     <p
       class="show-message-2fa error"
@@ -450,6 +465,7 @@ const twoFA = reactive({
   emailOTPNeedTwoFA: false,
   FIDONewDeviceName: '',
   FIDOPreRegistered: false,
+  FIDOUnregisterDeviceName: '',
   newRecoveryCodesNeedTwoFA: false,
   validationOTP: '',
   error: {
@@ -489,6 +505,7 @@ const twoFAButtonsDisabled = computed(
     twoFA.emailOTPPreEnabled ||
     twoFA.emailOTPNeedTwoFA ||
     twoFA.FIDOPreRegistered ||
+    twoFA.FIDOUnregisterDeviceName !== '' ||
     twoFA.newRecoveryCodesNeedTwoFA
 )
 
@@ -510,12 +527,17 @@ const textValidateTwoFA = computed(() => {
     )
   } else if (twoFA.newRecoveryCodesNeedTwoFA) {
     return t('profile.two_factor_authentication.recovery_codes.button_validate')
+  } else if (twoFA.FIDOUnregisterDeviceName) {
+    return t('profile.two_factor_authentication.fido.button_unregister')
   }
   return ''
 })
 
 const validateTwoFAIsDisable = computed(
-  () => twoFA.TOTPNeedTwoFA || twoFA.emailOTPNeedTwoFA
+  () =>
+    twoFA.TOTPNeedTwoFA ||
+    twoFA.emailOTPNeedTwoFA ||
+    twoFA.FIDOUnregisterDeviceName !== ''
 )
 
 const placeholderInputEnableOTP = computed(() => {
@@ -705,11 +727,21 @@ const registerFIDORequested = () => {
 }
 
 const unregisterFIDORequested = deviceName => {
+  if (twoFAButtonsDisabled.value) return
+  removeTwoFactorErrors()
+  twoFA.FIDOUnregisterDeviceName = deviceName
+}
+
+const unregisterFIDOConfirmed = payload => {
   removeTwoFactorErrors()
   twoFA.loadingAction = 'unregisterFIDO'
   store
-    .dispatch('unregisterFIDO', { deviceName })
+    .dispatch('unregisterFIDO', {
+      deviceName: twoFA.FIDOUnregisterDeviceName,
+      twoFactorPayload: payload
+    })
     .then(() => {
+      twoFA.FIDOUnregisterDeviceName = ''
       twoFA.validationOTP = ''
       twoFA.error.isWrongOTP = false
     })
@@ -758,6 +790,7 @@ const nextWithPayload = payload => {
   if (twoFA.TOTPNeedTwoFA) disableTOTPRequested(payload)
   else if (twoFA.emailOTPNeedTwoFA) disableEmailOTPRequested(payload)
   else if (twoFA.newRecoveryCodesNeedTwoFA) newRecoveryCodesRequested(payload)
+  else if (twoFA.FIDOUnregisterDeviceName) unregisterFIDOConfirmed(payload)
 }
 
 const copyRecoveryCodesToClipboard = () => {
@@ -783,6 +816,7 @@ const cancelCurrentTwoFactorAuthAction = () => {
   twoFA.newRecoveryCodesNeedTwoFA = false
   twoFA.FIDOPreRegistered = false
   twoFA.FIDONewDeviceName = ''
+  twoFA.FIDOUnregisterDeviceName = ''
   twoFA.loadingAction = null
   twoFA.validationOTP = ''
   twoFA.error.isWrongOTP = false
@@ -876,6 +910,11 @@ onUnmounted(() => {
 
   &:hover {
     color: var(--text);
+  }
+
+  &[aria-disabled='true'] {
+    opacity: 0.5;
+    pointer-events: none;
   }
 }
 

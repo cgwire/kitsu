@@ -1313,6 +1313,7 @@
           "button_register": "Neues FIDO-Gerät registrieren",
           "error_register": "Beim Registrieren des FIDO-Geräts ist ein Fehler aufgetreten.",
           "error_unregister": "Bei der Aufhebung der Registrierung des FIDO-Geräts ist ein Fehler aufgetreten.",
+          "button_unregister": "Validieren und Registrierung des FIDO-Geräts aufheben",
           "description": "Verwenden Sie einen Hardware-Schlüssel (YubiKey) oder einen Plattform-Authentifikator (Touch ID, Windows Hello).",
           "name": "Sicherheitsschlüssel"
         },

@@ -1311,6 +1311,7 @@
           "button_register": "새 FIDO 기기 등록",
           "error_register": "FIDO 기기 등록 중 오류가 발생했습니다.",
           "error_unregister": "FIDO 등록 취소 중 오류가 발생했습니다.",
+          "button_unregister": "확인하고 FIDO 기기 등록 취소하기",
           "description": "하드웨어 키(YubiKey) 또는 플랫폼 인증기(Touch ID, Windows Hello)를 사용하세요.",
           "name": "보안 키"
         },

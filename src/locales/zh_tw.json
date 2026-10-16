@@ -1313,6 +1313,7 @@
           "button_register": "註冊新的 FIDO 裝置",
           "error_register": "註冊 FIDO 裝置時發生錯誤。",
           "error_unregister": "取消註冊 FIDO 裝置時發生錯誤。",
+          "button_unregister": "驗證並取消註冊 FIDO 裝置",
           "description": "使用硬體金鑰（YubiKey）或平台驗證器（Touch ID、Windows Hello）。",
           "name": "安全金鑰"
         },

@@ -210,6 +210,18 @@ describe('store/api endpoints', () => {
     })
   })
 
+  // Zou checks a 2FA code before it removes a key.
+  describe('people unregisterFIDO', () => {
+    test('sends the 2FA code with the device name', () => {
+      peopleApi.unregisterFIDO('Yubikey', { totp: '123456' })
+
+      expect(client.pdel).toHaveBeenCalledWith('/api/auth/fido', {
+        totp: '123456',
+        device_name: 'Yubikey'
+      })
+    })
+  })
+
   describe('people setTimeSpent', () => {
     const path =
       '/api/actions/tasks/task-1/time-spents/2026-10-06/persons/person-1'

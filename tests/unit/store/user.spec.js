@@ -8,7 +8,8 @@ vi.mock('@/store/api/people', () => ({
   default: {
     loadDone: vi.fn(),
     loadTasksToCheck: vi.fn(),
-    loadTimeSpents: vi.fn()
+    loadTimeSpents: vi.fn(),
+    unregisterFIDO: vi.fn()
   }
 }))
 
@@ -346,6 +347,26 @@ describe('User store', () => {
 
         expect(doneTasks).toEqual(tasks)
         expect(commit).toHaveBeenCalledWith('USER_LOAD_DONE_TASKS_END', tasks)
+      })
+    })
+
+    describe('unregisterFIDO', () => {
+      test('sends the 2FA code, then drops the device', async () => {
+        peopleApi.unregisterFIDO.mockResolvedValue({ success: true })
+        const commit = vi.fn()
+
+        await store.actions.unregisterFIDO(
+          { commit },
+          { deviceName: 'Yubikey', twoFactorPayload: { totp: '123456' } }
+        )
+
+        expect(peopleApi.unregisterFIDO).toHaveBeenCalledWith('Yubikey', {
+          totp: '123456'
+        })
+        expect(commit).toHaveBeenCalledWith(
+          'USER_UNREGISTER_FIDO_SUCCESS',
+          'Yubikey'
+        )
       })
     })
 

@@ -1313,6 +1313,7 @@
           "button_register": "Registre um novo dispositivo FIDO",
           "error_register": "Ocorreu um erro ao registrar o dispositivo FIDO.",
           "error_unregister": "Ocorreu um erro ao cancelar o registro do dispositivo FIDO.",
+          "button_unregister": "Validar e cancelar o registro do dispositivo FIDO",
           "description": "Use uma chave de hardware (YubiKey) ou um autenticador de plataforma (Touch ID, Windows Hello).",
           "name": "Chave de segurança"
         },

@@ -1317,7 +1317,8 @@
           "registered_devices_title": "Appareils FIDO enregistrés",
           "button_register": "Enregistrer un nouvel appareil FIDO",
           "error_register": "Une erreur est survenue en enregistrant l'appareil FIDO.",
-          "error_unregister": "Une erreur est survenue en retirant l'appareil FIDO."
+          "error_unregister": "Une erreur est survenue en retirant l'appareil FIDO.",
+          "button_unregister": "Valider et retirer l'appareil FIDO"
         },
         "enabled": "Authentification à deux facteurs activée",
         "mandatory": "Votre organisation requiert une authentification à deux facteurs. Veuillez activer au moins une méthode pour continuer.",

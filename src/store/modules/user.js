@@ -327,8 +327,11 @@ const actions = {
       .then(body => coercePublicKeyFromJSON(body))
   },
 
-  async unregisterFIDO({ commit }, { deviceName }) {
-    await peopleApi.unregisterFIDO(deviceName)
+  async unregisterFIDO({ commit }, { deviceName, twoFactorPayload }) {
+    await peopleApi.unregisterFIDO(
+      deviceName,
+      coerceTwoFactorPayload(twoFactorPayload)
+    )
     commit(USER_UNREGISTER_FIDO_SUCCESS, deviceName)
   },
 

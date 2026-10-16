@@ -1294,6 +1294,7 @@
           "device_name": "FIDO eszköz neve",
           "error_register": "Hiba történt a FIDO eszköz regisztrálásakor.",
           "error_unregister": "Hiba történt a FIDO eszköz regisztrációjának törlésekor.",
+          "button_unregister": "Érvényesítés és a FIDO eszköz regisztrációjának törlése",
           "name": "Biztonsági kulcs",
           "registered_devices_title": "Regisztrált FIDO eszközök:"
         },
