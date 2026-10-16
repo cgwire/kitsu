@@ -237,7 +237,12 @@
             controls
             loop
             muted
-            v-if="isComparing && isMovieComparison"
+            v-if="
+              isComparing &&
+              isMovieComparison &&
+              !isCurrentPreviewMovie &&
+              !isCurrentPreviewFile
+            "
           />
           <span
             class="picture-preview"

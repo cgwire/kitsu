@@ -38,6 +38,22 @@ const entity = {
   preview_file_extension: 'blend'
 }
 
+// A shot with a preview for two task types: Layout sorts first, so it is
+// the one compared, and it is a movie.
+const comparedEntity = (id, extension = 'mp4') => ({
+  id,
+  preview_file_id: `${id}-anim`,
+  preview_file_extension: extension,
+  preview_files: {
+    'tt-anim': [{ id: `${id}-anim`, revision: 1, extension }],
+    'tt-layout': [{ id: `${id}-layout`, revision: 1, extension: 'mp4' }]
+  }
+})
+const comparedTaskTypeMap = new Map([
+  ['tt-anim', { id: 'tt-anim', name: 'Animation' }],
+  ['tt-layout', { id: 'tt-layout', name: 'Layout' }]
+])
+
 const withMethods = (names, values = {}) => ({
   template: '<div />',
   methods: {
@@ -367,21 +383,9 @@ describe('PlaylistPlayer.vue', () => {
   // downloading them, and loaded others on an HD switch or in the next
   // playlist, hidden.
   it('gives the comparison viewer no movie while the comparison is closed', async () => {
-    const comparedEntity = id => ({
-      id,
-      preview_file_id: `${id}-anim`,
-      preview_file_extension: 'mp4',
-      preview_files: {
-        'tt-anim': [{ id: `${id}-anim`, revision: 1, extension: 'mp4' }],
-        'tt-layout': [{ id: `${id}-layout`, revision: 1, extension: 'mp4' }]
-      }
-    })
     wrapper = mountPlayer({
       entities: [comparedEntity('shot-1'), comparedEntity('shot-2')],
-      taskTypeMap: new Map([
-        ['tt-anim', { id: 'tt-anim', name: 'Animation' }],
-        ['tt-layout', { id: 'tt-layout', name: 'Layout' }]
-      ])
+      taskTypeMap: comparedTaskTypeMap
     })
     await flushPromises()
     const comparisonViewer = wrapper.findComponent({ ref: 'raw-player-comparison' })
@@ -398,6 +402,53 @@ describe('PlaylistPlayer.vue', () => {
     await wrapper.setProps({ entities: [comparedEntity('shot-3')] })
     await flushPromises()
     expect(comparisonViewer.props('entities')).toEqual([])
+  })
+
+  describe('comparison movie of a picture', () => {
+    const openComparison = async entities => {
+      wrapper = mountPlayer({ entities, taskTypeMap: comparedTaskTypeMap })
+      await flushPromises()
+      wrapper
+        .findComponent({ name: 'PlayerComparisonBar' })
+        .vm.$emit('compare-clicked')
+      await flushPromises()
+      return wrapper.find({ ref: 'picture-video-player-comparison' })
+    }
+
+    it('plays in its video next to a picture', async () => {
+      const video = await openComparison([comparedEntity('shot-1', 'png')])
+
+      expect(video.attributes('src')).toBe(
+        '/api/movies/originals/preview-files/shot-1-layout.mp4'
+      )
+    })
+
+    // Next to a movie, the comparison viewer plays the compared movie: this
+    // video also loaded its original, hidden, on every entity.
+    it('is not loaded next to a movie', async () => {
+      const video = await openComparison([comparedEntity('shot-1')])
+
+      expect(video.exists()).toBe(false)
+    })
+
+    // The comparison stays open on a file no viewer shows, and so does
+    // nothing of it.
+    it('is not loaded next to a file', async () => {
+      await openComparison([
+        comparedEntity('shot-1'),
+        comparedEntity('shot-2', 'blend')
+      ])
+
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(button => button.attributes('title') === 'playlists.actions.next_shot')
+        .vm.$emit('click')
+      await flushPromises()
+
+      expect(
+        wrapper.find({ ref: 'picture-video-player-comparison' }).exists()
+      ).toBe(false)
+    })
   })
 
   // The player lays itself out, or turns the pencil back on, a little after
