@@ -3,6 +3,8 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import { createStore } from 'vuex'
 import { describe, expect, it, vi } from 'vitest'
 
+import { isArmed, pressOn, release } from '../fixtures/sortable'
+
 // Shows the interpolated values next to the key.
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -51,7 +53,11 @@ const router = createRouter({
   routes: [{ path: '/settings', component: { template: '<div />' } }]
 })
 
-const mountComponent = async (productionType = 'short', scheduleItems = []) => {
+const mountComponent = async (
+  productionType = 'short',
+  scheduleItems = [],
+  stubs = { draggable: DraggableStub }
+) => {
   const currentProduction = {
     id: 'production-1',
     production_type: productionType,
@@ -84,7 +90,7 @@ const mountComponent = async (productionType = 'short', scheduleItems = []) => {
     global: {
       plugins: [store, router],
       mocks: { $t: key => key },
-      stubs: { draggable: DraggableStub }
+      stubs
     }
   })
   await flushPromises()
@@ -321,5 +327,24 @@ describe('ProductionTaskTypes', () => {
       help('productions.video.bitrate_max {"value":40}'),
       help('productions.video.task_type_ld_bitrate_max')
     ])
+  })
+
+  // A held Remove button must not arm a drag: the list reloads after a
+  // removal, and rows shifting before the release crashed vuedraggable
+  // (see productionsettings.spec.js).
+  it('drags a row from its grip but not from its Remove button', async () => {
+    const { wrapper } = await mountComponent('short', [], {
+      draggable: false,
+      ProductionTaskType: false
+    })
+    const [row] = wrapper.findAll('tr.task-type')
+
+    pressOn(row.find('td.grab').element)
+    expect(isArmed(row)).toBe(true)
+    release()
+
+    pressOn(row.find('td.remove button').element)
+    expect(isArmed(row)).toBe(false)
+    release()
   })
 })

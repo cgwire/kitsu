@@ -3,6 +3,8 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import { createStore } from 'vuex'
 import { describe, expect, it, vi } from 'vitest'
 
+import { isArmed, pressOn, release } from '../fixtures/sortable'
+
 // Shows the interpolated values next to the key.
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -35,7 +37,11 @@ const router = createRouter({
 
 // The template task type carries its own bitrates, defaultBitrates are the
 // ones of the template.
-const mountSettings = async ({ defaultBitrates = {}, own = {} } = {}) => {
+const mountSettings = async ({
+  defaultBitrates = {},
+  own = {},
+  stubs = { draggable: DraggableStub }
+} = {}) => {
   const store = createStore({
     getters: {
       // An instance whose MOVIE_HIGHDEF_BITRATE is above the usual 28.
@@ -56,7 +62,7 @@ const mountSettings = async ({ defaultBitrates = {}, own = {} } = {}) => {
     global: {
       plugins: [store, router],
       mocks: { $t: key => key },
-      stubs: { draggable: DraggableStub }
+      stubs
     }
   })
 }
@@ -175,5 +181,21 @@ describe('TaskTypeSettings', () => {
     )
 
     expect(ld.attributes('placeholder')).toBe('3')
+  })
+
+  // A held Remove button must not arm a drag: the list reloads after a
+  // removal, and rows shifting before the release crashed vuedraggable
+  // (see productionsettings.spec.js).
+  it('drags a row from its grip but not from its Remove button', async () => {
+    const wrapper = await mountSettings({ stubs: { draggable: false } })
+    const [row] = wrapper.findAll('tr.task-type')
+
+    pressOn(row.find('td.grab').element)
+    expect(isArmed(row)).toBe(true)
+    release()
+
+    pressOn(row.find('td.remove button').element)
+    expect(isArmed(row)).toBe(false)
+    release()
   })
 })

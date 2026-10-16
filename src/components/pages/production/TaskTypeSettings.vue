@@ -44,9 +44,13 @@
               <th></th>
             </tr>
           </thead>
+          <!-- A held button must not arm a drag: a reload that shifted the
+               rows before the release made vuedraggable throw on the move. -->
           <draggable
             class="datatable-body"
+            filter="button"
             item-key="id"
+            :prevent-on-filter="false"
             tag="tbody"
             v-model="draggableList"
             @end="onReorder"

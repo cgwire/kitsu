@@ -1,7 +1,14 @@
-import { shallowMount } from '@vue/test-utils'
+import { flushPromises, shallowMount } from '@vue/test-utils'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { createStore } from 'vuex'
 import { describe, expect, it, vi } from 'vitest'
+
+import {
+  isArmed,
+  pressOn,
+  recordListenerErrors,
+  release
+} from '../fixtures/sortable'
 
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }))
@@ -92,5 +99,76 @@ describe('ProductionSettings — tab from the URL', () => {
   it('ignores an unknown tab', async () => {
     const wrapper = await mountWithAssetTypes([], '/settings?tab=foo')
     expect(activeTab(wrapper)).toBe(0)
+  })
+})
+
+const taskStatuses = ['Todo', 'WIP', 'WFA', 'Retake', 'Done'].map(
+  (name, index) => ({ id: name.toLowerCase(), name, priority: index + 1 })
+)
+
+// Mounts the real vuedraggable, so that SortableJS handles the rows.
+const mountWithTaskStatuses = async taskStatusIds => {
+  const store = createStore({
+    state: { taskStatusIds },
+    getters: {
+      assetTypes: () => [],
+      currentProduction: state => ({
+        id: 'prod-1',
+        name: 'Test',
+        asset_types: [],
+        task_statuses: state.taskStatusIds
+      }),
+      isCurrentUserProductionManager: () => true,
+      productionAssetTypes: () => [],
+      productionTaskStatuses: state =>
+        taskStatuses.filter(status => state.taskStatusIds.includes(status.id)),
+      taskStatus: () => taskStatuses
+    },
+    mutations: {
+      setTaskStatusIds: (state, ids) => {
+        state.taskStatusIds = ids
+      }
+    }
+  })
+  store.dispatch = vi.fn()
+  await router.push('/settings')
+  await router.isReady()
+  const wrapper = shallowMount(ProductionSettings, {
+    global: {
+      plugins: [store, router],
+      mocks: { $t: key => key },
+      stubs: { draggable: false, SettingsLayout: false }
+    }
+  })
+  return { store, wrapper }
+}
+
+describe('ProductionSettings task status tab', () => {
+  // Regression: quick removals made a reload put a removed status back while
+  // the next Remove button was held. On the release, Sortable reported the
+  // shifted row as moved, vuedraggable threw, and no drag worked afterwards.
+  it('keeps the rows draggable when they shift under a held Remove button', async () => {
+    const { store, wrapper } = await mountWithTaskStatuses([
+      'todo',
+      'wip',
+      'retake',
+      'done'
+    ])
+    const rows = () => wrapper.findAll('tr.task-status')
+    const names = () => rows().map(row => row.findAll('td')[1].text())
+
+    const errors = await recordListenerErrors(async () => {
+      pressOn(rows()[2].find('button').element)
+      store.commit('setTaskStatusIds', ['todo', 'wip', 'wfa', 'retake', 'done'])
+      await flushPromises()
+      expect(names()).toEqual(['Todo', 'WIP', 'WFA', 'Retake', 'Done'])
+      release()
+    })
+
+    expect(errors).toEqual([])
+    expect(names()).toEqual(['Todo', 'WIP', 'WFA', 'Retake', 'Done'])
+    pressOn(rows()[0].find('td.grab').element)
+    expect(isArmed(rows()[0])).toBe(true)
+    release()
   })
 })
