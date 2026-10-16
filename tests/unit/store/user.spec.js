@@ -24,6 +24,7 @@ describe('User store', () => {
         plugins: [
           { plugin_id: 'vfx_files', frontend_task_enabled: true, frontend_project_enabled: false },
           { plugin_id: 'project_only', frontend_task_enabled: false, frontend_project_enabled: true },
+          { plugin_id: 'admin_project', frontend_project_admin_enabled: true },
           { plugin_id: 'disabled', frontend_task_enabled: false, frontend_project_enabled: false }
         ]
       }
@@ -33,6 +34,12 @@ describe('User store', () => {
       ])
       expect(store.getters.projectPlugins(state).map(plugin => plugin.plugin_id)).toEqual([
         'project_only'
+      ])
+      expect(store.getters.projectPlugins(state, { isCurrentUserManager: false }).map(plugin => plugin.plugin_id)).toEqual([
+        'project_only'
+      ])
+      expect(store.getters.projectPlugins(state, { isCurrentUserManager: true }).map(plugin => plugin.plugin_id)).toEqual([
+        'project_only', 'admin_project'
       ])
     })
 
