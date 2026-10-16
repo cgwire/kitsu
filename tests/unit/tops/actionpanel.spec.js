@@ -45,7 +45,8 @@ const mountPanel = async (
   {
     path = '/productions/production-1/concepts',
     role = 'manager',
-    tasks = []
+    tasks = [],
+    validations = 0
   } = {}
 ) => {
   const router = createRouter({
@@ -80,6 +81,8 @@ const mountPanel = async (
     state: {
       // A concept selected alone comes with its task.
       nbSelectedTasks: concepts.length === 1 ? 1 : tasks.length,
+      // Empty cells: the cells of an entity list without a task.
+      nbSelectedValidations: validations,
       selectedConcepts: toSelection(concepts),
       selectedTasks: toSelection(tasks)
     },
@@ -94,7 +97,7 @@ const mountPanel = async (
       isCurrentUserClient: () => false,
       isShowAssignations: () => true,
       nbSelectedTasks: state => state.nbSelectedTasks,
-      nbSelectedValidations: () => 0,
+      nbSelectedValidations: state => state.nbSelectedValidations,
       productionMap: () => new Map(),
       selectedAssets: () => new Map(),
       selectedConcepts: state => state.selectedConcepts,
@@ -404,6 +407,20 @@ describe('ActionPanel, opened on a task selection', () => {
     ).toEqual(['tasks.change_priority'])
   })
 
+  // The store of these tests offers no status, like a selection of tasks
+  // whose productions share none.
+  test('changes nothing without a status to apply', async () => {
+    const { store, wrapper } = await mountOnShots()
+    store.dispatch.mockClear()
+
+    const button = wrapper.find('.action-bar .confirm-button')
+    await button.trigger('click')
+    await flushPromises()
+
+    expect(store.dispatch.mock.calls).toEqual([])
+    expect(button.classes()).not.toContain('is-loading')
+  })
+
   // Without episodes, these pages carry no episode in their route.
   test.each([
     ['shot', '/productions/production-1/shots/shot-1'],
@@ -419,6 +436,59 @@ describe('ActionPanel, opened on a task selection', () => {
       expect(store.commit).toHaveBeenCalledWith('CLEAR_SELECTED_TASKS')
     }
   )
+})
+
+describe('ActionPanel, opened on empty cells', () => {
+  const task = {
+    id: 'task-1',
+    project_id: 'production-1',
+    task_type_id: 'task-type-1'
+  }
+
+  const mountOnShots = options =>
+    mountPanel([], { path: '/productions/production-1/shots', ...options })
+
+  const confirmButtons = wrapper =>
+    wrapper.findAll('.action-bar .confirm-button').map(button => button.text())
+
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  test.each([
+    ['the status bar', null],
+    ['the bar used last', 'priorities']
+  ])('opens the task creation rather than %s', async (name, lastBar) => {
+    if (lastBar) localStorage.setItem('entities--selected-bar', lastBar)
+
+    const { wrapper } = await mountOnShots({ validations: 2 })
+
+    expect(confirmButtons(wrapper)).toEqual(['tasks.create_for_selection'])
+  })
+
+  test('opens no bar to a user who cannot create tasks', async () => {
+    const { wrapper } = await mountOnShots({
+      role: 'supervisor',
+      validations: 2
+    })
+
+    expect(wrapper.find('.menu').exists()).toBe(true)
+    expect(wrapper.find('.action-bar').exists()).toBe(false)
+  })
+
+  test('leaves the status bar once the last task is unselected', async () => {
+    const { store, wrapper } = await mountOnShots({
+      tasks: [task],
+      validations: 2
+    })
+    expect(confirmButtons(wrapper)).toEqual(['tasks.change_task_status'])
+
+    store.state.nbSelectedTasks = 0
+    store.state.selectedTasks = toSelection([])
+    await flushPromises()
+
+    expect(confirmButtons(wrapper)).toEqual(['tasks.create_for_selection'])
+  })
 })
 
 describe('ActionPanel, more actions menu', () => {

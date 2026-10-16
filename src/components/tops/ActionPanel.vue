@@ -207,13 +207,7 @@
           @click="selectBar('create-tasks')"
           @keydown.enter.prevent="selectBar('create-tasks')"
           @keydown.space.prevent="selectBar('create-tasks')"
-          v-if="
-            isCurrentViewEntity &&
-            !isCurrentViewTaskType &&
-            isCurrentUserManager &&
-            !isEntitySelection &&
-            nbSelectedTasks !== 1
-          "
+          v-if="isTaskCreationAvailable"
         >
           <check-square-icon />
         </div>
@@ -1267,6 +1261,15 @@ const isEntitySelection = computed(
     nbSelectedEdits.value > 0
 )
 
+const isTaskCreationAvailable = computed(
+  () =>
+    isCurrentViewEntity.value &&
+    !isCurrentViewTaskType.value &&
+    isCurrentUserManager.value &&
+    !isEntitySelection.value &&
+    nbSelectedTasks.value !== 1
+)
+
 const isCustomActionAvailable = computed(
   () =>
     !isEntitySelection.value &&
@@ -1372,10 +1375,11 @@ const storagePrefix = computed(() => {
 // --------------------------------------------------------------------------
 
 const confirmTaskStatusChange = async () => {
-  loading.changeStatus = true
   if (!taskStatusId.value) {
-    taskStatusId.value = availableTaskStatuses.value[0].id
+    taskStatusId.value = availableTaskStatuses.value[0]?.id ?? ''
   }
+  if (!taskStatusId.value) return
+  loading.changeStatus = true
   try {
     await store.dispatch('changeSelectedTaskStatus', {
       taskStatusId: taskStatusId.value,
@@ -1622,6 +1626,9 @@ const autoChooseSelectBar = () => {
     if (!['edit-concepts', 'move-concepts'].includes(selectedBar.value)) {
       selectedBar.value = 'delete-concepts'
     }
+  } else if (!isTaskSelection.value && nbSelectedValidations.value > 0) {
+    // Empty cells only: the task bars would have no task to act on.
+    selectedBar.value = isTaskCreationAvailable.value ? 'create-tasks' : ''
   } else {
     if (nbSelectedTasks.value === 1) selectedBar.value = ''
     const lastSelection = localStorage.getItem(
@@ -1741,7 +1748,7 @@ watchEntitySelection(nbSelectedShots)
 watchEntitySelection(nbSelectedEdits)
 watchEntitySelection(nbSelectedConcepts, 1)
 
-watch(isHidden, autoChooseSelectBar)
+watch([isHidden, isTaskSelection], autoChooseSelectBar)
 
 watch(
   nbSelectedTasks,
