@@ -49,6 +49,7 @@ import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
 import csv from '@/lib/csv'
+import { formatTrigger, getTrigger } from '@/lib/statusautomations'
 import stringHelpers from '@/lib/string'
 
 import DeleteModal from '@/components/modals/DeleteModal.vue'
@@ -131,10 +132,9 @@ const confirmDeleteStatusAutomation = () => {
 const onExportClicked = () => {
   const name = stringHelpers.slugify(t('status_automations.title'))
   const headers = [
-    t('main.type'),
     t('status_automations.fields.entity_type'),
-    t('status_automations.fields.in_task_type'),
-    t('status_automations.fields.in_task_status'),
+    t('status_automations.fields.operator'),
+    t('status_automations.fields.conditions'),
     t('status_automations.fields.out_field_type'),
     t('status_automations.fields.out_task_type'),
     t('status_automations.fields.out_task_status'),
@@ -143,10 +143,12 @@ const onExportClicked = () => {
   const entries = [
     headers,
     ...statusAutomations.value.map(sa => [
-      sa.type,
       sa.entity_type,
-      taskTypeMap.value.get(sa.in_task_type_id)?.name,
-      taskStatusMap.value.get(sa.in_task_status_id)?.short_name,
+      t(`status_automations.connectors.${getTrigger(sa).operator}`),
+      formatTrigger(sa, {
+        taskTypeMap: taskTypeMap.value,
+        taskStatusMap: taskStatusMap.value
+      }),
       sa.out_field_type === 'ready_for'
         ? t('status_automations.change_ready_for')
         : t('status_automations.change_status'),

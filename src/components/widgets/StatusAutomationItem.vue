@@ -3,18 +3,11 @@
     <span class="flexrow-item entity-type">
       {{ entityType }}
     </span>
-    <span class="in-task-type flexrow-item">
-      <task-type-name
-        class="in-task-type flexrow-item"
-        :task-type="getTaskType(statusAutomation.in_task_type_id)"
-      />
-    </span>
-    <span class="in-task-status flexrow-item">
-      <task-status-cell
-        :entry="getTaskStatus(statusAutomation.in_task_status_id)"
-        v-if="statusAutomation.in_field_type !== 'ready_for'"
-      />
-    </span>
+    <status-automation-conditions
+      class="flexrow-item conditions"
+      inline
+      :status-automation="statusAutomation"
+    />
     <span class="flexrow-item trigger-type">
       {{
         statusAutomation.out_field_type === 'ready_for'
@@ -48,6 +41,7 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
 import TaskStatusCell from '@/components/cells/TaskStatusCell.vue'
+import StatusAutomationConditions from '@/components/widgets/StatusAutomationConditions.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
 const { t } = useI18n()
@@ -85,7 +79,7 @@ const entityType = computed(() => {
   min-width: 40px;
 }
 
-.in-task-type {
+.conditions {
   text-align: left;
 }
 

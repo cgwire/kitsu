@@ -2025,16 +2025,18 @@
       "production_description": "Una automatización cambia el estado de una tarea, o la tarea siguiente, cuando se aplica un estado.",
       "run_for_selection": "Ejecutar la automatización de estado para las tareas seleccionadas:",
       "title": "Automatizaciones",
-      "wrong_automation": "Esta automatización se aplica a un tipo de tarea anterior. No está permitido por Kitsu (para evitar ciclos infinitos). No tendrá efecto.",
+      "wrong_automation": "En esta producción, todas las condiciones usan un tipo de tarea que va después del tipo de tarea aplicado. Sus cambios de estado no ejecutan esta automatización, para evitar ciclos infinitos: no tiene ningún efecto.",
       "fields": {
         "entity_type": "Tipo de entidad",
         "in_field_type": "Tipo de campo de entrada",
         "in_task_type": "Tipo de tarea",
         "in_task_status": "Estado de la tarea",
-        "out_field_type": "Activador",
+        "out_field_type": "Cambio aplicado",
         "out_task_type": "Tipo de tarea aplicado",
         "out_task_status": "Estado de tarea aplicado",
-        "import_last_revision": "Importar última revisión"
+        "import_last_revision": "Importar última revisión",
+        "conditions": "Condiciones",
+        "operator": "Operador"
       },
       "entity_types": {
         "asset": "Recurso",
@@ -2047,7 +2049,13 @@
         "status": "Estado",
         "ready_for": "Preparado para"
       },
-      "add_status_automation_placeholder": "+ Añadir automatización de estado"
+      "add_status_automation_placeholder": "+ Añadir automatización de estado",
+      "connectors": {
+        "and": "y",
+        "or": "o"
+      },
+      "guard_only_condition_and": "En esta producción, {taskType} va después del tipo de tarea aplicado: sus cambios de estado no ejecutan esta automatización, pero la condición debe cumplirse igualmente.",
+      "guard_only_condition_or": "En esta producción, {taskType} va después del tipo de tarea aplicado: esta condición se ignora."
     },
     "preview_room": {
       "join_room": "Unirse a la sala de revisión",

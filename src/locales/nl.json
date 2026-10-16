@@ -2025,16 +2025,18 @@
       "production_description": "Een automatisering wijzigt de status van een taak, of de volgende taak, wanneer een status wordt ingesteld.",
       "run_for_selection": "Statusautomatisering uitvoeren voor geselecteerde taken:",
       "title": "Automatiseringen",
-      "wrong_automation": "Deze automatisering is van toepassing op een upstream-taaktype. Dit is niet toegestaan door Kitsu (om oneindige cycli te vermijden). Het heeft geen effect.",
+      "wrong_automation": "In deze productie gebruikt elke voorwaarde een taaktype dat na het toegepaste taaktype komt. De statuswijzigingen ervan starten deze automatisering niet, om oneindige cycli te vermijden: ze heeft geen effect.",
       "fields": {
         "entity_type": "Entiteitstype",
         "in_field_type": "Type invoerveld",
         "in_task_type": "Taaktype",
         "in_task_status": "Taakstatus",
-        "out_field_type": "Trigger",
+        "out_field_type": "Toegepaste wijziging",
         "out_task_type": "Toegepast taaktype",
         "out_task_status": "Toegepaste taakstatus",
-        "import_last_revision": "Laatste revisie importeren"
+        "import_last_revision": "Laatste revisie importeren",
+        "conditions": "Voorwaarden",
+        "operator": "Operator"
       },
       "entity_types": {
         "asset": "Asset",
@@ -2047,7 +2049,13 @@
         "status": "Status",
         "ready_for": "Klaar Voor"
       },
-      "add_status_automation_placeholder": "+ Statusautomatisering toevoegen"
+      "add_status_automation_placeholder": "+ Statusautomatisering toevoegen",
+      "connectors": {
+        "and": "en",
+        "or": "of"
+      },
+      "guard_only_condition_and": "In deze productie komt {taskType} na het toegepaste taaktype: de statuswijzigingen ervan starten deze automatisering niet, maar aan de voorwaarde moet nog steeds worden voldaan.",
+      "guard_only_condition_or": "In deze productie komt {taskType} na het toegepaste taaktype: deze voorwaarde wordt genegeerd."
     },
     "preview_room": {
       "join_room": "Reviewruimte betreden",

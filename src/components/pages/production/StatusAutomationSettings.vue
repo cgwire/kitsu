@@ -22,6 +22,7 @@
 
         <status-automation-list
           :entries="statusAutomations"
+          :with-priority-warnings="withPriorityWarnings"
           @remove-clicked="onRemove"
           v-else
         />
@@ -40,7 +41,8 @@ import ComboboxStatusAutomation from '@/components/widgets/ComboboxStatusAutomat
 // --------------------------------------------------------------------------
 const props = defineProps({
   statusAutomations: { type: Array, default: () => [] },
-  allStatusAutomations: { type: Array, default: () => [] }
+  allStatusAutomations: { type: Array, default: () => [] },
+  withPriorityWarnings: { type: Boolean, default: false }
 })
 
 const emit = defineEmits(['add', 'remove'])

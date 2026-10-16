@@ -2025,16 +2025,18 @@
       "production_description": "Une automatisation change le statut d'une tâche, ou la tâche suivante, quand un statut est appliqué.",
       "run_for_selection": "Lancer l'automatisation pour les tâches sélectionnées :",
       "title": "Automatisations",
-      "wrong_automation": "Cette automatisation s'applique à un type de tâche en amont. Elle n'est pas autorisée par Kitsu (pour éviter les cycles infinis). Elle n'aura aucun effet.",
+      "wrong_automation": "Dans cette production, chaque condition porte sur un type de tâche qui vient après le type de tâche concerné. Leurs changements de statut ne déclenchent pas cette automatisation, pour éviter les cycles infinis : elle n'a aucun effet.",
       "fields": {
         "entity_type": "Type d'entité",
         "in_field_type": "Type d'entrée",
         "in_task_type": "Type de tâche",
         "in_task_status": "Statut de tâche",
-        "out_field_type": "Déclencheur",
+        "out_field_type": "Changement appliqué",
         "out_task_type": "Type de tâche concerné",
         "out_task_status": "Statut appliqué",
-        "import_last_revision": "Importer la dernière révision"
+        "import_last_revision": "Importer la dernière révision",
+        "conditions": "Conditions",
+        "operator": "Opérateur"
       },
       "entity_types": {
         "asset": "Asset",
@@ -2047,7 +2049,13 @@
         "status": "Statut",
         "ready_for": "Prêt pour"
       },
-      "add_status_automation_placeholder": "+ Ajouter une automatisation de statuts"
+      "add_status_automation_placeholder": "+ Ajouter une automatisation de statuts",
+      "connectors": {
+        "and": "et",
+        "or": "ou"
+      },
+      "guard_only_condition_and": "Dans cette production, {taskType} vient après le type de tâche concerné : ses changements de statut ne déclenchent pas cette automatisation, mais la condition doit quand même être remplie.",
+      "guard_only_condition_or": "Dans cette production, {taskType} vient après le type de tâche concerné : cette condition est ignorée."
     },
     "preview_room": {
       "join_room": "Rejoindre la session de review",

@@ -19,11 +19,30 @@ const taskTypes = [
   { id: COMPOSITING, name: 'Compositing', for_entity: 'Shot', priority: 3 }
 ]
 
+const DONE = 'task-status-done'
+
 const automation = (inTaskTypeId, outTaskTypeId, outFieldType = 'status') => ({
   id: 'automation-1',
   entity_type: 'shot',
   in_task_type_id: inTaskTypeId,
+  in_task_status_id: DONE,
   out_field_type: outFieldType,
+  out_task_type_id: outTaskTypeId
+})
+
+const multiAutomation = (taskTypeIds, outTaskTypeId) => ({
+  id: 'automation-2',
+  entity_type: 'shot',
+  in_conditions: {
+    operator: 'and',
+    conditions: taskTypeIds.map(taskTypeId => ({
+      task_type_id: taskTypeId,
+      task_status_ids: [DONE]
+    }))
+  },
+  in_task_type_id: null,
+  in_task_status_id: null,
+  out_field_type: 'status',
   out_task_type_id: outTaskTypeId
 })
 
@@ -32,7 +51,7 @@ const production = taskTypesPriority => ({
   task_types_priority: taskTypesPriority
 })
 
-describe('Status automation store, isStatusAutomationDisabled', () => {
+describe('Status automation store, priority warnings', () => {
   let store
   let scope
 
@@ -77,6 +96,64 @@ describe('Status automation store, isStatusAutomationDisabled', () => {
     store.commit('setCurrentProduction', currentProduction)
     return watchDisabled(statusAutomation).value
   }
+
+  const guardOnlyIdsIn = (currentProduction, statusAutomation) => {
+    store.commit('setCurrentProduction', currentProduction)
+    return scope
+      .run(() =>
+        computed(() =>
+          store.getters.getGuardOnlyConditions(statusAutomation)
+        )
+      )
+      .value.map(condition => condition.task_type_id)
+  }
+
+  test('lists the conditions coming after the output in the production', () => {
+    const currentProduction = production({
+      [ANIMATION]: 1,
+      [COMPOSITING]: 2,
+      [LIGHTING]: 3
+    })
+    const statusAutomation = multiAutomation([ANIMATION, LIGHTING], COMPOSITING)
+
+    expect(guardOnlyIdsIn(currentProduction, statusAutomation)).toEqual([
+      LIGHTING
+    ])
+    expect(
+      guardOnlyIdsIn(currentProduction, {
+        ...statusAutomation,
+        out_field_type: 'ready_for'
+      })
+    ).toEqual([])
+  })
+
+  // The other conditions still fire it.
+  test('keeps an automation with one guard-only condition running', () => {
+    expect(
+      isDisabledIn(
+        production({ [ANIMATION]: 1, [COMPOSITING]: 2, [LIGHTING]: 3 }),
+        multiAutomation([ANIMATION, LIGHTING], COMPOSITING)
+      )
+    ).toBe(false)
+  })
+
+  test('flags an automation whose every condition is guard-only', () => {
+    expect(
+      isDisabledIn(
+        production({ [ANIMATION]: 1, [COMPOSITING]: 2, [LIGHTING]: 3 }),
+        multiAutomation([LIGHTING], ANIMATION)
+      )
+    ).toBe(true)
+  })
+
+  test('never flags an automation without a condition', () => {
+    expect(
+      isDisabledIn(
+        production({ [ANIMATION]: 1 }),
+        multiAutomation([], ANIMATION)
+      )
+    ).toBe(false)
+  })
 
   test('flags an input task type of strictly higher priority', () => {
     expect(

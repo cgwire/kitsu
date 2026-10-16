@@ -399,16 +399,18 @@
       "production_description": "Automatyzacja zmienia status zadania lub następne zadanie, gdy ustawiony zostanie status.",
       "run_for_selection": "Uruchom automatyzację statusu dla wybranych zadań:",
       "title": "Automatyzacje",
-      "wrong_automation": "Ta automatyzacja dotyczy typu zadania znajdującego się wcześniej w procesie. Kitsu na to nie pozwala (aby uniknąć nieskończonych cykli). Nie będzie ona miała żadnego efektu.",
+      "wrong_automation": "W tej produkcji każdy warunek używa typu zadania występującego po docelowym typie zadania. Ich zmiany statusu nie uruchamiają tej automatyzacji, aby uniknąć nieskończonych cykli: nie ma ona żadnego efektu.",
       "fields": {
         "entity_type": "Typ obiektu",
         "in_field_type": "Typ pola wejściowego",
         "in_task_type": "Typ zadania",
         "in_task_status": "Status zadania",
-        "out_field_type": "Wyzwalacz",
+        "out_field_type": "Zastosowana zmiana",
         "out_task_type": "Docelowy typ zadania",
         "out_task_status": "Docelowy status zadania",
-        "import_last_revision": "Importuj ostatnią wersję"
+        "import_last_revision": "Importuj ostatnią wersję",
+        "conditions": "Warunki",
+        "operator": "Operator"
       },
       "entity_types": {
         "asset": "Asset",
@@ -420,7 +422,13 @@
       "field_types": {
         "status": "Status",
         "ready_for": "Gotowe do"
-      }
+      },
+      "connectors": {
+        "and": "i",
+        "or": "lub"
+      },
+      "guard_only_condition_and": "W tej produkcji {taskType} występuje po docelowym typie zadania: jego zmiany statusu nie uruchamiają tej automatyzacji, ale warunek nadal musi być spełniony.",
+      "guard_only_condition_or": "W tej produkcji {taskType} występuje po docelowym typie zadania: ten warunek jest pomijany."
     },
     "departments": {
       "all_departments": "Wszystkie działy",

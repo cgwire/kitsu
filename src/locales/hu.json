@@ -2371,9 +2371,11 @@
         "in_field_type": "Bemeneti mező típusa",
         "in_task_status": "Feladat állapot",
         "in_task_type": "Feladat típus",
-        "out_field_type": "Trigger",
+        "out_field_type": "Alkalmazott változás",
         "out_task_status": "Alkalmazott feladat állapot",
-        "out_task_type": "Alkalmazott feladat típus"
+        "out_task_type": "Alkalmazott feladat típus",
+        "conditions": "Feltételek",
+        "operator": "Operátor"
       },
       "in_title": "A változást kiváltó állapot",
       "new_status_automation": "Állapot-automatizálás hozzáadása",
@@ -2382,7 +2384,13 @@
       "production_description": "Egy automatizálás megváltoztatja egy feladat állapotát vagy a következő feladatot, amikor egy állapotot beállítanak.",
       "run_for_selection": "Állapot-automatizálás futtatása a kijelölt feladatokon:",
       "title": "Automatizálások",
-      "wrong_automation": "Ez az automatizálás egy feljebb lévő (upstream) feladat típusra vonatkozik. Ezt a Kitsu nem engedélyezi (a végtelen ciklusok elkerülése érdekében). Nem lesz hatása."
+      "wrong_automation": "Ebben a produkcióban minden feltétel olyan feladat típust használ, amely az alkalmazott feladat típus után következik. Ezek állapotváltozásai a végtelen ciklusok elkerülése érdekében nem indítják el ezt az automatizálást: nincs hatása.",
+      "connectors": {
+        "and": "és",
+        "or": "vagy"
+      },
+      "guard_only_condition_and": "Ebben a produkcióban a(z) {taskType} az alkalmazott feladat típus után következik: az állapotváltozásai nem indítják el ezt az automatizálást, de a feltételnek ettől még teljesülnie kell.",
+      "guard_only_condition_or": "Ebben a produkcióban a(z) {taskType} az alkalmazott feladat típus után következik: ez a feltétel figyelmen kívül marad."
     },
     "software_licenses": {
       "create_error": "Hiba történt a szoftverlicenc mentésekor.",

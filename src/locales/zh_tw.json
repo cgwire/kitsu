@@ -2025,16 +2025,18 @@
       "production_description": "自動化會在設定某個狀態時變更任務狀態或下一個任務。",
       "run_for_selection": "為選取的任務執行狀態自動化：",
       "title": "自動化",
-      "wrong_automation": "此自動化適用於上游任務類型。Kitsu 不允許這樣做（避免無限循環）。它不會有任何效果。",
+      "wrong_automation": "在此製作項目中，每個條件使用的任務類型都位於套用的任務類型之後。為避免無限循環，它們的狀態變更不會執行此自動化：它不會有任何效果。",
       "fields": {
         "entity_type": "實體類型",
         "in_field_type": "輸入欄位類型",
         "in_task_type": "任務類型",
         "in_task_status": "任務狀態",
-        "out_field_type": "觸發器",
+        "out_field_type": "套用的變更",
         "out_task_type": "套用的任務類型",
         "out_task_status": "套用的任務狀態",
-        "import_last_revision": "匯入上次修訂"
+        "import_last_revision": "匯入上次修訂",
+        "conditions": "條件",
+        "operator": "運算子"
       },
       "entity_types": {
         "asset": "資產",
@@ -2047,7 +2049,13 @@
         "status": "狀態",
         "ready_for": "可用於"
       },
-      "add_status_automation_placeholder": "+ 新增狀態自動化"
+      "add_status_automation_placeholder": "+ 新增狀態自動化",
+      "connectors": {
+        "and": "且",
+        "or": "或"
+      },
+      "guard_only_condition_and": "在此製作項目中，{taskType} 位於套用的任務類型之後：其狀態變更不會執行此自動化，但仍須符合此條件。",
+      "guard_only_condition_or": "在此製作項目中，{taskType} 位於套用的任務類型之後：此條件會被忽略。"
     },
     "preview_room": {
       "join_room": "加入審閱室",

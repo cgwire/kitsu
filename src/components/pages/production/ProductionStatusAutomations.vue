@@ -6,6 +6,7 @@
     <status-automation-settings
       :status-automations="productionStatusAutomations"
       :all-status-automations="allStatusAutomations"
+      with-priority-warnings
       @add="onAdd"
       @remove="onRemove"
     />

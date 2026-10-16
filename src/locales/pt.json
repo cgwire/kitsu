@@ -2025,16 +2025,18 @@
       "production_description": "Uma automação muda o status de uma tarefa, ou a tarefa seguinte, quando um status é definido.",
       "run_for_selection": "Executar automação de status para tarefas selecionadas:",
       "title": "Automações",
-      "wrong_automation": "Essa automação se aplica a um tipo de tarefa anterior no fluxo de trabalho. Ela não é permitida pelo Kitsu (para evitar ciclos infinitos). Ela não terá efeito.",
+      "wrong_automation": "Nesta produção, todas as condições usam um tipo de tarefa que vem depois do tipo de tarefa aplicada. As mudanças de status deles não executam esta automação, para evitar ciclos infinitos: ela não tem efeito.",
       "fields": {
         "entity_type": "Tipo de entidade",
         "in_field_type": "Tipo de campo de entrada",
         "in_task_type": "Tipo de tarefa",
         "in_task_status": "Status da tarefa",
-        "out_field_type": "Gatilho",
+        "out_field_type": "Alteração aplicada",
         "out_task_type": "Tipo de tarefa aplicada",
         "out_task_status": "Status da tarefa aplicada",
-        "import_last_revision": "Importar última revisão"
+        "import_last_revision": "Importar última revisão",
+        "conditions": "Condições",
+        "operator": "Operador"
       },
       "entity_types": {
         "asset": "Asset",
@@ -2047,7 +2049,13 @@
         "status": "Status",
         "ready_for": "Pronto para"
       },
-      "add_status_automation_placeholder": "+ Adicionar automação de status"
+      "add_status_automation_placeholder": "+ Adicionar automação de status",
+      "connectors": {
+        "and": "e",
+        "or": "ou"
+      },
+      "guard_only_condition_and": "Nesta produção, {taskType} vem depois do tipo de tarefa aplicada: as mudanças de status dele não executam esta automação, mas a condição ainda precisa ser atendida.",
+      "guard_only_condition_or": "Nesta produção, {taskType} vem depois do tipo de tarefa aplicada: esta condição é ignorada."
     },
     "preview_room": {
       "join_room": "Entrar na sala de revisão",

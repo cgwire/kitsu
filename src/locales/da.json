@@ -2025,16 +2025,18 @@
       "production_description": "En automatisering ændrer en opgaves status, eller den næste opgave, når en status sættes.",
       "run_for_selection": "Kør statusautomatisering for valgte opgaver:",
       "title": "Automatiseringer",
-      "wrong_automation": "Denne automatisering gælder for en opgavetype opstrøms. Det er ikke tilladt af Kitsu (for at undgå uendelige cyklusser). Den vil ikke have nogen effekt.",
+      "wrong_automation": "I denne produktion bruger hver betingelse en opgavetype, der kommer efter den anvendte opgavetype. Deres statusændringer kører ikke denne automatisering, for at undgå uendelige cyklusser: den har ingen effekt.",
       "fields": {
         "entity_type": "Enhedstype",
         "in_field_type": "Inputfelttype",
         "in_task_type": "Opgavetype",
         "in_task_status": "Opgavestatus",
-        "out_field_type": "Trigger",
+        "out_field_type": "Anvendt ændring",
         "out_task_type": "Anvendt opgavetype",
         "out_task_status": "Anvendt opgavestatus",
-        "import_last_revision": "Importer Seneste Revision"
+        "import_last_revision": "Importer Seneste Revision",
+        "conditions": "Betingelser",
+        "operator": "Operator"
       },
       "entity_types": {
         "asset": "Asset",
@@ -2047,7 +2049,13 @@
         "status": "Status",
         "ready_for": "Klar til"
       },
-      "add_status_automation_placeholder": "+ Tilføj statusautomatisering"
+      "add_status_automation_placeholder": "+ Tilføj statusautomatisering",
+      "connectors": {
+        "and": "og",
+        "or": "eller"
+      },
+      "guard_only_condition_and": "I denne produktion kommer {taskType} efter den anvendte opgavetype: dens statusændringer kører ikke denne automatisering, men betingelsen skal stadig være opfyldt.",
+      "guard_only_condition_or": "I denne produktion kommer {taskType} efter den anvendte opgavetype: denne betingelse ignoreres."
     },
     "preview_room": {
       "join_room": "Deltag i gennemgangsrummet",

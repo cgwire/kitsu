@@ -2025,16 +2025,18 @@
       "production_description": "自動化は、ステータスが設定されたときにタスクのステータス、または次のタスクを変更します。",
       "run_for_selection": "選択したタスクにステータス自動化を実行:",
       "title": "ステータス自動化",
-      "wrong_automation": "この自動化は上流のタスクタイプを対象にしているため動作しません。無限ループを防ぐため、Kitsu では上流方向への自動化を許可していません。",
+      "wrong_automation": "このプロダクションでは、すべての条件が適用対象タスクタイプより後の工程のタスクタイプを使用しています。無限ループを防ぐため、それらのステータス変更ではこの自動化は実行されず、効果はありません。",
       "fields": {
         "entity_type": "エンティティタイプ",
         "in_field_type": "入力フィールドタイプ",
         "in_task_type": "タスクタイプ",
         "in_task_status": "タスクステータス",
-        "out_field_type": "トリガー",
+        "out_field_type": "適用される変更",
         "out_task_type": "適用対象タスクタイプ",
         "out_task_status": "適用対象タスクステータス",
-        "import_last_revision": "最終リビジョンをインポート"
+        "import_last_revision": "最終リビジョンをインポート",
+        "conditions": "条件",
+        "operator": "演算子"
       },
       "entity_types": {
         "asset": "アセット",
@@ -2047,7 +2049,13 @@
         "status": "ステータス",
         "ready_for": "準備済み工程"
       },
-      "add_status_automation_placeholder": "+ ステータス自動化の追加"
+      "add_status_automation_placeholder": "+ ステータス自動化の追加",
+      "connectors": {
+        "and": "かつ",
+        "or": "または"
+      },
+      "guard_only_condition_and": "このプロダクションでは、{taskType} は適用対象タスクタイプより後の工程です。このタスクタイプのステータス変更ではこの自動化は実行されませんが、条件は満たされている必要があります。",
+      "guard_only_condition_or": "このプロダクションでは、{taskType} は適用対象タスクタイプより後の工程です。この条件は無視されます。"
     },
     "preview_room": {
       "join_room": "レビュールームに参加",

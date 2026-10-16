@@ -5,9 +5,12 @@ import { createStore } from 'vuex'
 
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 
+import csv from '@/lib/csv'
+
 import StatusAutomationList from '@/components/lists/StatusAutomationList.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import StatusAutomations from '@/components/pages/StatusAutomations.vue'
+import ListPageHeader from '@/components/widgets/ListPageHeader.vue'
 
 import { shallowMountWithI18n } from '../../fixtures/i18n'
 
@@ -23,14 +26,47 @@ const statusAutomation = {
   archived: false
 }
 
+const multiConditionAutomation = {
+  id: 'automation-2',
+  entity_type: 'shot',
+  in_conditions: {
+    operator: 'or',
+    conditions: [
+      { task_type_id: 'task-type-1', task_status_ids: ['task-status-1'] },
+      {
+        task_type_id: 'task-type-3',
+        task_status_ids: ['task-status-1', 'task-status-3']
+      }
+    ]
+  },
+  in_task_type_id: null,
+  in_task_status_id: null,
+  out_field_type: 'status',
+  out_task_type_id: 'task-type-2',
+  out_task_status_id: 'task-status-2',
+  import_last_revision: true,
+  archived: false
+}
+
+const taskTypeMap = new Map([
+  ['task-type-1', { id: 'task-type-1', name: 'Lighting' }],
+  ['task-type-2', { id: 'task-type-2', name: 'Compositing' }],
+  ['task-type-3', { id: 'task-type-3', name: 'FX' }]
+])
+const taskStatusMap = new Map([
+  ['task-status-1', { id: 'task-status-1', short_name: 'done' }],
+  ['task-status-2', { id: 'task-status-2', short_name: 'ready' }],
+  ['task-status-3', { id: 'task-status-3', short_name: 'na' }]
+])
+
 describe('StatusAutomations page', () => {
   const mountPage = async (actions = {}) => {
     const store = createStore({
       getters: {
-        statusAutomations: () => [statusAutomation],
+        statusAutomations: () => [statusAutomation, multiConditionAutomation],
         archivedStatusAutomations: () => [],
-        taskStatusMap: () => new Map(),
-        taskTypeMap: () => new Map()
+        taskStatusMap: () => taskStatusMap,
+        taskTypeMap: () => taskTypeMap
       },
       actions: { loadStatusAutomations: () => {}, ...actions }
     })
@@ -94,5 +130,45 @@ describe('StatusAutomations page', () => {
     )
     expect(consoleError).toHaveBeenCalledOnce()
     consoleError.mockRestore()
+  })
+
+  it('exports one line per automation with its conditions', async () => {
+    const buildCsvFile = vi
+      .spyOn(csv, 'buildCsvFile')
+      .mockImplementation(() => {})
+    const wrapper = await mountPage()
+
+    wrapper.findComponent(ListPageHeader).vm.$emit('export-clicked')
+
+    expect(buildCsvFile).toHaveBeenCalledWith('automations', [
+      [
+        'Entity Type',
+        'Operator',
+        'Conditions',
+        'Applied Change',
+        'Applied Task Type',
+        'Applied Task Status',
+        'Import Last Revision'
+      ],
+      [
+        'asset',
+        'and',
+        'Lighting: done',
+        'changes task status to',
+        'Compositing',
+        'ready',
+        false
+      ],
+      [
+        'shot',
+        'or',
+        'Lighting: done; FX: done, na',
+        'changes task status to',
+        'Compositing',
+        'ready',
+        true
+      ]
+    ])
+    buildCsvFile.mockRestore()
   })
 })

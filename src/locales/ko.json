@@ -2025,16 +2025,18 @@
       "production_description": "자동화는 상태가 설정될 때 작업 상태 또는 다음 작업을 변경합니다.",
       "run_for_selection": "선택된 작업에 상태 자동화 실행:",
       "title": "자동화",
-      "wrong_automation": "이 자동화는 선행 작업 유형에 적용됩니다. 이러한 자동화는 (무한 순환을 피하기 위해) Kitsu에서 허용되지 않으며, 아무 영향을 미치지 않습니다.",
+      "wrong_automation": "이 프로덕션에서는 모든 조건이 적용된 작업 유형보다 뒤에 오는 작업 유형을 사용합니다. 무한 순환을 피하기 위해 이들의 상태 변경은 이 자동화를 실행하지 않으므로 아무 효과가 없습니다.",
       "fields": {
         "entity_type": "엔티티 유형",
         "in_field_type": "입력 필드 유형",
         "in_task_type": "작업 유형",
         "in_task_status": "작업 상태",
-        "out_field_type": "트리거",
+        "out_field_type": "적용된 변경",
         "out_task_type": "적용된 작업 유형",
         "out_task_status": "적용된 작업 상태",
-        "import_last_revision": "마지막 수정본 가져오기"
+        "import_last_revision": "마지막 수정본 가져오기",
+        "conditions": "조건",
+        "operator": "연산자"
       },
       "entity_types": {
         "asset": "어셋",
@@ -2047,7 +2049,13 @@
         "status": "상태",
         "ready_for": "준비 대상"
       },
-      "add_status_automation_placeholder": "+ 상태 자동화 추가"
+      "add_status_automation_placeholder": "+ 상태 자동화 추가",
+      "connectors": {
+        "and": "그리고",
+        "or": "또는"
+      },
+      "guard_only_condition_and": "이 프로덕션에서 {taskType}은(는) 적용된 작업 유형보다 뒤에 옵니다. 이 작업 유형의 상태 변경은 이 자동화를 실행하지 않지만, 조건은 여전히 충족되어야 합니다.",
+      "guard_only_condition_or": "이 프로덕션에서 {taskType}은(는) 적용된 작업 유형보다 뒤에 옵니다. 이 조건은 무시됩니다."
     },
     "preview_room": {
       "join_room": "검수실 참여",

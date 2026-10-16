@@ -406,6 +406,8 @@ export default {
     delete_error: 'An error occurred while deleting this status automation. It may be linked to a production or a production template. If so, you must remove it from every production and template first.',
     edit_title: 'Edit a status automation',
     entity_title: 'Entity type affected by the trigger',
+    guard_only_condition_and: 'In this production, {taskType} comes after the applied task type: its status changes do not run this automation, but the condition must still be met.',
+    guard_only_condition_or: 'In this production, {taskType} comes after the applied task type: this condition is ignored.',
     number: 'status automation | status automations',
     in_title: 'Status triggering a change',
     out_title: 'The change that will be applied on trigger firing',
@@ -413,16 +415,22 @@ export default {
     production_description: 'An automation changes a task status, or the next task, when a status is set.',
     run_for_selection: 'Run status automation for selected tasks:',
     title: 'Automations',
-    wrong_automation: 'This automation applies to an upstream task type. It is not permitted by Kitsu (to avoid infinite cycles). It will have no effect.',
+    wrong_automation: 'In this production, every condition uses a task type that comes after the applied task type. Their status changes do not run this automation, to avoid infinite cycles: it has no effect.',
+    connectors: {
+      and: 'and',
+      or: 'or'
+    },
     fields: {
+      conditions: 'Conditions',
       entity_type: 'Entity Type',
       in_field_type: 'Input Field Type',
       in_task_type: 'Task Type',
       in_task_status: 'Task Status',
-      out_field_type: 'Trigger',
+      out_field_type: 'Applied Change',
       out_task_type: 'Applied Task Type',
       out_task_status: 'Applied Task Status',
-      import_last_revision: 'Import Last Revision'
+      import_last_revision: 'Import Last Revision',
+      operator: 'Operator'
     },
     entity_types: {
       asset: 'Asset',

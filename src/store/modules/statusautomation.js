@@ -1,6 +1,7 @@
-import statusAutomationsApi from '@/store/api/statusautomation'
 import { removeModelFromList } from '@/lib/models'
 import { getProjectTaskTypePriority } from '@/lib/productions'
+import { getTrigger } from '@/lib/statusautomations'
+import statusAutomationsApi from '@/store/api/statusautomation'
 
 import {
   LOAD_STATUS_AUTOMATIONS_START,
@@ -27,18 +28,28 @@ const getters = {
     state.statusAutomations.filter(s => s.archived),
   statusAutomationMap: () => cache.statusAutomationMap,
 
-  // Zou skips a status automation whose input task type comes strictly after
-  // its output task type in the current production.
-  isStatusAutomationDisabled:
+  // Zou never fires a status change from a condition whose task type comes
+  // strictly after the output task type in the current production: such a
+  // condition still has to be met under "and", and is ignored under "or".
+  getGuardOnlyConditions:
     (state, getters, rootState, rootGetters) => statusAutomation => {
+      if (statusAutomation.out_field_type === 'ready_for') return []
       const getPriority = taskTypeId =>
         getProjectTaskTypePriority(taskTypeId, rootGetters.currentProduction)
-      return (
-        statusAutomation.out_field_type !== 'ready_for' &&
-        getPriority(statusAutomation.in_task_type_id) >
-          getPriority(statusAutomation.out_task_type_id)
+      const outPriority = getPriority(statusAutomation.out_task_type_id)
+      return getTrigger(statusAutomation).conditions.filter(
+        condition => getPriority(condition.task_type_id) > outPriority
       )
-    }
+    },
+
+  isStatusAutomationDisabled: (state, getters) => statusAutomation => {
+    const { conditions } = getTrigger(statusAutomation)
+    return (
+      conditions.length > 0 &&
+      getters.getGuardOnlyConditions(statusAutomation).length ===
+        conditions.length
+    )
+  }
 }
 
 const actions = {

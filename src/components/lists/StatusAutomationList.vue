@@ -7,11 +7,8 @@
             <th scope="col" class="name">
               {{ $t('status_automations.fields.entity_type') }}
             </th>
-            <th scope="col" class="in-task-type">
-              {{ $t('status_automations.fields.in_task_type') }}
-            </th>
-            <th scope="col" class="in-task-status">
-              {{ $t('status_automations.fields.in_task_status') }}
+            <th scope="col" class="conditions">
+              {{ $t('status_automations.fields.conditions') }}
             </th>
             <th scope="col" class="automation-type">
               {{ $t('status_automations.fields.out_field_type') }}
@@ -39,7 +36,10 @@
                 <span
                   class="flexrow-item"
                   :title="$t('status_automations.wrong_automation')"
-                  v-if="isStatusAutomationDisabled(statusAutomation)"
+                  v-if="
+                    withPriorityWarnings &&
+                    isStatusAutomationDisabled(statusAutomation)
+                  "
                 >
                   <alert-triangle-icon />
                 </span>
@@ -48,14 +48,12 @@
                 </span>
               </div>
             </td>
-            <task-type-cell
-              class="in-task-type"
-              :task-type="getTaskType(statusAutomation.in_task_type_id)"
-            />
-            <task-status-cell
-              class="in-task-status"
-              :entry="taskStatusMap.get(statusAutomation.in_task_status_id)"
-            />
+            <td class="conditions">
+              <status-automation-conditions
+                :status-automation="statusAutomation"
+                :with-priority-warnings="withPriorityWarnings"
+              />
+            </td>
             <td class="input-separator">
               {{
                 statusAutomation.out_field_type === 'ready_for'
@@ -117,26 +115,30 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
 import RowActionsCell from '@/components/cells/RowActionsCell.vue'
-import TableInfo from '@/components/widgets/TableInfo.vue'
 import TaskStatusCell from '@/components/cells/TaskStatusCell.vue'
 import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
+import StatusAutomationConditions from '@/components/widgets/StatusAutomationConditions.vue'
+import TableInfo from '@/components/widgets/TableInfo.vue'
 
 const { t } = useI18n()
 const store = useStore()
 
 // Props / Emits
-
+// --------------------------------------------------------------------------
 const props = defineProps({
   entries: { type: Array, default: () => [] },
   isEditable: { type: Boolean, default: false },
   isError: { type: Boolean, default: false },
-  isLoading: { type: Boolean, default: false }
+  isLoading: { type: Boolean, default: false },
+  // The priorities of the current production: the production settings set
+  // it, the admin page and the templates have no current production.
+  withPriorityWarnings: { type: Boolean, default: false }
 })
 
 defineEmits(['delete-clicked', 'edit-clicked', 'remove-clicked'])
 
 // Computed
-
+// --------------------------------------------------------------------------
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
 const getTaskType = computed(() => store.getters.getTaskType)
 const isStatusAutomationDisabled = computed(
@@ -153,7 +155,7 @@ const statusAutomations = computed(() =>
 )
 
 // Functions
-
+// --------------------------------------------------------------------------
 const formatBoolean = value => (value ? t('main.yes') : t('main.no'))
 </script>
 
@@ -172,14 +174,8 @@ td.name {
   text-transform: capitalize;
 }
 
-.in-task-type {
-  width: 150px;
-  min-width: 150px;
-}
-
-.in-task-status {
-  width: 150px;
-  min-width: 150px;
+.conditions {
+  min-width: 260px;
 }
 
 .separator {
@@ -237,7 +233,7 @@ td.name {
     grid-template-columns: 1fr auto;
     grid-template-areas:
       'entity entity'
-      'in-type in-status'
+      'conditions conditions'
       'separator separator'
       'out-type out-status'
       'revision revision';
@@ -269,13 +265,8 @@ td.name {
     font-size: 1.1em;
   }
 
-  .in-task-type {
-    grid-area: in-type;
-  }
-
-  .in-task-status {
-    grid-area: in-status;
-    justify-self: end;
+  .conditions {
+    grid-area: conditions;
   }
 
   .input-separator {
