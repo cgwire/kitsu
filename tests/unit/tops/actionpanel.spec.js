@@ -70,6 +70,11 @@ const mountPanel = async (
         component: { template: '<div />' }
       },
       {
+        path: '/productions/:production_id/sequences',
+        name: 'sequences',
+        component: { template: '<div />' }
+      },
+      {
         path: '/productions/:production_id/shots',
         name: 'shots',
         component: { template: '<div />' }
@@ -437,6 +442,17 @@ describe('ActionPanel, opened on a task selection', () => {
     }
   )
 
+  test('offers no task creation without empty cells', async () => {
+    const { wrapper } = await mountPanel([], {
+      path: '/productions/production-1/shots',
+      tasks: [task, { ...task, id: 'task-2' }]
+    })
+
+    expect(wrapper.find('.menu > [title="menu.create_tasks"]').exists()).toBe(
+      false
+    )
+  })
+
   // The store of these tests offers no status, like a selection of tasks
   // whose productions share none.
   test('changes nothing without a status to apply', async () => {
@@ -496,6 +512,17 @@ describe('ActionPanel, opened on empty cells', () => {
     expect(confirmButtons(wrapper)).toEqual(['tasks.create_for_selection'])
   })
 
+  test('offers the task creation beside selected tasks', async () => {
+    const { wrapper } = await mountOnShots({
+      tasks: [task, { ...task, id: 'task-2' }],
+      validations: 2
+    })
+
+    expect(wrapper.find('.menu > [title="menu.create_tasks"]').exists()).toBe(
+      true
+    )
+  })
+
   test('opens no bar to a user who cannot create tasks', async () => {
     const { wrapper } = await mountOnShots({
       role: 'supervisor',
@@ -518,6 +545,37 @@ describe('ActionPanel, opened on empty cells', () => {
     await flushPromises()
 
     expect(confirmButtons(wrapper)).toEqual(['tasks.create_for_selection'])
+  })
+
+  // The created tasks take the place of the empty cells in the selection.
+  test('leaves the task creation once its cells hold tasks', async () => {
+    const tasks = [task, { ...task, id: 'task-2' }]
+    const { store, wrapper } = await mountOnShots({ tasks, validations: 1 })
+    await wrapper.find('.menu > [title="menu.create_tasks"]').trigger('click')
+    expect(confirmButtons(wrapper)).toEqual(['tasks.create_for_selection'])
+
+    store.state.nbSelectedValidations = 0
+    store.state.nbSelectedTasks = 3
+    store.state.selectedTasks = toSelection([...tasks, { ...task, id: 'task-3' }])
+    await flushPromises()
+
+    expect(confirmButtons(wrapper)).toEqual(['tasks.change_task_status'])
+  })
+
+  test('closes the task creation of the sequences once its cells hold tasks', async () => {
+    const { store, wrapper } = await mountPanel([], {
+      path: '/productions/production-1/sequences',
+      validations: 2
+    })
+    expect(confirmButtons(wrapper)).toEqual(['tasks.create_for_selection'])
+
+    store.state.nbSelectedValidations = 0
+    store.state.nbSelectedTasks = 2
+    store.state.selectedTasks = toSelection([task, { ...task, id: 'task-2' }])
+    await flushPromises()
+
+    expect(wrapper.find('.menu').exists()).toBe(true)
+    expect(wrapper.find('.action-bar').exists()).toBe(false)
   })
 })
 

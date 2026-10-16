@@ -1215,6 +1215,7 @@ const isTaskCreationAvailable = computed(
     !isCurrentViewTaskType.value &&
     isCurrentUserManager.value &&
     !isEntitySelection.value &&
+    nbSelectedValidations.value > 0 &&
     nbSelectedTasks.value !== 1
 )
 
@@ -1669,6 +1670,8 @@ const autoChooseSelectBar = () => {
       selectedBar.value = lastSelection
     } else if (isCurrentViewAssetShotOrEdit.value) {
       selectedBar.value = 'change-status'
+    } else if (!availableBars.value.has(selectedBar.value)) {
+      selectedBar.value = ''
     }
   }
 }
@@ -1780,6 +1783,12 @@ watchEntitySelection(nbSelectedEdits)
 watchEntitySelection(nbSelectedConcepts, 1)
 
 watch([isHidden, isTaskSelection], autoChooseSelectBar)
+
+// A selection change can take the open bar out of the menu, such as the task
+// creation once its cells hold the created tasks.
+watch(availableBars, bars => {
+  if (selectedBar.value && !bars.has(selectedBar.value)) autoChooseSelectBar()
+})
 
 watch(
   nbSelectedTasks,
