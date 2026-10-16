@@ -1,12 +1,16 @@
 <template>
   <div class="plugin-page page fixed-page">
     <iframe
+      v-if="plugin"
       class="plugin-iframe"
       :src="pluginUrl"
       frameborder="0"
       allowfullscreen
       referrerpolicy="same-origin"
     ></iframe>
+    <div v-else class="plugin-unavailable" role="status">
+      {{ $t('main.loading_error') }}
+    </div>
   </div>
 </template>
 
@@ -19,8 +23,12 @@ import { useHead } from '@unhead/vue'
 const route = useRoute()
 const store = useStore()
 
-const plugins = computed(() => store.getters.studioPlugins || [])
 const productionId = computed(() => route.params.production_id || '')
+const plugins = computed(() =>
+  productionId.value
+    ? store.getters.projectPlugins || []
+    : store.getters.studioPlugins || []
+)
 const episodeId = computed(() =>
   store.getters.isTVShow && productionId.value
     ? store.getters.currentEpisode?.id
