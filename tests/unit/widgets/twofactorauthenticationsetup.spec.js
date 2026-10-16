@@ -12,7 +12,7 @@ const i18n = createI18n({
   fallbackWarn: false
 })
 
-const mountSetup = user => {
+const mountSetup = (user, actions = {}) => {
   const store = createStore({
     getters: {
       user: () => ({
@@ -25,7 +25,8 @@ const mountSetup = user => {
       preEnableTOTP: () => ({
         totp_provisionning_uri: 'otpauth://totp/Kitsu:ada?secret=ABC',
         otp_secret: 'ABC'
-      })
+      }),
+      ...actions
     }
   })
   return mount(TwoFactorAuthenticationSetup, {
@@ -111,5 +112,18 @@ describe('widgets/TwoFactorAuthenticationSetup', () => {
       [label('email_otp.button_enable'), false],
       [label('fido.button_register'), false]
     ])
+  })
+
+  // The release of Enter on Enable TOTP lands in the code field when the
+  // server answers before it.
+  it('checks no empty setup code', async () => {
+    const enableTOTP = vi.fn()
+    const wrapper = mountSetup({}, { enableTOTP })
+    await findButton(wrapper, label('totp.button_enable')).trigger('click')
+    await flushPromises()
+
+    await wrapper.find('.otp-input').trigger('keyup', { key: 'Enter' })
+
+    expect(enableTOTP).not.toHaveBeenCalled()
   })
 })

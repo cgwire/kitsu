@@ -212,8 +212,11 @@ const updatePayload = () => {
   twoFactorPayload.value[chosenTwoFA.value] = OTPValue.value
 }
 
+// The release of the key that showed the code field lands in it, as an Enter
+// without a code.
 const validate = () => {
-  emit('validate', twoFactorPayload.value)
+  const hasCode = Object.values(twoFactorPayload.value).some(Boolean)
+  if (hasCode) emit('validate', twoFactorPayload.value)
 }
 
 const removeErrors = () => {

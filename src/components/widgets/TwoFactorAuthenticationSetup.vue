@@ -743,7 +743,10 @@ const newRecoveryCodesRequested = payload => {
   }
 }
 
+// The release of Enter on an Enable button lands in the code field when the
+// server answers first.
 const nextEnable = () => {
+  if (!twoFA.validationOTP) return
   if (twoFA.TOTPPreEnabled) enableTOTPRequested()
   else if (twoFA.emailOTPPreEnabled) enableEmailOTPRequested()
 }
