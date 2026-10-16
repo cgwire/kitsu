@@ -95,6 +95,20 @@ const cache = {
   todosIndex: {}
 }
 
+// Zou's order (TWO_FACTOR_FALLBACKS), so the page agrees with it until a
+// reload.
+const TWO_FACTOR_FALLBACKS = {
+  totp: ['fido', 'email_otp'],
+  email_otp: ['fido', 'totp'],
+  fido: ['totp', 'email_otp']
+}
+
+const preferNextTwoFactor = (user, method) => {
+  if (user.preferred_two_factor_authentication !== method) return
+  user.preferred_two_factor_authentication =
+    TWO_FACTOR_FALLBACKS[method].find(next => user[`${next}_enabled`]) ?? null
+}
+
 const initialState = {
   user: null,
   isAuthenticated: false,
@@ -580,15 +594,7 @@ const mutations = {
 
   [USER_DISABLE_TOTP_SUCCESS](state) {
     state.user.totp_enabled = false
-    if (state.user.preferred_two_factor_authentication === 'totp') {
-      if (state.user.fido_enabled) {
-        state.user.preferred_two_factor_authentication = 'fido'
-      } else if (state.user.email_otp_enabled) {
-        state.user.preferred_two_factor_authentication = 'email_otp'
-      } else {
-        state.user.preferred_two_factor_authentication = null
-      }
-    }
+    preferNextTwoFactor(state.user, 'totp')
   },
 
   [USER_ENABLE_EMAIL_OTP_SUCCESS](state) {
@@ -600,15 +606,7 @@ const mutations = {
 
   [USER_DISABLE_EMAIL_OTP_SUCCESS](state) {
     state.user.email_otp_enabled = false
-    if (state.user.preferred_two_factor_authentication === 'email_otp') {
-      if (state.user.fido_enabled) {
-        state.user.preferred_two_factor_authentication = 'fido'
-      } else if (state.user.totp_otp_enabled) {
-        state.user.preferred_two_factor_authentication = 'totp'
-      } else {
-        state.user.preferred_two_factor_authentication = null
-      }
-    }
+    preferNextTwoFactor(state.user, 'email_otp')
   },
 
   [USER_REGISTER_FIDO_SUCCESS](state, deviceName) {
@@ -629,15 +627,7 @@ const mutations = {
     }
     if (state.user.fido_devices.length === 0) {
       state.user.fido_enabled = false
-      if (state.user.preferred_two_factor_authentication === 'fido') {
-        if (state.user.email_otp_enabled) {
-          state.user.preferred_two_factor_authentication = 'email_otp'
-        } else if (state.user.totp_otp_enabled) {
-          state.user.preferred_two_factor_authentication = 'totp'
-        } else {
-          state.user.preferred_two_factor_authentication = null
-        }
-      }
+      preferNextTwoFactor(state.user, 'fido')
     }
   },
 
