@@ -779,3 +779,100 @@ describe('Sequences store, DELETE_TASK_END', () => {
     expect([...sequence.validations]).toEqual([['tt2', 't2']])
   })
 })
+
+// The search reads the index of the cached list: every change of that list
+// has to rebuild this index.
+describe('Sequences store, search index', () => {
+  const production = { id: 'p-search', descriptors: [] }
+
+  const buildSequence = (id, name) => ({
+    id,
+    name,
+    data: {},
+    description: '',
+    tasks: []
+  })
+
+  const load = sequences => {
+    const state = { sequenceSorting: [] }
+    sequencesStore.mutations.SET_SEQUENCES_WITH_TASKS(state, {
+      episodeMap: new Map(),
+      userFilters: {},
+      personMap: new Map(),
+      production,
+      sequences,
+      taskMap: new Map(),
+      taskTypeMap: new Map(),
+      taskStatusMap: new Map(),
+      loadingKey: 'p-search/all'
+    })
+    return state
+  }
+
+  const search = (state, sequenceSearch) => {
+    sequencesStore.mutations.SET_SEQUENCE_SEARCH(state, {
+      sequenceSearch,
+      production,
+      taskStatusMap: new Map(),
+      taskTypeMap: new Map(),
+      persons: [],
+      taskMap: new Map()
+    })
+    return state.displayedSequences.map(({ name }) => name)
+  }
+
+  test('finds an edited sequence under its new name only', () => {
+    const state = load([
+      buildSequence('sq-1', 'SQ010'),
+      buildSequence('sq-2', 'SQ020')
+    ])
+
+    sequencesStore.mutations.EDIT_SEQUENCE_END(
+      state,
+      buildSequence('sq-2', 'SQ999')
+    )
+
+    expect(search(state, 'SQ999')).toEqual(['SQ999'])
+    expect(search(state, 'SQ020')).toEqual([])
+  })
+
+  test('finds a sequence another user renamed', () => {
+    const state = load([
+      buildSequence('sq-1', 'SQ010'),
+      buildSequence('sq-2', 'SQ020')
+    ])
+
+    sequencesStore.mutations.UPDATE_SEQUENCE(
+      state,
+      buildSequence('sq-2', 'SQ999')
+    )
+
+    expect(search(state, 'SQ999')).toEqual(['SQ999'])
+  })
+
+  test('finds a sequence another user added', () => {
+    const state = load([buildSequence('sq-1', 'SQ010')])
+
+    sequencesStore.mutations.ADD_SEQUENCE(state, {
+      sequence: buildSequence('sq-3', 'SQ030'),
+      episodeMap: new Map()
+    })
+
+    expect(search(state, 'SQ030')).toEqual(['SQ030'])
+  })
+
+  test('searches the sequences of a load without tasks', () => {
+    const state = load([buildSequence('sq-1', 'SQ010')])
+
+    sequencesStore.mutations.LOAD_SEQUENCES_END(state, {
+      sequences: [buildSequence('sq-4', 'SQ040')],
+      episodeMap: new Map(),
+      production,
+      userFilters: {},
+      loadingKey: 'p-search/all'
+    })
+
+    expect(search(state, 'SQ040')).toEqual(['SQ040'])
+    expect(search(state, 'SQ010')).toEqual([])
+  })
+})
