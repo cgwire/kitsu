@@ -785,6 +785,16 @@ const isAssetShown = asset => {
   )
 }
 
+// Selectable if the cell already holds a task or if the task type is
+// included in the workflow. Cells with existing tasks stay actionable
+// even when a workflow change removed their task type, so they can
+// still be selected and managed instead of freezing.
+const isSelectable = (asset, columnId) => {
+  if (asset.shared) return false
+  if (taskMap.value.get(asset.validations?.get(columnId))) return true
+  return getAllowedTaskTypeIds(asset.asset_type_id).includes(columnId)
+}
+
 // Filter the displayed assets by the display settings.
 const filteredDisplayedAssets = computed(() => {
   const { showSharedAssets, showLinkedAssets } = props.displaySettings
@@ -842,6 +852,7 @@ const {
   emit,
   entities: filteredDisplayedAssets,
   isEntityShown: isAssetShown,
+  isCellSelectable: isSelectable,
   filledColumns: inWorkflowFilledColumns,
   metadataDescriptors: assetMetadataDescriptors,
   metadataDisplayHeaders: {
@@ -869,16 +880,6 @@ const assetEpisodes = (asset, full) => {
       ? `${episodeNames.slice(0, 2).join(', ')}, ...`
       : episodeNames.join(', ')
   return `${mainEpisodeName}, ${listedNames}`
-}
-
-// Selectable if the cell already holds a task or if the task type is
-// included in the workflow. Cells with existing tasks stay actionable
-// even when a workflow change removed their task type, so they can
-// still be selected and managed instead of freezing.
-const isSelectable = (asset, columnId) => {
-  if (asset.shared) return false
-  if (taskMap.value.get(asset.validations?.get(columnId))) return true
-  return getAllowedTaskTypeIds(asset.asset_type_id).includes(columnId)
 }
 
 // Rows are numbered as rendered, hidden assets left out: the task of the url

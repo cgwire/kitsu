@@ -128,17 +128,24 @@ describe('lists/AssetList task selection', () => {
   const layout = { id: 'task-type-layout', name: 'Layout', color: '#000' }
   const color = { id: 'task-type-color', name: 'Color', color: '#000' }
 
-  const buildEpisodeAsset = (name, episodeId, assetTypeId) => ({
+  const buildEpisodeAsset = (
+    name,
+    episodeId,
+    assetTypeId,
+    taskTypes = [layout, color]
+  ) => ({
     id: `asset-${name}`,
     name,
     full_name: name,
     data: {},
     asset_type_id: assetTypeId,
     episode_id: episodeId,
-    validations: new Map([
-      [layout.id, `task-${name}-layout`],
-      [color.id, `task-${name}-color`]
-    ])
+    validations: new Map(
+      taskTypes.map(taskType => [
+        taskType.id,
+        `task-${name}-${taskType.name.toLowerCase()}`
+      ])
+    )
   })
 
   // Assets of the first episode cast in the second one sort before its own
@@ -157,7 +164,7 @@ describe('lists/AssetList task selection', () => {
   let listedAssets = []
 
   // The store result holds every listed asset, the hidden ones included.
-  const mountList = async (displayedAssets, query = {}) => {
+  const mountList = async (displayedAssets, query = {}, displaySettings = {}) => {
     listedAssets = displayedAssets.flat()
     listedAssets.forEach(asset => assetStore.cache.assetMap.set(asset.id, asset))
     assetStore.cache.result = listedAssets
@@ -187,7 +194,8 @@ describe('lists/AssetList task selection', () => {
         displaySettings: {
           showInfos: true,
           showLinkedAssets: false,
-          showSharedAssets: true
+          showSharedAssets: true,
+          ...displaySettings
         },
         displayedAssets,
         validationColumns: [layout.id, color.id]
@@ -230,6 +238,7 @@ describe('lists/AssetList task selection', () => {
   afterEach(() => {
     listedAssets.forEach(asset => assetStore.cache.assetMap.delete(asset.id))
     assetStore.cache.result = []
+    assetTypeStore.cache.assetTypeMap.delete(charactersTypeId)
     localStorage.clear()
   })
 
@@ -274,6 +283,36 @@ describe('lists/AssetList task selection', () => {
     const ownCells = ownBackgrounds.map(({ name }) => `${name} Layout`)
     expect(selectedCells(wrapper)).toEqual(ownCells)
     expect(committedSelection(wrapper)).toEqual(ownCells)
+
+    wrapper.unmount()
+  })
+
+  test('Select column leaves the grayed cells out', async () => {
+    // Color is outside the workflow of the characters, and a library cell
+    // is never selectable. The characters come first: the next rows keep
+    // their place.
+    assetTypeStore.cache.assetTypeMap.set(charactersTypeId, {
+      id: charactersTypeId,
+      task_types: [layout.id]
+    })
+    const characters = ['E02_CH_01', 'E02_CH_02'].map(name =>
+      buildEpisodeAsset(name, 'episode-2', charactersTypeId, [layout])
+    )
+    const library = {
+      ...buildEpisodeAsset('LIB_BG_01', null, backgroundsTypeId, []),
+      shared: true
+    }
+    const wrapper = await mountList(
+      [characters, [...ownBackgrounds, library]],
+      {},
+      { showLinkedAssets: true }
+    )
+
+    await selectColumn(wrapper, color)
+
+    const backgroundCells = ownBackgrounds.map(({ name }) => `${name} Color`)
+    expect(selectedCells(wrapper)).toEqual(backgroundCells)
+    expect(committedSelection(wrapper)).toEqual(backgroundCells)
 
     wrapper.unmount()
   })

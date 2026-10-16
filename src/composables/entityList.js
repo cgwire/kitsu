@@ -165,6 +165,8 @@ export const getNextEditableCell = (cell, key) => {
  * - entities: ref of the displayed entities, grouped for assets and shots
  * - isEntityShown: whether the display settings show an entity of the store
  *   result, which Select column goes through
+ * - isCellSelectable: whether the cell of an entity in a task type column
+ *   can be selected, which Select column goes through too
  * - filledColumns: ref of the columns holding at least one task
  * - metadataDescriptors: ref of the production descriptors of the type
  * - metadataDisplayHeaders: the initial column display switches
@@ -177,6 +179,7 @@ export const useEntityList = ({
   emit,
   entities,
   isEntityShown = () => true,
+  isCellSelectable = () => true,
   filledColumns,
   metadataDescriptors,
   metadataDisplayHeaders: initialDisplayHeaders = {},
@@ -737,13 +740,17 @@ export const useEntityList = ({
   const onSelectColumn = () => {
     const taskTypeId = lastHeaderMenuDisplayed.value
     const y = getColumnIndexInGrid(taskTypeId)
+    // The rows are numbered before the grayed cells leave: the next rows
+    // keep their place in the grid.
     const selection = ENTITY_STORES[type].cache.result
       .filter(entity => !entity.canceled && isEntityShown(entity))
-      .map((entity, i) => ({
+      .map((entity, x) => ({ entity, x }))
+      .filter(({ entity }) => isCellSelectable(entity, taskTypeId))
+      .map(({ entity, x }) => ({
         entity,
         column: taskTypeMap.value.get(taskTypeId),
         task: taskMap.value.get(entity.validations.get(taskTypeId)),
-        x: i,
+        x,
         y
       }))
 
