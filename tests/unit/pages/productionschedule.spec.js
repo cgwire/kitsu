@@ -22,6 +22,7 @@ import ProductionSchedule from '@/components/pages/ProductionSchedule.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Checkbox from '@/components/widgets/Checkbox.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxNumber from '@/components/widgets/ComboboxNumber.vue'
 import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DateField from '@/components/widgets/DateField.vue'
@@ -260,7 +261,7 @@ const setTaskTypeVisible = async (wrapper, taskTypeId, value) => {
 }
 
 const toggleSidePanel = async wrapper => {
-  findButton(wrapper, 'menu.assign_tasks').vm.$emit('click')
+  findButton(wrapper, 'schedule.batch_schedule').vm.$emit('click')
   await flushPromises()
 }
 
@@ -273,6 +274,15 @@ const pickTaskType = async (wrapper, taskTypeId) => {
   wrapper
     .findComponent(ComboboxTaskType)
     .vm.$emit('update:model-value', taskTypeId)
+  await flushPromises()
+}
+
+// the sequence / asset type combobox of the panel
+const pickEntityGroup = async (wrapper, groupId = 'asset-type-props') => {
+  wrapper
+    .find('.side-column')
+    .findComponent(Combobox)
+    .vm.$emit('update:model-value', groupId)
   await flushPromises()
 }
 
@@ -311,6 +321,7 @@ describe('ProductionSchedule page', () => {
     taskTypeStore.cache.taskTypeMap.clear()
     assetTypeStore.cache.assetTypeMap.clear()
     assetStore.cache.assets = []
+    localStorage.clear()
     vi.restoreAllMocks()
     vi.useRealTimers()
   })
@@ -669,6 +680,46 @@ describe('ProductionSchedule page', () => {
     })
   })
 
+  describe('filter preferences', () => {
+    const zoomField = wrapper => wrapper.findComponent(ComboboxNumber)
+    const entityField = wrapper => findCombobox(wrapper, 'main.entities')
+
+    it('opens on the week zoom', async () => {
+      const { wrapper } = await mountPage()
+
+      expect(zoomField(wrapper).props('modelValue')).toBe(0)
+    })
+
+    it('restores the filters of the last visit', async () => {
+      const first = await mountPage()
+      zoomField(first.wrapper).vm.$emit('update:model-value', 2)
+      entityField(first.wrapper).vm.$emit('update:model-value', 'Shot')
+      await setTaskTypeVisible(first.wrapper, 'tt-animation', false)
+      first.wrapper.unmount()
+
+      const { wrapper } = await mountPage()
+
+      expect(zoomField(wrapper).props('modelValue')).toBe(2)
+      expect(entityField(wrapper).props('modelValue')).toBe('Shot')
+      expect(
+        wrapper.findComponent(ComboboxOptions).props('modelValue')
+      ).toMatchObject({ 'tt-animation': false })
+    })
+
+    it('prefers the query to the stored filters', async () => {
+      const first = await mountPage()
+      zoomField(first.wrapper).vm.$emit('update:model-value', 2)
+      entityField(first.wrapper).vm.$emit('update:model-value', 'Shot')
+      await flushPromises()
+      first.wrapper.unmount()
+
+      const { wrapper } = await mountPage({ query: { zoom: '1', type: 'Asset' } })
+
+      expect(zoomField(wrapper).props('modelValue')).toBe(1)
+      expect(entityField(wrapper).props('modelValue')).toBe('Asset')
+    })
+  })
+
   describe('route', () => {
     it('pushes a history entry when the mode changes', async () => {
       const { router, wrapper } = await mountPage()
@@ -690,6 +741,19 @@ describe('ProductionSchedule page', () => {
   // The date fields of the page are utc ones: they hold a day at UTC
   // midnight. At 00:30 local time, east of UTC, the UTC day is still the
   // day before.
+  describe('toolbar', () => {
+    it('hides the date row until the more filters button is clicked', async () => {
+      const { wrapper } = await mountPage()
+      const rows = wrapper.findAll('.toolbar-row')
+      expect(rows).toHaveLength(2)
+      // the page is not attached to the document: read the v-show style
+      expect(rows[1].attributes('style')).toContain('display: none')
+
+      await wrapper.find('.toggle-filters').trigger('click')
+      expect(rows[1].attributes('style') ?? '').not.toContain('display: none')
+    })
+  })
+
   describe('default dates', () => {
     const today = new Date('2026-10-06T00:00:00.000Z')
     const fieldDates = parent =>
@@ -708,39 +772,6 @@ describe('ProductionSchedule page', () => {
       assetStore.cache.assetMap.clear()
     })
 
-    it('dates an assignment from the panel on the local day', async () => {
-      const asset = {
-        id: 'asset-1',
-        name: 'Chair',
-        asset_type_id: 'asset-type-props'
-      }
-      assetStore.cache.assets = [asset]
-      assetStore.cache.assetMap.set(asset.id, asset)
-      const { wrapper } = await mountPage({
-        actions: {
-          loadTasks: vi.fn(() => [
-            {
-              id: 'task-1',
-              entity_id: 'asset-1',
-              task_type_id: 'tt-modeling',
-              assignees: []
-            }
-          ])
-        },
-        getters: {
-          productionAssetTypes: () => [
-            { id: 'asset-type-props', name: 'Props', task_types: [] }
-          ]
-        }
-      })
-      await toggleSidePanel(wrapper)
-      await pickTaskType(wrapper, 'tt-modeling')
-
-      await wrapper.find('.side-column .assignment-item').trigger('click')
-
-      expect(fieldDates(wrapper.find('.side-column'))).toEqual([today, today])
-    })
-
     it('ranges a production without dates from the local day', async () => {
       const { wrapper } = await mountPage({
         getters: {
@@ -752,7 +783,7 @@ describe('ProductionSchedule page', () => {
         }
       })
 
-      expect(fieldDates(wrapper.find('.project-dates'))).toEqual([
+      expect(fieldDates(wrapper.find('.schedule-toolbar'))).toEqual([
         today,
         new Date('2027-04-06T23:59:59.999Z')
       ])
@@ -864,6 +895,99 @@ describe('ProductionSchedule page', () => {
       expect(payloadsOf(storeActions.saveScheduleItem)[1].id).toBe(
         'bar-modeling'
       )
+    })
+
+    // A shift drag moves the tasks under a bar: the widget stamps where
+    // each one started from, the page asks before saving them all.
+    it('asks before saving the tasks a shift-dragged row carried along', async () => {
+      const { storeActions, wrapper } = await mountPage()
+      const taskTypeBar = rowsOf(wrapper)[0]
+      const movedBar = buildBar('2026-02-11', '2026-02-20')
+      taskTypeBar.children = [movedBar]
+      movedBar.parentElement = taskTypeBar
+      // Monday 9 to Wednesday 11 February, moved by ten days
+      const task = {
+        type: 'Task',
+        id: 'task-1',
+        assignees: ['person-1'],
+        estimation: 3 * 8 * 60,
+        startDate: day('2026-02-19'),
+        endDate: day('2026-02-21'),
+        _dragOrigStartDate: day('2026-02-09'),
+        _dragOrigEndDate: day('2026-02-11'),
+        parentElement: movedBar
+      }
+      movedBar.children = new Map([['person-1', [task]]])
+
+      await changeItem(wrapper, movedBar)
+
+      expect(wrapper.findComponent(ConfirmModal).props('text')).toContain(
+        '"count":1'
+      )
+      expect(storeActions.updateTask).not.toHaveBeenCalled()
+
+      wrapper.findComponent(ConfirmModal).vm.$emit('confirm')
+      await flushPromises()
+
+      expect(wrapper.findComponent(ConfirmModal).exists()).toBe(false)
+      expect(payloadsOf(storeActions.updateTask)).toHaveLength(1)
+      expect(payloadsOf(storeActions.updateTask)[0].data).toMatchObject({
+        start_date: '2026-02-19',
+        due_date: '2026-02-23'
+      })
+      // the page hands the store its reactive proxy of the bar
+      expect(
+        payloadsOf(storeActions.saveScheduleItem).map(bar => bar.start_date)
+      ).toContain('2026-02-11')
+    })
+
+    // A confirmed move can save a thousand tasks: the modal shows it is
+    // working and how far it got, and ignores a cancel in the meantime.
+    it('reports the progress of a long confirmation', async () => {
+      const resolvers = []
+      const { storeActions, wrapper } = await mountPage({
+        actions: {
+          updateTask: vi.fn(() => new Promise(resolve => resolvers.push(resolve)))
+        }
+      })
+      const taskTypeBar = rowsOf(wrapper)[0]
+      const movedBar = buildBar('2026-02-11', '2026-02-20')
+      taskTypeBar.children = [movedBar]
+      movedBar.parentElement = taskTypeBar
+      const tasks = Array.from({ length: 12 }, (_, index) => ({
+        type: 'Task',
+        id: `task-${index}`,
+        assignees: ['person-1'],
+        estimation: 8 * 60,
+        startDate: day('2026-02-19'),
+        endDate: day('2026-02-19'),
+        _dragOrigStartDate: day('2026-02-09'),
+        _dragOrigEndDate: day('2026-02-09'),
+        parentElement: movedBar
+      }))
+      movedBar.children = new Map([['person-1', tasks]])
+      await changeItem(wrapper, movedBar)
+
+      wrapper.findComponent(ConfirmModal).vm.$emit('confirm')
+      await flushPromises()
+
+      // the bar and the first nine tasks are in flight
+      expect(wrapper.findComponent(ConfirmModal).props('isLoading')).toBe(true)
+      expect(wrapper.findComponent(ConfirmModal).props('progress')).toBe(0)
+      expect(storeActions.updateTask).toHaveBeenCalledTimes(9)
+
+      wrapper.findComponent(ConfirmModal).vm.$emit('cancel')
+      await flushPromises()
+      expect(wrapper.findComponent(ConfirmModal).exists()).toBe(true)
+
+      resolvers.splice(0).forEach(resolve => resolve())
+      await flushPromises()
+      expect(wrapper.findComponent(ConfirmModal).props('progress')).toBe(77)
+      expect(storeActions.updateTask).toHaveBeenCalledTimes(12)
+
+      resolvers.splice(0).forEach(resolve => resolve())
+      await flushPromises()
+      expect(wrapper.findComponent(ConfirmModal).exists()).toBe(false)
     })
 
     // A task stretching past both ends of its bars must save each bar once
@@ -1034,7 +1158,7 @@ describe('ProductionSchedule page', () => {
     const selectProps = async wrapper => {
       await toggleSidePanel(wrapper)
       await pickTaskType(wrapper, 'tt-modeling')
-      await wrapper.find('.side-column .assignment-item').trigger('click')
+      await pickEntityGroup(wrapper)
     }
 
     // Monday 6 to Wednesday 8 April: three working days. A null start keeps
@@ -1074,6 +1198,9 @@ describe('ProductionSchedule page', () => {
     }
 
     const panelText = wrapper => wrapper.find('.side-column').text()
+    // TextField is stubbed: the estimate is its placeholder prop
+    const estimatedQuota = wrapper =>
+      wrapper.findComponent('.daily-quotas').props('placeholder')
 
     const writesOf = storeActions =>
       [
@@ -1178,30 +1305,10 @@ describe('ProductionSchedule page', () => {
       expect(findButton(wrapper, 'main.apply').props('isLoading')).toBe(true)
     })
 
-    const goBack = wrapper =>
-      wrapper.find('.side-column button.is-link').trigger('click')
-
     const panelReuses = [
-      [
-        'a new selection',
-        async wrapper => {
-          await goBack(wrapper)
-          await wrapper.find('.side-column .assignment-item').trigger('click')
-        }
-      ],
-      [
-        'a drop on the schedule',
-        async wrapper => {
-          await goBack(wrapper)
-          findSchedule(wrapper).vm.$emit(
-            'item-drop',
-            { start_date: '2026-04-06' },
-            { start_date: '2026-04-06', end_date: '2026-04-08' }
-          )
-          await flushPromises()
-        }
-      ],
-      ['another task type', wrapper => pickTaskType(wrapper, 'tt-layout')],
+      ['a new selection', wrapper => pickEntityGroup(wrapper), true],
+      // the group list changes with the task type: none selected yet
+      ['another task type', wrapper => pickTaskType(wrapper, 'tt-layout'), false],
       [
         'a task edit',
         async wrapper => {
@@ -1221,13 +1328,14 @@ describe('ProductionSchedule page', () => {
             [task]
           )
           await flushPromises()
-        }
+        },
+        true
       ]
     ]
 
     it.each(panelReuses)(
       'clears the error when the panel goes on with %s',
-      async (_, reuse) => {
+      async (_, reuse, formStays) => {
         vi.spyOn(console, 'error').mockImplementation(() => {})
         const { wrapper } = await mountAssignments({
           actions: {
@@ -1241,10 +1349,104 @@ describe('ProductionSchedule page', () => {
 
         await reuse(wrapper)
 
-        expect(wrapper.find('.side-column form').exists()).toBe(true)
+        expect(wrapper.find('.side-column form').exists()).toBe(formStays)
         expect(panelText(wrapper)).not.toContain('schedule.assign_error')
       }
     )
+
+    const rangeOf = wrapper =>
+      wrapper
+        .find('.side-column form')
+        .findAllComponents(DateField)
+        .slice(0, 2)
+        .map(field => field.props('modelValue'))
+
+    it('defaults the range to the bar of the group', async () => {
+      const { wrapper } = await mountAssignments()
+      findSchedule(wrapper).vm.$emit('root-element-expanded', rowsOf(wrapper)[0])
+      await waitForLoad()
+      await selectProps(wrapper)
+
+      expect(rangeOf(wrapper)).toEqual(['2026-02-01', '2026-02-20'])
+    })
+
+    it('counts the tasks without dates on the row', async () => {
+      propAssets.forEach(asset => assetStore.cache.assetMap.set(asset.id, asset))
+      const { wrapper } = await mountAssignments()
+      const modelingRow = rowsOf(wrapper)[0]
+      findSchedule(wrapper).vm.$emit('root-element-expanded', modelingRow)
+      await waitForLoad()
+
+      expect(modelingRow.children[0].nbUndatedTasks).toBe(2)
+      assetStore.cache.assetMap.clear()
+    })
+
+    it('opens the panel on the group a row asks to plan', async () => {
+      const { wrapper } = await mountAssignments()
+      const modelingRow = rowsOf(wrapper)[0]
+      findSchedule(wrapper).vm.$emit('root-element-expanded', modelingRow)
+      await waitForLoad()
+
+      findSchedule(wrapper).vm.$emit(
+        'plan-entity',
+        modelingRow,
+        modelingRow.children[0]
+      )
+      await flushPromises()
+
+      expect(wrapper.find('.side-column form').exists()).toBe(true)
+      expect(
+        wrapper.find('.side-column').findComponent(Combobox).props('modelValue')
+      ).toBe('asset-type-props')
+      expect(wrapper.findAll('.side-list.entities li').length).toBe(2)
+    })
+
+    it('marks the entities already assigned in the list', async () => {
+      // the row groups dated tasks of mapped assets by assignee
+      propAssets.forEach(asset => assetStore.cache.assetMap.set(asset.id, asset))
+      const { wrapper } = await mountAssignments({
+        actions: {
+          loadTasks: vi.fn(() =>
+            propAssets.slice(0, 2).map((asset, index) => ({
+              id: `task-${asset.id}`,
+              entity_id: asset.id,
+              assignees: index === 0 ? ['person-1'] : [],
+              start_date: '2026-04-06'
+            }))
+          )
+        }
+      })
+      await selectProps(wrapper)
+      wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.props('icon') === 'user-check')
+        .vm.$emit('click')
+      await flushPromises()
+
+      const rows = wrapper.findAll('.side-list.entities li')
+      expect(rows.map(row => row.classes('assigned'))).toEqual([true, false])
+      expect(rows[0].find('.assigned-icon').exists()).toBe(true)
+      assetStore.cache.assetMap.clear()
+    })
+
+    it('tells how many tasks were planned', async () => {
+      const { wrapper } = await mountAssignments()
+      await selectProps(wrapper)
+      await setRange(wrapper)
+      await apply(wrapper)
+
+      expect(panelText(wrapper)).toContain('schedule.assign_done {"count":2}')
+    })
+
+    it('stays open when the schedule is clicked outside a task', async () => {
+      const { wrapper } = await mountAssignments()
+      await selectProps(wrapper)
+
+      findSchedule(wrapper).vm.$emit('task-unselected')
+      await flushPromises()
+
+      expect(wrapper.find('.side-column form').exists()).toBe(true)
+    })
 
     // The bars of the tasks show once the Modeling row is expanded.
     const editTask = async (wrapper, task) => {
@@ -1326,12 +1528,11 @@ describe('ProductionSchedule page', () => {
 
     it.each([
       ['another task', wrapper => editTask(wrapper, buildTableTask())],
-      ['another task type', wrapper => pickTaskType(wrapper, 'tt-layout')],
       [
         'the assign mode',
         async wrapper => {
           await toggleSidePanel(wrapper)
-          await wrapper.find('.side-column .assignment-item').trigger('click')
+          await pickEntityGroup(wrapper)
         }
       ]
     ])(
@@ -1400,12 +1601,12 @@ describe('ProductionSchedule page', () => {
       await apply(wrapper)
       await apply(wrapper)
       await toggleSidePanel(wrapper)
-      await wrapper.find('.side-column .assignment-item').trigger('click')
+      await pickEntityGroup(wrapper)
 
       saves.forEach(reject => reject(new Error('Bad request')))
       await flushPromises()
 
-      expect(wrapper.find('.side-column h2').text()).toBe('menu.assign_tasks')
+      expect(wrapper.find('.side-column h2').text()).toBe('schedule.batch_schedule')
       expect(wrapper.find('.side-column form').exists()).toBe(true)
       expect(panelText(wrapper)).not.toContain('schedule.assign_error')
       expect(findButton(wrapper, 'main.apply').props('isLoading')).toBe(false)
@@ -1414,20 +1615,57 @@ describe('ProductionSchedule page', () => {
     // After a saved task edit, Assign tasks kept the state of the task form:
     // only the assignees of that task listed, and Override on. The next run
     // then cleared the assignees of the tasks it gave them.
+    it('hides the task type during a task edit', async () => {
+      const { wrapper } = await mountAssignments()
+      await editTask(wrapper, buildChairTask())
+
+      expect(wrapper.findComponent(ComboboxTaskType).exists()).toBe(false)
+      expect(wrapper.find('.side-column h2').text()).toBe('schedule.edit_task')
+    })
+
+    const pressEscape = async () => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+      await flushPromises()
+    }
+
+    it('closes the task edit on Escape, with no Cancel button', async () => {
+      const { scheduleWidget, wrapper } = await mountAssignments()
+      await editTask(wrapper, buildChairTask())
+      expect(wrapper.find('.side-column .is-link').exists()).toBe(false)
+      const selectionResets =
+        scheduleWidget.methods.resetSelection.mock.calls.length
+
+      await pressEscape()
+
+      expect(wrapper.find('.side-column').exists()).toBe(false)
+      expect(scheduleWidget.methods.resetSelection).toHaveBeenCalledTimes(
+        selectionResets + 1
+      )
+    })
+
+    it('keeps the batch form on Escape', async () => {
+      const { wrapper } = await mountAssignments()
+      await selectProps(wrapper)
+
+      await pressEscape()
+
+      expect(wrapper.find('.side-column form').exists()).toBe(true)
+    })
+
     it('starts Assign tasks from a clean panel after a task edit', async () => {
       const { storeActions, wrapper } = await mountAssignments()
       await editTask(wrapper, buildChairTask())
       await apply(wrapper)
 
       await toggleSidePanel(wrapper)
-      await wrapper.find('.side-column .assignment-item').trigger('click')
+      await pickEntityGroup(wrapper)
 
       expect(
         wrapper.findComponent(ComboboxTaskType).props('modelValue')
       ).toBe('tt-modeling')
       expect(
         wrapper
-          .find('.side-column table.assignees')
+          .find('.side-column .assignees')
           .findAllComponents(PeopleName)
           .map(name => name.props('person').id)
       ).toEqual(['person-1', 'person-2'])
@@ -1462,7 +1700,9 @@ describe('ProductionSchedule page', () => {
       expect(
         wrapper.findComponent(ComboboxTaskType).props('modelValue')
       ).toBeFalsy()
-      expect(wrapper.findAll('.side-column .assignment-item')).toHaveLength(0)
+      expect(
+        wrapper.find('.side-column').findComponent(Combobox).exists()
+      ).toBe(false)
     })
 
     // The save of a task wrote its dates into the form of the task the
@@ -1483,7 +1723,7 @@ describe('ProductionSchedule page', () => {
         await flushPromises()
       }
 
-      const [, , taskStartField] = wrapper
+      const [taskStartField] = wrapper
         .find('.side-column form')
         .findAllComponents(DateField)
       expect(taskStartField.props('modelValue')).toBe('2026-04-13')
@@ -1566,9 +1806,7 @@ describe('ProductionSchedule page', () => {
       await selectProps(wrapper)
       await setRange(wrapper)
 
-      expect(panelText(wrapper)).toContain(
-        'schedule.estimated_daily_quotas 0.33'
-      )
+      expect(estimatedQuota(wrapper)).toBe('0.33')
 
       await apply(wrapper)
 
@@ -1588,18 +1826,24 @@ describe('ProductionSchedule page', () => {
       expect(panelText(wrapper)).not.toContain('schedule.assign_no_fit')
     })
 
-    // The panel opens on today at the current time: the day count left
-    // that first day out once the end date was picked.
-    it('counts the first day of a range that starts now', async () => {
-      vi.useFakeTimers({ toFake: ['Date'] })
-      vi.setSystemTime(new Date('2026-04-06T10:30:00Z'))
-      const { storeActions, wrapper } = await mountAssignments()
+    // The panel opens on the bar of the group: its first day counts once
+    // the end date is picked.
+    it('counts the first day of the range the panel opened with', async () => {
+      const { storeActions, wrapper } = await mountAssignments({
+        actions: {
+          loadAssetTypeScheduleItems: vi.fn(() => [
+            {
+              ...buildAssetTypeBars()[0],
+              start_date: '2026-04-06',
+              end_date: '2026-04-07'
+            }
+          ])
+        }
+      })
       await selectProps(wrapper)
       await setRange(wrapper, null, '2026-04-07')
 
-      expect(panelText(wrapper)).toContain(
-        'schedule.estimated_daily_quotas 0.50'
-      )
+      expect(estimatedQuota(wrapper)).toBe('0.50')
 
       await apply(wrapper)
 
@@ -1645,7 +1889,7 @@ describe('ProductionSchedule page', () => {
       // Monday 6 April to Wednesday 19 August: 98 working days
       await setRange(wrapper, '2026-04-06', '2026-08-19')
       const [, removeBob] = wrapper
-        .find('.side-column table.assignees')
+        .find('.side-column .assignees')
         .findAllComponents(ButtonSimple)
       removeBob.vm.$emit('click')
       await flushPromises()
@@ -1676,7 +1920,7 @@ describe('ProductionSchedule page', () => {
       // Monday 6 to Tuesday 28 April: 17 working days
       await setRange(wrapper, '2026-04-06', '2026-04-28')
       const [, removeBob] = wrapper
-        .find('.side-column table.assignees')
+        .find('.side-column .assignees')
         .findAllComponents(ButtonSimple)
       removeBob.vm.$emit('click')
       await flushPromises()
@@ -1730,9 +1974,7 @@ describe('ProductionSchedule page', () => {
         await selectProps(wrapper)
         // Saturday 11 and Sunday 12 April
         await setRange(wrapper, '2026-04-11', '2026-04-12')
-        expect(panelText(wrapper)).toContain(
-          'schedule.estimated_daily_quotas 0.00'
-        )
+        expect(estimatedQuota(wrapper)).toBe('0.00')
 
         await apply(wrapper)
 
@@ -1835,7 +2077,7 @@ describe('ProductionSchedule page', () => {
 
     it.each(panelReuses)(
       'clears the no-fit message when the panel goes on with %s',
-      async (_, reuse) => {
+      async (_, reuse, formStays) => {
         const { wrapper } = await mountAssignments()
         await selectProps(wrapper)
         await setRange(wrapper)
@@ -1845,9 +2087,24 @@ describe('ProductionSchedule page', () => {
 
         await reuse(wrapper)
 
-        expect(wrapper.find('.side-column form').exists()).toBe(true)
+        expect(wrapper.find('.side-column form').exists()).toBe(formStays)
         expect(panelText(wrapper)).not.toContain('schedule.assign_no_fit')
       }
     )
+  })
+
+  describe('expand all', () => {
+    // Expand all drills every task type: the shot list (9.5 MB on a large
+    // production) was reloaded once per shot task type.
+    it('loads the entities of a kind once', async () => {
+      const { storeActions, wrapper } = await mountPage()
+      findSchedule(wrapper).vm.$emit('expand-all')
+      await waitForLoad()
+
+      expect(rowsOf(wrapper).every(row => row.expanded)).toBe(true)
+      expect(storeActions.loadTasks).toHaveBeenCalledTimes(3)
+      expect(storeActions.loadShots).toHaveBeenCalledTimes(1)
+      expect(storeActions.loadAssets).toHaveBeenCalledTimes(1)
+    })
   })
 })
