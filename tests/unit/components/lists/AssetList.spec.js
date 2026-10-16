@@ -1,8 +1,10 @@
 vi.mock('@/store', () => ({ default: {} }))
 
 import { flushPromises } from '@vue/test-utils'
+import { reactive } from 'vue'
 
 import AssetList from '@/components/lists/AssetList.vue'
+import assetStore from '@/store/modules/assets'
 import assetTypeStore from '@/store/modules/assettypes'
 
 import {
@@ -114,6 +116,122 @@ describe('lists/AssetList', () => {
       const asset = buildAsset(new Map([[modelingId, 'task-gone']]))
       expect((await selectableCells(asset)).modeling).toBe(false)
     })
+  })
+})
+
+describe('lists/AssetList selection from the url', () => {
+  const backgroundsTypeId = 'asset-type-backgrounds'
+
+  const buildEpisodeAsset = (name, episodeId, assetTypeId) => ({
+    id: `asset-${name}`,
+    name,
+    full_name: name,
+    data: {},
+    asset_type_id: assetTypeId,
+    episode_id: episodeId,
+    validations: new Map([[taskTypeId, `task-${name}`]])
+  })
+
+  // Assets of the first episode cast in the second one sort before its own
+  // assets, and the breakdown assets display option hides them.
+  const castBackgrounds = ['E01_BG_01', 'E01_BG_02', 'E01_BG_03'].map(name =>
+    buildEpisodeAsset(name, 'episode-1', backgroundsTypeId)
+  )
+  const ownBackgrounds = [
+    'E02_BG_20',
+    'E02_BG_21',
+    'E02_BG_22',
+    'E02_BG_23',
+    'E02_BG_24'
+  ].map(name => buildEpisodeAsset(name, 'episode-2', backgroundsTypeId))
+
+  let listedAssets = []
+
+  const mountList = async (displayedAssets, taskId) => {
+    listedAssets = displayedAssets.flat()
+    listedAssets.forEach(asset => assetStore.cache.assetMap.set(asset.id, asset))
+    const selectionState = { assetSelectionGrid: reactive(new Set()) }
+    const wrapper = await mountEntityList(AssetList, {
+      getters: {
+        assetSelectionGrid: selectionState.assetSelectionGrid,
+        currentEpisode: { id: 'episode-2' },
+        currentProduction: production,
+        displayedAssetsCount: listedAssets.length,
+        isTVShow: true,
+        productionAssetTaskTypes: [{ id: taskTypeId }],
+        taskMap: new Map(
+          listedAssets.map(asset => [
+            `task-${asset.name}`,
+            {
+              id: `task-${asset.name}`,
+              entity_id: asset.id,
+              task_type_id: taskTypeId
+            }
+          ])
+        ),
+        taskTypeMap: new Map([[taskTypeId, { id: taskTypeId, color: '#000' }]])
+      },
+      props: {
+        displaySettings: {
+          showInfos: true,
+          showLinkedAssets: false,
+          showSharedAssets: true
+        },
+        displayedAssets
+      },
+      query: { task_id: taskId }
+    })
+    // The real mutation fills the grid the cells read their state from.
+    wrapper.vm.$store.commit.mockImplementation((type, payload) =>
+      assetStore.mutations[type]?.(selectionState, payload)
+    )
+    return wrapper
+  }
+
+  const selectedAssetNames = wrapper =>
+    wrapper
+      .findAll('tbody tr.datatable-row')
+      .filter(
+        row => row.find('validation-cell-stub').attributes('selected') === 'true'
+      )
+      .map(row => row.find('router-link-stub').attributes('title'))
+
+  afterEach(() => {
+    listedAssets.forEach(asset => assetStore.cache.assetMap.delete(asset.id))
+  })
+
+  test('selects the cell of the task in the url below hidden cast assets', async () => {
+    const wrapper = await mountList(
+      [[...castBackgrounds, ...ownBackgrounds]],
+      'task-E02_BG_21'
+    )
+
+    wrapper.vm.selectTaskFromQuery()
+    await flushPromises()
+
+    expect(wrapper.findAll('tbody tr.datatable-row')).toHaveLength(5)
+    expect(selectedAssetNames(wrapper)).toEqual(['E02_BG_21'])
+
+    wrapper.unmount()
+  })
+
+  test('selects the cell of the task in the url after an asset type with hidden cast assets', async () => {
+    const characters = [
+      buildEpisodeAsset('E01_CH_01', 'episode-1', charactersTypeId),
+      buildEpisodeAsset('E02_CH_01', 'episode-2', charactersTypeId)
+    ]
+    const wrapper = await mountList(
+      [characters, [...castBackgrounds, ...ownBackgrounds]],
+      'task-E02_BG_21'
+    )
+
+    wrapper.vm.selectTaskFromQuery()
+    await flushPromises()
+
+    expect(wrapper.findAll('tbody tr.datatable-row')).toHaveLength(6)
+    expect(selectedAssetNames(wrapper)).toEqual(['E02_BG_21'])
+
+    wrapper.unmount()
   })
 })
 

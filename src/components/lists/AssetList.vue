@@ -845,7 +845,7 @@ const {
   type: 'asset',
   props,
   emit,
-  entities: computed(() => props.displayedAssets),
+  entities: filteredDisplayedAssets,
   filledColumns: inWorkflowFilledColumns,
   metadataDescriptors: assetMetadataDescriptors,
   metadataDisplayHeaders: {
@@ -885,7 +885,10 @@ const isSelectable = (asset, columnId) => {
   return getAllowedTaskTypeIds(asset.asset_type_id).includes(columnId)
 }
 
-const getIndex = (i, k) => getEntityLineNumber(props.displayedAssets, i, k)
+// Rows are numbered as rendered, hidden assets left out: the task of the url
+// is looked up in the same rows.
+const getIndex = (i, k) =>
+  getEntityLineNumber(filteredDisplayedAssets.value, i, k)
 
 const isSelected = (indexInGroup, groupIndex, columnIndex) =>
   assetSelectionGrid.value.has(
