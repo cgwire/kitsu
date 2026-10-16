@@ -155,6 +155,18 @@ const navigationFailureIntegration = {
   preprocessEvent(event, hint) {
     const kind = getNavigationFailureKind(hint.originalException)
     if (kind) nameNavigationFailure(event, hint.originalException, kind)
+  },
+  // Kitsu follows the redirects, and aborts and cancels are plain outcomes of
+  // the router: none crashes the session. The SDK only applies the handled
+  // false of the router capture after preprocessEvent.
+  processEvent(event, hint) {
+    if (getNavigationFailureKind(hint.originalException)) {
+      event.level = 'warning'
+      event.exception?.values?.forEach(({ mechanism }) => {
+        if (mechanism) mechanism.handled = true
+      })
+    }
+    return event
   }
 }
 

@@ -1,3 +1,4 @@
+import { startSession } from '@sentry/vue'
 import { createApp } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 
@@ -26,12 +27,12 @@ describe('lib/sentry with the SDK', () => {
   )
   let router
 
-  // The events of the envelopes posted to Sentry.
-  const getSentEvents = () =>
+  // The items of a type in the envelopes posted to Sentry.
+  const getSentItems = type =>
     fetch.mock.calls.flatMap(([, { body }]) => {
       const [, ...items] = body.split('\n')
       return items.flatMap((line, index) =>
-        index % 2 === 0 && JSON.parse(line).type === 'event'
+        index % 2 === 0 && JSON.parse(line).type === type
           ? [JSON.parse(items[index + 1])]
           : []
       )
@@ -88,10 +89,22 @@ describe('lib/sentry with the SDK', () => {
     fetch.mockClear()
   })
 
+  // Kitsu recovers from these failures: they must not count as crashes in
+  // the release health.
+  test('reports a navigation failure as handled, its session not crashed', async () => {
+    const { sid } = startSession()
+    await pushWithReplacedError(['/private'])
+    const [event] = getSentItems('event')
+    expect(event.level).toBe('warning')
+    expect(event.exception.values[0].mechanism.handled).toBe(true)
+    const sessions = getSentItems('session').filter(item => item.sid === sid)
+    expect(sessions.map(session => session.status)).toEqual(['ok'])
+  })
+
   // Dedupe drops an event like the one before it.
   test('sends a repeat of the same navigation failure once', async () => {
     await pushWithReplacedError(['/private', '/private'])
-    const events = getSentEvents()
+    const events = getSentItems('event')
     expect(events.map(event => event.exception.values[0].value)).toEqual([
       'redirect from private to login (window.Error replaced)'
     ])
@@ -99,7 +112,7 @@ describe('lib/sentry with the SDK', () => {
 
   test('sends each of two different navigation failures', async () => {
     await pushWithReplacedError(['/private', '/elsewhere'])
-    const events = getSentEvents()
+    const events = getSentItems('event')
     expect(events.map(event => event.exception.values[0].value)).toEqual([
       'redirect from private to login (window.Error replaced)',
       'redirect from elsewhere to other (window.Error replaced)'
