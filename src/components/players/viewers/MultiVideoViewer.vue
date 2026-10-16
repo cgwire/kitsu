@@ -482,16 +482,22 @@ const loadEntity = (index = 0, currentTime = 0, silentLoad = false) => {
     pendingSeekTime = null
     // Reuse the decoder that already holds the target movie (usually the
     // one that preloaded the next entity): swapping keeps its buffer
-    // instead of re-downloading on every manual navigation.
+    // instead of re-downloading on every manual navigation. The current one
+    // first: with a single movie in the playlist, both decoders hold it.
     const moviePath = getMoviePath(entity, props.currentPreviewIndex)
-    const preloadedPlayer = [player1Ref.value, player2Ref.value].find(
-      player => moviePath && player?.src.endsWith(moviePath)
-    )
+    const preloadedPlayer = [
+      currentPlayer.value,
+      player1Ref.value,
+      player2Ref.value
+    ].find(player => moviePath && player?.src.endsWith(moviePath))
     currentPlayer.value = preloadedPlayer || player1Ref.value
     nextPlayer.value =
       currentPlayer.value === player1Ref.value
         ? player2Ref.value
         : player1Ref.value
+    // The other decoder only preloads. It can still hold the movie played
+    // until now, which would go on, hidden, and end in place of this one.
+    nextPlayer.value?.pause()
     currentPlayer.value.removeEventListener('loadedmetadata', updateMaxDuration)
     currentPlayer.value.addEventListener('loadedmetadata', updateMaxDuration)
 
@@ -500,10 +506,7 @@ const loadEntity = (index = 0, currentTime = 0, silentLoad = false) => {
         currentPlayer.value.src = moviePath
       }
     } else {
-      // Nothing to play: stop the previous movie. Its decoder stays loaded
-      // when that movie comes next, and its end would move the playlist on.
-      player1Ref.value?.pause()
-      player2Ref.value?.pause()
+      // Nothing to play: the playback stops with the movie left.
       isPlaying.value = false
       if (currentPlayer.value) currentPlayer.value.src = ''
     }

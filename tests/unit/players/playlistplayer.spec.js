@@ -335,6 +335,30 @@ describe('PlaylistPlayer.vue', () => {
     })
   })
 
+  // The comparison viewer shows movies only: on a picture, a comparison
+  // movie still playing went on decoding, hidden.
+  it('stops the comparison movie on a move to a picture', async () => {
+    wrapper = mountPlayer({
+      entities: [
+        { ...entity, preview_file_extension: 'mp4' },
+        { id: 'shot-2', preview_file_id: 'preview-2', preview_file_extension: 'png' }
+      ]
+    })
+    await flushPromises()
+    const pause = vi.spyOn(
+      wrapper.findComponent({ ref: 'raw-player-comparison' }).vm,
+      'pause'
+    )
+
+    wrapper
+      .findAllComponents({ name: 'ButtonSimple' })
+      .find(button => button.attributes('title') === 'playlists.actions.next_shot')
+      .vm.$emit('click')
+    await flushPromises()
+
+    expect(pause).toHaveBeenCalled()
+  })
+
   // The player lays itself out, or turns the pencil back on, a little after
   // what asked for it: once closed, it has nothing left to work on.
   describe('timers of a closed player', () => {

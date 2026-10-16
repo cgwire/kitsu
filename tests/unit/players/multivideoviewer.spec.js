@@ -293,6 +293,8 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
     it('pauses on the held target and drops it', async () => {
       const { wrapper, player } = await mountSeekingViewer()
       wrapper.vm.setCurrentFrame(20)
+      // The load already paused the preloading decoder.
+      player.pause.mockClear()
       wrapper.vm.pause()
       expect(player.pause).toHaveBeenCalledOnce()
       expect(player.pause.mock.contexts[0]).toBe(player)
@@ -406,6 +408,41 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
 
       expect(HTMLMediaElement.prototype.pause.mock.contexts).toContain(player)
       expect(wrapper.emitted('play-next')).toBeUndefined()
+      wrapper.unmount()
+    })
+
+    // In a playlist of two movies, the one after the next is the one left:
+    // its decoder preloaded it again and played on, hidden, until its end
+    // cut the next movie short.
+    it('stops the movie it leaves for another one', async () => {
+      const { wrapper, player } = await mountLoaded()
+      wrapper.vm.play()
+
+      wrapper.vm.loadEntity(1)
+
+      expect(HTMLMediaElement.prototype.pause.mock.contexts).toContain(player)
+      wrapper.unmount()
+    })
+
+    // With a single movie in the playlist, both decoders hold it. A reload,
+    // on an element change, took the idle one and left the other playing.
+    it('reloads a movie in the decoder that plays it', async () => {
+      vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
+      const wrapper = mountViewer({
+        entities: [
+          { id: 'e1', preview_file_id: 'p1', preview_file_extension: 'mp4', fps: 25 },
+          { id: 'e2', preview_file_id: 'p2', preview_file_extension: 'png', fps: 25 }
+        ]
+      })
+      wrapper.vm.loadEntity(1, 0, true)
+      wrapper.vm.loadEntity(0)
+      await wrapper.vm.$nextTick()
+      const player = wrapper.vm.currentPlayer
+      wrapper.vm.play()
+
+      wrapper.vm.reloadCurrentEntity(true)
+
+      expect(wrapper.vm.currentPlayer).toBe(player)
       wrapper.unmount()
     })
   })

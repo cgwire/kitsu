@@ -2363,6 +2363,8 @@ const playEntity = (entityIndex, updateFullPlaylist = true, frame = -1) => {
     nextTick(() => {
       rawPlayer.value?.loadEntity(entityIndex, 0, true)
     })
+    // The comparison shows movies only: its movie would play on, hidden.
+    rawPlayerComparison.value?.pause()
     // Unlike movies, pictures have no time-update channel driving the
     // playlist playhead: jump it to the entity's slot here, even while
     // playing. Strip clicks/drags pass updateFullPlaylist=false and keep
