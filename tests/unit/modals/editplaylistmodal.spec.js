@@ -30,8 +30,14 @@ describe('EditPlaylistModal on the all pseudo-episode', () => {
     const wrapper = shallowMount(EditPlaylistModal, {
       global: {
         plugins: [store, i18n],
-        // shallowMount stubs BaseModal without its slot: render the form.
-        stubs: { BaseModal: { template: '<div><slot /></div>' } }
+        stubs: {
+          // shallowMount stubs BaseModal without its slot: render the form.
+          BaseModal: { template: '<div><slot /></div>' },
+          // The modal focuses its name field 100 ms after it opens, on the
+          // member the real TextField exposes. A stub without it throws once
+          // the tests are over.
+          TextField: { template: '<input />', methods: { focus() {} } }
+        }
       },
       props: { active: false, ...props }
     })
