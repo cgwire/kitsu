@@ -603,6 +603,10 @@ useHead({
 
 const templateId = computed(() => route.params.template_id)
 
+// The parameters as last loaded or sent: the autosave skips them, so a load
+// saves nothing.
+let savedParams = ''
+
 const loadTemplateData = async () => {
   const id = templateId.value
   const [tmpl, taskTypes, taskStatuses, assetTypes, automations, backgrounds] =
@@ -638,6 +642,7 @@ const loadTemplateData = async () => {
     is_frame_in_numbering: !!tmpl.is_frame_in_numbering,
     max_retakes: tmpl.max_retakes || 0
   }
+  savedParams = JSON.stringify(params.value)
   // Build roles map from task status link data (if available from API)
   const roles = {}
   taskStatuses.forEach(ts => {
@@ -682,6 +687,8 @@ const saveParameters = async () => {
       params.value[key] = bitrate
     }
   })
+  const previousParams = savedParams
+  savedParams = JSON.stringify(params.value)
   try {
     await store.dispatch('editProjectTemplate', {
       // The route can have left the template by the end of the delay.
@@ -692,6 +699,7 @@ const saveParameters = async () => {
       ...bitrates
     })
   } catch {
+    savedParams = previousParams
     errors.parameters = true
   }
   loading.parameters = false
@@ -701,8 +709,10 @@ let saveTimeout = null
 watch(
   () => ({ ...params.value }),
   () => {
-    if (!template.value?.id) return
     clearTimeout(saveTimeout)
+    if (!template.value?.id || JSON.stringify(params.value) === savedParams) {
+      return
+    }
     saveTimeout = setTimeout(saveParameters, 800)
   },
   { deep: true }
@@ -1223,11 +1233,6 @@ p {
   }
 
   /* Read-only mobile: hide all add buttons / mutation widgets */
-  /* Parameters: Save button row */
-  .tab .has-text-right {
-    display: none;
-  }
-
   /* Metadata: "Add a metadata" button row + actions column in the table */
   .tab > .flexrow.mt1.mb1 {
     display: none;

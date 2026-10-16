@@ -8,7 +8,8 @@ vi.mock('@/store/api/people', () => ({
   default: {
     loadDone: vi.fn(),
     loadTasksToCheck: vi.fn(),
-    loadTimeSpents: vi.fn()
+    loadTimeSpents: vi.fn(),
+    unregisterFIDO: vi.fn()
   }
 }))
 
@@ -260,6 +261,47 @@ describe('User store', () => {
       expect(state.projectRoles['production-1']).toBeUndefined()
     })
 
+    // Zou picks the next preferred method in the same order
+    // (TWO_FACTOR_FALLBACKS), so the page matches it until a reload.
+    describe('preferred 2FA method once one is turned off', () => {
+      const userWith = (preferred, enabled) => ({
+        preferred_two_factor_authentication: preferred,
+        totp_enabled: enabled.includes('totp'),
+        email_otp_enabled: enabled.includes('email_otp'),
+        fido_enabled: enabled.includes('fido'),
+        fido_devices: enabled.includes('fido') ? ['Yubikey'] : []
+      })
+
+      test('moves to FIDO, then email OTP, when TOTP goes', () => {
+        const state = { user: userWith('totp', ['totp', 'fido', 'email_otp']) }
+        store.mutations.USER_DISABLE_TOTP_SUCCESS(state)
+        expect(state.user.preferred_two_factor_authentication).toBe('fido')
+      })
+
+      test('moves to TOTP when email OTP goes', () => {
+        const state = { user: userWith('email_otp', ['email_otp', 'totp']) }
+        store.mutations.USER_DISABLE_EMAIL_OTP_SUCCESS(state)
+        expect(state.user.preferred_two_factor_authentication).toBe('totp')
+      })
+
+      test('moves to TOTP, then email OTP, when the last key goes', () => {
+        const state = { user: userWith('fido', ['fido', 'email_otp', 'totp']) }
+        store.mutations.USER_UNREGISTER_FIDO_SUCCESS(state, 'Yubikey')
+        expect(state.user.preferred_two_factor_authentication).toBe('totp')
+
+        const onlyTotp = { user: userWith('fido', ['fido', 'totp']) }
+        store.mutations.USER_UNREGISTER_FIDO_SUCCESS(onlyTotp, 'Yubikey')
+        expect(onlyTotp.user.preferred_two_factor_authentication).toBe('totp')
+      })
+
+      test('drops the preference when no method is left', () => {
+        const state = { user: userWith('fido', ['fido']) }
+        store.mutations.USER_UNREGISTER_FIDO_SUCCESS(state, 'Yubikey')
+        expect(state.user.preferred_two_factor_authentication).toBeNull()
+        expect(state.user.fido_enabled).toBe(false)
+      })
+    })
+
     test('USER_LOGOUT clears project roles', () => {
       const state = {
         user: { id: 'person-1' },
@@ -346,6 +388,26 @@ describe('User store', () => {
 
         expect(doneTasks).toEqual(tasks)
         expect(commit).toHaveBeenCalledWith('USER_LOAD_DONE_TASKS_END', tasks)
+      })
+    })
+
+    describe('unregisterFIDO', () => {
+      test('sends the 2FA code, then drops the device', async () => {
+        peopleApi.unregisterFIDO.mockResolvedValue({ success: true })
+        const commit = vi.fn()
+
+        await store.actions.unregisterFIDO(
+          { commit },
+          { deviceName: 'Yubikey', twoFactorPayload: { totp: '123456' } }
+        )
+
+        expect(peopleApi.unregisterFIDO).toHaveBeenCalledWith('Yubikey', {
+          totp: '123456'
+        })
+        expect(commit).toHaveBeenCalledWith(
+          'USER_UNREGISTER_FIDO_SUCCESS',
+          'Yubikey'
+        )
       })
     })
 

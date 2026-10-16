@@ -165,6 +165,29 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
     expect(rvfcCallbacks.length).toBe(registered)
   })
 
+  // A closed comparison empties its viewer: decoders left with their movies
+  // went on downloading them, or playing one, hidden.
+  it('releases its movies when its entities go', async () => {
+    vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
+    const wrapper = mountViewer()
+    wrapper.vm.loadEntity(0)
+    await wrapper.vm.$nextTick()
+    const player = wrapper.vm.currentPlayer
+    wrapper.vm.play()
+    HTMLMediaElement.prototype.pause.mockClear()
+
+    await wrapper.setProps({ entities: [] })
+
+    wrapper.findAll('video.playlist-movie-decoder').forEach(({ element }) => {
+      expect(element.hasAttribute('src')).toBe(false)
+      expect(HTMLMediaElement.prototype.load.mock.contexts).toContain(element)
+    })
+    expect(HTMLMediaElement.prototype.pause.mock.contexts).toContain(player)
+    expect(wrapper.vm.isPlaying).toBe(false)
+    expect(rvfcCancelled).toHaveLength(1)
+    wrapper.unmount()
+  })
+
   it('loads the video sub-element of a picture-main revision (#2095)', async () => {
     const store = createStore({
       getters: { currentProduction: () => ({ fps: '25' }) }
@@ -293,6 +316,8 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
     it('pauses on the held target and drops it', async () => {
       const { wrapper, player } = await mountSeekingViewer()
       wrapper.vm.setCurrentFrame(20)
+      // The load already paused the preloading decoder.
+      player.pause.mockClear()
       wrapper.vm.pause()
       expect(player.pause).toHaveBeenCalledOnce()
       expect(player.pause.mock.contexts[0]).toBe(player)
@@ -380,6 +405,67 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
       player.dispatchEvent(new Event('ended'))
 
       expect(wrapper.emitted('play-next')).toBeUndefined()
+      wrapper.unmount()
+    })
+
+    // The playlist moves to a 3D model while its movie plays. The movie
+    // comes next again, so its decoder stays loaded: it played on, hidden,
+    // and its end moved the playlist away from the model.
+    it('stops the movie when the playlist moves to an entity without one', async () => {
+      vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
+      const wrapper = mountViewer({
+        entities: [
+          { id: 'e1', preview_file_id: 'p1', preview_file_extension: 'mp4', fps: 25 },
+          { id: 'e2', preview_file_id: 'p2', preview_file_extension: 'glb', fps: 25 }
+        ]
+      })
+      // Back from the model, the movie plays in the decoder that preloaded it.
+      wrapper.vm.loadEntity(1, 0, true)
+      wrapper.vm.loadEntity(0)
+      await wrapper.vm.$nextTick()
+      const player = wrapper.vm.currentPlayer
+      wrapper.vm.play()
+
+      wrapper.vm.loadEntity(1, 0, true)
+      player.dispatchEvent(new Event('ended'))
+
+      expect(HTMLMediaElement.prototype.pause.mock.contexts).toContain(player)
+      expect(wrapper.emitted('play-next')).toBeUndefined()
+      wrapper.unmount()
+    })
+
+    // In a playlist of two movies, the one after the next is the one left:
+    // its decoder preloaded it again and played on, hidden, until its end
+    // cut the next movie short.
+    it('stops the movie it leaves for another one', async () => {
+      const { wrapper, player } = await mountLoaded()
+      wrapper.vm.play()
+
+      wrapper.vm.loadEntity(1)
+
+      expect(HTMLMediaElement.prototype.pause.mock.contexts).toContain(player)
+      wrapper.unmount()
+    })
+
+    // With a single movie in the playlist, both decoders hold it. A reload,
+    // on an element change, took the idle one and left the other playing.
+    it('reloads a movie in the decoder that plays it', async () => {
+      vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
+      const wrapper = mountViewer({
+        entities: [
+          { id: 'e1', preview_file_id: 'p1', preview_file_extension: 'mp4', fps: 25 },
+          { id: 'e2', preview_file_id: 'p2', preview_file_extension: 'png', fps: 25 }
+        ]
+      })
+      wrapper.vm.loadEntity(1, 0, true)
+      wrapper.vm.loadEntity(0)
+      await wrapper.vm.$nextTick()
+      const player = wrapper.vm.currentPlayer
+      wrapper.vm.play()
+
+      wrapper.vm.reloadCurrentEntity(true)
+
+      expect(wrapper.vm.currentPlayer).toBe(player)
       wrapper.unmount()
     })
   })

@@ -233,7 +233,6 @@
         "union_or": "以下のいずれかのフィルターに一致",
         "with_thumbnail": "サムネイルあり",
         "without_thumbnail": "サムネイルなし",
-        "department": "部門",
         "is_assets_ready": "アセットが準備完了",
         "assets_ready": "準備完了",
         "assets_not_ready": "準備未完了",
@@ -1312,6 +1311,7 @@
           "button_register": "新しい FIDO デバイスを登録",
           "error_register": "FIDO デバイスの登録中にエラーが発生しました。",
           "error_unregister": "FIDO デバイスの登録解除中にエラーが発生しました。",
+          "button_unregister": "検証して FIDO デバイスの登録を解除",
           "description": "ハードウェアキー（YubiKey）またはプラットフォーム認証器（Touch ID、Windows Hello）を使用します。",
           "name": "セキュリティキー"
         },

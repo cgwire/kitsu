@@ -9,10 +9,11 @@
           'is-disabled': isDisabled
         }"
         role="button"
-        tabindex="0"
-        @click="$emit('confirm')"
-        @keydown.enter.prevent="$emit('confirm')"
-        @keydown.space.prevent="$emit('confirm')"
+        :aria-disabled="isDisabled"
+        :tabindex="isDisabled ? -1 : 0"
+        @click="confirm"
+        @keydown.enter.prevent="confirm"
+        @keydown.space.prevent="confirm"
       >
         {{ confirmLabel || $t('main.confirmation') }}
       </a>
@@ -30,7 +31,7 @@
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   cancelLabel: { type: String, default: '' },
   confirmLabel: { type: String, default: '' },
   errorText: { type: String, default: '' },
@@ -41,7 +42,13 @@ defineProps({
   successText: { type: String, default: '' }
 })
 
-defineEmits(['cancel', 'confirm'])
+const emit = defineEmits(['cancel', 'confirm'])
+
+// The disabled and loading looks only stop the mouse (pointer-events: none):
+// Enter and Space still reach the button.
+const confirm = () => {
+  if (!props.isDisabled && !props.isLoading) emit('confirm')
+}
 </script>
 
 <style lang="scss" scoped>

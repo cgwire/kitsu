@@ -398,18 +398,20 @@ describe('lib/sentry', () => {
         ]
       }
     })
-    let nameEvent
+    let handleEvent
 
     beforeEach(() => {
       sentry.init({}, {}, { dsn: 'https://key@sentry.example.com/1' })
       const { integrations } = h.init.mock.calls[0][0]
-      const { preprocessEvent } = integrations.find(
+      const integration = integrations.find(
         integration => integration?.name === 'NavigationFailure'
       )
-      nameEvent = error => {
+      // Both hooks, in the order of the SDK.
+      handleEvent = error => {
+        const hint = { originalException: error }
         const event = routerEvent()
-        preprocessEvent(event, { originalException: error })
-        return event
+        integration.preprocessEvent(event, hint)
+        return integration.processEvent(event, hint)
       }
     })
 
@@ -422,13 +424,13 @@ describe('lib/sentry', () => {
       vi.stubGlobal('Error', function new_constructor(message) {
         return new NativeError(message)
       })
-      const event = nameEvent(failure)
+      const event = handleEvent(failure)
       vi.unstubAllGlobals()
       expect(event.exception.values).toEqual([
         {
           type: 'NavigationFailure',
           value: 'redirect from episode-playlist to login (window.Error replaced)',
-          mechanism: { type: 'generic', handled: false }
+          mechanism: { type: 'generic', handled: true }
         }
       ])
       expect(event.tags).toEqual({
@@ -443,12 +445,21 @@ describe('lib/sentry', () => {
       ])
     })
 
+    // Kitsu follows the redirects, and aborts and cancels are plain outcomes
+    // of the router: none is a crash.
+    test('reports a navigation failure as a handled warning', () => {
+      const failure = navigationFailure(4, { path: '/' }, { name: 'todos' })
+      const event = handleEvent(failure)
+      expect(event.level).toBe('warning')
+      expect(event.exception.values[0].mechanism.handled).toBe(true)
+    })
+
     test('tags a replacement without a name', () => {
       const failure = navigationFailure(2, { name: 'home' }, { name: 'login' })
       vi.stubGlobal('Error', function (message) {
         return new NativeError(message)
       })
-      const event = nameEvent(failure)
+      const event = handleEvent(failure)
       vi.unstubAllGlobals()
       expect(event.tags['kitsu.error_constructor']).toBe('(anonymous)')
     })
@@ -456,7 +467,7 @@ describe('lib/sentry', () => {
     // Aborts and cancels can target any route: one issue for each kind.
     test('groups the aborts whatever their target', () => {
       const failure = navigationFailure(4, { path: '/' }, { name: 'todos' })
-      const event = nameEvent(failure)
+      const event = handleEvent(failure)
       expect(event.exception.values[0].value).toBe('abort from / to todos')
       expect(event.fingerprint).toEqual(['navigation-failure', 'abort'])
     })
@@ -464,7 +475,7 @@ describe('lib/sentry', () => {
     // Should one reach Sentry another way, window.Error is not to blame.
     test('names a failure that came with window.Error intact', () => {
       const failure = navigationFailure(8, { name: 'shots' }, { name: 'assets' })
-      const event = nameEvent(failure)
+      const event = handleEvent(failure)
       expect(event.exception.values[0].value).toBe('cancel from shots to assets')
       expect(event.tags['kitsu.error_constructor']).toBe('Error')
       expect(event.fingerprint).toEqual(['navigation-failure', 'cancel'])
@@ -478,7 +489,7 @@ describe('lib/sentry', () => {
         { path: `/productions/${OTHER_ID}/shots` },
         '/timesheets/month/2026/10?search=jane'
       )
-      const event = nameEvent(failure)
+      const event = handleEvent(failure)
       expect(event.exception.values[0].value).toBe(
         'redirect from /productions/:id/shots to /timesheets/month/:n/:n'
       )
@@ -495,7 +506,7 @@ describe('lib/sentry', () => {
         navigationFailure(2, undefined, { name: 'login' }),
         navigationFailure(2, { name: 'home' }, undefined)
       ]
-      expect(errors.map(nameEvent)).toEqual(errors.map(routerEvent))
+      expect(errors.map(handleEvent)).toEqual(errors.map(routerEvent))
     })
   })
 

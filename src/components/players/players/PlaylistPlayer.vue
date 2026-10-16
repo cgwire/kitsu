@@ -132,7 +132,7 @@
           :style="{
             position: isComparisonOverlay ? 'absolute' : 'relative'
           }"
-          :entities="entityListToCompare"
+          :entities="comparisonViewerEntities"
           :is-hd="isHd"
           :is-repeating="isRepeating"
           :muted="true"
@@ -237,7 +237,12 @@
             controls
             loop
             muted
-            v-if="isComparing && isMovieComparison"
+            v-if="
+              isComparing &&
+              isMovieComparison &&
+              !isCurrentPreviewMovie &&
+              !isCurrentPreviewFile
+            "
           />
           <span
             class="picture-preview"
@@ -1140,6 +1145,8 @@ const currentPreviewIndex = ref(0)
 const currentTime = ref('00:00.000')
 const { currentTimeRaw, isHd, isMuted, isPlaying, isRepeating, speed, volume } =
   usePlayerTransport()
+// Set before the watchers: a quality change warms the movies again.
+isHd.value = Boolean(store.getters.organisation?.hd_by_default)
 const handleIn = ref(0)
 const handleOut = ref(0)
 const hasActiveShareLinks = ref(false)
@@ -1219,7 +1226,6 @@ const isCurrentUserManager = computed(() => store.getters.isCurrentUserManager)
 const isCurrentUserSupervisor = computed(
   () => store.getters.isCurrentUserSupervisor
 )
-const organisation = computed(() => store.getters.organisation)
 const personMap = computed(() => store.getters.personMap)
 const previewFileMap = computed(() => store.getters.previewFileMap)
 const previewFileStatusMap = computed(() => store.getters.previewFileStatusMap)
@@ -1506,6 +1512,13 @@ const isMovieComparison = computed(
 
 const isPictureComparison = computed(() =>
   isPicturePreview(currentPreviewToCompare.value?.extension)
+)
+
+// Closed, the comparison viewer gets no entities: hidden, it would go on
+// downloading its movies, and load others on an HD switch or in the next
+// playlist.
+const comparisonViewerEntities = computed(() =>
+  isComparing.value ? entityListToCompare.value : []
 )
 
 // True when the two viewers are laid out side-by-side in the
@@ -2363,6 +2376,8 @@ const playEntity = (entityIndex, updateFullPlaylist = true, frame = -1) => {
     nextTick(() => {
       rawPlayer.value?.loadEntity(entityIndex, 0, true)
     })
+    // The comparison shows movies only: its movie would play on, hidden.
+    rawPlayerComparison.value?.pause()
     // Unlike movies, pictures have no time-update channel driving the
     // playlist playhead: jump it to the entity's slot here, even while
     // playing. Strip clicks/drags pass updateFullPlaylist=false and keep
@@ -4942,23 +4957,28 @@ watch(speed, () => {
   updateRoomStatus()
 })
 
+watch(isHd, () => warmMovies())
+
 // Lifecycle
 
-// The server fills its movie cache on first read: ask it for the first
-// clips as soon as the list is known, so playback never starts cold.
+// The server fills its movie cache on first read: ask it for the next
+// clips, from the one on screen, as soon as the list or the quality is
+// known, so playback never starts cold.
 let stopMovieWarmup = null
 const warmMovies = () => {
   if (stopMovieWarmup) stopMovieWarmup()
-  stopMovieWarmup = warmPlaylistMovies(entityList.value, {
-    isHd: isHd.value
-  })
+  const index = playingEntityIndex.value
+  const list = entityList.value
+  stopMovieWarmup = warmPlaylistMovies(
+    [...list.slice(index), ...list.slice(0, index)],
+    { isHd: isHd.value }
+  )
 }
 
 onMounted(() => {
   if (isMounted) return
   isScrubbing.value = false
   if (isCurrentUserClient.value) isCommentsHidden.value = false
-  isHd.value = Boolean(organisation.value?.hd_by_default)
   entityList.value = props.entities ? props.entities : []
   warmMovies()
   startProgressiveRender()
@@ -4966,6 +4986,8 @@ onMounted(() => {
   room.value.id = props.playlist?.id
   room.value.localId = uuidv4()
   nextTick(() => {
+    // The player can close within the tick it opened in.
+    if (!isMounted) return
     window.addEventListener('keydown', onKeyDown, false)
     window.addEventListener('resize', onWindowResize)
     if (container.value) {
@@ -5010,6 +5032,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  isMounted = false
   if (stopMovieWarmup) stopMovieWarmup()
   endAnnotationSaving()
   cancelProgressiveRender()

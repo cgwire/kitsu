@@ -43,7 +43,7 @@ src/
   store/
     api/            # API client modules (studios.js, etc.)
     modules/        # Vuex store modules (studios.js, etc.)
-  styles/           # Global SCSS (shared.scss)
+  styles/           # Theme custom properties (theme.scss), shared SCSS partials
 ```
 
 ## Component conventions
@@ -305,6 +305,8 @@ background: #ffffff;   // breaks dark mode
 ```
 
 SCSS variables (`$red`, `$green`, `$dark-grey-light`, etc.) are fine for non-theme values like accents and are defined in `src/variables.scss`. For colors that must differ between light/dark, always use `var(--*)`.
+
+Define a new custom property in `src/styles/theme.scss` (light value on `:root`, dark one under `.dark`), never in `src/variables.scss`: Vite injects that file into every style block, so a CSS rule there ships once per component (`tests/unit/variables.spec.js` fails on one).
 
 ### Datatable pattern
 

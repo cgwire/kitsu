@@ -233,7 +233,6 @@
         "union_or": "Stimmt mit einem der folgenden Filter überein",
         "with_thumbnail": "Mit Vorschaubild",
         "without_thumbnail": "Ohne Miniaturansicht",
-        "department": "Abteilung",
         "is_assets_ready": "Assets sind bereit",
         "assets_ready": "Bereit",
         "assets_not_ready": "Nicht bereit",
@@ -1314,6 +1313,7 @@
           "button_register": "Neues FIDO-Gerät registrieren",
           "error_register": "Beim Registrieren des FIDO-Geräts ist ein Fehler aufgetreten.",
           "error_unregister": "Bei der Aufhebung der Registrierung des FIDO-Geräts ist ein Fehler aufgetreten.",
+          "button_unregister": "Validieren und Registrierung des FIDO-Geräts aufheben",
           "description": "Verwenden Sie einen Hardware-Schlüssel (YubiKey) oder einen Plattform-Authentifikator (Touch ID, Windows Hello).",
           "name": "Sicherheitsschlüssel"
         },

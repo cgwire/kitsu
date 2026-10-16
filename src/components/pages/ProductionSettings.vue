@@ -487,10 +487,6 @@ th {
     padding: 1em 0.75em;
   }
 
-  .column {
-    padding: 0.5em 0;
-  }
-
   .columns {
     margin-bottom: 1em;
   }
@@ -499,11 +495,8 @@ th {
     padding: 1.5em;
   }
 
-  /* Read-only mobile: hide add buttons / mutation widgets */
-  .tab .has-text-right {
-    display: none;
-  }
-
+  /* Read-only mobile: hide add buttons / mutation widgets. The Parameters
+     and Video forms stay editable, Save included. */
   .tab > .flexrow.mt1.mb1 {
     display: none;
   }

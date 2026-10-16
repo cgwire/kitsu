@@ -387,6 +387,22 @@ const getVideoRatio = () => {
   return videoHeight ? videoWidth / videoHeight : 0
 }
 
+// A viewer left without entities, like a closed comparison, drops its movies:
+// its hidden decoders would go on downloading them, or playing one.
+// Removing the source alone does not stop a download: load() does.
+const releasePlayers = () => {
+  stopRenderLoop()
+  isPlaying.value = false
+  const players = [player1Ref.value, player2Ref.value]
+  players
+    .filter(player => player?.hasAttribute('src'))
+    .forEach(player => {
+      player.pause()
+      player.removeAttribute('src')
+      player.load()
+    })
+}
+
 const clear = () => {
   if (currentPlayer.value) {
     currentPlayer.value.src = ''
@@ -482,16 +498,22 @@ const loadEntity = (index = 0, currentTime = 0, silentLoad = false) => {
     pendingSeekTime = null
     // Reuse the decoder that already holds the target movie (usually the
     // one that preloaded the next entity): swapping keeps its buffer
-    // instead of re-downloading on every manual navigation.
+    // instead of re-downloading on every manual navigation. The current one
+    // first: with a single movie in the playlist, both decoders hold it.
     const moviePath = getMoviePath(entity, props.currentPreviewIndex)
-    const preloadedPlayer = [player1Ref.value, player2Ref.value].find(
-      player => moviePath && player?.src.endsWith(moviePath)
-    )
+    const preloadedPlayer = [
+      currentPlayer.value,
+      player1Ref.value,
+      player2Ref.value
+    ].find(player => moviePath && player?.src.endsWith(moviePath))
     currentPlayer.value = preloadedPlayer || player1Ref.value
     nextPlayer.value =
       currentPlayer.value === player1Ref.value
         ? player2Ref.value
         : player1Ref.value
+    // The other decoder only preloads. It can still hold the movie played
+    // until now, which would go on, hidden, and end in place of this one.
+    nextPlayer.value?.pause()
     currentPlayer.value.removeEventListener('loadedmetadata', updateMaxDuration)
     currentPlayer.value.addEventListener('loadedmetadata', updateMaxDuration)
 
@@ -499,8 +521,10 @@ const loadEntity = (index = 0, currentTime = 0, silentLoad = false) => {
       if (!currentPlayer.value.src.endsWith(moviePath)) {
         currentPlayer.value.src = moviePath
       }
-    } else if (currentPlayer.value) {
-      currentPlayer.value.src = ''
+    } else {
+      // Nothing to play: the playback stops with the movie left.
+      isPlaying.value = false
+      if (currentPlayer.value) currentPlayer.value.src = ''
     }
     // The next entity always starts on its main preview: preload index 0.
     const nextMoviePath = nextEntity ? getMoviePath(nextEntity) : ''
@@ -848,6 +872,8 @@ watch(
 
       const entity = props.entities[currentIndex.value]
       if (entity && !entity.preview_file_id) loadNextEntity()
+    } else {
+      releasePlayers()
     }
     setTimeout(() => {
       resetHeight()

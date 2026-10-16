@@ -233,7 +233,6 @@
         "union_or": "Opfyld et af de følgende filtre",
         "with_thumbnail": "Med thumbnail",
         "without_thumbnail": "Uden thumbnail",
-        "department": "Afdeling",
         "is_assets_ready": "Assets er klar",
         "assets_ready": "Klar",
         "assets_not_ready": "Ikke klar",
@@ -1314,6 +1313,7 @@
           "button_register": "Registrer ny FIDO-enhed",
           "error_register": "Der opstod en fejl under registrering af FIDO-enhed.",
           "error_unregister": "Der opstod en fejl under afregistrering af FIDO-enhed.",
+          "button_unregister": "Valider og afregistrer FIDO-enhed",
           "description": "Brug en hardwarenøgle (YubiKey) eller en platformsautentificering (Touch ID, Windows Hello).",
           "name": "Sikkerhedsnøgle"
         },

@@ -511,7 +511,6 @@
         "assignation_exists_for": "Istnieją przypisania dla",
         "assigned_to": "Przypisane do",
         "checked": "Zaznaczone",
-        "department": "Dział",
         "descriptor": "Metadane",
         "equal": "Równe",
         "in": "Wśród",
@@ -1674,7 +1673,8 @@
           "registered_devices_title": "Zarejestrowane urządzenia FIDO:",
           "button_register": "Zarejestruj nowe urządzenie FIDO",
           "error_register": "Wystąpił błąd podczas rejestrowania urządzenia FIDO.",
-          "error_unregister": "Wystąpił błąd podczas wyrejestrowywania urządzenia FIDO."
+          "error_unregister": "Wystąpił błąd podczas wyrejestrowywania urządzenia FIDO.",
+          "button_unregister": "Zweryfikuj i wyrejestruj urządzenie FIDO"
         },
         "recovery_codes": {
           "title": "Kody odzyskiwania",

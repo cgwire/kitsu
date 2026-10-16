@@ -233,7 +233,6 @@
         "union_or": "Hacer coincidir uno de los siguientes filtros.",
         "with_thumbnail": "Con miniatura",
         "without_thumbnail": "Sin miniatura",
-        "department": "Departamento",
         "is_assets_ready": "Los recursos están listos",
         "assets_ready": "Listo",
         "assets_not_ready": "No listo",
@@ -1314,6 +1313,7 @@
           "button_register": "Registrar nuevo dispositivo FIDO",
           "error_register": "Se ha producido un error al registrar el dispositivo FIDO.",
           "error_unregister": "Se ha producido un error al anular el registro del dispositivo FIDO.",
+          "button_unregister": "Validar y anular el registro del dispositivo FIDO",
           "description": "Usa una llave de hardware (YubiKey) o un autenticador de plataforma (Touch ID, Windows Hello).",
           "name": "Llave de seguridad"
         },

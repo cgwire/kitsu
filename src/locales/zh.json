@@ -233,7 +233,6 @@
         "union_or": "匹配以下任一过滤器",
         "with_thumbnail": "有缩略图",
         "without_thumbnail": "无缩略图",
-        "department": "部门",
         "is_assets_ready": "资产准备就绪",
         "assets_ready": "已准备",
         "assets_not_ready": "未准备",
@@ -1314,6 +1313,7 @@
           "button_register": "注册新的 FIDO 设备",
           "error_register": "注册 FIDO 设备时发生错误。",
           "error_unregister": "取消注册 FIDO 设备时发生错误。",
+          "button_unregister": "验证并取消注册 FIDO 设备",
           "description": "使用硬件密钥（YubiKey）或平台验证器（Touch ID、Windows Hello）。",
           "name": "安全密钥"
         },

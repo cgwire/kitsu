@@ -105,9 +105,7 @@
           />
           <button
             class="button is-success flexrow-item"
-            :class="{
-              'is-disabled': selectedDepartment === null
-            }"
+            :disabled="selectedDepartment === null"
             type="button"
             @click="addDepartment"
             v-if="selectableDepartments.length > 0"

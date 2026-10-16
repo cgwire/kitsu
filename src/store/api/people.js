@@ -214,8 +214,8 @@ export default {
     return client.pget(`/api/auth/fido?email=${email}`)
   },
 
-  unregisterFIDO(deviceName) {
-    const data = { device_name: deviceName }
+  unregisterFIDO(deviceName, twoFactorPayload) {
+    const data = { ...twoFactorPayload, device_name: deviceName }
     return client.pdel('/api/auth/fido', data)
   },
 

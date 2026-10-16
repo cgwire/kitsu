@@ -709,6 +709,62 @@ describe('PreviewPlayer.vue', () => {
 
       expect(canvas.add).not.toHaveBeenCalled()
     })
+
+    describe('after a revision change', () => {
+      const revision = number => ({
+        ...moviePreview,
+        id: `preview-r${number}`,
+        revision: number
+      })
+      // Layout comes first in the payload, the revisions are Animation ones.
+      const mountOnRevision2 = async () => {
+        wrapper = mountPlayer({
+          props: {
+            previews: [revision(3)],
+            entityPreviewFiles: {
+              'task-type-layout': [{ ...moviePreview, id: 'preview-layout' }],
+              [task.task_type_id]: [revision(3), revision(2)]
+            },
+            taskTypeMap: new Map([
+              ['task-type-layout', { id: 'task-type-layout', name: 'Layout' }],
+              [task.task_type_id, { id: task.task_type_id, name: 'Animation' }]
+            ])
+          },
+          stubs: {
+            PreviewViewer: {
+              name: 'PreviewViewer',
+              template: '<div />',
+              props: { preview: Object },
+              methods: viewer
+            }
+          }
+        })
+        await nextTick()
+        await wrapper.setProps({ previews: [revision(2)] })
+        await flushPromises()
+      }
+      const comparedPreview = () =>
+        wrapper.findAllComponents({ name: 'PreviewViewer' })[1].props('preview')
+
+      // The change picked a revision to compare with the comparison closed:
+      // the hidden comparison viewer loaded its movie.
+      it('gives the closed comparison no revision', async () => {
+        await mountOnRevision2()
+
+        expect(comparedPreview()).toBeNull()
+      })
+
+      it('compares with the other revision on Alt+O', async () => {
+        await mountOnRevision2()
+
+        window.dispatchEvent(
+          new KeyboardEvent('keydown', { key: 'o', code: 'KeyO', altKey: true })
+        )
+        await flushPromises()
+
+        expect(comparedPreview().id).toBe('preview-r3')
+      })
+    })
   })
 
   // The comment box waits for the snapshots, and each of them waits 500 ms

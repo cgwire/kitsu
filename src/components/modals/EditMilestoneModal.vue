@@ -72,6 +72,8 @@ const modalTitle = computed(() => {
 // Functions
 
 const confirm = () => {
+  // Enter in a field lands here too, past the grayed confirm button.
+  if (!isFormFilled.value) return
   emit('confirm', form.value)
 }
 

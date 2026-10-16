@@ -38,6 +38,22 @@ const entity = {
   preview_file_extension: 'blend'
 }
 
+// A shot with a preview for two task types: Layout sorts first, so it is
+// the one compared, and it is a movie.
+const comparedEntity = (id, extension = 'mp4') => ({
+  id,
+  preview_file_id: `${id}-anim`,
+  preview_file_extension: extension,
+  preview_files: {
+    'tt-anim': [{ id: `${id}-anim`, revision: 1, extension }],
+    'tt-layout': [{ id: `${id}-layout`, revision: 1, extension: 'mp4' }]
+  }
+})
+const comparedTaskTypeMap = new Map([
+  ['tt-anim', { id: 'tt-anim', name: 'Animation' }],
+  ['tt-layout', { id: 'tt-layout', name: 'Layout' }]
+])
+
 const withMethods = (names, values = {}) => ({
   template: '<div />',
   methods: {
@@ -51,9 +67,11 @@ const mountPlayer = ({
   playlistProp = playlist,
   entities = [entity],
   canEditShotTrim = () => true,
+  organisation = {},
   previewFileStatusMap,
   shotMap = new Map(),
   taskMap = new Map(),
+  taskTypeMap = new Map(),
   stubs = {}
 } = {}) => {
   const store = createStore({
@@ -69,7 +87,7 @@ const mountPlayer = ({
       isCurrentUserClient: () => false,
       isCurrentUserManager: () => true,
       isCurrentUserSupervisor: () => false,
-      organisation: () => ({}),
+      organisation: () => organisation,
       personMap: () => new Map(),
       previewFileMap: () => new Map(),
       previewFileStatusMap: () => previewFileStatusMap,
@@ -82,7 +100,7 @@ const mountPlayer = ({
       shotMap: () => shotMap,
       taskMap: () => taskMap,
       taskStatusMap: () => new Map(),
-      taskTypeMap: () => new Map(),
+      taskTypeMap: () => taskTypeMap,
       use12HourClock: () => false,
       user: () => ({ id: 'user-1', timezone: 'Europe/Paris' })
     }
@@ -98,32 +116,35 @@ const mountPlayer = ({
       // The mount hooks drive the viewers through their template refs; the
       // default stubs have none of their methods.
       stubs: {
-        MultiVideoViewer: withMethods(
-          [
-            'clear',
-            'goNextFrame',
-            'goPreviousFrame',
-            'loadEntity',
-            'pause',
-            'play',
-            'playNext',
-            'reloadCurrentEntity',
-            'resetHeight',
-            'resetPanZoom',
-            'resumePanZoom',
-            'setCurrentFrame',
-            'setCurrentTimeRaw',
-            'setPanZoom',
-            'setSpeed',
-            'setVolume'
-          ],
-          {
-            getCurrentTime: () => 0,
-            getCurrentTimeRaw: () => 0,
-            getNaturalDimensions: () => ({ width: 1920, height: 1080 }),
-            getVideoRatio: () => 1
-          }
-        ),
+        MultiVideoViewer: {
+          ...withMethods(
+            [
+              'clear',
+              'goNextFrame',
+              'goPreviousFrame',
+              'loadEntity',
+              'pause',
+              'play',
+              'playNext',
+              'reloadCurrentEntity',
+              'resetHeight',
+              'resetPanZoom',
+              'resumePanZoom',
+              'setCurrentFrame',
+              'setCurrentTimeRaw',
+              'setPanZoom',
+              'setSpeed',
+              'setVolume'
+            ],
+            {
+              getCurrentTime: () => 0,
+              getCurrentTimeRaw: () => 0,
+              getNaturalDimensions: () => ({ width: 1920, height: 1080 }),
+              getVideoRatio: () => 1
+            }
+          ),
+          props: { entities: Array }
+        },
         MultiPictureViewer: {
           ...withMethods(['resetPanZoom', 'resumePanZoom', 'setPanZoom'], {
             getNaturalDimensions: () => ({ width: 1920, height: 1080 }),
@@ -335,6 +356,159 @@ describe('PlaylistPlayer.vue', () => {
     })
   })
 
+  // The comparison viewer shows movies only: on a picture, a comparison
+  // movie still playing went on decoding, hidden.
+  it('stops the comparison movie on a move to a picture', async () => {
+    wrapper = mountPlayer({
+      entities: [
+        { ...entity, preview_file_extension: 'mp4' },
+        { id: 'shot-2', preview_file_id: 'preview-2', preview_file_extension: 'png' }
+      ]
+    })
+    await flushPromises()
+    const pause = vi.spyOn(
+      wrapper.findComponent({ ref: 'raw-player-comparison' }).vm,
+      'pause'
+    )
+
+    wrapper
+      .findAllComponents({ name: 'ButtonSimple' })
+      .find(button => button.attributes('title') === 'playlists.actions.next_shot')
+      .vm.$emit('click')
+    await flushPromises()
+
+    expect(pause).toHaveBeenCalled()
+  })
+
+  // Once closed, the comparison viewer kept its movies: it went on
+  // downloading them, and loaded others on an HD switch or in the next
+  // playlist, hidden.
+  it('gives the comparison viewer no movie while the comparison is closed', async () => {
+    wrapper = mountPlayer({
+      entities: [comparedEntity('shot-1'), comparedEntity('shot-2')],
+      taskTypeMap: comparedTaskTypeMap
+    })
+    await flushPromises()
+    const comparisonViewer = wrapper.findComponent({ ref: 'raw-player-comparison' })
+    const comparisonBar = wrapper.findComponent({ name: 'PlayerComparisonBar' })
+
+    comparisonBar.vm.$emit('compare-clicked')
+    await flushPromises()
+    expect(comparisonViewer.props('entities')).toHaveLength(2)
+
+    comparisonBar.vm.$emit('compare-clicked')
+    await flushPromises()
+    expect(comparisonViewer.props('entities')).toEqual([])
+
+    await wrapper.setProps({ entities: [comparedEntity('shot-3')] })
+    await flushPromises()
+    expect(comparisonViewer.props('entities')).toEqual([])
+  })
+
+  describe('comparison movie of a picture', () => {
+    const openComparison = async entities => {
+      wrapper = mountPlayer({ entities, taskTypeMap: comparedTaskTypeMap })
+      await flushPromises()
+      wrapper
+        .findComponent({ name: 'PlayerComparisonBar' })
+        .vm.$emit('compare-clicked')
+      await flushPromises()
+      return wrapper.find({ ref: 'picture-video-player-comparison' })
+    }
+
+    it('plays in its video next to a picture', async () => {
+      const video = await openComparison([comparedEntity('shot-1', 'png')])
+
+      expect(video.attributes('src')).toBe(
+        '/api/movies/originals/preview-files/shot-1-layout.mp4'
+      )
+    })
+
+    // Next to a movie, the comparison viewer plays the compared movie: this
+    // video also loaded its original, hidden, on every entity.
+    it('is not loaded next to a movie', async () => {
+      const video = await openComparison([comparedEntity('shot-1')])
+
+      expect(video.exists()).toBe(false)
+    })
+
+    // The comparison stays open on a file no viewer shows, and so does
+    // nothing of it.
+    it('is not loaded next to a file', async () => {
+      await openComparison([
+        comparedEntity('shot-1'),
+        comparedEntity('shot-2', 'blend')
+      ])
+
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(button => button.attributes('title') === 'playlists.actions.next_shot')
+        .vm.$emit('click')
+      await flushPromises()
+
+      expect(
+        wrapper.find({ ref: 'picture-video-player-comparison' }).exists()
+      ).toBe(false)
+    })
+  })
+
+  describe('movie warm-up', () => {
+    const movie = id => ({
+      id,
+      preview_file_id: `${id}-movie`,
+      preview_file_extension: 'mp4'
+    })
+    const original = id =>
+      `/api/movies/originals/preview-files/${id}-movie.mp4`
+    const stubFetch = () =>
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+        arrayBuffer: () => Promise.resolve(new ArrayBuffer(0))
+      })
+    const warmedUrls = fetch => fetch.mock.calls.map(([url]) => url)
+
+    // The originals an HD switch plays were never asked for: the server had
+    // to fetch them from its storage while the playback waited.
+    it('warms the originals from the entity on screen on an HD switch', async () => {
+      const fetch = stubFetch()
+      wrapper = mountPlayer({
+        entities: [movie('shot-1'), movie('shot-2'), movie('shot-3')]
+      })
+      await flushPromises()
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(button => button.attributes('title') === 'playlists.actions.next_shot')
+        .vm.$emit('click')
+      await flushPromises()
+      fetch.mockClear()
+
+      wrapper
+        .findComponent({ name: 'PlayerPlaybackBar' })
+        .vm.$emit('update:isHd', true)
+      await flushPromises()
+
+      expect(warmedUrls(fetch)).toEqual([
+        original('shot-2'),
+        original('shot-3'),
+        original('shot-1')
+      ])
+    })
+
+    it('warms each movie once in a playlist opening in HD', async () => {
+      const fetch = stubFetch()
+      wrapper = mountPlayer({
+        entities: [movie('shot-1'), movie('shot-2'), movie('shot-3')],
+        organisation: { hd_by_default: true }
+      })
+      await flushPromises()
+
+      expect(warmedUrls(fetch)).toEqual([
+        original('shot-1'),
+        original('shot-2'),
+        original('shot-3')
+      ])
+    })
+  })
+
   // The player lays itself out, or turns the pencil back on, a little after
   // what asked for it: once closed, it has nothing left to work on.
   describe('timers of a closed player', () => {
@@ -484,6 +658,21 @@ describe('PlaylistPlayer.vue', () => {
     window.removeEventListener('error', onError)
 
     expect(errors).toEqual([])
+  })
+
+  // The mount hook adds its window and document listeners a tick later:
+  // a player closed within that tick kept them, its Shift+Tab one included.
+  it('adds no page listener once closed in the tick it opened', async () => {
+    wrapper = mountPlayer()
+    const onWindow = vi.spyOn(window, 'addEventListener')
+    const onDocument = vi.spyOn(document, 'addEventListener')
+    wrapper.unmount()
+    wrapper = null
+
+    await flushPromises()
+
+    expect(onWindow).not.toHaveBeenCalled()
+    expect(onDocument).not.toHaveBeenCalled()
   })
 
   // A plain link navigates the tab: the browser fires beforeunload, which

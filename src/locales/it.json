@@ -233,7 +233,6 @@
         "union_or": "Soddisfa uno dei filtri seguenti",
         "with_thumbnail": "Con miniatura",
         "without_thumbnail": "Senza miniatura",
-        "department": "Reparto",
         "is_assets_ready": "Gli asset sono pronti",
         "assets_ready": "Pronti",
         "assets_not_ready": "Non pronti",
@@ -1318,7 +1317,8 @@
           "registered_devices_title": "Dispositivi FIDO registrati:",
           "button_register": "Registra un nuovo dispositivo FIDO",
           "error_register": "Si è verificato un errore durante la registrazione del dispositivo FIDO.",
-          "error_unregister": "Si è verificato un errore durante la rimozione del dispositivo FIDO."
+          "error_unregister": "Si è verificato un errore durante la rimozione del dispositivo FIDO.",
+          "button_unregister": "Convalida e rimuovi il dispositivo FIDO"
         },
         "enabled": "Autenticazione a due fattori attivata",
         "mandatory": "La tua organizzazione richiede l'autenticazione a due fattori. Attiva almeno un metodo per continuare.",

@@ -233,7 +233,6 @@
         "union_or": "다음 필터 중 하나 맞추기",
         "with_thumbnail": "섬네일 적용",
         "without_thumbnail": "섬네일 미적용",
-        "department": "부서",
         "is_assets_ready": "자산이 준비되었습니다.",
         "assets_ready": "준비됨",
         "assets_not_ready": "준비되지 않음",
@@ -1312,6 +1311,7 @@
           "button_register": "새 FIDO 기기 등록",
           "error_register": "FIDO 기기 등록 중 오류가 발생했습니다.",
           "error_unregister": "FIDO 등록 취소 중 오류가 발생했습니다.",
+          "button_unregister": "확인하고 FIDO 기기 등록 취소하기",
           "description": "하드웨어 키(YubiKey) 또는 플랫폼 인증기(Touch ID, Windows Hello)를 사용하세요.",
           "name": "보안 키"
         },

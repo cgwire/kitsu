@@ -272,11 +272,6 @@ useHead({ title: computed(() => `${t('departments.title')} - Kitsu`) })
   margin-top: 0;
 }
 
-.tabs {
-  min-height: 30px;
-  margin-top: 1em;
-}
-
 @media screen and (max-width: 768px) {
   .departments {
     padding-left: 0.5em;
