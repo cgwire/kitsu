@@ -78,15 +78,7 @@ const getters = {
 
   getTaskStatus: state => id => {
     return state.taskStatuses.find(taskStatus => taskStatus.id === id)
-  },
-
-  taskStatusOptions: state =>
-    state.taskStatuseses.map(status => ({
-      label: status.short_name,
-      value: status.id,
-      color: status.color,
-      isArtistAllowed: status.is_artist_allowed
-    }))
+  }
 }
 
 const actions = {
