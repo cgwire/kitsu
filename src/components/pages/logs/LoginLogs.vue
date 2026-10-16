@@ -59,7 +59,7 @@
                 {{ log.date }}
               </td>
               <td class="person card-head">
-                <span class="flexrow">
+                <span class="flexrow" v-if="log.person">
                   <people-avatar
                     class="flexrow-item"
                     :size="20"
