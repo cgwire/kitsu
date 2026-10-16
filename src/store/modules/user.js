@@ -241,6 +241,8 @@ const getters = {
   plugins: state => state.plugins,
   studioPlugins: state =>
     state.plugins.filter(plugin => plugin.frontend_studio_enabled),
+  taskPlugins: state =>
+    state.plugins.filter(plugin => plugin.frontend_task_enabled),
   projectPlugins: state =>
     state.plugins.filter(plugin => plugin.frontend_project_enabled)
 }

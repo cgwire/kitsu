@@ -18,9 +18,9 @@ describe('TaskDetailExtensions.vue', () => {
       state: { user: { user: { locale: 'ja-JP' } } },
       getters: {
         isDarkTheme: () => true,
-        projectPlugins: () => [
-          { plugin_id: 'vfx_files', name: 'VFX Files' },
-          { plugin_id: 'other_plugin', name: 'Other plugin' }
+        taskPlugins: () => [
+          { plugin_id: 'vfx_files', name: 'VFX Files', frontend_task_enabled: true },
+          { plugin_id: 'other_plugin', name: 'Other plugin', frontend_task_enabled: true }
         ]
       }
     })
@@ -31,6 +31,9 @@ describe('TaskDetailExtensions.vue', () => {
     })
 
     expect(wrapper.find('.comments-content').exists()).toBe(true)
+    expect(wrapper.findAll('[role="tab"]').map(tab => tab.text())).toEqual([
+      'comments.title', 'VFX Files', 'Other plugin'
+    ])
     await wrapper.get('[role="tab"]:nth-child(1)').trigger('click')
     expect(wrapper.find('.comments-content').exists()).toBe(true)
     await wrapper.get('[role="tab"]:nth-child(2)').trigger('click')
@@ -43,9 +46,7 @@ describe('TaskDetailExtensions.vue', () => {
       task_id: 'task-1',
       entity_id: 'shot-task-1',
       entity_type: 'Shot',
-      task_type_id: 'type-task-1',
-      dark_theme: 'true',
-      locale: 'ja'
+      task_type_id: 'type-task-1'
     })
 
     await wrapper.setProps({ task: task('task-2', 'production-2') })
