@@ -33,7 +33,7 @@
       :active="modals.del"
       :is-loading="loading.del"
       :is-error="errors.del"
-      :text="deleteText"
+      :text="$t('status_automations.delete_text')"
       :error-text="$t('status_automations.delete_error')"
       @cancel="modals.del = false"
       @confirm="confirmDeleteStatusAutomation"
@@ -88,11 +88,6 @@ const isActiveTab = computed(() => activeTab.value === 'active')
 const statusAutomationsList = computed(() =>
   isActiveTab.value ? statusAutomations.value : archivedStatusAutomations.value
 )
-
-const deleteText = computed(() => {
-  const sa = statusAutomationToDelete.value
-  return sa ? t('custom_actions.delete_text', { name: sa.name }) : ''
-})
 
 // Functions
 

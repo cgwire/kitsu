@@ -2013,9 +2013,9 @@
     "status_automations": {
       "change_ready_for": "skifter \"klar til\" til",
       "change_status": "skifter opgavestatus til",
-      "create_error": "Der opstod en fejl under gemning af denne statusautomatisering. Er du sikker på, at der ikke allerede findes en anden automatisering med samme navn?",
-      "delete_text": "Er du sikker på, at du vil fjerne statusautomatisering {name} fra din database?",
-      "delete_error": "Der opstod en fejl under sletning af denne statusautomatisering. Den kan være knyttet til en produktion. Hvis det er tilfældet, skal du først fjerne den fra alle produktioner.",
+      "create_error": "Kunne ikke gemme. Prøv venligst igen.",
+      "delete_text": "Er du sikker på, at du vil fjerne denne statusautomatisering fra din database?",
+      "delete_error": "Der opstod en fejl under sletning af denne statusautomatisering. Den kan være knyttet til en produktion eller en produktionsskabelon. Hvis det er tilfældet, skal du først fjerne den fra alle produktioner og skabeloner.",
       "edit_title": "Rediger en statusautomatisering",
       "entity_title": "Enhedstype påvirket af triggeren",
       "number": "statusautomatisering | statusautomatiseringer",

@@ -2013,9 +2013,9 @@
     "status_automations": {
       "change_ready_for": "ändert „bereit für“ in",
       "change_status": "ändert den Aufgabenstatus in",
-      "create_error": "Beim Speichern dieser Statusautomatisierung ist ein Fehler aufgetreten. Sind Sie sicher, dass es keine andere Automatisierung mit demselben Namen gibt?",
-      "delete_text": "Sind Sie sicher, dass Sie die Statusautomatisierung {name} aus Ihrer Datenbank entfernen möchten?",
-      "delete_error": "Beim Löschen dieser Statusautomatisierung ist ein Fehler aufgetreten. Sie ist möglicherweise mit einer Produktion verknüpft. In diesem Fall müssen Sie sie zuerst aus jeder Produktion entfernen.",
+      "create_error": "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut.",
+      "delete_text": "Sind Sie sicher, dass Sie diese Statusautomatisierung aus Ihrer Datenbank entfernen möchten?",
+      "delete_error": "Beim Löschen dieser Statusautomatisierung ist ein Fehler aufgetreten. Sie ist möglicherweise mit einer Produktion oder einer Produktionsvorlage verknüpft. In diesem Fall müssen Sie sie zuerst aus jeder Produktion und jeder Vorlage entfernen.",
       "edit_title": "Eine Statusautomatisierung bearbeiten",
       "entity_title": "Vom Auslöser betroffener Entitätstyp",
       "number": "Statusautomatisierung | Statusautomatisierungen",

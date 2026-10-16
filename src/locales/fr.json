@@ -2013,9 +2013,9 @@
     "status_automations": {
       "change_ready_for": "Change \"Prêt pour\" en",
       "change_status": "Positionne le statut de tâche à",
-      "create_error": "Une erreur s'est produite lors de l'enregistrement de cette automatisation. Êtes-vous sûr qu'il n'existe pas d'autre automatisation portant le même nom ?",
-      "delete_text": "Êtes-vous sûr de vouloir supprimer l'automatisation {name} de votre base de données ?",
-      "delete_error": "Une erreur s'est produite lors de la suppression de cette automatisation. Il est possible qu'elle soit liée à une production. Si c'est le cas, vous devez d'abord la retirer de chaque production.",
+      "create_error": "Impossible d'enregistrer. Veuillez réessayer.",
+      "delete_text": "Êtes-vous sûr de vouloir supprimer cette automatisation de votre base de données ?",
+      "delete_error": "Une erreur s'est produite lors de la suppression de cette automatisation. Il est possible qu'elle soit liée à une production ou à un modèle de production. Si c'est le cas, vous devez d'abord la retirer de chaque production et de chaque modèle.",
       "edit_title": "Modifier une automatisation",
       "entity_title": "Type d'entité concerné par le déclencheur",
       "number": "automatisation | automatisations",

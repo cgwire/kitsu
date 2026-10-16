@@ -2013,9 +2013,9 @@
     "status_automations": {
       "change_ready_for": "altera \"pronto para\" para",
       "change_status": "altera o status da tarefa para",
-      "create_error": "Ocorreu um erro ao salvar essa automação de status. Tem certeza de que não há outra automação com o mesmo nome?",
-      "delete_text": "Tem certeza de que deseja remover a automação de status {name} do seu banco de dados?",
-      "delete_error": "Ocorreu um erro ao excluir essa automação de status. Ela pode estar vinculada a uma produção. Se for o caso, você deve removê-la de cada produção primeiro.",
+      "create_error": "Não foi possível salvar. Tente novamente.",
+      "delete_text": "Tem certeza de que deseja remover essa automação de status do seu banco de dados?",
+      "delete_error": "Ocorreu um erro ao excluir essa automação de status. Ela pode estar vinculada a uma produção ou a um template de produção. Se for o caso, você deve removê-la de cada produção e de cada template primeiro.",
       "edit_title": "Editar uma automação de status",
       "entity_title": "Tipo de entidade afetada pelo acionador",
       "number": "automação de status | automações de status",

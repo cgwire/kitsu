@@ -2349,9 +2349,9 @@
       "add_status_automation_placeholder": "+ Állapot-automatizálás hozzáadása",
       "change_ready_for": "a \"készen áll erre\" értéket erre változtatja:",
       "change_status": "a feladat állapotát erre változtatja:",
-      "create_error": "Hiba történt az állapot-automatizálás mentésekor. Biztos vagy benne, hogy nincs másik azonos nevű automatizálás?",
-      "delete_error": "Hiba történt az állapot-automatizálás törlésekor. Lehet, hogy egy produkcióhoz kapcsolódik. Ebben az esetben először el kell távolítanod minden produkcióból.",
-      "delete_text": "Biztosan eltávolítod a(z) {name} állapot-automatizálást az adatbázisodból?",
+      "create_error": "Nem sikerült menteni. Kérlek próbáld újra.",
+      "delete_error": "Hiba történt az állapot-automatizálás törlésekor. Lehet, hogy egy produkcióhoz vagy egy produkció-sablonhoz kapcsolódik. Ebben az esetben először el kell távolítanod minden produkcióból és sablonból.",
+      "delete_text": "Biztosan eltávolítod ezt az állapot-automatizálást az adatbázisodból?",
       "edit_title": "Állapot-automatizálás szerkesztése",
       "entity_title": "A trigger által érintett elem típusa",
       "entity_types": {

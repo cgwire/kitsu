@@ -2013,9 +2013,9 @@
     "status_automations": {
       "change_ready_for": "imposta \"pronto per\" a",
       "change_status": "imposta lo stato del task a",
-      "create_error": "Si è verificato un errore durante il salvataggio di questa automazione di stato. Sei sicuro che non esista un'altra automazione con lo stesso nome?",
-      "delete_text": "Sei sicuro di voler rimuovere l'automazione di stato {name} dal database?",
-      "delete_error": "Si è verificato un errore durante l'eliminazione di questa automazione di stato. Potrebbe essere collegata a una produzione. In tal caso, devi prima rimuoverla da ogni produzione.",
+      "create_error": "Impossibile salvare. Riprova.",
+      "delete_text": "Sei sicuro di voler rimuovere questa automazione di stato dal database?",
+      "delete_error": "Si è verificato un errore durante l'eliminazione di questa automazione di stato. Potrebbe essere collegata a una produzione o a un modello di produzione. In tal caso, devi prima rimuoverla da ogni produzione e da ogni modello.",
       "edit_title": "Modifica un'automazione di stato",
       "entity_title": "Tipo di entità interessato dal trigger",
       "number": "automazione di stato | automazioni di stato",
