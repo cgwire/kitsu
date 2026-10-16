@@ -223,7 +223,12 @@
           @click="selectBar('delete-assets')"
           @keydown.enter.prevent="selectBar('delete-assets')"
           @keydown.space.prevent="selectBar('delete-assets')"
-          v-if="isCurrentViewAsset && isCurrentUserManager && !isTaskSelection"
+          v-if="
+            isCurrentViewAsset &&
+            isCurrentUserManager &&
+            nbSelectedAssets > 0 &&
+            !isTaskSelection
+          "
         >
           <kitsu-icon name="trash" :title="$t('menu.delete_assets')" />
         </div>
@@ -239,7 +244,12 @@
           @click="selectBar('delete-shots')"
           @keydown.enter.prevent="selectBar('delete-shots')"
           @keydown.space.prevent="selectBar('delete-shots')"
-          v-if="isCurrentViewShot && isCurrentUserManager && !isTaskSelection"
+          v-if="
+            isCurrentViewShot &&
+            isCurrentUserManager &&
+            nbSelectedShots > 0 &&
+            !isTaskSelection
+          "
         >
           <kitsu-icon name="trash" :title="$t('menu.delete_shots')" />
         </div>
@@ -255,7 +265,12 @@
           @click="selectBar('delete-edits')"
           @keydown.enter.prevent="selectBar('delete-edits')"
           @keydown.space.prevent="selectBar('delete-edits')"
-          v-if="isCurrentViewEdit && isCurrentUserManager && !isTaskSelection"
+          v-if="
+            isCurrentViewEdit &&
+            isCurrentUserManager &&
+            nbSelectedEdits > 0 &&
+            !isTaskSelection
+          "
         >
           <kitsu-icon name="trash" :title="$t('menu.delete_edits')" />
         </div>

@@ -46,15 +46,27 @@ const mountPanel = async (
     path = '/productions/production-1/concepts',
     role = 'manager',
     tasks = [],
-    validations = 0
+    validations = 0,
+    // Lines selected in the list of the page: assets, shots or edits.
+    lines = []
   } = {}
 ) => {
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [
       {
+        path: '/productions/:production_id/assets',
+        name: 'assets',
+        component: { template: '<div />' }
+      },
+      {
         path: '/productions/:production_id/concepts',
         name: 'concepts',
+        component: { template: '<div />' }
+      },
+      {
+        path: '/productions/:production_id/edits',
+        name: 'edits',
         component: { template: '<div />' }
       },
       {
@@ -84,6 +96,7 @@ const mountPanel = async (
       // Empty cells: the cells of an entity list without a task.
       nbSelectedValidations: validations,
       selectedConcepts: toSelection(concepts),
+      selectedLines: toSelection(lines),
       selectedTasks: toSelection(tasks)
     },
     getters: {
@@ -99,10 +112,10 @@ const mountPanel = async (
       nbSelectedTasks: state => state.nbSelectedTasks,
       nbSelectedValidations: state => state.nbSelectedValidations,
       productionMap: () => new Map(),
-      selectedAssets: () => new Map(),
+      selectedAssets: state => state.selectedLines,
       selectedConcepts: state => state.selectedConcepts,
-      selectedEdits: () => new Map(),
-      selectedShots: () => new Map(),
+      selectedEdits: state => state.selectedLines,
+      selectedShots: state => state.selectedLines,
       selectedTasks: state => state.selectedTasks,
       taskMap: () => new Map(),
       taskStatusForCurrentUser: () => [],
@@ -489,6 +502,42 @@ describe('ActionPanel, opened on empty cells', () => {
 
     expect(confirmButtons(wrapper)).toEqual(['tasks.create_for_selection'])
   })
+})
+
+describe('ActionPanel, entity deletion', () => {
+  const deletions = [
+    ['assets', 'menu.delete_assets'],
+    ['shots', 'menu.delete_shots'],
+    ['edits', 'menu.delete_edits']
+  ]
+
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  test.each(deletions)(
+    'offers the deletion of the %s selected in the list',
+    async (page, title) => {
+      const { wrapper } = await mountPanel([], {
+        path: `/productions/production-1/${page}`,
+        lines: [{ id: 'line-1', canceled: false }]
+      })
+
+      expect(wrapper.find(`.menu > [title="${title}"]`).exists()).toBe(true)
+    }
+  )
+
+  test.each(deletions)(
+    'offers no deletion of %s on empty cells only',
+    async (page, title) => {
+      const { wrapper } = await mountPanel([], {
+        path: `/productions/production-1/${page}`,
+        validations: 2
+      })
+
+      expect(wrapper.find(`.menu > [title="${title}"]`).exists()).toBe(false)
+    }
+  )
 })
 
 describe('ActionPanel, more actions menu', () => {
