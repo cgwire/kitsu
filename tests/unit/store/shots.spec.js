@@ -1012,3 +1012,30 @@ describe('Shots store, getShotsCsvLines', () => {
     expect(lines[0].slice(3)).toEqual(['a', 'z'])
   })
 })
+
+describe('Shots store, list totals', () => {
+  test.each(['CLEAR_SHOTS', 'LOAD_SHOTS_START'])(
+    '%s resets the totals of the list',
+    mutation => {
+      const state = {
+        displayedShotsCount: 2,
+        displayedShotsLength: 2,
+        displayedShotsTimeSpent: 960,
+        displayedShotsEstimation: 1440,
+        displayedShotsFrames: 150,
+        displayedShotsDrawings: 12
+      }
+
+      shotsStore.mutations[mutation](state)
+
+      expect(state).toMatchObject({
+        displayedShotsCount: 0,
+        displayedShotsLength: 0,
+        displayedShotsTimeSpent: 0,
+        displayedShotsEstimation: 0,
+        displayedShotsFrames: 0,
+        displayedShotsDrawings: 0
+      })
+    }
+  )
+})

@@ -947,11 +947,7 @@ const mutations = {
     state.isShotsLoadingError = false
     state.shotsLoadingKey = null
     state.displayedShots = []
-    state.displayedShotsCount = 0
-    state.displayedShotsLength = 0
-    state.displayedTimeSpent = 0
-    state.displayedEstimation = 0
-    state.displayedFrames = 0
+    helpers.setListStats(state, [])
     state.shotSearchQueries = []
     state.shotSearchFilterGroups = []
 
@@ -972,10 +968,7 @@ const mutations = {
     state.shotsLoadingKey = loadingKey ?? null
 
     state.displayedShots = []
-    state.displayedShotsCount = 0
-    state.displayedShotsLength = 0
-    state.displayedEstimation = 0
-    state.displayedFrames = 0
+    helpers.setListStats(state, [])
     state.shotSearchQueries = []
     state.shotSearchFilterGroups = []
 
