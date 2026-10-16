@@ -261,6 +261,27 @@ describe('TaskInfo.vue', () => {
     })
   })
 
+  describe('action panel', () => {
+    it('shows the actions of a task selection', async () => {
+      const { wrapper } = await mountPanel({
+        props: { withActions: true },
+        getterOverrides: { nbSelectedTasks: () => 1 }
+      })
+      expect(wrapper.findComponent(ActionPanel).exists()).toBe(true)
+    })
+
+    it('keeps the actions from a client', async () => {
+      const { wrapper } = await mountPanel({
+        props: { withActions: true },
+        getterOverrides: {
+          isCurrentUserClient: () => true,
+          nbSelectedTasks: () => 1
+        }
+      })
+      expect(wrapper.findComponent(ActionPanel).exists()).toBe(false)
+    })
+  })
+
   describe('title', () => {
     it('names the entity the task belongs to', async () => {
       const { wrapper } = await mountPanel()

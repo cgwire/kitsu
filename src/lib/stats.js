@@ -177,6 +177,37 @@ export const computeStats = (entities, idField, taskStatusMap, taskMap) => {
   return results
 }
 
+// Fold the tasks of the entities (shots or assets with their tasks embedded)
+// by the department of their task type, in the shape getChartData reads at
+// entry "all": { all: { [departmentId]: { [taskStatusId]: entry } } }.
+// Canceled entities, unknown statuses and task types without department are
+// left out.
+export const computeDepartmentStats = (
+  entities,
+  taskTypeMap,
+  taskStatusMap
+) => {
+  const departments = {}
+  entities
+    .filter(entity => !entity.canceled)
+    .flatMap(entity => entity.tasks || [])
+    .forEach(task => {
+      const departmentId = taskTypeMap.get(task.task_type_id)?.department_id
+      const taskStatus = taskStatusMap.get(task.task_status_id)
+      if (departmentId && taskStatus) {
+        const statuses = (departments[departmentId] ||= {})
+        // The full name: the bar names the statuses on hover, to readers
+        // who do not know the short names.
+        const entry = (statuses[taskStatus.id] ||= {
+          ...createStatusEntry(taskStatus),
+          name: taskStatus.name
+        })
+        entry.count++
+      }
+    })
+  return { all: departments }
+}
+
 // Count the entities of each group. Canceled ones are left out, as in
 // computeStats.
 export const countEntities = (entities, idField) =>

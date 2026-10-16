@@ -173,6 +173,26 @@ describe('Topbar.vue', () => {
     vi.clearAllMocks()
   })
 
+  it('titles the home of a client with the productions of the studio', async () => {
+    expect(wrapper.find('.page-title').exists()).toBe(false)
+    const { store: clientStore } = makeStore({
+      isCurrentUserClient: () => true
+    })
+    const client = shallowMount(Topbar, {
+      global: {
+        config: { globalProperties: { $socket: socketMock } },
+        plugins: [clientStore, makeRouter()],
+        mocks: { $t: key => key, $route: mockRoute({ path: '/', name: 'open-productions', params: {}, query: {}, fullPath: '/' }) },
+        stubs: { GlobalSearchField: true, NotificationBell: true, PeopleAvatar: true, ShortcutModal: true }
+      }
+    })
+    await nextTick()
+    expect(client.find('.page-title').text()).toBe(
+      'Test Studio productions.title'
+    )
+    client.unmount()
+  })
+
   // Artists land on pages without production: the fallback production of the
   // store must not be configured for them.
   it('configures no production on a page without one', () => {

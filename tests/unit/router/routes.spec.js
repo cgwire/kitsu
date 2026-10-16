@@ -97,6 +97,19 @@ const ADMIN_ONLY_ROUTES = [
 // sends those roles to not-found (#1933).
 const SUPERVISOR_OR_MANAGER_ROUTES = ['team-schedule']
 
+// The entity and task type pages expose the assignees, estimations and
+// dates the lists hide from clients.
+const CLIENT_FORBIDDEN_ROUTES = [
+  'asset',
+  'edit',
+  'episode-asset',
+  'episode-edit',
+  'episode-shot',
+  'episode-task-type',
+  'shot',
+  'task-type'
+]
+
 describe('router/routes', () => {
   beforeEach(() => {
     h.isAdmin = false
@@ -125,6 +138,14 @@ describe('router/routes', () => {
         expect(route.meta?.requiresAdmin).toBeUndefined()
       }
     )
+  })
+
+  describe('client-forbidden route table', () => {
+    test.each(CLIENT_FORBIDDEN_ROUTES)('%s is forbidden for clients', name => {
+      const route = mainRoute.children.find(child => child.name === name)
+      expect(route).toBeDefined()
+      expect(route.meta?.forbiddenForClient).toBe(true)
+    })
   })
 
   describe('main guard', () => {

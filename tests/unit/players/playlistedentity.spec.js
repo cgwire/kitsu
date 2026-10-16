@@ -26,10 +26,11 @@ const entity = {
 }
 
 // Another entry of the shot holds its latest compositing revision.
-const mountEntity = () => {
+const mountEntity = ({ isClient = false } = {}) => {
   const store = createStore({
     getters: {
       currentProduction: () => ({ id: 'production-1' }),
+      isCurrentUserClient: () => isClient,
       isCurrentUserManager: () => true,
       isCurrentUserSupervisor: () => false,
       playlistEntryMap: () => new Map([['s1-pf-compo-2', {}]]),
@@ -45,6 +46,19 @@ const mountEntity = () => {
 }
 
 describe('PlaylistedEntity.vue', () => {
+  it('locks the task type and revision combos for a client', async () => {
+    const wrapper = mountEntity({ isClient: true })
+    await nextTick()
+    const combos = wrapper.findAllComponents(Combobox)
+    expect(combos).toHaveLength(2)
+    expect(combos.map(combo => combo.props('disabled'))).toEqual([true, true])
+    expect(
+      mountEntity()
+        .findAllComponents(Combobox)
+        .map(combo => combo.props('disabled'))
+    ).toEqual([false, false])
+  })
+
   // The playlist would hold the same revision of the shot twice.
   it('switches to a revision no other entry of the shot holds', async () => {
     const wrapper = mountEntity()

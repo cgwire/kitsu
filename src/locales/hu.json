@@ -1064,12 +1064,20 @@
       "remove_picture": "Kép eltávolítása",
       "title": "Produkciók",
       "home": {
+        "all_playlists": "Összes playlist",
+        "all_stats": "Összes statisztika",
         "create_new": "Új produkció létrehozása",
         "empty": "Nincs nyitott produkciód. Hozz létre egyet!",
-        "no_task": "Nincs számodra kiosztott feladat. Kérj feladatot a supervisor-odtól!",
+        "latest_playlists": "Legújabb playlistek",
+        "no_playlist": "Még nincs playlist",
         "no_prod_for_client": "Nincs hozzáférésed egy produkcióhoz sem. Lépj kapcsolatba a stúdió adminisztrátorával a hozzáférés megszerzéséhez.",
+        "no_progress": "Még nincs feladat",
+        "no_task": "Nincs számodra kiosztott feladat. Kérj feladatot a supervisor-odtól!",
+        "progress": "Haladás",
         "title": "Produkcióim",
-        "welcome": "Üdvözlünk a Kitsu-n"
+        "welcome": "Üdvözlünk a Kitsu-n",
+        "welcome_text": "Itt osztja meg Önnel a {studio} a munkáját. Kövesse az egyes produkciók előrehaladását, nézze meg a legújabb lejátszási listákat, és hagyja ott a visszajelzését.",
+        "welcome_title": "Üdvözöljük a {studio} oldalán"
       },
       "fields": {
         "fps": "FPS",

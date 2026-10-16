@@ -1064,12 +1064,20 @@
       "remove_picture": "移除图片",
       "title": "制作",
       "home": {
+        "all_playlists": "所有播放列表",
+        "all_stats": "所有统计",
         "create_new": "创建新制作",
         "empty": "您什么制作也没开启。要创建一个新的吗？",
-        "no_task": "还没有任务分配给您。您可以到监制那儿了解一下自己能做些什么！",
+        "latest_playlists": "最新播放列表",
+        "no_playlist": "暂无播放列表",
         "no_prod_for_client": "您无权访问任何制作。请联系您的站点管理员获取访问权限。",
+        "no_progress": "暂无任务",
+        "no_task": "还没有任务分配给您。您可以到监制那儿了解一下自己能做些什么！",
+        "progress": "进度",
         "title": "我的制作",
-        "welcome": "欢迎使用Kitsu"
+        "welcome": "欢迎使用Kitsu",
+        "welcome_text": "{studio} 在这里与您分享工作成果。跟踪每个项目的进度，观看最新的播放列表，并留下您的反馈。",
+        "welcome_title": "欢迎来到 {studio}"
       },
       "fields": {
         "fps": "FPS",

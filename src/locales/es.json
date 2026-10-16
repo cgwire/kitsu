@@ -1064,12 +1064,20 @@
       "remove_picture": "Eliminar la imagen",
       "title": "Producciones",
       "home": {
+        "all_playlists": "Todas las playlists",
+        "all_stats": "Todas las estadísticas",
         "create_new": "Crear una nueva producción",
         "empty": "No tienes ninguna producción abierta. ¿Qué tal si creamos una nueva?",
-        "no_task": "No tiene ninguna tarea asignada. ¡Consulte a su supervisor para ver qué puede hacer!",
+        "latest_playlists": "Últimas playlists",
+        "no_playlist": "Todavía no hay playlists",
         "no_prod_for_client": "No tiene acceso a ninguna producción. Póngase en contacto con el administrador del sitio para obtener acceso.",
+        "no_progress": "Todavía no hay tareas",
+        "no_task": "No tiene ninguna tarea asignada. ¡Consulte a su supervisor para ver qué puede hacer!",
+        "progress": "Progreso",
         "title": "Producciones en marcha",
-        "welcome": "Bienvenido a Kitsu"
+        "welcome": "Bienvenido a Kitsu",
+        "welcome_text": "Aquí es donde {studio} comparte su trabajo con usted. Siga el progreso de cada producción, vea las últimas playlists y deje sus comentarios.",
+        "welcome_title": "Bienvenido a {studio}"
       },
       "fields": {
         "fps": "FPS",

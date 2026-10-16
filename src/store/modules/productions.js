@@ -1,4 +1,7 @@
+import assetsApi from '@/store/api/assets'
+import playlistsApi from '@/store/api/playlists'
 import productionsApi from '@/store/api/productions'
+import shotsApi from '@/store/api/shots'
 import { sortProductions, sortByName } from '@/lib/sorting'
 
 import assetTypeStore from '@/store/modules/assettypes'
@@ -472,6 +475,23 @@ const getters = {
 }
 
 const actions = {
+  // The client home: the entities with their tasks and the latest playlists
+  // of a production, left out of the page caches.
+  async loadProductionOverview(context, production) {
+    const { production_type: productionType } = production
+    const [shots, assets, episodes, playlists] = await Promise.all([
+      productionType === 'assets' ? [] : shotsApi.getShots(production),
+      productionType === 'shots'
+        ? []
+        : assetsApi.getAssets(production, null, true),
+      productionType === 'tvshow' ? shotsApi.getEpisodes(production) : [],
+      playlistsApi.getPlaylists(production, null, null, 'updated_at', 1)
+    ])
+    // Zou types the shots but not the assets.
+    const typedAssets = assets.map(asset => ({ ...asset, type: 'Asset' }))
+    return { entities: [...shots, ...typedAssets], episodes, playlists }
+  },
+
   async loadProductionStatus({ commit }) {
     commit(LOAD_PRODUCTION_STATUS_START)
     try {

@@ -1,7 +1,7 @@
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import process from 'node:process'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { markRaw, reactive, ref } from 'vue'
+import { defineAsyncComponent, markRaw, reactive, ref } from 'vue'
 import { createStore } from 'vuex'
 
 vi.mock('vue-i18n', async importOriginal => ({
@@ -51,6 +51,7 @@ const mountPlayer = ({
   playlistProp = playlist,
   entities = [entity],
   canEditShotTrim = () => true,
+  isClient = false,
   previewFileStatusMap,
   shotMap = new Map(),
   taskMap = new Map(),
@@ -66,7 +67,7 @@ const mountPlayer = ({
       episodeMap: () => new Map(),
       isCurrentUserAdmin: () => false,
       isCurrentUserArtist: () => false,
-      isCurrentUserClient: () => false,
+      isCurrentUserClient: () => isClient,
       isCurrentUserManager: () => true,
       isCurrentUserSupervisor: () => false,
       organisation: () => ({}),
@@ -1009,6 +1010,77 @@ describe('PlaylistPlayer.vue', () => {
       await press(key)
 
       expect(canvas.clear).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('client', () => {
+    const zipLink = () =>
+      wrapper.find(
+        '.playlist-header a[href="/api/data/playlists/playlist-1/download/zip"]'
+      )
+
+    it('keeps the task type change and the download menu from a client', async () => {
+      wrapper = mountPlayer({ isClient: true })
+      await flushPromises()
+      expect(
+        wrapper.find('[title="playlists.actions.change_task_type"]').exists()
+      ).toBe(false)
+      expect(wrapper.find('[title="playlists.actions.download"]').exists()).toBe(
+        false
+      )
+    })
+
+    it('keeps the onion skin from a client', async () => {
+      wrapper = mountPlayer({ isClient: true })
+      await flushPromises()
+      const bar = wrapper.findComponent({ name: 'PlayerAnnotationBar' })
+      expect(bar.props('isOnionSkinOn')).toBeUndefined()
+    })
+
+    it('offers the comparison task type alone to a client', async () => {
+      wrapper = mountPlayer({
+        entities: [{ ...entity, preview_file_extension: 'png' }],
+        isClient: true
+      })
+      await flushPromises()
+      const bar = wrapper.findComponent({ name: 'PlayerComparisonBar' })
+      expect(bar.props('previewToCompareId')).toBeUndefined()
+      expect(bar.props('comparisonMode')).toBeUndefined()
+      expect(bar.props('taskTypeId')).not.toBeUndefined()
+    })
+
+    it('offers the playlist zip in the header to a client only', async () => {
+      wrapper = mountPlayer({ isClient: true })
+      await flushPromises()
+      expect(zipLink().attributes('target')).toBe('_blank')
+      wrapper.unmount()
+
+      wrapper = mountPlayer()
+      await flushPromises()
+      expect(zipLink().exists()).toBe(false)
+    })
+  })
+
+  describe('comment panel height', () => {
+    // The panel is an async component: it mounts after the player has
+    // sized its media once, as for a client, who gets it open on load.
+    it('sizes a panel that mounts after the media', async () => {
+      wrapper = mountPlayer({
+        isClient: true,
+        stubs: {
+          TaskInfo: defineAsyncComponent(() =>
+            Promise.resolve(withMethods(['focusCommentTextarea']))
+          )
+        }
+      })
+      await flushPromises()
+      await flushPromises()
+
+      const mediaHeight = wrapper.find('.video-container').element.style.height
+      expect(mediaHeight).toMatch(/px$/)
+      expect(wrapper.find('.task-info-column').element.style.height).toBe(
+        mediaHeight
+      )
     })
   })
 
