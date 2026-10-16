@@ -13,15 +13,7 @@
           @click="selectBar('change-status')"
           @keydown.enter.prevent="selectBar('change-status')"
           @keydown.space.prevent="selectBar('change-status')"
-          v-if="
-            (isCurrentUserManager ||
-              isSupervisorInDepartment ||
-              isInDepartment ||
-              isCurrentViewTodos) &&
-            !isEntitySelection &&
-            !isCurrentViewConcept &&
-            isTaskSelection
-          "
+          v-if="availableBars.has('change-status')"
         >
           {{ $t('main.status') }}
         </div>
@@ -37,16 +29,7 @@
           @click="selectBar('assignation')"
           @keydown.enter.prevent="selectBar('assignation')"
           @keydown.space.prevent="selectBar('assignation')"
-          v-if="
-            (isCurrentViewSingleEntity || isCurrentViewEntity) &&
-            (isCurrentUserManager ||
-              isSupervisorInDepartment ||
-              isInDepartment ||
-              isCurrentViewSingleEntity) &&
-            !isEntitySelection &&
-            isTaskSelection &&
-            !isCurrentUserArtist
-          "
+          v-if="availableBars.has('assignation')"
         >
           <kitsu-icon
             name="user-check"
@@ -61,14 +44,7 @@
             active: selectedBar === 'priorities'
           }"
           :title="$t('menu.change_priority')"
-          v-if="
-            (isCurrentViewSingleEntity ||
-              isCurrentViewEntity ||
-              isCurrentViewPerson) &&
-            (isCurrentUserManager || isSupervisorInDepartment) &&
-            !isEntitySelection &&
-            isTaskSelection
-          "
+          v-if="availableBars.has('priorities')"
           role="button"
           tabindex="0"
           @click="selectBar('priorities')"
@@ -88,12 +64,7 @@
             active: selectedBar === 'copy-client-comments'
           }"
           :title="$t('menu.copy_client_comments')"
-          v-if="
-            isCurrentUserManager &&
-            isTaskSelection &&
-            !isEntitySelection &&
-            !isCurrentViewConcept
-          "
+          v-if="availableBars.has('copy-client-comments')"
           role="button"
           tabindex="0"
           @click="selectBar('copy-client-comments')"
@@ -109,9 +80,7 @@
             active: selectedBar === 'thumbnails'
           }"
           :title="$t('menu.set_thumbnails')"
-          v-if="
-            isTaskSelection && !isCurrentUserArtist && !isCurrentViewConcept
-          "
+          v-if="availableBars.has('thumbnails')"
           role="button"
           tabindex="0"
           @click="selectBar('thumbnails')"
@@ -136,11 +105,7 @@
           @click="selectBar('edit-concepts')"
           @keydown.enter.prevent="selectBar('edit-concepts')"
           @keydown.space.prevent="selectBar('edit-concepts')"
-          v-if="
-            isCurrentViewConcept &&
-            (isCurrentUserManager || isConceptPublisher) &&
-            nbSelectedConcepts > 0
-          "
+          v-if="availableBars.has('edit-concepts')"
         >
           <link-icon />
         </div>
@@ -156,12 +121,7 @@
           @click="selectBar('move-concepts')"
           @keydown.enter.prevent="selectBar('move-concepts')"
           @keydown.space.prevent="selectBar('move-concepts')"
-          v-if="
-            isCurrentViewConcept &&
-            (isCurrentUserManager || isCurrentUserSupervisor) &&
-            nbSelectedConcepts > 0 &&
-            conceptFolders.length > 0
-          "
+          v-if="availableBars.has('move-concepts')"
         >
           <folder-input-icon />
         </div>
@@ -172,17 +132,7 @@
             active: selectedBar === 'playlists'
           }"
           :title="$t('menu.generate_playlist')"
-          v-if="
-            (isCurrentViewAsset ||
-              isCurrentViewShot ||
-              isCurrentViewSequence ||
-              isCurrentViewTodos ||
-              isCurrentViewTaskType) &&
-            !isEntitySelection &&
-            !isCurrentViewSingleEntity &&
-            isTaskSelection &&
-            nbSelectedTasks > 0
-          "
+          v-if="availableBars.has('playlists')"
           role="button"
           tabindex="0"
           @click="selectBar('playlists')"
@@ -207,7 +157,7 @@
           @click="selectBar('create-tasks')"
           @keydown.enter.prevent="selectBar('create-tasks')"
           @keydown.space.prevent="selectBar('create-tasks')"
-          v-if="isTaskCreationAvailable"
+          v-if="availableBars.has('create-tasks')"
         >
           <check-square-icon />
         </div>
@@ -223,12 +173,7 @@
           @click="selectBar('delete-assets')"
           @keydown.enter.prevent="selectBar('delete-assets')"
           @keydown.space.prevent="selectBar('delete-assets')"
-          v-if="
-            isCurrentViewAsset &&
-            isCurrentUserManager &&
-            nbSelectedAssets > 0 &&
-            !isTaskSelection
-          "
+          v-if="availableBars.has('delete-assets')"
         >
           <kitsu-icon name="trash" :title="$t('menu.delete_assets')" />
         </div>
@@ -244,12 +189,7 @@
           @click="selectBar('delete-shots')"
           @keydown.enter.prevent="selectBar('delete-shots')"
           @keydown.space.prevent="selectBar('delete-shots')"
-          v-if="
-            isCurrentViewShot &&
-            isCurrentUserManager &&
-            nbSelectedShots > 0 &&
-            !isTaskSelection
-          "
+          v-if="availableBars.has('delete-shots')"
         >
           <kitsu-icon name="trash" :title="$t('menu.delete_shots')" />
         </div>
@@ -265,12 +205,7 @@
           @click="selectBar('delete-edits')"
           @keydown.enter.prevent="selectBar('delete-edits')"
           @keydown.space.prevent="selectBar('delete-edits')"
-          v-if="
-            isCurrentViewEdit &&
-            isCurrentUserManager &&
-            nbSelectedEdits > 0 &&
-            !isTaskSelection
-          "
+          v-if="availableBars.has('delete-edits')"
         >
           <kitsu-icon name="trash" :title="$t('menu.delete_edits')" />
         </div>
@@ -286,9 +221,7 @@
           @click="selectBar('delete-concepts')"
           @keydown.enter.prevent="selectBar('delete-concepts')"
           @keydown.space.prevent="selectBar('delete-concepts')"
-          v-if="
-            isCurrentViewConcept && (isCurrentUserManager || isConceptPublisher)
-          "
+          v-if="availableBars.has('delete-concepts')"
         >
           <kitsu-icon name="trash" :title="$t('menu.delete_concepts')" />
         </div>
@@ -1379,6 +1312,89 @@ const isSupervisorInDepartment = computed(
     (user.value.departments.length === 0 || isInDepartment.value)
 )
 
+// The bars the menu offers to this selection. The bar used last comes back
+// only when offered: several pages share it, and it may come from a
+// selection of lines or of empty cells.
+const availableBars = computed(() => {
+  const menuBars = {
+    'change-status':
+      (isCurrentUserManager.value ||
+        isSupervisorInDepartment.value ||
+        isInDepartment.value ||
+        isCurrentViewTodos.value) &&
+      !isEntitySelection.value &&
+      !isCurrentViewConcept.value &&
+      isTaskSelection.value,
+    assignation:
+      (isCurrentViewSingleEntity.value || isCurrentViewEntity.value) &&
+      (isCurrentUserManager.value ||
+        isSupervisorInDepartment.value ||
+        isInDepartment.value ||
+        isCurrentViewSingleEntity.value) &&
+      !isEntitySelection.value &&
+      isTaskSelection.value &&
+      !isCurrentUserArtist.value,
+    priorities:
+      (isCurrentViewSingleEntity.value ||
+        isCurrentViewEntity.value ||
+        isCurrentViewPerson.value) &&
+      (isCurrentUserManager.value || isSupervisorInDepartment.value) &&
+      !isEntitySelection.value &&
+      isTaskSelection.value,
+    'copy-client-comments':
+      isCurrentUserManager.value &&
+      isTaskSelection.value &&
+      !isEntitySelection.value &&
+      !isCurrentViewConcept.value,
+    thumbnails:
+      isTaskSelection.value &&
+      !isCurrentUserArtist.value &&
+      !isCurrentViewConcept.value,
+    'edit-concepts':
+      isCurrentViewConcept.value &&
+      (isCurrentUserManager.value || isConceptPublisher.value) &&
+      nbSelectedConcepts.value > 0,
+    'move-concepts':
+      isCurrentViewConcept.value &&
+      (isCurrentUserManager.value || isCurrentUserSupervisor.value) &&
+      nbSelectedConcepts.value > 0 &&
+      conceptFolders.value.length > 0,
+    playlists:
+      (isCurrentViewAsset.value ||
+        isCurrentViewShot.value ||
+        isCurrentViewSequence.value ||
+        isCurrentViewTodos.value ||
+        isCurrentViewTaskType.value) &&
+      !isEntitySelection.value &&
+      !isCurrentViewSingleEntity.value &&
+      isTaskSelection.value &&
+      nbSelectedTasks.value > 0,
+    'create-tasks': isTaskCreationAvailable.value,
+    'delete-assets':
+      isCurrentViewAsset.value &&
+      isCurrentUserManager.value &&
+      nbSelectedAssets.value > 0 &&
+      !isTaskSelection.value,
+    'delete-shots':
+      isCurrentViewShot.value &&
+      isCurrentUserManager.value &&
+      nbSelectedShots.value > 0 &&
+      !isTaskSelection.value,
+    'delete-edits':
+      isCurrentViewEdit.value &&
+      isCurrentUserManager.value &&
+      nbSelectedEdits.value > 0 &&
+      !isTaskSelection.value,
+    'delete-concepts':
+      isCurrentViewConcept.value &&
+      (isCurrentUserManager.value || isConceptPublisher.value)
+  }
+  return new Set([
+    ...Object.keys(menuBars).filter(bar => menuBars[bar]),
+    ...moreActions.value.map(action => action.bar)
+  ])
+})
+
 const storagePrefix = computed(() => {
   if (isCurrentViewTaskType.value) return 'tasks-'
   if (isCurrentViewConcept.value) return 'concepts-'
@@ -1649,7 +1665,7 @@ const autoChooseSelectBar = () => {
     const lastSelection = localStorage.getItem(
       `${storagePrefix.value}-selected-bar`
     )
-    if (lastSelection) {
+    if (availableBars.value.has(lastSelection)) {
       selectedBar.value = lastSelection
     } else if (isCurrentViewAssetShotOrEdit.value) {
       selectedBar.value = 'change-status'

@@ -420,6 +420,23 @@ describe('ActionPanel, opened on a task selection', () => {
     ).toEqual(['tasks.change_priority'])
   })
 
+  // The assets, shots and edits pages share the bar used last, which may
+  // also come from a selection of lines or of empty cells.
+  test.each(['delete-assets', 'delete-shots', 'create-tasks'])(
+    'opens the status bar rather than %s, used last but not offered',
+    async lastBar => {
+      localStorage.setItem('entities--selected-bar', lastBar)
+
+      const { wrapper } = await mountOnShots()
+
+      expect(
+        wrapper
+          .findAll('.action-bar .confirm-button')
+          .map(button => button.text())
+      ).toEqual(['tasks.change_task_status'])
+    }
+  )
+
   // The store of these tests offers no status, like a selection of tasks
   // whose productions share none.
   test('changes nothing without a status to apply', async () => {
