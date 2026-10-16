@@ -163,6 +163,8 @@ export const getNextEditableCell = (cell, key) => {
  *   departmentFilter)
  * - emit: the list emit
  * - entities: ref of the displayed entities, grouped for assets and shots
+ * - isEntityShown: whether the display settings show an entity of the store
+ *   result, which Select column goes through
  * - filledColumns: ref of the columns holding at least one task
  * - metadataDescriptors: ref of the production descriptors of the type
  * - metadataDisplayHeaders: the initial column display switches
@@ -174,6 +176,7 @@ export const useEntityList = ({
   props,
   emit,
   entities,
+  isEntityShown = () => true,
   filledColumns,
   metadataDescriptors,
   metadataDisplayHeaders: initialDisplayHeaders = {},
@@ -735,7 +738,7 @@ export const useEntityList = ({
     const taskTypeId = lastHeaderMenuDisplayed.value
     const y = getColumnIndexInGrid(taskTypeId)
     const selection = ENTITY_STORES[type].cache.result
-      .filter(entity => !entity.canceled)
+      .filter(entity => !entity.canceled && isEntityShown(entity))
       .map((entity, i) => ({
         entity,
         column: taskTypeMap.value.get(taskTypeId),

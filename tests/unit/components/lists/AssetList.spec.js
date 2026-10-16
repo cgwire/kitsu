@@ -266,6 +266,18 @@ describe('lists/AssetList task selection', () => {
     wrapper.unmount()
   })
 
+  test('Select column leaves the hidden cast assets out', async () => {
+    const wrapper = await mountList([[...castBackgrounds, ...ownBackgrounds]])
+
+    await selectColumn(wrapper, layout)
+
+    const ownCells = ownBackgrounds.map(({ name }) => `${name} Layout`)
+    expect(selectedCells(wrapper)).toEqual(ownCells)
+    expect(committedSelection(wrapper)).toEqual(ownCells)
+
+    wrapper.unmount()
+  })
+
   test('Select column highlights its own column after a stuck one', async () => {
     localStorage.setItem(
       `stick-assets-${production.id}`,

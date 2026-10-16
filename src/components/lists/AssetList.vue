@@ -773,20 +773,23 @@ const inWorkflowFilledColumns = computed(() =>
   }, {})
 )
 
+// The display settings can hide the library and, in a TV show, the assets
+// of other episodes cast in the current one.
+const isAssetShown = asset => {
+  const { showSharedAssets, showLinkedAssets } = props.displaySettings
+  return (
+    (showSharedAssets || !asset.shared) &&
+    (!isTVShow.value ||
+      showLinkedAssets ||
+      ['all', asset.episode_id || 'main'].includes(currentEpisode.value?.id))
+  )
+}
+
 // Filter the displayed assets by the display settings.
 const filteredDisplayedAssets = computed(() => {
   const { showSharedAssets, showLinkedAssets } = props.displaySettings
   if (showSharedAssets && showLinkedAssets) return props.displayedAssets
-  const episodeId = currentEpisode.value?.id
-  return props.displayedAssets.map(typeList =>
-    typeList.filter(
-      asset =>
-        (showSharedAssets || !asset.shared) &&
-        (!isTVShow.value ||
-          showLinkedAssets ||
-          ['all', asset.episode_id || 'main'].includes(episodeId))
-    )
-  )
+  return props.displayedAssets.map(typeList => typeList.filter(isAssetShown))
 })
 
 const {
@@ -838,6 +841,7 @@ const {
   props,
   emit,
   entities: filteredDisplayedAssets,
+  isEntityShown: isAssetShown,
   filledColumns: inWorkflowFilledColumns,
   metadataDescriptors: assetMetadataDescriptors,
   metadataDisplayHeaders: {
