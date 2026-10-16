@@ -69,6 +69,7 @@ describe('App', () => {
         .spyOn(console, 'error')
         .mockImplementation(() => {})
       const error = Object.assign(new Error('HTTP 404'), { status: 404 })
+      errors.markRequestFailure(error)
 
       const { socket } = await mountApp({
         actions: { loadTask: () => Promise.reject(error) },
@@ -81,6 +82,24 @@ describe('App', () => {
 
       expect(rejections).toEqual([])
       expect(consoleError).toHaveBeenCalledWith(error)
+    })
+
+    it('leaves a bug in the task reload after a task update to Sentry', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const bug = new TypeError('Cannot read properties of undefined')
+
+      const rejections = await recordUnhandledRejections(async () => {
+        const { socket } = await mountApp({
+          actions: { loadTask: () => Promise.reject(bug) },
+          getters: { taskMap: () => new Map([['task-1', { id: 'task-1' }]]) }
+        })
+        emitSocketEvent(socket, 'task:update', { task_id: 'task-1' })
+      })
+
+      expect(rejections).toEqual([bug])
+      expect(consoleError).not.toHaveBeenCalledWith(bug)
     })
 
     // A production page replaces the task map, which then lacks the todos.
@@ -174,6 +193,47 @@ describe('App', () => {
         emitSocketEvent(socket, 'connect')
 
         expect(refresh).toHaveBeenCalled()
+      })
+
+      it('logs a failed read of the statuses after a reconnection', async () => {
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const failure = Object.assign(new Error('HTTP 502'), { status: 502 })
+        errors.markRequestFailure(failure)
+
+        const rejections = await recordUnhandledRejections(async () => {
+          const { socket } = await mountApp({
+            actions: {
+              refreshProcessingPreviewFiles: () => Promise.reject(failure)
+            },
+            getters
+          })
+          emitSocketEvent(socket, 'connect')
+        })
+
+        expect(rejections).toEqual([])
+        expect(consoleError).toHaveBeenCalledWith(failure)
+      })
+
+      it('leaves a bug in the read of the statuses to Sentry', async () => {
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const bug = new TypeError('Cannot read properties of undefined')
+
+        const rejections = await recordUnhandledRejections(async () => {
+          const { socket } = await mountApp({
+            actions: {
+              refreshProcessingPreviewFiles: () => Promise.reject(bug)
+            },
+            getters
+          })
+          emitSocketEvent(socket, 'connect')
+        })
+
+        expect(rejections).toEqual([bug])
+        expect(consoleError).not.toHaveBeenCalledWith(bug)
       })
     })
 
