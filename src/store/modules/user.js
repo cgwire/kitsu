@@ -241,8 +241,15 @@ const getters = {
   plugins: state => state.plugins,
   studioPlugins: state =>
     state.plugins.filter(plugin => plugin.frontend_studio_enabled),
-  projectPlugins: state =>
-    state.plugins.filter(plugin => plugin.frontend_project_enabled)
+  taskPlugins: state =>
+    state.plugins.filter(plugin => plugin.frontend_task_enabled),
+  projectPlugins: (state, getters) =>
+    state.plugins.filter(
+      plugin =>
+        plugin.frontend_project_enabled ||
+        (plugin.frontend_project_admin_enabled &&
+          Boolean(getters?.isCurrentUserManager))
+    )
 }
 
 const actions = {
