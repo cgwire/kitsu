@@ -441,7 +441,8 @@ const twoFA = reactive({
   OTPRecoveryCodes: null,
   // Name of the action currently in flight (e.g. 'enableTOTP',
   // 'preEnableEmailOTP') or null when idle. Each button checks for its own
-  // name so clicking on one TOTP action doesn't spin the rest.
+  // name so clicking on one TOTP action doesn't spin the rest. The request
+  // handlers return while it is set: a spinner only stops the mouse.
   loadingAction: null,
   TOTPPreEnabled: false,
   TOTPNeedTwoFA: false,
@@ -565,6 +566,7 @@ const enableTOTPRequested = () => {
 }
 
 const preEnableTOTPRequested = () => {
+  if (twoFA.loadingAction) return
   removeTwoFactorErrors()
   twoFA.loadingAction = 'preEnableTOTP'
   twoFA.TOTPPreEnabled = false
@@ -627,6 +629,7 @@ const enableEmailOTPRequested = () => {
 }
 
 const preEnableEmailOTPRequested = () => {
+  if (twoFA.loadingAction) return
   removeTwoFactorErrors()
   twoFA.loadingAction = 'preEnableEmailOTP'
   twoFA.emailOTPPreEnabled = false
@@ -674,7 +677,7 @@ const preRegisterFIDORequested = () => {
 }
 
 const registerFIDORequested = () => {
-  if (!twoFA.FIDONewDeviceName) return
+  if (!twoFA.FIDONewDeviceName || twoFA.loadingAction) return
 
   removeTwoFactorErrors()
   twoFA.loadingAction = 'registerFIDO'
@@ -746,7 +749,7 @@ const newRecoveryCodesRequested = payload => {
 // The release of Enter on an Enable button lands in the code field when the
 // server answers first.
 const nextEnable = () => {
-  if (!twoFA.validationOTP) return
+  if (!twoFA.validationOTP || twoFA.loadingAction) return
   if (twoFA.TOTPPreEnabled) enableTOTPRequested()
   else if (twoFA.emailOTPPreEnabled) enableEmailOTPRequested()
 }

@@ -43,6 +43,17 @@ describe('widgets/TwoFactorAuthentication', () => {
     expect(wrapper.emitted('validate')).toEqual([[{ totp: '123456' }]])
   })
 
+  // The spinner only stops the mouse.
+  it('validates nothing while the code is checked', async () => {
+    const wrapper = mountWidget({ isLoading: true })
+    await wrapper.find('input').setValue('123456')
+
+    await wrapper.find('input').trigger('keyup', { key: 'Enter' })
+    await wrapper.find('button').trigger('click')
+
+    expect(wrapper.emitted('validate')).toBeUndefined()
+  })
+
   describe('with a FIDO device', () => {
     const response = { id: 'credential-1' }
 
