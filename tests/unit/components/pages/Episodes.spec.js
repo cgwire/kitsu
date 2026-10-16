@@ -1,4 +1,5 @@
 import { flushPromises } from '@vue/test-utils'
+import { reactive } from 'vue'
 
 vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
@@ -50,6 +51,44 @@ describe('Episodes page', () => {
     await flushPromises()
 
     expect(router.currentRoute.value.query.search).toBe('e01')
+  })
+
+  // Writing back the search the URL already holds changes no route, so the
+  // URL watcher cannot apply it: the page applies it to the list itself.
+  test('applies the search of the URL on mount', async () => {
+    const { dispatched } = await mountPage({
+      getters: {
+        episodeMap: episodeMap(production.id),
+        episodeValidationColumns: ['task-type-1']
+      },
+      query: { search: 'e01' }
+    })
+
+    expect(dispatched('setEpisodeSearch')).toContainEqual([
+      'setEpisodeSearch',
+      'e01'
+    ])
+  })
+
+  test('applies the search of the URL after a reload of the list', async () => {
+    const getters = reactive({
+      episodeMap: episodeMap(production.id),
+      episodeValidationColumns: ['task-type-1'],
+      isEpisodesLoading: true
+    })
+    const { store, dispatched } = await mountPage({
+      getters,
+      query: { search: 'e01' }
+    })
+    store.dispatch.mockClear()
+
+    getters.isEpisodesLoading = false
+    await flushPromises()
+
+    expect(dispatched('setEpisodeSearch')).toContainEqual([
+      'setEpisodeSearch',
+      'e01'
+    ])
   })
 
   test('selects the task named in the URL', async () => {
