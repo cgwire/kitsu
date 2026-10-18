@@ -81,6 +81,7 @@
       "number": "tło | teł",
       "edit_background": "Edytuj tło",
       "new_background": "Dodaj nowe tło",
+      "production_description": "Tła 3D dostępne w odtwarzaczu dla podglądów 3D tej produkcji.",
       "title": "Tła 3D",
       "fields": {
         "is_default": "Domyślne",
@@ -92,6 +93,7 @@
       "title": "Tablica",
       "empty": "Nie ma nic do pokazania na tablicy: nie masz bieżących zadań, wyszukiwanie nie zwróciło wyników albo w ustawieniach produkcji nie włączono żadnych statusów zadań dla Twojej roli.",
       "settings": {
+        "description": "Role, które widzą ten status jako kolumnę na swojej tablicy.",
         "title": "Status na tablicy",
         "visible": "Wyświetlany na tablicy kanban dla...",
         "select_all": "Zaznacz wszystko",
@@ -403,6 +405,7 @@
       "in_title": "Status wyzwalający zmianę",
       "out_title": "Zmiana, która zostanie zastosowana po zadziałaniu wyzwalacza",
       "new_status_automation": "Dodaj automatyzację statusu",
+      "production_description": "Automatyzacja zmienia status zadania lub następne zadanie, gdy ustawiony zostanie status.",
       "run_for_selection": "Uruchom automatyzację statusu dla wybranych zadań:",
       "title": "Automatyzacje",
       "wrong_automation": "Ta automatyzacja dotyczy typu zadania znajdującego się wcześniej w procesie. Kitsu na to nie pozwala (aby uniknąć nieskończonych cykli). Nie będzie ona miała żadnego efektu.",
@@ -1429,7 +1432,9 @@
         "delete_confirm": "Usunąć konto podglądu tej produkcji?",
         "description": "Zobacz Kitsu dokładnie tak jak klient, tylko do odczytu i bez zajmowania licencji.",
         "error": "Wystąpił błąd podczas aktualizacji konta podglądu.",
+        "isolation_description": "Każdy klient widzi tylko własne komentarze i te udostępnione klientom, a nie komentarze innych klientów.",
         "isolation_title": "Izolacja klientów",
+        "metadata_description": "Zaznaczone kolumny metadanych są widoczne dla klientów na listach assetów i ujęć.",
         "metadata_empty": "Ta produkcja nie ma metadanych.",
         "metadata_title": "Metadane widoczne dla klientów",
         "open_for_hour": "Otwórz na 1 godzinę",
@@ -1443,6 +1448,7 @@
         "statuses_empty": "Żaden status nie jest widoczny dla klientów.",
         "statuses_link": "Edytuj statusy zadań",
         "statuses_title": "Statusy dostępne dla klientów",
+        "team_description": "Osoby z rolą Klient w zespole tej produkcji.",
         "team_empty": "Brak klientów w zespole.",
         "team_title": "Klienci zespołu",
         "title": "Klienci",
@@ -1584,6 +1590,7 @@
       },
       "brief": {
         "edit_error": "Wystąpił błąd podczas edycji briefu.",
+        "edit_hint": "Kliknij dwukrotnie brief, aby go edytować.",
         "empty": "Nie ma jeszcze briefu. Może go utworzysz?",
         "title": "Brief"
       },
@@ -1599,21 +1606,30 @@
         "bitrate_max": "Maksymalnie: {value} Mbit/s",
         "bitrate_size": "Około {size} MB na minutę",
         "bitrates": "Przepływności",
+        "encoding_explanation": "Przesłane filmy są konwertowane do tej liczby klatek na sekundę, proporcji i rozdzielczości; istniejące podglądy nie są ponownie kodowane.",
+        "encoding_title": "Kodowanie",
+        "frame_in_description": "Licznik odtwarzacza zaczyna się od klatki początkowej ujęcia zamiast od 0.",
         "hd_bitrate_description": "Wersja w pełnej rozdzielczości, odtwarzana w trybie HD i używana przy pobieraniu.",
         "ld_bitrate_description": "Lżejsza wersja o szerokości 1280 pikseli, odtwarzana w trybie LD.",
         "ld_bitrate_max": "Maksymalnie: {value} Mbit/s (przepływność HD)",
         "next_uploads_only": "Zmiany dotyczą tylko nowo przesyłanych plików: istniejące podglądy nie są ponownie kodowane.",
+        "previews_title": "Podglądy",
         "restore_default": "Przywróć wartość domyślną",
+        "revision_padding_description": "Dodaje wiodące zera do numerów wersji, na przykład 3 wyświetla się jako v001.",
         "task_type_bitrates": "Pozostaw puste, aby użyć przepływności z karty Wideo.",
         "task_type_ld_bitrate_max": "Maksymalnie: przepływność HD typu zadania",
         "title": "Wideo"
       },
       "parameters": {
+        "publish_default_description": "Artyści widzą formularz publikacji zamiast formularza komentarza, gdy otwierają zadanie.",
         "title": "Parametry",
-        "previews_and_comments": "Previews i komentarze",
+        "comments_and_retakes": "Komentarze i poprawki",
         "save": {
           "button": "Potwierdź"
-        }
+        },
+        "general_title": "Ogólne",
+        "max_retakes_description": "Artyści nie mogą ustawić statusu poprawki, gdy zadanie osiągnie tę liczbę poprawek. 0 oznacza brak limitu.",
+        "previews_and_comments": "Previews i komentarze"
       },
       "status": {
         "closed": "Zamknięta",
@@ -1803,6 +1819,7 @@
       "name": "status zadania",
       "number": "status zadania | statusów zadań",
       "new_task_status": "Dodaj status zadania",
+      "production_description": "Tylko te statusy można ustawiać w zadaniach tej produkcji.",
       "title": "Statusy zadań",
       "title_entities": "Statusy dla obiektów",
       "title_concepts": "Statusy dla konceptów",
@@ -1838,6 +1855,7 @@
       "new_task_type": "Dodaj typ zadania",
       "no_task_types": "Dla tego typu obiektu nie ma żadnych typów zadań",
       "number": "typ zadania | typów zadań",
+      "production_description": "Do tej produkcji można dodać tylko wymienione tutaj typy zadań.",
       "select_task_type": "Wybierz typ zadania...",
       "title": "Typy zadań",
       "fields": {

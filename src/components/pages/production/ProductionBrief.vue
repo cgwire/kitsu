@@ -1,6 +1,9 @@
 <template>
   <div class="production-brief">
-    <div v-if="!isEditing" class="box" @dblclick="openEditing">
+    <div v-if="!isEditing" class="box section" @dblclick="openEditing">
+      <p class="explanation edit-hint mb1">
+        {{ $t('productions.brief.edit_hint') }}
+      </p>
       <div v-if="!currentProduction?.description">
         <p>{{ $t('productions.brief.empty') }}</p>
       </div>
@@ -10,7 +13,7 @@
         v-else
       ></div>
     </div>
-    <div v-else class="box has-text-right">
+    <div v-else class="box section has-text-right">
       <textarea-field
         class="editor"
         ref="textarea"
@@ -92,27 +95,22 @@ const editBrief = async () => {
 </script>
 
 <style lang="scss" scoped>
-.dark {
-  .content {
-    color: $white;
-  }
-}
-
 .production-brief {
+  display: flex;
   flex: 1;
+  flex-direction: column;
+  max-width: 600px;
 }
 
 .box {
   display: flex;
   flex: 1;
   flex-direction: column;
-  height: calc(100% - 20px);
-  max-width: 800px;
   overflow: auto;
-  margin-bottom: 0.5em;
 }
 
 .content {
+  color: var(--text-strong);
   padding-bottom: 1em;
 }
 

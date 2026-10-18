@@ -56,6 +56,9 @@
         </div>
 
         <div class="tab" v-show="isActiveTab('taskStatus')">
+          <p class="explanation mb1">
+            {{ $t('task_status.production_description') }}
+          </p>
           <div
             class="flexrow mt1 mb1 add-task-status"
             v-if="!isEmpty(remainingTaskStatuses)"
@@ -185,9 +188,9 @@ const menuGroups = [
     label: 'productions.settings_menu.production',
     items: [
       { id: 'parameters', label: 'productions.parameters.title' },
+      { id: 'brief', label: 'productions.brief.title' },
       { id: 'clients', label: 'productions.clients.title' },
       { id: 'video', label: 'productions.video.title' },
-      { id: 'brief', label: 'productions.brief.title' },
       { id: 'backgrounds', label: 'backgrounds.title' }
     ]
   },
@@ -324,12 +327,6 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-.datatable th {
-  color: var(--text);
-}
-p {
-  color: var(--text);
-}
 .fixed-page {
   display: flex;
 }
@@ -407,28 +404,79 @@ p {
   flex-direction: column;
   overflow-y: auto;
   padding-left: 2px;
-}
 
-h2.subtitle {
-  color: $grey;
-  font-size: 1.2em;
-  font-weight: bold;
-  margin-bottom: 0.4em;
-  text-transform: uppercase;
+  // The look of the setting blocks of every tab lives here, so that the tab
+  // components only set their own width.
+  :deep(.section) {
+    border-radius: 12px;
+    margin-bottom: 1em;
+    padding: 2em;
+  }
+
+  // Empty list messages: modals also render a .box here, hence the parents.
+  :deep(.column > .box),
+  :deep(.background-settings > .box),
+  :deep(.board-settings > .box) {
+    border-radius: 12px;
+  }
+
+  // Direct children only: the Clients preview header lays out its own title.
+  :deep(.section > .subtitle) {
+    border-bottom: 0;
+    margin-bottom: 1.5em;
+    margin-top: 0;
+  }
+
+  :deep(.explanation) {
+    color: var(--text-alt);
+  }
+
+  // Same look as the TextField description, for the Checkbox that has no
+  // description prop.
+  :deep(.field-help) {
+    color: var(--text-alt);
+    font-size: 0.9em;
+    margin-top: 0.4em;
+  }
+
+  // Short numeric settings: the input sits on the left of its label, the
+  // description on its own line below.
+  :deep(.number-line) {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6em;
+
+    .label {
+      margin-bottom: 0;
+    }
+
+    .control {
+      flex: 0 0 auto;
+      order: -1;
+    }
+
+    .help {
+      flex: 0 0 100%;
+      margin-top: 0;
+    }
+
+    .input {
+      padding: 0.3em 0.3em;
+      width: 45px;
+      height: 35px;
+    }
+  }
 }
 
 .field {
   margin-bottom: 0;
 }
 
-.list {
-  width: 400px;
-  min-width: 400px;
-  max-width: 400px;
-
-  .name {
-    width: 100%;
-  }
+.datatable th {
+  color: var(--text);
+  padding-left: 10px;
+  padding-bottom: 5px;
 }
 
 .th-name {
@@ -443,12 +491,8 @@ h2.subtitle {
   width: 140px;
 }
 
-th {
-  padding-left: 10px;
-  padding-bottom: 5px;
-}
-
 .box {
+  border-radius: 12px;
   max-width: 400px;
 }
 
@@ -465,6 +509,28 @@ th {
   padding-top: 1em;
   width: 40px;
   color: $grey;
+}
+
+// Tablet: the content area is about 500px wide next to the menu.
+@media screen and (max-width: 1000px) {
+  .th-name,
+  .th-short-name,
+  .th-bool {
+    white-space: normal;
+    width: auto;
+  }
+
+  // The list and the importer stack instead of overflowing side by side.
+  :deep(.tab .asset-type-settings .columns),
+  :deep(.tab .production-task-types .columns) {
+    flex-wrap: wrap;
+  }
+
+  :deep(.tab .background-settings .name),
+  :deep(.tab .background-settings .is-default) {
+    min-width: 0;
+    width: auto;
+  }
 }
 
 @media screen and (max-width: 768px) {
@@ -497,17 +563,12 @@ th {
     }
   }
 
-  .columns {
-    margin-bottom: 1em;
-  }
-
-  .box {
+  .tab :deep(.section) {
     padding: 1.5em;
   }
 
-  /* Read-only mobile: hide add buttons / mutation widgets. The Parameters
-     and Video forms stay editable, Save included. */
-  .tab > .flexrow.mt1.mb1 {
+  .add-task-status,
+  :deep(.production-brief .edit-hint) {
     display: none;
   }
 
@@ -517,21 +578,20 @@ th {
 
   :deep(.tab .remove),
   :deep(.tab .grab),
-  :deep(.tab td.remove),
-  :deep(.tab td.grab),
   :deep(.tab .name-full) {
     display: none !important;
   }
 
   :deep(.background-settings .flexrow.mt1.mb1),
-  :deep(.task-status-settings .add-task-status),
+  :deep(.production-task-types .add-task-type),
   :deep(.status-automation-settings .add-status-automation) {
     display: none;
   }
 
   :deep(.background-settings .datatable th:last-child),
   :deep(.background-settings .datatable td:last-child),
-  :deep(.background-settings .is-default) {
+  :deep(.background-settings .is-default),
+  :deep(.production-task-types .bitrate) {
     display: none !important;
   }
 
@@ -554,7 +614,6 @@ th {
     margin-bottom: 0.35em;
   }
 
-  /* Card mode for every list/table inside a tab */
   :deep(.tab .datatable),
   :deep(.tab .datatable.list),
   :deep(.tab table.list) {

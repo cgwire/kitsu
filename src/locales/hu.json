@@ -1062,7 +1062,9 @@
         "delete_confirm": "Törli a produkció előnézeti fiókját?",
         "description": "Lásd a Kitsut pontosan úgy, mint egy ügyfél: csak olvasható módban, licenc foglalása nélkül.",
         "error": "Hiba történt az előnézeti fiók frissítésekor.",
+        "isolation_description": "Minden ügyfél csak a saját hozzászólásait és az ügyfelekkel megosztottakat látja, a többi ügyfélét nem.",
         "isolation_title": "Ügyfelek elkülönítése",
+        "metadata_description": "A bejelölt metaadat-oszlopok megjelennek az ügyfeleknek az asset- és snittlistákban.",
         "metadata_empty": "Ennek a produkciónak nincsenek metaadatai.",
         "metadata_title": "Az ügyfelek számára látható metaadatok",
         "open_for_hour": "Megnyitás 1 órára",
@@ -1076,6 +1078,7 @@
         "statuses_empty": "Egyetlen állapot sem látható az ügyfelek számára.",
         "statuses_link": "Feladatállapotok szerkesztése",
         "statuses_title": "Ügyfelek számára elérhető státuszok",
+        "team_description": "A produkció csapatának Megrendelő szerepkörű tagjai.",
         "team_empty": "Nincs ügyfél a csapatban.",
         "team_title": "A csapat ügyfelei",
         "title": "Ügyfelek",
@@ -1180,15 +1183,20 @@
       "edit_error": "Hiba történt a produkció szerkesztésekor. Kérlek keresd fel a támogató csapatunkat.",
       "brief": {
         "title": "Brief",
+        "edit_hint": "Kattints duplán a briefre a szerkesztéséhez.",
         "empty": "Jelenleg nincs még brief. Hozz létre egyet!",
         "edit_error": "Hiba történt a brief szerkesztésekor."
       },
       "parameters": {
+        "publish_default_description": "A művészek a publikálási űrlapot látják a hozzászólási űrlap helyett, amikor megnyitnak egy feladatot.",
         "title": "Paraméterek",
-        "previews_and_comments": "Previewk és megjegyzések",
+        "comments_and_retakes": "Megjegyzések és retake-ek",
         "save": {
           "button": "Megerősítés"
-        }
+        },
+        "general_title": "Általános",
+        "max_retakes_description": "A művészek nem állíthatnak be újraforgatás állapotot, ha egy feladat eléri ezt az újraforgatás-számot. A 0 azt jelenti, nincs korlát.",
+        "previews_and_comments": "Previewk és megjegyzések"
       },
       "creation": {
         "add_assets": "Asset-ek hozzáadása (nem kötelező)",
@@ -1250,11 +1258,16 @@
         "bitrate_max": "Maximum: {value} Mbit/s",
         "bitrate_size": "Körülbelül {size} MB percenként",
         "bitrates": "Bitráták",
+        "encoding_explanation": "A feltöltött videók erre a képkockasebességre, képarányra és felbontásra lesznek átalakítva; a meglévő előnézetek nem kerülnek újrakódolásra.",
+        "encoding_title": "Kódolás",
+        "frame_in_description": "A lejátszó számlálója a snitt kezdő kockájánál indul 0 helyett.",
         "hd_bitrate_description": "Teljes felbontású változat: HD módban ez kerül lejátszásra, és ez tölthető le.",
         "ld_bitrate_description": "Kisebb méretű, 1280 pixel széles változat: LD módban ez kerül lejátszásra.",
         "ld_bitrate_max": "Maximum: {value} Mbit/s (HD-bitráta)",
         "next_uploads_only": "A változtatások csak a következő feltöltéseket érintik: a meglévő előnézetek nem kerülnek újrakódolásra.",
+        "previews_title": "Előnézetek",
         "restore_default": "Alapértelmezett érték visszaállítása",
+        "revision_padding_description": "Vezető nullákat ad a revíziószámokhoz, például a 3 v001-ként jelenik meg.",
         "task_type_bitrates": "Hagyd üresen a Videó fülön beállított bitráták használatához.",
         "task_type_ld_bitrate_max": "Maximum: a feladattípus HD-bitrátája",
         "title": "Videó"
@@ -1411,6 +1424,7 @@
       "edit_title": "Feladat állapot szerkesztése",
       "number": "feladat állapot | feladat állapotok",
       "new_task_status": "Feladat állapot hozzáadása",
+      "production_description": "Csak ezek az állapotok állíthatók be a produkció feladatain.",
       "title": "Feladat állapot",
       "fields": {
         "color": "Szín",
@@ -1461,6 +1475,7 @@
       "add_task_type_to_library": "Feladat típus hozzáadása a könyvtárhoz",
       "library_title": "Feladat típus könyvtár",
       "no_task_types": "Nincs feladat típus ehhez az elem típushoz",
+      "production_description": "Csak az itt felsorolt feladattípusok adhatók hozzá ehhez a produkcióhoz.",
       "select_task_type": "Válassz egy feladat típust..."
     },
     "sequences": {
@@ -2004,6 +2019,7 @@
       "empty": "Nincs megjeleníthető elem a táblán: nincs folyamatban lévő feladatod, a keresésed nem adott találatot, vagy nincs feladat állapot engedélyezve a szerepedhez a produkció beállításaiban.",
       "settings": {
         "select_all": "Összes kijelölése",
+        "description": "Azok a szerepkörök, amelyek oszlopként látják ezt az állapotot a táblájukon.",
         "title": "Tábla állapot",
         "unselect_all": "Kijelölés megszüntetése",
         "visible": "Megjelenítve a kanban tábláján ennek..."
@@ -2180,6 +2196,7 @@
       "name": "háttér",
       "new_background": "Új háttér hozzáadása",
       "number": "háttér | háttér",
+      "production_description": "A produkció 3D előnézeteihez a lejátszóban felkínált 3D hátterek.",
       "title": "3D hátterek"
     },
     "search": {
@@ -2360,6 +2377,7 @@
       "new_status_automation": "Állapot-automatizálás hozzáadása",
       "number": "állapot-automatizálás | állapot-automatizálás",
       "out_title": "A trigger aktiválódásakor alkalmazott változás",
+      "production_description": "Egy automatizálás megváltoztatja egy feladat állapotát vagy a következő feladatot, amikor egy állapotot beállítanak.",
       "run_for_selection": "Állapot-automatizálás futtatása a kijelölt feladatokon:",
       "title": "Automatizálások",
       "wrong_automation": "Ez az automatizálás egy feljebb lévő (upstream) feladat típusra vonatkozik. Ezt a Kitsu nem engedélyezi (a végtelen ciklusok elkerülése érdekében). Nem lesz hatása."

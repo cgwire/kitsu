@@ -1,10 +1,15 @@
 <template>
-  <status-automation-settings
-    :status-automations="productionStatusAutomations"
-    :all-status-automations="allStatusAutomations"
-    @add="onAdd"
-    @remove="onRemove"
-  />
+  <div>
+    <p class="explanation mb1">
+      {{ $t('status_automations.production_description') }}
+    </p>
+    <status-automation-settings
+      :status-automations="productionStatusAutomations"
+      :all-status-automations="allStatusAutomations"
+      @add="onAdd"
+      @remove="onRemove"
+    />
+  </div>
 </template>
 
 <script setup>

@@ -35,19 +35,14 @@ const baseProduction = {
   end_date: '2026-12-31'
 }
 
-describe('ProductionParameters — is_frame_in_numbering', () => {
-  it('maps an explicit true to an enabled toggle', () => {
+describe('ProductionParameters: preview options', () => {
+  it('leaves the preview options to the Video tab', () => {
     const wrapper = mountWithProduction({
       ...baseProduction,
       is_frame_in_numbering: true
     })
-    expect(wrapper.vm.form.is_frame_in_numbering).toBe(true)
-  })
-
-  // The option is an opt-in; old zou versions without the column stay off.
-  it('defaults to disabled when the field is missing', () => {
-    const wrapper = mountWithProduction(baseProduction)
-    expect(wrapper.vm.form.is_frame_in_numbering).toBe(false)
+    expect(wrapper.vm.form.is_frame_in_numbering).toBeUndefined()
+    expect(wrapper.vm.form.revision_padding).toBeUndefined()
   })
 })
 

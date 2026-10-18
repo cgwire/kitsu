@@ -1062,7 +1062,9 @@
         "delete_confirm": "删除此制作的预览账户?",
         "description": "以客户的视角查看 Kitsu,只读且不占用席位。",
         "error": "更新预览账户时出错。",
+        "isolation_description": "每个客户只能看到自己的评论以及与客户共享的评论，看不到其他客户的评论。",
         "isolation_title": "客户隔离",
+        "metadata_description": "勾选的元数据列会在资产和镜头列表中向客户显示。",
         "metadata_empty": "此制作没有元数据。",
         "metadata_title": "对客户可见的元数据",
         "open_for_hour": "开放 1 小时",
@@ -1076,6 +1078,7 @@
         "statuses_empty": "没有对客户可见的状态。",
         "statuses_link": "编辑任务状态",
         "statuses_title": "客户可用的状态",
+        "team_description": "此制作团队中具有客户角色的人员。",
         "team_empty": "团队中没有客户。",
         "team_title": "团队的客户",
         "title": "客户",
@@ -1180,15 +1183,20 @@
       "edit_error": "编辑制作时出错。请联系我们的支持团队。",
       "brief": {
         "title": "简介",
+        "edit_hint": "双击简介即可编辑。",
         "empty": "还没有简介。创建一个？",
         "edit_error": "编辑摘要时出现错误。"
       },
       "parameters": {
+        "publish_default_description": "艺术家打开任务时看到的是发布表单，而不是评论表单。",
         "title": "参数",
-        "previews_and_comments": "预览和评论",
+        "comments_and_retakes": "评论和返工",
         "save": {
           "button": "确定"
-        }
+        },
+        "general_title": "常规",
+        "max_retakes_description": "任务的重新提交次数达到此数值后，艺术家将无法再设置重新提交状态。0 表示不限制。",
+        "previews_and_comments": "预览和评论"
       },
       "creation": {
         "add_assets": "添加资产(可选)",
@@ -1267,11 +1275,16 @@
         "bitrate_max": "最大值：{value} Mbit/s",
         "bitrate_size": "每分钟约 {size} MB",
         "bitrates": "码率",
+        "encoding_explanation": "上传的视频会被转换为此帧率、宽高比和分辨率；现有预览不会重新编码。",
+        "encoding_title": "编码",
+        "frame_in_description": "播放器计数器从镜头的入点帧开始，而不是从 0 开始。",
         "hd_bitrate_description": "全分辨率版本，在 HD 模式下播放，也用于下载。",
         "ld_bitrate_description": "宽度为 1280 像素的轻量版本，在 LD 模式下播放。",
         "ld_bitrate_max": "最大值：{value} Mbit/s (HD 码率)",
         "next_uploads_only": "更改仅适用于之后的上传，现有预览不会重新编码。",
+        "previews_title": "预览",
         "restore_default": "恢复默认值",
+        "revision_padding_description": "为修订号添加前导零，例如 3 显示为 v001。",
         "task_type_bitrates": "留空则使用“视频”标签页中的码率。",
         "task_type_ld_bitrate_max": "最大值：该任务类型的 HD 码率",
         "title": "视频"
@@ -1411,6 +1424,7 @@
       "edit_title": "编辑任务状态",
       "number": "任务状态 | 任务状态",
       "new_task_status": "添加任务状态",
+      "production_description": "此制作的任务只能设置这些状态。",
       "title": "任务状态",
       "fields": {
         "color": "颜色",
@@ -1459,6 +1473,7 @@
       },
       "no_task_types": "该实体类型没有任务类型",
       "add_task_type_placeholder": "+ 添加任务类型",
+      "production_description": "只有此处列出的任务类型可以添加到此制作中。",
       "select_task_type": "选择任务类型...",
       "add_task_type_to_library": "向任务类型库中添加任务类型",
       "library_title": "任务类型库"
@@ -2003,6 +2018,7 @@
       "in_title": "状态触发变化",
       "out_title": "将在触发器触发时应用的更改",
       "new_status_automation": "添加状态自动化",
+      "production_description": "自动化会在设置某个状态时更改任务状态或下一个任务。",
       "run_for_selection": "为选定的任务运行状态自动化：",
       "title": "状态自动化",
       "wrong_automation": "此自动化适用于上游任务类型。Kitsu 不允许这样做（以避免无限循环）。它不会有任何影响。",
@@ -2056,6 +2072,7 @@
       "number": "背景 | 背景",
       "edit_background": "编辑背景",
       "new_background": "添加新背景",
+      "production_description": "播放器中为此制作的 3D 预览提供的 3D 背景。",
       "title": "3D 背景",
       "fields": {
         "is_default": "是否默认",
@@ -2068,6 +2085,7 @@
       "title": "看板",
       "empty": "看板上没有可显示的内容：您没有正在进行的任务，您的搜索没有返回结果，或者在制作设置中没有为您的角色启用任何任务状态。",
       "settings": {
+        "description": "在自己的看板上将此状态显示为一列的角色。",
         "title": "看板状态",
         "visible": "显示在...",
         "select_all": "选择所有",

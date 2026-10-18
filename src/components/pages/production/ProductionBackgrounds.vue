@@ -1,14 +1,19 @@
 <template>
-  <background-settings
-    :backgrounds="productionBackgrounds"
-    :all-backgrounds="backgrounds"
-    :default-background-id="
-      currentProduction.default_preview_background_file_id
-    "
-    @add="onAdd"
-    @remove="onRemove"
-    @set-default="onSetDefault"
-  />
+  <div>
+    <p class="explanation mb1">
+      {{ $t('backgrounds.production_description') }}
+    </p>
+    <background-settings
+      :backgrounds="productionBackgrounds"
+      :all-backgrounds="backgrounds"
+      :default-background-id="
+        currentProduction.default_preview_background_file_id
+      "
+      @add="onAdd"
+      @remove="onRemove"
+      @set-default="onSetDefault"
+    />
+  </div>
 </template>
 
 <script setup>

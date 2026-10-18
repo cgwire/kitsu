@@ -113,6 +113,9 @@
 
     <div class="box section isolation-section">
       <h2 class="subtitle">{{ $t('productions.clients.isolation_title') }}</h2>
+      <p class="description">
+        {{ $t('productions.clients.isolation_description') }}
+      </p>
       <checkbox
         class="isolation"
         :key="`isolation-${checkboxKey}`"
@@ -151,6 +154,9 @@
 
     <div class="box section metadata">
       <h2 class="subtitle">{{ $t('productions.clients.metadata_title') }}</h2>
+      <p class="description">
+        {{ $t('productions.clients.metadata_description') }}
+      </p>
       <p class="empty" v-if="!descriptors.length">
         {{ $t('productions.clients.metadata_empty') }}
       </p>
@@ -172,6 +178,9 @@
 
     <div class="box section team-clients">
       <h2 class="subtitle">{{ $t('productions.clients.team_title') }}</h2>
+      <p class="description">
+        {{ $t('productions.clients.team_description') }}
+      </p>
       <p class="empty" v-if="!teamClients.length">
         {{ $t('productions.clients.team_empty') }}
       </p>
@@ -411,8 +420,7 @@ onMounted(load)
   margin-bottom: 1em;
 }
 
-// Prefixed to win over the .section .subtitle margin below
-.section .preview-header {
+.preview-header {
   align-items: center;
   display: flex;
   gap: 1em;
@@ -420,6 +428,7 @@ onMounted(load)
   margin-bottom: 1.5em;
 
   .subtitle {
+    border-bottom: 0;
     margin: 0;
   }
 }
@@ -481,17 +490,6 @@ onMounted(load)
 .action-group {
   display: flex;
   gap: 0.5em;
-}
-
-.section {
-  border-radius: 12px;
-  margin-bottom: 1em;
-
-  .subtitle {
-    border-bottom: 0;
-    margin-bottom: 1.5em;
-    margin-top: 0;
-  }
 }
 
 .status-list,

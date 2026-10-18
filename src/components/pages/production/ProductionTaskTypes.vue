@@ -1,6 +1,9 @@
 <template>
-  <div>
+  <div class="production-task-types">
     <div>
+      <p class="explanation mb1">
+        {{ $t('task_types.production_description') }}
+      </p>
       <route-section-tabs
         class="section-tabs"
         :active-tab="activeTab"
@@ -475,11 +478,18 @@ watch(
 
 <style lang="scss" scoped>
 .column {
+  flex-basis: 400px;
+  flex-grow: 0;
   overflow-y: initial;
+
+  &:last-child {
+    padding: 1em;
+  }
 }
 
 .datatable th {
   color: var(--text);
+  padding-bottom: 5px;
   padding-left: 10px;
   padding-top: 1em;
 }
@@ -512,54 +522,8 @@ table {
   margin-bottom: 1.5em;
 }
 
-th {
-  padding-left: 10px;
-  padding-bottom: 5px;
-}
-
-td p {
-  color: var(--text);
-}
-
-.column {
-  flex-basis: 400px;
-  flex-grow: 0;
-}
-
-td.name {
-  flex: 1;
-}
-
-.start-date {
-  width: 135px;
-}
-
-.end-date {
-  width: 135px;
-}
-
-.remove {
-  width: 100px;
-}
-
-.episode-span-column {
-  margin-left: 5rem;
-}
-
 .field {
   margin-bottom: 0;
-}
-
-.section-title {
-  color: $grey;
-  font-size: 1.2em;
-  margin-bottom: 1em;
-  margin-top: 2em;
-  text-transform: uppercase;
-}
-
-h2 {
-  border: 0;
 }
 
 .empty {
@@ -575,15 +539,7 @@ h2 {
   cursor: grabbing;
 }
 
-.column:last-child {
-  padding: 1em;
-}
-
 .pointer {
   cursor: pointer;
-}
-
-.grab {
-  cursor: grab;
 }
 </style>

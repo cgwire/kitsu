@@ -1062,7 +1062,9 @@
         "delete_confirm": "Eliminare l'account di anteprima di questa produzione?",
         "description": "Vedi Kitsu esattamente come un cliente, in sola lettura e senza occupare una licenza.",
         "error": "Si è verificato un errore durante l'aggiornamento dell'account di anteprima.",
+        "isolation_description": "Ogni cliente vede solo i propri commenti e quelli condivisi con i clienti, non quelli degli altri clienti.",
         "isolation_title": "Isolamento dei clienti",
+        "metadata_description": "Le colonne di metadati selezionate sono mostrate ai clienti negli elenchi di asset e inquadrature.",
         "metadata_empty": "Questa produzione non ha metadati.",
         "metadata_title": "Metadati visibili ai clienti",
         "open_for_hour": "Apri per 1 ora",
@@ -1076,6 +1078,7 @@
         "statuses_empty": "Nessuno stato è visibile ai clienti.",
         "statuses_link": "Modifica stati delle attività",
         "statuses_title": "Stati disponibili per i clienti",
+        "team_description": "Persone con il ruolo Cliente nel team di questa produzione.",
         "team_empty": "Nessun cliente nel team.",
         "team_title": "Clienti del team",
         "title": "Clienti",
@@ -1180,15 +1183,20 @@
       "edit_error": "Si è verificato un errore durante la modifica della produzione. Contatta il nostro team di supporto.",
       "brief": {
         "title": "Brief",
+        "edit_hint": "Fai doppio clic sul brief per modificarlo.",
         "empty": "Non c'è ancora nessun brief. Perché non crearne uno?",
         "edit_error": "Si è verificato un errore durante la modifica del brief."
       },
       "parameters": {
+        "publish_default_description": "Gli artisti vedono il modulo di pubblicazione invece del modulo di commento quando aprono un task.",
         "title": "Parametri",
-        "previews_and_comments": "Preview e commenti",
+        "comments_and_retakes": "Commenti e retake",
         "save": {
           "button": "Conferma"
-        }
+        },
+        "general_title": "Generale",
+        "max_retakes_description": "Gli artisti non possono più impostare uno stato di retake quando un task raggiunge questo numero di retake. 0 significa nessun limite.",
+        "previews_and_comments": "Preview e commenti"
       },
       "creation": {
         "add_assets": "Aggiungi asset (facoltativo)",
@@ -1267,11 +1275,16 @@
         "bitrate_max": "Massimo: {value} Mbit/s",
         "bitrate_size": "Circa {size} MB al minuto",
         "bitrates": "Bitrate",
+        "encoding_explanation": "I video caricati vengono convertiti a questa frequenza fotogrammi, proporzione e risoluzione; le anteprime esistenti non vengono ricodificate.",
+        "encoding_title": "Codifica",
+        "frame_in_description": "Il contatore del player parte dal fotogramma in dell'inquadratura invece che da 0.",
         "hd_bitrate_description": "Versione a piena risoluzione, riprodotta in modalità HD e usata per i download.",
         "ld_bitrate_description": "Versione più leggera, larga 1280 pixel, riprodotta in modalità LD.",
         "ld_bitrate_max": "Massimo: {value} Mbit/s (bitrate HD)",
         "next_uploads_only": "Le modifiche si applicano solo ai prossimi caricamenti: le anteprime esistenti non vengono ricodificate.",
+        "previews_title": "Anteprime",
         "restore_default": "Ripristina il valore predefinito",
+        "revision_padding_description": "Aggiunge zeri iniziali ai numeri di revisione, ad esempio 3 mostra v001.",
         "task_type_bitrates": "Lascia vuoto per usare i bitrate della scheda Video.",
         "task_type_ld_bitrate_max": "Massimo: il bitrate HD del tipo di task",
         "title": "Video"
@@ -1411,6 +1424,7 @@
       "edit_title": "Modifica stato del task",
       "number": "stato del task | stati dei task",
       "new_task_status": "Aggiungi uno stato del task",
+      "production_description": "Solo questi stati possono essere impostati sui task di questa produzione.",
       "title": "Stati dei task",
       "fields": {
         "color": "Colore",
@@ -1459,6 +1473,7 @@
       },
       "no_task_types": "Non ci sono tipi di task per questo tipo di entità",
       "add_task_type_placeholder": "+ Aggiungi tipo di task",
+      "production_description": "Solo i tipi di task elencati qui possono essere aggiunti a questa produzione.",
       "select_task_type": "Seleziona un tipo di task...",
       "add_task_type_to_library": "Aggiungi un tipo di task alla libreria",
       "library_title": "Libreria dei tipi di task"
@@ -2003,6 +2018,7 @@
       "in_title": "Stato che attiva un cambiamento",
       "out_title": "Il cambiamento che verrà applicato all'attivazione del trigger",
       "new_status_automation": "Aggiungi un'automazione di stato",
+      "production_description": "Un'automazione cambia lo stato di un task, o il task successivo, quando viene impostato uno stato.",
       "run_for_selection": "Esegui l'automazione di stato per i task selezionati:",
       "title": "Automazioni",
       "wrong_automation": "Questa automazione si applica a un tipo di task a monte. Non è consentita da Kitsu (per evitare cicli infiniti). Non avrà alcun effetto.",
@@ -2056,6 +2072,7 @@
       "number": "sfondo | sfondi",
       "edit_background": "Modifica sfondo",
       "new_background": "Aggiungi un nuovo sfondo",
+      "production_description": "Sfondi 3D proposti nel player per le anteprime 3D di questa produzione.",
       "title": "Sfondi 3D",
       "fields": {
         "is_default": "Predefinito",
@@ -2068,6 +2085,7 @@
       "title": "Bacheca",
       "empty": "Niente da mostrare nella bacheca: non hai task in corso, la ricerca non ha dato risultati oppure nessuno stato dei task è attivato per il tuo ruolo nelle impostazioni della produzione.",
       "settings": {
+        "description": "Ruoli che vedono questo stato come una colonna nella loro bacheca.",
         "title": "Stati della bacheca",
         "visible": "Visualizzato sulla bacheca kanban di...",
         "select_all": "Seleziona tutto",

@@ -1062,7 +1062,9 @@
         "delete_confirm": "刪除此製作的預覽帳號?",
         "description": "以客戶的視角檢視 Kitsu,唯讀且不佔用席位。",
         "error": "更新預覽帳號時發生錯誤。",
+        "isolation_description": "每位客戶只能看到自己的評論以及與客戶分享的評論，看不到其他客戶的評論。",
         "isolation_title": "客戶隔離",
+        "metadata_description": "勾選的中繼資料欄位會在資產和鏡頭清單中向客戶顯示。",
         "metadata_empty": "此製作沒有中繼資料。",
         "metadata_title": "對客戶可見的中繼資料",
         "open_for_hour": "開放 1 小時",
@@ -1076,6 +1078,7 @@
         "statuses_empty": "沒有對客戶可見的狀態。",
         "statuses_link": "編輯任務狀態",
         "statuses_title": "客戶可用的狀態",
+        "team_description": "此製作團隊中具有客戶角色的人員。",
         "team_empty": "團隊中沒有客戶。",
         "team_title": "團隊的客戶",
         "title": "客戶",
@@ -1180,15 +1183,20 @@
       "edit_error": "編輯製作時發生錯誤。請聯絡我們的支援團隊。",
       "brief": {
         "title": "簡介",
+        "edit_hint": "按兩下簡介即可編輯。",
         "empty": "還沒有簡介。創建一個？",
         "edit_error": "編輯摘要時發生錯誤。"
       },
       "parameters": {
+        "publish_default_description": "藝術家開啟任務時看到的是發佈表單，而不是評論表單。",
         "title": "參數",
-        "previews_and_comments": "預覽與留言",
+        "comments_and_retakes": "留言與重做",
         "save": {
           "button": "確定"
-        }
+        },
+        "general_title": "一般",
+        "max_retakes_description": "任務的重做次數達到此數值後，藝術家將無法再設定重做狀態。0 表示不限制。",
+        "previews_and_comments": "預覽與留言"
       },
       "creation": {
         "add_assets": "新增資產（選擇性）",
@@ -1267,11 +1275,16 @@
         "bitrate_max": "最大值：{value} Mbit/s",
         "bitrate_size": "每分鐘約 {size} MB",
         "bitrates": "位元率",
+        "encoding_explanation": "上傳的影片會轉換為此影格速率、寬高比和解析度；現有預覽不會重新編碼。",
+        "encoding_title": "編碼",
+        "frame_in_description": "播放器計數器從鏡頭的入點影格開始，而不是從 0 開始。",
         "hd_bitrate_description": "完整解析度版本，在 HD 模式下播放，也用於下載。",
         "ld_bitrate_description": "寬度為 1280 像素的輕量版本，在 LD 模式下播放。",
         "ld_bitrate_max": "最大值：{value} Mbit/s (HD 位元率)",
         "next_uploads_only": "變更僅適用於之後的上傳，現有預覽不會重新編碼。",
+        "previews_title": "預覽",
         "restore_default": "還原預設值",
+        "revision_padding_description": "為修訂版編號加上前導零，例如 3 顯示為 v001。",
         "task_type_bitrates": "留空以使用「影片」分頁中的位元率。",
         "task_type_ld_bitrate_max": "最大值：該任務類型的 HD 位元率",
         "title": "影片"
@@ -1411,6 +1424,7 @@
       "edit_title": "編輯任務狀態",
       "number": "任務狀態 | 任務狀態",
       "new_task_status": "新增任務狀態",
+      "production_description": "此製作的任務只能設定這些狀態。",
       "title": "任務狀態",
       "fields": {
         "color": "顏色",
@@ -1459,6 +1473,7 @@
       },
       "no_task_types": "此實體類型沒有任務類型",
       "add_task_type_placeholder": "+ 新增任務類型",
+      "production_description": "只有此處列出的任務類型可以加入此製作。",
       "select_task_type": "選擇任務類型...",
       "add_task_type_to_library": "新增任務類型到任務類型庫",
       "library_title": "任務類型庫"
@@ -2003,6 +2018,7 @@
       "in_title": "觸發變更的狀態",
       "out_title": "觸發啟動時應用的變更",
       "new_status_automation": "新增狀態自動化",
+      "production_description": "自動化會在設定某個狀態時變更任務狀態或下一個任務。",
       "run_for_selection": "為選取的任務執行狀態自動化：",
       "title": "自動化",
       "wrong_automation": "此自動化適用於上游任務類型。Kitsu 不允許這樣做（避免無限循環）。它不會有任何效果。",
@@ -2056,6 +2072,7 @@
       "number": "背景 | 背景",
       "edit_background": "編輯背景",
       "new_background": "新增背景",
+      "production_description": "播放器中為此製作的 3D 預覽提供的 3D 背景。",
       "title": "3D 背景",
       "fields": {
         "is_default": "是否預設",
@@ -2068,6 +2085,7 @@
       "title": "看板",
       "empty": "看板上沒有可顯示的內容：您沒有進行中的任務、搜尋沒有結果，或是在製作項目設定中未為您的角色啟用任何任務狀態。",
       "settings": {
+        "description": "在自己的看板上將此狀態顯示為一欄的角色。",
         "title": "看板狀態",
         "visible": "顯示在...",
         "select_all": "全部選取",
