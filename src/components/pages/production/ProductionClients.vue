@@ -31,16 +31,12 @@
         />
         <div class="account" v-else-if="account">
           <div class="credentials">
-            <label class="credential-label" for="preview-email">
-              {{ $t('people.fields.email') }}
-            </label>
             <div class="credential-row">
-              <input
-                id="preview-email"
-                class="input email"
-                :value="account.email"
-                readonly
-                @click="$event.target.select()"
+              <text-field
+                class="email"
+                :label="$t('people.fields.email')"
+                :model-value="account.email"
+                :readonly="true"
               />
               <button
                 class="button copy-button copy-email"
@@ -52,16 +48,12 @@
             </div>
 
             <template v-if="password">
-              <label class="credential-label" for="preview-password">
-                {{ $t('productions.clients.password') }}
-              </label>
               <div class="credential-row">
-                <input
-                  id="preview-password"
-                  class="input password-value"
-                  :value="password"
-                  readonly
-                  @click="$event.target.select()"
+                <text-field
+                  class="password-value"
+                  :label="$t('productions.clients.password')"
+                  :model-value="password"
+                  :readonly="true"
                 />
                 <button
                   class="button copy-button copy-password"
@@ -212,6 +204,7 @@ import { formatTimeOfDay, parseDate } from '@/lib/time'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Checkbox from '@/components/widgets/Checkbox.vue'
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
+import TextField from '@/components/widgets/TextField.vue'
 
 const store = useStore()
 const { timezone, use12HourClock } = useTime()
@@ -441,30 +434,27 @@ onMounted(load)
 .credentials {
   margin-bottom: 1.5em;
 
-  .credential-label {
-    color: var(--text-alt);
-    display: block;
-    font-size: 0.85em;
-    margin-bottom: 0.3em;
-  }
-
   .credential-row {
+    align-items: flex-end;
     display: flex;
     gap: 0.5em;
     margin-bottom: 1em;
+
+    .field {
+      flex: 1 1 auto;
+      margin-bottom: 0;
+    }
   }
 
-  .input {
-    flex: 1 1 auto;
-    font-family: monospace;
-  }
-
+  // Matches the 3em height of the Kitsu text inputs
   .copy-button {
     align-items: center;
     border-radius: 8px;
     display: inline-flex;
-    flex: 0 0 auto;
+    flex: 0 0 3em;
+    height: 3em;
     justify-content: center;
+    margin: 0;
   }
 
   .hint {

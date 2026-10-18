@@ -56,7 +56,7 @@ describe('ProductionClients', () => {
     )
     wrapper.findComponent('.create-button').vm.$emit('click')
     await flushPromises()
-    expect(wrapper.find('.password-value').element.value).toBe('abc')
+    expect(wrapper.findComponent('.password-value').props('modelValue')).toBe('abc')
     expect(wrapper.find('.copy-password').exists()).toBe(true)
     expect(store.dispatch).toHaveBeenCalledWith('getPreviewAccount', 'prod-1')
 
@@ -90,7 +90,7 @@ describe('ProductionClients', () => {
     const { wrapper } = await mountClients({
       responses: { getPreviewAccount: account('2000-01-01T00:00:00') }
     })
-    expect(wrapper.find('.email').element.value).toBe(
+    expect(wrapper.findComponent('.email').props('modelValue')).toBe(
       account('2000-01-01T00:00:00').email
     )
     await wrapper.find('.copy-email').trigger('click')
