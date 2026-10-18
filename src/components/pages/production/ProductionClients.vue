@@ -1,7 +1,20 @@
 <template>
   <div class="production-clients">
     <div class="box section preview">
-      <h2 class="subtitle">{{ $t('productions.clients.preview_title') }}</h2>
+      <div class="preview-header">
+        <h2 class="subtitle">{{ $t('productions.clients.preview_title') }}</h2>
+        <span
+          class="state-tag"
+          :class="{ 'is-open': isOpen }"
+          v-if="isEnabled && account"
+        >
+          {{
+            isOpen
+              ? $t('productions.clients.open_until', { time: openUntil })
+              : $t('productions.clients.blocked')
+          }}
+        </span>
+      </div>
       <p v-if="!isEnabled" class="unavailable">
         {{ $t('productions.clients.unavailable') }}
       </p>
@@ -17,53 +30,82 @@
           v-if="isLoaded && !account"
         />
         <div class="account" v-else-if="account">
-          <p class="email">{{ account.email }}</p>
-          <p class="status">
-            <template v-if="isOpen">
-              {{ $t('productions.clients.open_until', { time: openUntil }) }}
-            </template>
-            <template v-else>
-              {{ $t('productions.clients.blocked') }}
-            </template>
-          </p>
+          <div class="credentials">
+            <label class="credential-label" for="preview-email">
+              {{ $t('people.fields.email') }}
+            </label>
+            <div class="credential-row">
+              <input
+                id="preview-email"
+                class="input email"
+                :value="account.email"
+                readonly
+                @click="$event.target.select()"
+              />
+              <button
+                class="button copy-button copy-email"
+                :title="$t('productions.clients.copy')"
+                @click="copy(account.email)"
+              >
+                <copy-icon :size="16" />
+              </button>
+            </div>
 
-          <div class="password" v-if="password">
-            <label>{{ $t('productions.clients.password') }}</label>
-            <code class="password-value">{{ password }}</code>
-            <button-simple
-              class="copy-button"
-              :text="$t('productions.clients.copy')"
-              @click="copyPassword"
-            />
-            <p class="hint">{{ $t('productions.clients.password_hint') }}</p>
+            <template v-if="password">
+              <label class="credential-label" for="preview-password">
+                {{ $t('productions.clients.password') }}
+              </label>
+              <div class="credential-row">
+                <input
+                  id="preview-password"
+                  class="input password-value"
+                  :value="password"
+                  readonly
+                  @click="$event.target.select()"
+                />
+                <button
+                  class="button copy-button copy-password"
+                  :title="$t('productions.clients.copy')"
+                  @click="copy(password)"
+                >
+                  <copy-icon :size="16" />
+                </button>
+              </div>
+              <p class="hint">{{ $t('productions.clients.password_hint') }}</p>
+            </template>
           </div>
 
           <div class="actions">
-            <button-simple
-              class="open-button"
-              :is-primary="true"
-              :disabled="isWorking"
-              :text="$t('productions.clients.open_for_hour')"
-              @click="setOpen(true)"
-            />
-            <button-simple
-              class="block-button"
-              :disabled="isWorking || !isOpen"
-              :text="$t('productions.clients.block')"
-              @click="setOpen(false)"
-            />
-            <button-simple
-              class="regenerate-button"
-              :disabled="isWorking"
-              :text="$t('productions.clients.regenerate')"
-              @click="create"
-            />
-            <button-simple
-              class="delete-button"
-              :disabled="isWorking"
-              :text="$t('productions.clients.delete')"
-              @click="isDeleteModalActive = true"
-            />
+            <div class="action-group">
+              <button-simple
+                class="open-button"
+                :is-primary="true"
+                :disabled="isWorking"
+                :text="$t('productions.clients.open_for_hour')"
+                @click="setOpen(true)"
+              />
+              <button-simple
+                class="block-button"
+                :disabled="isWorking"
+                :text="$t('productions.clients.block')"
+                @click="setOpen(false)"
+                v-if="isOpen"
+              />
+            </div>
+            <div class="action-group">
+              <button-simple
+                class="regenerate-button"
+                :disabled="isWorking"
+                :text="$t('productions.clients.regenerate')"
+                @click="create"
+              />
+              <button-simple
+                class="delete-button"
+                :disabled="isWorking"
+                :text="$t('productions.clients.delete')"
+                @click="isDeleteModalActive = true"
+              />
+            </div>
           </div>
         </div>
 
@@ -159,6 +201,7 @@
 </template>
 
 <script setup>
+import { CopyIcon } from 'lucide-vue-next'
 import moment from 'moment-timezone'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useStore } from 'vuex'
@@ -283,9 +326,9 @@ const remove = async () => {
   if (!hasError.value) isDeleteModalActive.value = false
 }
 
-const copyPassword = async () => {
+const copy = async text => {
   try {
-    await navigator.clipboard.writeText(password.value)
+    await navigator.clipboard.writeText(text)
   } catch (err) {
     console.error(err)
   }
@@ -368,22 +411,65 @@ onMounted(load)
   margin-bottom: 1em;
 }
 
-.status,
-.email {
-  margin-bottom: 0.5em;
+.preview-header {
+  align-items: center;
+  display: flex;
+  gap: 1em;
+  justify-content: space-between;
+  margin-bottom: 1.5em;
+
+  .subtitle {
+    margin: 0;
+  }
 }
 
-.password {
-  margin: 1em 0;
+.state-tag {
+  background: var(--background-alt);
+  border-radius: 1em;
+  color: var(--text-alt);
+  font-size: 0.85em;
+  padding: 0.2em 0.8em;
+  white-space: nowrap;
 
-  .password-value {
-    margin: 0 0.5em;
-    user-select: all;
+  &.is-open {
+    background: $green;
+    color: $white;
+  }
+}
+
+.credentials {
+  margin-bottom: 1.5em;
+
+  .credential-label {
+    color: var(--text-alt);
+    display: block;
+    font-size: 0.85em;
+    margin-bottom: 0.3em;
+  }
+
+  .credential-row {
+    display: flex;
+    gap: 0.5em;
+    margin-bottom: 1em;
+  }
+
+  .input {
+    flex: 1 1 auto;
+    font-family: monospace;
+  }
+
+  .copy-button {
+    align-items: center;
+    border-radius: 8px;
+    display: inline-flex;
+    flex: 0 0 auto;
+    justify-content: center;
   }
 
   .hint {
     color: var(--text-alt);
-    margin-top: 0.5em;
+    font-size: 0.9em;
+    margin-top: -0.5em;
   }
 }
 
@@ -391,10 +477,22 @@ onMounted(load)
   display: flex;
   flex-wrap: wrap;
   gap: 0.5em;
+  justify-content: space-between;
+}
+
+.action-group {
+  display: flex;
+  gap: 0.5em;
 }
 
 .section {
   margin-bottom: 1em;
+
+  .subtitle {
+    border-bottom: 0;
+    margin-bottom: 1.5em;
+    margin-top: 0;
+  }
 }
 
 .empty {

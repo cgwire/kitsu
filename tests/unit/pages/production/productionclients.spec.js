@@ -56,8 +56,8 @@ describe('ProductionClients', () => {
     )
     wrapper.findComponent('.create-button').vm.$emit('click')
     await flushPromises()
-    expect(wrapper.find('.password-value').text()).toBe('abc')
-    expect(wrapper.find('.copy-button').exists()).toBe(true)
+    expect(wrapper.find('.password-value').element.value).toBe('abc')
+    expect(wrapper.find('.copy-password').exists()).toBe(true)
     expect(store.dispatch).toHaveBeenCalledWith('getPreviewAccount', 'prod-1')
 
     wrapper.findComponent('.open-button').vm.$emit('click')
@@ -69,15 +69,32 @@ describe('ProductionClients', () => {
     const { wrapper } = await mountClients({
       responses: { getPreviewAccount: account(inOneHour()) }
     })
-    expect(wrapper.find('.status').text()).toContain('productions.clients.open_until')
-    expect(wrapper.findComponent('.block-button').props('disabled')).toBe(false)
+    expect(wrapper.find('.state-tag').text()).toContain('productions.clients.open_until')
+    expect(wrapper.findComponent('.block-button').exists()).toBe(true)
   })
 
   it('shows blocked when the window is past', async () => {
     const { wrapper } = await mountClients({
       responses: { getPreviewAccount: account('2000-01-01T00:00:00') }
     })
-    expect(wrapper.find('.status').text()).toBe('productions.clients.blocked')
+    expect(wrapper.find('.state-tag').text()).toBe('productions.clients.blocked')
+    expect(wrapper.findComponent('.block-button').exists()).toBe(false)
+  })
+
+  it('copies the email with an icon button', async () => {
+    const writeText = vi.fn(() => Promise.resolve())
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText },
+      configurable: true
+    })
+    const { wrapper } = await mountClients({
+      responses: { getPreviewAccount: account('2000-01-01T00:00:00') }
+    })
+    expect(wrapper.find('.email').element.value).toBe(
+      account('2000-01-01T00:00:00').email
+    )
+    await wrapper.find('.copy-email').trigger('click')
+    expect(writeText).toHaveBeenCalledWith(account('2000-01-01T00:00:00').email)
   })
 
   it('open and block dispatch setPreviewAccountOpen', async () => {
