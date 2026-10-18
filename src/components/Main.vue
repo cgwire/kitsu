@@ -6,6 +6,9 @@
       }}</a>
       <topbar />
       <sidebar />
+      <div v-if="isPreviewAccount" class="preview-banner" role="status">
+        {{ $t('main.preview_account_banner') }}
+      </div>
       <main id="main-content">
         <router-view />
       </main>
@@ -14,7 +17,8 @@
 </template>
 
 <script setup>
-import { getCurrentInstance, onMounted } from 'vue'
+import { computed, getCurrentInstance, onMounted } from 'vue'
+import { useStore } from 'vuex'
 
 import Sidebar from '@/components/sides/Sidebar.vue'
 import Topbar from '@/components/tops/Topbar.vue'
@@ -22,6 +26,10 @@ import Topbar from '@/components/tops/Topbar.vue'
 // Composables
 // --------------------------------------------------------------------------
 
+const store = useStore()
+const isPreviewAccount = computed(
+  () => !!store.getters.user?.preview_project_id
+)
 const socket = getCurrentInstance().appContext.config.globalProperties.$socket
 
 // Lifecycle
@@ -37,6 +45,13 @@ onMounted(() => {
   height: 100%;
   display: flex;
   flex-direction: column;
+}
+
+.preview-banner {
+  padding: 0.4em 1em;
+  text-align: center;
+  background: var(--background-selected);
+  color: var(--text-strong);
 }
 
 .skip-link {

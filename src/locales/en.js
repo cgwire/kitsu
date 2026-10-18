@@ -825,6 +825,7 @@ export default {
   },
 
   main: {
+    preview_account_banner: 'Preview account (read-only)',
     about: 'About',
     active: 'Active',
     activity: 'Activity',

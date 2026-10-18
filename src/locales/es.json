@@ -431,6 +431,7 @@
       "reset_change_password_token_failed": "El enlace para restablecer la contraseña no es válido o ha caducado. Por favor, reinicie el procedimiento."
     },
     "main": {
+      "preview_account_banner": "Preview account (read-only)",
       "technical_details": "Detalles técnicos:",
       "about": "Acerca de",
       "add": "añadir",

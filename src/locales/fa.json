@@ -431,6 +431,7 @@
       "reset_change_password_token_failed": "پیوند بازنشانی رمز عبور نامعتبر است یا منقضی شده است. لطفاً روال را از ابتدا انجام دهید."
     },
     "main": {
+      "preview_account_banner": "Preview account (read-only)",
       "technical_details": "جزئیات فنی:",
       "about": "درباره",
       "add": "اضافه کردن",

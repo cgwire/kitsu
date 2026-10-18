@@ -431,6 +431,7 @@
       "reset_change_password_token_failed": "Der Link zum Zurücksetzen des Passworts ist ungültig oder abgelaufen. Bitte starten Sie den Vorgang erneut."
     },
     "main": {
+      "preview_account_banner": "Preview account (read-only)",
       "technical_details": "Technische Details:",
       "about": "Über",
       "add": "hinzufügen",

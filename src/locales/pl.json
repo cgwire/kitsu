@@ -790,6 +790,7 @@
       }
     },
     "main": {
+      "preview_account_banner": "Preview account (read-only)",
       "technical_details": "Szczegóły techniczne:",
       "about": "O programie",
       "active": "Aktywne",

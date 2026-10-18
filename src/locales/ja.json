@@ -431,6 +431,7 @@
       "reset_change_password_token_failed": "パスワードリセットリンクが無効か、有効期限が切れています。手続きをやり直してください。"
     },
     "main": {
+      "preview_account_banner": "Preview account (read-only)",
       "technical_details": "技術的な詳細：",
       "about": "Kitsu について",
       "add": "追加",

@@ -431,6 +431,7 @@
       "reset_change_password_token_failed": "密码重置链接无效或已过期。请重新启动程序。"
     },
     "main": {
+      "preview_account_banner": "Preview account (read-only)",
       "technical_details": "技术详情：",
       "about": "关于",
       "add": "添加",

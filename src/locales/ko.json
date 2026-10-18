@@ -431,6 +431,7 @@
       "reset_change_password_token_failed": "비밀번호 재설정 링크가 유효하지 않거나 만료되었습니다. 절차를 다시 시작하세요."
     },
     "main": {
+      "preview_account_banner": "Preview account (read-only)",
       "technical_details": "기술 세부 정보:",
       "about": "정보",
       "add": "추가",

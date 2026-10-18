@@ -431,6 +431,7 @@
       "reset_change_password_token_failed": "密碼重設連結無效或已過期。請重新啟動程序。"
     },
     "main": {
+      "preview_account_banner": "Preview account (read-only)",
       "technical_details": "技術詳情：",
       "about": "關於",
       "add": "新增",

@@ -431,6 +431,7 @@
       "wrong_totp": "A TOTP hitelesítése sikertelen."
     },
     "main": {
+      "preview_account_banner": "Preview account (read-only)",
       "technical_details": "Technikai részletek:",
       "about": "Rólunk",
       "add": "hozzáadás",

@@ -431,6 +431,7 @@
       "reset_change_password_token_failed": "O link de redefinição de senha é inválido ou expirou. Reinicie o procedimento."
     },
     "main": {
+      "preview_account_banner": "Preview account (read-only)",
       "technical_details": "Detalhes técnicos:",
       "about": "Sobre",
       "add": "Adicionar",

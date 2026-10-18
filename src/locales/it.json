@@ -431,6 +431,7 @@
       "reset_change_password_token_failed": "Il link per la reimpostazione della password non è valido o è scaduto. Ricomincia la procedura."
     },
     "main": {
+      "preview_account_banner": "Preview account (read-only)",
       "technical_details": "Dettagli tecnici:",
       "about": "Informazioni",
       "add": "aggiungi",

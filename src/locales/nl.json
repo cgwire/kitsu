@@ -431,6 +431,7 @@
       "reset_change_password_token_failed": "De link om het wachtwoord te resetten is ongeldig of verlopen. Start de procedure opnieuw."
     },
     "main": {
+      "preview_account_banner": "Preview account (read-only)",
       "technical_details": "Technische details:",
       "about": "Over",
       "add": "toevoegen",

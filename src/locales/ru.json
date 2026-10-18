@@ -431,6 +431,7 @@
       "reset_change_password_token_failed": "Ссылка для сброса пароля недействительна или срок ее действия истек. Пожалуйста, запустите процедуру заново."
     },
     "main": {
+      "preview_account_banner": "Preview account (read-only)",
       "technical_details": "Технические подробности:",
       "about": "О системе",
       "add": "Добавить",

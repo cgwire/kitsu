@@ -431,6 +431,7 @@
       "reset_change_password_token_failed": "Le lien de réinitialisation du mot de passe n'est pas valide ou a expiré. Veuillez recommencer la procédure."
     },
     "main": {
+      "preview_account_banner": "Preview account (read-only)",
       "technical_details": "Détails techniques :",
       "about": "À propos",
       "add": "Ajouter",

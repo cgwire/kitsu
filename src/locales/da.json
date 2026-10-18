@@ -431,6 +431,7 @@
       "reset_change_password_token_failed": "Linket til nulstilling af adgangskode er ugyldigt eller udløbet. Genstart venligst proceduren."
     },
     "main": {
+      "preview_account_banner": "Preview account (read-only)",
       "technical_details": "Tekniske detaljer:",
       "about": "Om",
       "add": "tilføj",
