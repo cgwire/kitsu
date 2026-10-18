@@ -1482,15 +1482,6 @@ export default {
     title: 'Productions',
 
     clients: {
-      statuses_title: 'Statuses visible to clients',
-      statuses_description: 'Clients only see tasks with these statuses.',
-      statuses_link: 'Edit task statuses',
-      statuses_empty: 'No status is visible to clients.',
-      metadata_title: 'Metadata visible to clients',
-      metadata_empty: 'This production has no metadata.',
-      team_title: 'Clients of the team',
-      team_empty: 'No client in the team.',
-      preview_title: 'Preview account',
       block: 'Block now',
       blocked: 'Blocked',
       copy: 'Copy',
@@ -1498,17 +1489,28 @@ export default {
       delete: 'Delete',
       delete_confirm: 'Delete the preview account of this production?',
       description:
-        'See Kitsu exactly as a client, read-only, not counted as a seat. Open it in a private window.',
+        'See Kitsu exactly as a client, read-only, not counted as a seat.',
       error: 'An error occurred while updating the preview account.',
+      isolation_title: 'Client isolation',
+      metadata_empty: 'This production has no metadata.',
+      metadata_title: 'Metadata visible to clients',
       open_for_hour: 'Open for 1 hour',
       open_until: 'Open until {time}',
       password: 'Password (shown once)',
       password_hint:
         'Copy it now. Log in with this email in a private window.',
+      preview_title: 'Preview account',
       regenerate: 'Regenerate password',
+      save_error: 'An error occurred while saving the settings.',
+      statuses_description: 'Clients only see tasks with these statuses.',
+      statuses_empty: 'No status is visible to clients.',
+      statuses_link: 'Edit task statuses',
+      statuses_title: 'Statuses visible to clients',
+      team_empty: 'No client in the team.',
+      team_title: 'Clients of the team',
       title: 'Clients',
       unavailable:
-        'Preview accounts need local authentication. With LDAP, create a regular client account.'
+        'Preview accounts need local authentication with passwords. Otherwise, create a regular client account.'
     },
 
     creation: {
