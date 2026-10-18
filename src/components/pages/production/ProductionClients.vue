@@ -1,70 +1,5 @@
 <template>
   <div class="production-clients">
-    <div class="box section">
-      <checkbox
-        class="isolation"
-        :toggle="true"
-        :disabled="isSaving"
-        :label="$t('productions.fields.is_clients_isolated')"
-        :model-value="!!currentProduction?.is_clients_isolated"
-        @change="setIsolated"
-      />
-    </div>
-
-    <div class="box section statuses">
-      <h2 class="subtitle">{{ $t('productions.clients.statuses_title') }}</h2>
-      <p class="description">
-        {{ $t('productions.clients.statuses_description') }}
-        <router-link v-if="isAdmin" :to="{ name: 'task-status' }">
-          {{ $t('productions.clients.statuses_link') }}
-        </router-link>
-      </p>
-      <p class="empty" v-if="!clientStatuses.length">
-        {{ $t('productions.clients.statuses_empty') }}
-      </p>
-      <ul v-else>
-        <li
-          class="status-item"
-          v-for="status in clientStatuses"
-          :key="status.id"
-        >
-          {{ status.name }}
-        </li>
-      </ul>
-    </div>
-
-    <div class="box section metadata">
-      <h2 class="subtitle">{{ $t('productions.clients.metadata_title') }}</h2>
-      <p class="empty" v-if="!descriptors.length">
-        {{ $t('productions.clients.metadata_empty') }}
-      </p>
-      <div
-        class="descriptor"
-        v-for="descriptor in descriptors"
-        :key="descriptor.id"
-      >
-        <checkbox
-          :toggle="true"
-          :disabled="isSaving"
-          :label="`${descriptor.name} (${descriptor.entity_type})`"
-          :model-value="!!descriptor.for_client"
-          @change="value => setForClient(descriptor, value)"
-        />
-      </div>
-    </div>
-
-    <div class="box section team-clients">
-      <h2 class="subtitle">{{ $t('productions.clients.team_title') }}</h2>
-      <p class="empty" v-if="!teamClients.length">
-        {{ $t('productions.clients.team_empty') }}
-      </p>
-      <ul v-else>
-        <li class="team-client" v-for="person in teamClients" :key="person.id">
-          {{ person.full_name }}
-        </li>
-      </ul>
-    </div>
-
     <div class="box section preview">
       <h2 class="subtitle">{{ $t('productions.clients.preview_title') }}</h2>
       <p v-if="!isEnabled" class="unavailable">
@@ -73,16 +8,15 @@
       <template v-else>
         <p class="description">{{ $t('productions.clients.description') }}</p>
 
-        <p v-if="!isLoaded"></p>
         <button-simple
           class="create-button"
           :is-primary="true"
           :is-loading="isWorking"
           :text="$t('productions.clients.create')"
           @click="create"
-          v-else-if="!account"
+          v-if="isLoaded && !account"
         />
-        <div class="account" v-else>
+        <div class="account" v-else-if="account">
           <p class="email">{{ account.email }}</p>
           <p class="status">
             <template v-if="isOpen">
@@ -139,6 +73,78 @@
       </template>
     </div>
 
+    <p v-if="saveError" class="error save-error">
+      {{ $t('productions.clients.save_error') }}
+    </p>
+
+    <div class="box section isolation-section">
+      <h2 class="subtitle">{{ $t('productions.clients.isolation_title') }}</h2>
+      <checkbox
+        class="isolation"
+        :key="`isolation-${checkboxKey}`"
+        :toggle="true"
+        :disabled="isSaving"
+        :label="$t('productions.fields.is_clients_isolated')"
+        :model-value="!!currentProduction?.is_clients_isolated"
+        @change="setIsolated"
+      />
+    </div>
+
+    <div class="box section statuses">
+      <h2 class="subtitle">{{ $t('productions.clients.statuses_title') }}</h2>
+      <p class="description">
+        {{ $t('productions.clients.statuses_description') }}
+        <router-link v-if="isAdmin" :to="{ name: 'task-status' }">
+          {{ $t('productions.clients.statuses_link') }}
+        </router-link>
+      </p>
+      <p class="empty" v-if="!clientStatuses.length">
+        {{ $t('productions.clients.statuses_empty') }}
+      </p>
+      <ul v-else>
+        <li
+          class="status-item"
+          v-for="status in clientStatuses"
+          :key="status.id"
+        >
+          {{ status.name }}
+        </li>
+      </ul>
+    </div>
+
+    <div class="box section metadata">
+      <h2 class="subtitle">{{ $t('productions.clients.metadata_title') }}</h2>
+      <p class="empty" v-if="!descriptors.length">
+        {{ $t('productions.clients.metadata_empty') }}
+      </p>
+      <div
+        class="descriptor"
+        v-for="descriptor in descriptors"
+        :key="descriptor.id"
+      >
+        <checkbox
+          :key="`${descriptor.id}-${checkboxKey}`"
+          :toggle="true"
+          :disabled="isSaving"
+          :label="getDescriptorLabel(descriptor)"
+          :model-value="!!descriptor.for_client"
+          @change="value => setForClient(descriptor, value)"
+        />
+      </div>
+    </div>
+
+    <div class="box section team-clients">
+      <h2 class="subtitle">{{ $t('productions.clients.team_title') }}</h2>
+      <p class="empty" v-if="!teamClients.length">
+        {{ $t('productions.clients.team_empty') }}
+      </p>
+      <ul v-else>
+        <li class="team-client" v-for="person in teamClients" :key="person.id">
+          {{ person.full_name }}
+        </li>
+      </ul>
+    </div>
+
     <confirm-modal
       :active="isDeleteModalActive"
       :is-danger="true"
@@ -157,6 +163,7 @@ import moment from 'moment-timezone'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useStore } from 'vuex'
 
+import { useTime } from '@/composables/time'
 import { formatTimeOfDay, parseDate } from '@/lib/time'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
@@ -164,6 +171,7 @@ import Checkbox from '@/components/widgets/Checkbox.vue'
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 
 const store = useStore()
+const { timezone, use12HourClock } = useTime()
 
 const account = ref(null)
 const hasError = ref(false)
@@ -172,6 +180,9 @@ const isLoaded = ref(false)
 const isSaving = ref(false)
 const isWorking = ref(false)
 const password = ref('')
+const saveError = ref(false)
+// Bumped on a failed save to reset the checkbox DOM state to the store value
+const checkboxKey = ref(0)
 
 const currentProduction = computed(() => store.getters.currentProduction)
 const isEnabled = computed(
@@ -183,6 +194,7 @@ const personMap = computed(() => store.getters.personMap)
 const productionTaskStatuses = computed(
   () => store.getters.productionTaskStatuses ?? []
 )
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
 const teamRoles = computed(() => store.getters.productionTeamRoles ?? {})
 
 const clientStatuses = computed(() =>
@@ -221,7 +233,12 @@ const isOpen = computed(
   () => !!openUntilDate.value && openUntilDate.value.isAfter(moment())
 )
 const openUntil = computed(() =>
-  openUntilDate.value ? formatTimeOfDay(openUntilDate.value.local()) : ''
+  openUntilDate.value
+    ? formatTimeOfDay(
+        openUntilDate.value.tz(timezone.value),
+        use12HourClock.value
+      )
+    : ''
 )
 
 // The password lives only in this component: any other action or a remount
@@ -276,12 +293,13 @@ const copyPassword = async () => {
 
 const save = async action => {
   isSaving.value = true
-  hasError.value = false
+  saveError.value = false
   try {
     await action()
   } catch (err) {
     console.error(err)
-    hasError.value = true
+    saveError.value = true
+    checkboxKey.value++
   } finally {
     isSaving.value = false
   }
@@ -295,6 +313,14 @@ const setIsolated = value =>
     })
   )
 
+const getDescriptorLabel = descriptor => {
+  const taskType = taskTypeMap.value?.get(descriptor.task_type_id)
+  const type = taskType
+    ? `${descriptor.entity_type}, ${taskType.name}`
+    : descriptor.entity_type
+  return `${descriptor.name} (${type})`
+}
+
 // zou's update schema resets the fields missing from the payload
 const setForClient = (descriptor, value) =>
   save(() =>
@@ -305,13 +331,25 @@ const setForClient = (descriptor, value) =>
     })
   )
 
+const loadAccount = async () => {
+  try {
+    account.value = await store.dispatch(
+      'getPreviewAccount',
+      productionId.value
+    )
+  } catch (err) {
+    console.error(err)
+    hasError.value = true
+  }
+}
+
 const load = async () => {
   password.value = ''
   account.value = null
   isLoaded.value = false
   if (!productionId.value) return
-  store.dispatch('loadProductionTeam')?.catch?.(console.error)
-  if (isEnabled.value) await run(() => Promise.resolve())
+  store.dispatch('loadProductionTeam').catch(console.error)
+  if (isEnabled.value) await loadAccount()
   isLoaded.value = true
 }
 
@@ -364,6 +402,10 @@ onMounted(load)
 }
 
 .error {
-  margin-top: 1em;
+  margin: 0 0 1em;
+}
+
+.preview .error {
+  margin: 1em 0 0;
 }
 </style>

@@ -130,6 +130,23 @@ describe('ProductionClients', () => {
     })
   })
 
+  it('shows a save error when editProduction fails', async () => {
+    const { wrapper, store } = await mountClients()
+    store.dispatch.mockRejectedValue(new Error('boom'))
+    wrapper.findComponent(Checkbox).vm.$emit('change', true)
+    await flushPromises()
+    expect(wrapper.find('.save-error').exists()).toBe(true)
+    expect(wrapper.find('.preview .error').exists()).toBe(false)
+  })
+
+  it('renders the other sections when preview accounts are disabled', async () => {
+    const { wrapper } = await mountClients({ enabled: false })
+    expect(wrapper.find('.isolation').exists()).toBe(true)
+    expect(wrapper.find('.statuses').exists()).toBe(true)
+    expect(wrapper.find('.metadata').exists()).toBe(true)
+    expect(wrapper.find('.team-clients').exists()).toBe(true)
+  })
+
   it('lists only statuses with is_client_allowed', async () => {
     const { wrapper } = await mountClients({
       getters: {
