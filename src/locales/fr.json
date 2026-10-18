@@ -1473,7 +1473,7 @@
       },
       "no_task_types": "Il n'y a pas de type de tâche pour ce type d'entité",
       "add_task_type_placeholder": "+ Ajouter un type de tâche",
-      "production_description": "Seuls les types de tâche listés ici peuvent être ajoutés à cette production.",
+      "production_description": "Les tâches de cette production ne peuvent utiliser que les types de tâche listés ici.",
       "select_task_type": "Sélectionner un type de tâche...",
       "add_task_type_to_library": "Ajouter un type de tâche à la bibliothèque",
       "library_title": "Bibliothèque de types de tâche"

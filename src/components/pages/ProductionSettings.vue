@@ -356,6 +356,7 @@ onMounted(() => {
 }
 
 .wrapper {
+  background: var(--background-page);
   margin-top: 0;
   overflow-y: scroll;
   padding: 1.5em 1em 1em;
@@ -437,12 +438,15 @@ onMounted(() => {
 
   // The look of the setting blocks of every tab lives here. Wide tables
   // scroll inside their block instead of stretching it.
+  // Same look as the .block panels of the entity pages (Shot.vue)
   :deep(.section) {
+    background: var(--background-block);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow-x: auto;
+    border-radius: 1em;
+    box-shadow: 0 0 6px var(--box-shadow);
     margin-bottom: 1em;
-    padding: 2em;
+    overflow-x: auto;
+    padding: 1.5em;
   }
 
   // Empty list messages: modals also render a .box here, hence the parents.
@@ -635,10 +639,14 @@ onMounted(() => {
   }
 }
 
-// Light theme only: the dark theme already gives boxes their own background.
-:global(.theme:not(.dark) .production-settings .tab .section) {
-  // Between --background and --background-alt, no theme token for it
-  background: #fafafa;
+// Light theme only: on the grey page the panel grey would blend in.
+:global(.theme:not(.dark) .production-settings .settings-menu) {
+  background: var(--background);
+}
+
+// Dark theme keeps the background App.vue gives to .dark .box
+:global(.dark .production-settings .tab .section) {
+  background: #3d4048;
 }
 
 @media screen and (max-width: 1000px) {

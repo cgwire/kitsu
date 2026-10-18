@@ -1473,7 +1473,7 @@
       },
       "no_task_types": "이 엔티티 유형에 대한 작업 유형이 없습니다.",
       "add_task_type_placeholder": "+ 작업 유형 추가",
-      "production_description": "여기에 나열된 작업 유형만 이 프로덕션에 추가할 수 있습니다.",
+      "production_description": "이 프로덕션의 작업은 여기에 나열된 작업 유형만 사용할 수 있습니다.",
       "select_task_type": "작업 유형 선택...",
       "add_task_type_to_library": "라이브러리에 작업 유형 추가하기",
       "library_title": "작업 유형 라이브러리"

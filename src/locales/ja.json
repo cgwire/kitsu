@@ -1473,7 +1473,7 @@
       },
       "no_task_types": "このエンティティタイプのタスクタイプはありません",
       "add_task_type_placeholder": "+ タスクタイプの追加",
-      "production_description": "ここに表示されたタスクタイプだけをこのプロダクションに追加できます。",
+      "production_description": "このプロダクションのタスクは、ここに表示されたタスクタイプのみを使用できます。",
       "select_task_type": "タスクタイプを選択…",
       "add_task_type_to_library": "タスクタイプをライブラリに追加",
       "library_title": "タスクタイプライブラリ"

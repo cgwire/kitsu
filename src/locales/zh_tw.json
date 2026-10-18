@@ -1473,7 +1473,7 @@
       },
       "no_task_types": "此實體類型沒有任務類型",
       "add_task_type_placeholder": "+ 新增任務類型",
-      "production_description": "只有此處列出的任務類型可以加入此製作。",
+      "production_description": "此製作的任務只能使用這裡列出的任務類型。",
       "select_task_type": "選擇任務類型...",
       "add_task_type_to_library": "新增任務類型到任務類型庫",
       "library_title": "任務類型庫"

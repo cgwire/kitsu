@@ -1927,7 +1927,8 @@ export default {
     new_task_type: 'Add a task type',
     no_task_types: 'There is no task type for this entity type',
     number: 'task type | task types',
-    production_description: 'Only the task types listed here can be added to this production.',
+    production_description:
+      'Tasks of this production can only use the task types listed here.',
     select_task_type: 'Select a task type...',
     title: 'Task Types',
     fields: {

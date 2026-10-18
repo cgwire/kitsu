@@ -1473,7 +1473,7 @@
       },
       "no_task_types": "Er is geen taaktype voor dit entiteittype",
       "add_task_type_placeholder": "+ Taaktype toevoegen",
-      "production_description": "Alleen de hier vermelde taaktypes kunnen aan deze productie worden toegevoegd.",
+      "production_description": "Taken van deze productie kunnen alleen de hier vermelde taaktypen gebruiken.",
       "select_task_type": "Selecteer een taaktype...",
       "add_task_type_to_library": "Een taaktype toevoegen aan de bibliotheek",
       "library_title": "Taaktype Bibliotheek"

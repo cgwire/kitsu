@@ -1473,7 +1473,7 @@
       },
       "no_task_types": "Es gibt keinen Aufgabentyp für diesen Entitätstyp",
       "add_task_type_placeholder": "+ Aufgabentyp",
-      "production_description": "Nur die hier aufgeführten Aufgabentypen können dieser Produktion hinzugefügt werden.",
+      "production_description": "Aufgaben dieser Produktion können nur die hier aufgeführten Aufgabentypen verwenden.",
       "select_task_type": "Wählen Sie einen Aufgabentyp...",
       "add_task_type_to_library": "Hinzufügen eines Aufgabentyps zur Bibliothek",
       "library_title": "Aufgabentyp-Bibliothek"

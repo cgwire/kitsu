@@ -1473,7 +1473,7 @@
       },
       "no_task_types": "Não existe um tipo de tarefa para esse tipo de entidade",
       "add_task_type_placeholder": "+ Tipo de tarefa",
-      "production_description": "Somente os tipos de tarefa listados aqui podem ser adicionados a esta produção.",
+      "production_description": "As tarefas desta produção só podem usar os tipos de tarefa listados aqui.",
       "select_task_type": "Selecione um tipo de tarefa...",
       "add_task_type_to_library": "Adicionar um tipo de tarefa à biblioteca",
       "library_title": "Biblioteca de tipos de tarefas"

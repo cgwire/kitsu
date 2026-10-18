@@ -1473,7 +1473,7 @@
       },
       "no_task_types": "Der er ingen opgavetype for denne enhedstype",
       "add_task_type_placeholder": "+ Opgavetype",
-      "production_description": "Kun de opgavetyper, der er angivet her, kan tilføjes til denne produktion.",
+      "production_description": "Opgaverne i denne produktion kan kun bruge de opgavetyper, der er angivet her.",
       "select_task_type": "Vælg en opgavetype...",
       "add_task_type_to_library": "Tilføj en opgavetype til biblioteket",
       "library_title": "Opgavetype-bibliotek"

@@ -1473,7 +1473,7 @@
       },
       "no_task_types": "Non ci sono tipi di task per questo tipo di entità",
       "add_task_type_placeholder": "+ Aggiungi tipo di task",
-      "production_description": "Solo i tipi di task elencati qui possono essere aggiunti a questa produzione.",
+      "production_description": "Le attività di questa produzione possono usare solo i tipi di attività elencati qui.",
       "select_task_type": "Seleziona un tipo di task...",
       "add_task_type_to_library": "Aggiungi un tipo di task alla libreria",
       "library_title": "Libreria dei tipi di task"

@@ -1473,7 +1473,7 @@
       },
       "no_task_types": "该实体类型没有任务类型",
       "add_task_type_placeholder": "+ 添加任务类型",
-      "production_description": "只有此处列出的任务类型可以添加到此制作中。",
+      "production_description": "此制作的任务只能使用这里列出的任务类型。",
       "select_task_type": "选择任务类型...",
       "add_task_type_to_library": "向任务类型库中添加任务类型",
       "library_title": "任务类型库"

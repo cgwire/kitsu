@@ -1855,7 +1855,7 @@
       "new_task_type": "Dodaj typ zadania",
       "no_task_types": "Dla tego typu obiektu nie ma żadnych typów zadań",
       "number": "typ zadania | typów zadań",
-      "production_description": "Do tej produkcji można dodać tylko wymienione tutaj typy zadań.",
+      "production_description": "Zadania tej produkcji mogą używać tylko wymienionych tutaj typów zadań.",
       "select_task_type": "Wybierz typ zadania...",
       "title": "Typy zadań",
       "fields": {

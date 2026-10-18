@@ -1475,7 +1475,7 @@
       "add_task_type_to_library": "Feladat típus hozzáadása a könyvtárhoz",
       "library_title": "Feladat típus könyvtár",
       "no_task_types": "Nincs feladat típus ehhez az elem típushoz",
-      "production_description": "Csak az itt felsorolt feladattípusok adhatók hozzá ehhez a produkcióhoz.",
+      "production_description": "A produkció feladatai csak az itt felsorolt feladattípusokat használhatják.",
       "select_task_type": "Válassz egy feladat típust..."
     },
     "sequences": {
