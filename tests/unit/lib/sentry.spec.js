@@ -576,6 +576,16 @@ describe('lib/sentry', () => {
       )
     })
 
+    test('does not report the refusals of a preview account', async () => {
+      sentry.setContext(
+        { name: 'Studio' },
+        { id: OWN_ID, role: 'client', preview_project_id: 'p1' }
+      )
+      await report(403, 'GET', nextRoute())
+      sentry.setContext({ name: 'Studio' }, { id: OWN_ID, role: 'user' })
+      expect(h.captureMessage).not.toHaveBeenCalled()
+    })
+
     test('names the person who now holds the session', async () => {
       h.authenticated = async () => ({ body: { user: { id: OTHER_ID } } })
       await report(403, 'GET', `${nextRoute()}/${OWN_ID}`)

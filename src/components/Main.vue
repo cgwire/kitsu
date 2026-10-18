@@ -50,8 +50,7 @@ onMounted(() => {
 .preview-banner {
   position: fixed;
   bottom: 1em;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 1em;
   z-index: 300;
   padding: 0.4em 1em;
   border-radius: 1em;
