@@ -201,4 +201,19 @@ describe('ProductionClients', () => {
     expect(wrapper.findComponent(ConfirmModal).props('active')).toBe(true)
     expect(wrapper.findComponent(ConfirmModal).props('isError')).toBe(true)
   })
+
+  it('shows the task status link to admins only', async () => {
+    const admin = await mountClients({
+      getters: { isCurrentUserAdmin: () => true }
+    })
+    expect(admin.wrapper.find('.statuses a, .statuses router-link').exists()).toBe(
+      true
+    )
+    const manager = await mountClients({
+      getters: { isCurrentUserAdmin: () => false }
+    })
+    expect(
+      manager.wrapper.find('.statuses a, .statuses router-link').exists()
+    ).toBe(false)
+  })
 })

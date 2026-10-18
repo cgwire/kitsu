@@ -15,7 +15,7 @@
       <h2 class="subtitle">{{ $t('productions.clients.statuses_title') }}</h2>
       <p class="description">
         {{ $t('productions.clients.statuses_description') }}
-        <router-link :to="{ name: 'task-status' }">
+        <router-link v-if="isAdmin" :to="{ name: 'task-status' }">
           {{ $t('productions.clients.statuses_link') }}
         </router-link>
       </p>
@@ -178,6 +178,7 @@ const isEnabled = computed(
   () => store.getters.mainConfig?.preview_accounts_enabled === true
 )
 const productionId = computed(() => currentProduction.value?.id)
+const isAdmin = computed(() => store.getters.isCurrentUserAdmin)
 const personMap = computed(() => store.getters.personMap)
 const productionTaskStatuses = computed(
   () => store.getters.productionTaskStatuses ?? []
