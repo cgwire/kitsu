@@ -411,7 +411,8 @@ onMounted(load)
   margin-bottom: 1em;
 }
 
-.preview-header {
+// Prefixed to win over the .section .subtitle margin below
+.section .preview-header {
   align-items: center;
   display: flex;
   gap: 1em;
