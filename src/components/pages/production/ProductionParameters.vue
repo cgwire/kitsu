@@ -331,7 +331,6 @@ watch(
 
 .production-parameters {
   margin-bottom: 2em;
-  max-width: 600px;
 }
 
 .picture-header {

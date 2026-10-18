@@ -99,7 +99,6 @@ const editBrief = async () => {
   display: flex;
   flex: 1;
   flex-direction: column;
-  max-width: 600px;
 }
 
 .box {
@@ -112,6 +111,30 @@ const editBrief = async () => {
 .content {
   color: var(--text-strong);
   padding-bottom: 1em;
+
+  // The global ul rule only indents by 1em, so the bullets sit on the edge
+  :deep(ul),
+  :deep(ol) {
+    margin: 0 0 1em;
+    padding-left: 1.8em;
+  }
+
+  :deep(ul) {
+    list-style-type: disc;
+  }
+
+  :deep(ol) {
+    list-style-type: decimal;
+  }
+
+  :deep(li) {
+    margin-bottom: 0.3em;
+  }
+
+  :deep(li > ul),
+  :deep(li > ol) {
+    margin: 0.3em 0 0;
+  }
 }
 
 .editor {

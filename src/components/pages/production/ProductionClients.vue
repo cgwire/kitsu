@@ -410,10 +410,6 @@ onMounted(load)
 </script>
 
 <style lang="scss" scoped>
-.production-clients {
-  max-width: 600px;
-}
-
 .description,
 .unavailable {
   color: var(--text-alt);

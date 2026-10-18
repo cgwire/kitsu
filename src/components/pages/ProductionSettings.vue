@@ -10,15 +10,12 @@
               :key="item.id"
               v-for="item in group.items"
             >
-              <a
-                role="button"
-                tabindex="0"
-                @click="activeTab = item.id"
-                @keydown.enter.prevent="activeTab = item.id"
-                @keydown.space.prevent="activeTab = item.id"
+              <router-link
+                :aria-current="isActiveTab(item.id) ? 'page' : undefined"
+                :to="{ query: { tab: item.id } }"
               >
                 {{ $t(item.label) }}
-              </a>
+              </router-link>
             </li>
           </ul>
         </div>
@@ -41,109 +38,129 @@
           <production-brief />
         </div>
 
-        <div class="tab" v-show="isActiveTab('assetTypes')">
-          <asset-type-settings
-            :asset-types="restrictedAssetTypes"
-            :all-asset-types="assetTypes"
-            @add="addAssetType"
-            @import-items="importAssetTypes"
-            @remove="removeAssetType"
-          />
-        </div>
-
-        <div class="tab" v-show="isActiveTab('taskTypes')">
-          <production-task-types />
-        </div>
-
-        <div class="tab" v-show="isActiveTab('taskStatus')">
-          <p class="explanation mb1">
-            {{ $t('task_status.production_description') }}
-          </p>
-          <div
-            class="flexrow mt1 mb1 add-task-status"
-            v-if="!isEmpty(remainingTaskStatuses)"
-          >
-            <combobox-status
-              class="flexrow-item selector"
-              :task-status-list="remainingTaskStatuses"
-              v-model="taskStatusId"
+        <div class="tab is-wide" v-show="isActiveTab('assetTypes')">
+          <div class="box section">
+            <h2 class="subtitle">{{ $t('asset_types.title') }}</h2>
+            <asset-type-settings
+              :asset-types="restrictedAssetTypes"
+              :all-asset-types="assetTypes"
+              @add="addAssetType"
+              @import-items="importAssetTypes"
+              @remove="removeAssetType"
             />
-            <button class="button flexrow-item" @click="addTaskStatus">
-              {{ $t('main.add') }}
-            </button>
           </div>
-          <div class="box" v-if="isEmpty(currentProduction?.task_statuses)">
-            {{ $t('settings.production.empty_list') }}
+        </div>
+
+        <div class="tab is-wide" v-show="isActiveTab('taskTypes')">
+          <div class="box section">
+            <h2 class="subtitle">{{ $t('task_types.title') }}</h2>
+            <production-task-types />
           </div>
-          <table class="datatable" v-else>
-            <thead>
-              <tr>
-                <th class="th-grab"></th>
-                <th class="th-name">{{ $t('task_status.fields.name') }}</th>
-                <th class="th-short-name">
-                  {{ $t('task_status.fields.short_name') }}
-                </th>
-                <th class="th-bool">{{ $t('task_status.fields.is_done') }}</th>
-                <th class="th-bool">
-                  {{ $t('task_status.fields.is_retake') }}
-                </th>
-                <th class="th-bool">
-                  {{ $t('task_status.fields.is_artist_allowed') }}
-                </th>
-                <th class="th-bool">
-                  {{ $t('task_status.fields.is_client_allowed') }}
-                </th>
-              </tr>
-            </thead>
-            <draggable
-              class="datatable-body"
-              item-key="id"
-              tag="tbody"
-              v-model="taskStatusItems"
-              @end="updateTaskStatusPriority"
+        </div>
+
+        <div class="tab is-wide" v-show="isActiveTab('taskStatus')">
+          <div class="box section">
+            <h2 class="subtitle">{{ $t('task_status.title') }}</h2>
+            <p class="explanation mb1">
+              {{ $t('task_status.production_description') }}
+            </p>
+            <div
+              class="flexrow mt1 mb1 add-task-status"
+              v-if="!isEmpty(remainingTaskStatuses)"
             >
-              <template #item="{ element: taskStatus }">
-                <tr class="datatable-row task-status">
-                  <td class="grab">
-                    <grip-vertical-icon />
-                  </td>
-                  <td>
-                    {{ taskStatus.name }}
-                  </td>
-                  <td class="name">
-                    <validation-tag
-                      :is-static="true"
-                      :task="{ task_status_id: taskStatus.id }"
-                    />
-                  </td>
-                  <boolean-cell :value="taskStatus.is_done" />
-                  <boolean-cell :value="taskStatus.is_retake" />
-                  <boolean-cell :value="taskStatus.is_artist_allowed" />
-                  <boolean-cell :value="taskStatus.is_client_allowed" />
-                  <td>
-                    <button
-                      class="button"
-                      @click="removeTaskStatus(taskStatus.id)"
-                    >
-                      {{ $t('main.remove') }}
-                    </button>
-                  </td>
+              <combobox-status
+                class="flexrow-item selector"
+                :task-status-list="remainingTaskStatuses"
+                v-model="taskStatusId"
+              />
+              <button class="button flexrow-item" @click="addTaskStatus">
+                {{ $t('main.add') }}
+              </button>
+            </div>
+            <div class="box" v-if="isEmpty(currentProduction?.task_statuses)">
+              {{ $t('settings.production.empty_list') }}
+            </div>
+            <table class="datatable" v-else>
+              <thead>
+                <tr>
+                  <th class="th-grab"></th>
+                  <th class="th-name">{{ $t('task_status.fields.name') }}</th>
+                  <th class="th-short-name">
+                    {{ $t('task_status.fields.short_name') }}
+                  </th>
+                  <th class="th-bool">
+                    {{ $t('task_status.fields.is_done') }}
+                  </th>
+                  <th class="th-bool">
+                    {{ $t('task_status.fields.is_retake') }}
+                  </th>
+                  <th class="th-bool">
+                    {{ $t('task_status.fields.is_artist_allowed') }}
+                  </th>
+                  <th class="th-bool">
+                    {{ $t('task_status.fields.is_client_allowed') }}
+                  </th>
                 </tr>
-              </template>
-            </draggable>
-          </table>
+              </thead>
+              <draggable
+                class="datatable-body"
+                item-key="id"
+                tag="tbody"
+                v-model="taskStatusItems"
+                @end="updateTaskStatusPriority"
+              >
+                <template #item="{ element: taskStatus }">
+                  <tr class="datatable-row task-status">
+                    <td class="grab">
+                      <grip-vertical-icon />
+                    </td>
+                    <td>
+                      {{ taskStatus.name }}
+                    </td>
+                    <td class="name">
+                      <validation-tag
+                        :is-static="true"
+                        :task="{ task_status_id: taskStatus.id }"
+                      />
+                    </td>
+                    <boolean-cell :value="taskStatus.is_done" />
+                    <boolean-cell :value="taskStatus.is_retake" />
+                    <boolean-cell :value="taskStatus.is_artist_allowed" />
+                    <boolean-cell :value="taskStatus.is_client_allowed" />
+                    <td>
+                      <button
+                        class="button"
+                        @click="removeTaskStatus(taskStatus.id)"
+                      >
+                        {{ $t('main.remove') }}
+                      </button>
+                    </td>
+                  </tr>
+                </template>
+              </draggable>
+            </table>
+          </div>
         </div>
 
-        <div class="tab" v-show="isActiveTab('board')">
-          <production-board />
+        <div class="tab is-wide" v-show="isActiveTab('board')">
+          <div class="box section">
+            <h2 class="subtitle">{{ $t('board.settings.title') }}</h2>
+            <production-board />
+          </div>
         </div>
 
-        <div class="tab" v-show="isActiveTab('statusAutomations')">
-          <production-status-automations />
+        <div class="tab is-wide" v-show="isActiveTab('statusAutomations')">
+          <div class="box section">
+            <h2 class="subtitle">{{ $t('status_automations.title') }}</h2>
+            <production-status-automations />
+          </div>
         </div>
 
         <div class="tab" v-show="isActiveTab('backgrounds')">
-          <production-backgrounds />
+          <div class="box section">
+            <h2 class="subtitle">{{ $t('backgrounds.title') }}</h2>
+            <production-backgrounds />
+          </div>
         </div>
       </div>
     </div>
@@ -285,6 +302,13 @@ const updateTaskStatusPriority = async () => {
   await updateTaskStatusPriorities(taskStatusItems.value)
 }
 
+watch(
+  () => route.query.tab,
+  tab => {
+    if (tab) activeTab.value = tab
+  }
+)
+
 watch(activeTab, tab => {
   if (route.query.tab !== tab) {
     router.push({ query: { tab } })
@@ -402,13 +426,20 @@ onMounted(() => {
   flex: 1;
   display: flex;
   flex-direction: column;
+  max-width: 800px;
   overflow-y: auto;
   padding-left: 2px;
 
-  // The look of the setting blocks of every tab lives here, so that the tab
-  // components only set their own width.
+  // Workflow tabs hold lists and tables, they need more room than forms.
+  &.is-wide {
+    max-width: 1200px;
+  }
+
+  // The look of the setting blocks of every tab lives here. Wide tables
+  // scroll inside their block instead of stretching it.
   :deep(.section) {
     border-radius: 12px;
+    overflow-x: auto;
     margin-bottom: 1em;
     padding: 2em;
   }
@@ -421,6 +452,32 @@ onMounted(() => {
   }
 
   // Direct children only: the Clients preview header lays out its own title.
+  // The shared list components (asset types, task types, automations,
+  // board) have fixed widths for the studio template page: here they fill
+  // their panel.
+  :deep(.section .columns > .column:first-child) {
+    flex: 1 1 auto;
+    max-width: none;
+  }
+
+  :deep(.section .datatable),
+  :deep(.section .list),
+  :deep(.section .columns > .column > .box),
+  :deep(.section > .box) {
+    max-width: none;
+    min-width: 0;
+    width: 100%;
+  }
+
+  :deep(.section .datatable) {
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  :deep(.section .datatable th) {
+    background: transparent;
+  }
+
   :deep(.section > .subtitle) {
     border-bottom: 0;
     margin-bottom: 1.5em;
@@ -493,7 +550,6 @@ onMounted(() => {
 
 .box {
   border-radius: 12px;
-  max-width: 400px;
 }
 
 .task-status {
@@ -512,6 +568,72 @@ onMounted(() => {
 }
 
 // Tablet: the content area is about 500px wide next to the menu.
+// The automation and background lists are shared with the studio pages:
+// their column widths are only adjusted in the production tabs.
+@media screen and (min-width: 769px) {
+  .tab :deep(.status-automation-settings .datatable) {
+    width: 100%;
+
+    td {
+      vertical-align: middle;
+    }
+
+    .name {
+      min-width: 130px;
+      width: 130px;
+    }
+
+    .in-task-type,
+    .out-task-type {
+      min-width: 170px;
+      width: 170px;
+    }
+
+    .in-task-status,
+    .out-task-status {
+      min-width: 130px;
+      width: 130px;
+    }
+
+    .automation-type,
+    .input-separator {
+      min-width: 170px;
+      text-align: center;
+      width: 170px;
+    }
+
+    .import-last-revision {
+      min-width: 140px;
+      text-align: center;
+      width: 140px;
+    }
+  }
+
+  .tab :deep(.background-settings .datatable) {
+    width: 100%;
+
+    td {
+      vertical-align: middle;
+    }
+
+    .name {
+      min-width: 0;
+      width: auto;
+    }
+
+    .is-default {
+      width: 140px;
+    }
+
+    th:last-child,
+    td:last-child {
+      text-align: right;
+      white-space: nowrap;
+      width: 1%;
+    }
+  }
+}
+
 @media screen and (max-width: 1000px) {
   .th-name,
   .th-short-name,

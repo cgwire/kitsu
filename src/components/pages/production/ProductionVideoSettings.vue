@@ -190,6 +190,5 @@ onMounted(resetForm)
 <style lang="scss" scoped>
 .production-video {
   margin-bottom: 2em;
-  max-width: 600px;
 }
 </style>
