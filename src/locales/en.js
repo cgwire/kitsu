@@ -825,7 +825,6 @@ export default {
   },
 
   main: {
-    preview_account_banner: 'Preview account (read-only)',
     about: 'About',
     active: 'Active',
     activity: 'Activity',
@@ -950,6 +949,7 @@ export default {
     people: 'People',
     preview_3d_not_supported:
       '3D previews are not supported in this browser (WebGL2 is required). Please update it to its latest version.',
+    preview_account_banner: 'Preview account (read-only)',
     previous: 'Previous',
     profile: 'Profile',
     production: 'Production',

@@ -48,10 +48,17 @@ onMounted(() => {
 }
 
 .preview-banner {
+  position: fixed;
+  bottom: 1em;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 300;
   padding: 0.4em 1em;
-  text-align: center;
+  border-radius: 1em;
   background: var(--background-selected);
   color: var(--text-strong);
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
 }
 
 .skip-link {
