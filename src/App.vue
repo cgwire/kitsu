@@ -1536,6 +1536,17 @@ textarea.input:focus {
   min-height: 0;
 }
 
+// a landscape phone gets the 44px topbar (see Topbar.vue)
+@media screen and (max-height: 500px) and (orientation: landscape) {
+  .fixed-page {
+    padding-top: 44px;
+  }
+
+  .page {
+    padding-top: 54px;
+  }
+}
+
 .page-header {
   margin-top: 2em;
   margin-bottom: 0;
@@ -2830,8 +2841,10 @@ th.validation-cell {
 }
 // Opt-in card layout for data tables on mobile. Cells carrying a data-label
 // become a "label / value" line, .card-head cells stack on top as plain
-// blocks, every other cell is hidden.
-@media screen and (max-width: 768px) {
+// blocks, every other cell is hidden. Landscape phones, wider than 768px,
+// get them too.
+@media screen and (max-width: 768px),
+  screen and (max-height: 500px) and (orientation: landscape) {
   .datatable.datatable--cards {
     background: transparent;
     display: block;

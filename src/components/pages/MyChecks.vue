@@ -443,7 +443,8 @@ useHead({ title: computed(() => `${t('tasks.my_checks')} - Kitsu`) })
   height: 42px;
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 768px),
+  screen and (max-height: 500px) and (orientation: landscape) {
   .filters {
     align-items: flex-end;
     flex-wrap: wrap;
@@ -496,6 +497,42 @@ useHead({ title: computed(() => `${t('tasks.my_checks')} - Kitsu`) })
   // TaskInfo edits the task: phones stay read-only
   .side-column {
     display: none;
+  }
+}
+
+// a landscape phone is too short to share its height with the list: the
+// whole page scrolls instead of the list alone
+@media screen and (max-height: 500px) and (orientation: landscape) {
+  .todos {
+    display: block;
+    height: auto;
+  }
+
+  .filters {
+    margin-top: 0.5em !important;
+  }
+
+  // the title and the playlist button share one line
+  .title-row {
+    align-items: center;
+    flex-wrap: nowrap;
+
+    .title {
+      flex: 1 1 auto;
+      font-size: 1.4em;
+      margin: 0.5em 0;
+    }
+
+    .playlist-button {
+      margin-bottom: 0;
+    }
+  }
+
+  .todos :deep(.data-list),
+  .todos :deep(.datatable-wrapper) {
+    height: auto;
+    max-height: none;
+    overflow: visible;
   }
 }
 </style>

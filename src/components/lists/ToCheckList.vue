@@ -238,6 +238,7 @@ import { computed, onMounted, ref, useTemplateRef } from 'vue'
 import { useStore } from 'vuex'
 
 import { useFormat } from '@/composables/format'
+import { usePhoneLayout } from '@/composables/phoneLayout'
 import { useTaskListSelection } from '@/composables/taskSelection'
 import { useTaskHelpers } from '@/composables/tasks'
 import { getTaskEntityPath } from '@/lib/path'
@@ -321,12 +322,13 @@ const isCurrentUserSupervisor = computed(
 const productionMap = computed(() => store.getters.productionMap)
 const taskMap = computed(() => store.getters.taskMap)
 
-// phones get a read-only list
-const isPhone = Boolean(window.matchMedia?.('(max-width: 768px)').matches)
+// phones get a read-only list, in landscape too
+const { isPhone } = usePhoneLayout()
 
 const isEditable = computed(
   () =>
-    !isPhone && (isCurrentUserManager.value || isCurrentUserSupervisor.value)
+    !isPhone.value &&
+    (isCurrentUserManager.value || isCurrentUserSupervisor.value)
 )
 
 const isEpisodeVisible = computed(() =>
@@ -583,7 +585,8 @@ input[type='number'] {
   padding: 0.5em;
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 768px),
+  screen and (max-height: 500px) and (orientation: landscape) {
   .datatable-wrapper {
     background: transparent;
     border: 0;

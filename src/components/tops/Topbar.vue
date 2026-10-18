@@ -1288,7 +1288,8 @@ onBeforeUnmount(() => {
   margin-top: 3px;
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 768px),
+  screen and (max-height: 500px) and (orientation: landscape) {
   .nav-item:has(.changelog-button),
   .nav-item:has(.help-button) {
     display: none;
@@ -1333,5 +1334,18 @@ onBeforeUnmount(() => {
 
 .notification-bell {
   margin-top: 9px;
+}
+
+// a landscape phone is short: the bar gives the page 16px back
+@media screen and (max-height: 500px) and (orientation: landscape) {
+  .nav {
+    max-height: 44px;
+    min-height: 44px;
+  }
+
+  .user-menu {
+    max-height: calc(100% - 44px);
+    top: 44px;
+  }
 }
 </style>
