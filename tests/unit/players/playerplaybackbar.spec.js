@@ -44,4 +44,28 @@ describe('players/PlayerPlaybackBar', () => {
       expect(wrapper.text()).not.toContain('1120')
     })
   })
+
+  describe('phone mode', () => {
+    it('keeps only play and the frame number on a phone', () => {
+      const wrapper = mountBar({ phone: true })
+      const buttons = wrapper.findAllComponents({ name: 'ButtonSimple' })
+      expect(buttons).toHaveLength(1)
+      expect(buttons[0].attributes('icon')).toBe('play')
+      expect(wrapper.findComponent({ name: 'SpeedButton' }).exists()).toBe(false)
+      expect(wrapper.findComponent({ name: 'ButtonSound' }).exists()).toBe(false)
+      expect(wrapper.find('.current-time').exists()).toBe(false)
+      expect(wrapper.text()).toContain('(005 / 120)')
+    })
+
+    it('renders every control off a phone', () => {
+      const wrapper = mountBar()
+      expect(wrapper.findComponent({ name: 'SpeedButton' }).exists()).toBe(true)
+      expect(wrapper.findComponent({ name: 'ButtonSound' }).exists()).toBe(true)
+      expect(
+        wrapper
+          .findAllComponents({ name: 'ButtonSimple' })
+          .some(button => button.attributes('text') === 'LD')
+      ).toBe(true)
+    })
+  })
 })

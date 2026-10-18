@@ -1,5 +1,24 @@
 <template>
-  <div class="flexrow" v-if="isMovie || isPicture">
+  <!-- phones draw freehand with the default pencil -->
+  <div class="flexrow" v-if="phone && (isMovie || isPicture)">
+    <template v-if="!readOnly && !isConcept">
+      <button-simple
+        class="flexrow-item"
+        icon="undo"
+        :title="$t('playlists.actions.annotation_undo')"
+        @click="$emit('undo')"
+      />
+      <button-simple
+        class="flexrow-item"
+        icon="pencil"
+        :active="isDrawing"
+        :title="$t('playlists.actions.annotation_draw')"
+        @click="$emit('pencil-annotate-clicked')"
+      />
+    </template>
+  </div>
+
+  <div class="flexrow" v-else-if="isMovie || isPicture">
     <button-simple
       class="flexrow-item"
       icon="undo"
@@ -320,6 +339,11 @@ defineProps({
   pencilWidth: {
     type: String,
     default: 'big'
+  },
+  // phones keep undo and the pencil only
+  phone: {
+    type: Boolean,
+    default: false
   },
   productionBackgrounds: {
     type: Array,

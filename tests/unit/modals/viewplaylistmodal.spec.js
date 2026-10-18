@@ -28,6 +28,9 @@ vi.mock('@/components/players/players/PlaylistPlayer.vue', () => ({
   default: { name: 'PlaylistPlayer', props: ['canSave'], render: () => null }
 }))
 
+const crisp = vi.hoisted(() => ({ setChatVisibility: vi.fn() }))
+vi.mock('@/lib/crisp', () => ({ default: crisp }))
+
 import shotStore from '@/store/modules/shots'
 
 import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal.vue'
@@ -54,6 +57,7 @@ describe('ViewPlaylistModal', () => {
       getters: {
         currentEpisode: () => null,
         currentProduction: () => ({ id: 'production-1' }),
+        isSupportChat: () => true,
         isTVShow: () => false,
         selectedTasks: () => new Map()
       },
@@ -90,7 +94,8 @@ describe('ViewPlaylistModal', () => {
     })
 
     wrapper = shallowMount(ViewPlaylistModal, {
-      global: { plugins: [store, i18n] },
+      // the modal sits in a teleport, disabled off a phone: render it in place
+      global: { plugins: [store, i18n], stubs: { teleport: false } },
       props: { active: false }
     })
   })
@@ -250,7 +255,8 @@ describe('ViewPlaylistModal', () => {
   ])('infers for_entity "%s" → "%s" when saving from a selection', async (path, expected) => {
     routeState.path = path
     const localWrapper = shallowMount(ViewPlaylistModal, {
-      global: { plugins: [store, i18n] },
+      // the modal sits in a teleport, disabled off a phone: render it in place
+      global: { plugins: [store, i18n], stubs: { teleport: false } },
       props: { active: false }
     })
 
@@ -273,11 +279,76 @@ describe('ViewPlaylistModal', () => {
     routeState.path = '/my-checks'
     routeState.params = {}
     const localWrapper = shallowMount(ViewPlaylistModal, {
-      global: { plugins: [store, i18n] },
+      // the modal sits in a teleport, disabled off a phone: render it in place
+      global: { plugins: [store, i18n], stubs: { teleport: false } },
       props: { active: false }
     })
     expect(
       localWrapper.findComponent({ name: 'PlaylistPlayer' }).props('canSave')
     ).toBe(false)
+  })
+
+  describe('on a phone', () => {
+    const stubPhone = isPhone => {
+      window.matchMedia = query => ({
+        matches: isPhone && query === '(max-width: 768px)',
+        addEventListener: () => {},
+        removeEventListener: () => {}
+      })
+    }
+
+    const mountActive = () =>
+      shallowMount(ViewPlaylistModal, {
+        attachTo: document.body,
+        // the modal sits in a teleport, disabled off a phone: render it in place
+      global: { plugins: [store, i18n], stubs: { teleport: false } },
+        props: { active: true }
+      })
+    const findModal = () => document.querySelector('#temp-playlist-modal')
+
+    beforeEach(() => {
+      crisp.setChatVisibility.mockClear()
+    })
+
+    afterEach(() => {
+      delete window.matchMedia
+    })
+
+    it('closes from the close button on a phone', async () => {
+      stubPhone(true)
+      const modal = mountActive()
+      findModal().querySelector('.close-button').click()
+      expect(modal.emitted('cancel')).toHaveLength(1)
+      expect(findModal().classList.contains('phone')).toBe(true)
+      modal.unmount()
+    })
+
+    // the fixed page container traps the z-index of what it holds under
+    // the topbar: the modal leaves it on phones
+    it('renders right under the body on a phone', async () => {
+      stubPhone(true)
+      const modal = mountActive()
+      expect(findModal().parentElement).toBe(document.body)
+      modal.unmount()
+    })
+
+    it('hides the support chat while open on a phone', async () => {
+      stubPhone(true)
+      const modal = mountActive()
+      await flushPromises()
+      expect(crisp.setChatVisibility).toHaveBeenCalledWith(false)
+      modal.unmount()
+      expect(crisp.setChatVisibility).toHaveBeenLastCalledWith(true)
+    })
+
+    it('leaves the chat alone off a phone', async () => {
+      stubPhone(false)
+      const modal = mountActive()
+      await flushPromises()
+      expect(crisp.setChatVisibility).not.toHaveBeenCalled()
+      expect(findModal().classList.contains('phone')).toBe(false)
+      expect(findModal().parentElement).not.toBe(document.body)
+      modal.unmount()
+    })
   })
 })

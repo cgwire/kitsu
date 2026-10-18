@@ -356,5 +356,19 @@ describe('lists/ToCheckList', () => {
       wrapper.unmount()
       window.matchMedia = matchMedia
     })
+
+    test('keeps the row read-only on a landscape phone', async () => {
+      const matchMedia = window.matchMedia
+      window.matchMedia = query => ({
+        matches: query === '(max-height: 500px) and (orientation: landscape)'
+      })
+      const wrapper = mountList({
+        getters: { isCurrentUserManager: () => true }
+      })
+      await wrapper.find('tbody td.duration').trigger('click')
+      expect(wrapper.find('tbody td.estimation input').exists()).toBe(false)
+      wrapper.unmount()
+      window.matchMedia = matchMedia
+    })
   })
 })
