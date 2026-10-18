@@ -1502,10 +1502,11 @@ export default {
       preview_title: 'Preview account',
       regenerate: 'Regenerate password',
       save_error: 'An error occurred while saving the settings.',
-      statuses_description: 'Clients only see tasks with these statuses.',
+      statuses_description:
+        'Clients can only set these statuses when they comment.',
       statuses_empty: 'No status is visible to clients.',
       statuses_link: 'Edit task statuses',
-      statuses_title: 'Statuses visible to clients',
+      statuses_title: 'Statuses available to clients',
       team_empty: 'No client in the team.',
       team_title: 'Clients of the team',
       title: 'Clients',
