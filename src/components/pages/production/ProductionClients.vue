@@ -135,13 +135,16 @@
       <p class="empty" v-if="!clientStatuses.length">
         {{ $t('productions.clients.statuses_empty') }}
       </p>
-      <ul v-else>
+      <ul class="status-list" v-else>
         <li
           class="status-item"
           v-for="status in clientStatuses"
           :key="status.id"
         >
-          {{ status.name }}
+          <validation-tag
+            :is-static="true"
+            :task="{ task_status_id: status.id }"
+          />
         </li>
       </ul>
     </div>
@@ -172,9 +175,10 @@
       <p class="empty" v-if="!teamClients.length">
         {{ $t('productions.clients.team_empty') }}
       </p>
-      <ul v-else>
+      <ul class="client-list" v-else>
         <li class="team-client" v-for="person in teamClients" :key="person.id">
-          {{ person.full_name }}
+          <people-avatar :font-size="14" :person="person" :size="30" />
+          <people-name :person="person" :with-link="true" />
         </li>
       </ul>
     </div>
@@ -204,7 +208,10 @@ import { formatTimeOfDay, parseDate } from '@/lib/time'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Checkbox from '@/components/widgets/Checkbox.vue'
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import PeopleName from '@/components/widgets/PeopleName.vue'
 import TextField from '@/components/widgets/TextField.vue'
+import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
 const store = useStore()
 const { timezone, use12HourClock } = useTime()
@@ -484,6 +491,30 @@ onMounted(load)
     margin-bottom: 1.5em;
     margin-top: 0;
   }
+}
+
+.status-list,
+.client-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.status-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+}
+
+.status-item,
+.team-client {
+  align-items: center;
+  display: flex;
+  gap: 0.5em;
+}
+
+.team-client {
+  margin-bottom: 0.8em;
 }
 
 .empty {

@@ -8,6 +8,8 @@ import ProductionClients from '@/components/pages/production/ProductionClients.v
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Checkbox from '@/components/widgets/Checkbox.vue'
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
+import PeopleName from '@/components/widgets/PeopleName.vue'
+import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
 const iso = date => date.toISOString().slice(0, 19)
 const inOneHour = () => iso(new Date(Date.now() + 3600 * 1000))
@@ -175,7 +177,9 @@ describe('ProductionClients', () => {
     })
     const items = wrapper.findAll('.status-item')
     expect(items).toHaveLength(1)
-    expect(items[0].text()).toBe('Valid')
+    expect(items[0].findComponent(ValidationTag).props('task')).toEqual({
+      task_status_id: 's2'
+    })
     expect(wrapper.find('.statuses input').exists()).toBe(false)
   })
 
@@ -218,7 +222,9 @@ describe('ProductionClients', () => {
     })
     const rows = wrapper.findAll('.team-client')
     expect(rows).toHaveLength(1)
-    expect(rows[0].text()).toBe('Cli')
+    expect(rows[0].findComponent(PeopleName).props('person').full_name).toBe(
+      'Cli'
+    )
   })
 
   it('keeps the delete modal open on failure', async () => {
