@@ -68,6 +68,7 @@ const mountPlayer = ({
   entities = [entity],
   canEditShotTrim = () => true,
   organisation = {},
+  props = {},
   previewFileStatusMap,
   shotMap = new Map(),
   taskMap = new Map(),
@@ -110,7 +111,7 @@ const mountPlayer = ({
   store.$socket = { on: vi.fn(), off: vi.fn(), emit: vi.fn() }
 
   return shallowMount(PlaylistPlayer, {
-    props: { playlist: playlistProp, entities },
+    props: { playlist: playlistProp, entities, ...props },
     global: {
       plugins: [store],
       // The mount hooks drive the viewers through their template refs; the
@@ -1254,6 +1255,335 @@ describe('PlaylistPlayer.vue', () => {
       await resize()
 
       expect([before, anchor.style.width]).toEqual(['800px', '400px'])
+    })
+  })
+
+  describe('on a phone', () => {
+    const PORTRAIT = '(max-width: 768px)'
+    const LANDSCAPE = '(max-height: 500px) and (orientation: landscape)'
+    let mediaLists = {}
+
+    const stubPhone = ({ portrait = false, landscape = false } = {}) => {
+      const matches = { [PORTRAIT]: portrait, [LANDSCAPE]: landscape }
+      mediaLists = {}
+      window.matchMedia = query => {
+        const listeners = []
+        mediaLists[query] = {
+          matches: Boolean(matches[query]),
+          listeners,
+          addEventListener: (name, listener) => listeners.push(listener),
+          removeEventListener: () => {}
+        }
+        return mediaLists[query]
+      }
+    }
+
+    const movie = { ...entity, preview_file_extension: 'mp4' }
+    const mountTemp = (options = {}) =>
+      mountPlayer({
+        entities: [movie],
+        ...options,
+        props: { tempMode: true, ...options.props }
+      })
+
+    // The file controls live in the extra-controls slot of the bar.
+    const PlaybackBarWithSlot = {
+      name: 'PlayerPlaybackBar',
+      template: '<div><slot name="extra-controls" /></div>',
+      props: { isHd: Boolean, phone: Boolean }
+    }
+
+    afterEach(() => {
+      delete window.matchMedia
+    })
+
+    it('shows the comments and plays the low definition', async () => {
+      stubPhone({ portrait: true })
+      wrapper = mountTemp({ organisation: { hd_by_default: true } })
+      await flushPromises()
+      expect(wrapper.find('.task-info-column').isVisible()).toBe(true)
+      expect(
+        wrapper.findComponent({ name: 'PlayerPlaybackBar' }).props('isHd')
+      ).toBe(false)
+    })
+
+    it('passes the phone mode to the bars', async () => {
+      stubPhone({ portrait: true })
+      wrapper = mountTemp()
+      await flushPromises()
+      expect(
+        wrapper.findComponent({ name: 'PlayerPlaybackBar' }).props('phone')
+      ).toBe(true)
+      expect(
+        wrapper.findComponent({ name: 'PlayerAnnotationBar' }).props('phone')
+      ).toBe(true)
+      expect(wrapper.classes()).toContain('phone')
+    })
+
+    it('drops the comparison and the save', async () => {
+      stubPhone({ portrait: true })
+      wrapper = mountTemp({ props: { canSave: true } })
+      await flushPromises()
+      expect(wrapper.findComponent({ name: 'PlayerComparisonBar' }).exists()).toBe(
+        false
+      )
+      expect(wrapper.find('[icon="save"]').exists()).toBe(false)
+    })
+
+    it('keeps the file controls of a multi-file version', async () => {
+      stubPhone({ portrait: true })
+      wrapper = mountTemp({
+        entities: [{ ...movie, preview_file_previews: [{ id: 'preview-2' }] }],
+        stubs: { PlayerPlaybackBar: PlaybackBarWithSlot }
+      })
+      await flushPromises()
+      expect(wrapper.find('[icon="left"]').exists()).toBe(true)
+      expect(wrapper.find('[icon="right"]').exists()).toBe(true)
+    })
+
+    it('drops the separators of the bar on a phone', async () => {
+      stubPhone({ portrait: true })
+      wrapper = mountTemp({
+        stubs: { PlayerPlaybackBar: PlaybackBarWithSlot }
+      })
+      await flushPromises()
+      expect(wrapper.find('.playlist-footer .separator').exists()).toBe(false)
+    })
+
+    it('hides the entity strip in landscape', async () => {
+      stubPhone({ landscape: true })
+      wrapper = mountTemp()
+      await flushPromises()
+      expect(wrapper.find('.playlisted-entities').classes()).toContain('hidden')
+      expect(wrapper.classes()).toEqual(
+        expect.arrayContaining(['phone', 'phone-landscape'])
+      )
+    })
+
+    describe('media height', () => {
+      const mediaHeight = () =>
+        wrapper.find('.video-container').element.style.height
+      const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
+      const RESIZE_WAIT = 350
+
+      beforeEach(() => {
+        vi.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockReturnValue(
+          360
+        )
+      })
+
+      it('sizes the media from the width in portrait', async () => {
+        stubPhone({ portrait: true })
+        wrapper = mountTemp()
+        await flushPromises()
+        expect(mediaHeight()).toBe('203px')
+      })
+
+      it('keeps the media height when the keyboard opens', async () => {
+        stubPhone({ portrait: true })
+        wrapper = mountTemp()
+        await flushPromises()
+        vi.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockReturnValue(
+          720
+        )
+        window.dispatchEvent(new Event('resize'))
+        await wait(350)
+        await flushPromises()
+        expect(mediaHeight()).toBe('203px')
+      })
+
+      it('resizes the media when the strip opens in landscape', async () => {
+        stubPhone({ landscape: true })
+        wrapper = mountTemp()
+        await flushPromises()
+        const innerHeight = window.innerHeight
+        window.innerHeight = 500
+        await wrapper.find('[icon="film"]').trigger('click')
+        await wait(RESIZE_WAIT)
+        await flushPromises()
+        expect(mediaHeight()).toBe('500px')
+        window.innerHeight = innerHeight
+      })
+
+      it('resizes the media and folds the strip on a rotation', async () => {
+        stubPhone({ portrait: true })
+        wrapper = mountTemp()
+        await flushPromises()
+        mediaLists[LANDSCAPE].matches = true
+        mediaLists[LANDSCAPE].listeners.forEach(listener =>
+          listener({ matches: true })
+        )
+        await flushPromises()
+        expect(mediaHeight()).toBe(`${window.innerHeight}px`)
+        expect(wrapper.find('.playlisted-entities').classes()).toContain(
+          'hidden'
+        )
+      })
+    })
+
+    describe('full screen', () => {
+      const fullScreenButton = () =>
+        wrapper.find('[title="playlists.actions.fullscreen"]')
+      // v-show writes the inline display: jsdom computes a detached
+      // element as hidden after a toggle
+      const isPanelShown = () =>
+        wrapper.find('.task-info-column').element.style.display !== 'none'
+
+      it('offers the full screen in both orientations', async () => {
+        stubPhone({ portrait: true })
+        wrapper = mountTemp()
+        await flushPromises()
+        expect(fullScreenButton().exists()).toBe(true)
+        wrapper.unmount()
+
+        stubPhone({ landscape: true })
+        wrapper = mountTemp()
+        await flushPromises()
+        expect(fullScreenButton().exists()).toBe(true)
+      })
+
+      it('gives the media the whole height in portrait', async () => {
+        stubPhone({ portrait: true })
+        vi.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockReturnValue(
+          360
+        )
+        wrapper = mountTemp()
+        await flushPromises()
+        await fullScreenButton().trigger('click')
+        await flushPromises()
+        expect(wrapper.classes()).toContain('phone-full-screen')
+        expect(isPanelShown()).toBe(false)
+        expect(wrapper.find('.video-container').element.style.height).toBe(
+          `${window.innerHeight}px`
+        )
+      })
+
+      it('goes full screen in the page', async () => {
+        stubPhone({ landscape: true })
+        wrapper = mountTemp()
+        await flushPromises()
+
+        await fullScreenButton().trigger('click')
+        expect(wrapper.classes()).toContain('phone-full-screen')
+        expect(isPanelShown()).toBe(false)
+
+        await fullScreenButton().trigger('click')
+        expect(wrapper.classes()).not.toContain('phone-full-screen')
+        expect(isPanelShown()).toBe(true)
+      })
+
+      it('leaves the full screen on a rotation to portrait', async () => {
+        stubPhone({ landscape: true })
+        wrapper = mountTemp()
+        await flushPromises()
+        await fullScreenButton().trigger('click')
+
+        mediaLists[LANDSCAPE].matches = false
+        mediaLists[LANDSCAPE].listeners.forEach(listener =>
+          listener({ matches: false })
+        )
+        mediaLists[PORTRAIT].matches = true
+        mediaLists[PORTRAIT].listeners.forEach(listener =>
+          listener({ matches: true })
+        )
+        await flushPromises()
+        expect(wrapper.classes()).not.toContain('phone-full-screen')
+        expect(isPanelShown()).toBe(true)
+      })
+    })
+
+    it('hides the entity counter on a phone', async () => {
+      stubPhone({ portrait: true })
+      wrapper = mountTemp()
+      await flushPromises()
+      expect(
+        wrapper.find('[title="playlists.actions.entity_index"]').exists()
+      ).toBe(false)
+      expect(
+        wrapper.find('[title="playlists.actions.next_shot"]').exists()
+      ).toBe(true)
+    })
+
+    it('hides the assignees of the comment panel on a phone', async () => {
+      stubPhone({ portrait: true })
+      wrapper = mountTemp()
+      await flushPromises()
+      expect(
+        wrapper.find('.task-info-column').attributes('show-assignees')
+      ).toBe('false')
+    })
+
+    it('leaves the playlist page alone on a phone', async () => {
+      stubPhone({ portrait: true })
+      wrapper = mountPlayer({ entities: [movie] })
+      await flushPromises()
+      expect(wrapper.classes()).not.toContain('phone')
+      expect(
+        wrapper.findComponent({ name: 'PlayerPlaybackBar' }).props('phone')
+      ).toBe(false)
+    })
+
+    // resetHeight clears the canvas: a resize must load the drawings again
+    it('reloads the annotations after a resize on a phone', async () => {
+      stubPhone({ portrait: true })
+      const canvas = createFakeCanvas()
+      wrapper = mountTemp({
+        stubs: { AnnotationCanvas: annotationCanvasStub(canvas) }
+      })
+      await flushPromises()
+      await new Promise(resolve => setTimeout(resolve, 350))
+      canvas.clear.mockClear()
+      window.dispatchEvent(new Event('resize'))
+      await new Promise(resolve => setTimeout(resolve, 350))
+      await flushPromises()
+      expect(canvas.clear).toHaveBeenCalled()
+    })
+
+    it('lays the player out again when the window turns into a phone', async () => {
+      stubPhone()
+      vi.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockReturnValue(360)
+      wrapper = mountTemp()
+      await flushPromises()
+      mediaLists[PORTRAIT].matches = true
+      mediaLists[PORTRAIT].listeners.forEach(listener =>
+        listener({ matches: true })
+      )
+      await flushPromises()
+      expect(wrapper.find('.video-container').element.style.height).toBe(
+        '203px'
+      )
+    })
+
+    // detached v-show toggles fool isVisible: read the bound flags instead
+    it('opens the comments when the window turns into a phone', async () => {
+      stubPhone()
+      wrapper = mountTemp()
+      await flushPromises()
+      const panel = () => wrapper.find('.task-info-column')
+      expect(panel().attributes('silent')).toBe('true')
+      mediaLists[PORTRAIT].matches = true
+      mediaLists[PORTRAIT].listeners.forEach(listener =>
+        listener({ matches: true })
+      )
+      await flushPromises()
+      expect(panel().attributes('silent')).toBe('false')
+      expect(panel().attributes('style') || '').not.toContain('display: none')
+    })
+
+    it('renders as today off a phone', async () => {
+      stubPhone()
+      wrapper = mountPlayer({
+        entities: [movie],
+        props: { canSave: true, tempMode: true }
+      })
+      await flushPromises()
+      expect(wrapper.classes()).not.toContain('phone')
+      expect(wrapper.findComponent({ name: 'PlayerComparisonBar' }).exists()).toBe(
+        true
+      )
+      expect(
+        wrapper.findComponent({ name: 'PlayerPlaybackBar' }).props('phone')
+      ).toBe(false)
     })
   })
 })

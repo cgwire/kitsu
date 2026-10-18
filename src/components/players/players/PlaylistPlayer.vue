@@ -5,6 +5,9 @@
       dark: true,
       'full-height': !isAddingEntity || isLoading,
       'movie-full-screen': isMediaFullScreen,
+      phone: isPhone,
+      'phone-full-screen': isPhoneFullScreen,
+      'phone-landscape': isPhoneLandscape,
       'playlist-player': true
     }"
     tabindex="-1"
@@ -431,7 +434,9 @@
         :silent="isCommentsHidden"
         :task="task"
         :player="playerProxy"
-        :show-assignees="isCurrentTaskManager || isCurrentTaskSupervisor"
+        :show-assignees="
+          !isPhone && (isCurrentTaskManager || isCurrentTaskSupervisor)
+        "
         @comment-added="onCommentAdded"
         @time-code-clicked="onTimeCodeClicked"
         v-show="!isCommentsHidden"
@@ -493,19 +498,21 @@
       v-if="playlist.id && !isAddingEntity"
     >
       <div class="flexrow flexrow-item comparison-buttons" v-if="tempMode">
-        <span
-          class="flexrow-item time-indicator"
-          :title="$t('playlists.actions.entity_index')"
-        >
-          {{ entityList.length > 0 ? playingEntityIndex + 1 : 0 }}
-        </span>
-        <span class="flexrow-item time-indicator"> / </span>
-        <span
-          class="flexrow-item time-indicator mr1"
-          :title="$t('playlists.actions.entities_number')"
-        >
-          {{ entityList.length }}
-        </span>
+        <template v-if="!isPhone">
+          <span
+            class="flexrow-item time-indicator"
+            :title="$t('playlists.actions.entity_index')"
+          >
+            {{ entityList.length > 0 ? playingEntityIndex + 1 : 0 }}
+          </span>
+          <span class="flexrow-item time-indicator"> / </span>
+          <span
+            class="flexrow-item time-indicator mr1"
+            :title="$t('playlists.actions.entities_number')"
+          >
+            {{ entityList.length }}
+          </span>
+        </template>
 
         <button-simple
           class="button playlist-button flexrow-item"
@@ -537,6 +544,7 @@
         :is-sound="isCurrentPreviewSound"
         :max-duration="maxDuration"
         :nb-frames="nbFrames"
+        :phone="isPhone"
         v-model:current-3-d-animation="objectModel.currentAnimation"
         v-model:is-hd="isHd"
         v-model:is-muted="isMuted"
@@ -553,7 +561,10 @@
         <template #extra-controls>
           <div
             class="separator"
-            v-if="isCurrentPreviewPicture || currentEntityPreviewLength > 1"
+            v-if="
+              !isPhone &&
+              (isCurrentPreviewPicture || currentEntityPreviewLength > 1)
+            "
           ></div>
 
           <div
@@ -602,10 +613,13 @@
             >
               <arrow-up-right-icon class="icon is-small" />
             </a>
-            <div class="separator" v-if="!isCurrentPreviewPicture"></div>
+            <div
+              class="separator"
+              v-if="!isPhone && !isCurrentPreviewPicture"
+            ></div>
           </div>
 
-          <div class="separator" v-if="!isFullMode"></div>
+          <div class="separator" v-if="!isFullMode && !isPhone"></div>
           <button-simple
             class="playlist-button flexrow-item"
             :title="$t('playlists.actions.change_task_type')"
@@ -617,7 +631,11 @@
       </player-playback-bar>
       <div
         class="flexrow flexrow-item comparison-buttons"
-        v-if="(isCurrentPreviewMovie || isCurrentPreviewPicture) && !isFullMode"
+        v-if="
+          (isCurrentPreviewMovie || isCurrentPreviewPicture) &&
+          !isFullMode &&
+          !isPhone
+        "
       >
         <player-comparison-bar
           :comparison-mode-options="comparisonModeOptions"
@@ -651,7 +669,8 @@
         v-if="
           (isCurrentUserManager || isCurrentUserSupervisor) &&
           tempMode &&
-          canSave
+          canSave &&
+          !isPhone
         "
       >
         <div class="separator"></div>
@@ -680,6 +699,7 @@
         :is-zoom-pan="false"
         :object-background-url="objectBackgroundUrl"
         :pencil-color="pencilColor"
+        :phone="isPhone"
         :pencil-palette="pencilPalette"
         :pencil-width="pencilWidth"
         :production-backgrounds="productionBackgrounds"
@@ -722,11 +742,12 @@
         :active="!isEntitiesHidden"
         @click="onFilmClicked"
         icon="film"
+        v-if="!isPhone || isPhoneLandscape"
       />
       <div
         class="flexrow-item playlist-button"
         style="position: relative"
-        v-if="!tempMode"
+        v-if="!tempMode && !isPhone"
       >
         <div
           :class="{
@@ -832,7 +853,7 @@
         :title="$t('playlists.actions.fullscreen')"
         @click="onFullscreenClicked"
         icon="maximize"
-        v-if="isFullScreenEnabled"
+        v-if="isPhone || isFullScreenEnabled"
       />
     </div>
 
@@ -955,6 +976,7 @@ import { useStore } from 'vuex'
 import WaveSurfer from 'wavesurfer.js'
 
 import { useFullScreen } from '@/composables/fullScreen'
+import { usePhoneLayout } from '@/composables/phoneLayout'
 import { useAnnotation } from '@/composables/players/annotation'
 import { useAnnotationBroadcast } from '@/composables/players/annotationBroadcast'
 import { useAnnotationCursor } from '@/composables/players/annotationCursor'
@@ -1147,6 +1169,12 @@ const { currentTimeRaw, isHd, isMuted, isPlaying, isRepeating, speed, volume } =
   usePlayerTransport()
 // Set before the watchers: a quality change warms the movies again.
 isHd.value = Boolean(store.getters.organisation?.hd_by_default)
+// only the temporary playlist reviews on phones: the playlist page stays
+const phoneLayout = usePhoneLayout()
+const isPhone = computed(() => props.tempMode && phoneLayout.isPhone.value)
+const isPhoneLandscape = computed(
+  () => props.tempMode && phoneLayout.isPhoneLandscape.value
+)
 const handleIn = ref(0)
 const handleOut = ref(0)
 const hasActiveShareLinks = ref(false)
@@ -1159,6 +1187,7 @@ const isDrawing = ref(false)
 const isEntitiesHidden = ref(false)
 const isEnvironmentSkybox = ref(false)
 const isFullMode = ref(false)
+const isPhoneFullScreen = ref(false)
 const isLaserModeOn = ref(false)
 const isObjectBackground = ref(false)
 const isShowAnnotationsWhilePlaying = ref(false)
@@ -2716,7 +2745,38 @@ const onToggleSoundClicked = () => {
   isMuted.value = !isMuted.value
 }
 
+// phones review on the go: comments open, low definition whatever the
+// studio default, and no entity strip next to the media in landscape
+const applyPhoneDefaults = () => {
+  isCommentsHidden.value = false
+  isHd.value = false
+  if (isPhoneLandscape.value) isEntitiesHidden.value = true
+}
+
+// iPhones cannot put an element full screen: phones fill the modal with
+// the media instead, and get their panels back on the way out.
+let panelsBeforePhoneFullScreen = null
+const togglePhoneFullScreen = () => {
+  if (isPhoneFullScreen.value) {
+    isCommentsHidden.value = panelsBeforePhoneFullScreen.isCommentsHidden
+    isEntitiesHidden.value = panelsBeforePhoneFullScreen.isEntitiesHidden
+    isPhoneFullScreen.value = false
+  } else {
+    panelsBeforePhoneFullScreen = {
+      isCommentsHidden: isCommentsHidden.value,
+      isEntitiesHidden: isEntitiesHidden.value
+    }
+    isCommentsHidden.value = true
+    isEntitiesHidden.value = true
+    isPhoneFullScreen.value = true
+  }
+}
+
 const onFullscreenClicked = () => {
+  if (isPhone.value) {
+    togglePhoneFullScreen()
+    return
+  }
   if (fullScreen.value) {
     removeTypeArea()
   } else {
@@ -3890,25 +3950,47 @@ const moveSelectedEntity = (entityToMove, toMoveIndex, targetIndex) => {
 const isTypingNote = () =>
   Boolean(fabricCanvas.value?.getActiveObject()?.isEditing)
 
+// The media takes what the header, the entity strip and the bars leave of
+// the available height.
+const getMediaHeight = availableHeight => {
+  let height = availableHeight
+  if (playlistedEntities.value) height -= playlistedEntities.value.offsetHeight
+  // Hidden bars leave the flow (see the .movie-full-screen styles), so
+  // they take no height from the media.
+  if (!isMediaFullScreen.value) {
+    height -= header.value ? header.value.offsetHeight : 0
+    if (buttonBar.value) height -= buttonBar.value.offsetHeight
+    if (progress.value?.$el) height -= progress.value.$el.offsetHeight
+    if (playlistProgressRef.value?.$el) {
+      height -= playlistProgressRef.value.$el.offsetHeight
+    }
+  }
+  if (isWaveformDisplayed.value && isCurrentPreviewMovie.value) height -= 60
+  return height
+}
+
+// The modal takes the whole screen on phones. In portrait the page scrolls
+// and the media takes a 16/9 box; in landscape or full screen it takes what
+// the bars leave.
+const getPhoneMediaHeight = () => {
+  if (isPhoneLandscape.value || isPhoneFullScreen.value) {
+    return getMediaHeight(window.innerHeight)
+  }
+  return Math.round(((videoContainer.value?.offsetWidth || 0) * 9) / 16)
+}
+
 const resetHeight = () => {
   nextTick(() => {
-    let height = window.innerHeight - 90
-    if (!props.tempMode) {
-      height = container.value ? container.value.offsetHeight : 0
+    let height
+    if (isPhone.value) {
+      height = getPhoneMediaHeight()
+    } else if (props.tempMode) {
+      height = getMediaHeight(window.innerHeight - 90)
+    } else {
+      height = getMediaHeight(
+        container.value ? container.value.offsetHeight : 0
+      )
     }
-    if (playlistedEntities.value)
-      height -= playlistedEntities.value.offsetHeight
-    // Hidden bars leave the flow (see the .movie-full-screen styles), so
-    // they take no height from the media.
-    if (!isMediaFullScreen.value) {
-      height -= header.value ? header.value.offsetHeight : 0
-      if (buttonBar.value) height -= buttonBar.value.offsetHeight
-      if (progress.value?.$el) height -= progress.value.$el.offsetHeight
-      if (playlistProgressRef.value?.$el) {
-        height -= playlistProgressRef.value.$el.offsetHeight
-      }
-    }
-    if (isWaveformDisplayed.value && isCurrentPreviewMovie.value) height -= 60
 
     if (videoContainer.value) videoContainer.value.style.height = `${height}px`
     if (taskInfoRef.value?.$el && !isCommentsHidden.value) {
@@ -4537,7 +4619,17 @@ const onKeyDown = event => {
   }
 }
 
+let lastWindowWidth = window.innerWidth
+
 const onWindowResize = () => {
+  // The keyboard of a phone shrinks the height only, as the reviewer
+  // types: the media keeps its size, only the drawings come back, which
+  // resetHeight cleared before its own resize event.
+  if (isPhone.value && window.innerWidth === lastWindowWidth) {
+    setPlayerTimeout(() => resizeAnnotations(), 200)
+    return
+  }
+  lastWindowWidth = window.innerWidth
   const now = new Date().getTime()
   if (now - lastResizeCall > 100) {
     lastResizeCall = now
@@ -4950,6 +5042,20 @@ watch(isCommentsHidden, () => {
 
 watch(isMediaFullScreen, () => resetHeight())
 
+// a rotation lays the phone out again: the strip folds in landscape
+watch(isPhoneLandscape, isLandscape => {
+  if (isPhoneFullScreen.value) togglePhoneFullScreen()
+  isEntitiesHidden.value = isLandscape
+  resetHeight()
+})
+
+watch(isPhoneFullScreen, () => resetHeight())
+
+watch(isPhone, phone => {
+  if (phone) applyPhoneDefaults()
+  resetHeight()
+})
+
 watch(speed, () => {
   const rates = [0.25, 0.5, 1, 1.5, 2]
   const rate = rates[speed.value - 1]
@@ -4979,6 +5085,7 @@ onMounted(() => {
   if (isMounted) return
   isScrubbing.value = false
   if (isCurrentUserClient.value) isCommentsHidden.value = false
+  if (isPhone.value) applyPhoneDefaults()
   entityList.value = props.entities ? props.entities : []
   warmMovies()
   startProgressiveRender()
@@ -5343,6 +5450,116 @@ const playerProxy = {
     position: relative;
     z-index: 1;
   }
+}
+
+// Phones (see usePhoneLayout). Portrait: one scrolling column, the compact
+// entity strip on top and the comments under the bars. Landscape: the
+// comments beside the media. The in-page full screen hides both panels.
+.playlist-player.phone {
+  // one line of controls: the kept ones fit a 375px screen
+  // three groups, the same gap between them: shots, playback, drawing
+  .playlist-footer {
+    height: auto;
+    padding: 0 4px;
+
+    > .comparison-buttons {
+      margin-right: 12px;
+    }
+
+    :deep(.time-indicator) {
+      margin: 0 0 0 4px;
+    }
+  }
+
+  // the review happens here: export and revision publishing wait for the
+  // desktop, the status tab of the comment form stays alone
+  .task-info-column :deep(.export-combo),
+  .task-info-column :deep(.add-comment .tab-row) {
+    display: none;
+  }
+
+  // the global .dark .box .title paints the modal titles
+  .task-info-column :deep(.title) {
+    background: transparent;
+  }
+
+  .playlist-footer :deep(.button),
+  .playlist-footer .playlist-button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .task-info-column {
+    max-width: none;
+    min-width: 0;
+  }
+}
+
+.playlist-player.phone:not(.phone-landscape) {
+  overflow-y: auto;
+
+  // the row of the media and the comments hands its children to the column
+  > .filler {
+    display: contents;
+  }
+
+  .video-container {
+    flex: none;
+  }
+
+  // the column scrolls: the panels keep their size instead of shrinking
+  .task-info-column {
+    flex: none;
+    order: 1;
+    width: 100%;
+  }
+
+  .playlisted-entities {
+    flex: none;
+    height: auto;
+    min-height: 0;
+    order: -1;
+    padding-bottom: 0.4em;
+
+    // one size for every card, whatever the title or the picture ratio
+    // the hidden drop areas used to space the cards
+    .playlisted-wrapper {
+      flex: none;
+      margin-right: 0.5em;
+    }
+
+    :deep(.playlisted-entity) {
+      min-width: 0;
+      width: 100px;
+    }
+
+    // the thumbnail sizes itself inline
+    :deep(.thumbnail-picture) {
+      height: 50px !important;
+      max-width: none !important;
+      object-fit: cover;
+      width: 100% !important;
+    }
+
+    :deep(.entity-title) {
+      max-width: none;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    :deep(.preview-choice),
+    :deep(.preview-meta),
+    :deep(.remove-button),
+    :deep(.drop-area) {
+      display: none;
+    }
+  }
+}
+
+.playlist-player.phone-landscape .task-info-column {
+  flex: none;
+  width: 40%;
 }
 
 .comparison-missing {
