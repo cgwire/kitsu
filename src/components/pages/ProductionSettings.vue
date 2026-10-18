@@ -438,6 +438,7 @@ onMounted(() => {
   // The look of the setting blocks of every tab lives here. Wide tables
   // scroll inside their block instead of stretching it.
   :deep(.section) {
+    border: 1px solid var(--border);
     border-radius: 12px;
     overflow-x: auto;
     margin-bottom: 1em;
@@ -632,6 +633,12 @@ onMounted(() => {
       width: 1%;
     }
   }
+}
+
+// Light theme only: the dark theme already gives boxes their own background.
+:global(.theme:not(.dark) .production-settings .tab .section) {
+  // Between --background and --background-alt, no theme token for it
+  background: #fafafa;
 }
 
 @media screen and (max-width: 1000px) {
