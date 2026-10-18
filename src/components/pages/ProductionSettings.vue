@@ -14,6 +14,17 @@
               {{ $t('productions.parameters.title') }}
             </a>
           </li>
+          <li :class="{ 'is-active': isActiveTab('clients') }">
+            <a
+              role="button"
+              tabindex="0"
+              @click="activeTab = 'clients'"
+              @keydown.enter.prevent="activeTab = 'clients'"
+              @keydown.space.prevent="activeTab = 'clients'"
+            >
+              {{ $t('productions.clients.title') }}
+            </a>
+          </li>
           <li :class="{ 'is-active': isActiveTab('video') }">
             <a
               role="button"
@@ -107,6 +118,10 @@
 
       <div class="tab" v-show="isActiveTab('parameters')">
         <production-parameters />
+      </div>
+
+      <div class="tab" v-show="isActiveTab('clients')">
+        <production-clients />
       </div>
 
       <div class="tab" v-show="isActiveTab('video')">
@@ -239,6 +254,7 @@ import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ProductionBackgrounds from '@/components/pages/production/ProductionBackgrounds.vue'
 import ProductionBoard from '@/components/pages/production/ProductionBoard.vue'
 import ProductionBrief from '@/components/pages/production/ProductionBrief.vue'
+import ProductionClients from '@/components/pages/production/ProductionClients.vue'
 import ProductionParameters from '@/components/pages/production/ProductionParameters.vue'
 import ProductionStatusAutomations from '@/components/pages/production/ProductionStatusAutomations.vue'
 import ProductionTaskTypes from '@/components/pages/production/ProductionTaskTypes.vue'

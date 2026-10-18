@@ -1052,6 +1052,23 @@
       "view_created": "查看播放列表"
     },
     "productions": {
+      "clients": {
+        "description": "See Kitsu exactly as a client, read-only, not counted as a seat. Open it in a private window.",
+        "open_for_hour": "Open for 1 hour",
+        "block": "Block now",
+        "open_until": "Open until {time}",
+        "blocked": "Blocked",
+        "regenerate": "Regenerate password",
+        "create": "Create preview account",
+        "delete": "Delete",
+        "delete_confirm": "Delete the preview account of this production?",
+        "password": "Password (shown once)",
+        "password_hint": "Copy it now. Log in with this email in a private window.",
+        "copy": "Copy",
+        "unavailable": "Preview accounts need local authentication. With LDAP, create a regular client account.",
+        "title": "Clients",
+        "error": "An error occurred while updating the preview account."
+      },
       "current": "所选制作",
       "delete_text": "您确定要从数据库中删除{name}吗？请在文本字段中输入要删除的项目的名称，以进行确认。",
       "delete_error": "删除此制作时出现错误。可能存在与之关联的数据。您确定此制作没有关联的任务、镜头或资产吗？Kitsu 不允许删除制作。如果您不想再看到该制作，可以将其关闭。",

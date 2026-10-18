@@ -1052,6 +1052,23 @@
       "view_created": "查看播放清單"
     },
     "productions": {
+      "clients": {
+        "description": "See Kitsu exactly as a client, read-only, not counted as a seat. Open it in a private window.",
+        "open_for_hour": "Open for 1 hour",
+        "block": "Block now",
+        "open_until": "Open until {time}",
+        "blocked": "Blocked",
+        "regenerate": "Regenerate password",
+        "create": "Create preview account",
+        "delete": "Delete",
+        "delete_confirm": "Delete the preview account of this production?",
+        "password": "Password (shown once)",
+        "password_hint": "Copy it now. Log in with this email in a private window.",
+        "copy": "Copy",
+        "unavailable": "Preview accounts need local authentication. With LDAP, create a regular client account.",
+        "title": "Clients",
+        "error": "An error occurred while updating the preview account."
+      },
       "current": "所選製作項目",
       "delete_text": "您確定要從資料庫中刪除{name}嗎？請在文本字段中輸入要刪除的項目的名稱，以進行確認。",
       "delete_error": "刪除此製作項目時發生錯誤。目前可能有資料連結至此。您確定沒有任務、鏡頭或資產連結至此製作項目嗎？Kitsu 不允許刪除製作項目。如果您不想再看到此製作項目，可以改為將它關閉。",

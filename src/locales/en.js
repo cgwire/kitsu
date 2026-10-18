@@ -1480,6 +1480,27 @@ export default {
     show_stats: 'Show stats',
     title: 'Productions',
 
+    clients: {
+      block: 'Block now',
+      blocked: 'Blocked',
+      copy: 'Copy',
+      create: 'Create preview account',
+      delete: 'Delete',
+      delete_confirm: 'Delete the preview account of this production?',
+      description:
+        'See Kitsu exactly as a client, read-only, not counted as a seat. Open it in a private window.',
+      error: 'An error occurred while updating the preview account.',
+      open_for_hour: 'Open for 1 hour',
+      open_until: 'Open until {time}',
+      password: 'Password (shown once)',
+      password_hint:
+        'Copy it now. Log in with this email in a private window.',
+      regenerate: 'Regenerate password',
+      title: 'Clients',
+      unavailable:
+        'Preview accounts need local authentication. With LDAP, create a regular client account.'
+    },
+
     creation: {
       add_assets: 'Add assets (optional)',
       add_asset_types: 'Add asset types',

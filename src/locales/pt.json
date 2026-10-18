@@ -1052,6 +1052,23 @@
       "view_created": "Ver playlist"
     },
     "productions": {
+      "clients": {
+        "description": "See Kitsu exactly as a client, read-only, not counted as a seat. Open it in a private window.",
+        "open_for_hour": "Open for 1 hour",
+        "block": "Block now",
+        "open_until": "Open until {time}",
+        "blocked": "Blocked",
+        "regenerate": "Regenerate password",
+        "create": "Create preview account",
+        "delete": "Delete",
+        "delete_confirm": "Delete the preview account of this production?",
+        "password": "Password (shown once)",
+        "password_hint": "Copy it now. Log in with this email in a private window.",
+        "copy": "Copy",
+        "unavailable": "Preview accounts need local authentication. With LDAP, create a regular client account.",
+        "title": "Clients",
+        "error": "An error occurred while updating the preview account."
+      },
       "current": "Produção selecionada",
       "delete_text": "Você tem certeza que deseja remover {name} do seu banco de dados? Por favor, confirme digitando o nome do projeto que você quer deletar no campo de texto.",
       "delete_error": "Ocorreu um erro ao excluir esta produção. Provavelmente há dados vinculados a ela. Tem certeza de que esta produção não tem nenhuma tarefa, shot ou asset vinculado a ela? Kitsu não permite a exclusão de produções. Se você não quiser mais ver a produção, pode fechá-la.",

@@ -1052,6 +1052,23 @@
       "view_created": "نمایش لیست پخش"
     },
     "productions": {
+      "clients": {
+        "description": "See Kitsu exactly as a client, read-only, not counted as a seat. Open it in a private window.",
+        "open_for_hour": "Open for 1 hour",
+        "block": "Block now",
+        "open_until": "Open until {time}",
+        "blocked": "Blocked",
+        "regenerate": "Regenerate password",
+        "create": "Create preview account",
+        "delete": "Delete",
+        "delete_confirm": "Delete the preview account of this production?",
+        "password": "Password (shown once)",
+        "password_hint": "Copy it now. Log in with this email in a private window.",
+        "copy": "Copy",
+        "unavailable": "Preview accounts need local authentication. With LDAP, create a regular client account.",
+        "title": "Clients",
+        "error": "An error occurred while updating the preview account."
+      },
       "current": "محصول انتخاب شده",
       "delete_text": "آیا مطمئنید که می خواهید {name} را حذف کنید؟ لطفا برای تایید این عمل در فیلد بعدی اسم پروژه را تایپ کنید.",
       "delete_error": "هنگام حذف این محصول خطایی رخ داده. آیا مطمئن هستید که وظیفه،شات ویا منبعی به این پروژه متصل نیست؟ Kitsu اجازه حذف محصول را ندارد. اگر نمیخواهید این محصول را ببینید میتوانید آن را ببندید.",

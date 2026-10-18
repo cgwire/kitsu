@@ -999,6 +999,22 @@ const actions = {
     return productionsApi.getProductionStats()
   },
 
+  getPreviewAccount(_, productionId) {
+    return productionsApi.getPreviewAccount(productionId)
+  },
+
+  createPreviewAccount(_, productionId) {
+    return productionsApi.createPreviewAccount(productionId)
+  },
+
+  setPreviewAccountOpen(_, { productionId, isOpen }) {
+    return productionsApi.setPreviewAccountOpen(productionId, isOpen)
+  },
+
+  deletePreviewAccount(_, productionId) {
+    return productionsApi.deletePreviewAccount(productionId)
+  },
+
   saveLastProductionRoute({ commit }, route) {
     this.commit(SAVE_LAST_PRODUCTION_ROUTE, route)
   }

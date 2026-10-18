@@ -1052,6 +1052,23 @@
       "view_created": "Afspeellijst bekijken"
     },
     "productions": {
+      "clients": {
+        "description": "See Kitsu exactly as a client, read-only, not counted as a seat. Open it in a private window.",
+        "open_for_hour": "Open for 1 hour",
+        "block": "Block now",
+        "open_until": "Open until {time}",
+        "blocked": "Blocked",
+        "regenerate": "Regenerate password",
+        "create": "Create preview account",
+        "delete": "Delete",
+        "delete_confirm": "Delete the preview account of this production?",
+        "password": "Password (shown once)",
+        "password_hint": "Copy it now. Log in with this email in a private window.",
+        "copy": "Copy",
+        "unavailable": "Preview accounts need local authentication. With LDAP, create a regular client account.",
+        "title": "Clients",
+        "error": "An error occurred while updating the preview account."
+      },
       "current": "Geselecteerde productie",
       "delete_text": "Weet je zeker dat je {name} wilt verwijderen uit de database? Bevestig in het tekstveld met de naam van het project dat je wilt verwijderen.",
       "delete_error": "Er is een probleem opgetreden tijdens het verwijderen van deze productie. Er is waarschijnlijk data aan gekoppeld. Weet je zeker dat de productie geen taken, shots of assets gekoppeld heeft? Kitsu staat het verwijderen van producties niet toe. Indien je de productie niet meer wilt zien kan je deze afsluiten.",

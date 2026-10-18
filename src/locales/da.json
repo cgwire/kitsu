@@ -1052,6 +1052,23 @@
       "view_created": "Vis playlist"
     },
     "productions": {
+      "clients": {
+        "description": "See Kitsu exactly as a client, read-only, not counted as a seat. Open it in a private window.",
+        "open_for_hour": "Open for 1 hour",
+        "block": "Block now",
+        "open_until": "Open until {time}",
+        "blocked": "Blocked",
+        "regenerate": "Regenerate password",
+        "create": "Create preview account",
+        "delete": "Delete",
+        "delete_confirm": "Delete the preview account of this production?",
+        "password": "Password (shown once)",
+        "password_hint": "Copy it now. Log in with this email in a private window.",
+        "copy": "Copy",
+        "unavailable": "Preview accounts need local authentication. With LDAP, create a regular client account.",
+        "title": "Clients",
+        "error": "An error occurred while updating the preview account."
+      },
       "current": "Valgt produktion",
       "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database? Bekræft venligst ved at skrive navnet på den produktion, du ønsker at slette, i tekstfeltet.",
       "delete_error": "Der opstod en fejl under sletning af denne produktion. Der kan være eksisterende data, der er knyttet til den. Er du sikker på, at denne produktion ikke har nogen opgave, shot eller asset knyttet til sig? Kitsu tillader ikke sletning af produktioner. Hvis du ikke længere ønsker at se produktionen, kan du i stedet lukke den.",

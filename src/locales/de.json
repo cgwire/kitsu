@@ -1052,6 +1052,23 @@
       "view_created": "Wiedergabeliste anzeigen"
     },
     "productions": {
+      "clients": {
+        "description": "See Kitsu exactly as a client, read-only, not counted as a seat. Open it in a private window.",
+        "open_for_hour": "Open for 1 hour",
+        "block": "Block now",
+        "open_until": "Open until {time}",
+        "blocked": "Blocked",
+        "regenerate": "Regenerate password",
+        "create": "Create preview account",
+        "delete": "Delete",
+        "delete_confirm": "Delete the preview account of this production?",
+        "password": "Password (shown once)",
+        "password_hint": "Copy it now. Log in with this email in a private window.",
+        "copy": "Copy",
+        "unavailable": "Preview accounts need local authentication. With LDAP, create a regular client account.",
+        "title": "Clients",
+        "error": "An error occurred while updating the preview account."
+      },
       "current": "Ausgewählte Produktion",
       "delete_text": "Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten? Bitte bestätigen Sie, indem Sie den Namen der zu löschenden Produktion in das Textfeld eingeben.",
       "delete_error": "Beim Löschen dieser Produktion ist ein Fehler aufgetreten. Möglicherweise sind noch Daten damit verknüpft. Sind Sie sicher, dass diese Produktion keine Aufgabe, keinen Shot und kein Asset enthält? Kitsu erlaubt das Löschen von Produktionen nicht. Wenn Sie die Produktion nicht mehr sehen möchten, können Sie sie stattdessen schließen.",

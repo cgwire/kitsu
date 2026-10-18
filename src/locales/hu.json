@@ -1052,6 +1052,23 @@
       "view_created": "Lejátszási lista megtekintése"
     },
     "productions": {
+      "clients": {
+        "description": "See Kitsu exactly as a client, read-only, not counted as a seat. Open it in a private window.",
+        "open_for_hour": "Open for 1 hour",
+        "block": "Block now",
+        "open_until": "Open until {time}",
+        "blocked": "Blocked",
+        "regenerate": "Regenerate password",
+        "create": "Create preview account",
+        "delete": "Delete",
+        "delete_confirm": "Delete the preview account of this production?",
+        "password": "Password (shown once)",
+        "password_hint": "Copy it now. Log in with this email in a private window.",
+        "copy": "Copy",
+        "unavailable": "Preview accounts need local authentication. With LDAP, create a regular client account.",
+        "title": "Clients",
+        "error": "An error occurred while updating the preview account."
+      },
       "current": "Kiválasztott produkció",
       "delete_text": "Biztosan törölni akarod {name}-t az adatbázisból? Kérlek erősítsd meg a törölni kívánt projekt nevének begépelésével.",
       "delete_error": "Hiba történt a produkció törlésekor. Valószínűleg adat hivatkozik rá. Biztos vagy benne, hogy nem hivatkozik rá feladat, shot vagy asset? A Kitsu nem engedi a produkciók törlését. Ha nem akarod többé látni a produkciót, inkább zárd le.",
