@@ -1090,6 +1090,10 @@
       "open_productions": "我的制作",
       "picture": "更换图片",
       "remove_picture": "移除图片",
+      "settings_menu": {
+        "production": "制作",
+        "workflow": "工作流程"
+      },
       "title": "制作",
       "home": {
         "all_playlists": "所有播放列表",

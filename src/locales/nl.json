@@ -1090,6 +1090,10 @@
       "open_productions": "Mijn producties",
       "picture": "Wijzig afbeelding",
       "remove_picture": "Afbeelding verwijderen",
+      "settings_menu": {
+        "production": "Productie",
+        "workflow": "Workflow"
+      },
       "title": "Producties",
       "home": {
         "all_playlists": "Alle playlists",

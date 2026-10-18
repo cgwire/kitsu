@@ -1454,6 +1454,10 @@
       "edit_error": "Wystąpił błąd podczas edytowania produkcji. Skontaktuj się z naszym zespołem wsparcia.",
       "edit_title": "Edytuj produkcję",
       "hide_stats": "Ukryj statystyki",
+      "settings_menu": {
+        "production": "Produkcja",
+        "workflow": "Przepływ pracy"
+      },
       "show_stats": "Pokaż statystyki",
       "new_production": "Dodaj produkcję",
       "number": "produkcja | produkcji",

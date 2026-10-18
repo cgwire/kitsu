@@ -1090,6 +1090,10 @@
       "open_productions": "Produkcióim",
       "picture": "Kép cseréje",
       "remove_picture": "Kép eltávolítása",
+      "settings_menu": {
+        "production": "Produkció",
+        "workflow": "Munkafolyamat"
+      },
       "title": "Produkciók",
       "home": {
         "all_playlists": "Összes playlist",

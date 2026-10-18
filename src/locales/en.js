@@ -1674,6 +1674,10 @@ export default {
       }
     },
 
+    settings_menu: {
+      production: 'Production',
+      workflow: 'Workflow'
+    },
     status: {
       closed: 'Closed',
       open: 'Open',

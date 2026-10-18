@@ -1,235 +1,147 @@
 <template>
   <div class="production-settings fixed-page" ref="page">
     <div class="wrapper">
-      <div class="tabs">
-        <ul>
-          <li :class="{ 'is-active': isActiveTab('parameters') }">
-            <a
-              role="button"
-              tabindex="0"
-              @click="activeTab = 'parameters'"
-              @keydown.enter.prevent="activeTab = 'parameters'"
-              @keydown.space.prevent="activeTab = 'parameters'"
+      <nav class="settings-menu">
+        <div class="menu-group" v-for="group in menuGroups" :key="group.label">
+          <p class="menu-label">{{ $t(group.label) }}</p>
+          <ul>
+            <li
+              :class="{ 'is-active': isActiveTab(item.id) }"
+              :key="item.id"
+              v-for="item in group.items"
             >
-              {{ $t('productions.parameters.title') }}
-            </a>
-          </li>
-          <li :class="{ 'is-active': isActiveTab('clients') }">
-            <a
-              role="button"
-              tabindex="0"
-              @click="activeTab = 'clients'"
-              @keydown.enter.prevent="activeTab = 'clients'"
-              @keydown.space.prevent="activeTab = 'clients'"
-            >
-              {{ $t('productions.clients.title') }}
-            </a>
-          </li>
-          <li :class="{ 'is-active': isActiveTab('video') }">
-            <a
-              role="button"
-              tabindex="0"
-              @click="activeTab = 'video'"
-              @keydown.enter.prevent="activeTab = 'video'"
-              @keydown.space.prevent="activeTab = 'video'"
-            >
-              {{ $t('productions.video.title') }}
-            </a>
-          </li>
-          <li :class="{ 'is-active': isActiveTab('brief') }">
-            <a
-              role="button"
-              tabindex="0"
-              @click="activeTab = 'brief'"
-              @keydown.enter.prevent="activeTab = 'brief'"
-              @keydown.space.prevent="activeTab = 'brief'"
-            >
-              {{ $t('productions.brief.title') }}
-            </a>
-          </li>
-          <li :class="{ 'is-active': isActiveTab('assetTypes') }">
-            <a
-              role="button"
-              tabindex="0"
-              @click="activeTab = 'assetTypes'"
-              @keydown.enter.prevent="activeTab = 'assetTypes'"
-              @keydown.space.prevent="activeTab = 'assetTypes'"
-            >
-              {{ $t('asset_types.title') }}
-            </a>
-          </li>
-          <li :class="{ 'is-active': isActiveTab('taskTypes') }">
-            <a
-              role="button"
-              tabindex="0"
-              @click="activeTab = 'taskTypes'"
-              @keydown.enter.prevent="activeTab = 'taskTypes'"
-              @keydown.space.prevent="activeTab = 'taskTypes'"
-            >
-              {{ $t('task_types.title') }}
-            </a>
-          </li>
-          <li :class="{ 'is-active': isActiveTab('taskStatus') }">
-            <a
-              role="button"
-              tabindex="0"
-              @click="activeTab = 'taskStatus'"
-              @keydown.enter.prevent="activeTab = 'taskStatus'"
-              @keydown.space.prevent="activeTab = 'taskStatus'"
-            >
-              {{ $t('task_status.title') }}
-            </a>
-          </li>
-          <li :class="{ 'is-active': isActiveTab('board') }">
-            <a
-              role="button"
-              tabindex="0"
-              @click="activeTab = 'board'"
-              @keydown.enter.prevent="activeTab = 'board'"
-              @keydown.space.prevent="activeTab = 'board'"
-            >
-              {{ $t('board.settings.title') }}
-            </a>
-          </li>
-          <li :class="{ 'is-active': isActiveTab('statusAutomations') }">
-            <a
-              role="button"
-              tabindex="0"
-              @click="activeTab = 'statusAutomations'"
-              @keydown.enter.prevent="activeTab = 'statusAutomations'"
-              @keydown.space.prevent="activeTab = 'statusAutomations'"
-            >
-              {{ $t('status_automations.title') }}
-            </a>
-          </li>
-          <li :class="{ 'is-active': isActiveTab('backgrounds') }">
-            <a
-              role="button"
-              tabindex="0"
-              @click="activeTab = 'backgrounds'"
-              @keydown.enter.prevent="activeTab = 'backgrounds'"
-              @keydown.space.prevent="activeTab = 'backgrounds'"
-            >
-              {{ $t('backgrounds.title') }}
-            </a>
-          </li>
-        </ul>
-      </div>
+              <a
+                role="button"
+                tabindex="0"
+                @click="activeTab = item.id"
+                @keydown.enter.prevent="activeTab = item.id"
+                @keydown.space.prevent="activeTab = item.id"
+              >
+                {{ $t(item.label) }}
+              </a>
+            </li>
+          </ul>
+        </div>
+      </nav>
 
-      <div class="tab" v-show="isActiveTab('parameters')">
-        <production-parameters />
-      </div>
+      <div class="settings-content">
+        <div class="tab" v-show="isActiveTab('parameters')">
+          <production-parameters />
+        </div>
 
-      <div class="tab" v-show="isActiveTab('clients')">
-        <production-clients />
-      </div>
+        <div class="tab" v-show="isActiveTab('clients')">
+          <production-clients />
+        </div>
 
-      <div class="tab" v-show="isActiveTab('video')">
-        <production-video-settings />
-      </div>
+        <div class="tab" v-show="isActiveTab('video')">
+          <production-video-settings />
+        </div>
 
-      <div class="tab" v-show="isActiveTab('brief')">
-        <production-brief />
-      </div>
+        <div class="tab" v-show="isActiveTab('brief')">
+          <production-brief />
+        </div>
 
-      <div class="tab" v-show="isActiveTab('assetTypes')">
-        <asset-type-settings
-          :asset-types="restrictedAssetTypes"
-          :all-asset-types="assetTypes"
-          @add="addAssetType"
-          @import-items="importAssetTypes"
-          @remove="removeAssetType"
-        />
-      </div>
-
-      <div class="tab" v-show="isActiveTab('taskTypes')">
-        <production-task-types />
-      </div>
-
-      <div class="tab" v-show="isActiveTab('taskStatus')">
-        <div
-          class="flexrow mt1 mb1 add-task-status"
-          v-if="!isEmpty(remainingTaskStatuses)"
-        >
-          <combobox-status
-            class="flexrow-item selector"
-            :task-status-list="remainingTaskStatuses"
-            v-model="taskStatusId"
+        <div class="tab" v-show="isActiveTab('assetTypes')">
+          <asset-type-settings
+            :asset-types="restrictedAssetTypes"
+            :all-asset-types="assetTypes"
+            @add="addAssetType"
+            @import-items="importAssetTypes"
+            @remove="removeAssetType"
           />
-          <button class="button flexrow-item" @click="addTaskStatus">
-            {{ $t('main.add') }}
-          </button>
         </div>
-        <div class="box" v-if="isEmpty(currentProduction?.task_statuses)">
-          {{ $t('settings.production.empty_list') }}
+
+        <div class="tab" v-show="isActiveTab('taskTypes')">
+          <production-task-types />
         </div>
-        <table class="datatable" v-else>
-          <thead>
-            <tr>
-              <th class="th-grab"></th>
-              <th class="th-name">{{ $t('task_status.fields.name') }}</th>
-              <th class="th-short-name">
-                {{ $t('task_status.fields.short_name') }}
-              </th>
-              <th class="th-bool">{{ $t('task_status.fields.is_done') }}</th>
-              <th class="th-bool">{{ $t('task_status.fields.is_retake') }}</th>
-              <th class="th-bool">
-                {{ $t('task_status.fields.is_artist_allowed') }}
-              </th>
-              <th class="th-bool">
-                {{ $t('task_status.fields.is_client_allowed') }}
-              </th>
-            </tr>
-          </thead>
-          <draggable
-            class="datatable-body"
-            item-key="id"
-            tag="tbody"
-            v-model="taskStatusItems"
-            @end="updateTaskStatusPriority"
+
+        <div class="tab" v-show="isActiveTab('taskStatus')">
+          <div
+            class="flexrow mt1 mb1 add-task-status"
+            v-if="!isEmpty(remainingTaskStatuses)"
           >
-            <template #item="{ element: taskStatus }">
-              <tr class="datatable-row task-status">
-                <td class="grab">
-                  <grip-vertical-icon />
-                </td>
-                <td>
-                  {{ taskStatus.name }}
-                </td>
-                <td class="name">
-                  <validation-tag
-                    :is-static="true"
-                    :task="{ task_status_id: taskStatus.id }"
-                  />
-                </td>
-                <boolean-cell :value="taskStatus.is_done" />
-                <boolean-cell :value="taskStatus.is_retake" />
-                <boolean-cell :value="taskStatus.is_artist_allowed" />
-                <boolean-cell :value="taskStatus.is_client_allowed" />
-                <td>
-                  <button
-                    class="button"
-                    @click="removeTaskStatus(taskStatus.id)"
-                  >
-                    {{ $t('main.remove') }}
-                  </button>
-                </td>
+            <combobox-status
+              class="flexrow-item selector"
+              :task-status-list="remainingTaskStatuses"
+              v-model="taskStatusId"
+            />
+            <button class="button flexrow-item" @click="addTaskStatus">
+              {{ $t('main.add') }}
+            </button>
+          </div>
+          <div class="box" v-if="isEmpty(currentProduction?.task_statuses)">
+            {{ $t('settings.production.empty_list') }}
+          </div>
+          <table class="datatable" v-else>
+            <thead>
+              <tr>
+                <th class="th-grab"></th>
+                <th class="th-name">{{ $t('task_status.fields.name') }}</th>
+                <th class="th-short-name">
+                  {{ $t('task_status.fields.short_name') }}
+                </th>
+                <th class="th-bool">{{ $t('task_status.fields.is_done') }}</th>
+                <th class="th-bool">
+                  {{ $t('task_status.fields.is_retake') }}
+                </th>
+                <th class="th-bool">
+                  {{ $t('task_status.fields.is_artist_allowed') }}
+                </th>
+                <th class="th-bool">
+                  {{ $t('task_status.fields.is_client_allowed') }}
+                </th>
               </tr>
-            </template>
-          </draggable>
-        </table>
-      </div>
+            </thead>
+            <draggable
+              class="datatable-body"
+              item-key="id"
+              tag="tbody"
+              v-model="taskStatusItems"
+              @end="updateTaskStatusPriority"
+            >
+              <template #item="{ element: taskStatus }">
+                <tr class="datatable-row task-status">
+                  <td class="grab">
+                    <grip-vertical-icon />
+                  </td>
+                  <td>
+                    {{ taskStatus.name }}
+                  </td>
+                  <td class="name">
+                    <validation-tag
+                      :is-static="true"
+                      :task="{ task_status_id: taskStatus.id }"
+                    />
+                  </td>
+                  <boolean-cell :value="taskStatus.is_done" />
+                  <boolean-cell :value="taskStatus.is_retake" />
+                  <boolean-cell :value="taskStatus.is_artist_allowed" />
+                  <boolean-cell :value="taskStatus.is_client_allowed" />
+                  <td>
+                    <button
+                      class="button"
+                      @click="removeTaskStatus(taskStatus.id)"
+                    >
+                      {{ $t('main.remove') }}
+                    </button>
+                  </td>
+                </tr>
+              </template>
+            </draggable>
+          </table>
+        </div>
 
-      <div class="tab" v-show="isActiveTab('board')">
-        <production-board />
-      </div>
+        <div class="tab" v-show="isActiveTab('board')">
+          <production-board />
+        </div>
 
-      <div class="tab" v-show="isActiveTab('statusAutomations')">
-        <production-status-automations />
-      </div>
+        <div class="tab" v-show="isActiveTab('statusAutomations')">
+          <production-status-automations />
+        </div>
 
-      <div class="tab" v-show="isActiveTab('backgrounds')">
-        <production-backgrounds />
+        <div class="tab" v-show="isActiveTab('backgrounds')">
+          <production-backgrounds />
+        </div>
       </div>
     </div>
   </div>
@@ -267,6 +179,29 @@ const router = useRouter()
 const store = useStore()
 
 const activeTab = ref('parameters')
+
+const menuGroups = [
+  {
+    label: 'productions.settings_menu.production',
+    items: [
+      { id: 'parameters', label: 'productions.parameters.title' },
+      { id: 'clients', label: 'productions.clients.title' },
+      { id: 'video', label: 'productions.video.title' },
+      { id: 'brief', label: 'productions.brief.title' },
+      { id: 'backgrounds', label: 'backgrounds.title' }
+    ]
+  },
+  {
+    label: 'productions.settings_menu.workflow',
+    items: [
+      { id: 'assetTypes', label: 'asset_types.title' },
+      { id: 'taskTypes', label: 'task_types.title' },
+      { id: 'taskStatus', label: 'task_status.title' },
+      { id: 'statusAutomations', label: 'status_automations.title' },
+      { id: 'board', label: 'board.settings.title' }
+    ]
+  }
+]
 const taskStatusItems = ref([])
 const taskStatusId = ref('')
 
@@ -402,18 +337,68 @@ p {
 .wrapper {
   margin-top: 0;
   overflow-y: scroll;
-  padding: 2em;
+  padding: 1.5em 1em 1em;
   flex: 1;
   display: flex;
+  gap: 1.5em;
+}
+
+.settings-menu {
+  align-self: flex-start;
+  background: var(--background-panel);
+  border-radius: 12px;
+  flex: 0 0 220px;
+  padding: 1.5em 1em 1em;
+  position: sticky;
+  top: 0;
+
+  .menu-group + .menu-group {
+    margin-top: 1.5em;
+  }
+
+  .menu-label {
+    color: var(--text-alt);
+    font-size: 0.8em;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5em;
+    text-transform: uppercase;
+  }
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  li {
+    margin-bottom: 0.2em;
+  }
+
+  a {
+    border-radius: 8px;
+    color: var(--text-panel);
+    cursor: pointer;
+    display: block;
+    padding: 0.4em 0.8em;
+
+    &:hover {
+      background: var(--background-hover);
+    }
+  }
+
+  .is-active a,
+  .is-active a:hover {
+    background: var(--background-selected);
+    color: var(--text-strong);
+    font-weight: 600;
+  }
+}
+
+.settings-content {
+  display: flex;
+  flex: 1;
   flex-direction: column;
-}
-
-.tabs {
-  min-height: 2em;
-}
-
-.tabs ul {
-  margin-left: 0;
+  min-width: 0;
 }
 
 .tab {
@@ -422,7 +407,6 @@ p {
   flex-direction: column;
   overflow-y: auto;
   padding-left: 2px;
-  padding-top: 0.5em;
 }
 
 h2.subtitle {
@@ -483,24 +467,34 @@ th {
   color: $grey;
 }
 
-.tabs {
-  overflow-x: auto;
-}
-
-.tabs ul {
-  flex-wrap: nowrap;
-  white-space: nowrap;
-}
-
-@media screen and (max-width: 1000px) {
-  .wrapper {
-    padding: 1.5em 1em;
-  }
-}
-
 @media screen and (max-width: 768px) {
   .wrapper {
-    padding: 1em 0.75em;
+    flex-direction: column;
+    gap: 1em;
+    padding: 1em;
+  }
+
+  .settings-menu {
+    align-self: stretch;
+    flex: 0 0 auto;
+    overflow-x: auto;
+    padding: 0.5em;
+    position: static;
+
+    &,
+    ul {
+      display: flex;
+      gap: 0.5em;
+      white-space: nowrap;
+    }
+
+    .menu-group + .menu-group {
+      margin-top: 0;
+    }
+
+    .menu-label {
+      display: none;
+    }
   }
 
   .columns {

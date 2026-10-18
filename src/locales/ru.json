@@ -1090,6 +1090,10 @@
       "open_productions": "Мои проекты",
       "picture": "Изменить картинку",
       "remove_picture": "Удалить изображение",
+      "settings_menu": {
+        "production": "Производство",
+        "workflow": "Рабочий процесс"
+      },
       "title": "Проекты",
       "home": {
         "all_playlists": "Все плейлисты",

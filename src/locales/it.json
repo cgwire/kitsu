@@ -1090,6 +1090,10 @@
       "open_productions": "Le mie produzioni",
       "picture": "Cambia immagine",
       "remove_picture": "Rimuovi immagine",
+      "settings_menu": {
+        "production": "Produzione",
+        "workflow": "Flusso di lavoro"
+      },
       "title": "Produzioni",
       "home": {
         "all_playlists": "Tutte le playlist",

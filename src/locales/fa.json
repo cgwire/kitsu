@@ -1090,6 +1090,10 @@
       "open_productions": "محصولات من",
       "picture": "تغییر تصویر",
       "remove_picture": "حذف تصویر",
+      "settings_menu": {
+        "production": "تولید",
+        "workflow": "گردش کار"
+      },
       "title": "محصولات",
       "home": {
         "all_playlists": "همه پلی‌لیست‌ها",

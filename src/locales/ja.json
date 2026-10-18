@@ -1090,6 +1090,10 @@
       "open_productions": "マイプロダクション",
       "picture": "画像を変更",
       "remove_picture": "画像を削除",
+      "settings_menu": {
+        "production": "プロダクション",
+        "workflow": "ワークフロー"
+      },
       "title": "プロダクション",
       "home": {
         "all_playlists": "すべてのプレイリスト",

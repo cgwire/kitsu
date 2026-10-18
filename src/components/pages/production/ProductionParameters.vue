@@ -1,6 +1,6 @@
 <template>
   <div class="columns">
-    <div class="column is-one-third box">
+    <div class="column parameters-column box">
       <header class="picture-header" v-if="currentProduction?.id">
         <production-name
           :production="currentProduction"
@@ -373,6 +373,11 @@ watch(
 .column {
   overflow-y: initial;
   padding: initial;
+}
+
+// Same width as the Clients tab
+.parameters-column {
+  max-width: 600px;
 }
 
 .box {

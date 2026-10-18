@@ -1090,6 +1090,10 @@
       "open_productions": "내 프로덕션",
       "picture": "사진 변경",
       "remove_picture": "이미지 삭제",
+      "settings_menu": {
+        "production": "프로덕션",
+        "workflow": "워크플로"
+      },
       "title": "프로덕션",
       "home": {
         "all_playlists": "모든 플레이리스트",
