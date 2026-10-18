@@ -484,6 +484,7 @@ onMounted(load)
 }
 
 .section {
+  border-radius: 12px;
   margin-bottom: 1em;
 
   .subtitle {
