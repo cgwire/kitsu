@@ -139,13 +139,6 @@
         <checkbox
           class="mb1"
           :toggle="true"
-          :label="$t('productions.fields.is_clients_isolated')"
-          v-model="form.is_clients_isolated"
-          v-if="currentProduction && currentProduction.id"
-        />
-        <checkbox
-          class="mb1"
-          :toggle="true"
           :label="$t('productions.fields.is_preview_download_allowed')"
           v-model="form.is_preview_download_allowed"
           v-if="currentProduction && currentProduction.id"
@@ -249,7 +242,6 @@ const emptyForm = () => ({
   episode_span: 0,
   max_retakes: 0,
   revision_padding: 0,
-  is_clients_isolated: false,
   is_frame_in_numbering: false,
   is_preview_download_allowed: false,
   is_set_preview_automated: false,
@@ -322,7 +314,6 @@ const resetForm = () => {
       max_retakes: production.max_retakes,
       revision_padding: production.revision_padding,
       nb_episodes: production.nb_episodes,
-      is_clients_isolated: !!production.is_clients_isolated,
       is_frame_in_numbering: !!production.is_frame_in_numbering,
       is_preview_download_allowed: !!production.is_preview_download_allowed,
       is_set_preview_automated: !!production.is_set_preview_automated,

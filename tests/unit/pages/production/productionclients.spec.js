@@ -6,16 +6,23 @@ vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }))
 
 import ProductionClients from '@/components/pages/production/ProductionClients.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import Checkbox from '@/components/widgets/Checkbox.vue'
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 
 const iso = date => date.toISOString().slice(0, 19)
 const inOneHour = () => iso(new Date(Date.now() + 3600 * 1000))
 
-const mountClients = async ({ enabled = true, responses = {} } = {}) => {
+const mountClients = async ({
+  enabled = true,
+  responses = {},
+  production = { id: 'prod-1' },
+  getters = {}
+} = {}) => {
   const store = createStore({
     getters: {
-      currentProduction: () => ({ id: 'prod-1' }),
-      mainConfig: () => ({ preview_accounts_enabled: enabled })
+      currentProduction: () => production,
+      mainConfig: () => ({ preview_accounts_enabled: enabled }),
+      ...getters
     }
   })
   store.dispatch = vi.fn(async name => responses[name] ?? null)
@@ -111,5 +118,87 @@ describe('ProductionClients', () => {
     const { wrapper } = await mountClients({ enabled: false })
     expect(wrapper.find('.unavailable').exists()).toBe(true)
     expect(wrapper.findAllComponents(ButtonSimple)).toHaveLength(0)
+  })
+
+  it('isolation toggle dispatches editProduction with is_clients_isolated', async () => {
+    const { wrapper, store } = await mountClients()
+    wrapper.findComponent(Checkbox).vm.$emit('change', true)
+    await flushPromises()
+    expect(store.dispatch).toHaveBeenCalledWith('editProduction', {
+      id: 'prod-1',
+      is_clients_isolated: true
+    })
+  })
+
+  it('lists only statuses with is_client_allowed', async () => {
+    const { wrapper } = await mountClients({
+      getters: {
+        productionTaskStatuses: () => [
+          { id: 's1', name: 'Todo', is_client_allowed: false },
+          { id: 's2', name: 'Valid', is_client_allowed: true }
+        ]
+      }
+    })
+    const items = wrapper.findAll('.status-item')
+    expect(items).toHaveLength(1)
+    expect(items[0].text()).toBe('Valid')
+    expect(wrapper.find('.statuses input').exists()).toBe(false)
+  })
+
+  it('metadata toggle sends the full descriptor', async () => {
+    const descriptor = {
+      id: 'd1',
+      name: 'Notes',
+      entity_type: 'Asset',
+      data_type: 'list',
+      choices: ['a', 'b'],
+      departments: [],
+      for_client: false
+    }
+    const { wrapper, store } = await mountClients({
+      getters: { assetMetadataDescriptors: () => [descriptor] }
+    })
+    wrapper
+      .findAllComponents(Checkbox)
+      .find(c => c.props('label').startsWith('Notes'))
+      .vm.$emit('change', true)
+    await flushPromises()
+    expect(store.dispatch).toHaveBeenCalledWith('addMetadataDescriptor', {
+      ...descriptor,
+      values: descriptor.choices,
+      for_client: true
+    })
+  })
+
+  it('team clients skips ids missing from personMap', async () => {
+    const { wrapper } = await mountClients({
+      production: { id: 'prod-1', team: ['c1', 'preview-1', 'a1'] },
+      getters: {
+        personMap: () =>
+          new Map([
+            ['c1', { id: 'c1', full_name: 'Cli', role: 'client' }],
+            ['a1', { id: 'a1', full_name: 'Art', role: 'client' }]
+          ]),
+        productionTeamRoles: () => ({ a1: 'user' })
+      }
+    })
+    const rows = wrapper.findAll('.team-client')
+    expect(rows).toHaveLength(1)
+    expect(rows[0].text()).toBe('Cli')
+  })
+
+  it('keeps the delete modal open on failure', async () => {
+    const { wrapper, store } = await mountClients({
+      responses: { getPreviewAccount: account() }
+    })
+    wrapper.findComponent('.delete-button').vm.$emit('click')
+    store.dispatch.mockImplementation(async name => {
+      if (name === 'deletePreviewAccount') throw new Error('boom')
+      return account()
+    })
+    wrapper.findComponent(ConfirmModal).vm.$emit('confirm')
+    await flushPromises()
+    expect(wrapper.findComponent(ConfirmModal).props('active')).toBe(true)
+    expect(wrapper.findComponent(ConfirmModal).props('isError')).toBe(true)
   })
 })

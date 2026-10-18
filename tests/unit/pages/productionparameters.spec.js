@@ -50,3 +50,13 @@ describe('ProductionParameters — is_frame_in_numbering', () => {
     expect(wrapper.vm.form.is_frame_in_numbering).toBe(false)
   })
 })
+
+describe('ProductionParameters — client isolation', () => {
+  it('has no is_clients_isolated field', () => {
+    const wrapper = mountWithProduction({
+      ...baseProduction,
+      is_clients_isolated: true
+    })
+    expect(wrapper.vm.form.is_clients_isolated).toBeUndefined()
+  })
+})

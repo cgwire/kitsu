@@ -1481,6 +1481,15 @@ export default {
     title: 'Productions',
 
     clients: {
+      statuses_title: 'Statuses visible to clients',
+      statuses_description: 'Clients only see tasks with these statuses.',
+      statuses_link: 'Edit task statuses',
+      statuses_empty: 'No status is visible to clients.',
+      metadata_title: 'Metadata visible to clients',
+      metadata_empty: 'This production has no metadata.',
+      team_title: 'Clients of the team',
+      team_empty: 'No client in the team.',
+      preview_title: 'Preview account',
       block: 'Block now',
       blocked: 'Blocked',
       copy: 'Copy',
