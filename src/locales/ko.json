@@ -1063,12 +1063,21 @@
       "remove_picture": "이미지 삭제",
       "title": "프로덕션",
       "home": {
+        "all_playlists": "모든 플레이리스트",
+        "all_stats": "모든 통계",
         "create_new": "새 프로덕션 생성",
         "empty": "열려 있는 프로덕션이 없습니다. 새로 하나 만드는 것이 어떻겠습니까?",
-        "no_task": "할당된 작업이 없습니다. 귀하가 무엇을 할 수 있는지 상사에게 문의하십시오!",
+        "latest_playlists": "최신 플레이리스트",
+        "no_playlist": "아직 플레이리스트가 없습니다",
         "no_prod_for_client": "귀하는 프로덕션에 접근할 수 없습니다. 접근 권한을 얻으려면 사이트 관리자에게 문의하십시오.",
+        "no_progress": "아직 작업이 없습니다",
+        "no_task": "할당된 작업이 없습니다. 귀하가 무엇을 할 수 있는지 상사에게 문의하십시오!",
+        "progress": "진행 상황",
+        "studio_productions": "{studio} 프로덕션",
         "title": "내 프로덕션",
-        "welcome": "Kitsu에 오신 것을 환영합니다"
+        "welcome": "Kitsu에 오신 것을 환영합니다",
+        "welcome_text": "{studio}이(가) 작업을 공유하는 곳입니다. 각 프로덕션의 진행 상황을 확인하고, 최신 플레이리스트를 보고, 피드백을 남겨 주세요.",
+        "welcome_title": "{studio}에 오신 것을 환영합니다"
       },
       "fields": {
         "fps": "FPS",

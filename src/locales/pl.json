@@ -1508,12 +1508,21 @@
         "type": "Typ"
       },
       "home": {
+        "all_playlists": "Wszystkie playlisty",
+        "all_stats": "Wszystkie statystyki",
         "create_new": "Utwórz nową produkcję",
         "empty": "Nie masz żadnych otwartych produkcji. Może utworzysz nową?",
-        "no_task": "Nie masz przypisanych żadnych zadań. Skontaktuj się ze swoim supervisorem, aby dowiedzieć się, co możesz zrobić!",
+        "latest_playlists": "Najnowsze playlisty",
+        "no_playlist": "Brak playlist na razie",
         "no_prod_for_client": "Nie masz dostępu do żadnych produkcji. Skontaktuj się z administratorem, aby uzyskać dostęp.",
+        "no_progress": "Brak zadań na razie",
+        "no_task": "Nie masz przypisanych żadnych zadań. Skontaktuj się ze swoim supervisorem, aby dowiedzieć się, co możesz zrobić!",
+        "progress": "Postęp",
+        "studio_productions": "Produkcje {studio}",
         "title": "Moje produkcje",
-        "welcome": "Witaj w Kitsu"
+        "welcome": "Witaj w Kitsu",
+        "welcome_text": "Tutaj {studio} dzieli się z Tobą swoją pracą. Śledź postępy każdej produkcji, oglądaj najnowsze playlisty i zostawiaj swoje uwagi.",
+        "welcome_title": "Witamy w {studio}"
       },
       "metadata": {
         "applies_to_all_projects": "Ta kolumna zostanie dodana do każdego projektu na liście. Każdy projekt może mieć własną wartość w widoku listy.",

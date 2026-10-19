@@ -52,6 +52,19 @@
       />
 
       <div class="filler"></div>
+      <!-- The client has no download menu: the zip, its one download, is
+           offered up front. Zou builds it while it answers, so a new tab
+           shows the wait. -->
+      <a
+        class="button playlist-button topbar-button flexrow-item full-button client-download"
+        :href="zipDlPath"
+        target="_blank"
+        rel="noopener noreferrer"
+        v-if="isCurrentUserClient && !isLoading && !isFullMode"
+      >
+        <download-icon class="icon" />
+        {{ $t('playlists.download_zip') }}
+      </a>
       <button-simple
         class="playlist-button topbar-button flexrow-item"
         :text="$t('playlists.actions.exit_play_full')"
@@ -219,7 +232,7 @@
             class="picture-preview"
             :background-color="pictureBackgroundColor"
             :big="true"
-            :default-height="pictureDefaultHeight"
+            :default-height="mediaHeight"
             :full-screen="fullScreen"
             :light="false"
             :margin-bottom="0"
@@ -312,19 +325,19 @@
         <pdf-viewer
           ref="pdf-player"
           :preview="currentPreview"
-          :default-height="pictureDefaultHeight"
+          :default-height="mediaHeight"
           v-if="isCurrentPreviewPdf && !isLoading"
         />
 
         <markdown-viewer
           :preview="currentPreview"
-          :default-height="pictureDefaultHeight"
+          :default-height="mediaHeight"
           v-if="isCurrentPreviewMarkdown && !isLoading"
         />
 
         <diff-viewer
           :preview="currentPreview"
-          :default-height="pictureDefaultHeight"
+          :default-height="mediaHeight"
           v-if="isCurrentPreviewDiff && !isLoading"
         />
 
@@ -362,7 +375,7 @@
           <multi-picture-viewer
             ref="picture-player"
             :background-color="pictureBackgroundColor"
-            :default-height="pictureDefaultHeight"
+            :default-height="mediaHeight"
             :full-screen="fullScreen"
             :light="false"
             :margin-bottom="0"
@@ -437,6 +450,7 @@
         :show-assignees="
           !isPhone && (isCurrentTaskManager || isCurrentTaskSupervisor)
         "
+        :style="mediaHeight ? { height: `${mediaHeight}px` } : null"
         @comment-added="onCommentAdded"
         @time-code-clicked="onTimeCodeClicked"
         v-show="!isCommentsHidden"
@@ -551,7 +565,10 @@
         v-model:is-show-annotations-while-playing="
           isShowAnnotationsWhilePlaying
         "
-        v-model:is-waveform-displayed="isWaveformDisplayed"
+        :is-waveform-displayed="
+          isCurrentUserClient ? undefined : isWaveformDisplayed
+        "
+        @update:is-waveform-displayed="isWaveformDisplayed = $event"
         v-model:speed="speed"
         v-model:volume="volume"
         @play-pause-clicked="onPlayPauseClicked"
@@ -625,7 +642,7 @@
             :title="$t('playlists.actions.change_task_type')"
             icon="check"
             @click="showTaskTypeModal"
-            v-if="!tempMode && !isFullMode"
+            v-if="!tempMode && !isFullMode && !isCurrentUserClient"
           />
         </template>
       </player-playback-bar>
@@ -634,7 +651,8 @@
         v-if="
           (isCurrentPreviewMovie || isCurrentPreviewPicture) &&
           !isFullMode &&
-          !isPhone
+          !isPhone &&
+          !isCurrentUserClient
         "
       >
         <player-comparison-bar
@@ -687,7 +705,9 @@
         :background-options="backgroundOptions"
         :full-screen="fullScreen"
         :is-3-d-model="isCurrentPreviewModel"
-        :is-annotations-displayed="isAnnotationsDisplayed"
+        :is-annotations-displayed="
+          isCurrentUserClient ? undefined : isAnnotationsDisplayed
+        "
         :is-comments-hidden="isCommentsHidden"
         :is-concept="false"
         :is-drawing="isDrawing"
@@ -712,7 +732,8 @@
         v-model:is-environment-skybox="isEnvironmentSkybox"
         v-model:is-eraser-mode-on="isEraserModeOn"
         v-model:is-laser-mode-on="isLaserModeOn"
-        v-model:is-onion-skin-on="isOnionSkinOn"
+        :is-onion-skin-on="isCurrentUserClient ? undefined : isOnionSkinOn"
+        @update:is-onion-skin-on="isOnionSkinOn = $event"
         v-model:onion-skin-frames="onionSkinFrames"
         v-model:picture-background-color="pictureBackgroundColor"
         v-model:is-shape-mode="isShapeMode"
@@ -844,7 +865,7 @@
           :title="$t('playlists.actions.download')"
           icon="download"
           @click="toggleDlButtons"
-          v-if="!isCurrentUserArtist"
+          v-if="!isCurrentUserArtist && !isCurrentUserClient"
         />
       </div>
 
@@ -1206,7 +1227,7 @@ const objectModel = ref({
 const onNextTimeUpdateActions = ref([])
 const pencilPalette = ref(['huge', 'big', 'medium', 'small', 'tiny'])
 const pictureBackgroundColor = ref('#000000')
-const pictureDefaultHeight = ref(0)
+const mediaHeight = ref(0)
 const playingEntityIndex = ref(0)
 const playlistDuration = ref(0)
 const playlistProgress = ref(0)
@@ -2870,11 +2891,7 @@ const getPreviousAnnotationTime = time => {
 }
 
 const onCommentClicked = () => {
-  const height = videoContainer.value.offsetHeight
   isCommentsHidden.value = !isCommentsHidden.value
-  if (!isCommentsHidden.value && taskInfoRef.value?.$el) {
-    taskInfoRef.value.$el.style.height = `${height}px`
-  }
   triggerResize()
   nextTick(() => {
     taskInfoRef.value?.focusCommentTextarea()
@@ -3993,13 +4010,12 @@ const resetHeight = () => {
     }
 
     if (videoContainer.value) videoContainer.value.style.height = `${height}px`
-    if (taskInfoRef.value?.$el && !isCommentsHidden.value) {
-      taskInfoRef.value.$el.style.height = `${height}px`
-    }
     if (fullPlaylistPlayer.value) {
       fullPlaylistPlayer.value.style.height = `${height}px`
     }
-    pictureDefaultHeight.value = height
+    // The comment panel binds this height: it is an async component, so a
+    // DOM write here would miss it on the first sizing.
+    mediaHeight.value = height
     rawPlayer.value?.resetHeight(height)
     if (isComparing.value && rawPlayerComparison.value) {
       rawPlayerComparison.value.resetHeight(height)
@@ -5740,6 +5756,15 @@ const playerProxy = {
 .full-button {
   &:hover {
     border: 1px solid var(--text);
+  }
+}
+
+.playlist-player .playlist-button.client-download {
+  font-weight: 600;
+  padding: 0.5em 1.2em;
+
+  .icon {
+    margin-right: 0.5em;
   }
 }
 

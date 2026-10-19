@@ -48,4 +48,25 @@ describe('players/PlayerAnnotationBar', () => {
       expect(icons(wrapper)).not.toContain('undo')
     })
   })
+
+  // Opt-in control: a consumer that does not bind it gets no picker.
+  it('shows the onion skin picker to the consumer binding it', () => {
+    expect(
+      mountBar({ isOnionSkinOn: false }).find('onion-skin-picker-stub').exists()
+    ).toBe(true)
+  })
+
+  it('keeps the onion skin picker from a consumer not binding it', () => {
+    expect(mountBar().find('onion-skin-picker-stub').exists()).toBe(false)
+  })
+
+  it('shows the annotation toggle to the consumer binding it', () => {
+    expect(
+      mountBar({ isAnnotationsDisplayed: true }).find('[icon="pen"]').exists()
+    ).toBe(true)
+  })
+
+  it('keeps the annotation toggle from a consumer not binding it', () => {
+    expect(mountBar().find('[icon="pen"]').exists()).toBe(false)
+  })
 })

@@ -14,7 +14,7 @@
             :label="$t('playlists.filter_task_type')"
             :thin="true"
             v-model="taskTypeId"
-            v-if="!isListToggled"
+            v-if="!isListToggled && !isCurrentUserClient"
           />
           <span class="filler" v-if="!isListToggled"></span>
           <button-simple
@@ -26,7 +26,7 @@
         </div>
 
         <div class="flexrow">
-          <template v-if="!isListToggled">
+          <template v-if="!isListToggled && !isCurrentUserClient">
             <combobox
               class="flexrow-item mb2"
               :label="$t('main.sorted_by')"
@@ -645,6 +645,7 @@ const displayedShotsBySequence = computed(
 )
 const editsLoadingKey = computed(() => store.getters.editsLoadingKey)
 const isAssetsLoading = computed(() => store.getters.isAssetsLoading)
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 const isCurrentUserManager = computed(
   () => store.getters.isCurrentUserProductionManager
 )

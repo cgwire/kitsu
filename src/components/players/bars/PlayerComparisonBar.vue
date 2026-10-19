@@ -22,7 +22,12 @@
       :is-dark="true"
       :thin="true"
       v-model="previewToCompareId"
-      v-if="showPanel && isComparing && (!light || isComparisonEnabled)"
+      v-if="
+        previewToCompareId !== undefined &&
+        showPanel &&
+        isComparing &&
+        (!light || isComparisonEnabled)
+      "
     />
     <combobox
       class="comparison-combobox"
@@ -30,7 +35,12 @@
       :is-dark="true"
       :thin="true"
       v-model="comparisonMode"
-      v-if="showPanel && isComparing && (!light || isComparisonEnabled)"
+      v-if="
+        comparisonMode !== undefined &&
+        showPanel &&
+        isComparing &&
+        (!light || isComparisonEnabled)
+      "
     />
     <div
       class="flexrow flexrow-item comparison-list"
@@ -127,8 +137,11 @@ defineEmits([
   'previous-comparison-clicked'
 ])
 
-const comparisonMode = defineModel('comparisonMode')
-const previewToCompareId = defineModel('previewToCompareId')
+// Opt-in pickers: they show only to a consumer binding them.
+const comparisonMode = defineModel('comparisonMode', { default: undefined })
+const previewToCompareId = defineModel('previewToCompareId', {
+  default: undefined
+})
 const taskTypeId = defineModel('taskTypeId')
 </script>
 

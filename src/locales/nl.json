@@ -1063,12 +1063,21 @@
       "remove_picture": "Afbeelding verwijderen",
       "title": "Producties",
       "home": {
+        "all_playlists": "Alle playlists",
+        "all_stats": "Alle statistieken",
         "create_new": "Een nieuwe productie toevoegen",
         "empty": "Je hebt geen enkele productie open staan. Wat denk je van een nieuwe productie toevoegen?",
-        "no_task": "Je hebt geen taken toegewezen gekregen. Vraag je leidinggevende of je wat kunt doen!",
+        "latest_playlists": "Laatste playlists",
+        "no_playlist": "Nog geen playlist",
         "no_prod_for_client": "Je hebt geen toegang tot een productie. Neem contact op met je sitebeheerder om toegang te krijgen.",
+        "no_progress": "Nog geen taak",
+        "no_task": "Je hebt geen taken toegewezen gekregen. Vraag je leidinggevende of je wat kunt doen!",
+        "progress": "Voortgang",
+        "studio_productions": "Producties van {studio}",
         "title": "Mijn producties",
-        "welcome": "Welkom bij Kitsu"
+        "welcome": "Welkom bij Kitsu",
+        "welcome_text": "Hier deelt {studio} zijn werk met u. Volg de voortgang van elke productie, bekijk de nieuwste playlists en laat uw feedback achter.",
+        "welcome_title": "Welkom bij {studio}"
       },
       "fields": {
         "fps": "FPS",

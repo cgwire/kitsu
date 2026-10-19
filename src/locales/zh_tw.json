@@ -1063,12 +1063,21 @@
       "remove_picture": "移除圖片",
       "title": "製作項目",
       "home": {
+        "all_playlists": "所有播放清單",
+        "all_stats": "所有統計",
         "create_new": "創建新製作項目",
         "empty": "您什麼製作項目也沒開啟。要創建一個新的嗎？",
-        "no_task": "還沒有任務分配給您。您可以去向主管反應！",
+        "latest_playlists": "最新播放清單",
+        "no_playlist": "尚無播放清單",
         "no_prod_for_client": "您無權存取任何製作項目。請聯絡您的網站管理員以取得存取權限。",
+        "no_progress": "尚無任務",
+        "no_task": "還沒有任務分配給您。您可以去向主管反應！",
+        "progress": "進度",
+        "studio_productions": "{studio} 的製作項目",
         "title": "我的製作項目",
-        "welcome": "歡迎使用Kitsu"
+        "welcome": "歡迎使用Kitsu",
+        "welcome_text": "{studio} 在這裡與您分享工作成果。追蹤每個專案的進度，觀看最新的播放清單，並留下您的回饋。",
+        "welcome_title": "歡迎來到 {studio}"
       },
       "fields": {
         "fps": "FPS",

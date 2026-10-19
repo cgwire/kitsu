@@ -92,6 +92,7 @@ const mountPage = async ({
       displayedShotsBySequence: () => [],
       editsLoadingKey: fromState('editsLoadingKey'),
       isAssetsLoading: () => false,
+      isCurrentUserClient: () => false,
       isCurrentUserProductionManager: () => true,
       isCurrentUserProductionSupervisor: () => false,
       isEditsLoading: fromState('isEditsLoading'),
@@ -898,5 +899,15 @@ describe('Playlist page, side column scroll', () => {
 
     expect(errorHandler).not.toHaveBeenCalled()
     expect(actions.displayMoreShots).not.toHaveBeenCalled()
+  })
+})
+
+describe('Playlist page, client', () => {
+  it('keeps the task type filter and the sort from a client', async () => {
+    const { wrapper } = await mountPage({
+      getters: { isCurrentUserClient: () => true }
+    })
+    expect(wrapper.findComponent(ComboboxTaskType).exists()).toBe(false)
+    expect(wrapper.findComponent(Combobox).exists()).toBe(false)
   })
 })

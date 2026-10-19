@@ -6,6 +6,7 @@
         ref="episode-search-field"
         placeholder="ex: e01"
         @change="onSearchChange"
+        v-if="!isCurrentUserClient"
       />
       <combobox-visible-options
         class="flexrow-item options-filter"
@@ -143,6 +144,7 @@ const episodeStats = computed(() => store.getters.episodeStats)
 const episodeValidationColumns = computed(
   () => store.getters.episodeValidationColumns
 )
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 const isPaperProduction = computed(() => store.getters.isPaperProduction)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
@@ -249,7 +251,7 @@ const reset = async () => {
 // Watchers
 // --------------------------------------------------------------------------
 watch(currentProduction, () => {
-  searchFieldRef.value.setValue('')
+  searchFieldRef.value?.setValue('')
   reset()
 })
 

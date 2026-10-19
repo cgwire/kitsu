@@ -59,7 +59,7 @@ const options = computed(() => {
     {
       label: t('tasks.full_task_type_names'),
       value: 'fullTaskTypeNames',
-      when: !isTaskType
+      when: !isTaskType && !isCurrentUserClient.value
     },
     {
       label: t('shots.show_timecode'),
@@ -69,7 +69,7 @@ const options = computed(() => {
     {
       label: t('breakdown.show_library'),
       value: 'showSharedAssets',
-      when: props.type === 'asset'
+      when: props.type === 'asset' && !isCurrentUserClient.value
     },
     {
       label: t('assets.show_linked'),

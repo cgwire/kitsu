@@ -126,7 +126,7 @@
           class="flexrow-item mr0 global-search"
           v-if="mainConfig.indexer_configured && !isCurrentUserClient"
         />
-        <div class="nav-item">
+        <div class="nav-item" v-if="!isCurrentUserClient">
           <a
             class="changelog-button"
             target="_blank"
@@ -487,6 +487,12 @@ const isProductionContext = computed(
 
 const pageTitle = computed(() => {
   if (isProductionContext.value) return ''
+  // The home of a client is the productions of the studio.
+  if (isCurrentUserClient.value && route.name === 'open-productions') {
+    return t('productions.home.studio_productions', {
+      studio: organisation.value.name
+    })
+  }
   const titleKey = route.meta?.title
   return titleKey ? t(titleKey) : ''
 })
@@ -1302,6 +1308,14 @@ onBeforeUnmount(() => {
 
   .studio-logo-wrapper {
     margin-right: 0;
+  }
+
+  .page-title {
+    font-size: 1.1em;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .global-search {
