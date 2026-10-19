@@ -8,6 +8,7 @@ import sentry from '@/lib/sentry'
 import timezone from '@/lib/timezone'
 
 import peopleStore from '@/store/modules/people'
+import productionsStore from '@/store/modules/productions'
 import taskTypeStore from '@/store/modules/tasktypes'
 import userStore from '@/store/modules/user'
 import store from '@/store'
@@ -155,19 +156,6 @@ export const routes = [
       lang.setLocale(userStore.state.user.locale)
       sentry.setContext(peopleStore.state.organisation, userStore.state.user)
 
-      const isSupervisorOrManager =
-        userStore.getters.isCurrentUserManager(userStore.state) ||
-        userStore.getters.isCurrentUserSupervisor(userStore.state)
-      const isProhibited =
-        (!userStore.getters.isCurrentUserAdmin(userStore.state) &&
-          to?.matched.some(record => record.meta.requiresAdmin)) ||
-        (!isSupervisorOrManager &&
-          to?.matched.some(
-            record => record.meta.requiresSupervisorOrManager
-          )) ||
-        (userStore.getters.isCurrentUserClient(userStore.state) &&
-          to?.matched.some(record => record.meta.forbiddenForClient))
-
       if (taskTypeStore.state.taskTypes.length === 0) {
         try {
           const ready = await init()
@@ -182,6 +170,38 @@ export const routes = [
       } else {
         store.commit('DATA_LOADING_END')
       }
+
+      // After init: it loads the project roles and the production flags.
+      // The route state still holds the previous page, hence the target one.
+      const isClient = userStore.getters.isCurrentUserClient(
+        userStore.state,
+        {},
+        { route: to }
+      )
+      const clientAccess = productionsStore.getters.getClientAccess(
+        productionsStore.state,
+        {},
+        {},
+        { isCurrentUserClient: isClient }
+      )(to?.params?.production_id)
+      const isSupervisorOrManager =
+        userStore.getters.isCurrentUserManager(userStore.state) ||
+        userStore.getters.isCurrentUserSupervisor(userStore.state)
+      const isProhibited =
+        (!userStore.getters.isCurrentUserAdmin(userStore.state) &&
+          to?.matched.some(record => record.meta.requiresAdmin)) ||
+        (!isSupervisorOrManager &&
+          to?.matched.some(
+            record => record.meta.requiresSupervisorOrManager
+          )) ||
+        (isClient &&
+          to?.matched.some(record => record.meta.forbiddenForClient)) ||
+        to?.matched.some(
+          ({ meta }) =>
+            (meta.clientAccess === 'stats' && !clientAccess.isStatsVisible) ||
+            (meta.clientAccess === 'taskList' &&
+              !clientAccess.isTaskListVisible)
+        )
 
       if (isProhibited) return { name: 'not-found' }
     },
@@ -650,40 +670,43 @@ export const routes = [
       {
         path: 'productions/:production_id/assets',
         component: Assets,
-        name: 'assets'
+        name: 'assets',
+        meta: { clientAccess: 'taskList' }
       },
 
       {
         path: 'productions/:production_id/assets/:asset_id',
         component: Asset,
         name: 'asset',
-        meta: { forbiddenForClient: true }
+        meta: { forbiddenForClient: true, clientAccess: 'taskList' }
       },
 
       {
         path: 'productions/:production_id/shots',
         component: Shots,
-        name: 'shots'
+        name: 'shots',
+        meta: { clientAccess: 'taskList' }
       },
 
       {
         path: 'productions/:production_id/shots/:shot_id',
         component: Shot,
         name: 'shot',
-        meta: { forbiddenForClient: true }
+        meta: { forbiddenForClient: true, clientAccess: 'taskList' }
       },
 
       {
         path: 'productions/:production_id/edits',
         component: Edits,
-        name: 'edits'
+        name: 'edits',
+        meta: { clientAccess: 'taskList' }
       },
 
       {
         path: 'productions/:production_id/edits/:edit_id',
         component: Edit,
         name: 'edit',
-        meta: { forbiddenForClient: true }
+        meta: { forbiddenForClient: true, clientAccess: 'taskList' }
       },
 
       {
@@ -717,20 +740,22 @@ export const routes = [
       {
         path: 'productions/:production_id/sequence-stats',
         component: SequenceStats,
-        name: 'sequence-stats'
+        name: 'sequence-stats',
+        meta: { clientAccess: 'stats' }
       },
 
       {
         path: 'productions/:production_id/asset-types',
         component: ProductionAssetTypes,
-        name: 'production-asset-types'
+        name: 'production-asset-types',
+        meta: { clientAccess: 'stats' }
       },
 
       {
         path: 'productions/:production_id/:type/task-types/:task_type_id',
         component: TaskType,
         name: 'task-type',
-        meta: { forbiddenForClient: true },
+        meta: { forbiddenForClient: true, clientAccess: 'taskList' },
         children: [
           {
             name: 'task-type-schedule',
@@ -747,6 +772,7 @@ export const routes = [
 
       {
         name: 'episode-task',
+        meta: { clientAccess: 'taskList' },
         path: 'productions/:production_id/episodes/:episode_id/:type/tasks/:task_id',
         component: Task,
         children: [
@@ -760,6 +786,7 @@ export const routes = [
 
       {
         name: 'task',
+        meta: { clientAccess: 'taskList' },
         path: 'productions/:production_id/:type/tasks/:task_id',
         component: Task,
         children: [
@@ -775,6 +802,7 @@ export const routes = [
         path: 'productions/:production_id/episode-stats',
         component: EpisodeStats,
         name: 'episode-stats',
+        meta: { clientAccess: 'stats' },
         children: []
       },
 
@@ -813,33 +841,36 @@ export const routes = [
       {
         path: 'productions/:production_id/episodes/:episode_id/assets',
         component: Assets,
-        name: 'episode-assets'
+        name: 'episode-assets',
+        meta: { clientAccess: 'taskList' }
       },
 
       {
         path: 'productions/:production_id/episodes/:episode_id/assets/:asset_id',
         component: Asset,
         name: 'episode-asset',
-        meta: { forbiddenForClient: true }
+        meta: { forbiddenForClient: true, clientAccess: 'taskList' }
       },
 
       {
         path: 'productions/:production_id/episodes/:episode_id/shots',
         component: Shots,
-        name: 'episode-shots'
+        name: 'episode-shots',
+        meta: { clientAccess: 'taskList' }
       },
 
       {
         path: 'productions/:production_id/episodes/:episode_id/shots/:shot_id',
         component: Shot,
         name: 'episode-shot',
-        meta: { forbiddenForClient: true }
+        meta: { forbiddenForClient: true, clientAccess: 'taskList' }
       },
 
       {
         path: 'productions/:production_id/episodes/:episode_id/edits',
         component: Edits,
         name: 'episode-edits',
+        meta: { clientAccess: 'taskList' },
         children: []
       },
 
@@ -847,13 +878,14 @@ export const routes = [
         path: 'productions/:production_id/episodes/:episode_id/edits/:edit_id',
         component: Edit,
         name: 'episode-edit',
-        meta: { forbiddenForClient: true }
+        meta: { forbiddenForClient: true, clientAccess: 'taskList' }
       },
 
       {
         path: 'productions/:production_id/episodes/:episode_id/asset-types',
         component: ProductionAssetTypes,
-        name: 'episode-production-asset-types'
+        name: 'episode-production-asset-types',
+        meta: { clientAccess: 'stats' }
       },
 
       {
@@ -873,14 +905,15 @@ export const routes = [
       {
         path: 'productions/:production_id/episodes/:episode_id/sequence-stats',
         component: SequenceStats,
-        name: 'episode-sequence-stats'
+        name: 'episode-sequence-stats',
+        meta: { clientAccess: 'stats' }
       },
 
       {
         path: 'productions/:production_id/episodes/:episode_id/:type/task-types/:task_type_id',
         component: TaskType,
         name: 'episode-task-type',
-        meta: { forbiddenForClient: true },
+        meta: { forbiddenForClient: true, clientAccess: 'taskList' },
         children: [
           {
             name: 'episode-task-type-schedule',
@@ -900,6 +933,7 @@ export const routes = [
         component: TaskType,
         name: 'episodes-task-type',
         meta: {
+          clientAccess: 'taskList',
           section: 'episodes',
           forbiddenForClient: true
         },
@@ -920,6 +954,7 @@ export const routes = [
       {
         path: 'productions/:production_id/episodes/:episode_id/tasks/:task_id',
         name: 'episode-episode-task',
+        meta: { clientAccess: 'taskList' },
         component: Task,
         children: [
           {

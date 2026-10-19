@@ -3,6 +3,7 @@
 import { vi } from 'vitest'
 
 const h = vi.hoisted(() => ({
+  clientProductionIds: [],
   isAdmin: false,
   isClient: false,
   isManager: false,
@@ -39,7 +40,10 @@ vi.mock('@/store/modules/user', () => ({
     getters: {
       isCurrentUserAdmin: () => h.isAdmin,
       isCurrentUserArtist: () => false,
-      isCurrentUserClient: () => h.isClient,
+      // A project role reads the production of the route it is given.
+      isCurrentUserClient: (state, getters, rootState) =>
+        h.isClient ||
+        h.clientProductionIds.includes(rootState?.route?.params?.production_id),
       isCurrentUserManager: () => h.isAdmin || h.isManager,
       isCurrentUserSupervisor: () => h.isSupervisor
     }
@@ -52,6 +56,7 @@ import auth from '@/lib/auth'
 import { markRequestFailure } from '@/lib/errors'
 import init from '@/lib/init'
 import store from '@/store'
+import productionsStore from '@/store/modules/productions'
 import taskTypeStore from '@/store/modules/tasktypes'
 import { routes } from '@/router/routes'
 
@@ -110,8 +115,39 @@ const CLIENT_FORBIDDEN_ROUTES = [
   'task-type'
 ]
 
+// The production settings can hide these pages from the clients.
+const CLIENT_TASK_LIST_ROUTES = [
+  'asset',
+  'assets',
+  'edit',
+  'edits',
+  'episode-asset',
+  'episode-assets',
+  'episode-edit',
+  'episode-edits',
+  'episode-episode-task',
+  'episode-shot',
+  'episode-shots',
+  'episode-task',
+  'episode-task-type',
+  'episodes-task-type',
+  'shot',
+  'shots',
+  'task',
+  'task-type'
+]
+const CLIENT_STATS_ROUTES = [
+  'episode-production-asset-types',
+  'episode-sequence-stats',
+  'episode-stats',
+  'production-asset-types',
+  'sequence-stats'
+]
+
 describe('router/routes', () => {
   beforeEach(() => {
+    h.clientProductionIds = []
+    productionsStore.state.productionMap = new Map()
     h.isAdmin = false
     h.isClient = false
     h.isManager = false
@@ -145,6 +181,98 @@ describe('router/routes', () => {
       const route = mainRoute.children.find(child => child.name === name)
       expect(route).toBeDefined()
       expect(route.meta?.forbiddenForClient).toBe(true)
+    })
+  })
+
+  describe('client access route table', () => {
+    test.each(CLIENT_TASK_LIST_ROUTES)('%s follows the task list setting', name => {
+      const route = mainRoute.children.find(child => child.name === name)
+      expect(route).toBeDefined()
+      expect(route.meta?.clientAccess).toBe('taskList')
+    })
+
+    test.each(CLIENT_STATS_ROUTES)('%s follows the stats setting', name => {
+      const route = mainRoute.children.find(child => child.name === name)
+      expect(route).toBeDefined()
+      expect(route.meta?.clientAccess).toBe('stats')
+    })
+  })
+
+  describe('main guard client access', () => {
+    const setProduction = flags => {
+      productionsStore.state.productionMap = new Map([
+        ['production-1', { id: 'production-1', ...flags }]
+      ])
+    }
+    const runGuardOn = name => {
+      const route = mainRoute.children.find(child => child.name === name)
+      return mainRoute.beforeEnter(
+        {
+          name,
+          params: { production_id: 'production-1' },
+          matched: [{ meta: route.meta || {} }]
+        },
+        {}
+      )
+    }
+
+    test.each(CLIENT_TASK_LIST_ROUTES)(
+      'sends a client to not-found on %s when the task list is off',
+      async name => {
+        h.isClient = true
+        setProduction({ is_client_task_list_visible: false })
+        expect(await runGuardOn(name)).toEqual({ name: 'not-found' })
+      }
+    )
+
+    test.each(CLIENT_STATS_ROUTES)(
+      'sends a client to not-found on %s when the stats are off',
+      async name => {
+        h.isClient = true
+        setProduction({ is_client_stats_visible: false })
+        expect(await runGuardOn(name)).toEqual({ name: 'not-found' })
+      }
+    )
+
+    test('keeps the playlists reachable for a client with everything off', async () => {
+      h.isClient = true
+      setProduction({
+        is_client_stats_visible: false,
+        is_client_task_list_visible: false
+      })
+      expect(await runGuardOn('playlists')).toBeUndefined()
+    })
+
+    test('lets a client through when the flags are null', async () => {
+      h.isClient = true
+      setProduction({
+        is_client_stats_visible: null,
+        is_client_task_list_visible: null
+      })
+      expect(await runGuardOn('shots')).toBeUndefined()
+      expect(await runGuardOn('sequence-stats')).toBeUndefined()
+    })
+
+    test('never redirects a manager', async () => {
+      h.isManager = true
+      setProduction({
+        is_client_stats_visible: false,
+        is_client_task_list_visible: false
+      })
+      expect(await runGuardOn('shots')).toBeUndefined()
+      expect(await runGuardOn('sequence-stats')).toBeUndefined()
+    })
+
+    // A deep link on a fresh page load: the production and the project
+    // roles arrive with the initial load, after the guard starts.
+    test('decides with the data of the initial load', async () => {
+      taskTypeStore.state.taskTypes = []
+      init.mockImplementation(async () => {
+        h.clientProductionIds = ['production-1']
+        setProduction({ is_client_task_list_visible: false })
+        return true
+      })
+      expect(await runGuardOn('shots')).toEqual({ name: 'not-found' })
     })
   })
 

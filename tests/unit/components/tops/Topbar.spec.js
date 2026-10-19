@@ -81,6 +81,7 @@ const makeStore = (getterOverrides = {}) => {
   const store = createStore({
     state: () => ({}),
     getters: {
+      clientAccess: () => ({ isStatsVisible: true, isTaskListVisible: true }),
       currentEpisode: () => null,
       currentProduction: () => null,
       episodes: () => [],
@@ -195,6 +196,56 @@ describe('Topbar.vue', () => {
       'productions.home.studio_productions:{"studio":"Test Studio"}'
     )
     client.unmount()
+  })
+
+  describe('client access sections', () => {
+    const sectionValues = async (getters = {}) => {
+      const { store: sectionStore } = makeStore({
+        currentProduction: () => ({ id: 'production-1', production_type: 'tvshow' }),
+        isCurrentUserClient: () => true,
+        isTVShow: () => true,
+        productionEditTaskTypes: () => [],
+        ...getters
+      })
+      const topbar = shallowMount(Topbar, {
+        global: {
+          config: { globalProperties: { $socket: socketMock } },
+          plugins: [sectionStore, makeRouter()],
+          mocks: { $t: key => key, $route: mockRoute({ path: '/', name: 'open-productions', params: {}, query: {}, fullPath: '/' }) },
+          stubs: { GlobalSearchField: true, NotificationBell: true, PeopleAvatar: true, ShortcutModal: true }
+        }
+      })
+      await nextTick()
+      const values = topbar.vm.sectionOptions.map(option => option.value)
+      topbar.unmount()
+      return values
+    }
+
+    it('lists the entities and stats when everything is visible', async () => {
+      const values = await sectionValues()
+      expect(values).toEqual(
+        expect.arrayContaining(['playlists', 'assets', 'shots', 'sequence-stats', 'episode-stats', 'assetTypes'])
+      )
+    })
+
+    it('drops the entity entries when the task list is hidden', async () => {
+      const values = await sectionValues({
+        clientAccess: () => ({ isStatsVisible: true, isTaskListVisible: false })
+      })
+      expect(values).not.toContain('assets')
+      expect(values).not.toContain('shots')
+      expect(values).toEqual(['playlists', 'sequence-stats', 'episode-stats', 'assetTypes'])
+    })
+
+    it('drops the stat entries when the stats are hidden', async () => {
+      const values = await sectionValues({
+        clientAccess: () => ({ isStatsVisible: false, isTaskListVisible: true })
+      })
+      expect(values).toContain('shots')
+      expect(values).not.toContain('sequence-stats')
+      expect(values).not.toContain('episode-stats')
+      expect(values).not.toContain('assetTypes')
+    })
   })
 
   // Artists land on pages without production: the fallback production of the
