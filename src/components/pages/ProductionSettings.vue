@@ -302,11 +302,13 @@ const updateTaskStatusPriority = async () => {
   await updateTaskStatusPriorities(taskStatusItems.value)
 }
 
+const tabIds = menuGroups.flatMap(group => group.items.map(item => item.id))
 watch(
   () => route.query.tab,
   tab => {
-    if (tab) activeTab.value = tab
-  }
+    if (tabIds.includes(tab)) activeTab.value = tab
+  },
+  { immediate: true }
 )
 
 watch(activeTab, tab => {
@@ -343,9 +345,6 @@ onMounted(() => {
 
   if (remainingTaskStatuses.value.length > 0) {
     taskStatusId.value = remainingTaskStatuses.value[0].id
-  }
-  if (route.query.tab) {
-    activeTab.value = route.query.tab
   }
 })
 </script>
