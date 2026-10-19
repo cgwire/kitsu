@@ -167,6 +167,38 @@ describe('New production page, creation', () => {
       })
     }
   )
+
+  // The type hides the import step of the other entity: what was imported
+  // there before the switch stays out of the production.
+  test.each([
+    ['assets', 1, 'uploadShotFile', [['Sequence', 'Name'], ['SQ01', 'SH01']]],
+    ['shots', 0, 'uploadAssetFile', [['Type', 'Name'], ['Character', 'Hero']]]
+  ])(
+    'leaves out the hidden import when the production holds %s only',
+    async (type, renderIndex, uploadAction, lines) => {
+      const upload = vi.fn()
+      const wrapper = await mountPage({
+        actions: {
+          newProduction: () => ({ id: 'production-1' }),
+          [uploadAction]: upload
+        }
+      })
+      await wrapper
+        .findAllComponents(ImportRenderModal)
+        [renderIndex].vm.$emit('confirm', lines)
+      await wrapper
+        .findAllComponents({ name: 'ComboboxStyled' })
+        .find(combo => combo.props('localeKeyPrefix') === 'productions.type.')
+        .vm.$emit('update:modelValue', type)
+      await fillForm(wrapper)
+
+      await wrapper.find('.big-button').trigger('click')
+      await flushPromises()
+
+      expect(upload).not.toHaveBeenCalled()
+      expect(push).toHaveBeenCalled()
+    }
+  )
 })
 
 describe('New production page, CSV import', () => {

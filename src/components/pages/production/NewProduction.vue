@@ -1012,8 +1012,11 @@ const createProduction = async () => {
     if (!hasTemplate) {
       await createProductionSettings()
     }
-    await createAssets()
-    if (productionToCreate.production_type !== 'assets') {
+    // What was imported in a step the production type now hides stays out.
+    if (!isShotsOnly.value) {
+      await createAssets()
+    }
+    if (!isAssetsOnly.value) {
       await createShots()
     }
     await store.dispatch('loadContext')
