@@ -162,6 +162,12 @@ export default {
     return client.ppost(path, data)
   },
 
+  setTaskStatusClientAllowed(productionId, taskStatusId, isClientAllowed) {
+    const data = { is_client_allowed: isClientAllowed }
+    const path = `/api/data/projects/${productionId}/settings/task-status/${taskStatusId}`
+    return client.pput(path, data)
+  },
+
   removeTaskStatusFromProduction(productionId, taskStatusId) {
     const path = `/api/data/projects/${productionId}/settings/task-status/${taskStatusId}`
     return client.pdel(path)

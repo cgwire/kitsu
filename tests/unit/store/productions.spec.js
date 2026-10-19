@@ -33,6 +33,7 @@ import {
   PRODUCTION_ADD_ASSET_TYPE,
   PRODUCTION_ADD_TASK_STATUS,
   PRODUCTION_ADD_TASK_TYPE,
+  PRODUCTION_SET_TASK_STATUS_LINK,
   PRODUCTION_SET_TASK_TYPE_LINK,
   PRODUCTION_AVATAR_UPLOADED,
   PRODUCTION_REMOVE_ASSET_TYPE,
@@ -968,6 +969,35 @@ describe('Productions store', () => {
         priority: 3,
         is_client_visible: false
       })
+    })
+
+    test('setTaskStatusClientAllowed sends the value and updates the link', async () => {
+      const production = {
+        id: '123',
+        task_statuses_link: { 456: { priority: 3, is_client_allowed: true } }
+      }
+      const state = { currentProduction: production }
+      const commit = (type, payload) => store.mutations[type](state, payload)
+      productionApi.setTaskStatusClientAllowed = vi.fn(() => Promise.resolve())
+      await store.actions.setTaskStatusClientAllowed(
+        { commit, state },
+        { taskStatusId: '456', isClientAllowed: null }
+      )
+      expect(productionApi.setTaskStatusClientAllowed).toHaveBeenCalledWith(
+        '123', '456', null
+      )
+      expect(production.task_statuses_link[456]).toEqual({
+        priority: 3,
+        is_client_allowed: null
+      })
+
+      const bare = { id: '789' }
+      store.mutations[PRODUCTION_SET_TASK_STATUS_LINK](state, {
+        production: bare,
+        taskStatusId: '1',
+        is_client_allowed: false
+      })
+      expect(bare.task_statuses_link).toEqual({ 1: { is_client_allowed: false } })
     })
 
     test('PRODUCTION_SET_TASK_TYPE_LINK keeps the other link fields', () => {

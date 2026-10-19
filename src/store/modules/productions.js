@@ -40,6 +40,7 @@ import {
   PRODUCTION_REMOVE_BACKGROUND,
   PRODUCTION_UPDATE_DEFAULT_BACKGROUND,
   PRODUCTION_ADD_TASK_TYPE,
+  PRODUCTION_SET_TASK_STATUS_LINK,
   PRODUCTION_SET_TASK_TYPE_LINK,
   PRODUCTION_REMOVE_TASK_TYPE,
   PRODUCTION_ADD_TASK_STATUS,
@@ -718,6 +719,22 @@ const actions = {
       })
   },
 
+  setTaskStatusClientAllowed(
+    { commit, state },
+    { taskStatusId, isClientAllowed }
+  ) {
+    const production = state.currentProduction
+    return productionsApi
+      .setTaskStatusClientAllowed(production.id, taskStatusId, isClientAllowed)
+      .then(() => {
+        commit(PRODUCTION_SET_TASK_STATUS_LINK, {
+          production,
+          taskStatusId,
+          is_client_allowed: isClientAllowed
+        })
+      })
+  },
+
   removeTaskTypeFromProduction({ commit, state }, taskTypeId) {
     commit(PRODUCTION_REMOVE_TASK_TYPE, taskTypeId)
     return productionsApi.removeTaskTypeFromProduction(
@@ -1276,6 +1293,17 @@ const mutations = {
     if (!production.task_type_links) production.task_type_links = {}
     production.task_type_links[taskTypeId] = {
       ...production.task_type_links[taskTypeId],
+      ...link
+    }
+  },
+
+  [PRODUCTION_SET_TASK_STATUS_LINK](
+    state,
+    { production, taskStatusId, ...link }
+  ) {
+    if (!production.task_statuses_link) production.task_statuses_link = {}
+    production.task_statuses_link[taskStatusId] = {
+      ...production.task_statuses_link[taskStatusId],
       ...link
     }
   },

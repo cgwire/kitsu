@@ -198,21 +198,79 @@ describe('ProductionClients', () => {
     expect(wrapper.find('.team-clients').exists()).toBe(true)
   })
 
-  it('lists only statuses with is_client_allowed', async () => {
+  it('shows an override equal to the studio value as the default', async () => {
     const { wrapper } = await mountClients({
+      production: {
+        id: 'prod-1',
+        task_statuses_link: { s1: { priority: 1, is_client_allowed: true } }
+      },
       getters: {
         productionTaskStatuses: () => [
-          { id: 's1', name: 'Todo', is_client_allowed: false },
-          { id: 's2', name: 'Valid', is_client_allowed: true }
+          { id: 's1', name: 'Valid', priority: 5, is_client_allowed: true }
+        ]
+      }
+    })
+    expect(wrapper.find('.status-item').classes()).not.toContain(
+      'is-overridden'
+    )
+    expect(wrapper.find('.statuses-reset').exists()).toBe(false)
+  })
+
+  it('lists every production status with its effective client value', async () => {
+    const { wrapper, store } = await mountClients({
+      production: {
+        id: 'prod-1',
+        task_statuses_link: {
+          s1: { priority: 2, is_client_allowed: true },
+          s2: { priority: 1, is_client_allowed: null }
+        }
+      },
+      getters: {
+        productionTaskStatuses: () => [
+          { id: 's1', name: 'Todo', priority: 5, is_client_allowed: false },
+          { id: 's2', name: 'Valid', priority: 5, is_client_allowed: true }
         ]
       }
     })
     const items = wrapper.findAll('.status-item')
-    expect(items).toHaveLength(1)
+    expect(items).toHaveLength(2)
+    // Production order: s2 has the lower production priority
     expect(items[0].findComponent(ValidationTag).props('task')).toEqual({
       task_status_id: 's2'
     })
-    expect(wrapper.find('.statuses input').exists()).toBe(false)
+    const [valid, todo] = items
+    expect(valid.findComponent('.status-client-allowed').props('modelValue')).toBe(true)
+    expect(valid.classes()).not.toContain('is-overridden')
+    expect(wrapper.find('.statuses-reset').exists()).toBe(true)
+    expect(todo.findComponent('.status-client-allowed').props('modelValue')).toBe(true)
+    expect(todo.classes()).toContain('is-overridden')
+
+    // Back to the studio value (false) clears the override
+    todo.findComponent('.status-client-allowed').vm.$emit('change', false)
+    await flushPromises()
+    expect(store.dispatch).toHaveBeenCalledWith('setTaskStatusClientAllowed', {
+      taskStatusId: 's1',
+      isClientAllowed: null
+    })
+    // Away from the studio value (true) sets it for the production
+    valid.findComponent('.status-client-allowed').vm.$emit('change', false)
+    await flushPromises()
+    expect(store.dispatch).toHaveBeenCalledWith('setTaskStatusClientAllowed', {
+      taskStatusId: 's2',
+      isClientAllowed: false
+    })
+    store.dispatch.mockClear()
+    await wrapper.find('.statuses-reset').trigger('click')
+    await flushPromises()
+    expect(store.dispatch).toHaveBeenCalledWith('setTaskStatusClientAllowed', {
+      taskStatusId: 's1',
+      isClientAllowed: null
+    })
+    // Statuses already on the studio value are not sent again
+    expect(store.dispatch).not.toHaveBeenCalledWith(
+      'setTaskStatusClientAllowed',
+      { taskStatusId: 's2', isClientAllowed: null }
+    )
   })
 
   it('metadata toggle sends the full descriptor', async () => {
@@ -272,21 +330,6 @@ describe('ProductionClients', () => {
     await flushPromises()
     expect(wrapper.findComponent(ConfirmModal).props('active')).toBe(true)
     expect(wrapper.findComponent(ConfirmModal).props('isError')).toBe(true)
-  })
-
-  it('shows the task status link to admins only', async () => {
-    const admin = await mountClients({
-      getters: { isCurrentUserAdmin: () => true }
-    })
-    expect(admin.wrapper.find('.statuses a, .statuses router-link').exists()).toBe(
-      true
-    )
-    const manager = await mountClients({
-      getters: { isCurrentUserAdmin: () => false }
-    })
-    expect(
-      manager.wrapper.find('.statuses a, .statuses router-link').exists()
-    ).toBe(false)
   })
 
   describe('client access', () => {
