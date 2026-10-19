@@ -315,11 +315,26 @@ const onSearchChange = search => {
     : openProductions.value
 }
 
+// Only the productions new to the list are loaded: the list changes on
+// every production event. A failed load shows an empty overview rather
+// than a spinner for good.
 const loadOverviews = () => {
+  const loaded = overviews.value
+  overviews.value = {}
   openProductions.value.forEach(production => {
-    store.dispatch('loadProductionOverview', production).then(overview => {
-      overviews.value[production.id] = overview
-    })
+    if (loaded[production.id]) {
+      overviews.value[production.id] = loaded[production.id]
+    } else {
+      store
+        .dispatch('loadProductionOverview', production)
+        .catch(err => {
+          console.error(err)
+          return { entities: [], episodes: [], playlists: [] }
+        })
+        .then(overview => {
+          overviews.value[production.id] = overview
+        })
+    }
   })
 }
 

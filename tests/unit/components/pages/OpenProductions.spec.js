@@ -1,4 +1,5 @@
 import { flushPromises, shallowMount } from '@vue/test-utils'
+import { ref } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { createStore } from 'vuex'
 
@@ -24,7 +25,11 @@ const productions = [
   { id: 'production-2', name: 'Agent 327', production_type: 'featurefilm' }
 ]
 
-const mountPage = async ({ isClient = false } = {}) => {
+const mountPage = async ({
+  isClient = false,
+  openProductions = ref(productions),
+  failing = []
+} = {}) => {
   const store = createStore({
     getters: {
       isCurrentUserAdmin: () => false,
@@ -32,15 +37,17 @@ const mountPage = async ({ isClient = false } = {}) => {
       isCurrentUserManager: () => !isClient,
       lastProductionScreen: () => 'assets',
       mainConfig: () => ({ is_self_hosted: false }),
-      openProductions: () => productions,
+      openProductions: () => openProductions.value,
       organisation: () => ({ name: 'Doudou Corp' })
     }
   })
   store.dispatch = vi.fn((type, production) =>
-    Promise.resolve({
-      entities: [{ id: `shot-of-${production.id}` }],
-      playlists: [{ id: `playlist-of-${production.id}` }]
-    })
+    failing.includes(production.id)
+      ? Promise.reject(new Error('down'))
+      : Promise.resolve({
+          entities: [{ id: `shot-of-${production.id}` }],
+          playlists: [{ id: `playlist-of-${production.id}` }]
+        })
   )
   const wrapper = shallowMount(OpenProductions, {
     global: {
@@ -70,6 +77,38 @@ describe('OpenProductions', () => {
       isLoading: false
     })
     expect(wrapper.find('.open-productions-list').exists()).toBe(false)
+  })
+
+  it('shows an empty overview when its load fails', async () => {
+    const { wrapper } = await mountPage({
+      isClient: true,
+      failing: ['production-2']
+    })
+    const overviews = wrapper.findAllComponents(ProductionOverview)
+    expect(overviews[0].props('isLoading')).toBe(false)
+    expect(overviews[1].props()).toMatchObject({
+      entities: [],
+      playlists: [],
+      isLoading: false
+    })
+  })
+
+  it('loads an overview once per production and drops the gone ones', async () => {
+    const openProductions = ref(productions)
+    const { store, wrapper } = await mountPage({ isClient: true, openProductions })
+    const added = { id: 'production-3', name: 'Caminandes', production_type: 'shots' }
+    openProductions.value = [productions[1], added]
+    await flushPromises()
+
+    expect(store.dispatch).toHaveBeenCalledTimes(3)
+    expect(store.dispatch).toHaveBeenLastCalledWith('loadProductionOverview', added)
+    expect(
+      wrapper.findAllComponents(ProductionOverview).map(overview => overview.props('production').id)
+    ).toEqual(['production-2', 'production-3'])
+    expect(wrapper.vm.overviews).toEqual({
+      'production-2': expect.objectContaining({ entities: [{ id: 'shot-of-production-2' }] }),
+      'production-3': expect.objectContaining({ entities: [{ id: 'shot-of-production-3' }] })
+    })
   })
 
   it('welcomes a client until the message is closed', async () => {
