@@ -1,7 +1,7 @@
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { createStore } from 'vuex'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import {
   dropBefore,
@@ -177,6 +177,10 @@ const mountWorkflow = async (options = {}) => {
 }
 
 describe('ProductionTaskTypes', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
   it('hides the entity tabs the production type does not use', async () => {
     const { wrapper } = await mountComponent('short')
     expect(tabNames(wrapper)).toEqual(['assets', 'shots', 'sequences', 'edits'])
@@ -480,5 +484,35 @@ describe('ProductionTaskTypes', () => {
     expect(rows()[1].element).toBe(lighting.element)
     expect(document.activeElement).toBe(input)
     wrapper.unmount()
+  })
+
+  // Regression: a reorder dropped while another was being saved left a flag
+  // up for good, after which each save sent its order once more, again and
+  // again while the server took more than a second to answer.
+  it('stops sending the order once it is saved on a slow server', async () => {
+    const { store, wrapper } = await mountComponent()
+    const list = wrapper.findComponent(DraggableStub)
+    const [animation, lighting] = list.props('modelValue')
+    const drop = items => {
+      list.vm.$emit('update:modelValue', items)
+      list.vm.$emit('end')
+    }
+    store.commit = vi.fn()
+    vi.useFakeTimers()
+    store.dispatch.mockImplementation(action =>
+      action === 'reorderTaskTypeLinks'
+        ? new Promise(resolve => setTimeout(resolve, 1500))
+        : Promise.resolve()
+    )
+
+    drop([lighting, animation])
+    await vi.advanceTimersByTimeAsync(500)
+    drop([animation, lighting])
+    await vi.advanceTimersByTimeAsync(20000)
+
+    const reorders = store.dispatch.mock.calls.filter(
+      ([action]) => action === 'reorderTaskTypeLinks'
+    )
+    expect(reorders).toHaveLength(2)
   })
 })

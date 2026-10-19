@@ -459,6 +459,7 @@ const savePriorities = async forms => {
     })
     isSaving = false
     if (newSaveCall) {
+      newSaveCall = false
       await savePriorities(forms)
     }
     setTimeout(() => {
