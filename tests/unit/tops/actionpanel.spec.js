@@ -48,7 +48,8 @@ const mountPanel = async (
     tasks = [],
     validations = 0,
     // Lines selected in the list of the page: assets, shots or edits.
-    lines = []
+    lines = [],
+    customActions = []
   } = {}
 ) => {
   const router = createRouter({
@@ -109,7 +110,7 @@ const mountPanel = async (
       currentProduction: () => ({ id: 'production-1' }),
       conceptFolders: () => folders,
       currentUserRoleForProduction: () => () => role,
-      getCustomActionsByType: () => () => [],
+      getCustomActionsByType: () => () => customActions,
       isCurrentUserAdmin: () => false,
       isCurrentUserArtist: () => false,
       isCurrentUserClient: () => false,
@@ -576,6 +577,23 @@ describe('ActionPanel, opened on empty cells', () => {
 
     expect(wrapper.find('.menu').exists()).toBe(true)
     expect(wrapper.find('.action-bar').exists()).toBe(false)
+  })
+
+  // Regression: the bar was chosen before the custom actions of the tasks
+  // joining the selection were listed, so the status bar opened instead.
+  test('reopens the custom actions used last once tasks join the cells', async () => {
+    localStorage.setItem('entities--selected-bar', 'custom-actions')
+    const { store, wrapper } = await mountOnShots({
+      customActions: [{ id: 'action-1', name: 'Render', url: 'https://a.test' }],
+      validations: 1
+    })
+
+    store.state.nbSelectedValidations = 0
+    store.state.nbSelectedTasks = 1
+    store.state.selectedTasks = toSelection([task])
+    await flushPromises()
+
+    expect(wrapper.find('.custom-action-combobox').exists()).toBe(true)
   })
 })
 

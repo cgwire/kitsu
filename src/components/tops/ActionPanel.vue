@@ -1648,6 +1648,8 @@ const autoChooseSelectBar = () => {
     return
   }
   window.addEventListener('keydown', onKeyDown)
+  // The watcher of the task count may run after this choice.
+  refreshSelectionActions()
   if (isCurrentViewAsset.value && nbSelectedAssets.value > 0) {
     selectedBar.value = 'delete-assets'
   } else if (isCurrentViewShot.value && nbSelectedShots.value > 0) {
@@ -1703,6 +1705,20 @@ const getSelectionCustomActions = () => {
       selectedTypes.has(type)
     )
   )
+}
+
+// The bars offered to a selection of tasks depend on its statuses and custom
+// actions.
+const refreshSelectionActions = () => {
+  if (nbSelectedTasks.value === 0) return
+  availableTaskStatuses.value = getAvailableStatuses()
+  customActions.value = getSelectionCustomActions()
+  const isActionStillAvailable =
+    customAction.value.url &&
+    customActions.value.some(action => action.id === customAction.value.id)
+  if (customActions.value.length > 0 && !isActionStillAvailable) {
+    customAction.value = customActions.value[0]
+  }
 }
 
 const isLinkedTo = (concept, entity) =>
@@ -1790,22 +1806,7 @@ watch(availableBars, bars => {
   if (selectedBar.value && !bars.has(selectedBar.value)) autoChooseSelectBar()
 })
 
-watch(
-  nbSelectedTasks,
-  () => {
-    if (nbSelectedTasks.value > 0) {
-      availableTaskStatuses.value = getAvailableStatuses()
-      customActions.value = getSelectionCustomActions()
-      const isActionStillAvailable =
-        customAction.value.url &&
-        customActions.value.some(action => action.id === customAction.value.id)
-      if (customActions.value.length > 0 && !isActionStillAvailable) {
-        customAction.value = customActions.value[0]
-      }
-    }
-  },
-  { immediate: true }
-)
+watch(nbSelectedTasks, refreshSelectionActions, { immediate: true })
 
 watch(
   () => route.name,
