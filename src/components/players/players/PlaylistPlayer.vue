@@ -565,7 +565,10 @@
         v-model:is-show-annotations-while-playing="
           isShowAnnotationsWhilePlaying
         "
-        v-model:is-waveform-displayed="isWaveformDisplayed"
+        :is-waveform-displayed="
+          isCurrentUserClient ? undefined : isWaveformDisplayed
+        "
+        @update:is-waveform-displayed="isWaveformDisplayed = $event"
         v-model:speed="speed"
         v-model:volume="volume"
         @play-pause-clicked="onPlayPauseClicked"
@@ -648,7 +651,8 @@
         v-if="
           (isCurrentPreviewMovie || isCurrentPreviewPicture) &&
           !isFullMode &&
-          !isPhone
+          !isPhone &&
+          !isCurrentUserClient
         "
       >
         <player-comparison-bar
@@ -659,13 +663,9 @@
           :is-comparison-enabled="true"
           :preview-file-options="revisionOptions"
           :task-type-options="taskTypeOptions"
-          :comparison-mode="isCurrentUserClient ? undefined : comparisonMode"
-          :preview-to-compare-id="
-            isCurrentUserClient ? undefined : revisionToCompare
-          "
+          v-model:comparison-mode="comparisonMode"
+          v-model:preview-to-compare-id="revisionToCompare"
           v-model:task-type-id="taskTypeToCompare"
-          @update:comparison-mode="comparisonMode = $event"
-          @update:preview-to-compare-id="revisionToCompare = $event"
           @compare-clicked="onCompareClicked"
           @previous-comparison-clicked="onPreviousComparisonPictureClicked"
           @next-comparison-clicked="onNextComparisonPictureClicked"
@@ -705,7 +705,9 @@
         :background-options="backgroundOptions"
         :full-screen="fullScreen"
         :is-3-d-model="isCurrentPreviewModel"
-        :is-annotations-displayed="isAnnotationsDisplayed"
+        :is-annotations-displayed="
+          isCurrentUserClient ? undefined : isAnnotationsDisplayed
+        "
         :is-comments-hidden="isCommentsHidden"
         :is-concept="false"
         :is-drawing="isDrawing"

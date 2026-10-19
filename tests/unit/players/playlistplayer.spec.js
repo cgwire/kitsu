@@ -1227,16 +1227,30 @@ describe('PlaylistPlayer.vue', () => {
       expect(bar.props('isOnionSkinOn')).toBeUndefined()
     })
 
-    it('offers the comparison task type alone to a client', async () => {
+    it('keeps the comparison bar from a client', async () => {
       wrapper = mountPlayer({
         entities: [{ ...entity, preview_file_extension: 'png' }],
         isClient: true
       })
       await flushPromises()
-      const bar = wrapper.findComponent({ name: 'PlayerComparisonBar' })
-      expect(bar.props('previewToCompareId')).toBeUndefined()
-      expect(bar.props('comparisonMode')).toBeUndefined()
-      expect(bar.props('taskTypeId')).not.toBeUndefined()
+      expect(
+        wrapper.findComponent({ name: 'PlayerComparisonBar' }).exists()
+      ).toBe(false)
+    })
+
+    it('keeps the waveform and annotation toggles from a client', async () => {
+      wrapper = mountPlayer({ isClient: true })
+      await flushPromises()
+      expect(
+        wrapper
+          .findComponent({ name: 'PlayerPlaybackBar' })
+          .props('isWaveformDisplayed')
+      ).toBeUndefined()
+      expect(
+        wrapper
+          .findComponent({ name: 'PlayerAnnotationBar' })
+          .props('isAnnotationsDisplayed')
+      ).toBeUndefined()
     })
 
     it('offers the playlist zip in the header to a client only', async () => {

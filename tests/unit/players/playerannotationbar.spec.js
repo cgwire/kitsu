@@ -59,4 +59,14 @@ describe('players/PlayerAnnotationBar', () => {
   it('keeps the onion skin picker from a consumer not binding it', () => {
     expect(mountBar().find('onion-skin-picker-stub').exists()).toBe(false)
   })
+
+  it('shows the annotation toggle to the consumer binding it', () => {
+    expect(
+      mountBar({ isAnnotationsDisplayed: true }).find('[icon="pen"]').exists()
+    ).toBe(true)
+  })
+
+  it('keeps the annotation toggle from a consumer not binding it', () => {
+    expect(mountBar().find('[icon="pen"]').exists()).toBe(false)
+  })
 })

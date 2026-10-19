@@ -40,7 +40,12 @@
       :title="$t('playlists.actions.toggle_annotations')"
       :active="isAnnotationsDisplayed"
       @click="$emit('annotation-displayed-clicked')"
-      v-if="(isPicture || isMovie) && (!light || fullScreen) && !isConcept"
+      v-if="
+        isAnnotationsDisplayed !== undefined &&
+        (isPicture || isMovie) &&
+        (!light || fullScreen) &&
+        !isConcept
+      "
     />
 
     <button-simple
@@ -284,9 +289,11 @@ defineProps({
     type: Boolean,
     default: false
   },
+  // Opt-in like the onion skin: a consumer that does not bind it gets no
+  // toggle.
   isAnnotationsDisplayed: {
     type: Boolean,
-    default: true
+    default: undefined
   },
   isCommentsHidden: {
     type: Boolean,
