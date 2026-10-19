@@ -212,7 +212,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useStore } from 'vuex'
 
 import { useTime } from '@/composables/time'
-import { formatTimeOfDay, parseDate } from '@/lib/time'
+import { parseDate } from '@/lib/time'
 
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Checkbox from '@/components/widgets/Checkbox.vue'
@@ -223,7 +223,7 @@ import TextField from '@/components/widgets/TextField.vue'
 import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
 const store = useStore()
-const { timezone, use12HourClock } = useTime()
+const { formatTime } = useTime()
 
 const account = ref(null)
 const hasError = ref(false)
@@ -288,11 +288,8 @@ const isOpen = computed(
   () => !!openUntilDate.value && openUntilDate.value.isAfter(now.value)
 )
 const openUntil = computed(() =>
-  openUntilDate.value
-    ? formatTimeOfDay(
-        openUntilDate.value.tz(timezone.value),
-        use12HourClock.value
-      )
+  account.value?.preview_open_until
+    ? formatTime(account.value.preview_open_until)
     : ''
 )
 
