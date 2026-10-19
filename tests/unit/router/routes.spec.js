@@ -51,10 +51,19 @@ vi.mock('@/store/modules/user', () => ({
 }))
 vi.mock('@/components/Main.vue', () => ({ default: {} }))
 vi.mock('@/components/pages/Login.vue', () => ({ default: {} }))
+vi.mock('@/components/pages/NotFound.vue', () => ({ default: {} }))
+vi.mock('@/components/pages/Playlist.vue', () => ({ default: {} }))
+vi.mock('@/components/pages/Shots.vue', () => ({ default: {} }))
+// The app router, on a history that needs no browser.
+vi.mock('vue-router', async importOriginal => {
+  const original = await importOriginal()
+  return { ...original, createWebHistory: original.createMemoryHistory }
+})
 
 import auth from '@/lib/auth'
 import { markRequestFailure } from '@/lib/errors'
 import init from '@/lib/init'
+import router from '@/router'
 import store from '@/store'
 import productionsStore from '@/store/modules/productions'
 import taskTypeStore from '@/store/modules/tasktypes'
@@ -267,12 +276,33 @@ describe('router/routes', () => {
     // roles arrive with the initial load, after the guard starts.
     test('decides with the data of the initial load', async () => {
       taskTypeStore.state.taskTypes = []
-      init.mockImplementation(async () => {
+      init.mockImplementationOnce(async () => {
         h.clientProductionIds = ['production-1']
         setProduction({ is_client_task_list_visible: false })
         return true
       })
       expect(await runGuardOn('shots')).toEqual({ name: 'not-found' })
+    })
+  })
+
+  describe('client access on in-app navigation', () => {
+    // The guard of the main route does not run again between its
+    // children: the switch to another production keeps the section.
+    test('sends a client to not-found when switching to a production with the task list off', async () => {
+      productionsStore.state.productionMap = new Map([
+        ['production-1', { id: 'production-1' }],
+        [
+          'production-2',
+          { id: 'production-2', is_client_task_list_visible: false }
+        ]
+      ])
+      h.clientProductionIds = ['production-1', 'production-2']
+      await router.push('/productions/production-1/shots')
+      expect(router.currentRoute.value.name).toBe('shots')
+      await router.push('/productions/production-2/shots')
+      expect(router.currentRoute.value.name).toBe('not-found')
+      await router.push('/productions/production-2/playlists')
+      expect(router.currentRoute.value.name).toBe('playlists')
     })
   })
 

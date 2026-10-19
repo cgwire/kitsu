@@ -92,6 +92,28 @@ const Timesheets = () => import('@/components/pages/Timesheets.vue')
 const Todos = () => import('@/components/pages/Todos.vue')
 const WrongBrowser = () => import('@/components/pages/WrongBrowser.vue')
 
+// The route state still holds the previous page during a navigation: the
+// role is read on the target one.
+const isTargetClient = to =>
+  userStore.getters.isCurrentUserClient(userStore.state, {}, { route: to })
+
+// Runs on every navigation, as the guard of the main route skips moves
+// between its children, such as a production switch.
+export const checkClientAccess = to => {
+  const clientAccess = productionsStore.getters.getClientAccess(
+    productionsStore.state,
+    {},
+    {},
+    { isCurrentUserClient: isTargetClient(to) }
+  )(to?.params?.production_id)
+  const isHidden = to?.matched.some(
+    ({ meta }) =>
+      (meta.clientAccess === 'stats' && !clientAccess.isStatsVisible) ||
+      (meta.clientAccess === 'taskList' && !clientAccess.isTaskListVisible)
+  )
+  if (isHidden) return { name: 'not-found' }
+}
+
 export const routes = [
   {
     path: '',
@@ -172,18 +194,7 @@ export const routes = [
       }
 
       // After init: it loads the project roles and the production flags.
-      // The route state still holds the previous page, hence the target one.
-      const isClient = userStore.getters.isCurrentUserClient(
-        userStore.state,
-        {},
-        { route: to }
-      )
-      const clientAccess = productionsStore.getters.getClientAccess(
-        productionsStore.state,
-        {},
-        {},
-        { isCurrentUserClient: isClient }
-      )(to?.params?.production_id)
+      const isClient = isTargetClient(to)
       const isSupervisorOrManager =
         userStore.getters.isCurrentUserManager(userStore.state) ||
         userStore.getters.isCurrentUserSupervisor(userStore.state)
@@ -194,16 +205,10 @@ export const routes = [
           to?.matched.some(
             record => record.meta.requiresSupervisorOrManager
           )) ||
-        (isClient &&
-          to?.matched.some(record => record.meta.forbiddenForClient)) ||
-        to?.matched.some(
-          ({ meta }) =>
-            (meta.clientAccess === 'stats' && !clientAccess.isStatsVisible) ||
-            (meta.clientAccess === 'taskList' &&
-              !clientAccess.isTaskListVisible)
-        )
+        (isClient && to?.matched.some(record => record.meta.forbiddenForClient))
 
       if (isProhibited) return { name: 'not-found' }
+      return checkClientAccess(to)
     },
 
     children: [
