@@ -571,7 +571,6 @@ const sideWrapperRef = useTemplateRef('side-wrapper')
 
 // Computed
 // --------------------------------------------------------------------------
-const currentEpisode = computed(() => store.getters.currentEpisode)
 const currentProduction = computed(() => store.getters.currentProduction)
 const isCurrentUserArtist = computed(() => store.getters.isCurrentUserArtist)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
@@ -589,7 +588,6 @@ const isCurrentUserManager = computed(
 const isCurrentUserSupervisor = computed(
   () => currentUserProductionRole.value === 'supervisor'
 )
-const isTVShow = computed(() => store.getters.isTVShow)
 const nbSelectedTasks = computed(() => store.getters.nbSelectedTasks)
 const nbSelectedValidations = computed(
   () => store.getters.nbSelectedValidations
@@ -830,15 +828,23 @@ const taskStatuses = computed(() => {
   )
 })
 
-const taskPath = computed(() =>
-  getTaskPath(
+// The store keeps the episode browsed last, maybe of another production: a
+// task without its own episode opens under the one of a page of its
+// production, else under all of them.
+const taskPath = computed(() => {
+  const pageEpisodeId =
+    route.params.production_id === props.task.project_id
+      ? route.params.episode_id
+      : null
+  return getTaskPath(
     props.task,
     null,
-    isTVShow.value,
-    currentEpisode.value,
+    productionMap.value.get(props.task.project_id)?.production_type ===
+      'tvshow',
+    { id: pageEpisodeId || 'all' },
     taskTypeMap.value
   )
-)
+})
 
 const taskEntityPath = computed(() =>
   getTaskEntityPath(props.task, route.params.episode_id)

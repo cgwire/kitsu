@@ -63,6 +63,9 @@ const buildTask = (overrides = {}) => ({
   ...overrides
 })
 
+// The default stub swallows its slot, which holds the panel title.
+const RouterLinkStub = { props: ['to'], template: '<a><slot /></a>' }
+
 const mountPanel = async ({
   task = buildTask(),
   props = {},
@@ -70,15 +73,24 @@ const mountPanel = async ({
   stubs = {},
   comments = [],
   previews = [],
-  slots = {}
+  slots = {},
+  path = '/'
 } = {}) => {
   const socket = { on: vi.fn(), off: vi.fn() }
 
+  const page = { template: '<div />' }
   const router = createRouter({
     history: createMemoryHistory(),
-    routes: [{ path: '/', name: 'home', component: { template: '<div />' } }]
+    routes: [
+      { path: '/', name: 'home', component: page },
+      { path: '/productions/:production_id/:section', component: page },
+      {
+        path: '/productions/:production_id/episodes/:episode_id/:section',
+        component: page
+      }
+    ]
   })
-  await router.push('/')
+  await router.push(path)
   await router.isReady()
 
   const store = createStore({
@@ -139,8 +151,7 @@ const mountPanel = async ({
           template: '<div />',
           methods: { focus: () => {}, setCurrentFrame: () => {} }
         },
-        // The default stub swallows its slot, which holds the panel title.
-        RouterLink: { props: ['to'], template: '<a><slot /></a>' },
+        RouterLink: RouterLinkStub,
         // Provided by the animxyz plugin, which the specs do not install.
         XyzTransitionGroup: { template: '<div><slot /></div>' },
         ...stubs
@@ -311,6 +322,120 @@ describe('TaskInfo.vue', () => {
       // A link without an entity id has no route to resolve.
       expect(wrapper.find('.header-title .title').text()).toBe('SH01')
       expect(wrapper.find('.header-title .title a').exists()).toBe(false)
+    })
+  })
+
+  // The panel also shows tasks of other productions (notifications, my
+  // tasks), and the store keeps the episode browsed last.
+  describe('task page link', () => {
+    const assetTaskType = {
+      id: 'task-type-2',
+      name: 'Modeling',
+      for_entity: 'Asset'
+    }
+    const productionMap = (firstType, secondType) => () =>
+      new Map([
+        ['production-1', { id: 'production-1', production_type: firstType }],
+        ['production-2', { id: 'production-2', production_type: secondType }]
+      ])
+    const tvShowContext = {
+      currentEpisode: () => ({ id: 'episode-9' }),
+      isTVShow: () => true,
+      taskTypeMap: () =>
+        new Map([
+          [taskType.id, taskType],
+          [assetTaskType.id, assetTaskType]
+        ])
+    }
+    const mainPackAssetTask = () =>
+      buildTask({ entity_type_name: 'Props', task_type_id: assetTaskType.id })
+
+    const taskPageLink = wrapper =>
+      wrapper
+        .findAllComponents(RouterLinkStub)
+        .find(link => link.classes().includes('history-button'))
+        .props('to')
+
+    it('links the task of a short without episode from a tv show', async () => {
+      const { wrapper } = await mountPanel({
+        task: buildTask({ project_id: 'production-2' }),
+        getterOverrides: {
+          ...tvShowContext,
+          productionMap: productionMap('tvshow', 'short')
+        }
+      })
+
+      expect(taskPageLink(wrapper)).toEqual({
+        name: 'task',
+        params: {
+          production_id: 'production-2',
+          task_id: TASK_ID,
+          type: 'shots'
+        }
+      })
+    })
+
+    it('links the task of a tv show under its episode from a short', async () => {
+      const { wrapper } = await mountPanel({
+        task: buildTask({ project_id: 'production-2', episode_id: 'episode-2' }),
+        getterOverrides: { productionMap: productionMap('short', 'tvshow') }
+      })
+
+      expect(taskPageLink(wrapper)).toEqual({
+        name: 'episode-task',
+        params: {
+          production_id: 'production-2',
+          task_id: TASK_ID,
+          episode_id: 'episode-2',
+          type: 'shots'
+        }
+      })
+    })
+
+    it('opens a task without episode under all of them on a page without one', async () => {
+      const { wrapper } = await mountPanel({
+        task: mainPackAssetTask(),
+        path: '/productions/production-1/news-feed',
+        getterOverrides: {
+          ...tvShowContext,
+          productionMap: productionMap('tvshow', 'short')
+        }
+      })
+
+      expect(taskPageLink(wrapper).params.episode_id).toBe('all')
+    })
+
+    it('opens a task without episode under the episode of the page', async () => {
+      const { wrapper } = await mountPanel({
+        task: mainPackAssetTask(),
+        path: '/productions/production-1/episodes/main/assets',
+        getterOverrides: {
+          ...tvShowContext,
+          currentEpisode: () => ({ id: 'main' }),
+          productionMap: productionMap('tvshow', 'short')
+        }
+      })
+
+      expect(taskPageLink(wrapper).params.episode_id).toBe('main')
+    })
+
+    // An asset of an episode is listed in the episodes it is cast in too.
+    it('opens a task under its own episode before the one of the page', async () => {
+      const { wrapper } = await mountPanel({
+        task: buildTask({
+          entity_type_name: 'Props',
+          task_type_id: assetTaskType.id,
+          episode_id: 'episode-1'
+        }),
+        path: '/productions/production-1/episodes/episode-3/assets',
+        getterOverrides: {
+          ...tvShowContext,
+          currentEpisode: () => ({ id: 'episode-3' }),
+          productionMap: productionMap('tvshow', 'short')
+        }
+      })
+
+      expect(taskPageLink(wrapper).params.episode_id).toBe('episode-1')
     })
   })
 
