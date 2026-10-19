@@ -16,11 +16,14 @@ import assetStore from '@/store/modules/assets'
 
 import TaskList from '@/components/lists/TaskList.vue'
 import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
+import ImportModal from '@/components/modals/ImportModal.vue'
 import TaskType from '@/components/pages/TaskType.vue'
 import EstimationHelper from '@/components/pages/tasktype/EstimationHelper.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxMultiple from '@/components/widgets/ComboboxMultiple.vue'
 import ComboboxStatusMultiple from '@/components/widgets/ComboboxStatusMultiple.vue'
+
+import { BrokenFileReader, GoneFileReader } from '../fixtures/file-reader'
 
 const SearchFieldStub = {
   template: '<div />',
@@ -487,6 +490,84 @@ describe('TaskType page', () => {
       await vi.advanceTimersByTimeAsync(400)
 
       expect(loadProductionTimeSpents).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('CSV import', () => {
+    // unmounted after each test, a failed one included
+    let wrapper = null
+
+    afterEach(() => {
+      wrapper?.unmount()
+      wrapper = null
+      vi.unstubAllGlobals()
+      vi.restoreAllMocks()
+    })
+
+    const buildFormData = () => {
+      const formData = new FormData()
+      formData.append('file', new File(['Asset,Estimation'], 'import.csv'))
+      return formData
+    }
+
+    const openImportModal = async () => {
+      // the data load the page starts 100 ms after mounting is not under test
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      const page = await mountPage({ section: 'tasks' })
+      wrapper = page.wrapper
+      await wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.props('icon') === 'import')
+        .vm.$emit('click')
+      return () => wrapper.findComponent(ImportModal)
+    }
+
+    it('shows the error of a file the browser cannot read', async () => {
+      vi.stubGlobal('FileReader', GoneFileReader)
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const modal = await openImportModal()
+
+      await modal().vm.$emit('confirm', buildFormData(), 'file')
+      await flushPromises()
+
+      expect(modal().props()).toMatchObject({
+        active: true,
+        isError: true,
+        isLoading: false
+      })
+    })
+
+    it('opens again without the error of an unreadable file', async () => {
+      vi.stubGlobal('FileReader', GoneFileReader)
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const modal = await openImportModal()
+      await modal().vm.$emit('confirm', buildFormData(), 'file')
+      await flushPromises()
+
+      await modal().vm.$emit('cancel')
+      await wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.props('icon') === 'import')
+        .vm.$emit('click')
+
+      expect(modal().props()).toMatchObject({ active: true, isError: false })
+    })
+
+    it('releases the modal on a bug, left to the error handler', async () => {
+      vi.stubGlobal('FileReader', BrokenFileReader)
+      const modal = await openImportModal()
+      const errorHandler = vi.fn()
+      wrapper.vm.$.appContext.config.errorHandler = errorHandler
+
+      await modal().vm.$emit('confirm', buildFormData(), 'file')
+      await flushPromises()
+
+      expect(modal().props()).toMatchObject({ isError: true, isLoading: false })
+      expect(errorHandler).toHaveBeenCalledWith(
+        expect.any(TypeError),
+        expect.anything(),
+        expect.anything()
+      )
     })
   })
 })

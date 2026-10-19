@@ -492,8 +492,10 @@
       "yes": "Ja",
       "csv": {
         "choose": "Auswählen",
+        "error_empty": "Die Datei ist leer.",
         "error_imported_rows": "{count} Zeile wurde vor dem Fehler importiert. | {count} Zeilen wurden vor dem Fehler importiert.",
         "error_line": "Zeile {line}",
+        "error_read": "Die Datei konnte nicht gelesen werden. Bitte wählen Sie sie erneut aus.",
         "error_timeout": "Der Import dauert länger als erwartet und läuft im Hintergrund weiter.",
         "error_timeout_hint": "Laden Sie die Seite in ein paar Minuten neu, um das Ergebnis zu prüfen, bevor Sie erneut importieren.",
         "error_upload": "Beim Hochladen Ihrer CSV-Datei ist ein Fehler aufgetreten.",

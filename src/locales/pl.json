@@ -995,8 +995,10 @@
       },
       "csv": {
         "choose": "Wybierz",
+        "error_empty": "Plik jest pusty.",
         "error_imported_rows": "Przed błędem zaimportowano {count} wiersz. | Przed błędem zaimportowano {count} wierszy.",
         "error_line": "Wiersz {line}",
+        "error_read": "Nie udało się odczytać pliku. Wybierz go ponownie.",
         "error_timeout": "Import trwa dłużej, niż oczekiwano, i jest kontynuowany w tle.",
         "error_timeout_hint": "Odśwież stronę za kilka minut, aby sprawdzić wynik przed ponownym importem.",
         "error_upload": "Wystąpił błąd podczas przesyłania pliku CSV.",

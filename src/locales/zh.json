@@ -492,8 +492,10 @@
       "yes": "是",
       "csv": {
         "choose": "选择",
+        "error_empty": "文件为空。",
         "error_imported_rows": "错误发生前已导入 {count} 行。 | 错误发生前已导入 {count} 行。",
         "error_line": "第 {line} 行",
+        "error_read": "无法读取文件。请重新选择。",
         "error_timeout": "导入耗时超出预期，正在后台继续进行。",
         "error_timeout_hint": "请在几分钟后刷新页面，确认结果后再重新导入。",
         "error_upload": "上传您的CSV文件时出现错误。",

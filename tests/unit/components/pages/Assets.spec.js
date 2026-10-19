@@ -5,6 +5,7 @@ vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditAssetModal from '@/components/modals/EditAssetModal.vue'
+import ImportModal from '@/components/modals/ImportModal.vue'
 import Assets from '@/components/pages/Assets.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
@@ -15,6 +16,7 @@ import {
   mountEntityPage,
   production
 } from '../../fixtures/entity-page'
+import { BrokenFileReader, GoneFileReader } from '../../fixtures/file-reader'
 
 // Two assets with their tasks in the store: the page decides on mount
 // whether their scope (episode) is the displayed one.
@@ -165,6 +167,63 @@ describe('Assets page, thumbnails import', () => {
 
     expect(commentTaskWithPreview).toHaveBeenCalledWith(
       expect.objectContaining({ taskId: 'task-1', forms: [form] })
+    )
+  })
+})
+
+describe('Assets page, CSV import', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.restoreAllMocks()
+  })
+
+  const openImportModal = async () => {
+    const { wrapper } = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters: { isCurrentUserProductionManager: true }
+    })
+    await wrapper
+      .findAllComponents(ButtonSimple)
+      .find(button => button.props('icon') === 'import')
+      .vm.$emit('click')
+    return { wrapper, modal: () => wrapper.findComponent(ImportModal) }
+  }
+
+  const buildFormData = () => {
+    const formData = new FormData()
+    formData.append('file', new File(['Type,Name'], 'import.csv'))
+    return formData
+  }
+
+  test('shows the error of a file the browser cannot read', async () => {
+    vi.stubGlobal('FileReader', GoneFileReader)
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { modal } = await openImportModal()
+
+    await modal().vm.$emit('confirm', buildFormData(), 'file')
+    await flushPromises()
+
+    expect(modal().props()).toMatchObject({
+      active: true,
+      isError: true,
+      isLoading: false
+    })
+  })
+
+  test('releases the modal on a bug, left to the error handler', async () => {
+    vi.stubGlobal('FileReader', BrokenFileReader)
+    const { wrapper, modal } = await openImportModal()
+    const errorHandler = vi.fn()
+    wrapper.vm.$.appContext.config.errorHandler = errorHandler
+
+    await modal().vm.$emit('confirm', buildFormData(), 'file')
+    await flushPromises()
+
+    expect(modal().props()).toMatchObject({ isError: true, isLoading: false })
+    expect(errorHandler).toHaveBeenCalledWith(
+      expect.any(TypeError),
+      expect.anything(),
+      expect.anything()
     )
   })
 })

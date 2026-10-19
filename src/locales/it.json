@@ -494,8 +494,10 @@
       "yes": "Sì",
       "csv": {
         "choose": "Scegli",
+        "error_empty": "Il file è vuoto.",
         "error_imported_rows": "{count} riga è stata importata prima dell'errore. | {count} righe sono state importate prima dell'errore.",
         "error_line": "Riga {line}",
+        "error_read": "Impossibile leggere il file. Selezionalo di nuovo.",
         "error_timeout": "L'importazione sta richiedendo più tempo del previsto e prosegue in background.",
         "error_timeout_hint": "Ricarica la pagina tra qualche minuto per verificare il risultato prima di importare di nuovo.",
         "error_upload": "Si è verificato un errore durante il caricamento del file CSV.",

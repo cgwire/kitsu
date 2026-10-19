@@ -492,8 +492,10 @@
       "yes": "Ja",
       "csv": {
         "choose": "Kies",
+        "error_empty": "Het bestand is leeg.",
         "error_imported_rows": "{count} regel is geïmporteerd vóór de fout. | {count} regels zijn geïmporteerd vóór de fout.",
         "error_line": "Regel {line}",
+        "error_read": "Kon het bestand niet lezen. Selecteer het opnieuw.",
         "error_timeout": "De import duurt langer dan verwacht en loopt op de achtergrond verder.",
         "error_timeout_hint": "Herlaad de pagina over een paar minuten om het resultaat te controleren voordat je opnieuw importeert.",
         "error_upload": "Er is een fout opgetreden tijdens het uploaden van de CSV.",

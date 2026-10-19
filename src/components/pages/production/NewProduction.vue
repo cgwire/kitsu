@@ -345,10 +345,7 @@
               {{ nbAssetsToImport }}
               {{ $t('productions.creation.assets_to_import') }}
             </span>
-            <button
-              class="button import-button"
-              @click="toggleModal('isAssetsImportDisplayed')"
-            >
+            <button class="button import-button" @click="showAssetsImportModal">
               {{ $t('productions.creation.import_assets_button') }}
             </button>
           </div>
@@ -369,10 +366,7 @@
               {{ nbShotsToImport }}
               {{ $t('productions.creation.shots_to_import') }}
             </span>
-            <button
-              class="button import-button"
-              @click="toggleModal('isShotsImportDisplayed')"
-            >
+            <button class="button import-button" @click="showShotsImportModal">
               {{ $t('productions.creation.import_shots_button') }}
             </button>
           </div>
@@ -457,7 +451,7 @@
       ref="import-assets-modal"
       :active="modals.isAssetsImportDisplayed"
       :is-loading="loading.importingAssets"
-      :is-error="errors.importingAssets"
+      :is-error="errors.readingAssetsCsv"
       :form-data="assetsCsvFormData"
       :columns="assetsDataMatchers"
       :optional-columns="assetsOptionalColumns"
@@ -487,7 +481,7 @@
       ref="import-shots-modal"
       :active="modals.isShotsImportDisplayed"
       :is-loading="loading.importingShots"
-      :is-error="errors.importingShots"
+      :is-error="errors.readingShotsCsv"
       :form-data="shotsCsvFormData"
       :columns="shotsDataMatchers"
       :optional-columns="shotsOptionalColumns"
@@ -561,7 +555,9 @@ const errors = reactive({
   importingAssets: false,
   importingAssetsError: null,
   importingShots: false,
-  importingShotsError: null
+  importingShotsError: null,
+  readingAssetsCsv: false,
+  readingShotsCsv: false
 })
 const loading = reactive({
   createProduction: false,
@@ -972,18 +968,27 @@ const toggleModal = modalName => {
   modals[modalName] = !modals[modalName]
 }
 
-const renderAssetsImport = (data, mode) => {
+const showAssetsImportModal = () => {
+  errors.readingAssetsCsv = false
+  modals.isAssetsImportDisplayed = true
+}
+
+const renderAssetsImport = async (data, mode) => {
   loading.importingAssets = true
   errors.importingAssets = false
-  if (mode === 'file') {
-    data = data.get('file')
-  }
-  csv.processCSV(data).then(results => {
-    parsedAssetsCSV.value = results
+  errors.readingAssetsCsv = false
+  try {
+    parsedAssetsCSV.value = await csv.processCSV(
+      mode === 'file' ? data.get('file') : data
+    )
     toggleModal('isAssetsImportDisplayed')
-    loading.importingAssets = false
     toggleModal('isAssetsImportRenderDisplayed')
-  })
+  } catch (err) {
+    errors.readingAssetsCsv = true
+    csv.logReadFailure(err)
+  } finally {
+    loading.importingAssets = false
+  }
 }
 
 const resetAssetsImport = () => {
@@ -1006,18 +1011,27 @@ const uploadAssetsImportFile = data => {
   toggleModal('isAssetsImportRenderDisplayed')
 }
 
-const renderShotsImport = (data, mode) => {
+const showShotsImportModal = () => {
+  errors.readingShotsCsv = false
+  modals.isShotsImportDisplayed = true
+}
+
+const renderShotsImport = async (data, mode) => {
   loading.importingShots = true
   errors.importingShots = false
-  if (mode === 'file') {
-    data = data.get('file')
-  }
-  csv.processCSV(data).then(results => {
-    parsedShotsCSV.value = results
+  errors.readingShotsCsv = false
+  try {
+    parsedShotsCSV.value = await csv.processCSV(
+      mode === 'file' ? data.get('file') : data
+    )
     toggleModal('isShotsImportDisplayed')
-    loading.importingShots = false
     toggleModal('isShotsImportRenderDisplayed')
-  })
+  } catch (err) {
+    errors.readingShotsCsv = true
+    csv.logReadFailure(err)
+  } finally {
+    loading.importingShots = false
+  }
 }
 
 const resetShotsImport = () => {
