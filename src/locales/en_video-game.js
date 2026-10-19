@@ -120,7 +120,6 @@ export default {
     },
     creation: {
       add_shots: 'Add maps (optional)',
-      add_shots_button: 'Add maps',
       add_shots_description: 'Add or import the maps for your production.',
       errorImportingShots: 'An error occurred while importing your maps. The production has been created though!',
       explanation_type: 'If you choose TV Show, the production will be split in chapters.',

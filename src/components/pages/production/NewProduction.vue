@@ -518,14 +518,6 @@
       @confirm="renderShotsImport"
       @cancel="toggleModal('isShotsImportDisplayed')"
     />
-
-    <manage-shots-modal
-      :active="modals.isAddShotsDisplayed"
-      @add-episode="addEpisode"
-      @add-sequence="addSequence"
-      @add-shot="addShot"
-      @cancel="toggleModal('isAddShotsDisplayed')"
-    />
   </div>
 </template>
 
@@ -557,7 +549,6 @@ import EditTaskStatusModal from '@/components/modals/EditTaskStatusModal.vue'
 import EditTaskTypeModal from '@/components/modals/EditTaskTypeModal.vue'
 import ImportModal from '@/components/modals/ImportModal.vue'
 import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
-import ManageShotsModal from '@/components/modals/ManageShotsModal.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 import TextField from '@/components/widgets/TextField.vue'
@@ -598,9 +589,7 @@ const loading = reactive({
   creatingAssetType: false
 })
 const modals = reactive({
-  isAddAssetsDisplayed: false,
   isAddAssetTypeDisplayed: false,
-  isAddShotsDisplayed: false,
   isAddTaskStatusDisplayed: false,
   isAddTaskTypeDisplayed: false,
   isAssetsImportDisplayed: false,
@@ -616,10 +605,8 @@ const productionToCreate = reactive({
   assetsToAdd: null,
   assetTypes: [],
   assetTaskTypes: [],
-  episodesToCreate: [],
   name: null,
   project_template_id: null,
-  sequencesToCreate: [],
   settings: {
     dateStart: null,
     dateEnd: null,
@@ -631,7 +618,6 @@ const productionToCreate = reactive({
   },
   shotsToAdd: null,
   shotTaskTypes: [],
-  shotsToCreate: [],
   taskStatuses: []
 })
 const assetsOptionalColumns = ['Description', 'Ready for', 'Resolution']
@@ -834,12 +820,11 @@ const nbAssetsToImport = computed(() => {
 })
 
 const nbShotsToImport = computed(() => {
-  let nb = productionToCreate.shotsToCreate.length
   if (productionToCreate.shotsToAdd) {
     const lines = productionToCreate.shotsToAdd.filter(l => l.length > 1)
-    nb += lines.length - 1
+    return lines.length - 1
   }
-  return nb
+  return 0
 })
 
 const startDatePlaceholder = computed(() => formatSimpleDate(moment()))
@@ -1121,24 +1106,6 @@ const uploadShotsImportFile = data => {
   store.commit('SHOT_CSV_FILE_SELECTED', formData)
   productionToCreate.shotsToAdd = data
   toggleModal('isShotsImportRenderDisplayed')
-}
-
-const addEpisode = (episode, callback) => {
-  productionToCreate.episodesToCreate.push(episode)
-  episode.id = productionToCreate.episodesToCreate.length - 1
-  callback(episode)
-}
-
-const addSequence = (sequence, callback) => {
-  productionToCreate.sequencesToCreate.push(sequence)
-  sequence.id = productionToCreate.sequencesToCreate.length - 1
-  callback(sequence)
-}
-
-const addShot = (shot, callback) => {
-  productionToCreate.shotsToCreate.push(shot)
-  shot.id = productionToCreate.shotsToCreate.length - 1
-  callback(shot)
 }
 
 const onAddLibraryAssetTaskTypeClicked = () => {

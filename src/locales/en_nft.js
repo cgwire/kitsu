@@ -82,7 +82,6 @@ export default {
     },
     creation: {
       add_shots: 'Add NFTs (optional)',
-      add_shots_button: 'Add NFTs',
       add_shots_description: 'Add or import the NFTs for your production.',
       errorImportingShots: 'An error occurred while importing your NFTs. The production has been created though!',
       import_shots_button: 'Import NFTs',
