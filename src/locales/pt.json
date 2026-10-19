@@ -1474,6 +1474,11 @@
       "no_task_types": "Não existe um tipo de tarefa para esse tipo de entidade",
       "add_task_type_placeholder": "+ Tipo de tarefa",
       "production_description": "As tarefas desta produção só podem usar os tipos de tarefa listados aqui.",
+      "remaining_tasks": "{name} ainda tem {count} tarefa nesta produção. Remover o tipo de tarefa não a exclui. | {name} ainda tem {count} tarefas nesta produção. Remover o tipo de tarefa não as exclui.",
+      "remaining_tasks_delete": "Excluir também esta tarefa, com seus comentários e visualizações | Excluir também estas {count} tarefas, com seus comentários e visualizações",
+      "remaining_tasks_lock": "Digite {name} para confirmar a exclusão",
+      "remove_error": "Não foi possível remover o tipo de tarefa. Tente novamente.",
+      "remove_title": "Remover o tipo de tarefa",
       "select_task_type": "Selecione um tipo de tarefa...",
       "add_task_type_to_library": "Adicionar um tipo de tarefa à biblioteca",
       "library_title": "Biblioteca de tipos de tarefas"

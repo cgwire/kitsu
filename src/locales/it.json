@@ -1474,6 +1474,11 @@
       "no_task_types": "Non ci sono tipi di task per questo tipo di entità",
       "add_task_type_placeholder": "+ Aggiungi tipo di task",
       "production_description": "Le attività di questa produzione possono usare solo i tipi di attività elencati qui.",
+      "remaining_tasks": "{name} ha ancora {count} task in questa produzione. Rimuovere il tipo di task non lo elimina. | {name} ha ancora {count} task in questa produzione. Rimuovere il tipo di task non li elimina.",
+      "remaining_tasks_delete": "Elimina anche questo task, con i suoi commenti e le sue anteprime | Elimina anche questi {count} task, con i loro commenti e le loro anteprime",
+      "remaining_tasks_lock": "Digita {name} per confermare l'eliminazione",
+      "remove_error": "Impossibile rimuovere il tipo di task. Riprova.",
+      "remove_title": "Rimuovi il tipo di task",
       "select_task_type": "Seleziona un tipo di task...",
       "add_task_type_to_library": "Aggiungi un tipo di task alla libreria",
       "library_title": "Libreria dei tipi di task"

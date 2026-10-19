@@ -10,6 +10,7 @@ vi.mock('vue-i18n', () => ({
   })
 }))
 
+import RemoveTaskTypeModal from '@/components/modals/RemoveTaskTypeModal.vue'
 import ProductionTaskType from '@/components/pages/production/ProductionTaskType.vue'
 import ProductionTaskTypes from '@/components/pages/production/ProductionTaskTypes.vue'
 import InfoQuestionMark from '@/components/widgets/InfoQuestionMark.vue'
@@ -146,6 +147,140 @@ describe('ProductionTaskTypes', () => {
       .findAllComponents(ProductionTaskType)
       .find(component => component.props('taskType').id === 'shot-1')
     expect(row.props('scheduleItem')).toEqual(taskTypeBar)
+  })
+
+  // A removed task type keeps its tasks, hidden from the lists and the
+  // schedule: the removal tells how many remain and can delete them first.
+  describe('removing a task type', () => {
+    const removeAnimation = async (wrapper, answers = {}) => {
+      wrapper.vm.$store.dispatch.mockImplementation(action =>
+        action in answers ? answers[action]() : Promise.resolve()
+      )
+      const row = wrapper
+        .findAllComponents(ProductionTaskType)
+        .find(component => component.props('taskType').id === 'shot-1')
+      row.vm.$emit('remove', {
+        taskType: row.props('taskType'),
+        scheduleItem: row.props('scheduleItem')
+      })
+      await flushPromises()
+    }
+
+    const actions = store =>
+      store.dispatch.mock.calls
+        .map(([action]) => action)
+        .filter(action =>
+          ['deleteAllTasks', 'removeTaskTypeFromProduction'].includes(action)
+        )
+
+    it('removes a task type with no task left right away', async () => {
+      const { store, wrapper } = await mountComponent()
+
+      await removeAnimation(wrapper, { countTasks: () => Promise.resolve(0) })
+
+      expect(store.dispatch).toHaveBeenCalledWith('countTasks', {
+        project_id: 'production-1',
+        task_type_id: 'shot-1'
+      })
+      expect(actions(store)).toEqual(['removeTaskTypeFromProduction'])
+      expect(wrapper.findComponent(RemoveTaskTypeModal).exists()).toBe(false)
+    })
+
+    it('keeps the remaining tasks when asked to', async () => {
+      const { store, wrapper } = await mountComponent()
+
+      await removeAnimation(wrapper, { countTasks: () => Promise.resolve(12) })
+      const modal = wrapper.findComponent(RemoveTaskTypeModal)
+      expect(modal.props('nbTasks')).toBe(12)
+      expect(modal.props('taskType').id).toBe('shot-1')
+      expect(actions(store)).toEqual([])
+
+      modal.vm.$emit('confirm', false)
+      await flushPromises()
+
+      expect(actions(store)).toEqual(['removeTaskTypeFromProduction'])
+      expect(wrapper.findComponent(RemoveTaskTypeModal).exists()).toBe(false)
+    })
+
+    it('deletes the remaining tasks before removing the task type', async () => {
+      const { store, wrapper } = await mountComponent()
+
+      await removeAnimation(wrapper, { countTasks: () => Promise.resolve(12) })
+      wrapper.findComponent(RemoveTaskTypeModal).vm.$emit('confirm', true)
+      await flushPromises()
+
+      expect(store.dispatch).toHaveBeenCalledWith('deleteAllTasks', {
+        projectId: 'production-1',
+        taskTypeId: 'shot-1'
+      })
+      expect(actions(store)).toEqual([
+        'deleteAllTasks',
+        'removeTaskTypeFromProduction'
+      ])
+    })
+
+    it('keeps the modal open while the tasks are being deleted', async () => {
+      const { store, wrapper } = await mountComponent()
+      let endDeletion
+
+      await removeAnimation(wrapper, {
+        countTasks: () => Promise.resolve(12),
+        deleteAllTasks: () =>
+          new Promise(resolve => {
+            endDeletion = resolve
+          })
+      })
+      const modal = wrapper.findComponent(RemoveTaskTypeModal)
+      modal.vm.$emit('confirm', true)
+      await flushPromises()
+      expect(modal.props('isLoading')).toBe(true)
+
+      modal.vm.$emit('cancel')
+      await flushPromises()
+      expect(wrapper.findComponent(RemoveTaskTypeModal).exists()).toBe(true)
+
+      endDeletion()
+      await flushPromises()
+      expect(actions(store)).toEqual([
+        'deleteAllTasks',
+        'removeTaskTypeFromProduction'
+      ])
+      expect(wrapper.findComponent(RemoveTaskTypeModal).exists()).toBe(false)
+    })
+
+    it('keeps the task type when its tasks could not be deleted', async () => {
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { store, wrapper } = await mountComponent()
+
+      await removeAnimation(wrapper, {
+        countTasks: () => Promise.resolve(12),
+        deleteAllTasks: () => Promise.reject(new Error('Server error'))
+      })
+      wrapper.findComponent(RemoveTaskTypeModal).vm.$emit('confirm', true)
+      await flushPromises()
+
+      expect(actions(store)).toEqual(['deleteAllTasks'])
+      const modal = wrapper.findComponent(RemoveTaskTypeModal)
+      expect(modal.props('isError')).toBe(true)
+      expect(modal.props('isLoading')).toBe(false)
+      expect(consoleError).toHaveBeenCalled()
+      consoleError.mockRestore()
+    })
+
+    it('keeps the task type when its tasks could not be counted', async () => {
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { store, wrapper } = await mountComponent()
+
+      await removeAnimation(wrapper, {
+        countTasks: () => Promise.reject(new Error('Server error'))
+      })
+
+      expect(actions(store)).toEqual([])
+      expect(wrapper.findComponent(RemoveTaskTypeModal).exists()).toBe(false)
+      expect(wrapper.get('.error').text()).toBe('productions.edit_error')
+      expect(consoleError).toHaveBeenCalled()
+      consoleError.mockRestore()
+    })
   })
 
   it('explains the bitrate columns and gives their maximum', async () => {

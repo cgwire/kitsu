@@ -1474,6 +1474,11 @@
       "no_task_types": "Il n'y a pas de type de tâche pour ce type d'entité",
       "add_task_type_placeholder": "+ Ajouter un type de tâche",
       "production_description": "Les tâches de cette production ne peuvent utiliser que les types de tâche listés ici.",
+      "remaining_tasks": "{name} a encore {count} tâche dans cette production. Retirer le type de tâche ne la supprime pas. | {name} a encore {count} tâches dans cette production. Retirer le type de tâche ne les supprime pas.",
+      "remaining_tasks_delete": "Supprimer aussi cette tâche, avec ses commentaires et ses previews | Supprimer aussi ces {count} tâches, avec leurs commentaires et leurs previews",
+      "remaining_tasks_lock": "Tapez {name} pour confirmer la suppression",
+      "remove_error": "Impossible de retirer le type de tâche. Veuillez réessayer.",
+      "remove_title": "Retirer le type de tâche",
       "select_task_type": "Sélectionner un type de tâche...",
       "add_task_type_to_library": "Ajouter un type de tâche à la bibliothèque",
       "library_title": "Bibliothèque de types de tâche"
