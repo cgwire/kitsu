@@ -185,14 +185,23 @@ describe('ProductionOverview', () => {
   it('links the production and its playlists to the playlist pages', () => {
     const wrapper = mountOverview({
       production: { ...production, production_type: 'tvshow', first_episode_id: 'ep-1' },
-      playlists: [playlist(1, 'ep-1')]
+      playlists: [
+        playlist(1, 'ep-1'),
+        { ...playlist(2), is_for_all: true },
+        playlist(3)
+      ]
     })
     expect(wrapper.find('a.production').attributes('href')).toBe(
       '/productions/production-1/episodes/ep-1/playlists'
     )
-    expect(wrapper.find('a.playlist').attributes('href')).toBe(
-      '/productions/production-1/episodes/ep-1/playlists/playlist-1'
-    )
+    // A playlist without episode is the main pack, unless it is for all.
+    expect(
+      wrapper.findAll('a.playlist').map(link => link.attributes('href'))
+    ).toEqual([
+      '/productions/production-1/episodes/ep-1/playlists/playlist-1',
+      '/productions/production-1/episodes/all/playlists/playlist-2',
+      '/productions/production-1/episodes/main/playlists/playlist-3'
+    ])
   })
 
   it('keeps the three latest playlists', () => {

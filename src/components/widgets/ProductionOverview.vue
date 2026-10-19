@@ -228,10 +228,12 @@ const chartData = departmentId =>
       (statusRanks.value.get(b[0]) ?? Infinity)
   )
 
+// A TV-show playlist without episode is the main pack, unless it is for all.
 const playlistPath = playlist =>
   getPlaylistPath(
     props.production.id,
-    episodeId.value && (playlist.episode_id || 'all'),
+    episodeId.value &&
+      (playlist.episode_id || (playlist.is_for_all ? 'all' : 'main')),
     playlist.id
   )
 </script>
