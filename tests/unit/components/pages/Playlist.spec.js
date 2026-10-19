@@ -598,6 +598,42 @@ describe('Playlist page, addition buttons', () => {
     await flushPromises()
   })
 
+  // Under All shots, the loaded shots are those of the whole production, and
+  // the main pack loads none of its own.
+  it.each([
+    [
+      'all shots',
+      { isTVShow: true, currentEpisode: { id: 'all' } },
+      { for_entity: 'shot' },
+      []
+    ],
+    ['the main pack', { isTVShow: true, currentEpisode: { id: 'main' } }, {}, []],
+    ['an episode', { isTVShow: true }, {}, ['playlists.add_episode']],
+    ['a movie', { isTVShow: false }, {}, ['playlists.add_movie']]
+  ])('offers the entire additions for %s', async (_, state, query, labels) => {
+    const { wrapper } = await openPlaylist(
+      { for_entity: 'shot' },
+      { state, query }
+    )
+    await flushPromises()
+    const additions = [
+      'playlists.build_daily',
+      'playlists.build_weekly',
+      'playlists.add_episode',
+      'playlists.add_movie'
+    ]
+    const offered = wrapper
+      .findAll('button')
+      .map(button => button.text())
+      .filter(text => additions.includes(text))
+
+    expect(offered).toEqual([
+      'playlists.build_daily',
+      'playlists.build_weekly',
+      ...labels
+    ])
+  })
+
   describe('loaded shots', () => {
     const shot = (id, name) => ({ id, name, sequence_name: 'SQ01' })
     const fillShotMap = shots => {

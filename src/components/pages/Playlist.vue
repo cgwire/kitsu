@@ -284,38 +284,40 @@
               >
                 {{ $t('playlists.build_weekly') }}
               </button>
-              <button
-                :class="{
-                  button: true,
-                  'add-sequence': true,
-                  'is-loading': loading.addEpisode
-                }"
-                :disabled="isAdditionLoading"
-                @click="addEpisodePending"
-                v-if="
-                  isTVShow &&
-                  !isAssetPlaylist &&
-                  !isSequencePlaylist &&
-                  !isEditPlaylist &&
-                  !isEpisodePlaylist
-                "
-              >
-                {{ $t('playlists.add_episode') }}
-              </button>
-              <button
-                :class="{
-                  button: true,
-                  'add-sequence': true,
-                  'is-loading': loading.addMovie
-                }"
-                :disabled="isAdditionLoading"
-                @click="addMovie"
-                v-else-if="
-                  !isAssetPlaylist && !isEditPlaylist && !isEpisodePlaylist
-                "
-              >
-                {{ $t('playlists.add_movie') }}
-              </button>
+              <template v-if="isEntireAdditionOffered">
+                <button
+                  :class="{
+                    button: true,
+                    'add-sequence': true,
+                    'is-loading': loading.addEpisode
+                  }"
+                  :disabled="isAdditionLoading"
+                  @click="addEpisodePending"
+                  v-if="
+                    isTVShow &&
+                    !isAssetPlaylist &&
+                    !isSequencePlaylist &&
+                    !isEditPlaylist &&
+                    !isEpisodePlaylist
+                  "
+                >
+                  {{ $t('playlists.add_episode') }}
+                </button>
+                <button
+                  :class="{
+                    button: true,
+                    'add-sequence': true,
+                    'is-loading': loading.addMovie
+                  }"
+                  :disabled="isAdditionLoading"
+                  @click="addMovie"
+                  v-else-if="
+                    !isAssetPlaylist && !isEditPlaylist && !isEpisodePlaylist
+                  "
+                >
+                  {{ $t('playlists.add_movie') }}
+                </button>
+              </template>
             </div>
           </div>
         </div>
@@ -680,6 +682,13 @@ const allForEntity = computed(() => {
 
 const allShotsQuery = computed(() =>
   allForEntity.value === 'shot' ? { for_entity: 'shot' } : {}
+)
+
+// The entire episode and movie additions add every loaded shot: those of
+// the whole production under All shots, those another page left loaded
+// under the main pack, which loads none.
+const isEntireAdditionOffered = computed(
+  () => !isTVShow.value || !['all', 'main'].includes(currentEpisode.value?.id)
 )
 
 // The store keeps the last loaded list across pages: on mount it can
