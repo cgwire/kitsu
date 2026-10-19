@@ -120,6 +120,15 @@ export default {
     return client.ppost(path, data)
   },
 
+  setTaskTypeClientVisibility(productionId, taskTypeId, isClientVisible) {
+    const data = {
+      task_type_id: taskTypeId,
+      is_client_visible: isClientVisible
+    }
+    const path = `/api/data/projects/${productionId}/settings/task-types`
+    return client.ppost(path, data)
+  },
+
   addSettingsToProduction(
     productionId,
     {

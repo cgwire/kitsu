@@ -424,6 +424,24 @@ const getters = {
     })
   },
 
+  // Only an explicit false hides: null or a missing flag means visible.
+  getClientAccess: (state, getters, rootState, rootGetters) => id => {
+    const production = state.productionMap.get(id)
+    const isClient = rootGetters.isCurrentUserClient
+    const isOn = flag => !isClient || production?.[flag] !== false
+    return {
+      isStatsVisible: isOn('is_client_stats_visible'),
+      isTaskListVisible: isOn('is_client_task_list_visible'),
+      isTaskPanelVisible: isOn('is_client_task_panel_visible'),
+      isTaskTypeVisible: taskTypeId =>
+        !isClient ||
+        production?.task_type_links?.[taskTypeId]?.is_client_visible !== false
+    }
+  },
+
+  clientAccess: (state, getters) =>
+    getters.getClientAccess(getters.currentProduction?.id),
+
   currentProduction: state => {
     if (state.currentProduction) {
       return state.currentProduction
@@ -680,6 +698,22 @@ const actions = {
           production,
           taskTypeId,
           ...bitrates
+        })
+      })
+  },
+
+  setTaskTypeClientVisibility(
+    { commit, state },
+    { taskTypeId, isClientVisible }
+  ) {
+    const production = state.currentProduction
+    return productionsApi
+      .setTaskTypeClientVisibility(production.id, taskTypeId, isClientVisible)
+      .then(() => {
+        commit(PRODUCTION_SET_TASK_TYPE_LINK, {
+          production,
+          taskTypeId,
+          is_client_visible: isClientVisible
         })
       })
   },

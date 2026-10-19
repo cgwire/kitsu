@@ -247,6 +247,64 @@ describe('Productions store', () => {
       ])
     })
 
+    describe('client access', () => {
+      const flags = {
+        is_client_stats_visible: false,
+        is_client_task_list_visible: false,
+        is_client_task_panel_visible: false,
+        task_type_links: { tt: { is_client_visible: false } }
+      }
+      const access = (production, isClient, id = 'p') =>
+        store.getters.getClientAccess(
+          { productionMap: new Map([['p', { id: 'p', ...production }]]) },
+          {},
+          {},
+          { isCurrentUserClient: isClient }
+        )(id)
+
+      test('non-client sees everything', () => {
+        const result = access(flags, false)
+        expect(result.isStatsVisible).toBe(true)
+        expect(result.isTaskListVisible).toBe(true)
+        expect(result.isTaskPanelVisible).toBe(true)
+        expect(result.isTaskTypeVisible('tt')).toBe(true)
+      })
+
+      test('client sees false per flag', () => {
+        const result = access(flags, true)
+        expect(result.isStatsVisible).toBe(false)
+        expect(result.isTaskListVisible).toBe(false)
+        expect(result.isTaskPanelVisible).toBe(false)
+        expect(result.isTaskTypeVisible('tt')).toBe(false)
+        expect(result.isTaskTypeVisible('other')).toBe(true)
+      })
+
+      test('flags are independent', () => {
+        const result = access({ is_client_task_list_visible: false }, true)
+        expect(result.isStatsVisible).toBe(true)
+        expect(result.isTaskListVisible).toBe(false)
+      })
+
+      test('null, missing flags and unknown production are visible', () => {
+        const nulls = access({ is_client_stats_visible: null }, true)
+        expect(nulls.isStatsVisible).toBe(true)
+        expect(nulls.isTaskListVisible).toBe(true)
+        expect(nulls.isTaskTypeVisible('tt')).toBe(true)
+        expect(access({}, true, 'unknown').isTaskPanelVisible).toBe(true)
+      })
+
+      test('clientAccess reads the current production', () => {
+        const getClientAccess = vi.fn(() => 'x')
+        expect(
+          store.getters.clientAccess(
+            {},
+            { getClientAccess, currentProduction: { id: 'p' } }
+          )
+        ).toBe('x')
+        expect(getClientAccess).toHaveBeenCalledWith('p')
+      })
+    })
+
     describe('team roles', () => {
       const state = {
         currentProduction: { id: 'production-1' },
@@ -889,6 +947,27 @@ describe('Productions store', () => {
         456: { hd_bitrate_compression: 20 }
       })
       expect(nextProduction.task_type_links).toEqual({})
+    })
+
+    test('setTaskTypeClientVisibility sends the flag and updates the link', async () => {
+      const production = {
+        id: '123',
+        task_type_links: { 456: { priority: 3 } }
+      }
+      const state = { currentProduction: production }
+      const commit = (type, payload) => store.mutations[type](state, payload)
+      productionApi.setTaskTypeClientVisibility = vi.fn(() => Promise.resolve())
+      await store.actions.setTaskTypeClientVisibility(
+        { commit, state },
+        { taskTypeId: '456', isClientVisible: false }
+      )
+      expect(productionApi.setTaskTypeClientVisibility).toHaveBeenCalledWith(
+        '123', '456', false
+      )
+      expect(production.task_type_links[456]).toEqual({
+        priority: 3,
+        is_client_visible: false
+      })
     })
 
     test('PRODUCTION_SET_TASK_TYPE_LINK keeps the other link fields', () => {
