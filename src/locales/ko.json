@@ -473,6 +473,7 @@
       "nb_frames": "프레임 | 프레임",
       "person": "사람",
       "preview_3d_not_supported": "이 브라우저에서는 3D 미리 보기를 지원하지 않습니다(WebGL2 필요). 브라우저를 최신 버전으로 업데이트하세요.",
+      "preview_account_banner": "미리보기 계정 (읽기 전용)",
       "previous": "이전",
       "profile": "프로필",
       "production": "프로덕션",
@@ -1052,6 +1053,37 @@
       "view_created": "재생 목록 보기"
     },
     "productions": {
+      "clients": {
+        "block": "지금 차단",
+        "blocked": "차단됨",
+        "copy": "복사",
+        "create": "미리보기 계정 만들기",
+        "delete": "삭제",
+        "delete_confirm": "이 프로덕션의 미리보기 계정을 삭제하시겠습니까?",
+        "description": "라이선스를 사용하지 않고 읽기 전용으로 클라이언트와 똑같이 Kitsu를 확인하세요.",
+        "error": "미리보기 계정을 업데이트하는 중 오류가 발생했습니다.",
+        "isolation_description": "각 고객은 자신의 댓글과 고객에게 공유된 댓글만 보며, 다른 고객의 댓글은 보지 않습니다.",
+        "isolation_title": "클라이언트 격리",
+        "metadata_description": "체크한 메타데이터 열은 에셋 및 샷 목록에서 고객에게 표시됩니다.",
+        "metadata_empty": "이 프로덕션에는 메타데이터가 없습니다.",
+        "metadata_title": "클라이언트에게 표시되는 메타데이터",
+        "open_for_hour": "1시간 동안 열기",
+        "open_until": "{time}까지 열림",
+        "password": "비밀번호 (한 번만 표시됨)",
+        "password_hint": "지금 복사하세요. 이 이메일로 시크릿 창에서 로그인하세요.",
+        "preview_title": "미리보기 계정",
+        "regenerate": "비밀번호 다시 생성",
+        "save_error": "설정을 저장하는 중 오류가 발생했습니다.",
+        "statuses_description": "클라이언트는 댓글을 작성할 때 이 상태만 설정할 수 있습니다.",
+        "statuses_empty": "클라이언트에게 표시되는 상태가 없습니다.",
+        "statuses_link": "작업 상태 편집",
+        "statuses_title": "클라이언트가 사용할 수 있는 상태",
+        "team_description": "이 프로덕션 팀에서 고객 역할을 가진 사람들입니다.",
+        "team_empty": "팀에 클라이언트가 없습니다.",
+        "team_title": "팀의 클라이언트",
+        "title": "클라이언트",
+        "unavailable": "미리보기 계정에는 비밀번호를 사용하는 로컬 인증이 필요합니다. 그렇지 않으면 일반 클라이언트 계정을 만드세요."
+      },
       "current": "선택된 프로덕션",
       "delete_text": "데이터베이스에서 {name}을(를) 제거하시겠습니까? 텍스트 필드에 삭제할 프로젝트의 이름을 입력하여 확인하십시오.",
       "delete_error": "이 프로덕션을 삭제하는 도중에 오류가 발생했습니다. 아마도 연결된 데이터가 있을 것입니다. 이 프로덕션에 작업, 샷 또는 자산이 연결되어 있지 않은 것이 확실합니까? Kitsu는 프로덕션 삭제를 허용하지 않습니다. 그 대신에, 더 이상 프로덕션을 보고 싶지 않다면 닫으실 수 있습니다.",
@@ -1061,6 +1093,10 @@
       "open_productions": "내 프로덕션",
       "picture": "사진 변경",
       "remove_picture": "이미지 삭제",
+      "settings_menu": {
+        "production": "프로덕션",
+        "workflow": "워크플로"
+      },
       "title": "프로덕션",
       "home": {
         "all_playlists": "모든 플레이리스트",
@@ -1147,15 +1183,20 @@
       "edit_error": "프로덕션을 편집하는 도중 오류가 발생했습니다. 지원팀에 문의하여 주십시오.",
       "brief": {
         "title": "요약",
+        "edit_hint": "요약을 두 번 클릭하면 편집할 수 있습니다.",
         "empty": "아직 요약이 없습니다. 만드시겠습니까?",
         "edit_error": "요약본을 편집하는 동안 오류가 발생했습니다."
       },
       "parameters": {
+        "publish_default_description": "아티스트가 작업을 열면 댓글 양식 대신 게시 양식이 표시됩니다.",
         "title": "매개변수",
-        "previews_and_comments": "프리뷰 및 댓글",
+        "comments_and_retakes": "댓글 및 리테이크",
         "save": {
           "button": "확인"
-        }
+        },
+        "general_title": "일반",
+        "max_retakes_description": "작업이 이 재촬영 횟수에 도달하면 아티스트는 재촬영 상태를 설정할 수 없습니다. 0은 제한 없음을 뜻합니다.",
+        "previews_and_comments": "프리뷰 및 댓글"
       },
       "creation": {
         "add_assets": "어셋 추가 (선택)",
@@ -1234,11 +1275,16 @@
         "bitrate_max": "최댓값: {value}Mbit/s",
         "bitrate_size": "분당 약 {size}MB",
         "bitrates": "비트레이트",
+        "encoding_explanation": "업로드된 영상은 이 프레임 레이트, 비율, 해상도로 변환되며, 기존 미리 보기는 다시 인코딩되지 않습니다.",
+        "encoding_title": "인코딩",
+        "frame_in_description": "플레이어 카운터가 0 대신 샷의 프레임 인에서 시작합니다.",
         "hd_bitrate_description": "전체 해상도 버전으로, HD 모드에서 재생되며 다운로드에도 사용됩니다.",
         "ld_bitrate_description": "가로 1280픽셀의 가벼운 버전으로, LD 모드에서 재생됩니다.",
         "ld_bitrate_max": "최댓값: {value}Mbit/s (HD 비트레이트)",
         "next_uploads_only": "변경 사항은 이후 업로드에만 적용되며, 기존 미리 보기는 다시 인코딩되지 않습니다.",
+        "previews_title": "미리보기",
         "restore_default": "기본값 복원",
+        "revision_padding_description": "수정본 번호 앞에 0을 채웁니다. 예를 들어 3이면 v001로 표시됩니다.",
         "task_type_bitrates": "동영상 탭의 비트레이트를 사용하려면 비워 두세요.",
         "task_type_ld_bitrate_max": "최댓값: 작업 유형의 HD 비트레이트",
         "title": "동영상"
@@ -1378,6 +1424,7 @@
       "edit_title": "작업 상태 편집",
       "number": "작업 상태 | 작업 상태",
       "new_task_status": "작업 상태 추가",
+      "production_description": "이 프로덕션의 작업에는 이 상태들만 설정할 수 있습니다.",
       "title": "작업 상태",
       "fields": {
         "color": "색상",
@@ -1426,6 +1473,7 @@
       },
       "no_task_types": "이 엔티티 유형에 대한 작업 유형이 없습니다.",
       "add_task_type_placeholder": "+ 작업 유형 추가",
+      "production_description": "이 프로덕션의 작업은 여기에 나열된 작업 유형만 사용할 수 있습니다.",
       "select_task_type": "작업 유형 선택...",
       "add_task_type_to_library": "라이브러리에 작업 유형 추가하기",
       "library_title": "작업 유형 라이브러리"
@@ -1970,6 +2018,7 @@
       "in_title": "변경을 발동하는 상태",
       "out_title": "트리거 발동 시 적용되는 변경입니다",
       "new_status_automation": "상태 자동화 추가",
+      "production_description": "자동화는 상태가 설정될 때 작업 상태 또는 다음 작업을 변경합니다.",
       "run_for_selection": "선택된 작업에 상태 자동화 실행:",
       "title": "상태 자동화",
       "wrong_automation": "이 자동화는 선행 작업 유형에 적용됩니다. 이러한 자동화는 (무한 순환을 피하기 위해) Kitsu에서 허용되지 않으며, 아무 영향을 미치지 않습니다.",
@@ -2023,6 +2072,7 @@
       "number": "배경 | 배경",
       "edit_background": "배경 편집",
       "new_background": "새 배경 추가",
+      "production_description": "이 프로덕션의 3D 미리 보기를 위해 플레이어에서 제공되는 3D 배경입니다.",
       "title": "3D 배경",
       "fields": {
         "is_default": "기본값입니다.",
@@ -2035,6 +2085,7 @@
       "title": "보드",
       "empty": "보드에 표시할 항목이 없습니다. 진행 중인 작업이 없거나, 검색 결과가 없거나, 프로덕션 설정에서 사용자 역할에 대해 활성화된 작업 상태가 없기 때문입니다.",
       "settings": {
+        "description": "이 상태를 자신의 보드에서 열로 보는 역할입니다.",
         "title": "보드 상태",
         "visible": "칸반 보드에 표시되는 ...",
         "select_all": "모두 선택",

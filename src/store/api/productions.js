@@ -267,5 +267,23 @@ export default {
         field_order: fieldOrder
       }
     )
+  },
+
+  getPreviewAccount(productionId) {
+    return client.pget(`/api/data/projects/${productionId}/preview-account`)
+  },
+
+  createPreviewAccount(productionId) {
+    return client.ppost(`/api/data/projects/${productionId}/preview-account`)
+  },
+
+  setPreviewAccountOpen(productionId, isOpen) {
+    return client.pput(`/api/data/projects/${productionId}/preview-account`, {
+      is_open: isOpen
+    })
+  },
+
+  deletePreviewAccount(productionId) {
+    return client.pdel(`/api/data/projects/${productionId}/preview-account`)
   }
 }

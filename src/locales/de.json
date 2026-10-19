@@ -473,6 +473,7 @@
       "nb_frames": "Frame | Frames",
       "person": "Person",
       "preview_3d_not_supported": "3D-Vorschauen werden in diesem Browser nicht unterstützt (WebGL2 ist erforderlich). Bitte aktualisieren Sie ihn auf die neueste Version.",
+      "preview_account_banner": "Vorschau-Konto (schreibgeschützt)",
       "previous": "Zurück",
       "profile": "Profil",
       "production": "Produktion",
@@ -1052,6 +1053,37 @@
       "view_created": "Wiedergabeliste anzeigen"
     },
     "productions": {
+      "clients": {
+        "block": "Jetzt sperren",
+        "blocked": "Gesperrt",
+        "copy": "Kopieren",
+        "create": "Vorschau-Konto erstellen",
+        "delete": "Löschen",
+        "delete_confirm": "Das Vorschau-Konto dieser Produktion löschen?",
+        "description": "Sieh Kitsu genau wie ein Kunde, schreibgeschützt und ohne einen Platz zu belegen.",
+        "error": "Beim Aktualisieren des Vorschau-Kontos ist ein Fehler aufgetreten.",
+        "isolation_description": "Jeder Kunde sieht nur seine eigenen Kommentare und die mit Kunden geteilten, nicht die anderer Kunden.",
+        "isolation_title": "Kundenisolierung",
+        "metadata_description": "Markierte Metadatenspalten werden Kunden in den Asset- und Shot-Listen angezeigt.",
+        "metadata_empty": "Diese Produktion hat keine Metadaten.",
+        "metadata_title": "Für Kunden sichtbare Metadaten",
+        "open_for_hour": "Für 1 Stunde öffnen",
+        "open_until": "Geöffnet bis {time}",
+        "password": "Passwort (wird nur einmal angezeigt)",
+        "password_hint": "Kopiere es jetzt. Melde dich mit dieser E-Mail in einem privaten Fenster an.",
+        "preview_title": "Vorschau-Konto",
+        "regenerate": "Passwort neu generieren",
+        "save_error": "Beim Speichern der Einstellungen ist ein Fehler aufgetreten.",
+        "statuses_description": "Kunden können beim Kommentieren nur diese Status setzen.",
+        "statuses_empty": "Kein Status ist für Kunden sichtbar.",
+        "statuses_link": "Aufgabenstatus bearbeiten",
+        "statuses_title": "Für Kunden verfügbare Status",
+        "team_description": "Personen mit der Rolle Kunde im Team dieser Produktion.",
+        "team_empty": "Kein Kunde im Team.",
+        "team_title": "Kunden des Teams",
+        "title": "Kunden",
+        "unavailable": "Vorschau-Konten erfordern lokale Authentifizierung mit Passwörtern. Erstelle andernfalls ein reguläres Kundenkonto."
+      },
       "current": "Ausgewählte Produktion",
       "delete_text": "Sind Sie sicher, dass Sie {name} aus Ihrer Datenbank entfernen möchten? Bitte bestätigen Sie, indem Sie den Namen der zu löschenden Produktion in das Textfeld eingeben.",
       "delete_error": "Beim Löschen dieser Produktion ist ein Fehler aufgetreten. Möglicherweise sind noch Daten damit verknüpft. Sind Sie sicher, dass diese Produktion keine Aufgabe, keinen Shot und kein Asset enthält? Kitsu erlaubt das Löschen von Produktionen nicht. Wenn Sie die Produktion nicht mehr sehen möchten, können Sie sie stattdessen schließen.",
@@ -1061,6 +1093,10 @@
       "open_productions": "Meine Produktionen",
       "picture": "Bild ändern",
       "remove_picture": "Bild entfernen",
+      "settings_menu": {
+        "production": "Produktion",
+        "workflow": "Workflow"
+      },
       "title": "Produktionen",
       "home": {
         "all_playlists": "Alle Playlists",
@@ -1147,15 +1183,20 @@
       "edit_error": "Beim Bearbeiten der Produktion ist ein Fehler aufgetreten. Bitte kontaktieren Sie unser Support-Team.",
       "brief": {
         "title": "Kurzdarstellung",
+        "edit_hint": "Doppelklicken Sie auf die Kurzdarstellung, um sie zu bearbeiten.",
         "empty": "Es gibt noch keine Kurzdarstellung. Was halten Sie davon, eine zu erstellen?",
         "edit_error": "Bei der Bearbeitung des Briefs ist ein Fehler aufgetreten."
       },
       "parameters": {
+        "publish_default_description": "Künstler sehen beim Öffnen einer Aufgabe das Veröffentlichungsformular statt des Kommentarformulars.",
         "title": "Parameter",
-        "previews_and_comments": "Previews und Kommentare",
+        "comments_and_retakes": "Kommentare und Retakes",
         "save": {
           "button": "Bestätigen"
-        }
+        },
+        "general_title": "Allgemein",
+        "max_retakes_description": "Künstler können keinen Retake-Status mehr setzen, sobald eine Aufgabe diese Anzahl an Retakes erreicht. 0 bedeutet kein Limit.",
+        "previews_and_comments": "Previews und Kommentare"
       },
       "creation": {
         "add_assets": "Assets hinzufügen (optional)",
@@ -1234,11 +1275,16 @@
         "bitrate_max": "Maximum: {value} Mbit/s",
         "bitrate_size": "Etwa {size} MB pro Minute",
         "bitrates": "Bitraten",
+        "encoding_explanation": "Hochgeladene Videos werden in diese Bildrate, dieses Seitenverhältnis und diese Auflösung umgewandelt; vorhandene Vorschauen werden nicht neu enkodiert.",
+        "encoding_title": "Kodierung",
+        "frame_in_description": "Der Zähler des Players beginnt beim Frame-In des Shots statt bei 0.",
         "hd_bitrate_description": "Version in voller Auflösung, die im HD-Modus abgespielt und für Downloads verwendet wird.",
         "ld_bitrate_description": "Kleinere, 1280 Pixel breite Version, die im LD-Modus abgespielt wird.",
         "ld_bitrate_max": "Maximum: {value} Mbit/s (HD-Bitrate)",
         "next_uploads_only": "Änderungen gelten nur für künftig hochgeladene Videos: Vorhandene Vorschauen werden nicht neu enkodiert.",
+        "previews_title": "Previews",
         "restore_default": "Standard wiederherstellen",
+        "revision_padding_description": "Fügt Revisionsnummern führende Nullen hinzu, zum Beispiel wird 3 als v001 angezeigt.",
         "task_type_bitrates": "Leer lassen, um die Bitraten der Registerkarte „Video“ zu verwenden.",
         "task_type_ld_bitrate_max": "Maximum: die HD-Bitrate des Aufgabentyps",
         "title": "Video"
@@ -1378,6 +1424,7 @@
       "edit_title": "Aufgabenstatus bearbeiten",
       "number": "Aufgabenstatus | Aufgabenstatus",
       "new_task_status": "Hinzufügen eines Aufgabenstatus",
+      "production_description": "Nur diese Status können für die Aufgaben dieser Produktion gesetzt werden.",
       "title": "Aufgabenstatus",
       "fields": {
         "color": "Farbe",
@@ -1426,6 +1473,7 @@
       },
       "no_task_types": "Es gibt keinen Aufgabentyp für diesen Entitätstyp",
       "add_task_type_placeholder": "+ Aufgabentyp",
+      "production_description": "Aufgaben dieser Produktion können nur die hier aufgeführten Aufgabentypen verwenden.",
       "select_task_type": "Wählen Sie einen Aufgabentyp...",
       "add_task_type_to_library": "Hinzufügen eines Aufgabentyps zur Bibliothek",
       "library_title": "Aufgabentyp-Bibliothek"
@@ -1970,6 +2018,7 @@
       "in_title": "Status, der eine Änderung auslöst",
       "out_title": "Die Änderung, die beim Auslösen des Triggers angewendet wird",
       "new_status_automation": "Statusautomatisierung hinzufügen",
+      "production_description": "Eine Automatisierung ändert den Status einer Aufgabe oder die nächste Aufgabe, wenn ein Status gesetzt wird.",
       "run_for_selection": "Führen Sie die Statusautomatisierung für ausgewählte Aufgaben aus:",
       "title": "Statusautomatisierungen",
       "wrong_automation": "Diese Automatisierung gilt für einen rückwärtsgerichteten Aufgabentyp. Sie ist von Kitsu nicht erlaubt (um Zyklen zu vermeiden). Sie hat keine Auswirkungen.",
@@ -2023,6 +2072,7 @@
       "number": "Hintergrund | Hintergründe",
       "edit_background": "Hintergrund bearbeiten",
       "new_background": "Einen neuen Hintergrund hinzufügen",
+      "production_description": "3D-Hintergründe, die im Player für die 3D-Vorschauen dieser Produktion angeboten werden.",
       "title": "3D-Hintergründe",
       "fields": {
         "is_default": "Ist Standard",
@@ -2035,6 +2085,7 @@
       "title": "Board",
       "empty": "Auf dem Board gibt es nichts anzuzeigen: Sie haben keine laufenden Aufgaben, Ihre Suche hat keine Ergebnisse geliefert, oder in den Produktionseinstellungen sind für Ihre Rolle keine Aufgabenstatus aktiviert.",
       "settings": {
+        "description": "Rollen, die diesen Status als Spalte auf ihrem Board sehen.",
         "title": "Board-Status",
         "visible": "Angezeigt auf der Kanban-Tafel von...",
         "select_all": "Alle auswählen",

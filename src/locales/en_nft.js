@@ -77,6 +77,9 @@ export default {
 
   productions: {
     delete_error: 'An error occurred while deleting this production. There are probably data linked to it. Are you sure this production has no task, NFT, or asset linked to it? Kitsu doesn\'t allow production deletion. If you don\'t want to see the production anymore, you can close it instead.',
+    clients: {
+      metadata_description: 'Checked metadata columns are shown to clients in the asset and NFT lists.'
+    },
     creation: {
       add_shots: 'Add NFTs (optional)',
       add_shots_button: 'Add NFTs',
@@ -92,6 +95,9 @@ export default {
     },
     type: {
       shots: 'Only NFTs'
+    },
+    video: {
+      frame_in_description: "The player counter starts at the NFT's frame in instead of 0."
     }
   },
 

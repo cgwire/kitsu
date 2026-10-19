@@ -115,6 +115,9 @@ export default {
 
   productions: {
     delete_error: 'An error occurred while deleting this production. There are probably data linked to it. Are you sure this production has no task, map, or asset linked to it? Kitsu doesn\'t allow production deletion. If you don\'t want to see the production anymore, you can close it instead.',
+    clients: {
+      metadata_description: 'Checked metadata columns are shown to clients in the asset and map lists.'
+    },
     creation: {
       add_shots: 'Add maps (optional)',
       add_shots_button: 'Add maps',
@@ -136,6 +139,9 @@ export default {
     },
     type: {
       shots: 'Only maps'
+    },
+    video: {
+      frame_in_description: "The player counter starts at the map's frame in instead of 0."
     }
   },
 

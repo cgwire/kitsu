@@ -90,6 +90,7 @@ const NAME_RGX =
 const SESSION_CHECK_TIMEOUT = 20000
 
 let userId = null
+let isPreviewAccount = false
 let isPageHidden = false
 const reportedRoutes = new Set()
 
@@ -191,10 +192,11 @@ const getSessionOwner = async () => {
 }
 
 // One warning per kind of failure, route and session, whatever the ids,
-// dates and numbers in the path. The 2FA setup gate refuses everything on
-// purpose.
+// dates and numbers in the path. The 2FA setup gate and the read-only preview
+// accounts refuse requests on purpose.
 export const reportApiError = async (err, { method, path, duration }) => {
   if (err?.body?.two_factor_authentication_required) return
+  if (isPreviewAccount) return
   const kind = getFailureKind(err)
   const cleanPath = scrubSharedToken(path.split('?')[0])
   const route = getPathPattern(cleanPath)
@@ -277,6 +279,7 @@ export default {
 
   setContext(organisation, user) {
     userId = user.id
+    isPreviewAccount = Boolean(user.preview_project_id)
     Sentry.setTag('kitsu.org', organisation.name)
     Sentry.setTag('kitsu.role', user.role)
     Sentry.setUser({

@@ -1,9 +1,12 @@
 <template>
-  <board-settings
-    :task-statuses="sortedProductionTaskStatuses"
-    :roles-map="rolesMap"
-    @update-roles="onUpdateRoles"
-  />
+  <div>
+    <p class="explanation mb1">{{ $t('board.settings.description') }}</p>
+    <board-settings
+      :task-statuses="sortedProductionTaskStatuses"
+      :roles-map="rolesMap"
+      @update-roles="onUpdateRoles"
+    />
+  </div>
 </template>
 
 <script setup>

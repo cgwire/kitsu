@@ -1,220 +1,167 @@
 <template>
   <div class="production-settings fixed-page" ref="page">
     <div class="wrapper">
-      <div class="tabs">
-        <ul>
-          <li :class="{ 'is-active': isActiveTab('parameters') }">
-            <a
-              role="button"
-              tabindex="0"
-              @click="activeTab = 'parameters'"
-              @keydown.enter.prevent="activeTab = 'parameters'"
-              @keydown.space.prevent="activeTab = 'parameters'"
+      <nav class="settings-menu">
+        <div class="menu-group" v-for="group in menuGroups" :key="group.label">
+          <p class="menu-label">{{ $t(group.label) }}</p>
+          <ul>
+            <li
+              :class="{ 'is-active': isActiveTab(item.id) }"
+              :key="item.id"
+              v-for="item in group.items"
             >
-              {{ $t('productions.parameters.title') }}
-            </a>
-          </li>
-          <li :class="{ 'is-active': isActiveTab('video') }">
-            <a
-              role="button"
-              tabindex="0"
-              @click="activeTab = 'video'"
-              @keydown.enter.prevent="activeTab = 'video'"
-              @keydown.space.prevent="activeTab = 'video'"
-            >
-              {{ $t('productions.video.title') }}
-            </a>
-          </li>
-          <li :class="{ 'is-active': isActiveTab('brief') }">
-            <a
-              role="button"
-              tabindex="0"
-              @click="activeTab = 'brief'"
-              @keydown.enter.prevent="activeTab = 'brief'"
-              @keydown.space.prevent="activeTab = 'brief'"
-            >
-              {{ $t('productions.brief.title') }}
-            </a>
-          </li>
-          <li :class="{ 'is-active': isActiveTab('assetTypes') }">
-            <a
-              role="button"
-              tabindex="0"
-              @click="activeTab = 'assetTypes'"
-              @keydown.enter.prevent="activeTab = 'assetTypes'"
-              @keydown.space.prevent="activeTab = 'assetTypes'"
-            >
-              {{ $t('asset_types.title') }}
-            </a>
-          </li>
-          <li :class="{ 'is-active': isActiveTab('taskTypes') }">
-            <a
-              role="button"
-              tabindex="0"
-              @click="activeTab = 'taskTypes'"
-              @keydown.enter.prevent="activeTab = 'taskTypes'"
-              @keydown.space.prevent="activeTab = 'taskTypes'"
-            >
-              {{ $t('task_types.title') }}
-            </a>
-          </li>
-          <li :class="{ 'is-active': isActiveTab('taskStatus') }">
-            <a
-              role="button"
-              tabindex="0"
-              @click="activeTab = 'taskStatus'"
-              @keydown.enter.prevent="activeTab = 'taskStatus'"
-              @keydown.space.prevent="activeTab = 'taskStatus'"
-            >
-              {{ $t('task_status.title') }}
-            </a>
-          </li>
-          <li :class="{ 'is-active': isActiveTab('board') }">
-            <a
-              role="button"
-              tabindex="0"
-              @click="activeTab = 'board'"
-              @keydown.enter.prevent="activeTab = 'board'"
-              @keydown.space.prevent="activeTab = 'board'"
-            >
-              {{ $t('board.settings.title') }}
-            </a>
-          </li>
-          <li :class="{ 'is-active': isActiveTab('statusAutomations') }">
-            <a
-              role="button"
-              tabindex="0"
-              @click="activeTab = 'statusAutomations'"
-              @keydown.enter.prevent="activeTab = 'statusAutomations'"
-              @keydown.space.prevent="activeTab = 'statusAutomations'"
-            >
-              {{ $t('status_automations.title') }}
-            </a>
-          </li>
-          <li :class="{ 'is-active': isActiveTab('backgrounds') }">
-            <a
-              role="button"
-              tabindex="0"
-              @click="activeTab = 'backgrounds'"
-              @keydown.enter.prevent="activeTab = 'backgrounds'"
-              @keydown.space.prevent="activeTab = 'backgrounds'"
-            >
-              {{ $t('backgrounds.title') }}
-            </a>
-          </li>
-        </ul>
-      </div>
-
-      <div class="tab" v-show="isActiveTab('parameters')">
-        <production-parameters />
-      </div>
-
-      <div class="tab" v-show="isActiveTab('video')">
-        <production-video-settings />
-      </div>
-
-      <div class="tab" v-show="isActiveTab('brief')">
-        <production-brief />
-      </div>
-
-      <div class="tab" v-show="isActiveTab('assetTypes')">
-        <asset-type-settings
-          :asset-types="restrictedAssetTypes"
-          :all-asset-types="assetTypes"
-          @add="addAssetType"
-          @import-items="importAssetTypes"
-          @remove="removeAssetType"
-        />
-      </div>
-
-      <div class="tab" v-show="isActiveTab('taskTypes')">
-        <production-task-types />
-      </div>
-
-      <div class="tab" v-show="isActiveTab('taskStatus')">
-        <div
-          class="flexrow mt1 mb1 add-task-status"
-          v-if="!isEmpty(remainingTaskStatuses)"
-        >
-          <combobox-status
-            class="flexrow-item selector"
-            :task-status-list="remainingTaskStatuses"
-            v-model="taskStatusId"
-          />
-          <button class="button flexrow-item" @click="addTaskStatus">
-            {{ $t('main.add') }}
-          </button>
+              <router-link
+                :aria-current="isActiveTab(item.id) ? 'page' : undefined"
+                :to="{ query: { tab: item.id } }"
+              >
+                {{ $t(item.label) }}
+              </router-link>
+            </li>
+          </ul>
         </div>
-        <div class="box" v-if="isEmpty(currentProduction?.task_statuses)">
-          {{ $t('settings.production.empty_list') }}
+      </nav>
+
+      <div class="settings-content">
+        <div class="tab" v-show="isActiveTab('parameters')">
+          <production-parameters />
         </div>
-        <table class="datatable" v-else>
-          <thead>
-            <tr>
-              <th class="th-grab"></th>
-              <th class="th-name">{{ $t('task_status.fields.name') }}</th>
-              <th class="th-short-name">
-                {{ $t('task_status.fields.short_name') }}
-              </th>
-              <th class="th-bool">{{ $t('task_status.fields.is_done') }}</th>
-              <th class="th-bool">{{ $t('task_status.fields.is_retake') }}</th>
-              <th class="th-bool">
-                {{ $t('task_status.fields.is_artist_allowed') }}
-              </th>
-              <th class="th-bool">
-                {{ $t('task_status.fields.is_client_allowed') }}
-              </th>
-            </tr>
-          </thead>
-          <draggable
-            class="datatable-body"
-            item-key="id"
-            tag="tbody"
-            v-model="taskStatusItems"
-            @end="updateTaskStatusPriority"
-          >
-            <template #item="{ element: taskStatus }">
-              <tr class="datatable-row task-status">
-                <td class="grab">
-                  <grip-vertical-icon />
-                </td>
-                <td>
-                  {{ taskStatus.name }}
-                </td>
-                <td class="name">
-                  <validation-tag
-                    :is-static="true"
-                    :task="{ task_status_id: taskStatus.id }"
-                  />
-                </td>
-                <boolean-cell :value="taskStatus.is_done" />
-                <boolean-cell :value="taskStatus.is_retake" />
-                <boolean-cell :value="taskStatus.is_artist_allowed" />
-                <boolean-cell :value="taskStatus.is_client_allowed" />
-                <td>
-                  <button
-                    class="button"
-                    @click="removeTaskStatus(taskStatus.id)"
-                  >
-                    {{ $t('main.remove') }}
-                  </button>
-                </td>
-              </tr>
-            </template>
-          </draggable>
-        </table>
-      </div>
 
-      <div class="tab" v-show="isActiveTab('board')">
-        <production-board />
-      </div>
+        <div class="tab" v-show="isActiveTab('clients')">
+          <production-clients />
+        </div>
 
-      <div class="tab" v-show="isActiveTab('statusAutomations')">
-        <production-status-automations />
-      </div>
+        <div class="tab" v-show="isActiveTab('video')">
+          <production-video-settings />
+        </div>
 
-      <div class="tab" v-show="isActiveTab('backgrounds')">
-        <production-backgrounds />
+        <div class="tab" v-show="isActiveTab('brief')">
+          <production-brief />
+        </div>
+
+        <div class="tab is-wide" v-show="isActiveTab('assetTypes')">
+          <div class="box section">
+            <h2 class="subtitle">{{ $t('asset_types.title') }}</h2>
+            <asset-type-settings
+              :asset-types="restrictedAssetTypes"
+              :all-asset-types="assetTypes"
+              @add="addAssetType"
+              @import-items="importAssetTypes"
+              @remove="removeAssetType"
+            />
+          </div>
+        </div>
+
+        <div class="tab is-wide" v-show="isActiveTab('taskTypes')">
+          <div class="box section">
+            <h2 class="subtitle">{{ $t('task_types.title') }}</h2>
+            <production-task-types />
+          </div>
+        </div>
+
+        <div class="tab is-wide" v-show="isActiveTab('taskStatus')">
+          <div class="box section">
+            <h2 class="subtitle">{{ $t('task_status.title') }}</h2>
+            <p class="explanation mb1">
+              {{ $t('task_status.production_description') }}
+            </p>
+            <div
+              class="flexrow mt1 mb1 add-task-status"
+              v-if="!isEmpty(remainingTaskStatuses)"
+            >
+              <combobox-status
+                class="flexrow-item selector"
+                :task-status-list="remainingTaskStatuses"
+                v-model="taskStatusId"
+              />
+              <button class="button flexrow-item" @click="addTaskStatus">
+                {{ $t('main.add') }}
+              </button>
+            </div>
+            <div class="box" v-if="isEmpty(currentProduction?.task_statuses)">
+              {{ $t('settings.production.empty_list') }}
+            </div>
+            <table class="datatable" v-else>
+              <thead>
+                <tr>
+                  <th class="th-grab"></th>
+                  <th class="th-name">{{ $t('task_status.fields.name') }}</th>
+                  <th class="th-short-name">
+                    {{ $t('task_status.fields.short_name') }}
+                  </th>
+                  <th class="th-bool">
+                    {{ $t('task_status.fields.is_done') }}
+                  </th>
+                  <th class="th-bool">
+                    {{ $t('task_status.fields.is_retake') }}
+                  </th>
+                  <th class="th-bool">
+                    {{ $t('task_status.fields.is_artist_allowed') }}
+                  </th>
+                  <th class="th-bool">
+                    {{ $t('task_status.fields.is_client_allowed') }}
+                  </th>
+                </tr>
+              </thead>
+              <draggable
+                class="datatable-body"
+                item-key="id"
+                tag="tbody"
+                v-model="taskStatusItems"
+                @end="updateTaskStatusPriority"
+              >
+                <template #item="{ element: taskStatus }">
+                  <tr class="datatable-row task-status">
+                    <td class="grab">
+                      <grip-vertical-icon />
+                    </td>
+                    <td>
+                      {{ taskStatus.name }}
+                    </td>
+                    <td class="name">
+                      <validation-tag
+                        :is-static="true"
+                        :task="{ task_status_id: taskStatus.id }"
+                      />
+                    </td>
+                    <boolean-cell :value="taskStatus.is_done" />
+                    <boolean-cell :value="taskStatus.is_retake" />
+                    <boolean-cell :value="taskStatus.is_artist_allowed" />
+                    <boolean-cell :value="taskStatus.is_client_allowed" />
+                    <td>
+                      <button
+                        class="button"
+                        @click="removeTaskStatus(taskStatus.id)"
+                      >
+                        {{ $t('main.remove') }}
+                      </button>
+                    </td>
+                  </tr>
+                </template>
+              </draggable>
+            </table>
+          </div>
+        </div>
+
+        <div class="tab is-wide" v-show="isActiveTab('board')">
+          <div class="box section">
+            <h2 class="subtitle">{{ $t('board.settings.title') }}</h2>
+            <production-board />
+          </div>
+        </div>
+
+        <div class="tab is-wide" v-show="isActiveTab('statusAutomations')">
+          <div class="box section">
+            <h2 class="subtitle">{{ $t('status_automations.title') }}</h2>
+            <production-status-automations />
+          </div>
+        </div>
+
+        <div class="tab" v-show="isActiveTab('backgrounds')">
+          <div class="box section">
+            <h2 class="subtitle">{{ $t('backgrounds.title') }}</h2>
+            <production-backgrounds />
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -239,6 +186,7 @@ import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ProductionBackgrounds from '@/components/pages/production/ProductionBackgrounds.vue'
 import ProductionBoard from '@/components/pages/production/ProductionBoard.vue'
 import ProductionBrief from '@/components/pages/production/ProductionBrief.vue'
+import ProductionClients from '@/components/pages/production/ProductionClients.vue'
 import ProductionParameters from '@/components/pages/production/ProductionParameters.vue'
 import ProductionStatusAutomations from '@/components/pages/production/ProductionStatusAutomations.vue'
 import ProductionTaskTypes from '@/components/pages/production/ProductionTaskTypes.vue'
@@ -251,6 +199,29 @@ const router = useRouter()
 const store = useStore()
 
 const activeTab = ref('parameters')
+
+const menuGroups = [
+  {
+    label: 'productions.settings_menu.production',
+    items: [
+      { id: 'parameters', label: 'productions.parameters.title' },
+      { id: 'brief', label: 'productions.brief.title' },
+      { id: 'clients', label: 'productions.clients.title' },
+      { id: 'video', label: 'productions.video.title' },
+      { id: 'backgrounds', label: 'backgrounds.title' }
+    ]
+  },
+  {
+    label: 'productions.settings_menu.workflow',
+    items: [
+      { id: 'assetTypes', label: 'asset_types.title' },
+      { id: 'taskTypes', label: 'task_types.title' },
+      { id: 'taskStatus', label: 'task_status.title' },
+      { id: 'statusAutomations', label: 'status_automations.title' },
+      { id: 'board', label: 'board.settings.title' }
+    ]
+  }
+]
 const taskStatusItems = ref([])
 const taskStatusId = ref('')
 
@@ -331,6 +302,15 @@ const updateTaskStatusPriority = async () => {
   await updateTaskStatusPriorities(taskStatusItems.value)
 }
 
+const tabIds = menuGroups.flatMap(group => group.items.map(item => item.id))
+watch(
+  () => route.query.tab,
+  tab => {
+    if (tabIds.includes(tab)) activeTab.value = tab
+  },
+  { immediate: true }
+)
+
 watch(activeTab, tab => {
   if (route.query.tab !== tab) {
     router.push({ query: { tab } })
@@ -366,69 +346,198 @@ onMounted(() => {
   if (remainingTaskStatuses.value.length > 0) {
     taskStatusId.value = remainingTaskStatuses.value[0].id
   }
-  if (route.query.tab) {
-    activeTab.value = route.query.tab
-  }
 })
 </script>
 
 <style lang="scss" scoped>
-.datatable th {
-  color: var(--text);
-}
-p {
-  color: var(--text);
-}
 .fixed-page {
   display: flex;
 }
 
 .wrapper {
+  background: var(--background-page);
   margin-top: 0;
   overflow-y: scroll;
-  padding: 2em;
+  padding: 1.5em 1em 1em;
   flex: 1;
   display: flex;
+  gap: 1.5em;
+}
+
+.settings-menu {
+  align-self: flex-start;
+  background: var(--background-panel);
+  border-radius: 12px;
+  flex: 0 0 220px;
+  padding: 1.5em 1em 1em;
+  position: sticky;
+  top: 0;
+
+  .menu-group + .menu-group {
+    margin-top: 1.5em;
+  }
+
+  .menu-label {
+    color: var(--text-alt);
+    font-size: 0.8em;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5em;
+    text-transform: uppercase;
+  }
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  li {
+    margin-bottom: 0.2em;
+  }
+
+  a {
+    border-radius: 8px;
+    color: var(--text-panel);
+    cursor: pointer;
+    display: block;
+    padding: 0.4em 0.8em;
+
+    &:hover {
+      background: var(--background-hover);
+    }
+  }
+
+  .is-active a,
+  .is-active a:hover {
+    background: var(--background-selected);
+    color: var(--text-strong);
+    font-weight: 600;
+  }
+}
+
+.settings-content {
+  display: flex;
+  flex: 1;
   flex-direction: column;
-}
-
-.tabs {
-  min-height: 2em;
-}
-
-.tabs ul {
-  margin-left: 0;
+  min-width: 0;
 }
 
 .tab {
   flex: 1;
   display: flex;
   flex-direction: column;
+  max-width: 800px;
   overflow-y: auto;
   padding-left: 2px;
-  padding-top: 0.5em;
-}
 
-h2.subtitle {
-  color: $grey;
-  font-size: 1.2em;
-  font-weight: bold;
-  margin-bottom: 0.4em;
-  text-transform: uppercase;
+  // Workflow tabs hold lists and tables, they need more room than forms.
+  &.is-wide {
+    max-width: 1200px;
+  }
+
+  // The look of the setting blocks of every tab lives here. Wide tables
+  // scroll inside their block instead of stretching it.
+  // Same look as the .block panels of the entity pages (Shot.vue)
+  :deep(.section) {
+    background: var(--background-block);
+    border: 1px solid var(--border);
+    border-radius: 1em;
+    box-shadow: 0 0 6px var(--box-shadow);
+    margin-bottom: 1em;
+    overflow-x: auto;
+    padding: 1.5em;
+  }
+
+  // Empty list messages: modals also render a .box here, hence the parents.
+  :deep(.column > .box),
+  :deep(.background-settings > .box),
+  :deep(.board-settings > .box) {
+    border-radius: 12px;
+  }
+
+  // Direct children only: the Clients preview header lays out its own title.
+  // The shared list components (asset types, task types, automations,
+  // board) have fixed widths for the studio template page: here they fill
+  // their panel.
+  :deep(.section .columns > .column:first-child) {
+    flex: 1 1 auto;
+    max-width: none;
+  }
+
+  :deep(.section .datatable),
+  :deep(.section .list),
+  :deep(.section .columns > .column > .box),
+  :deep(.section > .box) {
+    max-width: none;
+    min-width: 0;
+    width: 100%;
+  }
+
+  :deep(.section .datatable) {
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  :deep(.section .datatable th) {
+    background: transparent;
+  }
+
+  :deep(.section > .subtitle) {
+    border-bottom: 0;
+    margin-bottom: 1.5em;
+    margin-top: 0;
+  }
+
+  :deep(.explanation) {
+    color: var(--text-alt);
+  }
+
+  // Same look as the TextField description, for the Checkbox that has no
+  // description prop.
+  :deep(.field-help) {
+    color: var(--text-alt);
+    font-size: 0.9em;
+    margin-top: 0.4em;
+  }
+
+  // Short numeric settings: the input sits on the left of its label, the
+  // description on its own line below.
+  :deep(.number-line) {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6em;
+
+    .label {
+      margin-bottom: 0;
+    }
+
+    .control {
+      flex: 0 0 auto;
+      order: -1;
+    }
+
+    .help {
+      flex: 0 0 100%;
+      margin-top: 0;
+    }
+
+    .input {
+      padding: 0.3em 0.3em;
+      width: 45px;
+      height: 35px;
+    }
+  }
 }
 
 .field {
   margin-bottom: 0;
 }
 
-.list {
-  width: 400px;
-  min-width: 400px;
-  max-width: 400px;
-
-  .name {
-    width: 100%;
-  }
+.datatable th {
+  color: var(--text);
+  padding-left: 10px;
+  padding-bottom: 5px;
 }
 
 .th-name {
@@ -443,13 +552,8 @@ h2.subtitle {
   width: 140px;
 }
 
-th {
-  padding-left: 10px;
-  padding-bottom: 5px;
-}
-
 .box {
-  max-width: 400px;
+  border-radius: 12px;
 }
 
 .task-status {
@@ -467,37 +571,140 @@ th {
   color: $grey;
 }
 
-.tabs {
-  overflow-x: auto;
+// Tablet: the content area is about 500px wide next to the menu.
+// The automation and background lists are shared with the studio pages:
+// their column widths are only adjusted in the production tabs.
+@media screen and (min-width: 769px) {
+  .tab :deep(.status-automation-settings .datatable) {
+    width: 100%;
+
+    td {
+      vertical-align: middle;
+    }
+
+    .name {
+      min-width: 130px;
+      width: 130px;
+    }
+
+    .in-task-type,
+    .out-task-type {
+      min-width: 170px;
+      width: 170px;
+    }
+
+    .in-task-status,
+    .out-task-status {
+      min-width: 130px;
+      width: 130px;
+    }
+
+    .automation-type,
+    .input-separator {
+      min-width: 170px;
+      text-align: center;
+      width: 170px;
+    }
+
+    .import-last-revision {
+      min-width: 140px;
+      text-align: center;
+      width: 140px;
+    }
+  }
+
+  .tab :deep(.background-settings .datatable) {
+    width: 100%;
+
+    td {
+      vertical-align: middle;
+    }
+
+    .name {
+      min-width: 0;
+      width: auto;
+    }
+
+    .is-default {
+      width: 140px;
+    }
+
+    th:last-child,
+    td:last-child {
+      text-align: right;
+      white-space: nowrap;
+      width: 1%;
+    }
+  }
 }
 
-.tabs ul {
-  flex-wrap: nowrap;
-  white-space: nowrap;
+// Light theme only: on the grey page the panel grey would blend in.
+:global(.theme:not(.dark) .production-settings .settings-menu) {
+  background: var(--background);
+}
+
+// Dark theme keeps the background App.vue gives to .dark .box
+:global(.dark .production-settings .tab .section) {
+  background: #3d4048;
 }
 
 @media screen and (max-width: 1000px) {
-  .wrapper {
-    padding: 1.5em 1em;
+  .th-name,
+  .th-short-name,
+  .th-bool {
+    white-space: normal;
+    width: auto;
+  }
+
+  // The list and the importer stack instead of overflowing side by side.
+  :deep(.tab .asset-type-settings .columns),
+  :deep(.tab .production-task-types .columns) {
+    flex-wrap: wrap;
+  }
+
+  :deep(.tab .background-settings .name),
+  :deep(.tab .background-settings .is-default) {
+    min-width: 0;
+    width: auto;
   }
 }
 
 @media screen and (max-width: 768px) {
   .wrapper {
-    padding: 1em 0.75em;
+    flex-direction: column;
+    gap: 1em;
+    padding: 1em;
   }
 
-  .columns {
-    margin-bottom: 1em;
+  .settings-menu {
+    align-self: stretch;
+    flex: 0 0 auto;
+    overflow-x: auto;
+    padding: 0.5em;
+    position: static;
+
+    &,
+    ul {
+      display: flex;
+      gap: 0.5em;
+      white-space: nowrap;
+    }
+
+    .menu-group + .menu-group {
+      margin-top: 0;
+    }
+
+    .menu-label {
+      display: none;
+    }
   }
 
-  .box {
+  .tab :deep(.section) {
     padding: 1.5em;
   }
 
-  /* Read-only mobile: hide add buttons / mutation widgets. The Parameters
-     and Video forms stay editable, Save included. */
-  .tab > .flexrow.mt1.mb1 {
+  .add-task-status,
+  :deep(.production-brief .edit-hint) {
     display: none;
   }
 
@@ -507,21 +714,31 @@ th {
 
   :deep(.tab .remove),
   :deep(.tab .grab),
-  :deep(.tab td.remove),
-  :deep(.tab td.grab),
   :deep(.tab .name-full) {
     display: none !important;
   }
 
+  // The clients tab is read-only on a phone: no account action, no toggle.
+  :deep(.production-clients .create-button),
+  :deep(.production-clients .copy-button),
+  :deep(.production-clients .actions) {
+    display: none;
+  }
+
+  :deep(.production-clients .checkbox-field) {
+    pointer-events: none;
+  }
+
   :deep(.background-settings .flexrow.mt1.mb1),
-  :deep(.task-status-settings .add-task-status),
+  :deep(.production-task-types .add-task-type),
   :deep(.status-automation-settings .add-status-automation) {
     display: none;
   }
 
   :deep(.background-settings .datatable th:last-child),
   :deep(.background-settings .datatable td:last-child),
-  :deep(.background-settings .is-default) {
+  :deep(.background-settings .is-default),
+  :deep(.production-task-types .bitrate) {
     display: none !important;
   }
 
@@ -544,7 +761,6 @@ th {
     margin-bottom: 0.35em;
   }
 
-  /* Card mode for every list/table inside a tab */
   :deep(.tab .datatable),
   :deep(.tab .datatable.list),
   :deep(.tab table.list) {

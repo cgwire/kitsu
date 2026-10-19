@@ -473,6 +473,7 @@
       "nb_frames": "frame | frames",
       "person": "Pessoa",
       "preview_3d_not_supported": "As visualizações 3D não são suportadas neste navegador (WebGL2 é necessário). Por favor, atualize-o para a versão mais recente.",
+      "preview_account_banner": "Conta de pré-visualização (somente leitura)",
       "previous": "Anterior",
       "profile": "Perfil",
       "production": "Produção",
@@ -1052,6 +1053,37 @@
       "view_created": "Ver playlist"
     },
     "productions": {
+      "clients": {
+        "block": "Bloquear agora",
+        "blocked": "Bloqueado",
+        "copy": "Copiar",
+        "create": "Criar conta de pré-visualização",
+        "delete": "Excluir",
+        "delete_confirm": "Excluir a conta de pré-visualização desta produção?",
+        "description": "Veja o Kitsu exatamente como um cliente, somente leitura e sem ocupar uma licença.",
+        "error": "Ocorreu um erro ao atualizar a conta de pré-visualização.",
+        "isolation_description": "Cada cliente vê apenas os próprios comentários e os compartilhados com os clientes, não os de outros clientes.",
+        "isolation_title": "Isolamento de clientes",
+        "metadata_description": "As colunas de metadados marcadas são mostradas aos clientes nas listas de assets e planos.",
+        "metadata_empty": "Esta produção não tem metadados.",
+        "metadata_title": "Metadados visíveis para os clientes",
+        "open_for_hour": "Abrir por 1 hora",
+        "open_until": "Aberto até {time}",
+        "password": "Senha (mostrada uma única vez)",
+        "password_hint": "Copie-a agora. Entre com este e-mail numa janela privada.",
+        "preview_title": "Conta de pré-visualização",
+        "regenerate": "Gerar nova senha",
+        "save_error": "Ocorreu um erro ao salvar as configurações.",
+        "statuses_description": "Os clientes só podem definir estes status ao comentar.",
+        "statuses_empty": "Nenhum estado é visível para os clientes.",
+        "statuses_link": "Editar estados das tarefas",
+        "statuses_title": "Status disponíveis para clientes",
+        "team_description": "Pessoas com o papel Cliente na equipe desta produção.",
+        "team_empty": "Nenhum cliente na equipe.",
+        "team_title": "Clientes da equipe",
+        "title": "Clientes",
+        "unavailable": "As contas de pré-visualização exigem autenticação local com senhas. Caso contrário, crie uma conta de cliente normal."
+      },
       "current": "Produção selecionada",
       "delete_text": "Você tem certeza que deseja remover {name} do seu banco de dados? Por favor, confirme digitando o nome do projeto que você quer deletar no campo de texto.",
       "delete_error": "Ocorreu um erro ao excluir esta produção. Provavelmente há dados vinculados a ela. Tem certeza de que esta produção não tem nenhuma tarefa, shot ou asset vinculado a ela? Kitsu não permite a exclusão de produções. Se você não quiser mais ver a produção, pode fechá-la.",
@@ -1061,6 +1093,10 @@
       "open_productions": "Minhas produções",
       "picture": "Alterar imagem",
       "remove_picture": "Remover imagem",
+      "settings_menu": {
+        "production": "Produção",
+        "workflow": "Fluxo de trabalho"
+      },
       "title": "Produções",
       "home": {
         "all_playlists": "Todas as playlists",
@@ -1147,15 +1183,20 @@
       "edit_error": "Um erro ocorreu durante a edição da produção. Por favor contate nosso time de suporte.",
       "brief": {
         "title": "Brief",
+        "edit_hint": "Clique duas vezes no brief para editá-lo.",
         "empty": "Ainda não há um brief. Que tal criar um?",
         "edit_error": "Ocorreu um erro ao editar o resumo."
       },
       "parameters": {
+        "publish_default_description": "Os artistas veem o formulário de publicação em vez do formulário de comentário ao abrir uma tarefa.",
         "title": "Parâmetros",
-        "previews_and_comments": "Previews e comentários",
+        "comments_and_retakes": "Comentários e retakes",
         "save": {
           "button": "Confirmar"
-        }
+        },
+        "general_title": "Geral",
+        "max_retakes_description": "Os artistas não podem definir um status de repetição quando uma tarefa atinge este número de repetições. 0 significa sem limite.",
+        "previews_and_comments": "Previews e comentários"
       },
       "creation": {
         "add_assets": "Adicionar assets (opcional)",
@@ -1234,11 +1275,16 @@
         "bitrate_max": "Máximo: {value} Mbit/s",
         "bitrate_size": "Cerca de {size} MB por minuto",
         "bitrates": "Taxas de bits",
+        "encoding_explanation": "Os vídeos enviados são convertidos para esta taxa de quadros, proporção e resolução; as visualizações existentes não são recodificadas.",
+        "encoding_title": "Codificação",
+        "frame_in_description": "O contador do player começa no frame de entrada do plano em vez de 0.",
         "hd_bitrate_description": "Versão em resolução completa, reproduzida no modo HD e usada para downloads.",
         "ld_bitrate_description": "Versão mais leve, com 1280 pixels de largura, reproduzida no modo LD.",
         "ld_bitrate_max": "Máximo: {value} Mbit/s (taxa de bits HD)",
         "next_uploads_only": "As alterações se aplicam apenas aos próximos envios: as visualizações existentes não são recodificadas.",
+        "previews_title": "Pré-visualizações",
         "restore_default": "Restaurar padrão",
+        "revision_padding_description": "Adiciona zeros à esquerda nos números de revisão, por exemplo 3 mostra v001.",
         "task_type_bitrates": "Deixe em branco para usar as taxas de bits da aba Vídeo.",
         "task_type_ld_bitrate_max": "Máximo: a taxa de bits HD do tipo de tarefa",
         "title": "Vídeo"
@@ -1378,6 +1424,7 @@
       "edit_title": "Editar o status da tarefa",
       "number": "status da tarefa | status das tarefas",
       "new_task_status": "Adicionar um status de tarefa",
+      "production_description": "Somente estes status podem ser definidos nas tarefas desta produção.",
       "title": "Status da Tarefa",
       "fields": {
         "color": "Cor",
@@ -1426,6 +1473,7 @@
       },
       "no_task_types": "Não existe um tipo de tarefa para esse tipo de entidade",
       "add_task_type_placeholder": "+ Tipo de tarefa",
+      "production_description": "As tarefas desta produção só podem usar os tipos de tarefa listados aqui.",
       "select_task_type": "Selecione um tipo de tarefa...",
       "add_task_type_to_library": "Adicionar um tipo de tarefa à biblioteca",
       "library_title": "Biblioteca de tipos de tarefas"
@@ -1970,6 +2018,7 @@
       "in_title": "Status que aciona uma alteração",
       "out_title": "A alteração que será aplicada no disparo do gatilho",
       "new_status_automation": "Adicionar automação de status",
+      "production_description": "Uma automação muda o status de uma tarefa, ou a tarefa seguinte, quando um status é definido.",
       "run_for_selection": "Executar automação de status para tarefas selecionadas:",
       "title": "Automações",
       "wrong_automation": "Essa automação se aplica a um tipo de tarefa upstream. Ela não é permitida pelo Kitsu (para evitar ciclos infinitos). Ela não terá efeito.",
@@ -2023,6 +2072,7 @@
       "number": "plano de fundo | planos de fundo",
       "edit_background": "Editar plano de fundo",
       "new_background": "Adicionar um novo plano de fundo",
+      "production_description": "Fundos 3D oferecidos no player para as visualizações 3D desta produção.",
       "title": "Fundos 3D",
       "fields": {
         "is_default": "É padrão",
@@ -2035,6 +2085,7 @@
       "title": "Quadro",
       "empty": "Nada a exibir no quadro: você não tem tarefas em andamento, sua busca não retornou resultados ou nenhum status de tarefa está habilitado para o seu cargo nas configurações de produção.",
       "settings": {
+        "description": "Papéis que veem este status como uma coluna no seu quadro.",
         "title": "Status do quadro",
         "visible": "Exibido no quadro kanban de...",
         "select_all": "Selecionar tudo",

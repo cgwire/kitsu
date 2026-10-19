@@ -1,34 +1,37 @@
 <template>
-  <div class="columns">
-    <div class="column is-one-third box">
-      <header class="picture-header" v-if="currentProduction?.id">
-        <production-name
-          :production="currentProduction"
-          :size="120"
-          only-avatar
-        />
-        <div class="picture-actions">
-          <button
-            class="link-button"
-            type="button"
-            @click="modals.avatar = true"
-          >
-            {{ $t('productions.picture') }}
-          </button>
-          <template v-if="currentProduction.has_avatar">
-            <span class="dot">·</span>
+  <div class="production-parameters">
+    <form class="form" @submit.prevent="editParameters">
+      <div class="box section general">
+        <h2 class="subtitle">
+          {{ $t('productions.parameters.general_title') }}
+        </h2>
+        <header class="picture-header" v-if="currentProduction?.id">
+          <production-name
+            :production="currentProduction"
+            :size="120"
+            only-avatar
+          />
+          <div class="picture-actions">
             <button
-              class="link-button muted"
+              class="link-button"
               type="button"
-              :disabled="loading.avatar"
-              @click="removePicture"
+              @click="modals.avatar = true"
             >
-              {{ $t('productions.remove_picture') }}
+              {{ $t('productions.picture') }}
             </button>
-          </template>
-        </div>
-      </header>
-      <form class="form" @submit.prevent="editParameters">
+            <template v-if="currentProduction.has_avatar">
+              <span class="dot">·</span>
+              <button
+                class="link-button muted"
+                type="button"
+                :disabled="loading.avatar"
+                @click="removePicture"
+              >
+                {{ $t('productions.remove_picture') }}
+              </button>
+            </template>
+          </div>
+        </header>
         <text-field
           :label="$t('productions.fields.name')"
           :maxlength="80"
@@ -110,88 +113,48 @@
           v-model="form.episode_span"
           v-if="currentProduction && currentProduction.id && isLocalTVShow"
         /-->
+      </div>
 
-        <h3 class="section-title">
-          {{ $t('productions.parameters.previews_and_comments') }}
-        </h3>
+      <div class="box section comments">
+        <h2 class="subtitle">
+          {{ $t('productions.parameters.comments_and_retakes') }}
+        </h2>
         <text-field
           class="number-line"
           type="number"
           :step="1"
+          :description="$t('productions.parameters.max_retakes_description')"
           :label="$t('productions.fields.max_retakes')"
           @enter="runConfirmation"
           v-model="form.max_retakes"
           v-if="currentProduction && currentProduction.id"
         />
 
-        <text-field
-          class="number-line"
-          type="number"
-          :step="1"
-          :min="0"
-          :max="8"
-          :label="$t('productions.fields.revision_padding')"
-          @enter="runConfirmation"
-          v-model="form.revision_padding"
-          v-if="currentProduction && currentProduction.id"
-        />
-
-        <checkbox
-          class="mb1"
-          :toggle="true"
-          :label="$t('productions.fields.is_clients_isolated')"
-          v-model="form.is_clients_isolated"
-          v-if="currentProduction && currentProduction.id"
-        />
-        <checkbox
-          class="mb1"
-          :toggle="true"
-          :label="$t('productions.fields.is_preview_download_allowed')"
-          v-model="form.is_preview_download_allowed"
-          v-if="currentProduction && currentProduction.id"
-        />
-        <checkbox
-          class="mb1"
-          :toggle="true"
-          :label="$t('productions.fields.is_set_preview_automated')"
-          v-model="form.is_set_preview_automated"
-          v-if="currentProduction && currentProduction.id"
-        />
-        <checkbox
-          class="mb1"
-          :toggle="true"
-          :label="$t('productions.fields.is_single_preview_per_revision')"
-          v-model="form.is_single_preview_per_revision"
-          v-if="currentProduction && currentProduction.id"
-        />
-        <checkbox
-          class="mb1"
-          :toggle="true"
-          :label="$t('productions.fields.is_frame_in_numbering')"
-          v-model="form.is_frame_in_numbering"
-          v-if="currentProduction && currentProduction.id"
-        />
-        <checkbox
-          class="mb2"
-          :toggle="true"
-          :label="$t('productions.fields.is_publish_default')"
-          v-model="form.is_publish_default_for_artists"
-          v-if="currentProduction && currentProduction.id"
-        />
-        <p v-if="isError" class="error mt1">
-          {{ $t('productions.edit_error') }}
-        </p>
-        <div class="has-text-right mt2">
-          <button-simple
-            :is-primary="true"
-            :class="{ 'is-loading': isLoading }"
-            :disabled="isLoading"
-            :text="$t('main.save')"
-            type="submit"
+        <template v-if="currentProduction && currentProduction.id">
+          <checkbox
+            class="mb0"
+            :toggle="true"
+            :label="$t('productions.fields.is_publish_default')"
+            v-model="form.is_publish_default_for_artists"
           />
-        </div>
-      </form>
-    </div>
+          <p class="field-help mb2">
+            {{ $t('productions.parameters.publish_default_description') }}
+          </p>
+        </template>
+      </div>
+      <p v-if="isError" class="error mt1">
+        {{ $t('productions.edit_error') }}
+      </p>
+      <div class="has-text-right mt2">
+        <button-simple
+          :is-primary="true"
+          :class="{ 'is-loading': isLoading }"
+          :disabled="isLoading"
+          :text="$t('main.save')"
+          type="submit"
+        />
+      </div>
+    </form>
 
     <change-avatar-modal
       :active="modals.avatar"
@@ -248,12 +211,6 @@ const emptyForm = () => ({
   nb_episodes: 0,
   episode_span: 0,
   max_retakes: 0,
-  revision_padding: 0,
-  is_clients_isolated: false,
-  is_frame_in_numbering: false,
-  is_preview_download_allowed: false,
-  is_set_preview_automated: false,
-  is_single_preview_per_revision: false,
   is_publish_default_for_artists: false,
   homepage: HOME_PAGE_OPTIONS[0].value
 })
@@ -320,14 +277,7 @@ const resetForm = () => {
       production_style: production.production_style || '2d3d',
       episode_span: production.episode_span,
       max_retakes: production.max_retakes,
-      revision_padding: production.revision_padding,
       nb_episodes: production.nb_episodes,
-      is_clients_isolated: !!production.is_clients_isolated,
-      is_frame_in_numbering: !!production.is_frame_in_numbering,
-      is_preview_download_allowed: !!production.is_preview_download_allowed,
-      is_set_preview_automated: !!production.is_set_preview_automated,
-      is_single_preview_per_revision:
-        !!production.is_single_preview_per_revision,
       is_publish_default_for_artists:
         !!production.is_publish_default_for_artists,
       homepage: production.homepage
@@ -379,44 +329,8 @@ watch(
   margin-bottom: 2em;
 }
 
-.column {
-  overflow-y: initial;
-  padding: initial;
-}
-
-.box {
-  padding: 2em;
-}
-
-.section-title {
-  color: var(--text);
-  font-size: 1.1em;
-  font-weight: 500;
-  margin: 1.5em 0 0.8em;
-  text-transform: uppercase;
-}
-
-// Short numeric settings: the input sits on the left of its label.
-.number-line {
-  align-items: center;
-  display: flex;
-  flex-direction: row-reverse;
-  gap: 0.6em;
-  justify-content: flex-end;
-
-  :deep(.label) {
-    margin-bottom: 0;
-  }
-
-  :deep(.control) {
-    flex: 0 0 auto;
-  }
-
-  :deep(.input) {
-    padding: 0.3em 0.3em;
-    width: 45px;
-    height: 35px;
-  }
+.production-parameters {
+  margin-bottom: 2em;
 }
 
 .picture-header {

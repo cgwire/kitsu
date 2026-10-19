@@ -473,6 +473,7 @@
       "nb_frames": "fotograma | fotogramas",
       "person": "Persona",
       "preview_3d_not_supported": "Las vistas previas 3D no son compatibles con este navegador (se requiere WebGL2). Por favor, actualízalo a su última versión.",
+      "preview_account_banner": "Cuenta de vista previa (solo lectura)",
       "previous": "Anterior",
       "profile": "Perfil",
       "production": "Producción",
@@ -1052,6 +1053,37 @@
       "view_created": "Ver lista de reproducción"
     },
     "productions": {
+      "clients": {
+        "block": "Bloquear ahora",
+        "blocked": "Bloqueado",
+        "copy": "Copiar",
+        "create": "Crear cuenta de vista previa",
+        "delete": "Eliminar",
+        "delete_confirm": "¿Eliminar la cuenta de vista previa de esta producción?",
+        "description": "Ve Kitsu exactamente como un cliente, en solo lectura y sin ocupar una licencia.",
+        "error": "Se produjo un error al actualizar la cuenta de vista previa.",
+        "isolation_description": "Cada cliente solo ve sus propios comentarios y los compartidos con los clientes, no los de otros clientes.",
+        "isolation_title": "Aislamiento de clientes",
+        "metadata_description": "Las columnas de metadatos marcadas se muestran a los clientes en las listas de assets y planos.",
+        "metadata_empty": "Esta producción no tiene metadatos.",
+        "metadata_title": "Metadatos visibles para los clientes",
+        "open_for_hour": "Abrir durante 1 hora",
+        "open_until": "Abierto hasta {time}",
+        "password": "Contraseña (se muestra una sola vez)",
+        "password_hint": "Cópiala ahora. Inicia sesión con este correo en una ventana privada.",
+        "preview_title": "Cuenta de vista previa",
+        "regenerate": "Regenerar contraseña",
+        "save_error": "Se produjo un error al guardar los ajustes.",
+        "statuses_description": "Los clientes solo pueden usar estos estados al comentar.",
+        "statuses_empty": "Ningún estado es visible para los clientes.",
+        "statuses_link": "Editar estados de tareas",
+        "statuses_title": "Estados disponibles para los clientes",
+        "team_description": "Personas con el rol Cliente en el equipo de esta producción.",
+        "team_empty": "No hay ningún cliente en el equipo.",
+        "team_title": "Clientes del equipo",
+        "title": "Clientes",
+        "unavailable": "Las cuentas de vista previa requieren autenticación local con contraseñas. De lo contrario, crea una cuenta de cliente normal."
+      },
       "current": "Producción seleccionada",
       "delete_text": "¿Está seguro de que desea eliminar {name} de su base de datos? Confirme escribiendo el nombre del proyecto que desea eliminar a continuación.",
       "delete_error": "Se ha producido un error al eliminar esta producción. Es probable que haya datos asociados. ¿Está seguro de que esta producción no tiene ninguna tarea, toma o recurso asociado? Kitsu no permite la eliminación de producciones. Si no desea verla más, puede cerrarla.",
@@ -1061,6 +1093,10 @@
       "open_productions": "Mis Producciones",
       "picture": "Cambiar imagen",
       "remove_picture": "Eliminar la imagen",
+      "settings_menu": {
+        "production": "Producción",
+        "workflow": "Flujo de trabajo"
+      },
       "title": "Producciones",
       "home": {
         "all_playlists": "Todas las playlists",
@@ -1147,15 +1183,20 @@
       "edit_error": "Se ha producido un error al modificar la producción. Por favor, contacte con nuestro equipo de soporte técnico.",
       "brief": {
         "title": "Brief",
+        "edit_hint": "Haz doble clic en el brief para editarlo.",
         "empty": "Todavía no hay un Brief. ¿Quieres crear uno?",
         "edit_error": "Se ha producido un error al editar el Brief."
       },
       "parameters": {
+        "publish_default_description": "Los artistas ven el formulario de publicación en lugar del formulario de comentario al abrir una tarea.",
         "title": "Parámetros",
-        "previews_and_comments": "Previews y comentarios",
+        "comments_and_retakes": "Comentarios y retakes",
         "save": {
           "button": "Confirmar"
-        }
+        },
+        "general_title": "General",
+        "max_retakes_description": "Los artistas no pueden poner un estado de retoma cuando una tarea alcanza este número de retomas. 0 significa sin límite.",
+        "previews_and_comments": "Previews y comentarios"
       },
       "creation": {
         "add_assets": "Añadir recursos (opcional)",
@@ -1234,11 +1275,16 @@
         "bitrate_max": "Máximo: {value} Mbit/s",
         "bitrate_size": "Unos {size} MB por minuto",
         "bitrates": "Tasas de bits",
+        "encoding_explanation": "Los vídeos subidos se convierten a esta velocidad de fotogramas, relación de aspecto y resolución; las vistas previas existentes no se vuelven a codificar.",
+        "encoding_title": "Codificación",
+        "frame_in_description": "El contador del reproductor empieza en el frame de entrada del plano en lugar de 0.",
         "hd_bitrate_description": "Versión a resolución completa, que se reproduce en modo HD y se usa para las descargas.",
         "ld_bitrate_description": "Versión más ligera, de 1280 píxeles de ancho, que se reproduce en modo LD.",
         "ld_bitrate_max": "Máximo: {value} Mbit/s (tasa de bits HD)",
         "next_uploads_only": "Los cambios solo se aplican a las próximas subidas: las vistas previas existentes no se vuelven a codificar.",
+        "previews_title": "Previsualizaciones",
         "restore_default": "Restaurar valor por defecto",
+        "revision_padding_description": "Añade ceros a la izquierda a los números de revisión, por ejemplo 3 muestra v001.",
         "task_type_bitrates": "Déjalo vacío para usar las tasas de bits de la pestaña Vídeo.",
         "task_type_ld_bitrate_max": "Máximo: la tasa de bits HD del tipo de tarea",
         "title": "Vídeo"
@@ -1378,6 +1424,7 @@
       "edit_title": "Modificar el estado de la tarea",
       "number": "estado de la tarea | estados de la tarea",
       "new_task_status": "Añadir un status de tarea",
+      "production_description": "Solo estos estados pueden aplicarse a las tareas de esta producción.",
       "title": "Estado de la tarea",
       "fields": {
         "color": "Color",
@@ -1426,6 +1473,7 @@
       },
       "no_task_types": "No hay ningún tipo de tarea para este tipo de entidad",
       "add_task_type_placeholder": "+ Tipo de tarea",
+      "production_description": "Las tareas de esta producción solo pueden usar los tipos de tarea indicados aquí.",
       "select_task_type": "Seleccione un tipo de tarea...",
       "add_task_type_to_library": "Añadir un tipo de tarea a la biblioteca",
       "library_title": "Biblioteca de tipos de tarea"
@@ -1970,6 +2018,7 @@
       "in_title": "Estado provocando un cambio",
       "out_title": "El cambio que se aplicará al activarse el activador",
       "new_status_automation": "Añadir estado de automatización",
+      "production_description": "Una automatización cambia el estado de una tarea, o la tarea siguiente, cuando se aplica un estado.",
       "run_for_selection": "Ejecutar el estado de automatización para las tareas seleccionadas:",
       "title": "Automatizaciones de Estado",
       "wrong_automation": "Esta automatización se aplica a un tipo de tarea anterior. No está permitido por Kitsu (para evitar ciclos infinitos). No tendrá efecto.",
@@ -2023,6 +2072,7 @@
       "number": "fondo | fondos",
       "edit_background": "Editar fondo",
       "new_background": "Añadir un nuevo fondo",
+      "production_description": "Fondos 3D ofrecidos en el reproductor para las vistas previas 3D de esta producción.",
       "title": "Fondos 3D",
       "fields": {
         "is_default": "Es por defecto",
@@ -2035,6 +2085,7 @@
       "title": "Tablero",
       "empty": "No hay nada que mostrar en el tablero: no tiene tareas en curso, su búsqueda no ha devuelto resultados o no hay ningún estado de tarea activado para su rol en los ajustes de producción.",
       "settings": {
+        "description": "Roles que ven este estado como una columna en su tablero.",
         "title": "Estado del tablero",
         "visible": "Se muestra en el tablero Kanban de...",
         "select_all": "Seleccionar todo",

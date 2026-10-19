@@ -473,6 +473,7 @@
       "nb_frames": "frame | frames",
       "person": "Person",
       "preview_3d_not_supported": "3D-previews understøttes ikke i denne browser (WebGL2 er påkrævet). Opdater den venligst til nyeste version.",
+      "preview_account_banner": "Forhåndsvisningskonto (skrivebeskyttet)",
       "previous": "Forrige",
       "profile": "Profil",
       "production": "Produktion",
@@ -1052,6 +1053,37 @@
       "view_created": "Vis playlist"
     },
     "productions": {
+      "clients": {
+        "block": "Blokér nu",
+        "blocked": "Blokeret",
+        "copy": "Kopiér",
+        "create": "Opret forhåndsvisningskonto",
+        "delete": "Slet",
+        "delete_confirm": "Slet forhåndsvisningskontoen for denne produktion?",
+        "description": "Se Kitsu præcis som en kunde, skrivebeskyttet og uden at optage en licens.",
+        "error": "Der opstod en fejl under opdatering af forhåndsvisningskontoen.",
+        "isolation_description": "Hver klient ser kun sine egne kommentarer og dem, der er delt med klienter, ikke andre klienters.",
+        "isolation_title": "Isolering af kunder",
+        "metadata_description": "Afkrydsede metadatakolonner vises for klienter i asset- og shotlisterne.",
+        "metadata_empty": "Denne produktion har ingen metadata.",
+        "metadata_title": "Metadata synlige for kunder",
+        "open_for_hour": "Åbn i 1 time",
+        "open_until": "Åben indtil {time}",
+        "password": "Adgangskode (vises kun én gang)",
+        "password_hint": "Kopiér den nu. Log ind med denne e-mail i et privat vindue.",
+        "preview_title": "Forhåndsvisningskonto",
+        "regenerate": "Generér adgangskode igen",
+        "save_error": "Der opstod en fejl under lagring af indstillingerne.",
+        "statuses_description": "Kunder kan kun vælge disse statusser, når de kommenterer.",
+        "statuses_empty": "Ingen status er synlig for kunder.",
+        "statuses_link": "Rediger opgavestatusser",
+        "statuses_title": "Statusser tilgængelige for kunder",
+        "team_description": "Personer med rollen Klient i denne produktions team.",
+        "team_empty": "Ingen kunde i teamet.",
+        "team_title": "Teamets kunder",
+        "title": "Kunder",
+        "unavailable": "Forhåndsvisningskonti kræver lokal godkendelse med adgangskoder. Ellers kan du oprette en almindelig kundekonto."
+      },
       "current": "Valgt produktion",
       "delete_text": "Er du sikker på, at du vil fjerne {name} fra din database? Bekræft venligst ved at skrive navnet på den produktion, du ønsker at slette, i tekstfeltet.",
       "delete_error": "Der opstod en fejl under sletning af denne produktion. Der kan være eksisterende data, der er knyttet til den. Er du sikker på, at denne produktion ikke har nogen opgave, shot eller asset knyttet til sig? Kitsu tillader ikke sletning af produktioner. Hvis du ikke længere ønsker at se produktionen, kan du i stedet lukke den.",
@@ -1061,6 +1093,10 @@
       "open_productions": "Mine Produktioner",
       "picture": "Skift billede",
       "remove_picture": "Fjern billede",
+      "settings_menu": {
+        "production": "Produktion",
+        "workflow": "Workflow"
+      },
       "title": "Produktioner",
       "home": {
         "all_playlists": "Alle playlister",
@@ -1147,15 +1183,20 @@
       "edit_error": "Der opstod en fejl under redigering af produktionen. Kontakt venligst vores supportteam.",
       "brief": {
         "title": "Brief",
+        "edit_hint": "Dobbeltklik på briefen for at redigere den.",
         "empty": "Der er endnu ingen brief. Hvad med at oprette en?",
         "edit_error": "Der opstod en fejl under redigeringen af briefen."
       },
       "parameters": {
+        "publish_default_description": "Kunstnere ser publiceringsformularen i stedet for kommentarformularen, når de åbner en opgave.",
         "title": "Parametre",
-        "previews_and_comments": "Previews og kommentarer",
+        "comments_and_retakes": "Kommentarer og retakes",
         "save": {
           "button": "Bekræft"
-        }
+        },
+        "general_title": "Generelt",
+        "max_retakes_description": "Kunstnere kan ikke sætte en retake-status, når en opgave har nået dette antal retakes. 0 betyder ingen grænse.",
+        "previews_and_comments": "Previews og kommentarer"
       },
       "creation": {
         "add_assets": "Tilføj assets (Valgfrit)",
@@ -1234,11 +1275,16 @@
         "bitrate_max": "Maksimum: {value} Mbit/s",
         "bitrate_size": "Ca. {size} MB pr. minut",
         "bitrates": "Bitrater",
+        "encoding_explanation": "Uploadede videoer konverteres til denne billedfrekvens, ratio og opløsning; eksisterende previews bliver ikke kodet igen.",
+        "encoding_title": "Kodning",
+        "frame_in_description": "Afspillerens tæller starter ved shottets frame in i stedet for 0.",
         "hd_bitrate_description": "Version i fuld opløsning, der afspilles i HD-tilstand og bruges til downloads.",
         "ld_bitrate_description": "Lettere version, 1280 pixels bred, der afspilles i LD-tilstand.",
         "ld_bitrate_max": "Maksimum: {value} Mbit/s (HD-bitrate)",
         "next_uploads_only": "Ændringerne gælder kun for kommende uploads: eksisterende previews bliver ikke kodet igen.",
+        "previews_title": "Previews",
         "restore_default": "Gendan standard",
+        "revision_padding_description": "Tilføjer foranstillede nuller til revisionsnumre, for eksempel viser 3 v001.",
         "task_type_bitrates": "Lad feltet stå tomt for at bruge bitraten fra fanen Video.",
         "task_type_ld_bitrate_max": "Maksimum: opgavetypens HD-bitrate",
         "title": "Video"
@@ -1378,6 +1424,7 @@
       "edit_title": "Rediger opgavestatus",
       "number": "opgavestatus | opgavestatusser",
       "new_task_status": "Tilføj en opgavestatus",
+      "production_description": "Kun disse statusser kan sættes på denne produktions opgaver.",
       "title": "Opgavestatus",
       "fields": {
         "color": "Farve",
@@ -1426,6 +1473,7 @@
       },
       "no_task_types": "Der er ingen opgavetype for denne enhedstype",
       "add_task_type_placeholder": "+ Opgavetype",
+      "production_description": "Opgaverne i denne produktion kan kun bruge de opgavetyper, der er angivet her.",
       "select_task_type": "Vælg en opgavetype...",
       "add_task_type_to_library": "Tilføj en opgavetype til biblioteket",
       "library_title": "Opgavetype-bibliotek"
@@ -1970,6 +2018,7 @@
       "in_title": "Status, der udløser en ændring",
       "out_title": "Ændringen, der vil blive anvendt ved udløsning af triggeren",
       "new_status_automation": "Tilføj statusautomatisering",
+      "production_description": "En automatisering ændrer en opgaves status, eller den næste opgave, når en status sættes.",
       "run_for_selection": "Kør statusautomatisering for valgte opgaver:",
       "title": "Automatiseringer",
       "wrong_automation": "Denne automatisering gælder for en opgavetype opstrøms. Det er ikke tilladt af Kitsu (for at undgå uendelige cyklusser). Den vil ikke have nogen effekt.",
@@ -2023,6 +2072,7 @@
       "number": "baggrund | baggrunde",
       "edit_background": "Rediger baggrund",
       "new_background": "Tilføj en ny baggrund",
+      "production_description": "3D-baggrunde, der tilbydes i afspilleren til denne produktions 3D-previews.",
       "title": "3D-baggrunde",
       "fields": {
         "is_default": "Er standard",
@@ -2035,6 +2085,7 @@
       "title": "Tavle",
       "empty": "Der er intet at vise på tavlen: du har ingen igangværende opgaver, din søgning gav ingen resultater, eller der er ikke aktiveret nogen opgavestatusser for din rolle i produktionsindstillingerne.",
       "settings": {
+        "description": "Roller, der ser denne status som en kolonne på deres tavle.",
         "title": "Tavlestatus",
         "visible": "Vises på kanban-tavlen for...",
         "select_all": "Vælg alle",

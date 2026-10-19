@@ -84,6 +84,7 @@ export default {
     number: 'background | backgrounds',
     edit_background: 'Edit background',
     new_background: 'Add a new background',
+    production_description: '3D backgrounds offered in the player for the 3D previews of this production.',
     title: '3D Backgrounds',
     fields: {
       is_default: 'Is default',
@@ -96,6 +97,7 @@ export default {
     title: 'Board',
     empty: 'Nothing to show on the board: you have no ongoing tasks, your search returned no results, or no task statuses are enabled for your role in the production settings.',
     settings: {
+      description: 'Roles that see this status as a column on their board.',
       title: 'Board Status',
       visible: 'Displayed on kanban board of...',
       select_all: 'Select all',
@@ -417,6 +419,7 @@ export default {
     in_title: 'Status triggering a change',
     out_title: 'The change that will be applied on trigger firing',
     new_status_automation: 'Add status automation',
+    production_description: 'An automation changes a task status, or the next task, when a status is set.',
     run_for_selection: 'Run status automation for selected tasks:',
     title: 'Automations',
     wrong_automation: 'This automation applies to an upstream task type. It is not permitted by Kitsu (to avoid infinite cycles). It will have no effect.',
@@ -949,6 +952,7 @@ export default {
     people: 'People',
     preview_3d_not_supported:
       '3D previews are not supported in this browser (WebGL2 is required). Please update it to its latest version.',
+    preview_account_banner: 'Preview account (read-only)',
     previous: 'Previous',
     profile: 'Profile',
     production: 'Production',
@@ -1480,6 +1484,42 @@ export default {
     show_stats: 'Show stats',
     title: 'Productions',
 
+    clients: {
+      block: 'Block now',
+      blocked: 'Blocked',
+      copy: 'Copy',
+      create: 'Create preview account',
+      delete: 'Delete',
+      delete_confirm: 'Delete the preview account of this production?',
+      description:
+        'See Kitsu exactly as a client, read-only, not counted as a seat.',
+      error: 'An error occurred while updating the preview account.',
+      isolation_description: 'Each client only sees their own comments and the ones shared with clients, not those of other clients.',
+      isolation_title: 'Client isolation',
+      metadata_description: 'Checked metadata columns are shown to clients in the asset and shot lists.',
+      metadata_empty: 'This production has no metadata.',
+      metadata_title: 'Metadata visible to clients',
+      open_for_hour: 'Open for 1 hour',
+      open_until: 'Open until {time}',
+      password: 'Password (shown once)',
+      password_hint:
+        'Copy it now. Log in with this email in a private window.',
+      preview_title: 'Preview account',
+      regenerate: 'Regenerate password',
+      save_error: 'An error occurred while saving the settings.',
+      statuses_description:
+        'Clients can only set these statuses when they comment.',
+      statuses_empty: 'No status is visible to clients.',
+      statuses_link: 'Edit task statuses',
+      statuses_title: 'Statuses available to clients',
+      team_description: "People with the Client role in this production's team.",
+      team_empty: 'No client in the team.',
+      team_title: 'Clients of the team',
+      title: 'Clients',
+      unavailable:
+        'Preview accounts need local authentication with passwords. Otherwise, create a regular client account.'
+    },
+
     creation: {
       add_assets: 'Add assets (optional)',
       add_asset_types: 'Add asset types',
@@ -1606,6 +1646,7 @@ export default {
 
     brief: {
       edit_error: 'An error occurred while editing the brief.',
+      edit_hint: 'Double-click the brief to edit it.',
       empty: 'There is no brief yet. How about creating one?',
       title: 'Brief'
     },
@@ -1623,23 +1664,36 @@ export default {
       bitrate_max: 'Maximum: {value} Mbit/s',
       bitrate_size: 'About {size} MB per minute',
       bitrates: 'Bitrates',
+      encoding_explanation: 'Uploaded videos are converted to this frame rate, ratio and resolution; existing previews are not re-encoded.',
+      encoding_title: 'Encoding',
+      frame_in_description: "The player counter starts at the shot's frame in instead of 0.",
       hd_bitrate_description: 'Full-resolution version, played in HD mode and used for downloads.',
       ld_bitrate_description: 'Lighter version, 1280 pixels wide, played in LD mode.',
       ld_bitrate_max: 'Maximum: {value} Mbit/s (HD bitrate)',
       next_uploads_only: 'Changes apply to the next uploads only: existing previews are not re-encoded.',
+      previews_title: 'Previews',
       restore_default: 'Restore default',
+      revision_padding_description: 'Adds leading zeros to revision numbers, for example 3 shows v001.',
       task_type_bitrates: 'Leave empty to use the bitrates of the Video tab.',
       task_type_ld_bitrate_max: 'Maximum: the HD bitrate of the task type',
       title: 'Video'
     },
     parameters: {
-      title: 'Parameters',
+      comments_and_retakes: 'Comments and retakes',
+      general_title: 'General',
+      max_retakes_description: 'Artists cannot set a retake status once a task reaches this number of retakes. 0 means no limit.',
       previews_and_comments: 'Previews and Comments',
+      publish_default_description: 'Artists see the publish form instead of the comment form when they open a task.',
+      title: 'Parameters',
       save: {
         button: 'Confirm'
       }
     },
 
+    settings_menu: {
+      production: 'Production',
+      workflow: 'Workflow'
+    },
     status: {
       closed: 'Closed',
       open: 'Open',
@@ -1836,6 +1890,7 @@ export default {
     name: 'task status',
     number: 'task status | task statuses',
     new_task_status: 'Add a task status',
+    production_description: "Only these statuses can be set on this production's tasks.",
     title: 'Task Status',
     title_entities: 'Status for entities',
     title_concepts: 'Status for concepts',
@@ -1872,6 +1927,8 @@ export default {
     new_task_type: 'Add a task type',
     no_task_types: 'There is no task type for this entity type',
     number: 'task type | task types',
+    production_description:
+      'Tasks of this production can only use the task types listed here.',
     select_task_type: 'Select a task type...',
     title: 'Task Types',
     fields: {

@@ -27,7 +27,7 @@ const router = createRouter({
   ]
 })
 
-const mountWithAssetTypes = async assetTypeIds => {
+const mountWithAssetTypes = async (assetTypeIds, path = '/settings') => {
   const store = createStore({
     getters: {
       assetTypes: () => allAssetTypes,
@@ -48,7 +48,7 @@ const mountWithAssetTypes = async assetTypeIds => {
     }
   })
   store.dispatch = vi.fn()
-  await router.push('/settings')
+  await router.push(path)
   await router.isReady()
   return shallowMount(ProductionSettings, {
     global: { plugins: [store, router], mocks: { $t: key => key } }
@@ -71,5 +71,21 @@ describe('ProductionSettings — asset types tab', () => {
     expect(
       wrapper.findComponent(AssetTypeSettings).props('assetTypes')
     ).toEqual([{ id: 'at-2', name: 'Prop' }])
+  })
+})
+
+describe('ProductionSettings — tab from the URL', () => {
+  // The menu rows follow menuGroups: parameters, brief, clients, ...
+  const activeTab = wrapper =>
+    wrapper.findAll('.settings-menu li').findIndex(row => row.classes('is-active'))
+
+  it('opens the tab of the query on mount', async () => {
+    const wrapper = await mountWithAssetTypes([], '/settings?tab=clients')
+    expect(activeTab(wrapper)).toBe(2)
+  })
+
+  it('ignores an unknown tab', async () => {
+    const wrapper = await mountWithAssetTypes([], '/settings?tab=foo')
+    expect(activeTab(wrapper)).toBe(0)
   })
 })

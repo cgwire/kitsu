@@ -473,6 +473,7 @@
       "nb_frames": "フレーム | フレーム",
       "person": "ユーザー",
       "preview_3d_not_supported": "このブラウザでは3Dプレビューに対応していません（WebGL2が必要です）。ブラウザを最新バージョンに更新してください。",
+      "preview_account_banner": "プレビューアカウント(読み取り専用)",
       "previous": "前へ",
       "profile": "プロフィール",
       "production": "プロダクション",
@@ -1052,6 +1053,37 @@
       "view_created": "プレイリストを表示"
     },
     "productions": {
+      "clients": {
+        "block": "今すぐブロック",
+        "blocked": "ブロック済み",
+        "copy": "コピー",
+        "create": "プレビューアカウントを作成",
+        "delete": "削除",
+        "delete_confirm": "このプロダクションのプレビューアカウントを削除しますか?",
+        "description": "ライセンスを消費せず、読み取り専用で、クライアントと同じ表示で Kitsu を確認できます。",
+        "error": "プレビューアカウントの更新中にエラーが発生しました。",
+        "isolation_description": "各クライアントには自分のコメントとクライアントに共有されたコメントだけが表示され、他のクライアントのコメントは表示されません。",
+        "isolation_title": "クライアントの分離",
+        "metadata_description": "チェックしたメタデータ列は、アセットとショットの一覧でクライアントに表示されます。",
+        "metadata_empty": "このプロダクションにはメタデータがありません。",
+        "metadata_title": "クライアントに表示するメタデータ",
+        "open_for_hour": "1時間開く",
+        "open_until": "{time} まで開放中",
+        "password": "パスワード(一度だけ表示)",
+        "password_hint": "今すぐコピーしてください。このメールアドレスでプライベートウィンドウからログインします。",
+        "preview_title": "プレビューアカウント",
+        "regenerate": "パスワードを再生成",
+        "save_error": "設定の保存中にエラーが発生しました。",
+        "statuses_description": "クライアントはコメント時にこれらのステータスのみ設定できます。",
+        "statuses_empty": "クライアントに表示されるステータスはありません。",
+        "statuses_link": "タスクステータスを編集",
+        "statuses_title": "クライアントが使用できるステータス",
+        "team_description": "このプロダクションのチームでクライアントのロールを持つメンバーです。",
+        "team_empty": "チームにクライアントがいません。",
+        "team_title": "チームのクライアント",
+        "title": "クライアント",
+        "unavailable": "プレビューアカウントには、パスワードによるローカル認証が必要です。それ以外の場合は、通常のクライアントアカウントを作成してください。"
+      },
       "current": "選択中のプロダクション",
       "delete_text": "{name} をデータベースから削除してもよろしいですか？確認のため、下にプロダクション名を入力してください。",
       "delete_error": "プロダクションの削除中にエラーが発生しました。関連データが存在する可能性があります。このプロダクションにリンクされたタスク、ショット、アセットがないことを確認してください。Kitsu ではプロダクションの削除は許可されていません。プロダクションを表示したくない場合は、代わりに閉じることができます。",
@@ -1061,6 +1093,10 @@
       "open_productions": "マイプロダクション",
       "picture": "画像を変更",
       "remove_picture": "画像を削除",
+      "settings_menu": {
+        "production": "プロダクション",
+        "workflow": "ワークフロー"
+      },
       "title": "プロダクション",
       "home": {
         "all_playlists": "すべてのプレイリスト",
@@ -1147,15 +1183,20 @@
       "edit_error": "プロダクションの編集中にエラーが発生しました。サポートチームまでお問い合わせください。",
       "brief": {
         "title": "概要",
+        "edit_hint": "概要をダブルクリックすると編集できます。",
         "empty": "まだ概要がありません。ダブルクリックで作成できます。",
         "edit_error": "概要の編集中にエラーが発生しました。"
       },
       "parameters": {
+        "publish_default_description": "アーティストがタスクを開くと、コメントフォームではなく公開フォームが表示されます。",
         "title": "基本設定",
-        "previews_and_comments": "プレビューとコメント",
+        "comments_and_retakes": "コメントとリテイク",
         "save": {
           "button": "確定"
-        }
+        },
+        "general_title": "一般",
+        "max_retakes_description": "タスクのリテイク回数がこの数に達すると、アーティストはリテイクのステータスを設定できなくなります。0 は上限なしです。",
+        "previews_and_comments": "プレビューとコメント"
       },
       "creation": {
         "add_assets": "アセットを追加（任意）",
@@ -1234,11 +1275,16 @@
         "bitrate_max": "最大: {value} Mbit/s",
         "bitrate_size": "1分あたり約 {size} MB",
         "bitrates": "ビットレート",
+        "encoding_explanation": "アップロードされた動画はこのフレームレート、アスペクト比、解像度に変換されます。既存のプレビューは再エンコードされません。",
+        "encoding_title": "エンコード",
+        "frame_in_description": "プレイヤーのカウンターは 0 ではなくショットの開始フレームから始まります。",
         "hd_bitrate_description": "フル解像度のバージョンです。HDモードで再生され、ダウンロードにも使用されます。",
         "ld_bitrate_description": "幅1280ピクセルの軽量バージョンです。LDモードで再生されます。",
         "ld_bitrate_max": "最大: {value} Mbit/s (HDビットレート)",
         "next_uploads_only": "変更は今後のアップロードにのみ適用されます。既存のプレビューは再エンコードされません。",
+        "previews_title": "プレビュー",
         "restore_default": "デフォルトに戻す",
+        "revision_padding_description": "リビジョン番号の先頭にゼロを付けます。例えば 3 にすると v001 と表示されます。",
         "task_type_bitrates": "空欄のままにすると「動画」タブのビットレートが使用されます。",
         "task_type_ld_bitrate_max": "最大: タスクタイプのHDビットレート",
         "title": "動画"
@@ -1378,6 +1424,7 @@
       "edit_title": "タスクステータスを編集",
       "number": "タスクステータス | タスクステータス",
       "new_task_status": "タスクステータスを作成",
+      "production_description": "このプロダクションのタスクに設定できるのはこれらのステータスだけです。",
       "title": "タスクステータス",
       "fields": {
         "color": "色",
@@ -1426,6 +1473,7 @@
       },
       "no_task_types": "このエンティティタイプのタスクタイプはありません",
       "add_task_type_placeholder": "+ タスクタイプの追加",
+      "production_description": "このプロダクションのタスクは、ここに表示されたタスクタイプのみを使用できます。",
       "select_task_type": "タスクタイプを選択…",
       "add_task_type_to_library": "タスクタイプをライブラリに追加",
       "library_title": "タスクタイプライブラリ"
@@ -1970,6 +2018,7 @@
       "in_title": "変更をトリガーするステータス",
       "out_title": "トリガー発火時に適用される変更",
       "new_status_automation": "ステータス自動化を作成",
+      "production_description": "自動化は、ステータスが設定されたときにタスクのステータス、または次のタスクを変更します。",
       "run_for_selection": "選択したタスクにステータス自動化を実行:",
       "title": "ステータス自動化",
       "wrong_automation": "この自動化は上流のタスクタイプを対象にしているため動作しません。無限ループを防ぐため、Kitsu では上流方向への自動化を許可していません。",
@@ -2023,6 +2072,7 @@
       "number": "背景 | 背景",
       "edit_background": "背景を編集",
       "new_background": "新しい背景を追加",
+      "production_description": "このプロダクションの 3D プレビュー用にプレイヤーで選べる 3D 背景です。",
       "title": "3D背景",
       "fields": {
         "is_default": "デフォルト",
@@ -2035,6 +2085,7 @@
       "title": "ボード",
       "empty": "ボードに表示できるものがありません。進行中のタスクがないか、検索結果が0件か、プロダクション設定であなたのロール向けのタスクステータスが有効になっていない可能性があります。",
       "settings": {
+        "description": "このステータスを自分のボードの列として見るロールです。",
         "title": "ボードのステータス",
         "visible": "表示先のカンバンボード",
         "select_all": "すべて選択",
