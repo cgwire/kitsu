@@ -186,6 +186,32 @@ describe('ProductionTaskTypes', () => {
       expect(wrapper.findComponent(RemoveTaskTypeModal).exists()).toBe(false)
     })
 
+    // A task type without a bar of its own gets a placeholder with no id:
+    // deleting it sent DELETE /schedule-items/undefined.
+    it('deletes the bar of the task type only when it has one', async () => {
+      const taskTypeBar = {
+        id: 'task-type-bar',
+        task_type_id: 'shot-1',
+        object_id: null
+      }
+      const withBar = await mountComponent('short', [taskTypeBar])
+      await removeAnimation(withBar.wrapper, {
+        countTasks: () => Promise.resolve(0)
+      })
+      expect(withBar.store.dispatch).toHaveBeenCalledWith(
+        'deleteScheduleItem',
+        taskTypeBar
+      )
+
+      const withoutBar = await mountComponent()
+      await removeAnimation(withoutBar.wrapper, {
+        countTasks: () => Promise.resolve(0)
+      })
+      expect(
+        withoutBar.store.dispatch.mock.calls.map(([action]) => action)
+      ).not.toContain('deleteScheduleItem')
+    })
+
     it('keeps the remaining tasks when asked to', async () => {
       const { store, wrapper } = await mountComponent()
 

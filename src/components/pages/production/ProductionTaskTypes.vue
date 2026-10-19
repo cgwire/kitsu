@@ -352,7 +352,8 @@ const applyTaskTypeRemoval = async ({ taskType, scheduleItem }) => {
   errors.delete = false
   try {
     await store.dispatch('removeTaskTypeFromProduction', taskType.id)
-    if (scheduleItem !== null) {
+    // A task type without a bar of its own gets a placeholder with no id.
+    if (scheduleItem?.id) {
       loading.scheduleTimeDelete = true
       await store.dispatch('deleteScheduleItem', scheduleItem)
       loading.scheduleTimeDelete = false
