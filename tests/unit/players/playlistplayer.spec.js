@@ -1277,13 +1277,18 @@ describe('PlaylistPlayer.vue', () => {
           )
         }
       })
+      // The first sizing reads the player root on the next tick.
+      Object.defineProperty(wrapper.element, 'offsetHeight', {
+        get: () => 600
+      })
       await flushPromises()
       await flushPromises()
 
-      const mediaHeight = wrapper.find('.video-container').element.style.height
-      expect(mediaHeight).toMatch(/px$/)
+      expect(wrapper.find('.video-container').element.style.height).toBe(
+        '600px'
+      )
       expect(wrapper.find('.task-info-column').element.style.height).toBe(
-        mediaHeight
+        '600px'
       )
     })
   })

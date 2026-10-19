@@ -450,7 +450,7 @@
         :show-assignees="
           !isPhone && (isCurrentTaskManager || isCurrentTaskSupervisor)
         "
-        :style="{ height: `${mediaHeight}px` }"
+        :style="mediaHeight ? { height: `${mediaHeight}px` } : null"
         @comment-added="onCommentAdded"
         @time-code-clicked="onTimeCodeClicked"
         v-show="!isCommentsHidden"
