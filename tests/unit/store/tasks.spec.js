@@ -1303,6 +1303,43 @@ describe('Tasks store, new main previews', () => {
   })
 })
 
+// GET /api/data/tasks/:id/full nests the episode of a shot or a sequence
+// task, where the task lists give its id: the links to the task page read
+// the id, or fall back on the episode the user browsed last.
+describe('Tasks store, LOAD_TASK_END', () => {
+  const fullTask = fields => ({
+    id: 'task-1',
+    project: { name: 'Caminandes' },
+    entity: { id: 'shot-1', name: 'SH010' },
+    entity_type: { name: 'Shot' },
+    sequence: { id: 'sequence-1', name: 'SQ01' },
+    ...fields
+  })
+
+  test('gives a task the id of its episode', () => {
+    const state = { taskMap: new Map() }
+    const task = fullTask({ episode: { id: 'episode-2', name: 'E02' } })
+
+    tasksStore.mutations.LOAD_TASK_END(state, task)
+
+    expect(task.episode_id).toBe('episode-2')
+    expect(state.taskMap.get('task-1').episode_id).toBe('episode-2')
+  })
+
+  test('gives no episode to a task outside episodes', () => {
+    const state = { taskMap: new Map() }
+    const task = fullTask({
+      entity: { id: 'asset-1', name: 'Chair' },
+      entity_type: { name: 'Props' },
+      sequence: undefined
+    })
+
+    tasksStore.mutations.LOAD_TASK_END(state, task)
+
+    expect(task).not.toHaveProperty('episode_id')
+  })
+})
+
 describe('Tasks store, DELETE_TASK_END', () => {
   const task = { id: 't1', entity_id: 'e1', task_type_id: 'tt1' }
   const buildState = () => ({

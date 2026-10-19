@@ -1157,6 +1157,11 @@ const mutations = {
       project_name: task.project.name,
       entity_type_name: task.entity_type.name
     })
+    // Zou nests the episode: the links to the task page read its id, or fall
+    // back on the episode the user browsed last.
+    if (task.episode) {
+      task.episode_id = task.episode.id
+    }
     if (task.entity_type.name === 'Shot') {
       if (task.episode) {
         task.entity_name = `${task.episode.name} / ${task.sequence.name} / ${task.entity.name}`
