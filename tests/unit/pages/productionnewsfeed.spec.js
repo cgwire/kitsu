@@ -20,8 +20,10 @@ import '@/lib/auth'
 
 import newsModule from '@/store/modules/news'
 
+import NewsFilters from '@/components/pages/news/NewsFilters.vue'
 import NewsRow from '@/components/pages/news/NewsRow.vue'
 import ProductionNewsFeed from '@/components/pages/ProductionNewsFeed.vue'
+import TaskInfo from '@/components/sides/TaskInfo.vue'
 
 const production = { id: 'production-1', name: 'Caminandes' }
 
@@ -42,7 +44,10 @@ const newsList = [
 
 let mounted = null
 
-const mountPage = async path => {
+const mountPage = async (
+  path,
+  { loadTask = (_, { taskId }) => ({ id: taskId }) } = {}
+) => {
   pget.mockReset()
   pget.mockResolvedValue({ data: newsList, total: 2, stats: [] })
 
@@ -63,9 +68,7 @@ const mountPage = async path => {
     modules: {
       news: { ...newsModule, state: () => ({ newsList: [], newsTotal: 0 }) }
     },
-    actions: {
-      loadTask: (_, { taskId }) => ({ id: taskId })
-    },
+    actions: { loadTask },
     getters: {
       currentProduction: () => production,
       dateFormat: () => 'YYYY-MM-DD',
@@ -217,6 +220,99 @@ describe('pages/ProductionNewsFeed', () => {
       expect(rejections).toEqual([])
       expect(consoleError.mock.calls).toEqual([[error], [error]])
       expect(store.getters.newsList).toHaveLength(2)
+    })
+  })
+
+  describe('task selection', () => {
+    const feedPath = `/productions/${production.id}/news-feed`
+
+    // Each task load ends on demand: the user may select another news, or
+    // change a filter, before it lands.
+    const deferTaskLoads = () => {
+      const settlers = new Map()
+      const loadTask = vi.fn(
+        (_, { taskId }) =>
+          new Promise((resolve, reject) => {
+            settlers.set(taskId, { resolve, reject })
+          })
+      )
+      const finish = async taskId => {
+        settlers.get(taskId).resolve({ id: taskId })
+        await flushPromises()
+      }
+      const fail = async taskId => {
+        settlers.get(taskId).reject(httpError(502))
+        await flushPromises()
+      }
+      return { fail, finish, loadTask }
+    }
+
+    const panelTask = wrapper => wrapper.findComponent(TaskInfo).props('task')
+
+    it('shows the task of the news selected last when an earlier load ends after it', async () => {
+      const { finish, loadTask } = deferTaskLoads()
+      const { wrapper } = await mountPage(feedPath, { loadTask })
+      const [first, second] = wrapper.findAllComponents(NewsRow)
+
+      first.vm.$emit('select', newsList[0])
+      second.vm.$emit('select', newsList[1])
+      await finish('task-1')
+      await finish('task-2')
+
+      expect(panelTask(wrapper)?.id).toBe('task-1')
+      expect(first.props('isSelected')).toBe(false)
+      expect(second.props('isSelected')).toBe(true)
+    })
+
+    it('drops a task that loads once the feed is loaded again', async () => {
+      const { finish, loadTask } = deferTaskLoads()
+      const { wrapper } = await mountPage(feedPath, { loadTask })
+
+      wrapper.findAllComponents(NewsRow)[0].vm.$emit('select', newsList[0])
+      wrapper
+        .findComponent(NewsFilters)
+        .vm.$emit('update:taskTypeId', 'task-type-1')
+      await flushPromises()
+      await finish('task-2')
+
+      expect(panelTask(wrapper)).toBe(null)
+      expect(
+        wrapper.findAllComponents(NewsRow).some(row => row.props('isSelected'))
+      ).toBe(false)
+    })
+
+    // A second click closes the task shown: on a news still loading, it is
+    // the end of a double click.
+    it('opens a news clicked twice while its task loads', async () => {
+      const { finish, loadTask } = deferTaskLoads()
+      const { wrapper } = await mountPage(feedPath, { loadTask })
+      const row = wrapper.findAllComponents(NewsRow)[0]
+
+      row.vm.$emit('select', newsList[0])
+      row.vm.$emit('select', newsList[0])
+      await finish('task-2')
+
+      expect(panelTask(wrapper)?.id).toBe('task-2')
+      expect(row.props('isSelected')).toBe(true)
+    })
+
+    it('loads a task again on a click after its load failed', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const { fail, finish, loadTask } = deferTaskLoads()
+      const { wrapper } = await mountPage(feedPath, { loadTask })
+      const row = wrapper.findAllComponents(NewsRow)[0]
+
+      row.vm.$emit('select', newsList[0])
+      await fail('task-2')
+      row.vm.$emit('select', newsList[0])
+      await finish('task-2')
+
+      expect(loadTask).toHaveBeenCalledTimes(2)
+      expect(consoleError).toHaveBeenCalledTimes(1)
+      expect(panelTask(wrapper)?.id).toBe('task-2')
+      consoleError.mockRestore()
     })
   })
 
