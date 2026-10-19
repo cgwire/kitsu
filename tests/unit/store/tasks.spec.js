@@ -1304,8 +1304,9 @@ describe('Tasks store, new main previews', () => {
 })
 
 // GET /api/data/tasks/:id/full nests the episode of a shot or a sequence
-// task, where the task lists give its id: the links to the task page read
-// the id, or fall back on the episode the user browsed last.
+// task, and the entity of an asset or an edit task, where the task lists
+// give the episode id: the links to the task page read the id, or fall
+// back on the episode the user browsed last.
 describe('Tasks store, LOAD_TASK_END', () => {
   const fullTask = fields => ({
     id: 'task-1',
@@ -1326,13 +1327,61 @@ describe('Tasks store, LOAD_TASK_END', () => {
     expect(state.taskMap.get('task-1').episode_id).toBe('episode-2')
   })
 
-  test('gives no episode to a task outside episodes', () => {
+  // The task lists give an asset the episode it was created in.
+  test('gives an asset task the episode of its asset', () => {
     const state = { taskMap: new Map() }
     const task = fullTask({
-      entity: { id: 'asset-1', name: 'Chair' },
+      entity: { id: 'asset-1', name: 'Chair', source_id: 'episode-3' },
       entity_type: { name: 'Props' },
       sequence: undefined
     })
+
+    tasksStore.mutations.LOAD_TASK_END(state, task)
+
+    expect(task.episode_id).toBe('episode-3')
+  })
+
+  test('gives an edit task the episode of its edit', () => {
+    const state = { taskMap: new Map() }
+    const task = fullTask({
+      entity: { id: 'edit-1', name: 'Trailer', parent_id: 'episode-4' },
+      entity_type: { name: 'Edit' },
+      sequence: undefined
+    })
+
+    tasksStore.mutations.LOAD_TASK_END(state, task)
+
+    expect(task.episode_id).toBe('episode-4')
+  })
+
+  test.each([
+    [
+      'an asset of the main pack',
+      {
+        entity: { id: 'asset-1', name: 'Chair', source_id: null },
+        entity_type: { name: 'Props' },
+        sequence: undefined
+      }
+    ],
+    [
+      'a shot outside episodes',
+      { entity: { id: 'shot-1', name: 'SH010', parent_id: 'sequence-1' } }
+    ],
+    // Zou gives a shot made from a scene that scene for source.
+    [
+      'a shot made from a scene',
+      {
+        entity: {
+          id: 'shot-1',
+          name: 'SH010',
+          parent_id: 'sequence-1',
+          source_id: 'scene-1'
+        }
+      }
+    ]
+  ])('gives no episode to the task of %s', (_, fields) => {
+    const state = { taskMap: new Map() }
+    const task = fullTask(fields)
 
     tasksStore.mutations.LOAD_TASK_END(state, task)
 
