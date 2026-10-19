@@ -109,8 +109,9 @@ const reset = () => {
   }
 }
 
+// A drop of text or of a link holds no file.
 const onDrop = event => {
-  if (event.dataTransfer.files) {
+  if (event.dataTransfer.files?.length) {
     isSaving.value = false
     filesChange('file', event.dataTransfer.files)
   }
