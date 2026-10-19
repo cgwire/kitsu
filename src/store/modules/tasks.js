@@ -202,6 +202,10 @@ const actions = {
     return tasksApi.getTasks(filters)
   },
 
+  countTasks({}, filters) {
+    return tasksApi.countTasks(filters)
+  },
+
   loadOpenTasks({}, filters) {
     return tasksApi.getOpenTasks(filters)
   },

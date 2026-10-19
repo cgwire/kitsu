@@ -1474,6 +1474,11 @@
       "no_task_types": "이 엔티티 유형에 대한 작업 유형이 없습니다.",
       "add_task_type_placeholder": "+ 작업 유형 추가",
       "production_description": "이 프로덕션의 작업은 여기에 나열된 작업 유형만 사용할 수 있습니다.",
+      "remaining_tasks": "{name}에 이 프로덕션의 작업이 아직 {count}개 남아 있습니다. 작업 유형을 제거해도 작업은 삭제되지 않습니다. | {name}에 이 프로덕션의 작업이 아직 {count}개 남아 있습니다. 작업 유형을 제거해도 작업은 삭제되지 않습니다.",
+      "remaining_tasks_delete": "이 작업도 댓글 및 미리보기와 함께 삭제 | 이 작업 {count}개도 댓글 및 미리보기와 함께 삭제",
+      "remaining_tasks_lock": "삭제를 확인하려면 {name}을(를) 입력하세요",
+      "remove_error": "작업 유형을 제거할 수 없습니다. 다시 시도해 주세요.",
+      "remove_title": "작업 유형 제거",
       "select_task_type": "작업 유형 선택...",
       "add_task_type_to_library": "라이브러리에 작업 유형 추가하기",
       "library_title": "작업 유형 라이브러리"

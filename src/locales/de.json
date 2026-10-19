@@ -1474,6 +1474,11 @@
       "no_task_types": "Es gibt keinen Aufgabentyp für diesen Entitätstyp",
       "add_task_type_placeholder": "+ Aufgabentyp",
       "production_description": "Aufgaben dieser Produktion können nur die hier aufgeführten Aufgabentypen verwenden.",
+      "remaining_tasks": "{name} hat in dieser Produktion noch {count} Aufgabe. Wenn Sie den Aufgabentyp entfernen, wird sie nicht gelöscht. | {name} hat in dieser Produktion noch {count} Aufgaben. Wenn Sie den Aufgabentyp entfernen, werden sie nicht gelöscht.",
+      "remaining_tasks_delete": "Diese Aufgabe auch löschen, mit ihren Kommentaren und Vorschauen | Diese {count} Aufgaben auch löschen, mit ihren Kommentaren und Vorschauen",
+      "remaining_tasks_lock": "Geben Sie {name} ein, um das Löschen zu bestätigen",
+      "remove_error": "Der Aufgabentyp konnte nicht entfernt werden. Bitte versuchen Sie es erneut.",
+      "remove_title": "Aufgabentyp entfernen",
       "select_task_type": "Wählen Sie einen Aufgabentyp...",
       "add_task_type_to_library": "Hinzufügen eines Aufgabentyps zur Bibliothek",
       "library_title": "Aufgabentyp-Bibliothek"

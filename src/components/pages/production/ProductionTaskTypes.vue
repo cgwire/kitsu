@@ -124,6 +124,17 @@
         </div>
       </div>
     </div>
+
+    <remove-task-type-modal
+      active
+      :is-error="taskTypeRemoval.isError"
+      :is-loading="taskTypeRemoval.isLoading"
+      :nb-tasks="taskTypeRemoval.nbTasks"
+      :task-type="taskTypeRemoval.taskType"
+      @cancel="cancelTaskTypeRemoval"
+      @confirm="confirmTaskTypeRemoval"
+      v-if="taskTypeRemoval.taskType"
+    />
   </div>
 </template>
 <script setup>
@@ -140,6 +151,7 @@ import { formatFullDate } from '@/lib/time'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import InfoQuestionMark from '@/components/widgets/InfoQuestionMark.vue'
 import ProductionTaskType from '@/components/pages/production/ProductionTaskType.vue'
+import RemoveTaskTypeModal from '@/components/modals/RemoveTaskTypeModal.vue'
 import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
 import SettingImporter from '@/components/widgets/SettingImporter.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
@@ -161,6 +173,15 @@ const loading = reactive({
   episode_span: false,
   scheduleTimeUpdate: false,
   scheduleTimeDelete: false
+})
+// A removed task type keeps its tasks, hidden from the lists and the
+// schedule: when some remain, the modal lets the user delete them first.
+const taskTypeRemoval = reactive({
+  isError: false,
+  isLoading: false,
+  nbTasks: 0,
+  scheduleItem: null,
+  taskType: null
 })
 const errors = reactive({
   episode_span: false,
@@ -327,11 +348,12 @@ const addTaskType = async taskType => {
   resetDisplayedTaskTypes()
 }
 
-const removeTaskType = async ({ taskType, scheduleItem }) => {
+const applyTaskTypeRemoval = async ({ taskType, scheduleItem }) => {
   errors.delete = false
   try {
     await store.dispatch('removeTaskTypeFromProduction', taskType.id)
-    if (scheduleItem !== null) {
+    // A task type without a bar of its own gets a placeholder with no id.
+    if (scheduleItem?.id) {
       loading.scheduleTimeDelete = true
       await store.dispatch('deleteScheduleItem', scheduleItem)
       loading.scheduleTimeDelete = false
@@ -344,6 +366,59 @@ const removeTaskType = async ({ taskType, scheduleItem }) => {
   await nextTick()
   updateTaskTypeIdFromRemaining()
   resetDisplayedTaskTypes()
+}
+
+const removeTaskType = async ({ taskType, scheduleItem }) => {
+  errors.delete = false
+  let nbTasks
+  try {
+    nbTasks = await store.dispatch('countTasks', {
+      project_id: currentProduction.value.id,
+      task_type_id: taskType.id
+    })
+  } catch (err) {
+    console.error(err)
+    errors.delete = true
+    return
+  }
+  if (nbTasks > 0) {
+    Object.assign(taskTypeRemoval, {
+      isError: false,
+      nbTasks,
+      scheduleItem,
+      taskType
+    })
+  } else {
+    await applyTaskTypeRemoval({ taskType, scheduleItem })
+  }
+}
+
+const confirmTaskTypeRemoval = async isDeletingTasks => {
+  const { scheduleItem, taskType } = taskTypeRemoval
+  taskTypeRemoval.isError = false
+  taskTypeRemoval.isLoading = true
+  try {
+    if (isDeletingTasks) {
+      await store.dispatch('deleteAllTasks', {
+        projectId: currentProduction.value.id,
+        taskTypeId: taskType.id
+      })
+    }
+  } catch (err) {
+    console.error(err)
+    taskTypeRemoval.isError = true
+    return
+  } finally {
+    taskTypeRemoval.isLoading = false
+  }
+  taskTypeRemoval.taskType = null
+  await applyTaskTypeRemoval({ taskType, scheduleItem })
+}
+
+// A deletion of the tasks cannot be stopped once sent: the modal stays open
+// until it ends.
+const cancelTaskTypeRemoval = () => {
+  if (!taskTypeRemoval.isLoading) taskTypeRemoval.taskType = null
 }
 
 const onBitratesChanged = async ({ taskType, ...bitrates }) => {

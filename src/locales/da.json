@@ -1474,6 +1474,11 @@
       "no_task_types": "Der er ingen opgavetype for denne enhedstype",
       "add_task_type_placeholder": "+ Opgavetype",
       "production_description": "Opgaverne i denne produktion kan kun bruge de opgavetyper, der er angivet her.",
+      "remaining_tasks": "{name} har stadig {count} opgave i denne produktion. Hvis opgavetypen fjernes, slettes opgaven ikke. | {name} har stadig {count} opgaver i denne produktion. Hvis opgavetypen fjernes, slettes opgaverne ikke.",
+      "remaining_tasks_delete": "Slet også denne opgave med dens kommentarer og forhåndsvisninger | Slet også disse {count} opgaver med deres kommentarer og forhåndsvisninger",
+      "remaining_tasks_lock": "Skriv {name} for at bekræfte sletningen",
+      "remove_error": "Opgavetypen kunne ikke fjernes. Prøv venligst igen.",
+      "remove_title": "Fjern opgavetypen",
       "select_task_type": "Vælg en opgavetype...",
       "add_task_type_to_library": "Tilføj en opgavetype til biblioteket",
       "library_title": "Opgavetype-bibliotek"

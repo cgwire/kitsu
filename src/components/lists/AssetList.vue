@@ -744,21 +744,24 @@ const readyForTaskTypes = computed(() => [
   ...sortTaskTypes(productionShotTaskTypes.value, currentProduction.value)
 ])
 
-// Task types an asset type accepts: its own workflow, or every production
-// task type when it has none.
+// Task types an asset type accepts: the production ones, narrowed to its own
+// workflow when it has one, like the asset creation does.
 const getAllowedTaskTypeIds = assetTypeId => {
-  const taskTypeIds = assetTypeMap.get(assetTypeId)?.task_types
-  return taskTypeIds?.length
-    ? taskTypeIds
-    : productionAssetTaskTypes.value.map(taskType => taskType.id)
+  const productionTaskTypeIds = productionAssetTaskTypes.value.map(
+    taskType => taskType.id
+  )
+  const workflow = assetTypeMap.get(assetTypeId)?.task_types
+  return workflow?.length
+    ? productionTaskTypeIds.filter(taskTypeId => workflow.includes(taskTypeId))
+    : productionTaskTypeIds
 }
 
 // A column counts as filled only when at least one displayed asset has a
-// task whose type is part of the asset type's workflow. Tasks lingering
-// on assets whose type no longer accepts that task type (workflow-change
-// leftovers, asset type reassignments) are treated as if they did not
-// exist, so the column hides instead of being kept visible by orphaned
-// tasks the artist cannot actually edit.
+// task whose type its asset type accepts. Tasks lingering on assets whose
+// type no longer accepts that task type (workflow-change leftovers, asset
+// type reassignments, task types removed from the production) are treated
+// as if they did not exist, so the column hides instead of being kept
+// visible by orphaned tasks the artist cannot actually edit.
 const inWorkflowFilledColumns = computed(() =>
   props.displayedAssets.reduce((filled, typeGroup) => {
     if (typeGroup.length) {
@@ -787,8 +790,8 @@ const isAssetShown = asset => {
   )
 }
 
-// Selectable if the cell already holds a task or if the task type is
-// included in the workflow. Cells with existing tasks stay actionable
+// Selectable if the cell already holds a task or if its asset type accepts
+// the task type. Cells with existing tasks stay actionable
 // even when a workflow change removed their task type, so they can
 // still be selected and managed instead of freezing.
 const isSelectable = (asset, columnId) => {

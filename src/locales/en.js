@@ -1929,6 +1929,13 @@ export default {
     number: 'task type | task types',
     production_description:
       'Tasks of this production can only use the task types listed here.',
+    remaining_tasks:
+      '{name} still has {count} task in this production. Removing the task type does not delete it. | {name} still has {count} tasks in this production. Removing the task type does not delete them.',
+    remaining_tasks_delete:
+      'Also delete this task, with its comments and previews | Also delete these {count} tasks, with their comments and previews',
+    remaining_tasks_lock: 'Type {name} to confirm the deletion',
+    remove_error: 'Could not remove the task type. Please try again.',
+    remove_title: 'Remove the task type',
     select_task_type: 'Select a task type...',
     title: 'Task Types',
     fields: {

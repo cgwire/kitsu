@@ -1856,6 +1856,11 @@
       "no_task_types": "Dla tego typu obiektu nie ma żadnych typów zadań",
       "number": "typ zadania | typów zadań",
       "production_description": "Zadania tej produkcji mogą używać tylko wymienionych tutaj typów zadań.",
+      "remaining_tasks": "{name} ma jeszcze {count} zadanie w tej produkcji. Usunięcie typu zadania z produkcji nie skasuje tego zadania. | Pozostałe zadania typu {name} w tej produkcji: {count}. Usunięcie typu zadania z produkcji nie skasuje tych zadań.",
+      "remaining_tasks_delete": "Skasuj też to zadanie wraz z komentarzami i podglądami | Skasuj też te zadania ({count}) wraz z komentarzami i podglądami",
+      "remaining_tasks_lock": "Wpisz {name}, aby potwierdzić skasowanie",
+      "remove_error": "Nie udało się usunąć typu zadania. Spróbuj ponownie.",
+      "remove_title": "Usuń typ zadania",
       "select_task_type": "Wybierz typ zadania...",
       "title": "Typy zadań",
       "fields": {

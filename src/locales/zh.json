@@ -1474,6 +1474,11 @@
       "no_task_types": "该实体类型没有任务类型",
       "add_task_type_placeholder": "+ 添加任务类型",
       "production_description": "此制作的任务只能使用这里列出的任务类型。",
+      "remaining_tasks": "{name} 在此制作中仍有 {count} 个任务。移除该任务类型不会删除该任务。 | {name} 在此制作中仍有 {count} 个任务。移除该任务类型不会删除这些任务。",
+      "remaining_tasks_delete": "同时删除此任务及其评论和预览 | 同时删除这 {count} 个任务及其评论和预览",
+      "remaining_tasks_lock": "输入 {name} 以确认删除",
+      "remove_error": "无法移除任务类型。请重试。",
+      "remove_title": "移除任务类型",
       "select_task_type": "选择任务类型...",
       "add_task_type_to_library": "向任务类型库中添加任务类型",
       "library_title": "任务类型库"

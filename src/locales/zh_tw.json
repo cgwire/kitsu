@@ -1474,6 +1474,11 @@
       "no_task_types": "此實體類型沒有任務類型",
       "add_task_type_placeholder": "+ 新增任務類型",
       "production_description": "此製作的任務只能使用這裡列出的任務類型。",
+      "remaining_tasks": "{name} 在此製作中仍有 {count} 個任務。移除此任務類型不會刪除該任務。 | {name} 在此製作中仍有 {count} 個任務。移除此任務類型不會刪除這些任務。",
+      "remaining_tasks_delete": "同時刪除此任務及其註解和預覽 | 同時刪除這 {count} 個任務及其註解和預覽",
+      "remaining_tasks_lock": "輸入 {name} 以確認刪除",
+      "remove_error": "無法移除任務類型。請再試一次。",
+      "remove_title": "移除任務類型",
       "select_task_type": "選擇任務類型...",
       "add_task_type_to_library": "新增任務類型到任務類型庫",
       "library_title": "任務類型庫"

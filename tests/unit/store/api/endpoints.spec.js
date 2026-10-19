@@ -24,6 +24,7 @@ import previewsApi from '@/store/api/previews'
 import projectTemplatesApi from '@/store/api/projecttemplates'
 import scheduleApi from '@/store/api/schedule'
 import shotsApi from '@/store/api/shots'
+import tasksApi from '@/store/api/tasks'
 import taskTypesApi from '@/store/api/tasktypes'
 
 describe('store/api endpoints', () => {
@@ -334,5 +335,21 @@ describe('store/api endpoints', () => {
       `/api/data/preview-files?id=${encodeURIComponent('["p1","p2"]')}` +
         '&fields=id,status'
     )
+  })
+
+  // A paginated page carries the total of the matching tasks: one row is
+  // enough to count them.
+  test('counts the tasks with a one row page', async () => {
+    client.pget.mockResolvedValueOnce({ data: [{ id: 'task-1' }], total: 12 })
+
+    const nbTasks = await tasksApi.countTasks({
+      project_id: 'p1',
+      task_type_id: 'tt1'
+    })
+
+    expect(client.pget).toHaveBeenCalledWith(
+      '/api/data/tasks?project_id=p1&task_type_id=tt1&page=1&limit=1'
+    )
+    expect(nbTasks).toBe(12)
   })
 })

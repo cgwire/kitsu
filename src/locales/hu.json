@@ -1476,6 +1476,11 @@
       "library_title": "Feladat típus könyvtár",
       "no_task_types": "Nincs feladat típus ehhez az elem típushoz",
       "production_description": "A produkció feladatai csak az itt felsorolt feladattípusokat használhatják.",
+      "remaining_tasks": "{name}: még {count} feladat maradt ebben a produkcióban. A feladat típus eltávolítása nem törli a feladatot. | {name}: még {count} feladat maradt ebben a produkcióban. A feladat típus eltávolítása nem törli a feladatokat.",
+      "remaining_tasks_delete": "Töröld ezt a feladatot is a hozzászólásaival és előnézeteivel együtt | Töröld ezt a(z) {count} feladatot is a hozzászólásaikkal és előnézeteikkel együtt",
+      "remaining_tasks_lock": "A törlés megerősítéséhez írd be: {name}",
+      "remove_error": "Nem sikerült eltávolítani a feladat típust. Kérlek próbáld újra.",
+      "remove_title": "Feladat típus eltávolítása",
       "select_task_type": "Válassz egy feladat típust..."
     },
     "sequences": {

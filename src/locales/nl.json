@@ -1474,6 +1474,11 @@
       "no_task_types": "Er is geen taaktype voor dit entiteittype",
       "add_task_type_placeholder": "+ Taaktype toevoegen",
       "production_description": "Taken van deze productie kunnen alleen de hier vermelde taaktypen gebruiken.",
+      "remaining_tasks": "{name} heeft nog {count} taak in deze productie. Als je het taaktype verwijdert, wordt de taak niet gewist. | {name} heeft nog {count} taken in deze productie. Als je het taaktype verwijdert, worden de taken niet gewist.",
+      "remaining_tasks_delete": "Deze taak ook wissen, met de opmerkingen en previews | Deze {count} taken ook wissen, met hun opmerkingen en previews",
+      "remaining_tasks_lock": "Typ {name} om het wissen te bevestigen",
+      "remove_error": "Kon het taaktype niet verwijderen. Probeer het opnieuw.",
+      "remove_title": "Taaktype verwijderen",
       "select_task_type": "Selecteer een taaktype...",
       "add_task_type_to_library": "Een taaktype toevoegen aan de bibliotheek",
       "library_title": "Taaktype Bibliotheek"
