@@ -474,6 +474,8 @@ const enableDesktopNotifications = async () => {
 const body = ref(null)
 const currentTask = ref(null)
 const currentNotificationId = ref(null)
+// The notification selected last: its task may still be loading.
+let selectedNotificationId = null
 
 const errors = reactive({ notifications: false })
 const loading = reactive({
@@ -562,10 +564,16 @@ const buildLoadParams = () => {
   return params
 }
 
+const closeTask = () => {
+  selectedNotificationId = null
+  currentTask.value = null
+  currentNotificationId.value = null
+}
+
 const reloadData = () => {
   loading.notifications = true
   errors.notifications = false
-  currentTask.value = null
+  closeTask()
   store
     .dispatch('loadNotifications', buildLoadParams())
     .then(() => {
@@ -650,17 +658,28 @@ const onNotificationSelected = (event, notification) => {
   ) {
     return
   }
-  if (currentNotificationId.value !== notification.id) {
+  if (notification.id !== selectedNotificationId) {
+    selectedNotificationId = notification.id
     store
       .dispatch('loadTask', { taskId: notification.task_id })
       .then(task => {
+        // Answers come in any order: a slower load of a notification
+        // selected before would replace the task of this one.
+        if (notification.id !== selectedNotificationId) return
         currentTask.value = task
         currentNotificationId.value = notification.id
       })
-      .catch(console.error)
-  } else {
-    currentTask.value = null
-    currentNotificationId.value = null
+      .catch(err => {
+        console.error(err)
+        // A click on the notification loads it again.
+        if (notification.id === selectedNotificationId) {
+          selectedNotificationId = currentNotificationId.value
+        }
+      })
+  } else if (notification.id === currentNotificationId.value) {
+    // Only the task shown closes: a notification still loading gets the
+    // second click of a double click.
+    closeTask()
   }
 }
 
