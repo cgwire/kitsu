@@ -153,6 +153,7 @@ import draggable from 'vuedraggable'
 import { useStore } from 'vuex'
 
 import { useDraggableRebuild } from '@/composables/draggableRebuild'
+import func from '@/lib/func'
 import { sortByName, sortTaskTypes } from '@/lib/sorting'
 import { formatFullDate } from '@/lib/time'
 
@@ -194,9 +195,6 @@ const errors = reactive({
   scheduleTimeUpdate: false,
   delete: false
 })
-
-let pendingTaskTypeIds = null
-let prioritiesSave = null
 
 // Computed
 // --------------------------------------------------------------------------
@@ -447,29 +445,14 @@ const onBitratesChanged = async ({ taskType, ...bitrates }) => {
   }
 }
 
-const sendPendingPriorities = async () => {
-  try {
-    while (pendingTaskTypeIds) {
-      const taskTypeIds = pendingTaskTypeIds
-      pendingTaskTypeIds = null
-      await store.dispatch('reorderTaskTypeLinks', {
-        projectId: currentProduction.value.id,
-        taskTypeIds
-      })
-    }
-  } finally {
-    prioritiesSave = null
-  }
-}
-
-// A reorder dropped during a save waits for it, then only the last order is
-// sent: the saves never cross on the server, and each drop reloads the
-// context once every order is saved.
-const savePriorities = taskTypeIds => {
-  pendingTaskTypeIds = taskTypeIds
-  prioritiesSave ||= sendPendingPriorities()
-  return prioritiesSave
-}
+// The saves never cross on the server, and each drop reloads the context
+// once every order is saved.
+const savePriorities = func.queueLatest(taskTypeIds =>
+  store.dispatch('reorderTaskTypeLinks', {
+    projectId: currentProduction.value.id,
+    taskTypeIds
+  })
+)
 
 const updatePriorities = async items => {
   await savePriorities(items.map(item => item.taskType.id))
