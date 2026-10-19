@@ -120,6 +120,36 @@ describe('lists/AssetList', () => {
       const asset = buildAsset(new Map([[modelingId, 'task-gone']]))
       expect((await selectableCells(asset)).modeling).toBe(false)
     })
+
+    // The asset creation only makes the tasks of the production task types
+    // the workflow lists: the column follows the same rule, or a task type
+    // removed from the production keeps a column the schedule no longer has.
+    test('hides a workflow task type the production no longer has', async () => {
+      const wrapper = await mountEntityList(AssetList, {
+        getters: {
+          currentProduction: production,
+          displayedAssetsCount: 1,
+          productionAssetTaskTypes: [{ id: riggingId }],
+          taskMap: new Map(),
+          taskTypeMap: new Map([
+            [modelingId, { id: modelingId, color: '#000000' }],
+            [riggingId, { id: riggingId, color: '#000000' }]
+          ])
+        },
+        props: {
+          displaySettings: { showInfos: true, showSharedAssets: true },
+          validationColumns: [modelingId, riggingId],
+          displayedAssets: [[character]]
+        }
+      })
+
+      expect(
+        wrapper
+          .findAllComponents(ValidationHeader)
+          .map(header => header.props('columnId'))
+      ).toEqual([riggingId])
+      wrapper.unmount()
+    })
   })
 })
 
