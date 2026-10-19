@@ -27,7 +27,7 @@
           :is-loading="isWorking"
           :text="$t('productions.clients.create')"
           @click="create"
-          v-if="isLoaded && !account"
+          v-if="isLoaded && !account && !hasError"
         />
         <div class="account" v-else-if="account">
           <div class="credentials">

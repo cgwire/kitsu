@@ -28,7 +28,10 @@ const mountClients = async ({
       ...getters
     }
   })
-  store.dispatch = vi.fn(async name => responses[name] ?? null)
+  store.dispatch = vi.fn(async name => {
+    const response = responses[name]
+    return typeof response === 'function' ? response() : (response ?? null)
+  })
   const wrapper = shallowMount(ProductionClients, {
     global: { plugins: [store], mocks: { $t: (k, p) => k + (p?.time || '') } }
   })
@@ -90,6 +93,18 @@ describe('ProductionClients', () => {
     await nextTick()
     expect(wrapper.find('.state-tag').text()).toBe('productions.clients.blocked')
     expect(wrapper.findComponent('.block-button').exists()).toBe(false)
+  })
+
+  it('keeps the create button from a failed account load', async () => {
+    const { wrapper } = await mountClients({
+      responses: {
+        getPreviewAccount: () => {
+          throw new Error('down')
+        }
+      }
+    })
+    expect(wrapper.find('.preview .error').exists()).toBe(true)
+    expect(wrapper.findComponent('.create-button').exists()).toBe(false)
   })
 
   it('shows blocked when the window is past', async () => {
