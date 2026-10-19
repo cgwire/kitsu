@@ -345,7 +345,11 @@
               {{ nbAssetsToImport }}
               {{ $t('productions.creation.assets_to_import') }}
             </span>
-            <button class="button import-button" @click="showAssetsImportModal">
+            <button
+              class="button import-button"
+              :disabled="createdProduction !== null"
+              @click="showAssetsImportModal"
+            >
               {{ $t('productions.creation.import_assets_button') }}
             </button>
           </div>
@@ -366,7 +370,11 @@
               {{ nbShotsToImport }}
               {{ $t('productions.creation.shots_to_import') }}
             </span>
-            <button class="button import-button" @click="showShotsImportModal">
+            <button
+              class="button import-button"
+              :disabled="createdProduction !== null"
+              @click="showShotsImportModal"
+            >
               {{ $t('productions.creation.import_shots_button') }}
             </button>
           </div>
@@ -374,21 +382,42 @@
         <section class="has-text-centered mt2">
           <p v-if="errors.importingAssets" class="error">
             {{ $t('productions.creation.errorImportingAssets') }}
-            <br />
-            {{ errors.importingAssetsError }}
+            <template
+              :key="detail"
+              v-for="detail in getImportErrorDetails(
+                errors.importingAssetsError
+              )"
+            >
+              <br />
+              {{ detail }}
+            </template>
           </p>
           <p v-if="errors.importingShots" class="error">
             {{ $t('productions.creation.errorImportingShots') }}
-            <br />
-            {{ errors.importingShotsError }}
+            <template
+              :key="detail"
+              v-for="detail in getImportErrorDetails(
+                errors.importingShotsError
+              )"
+            >
+              <br />
+              {{ detail }}
+            </template>
           </p>
           <p v-if="errors.creatingProduction" class="error">
-            {{ $t('productions.creation.error') }}
+            {{ creationErrorText }}
             {{ errors.creatingProductionError }}
           </p>
           <button
             class="button big-button"
-            v-if="hasAllDataCorrect"
+            v-if="createdProduction && !loading.createProduction"
+            @click="openCreatedProduction"
+          >
+            {{ $t('productions.creation.open_production') }}
+          </button>
+          <button
+            class="button big-button"
+            v-else-if="hasAllDataCorrect"
             @click="createProduction"
           >
             <spinner
@@ -509,6 +538,7 @@ import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
 import csv from '@/lib/csv'
+import { logRequestFailure } from '@/lib/errors'
 import { removeModelFromList } from '@/lib/models'
 import { formatSimpleDate } from '@/lib/time'
 import { sortByName } from '@/lib/sorting'
@@ -578,6 +608,8 @@ const modals = reactive({
   isShotsImportDisplayed: false,
   isShotsImportRenderDisplayed: false
 })
+// Once Zou has created the production, the page can only open it.
+const createdProduction = ref(null)
 const parsedAssetsCSV = ref([])
 const parsedShotsCSV = ref([])
 const productionToCreate = reactive({
@@ -755,6 +787,13 @@ const hasAllDataCorrect = computed(() => {
   )
 })
 
+// Once Zou has created the production, what fails is its setup.
+const creationErrorText = computed(() =>
+  createdProduction.value
+    ? t('productions.creation.error_setup')
+    : t('productions.creation.error')
+)
+
 const availableAssetTaskTypes = computed(() =>
   assetTaskTypes.value.filter(
     att => !productionToCreate.assetTaskTypes.includes(att) && !att.archived
@@ -842,8 +881,10 @@ const createAssets = async () => {
     } catch (err) {
       errors.importingAssets = true
       errors.importingAssetsError = err
+      logRequestFailure(err)
+    } finally {
+      loading.importingAssets = false
     }
-    loading.importingAssets = false
   }
 }
 
@@ -856,9 +897,25 @@ const createShots = async () => {
     } catch (err) {
       errors.importingShots = true
       errors.importingShotsError = err
+      logRequestFailure(err)
+    } finally {
+      loading.importingShots = false
     }
-    loading.importingShots = false
   }
+}
+
+// What Zou said of an import it refused, as the import preview shows it, or
+// that a timed out import goes on in the background.
+const getImportErrorDetails = err => {
+  if (err?.isTimeout) return [t('main.csv.error_timeout')]
+  if (err?.status !== 400) return []
+  const body = err.body || {}
+  return [
+    body.message,
+    body.imported_rows > 0
+      ? t('main.csv.error_imported_rows', { count: body.imported_rows })
+      : null
+  ].filter(Boolean)
 }
 
 const createTaskType = taskType => {
@@ -909,17 +966,22 @@ const createAssetType = assetType => {
     })
 }
 
-const createProductionRoute = createdProduction => {
-  const params = { production_id: createdProduction.id }
+// The type of the created production, as Zou set it: a template gives its
+// own, and the form stays editable after a refused import.
+const createProductionRoute = production => {
+  const params = { production_id: production.id }
   let routeName = 'assets'
-  if (isTVShow.value) {
+  if (production.production_type === 'tvshow') {
     params.episode_id = 'all'
     routeName = 'episode-assets'
-  } else if (isShotsOnly.value) {
+  } else if (production.production_type === 'shots') {
     routeName = 'shots'
   }
   return { name: routeName, params }
 }
+
+const openCreatedProduction = () =>
+  router.push(createProductionRoute(createdProduction.value))
 
 const createProduction = async () => {
   if (loading.createProduction) return
@@ -945,8 +1007,8 @@ const createProduction = async () => {
         end_date: productionToCreate.settings.dateEnd
       })
     }
-    const createdProduction = await store.dispatch('newProduction', payload)
-    await store.dispatch('setProduction', createdProduction.id)
+    createdProduction.value = await store.dispatch('newProduction', payload)
+    await store.dispatch('setProduction', createdProduction.value.id)
     if (!hasTemplate) {
       await createProductionSettings()
     }
@@ -955,13 +1017,17 @@ const createProduction = async () => {
       await createShots()
     }
     await store.dispatch('loadContext')
-    await router.push(createProductionRoute(createdProduction))
+    // A refused import stays on screen: the production page would hide it.
+    if (!errors.importingAssets && !errors.importingShots) {
+      await openCreatedProduction()
+    }
   } catch (err) {
-    console.error(err)
     errors.creatingProduction = true
     errors.creatingProductionError = err.body?.message?.substring(0, 165) ?? ''
+    logRequestFailure(err)
+  } finally {
+    loading.createProduction = false
   }
-  loading.createProduction = false
 }
 
 const toggleModal = modalName => {
