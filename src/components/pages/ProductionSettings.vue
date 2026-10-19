@@ -718,6 +718,17 @@ onMounted(() => {
     display: none !important;
   }
 
+  // The clients tab is read-only on a phone: no account action, no toggle.
+  :deep(.production-clients .create-button),
+  :deep(.production-clients .copy-button),
+  :deep(.production-clients .actions) {
+    display: none;
+  }
+
+  :deep(.production-clients .checkbox-field) {
+    pointer-events: none;
+  }
+
   :deep(.background-settings .flexrow.mt1.mb1),
   :deep(.production-task-types .add-task-type),
   :deep(.status-automation-settings .add-status-automation) {
