@@ -1,6 +1,7 @@
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import { createStore } from 'vuex'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { nextTick } from 'vue'
 
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }))
 
@@ -42,6 +43,10 @@ const account = (until = null) => ({
 })
 
 describe('ProductionClients', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
   it('shows create button when no account', async () => {
     const { wrapper } = await mountClients()
     expect(wrapper.find('.create-button').exists()).toBe(true)
@@ -73,6 +78,18 @@ describe('ProductionClients', () => {
     })
     expect(wrapper.find('.state-tag').text()).toContain('productions.clients.open_until')
     expect(wrapper.findComponent('.block-button').exists()).toBe(true)
+  })
+
+  it('flips to blocked once the window expires', async () => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval', 'Date'] })
+    const { wrapper } = await mountClients({
+      responses: { getPreviewAccount: account(inOneHour()) }
+    })
+    expect(wrapper.find('.state-tag').text()).toContain('productions.clients.open_until')
+    vi.advanceTimersByTime(61 * 60 * 1000)
+    await nextTick()
+    expect(wrapper.find('.state-tag').text()).toBe('productions.clients.blocked')
+    expect(wrapper.findComponent('.block-button').exists()).toBe(false)
   })
 
   it('shows blocked when the window is past', async () => {

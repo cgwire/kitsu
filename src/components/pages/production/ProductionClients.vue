@@ -208,7 +208,7 @@
 <script setup>
 import { CopyIcon } from 'lucide-vue-next'
 import moment from 'moment-timezone'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useStore } from 'vuex'
 
 import { useTime } from '@/composables/time'
@@ -235,6 +235,9 @@ const password = ref('')
 const saveError = ref(false)
 // Bumped on a failed save to reset the checkbox DOM state to the store value
 const checkboxKey = ref(0)
+// Ticked every minute so the open state flips once the window expires
+const now = ref(moment())
+let clock = null
 
 const currentProduction = computed(() => store.getters.currentProduction)
 const isEnabled = computed(
@@ -282,7 +285,7 @@ const openUntilDate = computed(() =>
     : null
 )
 const isOpen = computed(
-  () => !!openUntilDate.value && openUntilDate.value.isAfter(moment())
+  () => !!openUntilDate.value && openUntilDate.value.isAfter(now.value)
 )
 const openUntil = computed(() =>
   openUntilDate.value
@@ -406,7 +409,14 @@ const load = async () => {
 }
 
 watch(productionId, load)
-onMounted(load)
+onMounted(() => {
+  load()
+  clock = setInterval(() => {
+    now.value = moment()
+  }, 60 * 1000)
+})
+
+onBeforeUnmount(() => clearInterval(clock))
 </script>
 
 <style lang="scss" scoped>
