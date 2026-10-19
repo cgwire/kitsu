@@ -1054,6 +1054,17 @@
     },
     "productions": {
       "clients": {
+        "access_description": "Ces réglages choisissent ce que les clients de cette production voient, compte de prévisualisation compris.",
+        "access_stats": "Pages de statistiques",
+        "access_stats_description": "Les clients peuvent ouvrir les pages de statistiques de cette production.",
+        "access_task_list": "Listes d'assets, de plans et de montages",
+        "access_task_list_description": "Les clients peuvent ouvrir les listes d'assets, de plans et de montages, et leurs pages.",
+        "access_task_list_hint": "Les listes sont masquées aux clients. Les types de tâche ci-dessous s'appliquent toujours aux statistiques.",
+        "access_task_panel": "Panneau de tâche",
+        "access_task_panel_description": "Commentaires et aperçus à côté des listes. Les clients peuvent toujours commenter depuis les playlists.",
+        "access_task_types_description": "Les types de tâche non cochés n'ont pas de colonne pour les clients.",
+        "access_task_types_title": "Types de tâche affichés aux clients",
+        "access_title": "Accès des clients",
         "block": "Bloquer maintenant",
         "blocked": "Bloqué",
         "copy": "Copier",

@@ -1054,6 +1054,17 @@
     },
     "productions": {
       "clients": {
+        "access_description": "この設定は、プレビューアカウントを含め、このプロダクションのクライアントに何を見せるかを決めます。",
+        "access_stats": "統計ページ",
+        "access_stats_description": "クライアントはこのプロダクションの統計ページを開けます。",
+        "access_task_list": "アセット、ショット、編集のリスト",
+        "access_task_list_description": "クライアントはアセット、ショット、編集のリストとそのページを開けます。",
+        "access_task_list_hint": "リストはクライアントに表示されません。下のタスクタイプは引き続き統計に適用されます。",
+        "access_task_panel": "タスクパネル",
+        "access_task_panel_description": "リストの横にコメントとプレビューを表示します。クライアントは引き続きプレイリストからコメントできます。",
+        "access_task_types_description": "チェックされていないタスクタイプは、クライアントに列が表示されません。",
+        "access_task_types_title": "クライアントに表示するタスクタイプ",
+        "access_title": "クライアントのアクセス",
         "block": "今すぐブロック",
         "blocked": "ブロック済み",
         "copy": "コピー",

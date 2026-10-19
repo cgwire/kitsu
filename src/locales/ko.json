@@ -1054,6 +1054,17 @@
     },
     "productions": {
       "clients": {
+        "access_description": "이 설정은 미리보기 계정을 포함해 이 프로덕션의 클라이언트에게 무엇을 보여줄지 정합니다.",
+        "access_stats": "통계 페이지",
+        "access_stats_description": "클라이언트가 이 프로덕션의 통계 페이지를 열 수 있습니다.",
+        "access_task_list": "에셋, 샷, 편집 목록",
+        "access_task_list_description": "클라이언트가 에셋, 샷, 편집 목록과 해당 페이지를 열 수 있습니다.",
+        "access_task_list_hint": "목록이 클라이언트에게 숨겨져 있습니다. 아래 태스크 유형은 통계에 계속 적용됩니다.",
+        "access_task_panel": "태스크 패널",
+        "access_task_panel_description": "목록 옆에 댓글과 미리보기를 표시합니다. 클라이언트는 플레이리스트에서 계속 댓글을 달 수 있습니다.",
+        "access_task_types_description": "선택하지 않은 태스크 유형은 클라이언트에게 열이 표시되지 않습니다.",
+        "access_task_types_title": "클라이언트에게 표시할 태스크 유형",
+        "access_title": "클라이언트 접근",
         "block": "지금 차단",
         "blocked": "차단됨",
         "copy": "복사",

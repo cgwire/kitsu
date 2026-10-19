@@ -1054,6 +1054,17 @@
     },
     "productions": {
       "clients": {
+        "access_description": "這些設定決定此製作的客戶能看到什麼，包括預覽帳戶。",
+        "access_stats": "統計頁面",
+        "access_stats_description": "客戶可以開啟此製作的統計頁面。",
+        "access_task_list": "資產、鏡頭和剪輯清單",
+        "access_task_list_description": "客戶可以開啟資產、鏡頭和剪輯清單及其頁面。",
+        "access_task_list_hint": "清單對客戶隱藏。下方的任務類型仍適用於統計。",
+        "access_task_panel": "任務面板",
+        "access_task_panel_description": "在清單旁顯示評論和預覽。客戶仍可從播放清單中評論。",
+        "access_task_types_description": "未勾選的任務類型不會為客戶顯示欄。",
+        "access_task_types_title": "向客戶顯示的任務類型",
+        "access_title": "客戶存取",
         "block": "立即封鎖",
         "blocked": "已封鎖",
         "copy": "複製",

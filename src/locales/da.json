@@ -1054,6 +1054,17 @@
     },
     "productions": {
       "clients": {
+        "access_description": "Disse indstillinger vælger, hvad kunderne i denne produktion ser, inklusive prøvekontoen.",
+        "access_stats": "Statistiksider",
+        "access_stats_description": "Kunder kan åbne statistiksiderne for denne produktion.",
+        "access_task_list": "Lister over assets, shots og edits",
+        "access_task_list_description": "Kunder kan åbne listerne over assets, shots og edits og deres sider.",
+        "access_task_list_hint": "Listerne er skjult for kunder. Opgavetyperne nedenfor gælder stadig for statistikken.",
+        "access_task_panel": "Opgavepanel",
+        "access_task_panel_description": "Kommentarer og forhåndsvisninger ved siden af listerne. Kunder kan stadig kommentere fra playlister.",
+        "access_task_types_description": "Opgavetyper uden markering har ingen kolonne for kunder.",
+        "access_task_types_title": "Opgavetyper vist for kunder",
+        "access_title": "Kundeadgang",
         "block": "Blokér nu",
         "blocked": "Blokeret",
         "copy": "Kopiér",

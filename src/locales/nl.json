@@ -1054,6 +1054,17 @@
     },
     "productions": {
       "clients": {
+        "access_description": "Deze instellingen bepalen wat klanten van deze productie zien, inclusief het voorbeeldaccount.",
+        "access_stats": "Statistiekpagina's",
+        "access_stats_description": "Klanten kunnen de statistiekpagina's van deze productie openen.",
+        "access_task_list": "Lijsten met assets, shots en edits",
+        "access_task_list_description": "Klanten kunnen de lijsten met assets, shots en edits en hun pagina's openen.",
+        "access_task_list_hint": "De lijsten zijn verborgen voor klanten. De taaktypen hieronder gelden nog steeds voor de statistieken.",
+        "access_task_panel": "Taakpaneel",
+        "access_task_panel_description": "Opmerkingen en voorbeelden naast de lijsten. Klanten kunnen nog steeds reageren vanuit playlists.",
+        "access_task_types_description": "Niet aangevinkte taaktypen hebben geen kolom voor klanten.",
+        "access_task_types_title": "Taaktypen die aan klanten worden getoond",
+        "access_title": "Toegang voor klanten",
         "block": "Nu blokkeren",
         "blocked": "Geblokkeerd",
         "copy": "Kopiëren",

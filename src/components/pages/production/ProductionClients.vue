@@ -127,6 +127,62 @@
       />
     </div>
 
+    <div class="box section access-section">
+      <h2 class="subtitle">{{ $t('productions.clients.access_title') }}</h2>
+      <p class="description">
+        {{ $t('productions.clients.access_description') }}
+      </p>
+      <div
+        class="access-option"
+        v-for="option in accessOptions"
+        :key="option.flag"
+      >
+        <checkbox
+          :class="`access-${option.name}`"
+          :key="`${option.flag}-${checkboxKey}`"
+          :toggle="true"
+          :disabled="isSaving"
+          :label="$t(`productions.clients.access_${option.label}`)"
+          :model-value="currentProduction?.[option.flag] !== false"
+          @change="value => setAccess(option.flag, value)"
+        />
+        <p class="hint">
+          {{ $t(`productions.clients.access_${option.label}_description`) }}
+        </p>
+      </div>
+      <p
+        class="hint access-task-list-hint"
+        v-if="currentProduction?.is_client_task_list_visible === false"
+      >
+        {{ $t('productions.clients.access_task_list_hint') }}
+      </p>
+
+      <h3 class="access-task-types-title">
+        {{ $t('productions.clients.access_task_types_title') }}
+      </h3>
+      <p class="description">
+        {{ $t('productions.clients.access_task_types_description') }}
+      </p>
+      <div
+        class="access-option"
+        v-for="taskType in sortedTaskTypes"
+        :key="taskType.id"
+      >
+        <checkbox
+          class="access-task-type"
+          :key="`${taskType.id}-${checkboxKey}`"
+          :toggle="true"
+          :disabled="isSaving"
+          :label="taskType.name"
+          :model-value="
+            currentProduction?.task_type_links?.[taskType.id]
+              ?.is_client_visible !== false
+          "
+          @change="value => setTaskTypeVisible(taskType.id, value)"
+        />
+      </div>
+    </div>
+
     <div class="box section statuses">
       <h2 class="subtitle">{{ $t('productions.clients.statuses_title') }}</h2>
       <p class="description">
@@ -212,6 +268,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useStore } from 'vuex'
 
 import { useTime } from '@/composables/time'
+import { sortTaskTypes } from '@/lib/sorting'
 import { parseDate } from '@/lib/time'
 
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
@@ -257,6 +314,27 @@ const productionTaskStatuses = computed(
 )
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 const teamRoles = computed(() => store.getters.productionTeamRoles ?? {})
+
+const sortedTaskTypes = computed(() =>
+  sortTaskTypes(
+    store.getters.productionTaskTypes ?? [],
+    currentProduction.value
+  )
+)
+
+const accessOptions = [
+  { name: 'stats', label: 'stats', flag: 'is_client_stats_visible' },
+  {
+    name: 'task-list',
+    label: 'task_list',
+    flag: 'is_client_task_list_visible'
+  },
+  {
+    name: 'task-panel',
+    label: 'task_panel',
+    flag: 'is_client_task_panel_visible'
+  }
+]
 
 const clientStatuses = computed(() =>
   productionTaskStatuses.value.filter(status => status.is_client_allowed)
@@ -370,6 +448,19 @@ const setIsolated = value =>
     store.dispatch('editProduction', {
       id: productionId.value,
       is_clients_isolated: value
+    })
+  )
+
+const setAccess = (flag, value) =>
+  save(() =>
+    store.dispatch('editProduction', { id: productionId.value, [flag]: value })
+  )
+
+const setTaskTypeVisible = (taskTypeId, value) =>
+  save(() =>
+    store.dispatch('setTaskTypeClientVisibility', {
+      taskTypeId,
+      isClientVisible: value
     })
   )
 
@@ -530,6 +621,21 @@ onBeforeUnmount(() => clearInterval(clock))
 
 .team-client {
   margin-bottom: 0.8em;
+}
+
+.access-option {
+  margin-bottom: 1em;
+}
+
+.hint {
+  color: var(--text-alt);
+  font-size: 0.9em;
+  margin: 0.3em 0 0;
+}
+
+.access-task-types-title {
+  font-weight: bold;
+  margin-top: 1.5em;
 }
 
 .empty {

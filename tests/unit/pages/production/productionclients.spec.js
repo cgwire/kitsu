@@ -288,4 +288,81 @@ describe('ProductionClients', () => {
       manager.wrapper.find('.statuses a, .statuses router-link').exists()
     ).toBe(false)
   })
+
+  describe('client access', () => {
+    const flags = [
+      ['stats', 'is_client_stats_visible'],
+      ['task-list', 'is_client_task_list_visible'],
+      ['task-panel', 'is_client_task_panel_visible']
+    ]
+
+    it('checks a flag that is null or missing, unchecks only false', async () => {
+      const { wrapper } = await mountClients({
+        production: {
+          id: 'prod-1',
+          is_client_stats_visible: null,
+          is_client_task_list_visible: false
+        }
+      })
+      const value = name =>
+        wrapper.findComponent(`.access-${name}`).props('modelValue')
+      expect(value('stats')).toBe(true)
+      expect(value('task-list')).toBe(false)
+      expect(value('task-panel')).toBe(true)
+    })
+
+    it.each(flags)('%s toggle dispatches editProduction', async (name, flag) => {
+      const { wrapper, store } = await mountClients()
+      wrapper.findComponent(`.access-${name}`).vm.$emit('change', false)
+      await flushPromises()
+      expect(store.dispatch).toHaveBeenCalledWith('editProduction', {
+        id: 'prod-1',
+        [flag]: false
+      })
+    })
+
+    it('lists the task types and dispatches the visibility', async () => {
+      const { wrapper, store } = await mountClients({
+        production: {
+          id: 'prod-1',
+          task_type_links: { t2: { is_client_visible: false } }
+        },
+        getters: {
+          productionTaskTypes: () => [
+            { id: 't1', name: 'Concept', for_entity: 'Asset' },
+            { id: 't2', name: 'Layout', for_entity: 'Shot' }
+          ]
+        }
+      })
+      const boxes = wrapper.findAllComponents('.access-task-type')
+      expect(boxes).toHaveLength(2)
+      expect(boxes[0].props('modelValue')).toBe(true)
+      expect(boxes[1].props('modelValue')).toBe(false)
+      boxes[1].vm.$emit('change', true)
+      await flushPromises()
+      expect(store.dispatch).toHaveBeenCalledWith(
+        'setTaskTypeClientVisibility',
+        { taskTypeId: 't2', isClientVisible: true }
+      )
+    })
+
+    it('shows the hint only when the task list is off', async () => {
+      const on = await mountClients()
+      expect(on.wrapper.find('.access-task-list-hint').exists()).toBe(false)
+      const off = await mountClients({
+        production: { id: 'prod-1', is_client_task_list_visible: false }
+      })
+      expect(off.wrapper.find('.access-task-list-hint').exists()).toBe(true)
+    })
+
+    it('resets the checkbox on a save error', async () => {
+      const { wrapper, store } = await mountClients()
+      store.dispatch.mockRejectedValue(new Error('boom'))
+      const before = wrapper.findComponent('.access-stats').vm
+      before.$emit('change', false)
+      await flushPromises()
+      expect(wrapper.find('.save-error').exists()).toBe(true)
+      expect(wrapper.findComponent('.access-stats').vm).not.toBe(before)
+    })
+  })
 })

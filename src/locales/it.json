@@ -1054,6 +1054,17 @@
     },
     "productions": {
       "clients": {
+        "access_description": "Queste impostazioni scelgono cosa vedono i clienti di questa produzione, account di anteprima incluso.",
+        "access_stats": "Pagine delle statistiche",
+        "access_stats_description": "I clienti possono aprire le pagine delle statistiche di questa produzione.",
+        "access_task_list": "Liste di asset, shot e montaggi",
+        "access_task_list_description": "I clienti possono aprire le liste di asset, shot e montaggi e le loro pagine.",
+        "access_task_list_hint": "Le liste sono nascoste ai clienti. I tipi di task qui sotto si applicano ancora alle statistiche.",
+        "access_task_panel": "Pannello del task",
+        "access_task_panel_description": "Commenti e anteprime accanto alle liste. I clienti possono ancora commentare dalle playlist.",
+        "access_task_types_description": "I tipi di task non selezionati non hanno colonna per i clienti.",
+        "access_task_types_title": "Tipi di task mostrati ai clienti",
+        "access_title": "Accesso dei clienti",
         "block": "Blocca ora",
         "blocked": "Bloccato",
         "copy": "Copia",

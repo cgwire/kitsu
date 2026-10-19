@@ -1054,6 +1054,17 @@
     },
     "productions": {
       "clients": {
+        "access_description": "Estos ajustes eligen lo que ven los clientes de esta producción, incluida la cuenta de vista previa.",
+        "access_stats": "Páginas de estadísticas",
+        "access_stats_description": "Los clientes pueden abrir las páginas de estadísticas de esta producción.",
+        "access_task_list": "Listas de assets, planos y ediciones",
+        "access_task_list_description": "Los clientes pueden abrir las listas de assets, planos y ediciones y sus páginas.",
+        "access_task_list_hint": "Las listas están ocultas para los clientes. Los tipos de tarea de abajo siguen aplicándose a las estadísticas.",
+        "access_task_panel": "Panel de tarea",
+        "access_task_panel_description": "Comentarios y vistas previas junto a las listas. Los clientes pueden seguir comentando desde las playlists.",
+        "access_task_types_description": "Los tipos de tarea sin marcar no tienen columna para los clientes.",
+        "access_task_types_title": "Tipos de tarea visibles para los clientes",
+        "access_title": "Acceso de clientes",
         "block": "Bloquear ahora",
         "blocked": "Bloqueado",
         "copy": "Copiar",

@@ -1054,6 +1054,17 @@
     },
     "productions": {
       "clients": {
+        "access_description": "Ezek a beállítások döntik el, mit látnak az ügyfelek ebben a produkcióban, az előnézeti fiókot is beleértve.",
+        "access_stats": "Statisztikai oldalak",
+        "access_stats_description": "Az ügyfelek megnyithatják a produkció statisztikai oldalait.",
+        "access_task_list": "Asset-, shot- és vágólisták",
+        "access_task_list_description": "Az ügyfelek megnyithatják az asset-, shot- és vágólistákat és azok oldalait.",
+        "access_task_list_hint": "A listák rejtve vannak az ügyfelek előtt. Az alábbi feladattípusok továbbra is érvényesek a statisztikákra.",
+        "access_task_panel": "Feladatpanel",
+        "access_task_panel_description": "Megjegyzések és előnézetek a listák mellett. Az ügyfelek továbbra is hozzászólhatnak a lejátszási listákból.",
+        "access_task_types_description": "A be nem jelölt feladattípusoknak nincs oszlopuk az ügyfelek számára.",
+        "access_task_types_title": "Az ügyfeleknek megjelenített feladattípusok",
+        "access_title": "Ügyfél-hozzáférés",
         "block": "Letiltás most",
         "blocked": "Letiltva",
         "copy": "Másolás",

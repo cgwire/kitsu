@@ -1485,6 +1485,17 @@ export default {
     title: 'Productions',
 
     clients: {
+      access_description: 'These settings choose what clients of this production see, preview account included.',
+      access_stats: 'Statistics pages',
+      access_stats_description: 'Clients can open the statistics pages of this production.',
+      access_task_list: 'Asset, shot and edit lists',
+      access_task_list_description: 'Clients can open the asset, shot and edit lists and their pages.',
+      access_task_list_hint: 'The lists are hidden from clients. The task types below still apply to statistics.',
+      access_task_panel: 'Task panel',
+      access_task_panel_description: 'Comments and previews beside the lists. Clients can still comment from playlists.',
+      access_task_types_description: 'Task types left unticked have no column for clients.',
+      access_task_types_title: 'Task types shown to clients',
+      access_title: 'Client access',
       block: 'Block now',
       blocked: 'Blocked',
       copy: 'Copy',

@@ -1424,6 +1424,17 @@
     },
     "productions": {
       "clients": {
+        "access_description": "Te ustawienia określają, co widzą klienci tej produkcji, w tym konto podglądu.",
+        "access_stats": "Strony statystyk",
+        "access_stats_description": "Klienci mogą otwierać strony statystyk tej produkcji.",
+        "access_task_list": "Listy assetów, ujęć i montaży",
+        "access_task_list_description": "Klienci mogą otwierać listy assetów, ujęć i montaży oraz ich strony.",
+        "access_task_list_hint": "Listy są ukryte przed klientami. Poniższe typy zadań nadal dotyczą statystyk.",
+        "access_task_panel": "Panel zadania",
+        "access_task_panel_description": "Komentarze i podglądy obok list. Klienci nadal mogą komentować z playlist.",
+        "access_task_types_description": "Niezaznaczone typy zadań nie mają kolumny dla klientów.",
+        "access_task_types_title": "Typy zadań widoczne dla klientów",
+        "access_title": "Dostęp klientów",
         "block": "Zablokuj teraz",
         "blocked": "Zablokowane",
         "copy": "Kopiuj",

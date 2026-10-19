@@ -1054,6 +1054,17 @@
     },
     "productions": {
       "clients": {
+        "access_description": "Diese Einstellungen legen fest, was die Kunden dieser Produktion sehen, einschließlich des Vorschaukontos.",
+        "access_stats": "Statistikseiten",
+        "access_stats_description": "Kunden können die Statistikseiten dieser Produktion öffnen.",
+        "access_task_list": "Listen für Assets, Shots und Edits",
+        "access_task_list_description": "Kunden können die Listen für Assets, Shots und Edits und deren Seiten öffnen.",
+        "access_task_list_hint": "Die Listen sind für Kunden ausgeblendet. Die Aufgabentypen unten gelten weiterhin für die Statistiken.",
+        "access_task_panel": "Aufgabenfenster",
+        "access_task_panel_description": "Kommentare und Vorschauen neben den Listen. Kunden können weiterhin aus Playlists kommentieren.",
+        "access_task_types_description": "Nicht angehakte Aufgabentypen haben keine Spalte für Kunden.",
+        "access_task_types_title": "Für Kunden sichtbare Aufgabentypen",
+        "access_title": "Kundenzugriff",
         "block": "Jetzt sperren",
         "blocked": "Gesperrt",
         "copy": "Kopieren",
