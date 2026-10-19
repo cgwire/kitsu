@@ -10,6 +10,7 @@ import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 
 import {
+  allVisible,
   buildAddThumbnailsModalStub,
   mountEntityPage,
   production
@@ -238,5 +239,53 @@ describe('Assets page, edit modal messages', () => {
 
     expect(modal().props('active')).toBe(true)
     expect(modal().props('isSuccess')).toBe(false)
+  })
+})
+
+describe('Assets page, client access', () => {
+  const hideTaskTypeAndPanel = {
+    clientAccess: {
+      ...allVisible,
+      isTaskPanelVisible: false,
+      isTaskTypeVisible: id => id !== 'task-type-1'
+    }
+  }
+
+  test('drops the hidden task type columns', async () => {
+    const { wrapper } = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters: { assetValidationColumns: ['task-type-1', 'task-type-2'] }
+    })
+    expect(
+      wrapper.findComponent({ name: 'AssetList' }).props('validationColumns')
+    ).toEqual(['task-type-1', 'task-type-2'])
+
+    const client = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters: {
+        assetValidationColumns: ['task-type-1', 'task-type-2'],
+        ...hideTaskTypeAndPanel
+      }
+    })
+    expect(
+      client.wrapper.findComponent({ name: 'AssetList' }).props(
+        'validationColumns'
+      )
+    ).toEqual(['task-type-2'])
+  })
+
+  test('keeps the side panel closed when the task panel is hidden', async () => {
+    const open = { nbSelectedTasks: 1 }
+    const shown = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters: open
+    })
+    expect(shown.wrapper.find('#side-column').isVisible()).toBe(true)
+
+    const hidden = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters: { ...open, ...hideTaskTypeAndPanel }
+    })
+    expect(hidden.wrapper.find('#side-column').isVisible()).toBe(false)
   })
 })

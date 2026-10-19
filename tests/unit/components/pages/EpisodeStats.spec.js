@@ -68,6 +68,7 @@ const mountPage = async ({ getters = {}, query = {} } = {}) => {
       episodeSearchText: () => '',
       episodeStats: () => episodeStats,
       episodeValidationColumns: () => ['layout', 'anim'],
+      clientAccess: () => ({ isTaskTypeVisible: () => true }),
       isCurrentUserClient: () => false,
       isPaperProduction: () => false,
       taskStatusMap: () => new Map(),
@@ -111,6 +112,27 @@ const showAllEpisodes = () =>
   combobox('statistics.episode_status').vm.$emit('update:model-value', 'all')
 
 describe('EpisodeStats page', () => {
+  describe('client access', () => {
+    afterEach(() => {
+      wrapper?.unmount()
+      wrapper = null
+    })
+
+    test('drops the task type columns hidden from the client', async () => {
+      await mountPage({
+        getters: {
+          clientAccess: () => ({ isTaskTypeVisible: id => id !== 'anim' })
+        }
+      })
+      expect(listProps().validationColumns).toEqual(['layout'])
+    })
+
+    test('keeps every column for the studio', async () => {
+      await mountPage()
+      expect(listProps().validationColumns).toEqual(['layout', 'anim'])
+    })
+  })
+
   describe('client', () => {
     afterEach(() => {
       wrapper?.unmount()

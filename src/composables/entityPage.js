@@ -174,10 +174,11 @@ export const useEntityPage = ({
 
   const isTaskSidePanelOpen = computed(
     () =>
-      nbSelectedTasks.value > 0 ||
-      keepTaskPanelOpen.value ||
-      nbSelectedEntities.value > 0 ||
-      nbSelectedValidations.value > 0
+      store.getters.clientAccess.isTaskPanelVisible &&
+      (nbSelectedTasks.value > 0 ||
+        keepTaskPanelOpen.value ||
+        nbSelectedEntities.value > 0 ||
+        nbSelectedValidations.value > 0)
   )
 
   const deleteAllTasksText = computed(() => {

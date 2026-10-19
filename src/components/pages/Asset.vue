@@ -458,7 +458,12 @@
       :class="{ 'is-open': isTaskDrawerOpen }"
       v-show="currentSection === 'infos'"
     >
-      <task-info :task="currentTask" entity-type="Asset" with-actions>
+      <task-info
+        v-if="clientAccess.isTaskPanelVisible"
+        :task="currentTask"
+        entity-type="Asset"
+        with-actions
+      >
         <entity-news class="news-column" :entity="currentAsset" />
       </task-info>
     </div>
@@ -482,7 +487,11 @@
       >
         <x-icon :size="20" />
       </button>
-      <task-info entity-type="Concept" :task="currentConceptTask" />
+      <task-info
+        v-if="clientAccess.isTaskPanelVisible"
+        entity-type="Concept"
+        :task="currentConceptTask"
+      />
     </div>
 
     <view-playlist-modal
@@ -557,6 +566,7 @@ defineOptions({ name: 'asset' })
 const { t } = useI18n()
 const route = useRoute()
 const store = useStore()
+const clientAccess = computed(() => store.getters.clientAccess)
 
 // State
 // --------------------------------------------------------------------------

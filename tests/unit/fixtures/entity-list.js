@@ -76,8 +76,16 @@ export const stickColumns = type => {
   )
 }
 
+export const allVisible = {
+  isStatsVisible: true,
+  isTaskListVisible: true,
+  isTaskPanelVisible: true,
+  isTaskTypeVisible: () => true
+}
+
 const neutralValue = name => {
   if (name.endsWith('Map') || name.startsWith('selected')) return new Map()
+  if (name === 'clientAccess') return allVisible
   if (name.startsWith('is')) return false
   if (name.startsWith('displayed') || name.startsWith('nb')) return 0
   if (name.endsWith('SearchText')) return ''

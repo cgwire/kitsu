@@ -321,8 +321,10 @@ const editsCsvFormData = computed(() => store.getters.editsCsvFormData)
 const editSearchQueries = computed(() => store.getters.editSearchQueries)
 const editSearchText = computed(() => store.getters.editSearchText)
 const editSorting = computed(() => store.getters.editSorting)
-const editValidationColumns = computed(
-  () => store.getters.editValidationColumns
+const editValidationColumns = computed(() =>
+  store.getters.editValidationColumns.filter(
+    store.getters.clientAccess.isTaskTypeVisible
+  )
 )
 const episodeMap = computed(() => store.getters.episodeMap)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)

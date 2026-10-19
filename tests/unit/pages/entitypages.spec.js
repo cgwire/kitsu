@@ -111,6 +111,10 @@ const mountPage = async (
     getters: {
       assetMetadataDescriptors: () => [],
       assetSearchText: () => '',
+      clientAccess: () => ({
+        isTaskPanelVisible: true,
+        isTaskTypeVisible: () => true
+      }),
       currentEpisode: () => null,
       currentProduction: state => state.currentProduction,
       editMetadataDescriptors: () => [],

@@ -53,6 +53,7 @@ const mountPage = async (getters = {}, query = {}) => {
       assetTypeMap: () => new Map([chars, props].map(t => [t.id, t])),
       assetTypeStats: () => assetTypeStats,
       assetValidationColumns: () => ['modeling', 'rigging'],
+      clientAccess: () => ({ isTaskTypeVisible: () => true }),
       currentEpisode: () => null,
       currentProduction: () => ({ id: 'production-1', name: 'Wing It' }),
       isAssetsLoading: () => false,

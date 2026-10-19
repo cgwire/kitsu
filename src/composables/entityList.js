@@ -657,6 +657,7 @@ export const useEntityList = ({
   }
 
   const onTaskSelected = (info, sticked) => {
+    if (!store.getters.clientAccess.isTaskPanelVisible) return
     const columnOffset = stickedDisplayedValidationColumns.value.length
     const validationInfo = sticked
       ? info

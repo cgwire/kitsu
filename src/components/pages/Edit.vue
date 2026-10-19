@@ -181,7 +181,12 @@
       :class="{ 'is-open': isTaskDrawerOpen }"
       v-show="currentSection === 'infos'"
     >
-      <task-info :task="currentTask" entity-type="Edit" with-actions>
+      <task-info
+        v-if="clientAccess.isTaskPanelVisible"
+        :task="currentTask"
+        entity-type="Edit"
+        with-actions
+      >
         <entity-news class="news-column" :entity="currentEdit" />
       </task-info>
     </div>
@@ -241,6 +246,7 @@ defineOptions({ name: 'edit' })
 const { t } = useI18n()
 const route = useRoute()
 const store = useStore()
+const clientAccess = computed(() => store.getters.clientAccess)
 
 // State
 // --------------------------------------------------------------------------

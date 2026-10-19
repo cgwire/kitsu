@@ -27,7 +27,12 @@ const parseIds = queryValue =>
  * rows and columnIds are refs: the entities listed by the page and the ids of
  * its task type columns. rowsParam names the URL param of the hidden rows.
  */
-export const useStatsPage = ({ preferenceKey, rowsParam, rows, columnIds }) => {
+export const useStatsPage = ({
+  preferenceKey,
+  rowsParam,
+  rows,
+  columnIds: allColumnIds
+}) => {
   const route = useRoute()
   const router = useRouter()
   const store = useStore()
@@ -46,6 +51,10 @@ export const useStatsPage = ({ preferenceKey, rowsParam, rows, columnIds }) => {
 
   const isFiltered = computed(
     () => displayedRows.value.length < rows.value.length
+  )
+
+  const columnIds = computed(() =>
+    allColumnIds.value.filter(store.getters.clientAccess.isTaskTypeVisible)
   )
 
   const columnTaskTypes = computed(() =>
