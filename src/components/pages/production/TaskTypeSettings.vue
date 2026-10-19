@@ -301,7 +301,14 @@ const onReorder = () => {
   width: 120px;
 
   input {
+    appearance: textfield;
     width: 100px;
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      appearance: none;
+      margin: 0;
+    }
   }
 }
 

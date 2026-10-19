@@ -478,6 +478,12 @@ onMounted(() => {
     overflow: hidden;
   }
 
+  // A long studio list would otherwise stretch the page below the linked items
+  :deep(.section .import-list) {
+    flex: none;
+    max-height: 400px;
+  }
+
   :deep(.section .datatable th) {
     background: transparent;
   }
