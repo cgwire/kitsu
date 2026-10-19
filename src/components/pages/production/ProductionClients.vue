@@ -214,17 +214,21 @@ import { useStore } from 'vuex'
 import { useTime } from '@/composables/time'
 import { parseDate } from '@/lib/time'
 
+import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Checkbox from '@/components/widgets/Checkbox.vue'
-import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
 import TextField from '@/components/widgets/TextField.vue'
 import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
+// Composables
+// --------------------------------------------------------------------------
 const store = useStore()
 const { formatTime } = useTime()
 
+// State
+// --------------------------------------------------------------------------
 const account = ref(null)
 const hasError = ref(false)
 const isDeleteModalActive = ref(false)
@@ -239,6 +243,8 @@ const checkboxKey = ref(0)
 const now = ref(moment())
 let clock = null
 
+// Computed
+// --------------------------------------------------------------------------
 const currentProduction = computed(() => store.getters.currentProduction)
 const isEnabled = computed(
   () => store.getters.mainConfig?.preview_accounts_enabled === true
@@ -293,6 +299,8 @@ const openUntil = computed(() =>
     : ''
 )
 
+// Functions
+// --------------------------------------------------------------------------
 // The password lives only in this component: any other action or a remount
 // drops it, as zou never returns it again.
 const run = async (action, { keepPassword = false } = {}) => {
@@ -405,7 +413,12 @@ const load = async () => {
   isLoaded.value = true
 }
 
+// Watchers
+// --------------------------------------------------------------------------
 watch(productionId, load)
+
+// Lifecycle
+// --------------------------------------------------------------------------
 onMounted(() => {
   load()
   clock = setInterval(() => {
