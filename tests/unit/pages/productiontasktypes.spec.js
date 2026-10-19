@@ -589,6 +589,87 @@ describe('ProductionTaskTypes', () => {
     expect(mostSaving).toBe(1)
   })
 
+  // Regression: an order waiting for a save went to the production shown
+  // once it was sent, another one after a switch.
+  it('saves a reorder to the production it was dropped in', async () => {
+    const { store, wrapper } = await mountComponent()
+    const list = wrapper.findComponent(DraggableStub)
+    const [animation, lighting] = list.props('modelValue')
+    const drop = items => {
+      list.vm.$emit('update:modelValue', items)
+      list.vm.$emit('end')
+    }
+    store.commit = vi.fn()
+    vi.useFakeTimers()
+    store.dispatch.mockImplementation(action =>
+      action === 'reorderTaskTypeLinks'
+        ? new Promise(resolve => setTimeout(resolve, 200))
+        : Promise.resolve()
+    )
+
+    drop([lighting, animation])
+    drop([animation, lighting])
+    store.getters.currentProduction.id = 'production-2'
+    await vi.advanceTimersByTimeAsync(1000)
+
+    const projectIds = store.dispatch.mock.calls
+      .filter(([action]) => action === 'reorderTaskTypeLinks')
+      .map(([, { projectId }]) => projectId)
+    expect(projectIds).toEqual(['production-1', 'production-1'])
+  })
+
+  // Regression: one queue served every list, so a drop on another list took
+  // the place of an order still waiting for its save.
+  test.each([
+    [
+      'production',
+      async store => {
+        store.getters.currentProduction.id = 'production-2'
+      },
+      'production-2:shot-2,shot-1'
+    ],
+    [
+      'entity',
+      async () => {
+        await router.push('/settings?section=assets')
+        await vi.advanceTimersByTimeAsync(0)
+      },
+      'production-1:asset-1'
+    ]
+  ])(
+    'saves the waiting order of a list after a drop for another %s',
+    async (name, switchList, otherOrder) => {
+      const { store, wrapper } = await mountComponent()
+      const list = () => wrapper.findComponent(DraggableStub)
+      const drop = items => {
+        list().vm.$emit('update:modelValue', items)
+        list().vm.$emit('end')
+      }
+      const [animation, lighting] = list().props('modelValue')
+      store.commit = vi.fn()
+      vi.useFakeTimers()
+      store.dispatch.mockImplementation(action =>
+        action === 'reorderTaskTypeLinks'
+          ? new Promise(resolve => setTimeout(resolve, 200))
+          : Promise.resolve()
+      )
+
+      drop([lighting, animation])
+      drop([animation, lighting])
+      await switchList(store)
+      drop(name === 'production' ? [lighting, animation] : list().props('modelValue'))
+      await vi.advanceTimersByTimeAsync(1000)
+
+      const orders = store.dispatch.mock.calls
+        .filter(([action]) => action === 'reorderTaskTypeLinks')
+        .map(([, order]) => `${order.projectId}:${order.taskTypeIds.join(',')}`)
+      expect(orders).toHaveLength(3)
+      expect(orders).toEqual(
+        expect.arrayContaining(['production-1:shot-1,shot-2', otherOrder])
+      )
+    }
+  )
+
   // Regression: a failed save failed the reorder dropped after it too, which
   // Zou had saved: the lists went back to a production never reloaded.
   it('reloads the production when a save fails', async () => {

@@ -446,18 +446,29 @@ const onBitratesChanged = async ({ taskType, ...bitrates }) => {
   }
 }
 
-// The saves never cross on the server, and each drop reloads the context
-// once every order is saved.
-const savePriorities = func.queueLatest(taskTypeIds =>
-  store.dispatch('reorderTaskTypeLinks', {
-    projectId: currentProduction.value.id,
-    taskTypeIds
-  })
-)
+// The saves of a list never cross on the server, and each drop reloads the
+// context once every order of its list is saved. A list holds the task types
+// of an entity in a production.
+const priorityQueues = new Map()
+
+const savePriorities = order => {
+  const listKey = `${order.projectId}-${activeTab.value}`
+  if (!priorityQueues.has(listKey)) {
+    priorityQueues.set(
+      listKey,
+      func.queueLatest(value => store.dispatch('reorderTaskTypeLinks', value))
+    )
+  }
+  return priorityQueues.get(listKey)(order)
+}
 
 const updatePriorities = async items => {
   try {
-    await savePriorities(items.map(item => item.taskType.id))
+    // An order can wait for a save past a switch to another production.
+    await savePriorities({
+      projectId: currentProduction.value.id,
+      taskTypeIds: items.map(item => item.taskType.id)
+    })
     setTimeout(() => {
       store.commit('SORT_VALIDATION_COLUMNS', taskTypeMap.value)
     }, 100)
