@@ -515,4 +515,53 @@ describe('ProductionTaskTypes', () => {
     )
     expect(reorders).toHaveLength(2)
   })
+
+  // Regression: a reorder dropped less than a second after the previous one,
+  // or during its save, was never sent, and the reload that followed the
+  // drop put the rows back.
+  it('saves each reorder before reloading, the last one last', async () => {
+    const { store, wrapper } = await mountComponent()
+    const list = wrapper.findComponent(DraggableStub)
+    const [animation, lighting] = list.props('modelValue')
+    const drop = items => {
+      list.vm.$emit('update:modelValue', items)
+      list.vm.$emit('end')
+    }
+    const calls = []
+    let saving = 0
+    let mostSaving = 0
+    store.commit = vi.fn()
+    vi.useFakeTimers()
+    store.dispatch.mockImplementation((action, payload) => {
+      if (action !== 'reorderTaskTypeLinks') {
+        calls.push(action)
+        return Promise.resolve()
+      }
+      calls.push(payload.taskTypeIds.join(','))
+      mostSaving = Math.max(mostSaving, ++saving)
+      return new Promise(resolve =>
+        setTimeout(() => {
+          saving--
+          resolve()
+        }, 200)
+      )
+    })
+
+    drop([lighting, animation])
+    await vi.advanceTimersByTimeAsync(300)
+    drop([animation, lighting])
+    await vi.advanceTimersByTimeAsync(100)
+    drop([lighting, animation])
+    await vi.advanceTimersByTimeAsync(5000)
+
+    expect(calls).toEqual([
+      'shot-2,shot-1',
+      'loadContext',
+      'shot-1,shot-2',
+      'shot-2,shot-1',
+      'loadContext',
+      'loadContext'
+    ])
+    expect(mostSaving).toBe(1)
+  })
 })

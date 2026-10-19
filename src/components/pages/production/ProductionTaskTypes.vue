@@ -195,9 +195,8 @@ const errors = reactive({
   delete: false
 })
 
-let lastCall = 0
-let isSaving = false
-let newSaveCall = false
+let pendingTaskTypeIds = null
+let prioritiesSave = null
 
 // Computed
 // --------------------------------------------------------------------------
@@ -448,35 +447,35 @@ const onBitratesChanged = async ({ taskType, ...bitrates }) => {
   }
 }
 
-const savePriorities = async forms => {
-  const now = new Date().getTime()
-  if (now - lastCall > 1000 && !isSaving) {
-    lastCall = now
-    isSaving = true
-    await store.dispatch('reorderTaskTypeLinks', {
-      projectId: currentProduction.value.id,
-      taskTypeIds: forms.map(form => form.taskTypeId)
-    })
-    isSaving = false
-    if (newSaveCall) {
-      newSaveCall = false
-      await savePriorities(forms)
+const sendPendingPriorities = async () => {
+  try {
+    while (pendingTaskTypeIds) {
+      const taskTypeIds = pendingTaskTypeIds
+      pendingTaskTypeIds = null
+      await store.dispatch('reorderTaskTypeLinks', {
+        projectId: currentProduction.value.id,
+        taskTypeIds
+      })
     }
-    setTimeout(() => {
-      store.commit('SORT_VALIDATION_COLUMNS', taskTypeMap.value)
-    }, 100)
-  } else {
-    newSaveCall = true
+  } finally {
+    prioritiesSave = null
   }
 }
 
+// A reorder dropped during a save waits for it, then only the last order is
+// sent: the saves never cross on the server, and each drop reloads the
+// context once every order is saved.
+const savePriorities = taskTypeIds => {
+  pendingTaskTypeIds = taskTypeIds
+  prioritiesSave ||= sendPendingPriorities()
+  return prioritiesSave
+}
+
 const updatePriorities = async items => {
-  const forms = items.map((item, index) => ({
-    projectId: currentProduction.value.id,
-    taskTypeId: item.taskType.id,
-    priority: index + 1
-  }))
-  await savePriorities(forms)
+  await savePriorities(items.map(item => item.taskType.id))
+  setTimeout(() => {
+    store.commit('SORT_VALIDATION_COLUMNS', taskTypeMap.value)
+  }, 100)
   await store.dispatch('loadContext')
 }
 
