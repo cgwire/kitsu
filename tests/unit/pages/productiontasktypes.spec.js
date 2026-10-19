@@ -63,7 +63,8 @@ const router = createRouter({
 const mountComponent = async (
   productionType = 'short',
   scheduleItems = [],
-  stubs = { draggable: DraggableStub }
+  stubs = { draggable: DraggableStub },
+  errorHandler = undefined
 ) => {
   const currentProduction = {
     id: 'production-1',
@@ -95,6 +96,7 @@ const mountComponent = async (
   await router.isReady()
   const wrapper = shallowMount(ProductionTaskTypes, {
     global: {
+      config: { errorHandler },
       plugins: [store, router],
       mocks: { $t: key => key },
       stubs
@@ -123,7 +125,7 @@ const workflow = ['Layout', 'Animation', 'Lighting', 'Compositing'].map(
 // Mounts the real vuedraggable and rows, so that SortableJS handles them.
 // A commit of setShotTaskTypeIds plays a reload of the production, which
 // lists its task types in that order.
-const mountWorkflow = async (options = {}) => {
+const mountWorkflow = async ({ errorHandler, ...options } = {}) => {
   const store = createStore({
     state: { shotTaskTypeIds: workflow.map(taskType => taskType.id) },
     getters: {
@@ -164,6 +166,7 @@ const mountWorkflow = async (options = {}) => {
   await router.isReady()
   const wrapper = shallowMount(ProductionTaskTypes, {
     global: {
+      config: { errorHandler },
       plugins: [store, router],
       mocks: { $t: key => key },
       stubs: { draggable: false, ProductionTaskType: false }
@@ -453,6 +456,27 @@ describe('ProductionTaskTypes', () => {
     expect(names()).toEqual(['COM', 'LAY', 'LIG'])
   })
 
+  // Regression: a failed save brings no reload, so the list kept what it
+  // showed during the drag, a task type removed meanwhile included.
+  it('rebuilds the list from the production when the save fails', async () => {
+    const errorHandler = vi.fn()
+    const { names, rows, store } = await mountWorkflow({ errorHandler })
+    const error = new Error('Bad Gateway')
+    store.dispatch.mockImplementation(async action => {
+      if (action === 'reorderTaskTypeLinks') throw error
+    })
+    const [first, , , last] = rows().map(row => row.element)
+
+    await startDrag(last.querySelector('td.short-name'))
+    store.commit('setShotTaskTypeIds', ['layout', 'lighting', 'compositing'])
+    await flushPromises()
+    dropBefore(last, first)
+    await flushPromises()
+
+    expect(errorHandler.mock.calls[0][0]).toBe(error)
+    expect(names()).toEqual(['LAY', 'LIG', 'COM'])
+  })
+
   it('shows a reload that came during a press once the row is released', async () => {
     const { names, rows, store } = await mountWorkflow()
 
@@ -563,5 +587,47 @@ describe('ProductionTaskTypes', () => {
       'loadContext'
     ])
     expect(mostSaving).toBe(1)
+  })
+
+  // Regression: a failed save failed the reorder dropped after it too, which
+  // Zou had saved: the lists went back to a production never reloaded.
+  it('reloads the production when a save fails', async () => {
+    const errorHandler = vi.fn()
+    const { store, wrapper } = await mountComponent(
+      'short',
+      [],
+      undefined,
+      errorHandler
+    )
+    const list = wrapper.findComponent(DraggableStub)
+    const [animation, lighting] = list.props('modelValue')
+    const drop = items => {
+      list.vm.$emit('update:modelValue', items)
+      list.vm.$emit('end')
+    }
+    const error = new Error('Bad Gateway')
+    const calls = []
+    store.commit = vi.fn()
+    vi.useFakeTimers()
+    store.dispatch.mockImplementation(action => {
+      calls.push(action)
+      if (action !== 'reorderTaskTypeLinks') return Promise.resolve()
+      const isFirst = calls.filter(call => call === action).length === 1
+      return new Promise((resolve, reject) => {
+        setTimeout(() => (isFirst ? reject(error) : resolve()), 200)
+      })
+    })
+
+    drop([lighting, animation])
+    drop([animation, lighting])
+    await vi.advanceTimersByTimeAsync(1000)
+
+    expect(calls).toEqual([
+      'reorderTaskTypeLinks',
+      'reorderTaskTypeLinks',
+      'loadContext',
+      'loadContext'
+    ])
+    expect(errorHandler.mock.calls[0][0]).toBe(error)
   })
 })

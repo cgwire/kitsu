@@ -153,6 +153,7 @@ import draggable from 'vuedraggable'
 import { useStore } from 'vuex'
 
 import { useDraggableRebuild } from '@/composables/draggableRebuild'
+import { logRequestFailure } from '@/lib/errors'
 import func from '@/lib/func'
 import { sortByName, sortTaskTypes } from '@/lib/sorting'
 import { formatFullDate } from '@/lib/time'
@@ -455,11 +456,19 @@ const savePriorities = func.queueLatest(taskTypeIds =>
 )
 
 const updatePriorities = async items => {
-  await savePriorities(items.map(item => item.taskType.id))
-  setTimeout(() => {
-    store.commit('SORT_VALIDATION_COLUMNS', taskTypeMap.value)
-  }, 100)
-  await store.dispatch('loadContext')
+  try {
+    await savePriorities(items.map(item => item.taskType.id))
+    setTimeout(() => {
+      store.commit('SORT_VALIDATION_COLUMNS', taskTypeMap.value)
+    }, 100)
+    await store.dispatch('loadContext')
+  } catch (err) {
+    // After a drop, the lists wait for a reload, which a failure needs too:
+    // Zou may hold an order saved after the failed one.
+    await store.dispatch('loadContext').catch(logRequestFailure)
+    resetDisplayedTaskTypes()
+    throw err
+  }
 }
 
 const importTaskTypesFromProduction = async productionId => {
