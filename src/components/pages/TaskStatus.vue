@@ -62,6 +62,7 @@ import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
 import csv from '@/lib/csv'
+import func from '@/lib/func'
 import stringHelpers from '@/lib/string'
 
 // eslint-disable-next-line no-unused-vars
@@ -127,10 +128,24 @@ const deleteText = computed(() =>
 
 // Functions
 
-const updatePriorities = async taskStatuses => {
-  for (const status of taskStatuses) {
-    await store.dispatch('updateTaskStatusPriority', status)
+// Each status saves on its own: the statuses of a reorder wait for those of
+// the previous one of the same list, so that two reorders never mix.
+const saveStatusPriorities = taskStatuses =>
+  func.runPromiseMapAsSeries(taskStatuses, status =>
+    store.dispatch('updateTaskStatusPriority', status)
+  )
+
+const priorityQueues = new Map()
+
+// The list rebuilds from the store after a drop: the new order goes there
+// first, rather than with each saved status, which a failed save never sends.
+const updatePriorities = taskStatuses => {
+  taskStatuses.forEach(status => store.commit('EDIT_TASK_STATUS_END', status))
+  const listKey = `${activeTab.value}-${entityTab.value}`
+  if (!priorityQueues.has(listKey)) {
+    priorityQueues.set(listKey, func.queueLatest(saveStatusPriorities))
   }
+  return priorityQueues.get(listKey)(taskStatuses)
 }
 
 const confirmEditTaskStatus = async form => {
