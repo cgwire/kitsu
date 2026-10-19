@@ -343,7 +343,6 @@ const personMap = computed(() => store.getters.personMap)
 const productionTaskStatuses = computed(
   () => store.getters.productionTaskStatuses ?? []
 )
-const taskTypeMap = computed(() => store.getters.taskTypeMap)
 const teamRoles = computed(() => store.getters.productionTeamRoles ?? {})
 
 const sortedTaskTypes = computed(() =>
@@ -396,8 +395,7 @@ const descriptors = computed(() =>
     'shotMetadataDescriptors',
     'sequenceMetadataDescriptors',
     'episodeMetadataDescriptors',
-    'editMetadataDescriptors',
-    'taskMetadataDescriptors'
+    'editMetadataDescriptors'
   ].flatMap(getter => store.getters[getter] ?? [])
 )
 
@@ -548,13 +546,8 @@ const setStatusClientAllowed = (status, value) =>
     })
   )
 
-const getDescriptorLabel = descriptor => {
-  const taskType = taskTypeMap.value?.get(descriptor.task_type_id)
-  const type = taskType
-    ? `${descriptor.entity_type}, ${taskType.name}`
-    : descriptor.entity_type
-  return `${descriptor.name} (${type})`
-}
+const getDescriptorLabel = descriptor =>
+  `${descriptor.name} (${descriptor.entity_type})`
 
 // zou's update schema resets the fields missing from the payload
 const setForClient = (descriptor, value) =>
