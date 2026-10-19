@@ -24,11 +24,16 @@ export const startDrag = async element => {
   await new Promise(resolve => setTimeout(resolve, 0))
 }
 
+// Drops the dragged row where it stands: Sortable reads the new index from
+// the DOM.
+export const drop = () =>
+  document.dispatchEvent(new Event('drop', { bubbles: true }))
+
 // Puts the dragged row before another, as the dragover events of a browser
-// do, then drops it: Sortable reads the new index from the DOM.
+// do, then drops it.
 export const dropBefore = (row, target) => {
   target.before(row)
-  document.dispatchEvent(new Event('drop', { bubbles: true }))
+  drop()
 }
 
 // The class Sortable gives the row it armed a drag on.
