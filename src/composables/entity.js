@@ -60,6 +60,7 @@ export const useEntity = ({ type, currentEntity, entityList, init }) => {
   const getTaskTypePriority = computed(() => store.getters.getTaskTypePriority)
   const currentEpisode = computed(() => store.getters.currentEpisode)
   const currentProduction = computed(() => store.getters.currentProduction)
+  const isTVShow = computed(() => store.getters.isTVShow)
   const organisation = computed(() => store.getters.organisation)
   const isCurrentUserManager = computed(
     () => store.getters.isCurrentUserProductionManager
@@ -90,11 +91,23 @@ export const useEntity = ({ type, currentEntity, entityList, init }) => {
     { label: '3', value: 3 }
   ]
 
+  // A detail page may load its entity by id into the list the store holds,
+  // whatever its episode: walk that list only when its last load was for the
+  // episode of the page. The episodes are listed for the whole production.
+  const isListOfPage = computed(() => {
+    if (type === 'episode') return true
+    const scope = isTVShow.value ? (currentEpisode.value?.id ?? '') : ''
+    return (
+      store.getters[`${type}sLoadingKey`] ===
+      `${currentProduction.value?.id}/${scope}`
+    )
+  })
+
   const getEntityIndex = entityId =>
     entityList.value.findIndex(entity => entity.id === entityId)
 
   const previousEntity = computed(() => {
-    if (!currentEntity.value) return null
+    if (!currentEntity.value || !isListOfPage.value) return null
     const entityIndex = getEntityIndex(currentEntity.value.id)
     if (entityIndex === -1) return null
     return entityIndex > 0
@@ -103,7 +116,7 @@ export const useEntity = ({ type, currentEntity, entityList, init }) => {
   })
 
   const nextEntity = computed(() => {
-    if (!currentEntity.value) return null
+    if (!currentEntity.value || !isListOfPage.value) return null
     const entityIndex = getEntityIndex(currentEntity.value.id)
     if (entityIndex === -1) return null
     return entityIndex < entityList.value.length - 1
