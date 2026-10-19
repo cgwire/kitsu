@@ -53,6 +53,7 @@ vi.mock('@/components/Main.vue', () => ({ default: {} }))
 vi.mock('@/components/pages/Login.vue', () => ({ default: {} }))
 vi.mock('@/components/pages/NotFound.vue', () => ({ default: {} }))
 vi.mock('@/components/pages/Playlist.vue', () => ({ default: {} }))
+vi.mock('@/components/pages/Shot.vue', () => ({ default: {} }))
 vi.mock('@/components/pages/Shots.vue', () => ({ default: {} }))
 // The app router, on a history that needs no browser.
 vi.mock('vue-router', async importOriginal => {
@@ -213,12 +214,16 @@ describe('router/routes', () => {
         ['production-1', { id: 'production-1', ...flags }]
       ])
     }
-    const runGuardOn = name => {
+    const playlists = {
+      name: 'playlists',
+      params: { production_id: 'production-1' }
+    }
+    const runGuardOn = (name, params = {}) => {
       const route = mainRoute.children.find(child => child.name === name)
       return mainRoute.beforeEnter(
         {
           name,
-          params: { production_id: 'production-1' },
+          params: { production_id: 'production-1', ...params },
           matched: [{ meta: route.meta || {} }]
         },
         {}
@@ -226,22 +231,38 @@ describe('router/routes', () => {
     }
 
     test.each(CLIENT_TASK_LIST_ROUTES)(
-      'sends a client to not-found on %s when the task list is off',
+      'sends a client to the playlists on %s when the task list is off',
       async name => {
         h.isClient = true
         setProduction({ is_client_task_list_visible: false })
-        expect(await runGuardOn(name)).toEqual({ name: 'not-found' })
+        const forbidden = mainRoute.children.find(
+          child => child.name === name
+        ).meta?.forbiddenForClient
+        expect(await runGuardOn(name)).toEqual(
+          forbidden ? { name: 'not-found' } : playlists
+        )
       }
     )
 
     test.each(CLIENT_STATS_ROUTES)(
-      'sends a client to not-found on %s when the stats are off',
+      'sends a client to the playlists on %s when the stats are off',
       async name => {
         h.isClient = true
         setProduction({ is_client_stats_visible: false })
-        expect(await runGuardOn(name)).toEqual({ name: 'not-found' })
+        expect(await runGuardOn(name)).toEqual(playlists)
       }
     )
+
+    test('keeps the episode when sending a client to the playlists', async () => {
+      h.isClient = true
+      setProduction({ is_client_task_list_visible: false })
+      expect(await runGuardOn('episode-shots', { episode_id: 'ep-1' })).toEqual(
+        {
+          name: 'episode-playlists',
+          params: { production_id: 'production-1', episode_id: 'ep-1' }
+        }
+      )
+    })
 
     test('keeps the playlists reachable for a client with everything off', async () => {
       h.isClient = true
@@ -281,14 +302,14 @@ describe('router/routes', () => {
         setProduction({ is_client_task_list_visible: false })
         return true
       })
-      expect(await runGuardOn('shots')).toEqual({ name: 'not-found' })
+      expect(await runGuardOn('shots')).toEqual(playlists)
     })
   })
 
   describe('client access on in-app navigation', () => {
     // The guard of the main route does not run again between its
     // children: the switch to another production keeps the section.
-    test('sends a client to not-found when switching to a production with the task list off', async () => {
+    test('sends a client to the playlists when switching to a production with the task list off', async () => {
       productionsStore.state.productionMap = new Map([
         ['production-1', { id: 'production-1' }],
         [
@@ -300,9 +321,22 @@ describe('router/routes', () => {
       await router.push('/productions/production-1/shots')
       expect(router.currentRoute.value.name).toBe('shots')
       await router.push('/productions/production-2/shots')
-      expect(router.currentRoute.value.name).toBe('not-found')
-      await router.push('/productions/production-2/playlists')
       expect(router.currentRoute.value.name).toBe('playlists')
+      expect(router.currentRoute.value.params.production_id).toBe(
+        'production-2'
+      )
+    })
+
+    test('sends a per-project client to not-found when switching to a client-forbidden page', async () => {
+      productionsStore.state.productionMap = new Map([
+        ['production-1', { id: 'production-1' }],
+        ['production-2', { id: 'production-2' }]
+      ])
+      h.clientProductionIds = ['production-2']
+      await router.push('/productions/production-1/shots/shot-1')
+      expect(router.currentRoute.value.name).toBe('shot')
+      await router.push('/productions/production-2/shots/shot-1')
+      expect(router.currentRoute.value.name).toBe('not-found')
     })
   })
 

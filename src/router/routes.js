@@ -100,18 +100,33 @@ const isTargetClient = to =>
 // Runs on every navigation, as the guard of the main route skips moves
 // between its children, such as a production switch.
 export const checkClientAccess = to => {
+  const isClient = isTargetClient(to)
+  if (isClient && to?.matched.some(({ meta }) => meta.forbiddenForClient)) {
+    return { name: 'not-found' }
+  }
+  const { production_id: productionId, episode_id: episodeId } =
+    to?.params || {}
   const clientAccess = productionsStore.getters.getClientAccess(
     productionsStore.state,
     {},
     {},
-    { isCurrentUserClient: isTargetClient(to) }
-  )(to?.params?.production_id)
+    { isCurrentUserClient: isClient }
+  )(productionId)
   const isHidden = to?.matched.some(
     ({ meta }) =>
       (meta.clientAccess === 'stats' && !clientAccess.isStatsVisible) ||
       (meta.clientAccess === 'taskList' && !clientAccess.isTaskListVisible)
   )
-  if (isHidden) return { name: 'not-found' }
+  // The production switcher keeps the section: the playlists are always
+  // open to clients.
+  if (isHidden && episodeId) {
+    return {
+      name: 'episode-playlists',
+      params: { production_id: productionId, episode_id: episodeId }
+    }
+  } else if (isHidden) {
+    return { name: 'playlists', params: { production_id: productionId } }
+  }
 }
 
 export const routes = [
@@ -194,7 +209,6 @@ export const routes = [
       }
 
       // After init: it loads the project roles and the production flags.
-      const isClient = isTargetClient(to)
       const isSupervisorOrManager =
         userStore.getters.isCurrentUserManager(userStore.state) ||
         userStore.getters.isCurrentUserSupervisor(userStore.state)
@@ -202,10 +216,7 @@ export const routes = [
         (!userStore.getters.isCurrentUserAdmin(userStore.state) &&
           to?.matched.some(record => record.meta.requiresAdmin)) ||
         (!isSupervisorOrManager &&
-          to?.matched.some(
-            record => record.meta.requiresSupervisorOrManager
-          )) ||
-        (isClient && to?.matched.some(record => record.meta.forbiddenForClient))
+          to?.matched.some(record => record.meta.requiresSupervisorOrManager))
 
       if (isProhibited) return { name: 'not-found' }
       return checkClientAccess(to)
