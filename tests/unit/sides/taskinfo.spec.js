@@ -437,6 +437,55 @@ describe('TaskInfo.vue', () => {
 
       expect(taskPageLink(wrapper).params.episode_id).toBe('episode-1')
     })
+
+    // The task page shows the latest revision unless its URL names another.
+    describe('with a revision picked', () => {
+      const previews = [
+        { id: 'preview-2', revision: 2, extension: 'mp4', task_id: TASK_ID },
+        { id: 'preview-1', revision: 1, extension: 'mp4', task_id: TASK_ID }
+      ]
+      const pick = async (wrapper, preview) => {
+        wrapper
+          .findComponent(PreviewPlayer)
+          .vm.$emit('change-current-preview', preview)
+        await flushPromises()
+      }
+
+      it('opens the task page on the revision the panel shows', async () => {
+        const { wrapper } = await mountPanel({ previews })
+        await pick(wrapper, previews[1])
+
+        expect(taskPageLink(wrapper)).toEqual({
+          name: 'task-preview',
+          params: {
+            production_id: 'production-1',
+            task_id: TASK_ID,
+            type: 'shots',
+            preview_id: 'preview-1'
+          }
+        })
+      })
+
+      it('opens the task page as it is on the latest revision', async () => {
+        const { wrapper } = await mountPanel({ previews })
+        await pick(wrapper, previews[0])
+
+        expect(taskPageLink(wrapper).name).toBe('task')
+      })
+
+      // Until the comments of a new task load, the panel shows the revisions
+      // of the task shown before.
+      it('leaves out a revision of another task', async () => {
+        const otherPreviews = previews.map(preview => ({
+          ...preview,
+          task_id: 'task-0'
+        }))
+        const { wrapper } = await mountPanel({ previews: otherPreviews })
+        await pick(wrapper, otherPreviews[1])
+
+        expect(taskPageLink(wrapper).name).toBe('task')
+      })
+    })
   })
 
   describe('entity page link', () => {

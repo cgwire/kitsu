@@ -841,16 +841,30 @@ const isTaskOfTVShow = computed(
 
 // The store keeps the episode browsed last, maybe of another production: a
 // task without its own episode opens under the one of a page of its
-// production, else under all of them.
-const taskPath = computed(() =>
-  getTaskPath(
+// production, else under all of them. The task page shows the latest revision
+// first: another one goes along, if it belongs to the task shown (until its
+// comments load, the panel shows the revisions of the previous task).
+const taskPath = computed(() => {
+  const path = getTaskPath(
     props.task,
     null,
     isTaskOfTVShow.value,
     { id: pageEpisodeId.value || 'all' },
     taskTypeMap.value
   )
-)
+  const preview = currentPreview.value
+  if (
+    !preview ||
+    preview.task_id !== props.task.id ||
+    preview.id === taskPreviews.value[0]?.id
+  ) {
+    return path
+  }
+  return {
+    name: `${path.name}-preview`,
+    params: { ...path.params, preview_id: preview.id }
+  }
+})
 
 // The entity opens under the episode of the page, as from its name in the
 // list, else under its own one on a TV show: the main pack for an asset
