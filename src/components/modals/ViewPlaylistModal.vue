@@ -165,6 +165,9 @@ const isAssetPlaylist = computed(() => currentEntityType.value === 'asset')
 const isSequencePlaylist = computed(
   () => currentEntityType.value === 'sequence'
 )
+const isAllShots = computed(
+  () => currentEpisode.value?.id === 'all' && currentEntityType.value === 'shot'
+)
 
 const onPreviewChanged = async ({
   entity,
@@ -219,6 +222,12 @@ const lookupEntity = entityInfo => {
   return shotStore.cache.shotMap.get(entityInfo.id)
 }
 
+// Sequence names repeat across episodes: All shots says which one.
+const getSequenceName = entity =>
+  isAllShots.value && entity.episode_name && entity.sequence_name
+    ? `${entity.episode_name} / ${entity.sequence_name}`
+    : entity.sequence_name
+
 const convertEntityToPlaylistFormat = entityInfo => {
   const entity = lookupEntity(entityInfo)
   if (!entity) return entityInfo
@@ -235,7 +244,7 @@ const convertEntityToPlaylistFormat = entityInfo => {
       parseFloat(currentProduction.value?.fps) ||
       25,
     parent_name:
-      entity.sequence_name || entity.episode_name || entity.asset_type_name,
+      getSequenceName(entity) || entity.episode_name || entity.asset_type_name,
     preview_files: entityInfo.preview_files,
     preview_file_id: entityInfo.preview_file_id || entity.preview_file_id,
     preview_file_extension:
@@ -316,10 +325,7 @@ const onViewCreatedPlaylist = () => {
     currentEpisode.value?.id,
     createdPlaylist.value.id
   )
-  if (
-    currentEpisode.value?.id === 'all' &&
-    currentEntityType.value === 'shot'
-  ) {
+  if (isAllShots.value) {
     // The playlists page splits the all pseudo-episode by entity type.
     route.query = { for_entity: 'shot' }
   }

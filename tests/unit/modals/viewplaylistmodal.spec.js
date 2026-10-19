@@ -1,4 +1,5 @@
 import { flushPromises, shallowMount } from '@vue/test-utils'
+import { reactive } from 'vue'
 import { createI18n } from 'vue-i18n'
 import { createStore } from 'vuex'
 
@@ -44,6 +45,8 @@ describe('ViewPlaylistModal', () => {
   let newPlaylistError
   let newPlaylistRequest
   let tempEntities
+  // The episode the topbar sets, which a test can move.
+  const scope = reactive({ episode: null, isTVShow: false })
 
   beforeEach(() => {
     routeState.path = '/shots'
@@ -52,13 +55,14 @@ describe('ViewPlaylistModal', () => {
     newPlaylistError = null
     newPlaylistRequest = null
     tempEntities = []
+    Object.assign(scope, { episode: null, isTVShow: false })
     store = createStore({
       strict: true,
       getters: {
-        currentEpisode: () => null,
+        currentEpisode: () => scope.episode,
         currentProduction: () => ({ id: 'production-1' }),
         isSupportChat: () => true,
-        isTVShow: () => false,
+        isTVShow: () => scope.isTVShow,
         selectedTasks: () => new Map()
       },
       mutations: {
@@ -243,6 +247,27 @@ describe('ViewPlaylistModal', () => {
     await new Promise(resolve => setTimeout(resolve))
 
     expect(tempEntities[0].preview_file_previews[0].duration).toBe(3.5)
+  })
+
+  // Sequence names repeat across episodes: All shots says which one.
+  it.each([
+    ['all shots', { id: 'all' }, 'E01 / SQ01'],
+    ['an episode', { id: 'episode-1', name: 'E01' }, 'SQ01']
+  ])('names the sequence of a shot under %s', async (_, episode, name) => {
+    Object.assign(scope, { episode, isTVShow: true })
+    shotStore.cache.shotMap.set('shot-1', {
+      id: 'shot-1',
+      name: 'SH01',
+      sequence_name: 'SQ01',
+      episode_name: 'E01'
+    })
+    tempEntities = [
+      { id: 'shot-1', preview_file_id: 'pf-1', preview_files: {} }
+    ]
+    await wrapper.setProps({ active: true })
+    await new Promise(resolve => setTimeout(resolve))
+
+    expect(tempEntities[0].parent_name).toBe(name)
   })
 
   it.each([
