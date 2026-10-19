@@ -4,10 +4,12 @@ import { createStore } from 'vuex'
 import { describe, expect, it, vi } from 'vitest'
 
 import {
+  dropBefore,
   isArmed,
   pressOn,
   recordListenerErrors,
-  release
+  release,
+  startDrag
 } from '../fixtures/sortable'
 
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
@@ -107,7 +109,7 @@ const taskStatuses = ['Todo', 'WIP', 'WFA', 'Retake', 'Done'].map(
 )
 
 // Mounts the real vuedraggable, so that SortableJS handles the rows.
-const mountWithTaskStatuses = async taskStatusIds => {
+const mountWithTaskStatuses = async (taskStatusIds, { errorHandler } = {}) => {
   const store = createStore({
     state: { taskStatusIds },
     getters: {
@@ -135,6 +137,7 @@ const mountWithTaskStatuses = async taskStatusIds => {
   await router.isReady()
   const wrapper = shallowMount(ProductionSettings, {
     global: {
+      config: { errorHandler },
       plugins: [store, router],
       mocks: { $t: key => key },
       stubs: { draggable: false, SettingsLayout: false }
@@ -170,5 +173,112 @@ describe('ProductionSettings task status tab', () => {
     pressOn(rows()[0].find('td.grab').element)
     expect(isArmed(rows()[0])).toBe(true)
     release()
+  })
+
+  it('keeps the rows draggable when they shift under a pressed row', async () => {
+    const { store, wrapper } = await mountWithTaskStatuses([
+      'todo',
+      'wip',
+      'retake',
+      'done'
+    ])
+    const rows = () => wrapper.findAll('tr.task-status')
+    const names = () => rows().map(row => row.findAll('td')[1].text())
+
+    const errors = await recordListenerErrors(async () => {
+      pressOn(rows()[2].findAll('td')[1].element)
+      store.commit('setTaskStatusIds', ['todo', 'wip', 'wfa', 'retake', 'done'])
+      await flushPromises()
+      release()
+      await flushPromises()
+    })
+
+    expect(errors).toEqual([])
+    expect(names()).toEqual(['Todo', 'WIP', 'WFA', 'Retake', 'Done'])
+    pressOn(rows()[0].find('td.grab').element)
+    expect(isArmed(rows()[0])).toBe(true)
+    release()
+  })
+
+  // Regression: the row before which vuedraggable puts the dragged row back
+  // was gone, and the drop threw.
+  it('saves the dropped order when a reload removes a status during the drag', async () => {
+    const { store, wrapper } = await mountWithTaskStatuses([
+      'todo',
+      'wip',
+      'retake',
+      'done'
+    ])
+    const rows = () => wrapper.findAll('tr.task-status')
+    const names = () => rows().map(row => row.findAll('td')[1].text())
+    const [first, , , last] = rows().map(row => row.element)
+
+    const errors = await recordListenerErrors(async () => {
+      await startDrag(last.querySelector('td.grab'))
+      store.commit('setTaskStatusIds', ['todo', 'retake', 'done'])
+      await flushPromises()
+      dropBefore(last, first)
+      await flushPromises()
+    })
+
+    expect(errors).toEqual([])
+    expect(names()).toEqual(['Done', 'Todo', 'WIP', 'Retake'])
+    expect(store.dispatch).toHaveBeenCalledWith('reorderTaskStatusLinks', {
+      projectId: 'prod-1',
+      taskStatusIds: ['done', 'todo', 'wip', 'retake']
+    })
+
+    // The reload that follows the save.
+    store.commit('setTaskStatusIds', ['todo', 'retake'])
+    await flushPromises()
+    expect(names()).toEqual(['Todo', 'Retake'])
+  })
+
+  // Regression: a failed save brings no reload, so the list kept what it
+  // showed during the drag, a status removed meanwhile included.
+  it('rebuilds the list from the production when the save fails', async () => {
+    const errorHandler = vi.fn()
+    const { store, wrapper } = await mountWithTaskStatuses(
+      ['todo', 'wip', 'retake', 'done'],
+      { errorHandler }
+    )
+    const error = new Error('Bad Gateway')
+    store.dispatch.mockImplementation(async action => {
+      if (action === 'reorderTaskStatusLinks') throw error
+    })
+    const rows = () => wrapper.findAll('tr.task-status')
+    const names = () => rows().map(row => row.findAll('td')[1].text())
+    const [first, , , last] = rows().map(row => row.element)
+
+    await startDrag(last.querySelector('td.grab'))
+    store.commit('setTaskStatusIds', ['todo', 'retake', 'done'])
+    await flushPromises()
+    dropBefore(last, first)
+    await flushPromises()
+
+    expect(errorHandler.mock.calls[0][0]).toBe(error)
+    expect(names()).toEqual(['Todo', 'Retake', 'Done'])
+  })
+
+  it('keeps the saved order when the reload after the save fails', async () => {
+    const errorHandler = vi.fn()
+    const { store, wrapper } = await mountWithTaskStatuses(
+      ['todo', 'wip', 'retake', 'done'],
+      { errorHandler }
+    )
+    const error = new Error('Bad Gateway')
+    store.dispatch.mockImplementation(async action => {
+      if (action === 'loadContext') throw error
+    })
+    const rows = () => wrapper.findAll('tr.task-status')
+    const names = () => rows().map(row => row.findAll('td')[1].text())
+    const [first, , , last] = rows().map(row => row.element)
+
+    await startDrag(last.querySelector('td.grab'))
+    dropBefore(last, first)
+    await flushPromises()
+
+    expect(errorHandler.mock.calls[0][0]).toBe(error)
+    expect(names()).toEqual(['Done', 'Todo', 'WIP', 'Retake'])
   })
 })

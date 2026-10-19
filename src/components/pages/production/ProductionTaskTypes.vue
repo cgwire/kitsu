@@ -88,7 +88,10 @@
                 item-key="taskType.id"
                 :prevent-on-filter="false"
                 tag="tbody"
+                @choose="onRowHeld"
                 @end="updatePriorities(taskListObject.list)"
+                @start="onRowDragged"
+                @unchoose="onRowReleased"
                 v-model="taskListObject.list"
               >
                 <template #item="{ element: taskTypeData }">
@@ -149,6 +152,7 @@ import { useRoute } from 'vue-router'
 import draggable from 'vuedraggable'
 import { useStore } from 'vuex'
 
+import { useDraggableRebuild } from '@/composables/draggableRebuild'
 import { sortByName, sortTaskTypes } from '@/lib/sorting'
 import { formatFullDate } from '@/lib/time'
 
@@ -310,7 +314,7 @@ const getScheduleItemForTaskType = taskType =>
     end_date: formatFullDate(moment())
   }
 
-const resetDisplayedTaskTypes = () => {
+const buildDisplayedTaskTypes = () => {
   Object.entries(groupByType).forEach(([type, { ref: stateRef, getter }]) => {
     stateRef.value = {
       entity: `${type.toLowerCase()}s`,
@@ -323,6 +327,13 @@ const resetDisplayedTaskTypes = () => {
     }
   })
 }
+
+const {
+  rebuild: resetDisplayedTaskTypes,
+  onRowHeld,
+  onRowDragged,
+  onRowReleased
+} = useDraggableRebuild(buildDisplayedTaskTypes)
 
 const updateTaskTypeIdFromRemaining = () => {
   taskTypeId.value = remainingTaskTypesForEntity.value[0]?.id || null

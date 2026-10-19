@@ -3,7 +3,14 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import { createStore } from 'vuex'
 import { describe, expect, it, vi } from 'vitest'
 
-import { isArmed, pressOn, release } from '../fixtures/sortable'
+import {
+  dropBefore,
+  isArmed,
+  pressOn,
+  recordListenerErrors,
+  release,
+  startDrag
+} from '../fixtures/sortable'
 
 // Shows the interpolated values next to the key.
 vi.mock('vue-i18n', () => ({
@@ -102,6 +109,71 @@ const tabNames = wrapper =>
     .findComponent(RouteSectionTabs)
     .props('tabs')
     .map(tab => tab.name)
+
+const workflow = ['Layout', 'Animation', 'Lighting', 'Compositing'].map(
+  (name, index) => ({
+    id: name.toLowerCase(),
+    name,
+    short_name: name.slice(0, 3).toUpperCase(),
+    for_entity: 'Shot',
+    priority: index + 1
+  })
+)
+
+// Mounts the real vuedraggable and rows, so that SortableJS handles them.
+// A commit of setShotTaskTypeIds plays a reload of the production, which
+// lists its task types in that order.
+const mountWorkflow = async () => {
+  const store = createStore({
+    state: { shotTaskTypeIds: workflow.map(taskType => taskType.id) },
+    getters: {
+      currentProduction: state => ({
+        id: 'production-1',
+        production_type: 'short',
+        task_types: state.shotTaskTypeIds,
+        task_types_priority: Object.fromEntries(
+          state.shotTaskTypeIds.map((id, index) => [id, index + 1])
+        )
+      }),
+      currentScheduleItems: () => [],
+      getProductionTaskTypes: () => () => [],
+      isTVShow: () => false,
+      movieBitrateDefaults: () => ({
+        hd_bitrate_compression: 40,
+        ld_bitrate_compression: 8
+      }),
+      productionAssetTaskTypes: () => [],
+      productionEditTaskTypes: () => [],
+      productionEpisodeTaskTypes: () => [],
+      productionSequenceTaskTypes: () => [],
+      productionShotTaskTypes: state =>
+        workflow.filter(taskType => state.shotTaskTypeIds.includes(taskType.id)),
+      taskTypeMap: () =>
+        new Map(workflow.map(taskType => [taskType.id, taskType])),
+      taskTypes: () => workflow
+    },
+    mutations: {
+      setShotTaskTypeIds: (state, ids) => {
+        state.shotTaskTypeIds = ids
+      },
+      SORT_VALIDATION_COLUMNS: () => {}
+    }
+  })
+  store.dispatch = vi.fn(() => Promise.resolve())
+  await router.push('/settings?section=shots')
+  await router.isReady()
+  const wrapper = shallowMount(ProductionTaskTypes, {
+    global: {
+      plugins: [store, router],
+      mocks: { $t: key => key },
+      stubs: { draggable: false, ProductionTaskType: false }
+    }
+  })
+  await flushPromises()
+  const rows = () => wrapper.findAll('tr.task-type')
+  const names = () => rows().map(row => row.find('td.short-name').text())
+  return { names, rows, store }
+}
 
 describe('ProductionTaskTypes', () => {
   it('hides the entity tabs the production type does not use', async () => {
@@ -346,5 +418,46 @@ describe('ProductionTaskTypes', () => {
     pressOn(row.find('td.remove button').element)
     expect(isArmed(row)).toBe(false)
     release()
+  })
+
+  // Regression: vuedraggable moves the row found at the index the dragged
+  // row had when its drag started. A reload that rebuilt the list meanwhile
+  // made it move an undefined row, and saving the order threw.
+  it('saves the dropped order when a reload removes a row during the drag', async () => {
+    const { names, rows, store } = await mountWorkflow()
+    const [first, , , last] = rows().map(row => row.element)
+
+    const errors = await recordListenerErrors(async () => {
+      await startDrag(last.querySelector('td.short-name'))
+      store.commit('setShotTaskTypeIds', ['layout', 'lighting', 'compositing'])
+      await flushPromises()
+      dropBefore(last, first)
+      await flushPromises()
+    })
+
+    expect(errors).toEqual([])
+    expect(names()).toEqual(['COM', 'LAY', 'ANI', 'LIG'])
+    expect(store.dispatch).toHaveBeenCalledWith('reorderTaskTypeLinks', {
+      projectId: 'production-1',
+      taskTypeIds: ['compositing', 'layout', 'animation', 'lighting']
+    })
+
+    // The reload that follows the save.
+    store.commit('setShotTaskTypeIds', ['compositing', 'layout', 'lighting'])
+    await flushPromises()
+    expect(names()).toEqual(['COM', 'LAY', 'LIG'])
+  })
+
+  it('shows a reload that came during a press once the row is released', async () => {
+    const { names, rows, store } = await mountWorkflow()
+
+    pressOn(rows()[1].find('td.short-name').element)
+    store.commit('setShotTaskTypeIds', ['layout', 'lighting', 'compositing'])
+    await flushPromises()
+    expect(names()).toEqual(['LAY', 'ANI', 'LIG', 'COM'])
+
+    release()
+    await flushPromises()
+    expect(names()).toEqual(['LAY', 'LIG', 'COM'])
   })
 })

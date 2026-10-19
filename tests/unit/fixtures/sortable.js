@@ -16,6 +16,21 @@ export const release = () =>
     new MouseEvent('mouseup', { bubbles: true, button: 0, cancelable: true })
   )
 
+// Sortable starts a native drag on the dragstart that follows the press, and
+// reports it after a timer.
+export const startDrag = async element => {
+  pressOn(element)
+  element.dispatchEvent(new Event('dragstart', { bubbles: true }))
+  await new Promise(resolve => setTimeout(resolve, 0))
+}
+
+// Puts the dragged row before another, as the dragover events of a browser
+// do, then drops it: Sortable reads the new index from the DOM.
+export const dropBefore = (row, target) => {
+  target.before(row)
+  document.dispatchEvent(new Event('drop', { bubbles: true }))
+}
+
 // The class Sortable gives the row it armed a drag on.
 export const isArmed = row => row.classes().includes('sortable-chosen')
 
