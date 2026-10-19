@@ -67,7 +67,7 @@
         <p class="empty" v-else>{{ $t('productions.home.no_playlist') }}</p>
       </section>
 
-      <section class="progress-section">
+      <section class="progress-section" v-if="clientAccess.isStatsVisible">
         <div class="flexrow section-head">
           <h3 class="section-title flexrow-item">
             {{ $t('productions.home.progress') }}
@@ -161,9 +161,22 @@ const nbEpisodes = computed(
 )
 const nbShots = computed(() => countEntities('Shot'))
 
-const departmentStats = computed(() =>
-  computeDepartmentStats(props.entities, taskTypeMap.value, taskStatusMap.value)
+const clientAccess = computed(() =>
+  store.getters.getClientAccess(props.production.id)
 )
+
+const departmentStats = computed(() => {
+  const { isTaskTypeVisible } = clientAccess.value
+  const entities = props.entities.map(entity => ({
+    ...entity,
+    tasks: entity.tasks?.filter(task => isTaskTypeVisible(task.task_type_id))
+  }))
+  return computeDepartmentStats(
+    entities,
+    taskTypeMap.value,
+    taskStatusMap.value
+  )
+})
 // The departments holding tasks, by name: the production task types are
 // not a reliable list, tasks exist outside of it.
 const departments = computed(() =>
