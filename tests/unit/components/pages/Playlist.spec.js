@@ -258,18 +258,95 @@ describe.each([
   })
 })
 
-describe('Playlist page, loadShots on mount', () => {
-  it('loads nothing for the pseudo-episodes', async () => {
+describe('Playlist page, loadShots under a pseudo-episode', () => {
+  const shotQuery = { for_entity: 'shot' }
+
+  const mountOn = async (episodeId, query, state = {}) => {
     const { actions } = await mountPage({
+      query,
       state: {
         isTVShow: true,
-        currentEpisode: { id: 'all' },
-        shotsLoadingKey: 'p1/ep-a'
+        currentEpisode: { id: episodeId },
+        shotsLoadingKey: 'p1/ep-a',
+        ...state
       }
     })
     await flushPromises()
+    return actions.loadShots
+  }
 
-    expect(actions.loadShots).not.toHaveBeenCalled()
+  it.each([
+    ['the main pack', 'main', {}],
+    ['all assets', 'all', {}]
+  ])('loads nothing for %s', async (_, episodeId, query) => {
+    expect(await mountOn(episodeId, query)).not.toHaveBeenCalled()
+  })
+
+  // Its playlists hold the shots of every episode.
+  it('loads the shots of the whole production for all shots', async () => {
+    expect(await mountOn('all', shotQuery)).toHaveBeenCalledTimes(1)
+  })
+
+  it('keeps the production-wide dataset for all shots', async () => {
+    const loader = await mountOn('all', shotQuery, { shotsLoadingKey: 'p1/all' })
+
+    expect(loader).not.toHaveBeenCalled()
+  })
+
+  it('loads the shots when the topbar moves an episode to all shots', async () => {
+    const { store, actions } = await mountPage({
+      state: { isTVShow: true, shotsLoadingKey: 'p1/ep-a' }
+    })
+    await flushPromises()
+    routeHolder.route.query = shotQuery
+    await moveScope(store, { currentEpisode: { id: 'all' } })
+    await flushPromises()
+
+    expect(actions.loadShots).toHaveBeenCalledTimes(1)
+  })
+
+  it('loads the shots when all assets turns to all shots', async () => {
+    const loader = await mountOn('all', {})
+    routeHolder.route.query = shotQuery
+    await flushPromises()
+
+    expect(loader).toHaveBeenCalledTimes(1)
+  })
+
+  describe('entries of several episodes', () => {
+    const shots = [
+      { id: 'e1-s1', name: 'SH010', episode_name: 'E01' },
+      { id: 'e2-s1', name: 'SH010', episode_name: 'E02' }
+    ]
+
+    afterEach(() => shots.forEach(({ id }) => shotStore.cache.shotMap.delete(id)))
+
+    it('shows the entries of every episode for all shots', async () => {
+      const loadShots = vi.fn(() => {
+        shots.forEach(shot => shotStore.cache.shotMap.set(shot.id, shot))
+        return Promise.resolve()
+      })
+      const { wrapper } = await openPlaylist(
+        {
+          for_entity: 'shot',
+          is_for_all: true,
+          shots: shots.map(({ id }) => ({ id, preview_files: {} }))
+        },
+        {
+          query: shotQuery,
+          state: {
+            isTVShow: true,
+            currentEpisode: { id: 'all' },
+            shotsLoadingKey: 'p1/ep-a'
+          },
+          actions: { loadShots }
+        }
+      )
+      await flushPromises()
+
+      const entities = wrapper.findComponent(PlaylistPlayer).props('entities')
+      expect(entities.map(({ id }) => id)).toEqual(['e1-s1', 'e2-s1'])
+    })
   })
 })
 

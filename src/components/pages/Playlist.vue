@@ -846,9 +846,12 @@ const loadShotsData = async () => {
     isShotsLoading.value ||
     shotsLoadingKey.value !== `${currentProduction.value.id}/${scope}`
   ) {
-    if (isTVShow.value && ['main', 'all'].includes(currentEpisode.value?.id)) {
-      // Pseudo-episodes load nothing of their own: only let the load in
-      // flight refill the map it emptied.
+    // The main pack and All assets list no shot: only let the load in
+    // flight refill the map it emptied. All shots loads every episode.
+    const isWithoutShots =
+      (isTVShow.value && currentEpisode.value?.id === 'main') ||
+      allForEntity.value === 'asset'
+    if (isWithoutShots) {
       if (isShotsLoading.value) await shotStore.cache.shotsLoadingPromise
     } else {
       if (isTVShow.value && !currentEpisode.value) {
