@@ -85,7 +85,7 @@
               <draggable
                 class="datatable-body"
                 filter="button"
-                item-key="taskType.id"
+                :item-key="item => item.taskType.id"
                 :prevent-on-filter="false"
                 tag="tbody"
                 @choose="onRowHeld"

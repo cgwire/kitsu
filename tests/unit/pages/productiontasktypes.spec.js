@@ -123,7 +123,7 @@ const workflow = ['Layout', 'Animation', 'Lighting', 'Compositing'].map(
 // Mounts the real vuedraggable and rows, so that SortableJS handles them.
 // A commit of setShotTaskTypeIds plays a reload of the production, which
 // lists its task types in that order.
-const mountWorkflow = async () => {
+const mountWorkflow = async (options = {}) => {
   const store = createStore({
     state: { shotTaskTypeIds: workflow.map(taskType => taskType.id) },
     getters: {
@@ -167,12 +167,13 @@ const mountWorkflow = async () => {
       plugins: [store, router],
       mocks: { $t: key => key },
       stubs: { draggable: false, ProductionTaskType: false }
-    }
+    },
+    ...options
   })
   await flushPromises()
   const rows = () => wrapper.findAll('tr.task-type')
   const names = () => rows().map(row => row.find('td.short-name').text())
-  return { names, rows, store }
+  return { names, rows, store, wrapper }
 }
 
 describe('ProductionTaskTypes', () => {
@@ -459,5 +460,25 @@ describe('ProductionTaskTypes', () => {
     release()
     await flushPromises()
     expect(names()).toEqual(['LAY', 'LIG', 'COM'])
+  })
+
+  // Regression: the rows had no key, so a reload that moved them rebuilt
+  // the rows of the task types that changed places.
+  it('keeps the focus in a bitrate field when a reload moves its row', async () => {
+    const { names, rows, store, wrapper } = await mountWorkflow({
+      attachTo: document.body
+    })
+    const lighting = rows()[2]
+    const input = lighting.find('td.bitrate input').element
+    input.focus()
+    expect(document.activeElement).toBe(input)
+
+    store.commit('setShotTaskTypeIds', ['animation', 'lighting', 'compositing'])
+    await flushPromises()
+
+    expect(names()).toEqual(['ANI', 'LIG', 'COM'])
+    expect(rows()[1].element).toBe(lighting.element)
+    expect(document.activeElement).toBe(input)
+    wrapper.unmount()
   })
 })
