@@ -73,8 +73,13 @@ export const useStatsPage = ({
     { omitColumns = omitStatsColumns, aggregate = aggregateStats } = {}
   ) => {
     const ids = displayedRows.value.map(row => row.id).filter(id => stats[id])
+    const { isTaskTypeVisible } = store.getters.clientAccess
+    const omitted = entry => [
+      ...hiddenColumnIds.value,
+      ...Object.keys(entry).filter(key => !isTaskTypeVisible(key))
+    ]
     const entries = Object.fromEntries(
-      ids.map(id => [id, omitColumns(stats[id], hiddenColumnIds.value)])
+      ids.map(id => [id, omitColumns(stats[id], omitted(stats[id]))])
     )
     return { ...entries, all: { all: {}, ...aggregate(entries, ids) } }
   }

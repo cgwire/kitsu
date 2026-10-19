@@ -127,6 +127,21 @@ describe('EpisodeStats page', () => {
       expect(listProps().validationColumns).toEqual(['layout'])
     })
 
+    test('keeps the hidden task type out of the totals and the export', async () => {
+      const generateRetakeStatReports = vi
+        .spyOn(csv, 'generateRetakeStatReports')
+        .mockImplementation(() => {})
+      await mountPage({
+        getters: {
+          clientAccess: () => ({ isTaskTypeVisible: id => id !== 'anim' })
+        }
+      })
+      expect(listProps().episodeRetakeStats.all.all.retake.count).toBe(1)
+      await findButton('download').vm.$emit('click')
+      const [, stats] = generateRetakeStatReports.mock.calls[0]
+      expect(Object.keys(stats.all).sort()).toEqual(['all', 'layout'])
+    })
+
     test('keeps every column for the studio', async () => {
       await mountPage()
       expect(listProps().validationColumns).toEqual(['layout', 'anim'])

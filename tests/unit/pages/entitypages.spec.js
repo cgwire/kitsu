@@ -276,6 +276,25 @@ describe.each(pages.filter(({ name }) => ['Asset', 'Edit', 'Shot'].includes(name
   }
 )
 
+describe.each(pages.filter(({ name }) => ['Asset', 'Edit', 'Shot'].includes(name)))(
+  '$name page, task panel client setting',
+  ({ entityParam, page }) => {
+    const panel = isTaskPanelVisible => ({
+      clientAccess: () => ({ isTaskPanelVisible, isTaskTypeVisible: () => true })
+    })
+
+    test('renders no task info when the panel is hidden', async () => {
+      const { wrapper } = await mountPage(page, entityParam, production, {}, panel(false))
+      expect(wrapper.findComponent({ name: 'TaskInfo' }).exists()).toBe(false)
+    })
+
+    test('renders the task info otherwise', async () => {
+      const { wrapper } = await mountPage(page, entityParam, production, {}, panel(true))
+      expect(wrapper.findComponent({ name: 'TaskInfo' }).exists()).toBe(true)
+    })
+  }
+)
+
 describe('Asset page, concepts', () => {
   afterEach(() => {
     assetStore.cache.assetMap.clear()
