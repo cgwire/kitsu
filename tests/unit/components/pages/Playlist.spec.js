@@ -809,6 +809,60 @@ describe('Playlist page, sequence playlist', () => {
   })
 })
 
+describe('Playlist page, sequence of a shot', () => {
+  const shot = {
+    id: 's1',
+    name: 'SH010',
+    sequence_id: 'sq-1',
+    sequence_name: 'SQ01',
+    episode_name: 'E01'
+  }
+
+  beforeEach(() => shotStore.cache.shotMap.set(shot.id, shot))
+  afterEach(() => shotStore.cache.shotMap.delete(shot.id))
+
+  const openOn = async (episodeId, query, shots) => {
+    const { wrapper } = await openPlaylist(
+      { for_entity: 'shot', shots },
+      {
+        query,
+        state: { isTVShow: true, currentEpisode: { id: episodeId } },
+        getters: { displayedShotsBySequence: () => [[shot]] }
+      }
+    )
+    await flushPromises()
+    return wrapper
+  }
+
+  // Sequence names repeat across episodes: All shots says which one.
+  const cases = [
+    ['all shots', 'all', { for_entity: 'shot' }, 'E01 / SQ01'],
+    ['an episode', 'ep-a', {}, 'SQ01']
+  ]
+
+  it.each(cases)(
+    'names it in the entries under %s',
+    async (_, episodeId, query, name) => {
+      const wrapper = await openOn(episodeId, query, [
+        { id: 's1', preview_files: {} }
+      ])
+
+      const [entity] = wrapper.findComponent(PlaylistPlayer).props('entities')
+      expect(entity.parent_name).toBe(name)
+    }
+  )
+
+  it.each(cases)(
+    'names it in the addition panel under %s',
+    async (_, episodeId, query, name) => {
+      const wrapper = await openOn(episodeId, query, [])
+
+      const title = wrapper.find('.entity-group-title').element
+      expect(title.firstChild.textContent.trim()).toBe(name)
+    }
+  )
+})
+
 // Zou serves an entry whose preview is unset or deleted without any: the page
 // pins it to a preview of its own, so that it plays and that the edits of
 // that entry find its stored row.

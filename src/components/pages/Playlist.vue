@@ -427,7 +427,7 @@
                 v-for="(sequenceShots, i) in displayedShotsBySequence"
               >
                 <h2 class="entity-group-title" v-if="sequenceShots.length > 0">
-                  {{ sequenceShots[0].sequence_name }}
+                  {{ getSequenceName(sequenceShots[0]) }}
                   <button
                     class="button"
                     @click="addSequence(sequenceShots)"
@@ -835,6 +835,12 @@ const getCachedEntity = entityId => {
   return shotStore.cache.shotMap.get(entityId)
 }
 
+// Sequence names repeat across episodes: All shots says which one.
+const getSequenceName = entity =>
+  allForEntity.value === 'shot' && entity.episode_name && entity.sequence_name
+    ? `${entity.episode_name} / ${entity.sequence_name}`
+    : entity.sequence_name
+
 // Data loading
 
 const loadShotsData = async () => {
@@ -1035,7 +1041,8 @@ const convertEntityToPlaylistFormat = entityInfo => {
   const playlistEntity = {
     id: entityInfo.id,
     name: entity.name,
-    parent_name: entity.sequence_name || episodeName || entity.asset_type_name,
+    parent_name:
+      getSequenceName(entity) || episodeName || entity.asset_type_name,
     // Per-entity fps: an entity can override the production fps via
     // data.fps. Carried here so the player uses the right rate for
     // whichever entity is playing (a playlist can mix fps).
