@@ -77,6 +77,8 @@ const mountPage = async ({
   previews = [],
   // Leave the task load hanging: the page then mounts with no task at all.
   pendingTaskLoad = false,
+  // The revision the URL names when the page opens.
+  previewId = null,
   stubs = {}
 } = {}) => {
   const dispatched = []
@@ -110,7 +112,14 @@ const mountPage = async ({
       }
     ]
   })
-  await router.push({ name: 'task', params: TASK_ROUTE_PARAMS })
+  await router.push(
+    previewId
+      ? {
+          name: 'task-preview',
+          params: { ...TASK_ROUTE_PARAMS, preview_id: previewId }
+        }
+      : { name: 'task', params: TASK_ROUTE_PARAMS }
+  )
   await router.isReady()
 
   const store = createStore({
@@ -502,6 +511,13 @@ describe('Task.vue preview selection', () => {
   it('shows the preview named by the route', async () => {
     const { wrapper, router } = await mountPage({ previews })
     await selectPreview(router, 'preview-2')
+    expect(playerPreviews(wrapper)).toEqual(['from-2'])
+  })
+
+  // The task panel opens the page on the revision it shows: no detour
+  // through the latest one.
+  it('shows the preview its URL names from the first render', async () => {
+    const { wrapper } = await mountPage({ previews, previewId: 'preview-2' })
     expect(playerPreviews(wrapper)).toEqual(['from-2'])
   })
 
