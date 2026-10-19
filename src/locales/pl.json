@@ -1518,6 +1518,7 @@
         "no_progress": "Brak zadań na razie",
         "no_task": "Nie masz przypisanych żadnych zadań. Skontaktuj się ze swoim supervisorem, aby dowiedzieć się, co możesz zrobić!",
         "progress": "Postęp",
+        "studio_productions": "Produkcje {studio}",
         "title": "Moje produkcje",
         "welcome": "Witaj w Kitsu",
         "welcome_text": "Tutaj {studio} dzieli się z Tobą swoją pracą. Śledź postępy każdej produkcji, oglądaj najnowsze playlisty i zostawiaj swoje uwagi.",

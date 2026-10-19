@@ -1568,6 +1568,7 @@ export default {
       no_progress: 'No task yet',
       no_task: 'You have no task assigned. Consult with your supervisor to see what you can do!',
       progress: 'Progress',
+      studio_productions: '{studio} productions',
       title: 'My Productions',
       welcome: 'Welcome to Kitsu',
       welcome_text: 'This is where {studio} shares its work with you. Follow the progress of each production, watch the latest playlists and leave your feedback.',

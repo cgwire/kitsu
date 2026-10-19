@@ -1073,6 +1073,7 @@
         "no_progress": "Még nincs feladat",
         "no_task": "Nincs számodra kiosztott feladat. Kérj feladatot a supervisor-odtól!",
         "progress": "Haladás",
+        "studio_productions": "{studio} produkciói",
         "title": "Produkcióim",
         "welcome": "Üdvözlünk a Kitsu-n",
         "welcome_text": "Itt osztja meg Önnel a {studio} a munkáját. Kövesse az egyes produkciók előrehaladását, nézze meg a legújabb lejátszási listákat, és hagyja ott a visszajelzését.",

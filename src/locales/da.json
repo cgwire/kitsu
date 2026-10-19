@@ -1073,6 +1073,7 @@
         "no_progress": "Ingen opgave endnu",
         "no_task": "Du har ingen opgave tildelt. Rådfør dig med din supervisor for at se, hvad du kan gøre!",
         "progress": "Fremdrift",
+        "studio_productions": "Produktioner hos {studio}",
         "title": "Mine Produktioner",
         "welcome": "Velkommen til Kitsu",
         "welcome_text": "Her deler {studio} sit arbejde med dig. Følg fremdriften i hver produktion, se de seneste playlister og efterlad din feedback.",

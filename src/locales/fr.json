@@ -1073,6 +1073,7 @@
         "no_progress": "Aucune tâche pour le moment",
         "no_task": "Aucune tâche ne vous a été assignée. Consultez votre superviseur pour voir ce que vous pouvez faire !",
         "progress": "Avancement",
+        "studio_productions": "Productions {studio}",
         "title": "Mes productions",
         "welcome": "Bienvenue sur Kitsu",
         "welcome_text": "C'est ici que {studio} partage son travail avec vous. Suivez l'avancement de chaque production, regardez les dernières playlists et laissez vos retours.",

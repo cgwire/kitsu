@@ -1073,6 +1073,7 @@
         "no_progress": "暂无任务",
         "no_task": "还没有任务分配给您。您可以到监制那儿了解一下自己能做些什么！",
         "progress": "进度",
+        "studio_productions": "{studio} 的制作",
         "title": "我的制作",
         "welcome": "欢迎使用Kitsu",
         "welcome_text": "{studio} 在这里与您分享工作成果。跟踪每个项目的进度，观看最新的播放列表，并留下您的反馈。",

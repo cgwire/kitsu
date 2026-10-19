@@ -1073,6 +1073,7 @@
         "no_progress": "Todavía no hay tareas",
         "no_task": "No tiene ninguna tarea asignada. ¡Consulte a su supervisor para ver qué puede hacer!",
         "progress": "Progreso",
+        "studio_productions": "Producciones de {studio}",
         "title": "Producciones en marcha",
         "welcome": "Bienvenido a Kitsu",
         "welcome_text": "Aquí es donde {studio} comparte su trabajo con usted. Siga el progreso de cada producción, vea las últimas playlists y deje sus comentarios.",

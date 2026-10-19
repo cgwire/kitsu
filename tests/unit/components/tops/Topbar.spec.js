@@ -6,7 +6,11 @@ import { createStore } from 'vuex'
 vi.mock('@/composables/desktopNotifications', () => ({
   useDesktopNotifications: vi.fn()
 }))
-vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }))
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: (key, values) => (values ? `${key}:${JSON.stringify(values)}` : key)
+  })
+}))
 
 // The component reads the route of useRoute(): each mount hands it the same
 // object as the $route mock, which tests move to simulate navigations.
@@ -188,7 +192,7 @@ describe('Topbar.vue', () => {
     })
     await nextTick()
     expect(client.find('.page-title').text()).toBe(
-      'Test Studio productions.title'
+      'productions.home.studio_productions:{"studio":"Test Studio"}'
     )
     client.unmount()
   })
