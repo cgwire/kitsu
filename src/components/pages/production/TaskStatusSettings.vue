@@ -44,7 +44,10 @@
         :prevent-on-filter="false"
         tag="tbody"
         v-model="draggableList"
+        @choose="onRowHeld"
         @end="onReorder"
+        @start="onRowDragged"
+        @unchoose="onRowReleased"
       >
         <template #item="{ element: taskStatus }">
           <tr class="datatable-row task-status">
@@ -101,6 +104,7 @@ import { GripVerticalIcon } from 'lucide-vue-next'
 import { computed, ref, watch } from 'vue'
 import draggable from 'vuedraggable'
 
+import { useDraggableRebuild } from '@/composables/draggableRebuild'
 import { sortByName } from '@/lib/sorting'
 
 import BooleanRep from '@/components/widgets/BooleanRep.vue'
@@ -139,31 +143,38 @@ const resetSelection = () => {
   taskStatusToAdd.value = remainingTaskStatuses.value[0]?.id || null
 }
 
+const {
+  rebuild: resetDraggableList,
+  onRowHeld,
+  onRowDragged,
+  onRowReleased
+} = useDraggableRebuild(() => {
+  draggableList.value = [...props.taskStatuses]
+})
+
 const onAdd = () => {
   if (!taskStatusToAdd.value) return
   emit('add', taskStatusToAdd.value)
   resetSelection()
 }
 
+// The list held during the drag may still show a status removed meanwhile,
+// and Zou links again a status a template reorder names.
 const onReorder = () => {
   emit(
     'reorder',
-    draggableList.value.map((ts, index) => ({
-      taskStatusId: ts.id,
-      priority: index + 1
-    }))
+    draggableList.value
+      .filter(ts => linkedIds.value.has(ts.id))
+      .map((ts, index) => ({
+        taskStatusId: ts.id,
+        priority: index + 1
+      }))
   )
 }
 
 // Watchers
 // --------------------------------------------------------------------------
-watch(
-  () => props.taskStatuses,
-  list => {
-    draggableList.value = [...list]
-  },
-  { immediate: true }
-)
+watch(() => props.taskStatuses, resetDraggableList, { immediate: true })
 
 watch(remainingTaskStatuses, resetSelection, { immediate: true })
 </script>

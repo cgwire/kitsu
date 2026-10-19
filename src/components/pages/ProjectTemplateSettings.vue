@@ -602,6 +602,15 @@ const updateTemplate = async (action, payload) => {
   await loadTemplateData()
 }
 
+// After a drop, the lists wait for the reload to rebuild, failed save or not.
+const reorderTemplate = async (action, payload) => {
+  try {
+    await store.dispatch(action, { templateId: templateId.value, ...payload })
+  } finally {
+    await loadTemplateData()
+  }
+}
+
 const onUpdateBoardRoles = async ({ taskStatusId, roles }) => {
   boardRoles.value = { ...boardRoles.value, [taskStatusId]: roles }
   await store.dispatch('addTaskStatusToTemplate', {
@@ -619,7 +628,7 @@ const removeTaskType = taskTypeId =>
   updateTemplate('removeTaskTypeFromTemplate', { taskTypeId })
 
 const reorderTaskTypes = ordered =>
-  updateTemplate('reorderTemplateTaskTypes', {
+  reorderTemplate('reorderTemplateTaskTypes', {
     taskTypeIds: ordered.map(item => item.taskTypeId)
   })
 
@@ -688,7 +697,7 @@ const removeTaskStatus = taskStatusId =>
   updateTemplate('removeTaskStatusFromTemplate', { taskStatusId })
 
 const reorderTaskStatuses = ordered =>
-  updateTemplate('reorderTemplateTaskStatuses', {
+  reorderTemplate('reorderTemplateTaskStatuses', {
     taskStatusIds: ordered.map(item => item.taskStatusId)
   })
 

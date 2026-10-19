@@ -12,6 +12,7 @@ import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
 import ProjectTemplateSettings from '@/components/pages/ProjectTemplateSettings.vue'
 import ClientAccessSettings from '@/components/pages/production/ClientAccessSettings.vue'
 import MovieBitrateField from '@/components/pages/production/MovieBitrateField.vue'
+import TaskStatusSettings from '@/components/pages/production/TaskStatusSettings.vue'
 import TaskTypeSettings from '@/components/pages/production/TaskTypeSettings.vue'
 import VideoSettingsForm from '@/components/pages/production/VideoSettingsForm.vue'
 import Checkbox from '@/components/widgets/Checkbox.vue'
@@ -290,6 +291,56 @@ describe('ProjectTemplateSettings page, task type bitrates', () => {
     })
     expect(dispatched('loadProjectTemplate')).toEqual([])
   })
+})
+
+// After a drop, the task type and status lists wait for the reload that
+// follows their save to rebuild.
+describe('ProjectTemplateSettings page, reorders', () => {
+  const template = { id: 'template-1', name: 'Feature', metadata_descriptors: [] }
+
+  test.each([
+    ['task types', TaskTypeSettings, 'reorderTemplateTaskTypes'],
+    ['task statuses', TaskStatusSettings, 'reorderTemplateTaskStatuses']
+  ])(
+    'reloads the template when a reorder of the %s fails',
+    async (name, list, reorder) => {
+      const error = new Error('Bad Gateway')
+      const errorHandler = vi.fn()
+      const { wrapper, router, store, dispatched } = await mountEntityPage(
+        ProjectTemplateSettings,
+        {
+          config: { errorHandler },
+          stubs,
+          getters: { movieBitrateDefaults },
+          actions: {
+            loadProjectTemplate: () => template,
+            loadTemplateTaskTypes: () => [],
+            loadTemplateTaskStatuses: () => [],
+            loadTemplateAssetTypes: () => [],
+            loadTemplateStatusAutomations: () => [],
+            loadTemplateBackgrounds: () => [],
+            [reorder]: () => Promise.reject(error)
+          }
+        }
+      )
+      router.addRoute({
+        path: '/project-templates/:template_id',
+        component: { template: '<div />' }
+      })
+      await router.push('/project-templates/template-1')
+      await flushPromises()
+      store.dispatch.mockClear()
+
+      await wrapper.findComponent(list).vm.$emit('reorder', [])
+      await flushPromises()
+
+      expect(dispatched(reorder)).toHaveLength(1)
+      expect(dispatched('loadProjectTemplate')).toEqual([
+        ['loadProjectTemplate', 'template-1']
+      ])
+      expect(errorHandler.mock.calls[0][0]).toBe(error)
+    }
+  )
 })
 
 // The parameters save 800 ms after their last change, and the page can be

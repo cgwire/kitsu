@@ -53,7 +53,10 @@
             :prevent-on-filter="false"
             tag="tbody"
             v-model="draggableList"
+            @choose="onRowHeld"
             @end="onReorder"
+            @start="onRowDragged"
+            @unchoose="onRowReleased"
           >
             <template #item="{ element: taskType }">
               <tr class="datatable-row task-type">
@@ -107,6 +110,7 @@ import { useRoute, useRouter } from 'vue-router'
 import draggable from 'vuedraggable'
 import { useStore } from 'vuex'
 
+import { useDraggableRebuild } from '@/composables/draggableRebuild'
 import { clampBitrates } from '@/lib/productions'
 import { sortByName } from '@/lib/sorting'
 
@@ -192,6 +196,15 @@ const remainingTaskTypesForEntity = computed(() =>
 // The tabs are named after the plural of the entity the task types are for
 const sectionOf = taskType => `${(taskType.for_entity || '').toLowerCase()}s`
 
+const {
+  rebuild: resetDraggableList,
+  onRowHeld,
+  onRowDragged,
+  onRowReleased
+} = useDraggableRebuild(() => {
+  draggableList.value = [...taskTypesForEntity.value]
+})
+
 const onImportItem = item => emit('add', item?.id || item)
 
 const onImportFromProduction = productionId => {
@@ -243,13 +256,17 @@ const onBitrateChange = (taskType, key, input) => {
   emit('bitrates-changed', { taskTypeId: taskType.id, ...bitrates })
 }
 
+// The list held during the drag may still show a task type removed
+// meanwhile, and Zou links again a task type a template reorder names.
 const onReorder = () => {
   emit(
     'reorder',
-    draggableList.value.map((tt, index) => ({
-      taskTypeId: tt.id,
-      priority: index + 1
-    }))
+    draggableList.value
+      .filter(tt => linkedIds.value.has(tt.id))
+      .map((tt, index) => ({
+        taskTypeId: tt.id,
+        priority: index + 1
+      }))
   )
 }
 
@@ -261,13 +278,7 @@ watch(entityTab, section => {
   router.replace({ query: { ...rest, section } })
 })
 
-watch(
-  taskTypesForEntity,
-  list => {
-    draggableList.value = [...list]
-  },
-  { immediate: true }
-)
+watch(taskTypesForEntity, resetDraggableList, { immediate: true })
 </script>
 
 <style lang="scss" scoped>
