@@ -828,27 +828,42 @@ const taskStatuses = computed(() => {
   )
 })
 
+const pageEpisodeId = computed(() =>
+  route.params.production_id === props.task.project_id
+    ? route.params.episode_id
+    : null
+)
+
+const isTaskOfTVShow = computed(
+  () =>
+    productionMap.value.get(props.task.project_id)?.production_type === 'tvshow'
+)
+
 // The store keeps the episode browsed last, maybe of another production: a
 // task without its own episode opens under the one of a page of its
 // production, else under all of them.
-const taskPath = computed(() => {
-  const pageEpisodeId =
-    route.params.production_id === props.task.project_id
-      ? route.params.episode_id
-      : null
-  return getTaskPath(
+const taskPath = computed(() =>
+  getTaskPath(
     props.task,
     null,
-    productionMap.value.get(props.task.project_id)?.production_type ===
-      'tvshow',
-    { id: pageEpisodeId || 'all' },
+    isTaskOfTVShow.value,
+    { id: pageEpisodeId.value || 'all' },
     taskTypeMap.value
   )
-})
-
-const taskEntityPath = computed(() =>
-  getTaskEntityPath(props.task, route.params.episode_id)
 )
+
+// The entity opens under the episode of the page, as from its name in the
+// list, else under its own one on a TV show: the main pack for an asset
+// without episode.
+const taskEntityPath = computed(() => {
+  const isAsset = !['Shot', 'Edit', 'Episode', 'Sequence'].includes(
+    props.task.entity_type_name
+  )
+  const ownEpisodeId = isTaskOfTVShow.value
+    ? props.task.episode_id || (isAsset ? 'main' : null)
+    : null
+  return getTaskEntityPath(props.task, pageEpisodeId.value || ownEpisodeId)
+})
 
 const previewOptions = computed(() => {
   if (!taskPreviews.value) return []

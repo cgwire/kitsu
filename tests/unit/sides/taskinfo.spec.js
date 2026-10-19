@@ -439,6 +439,86 @@ describe('TaskInfo.vue', () => {
     })
   })
 
+  describe('entity page link', () => {
+    const productionMap = () =>
+      new Map([
+        ['production-1', { id: 'production-1', production_type: 'tvshow' }],
+        ['production-2', { id: 'production-2', production_type: 'short' }]
+      ])
+
+    const entityPageLink = wrapper =>
+      wrapper
+        .find('.header-title .title')
+        .findComponent(RouterLinkStub)
+        .props('to')
+
+    it('opens the entity under its own episode on a page without one', async () => {
+      const { wrapper } = await mountPanel({
+        task: buildTask({ episode_id: 'episode-2' }),
+        path: '/productions/production-1/news-feed',
+        getterOverrides: { productionMap }
+      })
+
+      expect(entityPageLink(wrapper)).toEqual({
+        name: 'episode-shot',
+        params: {
+          production_id: 'production-1',
+          shot_id: ENTITY_ID,
+          episode_id: 'episode-2'
+        }
+      })
+    })
+
+    it('opens an asset of the main pack under the main pack on a page without episode', async () => {
+      const { wrapper } = await mountPanel({
+        task: buildTask({ entity_type_name: 'Props' }),
+        path: '/productions/production-1/news-feed',
+        getterOverrides: { productionMap }
+      })
+
+      expect(entityPageLink(wrapper).params.episode_id).toBe('main')
+    })
+
+    // As its name in the list: under all episodes, the list of all of them.
+    it('opens the entity under the episode of the page', async () => {
+      const { wrapper } = await mountPanel({
+        task: buildTask({ episode_id: 'episode-2' }),
+        path: '/productions/production-1/episodes/all/shots',
+        getterOverrides: { productionMap }
+      })
+
+      expect(entityPageLink(wrapper).params.episode_id).toBe('all')
+    })
+
+    it('leaves the episode of a page of another production out', async () => {
+      const { wrapper } = await mountPanel({
+        task: buildTask({ project_id: 'production-2' }),
+        path: '/productions/production-1/episodes/episode-9/shots',
+        getterOverrides: { productionMap }
+      })
+
+      expect(entityPageLink(wrapper)).toEqual({
+        name: 'shot',
+        params: { production_id: 'production-2', shot_id: ENTITY_ID }
+      })
+    })
+
+    // A short has no episode pages: a sequence may keep the episode it had
+    // before the production type changed.
+    it('opens the entity of a short without episode', async () => {
+      const { wrapper } = await mountPanel({
+        task: buildTask({ project_id: 'production-2', episode_id: 'episode-2' }),
+        path: '/productions/production-2/news-feed',
+        getterOverrides: { productionMap }
+      })
+
+      expect(entityPageLink(wrapper)).toEqual({
+        name: 'shot',
+        params: { production_id: 'production-2', shot_id: ENTITY_ID }
+      })
+    })
+  })
+
   describe('commenting permissions', () => {
     const canComment = wrapper => wrapper.findComponent(AddComment).exists()
 
