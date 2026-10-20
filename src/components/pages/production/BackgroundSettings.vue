@@ -72,11 +72,13 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 import BooleanField from '@/components/widgets/BooleanField.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 
+// Props / Emits
+// --------------------------------------------------------------------------
 const props = defineProps({
   backgrounds: { type: Array, default: () => [] },
   allBackgrounds: { type: Array, default: () => [] },
@@ -85,21 +87,18 @@ const props = defineProps({
 
 const emit = defineEmits(['add', 'remove', 'set-default'])
 
+// State
+// --------------------------------------------------------------------------
 const backgroundToAdd = ref(null)
 
-const backgroundMap = computed(() => {
-  const map = new Map()
-  props.allBackgrounds.forEach(bg => map.set(bg.id, bg))
-  return map
-})
+// Computed
+// --------------------------------------------------------------------------
+const backgroundMap = computed(
+  () => new Map(props.allBackgrounds.map(bg => [bg.id, bg]))
+)
 
 const linkedBackgrounds = computed(() =>
-  props.backgrounds
-    .map(bg => {
-      const full = backgroundMap.value.get(bg.id) || bg
-      return { ...full, ...bg }
-    })
-    .filter(Boolean)
+  props.backgrounds.map(bg => ({ ...backgroundMap.value.get(bg.id), ...bg }))
 )
 
 const linkedIds = computed(() => new Set(props.backgrounds.map(bg => bg.id)))
@@ -115,40 +114,36 @@ const remainingBackgroundsOptions = computed(() =>
   }))
 )
 
-const resetSelection = () => {
-  backgroundToAdd.value = remainingBackgrounds.value[0]?.id || null
-}
-
-watch(
-  remainingBackgrounds,
-  () => {
-    resetSelection()
-  },
-  { immediate: true }
-)
-
-const isGlobalDefault = background => {
-  return background.is_default && isCurrentDefault(background)
-}
-
-const isCurrentDefault = background => {
-  return props.defaultBackgroundId
+// Functions
+// --------------------------------------------------------------------------
+const isCurrentDefault = background =>
+  props.defaultBackgroundId
     ? background.id === props.defaultBackgroundId
     : Boolean(background.is_default)
-}
+
+const isGlobalDefault = background =>
+  background.is_default && isCurrentDefault(background)
 
 const onAdd = () => {
-  if (!backgroundToAdd.value) return
-  emit('add', backgroundToAdd.value)
+  if (backgroundToAdd.value) emit('add', backgroundToAdd.value)
 }
 
 const onSetDefault = (background, isDefault) => {
   emit('set-default', isDefault ? background.id : null)
 }
+
+// Watchers
+// --------------------------------------------------------------------------
+watch(
+  remainingBackgrounds,
+  list => {
+    backgroundToAdd.value = list[0]?.id || null
+  },
+  { immediate: true }
+)
 </script>
 
 <style lang="scss" scoped>
-.datatable-body tr:first-child th,
 .datatable-body tr:first-child td {
   border-top: 0;
 }

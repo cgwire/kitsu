@@ -149,21 +149,19 @@
 </template>
 
 <script setup>
-import draggable from 'vuedraggable'
+import { useHead } from '@unhead/vue'
+import { GripVerticalIcon } from 'lucide-vue-next'
 import { computed, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useHead } from '@unhead/vue'
 import { useRoute, useRouter } from 'vue-router'
+import draggable from 'vuedraggable'
 import { useStore } from 'vuex'
 
 import { useFieldCommitOnLeave } from '@/composables/fieldCommit'
 import { sortTaskStatuses } from '@/lib/sorting'
 
-import { GripVerticalIcon } from 'lucide-vue-next'
-
-import AssetTypeSettings from '@/components/pages/production/AssetTypeSettings.vue'
 import BooleanCell from '@/components/cells/BooleanCell.vue'
-import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
+import AssetTypeSettings from '@/components/pages/production/AssetTypeSettings.vue'
 import ProductionBackgrounds from '@/components/pages/production/ProductionBackgrounds.vue'
 import ProductionBoard from '@/components/pages/production/ProductionBoard.vue'
 import ProductionBrief from '@/components/pages/production/ProductionBrief.vue'
@@ -173,6 +171,7 @@ import ProductionStatusAutomations from '@/components/pages/production/Productio
 import ProductionTaskTypes from '@/components/pages/production/ProductionTaskTypes.vue'
 import ProductionVideoSettings from '@/components/pages/production/ProductionVideoSettings.vue'
 import SettingsLayout from '@/components/pages/production/SettingsLayout.vue'
+import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
 const { t } = useI18n()
@@ -180,8 +179,8 @@ const route = useRoute()
 const router = useRouter()
 const store = useStore()
 
-const activeTab = ref('parameters')
-
+// State
+// --------------------------------------------------------------------------
 const menuGroups = [
   {
     label: 'productions.settings_menu.production',
@@ -204,21 +203,21 @@ const menuGroups = [
     ]
   }
 ]
+const tabIds = menuGroups.flatMap(group => group.items.map(item => item.id))
+const activeTab = ref('parameters')
 const taskStatusItems = ref([])
 const taskStatusId = ref('')
+const layout = useTemplateRef('page')
 
+// Computed
+// --------------------------------------------------------------------------
 const assetTypes = computed(() => store.getters.assetTypes)
 const currentProduction = computed(() => store.getters.currentProduction)
 const isCurrentUserProductionManager = computed(
   () => store.getters.isCurrentUserProductionManager
 )
-// The asset-type tab edits the production's explicit restriction set, so it
-// shows the raw asset_types (empty = no restriction). productionAssetTypes
-// can't be used here: it expands an empty list to every asset type, which
-// made removing the last type repaint the whole list and blocked removal.
 const restrictedAssetTypes = computed(() => {
-  const ids = currentProduction.value?.asset_types
-  if (!ids?.length) return []
+  const ids = currentProduction.value?.asset_types ?? []
   return assetTypes.value.filter(assetType => ids.includes(assetType.id))
 })
 const productionTaskStatuses = computed(
@@ -238,6 +237,8 @@ const sortedProductionTaskStatuses = computed(() =>
   sortTaskStatuses(productionTaskStatuses.value, currentProduction.value)
 )
 
+// Functions
+// --------------------------------------------------------------------------
 const isEmpty = list => !list || list.length === 0
 const isActiveTab = tab => activeTab.value === tab
 
@@ -258,33 +259,28 @@ const removeAssetType = assetTypeId => {
   store.dispatch('removeAssetTypeFromProduction', assetTypeId)
 }
 
-const addTaskStatus = async () => {
-  await store.dispatch('addTaskStatusToProduction', taskStatusId.value)
+const changeTaskStatuses = async (action, payload) => {
+  await store.dispatch(action, payload)
   await store.dispatch('loadContext')
   taskStatusId.value = remainingTaskStatuses.value[0]?.id
 }
 
-const removeTaskStatus = async id => {
-  await store.dispatch('removeTaskStatusFromProduction', id)
-  await store.dispatch('loadContext')
-  taskStatusId.value = remainingTaskStatuses.value[0]?.id
-}
+const addTaskStatus = () =>
+  changeTaskStatuses('addTaskStatusToProduction', taskStatusId.value)
 
-const updateTaskStatusPriorities = async taskStatuses => {
-  // The batch route sets each priority from the list order and preserves
-  // the board roles of every link.
+const removeTaskStatus = id =>
+  changeTaskStatuses('removeTaskStatusFromProduction', id)
+
+const updateTaskStatusPriority = async () => {
   await store.dispatch('reorderTaskStatusLinks', {
     projectId: currentProduction.value.id,
-    taskStatusIds: taskStatuses.map(status => status.id)
+    taskStatusIds: taskStatusItems.value.map(status => status.id)
   })
   await store.dispatch('loadContext')
 }
 
-const updateTaskStatusPriority = async () => {
-  await updateTaskStatusPriorities(taskStatusItems.value)
-}
-
-const tabIds = menuGroups.flatMap(group => group.items.map(item => item.id))
+// Watchers
+// --------------------------------------------------------------------------
 watch(
   () => route.query.tab,
   tab => {
@@ -307,14 +303,8 @@ watch(
   { immediate: true }
 )
 
-useHead({
-  title: computed(
-    () => `${currentProduction.value?.name} | ${t('settings.title')} - Kitsu`
-  )
-})
-
-// The task type bitrates read the current production when they save.
-const layout = useTemplateRef('page')
+// Lifecycle
+// --------------------------------------------------------------------------
 useFieldCommitOnLeave(
   computed(() => layout.value?.$el),
   (to, from) => to.params.production_id !== from.params.production_id
@@ -329,6 +319,14 @@ onMounted(() => {
   if (remainingTaskStatuses.value.length > 0) {
     taskStatusId.value = remainingTaskStatuses.value[0].id
   }
+})
+
+// Head
+// --------------------------------------------------------------------------
+useHead({
+  title: computed(
+    () => `${currentProduction.value?.name} | ${t('settings.title')} - Kitsu`
+  )
 })
 </script>
 

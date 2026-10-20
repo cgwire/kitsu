@@ -35,7 +35,6 @@
         <text-field
           :label="$t('productions.fields.name')"
           :maxlength="80"
-          @enter="runConfirmation"
           required
           v-focus
           v-model.trim="form.name"
@@ -43,7 +42,6 @@
         <text-field
           :label="$t('productions.fields.code')"
           :maxlength="80"
-          @enter="runConfirmation"
           v-model.trim="form.code"
         />
         <div class="columns">
@@ -73,8 +71,7 @@
           class="mb2"
           locale-key-prefix="productions.type."
           :label="$t('productions.fields.type')"
-          :options="productionTypeOptions"
-          @enter="runConfirmation"
+          :options="PRODUCTION_TYPE_OPTIONS"
           v-model="form.production_type"
         />
 
@@ -82,37 +79,19 @@
           class="mb2"
           locale-key-prefix="productions.style."
           :label="$t('productions.fields.style')"
-          :options="productionStyleOptions"
-          @enter="runConfirmation"
+          :options="PRODUCTION_STYLE_OPTIONS"
           v-model="form.production_style"
-          v-if="currentProduction && currentProduction.id"
+          v-if="currentProduction?.id"
         />
 
         <combobox-styled
           class="mb2"
           locale-key-prefix="productions.homepage."
           :label="$t('productions.fields.homepage')"
-          :options="homepageOptions"
-          @enter="runConfirmation"
+          :options="HOME_PAGE_OPTIONS"
           v-model="form.homepage"
-          v-if="currentProduction && currentProduction.id"
+          v-if="currentProduction?.id"
         />
-
-        <!--text-field
-          type="number"
-          :step="1"
-          :label="$t('productions.fields.nb_episodes')"
-          @enter="runConfirmation"
-          v-model="form.nb_episodes"
-          v-if="currentProduction && currentProduction.id && isLocalTVShow"
-        /-->
-        <!--text-field
-          :label="$t('productions.fields.episode_span')"
-          @enter="runConfirmation"
-          v-focus
-          v-model="form.episode_span"
-          v-if="currentProduction && currentProduction.id && isLocalTVShow"
-        /-->
       </div>
 
       <div class="box section comments">
@@ -125,12 +104,11 @@
           :step="1"
           :description="$t('productions.parameters.max_retakes_description')"
           :label="$t('productions.fields.max_retakes')"
-          @enter="runConfirmation"
           v-model="form.max_retakes"
-          v-if="currentProduction && currentProduction.id"
+          v-if="currentProduction?.id"
         />
 
-        <template v-if="currentProduction && currentProduction.id">
+        <template v-if="currentProduction?.id">
           <checkbox
             class="mb0"
             :toggle="true"
@@ -172,12 +150,12 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useStore } from 'vuex'
 
-import { formatSimpleDate, parseSimpleDate } from '@/lib/time'
 import {
   HOME_PAGE_OPTIONS,
   PRODUCTION_STYLE_OPTIONS,
   PRODUCTION_TYPE_OPTIONS
 } from '@/lib/productions'
+import { formatSimpleDate, parseSimpleDate } from '@/lib/time'
 
 import ChangeAvatarModal from '@/components/modals/ChangeAvatarModal.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
@@ -187,19 +165,15 @@ import DateField from '@/components/widgets/DateField.vue'
 import ProductionName from '@/components/widgets/ProductionName.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
-const emit = defineEmits(['confirm'])
-
 const store = useStore()
 
+// State
+// --------------------------------------------------------------------------
 const isLoading = ref(false)
 const isError = ref(false)
 const modals = reactive({ avatar: false })
 const loading = reactive({ avatar: false })
 const errors = reactive({ avatar: false })
-const isLocalTVShow = ref(false)
-const productionTypeOptions = PRODUCTION_TYPE_OPTIONS
-const productionStyleOptions = PRODUCTION_STYLE_OPTIONS
-const homepageOptions = HOME_PAGE_OPTIONS
 
 const emptyForm = () => ({
   name: '',
@@ -217,9 +191,13 @@ const emptyForm = () => ({
 
 const form = ref(emptyForm())
 
+// Computed
+// --------------------------------------------------------------------------
 const currentProduction = computed(() => store.getters.currentProduction)
 const isTVShow = computed(() => store.getters.isTVShow)
 
+// Functions
+// --------------------------------------------------------------------------
 const uploadPicture = async formData => {
   loading.avatar = true
   errors.avatar = false
@@ -250,12 +228,7 @@ const removePicture = async () => {
   }
 }
 
-const runConfirmation = () => {
-  emit('confirm', form.value)
-}
-
 const updateTvShowRelatedDatas = tvShow => {
-  isLocalTVShow.value = tvShow
   if (tvShow && currentProduction.value) {
     form.value.nb_episodes = currentProduction.value.nb_episodes
     form.value.episode_span = currentProduction.value.episode_span
@@ -303,10 +276,8 @@ const editParameters = async () => {
   isLoading.value = false
 }
 
-onMounted(() => {
-  resetForm()
-})
-
+// Watchers
+// --------------------------------------------------------------------------
 watch(
   currentProduction,
   () => {
@@ -322,6 +293,10 @@ watch(
     updateTvShowRelatedDatas(newType === 'tvshow')
   }
 )
+
+// Lifecycle
+// --------------------------------------------------------------------------
+onMounted(resetForm)
 </script>
 
 <style lang="scss" scoped>

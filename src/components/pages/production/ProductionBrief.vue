@@ -55,21 +55,23 @@ import TextareaField from '@/components/widgets/TextareaField.vue'
 
 const store = useStore()
 
+// State
+// --------------------------------------------------------------------------
 const brief = ref('')
 const isEditing = ref(false)
 const isLoading = ref(false)
 const errors = reactive({ editBrief: false })
 const textarea = useTemplateRef('textarea')
 
+// Computed
+// --------------------------------------------------------------------------
 const currentProduction = computed(() => store.getters.currentProduction)
 const isCurrentUserProductionManager = computed(
   () => store.getters.isCurrentUserProductionManager
 )
 
-onMounted(() => {
-  brief.value = currentProduction.value?.description
-})
-
+// Functions
+// --------------------------------------------------------------------------
 const openEditing = () => {
   if (!isCurrentUserProductionManager.value) return
   isEditing.value = true
@@ -92,6 +94,12 @@ const editBrief = async () => {
   }
   isLoading.value = false
 }
+
+// Lifecycle
+// --------------------------------------------------------------------------
+onMounted(() => {
+  brief.value = currentProduction.value?.description
+})
 </script>
 
 <style lang="scss" scoped>

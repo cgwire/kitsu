@@ -86,8 +86,6 @@
 </template>
 
 <script setup>
-// Imports
-// --------------------------------------------------------------------------
 import { computed } from 'vue'
 
 import { clampBitrate } from '@/lib/productions'

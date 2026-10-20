@@ -96,20 +96,19 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { GripVerticalIcon } from 'lucide-vue-next'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import { useStore } from 'vuex'
-
 import draggable from 'vuedraggable'
-import { GripVerticalIcon } from 'lucide-vue-next'
+import { useStore } from 'vuex'
 
 import { clampBitrates } from '@/lib/productions'
 import { sortByName } from '@/lib/sorting'
 
+import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
 import InfoQuestionMark from '@/components/widgets/InfoQuestionMark.vue'
 import SettingImporter from '@/components/widgets/SettingImporter.vue'
-import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
 const { t } = useI18n()
@@ -117,9 +116,8 @@ const route = useRoute()
 const router = useRouter()
 const store = useStore()
 
-const VALID_SECTIONS = ['assets', 'shots', 'sequences', 'episodes', 'edits']
-const BITRATE_KEYS = ['hd_bitrate_compression', 'ld_bitrate_compression']
-
+// Props / Emits
+// --------------------------------------------------------------------------
 const props = defineProps({
   taskTypes: { type: Array, default: () => [] },
   allTaskTypes: { type: Array, default: () => [] },
@@ -135,19 +133,19 @@ const emit = defineEmits([
   'reorder'
 ])
 
-const initialSection = VALID_SECTIONS.includes(route.query.section)
-  ? route.query.section
-  : 'assets'
-const entityTab = ref(initialSection)
+// State
+// --------------------------------------------------------------------------
+const VALID_SECTIONS = ['assets', 'shots', 'sequences', 'episodes', 'edits']
+const BITRATE_KEYS = ['hd_bitrate_compression', 'ld_bitrate_compression']
+
+const entityTab = ref(
+  VALID_SECTIONS.includes(route.query.section) ? route.query.section : 'assets'
+)
 const draggableList = ref([])
 const loadingImport = ref(false)
 
-watch(entityTab, section => {
-  // eslint-disable-next-line no-unused-vars
-  const { search, ...rest } = route.query
-  router.replace({ query: { ...rest, section } })
-})
-
+// Computed
+// --------------------------------------------------------------------------
 const entityTabs = computed(() => [
   { label: t('assets.title'), name: 'assets' },
   { label: t('shots.title'), name: 'shots' },
@@ -174,44 +172,34 @@ const bitrateHelp = computed(() => {
 })
 
 const taskTypesForEntity = computed(() =>
-  props.taskTypes.filter(
-    tt => `${(tt.for_entity || '').toLowerCase()}s` === entityTab.value
-  )
+  props.taskTypes.filter(tt => sectionOf(tt) === entityTab.value)
 )
 
 const remainingTaskTypesForEntity = computed(() =>
   sortByName(
     props.allTaskTypes.filter(
-      tt =>
-        !linkedIds.value.has(tt.id) &&
-        `${(tt.for_entity || '').toLowerCase()}s` === entityTab.value
+      tt => !linkedIds.value.has(tt.id) && sectionOf(tt) === entityTab.value
     )
   )
 )
 
-watch(
-  taskTypesForEntity,
-  list => {
-    draggableList.value = [...list]
-  },
-  { immediate: true }
-)
+// Functions
+// --------------------------------------------------------------------------
+// The tabs are named after the plural of the entity the task types are for
+const sectionOf = taskType => `${(taskType.for_entity || '').toLowerCase()}s`
 
-const onImportItem = item => {
-  const id = item && item.id ? item.id : item
-  emit('add', id)
-}
+const onImportItem = item => emit('add', item?.id || item)
 
-const onImportFromProduction = async productionId => {
-  const productionMap = store.getters.productionMap
-  const sourceProduction = productionMap?.get(productionId)
+const onImportFromProduction = productionId => {
+  const sourceProduction = store.getters.productionMap?.get(productionId)
   if (!sourceProduction) return
-  const sourceTaskTypeIds = sourceProduction.task_types || []
-  const toAdd = sourceTaskTypeIds.filter(id => {
-    if (linkedIds.value.has(id)) return false
+  const toAdd = (sourceProduction.task_types || []).filter(id => {
     const taskType = props.allTaskTypes.find(tt => tt.id === id)
-    if (!taskType) return false
-    return `${(taskType.for_entity || '').toLowerCase()}s` === entityTab.value
+    return (
+      taskType &&
+      !linkedIds.value.has(id) &&
+      sectionOf(taskType) === entityTab.value
+    )
   })
   if (toAdd.length === 0) return
   loadingImport.value = true
@@ -252,12 +240,30 @@ const onBitrateChange = (taskType, key, input) => {
 }
 
 const onReorder = () => {
-  const ordered = draggableList.value.map((tt, index) => ({
-    taskTypeId: tt.id,
-    priority: index + 1
-  }))
-  emit('reorder', ordered)
+  emit(
+    'reorder',
+    draggableList.value.map((tt, index) => ({
+      taskTypeId: tt.id,
+      priority: index + 1
+    }))
+  )
 }
+
+// Watchers
+// --------------------------------------------------------------------------
+watch(entityTab, section => {
+  // eslint-disable-next-line no-unused-vars
+  const { search, ...rest } = route.query
+  router.replace({ query: { ...rest, section } })
+})
+
+watch(
+  taskTypesForEntity,
+  list => {
+    draggableList.value = [...list]
+  },
+  { immediate: true }
+)
 </script>
 
 <style lang="scss" scoped>

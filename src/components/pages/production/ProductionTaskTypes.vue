@@ -93,7 +93,6 @@
                     :task-type="taskTypeData.taskType"
                     :schedule-item="taskTypeData.scheduleItem"
                     @bitrates-changed="onBitratesChanged"
-                    @date-changed="onDateChanged"
                     @remove="removeTaskType"
                   />
                 </template>
@@ -137,21 +136,22 @@
     />
   </div>
 </template>
+
 <script setup>
-import draggable from 'vuedraggable'
 import moment from 'moment'
 import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
+import draggable from 'vuedraggable'
 import { useStore } from 'vuex'
 
 import { sortByName, sortTaskTypes } from '@/lib/sorting'
 import { formatFullDate } from '@/lib/time'
 
+import RemoveTaskTypeModal from '@/components/modals/RemoveTaskTypeModal.vue'
+import ProductionTaskType from '@/components/pages/production/ProductionTaskType.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import InfoQuestionMark from '@/components/widgets/InfoQuestionMark.vue'
-import ProductionTaskType from '@/components/pages/production/ProductionTaskType.vue'
-import RemoveTaskTypeModal from '@/components/modals/RemoveTaskTypeModal.vue'
 import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
 import SettingImporter from '@/components/widgets/SettingImporter.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
@@ -160,18 +160,17 @@ const { t } = useI18n()
 const route = useRoute()
 const store = useStore()
 
+// State
+// --------------------------------------------------------------------------
 const activeTab = ref('assets')
 const assetTaskTypes = ref({ list: [] })
 const editTaskTypes = ref({ list: [] })
 const episodeTaskTypes = ref({ list: [] })
 const sequenceTaskTypes = ref({ list: [] })
 const shotTaskTypes = ref({ list: [] })
-const episode_span = ref(0)
 const taskTypeId = ref('')
 const loading = reactive({
   import: false,
-  episode_span: false,
-  scheduleTimeUpdate: false,
   scheduleTimeDelete: false
 })
 // A removed task type keeps its tasks, hidden from the lists and the
@@ -184,7 +183,6 @@ const taskTypeRemoval = reactive({
   taskType: null
 })
 const errors = reactive({
-  episode_span: false,
   scheduleTimeUpdate: false,
   delete: false
 })
@@ -193,6 +191,8 @@ let lastCall = 0
 let isSaving = false
 let newSaveCall = false
 
+// Computed
+// --------------------------------------------------------------------------
 const currentProduction = computed(() => store.getters.currentProduction)
 const currentScheduleItems = computed(() => store.getters.currentScheduleItems)
 const getProductionTaskTypes = computed(
@@ -215,8 +215,16 @@ const productionEpisodeTaskTypes = computed(
 )
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 const taskTypes = computed(() => store.getters.taskTypes)
-
+const isTVShow = computed(() => store.getters.isTVShow)
 const bitrateDefaults = computed(() => store.getters.movieBitrateDefaults)
+
+const groupByType = {
+  Asset: { ref: assetTaskTypes, getter: productionAssetTaskTypes },
+  Shot: { ref: shotTaskTypes, getter: productionShotTaskTypes },
+  Sequence: { ref: sequenceTaskTypes, getter: productionSequenceTaskTypes },
+  Episode: { ref: episodeTaskTypes, getter: productionEpisodeTaskTypes },
+  Edit: { ref: editTaskTypes, getter: productionEditTaskTypes }
+}
 
 // The low definition bitrate of a row stays within its high definition one.
 const bitrateHelp = computed(() => {
@@ -235,14 +243,6 @@ const bitrateHelp = computed(() => {
     ld: help(t('productions.video.task_type_ld_bitrate_max'))
   }
 })
-
-const groupByType = {
-  Asset: { ref: assetTaskTypes, getter: productionAssetTaskTypes },
-  Shot: { ref: shotTaskTypes, getter: productionShotTaskTypes },
-  Sequence: { ref: sequenceTaskTypes, getter: productionSequenceTaskTypes },
-  Episode: { ref: episodeTaskTypes, getter: productionEpisodeTaskTypes },
-  Edit: { ref: editTaskTypes, getter: productionEditTaskTypes }
-}
 
 const remainingTaskTypes = computed(() =>
   sortByName(
@@ -268,8 +268,6 @@ const isShotsOnly = computed(
   () => currentProduction.value.production_type === 'shots'
 )
 
-const isTVShow = computed(() => store.getters.isTVShow)
-
 const visibleEntities = computed(() =>
   [
     !isShotsOnly.value && 'assets',
@@ -293,6 +291,8 @@ const taskTypeTabs = computed(() =>
   }))
 )
 
+// Functions
+// --------------------------------------------------------------------------
 const isEmpty = list => !list || list.length === 0
 
 // The loaded items also hold the entity bars of each task type: keep the
@@ -308,15 +308,14 @@ const getScheduleItemForTaskType = taskType =>
 
 const resetDisplayedTaskTypes = () => {
   Object.entries(groupByType).forEach(([type, { ref: stateRef, getter }]) => {
-    let list = sortTaskTypes([...getter.value], currentProduction.value)
-    list = list.map(taskType => ({
-      taskType,
-      scheduleItem: getScheduleItemForTaskType(taskType)
-    }))
     stateRef.value = {
       entity: `${type.toLowerCase()}s`,
-      title: t(`${type.toLowerCase()}s.title`),
-      list
+      list: sortTaskTypes([...getter.value], currentProduction.value).map(
+        taskType => ({
+          taskType,
+          scheduleItem: getScheduleItemForTaskType(taskType)
+        })
+      )
     }
   })
 }
@@ -326,7 +325,7 @@ const updateTaskTypeIdFromRemaining = () => {
 }
 
 const addTaskType = async taskType => {
-  const id = taskType && taskType.id ? taskType.id : taskTypeId.value
+  const id = taskType?.id || taskTypeId.value
   const taskTypeToAdd = taskTypeMap.value.get(id)
   if (!taskTypeToAdd) return
   const entityType = taskTypeToAdd.for_entity
@@ -434,16 +433,6 @@ const onBitratesChanged = async ({ taskType, ...bitrates }) => {
   }
 }
 
-const onDateChanged = async scheduleItem => {
-  errors.scheduleTimeUpdate = false
-  try {
-    await store.dispatch('saveScheduleItem', scheduleItem)
-  } catch (err) {
-    console.error(err)
-    errors.scheduleTimeUpdate = true
-  }
-}
-
 const savePriorities = async forms => {
   const now = new Date().getTime()
   if (now - lastCall > 1000 && !isSaving) {
@@ -513,26 +502,11 @@ const importTaskTypesFromProduction = async productionId => {
   loading.import = false
 }
 
-onMounted(() => {
-  updateTaskTypeIdFromRemaining()
-
-  activeTab.value = visibleEntities.value.includes(route.query.section)
-    ? route.query.section
-    : visibleEntities.value[0]
-
-  resetDisplayedTaskTypes()
-  if (currentProduction.value) {
-    episode_span.value = currentProduction.value.episode_span
-    store.dispatch('loadAllScheduleItems', currentProduction.value).then(() => {
-      resetDisplayedTaskTypes()
-    })
-  }
-})
-
+// Watchers
+// --------------------------------------------------------------------------
 watch(
   currentProduction,
   () => {
-    episode_span.value = currentProduction.value.episode_span
     store.dispatch('loadAllScheduleItems', currentProduction.value)
     resetDisplayedTaskTypes()
   },
@@ -549,6 +523,23 @@ watch(
     })
   }
 )
+
+// Lifecycle
+// --------------------------------------------------------------------------
+onMounted(() => {
+  updateTaskTypeIdFromRemaining()
+
+  activeTab.value = visibleEntities.value.includes(route.query.section)
+    ? route.query.section
+    : visibleEntities.value[0]
+
+  resetDisplayedTaskTypes()
+  if (currentProduction.value) {
+    store.dispatch('loadAllScheduleItems', currentProduction.value).then(() => {
+      resetDisplayedTaskTypes()
+    })
+  }
+})
 </script>
 
 <style lang="scss" scoped>

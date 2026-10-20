@@ -20,11 +20,15 @@ import StatusAutomationSettings from '@/components/pages/production/StatusAutoma
 
 const store = useStore()
 
+// Computed
+// --------------------------------------------------------------------------
 const productionStatusAutomations = computed(
   () => store.getters.productionStatusAutomations
 )
 const allStatusAutomations = computed(() => store.getters.statusAutomations)
 
+// Functions
+// --------------------------------------------------------------------------
 const onAdd = statusAutomationId => {
   store.dispatch('addStatusAutomationToProduction', statusAutomationId)
 }

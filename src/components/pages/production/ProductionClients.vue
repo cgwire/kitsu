@@ -517,9 +517,6 @@ onBeforeUnmount(() => clearInterval(clock))
   align-items: center;
   display: flex;
   gap: 0.5em;
-}
-
-.team-client {
   margin-bottom: 0.8em;
 }
 
