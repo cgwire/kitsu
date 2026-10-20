@@ -2413,6 +2413,13 @@
       "metadata_explanation": "Colonnes de métadonnées ajoutées aux productions créées à partir de ce modèle.",
       "settings_menu": {
         "template": "Modèle"
+      },
+      "backgrounds_explanation": "Fonds 3D proposés dans le lecteur pour les aperçus 3D des productions créées à partir de ce modèle.",
+      "clients": {
+        "access_description": "Ces réglages choisissent ce que voient les clients dans les productions créées à partir de ce modèle, compte de prévisualisation compris.",
+        "access_stats_description": "Les clients peuvent ouvrir les pages de statistiques de la production.",
+        "statuses_empty": "Ce modèle n’a aucun statut de tâche.",
+        "statuses_overridden": "Défini pour ce modèle"
       }
     },
     "share": {

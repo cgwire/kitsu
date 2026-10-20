@@ -116,4 +116,29 @@ describe('ClientAccessSettings', () => {
     const wrapper = mountSettings()
     expect(wrapper.find('.statuses .empty').exists()).toBe(true)
   })
+
+  // The production wording reads wrong on a template page.
+  it.each([
+    [false, 'productions.clients'],
+    [true, 'project_templates.clients']
+  ])('words the template texts when isTemplate is %s', (isTemplate, prefix) => {
+    const wrapper = mountSettings({ isTemplate })
+    const overridden = mountSettings({
+      isTemplate,
+      taskStatuses: [{ id: 's1', link_is_client_allowed: true }]
+    })
+
+    expect(wrapper.find('.access-section .description').text()).toBe(
+      `${prefix}.access_description`
+    )
+    expect(wrapper.findAll('.access-option .hint')[0].text()).toBe(
+      `${prefix}.access_stats_description`
+    )
+    expect(wrapper.find('.statuses .empty').text()).toBe(
+      `${prefix}.statuses_empty`
+    )
+    expect(overridden.find('.status-origin').text()).toBe(
+      `${prefix}.statuses_overridden`
+    )
+  })
 })

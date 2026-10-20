@@ -3,6 +3,7 @@ import { flushPromises } from '@vue/test-utils'
 vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 
+import { useHead } from '@unhead/vue'
 import { nextTick } from 'vue'
 import { RouterLink } from 'vue-router'
 
@@ -691,6 +692,61 @@ describe('ProjectTemplateSettings page, settings layout', () => {
     expect(dispatched('editProjectTemplate')).toEqual([])
     expect(wrapper.text()).toContain('project_templates.name_required')
     vi.clearAllTimers()
+  })
+
+  it('shows the duplicate name error on a taken name', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { wrapper } = await mountPage('parameters', {
+      editProjectTemplate: () =>
+        Promise.reject(
+          Object.assign(new Error(), {
+            body: { message: 'A project template with this name already exists' }
+          })
+        )
+    })
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+
+    await findTextField(wrapper, 'project_templates.fields.name').vm.$emit(
+      'update:modelValue',
+      'Series'
+    )
+    await nextTick()
+    vi.advanceTimersByTime(800)
+    await flushPromises()
+
+    expect(wrapper.find('.general').text()).toContain(
+      'project_templates.duplicate_name'
+    )
+    expect(wrapper.text()).not.toContain('productions.edit_error')
+    vi.clearAllTimers()
+  })
+
+  it('titles the browser tab with the name typed in', async () => {
+    useHead.mockClear()
+    const { wrapper } = await mountPage('parameters')
+    const title = useHead.mock.calls.at(-1)[0].title
+
+    await findTextField(wrapper, 'project_templates.fields.name').vm.$emit(
+      'update:modelValue',
+      'Series'
+    )
+
+    expect(title.value).toBe('Series - project_templates.title - Kitsu')
+  })
+
+  it('passes the template wording to the clients tab', async () => {
+    const { wrapper } = await mountPage('clients')
+
+    expect(
+      wrapper.findComponent(ClientAccessSettings).props('isTemplate')
+    ).toBe(true)
+  })
+
+  it('explains the backgrounds of a template', async () => {
+    const { wrapper } = await mountPage('backgrounds')
+
+    expect(wrapper.text()).toContain('project_templates.backgrounds_explanation')
+    expect(wrapper.text()).not.toContain('backgrounds.production_description')
   })
 
   it('holds the retakes and the publish default in the comments section', async () => {

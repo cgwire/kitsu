@@ -2413,6 +2413,13 @@
       "metadata_explanation": "このテンプレートから作成されたプロダクションに追加されるメタデータ列。",
       "settings_menu": {
         "template": "テンプレート"
+      },
+      "backgrounds_explanation": "このテンプレートから作成されたプロダクションの3Dプレビュー用にプレーヤーで提供される3D背景。",
+      "clients": {
+        "access_description": "これらの設定は、このテンプレートから作成されたプロダクションでクライアントに表示される内容を決めます（プレビューアカウントを含む）。",
+        "access_stats_description": "クライアントはプロダクションの統計ページを開けます。",
+        "statuses_empty": "このテンプレートにはタスクステータスがありません。",
+        "statuses_overridden": "このテンプレートで設定"
       }
     },
     "share": {

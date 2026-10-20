@@ -2413,6 +2413,13 @@
       "metadata_explanation": "Metadatakolonner, der tilføjes til produktioner oprettet ud fra denne skabelon.",
       "settings_menu": {
         "template": "Skabelon"
+      },
+      "backgrounds_explanation": "3D-baggrunde, der tilbydes i afspilleren til 3D-previews af produktioner oprettet ud fra denne skabelon.",
+      "clients": {
+        "access_description": "Disse indstillinger bestemmer, hvad kunder ser i produktioner oprettet ud fra denne skabelon, inklusive preview-kontoen.",
+        "access_stats_description": "Kunder kan åbne produktionens statistiksider.",
+        "statuses_empty": "Denne skabelon har ingen opgavestatus.",
+        "statuses_overridden": "Angivet for denne skabelon"
       }
     },
     "share": {

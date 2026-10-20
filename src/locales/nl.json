@@ -2413,6 +2413,13 @@
       "metadata_explanation": "Metadatakolommen die worden toegevoegd aan producties die met deze sjabloon zijn gemaakt.",
       "settings_menu": {
         "template": "Sjabloon"
+      },
+      "backgrounds_explanation": "3D-achtergronden die in de speler worden aangeboden voor de 3D-previews van producties die met deze sjabloon zijn gemaakt.",
+      "clients": {
+        "access_description": "Deze instellingen bepalen wat klanten zien in producties die met deze sjabloon zijn gemaakt, previewaccount inbegrepen.",
+        "access_stats_description": "Klanten kunnen de statistiekpagina’s van de productie openen.",
+        "statuses_empty": "Deze sjabloon heeft geen taakstatus.",
+        "statuses_overridden": "Ingesteld voor deze sjabloon"
       }
     },
     "share": {

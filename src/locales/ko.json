@@ -2413,6 +2413,13 @@
       "metadata_explanation": "이 템플릿으로 생성된 프로덕션에 추가되는 메타데이터 열입니다.",
       "settings_menu": {
         "template": "템플릿"
+      },
+      "backgrounds_explanation": "이 템플릿으로 생성된 프로덕션의 3D 미리보기를 위해 플레이어에서 제공되는 3D 배경입니다.",
+      "clients": {
+        "access_description": "이 설정은 이 템플릿으로 생성된 프로덕션에서 클라이언트가 보는 내용을 정합니다(미리보기 계정 포함).",
+        "access_stats_description": "클라이언트는 프로덕션의 통계 페이지를 열 수 있습니다.",
+        "statuses_empty": "이 템플릿에는 작업 상태가 없습니다.",
+        "statuses_overridden": "이 템플릿에 설정됨"
       }
     },
     "share": {

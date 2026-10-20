@@ -97,6 +97,7 @@
         :task-types="templateTaskTypes"
         :task-statuses="templateTaskStatuses"
         :is-saving="loading.clients"
+        is-template
         @update-setting="(flag, value) => (params[flag] = value)"
         @set-task-type-visible="setTaskTypeClientVisible"
         @set-status-client-allowed="setStatusClientAllowed"
@@ -230,7 +231,7 @@
       <div class="box section">
         <h2 class="subtitle">{{ $t('backgrounds.title') }}</h2>
         <p class="explanation mb1">
-          {{ $t('backgrounds.production_description') }}
+          {{ $t('project_templates.backgrounds_explanation') }}
         </p>
         <background-settings
           :backgrounds="templateBackgrounds"
@@ -531,7 +532,7 @@ watch(
 useHead({
   title: computed(() =>
     template.value
-      ? `${template.value.name} - ${t('project_templates.title')} - Kitsu`
+      ? `${params.value.name.trim() || template.value.name} - ${t('project_templates.title')} - Kitsu`
       : t('project_templates.title')
   )
 })
@@ -640,9 +641,14 @@ const saveParameters = async () => {
       name: params.value.name.trim(),
       ...bitrates
     })
-  } catch {
+  } catch (err) {
     savedParams = previousParams
-    errors.parameters = true
+    const message = err?.body?.message || err?.message || ''
+    if (message.toLowerCase().includes('already exists')) {
+      nameError.value = t('project_templates.duplicate_name')
+    } else {
+      errors.parameters = true
+    }
   }
   loading.parameters = false
 }
@@ -1070,6 +1076,15 @@ onMounted(async () => {
 }
 
 @media screen and (max-width: 768px) {
+  .section-tabs {
+    overflow-x: auto;
+  }
+
+  .section-tabs ul {
+    flex-wrap: nowrap;
+    white-space: nowrap;
+  }
+
   .template-name {
     font-size: 1.3em;
     margin-top: 0.3em;

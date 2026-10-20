@@ -2413,6 +2413,13 @@
       "metadata_explanation": "添加到基于此模板创建的制作中的元数据列。",
       "settings_menu": {
         "template": "模板"
+      },
+      "backgrounds_explanation": "播放器中为基于此模板创建的制作的 3D 预览提供的 3D 背景。",
+      "clients": {
+        "access_description": "这些设置决定客户在基于此模板创建的制作中能看到的内容，包括预览账户。",
+        "access_stats_description": "客户可以打开制作的统计页面。",
+        "statuses_empty": "此模板没有任务状态。",
+        "statuses_overridden": "为此模板设置"
       }
     },
     "share": {

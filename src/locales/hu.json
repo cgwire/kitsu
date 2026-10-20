@@ -2076,6 +2076,13 @@
       "metadata_explanation": "A sablonból létrehozott produkciókhoz hozzáadott metaadat-oszlopok.",
       "settings_menu": {
         "template": "Sablon"
+      },
+      "backgrounds_explanation": "A lejátszóban a sablonból létrehozott produkciók 3D előnézeteihez kínált 3D hátterek.",
+      "clients": {
+        "access_description": "Ezek a beállítások határozzák meg, mit látnak az ügyfelek a sablonból létrehozott produkciókban, az előnézeti fiókot is beleértve.",
+        "access_stats_description": "Az ügyfelek megnyithatják a produkció statisztikai oldalait.",
+        "statuses_empty": "Ennek a sablonnak nincs feladatállapota.",
+        "statuses_overridden": "Erre a sablonra beállítva"
       }
     },
     "hardware_items": {

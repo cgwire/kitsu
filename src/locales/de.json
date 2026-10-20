@@ -2413,6 +2413,13 @@
       "metadata_explanation": "Metadatenspalten, die den aus dieser Vorlage erstellten Produktionen hinzugefügt werden.",
       "settings_menu": {
         "template": "Vorlage"
+      },
+      "backgrounds_explanation": "3D-Hintergründe, die im Player für die 3D-Vorschauen der aus dieser Vorlage erstellten Produktionen angeboten werden.",
+      "clients": {
+        "access_description": "Diese Einstellungen legen fest, was Kunden in den aus dieser Vorlage erstellten Produktionen sehen, einschließlich des Vorschaukontos.",
+        "access_stats_description": "Kunden können die Statistikseiten der Produktion öffnen.",
+        "statuses_empty": "Diese Vorlage hat keinen Aufgabenstatus.",
+        "statuses_overridden": "Für diese Vorlage festgelegt"
       }
     },
     "share": {

@@ -2413,6 +2413,13 @@
       "metadata_explanation": "Colonne di metadati aggiunte alle produzioni create da questo modello.",
       "settings_menu": {
         "template": "Modello"
+      },
+      "backgrounds_explanation": "Sfondi 3D offerti nel player per le anteprime 3D delle produzioni create da questo modello.",
+      "clients": {
+        "access_description": "Queste impostazioni scelgono cosa vedono i clienti nelle produzioni create da questo modello, account di anteprima incluso.",
+        "access_stats_description": "I clienti possono aprire le pagine delle statistiche della produzione.",
+        "statuses_empty": "Questo modello non ha alcuno stato di attività.",
+        "statuses_overridden": "Impostato per questo modello"
       }
     },
     "share": {

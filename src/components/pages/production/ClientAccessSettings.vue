@@ -17,7 +17,7 @@
     <div class="box section access-section">
       <h2 class="subtitle">{{ $t('productions.clients.access_title') }}</h2>
       <p class="description">
-        {{ $t('productions.clients.access_description') }}
+        {{ $t(copyKey('access_description')) }}
       </p>
       <div
         class="access-option"
@@ -32,7 +32,7 @@
           @change="value => emit('update-setting', option.flag, value)"
         />
         <p class="hint">
-          {{ $t(`productions.clients.access_${option.label}_description`) }}
+          {{ $t(copyKey(`access_${option.label}_description`)) }}
         </p>
       </div>
     </div>
@@ -91,7 +91,7 @@
         {{ $t('productions.clients.statuses_use_studio_default') }}
       </button>
       <p class="empty" v-if="!taskStatuses.length">
-        {{ $t('productions.clients.statuses_empty') }}
+        {{ $t(copyKey('statuses_empty')) }}
       </p>
       <div class="status-list" v-else>
         <div
@@ -115,7 +115,7 @@
             {{
               isStudioDefault(status)
                 ? $t('productions.clients.statuses_studio_default')
-                : $t('productions.clients.statuses_overridden')
+                : $t(copyKey('statuses_overridden'))
             }}
           </span>
         </div>
@@ -141,13 +141,26 @@ const props = defineProps({
   // Studio statuses in display order, each with its link_is_client_allowed
   // override (null or missing: follows the studio value)
   taskStatuses: { type: Array, default: () => [] },
-  isSaving: { type: Boolean, default: false }
+  isSaving: { type: Boolean, default: false },
+  // Template pages swap the texts that name the production.
+  isTemplate: { type: Boolean, default: false }
 })
 const emit = defineEmits([
   'set-status-client-allowed',
   'set-task-type-visible',
   'update-setting'
 ])
+
+const TEMPLATE_KEYS = [
+  'access_description',
+  'access_stats_description',
+  'statuses_empty',
+  'statuses_overridden'
+]
+const copyKey = key =>
+  props.isTemplate && TEMPLATE_KEYS.includes(key)
+    ? `project_templates.clients.${key}`
+    : `productions.clients.${key}`
 
 // Computed
 // --------------------------------------------------------------------------

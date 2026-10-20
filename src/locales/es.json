@@ -2413,6 +2413,13 @@
       "metadata_explanation": "Columnas de metadatos añadidas a las producciones creadas a partir de esta plantilla.",
       "settings_menu": {
         "template": "Plantilla"
+      },
+      "backgrounds_explanation": "Fondos 3D ofrecidos en el reproductor para las previsualizaciones 3D de las producciones creadas a partir de esta plantilla.",
+      "clients": {
+        "access_description": "Estos ajustes eligen lo que ven los clientes en las producciones creadas a partir de esta plantilla, incluida la cuenta de vista previa.",
+        "access_stats_description": "Los clientes pueden abrir las páginas de estadísticas de la producción.",
+        "statuses_empty": "Esta plantilla no tiene ningún estado de tarea.",
+        "statuses_overridden": "Definido para esta plantilla"
       }
     },
     "share": {

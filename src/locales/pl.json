@@ -506,6 +506,13 @@
       "metadata_explanation": "Kolumny metadanych dodawane do produkcji utworzonych z tego szablonu.",
       "settings_menu": {
         "template": "Szablon"
+      },
+      "backgrounds_explanation": "Tła 3D oferowane w odtwarzaczu dla podglądów 3D produkcji utworzonych z tego szablonu.",
+      "clients": {
+        "access_description": "Te ustawienia określają, co klienci widzą w produkcjach utworzonych z tego szablonu, łącznie z kontem podglądu.",
+        "access_stats_description": "Klienci mogą otwierać strony statystyk produkcji.",
+        "statuses_empty": "Ten szablon nie ma żadnego statusu zadania.",
+        "statuses_overridden": "Ustawione dla tego szablonu"
       }
     },
     "entities": {

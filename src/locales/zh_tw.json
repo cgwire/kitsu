@@ -2413,6 +2413,13 @@
       "metadata_explanation": "新增至以此範本建立之製作的中繼資料欄位。",
       "settings_menu": {
         "template": "範本"
+      },
+      "backgrounds_explanation": "播放器中為以此範本建立之製作的 3D 預覽提供的 3D 背景。",
+      "clients": {
+        "access_description": "這些設定決定客戶在以此範本建立之製作中能看到的內容，包括預覽帳號。",
+        "access_stats_description": "客戶可以開啟製作的統計頁面。",
+        "statuses_empty": "此範本沒有任何任務狀態。",
+        "statuses_overridden": "為此範本設定"
       }
     },
     "share": {

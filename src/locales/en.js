@@ -508,6 +508,13 @@ export default {
     ratio_error: 'Ratio must follow the x:y format (e.g. 16:9).',
     resolution_error: 'Resolution must follow the WxH format (e.g. 1920x1080).',
     add_metadata: 'Add a metadata',
+    backgrounds_explanation: '3D backgrounds offered in the player for the 3D previews of the productions created from this template.',
+    clients: {
+      access_description: 'These settings choose what clients see in the productions created from this template, preview account included.',
+      access_stats_description: 'Clients can open the statistics pages of the production.',
+      statuses_empty: 'This template has no task status.',
+      statuses_overridden: 'Set for this template'
+    },
     metadata_explanation: 'Metadata columns added to the productions created from this template.',
     fields: {
       name: 'Name',
