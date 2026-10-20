@@ -285,6 +285,20 @@ describe('store/api endpoints', () => {
     })
   })
 
+  describe('project templates creation', () => {
+    test('sends the frame in numbering flag of the template', () => {
+      projectTemplatesApi.newProjectTemplate({
+        name: 'Feature',
+        is_frame_in_numbering: true
+      })
+
+      expect(client.ppost).toHaveBeenCalledWith(
+        '/api/data/project-templates',
+        expect.objectContaining({ is_frame_in_numbering: true })
+      )
+    })
+  })
+
   describe('project templates client access', () => {
     test('sends the client access flags of the template', () => {
       projectTemplatesApi.editProjectTemplate({
