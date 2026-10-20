@@ -24,7 +24,7 @@ const Host = defineComponent({
     isLoading: { type: Boolean, default: false },
     validationColumns: { type: Array, default: () => [] }
   },
-  emits: ['metadata-changed'],
+  emits: ['keep-task-panel-open', 'metadata-changed'],
   setup(props, { emit }) {
     const list = useEntityList({
       type: 'shot',

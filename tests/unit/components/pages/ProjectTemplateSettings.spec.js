@@ -597,13 +597,13 @@ describe('ProjectTemplateSettings page, clients tab', () => {
     const { wrapper } = await mountPage({
       addTaskStatusToTemplate: () => Promise.reject(new Error('boom'))
     })
-    const before = settings(wrapper).vm
+    const before = settings(wrapper)
 
-    await before.$emit('set-status-client-allowed', 's1', true)
+    await before.vm.$emit('set-status-client-allowed', 's1', true)
     await flushPromises()
 
     expect(wrapper.text()).toContain('productions.clients.save_error')
-    expect(settings(wrapper).vm).not.toBe(before)
+    expect(before.exists()).toBe(false)
     expect(
       settings(wrapper).props('taskStatuses')[0].link_is_client_allowed
     ).toBe(false)

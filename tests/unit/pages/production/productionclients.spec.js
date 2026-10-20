@@ -415,12 +415,15 @@ describe('ProductionClients', () => {
 
     it('resets the checkbox on a save error', async () => {
       const { wrapper, store } = await mountClients()
-      store.dispatch.mockRejectedValue(new Error('boom'))
-      const before = wrapper.findComponent('.access-stats').vm
-      before.$emit('change', false)
+      const error = new Error('boom')
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+      store.dispatch.mockRejectedValue(error)
+      const before = wrapper.findComponent('.access-stats')
+      before.vm.$emit('change', false)
       await flushPromises()
+      expect(consoleError).toHaveBeenCalledWith(error)
       expect(wrapper.find('.save-error').exists()).toBe(true)
-      expect(wrapper.findComponent('.access-stats').vm).not.toBe(before)
+      expect(before.exists()).toBe(false)
     })
   })
 })
