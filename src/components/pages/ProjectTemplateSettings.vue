@@ -596,14 +596,10 @@ const saveParameters = async () => {
   loading.parameters = false
 }
 
-// A link change saves, then the template reloads as a whole
+// A link change saves, then the template reloads as a whole, even after a
+// failure: the page shows what the template holds, and the task type and
+// status lists wait for this reload after a drop.
 const updateTemplate = async (action, payload) => {
-  await store.dispatch(action, { templateId: templateId.value, ...payload })
-  await loadTemplateData()
-}
-
-// After a drop, the lists wait for the reload to rebuild, failed save or not.
-const reorderTemplate = async (action, payload) => {
   try {
     await store.dispatch(action, { templateId: templateId.value, ...payload })
   } finally {
@@ -628,7 +624,7 @@ const removeTaskType = taskTypeId =>
   updateTemplate('removeTaskTypeFromTemplate', { taskTypeId })
 
 const reorderTaskTypes = ordered =>
-  reorderTemplate('reorderTemplateTaskTypes', {
+  updateTemplate('reorderTemplateTaskTypes', {
     taskTypeIds: ordered.map(item => item.taskTypeId)
   })
 
@@ -697,7 +693,7 @@ const removeTaskStatus = taskStatusId =>
   updateTemplate('removeTaskStatusFromTemplate', { taskStatusId })
 
 const reorderTaskStatuses = ordered =>
-  reorderTemplate('reorderTemplateTaskStatuses', {
+  updateTemplate('reorderTemplateTaskStatuses', {
     taskStatusIds: ordered.map(item => item.taskStatusId)
   })
 

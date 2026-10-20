@@ -94,6 +94,84 @@ describe('ProjectTemplateSettings page, metadata column modal', () => {
   })
 })
 
+// A failed save reloads the template: the list shows the saved columns.
+describe('ProjectTemplateSettings page, failed column saves', () => {
+  afterEach(() => vi.restoreAllMocks())
+
+  const template = {
+    id: 'template-1',
+    name: 'Feature',
+    metadata_descriptors: [
+      { name: 'Difficulty', data_type: 'string', entity_type: 'Asset' }
+    ]
+  }
+  const error = new Error('Bad Gateway')
+
+  const mountPage = (setTemplateMetadataDescriptors, config) =>
+    mountEntityPage(ProjectTemplateSettings, {
+      config,
+      stubs,
+      query: { tab: 'metadataDescriptors' },
+      getters: { movieBitrateDefaults },
+      actions: {
+        loadProjectTemplate: () => template,
+        loadTemplateTaskTypes: () => [],
+        loadTemplateTaskStatuses: () => [],
+        loadTemplateAssetTypes: () => [],
+        loadTemplateStatusAutomations: () => [],
+        loadTemplateBackgrounds: () => [],
+        setTemplateMetadataDescriptors
+      }
+    })
+
+  const columnCount = wrapper =>
+    wrapper.findAllComponents(RowActionsCell).length
+
+  it('sends a new column once when it is saved again', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    let saves = 0
+    const { wrapper, dispatched } = await mountPage(() =>
+      ++saves === 1 ? Promise.reject(error) : undefined
+    )
+    const modal = () => wrapper.findComponent(AddMetadataModal)
+
+    await wrapper
+      .findAll('button')
+      .find(button => button.text() === 'project_templates.add_metadata')
+      .trigger('click')
+    await modal().vm.$emit('confirm', { name: 'Complexity' })
+    await flushPromises()
+
+    expect(consoleError).toHaveBeenCalledWith(error)
+    expect(columnCount(wrapper)).toBe(1)
+
+    await modal().vm.$emit('confirm', { name: 'Complexity' })
+    await flushPromises()
+
+    expect(
+      dispatched('setTemplateMetadataDescriptors').map(([, { descriptors }]) =>
+        descriptors.map(descriptor => descriptor.name)
+      )
+    ).toEqual([
+      ['Difficulty', 'Complexity'],
+      ['Difficulty', 'Complexity']
+    ])
+  })
+
+  it('shows a column again when its removal fails', async () => {
+    const errorHandler = vi.fn()
+    const { wrapper } = await mountPage(() => Promise.reject(error), {
+      errorHandler
+    })
+
+    await wrapper.findComponent(RowActionsCell).vm.$emit('delete-clicked')
+    await flushPromises()
+
+    expect(errorHandler.mock.calls[0][0]).toBe(error)
+    expect(columnCount(wrapper)).toBe(1)
+  })
+})
+
 describe('ProjectTemplateSettings page, video tab', () => {
   afterEach(() => vi.useRealTimers())
 
