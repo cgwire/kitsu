@@ -42,9 +42,6 @@
         <p class="success" v-if="isSuccess">
           {{ $t('login.reset_password_succeed') }}
         </p>
-        <p class="error" v-else-if="isInactive">
-          {{ $t('login.reset_password_inactive') }}
-        </p>
         <p class="error" v-else-if="isError">
           {{ $t('login.reset_password_failed') }}
         </p>
@@ -76,7 +73,6 @@ const store = useStore()
 
 const email = ref('')
 const isError = ref(false)
-const isInactive = ref(false)
 const isLoading = ref(false)
 const isSuccess = ref(false)
 
@@ -85,18 +81,13 @@ const isSuccess = ref(false)
 
 const confirmResetPassword = async () => {
   isLoading.value = true
-  isInactive.value = false
   isError.value = false
   isSuccess.value = false
   try {
     await store.dispatch('resetPassword', email.value)
     isSuccess.value = true
-  } catch (error) {
-    if (error.body?.message?.includes('inactive')) {
-      isInactive.value = true
-    } else {
-      isError.value = true
-    }
+  } catch {
+    isError.value = true
   } finally {
     isLoading.value = false
   }

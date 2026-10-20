@@ -425,7 +425,6 @@
       "saml": "ورود به سیستم SSO",
       "login_with_oidc": "ورود SSO با {oidc_idp_name}",
       "oidc": "ورود به سیستم SSO",
-      "reset_password_inactive": "بازنشانی رمز عبور ناموفق بود. کاربری با این ایمیل غیرفعال است.",
       "set_password_title": "به Kitsu خوش آمدید!",
       "set_password": "رمز عبور خود را تنظیم کنید",
       "reset_change_password_token_failed": "پیوند بازنشانی رمز عبور نامعتبر است یا منقضی شده است. لطفاً روال را از ابتدا انجام دهید."

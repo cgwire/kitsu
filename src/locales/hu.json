@@ -414,7 +414,6 @@
       "login_with_oidc": "SSO belépés ezzel: {oidc_idp_name}",
       "oidc": "SSO belépés",
       "reset_change_password_token_failed": "A jelszó-visszaállítási link érvénytelen vagy lejárt. Kérlek kezdd újra a folyamatot.",
-      "reset_password_inactive": "A jelszavad visszaállítása sikertelen. Az ezzel az e-mail címmel rendelkező felhasználó inaktív.",
       "retry_fido_challenge": "FIDO kihívás újrapróbálása",
       "send_email_otp": "OTP újraküldése e-mailben",
       "set_password": "Add meg a jelszavad",

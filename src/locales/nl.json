@@ -425,7 +425,6 @@
       "saml": "SSO aanmelding",
       "login_with_oidc": "SSO aanmelding met {oidc_idp_name}",
       "oidc": "SSO aanmelding",
-      "reset_password_inactive": "Uw wachtwoord opnieuw instellen is mislukt. De gebruiker met dit e-mailadres is inactief.",
       "set_password_title": "Welkom bij Kitsu!",
       "set_password": "Wachtwoord instellen",
       "reset_change_password_token_failed": "De link om het wachtwoord te resetten is ongeldig of verlopen. Start de procedure opnieuw."

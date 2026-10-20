@@ -730,7 +730,6 @@
       "reset_change_password_title": "Wprowadź nowe hasło",
       "reset_password": "Zresetuj hasło",
       "reset_password_failed": "Resetowanie hasła nie powiodło się. Sprawdź swój adres e-mail.",
-      "reset_password_inactive": "Resetowanie hasła nie powiodło się. Użytkownik z tym adresem e-mail jest nieaktywny.",
       "reset_password_succeed": "Resetowanie hasła powiodło się. Sprawdź swoją skrzynkę odbiorczą.",
       "reset_password_title": "Wprowadź swój adres e-mail, aby zresetować hasło",
       "retry_fido_challenge": "Ponów wyzwanie FIDO",

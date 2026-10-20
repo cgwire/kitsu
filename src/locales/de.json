@@ -425,7 +425,6 @@
       "saml": "SSO-Anmeldung",
       "login_with_oidc": "SSO-Anmeldung mit {oidc_idp_name}",
       "oidc": "SSO-Anmeldung",
-      "reset_password_inactive": "Das Zurücksetzen Ihres Passworts ist fehlgeschlagen. Der Benutzer mit dieser E-Mail ist inaktiv.",
       "set_password_title": "Willkommen bei Kitsu!",
       "set_password": "Ihr Passwort festlegen",
       "reset_change_password_token_failed": "Der Link zum Zurücksetzen des Passworts ist ungültig oder abgelaufen. Bitte starten Sie den Vorgang erneut."

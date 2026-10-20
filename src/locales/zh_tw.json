@@ -425,7 +425,6 @@
       "saml": "SSO 登入",
       "login_with_oidc": "使用 {oidc_idp_name} 進行 SSO 登入",
       "oidc": "SSO 登入",
-      "reset_password_inactive": "重設密碼失敗。使用此電子郵件的使用者已停止活動。",
       "set_password_title": "歡迎來到 Kitsu！",
       "set_password": "設定您的密碼",
       "reset_change_password_token_failed": "密碼重設連結無效或已過期。請重新啟動程序。"

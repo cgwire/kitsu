@@ -425,7 +425,6 @@
       "saml": "Inicio de sesión SSO",
       "login_with_oidc": "Inicio de sesión SSO con {oidc_idp_name}",
       "oidc": "Inicio de sesión SSO",
-      "reset_password_inactive": "No se ha podido restablecer la contraseña. El usuario con este correo electrónico está inactivo.",
       "set_password_title": "¡Bienvenido a Kitsu!",
       "set_password": "Establezca su contraseña",
       "reset_change_password_token_failed": "El enlace para restablecer la contraseña no es válido o ha caducado. Por favor, reinicie el procedimiento."

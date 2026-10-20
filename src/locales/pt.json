@@ -425,7 +425,6 @@
       "saml": "Login SSO",
       "login_with_oidc": "Login SSO com {oidc_idp_name}",
       "oidc": "Login SSO",
-      "reset_password_inactive": "A redefinição de sua senha falhou. O usuário com esse e-mail está inativo.",
       "set_password_title": "Bem-vindo ao Kitsu!",
       "set_password": "Defina sua senha",
       "reset_change_password_token_failed": "O link de redefinição de senha é inválido ou expirou. Reinicie o procedimento."

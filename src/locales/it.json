@@ -425,7 +425,6 @@
       "saml": "Accesso SSO",
       "login_with_oidc": "Accesso SSO con {oidc_idp_name}",
       "oidc": "Accesso SSO",
-      "reset_password_inactive": "La reimpostazione della password non è riuscita. L'utente con questo indirizzo email è inattivo.",
       "set_password_title": "Ti diamo il benvenuto in Kitsu!",
       "set_password": "Imposta la tua password",
       "reset_change_password_token_failed": "Il link per la reimpostazione della password non è valido o è scaduto. Ricomincia la procedura."

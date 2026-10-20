@@ -425,7 +425,6 @@
       "saml": "Connexion SSO",
       "login_with_oidc": "Connexion SSO avec {oidc_idp_name}",
       "oidc": "Connexion SSO",
-      "reset_password_inactive": "La réinitialisation de votre mot de passe a échoué. L'utilisateur ayant cet e-mail est inactif.",
       "set_password_title": "Bienvenue sur Kitsu !",
       "set_password": "Définissez votre mot de passe",
       "reset_change_password_token_failed": "Le lien de réinitialisation du mot de passe n'est pas valide ou a expiré. Veuillez recommencer la procédure."
