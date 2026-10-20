@@ -1,2 +1,0 @@
-import{Ft as e,Mt as t,j as n,nt as r,u as i}from"./vue-vendor-D-GU3m8w.js";i();var a={__name:`ErrorText`,props:{text:{default:``,type:String},hidden:{default:!1,type:Boolean},alignRight:{default:!1,type:Boolean}},setup(i){return(a,o)=>(r(),n(`p`,{class:t({error:!0,"has-text-right":i.alignRight,"is-hidden":i.hidden})},e(i.text),3))}};export{a as t};
-//# sourceMappingURL=ErrorText-hugOT_Qo.js.map

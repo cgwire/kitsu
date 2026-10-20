@@ -1,0 +1,2 @@
+var e=e=>{let t=!1,n=!1,r=!1,i=()=>{r=t,t||e()};return{rebuild:i,onRowHeld:()=>{t=!0},onRowDragged:()=>{n=!0},onRowReleased:()=>{t=!1,r&&!n&&i(),n=!1}}};export{e as t};
+//# sourceMappingURL=draggableRebuild-CjInqaGu.js.map

@@ -1,0 +1,2 @@
+var e=new WeakSet,t=t=>{Object(t)===t&&e.add(t)},n=t=>e.has(t),r=e=>{if(!n(e))throw e;console.error(e)},i={backToLogin(){window.location.pathname!==`/login`&&window.location.replace(`/login`)},markRequestFailure:t,isRequestFailure:n,logRequestFailure:r};export{r as n,i as t};
+//# sourceMappingURL=errors-C2v2YU3_.js.map
