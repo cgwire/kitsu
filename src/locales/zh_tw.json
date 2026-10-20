@@ -1054,6 +1054,17 @@
     },
     "productions": {
       "clients": {
+        "access_description": "這些設定決定此製作的客戶能看到什麼，包括預覽帳戶。",
+        "access_stats": "統計頁面",
+        "access_stats_description": "客戶可以開啟此製作的統計頁面。",
+        "access_task_list": "資產、鏡頭和剪輯清單",
+        "access_task_list_description": "客戶可以開啟資產、鏡頭和剪輯清單及其頁面。",
+        "access_task_list_hint": "清單對客戶隱藏。下方的任務類型仍適用於統計。",
+        "access_task_panel": "任務面板",
+        "access_task_panel_description": "在清單旁顯示評論和預覽。客戶仍可從播放清單中評論。",
+        "access_task_types_description": "未勾選的任務類型不會為客戶顯示欄。",
+        "access_task_types_title": "向客戶顯示的任務類型",
+        "access_title": "客戶存取",
         "block": "立即封鎖",
         "blocked": "已封鎖",
         "copy": "複製",
@@ -1074,10 +1085,12 @@
         "preview_title": "預覽帳號",
         "regenerate": "重新產生密碼",
         "save_error": "儲存設定時發生錯誤。",
-        "statuses_description": "客戶在留言時只能設定這些狀態。",
-        "statuses_empty": "沒有對客戶可見的狀態。",
-        "statuses_link": "編輯任務狀態",
+        "statuses_description": "客戶在留言時可以設定已勾選的狀態。預設情況下，每個狀態遵循工作室設定。",
+        "statuses_empty": "此製作沒有任務狀態。",
+        "statuses_overridden": "為此製作單獨設定",
+        "statuses_studio_default": "工作室預設",
         "statuses_title": "客戶可用的狀態",
+        "statuses_use_studio_default": "全部恢復為工作室預設值",
         "team_description": "此製作團隊中具有客戶角色的人員。",
         "team_empty": "團隊中沒有客戶。",
         "team_title": "團隊的客戶",
@@ -2401,7 +2414,18 @@
         "task_statuses": "任務狀態",
         "task_types": "任務類型"
       },
-      "title": "範本"
+      "title": "範本",
+      "metadata_explanation": "新增至以此範本建立之製作的中繼資料欄位。",
+      "settings_menu": {
+        "template": "範本"
+      },
+      "backgrounds_explanation": "播放器中為以此範本建立之製作的 3D 預覽提供的 3D 背景。",
+      "clients": {
+        "access_description": "這些設定決定客戶在以此範本建立之製作中能看到的內容，包括預覽帳號。",
+        "access_stats_description": "客戶可以開啟製作的統計頁面。",
+        "statuses_empty": "此範本沒有任何任務狀態。",
+        "statuses_overridden": "為此範本設定"
+      }
     },
     "share": {
       "comment_placeholder": "留下評論...",

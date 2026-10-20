@@ -502,6 +502,17 @@
         "asset_types": "Typy assetów",
         "status_automations": "Automatyzacje statusów",
         "metadata_descriptors": "Metadane"
+      },
+      "metadata_explanation": "Kolumny metadanych dodawane do produkcji utworzonych z tego szablonu.",
+      "settings_menu": {
+        "template": "Szablon"
+      },
+      "backgrounds_explanation": "Tła 3D oferowane w odtwarzaczu dla podglądów 3D produkcji utworzonych z tego szablonu.",
+      "clients": {
+        "access_description": "Te ustawienia określają, co klienci widzą w produkcjach utworzonych z tego szablonu, łącznie z kontem podglądu.",
+        "access_stats_description": "Klienci mogą otwierać strony statystyk produkcji.",
+        "statuses_empty": "Ten szablon nie ma żadnego statusu zadania.",
+        "statuses_overridden": "Ustawione dla tego szablonu"
       }
     },
     "entities": {
@@ -1424,6 +1435,17 @@
     },
     "productions": {
       "clients": {
+        "access_description": "Te ustawienia określają, co widzą klienci tej produkcji, w tym konto podglądu.",
+        "access_stats": "Strony statystyk",
+        "access_stats_description": "Klienci mogą otwierać strony statystyk tej produkcji.",
+        "access_task_list": "Listy assetów, ujęć i montaży",
+        "access_task_list_description": "Klienci mogą otwierać listy assetów, ujęć i montaży oraz ich strony.",
+        "access_task_list_hint": "Listy są ukryte przed klientami. Poniższe typy zadań nadal dotyczą statystyk.",
+        "access_task_panel": "Panel zadania",
+        "access_task_panel_description": "Komentarze i podglądy obok list. Klienci nadal mogą komentować z playlist.",
+        "access_task_types_description": "Niezaznaczone typy zadań nie mają kolumny dla klientów.",
+        "access_task_types_title": "Typy zadań widoczne dla klientów",
+        "access_title": "Dostęp klientów",
         "block": "Zablokuj teraz",
         "blocked": "Zablokowane",
         "copy": "Kopiuj",
@@ -1444,10 +1466,12 @@
         "preview_title": "Konto podglądu",
         "regenerate": "Wygeneruj hasło ponownie",
         "save_error": "Wystąpił błąd podczas zapisywania ustawień.",
-        "statuses_description": "Klienci mogą ustawiać tylko te statusy podczas komentowania.",
-        "statuses_empty": "Żaden status nie jest widoczny dla klientów.",
-        "statuses_link": "Edytuj statusy zadań",
+        "statuses_description": "Klienci mogą ustawiać zaznaczone statusy podczas komentowania. Domyślnie każdy status korzysta z ustawienia studia.",
+        "statuses_empty": "Ta produkcja nie ma żadnego statusu zadania.",
+        "statuses_overridden": "Ustawione dla tej produkcji",
+        "statuses_studio_default": "Domyślne studia",
         "statuses_title": "Statusy dostępne dla klientów",
+        "statuses_use_studio_default": "Przywróć wszystko do ustawień studia",
         "team_description": "Osoby z rolą Klient w zespole tej produkcji.",
         "team_empty": "Brak klientów w zespole.",
         "team_title": "Klienci zespołu",

@@ -1054,6 +1054,17 @@
     },
     "productions": {
       "clients": {
+        "access_description": "Deze instellingen bepalen wat klanten van deze productie zien, inclusief het voorbeeldaccount.",
+        "access_stats": "Statistiekpagina's",
+        "access_stats_description": "Klanten kunnen de statistiekpagina's van deze productie openen.",
+        "access_task_list": "Lijsten met assets, shots en edits",
+        "access_task_list_description": "Klanten kunnen de lijsten met assets, shots en edits en hun pagina's openen.",
+        "access_task_list_hint": "De lijsten zijn verborgen voor klanten. De taaktypen hieronder gelden nog steeds voor de statistieken.",
+        "access_task_panel": "Taakpaneel",
+        "access_task_panel_description": "Opmerkingen en voorbeelden naast de lijsten. Klanten kunnen nog steeds reageren vanuit playlists.",
+        "access_task_types_description": "Niet aangevinkte taaktypen hebben geen kolom voor klanten.",
+        "access_task_types_title": "Taaktypen die aan klanten worden getoond",
+        "access_title": "Toegang voor klanten",
         "block": "Nu blokkeren",
         "blocked": "Geblokkeerd",
         "copy": "Kopiëren",
@@ -1074,10 +1085,12 @@
         "preview_title": "Voorbeeldaccount",
         "regenerate": "Wachtwoord opnieuw genereren",
         "save_error": "Er is een fout opgetreden bij het opslaan van de instellingen.",
-        "statuses_description": "Klanten kunnen bij het reageren alleen deze statussen kiezen.",
-        "statuses_empty": "Geen enkele status is zichtbaar voor klanten.",
-        "statuses_link": "Taakstatussen bewerken",
+        "statuses_description": "Klanten kunnen bij het reageren de aangevinkte statussen kiezen. Standaard volgt elke status de studio-instelling.",
+        "statuses_empty": "Deze productie heeft geen taakstatus.",
+        "statuses_overridden": "Ingesteld voor deze productie",
+        "statuses_studio_default": "Studiostandaard",
         "statuses_title": "Statussen beschikbaar voor klanten",
+        "statuses_use_studio_default": "Alles terugzetten naar studiostandaard",
         "team_description": "Personen met de rol Klant in het team van deze productie.",
         "team_empty": "Geen klant in het team.",
         "team_title": "Klanten van het team",
@@ -2401,7 +2414,18 @@
         "task_statuses": "Taakstatussen",
         "task_types": "Taaktypes"
       },
-      "title": "Sjablonen"
+      "title": "Sjablonen",
+      "metadata_explanation": "Metadatakolommen die worden toegevoegd aan producties die met deze sjabloon zijn gemaakt.",
+      "settings_menu": {
+        "template": "Sjabloon"
+      },
+      "backgrounds_explanation": "3D-achtergronden die in de speler worden aangeboden voor de 3D-previews van producties die met deze sjabloon zijn gemaakt.",
+      "clients": {
+        "access_description": "Deze instellingen bepalen wat klanten zien in producties die met deze sjabloon zijn gemaakt, previewaccount inbegrepen.",
+        "access_stats_description": "Klanten kunnen de statistiekpagina’s van de productie openen.",
+        "statuses_empty": "Deze sjabloon heeft geen taakstatus.",
+        "statuses_overridden": "Ingesteld voor deze sjabloon"
+      }
     },
     "share": {
       "comment_placeholder": "Laat een opmerking achter...",

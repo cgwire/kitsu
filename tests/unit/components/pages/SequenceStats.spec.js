@@ -52,6 +52,7 @@ const mountPage = async ({ dispatch, getters = {}, query = {} } = {}) => {
       currentEpisode: () => null,
       currentProduction: () => ({ id: 'production-1', name: 'Wing It' }),
       displayedSequences: () => [sq01, sq02],
+      clientAccess: () => ({ isTaskTypeVisible: () => true }),
       isCurrentUserClient: () => false,
       isPaperProduction: () => false,
       isShotsLoading: () => false,

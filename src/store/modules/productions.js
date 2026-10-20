@@ -40,6 +40,7 @@ import {
   PRODUCTION_REMOVE_BACKGROUND,
   PRODUCTION_UPDATE_DEFAULT_BACKGROUND,
   PRODUCTION_ADD_TASK_TYPE,
+  PRODUCTION_SET_TASK_STATUS_LINK,
   PRODUCTION_SET_TASK_TYPE_LINK,
   PRODUCTION_REMOVE_TASK_TYPE,
   PRODUCTION_ADD_TASK_STATUS,
@@ -424,6 +425,24 @@ const getters = {
     })
   },
 
+  // Only an explicit false hides: null or a missing flag means visible.
+  getClientAccess: (state, getters, rootState, rootGetters) => id => {
+    const production = state.productionMap.get(id)
+    const isClient = rootGetters.isCurrentUserClient
+    const isOn = flag => !isClient || production?.[flag] !== false
+    return {
+      isStatsVisible: isOn('is_client_stats_visible'),
+      isTaskListVisible: isOn('is_client_task_list_visible'),
+      isTaskPanelVisible: isOn('is_client_task_panel_visible'),
+      isTaskTypeVisible: taskTypeId =>
+        !isClient ||
+        production?.task_type_links?.[taskTypeId]?.is_client_visible !== false
+    }
+  },
+
+  clientAccess: (state, getters) =>
+    getters.getClientAccess(getters.currentProduction?.id),
+
   currentProduction: state => {
     if (state.currentProduction) {
       return state.currentProduction
@@ -680,6 +699,38 @@ const actions = {
           production,
           taskTypeId,
           ...bitrates
+        })
+      })
+  },
+
+  setTaskTypeClientVisibility(
+    { commit, state },
+    { taskTypeId, isClientVisible }
+  ) {
+    const production = state.currentProduction
+    return productionsApi
+      .setTaskTypeClientVisibility(production.id, taskTypeId, isClientVisible)
+      .then(() => {
+        commit(PRODUCTION_SET_TASK_TYPE_LINK, {
+          production,
+          taskTypeId,
+          is_client_visible: isClientVisible
+        })
+      })
+  },
+
+  setTaskStatusClientAllowed(
+    { commit, state },
+    { taskStatusId, isClientAllowed }
+  ) {
+    const production = state.currentProduction
+    return productionsApi
+      .setTaskStatusClientAllowed(production.id, taskStatusId, isClientAllowed)
+      .then(() => {
+        commit(PRODUCTION_SET_TASK_STATUS_LINK, {
+          production,
+          taskStatusId,
+          is_client_allowed: isClientAllowed
         })
       })
   },
@@ -1242,6 +1293,17 @@ const mutations = {
     if (!production.task_type_links) production.task_type_links = {}
     production.task_type_links[taskTypeId] = {
       ...production.task_type_links[taskTypeId],
+      ...link
+    }
+  },
+
+  [PRODUCTION_SET_TASK_STATUS_LINK](
+    state,
+    { production, taskStatusId, ...link }
+  ) {
+    if (!production.task_statuses_link) production.task_statuses_link = {}
+    production.task_statuses_link[taskStatusId] = {
+      ...production.task_statuses_link[taskStatusId],
       ...link
     }
   },

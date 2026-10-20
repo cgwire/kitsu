@@ -394,6 +394,7 @@ const display = reactive({
 // Computed
 // --------------------------------------------------------------------------
 
+const clientAccess = computed(() => store.getters.clientAccess)
 const currentEpisode = computed(() => store.getters.currentEpisode)
 const currentProduction = computed(() => store.getters.currentProduction)
 const episodeOptionGroups = computed(() => store.getters.episodeOptionGroups)
@@ -544,7 +545,12 @@ const sectionOptions = computed(() => {
   ]
 
   if (isClient) {
-    return [playlists, ...entityOptions, ...statOptions].filter(Boolean)
+    const access = clientAccess.value
+    return [
+      playlists,
+      ...(access.isTaskListVisible ? entityOptions : []),
+      ...(access.isStatsVisible ? statOptions : [])
+    ].filter(Boolean)
   }
 
   // The sections below are shown to studio members only.

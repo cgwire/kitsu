@@ -1054,6 +1054,17 @@
     },
     "productions": {
       "clients": {
+        "access_description": "Diese Einstellungen legen fest, was die Kunden dieser Produktion sehen, einschließlich des Vorschaukontos.",
+        "access_stats": "Statistikseiten",
+        "access_stats_description": "Kunden können die Statistikseiten dieser Produktion öffnen.",
+        "access_task_list": "Listen für Assets, Shots und Edits",
+        "access_task_list_description": "Kunden können die Listen für Assets, Shots und Edits und deren Seiten öffnen.",
+        "access_task_list_hint": "Die Listen sind für Kunden ausgeblendet. Die Aufgabentypen unten gelten weiterhin für die Statistiken.",
+        "access_task_panel": "Aufgabenfenster",
+        "access_task_panel_description": "Kommentare und Vorschauen neben den Listen. Kunden können weiterhin aus Playlists kommentieren.",
+        "access_task_types_description": "Nicht angehakte Aufgabentypen haben keine Spalte für Kunden.",
+        "access_task_types_title": "Für Kunden sichtbare Aufgabentypen",
+        "access_title": "Kundenzugriff",
         "block": "Jetzt sperren",
         "blocked": "Gesperrt",
         "copy": "Kopieren",
@@ -1074,10 +1085,12 @@
         "preview_title": "Vorschau-Konto",
         "regenerate": "Passwort neu generieren",
         "save_error": "Beim Speichern der Einstellungen ist ein Fehler aufgetreten.",
-        "statuses_description": "Kunden können beim Kommentieren nur diese Status setzen.",
-        "statuses_empty": "Kein Status ist für Kunden sichtbar.",
-        "statuses_link": "Aufgabenstatus bearbeiten",
+        "statuses_description": "Kunden können beim Kommentieren die angehakten Status setzen. Standardmäßig folgt jeder Status der Studioeinstellung.",
+        "statuses_empty": "Diese Produktion hat keinen Aufgabenstatus.",
+        "statuses_overridden": "Für diese Produktion festgelegt",
+        "statuses_studio_default": "Studiostandard",
         "statuses_title": "Für Kunden verfügbare Status",
+        "statuses_use_studio_default": "Alle auf Studio-Standard zurücksetzen",
         "team_description": "Personen mit der Rolle Kunde im Team dieser Produktion.",
         "team_empty": "Kein Kunde im Team.",
         "team_title": "Kunden des Teams",
@@ -2401,7 +2414,18 @@
         "task_statuses": "Aufgabenstatus",
         "task_types": "Aufgabentypen"
       },
-      "title": "Vorlagen"
+      "title": "Vorlagen",
+      "metadata_explanation": "Metadatenspalten, die den aus dieser Vorlage erstellten Produktionen hinzugefügt werden.",
+      "settings_menu": {
+        "template": "Vorlage"
+      },
+      "backgrounds_explanation": "3D-Hintergründe, die im Player für die 3D-Vorschauen der aus dieser Vorlage erstellten Produktionen angeboten werden.",
+      "clients": {
+        "access_description": "Diese Einstellungen legen fest, was Kunden in den aus dieser Vorlage erstellten Produktionen sehen, einschließlich des Vorschaukontos.",
+        "access_stats_description": "Kunden können die Statistikseiten der Produktion öffnen.",
+        "statuses_empty": "Diese Vorlage hat keinen Aufgabenstatus.",
+        "statuses_overridden": "Für diese Vorlage festgelegt"
+      }
     },
     "share": {
       "comment_placeholder": "Hinterlassen Sie einen Kommentar...",

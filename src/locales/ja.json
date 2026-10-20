@@ -1054,6 +1054,17 @@
     },
     "productions": {
       "clients": {
+        "access_description": "この設定は、プレビューアカウントを含め、このプロダクションのクライアントに何を見せるかを決めます。",
+        "access_stats": "統計ページ",
+        "access_stats_description": "クライアントはこのプロダクションの統計ページを開けます。",
+        "access_task_list": "アセット、ショット、編集のリスト",
+        "access_task_list_description": "クライアントはアセット、ショット、編集のリストとそのページを開けます。",
+        "access_task_list_hint": "リストはクライアントに表示されません。下のタスクタイプは引き続き統計に適用されます。",
+        "access_task_panel": "タスクパネル",
+        "access_task_panel_description": "リストの横にコメントとプレビューを表示します。クライアントは引き続きプレイリストからコメントできます。",
+        "access_task_types_description": "チェックされていないタスクタイプは、クライアントに列が表示されません。",
+        "access_task_types_title": "クライアントに表示するタスクタイプ",
+        "access_title": "クライアントのアクセス",
         "block": "今すぐブロック",
         "blocked": "ブロック済み",
         "copy": "コピー",
@@ -1074,10 +1085,12 @@
         "preview_title": "プレビューアカウント",
         "regenerate": "パスワードを再生成",
         "save_error": "設定の保存中にエラーが発生しました。",
-        "statuses_description": "クライアントはコメント時にこれらのステータスのみ設定できます。",
-        "statuses_empty": "クライアントに表示されるステータスはありません。",
-        "statuses_link": "タスクステータスを編集",
+        "statuses_description": "クライアントはコメント時にチェックしたステータスを設定できます。既定では、各ステータスはスタジオの設定に従います。",
+        "statuses_empty": "このプロダクションにはタスクステータスがありません。",
+        "statuses_overridden": "このプロダクション用に設定",
+        "statuses_studio_default": "スタジオの既定値",
         "statuses_title": "クライアントが使用できるステータス",
+        "statuses_use_studio_default": "すべてスタジオの既定値に戻す",
         "team_description": "このプロダクションのチームでクライアントのロールを持つメンバーです。",
         "team_empty": "チームにクライアントがいません。",
         "team_title": "チームのクライアント",
@@ -2401,7 +2414,18 @@
         "task_statuses": "タスクステータス",
         "task_types": "タスクタイプ"
       },
-      "title": "テンプレート"
+      "title": "テンプレート",
+      "metadata_explanation": "このテンプレートから作成されたプロダクションに追加されるメタデータ列。",
+      "settings_menu": {
+        "template": "テンプレート"
+      },
+      "backgrounds_explanation": "このテンプレートから作成されたプロダクションの3Dプレビュー用にプレーヤーで提供される3D背景。",
+      "clients": {
+        "access_description": "これらの設定は、このテンプレートから作成されたプロダクションでクライアントに表示される内容を決めます（プレビューアカウントを含む）。",
+        "access_stats_description": "クライアントはプロダクションの統計ページを開けます。",
+        "statuses_empty": "このテンプレートにはタスクステータスがありません。",
+        "statuses_overridden": "このテンプレートで設定"
+      }
     },
     "share": {
       "comment_placeholder": "コメントを入力…",

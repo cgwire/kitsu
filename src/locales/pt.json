@@ -1054,6 +1054,17 @@
     },
     "productions": {
       "clients": {
+        "access_description": "Estas definições escolhem o que os clientes desta produção veem, incluindo a conta de pré-visualização.",
+        "access_stats": "Páginas de estatísticas",
+        "access_stats_description": "Os clientes podem abrir as páginas de estatísticas desta produção.",
+        "access_task_list": "Listas de assets, planos e edições",
+        "access_task_list_description": "Os clientes podem abrir as listas de assets, planos e edições e as suas páginas.",
+        "access_task_list_hint": "As listas estão ocultas para os clientes. Os tipos de tarefa abaixo continuam a aplicar-se às estatísticas.",
+        "access_task_panel": "Painel de tarefa",
+        "access_task_panel_description": "Comentários e pré-visualizações ao lado das listas. Os clientes ainda podem comentar a partir das playlists.",
+        "access_task_types_description": "Os tipos de tarefa desmarcados não têm coluna para os clientes.",
+        "access_task_types_title": "Tipos de tarefa mostrados aos clientes",
+        "access_title": "Acesso dos clientes",
         "block": "Bloquear agora",
         "blocked": "Bloqueado",
         "copy": "Copiar",
@@ -1074,10 +1085,12 @@
         "preview_title": "Conta de pré-visualização",
         "regenerate": "Gerar nova senha",
         "save_error": "Ocorreu um erro ao salvar as configurações.",
-        "statuses_description": "Os clientes só podem definir estes status ao comentar.",
-        "statuses_empty": "Nenhum estado é visível para os clientes.",
-        "statuses_link": "Editar estados das tarefas",
+        "statuses_description": "Os clientes podem definir os status marcados ao comentar. Por padrão, cada status segue a configuração do estúdio.",
+        "statuses_empty": "Esta produção não tem nenhum status de tarefa.",
+        "statuses_overridden": "Definido para esta produção",
+        "statuses_studio_default": "Padrão do estúdio",
         "statuses_title": "Status disponíveis para clientes",
+        "statuses_use_studio_default": "Repor tudo para os valores do estúdio",
         "team_description": "Pessoas com o papel Cliente na equipe desta produção.",
         "team_empty": "Nenhum cliente na equipe.",
         "team_title": "Clientes da equipe",
@@ -2401,7 +2414,18 @@
         "task_statuses": "Status de Tarefa",
         "task_types": "Tipos de Tarefa"
       },
-      "title": "Templates"
+      "title": "Templates",
+      "metadata_explanation": "Colunas de metadados adicionadas às produções criadas a partir deste modelo.",
+      "settings_menu": {
+        "template": "Modelo"
+      },
+      "backgrounds_explanation": "Fundos 3D oferecidos no player para as pré-visualizações 3D das produções criadas a partir deste modelo.",
+      "clients": {
+        "access_description": "Estas configurações escolhem o que os clientes veem nas produções criadas a partir deste modelo, incluindo a conta de pré-visualização.",
+        "access_stats_description": "Os clientes podem abrir as páginas de estatísticas da produção.",
+        "statuses_empty": "Este modelo não tem nenhum status de tarefa.",
+        "statuses_overridden": "Definido para este modelo"
+      }
     },
     "share": {
       "comment_placeholder": "Deixe um comentário...",

@@ -1054,6 +1054,17 @@
     },
     "productions": {
       "clients": {
+        "access_description": "Disse indstillinger vælger, hvad kunderne i denne produktion ser, inklusive prøvekontoen.",
+        "access_stats": "Statistiksider",
+        "access_stats_description": "Kunder kan åbne statistiksiderne for denne produktion.",
+        "access_task_list": "Lister over assets, shots og edits",
+        "access_task_list_description": "Kunder kan åbne listerne over assets, shots og edits og deres sider.",
+        "access_task_list_hint": "Listerne er skjult for kunder. Opgavetyperne nedenfor gælder stadig for statistikken.",
+        "access_task_panel": "Opgavepanel",
+        "access_task_panel_description": "Kommentarer og forhåndsvisninger ved siden af listerne. Kunder kan stadig kommentere fra playlister.",
+        "access_task_types_description": "Opgavetyper uden markering har ingen kolonne for kunder.",
+        "access_task_types_title": "Opgavetyper vist for kunder",
+        "access_title": "Kundeadgang",
         "block": "Blokér nu",
         "blocked": "Blokeret",
         "copy": "Kopiér",
@@ -1074,10 +1085,12 @@
         "preview_title": "Forhåndsvisningskonto",
         "regenerate": "Generér adgangskode igen",
         "save_error": "Der opstod en fejl under lagring af indstillingerne.",
-        "statuses_description": "Kunder kan kun vælge disse statusser, når de kommenterer.",
-        "statuses_empty": "Ingen status er synlig for kunder.",
-        "statuses_link": "Rediger opgavestatusser",
+        "statuses_description": "Kunder kan vælge de afkrydsede statusser, når de kommenterer. Som standard følger hver status studiets indstilling.",
+        "statuses_empty": "Denne produktion har ingen opgavestatus.",
+        "statuses_overridden": "Valgt for denne produktion",
+        "statuses_studio_default": "Studiets standard",
         "statuses_title": "Statusser tilgængelige for kunder",
+        "statuses_use_studio_default": "Nulstil alle til studiets standard",
         "team_description": "Personer med rollen Klient i denne produktions team.",
         "team_empty": "Ingen kunde i teamet.",
         "team_title": "Teamets kunder",
@@ -2401,7 +2414,18 @@
         "task_statuses": "Opgavestatusser",
         "task_types": "Opgavetyper"
       },
-      "title": "Skabeloner"
+      "title": "Skabeloner",
+      "metadata_explanation": "Metadatakolonner, der tilføjes til produktioner oprettet ud fra denne skabelon.",
+      "settings_menu": {
+        "template": "Skabelon"
+      },
+      "backgrounds_explanation": "3D-baggrunde, der tilbydes i afspilleren til 3D-previews af produktioner oprettet ud fra denne skabelon.",
+      "clients": {
+        "access_description": "Disse indstillinger bestemmer, hvad kunder ser i produktioner oprettet ud fra denne skabelon, inklusive preview-kontoen.",
+        "access_stats_description": "Kunder kan åbne produktionens statistiksider.",
+        "statuses_empty": "Denne skabelon har ingen opgavestatus.",
+        "statuses_overridden": "Angivet for denne skabelon"
+      }
     },
     "share": {
       "comment_placeholder": "Efterlad en kommentar...",

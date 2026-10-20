@@ -508,10 +508,21 @@ export default {
     ratio_error: 'Ratio must follow the x:y format (e.g. 16:9).',
     resolution_error: 'Resolution must follow the WxH format (e.g. 1920x1080).',
     add_metadata: 'Add a metadata',
+    backgrounds_explanation: '3D backgrounds offered in the player for the 3D previews of the productions created from this template.',
+    clients: {
+      access_description: 'These settings choose what clients see in the productions created from this template, preview account included.',
+      access_stats_description: 'Clients can open the statistics pages of the production.',
+      statuses_empty: 'This template has no task status.',
+      statuses_overridden: 'Set for this template'
+    },
+    metadata_explanation: 'Metadata columns added to the productions created from this template.',
     fields: {
       name: 'Name',
       description: 'Description',
       entity_type: 'Entity type'
+    },
+    settings_menu: {
+      template: 'Template'
     },
     tabs: {
       task_types: 'Task Types',
@@ -1485,6 +1496,17 @@ export default {
     title: 'Productions',
 
     clients: {
+      access_description: 'These settings choose what clients of this production see, preview account included.',
+      access_stats: 'Statistics pages',
+      access_stats_description: 'Clients can open the statistics pages of this production.',
+      access_task_list: 'Asset, shot and edit lists',
+      access_task_list_description: 'Clients can open the asset, shot and edit lists and their pages.',
+      access_task_list_hint: 'The lists are hidden from clients. The task types below still apply to statistics.',
+      access_task_panel: 'Task panel',
+      access_task_panel_description: 'Comments and previews beside the lists. Clients can still comment from playlists.',
+      access_task_types_description: 'Task types left unticked have no column for clients.',
+      access_task_types_title: 'Task types shown to clients',
+      access_title: 'Client access',
       block: 'Block now',
       blocked: 'Blocked',
       copy: 'Copy',
@@ -1508,10 +1530,12 @@ export default {
       regenerate: 'Regenerate password',
       save_error: 'An error occurred while saving the settings.',
       statuses_description:
-        'Clients can only set these statuses when they comment.',
-      statuses_empty: 'No status is visible to clients.',
-      statuses_link: 'Edit task statuses',
+        'Clients can set the ticked statuses when they comment. By default, each status follows the studio setting.',
+      statuses_empty: 'This production has no task status.',
+      statuses_overridden: 'Set for this production',
+      statuses_studio_default: 'Studio default',
       statuses_title: 'Statuses available to clients',
+      statuses_use_studio_default: 'Reset all to studio defaults',
       team_description: "People with the Client role in this production's team.",
       team_empty: 'No client in the team.',
       team_title: 'Clients of the team',

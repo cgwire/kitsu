@@ -131,6 +131,13 @@ export function getTaskStatusPriorityOfProd(taskStatus, production) {
   return productionPriority || taskStatus.priority
 }
 
+// A null or missing production value inherits the studio setting.
+export const isTaskStatusClientAllowed = (production, taskStatus) => {
+  const value =
+    production?.task_statuses_link?.[taskStatus.id]?.is_client_allowed
+  return typeof value === 'boolean' ? value : taskStatus.is_client_allowed
+}
+
 /*
  * Return a copy of taskType with a `url` field pointing to the given task,
  * without mutating the taskType object (which is often a store cache entry).

@@ -357,7 +357,12 @@
       :class="{ 'is-open': isTaskDrawerOpen }"
       v-show="currentSection === 'infos'"
     >
-      <task-info :task="currentTask" entity-type="Shot" with-actions>
+      <task-info
+        v-if="clientAccess.isTaskPanelVisible"
+        :task="currentTask"
+        entity-type="Shot"
+        with-actions
+      >
         <entity-news class="news-column" :entity="currentShot" />
       </task-info>
     </div>
@@ -432,6 +437,7 @@ defineOptions({ name: 'shot' })
 const { t } = useI18n()
 const route = useRoute()
 const store = useStore()
+const clientAccess = computed(() => store.getters.clientAccess)
 
 // State
 // --------------------------------------------------------------------------

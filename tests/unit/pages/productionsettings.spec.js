@@ -51,7 +51,12 @@ const mountWithAssetTypes = async (assetTypeIds, path = '/settings') => {
   await router.push(path)
   await router.isReady()
   return shallowMount(ProductionSettings, {
-    global: { plugins: [store, router], mocks: { $t: key => key } }
+    global: {
+      plugins: [store, router],
+      mocks: { $t: key => key },
+      // The menu and the tabs render through the layout
+      stubs: { SettingsLayout: false }
+    }
   })
 }
 

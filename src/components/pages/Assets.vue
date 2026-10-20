@@ -316,8 +316,10 @@ const assetMap = computed(() => store.getters.assetMap)
 const assetsCsvFormData = computed(() => store.getters.assetsCsvFormData)
 const assetSearchText = computed(() => store.getters.assetSearchText)
 const assetSorting = computed(() => store.getters.assetSorting)
-const assetValidationColumns = computed(
-  () => store.getters.assetValidationColumns
+const assetValidationColumns = computed(() =>
+  store.getters.assetValidationColumns.filter(
+    store.getters.clientAccess.isTaskTypeVisible
+  )
 )
 const currentEpisode = computed(() => store.getters.currentEpisode)
 const currentProduction = computed(() => store.getters.currentProduction)

@@ -408,8 +408,10 @@ const shotSearchQueries = computed(() => store.getters.shotSearchQueries)
 const shotSearchText = computed(() => store.getters.shotSearchText)
 const shotsLoadingKey = computed(() => store.getters.shotsLoadingKey)
 const shotSorting = computed(() => store.getters.shotSorting)
-const shotValidationColumns = computed(
-  () => store.getters.shotValidationColumns
+const shotValidationColumns = computed(() =>
+  store.getters.shotValidationColumns.filter(
+    store.getters.clientAccess.isTaskTypeVisible
+  )
 )
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 

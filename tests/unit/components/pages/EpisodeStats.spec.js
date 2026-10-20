@@ -68,6 +68,7 @@ const mountPage = async ({ getters = {}, query = {} } = {}) => {
       episodeSearchText: () => '',
       episodeStats: () => episodeStats,
       episodeValidationColumns: () => ['layout', 'anim'],
+      clientAccess: () => ({ isTaskTypeVisible: () => true }),
       isCurrentUserClient: () => false,
       isPaperProduction: () => false,
       taskStatusMap: () => new Map(),
@@ -111,6 +112,42 @@ const showAllEpisodes = () =>
   combobox('statistics.episode_status').vm.$emit('update:model-value', 'all')
 
 describe('EpisodeStats page', () => {
+  describe('client access', () => {
+    afterEach(() => {
+      wrapper?.unmount()
+      wrapper = null
+    })
+
+    test('drops the task type columns hidden from the client', async () => {
+      await mountPage({
+        getters: {
+          clientAccess: () => ({ isTaskTypeVisible: id => id !== 'anim' })
+        }
+      })
+      expect(listProps().validationColumns).toEqual(['layout'])
+    })
+
+    test('keeps the hidden task type out of the totals and the export', async () => {
+      const generateRetakeStatReports = vi
+        .spyOn(csv, 'generateRetakeStatReports')
+        .mockImplementation(() => {})
+      await mountPage({
+        getters: {
+          clientAccess: () => ({ isTaskTypeVisible: id => id !== 'anim' })
+        }
+      })
+      expect(listProps().episodeRetakeStats.all.all.retake.count).toBe(1)
+      await findButton('download').vm.$emit('click')
+      const [, stats] = generateRetakeStatReports.mock.calls[0]
+      expect(Object.keys(stats.all).sort()).toEqual(['all', 'layout'])
+    })
+
+    test('keeps every column for the studio', async () => {
+      await mountPage()
+      expect(listProps().validationColumns).toEqual(['layout', 'anim'])
+    })
+  })
+
   describe('client', () => {
     afterEach(() => {
       wrapper?.unmount()

@@ -1054,6 +1054,17 @@
     },
     "productions": {
       "clients": {
+        "access_description": "이 설정은 미리보기 계정을 포함해 이 프로덕션의 클라이언트에게 무엇을 보여줄지 정합니다.",
+        "access_stats": "통계 페이지",
+        "access_stats_description": "클라이언트가 이 프로덕션의 통계 페이지를 열 수 있습니다.",
+        "access_task_list": "에셋, 샷, 편집 목록",
+        "access_task_list_description": "클라이언트가 에셋, 샷, 편집 목록과 해당 페이지를 열 수 있습니다.",
+        "access_task_list_hint": "목록이 클라이언트에게 숨겨져 있습니다. 아래 태스크 유형은 통계에 계속 적용됩니다.",
+        "access_task_panel": "태스크 패널",
+        "access_task_panel_description": "목록 옆에 댓글과 미리보기를 표시합니다. 클라이언트는 플레이리스트에서 계속 댓글을 달 수 있습니다.",
+        "access_task_types_description": "선택하지 않은 태스크 유형은 클라이언트에게 열이 표시되지 않습니다.",
+        "access_task_types_title": "클라이언트에게 표시할 태스크 유형",
+        "access_title": "클라이언트 접근",
         "block": "지금 차단",
         "blocked": "차단됨",
         "copy": "복사",
@@ -1074,10 +1085,12 @@
         "preview_title": "미리보기 계정",
         "regenerate": "비밀번호 다시 생성",
         "save_error": "설정을 저장하는 중 오류가 발생했습니다.",
-        "statuses_description": "클라이언트는 댓글을 작성할 때 이 상태만 설정할 수 있습니다.",
-        "statuses_empty": "클라이언트에게 표시되는 상태가 없습니다.",
-        "statuses_link": "작업 상태 편집",
+        "statuses_description": "클라이언트는 댓글을 작성할 때 선택된 상태를 설정할 수 있습니다. 기본적으로 각 상태는 스튜디오 설정을 따릅니다.",
+        "statuses_empty": "이 프로덕션에는 작업 상태가 없습니다.",
+        "statuses_overridden": "이 프로덕션에 맞게 설정됨",
+        "statuses_studio_default": "스튜디오 기본값",
         "statuses_title": "클라이언트가 사용할 수 있는 상태",
+        "statuses_use_studio_default": "모두 스튜디오 기본값으로 재설정",
         "team_description": "이 프로덕션 팀에서 고객 역할을 가진 사람들입니다.",
         "team_empty": "팀에 클라이언트가 없습니다.",
         "team_title": "팀의 클라이언트",
@@ -2401,7 +2414,18 @@
         "task_statuses": "작업 상태",
         "task_types": "작업 유형"
       },
-      "title": "템플릿"
+      "title": "템플릿",
+      "metadata_explanation": "이 템플릿으로 생성된 프로덕션에 추가되는 메타데이터 열입니다.",
+      "settings_menu": {
+        "template": "템플릿"
+      },
+      "backgrounds_explanation": "이 템플릿으로 생성된 프로덕션의 3D 미리보기를 위해 플레이어에서 제공되는 3D 배경입니다.",
+      "clients": {
+        "access_description": "이 설정은 이 템플릿으로 생성된 프로덕션에서 클라이언트가 보는 내용을 정합니다(미리보기 계정 포함).",
+        "access_stats_description": "클라이언트는 프로덕션의 통계 페이지를 열 수 있습니다.",
+        "statuses_empty": "이 템플릿에는 작업 상태가 없습니다.",
+        "statuses_overridden": "이 템플릿에 설정됨"
+      }
     },
     "share": {
       "comment_placeholder": "댓글을 남기세요...",

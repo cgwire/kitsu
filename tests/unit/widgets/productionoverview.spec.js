@@ -48,6 +48,10 @@ const mountOverview = (props = {}, getterOverrides = {}) => {
   const store = createStore({
     getters: {
       dateFormat: () => 'YYYY-MM-DD',
+      getClientAccess: () => () => ({
+        isStatsVisible: true,
+        isTaskTypeVisible: () => true
+      }),
       departmentMap: () =>
         new Map([
           ['dep-anim', { id: 'dep-anim', name: 'Animation', color: '#f00' }],
@@ -174,6 +178,36 @@ describe('ProductionOverview', () => {
       production: { ...production, production_type: 'assets' }
     })
     expect(assets.find('a.all-stats').exists()).toBe(false)
+  })
+
+  it('hides the progress and the stats link from a client with the stats off', () => {
+    const wrapper = mountOverview(
+      {},
+      {
+        getClientAccess: () => id => ({
+          isStatsVisible: id !== 'production-1',
+          isTaskTypeVisible: () => true
+        })
+      }
+    )
+    expect(wrapper.find('.progress-section').exists()).toBe(false)
+    expect(wrapper.find('a.all-stats').exists()).toBe(false)
+    expect(wrapper.find('a.all-playlists').exists()).toBe(true)
+  })
+
+  it('leaves the task types hidden from clients out of the progress', () => {
+    const wrapper = mountOverview(
+      {},
+      {
+        getClientAccess: () => () => ({
+          isStatsVisible: true,
+          isTaskTypeVisible: taskTypeId => taskTypeId !== 'tt-anim'
+        })
+      }
+    )
+    expect(wrapper.findComponent(StatsBar).props('data')).toEqual([
+      ['Done', 2, '#0f0', true]
+    ])
   })
 
   it('counts the shots and the assets under the logo', () => {

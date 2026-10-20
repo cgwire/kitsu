@@ -284,6 +284,12 @@ const onReorder = () => {
   overflow-y: initial;
   flex: 0 0 auto;
   max-width: 600px;
+
+  // Sized on its content, the importer was a narrow strip
+  & + .column {
+    flex: 0 0 360px;
+    width: 360px;
+  }
 }
 
 .list {
@@ -301,7 +307,14 @@ const onReorder = () => {
   width: 120px;
 
   input {
+    appearance: textfield;
     width: 100px;
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      appearance: none;
+      margin: 0;
+    }
   }
 }
 

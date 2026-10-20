@@ -1054,6 +1054,17 @@
     },
     "productions": {
       "clients": {
+        "access_description": "Ces réglages choisissent ce que les clients de cette production voient, compte de prévisualisation compris.",
+        "access_stats": "Pages de statistiques",
+        "access_stats_description": "Les clients peuvent ouvrir les pages de statistiques de cette production.",
+        "access_task_list": "Listes d'assets, de plans et de montages",
+        "access_task_list_description": "Les clients peuvent ouvrir les listes d'assets, de plans et de montages, et leurs pages.",
+        "access_task_list_hint": "Les listes sont masquées aux clients. Les types de tâche ci-dessous s'appliquent toujours aux statistiques.",
+        "access_task_panel": "Panneau de tâche",
+        "access_task_panel_description": "Commentaires et aperçus à côté des listes. Les clients peuvent toujours commenter depuis les playlists.",
+        "access_task_types_description": "Les types de tâche non cochés n'ont pas de colonne pour les clients.",
+        "access_task_types_title": "Types de tâche affichés aux clients",
+        "access_title": "Accès des clients",
         "block": "Bloquer maintenant",
         "blocked": "Bloqué",
         "copy": "Copier",
@@ -1074,10 +1085,12 @@
         "preview_title": "Compte de prévisualisation",
         "regenerate": "Régénérer le mot de passe",
         "save_error": "Une erreur est survenue lors de l'enregistrement des paramètres.",
-        "statuses_description": "Les clients ne peuvent choisir que ces statuts quand ils commentent.",
-        "statuses_empty": "Aucun statut n'est visible par les clients.",
-        "statuses_link": "Modifier les statuts de tâche",
+        "statuses_description": "Les clients peuvent choisir les statuts cochés quand ils commentent. Par défaut, chaque statut suit le réglage du studio.",
+        "statuses_empty": "Cette production n'a aucun statut de tâche.",
+        "statuses_overridden": "Réglé pour cette production",
+        "statuses_studio_default": "Réglage du studio",
         "statuses_title": "Statuts disponibles pour les clients",
+        "statuses_use_studio_default": "Tout remettre au réglage du studio",
         "team_description": "Les personnes ayant le rôle Client dans l'équipe de cette production.",
         "team_empty": "Aucun client dans l'équipe.",
         "team_title": "Clients de l'équipe",
@@ -2401,7 +2414,18 @@
         "task_statuses": "Statuts de tâche",
         "task_types": "Types de tâches"
       },
-      "title": "Modèles"
+      "title": "Modèles",
+      "metadata_explanation": "Colonnes de métadonnées ajoutées aux productions créées à partir de ce modèle.",
+      "settings_menu": {
+        "template": "Modèle"
+      },
+      "backgrounds_explanation": "Fonds 3D proposés dans le lecteur pour les aperçus 3D des productions créées à partir de ce modèle.",
+      "clients": {
+        "access_description": "Ces réglages choisissent ce que voient les clients dans les productions créées à partir de ce modèle, compte de prévisualisation compris.",
+        "access_stats_description": "Les clients peuvent ouvrir les pages de statistiques de la production.",
+        "statuses_empty": "Ce modèle n’a aucun statut de tâche.",
+        "statuses_overridden": "Défini pour ce modèle"
+      }
     },
     "share": {
       "comment_placeholder": "Ajouter un commentaire...",

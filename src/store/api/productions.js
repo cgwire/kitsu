@@ -120,6 +120,15 @@ export default {
     return client.ppost(path, data)
   },
 
+  setTaskTypeClientVisibility(productionId, taskTypeId, isClientVisible) {
+    const data = {
+      task_type_id: taskTypeId,
+      is_client_visible: isClientVisible
+    }
+    const path = `/api/data/projects/${productionId}/settings/task-types`
+    return client.ppost(path, data)
+  },
+
   addSettingsToProduction(
     productionId,
     {
@@ -151,6 +160,12 @@ export default {
     const data = { task_status_id: taskStatusId }
     const path = `/api/data/projects/${productionId}/settings/task-status`
     return client.ppost(path, data)
+  },
+
+  setTaskStatusClientAllowed(productionId, taskStatusId, isClientAllowed) {
+    const data = { is_client_allowed: isClientAllowed }
+    const path = `/api/data/projects/${productionId}/settings/task-status/${taskStatusId}`
+    return client.pput(path, data)
   },
 
   removeTaskStatusFromProduction(productionId, taskStatusId) {

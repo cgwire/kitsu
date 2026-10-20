@@ -111,46 +111,16 @@
       {{ $t('productions.clients.save_error') }}
     </p>
 
-    <div class="box section isolation-section">
-      <h2 class="subtitle">{{ $t('productions.clients.isolation_title') }}</h2>
-      <p class="description">
-        {{ $t('productions.clients.isolation_description') }}
-      </p>
-      <checkbox
-        class="isolation"
-        :key="`isolation-${checkboxKey}`"
-        :toggle="true"
-        :disabled="isSaving"
-        :label="$t('productions.fields.is_clients_isolated')"
-        :model-value="!!currentProduction?.is_clients_isolated"
-        @change="setIsolated"
-      />
-    </div>
-
-    <div class="box section statuses">
-      <h2 class="subtitle">{{ $t('productions.clients.statuses_title') }}</h2>
-      <p class="description">
-        {{ $t('productions.clients.statuses_description') }}
-        <router-link v-if="isAdmin" :to="{ name: 'task-status' }">
-          {{ $t('productions.clients.statuses_link') }}
-        </router-link>
-      </p>
-      <p class="empty" v-if="!clientStatuses.length">
-        {{ $t('productions.clients.statuses_empty') }}
-      </p>
-      <ul class="status-list" v-else>
-        <li
-          class="status-item"
-          v-for="status in clientStatuses"
-          :key="status.id"
-        >
-          <validation-tag
-            :is-static="true"
-            :task="{ task_status_id: status.id }"
-          />
-        </li>
-      </ul>
-    </div>
+    <client-access-settings
+      :key="checkboxKey"
+      :settings="currentProduction ?? {}"
+      :task-types="clientTaskTypes"
+      :task-statuses="clientTaskStatuses"
+      :is-saving="isSaving"
+      @update-setting="setAccess"
+      @set-task-type-visible="setTaskTypeVisible"
+      @set-status-client-allowed="setStatusClientAllowed"
+    />
 
     <div class="box section metadata">
       <h2 class="subtitle">{{ $t('productions.clients.metadata_title') }}</h2>
@@ -168,7 +138,6 @@
         <checkbox
           :key="`${descriptor.id}-${checkboxKey}`"
           :toggle="true"
-          :disabled="isSaving"
           :label="getDescriptorLabel(descriptor)"
           :model-value="!!descriptor.for_client"
           @change="value => setForClient(descriptor, value)"
@@ -212,15 +181,16 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useStore } from 'vuex'
 
 import { useTime } from '@/composables/time'
+import { sortTaskStatuses, sortTaskTypes } from '@/lib/sorting'
 import { parseDate } from '@/lib/time'
 
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
+import ClientAccessSettings from '@/components/pages/production/ClientAccessSettings.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Checkbox from '@/components/widgets/Checkbox.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
 import TextField from '@/components/widgets/TextField.vue'
-import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
 // Composables
 // --------------------------------------------------------------------------
@@ -250,16 +220,37 @@ const isEnabled = computed(
   () => store.getters.mainConfig?.preview_accounts_enabled === true
 )
 const productionId = computed(() => currentProduction.value?.id)
-const isAdmin = computed(() => store.getters.isCurrentUserAdmin)
 const personMap = computed(() => store.getters.personMap)
 const productionTaskStatuses = computed(
   () => store.getters.productionTaskStatuses ?? []
 )
-const taskTypeMap = computed(() => store.getters.taskTypeMap)
 const teamRoles = computed(() => store.getters.productionTeamRoles ?? {})
 
-const clientStatuses = computed(() =>
-  productionTaskStatuses.value.filter(status => status.is_client_allowed)
+const sortedTaskTypes = computed(() =>
+  sortTaskTypes(
+    store.getters.productionTaskTypes ?? [],
+    currentProduction.value
+  )
+)
+
+const clientTaskTypes = computed(() =>
+  sortedTaskTypes.value.map(taskType => ({
+    ...taskType,
+    is_client_visible:
+      currentProduction.value?.task_type_links?.[taskType.id]?.is_client_visible
+  }))
+)
+
+const clientTaskStatuses = computed(() =>
+  sortTaskStatuses(
+    [...productionTaskStatuses.value],
+    currentProduction.value
+  ).map(status => ({
+    ...status,
+    link_is_client_allowed:
+      currentProduction.value?.task_statuses_link?.[status.id]
+        ?.is_client_allowed
+  }))
 )
 
 const descriptors = computed(() =>
@@ -268,8 +259,7 @@ const descriptors = computed(() =>
     'shotMetadataDescriptors',
     'sequenceMetadataDescriptors',
     'episodeMetadataDescriptors',
-    'editMetadataDescriptors',
-    'taskMetadataDescriptors'
+    'editMetadataDescriptors'
   ].flatMap(getter => store.getters[getter] ?? [])
 )
 
@@ -365,21 +355,30 @@ const save = async action => {
   }
 }
 
-const setIsolated = value =>
+const setAccess = (flag, value) =>
   save(() =>
-    store.dispatch('editProduction', {
-      id: productionId.value,
-      is_clients_isolated: value
+    store.dispatch('editProduction', { id: productionId.value, [flag]: value })
+  )
+
+const setTaskTypeVisible = (taskTypeId, value) =>
+  save(() =>
+    store.dispatch('setTaskTypeClientVisibility', {
+      taskTypeId,
+      isClientVisible: value
     })
   )
 
-const getDescriptorLabel = descriptor => {
-  const taskType = taskTypeMap.value?.get(descriptor.task_type_id)
-  const type = taskType
-    ? `${descriptor.entity_type}, ${taskType.name}`
-    : descriptor.entity_type
-  return `${descriptor.name} (${type})`
-}
+// ClientAccessSettings sends null when the value goes back to the studio one
+const setStatusClientAllowed = (taskStatusId, isClientAllowed) =>
+  save(() =>
+    store.dispatch('setTaskStatusClientAllowed', {
+      taskStatusId,
+      isClientAllowed
+    })
+  )
+
+const getDescriptorLabel = descriptor =>
+  `${descriptor.name} (${descriptor.entity_type})`
 
 // zou's update schema resets the fields missing from the payload
 const setForClient = (descriptor, value) =>
@@ -508,20 +507,12 @@ onBeforeUnmount(() => clearInterval(clock))
   gap: 0.5em;
 }
 
-.status-list,
 .client-list {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.status-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5em;
-}
-
-.status-item,
 .team-client {
   align-items: center;
   display: flex;
@@ -530,6 +521,26 @@ onBeforeUnmount(() => clearInterval(clock))
 
 .team-client {
   margin-bottom: 0.8em;
+}
+
+.hint {
+  color: var(--text-alt);
+  font-size: 0.9em;
+  margin: 0.3em 0 0;
+}
+
+// Every toggle line of the tab shares one height and one spacing
+.descriptor {
+  align-items: center;
+  display: flex;
+  margin: 0 0 0.4em;
+  min-height: 2.5em;
+
+  // The field and tag margins break the vertical centring
+  > * {
+    margin-bottom: 0;
+    margin-top: 0;
+  }
 }
 
 .empty {

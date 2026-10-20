@@ -1054,6 +1054,17 @@
     },
     "productions": {
       "clients": {
+        "access_description": "Queste impostazioni scelgono cosa vedono i clienti di questa produzione, account di anteprima incluso.",
+        "access_stats": "Pagine delle statistiche",
+        "access_stats_description": "I clienti possono aprire le pagine delle statistiche di questa produzione.",
+        "access_task_list": "Liste di asset, shot e montaggi",
+        "access_task_list_description": "I clienti possono aprire le liste di asset, shot e montaggi e le loro pagine.",
+        "access_task_list_hint": "Le liste sono nascoste ai clienti. I tipi di task qui sotto si applicano ancora alle statistiche.",
+        "access_task_panel": "Pannello del task",
+        "access_task_panel_description": "Commenti e anteprime accanto alle liste. I clienti possono ancora commentare dalle playlist.",
+        "access_task_types_description": "I tipi di task non selezionati non hanno colonna per i clienti.",
+        "access_task_types_title": "Tipi di task mostrati ai clienti",
+        "access_title": "Accesso dei clienti",
         "block": "Blocca ora",
         "blocked": "Bloccato",
         "copy": "Copia",
@@ -1074,10 +1085,12 @@
         "preview_title": "Account di anteprima",
         "regenerate": "Rigenera password",
         "save_error": "Si è verificato un errore durante il salvataggio delle impostazioni.",
-        "statuses_description": "I clienti possono impostare solo questi stati quando commentano.",
-        "statuses_empty": "Nessuno stato è visibile ai clienti.",
-        "statuses_link": "Modifica stati delle attività",
+        "statuses_description": "I clienti possono impostare gli stati selezionati quando commentano. Per impostazione predefinita, ogni stato segue l'impostazione dello studio.",
+        "statuses_empty": "Questa produzione non ha stati delle attività.",
+        "statuses_overridden": "Impostato per questa produzione",
+        "statuses_studio_default": "Predefinito dello studio",
         "statuses_title": "Stati disponibili per i clienti",
+        "statuses_use_studio_default": "Ripristina tutto ai valori dello studio",
         "team_description": "Persone con il ruolo Cliente nel team di questa produzione.",
         "team_empty": "Nessun cliente nel team.",
         "team_title": "Clienti del team",
@@ -2401,7 +2414,18 @@
         "task_statuses": "Stati dei task",
         "task_types": "Tipi di task"
       },
-      "title": "Modelli"
+      "title": "Modelli",
+      "metadata_explanation": "Colonne di metadati aggiunte alle produzioni create da questo modello.",
+      "settings_menu": {
+        "template": "Modello"
+      },
+      "backgrounds_explanation": "Sfondi 3D offerti nel player per le anteprime 3D delle produzioni create da questo modello.",
+      "clients": {
+        "access_description": "Queste impostazioni scelgono cosa vedono i clienti nelle produzioni create da questo modello, account di anteprima incluso.",
+        "access_stats_description": "I clienti possono aprire le pagine delle statistiche della produzione.",
+        "statuses_empty": "Questo modello non ha alcuno stato di attività.",
+        "statuses_overridden": "Impostato per questo modello"
+      }
     },
     "share": {
       "comment_placeholder": "Lascia un commento...",

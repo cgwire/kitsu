@@ -111,6 +111,10 @@ const mountPage = async (
     getters: {
       assetMetadataDescriptors: () => [],
       assetSearchText: () => '',
+      clientAccess: () => ({
+        isTaskPanelVisible: true,
+        isTaskTypeVisible: () => true
+      }),
       currentEpisode: () => null,
       currentProduction: state => state.currentProduction,
       editMetadataDescriptors: () => [],
@@ -268,6 +272,25 @@ describe.each(pages.filter(({ name }) => ['Asset', 'Edit', 'Shot'].includes(name
       expect(wrapper.findComponent(EntityOutputFiles).props('entity')).toMatchObject({
         id: 'entity-1'
       })
+    })
+  }
+)
+
+describe.each(pages.filter(({ name }) => ['Asset', 'Edit', 'Shot'].includes(name)))(
+  '$name page, task panel client setting',
+  ({ entityParam, page }) => {
+    const panel = isTaskPanelVisible => ({
+      clientAccess: () => ({ isTaskPanelVisible, isTaskTypeVisible: () => true })
+    })
+
+    test('renders no task info when the panel is hidden', async () => {
+      const { wrapper } = await mountPage(page, entityParam, production, {}, panel(false))
+      expect(wrapper.findComponent({ name: 'TaskInfo' }).exists()).toBe(false)
+    })
+
+    test('renders the task info otherwise', async () => {
+      const { wrapper } = await mountPage(page, entityParam, production, {}, panel(true))
+      expect(wrapper.findComponent({ name: 'TaskInfo' }).exists()).toBe(true)
     })
   }
 )

@@ -9,8 +9,16 @@ export const production = {
   task_types: []
 }
 
+export const allVisible = {
+  isStatsVisible: true,
+  isTaskListVisible: true,
+  isTaskPanelVisible: true,
+  isTaskTypeVisible: () => true
+}
+
 const neutralValue = name => {
   if (name.endsWith('Map') || name.startsWith('selected')) return new Map()
+  if (name === 'clientAccess') return allVisible
   if (name.startsWith('is')) return false
   if (name.startsWith('nb') || name.endsWith('ScrollPosition')) return 0
   if (name.endsWith('SearchText')) return ''
@@ -87,7 +95,10 @@ export const mountEntityPage = async (
   const searchField = buildSearchFieldStub()
   const list = {
     name: listName,
-    props: { departmentFilter: { type: Array, default: () => [] } },
+    props: {
+      departmentFilter: { type: Array, default: () => [] },
+      validationColumns: { type: Array, default: () => [] }
+    },
     template: '<div />',
     methods: { setScrollPosition: vi.fn(), selectTaskFromQuery: vi.fn() }
   }

@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-import { routes } from '@/router/routes'
+import { checkClientAccess, routes } from '@/router/routes'
 
 const loadSavedScrollPosition = (to, from, savedPosition) => {
   if (savedPosition) {
@@ -14,5 +14,7 @@ const router = createRouter({
   scrollBehavior: loadSavedScrollPosition,
   routes
 })
+
+router.beforeEach(checkClientAccess)
 
 export default router
