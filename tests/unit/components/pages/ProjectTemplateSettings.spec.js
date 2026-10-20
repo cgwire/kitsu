@@ -12,6 +12,7 @@ import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
 import ProjectTemplateSettings from '@/components/pages/ProjectTemplateSettings.vue'
 import ClientAccessSettings from '@/components/pages/production/ClientAccessSettings.vue'
 import MovieBitrateField from '@/components/pages/production/MovieBitrateField.vue'
+import TaskStatusSettings from '@/components/pages/production/TaskStatusSettings.vue'
 import TaskTypeSettings from '@/components/pages/production/TaskTypeSettings.vue'
 import VideoSettingsForm from '@/components/pages/production/VideoSettingsForm.vue'
 import Checkbox from '@/components/widgets/Checkbox.vue'
@@ -90,6 +91,84 @@ describe('ProjectTemplateSettings page, metadata column modal', () => {
 
     expect(modal().props('active')).toBe(true)
     expect(modal().props('isError')).toBe(false)
+  })
+})
+
+// A failed save reloads the template: the list shows the saved columns.
+describe('ProjectTemplateSettings page, failed column saves', () => {
+  afterEach(() => vi.restoreAllMocks())
+
+  const template = {
+    id: 'template-1',
+    name: 'Feature',
+    metadata_descriptors: [
+      { name: 'Difficulty', data_type: 'string', entity_type: 'Asset' }
+    ]
+  }
+  const error = new Error('Bad Gateway')
+
+  const mountPage = (setTemplateMetadataDescriptors, config) =>
+    mountEntityPage(ProjectTemplateSettings, {
+      config,
+      stubs,
+      query: { tab: 'metadataDescriptors' },
+      getters: { movieBitrateDefaults },
+      actions: {
+        loadProjectTemplate: () => template,
+        loadTemplateTaskTypes: () => [],
+        loadTemplateTaskStatuses: () => [],
+        loadTemplateAssetTypes: () => [],
+        loadTemplateStatusAutomations: () => [],
+        loadTemplateBackgrounds: () => [],
+        setTemplateMetadataDescriptors
+      }
+    })
+
+  const columnCount = wrapper =>
+    wrapper.findAllComponents(RowActionsCell).length
+
+  it('sends a new column once when it is saved again', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    let saves = 0
+    const { wrapper, dispatched } = await mountPage(() =>
+      ++saves === 1 ? Promise.reject(error) : undefined
+    )
+    const modal = () => wrapper.findComponent(AddMetadataModal)
+
+    await wrapper
+      .findAll('button')
+      .find(button => button.text() === 'project_templates.add_metadata')
+      .trigger('click')
+    await modal().vm.$emit('confirm', { name: 'Complexity' })
+    await flushPromises()
+
+    expect(consoleError).toHaveBeenCalledWith(error)
+    expect(columnCount(wrapper)).toBe(1)
+
+    await modal().vm.$emit('confirm', { name: 'Complexity' })
+    await flushPromises()
+
+    expect(
+      dispatched('setTemplateMetadataDescriptors').map(([, { descriptors }]) =>
+        descriptors.map(descriptor => descriptor.name)
+      )
+    ).toEqual([
+      ['Difficulty', 'Complexity'],
+      ['Difficulty', 'Complexity']
+    ])
+  })
+
+  it('shows a column again when its removal fails', async () => {
+    const errorHandler = vi.fn()
+    const { wrapper } = await mountPage(() => Promise.reject(error), {
+      errorHandler
+    })
+
+    await wrapper.findComponent(RowActionsCell).vm.$emit('delete-clicked')
+    await flushPromises()
+
+    expect(errorHandler.mock.calls[0][0]).toBe(error)
+    expect(columnCount(wrapper)).toBe(1)
   })
 })
 
@@ -290,6 +369,56 @@ describe('ProjectTemplateSettings page, task type bitrates', () => {
     })
     expect(dispatched('loadProjectTemplate')).toEqual([])
   })
+})
+
+// After a drop, the task type and status lists wait for the reload that
+// follows their save to rebuild.
+describe('ProjectTemplateSettings page, reorders', () => {
+  const template = { id: 'template-1', name: 'Feature', metadata_descriptors: [] }
+
+  test.each([
+    ['task types', TaskTypeSettings, 'reorderTemplateTaskTypes'],
+    ['task statuses', TaskStatusSettings, 'reorderTemplateTaskStatuses']
+  ])(
+    'reloads the template when a reorder of the %s fails',
+    async (name, list, reorder) => {
+      const error = new Error('Bad Gateway')
+      const errorHandler = vi.fn()
+      const { wrapper, router, store, dispatched } = await mountEntityPage(
+        ProjectTemplateSettings,
+        {
+          config: { errorHandler },
+          stubs,
+          getters: { movieBitrateDefaults },
+          actions: {
+            loadProjectTemplate: () => template,
+            loadTemplateTaskTypes: () => [],
+            loadTemplateTaskStatuses: () => [],
+            loadTemplateAssetTypes: () => [],
+            loadTemplateStatusAutomations: () => [],
+            loadTemplateBackgrounds: () => [],
+            [reorder]: () => Promise.reject(error)
+          }
+        }
+      )
+      router.addRoute({
+        path: '/project-templates/:template_id',
+        component: { template: '<div />' }
+      })
+      await router.push('/project-templates/template-1')
+      await flushPromises()
+      store.dispatch.mockClear()
+
+      await wrapper.findComponent(list).vm.$emit('reorder', [])
+      await flushPromises()
+
+      expect(dispatched(reorder)).toHaveLength(1)
+      expect(dispatched('loadProjectTemplate')).toEqual([
+        ['loadProjectTemplate', 'template-1']
+      ])
+      expect(errorHandler.mock.calls[0][0]).toBe(error)
+    }
+  )
 })
 
 // The parameters save 800 ms after their last change, and the page can be
@@ -546,13 +675,13 @@ describe('ProjectTemplateSettings page, clients tab', () => {
     const { wrapper } = await mountPage({
       addTaskStatusToTemplate: () => Promise.reject(new Error('boom'))
     })
-    const before = settings(wrapper).vm
+    const before = settings(wrapper)
 
-    await before.$emit('set-status-client-allowed', 's1', true)
+    await before.vm.$emit('set-status-client-allowed', 's1', true)
     await flushPromises()
 
     expect(wrapper.text()).toContain('productions.clients.save_error')
-    expect(settings(wrapper).vm).not.toBe(before)
+    expect(before.exists()).toBe(false)
     expect(
       settings(wrapper).props('taskStatuses')[0].link_is_client_allowed
     ).toBe(false)

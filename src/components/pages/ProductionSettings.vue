@@ -85,12 +85,19 @@
               </th>
             </tr>
           </thead>
+          <!-- A held button must not arm a drag: a reload that shifted
+               the rows before the release made vuedraggable throw. -->
           <draggable
             class="datatable-body"
+            filter="button"
             item-key="id"
+            :prevent-on-filter="false"
             tag="tbody"
             v-model="taskStatusItems"
+            @choose="onRowHeld"
             @end="updateTaskStatusPriority"
+            @start="onRowDragged"
+            @unchoose="onRowReleased"
           >
             <template #item="{ element: taskStatus }">
               <tr class="datatable-row task-status">
@@ -157,6 +164,7 @@ import { useRoute, useRouter } from 'vue-router'
 import draggable from 'vuedraggable'
 import { useStore } from 'vuex'
 
+import { useDraggableRebuild } from '@/composables/draggableRebuild'
 import { useFieldCommitOnLeave } from '@/composables/fieldCommit'
 import { sortTaskStatuses } from '@/lib/sorting'
 
@@ -272,12 +280,29 @@ const removeTaskStatus = id =>
   changeTaskStatuses('removeTaskStatusFromProduction', id)
 
 const updateTaskStatusPriority = async () => {
-  await store.dispatch('reorderTaskStatusLinks', {
-    projectId: currentProduction.value.id,
-    taskStatusIds: taskStatusItems.value.map(status => status.id)
-  })
+  try {
+    await store.dispatch('reorderTaskStatusLinks', {
+      projectId: currentProduction.value.id,
+      taskStatusIds: taskStatusItems.value.map(status => status.id)
+    })
+  } catch (err) {
+    // After a drop, the list waits for the reload that a failure never does.
+    resetTaskStatusItems()
+    throw err
+  }
   await store.dispatch('loadContext')
 }
+
+const {
+  rebuild: resetTaskStatusItems,
+  onRowHeld,
+  onRowDragged,
+  onRowReleased
+} = useDraggableRebuild(() => {
+  taskStatusItems.value = JSON.parse(
+    JSON.stringify(sortedProductionTaskStatuses.value)
+  )
+})
 
 // Watchers
 // --------------------------------------------------------------------------
@@ -295,13 +320,7 @@ watch(activeTab, tab => {
   }
 })
 
-watch(
-  sortedProductionTaskStatuses,
-  list => {
-    taskStatusItems.value = JSON.parse(JSON.stringify(list))
-  },
-  { immediate: true }
-)
+watch(sortedProductionTaskStatuses, resetTaskStatusItems, { immediate: true })
 
 // Lifecycle
 // --------------------------------------------------------------------------

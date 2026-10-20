@@ -2100,8 +2100,17 @@ const startBrowsingY = event => {
   startMoveTracking()
 }
 
+const isInteracting = () =>
+  isBrowsingX.value ||
+  isBrowsingY.value ||
+  isChangeDates.value ||
+  isChangeStartDate.value ||
+  isChangeEndDate.value
+
 const stopBrowsing = event => {
-  document.body.style.cursor = 'default'
+  // only a move, a resize or a grab changes the cursor, and an outside script
+  // can take the body out of the page
+  if (isInteracting()) document.body.style.cursor = 'default'
   removeEvents(moveEvents)
   // a pending frame would move the item again after the drop is saved
   if (moveFrame) {

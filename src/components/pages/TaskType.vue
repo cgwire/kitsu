@@ -1863,6 +1863,7 @@ const confirmDeleteMetadata = () => {
 }
 
 const showImportModal = () => {
+  errors.importing = false
   modals.importing = true
 }
 
@@ -1914,26 +1915,21 @@ const uploadImportFile = data => {
     })
 }
 
-const renderImport = (data, mode) => {
+const renderImport = async (data, mode) => {
   loading.importing = true
   errors.importing = false
-  if (mode === 'file') {
-    data = data.get('file')
+  try {
+    parsedCSV.value = await csv.processCSV(
+      mode === 'file' ? data.get('file') : data
+    )
+    hideImportModal()
+    showImportRenderModal()
+  } catch (err) {
+    errors.importing = true
+    csv.logReadFailure(err)
+  } finally {
+    loading.importing = false
   }
-  csv
-    .processCSV(data)
-    .then(results => {
-      parsedCSV.value = results
-      hideImportModal()
-      showImportRenderModal()
-    })
-    .catch(err => {
-      console.error(err)
-      errors.importing = true
-    })
-    .finally(() => {
-      loading.importing = false
-    })
 }
 
 const resetTaskTypeDates = () => {

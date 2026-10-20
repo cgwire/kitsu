@@ -61,6 +61,56 @@ const mountComponent = async (deleteError, deleteImpl) => {
   return { store, wrapper }
 }
 
+const shotTaskTypes = ['Layout', 'Animation', 'Lighting'].map(
+  (name, index) => ({
+    id: name.toLowerCase(),
+    name,
+    for_entity: 'Shot',
+    priority: index + 1
+  })
+)
+
+// Each drop makes the list emit the task types in their new order. The
+// reorder implementation answers the saves.
+const mountForReorder = async reorder => {
+  const store = createStore({
+    getters: {
+      archivedTaskTypes: () => [],
+      departmentMap: () => new Map(),
+      taskTypes: () => shotTaskTypes
+    },
+    mutations: { EDIT_TASK_TYPE_END: () => {} }
+  })
+  store.dispatch = vi.fn((action, payload) =>
+    action === 'reorderTaskTypes' ? reorder(payload) : Promise.resolve()
+  )
+  const errorHandler = vi.fn()
+  await router.push('/task-types?entity=shots')
+  await router.isReady()
+  const wrapper = shallowMount(TaskTypes, {
+    global: {
+      config: { errorHandler },
+      plugins: [store, router],
+      mocks: { $t: key => key }
+    }
+  })
+  await flushPromises()
+  const drop = ids =>
+    wrapper.findComponent(TaskTypeList).vm.$emit(
+      'update-priorities',
+      ids.map((id, index) => ({
+        id,
+        name: shotTaskTypes.find(taskType => taskType.id === id).name,
+        priority: String(index + 1)
+      }))
+    )
+  const reorders = () =>
+    store.dispatch.mock.calls
+      .filter(([action]) => action === 'reorderTaskTypes')
+      .map(([, ids]) => ids.join(','))
+  return { drop, errorHandler, reorders }
+}
+
 const openDeleteModal = async (wrapper, target = taskType) => {
   wrapper.findComponent(TaskTypeList).vm.$emit('delete-clicked', target)
   await flushPromises()
@@ -203,5 +253,58 @@ describe('TaskTypes', () => {
     expect(modal.props('errorText')).toEqual('task_types.delete_error')
     expect(modal.props('errorDetails')).toEqual('')
     expect(modal.props('deleteButtonText')).toEqual('')
+  })
+
+  describe('reordering', () => {
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    // Regression: a reorder dropped less than a second after the previous
+    // one, or during its save, was never sent.
+    it('saves each reorder, the last one last', async () => {
+      const { drop, reorders } = await mountForReorder(
+        () => new Promise(resolve => setTimeout(resolve, 200))
+      )
+      vi.useFakeTimers()
+
+      drop(['animation', 'layout', 'lighting'])
+      await vi.advanceTimersByTimeAsync(300)
+      drop(['lighting', 'animation', 'layout'])
+      await vi.advanceTimersByTimeAsync(100)
+      drop(['layout', 'lighting', 'animation'])
+      await vi.advanceTimersByTimeAsync(5000)
+
+      expect(reorders()).toEqual([
+        'animation,layout,lighting',
+        'lighting,animation,layout',
+        'layout,lighting,animation'
+      ])
+    })
+
+    // Regression: a failed save left a flag up, and no later reorder was
+    // sent until the page was reloaded.
+    it('saves the next reorder after a failed save, and reports the failure', async () => {
+      const error = new Error('Internal Server Error')
+      let isFirst = true
+      const { drop, errorHandler, reorders } = await mountForReorder(() => {
+        const answer = isFirst ? Promise.reject(error) : Promise.resolve()
+        isFirst = false
+        return answer
+      })
+      vi.useFakeTimers()
+
+      drop(['animation', 'layout', 'lighting'])
+      await vi.advanceTimersByTimeAsync(3000)
+      drop(['lighting', 'animation', 'layout'])
+      await vi.advanceTimersByTimeAsync(100)
+
+      expect(reorders()).toEqual([
+        'animation,layout,lighting',
+        'lighting,animation,layout'
+      ])
+      expect(errorHandler).toHaveBeenCalledTimes(1)
+      expect(errorHandler.mock.calls[0][0]).toBe(error)
+    })
   })
 })

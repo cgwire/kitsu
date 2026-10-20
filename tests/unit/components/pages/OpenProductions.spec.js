@@ -80,10 +80,13 @@ describe('OpenProductions', () => {
   })
 
   it('shows an empty overview when its load fails', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
     const { wrapper } = await mountPage({
       isClient: true,
       failing: ['production-2']
     })
+    expect(consoleError).toHaveBeenCalledWith(new Error('down'))
+    consoleError.mockRestore()
     const overviews = wrapper.findAllComponents(ProductionOverview)
     expect(overviews[0].props('isLoading')).toBe(false)
     expect(overviews[1].props()).toMatchObject({

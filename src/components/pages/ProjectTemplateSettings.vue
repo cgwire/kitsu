@@ -596,10 +596,15 @@ const saveParameters = async () => {
   loading.parameters = false
 }
 
-// A link change saves, then the template reloads as a whole
+// A link change saves, then the template reloads as a whole, even after a
+// failure: the page shows what the template holds, and the task type and
+// status lists wait for this reload after a drop.
 const updateTemplate = async (action, payload) => {
-  await store.dispatch(action, { templateId: templateId.value, ...payload })
-  await loadTemplateData()
+  try {
+    await store.dispatch(action, { templateId: templateId.value, ...payload })
+  } finally {
+    await loadTemplateData()
+  }
 }
 
 const onUpdateBoardRoles = async ({ taskStatusId, roles }) => {

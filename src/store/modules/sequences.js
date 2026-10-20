@@ -719,7 +719,7 @@ const mutations = {
   },
 
   [SET_CURRENT_PRODUCTION](state, production) {
-    state.shotSearchText = ''
+    state.sequenceSearchText = ''
   },
 
   [SET_CURRENT_SEQUENCE](state, sequenceId) {
@@ -931,7 +931,7 @@ const mutations = {
         return stateSequence
       })
     }
-    state.sequenceIndex = buildSequenceIndex(cache.sequences)
+    cache.sequenceIndex = buildSequenceIndex(cache.sequences)
     if (sequence.description && !state.isSequenceDescription) {
       state.isSequenceDescription = true
     }
@@ -984,7 +984,7 @@ const mutations = {
       helpers.setEpisodeInfo(sequence, episodeMap)
     })
     cache.sequences = sortByName(sequences)
-    state.sequenceIndex = buildSequenceIndex(cache.sequences)
+    cache.sequenceIndex = buildSequenceIndex(cache.sequences)
     state.displayedSequences = cache.sequences
     state.displayedSequencesLength = cache.sequences.length
     // This task-less dataset replaces the one the recorded scope describes.
@@ -1143,13 +1143,19 @@ const mutations = {
       ...state.displayedSequences,
       sequence
     ])
-    state.sequenceIndex = buildSequenceIndex(cache.sequences)
+    cache.sequenceIndex = buildSequenceIndex(cache.sequences)
     state.displayedSequencesLength = state.displayedSequences.length
   },
 
   [UPDATE_SEQUENCE](state, sequence) {
+    // The map holds raw objects: assigned through it only, the displayed
+    // list would see no change.
+    const displayedSequence = state.displayedSequences.find(
+      ({ id }) => id === sequence.id
+    )
+    if (displayedSequence) Object.assign(displayedSequence, sequence)
     Object.assign(cache.sequenceMap.get(sequence.id), sequence)
-    state.sequenceIndex = buildSequenceIndex(cache.sequences)
+    cache.sequenceIndex = buildSequenceIndex(cache.sequences)
   },
 
   [REMOVE_SEQUENCE](state, sequenceToDelete) {

@@ -620,12 +620,18 @@ export const useEntityPage = ({
   const renderImport = async (data, mode) => {
     loading.importing = true
     errors.importing = false
-    parsedCSV.value = await csv.processCSV(
-      mode === 'file' ? data.get('file') : data
-    )
-    hideImportModal()
-    loading.importing = false
-    showImportRenderModal()
+    try {
+      parsedCSV.value = await csv.processCSV(
+        mode === 'file' ? data.get('file') : data
+      )
+      hideImportModal()
+      showImportRenderModal()
+    } catch (err) {
+      errors.importing = true
+      csv.logReadFailure(err)
+    } finally {
+      loading.importing = false
+    }
   }
 
   const uploadImportFile = async (data, toUpdate) => {

@@ -39,7 +39,10 @@
           item-key="id"
           tag="tbody"
           :disabled="isMobile"
+          @choose="onRowHeld"
           @end="updateTaskStatusPriorities"
+          @start="onRowDragged"
+          @unchoose="onRowReleased"
           v-model="taskStatuses"
         >
           <template #item="{ element: status }">
@@ -121,6 +124,8 @@ import { HelpCircleIcon } from 'lucide-vue-next'
 import draggable from 'vuedraggable'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
+import { useDraggableRebuild } from '@/composables/draggableRebuild'
+
 import BooleanCell from '@/components/cells/BooleanCell.vue'
 import RowActionsCell from '@/components/cells/RowActionsCell.vue'
 import TaskStatusCell from '@/components/cells/TaskStatusCell.vue'
@@ -145,24 +150,33 @@ const taskStatuses = ref([...props.entries])
 
 // Functions
 
+// The list held during the drag may still show a status deleted meanwhile,
+// whose save would fail.
 const updateTaskStatusPriorities = () => {
+  const entryIds = new Set(props.entries.map(entry => entry.id))
   emit(
     'update-priorities',
-    taskStatuses.value.map((status, index) => ({
-      id: status.id,
-      priority: index + 1
-    }))
+    taskStatuses.value
+      .filter(status => entryIds.has(status.id))
+      .map((status, index) => ({
+        id: status.id,
+        priority: index + 1
+      }))
   )
 }
 
+const {
+  rebuild: resetTaskStatuses,
+  onRowHeld,
+  onRowDragged,
+  onRowReleased
+} = useDraggableRebuild(() => {
+  taskStatuses.value = [...props.entries]
+})
+
 // Watchers
 
-watch(
-  () => props.entries,
-  entries => {
-    taskStatuses.value = [...entries]
-  }
-)
+watch(() => props.entries, resetTaskStatuses)
 
 // Lifecycle
 

@@ -24,7 +24,7 @@ const Host = defineComponent({
     isLoading: { type: Boolean, default: false },
     validationColumns: { type: Array, default: () => [] }
   },
-  emits: ['metadata-changed'],
+  emits: ['keep-task-panel-open', 'metadata-changed'],
   setup(props, { emit }) {
     const list = useEntityList({
       type: 'shot',
@@ -290,6 +290,28 @@ describe('entity list drag browsing', () => {
 
     wrapper.unmount()
   })
+
+  // An outside script can take the body out of the page: only the end of a
+  // grab resets its cursor.
+  test.each(['mouseup', 'mouseleave', 'touchend', 'touchcancel', 'keyup'])(
+    'leaves the page body alone on a %s without any grab',
+    async type => {
+      const wrapper = await mountEntityList(Host, {
+        getters: { currentProduction: production }
+      })
+      const onError = vi.fn()
+      window.addEventListener('error', onError)
+      const body = document.body
+      body.remove()
+
+      document.dispatchEvent(new Event(type))
+
+      document.documentElement.append(body)
+      window.removeEventListener('error', onError)
+      expect(onError).not.toHaveBeenCalled()
+      wrapper.unmount()
+    }
+  )
 })
 
 describe('entity list keyboard navigation', () => {

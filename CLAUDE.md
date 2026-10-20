@@ -366,6 +366,10 @@ This keeps auth/error handling, retries and store updates centralized. If you fi
 - Test files go in `tests/unit/` with `.spec.js` extension
 - Framework: Vitest with jsdom
 - Run: `npm run test:unit`
+- **Keep the console silent**: a spec must print nothing, even when all its tests pass. In an agent session Vitest picks its `minimal` reporter, which hides stderr: run a new or changed spec with `npx vitest run --reporter=default <file>` and fix every `stderr |` or `stdout |` block before committing. Usual causes:
+  - A component mounted without a router: stub the link, `stubs: { RouterLink: RouterLinkStub }`.
+  - A fixture missing a required prop or a getter the component reads.
+  - An expected error path: `vi.spyOn(console, 'error').mockImplementation(() => {})`, then assert the call.
 - **Transform cache** (`fsModuleCache`): entries ignore how imports resolve. When an extensionless import starts resolving to another file (module turned into `dir/index.js` or back, new extension, same-named file added), run `npx vitest --clearCache` after committing, pulling, or checking out across that change. Symptom: a missing module on an unchanged import. In that change and in its revert, delete the old path and set `VITEST_CACHE_VERSION` in `.github/workflows/ci.yml` to a unique value (date and module).
 - **Use jsdom only when a spec needs the DOM**: its setup is the largest share of suite time. A spec that mounts nothing and never touches `document`/`window` starts with `// @vitest-environment node` on line 1. Test a `ref`/`computed`/`watch`-only composable inside an `effectScope()`, not a mounted host.
   - Node 22 and 24 lack DOM globals Node 26 has, such as `Storage`: a node spec can pass on Node 26 (locally or on the `current` CI job), then fail on 22 and 24. `localStorage`/`sessionStorage` are plain objects from `tests/storage.setup.js`: spy on the global, never on `Storage.prototype`. Stub any other DOM global on `globalThis`.

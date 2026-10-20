@@ -2,6 +2,7 @@
 
 import { vi } from 'vitest'
 import { computed, reactive } from 'vue'
+import { createStore } from 'vuex'
 
 // Importing the episodes module transitively pulls in the root store
 // (lib/models → timezone → @/store); stub it so no Vuex store is built.
@@ -606,5 +607,25 @@ describe('Episodes store, DELETE_TASK_END', () => {
     const episode = episodesStore.cache.episodeMap.get('ep-full')
     expect(episode.tasks).toEqual(['t2'])
     expect([...episode.validations]).toEqual([['tt2', 't2']])
+  })
+})
+
+describe('Episodes store, production switch', () => {
+  // The back link of an episode page carries this search: the lists of
+  // another production must not inherit it.
+  test('forgets the search typed in the previous production', () => {
+    const store = createStore({
+      modules: {
+        episodes: {
+          state: { episodeSearchText: 'E01' },
+          getters: episodesStore.getters,
+          mutations: episodesStore.mutations
+        }
+      }
+    })
+
+    store.commit('SET_CURRENT_PRODUCTION', 'production-2')
+
+    expect(store.getters.episodeSearchText).toBe('')
   })
 })

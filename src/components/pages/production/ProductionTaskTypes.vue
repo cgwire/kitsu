@@ -80,11 +80,18 @@
                   <th></th>
                 </tr>
               </thead>
+              <!-- A held button must not arm a drag: a reload that shifted
+                   the rows before the release made vuedraggable throw. -->
               <draggable
                 class="datatable-body"
-                item-key="taskType.id"
+                filter="button"
+                :item-key="item => item.taskType.id"
+                :prevent-on-filter="false"
                 tag="tbody"
+                @choose="onRowHeld"
                 @end="updatePriorities(taskListObject.list)"
+                @start="onRowDragged"
+                @unchoose="onRowReleased"
                 v-model="taskListObject.list"
               >
                 <template #item="{ element: taskTypeData }">
@@ -145,6 +152,9 @@ import { useRoute } from 'vue-router'
 import draggable from 'vuedraggable'
 import { useStore } from 'vuex'
 
+import { useDraggableRebuild } from '@/composables/draggableRebuild'
+import { logRequestFailure } from '@/lib/errors'
+import func from '@/lib/func'
 import { sortByName, sortTaskTypes } from '@/lib/sorting'
 import { formatFullDate } from '@/lib/time'
 
@@ -186,10 +196,6 @@ const errors = reactive({
   scheduleTimeUpdate: false,
   delete: false
 })
-
-let lastCall = 0
-let isSaving = false
-let newSaveCall = false
 
 // Computed
 // --------------------------------------------------------------------------
@@ -306,7 +312,7 @@ const getScheduleItemForTaskType = taskType =>
     end_date: formatFullDate(moment())
   }
 
-const resetDisplayedTaskTypes = () => {
+const buildDisplayedTaskTypes = () => {
   Object.entries(groupByType).forEach(([type, { ref: stateRef, getter }]) => {
     stateRef.value = {
       entity: `${type.toLowerCase()}s`,
@@ -319,6 +325,13 @@ const resetDisplayedTaskTypes = () => {
     }
   })
 }
+
+const {
+  rebuild: resetDisplayedTaskTypes,
+  onRowHeld,
+  onRowDragged,
+  onRowReleased
+} = useDraggableRebuild(buildDisplayedTaskTypes)
 
 const updateTaskTypeIdFromRemaining = () => {
   taskTypeId.value = remainingTaskTypesForEntity.value[0]?.id || null
@@ -433,35 +446,40 @@ const onBitratesChanged = async ({ taskType, ...bitrates }) => {
   }
 }
 
-const savePriorities = async forms => {
-  const now = new Date().getTime()
-  if (now - lastCall > 1000 && !isSaving) {
-    lastCall = now
-    isSaving = true
-    await store.dispatch('reorderTaskTypeLinks', {
-      projectId: currentProduction.value.id,
-      taskTypeIds: forms.map(form => form.taskTypeId)
-    })
-    isSaving = false
-    if (newSaveCall) {
-      await savePriorities(forms)
-    }
-    setTimeout(() => {
-      store.commit('SORT_VALIDATION_COLUMNS', taskTypeMap.value)
-    }, 100)
-  } else {
-    newSaveCall = true
+// The saves of a list never cross on the server, and each drop reloads the
+// context once every order of its list is saved. A list holds the task types
+// of an entity in a production.
+const priorityQueues = new Map()
+
+const savePriorities = order => {
+  const listKey = `${order.projectId}-${activeTab.value}`
+  if (!priorityQueues.has(listKey)) {
+    priorityQueues.set(
+      listKey,
+      func.queueLatest(value => store.dispatch('reorderTaskTypeLinks', value))
+    )
   }
+  return priorityQueues.get(listKey)(order)
 }
 
 const updatePriorities = async items => {
-  const forms = items.map((item, index) => ({
-    projectId: currentProduction.value.id,
-    taskTypeId: item.taskType.id,
-    priority: index + 1
-  }))
-  await savePriorities(forms)
-  await store.dispatch('loadContext')
+  try {
+    // An order can wait for a save past a switch to another production.
+    await savePriorities({
+      projectId: currentProduction.value.id,
+      taskTypeIds: items.map(item => item.taskType.id)
+    })
+    setTimeout(() => {
+      store.commit('SORT_VALIDATION_COLUMNS', taskTypeMap.value)
+    }, 100)
+    await store.dispatch('loadContext')
+  } catch (err) {
+    // After a drop, the lists wait for a reload, which a failure needs too:
+    // Zou may hold an order saved after the failed one.
+    await store.dispatch('loadContext').catch(logRequestFailure)
+    resetDisplayedTaskTypes()
+    throw err
+  }
 }
 
 const importTaskTypesFromProduction = async productionId => {

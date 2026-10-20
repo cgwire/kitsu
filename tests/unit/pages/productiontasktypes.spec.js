@@ -1,7 +1,16 @@
 import { flushPromises, shallowMount } from '@vue/test-utils'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { createStore } from 'vuex'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+
+import {
+  dropBefore,
+  isArmed,
+  pressOn,
+  recordListenerErrors,
+  release,
+  startDrag
+} from '../fixtures/sortable'
 
 // Shows the interpolated values next to the key.
 vi.mock('vue-i18n', () => ({
@@ -51,7 +60,12 @@ const router = createRouter({
   routes: [{ path: '/settings', component: { template: '<div />' } }]
 })
 
-const mountComponent = async (productionType = 'short', scheduleItems = []) => {
+const mountComponent = async (
+  productionType = 'short',
+  scheduleItems = [],
+  stubs = { draggable: DraggableStub },
+  errorHandler = undefined
+) => {
   const currentProduction = {
     id: 'production-1',
     production_type: productionType,
@@ -82,9 +96,10 @@ const mountComponent = async (productionType = 'short', scheduleItems = []) => {
   await router.isReady()
   const wrapper = shallowMount(ProductionTaskTypes, {
     global: {
+      config: { errorHandler },
       plugins: [store, router],
       mocks: { $t: key => key },
-      stubs: { draggable: DraggableStub }
+      stubs
     }
   })
   await flushPromises()
@@ -97,7 +112,78 @@ const tabNames = wrapper =>
     .props('tabs')
     .map(tab => tab.name)
 
+const workflow = ['Layout', 'Animation', 'Lighting', 'Compositing'].map(
+  (name, index) => ({
+    id: name.toLowerCase(),
+    name,
+    short_name: name.slice(0, 3).toUpperCase(),
+    for_entity: 'Shot',
+    priority: index + 1
+  })
+)
+
+// Mounts the real vuedraggable and rows, so that SortableJS handles them.
+// A commit of setShotTaskTypeIds plays a reload of the production, which
+// lists its task types in that order.
+const mountWorkflow = async ({ errorHandler, ...options } = {}) => {
+  const store = createStore({
+    state: { shotTaskTypeIds: workflow.map(taskType => taskType.id) },
+    getters: {
+      currentProduction: state => ({
+        id: 'production-1',
+        production_type: 'short',
+        task_types: state.shotTaskTypeIds,
+        task_types_priority: Object.fromEntries(
+          state.shotTaskTypeIds.map((id, index) => [id, index + 1])
+        )
+      }),
+      currentScheduleItems: () => [],
+      getProductionTaskTypes: () => () => [],
+      isTVShow: () => false,
+      movieBitrateDefaults: () => ({
+        hd_bitrate_compression: 40,
+        ld_bitrate_compression: 8
+      }),
+      productionAssetTaskTypes: () => [],
+      productionEditTaskTypes: () => [],
+      productionEpisodeTaskTypes: () => [],
+      productionSequenceTaskTypes: () => [],
+      productionShotTaskTypes: state =>
+        workflow.filter(taskType => state.shotTaskTypeIds.includes(taskType.id)),
+      taskTypeMap: () =>
+        new Map(workflow.map(taskType => [taskType.id, taskType])),
+      taskTypes: () => workflow
+    },
+    mutations: {
+      setShotTaskTypeIds: (state, ids) => {
+        state.shotTaskTypeIds = ids
+      },
+      SORT_VALIDATION_COLUMNS: () => {}
+    }
+  })
+  store.dispatch = vi.fn(() => Promise.resolve())
+  await router.push('/settings?section=shots')
+  await router.isReady()
+  const wrapper = shallowMount(ProductionTaskTypes, {
+    global: {
+      config: { errorHandler },
+      plugins: [store, router],
+      mocks: { $t: key => key },
+      stubs: { draggable: false, ProductionTaskType: false }
+    },
+    ...options
+  })
+  await flushPromises()
+  const rows = () => wrapper.findAll('tr.task-type')
+  const names = () => rows().map(row => row.find('td.short-name').text())
+  return { names, rows, store, wrapper }
+}
+
 describe('ProductionTaskTypes', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
   it('hides the entity tabs the production type does not use', async () => {
     const { wrapper } = await mountComponent('short')
     expect(tabNames(wrapper)).toEqual(['assets', 'shots', 'sequences', 'edits'])
@@ -321,5 +407,308 @@ describe('ProductionTaskTypes', () => {
       help('productions.video.bitrate_max {"value":40}'),
       help('productions.video.task_type_ld_bitrate_max')
     ])
+  })
+
+  // A held Remove button must not arm a drag: the list reloads after a
+  // removal, and rows shifting before the release crashed vuedraggable
+  // (see productionsettings.spec.js).
+  it('drags a row from its grip but not from its Remove button', async () => {
+    const { wrapper } = await mountComponent('short', [], {
+      draggable: false,
+      ProductionTaskType: false
+    })
+    const [row] = wrapper.findAll('tr.task-type')
+
+    pressOn(row.find('td.grab').element)
+    expect(isArmed(row)).toBe(true)
+    release()
+
+    pressOn(row.find('td.remove button').element)
+    expect(isArmed(row)).toBe(false)
+    release()
+  })
+
+  // Regression: vuedraggable moves the row found at the index the dragged
+  // row had when its drag started. A reload that rebuilt the list meanwhile
+  // made it move an undefined row, and saving the order threw.
+  it('saves the dropped order when a reload removes a row during the drag', async () => {
+    const { names, rows, store } = await mountWorkflow()
+    const [first, , , last] = rows().map(row => row.element)
+
+    const errors = await recordListenerErrors(async () => {
+      await startDrag(last.querySelector('td.short-name'))
+      store.commit('setShotTaskTypeIds', ['layout', 'lighting', 'compositing'])
+      await flushPromises()
+      dropBefore(last, first)
+      await flushPromises()
+    })
+
+    expect(errors).toEqual([])
+    expect(names()).toEqual(['COM', 'LAY', 'ANI', 'LIG'])
+    expect(store.dispatch).toHaveBeenCalledWith('reorderTaskTypeLinks', {
+      projectId: 'production-1',
+      taskTypeIds: ['compositing', 'layout', 'animation', 'lighting']
+    })
+
+    // The reload that follows the save.
+    store.commit('setShotTaskTypeIds', ['compositing', 'layout', 'lighting'])
+    await flushPromises()
+    expect(names()).toEqual(['COM', 'LAY', 'LIG'])
+  })
+
+  // Regression: a failed save brings no reload, so the list kept what it
+  // showed during the drag, a task type removed meanwhile included.
+  it('rebuilds the list from the production when the save fails', async () => {
+    const errorHandler = vi.fn()
+    const { names, rows, store } = await mountWorkflow({ errorHandler })
+    const error = new Error('Bad Gateway')
+    store.dispatch.mockImplementation(async action => {
+      if (action === 'reorderTaskTypeLinks') throw error
+    })
+    const [first, , , last] = rows().map(row => row.element)
+
+    await startDrag(last.querySelector('td.short-name'))
+    store.commit('setShotTaskTypeIds', ['layout', 'lighting', 'compositing'])
+    await flushPromises()
+    dropBefore(last, first)
+    await flushPromises()
+
+    expect(errorHandler.mock.calls[0][0]).toBe(error)
+    expect(names()).toEqual(['LAY', 'LIG', 'COM'])
+  })
+
+  it('shows a reload that came during a press once the row is released', async () => {
+    const { names, rows, store } = await mountWorkflow()
+
+    pressOn(rows()[1].find('td.short-name').element)
+    store.commit('setShotTaskTypeIds', ['layout', 'lighting', 'compositing'])
+    await flushPromises()
+    expect(names()).toEqual(['LAY', 'ANI', 'LIG', 'COM'])
+
+    release()
+    await flushPromises()
+    expect(names()).toEqual(['LAY', 'LIG', 'COM'])
+  })
+
+  // Regression: the rows had no key, so a reload that moved them rebuilt
+  // the rows of the task types that changed places.
+  it('keeps the focus in a bitrate field when a reload moves its row', async () => {
+    const { names, rows, store, wrapper } = await mountWorkflow({
+      attachTo: document.body
+    })
+    const lighting = rows()[2]
+    const input = lighting.find('td.bitrate input').element
+    input.focus()
+    expect(document.activeElement).toBe(input)
+
+    store.commit('setShotTaskTypeIds', ['animation', 'lighting', 'compositing'])
+    await flushPromises()
+
+    expect(names()).toEqual(['ANI', 'LIG', 'COM'])
+    expect(rows()[1].element).toBe(lighting.element)
+    expect(document.activeElement).toBe(input)
+    wrapper.unmount()
+  })
+
+  // Regression: a reorder dropped while another was being saved left a flag
+  // up for good, after which each save sent its order once more, again and
+  // again while the server took more than a second to answer.
+  it('stops sending the order once it is saved on a slow server', async () => {
+    const { store, wrapper } = await mountComponent()
+    const list = wrapper.findComponent(DraggableStub)
+    const [animation, lighting] = list.props('modelValue')
+    const drop = items => {
+      list.vm.$emit('update:modelValue', items)
+      list.vm.$emit('end')
+    }
+    store.commit = vi.fn()
+    vi.useFakeTimers()
+    store.dispatch.mockImplementation(action =>
+      action === 'reorderTaskTypeLinks'
+        ? new Promise(resolve => setTimeout(resolve, 1500))
+        : Promise.resolve()
+    )
+
+    drop([lighting, animation])
+    await vi.advanceTimersByTimeAsync(500)
+    drop([animation, lighting])
+    await vi.advanceTimersByTimeAsync(20000)
+
+    const reorders = store.dispatch.mock.calls.filter(
+      ([action]) => action === 'reorderTaskTypeLinks'
+    )
+    expect(reorders).toHaveLength(2)
+  })
+
+  // Regression: a reorder dropped less than a second after the previous one,
+  // or during its save, was never sent, and the reload that followed the
+  // drop put the rows back.
+  it('saves each reorder before reloading, the last one last', async () => {
+    const { store, wrapper } = await mountComponent()
+    const list = wrapper.findComponent(DraggableStub)
+    const [animation, lighting] = list.props('modelValue')
+    const drop = items => {
+      list.vm.$emit('update:modelValue', items)
+      list.vm.$emit('end')
+    }
+    const calls = []
+    let saving = 0
+    let mostSaving = 0
+    store.commit = vi.fn()
+    vi.useFakeTimers()
+    store.dispatch.mockImplementation((action, payload) => {
+      if (action !== 'reorderTaskTypeLinks') {
+        calls.push(action)
+        return Promise.resolve()
+      }
+      calls.push(payload.taskTypeIds.join(','))
+      mostSaving = Math.max(mostSaving, ++saving)
+      return new Promise(resolve =>
+        setTimeout(() => {
+          saving--
+          resolve()
+        }, 200)
+      )
+    })
+
+    drop([lighting, animation])
+    await vi.advanceTimersByTimeAsync(300)
+    drop([animation, lighting])
+    await vi.advanceTimersByTimeAsync(100)
+    drop([lighting, animation])
+    await vi.advanceTimersByTimeAsync(5000)
+
+    expect(calls).toEqual([
+      'shot-2,shot-1',
+      'loadContext',
+      'shot-1,shot-2',
+      'shot-2,shot-1',
+      'loadContext',
+      'loadContext'
+    ])
+    expect(mostSaving).toBe(1)
+  })
+
+  // Regression: an order waiting for a save went to the production shown
+  // once it was sent, another one after a switch.
+  it('saves a reorder to the production it was dropped in', async () => {
+    const { store, wrapper } = await mountComponent()
+    const list = wrapper.findComponent(DraggableStub)
+    const [animation, lighting] = list.props('modelValue')
+    const drop = items => {
+      list.vm.$emit('update:modelValue', items)
+      list.vm.$emit('end')
+    }
+    store.commit = vi.fn()
+    vi.useFakeTimers()
+    store.dispatch.mockImplementation(action =>
+      action === 'reorderTaskTypeLinks'
+        ? new Promise(resolve => setTimeout(resolve, 200))
+        : Promise.resolve()
+    )
+
+    drop([lighting, animation])
+    drop([animation, lighting])
+    store.getters.currentProduction.id = 'production-2'
+    await vi.advanceTimersByTimeAsync(1000)
+
+    const projectIds = store.dispatch.mock.calls
+      .filter(([action]) => action === 'reorderTaskTypeLinks')
+      .map(([, { projectId }]) => projectId)
+    expect(projectIds).toEqual(['production-1', 'production-1'])
+  })
+
+  // Regression: one queue served every list, so a drop on another list took
+  // the place of an order still waiting for its save.
+  test.each([
+    [
+      'production',
+      async store => {
+        store.getters.currentProduction.id = 'production-2'
+      },
+      'production-2:shot-2,shot-1'
+    ],
+    [
+      'entity',
+      async () => {
+        await router.push('/settings?section=assets')
+        await vi.advanceTimersByTimeAsync(0)
+      },
+      'production-1:asset-1'
+    ]
+  ])(
+    'saves the waiting order of a list after a drop for another %s',
+    async (name, switchList, otherOrder) => {
+      const { store, wrapper } = await mountComponent()
+      const list = () => wrapper.findComponent(DraggableStub)
+      const drop = items => {
+        list().vm.$emit('update:modelValue', items)
+        list().vm.$emit('end')
+      }
+      const [animation, lighting] = list().props('modelValue')
+      store.commit = vi.fn()
+      vi.useFakeTimers()
+      store.dispatch.mockImplementation(action =>
+        action === 'reorderTaskTypeLinks'
+          ? new Promise(resolve => setTimeout(resolve, 200))
+          : Promise.resolve()
+      )
+
+      drop([lighting, animation])
+      drop([animation, lighting])
+      await switchList(store)
+      drop(name === 'production' ? [lighting, animation] : list().props('modelValue'))
+      await vi.advanceTimersByTimeAsync(1000)
+
+      const orders = store.dispatch.mock.calls
+        .filter(([action]) => action === 'reorderTaskTypeLinks')
+        .map(([, order]) => `${order.projectId}:${order.taskTypeIds.join(',')}`)
+      expect(orders).toHaveLength(3)
+      expect(orders).toEqual(
+        expect.arrayContaining(['production-1:shot-1,shot-2', otherOrder])
+      )
+    }
+  )
+
+  // Regression: a failed save failed the reorder dropped after it too, which
+  // Zou had saved: the lists went back to a production never reloaded.
+  it('reloads the production when a save fails', async () => {
+    const errorHandler = vi.fn()
+    const { store, wrapper } = await mountComponent(
+      'short',
+      [],
+      undefined,
+      errorHandler
+    )
+    const list = wrapper.findComponent(DraggableStub)
+    const [animation, lighting] = list.props('modelValue')
+    const drop = items => {
+      list.vm.$emit('update:modelValue', items)
+      list.vm.$emit('end')
+    }
+    const error = new Error('Bad Gateway')
+    const calls = []
+    store.commit = vi.fn()
+    vi.useFakeTimers()
+    store.dispatch.mockImplementation(action => {
+      calls.push(action)
+      if (action !== 'reorderTaskTypeLinks') return Promise.resolve()
+      const isFirst = calls.filter(call => call === action).length === 1
+      return new Promise((resolve, reject) => {
+        setTimeout(() => (isFirst ? reject(error) : resolve()), 200)
+      })
+    })
+
+    drop([lighting, animation])
+    drop([animation, lighting])
+    await vi.advanceTimersByTimeAsync(1000)
+
+    expect(calls).toEqual([
+      'reorderTaskTypeLinks',
+      'reorderTaskTypeLinks',
+      'loadContext',
+      'loadContext'
+    ])
+    expect(errorHandler.mock.calls[0][0]).toBe(error)
   })
 })

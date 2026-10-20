@@ -36,6 +36,8 @@ import ImportModal from '@/components/modals/ImportModal.vue'
 import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
 import Breakdown from '@/components/pages/Breakdown.vue'
 
+import { BrokenFileReader, GoneFileReader } from '../../fixtures/file-reader'
+
 const production = { id: 'p1', production_type: 'tvshow' }
 
 // The page is mounted on a store whose scope (production, episode) the tests
@@ -398,6 +400,61 @@ describe('Breakdown page, CSV import', () => {
     expect(importModal.props('active')).toBe(true)
     expect(importModal.props('isError')).toBe(false)
     wrapper.unmount()
+  })
+
+  describe('of a file', () => {
+    afterEach(() => {
+      vi.unstubAllGlobals()
+      vi.restoreAllMocks()
+    })
+
+    const confirmFile = async wrapper => {
+      await flushPromises()
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(button => button.props('icon') === 'import')
+        .vm.$emit('click')
+      const formData = new FormData()
+      formData.append('file', new File(['Name'], 'import.csv'))
+      wrapper.findComponent(ImportModal).vm.$emit('confirm', formData, 'file')
+      await flushPromises()
+      return wrapper.findComponent(ImportModal)
+    }
+
+    test('shows the error of a file the browser cannot read', async () => {
+      vi.stubGlobal('FileReader', GoneFileReader)
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { wrapper } = mountPage()
+
+      const importModal = await confirmFile(wrapper)
+
+      expect(importModal.props()).toMatchObject({
+        active: true,
+        isError: true,
+        isLoading: false
+      })
+      wrapper.unmount()
+    })
+
+    test('releases the modal on a bug, left to the error handler', async () => {
+      vi.stubGlobal('FileReader', BrokenFileReader)
+      const { wrapper } = mountPage()
+      const errorHandler = vi.fn()
+      wrapper.vm.$.appContext.config.errorHandler = errorHandler
+
+      const importModal = await confirmFile(wrapper)
+
+      expect(importModal.props()).toMatchObject({
+        isError: true,
+        isLoading: false
+      })
+      expect(errorHandler).toHaveBeenCalledWith(
+        expect.any(TypeError),
+        expect.anything(),
+        expect.anything()
+      )
+      wrapper.unmount()
+    })
   })
 })
 

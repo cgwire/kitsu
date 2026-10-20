@@ -2,6 +2,8 @@ import { flushPromises, shallowMount } from '@vue/test-utils'
 import { createStore } from 'vuex'
 
 import LoginLogs from '@/components/pages/logs/LoginLogs.vue'
+import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
+import PeopleName from '@/components/widgets/PeopleName.vue'
 
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 
@@ -63,6 +65,18 @@ describe('pages/logs/LoginLogs', () => {
     test('heads the card with the person', async () => {
       const wrapper = await mountPage()
       expect(wrapper.find('tbody td.person').classes()).toContain('card-head')
+    })
+
+    test('renders no avatar or name for an unknown person', async () => {
+      const wrapper = await mountPage()
+      const personOf = component => component.props('person')
+      expect(wrapper.findAll('tbody tr.datatable-row')).toHaveLength(2)
+      expect(wrapper.findAllComponents(PeopleAvatar).map(personOf)).toEqual([
+        person
+      ])
+      expect(wrapper.findAllComponents(PeopleName).map(personOf)).toEqual([
+        person
+      ])
     })
 
     test('labels the cells that carry a value', async () => {

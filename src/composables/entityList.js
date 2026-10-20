@@ -899,6 +899,7 @@ export const useEntityList = ({
   }
 
   const stopBrowsing = () => {
+    if (!isBrowsingX && !isBrowsingY) return
     document.body.style.cursor = 'default'
     isBrowsingX = false
     isBrowsingY = false

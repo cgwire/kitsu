@@ -1154,6 +1154,10 @@ const mutations = {
     // task columns resolve: tasks have their own events.
     const fields = { ...edit }
     delete fields.tasks
+    // The map holds raw objects: assigned through it only, the displayed
+    // list would see no change.
+    const displayedEdit = state.displayedEdits.find(({ id }) => id === edit.id)
+    if (displayedEdit) Object.assign(displayedEdit, fields)
     Object.assign(cache.editMap.get(edit.id), fields)
     cache.editIndex = buildEditIndex(cache.edits)
   },

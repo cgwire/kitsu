@@ -361,10 +361,7 @@ watch(currentProduction, () => {
 watch(isEpisodesLoading, isLoading => {
   if (isLoading) return
   initialLoading.value = false
-  nextTick(() => {
-    setSearchFromUrl()
-    onSearchChange()
-  })
+  nextTick(() => applySearchFromUrl())
   setScrollPosition()
 })
 
@@ -386,8 +383,7 @@ onMounted(() => {
   const finalize = () => {
     initialLoading.value = false
     if (listRef.value) {
-      setSearchFromUrl()
-      onSearchChange()
+      applySearchFromUrl()
       setScrollPosition()
       nextTick(() => {
         listRef.value?.selectTaskFromQuery()

@@ -28,7 +28,10 @@
           item-key="id"
           tag="tbody"
           :disabled="isMobile"
+          @choose="onRowHeld"
           @end="updatePriority"
+          @start="onRowDragged"
+          @unchoose="onRowReleased"
           v-model="items"
         >
           <template #item="{ element: taskType }">
@@ -101,6 +104,8 @@ import draggable from 'vuedraggable'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useStore } from 'vuex'
 
+import { useDraggableRebuild } from '@/composables/draggableRebuild'
+
 import BooleanCell from '@/components/cells/BooleanCell.vue'
 import RowActionsCell from '@/components/cells/RowActionsCell.vue'
 import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
@@ -134,24 +139,32 @@ const getDepartment = id => store.getters.getDepartment(id)
 
 const isEmpty = value => value === undefined || value === null || value === ''
 
+// The list held during the drag may still show a task type deleted
+// meanwhile, which the page would put back in the store.
 const updatePriority = () => {
-  const forms = items.value.map((item, index) => {
-    const priority = index + 1
-    item.priority = priority
-    return { id: item.id, name: item.name, priority: String(priority) }
-  })
+  const entryIds = new Set(props.entries.map(entry => entry.id))
+  const forms = items.value
+    .filter(item => entryIds.has(item.id))
+    .map((item, index) => {
+      const priority = index + 1
+      item.priority = priority
+      return { id: item.id, name: item.name, priority: String(priority) }
+    })
   emit('update-priorities', forms)
 }
 
+const {
+  rebuild: resetItems,
+  onRowHeld,
+  onRowDragged,
+  onRowReleased
+} = useDraggableRebuild(() => {
+  items.value = JSON.parse(JSON.stringify(props.entries))
+})
+
 // Watchers
 
-watch(
-  () => props.entries,
-  entries => {
-    items.value = JSON.parse(JSON.stringify(entries))
-  },
-  { deep: true, immediate: true }
-)
+watch(() => props.entries, resetItems, { deep: true, immediate: true })
 
 // Lifecycle
 

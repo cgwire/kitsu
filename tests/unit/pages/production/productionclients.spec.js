@@ -52,6 +52,7 @@ const account = (until = null) => ({
 
 describe('ProductionClients', () => {
   afterEach(() => {
+    vi.restoreAllMocks()
     vi.useRealTimers()
   })
 
@@ -101,13 +102,16 @@ describe('ProductionClients', () => {
   })
 
   it('keeps the create button from a failed account load', async () => {
+    const error = new Error('down')
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
     const { wrapper } = await mountClients({
       responses: {
         getPreviewAccount: () => {
-          throw new Error('down')
+          throw error
         }
       }
     })
+    expect(consoleError).toHaveBeenCalledWith(error)
     expect(wrapper.find('.preview .error').exists()).toBe(true)
     expect(wrapper.findComponent('.create-button').exists()).toBe(false)
   })
@@ -188,9 +192,12 @@ describe('ProductionClients', () => {
 
   it('shows a save error when editProduction fails', async () => {
     const { wrapper, store } = await mountClients()
-    store.dispatch.mockRejectedValue(new Error('boom'))
+    const error = new Error('boom')
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    store.dispatch.mockRejectedValue(error)
     wrapper.findComponent(Checkbox).vm.$emit('change', true)
     await flushPromises()
+    expect(consoleError).toHaveBeenCalledWith(error)
     expect(wrapper.find('.save-error').exists()).toBe(true)
     expect(wrapper.find('.preview .error').exists()).toBe(false)
   })
@@ -326,13 +333,16 @@ describe('ProductionClients', () => {
     const { wrapper, store } = await mountClients({
       responses: { getPreviewAccount: account() }
     })
+    const error = new Error('boom')
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
     wrapper.findComponent('.delete-button').vm.$emit('click')
     store.dispatch.mockImplementation(async name => {
-      if (name === 'deletePreviewAccount') throw new Error('boom')
+      if (name === 'deletePreviewAccount') throw error
       return account()
     })
     wrapper.findComponent(ConfirmModal).vm.$emit('confirm')
     await flushPromises()
+    expect(consoleError).toHaveBeenCalledWith(error)
     expect(wrapper.findComponent(ConfirmModal).props('active')).toBe(true)
     expect(wrapper.findComponent(ConfirmModal).props('isError')).toBe(true)
   })
@@ -405,12 +415,15 @@ describe('ProductionClients', () => {
 
     it('resets the checkbox on a save error', async () => {
       const { wrapper, store } = await mountClients()
-      store.dispatch.mockRejectedValue(new Error('boom'))
-      const before = wrapper.findComponent('.access-stats').vm
-      before.$emit('change', false)
+      const error = new Error('boom')
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+      store.dispatch.mockRejectedValue(error)
+      const before = wrapper.findComponent('.access-stats')
+      before.vm.$emit('change', false)
       await flushPromises()
+      expect(consoleError).toHaveBeenCalledWith(error)
       expect(wrapper.find('.save-error').exists()).toBe(true)
-      expect(wrapper.findComponent('.access-stats').vm).not.toBe(before)
+      expect(before.exists()).toBe(false)
     })
   })
 })
