@@ -482,7 +482,10 @@ watch(
   flex-grow: 0;
   overflow-y: initial;
 
+  // The importer keeps its width: shrunk by the wide list, it got narrow
+  // as soon as the import from production field was hidden
   &:last-child {
+    flex: 0 0 360px;
     padding: 1em;
   }
 }

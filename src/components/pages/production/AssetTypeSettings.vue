@@ -96,6 +96,13 @@ const onImportFromProduction = async productionId => {
   overflow-y: initial;
   flex: 0 0 auto;
   max-width: 400px;
+
+  // Asset type names are short: sized on its content, the importer was a
+  // narrow strip
+  & + .column {
+    flex: 0 0 360px;
+    width: 360px;
+  }
 }
 
 .list {
