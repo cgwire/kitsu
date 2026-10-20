@@ -119,6 +119,7 @@ defineProps({
   max-width: 800px;
   overflow-y: auto;
   padding-left: 2px;
+  padding-right: 1em;
 }
 
 // Workflow tabs hold lists and tables, they need more room than forms.
