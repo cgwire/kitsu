@@ -284,38 +284,40 @@
               >
                 {{ $t('playlists.build_weekly') }}
               </button>
-              <button
-                :class="{
-                  button: true,
-                  'add-sequence': true,
-                  'is-loading': loading.addEpisode
-                }"
-                :disabled="isAdditionLoading"
-                @click="addEpisodePending"
-                v-if="
-                  isTVShow &&
-                  !isAssetPlaylist &&
-                  !isSequencePlaylist &&
-                  !isEditPlaylist &&
-                  !isEpisodePlaylist
-                "
-              >
-                {{ $t('playlists.add_episode') }}
-              </button>
-              <button
-                :class="{
-                  button: true,
-                  'add-sequence': true,
-                  'is-loading': loading.addMovie
-                }"
-                :disabled="isAdditionLoading"
-                @click="addMovie"
-                v-else-if="
-                  !isAssetPlaylist && !isEditPlaylist && !isEpisodePlaylist
-                "
-              >
-                {{ $t('playlists.add_movie') }}
-              </button>
+              <template v-if="isEntireAdditionOffered">
+                <button
+                  :class="{
+                    button: true,
+                    'add-sequence': true,
+                    'is-loading': loading.addEpisode
+                  }"
+                  :disabled="isAdditionLoading"
+                  @click="addEpisodePending"
+                  v-if="
+                    isTVShow &&
+                    !isAssetPlaylist &&
+                    !isSequencePlaylist &&
+                    !isEditPlaylist &&
+                    !isEpisodePlaylist
+                  "
+                >
+                  {{ $t('playlists.add_episode') }}
+                </button>
+                <button
+                  :class="{
+                    button: true,
+                    'add-sequence': true,
+                    'is-loading': loading.addMovie
+                  }"
+                  :disabled="isAdditionLoading"
+                  @click="addMovie"
+                  v-else-if="
+                    !isAssetPlaylist && !isEditPlaylist && !isEpisodePlaylist
+                  "
+                >
+                  {{ $t('playlists.add_movie') }}
+                </button>
+              </template>
             </div>
           </div>
         </div>
@@ -427,7 +429,7 @@
                 v-for="(sequenceShots, i) in displayedShotsBySequence"
               >
                 <h2 class="entity-group-title" v-if="sequenceShots.length > 0">
-                  {{ sequenceShots[0].sequence_name }}
+                  {{ getSequenceName(sequenceShots[0]) }}
                   <button
                     class="button"
                     @click="addSequence(sequenceShots)"
@@ -682,6 +684,13 @@ const allShotsQuery = computed(() =>
   allForEntity.value === 'shot' ? { for_entity: 'shot' } : {}
 )
 
+// The entire episode and movie additions add every loaded shot: those of
+// the whole production under All shots, those another page left loaded
+// under the main pack, which loads none.
+const isEntireAdditionOffered = computed(
+  () => !isTVShow.value || !['all', 'main'].includes(currentEpisode.value?.id)
+)
+
 // The store keeps the last loaded list across pages: on mount it can
 // belong to another production, episode or all-mode entity type.
 const isPlaylistListStale = computed(() => {
@@ -835,6 +844,12 @@ const getCachedEntity = entityId => {
   return shotStore.cache.shotMap.get(entityId)
 }
 
+// Sequence names repeat across episodes: All shots says which one.
+const getSequenceName = entity =>
+  allForEntity.value === 'shot' && entity.episode_name && entity.sequence_name
+    ? `${entity.episode_name} / ${entity.sequence_name}`
+    : entity.sequence_name
+
 // Data loading
 
 const loadShotsData = async () => {
@@ -846,9 +861,12 @@ const loadShotsData = async () => {
     isShotsLoading.value ||
     shotsLoadingKey.value !== `${currentProduction.value.id}/${scope}`
   ) {
-    if (isTVShow.value && ['main', 'all'].includes(currentEpisode.value?.id)) {
-      // Pseudo-episodes load nothing of their own: only let the load in
-      // flight refill the map it emptied.
+    // The main pack and All assets list no shot: only let the load in
+    // flight refill the map it emptied. All shots loads every episode.
+    const isWithoutShots =
+      (isTVShow.value && currentEpisode.value?.id === 'main') ||
+      allForEntity.value === 'asset'
+    if (isWithoutShots) {
       if (isShotsLoading.value) await shotStore.cache.shotsLoadingPromise
     } else {
       if (isTVShow.value && !currentEpisode.value) {
@@ -1032,7 +1050,8 @@ const convertEntityToPlaylistFormat = entityInfo => {
   const playlistEntity = {
     id: entityInfo.id,
     name: entity.name,
-    parent_name: entity.sequence_name || episodeName || entity.asset_type_name,
+    parent_name:
+      getSequenceName(entity) || episodeName || entity.asset_type_name,
     // Per-entity fps: an entity can override the production fps via
     // data.fps. Carried here so the player uses the right rate for
     // whichever entity is playing (a playlist can mix fps).

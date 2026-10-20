@@ -258,18 +258,95 @@ describe.each([
   })
 })
 
-describe('Playlist page, loadShots on mount', () => {
-  it('loads nothing for the pseudo-episodes', async () => {
+describe('Playlist page, loadShots under a pseudo-episode', () => {
+  const shotQuery = { for_entity: 'shot' }
+
+  const mountOn = async (episodeId, query, state = {}) => {
     const { actions } = await mountPage({
+      query,
       state: {
         isTVShow: true,
-        currentEpisode: { id: 'all' },
-        shotsLoadingKey: 'p1/ep-a'
+        currentEpisode: { id: episodeId },
+        shotsLoadingKey: 'p1/ep-a',
+        ...state
       }
     })
     await flushPromises()
+    return actions.loadShots
+  }
 
-    expect(actions.loadShots).not.toHaveBeenCalled()
+  it.each([
+    ['the main pack', 'main', {}],
+    ['all assets', 'all', {}]
+  ])('loads nothing for %s', async (_, episodeId, query) => {
+    expect(await mountOn(episodeId, query)).not.toHaveBeenCalled()
+  })
+
+  // Its playlists hold the shots of every episode.
+  it('loads the shots of the whole production for all shots', async () => {
+    expect(await mountOn('all', shotQuery)).toHaveBeenCalledTimes(1)
+  })
+
+  it('keeps the production-wide dataset for all shots', async () => {
+    const loader = await mountOn('all', shotQuery, { shotsLoadingKey: 'p1/all' })
+
+    expect(loader).not.toHaveBeenCalled()
+  })
+
+  it('loads the shots when the topbar moves an episode to all shots', async () => {
+    const { store, actions } = await mountPage({
+      state: { isTVShow: true, shotsLoadingKey: 'p1/ep-a' }
+    })
+    await flushPromises()
+    routeHolder.route.query = shotQuery
+    await moveScope(store, { currentEpisode: { id: 'all' } })
+    await flushPromises()
+
+    expect(actions.loadShots).toHaveBeenCalledTimes(1)
+  })
+
+  it('loads the shots when all assets turns to all shots', async () => {
+    const loader = await mountOn('all', {})
+    routeHolder.route.query = shotQuery
+    await flushPromises()
+
+    expect(loader).toHaveBeenCalledTimes(1)
+  })
+
+  describe('entries of several episodes', () => {
+    const shots = [
+      { id: 'e1-s1', name: 'SH010', episode_name: 'E01' },
+      { id: 'e2-s1', name: 'SH010', episode_name: 'E02' }
+    ]
+
+    afterEach(() => shots.forEach(({ id }) => shotStore.cache.shotMap.delete(id)))
+
+    it('shows the entries of every episode for all shots', async () => {
+      const loadShots = vi.fn(() => {
+        shots.forEach(shot => shotStore.cache.shotMap.set(shot.id, shot))
+        return Promise.resolve()
+      })
+      const { wrapper } = await openPlaylist(
+        {
+          for_entity: 'shot',
+          is_for_all: true,
+          shots: shots.map(({ id }) => ({ id, preview_files: {} }))
+        },
+        {
+          query: shotQuery,
+          state: {
+            isTVShow: true,
+            currentEpisode: { id: 'all' },
+            shotsLoadingKey: 'p1/ep-a'
+          },
+          actions: { loadShots }
+        }
+      )
+      await flushPromises()
+
+      const entities = wrapper.findComponent(PlaylistPlayer).props('entities')
+      expect(entities.map(({ id }) => id)).toEqual(['e1-s1', 'e2-s1'])
+    })
   })
 })
 
@@ -521,6 +598,42 @@ describe('Playlist page, addition buttons', () => {
     await flushPromises()
   })
 
+  // Under All shots, the loaded shots are those of the whole production, and
+  // the main pack loads none of its own.
+  it.each([
+    [
+      'all shots',
+      { isTVShow: true, currentEpisode: { id: 'all' } },
+      { for_entity: 'shot' },
+      []
+    ],
+    ['the main pack', { isTVShow: true, currentEpisode: { id: 'main' } }, {}, []],
+    ['an episode', { isTVShow: true }, {}, ['playlists.add_episode']],
+    ['a movie', { isTVShow: false }, {}, ['playlists.add_movie']]
+  ])('offers the entire additions for %s', async (_, state, query, labels) => {
+    const { wrapper } = await openPlaylist(
+      { for_entity: 'shot' },
+      { state, query }
+    )
+    await flushPromises()
+    const additions = [
+      'playlists.build_daily',
+      'playlists.build_weekly',
+      'playlists.add_episode',
+      'playlists.add_movie'
+    ]
+    const offered = wrapper
+      .findAll('button')
+      .map(button => button.text())
+      .filter(text => additions.includes(text))
+
+    expect(offered).toEqual([
+      'playlists.build_daily',
+      'playlists.build_weekly',
+      ...labels
+    ])
+  })
+
   describe('loaded shots', () => {
     const shot = (id, name) => ({ id, name, sequence_name: 'SQ01' })
     const fillShotMap = shots => {
@@ -730,6 +843,60 @@ describe('Playlist page, sequence playlist', () => {
     expect(entity.parent_name).toBe('E01')
     expect(sequence.episode_name).toBeUndefined()
   })
+})
+
+describe('Playlist page, sequence of a shot', () => {
+  const shot = {
+    id: 's1',
+    name: 'SH010',
+    sequence_id: 'sq-1',
+    sequence_name: 'SQ01',
+    episode_name: 'E01'
+  }
+
+  beforeEach(() => shotStore.cache.shotMap.set(shot.id, shot))
+  afterEach(() => shotStore.cache.shotMap.delete(shot.id))
+
+  const openOn = async (episodeId, query, shots) => {
+    const { wrapper } = await openPlaylist(
+      { for_entity: 'shot', shots },
+      {
+        query,
+        state: { isTVShow: true, currentEpisode: { id: episodeId } },
+        getters: { displayedShotsBySequence: () => [[shot]] }
+      }
+    )
+    await flushPromises()
+    return wrapper
+  }
+
+  // Sequence names repeat across episodes: All shots says which one.
+  const cases = [
+    ['all shots', 'all', { for_entity: 'shot' }, 'E01 / SQ01'],
+    ['an episode', 'ep-a', {}, 'SQ01']
+  ]
+
+  it.each(cases)(
+    'names it in the entries under %s',
+    async (_, episodeId, query, name) => {
+      const wrapper = await openOn(episodeId, query, [
+        { id: 's1', preview_files: {} }
+      ])
+
+      const [entity] = wrapper.findComponent(PlaylistPlayer).props('entities')
+      expect(entity.parent_name).toBe(name)
+    }
+  )
+
+  it.each(cases)(
+    'names it in the addition panel under %s',
+    async (_, episodeId, query, name) => {
+      const wrapper = await openOn(episodeId, query, [])
+
+      const title = wrapper.find('.entity-group-title').element
+      expect(title.firstChild.textContent.trim()).toBe(name)
+    }
+  )
 })
 
 // Zou serves an entry whose preview is unset or deleted without any: the page
