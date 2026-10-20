@@ -31,8 +31,6 @@
 </template>
 
 <script setup>
-// Imports
-// --------------------------------------------------------------------------
 import { computed, onMounted, ref, watch } from 'vue'
 import { useStore } from 'vuex'
 
@@ -42,8 +40,6 @@ import VideoSettingsForm from '@/components/pages/production/VideoSettingsForm.v
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
-// Composables
-// --------------------------------------------------------------------------
 const store = useStore()
 
 // State

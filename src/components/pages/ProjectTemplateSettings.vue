@@ -36,21 +36,21 @@
             class="mb2"
             locale-key-prefix="productions.type."
             :label="$t('productions.fields.type')"
-            :options="productionTypeOptions"
+            :options="PRODUCTION_TYPE_OPTIONS"
             v-model="params.production_type"
           />
           <combobox-styled
             class="mb2"
             locale-key-prefix="productions.style."
             :label="$t('productions.fields.style')"
-            :options="productionStyleOptions"
+            :options="PRODUCTION_STYLE_OPTIONS"
             v-model="params.production_style"
           />
           <combobox-styled
             class="mb2"
             locale-key-prefix="productions.homepage."
             :label="$t('productions.fields.homepage')"
-            :options="homepageOptions"
+            :options="HOME_PAGE_OPTIONS"
             v-model="params.homepage"
           />
         </div>
@@ -329,28 +329,11 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive, watch, onMounted, useTemplateRef } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { useHead } from '@unhead/vue'
+import { computed, onMounted, reactive, ref, useTemplateRef, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
-
-import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
-import AssetTypeSettings from '@/components/pages/production/AssetTypeSettings.vue'
-import BackgroundSettings from '@/components/pages/production/BackgroundSettings.vue'
-import RowActionsCell from '@/components/cells/RowActionsCell.vue'
-import BoardSettings from '@/components/pages/production/BoardSettings.vue'
-import ClientAccessSettings from '@/components/pages/production/ClientAccessSettings.vue'
-import SettingsLayout from '@/components/pages/production/SettingsLayout.vue'
-import StatusAutomationSettings from '@/components/pages/production/StatusAutomationSettings.vue'
-import Checkbox from '@/components/widgets/Checkbox.vue'
-import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
-import Spinner from '@/components/widgets/Spinner.vue'
-import TaskStatusSettings from '@/components/pages/production/TaskStatusSettings.vue'
-import TaskTypeSettings from '@/components/pages/production/TaskTypeSettings.vue'
-import TextareaField from '@/components/widgets/TextareaField.vue'
-import TextField from '@/components/widgets/TextField.vue'
-import VideoSettingsForm from '@/components/pages/production/VideoSettingsForm.vue'
 
 import { useFieldCommitOnLeave } from '@/composables/fieldCommit'
 import {
@@ -361,12 +344,30 @@ import {
   clampBitrates
 } from '@/lib/productions'
 
+import RowActionsCell from '@/components/cells/RowActionsCell.vue'
+import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
+import AssetTypeSettings from '@/components/pages/production/AssetTypeSettings.vue'
+import BackgroundSettings from '@/components/pages/production/BackgroundSettings.vue'
+import BoardSettings from '@/components/pages/production/BoardSettings.vue'
+import ClientAccessSettings from '@/components/pages/production/ClientAccessSettings.vue'
+import SettingsLayout from '@/components/pages/production/SettingsLayout.vue'
+import StatusAutomationSettings from '@/components/pages/production/StatusAutomationSettings.vue'
+import TaskStatusSettings from '@/components/pages/production/TaskStatusSettings.vue'
+import TaskTypeSettings from '@/components/pages/production/TaskTypeSettings.vue'
+import VideoSettingsForm from '@/components/pages/production/VideoSettingsForm.vue'
+import Checkbox from '@/components/widgets/Checkbox.vue'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
+import Spinner from '@/components/widgets/Spinner.vue'
+import TextareaField from '@/components/widgets/TextareaField.vue'
+import TextField from '@/components/widgets/TextField.vue'
+
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const store = useStore()
 
-const activeTab = ref('parameters')
+// State
+// --------------------------------------------------------------------------
 const menuGroups = [
   {
     label: 'project_templates.settings_menu.template',
@@ -401,39 +402,12 @@ const VALID_METADATA_ENTITIES = [
   'Edit',
   'Task'
 ]
-const initialMetadataEntity = VALID_METADATA_ENTITIES.includes(
-  route.query.entity
+const activeTab = ref('parameters')
+const metadataEntityTab = ref(
+  VALID_METADATA_ENTITIES.includes(route.query.entity)
+    ? route.query.entity
+    : 'Asset'
 )
-  ? route.query.entity
-  : 'Asset'
-const metadataEntityTab = ref(initialMetadataEntity)
-
-watch(metadataEntityTab, entity => {
-  // eslint-disable-next-line no-unused-vars
-  const { search, ...rest } = route.query
-  router.replace({ query: { ...rest, entity } })
-})
-
-const metadataEntityTabs = computed(() => [
-  { label: t('assets.title'), name: 'Asset' },
-  { label: t('shots.title'), name: 'Shot' },
-  { label: t('sequences.title'), name: 'Sequence' },
-  { label: t('episodes.title'), name: 'Episode' },
-  { label: t('edits.title'), name: 'Edit' },
-  { label: t('tasks.tasks'), name: 'Task' }
-])
-
-const descriptorsForEntity = computed(() => {
-  const result = []
-  descriptors.value.forEach((d, index) => {
-    if ((d.entity_type || 'Asset') === metadataEntityTab.value) {
-      // attach the index to the original descriptor so v-model keeps the ref
-      d.__index = index
-      result.push(d)
-    }
-  })
-  return result
-})
 const template = ref(null)
 const templateTaskTypes = ref([])
 const templateTaskStatuses = ref([])
@@ -453,7 +427,6 @@ const errors = reactive({
   parameters: false,
   saveDescriptor: false
 })
-// Bumped on a failed save to reset the checkbox DOM state to the saved value
 const clientsKey = ref(0)
 const modals = reactive({ addMetadata: false })
 const descriptorToEdit = ref({})
@@ -462,11 +435,6 @@ const nameError = ref('')
 const ratioError = ref('')
 const resolutionError = ref('')
 const boardRoles = ref({}) // { taskStatusId: [roles] }
-
-const productionTypeOptions = PRODUCTION_TYPE_OPTIONS
-const productionStyleOptions = PRODUCTION_STYLE_OPTIONS
-const homepageOptions = HOME_PAGE_OPTIONS
-
 const params = ref({
   name: '',
   description: '',
@@ -489,6 +457,29 @@ const params = ref({
   is_frame_in_numbering: false,
   max_retakes: 0
 })
+let savedParams = ''
+let saveTimeout = null
+const layout = useTemplateRef('page')
+
+// Computed
+// --------------------------------------------------------------------------
+const templateId = computed(() => route.params.template_id)
+
+const metadataEntityTabs = computed(() => [
+  { label: t('assets.title'), name: 'Asset' },
+  { label: t('shots.title'), name: 'Shot' },
+  { label: t('sequences.title'), name: 'Sequence' },
+  { label: t('episodes.title'), name: 'Episode' },
+  { label: t('edits.title'), name: 'Edit' },
+  { label: t('tasks.tasks'), name: 'Task' }
+])
+
+// __index points back into descriptors, the list the modal edits
+const descriptorsForEntity = computed(() =>
+  descriptors.value
+    .map((descriptor, index) => ({ ...descriptor, __index: index }))
+    .filter(d => (d.entity_type || 'Asset') === metadataEntityTab.value)
+)
 
 const allTaskTypes = computed(() => {
   const taskTypes = store.getters.taskTypes || []
@@ -503,42 +494,9 @@ const departmentMap = computed(() => store.getters.departmentMap || new Map())
 const taskTypeMap = computed(() => store.getters.taskTypeMap || new Map())
 const bitrateDefaults = computed(() => store.getters.movieBitrateDefaults)
 
+// Functions
+// --------------------------------------------------------------------------
 const isActiveTab = tab => activeTab.value === tab
-
-watch(
-  () => route.query.tab,
-  tab => {
-    activeTab.value = tabIds.includes(tab) ? tab : 'parameters'
-  },
-  { immediate: true }
-)
-
-watch(
-  () => params.value.name,
-  () => (nameError.value = '')
-)
-watch(
-  () => params.value.ratio,
-  () => (ratioError.value = '')
-)
-watch(
-  () => params.value.resolution,
-  () => (resolutionError.value = '')
-)
-
-useHead({
-  title: computed(() =>
-    template.value
-      ? `${params.value.name.trim() || template.value.name} - ${t('project_templates.title')} - Kitsu`
-      : t('project_templates.title')
-  )
-})
-
-const templateId = computed(() => route.params.template_id)
-
-// The parameters as last loaded or sent: the autosave skips them, so a load
-// saves nothing.
-let savedParams = ''
 
 const loadTemplateData = async () => {
   const id = templateId.value
@@ -581,30 +539,23 @@ const loadTemplateData = async () => {
     max_retakes: tmpl.max_retakes || 0
   }
   savedParams = JSON.stringify(params.value)
-  // Build roles map from task status link data (if available from API)
-  const roles = {}
-  taskStatuses.forEach(ts => {
-    roles[ts.id] = ts.roles_for_board || []
-  })
-  boardRoles.value = roles
+  boardRoles.value = Object.fromEntries(
+    taskStatuses.map(ts => [ts.id, ts.roles_for_board || []])
+  )
 }
 
 const validateRatio = () => {
-  const v = params.value.ratio
-  if (!v) return ''
-  if (!/^\d+:\d+$/.test(v)) {
-    return t('project_templates.ratio_error')
-  }
-  return ''
+  const ratio = params.value.ratio
+  return ratio && !/^\d+:\d+$/.test(ratio)
+    ? t('project_templates.ratio_error')
+    : ''
 }
 
 const validateResolution = () => {
-  const v = params.value.resolution
-  if (!v) return ''
-  if (!/^\d+x\d+$|^\d+x$|^x\d+$/.test(v)) {
-    return t('project_templates.resolution_error')
-  }
-  return ''
+  const resolution = params.value.resolution
+  return resolution && !/^\d+x\d+$|^\d+x$|^x\d+$/.test(resolution)
+    ? t('project_templates.resolution_error')
+    : ''
 }
 
 const saveParameters = async () => {
@@ -618,10 +569,6 @@ const saveParameters = async () => {
   errors.parameters = false
   const max = bitrateDefaults.value.hd_bitrate_compression
   const bitrates = clampBitrates(params.value, { max })
-  // No form submit makes the browser check these fields: show each bitrate
-  // rounded and within bounds. The low definition one goes under the high
-  // definition one in the payload only: a save in the middle of typing the
-  // high definition one must not lower it for good.
   Object.keys(bitrates).forEach(key => {
     const bitrate = clampBitrate(params.value[key], max)
     if (bitrate !== null && bitrate !== params.value[key]) {
@@ -632,7 +579,6 @@ const saveParameters = async () => {
   savedParams = JSON.stringify(params.value)
   try {
     await store.dispatch('editProjectTemplate', {
-      // The route can have left the template by the end of the delay.
       id: template.value.id,
       ...params.value,
       name: params.value.name.trim(),
@@ -650,18 +596,11 @@ const saveParameters = async () => {
   loading.parameters = false
 }
 
-let saveTimeout = null
-watch(
-  () => ({ ...params.value }),
-  () => {
-    clearTimeout(saveTimeout)
-    if (!template.value?.id || JSON.stringify(params.value) === savedParams) {
-      return
-    }
-    saveTimeout = setTimeout(saveParameters, 800)
-  },
-  { deep: true }
-)
+// A link change saves, then the template reloads as a whole
+const updateTemplate = async (action, payload) => {
+  await store.dispatch(action, { templateId: templateId.value, ...payload })
+  await loadTemplateData()
+}
 
 const onUpdateBoardRoles = async ({ taskStatusId, roles }) => {
   boardRoles.value = { ...boardRoles.value, [taskStatusId]: roles }
@@ -673,13 +612,16 @@ const onUpdateBoardRoles = async ({ taskStatusId, roles }) => {
   })
 }
 
-const addTaskType = async taskTypeId => {
-  await store.dispatch('addTaskTypeToTemplate', {
-    templateId: templateId.value,
-    taskTypeId
+const addTaskType = taskTypeId =>
+  updateTemplate('addTaskTypeToTemplate', { taskTypeId })
+
+const removeTaskType = taskTypeId =>
+  updateTemplate('removeTaskTypeFromTemplate', { taskTypeId })
+
+const reorderTaskTypes = ordered =>
+  updateTemplate('reorderTemplateTaskTypes', {
+    taskTypeIds: ordered.map(item => item.taskTypeId)
   })
-  await loadTemplateData()
-}
 
 const setTaskTypeBitrates = async ({ taskTypeId, ...bitrates }) => {
   const id = templateId.value
@@ -688,11 +630,9 @@ const setTaskTypeBitrates = async ({ taskTypeId, ...bitrates }) => {
     taskTypeId,
     ...bitrates
   })
-  // A field saves on its way out of the page, which can be gone by now.
   if (templateId.value === id) await loadTemplateData()
 }
 
-// A reload would reset the parameters a pending autosave still has to send
 const saveClientAccess = async (action, update) => {
   loading.clients = true
   errors.clients = false
@@ -741,63 +681,27 @@ const setStatusClientAllowed = (taskStatusId, isClientAllowed) =>
     }
   )
 
-const removeTaskType = async taskTypeId => {
-  await store.dispatch('removeTaskTypeFromTemplate', {
-    templateId: templateId.value,
-    taskTypeId
-  })
-  await loadTemplateData()
-}
+const addTaskStatus = taskStatusId =>
+  updateTemplate('addTaskStatusToTemplate', { taskStatusId })
 
-const reorderTaskTypes = async ordered => {
-  await store.dispatch('reorderTemplateTaskTypes', {
-    templateId: templateId.value,
-    taskTypeIds: ordered.map(item => item.taskTypeId)
-  })
-  await loadTemplateData()
-}
+const removeTaskStatus = taskStatusId =>
+  updateTemplate('removeTaskStatusFromTemplate', { taskStatusId })
 
-const addTaskStatus = async taskStatusId => {
-  await store.dispatch('addTaskStatusToTemplate', {
-    templateId: templateId.value,
-    taskStatusId
-  })
-  await loadTemplateData()
-}
-
-const removeTaskStatus = async taskStatusId => {
-  await store.dispatch('removeTaskStatusFromTemplate', {
-    templateId: templateId.value,
-    taskStatusId
-  })
-  await loadTemplateData()
-}
-
-const reorderTaskStatuses = async ordered => {
-  await store.dispatch('reorderTemplateTaskStatuses', {
-    templateId: templateId.value,
+const reorderTaskStatuses = ordered =>
+  updateTemplate('reorderTemplateTaskStatuses', {
     taskStatusIds: ordered.map(item => item.taskStatusId)
   })
-  await loadTemplateData()
-}
 
-const addAssetType = async assetTypeId => {
-  await store.dispatch('addAssetTypeToTemplate', {
-    templateId: templateId.value,
-    assetTypeId
-  })
-  await loadTemplateData()
-}
+const addAssetType = assetTypeId =>
+  updateTemplate('addAssetTypeToTemplate', { assetTypeId })
 
-// Template routes are per id: keep the loop but reload the template data
-// once at the end instead of once per imported item.
-const importTaskTypes = async ({ ids, done }) => {
+const removeAssetType = assetTypeId =>
+  updateTemplate('removeAssetTypeFromTemplate', { assetTypeId })
+
+const importLinks = async ({ ids, done }, action, key) => {
   try {
-    for (const taskTypeId of ids) {
-      await store.dispatch('addTaskTypeToTemplate', {
-        templateId: templateId.value,
-        taskTypeId
-      })
+    for (const id of ids) {
+      await store.dispatch(action, { templateId: templateId.value, [key]: id })
     }
     await loadTemplateData()
   } catch (err) {
@@ -806,68 +710,26 @@ const importTaskTypes = async ({ ids, done }) => {
   done()
 }
 
-const importAssetTypes = async ({ ids, done }) => {
-  try {
-    for (const assetTypeId of ids) {
-      await store.dispatch('addAssetTypeToTemplate', {
-        templateId: templateId.value,
-        assetTypeId
-      })
-    }
-    await loadTemplateData()
-  } catch (err) {
-    console.error(err)
-  }
-  done()
-}
+const importTaskTypes = payload =>
+  importLinks(payload, 'addTaskTypeToTemplate', 'taskTypeId')
 
-const removeAssetType = async assetTypeId => {
-  await store.dispatch('removeAssetTypeFromTemplate', {
-    templateId: templateId.value,
-    assetTypeId
-  })
-  await loadTemplateData()
-}
+const importAssetTypes = payload =>
+  importLinks(payload, 'addAssetTypeToTemplate', 'assetTypeId')
 
-const addAutomation = async automationId => {
-  await store.dispatch('addStatusAutomationToTemplate', {
-    templateId: templateId.value,
-    statusAutomationId: automationId
-  })
-  await loadTemplateData()
-}
+const addAutomation = statusAutomationId =>
+  updateTemplate('addStatusAutomationToTemplate', { statusAutomationId })
 
-const removeAutomation = async automationId => {
-  await store.dispatch('removeStatusAutomationFromTemplate', {
-    templateId: templateId.value,
-    statusAutomationId: automationId
-  })
-  await loadTemplateData()
-}
+const removeAutomation = statusAutomationId =>
+  updateTemplate('removeStatusAutomationFromTemplate', { statusAutomationId })
 
-const addBackground = async backgroundId => {
-  await store.dispatch('addBackgroundToTemplate', {
-    templateId: templateId.value,
-    backgroundId
-  })
-  await loadTemplateData()
-}
+const addBackground = backgroundId =>
+  updateTemplate('addBackgroundToTemplate', { backgroundId })
 
-const removeBackground = async backgroundId => {
-  await store.dispatch('removeBackgroundFromTemplate', {
-    templateId: templateId.value,
-    backgroundId
-  })
-  await loadTemplateData()
-}
+const removeBackground = backgroundId =>
+  updateTemplate('removeBackgroundFromTemplate', { backgroundId })
 
-const setDefaultBackground = async backgroundId => {
-  await store.dispatch('setTemplateDefaultBackground', {
-    templateId: templateId.value,
-    backgroundId
-  })
-  await loadTemplateData()
-}
+const setDefaultBackground = backgroundId =>
+  updateTemplate('setTemplateDefaultBackground', { backgroundId })
 
 const cleanDescriptors = () =>
   descriptors.value.map(d => ({
@@ -882,15 +744,11 @@ const cleanDescriptors = () =>
     position: d.position
   }))
 
-const persistDescriptors = async () => {
-  await store.dispatch('setTemplateMetadataDescriptors', {
-    templateId: templateId.value,
+const persistDescriptors = () =>
+  updateTemplate('setTemplateMetadataDescriptors', {
     descriptors: cleanDescriptors()
   })
-  await loadTemplateData()
-}
 
-// Close leaves the error of the last save: opening drops it.
 const openAddDescriptor = () => {
   errors.saveDescriptor = false
   descriptorToEditIndex.value = -1
@@ -958,8 +816,49 @@ const confirmMetadataModal = async form => {
   loading.saveDescriptor = false
 }
 
-// The task type bitrates read the template of the route when they save.
-const layout = useTemplateRef('page')
+// Watchers
+// --------------------------------------------------------------------------
+watch(
+  () => route.query.tab,
+  tab => {
+    activeTab.value = tabIds.includes(tab) ? tab : 'parameters'
+  },
+  { immediate: true }
+)
+
+watch(metadataEntityTab, entity => {
+  // eslint-disable-next-line no-unused-vars
+  const { search, ...rest } = route.query
+  router.replace({ query: { ...rest, entity } })
+})
+
+watch(
+  () => params.value.name,
+  () => (nameError.value = '')
+)
+watch(
+  () => params.value.ratio,
+  () => (ratioError.value = '')
+)
+watch(
+  () => params.value.resolution,
+  () => (resolutionError.value = '')
+)
+
+watch(
+  () => ({ ...params.value }),
+  () => {
+    clearTimeout(saveTimeout)
+    if (!template.value?.id || JSON.stringify(params.value) === savedParams) {
+      return
+    }
+    saveTimeout = setTimeout(saveParameters, 800)
+  },
+  { deep: true }
+)
+
+// Lifecycle
+// --------------------------------------------------------------------------
 useFieldCommitOnLeave(
   computed(() => layout.value?.$el),
   (to, from) => to.params.template_id !== from.params.template_id
@@ -969,6 +868,16 @@ onMounted(async () => {
   loading.template = true
   await Promise.all([store.dispatch('loadContext'), loadTemplateData()])
   loading.template = false
+})
+
+// Head
+// --------------------------------------------------------------------------
+useHead({
+  title: computed(() =>
+    template.value
+      ? `${params.value.name.trim() || template.value.name} - ${t('project_templates.title')} - Kitsu`
+      : t('project_templates.title')
+  )
 })
 </script>
 
@@ -996,10 +905,6 @@ onMounted(async () => {
   border-bottom: none;
   margin-top: 0.5em;
   margin-bottom: 0.8em;
-}
-
-.datatable .field {
-  margin-bottom: 0;
 }
 
 .datatable th {
@@ -1108,26 +1013,26 @@ onMounted(async () => {
   }
 
   /* Descriptors: name as title (full width) */
-  :deep(.descriptors-table .datatable-row .descriptor-name) {
+  .descriptors-table .datatable-row .descriptor-name {
     flex: 1 1 100%;
     font-weight: 600;
     font-size: 1.05em;
   }
 
-  :deep(.descriptors-table .datatable-row .descriptor-type) {
+  .descriptors-table .datatable-row .descriptor-type {
     flex: 0 0 auto;
     font-size: 0.85em;
     color: var(--text-alt);
   }
 
-  :deep(.descriptors-table .descriptor-for-client),
-  :deep(.descriptors-table .datatable-row .actions),
-  :deep(.descriptors-table tr td.actions) {
+  .descriptors-table .descriptor-for-client,
+  .descriptors-table .datatable-row .actions,
+  .descriptors-table tr td.actions {
     display: none !important;
   }
 
-  :deep(.descriptors-table .datatable-row .descriptor-departments),
-  :deep(.descriptors-table .datatable-row .descriptor-values) {
+  .descriptors-table .datatable-row .descriptor-departments,
+  .descriptors-table .datatable-row .descriptor-values {
     flex: 1 1 100%;
     font-size: 0.9em;
     color: var(--text-alt);

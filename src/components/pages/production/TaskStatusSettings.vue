@@ -93,10 +93,9 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
-
-import draggable from 'vuedraggable'
 import { GripVerticalIcon } from 'lucide-vue-next'
+import { computed, ref, watch } from 'vue'
+import draggable from 'vuedraggable'
 
 import { sortByName } from '@/lib/sorting'
 
@@ -104,6 +103,8 @@ import BooleanRep from '@/components/widgets/BooleanRep.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
+// Props / Emits
+// --------------------------------------------------------------------------
 const props = defineProps({
   taskStatuses: { type: Array, default: () => [] },
   allTaskStatuses: { type: Array, default: () => [] }
@@ -111,9 +112,13 @@ const props = defineProps({
 
 const emit = defineEmits(['add', 'remove', 'reorder'])
 
+// State
+// --------------------------------------------------------------------------
 const taskStatusToAdd = ref(null)
 const draggableList = ref([])
 
+// Computed
+// --------------------------------------------------------------------------
 const linkedIds = computed(() => new Set(props.taskStatuses.map(s => s.id)))
 
 const remainingTaskStatuses = computed(() =>
@@ -124,22 +129,11 @@ const remainingTaskStatuses = computed(() =>
   )
 )
 
+// Functions
+// --------------------------------------------------------------------------
 const resetSelection = () => {
   taskStatusToAdd.value = remainingTaskStatuses.value[0]?.id || null
 }
-
-watch(
-  () => props.taskStatuses,
-  list => {
-    draggableList.value = [...list]
-    resetSelection()
-  },
-  { immediate: true }
-)
-
-watch(remainingTaskStatuses, () => {
-  resetSelection()
-})
 
 const onAdd = () => {
   if (!taskStatusToAdd.value) return
@@ -148,12 +142,26 @@ const onAdd = () => {
 }
 
 const onReorder = () => {
-  const ordered = draggableList.value.map((ts, index) => ({
-    taskStatusId: ts.id,
-    priority: index + 1
-  }))
-  emit('reorder', ordered)
+  emit(
+    'reorder',
+    draggableList.value.map((ts, index) => ({
+      taskStatusId: ts.id,
+      priority: index + 1
+    }))
+  )
 }
+
+// Watchers
+// --------------------------------------------------------------------------
+watch(
+  () => props.taskStatuses,
+  list => {
+    draggableList.value = [...list]
+  },
+  { immediate: true }
+)
+
+watch(remainingTaskStatuses, resetSelection, { immediate: true })
 </script>
 
 <style lang="scss" scoped>

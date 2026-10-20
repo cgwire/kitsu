@@ -24,12 +24,16 @@ import BackgroundSettings from '@/components/pages/production/BackgroundSettings
 
 const store = useStore()
 
+// Computed
+// --------------------------------------------------------------------------
 const backgrounds = computed(() => store.getters.backgrounds)
 const currentProduction = computed(() => store.getters.currentProduction)
 const productionBackgrounds = computed(
   () => store.getters.productionBackgrounds
 )
 
+// Functions
+// --------------------------------------------------------------------------
 const onAdd = backgroundId => {
   store.dispatch('addBackgroundToProduction', backgroundId)
 }

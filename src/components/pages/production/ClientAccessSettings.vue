@@ -151,19 +151,15 @@ const emit = defineEmits([
   'update-setting'
 ])
 
+// State
+// --------------------------------------------------------------------------
 const TEMPLATE_KEYS = [
   'access_description',
   'access_stats_description',
   'statuses_empty',
   'statuses_overridden'
 ]
-const copyKey = key =>
-  props.isTemplate && TEMPLATE_KEYS.includes(key)
-    ? `project_templates.clients.${key}`
-    : `productions.clients.${key}`
 
-// Computed
-// --------------------------------------------------------------------------
 const accessOptions = [
   { name: 'stats', label: 'stats', flag: 'is_client_stats_visible' },
   {
@@ -178,6 +174,8 @@ const accessOptions = [
   }
 ]
 
+// Computed
+// --------------------------------------------------------------------------
 // Clients never get the concept pages, so concept task types are left out
 const taskTypeGroups = computed(() => {
   const groups = new Map()
@@ -197,8 +195,17 @@ const taskTypeGroups = computed(() => {
   return [...groups.values()]
 })
 
+const overriddenStatuses = computed(() =>
+  props.taskStatuses.filter(status => !isStudioDefault(status))
+)
+
 // Functions
 // --------------------------------------------------------------------------
+const copyKey = key =>
+  props.isTemplate && TEMPLATE_KEYS.includes(key)
+    ? `project_templates.clients.${key}`
+    : `productions.clients.${key}`
+
 const isClientAllowed = status =>
   typeof status.link_is_client_allowed === 'boolean'
     ? status.link_is_client_allowed
@@ -210,10 +217,6 @@ const isStudioDefault = status =>
   status.link_is_client_allowed === status.is_client_allowed
 
 // null drops the override and follows the studio setting again
-const overriddenStatuses = computed(() =>
-  props.taskStatuses.filter(status => !isStudioDefault(status))
-)
-
 const resetStatusesToStudio = () =>
   overriddenStatuses.value.forEach(status =>
     emit('set-status-client-allowed', status.id, null)
@@ -263,16 +266,6 @@ const setStatusClientAllowed = (status, value) =>
 
 .status-tag {
   justify-self: start;
-}
-
-@media screen and (max-width: 768px) {
-  .status-list {
-    grid-template-columns: auto 1fr;
-  }
-
-  .status-origin {
-    grid-column: 1 / -1;
-  }
 }
 
 .status-origin {
@@ -346,5 +339,15 @@ const setStatusClientAllowed = (status, value) =>
 
 .empty {
   color: var(--text-alt);
+}
+
+@media screen and (max-width: 768px) {
+  .status-list {
+    grid-template-columns: auto 1fr;
+  }
+
+  .status-origin {
+    grid-column: 1 / -1;
+  }
 }
 </style>

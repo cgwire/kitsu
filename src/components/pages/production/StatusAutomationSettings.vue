@@ -31,11 +31,13 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 
-import ComboboxStatusAutomation from '@/components/widgets/ComboboxStatusAutomation.vue'
 import StatusAutomationList from '@/components/lists/StatusAutomationList.vue'
+import ComboboxStatusAutomation from '@/components/widgets/ComboboxStatusAutomation.vue'
 
+// Props / Emits
+// --------------------------------------------------------------------------
 const props = defineProps({
   statusAutomations: { type: Array, default: () => [] },
   allStatusAutomations: { type: Array, default: () => [] }
@@ -43,8 +45,12 @@ const props = defineProps({
 
 const emit = defineEmits(['add', 'remove'])
 
+// State
+// --------------------------------------------------------------------------
 const automationToAdd = ref(null)
 
+// Computed
+// --------------------------------------------------------------------------
 const linkedIds = computed(
   () => new Set(props.statusAutomations.map(a => a.id))
 )
@@ -53,21 +59,11 @@ const remainingAutomations = computed(() =>
   props.allStatusAutomations.filter(a => !linkedIds.value.has(a.id))
 )
 
+// Functions
+// --------------------------------------------------------------------------
 const resetSelection = () => {
   automationToAdd.value = remainingAutomations.value[0]?.id || null
 }
-
-watch(
-  () => props.statusAutomations,
-  () => {
-    resetSelection()
-  },
-  { immediate: true }
-)
-
-watch(remainingAutomations, () => {
-  resetSelection()
-})
 
 const onAdd = () => {
   if (!automationToAdd.value) return
@@ -75,9 +71,11 @@ const onAdd = () => {
   resetSelection()
 }
 
-const onRemove = id => {
-  emit('remove', id)
-}
+const onRemove = id => emit('remove', id)
+
+// Watchers
+// --------------------------------------------------------------------------
+watch(remainingAutomations, resetSelection, { immediate: true })
 </script>
 
 <style lang="scss" scoped>

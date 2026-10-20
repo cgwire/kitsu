@@ -31,37 +31,39 @@
 </template>
 
 <script setup>
-import moment from 'moment'
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { GripVerticalIcon } from 'lucide-vue-next'
+import { computed } from 'vue'
 import { useStore } from 'vuex'
 
 import { clampBitrates } from '@/lib/productions'
-import { parseDate } from '@/lib/time'
-import { GripVerticalIcon } from 'lucide-vue-next'
 
 import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
 
+const store = useStore()
+
+// Props / Emits
+// --------------------------------------------------------------------------
 const props = defineProps({
   taskType: { required: true, type: Object },
   scheduleItem: { required: true, type: Object }
 })
 
-const emit = defineEmits(['bitrates-changed', 'date-changed', 'remove'])
+const emit = defineEmits(['bitrates-changed', 'remove'])
 
+// State
+// --------------------------------------------------------------------------
 const BITRATE_KEYS = ['hd_bitrate_compression', 'ld_bitrate_compression']
 
-const store = useStore()
-
-const startDate = ref(null)
-const endDate = ref(null)
-const silent = ref(true)
-
+// Computed
+// --------------------------------------------------------------------------
 const currentProduction = computed(() => store.getters.currentProduction)
 const bitrateDefaults = computed(() => store.getters.movieBitrateDefaults)
 const link = computed(
   () => currentProduction.value.task_type_links?.[props.taskType.id] || {}
 )
 
+// Functions
+// --------------------------------------------------------------------------
 const bitrateCeiling = key =>
   key === 'hd_bitrate_compression'
     ? bitrateDefaults.value.hd_bitrate_compression
@@ -89,82 +91,9 @@ const onBitrateChange = (key, input) => {
   input.value = bitrates[key] ?? ''
   emit('bitrates-changed', { taskType: props.taskType, ...bitrates })
 }
-
-// eslint-disable-next-line no-unused-vars
-const productionTimeRange = computed(() => ({
-  to: parseDate(currentProduction.value.start_date).toDate(),
-  from: parseDate(currentProduction.value.end_date).toDate()
-}))
-
-// eslint-disable-next-line no-unused-vars
-const endDateTimeRange = computed(() => ({
-  to: startDate.value,
-  from: parseDate(currentProduction.value.end_date).toDate()
-}))
-
-onMounted(() => {
-  startDate.value = parseDate(props.scheduleItem.start_date).toDate()
-  endDate.value = parseDate(props.scheduleItem.end_date).toDate()
-  nextTick(() => {
-    silent.value = false
-  })
-})
-
-watch(startDate, () => {
-  if (silent.value) return
-  const start = moment(startDate.value)
-  let end = moment(endDate.value)
-  silent.value = true
-  if (end.isBefore(start)) {
-    end = start.clone().add(1, 'days')
-    endDate.value = end.toDate()
-  }
-  const data = { ...props.scheduleItem, startDate: start, endDate: end }
-  emit('date-changed', data)
-  nextTick(() => {
-    silent.value = false
-  })
-})
-
-watch(endDate, () => {
-  if (silent.value) return
-  let start = moment(startDate.value)
-  const end = moment(endDate.value)
-  silent.value = true
-  if (end.isBefore(start)) {
-    start = end.clone().add(-1, 'days')
-    startDate.value = start.toDate()
-  }
-  const data = { ...props.scheduleItem, startDate: start, endDate: end }
-  emit('date-changed', data)
-  nextTick(() => {
-    silent.value = false
-  })
-})
-
-watch(
-  () => props.scheduleItem,
-  () => {
-    silent.value = true
-    startDate.value = parseDate(props.scheduleItem.start_date).toDate()
-    endDate.value = parseDate(props.scheduleItem.end_date).toDate()
-    nextTick(() => {
-      silent.value = false
-    })
-  }
-)
 </script>
 
 <style lang="scss" scoped>
-.field {
-  margin-bottom: 0;
-  width: 105px;
-}
-
-.priority {
-  padding-left: 2rem;
-}
-
 .bitrate {
   min-width: 120px;
   width: 120px;
