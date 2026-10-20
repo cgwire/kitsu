@@ -1423,7 +1423,22 @@
         "edit_milestone": "Editar meta para",
         "name": "Nome",
         "error": "Ocorreu um erro ao adicionar ou editar a meta. Por favor, tente novamente.",
-        "delete_milestone": "Excluir marco"
+        "delete_milestone": "Excluir marco",
+        "type": "Tipo",
+        "status": "Status",
+        "color": "Cor",
+        "types": {
+          "kickoff": "Kickoff",
+          "review": "Revisão",
+          "approval": "Aprovação",
+          "delivery": "Entrega",
+          "other": "Outro"
+        },
+        "statuses": {
+          "todo": "A fazer",
+          "wfa": "WFA",
+          "done": "Concluído"
+        }
       },
       "mode": "Modo de exibição",
       "mode_prev": "Previsão",

@@ -1423,7 +1423,22 @@
         "edit_milestone": "Modifier la milestone",
         "name": "Nom",
         "error": "Une erreur est survenue en ajoutant ou modifiant cette milestone. Contactez notre support pour que nous puissions étudier le problème.",
-        "delete_milestone": "Supprimer la milestone"
+        "delete_milestone": "Supprimer la milestone",
+        "type": "Type",
+        "status": "Statut",
+        "color": "Couleur",
+        "types": {
+          "kickoff": "Lancement",
+          "review": "Revue",
+          "approval": "Validation",
+          "delivery": "Livraison",
+          "other": "Autre"
+        },
+        "statuses": {
+          "todo": "À faire",
+          "wfa": "WFA",
+          "done": "Terminé"
+        }
       },
       "mode": "Mode d'affichage",
       "mode_prev": "Prévisions",
