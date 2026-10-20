@@ -508,10 +508,14 @@ export default {
     ratio_error: 'Ratio must follow the x:y format (e.g. 16:9).',
     resolution_error: 'Resolution must follow the WxH format (e.g. 1920x1080).',
     add_metadata: 'Add a metadata',
+    metadata_explanation: 'Metadata columns added to the productions created from this template.',
     fields: {
       name: 'Name',
       description: 'Description',
       entity_type: 'Entity type'
+    },
+    settings_menu: {
+      template: 'Template'
     },
     tabs: {
       task_types: 'Task Types',

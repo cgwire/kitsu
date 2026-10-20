@@ -2409,7 +2409,11 @@
         "task_statuses": "وضعیت‌های وظیفه",
         "task_types": "انواع وظیفه"
       },
-      "title": "قالب‌ها"
+      "title": "قالب‌ها",
+      "metadata_explanation": "ستون‌های فراداده که به تولیدهای ساخته‌شده از این قالب افزوده می‌شوند.",
+      "settings_menu": {
+        "template": "قالب"
+      }
     },
     "share": {
       "comment_placeholder": "یک نظر بگذارید...",

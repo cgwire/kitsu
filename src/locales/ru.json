@@ -2409,7 +2409,11 @@
         "task_statuses": "Статусы задач",
         "task_types": "Типы задач"
       },
-      "title": "Шаблоны"
+      "title": "Шаблоны",
+      "metadata_explanation": "Столбцы метаданных, добавляемые в проекты, созданные по этому шаблону.",
+      "settings_menu": {
+        "template": "Шаблон"
+      }
     },
     "share": {
       "comment_placeholder": "Оставить комментарий...",

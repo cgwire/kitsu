@@ -502,6 +502,10 @@
         "asset_types": "Typy assetów",
         "status_automations": "Automatyzacje statusów",
         "metadata_descriptors": "Metadane"
+      },
+      "metadata_explanation": "Kolumny metadanych dodawane do produkcji utworzonych z tego szablonu.",
+      "settings_menu": {
+        "template": "Szablon"
       }
     },
     "entities": {

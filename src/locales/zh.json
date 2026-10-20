@@ -2409,7 +2409,11 @@
         "task_statuses": "任务状态",
         "task_types": "任务类型"
       },
-      "title": "模板"
+      "title": "模板",
+      "metadata_explanation": "添加到基于此模板创建的制作中的元数据列。",
+      "settings_menu": {
+        "template": "模板"
+      }
     },
     "share": {
       "comment_placeholder": "留下评论...",

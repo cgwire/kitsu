@@ -1,342 +1,129 @@
 <template>
-  <div class="project-template-settings fixed-page" ref="page" v-if="template">
-    <div class="wrapper">
-      <div class="flexrow back-row">
-        <router-link
-          class="flexrow-item back-link"
-          :to="{ name: 'project-templates' }"
-        >
-          &larr; {{ $t('project_templates.title') }}
-        </router-link>
-      </div>
+  <settings-layout
+    class="project-template-settings fixed-page"
+    ref="page"
+    :active-tab="activeTab"
+    :menu-groups="menuGroups"
+    v-if="template"
+  >
+    <div class="flexrow back-row">
+      <router-link
+        class="flexrow-item back-link"
+        :to="{ name: 'project-templates' }"
+      >
+        &larr; {{ $t('project_templates.title') }}
+      </router-link>
+    </div>
 
-      <h2 class="template-name">{{ template.name }}</h2>
+    <h2 class="template-name">{{ params.name.trim() || template.name }}</h2>
 
-      <div class="tabs">
-        <ul>
-          <li :class="{ 'is-active': isActiveTab('parameters') }">
-            <a
-              role="button"
-              tabindex="0"
-              @click="activeTab = 'parameters'"
-              @keydown.enter.prevent="activeTab = 'parameters'"
-              @keydown.space.prevent="activeTab = 'parameters'"
-            >
-              {{ $t('productions.parameters.title') }}
-            </a>
-          </li>
-          <li :class="{ 'is-active': isActiveTab('clients') }">
-            <a
-              role="button"
-              tabindex="0"
-              @click="activeTab = 'clients'"
-              @keydown.enter.prevent="activeTab = 'clients'"
-              @keydown.space.prevent="activeTab = 'clients'"
-            >
-              {{ $t('productions.clients.title') }}
-            </a>
-          </li>
-          <li :class="{ 'is-active': isActiveTab('video') }">
-            <a
-              role="button"
-              tabindex="0"
-              @click="activeTab = 'video'"
-              @keydown.enter.prevent="activeTab = 'video'"
-              @keydown.space.prevent="activeTab = 'video'"
-            >
-              {{ $t('productions.video.title') }}
-            </a>
-          </li>
-          <li :class="{ 'is-active': isActiveTab('metadataDescriptors') }">
-            <a
-              role="button"
-              tabindex="0"
-              @click="activeTab = 'metadataDescriptors'"
-              @keydown.enter.prevent="activeTab = 'metadataDescriptors'"
-              @keydown.space.prevent="activeTab = 'metadataDescriptors'"
-            >
-              {{ $t('project_templates.tabs.metadata_descriptors') }}
-            </a>
-          </li>
-          <li :class="{ 'is-active': isActiveTab('assetTypes') }">
-            <a
-              role="button"
-              tabindex="0"
-              @click="activeTab = 'assetTypes'"
-              @keydown.enter.prevent="activeTab = 'assetTypes'"
-              @keydown.space.prevent="activeTab = 'assetTypes'"
-            >
-              {{ $t('asset_types.title') }}
-            </a>
-          </li>
-          <li :class="{ 'is-active': isActiveTab('taskTypes') }">
-            <a
-              role="button"
-              tabindex="0"
-              @click="activeTab = 'taskTypes'"
-              @keydown.enter.prevent="activeTab = 'taskTypes'"
-              @keydown.space.prevent="activeTab = 'taskTypes'"
-            >
-              {{ $t('task_types.title') }}
-            </a>
-          </li>
-          <li :class="{ 'is-active': isActiveTab('taskStatuses') }">
-            <a
-              role="button"
-              tabindex="0"
-              @click="activeTab = 'taskStatuses'"
-              @keydown.enter.prevent="activeTab = 'taskStatuses'"
-              @keydown.space.prevent="activeTab = 'taskStatuses'"
-            >
-              {{ $t('task_status.title') }}
-            </a>
-          </li>
-          <li :class="{ 'is-active': isActiveTab('board') }">
-            <a
-              role="button"
-              tabindex="0"
-              @click="activeTab = 'board'"
-              @keydown.enter.prevent="activeTab = 'board'"
-              @keydown.space.prevent="activeTab = 'board'"
-            >
-              {{ $t('board.settings.title') }}
-            </a>
-          </li>
-          <li :class="{ 'is-active': isActiveTab('statusAutomations') }">
-            <a
-              role="button"
-              tabindex="0"
-              @click="activeTab = 'statusAutomations'"
-              @keydown.enter.prevent="activeTab = 'statusAutomations'"
-              @keydown.space.prevent="activeTab = 'statusAutomations'"
-            >
-              {{ $t('status_automations.title') }}
-            </a>
-          </li>
-          <li :class="{ 'is-active': isActiveTab('backgrounds') }">
-            <a
-              role="button"
-              tabindex="0"
-              @click="activeTab = 'backgrounds'"
-              @keydown.enter.prevent="activeTab = 'backgrounds'"
-              @keydown.space.prevent="activeTab = 'backgrounds'"
-            >
-              {{ $t('backgrounds.title') }}
-            </a>
-          </li>
-        </ul>
-      </div>
-
-      <!-- Parameters -->
-      <div class="tab" v-show="isActiveTab('parameters')">
-        <div class="columns">
-          <div class="column is-one-third box">
-            <div class="form">
-              <combobox-styled
-                class="mb2"
-                locale-key-prefix="productions.type."
-                :label="$t('productions.fields.type')"
-                :options="productionTypeOptions"
-                v-model="params.production_type"
-              />
-              <combobox-styled
-                class="mb2"
-                locale-key-prefix="productions.style."
-                :label="$t('productions.fields.style')"
-                :options="productionStyleOptions"
-                v-model="params.production_style"
-              />
-              <combobox-styled
-                class="mb2"
-                locale-key-prefix="productions.homepage."
-                :label="$t('productions.fields.homepage')"
-                :options="homepageOptions"
-                v-model="params.homepage"
-              />
-              <h3 class="section-title">
-                {{ $t('productions.parameters.previews_and_comments') }}
-              </h3>
-              <text-field
-                class="number-line"
-                type="number"
-                :step="1"
-                :label="$t('productions.fields.max_retakes')"
-                v-model="params.max_retakes"
-              />
-              <checkbox
-                class="mb1"
-                :toggle="true"
-                :label="$t('productions.fields.is_preview_download_allowed')"
-                v-model="params.is_preview_download_allowed"
-              />
-              <checkbox
-                class="mb1"
-                :toggle="true"
-                :label="$t('productions.fields.is_set_preview_automated')"
-                v-model="params.is_set_preview_automated"
-              />
-              <checkbox
-                class="mb1"
-                :toggle="true"
-                :label="$t('productions.fields.is_single_preview_per_revision')"
-                v-model="params.is_single_preview_per_revision"
-              />
-              <checkbox
-                class="mb1"
-                :toggle="true"
-                :label="$t('productions.fields.is_publish_default')"
-                v-model="params.is_publish_default_for_artists"
-              />
-              <checkbox
-                class="mb2"
-                :toggle="true"
-                :label="$t('productions.fields.is_frame_in_numbering')"
-                v-model="params.is_frame_in_numbering"
-              />
-              <p v-if="errors.parameters" class="error mt1">
-                {{ $t('productions.edit_error') }}
-              </p>
-            </div>
-          </div>
+    <!-- Parameters -->
+    <div class="tab" v-show="isActiveTab('parameters')">
+      <div class="form">
+        <div class="box section general">
+          <h2 class="subtitle">
+            {{ $t('productions.parameters.general_title') }}
+          </h2>
+          <text-field
+            :label="$t('project_templates.fields.name')"
+            :maxlength="80"
+            v-model="params.name"
+          />
+          <p class="error mb1" v-if="nameError">{{ nameError }}</p>
+          <textarea-field
+            class="mb2"
+            :label="$t('project_templates.fields.description')"
+            v-model="params.description"
+          />
+          <combobox-styled
+            class="mb2"
+            locale-key-prefix="productions.type."
+            :label="$t('productions.fields.type')"
+            :options="productionTypeOptions"
+            v-model="params.production_type"
+          />
+          <combobox-styled
+            class="mb2"
+            locale-key-prefix="productions.style."
+            :label="$t('productions.fields.style')"
+            :options="productionStyleOptions"
+            v-model="params.production_style"
+          />
+          <combobox-styled
+            class="mb2"
+            locale-key-prefix="productions.homepage."
+            :label="$t('productions.fields.homepage')"
+            :options="homepageOptions"
+            v-model="params.homepage"
+          />
         </div>
-      </div>
 
-      <!-- Clients -->
-      <div class="tab" v-show="isActiveTab('clients')">
-        <p v-if="errors.parameters || errors.clients" class="error mb1">
-          {{ $t('productions.clients.save_error') }}
+        <div class="box section comments">
+          <h2 class="subtitle">
+            {{ $t('productions.parameters.comments_and_retakes') }}
+          </h2>
+          <text-field
+            class="number-line"
+            type="number"
+            :step="1"
+            :description="$t('productions.parameters.max_retakes_description')"
+            :label="$t('productions.fields.max_retakes')"
+            v-model="params.max_retakes"
+          />
+          <checkbox
+            class="mb0"
+            :toggle="true"
+            :label="$t('productions.fields.is_publish_default')"
+            v-model="params.is_publish_default_for_artists"
+          />
+          <p class="field-help mb2">
+            {{ $t('productions.parameters.publish_default_description') }}
+          </p>
+        </div>
+        <p v-if="errors.parameters" class="error mt1">
+          {{ $t('productions.edit_error') }}
         </p>
-        <client-access-settings
-          :key="clientsKey"
-          :settings="params"
-          :task-types="templateTaskTypes"
-          :task-statuses="templateTaskStatuses"
-          :is-saving="loading.clients"
-          @update-setting="(flag, value) => (params[flag] = value)"
-          @set-task-type-visible="setTaskTypeClientVisible"
-          @set-status-client-allowed="setStatusClientAllowed"
-        />
       </div>
+    </div>
 
-      <!-- Task Types -->
-      <div class="tab" v-show="isActiveTab('taskTypes')">
-        <task-type-settings
-          :task-types="templateTaskTypes"
-          :all-task-types="allTaskTypes"
-          :default-bitrates="params"
-          @add="addTaskType"
-          @bitrates-changed="setTaskTypeBitrates"
-          @import-items="importTaskTypes"
-          @remove="removeTaskType"
-          @reorder="reorderTaskTypes"
-        />
-      </div>
+    <!-- Clients -->
+    <div class="tab" v-show="isActiveTab('clients')">
+      <p v-if="errors.parameters || errors.clients" class="error mb1">
+        {{ $t('productions.clients.save_error') }}
+      </p>
+      <client-access-settings
+        :key="clientsKey"
+        :settings="params"
+        :task-types="templateTaskTypes"
+        :task-statuses="templateTaskStatuses"
+        :is-saving="loading.clients"
+        @update-setting="(flag, value) => (params[flag] = value)"
+        @set-task-type-visible="setTaskTypeClientVisible"
+        @set-status-client-allowed="setStatusClientAllowed"
+      />
+    </div>
 
-      <!-- Task Statuses -->
-      <div class="tab" v-show="isActiveTab('taskStatuses')">
-        <task-status-settings
-          :task-statuses="templateTaskStatuses"
-          :all-task-statuses="allTaskStatuses"
-          @add="addTaskStatus"
-          @remove="removeTaskStatus"
-          @reorder="reorderTaskStatuses"
-        />
-      </div>
+    <!-- Video -->
+    <div class="tab" v-show="isActiveTab('video')">
+      <video-settings-form
+        :default-bitrates="bitrateDefaults"
+        :errors="{ ratio: ratioError, resolution: resolutionError }"
+        v-model="params"
+      />
+      <p v-if="errors.parameters" class="error mt1">
+        {{ $t('productions.edit_error') }}
+      </p>
+    </div>
 
-      <!-- Board -->
-      <div class="tab" v-show="isActiveTab('board')">
-        <board-settings
-          :task-statuses="templateTaskStatuses"
-          :roles-map="boardRoles"
-          @update-roles="onUpdateBoardRoles"
-        />
-      </div>
-
-      <!-- Asset Types -->
-      <div class="tab" v-show="isActiveTab('assetTypes')">
-        <asset-type-settings
-          :asset-types="templateAssetTypes"
-          :all-asset-types="allAssetTypes"
-          @add="addAssetType"
-          @import-items="importAssetTypes"
-          @remove="removeAssetType"
-        />
-      </div>
-
-      <!-- Status Automations -->
-      <div class="tab" v-show="isActiveTab('statusAutomations')">
-        <status-automation-settings
-          :status-automations="templateAutomations"
-          :all-status-automations="allAutomations"
-          @add="addAutomation"
-          @remove="removeAutomation"
-        />
-      </div>
-
-      <!-- Metadata Descriptors -->
-      <div class="tab" v-show="isActiveTab('video')">
-        <div class="columns">
-          <div class="column is-one-third box">
-            <div class="form">
-              <p class="explanation mb1">
-                {{ $t('productions.creation.explanation_video') }}
-              </p>
-              <text-field
-                type="number"
-                :max="60"
-                :step="0.001"
-                :label="$t('productions.fields.fps')"
-                placeholder="25"
-                v-model="params.fps"
-              />
-              <text-field
-                :label="$t('productions.fields.ratio')"
-                placeholder="16:9"
-                :maxlength="10"
-                v-model.trim="params.ratio"
-                @input="ratioError = ''"
-              />
-              <p class="field-error" v-if="ratioError">{{ ratioError }}</p>
-              <text-field
-                :label="$t('productions.fields.resolution')"
-                placeholder="1920x1080"
-                v-model.trim="params.resolution"
-                @input="resolutionError = ''"
-              />
-              <p class="field-error" v-if="resolutionError">
-                {{ resolutionError }}
-              </p>
-              <h3 class="section-title">
-                {{ $t('productions.video.bitrates') }}
-              </h3>
-              <p class="explanation mb1">
-                {{ $t('productions.video.bitrate_explanation') }}
-              </p>
-              <movie-bitrate-field
-                :default-value="bitrateDefaults.hd_bitrate_compression"
-                :description="$t('productions.video.hd_bitrate_description')"
-                :label="$t('productions.fields.hd_bitrate_compression')"
-                :max="bitrateDefaults.hd_bitrate_compression"
-                v-model="params.hd_bitrate_compression"
-              />
-              <movie-bitrate-field
-                :ceiling="bitrateDefaults.hd_bitrate_compression"
-                :default-value="bitrateDefaults.ld_bitrate_compression"
-                :description="$t('productions.video.ld_bitrate_description')"
-                is-low-definition
-                :label="$t('productions.fields.ld_bitrate_compression')"
-                :max="ldBitrateCeiling"
-                v-model="params.ld_bitrate_compression"
-              />
-              <p v-if="errors.parameters" class="error mt1">
-                {{ $t('productions.edit_error') }}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="tab" v-show="isActiveTab('metadataDescriptors')">
+    <!-- Metadata Descriptors -->
+    <div class="tab is-wide" v-show="isActiveTab('metadataDescriptors')">
+      <div class="box section">
+        <h2 class="subtitle">
+          {{ $t('project_templates.tabs.metadata_descriptors') }}
+        </h2>
+        <p class="explanation mb1">
+          {{ $t('project_templates.metadata_explanation') }}
+        </p>
         <div class="section-tabs tabs">
           <ul>
             <li
@@ -356,12 +143,11 @@
           </ul>
         </div>
 
-        <div class="flexrow mt1 mb1">
+        <div class="flexrow mt1 mb1 add-descriptor">
           <button class="button flexrow-item" @click="openAddDescriptor">
             {{ $t('project_templates.add_metadata') }}
           </button>
         </div>
-
         <div class="box" v-if="descriptorsForEntity.length === 0">
           {{ $t('settings.production.empty_metadata') }}
         </div>
@@ -437,9 +223,15 @@
           </table>
         </div>
       </div>
+    </div>
 
-      <!-- Backgrounds -->
-      <div class="tab" v-show="isActiveTab('backgrounds')">
+    <!-- Backgrounds -->
+    <div class="tab" v-show="isActiveTab('backgrounds')">
+      <div class="box section">
+        <h2 class="subtitle">{{ $t('backgrounds.title') }}</h2>
+        <p class="explanation mb1">
+          {{ $t('backgrounds.production_description') }}
+        </p>
         <background-settings
           :backgrounds="templateBackgrounds"
           :all-backgrounds="allBackgrounds"
@@ -447,6 +239,76 @@
           @add="addBackground"
           @remove="removeBackground"
           @set-default="setDefaultBackground"
+        />
+      </div>
+    </div>
+
+    <!-- Asset Types -->
+    <div class="tab is-wide" v-show="isActiveTab('assetTypes')">
+      <div class="box section">
+        <h2 class="subtitle">{{ $t('asset_types.title') }}</h2>
+        <asset-type-settings
+          :asset-types="templateAssetTypes"
+          :all-asset-types="allAssetTypes"
+          @add="addAssetType"
+          @import-items="importAssetTypes"
+          @remove="removeAssetType"
+        />
+      </div>
+    </div>
+
+    <!-- Task Types -->
+    <div class="tab is-wide" v-show="isActiveTab('taskTypes')">
+      <div class="box section">
+        <h2 class="subtitle">{{ $t('task_types.title') }}</h2>
+        <task-type-settings
+          :task-types="templateTaskTypes"
+          :all-task-types="allTaskTypes"
+          :default-bitrates="params"
+          @add="addTaskType"
+          @bitrates-changed="setTaskTypeBitrates"
+          @import-items="importTaskTypes"
+          @remove="removeTaskType"
+          @reorder="reorderTaskTypes"
+        />
+      </div>
+    </div>
+
+    <!-- Task Statuses -->
+    <div class="tab is-wide" v-show="isActiveTab('taskStatuses')">
+      <div class="box section">
+        <h2 class="subtitle">{{ $t('task_status.title') }}</h2>
+        <task-status-settings
+          :task-statuses="templateTaskStatuses"
+          :all-task-statuses="allTaskStatuses"
+          @add="addTaskStatus"
+          @remove="removeTaskStatus"
+          @reorder="reorderTaskStatuses"
+        />
+      </div>
+    </div>
+
+    <!-- Board -->
+    <div class="tab is-wide" v-show="isActiveTab('board')">
+      <div class="box section">
+        <h2 class="subtitle">{{ $t('board.settings.title') }}</h2>
+        <board-settings
+          :task-statuses="templateTaskStatuses"
+          :roles-map="boardRoles"
+          @update-roles="onUpdateBoardRoles"
+        />
+      </div>
+    </div>
+
+    <!-- Status Automations -->
+    <div class="tab is-wide" v-show="isActiveTab('statusAutomations')">
+      <div class="box section">
+        <h2 class="subtitle">{{ $t('status_automations.title') }}</h2>
+        <status-automation-settings
+          :status-automations="templateAutomations"
+          :all-status-automations="allAutomations"
+          @add="addAutomation"
+          @remove="removeAutomation"
         />
       </div>
     </div>
@@ -461,7 +323,7 @@
       @cancel="modals.addMetadata = false"
       @confirm="confirmMetadataModal"
     />
-  </div>
+  </settings-layout>
 
   <div class="has-text-centered mt2" v-else-if="loading.template">
     <spinner />
@@ -481,14 +343,16 @@ import BackgroundSettings from '@/components/pages/production/BackgroundSettings
 import RowActionsCell from '@/components/cells/RowActionsCell.vue'
 import BoardSettings from '@/components/pages/production/BoardSettings.vue'
 import ClientAccessSettings from '@/components/pages/production/ClientAccessSettings.vue'
-import MovieBitrateField from '@/components/pages/production/MovieBitrateField.vue'
+import SettingsLayout from '@/components/pages/production/SettingsLayout.vue'
 import StatusAutomationSettings from '@/components/pages/production/StatusAutomationSettings.vue'
 import Checkbox from '@/components/widgets/Checkbox.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 import TaskStatusSettings from '@/components/pages/production/TaskStatusSettings.vue'
 import TaskTypeSettings from '@/components/pages/production/TaskTypeSettings.vue'
+import TextareaField from '@/components/widgets/TextareaField.vue'
 import TextField from '@/components/widgets/TextField.vue'
+import VideoSettingsForm from '@/components/pages/production/VideoSettingsForm.vue'
 
 import { useFieldCommitOnLeave } from '@/composables/fieldCommit'
 import {
@@ -505,6 +369,32 @@ const router = useRouter()
 const store = useStore()
 
 const activeTab = ref('parameters')
+const menuGroups = [
+  {
+    label: 'project_templates.settings_menu.template',
+    items: [
+      { id: 'parameters', label: 'productions.parameters.title' },
+      { id: 'clients', label: 'productions.clients.title' },
+      { id: 'video', label: 'productions.video.title' },
+      {
+        id: 'metadataDescriptors',
+        label: 'project_templates.tabs.metadata_descriptors'
+      },
+      { id: 'backgrounds', label: 'backgrounds.title' }
+    ]
+  },
+  {
+    label: 'productions.settings_menu.workflow',
+    items: [
+      { id: 'assetTypes', label: 'asset_types.title' },
+      { id: 'taskTypes', label: 'task_types.title' },
+      { id: 'taskStatuses', label: 'task_status.title' },
+      { id: 'board', label: 'board.settings.title' },
+      { id: 'statusAutomations', label: 'status_automations.title' }
+    ]
+  }
+]
+const tabIds = menuGroups.flatMap(group => group.items.map(item => item.id))
 const VALID_METADATA_ENTITIES = [
   'Asset',
   'Shot',
@@ -570,6 +460,7 @@ const clientsKey = ref(0)
 const modals = reactive({ addMetadata: false })
 const descriptorToEdit = ref({})
 const descriptorToEditIndex = ref(-1)
+const nameError = ref('')
 const ratioError = ref('')
 const resolutionError = ref('')
 const boardRoles = ref({}) // { taskStatusId: [roles] }
@@ -579,6 +470,8 @@ const productionStyleOptions = PRODUCTION_STYLE_OPTIONS
 const homepageOptions = HOME_PAGE_OPTIONS
 
 const params = ref({
+  name: '',
+  description: '',
   production_type: 'short',
   production_style: '2d3d',
   homepage: 'assets',
@@ -612,19 +505,28 @@ const departmentMap = computed(() => store.getters.departmentMap || new Map())
 const taskTypeMap = computed(() => store.getters.taskTypeMap || new Map())
 const bitrateDefaults = computed(() => store.getters.movieBitrateDefaults)
 
-const ldBitrateCeiling = computed(
-  () =>
-    clampBitrate(
-      params.value.hd_bitrate_compression,
-      bitrateDefaults.value.hd_bitrate_compression
-    ) ?? bitrateDefaults.value.hd_bitrate_compression
-)
-
 const isActiveTab = tab => activeTab.value === tab
 
-watch(activeTab, tab => {
-  router.replace({ query: { ...route.query, tab } })
-})
+watch(
+  () => route.query.tab,
+  tab => {
+    activeTab.value = tabIds.includes(tab) ? tab : 'parameters'
+  },
+  { immediate: true }
+)
+
+watch(
+  () => params.value.name,
+  () => (nameError.value = '')
+)
+watch(
+  () => params.value.ratio,
+  () => (ratioError.value = '')
+)
+watch(
+  () => params.value.resolution,
+  () => (resolutionError.value = '')
+)
 
 useHead({
   title: computed(() =>
@@ -659,6 +561,8 @@ const loadTemplateData = async () => {
   templateBackgrounds.value = backgrounds
   descriptors.value = (tmpl.metadata_descriptors || []).map(d => ({ ...d }))
   params.value = {
+    name: tmpl.name || '',
+    description: tmpl.description || '',
     production_type: tmpl.production_type || 'short',
     production_style: tmpl.production_style || '2d3d',
     homepage: tmpl.homepage || 'assets',
@@ -706,9 +610,12 @@ const validateResolution = () => {
 }
 
 const saveParameters = async () => {
+  nameError.value = params.value.name.trim()
+    ? ''
+    : t('project_templates.name_required')
   ratioError.value = validateRatio()
   resolutionError.value = validateResolution()
-  if (ratioError.value || resolutionError.value) return
+  if (nameError.value || ratioError.value || resolutionError.value) return
   loading.parameters = true
   errors.parameters = false
   const max = bitrateDefaults.value.hd_bitrate_compression
@@ -729,9 +636,8 @@ const saveParameters = async () => {
     await store.dispatch('editProjectTemplate', {
       // The route can have left the template by the end of the delay.
       id: template.value.id,
-      name: template.value.name,
-      description: template.value.description,
       ...params.value,
+      name: params.value.name.trim(),
       ...bitrates
     })
   } catch {
@@ -1050,15 +956,13 @@ const confirmMetadataModal = async form => {
 }
 
 // The task type bitrates read the template of the route when they save.
+const layout = useTemplateRef('page')
 useFieldCommitOnLeave(
-  useTemplateRef('page'),
+  computed(() => layout.value?.$el),
   (to, from) => to.params.template_id !== from.params.template_id
 )
 
 onMounted(async () => {
-  if (route.query.tab) {
-    activeTab.value = route.query.tab
-  }
   loading.template = true
   await Promise.all([store.dispatch('loadContext'), loadTemplateData()])
   loading.template = false
@@ -1068,40 +972,6 @@ onMounted(async () => {
 <style lang="scss" scoped>
 .fixed-page {
   display: flex;
-}
-
-.wrapper {
-  margin-top: 0;
-  overflow-y: scroll;
-  padding: 2em;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.tabs {
-  min-height: 2em;
-}
-
-.tabs ul {
-  margin-left: 0;
-}
-
-.tab {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  padding-left: 2px;
-  padding-top: 0.5em;
-}
-
-h2.subtitle {
-  color: $grey;
-  font-size: 1.2em;
-  font-weight: bold;
-  margin-bottom: 0.4em;
-  text-transform: uppercase;
 }
 
 .back-link {
@@ -1127,99 +997,10 @@ h2.subtitle {
   margin-bottom: 0;
 }
 
-.list {
-  width: 400px;
-  min-width: 400px;
-  max-width: 400px;
-
-  .name {
-    width: 100%;
-  }
-}
-
-.box {
-  max-width: 600px;
-  width: 100%;
-  padding: 2em;
-}
-
-.explanation {
-  color: var(--text-alt);
-}
-
-.client-access-settings {
-  max-width: 800px;
-
-  :deep(.section) {
-    margin-bottom: 1em;
-    padding: 2em;
-  }
-}
-
-.section-title {
-  color: var(--text);
-  font-size: 1.1em;
-  font-weight: 500;
-  margin: 1.5em 0 0.8em;
-  text-transform: uppercase;
-}
-
-// Short numeric settings: the input sits on the left of its label.
-.number-line {
-  align-items: center;
-  display: flex;
-  flex-direction: row-reverse;
-  gap: 0.6em;
-  justify-content: flex-end;
-
-  :deep(.label) {
-    margin-bottom: 0;
-  }
-
-  :deep(.control) {
-    flex: 0 0 auto;
-  }
-
-  :deep(.input) {
-    padding: 0.3em 0.5em;
-    width: 65px;
-  }
-}
-
-.input.is-small,
-.select.is-small {
-  font-size: 0.9em;
-  padding: 0.3em 0.5em;
-}
-
-.datatable .name {
-  min-width: 200px;
-}
-
-.columns {
-  margin-bottom: 2em;
-}
-
-.column {
-  overflow-y: initial;
-  padding: 1em;
-}
-
-p {
-  color: var(--text);
-}
-
 .datatable th {
   color: var(--text);
   padding-left: 10px;
   padding-bottom: 5px;
-}
-
-.field-error {
-  color: $red;
-  font-size: 0.85em;
-  margin-top: -1.4rem;
-  margin-bottom: 0.5em;
 }
 
 .section-tabs {
@@ -1288,173 +1069,28 @@ p {
   width: 100%;
 }
 
-.tabs {
-  overflow-x: auto;
-}
-
-.tabs ul {
-  flex-wrap: nowrap;
-  white-space: nowrap;
-}
-
-@media screen and (max-width: 1000px) {
-  .wrapper {
-    padding: 1.5em 1em;
-  }
-}
-
 @media screen and (max-width: 768px) {
-  .wrapper {
-    padding: 1em 0.75em;
-  }
-
   .template-name {
     font-size: 1.3em;
     margin-top: 0.3em;
     margin-bottom: 0.5em;
   }
 
-  .column {
-    padding: 0.5em 0;
-  }
-
-  .columns {
-    margin-bottom: 1em;
-  }
-
-  .box {
-    padding: 1.5em;
-  }
-
-  /* Read-only mobile: hide all add buttons / mutation widgets */
-  /* Metadata: "Add a metadata" button row + actions column in the table */
-  .tab > .flexrow.mt1.mb1 {
-    display: none;
-  }
-
+  .add-descriptor,
   .descriptors-table .actions {
     display: none;
   }
 
-  /* Shared sub-components — hide importer column (right side of .columns) */
-  :deep(.tab .columns .column + .column) {
+  :deep(.task-status-settings .add-task-status) {
     display: none;
   }
 
-  /* Shared lists — hide remove buttons and drag handles */
-  :deep(.tab .remove),
-  :deep(.tab .grab),
-  :deep(.tab td.remove),
-  :deep(.tab td.grab),
-  :deep(.tab .name-full) {
-    display: none !important;
-  }
-
-  /* Add rows across shared sub-components */
-  :deep(.background-settings .flexrow.mt1.mb1),
-  :deep(.task-status-settings .add-task-status),
-  :deep(.status-automation-settings .add-status-automation) {
-    display: none;
-  }
-
-  /* BackgroundSettings — last column (remove) and is-default toggle */
-  :deep(.background-settings .datatable th:last-child),
-  :deep(.background-settings .datatable td:last-child),
-  :deep(.background-settings .is-default) {
-    display: none !important;
-  }
-
-  /* Catch-all: hide any remaining action buttons inside datatable rows
-     on mobile (read-only mode) */
-  :deep(.tab .datatable-row .button) {
-    display: none !important;
-  }
-
-  /* ClientAccessSettings — no reset, toggles read-only */
   :deep(.client-access-settings .statuses-reset) {
     display: none;
   }
 
   :deep(.client-access-settings .checkbox-field) {
     pointer-events: none;
-  }
-
-  /* BoardSettings — Select all / Unselect all buttons hidden, role toggles
-     rendered as disabled read-only checks. */
-  :deep(.board-settings .roles .button) {
-    display: none;
-  }
-
-  :deep(.board-settings .roles .bool-field) {
-    pointer-events: none;
-    opacity: 0.7;
-  }
-
-  :deep(.board-settings .datatable-row .roles .bool-field) {
-    flex: 0 0 100% !important;
-    width: 100% !important;
-    margin-bottom: 0.35em;
-  }
-
-  /* Card mode for every list/table inside a tab */
-  :deep(.tab .datatable),
-  :deep(.tab .datatable.list),
-  :deep(.tab table.list) {
-    display: block;
-    background: transparent;
-    overflow-x: visible;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    width: 100% !important;
-    white-space: normal;
-  }
-
-  :deep(.tab .columns),
-  :deep(.tab .columns .column) {
-    max-width: 100%;
-    min-width: 0;
-    width: auto;
-  }
-
-  :deep(.tab .datatable .datatable-head),
-  :deep(.tab .datatable thead) {
-    display: none;
-  }
-
-  :deep(.tab .datatable .datatable-body),
-  :deep(.tab .datatable tbody) {
-    display: block;
-  }
-
-  :deep(.tab .datatable .datatable-row),
-  :deep(.tab .datatable .datatable-row:nth-child(even)),
-  :deep(.tab .datatable .datatable-row:hover),
-  :deep(.tab .datatable .datatable-row:last-child) {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.5em;
-    padding: 0.6em 0.75em;
-    margin-bottom: 0.5em;
-    background-color: var(--background) !important;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    width: 100%;
-    box-sizing: border-box;
-    max-width: 100%;
-  }
-
-  :deep(.tab .datatable .datatable-row td),
-  :deep(.tab .datatable .datatable-row:last-child td),
-  :deep(.tab .datatable .datatable-row:last-child:nth-child(even) td),
-  :deep(.tab .datatable .datatable-row:last-child:hover td) {
-    display: block;
-    padding: 0;
-    border: 0;
-    background-color: transparent !important;
-    width: auto;
-    min-width: 0;
-    max-width: none;
   }
 
   /* Descriptors: name as title (full width) */

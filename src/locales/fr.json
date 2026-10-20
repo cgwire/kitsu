@@ -2409,7 +2409,11 @@
         "task_statuses": "Statuts de tâche",
         "task_types": "Types de tâches"
       },
-      "title": "Modèles"
+      "title": "Modèles",
+      "metadata_explanation": "Colonnes de métadonnées ajoutées aux productions créées à partir de ce modèle.",
+      "settings_menu": {
+        "template": "Modèle"
+      }
     },
     "share": {
       "comment_placeholder": "Ajouter un commentaire...",

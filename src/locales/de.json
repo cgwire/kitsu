@@ -2409,7 +2409,11 @@
         "task_statuses": "Aufgabenstatus",
         "task_types": "Aufgabentypen"
       },
-      "title": "Vorlagen"
+      "title": "Vorlagen",
+      "metadata_explanation": "Metadatenspalten, die den aus dieser Vorlage erstellten Produktionen hinzugefügt werden.",
+      "settings_menu": {
+        "template": "Vorlage"
+      }
     },
     "share": {
       "comment_placeholder": "Hinterlassen Sie einen Kommentar...",

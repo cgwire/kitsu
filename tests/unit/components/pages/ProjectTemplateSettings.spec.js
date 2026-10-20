@@ -4,6 +4,7 @@ vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 
 import { nextTick } from 'vue'
+import { RouterLink } from 'vue-router'
 
 import RowActionsCell from '@/components/cells/RowActionsCell.vue'
 import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
@@ -11,7 +12,9 @@ import ProjectTemplateSettings from '@/components/pages/ProjectTemplateSettings.
 import ClientAccessSettings from '@/components/pages/production/ClientAccessSettings.vue'
 import MovieBitrateField from '@/components/pages/production/MovieBitrateField.vue'
 import TaskTypeSettings from '@/components/pages/production/TaskTypeSettings.vue'
+import VideoSettingsForm from '@/components/pages/production/VideoSettingsForm.vue'
 import Checkbox from '@/components/widgets/Checkbox.vue'
+import TextareaField from '@/components/widgets/TextareaField.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
 import { mountEntityPage } from '../../fixtures/entity-page'
@@ -21,6 +24,9 @@ const movieBitrateDefaults = {
   hd_bitrate_compression: 40,
   ld_bitrate_compression: 8
 }
+
+// The layout renders the tabs, the video form the fields the tests drive.
+const stubs = { SettingsLayout: false, VideoSettingsForm: false }
 
 const findTextField = (wrapper, label) =>
   wrapper
@@ -41,6 +47,7 @@ describe('ProjectTemplateSettings page, metadata column modal', () => {
 
   const mountPage = () =>
     mountEntityPage(ProjectTemplateSettings, {
+      stubs,
       query: { tab: 'metadataDescriptors' },
       getters: { movieBitrateDefaults },
       actions: {
@@ -98,6 +105,7 @@ describe('ProjectTemplateSettings page, video tab', () => {
 
   const mountPage = (loadedTemplate = template) =>
     mountEntityPage(ProjectTemplateSettings, {
+      stubs,
       query: { tab: 'video' },
       getters: { movieBitrateDefaults },
       actions: {
@@ -136,7 +144,7 @@ describe('ProjectTemplateSettings page, video tab', () => {
       modelValue: 6
     })
     const title = wrapper
-      .findAll('h3.section-title')
+      .findAll('.tab h2.subtitle')
       .find(item => item.text() === 'productions.video.bitrates')
     expect(title.element.nextElementSibling.textContent.trim()).toBe(
       'productions.video.bitrate_explanation'
@@ -226,6 +234,7 @@ describe('ProjectTemplateSettings page, task type bitrates', () => {
 
   const mountPage = async addTaskTypeToTemplate => {
     const page = await mountEntityPage(ProjectTemplateSettings, {
+      stubs,
       query: { tab: 'taskTypes' },
       getters: { movieBitrateDefaults },
       actions: {
@@ -289,6 +298,7 @@ describe('ProjectTemplateSettings page, parameters autosave', () => {
 
   const mountOnTemplate = async (tab, actions = {}) => {
     const page = await mountEntityPage(ProjectTemplateSettings, {
+      stubs,
       query: { tab },
       getters: { movieBitrateDefaults },
       actions: {
@@ -433,6 +443,7 @@ describe('ProjectTemplateSettings page, clients tab', () => {
 
   const mountPage = (actions = {}) =>
     mountEntityPage(ProjectTemplateSettings, {
+      stubs,
       query: { tab: 'clients' },
       getters: { movieBitrateDefaults },
       actions: {
@@ -544,5 +555,195 @@ describe('ProjectTemplateSettings page, clients tab', () => {
     expect(
       settings(wrapper).props('taskStatuses')[0].link_is_client_allowed
     ).toBe(false)
+  })
+})
+
+describe('ProjectTemplateSettings page, settings layout', () => {
+  afterEach(() => vi.useRealTimers())
+
+  const template = {
+    id: 'template-1',
+    name: 'Feature',
+    description: 'Long form',
+    max_retakes: 3,
+    metadata_descriptors: []
+  }
+
+  const mountPage = (tab, actions = {}) =>
+    mountEntityPage(ProjectTemplateSettings, {
+      stubs,
+      query: tab ? { tab } : {},
+      getters: { movieBitrateDefaults },
+      actions: {
+        loadProjectTemplate: () => template,
+        loadTemplateTaskTypes: () => [],
+        loadTemplateTaskStatuses: () => [],
+        loadTemplateAssetTypes: () => [],
+        loadTemplateStatusAutomations: () => [],
+        loadTemplateBackgrounds: () => [],
+        ...actions
+      }
+    })
+
+  const menuTab = link => link.props('to').query.tab
+  const activeItem = wrapper =>
+    menuTab(
+      wrapper.find('.settings-menu li.is-active').findComponent(RouterLink)
+    )
+
+  it('lists the tabs in the template and workflow groups', async () => {
+    const { wrapper } = await mountPage()
+
+    expect(
+      wrapper.findAll('.settings-menu .menu-label').map(label => label.text())
+    ).toEqual([
+      'project_templates.settings_menu.template',
+      'productions.settings_menu.workflow'
+    ])
+    expect(
+      wrapper
+        .find('.settings-menu')
+        .findAllComponents(RouterLink)
+        .map(menuTab)
+    ).toEqual([
+        'parameters',
+        'clients',
+        'video',
+        'metadataDescriptors',
+        'backgrounds',
+        'assetTypes',
+        'taskTypes',
+        'taskStatuses',
+        'board',
+        'statusAutomations'
+    ])
+    expect(wrapper.find('.tabs:not(.section-tabs)').exists()).toBe(false)
+  })
+
+  it('opens the video tab of the URL on its form', async () => {
+    const { wrapper } = await mountPage('video')
+
+    expect(activeItem(wrapper)).toBe('video')
+    const form = wrapper.findComponent(VideoSettingsForm)
+    expect(form.props('modelValue')).toMatchObject({ fps: '25' })
+    expect(form.props('defaultBitrates')).toEqual(movieBitrateDefaults)
+    expect(form.element.closest('.tab').style.display).toBe('')
+  })
+
+  it('falls back to the parameters on an unknown tab', async () => {
+    const { wrapper } = await mountPage('foo')
+
+    expect(activeItem(wrapper)).toBe('parameters')
+  })
+
+  it('saves the name and description of the general section', async () => {
+    const { wrapper, dispatched } = await mountPage('parameters', {
+      editProjectTemplate: () => template
+    })
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    const general = wrapper.find('.box.section.general')
+    const field = label =>
+      general
+        .findAllComponents(TextField)
+        .find(item => item.props('label') === label)
+
+    expect(general.find('h2.subtitle').text()).toBe(
+      'productions.parameters.general_title'
+    )
+    expect(field('project_templates.fields.name').props('modelValue')).toBe(
+      'Feature'
+    )
+    const description = general.findComponent(TextareaField)
+    expect(description.props()).toMatchObject({
+      label: 'project_templates.fields.description',
+      modelValue: 'Long form'
+    })
+
+    await field('project_templates.fields.name').vm.$emit(
+      'update:modelValue',
+      'Series'
+    )
+    await description.vm.$emit('update:modelValue', 'Episodic')
+    await nextTick()
+    vi.advanceTimersByTime(800)
+    await nextTick()
+
+    expect(dispatched('editProjectTemplate').at(-1)[1]).toMatchObject({
+      id: 'template-1',
+      name: 'Series',
+      description: 'Episodic'
+    })
+    vi.clearAllTimers()
+  })
+
+  it('saves no empty name', async () => {
+    const { wrapper, dispatched } = await mountPage('parameters')
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+
+    await findTextField(wrapper, 'project_templates.fields.name').vm.$emit(
+      'update:modelValue',
+      ' '
+    )
+    await nextTick()
+    vi.advanceTimersByTime(800)
+    await nextTick()
+
+    expect(dispatched('editProjectTemplate')).toEqual([])
+    expect(wrapper.text()).toContain('project_templates.name_required')
+    vi.clearAllTimers()
+  })
+
+  it('holds the retakes and the publish default in the comments section', async () => {
+    const { wrapper } = await mountPage('parameters')
+    const comments = wrapper.find('.box.section.comments')
+    const retakes = comments.findComponent(TextField)
+
+    expect(comments.find('h2.subtitle').text()).toBe(
+      'productions.parameters.comments_and_retakes'
+    )
+    expect(retakes.props()).toMatchObject({
+      description: 'productions.parameters.max_retakes_description',
+      label: 'productions.fields.max_retakes',
+      modelValue: 3
+    })
+    expect(
+      comments.findAllComponents(Checkbox).map(box => box.props('label'))
+    ).toEqual(['productions.fields.is_publish_default'])
+    expect(comments.text()).toContain(
+      'productions.parameters.publish_default_description'
+    )
+  })
+
+  it('leaves the preview toggles to the video tab', async () => {
+    const { wrapper } = await mountPage('parameters')
+    const parameters = wrapper.find('.box.section.general').element.closest(
+      '.tab'
+    )
+    const labels = wrapper
+      .findAllComponents(Checkbox)
+      .filter(box => parameters.contains(box.element))
+      .map(box => box.props('label'))
+
+    expect(labels).toEqual(['productions.fields.is_publish_default'])
+  })
+
+  it('wraps the workflow, metadata and backgrounds tabs in titled sections', async () => {
+    const { wrapper } = await mountPage()
+    const titles = wrapper
+      .findAll('.tab > .box.section > h2.subtitle')
+      .map(title => title.text())
+
+    expect(titles).toEqual(
+      expect.arrayContaining([
+        'asset_types.title',
+        'task_types.title',
+        'task_status.title',
+        'board.settings.title',
+        'status_automations.title',
+        'project_templates.tabs.metadata_descriptors',
+        'backgrounds.title'
+      ])
+    )
+    expect(wrapper.findAll('.tab.is-wide')).toHaveLength(6)
   })
 })

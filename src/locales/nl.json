@@ -2409,7 +2409,11 @@
         "task_statuses": "Taakstatussen",
         "task_types": "Taaktypes"
       },
-      "title": "Sjablonen"
+      "title": "Sjablonen",
+      "metadata_explanation": "Metadatakolommen die worden toegevoegd aan producties die met deze sjabloon zijn gemaakt.",
+      "settings_menu": {
+        "template": "Sjabloon"
+      }
     },
     "share": {
       "comment_placeholder": "Laat een opmerking achter...",

@@ -2409,7 +2409,11 @@
         "task_statuses": "Opgavestatusser",
         "task_types": "Opgavetyper"
       },
-      "title": "Skabeloner"
+      "title": "Skabeloner",
+      "metadata_explanation": "Metadatakolonner, der tilføjes til produktioner oprettet ud fra denne skabelon.",
+      "settings_menu": {
+        "template": "Skabelon"
+      }
     },
     "share": {
       "comment_placeholder": "Efterlad en kommentar...",

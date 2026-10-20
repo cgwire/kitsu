@@ -2409,7 +2409,11 @@
         "task_statuses": "タスクステータス",
         "task_types": "タスクタイプ"
       },
-      "title": "テンプレート"
+      "title": "テンプレート",
+      "metadata_explanation": "このテンプレートから作成されたプロダクションに追加されるメタデータ列。",
+      "settings_menu": {
+        "template": "テンプレート"
+      }
     },
     "share": {
       "comment_placeholder": "コメントを入力…",

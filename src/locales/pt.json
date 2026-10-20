@@ -2409,7 +2409,11 @@
         "task_statuses": "Status de Tarefa",
         "task_types": "Tipos de Tarefa"
       },
-      "title": "Templates"
+      "title": "Templates",
+      "metadata_explanation": "Colunas de metadados adicionadas às produções criadas a partir deste modelo.",
+      "settings_menu": {
+        "template": "Modelo"
+      }
     },
     "share": {
       "comment_placeholder": "Deixe um comentário...",

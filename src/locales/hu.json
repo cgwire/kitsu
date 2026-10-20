@@ -2072,7 +2072,11 @@
         "task_statuses": "Feladat állapotok",
         "task_types": "Feladat típusok"
       },
-      "title": "Sablonok"
+      "title": "Sablonok",
+      "metadata_explanation": "A sablonból létrehozott produkciókhoz hozzáadott metaadat-oszlopok.",
+      "settings_menu": {
+        "template": "Sablon"
+      }
     },
     "hardware_items": {
       "create_error": "Hiba történt a hardvereszköz mentésekor.",

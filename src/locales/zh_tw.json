@@ -2409,7 +2409,11 @@
         "task_statuses": "任務狀態",
         "task_types": "任務類型"
       },
-      "title": "範本"
+      "title": "範本",
+      "metadata_explanation": "新增至以此範本建立之製作的中繼資料欄位。",
+      "settings_menu": {
+        "template": "範本"
+      }
     },
     "share": {
       "comment_placeholder": "留下評論...",

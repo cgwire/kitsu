@@ -2409,7 +2409,11 @@
         "task_statuses": "작업 상태",
         "task_types": "작업 유형"
       },
-      "title": "템플릿"
+      "title": "템플릿",
+      "metadata_explanation": "이 템플릿으로 생성된 프로덕션에 추가되는 메타데이터 열입니다.",
+      "settings_menu": {
+        "template": "템플릿"
+      }
     },
     "share": {
       "comment_placeholder": "댓글을 남기세요...",

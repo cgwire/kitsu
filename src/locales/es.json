@@ -2409,7 +2409,11 @@
         "task_statuses": "Estados de tarea",
         "task_types": "Tipos de tarea"
       },
-      "title": "Plantillas"
+      "title": "Plantillas",
+      "metadata_explanation": "Columnas de metadatos añadidas a las producciones creadas a partir de esta plantilla.",
+      "settings_menu": {
+        "template": "Plantilla"
+      }
     },
     "share": {
       "comment_placeholder": "Deja un comentario...",
