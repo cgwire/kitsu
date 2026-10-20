@@ -1,6 +1,12 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
+// Each spec file starts a fresh worker thread, which compiles jsdom and the
+// dependencies again: Node's compile cache hands them the bytecode instead.
+if (process.env.VITEST) {
+  process.env.NODE_COMPILE_CACHE ??= `${import.meta.dirname}/node_modules/.node-compile-cache`
+}
+
 export default defineConfig({
   plugins: [
     vue({
