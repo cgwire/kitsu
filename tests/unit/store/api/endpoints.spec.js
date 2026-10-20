@@ -271,6 +271,48 @@ describe('store/api endpoints', () => {
     })
   })
 
+  describe('project templates client access', () => {
+    test('sends the client access flags of the template', () => {
+      projectTemplatesApi.editProjectTemplate({
+        id: 'template-1',
+        is_clients_isolated: true,
+        is_client_stats_visible: false,
+        is_client_task_list_visible: true,
+        is_client_task_panel_visible: false
+      })
+
+      expect(client.pput).toHaveBeenCalledWith(
+        '/api/data/project-templates/template-1',
+        expect.objectContaining({
+          is_clients_isolated: true,
+          is_client_stats_visible: false,
+          is_client_task_list_visible: true,
+          is_client_task_panel_visible: false
+        })
+      )
+    })
+
+    // null drops the override of the template, a missing value keeps it
+    test.each([
+      [null, { is_client_allowed: null }],
+      [false, { is_client_allowed: false }],
+      [undefined, {}]
+    ])('sends a status client value of %s', (value, expected) => {
+      projectTemplatesApi.addTaskStatusToTemplate(
+        'template-1',
+        'status-1',
+        null,
+        null,
+        value
+      )
+
+      expect(client.ppost).toHaveBeenCalledWith(
+        '/api/data/project-templates/template-1/task-statuses',
+        { task_status_id: 'status-1', ...expected }
+      )
+    })
+  })
+
   describe('tasktypes deleteTaskType', () => {
     // Without force Zou refuses a task type still attached to schedule
     // items or productions, and says so: that answer drives the second,

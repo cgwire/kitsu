@@ -33,7 +33,12 @@ const mountClients = async ({
     return typeof response === 'function' ? response() : (response ?? null)
   })
   const wrapper = shallowMount(ProductionClients, {
-    global: { plugins: [store], mocks: { $t: (k, p) => k + (p?.time || '') } }
+    global: {
+      plugins: [store],
+      mocks: { $t: (k, p) => k + (p?.time || '') },
+      // The client access sections live in this child: render it for real
+      stubs: { ClientAccessSettings: false }
+    }
   })
   await flushPromises()
   return { wrapper, store }

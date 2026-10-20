@@ -8,8 +8,10 @@ import { nextTick } from 'vue'
 import RowActionsCell from '@/components/cells/RowActionsCell.vue'
 import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
 import ProjectTemplateSettings from '@/components/pages/ProjectTemplateSettings.vue'
+import ClientAccessSettings from '@/components/pages/production/ClientAccessSettings.vue'
 import MovieBitrateField from '@/components/pages/production/MovieBitrateField.vue'
 import TaskTypeSettings from '@/components/pages/production/TaskTypeSettings.vue'
+import Checkbox from '@/components/widgets/Checkbox.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
 import { mountEntityPage } from '../../fixtures/entity-page'
@@ -410,5 +412,137 @@ describe('ProjectTemplateSettings page, parameters autosave', () => {
       fps: '24',
       ratio: '16:9'
     })
+  })
+})
+
+describe('ProjectTemplateSettings page, clients tab', () => {
+  afterEach(() => vi.useRealTimers())
+
+  const template = {
+    id: 'template-1',
+    name: 'Feature',
+    is_clients_isolated: true,
+    is_client_stats_visible: null,
+    is_client_task_list_visible: false,
+    metadata_descriptors: []
+  }
+  const taskTypes = [{ id: 't1', for_entity: 'Shot', is_client_visible: true }]
+  const taskStatuses = [
+    { id: 's1', is_client_allowed: true, link_is_client_allowed: false }
+  ]
+
+  const mountPage = (actions = {}) =>
+    mountEntityPage(ProjectTemplateSettings, {
+      query: { tab: 'clients' },
+      getters: { movieBitrateDefaults },
+      actions: {
+        loadProjectTemplate: () => template,
+        loadTemplateTaskTypes: () => taskTypes,
+        loadTemplateTaskStatuses: () => taskStatuses,
+        loadTemplateAssetTypes: () => [],
+        loadTemplateStatusAutomations: () => [],
+        loadTemplateBackgrounds: () => [],
+        ...actions
+      }
+    })
+
+  const settings = wrapper => wrapper.findComponent(ClientAccessSettings)
+
+  it('hands the template client settings to the clients tab', async () => {
+    const { wrapper } = await mountPage()
+
+    expect(settings(wrapper).props()).toMatchObject({
+      settings: {
+        is_clients_isolated: true,
+        is_client_stats_visible: true,
+        is_client_task_list_visible: false,
+        is_client_task_panel_visible: true
+      },
+      taskTypes,
+      taskStatuses
+    })
+    // The isolation moved from the parameters to the clients tab
+    expect(
+      wrapper
+        .findAllComponents(Checkbox)
+        .map(checkbox => checkbox.props('label'))
+    ).not.toContain('productions.fields.is_clients_isolated')
+  })
+
+  it('saves a client setting with the template parameters', async () => {
+    const { wrapper, dispatched } = await mountPage({
+      editProjectTemplate: () => template
+    })
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+
+    await settings(wrapper).vm.$emit(
+      'update-setting',
+      'is_client_task_panel_visible',
+      false
+    )
+    vi.advanceTimersByTime(800)
+    await nextTick()
+
+    expect(dispatched('editProjectTemplate').at(-1)[1]).toMatchObject({
+      id: 'template-1',
+      is_clients_isolated: true,
+      is_client_stats_visible: true,
+      is_client_task_list_visible: false,
+      is_client_task_panel_visible: false
+    })
+    vi.clearAllTimers()
+  })
+
+  it('saves a task type visibility and shows it without a reload', async () => {
+    const { wrapper, store, dispatched } = await mountPage({
+      addTaskTypeToTemplate: () => ({})
+    })
+    store.dispatch.mockClear()
+
+    await settings(wrapper).vm.$emit('set-task-type-visible', 't1', false)
+    await flushPromises()
+
+    expect(dispatched('addTaskTypeToTemplate').at(-1)[1]).toMatchObject({
+      taskTypeId: 't1',
+      is_client_visible: false
+    })
+    expect(settings(wrapper).props('taskTypes')[0].is_client_visible).toBe(
+      false
+    )
+    expect(dispatched('loadProjectTemplate')).toEqual([])
+  })
+
+  it('saves a status override, null included', async () => {
+    const { wrapper, dispatched } = await mountPage({
+      addTaskStatusToTemplate: () => ({})
+    })
+
+    await settings(wrapper).vm.$emit('set-status-client-allowed', 's1', null)
+    await flushPromises()
+
+    expect(dispatched('addTaskStatusToTemplate').at(-1)[1]).toMatchObject({
+      taskStatusId: 's1',
+      isClientAllowed: null
+    })
+    expect(
+      settings(wrapper).props('taskStatuses')[0].link_is_client_allowed
+    ).toBeNull()
+  })
+
+  it('shows the error and resets the toggles on a refused save', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { wrapper } = await mountPage({
+      addTaskStatusToTemplate: () => Promise.reject(new Error('boom'))
+    })
+    const before = settings(wrapper).vm
+
+    await before.$emit('set-status-client-allowed', 's1', true)
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('productions.clients.save_error')
+    expect(settings(wrapper).vm).not.toBe(before)
+    expect(
+      settings(wrapper).props('taskStatuses')[0].link_is_client_allowed
+    ).toBe(false)
   })
 })

@@ -111,133 +111,16 @@
       {{ $t('productions.clients.save_error') }}
     </p>
 
-    <div class="box section isolation-section">
-      <h2 class="subtitle">{{ $t('productions.clients.isolation_title') }}</h2>
-      <p class="description">
-        {{ $t('productions.clients.isolation_description') }}
-      </p>
-      <checkbox
-        class="isolation"
-        :key="`isolation-${checkboxKey}`"
-        :toggle="true"
-        :label="$t('productions.fields.is_clients_isolated')"
-        :model-value="!!currentProduction?.is_clients_isolated"
-        @change="setIsolated"
-      />
-    </div>
-
-    <div class="box section access-section">
-      <h2 class="subtitle">{{ $t('productions.clients.access_title') }}</h2>
-      <p class="description">
-        {{ $t('productions.clients.access_description') }}
-      </p>
-      <div
-        class="access-option"
-        v-for="option in accessOptions"
-        :key="option.flag"
-      >
-        <checkbox
-          :class="`access-${option.name}`"
-          :key="`${option.flag}-${checkboxKey}`"
-          :toggle="true"
-          :label="$t(`productions.clients.access_${option.label}`)"
-          :model-value="currentProduction?.[option.flag] !== false"
-          @change="value => setAccess(option.flag, value)"
-        />
-        <p class="hint">
-          {{ $t(`productions.clients.access_${option.label}_description`) }}
-        </p>
-      </div>
-    </div>
-
-    <div class="box section access-task-types">
-      <h2 class="subtitle">
-        {{ $t('productions.clients.access_task_types_title') }}
-      </h2>
-      <p class="description">
-        {{ $t('productions.clients.access_task_types_description') }}
-      </p>
-      <p
-        class="hint access-task-list-hint mb1"
-        v-if="currentProduction?.is_client_task_list_visible === false"
-      >
-        {{ $t('productions.clients.access_task_list_hint') }}
-      </p>
-      <div
-        class="task-type-group"
-        v-for="group in taskTypeGroups"
-        :key="group.entity"
-      >
-        <h3 class="task-type-group-title">{{ $t(group.label) }}</h3>
-        <div
-          class="flexrow access-task-type-row"
-          v-for="taskType in group.taskTypes"
-          :key="taskType.id"
-        >
-          <checkbox
-            class="flexrow-item access-task-type"
-            :key="`${taskType.id}-${checkboxKey}`"
-            :toggle="true"
-            :model-value="
-              currentProduction?.task_type_links?.[taskType.id]
-                ?.is_client_visible !== false
-            "
-            @change="value => setTaskTypeVisible(taskType.id, value)"
-          />
-          <task-type-name
-            class="flexrow-item"
-            :task-type="taskType"
-            :is-link="false"
-          />
-        </div>
-      </div>
-    </div>
-
-    <div class="box section statuses">
-      <h2 class="subtitle">{{ $t('productions.clients.statuses_title') }}</h2>
-      <p class="description">
-        {{ $t('productions.clients.statuses_description') }}
-      </p>
-      <button
-        class="button is-link statuses-reset"
-        type="button"
-        @click="resetStatusesToStudio"
-        v-if="overriddenStatuses.length"
-      >
-        {{ $t('productions.clients.statuses_use_studio_default') }}
-      </button>
-      <p class="empty" v-if="!sortedTaskStatuses.length">
-        {{ $t('productions.clients.statuses_empty') }}
-      </p>
-      <div class="status-list" v-else>
-        <div
-          class="status-item"
-          :class="{ 'is-overridden': !isStudioDefault(status) }"
-          v-for="status in sortedTaskStatuses"
-          :key="status.id"
-        >
-          <checkbox
-            class="status-client-allowed"
-            :key="`${status.id}-${checkboxKey}`"
-            :toggle="true"
-            :model-value="isTaskStatusClientAllowed(currentProduction, status)"
-            @change="value => setStatusClientAllowed(status, value)"
-          />
-          <validation-tag
-            class="status-tag"
-            :is-static="true"
-            :task="{ task_status_id: status.id }"
-          />
-          <span class="status-origin">
-            {{
-              isStudioDefault(status)
-                ? $t('productions.clients.statuses_studio_default')
-                : $t('productions.clients.statuses_overridden')
-            }}
-          </span>
-        </div>
-      </div>
-    </div>
+    <client-access-settings
+      :key="checkboxKey"
+      :settings="currentProduction ?? {}"
+      :task-types="clientTaskTypes"
+      :task-statuses="clientTaskStatuses"
+      :is-saving="isSaving"
+      @update-setting="setAccess"
+      @set-task-type-visible="setTaskTypeVisible"
+      @set-status-client-allowed="setStatusClientAllowed"
+    />
 
     <div class="box section metadata">
       <h2 class="subtitle">{{ $t('productions.clients.metadata_title') }}</h2>
@@ -298,18 +181,16 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useStore } from 'vuex'
 
 import { useTime } from '@/composables/time'
-import { isTaskStatusClientAllowed } from '@/lib/productions'
 import { sortTaskStatuses, sortTaskTypes } from '@/lib/sorting'
 import { parseDate } from '@/lib/time'
 
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
+import ClientAccessSettings from '@/components/pages/production/ClientAccessSettings.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Checkbox from '@/components/widgets/Checkbox.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
-import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 import TextField from '@/components/widgets/TextField.vue'
-import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
 // Composables
 // --------------------------------------------------------------------------
@@ -352,41 +233,24 @@ const sortedTaskTypes = computed(() =>
   )
 )
 
-// Clients never get the concept pages, so concept task types are left out
-const taskTypeGroups = computed(() => {
-  const groups = new Map()
-  sortedTaskTypes.value
-    .filter(taskType => taskType.for_entity !== 'Concept')
-    .forEach(taskType => {
-      const entity = taskType.for_entity
-      if (!groups.has(entity)) {
-        groups.set(entity, {
-          entity,
-          label: `${entity.toLowerCase()}s.title`,
-          taskTypes: []
-        })
-      }
-      groups.get(entity).taskTypes.push(taskType)
-    })
-  return [...groups.values()]
-})
+const clientTaskTypes = computed(() =>
+  sortedTaskTypes.value.map(taskType => ({
+    ...taskType,
+    is_client_visible:
+      currentProduction.value?.task_type_links?.[taskType.id]?.is_client_visible
+  }))
+)
 
-const accessOptions = [
-  { name: 'stats', label: 'stats', flag: 'is_client_stats_visible' },
-  {
-    name: 'task-list',
-    label: 'task_list',
-    flag: 'is_client_task_list_visible'
-  },
-  {
-    name: 'task-panel',
-    label: 'task_panel',
-    flag: 'is_client_task_panel_visible'
-  }
-]
-
-const sortedTaskStatuses = computed(() =>
-  sortTaskStatuses([...productionTaskStatuses.value], currentProduction.value)
+const clientTaskStatuses = computed(() =>
+  sortTaskStatuses(
+    [...productionTaskStatuses.value],
+    currentProduction.value
+  ).map(status => ({
+    ...status,
+    link_is_client_allowed:
+      currentProduction.value?.task_statuses_link?.[status.id]
+        ?.is_client_allowed
+  }))
 )
 
 const descriptors = computed(() =>
@@ -491,14 +355,6 @@ const save = async action => {
   }
 }
 
-const setIsolated = value =>
-  save(() =>
-    store.dispatch('editProduction', {
-      id: productionId.value,
-      is_clients_isolated: value
-    })
-  )
-
 const setAccess = (flag, value) =>
   save(() =>
     store.dispatch('editProduction', { id: productionId.value, [flag]: value })
@@ -512,37 +368,12 @@ const setTaskTypeVisible = (taskTypeId, value) =>
     })
   )
 
-// An override equal to the studio value reads as the studio default
-const isStudioDefault = status => {
-  const value =
-    currentProduction.value?.task_statuses_link?.[status.id]?.is_client_allowed
-  return typeof value !== 'boolean' || value === status.is_client_allowed
-}
-
-// null drops the production override and follows the studio setting again
-const overriddenStatuses = computed(() =>
-  sortedTaskStatuses.value.filter(status => !isStudioDefault(status))
-)
-
-const resetStatusesToStudio = () =>
-  save(() =>
-    Promise.all(
-      overriddenStatuses.value.map(status =>
-        store.dispatch('setTaskStatusClientAllowed', {
-          taskStatusId: status.id,
-          isClientAllowed: null
-        })
-      )
-    )
-  )
-
-// Going back to the studio value clears the override, so the production
-// follows later studio changes again
-const setStatusClientAllowed = (status, value) =>
+// ClientAccessSettings sends null when the value goes back to the studio one
+const setStatusClientAllowed = (taskStatusId, isClientAllowed) =>
   save(() =>
     store.dispatch('setTaskStatusClientAllowed', {
-      taskStatusId: status.id,
-      isClientAllowed: value === status.is_client_allowed ? null : value
+      taskStatusId,
+      isClientAllowed
     })
   )
 
@@ -682,63 +513,6 @@ onBeforeUnmount(() => clearInterval(clock))
   padding: 0;
 }
 
-// One grid for every row: a long status name widens its column for all the
-// rows, so the origin text starts at the same place on each line
-.status-list {
-  align-items: center;
-  column-gap: 1em;
-  display: grid;
-  grid-template-columns: auto max-content 1fr;
-  grid-auto-rows: minmax(2.5em, auto);
-  margin-top: 1em;
-  row-gap: 0.4em;
-}
-
-.status-item {
-  display: contents;
-
-  // The field, tag and button margins push each cell off the row centre
-  > * {
-    margin: 0;
-  }
-
-  .status-client-allowed {
-    align-items: center;
-    display: flex;
-  }
-}
-
-.status-tag {
-  justify-self: start;
-}
-
-@media screen and (max-width: 768px) {
-  .status-list {
-    grid-template-columns: auto 1fr;
-  }
-
-  .status-origin {
-    grid-column: 1 / -1;
-  }
-}
-
-.status-origin {
-  color: var(--text-alt);
-  font-size: 0.9em;
-
-  .is-overridden & {
-    color: var(--text);
-    font-weight: 500;
-  }
-}
-
-.statuses-reset {
-  font-size: 0.9em;
-  height: auto;
-  margin-top: 0.5em;
-  padding: 0.4em 0.8em;
-}
-
 .team-client {
   align-items: center;
   display: flex;
@@ -749,40 +523,14 @@ onBeforeUnmount(() => clearInterval(clock))
   margin-bottom: 0.8em;
 }
 
-// The explanation sits right under its toggle, the option keeps the
-// common spacing below it
-.access-option {
-  margin-bottom: 0.4em;
-
-  > .field {
-    margin-bottom: 0;
-  }
-
-  .hint {
-    margin: 0;
-  }
-}
-
 .hint {
   color: var(--text-alt);
   font-size: 0.9em;
   margin: 0.3em 0 0;
 }
 
-.task-type-group + .task-type-group {
-  margin-top: 1.5em;
-}
-
-.task-type-group-title {
-  color: var(--text-strong);
-  font-weight: bold;
-  margin-bottom: 0.5em;
-}
-
 // Every toggle line of the tab shares one height and one spacing
-.isolation,
-.descriptor,
-.access-task-type-row {
+.descriptor {
   align-items: center;
   display: flex;
   margin: 0 0 0.4em;
@@ -793,13 +541,6 @@ onBeforeUnmount(() => clearInterval(clock))
     margin-bottom: 0;
     margin-top: 0;
   }
-}
-
-.access-option > .field,
-.access-task-type {
-  align-items: center;
-  display: flex;
-  min-height: 2.5em;
 }
 
 .empty {

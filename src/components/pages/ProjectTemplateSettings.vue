@@ -25,6 +25,17 @@
               {{ $t('productions.parameters.title') }}
             </a>
           </li>
+          <li :class="{ 'is-active': isActiveTab('clients') }">
+            <a
+              role="button"
+              tabindex="0"
+              @click="activeTab = 'clients'"
+              @keydown.enter.prevent="activeTab = 'clients'"
+              @keydown.space.prevent="activeTab = 'clients'"
+            >
+              {{ $t('productions.clients.title') }}
+            </a>
+          </li>
           <li :class="{ 'is-active': isActiveTab('video') }">
             <a
               role="button"
@@ -155,12 +166,6 @@
               <checkbox
                 class="mb1"
                 :toggle="true"
-                :label="$t('productions.fields.is_clients_isolated')"
-                v-model="params.is_clients_isolated"
-              />
-              <checkbox
-                class="mb1"
-                :toggle="true"
                 :label="$t('productions.fields.is_preview_download_allowed')"
                 v-model="params.is_preview_download_allowed"
               />
@@ -194,6 +199,23 @@
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- Clients -->
+      <div class="tab" v-show="isActiveTab('clients')">
+        <p v-if="errors.parameters || errors.clients" class="error mb1">
+          {{ $t('productions.clients.save_error') }}
+        </p>
+        <client-access-settings
+          :key="clientsKey"
+          :settings="params"
+          :task-types="templateTaskTypes"
+          :task-statuses="templateTaskStatuses"
+          :is-saving="loading.clients"
+          @update-setting="(flag, value) => (params[flag] = value)"
+          @set-task-type-visible="setTaskTypeClientVisible"
+          @set-status-client-allowed="setStatusClientAllowed"
+        />
       </div>
 
       <!-- Task Types -->
@@ -458,6 +480,7 @@ import AssetTypeSettings from '@/components/pages/production/AssetTypeSettings.v
 import BackgroundSettings from '@/components/pages/production/BackgroundSettings.vue'
 import RowActionsCell from '@/components/cells/RowActionsCell.vue'
 import BoardSettings from '@/components/pages/production/BoardSettings.vue'
+import ClientAccessSettings from '@/components/pages/production/ClientAccessSettings.vue'
 import MovieBitrateField from '@/components/pages/production/MovieBitrateField.vue'
 import StatusAutomationSettings from '@/components/pages/production/StatusAutomationSettings.vue'
 import Checkbox from '@/components/widgets/Checkbox.vue'
@@ -534,9 +557,16 @@ const loading = reactive({
   template: false,
   descriptors: false,
   saveDescriptor: false,
-  parameters: false
+  parameters: false,
+  clients: false
 })
-const errors = reactive({ parameters: false, saveDescriptor: false })
+const errors = reactive({
+  clients: false,
+  parameters: false,
+  saveDescriptor: false
+})
+// Bumped on a failed save to reset the checkbox DOM state to the saved value
+const clientsKey = ref(0)
 const modals = reactive({ addMetadata: false })
 const descriptorToEdit = ref({})
 const descriptorToEditIndex = ref(-1)
@@ -558,6 +588,9 @@ const params = ref({
   hd_bitrate_compression: '',
   ld_bitrate_compression: '',
   is_clients_isolated: false,
+  is_client_stats_visible: true,
+  is_client_task_list_visible: true,
+  is_client_task_panel_visible: true,
   is_preview_download_allowed: false,
   is_set_preview_automated: false,
   is_single_preview_per_revision: false,
@@ -635,6 +668,9 @@ const loadTemplateData = async () => {
     hd_bitrate_compression: tmpl.hd_bitrate_compression ?? '',
     ld_bitrate_compression: tmpl.ld_bitrate_compression ?? '',
     is_clients_isolated: !!tmpl.is_clients_isolated,
+    is_client_stats_visible: tmpl.is_client_stats_visible !== false,
+    is_client_task_list_visible: tmpl.is_client_task_list_visible !== false,
+    is_client_task_panel_visible: tmpl.is_client_task_panel_visible !== false,
     is_preview_download_allowed: !!tmpl.is_preview_download_allowed,
     is_set_preview_automated: !!tmpl.is_set_preview_automated,
     is_single_preview_per_revision: !!tmpl.is_single_preview_per_revision,
@@ -746,6 +782,55 @@ const setTaskTypeBitrates = async ({ taskTypeId, ...bitrates }) => {
   // A field saves on its way out of the page, which can be gone by now.
   if (templateId.value === id) await loadTemplateData()
 }
+
+// A reload would reset the parameters a pending autosave still has to send
+const saveClientAccess = async (action, update) => {
+  loading.clients = true
+  errors.clients = false
+  try {
+    await action()
+    update()
+  } catch (err) {
+    console.error(err)
+    errors.clients = true
+    clientsKey.value++
+  }
+  loading.clients = false
+}
+
+const setTaskTypeClientVisible = (taskTypeId, isClientVisible) =>
+  saveClientAccess(
+    () =>
+      store.dispatch('addTaskTypeToTemplate', {
+        templateId: templateId.value,
+        taskTypeId,
+        is_client_visible: isClientVisible
+      }),
+    () => {
+      templateTaskTypes.value = templateTaskTypes.value.map(taskType =>
+        taskType.id === taskTypeId
+          ? { ...taskType, is_client_visible: isClientVisible }
+          : taskType
+      )
+    }
+  )
+
+const setStatusClientAllowed = (taskStatusId, isClientAllowed) =>
+  saveClientAccess(
+    () =>
+      store.dispatch('addTaskStatusToTemplate', {
+        templateId: templateId.value,
+        taskStatusId,
+        isClientAllowed
+      }),
+    () => {
+      templateTaskStatuses.value = templateTaskStatuses.value.map(status =>
+        status.id === taskStatusId
+          ? { ...status, link_is_client_allowed: isClientAllowed }
+          : status
+      )
+    }
+  )
 
 const removeTaskType = async taskTypeId => {
   await store.dispatch('removeTaskTypeFromTemplate', {
@@ -1062,6 +1147,15 @@ h2.subtitle {
   color: var(--text-alt);
 }
 
+.client-access-settings {
+  max-width: 800px;
+
+  :deep(.section) {
+    margin-bottom: 1em;
+    padding: 2em;
+  }
+}
+
 .section-title {
   color: var(--text);
   font-size: 1.1em;
@@ -1274,6 +1368,15 @@ p {
      on mobile (read-only mode) */
   :deep(.tab .datatable-row .button) {
     display: none !important;
+  }
+
+  /* ClientAccessSettings — no reset, toggles read-only */
+  :deep(.client-access-settings .statuses-reset) {
+    display: none;
+  }
+
+  :deep(.client-access-settings .checkbox-field) {
+    pointer-events: none;
   }
 
   /* BoardSettings — Select all / Unselect all buttons hidden, role toggles
