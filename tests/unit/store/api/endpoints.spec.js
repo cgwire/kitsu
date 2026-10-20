@@ -271,6 +271,20 @@ describe('store/api endpoints', () => {
     })
   })
 
+  describe('project templates frame in numbering', () => {
+    test('sends the frame in numbering flag of the template', () => {
+      projectTemplatesApi.editProjectTemplate({
+        id: 'template-1',
+        is_frame_in_numbering: true
+      })
+
+      expect(client.pput).toHaveBeenCalledWith(
+        '/api/data/project-templates/template-1',
+        expect.objectContaining({ is_frame_in_numbering: true })
+      )
+    })
+  })
+
   describe('project templates client access', () => {
     test('sends the client access flags of the template', () => {
       projectTemplatesApi.editProjectTemplate({

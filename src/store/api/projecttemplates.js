@@ -52,7 +52,8 @@ export default {
       is_publish_default_for_artists: template.is_publish_default_for_artists,
       is_single_preview_per_revision: template.is_single_preview_per_revision,
       hd_bitrate_compression: template.hd_bitrate_compression,
-      ld_bitrate_compression: template.ld_bitrate_compression
+      ld_bitrate_compression: template.ld_bitrate_compression,
+      is_frame_in_numbering: template.is_frame_in_numbering
     }
     return client.pput(`/api/data/project-templates/${template.id}`, data)
   },
