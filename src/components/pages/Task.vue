@@ -495,6 +495,7 @@ import {
   ImageIcon
 } from 'lucide-vue-next'
 
+import { isListOfPageLoaded } from '@/composables/entity'
 import { isClientThread } from '@/lib/comments'
 import drafts from '@/lib/drafts'
 import { logRequestFailure } from '@/lib/errors'
@@ -557,7 +558,8 @@ const taskComments = ref([])
 const taskPreviews = ref([])
 const commentToEdit = ref(null)
 const failedActionCommentId = ref(null)
-const selectedPreviewId = ref(null)
+// The revision of the URL shows from the first render, not after the latest.
+const selectedPreviewId = ref(route.params.preview_id || null)
 const previewForms = ref([])
 const currentFrame = ref(0)
 const isUseCurrentFrame = ref(false)
@@ -658,7 +660,20 @@ const entityListsByType = {
   Shot: () => shotsStore.cache.shots
 }
 
-const entityList = computed(() => entityListsByType[currentType.value]())
+// The page loads the list of its episode once the task shows, and a list load
+// replaces the cached array out of sight of Vue: the chevrons walk the list
+// once that load is over. The sequences and the episodes reload without the
+// tasks the chevrons read: their lists stay as they were.
+const entityList = computed(() => {
+  const type = currentType.value
+  if (
+    ['Asset', 'Edit', 'Shot'].includes(type) &&
+    !isListOfPageLoaded(store.getters, type)
+  ) {
+    return []
+  }
+  return entityListsByType[type]()
+})
 
 // Computed (task)
 // --------------------------------------------------------------------------
@@ -1073,8 +1088,12 @@ function taskPath(targetTask, section = 'task') {
 
     if (isTVShow.value && currentEpisode.value) {
       target.name = `episode-${section}`
+      // The episode of the URL, the one of the list the chevrons walk: a task
+      // the store reloads carries its own, for an asset its source episode.
       target.params.episode_id =
-        targetTask.episode_id || currentEpisode.value.id
+        route.params.episode_id ||
+        targetTask.episode_id ||
+        currentEpisode.value.id
     }
   }
   return target

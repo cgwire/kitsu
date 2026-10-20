@@ -530,7 +530,7 @@ import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { useCastingView } from '@/composables/castingView'
-import { useEntity } from '@/composables/entity'
+import { isListOfPageLoaded, useEntity } from '@/composables/entity'
 import { sortByName } from '@/lib/sorting'
 import assetStore from '@/store/modules/assets'
 
@@ -599,7 +599,11 @@ const taskMap = computed(() => store.getters.taskMap)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
-const entityList = computed(() => assetStore.cache.assets)
+// The list of the page, once loaded: a load replaces the cached array out of
+// sight of Vue, and its scope and loading flag have it read again.
+const entityList = computed(() =>
+  isListOfPageLoaded(store.getters, 'asset') ? assetStore.cache.assets : []
+)
 
 const title = computed(() =>
   currentAsset.value
@@ -821,7 +825,15 @@ const {
   tasksEndDate,
   onTaskSelected,
   saveTaskScheduleItem
-} = useEntity({ type: 'asset', currentEntity: currentAsset, entityList, init })
+} = useEntity({
+  type: 'asset',
+  currentEntity: currentAsset,
+  entityList,
+  init,
+  // The list loaded holds its own object for the asset, the one the store
+  // updates from then on.
+  loadList: () => store.dispatch('loadAssets').then(resetData)
+})
 
 // Watchers
 // --------------------------------------------------------------------------

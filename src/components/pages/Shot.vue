@@ -403,7 +403,7 @@ import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { useCastingView } from '@/composables/castingView'
-import { useEntity } from '@/composables/entity'
+import { isListOfPageLoaded, useEntity } from '@/composables/entity'
 import { episodifyRoute } from '@/lib/path'
 import shotStore from '@/store/modules/shots'
 
@@ -464,7 +464,11 @@ const shotMetadataDescriptors = computed(
 const shotSearchText = computed(() => store.getters.shotSearchText)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
-const entityList = computed(() => shotStore.cache.shots)
+// The list of the page, once loaded: a load replaces the cached array out of
+// sight of Vue, and its scope and loading flag have it read again.
+const entityList = computed(() =>
+  isListOfPageLoaded(store.getters, 'shot') ? shotStore.cache.shots : []
+)
 
 const title = computed(() => {
   if (!currentShot.value) return t('main.loading')
@@ -631,7 +635,15 @@ const {
   tasksEndDate,
   onTaskSelected,
   saveTaskScheduleItem
-} = useEntity({ type: 'shot', currentEntity: currentShot, entityList, init })
+} = useEntity({
+  type: 'shot',
+  currentEntity: currentShot,
+  entityList,
+  init,
+  // The list loaded holds its own object for the shot, the one the store
+  // updates from then on.
+  loadList: () => store.dispatch('loadShots').then(resetData)
+})
 
 // Watchers
 // --------------------------------------------------------------------------

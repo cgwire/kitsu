@@ -1,4 +1,5 @@
 import { flushPromises, shallowMount } from '@vue/test-utils'
+import { ref } from 'vue'
 import { createMemoryHistory, createRouter } from 'vue-router'
 import { createStore } from 'vuex'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -17,11 +18,13 @@ import '@/lib/auth'
 
 import Task from '@/components/pages/Task.vue'
 import AddComment from '@/components/widgets/AddComment.vue'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import Comment from '@/components/widgets/Comment.vue'
 import PreviewPlayer from '@/components/players/players/PreviewPlayer.vue'
 import SubscribeButton from '@/components/widgets/SubscribeButton.vue'
 import drafts from '@/lib/drafts'
 import { DEFAULT_FPS } from '@/lib/video'
+import sequencesStore from '@/store/modules/sequences'
 import shotsStore from '@/store/modules/shots'
 
 import { recordUnhandledRejections } from '../fixtures/unhandled-rejections'
@@ -74,6 +77,8 @@ const mountPage = async ({
   previews = [],
   // Leave the task load hanging: the page then mounts with no task at all.
   pendingTaskLoad = false,
+  // The revision the URL names when the page opens.
+  previewId = null,
   stubs = {}
 } = {}) => {
   const dispatched = []
@@ -94,10 +99,27 @@ const mountPage = async ({
         path: '/productions/:production_id/:type/tasks/:task_id/previews/:preview_id',
         name: 'task-preview',
         component: { template: '<div />' }
+      },
+      {
+        path: '/productions/:production_id/episodes/:episode_id/:type/tasks/:task_id',
+        name: 'episode-task',
+        component: { template: '<div />' }
+      },
+      {
+        path: '/productions/:production_id/episodes/:episode_id/:type/tasks/:task_id/previews/:preview_id',
+        name: 'episode-task-preview',
+        component: { template: '<div />' }
       }
     ]
   })
-  await router.push({ name: 'task', params: TASK_ROUTE_PARAMS })
+  await router.push(
+    previewId
+      ? {
+          name: 'task-preview',
+          params: { ...TASK_ROUTE_PARAMS, preview_id: previewId }
+        }
+      : { name: 'task', params: TASK_ROUTE_PARAMS }
+  )
   await router.isReady()
 
   const store = createStore({
@@ -156,7 +178,8 @@ const mountPage = async ({
         // The default stub swallows its slot, which holds the page title.
         RouterLink: {
           props: ['to'],
-          template: '<a :data-task="to?.params?.task_id"><slot /></a>'
+          template:
+            '<a :data-task="to?.params?.task_id" :data-episode="to?.params?.episode_id"><slot /></a>'
         },
         // Provided by the animxyz plugin, which the specs do not install.
         XyzTransitionGroup: { template: '<div><slot /></div>' },
@@ -450,6 +473,36 @@ describe('Task.vue preview selection', () => {
     await flushPromises()
   }
 
+  // Same as the chevrons: the episode of the task may not be the one of the
+  // page, the list the page walks.
+  it('keeps the episode of the URL when it switches revision', async () => {
+    const { wrapper, router } = await mountPage({
+      previews,
+      task: buildTask({ episode_id: 'episode-2' }),
+      getterOverrides: {
+        currentEpisode: () => ({ id: 'episode-1' }),
+        isTVShow: () => true
+      }
+    })
+    await router.push({
+      name: 'episode-task',
+      params: { ...TASK_ROUTE_PARAMS, episode_id: 'episode-1' }
+    })
+    await flushPromises()
+
+    wrapper
+      .findAllComponents(ComboboxStyled)
+      .find(combo => combo.classes().includes('preview-combo'))
+      .vm.$emit('update:modelValue', 'preview-2')
+    await flushPromises()
+
+    expect(router.currentRoute.value.name).toBe('episode-task-preview')
+    expect(router.currentRoute.value.params).toMatchObject({
+      episode_id: 'episode-1',
+      preview_id: 'preview-2'
+    })
+  })
+
   it('shows the latest preview when none is selected', async () => {
     const { wrapper } = await mountPage({ previews })
     expect(playerPreviews(wrapper)).toEqual(['from-3'])
@@ -458,6 +511,13 @@ describe('Task.vue preview selection', () => {
   it('shows the preview named by the route', async () => {
     const { wrapper, router } = await mountPage({ previews })
     await selectPreview(router, 'preview-2')
+    expect(playerPreviews(wrapper)).toEqual(['from-2'])
+  })
+
+  // The task panel opens the page on the revision it shows: no detour
+  // through the latest one.
+  it('shows the preview its URL names from the first render', async () => {
+    const { wrapper } = await mountPage({ previews, previewId: 'preview-2' })
     expect(playerPreviews(wrapper)).toEqual(['from-2'])
   })
 
@@ -1065,11 +1125,16 @@ describe('Task.vue navigation', () => {
       .findAll('.header-title > div:not(.task-type) a')
       .map(link => link.attributes('data-task'))
 
-  const mountWith = ({ entities, production = {} } = {}) => {
+  const mountWith = ({
+    entities,
+    production = {},
+    currentTask = task,
+    getterOverrides = {}
+  } = {}) => {
     // entityList reads the module cache, not the store.
     shotsStore.cache.shots.push(...entities)
     return mountPage({
-      task,
+      task: currentTask,
       getterOverrides: {
         currentProduction: () => ({
           id: 'production-1',
@@ -1078,15 +1143,21 @@ describe('Task.vue navigation', () => {
           fps: 25,
           ...production
         }),
-        taskMap: () => new Map(tasks.map(item => [item.id, item])),
+        // The list of the page, loaded.
+        isShotsLoading: () => false,
+        shotsLoadingKey: () => 'production-1/',
+        taskMap: () =>
+          new Map([...tasks, currentTask].map(item => [item.id, item])),
         taskTypeMap: () =>
-          new Map(taskTypes.map(taskType => [taskType.id, taskType]))
+          new Map(taskTypes.map(taskType => [taskType.id, taskType])),
+        ...getterOverrides
       }
     })
   }
 
   afterEach(() => {
     shotsStore.cache.shots.length = 0
+    sequencesStore.cache.sequences.length = 0
   })
 
   describe('between the task types of an entity', () => {
@@ -1174,6 +1245,79 @@ describe('Task.vue navigation', () => {
         entities: [{ id: 'entity-9', tasks: ['task-3-anim'] }]
       })
       expect(entityLinks(wrapper)).toEqual([])
+    })
+  })
+
+  // The page loads the list of its episode once the task shows.
+  describe('list of the page', () => {
+    const entities = [
+      { id: 'entity-0', tasks: ['task-0-anim'] },
+      { id: 'entity-1', tasks: [TASK_ID] },
+      { id: 'entity-3', tasks: ['task-3-anim'] }
+    ]
+
+    it('offers no link while that list loads, then walks it', async () => {
+      const isLoading = ref(true)
+      const { wrapper } = await mountWith({
+        entities,
+        getterOverrides: { isShotsLoading: () => isLoading.value }
+      })
+      expect(entityLinks(wrapper)).toEqual([])
+
+      isLoading.value = false
+      await flushPromises()
+      expect(entityLinks(wrapper)).toEqual(['task-0-anim', 'task-3-anim'])
+    })
+
+    it('offers no link over the list of another episode', async () => {
+      const { wrapper } = await mountWith({
+        entities,
+        getterOverrides: {
+          currentEpisode: () => ({ id: 'episode-1' }),
+          isTVShow: () => true,
+          shotsLoadingKey: () => 'production-1/episode-3#partial'
+        }
+      })
+      expect(entityLinks(wrapper)).toEqual([])
+    })
+
+    // A task the store reloads (task:update) carries its own episode, for an
+    // asset its source, which may not be the episode of the page for an asset
+    // cast in from another one. Opened under it, a neighbor leaves the list.
+    it('opens a neighbor under the episode of the URL', async () => {
+      const { wrapper, router } = await mountWith({
+        entities,
+        currentTask: buildTask({ task_type_id: 'tt-anim', episode_id: 'episode-2' }),
+        getterOverrides: {
+          currentEpisode: () => ({ id: 'episode-1' }),
+          isTVShow: () => true,
+          shotsLoadingKey: () => 'production-1/episode-1'
+        }
+      })
+      await router.push({
+        name: 'episode-task',
+        params: { ...TASK_ROUTE_PARAMS, episode_id: 'episode-1' }
+      })
+      await flushPromises()
+      expect(
+        wrapper
+          .findAll('.header-title > div:not(.task-type) a')
+          .map(link => link.attributes('data-episode'))
+      ).toEqual(['episode-1', 'episode-1'])
+    })
+
+    // The page reloads them without the tasks the chevrons read.
+    it('keeps walking the sequences the store holds', async () => {
+      sequencesStore.cache.sequences.push(...entities)
+      const { wrapper } = await mountWith({
+        entities: [],
+        currentTask: buildTask({
+          task_type_id: 'tt-anim',
+          entity_type_name: 'Sequence'
+        }),
+        getterOverrides: { sequencesLoadingKey: () => 'production-1/#partial' }
+      })
+      expect(entityLinks(wrapper)).toEqual(['task-0-anim', 'task-3-anim'])
     })
   })
 })

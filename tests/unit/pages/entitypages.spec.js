@@ -45,6 +45,7 @@ const production = { id: 'production-1' }
 const pages = [
   {
     name: 'Asset',
+    listAction: 'loadAssets',
     page: Asset,
     entityParam: 'asset_id',
     listRoute: 'assets',
@@ -54,6 +55,7 @@ const pages = [
   },
   {
     name: 'Edit',
+    listAction: 'loadEdits',
     page: Edit,
     entityParam: 'edit_id',
     listRoute: 'edits',
@@ -72,6 +74,7 @@ const pages = [
   },
   {
     name: 'Sequence',
+    listAction: 'loadSequencesWithTasks',
     page: Sequence,
     entityParam: 'sequence_id',
     listRoute: 'sequences',
@@ -81,6 +84,7 @@ const pages = [
   },
   {
     name: 'Shot',
+    listAction: 'loadShots',
     page: Shot,
     entityParam: 'shot_id',
     listRoute: 'shots',
@@ -142,6 +146,7 @@ const mountPage = async (
       loadAsset: loadAction,
       loadAssetCastIn: loadAction,
       loadAssetCasting: loadAction,
+      loadAssets: loadAction,
       loadEdits: loadAction,
       loadEpisodeCasting: loadAction,
       loadEpisodesWithTasks: loadAction,
@@ -150,6 +155,7 @@ const mountPage = async (
       loadSequencesWithTasks: loadAction,
       loadShot: loadAction,
       loadShotCasting: loadAction,
+      loadShots: loadAction,
       ...actions
     }
   })
@@ -251,6 +257,56 @@ describe.each(pages)(
 
       expect(modal().props('active')).toBe(true)
       expect(modal().props('isError')).toBe(false)
+    })
+  }
+)
+
+// The pages whose arrows walk a list of the store, which may be the one of
+// another episode: an entity loaded by id, a list loaded elsewhere.
+describe.each(pages.filter(({ listAction }) => listAction))(
+  '$name page, list of the page',
+  ({ entityMap, entityParam, listAction, name, page }) => {
+    afterEach(() => {
+      entityMap.clear()
+    })
+
+    // A sequence loaded with its tasks is not loaded again by the page.
+    const entity = fields => ({
+      id: 'entity-1',
+      name: 'E01',
+      tasks: [],
+      validations: new Map(),
+      ...fields
+    })
+
+    // The list loaded carries its own object for the entity, the one the
+    // store updates from then on.
+    test('takes its entity from the list it loads for the arrows', async () => {
+      entityMap.set('entity-1', entity())
+      const loadList = vi.fn(() => {
+        entityMap.set('entity-1', entity({ name: 'E01 bis' }))
+        return Promise.resolve()
+      })
+      const { wrapper } = await mountPage(page, entityParam, production, {
+        [listAction]: loadList
+      })
+
+      expect(loadList).toHaveBeenCalledTimes(1)
+      expect(wrapper.find('.entity-title').text()).toContain('E01 bis')
+    })
+
+    test('keeps the list the store holds for its episode', async () => {
+      entityMap.set('entity-1', entity())
+      const loadList = vi.fn(() => Promise.resolve())
+      await mountPage(
+        page,
+        entityParam,
+        production,
+        { [listAction]: loadList },
+        { [`${name.toLowerCase()}sLoadingKey`]: () => `${production.id}/` }
+      )
+
+      expect(loadList).not.toHaveBeenCalled()
     })
   }
 )

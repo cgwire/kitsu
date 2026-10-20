@@ -571,7 +571,6 @@ const sideWrapperRef = useTemplateRef('side-wrapper')
 
 // Computed
 // --------------------------------------------------------------------------
-const currentEpisode = computed(() => store.getters.currentEpisode)
 const currentProduction = computed(() => store.getters.currentProduction)
 const isCurrentUserArtist = computed(() => store.getters.isCurrentUserArtist)
 const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
@@ -589,7 +588,6 @@ const isCurrentUserManager = computed(
 const isCurrentUserSupervisor = computed(
   () => currentUserProductionRole.value === 'supervisor'
 )
-const isTVShow = computed(() => store.getters.isTVShow)
 const nbSelectedTasks = computed(() => store.getters.nbSelectedTasks)
 const nbSelectedValidations = computed(
   () => store.getters.nbSelectedValidations
@@ -830,19 +828,56 @@ const taskStatuses = computed(() => {
   )
 })
 
-const taskPath = computed(() =>
-  getTaskPath(
-    props.task,
-    null,
-    isTVShow.value,
-    currentEpisode.value,
-    taskTypeMap.value
-  )
+const pageEpisodeId = computed(() =>
+  route.params.production_id === props.task.project_id
+    ? route.params.episode_id
+    : null
 )
 
-const taskEntityPath = computed(() =>
-  getTaskEntityPath(props.task, route.params.episode_id)
+const isTaskOfTVShow = computed(
+  () =>
+    productionMap.value.get(props.task.project_id)?.production_type === 'tvshow'
 )
+
+// The store keeps the episode browsed last, maybe of another production: a
+// task without its own episode opens under the one of a page of its
+// production, else under all of them. The task page shows the latest revision
+// first: another one goes along, if it belongs to the task shown (until its
+// comments load, the panel shows the revisions of the previous task).
+const taskPath = computed(() => {
+  const path = getTaskPath(
+    props.task,
+    null,
+    isTaskOfTVShow.value,
+    { id: pageEpisodeId.value || 'all' },
+    taskTypeMap.value
+  )
+  const preview = currentPreview.value
+  if (
+    !preview ||
+    preview.task_id !== props.task.id ||
+    preview.id === taskPreviews.value[0]?.id
+  ) {
+    return path
+  }
+  return {
+    name: `${path.name}-preview`,
+    params: { ...path.params, preview_id: preview.id }
+  }
+})
+
+// The entity opens under the episode of the page, as from its name in the
+// list, else under its own one on a TV show: the main pack for an asset
+// without episode.
+const taskEntityPath = computed(() => {
+  const isAsset = !['Shot', 'Edit', 'Episode', 'Sequence'].includes(
+    props.task.entity_type_name
+  )
+  const ownEpisodeId = isTaskOfTVShow.value
+    ? props.task.episode_id || (isAsset ? 'main' : null)
+    : null
+  return getTaskEntityPath(props.task, pageEpisodeId.value || ownEpisodeId)
+})
 
 const previewOptions = computed(() => {
   if (!taskPreviews.value) return []

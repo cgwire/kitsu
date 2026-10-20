@@ -35,6 +35,25 @@ export const getEntityMap = entityType => {
   return caches[entityType.toLowerCase()]
 }
 
+/*
+ * Whether the store holds the list of an entity type ('Asset', 'shot', ...)
+ * loaded for the episode of the page, its load over. A detail page may load
+ * its entity by id into the list of another episode, and a load replaces the
+ * cached list out of sight of Vue: a computed reading this runs again when a
+ * load starts and ends. The episodes are listed for the whole production.
+ */
+export const isListOfPageLoaded = (getters, entityType) => {
+  const type = entityType.toLowerCase()
+  if (type === 'episode') return true
+  const typeName = type[0].toUpperCase() + type.slice(1)
+  const scope = getters.isTVShow ? (getters.currentEpisode?.id ?? '') : ''
+  return (
+    !getters[`is${typeName}sLoading`] &&
+    getters[`${type}sLoadingKey`] ===
+      `${getters.currentProduction?.id}/${scope}`
+  )
+}
+
 /**
  * Shared logic of the entity pages (Edit, Asset, Shot, Sequence, Episode).
  * Intentionally narrow: only the parts these pages need.
@@ -49,8 +68,16 @@ export const getEntityMap = entityType => {
  *   passes a ref/computed.
  * @param {Function} options.init - reset/reload callback fired when the
  *   route params change.
+ * @param {Function} [options.loadList] - loads the list of the page for the
+ *   arrows when the store holds another one; returns a promise.
  */
-export const useEntity = ({ type, currentEntity, entityList, init }) => {
+export const useEntity = ({
+  type,
+  currentEntity,
+  entityList,
+  init,
+  loadList
+}) => {
   const route = useRoute()
   const store = useStore()
 
@@ -60,6 +87,7 @@ export const useEntity = ({ type, currentEntity, entityList, init }) => {
   const getTaskTypePriority = computed(() => store.getters.getTaskTypePriority)
   const currentEpisode = computed(() => store.getters.currentEpisode)
   const currentProduction = computed(() => store.getters.currentProduction)
+  const isTVShow = computed(() => store.getters.isTVShow)
   const organisation = computed(() => store.getters.organisation)
   const isCurrentUserManager = computed(
     () => store.getters.isCurrentUserProductionManager
@@ -90,11 +118,13 @@ export const useEntity = ({ type, currentEntity, entityList, init }) => {
     { label: '3', value: 3 }
   ]
 
+  const isListOfPage = computed(() => isListOfPageLoaded(store.getters, type))
+
   const getEntityIndex = entityId =>
     entityList.value.findIndex(entity => entity.id === entityId)
 
   const previousEntity = computed(() => {
-    if (!currentEntity.value) return null
+    if (!currentEntity.value || !isListOfPage.value) return null
     const entityIndex = getEntityIndex(currentEntity.value.id)
     if (entityIndex === -1) return null
     return entityIndex > 0
@@ -103,7 +133,7 @@ export const useEntity = ({ type, currentEntity, entityList, init }) => {
   })
 
   const nextEntity = computed(() => {
-    if (!currentEntity.value) return null
+    if (!currentEntity.value || !isListOfPage.value) return null
     const entityIndex = getEntityIndex(currentEntity.value.id)
     if (entityIndex === -1) return null
     return entityIndex < entityList.value.length - 1
@@ -314,6 +344,26 @@ export const useEntity = ({ type, currentEntity, entityList, init }) => {
       }
       currentSection.value = route.query.section || 'infos'
     }
+  )
+
+  // Opened elsewhere than from its list (news feed, search, a reload), the
+  // page shows its entity, then loads the list of its episode for the arrows.
+  // Once per entity: a URL naming another episode than the one of its entity
+  // would load a list without it again and again. A TV show page without an
+  // episode in its URL cannot tell which list it walks.
+  let listLoadEntityId = null
+  watch(
+    () =>
+      currentEntity.value && !isListOfPage.value
+        ? currentEntity.value.id
+        : null,
+    entityId => {
+      if (!loadList || !entityId || entityId === listLoadEntityId) return
+      if (isTVShow.value && !route.params.episode_id) return
+      listLoadEntityId = entityId
+      loadList().catch(console.error)
+    },
+    { immediate: true }
   )
 
   // Keep schedule items in sync with the current tasks list (mirrors the

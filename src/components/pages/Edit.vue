@@ -217,7 +217,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
-import { useEntity } from '@/composables/entity'
+import { isListOfPageLoaded, useEntity } from '@/composables/entity'
 import { getEntitiesPath } from '@/lib/path'
 import editStore from '@/store/modules/edits'
 
@@ -268,7 +268,11 @@ const isCurrentUserManager = computed(
 )
 const isTVShow = computed(() => store.getters.isTVShow)
 
-const entityList = computed(() => editStore.cache.edits)
+// The list of the page, once loaded: a load replaces the cached array out of
+// sight of Vue, and its scope and loading flag have it read again.
+const entityList = computed(() =>
+  isListOfPageLoaded(store.getters, 'edit') ? editStore.cache.edits : []
+)
 
 const title = computed(() => {
   if (!currentEdit.value) return t('main.loading')
@@ -354,7 +358,19 @@ const {
   tasksEndDate,
   onTaskSelected,
   saveTaskScheduleItem
-} = useEntity({ type: 'edit', currentEntity: currentEdit, entityList, init })
+} = useEntity({
+  type: 'edit',
+  currentEntity: currentEdit,
+  entityList,
+  init,
+  // The list loaded holds its own object for the edit, the one the store
+  // updates from then on.
+  loadList: () =>
+    store.dispatch('loadEdits').then(() => {
+      currentEdit.value =
+        editStore.cache.editMap.get(route.params.edit_id) || currentEdit.value
+    })
+})
 
 // Watchers
 // --------------------------------------------------------------------------

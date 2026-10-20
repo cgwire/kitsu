@@ -347,7 +347,7 @@ import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { useCastingView } from '@/composables/castingView'
-import { useEntity } from '@/composables/entity'
+import { isListOfPageLoaded, useEntity } from '@/composables/entity'
 import { episodifyRoute, getEntitiesPath } from '@/lib/path'
 import sequenceStore from '@/store/modules/sequences'
 
@@ -406,7 +406,13 @@ const sequenceMetadataDescriptors = computed(
 const sequenceSearchText = computed(() => store.getters.sequenceSearchText)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
-const entityList = computed(() => sequenceStore.cache.sequences)
+// The list of the page, once loaded: a load replaces the cached array out of
+// sight of Vue, and its scope and loading flag have it read again.
+const entityList = computed(() =>
+  isListOfPageLoaded(store.getters, 'sequence')
+    ? sequenceStore.cache.sequences
+    : []
+)
 
 const title = computed(() => {
   if (!currentSequence.value) return t('main.loading')
@@ -572,7 +578,10 @@ const {
   type: 'sequence',
   currentEntity: currentSequence,
   entityList,
-  init
+  init,
+  // The list loaded holds its own object for the sequence, the one the store
+  // updates from then on.
+  loadList: () => store.dispatch('loadSequencesWithTasks').then(resetData)
 })
 
 // Watchers

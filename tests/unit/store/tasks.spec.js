@@ -1303,6 +1303,92 @@ describe('Tasks store, new main previews', () => {
   })
 })
 
+// GET /api/data/tasks/:id/full nests the episode of a shot or a sequence
+// task, and the entity of an asset or an edit task, where the task lists
+// give the episode id: the links to the task page read the id, or fall
+// back on the episode the user browsed last.
+describe('Tasks store, LOAD_TASK_END', () => {
+  const fullTask = fields => ({
+    id: 'task-1',
+    project: { name: 'Caminandes' },
+    entity: { id: 'shot-1', name: 'SH010' },
+    entity_type: { name: 'Shot' },
+    sequence: { id: 'sequence-1', name: 'SQ01' },
+    ...fields
+  })
+
+  test('gives a task the id of its episode', () => {
+    const state = { taskMap: new Map() }
+    const task = fullTask({ episode: { id: 'episode-2', name: 'E02' } })
+
+    tasksStore.mutations.LOAD_TASK_END(state, task)
+
+    expect(task.episode_id).toBe('episode-2')
+    expect(state.taskMap.get('task-1').episode_id).toBe('episode-2')
+  })
+
+  // The task lists give an asset the episode it was created in.
+  test('gives an asset task the episode of its asset', () => {
+    const state = { taskMap: new Map() }
+    const task = fullTask({
+      entity: { id: 'asset-1', name: 'Chair', source_id: 'episode-3' },
+      entity_type: { name: 'Props' },
+      sequence: undefined
+    })
+
+    tasksStore.mutations.LOAD_TASK_END(state, task)
+
+    expect(task.episode_id).toBe('episode-3')
+  })
+
+  test('gives an edit task the episode of its edit', () => {
+    const state = { taskMap: new Map() }
+    const task = fullTask({
+      entity: { id: 'edit-1', name: 'Trailer', parent_id: 'episode-4' },
+      entity_type: { name: 'Edit' },
+      sequence: undefined
+    })
+
+    tasksStore.mutations.LOAD_TASK_END(state, task)
+
+    expect(task.episode_id).toBe('episode-4')
+  })
+
+  test.each([
+    [
+      'an asset of the main pack',
+      {
+        entity: { id: 'asset-1', name: 'Chair', source_id: null },
+        entity_type: { name: 'Props' },
+        sequence: undefined
+      }
+    ],
+    [
+      'a shot outside episodes',
+      { entity: { id: 'shot-1', name: 'SH010', parent_id: 'sequence-1' } }
+    ],
+    // Zou gives a shot made from a scene that scene for source.
+    [
+      'a shot made from a scene',
+      {
+        entity: {
+          id: 'shot-1',
+          name: 'SH010',
+          parent_id: 'sequence-1',
+          source_id: 'scene-1'
+        }
+      }
+    ]
+  ])('gives no episode to the task of %s', (_, fields) => {
+    const state = { taskMap: new Map() }
+    const task = fullTask(fields)
+
+    tasksStore.mutations.LOAD_TASK_END(state, task)
+
+    expect(task).not.toHaveProperty('episode_id')
+  })
+})
+
 describe('Tasks store, DELETE_TASK_END', () => {
   const task = { id: 't1', entity_id: 'e1', task_type_id: 'tt1' }
   const buildState = () => ({
