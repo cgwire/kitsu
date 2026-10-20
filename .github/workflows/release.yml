@@ -49,6 +49,8 @@ jobs:
         id: create_release
         with:
           artifacts: kitsu-*.tgz,kitsu-*.SHA512
+          artifactErrorsFailBuild: true
+          immutableCreate: true
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Update "build" branch
         if: startsWith(github.ref, 'refs/tags')
