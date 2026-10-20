@@ -6,14 +6,11 @@
     :menu-groups="menuGroups"
     v-if="template"
   >
-    <div class="flexrow back-row">
-      <router-link
-        class="flexrow-item back-link"
-        :to="{ name: 'project-templates' }"
-      >
+    <template #menu-top>
+      <router-link class="back-link" :to="{ name: 'project-templates' }">
         &larr; {{ $t('project_templates.title') }}
       </router-link>
-    </div>
+    </template>
 
     <h2 class="template-name">{{ params.name.trim() || template.name }}</h2>
 
@@ -982,8 +979,10 @@ onMounted(async () => {
 
 .back-link {
   color: var(--text-alt);
-  text-decoration: none;
+  display: block;
   font-size: 0.9em;
+  margin-bottom: 1em;
+  text-decoration: none;
 
   &:hover {
     text-decoration: underline;

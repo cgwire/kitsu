@@ -603,8 +603,8 @@ describe('ProjectTemplateSettings page, settings layout', () => {
     ])
     expect(
       wrapper
-        .find('.settings-menu')
-        .findAllComponents(RouterLink)
+        .findAll('.settings-menu .menu-group')
+        .flatMap(group => group.findAllComponents(RouterLink))
         .map(menuTab)
     ).toEqual([
         'parameters',

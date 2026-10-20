@@ -2,6 +2,7 @@
   <div class="settings-page">
     <div class="wrapper">
       <nav class="settings-menu">
+        <slot name="menu-top" />
         <div class="menu-group" v-for="group in menuGroups" :key="group.label">
           <p class="menu-label">{{ $t(group.label) }}</p>
           <ul>
