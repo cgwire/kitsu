@@ -46,6 +46,7 @@ import ComboboxOptions from '@/components/widgets/ComboboxOptions.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DateField from '@/components/widgets/DateField.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
+import ProgressBar from '@/components/widgets/ProgressBar.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
 // The page is driven through what it renders and what it calls: the
@@ -1531,6 +1532,39 @@ describe('ProductionSchedule page', () => {
       }
     )
 
+    // A long run only showed the spinner of the Apply button.
+    it('shows the progress of the run', async () => {
+      // jsdom has no element scrollTo
+      Element.prototype.scrollTo = vi.fn()
+      const resolvers = []
+      const { wrapper } = await mountAssignments({
+        nbAssets: 3,
+        actions: {
+          updateTask: vi.fn(() => new Promise(resolve => resolvers.push(resolve)))
+        }
+      })
+      await selectProps(wrapper)
+      await setRange(wrapper)
+      await apply(wrapper)
+
+      const bar = () => wrapper.findComponent(ProgressBar)
+      expect(bar().props('progress')).toBe(0)
+      // the bar shows under the Apply button, at the bottom of a panel that
+      // scrolls: the panel scrolls to its end
+      expect(wrapper.find('.side').element.scrollTo).toHaveBeenCalledWith({
+        top: wrapper.find('.side').element.scrollHeight,
+        behavior: 'smooth'
+      })
+      expect(
+        wrapper.find('.side-column form').element.lastElementChild
+      ).toBe(bar().element)
+      resolvers.splice(0).forEach(resolve => resolve())
+      await flushPromises()
+
+      expect(bar().exists()).toBe(false)
+      expect(findButton(wrapper, 'main.apply').props('isLoading')).toBe(false)
+    })
+
     it('clears the error when Apply runs again', async () => {
       vi.spyOn(console, 'error').mockImplementation(() => {})
       const { storeActions, wrapper } = await mountAssignments({
@@ -1709,6 +1743,37 @@ describe('ProductionSchedule page', () => {
         assetStore.cache.assetMap.clear()
       }
     )
+
+    // A task ending before the range is left out of the row, yet its start
+    // pulled the row back, months before the production: the batch panel
+    // then opened on that date.
+    it('keeps the tasks before the range from widening the row', async () => {
+      propAssets.forEach(asset => assetStore.cache.assetMap.set(asset.id, asset))
+      const { wrapper } = await mountAssignments({
+        actions: {
+          loadTasks: vi.fn(() =>
+            propAssets.slice(0, 2).map(asset => ({
+              id: `task-${asset.id}`,
+              entity_id: asset.id,
+              assignees: [],
+              start_date: '2025-11-03',
+              due_date: '2025-11-14'
+            }))
+          )
+        }
+      })
+      const modelingRow = rowsOf(wrapper)[0]
+      findSchedule(wrapper).vm.$emit('root-element-expanded', modelingRow)
+      await waitForLoad()
+
+      const [propsRow] = modelingRow.children
+      expect([format(propsRow.startDate), format(propsRow.endDate)]).toEqual([
+        '2026-02-01',
+        '2026-02-20'
+      ])
+      expect(propsRow.nbTasksOutOfRange).toBe(2)
+      assetStore.cache.assetMap.clear()
+    })
 
     it('counts the tasks of the real mode without a real start as undated', async () => {
       propAssets.forEach(asset => assetStore.cache.assetMap.set(asset.id, asset))

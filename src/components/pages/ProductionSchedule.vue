@@ -163,7 +163,7 @@
       class="column side-column"
       v-if="isSidePanelOpen && !isLockedSchedule && !isAllEpisodes"
     >
-      <div class="side">
+      <div class="side" ref="sidePanel">
         <div class="side-header">
           <h2>
             {{
@@ -460,6 +460,11 @@
                 v-if="assignments.type === 'task'"
               />
             </div>
+            <progress-bar
+              class="mt2"
+              :progress="assignments.progress"
+              v-if="assignments.progress !== null"
+            />
           </form>
         </div>
       </div>
@@ -551,6 +556,7 @@ import moment from 'moment-timezone'
 import { firstBy } from 'thenby'
 import {
   computed,
+  nextTick,
   onBeforeUnmount,
   onMounted,
   ref,
@@ -626,6 +632,7 @@ import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import DateField from '@/components/widgets/DateField.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
+import ProgressBar from '@/components/widgets/ProgressBar.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
@@ -653,6 +660,8 @@ const assignments = ref({
   loading: false,
   nbPlannedTasks: 0,
   nbUnfitTasks: 0,
+  // percentage of the run saved so far, null outside a run
+  progress: null,
   saving: false,
   startDate: null,
   endDate: null,
@@ -709,6 +718,7 @@ const pendingParentChange = ref(null)
 // percentage of the confirmed move saved so far, null outside a save
 const childMoveProgress = ref(null)
 const scheduleRef = useTemplateRef('schedule')
+const sidePanelRef = useTemplateRef('sidePanel')
 
 // Bumped when the production or the episode changes and when the page is
 // left: an expansion still running then stops, rather than loading the
@@ -1520,9 +1530,6 @@ const loadTaskTypeRows = async taskTypeElement => {
         if (!entityTypeItem) return
 
         // populate task with start and end dates
-        if (taskStartDate.isBefore(entityTypeItem.startDate)) {
-          entityTypeItem.startDate = taskStartDate.clone()
-        }
         task.startDate = taskStartDate
 
         let taskEndDate
@@ -1546,10 +1553,15 @@ const loadTaskTypeRows = async taskTypeElement => {
         if (taskEndDate.isBefore(startDate.value)) {
           return
         }
+        task.endDate = taskEndDate
+
+        // the row encloses the tasks it shows, not the ones left out
+        if (taskStartDate.isBefore(entityTypeItem.startDate)) {
+          entityTypeItem.startDate = taskStartDate.clone()
+        }
         if (taskEndDate.isAfter(entityTypeItem.endDate)) {
           entityTypeItem.endDate = taskEndDate.clone()
         }
-        task.endDate = taskEndDate
 
         if (!tasksByType[task.entity_type_id][assigneeId]) {
           tasksByType[task.entity_type_id][assigneeId] = []
@@ -1806,6 +1818,7 @@ const resetSidePanel = () => {
     loading: false,
     nbPlannedTasks: 0,
     nbUnfitTasks: 0,
+    progress: null,
     saving: false,
     startDate: null,
     endDate: null,
@@ -2179,9 +2192,21 @@ const saveAssignments = async () => {
   // that started it
   const panel = assignments.value
   panel.saving = true
+  panel.progress = 0
   clearAssignmentMessages()
+  // the bar shows under the Apply button, at the bottom of a panel that
+  // scrolls
+  await nextTick()
+  sidePanelRef.value?.scrollTo?.({
+    top: sidePanelRef.value.scrollHeight,
+    behavior: 'smooth'
+  })
   try {
-    const { nbPlannedTasks, nbUnfitTasks } = await distributeAssignments()
+    const { nbPlannedTasks, nbUnfitTasks } = await distributeAssignments(
+      progress => {
+        panel.progress = progress
+      }
+    )
     panel.nbPlannedTasks = nbPlannedTasks
     panel.nbUnfitTasks = nbUnfitTasks
   } catch (err) {
@@ -2189,10 +2214,12 @@ const saveAssignments = async () => {
     panel.isError = true
   } finally {
     panel.saving = false
+    panel.progress = null
   }
 }
 
-const distributeAssignments = async () => {
+// onProgress gets the percentage of the tasks saved so far
+const distributeAssignments = async onProgress => {
   const tasks = await store.dispatch(
     'loadTasks',
     buildTaskFilters(selectedTaskType.value)
@@ -2205,15 +2232,21 @@ const distributeAssignments = async () => {
     }
   })
 
+  const nbTasks = draggedEntities.value
+    .flatMap(entityType => entityType.children)
+    .filter(entity => taskByEntityId.has(entity.id)).length
+  let nbSavedTasks = 0
+  const reportSaved = nbSaved => {
+    nbSavedTasks += nbSaved
+    onProgress(nbTasks ? Math.round((nbSavedTasks / nbTasks) * 100) : 100)
+  }
+
   // a zero or empty quota would make taskEstimation infinite and hang
   // the distribution loop in addBusinessDays: no task fits
   const dailyQuota =
     parseFloat(assignments.value.forcedDailyQuota) || estimatedDailyQuota.value
   if (dailyQuota <= 0) {
-    const nbUnfitTasks = draggedEntities.value
-      .flatMap(entityType => entityType.children)
-      .filter(entity => taskByEntityId.has(entity.id)).length
-    return { nbPlannedTasks: 0, nbUnfitTasks }
+    return { nbPlannedTasks: 0, nbUnfitTasks: nbTasks }
   }
   const taskEstimation = 1 / dailyQuota
 
@@ -2333,6 +2366,7 @@ const distributeAssignments = async () => {
             } else {
               await store.dispatch('updateScheduleVersionedTask', versionedTask)
             }
+            reportSaved(1)
           } else {
             // assignation to the current assignee is batched after the loop
             if (!taskIdsByAssignee.has(taskAssignee.id)) {
@@ -2368,11 +2402,11 @@ const distributeAssignments = async () => {
     // Chunks of 5 keep the server load reasonable; a bulk endpoint in
     // zou would replace this.
     for (let i = 0; i < taskUpdates.length; i += 5) {
+      const chunk = taskUpdates.slice(i, i + 5)
       await Promise.all(
-        taskUpdates
-          .slice(i, i + 5)
-          .map(update => store.dispatch('updateTask', update))
+        chunk.map(update => store.dispatch('updateTask', update))
       )
+      reportSaved(chunk.length)
     }
 
     // unassign first so batched assignations are not cleared right after
