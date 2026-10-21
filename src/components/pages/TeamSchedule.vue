@@ -292,6 +292,7 @@ import {
   parseSimpleDate
 } from '@/lib/time'
 
+import Schedule from '@/components/schedule/Schedule.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
@@ -304,7 +305,6 @@ import DepartmentName from '@/components/widgets/DepartmentName.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 import ProductionName from '@/components/widgets/ProductionName.vue'
-import Schedule from '@/components/widgets/Schedule.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'

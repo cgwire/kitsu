@@ -30,6 +30,7 @@ src/
     modals/         # Modal dialogs (BaseModal, EditStudiosModal, etc.)
     pages/          # Page-level components (Studios, etc.)
     players/        # Preview/playlist player components (annotations, bars, viewers, ...)
+    schedule/       # Schedule timeline widget and its row components
     sides/          # Sidebar components
     spinners/       # Loading spinners
     tops/           # Topbar components
