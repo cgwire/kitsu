@@ -597,8 +597,7 @@
                   :with-ghosts="withGhosts"
                   :with-statuses="withStatuses"
                   :with-timesheets="withTimesheets"
-                  :selected-key="selectedKeyOf(rowItems(childElement))"
-                  :with-handles="rowHasHandles(rowItems(childElement))"
+                  v-bind="rowSelection(childElement)"
                   @bar-down="moveTimebar"
                   @left-handle-down="moveTimebarLeftSide"
                   @right-handle-down="moveTimebarRightSide"
@@ -1784,6 +1783,15 @@ const rowItems = childElement =>
   childElement.children instanceof Map
     ? [childElement, ...Array.from(childElement.children.values()).flat()]
     : [childElement]
+
+// one flattening per row and render for both props
+const rowSelection = childElement => {
+  const items = rowItems(childElement)
+  return {
+    selectedKey: selectedKeyOf(items),
+    withHandles: rowHasHandles(items)
+  }
+}
 
 const addToSelection = itemToAdd => {
   selection.value.push(itemToAdd)
