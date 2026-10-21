@@ -2442,6 +2442,159 @@ describe('ProductionSchedule page', () => {
       }
     )
 
+    // Every task got the share of the quota, estimated or not: a task of
+    // two days was spread over the range and its estimation overwritten.
+    const estimatedTasks = estimations => () =>
+      propAssets.slice(0, estimations.length).map((asset, index) => ({
+        id: `task-${asset.id}`,
+        entity_id: asset.id,
+        assignees: [],
+        estimation: estimations[index]
+      }))
+
+    const removeBob = async wrapper => {
+      const [, removeButton] = wrapper
+        .find('.side-column .assignees')
+        .findAllComponents(ButtonSimple)
+      removeButton.vm.$emit('click')
+      await flushPromises()
+    }
+
+    it('chains the tasks by their own estimations', async () => {
+      const { storeActions, wrapper } = await mountAssignments({
+        actions: { loadTasks: vi.fn(estimatedTasks([960, 960])) }
+      })
+      await selectProps(wrapper)
+      // Monday 6 to Friday 10 April: five working days
+      await setRange(wrapper, '2026-04-06', '2026-04-10')
+      await removeBob(wrapper)
+
+      // one task per two person-days
+      expect(estimatedQuota(wrapper)).toBe('0.50')
+      expect(panelText(wrapper)).toContain(
+        'schedule.daily_quota_estimated {"quota":"0.50"}'
+      )
+
+      await apply(wrapper)
+
+      expect(payloadsOf(storeActions.updateTask)).toEqual([
+        {
+          taskId: 'task-asset-1',
+          data: {
+            estimation: 960,
+            start_date: '2026-04-06',
+            due_date: '2026-04-07'
+          }
+        },
+        {
+          taskId: 'task-asset-2',
+          data: {
+            estimation: 960,
+            start_date: '2026-04-08',
+            due_date: '2026-04-09'
+          }
+        }
+      ])
+    })
+
+    it('gives the time left by the estimated tasks to the others', async () => {
+      const { storeActions, wrapper } = await mountAssignments({
+        nbAssets: 3,
+        actions: { loadTasks: vi.fn(estimatedTasks([960, undefined, 960])) }
+      })
+      await selectProps(wrapper)
+      await setRange(wrapper, '2026-04-06', '2026-04-10')
+      await removeBob(wrapper)
+
+      // one day left out of five for the task without an estimation
+      expect(estimatedQuota(wrapper)).toBe('1.00')
+      expect(panelText(wrapper)).toContain(
+        'schedule.daily_quota_help {"count":1,"quota":"1.00"}'
+      )
+
+      await apply(wrapper)
+
+      expect(payloadsOf(storeActions.updateTask)).toEqual([
+        {
+          taskId: 'task-asset-1',
+          data: {
+            estimation: 960,
+            start_date: '2026-04-06',
+            due_date: '2026-04-07'
+          }
+        },
+        {
+          taskId: 'task-asset-2',
+          data: {
+            estimation: 480,
+            start_date: '2026-04-08',
+            due_date: '2026-04-08'
+          }
+        },
+        {
+          taskId: 'task-asset-3',
+          data: {
+            estimation: 960,
+            start_date: '2026-04-09',
+            due_date: '2026-04-10'
+          }
+        }
+      ])
+    })
+
+    it('moves a task to the next person and counts the one that fits nobody', async () => {
+      const { storeActions, wrapper } = await mountAssignments({
+        nbAssets: 3,
+        actions: { loadTasks: vi.fn(estimatedTasks([480, 1440, 1920])) }
+      })
+      await selectProps(wrapper)
+      await setRange(wrapper)
+
+      await apply(wrapper)
+
+      expect(payloadsOf(storeActions.updateTask)).toEqual([
+        {
+          taskId: 'task-asset-1',
+          data: {
+            estimation: 480,
+            start_date: '2026-04-06',
+            due_date: '2026-04-06'
+          }
+        },
+        {
+          taskId: 'task-asset-2',
+          data: {
+            estimation: 1440,
+            start_date: '2026-04-06',
+            due_date: '2026-04-08'
+          }
+        }
+      ])
+      expect(payloadsOf(storeActions.assignSelectedTasks)).toEqual([
+        { personId: 'person-1', taskIds: ['task-asset-1'] },
+        { personId: 'person-2', taskIds: ['task-asset-2'] }
+      ])
+      expect(panelText(wrapper)).toContain('schedule.assign_no_fit {"count":1}')
+    })
+
+    it('keeps the estimation of a task in a version', async () => {
+      const { storeActions, wrapper } = await mountAssignments({
+        ...versionOptions,
+        nbAssets: 1,
+        actions: { loadTasks: vi.fn(estimatedTasks([960])) }
+      })
+      await selectProps(wrapper)
+      await setRange(wrapper)
+
+      await apply(wrapper)
+
+      expect(
+        payloadsOf(storeActions.createScheduleVersionedTask)
+      ).toMatchObject([
+        { estimation: 960, startDate: '2026-04-06', dueDate: '2026-04-07' }
+      ])
+    })
+
     // A task type without a department listed the managers only: every
     // other person belonged to some department it was not part of.
     it('lists the people of any department for a task type without one', async () => {
@@ -2461,6 +2614,64 @@ describe('ProductionSchedule page', () => {
         .findAllComponents(PeopleName)
         .map(name => name.props('person').full_name)
       expect(names).toEqual(['Alice Smith', 'Bob Jones'])
+    })
+
+    it('plans every task on a typed quota, estimations included', async () => {
+      const { storeActions, wrapper } = await mountAssignments({
+        actions: { loadTasks: vi.fn(estimatedTasks([960, 960])) }
+      })
+      await selectProps(wrapper)
+      await setRange(wrapper, '2026-04-06', '2026-04-10')
+      await removeBob(wrapper)
+      await forceQuota(wrapper, '1')
+
+      await apply(wrapper)
+
+      expect(payloadsOf(storeActions.updateTask)).toEqual([
+        {
+          taskId: 'task-asset-1',
+          data: {
+            estimation: 480,
+            start_date: '2026-04-06',
+            due_date: '2026-04-06'
+          }
+        },
+        {
+          taskId: 'task-asset-2',
+          data: {
+            estimation: 480,
+            start_date: '2026-04-07',
+            due_date: '2026-04-07'
+          }
+        }
+      ])
+    })
+
+    // The first person took every task that fitted the range, the next
+    // ones got the rest: on a wide range, most of the team got nothing.
+    it('gives each task to the person free the earliest', async () => {
+      const { storeActions, wrapper } = await mountAssignments({ nbAssets: 3 })
+      await selectProps(wrapper)
+      // Monday 6 to Friday 17 April: ten working days
+      await setRange(wrapper, '2026-04-06', '2026-04-17')
+      await forceQuota(wrapper, '1')
+
+      await apply(wrapper)
+
+      const oneDay = date => ({
+        estimation: 480,
+        start_date: date,
+        due_date: date
+      })
+      expect(payloadsOf(storeActions.updateTask)).toEqual([
+        { taskId: 'task-asset-1', data: oneDay('2026-04-06') },
+        { taskId: 'task-asset-2', data: oneDay('2026-04-06') },
+        { taskId: 'task-asset-3', data: oneDay('2026-04-07') }
+      ])
+      expect(payloadsOf(storeActions.assignSelectedTasks)).toEqual([
+        { personId: 'person-1', taskIds: ['task-asset-1', 'task-asset-3'] },
+        { personId: 'person-2', taskIds: ['task-asset-2'] }
+      ])
     })
 
     // Two days per task: one task per person in three days

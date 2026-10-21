@@ -2003,8 +2003,10 @@ export default {
       'Moving this bar also changes the dates of {count} sub-item. Continue? | Moving this bar also changes the dates of {count} sub-items. Continue?',
     create_version: 'Create schedule version',
     daily_quota: 'Tasks per assignee per day',
+    daily_quota_estimated:
+      'Every task has an estimation: the dates follow them, {quota} per assignee per day. A typed value applies to every task, estimations included.',
     daily_quota_help:
-      'Empty, the tasks are spread evenly over the date range: {quota} per assignee per day. A lower value leaves tasks out of the range, a higher one finishes earlier.',
+      'Empty, the task without an estimation gets the time the estimated ones leave: {quota} per assignee per day. A typed value applies to every task, estimations included: a lower one leaves tasks out of the range, a higher one finishes earlier. | Empty, the {count} tasks without an estimation share the time the estimated ones leave: {quota} per assignee per day. A typed value applies to every task, estimations included: a lower one leaves tasks out of the range, a higher one finishes earlier.',
     delete_version: 'Delete schedule version',
     delete_version_error: 'An error occurred while deleting this schedule version. Please contact our support team.',
     delete_version_message: 'Are you sure you want to delete the schedule version {name}? Please confirm by typing the schedule version name below.',

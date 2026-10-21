@@ -370,9 +370,14 @@
               </div>
               <p class="side-help">
                 {{
-                  $t('schedule.daily_quota_help', {
-                    quota: estimatedDailyQuota.toFixed(2)
-                  })
+                  nbUnestimatedTasks
+                    ? $t('schedule.daily_quota_help', {
+                        count: nbUnestimatedTasks,
+                        quota: estimatedDailyQuota.toFixed(2)
+                      })
+                    : $t('schedule.daily_quota_estimated', {
+                        quota: estimatedDailyQuota.toFixed(2)
+                      })
                 }}
               </p>
             </div>
@@ -653,6 +658,7 @@ const assignments = ref({
   assigned: false,
   entityExcludes: [],
   entityTypeId: '',
+  tasks: [],
   entityTypes: null,
   excludes: [],
   forcedDailyQuota: null,
@@ -803,6 +809,19 @@ const sideHelp = computed(() => {
     : t('schedule.assign_help_task_type')
 })
 
+// the task Apply plans for each selected entity: the first one of the
+// entity, undefined for an entity without one
+const plannedTasks = computed(() => {
+  const taskByEntityId = firstTaskByEntityId(assignments.value.tasks)
+  return draggedEntities.value
+    .flatMap(group => group.children ?? [])
+    .map(entity => taskByEntityId.get(entity.id))
+})
+
+const nbUnestimatedTasks = computed(
+  () => plannedTasks.value.filter(task => !task?.estimation).length
+)
+
 const estimatedDailyQuota = computed(() => {
   const rangeStartDate = parseSimpleDate(assignments.value.startDate)
   const rangeEndDate = parseSimpleDate(assignments.value.endDate)
@@ -811,15 +830,29 @@ const estimatedDailyQuota = computed(() => {
     rangeStartDate.startOf('day'),
     rangeEndDate.startOf('day')
   )
-  const nbEntities = draggedEntities.value.reduce(
-    (sum, entity) => sum + (entity.children?.length ?? 0),
-    0
-  )
   // a task goes to a single person: no more people than entities share
   // the work
-  const nbAssignees = Math.min(availablePersons.value.length, nbEntities)
+  const nbAssignees = Math.min(
+    availablePersons.value.length,
+    plannedTasks.value.length
+  )
+  const estimatedDays = plannedTasks.value.reduce(
+    (sum, task) =>
+      sum +
+      (task?.estimation
+        ? minutesToDays(organisation.value, task.estimation)
+        : 0),
+    0
+  )
+  // every task estimated: the pace the estimations set, for information
+  if (!nbUnestimatedTasks.value) {
+    return estimatedDays > 0 ? plannedTasks.value.length / estimatedDays : 0
+  }
+  // the tasks without an estimation share the person-days the estimated
+  // ones leave
+  const daysLeft = nbDays * nbAssignees - estimatedDays
 
-  return nbDays && nbAssignees ? nbEntities / nbDays / nbAssignees : 0
+  return daysLeft > 0 ? nbUnestimatedTasks.value / daysLeft : 0
 })
 
 const assetTypeMap = computed(() => {
@@ -1826,6 +1859,7 @@ const resetSidePanel = () => {
     startDate: null,
     endDate: null,
     task: {},
+    tasks: [],
     type: null,
     unassign: false
   }
@@ -1917,6 +1951,7 @@ const selectTaskTypeElement = async (
     await loadEntities(taskType.for_entity)
     if (isStaleSchedule(generation)) return
   }
+  assignments.value.tasks = tasks
   const taskEntityIds = new Set(tasks.map(task => task.entity_id))
 
   // load entity types
@@ -2221,19 +2256,24 @@ const saveAssignments = async () => {
   }
 }
 
+// first task per entity, preserving the find() first-match behavior
+const firstTaskByEntityId = tasks =>
+  tasks.reduce(
+    (taskByEntityId, task) =>
+      taskByEntityId.has(task.entity_id)
+        ? taskByEntityId
+        : taskByEntityId.set(task.entity_id, task),
+    new Map()
+  )
+
 // onProgress gets the percentage of the tasks saved so far
 const distributeAssignments = async onProgress => {
   const tasks = await store.dispatch(
     'loadTasks',
     buildTaskFilters(selectedTaskType.value)
   )
-  // first task per entity, preserving the find() first-match behavior
-  const taskByEntityId = new Map()
-  tasks.forEach(task => {
-    if (!taskByEntityId.has(task.entity_id)) {
-      taskByEntityId.set(task.entity_id, task)
-    }
-  })
+  assignments.value.tasks = tasks
+  const taskByEntityId = firstTaskByEntityId(tasks)
 
   const nbTasks = draggedEntities.value
     .flatMap(entityType => entityType.children)
@@ -2244,14 +2284,11 @@ const distributeAssignments = async onProgress => {
     onProgress(nbTasks ? Math.round((nbSavedTasks / nbTasks) * 100) : 100)
   }
 
-  // a zero or empty quota would make taskEstimation infinite and hang
-  // the distribution loop in addBusinessDays: no task fits
-  const dailyQuota =
-    parseFloat(assignments.value.forcedDailyQuota) || estimatedDailyQuota.value
-  if (dailyQuota <= 0) {
-    return { nbPlannedTasks: 0, nbUnfitTasks: nbTasks }
-  }
-  const taskEstimation = 1 / dailyQuota
+  // the days a task without an estimation takes: infinite on a zero or
+  // empty quota, so that it fits nobody instead of hanging addBusinessDays
+  const forcedDailyQuota = parseFloat(assignments.value.forcedDailyQuota)
+  const dailyQuota = forcedDailyQuota || estimatedDailyQuota.value
+  const quotaDays = dailyQuota > 0 ? 1 / dailyQuota : Infinity
 
   // versioned tasks all belong to the selected task type: load them once
   // instead of once per entity
@@ -2286,9 +2323,12 @@ const distributeAssignments = async onProgress => {
     const taskIdsByAssignee = new Map()
     const taskUpdates = []
 
-    let cumulatedTasks = 0
-    let nextAssigneeIndex = 0
-    let nextStartDate = rangeStartDate.clone()
+    // the work given to each person so far, in days from the range start
+    const loads = availablePersons.value.map(person => ({
+      person,
+      cumulatedDays: 0,
+      nextStartDate: rangeStartDate.clone()
+    }))
 
     // distribute the task assignments according to the daily quotas, the task type duration and people's availability.
     const entityTasks = taskType.children
@@ -2305,98 +2345,105 @@ const distributeAssignments = async onProgress => {
         task.versionedTaskId = versionedTask.id
       }
 
-      cumulatedTasks++
+      // the task keeps its own estimation, the quota fills in the others:
+      // a typed quota applies to every task
+      const ownEstimation = forcedDailyQuota
+        ? null
+        : (versionedTask?.estimation ?? task.estimation)
+      const duration = ownEstimation
+        ? minutesToDays(organisation.value, ownEstimation)
+        : quotaDays
+      const estimation =
+        ownEstimation || daysToMinutes(organisation.value, quotaDays)
 
-      let taskStartDate = nextStartDate
+      // the person free the earliest takes the task: no one else would end
+      // it sooner
+      const load = loads.reduce(
+        (earliest, candidate) =>
+          candidate.cumulatedDays < earliest.cumulatedDays
+            ? candidate
+            : earliest,
+        loads[0]
+      )
+      let fits = Number.isFinite(duration) && Boolean(load)
+      let taskStartDate = null
       let taskEndDate = null
-      while (nextAssigneeIndex < availablePersons.value.length) {
-        const taskAssignee = availablePersons.value[nextAssigneeIndex]
+      if (fits) {
+        const daysOff = daysOffByPerson.value[load.person.id]
         // round off the float noise: 1 / (1 / 49) is 49.00000000000001,
         // which would end a task of whole days a day late
         const cumulatedEstimation =
-          Math.round(cumulatedTasks * taskEstimation * 1e6) / 1e6
-
-        taskStartDate = addBusinessDays(
-          taskStartDate,
-          0,
-          daysOffByPerson.value[taskAssignee.id]
-        )
-
+          Math.round((load.cumulatedDays + duration) * 1e6) / 1e6
+        taskStartDate = addBusinessDays(load.nextStartDate, 0, daysOff)
         const { due_date } = getDatesFromStartDate(
           organisation.value,
           rangeStartDate,
-          taskEndDate,
+          null,
           cumulatedEstimation,
-          daysOffByPerson.value[taskAssignee.id]
+          daysOff
         )
         taskEndDate = parseDate(due_date)
-
-        if (taskEndDate.isAfter(rangeEndDate)) {
-          // try to assign the task to the next available person
-          nextAssigneeIndex++
-          cumulatedTasks = 1
-          taskStartDate = rangeStartDate.clone()
-          taskEndDate = null
-        } else {
-          // override once the task fits: one that fits nobody keeps its
-          // assignees
-          if (assignments.value.unassign) {
-            if (isVersioned.value) {
-              versionedTask.assignees = []
-            } else {
-              taskIdsToUnassign.push(task.id)
-            }
-          }
-          if (isVersioned.value) {
-            versionedTask.startDate = taskStartDate.format('YYYY-MM-DD')
-            versionedTask.dueDate = taskEndDate.format('YYYY-MM-DD')
-            versionedTask.estimation = daysToMinutes(
-              organisation.value,
-              taskEstimation
-            )
-            versionedTask.assignees.push(taskAssignee.id)
-
-            // save versioned task
-            if (!versionedTask.id) {
-              const createdTask = await store.dispatch(
-                'createScheduleVersionedTask',
-                versionedTask
-              )
-              // keep the created id: without it the task edits right
-              // after an assignment would post duplicates
-              versionedTask.id = createdTask.id
-              task.versionedTaskId = createdTask.id
-            } else {
-              await store.dispatch('updateScheduleVersionedTask', versionedTask)
-            }
-            reportSaved(1)
-          } else {
-            // assignation to the current assignee is batched after the loop
-            if (!taskIdsByAssignee.has(taskAssignee.id)) {
-              taskIdsByAssignee.set(taskAssignee.id, [])
-            }
-            taskIdsByAssignee.get(taskAssignee.id).push(task.id)
-            // task dates & estimation are flushed in batches after the loop
-            taskUpdates.push({
-              taskId: task.id,
-              data: {
-                estimation: daysToMinutes(organisation.value, taskEstimation),
-                start_date: taskStartDate.format('YYYY-MM-DD'),
-                due_date: taskEndDate.format('YYYY-MM-DD')
-              }
-            })
-          }
-          // set next start date
-          if (cumulatedEstimation % 1 !== 0) {
-            nextStartDate = taskEndDate.clone()
-          } else {
-            nextStartDate = taskEndDate.clone().add(1, 'days')
-          }
-          break // jump to next task
+        fits = !taskEndDate.isAfter(rangeEndDate)
+        if (fits) {
+          // the raw sum: the rounded one drifts a day up over many tasks
+          load.cumulatedDays += duration
+          // a task ending mid-day shares its last day with the next one
+          load.nextStartDate =
+            cumulatedEstimation % 1 !== 0
+              ? taskEndDate.clone()
+              : taskEndDate.clone().add(1, 'days')
         }
       }
-      // the loop ran out of people: the task fits nobody's range
-      if (nextAssigneeIndex === availablePersons.value.length) {
+
+      if (fits) {
+        const taskAssignee = load.person
+        // override once the task fits: one that fits nobody keeps its
+        // assignees
+        if (assignments.value.unassign) {
+          if (isVersioned.value) {
+            versionedTask.assignees = []
+          } else {
+            taskIdsToUnassign.push(task.id)
+          }
+        }
+        if (isVersioned.value) {
+          versionedTask.startDate = taskStartDate.format('YYYY-MM-DD')
+          versionedTask.dueDate = taskEndDate.format('YYYY-MM-DD')
+          versionedTask.estimation = estimation
+          versionedTask.assignees.push(taskAssignee.id)
+
+          // save versioned task
+          if (!versionedTask.id) {
+            const createdTask = await store.dispatch(
+              'createScheduleVersionedTask',
+              versionedTask
+            )
+            // keep the created id: without it the task edits right
+            // after an assignment would post duplicates
+            versionedTask.id = createdTask.id
+            task.versionedTaskId = createdTask.id
+          } else {
+            await store.dispatch('updateScheduleVersionedTask', versionedTask)
+          }
+          reportSaved(1)
+        } else {
+          // assignation to the current assignee is batched after the loop
+          if (!taskIdsByAssignee.has(taskAssignee.id)) {
+            taskIdsByAssignee.set(taskAssignee.id, [])
+          }
+          taskIdsByAssignee.get(taskAssignee.id).push(task.id)
+          // task dates & estimation are flushed in batches after the loop
+          taskUpdates.push({
+            taskId: task.id,
+            data: {
+              estimation,
+              start_date: taskStartDate.format('YYYY-MM-DD'),
+              due_date: taskEndDate.format('YYYY-MM-DD')
+            }
+          })
+        }
+      } else {
+        // the task fits nobody's range
         nbUnfitTasks++
       }
     }
