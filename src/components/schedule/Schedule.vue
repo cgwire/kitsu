@@ -907,6 +907,10 @@ let lastDragRelayoutAt = 0
 
 // the template iterates day-off ranges for each root and person row on every
 // render: expand each daysOff array once and reuse it
+// line of each item per row array: a task with several assignees sits in
+// one array per person row, and a line stored on the task itself would be
+// the one computed last
+const rowLines = new WeakMap()
 const dayOffRangeCache = new WeakMap()
 
 // A fresh [] per render would change the days-off prop of every person row
@@ -1168,8 +1172,11 @@ const getClientY = event => {
   )
 }
 
+const lineOf = (items, item) =>
+  rowLines.get(toRaw(items))?.get(item.id) ?? item.line ?? 0
+
 const getNbLines = (items = []) => {
-  const values = items.map(item => item.line || 0)
+  const values = items.map(item => lineOf(items, item))
   return values.length ? Math.max(...values) + 1 : 1
 }
 
@@ -2180,7 +2187,8 @@ const timesheetStyle = (
 const timebarSubchildStyle = (
   timeElement,
   rootElement,
-  selected = isSelected(timeElement)
+  selected = isSelected(timeElement),
+  line = timeElement.line
 ) => {
   const color = timeElement.color || rootElement.color
   return {
@@ -2191,7 +2199,7 @@ const timebarSubchildStyle = (
         ? 'all-scroll'
         : 'ew-resize'
       : 'default',
-    top: `${5 + 38 * timeElement.line}px`,
+    top: `${5 + 38 * line}px`,
     background: `color-mix(in srgb, ${color} ${selected ? 80 : 40}%, transparent)`,
     'box-shadow': `inset 0 0 1px 2px ${selected ? 'var(--background-selected)' : color}`
   }
@@ -2587,6 +2595,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
 
   // one entry per line: the [start, end] ranges already placed on it
   const lines = []
+  const lineByItemId = new Map()
   items.forEach(item => {
     const start = toRaw(item.startDate)
       .clone()
@@ -2605,7 +2614,9 @@ const setItemPositions = (items, unitOfTime = 'days') => {
     }
     lines[line].push([start, end])
     item.line = line
+    lineByItemId.set(item.id, line)
   })
+  rowLines.set(toRaw(items), lineByItemId)
 }
 
 // Watchers
@@ -2710,6 +2721,7 @@ provide('scheduleRowHelpers', {
   isDurationInHours,
   isOverlapping,
   isVisible,
+  lineOf,
   statuses,
   taskTimesheets,
   timebarChildStyle,
