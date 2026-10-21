@@ -628,6 +628,51 @@ const dragFrom = async (wrapper, handle, fromX, toX) => {
   await nextTick()
 }
 
+describe('Schedule widget - week zoom columns', () => {
+  // The header and the line layout count weeks from Monday, while the bar
+  // positions counted days / 7 from the schedule start, a Tuesday here:
+  // bars of two different weeks landed in one column, on separate lines.
+  it('places the bars on the Monday-aligned week of their dates', async () => {
+    const hierarchy = buildSubchildrenHierarchy(1)
+    const [root] = hierarchy
+    const [row] = root.children
+    const [wednesday] = row.children.get('person-1')
+    wednesday.startDate = moment.utc('2026-10-21')
+    wednesday.endDate = moment.utc('2026-10-23')
+    const monday = {
+      ...wednesday,
+      id: 'task-monday',
+      startDate: moment.utc('2026-10-26'),
+      endDate: moment.utc('2026-10-27')
+    }
+    const straddling = {
+      ...wednesday,
+      id: 'task-straddling',
+      startDate: moment.utc('2026-10-23'),
+      endDate: moment.utc('2026-10-26')
+    }
+    row.children.set('person-1', [wednesday, monday, straddling])
+    const wrapper = mountSubchildren(hierarchy, {
+      startDate: moment.utc('2026-09-01'),
+      endDate: moment.utc('2026-12-31'),
+      zoomLevel: 0
+    })
+    wrapper.vm.refreshItemPositions(root)
+    await nextTick()
+
+    const bars = wrapper
+      .findAll('.subchild .timebar')
+      .map(bar => [bar.element.style.left, bar.element.style.width, bar.element.style.top])
+    // the header starts on Monday 7 September: 21 October is its 7th week
+    expect(bars).toEqual([
+      ['123px', '16px', '5px'],
+      ['143px', '16px', '5px'],
+      ['123px', '34px', '43px']
+    ])
+    wrapper.unmount()
+  })
+})
+
 describe('Schedule widget - person rows', () => {
   let rafSpy
 

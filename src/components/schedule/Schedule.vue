@@ -2083,10 +2083,27 @@ const dateStatusStyle = date => {
   }
 }
 
+// The header columns are days, or weeks starting on a Monday: a week is
+// counted from the Monday of each date, not as seven days from the
+// schedule start, which can fall mid-week.
+const mondayOf = date => toRaw(date).clone().utc().startOf('isoWeek')
+
+const columnSpan = (startDate, endDate) =>
+  isWeekMode.value
+    ? mondayOf(endDate).diff(mondayOf(startDate), 'weeks')
+    : dateDiff(startDate, endDate, 'days')
+
+// columns between the first header column and the date
+const columnsFromStart = date =>
+  columnSpan(
+    isWeekMode.value
+      ? (weeksAvailable.value[0] ?? props.startDate)
+      : props.startDate,
+    date
+  )
+
 const getLeftPosition = date => {
-  const startDate = moment.utc(date)
-  const startDiff = dateDiff(props.startDate, startDate, unitOfTime.value)
-  return startDiff * cellWidth.value + 1
+  return columnsFromStart(moment.utc(date)) * cellWidth.value + 1
 }
 
 const entityLineStyle = (timeElement, root = false, header = false) => {
@@ -2243,8 +2260,7 @@ const onTaskBarClick = (rootElement, childElement, task) => {
 
 const getTimebarLeft = timeElement => {
   const startDate = timeElement.startDate || props.startDate
-  const startDiff = dateDiff(props.startDate, startDate, unitOfTime.value)
-  return startDiff * cellWidth.value + 3
+  return columnsFromStart(startDate) * cellWidth.value + 3
 }
 
 const getTimebarWidth = timeElement => {
@@ -2263,7 +2279,7 @@ const getTimebarWidth = timeElement => {
     endDate = addBusinessDays(startDate, days - 1)
   }
 
-  const lengthDiff = dateDiff(startDate, endDate, unitOfTime.value)
+  const lengthDiff = columnSpan(startDate, endDate)
   if (lengthDiff > 0) {
     return (lengthDiff + 1) * cellWidth.value - 6
   } else {
@@ -2370,7 +2386,7 @@ const milestoneLineStyle = milestone => {
   const startDate = parseDate(props.startDate.format('YYYY-MM-DD'))
   const milestoneDate = parseDate(milestone.date)
   if (startDate.isSameOrBefore(milestoneDate)) {
-    const lengthDiffVal = dateDiff(startDate, milestoneDate, unitOfTime.value)
+    const lengthDiffVal = columnsFromStart(milestoneDate)
     return {
       left: `${(lengthDiffVal + 0.5) * cellWidth.value}px`
     }
@@ -2588,10 +2604,12 @@ const setItemPositions = (items, unitOfTime = 'days') => {
   if (!items?.length) {
     return
   }
+  // the week columns start on Monday whatever the locale
+  const period = unitOfTime === 'weeks' ? 'isoWeek' : unitOfTime
   const minDate = moment
     .min(items.map(item => toRaw(item.startDate)))
     .clone()
-    .startOf(unitOfTime)
+    .startOf(period)
 
   // one entry per line: the [start, end] ranges already placed on it
   const lines = []
@@ -2599,11 +2617,11 @@ const setItemPositions = (items, unitOfTime = 'days') => {
   items.forEach(item => {
     const start = toRaw(item.startDate)
       .clone()
-      .startOf(unitOfTime)
+      .startOf(period)
       .diff(minDate, unitOfTime)
     const end = toRaw(item.endDate)
       .clone()
-      .endOf(unitOfTime)
+      .endOf(period)
       .diff(minDate, unitOfTime)
     let line = 0
     while (lines[line]?.some(([s, e]) => start <= e && end >= s)) {
