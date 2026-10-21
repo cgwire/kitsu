@@ -180,6 +180,7 @@ const mountPage = async ({
     editProduction: vi.fn(),
     loadAssetTypeScheduleItems: vi.fn(() => buildAssetTypeBars()),
     loadAssets: vi.fn(),
+    loadEpisodeScheduleItems: vi.fn(() => []),
     loadProductionDaysOff: vi.fn(() => ({})),
     loadScheduleItems: vi.fn(() => buildTaskTypeBars()),
     loadScheduleVersions: vi.fn(({ state }) => state.scheduleVersions),
@@ -1037,6 +1038,67 @@ describe('ProductionSchedule page', () => {
         today,
         new Date('2027-04-06T23:59:59.999Z')
       ])
+    })
+  })
+
+  // The view of an episode drew the task type bars of the production, so
+  // the dates planned for the episode in the all-episodes view never
+  // showed there, and a move from the episode view changed the production.
+  describe('episode view', () => {
+    const episode = { id: 'episode-3', name: 'E03' }
+    const episodeRowOf = taskType => ({
+      id: `${taskType.id}-e03`,
+      object_id: episode.id,
+      task_type_id: taskType.id,
+      name: episode.name,
+      start_date: '2026-02-10',
+      end_date: '2026-02-20'
+    })
+    const mountEpisode = () =>
+      mountPage({
+        actions: {
+          loadEpisodeScheduleItems: vi.fn((_, { taskType }) => [
+            episodeRowOf(taskType)
+          ])
+        },
+        getters: {
+          currentEpisode: () => episode,
+          isTVShow: () => true
+        }
+      })
+
+    it('draws each task type bar on the row of the episode', async () => {
+      const { storeActions, wrapper } = await mountEpisode()
+
+      expect(
+        storeActions.loadEpisodeScheduleItems.mock.calls.map(
+          ([, { episodeId }]) => episodeId
+        )
+      ).toEqual(['episode-3', 'episode-3', 'episode-3'])
+      expect(
+        rowsOf(wrapper).map(row => [
+          row.id,
+          format(row.startDate),
+          format(row.endDate)
+        ])
+      ).toEqual([
+        ['tt-modeling-e03', '2026-02-10', '2026-02-20'],
+        ['tt-layout-e03', '2026-02-10', '2026-02-20'],
+        ['tt-animation-e03', '2026-02-10', '2026-02-20']
+      ])
+    })
+
+    it('saves a moved task type bar on the row of the episode', async () => {
+      const { storeActions, wrapper } = await mountEpisode()
+      const bar = rowsOf(wrapper)[0]
+      bar.startDate = day('2026-02-12')
+      bar.endDate = day('2026-02-25')
+
+      await changeItem(wrapper, bar)
+
+      expect(payloadsOf(storeActions.saveScheduleItem)).toEqual([bar])
+      expect(bar.id).toBe('tt-modeling-e03')
+      expect(bar.start_date).toBe('2026-02-12')
     })
   })
 
