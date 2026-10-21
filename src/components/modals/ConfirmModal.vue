@@ -1,9 +1,11 @@
 <template>
   <base-modal :active="active" @cancel="$emit('cancel')">
     <p class="text">{{ text }}</p>
-    <div class="progress-wrapper" v-if="progress !== null">
-      <div class="progress" :style="{ width: `${progress}%` }"></div>
-    </div>
+    <progress-bar
+      class="progress-bar"
+      :progress="progress"
+      v-if="progress !== null"
+    />
     <p class="is-danger has-text-right" v-if="isError">{{ errorText }}</p>
     <p class="has-text-right">
       <a
@@ -30,6 +32,7 @@
 
 <script setup>
 import BaseModal from '@/components/modals/BaseModal.vue'
+import ProgressBar from '@/components/widgets/ProgressBar.vue'
 
 const props = defineProps({
   active: { type: Boolean, default: false },
@@ -61,16 +64,7 @@ const confirm = () => {
   margin-bottom: 1em;
 }
 
-// same bar as the file uploads
-.progress-wrapper {
-  border-radius: 5px;
-  background: var(--background-alt);
-  height: 5px;
+.progress-bar {
   margin-bottom: 1em;
-}
-
-.progress {
-  height: 5px;
-  background-color: $light-green;
 }
 </style>
