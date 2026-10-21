@@ -2019,6 +2019,8 @@ export default {
     edit_version_exist: 'A version with a similar name already exists.',
     export: 'Export schedule',
     export_error: 'An error occurred while exporting data.',
+    export_explanation:
+      'The export loads the tasks of {count} row, which can take a while on a large production. | The export loads the tasks of the {count} rows shown, which can take a while on a large production.',
     fields: {
       create_from_version: 'Create new or from a version',
       new: 'New schedule',

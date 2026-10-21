@@ -5,6 +5,23 @@ import { createMemoryHistory, createRouter } from 'vue-router'
 import { createStore } from 'vuex'
 
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
+vi.mock('@/lib/download', () => ({ downloadBlob: vi.fn() }))
+// the export drives the workbook API at length: a stand-in that accepts
+// every call and hands back an empty file
+vi.mock('exceljs', () => {
+  const anything = () =>
+    new Proxy(function () {}, {
+      get: (_, key) =>
+        key === 'writeBuffer'
+          ? () => Promise.resolve(new ArrayBuffer(0))
+          : key === 'then'
+            ? undefined
+            : anything(),
+      apply: () => anything(),
+      set: () => true
+    })
+  return { default: { Workbook: function () { return anything() } } }
+})
 vi.mock('vue-i18n', async importOriginal => ({
   ...(await importOriginal()),
   useI18n: () => ({ t: key => key })
@@ -12,6 +29,8 @@ vi.mock('vue-i18n', async importOriginal => ({
 
 // Pre-load the real store to avoid circular-import race from child components.
 import '@/lib/auth'
+
+import { downloadBlob } from '@/lib/download'
 
 import assetStore from '@/store/modules/assets'
 import assetTypeStore from '@/store/modules/assettypes'
@@ -245,6 +264,11 @@ const findButton = (wrapper, text) =>
   wrapper
     .findAllComponents(ButtonSimple)
     .find(button => button.props('text') === text)
+
+const findIconButton = (wrapper, title) =>
+  wrapper
+    .findAllComponents(ButtonSimple)
+    .find(button => button.props('title') === title)
 
 const findCombobox = (wrapper, label) =>
   wrapper
@@ -2458,6 +2482,109 @@ describe('ProductionSchedule page', () => {
         expect(panelText(wrapper)).not.toContain('schedule.assign_no_fit')
       }
     )
+  })
+
+  // The export used to expand every row on screen, hidden ones included,
+  // with no word on how long it would take.
+  describe('export', () => {
+    const openExport = async wrapper => {
+      findIconButton(wrapper, 'schedule.export').vm.$emit('click')
+      await flushPromises()
+    }
+    const confirmExport = async wrapper => {
+      wrapper.findComponent(ConfirmModal).vm.$emit('confirm')
+      await flushPromises()
+    }
+    const pendingTaskLoads = () => {
+      const resolvers = []
+      const loadTasks = vi.fn(
+        () => new Promise(resolve => resolvers.push(() => resolve([])))
+      )
+      return { loadTasks, resolvers }
+    }
+
+    beforeEach(() => {
+      downloadBlob.mockClear()
+    })
+
+    it('explains the export before loading anything', async () => {
+      const { storeActions, wrapper } = await mountPage()
+      await openExport(wrapper)
+
+      expect(wrapper.findComponent(ConfirmModal).props('text')).toBe(
+        'schedule.export_explanation {"count":3}'
+      )
+      expect(storeActions.loadTasks).not.toHaveBeenCalled()
+    })
+
+    it('loads the rows behind the scenes and reports the progress', async () => {
+      const { loadTasks, resolvers } = pendingTaskLoads()
+      const { scheduleWidget, wrapper } = await mountPage({
+        actions: { loadTasks }
+      })
+      scheduleWidget.methods.exportData.mockReturnValue({
+        header: [],
+        hierarchy: []
+      })
+      await openExport(wrapper)
+      await confirmExport(wrapper)
+
+      const modal = () => wrapper.findComponent(ConfirmModal)
+      expect(modal().props('isLoading')).toBe(true)
+      expect(modal().props('progress')).toBe(0)
+      // one row loads at a time
+      resolvers.shift()()
+      await flushPromises()
+      expect(modal().props('progress')).toBe(33)
+      resolvers.shift()()
+      await flushPromises()
+      expect(modal().props('progress')).toBe(67)
+      resolvers.shift()()
+      await flushPromises()
+
+      expect(loadTasks).toHaveBeenCalledTimes(3)
+      expect(rowsOf(wrapper).map(row => row.expanded)).toEqual([
+        false,
+        false,
+        false
+      ])
+      expect(wrapper.findComponent(ConfirmModal).exists()).toBe(false)
+      expect(downloadBlob).toHaveBeenCalledTimes(1)
+    })
+
+    it('leaves out the hidden task types and the rows already loaded', async () => {
+      const { scheduleWidget, storeActions, wrapper } = await mountPage()
+      scheduleWidget.methods.exportData.mockReturnValue({
+        header: [],
+        hierarchy: []
+      })
+      await setTaskTypeVisible(wrapper, 'tt-animation', false)
+      findSchedule(wrapper).vm.$emit('root-element-expanded', rowsOf(wrapper)[0])
+      await waitForLoad()
+      const taskLoads = storeActions.loadTasks.mock.calls.length
+
+      await openExport(wrapper)
+      await confirmExport(wrapper)
+
+      expect(storeActions.loadTasks).toHaveBeenCalledTimes(taskLoads + 1)
+      expect(downloadBlob).toHaveBeenCalledTimes(1)
+    })
+
+    it('stops loading on cancel and keeps the file', async () => {
+      const { loadTasks, resolvers } = pendingTaskLoads()
+      const { wrapper } = await mountPage({ actions: { loadTasks } })
+      await openExport(wrapper)
+      await confirmExport(wrapper)
+
+      wrapper.findComponent(ConfirmModal).vm.$emit('cancel')
+      await flushPromises()
+      expect(wrapper.findComponent(ConfirmModal).exists()).toBe(false)
+      resolvers.shift()()
+      await flushPromises()
+
+      expect(loadTasks).toHaveBeenCalledTimes(1)
+      expect(downloadBlob).not.toHaveBeenCalled()
+    })
   })
 
   describe('expand all', () => {

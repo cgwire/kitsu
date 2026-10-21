@@ -1515,6 +1515,7 @@
       "edit_version_exist": "Már létezik egy hasonló nevű verzió.",
       "export": "Időbeosztás exportálása",
       "export_error": "Hiba történt az adatok exportálásakor.",
+      "export_explanation": "Az exportálás {count} sor feladatait tölti be, ami nagy produkciónál időt vehet igénybe. | Az exportálás a megjelenített {count} sor feladatait tölti be, ami nagy produkciónál időt vehet igénybe.",
       "fields": {
         "create_from_version": "Új létrehozása vagy verzióból",
         "locked": "Zárolt verzió",

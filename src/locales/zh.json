@@ -1515,6 +1515,7 @@
       "edit_version_exist": "已有名称相似的版本。",
       "export": "导出日程计划",
       "export_error": "导出数据时发生错误。",
+      "export_explanation": "导出会加载 {count} 行的任务，在大型制作中可能需要一些时间。 | 导出会加载显示的 {count} 行的任务，在大型制作中可能需要一些时间。",
       "fields": {
         "create_from_version": "创建新版本或从版本中创建",
         "new": "新日程计划",

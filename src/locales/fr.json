@@ -1515,6 +1515,7 @@
       "edit_version_exist": "Une version portant un nom similaire existe déjà.",
       "export": "Exporter planning",
       "export_error": "Une erreur s'est produite lors de l'exportation des données.",
+      "export_explanation": "L'export charge les tâches de {count} ligne, ce qui peut prendre du temps sur une grosse production. | L'export charge les tâches des {count} lignes affichées, ce qui peut prendre du temps sur une grosse production.",
       "fields": {
         "create_from_version": "Créer une nouvelle version ou à partir d'une version",
         "new": "Nouveau planning",

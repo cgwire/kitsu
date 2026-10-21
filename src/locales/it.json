@@ -1515,6 +1515,7 @@
       "edit_version_exist": "Esiste già una versione con un nome simile.",
       "export": "Esporta pianificazione",
       "export_error": "Si è verificato un errore durante l'esportazione dei dati.",
+      "export_explanation": "L'esportazione carica i task di {count} riga, cosa che può richiedere tempo su una produzione grande. | L'esportazione carica i task delle {count} righe mostrate, cosa che può richiedere tempo su una produzione grande.",
       "fields": {
         "create_from_version": "Crea nuova o a partire da una versione",
         "new": "Nuova pianificazione",

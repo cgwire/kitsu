@@ -45,11 +45,10 @@
           </div>
           <button-simple
             class="flexrow-item"
-            :disabled="loading.exportSchedule || loading.expandSchedule"
+            :disabled="loading.expandSchedule"
             icon="export"
-            :is-loading="loading.exportSchedule"
             :title="$t('schedule.export')"
-            @click="exportSchedule()"
+            @click="modals.exportSchedule = true"
           />
           <button-simple
             class="flexrow-item"
@@ -506,6 +505,22 @@
   />
   <confirm-modal
     active
+    :confirm-button-text="$t('main.export')"
+    :text="
+      $t('schedule.export_explanation', {
+        count: filteredScheduleItems.length
+      })
+    "
+    :error-text="$t('schedule.export_error')"
+    :is-error="errors.exportSchedule"
+    :is-loading="exportProgress !== null"
+    :progress="exportProgress"
+    @cancel="cancelExport"
+    @confirm="exportSchedule"
+    v-if="modals.exportSchedule"
+  />
+  <confirm-modal
+    active
     :text="
       $t('schedule.confirm_move_children', {
         count: pendingParentChange ? pendingParentChange.affected.length : 0
@@ -673,20 +688,24 @@ const loading = ref({
   deleteScheduleVersion: false,
   editScheduleVersion: false,
   applyScheduleVersion: false,
-  expandSchedule: false,
-  exportSchedule: false
+  expandSchedule: false
 })
 const errors = ref({
   editScheduleVersion: false,
   deleteScheduleVersion: false,
-  applyScheduleVersion: false
+  applyScheduleVersion: false,
+  exportSchedule: false
 })
 const modals = ref({
   editScheduleVersion: false,
   deleteScheduleVersion: false,
   applyScheduleVersion: false,
-  confirmChildMove: false
+  confirmChildMove: false,
+  exportSchedule: false
 })
+// percentage of the rows loaded for the export, null outside an export
+const exportProgress = ref(null)
+let exportCancelled = false
 const pendingParentChange = ref(null)
 // percentage of the confirmed move saved so far, null outside a save
 const childMoveProgress = ref(null)
@@ -1272,29 +1291,32 @@ const expandEpisodeRows = async (
   taskTypeElement.expanded = expanded || !taskTypeElement.expanded
 
   if (taskTypeElement.expanded) {
-    try {
-      taskTypeElement.loading = true
-      taskTypeElement.children = []
-
-      // The episodes endpoint aggregates a task type schedule per episode,
-      // whatever the entity it applies to.
-      const episodeRows = await store.dispatch('loadEpisodeScheduleItems', {
-        production: currentProduction.value,
-        taskType: taskTypeMap.value.get(taskTypeElement.task_type_id)
-      })
-      taskTypeElement.children = sortByName(
-        convertScheduleItems(taskTypeElement, episodeRows)
-      )
-    } catch (err) {
-      console.error(err)
-      taskTypeElement.children = []
-    } finally {
-      taskTypeElement.loading = false
-    }
-
+    await loadEpisodeRows(taskTypeElement)
     if (refreshScheduleCallBack) {
       refreshScheduleCallBack(taskTypeElement)
     }
+  }
+}
+
+const loadEpisodeRows = async taskTypeElement => {
+  try {
+    taskTypeElement.loading = true
+    taskTypeElement.children = []
+
+    // The episodes endpoint aggregates a task type schedule per episode,
+    // whatever the entity it applies to.
+    const episodeRows = await store.dispatch('loadEpisodeScheduleItems', {
+      production: currentProduction.value,
+      taskType: taskTypeMap.value.get(taskTypeElement.task_type_id)
+    })
+    taskTypeElement.children = sortByName(
+      convertScheduleItems(taskTypeElement, episodeRows)
+    )
+  } catch (err) {
+    console.error(err)
+    taskTypeElement.children = []
+  } finally {
+    taskTypeElement.loading = false
   }
 }
 
@@ -1308,326 +1330,11 @@ const expandTaskTypeDrillDown = async (
 
   if (taskTypeElement.expanded) {
     const generation = scheduleGeneration
-    // unversioned task list shared with the side panel to avoid a reload
-    let rawTasks = null
-    try {
-      taskTypeElement.loading = true
+    selectedTaskType.value = taskTypeElement
+    assignments.value.loading = resetAssignments
 
-      selectedTaskType.value = taskTypeElement
-      assignments.value.loading = resetAssignments
-
-      taskTypeElement.children = []
-      taskTypeElement.people = {}
-      taskTypeElement.entitiesByType = {}
-
-      // one row per asset type (Asset), sequence (Shot/Sequence),
-      // episode (Episode) or edit (Edit)
-      const scheduleItemLoaders = {
-        Asset: payload => store.dispatch('loadAssetTypeScheduleItems', payload),
-        Shot: payload => store.dispatch('loadSequenceScheduleItems', payload),
-        Sequence: payload =>
-          store.dispatch('loadSequenceScheduleItems', payload),
-        Episode: payload => store.dispatch('loadEpisodeScheduleItems', payload),
-        Edit: payload => store.dispatch('loadEditScheduleItems', payload)
-      }
-      const loadEntityRows =
-        scheduleItemLoaders[taskTypeElement.for_entity] ??
-        (payload => store.dispatch('loadAssetTypeScheduleItems', payload))
-      const parameters = {
-        production: currentProduction.value,
-        taskType: taskTypeMap.value.get(taskTypeElement.task_type_id),
-        episodeId: currentEpisodeId.value
-      }
-      const entityRows = await loadEntityRows(parameters)
-      if (isStaleSchedule(generation)) return
-
-      let children = convertScheduleItems(taskTypeElement, entityRows)
-      const childrenById = new Map(
-        children.map(child => [child.object_id, child])
-      )
-
-      // load entities (scoped to the current episode for TV shows) that
-      // back the row grouping, the entity name and the episode filter
-      await loadEntities(taskTypeElement.for_entity)
-      if (isStaleSchedule(generation)) return
-
-      let tasks = await store.dispatch(
-        'loadTasks',
-        buildTaskFilters(taskTypeElement)
-      )
-      if (isStaleSchedule(generation)) return
-      rawTasks = tasks
-
-      // Update tasks for versioned schedules
-      if (isVersioned.value) {
-        const taskType = taskTypeMap.value.get(taskTypeElement.task_type_id)
-        const versionedTasks = await store.dispatch(
-          'loadTasksFromScheduleVersion',
-          {
-            version: { id: version.value },
-            taskType
-          }
-        )
-        const versionedTaskMap = new Map(
-          versionedTasks.map(versionedTask => [
-            versionedTask.task_id,
-            versionedTask
-          ])
-        )
-        // a task the version does not plan yet stays on its row as a task
-        // without dates, like in the reference
-        tasks = tasks.map(task => {
-          const versioned = versionedTaskMap.get(task.id)
-          return {
-            ...task,
-            versionedTaskId: versioned?.id,
-            start_date: versioned?.start_date ?? null,
-            due_date: versioned?.due_date ?? null,
-            estimation: versioned?.estimation ?? task.estimation,
-            assignees: versioned?.assignees ?? []
-          }
-        })
-      }
-
-      // days off only depend on the production and the date range:
-      // reuse them across expands
-      const daysOffKey = `${currentProduction.value.id}_${startDate.value.format('YYYY-MM-DD')}_${endDate.value.format('YYYY-MM-DD')}`
-      if (daysOffRangeKey.value !== daysOffKey) {
-        daysOffByPerson.value = await store
-          .dispatch('loadProductionDaysOff', {
-            startDate: startDate.value.format('YYYY-MM-DD'),
-            endDate: endDate.value.format('YYYY-MM-DD')
-          })
-          .catch(
-            () => ({}) // fallback if not allowed to fetch days off
-          )
-        daysOffRangeKey.value = daysOffKey
-      }
-      if (isStaleSchedule(generation)) return
-
-      // Read the entity maps fresh from the store cache. They are plain,
-      // non-reactive Maps replaced on each episode-scoped load, so a cached
-      // computed would keep returning the first episode's Map and empty the
-      // drill-down after switching episode.
-      const assetMap = assetStore.cache.assetMap
-      const shotMap = shotStore.cache.shotMap
-      const sequenceMap = sequenceStore.cache.sequenceMap
-      const episodeMap = episodeStore.cache.episodeMap
-      const editMap = editStore.cache.editMap
-
-      // group tasks by entity type and assignee
-      const tasksByType = {}
-      const people = {}
-      const nbUndatedTasksByType = {}
-      const nbTasksOutOfRangeByType = {}
-      const countTask = (counts, task) => {
-        counts[task.entity_type_id] = (counts[task.entity_type_id] || 0) + 1
-      }
-      tasks.forEach(task => {
-        // link entity to task; skip tasks whose entity is not in the
-        // current episode (loadTasks is not episode-scoped, but the entity
-        // maps are for TV shows). Sequence/Episode/Edit task types group
-        // under their own entity id.
-        if (taskTypeElement.for_entity === 'Asset') {
-          task.entity = assetMap.get(task.entity_id)
-          if (!task.entity || !assetInScope(task.entity)) return
-          task.entity_type_id = task.entity.asset_type_id
-        } else if (taskTypeElement.for_entity === 'Shot') {
-          task.entity = shotMap.get(task.entity_id)
-          if (!task.entity) return
-          task.entity_type_id = task.entity.sequence_id
-        } else if (taskTypeElement.for_entity === 'Sequence') {
-          task.entity = sequenceMap.get(task.entity_id)
-          if (!task.entity) return
-          task.entity_type_id = task.entity_id
-        } else if (taskTypeElement.for_entity === 'Episode') {
-          task.entity = episodeMap.get(task.entity_id)
-          if (!task.entity) return
-          task.entity_type_id = task.entity_id
-        } else if (taskTypeElement.for_entity === 'Edit') {
-          task.entity = editMap.get(task.entity_id)
-          if (!task.entity) return
-          task.entity_type_id = task.entity_id
-        } else {
-          // unknown for_entity: the task will be dropped by the
-          // childrenById guard below
-          task.entity_type_id = taskTypeElement.for_entity
-        }
-        if (task.entity?.canceled) {
-          return
-        }
-        // out of the planning, but its row tells how many wait for dates
-        const rawStartDate =
-          mode.value === 'real' ? task.real_start_date : task.start_date
-        if (!rawStartDate) {
-          countTask(nbUndatedTasksByType, task)
-          return
-        }
-        const taskStartDate = parseDate(rawStartDate)
-        if (taskStartDate.isAfter(endDate.value)) {
-          countTask(nbTasksOutOfRangeByType, task)
-          return
-        }
-
-        if (!tasksByType[task.entity_type_id]) {
-          tasksByType[task.entity_type_id] = {}
-        }
-
-        if (!task.assignees.length) {
-          task.assignees = ['unassigned']
-        }
-
-        let placed = false
-        task.assignees.forEach(assigneeId => {
-          const entityTypeItem = childrenById.get(task.entity_type_id)
-          if (!entityTypeItem) return
-
-          // populate task with start and end dates
-          if (taskStartDate.isBefore(entityTypeItem.startDate)) {
-            entityTypeItem.startDate = taskStartDate.clone()
-          }
-          task.startDate = taskStartDate
-
-          let taskEndDate
-          if (mode.value === 'real') {
-            taskEndDate = task.done_date
-              ? parseDate(task.done_date)
-              : moment.tz()
-          } else if (task.due_date) {
-            taskEndDate = parseDate(task.due_date)
-          } else if (task.end_date) {
-            taskEndDate = parseDate(task.end_date)
-          } else if (task.estimation) {
-            taskEndDate = addBusinessDays(
-              task.startDate,
-              Math.ceil(minutesToDays(organisation.value, task.estimation)) - 1,
-              daysOffByPerson.value[assigneeId]
-            )
-          }
-          if (!taskEndDate || taskEndDate.isBefore(taskStartDate)) {
-            const nbDays = taskStartDate.isoWeekday() === 5 ? 3 : 1
-            taskEndDate = taskStartDate.clone().add(nbDays, 'days')
-          }
-          if (taskEndDate.isBefore(startDate.value)) {
-            return
-          }
-          if (taskEndDate.isAfter(entityTypeItem.endDate)) {
-            entityTypeItem.endDate = taskEndDate.clone()
-          }
-          task.endDate = taskEndDate
-
-          if (!tasksByType[task.entity_type_id][assigneeId]) {
-            tasksByType[task.entity_type_id][assigneeId] = []
-            people[assigneeId] =
-              assigneeId !== 'unassigned'
-                ? {
-                    ...personMap.value.get(assigneeId),
-                    daysOff: daysOffByPerson.value[assigneeId]
-                  }
-                : {
-                    id: assigneeId,
-                    avatar: false,
-                    color: '#888',
-                    full_name: t('main.unassigned')
-                  }
-          }
-
-          task.editable = !isLockedSchedule.value
-          task.unresizable = false
-          task.parentElement = entityTypeItem
-
-          tasksByType[task.entity_type_id][assigneeId].push(task)
-          placed = true
-        })
-        if (!placed) countTask(nbTasksOutOfRangeByType, task)
-      })
-
-      if (taskTypeElement.for_entity === 'Asset') {
-        // drop the asset type rows with no asset in the current scope (the
-        // main pack keeps only the asset types with an episode-less asset)
-        const scopedAssetTypeIds = isMainPack.value
-          ? new Set(
-              [...assetMap.values()]
-                .filter(asset => assetInScope(asset))
-                .map(asset => asset.asset_type_id)
-            )
-          : null
-        // filtering following custom asset types workflow
-        children = children.filter(item => {
-          const assetType = assetTypeMap.value.get(item.object_id)
-          return (
-            assetType &&
-            (!assetType.task_types.length ||
-              assetType.task_types.includes(taskTypeElement.task_type_id)) &&
-            (!scopedAssetTypeIds || scopedAssetTypeIds.has(item.object_id))
-          )
-        })
-      } else if (
-        ['Shot', 'Sequence'].includes(taskTypeElement.for_entity) &&
-        currentEpisodeId.value
-      ) {
-        // keep only the sequences of the current episode
-        children = children.filter(item => {
-          const sequence = sequenceMap.get(item.object_id)
-          return sequence && sequence.episode_id === currentEpisodeId.value
-        })
-      } else if (
-        taskTypeElement.for_entity === 'Edit' &&
-        currentEpisodeId.value
-      ) {
-        // keep only the edits of the current episode
-        children = children.filter(item => {
-          const edit = editMap.get(item.object_id)
-          return edit && edit.episode_id === currentEpisodeId.value
-        })
-      }
-
-      // sort grouped tasks
-      const sortEntitiesByUserName = ([keyA], [keyB]) => {
-        if (keyA === 'unassigned') return 1
-        if (keyB === 'unassigned') return -1
-        return people[keyA].full_name.localeCompare(people[keyB].full_name)
-      }
-      const sortTasksByEntityName = (a, b) =>
-        a.entity?.name.localeCompare(b.entity?.name, undefined, {
-          numeric: true
-        })
-      children.forEach(child => {
-        const items = tasksByType[child.object_id] || {}
-        const sortedChildren = new Map(
-          Object.entries(items)
-            .sort(sortEntitiesByUserName)
-            .map(([key, tasks]) => [key, tasks.sort(sortTasksByEntityName)])
-        )
-
-        child.children = sortedChildren
-        child.nbUndatedTasks = nbUndatedTasksByType[child.object_id] || 0
-        child.nbTasksOutOfRange = nbTasksOutOfRangeByType[child.object_id] || 0
-      })
-
-      taskTypeElement.children = sortByName(children)
-      taskTypeElement.people = people
-
-      // group all assigned entities by type
-      taskTypeElement.entitiesByType = Object.fromEntries(
-        Object.entries(tasksByType).map(([entityTypeId, byAssignee]) => [
-          entityTypeId,
-          Object.entries(byAssignee)
-            .flatMap(([assignee, items]) =>
-              assignee !== 'unassigned'
-                ? items.map(item => item.entity_id)
-                : undefined
-            )
-            .filter(Boolean)
-        ])
-      )
-    } catch (err) {
-      console.error(err)
-      taskTypeElement.children = []
-      taskTypeElement.people = {}
-    } finally {
-      taskTypeElement.loading = false
-    }
+    const rawTasks = await loadTaskTypeRows(taskTypeElement)
+    if (isStaleSchedule(generation)) return
 
     if (refreshScheduleCallBack) {
       refreshScheduleCallBack(taskTypeElement)
@@ -1635,6 +1342,326 @@ const expandTaskTypeDrillDown = async (
 
     selectTaskTypeElement(taskTypeElement, null, resetAssignments, rawTasks)
   }
+}
+
+// Fill the entity, assignee and task rows of a task type bar. Returns the
+// unversioned task list, shared with the side panel to avoid a reload.
+const loadTaskTypeRows = async taskTypeElement => {
+  const generation = scheduleGeneration
+  let rawTasks = null
+  try {
+    taskTypeElement.loading = true
+
+    taskTypeElement.children = []
+    taskTypeElement.people = {}
+    taskTypeElement.entitiesByType = {}
+
+    // one row per asset type (Asset), sequence (Shot/Sequence),
+    // episode (Episode) or edit (Edit)
+    const scheduleItemLoaders = {
+      Asset: payload => store.dispatch('loadAssetTypeScheduleItems', payload),
+      Shot: payload => store.dispatch('loadSequenceScheduleItems', payload),
+      Sequence: payload => store.dispatch('loadSequenceScheduleItems', payload),
+      Episode: payload => store.dispatch('loadEpisodeScheduleItems', payload),
+      Edit: payload => store.dispatch('loadEditScheduleItems', payload)
+    }
+    const loadEntityRows =
+      scheduleItemLoaders[taskTypeElement.for_entity] ??
+      (payload => store.dispatch('loadAssetTypeScheduleItems', payload))
+    const parameters = {
+      production: currentProduction.value,
+      taskType: taskTypeMap.value.get(taskTypeElement.task_type_id),
+      episodeId: currentEpisodeId.value
+    }
+    const entityRows = await loadEntityRows(parameters)
+    if (isStaleSchedule(generation)) return null
+
+    let children = convertScheduleItems(taskTypeElement, entityRows)
+    const childrenById = new Map(
+      children.map(child => [child.object_id, child])
+    )
+
+    // load entities (scoped to the current episode for TV shows) that
+    // back the row grouping, the entity name and the episode filter
+    await loadEntities(taskTypeElement.for_entity)
+    if (isStaleSchedule(generation)) return null
+
+    let tasks = await store.dispatch(
+      'loadTasks',
+      buildTaskFilters(taskTypeElement)
+    )
+    if (isStaleSchedule(generation)) return null
+    rawTasks = tasks
+
+    // Update tasks for versioned schedules
+    if (isVersioned.value) {
+      const taskType = taskTypeMap.value.get(taskTypeElement.task_type_id)
+      const versionedTasks = await store.dispatch(
+        'loadTasksFromScheduleVersion',
+        {
+          version: { id: version.value },
+          taskType
+        }
+      )
+      const versionedTaskMap = new Map(
+        versionedTasks.map(versionedTask => [
+          versionedTask.task_id,
+          versionedTask
+        ])
+      )
+      // a task the version does not plan yet stays on its row as a task
+      // without dates, like in the reference
+      tasks = tasks.map(task => {
+        const versioned = versionedTaskMap.get(task.id)
+        return {
+          ...task,
+          versionedTaskId: versioned?.id,
+          start_date: versioned?.start_date ?? null,
+          due_date: versioned?.due_date ?? null,
+          estimation: versioned?.estimation ?? task.estimation,
+          assignees: versioned?.assignees ?? []
+        }
+      })
+    }
+
+    // days off only depend on the production and the date range:
+    // reuse them across expands
+    const daysOffKey = `${currentProduction.value.id}_${startDate.value.format('YYYY-MM-DD')}_${endDate.value.format('YYYY-MM-DD')}`
+    if (daysOffRangeKey.value !== daysOffKey) {
+      daysOffByPerson.value = await store
+        .dispatch('loadProductionDaysOff', {
+          startDate: startDate.value.format('YYYY-MM-DD'),
+          endDate: endDate.value.format('YYYY-MM-DD')
+        })
+        .catch(
+          () => ({}) // fallback if not allowed to fetch days off
+        )
+      daysOffRangeKey.value = daysOffKey
+    }
+    if (isStaleSchedule(generation)) return null
+
+    // Read the entity maps fresh from the store cache. They are plain,
+    // non-reactive Maps replaced on each episode-scoped load, so a cached
+    // computed would keep returning the first episode's Map and empty the
+    // drill-down after switching episode.
+    const assetMap = assetStore.cache.assetMap
+    const shotMap = shotStore.cache.shotMap
+    const sequenceMap = sequenceStore.cache.sequenceMap
+    const episodeMap = episodeStore.cache.episodeMap
+    const editMap = editStore.cache.editMap
+
+    // group tasks by entity type and assignee
+    const tasksByType = {}
+    const people = {}
+    const nbUndatedTasksByType = {}
+    const nbTasksOutOfRangeByType = {}
+    const countTask = (counts, task) => {
+      counts[task.entity_type_id] = (counts[task.entity_type_id] || 0) + 1
+    }
+    tasks.forEach(task => {
+      // link entity to task; skip tasks whose entity is not in the
+      // current episode (loadTasks is not episode-scoped, but the entity
+      // maps are for TV shows). Sequence/Episode/Edit task types group
+      // under their own entity id.
+      if (taskTypeElement.for_entity === 'Asset') {
+        task.entity = assetMap.get(task.entity_id)
+        if (!task.entity || !assetInScope(task.entity)) return
+        task.entity_type_id = task.entity.asset_type_id
+      } else if (taskTypeElement.for_entity === 'Shot') {
+        task.entity = shotMap.get(task.entity_id)
+        if (!task.entity) return
+        task.entity_type_id = task.entity.sequence_id
+      } else if (taskTypeElement.for_entity === 'Sequence') {
+        task.entity = sequenceMap.get(task.entity_id)
+        if (!task.entity) return
+        task.entity_type_id = task.entity_id
+      } else if (taskTypeElement.for_entity === 'Episode') {
+        task.entity = episodeMap.get(task.entity_id)
+        if (!task.entity) return
+        task.entity_type_id = task.entity_id
+      } else if (taskTypeElement.for_entity === 'Edit') {
+        task.entity = editMap.get(task.entity_id)
+        if (!task.entity) return
+        task.entity_type_id = task.entity_id
+      } else {
+        // unknown for_entity: the task will be dropped by the
+        // childrenById guard below
+        task.entity_type_id = taskTypeElement.for_entity
+      }
+      if (task.entity?.canceled) {
+        return
+      }
+      // out of the planning, but its row tells how many wait for dates
+      const rawStartDate =
+        mode.value === 'real' ? task.real_start_date : task.start_date
+      if (!rawStartDate) {
+        countTask(nbUndatedTasksByType, task)
+        return
+      }
+      const taskStartDate = parseDate(rawStartDate)
+      if (taskStartDate.isAfter(endDate.value)) {
+        countTask(nbTasksOutOfRangeByType, task)
+        return
+      }
+
+      if (!tasksByType[task.entity_type_id]) {
+        tasksByType[task.entity_type_id] = {}
+      }
+
+      if (!task.assignees.length) {
+        task.assignees = ['unassigned']
+      }
+
+      let placed = false
+      task.assignees.forEach(assigneeId => {
+        const entityTypeItem = childrenById.get(task.entity_type_id)
+        if (!entityTypeItem) return
+
+        // populate task with start and end dates
+        if (taskStartDate.isBefore(entityTypeItem.startDate)) {
+          entityTypeItem.startDate = taskStartDate.clone()
+        }
+        task.startDate = taskStartDate
+
+        let taskEndDate
+        if (mode.value === 'real') {
+          taskEndDate = task.done_date ? parseDate(task.done_date) : moment.tz()
+        } else if (task.due_date) {
+          taskEndDate = parseDate(task.due_date)
+        } else if (task.end_date) {
+          taskEndDate = parseDate(task.end_date)
+        } else if (task.estimation) {
+          taskEndDate = addBusinessDays(
+            task.startDate,
+            Math.ceil(minutesToDays(organisation.value, task.estimation)) - 1,
+            daysOffByPerson.value[assigneeId]
+          )
+        }
+        if (!taskEndDate || taskEndDate.isBefore(taskStartDate)) {
+          const nbDays = taskStartDate.isoWeekday() === 5 ? 3 : 1
+          taskEndDate = taskStartDate.clone().add(nbDays, 'days')
+        }
+        if (taskEndDate.isBefore(startDate.value)) {
+          return
+        }
+        if (taskEndDate.isAfter(entityTypeItem.endDate)) {
+          entityTypeItem.endDate = taskEndDate.clone()
+        }
+        task.endDate = taskEndDate
+
+        if (!tasksByType[task.entity_type_id][assigneeId]) {
+          tasksByType[task.entity_type_id][assigneeId] = []
+          people[assigneeId] =
+            assigneeId !== 'unassigned'
+              ? {
+                  ...personMap.value.get(assigneeId),
+                  daysOff: daysOffByPerson.value[assigneeId]
+                }
+              : {
+                  id: assigneeId,
+                  avatar: false,
+                  color: '#888',
+                  full_name: t('main.unassigned')
+                }
+        }
+
+        task.editable = !isLockedSchedule.value
+        task.unresizable = false
+        task.parentElement = entityTypeItem
+
+        tasksByType[task.entity_type_id][assigneeId].push(task)
+        placed = true
+      })
+      if (!placed) countTask(nbTasksOutOfRangeByType, task)
+    })
+
+    if (taskTypeElement.for_entity === 'Asset') {
+      // drop the asset type rows with no asset in the current scope (the
+      // main pack keeps only the asset types with an episode-less asset)
+      const scopedAssetTypeIds = isMainPack.value
+        ? new Set(
+            [...assetMap.values()]
+              .filter(asset => assetInScope(asset))
+              .map(asset => asset.asset_type_id)
+          )
+        : null
+      // filtering following custom asset types workflow
+      children = children.filter(item => {
+        const assetType = assetTypeMap.value.get(item.object_id)
+        return (
+          assetType &&
+          (!assetType.task_types.length ||
+            assetType.task_types.includes(taskTypeElement.task_type_id)) &&
+          (!scopedAssetTypeIds || scopedAssetTypeIds.has(item.object_id))
+        )
+      })
+    } else if (
+      ['Shot', 'Sequence'].includes(taskTypeElement.for_entity) &&
+      currentEpisodeId.value
+    ) {
+      // keep only the sequences of the current episode
+      children = children.filter(item => {
+        const sequence = sequenceMap.get(item.object_id)
+        return sequence && sequence.episode_id === currentEpisodeId.value
+      })
+    } else if (
+      taskTypeElement.for_entity === 'Edit' &&
+      currentEpisodeId.value
+    ) {
+      // keep only the edits of the current episode
+      children = children.filter(item => {
+        const edit = editMap.get(item.object_id)
+        return edit && edit.episode_id === currentEpisodeId.value
+      })
+    }
+
+    // sort grouped tasks
+    const sortEntitiesByUserName = ([keyA], [keyB]) => {
+      if (keyA === 'unassigned') return 1
+      if (keyB === 'unassigned') return -1
+      return people[keyA].full_name.localeCompare(people[keyB].full_name)
+    }
+    const sortTasksByEntityName = (a, b) =>
+      a.entity?.name.localeCompare(b.entity?.name, undefined, {
+        numeric: true
+      })
+    children.forEach(child => {
+      const items = tasksByType[child.object_id] || {}
+      const sortedChildren = new Map(
+        Object.entries(items)
+          .sort(sortEntitiesByUserName)
+          .map(([key, tasks]) => [key, tasks.sort(sortTasksByEntityName)])
+      )
+
+      child.children = sortedChildren
+      child.nbUndatedTasks = nbUndatedTasksByType[child.object_id] || 0
+      child.nbTasksOutOfRange = nbTasksOutOfRangeByType[child.object_id] || 0
+    })
+
+    taskTypeElement.children = sortByName(children)
+    taskTypeElement.people = people
+
+    // group all assigned entities by type
+    taskTypeElement.entitiesByType = Object.fromEntries(
+      Object.entries(tasksByType).map(([entityTypeId, byAssignee]) => [
+        entityTypeId,
+        Object.entries(byAssignee)
+          .flatMap(([assignee, items]) =>
+            assignee !== 'unassigned'
+              ? items.map(item => item.entity_id)
+              : undefined
+          )
+          .filter(Boolean)
+      ])
+    )
+  } catch (err) {
+    console.error(err)
+    taskTypeElement.children = []
+    taskTypeElement.people = {}
+  } finally {
+    taskTypeElement.loading = false
+  }
+  return rawTasks
 }
 
 const filteredAssignments = items => {
@@ -2641,250 +2668,267 @@ const collapseAllScheduleItems = () => {
   })
 }
 
-const exportSchedule = async (withAllRows = true) => {
+// The rows load behind the scenes, collapsed: the planning stays as it is
+// and the modal reports the progress. Cancel stops between two rows.
+const exportSchedule = async () => {
+  if (exportProgress.value !== null) return
   const generation = scheduleGeneration
-  loading.value.exportSchedule = true
+  const rows = filteredScheduleItems.value.filter(row => !row.expanded)
+  const loadRows = isAllEpisodes.value ? loadEpisodeRows : loadTaskTypeRows
+  exportCancelled = false
+  exportProgress.value = 0
+  errors.value.exportSchedule = false
 
   try {
-    if (withAllRows) {
-      await expandAllScheduleItems()
+    for (const [index, row] of rows.entries()) {
+      if (exportCancelled || isStaleSchedule(generation)) return
+      await loadRows(row)
+      exportProgress.value = Math.round(((index + 1) / rows.length) * 100)
     }
-    if (isStaleSchedule(generation)) return
+    if (exportCancelled || isStaleSchedule(generation)) return
+    await buildExportFile()
+    modals.value.exportSchedule = false
+  } catch (err) {
+    console.error(err)
+    errors.value.exportSchedule = true
+  } finally {
+    exportProgress.value = null
+  }
+}
 
-    const data = scheduleRef.value?.exportData()
+const cancelExport = () => {
+  exportCancelled = true
+  modals.value.exportSchedule = false
+}
 
-    const ExcelJS = (await import('exceljs')).default
-    const workbook = new ExcelJS.Workbook()
-    const sheet = workbook.addWorksheet(t('schedule.title'))
+const buildExportFile = async () => {
+  const data = scheduleRef.value?.exportData()
 
-    // init header
-    const header = ['', 'Task Type', 'Entity', 'Assignee', 'Description']
-    const dates = data.header.map(item => item.format('YYYY-MM-DD'))
-    const headerRow = sheet.addRow([...header, ...dates])
+  const ExcelJS = (await import('exceljs')).default
+  const workbook = new ExcelJS.Workbook()
+  const sheet = workbook.addWorksheet(t('schedule.title'))
 
-    headerRow.font = { bold: true }
-    headerRow.eachCell(cell => {
+  // init header
+  const header = ['', 'Task Type', 'Entity', 'Assignee', 'Description']
+  const dates = data.header.map(item => item.format('YYYY-MM-DD'))
+  const headerRow = sheet.addRow([...header, ...dates])
+
+  headerRow.font = { bold: true }
+  headerRow.eachCell(cell => {
+    cell.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFDDDDDD' } // grey light
+    }
+    cell.border = {
+      bottom: { style: 'thin' }
+    }
+  })
+  const datesColumn = header.length + 1
+
+  // level 1: Task Types
+  let startRowLevel1 = 2
+  let endRowLevel1 = null
+  data.hierarchy.forEach(item => {
+    endRowLevel1 = startRowLevel1
+
+    // ExcelJS expects 8-digit ARGB values, 6-digit hex shifts the
+    // channels and renders wrong colors
+    const lightened = colors.lightenColor(item.color, 0.2).hex()
+    const color = `FF${item.color.slice(1)}`.toUpperCase()
+    const color2 = `FF${lightened.slice(1)}`.toUpperCase()
+
+    const row = sheet.addRow([null, item.name])
+    row.getCell(1).fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: color }
+    }
+    row.getCell(2).alignment = { vertical: 'top' }
+    row.getCell(2).note = `${item.name}\n${item.start_date} - ${item.end_date}`
+    row.height = 30
+
+    // fill timebar
+    const start = dates.indexOf(item.start_date)
+    const end = dates.indexOf(item.end_date)
+    for (let i = start; i > -1 && i <= end; i++) {
+      const cell = row.getCell(5 + i)
       cell.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FFDDDDDD' } // grey light
-      }
-      cell.border = {
-        bottom: { style: 'thin' }
-      }
-    })
-    const datesColumn = header.length + 1
-
-    // level 1: Task Types
-    let startRowLevel1 = 2
-    let endRowLevel1 = null
-    data.hierarchy.forEach(item => {
-      endRowLevel1 = startRowLevel1
-
-      // ExcelJS expects 8-digit ARGB values, 6-digit hex shifts the
-      // channels and renders wrong colors
-      const lightened = colors.lightenColor(item.color, 0.2).hex()
-      const color = `FF${item.color.slice(1)}`.toUpperCase()
-      const color2 = `FF${lightened.slice(1)}`.toUpperCase()
-
-      const row = sheet.addRow([null, item.name])
-      row.getCell(1).fill = {
         type: 'pattern',
         pattern: 'solid',
         fgColor: { argb: color }
       }
-      row.getCell(2).alignment = { vertical: 'top' }
-      row.getCell(2).note =
-        `${item.name}\n${item.start_date} - ${item.end_date}`
-      row.height = 30
+    }
+
+    endRowLevel1++
+
+    // level 2: Entity Types
+    let startRowLevel2 = endRowLevel1
+    let endRowLevel2 = null
+    item.children.forEach(type => {
+      endRowLevel2 = startRowLevel2
+
+      const row = sheet.addRow([null, null, type.name, ''])
+      row.getCell(3).alignment = { vertical: 'top' }
+      row.getCell(3).note =
+        `${type.name}\n${type.start_date} - ${type.end_date}`
 
       // fill timebar
-      const start = dates.indexOf(item.start_date)
-      const end = dates.indexOf(item.end_date)
+      const start = dates.indexOf(type.start_date)
+      const end = dates.indexOf(type.end_date)
       for (let i = start; i > -1 && i <= end; i++) {
-        const cell = row.getCell(5 + i)
+        const cell = row.getCell(datesColumn + i)
         cell.fill = {
           type: 'pattern',
           pattern: 'solid',
-          fgColor: { argb: color }
+          fgColor: { argb: color2 }
         }
       }
 
       endRowLevel1++
+      endRowLevel2++
 
-      // level 2: Entity Types
-      let startRowLevel2 = endRowLevel1
-      let endRowLevel2 = null
-      item.children.forEach(type => {
-        endRowLevel2 = startRowLevel2
+      // level 3: Persons
+      let startRowLevel3 = endRowLevel2
+      let endRowLevel3 = null
+      type.children.forEach((tasks, assigneeId) => {
+        endRowLevel3 = startRowLevel3
+        const isAssigned = assigneeId !== 'unassigned'
 
-        const row = sheet.addRow([null, null, type.name, ''])
-        row.getCell(3).alignment = { vertical: 'top' }
-        row.getCell(3).note =
-          `${type.name}\n${type.start_date} - ${type.end_date}`
+        const assignee = isAssigned
+          ? personMap.value.get(assigneeId)
+          : {
+              id: assigneeId,
+              avatar: false,
+              color: '#888',
+              full_name: t('main.unassigned')
+            }
 
-        // fill timebar
-        const start = dates.indexOf(type.start_date)
-        const end = dates.indexOf(type.end_date)
-        for (let i = start; i > -1 && i <= end; i++) {
-          const cell = row.getCell(datesColumn + i)
-          cell.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: { argb: color2 }
+        const row = sheet.addRow([
+          null,
+          null,
+          null,
+          assignee.full_name,
+          isAssigned ? t('days_off.title') : null
+        ])
+        row.getCell(4).alignment = { vertical: 'top' }
+        row.getCell(5).alignment = { vertical: 'middle' }
+
+        // fill days off
+        const daysOff = getDayOffRange(daysOffByPerson.value[assigneeId])
+        daysOff.forEach(dayOff => {
+          const index = dates.findIndex(date => date === dayOff.date)
+          if (index !== -1) {
+            const cell = row.getCell(datesColumn + index)
+            cell.note = `${t('days_off.title')}\n${dayOff.description}`
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: 'FFAAAAAA' } // grey dark
+            }
           }
-        }
+        })
 
         endRowLevel1++
         endRowLevel2++
+        endRowLevel3++
 
-        // level 3: Persons
-        let startRowLevel3 = endRowLevel2
-        let endRowLevel3 = null
-        type.children.forEach((tasks, assigneeId) => {
-          endRowLevel3 = startRowLevel3
-          const isAssigned = assigneeId !== 'unassigned'
-
-          const assignee = isAssigned
-            ? personMap.value.get(assigneeId)
-            : {
-                id: assigneeId,
-                avatar: false,
-                color: '#888',
-                full_name: t('main.unassigned')
-              }
+        // level 4: Tasks
+        tasks.forEach(task => {
+          const duration =
+            mode.value === 'real'
+              ? formatDuration(task.duration)
+              : formatDuration(task.estimation)
 
           const row = sheet.addRow([
             null,
             null,
             null,
-            assignee.full_name,
-            isAssigned ? t('days_off.title') : null
+            null,
+            `${task.entity.name} (${duration}${durationUnit.value})`
           ])
-          row.getCell(4).alignment = { vertical: 'top' }
-          row.getCell(5).alignment = { vertical: 'middle' }
 
-          // fill days off
-          const daysOff = getDayOffRange(daysOffByPerson.value[assigneeId])
-          daysOff.forEach(dayOff => {
-            const index = dates.findIndex(date => date === dayOff.date)
-            if (index !== -1) {
-              const cell = row.getCell(datesColumn + index)
-              cell.note = `${t('days_off.title')}\n${dayOff.description}`
-              cell.fill = {
-                type: 'pattern',
-                pattern: 'solid',
-                fgColor: { argb: 'FFAAAAAA' } // grey dark
-              }
+          // fill task timebar
+          const start_date = task.startDate.format('YYYY-MM-DD')
+          const end_date = task.endDate.format('YYYY-MM-DD')
+          const startIndex = dates.indexOf(start_date)
+          const endIndex = dates.indexOf(end_date)
+          for (let i = startIndex; i > -1 && i <= endIndex; i++) {
+            const cell = row.getCell(datesColumn + i)
+            cell.note = `${task.entity.name}\n${start_date} - ${end_date}\n${duration} ${durationUnit.value}`
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: color }
             }
-          })
+          }
 
           endRowLevel1++
           endRowLevel2++
           endRowLevel3++
-
-          // level 4: Tasks
-          tasks.forEach(task => {
-            const duration =
-              mode.value === 'real'
-                ? formatDuration(task.duration)
-                : formatDuration(task.estimation)
-
-            const row = sheet.addRow([
-              null,
-              null,
-              null,
-              null,
-              `${task.entity.name} (${duration}${durationUnit.value})`
-            ])
-
-            // fill task timebar
-            const start_date = task.startDate.format('YYYY-MM-DD')
-            const end_date = task.endDate.format('YYYY-MM-DD')
-            const startIndex = dates.indexOf(start_date)
-            const endIndex = dates.indexOf(end_date)
-            for (let i = startIndex; i > -1 && i <= endIndex; i++) {
-              const cell = row.getCell(datesColumn + i)
-              cell.note = `${task.entity.name}\n${start_date} - ${end_date}\n${duration} ${durationUnit.value}`
-              cell.fill = {
-                type: 'pattern',
-                pattern: 'solid',
-                fgColor: { argb: color }
-              }
-            }
-
-            endRowLevel1++
-            endRowLevel2++
-            endRowLevel3++
-          })
-
-          // group cells of level 3
-          sheet.mergeCells(startRowLevel3, 4, endRowLevel3 - 1, 4)
-
-          startRowLevel3 = endRowLevel3
         })
 
-        // group cells of level 2
-        sheet.mergeCells(startRowLevel2, 3, endRowLevel2 - 1, 3)
+        // group cells of level 3
+        sheet.mergeCells(startRowLevel3, 4, endRowLevel3 - 1, 4)
 
-        startRowLevel2 = endRowLevel2
+        startRowLevel3 = endRowLevel3
       })
 
-      // group cells of level 1
-      sheet.mergeCells(startRowLevel1, 1, endRowLevel1 - 1, 1)
-      sheet.mergeCells(startRowLevel1, 2, endRowLevel1 - 1, 2)
+      // group cells of level 2
+      sheet.mergeCells(startRowLevel2, 3, endRowLevel2 - 1, 3)
 
-      // stylize borders
-      sheet.getRow(endRowLevel1 - 1).border = {
-        bottom: {
-          style: 'medium',
-          color: { argb: color }
-        }
-      }
-
-      startRowLevel1 = endRowLevel1
+      startRowLevel2 = endRowLevel2
     })
 
-    // customize columns size
-    sheet.getColumn(1).width = 5
-    for (let i = 0; i < dates.length; i++) {
-      sheet.getColumn(header.length + 1 + i).width = 10
-    }
-    const ajustColumnWidth = (columnIndex, minWidth = 10, maxWidth = 100) => {
-      const column = sheet.getColumn(columnIndex)
-      let maxLength = minWidth
-      column.eachCell({ includeEmpty: false }, cell => {
-        const cellValue = cell.value ? cell.value.toString() : ''
-        if (cellValue.length > maxLength) {
-          maxLength = cellValue.length
-        }
-      })
-      column.width = Math.min(maxLength, maxWidth)
-    }
-    ajustColumnWidth(2) // task type
-    ajustColumnWidth(3) // entity
-    ajustColumnWidth(4) // assignee
-    ajustColumnWidth(5) // description
+    // group cells of level 1
+    sheet.mergeCells(startRowLevel1, 1, endRowLevel1 - 1, 1)
+    sheet.mergeCells(startRowLevel1, 2, endRowLevel1 - 1, 2)
 
-    // generate an XLSX file
-    const buffer = await workbook.xlsx.writeBuffer()
-    const filename = `Kitsu - ${currentProduction.value.name} - ${t('schedule.title')}`
-    const modeLabel = modeOptions.value.find(
-      ({ value }) => value === mode.value
-    )?.label
-    const versionLabel = versionOptions.value.find(
-      ({ value }) => value === version.value
-    )?.label
-    const release = isVersioned.value
-      ? `${modeLabel} - ${versionLabel}`
-      : modeLabel
-    downloadBlob(new Blob([buffer]), `${filename} (${release}).xlsx`)
-  } catch (err) {
-    console.error(err)
-    alert(t('schedule.export_error'))
-  } finally {
-    loading.value.exportSchedule = false
+    // stylize borders
+    sheet.getRow(endRowLevel1 - 1).border = {
+      bottom: {
+        style: 'medium',
+        color: { argb: color }
+      }
+    }
+
+    startRowLevel1 = endRowLevel1
+  })
+
+  // customize columns size
+  sheet.getColumn(1).width = 5
+  for (let i = 0; i < dates.length; i++) {
+    sheet.getColumn(header.length + 1 + i).width = 10
   }
+  const ajustColumnWidth = (columnIndex, minWidth = 10, maxWidth = 100) => {
+    const column = sheet.getColumn(columnIndex)
+    let maxLength = minWidth
+    column.eachCell({ includeEmpty: false }, cell => {
+      const cellValue = cell.value ? cell.value.toString() : ''
+      if (cellValue.length > maxLength) {
+        maxLength = cellValue.length
+      }
+    })
+    column.width = Math.min(maxLength, maxWidth)
+  }
+  ajustColumnWidth(2) // task type
+  ajustColumnWidth(3) // entity
+  ajustColumnWidth(4) // assignee
+  ajustColumnWidth(5) // description
+
+  // generate an XLSX file
+  const buffer = await workbook.xlsx.writeBuffer()
+  const filename = `Kitsu - ${currentProduction.value.name} - ${t('schedule.title')}`
+  const modeLabel = modeOptions.value.find(
+    ({ value }) => value === mode.value
+  )?.label
+  const versionLabel = versionOptions.value.find(
+    ({ value }) => value === version.value
+  )?.label
+  const release = isVersioned.value
+    ? `${modeLabel} - ${versionLabel}`
+    : modeLabel
+  downloadBlob(new Blob([buffer]), `${filename} (${release}).xlsx`)
 }
 
 // Watchers

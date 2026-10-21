@@ -1515,6 +1515,7 @@
       "edit_version_exist": "Er bestaat al een versie met een vergelijkbare naam.",
       "export": "Planning exporteren",
       "export_error": "Er is een fout opgetreden tijdens het exporteren van gegevens.",
+      "export_explanation": "De export laadt de taken van {count} rij, wat bij een grote productie even kan duren. | De export laadt de taken van de {count} getoonde rijen, wat bij een grote productie even kan duren.",
       "fields": {
         "create_from_version": "Nieuw maken of vanuit een versie",
         "new": "Nieuwe planning",

@@ -1515,6 +1515,7 @@
       "edit_version_exist": "Eine Version mit einem ähnlichen Namen existiert bereits.",
       "export": "Zeitplan exportieren",
       "export_error": "Beim Exportieren von Daten ist ein Fehler aufgetreten.",
+      "export_explanation": "Der Export lädt die Aufgaben von {count} Zeile, was bei einer großen Produktion dauern kann. | Der Export lädt die Aufgaben der {count} angezeigten Zeilen, was bei einer großen Produktion dauern kann.",
       "fields": {
         "create_from_version": "Neu erstellen oder aus einer Version",
         "new": "Neuer Zeitplan",

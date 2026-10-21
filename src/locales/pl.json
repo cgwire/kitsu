@@ -1938,6 +1938,7 @@
       "edit_version_exist": "Wersja o podobnej nazwie już istnieje.",
       "export": "Eksportuj harmonogram",
       "export_error": "Wystąpił błąd podczas eksportowania danych.",
+      "export_explanation": "Eksport wczytuje zadania {count} wiersza, co w dużej produkcji może potrwać. | Eksport wczytuje zadania {count} wyświetlanych wierszy, co w dużej produkcji może potrwać.",
       "fields": {
         "create_from_version": "Utwórz nowy lub na podstawie wersji",
         "new": "Nowy harmonogram",

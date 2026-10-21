@@ -1515,6 +1515,7 @@
       "edit_version_exist": "Der findes allerede en version med et lignende navn.",
       "export": "Eksportér tidsplan",
       "export_error": "Der opstod en fejl under eksport af data.",
+      "export_explanation": "Eksporten indlæser opgaverne i {count} række, hvilket kan tage tid på en stor produktion. | Eksporten indlæser opgaverne i de {count} viste rækker, hvilket kan tage tid på en stor produktion.",
       "fields": {
         "create_from_version": "Opret ny eller fra en version",
         "new": "Ny tidsplan",

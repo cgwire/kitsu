@@ -1515,6 +1515,7 @@
       "edit_version_exist": "Ya existe una versión con un nombre similar.",
       "export": "Exportar calendario",
       "export_error": "Se ha producido un error al exportar los datos.",
+      "export_explanation": "La exportación carga las tareas de {count} fila, lo que puede tardar en una producción grande. | La exportación carga las tareas de las {count} filas mostradas, lo que puede tardar en una producción grande.",
       "fields": {
         "create_from_version": "Crear nuevo o a partir de una versión",
         "new": "Nuevo calendario",

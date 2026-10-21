@@ -1515,6 +1515,7 @@
       "edit_version_exist": "Já existe uma versão com um nome semelhante.",
       "export": "Exportar cronograma",
       "export_error": "Ocorreu um erro durante a exportação de dados.",
+      "export_explanation": "A exportação carrega as tarefas de {count} linha, o que pode demorar numa produção grande. | A exportação carrega as tarefas das {count} linhas exibidas, o que pode demorar numa produção grande.",
       "fields": {
         "create_from_version": "Criar uma nova versão ou a partir de uma versão",
         "new": "Novo cronograma",

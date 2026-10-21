@@ -1515,6 +1515,7 @@
       "edit_version_exist": "名稱相似的版本已經存在。",
       "export": "匯出時間表",
       "export_error": "匯出資料時發生錯誤。",
+      "export_explanation": "匯出會載入 {count} 列的任務，在大型製作中可能需要一些時間。 | 匯出會載入顯示的 {count} 列的任務，在大型製作中可能需要一些時間。",
       "fields": {
         "create_from_version": "建立新版本或從版本中建立",
         "new": "新時間表",
