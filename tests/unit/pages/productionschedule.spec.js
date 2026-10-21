@@ -451,35 +451,34 @@ describe('ProductionSchedule page', () => {
   })
 
   describe('side panel', () => {
-    // The side panel lists every task type of the production: picking a
-    // hidden one used to fill the panel while the schedule showed nothing.
-    it('shows a hidden type again when the panel picks it', async () => {
-      const { router, storeActions, wrapper } = await mountPage({
-        query: { hiddenTypes: 'tt-animation' }
+    // The panel lists the task types the schedule shows: picking a hidden
+    // one used to fill the panel while the schedule showed nothing.
+    it('lists the task types left by the entity and task type filters', async () => {
+      const { wrapper } = await mountPage({
+        query: { type: 'Shot', hiddenTypes: 'tt-animation' }
       })
       await toggleSidePanel(wrapper)
 
-      await pickTaskType(wrapper, 'tt-animation')
-
-      expect(rowNames(wrapper)).toContain('Shot / Animation')
-      expect(router.currentRoute.value.query.hiddenTypes).toBeUndefined()
-      expect(storeActions.loadSequenceScheduleItems).toHaveBeenCalled()
+      expect(
+        wrapper
+          .findComponent(ComboboxTaskType)
+          .props('taskTypeList')
+          .map(taskType => taskType.id)
+      ).toEqual(['tt-layout'])
     })
 
-    it('clears the entity filter and the task type filter at once', async () => {
-      const { router, wrapper } = await mountPage({
-        query: { type: 'Asset', hiddenTypes: 'tt-animation' }
-      })
+    it('closes when the entity filter leaves its task type out', async () => {
+      const { wrapper } = await mountPage()
       await toggleSidePanel(wrapper)
-      const push = vi.spyOn(router, 'push')
-      const replace = vi.spyOn(router, 'replace')
-
       await pickTaskType(wrapper, 'tt-animation')
 
-      expect(router.currentRoute.value.query.type).toBeUndefined()
-      expect(router.currentRoute.value.query.hiddenTypes).toBeUndefined()
-      expect(replace).toHaveBeenCalledTimes(1)
-      expect(push).not.toHaveBeenCalled()
+      findCombobox(wrapper, 'main.entities').vm.$emit(
+        'update:model-value',
+        'Asset'
+      )
+      await flushPromises()
+
+      expect(wrapper.find('.side-column').exists()).toBe(false)
     })
 
     // Expanding a row selects it, and Expand all or the export expand the

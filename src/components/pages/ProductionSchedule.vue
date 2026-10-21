@@ -660,7 +660,6 @@ const assignments = ref({
   type: null,
   unassign: false
 })
-const availableTaskTypes = ref([])
 const daysOffByPerson = ref({})
 const daysOffRangeKey = ref(null)
 // kind of entity to the promise of its load: a second caller joins the
@@ -983,6 +982,15 @@ const filteredScheduleItems = computed(() => {
   )
 })
 
+// the batch panel plans the task types the schedule shows, named like
+// their rows
+const availableTaskTypes = computed(() =>
+  filteredScheduleItems.value.map(item => ({
+    ...taskTypeMap.value.get(item.task_type_id),
+    name: item.name
+  }))
+)
+
 // Functions
 // --------------------------------------------------------------------------
 
@@ -1011,7 +1019,6 @@ const updateRoute = changes => {
 const loadData = async () => {
   const production = currentProduction.value
   loading.value.schedule = true
-  availableTaskTypes.value = []
   entityLoads.clear()
 
   try {
@@ -1075,11 +1082,6 @@ const loadData = async () => {
       currentProduction.value,
       taskTypeMap.value
     )
-
-    availableTaskTypes.value = scopedScheduleItems.value.map(item => ({
-      ...taskTypeMap.value.get(item.task_type_id),
-      name: item.name
-    }))
   } catch (err) {
     console.error(err)
   } finally {
@@ -1863,27 +1865,6 @@ const onSelectTaskType = taskTypeId => {
   selectedTaskType.value = scheduleItems.value.find(
     item => item.task_type_id === taskTypeId
   )
-  // clear the filters hiding the selected row, or the expand below would
-  // fill the panel while the schedule shows nothing
-  const query = {}
-  if (
-    entityType.value &&
-    selectedTaskType.value &&
-    selectedTaskType.value.for_entity !== entityType.value
-  ) {
-    entityType.value = null
-    query.type = null
-  }
-  if (hiddenTaskTypeIds.value.includes(taskTypeId)) {
-    hiddenTaskTypeIds.value = setTaskTypeVisibility(
-      hiddenTaskTypeIds.value,
-      taskTypeId,
-      true
-    )
-    query.hiddenTypes = formatHiddenTaskTypeIds(hiddenTaskTypeIds.value)
-  }
-  updateRoute(query)
-  saveFilterPreferences()
   refreshTaskTypeElement(selectedTaskType.value)
 }
 
@@ -2512,6 +2493,13 @@ const onZoomLevelChanged = zoom => {
 const onEntityTypeChanged = type => {
   updateRoute({ type })
   saveFilterPreferences()
+  // the side panel would keep planning a task type no longer displayed
+  if (
+    selectedTaskType.value &&
+    !filteredScheduleItems.value.includes(selectedTaskType.value)
+  ) {
+    closeSidePanel()
+  }
 }
 
 const onTaskTypeVisibilityChanged = ({ key, value }) => {
