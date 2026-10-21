@@ -642,6 +642,17 @@
  * Component to facilitate the build of schedule pages.
  */
 import {
+  BanIcon,
+  BriefcaseIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
+  EditIcon,
+  LinkIcon,
+  ListChevronsUpDownIcon,
+  PlusIcon
+} from 'lucide-vue-next'
+import moment from 'moment-timezone'
+import {
   computed,
   nextTick,
   onBeforeUnmount,
@@ -654,17 +665,6 @@ import {
 } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
-import {
-  BanIcon,
-  BriefcaseIcon,
-  ChevronDownIcon,
-  ChevronRightIcon,
-  EditIcon,
-  LinkIcon,
-  ListChevronsUpDownIcon,
-  PlusIcon
-} from 'lucide-vue-next'
-import moment from 'moment-timezone'
 
 import colors from '@/lib/colors'
 import { subItemsOf } from '@/lib/productionSchedule'
@@ -680,9 +680,9 @@ import {
   parseDate
 } from '@/lib/time'
 
-import DepartmentName from '@/components/widgets/DepartmentName.vue'
-import ScheduleEntityRow from '@/components/schedule/ScheduleEntityRow.vue'
 import EditMilestoneModal from '@/components/modals/EditMilestoneModal.vue'
+import ScheduleEntityRow from '@/components/schedule/ScheduleEntityRow.vue'
+import DepartmentName from '@/components/widgets/DepartmentName.vue'
 import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import ProductionName from '@/components/widgets/ProductionName.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
@@ -807,12 +807,12 @@ const emit = defineEmits([
   'item-drop',
   'item-selected',
   'item-unassign',
+  'plan-entity',
   'root-element-expanded',
   'root-element-selected',
   'scroll',
   'task-selected',
-  'task-unselected',
-  'plan-entity'
+  'task-unselected'
 ])
 
 // Template refs
@@ -893,19 +893,6 @@ const getClientY = event => {
     event.changedTouches?.[0]?.clientY ??
     event.clientY
   )
-}
-
-// Store actions
-const deleteMilestone = milestone => {
-  return store.dispatch('deleteMilestone', milestone)
-}
-
-const loadMilestones = production => {
-  return store.dispatch('loadMilestones', production)
-}
-
-const saveMilestone = milestone => {
-  return store.dispatch('saveMilestone', milestone)
 }
 
 // Data
@@ -990,15 +977,13 @@ const statuses = computed(() => {
   }
 })
 
-const currentMilestones = computed(() => {
-  const localMilestones = {}
-  Object.keys(milestones.value).forEach(key => {
-    if (displayedDaysIndex.value[key]) {
-      localMilestones[key] = milestones.value[key]
-    }
-  })
-  return localMilestones
-})
+const currentMilestones = computed(() =>
+  Object.fromEntries(
+    Object.entries(milestones.value).filter(
+      ([date]) => displayedDaysIndex.value[date]
+    )
+  )
+)
 
 const cellWidth = computed(() => {
   const cellWidthByLevel = [20, 20, 40, 60, 120]
@@ -1071,25 +1056,15 @@ const displayedDays = computed(() => {
   return daysAvailable.value
 })
 
-const displayedDaysIndex = computed(() => {
-  let index = 0
-  const dayIndex = {}
-  displayedDays.value.forEach(d => {
-    dayIndex[d.text] = index
-    index++
-  })
-  return dayIndex
-})
+const displayedDaysIndex = computed(() =>
+  Object.fromEntries(displayedDays.value.map((day, index) => [day.text, index]))
+)
 
-const displayedWeeksIndex = computed(() => {
-  let index = 0
-  const weekIndex = {}
-  weeksAvailable.value.forEach(w => {
-    weekIndex[w.weekText] = index
-    index++
-  })
-  return weekIndex
-})
+const displayedWeeksIndex = computed(() =>
+  Object.fromEntries(
+    weeksAvailable.value.map((week, index) => [week.weekText, index])
+  )
+)
 
 const isRealSchedule = computed(() => {
   return props.type === 'real'
@@ -1155,6 +1130,11 @@ const isWeekMode = computed(() => {
 const unitOfTime = computed(() => {
   return props.zoomLevel > 0 ? 'days' : 'weeks'
 })
+
+// the header cells of the current zoom: one per day, or one per week
+const columns = computed(() =>
+  isWeekMode.value ? weeksAvailable.value : displayedDays.value
+)
 
 // Methods
 //
@@ -1236,11 +1216,7 @@ const isVisible = timeElement => {
 const resetScheduleSize = () => {
   wrapperRect = null
   if (timelineContentRef.value) {
-    if (props.zoomLevel > 0) {
-      timelineContentRef.value.style.width = `${displayedDays.value.length * cellWidth.value}px`
-    } else {
-      timelineContentRef.value.style.width = `${weeksAvailable.value.length * cellWidth.value}px`
-    }
+    timelineContentRef.value.style.width = `${columns.value.length * cellWidth.value}px`
   }
 }
 
@@ -1387,6 +1363,9 @@ const getDisplayedWeeksIndex = date => {
     ? 0
     : weeksAvailable.value.length - 1
 }
+
+const getColumnIndex = date =>
+  isWeekMode.value ? getDisplayedWeeksIndex(date) : getDisplayedDaysIndex(date)
 
 const resetDroppableTargets = () => {
   scheduleRef.value?.querySelectorAll('.droppable').forEach(element => {
@@ -1565,23 +1544,12 @@ const changeStartDate = event => {
   const change = getClientX(event) - initialClientX + cellWidth.value / 2
   const dayChange = Math.floor(change / cellWidth.value)
 
-  const startDate = lastStartDate
-  const endDate = currentElement.value.endDate
-  let currentIndex, endDateIndex
-  if (isWeekMode.value) {
-    currentIndex = getDisplayedWeeksIndex(startDate)
-    endDateIndex = getDisplayedWeeksIndex(endDate)
-  } else {
-    currentIndex = getDisplayedDaysIndex(startDate)
-    endDateIndex = getDisplayedDaysIndex(endDate)
-  }
-  currentIndex += dayChange
+  const endDateIndex = getColumnIndex(currentElement.value.endDate)
+  let currentIndex = getColumnIndex(lastStartDate) + dayChange
   if (currentIndex > endDateIndex) currentIndex = endDateIndex
   if (currentIndex < 0) currentIndex = 0
 
-  const newStartDate = isWeekMode.value
-    ? weeksAvailable.value[currentIndex]
-    : displayedDays.value[currentIndex]
+  const newStartDate = columns.value[currentIndex]
 
   if (
     newStartDate &&
@@ -1612,32 +1580,14 @@ const changeEndDate = event => {
     lastEndDate = props.startDate.clone().add(1, 'days')
   }
 
-  const startDate = currentElement.value.startDate
-  const endDate = lastEndDate
-  let startDateIndex, currentIndex
-  if (isWeekMode.value) {
-    startDateIndex = getDisplayedWeeksIndex(startDate)
-    currentIndex = getDisplayedWeeksIndex(endDate)
-  } else {
-    startDateIndex = getDisplayedDaysIndex(startDate)
-    currentIndex = getDisplayedDaysIndex(endDate)
-  }
-
-  currentIndex += dayChange - 1
+  const startDateIndex = getColumnIndex(currentElement.value.startDate)
+  let currentIndex = getColumnIndex(lastEndDate) + dayChange - 1
   if (currentIndex < startDateIndex) currentIndex = startDateIndex
-  if (isWeekMode.value) {
-    if (currentIndex > weeksAvailable.value.length - 1) {
-      currentIndex = weeksAvailable.value.length - 1
-    }
-  } else {
-    if (currentIndex > displayedDays.value.length - 1) {
-      currentIndex = displayedDays.value.length - 1
-    }
+  if (currentIndex > columns.value.length - 1) {
+    currentIndex = columns.value.length - 1
   }
 
-  const newEndDate = isWeekMode.value
-    ? weeksAvailable.value[currentIndex]
-    : displayedDays.value[currentIndex]
+  const newEndDate = columns.value[currentIndex]
   if (
     newEndDate &&
     !newEndDate.isSame(currentElement.value.endDate) &&
@@ -2126,24 +2076,14 @@ const getLeftPosition = date => {
   return startDiff * cellWidth.value + 1
 }
 
-const entityLineStyle = (
-  timeElement,
-  root = false,
-  header = false,
-  expanded = false
-) => {
+const entityLineStyle = (timeElement, root = false, header = false) => {
   const style = {}
   let color = timeElement.color
   if (root) {
     // is a person
     color = isDarkTheme.value ? '#222' : '#EEF'
-  }
-  if (root) {
-    style['border-left'] = `1px solid ${color}`
     style['border-top'] = `1px solid ${color}`
-    if (!expanded) {
-      style['border-bottom'] = `1px solid ${color}`
-    }
+    style['border-bottom'] = `1px solid ${color}`
     if (header) {
       style.background = color
     }
@@ -2419,35 +2359,25 @@ const hideEditMilestoneModal = () => {
   modals.edit = false
 }
 
-const confirmEditMilestone = milestone => {
+// the modal closes once the milestone is saved or deleted
+const runMilestoneAction = async (action, milestone) => {
   loading.edit = true
-  saveMilestone(milestone)
-    .then(() => {
-      modals.edit = false
-    })
-    .catch(err => {
-      console.error(err)
-      errors.edit = true
-    })
-    .finally(() => {
-      loading.edit = false
-    })
+  try {
+    await store.dispatch(action, milestone)
+    modals.edit = false
+  } catch (err) {
+    console.error(err)
+    errors.edit = true
+  } finally {
+    loading.edit = false
+  }
 }
 
-const removeMilestone = milestone => {
-  loading.edit = true
-  deleteMilestone(milestone)
-    .then(() => {
-      modals.edit = false
-    })
-    .catch(err => {
-      console.error(err)
-      errors.edit = true
-    })
-    .finally(() => {
-      loading.edit = false
-    })
-}
+const confirmEditMilestone = milestone =>
+  runMilestoneAction('saveMilestone', milestone)
+
+const removeMilestone = milestone =>
+  runMilestoneAction('deleteMilestone', milestone)
 
 const milestoneLineStyle = milestone => {
   const startDate = parseDate(props.startDate.format('YYYY-MM-DD'))
@@ -2551,8 +2481,7 @@ const onTaskDragEnter = (event, rootElement) => {
 // Multiple tasks chain sequentially from the aimed day: each next task
 // starts on the first business day after the previous one ends.
 const getDropRanges = (event, rootElement, items) => {
-  const columns = isWeekMode.value ? weeksAvailable.value : displayedDays.value
-  if (!columns.length) {
+  if (!columns.value.length) {
     return []
   }
   if (!wrapperRect) {
@@ -2562,7 +2491,8 @@ const getDropRanges = (event, rootElement, items) => {
   const index = Math.floor(
     (timelineContentWrapperRef.value.scrollLeft + cursorX) / cellWidth.value
   )
-  const dropDate = columns[Math.min(Math.max(index, 0), columns.length - 1)]
+  const dropDate =
+    columns.value[Math.min(Math.max(index, 0), columns.value.length - 1)]
   let cursorDate = addBusinessDays(dropDate, 0, rootElement.daysOff)
   return items.map(item => {
     const startDate = cursorDate
@@ -2679,19 +2609,7 @@ watch(
   }
 )
 
-watch(
-  () => props.startDate,
-  () => {
-    resetScheduleSize()
-  }
-)
-
-watch(
-  () => props.endDate,
-  () => {
-    resetScheduleSize()
-  }
-)
+watch([() => props.startDate, () => props.endDate], resetScheduleSize)
 
 watch(
   () => props.zoomLevel,
@@ -2731,7 +2649,7 @@ watch(
   currentProduction,
   () => {
     if (props.withMilestones) {
-      loadMilestones(currentProduction.value)
+      store.dispatch('loadMilestones', currentProduction.value)
     }
   },
   { immediate: true }
@@ -3574,7 +3492,6 @@ const setItemPositions = (items, unitOfTime = 'days') => {
     font-weight: bold;
     padding: 2px 5px;
     position: relative;
-    border: 1px solid #eee;
     min-width: 100px;
     text-align: center;
     top: -5px;

@@ -56,8 +56,9 @@
  * under an entity row. A component of its own so a frame of drag or a
  * selection change re-renders this row alone, not every bar of the
  * schedule. The geometry helpers stay in Schedule.vue (they read its zoom
- * and date range) and come in as props; the selection comes in as the ids
- * of this row only, so the rows of the other people never follow it.
+ * and date range) and come in through its scheduleRowHelpers injection;
+ * the selection comes in as the ids of this row only, so the rows of the
+ * other people never follow it.
  */
 import { BriefcaseIcon } from 'lucide-vue-next'
 import { computed, inject } from 'vue'
@@ -84,11 +85,11 @@ defineEmits([
   'right-handle-down'
 ])
 
-// Computed
-// --------------------------------------------------------------------------
 const { dayOffStyle, getNbLines, timebarSubchildStyle, timebarSubchildTitle } =
   inject('scheduleRowHelpers')
 
+// Computed
+// --------------------------------------------------------------------------
 const selectedIds = computed(
   () => new Set(props.selectedKey.split(',').filter(Boolean))
 )
