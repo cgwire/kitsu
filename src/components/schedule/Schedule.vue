@@ -690,7 +690,15 @@ import Spinner from '@/components/widgets/Spinner.vue'
 const store = useStore()
 const { t } = useI18n()
 
+// Props / Emits
+// --------------------------------------------------------------------------
 const props = defineProps({
+  // page rule (item, person) => reason of the refusal or null, asked after
+  // the team check and shown through schedule.drop_forbidden_<reason>
+  assignRule: {
+    type: Function,
+    default: null
+  },
   clipChildren: {
     type: Boolean,
     default: false
@@ -698,12 +706,6 @@ const props = defineProps({
   daysOff: {
     type: Array,
     default: () => []
-  },
-  // page rule (item, person) => reason of the refusal or null, asked after
-  // the team check and shown through schedule.drop_forbidden_<reason>
-  assignRule: {
-    type: Function,
-    default: null
   },
   draggedItems: {
     type: Array,
@@ -713,15 +715,15 @@ const props = defineProps({
     type: Object,
     required: true
   },
-  isLoading: {
-    type: Boolean,
-    default: true
-  },
   hideEntities: {
     type: Boolean,
     default: false
   },
   hideManDays: {
+    type: Boolean,
+    default: false
+  },
+  hideRoot: {
     type: Boolean,
     default: false
   },
@@ -733,9 +735,29 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  isEstimationLinked: {
+    type: Boolean,
+    default: false
+  },
+  isLoading: {
+    type: Boolean,
+    default: true
+  },
+  multiline: {
+    type: Boolean,
+    default: false
+  },
+  reassignable: {
+    type: Boolean,
+    default: false
+  },
   showExpandAll: {
     type: Boolean,
     default: false
+  },
+  startDate: {
+    type: Object,
+    required: true
   },
   subEndDate: {
     type: Object,
@@ -745,17 +767,13 @@ const props = defineProps({
     type: Object,
     default: null
   },
-  startDate: {
-    type: Object,
-    required: true
-  },
-  isEstimationLinked: {
+  subchildren: {
     type: Boolean,
     default: false
   },
-  withMilestones: {
-    type: Boolean,
-    default: true
+  type: {
+    type: String,
+    validator: value => ['prev', 'real'].includes(value)
   },
   withEstimations: {
     type: Boolean,
@@ -765,6 +783,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  withMilestones: {
+    type: Boolean,
+    default: true
+  },
   withStatuses: {
     type: Boolean,
     default: false
@@ -773,29 +795,9 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  hideRoot: {
-    type: Boolean,
-    default: false
-  },
   zoomLevel: {
     type: Number,
     default: 2
-  },
-  multiline: {
-    type: Boolean,
-    default: false
-  },
-  subchildren: {
-    type: Boolean,
-    default: false
-  },
-  reassignable: {
-    type: Boolean,
-    default: false
-  },
-  type: {
-    type: String,
-    validator: value => ['prev', 'real'].includes(value)
   }
 })
 
@@ -815,7 +817,8 @@ const emit = defineEmits([
   'task-unselected'
 ])
 
-// Template refs
+// State
+// --------------------------------------------------------------------------
 const scheduleRef = ref(null)
 const entityListRef = ref(null)
 const timelineRef = ref(null)
@@ -824,79 +827,8 @@ const timelineContentWrapperRef = ref(null)
 const timelineHeaderRef = ref(null)
 const timelinePositionRef = ref(null)
 
-// Store getters
-const currentProduction = computed(() => store.getters.currentProduction)
-const dateFormat = computed(() => store.getters.dateFormat)
-const departmentMap = computed(() => store.getters.departmentMap)
-
-const displayDate = date => formatDisplayDate(toRaw(date), dateFormat.value)
-const isCurrentUserProductionManager = computed(
-  () => store.getters.isCurrentUserProductionManager
-)
-const isDarkTheme = computed(() => store.getters.isDarkTheme)
-const milestones = computed(() => store.getters.milestones)
-const openProductions = computed(() => store.getters.openProductions)
-const organisation = computed(() => store.getters.organisation)
-const taskMap = computed(() => store.getters.taskMap)
-const taskStatuses = computed(() => store.getters.taskStatuses)
-
-// Format mixin replacements
-const isDurationInHours = computed(() => {
-  return organisation.value.format_duration_in_hours
-})
-
-const durationUnit = computed(() =>
-  isDurationInHours.value ? t('schedule.hours') : t('schedule.md')
-)
-
-const formatDuration = (minutes, toLocale = true) => {
-  if (!minutes) {
-    return 0
-  }
-
-  const duration = organisation.value.format_duration_in_hours
-    ? minutes / 60
-    : minutesToDays(organisation.value, minutes)
-
-  if (toLocale) {
-    return duration.toLocaleString('fullwide', {
-      maximumFractionDigits: 2
-    })
-  }
-  return Math.round(duration * 100) / 100
-}
-
-// Dom mixin replacements
-const addEvents = events => {
-  events.forEach(([type, listener]) => {
-    document.addEventListener(type, listener)
-  })
-}
-
-const removeEvents = events => {
-  events.forEach(([type, listener]) => {
-    document.removeEventListener(type, listener)
-  })
-}
-
-const getClientX = event => {
-  return (
-    event.touches?.[0]?.clientX ??
-    event.changedTouches?.[0]?.clientX ??
-    event.clientX
-  )
-}
-
-const getClientY = event => {
-  return (
-    event.touches?.[0]?.clientY ??
-    event.changedTouches?.[0]?.clientY ??
-    event.clientY
-  )
-}
-
-// Data
 const currentElement = ref(null)
+
 // The text typed in an estimation field, shown as typed until the field is
 // left: rendered back from the estimation, "1." (no number yet) and "1.0"
 // (read as 1) lost their decimal point.
@@ -924,12 +856,15 @@ let initialClientX = null
 let initialClientY = null
 let lastStartDate = null
 let lastEndDate = null
+
 // person row the drag started on: a multi-assignee task renders one bar per
 // assignee, so assignees[0] is not necessarily the person being reassigned
 let dragSourcePersonId = null
+
 // shift held on the mousedown: the rows of a root bar move with it instead
 // of being clipped to its new bounds
 let isShiftDrag = false
+
 // person row each dragged bar last hopped to during the drag: once the bar
 // left its source row, the source id is gone from assignees and only this
 // map knows which row the next hop must unassign
@@ -967,7 +902,42 @@ let lastMoveEvent = null
 let domEvents = []
 let moveEvents = []
 
+// performance.now() of the last relayout of a drag
+let lastDragRelayoutAt = 0
+
+// the template iterates day-off ranges for each root and person row on every
+// render: expand each daysOff array once and reuse it
+const dayOffRangeCache = new WeakMap()
+
+// A fresh [] per render would change the days-off prop of every person row
+// and update them all on each schedule render.
+const NO_DAY_OFF = []
+
+// same render-time concern for timesheets: group them by task once per array
+const timesheetsByTaskCache = new WeakMap()
+
 // Computed
+// --------------------------------------------------------------------------
+const currentProduction = computed(() => store.getters.currentProduction)
+const dateFormat = computed(() => store.getters.dateFormat)
+const departmentMap = computed(() => store.getters.departmentMap)
+const isCurrentUserProductionManager = computed(
+  () => store.getters.isCurrentUserProductionManager
+)
+const isDarkTheme = computed(() => store.getters.isDarkTheme)
+const milestones = computed(() => store.getters.milestones)
+const openProductions = computed(() => store.getters.openProductions)
+const organisation = computed(() => store.getters.organisation)
+const taskMap = computed(() => store.getters.taskMap)
+const taskStatuses = computed(() => store.getters.taskStatuses)
+
+const isDurationInHours = computed(() => {
+  return organisation.value.format_duration_in_hours
+})
+
+const durationUnit = computed(() =>
+  isDurationInHours.value ? t('schedule.hours') : t('schedule.md')
+)
 
 const statuses = computed(() => {
   return {
@@ -1078,8 +1048,6 @@ const totalManDays = computed(() => {
   )
 })
 
-// Styles
-
 const timelineStyle = computed(() => {
   const firstDay = daysAvailable.value[0]
   const multiplier = firstDay ? -1 * (firstDay.isoWeekday() - 1) : 0
@@ -1137,13 +1105,68 @@ const columns = computed(() =>
   isWeekMode.value ? weeksAvailable.value : displayedDays.value
 )
 
-// Methods
-//
+// isSelected runs for every bar on every render: keep it O(1)
+const selectedIds = computed(() => new Set(selection.value.map(({ id }) => id)))
+
+// The header renders this title for every day of the range on each widget
+// render (a drag frame included): translate once and reuse the day text
+// daysAvailable already formatted.
+const addMilestoneLabel = computed(() => t('schedule.milestone.add_milestone'))
+
+// Functions
+// --------------------------------------------------------------------------
 // The items keep their moments in reactive state. The helpers below read
 // them with toRaw so the clone/diff/format chains stop paying a Proxy trap
 // per internal moment field, which leaves only the property read tracked:
 // always assign a new moment to an item date (clone first), never mutate
 // one in place with add/subtract/startOf, or the bars stop re-rendering.
+
+const displayDate = date => formatDisplayDate(toRaw(date), dateFormat.value)
+
+const formatDuration = (minutes, toLocale = true) => {
+  if (!minutes) {
+    return 0
+  }
+
+  const duration = organisation.value.format_duration_in_hours
+    ? minutes / 60
+    : minutesToDays(organisation.value, minutes)
+
+  if (toLocale) {
+    return duration.toLocaleString('fullwide', {
+      maximumFractionDigits: 2
+    })
+  }
+  return Math.round(duration * 100) / 100
+}
+
+const addEvents = events => {
+  events.forEach(([type, listener]) => {
+    document.addEventListener(type, listener)
+  })
+}
+
+const removeEvents = events => {
+  events.forEach(([type, listener]) => {
+    document.removeEventListener(type, listener)
+  })
+}
+
+const getClientX = event => {
+  return (
+    event.touches?.[0]?.clientX ??
+    event.changedTouches?.[0]?.clientX ??
+    event.clientX
+  )
+}
+
+const getClientY = event => {
+  return (
+    event.touches?.[0]?.clientY ??
+    event.changedTouches?.[0]?.clientY ??
+    event.clientY
+  )
+}
 
 const getNbLines = (items = []) => {
   const values = items.map(item => item.line || 0)
@@ -1163,7 +1186,6 @@ const refreshAllItemPositions = () => {
 // stalls fast drags on large sections. During a drag a ~100ms cadence is
 // enough for live feedback; the drop (stopBrowsing) still runs the exact
 // relayout on every moved item.
-let lastDragRelayoutAt = 0
 const refreshItemPositionsDuringDrag = rootElements => {
   const now = performance.now()
   if (now - lastDragRelayoutAt < 100) return
@@ -1712,9 +1734,6 @@ const isOverlapping = item => {
   )
 }
 
-// isSelected runs for every bar on every render: keep it O(1)
-const selectedIds = computed(() => new Set(selection.value.map(({ id }) => id)))
-
 const isSelected = item => selectedIds.value.has(item.id)
 
 // A row gets the selection as the ids of its own items and shows the resize
@@ -1988,15 +2007,6 @@ const stopBrowsing = event => {
   dragPersonByItem.clear()
   currentElement.value = null
 }
-
-// Helpers
-
-// the template iterates day-off ranges for each root and person row on every
-// render: expand each daysOff array once and reuse it
-const dayOffRangeCache = new WeakMap()
-// A fresh [] per render would change the days-off prop of every person row
-// and update them all on each schedule render.
-const NO_DAY_OFF = []
 const cachedDayOffRange = daysOff => {
   if (!daysOff?.length) return NO_DAY_OFF
   let range = dayOffRangeCache.get(daysOff)
@@ -2006,9 +2016,6 @@ const cachedDayOffRange = daysOff => {
   }
   return range
 }
-
-// same render-time concern for timesheets: group them by task once per array
-const timesheetsByTaskCache = new WeakMap()
 const taskTimesheets = (rootElement, taskId) => {
   if (!rootElement.timesheet) return []
   let byTask = timesheetsByTaskCache.get(rootElement.timesheet)
@@ -2045,8 +2052,6 @@ const isInRange = date => {
     day.isSameOrBefore(toRaw(props.endDate).clone().utc().startOf('day'))
   )
 }
-
-// Styles
 
 const dayClass = (day, index = 0) => {
   return {
@@ -2228,29 +2233,6 @@ const onTaskBarClick = (rootElement, childElement, task) => {
   emit('task-selected', rootElement, childElement, task, selection.value)
 }
 
-// The entity rows read the widget state (zoom, dates, selection) through
-// these helpers rather than through a dozen function props.
-provide('scheduleRowHelpers', {
-  cachedDayOffRange,
-  dateStatusStyle,
-  dayOffStyle,
-  displayDate,
-  formatDuration,
-  getNbLines,
-  isDarkTheme,
-  isDurationInHours,
-  isOverlapping,
-  isVisible,
-  statuses,
-  taskTimesheets,
-  timebarChildStyle,
-  timebarSubchildStyle,
-  timebarSubchildTitle,
-  timelineMultilineStyle,
-  timelineSubchildrenStyle,
-  timesheetStyle
-})
-
 const getTimebarLeft = timeElement => {
   const startDate = timeElement.startDate || props.startDate
   const startDiff = dateDiff(props.startDate, startDate, unitOfTime.value)
@@ -2280,8 +2262,6 @@ const getTimebarWidth = timeElement => {
     return cellWidth.value - 4
   }
 }
-
-// Children
 
 const expandRootElement = rootElement => {
   if (rootElement.expanded) {
@@ -2335,8 +2315,6 @@ const childrenStyle = (
   }
   return style
 }
-
-// Milestones
 
 const showEditMilestoneModal = (day, milestone) => {
   if (isCurrentUserProductionManager.value) {
@@ -2394,11 +2372,6 @@ const milestoneLineStyle = milestone => {
     }
   }
 }
-
-// The header renders this title for every day of the range on each widget
-// render (a drag frame included): translate once and reuse the day text
-// daysAvailable already formatted.
-const addMilestoneLabel = computed(() => t('schedule.milestone.add_milestone'))
 const addMilestoneTitle = day => `${addMilestoneLabel.value} ${day.text}`
 
 const getDropForbiddenReason = (item, person) => {
@@ -2596,8 +2569,47 @@ const exportData = () => {
   }
 }
 
-// Watchers
+/**
+ * Set the position of items in the schedule, avoiding collisions.
+ * Add a `line` attribute to each item.
+ *
+ * @param {Array<Object>} items - The list of items to position.
+ * @param {Moment.unitOfTime} unitOfTime - A unit of time (eg. 'days', 'weeks', 'months', ...).
+ */
+const setItemPositions = (items, unitOfTime = 'days') => {
+  if (!items?.length) {
+    return
+  }
+  const minDate = moment
+    .min(items.map(item => toRaw(item.startDate)))
+    .clone()
+    .startOf(unitOfTime)
 
+  // one entry per line: the [start, end] ranges already placed on it
+  const lines = []
+  items.forEach(item => {
+    const start = toRaw(item.startDate)
+      .clone()
+      .startOf(unitOfTime)
+      .diff(minDate, unitOfTime)
+    const end = toRaw(item.endDate)
+      .clone()
+      .endOf(unitOfTime)
+      .diff(minDate, unitOfTime)
+    let line = 0
+    while (lines[line]?.some(([s, e]) => start <= e && end >= s)) {
+      line++
+    }
+    if (!lines[line]) {
+      lines[line] = []
+    }
+    lines[line].push([start, end])
+    item.line = line
+  })
+}
+
+// Watchers
+// --------------------------------------------------------------------------
 // the drag can end anywhere (drop elsewhere, Escape): dragleave alone
 // cannot be trusted to clear the drop preview or the spring-load timer
 watch(
@@ -2657,7 +2669,7 @@ watch(
 )
 
 // Lifecycle
-
+// --------------------------------------------------------------------------
 onMounted(() => {
   moveEvents = [
     ['mousemove', onMouseMove],
@@ -2685,6 +2697,29 @@ onBeforeUnmount(() => {
   document.body.style.cursor = 'default'
 })
 
+// The entity rows read the widget state (zoom, dates, selection) through
+// these helpers rather than through a dozen function props.
+provide('scheduleRowHelpers', {
+  cachedDayOffRange,
+  dateStatusStyle,
+  dayOffStyle,
+  displayDate,
+  formatDuration,
+  getNbLines,
+  isDarkTheme,
+  isDurationInHours,
+  isOverlapping,
+  isVisible,
+  statuses,
+  taskTimesheets,
+  timebarChildStyle,
+  timebarSubchildStyle,
+  timebarSubchildTitle,
+  timelineMultilineStyle,
+  timelineSubchildrenStyle,
+  timesheetStyle
+})
+
 defineExpose({
   exportData,
   refreshAllItemPositions,
@@ -2696,45 +2731,6 @@ defineExpose({
   scrollToToday,
   setScrollPosition
 })
-
-/**
- * Set the position of items in the schedule, avoiding collisions.
- * Add a `line` attribute to each item.
- *
- * @param {Array<Object>} items - The list of items to position.
- * @param {Moment.unitOfTime} unitOfTime - A unit of time (eg. 'days', 'weeks', 'months', ...).
- */
-const setItemPositions = (items, unitOfTime = 'days') => {
-  if (!items?.length) {
-    return
-  }
-  const minDate = moment
-    .min(items.map(item => toRaw(item.startDate)))
-    .clone()
-    .startOf(unitOfTime)
-
-  // one entry per line: the [start, end] ranges already placed on it
-  const lines = []
-  items.forEach(item => {
-    const start = toRaw(item.startDate)
-      .clone()
-      .startOf(unitOfTime)
-      .diff(minDate, unitOfTime)
-    const end = toRaw(item.endDate)
-      .clone()
-      .endOf(unitOfTime)
-      .diff(minDate, unitOfTime)
-    let line = 0
-    while (lines[line]?.some(([s, e]) => start <= e && end >= s)) {
-      line++
-    }
-    if (!lines[line]) {
-      lines[line] = []
-    }
-    lines[line].push([start, end])
-    item.line = line
-  })
-}
 </script>
 
 <style lang="scss" scoped>
