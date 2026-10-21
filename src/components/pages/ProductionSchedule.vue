@@ -648,7 +648,9 @@ const availableTaskTypes = ref([])
 const daysOffByPerson = ref({})
 const daysOffRangeKey = ref(null)
 // production, episode and entity kind already loaded, see loadEntities
-const loadedEntityKeys = new Set()
+// kind of entity to the promise of its load: a second caller joins the
+// load in flight instead of starting its own
+const entityLoads = new Map()
 const taskEntities = ref([])
 const endDate = ref(getUserDay().add(6, 'months').endOf('day'))
 const entityType = ref(null)
@@ -998,7 +1000,7 @@ const loadData = async () => {
   const production = currentProduction.value
   loading.value.schedule = true
   availableTaskTypes.value = []
-  loadedEntityKeys.clear()
+  entityLoads.clear()
 
   try {
     await store.dispatch('loadScheduleVersions', production)
@@ -1227,9 +1229,16 @@ const loadEntities = async forEntity => {
   const loader = entityLoaders[forEntity]
   if (!loader) return
   const key = `${currentProduction.value.id}_${currentEpisodeId.value}_${forEntity}`
-  if (loadedEntityKeys.has(key)) return
-  await loader()
-  loadedEntityKeys.add(key)
+  if (!entityLoads.has(key)) {
+    entityLoads.set(
+      key,
+      loader().catch(error => {
+        entityLoads.delete(key)
+        throw error
+      })
+    )
+  }
+  await entityLoads.get(key)
 }
 
 // Whether an asset falls in the current scope: for the main pack, only the

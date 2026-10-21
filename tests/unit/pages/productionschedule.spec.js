@@ -2332,5 +2332,15 @@ describe('ProductionSchedule page', () => {
       expect(storeActions.loadShots).toHaveBeenCalledTimes(1)
       expect(storeActions.loadAssets).toHaveBeenCalledTimes(1)
     })
+
+    it('loads the entities of a kind once for two rows expanding at once', async () => {
+      const { storeActions, wrapper } = await mountPage()
+      const [, layoutRow, animationRow] = rowsOf(wrapper)
+      findSchedule(wrapper).vm.$emit('root-element-expanded', layoutRow)
+      findSchedule(wrapper).vm.$emit('root-element-expanded', animationRow)
+      await waitForLoad()
+
+      expect(storeActions.loadShots).toHaveBeenCalledTimes(1)
+    })
   })
 })
