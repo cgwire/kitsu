@@ -1684,16 +1684,16 @@ const saveChangedItem = async item => {
       Math.ceil(minutesToDays(organisation.value, item.estimation)) - 1,
       daysOff
     )
-    widenScheduleItemParents(item)
-    await saveTaskChanged(item)
+    await Promise.all([widenScheduleItemParents(item), saveTaskChanged(item)])
     return
   }
 
+  const parentSaves = []
   if (item.startDate && item.endDate && item.parentElement) {
     if (currentEpisodeId.value || isMainPack.value) {
       // the view only holds the rows of one episode, while the task
       // type bar spans the production: they can widen it, not shrink it
-      widenScheduleItemParents(item)
+      parentSaves.push(widenScheduleItemParents(item))
     } else {
       item.parentElement.startDate = getMinDate(
         item.parentElement,
@@ -1703,19 +1703,16 @@ const saveChangedItem = async item => {
         item.parentElement,
         startDate.value
       )
-      updateScheduleItem(item.parentElement)
+      parentSaves.push(updateScheduleItem(item.parentElement))
     }
   }
 
-  await updateScheduleItem(item)
+  await Promise.all([...parentSaves, updateScheduleItem(item)])
 }
 
 // save each widened bar once, with both its dates
-const widenScheduleItemParents = item => {
-  widenParents(item).forEach(parent => {
-    updateScheduleItem(parent)
-  })
-}
+const widenScheduleItemParents = item =>
+  Promise.all(widenParents(item).map(updateScheduleItem))
 
 const updateScheduleItem = async item => {
   refreshRawDates(item)

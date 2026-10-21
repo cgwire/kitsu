@@ -1216,6 +1216,48 @@ describe('ProductionSchedule page', () => {
       expect(wrapper.findComponent(ConfirmModal).exists()).toBe(false)
     })
 
+    it('keeps the confirmation open until the widened bars are saved', async () => {
+      const resolvers = []
+      const { wrapper } = await mountPage({
+        actions: {
+          saveScheduleItem: vi.fn(
+            () => new Promise(resolve => resolvers.push(resolve))
+          )
+        }
+      })
+      const taskTypeBar = rowsOf(wrapper)[0]
+      const movedBar = buildBar('2026-02-11', '2026-02-20')
+      taskTypeBar.children = [movedBar]
+      movedBar.parentElement = taskTypeBar
+      // Monday 2 to Friday 27 February: the task widens its bar
+      const task = {
+        type: 'Task',
+        id: 'task-1',
+        assignees: ['person-1'],
+        estimation: 20 * 8 * 60,
+        startDate: day('2026-02-02'),
+        endDate: day('2026-02-27'),
+        _dragOrigStartDate: day('2026-01-26'),
+        _dragOrigEndDate: day('2026-02-20'),
+        parentElement: movedBar
+      }
+      movedBar.children = new Map([['person-1', [task]]])
+      await changeItem(wrapper, movedBar)
+
+      wrapper.findComponent(ConfirmModal).vm.$emit('confirm')
+      await flushPromises()
+      // the moved bar, then the bar the task widens
+      expect(resolvers).toHaveLength(2)
+
+      resolvers.shift()()
+      await flushPromises()
+      expect(wrapper.findComponent(ConfirmModal).exists()).toBe(true)
+
+      resolvers.splice(0).forEach(resolve => resolve())
+      await flushPromises()
+      expect(wrapper.findComponent(ConfirmModal).exists()).toBe(false)
+    })
+
     // A task stretching past both ends of its bars must save each bar once
     // with its two new dates: two requests racing could keep a stale end.
     it('saves each bar a task widens once', async () => {
