@@ -3,7 +3,9 @@ import moment from 'moment'
 import { vi } from 'vitest'
 import { isReactive, nextTick, reactive } from 'vue'
 
-const { organisation } = vi.hoisted(() => ({
+const { milestones, organisation } = vi.hoisted(() => ({
+  // mutated by the milestone tests, by date
+  milestones: {},
   organisation: { hours_by_day: 8, format_duration_in_hours: false }
 }))
 
@@ -18,7 +20,7 @@ vi.mock('vuex', () => ({
       ]),
       isCurrentUserProductionManager: true,
       isDarkTheme: false,
-      milestones: [],
+      milestones,
       openProductions: [{ id: 'production-1', team: ['person-1'] }],
       organisation,
       taskMap: new Map(),
@@ -69,6 +71,30 @@ const mountSchedule = (props = {}, options = {}) =>
     global: { stubs: { RouterLink: true } },
     ...options
   })
+
+describe('Schedule widget - milestones', () => {
+  afterEach(() => {
+    Object.keys(milestones).forEach(date => delete milestones[date])
+  })
+
+  it('shows a milestone set on the first day of the range', () => {
+    milestones['2026-08-01'] = {
+      id: 'milestone-1',
+      date: '2026-08-01',
+      name: 'Kickoff'
+    }
+    // the header lists the days in UTC: a UTC start keeps that day first
+    const wrapper = mountSchedule({
+      startDate: moment.utc('2026-08-01'),
+      endDate: moment.utc('2026-10-31'),
+      withMilestones: true
+    })
+
+    expect(wrapper.find('.milestone-tooltip').text()).toBe('Kickoff')
+    expect(wrapper.find('.milestone-vertical-line').exists()).toBe(true)
+    wrapper.unmount()
+  })
+})
 
 describe('Schedule widget - assignRule page rule', () => {
   it('lets the drop through without a page rule', () => {
