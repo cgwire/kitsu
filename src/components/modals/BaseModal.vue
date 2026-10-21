@@ -15,7 +15,7 @@
       :aria-label="title"
     >
       <div class="box">
-        <h2 class="title">
+        <h2 class="title" v-if="title">
           {{ title }}
         </h2>
         <slot />
