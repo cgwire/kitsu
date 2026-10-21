@@ -112,11 +112,7 @@ describe('Schedule widget - assignRule page rule', () => {
     })
     // the entity panel has its own .children block: aim at the timeline row
     const row = wrapper.find('.children[data-root-element-id]')
-    // VTU trigger cannot attach dataTransfer to a jsdom event
-    const event = new Event('dragenter', { bubbles: true })
-    Object.defineProperty(event, 'dataTransfer', { value: { types: [] } })
-    row.element.dispatchEvent(event)
-    await wrapper.vm.$nextTick()
+    await row.trigger('dragenter')
 
     expect(wrapper.vm.dropTarget.forbidden).toBe('task_type')
     expect(wrapper.vm.dropTarget.rootElementId).toBe('person-1')

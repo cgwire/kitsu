@@ -2521,24 +2521,18 @@ const onRootDragLeave = (event, rootElement) => {
 }
 
 const onTaskDragEnter = (event, rootElement) => {
-  // HACK: the getData doesn't work on dragEnter, we use a "task-type-*" data key instead (key must be lowercase)
-  const draggedItemTaskType = event.dataTransfer.types.find(
-    dataKey => dataKey === `task-type-${rootElement.task_type_id}`
-  )
-  if (!draggedItemTaskType) {
-    const items = props.draggedItems || []
-    if (!items.length) {
-      return
-    }
-    // one forbidden task forbids the whole batch: no silent partial drop
-    const reason = items
-      .map(item => getDropForbiddenReason(item, rootElement))
-      .find(Boolean)
-    if (reason) {
-      dropTarget.rootElementId = rootElement.id
-      dropTarget.forbidden = reason
-      return
-    }
+  const items = props.draggedItems || []
+  if (!items.length) {
+    return
+  }
+  // one forbidden task forbids the whole batch: no silent partial drop
+  const reason = items
+    .map(item => getDropForbiddenReason(item, rootElement))
+    .find(Boolean)
+  if (reason) {
+    dropTarget.rootElementId = rootElement.id
+    dropTarget.forbidden = reason
+    return
   }
   event.currentTarget.classList.add('droppable')
 }
@@ -2631,16 +2625,12 @@ const onTaskDrop = (event, rootElement) => {
   event.currentTarget.classList.remove('droppable')
   clearDropTarget()
 
-  let items = props.draggedItems?.length ? [...props.draggedItems] : null
-  if (!items) {
-    const entityId = event.dataTransfer.getData('entityId')
-    const taskTypeId = event.dataTransfer.getData('taskTypeId')
-    if (!entityId || taskTypeId !== rootElement.task_type_id) {
-      return // invalid task type
-    }
-    items = [{ entity_id: entityId }]
-  } else if (items.some(item => !checkUserIsAllowed(item, rootElement))) {
-    return // invalid user rights
+  const items = [...(props.draggedItems || [])]
+  if (
+    !items.length ||
+    items.some(item => !checkUserIsAllowed(item, rootElement))
+  ) {
+    return
   }
 
   const ranges = getDropRanges(event, rootElement, items)
