@@ -2,7 +2,7 @@
   <div
     class="subchild"
     :class="{ 'drop-item-target': reassignable }"
-    :style="{ height: `${40 * nbLines(tasks)}px` }"
+    :style="{ height: `${40 * getNbLines(tasks)}px` }"
     :data-entity-type-id="childElement.object_id"
     :data-person-id="personId"
   >
@@ -19,8 +19,8 @@
       class="timebar"
       :class="{ selected: isSelected(task) }"
       :key="index"
-      :style="barStyle(task, rootElement, isSelected(task))"
-      :title="barTitle(task)"
+      :style="timebarSubchildStyle(task, rootElement, isSelected(task))"
+      :title="timebarSubchildTitle(task)"
       v-for="(task, index) in tasks"
     >
       <div
@@ -60,7 +60,7 @@
  * of this row only, so the rows of the other people never follow it.
  */
 import { BriefcaseIcon } from 'lucide-vue-next'
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 
 // Props / Emits
 // --------------------------------------------------------------------------
@@ -73,11 +73,7 @@ const props = defineProps({
   reassignable: { type: Boolean, default: false },
   // ids of the selected tasks of this row, comma separated
   selectedKey: { type: String, default: '' },
-  withHandles: { type: Boolean, default: false },
-  barStyle: { type: Function, default: () => ({}) },
-  barTitle: { type: Function, default: () => '' },
-  dayOffStyle: { type: Function, default: () => ({}) },
-  nbLines: { type: Function, default: () => 1 }
+  withHandles: { type: Boolean, default: false }
 })
 
 defineEmits([
@@ -90,6 +86,9 @@ defineEmits([
 
 // Computed
 // --------------------------------------------------------------------------
+const { dayOffStyle, getNbLines, timebarSubchildStyle, timebarSubchildTitle } =
+  inject('scheduleRowHelpers')
+
 const selectedIds = computed(
   () => new Set(props.selectedKey.split(',').filter(Boolean))
 )

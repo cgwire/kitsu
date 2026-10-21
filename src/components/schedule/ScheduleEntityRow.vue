@@ -164,10 +164,6 @@
         :reassignable="reassignable"
         :selected-key="selectedKey"
         :with-handles="withHandles"
-        :bar-style="timebarSubchildStyle"
-        :bar-title="timebarSubchildTitle"
-        :day-off-style="dayOffStyle"
-        :nb-lines="getNbLines"
         @bar-down="(task, event) => $emit('bar-down', task, event)"
         @left-handle-down="
           (task, event) => $emit('left-handle-down', task, event)
@@ -220,10 +216,8 @@ defineEmits([
 const {
   cachedDayOffRange,
   dateStatusStyle,
-  dayOffStyle,
   displayDate,
   formatDuration,
-  getNbLines,
   isDarkTheme,
   isDurationInHours,
   isOverlapping,
@@ -231,8 +225,6 @@ const {
   statuses,
   taskTimesheets,
   timebarChildStyle,
-  timebarSubchildStyle,
-  timebarSubchildTitle,
   timelineMultilineStyle,
   timelineSubchildrenStyle,
   timesheetStyle
