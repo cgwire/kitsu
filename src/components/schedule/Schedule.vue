@@ -977,10 +977,11 @@ const statuses = computed(() => {
   }
 })
 
+// the milestones of the displayed days, by date
 const currentMilestones = computed(() =>
   Object.fromEntries(
     Object.entries(milestones.value).filter(
-      ([date]) => displayedDaysIndex.value[date]
+      ([date]) => displayedDaysIndex.value[date] !== undefined
     )
   )
 )
