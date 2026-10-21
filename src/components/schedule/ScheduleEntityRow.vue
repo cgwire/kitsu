@@ -9,48 +9,19 @@
     v-show="!rootElement.loading"
   >
     <template v-if="withStatuses">
-      <span
-        class="status-date status-date-wip"
-        :class="{
-          'status-date-gap':
-            childElement.real_start_date.slice(0, 10) ===
-              childElement.end_date?.slice(0, 10) ||
-            childElement.real_start_date.slice(0, 10) ===
-              childElement.done_date?.slice(0, 10)
-        }"
-        :style="dateStatusStyle(childElement.real_start_date)"
-        :title="statuses.wip.name"
-        v-if="childElement.real_start_date"
-      >
-      </span>
-      <span
-        class="status-date status-date-wfa"
-        :class="{
-          'status-date-gap':
-            childElement.end_date.slice(0, 10) ===
-              childElement.real_start_date?.slice(0, 10) ||
-            childElement.end_date.slice(0, 10) ===
-              childElement.done_date?.slice(0, 10)
-        }"
-        :style="dateStatusStyle(childElement.end_date)"
-        :title="statuses.wfa.name"
-        v-if="childElement.end_date"
-      >
-      </span>
-      <span
-        class="status-date status-date-done"
-        :class="{
-          'status-date-gap':
-            childElement.done_date.slice(0, 10) ===
-              childElement.real_start_date?.slice(0, 10) ||
-            childElement.done_date.slice(0, 10) ===
-              childElement.end_date?.slice(0, 10)
-        }"
-        :style="dateStatusStyle(childElement.done_date)"
-        :title="statuses.done.name"
-        v-if="childElement.done_date"
-      >
-      </span>
+      <template :key="field" v-for="{ field, status } in STATUS_DATES">
+        <span
+          class="status-date"
+          :class="[
+            `status-date-${status}`,
+            { 'status-date-gap': hasDateGap(field) }
+          ]"
+          :style="dateStatusStyle(childElement[field])"
+          :title="statuses[status].name"
+          v-if="childElement[field]"
+        >
+        </span>
+      </template>
     </template>
 
     <template v-if="withTimesheets && rootElement.timesheet">
@@ -179,10 +150,24 @@
 </template>
 
 <script setup>
+/*
+ * One entity row of the schedule widget: the bar of a sequence, asset type
+ * or episode and, under it, one person row per assignee. A component of
+ * its own so a drag frame or a selection change re-renders this row alone.
+ */
 import { computed, inject } from 'vue'
 
 import SchedulePersonRow from '@/components/schedule/SchedulePersonRow.vue'
 
+// the status dates shown as marks on the row, by task status
+const STATUS_DATES = [
+  { field: 'real_start_date', status: 'wip' },
+  { field: 'end_date', status: 'wfa' },
+  { field: 'done_date', status: 'done' }
+]
+
+// Props / Emits
+// --------------------------------------------------------------------------
 const props = defineProps({
   rootElement: { type: Object, default: () => ({}) },
   childElement: { type: Object, default: () => ({}) },
@@ -230,6 +215,8 @@ const {
   timesheetStyle
 } = inject('scheduleRowHelpers')
 
+// Computed
+// --------------------------------------------------------------------------
 const selected = computed(() =>
   props.selectedKey.split(',').includes(props.childElement.id)
 )
@@ -241,4 +228,16 @@ const hasHandles = computed(
     props.childElement.editable &&
     !props.childElement.unresizable
 )
+
+// Functions
+// --------------------------------------------------------------------------
+// two marks on the same day: the mark steps aside so both show
+const hasDateGap = field => {
+  const day = props.childElement[field].slice(0, 10)
+  return STATUS_DATES.some(
+    other =>
+      other.field !== field &&
+      props.childElement[other.field]?.slice(0, 10) === day
+  )
+}
 </script>

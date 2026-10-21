@@ -622,11 +622,11 @@ const router = useRouter()
 const store = useStore()
 const { durationUnit, formatDuration } = useFormat()
 
+// State
+// --------------------------------------------------------------------------
 const ZOOM_STORAGE_KEY = 'schedule:zoom'
 const ENTITY_TYPE_STORAGE_KEY = 'schedule:type'
 
-// State
-// --------------------------------------------------------------------------
 const assignments = ref({
   assigned: false,
   entityExcludes: [],
@@ -648,7 +648,6 @@ const assignments = ref({
 const availableTaskTypes = ref([])
 const daysOffByPerson = ref({})
 const daysOffRangeKey = ref(null)
-// production, episode and entity kind already loaded, see loadEntities
 // kind of entity to the promise of its load: a second caller joins the
 // load in flight instead of starting its own
 const entityLoads = new Map()
@@ -910,23 +909,16 @@ const scopedScheduleItems = computed(() => {
 })
 
 const availableEntityTypes = computed(() => {
-  const types = new Set()
-  scopedScheduleItems.value.forEach(item => {
-    const taskType = taskTypeMap.value.get(item.task_type_id)
-    if (taskType?.for_entity) {
-      types.add(taskType.for_entity)
-    }
-  })
-  return Array.from(types).sort()
+  const types = scopedScheduleItems.value
+    .map(item => taskTypeMap.value.get(item.task_type_id)?.for_entity)
+    .filter(Boolean)
+  return [...new Set(types)].sort()
 })
 
-const entityTypeOptions = computed(() => {
-  const options = [{ label: t('main.all'), value: null }]
-  availableEntityTypes.value.forEach(type => {
-    options.push({ label: type, value: type })
-  })
-  return options
-})
+const entityTypeOptions = computed(() => [
+  { label: t('main.all'), value: null },
+  ...availableEntityTypes.value.map(type => ({ label: type, value: type }))
+])
 
 const entityFilteredScheduleItems = computed(() => {
   if (!entityType.value) {
@@ -1172,7 +1164,7 @@ const convertScheduleItems = (taskTypeElement, items) => {
     if (itemEndDate.isAfter(endDate.value)) {
       itemEndDate = endDate.value.clone()
     }
-    const scheduleItem = {
+    return {
       ...item,
       startDate: itemStartDate,
       endDate: itemEndDate,
@@ -1184,7 +1176,6 @@ const convertScheduleItems = (taskTypeElement, items) => {
       children: [],
       parentElement: taskTypeElement
     }
-    return scheduleItem
   })
 }
 
@@ -1767,22 +1758,11 @@ const cancelChildMove = () => {
   modals.value.confirmChildMove = false
 }
 
-const isInDepartment = taskType => {
-  if (isCurrentUserManager.value) {
-    return true
-  } else if (isCurrentUserSupervisor.value) {
-    if (user.value.departments.length === 0) {
-      return true
-    } else {
-      return (
-        taskType?.department_id &&
-        user.value.departments.includes(taskType.department_id)
-      )
-    }
-  } else {
-    return false
-  }
-}
+const isInDepartment = taskType =>
+  isCurrentUserManager.value ||
+  (isCurrentUserSupervisor.value &&
+    (!user.value.departments.length ||
+      user.value.departments.includes(taskType?.department_id)))
 
 const scrollScheduleToToday = () => {
   scheduleRef.value?.scrollToToday()
@@ -1880,15 +1860,7 @@ const onSelectTaskType = taskTypeId => {
   }
   updateRoute(query)
   saveFilterPreferences()
-  // refresh schedule
-  expandTaskTypeElement(
-    selectedTaskType.value,
-    () => {
-      scheduleRef.value?.refreshItemPositions(selectedTaskType.value)
-    },
-    true,
-    false
-  )
+  refreshTaskTypeElement(selectedTaskType.value)
 }
 
 const selectTaskTypeElement = async (
@@ -2216,7 +2188,6 @@ const saveAssignments = async () => {
 }
 
 const distributeAssignments = async () => {
-  // load tasks
   const tasks = await store.dispatch(
     'loadTasks',
     buildTaskFilters(selectedTaskType.value)
@@ -2279,12 +2250,10 @@ const distributeAssignments = async () => {
     let nextStartDate = rangeStartDate.clone()
 
     // distribute the task assignments according to the daily quotas, the task type duration and people's availability.
-    for (const entity of taskType.children) {
-      const task = taskByEntityId.get(entity.id)
-      if (!task) {
-        continue // no task found for this entity
-      }
-
+    const entityTasks = taskType.children
+      .map(entity => taskByEntityId.get(entity.id))
+      .filter(Boolean)
+    for (const task of entityTasks) {
       let versionedTask
       if (isVersioned.value) {
         versionedTask = versionedTaskByTaskId.get(task.id) ?? {
@@ -2412,15 +2381,7 @@ const distributeAssignments = async () => {
       await store.dispatch('assignSelectedTasks', { personId, taskIds })
     }
 
-    // refresh schedule
-    expandTaskTypeElement(
-      selectedTaskType.value,
-      () => {
-        scheduleRef.value?.refreshItemPositions(selectedTaskType.value)
-      },
-      true,
-      false
-    )
+    refreshTaskTypeElement(selectedTaskType.value)
   }
 
   return { nbPlannedTasks, nbUnfitTasks }
@@ -2454,15 +2415,7 @@ const saveTask = async () => {
     panel.task.startDate = task.startDate.format('YYYY-MM-DD')
     panel.task.endDate = task.endDate.format('YYYY-MM-DD')
     panel.task.estimationMinutes = task.estimation
-    // refresh schedule
-    expandTaskTypeElement(
-      selectedTaskType.value,
-      () => {
-        scheduleRef.value?.refreshItemPositions(selectedTaskType.value)
-      },
-      true,
-      false
-    )
+    refreshTaskTypeElement(selectedTaskType.value)
   } catch (err) {
     console.error(err)
     panel.isError = true
@@ -2488,11 +2441,9 @@ const onScheduleExpandAll = async () => {
 }
 
 const onScheduleItemAssigned = async (task, personId) => {
-  // update task to refresh the schedule
   task.assignees.push(personId)
   task.parentElement.children.get(personId).push(task)
 
-  // save change
   if (isVersioned.value) {
     return store.dispatch('updateScheduleVersionedTask', {
       id: task.versionedTaskId,
@@ -2507,7 +2458,6 @@ const onScheduleItemAssigned = async (task, personId) => {
 }
 
 const onScheduleItemUnassigned = async (task, personId) => {
-  // update task to refresh the schedule
   task.assignees = task.assignees.filter(id => id !== personId)
   const tasks = task.parentElement.children.get(personId)
   // guard: splice(-1, 1) on a miss would silently drop another task's bar
@@ -2516,7 +2466,6 @@ const onScheduleItemUnassigned = async (task, personId) => {
     tasks.splice(taskIndex, 1)
   }
 
-  // save change
   if (isVersioned.value) {
     return store.dispatch('updateScheduleVersionedTask', {
       id: task.versionedTaskId,
@@ -2563,40 +2512,38 @@ const onTaskTypeVisibilityChanged = ({ key, value }) => {
   }
 }
 
-const onModeChanged = newMode => {
-  updateRoute({ mode: newMode })
+// the mode and the version both decide what is editable and reload the rows
+const onScopeChanged = change => {
+  updateRoute(change)
   refreshScheduleItemsEditable()
   closeSidePanel()
   refreshSchedule()
 }
 
-const onVersionChanged = versionId => {
-  updateRoute({ version: versionId })
-  refreshScheduleItemsEditable()
-  closeSidePanel()
-  refreshSchedule()
-}
+const onModeChanged = mode => onScopeChanged({ mode })
+
+const onVersionChanged = version => onScopeChanged({ version })
 
 const refreshSchedule = () => {
   // scopedScheduleItems, not scheduleItems: under the main pack only the
   // Asset rows are in scope, and drilling an Edit / Shot / Sequence /
   // Episode row would forward episode_id=main to an endpoint that rejects
   // it. Same array reference in every other mode.
-  scopedScheduleItems.value.forEach(item => {
-    if (!item.expanded) {
-      return
-    }
-    // refresh schedule
-    expandTaskTypeElement(
-      item,
-      () => {
-        scheduleRef.value?.refreshItemPositions(item)
-      },
-      true,
-      false
-    )
-  })
+  scopedScheduleItems.value
+    .filter(item => item.expanded)
+    .forEach(refreshTaskTypeElement)
 }
+
+// reload the rows of an expanded task type, the side panel kept as is
+const refreshTaskTypeElement = item =>
+  expandTaskTypeElement(
+    item,
+    () => {
+      scheduleRef.value?.refreshItemPositions(item)
+    },
+    true,
+    false
+  )
 
 const openEditScheduleVersion = (scheduleVersion = {}) => {
   scheduleVersionToEdit.value = scheduleVersion
@@ -2954,33 +2901,25 @@ const exportSchedule = async (withAllRows = true) => {
 // Watchers
 // --------------------------------------------------------------------------
 
-watch(selectedStartDate, () => {
-  startDate.value = parseDate(selectedStartDate.value)
-  const start_date = startDate.value.format('YYYY-MM-DD')
-  if (
-    currentProduction.value.start_date &&
-    currentProduction.value.start_date !== start_date
-  ) {
-    store.dispatch('editProduction', {
-      id: currentProduction.value.id,
-      start_date
-    })
-  }
-})
+// a picked range date moves the schedule and, once the production has
+// one, its own date
+const watchRangeDate = (selectedDate, rangeDate, field) =>
+  watch(selectedDate, () => {
+    rangeDate.value = parseDate(selectedDate.value)
+    const date = rangeDate.value.format('YYYY-MM-DD')
+    if (
+      currentProduction.value[field] &&
+      currentProduction.value[field] !== date
+    ) {
+      store.dispatch('editProduction', {
+        id: currentProduction.value.id,
+        [field]: date
+      })
+    }
+  })
 
-watch(selectedEndDate, () => {
-  endDate.value = parseDate(selectedEndDate.value)
-  const end_date = endDate.value.format('YYYY-MM-DD')
-  if (
-    currentProduction.value.end_date &&
-    currentProduction.value.end_date !== end_date
-  ) {
-    store.dispatch('editProduction', {
-      id: currentProduction.value.id,
-      end_date
-    })
-  }
-})
+watchRangeDate(selectedStartDate, startDate, 'start_date')
+watchRangeDate(selectedEndDate, endDate, 'end_date')
 
 watch(currentProduction, value => {
   if (!value) return
@@ -3020,7 +2959,7 @@ useHead({
 
 <style lang="scss" scoped>
 .dark .schedule-toolbar {
-  color: $white-grey;
+  color: var(--text);
 }
 
 .schedule-toolbar {
@@ -3096,10 +3035,6 @@ useHead({
   border: 0;
   overflow: hidden;
   flex-direction: column;
-}
-
-.ml2 {
-  margin-left: 2em;
 }
 
 .side-column {
