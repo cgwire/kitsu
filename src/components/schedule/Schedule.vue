@@ -2773,82 +2773,22 @@ const setItemPositions = (items, unitOfTime = 'days') => {
     }
   }
 
-  .child-element-name {
-    color: $white;
-  }
-
   .timeline {
     .timeline-header {
       background: transparent;
-      color: $white;
 
-      .day {
-        .day-number {
-          color: $white;
-        }
-
-        .day-name {
-          margin: 0;
-          padding-bottom: 0;
-          &.new-month,
-          &.new-week {
-            border-left: 2px solid $white;
-          }
-        }
-
-        .month-name {
-          background: $dark-grey-2;
-          border-left: 2px solid $white;
-          color: $white;
+      .day .day-name {
+        margin: 0;
+        padding-bottom: 0;
+        &.new-month {
+          border-left: 2px solid var(--text-strong);
         }
       }
     }
 
-    .timeline-content-wrapper {
-      .timeline-content {
-        .entity-line.child-line {
-          :deep(.timebar) {
-            color: $dark-grey;
-          }
-        }
-
-        .milestone-vertical-line {
-          border-left: 1px dashed $white;
-        }
-      }
-    }
-  }
-
-  .expand,
-  .man-day-input {
-    color: $white;
-  }
-
-  .total-man-days {
-    background: $dark-grey-2;
-    color: $white;
-  }
-
-  .entity-name {
-    .man-days-unit {
-      color: $white;
-    }
-  }
-
-  .child-name .entity-name span {
-    color: $white;
-  }
-
-  .milestone {
-    .milestone-tooltip {
-      background: $dark-grey-lighter;
-      border: 1px solid $dark-grey;
-      box-shadow: 0 2px 2px 0 $dark-grey-strong;
-    }
-    .milestone-tooltip:after,
-    .milestone-tooltip:before {
-      border-color: transparent;
-      border-top-color: $dark-grey-lighter;
+    // the task bars carry their own light color
+    .timeline-content .entity-line.child-line :deep(.timebar) {
+      color: $dark-grey;
     }
   }
 }
@@ -2937,7 +2877,6 @@ const setItemPositions = (items, unitOfTime = 'days') => {
   }
 
   .expand {
-    color: $white;
     cursor: pointer;
     margin-right: 0.5em;
   }
@@ -2975,6 +2914,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
     overflow: hidden;
     z-index: 0;
     min-height: 85px;
+    color: var(--text-strong);
 
     &.without-milestones {
       min-height: 54px;
@@ -3010,7 +2950,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
         text-transform: uppercase;
 
         &.new-week {
-          border-left: 2px solid black;
+          border-left: 2px solid var(--text-strong);
 
           .zoom-level-1 & {
             border-left: none;
@@ -3019,7 +2959,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
       }
 
       .day-number {
-        color: black;
+        color: var(--text-strong);
         padding-top: 0.5em;
       }
 
@@ -3031,10 +2971,10 @@ const setItemPositions = (items, unitOfTime = 'days') => {
       }
 
       .month-name {
-        background: $white;
-        border-left: 2px solid black;
+        background: var(--background);
+        border-left: 2px solid var(--text-strong);
         bottom: 0;
-        color: black;
+        color: var(--text-strong);
         font-size: 0.9em;
         padding-bottom: 24px;
         padding-left: 0.5em;
@@ -3082,7 +3022,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
         top: 0;
         bottom: 0;
         width: 1px;
-        border-left: 1px dashed black;
+        border-left: 1px dashed var(--text-strong);
         margin-left: -0.5px;
         pointer-events: none;
         z-index: 100;
@@ -3303,12 +3243,13 @@ const setItemPositions = (items, unitOfTime = 'days') => {
     width: 30px;
     text-align: right;
     background: transparent;
+    color: var(--text-strong);
     margin-right: 0.2em;
     font-size: 1.1em;
   }
 
   .man-days-unit {
-    color: $dark-grey;
+    color: var(--text-strong);
     font-size: 0.8em;
     margin-right: 0.3em;
     display: inline;
@@ -3421,7 +3362,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
 }
 
 .child-name .entity-name span {
-  color: $dark-grey;
+  color: var(--text-strong);
   padding-left: 2.5em;
 
   .filler {
@@ -3434,7 +3375,8 @@ const setItemPositions = (items, unitOfTime = 'days') => {
   align-items: flex-end;
   justify-content: space-between;
   position: absolute;
-  background: $white;
+  background: var(--background);
+  color: var(--text-strong);
   height: 85px;
   min-width: 300px;
   padding-bottom: 2px;
@@ -3486,9 +3428,9 @@ const setItemPositions = (items, unitOfTime = 'days') => {
   .milestone-tooltip {
     visibility: hidden;
     display: inline-block;
-    border: 1px solid #eee;
+    border: 1px solid var(--border);
     border-radius: 5px;
-    box-shadow: 0 2px 2px 0 #eee;
+    box-shadow: 0 2px 2px 0 var(--box-shadow);
     font-size: 0.8em;
     font-weight: bold;
     padding: 2px 5px;
@@ -3496,7 +3438,7 @@ const setItemPositions = (items, unitOfTime = 'days') => {
     min-width: 100px;
     text-align: center;
     top: -5px;
-    background: $white;
+    background: var(--background-alt-2);
     z-index: 100;
     transform: translateX(-50%);
   }
@@ -3520,14 +3462,14 @@ const setItemPositions = (items, unitOfTime = 'days') => {
   }
 
   .milestone-tooltip:after {
-    border-color: rgba(255, 255, 255, 0);
-    border-top-color: $white;
+    border-color: transparent;
+    border-top-color: var(--background-alt-2);
     border-width: 5px;
     margin-left: -5px;
   }
   .milestone-tooltip:before {
-    border-color: rgba(238, 238, 238, 0);
-    border-top-color: #eeeeee;
+    border-color: transparent;
+    border-top-color: var(--border);
     border-width: 6px;
     margin-left: -6px;
   }
@@ -3536,17 +3478,12 @@ const setItemPositions = (items, unitOfTime = 'days') => {
 .root-element-name {
   padding-left: 10px;
   white-space: nowrap;
-
-  color: #222;
-
-  .dark & {
-    color: $white;
-  }
+  color: var(--text-strong);
 }
 
 .child-element-name {
   padding-left: 10px;
-  color: $grey-strong;
+  color: var(--text);
 }
 
 .date-widget {
@@ -3604,11 +3541,10 @@ const setItemPositions = (items, unitOfTime = 'days') => {
   height: 100%;
   line-height: 40px;
   text-align: center;
-  color: $dark-grey-light;
+  color: var(--text-strong);
   background-color: #f0f0f0;
 
   .dark & {
-    color: $white;
     background-color: #43474d;
   }
 
