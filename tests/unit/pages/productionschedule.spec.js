@@ -1911,6 +1911,21 @@ describe('ProductionSchedule page', () => {
       )
     })
 
+    it('keeps the task edit on an Escape a layer took', async () => {
+      const { wrapper } = await mountAssignments()
+      await editTask(wrapper, buildChairTask())
+
+      const event = new KeyboardEvent('keydown', {
+        key: 'Escape',
+        cancelable: true
+      })
+      event.preventDefault()
+      window.dispatchEvent(event)
+      await flushPromises()
+
+      expect(wrapper.find('.side-column').exists()).toBe(true)
+    })
+
     it('keeps the batch form on Escape', async () => {
       const { wrapper } = await mountAssignments()
       await selectProps(wrapper)

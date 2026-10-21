@@ -549,6 +549,7 @@ import { useStore } from 'vuex'
 import { useFormat } from '@/composables/format'
 import colors from '@/lib/colors'
 import { downloadBlob } from '@/lib/download'
+import { isFreeEscape } from '@/lib/keyboard'
 import { getTaskTypeSchedulePath } from '@/lib/path'
 import preferences from '@/lib/preferences'
 import {
@@ -2159,8 +2160,7 @@ const unselectAndCloseSidePanel = () => {
 // Escape leaves a task edit, like a modal; the batch form stays, it
 // holds a selection worth keeping
 const onKeydown = event => {
-  if (event.key !== 'Escape' || assignments.value.type !== 'task') return
-  if (Object.values(modals.value).some(Boolean)) return
+  if (!isFreeEscape(event) || assignments.value.type !== 'task') return
   unselectAndCloseSidePanel()
 }
 
