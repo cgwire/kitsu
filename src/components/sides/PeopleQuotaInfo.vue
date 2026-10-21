@@ -25,7 +25,7 @@
       :count-mode="countMode"
       :shots="shots"
       :is-loading="isLoading"
-      :is-error="isLoadingError"
+      :is-loading-error="isLoadingError"
     />
   </div>
 </template>

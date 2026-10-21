@@ -99,4 +99,12 @@ describe('sides/PeopleQuotaInfo', () => {
         .exists()
     ).toBe(false)
   })
+
+  // the list ignored the is-error attribute it used to get
+  test('passes a loading error on to the shot list', () => {
+    const wrapper = mountPanel({ isLoadingError: true })
+    expect(
+      wrapper.findComponent({ name: 'QuotaShotList' }).props('isLoadingError')
+    ).toBe(true)
+  })
 })
