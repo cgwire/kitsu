@@ -67,6 +67,10 @@ export default defineConfig({
               test: /node_modules[\\/]core-js[\\/]|[\\/]src[\\/]polyfills\.js$/
             },
             {
+              name: 'bowser',
+              test: /node_modules[\\/]bowser[\\/]/
+            },
+            {
               name: 'charts',
               test: /node_modules[\\/](?:chart\.js|chartkick|vue-chartkick|@kurkle|chartjs-adapter-date-fns)[\\/]/
             },
