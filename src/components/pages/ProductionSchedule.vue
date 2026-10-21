@@ -481,7 +481,7 @@
   <hard-delete-modal
     active
     :error-text="$t('schedule.delete_version_error')"
-    :is-loading="loading.delete"
+    :is-loading="loading.deleteScheduleVersion"
     :is-error="errors.deleteScheduleVersion"
     :lock-text="scheduleVersionToEdit?.name"
     :text="
@@ -670,7 +670,7 @@ const version = ref(DEFAULT_VERSION)
 const showMoreFilters = ref(false)
 const loading = ref({
   schedule: false,
-  delete: false,
+  deleteScheduleVersion: false,
   editScheduleVersion: false,
   applyScheduleVersion: false,
   expandSchedule: false,
@@ -2557,10 +2557,26 @@ const openDeleteScheduleVersion = versionId => {
   modals.value.deleteScheduleVersion = true
 }
 
-const editVersion = async scheduleVersion => {
-  loading.value.editScheduleVersion = true
-  errors.value.editScheduleVersion = false
+// run a version action behind its modal: the modal shows the spinner and
+// the error, and closes once the action is done. Whether it succeeded.
+const runVersionAction = async (key, action) => {
+  loading.value[key] = true
+  errors.value[key] = false
   try {
+    await action()
+    modals.value[key] = false
+    return true
+  } catch (err) {
+    console.error(err)
+    errors.value[key] = true
+    return false
+  } finally {
+    loading.value[key] = false
+  }
+}
+
+const editVersion = async scheduleVersion => {
+  const done = await runVersionAction('editScheduleVersion', async () => {
     if (!scheduleVersion.id) {
       const newVersion = await store.dispatch('createScheduleVersion', {
         production: currentProduction.value,
@@ -2571,49 +2587,25 @@ const editVersion = async scheduleVersion => {
     } else {
       await store.dispatch('updateScheduleVersion', scheduleVersion)
     }
-    modals.value.editScheduleVersion = false
-    scheduleVersionToEdit.value = {}
-  } catch (err) {
-    console.error(err)
-    errors.value.editScheduleVersion = true
-  } finally {
-    loading.value.editScheduleVersion = false
-  }
+  })
+  if (done) scheduleVersionToEdit.value = {}
 }
 
 const deleteVersion = async scheduleVersion => {
-  loading.value.delete = true
-  errors.value.deleteScheduleVersion = false
-  try {
+  const done = await runVersionAction('deleteScheduleVersion', async () => {
     await store.dispatch('deleteScheduleVersion', scheduleVersion)
     if (version.value === scheduleVersion.id) {
       version.value = DEFAULT_VERSION
       onVersionChanged(version.value)
     }
-    modals.value.deleteScheduleVersion = false
-    scheduleVersionToEdit.value = {}
-  } catch (err) {
-    console.error(err)
-    errors.value.deleteScheduleVersion = true
-  } finally {
-    loading.value.delete = false
-  }
+  })
+  if (done) scheduleVersionToEdit.value = {}
 }
 
 const applyToProduction = async () => {
-  let isApplied = false
-  loading.value.applyScheduleVersion = true
-  errors.value.applyScheduleVersion = false
-  try {
-    await store.dispatch('applyScheduleVersionToProduction', version.value)
-    modals.value.applyScheduleVersion = false
-    isApplied = true
-  } catch (err) {
-    console.error(err)
-    errors.value.applyScheduleVersion = true
-  } finally {
-    loading.value.applyScheduleVersion = false
-  }
+  const isApplied = await runVersionAction('applyScheduleVersion', () =>
+    store.dispatch('applyScheduleVersionToProduction', version.value)
+  )
   // refresh version list
   await store.dispatch('loadScheduleVersions', currentProduction.value)
   if (isApplied) {
