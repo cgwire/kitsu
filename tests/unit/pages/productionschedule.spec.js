@@ -1649,6 +1649,44 @@ describe('ProductionSchedule page', () => {
       assetStore.cache.assetMap.clear()
     })
 
+    // A new version holds no planning yet, or copies tasks without dates:
+    // the rows said "No task" where the reference offered to plan them.
+    it.each([
+      ['no versioned task', []],
+      [
+        'a versioned task without dates',
+        [
+          {
+            id: 'link-1',
+            task_id: 'task-asset-1',
+            start_date: null,
+            due_date: null,
+            estimation: 0,
+            assignees: []
+          }
+        ]
+      ]
+    ])(
+      'counts the tasks of a version with %s as undated',
+      async (_, versionedTasks) => {
+        propAssets.forEach(asset =>
+          assetStore.cache.assetMap.set(asset.id, asset)
+        )
+        const { wrapper } = await mountAssignments({
+          ...versionOptions,
+          actions: {
+            loadTasksFromScheduleVersion: vi.fn(() => versionedTasks)
+          }
+        })
+        const modelingRow = rowsOf(wrapper)[0]
+        findSchedule(wrapper).vm.$emit('root-element-expanded', modelingRow)
+        await waitForLoad()
+
+        expect(modelingRow.children[0].nbUndatedTasks).toBe(2)
+        assetStore.cache.assetMap.clear()
+      }
+    )
+
     it('counts the tasks of the real mode without a real start as undated', async () => {
       propAssets.forEach(asset => assetStore.cache.assetMap.set(asset.id, asset))
       const { wrapper } = await mountAssignments({

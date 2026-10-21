@@ -1374,22 +1374,19 @@ const expandTaskTypeDrillDown = async (
             versionedTask
           ])
         )
-        tasks = tasks
-          .map(task => {
-            const versioned = versionedTaskMap.get(task.id)
-            if (!versioned?.start_date) {
-              return null
-            }
-            return {
-              ...task,
-              versionedTaskId: versioned.id,
-              start_date: versioned.start_date,
-              due_date: versioned.due_date,
-              estimation: versioned.estimation,
-              assignees: versioned.assignees
-            }
-          })
-          .filter(Boolean)
+        // a task the version does not plan yet stays on its row as a task
+        // without dates, like in the reference
+        tasks = tasks.map(task => {
+          const versioned = versionedTaskMap.get(task.id)
+          return {
+            ...task,
+            versionedTaskId: versioned?.id,
+            start_date: versioned?.start_date ?? null,
+            due_date: versioned?.due_date ?? null,
+            estimation: versioned?.estimation ?? task.estimation,
+            assignees: versioned?.assignees ?? []
+          }
+        })
       }
 
       // days off only depend on the production and the date range:
