@@ -1535,6 +1535,7 @@
       "mode": "查看模式",
       "mode_prev": "预测",
       "mode_real": "真实",
+      "nb_tasks_out_of_range": "{count} 个任务在显示的日期之外 | {count} 个任务在显示的日期之外",
       "nb_undated_tasks": "{count} 个任务没有日期 | {count} 个任务没有日期",
       "new_version": "新版本",
       "no_assignee": "无可指派人员",

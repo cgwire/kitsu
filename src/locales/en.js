@@ -2039,6 +2039,8 @@ export default {
     mode: 'View Mode',
     mode_prev: 'Forecast',
     mode_real: 'Real',
+    nb_tasks_out_of_range:
+      '{count} task outside the dates shown | {count} tasks outside the dates shown',
     nb_undated_tasks: '{count} task without dates | {count} tasks without dates',
     new_version: 'New version',
     no_assignee: 'No assignable person',

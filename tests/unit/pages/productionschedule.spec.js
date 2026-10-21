@@ -1649,6 +1649,52 @@ describe('ProductionSchedule page', () => {
       assetStore.cache.assetMap.clear()
     })
 
+    it('counts the tasks of the real mode without a real start as undated', async () => {
+      propAssets.forEach(asset => assetStore.cache.assetMap.set(asset.id, asset))
+      const { wrapper } = await mountAssignments({
+        query: { mode: 'real' },
+        actions: {
+          loadTasks: vi.fn(() =>
+            propAssets.slice(0, 2).map(asset => ({
+              id: `task-${asset.id}`,
+              entity_id: asset.id,
+              assignees: [],
+              start_date: '2026-04-06'
+            }))
+          )
+        }
+      })
+      const modelingRow = rowsOf(wrapper)[0]
+      findSchedule(wrapper).vm.$emit('root-element-expanded', modelingRow)
+      await waitForLoad()
+
+      expect(modelingRow.children[0].nbUndatedTasks).toBe(2)
+      assetStore.cache.assetMap.clear()
+    })
+
+    it('counts the tasks outside the dates shown on the row', async () => {
+      propAssets.forEach(asset => assetStore.cache.assetMap.set(asset.id, asset))
+      const { wrapper } = await mountAssignments({
+        actions: {
+          loadTasks: vi.fn(() =>
+            propAssets.slice(0, 2).map(asset => ({
+              id: `task-${asset.id}`,
+              entity_id: asset.id,
+              assignees: [],
+              start_date: '2040-04-06'
+            }))
+          )
+        }
+      })
+      const modelingRow = rowsOf(wrapper)[0]
+      findSchedule(wrapper).vm.$emit('root-element-expanded', modelingRow)
+      await waitForLoad()
+
+      expect(modelingRow.children[0].nbUndatedTasks).toBe(0)
+      expect(modelingRow.children[0].nbTasksOutOfRange).toBe(2)
+      assetStore.cache.assetMap.clear()
+    })
+
     it('opens the panel on the group a row asks to plan', async () => {
       const { wrapper } = await mountAssignments()
       const modelingRow = rowsOf(wrapper)[0]

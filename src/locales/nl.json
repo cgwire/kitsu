@@ -1535,6 +1535,7 @@
       "mode": "Weergavemodus",
       "mode_prev": "Prognose",
       "mode_real": "Werkelijk",
+      "nb_tasks_out_of_range": "{count} taak buiten de getoonde datums | {count} taken buiten de getoonde datums",
       "nb_undated_tasks": "{count} taak zonder datums | {count} taken zonder datums",
       "new_version": "Nieuwe versie",
       "no_assignee": "Geen toewijsbare persoon",

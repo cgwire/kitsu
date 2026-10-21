@@ -1535,6 +1535,7 @@
       "mode": "보기 모드",
       "mode_prev": "예측",
       "mode_real": "실제",
+      "nb_tasks_out_of_range": "표시된 기간 밖의 작업 {count}개 | 표시된 기간 밖의 작업 {count}개",
       "nb_undated_tasks": "날짜 없는 작업 {count}개 | 날짜 없는 작업 {count}개",
       "new_version": "새 버전",
       "no_assignee": "할당 가능한 사람 없음",

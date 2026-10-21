@@ -1535,6 +1535,7 @@
       "mode": "Режим просмотра",
       "mode_prev": "Прогноз",
       "mode_real": "Фактический",
+      "nb_tasks_out_of_range": "{count} задача вне показанных дат | {count} задач вне показанных дат",
       "nb_undated_tasks": "{count} задача без дат | {count} задач без дат",
       "new_version": "Новая версия",
       "no_assignee": "Нет людей для назначения",

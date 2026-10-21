@@ -1535,6 +1535,7 @@
       "mode": "Visningstilstand",
       "mode_prev": "Prognose",
       "mode_real": "Faktisk",
+      "nb_tasks_out_of_range": "{count} opgave uden for de viste datoer | {count} opgaver uden for de viste datoer",
       "nb_undated_tasks": "{count} opgave uden datoer | {count} opgaver uden datoer",
       "new_version": "Ny version",
       "no_assignee": "Ingen person at tildele",

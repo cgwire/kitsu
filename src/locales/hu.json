@@ -1535,6 +1535,7 @@
       "mode": "Nézet módja",
       "mode_prev": "Előrejelzés",
       "mode_real": "Valós",
+      "nb_tasks_out_of_range": "{count} feladat a megjelenített dátumokon kívül | {count} feladat a megjelenített dátumokon kívül",
       "nb_undated_tasks": "{count} feladat dátum nélkül | {count} feladat dátum nélkül",
       "new_version": "Új verzió",
       "no_assignee": "Nincs kiosztható személy",

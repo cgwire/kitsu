@@ -1535,6 +1535,7 @@
       "mode": "Modo de vista",
       "mode_prev": "Previsión",
       "mode_real": "Real",
+      "nb_tasks_out_of_range": "{count} tarea fuera de las fechas mostradas | {count} tareas fuera de las fechas mostradas",
       "nb_undated_tasks": "{count} tarea sin fechas | {count} tareas sin fechas",
       "new_version": "Nueva versión",
       "no_assignee": "Ninguna persona asignable",

@@ -1958,6 +1958,7 @@
       "mode": "Tryb widoku",
       "mode_prev": "Prognoza",
       "mode_real": "Rzeczywisty",
+      "nb_tasks_out_of_range": "{count} zadanie poza wyświetlanymi datami | {count} zadań poza wyświetlanymi datami",
       "nb_undated_tasks": "{count} zadanie bez dat | {count} zadań bez dat",
       "new_version": "Nowa wersja",
       "no_assignee": "Brak osób do przypisania",

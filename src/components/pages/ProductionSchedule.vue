@@ -1431,6 +1431,10 @@ const expandTaskTypeDrillDown = async (
       const tasksByType = {}
       const people = {}
       const nbUndatedTasksByType = {}
+      const nbTasksOutOfRangeByType = {}
+      const countTask = (counts, task) => {
+        counts[task.entity_type_id] = (counts[task.entity_type_id] || 0) + 1
+      }
       tasks.forEach(task => {
         // link entity to task; skip tasks whose entity is not in the
         // current episode (loadTasks is not episode-scoped, but the entity
@@ -1465,9 +1469,15 @@ const expandTaskTypeDrillDown = async (
           return
         }
         // out of the planning, but its row tells how many wait for dates
-        if (!task.start_date) {
-          nbUndatedTasksByType[task.entity_type_id] =
-            (nbUndatedTasksByType[task.entity_type_id] || 0) + 1
+        const rawStartDate =
+          mode.value === 'real' ? task.real_start_date : task.start_date
+        if (!rawStartDate) {
+          countTask(nbUndatedTasksByType, task)
+          return
+        }
+        const taskStartDate = parseDate(rawStartDate)
+        if (taskStartDate.isAfter(endDate.value)) {
+          countTask(nbTasksOutOfRangeByType, task)
           return
         }
 
@@ -1479,24 +1489,12 @@ const expandTaskTypeDrillDown = async (
           task.assignees = ['unassigned']
         }
 
+        let placed = false
         task.assignees.forEach(assigneeId => {
           const entityTypeItem = childrenById.get(task.entity_type_id)
           if (!entityTypeItem) return
 
           // populate task with start and end dates
-
-          let taskStartDate
-          if (mode.value === 'real') {
-            if (!task.real_start_date) {
-              return
-            }
-            taskStartDate = parseDate(task.real_start_date)
-          } else {
-            taskStartDate = parseDate(task.start_date)
-          }
-          if (taskStartDate.isAfter(endDate.value)) {
-            return
-          }
           if (taskStartDate.isBefore(entityTypeItem.startDate)) {
             entityTypeItem.startDate = taskStartDate.clone()
           }
@@ -1551,7 +1549,9 @@ const expandTaskTypeDrillDown = async (
           task.parentElement = entityTypeItem
 
           tasksByType[task.entity_type_id][assigneeId].push(task)
+          placed = true
         })
+        if (!placed) countTask(nbTasksOutOfRangeByType, task)
       })
 
       if (taskTypeElement.for_entity === 'Asset') {
@@ -1614,6 +1614,7 @@ const expandTaskTypeDrillDown = async (
 
         child.children = sortedChildren
         child.nbUndatedTasks = nbUndatedTasksByType[child.object_id] || 0
+        child.nbTasksOutOfRange = nbTasksOutOfRangeByType[child.object_id] || 0
       })
 
       taskTypeElement.children = sortByName(children)

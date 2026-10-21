@@ -201,6 +201,13 @@
                         {{ $t(planEntityLabelKey(rootElement)) }}
                       </button>
                     </template>
+                    <template v-else-if="childElement.nbTasksOutOfRange">
+                      {{
+                        $t('schedule.nb_tasks_out_of_range', {
+                          count: childElement.nbTasksOutOfRange
+                        })
+                      }}
+                    </template>
                     <template v-else>{{ $t('schedule.no_task') }}</template>
                   </div>
                 </div>

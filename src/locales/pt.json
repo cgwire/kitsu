@@ -1535,6 +1535,7 @@
       "mode": "Modo de exibição",
       "mode_prev": "Previsão",
       "mode_real": "Real",
+      "nb_tasks_out_of_range": "{count} tarefa fora das datas exibidas | {count} tarefas fora das datas exibidas",
       "nb_undated_tasks": "{count} tarefa sem datas | {count} tarefas sem datas",
       "new_version": "Nova versão",
       "no_assignee": "Nenhuma pessoa atribuível",

@@ -1535,6 +1535,7 @@
       "mode": "檢視模式",
       "mode_prev": "預測",
       "mode_real": "實際",
+      "nb_tasks_out_of_range": "{count} 個任務在顯示的日期之外 | {count} 個任務在顯示的日期之外",
       "nb_undated_tasks": "{count} 個任務沒有日期 | {count} 個任務沒有日期",
       "new_version": "新版本",
       "no_assignee": "無可指派人員",

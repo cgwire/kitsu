@@ -1535,6 +1535,7 @@
       "mode": "Ansichtsmodus",
       "mode_prev": "Prognose",
       "mode_real": "Tatsächlich",
+      "nb_tasks_out_of_range": "{count} Aufgabe außerhalb des angezeigten Zeitraums | {count} Aufgaben außerhalb des angezeigten Zeitraums",
       "nb_undated_tasks": "{count} Aufgabe ohne Termine | {count} Aufgaben ohne Termine",
       "new_version": "Neue Version",
       "no_assignee": "Keine zuweisbare Person",
