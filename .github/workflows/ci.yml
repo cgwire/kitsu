@@ -1,7 +1,13 @@
 ---
 name: Kitsu CI
 
-on: [push, pull_request]
+# Branches only: scripts/release.sh pushes each tag together with its
+# commit on main, which the main run already tests.
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
 
 # A new push to the same branch makes the run in flight pointless: stop it
 # instead of paying for it to finish.
