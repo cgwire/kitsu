@@ -631,6 +631,43 @@ const dragFrom = async (wrapper, handle, fromX, toX) => {
 describe('Schedule widget - person rows', () => {
   let rafSpy
 
+  // A task with two assignees sits in both person rows as the same object:
+  // the line computed for the second row overwrote the first, and the bar
+  // landed on another task of the first row.
+  it('lays a task shared by two person rows out in each row', async () => {
+    const hierarchy = buildSubchildrenHierarchy(1)
+    const [root] = hierarchy
+    const [row] = root.children
+    const [other] = row.children.get('person-1')
+    const shared = {
+      ...other,
+      id: 'task-shared',
+      entity: { name: 'SH9' },
+      assignees: ['person-1', 'person-2'],
+      startDate: moment('2026-08-12'),
+      endDate: moment('2026-08-18')
+    }
+    root.people['person-2'] = { ...person, id: 'person-2', daysOff: [] }
+    row.children = new Map([
+      ['person-1', [other, shared]],
+      ['person-2', [shared]]
+    ])
+    const wrapper = mountSubchildren(hierarchy)
+    wrapper.vm.refreshItemPositions(root)
+    await nextTick()
+
+    const rows = wrapper.findAll('.subchild')
+    const tops = rows.map(personRow =>
+      personRow.findAll('.timebar').map(bar => bar.element.style.top)
+    )
+    expect(tops).toEqual([['5px', '43px'], ['5px']])
+    expect(rows.map(personRow => personRow.element.style.height)).toEqual([
+      '80px',
+      '40px'
+    ])
+    wrapper.unmount()
+  })
+
   beforeEach(() => {
     rafSpy = vi
       .spyOn(window, 'requestAnimationFrame')

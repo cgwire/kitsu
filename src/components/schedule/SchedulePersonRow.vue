@@ -19,7 +19,14 @@
       class="timebar"
       :class="{ selected: isSelected(task) }"
       :key="index"
-      :style="timebarSubchildStyle(task, rootElement, isSelected(task))"
+      :style="
+        timebarSubchildStyle(
+          task,
+          rootElement,
+          isSelected(task),
+          lineOf(tasks, task)
+        )
+      "
       :title="timebarSubchildTitle(task)"
       v-for="(task, index) in tasks"
     >
@@ -85,8 +92,13 @@ defineEmits([
   'right-handle-down'
 ])
 
-const { dayOffStyle, getNbLines, timebarSubchildStyle, timebarSubchildTitle } =
-  inject('scheduleRowHelpers')
+const {
+  dayOffStyle,
+  getNbLines,
+  lineOf,
+  timebarSubchildStyle,
+  timebarSubchildTitle
+} = inject('scheduleRowHelpers')
 
 // Computed
 // --------------------------------------------------------------------------
