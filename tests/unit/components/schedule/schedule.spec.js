@@ -1000,6 +1000,18 @@ describe('Schedule widget - rows without dated tasks', () => {
     expect(wrapper.emitted('plan-entity')).toEqual([[root, root.children[0]]])
   })
 
+  it('tells that the tasks of a sequence fall outside the dates shown', () => {
+    const wrapper = mountSchedule({
+      hierarchy: reactive([buildRoot([{ ...buildSequence(), nbTasksOutOfRange: 3 }])]),
+      subchildren: true,
+      reassignable: true
+    })
+
+    const label = wrapper.find('.subchild-label.empty')
+    expect(label.text()).toContain('schedule.nb_tasks_out_of_range')
+    expect(label.find('.plan-entity').exists()).toBe(false)
+  })
+
   it('keeps the planning button off a locked schedule', () => {
     const wrapper = mountRows(
       buildRoot([{ ...buildSequence(), nbUndatedTasks: 3 }])
