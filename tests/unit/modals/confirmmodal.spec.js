@@ -28,4 +28,22 @@ describe('ConfirmModal', () => {
     expect(button.classes()).toContain('is-danger')
     expect(button.classes()).toContain('is-loading')
   })
+
+  it('shows no progress bar by default', () => {
+    expect(mountModal().find('.progress').exists()).toBe(false)
+  })
+
+  it('shows the progress of a long confirmation', () => {
+    const wrapper = mountModal({ progress: 40 })
+    expect(wrapper.find('.progress').element.style.width).toBe('40%')
+  })
+
+  // the loading look only stops the mouse: Enter and Space still reach
+  // the button
+  it('ignores a keyboard confirm while loading', async () => {
+    const wrapper = mountModal({ isLoading: true })
+    await confirmButton(wrapper).trigger('keydown.enter')
+    await confirmButton(wrapper).trigger('keydown.space')
+    expect(wrapper.emitted('confirm')).toBeUndefined()
+  })
 })
