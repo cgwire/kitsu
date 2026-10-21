@@ -828,13 +828,16 @@ const assetTypeMap = computed(() => {
 
 const availablePersons = computed(() => {
   const taskType = taskTypeMap.value.get(selectedTaskType.value.task_type_id)
+  // a task type without a department is open to every department
+  const departmentId = taskType?.department_id
   return team.value.filter(
     person =>
       !assignments.value.excludes.includes(person.id) &&
       person.role !== 'client' &&
       (['admin', 'manager'].includes(person.role) ||
+        !departmentId ||
         !person.departments.length ||
-        person.departments.includes(taskType?.department_id) ||
+        person.departments.includes(departmentId) ||
         // an out-of-department person already assigned to the edited
         // task stays listed: saveTask replaces the full assignee list,
         // so hiding them here would silently unassign them

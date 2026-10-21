@@ -1417,6 +1417,7 @@ describe('ProductionSchedule page', () => {
 
     const mountAssignments = ({
       actions = {},
+      getters = {},
       nbAssets = 2,
       ...options
     } = {}) => {
@@ -1442,7 +1443,8 @@ describe('ProductionSchedule page', () => {
           personMap: () => new Map(people.map(person => [person.id, person])),
           productionAssetTypes: () => [
             { id: 'asset-type-props', name: 'Props', task_types: [] }
-          ]
+          ],
+          ...getters
         }
       })
     }
@@ -2439,6 +2441,27 @@ describe('ProductionSchedule page', () => {
         expect(writesOf(storeActions)).toEqual([])
       }
     )
+
+    // A task type without a department listed the managers only: every
+    // other person belonged to some department it was not part of.
+    it('lists the people of any department for a task type without one', async () => {
+      const riggers = people.map(person => ({
+        ...person,
+        departments: ['dept-rigging']
+      }))
+      const { wrapper } = await mountAssignments({
+        getters: {
+          personMap: () => new Map(riggers.map(person => [person.id, person]))
+        }
+      })
+      await selectProps(wrapper)
+
+      const names = wrapper
+        .find('.side-column .assignees')
+        .findAllComponents(PeopleName)
+        .map(name => name.props('person').full_name)
+      expect(names).toEqual(['Alice Smith', 'Bob Jones'])
+    })
 
     // Two days per task: one task per person in three days
     it('assigns the tasks that fit and tells how many did not', async () => {
