@@ -181,6 +181,12 @@ export default {
     explanation_weighteddone: 'Maps are considered complete upon the last approval. Then, quotas are weighted based on the time spent on the task, as recorded in the artist\'s timesheet.\n\nIf no time is recorded, it is assumed that:\n* The task started at the first status change to WIP.\n* The task was completed on the day it was approved.\n* The completed frames are distributed evenly among all business days between the start and end dates.'
   },
 
+  schedule: {
+    assign_help_entity_group: 'Pick a level, asset type or chapter: its entities to plan are listed below, remove the ones to leave out. The button next to the task type also lists the entities already assigned.',
+    assign_help_task_type: 'Pick a task type to list the levels, maps or assets with a task of that type that nobody is assigned to yet.',
+    plan_sequence_tasks: 'Schedule tasks for this level'
+  },
+
   shots: {
     casting: 'Map casting',
     creation_explanation: 'To add maps, you first need to create a chapter and a level. Type a chapter name at the bottom of the left column, then click "Add" to create a new chapter. Select this chapter and repeat the same operation for the level. Finally, select a level and type a map name in the field at the bottom of the right column. Click the "Add" button below. Your first map is now created. You can add many more! If it\'s not a TV show, you can directly create a level.',
