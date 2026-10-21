@@ -1819,8 +1819,10 @@ const moveTimebar = (timeElement, event) => {
     document.body.style.cursor = props.reassignable ? 'all-scroll' : 'ew-resize'
 
     startMoveTracking()
-    stampDragOrigin(timeElement)
     updateSelection(timeElement, event)
+    // every selected bar moves: the stamps of a bar selected earlier date
+    // from its own click, and its rows may have been snapped since
+    new Set([timeElement, ...selection.value]).forEach(stampDragOrigin)
   }
 }
 

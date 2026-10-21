@@ -879,6 +879,47 @@ describe('Schedule widget - shift drag with tasks', () => {
     wrapper.unmount()
   })
 
+  it('moves the tasks of every selected row on a shift drag', async () => {
+    const hierarchy = buildSubchildrenHierarchy(2)
+    const [root] = hierarchy
+    const [first, second] = root.children
+    const [firstTask] = first.children.get('person-1')
+    first.endDate = moment('2026-09-30')
+    second.endDate = moment('2026-09-30')
+    const wrapper = mountSubchildren(hierarchy)
+
+    const [firstBar, secondBar] = wrapper
+      .findAll('.timebar-center')
+      .filter(
+        ({ element }) =>
+          !element.closest('.root-element') && !element.closest('.subchild')
+      )
+    await selectBar(wrapper, firstBar)
+    // the page snapped the task to a working day since the selection
+    firstTask.startDate = moment('2026-08-11')
+    firstTask.endDate = moment('2026-08-15')
+    await nextTick()
+    await secondBar.trigger('mousedown', {
+      clientX: 300,
+      ctrlKey: true,
+      shiftKey: true
+    })
+    document.dispatchEvent(
+      new MouseEvent('mousemove', { bubbles: true, clientX: 500 })
+    )
+    document.dispatchEvent(
+      new MouseEvent('mouseup', { bubbles: true, clientX: 500 })
+    )
+    await nextTick()
+
+    expect(fmt(first.startDate)).toBe('2026-08-13')
+    expect([fmt(firstTask.startDate), fmt(firstTask.endDate)]).toEqual([
+      '2026-08-21',
+      '2026-08-25'
+    ])
+    wrapper.unmount()
+  })
+
   it('moves the rows and their tasks along with the root bar', async () => {
     const hierarchy = buildSubchildrenHierarchy(2)
     const [root] = hierarchy
