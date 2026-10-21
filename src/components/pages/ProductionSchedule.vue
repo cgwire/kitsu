@@ -1057,6 +1057,20 @@ const updateRoute = changes => {
   }
 }
 
+const loadEpisodeItems = (production, items) =>
+  Promise.all(
+    items.map(async item => {
+      const taskType = taskTypeMap.value.get(item.task_type_id)
+      if (!taskType) return item
+      const [episodeItem] = await store.dispatch('loadEpisodeScheduleItems', {
+        production,
+        taskType,
+        episodeId: currentEpisodeId.value
+      })
+      return episodeItem ? { ...item, ...episodeItem } : item
+    })
+  )
+
 const loadData = async () => {
   const production = currentProduction.value
   loading.value.schedule = true
@@ -1065,7 +1079,15 @@ const loadData = async () => {
   try {
     await store.dispatch('loadScheduleVersions', production)
 
-    const items = await store.dispatch('loadScheduleItems', production)
+    const productionItems = await store.dispatch(
+      'loadScheduleItems',
+      production
+    )
+    // an episode view plans the episode: its own row per task type, drawn
+    // on the production bar until someone moves it
+    const items = currentEpisodeId.value
+      ? await loadEpisodeItems(production, productionItems)
+      : productionItems
     // A production switched during the fetches runs its own load.
     if (currentProduction.value?.id !== production.id) return
     const scheduleStartDate = parseDate(selectedStartDate.value)
