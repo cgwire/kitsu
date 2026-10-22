@@ -42,7 +42,6 @@ export default {
   },
 
   entities: {
-    nb_selected_shots: '{nbSelectedShots} NFT selected | {nbSelectedShots} NFTs selected',
     thumbnails: {
       shots_pattern: '"SequenceName NFTName" e.g. SQ01_NFT01.'
     }
@@ -70,9 +69,7 @@ export default {
 
 
   playlists: {
-    add_shots: 'Add NFTs',
-    no_shot_for_production: 'There is no NFT for this production',
-    select_shot: 'Please select an NFT in the right column'
+    add_shots: 'Add NFTs'
   },
 
   productions: {

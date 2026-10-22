@@ -254,7 +254,7 @@ const title = computed(() => t('studios.title'))
 vue-i18n runs in **Composition mode** (`src/lib/i18n.js`, `legacy: false`): the global locale is a ref (`i18n.global.locale.value`), and `$t` reaches templates through the default `globalInjection`. `vite.config.js` compiles out its legacy API and the global registration of `<i18n-t>`, `<i18n-d>`, `<i18n-n>` and `v-t`, all unused. Two calls go wrong without a warning:
 
 - **A `t()` at setup top level does not follow a locale change.** It resolves once, in the language of that moment. Call `t()` inside a `computed` or a handler (template `$t()` is unaffected).
-- **A string second argument is a default message, not a locale.** `t('assets.cast_in', 'fr')` returns "Cast in" to an English user. Pass the locale as an option: `t(key, {}, { locale: 'fr' })`.
+- **A string second argument is a default message, not a locale.** `t('main.cancel', 'fr')` returns "Cancel" to an English user. Pass the locale as an option: `t(key, {}, { locale: 'fr' })`.
 
 To test real translations rather than the global `$t` mock, mount with `mountWithI18n` from `tests/unit/fixtures/i18n.js`.
 

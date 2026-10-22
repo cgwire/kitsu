@@ -11,7 +11,6 @@
       "warning": "이 로그인을 직접 애플리케이션에서 시작한 경우에만 승인하세요. 애플리케이션은 사용자의 권한으로 Kitsu에 접근합니다."
     },
     "assets": {
-      "cast_in": "출연하는 샷",
       "delete_error": "이 어셋을 삭제하는 동안 오류가 발생했습니다. 현재 이 어셋에 연결된 데이터가 있을 수 있습니다. 이 어셋에 연결된 작업이 없는 것이 확실합니까?",
       "delete_text": "데이터베이스에서 {name}을(를) 정말로 제거하시겠습니까?",
       "edit_fail": "저장에 실패했습니다. 비슷한 이름의 어셋이 이미 존재할 수 있습니다.",
@@ -69,7 +68,6 @@
       },
       "include_all": "모든 어셋 작업 유형 포함",
       "add_asset_type_to_library": "라이브러리에 어셋 종류 추가",
-      "library_title": "어셋 종류 라이브러리",
       "add_asset_type_placeholder": "+ 어셋 종류 추가"
     },
     "breakdown": {
@@ -102,7 +100,6 @@
         "standby": "대기"
       },
       "save_error": "캐스팅 저장 중 오류",
-      "hide_library": "라이브러리 숨기기",
       "show_library": "라이브러리 표시",
       "filters": {
         "all": "모든 줄",
@@ -120,22 +117,18 @@
       "change_preview": "미리 보기 변경",
       "comment_from_client": "클라이언트의 댓글",
       "edit_title": "댓글 수정",
-      "empty_text": "댓글이 비어 있습니다",
       "action_error": "저장할 수 없습니다. 다시 시도해 주세요.",
       "edit_error": "댓글을 수정하는 도중 오류가 발생했습니다. 고객 지원팀에 문의하십시오.",
       "error": "댓글을 게시하는 도중 오류가 발생했습니다",
-      "no_file_attached": "첨부된 미리 보기 없음",
       "pin": "핀 고정",
       "pinned": "핀 고정됨",
       "post_status": "댓글 달기",
       "retake": "리테이크",
       "revision": "수정본",
-      "set_status_to": "상태 설정",
       "task_placeholder": "새 아이템...",
       "text": "텍스트",
       "unpin": "고정 해제",
       "validated": "검증 완료!",
-      "validation_required": "검증 필요",
       "fields": {
         "text": "텍스트",
         "created_at": "생성 날짜",
@@ -271,9 +264,6 @@
         "uploader": "업로드한 사람",
         "uploaded_at": "업로드 일시"
       },
-      "nb_selected_assets": "{nbSelectedAssets} 어셋 선택됨 | {nbSelectedAssets} 어셋 선택됨",
-      "nb_selected_shots": "{nbSelectedShots} 샷 선택됨 | {nbSelectedShots} 샷 선택됨",
-      "nb_selected_edits": "{nbSelectedEdits} 편집본 선택됨 | {nbSelectedEdits} 편집본 선택됨",
       "output_files": {
         "extension": "확장자",
         "name": "이름",
@@ -685,7 +675,6 @@
       "create_tasks": "작업 만들기",
       "delete_tasks": "작업 삭제",
       "run_custom_action": "사용자 지정 액션 실행",
-      "set_estimations": "추정치 설정",
       "delete_assets": "어셋 삭제",
       "delete_shots": "샷 삭제",
       "delete_edits": "편집본 삭제",
@@ -703,7 +692,6 @@
       "no_news": "뉴스가 없습니다.",
       "only_comments": "댓글만",
       "only_previews": "미리보기만",
-      "set_preview_on": "다음에 미리 보기 설정:",
       "task_status": "작업 상태",
       "task_type": "작업 유형",
       "title": "뉴스피드",
@@ -724,10 +712,8 @@
       "no_notifications": "현재 진행 중인 프로덕션에 대한 알림이 없습니다.",
       "unread_notifications": "읽지 않은 알림 | 읽지 않은 알림",
       "title": "알림",
-      "with_preview": "미리 보기로",
       "replied_on": "님이 댓글에 답글을 남겼습니다",
       "all_types": "모든 알림 유형",
-      "new_revision": "새 수정본이 게시되었습니다",
       "only_assignations": "할당된 것만",
       "only_comments": "댓글만",
       "only_mentions": "멘션만",
@@ -770,7 +756,6 @@
     },
     "people": {
       "active": "활성",
-      "active_persons": "활성 사용자 | 활성 사용자들",
       "add_member_to_team": "팀에 구성원 추가:",
       "create_invite": "사용자 생성 및 초대장 보내기",
       "create_error": "이 사용자를 생성하거나 업데이트하는 동안 서버 오류가 발생했습니다. 자세한 내용은 지원팀에 문의하십시오.",
@@ -791,7 +776,6 @@
       "no_task_pending": "피드백을 기다리는 작업이 없습니다",
       "persons": "사용자 | 사용자들",
       "project_role": "프로젝트 역할",
-      "running_tasks": "진행 중인 작업",
       "select_person": "사용자 선택...",
       "team": "팀",
       "title": "사람들",
@@ -877,7 +861,6 @@
       "archive_guest_error": "이 게스트를 보관할 수 없습니다. 다시 시도해 주세요.",
       "archived_guests": "보관된 게스트",
       "guests": "게스트 | 게스트",
-      "restore_guest_error": "이 게스트를 복원할 수 없습니다. 다시 시도해 주세요.",
       "seats_remaining": "남은 라이선스 없음 | 라이선스 {count}개 남음 | 라이선스 {count}개 남음"
     },
     "playlists": {
@@ -906,18 +889,11 @@
       "for_client": "클라이언트",
       "for_studio": "스튜디오",
       "edit_title": "재생 목록 편집",
-      "last_creation": "최근 생성",
-      "last_modification": "마지막 수정 사항",
       "loading_error": "서버 오류가 발생했습니다. 재생 목록을 로드할 수 없습니다.",
       "new_playlist": "재생 목록 추가",
       "no_build": "빌드 없음",
       "no_playlist": "현재 이 프로덕션이나 에피소드에 대한 재생 목록이 없습니다.",
       "no_preview": "미리 보기 없음",
-      "no_selection": "왼쪽에서 재생 목록을 선택하십시오.",
-      "no_sequence_for_episode": "이 에피소드에는 시퀀스가 없습니다.",
-      "no_shot_for_production": "이 프로덕션에는 샷이 없습니다.",
-      "select_shot": "오른쪽 열에서 샷을 선택하십시오.",
-      "select_playlist": "왼쪽 열에서 재생 목록을 선택하십시오.",
       "select_task_type": "모든 엔티티의 작업 유형 변경",
       "title": "재생 목록",
       "updated_at": "업데이트 시각:",
@@ -956,7 +932,6 @@
         "split_screen": "다른 작업 유형과 비교",
         "annotation_draw": "주석 그리기",
         "current_time": "동영상 내 위치",
-        "display_revision": "수정본 표시",
         "download_file": "파일 다운로드",
         "entity_index": "재생 목록 내 현재 엔티티 색인",
         "entities_number": "재생 목록 내 엔티티 수",
@@ -969,14 +944,12 @@
         "looping": "현재 동영상 반복",
         "mute": "음소거",
         "unmute": "음소거 해제",
-        "number_of_files": "이 수정본의 파일 수",
         "max_duration": "동영상 길이",
         "see_original_file": "새 탭에서 원본 파일 열기",
         "overlay": "오버레이",
         "side_by_side": "나란히",
         "switch_ld": "저화질로 전환",
         "switch_hd": "고화질로 전환",
-        "frames_per_picture": "사진당 프레임",
         "toggle_playing_annotations": "동영상 재생 중 주석 표시/숨기기",
         "toggle_waveform": "동영상 파형 표시/숨기기",
         "annotation_erase": "주석 지우기",
@@ -985,7 +958,6 @@
         "annotation_zoom_pan": "확대/축소 초기화",
         "default": "기본값",
         "exit_play_full": "전체 동영상 재생 종료",
-        "object_background": "3D 모델에 새 환경 맵을 설정합니다.",
         "select_background": "배경 선택",
         "toggle_environment_skybox": "스카이박스 배경 표시/숨기기",
         "toggle_wireframe": "와이어프레임 렌더링 활성화/비활성화",
@@ -1157,8 +1129,6 @@
         "is_frame_in_numbering": "플레이어 프레임 카운터를 프레임 인부터 시작"
       },
       "metadata": {
-        "add_explanation": "이 프로덕션에 필요한 특정 데이터를 추가합니다.",
-        "add_failed": "프로덕션에 메타데이터를 추가하는 동안 오류가 발생했습니다.",
         "add_new_values": "현재 사용 가능한 값이 없습니다.",
         "available_values": "사용 가능한 값",
         "choices": "값 목록",
@@ -1174,7 +1144,6 @@
         "tags": "태그 목록",
         "applies_to_all_projects": "이 열은 목록의 모든 프로덕션에 추가됩니다. 각 프로덕션은 목록 보기에서 고유한 값을 가질 수 있습니다.",
         "delete_list_column_text": "이 작업은 저장된 값을 포함하여 모든 프로덕션에서 “{name}” 열을 제거합니다. 계속하시겠습니까?",
-        "target_project": "프로젝트",
         "date": "날짜",
         "url": "링크",
         "textarea": "긴 텍스트",
@@ -1209,8 +1178,7 @@
           "button": "확인"
         },
         "general_title": "일반",
-        "max_retakes_description": "작업이 이 리테이크 횟수에 도달하면 아티스트는 리테이크 상태를 설정할 수 없습니다. 0은 제한 없음을 뜻합니다.",
-        "previews_and_comments": "미리 보기 및 댓글"
+        "max_retakes_description": "작업이 이 리테이크 횟수에 도달하면 아티스트는 리테이크 상태를 설정할 수 없습니다. 0은 제한 없음을 뜻합니다."
       },
       "creation": {
         "add_assets": "어셋 추가 (선택)",
@@ -1236,8 +1204,6 @@
         "import_shots_button": "샷 가져오기",
         "new_project": "새 프로덕션",
         "open_production": "프로덕션 열기",
-        "placeholder_date_start": "시작일",
-        "placeholder_date_end": "종료일",
         "placeholder_name": "내 멋진 프로덕션",
         "placeholder_fps": "25",
         "placeholder_ratio1": "16",
@@ -1254,8 +1220,6 @@
         "select_task_status_description": "제작 중 사용할 작업 상태를 선택하세요.",
         "start_and_end_dates": "시작 및 종료 날짜",
         "shots_to_import": "가져올 샷",
-        "select_edit_task_type": "편집본 작업 유형 선택",
-        "select_edit_task_type_description": "이 작업 유형은 편집본의 제작 단계를 정의합니다.",
         "choose_template": "프로덕션 템플릿 적용 (선택 사항)",
         "choose_template_description": "작업 유형, 작업 상태, 어셋 종류, 메타데이터 및 설정을 미리 채울 템플릿을 선택하세요. 처음부터 구성하려면 비워 두세요.",
         "no_template": "템플릿 없음"
@@ -1398,7 +1362,6 @@
       "change_logo": "로고 변경",
       "integrations": "통합",
       "logo": "스튜디오 로고",
-      "no_logo": "로고 설정이 없습니다.",
       "set_logo": "스튜디오 로고 설정",
       "title": "설정",
       "fields": {
@@ -1455,13 +1418,10 @@
         "is_wip": "WIP"
       },
       "name": "작업 상태",
-      "title_entities": "엔티티 상태",
-      "title_concepts": "컨셉 상태",
       "help": {
         "entities": "어셋, 샷, 시퀀스, ..."
       },
       "add_task_status_to_library": "라이브러리에 작업 상태 추가",
-      "library_title": "작업 상태 라이브러리",
       "add_task_status_placeholder": "+ 작업 상태 추가"
     },
     "task_types": {
@@ -1494,8 +1454,7 @@
       "remove_error": "작업 유형을 제거할 수 없습니다. 다시 시도해 주세요.",
       "remove_title": "작업 유형 제거",
       "select_task_type": "작업 유형 선택...",
-      "add_task_type_to_library": "라이브러리에 작업 유형 추가하기",
-      "library_title": "작업 유형 라이브러리"
+      "add_task_type_to_library": "라이브러리에 작업 유형 추가하기"
     },
     "sequences": {
       "all_hidden": "모든 시퀀스가 숨겨져 있습니다.",
@@ -1568,7 +1527,6 @@
       "new_version": "새 버전",
       "no_assignee": "할당 가능한 사람 없음",
       "no_entity": "할당 가능한 엔티티 없음",
-      "overall_man_days": "맨데이",
       "reset_list": "목록 초기화",
       "save_task_error": "작업을 저장할 수 없습니다. 다시 시도해 주세요.",
       "select_task_type": "작업 유형 선택",
@@ -1707,9 +1665,6 @@
       "add_preview": "새 미리 보기 수정본을 위한 파일 추가",
       "add_preview_error": "미리 보기 추가 도중 오류가 발생했습니다.",
       "assign": "선택한 작업에 할당 | 선택한 {nbSelectedTasks}개 작업에 할당",
-      "back_to_list": "목록으로 돌아가기",
-      "bigger": "작업 패널 넓게",
-      "change_status_to": "작업 상태 변경:",
       "change_preview": "미리 보기 변경",
       "change_priority": "선택한 작업의 우선 순위 변경 | 선택한 {nbSelectedTasks}개 작업의 우선 순위 변경",
       "clear_assignations": "할당 삭제",
@@ -1738,16 +1693,12 @@
       "delete_for_selection": "선택한 작업 삭제 | 선택한 작업 {nbSelectedTasks}개 삭제",
       "delete_preview": "정말 이 미리 보기를 삭제하시겠습니까?",
       "delete_preview_error": "미리 보기를 삭제하는 도중 오류가 발생했습니다.",
-      "edit_comment": "댓글 편집",
       "done": "완료",
       "download_pdf_file": ".{extension} 파일 다운로드",
       "feedback": "피드백",
-      "full_screen": "전체 화면으로 표시",
-      "hide_assignations": "할당 숨기기",
       "hide_infos": "추가 정보 숨기기",
       "my_tasks": "내 작업",
       "next": "다음 작업",
-      "no_assignation_right": "할당을 관리할 권한이 없습니다",
       "no_comment": "현재 이 작업에는 댓글이 없습니다.",
       "no_preview": "이 작업에는 현재 미리 보기가 없습니다.",
       "no_task_selected": "선택된 작업 없음",
@@ -1755,17 +1706,14 @@
       "preview": "미리 보기",
       "previous": "이전 작업",
       "unsubscribe_notifications": "알림 구독 해제",
-      "set_estimations": "선택한 작업의 추정치를 설정하세요:",
       "set_preview": "이 미리 보기를 섬네일로 설정",
       "set_preview_error": "미리 보기를 섬네일로 설정하는 도중 오류가 발생했습니다",
-      "set_preview_done": "이 미리 보기는 현재 엔티티의 섬네일로 사용되고 있습니다.",
       "select_preview_file": "현재 작업에 미리 보기로 사용될 파일(사진, 동영상 등)을 하드 디스크에서 선택하여 주십시오:",
       "show_assignations": "할당 표시",
       "show_infos": "추가 정보 표시",
       "subscribe_notifications": "알림 구독",
       "tasks": "작업",
       "validation": "검증",
-      "with_comment": "댓글과 함께...",
       "fields": {
         "asset_type": "어셋 종류",
         "assignees": "담당자",
@@ -1827,7 +1775,6 @@
       "create_tasks_edit_explanation": "지정된 작업 유형에 대한 현재 프로덕션의 각 편집본에 새 작업을 생성하려고 합니다. 정말 계속하시겠습니까?",
       "create_tasks_edit_failed": "작업을 생성하는 도중 서버 오류가 발생했습니다.",
       "smaller": "작업 패널 축소",
-      "small_thumbnails": "작은 섬네일 표시",
       "combobox_departments": {
         "all_departments": "모든 부서",
         "my_departments": "내 부서"
@@ -1853,7 +1800,6 @@
       "estimation_approval_late": "마감일 지연(피드백)",
       "estimation_done_late": "마감일 지연(완료)",
       "late": "늦은 상태",
-      "nb_selected_tasks": "{nbSelectedTasks} 작업 선택됨 | {nbSelectedTasks} 작업 선택됨",
       "set_thumbnails_from_tasks": "선택한 작업의 마지막 미리보기를 섬네일로 설정 | 선택한 작업 {nbSelectedTasks}개의 마지막 미리보기를 섬네일로 설정",
       "to_myself": "나 자신에게",
       "create_tasks_episode": "현재 에피소드에 대한 작업 추가",
@@ -1915,7 +1861,6 @@
       "timelog_title": "타임로그",
       "title": "타임시트",
       "year": "년",
-      "confirm_day_off": "이 날짜를 휴무로 설정하면 현재 날짜에 입력된 모든 시간이 삭제됩니다. 정말 계속하시겠습니까?",
       "day_off": "휴무",
       "export_timespents": "열려 있는 프로덕션의 소요 시간 항목을 목록으로 내보내기",
       "unit": "단위",
@@ -2097,8 +2042,7 @@
         "is_default": "기본값",
         "name": "이름",
         "file": "HDRi 파일"
-      },
-      "library_title": "3D 배경 라이브러리"
+      }
     },
     "board": {
       "title": "보드",
@@ -2114,7 +2058,6 @@
     "bots": {
       "title": "봇",
       "bots": "봇 | 봇",
-      "active_bots": "활성 봇 | 활성 봇",
       "new_bot": "새 봇 추가하기",
       "edit_title": "봇 편집",
       "edit_avatar_error": "봇 아바타를 업데이트하는 동안 오류가 발생했습니다.",
@@ -2240,7 +2183,6 @@
       "asset_library": "어셋 라이브러리",
       "from_library": "어셋 라이브러리에서",
       "import_from_asset_type": "선택한 종류 및 프로덕션에서 모든 어셋 가져오기",
-      "import_from_assets": "선택한 프로덕션 및 어셋 종류에서 어셋 가져오기",
       "import_from_list": "목록에서 선택한 어셋 가져오기",
       "import_from_production": "선택한 프로덕션에서 모든 어셋 가져오기",
       "manage": "라이브러리에 어셋 추가",
@@ -2250,7 +2192,6 @@
       "remove_selected_assets": "라이브러리에서 선택한 어셋 제거 | 라이브러리에서 선택한 어셋 {nbSelectedAssets}개 제거",
       "select_asset_type": "어셋 종류 선택",
       "select_production": "프로덕션 선택",
-      "selected_assets": "선택한 어셋",
       "fields": {
         "name": "이름",
         "production": "프로덕션",
@@ -2272,7 +2213,6 @@
       "create_budget": "새 예산 만들기",
       "create_budget_error": "이 예산을 저장하는 동안 오류가 발생했습니다. 지원팀에 문의하세요.",
       "delete_budget": "예산 삭제",
-      "delete_budget_entry": "항목 삭제",
       "delete_budget_entry_error": "이 예산 항목을 삭제하는 동안 오류가 발생했습니다. 지원팀에 문의해 주세요.",
       "delete_budget_entry_message": "이 예산 항목을 삭제하시겠습니까?",
       "delete_budget_error": "이 예산을 삭제하는 동안 오류가 발생했습니다. 지원팀에 문의해 주세요.",
@@ -2280,10 +2220,8 @@
       "difference": "차이점",
       "edit_budget": "현재 예산 버전 편집",
       "edit_budget_entry": "항목 수정",
-      "edit_budget_entry_error": "이 예산 항목을 편집하는 동안 오류가 발생했습니다. 지원팀에 문의해 주세요.",
       "entries": "항목",
       "gap": "격차",
-      "hide_expenses": "실제 비용 숨기기",
       "months": "개월",
       "new_hiring": "신규 채용",
       "new_version": "새 버전",
@@ -2385,9 +2323,6 @@
     "project_templates": {
       "add_metadata": "메타데이터 열 추가",
       "apply": "템플릿 적용",
-      "apply_confirm": "이 작업은 템플릿의 작업 유형, 상태, 어셋 종류, 자동화 및 메타데이터 디스크립터를 이 프로덕션에 추가합니다. 기존 설정은 유지됩니다. 계속하시겠습니까?",
-      "apply_to": "템플릿 적용",
-      "apply_to_description": "템플릿의 구성을 이 프로덕션에 추가합니다. 기존 설정은 유지됩니다.",
       "click_name_to_edit": "구성을 편집하려면 템플릿 이름을 클릭하세요.",
       "create_error": "이 템플릿을 저장하는 동안 오류가 발생했습니다. 비슷한 이름의 템플릿이 없는 것이 확실합니까?",
       "delete_error": "이 템플릿을 삭제하는 동안 오류가 발생했습니다.",
@@ -2400,8 +2335,6 @@
         "entity_type": "엔티티 유형",
         "name": "이름"
       },
-      "fps_error": "FPS는 1에서 200 사이의 정수여야 합니다.",
-      "from_production": "프로덕션에서 만들기",
       "name_required": "이름이 필요합니다.",
       "new_project_template": "프로덕션 템플릿 추가",
       "number": "프로덕션 템플릿 | 프로덕션 템플릿",
@@ -2444,7 +2377,6 @@
       "no_comments_yet": "아직 댓글이 없습니다.",
       "no_preview": "미리 보기 없음",
       "no_status_available": "이 프로덕션에 구성된 작업 상태가 없습니다.",
-      "player_placeholder": "플레이어가 여기에 표시됩니다.",
       "post_comment_error": "댓글을 게시할 수 없습니다. 페이지를 새로 고치고 다시 시도해 주세요.",
       "review_session": "검토 세션",
       "your_name": "귀하의 이름"

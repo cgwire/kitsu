@@ -53,7 +53,6 @@ export default {
   },
 
   entities: {
-    nb_selected_shots: '{nbSelectedShots} map selected | {nbSelectedShots} maps selected',
     thumbnails: {
       edits_tvshow_pattern: '"ChapterName EditName" e.g. CH01_Trailer.',
       shots_pattern: '"LevelName MapName" e.g. LV01_MP01.'
@@ -107,10 +106,7 @@ export default {
     add_shots: 'Add maps',
     add_sequence: 'Add entire level',
     add_episode: 'Add entire chapter',
-    no_playlist: 'There are currently no playlists for this production or chapter.',
-    no_sequence_for_episode: 'There is no level for this chapter',
-    no_shot_for_production: 'There is no map for this production',
-    select_shot: 'Please select a map in the right column'
+    no_playlist: 'There are currently no playlists for this production or chapter.'
   },
 
   productions: {

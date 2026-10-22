@@ -11,7 +11,6 @@
       "warning": "Autoriseer alleen als je dit inloggen zelf vanuit de applicatie hebt gestart. De applicatie krijgt toegang tot Kitsu met jouw rechten."
     },
     "assets": {
-      "cast_in": "Opgenomen in",
       "delete_error": "Er is een fout opgetreden bij het verwijderen van deze asset. Mogelijk zijn er gegevens aan gekoppeld. Weet je zeker dat er geen taak aan deze asset is gekoppeld?",
       "delete_text": "Weet je zeker dat je {name} uit de database wilt verwijderen?",
       "edit_fail": "Opslaan mislukt, dit kan komen omdat een asset met dezelfde naam reeds bestaat.",
@@ -69,7 +68,6 @@
       },
       "include_all": "Omvat alle asset-taaktypes",
       "add_asset_type_to_library": "Een assettype toevoegen aan de bibliotheek",
-      "library_title": "Bibliotheek met assettypes",
       "add_asset_type_placeholder": "+ Assettype toevoegen"
     },
     "breakdown": {
@@ -102,7 +100,6 @@
         "standby": "STDB"
       },
       "save_error": "Fout bij het opslaan van casting",
-      "hide_library": "Bibliotheek verbergen",
       "show_library": "Bibliotheek weergeven",
       "filters": {
         "all": "Alle regels",
@@ -120,22 +117,18 @@
       "change_preview": "Preview wijzigen",
       "comment_from_client": "Opmerking van klant",
       "edit_title": "Opmerking bewerken",
-      "empty_text": "Deze opmerking is leeg.",
       "action_error": "Opslaan mislukt. Probeer het opnieuw.",
       "edit_error": "Er is een fout opgetreden bij het bewerken van de opmerking. Neem contact op met ons ondersteuningsteam.",
       "error": "Er is een fout opgetreden bij het plaatsen van de opmerking.",
-      "no_file_attached": "Geen preview gekoppeld.",
       "pin": "Vastzetten",
       "pinned": "Vastgezet",
       "post_status": "Opmerking plaatsen",
       "retake": "Retake",
       "revision": "revisie",
-      "set_status_to": "Zet status op",
       "task_placeholder": "Nieuw item...",
       "text": "Tekst",
       "unpin": "Losmaken",
       "validated": "Gevalideerd!",
-      "validation_required": "Validatie vereist",
       "fields": {
         "text": "Tekst",
         "created_at": "Aanmaakdatum",
@@ -271,9 +264,6 @@
         "uploader": "Geüpload door",
         "uploaded_at": "Geüpload op"
       },
-      "nb_selected_assets": "{nbSelectedAssets} asset geselecteerd | {nbSelectedAssets} assets geselecteerd",
-      "nb_selected_shots": "{nbSelectedShots} opname geselecteerd | {nbSelectedShots} opnamen geselecteerd",
-      "nb_selected_edits": "{nbSelectedEdits} montage geselecteerd | {nbSelectedEdits} montages geselecteerd",
       "output_files": {
         "extension": "Extensie",
         "name": "Naam",
@@ -685,7 +675,6 @@
       "create_tasks": "Taken aanmaken",
       "delete_tasks": "Taken verwijderen",
       "run_custom_action": "Voer zelfbepaalde actie uit",
-      "set_estimations": "Stel schatting in",
       "delete_assets": "Verwijder Assets",
       "delete_shots": "Verwijder opnamen",
       "delete_edits": "Verwijder montages",
@@ -703,7 +692,6 @@
       "no_news": "Er is geen nieuws voor deze productie of filter.",
       "only_comments": "Alleen opmerkingen",
       "only_previews": "Alleen previews",
-      "set_preview_on": "stel preview in op",
       "task_status": "Taakstatus",
       "task_type": "Taaktype",
       "title": "Nieuwsfeed",
@@ -724,10 +712,8 @@
       "no_notifications": "Er zijn geen meldingen voor je huidige producties.",
       "unread_notifications": "ongelezen melding | ongelezen meldingen",
       "title": "Meldingen",
-      "with_preview": "met een preview",
       "replied_on": "heeft gereageerd op een opmerking",
       "all_types": "Alle meldingstypes",
-      "new_revision": "Nieuwe revisie gepubliceerd",
       "only_assignations": "Alleen toewijzingen",
       "only_comments": "Alleen opmerkingen",
       "only_mentions": "Alleen vermeldingen",
@@ -770,7 +756,6 @@
     },
     "people": {
       "active": "Actief",
-      "active_persons": "actieve gebruiker | actieve gebruikers",
       "add_member_to_team": "Voeg een lid toe aan het team",
       "create_invite": "Gebruiker aanmaken en uitnodiging versturen",
       "create_error": "Er is een serverfout opgetreden tijdens het aanmaken of bijwerken van deze gebruiker. Neem contact op met ons ondersteuningsteam voor meer informatie.",
@@ -791,7 +776,6 @@
       "no_task_pending": "Er wacht geen taak op feedback",
       "persons": "gebruiker | gebruikers",
       "project_role": "Projectrol",
-      "running_tasks": "Lopende taken",
       "select_person": "Kies een gebruiker...",
       "team": "Team",
       "title": "Mensen",
@@ -877,7 +861,6 @@
       "archive_guest_error": "Kon deze gast niet archiveren. Probeer het opnieuw.",
       "archived_guests": "Gearchiveerde gasten",
       "guests": "gast | gasten",
-      "restore_guest_error": "Kon deze gast niet herstellen. Probeer het opnieuw.",
       "seats_remaining": "geen plaatsen meer beschikbaar | {count} plaats beschikbaar | {count} plaatsen beschikbaar"
     },
     "playlists": {
@@ -906,18 +889,11 @@
       "for_client": "De klant",
       "for_studio": "De Studio",
       "edit_title": "Bewerk afspeellijst",
-      "last_creation": "Laatste creaties",
-      "last_modification": "Laatste aanpassingen",
       "loading_error": "Er is een serverfout opgetreden. De afspeellijsten kunnen niet geladen worden.",
       "new_playlist": "Voeg een afspeellijst toe",
       "no_build": "Geen build",
       "no_playlist": "Er zijn momenteel geen afspeellijsten voor deze productie of aflevering.",
       "no_preview": "Geen preview",
-      "no_selection": "Selecteer links een afspeellijst.",
-      "no_sequence_for_episode": "Er is geen sequentie voor deze aflevering",
-      "no_shot_for_production": "Er is geen opname voor deze productie",
-      "select_shot": "Selecteer een opname in de rechterkolom",
-      "select_playlist": "Selecteer een afspeellijst in de linkerkolom",
       "select_task_type": "Wijzig taaktype voor alle entiteiten",
       "title": "Afspeellijsten",
       "updated_at": "Bijgewerkt op:",
@@ -956,7 +932,6 @@
         "split_screen": "Vergelijken met andere taaktypes",
         "annotation_draw": "Annotaties tekenen",
         "current_time": "Positie in de video",
-        "display_revision": "Revisieweergave",
         "download_file": "Download bestand",
         "entity_index": "Index van het huidige item in de afspeellijst",
         "entities_number": "Aantal items in de afspeellijst",
@@ -969,14 +944,12 @@
         "looping": "Herhaling op huidige video",
         "mute": "Dempen",
         "unmute": "Dempen opheffen",
-        "number_of_files": "Aantal bestanden voor deze revisie",
         "max_duration": "Videolengte",
         "see_original_file": "Open origineel bestand in nieuw tabblad",
         "overlay": "Overlay",
         "side_by_side": "Zij aan zij",
         "switch_ld": "Overschakelen naar lage resolutie",
         "switch_hd": "Overschakelen naar hoge resolutie",
-        "frames_per_picture": "Frames per afbeelding",
         "toggle_playing_annotations": "Toon/verberg annotaties bij het afspelen van films",
         "toggle_waveform": "Toon/Verberg film geluidsgolf",
         "annotation_erase": "Annotatie wissen",
@@ -985,7 +958,6 @@
         "annotation_zoom_pan": "Zoom resetten",
         "default": "standaard",
         "exit_play_full": "Afspelen van volledige film stoppen",
-        "object_background": "Een nieuwe omgevingskaart instellen op het 3D-model",
         "select_background": "Selecteer een achtergrond",
         "toggle_environment_skybox": "Achtergrond skybox tonen/verbergen",
         "toggle_wireframe": "Draadmodelweergave in-/uitschakelen",
@@ -1157,8 +1129,6 @@
         "revision_padding": "Opvulling revisienummer (0 = geen opvulling)"
       },
       "metadata": {
-        "add_explanation": "Voeg specifieke gegevens toe die nodig zijn voor deze productie.",
-        "add_failed": "Er is een fout opgetreden bij het toevoegen van metadata aan je productie.",
         "add_new_values": "Er zijn momenteel geen beschikbare waarden.",
         "available_values": "Beschikbare waarden",
         "choices": "Lijst van waarden",
@@ -1174,7 +1144,6 @@
         "tags": "Lijst met tags",
         "applies_to_all_projects": "Deze kolom wordt toegevoegd aan elke productie in de lijst. Elke productie kan een eigen waarde hebben in de lijstweergave.",
         "delete_list_column_text": "Hiermee wordt de kolom “{name}” uit alle producties verwijderd, inclusief opgeslagen waarden. Doorgaan?",
-        "target_project": "Project",
         "date": "Datum",
         "url": "Link",
         "textarea": "Lange tekst",
@@ -1209,8 +1178,7 @@
           "button": "Bevestigen"
         },
         "general_title": "Algemeen",
-        "max_retakes_description": "Artists kunnen geen retake-status meer instellen zodra een taak dit aantal retakes bereikt. 0 betekent geen limiet.",
-        "previews_and_comments": "Previews en opmerkingen"
+        "max_retakes_description": "Artists kunnen geen retake-status meer instellen zodra een taak dit aantal retakes bereikt. 0 betekent geen limiet."
       },
       "creation": {
         "add_assets": "Assets toevoegen (optioneel)",
@@ -1236,8 +1204,6 @@
         "import_shots_button": "Importeer opnamen",
         "new_project": "Nieuwe productie",
         "open_production": "Productie openen",
-        "placeholder_date_start": "Begin bij",
-        "placeholder_date_end": "Eindig bij",
         "placeholder_name": "Mijn fantastische productie",
         "placeholder_fps": "25",
         "placeholder_ratio1": "16",
@@ -1254,8 +1220,6 @@
         "select_task_status_description": "Selecteer de taakstatussen die je tijdens de productie gaat gebruiken.",
         "start_and_end_dates": "Start- en einddatum",
         "shots_to_import": "te importeren opnamen",
-        "select_edit_task_type": "Selecteer montage-taaktypes",
-        "select_edit_task_type_description": "Deze taaktypen definiëren de bouwstappen van je montages.",
         "choose_template": "Een productiesjabloon toepassen (optioneel)",
         "choose_template_description": "Kies een sjabloon om taaktypes, taakstatussen, assettypes, metadata en instellingen vooraf in te vullen. Laat leeg om de productie vanaf nul te configureren.",
         "no_template": "Geen sjabloon"
@@ -1398,7 +1362,6 @@
       "change_logo": "Wijzig logo",
       "integrations": "Integraties",
       "logo": "Studiologo",
-      "no_logo": "Er is geen logo ingesteld.",
       "set_logo": "Studiologo instellen",
       "title": "Instellingen",
       "fields": {
@@ -1455,13 +1418,10 @@
         "is_wip": "Is WIP"
       },
       "name": "taakstatus",
-      "title_entities": "Status voor entiteiten",
-      "title_concepts": "Status voor concepten",
       "help": {
         "entities": "Assets, opnamen, sequenties, ..."
       },
       "add_task_status_to_library": "Een taakstatus toevoegen aan de bibliotheek",
-      "library_title": "Taakstatusbibliotheek",
       "add_task_status_placeholder": "+ Taakstatus toevoegen"
     },
     "task_types": {
@@ -1494,8 +1454,7 @@
       "remove_error": "Kon het taaktype niet verwijderen. Probeer het opnieuw.",
       "remove_title": "Taaktype verwijderen",
       "select_task_type": "Selecteer een taaktype...",
-      "add_task_type_to_library": "Een taaktype toevoegen aan de bibliotheek",
-      "library_title": "Taaktypebibliotheek"
+      "add_task_type_to_library": "Een taaktype toevoegen aan de bibliotheek"
     },
     "sequences": {
       "all_hidden": "Alle sequenties zijn verborgen.",
@@ -1568,7 +1527,6 @@
       "new_version": "Nieuwe versie",
       "no_assignee": "Geen toewijsbare persoon",
       "no_entity": "Geen toewijsbare entiteit",
-      "overall_man_days": "Mensdagen",
       "reset_list": "Lijst resetten",
       "save_task_error": "Kon de taak niet opslaan. Probeer het opnieuw.",
       "select_task_type": "Selecteer een taaktype...",
@@ -1707,9 +1665,6 @@
       "add_preview": "Bestanden toevoegen voor een nieuwe previewrevisie",
       "add_preview_error": "Een fout is opgetreden tijdens het toevoegen van een preview.",
       "assign": "Toewijzen aan de geselecteerde taak | Toewijzen aan de {nbSelectedTasks} geselecteerde taken",
-      "back_to_list": "terug naar lijst",
-      "bigger": "Taakpaneel breder",
-      "change_status_to": "Wijzig taakstatus in:",
       "change_preview": "Preview wijzigen",
       "change_priority": "Wijzig prioriteit van de geselecteerde taak | Wijzig prioriteit van de {nbSelectedTasks} geselecteerde taken",
       "clear_assignations": "toewijzingen verwijderen uit selectie",
@@ -1738,16 +1693,12 @@
       "delete_for_selection": "Verwijder de geselecteerde taak | Verwijder de {nbSelectedTasks} geselecteerde taken",
       "delete_preview": "Weet je zeker dat je deze preview wilt verwijderen?",
       "delete_preview_error": "Er is een fout opgetreden bij het verwijderen van de preview.",
-      "edit_comment": "Opmerking bewerken",
       "done": "Voltooid",
       "download_pdf_file": "Download .{extension} bestand",
       "feedback": "feedback",
-      "full_screen": "In volledig scherm weergeven",
-      "hide_assignations": "Toewijzingen verbergen",
       "hide_infos": "Aanvullende informatie verbergen",
       "my_tasks": "Mijn taken",
       "next": "volgende taak",
-      "no_assignation_right": "Je mag geen toewijzingen beheren",
       "no_comment": "Er zijn momenteel geen opmerkingen bij deze taak.",
       "no_preview": "Er is momenteel geen preview voor deze taak.",
       "no_task_selected": "Geen taak geselecteerd",
@@ -1755,17 +1706,14 @@
       "preview": "Previews",
       "previous": "vorige taak",
       "unsubscribe_notifications": "Meldingen uitschakelen",
-      "set_estimations": "Schattingen instellen voor geselecteerde taken:",
       "set_preview": "Preview als thumbnail instellen",
       "set_preview_error": "Er is een fout opgetreden bij het instellen van preview als thumbnail",
-      "set_preview_done": "Deze preview wordt gebruikt als thumbnail voor de huidige entiteit.",
       "select_preview_file": "Selecteer bestanden (afbeeldingen, films, enz.) van je harde schijf om te gebruiken als nieuwe previewrevisie voor de huidige taak:",
       "show_assignations": "Toon toewijzingen",
       "show_infos": "Toon aanvullende informatie",
       "subscribe_notifications": "Zet meldingen aan",
       "tasks": "Taken",
       "validation": "Validatie",
-      "with_comment": "Met een opmerking...",
       "fields": {
         "asset_type": "Assettype",
         "assignees": "Toegewezen personen",
@@ -1827,7 +1775,6 @@
       "create_tasks_edit_explanation": "Je gaat een nieuwe taak aanmaken voor iedere montage van de huidige productie voor het gegeven taaktype. Wil je doorgaan?",
       "create_tasks_edit_failed": "Er is een serverfout opgetreden tijdens het aanmaken van de taken.",
       "smaller": "Taakpaneel verkleinen",
-      "small_thumbnails": "Kleine thumbnails tonen",
       "combobox_departments": {
         "all_departments": "Alle afdelingen",
         "my_departments": "Mijn afdelingen"
@@ -1853,7 +1800,6 @@
       "estimation_approval_late": "Einddatum is laat (feedback)",
       "estimation_done_late": "Einddatum is laat (klaar)",
       "late": "Status „te laat”",
-      "nb_selected_tasks": "{nbSelectedTasks} taak geselecteerd | {nbSelectedTasks} taken geselecteerd",
       "set_thumbnails_from_tasks": "Stel de laatste preview van de geselecteerde taak in als thumbnail | Stel de laatste previews van de {nbSelectedTasks} geselecteerde taken in als thumbnails",
       "to_myself": "Voor mezelf",
       "create_tasks_episode": "Taken toevoegen voor huidige afleveringen",
@@ -1915,7 +1861,6 @@
       "timelog_title": "Tijdlog",
       "title": "Urenstaten",
       "year": "Jaar",
-      "confirm_day_off": "Als je deze dag als vrije dag instelt, wordt alle voor de huidige dag ingevulde tijd gewist. Weet je zeker dat je door wilt gaan?",
       "day_off": "Vrije dag",
       "export_timespents": "Tijdsbesteding voor open producties exporteren als een lijst",
       "unit": "Eenheid",
@@ -2097,8 +2042,7 @@
         "is_default": "Is standaard",
         "name": "Naam",
         "file": "HDRi-bestand"
-      },
-      "library_title": "3D-achtergrondbibliotheek"
+      }
     },
     "board": {
       "title": "Bord",
@@ -2114,7 +2058,6 @@
     "bots": {
       "title": "Bots",
       "bots": "bot | bots",
-      "active_bots": "actieve bot | actieve bots",
       "new_bot": "Een nieuwe bot toevoegen",
       "edit_title": "Bot bewerken",
       "edit_avatar_error": "Er is een fout opgetreden tijdens het bijwerken van de avatar van de bot.",
@@ -2240,7 +2183,6 @@
       "asset_library": "Asset-bibliotheek",
       "from_library": "Uit de asset-bibliotheek",
       "import_from_asset_type": "Importeer alle assets van het geselecteerde type en de geselecteerde productie",
-      "import_from_assets": "Assets importeren uit de geselecteerde productie en het geselecteerde assettype",
       "import_from_list": "Geselecteerde assets importeren uit de lijst",
       "import_from_production": "Alle assets importeren uit de geselecteerde productie",
       "manage": "Assets toevoegen aan je bibliotheek",
@@ -2250,7 +2192,6 @@
       "remove_selected_assets": "Verwijder de geselecteerde asset uit de bibliotheek | Verwijder {nbSelectedAssets} geselecteerde assets uit de bibliotheek",
       "select_asset_type": "Selecteer een asset-type",
       "select_production": "Selecteer een productie",
-      "selected_assets": "Geselecteerde assets",
       "fields": {
         "name": "Naam",
         "production": "Productie",
@@ -2272,7 +2213,6 @@
       "create_budget": "Een nieuw budget maken",
       "create_budget_error": "Er is een fout opgetreden tijdens het opslaan van dit budget. Neem contact op met ons ondersteuningsteam.",
       "delete_budget": "Budget schrappen",
-      "delete_budget_entry": "Item verwijderen",
       "delete_budget_entry_error": "Er is een fout opgetreden tijdens het verwijderen van deze budgetvermelding. Neem contact op met ons ondersteuningsteam.",
       "delete_budget_entry_message": "Weet je zeker dat je deze budgetvermelding wilt verwijderen?",
       "delete_budget_error": "Er is een fout opgetreden tijdens het verwijderen van dit budget. Neem contact op met ons ondersteuningsteam.",
@@ -2280,10 +2220,8 @@
       "difference": "Verschil",
       "edit_budget": "Huidige budgetversie bewerken",
       "edit_budget_entry": "Item bewerken",
-      "edit_budget_entry_error": "Er is een fout opgetreden tijdens het bewerken van deze budgetvermelding. Neem contact op met ons ondersteuningsteam.",
       "entries": "Items",
       "gap": "Afwijking",
-      "hide_expenses": "Echte kosten verbergen",
       "months": "Maanden",
       "new_hiring": "Nieuwe aanwerving",
       "new_version": "Nieuwe versie",
@@ -2385,9 +2323,6 @@
     "project_templates": {
       "add_metadata": "Een metadatakolom toevoegen",
       "apply": "Sjabloon toepassen",
-      "apply_confirm": "Hiermee worden de taaktypes, statussen, assettypes, automatiseringen en metadatadescriptoren van het sjabloon aan deze productie toegevoegd. Bestaande instellingen blijven behouden. Doorgaan?",
-      "apply_to": "Een sjabloon toepassen",
-      "apply_to_description": "Voeg de configuratie van een sjabloon toe aan deze productie. Bestaande instellingen blijven behouden.",
       "click_name_to_edit": "Klik op een sjabloonnaam om de configuratie ervan te bewerken.",
       "create_error": "Er is een fout opgetreden tijdens het opslaan van dit sjabloon. Weet je zeker dat er geen sjabloon met een vergelijkbare naam is?",
       "delete_error": "Er is een fout opgetreden tijdens het verwijderen van dit sjabloon.",
@@ -2400,8 +2335,6 @@
         "entity_type": "Entiteitstype",
         "name": "Naam"
       },
-      "fps_error": "FPS moet een geheel getal tussen 1 en 200 zijn.",
-      "from_production": "Maken vanuit productie",
       "name_required": "Een naam is vereist.",
       "new_project_template": "Een productiesjabloon toevoegen",
       "number": "productiesjabloon | productiesjablonen",
@@ -2444,7 +2377,6 @@
       "no_comments_yet": "Nog geen opmerkingen.",
       "no_preview": "Geen preview",
       "no_status_available": "Er zijn geen taakstatussen geconfigureerd voor deze productie.",
-      "player_placeholder": "De speler wordt hier weergegeven.",
       "post_comment_error": "Kon de opmerking niet plaatsen. Herlaad de pagina en probeer het opnieuw.",
       "review_session": "Reviewsessie",
       "your_name": "Je naam"

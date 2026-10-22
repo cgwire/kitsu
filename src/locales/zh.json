@@ -11,7 +11,6 @@
       "warning": "仅当您亲自从应用程序发起此登录时才授权。该应用程序将以您的权限访问 Kitsu。"
     },
     "assets": {
-      "cast_in": "已分配到",
       "delete_error": "删除此资产时出现错误。可能存在链接至此的数据。您确定没有任务链接至此资产吗？",
       "delete_text": "您确定要从您的数据库移除{name}吗？",
       "edit_fail": "保存失败。可能已存在名称相似的资产。",
@@ -69,7 +68,6 @@
       },
       "include_all": "包括所有资产任务类型",
       "add_asset_type_to_library": "向库中添加资产类型",
-      "library_title": "资产类型库",
       "add_asset_type_placeholder": "+ 添加资产类型"
     },
     "breakdown": {
@@ -102,7 +100,6 @@
         "standby": "待命"
       },
       "save_error": "保存选角时出错",
-      "hide_library": "隐藏资源库",
       "show_library": "显示资源库",
       "filters": {
         "all": "所有行",
@@ -120,22 +117,18 @@
       "change_preview": "更换预览",
       "comment_from_client": "客户留言",
       "edit_title": "编辑评论",
-      "empty_text": "此条评论为空",
       "action_error": "无法保存。请重试。",
       "edit_error": "编辑评论时发生错误。请联系我们的支持团队。",
       "error": "发布评论时出现错误",
-      "no_file_attached": "未附加预览",
       "pin": "置顶",
       "pinned": "已置顶",
       "post_status": "发表评论",
       "retake": "返修",
       "revision": "修订",
-      "set_status_to": "将状态设为",
       "task_placeholder": "新事项...",
       "text": "文本",
       "unpin": "取消置顶",
       "validated": "已确认！",
-      "validation_required": "需要验证",
       "fields": {
         "text": "文本",
         "created_at": "创建日期",
@@ -271,9 +264,6 @@
         "uploader": "上传者",
         "uploaded_at": "上传于"
       },
-      "nb_selected_assets": "已选定 {nbSelectedAssets} 个资产 | 已选定 {nbSelectedAssets} 个资产",
-      "nb_selected_shots": "已选定 {nbSelectedShots} 个镜头 | 已选定 {nbSelectedShots} 个镜头",
-      "nb_selected_edits": "已选定 {nbSelectedEdits} 个剪辑 | 已选定 {nbSelectedEdits} 个剪辑",
       "output_files": {
         "extension": "扩展名",
         "name": "名称",
@@ -685,7 +675,6 @@
       "create_tasks": "创建任务",
       "delete_tasks": "删除任务",
       "run_custom_action": "执行自定义操作",
-      "set_estimations": "设定估算",
       "delete_assets": "删除资产",
       "delete_shots": "删除镜头",
       "delete_edits": "删除剪辑",
@@ -703,7 +692,6 @@
       "no_news": "没有消息。",
       "only_comments": "仅评论",
       "only_previews": "仅预览",
-      "set_preview_on": "设置了预览于",
       "task_status": "任务状态",
       "task_type": "任务类型",
       "title": "消息提要",
@@ -724,10 +712,8 @@
       "no_notifications": "目前没有关于您当前制作的通知。",
       "unread_notifications": "未读通知 | 未读通知",
       "title": "通知",
-      "with_preview": "带有预览",
       "replied_on": "回复了评论",
       "all_types": "所有类型",
-      "new_revision": "新修订已发布",
       "only_assignations": "仅分配",
       "only_comments": "仅评论",
       "only_mentions": "仅提到",
@@ -770,7 +756,6 @@
     },
     "people": {
       "active": "活动",
-      "active_persons": "活跃用户 | 活跃用户",
       "add_member_to_team": "向团队添加成员：",
       "create_invite": "创建用户并发送邀请",
       "create_error": "创建或更新此用户时发生服务器错误。请联系我们的支持团队以获取更多信息。",
@@ -791,7 +776,6 @@
       "no_task_pending": "没有等待反馈的任务",
       "persons": "用户 | 用户",
       "project_role": "项目角色",
-      "running_tasks": "在执行任务",
       "select_person": "选择用户...",
       "team": "团队",
       "title": "人员",
@@ -877,7 +861,6 @@
       "archive_guest_error": "无法归档此访客。请重试。",
       "archived_guests": "已归档的访客",
       "guests": "访客 | 访客",
-      "restore_guest_error": "无法恢复此访客。请重试。",
       "seats_remaining": "无剩余席位 | 剩余 {count} 个席位 | 剩余 {count} 个席位"
     },
     "playlists": {
@@ -906,18 +889,11 @@
       "for_client": "客户",
       "for_studio": "工作室",
       "edit_title": "编辑播放列表",
-      "last_creation": "最后的创建",
-      "last_modification": "最后修改",
       "loading_error": "出现服务器错误。多个播放列表无法被加载。",
       "new_playlist": "添加播放列表",
       "no_build": "无生成版本",
       "no_playlist": "此制作或剧集当前没有播放列表。",
       "no_preview": "无预览",
-      "no_selection": "请从左侧选择播放列表。",
-      "no_sequence_for_episode": "此剧集没有序列",
-      "no_shot_for_production": "此制作没有镜头",
-      "select_shot": "请从右列中选择镜头",
-      "select_playlist": "请从左列中选择播放列表",
       "select_task_type": "更改所有实体的任务类型",
       "title": "播放列表",
       "updated_at": "更新时间：",
@@ -956,7 +932,6 @@
         "split_screen": "与其他任务类型比较",
         "annotation_draw": "绘制注释",
         "current_time": "在视频中的位置",
-        "display_revision": "显示修订",
         "download_file": "下载文件",
         "entity_index": "播放列表中当前实体的索引",
         "entities_number": "播放列表中的实体数量",
@@ -969,14 +944,12 @@
         "looping": "循环播放当前视频",
         "mute": "静音",
         "unmute": "取消静音",
-        "number_of_files": "此修订的文件数",
         "max_duration": "视频时长",
         "see_original_file": "在新标签页中打开原始文件",
         "overlay": "覆盖",
         "side_by_side": "并排",
         "switch_ld": "切换到低清晰度",
         "switch_hd": "切换到高清",
-        "frames_per_picture": "每张图片的帧数",
         "toggle_playing_annotations": "播放影片时显示/隐藏注释",
         "toggle_waveform": "显示/隐藏电影波形",
         "annotation_erase": "清除注释",
@@ -985,7 +958,6 @@
         "annotation_zoom_pan": "重置缩放",
         "default": "默认",
         "exit_play_full": "退出完整影片播放",
-        "object_background": "为 3D 模型设置新的环境贴图",
         "select_background": "选择背景",
         "toggle_environment_skybox": "显示/隐藏天空盒背景",
         "toggle_wireframe": "启用/禁用线框渲染",
@@ -1157,8 +1129,6 @@
         "revision_padding": "修订号补零位数（0 = 不补零）"
       },
       "metadata": {
-        "add_explanation": "添加此制作需要的特定数据。",
-        "add_failed": "向您的制作添加元数据时出现错误。",
         "add_new_values": "当前没有可用值。",
         "available_values": "可用值",
         "choices": "值列表",
@@ -1174,7 +1144,6 @@
         "tags": "标签列表",
         "applies_to_all_projects": "此列将添加到列表中的每个制作。每个制作在列表视图中都可以有自己的值。",
         "delete_list_column_text": "这将从所有制作中移除列“{name}”，包括已存储的值。是否继续？",
-        "target_project": "项目",
         "date": "日期",
         "url": "链接",
         "textarea": "长文本",
@@ -1209,8 +1178,7 @@
           "button": "确定"
         },
         "general_title": "常规",
-        "max_retakes_description": "任务的返修次数达到此数值后，艺术家将无法再设置返修状态。0 表示不限制。",
-        "previews_and_comments": "预览和评论"
+        "max_retakes_description": "任务的返修次数达到此数值后，艺术家将无法再设置返修状态。0 表示不限制。"
       },
       "creation": {
         "add_assets": "添加资产（可选）",
@@ -1236,8 +1204,6 @@
         "import_shots_button": "导入镜头",
         "new_project": "新建制作",
         "open_production": "打开制作",
-        "placeholder_date_start": "开始时间",
-        "placeholder_date_end": "结束时间",
         "placeholder_name": "我的精彩制作",
         "placeholder_fps": "25",
         "placeholder_ratio1": "16",
@@ -1254,8 +1220,6 @@
         "select_task_status_description": "选择您将在制作过程中使用的任务状态。",
         "start_and_end_dates": "开始和结束日期",
         "shots_to_import": "要导入的镜头",
-        "select_edit_task_type": "选择剪辑任务类型",
-        "select_edit_task_type_description": "这些任务类型定义了剪辑的构建步骤。",
         "choose_template": "应用制作模板（可选）",
         "choose_template_description": "选择一个模板以预填充任务类型、任务状态、资产类型、元数据和设置。留空则从头开始配置。",
         "no_template": "无模板"
@@ -1398,7 +1362,6 @@
       "change_logo": "更改Logo",
       "integrations": "集成",
       "logo": "工作室Logo",
-      "no_logo": "没有设置Logo。",
       "set_logo": "设置工作室Logo",
       "title": "设置",
       "fields": {
@@ -1455,13 +1418,10 @@
         "is_wip": "是 WIP"
       },
       "name": "任务状态",
-      "title_entities": "实体的状态",
-      "title_concepts": "概念的状态",
       "help": {
         "entities": "资产、镜头、序列..."
       },
       "add_task_status_to_library": "向任务状态库中添加任务状态",
-      "library_title": "任务状态库",
       "add_task_status_placeholder": "+ 添加任务状态"
     },
     "task_types": {
@@ -1494,8 +1454,7 @@
       "remove_error": "无法移除任务类型。请重试。",
       "remove_title": "移除任务类型",
       "select_task_type": "选择任务类型...",
-      "add_task_type_to_library": "向任务类型库中添加任务类型",
-      "library_title": "任务类型库"
+      "add_task_type_to_library": "向任务类型库中添加任务类型"
     },
     "sequences": {
       "all_hidden": "所有序列均已隐藏。",
@@ -1568,7 +1527,6 @@
       "new_version": "新版本",
       "no_assignee": "无可指派人员",
       "no_entity": "无可指派实体",
-      "overall_man_days": "人天",
       "reset_list": "重置列表",
       "save_task_error": "无法保存任务。请重试。",
       "select_task_type": "选择任务类型",
@@ -1707,9 +1665,6 @@
       "add_preview": "为新预览修订版添加文件",
       "add_preview_error": "添加预览时出现错误。",
       "assign": "将单个任务分配给： | 将{nbSelectedTasks}个任务分配给：",
-      "back_to_list": "返回列表",
-      "bigger": "加宽任务面板",
-      "change_status_to": "将任务状态改为：",
       "change_preview": "更换预览",
       "change_priority": "更改所选任务的优先级 | 更改{nbSelectedTasks}个所选任务的优先级",
       "clear_assignations": "取消所选任务的分配",
@@ -1738,16 +1693,12 @@
       "delete_for_selection": "删除所选的任务 | 删除所选的 {nbSelectedTasks} 个任务",
       "delete_preview": "您确定要删除此预览吗？",
       "delete_preview_error": "删除预览时出现错误。",
-      "edit_comment": "编辑评论",
       "done": "已完成",
       "download_pdf_file": "下载.{extension}文件",
       "feedback": "反馈",
-      "full_screen": "全屏显示",
-      "hide_assignations": "隐藏多个任务分配",
       "hide_infos": "隐藏其他信息",
       "my_tasks": "我的任务",
       "next": "下一个任务",
-      "no_assignation_right": "不允许您管理多个任务分配",
       "no_comment": "此任务当前没有评论。",
       "no_preview": "此任务当前没有预览。",
       "no_task_selected": "未选中任务",
@@ -1755,17 +1706,14 @@
       "preview": "预览",
       "previous": "上一个任务",
       "unsubscribe_notifications": "取消订阅通知",
-      "set_estimations": "为所选任务设置预估：",
       "set_preview": "将此预览设置为缩略图",
       "set_preview_error": "将预览设置为缩略图时出现错误",
-      "set_preview_done": "此预览被用作当前实体的缩略图。",
       "select_preview_file": "请从您的硬盘选择文件（图片、视频等）以用作当前任务的新预览修订版：",
       "show_assignations": "显示多个任务分配",
       "show_infos": "显示其他信息",
       "subscribe_notifications": "订阅通知",
       "tasks": "任务",
       "validation": "确认",
-      "with_comment": "有评论...",
       "fields": {
         "asset_type": "资产类型",
         "assignees": "负责人",
@@ -1827,7 +1775,6 @@
       "create_tasks_edit_explanation": "您将要为当前制作的每个剪辑创建给定任务类型的新任务。要继续吗？",
       "create_tasks_edit_failed": "创建任务时发生服务器错误。",
       "smaller": "缩小任务面板",
-      "small_thumbnails": "显示小缩略图",
       "combobox_departments": {
         "all_departments": "所有部门",
         "my_departments": "我的部门"
@@ -1853,7 +1800,6 @@
       "estimation_approval_late": "晚于截止日期（反馈）",
       "estimation_done_late": "晚于截止日期（完成）",
       "late": "延迟状态",
-      "nb_selected_tasks": "已选定 {nbSelectedTasks} 个任务 | 已选定 {nbSelectedTasks} 个任务",
       "set_thumbnails_from_tasks": "设定所选任务的最后一次预览为缩略图 | 设定所选 {nbSelectedTasks} 个任务的最后一次预览为缩略图",
       "to_myself": "分配给自己",
       "create_tasks_episode": "添加任务到当前剧集",
@@ -1915,7 +1861,6 @@
       "timelog_title": "时间日志",
       "title": "时间表",
       "year": "年",
-      "confirm_day_off": "将这一天设置为休息日将清除当天填写的所有时间。您确定要继续吗？",
       "day_off": "休假",
       "export_timespents": "将开启的制作的耗时记录导出为列表",
       "unit": "单位",
@@ -2097,8 +2042,7 @@
         "is_default": "是否默认",
         "name": "名称",
         "file": "HDRi 文件"
-      },
-      "library_title": "3D 背景库"
+      }
     },
     "board": {
       "title": "看板",
@@ -2114,7 +2058,6 @@
     "bots": {
       "title": "机器人",
       "bots": "机器人 | 机器人",
-      "active_bots": "活跃机器人 | 活跃机器人",
       "new_bot": "添加新机器人",
       "edit_title": "编辑机器人",
       "edit_avatar_error": "更新机器人头像时发生错误。",
@@ -2240,7 +2183,6 @@
       "asset_library": "资产库",
       "from_library": "来自资产库",
       "import_from_asset_type": "从选定的类型和制作中导入所有资产",
-      "import_from_assets": "从选定的制作和资产类型中导入资产",
       "import_from_list": "从列表中导入选定的资产",
       "import_from_production": "从选定的制作中导入所有资产",
       "manage": "将资产添加到您的资料库",
@@ -2250,7 +2192,6 @@
       "remove_selected_assets": "从库中移除所选资产 | 从库中移除所选的 {nbSelectedAssets} 个资产",
       "select_asset_type": "选择资产类型",
       "select_production": "选择制作",
-      "selected_assets": "选定的资产",
       "fields": {
         "name": "名称",
         "production": "制作",
@@ -2272,7 +2213,6 @@
       "create_budget": "创建新预算",
       "create_budget_error": "保存此预算时发生错误。请联系我们的支持团队。",
       "delete_budget": "删除预算",
-      "delete_budget_entry": "删除条目",
       "delete_budget_entry_error": "删除此预算条目时发生错误。请联系我们的支持团队。",
       "delete_budget_entry_message": "您确定要删除此预算条目吗？",
       "delete_budget_error": "删除此预算时发生错误。请联系我们的支持团队。",
@@ -2280,10 +2220,8 @@
       "difference": "差异",
       "edit_budget": "编辑当前预算版本",
       "edit_budget_entry": "编辑条目",
-      "edit_budget_entry_error": "编辑此预算条目时发生错误。请联系我们的支持团队。",
       "entries": "条目",
       "gap": "差距",
-      "hide_expenses": "隐藏实际成本",
       "months": "月数",
       "new_hiring": "新招聘",
       "new_version": "新版本",
@@ -2385,9 +2323,6 @@
     "project_templates": {
       "add_metadata": "添加元数据列",
       "apply": "应用模板",
-      "apply_confirm": "这将把该模板的任务类型、状态、资产类型、自动化和元数据描述符添加到此制作中。现有设置将被保留。是否继续？",
-      "apply_to": "应用模板",
-      "apply_to_description": "将模板的配置添加到此制作中。现有设置将被保留。",
       "click_name_to_edit": "点击模板名称以编辑其配置。",
       "create_error": "保存此模板时发生错误。您确定没有名称相似的模板吗？",
       "delete_error": "删除此模板时发生错误。",
@@ -2400,8 +2335,6 @@
         "entity_type": "实体类型",
         "name": "名称"
       },
-      "fps_error": "FPS 必须是 1 到 200 之间的整数。",
-      "from_production": "从制作创建",
       "name_required": "需要填写名称。",
       "new_project_template": "添加制作模板",
       "number": "制作模板 | 制作模板",
@@ -2444,7 +2377,6 @@
       "no_comments_yet": "尚无评论。",
       "no_preview": "无预览",
       "no_status_available": "此制作未配置任何任务状态。",
-      "player_placeholder": "播放器将显示在此处。",
       "post_comment_error": "无法发布评论。请重新加载页面并重试。",
       "review_session": "审核会话",
       "your_name": "您的姓名"
