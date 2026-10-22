@@ -234,14 +234,16 @@ Formatting that follows the user and organization settings: dates, durations and
 ## i18n
 
 - `src/locales/en.js` is the **source of truth**. Add the key there, then translate it into **every** `<lang>.json` in the same change: vue-i18n falls back to `en`, so a key missing from a locale renders in English without warning. The JSON files nest their messages under a top-level `default` key. `tests/unit/locales/parity.spec.js` fails on any drift, in either direction. The English overlays have no such spec: after any change to `en.js`, run `node scripts/check-locale-overlays.js` (see the overlays below). POEditor was dropped (2026-05): non-English locales are LLM-translated directly in the JSON files.
+- **An `en.js` change that alters what a sentence says is retranslated in every `<lang>.json` in the same commit**, placeholders included (a new or renamed `{name}`). `parity.spec.js` only compares the keys and the plural segments: a locale left alone keeps the old meaning, and nothing warns. A typo, punctuation, or casing fix needs no retranslation.
 - Use `$t()` (or `t()` in `<script setup>`), never `$tc()` (removed in vue-i18n 11).
-- Pluralization with pipe format (`"studio | studios"`): pass a **named object**, `$t('key', { count })`. Every locale picks between the singular and the plural only (`src/lib/i18n.js`, see below), so keep the **same number of `|` segments as en.js** and don't add a language's extra grammatical plural forms.
+- Pluralization with pipe format (`"studio | studios"`): pass a **named object**, `$t('key', { count })`. Every locale picks between the singular and the plural only (`src/lib/i18n.js`, see below), so keep the **same number of `|` segments as en.js** and don't add a language's extra grammatical plural forms. Where a Russian or Polish noun changes after 2, 5, or 21, the plural segment ends on the number, as a label or in parentheses (`Выбрано файлов: {count}`, `Удалить выбранные задачи ({nbSelectedTasks})`).
+- **A number goes inside its message**, as `{count}`, with a plural whenever a noun goes with it: `'{count} file selected | {count} files selected'`. A single form reads "Cast in 1 shots", and a number written next to `$t()` in the template (`{{ n }} {{ $t('key') }}`) leaves no language a way to move it or agree with it (Korean counts `파일 2개`). Some older templates, such as `TaskListNumbers.vue`, still concatenate: don't copy them.
 - For animation/VFX domain terms (shot, frame, onion skin, edit/montage, …), align translations with Blender's official terminology (`blender/blender-translations` `po/<lang>.po`, or the translated manual at `docs.blender.org/manual/<lang>/`).
 
 ```vue
 <template>
   <!-- Plural takes an object, never a bare number -->
-  {{ $t('studios.number', { count: entries.length }) }}
+  {{ $t('main.files_selected', { count: files.length }) }}
 </template>
 
 <script setup>
