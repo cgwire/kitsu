@@ -32,7 +32,7 @@ export default {
   breakdown: {
     remove: {
       confirm: 'Remove asset from its chapter',
-      text: 'If you remove this asset from the selected chapter, it will remove the assets in all the underlying maps. Are you sure you want to remove it?'
+      text: 'If you remove this asset from the selected chapter, it will also be removed from all the underlying maps. Are you sure you want to remove it?'
     }
   },
 
@@ -55,14 +55,14 @@ export default {
   entities: {
     nb_selected_shots: '{nbSelectedShots} map selected | {nbSelectedShots} maps selected',
     thumbnails: {
-      edits_tvshow_pattern: '"ChapterName EditName" eg. CH01_Trailer.',
-      shots_pattern: '"LevelName MapName" eg. LV01_MP01.'
+      edits_tvshow_pattern: '"ChapterName EditName" e.g. CH01_Trailer.',
+      shots_pattern: '"LevelName MapName" e.g. LV01_MP01.'
     }
   },
 
   episodes: {
     all_hidden: 'All chapters are hidden.',
-    edit_error: 'An error occurred while saving this chapter. Are you sure there is no chapter with similar name?',
+    edit_error: 'An error occurred while saving this chapter. Are you sure there is no chapter with a similar name?',
     delete_error: 'An error occurred while deleting this chapter. There may be existing data currently linked to it. Are you sure this chapter has no level linked to it?',
     delete_text: 'Are you sure you want to remove {name} from your database? All related maps and previews will also be deleted. Please confirm by typing the chapter name below.',
     edit_title: 'Edit chapter',
@@ -75,7 +75,7 @@ export default {
     restore_error: 'An error occurred while restoring this chapter.',
     tasks: 'Chapter tasks',
     title: 'Chapters',
-    stats_title: 'Chapters Stats',
+    stats_title: 'Chapter Stats',
     fields: {
       placeholder: 'CH01'
     }
@@ -92,7 +92,7 @@ export default {
       preview_episode_name: 'Chapter name'
     },
     edl: {
-      explanation: 'It\'s possible to import common OpenTimeLineIO supported files (otio, fcp_xml, fcpx_xml, edl). Maps will be created or updated with the given frame range, frame in and frame out. Frame in starts at 0.'
+      explanation: 'It\'s possible to import common OpenTimelineIO supported files (otio, fcp_xml, fcpx_xml, edl). Maps will be created or updated with the given frame range, frame in, and frame out. Frame in starts at 0.'
     }
   },
 
@@ -116,8 +116,8 @@ export default {
   productions: {
     delete_error: 'An error occurred while deleting this production. There may be existing data currently linked to it. Are you sure this production has no task, map, or asset linked to it? Kitsu doesn\'t allow production deletion. If you don\'t want to see the production anymore, you can close it instead.',
     clients: {
-      access_task_list: 'Asset, map and edit lists',
-      access_task_list_description: 'Clients can open the asset, map and edit lists and their pages.',
+      access_task_list: 'Asset, map, and edit lists',
+      access_task_list_description: 'Clients can open the asset, map, and edit lists and their pages.',
       metadata_description: 'Checked metadata columns are shown to clients in the asset and map lists.'
     },
     creation: {
@@ -208,7 +208,7 @@ export default {
     sequences: 'Levels',
     tasks: 'Map tasks',
     title: 'Maps',
-    wrong_file_duration: 'One of the uploaded video file duration doesn\'t match the expected duration of the current map.',
+    wrong_file_duration: 'The duration of one of the uploaded video files doesn\'t match the expected duration of the current map.',
     fields: {
       episode: 'Chapter',
       placeholder: 'MP01',

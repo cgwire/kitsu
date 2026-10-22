@@ -25,7 +25,7 @@ export default {
 
   breakdown: {
     remove: {
-      text: 'If you remove this asset from the selected episode, it will remove the assets in all the underlying NFTs. Are you sure you want to remove it?'
+      text: 'If you remove this asset from the selected episode, it will also be removed from all the underlying NFTs. Are you sure you want to remove it?'
     }
   },
 
@@ -44,7 +44,7 @@ export default {
   entities: {
     nb_selected_shots: '{nbSelectedShots} NFT selected | {nbSelectedShots} NFTs selected',
     thumbnails: {
-      shots_pattern: '"SequenceName NFTName" eg. SQ01_NFT01.'
+      shots_pattern: '"SequenceName NFTName" e.g. SQ01_NFT01.'
     }
   },
 
@@ -60,7 +60,7 @@ export default {
   main: {
     all_shots: 'All NFTs',
     edl: {
-      explanation: 'It\'s possible to import common OpenTimeLineIO supported files (otio, fcp_xml, fcpx_xml, edl). NFTs will be created or updated with the given frame range, frame in and frame out. Frame in starts at 0.'
+      explanation: 'It\'s possible to import common OpenTimelineIO supported files (otio, fcp_xml, fcpx_xml, edl). NFTs will be created or updated with the given frame range, frame in, and frame out. Frame in starts at 0.'
     }
   },
 
@@ -78,8 +78,8 @@ export default {
   productions: {
     delete_error: 'An error occurred while deleting this production. There may be existing data currently linked to it. Are you sure this production has no task, NFT, or asset linked to it? Kitsu doesn\'t allow production deletion. If you don\'t want to see the production anymore, you can close it instead.',
     clients: {
-      access_task_list: 'Asset, NFT and edit lists',
-      access_task_list_description: 'Clients can open the asset, NFT and edit lists and their pages.',
+      access_task_list: 'Asset, NFT, and edit lists',
+      access_task_list_description: 'Clients can open the asset, NFT, and edit lists and their pages.',
       metadata_description: 'Checked metadata columns are shown to clients in the asset and NFT lists.'
     },
     creation: {
@@ -141,7 +141,7 @@ export default {
     restore_error: 'An error occurred while restoring this NFT.',
     tasks: 'NFT tasks',
     title: 'NFT Collection',
-    wrong_file_duration: 'One of the uploaded video file duration doesn\'t match the expected duration of the current NFT.',
+    wrong_file_duration: 'The duration of one of the uploaded video files doesn\'t match the expected duration of the current NFT.',
     fields: {
       placeholder: "NFT01"
     }

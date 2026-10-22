@@ -12,7 +12,7 @@
     },
     "assets": {
       "cast_in": "Presente in",
-      "delete_error": "Si è verificato un errore durante l'eliminazione di questo asset. Potrebbero esserci dati esistenti attualmente collegati. Sei sicuro che a questo tipo di asset non sia collegato nessun task?",
+      "delete_error": "Si è verificato un errore durante l'eliminazione di questo asset. Potrebbero esserci dati esistenti attualmente collegati. Sei sicuro che a questo asset non sia collegato nessun task?",
       "delete_text": "Sei sicuro di voler rimuovere {name} dal database?",
       "edit_fail": "Salvataggio non riuscito. Potrebbe già esistere un asset con un nome simile.",
       "edit_success": "Asset {name} modificato con successo.",
@@ -63,7 +63,7 @@
       "production_title": "Statistiche dei tipi di asset",
       "fields": {
         "name": "Nome",
-        "task_types": "Workflow",
+        "task_types": "Flusso di lavoro",
         "short_name": "Nome breve",
         "description": "Descrizione"
       },
@@ -96,10 +96,10 @@
       "remove": {
         "confirm": "Rimuovi l'asset dal suo episodio",
         "error": "Si è verificato un errore del server durante la rimozione dell'asset. Riprova. Se il problema persiste, contatta il nostro team di supporto.",
-        "text": "Se rimuovi questo asset dall'episodio selezionato, verranno rimossi gli asset in tutti gli shot sottostanti. Sei sicuro di volerlo rimuovere?"
+        "text": "Se rimuovi questo asset dall'episodio selezionato, verrà rimosso anche da tutti gli shot sottostanti. Sei sicuro di volerlo rimuovere?"
       },
       "fields": {
-        "standby": "Stand by"
+        "standby": "In attesa"
       },
       "save_error": "Errore durante il salvataggio del casting",
       "hide_library": "Nascondi la libreria",
@@ -142,7 +142,7 @@
         "task_status": "Stato del task",
         "person": "Nome della persona",
         "checklist": "Checklist",
-        "acknowledgements": "Approvazioni",
+        "acknowledgements": "Prese visione",
         "revision": "Revisione",
         "attachments": "Allegati"
       },
@@ -162,7 +162,7 @@
       "add_attachment_to_reply": "Aggiungi un allegato alla risposta",
       "add_frame_to_comment": "Aggiungi il fotogramma corrente al commento",
       "add_emoji": "Aggiungi un'emoji",
-      "for_client_badge": "Testo visibile al cliente",
+      "for_client_badge": "Testo visibile ai clienti",
       "for_client_off": "Testo non visibile ai clienti. Clicca per rendere il testo visibile ai clienti",
       "for_client_on": "Testo visibile ai clienti. Clicca per rendere il testo non visibile ai clienti",
       "move_modal": {
@@ -194,7 +194,7 @@
       "edit_title": "Modifica un'azione personalizzata",
       "new_custom_action": "Aggiungi un'azione personalizzata",
       "number": "azione personalizzata | azioni personalizzate",
-      "run_for_selection": "Esegui l'azione personalizzata per il task selezionato | Esegui le azioni personalizzate per i {nbSelectedTasks} task selezionati",
+      "run_for_selection": "Esegui l'azione personalizzata per il task selezionato | Esegui l'azione personalizzata per i {nbSelectedTasks} task selezionati",
       "title": "Azioni personalizzate",
       "fields": {
         "name": "Nome",
@@ -305,8 +305,8 @@
       "number": "episodio | episodi",
       "title": "Episodi",
       "fields": {
-        "name": "nome",
-        "description": "descrizione",
+        "name": "Nome",
+        "description": "Descrizione",
         "time_spent": "Tempo",
         "placeholder": "E01"
       },
@@ -355,7 +355,7 @@
       "next_annotation": "Annotazione successiva",
       "next_frame": "Fotogramma successivo",
       "pan_image": "Sposta l'immagine",
-      "zoom_image": "Zooma l'immagine",
+      "zoom_image": "Ingrandisci o riduci l'immagine",
       "paste_annotation": "Incolla l'annotazione",
       "play_pause": "Riproduci / pausa",
       "play_pause_typing": "Riproduci / pausa (anche mentre scrivi un commento)",
@@ -457,7 +457,7 @@
       "end_date": "Data di fine",
       "files_selected": "file selezionati",
       "for": "Per",
-      "go_productions": "Torna alle produzioni",
+      "go_productions": "Torna alla produzione",
       "history": "cronologia",
       "info": "Informazioni",
       "or": "o",
@@ -518,7 +518,7 @@
         "preview_title": "Anteprima dei dati importati",
         "preview_description": "Carica un file .csv per popolare la tabella delle entità.",
         "preview_required": "Le intestazioni servono a far corrispondere le colonne ai dati da impostare. Devono essere incluse nella prima riga.",
-        "preview_reupload": "Ricarica il file .CSV",
+        "preview_reupload": "Ricarica il file .csv",
         "required_fields": "Il file CSV deve contenere le seguenti colonne:",
         "select_file": "Seleziona un file da una delle tue cartelle:",
         "tab_select_file": "Carica un file CSV",
@@ -540,7 +540,7 @@
       "after": "Dopo",
       "before": "Prima",
       "from": "Da",
-      "home": "torna alla pagina iniziale",
+      "home": "Torna alla pagina iniziale",
       "less_filters": "Meno filtri",
       "more_filters": "Più filtri",
       "reload": "Ricarica",
@@ -591,7 +591,7 @@
         "upload_edl": "Carica EDL",
         "naming_convention": "Convenzione di denominazione",
         "match_case": "Rispetta maiuscole/minuscole",
-        "explanation": "È possibile importare i formati OpenTimeLineIO più comuni (otio, fcp_xml, fcpx_xml, edl). Gli shot verranno creati o aggiornati con l'intervallo di fotogrammi, il fotogramma in e il fotogramma out indicati. Il fotogramma in parte da 0."
+        "explanation": "È possibile importare i formati OpenTimelineIO più comuni (otio, fcp_xml, fcpx_xml, edl). Gli shot verranno creati o aggiornati con l'intervallo di fotogrammi, il fotogramma in e il fotogramma out indicati. Il fotogramma in parte da 0."
       },
       "active": "Attivo",
       "activity": "Attività",
@@ -735,7 +735,7 @@
       "assigned_you": "ti ha assegnato questo task",
       "commented_on": "ha commentato",
       "mention_you_on": "ti ha menzionato in un commento",
-      "no_notifications": "Al momento non ci sono notifiche per le tue produzioni in corso.",
+      "no_notifications": "Non ci sono notifiche per le tue produzioni in corso.",
       "unread_notifications": "notifica non letta | notifiche non lette",
       "title": "Notifiche",
       "with_preview": "con un'anteprima",
@@ -787,8 +787,8 @@
       "invite_link_error": "Si è verificato un errore durante la generazione del link di invito",
       "new_person": "Aggiungi un nuovo utente",
       "no_task_assigned": "Non ci sono task in corso assegnati a te",
-      "no_task_done": "Non hai ancora attività validate",
-      "no_task_pending": "Nessuna attività è in attesa di un feedback",
+      "no_task_done": "Non hai ancora task validati",
+      "no_task_pending": "Nessun task è in attesa di un feedback",
       "persons": "utente | utenti",
       "project_role": "Ruolo di progetto",
       "running_tasks": "Task in corso",
@@ -831,7 +831,7 @@
         "seniority": "Anzianità"
       },
       "role": {
-        "admin": "Studio Manager",
+        "admin": "Responsabile dello studio",
         "client": "Cliente",
         "manager": "Responsabile di produzione",
         "user": "Artista",
@@ -1055,7 +1055,7 @@
     },
     "productions": {
       "clients": {
-        "access_description": "Queste impostazioni scelgono cosa vedono i clienti di questa produzione, account di anteprima incluso.",
+        "access_description": "Queste impostazioni definiscono cosa vedono i clienti di questa produzione, account di anteprima incluso.",
         "access_stats": "Pagine delle statistiche",
         "access_stats_description": "I clienti possono aprire le pagine delle statistiche di questa produzione.",
         "access_task_list": "Liste di asset, shot e montaggi",
@@ -1076,18 +1076,18 @@
         "error": "Si è verificato un errore durante l'aggiornamento dell'account di anteprima.",
         "isolation_description": "Ogni cliente vede solo i propri commenti e quelli condivisi con i clienti, non quelli degli altri clienti.",
         "isolation_title": "Isolamento dei clienti",
-        "metadata_description": "Le colonne di metadati selezionate sono mostrate ai clienti negli elenchi di asset e inquadrature.",
+        "metadata_description": "Le colonne di metadati selezionate sono mostrate ai clienti negli elenchi di asset e shot.",
         "metadata_empty": "Questa produzione non ha metadati.",
         "metadata_title": "Metadati visibili ai clienti",
         "open_for_hour": "Apri per 1 ora",
         "open_until": "Aperto fino alle {time}",
         "password": "Password (mostrata una sola volta)",
-        "password_hint": "Copiala ora. Accedi con questa e-mail in una finestra privata.",
+        "password_hint": "Copiala ora. Accedi con questa email in una finestra privata.",
         "preview_title": "Account di anteprima",
         "regenerate": "Rigenera password",
         "save_error": "Si è verificato un errore durante il salvataggio delle impostazioni.",
         "statuses_description": "I clienti possono impostare gli stati selezionati quando commentano. Per impostazione predefinita, ogni stato segue l'impostazione dello studio.",
-        "statuses_empty": "Questa produzione non ha stati delle attività.",
+        "statuses_empty": "Questa produzione non ha stati dei task.",
         "statuses_overridden": "Impostato per questa produzione",
         "statuses_studio_default": "Predefinito dello studio",
         "statuses_title": "Stati disponibili per i clienti",
@@ -1127,7 +1127,7 @@
         "title": "Le mie produzioni",
         "welcome": "Ti diamo il benvenuto su Kitsu",
         "welcome_text": "Qui {studio} condivide il suo lavoro con te. Segui l'avanzamento di ogni produzione, guarda le ultime playlist e lascia i tuoi commenti.",
-        "welcome_title": "Benvenuto in {studio}"
+        "welcome_title": "Ti diamo il benvenuto in {studio}"
       },
       "fields": {
         "fps": "FPS",
@@ -1163,7 +1163,7 @@
         "available_values": "Valori disponibili",
         "choices": "Elenco di valori",
         "delete_text": "Sei sicuro di voler eliminare questa colonna e i dati associati per tutti gli asset di questa produzione?",
-        "delete_list_column_text": "Questa operazione rimuoverà la colonna “{name}” da tutti i progetti, inclusi i valori salvati. Vuoi continuare?",
+        "delete_list_column_text": "Questa operazione rimuoverà la colonna “{name}” da tutte le produzioni, inclusi i valori salvati. Vuoi continuare?",
         "delete_error": "Si è verificato un errore durante l'eliminazione di questa colonna di metadati.",
         "error": "Si è verificato un errore durante l'aggiunta della colonna di metadati. Assicurati che non esista una colonna con un nome simile e che tutti i campi siano compilati. Se il problema persiste, contatta il team di supporto.",
         "title": "Aggiungi una colonna di metadati",
@@ -1173,7 +1173,7 @@
         "number": "Numero",
         "string": "Testo",
         "tags": "Elenco di tag",
-        "applies_to_all_projects": "Questa colonna viene aggiunta a tutti i progetti dell'elenco. Ogni progetto può avere il proprio valore nella vista a elenco.",
+        "applies_to_all_projects": "Questa colonna viene aggiunta a tutte le produzioni dell'elenco. Ogni produzione può avere il proprio valore nella vista a elenco.",
         "target_project": "Progetto",
         "date": "Data",
         "url": "Link",
@@ -1210,7 +1210,7 @@
         },
         "general_title": "Generale",
         "max_retakes_description": "Gli artisti non possono più impostare uno stato di retake quando un task raggiunge questo numero di retake. 0 significa nessun limite.",
-        "previews_and_comments": "Preview e commenti"
+        "previews_and_comments": "Anteprime e commenti"
       },
       "creation": {
         "add_assets": "Aggiungi asset (facoltativo)",
@@ -1289,9 +1289,9 @@
         "bitrate_max": "Massimo: {value} Mbit/s",
         "bitrate_size": "Circa {size} MB al minuto",
         "bitrates": "Bitrate",
-        "encoding_explanation": "I video caricati vengono convertiti a questa frequenza fotogrammi, proporzione e risoluzione; le anteprime esistenti non vengono ricodificate.",
+        "encoding_explanation": "I video caricati vengono convertiti a questa frequenza fotogrammi, a queste proporzioni e a questa risoluzione; le anteprime esistenti non vengono ricodificate.",
         "encoding_title": "Codifica",
-        "frame_in_description": "Il contatore del player parte dal fotogramma in dell'inquadratura invece che da 0.",
+        "frame_in_description": "Il contatore del player parte dal fotogramma in dello shot invece che da 0.",
         "hd_bitrate_description": "Versione a piena risoluzione, riprodotta in modalità HD e usata per i download.",
         "ld_bitrate_description": "Versione più leggera, larga 1280 pixel, riprodotta in modalità LD.",
         "ld_bitrate_max": "Massimo: {value} Mbit/s (bitrate HD)",
@@ -1487,7 +1487,7 @@
       },
       "no_task_types": "Non ci sono tipi di task per questo tipo di entità",
       "add_task_type_placeholder": "+ Aggiungi tipo di task",
-      "production_description": "Le attività di questa produzione possono usare solo i tipi di attività elencati qui.",
+      "production_description": "I task di questa produzione possono usare solo i tipi di task elencati qui.",
       "remaining_tasks": "{name} ha ancora {count} task in questa produzione. Rimuovere il tipo di task non lo elimina. | {name} ha ancora {count} task in questa produzione. Rimuovere il tipo di task non li elimina.",
       "remaining_tasks_delete": "Elimina anche questo task, con i suoi commenti e le sue anteprime | Elimina anche questi {count} task, con i loro commenti e le loro anteprime",
       "remaining_tasks_lock": "Digita {name} per confermare l'eliminazione",
@@ -1547,9 +1547,9 @@
       "export_error": "Si è verificato un errore durante l'esportazione dei dati.",
       "fields": {
         "create_from_version": "Crea nuova o a partire da una versione",
-        "new": "nuova pianificazione",
-        "name": "nome della versione",
-        "locked": "versione bloccata"
+        "new": "Nuova pianificazione",
+        "name": "Nome della versione",
+        "locked": "Versione bloccata"
       },
       "force_unassign": "Sovrascrivi le assegnazioni precedenti",
       "forced_daily_quotas": "Quote giornaliere forzate:",
@@ -1616,8 +1616,8 @@
       "explanation_feedback": "Lo shot è considerato completato alla prima richiesta di feedback. Il suo numero di fotogrammi viene aggiunto alle quote di quel giorno.",
       "done_date": "Data di approvazione",
       "explanation_done": "Lo shot è considerato completato all'ultima approvazione. Il suo numero di fotogrammi viene aggiunto alle quote di quel giorno.",
-      "explanation_weighted": "Gli shot sono considerati completati alla prima richiesta di feedback. Le quote vengono poi ponderate in base al tempo dedicato al task, come registrato nel timesheet dell'artista.\n\n Se non viene registrato alcun tempo, si assume che:\n* Il task è iniziato al primo cambio di stato in WIP.\n* Il task è stato completato il giorno in cui è stata fatta la richiesta di feedback.\n * I fotogrammi completati sono distribuiti uniformemente tra tutti i giorni lavorativi compresi tra la data di inizio e quella di fine.",
-      "explanation_weighteddone": "Gli shot sono considerati completati all'ultima approvazione. Le quote vengono poi ponderate in base al tempo dedicato al task, come registrato nel timesheet dell'artista.\n\n Se non viene registrato alcun tempo, si assume che:\n* Il task è iniziato al primo cambio di stato in WIP.\n* Il task è stato completato il giorno in cui è stato approvato.\n * I fotogrammi completati sono distribuiti uniformemente tra tutti i giorni lavorativi compresi tra la data di inizio e quella di fine.",
+      "explanation_weighted": "Gli shot sono considerati completati alla prima richiesta di feedback. Le quote vengono poi ponderate in base al tempo dedicato al task, come registrato nel timesheet dell'artista.\n\nSe non viene registrato alcun tempo, si assume che:\n* Il task è iniziato al primo cambio di stato in WIP.\n* Il task è stato completato il giorno in cui è stata fatta la richiesta di feedback.\n* I fotogrammi completati sono distribuiti uniformemente tra tutti i giorni lavorativi compresi tra la data di inizio e quella di fine.",
+      "explanation_weighteddone": "Gli shot sono considerati completati all'ultima approvazione. Le quote vengono poi ponderate in base al tempo dedicato al task, come registrato nel timesheet dell'artista.\n\nSe non viene registrato alcun tempo, si assume che:\n* Il task è iniziato al primo cambio di stato in WIP.\n* Il task è stato completato il giorno in cui è stato approvato.\n* I fotogrammi completati sono distribuiti uniformemente tra tutti i giorni lavorativi compresi tra la data di inizio e quella di fine.",
       "weighted_done": "Ponderato (approvazione)",
       "drawings": "Disegni"
     },
@@ -1854,7 +1854,7 @@
       "estimation_done_late": "Scadenza superata (terminato)",
       "late": "Stato di ritardo",
       "nb_selected_tasks": "{nbSelectedTasks} task selezionato | {nbSelectedTasks} task selezionati",
-      "set_thumbnails_from_tasks": "Usa l'ultima anteprima del task selezionato come miniatura | Usa le ultime anteprime dei task selezionati come miniature",
+      "set_thumbnails_from_tasks": "Usa l'ultima anteprima del task selezionato come miniatura | Usa le ultime anteprime dei {nbSelectedTasks} task selezionati come miniature",
       "to_myself": "A me",
       "create_tasks_episode": "Aggiungi task per gli episodi visualizzati",
       "create_tasks_episode_explanation": "Stai per creare un nuovo task per ogni episodio della produzione corrente per il tipo di task indicato. Vuoi continuare?",
@@ -2030,7 +2030,7 @@
       "change_status": "imposta lo stato del task a",
       "create_error": "Si è verificato un errore durante il salvataggio di questa automazione di stato. Sei sicuro che non esista un'altra automazione con lo stesso nome?",
       "delete_text": "Sei sicuro di voler rimuovere l'automazione di stato {name} dal database?",
-      "delete_error": "Si è verificato un errore durante l'eliminazione di questa automazione di stato. Potrebbe essere collegata a un progetto. In tal caso, devi prima rimuoverla da ogni produzione.",
+      "delete_error": "Si è verificato un errore durante l'eliminazione di questa automazione di stato. Potrebbe essere collegata a una produzione. In tal caso, devi prima rimuoverla da ogni produzione.",
       "edit_title": "Modifica un'automazione di stato",
       "entity_title": "Tipo di entità interessato dal trigger",
       "number": "automazione di stato | automazioni di stato",
@@ -2383,7 +2383,7 @@
       "archive": "Archivia"
     },
     "project_templates": {
-      "add_metadata": "Aggiungi un metadato",
+      "add_metadata": "Aggiungi una colonna di metadati",
       "apply": "Applica il modello",
       "apply_confirm": "Questo aggiungerà a questa produzione i tipi di task, gli stati, i tipi di asset, le automazioni e i descrittori di metadati del modello. Le impostazioni esistenti vengono conservate. Vuoi continuare?",
       "apply_to": "Applica un modello",
@@ -2422,9 +2422,9 @@
       },
       "backgrounds_explanation": "Sfondi 3D offerti nel player per le anteprime 3D delle produzioni create da questo modello.",
       "clients": {
-        "access_description": "Queste impostazioni scelgono cosa vedono i clienti nelle produzioni create da questo modello, account di anteprima incluso.",
+        "access_description": "Queste impostazioni definiscono cosa vedono i clienti nelle produzioni create da questo modello, account di anteprima incluso.",
         "access_stats_description": "I clienti possono aprire le pagine delle statistiche della produzione.",
-        "statuses_empty": "Questo modello non ha alcuno stato di attività.",
+        "statuses_empty": "Questo modello non ha alcuno stato dei task.",
         "statuses_overridden": "Impostato per questo modello"
       }
     },
@@ -2443,7 +2443,7 @@
       "name_placeholder": "Mario Rossi",
       "no_comments_yet": "Ancora nessun commento.",
       "no_preview": "Nessuna anteprima",
-      "no_status_available": "Nessuno stato dei task è configurato per questo progetto.",
+      "no_status_available": "Nessuno stato dei task è configurato per questa produzione.",
       "player_placeholder": "Il player verrà visualizzato qui.",
       "post_comment_error": "Impossibile pubblicare il commento. Ricarica la pagina e riprova.",
       "review_session": "Sessione di revisione",
