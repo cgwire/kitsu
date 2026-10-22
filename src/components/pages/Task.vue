@@ -496,7 +496,7 @@ import {
 } from 'lucide-vue-next'
 
 import { isListOfPageLoaded } from '@/composables/entity'
-import { isClientThread } from '@/lib/comments'
+import { isCommentReplyable } from '@/lib/comments'
 import drafts from '@/lib/drafts'
 import { logRequestFailure } from '@/lib/errors'
 import func from '@/lib/func'
@@ -1360,27 +1360,16 @@ const confirmDeleteTaskComment = () => {
     })
 }
 
-// The client is shown who answers the threads it sees: there, the production
-// managers answer for the studio, and the client once mentioned. The other
-// threads reach the client emptied of their text, so only the studio answers.
-const canReplyTo = comment => {
-  if (isCurrentUserManager.value) return true
-  const isAuthor = Boolean(user.value) && user.value.id === comment.person?.id
-  if (isCurrentUserClient.value) {
-    return (
-      isAuthor ||
-      (isClientThread(comment, teamRoles.value) &&
-        (isAssigned.value || isMentioned.value))
-    )
-  }
-  return (
-    !isClientThread(comment, teamRoles.value) &&
-    (isAuthor ||
-      isAssigned.value ||
-      isMentioned.value ||
-      isDepartmentSupervisor.value)
-  )
-}
+const canReplyTo = comment =>
+  isCommentReplyable(comment, {
+    user: user.value,
+    teamRoles: teamRoles.value,
+    isManager: isCurrentUserManager.value,
+    isClient: isCurrentUserClient.value,
+    isAssigned: isAssigned.value,
+    isMentioned: isMentioned.value,
+    isDepartmentSupervisor: isDepartmentSupervisor.value
+  })
 
 const isStatusChange = index => {
   const comments = taskComments.value

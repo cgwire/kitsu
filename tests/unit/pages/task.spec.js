@@ -407,6 +407,22 @@ describe('Task.vue', () => {
           own: true
         })
       })
+
+      it('answers the clients of its studio', async () => {
+        const { wrapper } = await mountPage({
+          comments: [
+            {
+              id: 'same-studio',
+              person: { id: 'client-2', role: 'client', studio_id: 'studio-1' }
+            }
+          ],
+          getterOverrides: {
+            isCurrentUserClient: () => true,
+            user: () => ({ id: 'user-1', departments: [], studio_id: 'studio-1' })
+          }
+        })
+        expect(replyable(wrapper)).toEqual({ 'same-studio': true })
+      })
     })
 
     it('lets a manager answer every thread', async () => {
