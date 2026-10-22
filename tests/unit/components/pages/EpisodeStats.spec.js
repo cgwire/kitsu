@@ -128,17 +128,18 @@ describe('EpisodeStats page', () => {
     })
 
     test('keeps the hidden task type out of the totals and the export', async () => {
-      const generateRetakeStatReports = vi
-        .spyOn(csv, 'generateRetakeStatReports')
+      const generateStatReports = vi
+        .spyOn(csv, 'generateStatReports')
         .mockImplementation(() => {})
       await mountPage({
         getters: {
-          clientAccess: () => ({ isTaskTypeVisible: id => id !== 'anim' })
+          clientAccess: () => ({ isTaskTypeVisible: id => id !== 'anim' }),
+          isCurrentUserClient: () => true
         }
       })
-      expect(listProps().episodeRetakeStats.all.all.retake.count).toBe(1)
+      expect(listProps().episodeStats.all.all.done.count).toBe(1)
       await findButton('download').vm.$emit('click')
-      const [, stats] = generateRetakeStatReports.mock.calls[0]
+      const [, stats] = generateStatReports.mock.calls[0]
       expect(Object.keys(stats.all).sort()).toEqual(['all', 'layout'])
     })
 
@@ -162,6 +163,30 @@ describe('EpisodeStats page', () => {
     test('keeps the search from a client', async () => {
       await mountPage({ getters: { isCurrentUserClient: () => true } })
       expect(wrapper.findComponent(SearchField).exists()).toBe(false)
+    })
+
+    // Zou refuses the retake stats to clients since 1.0.97.
+    test('keeps the retakes mode from a client', async () => {
+      await mountPage({ getters: { isCurrentUserClient: () => true } })
+      const labels = wrapper
+        .findAllComponents(Combobox)
+        .map(box => box.props('label'))
+      expect(labels).not.toContain('statistics.data_mode')
+      expect(listProps().dataMode).toBe('status')
+      expect(listProps().episodeRetakeStats).toEqual({})
+    })
+
+    test('exports the status stats for a client', async () => {
+      const generateRetakeStatReports = vi
+        .spyOn(csv, 'generateRetakeStatReports')
+        .mockImplementation(() => {})
+      const generateStatReports = vi
+        .spyOn(csv, 'generateStatReports')
+        .mockImplementation(() => {})
+      await mountPage({ getters: { isCurrentUserClient: () => true } })
+      await findButton('download').vm.$emit('click')
+      expect(generateStatReports).toHaveBeenCalled()
+      expect(generateRetakeStatReports).not.toHaveBeenCalled()
     })
   })
 
