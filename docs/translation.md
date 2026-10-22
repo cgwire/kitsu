@@ -23,11 +23,13 @@ are organized, how to add or change a key, and how to add a whole language.
 1. Add it to `en.js` first (single-quoted; escape apostrophes as `\'`).
 2. Add the same path to the other locale files (JSON, double-quoted). Missing
    ones fall back to English, but keeping locales in sync is preferred.
-3. If the English value mentions **shot**, **sequence** or **episode**, update
-   the overlays — `en_nft.js` (_shot → NFT_) and `en_video-game.js`
-   (_shot → map_, _sequence → level_, _episode → chapter_) — but only for keys
-   whose wording actually differs. When you **rename** a key in `en.js`, rename
-   it in the overlays too, or the stale override leaks the English word.
+3. If the English value mentions **shot**, **sequence**, or **episode**, update
+   the overlays (`en_nft.js`: _shot → NFT_; `en_video-game.js`: _shot → map_,
+   _sequence → level_, _episode → chapter_), but only for keys whose wording
+   actually differs. When you **rename** a key in `en.js`, rename it in the
+   overlays too, or the stale override leaks the English word. Then run
+   `node scripts/check-locale-overlays.js` until it prints nothing: it lists
+   every missing, dead, or outdated override with the value it expects.
 
 Read keys with `$t('key')` / `t('key')`. Pluralize with the pipe format
 (`'shot | shots'`) and a count (`$t('shots.number', count)`); never `$tc()`
@@ -81,4 +83,6 @@ Preserve the machine-readable parts of each value:
 - `npm run test:unit` and `npm run build` import every locale, so malformed JSON
   or a broken `en.js` fails fast.
 - Diff your key structure against `en.js`.
+- `node scripts/check-locale-overlays.js` checks the English overlays against
+  `en.js`, and prints nothing when they follow it.
 - `npm run dev` hot-swaps locale edits so you can review wording in context.

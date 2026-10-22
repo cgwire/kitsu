@@ -233,7 +233,7 @@ Formatting that follows the user and organization settings: dates, durations and
 
 ## i18n
 
-- `src/locales/en.js` is the **source of truth**. Add the key there, then translate it into **every** `<lang>.json` in the same change: vue-i18n falls back to `en`, so a key missing from a locale renders in English without warning. The JSON files nest their messages under a top-level `default` key. `tests/unit/locales/parity.spec.js` fails on any drift, in either direction. POEditor was dropped (2026-05): non-English locales are LLM-translated directly in the JSON files.
+- `src/locales/en.js` is the **source of truth**. Add the key there, then translate it into **every** `<lang>.json` in the same change: vue-i18n falls back to `en`, so a key missing from a locale renders in English without warning. The JSON files nest their messages under a top-level `default` key. `tests/unit/locales/parity.spec.js` fails on any drift, in either direction. The English overlays have no such spec: after any change to `en.js`, run `node scripts/check-locale-overlays.js` (see the overlays below). POEditor was dropped (2026-05): non-English locales are LLM-translated directly in the JSON files.
 - Use `$t()` (or `t()` in `<script setup>`), never `$tc()` (removed in vue-i18n 11).
 - Pluralization with pipe format (`"studio | studios"`): pass a **named object**, `$t('key', { count })`. Every locale picks between the singular and the plural only (`src/lib/i18n.js`, see below), so keep the **same number of `|` segments as en.js** and don't add a language's extra grammatical plural forms.
 - For animation/VFX domain terms (shot, frame, onion skin, edit/montage, …), align translations with Blender's official terminology (`blender/blender-translations` `po/<lang>.po`, or the translated manual at `docs.blender.org/manual/<lang>/`).
@@ -280,7 +280,7 @@ Rules:
 
 - These files contain **only** the keys whose wording differs from `en.js`: never copy a key whose value is identical to the base.
 - Key names must **mirror `en.js` exactly**. When a key is renamed in `en.js` (e.g. `creation_explaination → creation_explanation`), rename it in the overlays too: a stale key becomes a dead override and the new base key then leaks untranslated vocabulary (English "shot" showing in an NFT/map UI).
-- When a key is **added** to `en.js` whose value mentions a remapped word (shot / sequence / episode), add the matching override to the relevant overlay.
+- **Every change to `en.js` or to an overlay ends with `node scripts/check-locale-overlays.js`**, rerun until it prints nothing. It lists the keys the remap changes (a shot / sequence / episode word, or a code such as `SH01`) with no override, the dead and identical overrides, and the overrides that no longer read like `en.js` once remapped, each with the expected value: a new key needs its overrides, and a copy edit of an `en.js` sentence goes to its overrides, in the same commit. Its remap table and its list of deliberate wordings are the reference.
 - Only English has these overlays. The other locales (`fr.json`, …) translate `en.js` and have no production-type variant.
 
 ## CSS / SCSS
