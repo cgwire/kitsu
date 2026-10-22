@@ -17,7 +17,7 @@
 </template>
 
 <script setup>
-import { computed, getCurrentInstance, onMounted } from 'vue'
+import { computed, getCurrentInstance, onBeforeUnmount, onMounted } from 'vue'
 import { useStore } from 'vuex'
 
 import Sidebar from '@/components/sides/Sidebar.vue'
@@ -35,8 +35,23 @@ const socket = getCurrentInstance().appContext.config.globalProperties.$socket
 // Lifecycle
 // --------------------------------------------------------------------------
 
+let playlistPlayerTimer = null
+
 onMounted(() => {
   socket.connect()
+  // Pages load the playlist player when a playlist opens, but a deploy
+  // removes its chunks from under an open tab: fetch it once the first page
+  // had time to show. Not offline: Chromium keeps a failed import failed
+  // until the page reloads.
+  playlistPlayerTimer = setTimeout(() => {
+    if (navigator.onLine) {
+      import('@/components/modals/ViewPlaylistModal.vue').catch(() => {})
+    }
+  }, 5000)
+})
+
+onBeforeUnmount(() => {
+  clearTimeout(playlistPlayerTimer)
 })
 </script>
 

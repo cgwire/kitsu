@@ -110,7 +110,14 @@
 // Imports
 import { useHead } from '@unhead/vue'
 import moment from 'moment-timezone'
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import {
+  computed,
+  defineAsyncComponent,
+  onMounted,
+  reactive,
+  ref,
+  watch
+} from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
@@ -118,7 +125,6 @@ import { useStore } from 'vuex'
 import { sortPeople } from '@/lib/sorting'
 
 import ToCheckList from '@/components/lists/ToCheckList.vue'
-import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
@@ -126,6 +132,10 @@ import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
+
+const ViewPlaylistModal = defineAsyncComponent(
+  () => import('@/components/modals/ViewPlaylistModal.vue')
+)
 
 // Composables
 const { t } = useI18n()

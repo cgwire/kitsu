@@ -472,6 +472,7 @@
 <script setup>
 import {
   computed,
+  defineAsyncComponent,
   getCurrentInstance,
   nextTick,
   onBeforeUnmount,
@@ -535,8 +536,11 @@ import Spinner from '@/components/widgets/Spinner.vue'
 import SubscribeButton from '@/components/widgets/SubscribeButton.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 import ValidationTag from '@/components/widgets/ValidationTag.vue'
-import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal.vue'
 /* eslint-enable no-unused-vars */
+
+const ViewPlaylistModal = defineAsyncComponent(
+  () => import('@/components/modals/ViewPlaylistModal.vue')
+)
 
 defineOptions({
   name: 'task'

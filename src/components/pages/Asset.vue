@@ -524,7 +524,15 @@ import {
   ImageIcon,
   XIcon
 } from 'lucide-vue-next'
-import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
+import {
+  computed,
+  defineAsyncComponent,
+  nextTick,
+  onMounted,
+  reactive,
+  ref,
+  watch
+} from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
@@ -539,7 +547,6 @@ import DescriptionCell from '@/components/cells/DescriptionCell.vue'
 import CastingList from '@/components/lists/CastingList.vue'
 import EntityTaskList from '@/components/lists/EntityTaskList.vue'
 import EditAssetModal from '@/components/modals/EditAssetModal.vue'
-import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal.vue'
 import EntityChat from '@/components/pages/entities/EntityChat.vue'
 import EntityNews from '@/components/pages/entities/EntityNews.vue'
 import EntityOutputFiles from '@/components/pages/entities/EntityOutputFiles.vue'
@@ -560,6 +567,10 @@ import Schedule from '@/components/widgets/Schedule.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 /* eslint-enable no-unused-vars */
+
+const ViewPlaylistModal = defineAsyncComponent(
+  () => import('@/components/modals/ViewPlaylistModal.vue')
+)
 
 defineOptions({ name: 'asset' })
 
