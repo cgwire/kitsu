@@ -383,7 +383,7 @@ This keeps auth/error handling, retries and store updates centralized. If you fi
 
 ## Migration status
 
-The Composition API migration is done: every component uses `<script setup>`, and no mixin is left. Only the Storybook samples of `src/stories/` stay on the Options API (ESLint ignores them).
+The Composition API migration is done: every component uses `<script setup>`, and no mixin is left.
 
 When writing a modal:
 

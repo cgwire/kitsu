@@ -1985,10 +1985,6 @@ video {
   font-weight: bold;
 }
 
-.preview-row {
-  margin-bottom: 0.5em;
-}
-
 .add-comment {
   margin-bottom: 1em;
   padding: 1em;
