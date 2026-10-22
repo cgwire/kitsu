@@ -12,7 +12,7 @@ export default {
   },
 
   assets: {
-    casted_in_shots: 'Cast in {nbShots} shots',
+    casted_in_shots: 'Cast in {count} shot | Cast in {count} shots',
     cancel_text: 'Are you sure you want to archive {name}?',
     delete_error: 'An error occurred while deleting this asset. There may be existing data currently linked to it. Are you sure this asset has no task linked to it?',
     delete_for_selection: 'Delete the selected asset | Delete the {nbSelectedAssets} selected assets',
@@ -880,7 +880,7 @@ export default {
     expand_all: 'Expand all',
     export: 'Export',
     feedback: 'Roadmap / Feedback',
-    files_selected: 'files selected',
+    files_selected: '{count} file selected | {count} files selected',
     filter_group: 'Filter Group',
     filter_group_add: 'Add a filter group',
     filter_group_edit: 'Edit a filter group',
@@ -2258,7 +2258,7 @@ export default {
     estimation_over: 'Duration over estimation',
     estimation_approval_late: 'Due date is late (feedback)',
     estimation_done_late: 'Due date is late (done)',
-    empty_cells_selected: 'empty cell selected | empty cells selected',
+    empty_cells_selected: '{count} empty cell selected | {count} empty cells selected',
     feedback: 'feedback',
     for_selection: 'For current list and filters',
     for_project: 'For production',

@@ -60,7 +60,6 @@
           </div>
           <div class="mt2 selected-task-line" v-if="nbSelectedValidations > 0">
             <span v-if="nbSelectedTasks > 0">+</span>
-            {{ nbSelectedValidations }}
             {{
               $t('tasks.empty_cells_selected', { count: nbSelectedValidations })
             }}

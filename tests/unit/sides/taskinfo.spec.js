@@ -19,6 +19,7 @@ import AddComment from '@/components/widgets/AddComment.vue'
 import Comment from '@/components/widgets/Comment.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 import drafts from '@/lib/drafts'
+import i18n, { loadLocaleMessages } from '@/lib/i18n'
 import { DEFAULT_FPS } from '@/lib/video'
 import shotStore from '@/store/modules/shots'
 
@@ -74,6 +75,7 @@ const mountPanel = async ({
   comments = [],
   previews = [],
   slots = {},
+  mocks = {},
   path = '/'
 } = {}) => {
   const socket = { on: vi.fn(), off: vi.fn() }
@@ -140,6 +142,7 @@ const mountPanel = async ({
     props: { task, ...props },
     slots,
     global: {
+      mocks,
       stubs: {
         // reset() runs after every load; the default stub has no such method
         // and the resulting throw would cut the reset short.
@@ -269,6 +272,27 @@ describe('TaskInfo.vue', () => {
       })
       expect(wrapper.find('.custom-selection').exists()).toBe(true)
       expect(wrapper.find('.entity-line').exists()).toBe(false)
+    })
+  })
+
+  describe('empty cell selection', () => {
+    afterEach(() => {
+      i18n.global.locale.value = 'en'
+    })
+
+    // Korean puts the count after the noun, with a counter.
+    it('lets the language place the number of empty cells', async () => {
+      await loadLocaleMessages('ko')
+      i18n.global.locale.value = 'ko'
+      const { wrapper } = await mountPanel({
+        task: null,
+        props: { withActions: true },
+        getterOverrides: { nbSelectedValidations: () => 3 },
+        mocks: { $t: (key, named) => i18n.global.t(key, named) }
+      })
+      expect(wrapper.find('.mt2.selected-task-line').text()).toBe(
+        '빈 셀 3개 선택됨'
+      )
     })
   })
 

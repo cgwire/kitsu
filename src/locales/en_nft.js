@@ -19,7 +19,7 @@
 export default {
 
   assets: {
-    casted_in_shots: 'Cast in {nbShots} NFTs',
+    casted_in_shots: 'Cast in {count} NFT | Cast in {count} NFTs',
     no_cast_in: 'This asset is not cast in any NFT.'
   },
 

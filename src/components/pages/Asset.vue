@@ -152,7 +152,7 @@
                 <page-subtitle
                   class="flexrow-item"
                   :text="
-                    $t('assets.casted_in_shots', { nbShots: nbShotsCastedIn })
+                    $t('assets.casted_in_shots', { count: nbShotsCastedIn })
                   "
                 />
                 <div class="filler"></div>

@@ -21,7 +21,7 @@
 export default {
 
   assets: {
-    casted_in_shots: 'Cast in {nbShots} maps',
+    casted_in_shots: 'Cast in {count} map | Cast in {count} maps',
     only_current_episode: 'Only current chapter',
     no_cast_in: 'This asset is not cast in any map.',
     fields: {

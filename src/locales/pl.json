@@ -11,7 +11,7 @@
       "warning": "Autoryzuj tylko wtedy, gdy samodzielnie uruchomiłeś to logowanie z aplikacji. Aplikacja uzyska dostęp do Kitsu z Twoimi uprawnieniami."
     },
     "assets": {
-      "casted_in_shots": "Występuje w {nbShots} ujęciach",
+      "casted_in_shots": "Występuje w {count} ujęciu | Występuje w {count} ujęciach",
       "cancel_text": "Czy na pewno chcesz zarchiwizować {name}?",
       "delete_error": "Wystąpił błąd podczas usuwania tego assetu. Mogą istnieć dane, które są z nim powiązane. Czy na pewno żadne zadanie nie jest powiązane z tym assetem?",
       "delete_for_selection": "Usuń wybrany asset | Usuń wybrane assety ({nbSelectedAssets})",
@@ -846,7 +846,7 @@
       "expand_all": "Rozwiń wszystko",
       "export": "Eksportuj",
       "feedback": "Plan rozwoju / Opinie",
-      "files_selected": "wybranych plików",
+      "files_selected": "Wybrano {count} plik | Wybrano plików: {count}",
       "filter_group": "Grupa filtrów",
       "filter_group_add": "Dodaj grupę filtrów",
       "filter_group_edit": "Edytuj grupę filtrów",
@@ -2170,7 +2170,7 @@
       "estimation_over": "Czas trwania przekracza szacowany czas",
       "estimation_approval_late": "Termin przekroczony (feedback)",
       "estimation_done_late": "Termin przekroczony (ukończone)",
-      "empty_cells_selected": "wybrana pusta komórka | wybranych pustych komórek",
+      "empty_cells_selected": "Wybrano {count} pustą komórkę | Wybrano pustych komórek: {count}",
       "feedback": "feedback",
       "for_selection": "Dla bieżącej listy i filtrów",
       "for_project": "Dla produkcji",
