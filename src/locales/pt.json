@@ -1053,6 +1053,10 @@
       "view_as_playlist": "Ver como playlist",
       "view_created": "Ver playlist"
     },
+    "plugins": {
+      "load_error": "Não foi possível carregar o plugin {name}.",
+      "page_not_found": "Esta página não existe no plugin {name}."
+    },
     "productions": {
       "clients": {
         "access_description": "Estas definições escolhem o que os clientes desta produção veem, incluindo a conta de pré-visualização.",

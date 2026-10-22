@@ -46,7 +46,8 @@ export default defineConfig([
       sourceType: 'module',
       globals: {
         ...globals.browser,
-        ...globals.es2021
+        ...globals.es2021,
+        __KITSU_PLUGIN_DEV_URLS__: 'readonly'
       }
     },
     rules: {

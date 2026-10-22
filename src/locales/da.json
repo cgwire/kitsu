@@ -1053,6 +1053,10 @@
       "view_as_playlist": "Vis som playliste",
       "view_created": "Vis playlist"
     },
+    "plugins": {
+      "load_error": "{name}-pluginet kunne ikke indlæses.",
+      "page_not_found": "Denne side findes ikke i {name}-pluginet."
+    },
     "productions": {
       "clients": {
         "access_description": "Disse indstillinger vælger, hvad kunderne i denne produktion ser, inklusive prøvekontoen.",

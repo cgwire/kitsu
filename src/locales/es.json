@@ -1053,6 +1053,10 @@
       "view_as_playlist": "Ver como playlist",
       "view_created": "Ver lista de reproducción"
     },
+    "plugins": {
+      "load_error": "No se pudo cargar el complemento {name}.",
+      "page_not_found": "Esta página no existe en el complemento {name}."
+    },
     "productions": {
       "clients": {
         "access_description": "Estos ajustes eligen lo que ven los clientes de esta producción, incluida la cuenta de vista previa.",

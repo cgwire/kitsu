@@ -1053,6 +1053,10 @@
       "view_as_playlist": "Als playlist bekijken",
       "view_created": "Afspeellijst bekijken"
     },
+    "plugins": {
+      "load_error": "De plugin {name} kon niet worden geladen.",
+      "page_not_found": "Deze pagina bestaat niet in de plugin {name}."
+    },
     "productions": {
       "clients": {
         "access_description": "Deze instellingen bepalen wat klanten van deze productie zien, inclusief het voorbeeldaccount.",

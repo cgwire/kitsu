@@ -1053,6 +1053,10 @@
       "view_as_playlist": "Megtekintés lejátszási listaként",
       "view_created": "Lejátszási lista megtekintése"
     },
+    "plugins": {
+      "load_error": "A(z) {name} bővítményt nem sikerült betölteni.",
+      "page_not_found": "Ez az oldal nem létezik a(z) {name} bővítményben."
+    },
     "productions": {
       "clients": {
         "access_description": "Ezek a beállítások döntik el, mit látnak az ügyfelek ebben a produkcióban, az előnézeti fiókot is beleértve.",
