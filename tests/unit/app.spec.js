@@ -1134,6 +1134,97 @@ describe('App', () => {
     })
   })
 
+  // The config answers after the first render: the theme the page starts
+  // with comes from the storage.
+  describe('dark theme', () => {
+    let answerConfig = null
+
+    const mountWithTheme = async () => {
+      const isDarkTheme = ref(false)
+      const config = new Promise(resolve => {
+        answerConfig = async answer => {
+          resolve(answer)
+          await flushPromises()
+        }
+      })
+      await mountApp({
+        actions: { setMainConfig: () => config },
+        getters: { isDarkTheme: () => isDarkTheme.value },
+        mutations: {
+          TOGGLE_DARK_THEME: (state, isDark) => {
+            isDarkTheme.value = isDark
+          }
+        }
+      })
+    }
+
+    afterEach(() => {
+      localStorage.removeItem('dark-theme')
+      localStorage.removeItem('dark-theme-default')
+      window.history.replaceState(null, '', '/')
+    })
+
+    it('starts in the theme the user chose, before the config answers', async () => {
+      localStorage.setItem('dark-theme', 'true')
+      await mountWithTheme()
+
+      expect(wrapper.classes('dark')).toBe(true)
+    })
+
+    it('starts in the studio default the last config left', async () => {
+      localStorage.setItem('dark-theme-default', 'true')
+      await mountWithTheme()
+
+      expect(wrapper.classes('dark')).toBe(true)
+    })
+
+    it('remembers the studio default of the config for the next start', async () => {
+      await mountWithTheme()
+      await answerConfig({ dark_theme_by_default: true })
+
+      expect(wrapper.classes('dark')).toBe(true)
+      expect(localStorage.getItem('dark-theme-default')).toBe('true')
+    })
+
+    it('keeps the theme the user chose over the studio default', async () => {
+      localStorage.setItem('dark-theme', 'false')
+      await mountWithTheme()
+      await answerConfig({ dark_theme_by_default: true })
+
+      expect(wrapper.classes('dark')).toBe(false)
+    })
+
+    it('keeps the theme it started with when the config fails', async () => {
+      localStorage.setItem('dark-theme-default', 'true')
+      await mountWithTheme()
+      // setMainConfig answers an empty config when its request fails.
+      await answerConfig({})
+
+      expect(wrapper.classes('dark')).toBe(true)
+      expect(localStorage.getItem('dark-theme-default')).toBe('true')
+    })
+
+    it('keeps a shared playlist dark when the config answers after it', async () => {
+      window.history.replaceState(null, '', '/playlists/shared/token-1')
+      await mountWithTheme()
+      expect(wrapper.classes('dark')).toBe(true)
+
+      await answerConfig({ dark_theme_by_default: false })
+
+      expect(wrapper.classes('dark')).toBe(true)
+    })
+
+    it('starts light when the browser blocks the storage', async () => {
+      vi.spyOn(localStorage, 'getItem').mockImplementation(() => {
+        throw new Error('The operation is insecure.')
+      })
+      await mountWithTheme()
+      await answerConfig({})
+
+      expect(wrapper.classes('dark')).toBe(false)
+    })
+  })
+
   describe('top-level page swap', () => {
     // Vue looks past a single teleport for the node after a page: once the
     // preview modal had moved past the teleports of the shot cells, the
