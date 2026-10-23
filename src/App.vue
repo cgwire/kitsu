@@ -219,7 +219,13 @@ const setupAuthChannel = () => {
   const channel = auth.getBroadcastChannel()
   if (!channel) return
   channel.onmessage = async event => {
-    if (route.name !== 'login' && event.data === 'logout') {
+    // A shared playlist tab has no session to purge, and the redirect would
+    // carry its share token to the login page, where Crisp loads.
+    if (
+      route.name !== 'login' &&
+      !isSharedPlaylistPage() &&
+      event.data === 'logout'
+    ) {
       // Another tab logged out: purge this tab's session too, otherwise
       // store and socket keep the previous user's data. Navigate first:
       // purging while the current page is still mounted crashes the

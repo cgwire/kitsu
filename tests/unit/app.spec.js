@@ -5,6 +5,7 @@ import { createMemoryHistory, createRouter } from 'vue-router'
 import { createStore } from 'vuex'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import auth from '@/lib/auth'
 import errors from '@/lib/errors'
 import i18n, { loadLocaleMessages } from '@/lib/i18n'
 
@@ -15,12 +16,22 @@ import { recordUnhandledRejections } from './fixtures/unhandled-rejections'
 
 let wrapper = null
 
-const mountApp = async ({ actions, getters, mutations }) => {
+const Page = { template: '<div />' }
+
+const mountApp = async ({ actions, getters, mutations, path = '/' }) => {
   const router = createRouter({
     history: createMemoryHistory(),
-    routes: [{ path: '/', component: { template: '<div />' } }]
+    routes: [
+      { path: '/', component: Page },
+      { path: '/login', name: 'login', component: Page },
+      {
+        path: '/playlists/shared/:token',
+        name: 'shared-playlist',
+        component: Page
+      }
+    ]
   })
-  router.push('/')
+  router.push(path)
   await router.isReady()
 
   const store = createStore({
@@ -44,7 +55,7 @@ const mountApp = async ({ actions, getters, mutations }) => {
     }
   })
   await flushPromises()
-  return { socket }
+  return { router, socket }
 }
 
 const emitSocketEvent = (socket, event, eventData) => {
@@ -1222,6 +1233,46 @@ describe('App', () => {
       await answerConfig({})
 
       expect(wrapper.classes('dark')).toBe(false)
+    })
+  })
+
+  describe('logout in another tab', () => {
+    const mountTab = async path => {
+      const channel = {}
+      vi.spyOn(auth, 'getBroadcastChannel').mockReturnValue(channel)
+      const logoutLocal = vi.fn()
+      const { router } = await mountApp({ actions: { logoutLocal }, path })
+      const receiveLogout = async () => {
+        await channel.onmessage({ data: 'logout' })
+        await flushPromises()
+      }
+      return { logoutLocal, receiveLogout, router }
+    }
+
+    afterEach(() => {
+      window.history.replaceState(null, '', '/')
+    })
+
+    it('purges the tab from the login page', async () => {
+      const { logoutLocal, receiveLogout, router } = await mountTab('/')
+
+      await receiveLogout()
+
+      expect(router.currentRoute.value.name).toBe('login')
+      expect(router.currentRoute.value.query).toEqual({ redirect: '/' })
+      expect(logoutLocal).toHaveBeenCalled()
+    })
+
+    it('leaves a shared playlist tab alone', async () => {
+      window.history.replaceState(null, '', '/playlists/shared/token-1')
+      const { logoutLocal, receiveLogout, router } = await mountTab(
+        '/playlists/shared/token-1'
+      )
+
+      await receiveLogout()
+
+      expect(router.currentRoute.value.name).toBe('shared-playlist')
+      expect(logoutLocal).not.toHaveBeenCalled()
     })
   })
 
