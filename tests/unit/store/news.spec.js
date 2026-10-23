@@ -136,6 +136,23 @@ describe('News store', () => {
       ])
     })
 
+    test('REMOVE_NEWS', () => {
+      state.newsTotal = 3
+      store.mutations.REMOVE_NEWS(state, 'news-2')
+      expect(state.newsList).toEqual([
+        { id: 'news-3', created_at: '2019-05-04T23:12:23' },
+        { id: 'news-1', created_at: '2019-05-02T23:12:23' }
+      ])
+      expect(state.newsTotal).toEqual(2)
+    })
+
+    test('REMOVE_NEWS - unknown news', () => {
+      state.newsTotal = 3
+      store.mutations.REMOVE_NEWS(state, 'news-4')
+      expect(state.newsList).toHaveLength(3)
+      expect(state.newsTotal).toEqual(3)
+    })
+
     test('NEWS_ADD_PREVIEW', () => {
       state.newsList[1].comment_id = 'comment-1'
       store.mutations.NEWS_ADD_PREVIEW(state, {

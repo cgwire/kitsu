@@ -13,15 +13,7 @@
           @click="selectBar('change-status')"
           @keydown.enter.prevent="selectBar('change-status')"
           @keydown.space.prevent="selectBar('change-status')"
-          v-if="
-            (isCurrentUserManager ||
-              isSupervisorInDepartment ||
-              isInDepartment ||
-              isCurrentViewTodos) &&
-            !isEntitySelection &&
-            !isCurrentViewConcept &&
-            isTaskSelection
-          "
+          v-if="availableBars.has('change-status')"
         >
           {{ $t('main.status') }}
         </div>
@@ -37,16 +29,7 @@
           @click="selectBar('assignation')"
           @keydown.enter.prevent="selectBar('assignation')"
           @keydown.space.prevent="selectBar('assignation')"
-          v-if="
-            (isCurrentViewSingleEntity || isCurrentViewEntity) &&
-            (isCurrentUserManager ||
-              isSupervisorInDepartment ||
-              isInDepartment ||
-              isCurrentViewSingleEntity) &&
-            !isEntitySelection &&
-            isTaskSelection &&
-            !isCurrentUserArtist
-          "
+          v-if="availableBars.has('assignation')"
         >
           <kitsu-icon
             name="user-check"
@@ -61,15 +44,7 @@
             active: selectedBar === 'priorities'
           }"
           :title="$t('menu.change_priority')"
-          v-if="
-            (isCurrentViewSingleEntity ||
-              isCurrentViewEntity ||
-              isCurrentViewPerson ||
-              isCurrentViewSingleEntity) &&
-            (isCurrentUserManager || isSupervisorInDepartment) &&
-            !isEntitySelection &&
-            isTaskSelection
-          "
+          v-if="availableBars.has('priorities')"
           role="button"
           tabindex="0"
           @click="selectBar('priorities')"
@@ -86,12 +61,26 @@
         <div
           class="menu-item"
           :class="{
+            active: selectedBar === 'copy-client-comments'
+          }"
+          :title="$t('menu.copy_client_comments')"
+          v-if="availableBars.has('copy-client-comments')"
+          role="button"
+          tabindex="0"
+          @click="selectBar('copy-client-comments')"
+          @keydown.enter.prevent="selectBar('copy-client-comments')"
+          @keydown.space.prevent="selectBar('copy-client-comments')"
+        >
+          <message-square-quote-icon />
+        </div>
+
+        <div
+          class="menu-item"
+          :class="{
             active: selectedBar === 'thumbnails'
           }"
           :title="$t('menu.set_thumbnails')"
-          v-if="
-            isTaskSelection && !isCurrentUserArtist && !isCurrentViewConcept
-          "
+          v-if="availableBars.has('thumbnails')"
           role="button"
           tabindex="0"
           @click="selectBar('thumbnails')"
@@ -106,31 +95,6 @@
         </div>
 
         <div
-          class="menu-item"
-          :class="{
-            active: selectedBar === 'subscribe'
-          }"
-          :title="$t('menu.subscribe')"
-          v-if="
-            isTaskSelection &&
-            !isCurrentViewSingleEntity &&
-            !isCurrentViewTodos &&
-            !isCurrentViewConcept
-          "
-          role="button"
-          tabindex="0"
-          @click="selectBar('subscribe')"
-          @keydown.enter.prevent="selectBar('subscribe')"
-          @keydown.space.prevent="selectBar('subscribe')"
-        >
-          <kitsu-icon
-            name="watch"
-            :active="selectedBar === 'subscribe'"
-            :title="$t('menu.subscribe')"
-          />
-        </div>
-
-        <div
           class="menu-item ml05"
           :class="{
             active: selectedBar === 'edit-concepts'
@@ -141,19 +105,26 @@
           @click="selectBar('edit-concepts')"
           @keydown.enter.prevent="selectBar('edit-concepts')"
           @keydown.space.prevent="selectBar('edit-concepts')"
-          v-if="
-            isCurrentViewConcept &&
-            (isCurrentUserManager || isConceptPublisher) &&
-            isTaskSelection
-          "
+          v-if="availableBars.has('edit-concepts')"
         >
           <link-icon />
         </div>
 
         <div
-          class="menu-separator"
-          v-if="!isEntitySelection && isTaskSelection && nbSelectedTasks > 1"
-        ></div>
+          class="menu-item"
+          :class="{
+            active: selectedBar === 'move-concepts'
+          }"
+          :title="$t('concepts.folders.move')"
+          role="button"
+          tabindex="0"
+          @click="selectBar('move-concepts')"
+          @keydown.enter.prevent="selectBar('move-concepts')"
+          @keydown.space.prevent="selectBar('move-concepts')"
+          v-if="availableBars.has('move-concepts')"
+        >
+          <folder-input-icon />
+        </div>
 
         <div
           class="menu-item"
@@ -161,17 +132,7 @@
             active: selectedBar === 'playlists'
           }"
           :title="$t('menu.generate_playlist')"
-          v-if="
-            (isCurrentViewAsset ||
-              isCurrentViewShot ||
-              isCurrentViewSequence ||
-              isCurrentViewTodos ||
-              isCurrentViewTaskType) &&
-            !isEntitySelection &&
-            !isCurrentViewSingleEntity &&
-            isTaskSelection &&
-            nbSelectedTasks > 0
-          "
+          v-if="availableBars.has('playlists')"
           role="button"
           tabindex="0"
           @click="selectBar('playlists')"
@@ -186,19 +147,6 @@
         </div>
 
         <div
-          v-if="
-            (isCurrentViewAsset ||
-              isCurrentViewShot ||
-              isCurrentViewTaskType) &&
-            !isEntitySelection &&
-            !isCurrentViewSingleEntity &&
-            isTaskSelection &&
-            isCurrentUserManager
-          "
-          class="menu-separator"
-        ></div>
-
-        <div
           class="menu-item"
           :class="{
             active: selectedBar === 'create-tasks'
@@ -209,72 +157,9 @@
           @click="selectBar('create-tasks')"
           @keydown.enter.prevent="selectBar('create-tasks')"
           @keydown.space.prevent="selectBar('create-tasks')"
-          v-if="
-            isCurrentViewEntity &&
-            !isCurrentViewTaskType &&
-            isCurrentUserManager &&
-            !isEntitySelection &&
-            nbSelectedTasks !== 1
-          "
+          v-if="availableBars.has('create-tasks')"
         >
           <check-square-icon />
-        </div>
-
-        <div
-          class="menu-item"
-          :class="{
-            active: selectedBar === 'delete-tasks'
-          }"
-          :title="$t('menu.delete_tasks')"
-          role="button"
-          tabindex="0"
-          @click="selectBar('delete-tasks')"
-          @keydown.enter.prevent="selectBar('delete-tasks')"
-          @keydown.space.prevent="selectBar('delete-tasks')"
-          v-if="
-            isCurrentViewEntity &&
-            isCurrentUserManager &&
-            !isEntitySelection &&
-            !isCurrentViewSingleEntity &&
-            isTaskSelection
-          "
-        >
-          <kitsu-icon
-            name="trash"
-            :active="selectedBar === 'delete-tasks'"
-            :title="$t('menu.delete_tasks')"
-          />
-        </div>
-
-        <div
-          class="menu-separator"
-          v-if="
-            !isEntitySelection &&
-            isTaskSelection &&
-            !isCurrentViewConcept &&
-            customActions?.length
-          "
-        ></div>
-
-        <div
-          class="menu-item"
-          :class="{
-            active: selectedBar === 'custom-actions'
-          }"
-          :title="$t('menu.run_custom_action')"
-          role="button"
-          tabindex="0"
-          @click="selectBar('custom-actions')"
-          @keydown.enter.prevent="selectBar('custom-actions')"
-          @keydown.space.prevent="selectBar('custom-actions')"
-          v-if="
-            !isEntitySelection &&
-            isTaskSelection &&
-            !isCurrentViewConcept &&
-            customActions?.length
-          "
-        >
-          <play-circle-icon />
         </div>
 
         <div
@@ -288,7 +173,7 @@
           @click="selectBar('delete-assets')"
           @keydown.enter.prevent="selectBar('delete-assets')"
           @keydown.space.prevent="selectBar('delete-assets')"
-          v-if="isCurrentViewAsset && isCurrentUserManager && !isTaskSelection"
+          v-if="availableBars.has('delete-assets')"
         >
           <kitsu-icon name="trash" :title="$t('menu.delete_assets')" />
         </div>
@@ -304,7 +189,7 @@
           @click="selectBar('delete-shots')"
           @keydown.enter.prevent="selectBar('delete-shots')"
           @keydown.space.prevent="selectBar('delete-shots')"
-          v-if="isCurrentViewShot && isCurrentUserManager && !isTaskSelection"
+          v-if="availableBars.has('delete-shots')"
         >
           <kitsu-icon name="trash" :title="$t('menu.delete_shots')" />
         </div>
@@ -320,7 +205,7 @@
           @click="selectBar('delete-edits')"
           @keydown.enter.prevent="selectBar('delete-edits')"
           @keydown.space.prevent="selectBar('delete-edits')"
-          v-if="isCurrentViewEdit && isCurrentUserManager && !isTaskSelection"
+          v-if="availableBars.has('delete-edits')"
         >
           <kitsu-icon name="trash" :title="$t('menu.delete_edits')" />
         </div>
@@ -336,11 +221,58 @@
           @click="selectBar('delete-concepts')"
           @keydown.enter.prevent="selectBar('delete-concepts')"
           @keydown.space.prevent="selectBar('delete-concepts')"
-          v-if="
-            isCurrentViewConcept && (isCurrentUserManager || isConceptPublisher)
-          "
+          v-if="availableBars.has('delete-concepts')"
         >
           <kitsu-icon name="trash" :title="$t('menu.delete_concepts')" />
+        </div>
+
+        <div class="more-actions" v-if="moreActions.length">
+          <div
+            class="menu-item"
+            ref="more-actions-button"
+            :class="{ active: isMoreActionSelected }"
+            :title="$t('menu.more_actions')"
+            role="combobox"
+            tabindex="0"
+            aria-haspopup="listbox"
+            :aria-expanded="isMoreActionsOpen"
+            :aria-activedescendant="
+              moreActionIndex > -1 ? moreActionId(moreActionIndex) : undefined
+            "
+            @click="toggleMoreActions"
+            @keydown="onMoreActionsKeydown"
+          >
+            <ellipsis-icon />
+          </div>
+          <div
+            class="more-actions-list"
+            ref="more-actions-list"
+            role="listbox"
+            :style="moreActionsPosition"
+            v-if="isMoreActionsOpen"
+          >
+            <div
+              :id="moreActionId(index)"
+              :key="action.bar"
+              class="more-action flexrow"
+              :class="{
+                active: selectedBar === action.bar,
+                focused: index === moreActionIndex
+              }"
+              role="option"
+              :aria-selected="selectedBar === action.bar"
+              @click="selectMoreAction(action)"
+              v-for="(action, index) in moreActions"
+            >
+              <component :is="action.icon" :size="16" class="flexrow-item" />
+              <span class="flexrow-item">{{ action.label }}</span>
+            </div>
+          </div>
+          <div
+            class="c-mask"
+            :class="{ 'is-active': isMoreActionsOpen }"
+            @click="toggleMoreActions"
+          ></div>
         </div>
 
         <div class="filler"></div>
@@ -376,7 +308,7 @@
         </div>
       </div>
 
-      <div class="flexrow action-bar" v-if="selectedBar && !minimized">
+      <div class="flexrow action-bar" v-if="selectedBar">
         <div class="flexcolumn is-wide" v-if="selectedBar === 'change-status'">
           <div class="flexrow mb05">
             <div class="flexrow-item change-status-item">
@@ -540,6 +472,45 @@
           </div>
         </div>
 
+        <div
+          class="flexcolumn is-wide copy-client-comments"
+          v-if="selectedBar === 'copy-client-comments'"
+        >
+          <div class="flexrow-item prefix-field mb05">
+            <input
+              class="comment-text input"
+              type="text"
+              :placeholder="$t('tasks.copy_client_comments_prefix')"
+              v-model="clientCommentsPrefix"
+            />
+          </div>
+          <div class="flexrow-item is-wide">
+            <button
+              class="button confirm-button is-wide"
+              :class="{
+                'is-loading': loading.copyClientComments
+              }"
+              @click="confirmClientCommentsCopy"
+            >
+              {{
+                $t('tasks.copy_client_comments', {
+                  count: nbSelectedTasks,
+                  nbSelectedTasks
+                })
+              }}
+            </button>
+          </div>
+          <p class="result mt05" v-if="clientCommentsCopy">
+            {{ $t('tasks.client_comments_copied', clientCommentsCopy) }}
+          </p>
+          <p
+            class="is-danger has-text-centered mt05"
+            v-if="errors.copyClientComments"
+          >
+            {{ $t('tasks.copy_client_comments_error') }}
+          </p>
+        </div>
+
         <div class="flexrow is-wide" v-if="selectedBar === 'create-tasks'">
           <button
             class="button confirm-button is-wide"
@@ -642,14 +613,35 @@
                 class="tag"
                 role="button"
                 tabindex="0"
+                :title="$t('concepts.actions.remove_link')"
                 @click="onRemoveLink(entity)"
                 @keydown.enter.prevent="onRemoveLink(entity)"
                 @keydown.space.prevent="onRemoveLink(entity)"
                 v-for="entity in conceptLinkedEntities"
               >
-                {{ entity.name }}
+                {{ getLinkLabel(entity) }}
               </li>
             </template>
+          </ul>
+        </div>
+
+        <div
+          class="flexrow-item is-wide"
+          v-if="selectedBar === 'move-concepts'"
+        >
+          <h3 class="mb05">{{ $t('concepts.folders.move') }}</h3>
+          <ul class="concept-folders mb05">
+            <li
+              :key="folder.id ?? 'none'"
+              role="button"
+              tabindex="0"
+              @click="onMoveConcepts(folder)"
+              @keydown.enter.prevent="onMoveConcepts(folder)"
+              @keydown.space.prevent="onMoveConcepts(folder)"
+              v-for="folder in conceptFolderTargets"
+            >
+              <concept-folder-tile :name="folder.name" />
+            </li>
           </ul>
         </div>
 
@@ -845,7 +837,7 @@
       class="flexrow-item is-wide pa1"
       v-if="selectedBar === 'edit-concepts'"
     >
-      <div ref="asset-list" class="concept-links">
+      <div class="concept-links">
         <h2 class="subtitle">{{ $t('concepts.add_links') }}</h2>
         <div class="flexrow mb2">
           <search-field
@@ -906,915 +898,942 @@
   </div>
 </template>
 
-<script>
+<script setup>
+/* eslint-disable no-unused-vars */
 import {
   CheckSquareIcon,
+  EllipsisIcon,
+  EyeIcon,
+  FolderInputIcon,
   LinkIcon,
+  MessageSquareQuoteIcon,
   PlayCircleIcon,
+  Trash2Icon,
   XIcon
 } from 'lucide-vue-next'
-import { mapGetters, mapActions } from 'vuex'
+import {
+  computed,
+  defineAsyncComponent,
+  onBeforeUnmount,
+  onMounted,
+  reactive,
+  ref,
+  useTemplateRef,
+  watch
+} from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 
-import assetsStore from '@/store/modules/assets.js'
+import { useComboboxKeyboard } from '@/composables/comboboxKeyboard'
 import { intersection } from '@/lib/array'
+import func from '@/lib/func'
+import { isFreeEscape } from '@/lib/keyboard'
+import assetsStore from '@/store/modules/assets.js'
 
 import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
+import DeleteEntities from '@/components/tops/actions/DeleteEntities.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxModel from '@/components/widgets/ComboboxModel.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
-import DeleteEntities from '@/components/tops/actions/DeleteEntities.vue'
+import ConceptFolderTile from '@/components/widgets/ConceptFolderTile.vue'
 import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
-import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal.vue'
+/* eslint-enable no-unused-vars */
 
-export default {
-  name: 'action-panel',
+// The playlist player weighs more than the rest of the panel, which every
+// task panel shows: it loads after the first page (see Main.vue).
+const ViewPlaylistModal = defineAsyncComponent(
+  () => import('@/components/modals/ViewPlaylistModal.vue')
+)
 
-  props: {
-    isMoviePreview: {
-      type: Boolean,
-      default: false
+const { t } = useI18n()
+const route = useRoute()
+const store = useStore()
+
+// Props / Emits
+// --------------------------------------------------------------------------
+
+const props = defineProps({
+  isMoviePreview: { type: Boolean, default: false },
+  isSetFrameThumbnailLoading: { type: Boolean, default: false },
+  productionId: { type: String, default: null },
+  team: { type: Array, default: () => [] }
+})
+
+const emit = defineEmits(['export-task', 'set-frame-thumbnail'])
+
+const CLIENT_COMMENTS_PREFIX_KEY = 'action-panel:client-comments-prefix'
+
+// State
+// --------------------------------------------------------------------------
+
+const assignationFieldRef = useTemplateRef('assignation-field')
+const entitySearchFieldRef = useTemplateRef('entity-search-field')
+
+const availableTaskStatuses = ref([])
+const customAction = ref({})
+const customActions = ref([])
+const clientCommentsCopy = ref(null)
+const clientCommentsPrefix = ref(
+  localStorage.getItem(CLIENT_COMMENTS_PREFIX_KEY) || ''
+)
+const isMoreActionsOpen = ref(false)
+const moreActionsPosition = ref({})
+const isUseCurrentFrame = ref(false)
+const person = ref(null)
+const priority = ref('0')
+const selectedBar = ref('')
+const statusComment = ref('')
+const taskStatusId = ref('')
+
+const modals = reactive({
+  buildFilter: false,
+  playlist: false
+})
+
+const loading = reactive({
+  assignation: false,
+  assetDeletion: false,
+  changePriority: false,
+  changeStatus: false,
+  conceptDeletion: false,
+  copyClientComments: false,
+  editDeletion: false,
+  taskCreation: false,
+  taskDeletion: false,
+  setThumbnails: false,
+  shotDeletion: false,
+  tasksSubscription: false
+})
+
+const errors = reactive({
+  assetDeletion: false,
+  conceptDeletion: false,
+  copyClientComments: false,
+  editDeletion: false,
+  shotDeletion: false,
+  taskAssignation: false,
+  taskDeletion: false
+})
+
+const currentHost = window.location.host
+
+let linkQueue = Promise.resolve()
+
+// Computed
+// --------------------------------------------------------------------------
+
+const assetsByType = computed(() => store.getters.assetsByType)
+const conceptFolders = computed(() => store.getters.conceptFolders)
+const currentProduction = computed(() => store.getters.currentProduction)
+const isCurrentUserArtist = computed(() => store.getters.isCurrentUserArtist)
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+const isShowAssignations = computed(() => store.getters.isShowAssignations)
+const nbSelectedTasks = computed(() => store.getters.nbSelectedTasks)
+const nbSelectedValidations = computed(
+  () => store.getters.nbSelectedValidations
+)
+const productionMap = computed(() => store.getters.productionMap)
+const selectedAssets = computed(() => store.getters.selectedAssets)
+const selectedConcepts = computed(() => store.getters.selectedConcepts)
+const selectedEdits = computed(() => store.getters.selectedEdits)
+const selectedShots = computed(() => store.getters.selectedShots)
+const selectedTasks = computed(() => store.getters.selectedTasks)
+const taskMap = computed(() => store.getters.taskMap)
+const taskStatusForCurrentUser = computed(
+  () => store.getters.taskStatusForCurrentUser
+)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
+const user = computed(() => store.getters.user)
+
+// Role gating follows the production of the displayed tasks, not the
+// globally selected one: this panel also serves cross-production views
+// (Todos, All Tasks, checks, notifications).
+const currentUserProductionRole = computed(() =>
+  store.getters.currentUserRoleForProduction(props.productionId)
+)
+
+const isCurrentUserManager = computed(
+  () =>
+    store.getters.isCurrentUserAdmin ||
+    currentUserProductionRole.value === 'manager'
+)
+
+const isCurrentUserSupervisor = computed(
+  () => currentUserProductionRole.value === 'supervisor'
+)
+
+const currentUrl = computed(() => route.path)
+
+const isCurrentViewSingleEntity = computed(() =>
+  [
+    'asset',
+    'shot',
+    'edit',
+    'episode',
+    'sequence',
+    'episode-asset',
+    'episode-shot',
+    'episode-edit',
+    'episode-sequence'
+  ].includes(route.name)
+)
+
+const isCurrentViewAsset = computed(
+  () => route.path.includes('asset') && !route.params.shot_id
+)
+
+const isCurrentViewShot = computed(
+  () => route.path.includes('shot') && !route.params.shot_id
+)
+
+const isCurrentViewEdit = computed(
+  () => route.path.includes('edit') && !route.params.edit_id
+)
+
+const isCurrentViewConcept = computed(() => route.path.includes('concept'))
+
+const isCurrentViewPerson = computed(() => route.path.includes('people/'))
+
+const isCurrentViewTodos = computed(
+  () => route.path.includes('my-tasks') || isCurrentViewPerson.value
+)
+
+const isCurrentViewTaskType = computed(() => route.path.includes('task-type'))
+
+const isCurrentViewAssetShotOrEdit = computed(
+  () =>
+    isCurrentViewAsset.value ||
+    isCurrentViewShot.value ||
+    isCurrentViewEdit.value
+)
+
+const isCurrentViewEpisode = computed(
+  () => !isCurrentViewAssetShotOrEdit.value && route.path.includes('episodes')
+)
+
+const isCurrentViewSequence = computed(
+  () => !isCurrentViewAssetShotOrEdit.value && route.path.includes('sequences')
+)
+
+const isCurrentViewEntity = computed(
+  () =>
+    isCurrentViewAssetShotOrEdit.value ||
+    isCurrentViewSequence.value ||
+    isCurrentViewEpisode.value
+)
+
+const currentEntityType = computed(() => {
+  if (isCurrentViewAsset.value) return 'asset'
+  if (isCurrentViewShot.value) return 'shot'
+  if (isCurrentViewSequence.value) return 'sequence'
+  if (isCurrentViewEdit.value) return 'edit'
+  return 'episode'
+})
+
+const selectedConceptList = computed(() => [...selectedConcepts.value.values()])
+
+const isConceptPublisher = computed(
+  () =>
+    selectedConceptList.value.length > 0 &&
+    selectedConceptList.value.every(
+      concept => concept.created_by === user.value.id
+    )
+)
+
+// Where the selection can go: out of its folder when a concept sits in
+// one, and to every folder that does not already hold it all.
+const conceptFolderTargets = computed(() => [
+  ...(selectedConceptList.value.some(concept => concept.parent_id)
+    ? [{ id: null, name: t('concepts.folders.none') }]
+    : []),
+  ...conceptFolders.value.filter(folder =>
+    selectedConceptList.value.some(concept => concept.parent_id !== folder.id)
+  )
+])
+
+// The assets at least one selected concept is linked to.
+const conceptLinkedEntities = computed(() =>
+  [
+    ...new Set(
+      selectedConceptList.value.flatMap(
+        concept => concept.entity_concept_links ?? []
+      )
+    )
+  ]
+    .map(id => assetsStore.cache.assetMap.get(id))
+    .filter(Boolean)
+)
+
+const availableLinksByType = computed(() =>
+  assetsByType.value
+    .filter(assets => assets.length)
+    .map(assets => ({
+      type: assets[0].asset_type_name,
+      links: assets
+        .filter(asset => nbLinkedConcepts(asset) < nbSelectedConcepts.value)
+        .map(asset => ({ id: asset.id, name: asset.name }))
+    }))
+)
+
+const currentTeam = computed(() => {
+  const isSupervisorWithDepartments =
+    isCurrentUserSupervisor.value && user.value.departments.length > 0
+  return props.team.filter(
+    member =>
+      !member?.is_bot &&
+      (!isSupervisorWithDepartments ||
+        member.departments.length === 0 ||
+        member.departments.some(department =>
+          user.value.departments.includes(department)
+        ))
+  )
+})
+
+const priorityOptions = computed(() =>
+  ['normal', 'high', 'very_high', 'emergency'].map((name, index) => ({
+    label: t(`tasks.priority.${name}`),
+    value: String(index)
+  }))
+)
+
+const isTaskSelection = computed(() => nbSelectedTasks.value > 0)
+
+const nbSelectedAssets = computed(() => selectedAssets.value.size)
+const nbSelectedShots = computed(() => selectedShots.value.size)
+const nbSelectedEdits = computed(() => selectedEdits.value.size)
+const nbSelectedConcepts = computed(() => selectedConcepts.value.size)
+
+const isEntitySelection = computed(
+  () =>
+    nbSelectedAssets.value > 0 ||
+    nbSelectedShots.value > 0 ||
+    nbSelectedEdits.value > 0
+)
+
+const isTaskCreationAvailable = computed(
+  () =>
+    isCurrentViewEntity.value &&
+    !isCurrentViewTaskType.value &&
+    isCurrentUserManager.value &&
+    !isEntitySelection.value &&
+    nbSelectedValidations.value > 0 &&
+    nbSelectedTasks.value !== 1
+)
+
+const isCustomActionAvailable = computed(
+  () =>
+    !isEntitySelection.value &&
+    isTaskSelection.value &&
+    !isCurrentViewConcept.value &&
+    customActions.value.length > 0
+)
+
+// Secondary actions, listed in the more actions menu instead of the bar
+const moreActions = computed(() =>
+  [
+    {
+      bar: 'subscribe',
+      icon: EyeIcon,
+      label: t('menu.subscribe'),
+      isAvailable:
+        isTaskSelection.value &&
+        !isCurrentViewSingleEntity.value &&
+        !isCurrentViewTodos.value &&
+        !isCurrentViewConcept.value
     },
-    isSetFrameThumbnailLoading: {
-      type: Boolean,
-      default: false
+    {
+      bar: 'custom-actions',
+      icon: PlayCircleIcon,
+      label: t('menu.run_custom_action'),
+      isAvailable: isCustomActionAvailable.value
     },
-    productionId: {
-      type: String,
-      default: null
-    },
-    team: {
-      type: Array,
-      default: () => []
+    {
+      bar: 'delete-tasks',
+      icon: Trash2Icon,
+      label: t('menu.delete_tasks'),
+      isAvailable:
+        isCurrentViewEntity.value &&
+        isCurrentUserManager.value &&
+        !isEntitySelection.value &&
+        !isCurrentViewSingleEntity.value &&
+        isTaskSelection.value
     }
-  },
-
-  components: {
-    BuildFilterModal,
-    ButtonSimple,
-    CheckSquareIcon,
-    ComboboxModel,
-    ComboboxStatus,
-    ComboboxStyled,
-    DeleteEntities,
-    KitsuIcon,
-    LinkIcon,
-    PeopleField,
-    PlayCircleIcon,
-    SearchField,
-    Spinner,
-    ViewPlaylistModal,
-    XIcon
-  },
-
-  emits: ['export-task', 'set-frame-thumbnail'],
-
-  data() {
-    return {
-      availableTaskStatuses: [],
-      customAction: {},
-      customActions: [],
-      isUseCurrentFrame: false,
-      person: null,
-      priority: '0',
-      selectedBar: '',
-      taskStatusId: '',
-      statusComment: '',
-      modals: {
-        buildFilter: false,
-        playlist: false
-      },
-      priorityOptions: [
-        {
-          label: this.$t('tasks.priority.normal'),
-          value: '0'
-        },
-        {
-          label: this.$t('tasks.priority.high'),
-          value: '1'
-        },
-        {
-          label: this.$t('tasks.priority.very_high'),
-          value: '2'
-        },
-        {
-          label: this.$t('tasks.priority.emergency'),
-          value: '3'
-        }
-      ],
-      loading: {
-        assignation: false,
-        assetDeletion: false,
-        changePriority: false,
-        changeStatus: false,
-        conceptDeletion: false,
-        editDeletion: false,
-        taskCreation: false,
-        taskDeletion: false,
-        setThumbnails: false,
-        shotDeletion: false,
-        tasksSubscription: false
-      },
-      errors: {
-        assetDeletion: false,
-        taskAssignation: false,
-        taskDeletion: false,
-        conceptDeletion: false,
-        editDeletion: false,
-        shotDeletion: false
-      }
-    }
-  },
-
-  mounted() {
-    this.customAction = this.defaultCustomAction
-  },
-
-  beforeUnmount() {
-    window.removeEventListener('keydown', this.onKeyDown)
-  },
-
-  computed: {
-    ...mapGetters([
-      'assetsByType',
-      'currentProduction',
-      'getCustomActionsByType',
-      'isCurrentUserArtist',
-      'isCurrentUserClient',
-      'isShowAssignations',
-      'nbSelectedTasks',
-      'nbSelectedValidations',
-      'productionMap',
-      'selectedAssets',
-      'selectedConcepts',
-      'selectedEdits',
-      'selectedShots',
-      'selectedTasks',
-      'taskMap',
-      'taskStatusForCurrentUser',
-      'taskTypeMap',
-      'user'
-    ]),
-
-    // Role gating follows the production of the displayed tasks, not the
-    // globally selected one: this panel also serves cross-production views
-    // (Todos, All Tasks, checks, notifications).
-    currentUserProductionRole() {
-      return this.$store.getters.currentUserRoleForProduction(this.productionId)
-    },
-
-    isCurrentUserManager() {
-      return (
-        this.$store.getters.isCurrentUserAdmin ||
-        this.currentUserProductionRole === 'manager'
-      )
-    },
-
-    isCurrentUserSupervisor() {
-      return this.currentUserProductionRole === 'supervisor'
-    },
-
-    assetMap() {
-      return assetsStore.cache.assetMap
-    },
-
-    minimized() {
-      return this.selectedBar === ''
-    },
-
-    currentUrl() {
-      return this.$route.path
-    },
-
-    currentHost() {
-      return window.location.host
-    },
-
-    currentEntityType() {
-      if (this.isCurrentViewAsset) return 'asset'
-      if (this.isCurrentViewShot) return 'shot'
-      if (this.isCurrentViewSequence) return 'sequence'
-      if (this.isCurrentViewEdit) return 'edit'
-      return 'episode'
-    },
-
-    currentConcept() {
-      return this.selectedConcepts.values().next().value
-    },
-
-    conceptLinkedEntities() {
-      return this.getLinkedEntities(this.currentConcept)
-    },
-
-    currentTeam() {
-      const isSupervisorWithDepartments =
-        this.isCurrentUserSupervisor && this.user.departments.length > 0
-
-      return this.team.filter(person => {
-        if (!person?.is_bot) {
-          if (isSupervisorWithDepartments) {
-            return (
-              person.departments.length === 0 ||
-              person.departments.some(department =>
-                this.user.departments.includes(department)
-              )
-            )
-          }
-          return true
-        }
-        return false
-      })
-    },
-
-    defaultCustomAction() {
-      return this.customActions?.[0] ?? {}
-    },
-
-    isTaskSelection() {
-      return this.nbSelectedTasks > 0
-    },
-
-    isEntitySelection() {
-      return (
-        this.selectedAssets.size > 0 ||
-        this.selectedShots.size > 0 ||
-        this.selectedEdits.size > 0
-      )
-    },
-
-    nbSelectedAssets() {
-      return this.selectedAssets.size
-    },
-
-    nbSelectedShots() {
-      return this.selectedShots.size
-    },
-
-    nbSelectedEdits() {
-      return this.selectedEdits.size
-    },
-
-    nbSelectedConcepts() {
-      return this.selectedConcepts.size
-    },
-
-    allAssetsCanceled() {
-      return Array.from(this.selectedAssets.values()).every(
-        asset => asset.canceled
-      )
-    },
-
-    allShotsCanceled() {
-      const allShotsCanceled = Array.from(this.selectedShots.values()).every(
-        shot => shot.canceled
-      )
-      return allShotsCanceled
-    },
-
-    allEditsCanceled() {
-      return Array.from(this.selectedEdits.values()).every(
-        edit => edit.canceled
-      )
-    },
-
-    isHidden() {
-      return (
-        (this.nbSelectedTasks === 0 &&
-          this.nbSelectedValidations === 0 &&
-          this.nbSelectedAssets === 0 &&
-          this.nbSelectedShots === 0 &&
-          this.nbSelectedEdits === 0 &&
-          this.nbSelectedConcepts === 0) ||
-        !(
-          this.isCurrentViewAsset ||
-          this.isCurrentViewTodos ||
-          this.isCurrentViewShot ||
-          this.isCurrentViewEpisode ||
-          this.isCurrentViewSequence ||
-          this.isCurrentViewEdit ||
-          this.isCurrentViewConcept
-        )
-      )
-    },
-
-    isConceptPublisher() {
-      return this.currentConcept?.created_by === this.user.id
-    },
-
-    isCurrentViewSingleEntity() {
-      return [
-        'asset',
-        'shot',
-        'edit',
-        'episode',
-        'sequence',
-        'episode-asset',
-        'episode-shot',
-        'episode-edit',
-        'episode-sequence'
-      ].includes(this.$route.name)
-    },
-
-    isCurrentViewAsset() {
-      return this.$route.path.includes('asset') && !this.$route.params.shot_id
-    },
-
-    isCurrentViewShot() {
-      return this.$route.path.includes('shot') && !this.$route.params.shot_id
-    },
-
-    isCurrentViewEdit() {
-      return this.$route.path.includes('edit') && !this.$route.params.edit_id
-    },
-
-    isCurrentViewConcept() {
-      return this.$route.path.includes('concept')
-    },
-
-    isCurrentViewTodos() {
-      return (
-        this.$route.path.includes('my-tasks') ||
-        this.$route.path.includes('people/')
-      )
-    },
-
-    isCurrentViewPerson() {
-      return this.$route.path.includes('people/')
-    },
-
-    isCurrentViewTaskType() {
-      return this.$route.path.includes('task-type')
-    },
-
-    isCurrentViewEntity() {
-      return (
-        this.isCurrentViewAsset ||
-        this.isCurrentViewShot ||
-        this.isCurrentViewEdit ||
-        this.isCurrentViewSequence ||
-        this.isCurrentViewEpisode
-      )
-    },
-
-    isCurrentViewEpisode() {
-      return (
-        !(
-          this.isCurrentViewAsset ||
-          this.isCurrentViewShot ||
-          this.isCurrentViewEdit
-        ) && this.$route.path.includes('episodes')
-      )
-    },
-
-    isCurrentViewSequence() {
-      return (
-        !(
-          this.isCurrentViewAsset ||
-          this.isCurrentViewShot ||
-          this.isCurrentViewEdit
-        ) && this.$route.path.includes('sequences')
-      )
-    },
-
-    selectedPersonId() {
-      return this.person ? this.person.id : null
-    },
-
-    selectedTaskIds() {
-      return Array.from(this.selectedTasks.keys())
-    },
-
-    isInDepartment() {
-      return this.selectedTaskIds.every(taskId => {
-        const task = this.taskMap.get(taskId)
-        if (task) {
-          const taskType = this.taskTypeMap.get(task.task_type_id)
-          return (
-            taskType?.department_id &&
-            this.user.departments.includes(taskType.department_id)
-          )
-        } else {
-          return true // The task is not loaded, don't block the action here.
-        }
-      })
-    },
-
-    isSupervisorInDepartment() {
-      return (
-        this.isCurrentUserSupervisor &&
-        (this.user.departments.length === 0 || this.isInDepartment)
-      )
-    },
-
-    storagePrefix() {
-      let prefix = 'todos-'
-      if (
-        this.isCurrentViewAsset ||
-        this.isCurrentViewShot ||
-        this.isCurrentViewEdit
-      ) {
-        prefix = 'entities-'
-      }
-      if (this.isCurrentViewConcept) prefix = 'concepts-'
-      if (this.isCurrentViewTaskType) prefix = 'tasks-'
-      return prefix
-    },
-
-    availableLinksByType() {
-      const assetGroups = [...this.assetsByType]
-      const result = assetGroups
-        .map(assets => {
-          if (!assets.length) return
-          const links = assets
-            .filter(
-              asset =>
-                !this.conceptLinkedEntities.some(
-                  entity => entity.id === asset.id
-                )
-            )
-            .map(asset => ({
-              id: asset.id,
-              name: asset.name
-            }))
-          return {
-            type: assets[0].asset_type_name,
-            links
-          }
-        })
-        .filter(Boolean)
-      return result
-    }
-  },
-
-  methods: {
-    ...mapActions([
-      'assignSelectedTasks',
-      'changeSelectedTaskStatus',
-      'changeSelectedPriorities',
-      'clearSelectedAssets',
-      'clearSelectedShots',
-      'clearSelectedEdits',
-      'clearSelectedConcepts',
-      'clearSelectedTasks',
-      'createSelectedTasks',
-      'deleteSelectedAssets',
-      'deleteSelectedShots',
-      'deleteSelectedTasks',
-      'deleteSelectedEdits',
-      'deleteSelectedConcepts',
-      'editConcept',
-      'loadAssets',
-      'postCustomAction',
-      'setAssetSearch',
-      'setLastTaskPreview',
-      'setTasksMainPreview',
-      'subscribeToTask',
-      'subscribeToTasks',
-      'unassignPersonFromTasks',
-      'unassignSelectedTasks',
-      'unsubscribeFromTask',
-      'unsubscribeFromTasks'
-    ]),
-
-    getLinkedEntities(concept) {
-      return concept.entity_concept_links
-        .map(id => this.assetMap.get(id))
-        .filter(Boolean)
-    },
-
-    confirmTaskStatusChange() {
-      this.loading.changeStatus = true
-      if (!this.taskStatusId) {
-        this.taskStatusId = this.availableTaskStatuses[0].id
-      }
-      this.changeSelectedTaskStatus({
-        taskStatusId: this.taskStatusId,
-        comment: this.statusComment
-      })
-        .then(() => {
-          this.statusComment = ''
-          this.loading.changeStatus = false
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.changeStatus = false
-        })
-    },
-
-    async confirmAssign() {
-      if (this.selectedPersonId || this.isInDepartment) {
-        const personId =
-          this.isCurrentUserManager || this.isCurrentUserSupervisor
-            ? this.selectedPersonId
-            : this.user.id
-        this.loading.assignation = true
-        this.errors.taskAssignation = false
-        try {
-          await this.assignSelectedTasks({ personId })
-          this.$refs['assignation-field']?.clear()
-        } catch (err) {
-          this.errors.taskAssignation = true
-          console.error(err)
-        } finally {
-          this.loading.assignation = false
-        }
-      }
-    },
-
-    clearAssignation() {
-      const person = this.isCurrentUserArtist ? this.user : this.person
-      if (person) {
-        this.loading.assignation = true
-        this.unassignPersonFromTasks({
-          tasks: Array.from(this.selectedTasks.values()),
-          person
-        })
-          .catch(console.error)
-          .finally(() => {
-            this.loading.assignation = false
-          })
-      }
-    },
-
-    clearAllAssignations() {
-      this.loading.assignation = true
-      return this.unassignSelectedTasks({})
-        .then(() => {
-          this.loading.assignation = false
-        })
-        .catch(console.error)
-    },
-
-    async confirmPriorityChange() {
-      this.loading.changePriority = true
-      await this.changeSelectedPriorities({
-        priority: Number(this.priority)
-      })
-      this.loading.changePriority = false
-    },
-
-    confirmTaskCreation() {
-      const type = this.$route.path.includes('shots')
-        ? 'shots'
-        : this.$route.path.includes('assets')
-          ? 'assets'
-          : this.$route.path.includes('edits')
-            ? 'edits'
-            : 'episodes'
-      this.loading.taskCreation = true
-      this.createSelectedTasks({
-        type,
-        projectId: this.productionId
-      })
-        .then(() => {
-          this.loading.taskCreation = false
-        })
-        .catch(err => {
-          this.loading.taskCreation = false
-          console.error(err)
-        })
-    },
-
-    confirmTaskDeletion() {
-      this.loading.taskDeletion = true
-      this.errors.taskDeletion = false
-      this.deleteSelectedTasks()
-        .then(() => {
-          this.loading.taskDeletion = false
-          this.clearSelectedTasks()
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.taskDeletion = false
-          this.errors.taskDeletion = true
-        })
-    },
-
-    confirmAssetDeletion() {
-      this.loading.assetDeletion = true
-      this.errors.assetDeletion = false
-      this.deleteSelectedAssets()
-        .then(() => {
-          this.loading.assetDeletion = false
-          this.clearSelectedAssets()
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.assetDeletion = false
-          this.errors.assetDeletion = true
-        })
-    },
-
-    confirmShotDeletion() {
-      this.loading.shotDeletion = true
-      this.errors.shotDeletion = false
-      this.deleteSelectedShots()
-        .then(() => {
-          this.loading.shotDeletion = false
-          this.clearSelectedShots()
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.shotDeletion = false
-          this.errors.shotDeletion = true
-        })
-    },
-
-    confirmEditDeletion() {
-      this.loading.editDeletion = true
-      this.errors.editDeletion = false
-      this.deleteSelectedEdits()
-        .then(() => {
-          this.loading.editDeletion = false
-          this.clearSelectedEdits()
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.editDeletion = false
-          this.errors.editDeletion = true
-        })
-    },
-
-    confirmConceptDeletion() {
-      this.loading.conceptDeletion = true
-      this.errors.conceptDeletion = false
-      this.deleteSelectedConcepts()
-        .then(() => {
-          this.loading.conceptDeletion = false
-          this.clearSelectedConcepts()
-        })
-        .catch(err => {
-          console.error(err)
-          this.loading.conceptDeletion = false
-          this.errors.conceptDeletion = true
-        })
-    },
-
-    confirmPlaylistGeneration() {
-      this.modals.playlist = true
-      this.selectedBar = ''
-    },
-
-    confirmTasksSubscription() {
-      this.loading.tasksSubscription = true
-      this.subscribeToTasks(Array.from(this.selectedTasks.keys()))
-        .catch(err => {
-          console.error(err)
-        })
-        .finally(() => {
-          this.loading.tasksSubscription = false
-        })
-    },
-
-    confirmTasksUnsubscription() {
-      this.loading.tasksSubscription = true
-      this.unsubscribeFromTasks(Array.from(this.selectedTasks.keys()))
-        .catch(err => {
-          console.error(err)
-        })
-        .finally(() => {
-          this.loading.tasksSubscription = false
-        })
-    },
-
-    hidePlaylistModal() {
-      this.modals.playlist = false
-    },
-
-    confirmSetThumbnailsFromTasks() {
-      this.loading.setThumbnails = true
-      if (this.nbSelectedTasks === 1) {
-        this.$emit(
-          'set-frame-thumbnail',
-          this.isMoviePreview && this.isUseCurrentFrame
-        )
-        this.loading.setThumbnails = false
-      } else {
-        this.setTasksMainPreview(Array.from(this.selectedTasks.keys()))
-          .catch(console.error)
-          .finally(() => {
-            this.loading.setThumbnails = false
-          })
-      }
-    },
-
-    runCustomAction() {
-      this.postCustomAction({
-        data: {
-          entitytype: this.currentEntityType,
-          originurl: this.currentUrl,
-          originserver: this.currentHost,
-          selection: this.selectedTaskIds,
-          productionid: this.productionId,
-          userid: this.user.id,
-          useremail: this.user.email
-        },
-        url: this.customAction.url
-      })
-    },
-
-    onKeyDown(event) {
-      if (event.keyCode === 27) {
-        if (!this.modals.playlist) {
-          this.$store.commit('CLEAR_SELECTED_TASKS')
-        }
-      }
-    },
-
-    clearSelection() {
-      this.clearSelectedAssets()
-      this.clearSelectedShots()
-      this.clearSelectedTasks()
-      this.clearSelectedEdits()
-      this.clearSelectedConcepts()
-    },
-
-    selectBar(barName) {
-      localStorage.setItem(`${this.storagePrefix}-selected-bar`, barName)
-      if (this.selectedBar !== barName) {
-        this.selectedBar = barName
-      } else {
-        this.selectedBar = ''
-      }
-    },
-
-    autoChooseSelectBar() {
-      if (!this.isHidden) {
-        window.addEventListener('keydown', this.onKeyDown)
-        if (this.isCurrentViewAsset && this.nbSelectedAssets > 0) {
-          this.selectedBar = 'delete-assets'
-          return
-        }
-        if (this.isCurrentViewShot && this.nbSelectedShots > 0) {
-          this.selectedBar = 'delete-shots'
-          return
-        }
-        if (this.isCurrentViewEdit && this.nbSelectedEdits > 0) {
-          this.selectedBar = 'delete-edits'
-          return
-        }
-        if (this.isCurrentViewConcept && this.nbSelectedConcepts > 1) {
-          this.selectedBar = 'delete-concepts'
-          return
-        }
-        if (this.nbSelectedTasks === 1) {
-          this.selectedBar = ''
-        }
-
-        const lastSelection = localStorage.getItem(
-          `${this.storagePrefix}-selected-bar`
-        )
-        if (lastSelection) {
-          this.selectedBar = lastSelection
-        } else if (
-          this.isCurrentViewAsset ||
-          this.isCurrentViewShot ||
-          this.isCurrentViewEdit
-        ) {
-          this.selectedBar = 'change-status'
-        }
-      } else {
-        window.removeEventListener('keydown', this.onKeyDown)
-      }
-    },
-
-    setAvailableStatuses() {
-      let availableTaskStatuses
-      if (this.selectedTasks.size === 0) {
-        availableTaskStatuses = []
-      } else if (this.isCurrentViewTodos) {
-        const statusLists = Array.from(this.selectedTasks.values())
-          .map(task => this.productionMap.get(task.project_id)?.task_statuses)
-          .filter(Boolean)
-        const availableStatus = new Set(intersection(statusLists))
-        availableTaskStatuses = this.taskStatusForCurrentUser.filter(status =>
-          availableStatus.has(status.id)
-        )
-      } else {
-        availableTaskStatuses = this.taskStatusForCurrentUser
-      }
-      availableTaskStatuses = availableTaskStatuses.filter(
-        status => Boolean(status.for_concept) === this.isCurrentViewConcept
-      )
-      this.availableTaskStatuses = availableTaskStatuses
-    },
-
-    onRemoveLink(link) {
-      const concept = {
-        id: this.currentConcept.id,
-        entity_concept_links: this.currentConcept.entity_concept_links.filter(
-          id => id !== link.id
-        )
-      }
-      this.editConcept(concept)
-    },
-
-    confirmBuildFilter(query) {
-      this.modals.buildFilter = false
-      this.$refs['entity-search-field'].setValue(query)
-      this.onEntitySearchChange(query)
-    },
-
-    onEntitySearchChange(searchQuery) {
-      this.setAssetSearch(searchQuery)
-    },
-
-    onSelectLink(link) {
-      const concept = {
-        id: this.currentConcept.id,
-        entity_concept_links: [
-          ...this.currentConcept.entity_concept_links
-        ].concat(link.id)
-      }
-      this.editConcept(concept)
-    }
-  },
-
-  watch: {
-    nbSelectedAssets() {
-      this.autoChooseSelectBar()
-      if (this.nbSelectedAssets > 0) this.clearSelectedTasks()
-    },
-
-    nbSelectedShots() {
-      this.autoChooseSelectBar()
-      if (this.nbSelectedShots > 0) this.clearSelectedTasks()
-    },
-
-    nbSelectedEdits() {
-      this.autoChooseSelectBar()
-      if (this.nbSelectedEdits > 0) this.clearSelectedTasks()
-    },
-
-    nbSelectedConcepts() {
-      this.autoChooseSelectBar()
-      if (this.nbSelectedConcepts > 1) this.clearSelectedTasks()
-    },
-
-    isHidden() {
-      this.autoChooseSelectBar()
-    },
-
-    nbSelectedTasks: {
-      immediate: true,
-      handler() {
-        if (this.nbSelectedTasks > 0) {
-          this.setAvailableStatuses()
-
-          const selectedTypes = {
-            Asset: false,
-            Shot: false,
-            Sequence: false,
-            Edit: false,
-            Episode: false
-          }
-          this.selectedTasks.forEach(task => {
-            const type = this.taskTypeMap.get(task.task_type_id)
-            selectedTypes[type?.for_entity] = true
-          })
-
-          this.customActions = this.getCustomActionsByType(
-            selectedTypes.Asset,
-            selectedTypes.Shot,
-            selectedTypes.Sequence,
-            selectedTypes.Edit,
-            selectedTypes.Episode
-          )
-
-          if (this.customActions.length > 0) {
-            const isUrlSelected =
-              this.customAction.url &&
-              this.customActions.findIndex(action => {
-                return action.id === this.customAction.id
-              }) >= 0
-
-            if (!isUrlSelected) {
-              this.customAction = this.customActions[0]
-            }
-          }
-
-          if (this.nbSelectedTasks === 1) {
-            this.lastSelectedBar = this.selectedBar
-            this.selectedBar === ''
-          } else if (this.lastSelectedBar) {
-            this.selectedBar === this.lastSelectedBar
-          }
-        }
-      }
-    },
-
-    $route(oldRoute, newRoute) {
-      if (oldRoute.name !== newRoute.name) {
-        if (this.nbSelectedTasks > 0) {
-          this.clearSelectedTasks()
-        }
-      }
+  ].filter(action => action.isAvailable)
+)
+
+const isMoreActionSelected = computed(() =>
+  moreActions.value.some(action => action.bar === selectedBar.value)
+)
+
+const allAssetsCanceled = computed(() =>
+  Array.from(selectedAssets.value.values()).every(asset => asset.canceled)
+)
+
+const allShotsCanceled = computed(() =>
+  Array.from(selectedShots.value.values()).every(shot => shot.canceled)
+)
+
+const allEditsCanceled = computed(() =>
+  Array.from(selectedEdits.value.values()).every(edit => edit.canceled)
+)
+
+const isHidden = computed(
+  () =>
+    (nbSelectedTasks.value === 0 &&
+      nbSelectedValidations.value === 0 &&
+      nbSelectedAssets.value === 0 &&
+      nbSelectedShots.value === 0 &&
+      nbSelectedEdits.value === 0 &&
+      nbSelectedConcepts.value === 0) ||
+    !(
+      isCurrentViewEntity.value ||
+      isCurrentViewSingleEntity.value ||
+      isCurrentViewTodos.value ||
+      isCurrentViewConcept.value
+    )
+)
+
+const selectedTaskIds = computed(() => Array.from(selectedTasks.value.keys()))
+
+const isInDepartment = computed(() =>
+  selectedTaskIds.value.every(taskId => {
+    const task = taskMap.value.get(taskId)
+    // A task that is not loaded must not block the action here.
+    if (!task) return true
+    const taskType = taskTypeMap.value.get(task.task_type_id)
+    return (
+      taskType?.department_id &&
+      user.value.departments.includes(taskType.department_id)
+    )
+  })
+)
+
+const isSupervisorInDepartment = computed(
+  () =>
+    isCurrentUserSupervisor.value &&
+    (user.value.departments.length === 0 || isInDepartment.value)
+)
+
+// The bars the menu offers to this selection. The bar used last comes back
+// only when offered: several pages share it, and it may come from a
+// selection of lines or of empty cells.
+const availableBars = computed(() => {
+  const menuBars = {
+    'change-status':
+      (isCurrentUserManager.value ||
+        isSupervisorInDepartment.value ||
+        isInDepartment.value ||
+        isCurrentViewTodos.value) &&
+      !isEntitySelection.value &&
+      !isCurrentViewConcept.value &&
+      isTaskSelection.value,
+    assignation:
+      (isCurrentViewSingleEntity.value || isCurrentViewEntity.value) &&
+      (isCurrentUserManager.value ||
+        isSupervisorInDepartment.value ||
+        isInDepartment.value ||
+        isCurrentViewSingleEntity.value) &&
+      !isEntitySelection.value &&
+      isTaskSelection.value &&
+      !isCurrentUserArtist.value,
+    priorities:
+      (isCurrentViewSingleEntity.value ||
+        isCurrentViewEntity.value ||
+        isCurrentViewPerson.value) &&
+      (isCurrentUserManager.value || isSupervisorInDepartment.value) &&
+      !isEntitySelection.value &&
+      isTaskSelection.value,
+    'copy-client-comments':
+      isCurrentUserManager.value &&
+      isTaskSelection.value &&
+      !isEntitySelection.value &&
+      !isCurrentViewConcept.value,
+    thumbnails:
+      isTaskSelection.value &&
+      !isCurrentUserArtist.value &&
+      !isCurrentViewConcept.value,
+    'edit-concepts':
+      isCurrentViewConcept.value &&
+      (isCurrentUserManager.value || isConceptPublisher.value) &&
+      nbSelectedConcepts.value > 0,
+    'move-concepts':
+      isCurrentViewConcept.value &&
+      (isCurrentUserManager.value || isCurrentUserSupervisor.value) &&
+      nbSelectedConcepts.value > 0 &&
+      conceptFolders.value.length > 0,
+    playlists:
+      (isCurrentViewAsset.value ||
+        isCurrentViewShot.value ||
+        isCurrentViewSequence.value ||
+        isCurrentViewTodos.value ||
+        isCurrentViewTaskType.value) &&
+      !isEntitySelection.value &&
+      !isCurrentViewSingleEntity.value &&
+      isTaskSelection.value &&
+      nbSelectedTasks.value > 0,
+    'create-tasks': isTaskCreationAvailable.value,
+    'delete-assets':
+      isCurrentViewAsset.value &&
+      isCurrentUserManager.value &&
+      nbSelectedAssets.value > 0 &&
+      !isTaskSelection.value,
+    'delete-shots':
+      isCurrentViewShot.value &&
+      isCurrentUserManager.value &&
+      nbSelectedShots.value > 0 &&
+      !isTaskSelection.value,
+    'delete-edits':
+      isCurrentViewEdit.value &&
+      isCurrentUserManager.value &&
+      nbSelectedEdits.value > 0 &&
+      !isTaskSelection.value,
+    'delete-concepts':
+      isCurrentViewConcept.value &&
+      (isCurrentUserManager.value || isConceptPublisher.value)
+  }
+  return new Set([
+    ...Object.keys(menuBars).filter(bar => menuBars[bar]),
+    ...moreActions.value.map(action => action.bar)
+  ])
+})
+
+const storagePrefix = computed(() => {
+  if (isCurrentViewTaskType.value) return 'tasks-'
+  if (isCurrentViewConcept.value) return 'concepts-'
+  if (isCurrentViewAssetShotOrEdit.value) return 'entities-'
+  return 'todos-'
+})
+
+// Functions
+// --------------------------------------------------------------------------
+
+const confirmTaskStatusChange = async () => {
+  if (!taskStatusId.value) {
+    taskStatusId.value = availableTaskStatuses.value[0]?.id ?? ''
+  }
+  if (!taskStatusId.value) return
+  loading.changeStatus = true
+  try {
+    await store.dispatch('changeSelectedTaskStatus', {
+      taskStatusId: taskStatusId.value,
+      comment: statusComment.value
+    })
+    statusComment.value = ''
+  } catch (err) {
+    console.error(err)
+  }
+  loading.changeStatus = false
+}
+
+const confirmAssign = async () => {
+  if (person.value || isInDepartment.value) {
+    const personId =
+      isCurrentUserManager.value || isCurrentUserSupervisor.value
+        ? (person.value?.id ?? null)
+        : user.value.id
+    loading.assignation = true
+    errors.taskAssignation = false
+    try {
+      await store.dispatch('assignSelectedTasks', { personId })
+      assignationFieldRef.value?.clear()
+    } catch (err) {
+      errors.taskAssignation = true
+      console.error(err)
+    } finally {
+      loading.assignation = false
     }
   }
 }
+
+const runUnassignation = async (action, payload) => {
+  loading.assignation = true
+  try {
+    await store.dispatch(action, payload)
+  } catch (err) {
+    console.error(err)
+  }
+  loading.assignation = false
+}
+
+const clearAssignation = () => {
+  const personToClear = isCurrentUserArtist.value ? user.value : person.value
+  if (personToClear) {
+    runUnassignation('unassignPersonFromTasks', {
+      tasks: Array.from(selectedTasks.value.values()),
+      person: personToClear
+    })
+  }
+}
+
+const clearAllAssignations = () => runUnassignation('unassignSelectedTasks', {})
+
+const confirmPriorityChange = async () => {
+  loading.changePriority = true
+  try {
+    await store.dispatch('changeSelectedPriorities', {
+      priority: Number(priority.value)
+    })
+  } catch (err) {
+    console.error(err)
+  }
+  loading.changePriority = false
+}
+
+const confirmClientCommentsCopy = async () => {
+  loading.copyClientComments = true
+  errors.copyClientComments = false
+  clientCommentsCopy.value = null
+  localStorage.setItem(CLIENT_COMMENTS_PREFIX_KEY, clientCommentsPrefix.value)
+  try {
+    clientCommentsCopy.value = await store.dispatch('copyLastClientComments', {
+      prefix: clientCommentsPrefix.value
+    })
+  } catch (err) {
+    console.error(err)
+    errors.copyClientComments = true
+  }
+  loading.copyClientComments = false
+}
+
+const confirmTaskCreation = async () => {
+  const type =
+    ['shots', 'assets', 'edits'].find(name => route.path.includes(name)) ||
+    'episodes'
+  loading.taskCreation = true
+  try {
+    await store.dispatch('createSelectedTasks', {
+      type,
+      projectId: props.productionId
+    })
+  } catch (err) {
+    console.error(err)
+  }
+  loading.taskCreation = false
+}
+
+const runDeletion = async (key, deleteAction, clearAction) => {
+  loading[key] = true
+  errors[key] = false
+  try {
+    await store.dispatch(deleteAction)
+    store.dispatch(clearAction)
+  } catch (err) {
+    console.error(err)
+    errors[key] = true
+  }
+  loading[key] = false
+}
+
+const confirmTaskDeletion = () =>
+  runDeletion('taskDeletion', 'deleteSelectedTasks', 'clearSelectedTasks')
+
+const confirmAssetDeletion = () =>
+  runDeletion('assetDeletion', 'deleteSelectedAssets', 'clearSelectedAssets')
+
+const confirmShotDeletion = () =>
+  runDeletion('shotDeletion', 'deleteSelectedShots', 'clearSelectedShots')
+
+const confirmEditDeletion = () =>
+  runDeletion('editDeletion', 'deleteSelectedEdits', 'clearSelectedEdits')
+
+const confirmConceptDeletion = () =>
+  runDeletion(
+    'conceptDeletion',
+    'deleteSelectedConcepts',
+    'clearSelectedConcepts'
+  )
+
+const confirmPlaylistGeneration = () => {
+  modals.playlist = true
+  selectedBar.value = ''
+}
+
+const hidePlaylistModal = () => {
+  modals.playlist = false
+}
+
+const runSubscription = async action => {
+  loading.tasksSubscription = true
+  try {
+    await store.dispatch(action, selectedTaskIds.value)
+  } catch (err) {
+    console.error(err)
+  }
+  loading.tasksSubscription = false
+}
+
+const confirmTasksSubscription = () => runSubscription('subscribeToTasks')
+
+const confirmTasksUnsubscription = () => runSubscription('unsubscribeFromTasks')
+
+const confirmSetThumbnailsFromTasks = async () => {
+  if (nbSelectedTasks.value === 1) {
+    emit('set-frame-thumbnail', props.isMoviePreview && isUseCurrentFrame.value)
+  } else {
+    loading.setThumbnails = true
+    try {
+      await store.dispatch('setTasksMainPreview', selectedTaskIds.value)
+    } catch (err) {
+      console.error(err)
+    }
+    loading.setThumbnails = false
+  }
+}
+
+const runCustomAction = () => {
+  store.dispatch('postCustomAction', {
+    data: {
+      entitytype: currentEntityType.value,
+      originurl: currentUrl.value,
+      originserver: currentHost,
+      selection: selectedTaskIds.value,
+      productionid: props.productionId,
+      userid: user.value.id,
+      useremail: user.value.email
+    },
+    url: customAction.value.url
+  })
+}
+
+const onKeyDown = event => {
+  if (isFreeEscape(event)) store.commit('CLEAR_SELECTED_TASKS')
+}
+
+const clearSelection = () => {
+  store.dispatch('clearSelectedAssets')
+  store.dispatch('clearSelectedShots')
+  store.dispatch('clearSelectedTasks')
+  store.dispatch('clearSelectedEdits')
+  store.dispatch('clearSelectedConcepts')
+}
+
+const selectBar = barName => {
+  localStorage.setItem(`${storagePrefix.value}-selected-bar`, barName)
+  selectedBar.value = selectedBar.value !== barName ? barName : ''
+}
+
+// The menu bar scrolls horizontally, which clips any absolute child: the
+// list is fixed, under the button and opening leftwards.
+const moreActionsButtonRef = useTemplateRef('more-actions-button')
+const toggleMoreActions = () => {
+  isMoreActionsOpen.value = !isMoreActionsOpen.value
+  if (isMoreActionsOpen.value) {
+    const rect = moreActionsButtonRef.value.getBoundingClientRect()
+    moreActionsPosition.value = {
+      top: `${rect.bottom}px`,
+      right: `${document.documentElement.clientWidth - rect.right}px`
+    }
+  }
+}
+
+const selectMoreAction = action => {
+  isMoreActionsOpen.value = false
+  selectBar(action.bar)
+}
+
+const {
+  activeIndex: moreActionIndex,
+  onKeydown: onMoreActionsKeydown,
+  optionId: moreActionId
+} = useComboboxKeyboard({
+  isOpen: isMoreActionsOpen,
+  toggle: toggleMoreActions,
+  optionsLength: () => moreActions.value.length,
+  onSelect: index => selectMoreAction(moreActions.value[index]),
+  listRef: useTemplateRef('more-actions-list')
+})
+
+const autoChooseSelectBar = () => {
+  if (isHidden.value) {
+    window.removeEventListener('keydown', onKeyDown)
+    return
+  }
+  window.addEventListener('keydown', onKeyDown)
+  // The watcher of the task count may run after this choice.
+  refreshSelectionActions()
+  if (isCurrentViewAsset.value && nbSelectedAssets.value > 0) {
+    selectedBar.value = 'delete-assets'
+  } else if (isCurrentViewShot.value && nbSelectedShots.value > 0) {
+    selectedBar.value = 'delete-shots'
+  } else if (isCurrentViewEdit.value && nbSelectedEdits.value > 0) {
+    selectedBar.value = 'delete-edits'
+  } else if (isCurrentViewConcept.value && nbSelectedConcepts.value > 1) {
+    if (!['edit-concepts', 'move-concepts'].includes(selectedBar.value)) {
+      selectedBar.value = 'delete-concepts'
+    }
+  } else if (!isTaskSelection.value && nbSelectedValidations.value > 0) {
+    // Empty cells only: the task bars would have no task to act on.
+    selectedBar.value = isTaskCreationAvailable.value ? 'create-tasks' : ''
+  } else {
+    if (nbSelectedTasks.value === 1) selectedBar.value = ''
+    const lastSelection = localStorage.getItem(
+      `${storagePrefix.value}-selected-bar`
+    )
+    if (availableBars.value.has(lastSelection)) {
+      selectedBar.value = lastSelection
+    } else if (isCurrentViewAssetShotOrEdit.value) {
+      selectedBar.value = 'change-status'
+    } else if (!availableBars.value.has(selectedBar.value)) {
+      selectedBar.value = ''
+    }
+  }
+}
+
+const getAvailableStatuses = () => {
+  if (selectedTasks.value.size === 0) return []
+  const isForCurrentView = status =>
+    Boolean(status.for_concept) === isCurrentViewConcept.value
+  if (!isCurrentViewTodos.value) {
+    return taskStatusForCurrentUser.value.filter(isForCurrentView)
+  }
+  const statusLists = Array.from(selectedTasks.value.values())
+    .map(task => productionMap.value.get(task.project_id)?.task_statuses)
+    .filter(Boolean)
+  const availableStatus = new Set(intersection(statusLists))
+  return taskStatusForCurrentUser.value.filter(
+    status => availableStatus.has(status.id) && isForCurrentView(status)
+  )
+}
+
+const getSelectionCustomActions = () => {
+  const selectedTypes = new Set(
+    Array.from(selectedTasks.value.values()).map(
+      task => taskTypeMap.value.get(task.task_type_id)?.for_entity
+    )
+  )
+  return store.getters.getCustomActionsByType(
+    ...['Asset', 'Shot', 'Sequence', 'Edit', 'Episode'].map(type =>
+      selectedTypes.has(type)
+    )
+  )
+}
+
+// The bars offered to a selection of tasks depend on its statuses and custom
+// actions.
+const refreshSelectionActions = () => {
+  if (nbSelectedTasks.value === 0) return
+  availableTaskStatuses.value = getAvailableStatuses()
+  customActions.value = getSelectionCustomActions()
+  const isActionStillAvailable =
+    customAction.value.url &&
+    customActions.value.some(action => action.id === customAction.value.id)
+  if (customActions.value.length > 0 && !isActionStillAvailable) {
+    customAction.value = customActions.value[0]
+  }
+}
+
+const isLinkedTo = (concept, entity) =>
+  (concept.entity_concept_links ?? []).includes(entity.id)
+
+const nbLinkedConcepts = entity =>
+  selectedConceptList.value.filter(concept => isLinkedTo(concept, entity))
+    .length
+
+const getLinkLabel = entity => {
+  const count = nbLinkedConcepts(entity)
+  const total = nbSelectedConcepts.value
+  return count < total ? `${entity.name} (${count}/${total})` : entity.name
+}
+
+// A request sends the whole link list of a concept: they all go through one
+// queue, so each one builds on the answer to the previous one.
+const editConceptLinks = (concepts, getLinks) => {
+  linkQueue = linkQueue
+    .then(() =>
+      func.runPromiseMapAsSeries(concepts, concept =>
+        store.dispatch('editConcept', {
+          id: concept.id,
+          entity_concept_links: getLinks(concept.entity_concept_links ?? [])
+        })
+      )
+    )
+    .catch(console.error)
+}
+
+const onRemoveLink = link =>
+  editConceptLinks(
+    selectedConceptList.value.filter(concept => isLinkedTo(concept, link)),
+    links => links.filter(id => id !== link.id)
+  )
+
+const onSelectLink = link =>
+  editConceptLinks(
+    selectedConceptList.value.filter(concept => !isLinkedTo(concept, link)),
+    links => [...new Set([...links, link.id])]
+  )
+
+const onMoveConcepts = async folder => {
+  try {
+    await store.dispatch('moveConcepts', {
+      conceptIds: selectedConceptList.value.map(concept => concept.id),
+      folderId: folder.id
+    })
+    clearSelection()
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+const onEntitySearchChange = searchQuery => {
+  store.dispatch('setAssetSearch', searchQuery)
+}
+
+const confirmBuildFilter = query => {
+  modals.buildFilter = false
+  entitySearchFieldRef.value.setValue(query)
+  onEntitySearchChange(query)
+}
+
+// Watchers
+// --------------------------------------------------------------------------
+
+const watchEntitySelection = (count, threshold = 0) => {
+  watch(count, () => {
+    autoChooseSelectBar()
+    if (count.value > threshold) store.dispatch('clearSelectedTasks')
+  })
+}
+
+watchEntitySelection(nbSelectedAssets)
+watchEntitySelection(nbSelectedShots)
+watchEntitySelection(nbSelectedEdits)
+watchEntitySelection(nbSelectedConcepts, 1)
+
+watch([isHidden, isTaskSelection], autoChooseSelectBar)
+
+// A selection change can take the open bar out of the menu, such as the task
+// creation once its cells hold the created tasks.
+watch(availableBars, bars => {
+  if (selectedBar.value && !bars.has(selectedBar.value)) autoChooseSelectBar()
+})
+
+watch(nbSelectedTasks, refreshSelectionActions, { immediate: true })
+
+watch(
+  () => route.name,
+  () => {
+    if (nbSelectedTasks.value > 0) store.dispatch('clearSelectedTasks')
+  }
+)
+
+// Lifecycle
+// --------------------------------------------------------------------------
+
+onMounted(() => {
+  customAction.value = customActions.value[0] ?? {}
+  // The task panel shows this one with its selection already made: the
+  // watchers only see the changes that follow.
+  autoChooseSelectBar()
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKeyDown)
+})
 </script>
 
 <style lang="scss" scoped>
@@ -1843,10 +1862,6 @@ export default {
   background: #f4f4ff;
   color: $grey;
   z-index: 1000;
-}
-
-.hidden {
-  display: none;
 }
 
 .clear-assignation-button {
@@ -1912,16 +1927,41 @@ export default {
   padding: 8px;
 }
 
+.prefix-field,
+.prefix-field .input {
+  width: 100%;
+}
+
 .priority-combobox {
   color: var(--text);
   margin-left: 0.3em;
 }
 
-.menu-separator {
-  padding: 0.2em;
-  border-right: 2px solid $light-grey-light;
-  height: 26px;
-  margin-bottom: 8px;
+.more-actions-list {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  color: var(--text);
+  min-width: 200px;
+  overflow: hidden;
+  position: fixed;
+  z-index: 1001;
+}
+
+.more-action {
+  cursor: pointer;
+  padding: 0.6em 0.8em;
+  white-space: nowrap;
+
+  &:hover,
+  &.focused {
+    background: var(--background-hover);
+  }
+
+  &.active {
+    color: var(--text-selected);
+  }
 }
 
 .is-wide {
@@ -1986,20 +2026,8 @@ export default {
     border: 1px solid $light-green;
     transition: transform 0.1s linear;
 
-    .action {
-      border-radius: 50%;
-      display: none;
-      height: 14px;
-      width: 14px;
-      line-height: 8px;
-    }
-
     &:hover {
       transform: scale(1.1);
-
-      .action {
-        display: inline-block;
-      }
     }
   }
 }
@@ -2039,13 +2067,15 @@ export default {
 
     .tag {
       border-color: $light-grey;
-      cursor: pointer;
-      transition: transform 0.1s linear;
-
-      &:hover {
-        transform: scale(1.1);
-      }
     }
   }
+}
+
+.concept-folders {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  list-style: none;
+  margin-left: 0;
 }
 </style>

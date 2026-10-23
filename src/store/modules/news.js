@@ -6,6 +6,7 @@ import {
   CLEAR_NEWS,
   ADD_PREVIOUS_NEWS,
   ADD_FIRST_NEWS,
+  REMOVE_NEWS,
   NEWS_ADD_PREVIEW,
   NEWS_SET_TOTAL,
   RESET_ALL
@@ -91,6 +92,14 @@ const mutations = {
     } else {
       state.newsList.unshift(news)
       state.newsTotal += 1
+    }
+  },
+
+  [REMOVE_NEWS](state, newsId) {
+    const index = state.newsList.findIndex(news => news.id === newsId)
+    if (index !== -1) {
+      state.newsList.splice(index, 1)
+      state.newsTotal -= 1
     }
   },
 

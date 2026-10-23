@@ -57,13 +57,15 @@ describe('lib/players/onionSkin', () => {
     })
 
     it('clamps to the lower bound', () => {
-      const result = selectOnionNeighbors(0, 5, getAt, 100)
-      expect(result.every(entry => entry.frame >= 0)).toBe(true)
+      const everyFrame = frame => ({ id: `a${frame}` })
+      const result = selectOnionNeighbors(1, 3, everyFrame, 100)
+      expect(result.map(entry => entry.frame)).toEqual([0, 2, 3, 4])
     })
 
     it('clamps to the upper bound (nbFrames)', () => {
-      const result = selectOnionNeighbors(13, 5, getAt, 14)
-      expect(result.every(entry => entry.frame <= 13)).toBe(true)
+      const everyFrame = frame => ({ id: `a${frame}` })
+      const result = selectOnionNeighbors(12, 3, everyFrame, 14)
+      expect(result.map(entry => entry.frame)).toEqual([11, 13, 10, 9])
     })
 
     it('returns nothing for n = 0', () => {

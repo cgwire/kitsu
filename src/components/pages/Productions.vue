@@ -293,7 +293,9 @@ const onProjectMetadataChanged = async ({ entry, descriptor, value }) => {
   }
 }
 
+// Close leaves the error of the last save: opening drops it.
 const onAddProjectMetadata = () => {
+  errors.addMetadata = false
   descriptorToEdit.value = null
   modals.isAddProjectMetadata = true
 }
@@ -301,6 +303,7 @@ const onAddProjectMetadata = () => {
 const onEditProjectMetadata = fieldName => {
   const d = findFirstProjectDescriptorByFieldName(fieldName)
   if (!d) return
+  errors.addMetadata = false
   descriptorToEdit.value = { ...d }
   modals.isAddProjectMetadata = true
 }

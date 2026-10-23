@@ -1,0 +1,491 @@
+import { shallowMount } from '@vue/test-utils'
+import { vi } from 'vitest'
+import { nextTick } from 'vue'
+import { createStore } from 'vuex'
+
+import { trackTaskSelection } from '../../fixtures/task-selection'
+
+import resizableColumn from '@/directives/resizable-column'
+
+import TodosList from '@/components/lists/TodosList.vue'
+
+// The tasks module of the selection fixture reaches the store index.
+vi.mock('@/store', () => ({ default: {} }))
+
+vi.mock('vue-i18n', async importOriginal => ({
+  ...(await importOriginal()),
+  useI18n: () => ({ t: key => key })
+}))
+
+const task = {
+  id: 'task-1',
+  project_id: 'production-1',
+  task_type_id: 'task-type-1',
+  entity_type_name: 'Shot',
+  full_entity_name: 'SQ010 / SH0010',
+  due_date: '2026-10-01',
+  estimation: 240
+}
+
+const mountList = (
+  props,
+  config,
+  { getters = {}, actions = {}, selection, attachTo } = {}
+) =>
+  shallowMount(TodosList, {
+    attachTo,
+    global: {
+      config,
+      plugins: [
+        createStore({
+          state: selection?.state,
+          mutations: selection?.mutations,
+          getters: {
+            dateFormat: () => 'YYYY-MM-DD',
+            isCurrentUserManager: () => false,
+            isCurrentUserSupervisor: () => false,
+            nbSelectedTasks: () => 0,
+            openProductions: () => [],
+            organisation: () => ({ hours_by_day: 8 }),
+            personMap: () => new Map(),
+            productionMap: () => new Map(),
+            selectedTasks: () => new Map(),
+            taskMap: () => new Map(),
+            taskTypeMap: () => new Map(),
+            use12HourClock: () => false,
+            user: () => ({ id: 'user-1', departments: [] }),
+            ...selection?.getters,
+            ...getters
+          },
+          actions: {
+            addSelectedTask: () => {},
+            clearSelectedTasks: () => {},
+            removeSelectedTask: () => {},
+            ...selection?.actions,
+            ...actions
+          }
+        }),
+        resizableColumn
+      ],
+      stubs: { RouterLink: true }
+    },
+    props
+  })
+
+// The pages mount the list while the tasks load: the table only renders
+// once the loading ends.
+const mountLoadedList = async (config, store) => {
+  const wrapper = mountList({ isLoading: true, tasks: [] }, config, store)
+  await wrapper.setProps({ isLoading: false, tasks: [task] })
+  return wrapper
+}
+
+// What a browser reports once "1." is left in a number field: no number, so
+// an empty value with a bad input
+const leaveInvalidEntry = async input => {
+  input.element.value = '1.'
+  Object.defineProperty(input.element, 'validity', {
+    configurable: true,
+    value: { badInput: true }
+  })
+  await input.trigger('change')
+}
+
+// The click target when the pointer is on the drawn line of an icon
+const appendIconStroke = cell => {
+  const svgNamespace = 'http://www.w3.org/2000/svg'
+  const icon = document.createElementNS(svgNamespace, 'svg')
+  const stroke = document.createElementNS(svgNamespace, 'path')
+  icon.appendChild(stroke)
+  cell.appendChild(icon)
+  return stroke
+}
+
+// MouseEventInit has no pageX key, so jsdom drops it in the constructor.
+const mouseEvent = (type, pageX) => {
+  const event = new MouseEvent(type, { bubbles: true })
+  Object.defineProperty(event, 'pageX', { value: pageX })
+  return event
+}
+
+describe('lists/TodosList', () => {
+  afterEach(() => {
+    localStorage.clear()
+  })
+
+  // Phones get read-only cards from the global datatable--cards rule
+  describe('cards on mobile', () => {
+    const cell = (wrapper, name) =>
+      wrapper.find(`.datatable-body tr > .${name}`)
+
+    test('opts the table into the card layout', async () => {
+      const wrapper = await mountLoadedList()
+      expect(wrapper.find('table').classes()).toContain('datatable--cards')
+      expect(cell(wrapper, 'name').classes()).toContain('card-head')
+      wrapper.unmount()
+    })
+
+    test('labels the cells that carry a value', async () => {
+      const wrapper = await mountLoadedList()
+      expect(cell(wrapper, 'production').attributes('data-label')).toBe(
+        'main.production'
+      )
+      expect(cell(wrapper, 'type').attributes('data-label')).toBe(
+        'tasks.fields.task_type'
+      )
+      expect(cell(wrapper, 'status').attributes('data-label')).toBe(
+        'tasks.fields.task_status'
+      )
+      expect(cell(wrapper, 'due-date').attributes('data-label')).toBe(
+        'tasks.fields.due_date'
+      )
+      expect(cell(wrapper, 'estimation').attributes('data-label')).toBe(
+        'main.estimation'
+      )
+      wrapper.unmount()
+    })
+
+    test('labels the end date of a done task', async () => {
+      const wrapper = mountList({ done: true, isLoading: true, tasks: [] })
+      await wrapper.setProps({
+        isLoading: false,
+        tasks: [{ ...task, end_date: '2026-10-02' }]
+      })
+      expect(cell(wrapper, 'end-date').attributes('data-label')).toBe(
+        'tasks.fields.end_date'
+      )
+      wrapper.unmount()
+    })
+
+    test('leaves the empty and secondary cells out of the card', async () => {
+      const wrapper = await mountLoadedList()
+      ;['start-date', 'duration', 'last-comment'].forEach(name => {
+        expect(cell(wrapper, name).attributes('data-label')).toBeUndefined()
+      })
+      wrapper.unmount()
+    })
+  })
+
+  test('can show the empty message without the illustration', () => {
+    const wrapper = mountList({
+      emptyText: 'Nothing waiting',
+      tasks: [],
+      withIllustration: false
+    })
+    expect(wrapper.find('.empty-list').text()).toBe('Nothing waiting')
+    expect(wrapper.find('.empty-list img').exists()).toBe(false)
+    wrapper.unmount()
+  })
+
+  test('lets the user resize the entity column once the tasks load', async () => {
+    const wrapper = await mountLoadedList()
+
+    expect(wrapper.find('thead th.name .resizable-knob').exists()).toBe(true)
+
+    wrapper.unmount()
+  })
+
+  test('keeps the entity column width when the list reloads', async () => {
+    const wrapper = await mountLoadedList()
+    const knob = wrapper.find('thead th.name .resizable-knob').element
+
+    // jsdom lays nothing out: the column starts from a 0px width.
+    knob.dispatchEvent(mouseEvent('mousedown', 100))
+    document.dispatchEvent(mouseEvent('mousemove', 520))
+    document.dispatchEvent(mouseEvent('mouseup', 520))
+    await wrapper.setProps({ isLoading: true })
+    await wrapper.setProps({ isLoading: false })
+
+    expect(wrapper.find('thead th.name').element.style.width).toBe('420px')
+
+    wrapper.unmount()
+  })
+
+  test('selects a task when its row is clicked', async () => {
+    const wrapper = await mountLoadedList()
+
+    await wrapper.find('tbody td.duration').trigger('click')
+
+    expect(wrapper.emitted('task-selected')).toHaveLength(1)
+
+    wrapper.unmount()
+  })
+
+  test('does not select a task from a click on an icon', async () => {
+    const errorHandler = vi.fn()
+    const wrapper = await mountLoadedList({ errorHandler })
+    const stroke = appendIconStroke(wrapper.find('tbody td.duration').element)
+
+    stroke.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+
+    expect(errorHandler).not.toHaveBeenCalled()
+    expect(wrapper.emitted('task-selected')).toBeUndefined()
+
+    wrapper.unmount()
+  })
+
+  describe('selection', () => {
+    const tasks = ['task-1', 'task-2', 'task-3'].map(id => ({ ...task, id }))
+
+    const mountSelectableList = async ({ actions, getters, selection }) => {
+      const wrapper = mountList({ isLoading: true, tasks: [] }, undefined, {
+        actions,
+        getters,
+        selection
+      })
+      await wrapper.setProps({ isLoading: false, tasks })
+      return wrapper
+    }
+
+    // A Ctrl+click left the row selected, and the edits reached it.
+    test('unselects a row of a multi-selection on Ctrl+click', async () => {
+      const updateTask = vi.fn()
+      const selection = trackTaskSelection()
+      const wrapper = await mountSelectableList({
+        selection,
+        actions: { updateTask },
+        getters: {
+          isCurrentUserManager: () => true,
+          taskMap: () => new Map(tasks.map(entry => [entry.id, entry]))
+        }
+      })
+      const cells = wrapper.findAll('tbody td.duration')
+      await cells[0].trigger('click')
+      await cells[1].trigger('click', { ctrlKey: true })
+      await cells[2].trigger('click', { ctrlKey: true })
+
+      await cells[1].trigger('click', { ctrlKey: true })
+      await wrapper.find('tbody td.estimation input').setValue('1')
+
+      expect(selection.selectedIds()).toEqual(['task-1', 'task-3'])
+      expect(updateTask.mock.calls.map(([, { taskId }]) => taskId)).toEqual([
+        'task-1',
+        'task-3'
+      ])
+
+      wrapper.unmount()
+    })
+
+    test('selects a row of a multi-selection alone on a click', async () => {
+      const selection = trackTaskSelection()
+      const wrapper = await mountSelectableList({ selection })
+      const cells = wrapper.findAll('tbody td.duration')
+      await cells[0].trigger('click')
+      await cells[1].trigger('click', { ctrlKey: true })
+
+      await cells[1].trigger('click')
+
+      expect(selection.selectedIds()).toEqual(['task-2'])
+
+      wrapper.unmount()
+    })
+
+    // A Shift+click back to a closer row shrank the highlight only: the
+    // action panel still changed the rows left out.
+    test('gives the store only the range of the last Shift+click', async () => {
+      const selection = trackTaskSelection()
+      const wrapper = await mountSelectableList({ selection })
+      const cells = wrapper.findAll('tbody td.duration')
+
+      await cells[0].trigger('click')
+      await cells[2].trigger('click', { shiftKey: true })
+      await cells[1].trigger('click', { shiftKey: true })
+
+      expect(wrapper.findAll('tbody tr.selected')).toHaveLength(2)
+      expect(selection.selectedIds()).toEqual(['task-1', 'task-2'])
+
+      wrapper.unmount()
+    })
+
+    // A new sort dropped the highlight but not the store selection: the
+    // action panel changed rows the list no longer showed as selected.
+    test('keeps the selected rows highlighted through a new sort', async () => {
+      const selection = trackTaskSelection()
+      const wrapper = await mountSelectableList({ selection })
+      const cells = wrapper.findAll('tbody td.duration')
+      await cells[0].trigger('click')
+      await cells[1].trigger('click', { ctrlKey: true })
+
+      await wrapper.setProps({ tasks: [...tasks].reverse() })
+
+      expect(
+        wrapper.findAll('tbody tr').map(row => row.classes('selected'))
+      ).toEqual([false, true, true])
+      expect(selection.selectedIds()).toEqual(['task-1', 'task-2'])
+
+      wrapper.unmount()
+    })
+
+    // Alt+Down came back to the only row and unselected it.
+    test('keeps the only row selected on Alt+Down', async () => {
+      const selection = trackTaskSelection()
+      const wrapper = mountList({ isLoading: true, tasks: [] }, undefined, {
+        selection
+      })
+      await wrapper.setProps({ isLoading: false, tasks: [task] })
+      await wrapper.find('tbody td.duration').trigger('click')
+
+      window.dispatchEvent(
+        new KeyboardEvent('keydown', { altKey: true, keyCode: 40 })
+      )
+      await nextTick()
+
+      expect(wrapper.findAll('tbody tr.selected')).toHaveLength(1)
+      expect(selection.selectedIds()).toEqual(['task-1'])
+
+      wrapper.unmount()
+    })
+  })
+
+  // 2.05 hours make 122.99999999999999 minutes in floats.
+  test('saves an estimation typed in hours in whole minutes', async () => {
+    const updateTask = vi.fn()
+    const wrapper = await mountLoadedList(undefined, {
+      getters: {
+        isCurrentUserManager: () => true,
+        organisation: () => ({
+          hours_by_day: 8,
+          format_duration_in_hours: true
+        }),
+        taskMap: () => new Map([[task.id, task]])
+      },
+      actions: { updateTask }
+    })
+    await wrapper.find('tbody td.duration').trigger('click')
+    const input = wrapper.find('tbody td.estimation input')
+
+    // setValue fires the change event the list saves on
+    await input.setValue('2.05')
+
+    expect(updateTask.mock.calls.map(([, payload]) => payload)).toEqual([
+      { taskId: 'task-1', data: { estimation: 123 } }
+    ])
+
+    wrapper.unmount()
+  })
+
+  // My tasks shows the list read-only, the person page keeps the editors
+  test('shows no editor when not editable', async () => {
+    const wrapper = mountList(
+      { isLoading: true, tasks: [], editable: false },
+      undefined,
+      {
+        getters: {
+          isCurrentUserManager: () => true,
+          taskMap: () => new Map([[task.id, task]])
+        }
+      }
+    )
+    await wrapper.setProps({ isLoading: false, tasks: [task] })
+    await wrapper.find('tbody td.duration').trigger('click')
+
+    expect(wrapper.find('tbody td.estimation input').exists()).toBe(false)
+    expect(wrapper.find('tbody td.start-date date-field-stub').exists()).toBe(
+      false
+    )
+    expect(wrapper.find('tbody td.due-date date-field-stub').exists()).toBe(
+      false
+    )
+
+    wrapper.unmount()
+  })
+
+  describe('estimation field', () => {
+    const mountEditableList = updateTask =>
+      mountLoadedList(undefined, {
+        getters: {
+          isCurrentUserManager: () => true,
+          taskMap: () => new Map([[task.id, task]])
+        },
+        actions: { updateTask }
+      })
+
+    // It read as an emptied field and saved 0 for every selected task.
+    test('ignores an entry that is no number', async () => {
+      const updateTask = vi.fn()
+      const wrapper = await mountEditableList(updateTask)
+      await wrapper.find('tbody td.duration').trigger('click')
+      const input = wrapper.find('tbody td.estimation input')
+
+      await leaveInvalidEntry(input)
+
+      expect(updateTask).not.toHaveBeenCalled()
+      // the half day stored comes back
+      expect(input.element.value).toBe('0.5')
+
+      wrapper.unmount()
+    })
+
+    // A valid number, it saved -480 minutes for every selected task.
+    test('ignores a negative entry', async () => {
+      const updateTask = vi.fn()
+      const wrapper = await mountEditableList(updateTask)
+      await wrapper.find('tbody td.duration').trigger('click')
+      const input = wrapper.find('tbody td.estimation input')
+
+      await input.setValue('-1')
+
+      expect(updateTask).not.toHaveBeenCalled()
+      // the half day stored comes back
+      expect(input.element.value).toBe('0.5')
+
+      wrapper.unmount()
+    })
+
+    test('saves 0 for an emptied field', async () => {
+      const updateTask = vi.fn()
+      const wrapper = await mountEditableList(updateTask)
+      await wrapper.find('tbody td.duration').trigger('click')
+
+      await wrapper.find('tbody td.estimation input').setValue('')
+
+      expect(updateTask.mock.calls.map(([, payload]) => payload)).toEqual([
+        { taskId: 'task-1', data: { estimation: 0 } }
+      ])
+
+      wrapper.unmount()
+    })
+
+    // The field goes away with the selection of its row, and a browser fires
+    // the change of a field removed while focused once the next row is
+    // selected: the typed value was saved on that row.
+    test('saves the value typed before Alt+Down on its own row', async () => {
+      const next = { ...task, id: 'task-2' }
+      const updateTask = vi.fn()
+      const wrapper = mountList({ isLoading: true, tasks: [] }, undefined, {
+        getters: {
+          isCurrentUserManager: () => true,
+          taskMap: () =>
+            new Map([
+              [task.id, task],
+              [next.id, next]
+            ])
+        },
+        actions: { updateTask },
+        attachTo: document.body
+      })
+      await wrapper.setProps({ isLoading: false, tasks: [task, next] })
+      await wrapper.find('tbody td.duration').trigger('click')
+      const field = wrapper.find('tbody td.estimation input').element
+      field.focus()
+      field.value = '1'
+      // jsdom fires no change on blur, nor on the removal of a focused field
+      field.addEventListener('blur', () =>
+        field.dispatchEvent(new Event('change'))
+      )
+
+      field.dispatchEvent(
+        new KeyboardEvent('keydown', { altKey: true, keyCode: 40, bubbles: true })
+      )
+      const isFocusedAtRemoval = document.activeElement === field
+      await nextTick()
+      if (isFocusedAtRemoval) field.dispatchEvent(new Event('change'))
+
+      expect(updateTask.mock.calls.map(([, { taskId }]) => taskId)).toEqual([
+        'task-1'
+      ])
+
+      wrapper.unmount()
+    })
+  })
+})

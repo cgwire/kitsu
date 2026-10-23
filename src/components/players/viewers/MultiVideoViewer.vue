@@ -13,7 +13,7 @@
       preload="auto"
       playsinline
       :muted="muted"
-      @ended="$emit('play-next')"
+      @ended="onEnded"
     />
     <video
       ref="player2"
@@ -21,7 +21,7 @@
       preload="auto"
       playsinline
       :muted="muted"
-      @ended="$emit('play-next')"
+      @ended="onEnded"
     />
     <canvas ref="displayCanvas" class="playlist-movie" />
   </div>
@@ -53,8 +53,15 @@ import {
 } from 'vue'
 import { useStore } from 'vuex'
 
+import { panPanzoomBy, zoomPanzoomAt } from '@/lib/players/panzoom'
 import { swallowBrowserZoom } from '@/lib/players/wheel'
-import { DEFAULT_FPS, floorToFrame, roundToFrame } from '@/lib/video'
+import {
+  DEFAULT_FPS,
+  floorToFrame,
+  frameStartTime,
+  roundToFrame,
+  SEEK_NUDGE
+} from '@/lib/video'
 import {
   createFrameRenderer,
   supportsVideoFrameCallback
@@ -157,6 +164,8 @@ let renderLoopGeneration = 0
 // Target of a seek issued while playing — the render loop skips stale
 // presentations until the target frame lands (same guard as VideoViewer).
 let seekGuardTarget = null
+// Latest scrub target, applied once the in-flight seek lands.
+let pendingSeekTime = null
 // One play-next per trim end: entity switches to non-movie previews are
 // asynchronous, and extra presentations past the handle-out would emit
 // again and skip entities.
@@ -266,7 +275,7 @@ const startRenderLoop = () => {
         Math.round(metadata.mediaTime * fps.value) >= props.handleOut
       ) {
         if (props.isRepeating) {
-          const target = props.handleIn / fps.value
+          const target = frameStartTime(props.handleIn, fps.value)
           seekGuardTarget = target
           player.currentTime = target
           emit('repeat')
@@ -378,6 +387,22 @@ const getVideoRatio = () => {
   return videoHeight ? videoWidth / videoHeight : 0
 }
 
+// A viewer left without entities, like a closed comparison, drops its movies:
+// its hidden decoders would go on downloading them, or playing one.
+// Removing the source alone does not stop a download: load() does.
+const releasePlayers = () => {
+  stopRenderLoop()
+  isPlaying.value = false
+  const players = [player1Ref.value, player2Ref.value]
+  players
+    .filter(player => player?.hasAttribute('src'))
+    .forEach(player => {
+      player.pause()
+      player.removeAttribute('src')
+      player.load()
+    })
+}
+
 const clear = () => {
   if (currentPlayer.value) {
     currentPlayer.value.src = ''
@@ -460,7 +485,7 @@ const preseekNextPlayer = () => {
     parseFloat(nextEntity?.fps) ||
     parseFloat(currentProduction.value?.fps) ||
     DEFAULT_FPS
-  player.currentTime = props.nextHandleIn / nextFps
+  player.currentTime = frameStartTime(props.nextHandleIn, nextFps)
 }
 
 const loadEntity = (index = 0, currentTime = 0, silentLoad = false) => {
@@ -470,18 +495,25 @@ const loadEntity = (index = 0, currentTime = 0, silentLoad = false) => {
     const nextEntity = props.entities[nextIndex]
 
     currentIndex.value = index
+    pendingSeekTime = null
     // Reuse the decoder that already holds the target movie (usually the
     // one that preloaded the next entity): swapping keeps its buffer
-    // instead of re-downloading on every manual navigation.
+    // instead of re-downloading on every manual navigation. The current one
+    // first: with a single movie in the playlist, both decoders hold it.
     const moviePath = getMoviePath(entity, props.currentPreviewIndex)
-    const preloadedPlayer = [player1Ref.value, player2Ref.value].find(
-      player => moviePath && player?.src.endsWith(moviePath)
-    )
+    const preloadedPlayer = [
+      currentPlayer.value,
+      player1Ref.value,
+      player2Ref.value
+    ].find(player => moviePath && player?.src.endsWith(moviePath))
     currentPlayer.value = preloadedPlayer || player1Ref.value
     nextPlayer.value =
       currentPlayer.value === player1Ref.value
         ? player2Ref.value
         : player1Ref.value
+    // The other decoder only preloads. It can still hold the movie played
+    // until now, which would go on, hidden, and end in place of this one.
+    nextPlayer.value?.pause()
     currentPlayer.value.removeEventListener('loadedmetadata', updateMaxDuration)
     currentPlayer.value.addEventListener('loadedmetadata', updateMaxDuration)
 
@@ -489,8 +521,10 @@ const loadEntity = (index = 0, currentTime = 0, silentLoad = false) => {
       if (!currentPlayer.value.src.endsWith(moviePath)) {
         currentPlayer.value.src = moviePath
       }
-    } else if (currentPlayer.value) {
-      currentPlayer.value.src = ''
+    } else {
+      // Nothing to play: the playback stops with the movie left.
+      isPlaying.value = false
+      if (currentPlayer.value) currentPlayer.value.src = ''
     }
     // The next entity always starts on its main preview: preload index 0.
     const nextMoviePath = nextEntity ? getMoviePath(nextEntity) : ''
@@ -530,10 +564,7 @@ const pause = () => {
   seekGuardTarget = null
   if (currentPlayer.value) {
     currentPlayer.value.pause()
-    currentPlayer.value.currentTime = roundToFrame(
-      currentPlayer.value.currentTime,
-      fps.value
-    )
+    seekNow(roundToFrame(getCurrentTime(), fps.value))
     currentTimeRaw = currentPlayer.value.currentTime
     const frameNumber = Math.round(
       currentPlayer.value.currentTime / frameDuration.value
@@ -561,9 +592,7 @@ const playNext = handleIn => {
   if (!isPlaying.value) return
   handleIn = handleIn || props.handleIn
   if (props.isRepeating) {
-    currentPlayer.value.currentTime = props.handleIn
-      ? props.handleIn * frameDuration.value
-      : frameDuration.value
+    seekNow(frameStartTime(props.handleIn || 1, fps.value))
     currentPlayer.value.play()?.catch(() => {})
     emit('repeat')
   } else {
@@ -572,9 +601,7 @@ const playNext = handleIn => {
     emit('entity-change', currentIndex.value)
 
     if (nextPlayer.value) {
-      nextPlayer.value.currentTime = handleIn
-        ? handleIn * frameDuration.value
-        : 0
+      nextPlayer.value.currentTime = frameStartTime(handleIn || 0, fps.value)
       nextPlayer.value.play()?.catch(() => {})
     }
 
@@ -584,7 +611,13 @@ const playNext = handleIn => {
 }
 
 const getCurrentTime = () =>
-  currentPlayer.value ? currentPlayer.value.currentTime : 0
+  currentPlayer.value ? (pendingSeekTime ?? currentPlayer.value.currentTime) : 0
+
+// Direct seeks (pause, loops, raw sync) win over a held scrub target.
+const seekNow = currentTime => {
+  pendingSeekTime = null
+  currentPlayer.value.currentTime = currentTime
+}
 
 const getCurrentFrame = () => {
   let time = getCurrentTime()
@@ -592,13 +625,15 @@ const getCurrentFrame = () => {
   return time / frameDuration.value
 }
 
-const getCurrentTimeRaw = () =>
-  currentPlayer.value ? currentPlayer.value.currentTime : 0
+const getCurrentTimeRaw = getCurrentTime
 
 const setCurrentTimeRaw = currentTime => {
   if (currentPlayer.value) {
     if (isPlaying.value) seekGuardTarget = currentTime
-    currentPlayer.value.currentTime = currentTime
+    // The comparison viewer is re-synced on every scrub move: hold the
+    // target like setCurrentTime does, or each seek aborts the previous one.
+    if (currentPlayer.value.seeking) pendingSeekTime = currentTime
+    else seekNow(currentTime)
   }
 }
 
@@ -630,12 +665,16 @@ const runSetCurrentTime = currentTime => {
   // onTimeUpdate emits frame-update, which PlaylistPlayer can answer with
   // another seek: ignore those re-entrant calls so the loop can't recurse.
   if (isSeeking) return
-  if (currentPlayer.value && currentPlayer.value.currentTime !== currentTime) {
+  if (currentPlayer.value && getCurrentTime() !== currentTime) {
     isSeeking = true
     try {
       if (isPlaying.value) seekGuardTarget = currentTime
       // tweaks needed because the html video player is messy with frames
-      currentPlayer.value.currentTime = currentTime + 0.001
+      const target = currentTime + SEEK_NUDGE
+      // Scrubbing asks for a seek per mousemove and each one aborts the
+      // in-flight seek, so no frame landed until the cursor stopped.
+      if (currentPlayer.value.seeking) pendingSeekTime = target
+      else seekNow(target)
       onTimeUpdate()
     } finally {
       isSeeking = false
@@ -647,14 +686,27 @@ const onTimeUpdate = () => {
   const isChromium = !!window.chrome
   const change = isChromium ? frameDuration.value : 0
   if (currentPlayer.value) {
-    currentTimeRaw = currentPlayer.value.currentTime - change
+    currentTimeRaw = getCurrentTime() - change
   } else {
     currentTimeRaw = 0 + change
   }
   emit('frame-update', Math.round(currentTimeRaw / frameDuration.value))
 }
 
+const onSeeked = event => {
+  if (pendingSeekTime !== null && event.target === currentPlayer.value) {
+    seekNow(pendingSeekTime)
+  }
+}
+
+// A seek can land a paused movie on its very end, where the browser fires
+// ended as well: only a playback reaching the end moves on.
+const onEnded = () => {
+  if (isPlaying.value) emit('play-next')
+}
+
 const switchPlayers = () => {
+  pendingSeekTime = null
   const nextIndex = getNextIndex(currentIndex.value)
   const nextEntity = props.entities[nextIndex]
   const tmpPlayer = currentPlayer.value
@@ -740,6 +792,24 @@ const setPanZoom = (x, y, scale) => {
   })
 }
 
+const panBy = (dx, dy) => {
+  panzoomInstances.forEach(panzoomInstance => {
+    panPanzoomBy(panzoomInstance, dx, dy)
+  })
+}
+
+const zoomAt = (clientX, clientY, ratio) => {
+  panzoomInstances.forEach(panzoomInstance => {
+    zoomPanzoomAt(
+      panzoomInstance,
+      displayCanvasRef.value,
+      clientX,
+      clientY,
+      ratio
+    )
+  })
+}
+
 const setVolume = volume => {
   if (currentPlayer.value) currentPlayer.value.volume = volume / 100
   if (nextPlayer.value) nextPlayer.value.volume = volume / 100
@@ -750,7 +820,8 @@ const LOADING_HANDLERS = [
   ['stalled', showLoading],
   ['waiting', showLoading],
   ['loadstart', showLoading],
-  ['error', hideLoading]
+  ['error', hideLoading],
+  ['seeked', onSeeked]
 ]
 
 const bindLoadingHandlers = player => {
@@ -801,6 +872,8 @@ watch(
 
       const entity = props.entities[currentIndex.value]
       if (entity && !entity.preview_file_id) loadNextEntity()
+    } else {
+      releasePlayers()
     }
     setTimeout(() => {
       resetHeight()
@@ -852,6 +925,9 @@ onBeforeUnmount(() => {
   containerResizeObserver?.disconnect()
   player1Ref.value?.removeEventListener('loadedmetadata', emitLoadedEvent)
   player1Ref.value?.removeEventListener('loadedmetadata', setupPanZoom)
+  // The decoders keep loading once closed, and this one restarts the loop.
+  player1Ref.value?.removeEventListener('loadedmetadata', updateMaxDuration)
+  player2Ref.value?.removeEventListener('loadedmetadata', updateMaxDuration)
 
   unbindLoadingHandlers(player1Ref.value)
   unbindLoadingHandlers(player2Ref.value)
@@ -896,6 +972,8 @@ defineExpose({
   resetPanZoom,
   resumePanZoom,
   setPanZoom,
+  panBy,
+  zoomAt,
   getDisplaySurface
 })
 </script>

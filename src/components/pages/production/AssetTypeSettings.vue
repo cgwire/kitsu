@@ -48,6 +48,8 @@ import SettingImporter from '@/components/widgets/SettingImporter.vue'
 
 const store = useStore()
 
+// Props / Emits
+// --------------------------------------------------------------------------
 const props = defineProps({
   assetTypes: { type: Array, default: () => [] },
   allAssetTypes: { type: Array, default: () => [] }
@@ -55,25 +57,28 @@ const props = defineProps({
 
 const emit = defineEmits(['add', 'import-items', 'remove'])
 
+// State
+// --------------------------------------------------------------------------
 const loadingImport = ref(false)
 
+// Computed
+// --------------------------------------------------------------------------
 const linkedIds = computed(() => new Set(props.assetTypes.map(a => a.id)))
 
 const remainingAssetTypes = computed(() =>
   sortByName(props.allAssetTypes.filter(at => !linkedIds.value.has(at.id)))
 )
 
-const onImportItem = item => {
-  const id = item && item.id ? item.id : item
-  emit('add', id)
-}
+// Functions
+// --------------------------------------------------------------------------
+const onImportItem = item => emit('add', item?.id || item)
 
-const onImportFromProduction = async productionId => {
-  const productionMap = store.getters.productionMap
-  const sourceProduction = productionMap?.get(productionId)
+const onImportFromProduction = productionId => {
+  const sourceProduction = store.getters.productionMap?.get(productionId)
   if (!sourceProduction) return
-  const sourceAssetTypeIds = sourceProduction.asset_types || []
-  const toAdd = sourceAssetTypeIds.filter(id => !linkedIds.value.has(id))
+  const toAdd = (sourceProduction.asset_types || []).filter(
+    id => !linkedIds.value.has(id)
+  )
   if (toAdd.length === 0) return
   loadingImport.value = true
   emit('import-items', {
@@ -96,6 +101,13 @@ const onImportFromProduction = async productionId => {
   overflow-y: initial;
   flex: 0 0 auto;
   max-width: 400px;
+
+  // Asset type names are short: sized on its content, the importer was a
+  // narrow strip
+  & + .column {
+    flex: 0 0 360px;
+    width: 360px;
+  }
 }
 
 .list {

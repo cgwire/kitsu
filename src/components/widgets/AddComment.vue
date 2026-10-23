@@ -34,7 +34,7 @@
           @click="mode = 'publish'"
           @keydown.enter.prevent="mode = 'publish'"
           @keydown.space.prevent="mode = 'publish'"
-          v-if="!isConcept"
+          v-if="!isConcept && !isCurrentUserClient"
         >
           {{ $t('tasks.publish_revision') }}
         </span>
@@ -764,7 +764,11 @@ const runAddComment = (
     )
   }
 
-  store.commit('CLEAR_UPLOAD_PROGRESS')
+  // The extra preview modal of the panel may upload at the same time.
+  store.commit(
+    'CLEAR_UPLOAD_PROGRESS',
+    props.previewForms.map(form => form.get('file').name)
+  )
   if (mode.value === 'publish') {
     if (!showCommentArea.value) textVal = ''
     attachmentsVal = []
@@ -863,18 +867,8 @@ const onDragleave = () => {
 }
 
 const onDrop = event => {
-  if (event.target.id === 'drop-mask') return
-  if (event.target.parentElement?.className?.indexOf('add-attachment-box') >= 0)
-    return
-  if (
-    event.target.parentElement?.className?.indexOf('add-attachment-buttons') >=
-    0
-  )
-    return
-  if (
-    event.target.parentElement?.className?.indexOf('attachment-modal-box') >= 0
-  )
-    return
+  // The attachment modal renders inside this widget and handles its own drops
+  if (event.target.closest?.('.attachment-modal-box')) return
 
   const forms = []
   for (let i = 0; i < event.dataTransfer.files.length; i++) {
@@ -935,7 +929,7 @@ const removeTask = entry => {
 }
 
 const setValue = async comment => {
-  checklistItems.value = JSON.parse(JSON.stringify(comment.checklist))
+  checklistItems.value = JSON.parse(JSON.stringify(comment.checklist || []))
   text.value = comment.text
 
   // duplicate attachment files, one download at a time

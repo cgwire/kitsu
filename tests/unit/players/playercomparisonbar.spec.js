@@ -17,16 +17,32 @@ const mountBar = (props = {}) =>
   })
 
 describe('players/PlayerComparisonBar', () => {
-  describe('comparison picture picker', () => {
-    it('is hidden when the compared revision has a single picture', () => {
-      const wrapper = mountBar({ comparisonPreviewLength: 1 })
-      expect(wrapper.find('.comparison-list').exists()).toBe(false)
+  // Opt-in pickers: a consumer that does not bind them gets the task type
+  // alone.
+  describe('revision and mode pickers', () => {
+    const combos = wrapper =>
+      wrapper.findAll('combobox-stub').map(combo => combo.classes().join(' '))
+
+    it('shows them to the consumer binding them', () => {
+      const wrapper = mountBar({ comparisonMode: 'sidebyside', previewToCompareId: null })
+      expect(combos(wrapper)).toHaveLength(3)
     })
 
-    it('is hidden when the compared revision picture count is unknown', () => {
-      const wrapper = mountBar({ comparisonPreviewLength: 0 })
-      expect(wrapper.find('.comparison-list').exists()).toBe(false)
+    it('keeps them from a consumer not binding them', () => {
+      const wrapper = mountBar()
+      expect(combos(wrapper)).toHaveLength(1)
     })
+  })
+
+  describe('comparison picture picker', () => {
+    // The players send 0 when the compared revision has no previews array.
+    it.each([0, 1])(
+      'is hidden when the compared revision has %s picture',
+      comparisonPreviewLength => {
+        const wrapper = mountBar({ comparisonPreviewLength })
+        expect(wrapper.find('.comparison-list').exists()).toBe(false)
+      }
+    )
 
     it('is hidden when not comparing', () => {
       const wrapper = mountBar({

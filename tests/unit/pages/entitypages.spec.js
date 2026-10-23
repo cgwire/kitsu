@@ -1,0 +1,433 @@
+import { flushPromises, RouterLinkStub, shallowMount } from '@vue/test-utils'
+import { nextTick, reactive } from 'vue'
+import { createStore } from 'vuex'
+
+// Importing the pages transitively pulls in the root store
+// (lib/models → timezone → @/store); stub it so no Vuex store is built.
+vi.mock('@/store', () => ({ default: {} }))
+vi.mock('@unhead/vue', async importOriginal => ({
+  ...(await importOriginal()),
+  useHead: vi.fn()
+}))
+vi.mock('vue-i18n', async importOriginal => ({
+  ...(await importOriginal()),
+  useI18n: () => ({ t: key => key })
+}))
+const routeHolder = vi.hoisted(() => ({ route: null }))
+vi.mock('vue-router', async importOriginal => ({
+  ...(await importOriginal()),
+  useRoute: () => routeHolder.route
+}))
+
+import i18n from '@/lib/i18n'
+import assetStore from '@/store/modules/assets'
+import editStore from '@/store/modules/edits'
+import episodeStore from '@/store/modules/episodes'
+import sequenceStore from '@/store/modules/sequences'
+import shotStore from '@/store/modules/shots'
+
+import EditAssetModal from '@/components/modals/EditAssetModal.vue'
+import EditEditModal from '@/components/modals/EditEditModal.vue'
+import EditEpisodeModal from '@/components/modals/EditEpisodeModal.vue'
+import EditSequenceModal from '@/components/modals/EditSequenceModal.vue'
+import EditShotModal from '@/components/modals/EditShotModal.vue'
+import Asset from '@/components/pages/Asset.vue'
+import Edit from '@/components/pages/Edit.vue'
+import Episode from '@/components/pages/Episode.vue'
+import Sequence from '@/components/pages/Sequence.vue'
+import Shot from '@/components/pages/Shot.vue'
+import EntityOutputFiles from '@/components/pages/entities/EntityOutputFiles.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
+import ConceptCard from '@/components/widgets/ConceptCard.vue'
+import PageSubtitle from '@/components/widgets/PageSubtitle.vue'
+
+const production = { id: 'production-1' }
+
+const pages = [
+  {
+    name: 'Asset',
+    listAction: 'loadAssets',
+    page: Asset,
+    entityParam: 'asset_id',
+    listRoute: 'assets',
+    entityMap: assetStore.cache.assetMap,
+    editAction: 'editAsset',
+    editModal: EditAssetModal
+  },
+  {
+    name: 'Edit',
+    listAction: 'loadEdits',
+    page: Edit,
+    entityParam: 'edit_id',
+    listRoute: 'edits',
+    entityMap: editStore.cache.editMap,
+    editAction: 'editEdit',
+    editModal: EditEditModal
+  },
+  {
+    name: 'Episode',
+    page: Episode,
+    entityParam: 'episode_id',
+    listRoute: 'episodes',
+    entityMap: episodeStore.cache.episodeMap,
+    editAction: 'editEpisode',
+    editModal: EditEpisodeModal
+  },
+  {
+    name: 'Sequence',
+    listAction: 'loadSequencesWithTasks',
+    page: Sequence,
+    entityParam: 'sequence_id',
+    listRoute: 'sequences',
+    entityMap: sequenceStore.cache.sequenceMap,
+    editAction: 'editSequence',
+    editModal: EditSequenceModal
+  },
+  {
+    name: 'Shot',
+    listAction: 'loadShots',
+    page: Shot,
+    entityParam: 'shot_id',
+    listRoute: 'shots',
+    entityMap: shotStore.cache.shotMap,
+    editAction: 'editShot',
+    editModal: EditShotModal
+  }
+]
+
+// Unless a test puts it in the cache of its store module, the entity of the
+// URL is found nowhere: the page loads nothing and shows its empty state.
+const mountPage = async (
+  page,
+  entityParam,
+  currentProduction,
+  actions = {},
+  getters = {},
+  query = {},
+  $t = key => key
+) => {
+  routeHolder.route = reactive({
+    params: { production_id: production.id, [entityParam]: 'entity-1' },
+    query,
+    path: '/'
+  })
+  const loadAction = vi.fn(() => Promise.resolve())
+  const store = createStore({
+    state: () => ({ currentProduction }),
+    getters: {
+      assetMetadataDescriptors: () => [],
+      assetSearchText: () => '',
+      clientAccess: () => ({
+        isTaskPanelVisible: true,
+        isTaskTypeVisible: () => true
+      }),
+      currentEpisode: () => null,
+      currentProduction: state => state.currentProduction,
+      editMetadataDescriptors: () => [],
+      episodeMetadataDescriptors: () => [],
+      episodeSearchText: () => '',
+      getTaskTypePriority: () => () => 1,
+      isCurrentUserProductionManager: () => true,
+      isCurrentUserProductionSupervisor: () => false,
+      isTVShow: () => false,
+      linkedConcepts: () => [],
+      nbSelectedTasks: () => 0,
+      organisation: () => ({}),
+      sequenceMetadataDescriptors: () => [],
+      sequenceSearchText: () => '',
+      shotMetadataDescriptors: () => [],
+      shotSearchText: () => '',
+      taskMap: () => new Map(),
+      taskStatusMap: () => new Map(),
+      taskTypeMap: () => new Map(),
+      user: () => ({ departments: [] }),
+      ...getters
+    },
+    actions: {
+      clearSelectedTasks: vi.fn(),
+      loadAsset: loadAction,
+      loadAssetCastIn: loadAction,
+      loadAssetCasting: loadAction,
+      loadAssets: loadAction,
+      loadEdits: loadAction,
+      loadEpisodeCasting: loadAction,
+      loadEpisodesWithTasks: loadAction,
+      loadLinkedConcepts: loadAction,
+      loadSequenceCasting: loadAction,
+      loadSequencesWithTasks: loadAction,
+      loadShot: loadAction,
+      loadShotCasting: loadAction,
+      loadShots: loadAction,
+      ...actions
+    }
+  })
+  const wrapper = shallowMount(page, {
+    global: {
+      plugins: [store],
+      mocks: { $route: routeHolder.route, $t },
+      stubs: { RouterLink: RouterLinkStub }
+    }
+  })
+  await flushPromises()
+  return { store, wrapper }
+}
+
+describe.each(pages)('$name page', ({ entityParam, listRoute, page }) => {
+  test('links back to the list of the current production', async () => {
+    const { wrapper } = await mountPage(page, entityParam, production)
+
+    expect(wrapper.findComponent(RouterLinkStub).props('to')).toMatchObject({
+      name: listRoute,
+      params: { production_id: production.id }
+    })
+  })
+
+  // A user with no open production has none in the store until the topbar
+  // has loaded the one of the URL, or left the page when it cannot.
+  test('renders once the store holds a production', async () => {
+    const { store, wrapper } = await mountPage(page, entityParam, null)
+
+    expect(wrapper.find('.page-header').exists()).toBe(false)
+
+    store.state.currentProduction = production
+    await nextTick()
+
+    expect(wrapper.find('.page-header').exists()).toBe(true)
+    expect(wrapper.findComponent(RouterLinkStub).props('to')).toMatchObject({
+      name: listRoute,
+      params: { production_id: production.id }
+    })
+  })
+})
+
+describe.each(pages)(
+  '$name page, edit modal',
+  ({ editAction, editModal, entityMap, entityParam, page }) => {
+    afterEach(() => {
+      entityMap.clear()
+      vi.restoreAllMocks()
+    })
+
+    // Close keeps the error of a failed save: the next edit opens without it.
+    test('opens without the error of a failed save', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      entityMap.set('entity-1', { id: 'entity-1', name: 'E01', tasks: [] })
+      const { wrapper } = await mountPage(page, entityParam, production, {
+        [editAction]: () => Promise.reject(new Error('taken'))
+      })
+      const editButton = wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.props('icon') === 'edit')
+      const modal = () => wrapper.findComponent(editModal)
+
+      await editButton.vm.$emit('click')
+      await modal().vm.$emit('confirm', { name: 'E02' })
+      await flushPromises()
+      expect(modal().props('isError')).toBe(true)
+
+      await modal().vm.$emit('cancel')
+      await editButton.vm.$emit('click')
+
+      expect(modal().props('active')).toBe(true)
+      expect(modal().props('isError')).toBe(false)
+    })
+
+    // Clearing on close would miss a save that fails after the close.
+    test('opens without the error of a save that failed after a close', async () => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      entityMap.set('entity-1', { id: 'entity-1', name: 'E01', tasks: [] })
+      let rejectSave
+      const { wrapper } = await mountPage(page, entityParam, production, {
+        [editAction]: () =>
+          new Promise((resolve, reject) => {
+            rejectSave = reject
+          })
+      })
+      const editButton = wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.props('icon') === 'edit')
+      const modal = () => wrapper.findComponent(editModal)
+
+      await editButton.vm.$emit('click')
+      await modal().vm.$emit('confirm', { name: 'E02' })
+      await modal().vm.$emit('cancel')
+      rejectSave(new Error('taken'))
+      await flushPromises()
+      expect(modal().props('isError')).toBe(true)
+
+      await editButton.vm.$emit('click')
+
+      expect(modal().props('active')).toBe(true)
+      expect(modal().props('isError')).toBe(false)
+    })
+  }
+)
+
+// The pages whose arrows walk a list of the store, which may be the one of
+// another episode: an entity loaded by id, a list loaded elsewhere.
+describe.each(pages.filter(({ listAction }) => listAction))(
+  '$name page, list of the page',
+  ({ entityMap, entityParam, listAction, name, page }) => {
+    afterEach(() => {
+      entityMap.clear()
+    })
+
+    // A sequence loaded with its tasks is not loaded again by the page.
+    const entity = fields => ({
+      id: 'entity-1',
+      name: 'E01',
+      tasks: [],
+      validations: new Map(),
+      ...fields
+    })
+
+    // The list loaded carries its own object for the entity, the one the
+    // store updates from then on.
+    test('takes its entity from the list it loads for the arrows', async () => {
+      entityMap.set('entity-1', entity())
+      const loadList = vi.fn(() => {
+        entityMap.set('entity-1', entity({ name: 'E01 bis' }))
+        return Promise.resolve()
+      })
+      const { wrapper } = await mountPage(page, entityParam, production, {
+        [listAction]: loadList
+      })
+
+      expect(loadList).toHaveBeenCalledTimes(1)
+      expect(wrapper.find('.entity-title').text()).toContain('E01 bis')
+    })
+
+    test('keeps the list the store holds for its episode', async () => {
+      entityMap.set('entity-1', entity())
+      const loadList = vi.fn(() => Promise.resolve())
+      await mountPage(
+        page,
+        entityParam,
+        production,
+        { [listAction]: loadList },
+        { [`${name.toLowerCase()}sLoadingKey`]: () => `${production.id}/` }
+      )
+
+      expect(loadList).not.toHaveBeenCalled()
+    })
+  }
+)
+
+// Every page whose entity can carry output files lists them in a tab.
+describe.each(pages.filter(({ name }) => ['Asset', 'Edit', 'Shot'].includes(name)))(
+  '$name page, output files',
+  ({ entityMap, entityParam, page }) => {
+    afterEach(() => {
+      entityMap.clear()
+    })
+
+    test('lists the output files of its entity', async () => {
+      entityMap.set('entity-1', { id: 'entity-1', name: 'E01', tasks: [] })
+      const { wrapper } = await mountPage(page, entityParam, production, {}, {}, {
+        section: 'output-files'
+      })
+
+      expect(wrapper.findComponent(EntityOutputFiles).props('entity')).toMatchObject({
+        id: 'entity-1'
+      })
+    })
+  }
+)
+
+describe.each(pages.filter(({ name }) => ['Asset', 'Edit', 'Shot'].includes(name)))(
+  '$name page, task panel client setting',
+  ({ entityParam, page }) => {
+    const panel = isTaskPanelVisible => ({
+      clientAccess: () => ({ isTaskPanelVisible, isTaskTypeVisible: () => true })
+    })
+
+    test('renders no task info when the panel is hidden', async () => {
+      const { wrapper } = await mountPage(page, entityParam, production, {}, panel(false))
+      expect(wrapper.findComponent({ name: 'TaskInfo' }).exists()).toBe(false)
+    })
+
+    test('renders the task info otherwise', async () => {
+      const { wrapper } = await mountPage(page, entityParam, production, {}, panel(true))
+      expect(wrapper.findComponent({ name: 'TaskInfo' }).exists()).toBe(true)
+    })
+  }
+)
+
+describe('Asset page, concepts', () => {
+  afterEach(() => {
+    assetStore.cache.assetMap.clear()
+  })
+
+  // A concept whose creation stopped after the entity has no task.
+  test('leaves a concept without task out of a status filter', async () => {
+    assetStore.cache.assetMap.set('entity-1', {
+      id: 'entity-1',
+      name: 'Tree',
+      tasks: []
+    })
+    const buildConcept = (id, tasks) => ({
+      id,
+      entity_concept_links: [],
+      tasks
+    })
+    const { wrapper } = await mountPage(
+      Asset,
+      'asset_id',
+      production,
+      {},
+      {
+        linkedConcepts: () => [
+          buildConcept('concept-0', []),
+          buildConcept('concept-1', [
+            { id: 'task-1', task_status_id: 'status-todo' }
+          ])
+        ]
+      }
+    )
+    const concepts = wrapper.find('.concepts')
+
+    await concepts
+      .findComponent(ComboboxStatus)
+      .vm.$emit('update:modelValue', 'status-todo')
+
+    expect(
+      concepts
+        .findAllComponents(ConceptCard)
+        .map(card => card.props('concept').id)
+    ).toEqual(['concept-1'])
+  })
+})
+
+describe('Asset page, casting', () => {
+  afterEach(() => {
+    assetStore.cache.assetMap.clear()
+  })
+
+  test.each([
+    ['Cast in 1 shot', 1],
+    ['Cast in 3 shots', 3]
+  ])('titles its casting "%s"', async (title, nbShots) => {
+    assetStore.cache.assetMap.set('entity-1', {
+      id: 'entity-1',
+      name: 'Tree',
+      tasks: [],
+      castInShotsBySequence: [
+        Array.from({ length: nbShots }, (_, index) => ({ id: `shot-${index}` }))
+      ]
+    })
+    const { wrapper } = await mountPage(
+      Asset,
+      'asset_id',
+      production,
+      {},
+      {},
+      { section: 'casting' },
+      (key, named) => i18n.global.t(key, named)
+    )
+
+    expect(
+      wrapper.find('.casting-title').findComponent(PageSubtitle).props('text')
+    ).toBe(title)
+  })
+})

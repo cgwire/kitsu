@@ -23,20 +23,22 @@
   </div>
 
   <div class="left flexrow" v-if="isMovie && !compact">
-    <span
-      class="flexrow-item time-indicator current-time"
-      :title="$t('playlists.actions.current_time')"
-    >
-      {{ currentTime }}
-    </span>
-    <span class="flexrow-item time-indicator" v-if="fullScreen"> / </span>
-    <span
-      class="flexrow-item time-indicator"
-      :title="$t('playlists.actions.max_duration')"
-      v-if="fullScreen"
-    >
-      {{ maxDuration }}
-    </span>
+    <template v-if="!phone">
+      <span
+        class="flexrow-item time-indicator current-time"
+        :title="$t('playlists.actions.current_time')"
+      >
+        {{ currentTime }}
+      </span>
+      <span class="flexrow-item time-indicator" v-if="fullScreen"> / </span>
+      <span
+        class="flexrow-item time-indicator"
+        :title="$t('playlists.actions.max_duration')"
+        v-if="fullScreen"
+      >
+        {{ maxDuration }}
+      </span>
+    </template>
 
     <div
       class="flexrow-item time-indicator mr1 nowrap"
@@ -45,53 +47,57 @@
       {{ frameIndicator }}
     </div>
 
-    <div class="separator"></div>
+    <template v-if="!phone">
+      <div class="separator"></div>
 
-    <button-simple
-      :active="isRepeating"
-      :title="$t('playlists.actions.looping')"
-      icon="repeat"
-      @click="$emit('repeat-clicked')"
-      v-if="!light || fullScreen"
-    />
-    <button-simple
-      class="flexrow-item"
-      :title="
-        $t(isHd ? 'playlists.actions.switch_ld' : 'playlists.actions.switch_hd')
-      "
-      :text="isHd ? 'HD' : 'LD'"
-      @click="isHd = !isHd"
-      v-if="!light || fullScreen"
-    />
+      <button-simple
+        :active="isRepeating"
+        :title="$t('playlists.actions.looping')"
+        icon="repeat"
+        @click="$emit('repeat-clicked')"
+        v-if="!light || fullScreen"
+      />
+      <button-simple
+        class="flexrow-item"
+        :title="
+          $t(
+            isHd ? 'playlists.actions.switch_ld' : 'playlists.actions.switch_hd'
+          )
+        "
+        :text="isHd ? 'HD' : 'LD'"
+        @click="isHd = !isHd"
+        v-if="!light || fullScreen"
+      />
 
-    <speed-button class="flexrow-item" v-model="speed" />
+      <speed-button class="flexrow-item" v-model="speed" />
 
-    <button-simple
-      class="flexrow-item"
-      :active="isShowAnnotationsWhilePlaying"
-      :title="$t('playlists.actions.toggle_playing_annotations')"
-      icon="triangle"
-      @click="isShowAnnotationsWhilePlaying = !isShowAnnotationsWhilePlaying"
-      v-if="
-        isShowAnnotationsWhilePlaying !== undefined && (!light || fullScreen)
-      "
-    />
+      <button-simple
+        class="flexrow-item"
+        :active="isShowAnnotationsWhilePlaying"
+        :title="$t('playlists.actions.toggle_playing_annotations')"
+        icon="triangle"
+        @click="isShowAnnotationsWhilePlaying = !isShowAnnotationsWhilePlaying"
+        v-if="
+          isShowAnnotationsWhilePlaying !== undefined && (!light || fullScreen)
+        "
+      />
 
-    <button-sound
-      class="flexrow-item"
-      @change-sound="$emit('toggle-sound-clicked')"
-      v-model:muted="isMuted"
-      v-model:volume="volume"
-    />
+      <button-sound
+        class="flexrow-item"
+        @change-sound="$emit('toggle-sound-clicked')"
+        v-model:muted="isMuted"
+        v-model:volume="volume"
+      />
 
-    <button-simple
-      class="flexrow-item"
-      :active="isWaveformDisplayed"
-      :title="$t('playlists.actions.toggle_waveform')"
-      icon="waveform"
-      @click="isWaveformDisplayed = !isWaveformDisplayed"
-      v-if="isWaveformDisplayed !== undefined && (!light || fullScreen)"
-    />
+      <button-simple
+        class="flexrow-item"
+        :active="isWaveformDisplayed"
+        :title="$t('playlists.actions.toggle_waveform')"
+        icon="waveform"
+        @click="isWaveformDisplayed = !isWaveformDisplayed"
+        v-if="isWaveformDisplayed !== undefined && (!light || fullScreen)"
+      />
+    </template>
   </div>
 
   <slot name="extra-controls" />
@@ -172,6 +178,11 @@ const props = defineProps({
   nbFrames: {
     type: Number,
     default: 0
+  },
+  // phones keep play and the frame number only
+  phone: {
+    type: Boolean,
+    default: false
   }
 })
 

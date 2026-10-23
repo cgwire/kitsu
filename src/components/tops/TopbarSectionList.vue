@@ -30,16 +30,12 @@
             :name="currentSection.value"
             v-else-if="currentSection.value !== 'budget'"
           />
-          <hand-coins-icon
-            class="section-icon"
-            :stroke-width="1.5"
-            v-else-if="currentSection.value === 'budget'"
-          />
+          <hand-coins-icon class="section-icon" :stroke-width="1.5" v-else />
           <span class="section-label">{{ currentSection.label }}</span>
         </div>
         <chevron-down-icon class="down-icon flexrow-item" />
       </div>
-      <div class="select-input" ref="select" v-if="showSectionList">
+      <div class="select-input" v-if="showSectionList">
         <div
           :key="`${section.value}-${index}`"
           class="section-line"
@@ -56,7 +52,6 @@
               :name="section.icon"
               :size="20"
               :stroke-width="1.5"
-              v-if="section.type === 'plugin'"
             />
             <span class="flexrow-item">{{ section.label }}</span>
           </router-link>
@@ -70,11 +65,7 @@
               :name="section.value"
               v-if="section.value !== 'budget'"
             />
-            <hand-coins-icon
-              class="section-icon"
-              :stroke-width="1.5"
-              v-else-if="section.value === 'budget'"
-            />
+            <hand-coins-icon class="section-icon" :stroke-width="1.5" v-else />
             <span class="flexrow-item">
               {{ section.label }}
             </span>

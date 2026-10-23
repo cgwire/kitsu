@@ -15,6 +15,7 @@ import {
   DELETE_PLAYLIST_ERROR,
   DELETE_PLAYLIST_END,
   CHANGE_PLAYLIST_PREVIEW,
+  PIN_PLAYLIST_ENTRY,
   CHANGE_PLAYLIST_ORDER,
   CHANGE_PLAYLIST_TYPE,
   UPDATE_PLAYLIST_TO_LATEST_VERSION,
@@ -147,9 +148,22 @@ const actions = {
   // A live event refetches a playlist. A new one joins the list only when it
   // matches the scope the list was loaded for, an updated one is refreshed
   // only while listed: the list may have been replaced during the fetch.
+  // Events reach every member of the production, so a client is refused the
+  // internal playlists (403), and a deleted one is gone (404): it resolves to
+  // null and leaves the list.
   async refreshPlaylist({ commit, state, rootGetters }, { id, scope = null }) {
     const currentProduction = rootGetters.currentProduction
-    const playlist = await playlistsApi.getPlaylist(currentProduction, { id })
+    let playlist
+    try {
+      playlist = await playlistsApi.getPlaylist(currentProduction, { id })
+    } catch (err) {
+      const isUnreadable = [403, 404].includes(err?.status)
+      if (!isUnreadable) console.error(err)
+      if (isUnreadable && state.playlistMap.get(id)) {
+        commit(DELETE_PLAYLIST_END, { id })
+      }
+      return null
+    }
     const isListed = scope
       ? isPlaylistInScope(playlist, scope)
       : Boolean(state.playlistMap.get(playlist.id))
@@ -535,6 +549,25 @@ const mutations = {
     }
   },
 
+  // Give a stored entry the preview fields Zou serves for a pinned one.
+  [PIN_PLAYLIST_ENTRY](state, { entry, previewFile }) {
+    const entityId = entry.entity_id || entry.id
+    state.playlistEntryMap.delete(`${entityId}-${entry.preview_file_id}`)
+    Object.assign(entry, {
+      preview_file_id: previewFile.id,
+      preview_file_task_id: previewFile.task_id,
+      preview_file_extension: previewFile.extension,
+      preview_file_revision: previewFile.revision,
+      preview_file_width: previewFile.width,
+      preview_file_height: previewFile.height,
+      preview_file_duration: previewFile.duration,
+      preview_file_annotations: previewFile.annotations,
+      preview_file_previews: previewFile.previews
+    })
+    state.playlistEntryMap.set(`${entityId}-${previewFile.id}`, entry)
+    state.previewFileEntityMap.set(previewFile.id, entry)
+  },
+
   [CHANGE_PLAYLIST_ORDER](state, { playlist, info }) {
     const entityToMove = playlist.shots.find(
       entityPlaylist =>
@@ -573,8 +606,18 @@ const mutations = {
         e => e.id === entityId && e.preview_file_id === previousPreviewFileId
       )
     }
+    // An entry without preview can come with another unset value than its
+    // stored row: undefined, null, or an empty string.
+    if (!entityToChange) {
+      entityToChange = playlist.shots.find(
+        e => (e.entity_id || e.id) === entityId && !e.preview_file_id
+      )
+    }
     state.playlistEntryMap.delete(`${entityId}-${previousPreviewFileId}`)
     if (entityToChange) {
+      state.playlistEntryMap.delete(
+        `${entityId}-${entityToChange.preview_file_id}`
+      )
       state.playlistEntryMap.set(`${entityId}-${previewFileId}`, entityToChange)
       entityToChange.preview_file_id = previewFileId
     }

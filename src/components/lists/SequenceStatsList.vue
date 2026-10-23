@@ -1,10 +1,10 @@
 <template>
   <div class="data-list">
-    <div class="datatable-wrapper" ref="body" @scroll.passive="onBodyScroll">
-      <table class="datatable">
+    <div class="datatable-wrapper">
+      <table class="datatable datatable--cards">
         <thead class="datatable-head">
           <tr>
-            <th scope="col" class="name datatable-row-header" ref="th-sequence">
+            <th scope="col" class="name datatable-row-header">
               {{ $t('shots.fields.sequence') }}
             </th>
             <th scope="col" class="validation">{{ $t('main.all') }}</th>
@@ -41,13 +41,17 @@
           </tr>
         </thead>
         <tbody class="datatable-body" v-if="!isLoading">
-          <tr class="all-line datatable-row" v-if="showAll && !isEmptyList">
-            <th scope="row" class="name datatable-row-header">
+          <tr class="all-line datatable-row" v-if="entryStats.length > 0">
+            <th scope="row" class="name datatable-row-header card-head">
               {{ $t('sequences.all_sequences') }}
+              <span class="shot-count">
+                {{ totalShotCount }}
+                {{ $t('shots.number', { count: totalShotCount }) }}
+              </span>
             </th>
 
             <stats-cell
-              class="all-validation"
+              :data-label="$t('main.all')"
               :colors="chartColors('all', 'all')"
               :data="chartData('all', 'all')"
               :frames-data="chartData('all', 'all', 'frames')"
@@ -59,6 +63,7 @@
             <stats-cell
               :style="getValidationStyle(columnId)"
               :key="'all-' + columnId"
+              :data-label="taskTypeMap.get(columnId)?.name"
               :colors="chartColors('all', columnId)"
               :data="chartData('all', columnId)"
               :frames-data="chartData('all', columnId, 'frames')"
@@ -72,11 +77,18 @@
           </tr>
 
           <tr class="datatable-row" :key="entry.id" v-for="entry in entryStats">
-            <td scope="row" class="name datatable-row-header">
-              {{ entry.name }}
+            <td class="name datatable-row-header card-head">
+              <router-link :to="shotsPath(entry)">
+                {{ entry.name }}
+              </router-link>
+              <span class="shot-count">
+                {{ shotCount(entry.id) }}
+                {{ $t('shots.number', { count: shotCount(entry.id) }) }}
+              </span>
             </td>
 
             <stats-cell
+              :data-label="$t('main.all')"
               :colors="chartColors(entry.id, 'all')"
               :data="chartData(entry.id, 'all')"
               :frames-data="chartData(entry.id, 'all', 'frames')"
@@ -93,6 +105,7 @@
             >
               <stats-cell
                 :key="entry.id + columnId"
+                :data-label="taskTypeMap.get(columnId)?.name"
                 :style="getValidationStyle(columnId)"
                 :colors="chartColors(entry.id, columnId)"
                 :data="chartData(entry.id, columnId)"
@@ -122,214 +135,153 @@
     <empty-list
       :text="$t('sequences.empty_list')"
       :read-only-text="$t('sequences.empty_list_read_only')"
-      v-if="isEmptyList && !isLoading"
+      v-if="isEmptyList"
     />
 
-    <p class="has-text-centered nb-sequences" v-if="!isEmptyList && !isLoading">
-      {{ displayedSequencesLength }}
-      {{ $t('sequences.number', { count: displayedSequencesLength }) }}
+    <p class="has-text-centered all-hidden" v-if="isAllHidden">
+      {{ $t('sequences.all_hidden') }}
+    </p>
+    <p
+      class="has-text-centered nb-sequences"
+      v-else-if="!isEmptyList && !isLoading"
+    >
+      {{ entryStats.length }}
+      {{ $t('sequences.number', { count: entryStats.length }) }}
     </p>
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+// Imports
+// --------------------------------------------------------------------------
+import { computed } from 'vue'
+import { useStore } from 'vuex'
 
+import colors from '@/lib/colors'
+import { getEntitiesPath } from '@/lib/path'
 import { getChartColors, getChartData } from '@/lib/stats'
 
-import { entityListMixin } from '@/components/mixins/entity_list'
-
+import StatsCell from '@/components/cells/StatsCell.vue'
 import EmptyList from '@/components/widgets/EmptyList.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
-import StatsCell from '@/components/cells/StatsCell.vue'
 
-export default {
-  name: 'sequence-stats-list',
+const store = useStore()
 
-  mixins: [entityListMixin],
+// Props / Emits
+// --------------------------------------------------------------------------
+const props = defineProps({
+  countMode: { type: String, default: 'count' },
+  displayMode: { type: String, default: 'pie' },
+  entries: { type: Array, default: () => [] },
+  isError: { type: Boolean, default: false },
+  isFiltered: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  sequenceStats: { type: Object, default: () => ({}) },
+  shotCounts: { type: Object, default: () => ({}) },
+  validationColumns: { type: Array, default: () => [] }
+})
 
-  components: {
-    EmptyList,
-    StatsCell,
-    TableInfo
-  },
+// Computed
+// --------------------------------------------------------------------------
+const currentEpisode = computed(() => store.getters.currentEpisode)
+const currentProduction = computed(() => store.getters.currentProduction)
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+const isTVShow = computed(() => store.getters.isTVShow)
+const sequenceSearchText = computed(() => store.getters.sequenceSearchText)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
-  props: {
-    countMode: {
-      type: String,
-      default: 'count'
-    },
-    displayMode: {
-      type: String,
-      default: 'pie'
-    },
-    entries: {
-      type: Array,
-      default: () => []
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    sequenceStats: {
-      type: Object,
-      default: () => {}
-    },
-    showAll: {
-      type: Boolean,
-      default: false
-    },
-    validationColumns: {
-      type: Array,
-      default: () => []
-    }
-  },
+const entryStats = computed(() =>
+  props.entries.filter(entry => isEntryStats(entry.id))
+)
 
-  computed: {
-    ...mapGetters([
-      'currentProduction',
-      'currentEpisode',
-      'displayedSequencesLength',
-      'isCurrentUserClient',
-      'isTVShow',
-      'sequenceSearchText',
-      'taskTypeMap'
-    ]),
+const isEmptyList = computed(
+  () =>
+    props.entries.length === 0 &&
+    !props.isLoading &&
+    !props.isError &&
+    !props.isFiltered &&
+    !sequenceSearchText.value
+)
 
-    entryStats() {
-      return this.entries.filter(entry => this.isEntryStats(entry.id))
-    },
+const isAllHidden = computed(
+  () =>
+    props.isFiltered &&
+    props.entries.length === 0 &&
+    !props.isLoading &&
+    !props.isError
+)
 
-    isEmptyList() {
-      return (
-        this.entries &&
-        this.entries.length === 0 &&
-        !this.isLoading &&
-        !this.isError &&
-        (!this.sequenceSearchText || this.sequenceSearchText.length === 0)
-      )
-    }
-  },
+const totalShotCount = computed(() =>
+  entryStats.value.reduce((total, entry) => total + shotCount(entry.id), 0)
+)
 
-  methods: {
-    chartColors(entryId, columnId) {
-      return getChartColors(this.sequenceStats, entryId, columnId)
-    },
+// Functions
+// --------------------------------------------------------------------------
+const shotCount = entryId => props.shotCounts[entryId] || 0
 
-    chartData(entryId, columnId, dataType = 'count') {
-      return getChartData(this.sequenceStats, entryId, columnId, dataType)
-    },
+const chartColors = (entryId, columnId) =>
+  getChartColors(props.sequenceStats, entryId, columnId)
 
-    isStats(entryId, columnId) {
-      return (
-        this.sequenceStats[entryId] && this.sequenceStats[entryId][columnId]
-      )
-    },
+const chartData = (entryId, columnId, dataType = 'count') =>
+  getChartData(props.sequenceStats, entryId, columnId, dataType)
 
-    isEntryStats(entryId) {
-      if (!this.sequenceStats[entryId] && this.sequenceSearchText) return false
-      if (!this.sequenceStats[entryId]) return true
-      let isStats = false
-      Object.keys(this.sequenceStats[entryId]).forEach(statKey => {
-        isStats = isStats || this.sequenceStats[entryId][statKey]
-      })
-      return isStats
-    },
+const isStats = (entryId, columnId) => props.sequenceStats[entryId]?.[columnId]
 
-    editPath(sequenceId) {
-      return this.getPath('edit-sequence', sequenceId)
-    },
+// A sequence without stats is kept, unless a search is filtering the list.
+const isEntryStats = entryId => {
+  const stats = props.sequenceStats[entryId]
+  if (!stats) return !sequenceSearchText.value
+  return Object.values(stats).some(Boolean)
+}
 
-    deletePath(sequenceId) {
-      return this.getPath('delete-sequence', sequenceId)
-    },
+const getValidationStyle = columnId => {
+  const taskType = taskTypeMap.value.get(columnId)
+  if (!taskType) return {}
+  return {
+    'border-left': `1px solid ${taskType.color}`,
+    background: colors.hexToRGBa(taskType.color, 0.08)
+  }
+}
 
-    taskTypePath(taskTypeId) {
-      const route = {
-        name: 'task-type',
-        params: {
-          production_id: this.currentProduction.id,
-          task_type_id: taskTypeId,
-          type: 'shots'
-        }
-      }
-
-      if (this.isTVShow && this.currentEpisode) {
-        route.name = 'episode-task-type'
-        route.params.episode_id = this.currentEpisode.id
-      }
-
-      return route
-    },
-
-    getPath(section, sequenceId) {
-      const route = {
-        name: section,
-        params: {
-          production_id: this.currentProduction.id
-        }
-      }
-
-      if (this.isTVShow && this.currentEpisode) {
-        route.name = `episode-${section}`
-        route.params.episode_id = this.currentEpisode.id
-      }
-
-      if (sequenceId) {
-        route.params.sequence_id = sequenceId
-      }
-      return route
+const taskTypePath = taskTypeId => {
+  const withEpisode = isTVShow.value && currentEpisode.value
+  return {
+    name: withEpisode ? 'episode-task-type' : 'task-type',
+    params: {
+      production_id: currentProduction.value.id,
+      task_type_id: taskTypeId,
+      type: 'shots',
+      ...(withEpisode ? { episode_id: currentEpisode.value.id } : {})
     }
   }
 }
+
+// Quoted, a name made of several words is searched as a whole.
+const shotsPath = sequence => ({
+  ...getEntitiesPath(
+    currentProduction.value?.id,
+    'shots',
+    isTVShow.value ? currentEpisode.value?.id : null
+  ),
+  query: { search: `"${sequence.name}"` }
+})
 </script>
 
 <style lang="scss" scoped>
-.datatable-body tr:first-child th,
-.datatable-body tr:first-child td {
-  border-top: 0;
-}
-.episode {
-  min-width: 100px;
-  width: 100px;
-}
+@use '@/styles/stats.scss' as stats;
+
+@include stats.list;
 
 .name {
   min-width: 150px;
   width: 150px;
-  font-weight: bold;
 }
 
-.name a {
-  color: inherit;
-}
-
-td.name {
-  font-size: 1.2em;
-}
-
-.description {
-  min-width: 200px;
-  width: 200px;
-}
-
-.validation {
-  min-width: 170px;
-  max-width: 170px;
-  width: 170px;
-  word-wrap: break-word;
-}
-
-.actions {
-  min-width: 100px;
-}
-
-th.actions {
-  padding: 0.4em;
+.shot-count {
+  display: block;
+  color: var(--text-alt);
+  font-size: 0.8rem;
+  font-weight: normal;
 }
 
 .actions {

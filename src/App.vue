@@ -14,8 +14,14 @@
       v-if="previewFileIdToShow"
       active
       :preview-file-id="previewFileIdToShow"
+      :preview-file-ids="previewFileIdsToBrowse"
       @cancel="hidePreviewFile"
+      @change="showPreviewFile"
     />
+
+    <!-- Popups teleport here, not next to the router-view: Vue looks past a
+         single teleport for the node after a page. -->
+    <div id="theme-popups" />
   </div>
 </template>
 
@@ -27,8 +33,11 @@ import { useStore } from 'vuex'
 import auth from '@/lib/auth'
 import crisp from '@/lib/crisp'
 import { isNewShotInLoadedScope } from '@/lib/episodes'
+import errors from '@/lib/errors'
 import i18n from '@/lib/i18n'
+import { getProductionRole } from '@/lib/people'
 import localPreferences from '@/lib/preferences'
+import { isPreviewFileStatus } from '@/lib/preview'
 import sentry from '@/lib/sentry'
 import assetsStore from '@/store/modules/assets.js'
 import editStore from '@/store/modules/edits.js'
@@ -71,9 +80,11 @@ const isDataLoading = computed(() => store.getters.isDataLoading)
 const isSavingCommentPreview = computed(
   () => store.getters.isSavingCommentPreview
 )
-const mainConfig = computed(() => store.getters.mainConfig)
 const personMap = computed(() => store.getters.personMap)
 const previewFileIdToShow = computed(() => store.getters.previewFileIdToShow)
+const previewFileIdsToBrowse = computed(
+  () => store.getters.previewFileIdsToBrowse
+)
 const productionMap = computed(() => store.getters.productionMap)
 const shotsLoadingKey = computed(() => store.getters.shotsLoadingKey)
 const isAssetsLoading = computed(() => store.getters.isAssetsLoading)
@@ -89,8 +100,19 @@ const user = computed(() => store.getters.user)
 // Functions
 // --------------------------------------------------------------------------
 
+// A production page replaces the task map: the todos and the person tasks it
+// held are then found in their own lists.
+const getHeldTask = taskId =>
+  taskMap.value.get(taskId) ||
+  todoMap.value.get(taskId) ||
+  store.state.people?.personTasks.find(({ id }) => id === taskId)
+
 const hidePreviewFile = () => {
   store.commit('HIDE_PREVIEW_FILE')
+}
+
+const showPreviewFile = previewFileId => {
+  store.commit('SHOW_PREVIEW_FILE', previewFileId)
 }
 
 const onAssignation = (eventData, assign = true) => {
@@ -109,14 +131,66 @@ const onAssignation = (eventData, assign = true) => {
   }
 }
 
-const setupDarkTheme = () => {
-  const darkTheme = localStorage.getItem('dark-theme')
+// As Zou's check_comment_access: an admin, a supervisor or a manager of the
+// production reads every comment; a client, the comments flagged for it and
+// those of clients, only its own on a production that isolates them; anyone
+// else, every comment but those of clients. Older Zou versions leave the
+// author and the flag out of the events, and Zou reads a null flag as false.
+const isUnreadableComment = eventData => {
+  if (!('person_id' in eventData) || user.value.role === 'admin') return false
+  const projectId = eventData.project_id
+  const role = store.getters.currentUserRoleForProduction(projectId)
+  if (['manager', 'supervisor'].includes(role)) return false
+  const author = personMap.value.get(eventData.person_id)
+  const isClientAuthor = author
+    ? getProductionRole(
+        author,
+        store.getters.teamRolesForProduction(projectId)
+      ) === 'client'
+    : undefined
+  if (role !== 'client') return isClientAuthor === true
+  if (eventData.for_client) return false
+  if (productionMap.value.get(projectId)?.is_clients_isolated) {
+    return eventData.person_id !== user.value.id
+  }
+  return isClientAuthor === false
+}
+
+const isSharedPlaylistPage = () =>
+  window.location.pathname.startsWith('/playlists/shared/')
+
+// A stored theme flag, null when unset or when the browser blocks the storage.
+const getStoredTheme = key => {
+  try {
+    const value = localStorage.getItem(key)
+    return value === 'true' || value === 'false' ? value === 'true' : null
+  } catch {
+    return null
+  }
+}
+
+// The config answers after the first render: the page starts with the
+// user's choice, else with the studio default the last config left, and
+// shared playlists are always dark. index.html paints the same theme before
+// the app loads.
+const applyStartupTheme = () => {
   store.commit(
     'TOGGLE_DARK_THEME',
-    darkTheme === 'true' ||
-      (darkTheme !== 'false' &&
-        Boolean(mainConfig.value?.dark_theme_by_default))
+    isSharedPlaylistPage() ||
+      (getStoredTheme('dark-theme') ??
+        getStoredTheme('dark-theme-default') ??
+        false)
   )
+}
+
+// A failed config comes as {} and keeps the startup theme.
+const setupDarkTheme = config => {
+  if (config.dark_theme_by_default === undefined) return
+  const isDefaultDark = Boolean(config.dark_theme_by_default)
+  localPreferences.setBoolPreference('dark-theme-default', isDefaultDark)
+  if (getStoredTheme('dark-theme') === null && !isSharedPlaylistPage()) {
+    store.commit('TOGGLE_DARK_THEME', isDefaultDark)
+  }
 }
 
 const setupCrisp = config => {
@@ -145,7 +219,13 @@ const setupAuthChannel = () => {
   const channel = auth.getBroadcastChannel()
   if (!channel) return
   channel.onmessage = async event => {
-    if (route.name !== 'login' && event.data === 'logout') {
+    // A shared playlist tab has no session to purge, and the redirect would
+    // carry its share token to the login page, where Crisp loads.
+    if (
+      route.name !== 'login' &&
+      !isSharedPlaylistPage() &&
+      event.data === 'logout'
+    ) {
       // Another tab logged out: purge this tab's session too, otherwise
       // store and socket keep the previous user's data. Navigate first:
       // purging while the current page is still mounted crashes the
@@ -169,19 +249,36 @@ const setupAuthChannel = () => {
 const socketEvents = {
   'project:new': eventData => {
     if (!productionMap.value.get(eventData.project_id)) {
-      store.dispatch('loadProduction', eventData.project_id).catch(err => {
-        console.error(err)
-      })
+      store
+        .dispatch('loadProductionIfShared', eventData.project_id)
+        .catch(errors.logRequestFailure)
     }
   },
 
   'project:update': eventData => {
-    if (productionMap.value.get(eventData.project_id)) {
-      store.dispatch('loadProduction', eventData.project_id).catch(() => {
-        store.commit('REMOVE_PRODUCTION', { id: eventData.project_id })
-      })
+    const productionId = eventData.project_id
+    if (productionMap.value.get(productionId)) {
+      store
+        .dispatch('loadProduction', productionId)
+        .then(() => {
+          // Zou also announces a team role change as a project update,
+          // possibly one changing the role of the user.
+          store
+            .dispatch('reloadTeamRoles', productionId)
+            .catch(errors.logRequestFailure)
+        })
+        .catch(err => {
+          // Deleted, or no longer shared with the user.
+          if ([403, 404].includes(err?.status)) {
+            store.commit('REMOVE_PRODUCTION', { id: productionId })
+          } else {
+            errors.logRequestFailure(err)
+          }
+        })
     } else {
-      store.dispatch('loadOpenProductions')
+      store
+        .dispatch('loadProductionIfOpen', productionId)
+        .catch(errors.logRequestFailure)
     }
   },
 
@@ -343,14 +440,35 @@ const socketEvents = {
     }
   },
 
-  // Emitted by Zou when a production has "set preview automatically"
-  // enabled: reflect the new entity thumbnail without a manual refresh.
+  // Zou builds the files of an uploaded preview in a job: its routes answer
+  // 404 until this event tells it ready.
+  'preview-file:update': eventData => {
+    if (isPreviewFileStatus(eventData.status)) {
+      store.commit('SET_PREVIEW_FILE_STATUS', {
+        previewFileId: eventData.preview_file_id,
+        status: eventData.status
+      })
+    }
+  },
+
+  // Sent for every new main preview, set by hand or by the job: its status
+  // goes first, so the thumbnails do not ask for a picture still processing.
   'preview-file:set-main': eventData => {
+    store.dispatch('registerPreviewFileStatuses', [
+      { id: eventData.preview_file_id, status: eventData.preview_file_status }
+    ])
     store.commit('SET_PREVIEW', {
       entityId: eventData.entity_id,
       previewId: eventData.preview_file_id,
       taskMap: taskMap.value
     })
+  },
+
+  // Zou does not send again the events emitted while the socket was down.
+  connect: () => {
+    store
+      .dispatch('refreshProcessingPreviewFiles')
+      .catch(errors.logRequestFailure)
   },
 
   'task:delete': eventData => {
@@ -362,12 +480,16 @@ const socketEvents = {
 
   'department:new': eventData => {
     if (!departmentMap.value.get(eventData.department_id)) {
-      store.dispatch('loadDepartment', eventData.department_id)
+      store
+        .dispatch('loadDepartment', eventData.department_id)
+        .catch(errors.logRequestFailure)
     }
   },
 
   'department:update': eventData => {
-    store.dispatch('loadDepartment', eventData.department_id)
+    store
+      .dispatch('loadDepartment', eventData.department_id)
+      .catch(errors.logRequestFailure)
   },
 
   'department:delete': eventData => {
@@ -378,7 +500,9 @@ const socketEvents = {
 
   'task-type:new': eventData => {
     if (!taskTypeMap.value.get(eventData.task_type_id)) {
-      store.dispatch('loadTaskType', eventData.task_type_id)
+      store
+        .dispatch('loadTaskType', eventData.task_type_id)
+        .catch(errors.logRequestFailure)
     }
   },
 
@@ -390,13 +514,17 @@ const socketEvents = {
 
   'task-status:new': eventData => {
     if (!taskStatusMap.value.get(eventData.task_status_id)) {
-      store.dispatch('loadTaskStatus', eventData.task_status_id)
+      store
+        .dispatch('loadTaskStatus', eventData.task_status_id)
+        .catch(errors.logRequestFailure)
     }
   },
 
   'task-status:update': eventData => {
     if (taskStatusMap.value.get(eventData.task_status_id)) {
-      store.dispatch('loadTaskStatus', eventData.task_status_id)
+      store
+        .dispatch('loadTaskStatus', eventData.task_status_id)
+        .catch(errors.logRequestFailure)
     }
   },
 
@@ -408,13 +536,17 @@ const socketEvents = {
 
   'asset-type:new': eventData => {
     if (!assetTypeMap.value.get(eventData.asset_type_id)) {
-      store.dispatch('loadAssetType', eventData.asset_type_id)
+      store
+        .dispatch('loadAssetType', eventData.asset_type_id)
+        .catch(errors.logRequestFailure)
     }
   },
 
   'asset-type:update': eventData => {
     if (assetTypeMap.value.get(eventData.asset_type_id)) {
-      store.dispatch('loadAssetType', eventData.asset_type_id)
+      store
+        .dispatch('loadAssetType', eventData.asset_type_id)
+        .catch(errors.logRequestFailure)
     }
   },
 
@@ -426,13 +558,17 @@ const socketEvents = {
 
   'person:new': eventData => {
     if (!personMap.value.get(eventData.person_id)) {
-      store.dispatch('loadPerson', eventData.person_id)
+      store
+        .dispatch('loadPerson', eventData.person_id)
+        .catch(errors.logRequestFailure)
     }
   },
 
   'person:update': eventData => {
     if (personMap.value.get(eventData.person_id)) {
-      store.dispatch('loadPerson', eventData.person_id)
+      store
+        .dispatch('loadPerson', eventData.person_id)
+        .catch(errors.logRequestFailure)
     }
   },
 
@@ -449,13 +585,16 @@ const socketEvents = {
 
   'comment:new': eventData => {
     const commentId = eventData.comment_id
-    const task = taskMap.value.get(eventData.task_id)
+    const task = getHeldTask(eventData.task_id)
     if (!isSavingCommentPreview.value && task) {
       if (
-        taskComments.value[eventData.task_id] ||
-        todoMap.value.get(eventData.task_id)
+        !isUnreadableComment(eventData) &&
+        (taskComments.value[eventData.task_id] ||
+          todoMap.value.get(eventData.task_id))
       ) {
-        store.dispatch('loadComment', { commentId }).catch(console.error)
+        store
+          .dispatch('loadComment', { commentId, taskId: eventData.task_id })
+          .catch(errors.logRequestFailure)
       } else {
         store.commit('UPDATE_TASK', {
           task,
@@ -468,8 +607,17 @@ const socketEvents = {
   'comment:update': eventData => {
     const commentId = eventData.comment_id
     const taskId = eventData.task_id
-    const task = taskId ? taskMap.value.get(taskId) : null
-    if (!task && !taskComments.value[taskId]) return
+    // A list holds no comment, and a client may not read every comment of
+    // the tasks it lists.
+    if (!taskComments.value[taskId]) return
+    // The comment the user posts with previews joins the store once its last
+    // file is up: reloaded before, it would list them with no revision.
+    if (store.getters.isPublishingComment(commentId)) return
+    // A comment the user holds is reloaded even so: a 403 blanks it below.
+    const isStored = taskComments.value[taskId].some(
+      ({ id }) => id === commentId
+    )
+    if (!isStored && isUnreadableComment(eventData)) return
     store.dispatch('loadComment', { commentId }).catch(err => {
       // A manager may have just flipped for_client off — the client
       // loses access and gets a 403. Keep the row but blank its
@@ -477,15 +625,28 @@ const socketEvents = {
       if (err?.status === 403 || err?.body?.status === 403) {
         store.commit('BLANK_COMMENT_CONTENT', { taskId, commentId })
       } else {
-        console.error(err)
+        errors.logRequestFailure(err)
       }
     })
   },
 
+  // The task:update of the reset that follows a comment deletion reloads a
+  // task without its last comment.
+  'comment:delete': eventData => {
+    store
+      .dispatch('reloadTaskLastComment', {
+        commentId: eventData.comment_id,
+        taskId: eventData.task_id
+      })
+      .catch(errors.logRequestFailure)
+  },
+
   'task:update': eventData => {
-    if (taskMap.value.get(eventData.task_id)) {
+    if (getHeldTask(eventData.task_id)) {
       nextTick(() => {
-        store.dispatch('loadTask', { taskId: eventData.task_id })
+        store
+          .dispatch('loadTask', { taskId: eventData.task_id })
+          .catch(errors.logRequestFailure)
       })
     }
   },
@@ -522,19 +683,17 @@ const socketEvents = {
 
   'metadata-descriptor:new': eventData => {
     if (currentProduction.value?.id === eventData.project_id) {
-      store.dispatch(
-        'refreshMetadataDescriptor',
-        eventData.metadata_descriptor_id
-      )
+      store
+        .dispatch('refreshMetadataDescriptor', eventData.metadata_descriptor_id)
+        .catch(errors.logRequestFailure)
     }
   },
 
   'metadata-descriptor:update': eventData => {
     if (currentProduction.value?.id === eventData.project_id) {
-      store.dispatch(
-        'refreshMetadataDescriptor',
-        eventData.metadata_descriptor_id
-      )
+      store
+        .dispatch('refreshMetadataDescriptor', eventData.metadata_descriptor_id)
+        .catch(errors.logRequestFailure)
     }
   },
 
@@ -546,7 +705,7 @@ const socketEvents = {
 
   'organisation:update': () => {
     if (isCurrentUserAdmin.value) {
-      store.dispatch('getOrganisation')
+      store.dispatch('getOrganisation').catch(errors.logRequestFailure)
     }
   }
 }
@@ -560,6 +719,9 @@ Object.entries(socketEvents).forEach(([event, handler]) =>
 
 // Watchers
 // --------------------------------------------------------------------------
+
+// Before the immediate watcher below, so the first frame has the theme.
+applyStartupTheme()
 
 watch(
   isDarkTheme,
@@ -578,11 +740,11 @@ watch(
     if (userLocale !== 'en') return
     const variant = currentProduction.value?.production_style
     if (['nft', 'video-game'].includes(variant)) {
-      i18n.global.silentFallbackWarn = true
-      i18n.global.locale = `en_${variant}`
+      i18n.global.fallbackWarn = false
+      i18n.global.locale.value = `en_${variant}`
     } else {
-      i18n.global.silentFallbackWarn = false
-      i18n.global.locale = 'en'
+      i18n.global.fallbackWarn = true
+      i18n.global.locale.value = 'en'
     }
   },
   { immediate: true }
@@ -593,7 +755,7 @@ watch(
 
 onMounted(async () => {
   const config = await store.dispatch('setMainConfig')
-  setupDarkTheme()
+  setupDarkTheme(config)
   setupCrisp(config)
   setupSentry(config)
   setupAuthChannel()
@@ -609,6 +771,12 @@ onMounted(async () => {
 :focus-visible {
   outline: 2px solid var(--text-selected);
   outline-offset: 1px;
+}
+// useModal focuses the dialog itself when it opens: a frame around the
+// whole dialog would only be noise.
+.modal:focus,
+.modal-content:focus {
+  outline: none;
 }
 ::-moz-focus-inner {
   border: 0;
@@ -1166,27 +1334,6 @@ input.input:focus {
   border-radius: 2em;
 }
 
-.datepicker {
-  .input {
-    border-radius: 10px;
-
-    &::placeholder {
-      color: $light-grey;
-    }
-
-    &.is-small {
-      font-size: 1em;
-      padding: 0.5em;
-      height: 2.3em;
-      width: 100px;
-    }
-
-    &.invalid {
-      border-color: $red;
-    }
-  }
-}
-
 .button:focus {
   box-shadow: none;
 }
@@ -1424,8 +1571,18 @@ textarea.input:focus {
   min-height: 0;
 }
 
-.page-header,
-.page-header.level {
+// a landscape phone gets the 44px topbar (see Topbar.vue)
+@media screen and (max-height: 500px) and (orientation: landscape) {
+  .fixed-page {
+    padding-top: 44px;
+  }
+
+  .page {
+    padding-top: 54px;
+  }
+}
+
+.page-header {
   margin-top: 2em;
   margin-bottom: 0;
 }
@@ -2639,17 +2796,6 @@ th.validation-cell {
   border-radius: 50%;
 }
 
-@media screen and (max-width: 768px) {
-  .level-left + .level-right {
-    display: flex;
-    justify-content: left;
-  }
-
-  .level-item:not(:last-child) {
-    margin-bottom: 0;
-  }
-}
-
 @media (min-width: 500px) {
   .container {
     margin: 0 auto;
@@ -2730,8 +2876,10 @@ th.validation-cell {
 }
 // Opt-in card layout for data tables on mobile. Cells carrying a data-label
 // become a "label / value" line, .card-head cells stack on top as plain
-// blocks, every other cell is hidden.
-@media screen and (max-width: 768px) {
+// blocks, every other cell is hidden. Landscape phones, wider than 768px,
+// get them too.
+@media screen and (max-width: 768px),
+  screen and (max-height: 500px) and (orientation: landscape) {
   .datatable.datatable--cards {
     background: transparent;
     display: block;
@@ -2817,11 +2965,13 @@ th.validation-cell {
       justify-content: space-between;
       text-align: right;
 
+      // the label must not inherit the bold of a header cell
       &::before {
         color: var(--text-alt);
         content: attr(data-label);
         flex-shrink: 0;
         font-size: 0.8em;
+        font-weight: normal;
         letter-spacing: 0.06em;
         text-transform: uppercase;
       }

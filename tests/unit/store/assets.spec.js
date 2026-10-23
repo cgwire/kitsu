@@ -11,6 +11,7 @@ import assetsApi from '@/store/api/assets'
 import entitiesApi from '@/store/api/entities'
 import taskStatusStore from '@/store/modules/taskstatus'
 import { buildAssetIndex } from '@/lib/indexing'
+import { PAGE_SIZE } from '@/lib/pagination'
 
 const baseRootGetters = () => ({
   assetTypeMap: new Map(),
@@ -373,6 +374,119 @@ describe('Assets store', () => {
     })
   })
 
+  describe('SET_ASSET_SEARCH paging', () => {
+    const searchPayload = (assetSearch, options = {}) => ({
+      assetSearch,
+      production: { id: 'p1', descriptors: [] },
+      taskStatusMap: new Map(),
+      taskTypeMap: new Map(),
+      persons: [],
+      ...options
+    })
+
+    const makeState = displayedAssets => ({
+      assetSorting: [],
+      assetTypes: [],
+      displayedAssets,
+      displayedAssetsTimeSpent: 0,
+      displayedAssetsEstimation: 0
+    })
+
+    beforeEach(() => {
+      assetsStore.cache.assets = Array.from(
+        { length: PAGE_SIZE * 3 },
+        (_, index) => ({
+          id: `a${index}`,
+          name: `Asset ${index}`,
+          asset_type_name: 'Char',
+          canceled: false,
+          timeSpent: 0,
+          estimation: 0,
+          tasks: [],
+          data: {}
+        })
+      )
+      assetsStore.cache.assetIndex = {}
+      assetsStore.cache.result = []
+    })
+
+    // The Assets page keeps its scroll depth across searches.
+    test('keeps the number of displayed assets by default', () => {
+      const state = makeState(assetsStore.cache.assets.slice(0, PAGE_SIZE * 2))
+
+      assetsStore.mutations.SET_ASSET_SEARCH(state, searchPayload(''))
+
+      expect(state.displayedAssets).toHaveLength(PAGE_SIZE * 2)
+    })
+
+    test('comes back to one page when asked to', () => {
+      const state = makeState(assetsStore.cache.assets.slice(0, PAGE_SIZE * 2))
+
+      assetsStore.mutations.SET_ASSET_SEARCH(
+        state,
+        searchPayload('', { isPageReset: true })
+      )
+
+      expect(state.displayedAssets).toHaveLength(PAGE_SIZE)
+    })
+  })
+
+  describe('SET_ASSET_SEARCH ready for filter', () => {
+    const makeAsset = (id, readyFor) => ({
+      id,
+      name: id,
+      asset_type_name: 'Char',
+      canceled: false,
+      ready_for: readyFor,
+      timeSpent: 0,
+      estimation: 0,
+      tasks: [],
+      validations: new Map(),
+      data: {}
+    })
+
+    const taskTypeMap = new Map(
+      [
+        { id: 'tt-modeling', name: 'Modeling', for_entity: 'Asset' },
+        { id: 'tt-lighting', name: 'Lighting', for_entity: 'Shot' },
+        { id: 'tt-animation', name: 'Animation', for_entity: 'Shot' }
+      ].map(taskType => [taskType.id, taskType])
+    )
+
+    beforeEach(() => {
+      assetsStore.cache.assets = [
+        makeAsset('a1', 'tt-lighting'),
+        makeAsset('a2', 'tt-animation'),
+        // Zou serializes an unset ready_for with str(None).
+        makeAsset('a3', 'None')
+      ]
+      assetsStore.cache.assetIndex = {}
+      assetsStore.cache.result = []
+    })
+
+    // An asset is ready for a shot task type, while the task status filters
+    // of the page only resolve asset task types.
+    test('keeps the assets ready for the given shot task type', () => {
+      const state = {
+        assetSorting: [],
+        assetTypes: [],
+        displayedAssets: [],
+        displayedAssetsTimeSpent: 0,
+        displayedAssetsEstimation: 0
+      }
+
+      assetsStore.mutations.SET_ASSET_SEARCH(state, {
+        assetSearch: 'readyfor=[lighting]',
+        production: { id: 'p1', descriptors: [] },
+        taskStatusMap: new Map(),
+        taskTypeMap,
+        persons: []
+      })
+
+      expect(state.displayedAssets.map(asset => asset.id)).toEqual(['a1'])
+    })
+  })
+
   describe('LOAD_ASSETS_END', () => {
     test('keeps the task own metadata (task descriptors) on reload', () => {
       taskStatusStore.cache.taskStatusMap = new Map([
@@ -414,6 +528,52 @@ describe('Assets store', () => {
       )
 
       expect(taskMap.get('t1').data).toEqual({ revision_note: 'keep me' })
+    })
+
+    test('lists the asset types the loaded assets use', () => {
+      const state = { assetSearchText: '' }
+      assetsStore.mutations.LOAD_ASSETS_END(state, {
+        production: { id: 'p1' },
+        assets: [
+          {
+            id: 'a1',
+            name: 'A1',
+            asset_type_id: 'type1',
+            asset_type_name: 'Char',
+            tasks: []
+          }
+        ],
+        userFilters: {},
+        userFilterGroups: {},
+        personMap: new Map(),
+        taskMap: new Map(),
+        taskTypeMap: new Map()
+      })
+
+      const names = assetsStore.getters
+        .usedAssetTypes(state)
+        .map(assetType => assetType.name)
+      expect(names).toEqual(['Char'])
+      expect(state.displayedAssetTypes).toBeUndefined()
+    })
+  })
+
+  describe('COMPUTE_ASSET_TYPE_STATS', () => {
+    test('counts the assets of each type along with the task stats', () => {
+      assetsStore.cache.assets = [
+        { id: 'a1', asset_type_id: 'chars', tasks: [] },
+        { id: 'a2', asset_type_id: 'chars', tasks: [] },
+        { id: 'a3', asset_type_id: 'props', tasks: [], canceled: true }
+      ]
+      const state = {}
+      assetsStore.mutations.COMPUTE_ASSET_TYPE_STATS(state, {
+        taskStatusMap: new Map(),
+        taskMap: new Map()
+      })
+      expect(state.assetTypeAssetCounts).toEqual({ chars: 2 })
+      expect(assetsStore.getters.assetTypeAssetCounts(state)).toEqual({
+        chars: 2
+      })
     })
   })
 

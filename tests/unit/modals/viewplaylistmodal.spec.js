@@ -1,4 +1,5 @@
-import { shallowMount } from '@vue/test-utils'
+import { flushPromises, shallowMount } from '@vue/test-utils'
+import { reactive } from 'vue'
 import { createI18n } from 'vue-i18n'
 import { createStore } from 'vuex'
 
@@ -28,6 +29,11 @@ vi.mock('@/components/players/players/PlaylistPlayer.vue', () => ({
   default: { name: 'PlaylistPlayer', props: ['canSave'], render: () => null }
 }))
 
+const crisp = vi.hoisted(() => ({ setChatVisibility: vi.fn() }))
+vi.mock('@/lib/crisp', () => ({ default: crisp }))
+
+import shotStore from '@/store/modules/shots'
+
 import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal.vue'
 import EditPlaylistModal from '@/components/modals/EditPlaylistModal.vue'
 
@@ -36,19 +42,27 @@ describe('ViewPlaylistModal', () => {
   let wrapper
   let i18n
   let editPlaylistPayload
+  let newPlaylistError
+  let newPlaylistRequest
   let tempEntities
+  // The episode the topbar sets, which a test can move.
+  const scope = reactive({ episode: null, isTVShow: false })
 
   beforeEach(() => {
     routeState.path = '/shots'
     routeState.params = { production_id: 'production-1' }
     editPlaylistPayload = null
+    newPlaylistError = null
+    newPlaylistRequest = null
     tempEntities = []
+    Object.assign(scope, { episode: null, isTVShow: false })
     store = createStore({
       strict: true,
       getters: {
-        currentEpisode: () => null,
+        currentEpisode: () => scope.episode,
         currentProduction: () => ({ id: 'production-1' }),
-        isTVShow: () => false,
+        isSupportChat: () => true,
+        isTVShow: () => scope.isTVShow,
         selectedTasks: () => new Map()
       },
       mutations: {
@@ -58,6 +72,8 @@ describe('ViewPlaylistModal', () => {
         // The create response does not necessarily echo task_type_id back, so
         // the save flow must not rely on it being present here.
         newPlaylist: (_ctx, data) => {
+          if (newPlaylistError) return Promise.reject(newPlaylistError)
+          if (newPlaylistRequest) return newPlaylistRequest
           const created = { ...data, id: 'playlist-1' }
           delete created.task_type_id
           return Promise.resolve(created)
@@ -82,9 +98,15 @@ describe('ViewPlaylistModal', () => {
     })
 
     wrapper = shallowMount(ViewPlaylistModal, {
-      global: { plugins: [store, i18n] },
+      // the modal sits in a teleport, disabled off a phone: render it in place
+      global: { plugins: [store, i18n], stubs: { teleport: false } },
       props: { active: false }
     })
+  })
+
+  afterEach(() => {
+    shotStore.cache.shotMap.delete('shot-1')
+    vi.restoreAllMocks()
   })
 
   it('keeps the selected task type when saving a playlist from a selection', async () => {
@@ -127,6 +149,53 @@ describe('ViewPlaylistModal', () => {
     expect(editModal.props('successText')).toContain('My playlist')
   })
 
+  // Close keeps the error of a failed save: the next Save opens without it.
+  it('opens the save form without the error of a failed save', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    newPlaylistError = new Error('taken')
+    const player = wrapper.findComponent({ name: 'PlaylistPlayer' })
+    const editModal = wrapper.findComponent(EditPlaylistModal)
+
+    player.vm.$emit('save-clicked')
+    await wrapper.vm.$nextTick()
+    editModal.vm.$emit('confirm', { name: 'My playlist', for_entity: 'shot' })
+    await flushPromises()
+    expect(editModal.props('isError')).toBe(true)
+
+    editModal.vm.$emit('cancel')
+    await wrapper.vm.$nextTick()
+    player.vm.$emit('save-clicked')
+    await wrapper.vm.$nextTick()
+
+    expect(editModal.props('active')).toBe(true)
+    expect(editModal.props('isError')).toBe(false)
+  })
+
+  // Clearing on cancel would miss a save that fails after the cancel.
+  it('opens the save form without the error of a save that failed after a cancel', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    let rejectSave
+    newPlaylistRequest = new Promise((resolve, reject) => {
+      rejectSave = reject
+    })
+    const player = wrapper.findComponent({ name: 'PlaylistPlayer' })
+    const editModal = wrapper.findComponent(EditPlaylistModal)
+
+    player.vm.$emit('save-clicked')
+    await wrapper.vm.$nextTick()
+    editModal.vm.$emit('confirm', { name: 'My playlist', for_entity: 'shot' })
+    editModal.vm.$emit('cancel')
+    rejectSave(new Error('taken'))
+    await flushPromises()
+    expect(editModal.props('isError')).toBe(true)
+
+    player.vm.$emit('save-clicked')
+    await wrapper.vm.$nextTick()
+
+    expect(editModal.props('active')).toBe(true)
+    expect(editModal.props('isError')).toBe(false)
+  })
+
   it('saves the chosen task type preview for each entity, not the default one', async () => {
     // Entity carries a preview per task type; the default differs from the one
     // matching the task type the user picks.
@@ -161,6 +230,46 @@ describe('ViewPlaylistModal', () => {
     ])
   })
 
+  // The cached shot has no preview duration: copying it onto the
+  // sub-previews of a multi-file revision erased the durations Zou sends.
+  it('keeps the duration of each sub-preview', async () => {
+    shotStore.cache.shotMap.set('shot-1', { id: 'shot-1', name: 'SH01' })
+    tempEntities = [
+      {
+        id: 'shot-1',
+        preview_file_id: 'pf-1',
+        preview_file_duration: 2,
+        preview_file_previews: [{ id: 'pf-1-b', duration: 3.5 }],
+        preview_files: { 'tt-anim': [{ id: 'pf-1' }] }
+      }
+    ]
+    await wrapper.setProps({ active: true })
+    await new Promise(resolve => setTimeout(resolve))
+
+    expect(tempEntities[0].preview_file_previews[0].duration).toBe(3.5)
+  })
+
+  // Sequence names repeat across episodes: All shots says which one.
+  it.each([
+    ['all shots', { id: 'all' }, 'E01 / SQ01'],
+    ['an episode', { id: 'episode-1', name: 'E01' }, 'SQ01']
+  ])('names the sequence of a shot under %s', async (_, episode, name) => {
+    Object.assign(scope, { episode, isTVShow: true })
+    shotStore.cache.shotMap.set('shot-1', {
+      id: 'shot-1',
+      name: 'SH01',
+      sequence_name: 'SQ01',
+      episode_name: 'E01'
+    })
+    tempEntities = [
+      { id: 'shot-1', preview_file_id: 'pf-1', preview_files: {} }
+    ]
+    await wrapper.setProps({ active: true })
+    await new Promise(resolve => setTimeout(resolve))
+
+    expect(tempEntities[0].parent_name).toBe(name)
+  })
+
   it.each([
     // A shots page under an episode contains "episodes" in the URL but is a
     // shot view: it must save a shot playlist, not an empty episode one.
@@ -171,7 +280,8 @@ describe('ViewPlaylistModal', () => {
   ])('infers for_entity "%s" → "%s" when saving from a selection', async (path, expected) => {
     routeState.path = path
     const localWrapper = shallowMount(ViewPlaylistModal, {
-      global: { plugins: [store, i18n] },
+      // the modal sits in a teleport, disabled off a phone: render it in place
+      global: { plugins: [store, i18n], stubs: { teleport: false } },
       props: { active: false }
     })
 
@@ -194,11 +304,76 @@ describe('ViewPlaylistModal', () => {
     routeState.path = '/my-checks'
     routeState.params = {}
     const localWrapper = shallowMount(ViewPlaylistModal, {
-      global: { plugins: [store, i18n] },
+      // the modal sits in a teleport, disabled off a phone: render it in place
+      global: { plugins: [store, i18n], stubs: { teleport: false } },
       props: { active: false }
     })
     expect(
       localWrapper.findComponent({ name: 'PlaylistPlayer' }).props('canSave')
     ).toBe(false)
+  })
+
+  describe('on a phone', () => {
+    const stubPhone = isPhone => {
+      window.matchMedia = query => ({
+        matches: isPhone && query === '(max-width: 768px)',
+        addEventListener: () => {},
+        removeEventListener: () => {}
+      })
+    }
+
+    const mountActive = () =>
+      shallowMount(ViewPlaylistModal, {
+        attachTo: document.body,
+        // the modal sits in a teleport, disabled off a phone: render it in place
+      global: { plugins: [store, i18n], stubs: { teleport: false } },
+        props: { active: true }
+      })
+    const findModal = () => document.querySelector('#temp-playlist-modal')
+
+    beforeEach(() => {
+      crisp.setChatVisibility.mockClear()
+    })
+
+    afterEach(() => {
+      delete window.matchMedia
+    })
+
+    it('closes from the close button on a phone', async () => {
+      stubPhone(true)
+      const modal = mountActive()
+      findModal().querySelector('.close-button').click()
+      expect(modal.emitted('cancel')).toHaveLength(1)
+      expect(findModal().classList.contains('phone')).toBe(true)
+      modal.unmount()
+    })
+
+    // the fixed page container traps the z-index of what it holds under
+    // the topbar: the modal leaves it on phones
+    it('renders right under the body on a phone', async () => {
+      stubPhone(true)
+      const modal = mountActive()
+      expect(findModal().parentElement).toBe(document.body)
+      modal.unmount()
+    })
+
+    it('hides the support chat while open on a phone', async () => {
+      stubPhone(true)
+      const modal = mountActive()
+      await flushPromises()
+      expect(crisp.setChatVisibility).toHaveBeenCalledWith(false)
+      modal.unmount()
+      expect(crisp.setChatVisibility).toHaveBeenLastCalledWith(true)
+    })
+
+    it('leaves the chat alone off a phone', async () => {
+      stubPhone(false)
+      const modal = mountActive()
+      await flushPromises()
+      expect(crisp.setChatVisibility).not.toHaveBeenCalled()
+      expect(findModal().classList.contains('phone')).toBe(false)
+      expect(findModal().parentElement).not.toBe(document.body)
+      modal.unmount()
+    })
   })
 })

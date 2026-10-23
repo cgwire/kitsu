@@ -7,6 +7,10 @@ import stringHelpers from '@/lib/string'
 import { getDayRange, getMonthRange, getWeekRange } from '@/lib/time'
 import { convertHours } from '@/lib/timesheet'
 
+// The errors of the imported files the browser could not read (moved,
+// deleted or changed since they were picked) and of the empty ones.
+const readFailures = new WeakSet()
+
 const csv = {
   generateTimesheet({
     name,
@@ -265,7 +269,7 @@ const csv = {
     const names = new Map()
     parsedCsv
       .slice(1)
-      .filter(line => line.length > 1)
+      .filter(line => line.length > 1 || line[0])
       .forEach(line => {
         const values = indexMatchers.map(index => line[index] || '')
         const key = values.join('')
@@ -543,17 +547,33 @@ const csv = {
 
   processCSV: (data, config = {}) => {
     return new Promise((resolve, reject) => {
+      const fail = err => {
+        if (Object(err) === err) readFailures.add(err)
+        reject(err)
+      }
       Papa.parse(data, {
         encoding: 'UTF-8',
-        error: reject,
+        error: fail,
         transform: value => value.trim(),
+        // For a file, this runs in a FileReader callback, outside the
+        // promise: a throw here would leave it pending.
         complete: results => {
-          results.data[0].forEach(stringHelpers.capitalize)
-          resolve(results.data)
+          if (results.data.length) {
+            resolve(results.data)
+          } else {
+            fail(new Error('The CSV file is empty'))
+          }
         },
         ...config
       })
     })
+  },
+
+  // A file the browser could not read is the user's: the import modal says
+  // so. Anything else is a bug that must stay unhandled for Sentry.
+  logReadFailure: err => {
+    if (!readFailures.has(err)) throw err
+    console.error(err)
   }
 }
 

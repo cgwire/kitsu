@@ -2,16 +2,16 @@
   <div class="columns fixed-page">
     <div class="column main-column">
       <div class="todos page">
-        <div class="filters flexrow mt1">
+        <div class="filters flexrow mt1" :class="{ collapsed: !showFilters }">
           <combobox-production
-            class="flexrow-item"
+            class="combobox-production flexrow-item"
             :label="$t('main.production')"
             :production-list="productionList"
             v-model="filters.productionId"
           />
 
           <combobox
-            class="flexrow-item"
+            class="flexrow-item collapsible"
             :label="$t('shots.fields.episode')"
             :options="episodeOptions"
             v-model="filters.episodeId"
@@ -19,21 +19,21 @@
           />
 
           <combobox-task-type
-            class="flexrow-item selector"
+            class="flexrow-item selector collapsible"
             :label="$t('news.task_type')"
             :task-type-list="taskTypeList"
             v-model="filters.taskTypeId"
           />
 
           <combobox-status
-            class="flexrow-item selector"
+            class="flexrow-item selector collapsible"
             :label="$t('news.task_status')"
             :task-status-list="taskStatusList"
             v-model="filters.taskStatusId"
           />
 
           <people-field
-            class="flexrow-item selector"
+            class="flexrow-item selector collapsible"
             :label="$t('main.person')"
             :people="personList"
             small
@@ -43,7 +43,7 @@
           <span class="filler"></span>
 
           <combobox
-            class="flexrow-item"
+            class="flexrow-item collapsible"
             :label="$t('main.show')"
             :options="filterOptions"
             locale-key-prefix="tasks."
@@ -51,21 +51,30 @@
           />
 
           <combobox
-            class="flexrow-item"
+            class="flexrow-item collapsible"
             :label="$t('main.sorted_by')"
             :options="sortOptions"
             locale-key-prefix="tasks.fields."
             v-model="filters.currentSort"
           />
+
+          <button-simple
+            class="flexrow-item filters-toggle"
+            icon="funnel"
+            :aria-expanded="`${showFilters}`"
+            :is-on="showFilters"
+            :title="$t(showFilters ? 'main.less_filters' : 'main.more_filters')"
+            @click="showFilters = !showFilters"
+          />
         </div>
 
-        <div class="flexrow">
+        <div class="title-row flexrow">
           <h1 class="title mt1 flexrow-item filler">
             {{ stats.total }}
             {{ $t('my_checks.title', { count: stats.total }) }}
           </h1>
           <button-simple
-            class="flexrow-item"
+            class="flexrow-item playlist-button"
             @click="isPlaylist = true"
             :text="buildPlaylistText"
             :title="isMore ? $t('my_checks.build_playlist_loaded_only') : ''"
@@ -101,7 +110,14 @@
 // Imports
 import { useHead } from '@unhead/vue'
 import moment from 'moment-timezone'
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import {
+  computed,
+  defineAsyncComponent,
+  onMounted,
+  reactive,
+  ref,
+  watch
+} from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
@@ -109,7 +125,6 @@ import { useStore } from 'vuex'
 import { sortPeople } from '@/lib/sorting'
 
 import ToCheckList from '@/components/lists/ToCheckList.vue'
-import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal.vue'
 import TaskInfo from '@/components/sides/TaskInfo.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
@@ -117,6 +132,10 @@ import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
+
+const ViewPlaylistModal = defineAsyncComponent(
+  () => import('@/components/modals/ViewPlaylistModal.vue')
+)
 
 // Composables
 const { t } = useI18n()
@@ -134,6 +153,7 @@ const isMore = ref(false)
 const isMoreLoading = ref(false)
 const isPlaylist = ref(false)
 const page = ref(1)
+const showFilters = ref(false)
 const stats = ref({ total: 0 })
 const tasks = ref([])
 
@@ -423,6 +443,106 @@ useHead({ title: computed(() => `${t('tasks.my_checks')} - Kitsu`) })
   :deep(.multiselect__tags) {
     height: 42px;
     min-height: 42px;
+  }
+}
+
+// small screens only: the filters fold behind the toggle
+.filters-toggle {
+  align-self: flex-end;
+  display: none;
+  height: 42px;
+}
+
+@media screen and (max-width: 768px),
+  screen and (max-height: 500px) and (orientation: landscape) {
+  .filters {
+    align-items: flex-end;
+    flex-wrap: wrap;
+    row-gap: 0.5em;
+
+    .filler {
+      display: none;
+    }
+  }
+
+  .filters-toggle {
+    display: flex;
+    flex: none;
+  }
+
+  .combobox-production {
+    flex: 1;
+    min-width: 0;
+
+    :deep(.production-combo),
+    :deep(.select-input) {
+      min-width: 0;
+      width: 100%;
+    }
+  }
+
+  .collapsed .collapsible {
+    display: none;
+  }
+
+  // unfolded, each filter takes a line under the production one
+  .filters > .collapsible {
+    flex: 0 0 100%;
+    margin-right: 0;
+    order: 1;
+  }
+
+  .title-row {
+    flex-wrap: wrap;
+
+    .title {
+      flex: 0 0 100%;
+    }
+
+    .playlist-button {
+      margin-bottom: 1em;
+    }
+  }
+
+  // TaskInfo edits the task: phones stay read-only
+  .side-column {
+    display: none;
+  }
+}
+
+// a landscape phone is too short to share its height with the list: the
+// whole page scrolls instead of the list alone
+@media screen and (max-height: 500px) and (orientation: landscape) {
+  .todos {
+    display: block;
+    height: auto;
+  }
+
+  .filters {
+    margin-top: 0.5em !important;
+  }
+
+  // the title and the playlist button share one line
+  .title-row {
+    align-items: center;
+    flex-wrap: nowrap;
+
+    .title {
+      flex: 1 1 auto;
+      font-size: 1.4em;
+      margin: 0.5em 0;
+    }
+
+    .playlist-button {
+      margin-bottom: 0;
+    }
+  }
+
+  .todos :deep(.data-list),
+  .todos :deep(.datatable-wrapper) {
+    height: auto;
+    max-height: none;
+    overflow: visible;
   }
 }
 </style>

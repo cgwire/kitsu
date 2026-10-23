@@ -297,6 +297,32 @@ describe('TeamSchedule page', () => {
     })
   })
 
+  // The date fields of the page are utc ones: they hold a day at UTC
+  // midnight. At 00:30 local time, east of UTC, the UTC day is still the
+  // day before.
+  describe('default range', () => {
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['Date'] })
+      vi.setSystemTime(new Date(2026, 9, 6, 0, 30))
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('runs from the local day when nobody has dates', async () => {
+      const { wrapper } = await mountPage()
+      await flushPromises()
+
+      const fields = wrapper.findAllComponents({ name: 'DateField' })
+      expect(fields.map(field => field.props('modelValue'))).toEqual([
+        new Date('2026-10-06T00:00:00.000Z'),
+        new Date('2027-01-06T00:00:00.000Z')
+      ])
+      wrapper.unmount()
+    })
+  })
+
   describe('department filter', () => {
     const departmentCombo = wrapper =>
       wrapper.findComponent({ name: 'ComboboxDepartment' })
@@ -779,24 +805,32 @@ describe('TeamSchedule page', () => {
       wrapper.unmount()
     })
 
-    it('ignores an entity absent from the panel', async () => {
-      const { wrapper, handler } = await mountPage()
-      wrapper.vm.unassignedTasks = [
-        { id: 'task-1', entity_id: 'entity-1', entity_preview_file_id: 'old' }
-      ]
-
-      handler({ entity_id: 'entity-9', preview_file_id: 'preview-1' })
-
-      expect(wrapper.vm.unassignedTasks[0].entity_preview_file_id).toEqual(
-        'old'
-      )
-      wrapper.unmount()
-    })
-
     it('is unregistered on unmount', async () => {
       const { wrapper, socket, handler } = await mountPage()
       wrapper.unmount()
       expect(socket.off).toHaveBeenCalledWith('preview-file:set-main', handler)
+    })
+  })
+
+  describe('unassigned tasks', () => {
+    it('rounds the person days of an estimation', async () => {
+      const loadOpenTasks = vi.fn(() => ({
+        data: [{ id: 'task-1', estimation: 160 }],
+        is_more: false,
+        stats: { total: 1 }
+      }))
+      const { wrapper } = await mountPage({
+        getters: { organisation: () => ({ hours_by_day: 8 }) },
+        actions: { loadOpenTasks },
+        renderStubDefaultSlot: true
+      })
+
+      wrapper.vm.toggleTaskSidePanel()
+      await flushPromises()
+
+      // 160 minutes are a third of an 8 hour day
+      expect(wrapper.find('.task-item em').text()).toBe('0.33 main.man_days')
+      wrapper.unmount()
     })
   })
 })

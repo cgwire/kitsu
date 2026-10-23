@@ -1,11 +1,16 @@
 // @vitest-environment node
 
+import { execFileSync } from 'node:child_process'
+import process from 'node:process'
+
 import moment from 'moment-timezone'
 import {
   addBusinessDays,
   daysToMinutes,
+  durationToMinutes,
   formatDate,
   formatDisplayDate,
+  formatDayOffLabel,
   formatDuration,
   formatFullDate,
   formatFullDateWithRevertedTimezone,
@@ -27,6 +32,7 @@ import {
   getStartDateFromString,
   getWeekRange,
   hoursToDays,
+  hoursToMinutes,
   minutesToDays,
   monthToString,
   parseDate,
@@ -279,6 +285,12 @@ describe('time', () => {
       start_date: '2019-10-01',
       due_date: '2019-10-09'
     })
+    // three days of 7.6 hours
+    const threeDays = minutesToDays({ hours_by_day: 7.6 }, 1368)
+    expect(getDatesFromStartDate({}, startDate, null, threeDays)).toEqual({
+      start_date: '2019-10-01',
+      due_date: '2019-10-03'
+    })
   })
   test('getDatesFromEndDate', () => {
     const startDate = parseSimpleDate('2019-10-01')
@@ -405,16 +417,54 @@ describe('time', () => {
     expect(daysToMinutes({ hours_by_day: 8 }, 8)).toEqual(8 * 8 * 60)
     expect(daysToMinutes({ hours_by_day: 7 }, 8)).toEqual(8 * 7 * 60)
     expect(daysToMinutes({ hours_by_day: 7 }, undefined)).toEqual(0)
+    expect(daysToMinutes({ hours_by_day: 8 }, 1.5)).toEqual(720)
+    expect(daysToMinutes({ hours_by_day: 8 }, 1.01)).toEqual(484)
+    // Float products fall just under the whole minute: 3 days of 7.6 hours
+    // make 1367.9999999999998 minutes, and 1 / quota gives 3 days as
+    // 2.9999999999999996.
+    expect(daysToMinutes({ hours_by_day: 7.6 }, 3)).toEqual(1368)
+    expect(daysToMinutes({ hours_by_day: 8 }, 2.9999999999999996)).toEqual(
+      1440
+    )
   })
   test('minutesToDays', () => {
     expect(minutesToDays({ hours_by_day: 8 }, 8 * 8 * 60)).toEqual(8)
     expect(minutesToDays({ hours_by_day: 7 }, 8 * 7 * 60)).toEqual(8)
     expect(minutesToDays({ hours_by_day: 7 }, undefined)).toEqual(0)
+    expect(minutesToDays({ hours_by_day: 8 }, 720)).toEqual(1.5)
+    expect(minutesToDays({ hours_by_day: 8 }, 500)).toEqual(500 / 60 / 8)
+    // Whole days divide with float noise above them, 3.0000000000000004 for
+    // 1368 minutes of 7.6 hours, which a day count rounds up a day too far.
+    expect(minutesToDays({ hours_by_day: 7.6 }, 1368)).toEqual(3)
+    expect(minutesToDays({ hours_by_day: 7.8 }, 6084)).toEqual(13)
   })
   test('hoursToDays', () => {
     expect(hoursToDays({ hours_by_day: 8 }, 16)).toEqual(2)
     expect(hoursToDays({ hours_by_day: 7 }, 21)).toEqual(3)
     expect(hoursToDays({ hours_by_day: 7 }, undefined)).toEqual(0)
+  })
+  test('hoursToMinutes', () => {
+    expect(hoursToMinutes(1.5)).toEqual(90)
+    expect(hoursToMinutes(undefined)).toEqual(0)
+    // 8.2 hours make 491.99999999999994 minutes in floats, 8.3 hours
+    // 498.00000000000006
+    expect(hoursToMinutes(8.2)).toEqual(492)
+    expect(hoursToMinutes(8.3)).toEqual(498)
+    // A fraction of a minute is no float noise
+    expect(hoursToMinutes(7.33)).toEqual(7.33 * 60)
+  })
+  test('durationToMinutes', () => {
+    const hoursOrganisation = {
+      format_duration_in_hours: true,
+      hours_by_day: 7
+    }
+    expect(durationToMinutes({ hours_by_day: 7 }, 8)).toEqual(8 * 7 * 60)
+    expect(durationToMinutes(hoursOrganisation, 8)).toEqual(8 * 60)
+    expect(durationToMinutes(hoursOrganisation, 1.5)).toEqual(90)
+    expect(durationToMinutes(hoursOrganisation, undefined)).toEqual(0)
+    expect(durationToMinutes(hoursOrganisation, 0.34)).toEqual(0.34 * 60)
+    // 2.05 hours make 122.99999999999999 minutes in floats
+    expect(durationToMinutes(hoursOrganisation, 2.05)).toEqual(123)
   })
 
   test('formatDuration', () => {
@@ -454,6 +504,76 @@ describe('time', () => {
       { id: 'off-2', date: '2023-05-02', end_date: '2023-05-03' },
       { id: 'off-2', date: '2023-05-03', end_date: '2023-05-03' }
     ])
+  })
+})
+
+describe('getDayOffRange across DST changes', () => {
+  // Vitest runs the specs in worker threads, where assigning process.env.TZ
+  // leaves the timezone unchanged: expand the ranges in a process started in
+  // the timezone instead.
+  const expandIn = (timeZone, daysOff) => {
+    const time = new URL('../../../src/lib/time.js', import.meta.url)
+    const script = `
+      import { getDayOffRange } from ${JSON.stringify(time.href)}
+      console.log(JSON.stringify({
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        dates: getDayOffRange(${JSON.stringify(daysOff)}).map(({ date }) => date)
+      }))
+    `
+    const output = execFileSync(
+      process.execPath,
+      ['--input-type=module', '--eval', script],
+      { encoding: 'utf8', env: { ...process.env, TZ: timeZone } }
+    )
+    return JSON.parse(output)
+  }
+
+  test('keeps every day off in Europe/Budapest', () => {
+    // DST starts on 2026-03-29 and ends on 2026-10-25
+    const daysOff = [
+      { date: '2026-03-27', end_date: '2026-04-02' },
+      { date: '2026-10-23', end_date: '2026-10-27' }
+    ]
+    expect(expandIn('Europe/Budapest', daysOff)).toEqual({
+      timeZone: 'Europe/Budapest',
+      dates: [
+        '2026-03-27',
+        '2026-03-28',
+        '2026-03-29',
+        '2026-03-30',
+        '2026-03-31',
+        '2026-04-01',
+        '2026-04-02',
+        '2026-10-23',
+        '2026-10-24',
+        '2026-10-25',
+        '2026-10-26',
+        '2026-10-27'
+      ]
+    })
+  })
+
+  test('keeps every day off in America/New_York', () => {
+    // DST starts on 2026-03-08 and ends on 2026-11-01
+    const daysOff = [
+      { date: '2026-03-06', end_date: '2026-03-10' },
+      { date: '2026-10-30', end_date: '2026-11-03' }
+    ]
+    expect(expandIn('America/New_York', daysOff)).toEqual({
+      timeZone: 'America/New_York',
+      dates: [
+        '2026-03-06',
+        '2026-03-07',
+        '2026-03-08',
+        '2026-03-09',
+        '2026-03-10',
+        '2026-10-30',
+        '2026-10-31',
+        '2026-11-01',
+        '2026-11-02',
+        '2026-11-03'
+      ]
+    })
   })
 })
 
@@ -500,5 +620,28 @@ describe('getMonthsBetween', () => {
         moment.utc('2026-12-09')
       ).map(({ month }) => month)
     ).toEqual([9, 10, 11, 12])
+  })
+})
+
+describe('formatDayOffLabel', () => {
+  it('labels a day off with its description and period', () => {
+    expect(
+      formatDayOffLabel(
+        { description: 'Holidays', date: '2026-10-09', end_date: '2026-10-13' },
+        'Day off'
+      )
+    ).toBe('Holidays (2026-10-09 - 2026-10-13)')
+  })
+
+  it('falls back to the default text and a single date', () => {
+    expect(
+      formatDayOffLabel(
+        { date: '2026-10-09', end_date: '2026-10-09' },
+        'Day off'
+      )
+    ).toBe('Day off (2026-10-09)')
+    expect(formatDayOffLabel({ date: '2026-10-09' }, 'Day off')).toBe(
+      'Day off (2026-10-09)'
+    )
   })
 })

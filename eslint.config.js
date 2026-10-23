@@ -12,13 +12,10 @@ export default defineConfig([
   {
     name: 'global-ignores',
     ignores: [
-      'build/*.js',
-      'config/*.js',
       'src/locales/*',
       '!src/locales/en.js',
       '!src/locales/en_nft.js',
-      '!src/locales/en_video-game.js',
-      'src/stories/*'
+      '!src/locales/en_video-game.js'
     ]
   },
 
@@ -58,7 +55,6 @@ export default defineConfig([
 
       // Code quality
       eqeqeq: ['error', 'always', { null: 'ignore' }],
-      'no-constant-binary-expression': 'off',
       'no-empty-pattern': ['error', { allowObjectPatternsAsParameters: true }],
       'no-unused-vars': ['error', { args: 'none', caughtErrors: 'none' }],
       'no-var': 'error',
@@ -77,6 +73,7 @@ export default defineConfig([
       'vue/component-name-in-template-casing': ['error', 'kebab-case'],
       'vue/custom-event-name-casing': ['error', 'kebab-case'],
       'vue/eqeqeq': ['error', 'always', { null: 'ignore' }],
+      'vue/no-undef-properties': 'error',
       'vue/no-unused-emit-declarations': 'error',
       'vue/prop-name-casing': ['error', 'camelCase'],
       'vue/require-explicit-emits': 'error',
@@ -89,8 +86,7 @@ export default defineConfig([
       'vue/order-in-components': 'off',
       'vue/require-default-prop': 'off',
       'vue/require-prop-types': 'off',
-      'vue/no-template-shadow': 'off',
-      'vue/no-undef-properties': 'off' // Off until the Options API migration ends
+      'vue/no-template-shadow': 'off'
     }
   },
 

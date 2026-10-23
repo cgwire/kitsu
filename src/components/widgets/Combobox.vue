@@ -44,13 +44,17 @@
 </template>
 
 <script setup>
-import { ref, computed, useId } from 'vue'
+// Imports
+// --------------------------------------------------------------------------
+import { computed, ref, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 
 const fieldId = useId()
 
+// Props / Emits
+// --------------------------------------------------------------------------
 const props = defineProps({
   label: {
     default: '',
@@ -103,36 +107,32 @@ const props = defineProps({
 
 const emit = defineEmits(['enter', 'update:model-value'])
 
+// State
+// --------------------------------------------------------------------------
 const selectRef = ref(null)
 const touched = ref(false)
 
-const hasSelectedOption = computed(() => {
-  return props.options.some(option => option.value === props.modelValue)
-})
+// Computed
+// --------------------------------------------------------------------------
+const hasSelectedOption = computed(() =>
+  props.options.some(option => option.value === props.modelValue)
+)
 
-const isValid = computed(() => {
-  return !props.required || hasSelectedOption.value
-})
+const isValid = computed(() => !props.required || hasSelectedOption.value)
 
-const updateValue = () => {
-  let value = selectRef.value.value
-  props.options.forEach(option => {
-    if (option.label === value) {
-      value = option.value
-    }
-  })
-  emit('update:model-value', value)
+// Functions
+// --------------------------------------------------------------------------
+const getSelectedValue = () => {
+  const selected = selectRef.value.value
+  return props.options.reduce(
+    (value, option) => (option.label === selected ? option.value : value),
+    selected
+  )
 }
 
-const emitEnter = () => {
-  let value = selectRef.value.value
-  props.options.forEach(option => {
-    if (option.label === value) {
-      value = option.value
-    }
-  })
-  emit('enter', value)
-}
+const updateValue = () => emit('update:model-value', getSelectedValue())
+
+const emitEnter = () => emit('enter', getSelectedValue())
 
 const getOptionLabel = option => {
   if (props.localeKeyPrefix && option.label) {

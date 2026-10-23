@@ -56,6 +56,24 @@ export const formatSimpleDate = date => {
   else return ''
 }
 
+// A utc date field holds a day as the Date at UTC midnight of that day, the
+// way parseDate reads it back, while its date picker works in local time.
+export const utcDayToLocalDate = date => {
+  if (!date) return null
+  const day = moment.utc(date)
+  return new Date(day.year(), day.month(), day.date())
+}
+
+export const localDayToUtcDate = date => {
+  if (!date) return null
+  return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+}
+
+// The day a date (now by default) falls on for the user, at UTC midnight
+// like a utc date field holds it: moment works in the time zone of the user
+// profile.
+export const getUserDay = date => moment(date).utc(true).startOf('day')
+
 export const formatTimeOfDay = (
   date,
   use12HourClock = false,
@@ -348,8 +366,18 @@ export const removeBusinessDays = (
   return adjustBusinessDays(originalDate, numDaysToRemove, daysOff, 'subtract')
 }
 
+export const formatDayOffLabel = (
+  { description, date, end_date },
+  defaultText
+) => {
+  const period = end_date && date !== end_date ? `${date} - ${end_date}` : date
+  return `${description || defaultText} (${period})`
+}
+
 export const getDayOffRange = (daysOff = []) => {
   return daysOff.reduce((range, dayOff) => {
+    // 'YYYY-MM-DD' parses as UTC midnight, so step in UTC: a local day step
+    // shifts the UTC time by an hour across a DST change.
     const startDate = new Date(dayOff.date)
     const endDate = new Date(dayOff.end_date || dayOff.date)
     while (startDate <= endDate) {
@@ -357,20 +385,40 @@ export const getDayOffRange = (daysOff = []) => {
         ...dayOff,
         date: startDate.toISOString().slice(0, 10)
       })
-      startDate.setDate(startDate.getDate() + 1)
+      startDate.setUTCDate(startDate.getUTCDate() + 1)
     }
     return range
   }, [])
 }
 
+// Float arithmetic leaves a whole number of minutes or days a hair off
+// (3 days of 7.6 hours make 1367.9999999999998 minutes, and 1368 minutes
+// 3.0000000000000004 days): a floor or a day count then lands one off.
+const snapToWhole = value => {
+  const whole = Math.round(value)
+  return Math.abs(value - whole) < 1e-6 ? whole : value
+}
+
 export const daysToMinutes = (organisation, days = 0) => {
-  return Math.floor(days * organisation.hours_by_day * 60)
+  return Math.floor(snapToWhole(days * organisation.hours_by_day * 60))
 }
 
 export const minutesToDays = (organisation, minutes = 0) => {
-  return minutes / 60 / organisation.hours_by_day
+  return snapToWhole(minutes / 60 / organisation.hours_by_day)
 }
 
 export const hoursToDays = (organisation, hours = 0) => {
   return hours / organisation.hours_by_day
+}
+
+export const hoursToMinutes = (hours = 0) => {
+  return snapToWhole(hours * 60)
+}
+
+// Estimations are stored in minutes, and typed in the unit the organisation
+// displays durations in: hours or days.
+export const durationToMinutes = (organisation, duration = 0) => {
+  return organisation.format_duration_in_hours
+    ? snapToWhole(duration * 60)
+    : daysToMinutes(organisation, duration)
 }

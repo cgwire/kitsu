@@ -31,25 +31,28 @@ const PRETTY_DIFF = `/dev/null → tests/test_demarrage.py
 +   2 import asyncio
 `
 
-const mountViewer = () =>
-  mount(DiffViewer, {
+// The viewer imports diff2html along with the diff: wait for both.
+const mountViewer = async () => {
+  const wrapper = mount(DiffViewer, {
     props: { preview: { id: 'p1' } },
     global: { mocks: { $t: key => key } }
   })
+  await vi.dynamicImportSettled()
+  await flushPromises()
+  return wrapper
+}
 
 describe('players/DiffViewer', () => {
   it('renders the diff2html output for a valid unified diff', async () => {
     filesApi.getPreviewFileText.mockResolvedValue(UNIFIED_DIFF)
-    const wrapper = mountViewer()
-    await flushPromises()
+    const wrapper = await mountViewer()
     expect(wrapper.find('.d2h-file-diff').exists()).toBe(true)
     expect(wrapper.find('.diff-raw').exists()).toBe(false)
   })
 
   it('falls back to readable raw text when the diff is not parseable', async () => {
     filesApi.getPreviewFileText.mockResolvedValue(PRETTY_DIFF)
-    const wrapper = mountViewer()
-    await flushPromises()
+    const wrapper = await mountViewer()
     const raw = wrapper.find('.diff-raw')
     expect(raw.exists()).toBe(true)
     expect(raw.text()).toContain('+167 added')

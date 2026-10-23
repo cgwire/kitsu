@@ -15,15 +15,6 @@ describe('ComboboxBoolean', () => {
     })
   })
 
-  it('mounts successfully', () => {
-    expect(wrapper.exists()).toBe(true)
-  })
-
-  it('renders a Combobox child component', () => {
-    const combobox = wrapper.findComponent({ name: 'Combobox' })
-    expect(combobox.exists()).toBe(true)
-  })
-
   it('passes boolean options (yes/no) to the inner combobox', () => {
     const combobox = wrapper.findComponent({ name: 'Combobox' })
     const options = combobox.props('options')

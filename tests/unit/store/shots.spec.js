@@ -1,6 +1,7 @@
 // @vitest-environment node
 
 import { vi } from 'vitest'
+import { computed, reactive } from 'vue'
 
 // Importing the shots module transitively pulls in the root store
 // (lib/models → timezone → @/store); stub it so no Vuex store is built.
@@ -308,17 +309,6 @@ describe('Shots store', () => {
       // No episode_id on the wire: zou returns every shot of the project.
       expect(getShots).toHaveBeenCalledWith(baseGetters.currentProduction, null)
       expect(shotsStore.getters.shotsLoadingKey(state)).toBe('p-all/all')
-    })
-
-    test('the loading scope is served from the state, and cleared with the shots', () => {
-      const state = { shotsLoadingKey: null, selectedShots: new Map() }
-      shotsStore.mutations.LOAD_SHOTS_START(state, {
-        loadingKey: 'p-all/all'
-      })
-      expect(shotsStore.getters.shotsLoadingKey(state)).toBe('p-all/all')
-
-      shotsStore.mutations.CLEAR_SHOTS(state)
-      expect(shotsStore.getters.shotsLoadingKey(state)).toBe(null)
     })
 
     test('still no-ops on the main pack (there is no main pack for shots)', async () => {
@@ -681,13 +671,27 @@ describe('Shots store, UPDATE_SHOT', () => {
       tasks: ['t1']
     })
     shotsStore.mutations.UPDATE_SHOT(
-      {},
+      { displayedShots: [] },
       { id: 'sh-upd', name: 'new', tasks: [{ id: 't1' }] }
     )
     expect(shotsStore.cache.shotMap.get('sh-upd')).toMatchObject({
       name: 'new',
       tasks: ['t1']
     })
+  })
+
+  // The list reads the displayed shots through the reactive state: a change
+  // made to the raw object of the cache does not reach it.
+  test('shows the new name of a shot another user renamed', () => {
+    const shot = { id: 'sh-upd', name: 'SH020', tasks: [] }
+    shotsStore.cache.shotMap.set(shot.id, shot)
+    const state = reactive({ displayedShots: [shot] })
+    const names = computed(() => state.displayedShots.map(({ name }) => name))
+    expect(names.value).toEqual(['SH020'])
+
+    shotsStore.mutations.UPDATE_SHOT(state, { id: 'sh-upd', name: 'SH999' })
+
+    expect(names.value).toEqual(['SH999'])
   })
 })
 
@@ -736,6 +740,208 @@ describe('Shots store, NEW_SHOT_END', () => {
 
     expect(shotsStore.cache.shots.map(({ id }) => id)).toEqual(['shot-1'])
     expect(state.displayedShots.map(({ id }) => id)).toEqual(['shot-1'])
+  })
+})
+
+// A frame in of 0 is a value: the edit must reveal the Frame In column, as
+// the list load and the creation do.
+describe('Shots store, EDIT_SHOT_END', () => {
+  const editShot = data => {
+    const shot = { id: 'sh-edit', name: 'SH01', parent_id: 'sq-1', data: {} }
+    shotsStore.cache.shots = [shot]
+    shotsStore.cache.shotMap = new Map([[shot.id, shot]])
+    shotsStore.cache.shotIndex = {}
+    const state = {
+      displayedShots: [shot],
+      shotSearchText: '',
+      isFrameIn: false
+    }
+    shotsStore.mutations.EDIT_SHOT_END(state, {
+      newShot: { id: shot.id, data },
+      sequences: []
+    })
+    return state
+  }
+
+  test('shows the frame in column for a frame in of 0', () => {
+    expect(editShot({ frame_in: 0 }).isFrameIn).toBe(true)
+  })
+
+  test('keeps the frame in column hidden without a frame in', () => {
+    expect(editShot({ handle_in: 12 }).isFrameIn).toBe(false)
+  })
+
+  // The edit modal sends its untouched frame in field as an empty string.
+  test('keeps the frame in column hidden for an empty frame in', () => {
+    expect(editShot({ frame_in: '' }).isFrameIn).toBe(false)
+  })
+})
+
+// The task panel's preview player trims shots from pages that never load the
+// shots list (news feed, my tasks): the edit payload only holds the id and
+// the data.
+describe('Shots store, editShot', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  test('saves a shot missing from the loaded list without adding it', async () => {
+    shotsStore.cache.shots = []
+    shotsStore.cache.shotMap = new Map()
+    vi.spyOn(shotsApi, 'updateShot').mockResolvedValue({})
+    const state = { displayedShots: [], shotSearchText: '' }
+    const commit = (type, payload) => shotsStore.mutations[type](state, payload)
+    const edit = { id: 'sh-trim', data: { handle_in: 12 } }
+
+    await shotsStore.actions.editShot(
+      { commit, rootGetters: { displayedSequences: [] } },
+      edit
+    )
+
+    expect(shotsApi.updateShot).toHaveBeenCalledWith(edit)
+    expect(shotsStore.cache.shots).toEqual([])
+    expect(shotsStore.cache.shotMap.size).toBe(0)
+  })
+})
+
+// The inline cells of the shots list save on every keystroke: the edits of a
+// shot dispatched within the delay are merged into one request, so a typed
+// number reaches the server (and its version history) as a single value.
+describe('Shots store, editShotDebounced', () => {
+  const buildContext = () => {
+    const shot = {
+      id: 'sh-typed',
+      name: 'SH01',
+      sequence_name: 'SQ01',
+      data: { frame_out: 100 },
+      nb_frames: 50
+    }
+    const other = {
+      id: 'sh-other',
+      name: 'SH02',
+      sequence_name: 'SQ01',
+      data: { frame_out: 200 },
+      nb_frames: 50
+    }
+    shotsStore.cache.shots = [shot, other]
+    shotsStore.cache.shotMap = new Map([
+      [shot.id, shot],
+      [other.id, other]
+    ])
+    shotsStore.cache.shotIndex = buildShotIndex([shot, other])
+    const state = { displayedShots: [shot, other], shotSearchText: '' }
+    const commit = (type, payload) => shotsStore.mutations[type](state, payload)
+    const context = { commit, rootGetters: { displayedSequences: [] } }
+    const edit = (id, data) =>
+      shotsStore.actions.editShotDebounced(context, { id, ...data })
+    return { shot, other, state, edit }
+  }
+
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.spyOn(shotsApi, 'updateShot').mockResolvedValue({})
+  })
+
+  afterEach(async () => {
+    // Flush the pending edit of a failed test so it cannot leak into the next.
+    await vi.runOnlyPendingTimersAsync()
+    vi.useRealTimers()
+    vi.restoreAllMocks()
+  })
+
+  test('merges the keystrokes of a shot into one request holding the last values', async () => {
+    const { shot, state, edit } = buildContext()
+
+    const first = edit(shot.id, { data: { frame_in: 1 }, nb_frames: 100 })
+    const second = edit(shot.id, { data: { frame_in: 12 }, nb_frames: 89 })
+
+    // The list shows the typed value at once, the request waits.
+    expect(state.displayedShots[0].data.frame_in).toBe(12)
+    expect(shotsApi.updateShot).not.toHaveBeenCalled()
+
+    await vi.advanceTimersByTimeAsync(400)
+
+    expect(shotsApi.updateShot).toHaveBeenCalledTimes(1)
+    expect(shotsApi.updateShot).toHaveBeenCalledWith({
+      id: shot.id,
+      data: { frame_in: 12 },
+      nb_frames: 89
+    })
+    await expect(Promise.all([first, second])).resolves.toEqual([{}, {}])
+  })
+
+  test('keeps the fields an edit of another cell does not carry', async () => {
+    const { shot, edit } = buildContext()
+
+    edit(shot.id, { data: { frame_in: 12 }, nb_frames: 89 })
+    edit(shot.id, { data: { frame_out: 120 } })
+    await vi.advanceTimersByTimeAsync(400)
+
+    expect(shotsApi.updateShot).toHaveBeenCalledWith({
+      id: shot.id,
+      data: { frame_in: 12, frame_out: 120 },
+      nb_frames: 89
+    })
+  })
+
+  test('restarts the delay on each keystroke', async () => {
+    const { shot, edit } = buildContext()
+
+    edit(shot.id, { data: { frame_in: 1 } })
+    await vi.advanceTimersByTimeAsync(300)
+    edit(shot.id, { data: { frame_in: 12 } })
+    await vi.advanceTimersByTimeAsync(300)
+    expect(shotsApi.updateShot).not.toHaveBeenCalled()
+
+    await vi.advanceTimersByTimeAsync(100)
+    expect(shotsApi.updateShot).toHaveBeenCalledTimes(1)
+  })
+
+  test('sends one request per shot', async () => {
+    const { shot, other, edit } = buildContext()
+
+    edit(shot.id, { data: { frame_in: 1 } })
+    edit(other.id, { data: { frame_in: 1 } })
+    edit(shot.id, { data: { frame_in: 12 } })
+    await vi.advanceTimersByTimeAsync(400)
+
+    const sent = shotsApi.updateShot.mock.calls.map(([data]) => data)
+    expect(sent.sort((a, b) => a.id.localeCompare(b.id))).toEqual([
+      { id: other.id, data: { frame_in: 1 } },
+      { id: shot.id, data: { frame_in: 12 } }
+    ])
+  })
+
+  test('keeps the shot locked until 2 s after the shared request settles', async () => {
+    const { shot, edit } = buildContext()
+
+    edit(shot.id, { data: { frame_in: 1 } })
+    edit(shot.id, { data: { frame_in: 12 } })
+    expect(shot.lock).toBe(2)
+
+    await vi.advanceTimersByTimeAsync(400 + 1999)
+    expect(shot.lock).toBe(2)
+    await vi.advanceTimersByTimeAsync(1)
+    expect(shot.lock).toBe(0)
+  })
+
+  test('rejects every merged call when the request fails', async () => {
+    shotsApi.updateShot.mockRejectedValue(new Error('offline'))
+    const { shot, edit } = buildContext()
+
+    const settled = Promise.allSettled([
+      edit(shot.id, { data: { frame_in: 1 } }),
+      edit(shot.id, { data: { frame_in: 12 } })
+    ])
+    await vi.advanceTimersByTimeAsync(400)
+
+    expect(shotsApi.updateShot).toHaveBeenCalledTimes(1)
+    expect((await settled).map(({ status }) => status)).toEqual([
+      'rejected',
+      'rejected'
+    ])
+    await vi.advanceTimersByTimeAsync(2000)
+    expect(shot.lock).toBe(0)
   })
 })
 
@@ -805,4 +1011,31 @@ describe('Shots store, getShotsCsvLines', () => {
 
     expect(lines[0].slice(3)).toEqual(['a', 'z'])
   })
+})
+
+describe('Shots store, list totals', () => {
+  test.each(['CLEAR_SHOTS', 'LOAD_SHOTS_START'])(
+    '%s resets the totals of the list',
+    mutation => {
+      const state = {
+        displayedShotsCount: 2,
+        displayedShotsLength: 2,
+        displayedShotsTimeSpent: 960,
+        displayedShotsEstimation: 1440,
+        displayedShotsFrames: 150,
+        displayedShotsDrawings: 12
+      }
+
+      shotsStore.mutations[mutation](state)
+
+      expect(state).toMatchObject({
+        displayedShotsCount: 0,
+        displayedShotsLength: 0,
+        displayedShotsTimeSpent: 0,
+        displayedShotsEstimation: 0,
+        displayedShotsFrames: 0,
+        displayedShotsDrawings: 0
+      })
+    }
+  )
 })

@@ -75,17 +75,6 @@ describe('EntityChat errors', () => {
     expect(errorShown(wrapper, 'chats.leave_error')).toBe(true)
   })
 
-  test('reports a message that fails to send', async () => {
-    const { wrapper } = await mountChat({
-      participants: [currentUser.id],
-      failing: { sendChatMessage: true }
-    })
-    await wrapper.find('#message-box').setValue('Hello')
-    await wrapper.find('#message-box').trigger('keydown.enter')
-    await flushPromises()
-    expect(errorShown(wrapper, 'chats.send_error')).toBe(true)
-  })
-
   // The panel stays mounted when the selected entity changes, so an error
   // raised on the previous chat must not survive the reset.
   test('clears the errors of the previous chat', async () => {

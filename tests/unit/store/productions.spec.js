@@ -1,12 +1,19 @@
 // @vitest-environment node
 
+import { computed, effectScope } from 'vue'
+import { createStore } from 'vuex'
+
 import store from '@/store/modules/productions'
 import assetTypeStore from '@/store/modules/assettypes'
+import backgroundStore from '@/store/modules/backgrounds'
 import taskStatusStore from '@/store/modules/taskstatus'
 import taskTypeStore from '@/store/modules/tasktypes'
 
 import client from '@/store/api/client'
+import assetsApi from '@/store/api/assets'
+import playlistsApi from '@/store/api/playlists'
 import productionApi from '@/store/api/productions.js'
+import shotsApi from '@/store/api/shots'
 
 import {
   ADD_METADATA_DESCRIPTOR_END,
@@ -14,9 +21,9 @@ import {
   CLEAR_ASSETS,
   CLEAR_EDITS,
   CLEAR_SHOTS,
+  LOAD_BACKGROUNDS_END,
+  LOAD_BACKGROUNDS_START,
   LOAD_OPEN_PRODUCTIONS_END,
-  LOAD_OPEN_PRODUCTIONS_ERROR,
-  LOAD_OPEN_PRODUCTIONS_START,
   LOAD_PRODUCTION_STATUS_END,
   LOAD_PRODUCTION_STATUS_ERROR,
   LOAD_PRODUCTION_STATUS_START,
@@ -26,8 +33,9 @@ import {
   PRODUCTION_ADD_ASSET_TYPE,
   PRODUCTION_ADD_TASK_STATUS,
   PRODUCTION_ADD_TASK_TYPE,
+  PRODUCTION_SET_TASK_STATUS_LINK,
+  PRODUCTION_SET_TASK_TYPE_LINK,
   PRODUCTION_AVATAR_UPLOADED,
-  PRODUCTION_PICTURE_FILE_SELECTED,
   PRODUCTION_REMOVE_ASSET_TYPE,
   PRODUCTION_REMOVE_TASK_STATUS,
   PRODUCTION_REMOVE_TASK_TYPE,
@@ -58,7 +66,7 @@ describe('Productions store', () => {
           }))
         },
         taskStatus: {
-          taskStatus: [
+          taskStatuses: [
             { id: 'task-status-1', name: 'Task status 1' },
             { id: 'task-status-2', name: 'Task status 2' },
             { id: 'task-status-3', name: 'Task status 3' }
@@ -240,6 +248,84 @@ describe('Productions store', () => {
       ])
     })
 
+    describe('client access', () => {
+      const flags = {
+        is_client_stats_visible: false,
+        is_client_task_list_visible: false,
+        is_client_task_panel_visible: false,
+        task_type_links: { tt: { is_client_visible: false } }
+      }
+      const access = (production, isClient, id = 'p') =>
+        store.getters.getClientAccess(
+          { productionMap: new Map([['p', { id: 'p', ...production }]]) },
+          {},
+          {},
+          { isCurrentUserClient: isClient }
+        )(id)
+
+      test('non-client sees everything', () => {
+        const result = access(flags, false)
+        expect(result.isStatsVisible).toBe(true)
+        expect(result.isTaskListVisible).toBe(true)
+        expect(result.isTaskPanelVisible).toBe(true)
+        expect(result.isTaskTypeVisible('tt')).toBe(true)
+      })
+
+      test('client sees false per flag', () => {
+        const result = access(flags, true)
+        expect(result.isStatsVisible).toBe(false)
+        expect(result.isTaskListVisible).toBe(false)
+        expect(result.isTaskPanelVisible).toBe(false)
+        expect(result.isTaskTypeVisible('tt')).toBe(false)
+        expect(result.isTaskTypeVisible('other')).toBe(true)
+      })
+
+      test('flags are independent', () => {
+        const result = access({ is_client_task_list_visible: false }, true)
+        expect(result.isStatsVisible).toBe(true)
+        expect(result.isTaskListVisible).toBe(false)
+      })
+
+      test('null, missing flags and unknown production are visible', () => {
+        const nulls = access({ is_client_stats_visible: null }, true)
+        expect(nulls.isStatsVisible).toBe(true)
+        expect(nulls.isTaskListVisible).toBe(true)
+        expect(nulls.isTaskTypeVisible('tt')).toBe(true)
+        expect(access({}, true, 'unknown').isTaskPanelVisible).toBe(true)
+      })
+
+      test('clientAccess reads the current production', () => {
+        const getClientAccess = vi.fn(() => 'x')
+        expect(
+          store.getters.clientAccess(
+            {},
+            { getClientAccess, currentProduction: { id: 'p' } }
+          )
+        ).toBe('x')
+        expect(getClientAccess).toHaveBeenCalledWith('p')
+      })
+    })
+
+    describe('team roles', () => {
+      const state = {
+        currentProduction: { id: 'production-1' },
+        teamRoles: { 'production-1': { 123: 'supervisor' } }
+      }
+
+      test('productionTeamRoles lists those of the current production', () => {
+        expect(store.getters.productionTeamRoles(state)).toEqual({
+          123: 'supervisor'
+        })
+      })
+
+      test('teamRolesForProduction lists those of given production', () => {
+        const teamRolesFor = store.getters.teamRolesForProduction(state)
+        expect(teamRolesFor('production-1')).toEqual({ 123: 'supervisor' })
+        expect(teamRolesFor('production-2')).toEqual({})
+        expect(teamRolesFor(undefined)).toEqual({})
+      })
+    })
+
     test('productionAssetTypeOptions', () => {
       const fakeGetters = {
         productionAssetTypes: rootState.assetTypes.assetTypes
@@ -253,6 +339,69 @@ describe('Productions store', () => {
   })
 
   describe('Actions', () => {
+    describe('loadProductionOverview', () => {
+      beforeEach(() => {
+        shotsApi.getShots = vi.fn(() => Promise.resolve([{ id: 'shot-1' }]))
+        assetsApi.getAssets = vi.fn(() => Promise.resolve([{ id: 'asset-1' }]))
+        playlistsApi.getPlaylists = vi.fn(() =>
+          Promise.resolve([{ id: 'playlist-1' }])
+        )
+        shotsApi.getEpisodes = vi.fn(() =>
+          Promise.resolve([{ id: 'episode-1' }])
+        )
+      })
+
+      test('loads the episodes of a tv show only', async () => {
+        const tvshow = { id: 'production-1', production_type: 'tvshow' }
+        const overview = await store.actions.loadProductionOverview({}, tvshow)
+        expect(shotsApi.getEpisodes).toHaveBeenCalledWith(tvshow)
+        expect(overview.episodes).toEqual([{ id: 'episode-1' }])
+        shotsApi.getEpisodes.mockClear()
+        const film = await store.actions.loadProductionOverview(
+          {},
+          { id: 'production-1', production_type: 'featurefilm' }
+        )
+        expect(shotsApi.getEpisodes).not.toHaveBeenCalled()
+        expect(film.episodes).toEqual([])
+      })
+
+      test('loads the entities with their tasks, typed, and the latest playlists', async () => {
+        const production = { id: 'production-1', production_type: 'featurefilm' }
+        const overview = await store.actions.loadProductionOverview(
+          {},
+          production
+        )
+        expect(assetsApi.getAssets).toHaveBeenCalledWith(production, null, true)
+        expect(shotsApi.getShots).toHaveBeenCalledWith(production)
+        expect(playlistsApi.getPlaylists).toHaveBeenCalledWith(
+          production,
+          null,
+          null,
+          'updated_at',
+          1
+        )
+        expect(overview).toEqual({
+          entities: [{ id: 'shot-1' }, { id: 'asset-1', type: 'Asset' }],
+          episodes: [],
+          playlists: [{ id: 'playlist-1' }]
+        })
+      })
+
+      test.each([
+        ['assets', shotsApi, 'getShots'],
+        ['shots', assetsApi, 'getAssets']
+      ])(
+        'skips the entities an %s production has none of',
+        async (productionType, api, method) => {
+          await store.actions.loadProductionOverview(
+            {},
+            { id: 'production-1', production_type: productionType }
+          )
+          expect(api[method]).not.toHaveBeenCalled()
+        }
+      )
+    })
+
     test('loadProductionStatus', async () => {
       let mockCommit = vi.fn()
       productionApi.getProductionStatus = vi.fn(() => Promise.reject())
@@ -269,24 +418,6 @@ describe('Productions store', () => {
       expect(mockCommit).toBeCalledTimes(2)
       expect(mockCommit).toHaveBeenNthCalledWith(1, LOAD_PRODUCTION_STATUS_START)
       expect(mockCommit).toHaveBeenNthCalledWith(2, LOAD_PRODUCTION_STATUS_END, 123)
-    })
-
-    test('loadOpenProductions', async () => {
-      let mockCommit = vi.fn()
-      productionApi.getOpenProductions = vi.fn(() => Promise.reject())
-      await store.actions.loadOpenProductions({ commit: mockCommit, state: null })
-      expect(productionApi.getOpenProductions).toBeCalledTimes(1)
-      expect(mockCommit).toBeCalledTimes(2)
-      expect(mockCommit).toHaveBeenNthCalledWith(1, LOAD_OPEN_PRODUCTIONS_START)
-      expect(mockCommit).toHaveBeenNthCalledWith(2, LOAD_OPEN_PRODUCTIONS_ERROR)
-
-      mockCommit = vi.fn()
-      productionApi.getOpenProductions = vi.fn(() => Promise.resolve(123))
-      await store.actions.loadOpenProductions({ commit: mockCommit, state: null })
-      expect(productionApi.getOpenProductions).toBeCalledTimes(1)
-      expect(mockCommit).toBeCalledTimes(2)
-      expect(mockCommit).toHaveBeenNthCalledWith(1, LOAD_OPEN_PRODUCTIONS_START)
-      expect(mockCommit).toHaveBeenNthCalledWith(2, LOAD_OPEN_PRODUCTIONS_END, 123)
     })
 
     test('loadProductions', async () => {
@@ -589,11 +720,24 @@ describe('Productions store', () => {
       expect(mockCommit).toHaveBeenNthCalledWith(4, CLEAR_EDITS)
     })
 
-    test('storeProductionPicture', () => {
-      const mockCommit = vi.fn()
-      store.actions.storeProductionPicture({ commit: mockCommit }, 'form-data')
-      expect(mockCommit).toBeCalledTimes(1)
-      expect(mockCommit).toHaveBeenNthCalledWith(1, PRODUCTION_PICTURE_FILE_SELECTED, 'form-data')
+    // Productions.vue stores the picture on selection and uploads it only
+    // once the production is saved: a lost form data skips the upload.
+    test('storeProductionPicture keeps the picture for uploadProductionAvatar', async () => {
+      const state = { productionAvatarFormData: null }
+      const commit = (type, payload) => store.mutations[type](state, payload)
+      productionApi.postAvatar = vi.fn(() => Promise.resolve())
+
+      store.actions.storeProductionPicture({ commit }, 'form-data')
+      expect(store.getters.productionAvatarFormData(state)).toBe('form-data')
+
+      await store.actions.uploadProductionAvatar(
+        { commit: vi.fn(), state },
+        'production-id'
+      )
+      expect(productionApi.postAvatar).toHaveBeenCalledWith(
+        'production-id',
+        'form-data'
+      )
     })
 
     test('uploadProductionAvatar', async () => {
@@ -626,6 +770,95 @@ describe('Productions store', () => {
       expect(mockCommit).toBeCalledTimes(1)
       expect(mockCommit).toHaveBeenNthCalledWith(1, TEAM_ADD_PERSON, '456')
       expect(productionApi.addPersonToTeam).toBeCalledTimes(1)
+    })
+
+    describe('team roles', () => {
+      const team = [{ id: '456', project_role: 'client' }]
+
+      beforeEach(() => {
+        productionApi.getTeam = vi.fn(() => Promise.resolve(team))
+      })
+
+      test('loadProductionTeam loads those of the current production', async () => {
+        const commit = vi.fn()
+        const state = { currentProduction: { id: '123' }, teamRoles: {} }
+        await store.actions.loadProductionTeam({ commit, state })
+        expect(productionApi.getTeam).toHaveBeenCalledWith('123')
+        expect(commit).toHaveBeenCalledWith('TEAM_ROLES_LOADED', {
+          productionId: '123',
+          team
+        })
+      })
+
+      test('loadTeamRolesOnce loads those of given production', async () => {
+        const commit = vi.fn()
+        const state = { currentProduction: { id: '123' }, teamRoles: {} }
+        await store.actions.loadTeamRolesOnce({ commit, state }, '789')
+        expect(productionApi.getTeam).toHaveBeenCalledWith('789')
+        expect(commit).toHaveBeenCalledWith('TEAM_ROLES_LOADED', {
+          productionId: '789',
+          team
+        })
+      })
+
+      test('loadTeamRolesOnce asks nothing without a production', async () => {
+        const commit = vi.fn()
+        await store.actions.loadTeamRolesOnce({ commit, state: { teamRoles: {} } })
+        expect(productionApi.getTeam).not.toHaveBeenCalled()
+      })
+
+      // Every task opened asks for them.
+      test('loadTeamRolesOnce keeps the roles it already holds', async () => {
+        const commit = vi.fn()
+        const state = { teamRoles: { 789: {} } }
+        await store.actions.loadTeamRolesOnce({ commit, state }, '789')
+        expect(productionApi.getTeam).not.toHaveBeenCalled()
+        expect(commit).not.toHaveBeenCalled()
+      })
+
+      // Someone else may have changed the role of the user.
+      describe('reloadTeamRoles', () => {
+        const rootState = { user: { user: { id: '456' } } }
+
+        const reload = async members => {
+          productionApi.getTeam = vi.fn(() => Promise.resolve(members))
+          const commit = vi.fn()
+          await store.actions.reloadTeamRoles({ commit, rootState }, '789')
+          return commit
+        }
+
+        test('reloads them with the role of the user', async () => {
+          const members = [
+            { id: '123', project_role: 'manager' },
+            { id: '456', project_role: 'client' }
+          ]
+          const commit = await reload(members)
+          expect(productionApi.getTeam).toHaveBeenCalledWith('789')
+          expect(commit.mock.calls).toEqual([
+            ['TEAM_ROLES_LOADED', { productionId: '789', team: members }],
+            ['SET_USER_PROJECT_ROLE', { projectId: '789', role: 'client' }]
+          ])
+        })
+
+        test('gives the user back the global role', async () => {
+          const commit = await reload([
+            { id: '123', project_role: 'manager' },
+            { id: '456', project_role: null }
+          ])
+          expect(commit).toHaveBeenLastCalledWith('SET_USER_PROJECT_ROLE', {
+            projectId: '789',
+            role: null
+          })
+        })
+
+        test('gives the global role to a user out of the team', async () => {
+          const commit = await reload([{ id: '123', project_role: 'manager' }])
+          expect(commit).toHaveBeenLastCalledWith('SET_USER_PROJECT_ROLE', {
+            projectId: '789',
+            role: null
+          })
+        })
+      })
     })
 
     test('removePersonFromTeam', () => {
@@ -664,21 +897,126 @@ describe('Productions store', () => {
       expect(productionApi.removeAssetTypeFromProduction).toBeCalledTimes(1)
     })
 
-    test('addTaskTypeToProduction', () => {
+    test('addTaskTypeToProduction', async () => {
       const mockCommit = vi.fn()
       const state = {
         currentProduction: { id: '123' }
       }
-      productionApi.addTaskTypeToProduction = vi.fn()
-      store.actions.addTaskTypeToProduction(
+      productionApi.addTaskTypeToProduction = vi.fn(() => Promise.resolve())
+      await store.actions.addTaskTypeToProduction(
         { commit: mockCommit, state },
-        { taskTypeId: '456', priority: 1 }
+        { taskTypeId: '456', priority: 1, hd_bitrate_compression: 20 }
       )
-      expect(mockCommit).toBeCalledTimes(1)
+      expect(mockCommit).toBeCalledTimes(2)
       expect(mockCommit).toHaveBeenNthCalledWith(
         1, PRODUCTION_ADD_TASK_TYPE, '456'
       )
-      expect(productionApi.addTaskTypeToProduction).toBeCalledTimes(1)
+      expect(mockCommit).toHaveBeenNthCalledWith(
+        2, PRODUCTION_SET_TASK_TYPE_LINK,
+        {
+          production: state.currentProduction,
+          taskTypeId: '456',
+          hd_bitrate_compression: 20
+        }
+      )
+      expect(productionApi.addTaskTypeToProduction).toHaveBeenCalledWith(
+        '123', '456', 1, { hd_bitrate_compression: 20 }
+      )
+    })
+
+    // A bitrate field saves on its way out of the settings of a production:
+    // the next production is current by the time the answer comes back.
+    test('addTaskTypeToProduction updates the production it saves', async () => {
+      let answer
+      productionApi.addTaskTypeToProduction = vi.fn(
+        () => new Promise(resolve => (answer = resolve))
+      )
+      const production = { id: 'a', task_types: [], task_type_links: {} }
+      const nextProduction = { id: 'b', task_types: [], task_type_links: {} }
+      const state = { currentProduction: production }
+      const commit = (type, payload) => store.mutations[type](state, payload)
+
+      const saving = store.actions.addTaskTypeToProduction(
+        { commit, state },
+        { taskTypeId: '456', hd_bitrate_compression: 20 }
+      )
+      state.currentProduction = nextProduction
+      answer()
+      await saving
+
+      expect(production.task_type_links).toEqual({
+        456: { hd_bitrate_compression: 20 }
+      })
+      expect(nextProduction.task_type_links).toEqual({})
+    })
+
+    test('setTaskTypeClientVisibility sends the flag and updates the link', async () => {
+      const production = {
+        id: '123',
+        task_type_links: { 456: { priority: 3 } }
+      }
+      const state = { currentProduction: production }
+      const commit = (type, payload) => store.mutations[type](state, payload)
+      productionApi.setTaskTypeClientVisibility = vi.fn(() => Promise.resolve())
+      await store.actions.setTaskTypeClientVisibility(
+        { commit, state },
+        { taskTypeId: '456', isClientVisible: false }
+      )
+      expect(productionApi.setTaskTypeClientVisibility).toHaveBeenCalledWith(
+        '123', '456', false
+      )
+      expect(production.task_type_links[456]).toEqual({
+        priority: 3,
+        is_client_visible: false
+      })
+    })
+
+    test('setTaskStatusClientAllowed sends the value and updates the link', async () => {
+      const production = {
+        id: '123',
+        task_statuses_link: { 456: { priority: 3, is_client_allowed: true } }
+      }
+      const state = { currentProduction: production }
+      const commit = (type, payload) => store.mutations[type](state, payload)
+      productionApi.setTaskStatusClientAllowed = vi.fn(() => Promise.resolve())
+      await store.actions.setTaskStatusClientAllowed(
+        { commit, state },
+        { taskStatusId: '456', isClientAllowed: null }
+      )
+      expect(productionApi.setTaskStatusClientAllowed).toHaveBeenCalledWith(
+        '123', '456', null
+      )
+      expect(production.task_statuses_link[456]).toEqual({
+        priority: 3,
+        is_client_allowed: null
+      })
+
+      const bare = { id: '789' }
+      store.mutations[PRODUCTION_SET_TASK_STATUS_LINK](state, {
+        production: bare,
+        taskStatusId: '1',
+        is_client_allowed: false
+      })
+      expect(bare.task_statuses_link).toEqual({ 1: { is_client_allowed: false } })
+    })
+
+    test('PRODUCTION_SET_TASK_TYPE_LINK keeps the other link fields', () => {
+      const state = {
+        currentProduction: {
+          id: '123',
+          task_type_links: { 456: { priority: 3, ld_bitrate_compression: 4 } }
+        }
+      }
+      store.mutations[PRODUCTION_SET_TASK_TYPE_LINK](state, {
+        production: state.currentProduction,
+        taskTypeId: '456',
+        hd_bitrate_compression: 20
+      })
+      expect(state.currentProduction.task_type_links['456']).toEqual({
+        priority: 3,
+        hd_bitrate_compression: 20,
+        ld_bitrate_compression: 4
+      })
     })
 
     test('addSettingsToProduction', async () => {
@@ -827,7 +1165,8 @@ describe('Productions store', () => {
         productions: [
           { id: 'production-1', name: 'caminandes' }
         ],
-        openProductions: []
+        openProductions: [],
+        productionMap: new Map()
       }
     })
 
@@ -836,53 +1175,131 @@ describe('Productions store', () => {
       expect(state.productions).toEqual([])
     })
 
-    test('LOAD_PRODUCTIONS_START', () => {
-      store.mutations.LOAD_PRODUCTIONS_START(state)
-      expect(state.productions).toHaveLength(0)
-      expect(state.isProductionsLoading).toBeTruthy()
-      expect(state.isProductionsLoadingError).toBeFalsy()
-    })
+    // The map is filled in place, so a reset must not hand back the very
+    // Map the initial state holds, filled since the last reset.
+    test('RESET_ALL empties the production map', () => {
+      store.mutations.RESET_ALL(state)
+      state.productionMap.set('production-1', { id: 'production-1' })
 
-    test('LOAD_PRODUCTIONS_ERROR', () => {
-      store.mutations.LOAD_PRODUCTIONS_ERROR(state)
-      expect(state.productions).toHaveLength(0)
-      expect(state.isProductionsLoading).toBeFalsy()
-      expect(state.isProductionsLoadingError).toBeTruthy()
+      store.mutations.RESET_ALL(state)
+
+      expect(state.productionMap.size).toBe(0)
     })
 
     test('LOAD_PRODUCTIONS_END', () => {
       store.mutations.LOAD_PRODUCTIONS_END(state, [{ id: 1, project_status_name: 'Status 1' }, { id: 2, project_status_name: 'Status 2' }])
       expect(state.productions).toHaveLength(2)
-      expect(state.isProductionsLoading).toBeFalsy()
-      expect(state.isProductionsLoadingError).toBeFalsy()
       expect(state.productionMap.get(1)).toEqual({ id: 1, project_status_name: 'Status 1' })
       expect(state.productionMap.get(2)).toEqual({ id: 2, project_status_name: 'Status 2' })
     })
 
-    test('LOAD_OPEN_PRODUCTIONS_START', () => {
-      store.mutations.LOAD_OPEN_PRODUCTIONS_START(state)
-      expect(state.isOpenProductionsLoading).toBeTruthy()
-      expect(state.openProductions).toHaveLength(0)
+    // The all-productions listing carries no relations and the Project
+    // descriptors only: an entry loaded in full keeps them and its object,
+    // and takes the listed fields.
+    test('LOAD_PRODUCTIONS_END keeps a production loaded in full', () => {
+      const projectDescriptor = {
+        id: 'descriptor-project',
+        entity_type: 'Project'
+      }
+      const full = {
+        id: 'production-closed',
+        name: 'Archive',
+        project_status_name: 'Closed',
+        task_types: ['task-type-id'],
+        descriptors: [
+          projectDescriptor,
+          { id: 'descriptor-asset', entity_type: 'Asset' }
+        ]
+      }
+      state.productionMap = new Map([[full.id, full]])
+
+      store.mutations.LOAD_PRODUCTIONS_END(state, [
+        {
+          id: 'production-closed',
+          name: 'Archive 2',
+          project_status_name: 'Closed',
+          descriptors: [projectDescriptor]
+        }
+      ])
+
+      expect(state.productionMap.get('production-closed')).toBe(full)
+      expect(full.name).toBe('Archive 2')
+      expect(full.task_types).toEqual(['task-type-id'])
+      expect(full.descriptors).toHaveLength(2)
     })
 
-    test('LOAD_OPEN_PRODUCTIONS_ERROR', () => {
-      store.mutations.LOAD_OPEN_PRODUCTIONS_ERROR(state)
-      expect(state.isOpenProductionsLoading).toBeFalsy()
+    // Productions.vue feeds both flags to the list: a failed load must show
+    // the error, and a reload must clear it. Each step starts from the
+    // opposite flag values, so every assignment is checked.
+    describe('productions loading flags', () => {
+      test('START shows the loading state and drops the list', () => {
+        state.isProductionsLoading = false
+        state.isProductionsLoadingError = true
+
+        store.mutations.LOAD_PRODUCTIONS_START(state)
+
+        expect(state.productions).toEqual([])
+        expect(state.isProductionsLoading).toBe(true)
+        expect(state.isProductionsLoadingError).toBe(false)
+      })
+
+      test('ERROR shows the error and drops the list', () => {
+        state.isProductionsLoading = true
+        state.isProductionsLoadingError = false
+
+        store.mutations.LOAD_PRODUCTIONS_ERROR(state)
+
+        expect(state.productions).toEqual([])
+        expect(state.isProductionsLoading).toBe(false)
+        expect(state.isProductionsLoadingError).toBe(true)
+      })
+
+      test('END clears both flags', () => {
+        state.isProductionsLoading = true
+        state.isProductionsLoadingError = true
+
+        store.mutations.LOAD_PRODUCTIONS_END(state, [])
+
+        expect(state.isProductionsLoading).toBe(false)
+        expect(state.isProductionsLoadingError).toBe(false)
+      })
     })
 
     test('LOAD_OPEN_PRODUCTIONS_END', () => {
       state.currentProduction = null
       store.mutations.LOAD_OPEN_PRODUCTIONS_END(state, [{ id: 1, name: 'Name 1' }, { id: 2, name: 'Name 2' }])
-      expect(state.isOpenProductionsLoading).toBeFalsy()
       expect(state.openProductions).toHaveLength(2)
       expect(state.productionMap.get(1)).toEqual({ id: 1, name: 'Name 1' })
       expect(state.productionMap.get(2)).toEqual({ id: 2, name: 'Name 2' })
       expect(state.currentProduction).toEqual({ id: 1, name: 'Name 1' })
     })
 
-    test('LOAD_PRODUCTION_STATUS_START', () => {
-      store.mutations.LOAD_PRODUCTION_STATUS_START(state)
-      expect(state.productionStatus).toHaveLength(0)
+    // A context reload lists the open productions only: the map keeps its
+    // objects, an open one taking the listed fields, a closed one, the
+    // current one among others, staying as loaded.
+    test('LOAD_OPEN_PRODUCTIONS_END keeps the known productions', () => {
+      const open = {
+        id: 'production-open',
+        name: 'Open',
+        task_types: ['task-type-id']
+      }
+      const closed = { id: 'production-closed', name: 'Archive' }
+      state.currentProduction = closed
+      state.openProductions = [open]
+      state.productionMap = new Map([
+        [open.id, open],
+        [closed.id, closed]
+      ])
+
+      store.mutations.LOAD_OPEN_PRODUCTIONS_END(state, [
+        { id: 'production-open', name: 'Renamed', task_types: ['task-type-id'] }
+      ])
+
+      expect(state.openProductions[0]).toBe(open)
+      expect(state.productionMap.get('production-open')).toBe(open)
+      expect(open.name).toBe('Renamed')
+      expect(state.productionMap.get('production-closed')).toBe(closed)
+      expect(state.currentProduction).toBe(closed)
     })
 
     test('LOAD_PRODUCTION_STATUS_END', () => {
@@ -929,11 +1346,6 @@ describe('Productions store', () => {
       expect(state.productionMap).toEqual(new Map())
     })
 
-    test('PRODUCTION_PICTURE_FILE_SELECTED', () => {
-      store.mutations.PRODUCTION_PICTURE_FILE_SELECTED(state, 'form-data')
-      expect(state.productionAvatarFormData).toEqual('form-data')
-    })
-
     test('PRODUCTION_AVATAR_UPLOADED', () => {
       state.productionMap = new Map()
       state.productionMap.set('production-id', { id: 'production-id' })
@@ -959,34 +1371,55 @@ describe('Productions store', () => {
 
     test('TEAM_REMOVE_PERSON', () => {
       state.currentProduction = {
+        id: 'production-1',
         team: [123]
       }
-      state.currentTeamRoles = { 123: 'manager' }
+      state.teamRoles = { 'production-1': { 123: 'manager' } }
       store.mutations.TEAM_REMOVE_PERSON(state, 123)
       expect(state.currentProduction.team).toHaveLength(0)
-      expect(state.currentTeamRoles[123]).toBeUndefined()
+      expect(state.teamRoles['production-1'][123]).toBeUndefined()
     })
 
+    // The roles are kept per production: the comments of a task read those
+    // of its production, which is not always the current one.
     test('TEAM_ROLES_LOADED', () => {
-      store.mutations.TEAM_ROLES_LOADED(state, [
-        { id: 123, project_role: 'supervisor' },
-        { id: 456, project_role: null }
-      ])
-      expect(state.currentTeamRoles).toEqual({ 123: 'supervisor', 456: null })
+      state.teamRoles = { 'production-2': { 789: 'client' } }
+      store.mutations.TEAM_ROLES_LOADED(state, {
+        productionId: 'production-1',
+        team: [
+          { id: 123, project_role: 'supervisor' },
+          { id: 456, project_role: null }
+        ]
+      })
+      expect(state.teamRoles).toEqual({
+        'production-1': { 123: 'supervisor', 456: null },
+        'production-2': { 789: 'client' }
+      })
+    })
+
+    test('RESET_ALL forgets the team roles', () => {
+      store.mutations.RESET_ALL(state)
+      store.mutations.TEAM_ROLES_LOADED(state, {
+        productionId: 'production-1',
+        team: [{ id: 123, project_role: 'supervisor' }]
+      })
+      store.mutations.RESET_ALL(state)
+      expect(state.teamRoles).toEqual({})
     })
 
     test('TEAM_MEMBER_ROLE_UPDATED', () => {
-      state.currentTeamRoles = { 123: 'supervisor' }
+      state.currentProduction = { id: 'production-1' }
+      state.teamRoles = { 'production-1': { 123: 'supervisor' } }
       store.mutations.TEAM_MEMBER_ROLE_UPDATED(state, {
         person_id: 123,
         role: 'manager'
       })
-      expect(state.currentTeamRoles[123]).toEqual('manager')
+      expect(state.teamRoles['production-1'][123]).toEqual('manager')
       store.mutations.TEAM_MEMBER_ROLE_UPDATED(state, {
         person_id: 123,
         role: null
       })
-      expect(state.currentTeamRoles[123]).toBeNull()
+      expect(state.teamRoles['production-1'][123]).toBeNull()
     })
 
     test('PRODUCTION_ADD_ASSET_TYPE', () => {
@@ -1101,6 +1534,31 @@ describe('Productions store', () => {
   })
 
   describe('API', () => {
+    // Unlike a read, the listing answers a production out of the user's
+    // teams with none rather than a refusal.
+    describe('getListedProduction', () => {
+      let pget
+
+      afterEach(() => {
+        pget.mockRestore()
+      })
+
+      test('reads the listing filtered on the production', async () => {
+        pget = vi.spyOn(client, 'pget').mockResolvedValue([{ id: '1' }])
+
+        const production = await productionApi.getListedProduction('1')
+
+        expect(pget).toHaveBeenCalledWith('/api/data/projects?id=1')
+        expect(production).toEqual({ id: '1' })
+      })
+
+      test('resolves to nothing when the listing leaves it out', async () => {
+        pget = vi.spyOn(client, 'pget').mockResolvedValue([])
+
+        expect(await productionApi.getListedProduction('1')).toBeUndefined()
+      })
+    })
+
     describe('updateProduction', () => {
       let pput
 
@@ -1256,6 +1714,82 @@ describe('Productions store, production paths', () => {
   })
 })
 
+describe('Productions store, production backgrounds', () => {
+  const background = (id, name) => ({ id, name, extension: 'hdr' })
+
+  let vuexStore
+  let scope
+
+  const loadBackgrounds = () =>
+    vuexStore.commit(LOAD_BACKGROUNDS_END, [
+      background('background-2', 'Studio'),
+      background('background-1', 'Forest'),
+      background('background-3', 'Attic')
+    ])
+
+  beforeEach(() => {
+    vuexStore = createStore({
+      modules: {
+        productions: {
+          state: {
+            currentProduction: null,
+            openProductions: [],
+            productionMap: new Map()
+          },
+          getters: store.getters,
+          mutations: store.mutations
+        },
+        backgrounds: {
+          state: { backgrounds: [] },
+          getters: backgroundStore.getters,
+          mutations: backgroundStore.mutations
+        }
+      }
+    })
+    vuexStore.commit(LOAD_BACKGROUNDS_START)
+    vuexStore.commit(LOAD_OPEN_PRODUCTIONS_END, [
+      {
+        id: 'production-1',
+        name: 'Caminandes',
+        preview_background_files: ['background-2', 'unknown', 'background-1']
+      }
+    ])
+    scope = effectScope()
+  })
+
+  afterEach(() => {
+    scope.stop()
+  })
+
+  test('list the backgrounds of a production by name', () => {
+    loadBackgrounds()
+    const names = list => list.map(({ name }) => name)
+    expect(names(vuexStore.getters.productionBackgrounds)).toEqual([
+      'Forest',
+      'Studio'
+    ])
+    expect(
+      names(vuexStore.getters.getProductionBackgrounds('production-1'))
+    ).toEqual(['Forest', 'Studio'])
+    expect(vuexStore.getters.getProductionBackgrounds('production-2')).toEqual(
+      []
+    )
+  })
+
+  test('follow a load of the background list', () => {
+    scope.run(() => {
+      const names = computed(() =>
+        vuexStore.getters.productionBackgrounds.map(({ name }) => name)
+      )
+      expect(names.value).toEqual([])
+
+      loadBackgrounds()
+
+      expect(names.value).toEqual(['Forest', 'Studio'])
+    })
+  })
+})
+
 describe('Productions store, closed production', () => {
   // A closed production loaded for a link must not show among the open ones.
   test('adds a closed production to the map only', () => {
@@ -1276,5 +1810,364 @@ describe('Productions store, closed production', () => {
 
     expect(state.productionMap.has('production-closed')).toBe(true)
     expect(state.openProductions).toEqual([])
+  })
+
+  // Listed by the productions page without its relations and with the
+  // Project descriptors only, a closed production is reloaded in full before
+  // it becomes the current one. An edit must reach that copy, and must not
+  // narrow it down to the listed one.
+  test('keeps the current production whole and up to date after an edit', () => {
+    const projectDescriptor = {
+      id: 'descriptor-project',
+      entity_type: 'Project'
+    }
+    const listed = {
+      id: 'production-closed',
+      name: 'Archive',
+      project_status_id: 'status-closed',
+      descriptors: [projectDescriptor]
+    }
+    const current = {
+      ...listed,
+      task_types: ['task-type-id'],
+      descriptors: [
+        projectDescriptor,
+        { id: 'descriptor-asset', entity_type: 'Asset' }
+      ]
+    }
+    const state = {
+      currentProduction: current,
+      productions: [listed],
+      openProductions: [],
+      productionMap: new Map([[current.id, current]]),
+      productionStatusMap: new Map([
+        ['status-closed', { id: 'status-closed', name: 'Closed' }]
+      ])
+    }
+
+    store.mutations.UPDATE_PRODUCTION(state, {
+      id: 'production-closed',
+      name: 'Archive',
+      project_status_id: 'status-closed',
+      description: 'New brief'
+    })
+
+    expect(state.currentProduction).toBe(
+      state.productionMap.get('production-closed')
+    )
+    expect(state.currentProduction.description).toBe('New brief')
+    expect(state.currentProduction.task_types).toEqual(['task-type-id'])
+    expect(state.currentProduction.descriptors).toHaveLength(2)
+    expect(listed.description).toBe('New brief')
+  })
+})
+
+describe('Productions store, production status', () => {
+  const makeState = ({ open = [], others = [] } = {}) => ({
+    productions: [],
+    openProductions: [...open],
+    productionMap: new Map([...open, ...others].map(p => [p.id, p])),
+    productionStatusMap: new Map(
+      [
+        { id: 'status-open', name: 'Open' },
+        { id: 'status-active', name: 'Active' },
+        { id: 'status-closed', name: 'Closed' }
+      ].map(status => [status.id, status])
+    )
+  })
+
+  // The context loads the statuses once: one created later through the API
+  // is missing from the map. A read of the production serves its name.
+  test('adds a production with a status created after the context', () => {
+    const state = makeState()
+
+    store.mutations.ADD_PRODUCTION(state, {
+      id: 'production-1',
+      name: 'Forest',
+      project_status_id: 'status-new',
+      project_status_name: 'Bidding'
+    })
+
+    expect(state.productionMap.get('production-1').project_status_name).toBe(
+      'Bidding'
+    )
+    expect(state.openProductions).toEqual([])
+  })
+
+  test('updates a production to a status created after the context', () => {
+    const production = {
+      id: 'production-1',
+      name: 'Forest',
+      project_status_id: 'status-open',
+      project_status_name: 'Open'
+    }
+    const state = makeState({ open: [production] })
+
+    store.mutations.UPDATE_PRODUCTION(state, {
+      id: 'production-1',
+      project_status_id: 'status-new',
+      project_status_name: 'Bidding'
+    })
+
+    expect(production.project_status_name).toBe('Bidding')
+    expect(state.openProductions).toEqual([])
+  })
+
+  // An edit answers with the status id only.
+  test('keeps through an edit the status name a read served', () => {
+    const production = {
+      id: 'production-1',
+      name: 'Forest',
+      project_status_id: 'status-new',
+      project_status_name: 'Bidding'
+    }
+    const state = makeState({ others: [production] })
+
+    store.mutations.UPDATE_PRODUCTION(state, {
+      id: 'production-1',
+      name: 'Forest 2',
+      project_status_id: 'status-new'
+    })
+
+    expect(production.name).toBe('Forest 2')
+    expect(production.project_status_name).toBe('Bidding')
+  })
+
+  test('forgets the status name when an edit moves to an unknown status', () => {
+    const production = {
+      id: 'production-1',
+      name: 'Forest',
+      project_status_id: 'status-open',
+      project_status_name: 'Open'
+    }
+    const state = makeState({ open: [production] })
+
+    store.mutations.UPDATE_PRODUCTION(state, {
+      id: 'production-1',
+      project_status_id: 'status-new'
+    })
+
+    expect(production.project_status_name).toBeUndefined()
+    expect(state.openProductions).toEqual([])
+  })
+
+  // The user context lists the Open productions only, though some Zou
+  // routes also count Active and open: a reload would drop the others.
+  test('adds an Active production to the map only', () => {
+    const state = makeState()
+
+    store.mutations.ADD_PRODUCTION(state, {
+      id: 'production-1',
+      name: 'Forest',
+      project_status_id: 'status-active'
+    })
+
+    expect(state.productionMap.has('production-1')).toBe(true)
+    expect(state.openProductions).toEqual([])
+  })
+
+  test('removes a production switched to Active from the open ones', () => {
+    const production = {
+      id: 'production-1',
+      name: 'Forest',
+      project_status_id: 'status-open'
+    }
+    const state = makeState({ open: [production] })
+
+    store.mutations.UPDATE_PRODUCTION(state, {
+      id: 'production-1',
+      project_status_id: 'status-active'
+    })
+
+    expect(state.openProductions).toEqual([])
+  })
+
+  // Only the productions page, the timesheets and the logs load the
+  // all-productions listing.
+  test('removes a production closed live from the open ones', () => {
+    const production = {
+      id: 'production-1',
+      name: 'Forest',
+      project_status_id: 'status-open'
+    }
+    const state = makeState({ open: [production] })
+
+    store.mutations.UPDATE_PRODUCTION(state, {
+      id: 'production-1',
+      project_status_id: 'status-closed'
+    })
+
+    expect(state.openProductions).toEqual([])
+  })
+
+  test('adds a production reopened live to the open ones', () => {
+    const production = {
+      id: 'production-1',
+      name: 'Forest',
+      project_status_id: 'status-closed'
+    }
+    const state = makeState({ others: [production] })
+
+    store.mutations.UPDATE_PRODUCTION(state, {
+      id: 'production-1',
+      project_status_id: 'status-open'
+    })
+
+    expect(state.openProductions).toHaveLength(1)
+    expect(state.openProductions[0]).toBe(production)
+  })
+})
+
+// Zou announces the update of a production to every user: one missing from
+// the store joins it once the user enters its team, or once it reopens.
+describe('Productions store, production opened to the user', () => {
+  const state = {
+    productionStatusMap: new Map([
+      ['status-open', { id: 'status-open', name: 'Open' }],
+      ['status-closed', { id: 'status-closed', name: 'Closed' }]
+    ])
+  }
+  let getListedProduction
+
+  beforeEach(() => {
+    getListedProduction = vi.spyOn(productionApi, 'getListedProduction')
+  })
+
+  afterEach(() => {
+    getListedProduction.mockRestore()
+  })
+
+  test('loads a production the user lists', async () => {
+    getListedProduction.mockResolvedValue({
+      id: 'production-1',
+      project_status_id: 'status-open'
+    })
+    const dispatch = vi.fn()
+
+    await store.actions.loadProductionIfOpen({ dispatch, state }, 'production-1')
+
+    expect(getListedProduction).toHaveBeenCalledWith('production-1')
+    expect(dispatch).toHaveBeenCalledWith('loadProduction', 'production-1')
+  })
+
+  test('leaves out a production the user does not list', async () => {
+    getListedProduction.mockResolvedValue(undefined)
+    const dispatch = vi.fn()
+
+    await store.actions.loadProductionIfOpen({ dispatch, state }, 'production-1')
+
+    expect(dispatch).not.toHaveBeenCalled()
+  })
+
+  // Admins list every production, the closed ones too.
+  test('leaves out a closed production', async () => {
+    getListedProduction.mockResolvedValue({
+      id: 'production-1',
+      project_status_id: 'status-closed'
+    })
+    const dispatch = vi.fn()
+
+    await store.actions.loadProductionIfOpen({ dispatch, state }, 'production-1')
+
+    expect(dispatch).not.toHaveBeenCalled()
+  })
+
+  test('fails with the load of the production', async () => {
+    getListedProduction.mockResolvedValue({
+      id: 'production-1',
+      project_status_id: 'status-open'
+    })
+    const failure = new Error('Request has been terminated')
+    const dispatch = () => Promise.reject(failure)
+
+    await expect(
+      store.actions.loadProductionIfOpen({ dispatch, state }, 'production-1')
+    ).rejects.toBe(failure)
+  })
+})
+
+// Zou announces a new production to every user, and refuses its read to
+// those out of its team, whatever its status.
+describe('Productions store, new production shared with the user', () => {
+  const admin = { isCurrentUserAdmin: true }
+  const nonAdmin = { isCurrentUserAdmin: false }
+  let getProductions
+
+  beforeEach(() => {
+    getProductions = vi.spyOn(productionApi, 'getProductions')
+  })
+
+  afterEach(() => {
+    getProductions.mockRestore()
+  })
+
+  test('loads it for an admin, who reads every production', async () => {
+    const dispatch = vi.fn()
+
+    await store.actions.loadProductionIfShared(
+      { dispatch, rootGetters: admin },
+      'production-1'
+    )
+
+    expect(getProductions).not.toHaveBeenCalled()
+    expect(dispatch).toHaveBeenCalledWith('loadProduction', 'production-1')
+  })
+
+  // Unlike the listing filtered on it, the productions of the user's teams
+  // hold the closed ones too.
+  test('loads it for a member of its team, even closed', async () => {
+    getProductions.mockResolvedValue([
+      { id: 'production-2', project_status_id: 'status-open' },
+      { id: 'production-1', project_status_id: 'status-closed' }
+    ])
+    const dispatch = vi.fn()
+
+    await store.actions.loadProductionIfShared(
+      { dispatch, rootGetters: nonAdmin },
+      'production-1'
+    )
+
+    expect(dispatch).toHaveBeenCalledWith('loadProduction', 'production-1')
+  })
+
+  test('leaves it out for a user out of its team', async () => {
+    getProductions.mockResolvedValue([
+      { id: 'production-2', project_status_id: 'status-open' }
+    ])
+    const dispatch = vi.fn()
+
+    await store.actions.loadProductionIfShared(
+      { dispatch, rootGetters: nonAdmin },
+      'production-1'
+    )
+
+    expect(getProductions).toHaveBeenCalledTimes(1)
+    expect(dispatch).not.toHaveBeenCalled()
+  })
+
+  test('fails with the listing of the productions', async () => {
+    const failure = new Error('Request has been terminated')
+    getProductions.mockRejectedValue(failure)
+    const dispatch = vi.fn()
+
+    await expect(
+      store.actions.loadProductionIfShared(
+        { dispatch, rootGetters: nonAdmin },
+        'production-1'
+      )
+    ).rejects.toBe(failure)
+    expect(dispatch).not.toHaveBeenCalled()
+  })
+
+  test('fails with the load of the production', async () => {
+    const failure = new Error('Request has been terminated')
+    const dispatch = () => Promise.reject(failure)
+
+    await expect(
+      store.actions.loadProductionIfShared(
+        { dispatch, rootGetters: admin },
+        'production-1'
+      )
+    ).rejects.toBe(failure)
   })
 })

@@ -2,10 +2,23 @@
   <div class="episodes page fixed-page">
     <div class="episode-list-header page-header flexrow">
       <search-field
-        class="flexrow-item mt1"
+        class="flexrow-item search-field"
         ref="episode-search-field"
-        placeholder="ex: e01 s01, anim=wip"
+        placeholder="ex: e01"
         @change="onSearchChange"
+        v-if="!isCurrentUserClient"
+      />
+      <combobox-visible-options
+        class="flexrow-item options-filter"
+        :label="$t('episodes.title')"
+        :options="episodeOptions"
+        v-model:hidden="hiddenEpisodeIds"
+      />
+      <combobox-task-type-options
+        class="flexrow-item options-filter"
+        :label="$t('task_types.title')"
+        :task-types="columnTaskTypes"
+        v-model:hidden="hiddenTaskTypeIds"
       />
       <combobox
         class="mb0 flexrow-item"
@@ -13,12 +26,13 @@
         :label="$t('statistics.data_mode')"
         :options="dataModeOptions"
         v-model="dataMode"
+        v-if="!isCurrentUserClient"
       />
       <combobox
         class="mb0 flexrow-item"
         locale-key-prefix="statistics."
         :label="$t('statistics.display_mode')"
-        :options="displayModeOptions"
+        :options="STATS_DISPLAY_MODE_OPTIONS"
         v-model="displayMode"
       />
       <combobox
@@ -44,248 +58,253 @@
         @click="reset"
       />
       <button-simple
-        class="flexrow-item"
+        class="flexrow-item export-button"
         :disabled="isLoading"
         icon="download"
+        :title="$t('main.csv.export_file')"
         @click="exportStatisticsToCsv"
       />
     </div>
 
     <episode-stats-list
-      ref="episode-list"
       :count-mode="countMode"
-      :data-mode="dataMode"
+      :data-mode="displayedDataMode"
       :display-mode="displayMode"
-      :entries="
-        statusMode === 'running'
-          ? displayedEpisodes.filter(e => e.status === 'running')
-          : displayedEpisodes
-      "
+      :entries="displayedEpisodeEntries"
+      :episode-retake-stats="displayedRetakeStats"
+      :episode-stats="displayedStats"
       :is-loading="isLoading"
       :is-error="isLoadingError"
-      :show-all="episodeSearchText.length === 0"
-      :validation-columns="episodeValidationColumns"
-      @field-changed="onFieldChanged"
-      @scroll="saveScrollPosition"
+      :is-filtered="isFiltered"
+      :validation-columns="displayedColumns"
     />
   </div>
 </template>
 
-<script>
+<script setup>
+// Imports
+// --------------------------------------------------------------------------
+import { useHead } from '@unhead/vue'
 import moment from 'moment'
-import { mapGetters, mapActions } from 'vuex'
+import { computed, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
-import { searchMixin } from '@/components/mixins/search'
-
+import {
+  STATS_DISPLAY_MODE_OPTIONS,
+  useStatsPage
+} from '@/composables/statsPage'
 import csv from '@/lib/csv'
 import preferences from '@/lib/preferences'
+import { aggregateRetakeStats, omitRetakeStatsColumns } from '@/lib/stats'
 import stringHelpers from '@/lib/string'
 
+import EpisodeStatsList from '@/components/lists/EpisodeStatsList.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
-import EpisodeStatsList from '@/components/lists/EpisodeStatsList.vue'
+import ComboboxTaskTypeOptions from '@/components/widgets/ComboboxTaskTypeOptions.vue'
+import ComboboxVisibleOptions from '@/components/widgets/ComboboxVisibleOptions.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 
-export default {
-  name: 'episode-stats',
+const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
+const store = useStore()
 
-  mixins: [searchMixin],
+// State
+// --------------------------------------------------------------------------
+const DATA_MODE_PREFERENCE = 'stats:episode-mode'
 
-  components: {
-    ButtonSimple,
-    Combobox,
-    EpisodeStatsList,
-    SearchField
-  },
+const searchFieldRef = useTemplateRef('episode-search-field')
 
-  data() {
-    return {
-      countMode: 'count',
-      dataMode: 'retakes',
-      displayMode: 'pie',
-      isLoading: true,
-      isLoadingError: false,
-      statusMode: 'running',
-      countModeOptions: [
-        { label: 'shots', value: 'count' },
-        { label: 'frames', value: 'frames' }
-      ],
-      dataModeOptions: [
-        { label: 'retakes', value: 'retakes' },
-        { label: 'status', value: 'status' }
-      ],
-      displayModeOptions: [
-        { label: 'pie', value: 'pie' },
-        { label: 'count', value: 'count' }
-      ],
-      statusModeOptions: [
-        { label: 'only_running', value: 'running' },
-        { label: 'all', value: 'all' }
-      ]
-    }
-  },
+const countMode = ref('count')
+const dataMode = ref(
+  preferences.getPreference(DATA_MODE_PREFERENCE) || 'retakes'
+)
+const isLoading = ref(true)
+const isLoadingError = ref(false)
+const statusMode = ref('running')
 
-  mounted() {
-    this.setCountOptions()
-    const mode = preferences.getPreference('stats:episode-mode') || 'retakes'
-    this.dataMode = mode
-    this.setDefaultListScrollPosition()
-    this.isLoading = true
-    this.isLoadingError = false
-    this.setSearchFromUrl()
-    this.initEpisodeStats()
-      .then(() => {
-        this.isLoading = false
-        this.setSearchInUrl()
-        this.onSearchChange()
+const dataModeOptions = [
+  { label: 'retakes', value: 'retakes' },
+  { label: 'status', value: 'status' }
+]
+const statusModeOptions = [
+  { label: 'only_running', value: 'running' },
+  { label: 'all', value: 'all' }
+]
+
+// Computed
+// --------------------------------------------------------------------------
+const currentProduction = computed(() => store.getters.currentProduction)
+const displayedEpisodes = computed(() => store.getters.displayedEpisodes)
+const episodeMap = computed(() => store.getters.episodeMap)
+const episodeRetakeStats = computed(() => store.getters.episodeRetakeStats)
+const episodeStats = computed(() => store.getters.episodeStats)
+const episodeValidationColumns = computed(
+  () => store.getters.episodeValidationColumns
+)
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+const isPaperProduction = computed(() => store.getters.isPaperProduction)
+const taskStatusMap = computed(() => store.getters.taskStatusMap)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
+
+const countModeOptions = computed(() => [
+  { label: 'shots', value: 'count' },
+  isPaperProduction.value
+    ? { label: 'drawings', value: 'drawings' }
+    : { label: 'frames', value: 'frames' }
+])
+
+const episodeEntries = computed(() =>
+  statusMode.value === 'running'
+    ? displayedEpisodes.value.filter(episode => episode.status === 'running')
+    : displayedEpisodes.value
+)
+
+// Zou refuses the retake stats to clients: they get the status mode only.
+const isRetakeDataMode = computed(
+  () => !isCurrentUserClient.value && dataMode.value === 'retakes'
+)
+const displayedDataMode = computed(() =>
+  isRetakeDataMode.value ? 'retakes' : 'status'
+)
+
+// The selector works on the result of the search and of the status filter.
+const {
+  columnTaskTypes,
+  displayMode,
+  displayedColumns,
+  displayedRows: displayedEpisodeEntries,
+  getDisplayedStats,
+  hiddenColumnIds: hiddenTaskTypeIds,
+  hiddenRowIds: hiddenEpisodeIds,
+  isFiltered,
+  rowOptions: episodeOptions
+} = useStatsPage({
+  preferenceKey: 'stats:episode-display-mode',
+  rowsParam: 'hiddenEpisodes',
+  rows: episodeEntries,
+  columnIds: episodeValidationColumns
+})
+
+const displayedStats = computed(() => getDisplayedStats(episodeStats.value))
+
+// The list and the export only read the retake stats in the retakes mode.
+const displayedRetakeStats = computed(() =>
+  isRetakeDataMode.value
+    ? getDisplayedStats(episodeRetakeStats.value, {
+        omitColumns: omitRetakeStatsColumns,
+        aggregate: aggregateRetakeStats
       })
-      .catch(err => {
-        this.isLoading = false
-        this.isLoadingError = true
-        console.error(err)
-      })
-  },
+    : {}
+)
 
-  computed: {
-    ...mapGetters([
-      'currentProduction',
-      'displayedEpisodes',
-      'episodeMap',
-      'episodeStats',
-      'episodeRetakeStats',
-      'episodeSearchText',
-      'episodeListScrollPosition',
-      'episodeValidationColumns',
-      'isPaperProduction',
-      'taskStatusMap',
-      'taskTypeMap'
-    ]),
-
-    searchField() {
-      return this.$refs['episode-search-field']
-    },
-
-    isRetakeDataMode() {
-      return this.dataMode === 'retakes'
-    }
-  },
-
-  methods: {
-    ...mapActions([
-      'editEpisode',
-      'initEpisodeStats',
-      'loadEpisodeStats',
-      'loadEpisodeRetakeStats',
-      'setEpisodeSearch',
-      'setEpisodeListScrollPosition'
-    ]),
-
-    setCountOptions() {
-      if (this.isPaperProduction) {
-        this.countModeOptions = [
-          { label: 'shots', value: 'count' },
-          { label: 'drawings', value: 'drawings' }
-        ]
-      } else {
-        this.countModeOptions = [
-          { label: 'shots', value: 'count' },
-          { label: 'frames', value: 'frames' }
-        ]
-      }
-      this.countMode = this.countModeOptions[0].value
-    },
-
-    setDefaultListScrollPosition() {
-      this.$refs['episode-list'].setScrollPosition(
-        this.episodeListScrollPosition
-      )
-    },
-
-    onSearchChange() {
-      const searchQuery = this.searchField.getValue()
-      this.setSearchInUrl()
-      this.setEpisodeSearch(searchQuery)
-    },
-
-    saveScrollPosition(scrollPosition) {
-      this.setEpisodeListScrollPosition(scrollPosition)
-    },
-
-    exportStatisticsToCsv() {
-      const nameData = [
-        moment().format('YYYYMMDD'),
-        this.currentProduction.name,
-        'episodes',
-        'statistics'
-      ]
-      if (this.isRetakeDataMode) nameData.splice(3, 0, 'retake')
-      const name = stringHelpers.slugify(nameData.join('_'))
-      if (this.isRetakeDataMode) {
-        csv.generateRetakeStatReports(
-          name,
-          this.episodeRetakeStats,
-          this.taskTypeMap,
-          this.taskStatusMap,
-          this.episodeMap,
-          this.countMode,
-          this.currentProduction
-        )
-      } else {
-        csv.generateStatReports(
-          name,
-          this.episodeStats,
-          this.taskTypeMap,
-          this.taskStatusMap,
-          this.episodeMap,
-          this.countMode,
-          this.currentProduction
-        )
-      }
-    },
-
-    onFieldChanged({ entry, fieldName, value }) {
-      const data = { id: entry.id }
-      data[fieldName] = value
-      this.editEpisode(data)
-    },
-
-    reset() {
-      this.isLoading = true
-      this.isLoadingError = false
-      this.setCountOptions()
-      this.loadEpisodeStats(this.currentProduction.id)
-        .then(() => {
-          return this.loadEpisodeRetakeStats(this.currentProduction.id)
-        })
-        .then(() => {
-          this.isLoading = false
-        })
-        .catch(err => {
-          this.isLoading = false
-          this.isLoadingError = true
-          console.error(err)
-        })
-    }
-  },
-
-  watch: {
-    currentProduction() {
-      this.searchField.setValue('')
-      this.$store.commit('SET_EPISODE_LIST_SCROLL_POSITION', 0)
-      this.reset()
-    },
-
-    dataMode() {
-      preferences.setPreference('stats:episode-mode', this.dataMode)
-    }
-  },
-
-  head() {
-    return {
-      title: `${this.currentProduction.name} ${this.$t(
-        'episodes.title'
-      )} - Kitsu`
-    }
+// Functions
+// --------------------------------------------------------------------------
+const setSearchFromUrl = () => {
+  const searchFromUrl = route.query.search
+  if (!searchFieldRef.value?.getValue() && searchFromUrl) {
+    searchFieldRef.value?.setValue(searchFromUrl)
   }
 }
+
+const onSearchChange = () => {
+  const searchQuery = searchFieldRef.value?.getValue()
+  router.replace({
+    query: { ...route.query, search: searchQuery || undefined }
+  })
+  store.dispatch('setEpisodeSearch', searchQuery)
+}
+
+const exportStatisticsToCsv = () => {
+  const nameData = [
+    moment().format('YYYYMMDD'),
+    currentProduction.value.name,
+    'episodes',
+    ...(isRetakeDataMode.value ? ['retake'] : []),
+    'statistics'
+  ]
+  const name = stringHelpers.slugify(nameData.join('_'))
+  const generateReports = isRetakeDataMode.value
+    ? csv.generateRetakeStatReports
+    : csv.generateStatReports
+  generateReports(
+    name,
+    isRetakeDataMode.value ? displayedRetakeStats.value : displayedStats.value,
+    taskTypeMap.value,
+    taskStatusMap.value,
+    episodeMap.value,
+    countMode.value,
+    currentProduction.value
+  )
+}
+
+const reset = async () => {
+  isLoading.value = true
+  isLoadingError.value = false
+  countMode.value = 'count'
+  try {
+    await store.dispatch('loadEpisodeStats', currentProduction.value.id)
+    await store.dispatch('loadEpisodeRetakeStats', currentProduction.value.id)
+  } catch (err) {
+    console.error(err)
+    isLoadingError.value = true
+  }
+  isLoading.value = false
+}
+
+// Watchers
+// --------------------------------------------------------------------------
+watch(currentProduction, () => {
+  searchFieldRef.value?.setValue('')
+  reset()
+})
+
+watch(dataMode, () => {
+  preferences.setPreference(DATA_MODE_PREFERENCE, dataMode.value)
+})
+
+// Lifecycle
+// --------------------------------------------------------------------------
+onMounted(async () => {
+  setSearchFromUrl()
+  try {
+    await store.dispatch('initEpisodeStats')
+    onSearchChange()
+  } catch (err) {
+    console.error(err)
+    isLoadingError.value = true
+  }
+  isLoading.value = false
+})
+
+// Head
+// --------------------------------------------------------------------------
+useHead({
+  title: computed(
+    () =>
+      `${currentProduction.value?.name || ''} ${t('episodes.title')} - Kitsu`
+  )
+})
 </script>
+
+<style lang="scss" scoped>
+@use '@/styles/stats.scss' as stats;
+
+.episode-list-header {
+  // Nine controls do not fit on one line below a wide desktop.
+  flex-wrap: wrap;
+  row-gap: 0.5em;
+
+  @include stats.page-header($with-search: true);
+}
+
+@media screen and (max-width: 768px) {
+  // Mobile is read-only.
+  .export-button {
+    display: none;
+  }
+}
+</style>

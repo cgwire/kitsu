@@ -144,6 +144,8 @@ const getDimensions = () => {
 }
 
 const resetPicture = () => {
+  // Deferred callers (nextTick, setTimeout) can outlive the component.
+  if (!container.value) return
   container.value.style.height = props.defaultHeight + 'px'
   const viewer = getCurrentViewer()
   if (viewer) viewer.resetPicture()
@@ -165,6 +167,16 @@ const resumePanZoom = () => {
 const setPanZoom = (x, y, scale) => {
   const viewer = getCurrentViewer()
   if (viewer) viewer.setPanZoom(x, y, scale)
+}
+
+const panBy = (dx, dy) => {
+  const viewer = getCurrentViewer()
+  if (viewer) viewer.panBy(dx, dy)
+}
+
+const zoomAt = (clientX, clientY, ratio) => {
+  const viewer = getCurrentViewer()
+  if (viewer) viewer.zoomAt(clientX, clientY, ratio)
 }
 
 // Lifecycle
@@ -205,11 +217,13 @@ defineExpose({
   getDimensions,
   getNaturalDimensions,
   getPictureElement,
+  panBy,
   pausePanZoom,
   resetPanZoom,
   resetPicture,
   resumePanZoom,
-  setPanZoom
+  setPanZoom,
+  zoomAt
 })
 </script>
 

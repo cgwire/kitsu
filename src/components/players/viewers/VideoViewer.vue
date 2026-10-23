@@ -28,11 +28,7 @@
         type="video/mp4"
         playsinline
       ></video>
-      <canvas
-        ref="displayCanvas"
-        class="annotation-movie"
-        v-show="!isLoading"
-      ></canvas>
+      <canvas ref="displayCanvas" class="annotation-movie"></canvas>
     </div>
   </div>
 </template>
@@ -46,6 +42,7 @@ import {
   createFrameRenderer,
   supportsVideoFrameCallback
 } from '@/lib/players/frameRenderer'
+import { panPanzoomBy, zoomPanzoomAt } from '@/lib/players/panzoom'
 import { swallowBrowserZoom } from '@/lib/players/wheel'
 import { DEFAULT_FPS, formatFrame } from '@/lib/video'
 
@@ -145,7 +142,7 @@ let panzoomSilent = false
 // so we remember that intent here and apply it when the instance
 // finally exists.
 let panzoomActive = false
-let currentTimeCalls = []
+let pendingSeekTime = null
 let lastEmittedFrame = null
 let isPlaying = false
 let previousDimensions = null
@@ -224,14 +221,7 @@ const getDimensions = () => {
   return { width, height }
 }
 
-const getLastPushedCurrentTime = () => {
-  const length = currentTimeCalls.length
-  if (length > 0) {
-    return currentTimeCalls[length - 1]
-  } else {
-    return currentTimeRaw.value
-  }
-}
+const getLastPushedCurrentTime = () => pendingSeekTime ?? currentTimeRaw.value
 
 // Seek to the middle of the target frame rather than its boundary.
 // frame / fps lands right on the edge between two frames, and the rounding
@@ -249,30 +239,28 @@ const setCurrentFrame = frame => {
 const setCurrentTimeRaw = currentTime => {
   if (currentTime < frameDuration.value) currentTime = 0
   if (!video.value.paused) seekGuardTarget = currentTime
+  seekNow(currentTime)
+}
+
+// Direct seeks (frame steps, pause) win over a target held for scrubbing.
+const seekNow = currentTime => {
+  pendingSeekTime = null
   video.value.currentTime = currentTime
 }
 
-const runSetCurrentTime = () => {
-  if (currentTimeCalls.length === 0) {
-    return
-  } else {
-    const currentTime = currentTimeCalls.shift()
-    if (video.value.currentTime !== currentTime) {
-      video.value.currentTime = currentTime
-    }
-    setTimeout(() => {
-      runSetCurrentTime()
-    }, 10)
+const setCurrentTime = currentTime => {
+  // Scrubbing asks for a seek per mousemove. Each new seek aborts the
+  // in-flight one, so no frame landed until the cursor stopped: hold the
+  // latest target until 'seeked' instead.
+  if (video.value.seeking) {
+    pendingSeekTime = currentTime
+  } else if (video.value.currentTime !== currentTime) {
+    seekNow(currentTime)
   }
 }
 
-const setCurrentTime = currentTime => {
-  // Scrubbing queues a seek per mousemove; only the latest target
-  // matters, and every landed seek now costs a decode + a canvas paint.
-  // Drop the stale backlog instead of replaying the whole trail.
-  currentTimeCalls.length = 0
-  currentTimeCalls.push(currentTime)
-  runSetCurrentTime()
+const onSeeked = () => {
+  if (pendingSeekTime !== null) setCurrentTime(pendingSeekTime)
 }
 
 const resetSize = () => {
@@ -399,6 +387,9 @@ const startRenderLoop = () => {
       // target while the decoder still holds the old position — drawing
       // would paint stale frames past the trim and emit stale times.
       if (video.value && !video.value.seeking) {
+        // The seek landed: release the guard armed by a playing raw seek,
+        // or every later 'waiting' would be ignored.
+        seekGuardTarget = null
         if (video.value.currentTime !== lastDrawnTime) {
           hasPaintedVideoFrame = true
           lastDrawnTime = video.value.currentTime
@@ -464,7 +455,7 @@ const play = () => {
 const pause = () => {
   seekGuardTarget = null
   video.value.pause()
-  video.value.currentTime = frameToTime(props.currentFrame)
+  seekNow(frameToTime(props.currentFrame))
   emit('frame-update', props.currentFrame)
 }
 
@@ -475,7 +466,7 @@ const toggleMute = () => {
 const goPreviousFrame = () => {
   const nextFrame = props.currentFrame - 1
   if (nextFrame < 0) return
-  video.value.currentTime = frameToTime(nextFrame)
+  seekNow(frameToTime(nextFrame))
   emit('frame-update', nextFrame)
   return nextFrame
 }
@@ -483,7 +474,7 @@ const goPreviousFrame = () => {
 const goNextFrame = () => {
   const nextFrame = props.currentFrame + 1
   if (nextFrame >= props.nbFrames) return
-  video.value.currentTime = frameToTime(nextFrame)
+  seekNow(frameToTime(nextFrame))
   emit('frame-update', nextFrame)
   return nextFrame
 }
@@ -494,7 +485,7 @@ const onVideoEnd = () => {
   if (!video.value) return
   if (props.isRepeating) {
     emit('video-end')
-    video.value.currentTime = 0
+    seekNow(0)
     play()
   } else {
     emit('play-ended')
@@ -527,6 +518,11 @@ const setPanZoom = (x, y, scale) => {
     panzoomSilent = false
   })
 }
+
+const panBy = (dx, dy) => panPanzoomBy(panzoomInstance, dx, dy)
+
+const zoomAt = (clientX, clientY, ratio) =>
+  zoomPanzoomAt(panzoomInstance, displayCanvas.value, clientX, clientY, ratio)
 
 const emitPanZoom = () => {
   if (panzoomSilent || !panzoomInstance) return
@@ -660,7 +656,6 @@ watch(
 // Lifecycle
 
 onMounted(() => {
-  currentTimeCalls = []
   container.value.style.height = props.defaultHeight + 'px'
   isLoading.value = true
   if (props.isMuted) {
@@ -668,19 +663,23 @@ onMounted(() => {
   }
   setTimeout(() => {
     if (video.value) {
-      if (video.value.readyState === 4) {
+      // A cached movie can fire loadedmetadata before these listeners
+      // exist: rescue any state past HAVE_METADATA, not only fully loaded.
+      if (video.value.readyState >= HTMLMediaElement.HAVE_METADATA) {
         configureVideo()
         onWindowResize()
-        isLoading.value = false
+        isLoading.value =
+          video.value.readyState < HTMLMediaElement.HAVE_FUTURE_DATA
         setCurrentTime(0)
         setCurrentTimeRaw(0)
         nextTick(() => {
-          video.value.currentTime = 0
+          seekNow(0)
         })
         emit('video-loaded')
         setupPanZoom()
       }
       video.value.addEventListener('focus', e => e.target.blur())
+      video.value.addEventListener('seeked', onSeeked)
       video.value.addEventListener('resize', () => {
         resizeRenderer()
         resetSize()
@@ -717,7 +716,11 @@ onMounted(() => {
       })
 
       video.value.addEventListener('stalled', () => {
-        isLoading.value = true
+        // WebKit fires 'stalled' on a paused movie whose prefetch stopped
+        // while readyState is still 4: no canplay follows to clear the flag.
+        if (video.value?.readyState < HTMLMediaElement.HAVE_FUTURE_DATA) {
+          isLoading.value = true
+        }
       })
 
       video.value.addEventListener('waiting', () => {
@@ -765,6 +768,8 @@ defineExpose({
   goNextFrame,
   resetPanZoom,
   setPanZoom,
+  panBy,
+  zoomAt,
   pausePanZoom,
   resumePanZoom,
   setSpeed,
@@ -778,6 +783,9 @@ defineExpose({
 .loading-background {
   background: #00000088;
   position: absolute;
+  // The canvas stays visible under the loader; panzoom's transform
+  // would otherwise paint it above.
+  z-index: 1;
   display: flex;
   top: 0;
   left: 0;

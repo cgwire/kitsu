@@ -147,7 +147,7 @@ export const sortTaskStatuses = (taskStatuses, currentProduction) => {
 }
 
 export const sortTaskTypes = (taskTypes, currentProduction) => {
-  return taskTypes.sort(
+  return [...taskTypes].sort(
     firstBy('for_entity')
       .thenBy((taskTypeA, taskTypeB) => {
         const taskTypeAPriority = getTaskTypePriorityOfProd(
@@ -188,12 +188,6 @@ export const sortTaskTypeScheduleItems = (
     })
     .thenBy('name')
   return items.sort(sortFunc)
-}
-
-export const sortPlaylists = playlists => {
-  return playlists.sort(
-    firstBy('created_at', -1).thenBy((a, b) => collator.compare(a.name, b.name))
-  )
 }
 
 export const sortPeople = people => {
@@ -391,6 +385,20 @@ export const sortEditResult = (result, sorting, taskTypeMap, taskMap) => {
   )
 }
 
+// A value written for another type of column ("null" or text from a CSV
+// import, "true" left by a boolean one) sorts as an unticked checklist.
+const toChecklist = value =>
+  value && typeof value === 'object' && !Array.isArray(value) ? value : {}
+
+const parseChecklist = value => {
+  if (typeof value !== 'string') return toChecklist(value)
+  try {
+    return toChecklist(JSON.parse(value))
+  } catch {
+    return {}
+  }
+}
+
 const getMetadataValues = (sortInfo, a, b, defaultValue = '') => {
   let dataA = a.data?.[sortInfo.column] ?? defaultValue
   let dataB = b.data?.[sortInfo.column] ?? defaultValue
@@ -422,14 +430,8 @@ export const sortByMetadata = sortInfo => {
       if (dataA === dataB) return 0
       if (!dataB) return -1
       if (!dataA) return 1
-      let checklistA, checklistB
-      try {
-        checklistA = JSON.parse(dataA)
-        checklistB = JSON.parse(dataB)
-      } catch {
-        // Malformed checklist metadata must not break the whole sort.
-        return 0
-      }
+      const checklistA = parseChecklist(dataA)
+      const checklistB = parseChecklist(dataB)
       let resultA = 0
       let resultB = 0
       const length = Object.keys(checklistA).length

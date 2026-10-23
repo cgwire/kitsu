@@ -1,6 +1,12 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
+// Each spec file starts a fresh worker thread, which compiles jsdom and the
+// dependencies again: Node's compile cache hands them the bytecode instead.
+if (process.env.VITEST) {
+  process.env.NODE_COMPILE_CACHE ??= `${import.meta.dirname}/node_modules/.node-compile-cache`
+}
+
 export default defineConfig({
   plugins: [
     vue({
@@ -11,6 +17,12 @@ export default defineConfig({
       }
     })
   ],
+  // vue-i18n runs in composition mode, without its <i18n-*> components or
+  // v-t: compile its legacy API and its full install out of the bundle.
+  define: {
+    __VUE_I18N_LEGACY_API__: false,
+    __VUE_I18N_FULL_INSTALL__: false
+  },
   build: {
     sourcemap: true,
     target: 'es2020',
@@ -45,6 +57,18 @@ export default defineConfig({
             {
               name: 'realtime',
               test: /node_modules[\\/](?:socket\.io-client|engine\.io-client|engine\.io-parser|socket\.io-parser)[\\/]/
+            },
+            {
+              // The module that installs the polyfills goes along: left in the
+              // entry, it runs after every chunk the entry imports, too late
+              // for a dependency that calls Object.hasOwn as it loads
+              // (color-string, in the colors chunk).
+              name: 'polyfills',
+              test: /node_modules[\\/]core-js[\\/]|[\\/]src[\\/]polyfills\.js$/
+            },
+            {
+              name: 'bowser',
+              test: /node_modules[\\/]bowser[\\/]/
             },
             {
               name: 'charts',
@@ -112,6 +136,18 @@ export default defineConfig({
     // reuse the process where the default 'forks' pool pays a Node bootstrap.
     pool: 'threads',
     isolate: true,
+    // Transforms are a third of the run: persist them in
+    // node_modules/.vitest-cache. Entries are keyed on each file's own content,
+    // config, and lockfile, not on how its imports resolve. Whenever the working
+    // tree crosses a change to the file an unchanged extensionless import
+    // resolves to (a module turned into a directory index or back, renamed to
+    // another extension, or joined by a same-named file with another one),
+    // making, pulling, checking out, or bisecting across it, run
+    // `npx vitest --clearCache`: the symptom is a missing module on an import
+    // that did not change. Delete the old path in that change, or cached
+    // importers keep loading it without any error. In CI, change
+    // VITEST_CACHE_VERSION (.github/workflows/ci.yml).
+    fsModuleCache: true,
     deps: {
       optimizer: {
         client: {

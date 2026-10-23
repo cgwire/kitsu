@@ -4,6 +4,7 @@
       <div class="flexrow filler">
         <div
           class="preview-container filler"
+          :class="{ 'touch-navigation': isTouchNavigationEnabled }"
           :style="{ cursor: annotationCursor || null }"
           ref="preview-container"
         >
@@ -160,7 +161,7 @@
           @comment-added="$emit('comment-added')"
           @time-code-clicked="timeCodeClicked"
           v-show="!isCommentsHidden"
-          v-if="!readOnly && task.id"
+          v-if="!readOnly && task?.id"
         />
       </div>
     </div>
@@ -179,6 +180,7 @@
         :handle-in="handleIn"
         :handle-out="handleOut"
         :preview-id="isMovie && currentPreview ? currentPreview.id : ''"
+        :read-only="areHandlesReadOnly"
         @start-scrub="$refs['button-bar'].classList.add('unselectable')"
         @end-scrub="$refs['button-bar'].classList.remove('unselectable')"
         @progress-changed="onProgressChanged"
@@ -369,6 +371,7 @@
             }"
             :href="originalDlPath"
             :title="$t('playlists.actions.download_file')"
+            download
             v-if="
               !isCurrentUserArtist ||
               currentProduction?.is_preview_download_allowed
@@ -473,7 +476,9 @@ import { useAnnotationCursor } from '@/composables/players/annotationCursor'
 import { useComparison } from '@/composables/players/comparison'
 import { useOnionSkin } from '@/composables/players/onionSkin'
 import { usePreviewShortcuts } from '@/composables/players/previewShortcuts'
+import { useTouchNavigation } from '@/composables/players/touchNavigation'
 import { usePlayerTransport } from '@/composables/players/transport'
+import { useTrimmedShot } from '@/composables/players/trimmedShot'
 import func from '@/lib/func'
 import { getEntityPath } from '@/lib/path'
 import { mergeAnnotationsByFrame } from '@/lib/players/annotation'
@@ -495,6 +500,7 @@ import {
   floorToFrame,
   formatFrame,
   formatTime,
+  frameStartTime,
   getEntityFrameStart,
   roundToFrame
 } from '@/lib/video'
@@ -717,6 +723,7 @@ const annotation = useAnnotation({
 })
 
 const {
+  fabricCanvas,
   notSaved,
   pencilColor,
   pencilWidth,
@@ -760,6 +767,30 @@ const {
   restoreFailedAnnotations,
   toggleShapeMode
 } = annotation
+
+// Two fingers pan and zoom the media, over the annotations too. One finger
+// uses the annotation tool turned on, or pans when none is.
+const isTouchNavigationEnabled = computed(
+  () => isMovie.value || isPicture.value
+)
+const isAnnotationToolOn = computed(
+  () =>
+    isDrawing.value ||
+    isShapeMode.value ||
+    isEraserModeOn.value ||
+    isTyping.value
+)
+
+useTouchNavigation({
+  container: previewContainer,
+  surfaces: () => [canvasWrapper.value, mainMediaElement.value?.parentElement],
+  overlay: canvasWrapper,
+  isAnnotating: isAnnotationToolOn,
+  isEnabled: isTouchNavigationEnabled,
+  panBy: (dx, dy) => previewViewer.value?.panBy(dx, dy),
+  zoomAt: (clientX, clientY, ratio) =>
+    previewViewer.value?.zoomAt(clientX, clientY, ratio)
+})
 
 // Onion skin: ghost the annotations of nearby frames. Persisted like the
 // other player preferences.
@@ -831,7 +862,6 @@ const {
   isComparisonOverlay,
   overlayOpacity,
   toggleComparison,
-  setDefaultComparisonTaskType,
   setDefaultComparisonPreview,
   goToPreviousComparison,
   goToNextComparison,
@@ -843,7 +873,7 @@ const {
   currentPreview,
   taskTypeMap: computed(() => props.taskTypeMap),
   currentProduction: computed(() =>
-    productionMap.value.get(props.task.project_id)
+    productionMap.value.get(props.task?.project_id)
   ),
   t
 })
@@ -855,7 +885,7 @@ if (props.entityPreviewFiles) {
 }
 
 const currentProduction = computed(() =>
-  productionMap.value.get(props.task.project_id)
+  productionMap.value.get(props.task?.project_id)
 )
 
 const allowExtraPreview = computed(
@@ -1092,7 +1122,8 @@ const onSubPreviewsWheel = event => {
 }
 
 const setCurrentFrame = frame => {
-  if (!Number.isFinite(frame)) return
+  // Null once closed: a timecode click moves the frame 20 ms later.
+  if (!Number.isFinite(frame) || !previewViewer.value) return
   if (currentFrame.value !== frame) {
     setVideoFrameContext(frame)
     previewViewer.value.setCurrentFrame(frame)
@@ -1114,7 +1145,8 @@ const toggleIsOrdering = () => {
 }
 
 const focus = () => {
-  container.value.focus()
+  // Null after a render that threw, and TaskInfo still calls this.
+  container.value?.focus()
 }
 
 const timeCodeClicked = ({ versionRevision, frame }) => {
@@ -1179,7 +1211,7 @@ const getCurrentFrame = () => {
 // the first playback emission after the seek lands is ceil+1-based
 // (~start + 2), so the counter would visibly restart a few frames in.
 const seekTrimStart = () => {
-  const startTime = trimStartFrame.value * frameDuration.value
+  const startTime = frameStartTime(trimStartFrame.value, fps.value)
   pendingTrimSeek = true
   previewViewer.value.setCurrentTimeRaw(startTime)
   comparisonViewer.value?.setCurrentTimeRaw(startTime)
@@ -1224,6 +1256,9 @@ const pause = () => {
     } else {
       if (previewViewer.value) previewViewer.value.pause()
       if (comparisonViewer.value) comparisonViewer.value.pause()
+      // The playback wiped the canvas, and the movie stops on the frame it
+      // shows: no frame change reloads its drawing.
+      loadAnnotation()
       nextTick(() => {
         syncComparisonViewer()
       })
@@ -1231,27 +1266,31 @@ const pause = () => {
   }
 }
 
+// Past the ends of a movie, or on a picture, the viewer does not move and
+// no frame reloads the drawing: the canvas keeps it.
 const goPreviousFrame = () => {
+  if (currentFrame.value <= 0) return
   clearCanvas()
   previewViewer.value.goPreviousFrame()
   syncComparisonViewer()
 }
 
 const goNextFrame = () => {
+  if (currentFrame.value >= nbFrames.value - 1) return
   clearCanvas()
   previewViewer.value.goNextFrame()
   syncComparisonViewer()
 }
 
 const goToFirstFrame = () => {
-  if (!isMovie.value) return
+  if (!isMovie.value || currentFrame.value <= 0) return
   clearCanvas()
   setCurrentFrame(0)
   syncComparisonViewer()
 }
 
 const goToLastFrame = () => {
-  if (!isMovie.value) return
+  if (!isMovie.value || currentFrame.value >= nbFrames.value - 1) return
   clearCanvas()
   setCurrentFrame(nbFrames.value - 1)
   syncComparisonViewer()
@@ -1273,6 +1312,9 @@ const jumpToAnnotationFrame = annotation => {
     // string), which landed 1-2 frames past the drawing and lost the
     // next step.
     const frame = Math.round(annotation.time / frameDuration.value)
+    // On the frame on screen (always frame 0 on a picture), setCurrentFrame
+    // reloads nothing after a wipe: its drawing is shown already.
+    if (frame === currentFrame.value) return
     clearCanvas()
     setCurrentFrame(frame)
     syncComparisonViewer()
@@ -1300,6 +1342,11 @@ const realignComparisonCanvas = () => {
   comparisonAnnotationCanvas.value?.updateBounds()
   loadComparisonAnnotationAtCurrentFrame()
 }
+
+const realignComparisonCanvasLater = func.debounce(
+  realignComparisonCanvas,
+  RESIZE_DELAY
+)
 
 // Push the main viewer's current transform onto the comparison
 // viewer once its panzoom instance is (re)bound. The comparison
@@ -1339,7 +1386,7 @@ const onComparisonVideoLoaded = () => {
   // Draw once after RESIZE_DELAY rather than on nextTick: painting before
   // the transition settles places the annotation at a mid-transition
   // position, so it visibly jumps when corrected.
-  setTimeout(realignComparisonCanvas, RESIZE_DELAY)
+  realignComparisonCanvasLater()
 }
 
 const onComparisonCanvasResized = () => {
@@ -1355,18 +1402,15 @@ const onProgressChanged = frame => {
 }
 
 // Shot trim handles, shown on the progress bar like in PlaylistPlayer.
-// Not every parent passes entity-type (the Task page doesn't): derive the
-// type from the task payload too. A plain function, not a computed: the
-// shotMap getter exposes a non-reactive cache, so it must be re-read at
-// call time (the watcher below re-runs when the shots finish loading).
-const getTrimmedShot = () => {
-  const entityType =
-    props.entityType ||
-    props.task?.entity_type?.name ||
-    props.task?.entity_type_name
-  if (entityType !== 'Shot') return null
-  return store.getters.shotMap?.get(props.task?.entity_id) || props.task?.entity
-}
+const { canEditTrim, getTrimmedShot, saveTrimmedShot } = useTrimmedShot({
+  entityType: computed(() => props.entityType),
+  store,
+  task: computed(() => props.task)
+})
+
+// Zou refuses the trim of clients and department supervisors: keep the
+// handles visible but frozen for them.
+const areHandlesReadOnly = computed(() => props.readOnly || !canEditTrim.value)
 
 const toFrameNumber = value => {
   const frame = parseInt(value, 10)
@@ -1391,29 +1435,31 @@ const resetHandles = () => {
   handleOut.value = outFrame > 0 ? outFrame : nbFrames.value
 }
 
+// Only the moved handle is saved: the other one shows either the clip
+// bound of the revision on screen, or a trim set on another revision.
+const saveHandles = handles => {
+  saveTrimmedShot(handles).catch(err => {
+    console.error(err)
+    resetHandles()
+  })
+}
+
 const onHandleInChanged = ({ frameNumber, save }) => {
-  if (props.readOnly) return
+  if (areHandlesReadOnly.value) return
   handleIn.value = frameNumber
-  if (save) saveHandles()
+  if (save) saveHandles({ handle_in: frameNumber })
 }
 
 const onHandleOutChanged = ({ frameNumber, save }) => {
-  if (props.readOnly) return
+  if (areHandlesReadOnly.value) return
   handleOut.value = frameNumber
-  if (save) saveHandles()
-}
-
-const saveHandles = () => {
-  const shot = getTrimmedShot()
-  if (!shot?.id) return
-  store.dispatch('editShot', {
-    id: shot.id,
-    data: {
-      ...shot.data,
-      ...(handleIn.value >= 0 && { handle_in: handleIn.value }),
-      ...(handleOut.value >= 0 && { handle_out: handleOut.value })
-    }
-  })
+  // An end handle at the clip end is no trim: saving that frame would
+  // stop a longer revision at the length of the one on screen.
+  if (save) {
+    saveHandles({
+      handle_out: frameNumber < nbFrames.value ? frameNumber : null
+    })
+  }
 }
 
 // Playback respects the trim like PlaylistPlayer: start on handle-in,
@@ -1690,9 +1736,6 @@ const loadAnnotation = annotation => {
     }
     annotation = getAnnotation(currentTimeVal)
     if (!annotation) {
-      if (!isMovie.value) {
-        console.warn('Annotations are malformed or empty.')
-      }
       if (isComparing.value && !isComparisonOverlay.value) {
         loadComparisonAnnotation(currentTimeVal)
       }
@@ -1768,13 +1811,19 @@ const getFileFromCanvas = (canvas, filename) => {
   })
 }
 
+// Resolves false once the player is closed: no viewer is left to read the
+// frame from, and the snapshots are of no use anymore.
 const extractVideoFrame = (canvas, frame) => {
   return new Promise(resolve => {
+    if (!previewViewer.value) {
+      resolve(false)
+      return
+    }
     setCurrentFrame(frame)
     nextTick(() => {
       setTimeout(() => {
-        previewViewer.value.extractFrame(canvas, frame)
-        resolve()
+        previewViewer.value?.extractFrame(canvas, frame)
+        resolve(Boolean(previewViewer.value))
       }, RESIZE_DELAY)
     })
   })
@@ -1816,13 +1865,14 @@ const extractVideoAnnotationSnapshots = async ({ withLabel = false } = {}) => {
     const frame = Math.round(
       roundToFrame(annotation.time, fps.value) / frameDuration.value
     )
-    await extractVideoFrame(canvas, frame)
+    if (!(await extractVideoFrame(canvas, frame))) return []
     await copyAnnotationCanvas(canvas, annotation)
     if (withLabel) drawSnapshotTitle(canvas, snapshotTitle({ revision, frame }))
     files.push(
       await getFileFromCanvas(canvas, snapshotFilename({ revision, frame }))
     )
   }
+  if (!previewViewer.value) return []
   // currentFrame is 0-based here (unlike PlaylistPlayer's 1-based label
   // this restore was copied from): no -1, or the playhead steps back.
   previewViewer.value.setCurrentFrame(cur)
@@ -1859,6 +1909,8 @@ const extractPicturePreviewSnapshots = async ({ withLabel = false } = {}) => {
     // capture an empty live canvas, producing a PNG without any
     // annotation.
     await new Promise(resolve => setTimeout(resolve, 500))
+    // Closed meanwhile, like in extractVideoFrame
+    if (!previewViewer.value) return []
     const canvas = document.getElementById('annotation-snapshot')
     previewViewer.value.extractPicture(canvas)
     await compositeLiveAnnotationsOntoCanvas(canvas)
@@ -1964,8 +2016,8 @@ const onCommentClicked = () => {
   }
   endAnnotationSaving()
   nextTick(() => {
-    previewViewer.value.resize()
-    comparisonViewer.value.resize()
+    previewViewer.value?.resize()
+    comparisonViewer.value?.resize()
     loadAnnotation()
   })
 }
@@ -1993,14 +2045,39 @@ const resetPlayerPositions = () => {
   resetPanzoomTransform()
 }
 
+// Debounced: a live window resize (or the fullscreen transition) fires
+// this continuously, and each tick cleared and rebuilt the annotation
+// objects (async PSStroke deserialization).
+const onContainerResized = func.debounce(() => {
+  resetPlayerPositions()
+  // On a phone the keyboard resizes the player as a note is typed: the
+  // reload would end the typing. AnnotationCanvas resizes the canvas once
+  // the note is done.
+  if (fabricCanvas.value?.getActiveObject()?.isEditing) return
+  if (isPicture.value || isMovie.value) loadAnnotation()
+}, 200)
+
 const onPreviewLoaded = () => {
   if (isMovie.value) {
     movieDimensions.value = {
       width: currentPreview.value.width,
       height: currentPreview.value.height
     }
-    setCurrentFrame(0)
-    progress.value.updateProgressBar(0)
+    if (isQualitySwitchPending) {
+      // The LD/HD reload restarted the decoder at 0 and paused it: put
+      // it back where the user was.
+      isQualitySwitchPending = false
+      previewViewer.value.setCurrentFrame(currentFrame.value)
+      if (isPlaying.value) {
+        previewViewer.value.play()
+        if (comparisonViewer.value && isComparing.value) {
+          comparisonViewer.value.play()
+        }
+      }
+    } else {
+      setCurrentFrame(0)
+      progress.value.updateProgressBar(0)
+    }
   }
   // Replay the same sequence that fires on a comparison toggle: it
   // forces a resetPicture/mountVideo round-trip on the viewers, which
@@ -2265,7 +2342,7 @@ watch(currentPreview, (newPreview, oldPreview) => {
       if (previewViewer.value) {
         movieDimensions.value = previewViewer.value.getNaturalDimensions()
         previewViewer.value.resize()
-        comparisonViewer.value.resize()
+        comparisonViewer.value?.resize()
       }
     }, RESIZE_DELAY)
   } else if (isPicture.value) {
@@ -2284,10 +2361,11 @@ watch(currentPreview, (newPreview, oldPreview) => {
       clearCanvas()
     }
   })
-  // Re-pick the default comparison target only on a real revision change;
-  // doing it on every sub-preview step would reset the user's selection.
+  // A real revision change drops the comparison target, as closing does:
+  // kept, it loads its movie in the hidden viewer. Opening the comparison
+  // picks a new one. Sub-preview steps keep the user's selection.
   if (revisionChanged) {
-    setDefaultComparisonTaskType()
+    taskTypeId.value = ''
   }
   isOrdering.value =
     props.previews.length > 1 &&
@@ -2333,8 +2411,8 @@ watch(currentIndex, () => {
 watch(previewToCompare, () => {
   comparisonPreviewIndex.value = 0
   nextTick(() => {
-    previewViewer.value.resize()
-    comparisonViewer.value.resize()
+    previewViewer.value?.resize()
+    comparisonViewer.value?.resize()
   })
 })
 
@@ -2390,8 +2468,8 @@ watch(
   () => props.light,
   () => {
     endAnnotationSaving()
-    previewViewer.value.resize()
-    comparisonViewer.value.resize()
+    previewViewer.value?.resize()
+    comparisonViewer.value?.resize()
   }
 )
 
@@ -2399,8 +2477,8 @@ watch(
   () => props.extraWide,
   () => {
     endAnnotationSaving()
-    previewViewer.value.resize()
-    comparisonViewer.value.resize()
+    previewViewer.value?.resize()
+    comparisonViewer.value?.resize()
   }
 )
 
@@ -2413,8 +2491,8 @@ watch(isDrawing, () => {
 
 watch(isOrdering, () => {
   nextTick(() => {
-    previewViewer.value.resize()
-    comparisonViewer.value.resize()
+    previewViewer.value?.resize()
+    comparisonViewer.value?.resize()
   })
 })
 
@@ -2470,6 +2548,13 @@ watch(volume, () => {
   localPreferences.setPreference('player:volume', volume.value)
 })
 
+// The viewers reload their source on a quality switch: onPreviewLoaded then
+// restores the frame instead of resetting it.
+let isQualitySwitchPending = false
+watch(isHd, () => {
+  if (isMovie.value) isQualitySwitchPending = true
+})
+
 // Persist through a watcher: ButtonSound drives isMuted via v-model and
 // never emits change-sound, so a click handler on the toggle chain never
 // runs and the preference was never written.
@@ -2480,6 +2565,11 @@ watch(isMuted, () => {
 // Lifecycle
 
 onMounted(() => {
+  // A render that threw leaves every template ref null: Vue mounts a comment
+  // node in its place and still runs this hook. The render error is already
+  // reported, so skip the wiring instead of failing a second time.
+  if (!container.value) return
+
   configureEvents()
 
   resetPreviewFileMap()
@@ -2511,13 +2601,6 @@ onMounted(() => {
   // viewer's transform through the panzoom-changed sync.
   previewViewer.value?.resumeZoom()
 
-  // Debounced: a live window resize (or the fullscreen transition) fires
-  // this continuously, and each tick cleared and rebuilt the annotation
-  // objects (async PSStroke deserialization).
-  const onContainerResized = func.debounce(() => {
-    resetPlayerPositions()
-    if (isPicture.value || isMovie.value) loadAnnotation()
-  }, 200)
   containerResizeObserver = new ResizeObserver(onContainerResized)
   containerResizeObserver.observe(container.value)
 
@@ -2545,6 +2628,8 @@ onBeforeUnmount(() => {
   document.removeEventListener('mouseup', onScrubEnd)
   containerResizeObserver?.disconnect()
   containerResizeObserver = null
+  onContainerResized.cancel()
+  realignComparisonCanvasLater.cancel()
 })
 
 // Player API (passed to TaskInfo via :player prop)
@@ -2833,6 +2918,12 @@ defineExpose({
   // would otherwise let Chrome's two-finger swipe navigate back / forward
   // and drop any unsaved comment — issue #1700.
   overscroll-behavior-x: contain;
+
+  // The fingers navigate the media there: the page must not scroll or
+  // zoom under them.
+  &.touch-navigation {
+    touch-action: none;
+  }
 }
 
 .viewers {

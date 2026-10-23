@@ -35,12 +35,19 @@
           <th></th>
         </tr>
       </thead>
+      <!-- A held button must not arm a drag: a reload that shifted the rows
+           before the release made vuedraggable throw on the move. -->
       <draggable
         class="datatable-body"
+        filter="button"
         item-key="id"
+        :prevent-on-filter="false"
         tag="tbody"
         v-model="draggableList"
+        @choose="onRowHeld"
         @end="onReorder"
+        @start="onRowDragged"
+        @unchoose="onRowReleased"
       >
         <template #item="{ element: taskStatus }">
           <tr class="datatable-row task-status">
@@ -93,17 +100,19 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
-
-import draggable from 'vuedraggable'
 import { GripVerticalIcon } from 'lucide-vue-next'
+import { computed, ref, watch } from 'vue'
+import draggable from 'vuedraggable'
 
+import { useDraggableRebuild } from '@/composables/draggableRebuild'
 import { sortByName } from '@/lib/sorting'
 
 import BooleanRep from '@/components/widgets/BooleanRep.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ValidationTag from '@/components/widgets/ValidationTag.vue'
 
+// Props / Emits
+// --------------------------------------------------------------------------
 const props = defineProps({
   taskStatuses: { type: Array, default: () => [] },
   allTaskStatuses: { type: Array, default: () => [] }
@@ -111,9 +120,13 @@ const props = defineProps({
 
 const emit = defineEmits(['add', 'remove', 'reorder'])
 
+// State
+// --------------------------------------------------------------------------
 const taskStatusToAdd = ref(null)
 const draggableList = ref([])
 
+// Computed
+// --------------------------------------------------------------------------
 const linkedIds = computed(() => new Set(props.taskStatuses.map(s => s.id)))
 
 const remainingTaskStatuses = computed(() =>
@@ -124,21 +137,19 @@ const remainingTaskStatuses = computed(() =>
   )
 )
 
+// Functions
+// --------------------------------------------------------------------------
 const resetSelection = () => {
   taskStatusToAdd.value = remainingTaskStatuses.value[0]?.id || null
 }
 
-watch(
-  () => props.taskStatuses,
-  list => {
-    draggableList.value = [...list]
-    resetSelection()
-  },
-  { immediate: true }
-)
-
-watch(remainingTaskStatuses, () => {
-  resetSelection()
+const {
+  rebuild: resetDraggableList,
+  onRowHeld,
+  onRowDragged,
+  onRowReleased
+} = useDraggableRebuild(() => {
+  draggableList.value = [...props.taskStatuses]
 })
 
 const onAdd = () => {
@@ -147,13 +158,25 @@ const onAdd = () => {
   resetSelection()
 }
 
+// The list held during the drag may still show a status removed meanwhile,
+// and Zou links again a status a template reorder names.
 const onReorder = () => {
-  const ordered = draggableList.value.map((ts, index) => ({
-    taskStatusId: ts.id,
-    priority: index + 1
-  }))
-  emit('reorder', ordered)
+  emit(
+    'reorder',
+    draggableList.value
+      .filter(ts => linkedIds.value.has(ts.id))
+      .map((ts, index) => ({
+        taskStatusId: ts.id,
+        priority: index + 1
+      }))
+  )
 }
+
+// Watchers
+// --------------------------------------------------------------------------
+watch(() => props.taskStatuses, resetDraggableList, { immediate: true })
+
+watch(remainingTaskStatuses, resetSelection, { immediate: true })
 </script>
 
 <style lang="scss" scoped>

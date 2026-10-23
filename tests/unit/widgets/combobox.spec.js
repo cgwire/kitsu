@@ -21,10 +21,6 @@ describe('Combobox', () => {
     })
   })
 
-  it('mounts successfully', () => {
-    expect(wrapper.exists()).toBe(true)
-  })
-
   it('renders all options', () => {
     const optionEls = wrapper.findAll('option')
     expect(optionEls).toHaveLength(3)
@@ -52,6 +48,23 @@ describe('Combobox', () => {
     await select.trigger('keyup.enter')
     expect(wrapper.emitted('enter')).toBeTruthy()
     expect(wrapper.emitted('enter')[0]).toEqual(['a'])
+  })
+
+  it('does not read a selected value as the label of another option', async () => {
+    const wrapper2 = shallowMount(Combobox, {
+      props: {
+        options: [
+          { label: 'a', value: 'b' },
+          { label: 'b', value: 'c' }
+        ],
+        modelValue: 'c'
+      },
+      global: { plugins: [i18n] }
+    })
+    const select = wrapper2.find('select')
+    select.element.value = 'a'
+    await select.trigger('change')
+    expect(wrapper2.emitted('update:model-value')[0]).toEqual(['b'])
   })
 
   it('renders label when provided', async () => {

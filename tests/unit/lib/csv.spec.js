@@ -10,7 +10,64 @@ import moment from 'moment'
 
 import csv from '@/lib/csv'
 
+import { GoneFileReader, TextFileReader } from '../fixtures/file-reader'
+
 describe('lib/csv', () => {
+  describe('processCSV', () => {
+    beforeEach(() => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+    })
+
+    afterEach(() => {
+      vi.unstubAllGlobals()
+      vi.restoreAllMocks()
+    })
+
+    const failedReading = file =>
+      csv.processCSV(file).then(
+        data => {
+          throw new Error(`Read ${JSON.stringify(data)}`)
+        },
+        err => err
+      )
+
+    test('parses a CSV file', async () => {
+      vi.stubGlobal('FileReader', TextFileReader)
+      const file = new File(['Type,Name\nProp, Sword '], 'assets.csv')
+
+      expect(await csv.processCSV(file)).toEqual([
+        ['Type', 'Name'],
+        ['Prop', 'Sword']
+      ])
+    })
+
+    test('rejects an empty file as a read failure', async () => {
+      vi.stubGlobal('FileReader', TextFileReader)
+      const error = await failedReading(new File([], 'assets.csv'))
+
+      csv.logReadFailure(error)
+
+      expect(console.error).toHaveBeenCalledWith(error)
+    })
+
+    test('rejects a file the browser cannot read as a read failure', async () => {
+      vi.stubGlobal('FileReader', GoneFileReader)
+      const error = await failedReading(new File(['Type,Name'], 'assets.csv'))
+
+      csv.logReadFailure(error)
+
+      expect(error.name).toBe('NotFoundError')
+      expect(console.error).toHaveBeenCalledWith(error)
+    })
+
+    test('leaves any other failure to the caller', () => {
+      const bug = new TypeError('data is undefined')
+
+      expect(() => csv.logReadFailure(bug)).toThrow(bug)
+      expect(console.error).not.toHaveBeenCalled()
+    })
+  })
+
   describe('turnEntriesToCsvString', () => {
     test('escapes spreadsheet formula cells (SEC-8)', () => {
       const entries = [
@@ -255,7 +312,7 @@ describe('lib/csv', () => {
       ])
     })
 
-    test('ignores empty and single-cell lines', () => {
+    test('ignores empty lines', () => {
       const sparseCsv = [
         ['Sequence', 'Name'],
         [''],
@@ -264,6 +321,20 @@ describe('lib/csv', () => {
       ]
       expect(csv.getNewEntityNames(sparseCsv, indexMatchers, {})).toEqual([
         'SEQ01 / SH001'
+      ])
+    })
+
+    // The preview shows such a line and Kitsu uploads it: the user must see
+    // it among the entries to create.
+    test('lists a line holding a single cell', () => {
+      const singleCellCsv = [
+        ['Name', 'Description'],
+        ['E010', 'An edit'],
+        ['E020']
+      ]
+      expect(csv.getNewEntityNames(singleCellCsv, [0], {})).toEqual([
+        'E010',
+        'E020'
       ])
     })
 

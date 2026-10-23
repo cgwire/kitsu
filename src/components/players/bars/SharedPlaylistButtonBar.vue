@@ -47,7 +47,7 @@
       >
         {{ currentTimeFormatted }}
       </span>
-      <span class="flexrow-item time-indicator">/</span>
+      <span class="flexrow-item time-indicator"> / </span>
       <span
         class="flexrow-item time-indicator"
         :title="$t('playlists.actions.max_duration')"
@@ -55,10 +55,10 @@
         {{ maxDurationFormatted }}
       </span>
       <span
-        class="flexrow-item frame-counter mr05 nowrap"
+        class="flexrow-item frame-counter nowrap"
         :title="$t('playlists.actions.frame_number')"
       >
-        {{ currentFrameDisplay }} / {{ nbFramesDisplay }}
+        ({{ currentFrameDisplay }} / {{ nbFramesDisplay }})
       </span>
     </div>
 
@@ -69,12 +69,6 @@
         :title="$t('playlists.actions.looping')"
         icon="repeat"
         @click="isRepeating = !isRepeating"
-      />
-      <button-simple
-        class="playlist-button flexrow-item"
-        :title="$t('playlists.actions.' + (isHd ? 'switch_ld' : 'switch_hd'))"
-        :text="isHd ? 'HD' : 'LD'"
-        @click="isHd = !isHd"
       />
       <button-sound
         class="flexrow-item playlist-button"
@@ -169,7 +163,6 @@ const isEntitiesHidden = defineModel('isEntitiesHidden', {
   type: Boolean,
   default: false
 })
-const isHd = defineModel('isHd', { type: Boolean, default: true })
 const isMuted = defineModel('isMuted', { type: Boolean, default: false })
 const isRepeating = defineModel('isRepeating', {
   type: Boolean,
@@ -215,6 +208,7 @@ const volume = defineModel('volume', { type: Number, default: 100 })
   width: 100%;
 }
 
+.frame-counter,
 .time-indicator {
   color: rgba(244, 245, 250, 0.6);
   font-variant-numeric: tabular-nums;

@@ -1,14 +1,19 @@
 <template>
-  <background-settings
-    :backgrounds="productionBackgrounds"
-    :all-backgrounds="backgrounds"
-    :default-background-id="
-      currentProduction.default_preview_background_file_id
-    "
-    @add="onAdd"
-    @remove="onRemove"
-    @set-default="onSetDefault"
-  />
+  <div>
+    <p class="explanation mb1">
+      {{ $t('backgrounds.production_description') }}
+    </p>
+    <background-settings
+      :backgrounds="productionBackgrounds"
+      :all-backgrounds="backgrounds"
+      :default-background-id="
+        currentProduction.default_preview_background_file_id
+      "
+      @add="onAdd"
+      @remove="onRemove"
+      @set-default="onSetDefault"
+    />
+  </div>
 </template>
 
 <script setup>
@@ -19,12 +24,16 @@ import BackgroundSettings from '@/components/pages/production/BackgroundSettings
 
 const store = useStore()
 
+// Computed
+// --------------------------------------------------------------------------
 const backgrounds = computed(() => store.getters.backgrounds)
 const currentProduction = computed(() => store.getters.currentProduction)
 const productionBackgrounds = computed(
   () => store.getters.productionBackgrounds
 )
 
+// Functions
+// --------------------------------------------------------------------------
 const onAdd = backgroundId => {
   store.dispatch('addBackgroundToProduction', backgroundId)
 }

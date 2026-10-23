@@ -2,18 +2,31 @@
   <div class="sequences page fixed-page">
     <div class="sequence-list-header page-header flexrow">
       <search-field
-        class="flexrow-item mt1"
+        class="flexrow-item search-field"
         ref="sequence-search-field"
         :can-save="true"
         @change="onSearchChange"
         @save="saveSearchQuery"
-        placeholder="ex: e01 s01 anim=wip"
+        placeholder="ex: e01 s01"
+        v-if="!isCurrentUserClient"
+      />
+      <combobox-visible-options
+        class="flexrow-item options-filter"
+        :label="$t('sequences.title')"
+        :options="sequenceOptions"
+        v-model:hidden="hiddenSequenceIds"
+      />
+      <combobox-task-type-options
+        class="flexrow-item options-filter"
+        :label="$t('task_types.title')"
+        :task-types="columnTaskTypes"
+        v-model:hidden="hiddenTaskTypeIds"
       />
       <combobox
         class="mb0 flexrow-item"
         :label="$t('statistics.display_mode')"
         locale-key-prefix="statistics."
-        :options="displayModeOptions"
+        :options="STATS_DISPLAY_MODE_OPTIONS"
         v-model="displayMode"
       />
       <combobox
@@ -23,7 +36,7 @@
         :options="countModeOptions"
         v-model="countMode"
       />
-      <span class="filler"> </span>
+      <span class="filler"></span>
       <button-simple
         class="flexrow-item"
         icon="refresh"
@@ -31,14 +44,14 @@
         @click="reloadData"
       />
       <button-simple
-        class="flexrow-item"
+        class="flexrow-item export-button"
         icon="download"
         :title="$t('main.csv.export_file')"
         @click="exportStatisticsToCsv"
       />
     </div>
 
-    <div class="query-list mt1">
+    <div class="query-list mt1" v-if="!isCurrentUserClient">
       <search-query-list
         :queries="sequenceSearchQueries"
         type="sequenceStat"
@@ -48,267 +61,251 @@
     </div>
 
     <sequence-stats-list
-      ref="sequence-list"
       :count-mode="countMode"
       :display-mode="displayMode"
       :entries="displayedSequences"
       :is-loading="isShotsLoading || initialLoading"
       :is-error="isShotsLoadingError"
-      :validation-columns="shotValidationColumns"
-      :sequence-stats="sequenceStats"
-      :show-all="!sequenceSearchText"
-      @field-changed="onFieldChanged"
-      @scroll="saveScrollPosition"
+      :is-filtered="isFiltered"
+      :validation-columns="displayedColumns"
+      :sequence-stats="displayedStats"
+      :shot-counts="sequenceShotCounts"
     />
   </div>
 </template>
 
-<script>
+<script setup>
+// Imports
+// --------------------------------------------------------------------------
+import { useHead } from '@unhead/vue'
 import moment from 'moment'
-import { mapGetters, mapActions } from 'vuex'
+import { computed, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
-import { searchMixin } from '@/components/mixins/search'
-
+import {
+  STATS_DISPLAY_MODE_OPTIONS,
+  useStatsPage
+} from '@/composables/statsPage'
 import csv from '@/lib/csv'
 import stringHelpers from '@/lib/string'
 
+import SequenceStatsList from '@/components/lists/SequenceStatsList.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxTaskTypeOptions from '@/components/widgets/ComboboxTaskTypeOptions.vue'
+import ComboboxVisibleOptions from '@/components/widgets/ComboboxVisibleOptions.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
-import SequenceStatsList from '@/components/lists/SequenceStatsList.vue'
 
-export default {
-  name: 'sequence-stats',
+const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
+const store = useStore()
 
-  mixins: [searchMixin],
+// State
+// --------------------------------------------------------------------------
+const searchFieldRef = useTemplateRef('sequence-search-field')
 
-  components: {
-    ButtonSimple,
-    Combobox,
-    SearchField,
-    SearchQueryList,
-    SequenceStatsList
-  },
+const countMode = ref('count')
+const initialLoading = ref(true)
+const isSavingSearch = ref(false)
 
-  data() {
-    return {
-      countMode: 'count',
-      displayMode: 'pie',
-      initialLoading: true,
-      countModeOptions: [
-        { label: 'shots', value: 'count' },
-        { label: 'frames', value: 'frames' }
-      ],
-      displayModeOptions: [
-        { label: 'pie', value: 'pie' },
-        { label: 'count', value: 'count' }
-      ],
-      loading: {
-        savingSearch: false
-      }
-    }
-  },
+// Computed
+// --------------------------------------------------------------------------
+const currentEpisode = computed(() => store.getters.currentEpisode)
+const currentProduction = computed(() => store.getters.currentProduction)
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+const isPaperProduction = computed(() => store.getters.isPaperProduction)
+const isShotsLoading = computed(() => store.getters.isShotsLoading)
+const isShotsLoadingError = computed(() => store.getters.isShotsLoadingError)
+const isTVShow = computed(() => store.getters.isTVShow)
+const searchedSequences = computed(() => store.getters.displayedSequences)
+const searchSequenceFilters = computed(
+  () => store.getters.searchSequenceFilters
+)
+const sequenceMap = computed(() => store.getters.sequenceMap)
+const sequenceSearchQueries = computed(
+  () => store.getters.sequenceSearchQueries
+)
+const sequenceShotCounts = computed(() => store.getters.sequenceShotCounts)
+const sequenceStats = computed(() => store.getters.sequenceStats)
+const shotValidationColumns = computed(
+  () => store.getters.shotValidationColumns
+)
+const taskStatusMap = computed(() => store.getters.taskStatusMap)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
-  mounted() {
-    this.setCountOptions()
-    this.loadShots().then(() => {
-      this.initSequences()
-        .then(() => {
-          this.initialLoading = false
-          setTimeout(() => {
-            this.setSearchFromUrl()
-            this.onSearchChange()
-          }, 100) // wait for data to be ready
-        })
-        .catch(err => console.error(err))
-    })
-  },
+const countModeOptions = computed(() => [
+  { label: 'shots', value: 'count' },
+  isPaperProduction.value
+    ? { label: 'drawings', value: 'drawings' }
+    : { label: 'frames', value: 'frames' }
+])
 
-  computed: {
-    ...mapGetters([
-      'currentEpisode',
-      'currentProduction',
-      'displayedSequences',
-      'isPaperProduction',
-      'isShotsLoading',
-      'isShotsLoadingError',
-      'isTVShow',
-      'searchSequenceFilters',
-      'sequenceMap',
-      'sequencesPath',
-      'sequenceStats',
-      'sequenceSearchText',
-      'sequenceSearchQueries',
-      'sequenceListScrollPosition',
-      'shotValidationColumns',
-      'taskTypeMap',
-      'taskStatusMap'
-    ]),
+// The selector works on the result of the search: both narrow the table.
+const {
+  columnTaskTypes,
+  displayMode,
+  displayedColumns,
+  displayedRows: displayedSequences,
+  getDisplayedStats,
+  hiddenColumnIds: hiddenTaskTypeIds,
+  hiddenRowIds: hiddenSequenceIds,
+  isFiltered,
+  rowOptions: sequenceOptions
+} = useStatsPage({
+  preferenceKey: 'stats:sequence-display-mode',
+  rowsParam: 'hiddenSequences',
+  rows: searchedSequences,
+  columnIds: shotValidationColumns
+})
 
-    searchField() {
-      return this.$refs['sequence-search-field']
-    }
-  },
+const displayedStats = computed(() => getDisplayedStats(sequenceStats.value))
 
-  methods: {
-    ...mapActions([
-      'computeSequenceStats',
-      'initSequences',
-      'loadShots',
-      'removeSequenceSearch',
-      'saveSequenceSearch',
-      'setSequenceListScrollPosition',
-      'setSequenceStatsSearch'
-    ]),
-
-    reloadData() {
-      this.initialLoading = true
-      this.loadShots().then(() => {
-        this.initialLoading = false
-        this.computeSequenceStats()
-      })
-    },
-
-    setDefaultListScrollPosition() {
-      this.$refs['sequence-list']?.setScrollPosition(
-        this.sequenceListScrollPosition
-      )
-    },
-
-    navigateToList() {
-      this.$router.push(this.sequencesPath)
-    },
-
-    onSearchChange() {
-      const searchQuery = this.$refs['sequence-search-field']?.getValue()
-      this.setSearchInUrl()
-      this.setSequenceStatsSearch(searchQuery)
-    },
-
-    saveSearchQuery(searchQuery) {
-      if (this.loading.savingSearch) {
-        return
-      }
-      this.loading.savingSearch = true
-      this.saveSequenceSearch(searchQuery)
-        .catch(console.error)
-        .finally(() => {
-          this.loading.savingSearch = false
-        })
-    },
-
-    removeSearchQuery(searchQuery) {
-      this.removeSequenceSearch(searchQuery).catch(console.error)
-    },
-
-    saveScrollPosition(scrollPosition) {
-      this.setSequenceListScrollPosition(scrollPosition)
-    },
-
-    exportStatisticsToCsv() {
-      const nameData = [
-        moment().format('YYYYMMDD'),
-        this.currentProduction.name,
-        'sequences',
-        'statistics'
-      ]
-      if (this.currentEpisode) {
-        nameData.splice(2, 0, this.currentEpisode.name)
-      }
-      const name = stringHelpers.slugify(nameData.join('_'))
-      csv.generateStatReports(
-        name,
-        this.sequenceStats,
-        this.taskTypeMap,
-        this.taskStatusMap,
-        this.sequenceMap,
-        this.countMode,
-        this.currentProduction
-      )
-    },
-
-    onFieldChanged({ entry, fieldName, value }) {
-      const data = { id: entry.id }
-      data[fieldName] = value
-      this.editSequence(data)
-    },
-
-    setCountOptions() {
-      if (this.isPaperProduction) {
-        this.countModeOptions = [
-          { label: 'shots', value: 'count' },
-          { label: 'drawings', value: 'drawings' }
-        ]
-      } else {
-        this.countModeOptions = [
-          { label: 'shots', value: 'count' },
-          { label: 'frames', value: 'frames' }
-        ]
-      }
-      this.countMode = this.countModeOptions[0].value
-    }
-  },
-
-  watch: {
-    currentProduction() {
-      this.$refs['sequence-search-field'].setValue('')
-      this.$store.commit('SET_SEQUENCE_LIST_SCROLL_POSITION', 0)
-      this.setCountOptions()
-
-      if (!this.isTVShow) {
-        this.loadShots().then(() => {
-          this.initSequences().catch(err => console.error(err))
-        })
-      }
-    },
-
-    currentEpisode() {
-      if (this.isTVShow && this.currentEpisode) {
-        this.loadShots().then(() => {
-          this.initSequences()
-            .then(() => {
-              this.initialLoading = false
-            })
-            .catch(err => console.error(err))
-        })
-      }
-    },
-
-    searchSequenceFilters: {
-      deep: true,
-      handler() {
-        this.computeSequenceStats()
-      }
-    },
-
-    '$route.query.search'(search) {
-      this.searchField?.setValue(search)
-      this.onSearchChange()
-    }
-  },
-
-  head() {
-    if (this.isTVShow) {
-      return {
-        title:
-          `${this.currentProduction ? this.currentProduction.name : ''}` +
-          ` - ${this.currentEpisode ? this.currentEpisode.name : ''}` +
-          ` | ${this.$t('sequences.title')} - Kitsu`
-      }
-    } else {
-      return {
-        title:
-          `${this.currentProduction ? this.currentProduction.name : ''}` +
-          ` | ${this.$t('sequences.title')} - Kitsu`
-      }
-    }
+// Functions
+// --------------------------------------------------------------------------
+const loadSequences = async () => {
+  try {
+    await store.dispatch('loadShots')
+    await store.dispatch('initSequences')
+  } catch (err) {
+    console.error(err)
   }
 }
+
+const reloadData = async () => {
+  initialLoading.value = true
+  try {
+    await store.dispatch('loadShots')
+    store.dispatch('computeSequenceStats')
+  } catch (err) {
+    console.error(err)
+  }
+  initialLoading.value = false
+}
+
+const setSearchFromUrl = () => {
+  const searchFromUrl = route.query.search
+  if (!searchFieldRef.value?.getValue() && searchFromUrl) {
+    searchFieldRef.value?.setValue(searchFromUrl)
+  }
+}
+
+const onSearchChange = () => {
+  const searchQuery = searchFieldRef.value?.getValue()
+  router.replace({
+    query: { ...route.query, search: searchQuery || undefined }
+  })
+  store.dispatch('setSequenceStatsSearch', searchQuery)
+}
+
+const saveSearchQuery = async searchQuery => {
+  if (isSavingSearch.value) return
+  isSavingSearch.value = true
+  try {
+    await store.dispatch('saveSequenceSearch', searchQuery)
+  } catch (err) {
+    console.error(err)
+  }
+  isSavingSearch.value = false
+}
+
+const removeSearchQuery = searchQuery => {
+  store.dispatch('removeSequenceSearch', searchQuery).catch(console.error)
+}
+
+const exportStatisticsToCsv = () => {
+  const nameData = [
+    moment().format('YYYYMMDD'),
+    currentProduction.value.name,
+    ...(currentEpisode.value ? [currentEpisode.value.name] : []),
+    'sequences',
+    'statistics'
+  ]
+  const name = stringHelpers.slugify(nameData.join('_'))
+  csv.generateStatReports(
+    name,
+    displayedStats.value,
+    taskTypeMap.value,
+    taskStatusMap.value,
+    sequenceMap.value,
+    countMode.value,
+    currentProduction.value
+  )
+}
+
+// Watchers
+// --------------------------------------------------------------------------
+watch(currentProduction, () => {
+  searchFieldRef.value?.setValue('')
+  countMode.value = 'count'
+  if (!isTVShow.value) loadSequences()
+})
+
+watch(currentEpisode, async () => {
+  if (isTVShow.value && currentEpisode.value) {
+    await loadSequences()
+    initialLoading.value = false
+  }
+})
+
+watch(
+  searchSequenceFilters,
+  () => {
+    store.dispatch('computeSequenceStats')
+  },
+  { deep: true }
+)
+
+watch(
+  () => route.query.search,
+  search => {
+    searchFieldRef.value?.setValue(search)
+    onSearchChange()
+  }
+)
+
+// Lifecycle
+// --------------------------------------------------------------------------
+onMounted(async () => {
+  await loadSequences()
+  initialLoading.value = false
+  setSearchFromUrl()
+  onSearchChange()
+})
+
+// Head
+// --------------------------------------------------------------------------
+useHead({
+  title: computed(() => {
+    const production = currentProduction.value?.name || ''
+    const episode = isTVShow.value
+      ? ` - ${currentEpisode.value?.name || ''}`
+      : ''
+    return `${production}${episode} | ${t('sequences.title')} - Kitsu`
+  })
+})
 </script>
 
 <style lang="scss" scoped>
-.mb0 {
-  margin-bottom: 0;
+@use '@/styles/stats.scss' as stats;
+
+.sequence-list-header {
+  @include stats.page-header($with-search: true);
+}
+
+@media screen and (max-width: 768px) {
+  // Mobile is read-only.
+  .export-button {
+    display: none;
+  }
+
+  // Without saved searches this block is empty: its margin only pushed the
+  // cards down.
+  .query-list {
+    margin-bottom: 0;
+  }
 }
 </style>

@@ -114,17 +114,12 @@
                 type="number"
                 step="any"
                 placeholder="0"
-                @input="
-                  $emit('estimation-changed', {
-                    days: $event.target.valueAsNumber || 0,
-                    item: rootElement,
-                    daysOff: rootElement.daysOff
-                  })
-                "
+                @blur="estimationDraft = null"
+                @input="onRootEstimationChanged($event, rootElement)"
                 v-if="
                   !rootElement.avatar && rootElement.editable && !hideManDays
                 "
-                :value="formatDuration(rootElement.man_days, false)"
+                :value="getEstimationValue(rootElement)"
               />
               <span
                 class="man-days-unit flexrow-item"
@@ -224,6 +219,7 @@
                         min="0"
                         placeholder="0"
                         step="any"
+                        @blur="estimationDraft = null"
                         @input="
                           onChildEstimationChanged(
                             $event,
@@ -231,7 +227,7 @@
                             rootElement
                           )
                         "
-                        :value="formatDuration(childElement.man_days, false)"
+                        :value="getEstimationValue(childElement)"
                       />
                       {{ durationUnit }}
                     </span>
@@ -908,6 +904,7 @@ import { getMilestoneColor } from '@/lib/milestones'
 import {
   addBusinessDays,
   daysToMinutes,
+  durationToMinutes,
   formatDisplayDate,
   formatFullDate,
   getBusinessDays,
@@ -1145,6 +1142,10 @@ const saveMilestone = milestone => {
 
 // Data
 const currentElement = ref(null)
+// The text typed in an estimation field, shown as typed until the field is
+// left: rendered back from the estimation, "1." (no number yet) and "1.0"
+// (read as 1) lost their decimal point.
+const estimationDraft = ref(null)
 const selection = ref([])
 const isBrowsingX = ref(false)
 const isBrowsingY = ref(false)
@@ -1374,12 +1375,10 @@ const timelinePositionStyle = computed(() => {
 
 const timelineTodayPositionStyle = computed(() => {
   const today = moment().utc(true)
-  const isVisible =
-    today.isAfter(props.startDate) && today.isBefore(props.endDate)
   return {
     width: `${cellWidth.value}px`,
     left: `${getTimebarLeft({ startDate: today }) - 3}px`,
-    display: isVisible ? 'block' : 'none'
+    display: isInRange(today) ? 'block' : 'none'
   }
 })
 
@@ -1536,24 +1535,50 @@ const startMoveTracking = () => {
   addEvents(moveEvents)
 }
 
+const getEstimationValue = element =>
+  estimationDraft.value?.id === element.id
+    ? estimationDraft.value.text
+    : formatDuration(element.man_days, false)
+
+// The minutes typed, or null while the number is being typed ("1.") and
+// for a negative number
+const readEstimation = (event, element) => {
+  estimationDraft.value = { id: element.id, text: event.target.value }
+  if (event.target.validity.badInput || event.target.valueAsNumber < 0) {
+    return null
+  }
+  return durationToMinutes(organisation.value, event.target.valueAsNumber || 0)
+}
+
+const onRootEstimationChanged = (event, rootElement) => {
+  const estimation = readEstimation(event, rootElement)
+  if (estimation === null) return
+  emit('estimation-changed', {
+    estimation,
+    item: rootElement,
+    daysOff: rootElement.daysOff
+  })
+}
+
 const onChildEstimationChanged = (event, childElement, rootElement) => {
-  const estimation = event.target.valueAsNumber || 0
+  const estimation = readEstimation(event, childElement)
+  if (estimation === null) return
   if (props.isEstimationLinked) {
-    childElement.man_days = daysToMinutes(organisation.value, estimation)
-    childElement.estimation = childElement.man_days
+    childElement.man_days = estimation
+    childElement.estimation = estimation
     refreshManDays(rootElement)
 
     if (estimation > 0) {
       childElement.endDate = addBusinessDays(
         childElement.startDate,
-        estimation - 1,
+        minutesToDays(organisation.value, estimation) - 1,
         rootElement.daysOff
       )
     }
   }
   emit('estimation-changed', {
     taskId: childElement.id,
-    days: estimation,
+    estimation,
     item: childElement,
     daysOff: rootElement.daysOff
   })
@@ -2057,7 +2082,7 @@ const moveTimebarRightSide = (timeElement, event) => {
 }
 
 const onTimelineScroll = event => {
-  if (!event?.target) return
+  if (!event?.target || !entityListRef.value) return
   const position = event.target
   const newTop = position.scrollTop
   entityListRef.value.scrollTop = newTop
@@ -2094,18 +2119,20 @@ const scrollScheduleTop = event => {
 }
 
 const scrollToToday = () => {
-  const today = moment()
-  scrollToDate(today)
+  scrollToDate(moment().utc(true))
 }
 
+// A date out of the range goes to the range end closest to it: doing nothing
+// made the Today button look broken.
 const scrollToDate = date => {
   setTimeout(() => {
-    if (
-      scheduleRef.value &&
-      date.isAfter(props.startDate) &&
-      date.isBefore(props.endDate)
-    ) {
-      const datePosition = getTimebarLeft({ startDate: date }) - 5
+    if (scheduleRef.value) {
+      const target = isInRange(date)
+        ? date
+        : date.isBefore(props.startDate)
+          ? props.startDate
+          : props.endDate
+      const datePosition = getTimebarLeft({ startDate: target }) - 5
       const newLeft = datePosition - (scheduleRef.value.offsetWidth / 2 - 300)
       timelineContentWrapperRef.value.scrollLeft = newLeft
       if (timelineHeaderRef.value) {
@@ -2144,8 +2171,17 @@ const startBrowsingY = event => {
   startMoveTracking()
 }
 
+const isInteracting = () =>
+  isBrowsingX.value ||
+  isBrowsingY.value ||
+  isChangeDates.value ||
+  isChangeStartDate.value ||
+  isChangeEndDate.value
+
 const stopBrowsing = event => {
-  document.body.style.cursor = 'default'
+  // only a move, a resize or a grab changes the cursor, and an outside script
+  // can take the body out of the page
+  if (isInteracting()) document.body.style.cursor = 'default'
   removeEvents(moveEvents)
   // a pending frame would move the item again after the drop is saved
   if (moveFrame) {
@@ -2238,6 +2274,16 @@ const dateDiff = (startDate, endDate, unit = 'days') => {
   const first = start.clone().utc().startOf('day')
   const last = end.clone().utc().endOf('day')
   return last.diff(first, unit)
+}
+
+// Whether the date falls on one of the days the timeline lists, the last one
+// included
+const isInRange = date => {
+  const day = toRaw(date).clone().utc().startOf('day')
+  return (
+    day.isSameOrAfter(toRaw(props.startDate).clone().utc().startOf('day')) &&
+    day.isSameOrBefore(toRaw(props.endDate).clone().utc().startOf('day'))
+  )
 }
 
 // Styles

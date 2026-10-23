@@ -1,5 +1,6 @@
-import taskStatusApi from '@/store/api/taskstatus'
+import { isTaskStatusClientAllowed } from '@/lib/productions'
 import { sortByName } from '@/lib/sorting'
+import taskStatusApi from '@/store/api/taskstatus'
 
 import {
   LOAD_TASK_STATUSES_START,
@@ -41,9 +42,9 @@ const getters = {
     ) {
       return statuses
     } else if (rootGetters.isCurrentUserClient) {
-      return statuses.filter(taskStatus => {
-        return taskStatus.is_client_allowed
-      })
+      return statuses.filter(taskStatus =>
+        isTaskStatusClientAllowed(rootGetters.currentProduction, taskStatus)
+      )
     } else {
       return statuses.filter(taskStatus => {
         return taskStatus.is_artist_allowed
@@ -66,7 +67,10 @@ const getters = {
       ) {
         return statuses
       } else if (rootGetters.isCurrentUserClient) {
-        return statuses.filter(taskStatus => taskStatus.is_client_allowed)
+        const production = rootGetters.productionMap.get(projectId)
+        return statuses.filter(taskStatus =>
+          isTaskStatusClientAllowed(production, taskStatus)
+        )
       } else {
         return statuses.filter(taskStatus => taskStatus.is_artist_allowed)
       }
@@ -74,15 +78,7 @@ const getters = {
 
   getTaskStatus: state => id => {
     return state.taskStatuses.find(taskStatus => taskStatus.id === id)
-  },
-
-  taskStatusOptions: state =>
-    state.taskStatuseses.map(status => ({
-      label: status.short_name,
-      value: status.id,
-      color: status.color,
-      isArtistAllowed: status.is_artist_allowed
-    }))
+  }
 }
 
 const actions = {

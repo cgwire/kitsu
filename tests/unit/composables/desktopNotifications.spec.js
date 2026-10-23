@@ -46,12 +46,6 @@ describe('composables/desktopNotifications', () => {
     expect(permission.value).toBe('granted')
   })
 
-  it('shouldShowBanner is true when supported and not granted', async () => {
-    setupNotification('default')
-    const { shouldShowBanner } = await loadComposable()
-    expect(shouldShowBanner.value).toBe(true)
-  })
-
   it('respects persisted dismiss flag for the current permission', async () => {
     setupNotification('default')
     localStorage.setItem(

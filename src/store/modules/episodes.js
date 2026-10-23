@@ -36,6 +36,7 @@ import {
   REMOVE_EPISODE_SEARCH,
   REMOVE_SELECTED_TASK,
   SET_CURRENT_EPISODE,
+  SET_CURRENT_PRODUCTION,
   SET_EPISODE_LIST_SCROLL_POSITION,
   SET_EPISODE_SELECTION,
   SET_EPISODE_SEARCH,
@@ -495,21 +496,17 @@ const actions = {
   },
 
   loadEpisodeRetakeStats({ commit, rootGetters }, productionId) {
-    const taskTypeMap = rootGetters.taskTypeMap
-    const production = rootGetters.currentProduction
-    commit(SET_EPISODE_RETAKE_STATS, {
-      episodeRetakeStats: {},
-      production,
-      taskTypeMap
-    })
+    commit(SET_EPISODE_RETAKE_STATS, { episodeRetakeStats: {} })
+    // Zou refuses the retake stats to clients since 1.0.97. The role is read
+    // on the requested production: the route may show another one by now.
+    const isClient =
+      !rootGetters.isCurrentUserAdmin &&
+      rootGetters.currentUserRoleForProduction(productionId) === 'client'
+    if (isClient) return Promise.resolve({})
     return shotsApi
       .getEpisodeRetakeStats(productionId)
       .then(episodeRetakeStats => {
-        commit(SET_EPISODE_RETAKE_STATS, {
-          episodeRetakeStats,
-          production,
-          taskTypeMap
-        })
+        commit(SET_EPISODE_RETAKE_STATS, { episodeRetakeStats })
         return episodeRetakeStats
       })
       .catch(console.error)
@@ -601,6 +598,10 @@ const mutations = {
         state.currentEpisode = cache.episodeMap.get(episodeId)
       }
     }
+  },
+
+  [SET_CURRENT_PRODUCTION](state) {
+    state.episodeSearchText = ''
   },
 
   [SET_EPISODES_WITH_TASKS](
@@ -798,8 +799,10 @@ const mutations = {
     const episode = cache.episodeMap.get(newEpisode.id)
     const episodeFromMain = state.episodes.find(e => e.id === newEpisode.id)
     if (episode) {
-      Object.assign(episode, newEpisode)
-      Object.assign(episodeFromMain, newEpisode)
+      const copyNewEpisode = { ...newEpisode }
+      copyNewEpisode.data = { ...episode.data, ...newEpisode.data }
+      Object.assign(episode, copyNewEpisode)
+      Object.assign(episodeFromMain, copyNewEpisode)
       state.displayedEpisodes = state.displayedEpisodes.map(stateEpisode => {
         if (stateEpisode.id === newEpisode.id) {
           return { ...episode }
@@ -904,15 +907,9 @@ const mutations = {
     state.episodeStats = episodeStats
   },
 
-  [SET_EPISODE_RETAKE_STATS](
-    state,
-    { episodeRetakeStats, taskTypeMap, production }
-  ) {
-    state.episodeValidationColumns = helpers.sortStatColumns(
-      episodeRetakeStats,
-      taskTypeMap,
-      production
-    )
+  // The columns come from the status stats, which count the same tasks: a
+  // retake load that is skipped or fails must not empty the table.
+  [SET_EPISODE_RETAKE_STATS](state, { episodeRetakeStats }) {
     state.episodeRetakeStats = episodeRetakeStats
   },
 
@@ -1015,7 +1012,9 @@ const mutations = {
 
   [DELETE_TASK_END](state, task) {
     const episode = cache.episodeMap.get(task.entity_id)
-    if (episode) {
+    // loadEpisodes fills the map without tasks, unlike
+    // loadEpisodesWithTasks.
+    if (episode?.tasks) {
       const validations = new Map(episode.validations)
       validations.delete(task.task_type_id)
       delete episode.validations

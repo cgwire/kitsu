@@ -51,7 +51,7 @@
                                 event
                               )
                           "
-                          :value="
+                          v-number-value="
                             salaryScale[department.id]?.[position]?.[seniority]
                               ?.salary || 0
                           "
@@ -102,7 +102,7 @@
                         event
                       )
                   "
-                  :value="
+                  v-number-value="
                     salaryScale[department.id]?.[position][seniority].salary ||
                     0
                   "
@@ -119,6 +119,9 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useStore } from 'vuex'
+
+import vNumberValue from '@/directives/number-value'
+import { readNumberInput } from '@/lib/number'
 
 import PageLayout from '@/components/layouts/PageLayout.vue'
 import DepartmentName from '@/components/widgets/DepartmentName.vue'
@@ -146,10 +149,12 @@ const setSalaryScale = async () => {
   isLoading.value = false
 }
 
+// "120." or 120.5 is no salary: it is not saved. An emptied field saves 0.
 const modifySalaryScale = (departmentId, position, seniority, event) => {
-  const salary = Math.trunc(event.target.valueAsNumber || 0)
+  const salary = readNumberInput(event.target)
+  if (salary === undefined) return
   const scaleEntry = salaryScale.value[departmentId][position][seniority]
-  scaleEntry.salary = salary
+  scaleEntry.salary = salary ?? 0
   store.dispatch('updateSalaryScale', scaleEntry)
 }
 
@@ -246,6 +251,10 @@ input[type='number'] {
   &:focus {
     border-color: $green;
     outline: none;
+  }
+
+  &:invalid {
+    color: $red;
   }
 }
 

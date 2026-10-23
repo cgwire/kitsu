@@ -1,6 +1,6 @@
 <template>
   <div class="table-metadata-selector-host" ref="hostRef" aria-hidden="true" />
-  <teleport to=".theme">
+  <teleport to="#theme-popups">
     <template v-if="isOpen">
       <div class="column-menu__mask" aria-hidden="true" @click="closeMenu" />
       <div class="column-menu" :style="menuStyle">
@@ -31,7 +31,10 @@
             v-model="sortedMetadataDescriptors"
             item-key="field_name"
             handle=".drag-handle"
+            @choose="onRowHeld"
             @end="onDragEnd"
+            @start="onRowDragged"
+            @unchoose="onRowReleased"
           >
             <template #item="{ element: descriptor }">
               <li>
@@ -89,7 +92,10 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 import draggable from 'vuedraggable'
 
+import { useDraggableRebuild } from '@/composables/draggableRebuild'
+
 const SIDE_PAD = 8
+const MENU_MAX_HEIGHT = 400
 const MENU_WIDTH = 200
 
 const { t } = useI18n()
@@ -173,7 +179,11 @@ const isColumnVisible = name => props.modelValue?.[name] !== false
 const positionMenu = () => {
   if (!props.isOpen) return
   if (!hostRef.value) {
-    menuStyle.value = { top: '5rem', right: `${SIDE_PAD}px` }
+    menuStyle.value = {
+      top: '5rem',
+      right: `${SIDE_PAD}px`,
+      maxHeight: `${MENU_MAX_HEIGHT}px`
+    }
     return
   }
   const rect = hostRef.value.getBoundingClientRect()
@@ -186,13 +196,28 @@ const positionMenu = () => {
     Math.max(SIDE_PAD, rect.top + topOffset),
     window.innerHeight - SIDE_PAD - 64
   )
-  menuStyle.value = { top: `${topPx}px`, right: `${rightPx}px` }
+  // The menu is its own scroll box: past the window bottom, its last entries
+  // could never be scrolled into view.
+  const maxHeightPx = Math.min(
+    MENU_MAX_HEIGHT,
+    window.innerHeight - SIDE_PAD - topPx
+  )
+  menuStyle.value = {
+    top: `${topPx}px`,
+    right: `${rightPx}px`,
+    maxHeight: `${maxHeightPx}px`
+  }
 }
 
 const closeMenu = () => emit('update:is-open', false)
 
 const onKeyEscape = event => {
-  if (event.key === 'Escape' && props.isOpen) closeMenu()
+  if (event.key === 'Escape' && props.isOpen) {
+    // Tells isFreeEscape the key is taken: the menu is closed by the time
+    // the page listener runs.
+    event.preventDefault()
+    closeMenu()
+  }
 }
 
 const setMetadataDisplayValue = (metadataName, isSelected) => {
@@ -204,20 +229,43 @@ const setMetadataDisplayValue = (metadataName, isSelected) => {
   emit('update:model-value', headers)
 }
 
-const onDragEnd = () => {
+const buildSortedMetadataDescriptors = () => {
+  sortedMetadataDescriptors.value = [...filteredMetadataDescriptors.value]
+}
+
+const {
+  rebuild: resetSortedMetadataDescriptors,
+  onRowHeld,
+  onRowDragged,
+  onRowReleased
+} = useDraggableRebuild(buildSortedMetadataDescriptors)
+
+const saveOrder = () => {
   const ordered = sortedMetadataDescriptors.value
-  if (props.externalReorder) {
-    props.externalReorder(ordered)
-    return
-  }
-  const descriptorIds = ordered.filter(d => d.id).map(d => d.id)
+  if (props.externalReorder) return props.externalReorder(ordered)
+  // A row held during a reload may be a descriptor deleted meanwhile: Zou
+  // refuses the whole order for a single unknown descriptor.
+  const knownIds = new Set(props.descriptors.map(descriptor => descriptor.id))
+  const descriptorIds = ordered
+    .map(descriptor => descriptor.id)
+    .filter(id => id && knownIds.has(id))
   const entityType = props.descriptors.find(d => d.entity_type)?.entity_type
   if (!entityType || descriptorIds.length === 0) return
-  store
+  return store
     .dispatch('reorderMetadataDescriptors', { entityType, descriptorIds })
     .catch(err => {
       console.error('Failed to reorder metadata descriptors:', err)
     })
+}
+
+// The answer moves the descriptors in place: when it leaves their order as
+// it was, nothing else applies a rebuild held during the drag.
+const onDragEnd = async () => {
+  try {
+    await saveOrder()
+  } finally {
+    resetSortedMetadataDescriptors()
+  }
 }
 
 // Initialization: merge defaults from descriptors with localStorage overrides
@@ -235,23 +283,29 @@ props.descriptors.forEach(descriptor => {
   }
 })
 emit('update:model-value', initialHeaders)
-sortedMetadataDescriptors.value = [...filteredMetadataDescriptors.value]
+buildSortedMetadataDescriptors()
 
 // Watchers
 
-watch(filteredMetadataDescriptors, newValue => {
-  if (
-    sortedMetadataDescriptors.value.length === 0 ||
-    sortedMetadataDescriptors.value.length !== newValue.length
-  ) {
-    sortedMetadataDescriptors.value = [...newValue]
-  }
+// The lists pass a new exclude object on each of their renders, which
+// recomputes the descriptors: a rebuild then would put the stored order back
+// over a drop not saved yet.
+watch(filteredMetadataDescriptors, (descriptors, previousDescriptors) => {
+  const isSameOrder =
+    descriptors.length === previousDescriptors.length &&
+    descriptors.every(
+      (descriptor, index) => descriptor === previousDescriptors[index]
+    )
+  if (!isSameOrder) resetSortedMetadataDescriptors()
 })
 
 watch(
   () => props.isOpen,
   isOpen => {
     if (isOpen) nextTick(positionMenu)
+    // An Escape can close the menu during a press: its list then goes without
+    // reporting the release.
+    else onRowReleased()
   }
 )
 
@@ -278,7 +332,6 @@ onBeforeUnmount(() => {
   border-bottom-right-radius: 10px;
   box-shadow: 0 2px 6px var(--box-shadow);
   color: var(--text);
-  max-height: 400px;
   overflow: auto;
   position: fixed;
   text-align: left;

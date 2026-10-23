@@ -1,193 +1,259 @@
+import { flushPromises, shallowMount } from '@vue/test-utils'
 import { vi } from 'vitest'
+import { nextTick, reactive } from 'vue'
+import { createStore } from 'vuex'
 
 // Importing the page transitively pulls in the root store
 // (lib/models → timezone → @/store); stub it so no Vuex store is built.
 vi.mock('@/store', () => ({ default: {} }))
+vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
+vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }))
+// The route follows the pushes of the page, as the router would: the page
+// watches the search of the URL it writes itself.
+const routeHolder = vi.hoisted(() => ({ route: null }))
+vi.mock('vue-router', () => ({
+  useRoute: () => routeHolder.route,
+  useRouter: () => ({
+    push: location => {
+      if (location.query) routeHolder.route.query = location.query
+      return Promise.resolve()
+    }
+  })
+}))
+vi.mock('@/lib/preferences', () => ({
+  default: {
+    getBoolPreference: vi.fn(() => false),
+    getPreference: vi.fn(() => null),
+    setPreference: vi.fn()
+  }
+}))
 
+import preferences from '@/lib/preferences'
+
+import DeleteModal from '@/components/modals/DeleteModal.vue'
+import EditAssetModal from '@/components/modals/EditAssetModal.vue'
+import ImportModal from '@/components/modals/ImportModal.vue'
+import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
 import Breakdown from '@/components/pages/Breakdown.vue'
 
-describe('Breakdown page, reloadEntities', () => {
-  const production = { id: 'p1', production_type: 'tvshow' }
+import { BrokenFileReader, GoneFileReader } from '../../fixtures/file-reader'
 
-  // The page logs the failed episodes fetch: keep that expected error out
-  // of the test output.
-  beforeEach(() => {
-    vi.spyOn(console, 'error').mockImplementation(() => {})
-  })
+const production = { id: 'p1', production_type: 'tvshow' }
 
-  afterEach(() => {
-    vi.restoreAllMocks()
-  })
+// The page is mounted on a store whose scope (production, episode) the tests
+// move from inside the load actions, as the topbar does during a real load.
+beforeEach(() => {
+  routeHolder.route = reactive({ params: {}, query: {}, path: '/' })
+})
 
-  // The method only reads its component instance, so a plain object is
-  // enough to exercise the reload decision without mounting the page.
-  const buildContext = (overrides = {}) => ({
-    isTVShow: true,
-    currentProduction: production,
-    currentEpisode: { id: 'ep-a' },
-    episodeId: '',
-    assetTypeId: null,
-    sequenceId: null,
-    isLoading: false,
-    isUnmounted: false,
-    hasScopeMoved: false,
+const mountPage = ({
+  state = {},
+  actions = {},
+  getters = {},
+  stubs = {},
+  mixins = []
+} = {}) => {
+  const storeActions = {
+    addAssetToCasting: vi.fn(),
+    castAsset: vi.fn(() => Promise.resolve()),
+    displayMoreAssets: vi.fn(),
+    loadAssets: vi.fn(() => Promise.resolve()),
     loadEpisodes: vi.fn(() => Promise.resolve()),
-    castingType: 'shot',
     loadSequences: vi.fn(() => Promise.resolve()),
     loadShots: vi.fn(() => Promise.resolve()),
-    loadAssets: vi.fn(() => Promise.resolve()),
+    removeAssetFromCasting: vi.fn(),
+    setCastingAssetType: vi.fn(),
+    setCastingAssetTypes: vi.fn(),
     setCastingEpisode: vi.fn(),
     setCastingForProductionEpisodes: vi.fn(),
-    displayMoreAssets: vi.fn(),
-    fillAssetList: vi.fn(),
-    setCastingAssetTypes: vi.fn(),
-    setCastingAssetType: vi.fn(),
     setCastingSequence: vi.fn(),
-    resetSequenceOption: vi.fn(),
-    resetSelection: vi.fn(),
-    resetColumnWidth: vi.fn(),
-    reset: vi.fn(),
-    ...overrides
+    setLastProductionScreen: vi.fn(),
+    ...actions
+  }
+  const store = createStore({
+    state: () => ({
+      casting: {},
+      currentEpisode: { id: 'ep-a' },
+      currentProduction: production,
+      isTVShow: true,
+      ...state
+    }),
+    getters: {
+      assetMetadataDescriptors: () => [],
+      assetTypeMap: () => new Map(),
+      assetsByType: () => [],
+      breakdownSearchFilterGroups: () => [],
+      breakdownSearchQueries: () => [],
+      casting: state => state.casting,
+      castingAssetTypeAssets: () => [],
+      castingAssetTypesOptions: () => [],
+      castingByType: () => ({}),
+      castingEpisodes: () => [],
+      castingSequenceShots: () => [],
+      castingSequencesOptions: () => [],
+      currentEpisode: state => state.currentEpisode,
+      currentProduction: state => state.currentProduction,
+      departmentMap: () => new Map(),
+      displayedAssets: () => [],
+      displayedSequences: () => [],
+      episodes: () => [],
+      getTaskTypePriority: () => () => 1,
+      isAssetsLoading: () => false,
+      isCurrentUserProductionManager: () => true,
+      isFrameIn: () => false,
+      isFrameOut: () => false,
+      isFrames: () => false,
+      isShowInfosBreakdown: () => false,
+      isTVShow: state => state.isTVShow,
+      productionShotTaskTypes: () => [],
+      sequenceMap: () => new Map(),
+      shotMetadataDescriptors: () => [],
+      ...getters
+    },
+    actions: storeActions
+  })
+  const wrapper = shallowMount(Breakdown, {
+    global: {
+      plugins: [store],
+      config: {
+        globalProperties: { $socket: { on: vi.fn(), off: vi.fn() } }
+      },
+      // Keys with their parameters: the counts of a plural show in the text.
+      mocks: {
+        $t: (key, params) =>
+          params ? `${key} ${JSON.stringify(params)}` : key
+      },
+      mixins,
+      // The page drives its search field through a ref.
+      stubs: {
+        SearchField: {
+          name: 'SearchField',
+          template: '<div />',
+          methods: { getValue: () => '', setValue: () => {} }
+        },
+        ...stubs
+      }
+    }
+  })
+  return { wrapper, store, actions: storeActions }
+}
+
+// Moves the scope of the store and lets the page watchers see it, as they
+// would between two steps of a real load.
+const moveScope = async (store, scope) => {
+  Object.assign(store.state, scope)
+  await nextTick()
+}
+
+// The load races are covered by the spec of useBreakdownLoader.
+describe('Breakdown page, loading', () => {
+  test('loads on mount, without delay, and fills the page once loaded', async () => {
+    const { wrapper, actions } = mountPage()
+
+    await flushPromises()
+
+    expect(actions.loadAssets).toHaveBeenCalledTimes(1)
+    expect(actions.setCastingSequence.mock.calls[0][1]).toBe('all')
+    expect(wrapper.vm.episodeId).toBe('ep-a')
+    expect(wrapper.vm.isLoading).toBe(false)
   })
 
-  // The currentEpisode watcher ignores a change made while the page loads:
-  // the load itself has to notice the switch once it settles.
-  test('reloads when the episode changed during the load', async () => {
-    const context = buildContext()
-    context.loadShots = vi.fn(() => {
-      context.currentEpisode = { id: 'ep-b' }
-      return Promise.resolve()
+  // Coming from the Assets page, the store already holds the assets of its
+  // episode: showing them until the production-wide load replaces them looks
+  // like a list loading twice.
+  test('hides the assets left by another page while it loads', async () => {
+    const asset = { id: 'asset-1', name: 'Hero', asset_type_name: 'Characters' }
+    const { wrapper } = mountPage({
+      actions: { loadSequences: vi.fn(() => new Promise(() => {})) },
+      getters: { assetsByType: () => [[asset]] }
+    })
+    await nextTick()
+
+    expect(
+      wrapper.findAllComponents({ name: 'AvailableAssetBlock' })
+    ).toHaveLength(0)
+  })
+
+  test('reads the column widths of the production it switches to', async () => {
+    const { store } = mountPage()
+    await flushPromises()
+    preferences.getPreference.mockClear()
+
+    await moveScope(store, {
+      currentProduction: { id: 'p2', production_type: 'tvshow' }
     })
 
-    await Breakdown.methods.reloadEntities.call(context)
-
-    expect(context.isLoading).toBe(false)
-    expect(context.reset).toHaveBeenCalledTimes(1)
-    expect(context.resetColumnWidth).not.toHaveBeenCalled()
+    expect(preferences.getPreference).toHaveBeenCalled()
   })
+})
 
-  test('reloads when the production changed during the load', async () => {
-    const context = buildContext()
-    context.loadShots = vi.fn(() => {
-      context.currentProduction = { id: 'p2', production_type: 'tvshow' }
-      return Promise.resolve()
+describe('Breakdown page, live casting updates', () => {
+  const shots = Array.from({ length: 50 }, (_, index) => ({
+    id: `shot-${index}`,
+    sequence_id: 'seq-1'
+  }))
+
+  const mountLivePage = async () => {
+    const mounted = mountPage({
+      actions: { loadShotCasting: vi.fn() },
+      getters: {
+        shotMap: () => new Map(shots.map(shot => [shot.id, shot]))
+      }
     })
+    await flushPromises()
+    mounted.wrapper.vm.sequenceId = 'seq-1'
+    mounted.actions.setCastingSequence.mockClear()
+    vi.useFakeTimers()
+    return mounted
+  }
 
-    await Breakdown.methods.reloadEntities.call(context)
-
-    expect(context.reset).toHaveBeenCalledTimes(1)
-    // Same as the currentProduction watcher, which the load short-circuited.
-    expect(context.resetColumnWidth).toHaveBeenCalledTimes(1)
+  afterEach(() => {
+    vi.useRealTimers()
   })
 
-  // Leaving the page during the load must not replay it: the ghost reload
-  // would push a production-wide dataset under the page displayed next.
-  test('does not reload once the page is unmounted', async () => {
-    const context = buildContext()
-    context.loadShots = vi.fn(() => {
-      context.currentEpisode = { id: 'ep-b' }
-      context.isUnmounted = true
-      return Promise.resolve()
-    })
+  test('loads the casting of the few shots another user changed', async () => {
+    const { wrapper, actions } = await mountLivePage()
 
-    await Breakdown.methods.reloadEntities.call(context)
+    wrapper.vm.onShotCastingUpdate({ shot_id: 'shot-1' })
+    wrapper.vm.onShotCastingUpdate({ shot_id: 'shot-2' })
+    wrapper.vm.onShotCastingUpdate({ shot_id: 'shot-2' })
+    vi.runAllTimers()
 
-    expect(context.reset).not.toHaveBeenCalled()
-    // The production-wide load would land under the page displayed next.
-    expect(context.loadAssets).not.toHaveBeenCalled()
-    expect(context.setCastingEpisode).not.toHaveBeenCalled()
+    expect(actions.loadShotCasting).toHaveBeenCalledTimes(2)
+    expect(actions.setCastingSequence).not.toHaveBeenCalled()
   })
 
-  // The watchers are inert while the page loads, so a switch that comes back
-  // to the episode the run started with leaves the store on the other one.
-  test('reloads when the episode moved and came back during the load', async () => {
-    const context = buildContext()
-    context.loadSequences = vi.fn(() => {
-      Breakdown.watch.currentEpisode.call(
-        Object.assign(context, { currentEpisode: { id: 'ep-b' } })
-      )
-      return Promise.resolve()
-    })
-    context.loadShots = vi.fn(() => {
-      Breakdown.watch.currentEpisode.call(
-        Object.assign(context, { currentEpisode: { id: 'ep-a' } })
-      )
-      return Promise.resolve()
-    })
+  // "All" is the default view: it shows every sequence, so every shot counts.
+  test('follows the shots of every sequence when all of them are displayed', async () => {
+    const { wrapper, actions } = await mountLivePage()
+    wrapper.vm.sequenceId = 'all'
 
-    await Breakdown.methods.reloadEntities.call(context)
+    wrapper.vm.onShotCastingUpdate({ shot_id: 'shot-1' })
+    vi.runAllTimers()
 
-    expect(context.reset).toHaveBeenCalledTimes(1)
+    expect(actions.loadShotCasting).toHaveBeenCalledTimes(1)
   })
 
-  test('does not reload when nothing moved', async () => {
-    const context = buildContext()
+  // A casting pasted on 50 shots sends 50 events: one request for the whole
+  // scope instead of one per shot.
+  test('loads the scope once when many shots change together', async () => {
+    const { wrapper, actions } = await mountLivePage()
 
-    await Breakdown.methods.reloadEntities.call(context)
+    shots.forEach(shot => wrapper.vm.onShotCastingUpdate({ shot_id: shot.id }))
+    vi.runAllTimers()
 
-    expect(context.reset).not.toHaveBeenCalled()
+    expect(actions.loadShotCasting).not.toHaveBeenCalled()
+    expect(actions.setCastingSequence).toHaveBeenCalledTimes(1)
   })
 
-  // The topbar resolves the route episode asynchronously: starting the load
-  // before it lands costs a full production-wide second pass. The resolution
-  // fires the episode watcher like any change: it must not count as a move.
-  test('resolves the episode before loading on a direct link', async () => {
-    const context = buildContext({ currentEpisode: null })
-    context.loadEpisodes = vi.fn(() => {
-      Breakdown.watch.currentEpisode.call(
-        Object.assign(context, { currentEpisode: { id: 'ep-a' } })
-      )
-      return Promise.resolve()
-    })
+  test('drops the pending loads when the page is left', async () => {
+    const { wrapper, actions } = await mountLivePage()
 
-    await Breakdown.methods.reloadEntities.call(context)
+    wrapper.vm.onShotCastingUpdate({ shot_id: 'shot-1' })
+    wrapper.unmount()
+    vi.runAllTimers()
 
-    expect(context.loadEpisodes).toHaveBeenCalledTimes(1)
-    expect(context.reset).not.toHaveBeenCalled()
-    expect(context.episodeId).toBe('ep-a')
-  })
-
-  // The episodes fetch can fail like any other: the page must come back
-  // to life, or the watchers stay muted behind a stuck loading flag.
-  test('releases the loading flag when the episodes fetch fails', async () => {
-    const context = buildContext({ currentEpisode: null })
-    context.loadEpisodes = vi.fn(() => Promise.reject(new Error('down')))
-
-    await Breakdown.methods.reloadEntities.call(context)
-
-    expect(context.isLoading).toBe(false)
-    expect(context.reset).not.toHaveBeenCalled()
-  })
-
-  test('loads nothing when the page unmounts during the episodes fetch', async () => {
-    const context = buildContext({ currentEpisode: null })
-    context.loadEpisodes = vi.fn(() => {
-      context.isUnmounted = true
-      return Promise.resolve()
-    })
-
-    await Breakdown.methods.reloadEntities.call(context)
-
-    expect(context.loadSequences).not.toHaveBeenCalled()
-    expect(context.loadAssets).not.toHaveBeenCalled()
-  })
-
-  test('loads nothing on an unmounted page', async () => {
-    const context = buildContext({ isUnmounted: true })
-
-    await Breakdown.methods.reloadEntities.call(context)
-
-    expect(context.loadSequences).not.toHaveBeenCalled()
-    expect(context.loadAssets).not.toHaveBeenCalled()
-  })
-
-  test('settles on the episode it loaded', async () => {
-    const context = buildContext()
-
-    await Breakdown.methods.reloadEntities.call(context)
-
-    expect(context.episodeId).toBe('ep-a')
-    expect(context.reset).not.toHaveBeenCalled()
+    expect(actions.loadShotCasting).not.toHaveBeenCalled()
   })
 })
 
@@ -195,40 +261,200 @@ describe('Breakdown page, removeOneAssetFromSelection', () => {
   // The casting map only carries the entities the API returned, so an
   // entity without any asset has no key at all: the selection is built
   // from the full entity list and can still include it.
-  const buildContext = (overrides = {}) => ({
-    selection: { 'shot-a': true, 'shot-b': true },
-    casting: {
-      'shot-a': [{ asset_id: 'asset-1', nb_occurences: 2 }]
-    },
-    isEpisodeCasting: false,
-    loading: { remove: false },
-    errors: { remove: false },
-    saveErrors: {},
-    removeAssetFromCasting: vi.fn(),
-    removeOneAsset: vi.fn(() => Promise.resolve()),
-    castAsset: vi.fn(() => Promise.resolve()),
-    ...overrides
-  })
-
   test('skips a selected entity that has no casting', async () => {
-    const context = buildContext()
+    const { wrapper, actions } = mountPage({
+      state: {
+        casting: { 'shot-a': [{ asset_id: 'asset-1', nb_occurences: 2 }] }
+      }
+    })
+    wrapper.vm.selection = new Set(['shot-a', 'shot-b'])
 
-    await Breakdown.methods.removeOneAssetFromSelection.call(
-      context,
-      'asset-1'
-    )
+    await wrapper.vm.removeOneAssetFromSelection('asset-1')
 
-    expect(context.removeAssetFromCasting).toHaveBeenCalledTimes(1)
-    expect(context.removeAssetFromCasting).toHaveBeenCalledWith({
+    expect(actions.removeAssetFromCasting).toHaveBeenCalledTimes(1)
+    expect(actions.removeAssetFromCasting.mock.calls[0][1]).toEqual({
       entityId: 'shot-a',
       assetId: 'asset-1',
       nbOccurences: 1
     })
-    expect(context.castAsset).toHaveBeenCalledWith({
+    expect(actions.castAsset.mock.calls[0][1]).toEqual({
       entityIds: ['shot-a'],
       assetId: 'asset-1'
     })
-    expect(context.loading.remove).toBe(false)
+    expect(wrapper.vm.loading.remove).toBe(false)
+  })
+
+  test('shows the error of a failed removal in the confirmation modal', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { wrapper } = mountPage({
+      state: {
+        casting: { 'shot-a': [{ asset_id: 'asset-1', nb_occurences: 2 }] }
+      },
+      actions: { castAsset: vi.fn(() => Promise.reject(new Error('down'))) }
+    })
+    wrapper.vm.selection = new Set(['shot-a'])
+
+    await wrapper.vm.removeOneAssetFromSelection('asset-1')
+    await nextTick()
+
+    expect(wrapper.findComponent(DeleteModal).props('isError')).toBe(true)
+    expect(wrapper.vm.saveErrors).toEqual({ 'shot-a': true })
+    vi.restoreAllMocks()
+  })
+
+  // Close keeps the error of a refused removal: the next confirmation opens
+  // without it.
+  test('opens the confirmation without the error of a past removal', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { wrapper } = mountPage({
+      state: {
+        currentEpisode: { id: 'all' },
+        casting: { 'episode-a': [{ asset_id: 'asset-1', nb_occurences: 1 }] }
+      },
+      actions: { castAsset: vi.fn(() => Promise.reject(new Error('down'))) }
+    })
+    // The end of the load resets the selection.
+    await flushPromises()
+    const modal = wrapper.findComponent(DeleteModal)
+    wrapper.vm.selection = new Set(['episode-a'])
+
+    await wrapper.vm.removeOneAssetFromSelection('asset-1')
+    modal.vm.$emit('confirm')
+    await flushPromises()
+    expect(modal.props('isError')).toBe(true)
+
+    modal.vm.$emit('cancel')
+    await wrapper.vm.removeOneAssetFromSelection('asset-1')
+    await nextTick()
+
+    expect(modal.props('active')).toBe(true)
+    expect(modal.props('isError')).toBe(false)
+    // Its undo step would answer the ctrl + z of a later test.
+    wrapper.unmount()
+    vi.restoreAllMocks()
+  })
+
+  // A removal that needs no confirmation fails with the modal closed: the
+  // next confirmation opens without its error.
+  test('opens the confirmation without the error of an unconfirmed removal', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const castAsset = vi
+      .fn(() => Promise.resolve())
+      .mockImplementationOnce(() => Promise.reject(new Error('down')))
+    const { wrapper } = mountPage({
+      state: {
+        currentEpisode: { id: 'all' },
+        casting: {
+          'episode-a': [{ asset_id: 'asset-1', nb_occurences: 2 }],
+          'episode-b': [{ asset_id: 'asset-1', nb_occurences: 1 }]
+        }
+      },
+      actions: { castAsset }
+    })
+    // The end of the load resets the selection.
+    await flushPromises()
+    const modal = wrapper.findComponent(DeleteModal)
+
+    wrapper.vm.selection = new Set(['episode-a'])
+    await wrapper.vm.removeOneAssetFromSelection('asset-1')
+    expect(wrapper.vm.saveErrors).toEqual({ 'episode-a': true })
+    expect(modal.props('active')).toBe(false)
+    wrapper.vm.selection = new Set(['episode-b'])
+    await wrapper.vm.removeOneAssetFromSelection('asset-1')
+    await nextTick()
+
+    expect(modal.props('active')).toBe(true)
+    expect(modal.props('isError')).toBe(false)
+    wrapper.unmount()
+    vi.restoreAllMocks()
+  })
+})
+
+describe('Breakdown page, CSV import', () => {
+  // Close keeps the error of a failed upload: the next import opens without
+  // it.
+  test('opens the import without the error of a past upload', async () => {
+    const { wrapper } = mountPage({
+      actions: {
+        uploadCastingFile: vi.fn(() => Promise.reject(new Error('down')))
+      }
+    })
+    await flushPromises()
+    const importButton = wrapper
+      .findAllComponents({ name: 'ButtonSimple' })
+      .find(button => button.props('icon') === 'import')
+    const importModal = wrapper.findComponent(ImportModal)
+    const renderModal = wrapper.findComponent(ImportRenderModal)
+
+    importButton.vm.$emit('click')
+    importModal.vm.$emit('confirm', 'Name\nHero', 'text')
+    await flushPromises()
+    renderModal.vm.$emit('confirm', [['Name'], ['Hero']])
+    await flushPromises()
+    expect(renderModal.props('isError')).toBe(true)
+
+    renderModal.vm.$emit('cancel')
+    importButton.vm.$emit('click')
+    await nextTick()
+
+    expect(importModal.props('active')).toBe(true)
+    expect(importModal.props('isError')).toBe(false)
+    wrapper.unmount()
+  })
+
+  describe('of a file', () => {
+    afterEach(() => {
+      vi.unstubAllGlobals()
+      vi.restoreAllMocks()
+    })
+
+    const confirmFile = async wrapper => {
+      await flushPromises()
+      wrapper
+        .findAllComponents({ name: 'ButtonSimple' })
+        .find(button => button.props('icon') === 'import')
+        .vm.$emit('click')
+      const formData = new FormData()
+      formData.append('file', new File(['Name'], 'import.csv'))
+      wrapper.findComponent(ImportModal).vm.$emit('confirm', formData, 'file')
+      await flushPromises()
+      return wrapper.findComponent(ImportModal)
+    }
+
+    test('shows the error of a file the browser cannot read', async () => {
+      vi.stubGlobal('FileReader', GoneFileReader)
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { wrapper } = mountPage()
+
+      const importModal = await confirmFile(wrapper)
+
+      expect(importModal.props()).toMatchObject({
+        active: true,
+        isError: true,
+        isLoading: false
+      })
+      wrapper.unmount()
+    })
+
+    test('releases the modal on a bug, left to the error handler', async () => {
+      vi.stubGlobal('FileReader', BrokenFileReader)
+      const { wrapper } = mountPage()
+      const errorHandler = vi.fn()
+      wrapper.vm.$.appContext.config.errorHandler = errorHandler
+
+      const importModal = await confirmFile(wrapper)
+
+      expect(importModal.props()).toMatchObject({
+        isError: true,
+        isLoading: false
+      })
+      expect(errorHandler).toHaveBeenCalledWith(
+        expect.any(TypeError),
+        expect.anything(),
+        expect.anything()
+      )
+      wrapper.unmount()
+    })
   })
 })
 
@@ -236,20 +462,686 @@ describe('Breakdown page, getEntityName', () => {
   const entity = { name: 'SH01', sequence_name: 'SEQ01' }
 
   test('prefixes the sequence on a TV show before the episode resolves', () => {
-    const context = { sequenceId: 'all', isTVShow: true, currentEpisode: null }
+    const { wrapper } = mountPage({ state: { currentEpisode: null } })
 
-    expect(Breakdown.methods.getEntityName.call(context, entity)).toBe(
-      'SEQ01 / SH01'
-    )
+    expect(wrapper.vm.getEntityName(entity)).toBe('SEQ01 / SH01')
   })
 
   test('keeps the bare name on the episode casting', () => {
-    const context = {
-      sequenceId: 'all',
-      isTVShow: true,
-      currentEpisode: { id: 'all' }
-    }
+    const { wrapper } = mountPage({ state: { currentEpisode: { id: 'all' } } })
 
-    expect(Breakdown.methods.getEntityName.call(context, entity)).toBe('SH01')
+    expect(wrapper.vm.getEntityName(entity)).toBe('SH01')
+  })
+})
+
+describe('Breakdown page, selection', () => {
+  // A click must cost the lines it selects and unselects, not a render of the
+  // whole page: the page lists every entity and every available asset.
+  test('renders only the lines whose selection changed', async () => {
+    const shots = ['shot-a', 'shot-b', 'shot-c'].map(id => ({
+      id,
+      name: id,
+      sequence_name: 'SEQ01',
+      data: {}
+    }))
+    const updates = {}
+    const { wrapper } = mountPage({
+      state: { isTVShow: false, currentEpisode: null },
+      getters: {
+        castingByType: () => ({}),
+        castingSequenceShots: () => shots,
+        isCurrentUserProductionSupervisor: () => false,
+        user: () => ({ departments: [] })
+      },
+      stubs: { ShotLine: false },
+      mixins: [
+        {
+          updated() {
+            const name = this.$options.__name
+            updates[name] = (updates[name] || 0) + 1
+          }
+        }
+      ]
+    })
+    await flushPromises()
+    const lines = wrapper.findAll('.shot')
+    // The first selection also enables the available assets column.
+    await lines[0].trigger('click')
+    await nextTick()
+    Object.keys(updates).forEach(name => delete updates[name])
+
+    await lines[1].trigger('click')
+    await nextTick()
+
+    expect(lines[0].classes()).not.toContain('selected')
+    expect(lines[1].classes()).toContain('selected')
+    expect(updates).toEqual({ ShotLine: 2 })
+  })
+
+  test('selects the lines between two shift clicks, in list order', async () => {
+    const shots = ['shot-a', 'shot-b', 'shot-c', 'shot-d'].map(id => ({
+      id,
+      name: id,
+      sequence_name: 'SEQ01',
+      data: {}
+    }))
+    const { wrapper } = mountPage({
+      state: { isTVShow: false, currentEpisode: null },
+      getters: { castingSequenceShots: () => shots }
+    })
+    await flushPromises()
+
+    wrapper.vm.selectEntity('shot-c', {})
+    wrapper.vm.selectEntity('shot-a', { shiftKey: true })
+
+    expect(wrapper.vm.selectedEntityIds.sort()).toEqual([
+      'shot-a',
+      'shot-b',
+      'shot-c'
+    ])
+  })
+
+  // Casting an asset rewrites the casting of its entity only: the asset type
+  // columns are unchanged, so the other lines have nothing to render.
+  test('renders only the line whose casting changed', async () => {
+    const shots = ['shot-a', 'shot-b', 'shot-c'].map(id => ({
+      id,
+      name: id,
+      sequence_name: 'SEQ01',
+      data: {}
+    }))
+    const castAsset = nbOccurences => [
+      [
+        {
+          id: 'link-1',
+          asset_id: 'asset-1',
+          asset_name: 'Hero',
+          name: 'Hero',
+          asset_type_name: 'Characters',
+          nb_occurences: nbOccurences
+        }
+      ]
+    ]
+    const updates = {}
+    const { store } = mountPage({
+      state: {
+        isTVShow: false,
+        currentEpisode: null,
+        castingByType: {
+          'shot-a': castAsset(1),
+          'shot-b': castAsset(1),
+          'shot-c': castAsset(1)
+        }
+      },
+      getters: {
+        castingByType: state => state.castingByType,
+        castingSequenceShots: () => shots,
+        isCurrentUserProductionSupervisor: () => false,
+        user: () => ({ departments: [] })
+      },
+      stubs: { ShotLine: false },
+      mixins: [
+        {
+          updated() {
+            // Stubs have no __name: the stubbed asset block of the line is
+            // expected to update along with it.
+            const name = this.$options.__name
+            if (name) updates[name] = (updates[name] || 0) + 1
+          }
+        }
+      ]
+    })
+    await flushPromises()
+    Object.keys(updates).forEach(name => delete updates[name])
+
+    store.state.castingByType['shot-b'] = castAsset(2)
+    await nextTick()
+
+    expect(updates).toEqual({ ShotLine: 1 })
+  })
+})
+
+describe('Breakdown page, casting helpers', () => {
+  const link = (assetId, name, type, nbOccurences) => ({
+    id: `link-${assetId}`,
+    asset_id: assetId,
+    asset_name: name,
+    name,
+    asset_type_name: type,
+    nb_occurences: nbOccurences
+  })
+  const shots = [
+    { id: 'shot-a', name: 'SH01', sequence_name: 'SEQ01', data: {} },
+    { id: 'shot-b', name: 'SH02', sequence_name: 'SEQ01', data: {} },
+    {
+      id: 'shot-c',
+      name: 'SH03',
+      sequence_name: 'SEQ01',
+      data: {},
+      is_casting_standby: true
+    }
+  ]
+  const hero = link('asset-1', 'Hero', 'Characters', 2)
+  const villain = link('asset-2', 'Villain', 'Characters', 3)
+  const forest = link('asset-3', 'Forest', 'Environments', 1)
+
+  const mountCasting = async (actions = {}) => {
+    const mounted = mountPage({
+      state: {
+        isTVShow: false,
+        currentEpisode: null,
+        casting: { 'shot-a': [hero, forest], 'shot-c': [hero, villain] }
+      },
+      actions: { setEntityCasting: vi.fn(), saveCastings: vi.fn(), ...actions },
+      getters: {
+        castingByType: () => ({
+          'shot-a': [[hero], [forest]],
+          'shot-c': [[hero, villain]]
+        }),
+        castingSequenceShots: () => shots,
+        getTaskTypePriority: () => taskTypeId =>
+          ({ layout: 1, animation: 2 })[taskTypeId],
+        productionShotTaskTypes: () => [
+          { id: 'animation', name: 'Animation' },
+          { id: 'layout', name: 'Layout' }
+        ]
+      },
+      stubs: { CastingTypeTotal: false }
+    })
+    await flushPromises()
+    return mounted
+  }
+
+  const typeTotals = wrapper =>
+    Object.fromEntries(
+      wrapper
+        .findAllComponents({ name: 'CastingTypeTotal' })
+        .map(total => [
+          total.props('assetType'),
+          total.findAll('span').map(part => part.text())
+        ])
+    )
+
+  const displayedIds = wrapper =>
+    wrapper
+      .findAllComponents({ name: 'ShotLine' })
+      .map(line => line.props('entity').id)
+
+  test('totals the distinct assets and the occurrences of each type', async () => {
+    const { wrapper } = await mountCasting()
+
+    expect(typeTotals(wrapper)).toEqual({
+      Characters: [
+        'breakdown.nb_assets {"count":2}',
+        'breakdown.nb_occurrences {"count":7}'
+      ],
+      Environments: [
+        'breakdown.nb_assets {"count":1}',
+        'breakdown.nb_occurrences {"count":1}'
+      ]
+    })
+  })
+
+  test('displays the lines without casting only', async () => {
+    const { wrapper } = await mountCasting()
+
+    wrapper.vm.lineFilter = 'empty'
+    await nextTick()
+
+    expect(displayedIds(wrapper)).toEqual(['shot-b'])
+  })
+
+  test('displays the standby lines only', async () => {
+    const { wrapper } = await mountCasting()
+
+    wrapper.vm.lineFilter = 'standby'
+    await nextTick()
+
+    expect(displayedIds(wrapper)).toEqual(['shot-c'])
+  })
+
+  test('displays the lines that cast a given asset', async () => {
+    const { wrapper } = await mountCasting()
+
+    wrapper.vm.castedAssetSearch = 'vill'
+    await nextTick()
+
+    expect(displayedIds(wrapper)).toEqual(['shot-c'])
+    // The totals follow the lines displayed.
+    expect(typeTotals(wrapper).Characters[1]).toBe(
+      'breakdown.nb_occurrences {"count":5}'
+    )
+  })
+
+  test('hands the step chosen for the ready indicator to the lines', async () => {
+    const { wrapper } = await mountCasting()
+
+    // Pipeline order, not alphabetical: the first option is "no indicator".
+    expect(wrapper.vm.readyForTaskTypes.map(taskType => taskType.id)).toEqual([
+      '',
+      'layout',
+      'animation'
+    ])
+    wrapper.vm.readyTaskTypeId = 'animation'
+    await nextTick()
+
+    const line = wrapper.findComponent({ name: 'ShotLine' })
+    expect(line.props('readyTaskTypeId')).toBe('animation')
+    expect(preferences.setPreference).toHaveBeenCalledWith(
+      'breakdown:ready-for-p1',
+      'animation'
+    )
+  })
+
+  test('casts a dropped asset on the line it lands on', async () => {
+    const { wrapper, actions } = await mountCasting()
+    wrapper.vm.selection = new Set(['shot-a'])
+
+    wrapper
+      .findAllComponents({ name: 'ShotLine' })[1]
+      .vm.$emit('drop-asset', 'shot-b', 'asset-2')
+    await flushPromises()
+
+    expect(actions.addAssetToCasting).toHaveBeenCalledTimes(1)
+    expect(actions.addAssetToCasting.mock.calls[0][1]).toMatchObject({
+      entityId: 'shot-b',
+      assetId: 'asset-2',
+      nbOccurences: 1
+    })
+    expect(actions.castAsset.mock.calls[0][1]).toEqual({
+      entityIds: ['shot-b'],
+      assetId: 'asset-2'
+    })
+  })
+
+  // Dropping on one of the selected lines works like "+1": all of them.
+  test('casts a dropped asset on the whole selection it lands in', async () => {
+    const { wrapper, actions } = await mountCasting()
+    wrapper.vm.selection = new Set(['shot-a', 'shot-b'])
+
+    wrapper
+      .findAllComponents({ name: 'ShotLine' })[1]
+      .vm.$emit('drop-asset', 'shot-b', 'asset-2')
+    await flushPromises()
+
+    expect(actions.castAsset.mock.calls[0][1]).toEqual({
+      entityIds: ['shot-a', 'shot-b'],
+      assetId: 'asset-2'
+    })
+  })
+
+  test('copies the casting of a line to paste it on the selection', async () => {
+    const { wrapper, actions } = await mountCasting()
+    const lines = wrapper.findAllComponents({ name: 'ShotLine' })
+
+    lines[0].vm.$emit('copy-casting', 'shot-a')
+    wrapper.vm.selection = new Set(['shot-b'])
+    await wrapper.vm.pasteCasting()
+
+    expect(actions.setEntityCasting.mock.calls[0][1]).toEqual({
+      entityId: 'shot-b',
+      casting: [hero, forest]
+    })
+    expect(actions.saveCastings.mock.calls[0][1]).toEqual(['shot-b'])
+  })
+})
+
+describe('Breakdown page, paste and undo', () => {
+  const link = (assetId, nbOccurences) => ({
+    asset_id: assetId,
+    asset_name: assetId,
+    asset_type_name: 'Characters',
+    nb_occurences: nbOccurences
+  })
+
+  // The store of the page for real: the casting actions write in the state.
+  const mountUndo = async () => {
+    const mounted = mountPage({
+      state: {
+        isTVShow: false,
+        currentEpisode: null,
+        casting: { 'shot-a': [link('hero', 2)], 'shot-b': [] }
+      },
+      actions: {
+        addAssetToCasting: ({ state }, { entityId, assetId, nbOccurences }) => {
+          const casted = state.casting[entityId].find(
+            ({ asset_id }) => asset_id === assetId
+          )
+          // In place, as the store does.
+          if (casted) casted.nb_occurences += nbOccurences
+          else state.casting[entityId].push(link(assetId, nbOccurences))
+        },
+        saveCastings: vi.fn(() => Promise.resolve()),
+        setEntityCasting: ({ state }, { entityId, casting }) => {
+          state.casting[entityId] = casting
+        }
+      },
+      getters: {
+        castingSequenceShots: () => [
+          { id: 'shot-a', name: 'SH01', data: {} },
+          { id: 'shot-b', name: 'SH02', data: {} }
+        ]
+      }
+    })
+    await flushPromises()
+    return mounted
+  }
+
+  // The store adds occurrences in place: lines sharing one pasted array, and
+  // the clipboard with them, would all change along with the line edited.
+  test('pastes a casting of its own on each line', async () => {
+    const { wrapper, store } = await mountUndo()
+    store.state.casting['shot-c'] = []
+    wrapper.vm.copyEntityCasting('shot-a')
+    wrapper.vm.selection = new Set(['shot-b', 'shot-c'])
+    await wrapper.vm.pasteCasting()
+
+    wrapper.vm.selection = new Set(['shot-b'])
+    await wrapper.vm.addOneAsset('hero')
+
+    expect(store.state.casting['shot-b']).toEqual([link('hero', 3)])
+    expect(store.state.casting['shot-c']).toEqual([link('hero', 2)])
+    expect(store.state.casting['shot-a']).toEqual([link('hero', 2)])
+  })
+
+  test('pastes the casting as it was when copied', async () => {
+    const { wrapper, store } = await mountUndo()
+    wrapper.vm.copyEntityCasting('shot-a')
+    wrapper.vm.selection = new Set(['shot-a'])
+    await wrapper.vm.addOneAsset('hero')
+
+    wrapper.vm.selection = new Set(['shot-b'])
+    await wrapper.vm.pasteCasting()
+
+    expect(store.state.casting['shot-b']).toEqual([link('hero', 2)])
+  })
+
+  test('has nothing to undo before a change', async () => {
+    const { wrapper, actions } = await mountUndo()
+
+    expect(wrapper.vm.canUndo).toBe(false)
+    await wrapper.vm.undoCasting()
+
+    expect(actions.saveCastings).not.toHaveBeenCalled()
+  })
+
+  test('puts back the castings a paste replaced', async () => {
+    const { wrapper, store, actions } = await mountUndo()
+    wrapper.vm.copyEntityCasting('shot-a')
+    wrapper.vm.selection = new Set(['shot-b'])
+    await wrapper.vm.pasteCasting()
+    expect(store.state.casting['shot-b']).toHaveLength(1)
+
+    await wrapper.vm.undoCasting()
+
+    expect(store.state.casting['shot-b']).toEqual([])
+    expect(actions.saveCastings.mock.calls.at(-1)[1]).toEqual(['shot-b'])
+    expect(wrapper.vm.canUndo).toBe(false)
+  })
+
+  // The store adds occurrences in place: the snapshot must be a copy.
+  test('undoes the changes one by one, the last first', async () => {
+    const { wrapper, store } = await mountUndo()
+    wrapper.vm.selection = new Set(['shot-a'])
+    await wrapper.vm.addOneAsset('hero')
+    await wrapper.vm.addOneAsset('villain')
+    expect(store.state.casting['shot-a']).toEqual([
+      link('hero', 3),
+      link('villain', 1)
+    ])
+
+    await wrapper.vm.undoCasting()
+    expect(store.state.casting['shot-a']).toEqual([link('hero', 3)])
+    await wrapper.vm.undoCasting()
+    expect(store.state.casting['shot-a']).toEqual([link('hero', 2)])
+  })
+
+  test('undoes on ctrl + z, outside text fields', async () => {
+    const { wrapper, store } = await mountUndo()
+    wrapper.vm.selection = new Set(['shot-a'])
+    await wrapper.vm.addOneAsset('hero')
+
+    window.dispatchEvent(
+      new KeyboardEvent('keydown', { keyCode: 90, ctrlKey: true })
+    )
+    await flushPromises()
+
+    expect(store.state.casting['shot-a']).toEqual([link('hero', 2)])
+  })
+
+  // The lines of another sequence are not displayed: undoing them blind
+  // would rewrite castings nobody is looking at.
+  test('forgets the changes when the scope moves', async () => {
+    const { wrapper } = await mountUndo()
+    wrapper.vm.selection = new Set(['shot-a'])
+    await wrapper.vm.addOneAsset('hero')
+    expect(wrapper.vm.canUndo).toBe(true)
+
+    wrapper.vm.resetSelection()
+
+    expect(wrapper.vm.canUndo).toBe(false)
+  })
+})
+
+describe('Breakdown page, asset search', () => {
+  // The page writes the search in the URL and watches that same URL for the
+  // searches coming from elsewhere (saved queries, back button).
+  const search = async (wrapper, query) => {
+    wrapper.findComponent({ name: 'SearchField' }).vm.$emit('change', query)
+    await nextTick()
+    await nextTick()
+  }
+
+  test('runs a typed search once', async () => {
+    const setAssetSearch = vi.fn()
+    const { wrapper } = mountPage({ actions: { setAssetSearch } })
+
+    await search(wrapper, 'hero')
+
+    expect(setAssetSearch).toHaveBeenCalledTimes(1)
+    // One page only: after a long scroll, every keystroke would render all
+    // the tiles loaded so far.
+    expect(setAssetSearch.mock.calls[0][1]).toEqual({
+      assetSearch: 'hero',
+      isPageReset: true
+    })
+  })
+
+  test('still applies a search coming from the URL', async () => {
+    const setAssetSearch = vi.fn()
+    mountPage({ actions: { setAssetSearch } })
+
+    routeHolder.route.query = { search: 'saved' }
+    await nextTick()
+
+    expect(setAssetSearch).toHaveBeenCalledTimes(1)
+    expect(setAssetSearch.mock.calls[0][1].assetSearch).toBe('saved')
+  })
+
+  // The store keeps the number of assets displayed across searches: asking
+  // for one more page on each of them made the list grow with every keystroke.
+  test('does not display more assets on each search', async () => {
+    // jsdom has no layout: an overflowing column keeps fillAssetList quiet.
+    const overflow = { configurable: true, get: () => 1000 }
+    const fit = { configurable: true, get: () => 500 }
+    Object.defineProperty(HTMLElement.prototype, 'scrollHeight', overflow)
+    Object.defineProperty(HTMLElement.prototype, 'clientHeight', fit)
+    const displayMoreAssets = vi.fn()
+    const { wrapper } = mountPage({
+      actions: { setAssetSearch: vi.fn(), displayMoreAssets }
+    })
+    // The load of the page displays the first page of assets.
+    await flushPromises()
+    displayMoreAssets.mockClear()
+
+    await search(wrapper, 'hero')
+
+    expect(displayMoreAssets).not.toHaveBeenCalled()
+  })
+
+  afterEach(() => {
+    delete HTMLElement.prototype.scrollHeight
+    delete HTMLElement.prototype.clientHeight
+  })
+})
+
+describe('Breakdown page, asset creation', () => {
+  // The real modal: the page resets its form by handing it a new asset.
+  const mountCreation = async (newAsset = vi.fn(() => Promise.resolve())) => {
+    const mounted = mountPage({
+      actions: { newAsset },
+      getters: {
+        assetCreated: () => '',
+        openProductions: () => [production],
+        productionAssetTypeOptions: () => [
+          { label: 'Characters', value: 'type-1' }
+        ]
+      },
+      stubs: { EditAssetModal: false }
+    })
+    await flushPromises()
+    mounted.wrapper.vm.modals.isNewDisplayed = true
+    await nextTick()
+    const modal = mounted.wrapper.findComponent(EditAssetModal)
+    modal.vm.form.name = 'Hero'
+    modal.vm.form.description = 'The main character'
+    modal.vm.form.data = { resolution: '4K' }
+    return { ...mounted, modal }
+  }
+
+  // The modal stays open for the next asset: it must not start from the
+  // name, description and metadata of the one just created.
+  test('clears the asset form after a confirm and stay', async () => {
+    const { actions, modal } = await mountCreation()
+
+    modal.vm.$emit('confirm-and-stay', { name: 'Hero' })
+    await flushPromises()
+
+    expect(actions.newAsset).toHaveBeenCalledTimes(1)
+    expect(modal.props('isSuccess')).toBe(true)
+    expect(modal.vm.form.name).toBe('')
+    expect(modal.vm.form.description).toBe('')
+    expect(modal.vm.form.data).toEqual({})
+  })
+
+  // A failed creation keeps what was typed, to fix and send again.
+  test('keeps the asset form when the creation fails', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { modal } = await mountCreation(
+      vi.fn(() => Promise.reject(new Error('down')))
+    )
+
+    modal.vm.$emit('confirm-and-stay', { name: 'Hero' })
+    await flushPromises()
+
+    expect(modal.props('isError')).toBe(true)
+    expect(modal.vm.form.name).toBe('Hero')
+    vi.restoreAllMocks()
+  })
+
+  // A creation sent again after a failure shows its success alone.
+  test('clears a past error on a new confirm and stay', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const newAsset = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('down'))
+      .mockResolvedValueOnce()
+    const { modal } = await mountCreation(newAsset)
+
+    modal.vm.$emit('confirm-and-stay', { name: 'Hero' })
+    await flushPromises()
+    modal.vm.$emit('confirm-and-stay', { name: 'Hero' })
+    await flushPromises()
+
+    expect(modal.props('isSuccess')).toBe(true)
+    expect(modal.props('isError')).toBe(false)
+    vi.restoreAllMocks()
+  })
+
+  // A plain confirm that fails after a confirm and stay shows its error alone.
+  test('clears a past success when a plain confirm fails', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const newAsset = vi
+      .fn()
+      .mockResolvedValueOnce()
+      .mockRejectedValueOnce(new Error('down'))
+    const { modal } = await mountCreation(newAsset)
+
+    modal.vm.$emit('confirm-and-stay', { name: 'Hero' })
+    await flushPromises()
+    modal.vm.$emit('confirm', { name: 'Villain' })
+    await flushPromises()
+
+    expect(modal.props('isError')).toBe(true)
+    expect(modal.props('isSuccess')).toBe(false)
+    vi.restoreAllMocks()
+  })
+
+  // The + button of the asset column is the only way to open the modal.
+  const clickNewAsset = wrapper =>
+    wrapper
+      .findAllComponents({ name: 'ButtonSimple' })
+      .find(button => button.props('icon') === 'plus')
+      .vm.$emit('click')
+
+  // Close keeps the messages of the last creation: opening drops them.
+  test('opens without the error of a past failed creation', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { wrapper, modal } = await mountCreation(
+      vi.fn(() => Promise.reject(new Error('down')))
+    )
+
+    modal.vm.$emit('confirm-and-stay', { name: 'Hero' })
+    await flushPromises()
+    expect(modal.props('isError')).toBe(true)
+
+    modal.vm.$emit('cancel')
+    await nextTick()
+    clickNewAsset(wrapper)
+    await nextTick()
+
+    expect(modal.props('active')).toBe(true)
+    expect(modal.props('isError')).toBe(false)
+    vi.restoreAllMocks()
+  })
+
+  test('opens without the success of a past confirm and stay', async () => {
+    const { wrapper, modal } = await mountCreation()
+
+    modal.vm.$emit('confirm-and-stay', { name: 'Hero' })
+    await flushPromises()
+    expect(modal.props('isSuccess')).toBe(true)
+
+    modal.vm.$emit('cancel')
+    await nextTick()
+    clickNewAsset(wrapper)
+    await nextTick()
+
+    expect(modal.props('active')).toBe(true)
+    expect(modal.props('isSuccess')).toBe(false)
+  })
+})
+
+describe('Breakdown page, asset column scroll', () => {
+  // The browser still delivers a scroll queued before the unmount, once the
+  // template refs are null.
+  test('ignores a scroll that reaches the detached asset column', async () => {
+    const displayMoreAssets = vi.fn()
+    const { wrapper } = mountPage({ actions: { displayMoreAssets } })
+    await flushPromises()
+    const errorHandler = vi.fn()
+    wrapper.vm.$.appContext.config.errorHandler = errorHandler
+    const column = wrapper.find('.assets-column').element
+    displayMoreAssets.mockClear()
+    // jsdom has no layout: the column reads as scrolled to its bottom.
+    column.dispatchEvent(new Event('scroll'))
+    expect(displayMoreAssets).toHaveBeenCalledTimes(1)
+    displayMoreAssets.mockClear()
+    wrapper.unmount()
+
+    column.dispatchEvent(new Event('scroll'))
+
+    expect(errorHandler).not.toHaveBeenCalled()
+    expect(displayMoreAssets).not.toHaveBeenCalled()
   })
 })

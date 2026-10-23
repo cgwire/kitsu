@@ -1,7 +1,7 @@
 <template>
   <div class="data-list">
     <div style="overflow: hidden">
-      <table class="datatable" ref="headerWrapper">
+      <table class="datatable datatable--cards" ref="headerWrapper">
         <thead class="datatable-head">
           <tr class="datatable-row-header">
             <th class="date">
@@ -36,7 +36,7 @@
     />
 
     <div @scroll.passive="onBodyScroll" v-if="previewFiles.length > 0">
-      <table class="datatable">
+      <table class="datatable datatable--cards">
         <tbody class="datatable-body">
           <tr
             :key="previewFile.id"
@@ -47,25 +47,36 @@
             @keydown.enter.prevent="redirectToTask(previewFile)"
             v-for="previewFile in previewFiles"
           >
-            <td class="date">
+            <td class="date" :data-label="$t('logs.preview_files.date')">
               {{ formatDate(previewFile.created_at) }}
             </td>
-            <td class="production">
+            <td
+              class="production"
+              :data-label="$t('logs.preview_files.production')"
+            >
               <production-name-cell
                 :entry="productionMap.get(previewFile.project_id)"
               />
             </td>
-            <td class="entity-name">
+            <td class="entity-name card-head">
               {{ previewFile.full_entity_name }}
             </td>
             <task-type-cell
               class="task-type"
               :task-type="taskTypeMap.get(previewFile.task_type_id)"
+              :data-label="$t('logs.preview_files.task_type_id')"
             />
-            <td class="revision">
+            <td
+              class="revision"
+              :data-label="$t('logs.preview_files.revision')"
+            >
               {{ previewFile.revision }}
             </td>
-            <td class="status" :data-status="previewFile.status">
+            <td
+              class="status"
+              :data-label="$t('logs.preview_files.status')"
+              :data-status="previewFile.status"
+            >
               {{ $t(`logs.preview_files.statuses.${previewFile.status}`) }}
             </td>
             <td class="end-cell has-text-right">
@@ -126,6 +137,7 @@ const formatDate = date =>
   formatDateBase(date, dateFormat.value, use12HourClock.value)
 
 const onBodyScroll = event => {
+  if (!headerWrapper.value) return
   headerWrapper.value.style.left = `-${event.target.scrollLeft}px`
 }
 

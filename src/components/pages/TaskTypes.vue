@@ -58,6 +58,7 @@ import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
 import csv from '@/lib/csv'
+import func from '@/lib/func'
 import stringHelpers from '@/lib/string'
 
 // eslint-disable-next-line no-unused-vars
@@ -93,11 +94,6 @@ const loading = reactive({
   del: false
 })
 const modals = reactive({ del: false, edit: false })
-
-// Non-reactive scheduling state for savePriorities throttling.
-let isSaving = false
-let lastCall = 0
-let newSaveCall = false
 
 // Computed
 
@@ -203,31 +199,14 @@ const confirmDeleteTaskType = async () => {
   loading.del = false
 }
 
-const savePriorities = forms => {
-  const now = Date.now()
-  if (now - lastCall > 1000 && !isSaving) {
-    lastCall = now
-    isSaving = true
-    store
-      .dispatch(
-        'reorderTaskTypes',
-        forms.map(form => form.id)
-      )
-      .then(() => {
-        isSaving = false
-        if (newSaveCall) {
-          newSaveCall = false
-          savePriorities(forms)
-        }
-      })
-  } else {
-    newSaveCall = true
-  }
-}
+// The saves never cross on the server.
+const savePriorities = func.queueLatest(taskTypeIds =>
+  store.dispatch('reorderTaskTypes', taskTypeIds)
+)
 
 const updatePriorities = forms => {
   forms.forEach(form => store.commit('EDIT_TASK_TYPE_END', form))
-  savePriorities(forms)
+  return savePriorities(forms.map(form => form.id))
 }
 
 const onExportClicked = () => {

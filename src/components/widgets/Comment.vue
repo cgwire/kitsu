@@ -23,13 +23,13 @@
             :size="25"
             :font-size="12"
             :person="comment.person"
-            :is-link="!isCurrentUserClient"
-            v-if="comment.person?.id"
+            :is-link="isAvatarLink"
+            v-if="comment.person?.id && !isAuthorHidden"
           />
           <people-name
             class="flexrow-item strong"
             :person="comment.person"
-            v-if="comment.person?.id"
+            v-if="comment.person?.id && !isAuthorHidden"
           />
           <div class="filler"></div>
           <span class="flexrow-item date" :title="fullDate">
@@ -185,7 +185,7 @@
                       :size="18"
                       :font-size="10"
                       :person="replyComment.person"
-                      :is-link="!isCurrentUserClient"
+                      :is-link="isAvatarLink"
                     />
                     <people-name
                       class="flexrow-item strong"
@@ -378,7 +378,7 @@
 
             <div
               class="flexrow"
-              :title="isLikedBy"
+              :title="isAcknowledgeable ? isLikedBy : undefined"
               v-if="
                 comment.text.length > 0 ||
                 comment.previews.length > 0 ||
@@ -393,6 +393,7 @@
                 }"
                 type="button"
                 @click="acknowledgeComment(comment)"
+                v-if="isAcknowledgeable"
               >
                 <thumbs-up-icon class="icon-1x" />
                 <span>{{ comment.acknowledgements.length }}</span>
@@ -410,13 +411,19 @@
                 {{ $t('main.reply') }}
               </span>
             </div>
+            <div class="error action-error has-text-right" v-if="isActionError">
+              <em>{{ $t('comments.action_error') }}</em>
+            </div>
             <div class="pinned-text" v-if="comment.pinned">
               {{ $t('comments.pinned') }}
             </div>
             <div
               class="edited-text"
               v-if="
-                comment.editor_id && comment.editor_id !== comment.person_id
+                comment.editor_id &&
+                comment.editor_id !== comment.person_id &&
+                !isAuthorHidden &&
+                !urlPrefix
               "
             >
               {{
@@ -432,14 +439,19 @@
         class="flexrow content-wrapper preview-info"
         v-if="comment.previews.length > 0 && !isConcept"
       >
-        <router-link class="round-name revision" :to="previewRoute">
+        <!-- Shared playlist guests can't open the studio preview page. -->
+        <component
+          :is="urlPrefix ? 'span' : 'router-link'"
+          class="round-name revision"
+          :to="urlPrefix ? undefined : previewRoute"
+        >
           {{
             comment.pinned
               ? $t('comments.pinned_revision')
               : $t('comments.revision')
           }}
           {{ comment.previews[0].revision }}
-        </router-link>
+        </component>
         <a
           class="preview-link button"
           :href="safeUrl(comment.links[0])"
@@ -479,9 +491,14 @@
           :person="comment.person"
           :size="25"
           :font-size="12"
-          :is-link="!isCurrentUserClient"
+          :is-link="isAvatarLink"
+          v-if="!isAuthorHidden"
         />
-        <people-name class="flexrow-item strong" :person="comment.person" />
+        <people-name
+          class="flexrow-item strong"
+          :person="comment.person"
+          v-if="!isAuthorHidden"
+        />
         <span class="filler"> </span>
         <span class="flexrow-item date" :title="fullDate">
           {{ shortDate }}
@@ -561,6 +578,7 @@ import {
   ThumbsUpIcon
 } from 'lucide-vue-next'
 
+import { isClientThread } from '@/lib/comments'
 import files from '@/lib/files'
 import { remove } from '@/lib/models'
 import {
@@ -579,8 +597,8 @@ import {
 import stringHelpers from '@/lib/string'
 
 import { useAtMentionsMembers } from '@/composables/atMentions'
+import { pauseEvent } from '@/composables/dom'
 import { useTime } from '@/composables/time'
-import { domMixin } from '@/components/mixins/dom'
 
 import AddAttachmentModal from '@/components/modals/AddAttachmentModal.vue'
 import AttachmentAudioPlayer from '@/components/players/viewers/AttachmentAudioPlayer.vue'
@@ -594,8 +612,6 @@ import PeopleAvatar from '@/components/widgets/PeopleAvatar.vue'
 import PeopleName from '@/components/widgets/PeopleName.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 import ValidationTag from '@/components/widgets/ValidationTag.vue'
-
-const { pauseEvent } = domMixin.methods
 
 const store = useStore()
 const route = useRoute()
@@ -629,6 +645,14 @@ const props = defineProps({
   fps: {
     type: Number,
     default: 25
+  },
+  isAcknowledgeable: {
+    type: Boolean,
+    default: true
+  },
+  isActionError: {
+    type: Boolean,
+    default: false
   },
   isChange: {
     type: Boolean,
@@ -730,6 +754,22 @@ const isConcept = computed(() => {
 })
 
 const canToggleForClient = computed(() => isCurrentUserManager.value)
+
+// The person page sits behind the login, and stays out of the clients' reach.
+const isAvatarLink = computed(
+  () => Boolean(user.value) && !isCurrentUserClient.value
+)
+
+// Zou hands the client the internal comments that carry a preview, emptied
+// of their text, for the revisions they hold: who wrote them stays internal.
+const isAuthorHidden = computed(
+  () =>
+    isCurrentUserClient.value &&
+    !isClientThread(
+      props.comment,
+      store.getters.teamRolesForProduction(props.task?.project_id)
+    )
+)
 
 const isPreviewBound = computed(() => {
   return Boolean(
@@ -1150,10 +1190,6 @@ article.comment {
   margin: 1em 0;
   word-wrap: anywhere;
   hyphens: auto;
-}
-
-.media {
-  padding: 0.6em;
 }
 
 .content .comment-person {

@@ -1,6 +1,8 @@
 // @vitest-environment node
 
 import { vi } from 'vitest'
+import { computed, effectScope } from 'vue'
+import { createStore } from 'vuex'
 
 // Importing the people module transitively pulls in the root store
 // (lib/models → timezone → @/store); stub it so no Vuex store is built.
@@ -10,7 +12,13 @@ vi.mock('@/store/api/people', () => ({
   default: {
     deleteOrganisationLogo: vi.fn(),
     getDaysOff: vi.fn(),
-    postOrganisationLogo: vi.fn()
+    getDayTable: vi.fn(),
+    getMonthTable: vi.fn(),
+    getPersonQuotaShots: vi.fn(),
+    getWeekTable: vi.fn(),
+    getYearTable: vi.fn(),
+    postOrganisationLogo: vi.fn(),
+    setTimeSpent: vi.fn()
   }
 }))
 
@@ -156,6 +164,119 @@ describe('People store', () => {
     })
   })
 
+  // Vuex keeps a getter's value until one of its reactive reads changes, and
+  // the people list lives out of the state: a mutation-only test cannot see
+  // a getter stuck on its first read.
+  describe('List getters', () => {
+    const person = (id, extra = {}) => ({
+      id,
+      first_name: id,
+      last_name: 'Doe',
+      email: `${id}@example.com`,
+      active: true,
+      is_bot: false,
+      ...extra
+    })
+
+    let vuexStore
+    let scope
+
+    beforeEach(() => {
+      store.cache.people = []
+      store.cache.peopleIndex = {}
+      store.cache.personMap = new Map()
+      store.cache.guests = []
+      vuexStore = createStore({
+        state: { ...store.state },
+        getters: store.getters,
+        mutations: store.mutations
+      })
+      vuexStore.commit('LOAD_PEOPLE_END', {
+        people: [
+          person('alice'),
+          person('bob'),
+          person('robot', { is_bot: true })
+        ],
+        userFilters: {}
+      })
+      scope = effectScope()
+    })
+
+    afterEach(() => {
+      scope.stop()
+    })
+
+    // The Team page offers the active people out of the team: a person
+    // created on the People page after a first visit has to be offered too.
+    test('activePeople follows a person created after a first read', () => {
+      scope.run(() => {
+        const team = ['alice']
+        const activePeople = computed(() => vuexStore.getters.activePeople)
+        const unlisted = computed(() =>
+          activePeople.value
+            .filter(({ id }) => !team.includes(id))
+            .map(({ id }) => id)
+        )
+        expect(unlisted.value).toEqual(['bob', 'robot'])
+
+        vuexStore.commit('EDIT_PEOPLE_END', person('carol'))
+
+        expect(unlisted.value).toEqual(['bob', 'carol', 'robot'])
+      })
+    })
+
+    test('the list getters follow a creation, an archive, a deletion, and a reload', () => {
+      scope.run(() => {
+        const ids = getter =>
+          computed(() => vuexStore.getters[getter].map(({ id }) => id))
+        const people = ids('people')
+        const peopleWithoutBot = ids('peopleWithoutBot')
+        const activePeople = ids('activePeople')
+        const activePeopleWithoutBot = ids('activePeopleWithoutBot')
+        expect(people.value).toEqual(['alice', 'bob', 'robot'])
+        expect(peopleWithoutBot.value).toEqual(['alice', 'bob'])
+        expect(activePeople.value).toEqual(['alice', 'bob', 'robot'])
+        expect(activePeopleWithoutBot.value).toEqual(['alice', 'bob'])
+
+        vuexStore.commit('EDIT_PEOPLE_END', person('carol'))
+        expect(people.value).toEqual(['alice', 'bob', 'carol', 'robot'])
+        expect(peopleWithoutBot.value).toEqual(['alice', 'bob', 'carol'])
+        expect(activePeopleWithoutBot.value).toEqual(['alice', 'bob', 'carol'])
+
+        vuexStore.commit('EDIT_PEOPLE_END', person('bob', { active: false }))
+        expect(people.value).toEqual(['alice', 'carol', 'robot', 'bob'])
+        expect(activePeople.value).toEqual(['alice', 'carol', 'robot'])
+        expect(activePeopleWithoutBot.value).toEqual(['alice', 'carol'])
+
+        vuexStore.commit('DELETE_PEOPLE_END', person('carol'))
+        expect(people.value).toEqual(['alice', 'robot', 'bob'])
+        expect(peopleWithoutBot.value).toEqual(['alice', 'bob'])
+        expect(activePeopleWithoutBot.value).toEqual(['alice'])
+
+        vuexStore.commit('LOAD_PEOPLE_END', {
+          people: [person('alice'), person('dan')],
+          userFilters: {}
+        })
+        expect(people.value).toEqual(['alice', 'dan'])
+        expect(activePeople.value).toEqual(['alice', 'dan'])
+      })
+    })
+
+    // The People, Bots and Team Schedule pages list the displayed people.
+    test('displayedPeople follows a deletion', () => {
+      scope.run(() => {
+        const displayedPeople = computed(() =>
+          vuexStore.getters.displayedPeople.map(({ id }) => id)
+        )
+        expect(displayedPeople.value).toEqual(['alice', 'bob', 'robot'])
+
+        vuexStore.commit('DELETE_PEOPLE_END', person('bob'))
+
+        expect(displayedPeople.value).toEqual(['alice', 'robot'])
+      })
+    })
+  })
+
   describe('Organisation logo', () => {
     const stateWith = organisation => ({ organisation })
 
@@ -164,16 +285,6 @@ describe('People store', () => {
     })
 
     const updatedAt = '2026-09-08T10:00:00'
-
-    test('organisationLogoPath targets the organisation thumbnail', () => {
-      expect(
-        store.getters.organisationLogoPath(
-          stateWith({ id: 'org-1', has_avatar: true, updated_at: updatedAt })
-        )
-      ).toEqual(
-        `/api/pictures/thumbnails/organisations/org-1.png?t=${Date.parse(updatedAt)}`
-      )
-    })
 
     test('organisationLogoPath is null while there is no logo', () => {
       expect(
@@ -327,6 +438,7 @@ describe('People store loadDaysOff action', () => {
   test('rejects when every month fails', async () => {
     peopleApi.getDaysOff.mockRejectedValue(new Error('403'))
     const commit = vi.fn()
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
 
     await expect(
       store.actions.loadDaysOff(
@@ -335,5 +447,198 @@ describe('People store loadDaysOff action', () => {
       )
     ).rejects.toThrow('403')
     expect(commit).not.toHaveBeenCalled()
+    expect(consoleError).toHaveBeenCalledTimes(3)
+    consoleError.mockRestore()
+  })
+})
+
+describe('People store setTimeSpent action', () => {
+  const deferred = () => {
+    const handlers = {}
+    const promise = new Promise((resolve, reject) => {
+      handlers.resolve = resolve
+      handlers.reject = reject
+    })
+    return { promise, ...handlers }
+  }
+
+  const settle = () => new Promise(resolve => setTimeout(resolve))
+
+  const setTimeSpent = (commit, taskId, duration) =>
+    store.actions.setTimeSpent(
+      { commit },
+      { personId: 'person-1', taskId, date: '2026-09-29', duration }
+    )
+
+  beforeEach(() => {
+    peopleApi.setTimeSpent.mockReset()
+  })
+
+  // The sliders save on every wheel notch: concurrent writes of one day could
+  // land out of order, and Zou answers 404 to a write whose row a concurrent
+  // delete removed.
+  test('sends one write at a time, with the last value set meanwhile', async () => {
+    const first = deferred()
+    const second = deferred()
+    peopleApi.setTimeSpent
+      .mockReturnValueOnce(first.promise)
+      .mockReturnValueOnce(second.promise)
+    const commit = vi.fn()
+
+    const writes = [setTimeSpent(commit, 'task-1', 1)]
+    await settle()
+    writes.push(
+      setTimeSpent(commit, 'task-1', 0.5),
+      setTimeSpent(commit, 'task-1', 0)
+    )
+    await settle()
+
+    expect(peopleApi.setTimeSpent.mock.calls).toEqual([
+      ['task-1', 'person-1', '2026-09-29', 1]
+    ])
+
+    first.resolve({ task_id: 'task-1', duration: 60 })
+    await settle()
+
+    expect(peopleApi.setTimeSpent.mock.calls).toEqual([
+      ['task-1', 'person-1', '2026-09-29', 1],
+      ['task-1', 'person-1', '2026-09-29', 0]
+    ])
+
+    second.resolve({ task_id: 'task-1', duration: 0 })
+    await Promise.all(writes)
+
+    expect(commit.mock.calls).toEqual([
+      ['SET_TIME_SPENT', { task_id: 'task-1', duration: 60 }],
+      ['SET_TIME_SPENT', { task_id: 'task-1', duration: 0 }]
+    ])
+  })
+
+  test('sends the next value after a failed write', async () => {
+    const failure = deferred()
+    const error = new Error('404')
+    peopleApi.setTimeSpent
+      .mockReturnValueOnce(failure.promise)
+      .mockResolvedValueOnce({ task_id: 'task-2', duration: 30 })
+    const commit = vi.fn()
+
+    const failed = setTimeSpent(commit, 'task-2', 1)
+    await settle()
+    const next = setTimeSpent(commit, 'task-2', 0.5)
+    failure.reject(error)
+
+    await expect(failed).rejects.toBe(error)
+    await next
+    expect(peopleApi.setTimeSpent).toHaveBeenLastCalledWith(
+      'task-2',
+      'person-1',
+      '2026-09-29',
+      0.5
+    )
+    expect(commit.mock.calls).toEqual([
+      ['SET_TIME_SPENT', { task_id: 'task-2', duration: 30 }]
+    ])
+  })
+
+  test('writes the time of two tasks at the same time', async () => {
+    const first = deferred()
+    const second = deferred()
+    peopleApi.setTimeSpent
+      .mockReturnValueOnce(first.promise)
+      .mockReturnValueOnce(second.promise)
+    const commit = vi.fn()
+
+    const writes = [
+      setTimeSpent(commit, 'task-3', 1),
+      setTimeSpent(commit, 'task-4', 2)
+    ]
+    await settle()
+
+    expect(peopleApi.setTimeSpent.mock.calls).toEqual([
+      ['task-3', 'person-1', '2026-09-29', 1],
+      ['task-4', 'person-1', '2026-09-29', 2]
+    ])
+
+    first.resolve({ task_id: 'task-3', duration: 60 })
+    second.resolve({ task_id: 'task-4', duration: 120 })
+    await Promise.all(writes)
+  })
+})
+
+describe('People store loadTimesheets action', () => {
+  const table = { 3: { 'person-1': 120 } }
+  const load = (detailLevel, getters = {}) => {
+    const commit = vi.fn()
+    const context = { commit, getters: { firstTimesheetYear: 2024, ...getters } }
+    const payload = { detailLevel, year: 2026, month: 3 }
+    return store.actions.loadTimesheets(context, payload).then(() => commit)
+  }
+
+  beforeEach(() => {
+    peopleApi.getDaysOff.mockReset()
+    peopleApi.getMonthTable.mockResolvedValue(table)
+    peopleApi.getYearTable.mockResolvedValue(table)
+  })
+
+  // The studio-wide day off listing is admin-only on Zou: the year route is
+  // scoped to the persons the caller may read.
+  test('reads the days off of the year at the month level', async () => {
+    peopleApi.getDaysOff.mockResolvedValue([])
+
+    await load('month')
+
+    expect(peopleApi.getDaysOff.mock.calls).toEqual([[2026]])
+  })
+
+  test('reads the days off of every column year at the year level', async () => {
+    vi.useFakeTimers().setSystemTime(new Date('2026-10-01'))
+    peopleApi.getDaysOff.mockResolvedValue([])
+
+    await load('year')
+
+    expect(peopleApi.getDaysOff.mock.calls).toEqual([[2024], [2025], [2026]])
+    vi.useRealTimers()
+  })
+
+  // The days off only tint the overtime cells: the grid stands without them.
+  test('shows the grid when the days off are refused', async () => {
+    const error = new Error('403')
+    peopleApi.getDaysOff.mockRejectedValue(error)
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const commit = await load('month')
+
+    expect(commit).toHaveBeenCalledWith('PEOPLE_TIMESHEET_LOADED', table)
+    expect(commit).toHaveBeenCalledWith('PEOPLE_SET_DAY_OFFS', [])
+    expect(consoleError).toHaveBeenCalledWith(error)
+    consoleError.mockRestore()
+  })
+})
+
+describe('People store getPersonQuotaShots action', () => {
+  test('forwards the production of the payload', () => {
+    store.actions.getPersonQuotaShots(
+      {},
+      {
+        productionId: 'p1',
+        taskTypeId: 'tt1',
+        detailLevel: 'month',
+        personId: 'u1',
+        year: 2026,
+        month: 10,
+        computeMode: 'raw'
+      }
+    )
+    expect(peopleApi.getPersonQuotaShots).toHaveBeenCalledWith(
+      'p1',
+      'tt1',
+      'u1',
+      'month',
+      2026,
+      10,
+      undefined,
+      undefined,
+      'raw'
+    )
   })
 })

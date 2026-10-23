@@ -1,0 +1,368 @@
+import { flushPromises, shallowMount } from '@vue/test-utils'
+import { createRouter, createWebHashHistory } from 'vue-router'
+import { createStore } from 'vuex'
+
+vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
+vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }))
+
+import '@/lib/auth'
+
+import csv from '@/lib/csv'
+
+import EpisodeStatsList from '@/components/lists/EpisodeStatsList.vue'
+import EpisodeStats from '@/components/pages/EpisodeStats.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxTaskTypeOptions from '@/components/widgets/ComboboxTaskTypeOptions.vue'
+import ComboboxVisibleOptions from '@/components/widgets/ComboboxVisibleOptions.vue'
+import SearchField from '@/components/widgets/SearchField.vue'
+
+const status = count => ({
+  done: { name: 'done', color: '#22d160', count, frames: 0, drawings: 0 }
+})
+const retake = (retakes, done, max) => ({
+  max_retake_count: max,
+  evolution: {},
+  retake: { count: retakes, frames: 0, drawings: 0 },
+  done: { count: done, frames: 0, drawings: 0 },
+  other: { count: 0, frames: 0, drawings: 0 }
+})
+// As on the server, an "all" column sums the task type columns.
+const episodeStats = {
+  all: { all: status(9), layout: status(5), anim: status(4) },
+  e01: { all: status(3), layout: status(1), anim: status(2) },
+  e02: { all: status(6), layout: status(4), anim: status(2) }
+}
+const episodeRetakeStats = {
+  all: { all: retake(6, 6, 2), layout: retake(3, 3, 1), anim: retake(3, 3, 2) },
+  e01: { all: retake(2, 2, 1), layout: retake(1, 1, 1), anim: retake(1, 1, 1) },
+  e02: { all: retake(4, 4, 2), layout: retake(2, 2, 1), anim: retake(2, 2, 2) }
+}
+const e01 = { id: 'e01', name: 'E01', status: 'running' }
+const e02 = { id: 'e02', name: 'E02', status: 'complete' }
+const taskTypes = [
+  { id: 'layout', name: 'Layout' },
+  { id: 'anim', name: 'Animation' }
+]
+
+const router = createRouter({
+  history: createWebHashHistory(),
+  routes: [
+    {
+      path: '/productions/:production_id/episode-stats',
+      name: 'episode-stats',
+      component: EpisodeStats
+    }
+  ]
+})
+
+let wrapper
+
+const mountPage = async ({ getters = {}, query = {} } = {}) => {
+  const store = createStore({
+    getters: {
+      currentProduction: () => ({ id: 'production-1', name: 'Wing It' }),
+      displayedEpisodes: () => [e01, e02],
+      episodeMap: () => new Map([e01, e02].map(e => [e.id, e])),
+      episodeRetakeStats: () => episodeRetakeStats,
+      episodeSearchText: () => '',
+      episodeStats: () => episodeStats,
+      episodeValidationColumns: () => ['layout', 'anim'],
+      clientAccess: () => ({ isTaskTypeVisible: () => true }),
+      isCurrentUserClient: () => false,
+      isPaperProduction: () => false,
+      taskStatusMap: () => new Map(),
+      taskTypeMap: () => new Map(taskTypes.map(t => [t.id, t])),
+      ...getters
+    }
+  })
+  store.dispatch = vi.fn(() => Promise.resolve())
+  await router.push({ path: '/productions/production-1/episode-stats', query })
+  await router.isReady()
+  const push = vi.spyOn(router, 'push')
+  const replace = vi.spyOn(router, 'replace')
+  wrapper = shallowMount(EpisodeStats, {
+    global: {
+      plugins: [store, router],
+      mocks: { $t: key => key },
+      stubs: { SearchField: false }
+    }
+  })
+  await flushPromises()
+  return { store, wrapper, push, replace }
+}
+
+const listProps = () => wrapper.findComponent(EpisodeStatsList).props()
+
+const episodeFilter = () => wrapper.findComponent(ComboboxVisibleOptions)
+const taskTypeFilter = () => wrapper.findComponent(ComboboxTaskTypeOptions)
+
+const combobox = label =>
+  wrapper
+    .findAllComponents(Combobox)
+    .find(box => box.props('label') === label)
+
+const findButton = icon =>
+  wrapper
+    .findAllComponents(ButtonSimple)
+    .find(button => button.props('icon') === icon)
+
+// The page opens on the running episodes only.
+const showAllEpisodes = () =>
+  combobox('statistics.episode_status').vm.$emit('update:model-value', 'all')
+
+describe('EpisodeStats page', () => {
+  describe('client access', () => {
+    afterEach(() => {
+      wrapper?.unmount()
+      wrapper = null
+    })
+
+    test('drops the task type columns hidden from the client', async () => {
+      await mountPage({
+        getters: {
+          clientAccess: () => ({ isTaskTypeVisible: id => id !== 'anim' })
+        }
+      })
+      expect(listProps().validationColumns).toEqual(['layout'])
+    })
+
+    test('keeps the hidden task type out of the totals and the export', async () => {
+      const generateStatReports = vi
+        .spyOn(csv, 'generateStatReports')
+        .mockImplementation(() => {})
+      await mountPage({
+        getters: {
+          clientAccess: () => ({ isTaskTypeVisible: id => id !== 'anim' }),
+          isCurrentUserClient: () => true
+        }
+      })
+      expect(listProps().episodeStats.all.all.done.count).toBe(1)
+      await findButton('download').vm.$emit('click')
+      const [, stats] = generateStatReports.mock.calls[0]
+      expect(Object.keys(stats.all).sort()).toEqual(['all', 'layout'])
+    })
+
+    test('keeps every column for the studio', async () => {
+      await mountPage()
+      expect(listProps().validationColumns).toEqual(['layout', 'anim'])
+    })
+  })
+
+  describe('client', () => {
+    afterEach(() => {
+      wrapper?.unmount()
+      wrapper = null
+    })
+
+    test('offers the search to the studio', async () => {
+      await mountPage()
+      expect(wrapper.findComponent(SearchField).exists()).toBe(true)
+    })
+
+    test('keeps the search from a client', async () => {
+      await mountPage({ getters: { isCurrentUserClient: () => true } })
+      expect(wrapper.findComponent(SearchField).exists()).toBe(false)
+    })
+
+    // Zou refuses the retake stats to clients since 1.0.97.
+    test('keeps the retakes mode from a client', async () => {
+      await mountPage({ getters: { isCurrentUserClient: () => true } })
+      const labels = wrapper
+        .findAllComponents(Combobox)
+        .map(box => box.props('label'))
+      expect(labels).not.toContain('statistics.data_mode')
+      expect(listProps().dataMode).toBe('status')
+      expect(listProps().episodeRetakeStats).toEqual({})
+    })
+
+    test('exports the status stats for a client', async () => {
+      const generateRetakeStatReports = vi
+        .spyOn(csv, 'generateRetakeStatReports')
+        .mockImplementation(() => {})
+      const generateStatReports = vi
+        .spyOn(csv, 'generateStatReports')
+        .mockImplementation(() => {})
+      await mountPage({ getters: { isCurrentUserClient: () => true } })
+      await findButton('download').vm.$emit('click')
+      expect(generateStatReports).toHaveBeenCalled()
+      expect(generateRetakeStatReports).not.toHaveBeenCalled()
+    })
+  })
+
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  afterEach(() => {
+    wrapper?.unmount()
+    wrapper = null
+    vi.restoreAllMocks()
+  })
+
+  test('applies the search of the URL at mount, without a history entry', async () => {
+    const { store, push, replace } = await mountPage({
+      query: { search: 'e01' }
+    })
+    expect(store.dispatch).toHaveBeenCalledWith('setEpisodeSearch', 'e01')
+    expect(push).not.toHaveBeenCalled()
+    expect(replace).toHaveBeenCalledWith({ query: { search: 'e01' } })
+  })
+
+  test('lets the user choose among the episodes of the current status filter', async () => {
+    await mountPage()
+    expect(episodeFilter().props()).toMatchObject({
+      label: 'episodes.title',
+      options: [{ label: 'E01', value: 'e01' }],
+      hidden: []
+    })
+    await showAllEpisodes()
+    expect(episodeFilter().props('options')).toEqual([
+      { label: 'E01', value: 'e01' },
+      { label: 'E02', value: 'e02' }
+    ])
+    expect(listProps().entries).toEqual([e01, e02])
+    expect(listProps().isFiltered).toBe(false)
+  })
+
+  test('takes a hidden episode out of the table, the totals and the URL', async () => {
+    const { replace } = await mountPage()
+    await showAllEpisodes()
+    await episodeFilter().vm.$emit('update:hidden', ['e02'])
+    expect(listProps().entries).toEqual([e01])
+    expect(listProps().isFiltered).toBe(true)
+    expect(Object.keys(listProps().episodeStats).sort()).toEqual(['all', 'e01'])
+    expect(listProps().episodeStats.all.all.done.count).toBe(3)
+    expect(listProps().episodeRetakeStats.all.all.retake.count).toBe(2)
+    expect(replace).toHaveBeenCalledWith({ query: { hiddenEpisodes: 'e02' } })
+  })
+
+  test('lets the user choose the task types to display, all by default', async () => {
+    await mountPage()
+    expect(taskTypeFilter().props()).toMatchObject({
+      label: 'task_types.title',
+      taskTypes,
+      hidden: []
+    })
+    expect(listProps().validationColumns).toEqual(['layout', 'anim'])
+  })
+
+  test('totals every task type while none is hidden', async () => {
+    await mountPage()
+    expect(listProps().episodeStats.e01.all).toEqual(episodeStats.e01.all)
+    expect(listProps().episodeRetakeStats.e01.all).toMatchObject({
+      max_retake_count: 1,
+      retake: { count: 2 },
+      done: { count: 2 }
+    })
+  })
+
+  test('takes a hidden task type out of the columns and of the totals', async () => {
+    await mountPage({ query: { hiddenTaskTypes: 'anim' } })
+    expect(taskTypeFilter().props('hidden')).toEqual(['anim'])
+    expect(listProps().validationColumns).toEqual(['layout'])
+    const stats = listProps().episodeStats
+    expect(Object.keys(stats.e01).sort()).toEqual(['all', 'layout'])
+    expect(stats.e01.all.done.count).toBe(1)
+    const retakeStats = listProps().episodeRetakeStats
+    expect(Object.keys(retakeStats.e01).sort()).toEqual(['all', 'layout'])
+    expect(retakeStats.e01.all).toMatchObject({
+      max_retake_count: 1,
+      retake: { count: 1 }
+    })
+  })
+
+  // The page is reused from a production to the next: the new URL starts
+  // without any filter.
+  test('follows the hidden ids of the URL when the route changes', async () => {
+    await mountPage({
+      query: { hiddenEpisodes: 'e01', hiddenTaskTypes: 'anim' }
+    })
+    await router.push({ path: '/productions/production-2/episode-stats' })
+    await flushPromises()
+    expect(episodeFilter().props('hidden')).toEqual([])
+    expect(taskTypeFilter().props('hidden')).toEqual([])
+    expect(listProps().entries).toEqual([e01])
+    expect(listProps().validationColumns).toEqual(['layout', 'anim'])
+  })
+
+  test('builds the retake stats in the retakes mode only', async () => {
+    await mountPage()
+    expect(Object.keys(listProps().episodeRetakeStats)).toContain('e01')
+    await combobox('statistics.data_mode').vm.$emit(
+      'update:model-value',
+      'status'
+    )
+    expect(listProps().episodeRetakeStats).toEqual({})
+  })
+
+  test('exports the displayed episodes and task types, in the current data mode', async () => {
+    const generateRetakeStatReports = vi
+      .spyOn(csv, 'generateRetakeStatReports')
+      .mockImplementation(() => {})
+    const generateStatReports = vi
+      .spyOn(csv, 'generateStatReports')
+      .mockImplementation(() => {})
+    await mountPage({ query: { hiddenTaskTypes: 'anim' } })
+
+    await findButton('download').vm.$emit('click')
+    const [, retakeStats] = generateRetakeStatReports.mock.calls[0]
+    expect(Object.keys(retakeStats).sort()).toEqual(['all', 'e01'])
+    expect(Object.keys(retakeStats.all).sort()).toEqual(['all', 'layout'])
+
+    await combobox('statistics.data_mode').vm.$emit(
+      'update:model-value',
+      'status'
+    )
+    await findButton('download').vm.$emit('click')
+    const [, stats] = generateStatReports.mock.calls[0]
+    expect(Object.keys(stats).sort()).toEqual(['all', 'e01'])
+    expect(Object.keys(stats.all).sort()).toEqual(['all', 'layout'])
+  })
+
+  test('names the export button and marks it for the mobile layout', async () => {
+    await mountPage()
+    expect(findButton('download').props('title')).toBe('main.csv.export_file')
+    expect(findButton('download').classes()).toContain('export-button')
+  })
+
+  test('offers the stacked bars and the heatmap as display modes', async () => {
+    await mountPage()
+    const options = combobox('statistics.display_mode').props('options')
+    expect(options.map(option => option.value)).toEqual([
+      'pie',
+      'count',
+      'bars',
+      'heatmap'
+    ])
+  })
+
+  test('remembers the display mode and the data mode between visits', async () => {
+    await mountPage()
+    expect(listProps().displayMode).toBe('pie')
+    expect(listProps().dataMode).toBe('retakes')
+    await combobox('statistics.display_mode').vm.$emit(
+      'update:model-value',
+      'heatmap'
+    )
+    await combobox('statistics.data_mode').vm.$emit(
+      'update:model-value',
+      'status'
+    )
+    wrapper.unmount()
+
+    await mountPage()
+    expect(listProps().displayMode).toBe('heatmap')
+    expect(listProps().dataMode).toBe('status')
+  })
+
+  // The scroll position of the store belongs to the Episodes list page.
+  test('leaves the scroll position of the episodes page alone', async () => {
+    const { store } = await mountPage()
+    await wrapper.findComponent(EpisodeStatsList).vm.$emit('scroll', 120)
+    expect(store.dispatch).not.toHaveBeenCalledWith(
+      'setEpisodeListScrollPosition',
+      120
+    )
+  })
+})

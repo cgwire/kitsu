@@ -4,15 +4,13 @@
       <route-tabs :active-tab="activeTab" :tabs="tabs" />
 
       <div class="flexrow filters">
-        <div class="flexrow-item" v-if="activeTab === 'tasktypes'">
-          <combobox-task-type
-            class="flexrow-item"
-            :label="$t('quota.type_label')"
-            :task-type-list="taskTypeList"
-            :disabled="!params.person"
-            v-model="params.taskTypeId"
-          />
-        </div>
+        <combobox-task-type
+          class="flexrow-item"
+          :label="$t('quota.type_label')"
+          :task-type-list="taskTypeList"
+          v-model="params.taskTypeId"
+          v-if="activeTab === 'tasktypes'"
+        />
         <people-field
           class="person-field flexrow-item"
           :clearable="false"
@@ -58,6 +56,22 @@
           :text="$t(`quota.explanation_${params.computeMode}`)"
         />
         <div class="filler"></div>
+        <template v-if="activeTab === 'tasktypes'">
+          <combobox-department
+            class="flexrow-item"
+            all-departments-label
+            :label="$t('main.department')"
+            v-model="params.departmentId"
+          />
+          <combobox-styled
+            class="flexrow-item"
+            :label="$t('people.fields.role')"
+            locale-key-prefix="people.role."
+            open-left
+            :options="roleOptions"
+            v-model="params.role"
+          />
+        </template>
         <button-simple
           class="flexrow-item"
           :title="$t('quota.export_quotas')"
@@ -95,6 +109,8 @@
         :month="currentMonth"
         :count-mode="params.countMode"
         :compute-mode="params.computeMode"
+        :department-id="params.departmentId"
+        :role="params.role"
         :search-text="searchText"
         :max-quota="maxQuota"
       />
@@ -107,7 +123,7 @@
         :week="currentWeek"
         :day="currentDay"
         :is-loading="isPersonShotsLoading"
-        :is-loading-error="false"
+        :is-loading-error="isPersonShotsLoadingError"
         :shots="personShots"
         :count-mode="params.countMode"
       />
@@ -115,12 +131,20 @@
   </div>
 </template>
 
-<script>
+<script setup>
+// Imports
+// --------------------------------------------------------------------------
+import { useHead } from '@unhead/vue'
 import moment from 'moment-timezone'
-import { mapActions, mapGetters } from 'vuex'
+import { computed, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
 import csv from '@/lib/csv'
-import { episodifyRoute } from '@/lib/path'
+import errors from '@/lib/errors'
+import { episodifyRoute as addEpisodeToRoute } from '@/lib/path'
+import { roleOptions } from '@/lib/people'
 import preferences from '@/lib/preferences'
 import { sortPeople } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
@@ -131,6 +155,8 @@ import Quota from '@/components/pages/quota/Quota.vue'
 import PeopleQuotaInfo from '@/components/sides/PeopleQuotaInfo.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
+import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import InfoQuestionMark from '@/components/widgets/InfoQuestionMark.vue'
 import PeopleField from '@/components/widgets/PeopleField.vue'
@@ -138,444 +164,433 @@ import RouteTabs from '@/components/widgets/RouteTabs.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import TextField from '@/components/widgets/TextField.vue'
 
+const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
+const store = useStore()
+
 const personMap = personStore.cache.personMap
 
-export default {
-  name: 'production-quota',
+// State
+// --------------------------------------------------------------------------
+const quotaListRef = useTemplateRef('quota-list')
 
-  components: {
-    ButtonSimple,
-    Combobox,
-    ComboboxTaskType,
-    InfoQuestionMark,
-    PeopleField,
-    PeopleQuotaInfo,
-    Quota,
-    RouteTabs,
-    SearchField,
-    TextField
-  },
+const activeTab = ref('tasktypes')
+const currentDay = ref(moment().date())
+const currentMonth = ref(moment().month() + 1)
+const currentPerson = ref(null)
+const currentWeek = ref(moment().week())
+const currentYear = ref(moment().year())
+const detailLevelString = ref('day')
+const isPersonShotsLoading = ref(false)
+const isPersonShotsLoadingError = ref(false)
+const maxQuota = ref(0)
+const monthString = ref(`${moment().month() + 1}`)
+const params = ref({
+  countMode: 'frames',
+  computeMode: 'weighted',
+  departmentId: '',
+  person: null,
+  role: 'all',
+  taskTypeId: ''
+})
+const personShots = ref([])
+const searchText = ref('')
+const showInfo = ref(false)
+const yearString = ref(`${moment().year()}`)
 
-  data() {
-    return {
-      activeTab: 'tasktypes',
-      tabs: [
-        { name: 'tasktypes', label: this.$t('task_types.title') },
-        { name: 'persons', label: this.$t('main.people') }
-      ],
-      countModeOptions: [
-        { label: this.$t('quota.frames'), value: 'frames' },
-        { label: this.$t('quota.seconds'), value: 'seconds' },
-        { label: this.$t('quota.count'), value: 'count' }
-      ],
-      detailLevelOptions: [
-        { label: this.$t('quota.day'), value: 'day' },
-        { label: this.$t('quota.week'), value: 'week' },
-        { label: this.$t('quota.month'), value: 'month' }
-      ],
-      computeModeOptions: [
-        { label: this.$t('quota.weighted'), value: 'weighted' },
-        { label: this.$t('quota.feedback_date'), value: 'feedback' },
-        { label: this.$t('quota.weighted_done'), value: 'weighteddone' },
-        { label: this.$t('quota.done_date'), value: 'done' }
-      ],
-      currentYear: moment().year(),
-      currentMonth: moment().month() + 1,
-      currentWeek: moment().week(),
-      currentDay: moment().date(),
-      currentPerson: this.getCurrentPerson(),
+let detailLevel = 'day'
+let paramsProductionId = null
+let silent = false
+// A click on a cell loads twice, and the user can move on or close the
+// panel before an answer: only the latest load may update the panel.
+let latestShotsLoad = 0
 
-      detailLevel: 'day',
+// Computed
+// --------------------------------------------------------------------------
+const currentEpisode = computed(() => store.getters.currentEpisode)
+const currentProduction = computed(() => store.getters.currentProduction)
+const isCurrentUserArtist = computed(() => store.getters.isCurrentUserArtist)
+const isPaperProduction = computed(() => store.getters.isPaperProduction)
+const productionShotTaskTypes = computed(
+  () => store.getters.productionShotTaskTypes
+)
+const user = computed(() => store.getters.user)
 
-      isPersonShotsLoading: false,
-      maxQuota: 0,
+const tabs = computed(() => [
+  { name: 'tasktypes', label: t('task_types.title') },
+  { name: 'persons', label: t('main.people') }
+])
 
-      detailLevelString: 'day',
-      monthString: `${moment().month() + 1}`,
-      yearString: `${moment().year()}`,
+const countModeOptions = computed(() =>
+  isPaperProduction.value
+    ? [
+        { label: t('quota.drawings'), value: 'drawings' },
+        { label: t('quota.count'), value: 'count' }
+      ]
+    : [
+        { label: t('quota.frames'), value: 'frames' },
+        { label: t('quota.seconds'), value: 'seconds' },
+        { label: t('quota.count'), value: 'count' }
+      ]
+)
 
-      params: {
-        countMode: 'frames',
-        computeMode: 'weighted',
-        person: null,
-        taskTypeId: ''
-      },
-      paramsProductionId: null,
-      personShots: [],
-      silent: false,
+const detailLevelOptions = computed(() => [
+  { label: t('quota.day'), value: 'day' },
+  { label: t('quota.week'), value: 'week' },
+  { label: t('quota.month'), value: 'month' }
+])
 
-      searchText: '',
-      showInfo: false
-    }
-  },
+const computeModeOptions = computed(() => [
+  { label: t('quota.weighted'), value: 'weighted' },
+  { label: t('quota.feedback_date'), value: 'feedback' },
+  { label: t('quota.weighted_done'), value: 'weighteddone' },
+  { label: t('quota.done_date'), value: 'done' }
+])
 
-  mounted() {
-    this.setCountModeOptions()
-    this.activeTab = this.$route.query.tab || 'tasktypes'
-    // Mounted before the topbar set the production of the route: the
-    // production watcher starts from the params of that production.
-    if (this.$route.params.production_id !== this.currentProduction.id) return
-    this.initParams()
-    this.resetRouteQuery()
-    this.loadRoute()
-  },
+const taskTypeList = computed(() => [...productionShotTaskTypes.value])
 
-  computed: {
-    ...mapGetters([
-      'currentEpisode',
-      'currentProduction',
-      'isCurrentUserArtist',
-      'isPaperProduction',
-      'productionShotTaskTypes',
-      'user'
-    ]),
+const teamPersons = computed(() => {
+  if (isCurrentUserArtist.value) return [personMap.get(user.value.id)]
+  const persons =
+    currentProduction.value?.team
+      .map(personId => personMap.get(personId))
+      .filter(Boolean) ?? []
+  return sortPeople(persons)
+})
 
-    taskTypeList() {
-      return [...this.productionShotTaskTypes]
-    },
+const yearOptions = computed(() =>
+  range(2018, moment().year())
+    .map(year => ({ label: year, value: `${year}` }))
+    .reverse()
+)
 
-    teamPersons() {
-      if (this.isCurrentUserArtist) {
-        return [personMap.get(this.user.id)]
-      }
-      const persons =
-        this.currentProduction?.team
-          .map(personId => personMap.get(personId))
-          .filter(Boolean) ?? []
-      return sortPeople(persons)
-    },
+const monthOptions = computed(() => {
+  const isCurrentYear = yearString.value === `${moment().year()}`
+  const lastMonth = isCurrentYear ? moment().month() + 1 : 12
+  return range(1, lastMonth).map(month => ({
+    label: monthToString(month),
+    value: `${month}`
+  }))
+})
 
-    yearOptions() {
-      return range(2018, moment().year())
-        .map(year => ({ label: year, value: `${year}` }))
-        .reverse()
-    },
+// Functions
+// --------------------------------------------------------------------------
+const getCurrentPerson = () => personMap.get(route.params.person_id) ?? {}
 
-    monthOptions() {
-      const isCurrentYear = this.yearString === `${moment().year()}`
-      const lastMonth = isCurrentYear ? moment().month() + 1 : 12
-      return range(1, lastMonth).map(month => ({
-        label: monthToString(month),
-        value: `${month}`
-      }))
-    }
-  },
+const episodifyRoute = targetRoute => {
+  if (currentEpisode.value) {
+    addEpisodeToRoute(targetRoute, currentEpisode.value.id)
+  }
+  return targetRoute
+}
 
-  methods: {
-    ...mapActions(['getPersonQuotaShots', 'loadShots']),
+const loadRoute = async () => {
+  const { month, year, week, day } = route.params
+  const { taskTypeId, computeMode, personId } = route.query
 
-    getCurrentPerson() {
-      const personId = this.$route.params.person_id
-      return personMap?.get(personId) ?? {}
-    },
+  if (route.path.includes('week')) detailLevel = 'week'
+  if (route.path.includes('month')) detailLevel = 'month'
+  if (route.path.includes('day')) detailLevel = 'day'
 
-    loadRoute() {
-      const { month, year, week, day } = this.$route.params
-      const { countMode, taskTypeId, computeMode } = this.$route.query
+  currentPerson.value = getCurrentPerson()
+  detailLevelString.value = detailLevel
+  if (taskTypeId) params.value.taskTypeId = taskTypeId
+  if (personId) params.value.person = personMap.get(personId)
+  if (computeMode) params.value.computeMode = computeMode
+  if (month) {
+    currentMonth.value = Number(month)
+    monthString.value = `${month}`
+  }
+  if (year) {
+    currentYear.value = Number(year)
+    yearString.value = `${year}`
+  }
+  if (week) currentWeek.value = Number(week)
+  if (day) currentDay.value = Number(day)
 
-      if (this.$route.path.includes('week')) this.detailLevel = 'week'
-      if (this.$route.path.includes('month')) this.detailLevel = 'month'
-      if (this.$route.path.includes('day')) this.detailLevel = 'day'
-
-      this.currentPerson = this.getCurrentPerson()
-      this.detailLevelString = this.detailLevel
-      if (countMode) {
-        this.countMode = countMode
-      }
-      if (taskTypeId) {
-        this.params.taskTypeId = taskTypeId
-      }
-      if (this.$route.query.personId) {
-        this.params.person = personMap.get(this.$route.query.personId)
-      }
-      if (computeMode) {
-        this.params.computeMode = computeMode
-      }
-      if (month) {
-        this.currentMonth = Number(month)
-        this.monthString = `${month}`
-      }
-      if (year) {
-        this.currentYear = Number(year)
-        this.yearString = `${year}`
-      }
-      if (week) {
-        this.currentWeek = Number(week)
-      }
-      if (day) {
-        this.currentDay = Number(day)
-      }
-
-      if (this.$route.path.includes('person')) {
-        this.isPersonShotsLoading = true
-        this.getPersonQuotaShots({
-          personId: this.currentPerson.id,
-          detailLevel: this.detailLevel,
-          taskTypeId: this.params.taskTypeId,
-          year,
-          month,
-          week,
-          day,
-          computeMode: this.params.computeMode
-        }).then(shots => {
-          this.isPersonShotsLoading = false
-          this.personShots = shots
-          this.showSideInfo()
-        })
-      } else {
-        this.hideSideInfo()
-      }
-    },
-
-    showSideInfo() {
-      this.showInfo = true
-    },
-
-    hideSideInfo() {
-      this.showInfo = false
-    },
-
-    episodifyRoute(route) {
-      if (this.currentEpisode) {
-        episodifyRoute(route, this.currentEpisode.id)
-      }
-      return route
-    },
-
-    exportQuotas() {
-      const quotas = this.$refs['quota-list'].quotaMap
-      const nameData = ['quotas', this.detailLevel, this.currentYear]
-      if (this.detailLevel === 'day') nameData.push(this.currentMonth)
-      const name = stringHelpers.slugify(nameData.join('_'))
-      const people = Object.keys(quotas)
-        .map(personId => personMap.get(personId))
-        .filter(Boolean)
-        .sort((a, b) => a.full_name.localeCompare(b.full_name))
-      csv.generateQuotas(
-        name,
-        quotas,
-        people,
-        this.countMode,
-        this.detailLevel,
-        moment().year(),
-        moment().month() + 1,
-        this.currentYear,
-        this.currentMonth,
-        this.currentWeek
-      )
-    },
-
-    onSearchChange(searchText) {
-      this.searchText = searchText
-    },
-
-    setCountModeOptions() {
-      if (this.isPaperProduction) {
-        this.countModeOptions = [
-          { label: this.$t('quota.drawings'), value: 'drawings' },
-          { label: this.$t('quota.count'), value: 'count' }
-        ]
-        this.countMode = 'drawings'
-      } else {
-        this.countModeOptions = [
-          { label: this.$t('quota.frames'), value: 'frames' },
-          { label: this.$t('quota.seconds'), value: 'seconds' },
-          { label: this.$t('quota.count'), value: 'count' }
-        ]
-        this.params.countMode = 'frames'
-      }
-    },
-
-    // Params of the current production: the route query first, then the ones
-    // saved for this production.
-    initParams() {
-      const key = `quota:${this.currentProduction.id}:params`
-      const savedParams = preferences.getObjectPreference(key) || {}
-      const defaultParams = {
-        countMode: this.countModeOptions[0].value,
-        computeMode: this.computeModeOptions[0].value,
-        taskTypeId: this.productionShotTaskTypes[0].id
-      }
-      this.params = {
-        countMode:
-          this.$route.query.countMode ||
-          savedParams.countMode ||
-          defaultParams.countMode,
-        computeMode:
-          this.$route.query.computeMode ||
-          savedParams.computeMode ||
-          defaultParams.computeMode,
-        taskTypeId: this.$route.query.taskTypeId,
-        person: this.$route.query.personId
-          ? personMap.get(this.$route.query.personId)
-          : null
-      }
-      if (!this.params.taskTypeId && !this.params.person) {
-        this.params.taskTypeId =
-          savedParams.taskTypeId || defaultParams.taskTypeId
-      }
-      this.paramsProductionId = this.currentProduction.id
-    },
-
-    resetRouteQuery() {
-      const query = this.getQuery()
-      const key = `quota:${this.currentProduction.id}:params`
-      preferences.setObjectPreference(key, this.params)
-      // Replace: the query mirrors the params, it is no navigation of the
-      // user's. A pushed entry was landed on by Back, then pushed again.
-      this.$router.replace({ query })
-    },
-
-    throttledResetRouteQuery() {
-      if (this.silent) return
-      this.silent = true
-      this.resetRouteQuery()
-      setTimeout(() => {
-        this.silent = false
-      }, 100)
-    },
-
-    reloadShots() {
-      this.loadShots().then(() => {
-        this.resetRouteQuery()
-        this.loadRoute()
+  const load = ++latestShotsLoad
+  const isLatest = () => load === latestShotsLoad
+  if (route.path.includes('person')) {
+    isPersonShotsLoading.value = true
+    isPersonShotsLoadingError.value = false
+    try {
+      const shots = await store.dispatch('getPersonQuotaShots', {
+        productionId: currentProduction.value.id,
+        personId: currentPerson.value.id,
+        detailLevel,
+        taskTypeId: params.value.taskTypeId,
+        year,
+        month,
+        week,
+        day,
+        computeMode: params.value.computeMode
       })
-    },
-
-    getQuery() {
-      const taskTypeId =
-        this.activeTab === 'tasktypes' ? this.params.taskTypeId : undefined
-      const isPersonTab =
-        this.activeTab === 'persons' || this.$route.query.tab === 'persons'
-      const personId = isPersonTab
-        ? (this.params.person?.id ?? this.teamPersons[0]?.id)
-        : undefined
-      return {
-        countMode: this.params.countMode,
-        computeMode: this.params.computeMode,
-        tab: this.activeTab || 'tasktypes',
-        taskTypeId,
-        personId: personId || undefined
+      if (isLatest()) personShots.value = shots
+    } catch (err) {
+      if (isLatest()) {
+        personShots.value = []
+        isPersonShotsLoadingError.value = true
+      }
+      errors.logRequestFailure(err)
+    } finally {
+      if (isLatest()) {
+        isPersonShotsLoading.value = false
+        showInfo.value = true
       }
     }
-  },
-
-  watch: {
-    'params.person'() {
-      this.throttledResetRouteQuery()
-    },
-
-    detailLevelString() {
-      if (this.detailLevel !== this.detailLevelString) {
-        const route = {
-          name: `quota-${this.detailLevelString}`,
-          params: {
-            year: this.currentYear
-          },
-          query: this.getQuery()
-        }
-        if (this.detailLevelString === 'day') {
-          route.params.month = this.currentMonth
-        }
-        this.$router.push(this.episodifyRoute(route))
-      }
-    },
-
-    yearString() {
-      const year = Number(this.yearString)
-      const currentMonth = moment().month() + 1
-      if (this.currentYear !== year) {
-        const route = {
-          name: `quota-${this.detailLevelString}`,
-          params: {
-            year
-          },
-          query: this.getQuery()
-        }
-        if (this.detailLevelString === 'day') {
-          route.params.month = `${Math.min(
-            Number(this.monthString),
-            currentMonth
-          )}`
-        }
-        this.$router.push(this.episodifyRoute(route))
-      }
-    },
-
-    monthString() {
-      if (this.currentMonth !== Number(this.monthString)) {
-        const route = {
-          name: 'quota-day',
-          params: {
-            year: this.currentYear,
-            month: this.monthString
-          },
-          query: this.getQuery()
-        }
-        this.$router.push(this.episodifyRoute(route))
-      }
-    },
-
-    'params.countMode'() {
-      this.resetRouteQuery()
-    },
-
-    'params.computeMode'() {
-      if (this.$route.query.computeMode !== this.params.computeMode) {
-        this.resetRouteQuery()
-        this.currentPerson = null
-      }
-    },
-
-    'params.taskTypeId'() {
-      if (this.params.taskTypeId) this.throttledResetRouteQuery()
-    },
-
-    currentProduction() {
-      if (!this.currentProduction) return
-      this.setCountModeOptions()
-      // The params of the production left must neither be saved under this
-      // one nor written into its URL.
-      this.initParams()
-      this.reloadShots()
-    },
-
-    currentEpisode() {
-      this.reloadShots()
-    },
-
-    $route() {
-      this.activeTab = this.$route.query.tab || 'tasktypes'
-      // A production switch: the production watcher starts over from the
-      // params of the new production.
-      if (this.$route.params.production_id !== this.paramsProductionId) return
-      this.resetRouteQuery()
-      this.loadRoute()
-    }
-  },
-
-  head() {
-    const prodName = this.currentProduction.name
-    return {
-      title: `${prodName} | ${this.$t('quota.title')} - Kitsu`
-    }
+  } else {
+    showInfo.value = false
   }
 }
+
+const exportQuotas = () => {
+  const quotas = quotaListRef.value.quotaMap
+  const nameData = [
+    'quotas',
+    detailLevel,
+    currentYear.value,
+    ...(detailLevel === 'day' ? [currentMonth.value] : [])
+  ]
+  const name = stringHelpers.slugify(nameData.join('_'))
+  const people = Object.keys(quotas)
+    .map(personId => personMap.get(personId))
+    .filter(Boolean)
+    .sort((a, b) => a.full_name.localeCompare(b.full_name))
+  csv.generateQuotas(
+    name,
+    quotas,
+    people,
+    params.value.countMode,
+    detailLevel,
+    moment().year(),
+    moment().month() + 1,
+    currentYear.value,
+    currentMonth.value,
+    currentWeek.value
+  )
+}
+
+const onSearchChange = text => {
+  searchText.value = text
+}
+
+const paramsKey = () => `quota:${currentProduction.value.id}:params`
+
+// Params of the current production: the route query first, then the ones
+// saved for this production.
+const initParams = () => {
+  const savedParams = preferences.getObjectPreference(paramsKey()) || {}
+  const { query } = route
+  params.value = {
+    countMode:
+      query.countMode ||
+      savedParams.countMode ||
+      countModeOptions.value[0].value,
+    computeMode:
+      query.computeMode ||
+      savedParams.computeMode ||
+      computeModeOptions.value[0].value,
+    departmentId: query.department || savedParams.departmentId || '',
+    role: query.role || savedParams.role || 'all',
+    taskTypeId: query.taskTypeId,
+    person: query.personId ? personMap.get(query.personId) : null
+  }
+  if (!params.value.taskTypeId && !params.value.person) {
+    params.value.taskTypeId =
+      savedParams.taskTypeId || productionShotTaskTypes.value[0].id
+  }
+  paramsProductionId = currentProduction.value.id
+}
+
+const getQuery = () => {
+  const isPersonTab =
+    activeTab.value === 'persons' || route.query.tab === 'persons'
+  const personId = isPersonTab
+    ? (params.value.person?.id ?? teamPersons.value[0]?.id)
+    : undefined
+  return {
+    countMode: params.value.countMode,
+    computeMode: params.value.computeMode,
+    tab: activeTab.value || 'tasktypes',
+    taskTypeId:
+      activeTab.value === 'tasktypes' ? params.value.taskTypeId : undefined,
+    department:
+      activeTab.value === 'tasktypes'
+        ? params.value.departmentId || undefined
+        : undefined,
+    role:
+      activeTab.value === 'tasktypes' && params.value.role !== 'all'
+        ? params.value.role
+        : undefined,
+    personId: personId || undefined
+  }
+}
+
+const resetRouteQuery = () => {
+  preferences.setObjectPreference(paramsKey(), params.value)
+  // Replace: the query mirrors the params, it is no navigation of the
+  // user's. A pushed entry was landed on by Back, then pushed again.
+  router.replace({ query: getQuery() })
+}
+
+const throttledResetRouteQuery = () => {
+  if (silent) return
+  silent = true
+  resetRouteQuery()
+  setTimeout(() => {
+    silent = false
+  }, 100)
+}
+
+// the role filter reads the roles held in the production
+const loadTeamRoles = () =>
+  store.dispatch('loadProductionTeam').catch(console.error)
+
+const reloadShots = async () => {
+  await store.dispatch('loadShots')
+  resetRouteQuery()
+  loadRoute()
+}
+
+const pushPeriodRoute = (name, periodParams) => {
+  router.push(episodifyRoute({ name, params: periodParams, query: getQuery() }))
+}
+
+// Watchers
+// --------------------------------------------------------------------------
+watch(
+  () => params.value.person,
+  () => throttledResetRouteQuery()
+)
+
+watch(detailLevelString, () => {
+  if (detailLevel === detailLevelString.value) return
+  pushPeriodRoute(`quota-${detailLevelString.value}`, {
+    year: currentYear.value,
+    ...(detailLevelString.value === 'day' ? { month: currentMonth.value } : {})
+  })
+})
+
+watch(yearString, () => {
+  const year = Number(yearString.value)
+  if (currentYear.value === year) return
+  const lastMonth = moment().month() + 1
+  pushPeriodRoute(`quota-${detailLevelString.value}`, {
+    year,
+    ...(detailLevelString.value === 'day'
+      ? { month: `${Math.min(Number(monthString.value), lastMonth)}` }
+      : {})
+  })
+})
+
+watch(monthString, () => {
+  if (currentMonth.value === Number(monthString.value)) return
+  pushPeriodRoute('quota-day', {
+    year: currentYear.value,
+    month: monthString.value
+  })
+})
+
+watch(
+  () => [params.value.countMode, params.value.departmentId, params.value.role],
+  () => resetRouteQuery()
+)
+
+watch(
+  () => params.value.computeMode,
+  () => {
+    if (route.query.computeMode !== params.value.computeMode) {
+      resetRouteQuery()
+      currentPerson.value = null
+    }
+  }
+)
+
+watch(
+  () => params.value.taskTypeId,
+  () => {
+    if (params.value.taskTypeId) throttledResetRouteQuery()
+  }
+)
+
+watch(currentProduction, () => {
+  if (!currentProduction.value) return
+  // The params of the production left must neither be saved under this
+  // one nor written into its URL.
+  initParams()
+  loadTeamRoles()
+  reloadShots()
+})
+
+watch(currentEpisode, () => {
+  reloadShots()
+})
+
+watch(
+  () => route.fullPath,
+  () => {
+    activeTab.value = route.query.tab || 'tasktypes'
+    // A production switch: the production watcher starts over from the
+    // params of the new production.
+    if (route.params.production_id !== paramsProductionId) return
+    resetRouteQuery()
+    loadRoute()
+  }
+)
+
+// Lifecycle
+// --------------------------------------------------------------------------
+onMounted(() => {
+  currentPerson.value = getCurrentPerson()
+  activeTab.value = route.query.tab || 'tasktypes'
+  // Mounted before the topbar set the production of the route: the
+  // production watcher starts from the params of that production.
+  if (route.params.production_id !== currentProduction.value.id) return
+  initParams()
+  loadTeamRoles()
+  resetRouteQuery()
+  loadRoute()
+})
+
+// Head
+// --------------------------------------------------------------------------
+useHead({
+  title: computed(
+    () => `${currentProduction.value?.name} | ${t('quota.title')} - Kitsu`
+  )
+})
 </script>
 
 <style lang="scss" scoped>
-.dark {
-  .filters {
-    color: $white-grey;
-  }
-}
-
 .filters {
+  color: var(--text);
   padding-bottom: 2rem;
 
   .field {
     padding-bottom: 0;
     margin-bottom: 0;
+  }
+
+  // the export button renders 32px tall: stretch it to the controls and
+  // sit it on the row's bottom edge, under the labels (as on Timesheets)
+  > .button {
+    align-self: flex-end;
+    height: 42px;
+  }
+
+  // the department combo's control renders 38px tall against 42px for
+  // the Bulma selects, and its label carries a 5px padding-top
+  :deep(.department-combo) {
+    display: flex;
+    flex-direction: column;
+    height: 42px;
+    justify-content: center;
+  }
+
+  :deep(.department-combo .label) {
+    margin-bottom: 5px;
+    padding-top: 0;
   }
 }
 

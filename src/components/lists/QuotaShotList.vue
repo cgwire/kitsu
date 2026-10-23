@@ -20,7 +20,7 @@
         <tr :key="`shot-quota-${shot.id}`" v-for="shot in shots">
           <td>{{ shot.full_name }}</td>
           <td>{{ getQuota(shot) }}</td>
-          <td>{{ shot.weight }}</td>
+          <td>{{ getWeight(shot) }}</td>
         </tr>
       </tbody>
     </table>
@@ -59,13 +59,24 @@ const props = defineProps({
 // Computed
 // --------------------------------------------------------------------------
 const currentProduction = computed(() => store.getters.currentProduction)
+const productionMap = computed(() => store.getters.productionMap)
 
 // Functions
 // --------------------------------------------------------------------------
+
+// On My tasks the shots span several productions, and the current one is
+// whichever was opened last.
+const getShotProduction = shot =>
+  productionMap.value?.get(shot.project_id) || currentProduction.value
+
 const getQuota = shot =>
   props.countMode === 'seconds'
-    ? frameToSeconds(shot.nb_frames, currentProduction.value, shot)
+    ? frameToSeconds(shot.nb_frames, getShotProduction(shot), shot)
     : shot.nb_frames
+
+// the weights add up float errors, such as 1.1800000000000002
+const getWeight = shot =>
+  shot.weight == null ? '' : Math.round(shot.weight * 100) / 100
 </script>
 
 <style lang="scss" scoped>

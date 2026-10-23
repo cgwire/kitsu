@@ -7,6 +7,18 @@
     <td class="short-name">
       {{ taskType.short_name }}
     </td>
+    <td class="bitrate" v-for="key in BITRATE_KEYS" :key="key">
+      <input
+        class="input"
+        type="number"
+        min="1"
+        :max="bitrateCeiling(key)"
+        :placeholder="inheritedBitrate(key)"
+        :title="$t(`productions.fields.${key}`)"
+        :value="link[key] ?? ''"
+        @change="onBitrateChange(key, $event.target)"
+      />
+    </td>
     <td class="remove">
       <button
         class="button"
@@ -19,103 +31,76 @@
 </template>
 
 <script setup>
-import moment from 'moment'
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { GripVerticalIcon } from 'lucide-vue-next'
+import { computed } from 'vue'
 import { useStore } from 'vuex'
 
-import { parseDate } from '@/lib/time'
-import { GripVerticalIcon } from 'lucide-vue-next'
+import { clampBitrates } from '@/lib/productions'
 
 import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
 
+const store = useStore()
+
+// Props / Emits
+// --------------------------------------------------------------------------
 const props = defineProps({
   taskType: { required: true, type: Object },
   scheduleItem: { required: true, type: Object }
 })
 
-const emit = defineEmits(['date-changed', 'remove'])
+const emit = defineEmits(['bitrates-changed', 'remove'])
 
-const store = useStore()
+// State
+// --------------------------------------------------------------------------
+const BITRATE_KEYS = ['hd_bitrate_compression', 'ld_bitrate_compression']
 
-const startDate = ref(null)
-const endDate = ref(null)
-const silent = ref(true)
-
+// Computed
+// --------------------------------------------------------------------------
 const currentProduction = computed(() => store.getters.currentProduction)
-
-// eslint-disable-next-line no-unused-vars
-const productionTimeRange = computed(() => ({
-  to: parseDate(currentProduction.value.start_date).toDate(),
-  from: parseDate(currentProduction.value.end_date).toDate()
-}))
-
-// eslint-disable-next-line no-unused-vars
-const endDateTimeRange = computed(() => ({
-  to: startDate.value,
-  from: parseDate(currentProduction.value.end_date).toDate()
-}))
-
-onMounted(() => {
-  startDate.value = parseDate(props.scheduleItem.start_date).toDate()
-  endDate.value = parseDate(props.scheduleItem.end_date).toDate()
-  nextTick(() => {
-    silent.value = false
-  })
-})
-
-watch(startDate, () => {
-  if (silent.value) return
-  const start = moment(startDate.value)
-  let end = moment(endDate.value)
-  silent.value = true
-  if (end.isBefore(start)) {
-    end = start.clone().add(1, 'days')
-    endDate.value = end.toDate()
-  }
-  const data = { ...props.scheduleItem, startDate: start, endDate: end }
-  emit('date-changed', data)
-  nextTick(() => {
-    silent.value = false
-  })
-})
-
-watch(endDate, () => {
-  if (silent.value) return
-  let start = moment(startDate.value)
-  const end = moment(endDate.value)
-  silent.value = true
-  if (end.isBefore(start)) {
-    start = end.clone().add(-1, 'days')
-    startDate.value = start.toDate()
-  }
-  const data = { ...props.scheduleItem, startDate: start, endDate: end }
-  emit('date-changed', data)
-  nextTick(() => {
-    silent.value = false
-  })
-})
-
-watch(
-  () => props.scheduleItem,
-  () => {
-    silent.value = true
-    startDate.value = parseDate(props.scheduleItem.start_date).toDate()
-    endDate.value = parseDate(props.scheduleItem.end_date).toDate()
-    nextTick(() => {
-      silent.value = false
-    })
-  }
+const bitrateDefaults = computed(() => store.getters.movieBitrateDefaults)
+const link = computed(
+  () => currentProduction.value.task_type_links?.[props.taskType.id] || {}
 )
+
+// Functions
+// --------------------------------------------------------------------------
+const bitrateCeiling = key =>
+  key === 'hd_bitrate_compression'
+    ? bitrateDefaults.value.hd_bitrate_compression
+    : link.value.hd_bitrate_compression ||
+      currentProduction.value.hd_bitrate_compression ||
+      bitrateDefaults.value.hd_bitrate_compression
+
+// The bitrate the task type gets while its own is empty: Zou encodes the low
+// definition version within the high definition bitrate.
+const inheritedBitrate = key =>
+  Math.min(
+    currentProduction.value[key] || bitrateDefaults.value[key],
+    bitrateCeiling(key)
+  )
+
+const onBitrateChange = (key, input) => {
+  const bitrates = clampBitrates(
+    { ...link.value, [key]: input.value },
+    {
+      inheritedHd: currentProduction.value.hd_bitrate_compression,
+      max: bitrateDefaults.value.hd_bitrate_compression
+    }
+  )
+  // A change event skips the checks of the browser: show what is saved.
+  input.value = bitrates[key] ?? ''
+  emit('bitrates-changed', { taskType: props.taskType, ...bitrates })
+}
 </script>
 
 <style lang="scss" scoped>
-.field {
-  margin-bottom: 0;
-  width: 105px;
-}
+.bitrate {
+  min-width: 120px;
+  width: 120px;
 
-.priority {
-  padding-left: 2rem;
+  input {
+    width: 100px;
+  }
 }
 
 .grab {

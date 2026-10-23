@@ -1,5 +1,9 @@
 <template>
-  <div class="columns fixed-page episode xyz-in" xyz="fade">
+  <div
+    class="columns fixed-page episode xyz-in"
+    xyz="fade"
+    v-if="currentProduction"
+  >
     <div class="page column main-column">
       <div class="page-header flexrow">
         <router-link
@@ -86,7 +90,7 @@
               <button-simple
                 icon="edit"
                 :title="$t('episodes.edit_title')"
-                @click="modals.edit = true"
+                @click="showEditModal"
                 v-if="isCurrentUserManager"
               />
             </div>
@@ -353,7 +357,15 @@ import {
   ChevronRightIcon,
   CornerLeftUpIcon
 } from 'lucide-vue-next'
-import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
+import {
+  computed,
+  defineAsyncComponent,
+  nextTick,
+  onMounted,
+  reactive,
+  ref,
+  watch
+} from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
@@ -367,7 +379,6 @@ import DescriptionCell from '@/components/cells/DescriptionCell.vue'
 import CastingList from '@/components/lists/CastingList.vue'
 import EntityTaskList from '@/components/lists/EntityTaskList.vue'
 import EditEpisodeModal from '@/components/modals/EditEpisodeModal.vue'
-import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal.vue'
 import EntityChat from '@/components/pages/entities/EntityChat.vue'
 import EntityNews from '@/components/pages/entities/EntityNews.vue'
 import EntityPreviewFiles from '@/components/pages/entities/EntityPreviewFiles.vue'
@@ -384,6 +395,10 @@ import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
 import Schedule from '@/components/widgets/Schedule.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
+
+const ViewPlaylistModal = defineAsyncComponent(
+  () => import('@/components/modals/ViewPlaylistModal.vue')
+)
 
 defineOptions({ name: 'episode' })
 
@@ -515,6 +530,12 @@ const assetPath = asset =>
     },
     currentEpisode.value.id
   )
+
+// Close leaves the error of the last save: opening drops it.
+const showEditModal = () => {
+  errors.edit = false
+  modals.edit = true
+}
 
 const confirmEditEpisode = async form => {
   loading.edit = true

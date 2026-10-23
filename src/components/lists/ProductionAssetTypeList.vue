@@ -1,7 +1,7 @@
 <template>
   <div class="data-list">
-    <div class="datatable-wrapper" ref="body" @scroll.passive="onBodyScroll">
-      <table class="datatable">
+    <div class="datatable-wrapper">
+      <table class="datatable datatable--cards">
         <thead class="datatable-head">
           <tr>
             <th scope="col" class="name datatable-row-header">
@@ -41,12 +41,17 @@
           </tr>
         </thead>
         <tbody class="datatable-body" v-if="!isLoading">
-          <tr class="all-line datatable-row" v-if="showAll && !isEmptyList">
-            <th scope="row" class="name datatable-row-header">
+          <tr class="all-line datatable-row" v-if="entries.length > 0">
+            <th scope="row" class="name datatable-row-header card-head">
               {{ $t('asset_types.all_asset_types') }}
+              <span class="asset-count">
+                {{ totalAssetCount }}
+                {{ $t('assets.number', { count: totalAssetCount }) }}
+              </span>
             </th>
 
             <stats-cell
+              :data-label="$t('main.all')"
               :colors="chartColors('all', 'all')"
               :data="chartData('all', 'all')"
               :display-mode="displayMode"
@@ -55,6 +60,7 @@
             <stats-cell
               :style="getValidationStyle(columnId)"
               :key="'all-' + columnId"
+              :data-label="taskTypeMap.get(columnId)?.name"
               :colors="chartColors('all', columnId)"
               :data="chartData('all', columnId)"
               :display-mode="displayMode"
@@ -65,11 +71,18 @@
           </tr>
 
           <tr class="datatable-row" :key="entry.id" v-for="entry in entries">
-            <td scope="row" class="name datatable-row-header">
-              {{ entry.name }}
+            <td class="name datatable-row-header card-head">
+              <router-link :to="assetsPath(entry)">
+                {{ entry.name }}
+              </router-link>
+              <span class="asset-count">
+                {{ assetCount(entry.id) }}
+                {{ $t('assets.number', { count: assetCount(entry.id) }) }}
+              </span>
             </td>
 
             <stats-cell
+              :data-label="$t('main.all')"
               :colors="chartColors(entry.id, 'all')"
               :data="chartData(entry.id, 'all')"
               :display-mode="displayMode"
@@ -83,6 +96,7 @@
             >
               <stats-cell
                 :key="entry.id + columnId"
+                :data-label="taskTypeMap.get(columnId)?.name"
                 :style="getValidationStyle(columnId)"
                 :colors="chartColors(entry.id, columnId)"
                 :data="chartData(entry.id, columnId)"
@@ -110,172 +124,142 @@
       :text="$t('assets.empty_list')"
       :read-only-text="$t('assets.empty_list_read_only')"
       :illustration="emptyAssetIllustration"
-      v-if="isEmptyList && !isLoading"
+      v-if="isEmptyList"
     />
 
+    <p class="has-text-centered all-hidden" v-if="isAllHidden">
+      {{ $t('asset_types.all_hidden') }}
+    </p>
     <p
       class="has-text-centered nb-asset-types"
-      v-if="!isEmptyList && !isLoading"
+      v-else-if="!isEmptyList && !isLoading"
     >
-      {{ displayedAssetTypesLength }}
-      {{ $t('asset_types.number', { count: displayedAssetTypesLength }) }}
+      {{ entries.length }}
+      {{ $t('asset_types.number', { count: entries.length }) }}
     </p>
   </div>
 </template>
 
-<script>
-import { mapGetters } from 'vuex'
+<script setup>
+// Imports
+// --------------------------------------------------------------------------
+import { computed } from 'vue'
+import { useStore } from 'vuex'
 
 import emptyAssetIllustration from '@/assets/illustrations/empty_asset.png'
+import colors from '@/lib/colors'
+import { getEntitiesPath } from '@/lib/path'
 import { getChartColors, getChartData } from '@/lib/stats'
 
-import { entityListMixin } from '@/components/mixins/entity_list'
-
-import EmptyList from '@/components/widgets/EmptyList.vue'
 import StatsCell from '@/components/cells/StatsCell.vue'
+import EmptyList from '@/components/widgets/EmptyList.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
-export default {
-  name: 'production-asset-type-list',
+const store = useStore()
 
-  mixins: [entityListMixin],
+// Props / Emits
+// --------------------------------------------------------------------------
+const props = defineProps({
+  assetCounts: { type: Object, default: () => ({}) },
+  assetTypeStats: { type: Object, default: () => ({}) },
+  displayMode: { type: String, default: 'pie' },
+  entries: { type: Array, default: () => [] },
+  isError: { type: Boolean, default: false },
+  isFiltered: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  validationColumns: { type: Array, default: () => [] }
+})
 
-  props: {
-    displayMode: {
-      type: String,
-      default: 'pie'
-    },
-    entries: {
-      type: Array,
-      default: () => []
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    assetTypeStats: {
-      type: Object,
-      default: () => {}
-    },
-    showAll: {
-      type: Boolean,
-      default: false
-    },
-    validationColumns: {
-      type: Array,
-      default: () => []
-    }
-  },
+// Computed
+// --------------------------------------------------------------------------
+const currentEpisode = computed(() => store.getters.currentEpisode)
+const currentProduction = computed(() => store.getters.currentProduction)
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+const isTVShow = computed(() => store.getters.isTVShow)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
-  components: {
-    EmptyList,
-    StatsCell,
-    TableInfo
-  },
+const isEmptyList = computed(
+  () =>
+    props.entries.length === 0 &&
+    !props.isLoading &&
+    !props.isError &&
+    !props.isFiltered
+)
 
-  data() {
-    return {
-      emptyAssetIllustration
-    }
-  },
+const isAllHidden = computed(
+  () =>
+    props.isFiltered &&
+    props.entries.length === 0 &&
+    !props.isLoading &&
+    !props.isError
+)
 
-  computed: {
-    ...mapGetters([
-      'assetTypeSearchText',
-      'currentEpisode',
-      'currentProduction',
-      'displayedAssetTypesLength',
-      'isCurrentUserClient',
-      'isTVShow',
-      'taskTypeMap'
-    ]),
+const totalAssetCount = computed(() =>
+  props.entries.reduce((total, entry) => total + assetCount(entry.id), 0)
+)
 
-    isEmptyList() {
-      return (
-        this.entries &&
-        this.entries.length === 0 &&
-        !this.isLoading &&
-        !this.isError &&
-        (!this.assetTypeSearchText || this.assetTypeSearchText.length === 0)
-      )
-    }
-  },
+// Functions
+// --------------------------------------------------------------------------
+const assetCount = entryId => props.assetCounts[entryId] || 0
 
-  methods: {
-    chartColors(entryId, columnId) {
-      return getChartColors(this.assetTypeStats, entryId, columnId)
-    },
+const chartColors = (entryId, columnId) =>
+  getChartColors(props.assetTypeStats, entryId, columnId)
 
-    chartData(entryId, columnId) {
-      return getChartData(this.assetTypeStats, entryId, columnId)
-    },
+const chartData = (entryId, columnId) =>
+  getChartData(props.assetTypeStats, entryId, columnId)
 
-    isStats(entryId, columnId) {
-      return (
-        this.assetTypeStats[entryId] && this.assetTypeStats[entryId][columnId]
-      )
-    },
+const isStats = (entryId, columnId) => props.assetTypeStats[entryId]?.[columnId]
 
-    onHeaderScroll(event, position) {
-      this.$refs.tableWrapper.scrollLeft = position.scrollLeft
-    },
+const getValidationStyle = columnId => {
+  const taskType = taskTypeMap.value.get(columnId)
+  if (!taskType) return {}
+  return {
+    'border-left': `1px solid ${taskType.color}`,
+    background: colors.hexToRGBa(taskType.color, 0.08)
+  }
+}
 
-    taskTypePath(taskTypeId) {
-      const route = {
-        name: 'task-type',
-        params: {
-          production_id: this.currentProduction.id,
-          task_type_id: taskTypeId,
-          type: 'assets'
-        }
-      }
-
-      if (this.isTVShow && this.currentEpisode) {
-        route.name = 'episode-task-type'
-        route.params.episode_id = this.currentEpisode.id
-      }
-
-      return route
+const taskTypePath = taskTypeId => {
+  const withEpisode = isTVShow.value && currentEpisode.value
+  return {
+    name: withEpisode ? 'episode-task-type' : 'task-type',
+    params: {
+      production_id: currentProduction.value.id,
+      task_type_id: taskTypeId,
+      type: 'assets',
+      ...(withEpisode ? { episode_id: currentEpisode.value.id } : {})
     }
   }
 }
+
+const assetsPath = assetType => ({
+  ...getEntitiesPath(
+    currentProduction.value?.id,
+    'assets',
+    isTVShow.value ? currentEpisode.value?.id : null
+  ),
+  query: { search: `type=[${assetType.name}]` }
+})
 </script>
 
 <style lang="scss" scoped>
-.datatable-body tr:first-child th,
-.datatable-body tr:first-child td {
-  border-top: 0;
-}
+@use '@/styles/stats.scss' as stats;
+
+@include stats.list;
+
 .name {
   min-width: 200px;
   width: 200px;
-  font-weight: bold;
 }
 
-.name a {
-  color: inherit;
-}
-
-td.name {
-  font-size: 1.2em;
-}
-
-.validation {
-  min-width: 170px;
-  max-width: 170px;
-  width: 170px;
-  word-wrap: break-word;
+.asset-count {
+  display: block;
+  color: var(--text-alt);
+  font-size: 0.8rem;
+  font-weight: normal;
 }
 
 .actions {
   min-width: 100px;
-}
-
-th.actions {
-  padding: 0.4em;
 }
 </style>

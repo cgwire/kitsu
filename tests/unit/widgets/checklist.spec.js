@@ -25,10 +25,6 @@ describe('Checklist', () => {
     wrapper = mountChecklist()
   })
 
-  it('mounts successfully', () => {
-    expect(wrapper.exists()).toBe(true)
-  })
-
   it('renders all checklist entries', () => {
     const entries = wrapper.findAll('.checklist-entry')
     expect(entries).toHaveLength(3)

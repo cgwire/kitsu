@@ -21,7 +21,7 @@
             : 'input flexrow-item' + inputClass
         "
         :autocomplete="autocomplete"
-        :aria-describedby="errored ? errorId : undefined"
+        :aria-describedby="describedBy"
         :aria-invalid="errored"
         :disabled="disabled"
         :maxlength="maxlength"
@@ -32,7 +32,7 @@
         :required="required"
         :step="type === 'number' ? step || 'any' : undefined"
         :type="type"
-        :value="modelValue"
+        :value="getFieldValue()"
         @input="updateValue()"
         @keyup.enter="emitEnter()"
       />
@@ -47,6 +47,9 @@
         {{ unitLabel }}
       </span>
     </p>
+    <p class="help" :id="descriptionId" v-if="description">
+      {{ description }}
+    </p>
     <p class="error" :id="errorId" v-if="errored">
       {{ errorText }}
     </p>
@@ -54,10 +57,16 @@
 </template>
 
 <script setup>
-import { ref, useId } from 'vue'
+import { computed, ref, useId } from 'vue'
+
+import { isNumberTyped } from '@/lib/number'
 
 const props = defineProps({
   autocomplete: {
+    type: String
+  },
+  description: {
+    default: '',
     type: String
   },
   disabled: {
@@ -131,8 +140,16 @@ const props = defineProps({
 const emit = defineEmits(['enter', 'update:model-value'])
 
 const fieldId = useId()
+const descriptionId = `${fieldId}-description`
 const errorId = `${fieldId}-error`
 const inputRef = ref(null)
+
+const describedBy = computed(
+  () =>
+    [props.description && descriptionId, props.errored && errorId]
+      .filter(Boolean)
+      .join(' ') || undefined
+)
 
 const getInputValue = () => {
   const input = inputRef.value
@@ -144,6 +161,16 @@ const getInputValue = () => {
     }
     return input.value
   }
+}
+
+// A number field keeps the text typed while it reads as the model value,
+// as v-model does: written back from the number, "2.0" turned into "2", and
+// typing 5 next gave 25. A leading zero is still dropped.
+const getFieldValue = () => {
+  const input = inputRef.value
+  const isTyped =
+    props.type === 'number' && input && isNumberTyped(input, props.modelValue)
+  return isTyped ? input.value : props.modelValue
 }
 
 const emitEnter = () => {
@@ -202,6 +229,12 @@ input.input.thin {
 
 .unit {
   margin-left: 0.5rem;
+}
+
+.help {
+  color: var(--text-alt);
+  font-size: 0.9em;
+  margin-top: 0.4em;
 }
 
 .input:invalid,

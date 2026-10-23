@@ -1,4 +1,4 @@
-# Kitsu — CLAUDE.md
+# CLAUDE.md for Kitsu
 
 Kitsu is a production tracking web application for animation studios, built by CGWire.
 
@@ -6,7 +6,7 @@ Kitsu is a production tracking web application for animation studios, built by C
 
 | Item | Value |
 |------|-------|
-| Stack | Vue 3.5, Vuex 4, Vue Router 5, vue-i18n 9, Vite 8, Vitest |
+| Stack | Vue 3.5, Vuex 4, Vue Router 5, vue-i18n 11, Vite 8, Vitest |
 | Node | >= 22.22.2 |
 | npm | >= 10 |
 | Browser floor | Chrome 87, Edge 91, Firefox 79, Opera 73, Safari/iOS 14. Declared in `.browserslistrc`, enforced at runtime by the Bowser gate in `src/router/routes.js` (keep both in sync). No Web APIs newer than this floor unless polyfilled in `src/polyfills.js`; core-js has no polyfill for DOM APIs like `AbortSignal.timeout()` (Safari 15.4+), so those stay off limits. |
@@ -14,10 +14,10 @@ Kitsu is a production tracking web application for animation studios, built by C
 | Default branch | `main` |
 | Dev server | `npm run dev` |
 | Tests | `npm run test:unit` (vitest) |
-| Lint | `npm run lint` (eslint + prettier, auto-run on commit via husky + lint-staged) |
+| Lint | `npm run lint` (src) and `npm run lint:test` (tests): ESLint, with Prettier as a rule. Staged `.js`/`.vue` files are linted on commit (husky + lint-staged) |
 | Build | `npm run build` |
-| Commit style | `[scope] Short description` (e.g. `[widgets] Convert Combobox to composition API`) |
-| PR format | C4 contract — `**Problem**` / `**Solution**` bold two-paragraph body (see below) |
+| Commit style | `[scope] Short description` (e.g. `[widgets] Convert Combobox to composition API`). Comment, lint and dead-code cleanups take `[qa]`, whatever the area |
+| PR format | C4 contract: `**Problem**` / `**Solution**` bold two-paragraph body (see below) |
 
 ## Architecture
 
@@ -25,14 +25,15 @@ Kitsu is a production tracking web application for animation studios, built by C
 src/
   components/
     cells/          # Table cell components (RowActionsCell, etc.)
+    layouts/        # Page layouts (PageLayout, PageLeftSideLayout)
     lists/          # List/table components (StudioList, etc.)
     modals/         # Modal dialogs (BaseModal, EditStudiosModal, etc.)
     pages/          # Page-level components (Studios, etc.)
     players/        # Preview/playlist player components (annotations, bars, viewers, ...)
     sides/          # Sidebar components
+    spinners/       # Loading spinners
     tops/           # Topbar components
     widgets/        # Reusable UI widgets (Combobox*, DateField, etc.)
-    mixins/         # Legacy Options API mixins still being migrated to composables
   composables/
     players/        # Player-specific composables (annotation, comparison, playlistComparison, ...)
                     # Generic ones (modal, combobox, ...) stay at the root
@@ -42,20 +43,20 @@ src/
   store/
     api/            # API client modules (studios.js, etc.)
     modules/        # Vuex store modules (studios.js, etc.)
-  styles/           # Global SCSS (shared.scss)
+  styles/           # Theme custom properties (theme.scss), shared SCSS partials
 ```
 
 ## Component conventions
 
 ### Composition API (`<script setup>`)
 
-All new and refactored components use `<script setup>`. When converting from Options API:
+All components use `<script setup>`:
 
 ```vue
 <script setup>
+import { useHead } from '@unhead/vue'
 import { ref, computed, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useHead } from '@unhead/vue'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
@@ -66,8 +67,9 @@ const store = useStore()
 // Vuex getters → computed
 const studios = computed(() => store.getters.studios)
 
-// Vuex actions → store.dispatch
-await store.dispatch('loadStudios')
+// Vuex actions → store.dispatch (a top-level await would make the
+// component async, which needs a <Suspense>)
+onMounted(() => store.dispatch('loadStudios'))
 
 // head() → useHead with reactive computed
 useHead({ title: computed(() => `${t('studios.title')} - Kitsu`) })
@@ -82,9 +84,10 @@ A `<script setup>` component exposes nothing through a template ref (≠ Options
 - Fix: grep both ref styles and add the members to `defineExpose`.
 - If the parent only *wrote* state, prefer a watcher on the child's props and delete the ref access.
 
-#### Known eslint gotcha
+#### Template bindings and ESLint
 
-The eslint config does not detect template usage of component imports in `<script setup>`. Wrap those imports in `eslint-disable no-unused-vars` / `eslint-enable` comments (see `AddMetadataModal.vue` for the pattern).
+- ESLint sees the components a template uses: their imports need no `eslint-disable no-unused-vars` comment (older files still carry some).
+- `vue/no-undef-properties` is on: a name the template reads and the `<script setup>` does not define fails the lint.
 
 ### Script setup organization
 
@@ -126,9 +129,9 @@ Underline every section title with a dashed line padded to the 80-column limit:
 
 Within `<script setup>`, sort imports **alphabetically by source path** within each of these blocks (separate blocks with a blank line):
 
-1. Third-party packages (`vue`, `vue-i18n`, `vuex`, `vue-router`, `lucide-vue-next`, `moment`, …) — alphabetical by package name.
-2. Project libs and composables (`@/lib/...`, `@/composables/...`, `@/store/...`).
-3. Vue components (`@/components/...`) — alphabetical by path; named imports alphabetical too.
+1. Third-party packages, alphabetical by package name (`@unhead/vue`, `lucide-vue-next`, `moment`, `vue`, `vue-i18n`, `vue-router`, `vuex`, …).
+2. Project libs and composables (`@/composables/...`, `@/lib/...`, `@/store/...`).
+3. Vue components (`@/components/...`), alphabetical by path; named imports alphabetical too.
 
 The same rule applies in `.js` files.
 
@@ -194,11 +197,11 @@ defineEmits(['delete-clicked', 'edit-clicked'])
 
 ## Composables
 
-Composables live in `src/composables/`. Existing ones:
+Composables live in `src/composables/`, the player ones in `src/composables/players/`. A few shared ones:
 
 ### `useModal(active, emit)`
 
-Handles Escape key to close modal, manages event listener lifecycle. (It replaced the legacy `modalMixin`, now removed.)
+Handles Escape, moves the focus into the dialog when it opens, keeps Tab and Shift+Tab inside it and gives the focus back to the opener on close or unmount. Only the top open modal answers the keyboard. The dialog is the optional third argument (`BaseModal` passes its `.modal-content`), else the component root element: keep the template on a single root, since a top-level comment makes it a fragment in dev builds and turns the trap off.
 
 ```js
 import { toRef } from 'vue'
@@ -213,6 +216,10 @@ useModal(toRef(props, 'active'), emit)
 
 Shared toggle/select logic for custom combobox components.
 
+### `useFormat()`
+
+Formatting that follows the user and organization settings: dates, durations and their unit, priorities. `src/composables/format.js` also exports pure helpers for the rest.
+
 ### `BaseModal` component
 
 `BaseModal.vue` wraps the modal markup (background, content box, title, slot) and uses `useModal` internally. Prefer using `BaseModal` over reimplementing the modal structure:
@@ -226,46 +233,56 @@ Shared toggle/select logic for custom combobox components.
 
 ## i18n
 
-- `src/locales/en.js` is the **source of truth**. Add the key there, then translate it into **every** `<lang>.json` in the same change: vue-i18n falls back to `en`, so a key missing from a locale renders in English without warning. The JSON files nest their messages under a top-level `default` key. `tests/unit/locales/parity.spec.js` fails on any drift, in either direction. POEditor was dropped (2026-05): non-English locales are LLM-translated directly in the JSON files.
-- Use `$t()` (or `t()` in `<script setup>`), never `$tc()` (deprecated in vue-i18n 9+).
-- Pluralization with pipe format (`"studio | studios"`): pass a **named object**, `$t('key', { count })`. Every locale uses vue-i18n's DEFAULT plural resolver, so keep the **same number of `|` segments as en.js** and don't add a language's extra grammatical plural forms.
+- `src/locales/en.js` is the **source of truth**. Add the key there, then translate it into **every** `<lang>.json` in the same change: vue-i18n falls back to `en`, so a key missing from a locale renders in English without warning. The JSON files nest their messages under a top-level `default` key. `tests/unit/locales/parity.spec.js` fails on any drift, in either direction. The English overlays have no such spec: after any change to `en.js`, run `node scripts/check-locale-overlays.js` (see the overlays below). POEditor was dropped (2026-05): non-English locales are LLM-translated directly in the JSON files.
+- **An `en.js` change that alters what a sentence says is retranslated in every `<lang>.json` in the same commit**, placeholders included (a new or renamed `{name}`). `parity.spec.js` only compares the keys and the plural segments: a locale left alone keeps the old meaning, and nothing warns. A typo, punctuation, or casing fix needs no retranslation.
+- Use `$t()` (or `t()` in `<script setup>`), never `$tc()` (removed in vue-i18n 11).
+- Pluralization with pipe format (`"studio | studios"`): pass a **named object**, `$t('key', { count })`. Every locale picks between the singular and the plural only (`src/lib/i18n.js`, see below), so keep the **same number of `|` segments as en.js** and don't add a language's extra grammatical plural forms. Where a Russian or Polish noun changes after 2, 5, or 21, the plural segment ends on the number, as a label or in parentheses (`Выбрано файлов: {count}`, `Удалить выбранные задачи ({nbSelectedTasks})`).
+- **A number goes inside its message**, as `{count}`, with a plural whenever a noun goes with it: `'{count} file selected | {count} files selected'`. A single form reads "Cast in 1 shots", and a number written next to `$t()` in the template (`{{ n }} {{ $t('key') }}`) leaves no language a way to move it or agree with it (Korean counts `파일 2개`). Some older templates, such as `TaskListNumbers.vue`, still concatenate: don't copy them.
 - For animation/VFX domain terms (shot, frame, onion skin, edit/montage, …), align translations with Blender's official terminology (`blender/blender-translations` `po/<lang>.po`, or the translated manual at `docs.blender.org/manual/<lang>/`).
 
-```js
-// In template. Plural takes an object, never a bare number
-{{ $t('studios.number', { count: entries.length }) }}
+```vue
+<template>
+  <!-- Plural takes an object, never a bare number -->
+  {{ $t('main.files_selected', { count: files.length }) }}
+</template>
 
-// In script setup
-t('studios.title')
+<script setup>
+const title = computed(() => t('studios.title'))
+</script>
 ```
 
-### Two legacy-mode traps
+### Composition mode
 
-vue-i18n is configured in **legacy mode** (`src/lib/i18n.js`), which costs two silent failures. Both fail without a warning, so nothing surfaces until someone reads the rendered string.
+vue-i18n runs in **Composition mode** (`src/lib/i18n.js`, `legacy: false`): the global locale is a ref (`i18n.global.locale.value`), and `$t` reaches templates through the default `globalInjection`. `vite.config.js` compiles out its legacy API and the global registration of `<i18n-t>`, `<i18n-d>`, `<i18n-n>` and `v-t`, all unused. Two calls go wrong without a warning:
 
-**`$t(key, <number>)` does not pluralize.** Legacy `$t()` has no plural overload, so a bare number is ignored: `$t('studios.number', 3)` returns the **first** segment and leaves any `{count}` unresolved. Legacy's plural call is `$tc(key, 3)`, but it is deprecated. Pass `{ count }` instead: that key drives both branch selection and `{count}` interpolation, so the object form is right whether or not the message embeds the number.
+- **A `t()` at setup top level does not follow a locale change.** It resolves once, in the language of that moment. Call `t()` inside a `computed` or a handler (template `$t()` is unaffected).
+- **A string second argument is a default message, not a locale.** `t('main.cancel', 'fr')` returns "Cancel" to an English user. Pass the locale as an option: `t(key, {}, { locale: 'fr' })`.
+
+To test real translations rather than the global `$t` mock, mount with `mountWithI18n` from `tests/unit/fixtures/i18n.js`.
+
+### Plural calls
+
+Pass plurals as `{ count }`: that key drives both branch selection and `{count}` interpolation, so the object form is right whether or not the message embeds the number (vue-i18n 9 ignored a bare number, so older code never relies on `$t(key, 3)`).
 
 ```js
 $t('studios.number', { count: 5 }) // "studios", message has no {count}
 $t('logs.nb_events', { count: 5 }) // "5 events listed"
 ```
 
-`count` must be a **number**: `{ count: '5' }` renders the singular. Note also that the default resolver splits on `count > 1`, so a fractional count below 1 stays singular while 0 goes plural.
-
-**`t()` from `useI18n` returns `''` during setup.** The `useI18n()` bridge only resolves in `onBeforeMount`, so a `t()` call at setup top level silently returns `''`. Always call `t()` inside a `computed` or a handler (template `$t()` is unaffected). The `$t` test mock hides the bug; to test real translations, see `tests/unit/pages/wrongbrowser.spec.js`.
+`count` must be a **number**: `{ count: '5' }` renders the singular. An integer count is singular at 1 only, so 0 goes plural, in every locale. A decimal count follows the grammar of its language through `Intl.PluralRules`: "0.5 days" in English, but "0,5 jour" and "1,5 jour" in French. vue-i18n 11 alone makes every decimal plural: `src/lib/i18n.js` registers this rule for every locale, a locale added to `src/locales/index.js` included.
 
 ### Production-type terminology overlays
 
 `en.js` is the English source of truth. Two **partial overlays** are merged on top of it for specific production types:
 
-- `en_nft.js` — NFT productions: remaps the *shot* concept to **NFT** (`shot/shots/Shot/Shots → NFT/NFTs`). Sequence, episode, asset and edit are unchanged.
-- `en_video-game.js` — video-game productions: `shot → map`, `sequence → level`, `episode → chapter` (asset and edit unchanged).
+- `en_nft.js` (NFT productions): remaps the *shot* concept to **NFT** (`shot/shots/Shot/Shots → NFT/NFTs`). Sequence, episode, asset and edit are unchanged.
+- `en_video-game.js` (video-game productions): `shot → map`, `sequence → level`, `episode → chapter` (asset and edit unchanged).
 
 Rules:
 
-- These files contain **only** the keys whose wording differs from `en.js` — never copy a key whose value is identical to the base.
+- These files contain **only** the keys whose wording differs from `en.js`: never copy a key whose value is identical to the base.
 - Key names must **mirror `en.js` exactly**. When a key is renamed in `en.js` (e.g. `creation_explaination → creation_explanation`), rename it in the overlays too: a stale key becomes a dead override and the new base key then leaks untranslated vocabulary (English "shot" showing in an NFT/map UI).
-- When a key is **added** to `en.js` whose value mentions a remapped word (shot / sequence / episode), add the matching override to the relevant overlay.
+- **Every change to `en.js` or to an overlay ends with `node scripts/check-locale-overlays.js`**, rerun until it prints nothing. It lists the keys the remap changes (a shot / sequence / episode word, or a code such as `SH01`) with no override, the dead and identical overrides, and the overrides that no longer read like `en.js` once remapped, each with the expected value: a new key needs its overrides, and a copy edit of an `en.js` sentence goes to its overrides, in the same commit. Its remap table and its list of deliberate wordings are the reference.
 - Only English has these overlays. The other locales (`fr.json`, …) translate `en.js` and have no production-type variant.
 
 ## CSS / SCSS
@@ -291,6 +308,8 @@ background: #ffffff;   // breaks dark mode
 
 SCSS variables (`$red`, `$green`, `$dark-grey-light`, etc.) are fine for non-theme values like accents and are defined in `src/variables.scss`. For colors that must differ between light/dark, always use `var(--*)`.
 
+Define a new custom property in `src/styles/theme.scss` (light value on `:root`, dark one under `.dark`), never in `src/variables.scss`: Vite injects that file into every style block, so a CSS rule there ships once per component (`tests/unit/variables.spec.js` fails on one).
+
 ### Datatable pattern
 
 Tables use `.data-list > .datatable-wrapper > table.datatable`. The wrapper handles `overflow: auto` and `border-radius` globally from `App.vue`.
@@ -302,12 +321,13 @@ Beware: global `.datatable-row` styles in `App.vue` paint backgrounds on `td` di
 Desktop-first approach. The primary users are on large screens; tablet (768px-1024px) is the secondary target for production managers on the studio floor; mobile is occasional.
 
 Breakpoints used in the project:
-- `768px` — primary mobile/tablet breakpoint
-- `1000px` — secondary desktop breakpoint
+
+- `768px`: primary mobile/tablet breakpoint
+- `1000px`: secondary desktop breakpoint
 
 **Mobile (≤768px) is read-only and card-based:**
 
-1. **Read-only**: hide all editing affordances — page-header action buttons (new, export), in-row edit/delete actions, any "click to edit" hint. Keep detail navigation (router-links on names).
+1. **Read-only**: hide all editing affordances, that is page-header action buttons (new, export), in-row edit/delete actions and any "click to edit" hint. Keep detail navigation (router-links on names).
 2. **Cards over rows**: render list entries as cards, not table rows, via pure CSS (table + `display: block` overrides on `tr`/`td`, hidden `<thead>`, badges for compact attributes). Don't duplicate markup with a separate mobile view.
 
 Apply with a `@media (max-width: 768px)` block: `:deep()` on the page header and `:deep(.actions) { display: none }` on rows, then flip the table to a flex card layout.
@@ -317,12 +337,22 @@ Apply with a `@media (max-width: 768px)` block: `:deep()` on the page header and
 Store modules are in `src/store/modules/`. API client functions are in `src/store/api/`.
 
 Pattern:
+
 - API module exports functions that call `client.pget/ppost/pput/pdel`
 - Store actions call the API, then commit mutations
 - Mutations update state and maintain caches (often a `Map` outside reactive state)
 - Use `sortByName()` from `@/lib/sorting` after loading collections
 
 When editing/adding items, re-sort the list to maintain order (some mutations miss this).
+
+### Getters over the module cache
+
+Big lists and maps live in a module-level `cache` object, out of the reactive state. Vuex wraps every getter in a `computed`, and a getter that reads only `cache` depends on nothing that ever changes: it runs once per tab and keeps its first value.
+
+- A getter over `cache` also reads a reactive value of the state that changes with that data (`readPeople` in `people.js` reads `personMapVersion`), and returns a new value when the data changes. One that hands back the same `Map` object notifies no `computed`.
+- A `computed` over such a `Map` freezes the same way: read the `Map` in an event handler instead (`onSearchTyped` in `Edits.vue`).
+- Mutate a cached `Map` in place (`clear()`, then `set()`), never reassign it: consumers keep the instance of their first read.
+- Test such a getter with a real `createStore` and a `computed` over it: a mutation-only test passes on a frozen getter.
 
 ### No direct `fetch` from components
 
@@ -331,24 +361,36 @@ Components must never call `fetch()` (or any HTTP client) directly. All network 
 1. an API method in `src/store/api/<entity>.js` using the shared `client.*` helpers (`pget`, `ppost`, `pput`, `pdel`),
 2. a Vuex action in `src/store/modules/<entity>.js` that wraps it and commits the resulting mutations.
 
-This keeps auth/error handling, retries and store updates centralised. If you find yourself reaching for `fetch` in a `.vue` file, add the missing API method and action instead.
+This keeps auth/error handling, retries and store updates centralized. If you find yourself reaching for `fetch` in a `.vue` file, add the missing API method and action instead.
 
 ## Testing
 
 - Test files go in `tests/unit/` with `.spec.js` extension
 - Framework: Vitest with jsdom
 - Run: `npm run test:unit`
-- A green unit test is NOT proof a UI/player bug is fixed — reproduce against the running dev app (localhost:8080) before claiming success.
+- **Keep the console silent**: a spec must print nothing, even when all its tests pass. In an agent session Vitest picks its `minimal` reporter, which hides stderr: run a new or changed spec with `npx vitest run --reporter=default <file>` and fix every `stderr |` or `stdout |` block before committing. Usual causes:
+  - A component mounted without a router: stub the link, `stubs: { RouterLink: RouterLinkStub }`.
+  - A fixture missing a required prop or a getter the component reads.
+  - An expected error path: `vi.spyOn(console, 'error').mockImplementation(() => {})`, then assert the call.
+- **Transform cache** (`fsModuleCache`): entries ignore how imports resolve. When an extensionless import starts resolving to another file (module turned into `dir/index.js` or back, new extension, same-named file added), run `npx vitest --clearCache` after committing, pulling, or checking out across that change. Symptom: a missing module on an unchanged import. In that change and in its revert, delete the old path and set `VITEST_CACHE_VERSION` in `.github/workflows/ci.yml` to a unique value (date and module).
+- **Use jsdom only when a spec needs the DOM**: its setup is the largest share of suite time. A spec that mounts nothing and never touches `document`/`window` starts with `// @vitest-environment node` on line 1. Test a `ref`/`computed`/`watch`-only composable inside an `effectScope()`, not a mounted host.
+  - Node 22 and 24 lack DOM globals Node 26 has, such as `Storage`: a node spec can pass on Node 26 (locally or on the `current` CI job), then fail on 22 and 24. `localStorage`/`sessionStorage` are plain objects from `tests/storage.setup.js`: spy on the global, never on `Storage.prototype`. Stub any other DOM global on `globalThis`.
+  - Vitest matches the pragma anywhere in the file: never quote it elsewhere in a spec.
+- **No real-timer waits**: a spec that sleeps through a debounce pays it in every test. Fake `setTimeout`/`clearTimeout` and advance the clock (`waitForLoad` in `tests/unit/pages/productionschedule.spec.js`).
+- **Stub async children explicitly**: the default stub of `shallowMount` imports a `defineAsyncComponent` child to stub its resolved form, and an import still running when the spec file ends fails the run (`EnvironmentTeardownError`, seen under coverage). Pass an explicit stub (`TaskInfo` in `tests/unit/players/previewplayer.spec.js`).
+- A green unit test is NOT proof a UI/player bug is fixed: reproduce against the running dev app (localhost:8080) before claiming success.
+- **Strict Red/Green TDD Cycle:** To prevent shallow or fake tests, you must write the test or assertion first, run `npx vitest run <file>` to verify that it **fails (Red)**, write the minimal code to make it **pass (Green)**, and then refactor. Never mock internal module logic that can be tested through public component interfaces.
 
 ## Migration status
 
-The codebase is migrating from Options API to Composition API. Many components (especially pages and modals) still use Options API with mixins. When touching these files, convert them to `<script setup>` (see the `composition-api-migration` skill).
+The Composition API migration is done: every component uses `<script setup>`, and no mixin is left.
 
-The `modalMixin` migration is done (the mixin has been removed). When converting a modal:
+When writing a modal:
+
 1. Use `BaseModal` component if possible (handles markup + Escape key)
 2. Otherwise use `useModal(toRef(props, 'active'), emit)` directly
 
-Vue/Vuex/vue-router/vue-i18n are **deliberately pinned** to their current majors until the Composition API migration finishes. Do not propose major upgrades (Pinia, router majors) as fixes, and don't frame the pins as tech debt. A Vuex → Pinia migration is planned afterwards.
+Vue/Vuex/vue-router stay **deliberately pinned** to their current majors until the Vuex → Pinia migration, the next step. Do not propose major upgrades (Pinia, router majors) as fixes, and don't frame the pins as tech debt.
 
 ## PR body format
 
@@ -364,12 +406,12 @@ Bold headers, no `## Problems` / `## Solutions` sections (harmonized across cgwi
 
 ## Key dependencies
 
-- **fabric.js** v7 (official npm package) — annotation canvas, wrapped by `src/composables/players/annotation.js` and `src/components/players/annotations/AnnotationCanvas.vue`
-- **fabricjs-psbrush** (cgwire fork) — pressure-sensitive brush on top of fabric
-- **socket.io-client** — real-time events via `vue-websocket-next`
-- **moment / moment-timezone** — date handling (used throughout schedule and timesheet components)
-- **vue-multiselect** — people/entity selection dropdowns
+- **fabric.js** v7 (official npm package): annotation canvas, wrapped by `src/composables/players/annotation.js` and `src/components/players/annotations/AnnotationCanvas.vue`
+- **fabricjs-psbrush** (cgwire fork): pressure-sensitive brush on top of fabric
+- **socket.io-client**: real-time events, through the `$socket` global property that `src/main.js` sets
+- **moment / moment-timezone**: date handling (used throughout schedule and timesheet components)
+- **vue-multiselect**: people/entity selection dropdowns
 
 ## AI features
 
-Kitsu integrates AI **without forcing**: no dedicated AI styling, opt-in activation (disabled by default on self-hosted), no anthropomorphization, full transparency on models and data flows, and features only built for validated studio pain points. Before adding or reviewing any AI feature, read the full charter and its merge checklist: [`docs/ai-integration-charter.md`](./docs/ai-integration-charter.md).
+Kitsu integrates AI **without forcing**: no dedicated AI styling, opt-in activation (disabled by default on self-hosted), no anthropomorphization, full transparency on models and data flows, and features only built for validated studio pain points. Check every AI feature against these rules before adding or reviewing it.

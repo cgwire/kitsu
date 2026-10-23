@@ -6,6 +6,7 @@ import {
   formatFrame,
   formatTime,
   formatToTimecode,
+  frameStartTime,
   frameToSeconds,
   getEntityFrameStart,
   roundToFrame
@@ -41,6 +42,16 @@ describe('video', () => {
     expect(frameToSeconds(50, { fps: 25 })).toBe(2)
     expect(frameToSeconds(32, { fps: 25 })).toBe(1.28)
     expect(frameToSeconds(47, { fps: 25 })).toBe(1.88)
+  })
+
+  it('frameStartTime lands inside the frame whatever the fps', () => {
+    // Multiplying by the 4-decimal frame duration drifts (120 * 0.0333 is
+    // frame 119.88 at 30 fps) and an exact boundary can truncate to the
+    // previous frame: the start time carries the seek nudge.
+    expect(frameStartTime(120, 30)).toBeCloseTo(120 / 30 + 0.001, 9)
+    expect(Math.floor(frameStartTime(120, 30) * 30)).toBe(120)
+    expect(Math.floor(frameStartTime(3, 25) * 25)).toBe(3)
+    expect(frameStartTime(0, 25)).toBeCloseTo(0.001, 9)
   })
 
   it('formatFrame', () => {

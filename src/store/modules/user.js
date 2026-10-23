@@ -2,6 +2,7 @@ import peopleApi from '@/store/api/people'
 import peopleStore from '@/store/modules/people'
 import taskStatusStore from '@/store/modules/taskstatus'
 import auth from '@/lib/auth'
+import { isLatestTaskComment, isPostedSince } from '@/lib/comments'
 import { sortTasks, sortByName } from '@/lib/sorting'
 import { indexSearch, buildTaskIndex } from '@/lib/indexing'
 import { getKeyWords } from '@/lib/filtering'
@@ -53,7 +54,9 @@ import {
   CHANGE_AVATAR_FILE,
   CLEAR_AVATAR,
   EDIT_PEOPLE_END,
+  LOAD_TASK_END,
   NEW_TASK_COMMENT_END,
+  SET_TASK_LAST_COMMENT,
   SET_TODO_LIST_SCROLL_POSITION,
   SAVE_ASSET_SEARCH_END,
   SAVE_SHOT_SEARCH_END,
@@ -90,6 +93,20 @@ const cache = {
   doneIndex: {},
   doneTasks: [],
   todosIndex: {}
+}
+
+// Zou's order (TWO_FACTOR_FALLBACKS), so the page agrees with it until a
+// reload.
+const TWO_FACTOR_FALLBACKS = {
+  totp: ['fido', 'email_otp'],
+  email_otp: ['fido', 'totp'],
+  fido: ['totp', 'email_otp']
+}
+
+const preferNextTwoFactor = (user, method) => {
+  if (user.preferred_two_factor_authentication !== method) return
+  user.preferred_two_factor_authentication =
+    TWO_FACTOR_FALLBACKS[method].find(next => user[`${next}_enabled`]) ?? null
 }
 
 const initialState = {
@@ -134,20 +151,30 @@ const state = {
   ...initialState
 }
 
+// Keyed on the route rather than on currentProduction: the latter is never
+// cleared, so it would leak a project role onto studio-wide pages. Admin is
+// a global-only role, as in zou.
+const routeRole = (state, rootState) => {
+  const role = state.user?.role
+  if (role === 'admin') return role
+  const productionId = rootState?.route?.params?.production_id
+  return (productionId && state.projectRoles?.[productionId]) || role
+}
+
 const getters = {
   user: state => state.user,
   isAuthenticated: state => state.isAuthenticated,
-  isCurrentUserManager: state => {
-    return state.user && ['admin', 'manager'].includes(state.user.role)
-  },
+  isCurrentUserManager: (state, getters, rootState) =>
+    state.user && ['admin', 'manager'].includes(routeRole(state, rootState)),
   isCurrentUserAdmin: state => state.user && state.user.role === 'admin',
-  isCurrentUserArtist: state => {
-    return state.user && ['user', 'vendor'].includes(state.user.role)
-  },
-  isCurrentUserSupervisor: state =>
-    state.user && state.user.role === 'supervisor',
-  isCurrentUserClient: state => state.user && state.user.role === 'client',
-  isCurrentUserVendor: state => state.user && state.user.role === 'vendor',
+  isCurrentUserArtist: (state, getters, rootState) =>
+    state.user && ['user', 'vendor'].includes(routeRole(state, rootState)),
+  isCurrentUserSupervisor: (state, getters, rootState) =>
+    state.user && routeRole(state, rootState) === 'supervisor',
+  isCurrentUserClient: (state, getters, rootState) =>
+    state.user && routeRole(state, rootState) === 'client',
+  isCurrentUserVendor: (state, getters, rootState) =>
+    state.user && routeRole(state, rootState) === 'vendor',
 
   // Role the user effectively holds on given production: the per-project
   // role when one is set, the global role otherwise.
@@ -176,6 +203,18 @@ const getters = {
     return (
       departments.length === 0 || departments.includes(taskType?.department_id)
     )
+  },
+  // Mirrors zou's metadata access for the trim handles, data keys without a
+  // descriptor: admins anywhere, managers and supervisors without department
+  // when they belong to the production team.
+  canEditShotTrim: (state, getters, rootState, rootGetters) => task => {
+    if (!state.user) return false
+    if (state.user.role === 'admin') return true
+    const production = rootGetters.productionMap.get(task?.project_id)
+    if (!production?.team?.includes(state.user.id)) return false
+    const role = getters.currentUserRoleForProduction(task?.project_id)
+    if (role === 'manager') return true
+    return role === 'supervisor' && !(state.user.departments || []).length
   },
   use12HourClock: state => Boolean(state.user?.use_12_hour_clock),
   isSaveProfileLoading: state => state.isSaveProfileLoading,
@@ -302,8 +341,11 @@ const actions = {
       .then(body => coercePublicKeyFromJSON(body))
   },
 
-  async unregisterFIDO({ commit }, { deviceName }) {
-    await peopleApi.unregisterFIDO(deviceName)
+  async unregisterFIDO({ commit }, { deviceName, twoFactorPayload }) {
+    await peopleApi.unregisterFIDO(
+      deviceName,
+      coerceTwoFactorPayload(twoFactorPayload)
+    )
     commit(USER_UNREGISTER_FIDO_SUCCESS, deviceName)
   },
 
@@ -415,8 +457,8 @@ const actions = {
     commit(SET_TODO_LIST_SCROLL_POSITION, scrollPosition)
   },
 
-  loadContext({ commit, rootGetters }) {
-    return peopleApi.getContext().then(context => {
+  loadContext({ commit, dispatch, rootGetters }) {
+    return peopleApi.getContext().then(async context => {
       commit(LOAD_USER_FILTERS_END, context.search_filters)
       commit(LOAD_USER_FILTER_GROUPS_END, context.search_filter_groups)
       commit(LOAD_PRODUCTION_STATUS_END, context.project_status)
@@ -441,6 +483,13 @@ const actions = {
       }
       commit(LOAD_TASK_TYPES_END, context.task_types)
       commit(LOAD_PLUGINS_END, context.plugins)
+      // A closed current production is out of the open listing: reload it,
+      // since its settings pages read back from here what they saved.
+      const production = rootGetters.currentProduction
+      const isListed = context.projects.some(({ id }) => id === production?.id)
+      if (production && !isListed) {
+        await dispatch('loadProduction', production.id).catch(console.error)
+      }
     })
   }
 }
@@ -545,15 +594,7 @@ const mutations = {
 
   [USER_DISABLE_TOTP_SUCCESS](state) {
     state.user.totp_enabled = false
-    if (state.user.preferred_two_factor_authentication === 'totp') {
-      if (state.user.fido_enabled) {
-        state.user.preferred_two_factor_authentication = 'fido'
-      } else if (state.user.email_otp_enabled) {
-        state.user.preferred_two_factor_authentication = 'email_otp'
-      } else {
-        state.user.preferred_two_factor_authentication = null
-      }
-    }
+    preferNextTwoFactor(state.user, 'totp')
   },
 
   [USER_ENABLE_EMAIL_OTP_SUCCESS](state) {
@@ -565,15 +606,7 @@ const mutations = {
 
   [USER_DISABLE_EMAIL_OTP_SUCCESS](state) {
     state.user.email_otp_enabled = false
-    if (state.user.preferred_two_factor_authentication === 'email_otp') {
-      if (state.user.fido_enabled) {
-        state.user.preferred_two_factor_authentication = 'fido'
-      } else if (state.user.totp_otp_enabled) {
-        state.user.preferred_two_factor_authentication = 'totp'
-      } else {
-        state.user.preferred_two_factor_authentication = null
-      }
-    }
+    preferNextTwoFactor(state.user, 'email_otp')
   },
 
   [USER_REGISTER_FIDO_SUCCESS](state, deviceName) {
@@ -594,15 +627,7 @@ const mutations = {
     }
     if (state.user.fido_devices.length === 0) {
       state.user.fido_enabled = false
-      if (state.user.preferred_two_factor_authentication === 'fido') {
-        if (state.user.email_otp_enabled) {
-          state.user.preferred_two_factor_authentication = 'email_otp'
-        } else if (state.user.totp_otp_enabled) {
-          state.user.preferred_two_factor_authentication = 'totp'
-        } else {
-          state.user.preferred_two_factor_authentication = null
-        }
-      }
+      preferNextTwoFactor(state.user, 'fido')
     }
   },
 
@@ -666,18 +691,45 @@ const mutations = {
 
   [NEW_TASK_COMMENT_END](state, { comment, taskId }) {
     const task = state.todos.find(task => task.id === taskId)
+    // A status created after the context is missing from the store.
+    const taskStatus = helpers.getTaskStatus(comment.task_status_id)
 
-    if (task) {
-      const taskStatus = helpers.getTaskStatus(comment.task_status_id)
-
+    if (task && taskStatus && isLatestTaskComment(task, comment)) {
       Object.assign(task, {
         task_status_id: taskStatus.id,
         task_status_name: taskStatus.name,
         task_status_short_name: taskStatus.short_name,
         task_status_color: taskStatus.color,
-        last_comment: comment
+        last_comment: comment,
+        last_comment_date: comment.created_at || task.last_comment_date
       })
       cache.todosIndex = buildTaskIndex(state.todos)
+    }
+  },
+
+  // A task reloads on each update Zou announces, the reset that follows a
+  // comment deletion included: the todo takes its status and last comment
+  // date.
+  [LOAD_TASK_END](state, loadedTask) {
+    const task = state.todos.find(task => task.id === loadedTask.id)
+    const taskStatus = helpers.getTaskStatus(loadedTask.task_status_id)
+
+    if (task && taskStatus) {
+      Object.assign(task, {
+        task_status_id: taskStatus.id,
+        task_status_name: taskStatus.name,
+        task_status_short_name: taskStatus.short_name,
+        task_status_color: taskStatus.color,
+        last_comment_date: loadedTask.last_comment_date
+      })
+      cache.todosIndex = buildTaskIndex(state.todos)
+    }
+  },
+
+  [SET_TASK_LAST_COMMENT](state, { taskId, commentId, comment }) {
+    const task = state.todos.find(task => task.id === taskId)
+    if (task && !isPostedSince(task.last_comment, comment, commentId)) {
+      task.last_comment = comment || {}
     }
   },
 

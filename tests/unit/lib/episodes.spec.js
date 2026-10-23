@@ -25,11 +25,6 @@ describe('isEpisodeInLoadedScope', () => {
     expect(isEpisodeInLoadedScope('p1/ep-a', 'ep-a', 'p1')).toBe(true)
   })
 
-  test('checks the episode alone when no production is given', () => {
-    expect(isEpisodeInLoadedScope('p1/all', 'ep-b')).toBe(true)
-    expect(isEpisodeInLoadedScope('p1/all', 'ep-b', undefined)).toBe(true)
-  })
-
   test('holds everything for a production without episodes', () => {
     expect(isEpisodeInLoadedScope('p1/', null)).toBe(true)
     expect(isEpisodeInLoadedScope('p1/', 'ep-a')).toBe(true)

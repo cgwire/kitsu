@@ -1,11 +1,11 @@
 <template>
   <div class="data-list">
-    <div class="datatable-wrapper" ref="body" @scroll.passive="onBodyScroll">
-      <table class="datatable">
+    <div class="datatable-wrapper">
+      <table class="datatable datatable--cards">
         <thead class="datatable-head">
           <tr>
             <th class="expander"></th>
-            <th scope="col" class="name datatable-row-header" ref="th-episode">
+            <th scope="col" class="name datatable-row-header">
               {{ $t('shots.fields.episode') }}
             </th>
             <th scope="col" class="validation">{{ $t('main.all') }}</th>
@@ -40,14 +40,15 @@
           </tr>
         </thead>
         <tbody class="datatable-body" v-if="!isLoading">
-          <tr class="all-line datatable-row" v-if="showAll && !isEmptyList">
+          <tr class="all-line datatable-row" v-if="entries.length > 0">
             <td class="expander"></td>
 
-            <td scope="col" class="name datatable-row-header">
+            <td class="name datatable-row-header card-head">
               {{ $t('episodes.all_episodes') }}
             </td>
 
             <stats-cell
+              :data-label="$t('main.all')"
               :colors="chartColors('all', 'all')"
               :data="chartData('all', 'all')"
               :frames-data="chartData('all', 'all', 'frames')"
@@ -59,6 +60,7 @@
             <stats-cell
               :style="getValidationStyle(columnId)"
               :key="'all-' + columnId"
+              :data-label="taskTypeMap.get(columnId)?.name"
               :colors="chartColors('all', columnId)"
               :data="chartData('all', columnId)"
               :frames-data="chartData('all', columnId, 'frames')"
@@ -79,20 +81,21 @@
                 tabindex="0"
                 @click="toggleExpanded(entry.id)"
                 @keydown.enter.prevent="toggleExpanded(entry.id)"
+                v-if="isRetakes"
               >
-                <chevron-right-icon
-                  v-if="isRetakes && expanded[entry.id] !== true"
-                />
-                <chevron-down-icon
-                  v-if="isRetakes && expanded[entry.id] === true"
-                />
+                <chevron-down-icon v-if="expanded[entry.id]" />
+                <chevron-right-icon v-else />
               </td>
+              <td class="expander" v-else></td>
 
-              <td class="name datatable-row-header">
-                {{ entry.name }}
+              <td class="name datatable-row-header card-head">
+                <router-link :to="shotsPath(entry)">
+                  {{ entry.name }}
+                </router-link>
               </td>
 
               <stats-cell
+                :data-label="$t('main.all')"
                 :colors="chartColors(entry.id, 'all')"
                 :data="chartData(entry.id, 'all')"
                 :frames-data="chartData(entry.id, 'all', 'frames')"
@@ -106,6 +109,7 @@
               <template v-for="columnId in validationColumns">
                 <stats-cell
                   :key="entry.id + columnId"
+                  :data-label="taskTypeMap.get(columnId)?.name"
                   :style="getValidationStyle(columnId)"
                   :colors="chartColors(entry.id, columnId)"
                   :data="chartData(entry.id, columnId)"
@@ -128,27 +132,37 @@
             </tr>
             <template v-if="expanded[entry.id]">
               <tr
-                class="datatable-row"
+                class="datatable-row take-row"
+                :class="{
+                  'take-row--first': takeNumber === 1,
+                  'take-row--last': takeNumber === takeRange(entry.id).length
+                }"
                 :key="takeNumber + '-' + entry.id"
                 v-for="takeNumber in takeRange(entry.id)"
               >
                 <td class="expander"></td>
-                <td class="name datatable-row-header">
-                  - Take {{ takeNumber }}
+                <td class="name datatable-row-header take-name card-head">
+                  <span
+                    class="tag take-tag"
+                    :style="{ backgroundColor: takeColor(takeNumber) }"
+                  >
+                    Take {{ takeNumber }}
+                  </span>
                 </td>
                 <td></td>
 
                 <template v-for="columnId in validationColumns">
                   <stats-cell
                     :key="takeNumber + entry.id + columnId"
+                    :data-label="taskTypeMap.get(columnId)?.name"
                     :style="getValidationStyle(columnId)"
                     :colors="chartColors(entry.id, columnId)"
-                    :data="chartTakeData(entry.id, columnId, takeNumber)"
+                    :data="chartData(entry.id, columnId, 'count', takeNumber)"
                     :frames-data="
-                      chartTakeData(entry.id, columnId, takeNumber, 'frames')
+                      chartData(entry.id, columnId, 'frames', takeNumber)
                     "
                     :drawings-data="
-                      chartTakeData(entry.id, columnId, takeNumber, 'drawings')
+                      chartData(entry.id, columnId, 'drawings', takeNumber)
                     "
                     :count-mode="countMode"
                     :display-mode="displayMode"
@@ -159,6 +173,7 @@
 
                   <stats-cell
                     :key="takeNumber + entry.id + columnId"
+                    :data-label="taskTypeMap.get(columnId)?.name"
                     :style="getValidationStyle(columnId)"
                     :colors="chartColors(entry.id, columnId)"
                     :data="chartData(entry.id, columnId)"
@@ -197,303 +212,221 @@
     <empty-list
       :text="$t('episodes.empty_list')"
       :read-only-text="$t('episodes.empty_list_read_only')"
-      v-if="!isLoading && isEmptyList"
+      v-if="isEmptyList"
     />
 
-    <p class="has-text-centered nb-episodes" v-if="!isEmptyList">
-      {{ displayedEpisodesLength }}
-      {{ $t('episodes.number', { count: displayedEpisodesLength }) }}
+    <p class="has-text-centered all-hidden" v-if="isAllHidden">
+      {{ $t('episodes.all_hidden') }}
+    </p>
+    <p
+      class="has-text-centered nb-episodes"
+      v-else-if="!isEmptyList && !isLoading"
+    >
+      {{ entries.length }}
+      {{ $t('episodes.number', { count: entries.length }) }}
     </p>
   </div>
 </template>
 
-<script>
+<script setup>
+// Imports
+// --------------------------------------------------------------------------
 import { ChevronDownIcon, ChevronRightIcon } from 'lucide-vue-next'
-import { mapGetters } from 'vuex'
+import { computed, ref, watch } from 'vue'
+import { useStore } from 'vuex'
 
-import { entityListMixin } from '@/components/mixins/entity_list'
-import { range } from '@/lib/time'
+import colors from '@/lib/colors'
+import { getEntitiesPath } from '@/lib/path'
 import {
-  aggregateRetakeStats,
-  aggregateStats,
   getChartData,
   getChartRetakeCount,
   getRetakeChartData
 } from '@/lib/stats'
+import { range } from '@/lib/time'
 
-import EmptyList from '@/components/widgets/EmptyList.vue'
 import StatsCell from '@/components/cells/StatsCell.vue'
+import EmptyList from '@/components/widgets/EmptyList.vue'
 import TableInfo from '@/components/widgets/TableInfo.vue'
 
-export default {
-  name: 'episode-stats-list',
+const store = useStore()
 
-  mixins: [entityListMixin],
+// Props / Emits
+// --------------------------------------------------------------------------
+const props = defineProps({
+  countMode: { type: String, default: 'count' },
+  dataMode: { type: String, default: 'retakes' },
+  displayMode: { type: String, default: 'pie' },
+  entries: { type: Array, default: () => [] },
+  episodeRetakeStats: { type: Object, default: () => ({}) },
+  episodeStats: { type: Object, default: () => ({}) },
+  isError: { type: Boolean, default: false },
+  isFiltered: { type: Boolean, default: false },
+  isLoading: { type: Boolean, default: false },
+  validationColumns: { type: Array, default: () => [] }
+})
 
-  components: {
-    ChevronDownIcon,
-    ChevronRightIcon,
-    EmptyList,
-    StatsCell,
-    TableInfo
-  },
+// State
+// --------------------------------------------------------------------------
+const expanded = ref({})
 
-  props: {
-    countMode: {
-      type: String,
-      default: 'count'
-    },
-    dataMode: {
-      type: String,
-      default: 'retakes'
-    },
-    displayMode: {
-      type: String,
-      default: 'pie'
-    },
-    entries: {
-      type: Array,
-      default: () => []
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    isError: {
-      type: Boolean,
-      default: false
-    },
-    showAll: {
-      type: Boolean,
-      default: false
-    },
-    validationColumns: {
-      type: Array,
-      default: () => []
-    }
-  },
+const takeLabelColors = ['#FB8C00', '#EF6C00', '#d35400', '#e74c3c', '#c0392b']
 
-  data() {
-    return {
-      expanded: {},
-      lastSelection: null,
-      takeLabelColors: ['#FB8C00', '#EF6C00', '#d35400', '#e74c3c', '#c0392b']
-    }
-  },
+// Computed
+// --------------------------------------------------------------------------
+const currentProduction = computed(() => store.getters.currentProduction)
+const episodeSearchText = computed(() => store.getters.episodeSearchText)
+const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
+const taskStatusMap = computed(() => store.getters.taskStatusMap)
+const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
-  mounted() {
-    this.entries.forEach(e => {
-      this.expanded[e.id] = false
-    })
-  },
+const isEmptyList = computed(
+  () =>
+    props.entries.length === 0 &&
+    !props.isLoading &&
+    !props.isError &&
+    !props.isFiltered &&
+    !episodeSearchText.value
+)
 
-  computed: {
-    ...mapGetters([
-      'currentEpisode',
-      'currentProduction',
-      'displayedEpisodesLength',
-      'episodeSearchText',
-      'episodeStats',
-      'episodeRetakeStats',
-      'isCurrentUserClient',
-      'isTVShow',
-      'taskTypeMap'
-    ]),
+const isAllHidden = computed(
+  () =>
+    props.isFiltered &&
+    props.entries.length === 0 &&
+    !props.isLoading &&
+    !props.isError
+)
 
-    isEmptyList() {
-      return (
-        this.entries &&
-        this.entries.length === 0 &&
-        !this.isLoading &&
-        !this.isError &&
-        (!this.episodeSearchText || this.episodeSearchText.length === 0)
+const isRetakes = computed(() => props.dataMode === 'retakes')
+
+// Functions
+// --------------------------------------------------------------------------
+// The status stats come from the server without the done flag of their
+// statuses: the status map provides it.
+const chartData = (entryId, columnId, dataType = 'count', takeNumber = null) =>
+  isRetakes.value
+    ? getRetakeChartData(
+        props.episodeRetakeStats,
+        entryId,
+        columnId,
+        dataType,
+        takeNumber
       )
-    },
+    : getChartData(
+        props.episodeStats,
+        entryId,
+        columnId,
+        dataType,
+        taskStatusMap.value
+      )
 
-    isRetakes() {
-      return this.dataMode === 'retakes'
-    },
+const chartColors = (entryId, columnId) =>
+  chartData(entryId, columnId).map(data => data[2])
 
-    // The "all" row aggregates the displayed entries only, so it stays
-    // consistent when episodes are filtered (e.g. "only running").
-    displayedEntriesStats() {
-      const entryIds = this.entries.map(entry => entry.id)
-      return { all: aggregateStats(this.episodeStats, entryIds) }
-    },
+const chartRetakeMaxCount = (entryId, columnId) =>
+  getChartRetakeCount(props.episodeRetakeStats, entryId, columnId)
 
-    displayedEntriesRetakeStats() {
-      const entryIds = this.entries.map(entry => entry.id)
-      return { all: aggregateRetakeStats(this.episodeRetakeStats, entryIds) }
-    }
-  },
+const chartLabel = (entryId, columnId) => {
+  if (!isRetakes.value) return ''
+  const count = chartRetakeMaxCount(entryId, columnId)
+  return count >= 1 ? `Take ${count + 1}` : ''
+}
 
-  methods: {
-    chartColors(entryId, columnId) {
-      if (this.isRetakes) {
-        return ['#ff3860', '#6f727a', '#22d160']
-      } else {
-        return this.chartData(entryId, columnId).map(data => data[2])
-      }
-    },
+// A cell is labelled with its current take, one more than its retake count.
+const takeColor = takeNumber => takeLabelColors[Math.min(takeNumber - 1, 4)]
 
-    chartData(entryId, columnId, dataType = 'count') {
-      if (this.isRetakes) {
-        const stats =
-          entryId === 'all'
-            ? this.displayedEntriesRetakeStats
-            : this.episodeRetakeStats
-        return getRetakeChartData(stats, entryId, columnId, dataType)
-      } else {
-        const stats =
-          entryId === 'all' ? this.displayedEntriesStats : this.episodeStats
-        return getChartData(stats, entryId, columnId, dataType)
-      }
-    },
+const chartLabelColor = (entryId, columnId) => {
+  if (!isRetakes.value) return ''
+  return takeColor(chartRetakeMaxCount(entryId, columnId) + 1)
+}
 
-    chartTakeData(entryId, columnId, takeNumber, dataType = 'count') {
-      const evolutionStats =
-        this.episodeRetakeStats[entryId][columnId].evolution
-      const nbRetakes = evolutionStats[takeNumber].retake[dataType]
-      const nbDones = evolutionStats[takeNumber].done[dataType]
-      const nbOthers = evolutionStats[takeNumber].other[dataType]
-      // Order here is important
-      return [
-        ['retake', nbRetakes, '#ff3860'],
-        ['other', nbOthers, '#6f727a'],
-        ['done', nbDones, '#22d160']
-      ]
-    },
+const takeRange = entryId => range(1, chartRetakeMaxCount(entryId, 'all') + 1)
 
-    chartLabel(entryId, columnId) {
-      if (this.isRetakes) {
-        const count = getChartRetakeCount(
-          this.episodeRetakeStats,
-          entryId,
-          columnId
-        )
-        return count >= 1 ? `Take ${count + 1}` : ''
-      } else {
-        return ''
-      }
-    },
+const isStats = (entryId, columnId) => props.episodeStats[entryId]?.[columnId]
 
-    chartLabelColor(entryId, columnId) {
-      if (this.isRetakes) {
-        let count = getChartRetakeCount(
-          this.episodeRetakeStats,
-          entryId,
-          columnId
-        )
-        count = Math.min(count, 4)
-        return this.takeLabelColors[count]
-      } else {
-        return ''
-      }
-    },
+const toggleExpanded = episodeId => {
+  expanded.value[episodeId] = !expanded.value[episodeId]
+}
 
-    chartRetakeMaxCount(entryId, columnId) {
-      return getChartRetakeCount(this.episodeRetakeStats, entryId, columnId)
-    },
-
-    takeRange(entryId) {
-      return range(1, this.chartRetakeMaxCount(entryId, 'all') + 1)
-    },
-
-    isStats(entryId, columnId) {
-      return this.episodeStats[entryId] && this.episodeStats[entryId][columnId]
-    },
-
-    taskTypePath(taskTypeId) {
-      const route = {
-        name: 'task-type',
-        params: {
-          production_id: this.currentProduction.id,
-          task_type_id: taskTypeId,
-          type: 'count'
-        }
-      }
-
-      if (this.isTVShow) {
-        route.name = 'episode-task-type'
-        route.params.episode_id = this.currentEpisode.id
-      }
-
-      return route
-    },
-
-    getPath(section, episodeId) {
-      const route = {
-        name: section,
-        params: {
-          production_id: this.currentProduction.id,
-          episode_id: episodeId
-        }
-      }
-
-      return route
-    },
-
-    toggleExpanded(episodeId) {
-      this.expanded[episodeId] = !this.expanded[episodeId]
-    }
-  },
-
-  watch: {
-    entries() {
-      this.entries.forEach(e => {
-        const value = this.expanded[e.id] || false
-        this.expanded[e.id] = value
-      })
-    },
-
-    isRetakes() {
-      if (!this.isRetakes) {
-        this.entries.forEach(e => {
-          this.expanded[e.id] = false
-        })
-      }
-    }
+const getValidationStyle = columnId => {
+  const taskType = taskTypeMap.value.get(columnId)
+  if (!taskType) return {}
+  return {
+    'border-left': `1px solid ${taskType.color}`,
+    background: colors.hexToRGBa(taskType.color, 0.08)
   }
 }
+
+const taskTypePath = taskTypeId => ({
+  name: 'episodes-task-type',
+  params: {
+    production_id: currentProduction.value.id,
+    task_type_id: taskTypeId
+  }
+})
+
+const shotsPath = episode =>
+  getEntitiesPath(currentProduction.value?.id, 'shots', episode.id)
+
+// Watchers
+// --------------------------------------------------------------------------
+watch(isRetakes, () => {
+  if (!isRetakes.value) expanded.value = {}
+})
 </script>
 
 <style lang="scss" scoped>
-.datatable-body tr:first-child th,
-.datatable-body tr:first-child td {
-  border-top: 0;
-}
+@use '@/styles/stats.scss' as stats;
+
+@include stats.list;
+
 .name {
   min-width: 100px;
   width: 100px;
+}
+
+// Take rows detail the episode above them: indented, and tagged like the
+// "Take N" label of the cells rather than titled like an episode.
+td.take-name {
+  // Rail linking the takes to their episode. A background layer spans the
+  // whole cell height whatever its positioning, and joins from row to row.
+  background-image: linear-gradient(var(--border-alt), var(--border-alt));
+  background-position: 1em 0;
+  background-repeat: no-repeat;
+  background-size: 1px 100%;
+  font-size: 1em;
+  padding-left: 2em;
+}
+
+// The rail stops short at both ends of the group of takes.
+.take-row--first td.take-name {
+  background-position: 1em 100%;
+  background-size: 1px 70%;
+}
+
+.take-row--last td.take-name {
+  background-size: 1px 70%;
+}
+
+.take-row--first.take-row--last td.take-name {
+  background-position: 1em 50%;
+  background-size: 1px 40%;
+}
+
+.take-tag {
+  color: white;
+  cursor: default;
   font-weight: bold;
-}
-
-.name a {
-  color: inherit;
-}
-
-td.name {
-  font-size: 1.2em;
+  text-transform: uppercase;
 }
 
 .expander {
-  cursor: pointer;
   min-width: 10px;
   width: 10px;
   padding-top: 10px;
-}
 
-.description {
-  min-width: 200px;
-  max-width: 200px;
-  width: 200px;
-}
-
-.validation {
-  min-width: 170px;
-  max-width: 170px;
-  width: 170px;
-  word-wrap: break-word;
+  &[role='button'] {
+    cursor: pointer;
+  }
 }
 
 .actions {
@@ -501,7 +434,27 @@ td.name {
   width: 150px;
 }
 
-th.actions {
-  padding: 0.4em;
+@media screen and (max-width: 768px) {
+  // The expander sits in the top right corner of the card of its episode.
+  .datatable-body .datatable-row {
+    position: relative;
+  }
+
+  .datatable-body td.expander[role='button'] {
+    display: block;
+    padding: 0;
+    position: absolute;
+    right: 1em;
+    top: 1em;
+    width: auto;
+    // The name cell keeps the z-index of the sticky column and spans the
+    // card: without this it covers the expander and takes its clicks.
+    z-index: 2;
+  }
+
+  // The cards of the takes nest under the card of their episode.
+  .datatable-body .take-row.datatable-row {
+    margin-left: 1.5em;
+  }
 }
 </style>

@@ -23,9 +23,7 @@
 </template>
 
 <script setup>
-import { ref, toRef, watch } from 'vue'
-
-import { useModal } from '@/composables/modal'
+import { ref, watch } from 'vue'
 
 import BaseModal from '@/components/modals/BaseModal.vue'
 import ModalFooter from '@/components/modals/ModalFooter.vue'
@@ -44,8 +42,6 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['cancel', 'confirm', 'fileselected'])
-
-useModal(toRef(props, 'active'), emit)
 
 const cropperRef = ref(null)
 const hasFile = ref(false)

@@ -29,13 +29,15 @@
       />
       <text-field
         :label="$t('shots.fields.frame_in')"
-        v-model="form.frameIn"
+        :model-value="form.frameIn"
         type="number"
+        @update:model-value="onFrameBoundChanged('frameIn', $event)"
       />
       <text-field
         :label="$t('shots.fields.frame_out')"
-        v-model="form.frameOut"
+        :model-value="form.frameOut"
         type="number"
+        @update:model-value="onFrameBoundChanged('frameOut', $event)"
         @enter="runConfirmation"
       />
       <text-field
@@ -116,7 +118,6 @@ const currentProduction = computed(() => store.getters.currentProduction)
 const isPaperProduction = computed(() => store.getters.isPaperProduction)
 const openProductions = computed(() => store.getters.openProductions)
 const sequenceOptions = computed(() => store.getters.sequenceOptions)
-const sequences = computed(() => store.getters.sequences)
 const shotMetadataDescriptors = computed(
   () => store.getters.shotMetadataDescriptors
 )
@@ -151,8 +152,8 @@ const resetForm = () => {
       name: props.shotToEdit.name,
       description: props.shotToEdit.description,
       nb_frames: props.shotToEdit.nb_frames,
-      frameIn: shotData.frame_in || '',
-      frameOut: shotData.frame_out || '',
+      frameIn: shotData.frame_in ?? '',
+      frameOut: shotData.frame_out ?? '',
       fps: shotData.fps || '',
       max_retakes: parseInt(shotData.max_retakes) || '',
       resolution: shotData.resolution || '',
@@ -162,8 +163,8 @@ const resetForm = () => {
     if (openProductions.value.length > 0) {
       form.value.project_id = currentProduction.value?.id || ''
     }
-    if (sequences.value.length > 0) {
-      form.value.sequence_id = sequences.value[0].id
+    if (sequenceOptions.value.length > 0) {
+      form.value.sequence_id = sequenceOptions.value[0].value
     }
     form.value.name = ''
     form.value.description = ''
@@ -172,10 +173,16 @@ const resetForm = () => {
   }
 }
 
-const updateNbFramesFromRange = () => {
+// Only a bound typed by the user recounts the frames: the stored count can
+// differ from the range on purpose, and opening the modal must not alter it.
+const onFrameBoundChanged = (field, value) => {
+  form.value[field] = value
+  // sanitizeInteger reads an empty field as 0, which is a valid frame in.
+  const bounds = [form.value.frameIn, form.value.frameOut]
+  if (bounds.some(bound => bound === '' || bound == null)) return
   const frameIn = sanitizeInteger(form.value.frameIn)
   const frameOut = sanitizeInteger(form.value.frameOut)
-  if (frameIn && frameOut && frameOut > frameIn) {
+  if (frameOut >= frameIn) {
     form.value.nb_frames = frameOut - frameIn + 1
   }
 }
@@ -184,19 +191,16 @@ watch(
   () => props.active,
   active => {
     resetForm()
-    if (sequences.value.length === 0) {
+    if (!active) return
+    if (sequenceOptions.value.length === 0) {
       store.dispatch('loadSequences')
     }
-    if (active) {
-      setTimeout(() => {
-        nameField.value?.focus()
-      }, 100)
-    }
+    setTimeout(() => {
+      nameField.value?.focus()
+    }, 100)
   }
 )
 
-watch(() => form.value.frameIn, updateNbFramesFromRange)
-watch(() => form.value.frameOut, updateNbFramesFromRange)
 watch(() => props.shotToEdit, resetForm)
 
 onMounted(resetForm)

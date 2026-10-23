@@ -8,6 +8,7 @@
       :empty-height="200"
       :empty-width="300"
       :height="200"
+      :preview-file-status="previewFile.status"
       :width="300"
       is-rounded-top-border
       show-movie
@@ -51,6 +52,7 @@
           class="download-button"
           :href="downloadPath"
           :title="$t('playlists.actions.download_file')"
+          download
           v-if="!isCurrentUserArtist"
         >
           <download-icon class="icon is-small" />

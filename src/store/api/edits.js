@@ -62,7 +62,7 @@ export default {
   postCsv(production, formData, toUpdate) {
     let path = `/api/import/csv/projects/${production.id}/edits`
     if (toUpdate) path += '?update=true'
-    return client.ppost(path, formData)
+    return client.ppostImport(path, formData)
   },
 
   getEpisodeStats(productionId) {

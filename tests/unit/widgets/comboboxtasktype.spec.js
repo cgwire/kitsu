@@ -46,10 +46,6 @@ describe('ComboboxTaskType', () => {
   // outside wrapper.element and has to be queried on the real document.
   const findTeleportedList = () => document.querySelector('.select-input')
 
-  it('mounts successfully', () => {
-    expect(wrapper.exists()).toBe(true)
-  })
-
   it('exposes combobox/listbox ARIA roles', async () => {
     const trigger = wrapper.find('.flexrow.selector')
     expect(trigger.attributes('role')).toBe('combobox')

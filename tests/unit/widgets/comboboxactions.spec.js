@@ -2,8 +2,6 @@ import { shallowMount } from '@vue/test-utils'
 
 import ComboboxActions from '@/components/widgets/ComboboxActions.vue'
 
-import './setup'
-
 describe('ComboboxActions', () => {
   let handler, wrapper
 
@@ -17,10 +15,6 @@ describe('ComboboxActions', () => {
     wrapper = shallowMount(ComboboxActions, {
       props: { title: 'Actions', actions }
     })
-  })
-
-  it('mounts successfully', () => {
-    expect(wrapper.exists()).toBe(true)
   })
 
   it('exposes combobox/listbox ARIA roles', async () => {

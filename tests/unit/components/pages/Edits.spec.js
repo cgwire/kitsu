@@ -1,93 +1,373 @@
-import { vi } from 'vitest'
+import { flushPromises } from '@vue/test-utils'
 
-// Importing the edits page transitively pulls in the root store
-// (lib/models → timezone → @/store); stub it so no Vuex store is built.
 vi.mock('@/store', () => ({ default: {} }))
+vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 
+import CreateTasksModal from '@/components/modals/CreateTasksModal.vue'
+import DeleteModal from '@/components/modals/DeleteModal.vue'
+import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
+import ImportModal from '@/components/modals/ImportModal.vue'
+import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
 import Edits from '@/components/pages/Edits.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 
-describe('Edits page, reloadEpisodeEditsIfNeeded', () => {
-  const production = { id: 'p' }
+import {
+  buildAddThumbnailsModalStub,
+  mountEntityPage,
+  production
+} from '../../fixtures/entity-page'
 
-  // The method only reads its component instance, so a plain object is
-  // enough to exercise the staleness decision without mounting the page.
-  const buildContext = (overrides = {}) => {
-    const context = {
-      currentProduction: production,
-      currentEpisode: null,
-      isTVShow: false,
-      editsLoadingKey: 'p/',
-      initialLoading: false,
-      loadEdits: vi.fn(),
-      $refs: {},
-      $store: { commit: vi.fn() },
-      ...overrides
-    }
-    context.reset = () => Edits.methods.reset.call(context)
-    return context
-  }
+// Two edits with their tasks in the store: the page decides on mount
+// whether their scope (episode) is the displayed one.
+const editMap = new Map([
+  ['edit-1', { id: 'edit-1', project_id: production.id, validations: new Map() }],
+  ['edit-2', { id: 'edit-2', project_id: production.id, validations: new Map() }]
+])
 
-  const run = context => {
-    Edits.methods.reloadEpisodeEditsIfNeeded.call(context)
-    return context
-  }
+const mountPage = async ({ getters = {}, actions = {}, stubs = {} } = {}) => {
+  const page = await mountEntityPage(Edits, {
+    listName: 'EditList',
+    getters: { editMap, editValidationColumns: ['task-type-1'], ...getters },
+    actions,
+    stubs
+  })
+  await flushPromises()
+  return page
+}
 
-  test('reloads when the store holds another episode', () => {
-    const context = run(
-      buildContext({
+describe('Edits page, reload of another episode', () => {
+  test('reloads when the store holds another episode', async () => {
+    const { dispatched } = await mountPage({
+      getters: {
         isTVShow: true,
         currentEpisode: { id: 'ep-b' },
-        editsLoadingKey: 'p/ep-a'
-      })
-    )
+        editsLoadingKey: `${production.id}/ep-a`
+      }
+    })
 
-    expect(context.loadEdits).toHaveBeenCalled()
-    expect(context.initialLoading).toBe(true)
+    expect(dispatched('loadEdits')).toHaveLength(1)
   })
 
-  test('reloads when the store holds the production-wide dataset', () => {
-    const context = run(
-      buildContext({
+  test('reloads when the store holds the production-wide dataset', async () => {
+    const { dispatched } = await mountPage({
+      getters: {
         isTVShow: true,
         currentEpisode: { id: 'ep-a' },
-        editsLoadingKey: 'p/all'
-      })
-    )
+        editsLoadingKey: `${production.id}/all`
+      }
+    })
 
-    expect(context.loadEdits).toHaveBeenCalled()
+    expect(dispatched('loadEdits')).toHaveLength(1)
   })
 
-  test('does not reload when the store holds the displayed episode', () => {
-    const context = run(
-      buildContext({
+  test('does not reload when the store holds the displayed episode', async () => {
+    const { dispatched, list } = await mountPage({
+      getters: {
         isTVShow: true,
         currentEpisode: { id: 'ep-a' },
-        editsLoadingKey: 'p/ep-a'
-      })
-    )
+        editsLoadingKey: `${production.id}/ep-a`
+      }
+    })
 
-    expect(context.loadEdits).not.toHaveBeenCalled()
-    expect(context.initialLoading).toBe(false)
+    expect(dispatched('loadEdits')).toHaveLength(0)
+    expect(list.selectTaskFromQuery).toHaveBeenCalled()
   })
 
-  test('does not reload on a production without episodes', () => {
-    const context = run(
-      buildContext({
-        // A stale currentEpisode left by a previous TV show must not make an
-        // episode-less production look out of scope.
+  // A stale currentEpisode left by a previous TV show must not make an
+  // episode-less production look out of scope.
+  test('does not reload on a production without episodes', async () => {
+    const { dispatched } = await mountPage({
+      getters: {
         currentEpisode: { id: 'ep-a' },
-        editsLoadingKey: 'p/'
-      })
-    )
+        editsLoadingKey: `${production.id}/`
+      }
+    })
 
-    expect(context.loadEdits).not.toHaveBeenCalled()
+    expect(dispatched('loadEdits')).toHaveLength(0)
+  })
+})
+
+describe('Edits page, CSV import', () => {
+  const lines = [
+    ['Name', 'Description'],
+    ['E01', 'intro']
+  ]
+
+  const upload = async wrapper => {
+    await wrapper
+      .findComponent(ImportRenderModal)
+      .vm.$emit('confirm', lines, false)
+    await flushPromises()
+    return wrapper.findComponent(ImportRenderModal).props()
+  }
+
+  // The modal reads the import error to show the rejected line or the
+  // timeout message.
+  test('hands the failure to the import modal', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const error = Object.assign(new Error('Bad Request'), { status: 400 })
+    const { wrapper } = await mountPage({
+      actions: { uploadEditFile: () => Promise.reject(error) }
+    })
+
+    const modal = await upload(wrapper)
+
+    expect(modal.isError).toBe(true)
+    expect(modal.importError).toBe(error)
+    expect(modal.isLoading).toBe(false)
   })
 
-  test('does nothing while no production is set', () => {
-    const context = run(
-      buildContext({ currentProduction: null, editsLoadingKey: null })
-    )
+  test('clears the previous failure and closes the modal on success', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const uploadEditFile = vi
+      .fn(() => Promise.resolve())
+      .mockImplementationOnce(() => Promise.reject(new Error('previous')))
+    const { wrapper, dispatched } = await mountPage({
+      actions: { uploadEditFile }
+    })
+    await upload(wrapper)
 
-    expect(context.loadEdits).not.toHaveBeenCalled()
+    const modal = await upload(wrapper)
+
+    expect(modal.importError).toBe(null)
+    expect(modal.active).toBe(false)
+    expect(dispatched('loadEdits')).toHaveLength(1)
+  })
+
+  test('offers the description as an optional column', async () => {
+    const { wrapper } = await mountPage()
+
+    expect(wrapper.findComponent(ImportModal).props('optionalColumns')).toEqual(
+      ['Description']
+    )
+    expect(wrapper.findComponent(ImportRenderModal).props('columns')).toContain(
+      'Description'
+    )
+  })
+})
+
+// The modals cannot reset the error of a failed confirm, and a close keeps
+// it: the next opening drops it.
+describe('Edits page, past confirmation errors', () => {
+  afterEach(() => vi.restoreAllMocks())
+
+  const edit = { id: 'edit-1', name: 'E01' }
+  const taskType = { id: 'task-type-1', name: 'Compositing' }
+
+  // The three delete modals of the page differ by their error text.
+  const deleteModal = errorText => wrapper =>
+    wrapper
+      .findAllComponents(DeleteModal)
+      .find(modal => modal.props('errorText') === errorText)
+
+  test.each([
+    {
+      modal: 'the delete modal',
+      action: 'deleteEdit',
+      event: ['delete-clicked', edit],
+      find: deleteModal('edits.delete_error'),
+      confirm: []
+    },
+    {
+      modal: 'the restore modal',
+      action: 'restoreEdit',
+      event: ['restore-clicked', edit],
+      find: deleteModal('edits.restore_error'),
+      confirm: []
+    },
+    {
+      modal: 'the column delete modal',
+      action: 'deleteMetadataDescriptor',
+      event: ['delete-metadata', 'descriptor-1'],
+      find: deleteModal('productions.metadata.delete_error'),
+      confirm: []
+    },
+    {
+      modal: 'the task delete modal',
+      action: 'deleteAllEditTasks',
+      event: ['delete-all-tasks', taskType.id],
+      find: wrapper => wrapper.findComponent(HardDeleteModal),
+      confirm: [false]
+    },
+    {
+      modal: 'the task creation modal',
+      action: 'createTasks',
+      event: ['create-tasks'],
+      find: wrapper => wrapper.findComponent(CreateTasksModal),
+      confirm: [{ form: { task_type_id: taskType.id }, selectionOnly: false }]
+    }
+  ])(
+    'opens $modal without the error of a past failure',
+    async ({ action, event, find, confirm }) => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const { wrapper } = await mountPage({
+        getters: { taskTypeMap: new Map([[taskType.id, taskType]]) },
+        actions: { [action]: () => Promise.reject(new Error('down')) }
+      })
+      const list = wrapper.findComponent({ name: 'EditList' })
+      const modal = () => find(wrapper)
+
+      await list.vm.$emit(...event)
+      await modal().vm.$emit('confirm', ...confirm)
+      await flushPromises()
+      expect(modal().props('isError')).toBe(true)
+
+      await modal().vm.$emit('cancel')
+      await list.vm.$emit(...event)
+
+      expect(modal().props('active')).toBe(true)
+      expect(modal().props('isError')).toBe(false)
+    }
+  )
+
+  // A delete still running at the close fails after it: the next opening
+  // drops that error too.
+  test('opens the delete modal without the error of a delete that failed after a close', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    let refuse = null
+    const { wrapper } = await mountPage({
+      actions: {
+        deleteEdit: () => new Promise((resolve, reject) => (refuse = reject))
+      }
+    })
+    const list = wrapper.findComponent({ name: 'EditList' })
+    const modal = () => deleteModal('edits.delete_error')(wrapper)
+
+    await list.vm.$emit('delete-clicked', edit)
+    await modal().vm.$emit('confirm')
+    await modal().vm.$emit('cancel')
+    refuse(new Error('down'))
+    await flushPromises()
+    expect(modal().props('active')).toBe(false)
+    expect(modal().props('isError')).toBe(true)
+
+    await list.vm.$emit('delete-clicked', edit)
+
+    expect(modal().props('active')).toBe(true)
+    expect(modal().props('isError')).toBe(false)
+  })
+
+  test('opens the import without the error of a past upload', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { wrapper } = await mountPage({
+      getters: { isCurrentUserProductionManager: true },
+      actions: { uploadEditFile: () => Promise.reject(new Error('down')) }
+    })
+    const importButton = wrapper
+      .findAllComponents(ButtonSimple)
+      .find(button => button.props('icon') === 'import')
+    const importModal = () => wrapper.findComponent(ImportModal)
+    const renderModal = () => wrapper.findComponent(ImportRenderModal)
+
+    await importButton.vm.$emit('click')
+    await importModal().vm.$emit('confirm', 'Name\nE01', 'text')
+    await flushPromises()
+    await renderModal().vm.$emit('confirm', [['Name'], ['E01']], false)
+    await flushPromises()
+    expect(renderModal().props('isError')).toBe(true)
+
+    await renderModal().vm.$emit('cancel')
+    await importButton.vm.$emit('click')
+
+    expect(importModal().props('active')).toBe(true)
+    expect(importModal().props('isError')).toBe(false)
+  })
+})
+
+describe('Edits page, search', () => {
+  const searchesFor = (dispatched, query) =>
+    dispatched('setEditSearch').filter(([, search]) => search === query)
+
+  const mountLongList = () =>
+    mountPage({
+      getters: {
+        editMap: new Map(
+          Array.from({ length: 501 }, (_, index) => [
+            `edit-${index}`,
+            {
+              id: `edit-${index}`,
+              project_id: production.id,
+              validations: new Map()
+            }
+          ])
+        )
+      }
+    })
+
+  test('applies the search on Enter', async () => {
+    const { wrapper, searchField, dispatched } = await mountPage()
+    searchField.value = 'e01'
+
+    await wrapper.findComponent({ name: 'SearchField' }).vm.$emit('enter', 'e01')
+
+    expect(dispatched('setEditSearch')).toContainEqual(['setEditSearch', 'e01'])
+  })
+
+  test('searches a short list as it is typed', async () => {
+    const { wrapper, searchField, dispatched } = await mountPage()
+    searchField.value = 'e01'
+
+    wrapper.findComponent({ name: 'SearchField' }).vm.$emit('change', 'e01')
+    await flushPromises()
+
+    expect(searchesFor(dispatched, 'e01')).not.toHaveLength(0)
+  })
+
+  // Like the shot list: searching a long list on every key is too slow.
+  test('searches a long list on Enter only', async () => {
+    const { wrapper, router, searchField, dispatched } = await mountLongList()
+    const field = wrapper.findComponent({ name: 'SearchField' })
+    searchField.value = 'e01'
+
+    field.vm.$emit('change', 'e01')
+    await flushPromises()
+
+    expect(searchesFor(dispatched, 'e01')).toHaveLength(0)
+    expect(router.currentRoute.value.query.search).toBeUndefined()
+
+    field.vm.$emit('enter', 'e01')
+    await flushPromises()
+
+    expect(searchesFor(dispatched, 'e01')).not.toHaveLength(0)
+    expect(router.currentRoute.value.query.search).toBe('e01')
+  })
+
+  test('clears the search of a long list as it is typed', async () => {
+    const { wrapper, searchField, dispatched } = await mountLongList()
+    const clearsAtMount = searchesFor(dispatched, '').length
+    searchField.value = ''
+
+    wrapper.findComponent({ name: 'SearchField' }).vm.$emit('change', '')
+    await flushPromises()
+
+    expect(searchesFor(dispatched, '').length).toBeGreaterThan(clearsAtMount)
+  })
+})
+
+describe('Edits page, thumbnails import', () => {
+  test('opens the modal and marks each edit while its preview uploads', async () => {
+    const modalStub = buildAddThumbnailsModalStub()
+    const { wrapper } = await mountPage({
+      getters: { isCurrentUserProductionManager: true },
+      actions: {
+        commentTaskWithPreview: () => ({ preview: { id: 'preview-1' } })
+      },
+      stubs: { AddThumbnailsModal: modalStub }
+    })
+    const modal = () => wrapper.findComponent({ name: 'AddThumbnailsModal' })
+
+    await wrapper
+      .findAllComponents(ButtonSimple)
+      .find(button => button.props('icon') === 'import-files')
+      .vm.$emit('click')
+    expect(modal().exists()).toBe(true)
+
+    await modal().vm.$emit('confirm', [
+      { task: { id: 'task-1', entity_id: 'edit-1' } }
+    ])
+    await flushPromises()
+
+    expect(modalStub.methods.markLoading).toHaveBeenCalledWith('edit-1')
+    expect(modalStub.methods.markUploaded).toHaveBeenCalledWith('edit-1')
   })
 })

@@ -131,9 +131,7 @@
             />
             <button
               class="button is-success flexrow-item"
-              :class="{
-                'is-disabled': selectedDepartment === null
-              }"
+              :disabled="selectedDepartment === null"
               @click="addDepartment"
             >
               {{ $t('main.add') }}
@@ -375,6 +373,8 @@ const removeTask = entry => {
 }
 
 const confirm = () => {
+  // Enter in a field lands here too, past the grayed confirm button.
+  if (!isFormFilled.value) return
   if (SIMPLE_TYPES.includes(form.value.data_type)) {
     form.value.values = []
   } else if (form.value.data_type === 'checklist') {

@@ -77,22 +77,26 @@
 </template>
 
 <script setup>
+// Imports
+// --------------------------------------------------------------------------
+import { ChevronDownIcon } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
-import { ChevronDownIcon } from 'lucide-vue-next'
 
-import { sortTaskStatuses } from '@/lib/sorting'
 import { useCombobox } from '@/composables/combobox'
 import { useComboboxKeyboard } from '@/composables/comboboxKeyboard'
 import { useTaskStatusStyle } from '@/composables/taskStatus'
+import { sortTaskStatuses } from '@/lib/sorting'
 
 import ComboboxMask from '@/components/widgets/ComboboxMask.vue'
 
 const { t } = useI18n()
 const store = useStore()
-const { backgroundColor, color, isDarkTheme } = useTaskStatusStyle()
+const { backgroundColor, color } = useTaskStatusStyle()
 
+// Props / Emits
+// --------------------------------------------------------------------------
 const props = defineProps({
   colorOnly: {
     default: false,
@@ -134,6 +138,8 @@ const props = defineProps({
 
 const emit = defineEmits(['update:model-value'])
 
+// State
+// --------------------------------------------------------------------------
 const {
   showList: showStatusList,
   toggle: toggleStatusList,
@@ -149,6 +155,8 @@ const { activeIndex, onKeydown, optionId } = useComboboxKeyboard({
   listRef
 })
 
+// Computed
+// --------------------------------------------------------------------------
 const productionMap = computed(() => store.getters.productionMap)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
 
@@ -174,41 +182,31 @@ const currentStatus = computed(() => {
   }
 })
 
-const comboStyles = computed(() => {
-  return {
-    background: props.colorOnly
-      ? backgroundColor(currentStatus.value)
-      : isDarkTheme.value
-        ? '#36393F'
-        : '#FEFEFE',
-    color: props.colorOnly ? color(currentStatus.value) : 'inherit',
-    'border-top-left-radius': props.colorOnly ? '20px' : '10px',
-    'border-top-right-radius': props.colorOnly ? '0px' : '10px',
-    'border-bottom-left-radius': showStatusList.value
-      ? '0'
-      : props.colorOnly
-        ? '20px'
-        : '10px',
-    'border-bottom-right-radius': showStatusList.value
-      ? '0'
-      : props.colorOnly
-        ? '0px'
-        : '10px'
-  }
-})
+const comboStyles = computed(() => ({
+  background: props.colorOnly
+    ? backgroundColor(currentStatus.value)
+    : undefined,
+  color: props.colorOnly ? color(currentStatus.value) : 'inherit',
+  'border-top-left-radius': props.colorOnly ? '20px' : '10px',
+  'border-top-right-radius': props.colorOnly ? '0px' : '10px',
+  'border-bottom-left-radius': showStatusList.value
+    ? '0'
+    : props.colorOnly
+      ? '20px'
+      : '10px',
+  'border-bottom-right-radius': showStatusList.value
+    ? '0'
+    : props.colorOnly
+      ? '0px'
+      : '10px'
+}))
 </script>
 
 <style lang="scss" scoped>
 .dark {
   .select-input,
-  .status-line,
-  .status-combo {
+  .status-line {
     background: $dark-grey-light;
-    border-color: $dark-grey;
-  }
-
-  .status-line:hover {
-    background: $dark-purple;
   }
 }
 
@@ -216,7 +214,7 @@ const comboStyles = computed(() => {
   display: inline-block;
   background: var(--background);
   min-width: 80px;
-  border: 1px solid $light-grey-light;
+  border: 1px solid var(--border);
   user-select: none;
   cursor: pointer;
   margin: 0;
@@ -248,7 +246,7 @@ const comboStyles = computed(() => {
   text-transform: uppercase;
 
   &:hover {
-    background: $purple;
+    background: var(--purple);
   }
 }
 
@@ -264,7 +262,7 @@ const comboStyles = computed(() => {
   background: $white;
   min-width: calc(100% + 2px);
   position: absolute;
-  border: 1px solid $light-grey-light;
+  border: 1px solid var(--border);
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
   z-index: $z-dropdown;

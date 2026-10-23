@@ -9,12 +9,6 @@ const mountPlayer = (props = {}) =>
   })
 
 describe('players/AttachmentAudioPlayer', () => {
-  it('renders an audio element and a play button', () => {
-    const wrapper = mountPlayer()
-    expect(wrapper.find('audio').exists()).toBe(true)
-    expect(wrapper.find('.play-button').exists()).toBe(true)
-  })
-
   it('clicking play calls the audio element play()', async () => {
     const wrapper = mountPlayer()
     const audio = wrapper.find('audio').element

@@ -12,6 +12,14 @@ export default {
     return client.pget(buildQueryString(path, filters))
   },
 
+  // A page carries the total of the matching tasks: one row is enough.
+  countTasks(filters) {
+    const path = '/api/data/tasks'
+    return client
+      .pget(buildQueryString(path, { ...filters, page: 1, limit: 1 }))
+      .then(result => result.total)
+  },
+
   getOpenTasks(filters) {
     const path = '/api/data/tasks/open-tasks'
     return client.pget(buildQueryString(path, filters))
@@ -113,6 +121,13 @@ export default {
     return client.ppost(
       `/api/actions/projects/${projectId}/tasks/comment-many`,
       comments
+    )
+  },
+
+  copyLastClientComments(projectId, taskIds, prefix) {
+    return client.ppost(
+      `/api/actions/projects/${projectId}/tasks/copy-client-comments`,
+      { task_ids: taskIds, prefix }
     )
   },
 

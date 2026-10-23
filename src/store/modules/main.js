@@ -1,5 +1,6 @@
 import client from '@/store/api/client'
 import crisp from '@/lib/crisp'
+import { getMovieBitrateDefaults } from '@/lib/productions'
 import {
   USER_LOGIN,
   TOGGLE_DARK_THEME,
@@ -12,6 +13,7 @@ import {
   SET_CURRENT_PRODUCTION,
   SHOW_PREVIEW_FILE,
   HIDE_PREVIEW_FILE,
+  SET_PREVIEW_FILES_TO_BROWSE,
   RESET_ALL
 } from '@/store/mutation-types'
 
@@ -25,7 +27,8 @@ const initialState = {
   lastProductionScreen: 'assets',
   lastProductionViewed: null,
   mainConfig: {},
-  previewFileIdToShow: ''
+  previewFileIdToShow: '',
+  previewFileIdsToBrowse: []
 }
 
 const state = { ...initialState }
@@ -40,7 +43,9 @@ const getters = {
   lastProductionScreen: state => state.lastProductionScreen,
   lastProductionViewed: state => state.lastProductionViewed,
   mainConfig: state => state.mainConfig,
-  previewFileIdToShow: state => state.previewFileIdToShow
+  movieBitrateDefaults: state => getMovieBitrateDefaults(state.mainConfig),
+  previewFileIdToShow: state => state.previewFileIdToShow,
+  previewFileIdsToBrowse: state => state.previewFileIdsToBrowse
 }
 
 const actions = {
@@ -141,6 +146,10 @@ const mutations = {
 
   [HIDE_PREVIEW_FILE](state) {
     state.previewFileIdToShow = ''
+  },
+
+  [SET_PREVIEW_FILES_TO_BROWSE](state, previewFileIds) {
+    state.previewFileIdsToBrowse = previewFileIds
   },
 
   [SET_CONFIG](state, mainConfig) {

@@ -1,5 +1,6 @@
 // @vitest-environment node
 
+import process from 'node:process'
 import { vi } from 'vitest'
 
 // Fake superagent: every call returns a thenable request that resolves with
@@ -9,13 +10,17 @@ const h = vi.hoisted(() => ({
   error: null,
   calls: [],
   sent: null,
-  responseType: null
+  responseType: null,
+  timeout: null
 }))
 
 vi.mock('superagent', () => {
   const makeRequest = () => {
     const request = {}
-    request.timeout = vi.fn(() => request)
+    request.timeout = vi.fn(value => {
+      h.timeout = value
+      return request
+    })
     request.send = vi.fn(data => {
       h.sent = data
       return request
@@ -46,10 +51,10 @@ vi.mock('superagent', () => {
 })
 
 vi.mock('@/lib/errors', () => ({
-  default: { backToLogin: vi.fn() }
+  default: { backToLogin: vi.fn(), markRequestFailure: vi.fn() }
 }))
 
-import client, { buildQuery } from '@/store/api/client'
+import client, { buildQuery, setErrorReporter } from '@/store/api/client'
 import errors from '@/lib/errors'
 
 describe('store/api/client', () => {
@@ -59,6 +64,7 @@ describe('store/api/client', () => {
     h.calls = []
     h.sent = null
     h.responseType = null
+    h.timeout = null
     vi.clearAllMocks()
   })
 
@@ -104,6 +110,73 @@ describe('store/api/client', () => {
       body: ''
     })
   })
+
+  test('regular requests stop waiting for an answer after 60s', async () => {
+    h.response = { body: {} }
+    await client.ppost('/api/data/foo', { name: 'foo' })
+    expect(h.timeout).toEqual({ response: 60000, deadline: 300000 })
+  })
+
+  // Zou answers an import only once every row is processed, which takes
+  // minutes on a large file: a 60s wait made Kitsu report an error while
+  // the import kept running on the server.
+  test('ppostImport waits up to 10 minutes for the import to finish', async () => {
+    h.response = { body: [{ id: 'shot-1' }] }
+    const formData = { file: 'import.csv' }
+    await expect(
+      client.ppostImport('/api/import/csv/projects/p1/shots', formData)
+    ).resolves.toEqual([{ id: 'shot-1' }])
+    expect(h.calls).toEqual([
+      { method: 'POST', path: '/api/import/csv/projects/p1/shots' }
+    ])
+    expect(h.sent).toBe(formData)
+    expect(h.timeout).toEqual({ deadline: 600000 })
+  })
+
+  test('a request that timed out rejects as a timeout', async () => {
+    h.error = Object.assign(new Error('Response timeout of 60000ms exceeded'), {
+      code: 'ECONNABORTED',
+      timeout: 60000
+    })
+    await expect(client.ppost('/api/data/foo')).rejects.toMatchObject({
+      isTimeout: true
+    })
+  })
+
+  test('a gateway timeout rejects as a timeout', async () => {
+    h.error = { status: 504, response: { status: 504, body: '' } }
+    await expect(client.ppost('/api/data/foo')).rejects.toMatchObject({
+      isTimeout: true
+    })
+  })
+
+  test('other failures are not timeouts', async () => {
+    h.error = { status: 500, response: { status: 500, body: {} } }
+    await expect(client.ppost('/api/data/foo')).rejects.toMatchObject({
+      isTimeout: false
+    })
+  })
+
+  // Without an answer, only a file the server got whole may still be
+  // processed there.
+  test.each([
+    ['before its file left', [['upload', 40]], false],
+    ['once its file left', [['upload', 40], ['upload', 100]], true],
+    ['after a download progress', [['download', 100]], false]
+  ])(
+    'an upload cut %s tells whether the file left',
+    async (_, events, isBodySent) => {
+      h.error = new Error('Request has been terminated')
+      const { request, promise } = client.ppostFile('/api/pictures/p1', {})
+      const [, onProgress] = request.on.mock.calls.find(
+        ([event]) => event === 'progress'
+      )
+      events.forEach(([direction, percent]) =>
+        onProgress({ direction, percent })
+      )
+      await expect(promise).rejects.toMatchObject({ isBodySent })
+    }
+  )
 
   test('getText resolves with the response text', async () => {
     h.response = { text: 'plain content' }
@@ -238,6 +311,187 @@ describe('store/api/client', () => {
       expect(outcome).toBe('pending')
       expect(errors.backToLogin).toHaveBeenCalled()
     })
+
+    describe('once the answer streams', () => {
+      const PATH = '/api/data/shots/with-tasks'
+      const STREAM_PATH = `${PATH}?stream=true&compact=true`
+      const header = '{"compact":true,"shot_fields":["id"],"task_fields":[]}\n'
+
+      // A first chunk, then what the second read meets.
+      const streaming = second => ({
+        ok: true,
+        status: 200,
+        headers: { get: () => 'application/x-ndjson' },
+        body: new ReadableStream({
+          start(controller) {
+            controller.enqueue(new TextEncoder().encode(header))
+          },
+          pull: second
+        })
+      })
+
+      let reporter
+
+      beforeEach(() => {
+        reporter = vi.fn()
+        setErrorReporter(reporter)
+      })
+
+      afterEach(() => {
+        setErrorReporter(null)
+        vi.useRealTimers()
+      })
+
+      test('reports a body cut on the way as a failed request', async () => {
+        const cut = new TypeError('network error')
+        vi.stubGlobal(
+          'fetch',
+          vi.fn(async () => streaming(controller => controller.error(cut)))
+        )
+        await expect(client.pgetNdjson(PATH)).rejects.toBe(cut)
+        await new Promise(resolve => setTimeout(resolve))
+        expect(errors.markRequestFailure).toHaveBeenCalledWith(cut)
+        expect(reporter).toHaveBeenCalledWith(cut, {
+          method: 'GET',
+          path: STREAM_PATH,
+          duration: expect.any(Number)
+        })
+      })
+
+      test('reports a body stopped by the deadline as a timeout', async () => {
+        vi.useFakeTimers()
+        vi.stubGlobal(
+          'fetch',
+          vi.fn(async (url, { signal }) =>
+            streaming(controller => {
+              signal.addEventListener('abort', () =>
+                controller.error(new DOMException('Aborted', 'AbortError'))
+              )
+            })
+          )
+        )
+        const failure = client.pgetNdjson(PATH).catch(err => err)
+        await vi.advanceTimersByTimeAsync(300000)
+        expect(await failure).toMatchObject({ timeout: 300000, isTimeout: true })
+        expect(errors.markRequestFailure).toHaveBeenCalled()
+      })
+
+      // A line that does not decode is a bug, not a failed request.
+      test('leaves a line that does not decode as a bug', async () => {
+        vi.stubGlobal(
+          'fetch',
+          vi.fn(async () =>
+            streaming(controller => {
+              controller.enqueue(new TextEncoder().encode('{not json\n'))
+              controller.close()
+            })
+          )
+        )
+        await expect(client.pgetNdjson(PATH)).rejects.toThrow(SyntaxError)
+        await new Promise(resolve => setTimeout(resolve))
+        expect(errors.markRequestFailure).not.toHaveBeenCalled()
+        expect(reporter).not.toHaveBeenCalled()
+      })
+    })
+  })
+
+  // The reporter hears of a failure even when the caller catches it, so a
+  // page that keeps working after a refusal does not hide it.
+  describe('error reporter', () => {
+    const refusal = { status: 403, response: { status: 403, body: {} } }
+    const settle = () => new Promise(resolve => setTimeout(resolve))
+
+    afterEach(() => {
+      setErrorReporter(null)
+    })
+
+    test('hears of every failed request with its method and path', async () => {
+      const reporter = vi.fn()
+      setErrorReporter(reporter)
+      h.error = refusal
+      await client.pget('/api/data/a').catch(() => {})
+      await client.pput('/api/data/b', {}).catch(() => {})
+      await client.ppostFile('/api/data/c', {}).promise.catch(() => {})
+      await client.getText('/api/d.txt').catch(() => {})
+      await client.getBlob('/api/e.png').catch(() => {})
+      await settle()
+      const duration = expect.any(Number)
+      expect(reporter.mock.calls).toEqual([
+        [refusal, { method: 'GET', path: '/api/data/a', duration }],
+        [refusal, { method: 'PUT', path: '/api/data/b', duration }],
+        [refusal, { method: 'POST', path: '/api/data/c', duration }],
+        [refusal, { method: 'GET', path: '/api/d.txt', duration }],
+        [refusal, { method: 'GET', path: '/api/e.png', duration }]
+      ])
+    })
+
+    test('tells how long the failed request ran', async () => {
+      const reporter = vi.fn()
+      setErrorReporter(reporter)
+      h.error = refusal
+      const now = vi
+        .spyOn(Date, 'now')
+        .mockReturnValueOnce(1000)
+        .mockReturnValueOnce(61000)
+      await client.pget('/api/data/a').catch(() => {})
+      await settle()
+      now.mockRestore()
+      expect(reporter).toHaveBeenCalledWith(refusal, {
+        method: 'GET',
+        path: '/api/data/a',
+        duration: 60000
+      })
+    })
+
+    // Sentry leaves out the raw error of a failure the reporter heard of.
+    test('marks every failure the reporter hears of', async () => {
+      h.error = refusal
+      await client.pget('/api/data/a').catch(() => {})
+      await client.ppostFile('/api/data/c', {}).promise.catch(() => {})
+      await client.getText('/api/d.txt').catch(() => {})
+      await client.getBlob('/api/e.png').catch(() => {})
+      expect(errors.markRequestFailure.mock.calls).toEqual([
+        [refusal],
+        [refusal],
+        [refusal],
+        [refusal]
+      ])
+    })
+
+    test('never hears of a 401, which sends back to login', async () => {
+      const reporter = vi.fn()
+      setErrorReporter(reporter)
+      h.error = { response: { status: 401 } }
+      client.pget('/api/data/foo')
+      await settle()
+      expect(reporter).not.toHaveBeenCalled()
+      expect(errors.markRequestFailure).not.toHaveBeenCalled()
+    })
+
+    test('a failing reporter leaves the request failure as it was', async () => {
+      const rejections = []
+      const onRejection = reason => rejections.push(reason)
+      process.on('unhandledRejection', onRejection)
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      h.error = refusal
+
+      setErrorReporter(() => {
+        throw new Error('reporter bug')
+      })
+      await expect(client.pget('/api/data/foo')).rejects.toBe(refusal)
+      setErrorReporter(async () => {
+        throw new Error('reporter bug')
+      })
+      await expect(client.pget('/api/data/foo')).rejects.toBe(refusal)
+      await settle()
+      process.off('unhandledRejection', onRejection)
+
+      expect(rejections).toEqual([])
+      expect(consoleError).toHaveBeenCalledTimes(2)
+      consoleError.mockRestore()
+    })
   })
 
   describe('buildQuery', () => {
@@ -282,12 +536,6 @@ describe('store/api/client', () => {
           '&person_ids=person-1&person_ids=person-2' +
           '&name_prefixes=task&name_suffixes=update&name_suffixes=new'
       )
-    })
-
-    test('getEvents omits only_files when it is false', async () => {
-      h.response = { body: [] }
-      await client.getEvents({ limit: 10 })
-      expect(h.calls[0].path).toBe('/api/data/events/last?limit=10')
     })
 
     test('getLoginLogs passes the cursor and the person filter', async () => {

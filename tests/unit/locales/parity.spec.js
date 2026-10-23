@@ -1,4 +1,6 @@
-import { describe, expect, it } from 'vitest'
+// @vitest-environment node
+
+import { beforeAll, describe, expect, it } from 'vitest'
 
 import en from '@/locales/en'
 import { localeLoaders } from '@/locales'
@@ -20,30 +22,58 @@ const enPlurals = new Map(
     .map(([key, value]) => [key, value.split('|').length])
 )
 
-const locales = Object.keys(localeLoaders)
-
 // Same access path as loadLocaleMessages: the files nest under "default".
 const loadLocale = async locale =>
   new Map(flatten((await localeLoaders[locale]()).default.default))
 
+// One entry per locale with drifted keys, so a failure names each locale
+// and every key at fault.
+const driftByLocale = findDrift =>
+  Object.fromEntries(
+    [...localeMessages.entries()]
+      .map(([locale, messages]) => [locale, findDrift(messages)])
+      .filter(([, keys]) => keys.length > 0)
+  )
+
+let localeMessages
+
 describe('locales', () => {
-  it.each(locales)('%s translates every key of en.js', async locale => {
-    const messages = await loadLocale(locale)
-    expect([...enKeys].filter(key => !messages.has(key))).toEqual([])
+  beforeAll(async () => {
+    const locales = Object.keys(localeLoaders)
+    localeMessages = new Map(
+      await Promise.all(
+        locales.map(async locale => [locale, await loadLocale(locale)])
+      )
+    )
   })
 
-  it.each(locales)('%s keeps no key en.js has dropped', async locale => {
-    const messages = await loadLocale(locale)
-    expect([...messages.keys()].filter(key => !enKeys.has(key))).toEqual([])
+  it('translate every key of en.js', () => {
+    expect(
+      driftByLocale(messages =>
+        [...enKeys].filter(key => !messages.has(key))
+      )
+    ).toEqual({})
   })
 
-  it.each(locales)('%s keeps the plural segments of en.js', async locale => {
-    const messages = await loadLocale(locale)
+  it('keep no key en.js has dropped', () => {
+    expect(
+      driftByLocale(messages =>
+        [...messages.keys()].filter(key => !enKeys.has(key))
+      )
+    ).toEqual({})
+  })
+
+  it('keep the plural segments of en.js', () => {
     // Every locale uses the default plural resolver, which picks the segment
     // by index: an extra grammatical form shifts the whole message.
-    const mismatched = [...enPlurals.entries()]
-      .filter(([key, count]) => messages.get(key)?.split('|').length !== count)
-      .map(([key]) => key)
-    expect(mismatched).toEqual([])
+    expect(
+      driftByLocale(messages =>
+        [...enPlurals.entries()]
+          .filter(
+            ([key, count]) => messages.get(key)?.split('|').length !== count
+          )
+          .map(([key]) => key)
+      )
+    ).toEqual({})
   })
 })

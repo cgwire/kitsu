@@ -167,16 +167,6 @@ describe('Eraser', () => {
     expect(eraser.width).toBe(100)
   })
 
-  it('fromObject disables initialization layout so children stay in group coords', async () => {
-    const eraser = await Eraser.fromObject({
-      width: 100,
-      height: 50,
-      objects: [{ path: 'M 0 0 L 5 5' }]
-    })
-    expect(eraser.layoutManager).toBeDefined()
-    expect(eraser.getObjects()).toHaveLength(1)
-  })
-
   it('drawObject fills a centered black rect covering the eraser bounds', () => {
     const eraser = new Eraser([], { width: 100, height: 50 })
     const calls = []

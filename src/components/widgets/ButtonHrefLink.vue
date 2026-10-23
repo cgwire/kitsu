@@ -1,5 +1,5 @@
 <template>
-  <a class="button" :title="title" :href="path" :target="target">
+  <a class="button" :title="title" :href="path" :target="target" download>
     <plus-icon class="icon is-small" v-if="icon === 'plus'" />
     <download-icon class="icon is-small" v-else-if="icon === 'download'" />
     <upload-icon class="icon is-small" v-else-if="icon === 'upload'" />
@@ -20,6 +20,8 @@ import { DownloadIcon, ListIcon, PlusIcon, UploadIcon } from 'lucide-vue-next'
 
 import KitsuIcon from '@/components/widgets/KitsuIcon.vue'
 
+// Every caller links to a Zou export sent as an attachment: the download
+// attribute of the link saves it without navigating the tab.
 defineProps({
   text: {
     type: String

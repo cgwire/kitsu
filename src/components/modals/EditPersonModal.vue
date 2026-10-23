@@ -105,9 +105,7 @@
           />
           <button
             class="button is-success flexrow-item"
-            :class="{
-              'is-disabled': selectedDepartment === null
-            }"
+            :disabled="selectedDepartment === null"
             type="button"
             @click="addDepartment"
             v-if="selectableDepartments.length > 0"
@@ -364,8 +362,10 @@ const isUniqEmail = computed(
 
 const isValidEmail = computed(() => {
   if (!form.value.email?.length) return false
+  // A dotless domain, like "jdoe@studio", is left to Zou: it accepts one
+  // where the instance does not check deliverability.
   const emailRegex =
-    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,})|([a-zA-Z\-0-9]+))$/
   if (!emailRegex.test(form.value.email)) return false
   if (form.value.is_bot) return true
   return isUniqEmail.value && !props.isEmailDomainError

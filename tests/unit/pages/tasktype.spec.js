@@ -1,0 +1,573 @@
+import { flushPromises, shallowMount } from '@vue/test-utils'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { ref } from 'vue'
+import { createRouter, createWebHashHistory } from 'vue-router'
+import { createStore } from 'vuex'
+
+vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
+vi.mock('vue-i18n', async importOriginal => ({
+  ...(await importOriginal()),
+  useI18n: () => ({ t: key => key })
+}))
+
+// Pre-load the real store to avoid circular-import race from child components.
+import '@/lib/auth'
+import assetStore from '@/store/modules/assets'
+
+import TaskList from '@/components/lists/TaskList.vue'
+import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
+import ImportModal from '@/components/modals/ImportModal.vue'
+import TaskType from '@/components/pages/TaskType.vue'
+import EstimationHelper from '@/components/pages/tasktype/EstimationHelper.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import ComboboxMultiple from '@/components/widgets/ComboboxMultiple.vue'
+import ComboboxStatusMultiple from '@/components/widgets/ComboboxStatusMultiple.vue'
+
+import { BrokenFileReader, GoneFileReader } from '../fixtures/file-reader'
+
+const SearchFieldStub = {
+  template: '<div />',
+  methods: {
+    focus: () => {},
+    getValue: () => '',
+    setValue: () => {}
+  }
+}
+
+const ScheduleStub = {
+  name: 'Schedule',
+  props: { hierarchy: { type: Array, default: () => [] } },
+  template: '<div />',
+  methods: {
+    scrollToDate: () => {},
+    scrollToToday: () => {}
+  }
+}
+
+// Monday 31 August, one working day
+const task = {
+  id: 'task-1',
+  estimation: 8 * 60,
+  start_date: '2026-08-31T00:00:00',
+  due_date: '2026-08-31T00:00:00'
+}
+
+const mountPage = async ({
+  actions = {},
+  getters = {},
+  query = '',
+  section = 'estimation',
+  socket = { on: vi.fn(), off: vi.fn() },
+  stubs = {}
+} = {}) => {
+  const storeActions = {
+    clearSelectedTasks: vi.fn(),
+    initTaskType: vi.fn(() => Promise.resolve()),
+    updateTask: vi.fn(() => Promise.resolve()),
+    ...actions
+  }
+  const store = createStore({
+    getters: {
+      currentEpisode: () => null,
+      currentProduction: () => ({ id: 'production-1', name: 'Production' }),
+      currentTaskType: () => ({
+        id: 'task-type-1',
+        name: 'Modeling',
+        for_entity: 'Asset'
+      }),
+      isCurrentUserProductionManager: () => true,
+      isCurrentUserProductionSupervisor: () => false,
+      isPaperProduction: () => false,
+      isTVShow: () => false,
+      nbSelectedTasks: () => 0,
+      organisation: () => ({ hours_by_day: 8 }),
+      personMap: () => new Map(),
+      productionAssetTypes: () => [],
+      productionTaskStatuses: () => [],
+      selectedTasks: () => new Map(),
+      taskMap: () => new Map([[task.id, task]]),
+      taskMetadataDescriptors: () => [],
+      taskSearchQueries: () => [],
+      user: () => ({ id: 'manager-1', departments: [] }),
+      ...getters
+    },
+    actions: storeActions
+  })
+  const router = createRouter({
+    history: createWebHashHistory(),
+    routes: [
+      {
+        path: '/productions/:production_id/assets/task-types/:task_type_id/:section',
+        component: { template: '<div />' }
+      }
+    ]
+  })
+  await router.push(
+    `/productions/production-1/assets/task-types/task-type-1/${section}${query}`
+  )
+  const wrapper = shallowMount(TaskType, {
+    global: {
+      plugins: [
+        store,
+        router,
+        {
+          install: app => {
+            app.config.globalProperties.$socket = socket
+            app.config.globalProperties.$t = key => key
+          }
+        }
+      ],
+      stubs: { Schedule: ScheduleStub, SearchField: SearchFieldStub, ...stubs }
+    }
+  })
+  await flushPromises()
+  return { storeActions, wrapper }
+}
+
+describe('TaskType page', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  // The estimation helper and the schedule widget send the estimation in
+  // minutes: the end date follows it.
+  it('saves an estimation edited in the estimation tab', async () => {
+    // the data load the page starts 100 ms after mounting is not under test
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    const { storeActions, wrapper } = await mountPage()
+
+    wrapper
+      .findComponent(EstimationHelper)
+      .vm.$emit('estimation-changed', { taskId: 'task-1', estimation: 16 * 60 })
+    await flushPromises()
+
+    expect(storeActions.updateTask).toHaveBeenCalledTimes(1)
+    expect(storeActions.updateTask.mock.calls[0][1]).toEqual({
+      taskId: 'task-1',
+      data: {
+        estimation: 16 * 60,
+        start_date: '2026-08-31',
+        due_date: '2026-09-01'
+      }
+    })
+    wrapper.unmount()
+  })
+
+  // A task deleted elsewhere while its field holds a typed value: the field
+  // fires its change when its row goes away.
+  it('skips the estimation of a task that left the task map', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    const { storeActions, wrapper } = await mountPage()
+    const errorHandler = vi.fn()
+    wrapper.vm.$.appContext.config.errorHandler = errorHandler
+
+    wrapper
+      .findComponent(EstimationHelper)
+      .vm.$emit('estimation-changed', { taskId: 'task-9', estimation: 16 * 60 })
+    await flushPromises()
+
+    expect(errorHandler).not.toHaveBeenCalled()
+    expect(storeActions.updateTask).not.toHaveBeenCalled()
+    wrapper.unmount()
+  })
+
+  // Zou refuses a column named like another one of the task type: a close
+  // keeps the error, the next opening drops it.
+  describe('metadata column modal', () => {
+    const descriptor = { id: 'descriptor-1', name: 'Difficulty' }
+    // unmounted after each test, a failed one included
+    let wrapper = null
+
+    afterEach(() => {
+      wrapper?.unmount()
+      wrapper = null
+      vi.restoreAllMocks()
+    })
+
+    it.each([
+      [
+        'a new column',
+        () =>
+          wrapper
+            .findAllComponents(ButtonSimple)
+            .find(button => button.props('icon') === 'plus')
+            .vm.$emit('click')
+      ],
+      [
+        'a column edit',
+        () =>
+          wrapper
+            .findComponent(TaskList)
+            .vm.$emit('edit-metadata', descriptor.id)
+      ]
+    ])('opens %s without the error of a refused column', async (_, open) => {
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      // the data load the page starts 100 ms after mounting is not under test
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      const page = await mountPage({
+        section: 'tasks',
+        actions: {
+          addMetadataDescriptor: vi.fn(() => Promise.reject(new Error('taken')))
+        },
+        getters: {
+          currentProduction: () => ({
+            id: 'production-1',
+            name: 'Production',
+            descriptors: [descriptor]
+          })
+        }
+      })
+      wrapper = page.wrapper
+      const modal = () => wrapper.findComponent(AddMetadataModal)
+
+      await open()
+      await modal().vm.$emit('confirm', { name: 'Complexity' })
+      await flushPromises()
+      expect(modal().props('isError')).toBe(true)
+
+      await modal().vm.$emit('cancel')
+      await open()
+
+      expect(modal().props('active')).toBe(true)
+      expect(modal().props('isError')).toBe(false)
+    })
+  })
+
+  describe('task filters', () => {
+    const TaskListStub = {
+      name: 'TaskList',
+      props: { tasks: { type: Array, default: () => [] } },
+      template: '<div />',
+      methods: { resetSelection: () => {} }
+    }
+    const statusTasks = ['status-1', 'status-2', 'status-3'].map(
+      (statusId, index) => ({
+        id: `task-${index + 10}`,
+        assignees: [],
+        // task-10 on a character, the others on a prop
+        entity_id: index ? 'asset-2' : 'asset-1',
+        entity_name: 'Chair',
+        task_status_id: statusId,
+        task_type_id: 'task-type-1'
+      })
+    )
+    // unmounted after each test, a failed one included
+    let wrapper = null
+
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    })
+
+    afterEach(() => {
+      wrapper?.unmount()
+      wrapper = null
+      assetStore.cache.assetMap.delete('asset-1')
+      assetStore.cache.assetMap.delete('asset-2')
+    })
+
+    // The URL filters are read on the first load only, once the tasks
+    // arrive: 100 ms after mounting, then 200 ms more.
+    const mountTasks = async query => {
+      const page = await mountPage({
+        section: 'tasks',
+        query,
+        stubs: { TaskList: TaskListStub },
+        actions: {
+          initTaskType: vi.fn(() => {
+            assetStore.cache.assetMap.set('asset-1', {
+              id: 'asset-1',
+              asset_type_id: 'chars',
+              tasks: ['task-10']
+            })
+            assetStore.cache.assetMap.set('asset-2', {
+              id: 'asset-2',
+              asset_type_id: 'props',
+              tasks: ['task-11', 'task-12']
+            })
+          }),
+          loadScheduleItems: vi.fn(() => [])
+        },
+        getters: {
+          assetValidationColumns: () => [],
+          productionAssetTypes: () => [
+            { id: 'chars', name: 'Characters' },
+            { id: 'props', name: 'Props' }
+          ],
+          taskMap: () => new Map(statusTasks.map(t => [t.id, t])),
+          user: () => ({ id: 'manager-1', departments: [], full_name: 'M' })
+        }
+      })
+      wrapper = page.wrapper
+      await vi.advanceTimersByTimeAsync(400)
+      await flushPromises()
+    }
+
+    const listedTaskIds = () =>
+      wrapper
+        .findComponent(TaskListStub)
+        .props('tasks')
+        .map(t => t.id)
+        .sort()
+
+    it('keeps the tasks of every status the URL selects', async () => {
+      await mountTasks('?task_status_id=status-1,status-3')
+      expect(
+        wrapper.findComponent(ComboboxStatusMultiple).props('modelValue')
+      ).toEqual(['status-1', 'status-3'])
+      expect(listedTaskIds()).toEqual(['task-10', 'task-12'])
+    })
+
+    it('keeps the tasks of the asset types the URL selects', async () => {
+      await mountTasks('?asset_type_id=props')
+      expect(
+        wrapper.findComponent(ComboboxMultiple).props('modelValue')
+      ).toEqual(['props'])
+      expect(listedTaskIds()).toEqual(['task-11', 'task-12'])
+    })
+
+    it('combines the asset type and status filters', async () => {
+      await mountTasks('?asset_type_id=props&task_status_id=status-1,status-2')
+      expect(listedTaskIds()).toEqual(['task-11'])
+    })
+
+    it('lists every task again once the selection is emptied', async () => {
+      await mountTasks('?task_status_id=status-2')
+      expect(listedTaskIds()).toEqual(['task-11'])
+      await wrapper
+        .findComponent(ComboboxStatusMultiple)
+        .vm.$emit('update:model-value', [])
+      await flushPromises()
+      expect(listedTaskIds()).toEqual(['task-10', 'task-11', 'task-12'])
+    })
+  })
+
+  describe('schedule timesheets', () => {
+    const scheduleTask = {
+      id: 'task-2',
+      assignees: ['person-1'],
+      entity_id: 'asset-1',
+      entity_name: 'Chair',
+      estimation: 0,
+      start_date: '2026-10-05T00:00:00',
+      due_date: '2026-10-09T00:00:00',
+      task_status_id: 'status-1',
+      task_type_id: 'task-type-1'
+    }
+    const person = {
+      id: 'person-1',
+      first_name: 'Alice',
+      last_name: 'Smith',
+      full_name: 'Alice Smith'
+    }
+    // unmounted after each test, a failed one included
+    let wrapper = null
+
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      assetStore.cache.assetMap.set('asset-1', {
+        id: 'asset-1',
+        tasks: [scheduleTask.id]
+      })
+      localStorage.setItem(
+        'tasktype:data_display',
+        JSON.stringify({ timesheets: true })
+      )
+    })
+
+    afterEach(() => {
+      wrapper?.unmount()
+      wrapper = null
+      assetStore.cache.assetMap.delete('asset-1')
+      localStorage.removeItem('tasktype:data_display')
+    })
+
+    // the data load starts 100 ms after mounting, the schedule dates follow
+    // 200 ms after it
+    const mountSchedule = async ({
+      actions = {},
+      getters = {},
+      socket
+    } = {}) => {
+      const page = await mountPage({
+        section: 'schedule',
+        socket,
+        actions: {
+          loadProductionDaysOff: vi.fn(() => ({})),
+          loadProductionTimeSpents: vi.fn(() => ({})),
+          loadScheduleItems: vi.fn(() => [
+            {
+              id: 'schedule-item-1',
+              task_type_id: 'task-type-1',
+              start_date: '2026-10-01',
+              end_date: '2026-10-30'
+            }
+          ]),
+          saveScheduleItem: vi.fn(),
+          ...actions
+        },
+        getters: {
+          assetValidationColumns: () => [],
+          currentProduction: () => ({
+            id: 'production-1',
+            name: 'Production',
+            start_date: '2026-01-01',
+            end_date: '2026-12-31',
+            team: [person.id]
+          }),
+          personMap: () => new Map([[person.id, person]]),
+          taskMap: () => new Map([[scheduleTask.id, scheduleTask]]),
+          user: () => ({
+            id: 'manager-1',
+            departments: [],
+            full_name: 'Manager'
+          }),
+          ...getters
+        }
+      })
+      wrapper = page.wrapper
+      await vi.advanceTimersByTimeAsync(400)
+      await flushPromises()
+    }
+
+    // The timesheet stores a day logged with its preset in whole minutes, 498
+    // for 8.3 hours by day, while 8.3 * 60 makes 498.00000000000006. What it
+    // stored before keeps its float noise: 491.99999999999994 for 8.2 hours.
+    it.each([
+      [8.3, 498],
+      [8.2, 491.99999999999994]
+    ])(
+      'merges two full days in a row of %s hours',
+      async (hoursByDay, minutes) => {
+        const timeSpent = date => ({
+          id: `time-spent-${date}`,
+          date,
+          duration: minutes,
+          person_id: person.id,
+          task_id: scheduleTask.id
+        })
+        await mountSchedule({
+          actions: {
+            loadProductionTimeSpents: vi.fn(() => ({
+              [person.id]: [timeSpent('2026-10-06'), timeSpent('2026-10-05')]
+            }))
+          },
+          getters: { organisation: () => ({ hours_by_day: hoursByDay }) }
+        })
+
+        const [personRow] = wrapper
+          .findComponent({ name: 'Schedule' })
+          .props('hierarchy')
+        expect(
+          personRow.timesheet.map(({ date, duration }) => [date, duration])
+        ).toEqual([['2026-10-05', minutes * 2]])
+      }
+    )
+
+    // The store's task type follows the route: a rebuild fired once the page
+    // was left asked for the time spents of an undefined task type.
+    it('drops a remote update rebuild once the page is left', async () => {
+      const socket = { on: vi.fn(), off: vi.fn() }
+      const loadProductionTimeSpents = vi.fn(() => ({}))
+      const taskType = ref({
+        id: 'task-type-1',
+        name: 'Modeling',
+        for_entity: 'Asset'
+      })
+      await mountSchedule({
+        actions: { loadProductionTimeSpents },
+        getters: { currentTaskType: () => taskType.value },
+        socket
+      })
+      const [, onTaskUpdate] = socket.on.mock.calls.find(
+        ([event]) => event === 'task:update'
+      )
+      loadProductionTimeSpents.mockClear()
+
+      onTaskUpdate({ task_id: scheduleTask.id })
+      wrapper.unmount()
+      wrapper = null
+      taskType.value = {}
+      await vi.advanceTimersByTimeAsync(400)
+
+      expect(loadProductionTimeSpents).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('CSV import', () => {
+    // unmounted after each test, a failed one included
+    let wrapper = null
+
+    afterEach(() => {
+      wrapper?.unmount()
+      wrapper = null
+      vi.unstubAllGlobals()
+      vi.restoreAllMocks()
+    })
+
+    const buildFormData = () => {
+      const formData = new FormData()
+      formData.append('file', new File(['Asset,Estimation'], 'import.csv'))
+      return formData
+    }
+
+    const openImportModal = async () => {
+      // the data load the page starts 100 ms after mounting is not under test
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      const page = await mountPage({ section: 'tasks' })
+      wrapper = page.wrapper
+      await wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.props('icon') === 'import')
+        .vm.$emit('click')
+      return () => wrapper.findComponent(ImportModal)
+    }
+
+    it('shows the error of a file the browser cannot read', async () => {
+      vi.stubGlobal('FileReader', GoneFileReader)
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const modal = await openImportModal()
+
+      await modal().vm.$emit('confirm', buildFormData(), 'file')
+      await flushPromises()
+
+      expect(modal().props()).toMatchObject({
+        active: true,
+        isError: true,
+        isLoading: false
+      })
+    })
+
+    it('opens again without the error of an unreadable file', async () => {
+      vi.stubGlobal('FileReader', GoneFileReader)
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+      const modal = await openImportModal()
+      await modal().vm.$emit('confirm', buildFormData(), 'file')
+      await flushPromises()
+
+      await modal().vm.$emit('cancel')
+      await wrapper
+        .findAllComponents(ButtonSimple)
+        .find(button => button.props('icon') === 'import')
+        .vm.$emit('click')
+
+      expect(modal().props()).toMatchObject({ active: true, isError: false })
+    })
+
+    it('releases the modal on a bug, left to the error handler', async () => {
+      vi.stubGlobal('FileReader', BrokenFileReader)
+      const modal = await openImportModal()
+      const errorHandler = vi.fn()
+      wrapper.vm.$.appContext.config.errorHandler = errorHandler
+
+      await modal().vm.$emit('confirm', buildFormData(), 'file')
+      await flushPromises()
+
+      expect(modal().props()).toMatchObject({ isError: true, isLoading: false })
+      expect(errorHandler).toHaveBeenCalledWith(
+        expect.any(TypeError),
+        expect.anything(),
+        expect.anything()
+      )
+    })
+  })
+})

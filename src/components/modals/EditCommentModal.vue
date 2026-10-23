@@ -266,6 +266,8 @@ const isValidForm = computed(() =>
 )
 
 const runConfirmation = event => {
+  // Enter in a field lands here too, past the grayed confirm button.
+  if (!isValidForm.value) return
   if (!event || event.keyCode === 13 || !event.keyCode) {
     emit('confirm', {
       id: props.commentToEdit.id,
@@ -303,7 +305,7 @@ const reset = () => {
     form.value = {
       text: props.commentToEdit.text,
       task_status_id: props.commentToEdit.task_status_id,
-      checklist: [...props.commentToEdit.checklist],
+      checklist: [...(props.commentToEdit.checklist || [])],
       attachment_files: [...props.commentToEdit.attachment_files],
       link: props.commentToEdit.links?.[0]
     }

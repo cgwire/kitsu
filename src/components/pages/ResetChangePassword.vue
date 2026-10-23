@@ -44,11 +44,8 @@
 
         <p class="control">
           <a
-            :class="{
-              'main-button': true,
-              'is-fullwidth': true,
-              'is-loading': isLoading
-            }"
+            class="button main-button is-fullwidth"
+            :class="{ 'is-loading': isLoading }"
             role="button"
             tabindex="0"
             @click="confirmResetChangePassword"
@@ -134,6 +131,8 @@ const isNew = computed(() => route.query.type === 'new')
 // --------------------------------------------------------------------------
 
 const confirmResetChangePassword = async () => {
+  // Enter in a field submits too, whatever the button shows.
+  if (isLoading.value) return
   isError.value = false
   isFormError.value = false
   isTokenError.value = false

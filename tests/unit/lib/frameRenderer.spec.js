@@ -22,13 +22,13 @@ const createFakeVideo = () => ({ videoWidth: 1920, videoHeight: 1080 })
 
 describe('lib/players/frameRenderer', () => {
   describe('Canvas2DFrameRenderer', () => {
-    it('acquires an opaque desynchronized 2d context on construction', () => {
+    it('acquires an opaque, compositor-synchronized 2d context', () => {
+      // desynchronized presents paints through a hardware overlay on some
+      // Chrome platforms, with visible tearing; scrub seeks are held until
+      // 'seeked' anyway, so the low-latency hint bought nothing.
       const { canvas } = createFakeCanvas()
       new Canvas2DFrameRenderer(canvas, createFakeVideo())
-      expect(canvas.getContext).toHaveBeenCalledWith('2d', {
-        alpha: false,
-        desynchronized: true
-      })
+      expect(canvas.getContext).toHaveBeenCalledWith('2d', { alpha: false })
     })
 
     it('resize sets the internal bitmap resolution', () => {

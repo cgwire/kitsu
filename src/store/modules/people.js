@@ -1,12 +1,13 @@
 import peopleApi from '@/store/api/people'
+import shotsApi from '@/store/api/shots'
 import colors from '@/lib/colors'
+import { isLatestTaskComment, isPostedSince } from '@/lib/comments'
 import { populateTask, setTasksEntityPreview } from '@/lib/models'
 import { sortTasks, sortPeople, sortByName } from '@/lib/sorting'
 import { indexSearch, buildTaskIndex, buildPeopleIndex } from '@/lib/indexing'
 import { applyFilters, getFilters, getKeyWords } from '@/lib/filtering'
-import { getMonthsBetween } from '@/lib/time'
+import { getDayOffRange, getMonthsBetween, range } from '@/lib/time'
 import auth from '@/lib/auth'
-import { getDayOffRange } from '@/lib/time'
 
 import taskStatusStore from '@/store/modules/taskstatus'
 import taskStore from '@/store/modules/tasks'
@@ -32,7 +33,9 @@ import {
   SET_PERSON_TASKS_SEARCH,
   SAVE_PERSON_TASKS_SEARCH_END,
   REMOVE_PERSON_TASKS_SEARCH_END,
+  LOAD_TASK_END,
   NEW_TASK_COMMENT_END,
+  SET_TASK_LAST_COMMENT,
   ADD_SELECTED_TASK,
   REMOVE_SELECTED_TASK,
   CLEAR_SELECTED_TASKS,
@@ -126,6 +129,12 @@ const cache = {
   guests: []
 }
 
+// The timesheet sliders save on every wheel notch. The writes of a task,
+// person and day go one at a time, and a write waiting for its turn keeps only
+// the last value set: concurrent writes could land out of order, and Zou
+// answers 404 to a write whose row a concurrent delete removed.
+const timeSpentWrites = new Map()
+
 const initialState = {
   organisation: {
     name: 'Kitsu',
@@ -191,6 +200,13 @@ const state = {
   ...initialState
 }
 
+// The list lives out of the reactive state: without the version read, Vuex
+// would keep the first value of the list getters for the life of the store.
+const readPeople = state => {
+  state.personMapVersion // eslint-disable-line no-unused-expressions
+  return cache.people
+}
+
 const getters = {
   organisation: state => state.organisation,
   // floor of the timesheet year selectors: nothing was tracked before the
@@ -219,13 +235,12 @@ const getters = {
     return `/api/pictures/thumbnails/organisations/${id}.png?t=${timestamp}`
   },
 
-  people: state => cache.people,
-  peopleWithoutBot: state => cache.people.filter(person => !person.is_bot),
-  activePeople: state => cache.people.filter(person => person.active),
+  people: state => readPeople(state),
+  peopleWithoutBot: state => readPeople(state).filter(person => !person.is_bot),
+  activePeople: state => readPeople(state).filter(person => person.active),
   activePeopleWithoutBot: state =>
-    cache.people.filter(person => person.active && !person.is_bot),
+    readPeople(state).filter(person => person.active && !person.is_bot),
   displayedPeople: state => state.displayedPeople,
-  peopleIndex: state => cache.peopleIndex,
   personMap: state => {
     // Access personMapVersion to trigger reactivity when the map changes.
     state.personMapVersion // eslint-disable-line no-unused-expressions
@@ -234,7 +249,6 @@ const getters = {
   isPeopleLoading: state => state.isPeopleLoading,
   isPeopleLoadingError: state => state.isPeopleLoadingError,
   peopleSearchQueries: state => state.peopleSearchQueries,
-  peopleSearchText: state => state.peopleSearchText,
 
   guests: state => state.guests,
   isGuestsLoading: state => state.isGuestsLoading,
@@ -270,6 +284,27 @@ const getters = {
   daysOff: state => state.daysOff,
 
   userLimit: state => state.userLimit
+}
+
+// The failed requests are logged and the days off of the others merged, a
+// day off spanning two periods coming back once per period.
+const settleDaysOff = async requests => {
+  const results = await Promise.allSettled(requests)
+  const failures = results
+    .filter(({ status }) => status === 'rejected')
+    .map(({ reason }) => reason)
+  failures.forEach(reason => console.error(reason))
+  const daysOffById = new Map(
+    results
+      .filter(({ status }) => status === 'fulfilled')
+      .flatMap(({ value }) => value)
+      .map(dayOff => [dayOff.id, dayOff])
+  )
+  return {
+    daysOff: [...daysOffById.values()],
+    failures,
+    allFailed: failures.length > 0 && failures.length === results.length
+  }
 }
 
 const actions = {
@@ -478,6 +513,10 @@ const actions = {
     return peopleApi.getTimeSpentsByPeriod(personId, startDate, endDate)
   },
 
+  loadUserTimeSpentsByPeriod({}, { startDate, endDate }) {
+    return peopleApi.getUserTimeSpentsByPeriod(startDate, endDate)
+  },
+
   loadProductionTimeSpents({ rootGetters }, { taskType, startDate, endDate }) {
     return peopleApi.getProjectTimeSpentsByTaskType(
       rootGetters.currentProduction.id,
@@ -545,14 +584,28 @@ const actions = {
     commit(REMOVE_PERSON_TASKS_SEARCH_END, { searchQuery })
   },
 
-  async setTimeSpent({ commit }, { personId, taskId, date, duration }) {
-    const timeSpent = await peopleApi.setTimeSpent(
-      taskId,
-      personId,
-      date,
-      duration
-    )
-    commit(SET_TIME_SPENT, timeSpent)
+  setTimeSpent({ commit }, { personId, taskId, date, duration }) {
+    const key = `${taskId}/${personId}/${date}`
+    const last = timeSpentWrites.get(key)
+    if (last && !last.isSent) {
+      last.duration = duration
+      return last.promise
+    }
+    const write = { duration, isSent: false }
+    const previous = last?.promise.catch(() => {}) ?? Promise.resolve()
+    write.promise = previous
+      .then(() => {
+        write.isSent = true
+        return peopleApi.setTimeSpent(taskId, personId, date, write.duration)
+      })
+      .then(timeSpent => {
+        commit(SET_TIME_SPENT, timeSpent)
+      })
+      .finally(() => {
+        if (timeSpentWrites.get(key) === write) timeSpentWrites.delete(key)
+      })
+    timeSpentWrites.set(key, write)
+    return write.promise
   },
 
   setDayOff(_, { id, personId, date, end_date, description }) {
@@ -569,58 +622,45 @@ const actions = {
     commit(SET_PERSON_TASKS_SCROLL_POSITION, scrollPosition)
   },
 
+  // The studio-wide day off listing is admin-only on Zou: the year and
+  // month routes scope the persons to the ones the caller may read. The
+  // days off only tint the overtime cells: the grid stands without them.
   async loadTimesheets(
-    { commit },
+    { commit, getters },
     { detailLevel, year, month, productionId, studioId }
   ) {
     const monthString = String(month).padStart(2, '0')
-    let getTableFn
-    switch (detailLevel) {
-      case 'day':
-        getTableFn = peopleApi.getDayTable
-        break
-      case 'week':
-        getTableFn = peopleApi.getWeekTable
-        break
-      case 'year':
-        getTableFn = peopleApi.getYearTable
-        break
-      default:
-        getTableFn = peopleApi.getMonthTable
-    }
+    const getTableFn = {
+      day: peopleApi.getDayTable,
+      week: peopleApi.getWeekTable,
+      year: peopleApi.getYearTable,
+      month: peopleApi.getMonthTable
+    }[detailLevel]
     const table = await getTableFn(year, monthString, productionId, studioId)
-    // ponytail: zou only lists day offs per month or in full; the full list
-    // is fetched for the other levels, add a range endpoint if it grows
-    const dayOffs = await peopleApi.getDaysOff(
-      detailLevel === 'day' ? year : undefined,
-      detailLevel === 'day' ? monthString : undefined
-    )
-    commit(PEOPLE_SET_DAY_OFFS, dayOffs)
     commit(PEOPLE_TIMESHEET_LOADED, table)
+    const years =
+      detailLevel === 'year'
+        ? range(getters.firstTimesheetYear, new Date().getFullYear())
+        : [year]
+    const { daysOff } = await settleDaysOff(
+      detailLevel === 'day'
+        ? [peopleApi.getDaysOff(year, monthString)]
+        : years.map(columnYear => peopleApi.getDaysOff(columnYear))
+    )
+    commit(PEOPLE_SET_DAY_OFFS, daysOff)
   },
 
   // Month by month: Zou keeps the studio-wide listing for the admins, the
   // month route scopes the persons to the ones the caller may read. A
   // failed month only loses its own days off.
   async loadDaysOff({ commit }, { startDate, endDate }) {
-    const results = await Promise.allSettled(
+    const { daysOff, failures, allFailed } = await settleDaysOff(
       getMonthsBetween(startDate, endDate).map(({ year, month }) =>
         peopleApi.getDaysOff(year, String(month).padStart(2, '0'))
       )
     )
-    const failures = results.filter(({ status }) => status === 'rejected')
-    if (failures.length > 0 && failures.length === results.length) {
-      throw failures[0].reason
-    }
-    failures.forEach(({ reason }) => console.error(reason))
-    // a day off spanning two months comes back once per month
-    const daysOffById = new Map(
-      results
-        .filter(({ status }) => status === 'fulfilled')
-        .flatMap(({ value }) => value)
-        .map(dayOff => [dayOff.id, dayOff])
-    )
-    commit(PEOPLE_SET_DAYS_OFF, [...daysOffById.values()])
+    if (allFailed) throw failures[0]
+    commit(PEOPLE_SET_DAYS_OFF, daysOff)
   },
 
   loadProductionDaysOff({ rootGetters }, { startDate, endDate }) {
@@ -658,13 +698,26 @@ const actions = {
     commit(REMOVE_PEOPLE_SEARCH_END, { searchQuery })
   },
 
+  loadPersonQuotas(_, { productionId, personId, computeMode }) {
+    return shotsApi.getPersonQuotas(productionId, personId, computeMode)
+  },
+
   getPersonQuotaShots(
-    { rootGetters },
-    { taskTypeId, detailLevel, personId, year, month, week, day, computeMode }
+    _,
+    {
+      productionId,
+      taskTypeId,
+      detailLevel,
+      personId,
+      year,
+      month,
+      week,
+      day,
+      computeMode
+    }
   ) {
-    const production = rootGetters.currentProduction
     return peopleApi.getPersonQuotaShots(
-      production.id,
+      productionId,
       taskTypeId,
       personId,
       detailLevel,
@@ -752,12 +805,8 @@ const mutations = {
 
   [DELETE_PEOPLE_END](state, person) {
     if (person) {
-      const personToDeleteIndex = cache.people.findIndex(
-        ({ id }) => id === person.id
-      )
-      if (personToDeleteIndex >= 0) {
-        cache.people.splice(personToDeleteIndex, 1)
-      }
+      // A new list: readers of the same array would miss the deletion.
+      cache.people = cache.people.filter(({ id }) => id !== person.id)
       cache.personMap.delete(person.id)
     }
     state.personMapVersion++
@@ -919,18 +968,47 @@ const mutations = {
 
   [NEW_TASK_COMMENT_END](state, { comment, taskId }) {
     const task = state.personTasks.find(task => task.id === taskId)
+    // A status created after the context is missing from the store.
+    const taskStatus = helpers.getTaskStatus(comment.task_status_id)
 
-    if (task) {
-      const taskStatus = helpers.getTaskStatus(comment.task_status_id)
-
+    if (task && taskStatus && isLatestTaskComment(task, comment)) {
       Object.assign(task, {
         task_status_id: taskStatus.id,
         task_status_name: taskStatus.name,
         task_status_short_name: taskStatus.short_name,
-        task_status_color: taskStatus.color
+        task_status_color: taskStatus.color,
+        last_comment: comment,
+        last_comment_date: comment.created_at || task.last_comment_date
       })
 
       cache.personTasksIndex = buildTaskIndex(state.personTasks)
+    }
+  },
+
+  // A task reloads on each update Zou announces, the reset that follows a
+  // comment deletion included: the person task takes its status and last
+  // comment date.
+  [LOAD_TASK_END](state, loadedTask) {
+    const task = state.personTasks.find(task => task.id === loadedTask.id)
+    const taskStatus = helpers.getTaskStatus(loadedTask.task_status_id)
+
+    if (task && taskStatus) {
+      Object.assign(task, {
+        task_status_id: taskStatus.id,
+        task_status_name: taskStatus.name,
+        task_status_short_name: taskStatus.short_name,
+        task_status_color: taskStatus.color,
+        last_comment_date: loadedTask.last_comment_date
+      })
+
+      cache.personTasksIndex = buildTaskIndex(state.personTasks)
+    }
+  },
+
+  [SET_TASK_LAST_COMMENT](state, { taskId, commentId, comment }) {
+    const task = state.personTasks.find(task => task.id === taskId)
+    if (task && !isPostedSince(task.last_comment, comment, commentId)) {
+      task.last_comment = comment || {}
     }
   },
 

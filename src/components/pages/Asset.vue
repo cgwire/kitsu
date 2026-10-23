@@ -1,5 +1,9 @@
 <template>
-  <div class="columns fixed-page asset xyz-in" xyz="fade">
+  <div
+    class="columns fixed-page asset xyz-in"
+    xyz="fade"
+    v-if="currentProduction"
+  >
     <div class="page column main-column">
       <div class="page-header flexrow">
         <router-link
@@ -102,7 +106,7 @@
               <button-simple
                 icon="edit"
                 :title="$t('assets.edit_title')"
-                @click="modals.edit = true"
+                @click="showEditModal"
                 v-if="isCurrentUserManager"
               />
             </div>
@@ -148,7 +152,7 @@
                 <page-subtitle
                   class="flexrow-item"
                   :text="
-                    $t('assets.casted_in_shots', { nbShots: nbShotsCastedIn })
+                    $t('assets.casted_in_shots', { count: nbShotsCastedIn })
                   "
                 />
                 <div class="filler"></div>
@@ -385,10 +389,9 @@
           />
           <div class="concept-list mt1" v-if="filteredLinkedConcepts.length">
             <concept-card
-              class="concept"
-              :class="{ selected: currentConcept?.id === concept.id }"
               :key="'concept-' + concept.id"
               :concept="concept"
+              :selected="currentConcept?.id === concept.id"
               @click="selectConcept(concept)"
               v-for="concept in filteredLinkedConcepts"
             />
@@ -455,7 +458,12 @@
       :class="{ 'is-open': isTaskDrawerOpen }"
       v-show="currentSection === 'infos'"
     >
-      <task-info :task="currentTask" entity-type="Asset" with-actions>
+      <task-info
+        v-if="clientAccess.isTaskPanelVisible"
+        :task="currentTask"
+        entity-type="Asset"
+        with-actions
+      >
         <entity-news class="news-column" :entity="currentAsset" />
       </task-info>
     </div>
@@ -479,7 +487,11 @@
       >
         <x-icon :size="20" />
       </button>
-      <task-info entity-type="Concept" :task="currentConceptTask" />
+      <task-info
+        v-if="clientAccess.isTaskPanelVisible"
+        entity-type="Concept"
+        :task="currentConceptTask"
+      />
     </div>
 
     <view-playlist-modal
@@ -512,13 +524,21 @@ import {
   ImageIcon,
   XIcon
 } from 'lucide-vue-next'
-import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
+import {
+  computed,
+  defineAsyncComponent,
+  nextTick,
+  onMounted,
+  reactive,
+  ref,
+  watch
+} from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { useCastingView } from '@/composables/castingView'
-import { useEntity } from '@/composables/entity'
+import { isListOfPageLoaded, useEntity } from '@/composables/entity'
 import { sortByName } from '@/lib/sorting'
 import assetStore from '@/store/modules/assets'
 
@@ -527,7 +547,6 @@ import DescriptionCell from '@/components/cells/DescriptionCell.vue'
 import CastingList from '@/components/lists/CastingList.vue'
 import EntityTaskList from '@/components/lists/EntityTaskList.vue'
 import EditAssetModal from '@/components/modals/EditAssetModal.vue'
-import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal.vue'
 import EntityChat from '@/components/pages/entities/EntityChat.vue'
 import EntityNews from '@/components/pages/entities/EntityNews.vue'
 import EntityOutputFiles from '@/components/pages/entities/EntityOutputFiles.vue'
@@ -549,11 +568,16 @@ import TableInfo from '@/components/widgets/TableInfo.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 /* eslint-enable no-unused-vars */
 
+const ViewPlaylistModal = defineAsyncComponent(
+  () => import('@/components/modals/ViewPlaylistModal.vue')
+)
+
 defineOptions({ name: 'asset' })
 
 const { t } = useI18n()
 const route = useRoute()
 const store = useStore()
+const clientAccess = computed(() => store.getters.clientAccess)
 
 // State
 // --------------------------------------------------------------------------
@@ -586,7 +610,11 @@ const taskMap = computed(() => store.getters.taskMap)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
 
-const entityList = computed(() => assetStore.cache.assets)
+// The list of the page, once loaded: a load replaces the cached array out of
+// sight of Vue, and its scope and loading flag have it read again.
+const entityList = computed(() =>
+  isListOfPageLoaded(store.getters, 'asset') ? assetStore.cache.assets : []
+)
 
 const title = computed(() =>
   currentAsset.value
@@ -649,7 +677,7 @@ const filteredLinkedConcepts = computed(() =>
   currentConceptStatus.value
     ? linkedConcepts.value.filter(
         concept =>
-          concept.tasks[0].task_status_id === currentConceptStatus.value
+          concept.tasks[0]?.task_status_id === currentConceptStatus.value
       )
     : linkedConcepts.value
 )
@@ -744,6 +772,12 @@ const shotPath = shot => ({
   query: { section: 'casting' }
 })
 
+// Close leaves the error of the last save: opening drops it.
+const showEditModal = () => {
+  errors.edit = false
+  modals.edit = true
+}
+
 const confirmEditAsset = async form => {
   const data = { ...form, id: currentAsset.value.id }
   loading.edit = true
@@ -802,7 +836,15 @@ const {
   tasksEndDate,
   onTaskSelected,
   saveTaskScheduleItem
-} = useEntity({ type: 'asset', currentEntity: currentAsset, entityList, init })
+} = useEntity({
+  type: 'asset',
+  currentEntity: currentAsset,
+  entityList,
+  init,
+  // The list loaded holds its own object for the asset, the one the store
+  // updates from then on.
+  loadList: () => store.dispatch('loadAssets').then(resetData)
+})
 
 // Watchers
 // --------------------------------------------------------------------------
@@ -919,10 +961,11 @@ h2.subtitle {
 
 .concept-list {
   color: var(--text);
-  display: flex;
-  flex-wrap: wrap;
-  padding-bottom: 1em;
-  gap: 10px;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  // room for the selection ring and the hover lift of the cards
+  padding: 4px 4px 1em;
 }
 
 .casting-card {
@@ -1162,19 +1205,6 @@ h2.subtitle {
 
 .news-column {
   max-height: 85%;
-}
-
-.concept {
-  border: 5px solid transparent;
-  cursor: pointer;
-  transition: border 0.2s linear;
-  &:hover {
-    border: 5px solid var(--background-selectable);
-  }
-}
-
-.selected {
-  border: 5px solid var(--background-selected);
 }
 
 .drawer-close,

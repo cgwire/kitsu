@@ -1,114 +1,382 @@
-import { vi } from 'vitest'
+import { flushPromises } from '@vue/test-utils'
+import { reactive } from 'vue'
 
-// Importing the assets page transitively pulls in the root store
-// (lib/models → timezone → @/store); stub it so no Vuex store is built.
 vi.mock('@/store', () => ({ default: {} }))
+vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 
+import DeleteModal from '@/components/modals/DeleteModal.vue'
+import EditAssetModal from '@/components/modals/EditAssetModal.vue'
+import ImportModal from '@/components/modals/ImportModal.vue'
 import Assets from '@/components/pages/Assets.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
 
-describe('Assets page, reloadEpisodeAssetsIfNeeded', () => {
-  const production = { id: 'p' }
+import {
+  allVisible,
+  buildAddThumbnailsModalStub,
+  mountEntityPage,
+  production
+} from '../../fixtures/entity-page'
+import { BrokenFileReader, GoneFileReader } from '../../fixtures/file-reader'
 
-  // The method only reads its component instance, so a plain object is
-  // enough to exercise the staleness decision without mounting the page.
-  const buildContext = (overrides = {}) => ({
-    currentProduction: production,
-    currentEpisode: null,
-    isTVShow: false,
-    assetsLoadingKey: 'p/',
-    isAssetsLoading: false,
-    initialLoading: false,
-    loadAssets: vi.fn(() => Promise.resolve()),
-    applySearchFromUrl: vi.fn(),
-    $refs: {},
-    $store: { commit: vi.fn() },
-    ...overrides
+// Two assets with their tasks in the store: the page decides on mount
+// whether their scope (episode) is the displayed one.
+const asset = id => ({
+  id,
+  project_id: production.id,
+  validations: new Map([['task-type-1', 'task-1']])
+})
+const assetMap = new Map([
+  ['asset-1', asset('asset-1')],
+  ['asset-2', asset('asset-2')]
+])
+
+const mountPage = async getters => {
+  const page = await mountEntityPage(Assets, {
+    listName: 'AssetList',
+    getters: { assetMap, assetValidationColumns: ['task-type-1'], ...getters }
+  })
+  await flushPromises()
+  return page.dispatched('loadAssets')
+}
+
+describe('Assets page, reload of another episode', () => {
+  test('reloads when the store holds another episode', async () => {
+    const loads = await mountPage({
+      isTVShow: true,
+      currentEpisode: { id: 'ep-b' },
+      assetsLoadingKey: `${production.id}/ep-a`
+    })
+
+    expect(loads).toHaveLength(1)
   })
 
-  const run = context => {
-    Assets.methods.reloadEpisodeAssetsIfNeeded.call(context)
-    return context
+  test('reloads when the store holds the production-wide dataset', async () => {
+    const loads = await mountPage({
+      isTVShow: true,
+      currentEpisode: { id: 'ep-a' },
+      assetsLoadingKey: `${production.id}/all`
+    })
+
+    expect(loads).toHaveLength(1)
+  })
+
+  test('does not reload when the store holds the displayed episode', async () => {
+    const loads = await mountPage({
+      isTVShow: true,
+      currentEpisode: { id: 'ep-a' },
+      assetsLoadingKey: `${production.id}/ep-a`
+    })
+
+    expect(loads).toHaveLength(0)
+  })
+
+  test.each(['all', 'main'])(
+    'does not reload the %s pseudo-episode already loaded',
+    async episodeId => {
+      const loads = await mountPage({
+        isTVShow: true,
+        currentEpisode: { id: episodeId },
+        assetsLoadingKey: `${production.id}/${episodeId}`
+      })
+
+      expect(loads).toHaveLength(0)
+    }
+  )
+
+  test('does not reload on a production without episodes', async () => {
+    const loads = await mountPage({
+      currentEpisode: { id: 'ep-a' },
+      assetsLoadingKey: `${production.id}/`
+    })
+
+    expect(loads).toHaveLength(0)
+  })
+})
+
+describe('Assets page, restore', () => {
+  test('shows the error of a failed restore in its modal', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { wrapper } = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      actions: { restoreAsset: () => Promise.reject(new Error('down')) }
+    })
+    await flushPromises()
+    await wrapper
+      .findComponent({ name: 'AssetList' })
+      .vm.$emit('restore-clicked', { id: 'asset-1', name: 'Tree' })
+    const modal = () =>
+      wrapper.findAllComponents(DeleteModal).find(modal => modal.props('active'))
+
+    await modal().vm.$emit('confirm')
+    await flushPromises()
+
+    expect(modal().props('isError')).toBe(true)
+  })
+})
+
+describe('Assets page, thumbnails import', () => {
+  test('opens the modal and marks each asset while its preview uploads', async () => {
+    const modalStub = buildAddThumbnailsModalStub()
+    const { wrapper } = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters: { isCurrentUserProductionManager: true },
+      actions: {
+        commentTaskWithPreview: () => ({ preview: { id: 'preview-1' } })
+      },
+      stubs: { AddThumbnailsModal: modalStub }
+    })
+    const modal = () => wrapper.findComponent({ name: 'AddThumbnailsModal' })
+
+    await wrapper
+      .findAllComponents(ButtonSimple)
+      .find(button => button.props('icon') === 'import-files')
+      .vm.$emit('click')
+    expect(modal().exists()).toBe(true)
+
+    await modal().vm.$emit('confirm', [
+      { task: { id: 'task-1', entity_id: 'asset-1' } }
+    ])
+    await flushPromises()
+
+    expect(modalStub.methods.markLoading).toHaveBeenCalledWith('asset-1')
+    expect(modalStub.methods.markUploaded).toHaveBeenCalledWith('asset-1')
+  })
+
+  test('uploads each thumbnail as the only file of its comment', async () => {
+    const commentTaskWithPreview = vi.fn(() => ({
+      preview: { id: 'preview-1' }
+    }))
+    const { wrapper } = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters: { isCurrentUserProductionManager: true },
+      actions: { commentTaskWithPreview },
+      stubs: { AddThumbnailsModal: buildAddThumbnailsModalStub() }
+    })
+    const form = {
+      task: { id: 'task-1', entity_id: 'asset-1', task_status_id: 'status-1' }
+    }
+
+    await wrapper
+      .findAllComponents(ButtonSimple)
+      .find(button => button.props('icon') === 'import-files')
+      .vm.$emit('click')
+    await wrapper
+      .findComponent({ name: 'AddThumbnailsModal' })
+      .vm.$emit('confirm', [form])
+    await flushPromises()
+
+    expect(commentTaskWithPreview).toHaveBeenCalledWith(
+      expect.objectContaining({ taskId: 'task-1', forms: [form] })
+    )
+  })
+})
+
+describe('Assets page, CSV import', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.restoreAllMocks()
+  })
+
+  const openImportModal = async () => {
+    const { wrapper } = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters: { isCurrentUserProductionManager: true }
+    })
+    await wrapper
+      .findAllComponents(ButtonSimple)
+      .find(button => button.props('icon') === 'import')
+      .vm.$emit('click')
+    return { wrapper, modal: () => wrapper.findComponent(ImportModal) }
   }
 
-  test('reloads when the store holds another episode', () => {
-    const context = run(
-      buildContext({
-        isTVShow: true,
-        currentEpisode: { id: 'ep-b' },
-        assetsLoadingKey: 'p/ep-a'
-      })
-    )
+  const buildFormData = () => {
+    const formData = new FormData()
+    formData.append('file', new File(['Type,Name'], 'import.csv'))
+    return formData
+  }
 
-    expect(context.loadAssets).toHaveBeenCalled()
-    expect(context.initialLoading).toBe(true)
+  // Zou reads the English names only: it drops a translated column without
+  // a word.
+  test('keeps the names Zou reads for the optional columns', async () => {
+    const getters = reactive({
+      currentProduction: production,
+      isCurrentUserProductionManager: true
+    })
+    const { wrapper } = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters
+    })
+
+    getters.currentProduction = { ...production, id: 'production-2' }
+    await flushPromises()
+
+    expect(wrapper.findComponent(ImportModal).props('optionalColumns')).toEqual(
+      ['Description', 'Ready for', 'Resolution']
+    )
   })
 
-  test('reloads when the store holds the production-wide dataset', () => {
-    // Assets cast in from other episodes are legitimate rows of an episode
-    // load, so only the recorded scope tells an All dataset from an episode
-    // one: the rows themselves cannot.
-    const context = run(
-      buildContext({
-        isTVShow: true,
-        currentEpisode: { id: 'ep-a' },
-        assetsLoadingKey: 'p/all'
-      })
-    )
+  test('leaves the ready for column out of a paper production', async () => {
+    const { wrapper } = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters: { isPaperProduction: true }
+    })
 
-    expect(context.loadAssets).toHaveBeenCalled()
+    expect(wrapper.findComponent(ImportModal).props('optionalColumns')).toEqual(
+      ['Description', 'Resolution']
+    )
   })
 
-  test('does not reload when the store holds the displayed episode', () => {
-    const context = run(
-      buildContext({
-        isTVShow: true,
-        currentEpisode: { id: 'ep-a' },
-        assetsLoadingKey: 'p/ep-a'
-      })
-    )
+  test('shows the error of a file the browser cannot read', async () => {
+    vi.stubGlobal('FileReader', GoneFileReader)
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { modal } = await openImportModal()
 
-    expect(context.loadAssets).not.toHaveBeenCalled()
-    expect(context.initialLoading).toBe(false)
+    await modal().vm.$emit('confirm', buildFormData(), 'file')
+    await flushPromises()
+
+    expect(modal().props()).toMatchObject({
+      active: true,
+      isError: true,
+      isLoading: false
+    })
   })
 
-  test('does not reload for the all and main pseudo-episodes already loaded', () => {
-    const all = run(
-      buildContext({
-        isTVShow: true,
-        currentEpisode: { id: 'all' },
-        assetsLoadingKey: 'p/all'
-      })
-    )
-    const main = run(
-      buildContext({
-        isTVShow: true,
-        currentEpisode: { id: 'main' },
-        assetsLoadingKey: 'p/main'
-      })
-    )
+  test('releases the modal on a bug, left to the error handler', async () => {
+    vi.stubGlobal('FileReader', BrokenFileReader)
+    const { wrapper, modal } = await openImportModal()
+    const errorHandler = vi.fn()
+    wrapper.vm.$.appContext.config.errorHandler = errorHandler
 
-    expect(all.loadAssets).not.toHaveBeenCalled()
-    expect(main.loadAssets).not.toHaveBeenCalled()
+    await modal().vm.$emit('confirm', buildFormData(), 'file')
+    await flushPromises()
+
+    expect(modal().props()).toMatchObject({ isError: true, isLoading: false })
+    expect(errorHandler).toHaveBeenCalledWith(
+      expect.any(TypeError),
+      expect.anything(),
+      expect.anything()
+    )
+  })
+})
+
+describe('Assets page, department filter', () => {
+  // The page saves the selected department as a preference.
+  afterEach(() => localStorage.clear())
+
+  test('hands the selected department to the list', async () => {
+    const { wrapper } = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters: { departments: [{ id: 'department-1', name: 'Modeling' }] }
+    })
+
+    await wrapper
+      .findComponent(ComboboxDepartment)
+      .vm.$emit('update:modelValue', 'department-1')
+    await flushPromises()
+
+    expect(
+      wrapper.findComponent({ name: 'AssetList' }).props('departmentFilter')
+    ).toEqual(['department-1'])
+  })
+})
+
+describe('Assets page, edit modal messages', () => {
+  afterEach(() => vi.restoreAllMocks())
+
+  // The real modal: a confirm and stay calls its focusName.
+  const mountModal = async actions => {
+    const { wrapper } = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters: { isCurrentUserProductionManager: true },
+      actions,
+      stubs: { EditAssetModal: false }
+    })
+    const newButton = wrapper
+      .findAllComponents(ButtonSimple)
+      .find(button => button.props('icon') === 'plus')
+    return { newButton, modal: () => wrapper.findComponent(EditAssetModal) }
+  }
+
+  // Close keeps the messages of the last save: opening drops them.
+  test('opens without the error of a past failed creation', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { newButton, modal } = await mountModal({
+      newAsset: () => Promise.reject(new Error('down'))
+    })
+
+    await newButton.vm.$emit('click')
+    await modal().vm.$emit('confirm', { name: 'Hero' })
+    await flushPromises()
+    expect(modal().props('isError')).toBe(true)
+
+    await modal().vm.$emit('cancel')
+    await newButton.vm.$emit('click')
+
+    expect(modal().props('active')).toBe(true)
+    expect(modal().props('isError')).toBe(false)
   })
 
-  test('does not reload on a production without episodes', () => {
-    const context = run(
-      buildContext({
-        // A stale currentEpisode left by a previous TV show must not make an
-        // episode-less production look out of scope.
-        currentEpisode: { id: 'ep-a' },
-        assetsLoadingKey: 'p/'
-      })
-    )
+  test('opens without the success of a past confirm and stay', async () => {
+    const { newButton, modal } = await mountModal()
 
-    expect(context.loadAssets).not.toHaveBeenCalled()
+    await newButton.vm.$emit('click')
+    await modal().vm.$emit('confirm-and-stay', { name: 'Hero' })
+    await flushPromises()
+    expect(modal().props('isSuccess')).toBe(true)
+
+    await modal().vm.$emit('cancel')
+    await newButton.vm.$emit('click')
+
+    expect(modal().props('active')).toBe(true)
+    expect(modal().props('isSuccess')).toBe(false)
+  })
+})
+
+describe('Assets page, client access', () => {
+  const hideTaskTypeAndPanel = {
+    clientAccess: {
+      ...allVisible,
+      isTaskPanelVisible: false,
+      isTaskTypeVisible: id => id !== 'task-type-1'
+    }
+  }
+
+  test('drops the hidden task type columns', async () => {
+    const { wrapper } = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters: { assetValidationColumns: ['task-type-1', 'task-type-2'] }
+    })
+    expect(
+      wrapper.findComponent({ name: 'AssetList' }).props('validationColumns')
+    ).toEqual(['task-type-1', 'task-type-2'])
+
+    const client = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters: {
+        assetValidationColumns: ['task-type-1', 'task-type-2'],
+        ...hideTaskTypeAndPanel
+      }
+    })
+    expect(
+      client.wrapper.findComponent({ name: 'AssetList' }).props(
+        'validationColumns'
+      )
+    ).toEqual(['task-type-2'])
   })
 
-  test('does nothing while no production is set', () => {
-    const context = run(
-      buildContext({ currentProduction: null, assetsLoadingKey: null })
-    )
+  test('keeps the side panel closed when the task panel is hidden', async () => {
+    const open = { nbSelectedTasks: 1 }
+    const shown = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters: open
+    })
+    expect(shown.wrapper.find('#side-column').isVisible()).toBe(true)
 
-    expect(context.loadAssets).not.toHaveBeenCalled()
+    const hidden = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters: { ...open, ...hideTaskTypeAndPanel }
+    })
+    expect(hidden.wrapper.find('#side-column').isVisible()).toBe(false)
   })
 })

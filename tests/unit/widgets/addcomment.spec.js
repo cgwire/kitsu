@@ -1,4 +1,4 @@
-import { reactive } from 'vue'
+import { nextTick, reactive } from 'vue'
 import { shallowMount } from '@vue/test-utils'
 import { createStore } from 'vuex'
 import { createRouter, createWebHistory } from 'vue-router'
@@ -33,7 +33,7 @@ const makeFormWithFile = name => {
 }
 
 describe('AddComment', () => {
-  let store, wrapper, draftComment
+  let store, wrapper, draftComment, clearedProgress
 
   const taskStatusList = [
     {
@@ -64,8 +64,9 @@ describe('AddComment', () => {
     project_id: 'production-1'
   }
 
-  beforeEach(async () => {
+  const mountComment = async (getterOverrides = {}) => {
     draftComment = makeDraftComment()
+    clearedProgress = []
 
     store = createStore({
       strict: true,
@@ -96,10 +97,11 @@ describe('AddComment', () => {
           new Map([
             ['task-type-1', { id: 'task-type-1', name: 'Animation' }]
           ]),
-        uploadProgress: () => ({})
+        uploadProgress: () => ({}),
+        ...getterOverrides
       },
       mutations: {
-        CLEAR_UPLOAD_PROGRESS: () => {}
+        CLEAR_UPLOAD_PROGRESS: (state, names) => clearedProgress.push(names)
       }
     })
 
@@ -130,11 +132,9 @@ describe('AddComment', () => {
         }
       }
     })
-  })
+  }
 
-  it('mounts successfully', () => {
-    expect(wrapper.exists()).toBe(true)
-  })
+  beforeEach(() => mountComment())
 
   it('renders the status tab as active by default', () => {
     const tabs = wrapper.findAll('.tab-row span')
@@ -148,6 +148,13 @@ describe('AddComment', () => {
     expect(draftComment.mode).toBe('publish')
   })
 
+  it('keeps the publish tab from a client', async () => {
+    wrapper.unmount()
+    await mountComment({ isCurrentUserClient: () => true })
+    expect(wrapper.findAll('.tab-row span')).toHaveLength(1)
+    expect(draftComment.mode).toBe('status')
+  })
+
   it('has the comment input area in status mode', () => {
     // at-ta wraps the comment textarea. Verify the comment area exists.
     const html = wrapper.html()
@@ -156,20 +163,19 @@ describe('AddComment', () => {
     ).toBe(true)
   })
 
-  it('updates draft text via exposed API', () => {
-    draftComment.text = 'Great work!'
-    expect(draftComment.text).toBe('Great work!')
-  })
-
-  it('shows post button', () => {
-    const postButton = wrapper.find('.post-button')
-    expect(postButton.exists()).toBe(true)
-  })
-
   it('emits add-comment when post button is clicked in status mode', async () => {
     const postButton = wrapper.find('.post-button')
     await postButton.trigger('click')
     expect(wrapper.emitted('add-comment')).toBeTruthy()
+  })
+
+  // The extra preview modal of the panel may upload at the same time.
+  it('clears the progress of its own files only when it publishes', async () => {
+    await wrapper.setProps({ previewForms: [makeFormWithFile('sh010.mp4')] })
+
+    await wrapper.find('.post-button').trigger('click')
+
+    expect(clearedProgress).toEqual([['sh010.mp4']])
   })
 
   describe('exposed methods', () => {
@@ -184,6 +190,19 @@ describe('AddComment', () => {
       expect(draftComment.checklist).toEqual([])
       expect(draftComment.link).toBeNull()
       expect(draftComment.nextRevision).toBeUndefined()
+    })
+
+    // Zou keeps a null checklist on the comments that predate the column.
+    it('setValue reads a null checklist as an empty one', async () => {
+      await wrapper.vm.setValue({
+        text: 'Client note',
+        checklist: null,
+        attachment_files: []
+      })
+      await nextTick()
+
+      expect(draftComment.text).toBe('Client note')
+      expect(draftComment.checklist).toEqual([])
     })
   })
 
@@ -307,6 +326,33 @@ describe('AddComment', () => {
       await wrapper.trigger('dragover')
       await wrapper.trigger('dragleave')
       expect(wrapper.classes()).not.toContain('is-dragging')
+    })
+
+    const dropFileOn = element => {
+      const event = new Event('drop', { bubbles: true })
+      event.dataTransfer = { files: [new File([''], 'notes.txt')] }
+      element.dispatchEvent(event)
+    }
+
+    it('attaches a file dropped on an icon stroke', () => {
+      const svgNamespace = 'http://www.w3.org/2000/svg'
+      const icon = document.createElementNS(svgNamespace, 'svg')
+      const stroke = document.createElementNS(svgNamespace, 'path')
+      icon.appendChild(stroke)
+      wrapper.find('.button-row').element.appendChild(icon)
+      dropFileOn(stroke)
+      expect(draftComment.attachments).toHaveLength(1)
+    })
+
+    it('ignores a drop handled by the attachment modal', () => {
+      const modalBox = document.createElement('div')
+      modalBox.className = 'box attachment-modal-box'
+      const dropMask = document.createElement('div')
+      dropMask.id = 'drop-mask'
+      modalBox.appendChild(dropMask)
+      wrapper.element.appendChild(modalBox)
+      dropFileOn(dropMask)
+      expect(draftComment.attachments).toHaveLength(0)
     })
   })
 })

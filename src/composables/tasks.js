@@ -17,9 +17,10 @@ export const useTaskHelpers = () => {
   // Task cards link the task type scoped to an episode: tvshow tasks
   // without one fall back to the production's first episode.
   const getTaskType = task => {
-    const taskType = { ...taskTypeMap.value.get(task.task_type_id) }
+    const entry = taskTypeMap.value.get(task.task_type_id)
+    if (!entry) return null
     const production = productionMap.value.get(task.project_id)
-    taskType.episode_id = task.episode_id
+    const taskType = { ...entry, episode_id: task.episode_id }
     if (production?.production_type === 'tvshow' && !task.episode_id) {
       taskType.episode_id = production.first_episode_id
     }

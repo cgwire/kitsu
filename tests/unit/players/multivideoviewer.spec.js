@@ -52,6 +52,7 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
     vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(
       fakeContext
     )
+    vi.spyOn(HTMLMediaElement.prototype, 'pause').mockImplementation(() => {})
     fakeContext.drawImage.mockClear()
     HTMLMediaElement.prototype.load = vi.fn()
     installRvfcMock()
@@ -101,6 +102,8 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
       'resetPanZoom',
       'resumePanZoom',
       'setPanZoom',
+      'panBy',
+      'zoomAt',
       'getDisplaySurface'
     ]
     exposed.forEach(name => {
@@ -144,6 +147,44 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
     tick2()
     expect(fakeContext.drawImage).toHaveBeenCalled()
 
+    wrapper.unmount()
+  })
+
+  // A closed viewer keeps its decoders loading: their metadata restarted the
+  // render loop, which never stops on a detached video without rVFC.
+  it('starts no render loop for the metadata of a closed viewer', async () => {
+    const wrapper = mountViewer()
+    wrapper.vm.loadEntity(0)
+    await wrapper.vm.$nextTick()
+    const decoder = wrapper.find('video.playlist-movie-decoder').element
+    wrapper.unmount()
+    const registered = rvfcCallbacks.length
+
+    decoder.dispatchEvent(new Event('loadedmetadata'))
+
+    expect(rvfcCallbacks.length).toBe(registered)
+  })
+
+  // A closed comparison empties its viewer: decoders left with their movies
+  // went on downloading them, or playing one, hidden.
+  it('releases its movies when its entities go', async () => {
+    vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
+    const wrapper = mountViewer()
+    wrapper.vm.loadEntity(0)
+    await wrapper.vm.$nextTick()
+    const player = wrapper.vm.currentPlayer
+    wrapper.vm.play()
+    HTMLMediaElement.prototype.pause.mockClear()
+
+    await wrapper.setProps({ entities: [] })
+
+    wrapper.findAll('video.playlist-movie-decoder').forEach(({ element }) => {
+      expect(element.hasAttribute('src')).toBe(false)
+      expect(HTMLMediaElement.prototype.load.mock.contexts).toContain(element)
+    })
+    expect(HTMLMediaElement.prototype.pause.mock.contexts).toContain(player)
+    expect(wrapper.vm.isPlaying).toBe(false)
+    expect(rvfcCancelled).toHaveLength(1)
     wrapper.unmount()
   })
 
@@ -225,5 +266,207 @@ describe('players/MultiVideoViewer (canvas pipeline)', () => {
     expect(countAfter).toBe(countBefore)
 
     wrapper.unmount()
+  })
+
+  describe('scrub seeks', () => {
+    const mountSeekingViewer = async () => {
+      const wrapper = mountViewer()
+      wrapper.vm.loadEntity(0)
+      await wrapper.vm.$nextTick()
+      const player = wrapper.vm.currentPlayer
+      Object.defineProperty(player, 'currentTime', {
+        value: 0,
+        writable: true,
+        configurable: true
+      })
+      Object.defineProperty(player, 'duration', {
+        value: 10,
+        configurable: true
+      })
+      Object.defineProperty(player, 'seeking', {
+        value: true,
+        writable: true,
+        configurable: true
+      })
+      return { wrapper, player }
+    }
+
+    it('holds the latest target while a seek is in flight', async () => {
+      // A seek per mousemove aborts the in-flight one, so no frame lands
+      // until the cursor stops. Waiting for 'seeked' lets frames show.
+      const { wrapper, player } = await mountSeekingViewer()
+      wrapper.vm.setCurrentFrame(10)
+      wrapper.vm.setCurrentFrame(20)
+      expect(player.currentTime).toBe(0)
+      expect(wrapper.emitted('frame-update').at(-1)).toEqual([20])
+      player.seeking = false
+      player.dispatchEvent(new Event('seeked'))
+      expect(player.currentTime).toBeCloseTo(20 / 25 + 0.001)
+      wrapper.unmount()
+    })
+
+    it('reports the held target as the current time', async () => {
+      // The comparison player syncs on getCurrentTimeRaw().
+      const { wrapper } = await mountSeekingViewer()
+      wrapper.vm.setCurrentFrame(20)
+      expect(wrapper.vm.getCurrentTimeRaw()).toBeCloseTo(20 / 25 + 0.001)
+      wrapper.unmount()
+    })
+
+    it('pauses on the held target and drops it', async () => {
+      const { wrapper, player } = await mountSeekingViewer()
+      wrapper.vm.setCurrentFrame(20)
+      // The load already paused the preloading decoder.
+      player.pause.mockClear()
+      wrapper.vm.pause()
+      expect(player.pause).toHaveBeenCalledOnce()
+      expect(player.pause.mock.contexts[0]).toBe(player)
+      expect(player.currentTime).toBeCloseTo(20 / 25)
+      player.currentTime = 0.4
+      player.seeking = false
+      player.dispatchEvent(new Event('seeked'))
+      expect(player.currentTime).toBe(0.4)
+      wrapper.unmount()
+    })
+  })
+
+  it('holds a raw seek issued while the decoder is still seeking', async () => {
+    // The comparison viewer is re-synced through setCurrentTimeRaw on every
+    // scrub move: each direct seek aborted the in-flight one, so its frame
+    // only landed once the cursor stopped.
+    const wrapper = mountViewer()
+    wrapper.vm.loadEntity(0)
+    await wrapper.vm.$nextTick()
+    const player = wrapper.vm.currentPlayer
+    player.currentTime = 1
+    Object.defineProperty(player, 'seeking', {
+      value: true,
+      configurable: true
+    })
+    wrapper.vm.setCurrentTimeRaw(2)
+    expect(player.currentTime).toBe(1)
+    Object.defineProperty(player, 'seeking', {
+      value: false,
+      configurable: true
+    })
+    player.dispatchEvent(new Event('seeked'))
+    expect(player.currentTime).toBe(2)
+    wrapper.unmount()
+  })
+
+  it('loops on the handle-in frame with the seek nudge, not on its boundary', async () => {
+    // 120 * 0.0333 (rounded frame duration) is 3.996 s, frame 119.88 at
+    // 30 fps: the loop restarted one frame before the handle-in. An exact
+    // boundary can also truncate to the previous frame.
+    vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
+    const wrapper = mountViewer({
+      entities: [
+        { id: 'e1', preview_file_id: 'p1', preview_file_extension: 'mp4', fps: 30 }
+      ],
+      handleIn: 120,
+      handleOut: 200,
+      isRepeating: true
+    })
+    wrapper.vm.loadEntity(0)
+    await wrapper.vm.$nextTick()
+    wrapper.vm.play()
+    const player = wrapper.vm.currentPlayer
+    const { cb: tick } = rvfcCallbacks.at(-1)
+    tick(performance.now(), { mediaTime: 200 / 30 })
+    expect(player.currentTime).toBeCloseTo(120 / 30 + 0.001, 6)
+    expect(wrapper.emitted('repeat')).toHaveLength(1)
+    wrapper.unmount()
+  })
+
+  describe('end of a movie', () => {
+    const mountLoaded = async () => {
+      vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
+      const wrapper = mountViewer()
+      wrapper.vm.loadEntity(0)
+      await wrapper.vm.$nextTick()
+      return { wrapper, player: wrapper.vm.currentPlayer }
+    }
+
+    it('plays the next entry when the playback ends', async () => {
+      const { wrapper, player } = await mountLoaded()
+      wrapper.vm.play()
+
+      player.dispatchEvent(new Event('ended'))
+
+      expect(wrapper.emitted('play-next')).toHaveLength(1)
+      wrapper.unmount()
+    })
+
+    // A seek can land a paused movie on its very end, and the browser then
+    // fires ended: the playlist started the next entry.
+    it('stays on a paused movie that ends', async () => {
+      const { wrapper, player } = await mountLoaded()
+
+      player.dispatchEvent(new Event('ended'))
+
+      expect(wrapper.emitted('play-next')).toBeUndefined()
+      wrapper.unmount()
+    })
+
+    // The playlist moves to a 3D model while its movie plays. The movie
+    // comes next again, so its decoder stays loaded: it played on, hidden,
+    // and its end moved the playlist away from the model.
+    it('stops the movie when the playlist moves to an entity without one', async () => {
+      vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
+      const wrapper = mountViewer({
+        entities: [
+          { id: 'e1', preview_file_id: 'p1', preview_file_extension: 'mp4', fps: 25 },
+          { id: 'e2', preview_file_id: 'p2', preview_file_extension: 'glb', fps: 25 }
+        ]
+      })
+      // Back from the model, the movie plays in the decoder that preloaded it.
+      wrapper.vm.loadEntity(1, 0, true)
+      wrapper.vm.loadEntity(0)
+      await wrapper.vm.$nextTick()
+      const player = wrapper.vm.currentPlayer
+      wrapper.vm.play()
+
+      wrapper.vm.loadEntity(1, 0, true)
+      player.dispatchEvent(new Event('ended'))
+
+      expect(HTMLMediaElement.prototype.pause.mock.contexts).toContain(player)
+      expect(wrapper.emitted('play-next')).toBeUndefined()
+      wrapper.unmount()
+    })
+
+    // In a playlist of two movies, the one after the next is the one left:
+    // its decoder preloaded it again and played on, hidden, until its end
+    // cut the next movie short.
+    it('stops the movie it leaves for another one', async () => {
+      const { wrapper, player } = await mountLoaded()
+      wrapper.vm.play()
+
+      wrapper.vm.loadEntity(1)
+
+      expect(HTMLMediaElement.prototype.pause.mock.contexts).toContain(player)
+      wrapper.unmount()
+    })
+
+    // With a single movie in the playlist, both decoders hold it. A reload,
+    // on an element change, took the idle one and left the other playing.
+    it('reloads a movie in the decoder that plays it', async () => {
+      vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
+      const wrapper = mountViewer({
+        entities: [
+          { id: 'e1', preview_file_id: 'p1', preview_file_extension: 'mp4', fps: 25 },
+          { id: 'e2', preview_file_id: 'p2', preview_file_extension: 'png', fps: 25 }
+        ]
+      })
+      wrapper.vm.loadEntity(1, 0, true)
+      wrapper.vm.loadEntity(0)
+      await wrapper.vm.$nextTick()
+      const player = wrapper.vm.currentPlayer
+      wrapper.vm.play()
+
+      wrapper.vm.reloadCurrentEntity(true)
+
+      expect(wrapper.vm.currentPlayer).toBe(player)
+      wrapper.unmount()
+    })
   })
 })

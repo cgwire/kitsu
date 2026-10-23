@@ -12,13 +12,12 @@
       :input-attrs="{ clearable: canDelete, hideInputIcon: true }"
       :locale="dateFnsLocale"
       :model-type="modelType"
-      :min-date="minDate"
-      :max-date="maxDate"
+      :min-date="pickerMinDate"
+      :max-date="pickerMaxDate"
       :placeholder="placeholder"
       :range="range ? { partialRange: false } : false"
       :teleport="true"
       :time-config="{ enableTimePicker: false }"
-      :timezone="utc ? 'utc' : undefined"
       v-model="localValue"
     >
     </vue-date-picker>
@@ -52,6 +51,8 @@ import {
 } from 'date-fns/locale'
 import { computed } from 'vue'
 import { useStore } from 'vuex'
+
+import { localDayToUtcDate, utcDayToLocalDate } from '@/lib/time'
 
 // date-fns locales matching src/locales/, keyed by two-letter code.
 const DATE_FNS_LOCALES = {
@@ -157,9 +158,25 @@ const inputFormat = computed(() => {
   }
 })
 
+// A utc field holds each day as the Date at UTC midnight of that day, while
+// the picker shows and returns local dates.
+const toPickerDate = date => (props.utc ? utcDayToLocalDate(date) : date)
+
+const toModelDate = date => {
+  if (props.utc) return localDayToUtcDate(date)
+  date.setHours(0, 0, 0, 0)
+  return date
+}
+
+const pickerMinDate = computed(() => toPickerDate(props.minDate))
+const pickerMaxDate = computed(() => toPickerDate(props.maxDate))
+
 const localValue = computed({
   get() {
-    return props.modelValue
+    if (props.utc && Array.isArray(props.modelValue)) {
+      return props.modelValue.map(utcDayToLocalDate)
+    }
+    return toPickerDate(props.modelValue)
   },
   set(value) {
     if (props.range) {
@@ -169,17 +186,14 @@ const localValue = computed({
       // range can never reach the parent and trigger a reload.
       const dates = value?.filter(Boolean) ?? []
       if (value?.length && dates.length !== 2) return
-      const range = dates.length === 2 ? dates : null
-      range?.forEach(date => date.setHours(0, 0, 0, 0))
+      const range = dates.length === 2 ? dates.map(toModelDate) : null
       emit('update:model-value', range)
       emit('change', range)
       return
     }
-    if (value?.setHours) {
-      value.setHours(0, 0, 0, 0)
-    }
-    emit('update:model-value', value)
-    emit('change', value)
+    const date = value?.setHours ? toModelDate(value) : value
+    emit('update:model-value', date)
+    emit('change', date)
   }
 })
 </script>

@@ -7,7 +7,6 @@ import {
   sortByPersonName,
   sortByDate,
   sortPeople,
-  sortPlaylists,
   sortProductions,
   sortTaskTypeScheduleItems,
   sortSequences,
@@ -25,9 +24,6 @@ const taskTypeMap = new Map(Object.entries({
 }))
 
 describe('lib/sorting', () => {
-  beforeEach(() => {
-  })
-
   it('sortByMetadata', () => {
     const entries = [
       { id: 1, data: { render_layer: 'fg' } },
@@ -47,6 +43,22 @@ describe('lib/sorting', () => {
       sortByMetadata({ column: 'weight', data_type: 'number' })
     )
     expect(results.map(entry => entry.id)).toEqual([2, 1])
+  })
+
+  // A checklist cell can hold a value written for another type of column:
+  // "null" or text from a CSV import, "true" left by a boolean column.
+  it('sortByMetadata ranks a checklist cell of another type as unticked', () => {
+    const entries = [
+      { id: 1, data: { steps: 'Model' } },
+      { id: 2, data: { steps: '{"Model":true,"Rig":false}' } },
+      { id: 3, data: { steps: 'null' } },
+      { id: 4, data: { steps: { Model: true, Rig: true } } },
+      { id: 5, data: { steps: 'true' } }
+    ]
+    const results = [...entries].sort(
+      sortByMetadata({ column: 'steps', data_type: 'checklist' })
+    )
+    expect(results.slice(0, 2).map(entry => entry.id)).toEqual([4, 2])
   })
 
   it('sortByName', () => {
@@ -402,19 +414,6 @@ describe('lib/sorting', () => {
 
     results = sortValidationColumns([])
     expect(results).toHaveLength(0)
-  })
-
-  it('sortPlaylists', () => {
-    const entries = [
-      { id: 1, created_at: '2018-09-12-12:18:30', name: 'Playlist1' },
-      { id: 2, created_at: '2018-09-18-18:19:00', name: 'Playlist2' },
-      { id: 3, created_at: '2018-09-18-18:19:00', name: 'Playlist3' }
-    ]
-    const results = sortPlaylists(entries)
-    expect(results).toHaveLength(3)
-    expect(results[0].id).toEqual(2)
-    expect(results[1].id).toEqual(3)
-    expect(results[2].id).toEqual(1)
   })
 
   it('sortPeople', () => {

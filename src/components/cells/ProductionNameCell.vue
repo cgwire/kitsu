@@ -47,7 +47,7 @@ import colors from '@/lib/colors.js'
 const ENTITY_PAGES = ['assets', 'shots', 'edits', 'sequences', 'episodes']
 
 const props = defineProps({
-  entry: { type: Object, default: () => ({}) },
+  entry: { type: Object, default: null },
   isLink: { type: Boolean, default: true },
   isTooltip: { type: Boolean, default: false },
   lastProductionScreen: { type: String, default: 'assets' },

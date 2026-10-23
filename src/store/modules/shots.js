@@ -99,6 +99,28 @@ const cache = {
   result: []
 }
 
+// The inline cells of the shots list save on every keystroke: the edits of a
+// shot dispatched within this delay go to the server as one request, so a
+// typed number reaches it (and its version history) as a single value.
+const EDIT_SHOT_DELAY = 400
+const pendingEdits = new Map()
+
+const mergeShotEdits = (previous, next) => {
+  const merged = { ...previous, ...next }
+  if (previous.data && next.data) {
+    merged.data = { ...previous.data, ...next.data }
+  }
+  return merged
+}
+
+const applyShotEdit = ({ commit, rootGetters }, data) => {
+  commit(LOCK_SHOT, data)
+  commit(EDIT_SHOT_END, {
+    newShot: data,
+    sequences: rootGetters.displayedSequences
+  })
+}
+
 const helpers = {
   getCurrentProduction() {
     return productionsStore.getters.currentProduction(productionsStore.state)
@@ -315,7 +337,6 @@ const state = {
 }
 
 const getters = {
-  shots: state => cache.shots,
   shotValidationColumns: state => state.shotValidationColumns,
 
   shotSearchQueries: state => state.shotSearchQueries,
@@ -357,27 +378,9 @@ const getters = {
   isShotsLoadingError: state => state.isShotsLoadingError,
   shotCreated: state => state.shotCreated,
 
-  isLongShotList: state => cache.shotMap.size > 500,
   shotsCsvFormData: state => state.shotsCsvFormData,
   shotListScrollPosition: state => state.shotListScrollPosition,
 
-  shotsByEpisode: state => {
-    const shotsBySequence = []
-    let sequenceShots = []
-    let previousShot = null
-
-    Array.from(cache.shotMap.values()).forEach(shot => {
-      if (previousShot && shot.sequence_name !== previousShot.sequence_name) {
-        shotsBySequence.push(sequenceShots.slice(0))
-        sequenceShots = []
-      }
-      sequenceShots.push(shot)
-      previousShot = shot
-    })
-    shotsBySequence.push(sortShots(sequenceShots))
-
-    return shotsBySequence
-  },
   selectedShots: state => state.selectedShots
 }
 
@@ -585,16 +588,40 @@ const actions = {
     })
   },
 
-  editShot({ commit, rootGetters }, data) {
-    commit(LOCK_SHOT, data)
-    commit(EDIT_SHOT_END, {
-      newShot: data,
-      sequences: rootGetters.displayedSequences
-    })
+  editShot(context, data) {
+    applyShotEdit(context, data)
     return shotsApi.updateShot(data).finally(() => {
       setTimeout(() => {
-        commit(UNLOCK_SHOT, data)
+        context.commit(UNLOCK_SHOT, data)
       }, 2000)
+    })
+  },
+
+  // editShot for the inline cells: the list is updated at once, the edits of
+  // a shot made within EDIT_SHOT_DELAY are merged into one request, each call
+  // resolves once that request settles and keeps its own lock 2 s after it.
+  editShotDebounced(context, data) {
+    applyShotEdit(context, data)
+    const pending = pendingEdits.get(data.id) || { data: {}, waiters: [] }
+    pending.data = mergeShotEdits(pending.data, data)
+    clearTimeout(pending.timer)
+    pendingEdits.set(data.id, pending)
+    return new Promise((resolve, reject) => {
+      pending.waiters.push({ resolve, reject })
+      pending.timer = setTimeout(() => {
+        pendingEdits.delete(data.id)
+        shotsApi
+          .updateShot(pending.data)
+          .then(
+            result => pending.waiters.forEach(waiter => waiter.resolve(result)),
+            err => pending.waiters.forEach(waiter => waiter.reject(err))
+          )
+          .finally(() => {
+            setTimeout(() => {
+              pending.waiters.forEach(() => context.commit(UNLOCK_SHOT, data))
+            }, 2000)
+          })
+      }, EDIT_SHOT_DELAY)
     })
   },
 
@@ -920,11 +947,7 @@ const mutations = {
     state.isShotsLoadingError = false
     state.shotsLoadingKey = null
     state.displayedShots = []
-    state.displayedShotsCount = 0
-    state.displayedShotsLength = 0
-    state.displayedTimeSpent = 0
-    state.displayedEstimation = 0
-    state.displayedFrames = 0
+    helpers.setListStats(state, [])
     state.shotSearchQueries = []
     state.shotSearchFilterGroups = []
 
@@ -945,10 +968,7 @@ const mutations = {
     state.shotsLoadingKey = loadingKey ?? null
 
     state.displayedShots = []
-    state.displayedShotsCount = 0
-    state.displayedShotsLength = 0
-    state.displayedEstimation = 0
-    state.displayedFrames = 0
+    helpers.setListStats(state, [])
     state.shotSearchQueries = []
     state.shotSearchFilterGroups = []
 
@@ -1137,32 +1157,24 @@ const mutations = {
 
   [EDIT_SHOT_END](state, { newShot, sequences }) {
     const shot = cache.shotMap.get(newShot.id)
+    // The edit payload is partial: a shot outside the loaded list (trim saved
+    // from the task panel on the news feed) must not enter it.
+    if (!shot) return
     const sequence = sequences.find(
       sequence => sequence.id === newShot.parent_id
     )
     if (sequence) newShot.sequence_name = sequence.name
 
-    if (shot) {
-      const copyNewShot = { ...newShot }
-      copyNewShot.data = { ...shot.data, ...newShot.data }
-      Object.assign(shot, copyNewShot)
-      state.displayedShots = state.displayedShots.map(stateShot => {
-        if (stateShot.id === newShot.id) {
-          return { ...shot }
-        }
-        return stateShot
-      })
-    } else {
-      insertSortedShot(cache.shots, newShot)
-      cache.shotMap.set(newShot.id, newShot)
-      state.shotSelectionGrid = buildSelectionGrid()
-    }
-    const indexedShot = shot || newShot
-    updateEntryInIndex(
-      cache.shotIndex,
-      indexedShot,
-      getShotIndexWords(indexedShot)
-    )
+    const copyNewShot = { ...newShot }
+    copyNewShot.data = { ...shot.data, ...newShot.data }
+    Object.assign(shot, copyNewShot)
+    state.displayedShots = state.displayedShots.map(stateShot => {
+      if (stateShot.id === newShot.id) {
+        return { ...shot }
+      }
+      return stateShot
+    })
+    updateEntryInIndex(cache.shotIndex, shot, getShotIndexWords(shot))
     state.shotCreated = newShot.name
 
     if (state.shotSearchText) {
@@ -1174,8 +1186,9 @@ const mutations = {
     if (!newShot.data) newShot.data = {}
     if (newShot.data.fps && !state.isFps) state.isFps = true
     if (newShot.nb_frames && !state.isFrames) state.isFrames = true
-    if (newShot.data.frame_in && !state.isFrameIn != null)
-      state.isFrameIn = true
+    // 0 is a frame in, the empty field of the edit modal is not.
+    const frameIn = newShot.data.frame_in
+    if (frameIn != null && frameIn !== '') state.isFrameIn = true
     if (newShot.data.frame_out && !state.isFrameOut) state.isFrameOut = true
     if (newShot.data.resolution && !state.isResolution) {
       state.isResolution = true
@@ -1472,6 +1485,12 @@ const mutations = {
       // task columns and the detail page resolve: tasks have their own events.
       const fields = { ...shot }
       delete fields.tasks
+      // The map holds raw objects: assigned through it only, the displayed
+      // list would see no change.
+      const displayedShot = state.displayedShots.find(
+        ({ id }) => id === shot.id
+      )
+      if (displayedShot) Object.assign(displayedShot, fields)
       Object.assign(cachedShot, fields)
       updateEntryInIndex(
         cache.shotIndex,

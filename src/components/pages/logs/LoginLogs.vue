@@ -2,7 +2,7 @@
   <div class="mt1">
     <div class="flexrow filters">
       <date-field
-        class="flexrow-item"
+        class="date-range flexrow-item"
         :can-delete="false"
         :label="$t('logs.date_range_label')"
         :max-date="today"
@@ -12,7 +12,7 @@
         @change="onDateRangeChange"
       />
       <people-field
-        class="field flexrow-item"
+        class="field flexrow-item people-filter"
         multiple
         search-email
         :label="$t('logs.people_label')"
@@ -22,15 +22,13 @@
         @select="onPeopleSelect"
       />
       <div class="filler"></div>
-      <div class="field flexrow-item">
-        <button-simple
-          class="flexrow-item small"
-          icon="refresh"
-          :is-loading="loading.logs"
-          :title="$t('main.reload')"
-          @click="loadLogs"
-        />
-      </div>
+      <button-simple
+        class="flexrow-item small mt2"
+        icon="refresh"
+        :is-loading="loading.logs"
+        :title="$t('main.reload')"
+        @click="loadLogs"
+      />
     </div>
 
     <div class="has-text-centered" v-if="loading.logs">
@@ -39,37 +37,77 @@
     <div class="mt2 empty" v-else-if="!logs.length">
       {{ $t('logs.empty_list') }}
     </div>
-    <table class="log-list" v-else>
-      <tr class="log-line" :key="log.id" v-for="log in logs">
-        <td>
-          <span class="tag">{{ log.date }}</span>
-        </td>
-        <td class="person">
-          <span class="flexrow">
-            <people-avatar
-              class="flexrow-item"
-              :size="20"
-              :font-size="10"
-              :person="log.person"
-            />
-            <people-name class="flexrow-item" :person="log.person" with-link />
-          </span>
-        </td>
-        <td>{{ log.person?.email }}</td>
-        <td>(IP: {{ log.ip_address }})</td>
-        <td>{{ log.origin }}</td>
-      </tr>
-      <tr v-if="hasMoreLogs">
-        <td colspan="5" class="has-text-centered">
-          <button-simple
-            class="mt2"
-            :is-loading="loading.moreLogs"
-            :text="$t('main.load_more')"
-            @click="loadMoreLogs"
-          />
-        </td>
-      </tr>
-    </table>
+    <div class="data-list" v-else>
+      <div class="datatable-wrapper">
+        <table class="datatable datatable--cards">
+          <thead class="datatable-head">
+            <tr>
+              <th scope="col" class="date">{{ $t('main.date') }}</th>
+              <th scope="col" class="person">{{ $t('logs.logins.user') }}</th>
+              <th scope="col" class="email">
+                {{ $t('people.fields.email') }}
+              </th>
+              <th scope="col" class="ip-address">
+                {{ $t('logs.logins.ip_address') }}
+              </th>
+              <th scope="col" class="origin">{{ $t('logs.logins.origin') }}</th>
+            </tr>
+          </thead>
+          <tbody class="datatable-body">
+            <tr class="datatable-row" :key="log.id" v-for="log in logs">
+              <td class="date" :data-label="$t('main.date')">
+                {{ log.date }}
+              </td>
+              <td class="person card-head">
+                <span class="flexrow" v-if="log.person">
+                  <people-avatar
+                    class="flexrow-item"
+                    :size="20"
+                    :font-size="10"
+                    :person="log.person"
+                  />
+                  <people-name
+                    class="flexrow-item"
+                    :person="log.person"
+                    with-link
+                  />
+                </span>
+              </td>
+              <td
+                class="email"
+                :data-label="
+                  log.person?.email ? $t('people.fields.email') : null
+                "
+              >
+                {{ log.person?.email }}
+              </td>
+              <td
+                class="ip-address"
+                :data-label="
+                  log.ip_address ? $t('logs.logins.ip_address') : null
+                "
+              >
+                {{ log.ip_address }}
+              </td>
+              <td
+                class="origin"
+                :data-label="log.origin ? $t('logs.logins.origin') : null"
+              >
+                {{ log.origin }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="has-text-centered load-more" v-if="hasMoreLogs">
+        <button-simple
+          class="mt2"
+          :is-loading="loading.moreLogs"
+          :text="$t('main.load_more')"
+          @click="loadMoreLogs"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -252,11 +290,6 @@ useHead({ title: computed(() => `${t('logs.logins.title')} - Kitsu`) })
 </script>
 
 <style lang="scss" scoped>
-.dark .tag {
-  background: $dark-grey;
-  color: $white;
-}
-
 .empty {
   font-style: italic;
 }
@@ -266,33 +299,52 @@ useHead({ title: computed(() => `${t('logs.logins.title')} - Kitsu`) })
   flex-wrap: wrap;
 }
 
-.log-line {
-  transition: background 0.2s ease;
-
-  &:hover {
-    background: var(--background-selectable);
-  }
-
-  .tag {
-    border-radius: 4px;
-    font-variant-numeric: tabular-nums;
-    font-weight: 500;
-  }
-
-  td {
-    padding: 0.5em;
-
-    &:first-child {
-      padding-left: 0.25em;
-    }
-
-    &:last-child {
-      padding-right: 0.25em;
-    }
-  }
+.data-list {
+  margin-bottom: 2em;
 }
 
-.log-list {
-  width: auto;
+.date {
+  max-width: 180px;
+  min-width: 180px;
+  width: 180px;
+}
+
+@media screen and (max-width: 768px) {
+  .filters {
+    align-items: flex-end;
+    row-gap: 0.5em;
+
+    .filler {
+      display: none;
+    }
+
+    // measured: 32px buttons against the 40px date input
+    .button {
+      height: 40px;
+    }
+
+    .mt2 {
+      margin-top: 0;
+    }
+  }
+
+  // the .field bottom margin of DateField lifted it above the buttons
+  .date-range {
+    flex: 1;
+    margin-bottom: 0;
+    min-width: 0;
+  }
+
+  .people-filter {
+    flex: 0 0 100%;
+    margin-right: 0;
+    order: 1;
+  }
+
+  .datatable-wrapper {
+    background: transparent;
+    border: 0;
+    overflow-x: visible;
+  }
 }
 </style>

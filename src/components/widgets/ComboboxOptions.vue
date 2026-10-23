@@ -45,9 +45,12 @@
           v-for="(option, index) in optionList"
         >
           <toggle-button
-            :label="option.label"
+            :label="$slots.option ? '' : option.label"
             :model-value="!!modelValue[option.value]"
           />
+          <span class="ml05" v-if="$slots.option">
+            <slot name="option" :option="option" />
+          </span>
         </div>
       </div>
     </div>

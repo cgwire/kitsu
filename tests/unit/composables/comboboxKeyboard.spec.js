@@ -78,17 +78,10 @@ describe('composables/comboboxKeyboard', () => {
     expect(wrapper.vm.isOpen).toBe(true)
   })
 
-  it('moves the active option down on ArrowDown while open', async () => {
-    const wrapper = createWrapper()
-    // First ArrowDown only opens the list; the following ones move the cursor.
-    await wrapper.find('.trigger').trigger('keydown', { key: 'ArrowDown' })
-    await wrapper.find('.trigger').trigger('keydown', { key: 'ArrowDown' })
-    await wrapper.find('.trigger').trigger('keydown', { key: 'ArrowDown' })
-    expect(wrapper.vm.activeIndex).toBe(1)
-  })
-
   it('clamps the active option at the last one on ArrowDown', async () => {
     const wrapper = createWrapper(2)
+    // Opens, lands on the first option, moves to the last, then presses past it.
+    await wrapper.find('.trigger').trigger('keydown', { key: 'ArrowDown' })
     await wrapper.find('.trigger').trigger('keydown', { key: 'ArrowDown' })
     await wrapper.find('.trigger').trigger('keydown', { key: 'ArrowDown' })
     await wrapper.find('.trigger').trigger('keydown', { key: 'ArrowDown' })

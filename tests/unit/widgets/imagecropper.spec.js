@@ -66,6 +66,7 @@ describe('ImageCropper crop output type', () => {
   let wrapper
 
   beforeEach(() => {
+    URL.createObjectURL = vi.fn(() => 'blob:logo')
     URL.revokeObjectURL = vi.fn()
   })
 

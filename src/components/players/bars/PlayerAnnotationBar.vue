@@ -1,5 +1,24 @@
 <template>
-  <div class="flexrow" v-if="isMovie || isPicture">
+  <!-- phones draw freehand with the default pencil -->
+  <div class="flexrow" v-if="phone && (isMovie || isPicture)">
+    <template v-if="!readOnly && !isConcept">
+      <button-simple
+        class="flexrow-item"
+        icon="undo"
+        :title="$t('playlists.actions.annotation_undo')"
+        @click="$emit('undo')"
+      />
+      <button-simple
+        class="flexrow-item"
+        icon="pencil"
+        :active="isDrawing"
+        :title="$t('playlists.actions.annotation_draw')"
+        @click="$emit('pencil-annotate-clicked')"
+      />
+    </template>
+  </div>
+
+  <div class="flexrow" v-else-if="isMovie || isPicture">
     <button-simple
       class="flexrow-item"
       icon="undo"
@@ -21,7 +40,12 @@
       :title="$t('playlists.actions.toggle_annotations')"
       :active="isAnnotationsDisplayed"
       @click="$emit('annotation-displayed-clicked')"
-      v-if="(isPicture || isMovie) && (!light || fullScreen) && !isConcept"
+      v-if="
+        isAnnotationsDisplayed !== undefined &&
+        (isPicture || isMovie) &&
+        (!light || fullScreen) &&
+        !isConcept
+      "
     />
 
     <button-simple
@@ -45,7 +69,12 @@
       :is-on="isOnionSkinOn"
       :frames="onionSkinFrames"
       @change="onOnionChange"
-      v-if="isMovie && (!light || fullScreen) && !isConcept"
+      v-if="
+        isOnionSkinOn !== undefined &&
+        isMovie &&
+        (!light || fullScreen) &&
+        !isConcept
+      "
     />
 
     <transition name="slide">
@@ -260,9 +289,11 @@ defineProps({
     type: Boolean,
     default: false
   },
+  // Opt-in like the onion skin: a consumer that does not bind it gets no
+  // toggle.
   isAnnotationsDisplayed: {
     type: Boolean,
-    default: true
+    default: undefined
   },
   isCommentsHidden: {
     type: Boolean,
@@ -321,6 +352,11 @@ defineProps({
     type: String,
     default: 'big'
   },
+  // phones keep undo and the pencil only
+  phone: {
+    type: Boolean,
+    default: false
+  },
   productionBackgrounds: {
     type: Array,
     default: () => []
@@ -371,7 +407,8 @@ const isLaserModeOn = defineModel('isLaserModeOn', { default: undefined })
 const isEraserModeOn = defineModel('isEraserModeOn', { default: undefined })
 const isShapeMode = defineModel('isShapeMode', { default: undefined })
 const currentShape = defineModel('currentShape', { default: undefined })
-const isOnionSkinOn = defineModel('isOnionSkinOn', { default: false })
+// Opt-in: the picker shows only to a consumer binding it.
+const isOnionSkinOn = defineModel('isOnionSkinOn', { default: undefined })
 const onionSkinFrames = defineModel('onionSkinFrames', { default: 2 })
 const pictureBackgroundColor = defineModel('pictureBackgroundColor', {
   default: '#000000'

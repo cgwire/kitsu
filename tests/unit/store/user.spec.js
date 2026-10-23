@@ -8,7 +8,8 @@ vi.mock('@/store/api/people', () => ({
   default: {
     loadDone: vi.fn(),
     loadTasksToCheck: vi.fn(),
-    loadTimeSpents: vi.fn()
+    loadTimeSpents: vi.fn(),
+    unregisterFIDO: vi.fn()
   }
 }))
 
@@ -107,6 +108,43 @@ describe('User store', () => {
       })
     })
 
+    describe('role getters follow the project role on production routes', () => {
+      const routeFor = productionId => ({
+        route: { params: productionId ? { production_id: productionId } : {} }
+      })
+      const promoted = stateFor('user', { 'production-1': 'manager' })
+
+      test('artist promoted manager on the production', () => {
+        const rootState = routeFor('production-1')
+        expect(
+          store.getters.isCurrentUserManager(promoted, {}, rootState)
+        ).toBe(true)
+        expect(store.getters.isCurrentUserArtist(promoted, {}, rootState)).toBe(
+          false
+        )
+      })
+
+      test('global role applies outside of a production route', () => {
+        const rootState = routeFor(null)
+        expect(
+          store.getters.isCurrentUserManager(promoted, {}, rootState)
+        ).toBe(false)
+        expect(store.getters.isCurrentUserArtist(promoted, {}, rootState)).toBe(
+          true
+        )
+      })
+
+      test('admin stays manager whatever the project role says', () => {
+        expect(
+          store.getters.isCurrentUserManager(
+            stateFor('admin', { 'production-1': 'user' }),
+            {},
+            routeFor('production-1')
+          )
+        ).toBe(true)
+      })
+    })
+
     describe('isCurrentUserProductionSupervisor', () => {
       const getter = store.getters.isCurrentUserProductionSupervisor
 
@@ -151,6 +189,53 @@ describe('User store', () => {
     })
   })
 
+  describe('canEditShotTrim', () => {
+    const task = { project_id: 'production-1' }
+    const call = (role, departments, options = {}) => {
+      const { team = ['person-1'], projectRoles = {} } = options
+      const state = { user: { id: 'person-1', role, departments }, projectRoles }
+      return store.getters.canEditShotTrim(
+        state,
+        {
+          currentUserRoleForProduction:
+            store.getters.currentUserRoleForProduction(state)
+        },
+        {},
+        { productionMap: new Map([['production-1', { team }]]) }
+      )(task)
+    }
+
+    test('admins edit the trim of any production', () => {
+      expect(call('admin', ['dep-1'], { team: [] })).toBe(true)
+    })
+
+    test('managers and department-less supervisors edit it from the team', () => {
+      expect(call('manager', [])).toBe(true)
+      expect(call('supervisor', [])).toBe(true)
+      const projectRoles = { 'production-1': 'manager' }
+      expect(call('user', [], { projectRoles })).toBe(true)
+    })
+
+    // zou only lets a supervisor with departments edit the descriptor keys
+    // of those departments, and the trim handles are not descriptors
+    test('supervisors with departments, clients and artists do not', () => {
+      expect(call('supervisor', ['dep-1'])).toBe(false)
+      expect(call('client', [])).toBe(false)
+      expect(call('user', [])).toBe(false)
+    })
+
+    test('managers outside the production team do not', () => {
+      expect(call('manager', [], { team: ['person-2'] })).toBe(false)
+    })
+
+    test('nobody edits it without a user', () => {
+      const rootGetters = { productionMap: new Map() }
+      expect(
+        store.getters.canEditShotTrim({ user: null }, {}, {}, rootGetters)(task)
+      ).toBe(false)
+    })
+  })
+
   describe('Mutations', () => {
     test('SET_USER_PROJECT_ROLES', () => {
       const state = { projectRoles: {} }
@@ -174,6 +259,47 @@ describe('User store', () => {
         role: null
       })
       expect(state.projectRoles['production-1']).toBeUndefined()
+    })
+
+    // Zou picks the next preferred method in the same order
+    // (TWO_FACTOR_FALLBACKS), so the page matches it until a reload.
+    describe('preferred 2FA method once one is turned off', () => {
+      const userWith = (preferred, enabled) => ({
+        preferred_two_factor_authentication: preferred,
+        totp_enabled: enabled.includes('totp'),
+        email_otp_enabled: enabled.includes('email_otp'),
+        fido_enabled: enabled.includes('fido'),
+        fido_devices: enabled.includes('fido') ? ['Yubikey'] : []
+      })
+
+      test('moves to FIDO, then email OTP, when TOTP goes', () => {
+        const state = { user: userWith('totp', ['totp', 'fido', 'email_otp']) }
+        store.mutations.USER_DISABLE_TOTP_SUCCESS(state)
+        expect(state.user.preferred_two_factor_authentication).toBe('fido')
+      })
+
+      test('moves to TOTP when email OTP goes', () => {
+        const state = { user: userWith('email_otp', ['email_otp', 'totp']) }
+        store.mutations.USER_DISABLE_EMAIL_OTP_SUCCESS(state)
+        expect(state.user.preferred_two_factor_authentication).toBe('totp')
+      })
+
+      test('moves to TOTP, then email OTP, when the last key goes', () => {
+        const state = { user: userWith('fido', ['fido', 'email_otp', 'totp']) }
+        store.mutations.USER_UNREGISTER_FIDO_SUCCESS(state, 'Yubikey')
+        expect(state.user.preferred_two_factor_authentication).toBe('totp')
+
+        const onlyTotp = { user: userWith('fido', ['fido', 'totp']) }
+        store.mutations.USER_UNREGISTER_FIDO_SUCCESS(onlyTotp, 'Yubikey')
+        expect(onlyTotp.user.preferred_two_factor_authentication).toBe('totp')
+      })
+
+      test('drops the preference when no method is left', () => {
+        const state = { user: userWith('fido', ['fido']) }
+        store.mutations.USER_UNREGISTER_FIDO_SUCCESS(state, 'Yubikey')
+        expect(state.user.preferred_two_factor_authentication).toBeNull()
+        expect(state.user.fido_enabled).toBe(false)
+      })
     })
 
     test('USER_LOGOUT clears project roles', () => {
@@ -262,6 +388,26 @@ describe('User store', () => {
 
         expect(doneTasks).toEqual(tasks)
         expect(commit).toHaveBeenCalledWith('USER_LOAD_DONE_TASKS_END', tasks)
+      })
+    })
+
+    describe('unregisterFIDO', () => {
+      test('sends the 2FA code, then drops the device', async () => {
+        peopleApi.unregisterFIDO.mockResolvedValue({ success: true })
+        const commit = vi.fn()
+
+        await store.actions.unregisterFIDO(
+          { commit },
+          { deviceName: 'Yubikey', twoFactorPayload: { totp: '123456' } }
+        )
+
+        expect(peopleApi.unregisterFIDO).toHaveBeenCalledWith('Yubikey', {
+          totp: '123456'
+        })
+        expect(commit).toHaveBeenCalledWith(
+          'USER_UNREGISTER_FIDO_SUCCESS',
+          'Yubikey'
+        )
       })
     })
 

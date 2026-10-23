@@ -14,10 +14,4 @@ describe('selection', () => {
     clearSelectionGrid(selectionGrid)
     expect(selectionGrid.size).toBe(0)
   })
-
-  test('clearSelectionGrid with empty set', () => {
-    const selectionGrid = new Set()
-    clearSelectionGrid(selectionGrid)
-    expect(selectionGrid.size).toBe(0)
-  })
 })

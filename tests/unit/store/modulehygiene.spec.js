@@ -7,13 +7,11 @@ import { vi } from 'vitest'
 vi.mock('@/store', () => ({ default: {} }))
 
 import assetsStore from '@/store/modules/assets'
-import departmentsStore from '@/store/modules/departments'
 import editsStore from '@/store/modules/edits'
 import episodesStore from '@/store/modules/episodes'
 import sequencesStore from '@/store/modules/sequences'
 import shotsStore from '@/store/modules/shots'
 import taskStatusStore from '@/store/modules/taskstatus'
-import taskTypesStore from '@/store/modules/tasktypes'
 
 // The preview-file:set-main socket event commits SET_PREVIEW to every module
 // at once, whatever the open page, so each entity module gets a payload built
@@ -28,37 +26,16 @@ const entityModules = [
 
 describe('store module hygiene', () => {
   describe('RESET_ALL clears the module caches (ARCH-9)', () => {
-    test.each([
-      ['tasktypes', taskTypesStore, 'taskTypeMap'],
-      ['taskstatus', taskStatusStore, 'taskStatusMap'],
-      ['departments', departmentsStore, 'departmentMap']
-    ])('%s', (name, module, mapName) => {
-      module.cache[mapName].set('x1', { id: 'x1', name: 'Leftover' })
-      const state = {}
-      module.mutations.RESET_ALL(state)
+    // tasktypes and departments check it in their own spec.
+    test('taskstatus', () => {
+      taskStatusStore.cache.taskStatusMap.set('x1', { id: 'x1', name: 'Leftover' })
+      taskStatusStore.mutations.RESET_ALL({})
       // A leftover entry here leaks data from the previous session.
-      expect(module.cache[mapName].size).toBe(0)
+      expect(taskStatusStore.cache.taskStatusMap.size).toBe(0)
     })
   })
 
   describe('edit mutations keep lists sorted (ARCH-21)', () => {
-    test('EDIT_DEPARTMENTS_END re-sorts after a rename', () => {
-      const alpha = { id: 'd1', name: 'Alpha' }
-      const zeta = { id: 'd2', name: 'Zeta' }
-      const state = { departments: [alpha, zeta] }
-      departmentsStore.cache.departmentMap = new Map([
-        ['d1', alpha],
-        ['d2', zeta]
-      ])
-
-      departmentsStore.mutations.EDIT_DEPARTMENTS_END(state, {
-        id: 'd1',
-        name: 'Zzz'
-      })
-
-      expect(state.departments.map(d => d.name)).toEqual(['Zeta', 'Zzz'])
-    })
-
     test('EDIT_TASK_STATUS_END re-sorts after a rename', () => {
       const done = { id: 's1', name: 'Done' }
       const wip = { id: 's2', name: 'WIP' }

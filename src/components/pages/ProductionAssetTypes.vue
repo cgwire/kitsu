@@ -1,17 +1,23 @@
 <template>
   <div class="asset-types page fixed-page">
     <div class="asset-type-list-header page-header flexrow">
-      <search-field
-        class="flexrow-item mt1"
-        ref="asset-type-search-field"
-        @change="onSearchChange"
-        placeholder="ex: chars, agent327"
+      <combobox-visible-options
+        class="flexrow-item options-filter"
+        :label="$t('asset_types.title')"
+        :options="assetTypeOptions"
+        v-model:hidden="hiddenAssetTypeIds"
+      />
+      <combobox-task-type-options
+        class="flexrow-item options-filter"
+        :label="$t('task_types.title')"
+        :task-types="columnTaskTypes"
+        v-model:hidden="hiddenTaskTypeIds"
       />
       <combobox
         class="mb0 flexrow-item"
         :label="$t('statistics.display_mode')"
         locale-key-prefix="statistics."
-        :options="displayModeOptions"
+        :options="STATS_DISPLAY_MODE_OPTIONS"
         v-model="displayMode"
       />
       <span class="filler"></span>
@@ -22,22 +28,22 @@
         @click="reset"
       />
       <button-simple
-        class="flexrow-item"
+        class="flexrow-item export-button"
         icon="download"
+        :title="$t('main.csv.export_file')"
         @click="exportStatisticsToCsv"
       />
     </div>
 
     <production-asset-type-list
-      ref="asset-type-list"
       :entries="displayedAssetTypes"
       :is-loading="isAssetsLoading || initialLoading"
       :is-error="isAssetsLoadingError"
-      :validation-columns="assetValidationColumns"
-      :asset-type-stats="assetTypeStats"
+      :is-filtered="isFiltered"
+      :validation-columns="displayedColumns"
+      :asset-type-stats="displayedStats"
+      :asset-counts="assetTypeAssetCounts"
       :display-mode="displayMode"
-      :show-all="!assetTypeSearchText"
-      @scroll="saveScrollPosition"
     />
   </div>
 </template>
@@ -47,78 +53,68 @@
 // --------------------------------------------------------------------------
 import { useHead } from '@unhead/vue'
 import moment from 'moment'
-import { computed, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
+import {
+  STATS_DISPLAY_MODE_OPTIONS,
+  useStatsPage
+} from '@/composables/statsPage'
 import csv from '@/lib/csv'
 import stringHelpers from '@/lib/string'
 
 import ProductionAssetTypeList from '@/components/lists/ProductionAssetTypeList.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
-import SearchField from '@/components/widgets/SearchField.vue'
+import ComboboxTaskTypeOptions from '@/components/widgets/ComboboxTaskTypeOptions.vue'
+import ComboboxVisibleOptions from '@/components/widgets/ComboboxVisibleOptions.vue'
 
 const { t } = useI18n()
-const route = useRoute()
-const router = useRouter()
 const store = useStore()
 
 // State
 // --------------------------------------------------------------------------
-const assetTypeListRef = useTemplateRef('asset-type-list')
-const searchFieldRef = useTemplateRef('asset-type-search-field')
-
-const displayMode = ref('pie')
 const initialLoading = ref(true)
-
-const displayModeOptions = [
-  { label: 'pie', value: 'pie' },
-  { label: 'count', value: 'count' }
-]
 
 // Computed
 // --------------------------------------------------------------------------
-const assetTypeListScrollPosition = computed(
-  () => store.getters.assetTypeListScrollPosition
-)
+const assetTypeAssetCounts = computed(() => store.getters.assetTypeAssetCounts)
 const assetTypeMap = computed(() => store.getters.assetTypeMap)
-const assetTypeSearchText = computed(() => store.getters.assetTypeSearchText)
 const assetTypeStats = computed(() => store.getters.assetTypeStats)
 const assetValidationColumns = computed(
   () => store.getters.assetValidationColumns
 )
 const currentEpisode = computed(() => store.getters.currentEpisode)
 const currentProduction = computed(() => store.getters.currentProduction)
-const displayedAssetTypes = computed(() => store.getters.displayedAssetTypes)
 const isAssetsLoading = computed(() => store.getters.isAssetsLoading)
 const isAssetsLoadingError = computed(() => store.getters.isAssetsLoadingError)
 const isTVShow = computed(() => store.getters.isTVShow)
 const taskStatusMap = computed(() => store.getters.taskStatusMap)
 const taskTypeMap = computed(() => store.getters.taskTypeMap)
+const usedAssetTypes = computed(() => store.getters.usedAssetTypes)
+
+const {
+  columnTaskTypes,
+  displayMode,
+  displayedColumns,
+  displayedRows: displayedAssetTypes,
+  getDisplayedStats,
+  hiddenColumnIds: hiddenTaskTypeIds,
+  hiddenRowIds: hiddenAssetTypeIds,
+  isFiltered,
+  rowOptions: assetTypeOptions
+} = useStatsPage({
+  preferenceKey: 'stats:asset-type-display-mode',
+  rowsParam: 'hiddenAssetTypes',
+  rows: usedAssetTypes,
+  columnIds: assetValidationColumns
+})
+
+const displayedStats = computed(() => getDisplayedStats(assetTypeStats.value))
 
 // Functions
 // --------------------------------------------------------------------------
-const onSearchChange = () => {
-  const searchQuery = searchFieldRef.value?.getValue()
-  store.dispatch('setAssetTypeSearch', searchQuery)
-  router.push({
-    query: { ...route.query, search: searchQuery || undefined }
-  })
-}
-
-const setSearchFromUrl = () => {
-  const searchFromUrl = route.query.search
-  if (!searchFieldRef.value?.getValue() && searchFromUrl) {
-    searchFieldRef.value?.setValue(searchFromUrl)
-  }
-}
-
-const saveScrollPosition = scrollPosition => {
-  store.dispatch('setAssetTypeListScrollPosition', scrollPosition)
-}
-
 const exportStatisticsToCsv = () => {
   const nameData = [
     moment().format('YYYYMMDD'),
@@ -130,7 +126,7 @@ const exportStatisticsToCsv = () => {
   const name = stringHelpers.slugify(nameData.join('_'))
   csv.generateStatReports(
     name,
-    assetTypeStats.value,
+    displayedStats.value,
     taskTypeMap.value,
     taskStatusMap.value,
     assetTypeMap.value,
@@ -143,10 +139,7 @@ const reset = async () => {
   initialLoading.value = true
   await store.dispatch('loadAssets')
   store.dispatch('computeAssetTypeStats')
-  store.dispatch('setAssetTypeListScrollPosition', 0)
   initialLoading.value = false
-  setSearchFromUrl()
-  onSearchChange()
 }
 
 // Watchers
@@ -162,19 +155,39 @@ watch(currentEpisode, () => {
 // Lifecycle
 // --------------------------------------------------------------------------
 onMounted(() => {
-  if (assetTypeSearchText.value) {
-    searchFieldRef.value.setValue(assetTypeSearchText.value)
-  }
-  assetTypeListRef.value.setScrollPosition(assetTypeListScrollPosition.value)
-  setTimeout(reset, 100)
+  store.dispatch('setLastProductionScreen', 'production-asset-types')
+  reset()
 })
 
 // Head
 // --------------------------------------------------------------------------
+const episodeName = computed(() => {
+  if (!isTVShow.value || !currentEpisode.value) return ''
+  if (currentEpisode.value.id === 'all') return t('main.all')
+  if (currentEpisode.value.id === 'main') return t('main.main_pack')
+  return currentEpisode.value.name
+})
+
 useHead({
-  title: computed(
-    () =>
-      `${currentProduction.value?.name} | ${t('asset_types.production_title')} - Kitsu`
-  )
+  title: computed(() => {
+    const production = currentProduction.value?.name || ''
+    const episode = episodeName.value ? ` - ${episodeName.value}` : ''
+    return `${production}${episode} | ${t('asset_types.production_title')} - Kitsu`
+  })
 })
 </script>
+
+<style lang="scss" scoped>
+@use '@/styles/stats.scss' as stats;
+
+.asset-type-list-header {
+  @include stats.page-header;
+}
+
+@media screen and (max-width: 768px) {
+  // Mobile is read-only.
+  .export-button {
+    display: none;
+  }
+}
+</style>

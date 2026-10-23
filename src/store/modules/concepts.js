@@ -1,8 +1,9 @@
 import { v4 as uuidv4 } from 'uuid'
 
-import func from '@/lib/func'
+import { sortByName } from '@/lib/sorting'
 import conceptsApi from '@/store/api/concepts'
 import entitiesApi from '@/store/api/entities'
+import tasksApi from '@/store/api/tasks'
 
 import {
   LOAD_CONCEPTS_START,
@@ -15,6 +16,11 @@ import {
   LOAD_LINKED_CONCEPTS_START,
   LOAD_LINKED_CONCEPTS_ERROR,
   LOAD_LINKED_CONCEPTS_END,
+  LOAD_CONCEPT_FOLDERS_END,
+  EDIT_CONCEPT_FOLDER_END,
+  DELETE_CONCEPT_FOLDER_END,
+  MOVE_CONCEPTS_END,
+  UPDATE_CONCEPT_PREVIEW_STATUS,
   RESET_ALL
 } from '@/store/mutation-types'
 
@@ -38,6 +44,7 @@ const helpers = {
 
 const initialState = {
   concepts: [],
+  conceptFolders: [],
   conceptMap: new Map(),
   conceptSearchText: '',
   conceptSearchQueries: [],
@@ -51,21 +58,29 @@ const state = {
 
 const getters = {
   concepts: state => state.concepts,
+  conceptFolders: state => state.conceptFolders,
   conceptMap: state => state.conceptMap,
   linkedConcepts: state => state.linkedConcepts,
   selectedConcepts: state => state.selectedConcepts
 }
 
 const actions = {
-  async loadConcepts({ commit, rootGetters }) {
+  async loadConcepts({ commit, dispatch, rootGetters }) {
     commit(LOAD_CONCEPTS_START)
     try {
       const production = rootGetters.currentProduction
       const concepts = await conceptsApi.getConcepts(production)
       commit(LOAD_CONCEPTS_END, { concepts })
+      // The variants may have been stored after the list was read: the event
+      // announcing them then matched no card.
+      concepts
+        .filter(concept => concept.preview_file_status === 'processing')
+        .forEach(concept => {
+          dispatch('refreshConceptPreview', concept).catch(console.error)
+        })
     } catch (err) {
-      console.error(err)
       commit(LOAD_CONCEPTS_ERROR)
+      throw err
     }
   },
 
@@ -78,20 +93,16 @@ const actions = {
     }
   },
 
-  async newConcepts({ dispatch }, forms) {
-    // Each concept creation is several requests (entity, task, preview):
-    // run them one file at a time to avoid hammering the server.
-    return func.runPromiseMapAsSeries(forms, form =>
-      dispatch('newConcept', form)
-    )
-  },
-
-  async newConcept({ commit, dispatch, rootGetters }, form) {
+  async newConcept(
+    { commit, dispatch, rootGetters },
+    { form, parentId = null }
+  ) {
     const production = rootGetters.currentProduction
 
     // Create Entity
     const entity = {
       name: form.get('file').name + '-' + uuidv4(), // unique and mandatory field
+      parent_id: parentId,
       project_id: production.id
     }
     const concept = await conceptsApi.newConcept(entity)
@@ -111,16 +122,31 @@ const actions = {
     const { preview } = await dispatch('commentTaskWithPreview', {
       taskId: task.id,
       taskStatusId: task.task_status_id,
-      form
+      forms: [form]
     })
     await dispatch('setLastTaskPreview', task.id)
 
     concept.tasks = [task]
     concept.preview_file_id = preview.id
+    concept.preview_file_status = preview.status
     helpers.populateConcept(concept)
 
     commit(EDIT_CONCEPT_END, concept)
+    // The variants may have been stored before the concept was listed: the
+    // event announcing them then matched no card.
+    if (concept.preview_file_status === 'processing') {
+      dispatch('refreshConceptPreview', concept).catch(console.error)
+    }
     return concept
+  },
+
+  async refreshConceptPreview({ commit }, concept) {
+    const preview = await tasksApi.getPreviewFile(concept.preview_file_id)
+    commit(UPDATE_CONCEPT_PREVIEW_STATUS, {
+      conceptId: concept.id,
+      previewFileId: preview.id,
+      status: preview.status
+    })
   },
 
   async editConcept({ commit }, data) {
@@ -163,6 +189,42 @@ const actions = {
 
   clearSelectedConcepts({ commit }) {
     commit(CLEAR_SELECTED_CONCEPTS)
+  },
+
+  async loadConceptFolders({ commit, rootGetters }) {
+    const folders = await conceptsApi.getConceptFolders(
+      rootGetters.currentProduction
+    )
+    commit(LOAD_CONCEPT_FOLDERS_END, folders)
+  },
+
+  async newConceptFolder({ commit, rootGetters }, name) {
+    const folder = await conceptsApi.newConceptFolder(
+      rootGetters.currentProduction,
+      name
+    )
+    commit(EDIT_CONCEPT_FOLDER_END, folder)
+    return folder
+  },
+
+  async editConceptFolder({ commit }, data) {
+    const folder = await conceptsApi.updateConceptFolder(data)
+    commit(EDIT_CONCEPT_FOLDER_END, folder)
+    return folder
+  },
+
+  async deleteConceptFolder({ commit }, folder) {
+    await conceptsApi.deleteConceptFolder(folder)
+    commit(DELETE_CONCEPT_FOLDER_END, folder)
+  },
+
+  async moveConcepts({ commit, rootGetters }, { conceptIds, folderId }) {
+    const movedIds = await conceptsApi.moveConcepts(
+      rootGetters.currentProduction,
+      conceptIds,
+      folderId
+    )
+    commit(MOVE_CONCEPTS_END, { conceptIds: movedIds, folderId })
   },
 
   async loadLinkedConcepts({ commit }, entity) {
@@ -235,6 +297,48 @@ const mutations = {
   [LOAD_LINKED_CONCEPTS_END](state, { concepts }) {
     concepts.forEach(helpers.populateConcept)
     state.linkedConcepts = concepts
+  },
+
+  [LOAD_CONCEPT_FOLDERS_END](state, folders) {
+    state.conceptFolders = sortByName(folders)
+  },
+
+  [EDIT_CONCEPT_FOLDER_END](state, folder) {
+    state.conceptFolders = sortByName([
+      ...state.conceptFolders.filter(({ id }) => id !== folder.id),
+      folder
+    ])
+  },
+
+  [DELETE_CONCEPT_FOLDER_END](state, folder) {
+    state.conceptFolders = state.conceptFolders.filter(
+      ({ id }) => id !== folder.id
+    )
+    state.concepts
+      .filter(concept => concept.parent_id === folder.id)
+      .forEach(concept => {
+        concept.parent_id = null
+      })
+  },
+
+  [MOVE_CONCEPTS_END](state, { conceptIds, folderId }) {
+    state.concepts
+      .filter(concept => conceptIds.includes(concept.id))
+      .forEach(concept => {
+        concept.parent_id = folderId
+      })
+  },
+
+  [UPDATE_CONCEPT_PREVIEW_STATUS](state, { conceptId, previewFileId, status }) {
+    const concept = state.conceptMap.get(conceptId)
+    // Two reads can cross: the answer sent before the variants were stored
+    // must not undo the one sent after.
+    if (
+      concept?.preview_file_id === previewFileId &&
+      concept.preview_file_status === 'processing'
+    ) {
+      concept.preview_file_status = status
+    }
   },
 
   [RESET_ALL](state) {

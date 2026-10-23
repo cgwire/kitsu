@@ -1,5 +1,5 @@
 import { nextTick, ref } from 'vue'
-import { shallowMount } from '@vue/test-utils'
+import { flushPromises, shallowMount } from '@vue/test-utils'
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { createStore } from 'vuex'
 
@@ -21,13 +21,17 @@ import '@/lib/auth'
 
 import { useDesktopNotifications } from '@/composables/desktopNotifications'
 import NotificationsPage from '@/components/pages/Notifications.vue'
+import TaskInfo from '@/components/sides/TaskInfo.vue'
+import BooleanField from '@/components/widgets/BooleanField.vue'
+import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
+import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
 const ButtonSimpleStub = {
   template: '<button v-bind="$attrs"><slot /></button>',
   inheritAttrs: true
 }
 
-const makeStore = () => {
+const makeStore = (getterOverrides = {}) => {
   const actions = {
     clearNotifications: vi.fn(),
     loadNotifications: vi.fn(() => Promise.resolve()),
@@ -48,7 +52,8 @@ const makeStore = () => {
       taskStatus: () => [],
       taskTypes: () => [],
       taskTypeMap: () => new Map(),
-      user: () => ({ id: 'user-1' })
+      user: () => ({ id: 'user-1' }),
+      ...getterOverrides
     },
     actions
   })
@@ -62,6 +67,27 @@ describe('Notifications.vue', () => {
 
   const getSocketHandler = event =>
     socketMock.on.mock.calls.find(([e]) => e === event)?.[1]
+
+  const mountPage = store => {
+    const router = createRouter({
+      history: createWebHashHistory(),
+      routes: [{ path: '/', component: { template: '<div />' } }]
+    })
+    return shallowMount(NotificationsPage, {
+      global: {
+        plugins: [
+          store,
+          router,
+          {
+            install: app => {
+              app.config.globalProperties.$socket = socketMock
+            }
+          }
+        ],
+        stubs: { ButtonSimple: ButtonSimpleStub }
+      }
+    })
+  }
 
   beforeEach(async () => {
     socketMock = { on: vi.fn(), off: vi.fn() }
@@ -85,32 +111,199 @@ describe('Notifications.vue', () => {
     })
 
     ;({ store } = makeStore())
-
-    const router = createRouter({
-      history: createWebHashHistory(),
-      routes: [{ path: '/', component: { template: '<div />' } }]
-    })
-
-    wrapper = shallowMount(NotificationsPage, {
-      global: {
-        plugins: [
-          store,
-          router,
-          {
-            install: app => {
-              app.config.globalProperties.$socket = socketMock
-            }
-          }
-        ],
-        stubs: { ButtonSimple: ButtonSimpleStub }
-      }
-    })
+    wrapper = mountPage(store)
     await nextTick()
   })
 
   afterEach(() => {
     wrapper.unmount()
     vi.clearAllMocks()
+  })
+
+  describe('task type tag', () => {
+    const notification = {
+      id: 'notification-1',
+      author_id: 'person-1',
+      created_at: '2026-09-21T10:00:00',
+      episode_id: 'episode-1',
+      full_entity_name: 'SH010',
+      notification_type: 'comment',
+      project_id: 'production-1',
+      read: false,
+      task_id: 'task-1',
+      task_type_id: 'task-type-1'
+    }
+
+    const remountWith = async getters => {
+      wrapper.unmount()
+      ;({ store } = makeStore(getters))
+      wrapper = mountPage(store)
+      await flushPromises()
+    }
+
+    it('passes the task type scoped to the episode when it is known', async () => {
+      const taskType = { id: 'task-type-1', name: 'Animation', for_entity: 'Shot' }
+      await remountWith({
+        notifications: () => [notification],
+        taskTypeMap: () => new Map([[taskType.id, taskType]])
+      })
+
+      expect(wrapper.findComponent(TaskTypeName).props('taskType')).toEqual({
+        ...taskType,
+        episode_id: 'episode-1'
+      })
+    })
+
+    // A task type created after the tab loaded, or whose socket event was
+    // missed, is absent from the map: the tag must not receive a partial
+    // object the widget would turn into a broken link.
+    it('passes null when the task type is unknown', async () => {
+      await remountWith({ notifications: () => [notification] })
+
+      expect(wrapper.findComponent(TaskTypeName).props('taskType')).toBeNull()
+    })
+  })
+
+  describe('read toggle', () => {
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    it('logs a read status that fails to save', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const error = new Error('Request has been terminated')
+      const notification = {
+        id: 'notification-1',
+        author_id: 'person-1',
+        created_at: '2026-09-21T10:00:00',
+        notification_type: 'comment',
+        project_id: 'production-1',
+        read: false,
+        task_id: 'task-1',
+        task_type_id: 'task-type-1'
+      }
+      wrapper.unmount()
+      let actions
+      ;({ store, actions } = makeStore({
+        notifications: () => [notification]
+      }))
+      actions.toggleNotificationReadStatus.mockRejectedValueOnce(error)
+      wrapper = mountPage(store)
+      await flushPromises()
+
+      wrapper.findComponent(BooleanField).vm.$emit('click', true)
+      await flushPromises()
+
+      expect(actions.toggleNotificationReadStatus).toHaveBeenCalled()
+      expect(consoleError).toHaveBeenCalledWith(error)
+    })
+  })
+
+  describe('task selection', () => {
+    const notificationOf = (id, taskId) => ({
+      id,
+      author_id: 'person-1',
+      created_at: '2026-09-21T10:00:00',
+      notification_type: 'comment',
+      project_id: 'production-1',
+      read: false,
+      task_id: taskId,
+      task_type_id: 'task-type-1'
+    })
+    const notifications = [
+      notificationOf('notification-1', 'task-1'),
+      notificationOf('notification-2', 'task-2')
+    ]
+
+    // Each task load ends on demand: the user may select another
+    // notification, or change a filter, before it lands.
+    const mountWithDeferredLoads = async () => {
+      const settlers = new Map()
+      wrapper.unmount()
+      let actions
+      ;({ store, actions } = makeStore({ notifications: () => notifications }))
+      actions.loadTask.mockImplementation(
+        (_, { taskId }) =>
+          new Promise((resolve, reject) => {
+            settlers.set(taskId, { resolve, reject })
+          })
+      )
+      wrapper = mountPage(store)
+      await flushPromises()
+      const finish = async taskId => {
+        settlers.get(taskId).resolve({ id: taskId })
+        await flushPromises()
+      }
+      const fail = async taskId => {
+        settlers.get(taskId).reject(new Error('Bad Gateway'))
+        await flushPromises()
+      }
+      return { actions, fail, finish }
+    }
+
+    const rows = () => wrapper.findAll('.notification')
+    const panelTask = () => wrapper.findComponent(TaskInfo).props('task')
+    const isSelected = row => row.classes().includes('selected')
+
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    it('shows the task of the notification selected last when an earlier load ends after it', async () => {
+      const { finish } = await mountWithDeferredLoads()
+
+      await rows()[0].trigger('click')
+      await rows()[1].trigger('click')
+      await finish('task-2')
+      await finish('task-1')
+
+      expect(panelTask()?.id).toBe('task-2')
+      expect(isSelected(rows()[0])).toBe(false)
+      expect(isSelected(rows()[1])).toBe(true)
+    })
+
+    it('drops a task that loads once the notifications are loaded again', async () => {
+      const { finish } = await mountWithDeferredLoads()
+
+      await rows()[0].trigger('click')
+      wrapper
+        .findComponent(ComboboxTaskType)
+        .vm.$emit('update:modelValue', 'task-type-1')
+      await flushPromises()
+      await finish('task-1')
+
+      expect(panelTask()).toBe(null)
+      expect(rows().some(isSelected)).toBe(false)
+    })
+
+    it('opens a notification clicked twice while its task loads', async () => {
+      const { finish } = await mountWithDeferredLoads()
+
+      await rows()[0].trigger('click')
+      await rows()[0].trigger('click')
+      await finish('task-1')
+
+      expect(panelTask()?.id).toBe('task-1')
+      expect(isSelected(rows()[0])).toBe(true)
+    })
+
+    it('loads a task again on a click after its load failed', async () => {
+      const consoleError = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
+      const { actions, fail, finish } = await mountWithDeferredLoads()
+
+      await rows()[0].trigger('click')
+      await fail('task-1')
+      await rows()[0].trigger('click')
+      await finish('task-1')
+
+      expect(actions.loadTask).toHaveBeenCalledTimes(2)
+      expect(consoleError).toHaveBeenCalledTimes(1)
+      expect(panelTask()?.id).toBe('task-1')
+    })
   })
 
   describe('desktop banner', () => {

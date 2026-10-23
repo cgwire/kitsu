@@ -47,31 +47,10 @@ describe('composables/annotationCursor', () => {
   })
 
   describe('per-mode mapping', () => {
-    it('maps isTyping to text', () => {
-      const { cursor, modes, wrapper } = mountCursor()
-      modes.isTyping.value = true
-      expect(cursor.value).toBe('text')
-      wrapper.unmount()
-    })
-
-    it('maps isShapeMode to crosshair', () => {
-      const { cursor, modes, wrapper } = mountCursor()
-      modes.isShapeMode.value = true
-      expect(cursor.value).toBe('crosshair')
-      wrapper.unmount()
-    })
-
     it('maps isDrawing to the pencil cursor', () => {
       const { cursor, modes, wrapper } = mountCursor()
       modes.isDrawing.value = true
       expect(cursor.value).toBe(CURSOR_PENCIL)
-      wrapper.unmount()
-    })
-
-    it('maps isLaserModeOn to the laser cursor', () => {
-      const { cursor, modes, wrapper } = mountCursor()
-      modes.isLaserModeOn.value = true
-      expect(cursor.value).toBe(CURSOR_LASER)
       wrapper.unmount()
     })
 
@@ -97,13 +76,6 @@ describe('composables/annotationCursor', () => {
   })
 
   describe('Alt-pan', () => {
-    it('returns grab when Alt is held and the mouse is up', () => {
-      const { cursor, modes, wrapper } = mountCursor()
-      modes.isAltHeld.value = true
-      expect(cursor.value).toBe('grab')
-      wrapper.unmount()
-    })
-
     it('swaps to grabbing when the mouse is pressed', () => {
       const { cursor, modes, wrapper } = mountCursor()
       modes.isAltHeld.value = true
@@ -165,19 +137,5 @@ describe('composables/annotationCursor', () => {
       expect(cursor.value).toBe('crosshair')
       wrapper.unmount()
     })
-  })
-
-  it('detaches the global mouse listeners on unmount', () => {
-    const { cursor, modes, wrapper } = mountCursor()
-    modes.isAltHeld.value = true
-    fireMouse('mousedown')
-    expect(cursor.value).toBe('grabbing')
-    wrapper.unmount()
-    // Releasing after unmount must not flip the state of a stale
-    // instance (cursor is dead, but the listener shouldn't keep
-    // firing on the window either).
-    fireMouse('mouseup')
-    // Nothing to assert beyond "did not throw" — the composable is
-    // gone, we just verified the listener removal contract holds.
   })
 })

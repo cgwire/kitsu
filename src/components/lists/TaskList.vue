@@ -263,7 +263,7 @@
                 step="any"
                 type="number"
                 :value="formatDuration(task.estimation, false)"
-                @change="updateEstimation($event.target.value)"
+                @change="updateEstimation($event.target, task)"
                 v-if="isInDepartment(task) && selectionGrid[task.id]"
               />
               <template v-else>
@@ -446,23 +446,22 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
-import { pauseEvent } from '@/composables/dom'
 import { getEntityMap } from '@/composables/entity'
 import { useFormat } from '@/composables/format'
 import { useGrabList } from '@/composables/grabList'
+import { useTaskListSelection } from '@/composables/taskSelection'
 import {
   getMetadataFieldValue,
   isSupervisorInDepartments
 } from '@/lib/descriptors'
 import { getTaskHref } from '@/lib/path'
 import {
-  daysToMinutes,
+  durationToMinutes,
   formatSimpleDate,
   getDatesFromStartDate,
   getDatesFromEndDate,
   parseSimpleDate,
-  minutesToDays,
-  range
+  minutesToDays
 } from '@/lib/time'
 
 import MetadataHeader from '@/components/cells/MetadataHeader.vue'
@@ -484,8 +483,7 @@ import ValidationTag from '@/components/widgets/ValidationTag.vue'
 const { t } = useI18n()
 const router = useRouter()
 const store = useStore()
-const { formatDuration, formatDisplayDate, isDurationInHours, organisation } =
-  useFormat()
+const { formatDuration, formatDisplayDate, organisation } = useFormat()
 
 // Props / Emits
 const props = defineProps({
@@ -544,9 +542,7 @@ const difficultyOptions = [
   { label: '•••••', value: 5 }
 ]
 
-const lastSelection = ref(null)
 const page = ref(1)
-const selectionGrid = ref({})
 
 // Column show/hide, mirroring the assets/shots lists' selector menu. Keys
 // are the fixed task columns; metadata columns are keyed by field_name and
@@ -612,6 +608,13 @@ const taskRows = new Map()
 
 const { startBrowsing } = useGrabList(bodyRef)
 
+const { applySelection, resetSelection, selectionGrid } = useTaskListSelection({
+  tasks: () => props.tasks,
+  body: bodyRef,
+  emit,
+  onSelect: task => scrollToLine(task.id)
+})
+
 // Computed
 const currentEpisode = computed(() => store.getters.currentEpisode)
 const currentProduction = computed(() => store.getters.currentProduction)
@@ -623,7 +626,6 @@ const isCurrentUserProductionSupervisor = computed(
   () => store.getters.isCurrentUserProductionSupervisor
 )
 const isPaperProduction = computed(() => store.getters.isPaperProduction)
-const nbSelectedTasks = computed(() => store.getters.nbSelectedTasks)
 const personMap = computed(() => store.getters.personMap)
 const selectedTasks = computed(() => store.getters.selectedTasks)
 const taskMap = computed(() => store.getters.taskMap)
@@ -733,6 +735,7 @@ const getDate = date => (date ? moment(date, 'YYYY-MM-DD').toDate() : null)
 const applyToSelection = buildData => {
   Object.keys(selectionGrid.value).forEach(taskId => {
     const task = taskMap.value.get(taskId)
+    if (!task) return
     const data = buildData(task)
     if (data && isTaskChanged(task, data)) {
       store.dispatch('updateTask', { taskId, data }).catch(console.error)
@@ -740,10 +743,15 @@ const applyToSelection = buildData => {
   })
 }
 
-const updateEstimation = duration => {
-  const estimation = isDurationInHours.value
-    ? duration * 60
-    : daysToMinutes(organisation.value, duration)
+// "1." left in the field is no number and reads as an emptied field, which
+// saved an estimation of 0, and a negative number saved a negative one: the
+// stored one comes back instead. An emptied field still saves 0.
+const updateEstimation = (input, task) => {
+  if (input.validity.badInput || input.valueAsNumber < 0) {
+    input.value = formatDuration(task.estimation, false)
+    return
+  }
+  const estimation = durationToMinutes(organisation.value, input.value)
 
   updateTasksEstimation({ estimation })
 }
@@ -846,30 +854,16 @@ const onBodyScroll = event => {
   emit('scroll', { top: position.scrollTop })
 }
 
-const onKeyDown = event => {
-  if (props.tasks.length > 0 && event.altKey) {
-    let index = lastSelection.value || 0
-    if ([37, 38].includes(event.keyCode)) {
-      index = index - 1 < 0 ? props.tasks.length - 1 : index - 1
-      selectTask({}, index, props.tasks[index])
-      pauseEvent(event)
-    } else if ([39, 40].includes(event.keyCode)) {
-      index = index + 1 >= props.tasks.length ? 0 : index + 1
-      selectTask({}, index, props.tasks[index])
-      pauseEvent(event)
-    }
-  }
-}
-
 const selectTask = (event, index, task) => {
   if (
     event &&
     event.target &&
     // Dirty hack needed to make date picker and inputs work properly
     (['INPUT', 'LABEL', 'SELECT', 'TEXTAREA'].includes(event.target.nodeName) ||
+      // Icons should not trigger selection (an SVG className is no string)
+      event.target instanceof SVGElement ||
       // Combo box should not trigger selection
       event.target.className.indexOf('selected-line') >= 0 ||
-      event.target.className.indexOf('down-icon') >= 0 ||
       event.target.className.indexOf('flexrow') >= 0 ||
       event.target.className.indexOf('c-mask') >= 0 ||
       event.target.className.indexOf('option-line') >= 0 ||
@@ -891,38 +885,6 @@ const selectTask = (event, index, task) => {
 const selectTaskFromCard = (event, index, task) => {
   if (event.target?.closest?.('.avatar-wrapper')) return
   applySelection(event, index, task)
-}
-
-const applySelection = (event, index, task) => {
-  const isSelected = selectionGrid.value[task.id]
-  if (!(event.ctrlKey || event.metaKey) && !event.shiftKey) {
-    store.dispatch('clearSelectedTasks')
-    resetSelection()
-  }
-
-  if (!event.shiftKey) {
-    if (isSelected) {
-      store.dispatch('removeSelectedTask', { task })
-      selectionGrid.value[task.id] = undefined
-    } else {
-      store.dispatch('addSelectedTask', { task })
-      emit('task-selected', task)
-      selectionGrid.value[task.id] = true
-      lastSelection.value = index
-    }
-  } else {
-    selectionGrid.value = {}
-    const taskIndices =
-      lastSelection.value > index
-        ? range(index, lastSelection.value)
-        : range(lastSelection.value, index)
-    const selection = taskIndices.map(i => ({ task: props.tasks[i] }))
-    selection.forEach(task => {
-      selectionGrid.value[task.task.id] = true
-    })
-    store.dispatch('addSelectedTasks', selection)
-  }
-  scrollToLine(task.id)
 }
 
 const setScrollPosition = top => {
@@ -1028,11 +990,6 @@ const onMetadataChanged = ({ entry, descriptor, value }) => {
     .catch(console.error)
 }
 
-const resetSelection = () => {
-  selectionGrid.value = {}
-  lastSelection.value = null
-}
-
 const getTableData = () => {
   const headers = [
     isAssets.value ? t('tasks.fields.asset_type') : t('tasks.fields.sequence'),
@@ -1100,22 +1057,15 @@ watch(
   () => props.tasks,
   () => {
     page.value = 1
-    resetSelection()
   }
 )
 
-watch(nbSelectedTasks, () => {
-  if (nbSelectedTasks.value === 0) resetSelection()
-})
-
 // Lifecycle
 onMounted(() => {
-  window.addEventListener('keydown', onKeyDown, false)
   window.addEventListener('mousedown', onClickOutsideMenu)
 })
 
 onBeforeUnmount(() => {
-  window.removeEventListener('keydown', onKeyDown)
   window.removeEventListener('mousedown', onClickOutsideMenu)
 })
 

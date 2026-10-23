@@ -1,4 +1,4 @@
-import { mount } from '@vue/test-utils'
+import { flushPromises, mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
 
 import DeleteModal from '@/components/modals/DeleteModal.vue'
@@ -38,5 +38,28 @@ describe('DeleteModal', () => {
     const wrapper = mountModal({ isError: true, errorText: 'Still linked' })
 
     expect(wrapper.find('.error-details').exists()).toBe(false)
+  })
+
+  // A row button hides itself once the modal covers the row, which used to
+  // drop the focus on <body>: Shift+Tab then reached the page behind.
+  it('keeps Shift+Tab inside the modal it opened', async () => {
+    const wrapper = mount(DeleteModal, {
+      props: { active: false, text: 'Are you sure?' },
+      global: { mocks: { $t: key => key } },
+      attachTo: document.body
+    })
+
+    await wrapper.setProps({ active: true })
+    await flushPromises()
+    const event = new KeyboardEvent('keydown', {
+      key: 'Tab',
+      shiftKey: true,
+      cancelable: true
+    })
+    window.dispatchEvent(event)
+
+    expect(event.defaultPrevented).toBe(true)
+    expect(document.activeElement).toBe(wrapper.get('button.is-link').element)
+    wrapper.unmount()
   })
 })

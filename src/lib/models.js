@@ -45,10 +45,6 @@ export const setTasksEntityPreview = (tasks, entityId, previewId) => {
   })
 }
 
-export const findModelInList = (items, modelToFind) => {
-  return items.find(item => item.id === modelToFind.id)
-}
-
 export const updateModelFromList = (items, modelToUpdate) => {
   const item = items.find(item => item.id === modelToUpdate.id)
   if (item) Object.assign(item, modelToUpdate)

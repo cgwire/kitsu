@@ -6,22 +6,32 @@ const RETAKE_CHART_COLORS = {
 
 const DEFAULT_STATUS_COLOR = '#6F727A'
 
+// Out of the box the default status is near white, unreadable on a light
+// background: it is drawn grey.
+export const getStatusColor = taskStatus =>
+  taskStatus.is_default ? DEFAULT_STATUS_COLOR : taskStatus.color
+
 const createStatusEntry = taskStatus => ({
   name: taskStatus.short_name,
   color: taskStatus.color,
   count: 0,
   frames: 0,
-  drawings: 0
+  drawings: 0,
+  is_done: !!taskStatus.is_done,
+  is_default: !!taskStatus.is_default
 })
 
 // Get all data displayed in statistics (needed by the stat cell widget).
-// Data follow this format: [[task-status-1-name, value], ...]
+// Data follow this format: [[task-status-1-name, value, color, isDone], ...]
 // Set count data or frames data depending on data type.
+// The stats computed by the server carry no done or default flag: give the
+// task status map to read them from the statuses.
 export const getChartData = (
   mainStats,
   entryId,
   columnId,
-  dataType = 'count'
+  dataType = 'count',
+  taskStatusMap = null
 ) => {
   if (!mainStats[entryId] || !mainStats[entryId][columnId]) return []
   const statusData = mainStats[entryId][columnId]
@@ -29,8 +39,11 @@ export const getChartData = (
   return Object.keys(statusData)
     .map(taskStatusId => {
       const data = statusData[taskStatusId]
-      const color = data.is_default ? DEFAULT_STATUS_COLOR : data.color
-      return [data.name, data[valueField], color]
+      const taskStatus = taskStatusMap?.get(taskStatusId)
+      const isDefault = data.is_default ?? taskStatus?.is_default
+      const color = isDefault ? DEFAULT_STATUS_COLOR : data.color
+      const isDone = data.is_done ?? taskStatus?.is_done
+      return [data.name, data[valueField], color, !!isDone]
     })
     .sort(_sortData)
 }
@@ -47,26 +60,65 @@ const _sortData = (a, b) => {
   }
 }
 
+// Give a take number to read the stats the column had at that take instead
+// of its current ones.
 export const getRetakeChartData = (
   mainStats,
   entryId,
   columnId,
-  dataType = 'count'
+  dataType = 'count',
+  takeNumber = null
 ) => {
-  if (!mainStats[entryId] || !mainStats[entryId][columnId]) return []
-  const statusData = { ...mainStats[entryId][columnId] }
-  delete statusData.evolution
-  delete statusData.max_retake_count
-  const valueField = dataType
-  return [
-    [
-      'retake',
-      statusData.retake?.[valueField] || 0,
-      RETAKE_CHART_COLORS.retake
-    ],
-    ['other', statusData.other?.[valueField] || 0, RETAKE_CHART_COLORS.other],
-    ['done', statusData.done?.[valueField] || 0, RETAKE_CHART_COLORS.done]
-  ]
+  const column = mainStats[entryId]?.[columnId]
+  if (!column) return []
+  const statusData = takeNumber ? column.evolution[takeNumber] : column
+  return ['retake', 'other', 'done'].map(name => [
+    name,
+    statusData[name]?.[dataType] || 0,
+    RETAKE_CHART_COLORS[name],
+    name === 'done'
+  ])
+}
+
+// Share of the chart data value held by the done statuses, between 0 and 1.
+export const getDoneRatio = chartData => {
+  const total = chartData.reduce((sum, row) => sum + (row[1] || 0), 0)
+  const done = chartData
+    .filter(row => row[3])
+    .reduce((sum, row) => sum + (row[1] || 0), 0)
+  return total > 0 ? done / total : 0
+}
+
+// Share as a whole percentage, where only an empty share reads 0 and only a
+// full one 100: a single shot left in retake must not show as complete.
+export const roundPercent = ratio => {
+  const percent = Math.round(ratio * 100)
+  if (ratio > 0 && percent === 0) return 1
+  if (ratio < 1 && percent === 100) return 99
+  return percent
+}
+
+// Below this share, the slice of a 50px pie hardly shows past its white
+// outline.
+const PIE_MIN_SHARE = 0.03
+
+// Values to draw a pie with: a status under the minimum share is drawn
+// larger, or a single shot left in retake vanishes from a full pie. The
+// statuses raised share one minimum share of extra room at most, so a few
+// stragglers barely shrink the other slices.
+export const getPieChartData = chartData => {
+  const total = chartData.reduce((sum, row) => sum + (row[1] || 0), 0)
+  const minValue = total * PIE_MIN_SHARE
+  const isSmall = row => row[1] > 0 && row[1] < minValue
+  const extra = chartData
+    .filter(isSmall)
+    .reduce((sum, row) => sum + minValue - row[1], 0)
+  const scale = extra > minValue ? minValue / extra : 1
+  return chartData.map(row =>
+    isSmall(row)
+      ? [row[0], row[1] + (minValue - row[1]) * scale, ...row.slice(2)]
+      : row
+  )
 }
 
 // Get all colors displayed in statistics (needed by the stat cell widget).
@@ -74,11 +126,10 @@ export const getChartColors = (mainStats, entry, column) => {
   return getChartData(mainStats, entry, column).map(entry => entry[2])
 }
 
-// Extract max retake count info from retake statistics.
-export const getChartRetakeCount = (mainStats, entryId, columnId) => {
-  if (!mainStats[entryId] || !mainStats[entryId][columnId]) return -1
-  return mainStats[entryId][columnId].max_retake_count
-}
+// Extract max retake count info from retake statistics. A column rebuilt
+// from no visible task type is empty: it counts as a missing one.
+export const getChartRetakeCount = (mainStats, entryId, columnId) =>
+  mainStats[entryId]?.[columnId]?.max_retake_count ?? -1
 
 // Build a map containing all stats of a production or episode:
 //
@@ -125,6 +176,47 @@ export const computeStats = (entities, idField, taskStatusMap, taskMap) => {
   })
   return results
 }
+
+// Fold the tasks of the entities (shots or assets with their tasks embedded)
+// by the department of their task type, in the shape getChartData reads at
+// entry "all": { all: { [departmentId]: { [taskStatusId]: entry } } }.
+// Canceled entities, unknown statuses and task types without department are
+// left out.
+export const computeDepartmentStats = (
+  entities,
+  taskTypeMap,
+  taskStatusMap
+) => {
+  const departments = {}
+  entities
+    .filter(entity => !entity.canceled)
+    .flatMap(entity => entity.tasks || [])
+    .forEach(task => {
+      const departmentId = taskTypeMap.get(task.task_type_id)?.department_id
+      const taskStatus = taskStatusMap.get(task.task_status_id)
+      if (departmentId && taskStatus) {
+        const statuses = (departments[departmentId] ||= {})
+        // The full name: the bar names the statuses on hover, to readers
+        // who do not know the short names.
+        const entry = (statuses[taskStatus.id] ||= {
+          ...createStatusEntry(taskStatus),
+          name: taskStatus.name
+        })
+        entry.count++
+      }
+    })
+  return { all: departments }
+}
+
+// Count the entities of each group. Canceled ones are left out, as in
+// computeStats.
+export const countEntities = (entities, idField) =>
+  entities.reduce((counts, entity) => {
+    if (!entity.canceled) {
+      counts[entity[idField]] = (counts[entity[idField]] || 0) + 1
+    }
+    return counts
+  }, {})
 
 // Add to result map, statistic for given task (add 1 for task status matching
 // given task).
@@ -215,6 +307,31 @@ export const aggregateStats = (mainStats, entryIds) => {
   })
   return result
 }
+
+// Drop the given columns of an entry and rebuild its "all" column from the
+// remaining ones.
+export const omitStatsColumns = (
+  entryStats,
+  hiddenColumnIds,
+  aggregate = aggregateStats
+) => {
+  const columnIds = Object.keys(entryStats).filter(
+    id => id !== 'all' && !hiddenColumnIds.includes(id)
+  )
+  // The aggregate sums entries: each kept column is given to it as an entry
+  // holding a single "all" column.
+  const columns = Object.fromEntries(
+    columnIds.map(id => [id, { all: entryStats[id] }])
+  )
+  return {
+    ...Object.fromEntries(columnIds.map(id => [id, entryStats[id]])),
+    all: aggregate(columns, columnIds).all || {}
+  }
+}
+
+// Same as omitStatsColumns for retake stats.
+export const omitRetakeStatsColumns = (entryStats, hiddenColumnIds) =>
+  omitStatsColumns(entryStats, hiddenColumnIds, aggregateRetakeStats)
 
 // Same as aggregateStats for retake stats (retake / done / other buckets).
 export const aggregateRetakeStats = (retakeStats, entryIds) => {

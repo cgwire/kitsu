@@ -14,7 +14,7 @@
       ></div>
     </template>
     <template v-else>
-      <div class="c-mask" v-if="isOpen"></div>
+      <div class="c-mask is-active" v-if="isOpen"></div>
       <span
         class="description-shorten-text selectable"
         v-html="
@@ -202,10 +202,5 @@ span.description-shorten-text {
     border-top-color: $white;
     content: '';
   }
-}
-
-.c-mask {
-  width: 100%;
-  height: 100%;
 }
 </style>

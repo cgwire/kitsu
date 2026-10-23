@@ -25,12 +25,38 @@
           {{ $t('settings.production.empty_list') }}
         </div>
         <table class="datatable list" v-else>
+          <thead>
+            <tr>
+              <th class="th-grab"></th>
+              <th>{{ $t('task_types.fields.name') }}</th>
+              <th class="th-bitrate">
+                <span class="th-bitrate-label">
+                  {{ $t('productions.fields.hd_bitrate_short') }}
+                  <info-question-mark position="left" :text="bitrateHelp.hd" />
+                </span>
+              </th>
+              <th class="th-bitrate">
+                <span class="th-bitrate-label">
+                  {{ $t('productions.fields.ld_bitrate_short') }}
+                  <info-question-mark position="left" :text="bitrateHelp.ld" />
+                </span>
+              </th>
+              <th></th>
+            </tr>
+          </thead>
+          <!-- A held button must not arm a drag: a reload that shifted the
+               rows before the release made vuedraggable throw on the move. -->
           <draggable
             class="datatable-body"
+            filter="button"
             item-key="id"
+            :prevent-on-filter="false"
             tag="tbody"
             v-model="draggableList"
+            @choose="onRowHeld"
             @end="onReorder"
+            @start="onRowDragged"
+            @unchoose="onRowReleased"
           >
             <template #item="{ element: taskType }">
               <tr class="datatable-row task-type">
@@ -38,6 +64,18 @@
                   <grip-vertical-icon />
                 </td>
                 <task-type-cell :task-type="taskType" />
+                <td class="bitrate" v-for="key in BITRATE_KEYS" :key="key">
+                  <input
+                    class="input"
+                    type="number"
+                    min="1"
+                    :max="bitrateCeiling(taskType, key)"
+                    :placeholder="inheritedBitrate(taskType, key)"
+                    :title="$t(`productions.fields.${key}`)"
+                    :value="taskType[key] ?? ''"
+                    @change="onBitrateChange(taskType, key, $event.target)"
+                  />
+                </td>
                 <td class="remove">
                   <button class="button" @click="$emit('remove', taskType.id)">
                     {{ $t('main.remove') }}
@@ -65,18 +103,20 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { GripVerticalIcon } from 'lucide-vue-next'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
+import draggable from 'vuedraggable'
 import { useStore } from 'vuex'
 
-import draggable from 'vuedraggable'
-import { GripVerticalIcon } from 'lucide-vue-next'
-
+import { useDraggableRebuild } from '@/composables/draggableRebuild'
+import { clampBitrates } from '@/lib/productions'
 import { sortByName } from '@/lib/sorting'
 
-import SettingImporter from '@/components/widgets/SettingImporter.vue'
 import TaskTypeCell from '@/components/cells/TaskTypeCell.vue'
+import InfoQuestionMark from '@/components/widgets/InfoQuestionMark.vue'
+import SettingImporter from '@/components/widgets/SettingImporter.vue'
 import TaskTypeName from '@/components/widgets/TaskTypeName.vue'
 
 const { t } = useI18n()
@@ -84,28 +124,36 @@ const route = useRoute()
 const router = useRouter()
 const store = useStore()
 
-const VALID_SECTIONS = ['assets', 'shots', 'sequences', 'episodes', 'edits']
-
+// Props / Emits
+// --------------------------------------------------------------------------
 const props = defineProps({
   taskTypes: { type: Array, default: () => [] },
-  allTaskTypes: { type: Array, default: () => [] }
+  allTaskTypes: { type: Array, default: () => [] },
+  // Bitrates shown as placeholders when a task type inherits them.
+  defaultBitrates: { type: Object, default: () => ({}) }
 })
 
-const emit = defineEmits(['add', 'import-items', 'remove', 'reorder'])
+const emit = defineEmits([
+  'add',
+  'bitrates-changed',
+  'import-items',
+  'remove',
+  'reorder'
+])
 
-const initialSection = VALID_SECTIONS.includes(route.query.section)
-  ? route.query.section
-  : 'assets'
-const entityTab = ref(initialSection)
+// State
+// --------------------------------------------------------------------------
+const VALID_SECTIONS = ['assets', 'shots', 'sequences', 'episodes', 'edits']
+const BITRATE_KEYS = ['hd_bitrate_compression', 'ld_bitrate_compression']
+
+const entityTab = ref(
+  VALID_SECTIONS.includes(route.query.section) ? route.query.section : 'assets'
+)
 const draggableList = ref([])
 const loadingImport = ref(false)
 
-watch(entityTab, section => {
-  // eslint-disable-next-line no-unused-vars
-  const { search, ...rest } = route.query
-  router.replace({ query: { ...rest, section } })
-})
-
+// Computed
+// --------------------------------------------------------------------------
 const entityTabs = computed(() => [
   { label: t('assets.title'), name: 'assets' },
   { label: t('shots.title'), name: 'shots' },
@@ -115,46 +163,60 @@ const entityTabs = computed(() => [
 ])
 
 const linkedIds = computed(() => new Set(props.taskTypes.map(tt => tt.id)))
+const bitrateDefaults = computed(() => store.getters.movieBitrateDefaults)
+
+// The low definition bitrate of a row stays within its high definition one.
+const bitrateHelp = computed(() => {
+  const help = maximum =>
+    `${t('productions.video.task_type_bitrates')}\n\n${maximum}`
+  return {
+    hd: help(
+      t('productions.video.bitrate_max', {
+        value: bitrateDefaults.value.hd_bitrate_compression
+      })
+    ),
+    ld: help(t('productions.video.task_type_ld_bitrate_max'))
+  }
+})
 
 const taskTypesForEntity = computed(() =>
-  props.taskTypes.filter(
-    tt => `${(tt.for_entity || '').toLowerCase()}s` === entityTab.value
-  )
+  props.taskTypes.filter(tt => sectionOf(tt) === entityTab.value)
 )
 
 const remainingTaskTypesForEntity = computed(() =>
   sortByName(
     props.allTaskTypes.filter(
-      tt =>
-        !linkedIds.value.has(tt.id) &&
-        `${(tt.for_entity || '').toLowerCase()}s` === entityTab.value
+      tt => !linkedIds.value.has(tt.id) && sectionOf(tt) === entityTab.value
     )
   )
 )
 
-watch(
-  taskTypesForEntity,
-  list => {
-    draggableList.value = [...list]
-  },
-  { immediate: true }
-)
+// Functions
+// --------------------------------------------------------------------------
+// The tabs are named after the plural of the entity the task types are for
+const sectionOf = taskType => `${(taskType.for_entity || '').toLowerCase()}s`
 
-const onImportItem = item => {
-  const id = item && item.id ? item.id : item
-  emit('add', id)
-}
+const {
+  rebuild: resetDraggableList,
+  onRowHeld,
+  onRowDragged,
+  onRowReleased
+} = useDraggableRebuild(() => {
+  draggableList.value = [...taskTypesForEntity.value]
+})
 
-const onImportFromProduction = async productionId => {
-  const productionMap = store.getters.productionMap
-  const sourceProduction = productionMap?.get(productionId)
+const onImportItem = item => emit('add', item?.id || item)
+
+const onImportFromProduction = productionId => {
+  const sourceProduction = store.getters.productionMap?.get(productionId)
   if (!sourceProduction) return
-  const sourceTaskTypeIds = sourceProduction.task_types || []
-  const toAdd = sourceTaskTypeIds.filter(id => {
-    if (linkedIds.value.has(id)) return false
+  const toAdd = (sourceProduction.task_types || []).filter(id => {
     const taskType = props.allTaskTypes.find(tt => tt.id === id)
-    if (!taskType) return false
-    return `${(taskType.for_entity || '').toLowerCase()}s` === entityTab.value
+    return (
+      taskType &&
+      !linkedIds.value.has(id) &&
+      sectionOf(taskType) === entityTab.value
+    )
   })
   if (toAdd.length === 0) return
   loadingImport.value = true
@@ -166,13 +228,57 @@ const onImportFromProduction = async productionId => {
   })
 }
 
-const onReorder = () => {
-  const ordered = draggableList.value.map((tt, index) => ({
-    taskTypeId: tt.id,
-    priority: index + 1
-  }))
-  emit('reorder', ordered)
+const bitrateCeiling = (taskType, key) =>
+  key === 'hd_bitrate_compression'
+    ? bitrateDefaults.value.hd_bitrate_compression
+    : taskType.hd_bitrate_compression ||
+      props.defaultBitrates.hd_bitrate_compression ||
+      bitrateDefaults.value.hd_bitrate_compression
+
+// The bitrate a task type gets while its own is empty: Zou encodes the low
+// definition version within the high definition bitrate.
+const inheritedBitrate = (taskType, key) =>
+  Math.min(
+    props.defaultBitrates[key] || bitrateDefaults.value[key],
+    bitrateCeiling(taskType, key)
+  )
+
+const onBitrateChange = (taskType, key, input) => {
+  const bitrates = clampBitrates(
+    { ...taskType, [key]: input.value },
+    {
+      inheritedHd: props.defaultBitrates.hd_bitrate_compression,
+      max: bitrateDefaults.value.hd_bitrate_compression
+    }
+  )
+  // A change event skips the checks of the browser: show what is saved.
+  input.value = bitrates[key] ?? ''
+  emit('bitrates-changed', { taskTypeId: taskType.id, ...bitrates })
 }
+
+// The list held during the drag may still show a task type removed
+// meanwhile, and Zou links again a task type a template reorder names.
+const onReorder = () => {
+  emit(
+    'reorder',
+    draggableList.value
+      .filter(tt => linkedIds.value.has(tt.id))
+      .map((tt, index) => ({
+        taskTypeId: tt.id,
+        priority: index + 1
+      }))
+  )
+}
+
+// Watchers
+// --------------------------------------------------------------------------
+watch(entityTab, section => {
+  // eslint-disable-next-line no-unused-vars
+  const { search, ...rest } = route.query
+  router.replace({ query: { ...rest, section } })
+})
+
+watch(taskTypesForEntity, resetDraggableList, { immediate: true })
 </script>
 
 <style lang="scss" scoped>
@@ -198,21 +304,73 @@ const onReorder = () => {
 .column {
   overflow-y: initial;
   flex: 0 0 auto;
-  max-width: 400px;
+  max-width: 600px;
+
+  // Sized on its content, the importer was a narrow strip
+  & + .column {
+    flex: 0 0 360px;
+    width: 360px;
+  }
 }
 
 .list {
-  width: 400px;
-  min-width: 400px;
-  max-width: 400px;
+  width: 600px;
+  min-width: 600px;
+  max-width: 600px;
 
   .name {
     width: 100%;
   }
 }
 
+.bitrate {
+  min-width: 120px;
+  width: 120px;
+
+  input {
+    appearance: textfield;
+    width: 100px;
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      appearance: none;
+      margin: 0;
+    }
+  }
+}
+
 .box {
-  max-width: 400px;
+  max-width: 600px;
+}
+
+.datatable th {
+  color: var(--text);
+  padding-left: 10px;
+  padding-top: 1em;
+}
+
+.th-grab {
+  width: 30px;
+}
+
+.th-bitrate {
+  min-width: 120px;
+  white-space: nowrap;
+  // A sticky header cell is its own stacking context: without a z-index, the
+  // inputs of the rows (positioned, later in the page) cover its tooltip.
+  z-index: 2;
+
+  // The tooltip opens over the next columns: narrow, it stays within the tab
+  // on a tablet.
+  :deep(.question-text) {
+    max-width: 320px;
+  }
+}
+
+.th-bitrate-label {
+  align-items: center;
+  display: flex;
+  gap: 0.3em;
 }
 
 .task-type {

@@ -142,9 +142,15 @@ const productionPath = production =>
   background: $white;
   cursor: pointer;
   margin: 0;
-  padding: 0 0.2em;
   margin-left: 3px;
   margin-right: 3px;
+
+  // The padding belongs to the link: on the line it would close the list
+  // without navigating.
+  a {
+    display: block;
+    padding: 0 0.2em;
+  }
 
   &:first-child {
     margin-top: 7px;

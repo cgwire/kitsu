@@ -1,5 +1,8 @@
 <template>
-  <page-left-side-layout>
+  <page-left-side-layout
+    class="entity-chats"
+    :class="{ 'chat-open': isChatOpen }"
+  >
     <template #side>
       <div class="chat-column">
         <spinner class="mt1" v-if="isListLoading" />
@@ -44,6 +47,13 @@
 
     <template #main>
       <div class="selected-entity-chat">
+        <button-simple
+          class="back-button"
+          icon="left"
+          :text="$t('main.back')"
+          @click="router.push({ query: {} })"
+          v-if="chats.length"
+        />
         <entity-chat
           ref="entityChat"
           :entity="entity"
@@ -75,6 +85,7 @@ import { useFormat } from '@/composables/format'
 
 import PageLeftSideLayout from '@/components/layouts/PageLeftSideLayout.vue'
 import EntityChat from '@/components/pages/entities/EntityChat.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import EntityThumbnail from '@/components/widgets/EntityThumbnail.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 
@@ -94,6 +105,8 @@ const isListLoading = ref(false)
 
 const entityChatRef = useTemplateRef('entityChat')
 
+const isPhone = Boolean(window.matchMedia?.('(max-width: 768px)').matches)
+
 // Computed
 // --------------------------------------------------------------------------
 const productionMap = computed(() => store.getters.productionMap)
@@ -110,6 +123,14 @@ const chatList = computed(() =>
       a.entity_name.localeCompare(b.entity_name)
     )
   })
+)
+
+// phones show either the list or a chat: the URL tells which, so the
+// browser back goes to the list. Without chat, EntityChat explains why.
+const isChatOpen = computed(
+  () =>
+    Boolean(route.query.entity_id) ||
+    (!isListLoading.value && chats.value.length === 0)
 )
 
 const selectedChatName = computed(
@@ -141,8 +162,11 @@ const selectFromQuery = () => {
 
 const selectChat = async chat => {
   entity.value = { id: chat.object_id }
-  await nextTick()
-  entityChatRef.value.focusMessageBox()
+  // the keyboard would cover a phone screen
+  if (!isPhone) {
+    await nextTick()
+    entityChatRef.value.focusMessageBox()
+  }
   router.push({ query: { entity_id: chat.object_id } })
 }
 
@@ -219,6 +243,30 @@ useHead({ title: computed(() => `${t('chats.title')} - Kitsu`) })
   max-height: 100%;
   padding: 1em;
   padding-top: 60px;
+}
+
+.back-button {
+  display: none;
+}
+
+@media screen and (max-width: 768px) {
+  .entity-chats {
+    :deep(.left-side-column) {
+      max-width: none;
+      width: 100%;
+    }
+
+    &:not(.chat-open) :deep(.main-column),
+    &.chat-open :deep(.left-side-column) {
+      display: none;
+    }
+  }
+
+  .back-button {
+    align-self: flex-start;
+    display: flex;
+    margin-top: 1em;
+  }
 }
 
 .chat-item {

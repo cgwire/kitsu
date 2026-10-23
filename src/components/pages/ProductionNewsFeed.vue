@@ -114,6 +114,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
 import { useTime } from '@/composables/time'
+import { isFreeEscape } from '@/lib/keyboard'
 import {
   formatFullDateWithRevertedTimezone,
   formatSimpleDate
@@ -154,7 +155,8 @@ const loading = reactive({ more: false, news: false })
 
 // Non-reactive scheduling/selection state.
 const newsRefs = new Map()
-let lastSelection = null
+// The news selected last: its task may still be loading.
+let selectedNewsId = null
 let silent = false
 
 const setNewsRef = (id, el) => {
@@ -241,24 +243,32 @@ const scrollToLine = news => {
 }
 
 const closeTask = () => {
-  lastSelection = -1
+  selectedNewsId = null
   currentTask.value = null
   currentNewsId.value = ''
 }
 
 const onNewsSelected = news => {
-  const index = newsList.value.findIndex(n => n.id === news.id)
-  if (lastSelection !== index) {
-    lastSelection = index
+  if (news.id !== selectedNewsId) {
+    selectedNewsId = news.id
     store
       .dispatch('loadTask', { taskId: news.task_id })
       .then(task => {
+        // Answers come in any order: a slower load of a news selected
+        // before would replace the task of this one.
+        if (news.id !== selectedNewsId) return
         currentTask.value = task
         currentNewsId.value = news.id
       })
-      .catch(console.error)
+      .catch(err => {
+        console.error(err)
+        // A click on the news loads it again.
+        if (news.id === selectedNewsId) selectedNewsId = currentNewsId.value
+      })
     scrollToLine(news)
-  } else {
+  } else if (news.id === currentNewsId.value) {
+    // Only the task shown closes: a news still loading gets the second
+    // click of a double click.
     closeTask()
   }
 }
@@ -269,7 +279,7 @@ const init = () => {
     currentPage.value = 1
     loading.news = true
     errors.news = false
-    currentTask.value = null
+    closeTask()
     // replace, not push: filter changes must not stack history entries the
     // back button then has to walk through.
     router.replace({ query: filterQuery.value })
@@ -319,12 +329,12 @@ const onBodyScroll = event => {
 }
 
 const onKeyDown = event => {
-  if (event.key === 'Escape' && isDrawerOpen.value) {
+  if (isFreeEscape(event) && isDrawerOpen.value) {
     closeTask()
     return
   }
   if (newsList.value && newsList.value.length > 0 && event.altKey) {
-    let index = lastSelection ? lastSelection : 0
+    let index = newsList.value.findIndex(news => news.id === selectedNewsId)
     if ([37, 38].includes(event.keyCode)) {
       index = index - 1 < 0 ? newsList.value.length - 1 : index - 1
       onNewsSelected(newsList.value[index])
@@ -368,6 +378,10 @@ const onNewsNew = eventData => {
         newsId: eventData.news_id
       })
       .then(() => markRecent(eventData.news_id))
+      .catch(err => {
+        // Its comment was deleted or moved before the news could load.
+        if (err?.status !== 404) console.error(err)
+      })
   }
 }
 
@@ -378,10 +392,16 @@ const onTaskUpdate = eventData => {
       news.task_id === eventData.task_id
   )
   if (relatedNews) {
-    store.dispatch('loadSingleNews', {
-      productionId: relatedNews.project_id,
-      newsId: relatedNews.id
-    })
+    store
+      .dispatch('loadSingleNews', {
+        productionId: relatedNews.project_id,
+        newsId: relatedNews.id
+      })
+      .catch(err => {
+        // Deleting or moving a comment deletes its news, then updates its task.
+        if (err?.status === 404) store.commit('REMOVE_NEWS', relatedNews.id)
+        else console.error(err)
+      })
   }
 }
 
