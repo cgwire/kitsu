@@ -199,7 +199,8 @@
                 v-if="
                   isCurrentUserManager &&
                   displayedEpisodes.length > 0 &&
-                  !isLoading
+                  !isLoading &&
+                  !isError
                 "
               />
 
@@ -499,7 +500,10 @@
       v-if="isEmptyList && !isLoading"
     />
 
-    <p class="has-text-centered nb-episodes" v-if="!isEmptyList && !isLoading">
+    <p
+      class="has-text-centered nb-episodes"
+      v-if="!isEmptyList && !isLoading && !isError"
+    >
       {{ displayedEpisodesLength }}
       {{ $t('episodes.number', { count: displayedEpisodesLength }) }}
       <span

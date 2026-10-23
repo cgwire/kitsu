@@ -183,7 +183,8 @@
                 v-if="
                   isCurrentUserManager &&
                   displayedSequences.length > 0 &&
-                  !isLoading
+                  !isLoading &&
+                  !isError
                 "
               />
 
@@ -466,7 +467,10 @@
       v-if="isEmptyList && !isLoading"
     />
 
-    <p class="has-text-centered nb-sequences" v-if="!isEmptyList && !isLoading">
+    <p
+      class="has-text-centered nb-sequences"
+      v-if="!isEmptyList && !isLoading && !isError"
+    >
       {{ displayedSequencesLength }}
       {{ $t('sequences.number', { count: displayedSequencesLength }) }}
       <span

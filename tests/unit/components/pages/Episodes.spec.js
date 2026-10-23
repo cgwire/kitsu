@@ -4,6 +4,8 @@ import { reactive } from 'vue'
 vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 
+import errors from '@/lib/errors'
+
 import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditEpisodeModal from '@/components/modals/EditEpisodeModal.vue'
@@ -11,6 +13,7 @@ import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
 import Episodes from '@/components/pages/Episodes.vue'
 
 import { mountEntityPage, production } from '../../fixtures/entity-page'
+import { recordUnhandledRejections } from '../../fixtures/unhandled-rejections'
 
 const mountPage = options =>
   mountEntityPage(Episodes, { listName: 'EpisodeList', ...options })
@@ -212,5 +215,171 @@ describe('Episodes page', () => {
     ].filter(modal => modal.props('active'))
     expect(openModals).toHaveLength(1)
     expect(openModals[0].props('lockText')).toBe('E01')
+  })
+})
+
+// The topbar switches the production under the mounted page, which then
+// reloads the list of the new one.
+describe('Episodes page, reload after a production switch', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  const mountOnProduction = async loadEpisodesWithTasks => {
+    const getters = reactive({
+      currentProduction: production,
+      episodeMap: episodeMap(production.id),
+      episodeValidationColumns: ['task-type-1']
+    })
+    const page = await mountPage({ getters, actions: { loadEpisodesWithTasks } })
+    const switchTo = async id => {
+      getters.currentProduction = { ...production, id }
+      await flushPromises()
+    }
+    return { ...page, switchTo }
+  }
+
+  const switchProduction = async loadEpisodesWithTasks => {
+    const page = await mountOnProduction(loadEpisodesWithTasks)
+    await page.switchTo('production-2')
+    return page
+  }
+
+  const requestFailure = () => {
+    const failure = new Error('Request has been terminated')
+    errors.markRequestFailure(failure)
+    return failure
+  }
+
+  const listOf = wrapper => wrapper.findComponent({ name: 'EpisodeList' })
+
+  test('logs a failed reload of the list', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const failure = requestFailure()
+
+    const rejections = await recordUnhandledRejections(() =>
+      switchProduction(() => Promise.reject(failure))
+    )
+
+    expect(rejections).toEqual([])
+    expect(consoleError).toHaveBeenCalledWith(failure)
+  })
+
+  test('leaves a bug in the reload of the list to Sentry', async () => {
+    const bug = new TypeError('Cannot read properties of undefined')
+
+    const rejections = await recordUnhandledRejections(() =>
+      switchProduction(() => Promise.reject(bug))
+    )
+
+    expect(rejections).toEqual([bug])
+  })
+
+  // The store still holds the episodes, columns and saved searches of the
+  // production left.
+  test('shows the loading error instead of the production left', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const failure = requestFailure()
+
+    const { wrapper } = await switchProduction(() => Promise.reject(failure))
+
+    expect(listOf(wrapper).props('isError')).toBe(true)
+    expect(listOf(wrapper).props('validationColumns')).toEqual([])
+    expect(wrapper.findComponent({ name: 'SearchQueryList' }).exists()).toBe(
+      false
+    )
+  })
+
+  test('clears the loading error once a reload succeeds', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const load = vi.fn().mockRejectedValueOnce(requestFailure())
+    const { wrapper, switchTo } = await mountOnProduction(load)
+
+    await switchTo('production-2')
+    expect(listOf(wrapper).props('isError')).toBe(true)
+    await switchTo('production-3')
+
+    expect(listOf(wrapper).props('isError')).toBe(false)
+    expect(listOf(wrapper).props('validationColumns')).toEqual(['task-type-1'])
+  })
+
+  test('ignores the failure of a production left since', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    let failLeftLoad = null
+    const load = vi.fn().mockImplementationOnce(
+      () =>
+        new Promise((resolve, reject) => {
+          failLeftLoad = reject
+        })
+    )
+    const { wrapper, switchTo } = await mountOnProduction(load)
+
+    await switchTo('production-2')
+    await switchTo('production-3')
+    failLeftLoad(requestFailure())
+    await flushPromises()
+
+    expect(listOf(wrapper).props('isError')).toBe(false)
+  })
+
+  // Back on a production whose first load is still running: that load
+  // fails after the newer one succeeded.
+  test('ignores a failure overtaken by a newer load', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    let failFirstLoad = null
+    const load = vi.fn().mockImplementationOnce(
+      () =>
+        new Promise((resolve, reject) => {
+          failFirstLoad = reject
+        })
+    )
+    const { wrapper, switchTo } = await mountOnProduction(load)
+
+    await switchTo('production-2')
+    await switchTo(production.id)
+    await switchTo('production-2')
+    failFirstLoad(requestFailure())
+    await flushPromises()
+
+    expect(listOf(wrapper).props('isError')).toBe(false)
+  })
+})
+
+describe('Episodes page, first load', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.restoreAllMocks()
+  })
+
+  test('shows the loading error of a failed first load', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const failure = new Error('Request has been terminated')
+    errors.markRequestFailure(failure)
+
+    const { wrapper } = await mountPage({
+      actions: { loadEpisodesWithTasks: () => Promise.reject(failure) }
+    })
+    await flushPromises()
+    vi.advanceTimersByTime(200)
+    await flushPromises()
+
+    const list = wrapper.findComponent({ name: 'EpisodeList' })
+    expect(list.props('isError')).toBe(true)
+    expect(list.props('isLoading')).toBe(false)
+    expect(consoleError).toHaveBeenCalledWith(failure)
+  })
+
+  test('leaves a bug in the first load to Sentry', async () => {
+    const bug = new TypeError('Cannot read properties of undefined')
+
+    const rejections = await recordUnhandledRejections(async () => {
+      await mountPage({
+        actions: { loadEpisodesWithTasks: () => Promise.reject(bug) }
+      })
+      await flushPromises()
+    })
+
+    expect(rejections).toEqual([bug])
   })
 })

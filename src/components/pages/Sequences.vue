@@ -49,7 +49,7 @@
               type="sequence"
               :production-id="currentProduction?.id"
               @remove-search="removeSearchQuery"
-              v-if="!isSequencesLoading && !initialLoading"
+              v-if="!isSequencesLoading && !initialLoading && !isLoadingError"
             />
           </div>
         </div>
@@ -65,8 +65,8 @@
           :display-settings="displaySettings"
           :displayed-sequences="displayedSequences"
           :is-loading="isSequencesLoading || initialLoading"
-          :is-error="isSequencesLoadingError"
-          :validation-columns="sequenceValidationColumns"
+          :is-error="isLoadingError"
+          :validation-columns="validationColumns"
           :department-filter="departmentFilter"
           @add-metadata="onAddMetadataClicked"
           @add-sequences="showNewModal"
@@ -198,6 +198,7 @@ import { useI18n } from 'vue-i18n'
 import { useStore } from 'vuex'
 
 import { useEntityPage } from '@/composables/entityPage'
+import { logRequestFailure } from '@/lib/errors'
 
 /* eslint-disable no-unused-vars */
 import SequenceList from '@/components/lists/SequenceList.vue'
@@ -230,6 +231,9 @@ const listRef = useTemplateRef('sequence-list')
 const searchFieldRef = useTemplateRef('sequence-search-field')
 
 const initialLoading = ref(true)
+// No store action flags a failed load of this list.
+const isLoadingError = ref(false)
+let lastLoadId = 0
 
 // Computed
 // --------------------------------------------------------------------------
@@ -244,9 +248,6 @@ const isCurrentUserManager = computed(
   () => store.getters.isCurrentUserProductionManager
 )
 const isSequencesLoading = computed(() => store.getters.isSequencesLoading)
-const isSequencesLoadingError = computed(
-  () => store.getters.isSequencesLoadingError
-)
 const isTVShow = computed(() => store.getters.isTVShow)
 const selectedTasks = computed(() => store.getters.selectedTasks)
 const sequenceMap = computed(() => store.getters.sequenceMap)
@@ -257,18 +258,30 @@ const sequenceSorting = computed(() => store.getters.sequenceSorting)
 const sequenceValidationColumns = computed(
   () => store.getters.sequenceValidationColumns
 )
+// After a failed load, the store still holds the columns of the production
+// left.
+const validationColumns = computed(() =>
+  isLoadingError.value ? [] : sequenceValidationColumns.value
+)
 const user = computed(() => store.getters.user)
 
 // Functions
 // --------------------------------------------------------------------------
 
+const loadList = () => {
+  const loadId = ++lastLoadId
+  isLoadingError.value = false
+  return store.dispatch('loadSequencesWithTasks').catch(err => {
+    // An older load may fail after a newer one, of this production or of
+    // another, succeeded.
+    if (loadId === lastLoadId) isLoadingError.value = true
+    logRequestFailure(err)
+  })
+}
+
 const reset = () => {
   initialLoading.value = false
-  store.dispatch('loadSequencesWithTasks', err => {
-    if (err) console.error(err)
-    applySearchFromUrl()
-    initialLoading.value = false
-  })
+  loadList()
 }
 
 const {
@@ -408,13 +421,10 @@ onMounted(() => {
     sequenceMap.value.values().next().value?.project_id !==
       currentProduction.value.id
   ) {
-    store
-      .dispatch('loadSequencesWithTasks')
-      .then(() => {
-        initialLoading.value = false
-        finalize()
-      })
-      .catch(console.error)
+    loadList().then(() => {
+      initialLoading.value = false
+      finalize()
+    })
   } else {
     if (!isSequencesLoading.value) initialLoading.value = false
     finalize()
