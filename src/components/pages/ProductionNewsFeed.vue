@@ -157,9 +157,8 @@ const loading = reactive({ more: false, news: false })
 const newsRefs = new Map()
 // The news selected last: its task may still be loading.
 let selectedNewsId = null
-// A load that ends after the deletion of its news keeps it out.
-const deletedNewsIds = new Set()
 let silent = false
+let isUnmounted = false
 
 const setNewsRef = (id, el) => {
   if (el) newsRefs.set(id, el)
@@ -297,8 +296,10 @@ const init = () => {
       })
       .finally(() => {
         // A production or filter change during the load was dropped by the
-        // guard above: load again for it.
-        if (JSON.stringify(params.value) !== loadedParams) init()
+        // guard above: load again for it, unless the page was left meanwhile.
+        if (!isUnmounted && JSON.stringify(params.value) !== loadedParams) {
+          init()
+        }
       })
   }
 }
@@ -409,7 +410,7 @@ const onNewsNew = eventData => {
         newsId: eventData.news_id
       })
       .then(news => {
-        if (news && !deletedNewsIds.has(news.id) && isNewsInFeed(news)) {
+        if (news && isNewsInFeed(news)) {
           store.commit('ADD_FIRST_NEWS', news)
           markRecent(news.id)
         }
@@ -421,10 +422,10 @@ const onNewsNew = eventData => {
   }
 }
 
-// The event may carry no project: REMOVE_NEWS skips a news the feed lacks.
+// The event may carry no project, and its news may still be on its way:
+// DELETE_NEWS keeps it out of the feed either way.
 const onNewsDelete = eventData => {
-  deletedNewsIds.add(eventData.news_id)
-  store.commit('REMOVE_NEWS', eventData.news_id)
+  store.commit('DELETE_NEWS', eventData.news_id)
 }
 
 const onTaskUpdate = eventData => {
@@ -447,7 +448,7 @@ const onTaskUpdate = eventData => {
       })
       .catch(err => {
         // Deleting or moving a comment deletes its news, then updates its task.
-        if (err?.status === 404) store.commit('REMOVE_NEWS', relatedNews.id)
+        if (err?.status === 404) store.commit('DELETE_NEWS', relatedNews.id)
         else console.error(err)
       })
   }
@@ -510,6 +511,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  isUnmounted = true
   window.removeEventListener('keydown', onKeyDown)
   socket.off('preview-file:add-file', onPreviewFileAddFile)
   socket.off('news:new', onNewsNew)

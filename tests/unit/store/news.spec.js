@@ -1,5 +1,10 @@
 // @vitest-environment node
 
+vi.mock('@/store/api/news', () => ({
+  default: { getLastNews: vi.fn(), getNews: vi.fn() }
+}))
+
+import newsApi from '@/store/api/news'
 import store from '@/store/modules/news'
 
 const timezone = 'Europe/Paris'
@@ -91,10 +96,48 @@ describe('News store', () => {
     })
   })
 
+  describe('Actions', () => {
+    const newState = () => ({
+      deletedNewsIds: new Set(),
+      isNewsListComplete: false,
+      newsList: [],
+      newsListVersion: 0
+    })
+    const runner = state => ({
+      commit: (type, payload) => store.mutations[type](state, payload),
+      state
+    })
+
+    test('loadNews - answer of a load sent before the last one', async () => {
+      const state = newState()
+      let answerFirst = null
+      newsApi.getLastNews
+        .mockImplementationOnce(
+          () =>
+            new Promise(resolve => {
+              answerFirst = resolve
+            })
+        )
+        .mockResolvedValueOnce({
+          data: [{ id: 'news-2', created_at: '2019-05-03T21:12:23' }]
+        })
+
+      const firstLoad = store.actions.loadNews(runner(state), { limit: 50 })
+      await store.actions.loadNews(runner(state), { limit: 50 })
+      answerFirst({
+        data: [{ id: 'news-1', created_at: '2019-05-02T23:12:23' }]
+      })
+      await firstLoad
+
+      expect(state.newsList.map(news => news.id)).toEqual(['news-2'])
+    })
+  })
+
   describe('Mutations', () => {
     let state
     beforeEach(() => {
       state = {
+        deletedNewsIds: new Set(),
         newsList: [
           { id: 'news-3', created_at: '2019-05-04T23:12:23' },
           { id: 'news-2', created_at: '2019-05-03T21:12:23' },
@@ -193,6 +236,18 @@ describe('News store', () => {
     test('REMOVE_NEWS - unknown news', () => {
       store.mutations.REMOVE_NEWS(state, 'news-4')
       expect(state.newsList).toHaveLength(3)
+    })
+
+    test('DELETE_NEWS', () => {
+      store.mutations.DELETE_NEWS(state, 'news-2')
+      store.mutations.ADD_FIRST_NEWS(state, {
+        id: 'news-2',
+        created_at: '2019-05-03T21:12:23'
+      })
+      store.mutations.ADD_PREVIOUS_NEWS(state, [
+        { id: 'news-2', created_at: '2019-05-03T21:12:23' }
+      ])
+      expect(state.newsList.map(news => news.id)).toEqual(['news-3', 'news-1'])
     })
 
     test('NEWS_ADD_PREVIEW', () => {

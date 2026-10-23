@@ -8,6 +8,7 @@ import {
   ADD_FIRST_NEWS,
   UPDATE_NEWS,
   REMOVE_NEWS,
+  DELETE_NEWS,
   NEWS_ADD_PREVIEW,
   NEWS_SET_COMPLETE,
   RESET_ALL
@@ -24,7 +25,9 @@ const initialState = {
 }
 
 const state = {
-  ...initialState
+  ...initialState,
+  // The news Zou deleted: an answer that left before keeps them out.
+  deletedNewsIds: new Set()
 }
 
 const getters = {
@@ -63,11 +66,14 @@ const getters = {
 }
 
 const actions = {
-  async loadNews({ commit }, params) {
+  async loadNews({ commit, state }, params) {
     commit(CLEAR_NEWS)
+    const version = state.newsListVersion
     const newsList = await newsApi.getLastNews(params)
-    commit(ADD_PREVIOUS_NEWS, newsList.data)
-    commit(NEWS_SET_COMPLETE, newsList.data.length < params.limit)
+    if (state.newsListVersion === version) {
+      commit(ADD_PREVIOUS_NEWS, newsList.data)
+      commit(NEWS_SET_COMPLETE, newsList.data.length < params.limit)
+    }
   },
 
   // The number of news the page added, null when the feed loaded again
@@ -103,11 +109,16 @@ const mutations = {
   [ADD_PREVIOUS_NEWS](state, newsList) {
     const listedIds = new Set(state.newsList.map(news => news.id))
     state.newsList = state.newsList.concat(
-      sortByDate(newsList.filter(news => !listedIds.has(news.id)))
+      sortByDate(
+        newsList.filter(
+          news => !listedIds.has(news.id) && !state.deletedNewsIds.has(news.id)
+        )
+      )
     )
   },
 
   [ADD_FIRST_NEWS](state, news) {
+    if (state.deletedNewsIds.has(news.id)) return
     const existingNews = state.newsList.find(n => n.id === news.id)
     if (existingNews) {
       Object.assign(existingNews, news)
@@ -126,6 +137,12 @@ const mutations = {
     if (index !== -1) state.newsList.splice(index, 1)
   },
 
+  [DELETE_NEWS](state, newsId) {
+    state.deletedNewsIds.add(newsId)
+    const index = state.newsList.findIndex(news => news.id === newsId)
+    if (index !== -1) state.newsList.splice(index, 1)
+  },
+
   [NEWS_ADD_PREVIEW](state, { commentId, previewId, extension }) {
     if (!commentId) return
     const news = state.newsList.find(news => news.comment_id === commentId)
@@ -140,7 +157,7 @@ const mutations = {
   },
 
   [RESET_ALL](state) {
-    Object.assign(state, { ...initialState })
+    Object.assign(state, { ...initialState, deletedNewsIds: new Set() })
   }
 }
 

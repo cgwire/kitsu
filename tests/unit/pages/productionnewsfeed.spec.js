@@ -75,6 +75,7 @@ const mountPage = async (
       news: {
         ...newsModule,
         state: () => ({
+          deletedNewsIds: new Set(),
           isNewsListComplete: false,
           newsList: [],
           newsListVersion: 0
@@ -109,7 +110,7 @@ const mountPage = async (
     }
   })
   await flushPromises()
-  return { socket, store, wrapper: mounted }
+  return { router, socket, store, wrapper: mounted }
 }
 
 const emitSocketEvent = (socket, event, eventData) => {
@@ -514,6 +515,55 @@ describe('pages/ProductionNewsFeed', () => {
 
       expect(pget).toHaveBeenCalledTimes(3)
       expect(newsIds(store)).toEqual(['news-2', 'news-1'])
+    })
+
+    it('keeps out a news deleted while its page loads', async () => {
+      const { socket, store, wrapper } = await mountPage(feedPath, {
+        firstPage: Array.from({ length: 50 }, (_, index) => ({
+          ...newsList[0],
+          id: `news-page-${index}`
+        })),
+        total: 60
+      })
+      const answer = deferNextRequest()
+
+      await wrapper.find('.news.page').trigger('scroll')
+      emitSocketEvent(socket, 'news:delete', { news_id: 'news-3' })
+      await answer({ data: [news3], total: 60, stats: [] })
+
+      expect(newsIds(store)).not.toContain('news-3')
+    })
+
+    it('keeps out a news deleted while the feed loads again', async () => {
+      const { socket, store, wrapper } = await mountPage(feedPath)
+      const answer = deferNextRequest()
+
+      wrapper
+        .findComponent(NewsFilters)
+        .vm.$emit('update:previewMode', 'previews')
+      await flushPromises()
+      emitSocketEvent(socket, 'news:delete', { news_id: 'news-2' })
+      await answer({ data: newsList, total: 2, stats: [] })
+
+      expect(newsIds(store)).toEqual(['news-1'])
+    })
+
+    // Vue keeps evaluating the computeds of a page left meanwhile.
+    it('loads nothing once the feed is left', async () => {
+      const { router, wrapper } = await mountPage(feedPath)
+      const answer = deferNextRequest()
+
+      wrapper
+        .findComponent(NewsFilters)
+        .vm.$emit('update:previewMode', 'previews')
+      await flushPromises()
+      mounted.unmount()
+      mounted = null
+      await router.push('/news-feed')
+      await answer({ data: newsList, total: 2, stats: [] })
+
+      expect(pget).toHaveBeenCalledTimes(2)
+      expect(router.currentRoute.value.fullPath).toBe('/news-feed')
     })
 
     it('keeps out a page that loads once the feed is loaded again', async () => {
