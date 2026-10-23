@@ -385,6 +385,43 @@ describe('pages/ProductionNewsFeed', () => {
       }
     )
 
+    // In previews mode, a row mounted again starts its player over.
+    it('keeps the rows of the day mounted when a news arrives', async () => {
+      const { socket, wrapper } = await mountPage(feedPath)
+      const rowOf = newsId =>
+        wrapper
+          .findAllComponents(NewsRow)
+          .find(row => row.props('news').id === newsId)
+      const row = rowOf('news-2')
+      const canvasId = row.props('canvasId')
+
+      await receive(socket, liveNews({ created_at: '2026-09-15T12:00:00' }))
+
+      expect(wrapper.findAllComponents(NewsRow)).toHaveLength(3)
+      expect(rowOf('news-2').vm).toBe(row.vm)
+      expect(rowOf('news-2').props('canvasId')).toBe(canvasId)
+    })
+
+    // A moved comment keeps the date of its first post.
+    it('puts a live news older than the top of the feed at its date', async () => {
+      const { socket, store, wrapper } = await mountPage(feedPath)
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      const row = wrapper
+        .findAllComponents(NewsRow)
+        .find(newsRow => newsRow.props('news').id === 'news-1')
+
+      await receive(socket, liveNews({ created_at: '2026-09-14T12:00:00' }))
+
+      expect(newsIds(store)).toEqual(['news-2', 'news-3', 'news-1'])
+      expect(
+        wrapper
+          .findAllComponents(NewsRow)
+          .find(newsRow => newsRow.props('news').id === 'news-1').vm
+      ).toBe(row.vm)
+      expect(warn).not.toHaveBeenCalled()
+      warn.mockRestore()
+    })
+
     it('loads no live news of a production the studio feed leaves out', async () => {
       const { socket, store } = await mountPage('/news-feed')
 
@@ -653,6 +690,24 @@ describe('pages/ProductionNewsFeed', () => {
 
       expect(pget).toHaveBeenCalledTimes(3)
       expect(store.getters.newsList).toHaveLength(60)
+    })
+
+    it('leaves a live news older than the loaded pages to its page', async () => {
+      const { socket, store } = await mountPage(feedPath, {
+        firstPage: page(0, 50),
+        total: 120
+      })
+      pget.mockResolvedValueOnce({ ...page(70, 1)[0], id: 'news-moved' })
+
+      emitSocketEvent(socket, 'news:new', {
+        news_id: 'news-moved',
+        project_id: production.id
+      })
+      await flushPromises()
+
+      expect(store.getters.newsList.map(news => news.id)).not.toContain(
+        'news-moved'
+      )
     })
 
     it('asks for no more news once a page comes back short', async () => {

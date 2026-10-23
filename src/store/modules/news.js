@@ -5,7 +5,7 @@ import { formatFullDateWithTimezone } from '@/lib/time'
 import {
   CLEAR_NEWS,
   ADD_PREVIOUS_NEWS,
-  ADD_FIRST_NEWS,
+  ADD_NEWS,
   UPDATE_NEWS,
   REMOVE_NEWS,
   DELETE_NEWS,
@@ -97,6 +97,11 @@ const actions = {
   }
 }
 
+// The order of Zou: the newest first, then the highest id.
+const isNewsBefore = (news, otherNews) =>
+  news.created_at > otherNews.created_at ||
+  (news.created_at === otherNews.created_at && news.id > otherNews.id)
+
 const mutations = {
   [CLEAR_NEWS](state) {
     state.newsList = []
@@ -117,13 +122,20 @@ const mutations = {
     )
   },
 
-  [ADD_FIRST_NEWS](state, news) {
+  // A live news goes where its date puts it: a moved comment keeps the date
+  // of its first post. Older than every news listed, it waits for its page.
+  [ADD_NEWS](state, news) {
     if (state.deletedNewsIds.has(news.id)) return
     const existingNews = state.newsList.find(n => n.id === news.id)
     if (existingNews) {
       Object.assign(existingNews, news)
-    } else {
-      state.newsList.unshift(news)
+      return
+    }
+    const index = state.newsList.findIndex(n => isNewsBefore(news, n))
+    if (index !== -1) {
+      state.newsList.splice(index, 0, news)
+    } else if (state.isNewsListComplete || state.newsList.length === 0) {
+      state.newsList.push(news)
     }
   },
 

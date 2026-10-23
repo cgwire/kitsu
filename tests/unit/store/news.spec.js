@@ -192,8 +192,8 @@ describe('News store', () => {
       ])
     })
 
-    test('ADD_FIRST_NEWS', () => {
-      store.mutations.ADD_FIRST_NEWS(state, {
+    test('ADD_NEWS', () => {
+      store.mutations.ADD_NEWS(state, {
         id: 'news-4', created_at: '2019-05-06T23:12:23'
       })
       expect(state.newsList).toEqual([
@@ -202,6 +202,34 @@ describe('News store', () => {
         { id: 'news-2', created_at: '2019-05-03T21:12:23' },
         { id: 'news-1', created_at: '2019-05-02T23:12:23' }
       ])
+    })
+
+    test('ADD_NEWS - at its date', () => {
+      store.mutations.ADD_NEWS(state, {
+        id: 'news-moved',
+        created_at: '2019-05-03T22:12:23'
+      })
+      store.mutations.ADD_NEWS(state, {
+        id: 'news-2b',
+        created_at: '2019-05-03T21:12:23'
+      })
+      expect(state.newsList.map(news => news.id)).toEqual([
+        'news-3',
+        'news-moved',
+        'news-2b',
+        'news-2',
+        'news-1'
+      ])
+    })
+
+    test('ADD_NEWS - older than every news listed', () => {
+      const oldNews = { id: 'news-0', created_at: '2019-05-01T23:12:23' }
+      state.isNewsListComplete = false
+      store.mutations.ADD_NEWS(state, oldNews)
+      expect(state.newsList).toHaveLength(3)
+      state.isNewsListComplete = true
+      store.mutations.ADD_NEWS(state, oldNews)
+      expect(state.newsList[3]).toEqual(oldNews)
     })
 
     test('UPDATE_NEWS', () => {
@@ -240,7 +268,7 @@ describe('News store', () => {
 
     test('DELETE_NEWS', () => {
       store.mutations.DELETE_NEWS(state, 'news-2')
-      store.mutations.ADD_FIRST_NEWS(state, {
+      store.mutations.ADD_NEWS(state, {
         id: 'news-2',
         created_at: '2019-05-03T21:12:23'
       })

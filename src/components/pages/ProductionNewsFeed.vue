@@ -32,10 +32,7 @@
             </div>
 
             <template v-else>
-              <div
-                :key="dayList.length > 0 ? dayList[0].created_at : ''"
-                v-for="dayList in newsListByDay(timezone)"
-              >
+              <div :key="key" v-for="{ dayList, key } in newsDays">
                 <div
                   class="has-text-centered subtitle timeline-entry day-sticky"
                 >
@@ -47,14 +44,14 @@
                 <news-row
                   :key="`news-${news.id}`"
                   :ref="el => setNewsRef(news.id, el?.root)"
-                  :canvas-id="`annotation-canvas-${dayList[0].created_at.substring(0, 10)}-${index}`"
+                  :canvas-id="`annotation-canvas-${news.id}`"
                   :is-new="recentNewsIds.has(news.id)"
                   :is-selected="news.id === currentNewsId"
                   :is-studio="isStudio"
                   :news="news"
                   :preview-mode="previewMode"
                   @select="onNewsSelected"
-                  v-for="(news, index) in dayList"
+                  v-for="news in dayList"
                 />
               </div>
             </template>
@@ -117,6 +114,7 @@ import { useTime } from '@/composables/time'
 import { isFreeEscape } from '@/lib/keyboard'
 import {
   formatFullDateWithRevertedTimezone,
+  formatFullDateWithTimezone,
   formatSimpleDate
 } from '@/lib/time'
 
@@ -171,6 +169,19 @@ const currentProduction = computed(() => store.getters.currentProduction)
 const personMap = computed(() => store.getters.personMap)
 const newsList = computed(() => store.getters.newsList)
 const newsListByDay = computed(() => store.getters.newsListByDay)
+
+// A day keeps its key when news come or go: a new key mounts all its rows
+// again, and their previews start over. The feed stays in date order, so a
+// day is never listed twice.
+const newsDays = computed(() =>
+  newsListByDay.value(timezone.value).map(dayList => ({
+    dayList,
+    key: formatFullDateWithTimezone(
+      dayList[0].created_at,
+      timezone.value
+    ).substring(0, 10)
+  }))
+)
 
 const isStudio = computed(() => !route.path.includes('productions'))
 
@@ -411,7 +422,7 @@ const onNewsNew = eventData => {
       })
       .then(news => {
         if (news && isNewsInFeed(news)) {
-          store.commit('ADD_FIRST_NEWS', news)
+          store.commit('ADD_NEWS', news)
           markRecent(news.id)
         }
       })
