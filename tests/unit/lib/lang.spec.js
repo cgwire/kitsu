@@ -29,7 +29,7 @@ describe('lang', () => {
     expect(moment.locale()).toEqual('fr')
     expect(i18n.global.locale.value).toEqual('fr')
     // The lazily loaded chunk registered actual French messages.
-    expect(i18n.global.t('assets.cast_in', {}, { locale: 'fr' })).toEqual('Présent dans')
+    expect(i18n.global.t('main.cancel', {}, { locale: 'fr' })).toEqual('Annuler')
   })
 
   test('setLocale keeps the last requested language on rapid switches', async () => {

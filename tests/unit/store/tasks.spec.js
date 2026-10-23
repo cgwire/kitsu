@@ -783,6 +783,23 @@ describe('Tasks store, preview uploads', () => {
     expect(state.uploadProgress).toEqual({ 'a.png': 40 })
   })
 
+  test('SET_UPLOAD_PROGRESS keeps the progress of each file under its name only', () => {
+    const state = { uploadProgress: {} }
+
+    tasksStore.mutations.SET_UPLOAD_PROGRESS(state, {
+      name: 'a.png',
+      percent: 12
+    })
+    tasksStore.mutations.SET_UPLOAD_PROGRESS(state, {
+      name: 'a.png',
+      percent: 80
+    })
+    expect(state.uploadProgress).toEqual({ 'a.png': 80 })
+
+    tasksStore.mutations.CLEAR_UPLOAD_PROGRESS(state, ['a.png'])
+    expect(state.uploadProgress).toEqual({})
+  })
+
   test('commentTaskWithPreview clears the progress of its files once done', async () => {
     const commit = vi.fn()
 

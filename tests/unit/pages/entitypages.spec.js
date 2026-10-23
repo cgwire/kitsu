@@ -19,6 +19,7 @@ vi.mock('vue-router', async importOriginal => ({
   useRoute: () => routeHolder.route
 }))
 
+import i18n from '@/lib/i18n'
 import assetStore from '@/store/modules/assets'
 import editStore from '@/store/modules/edits'
 import episodeStore from '@/store/modules/episodes'
@@ -39,6 +40,7 @@ import EntityOutputFiles from '@/components/pages/entities/EntityOutputFiles.vue
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxStatus from '@/components/widgets/ComboboxStatus.vue'
 import ConceptCard from '@/components/widgets/ConceptCard.vue'
+import PageSubtitle from '@/components/widgets/PageSubtitle.vue'
 
 const production = { id: 'production-1' }
 
@@ -102,7 +104,8 @@ const mountPage = async (
   currentProduction,
   actions = {},
   getters = {},
-  query = {}
+  query = {},
+  $t = key => key
 ) => {
   routeHolder.route = reactive({
     params: { production_id: production.id, [entityParam]: 'entity-1' },
@@ -162,7 +165,7 @@ const mountPage = async (
   const wrapper = shallowMount(page, {
     global: {
       plugins: [store],
-      mocks: { $route: routeHolder.route, $t: key => key },
+      mocks: { $route: routeHolder.route, $t },
       stubs: { RouterLink: RouterLinkStub }
     }
   })
@@ -393,5 +396,38 @@ describe('Asset page, concepts', () => {
         .findAllComponents(ConceptCard)
         .map(card => card.props('concept').id)
     ).toEqual(['concept-1'])
+  })
+})
+
+describe('Asset page, casting', () => {
+  afterEach(() => {
+    assetStore.cache.assetMap.clear()
+  })
+
+  test.each([
+    ['Cast in 1 shot', 1],
+    ['Cast in 3 shots', 3]
+  ])('titles its casting "%s"', async (title, nbShots) => {
+    assetStore.cache.assetMap.set('entity-1', {
+      id: 'entity-1',
+      name: 'Tree',
+      tasks: [],
+      castInShotsBySequence: [
+        Array.from({ length: nbShots }, (_, index) => ({ id: `shot-${index}` }))
+      ]
+    })
+    const { wrapper } = await mountPage(
+      Asset,
+      'asset_id',
+      production,
+      {},
+      {},
+      { section: 'casting' },
+      (key, named) => i18n.global.t(key, named)
+    )
+
+    expect(
+      wrapper.find('.casting-title').findComponent(PageSubtitle).props('text')
+    ).toBe(title)
   })
 })

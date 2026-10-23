@@ -1,6 +1,12 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
+// Each spec file starts a fresh worker thread, which compiles jsdom and the
+// dependencies again: Node's compile cache hands them the bytecode instead.
+if (process.env.VITEST) {
+  process.env.NODE_COMPILE_CACHE ??= `${import.meta.dirname}/node_modules/.node-compile-cache`
+}
+
 export default defineConfig({
   plugins: [
     vue({
@@ -51,6 +57,18 @@ export default defineConfig({
             {
               name: 'realtime',
               test: /node_modules[\\/](?:socket\.io-client|engine\.io-client|engine\.io-parser|socket\.io-parser)[\\/]/
+            },
+            {
+              // The module that installs the polyfills goes along: left in the
+              // entry, it runs after every chunk the entry imports, too late
+              // for a dependency that calls Object.hasOwn as it loads
+              // (color-string, in the colors chunk).
+              name: 'polyfills',
+              test: /node_modules[\\/]core-js[\\/]|[\\/]src[\\/]polyfills\.js$/
+            },
+            {
+              name: 'bowser',
+              test: /node_modules[\\/]bowser[\\/]/
             },
             {
               name: 'charts',

@@ -913,6 +913,7 @@ import {
 } from 'lucide-vue-next'
 import {
   computed,
+  defineAsyncComponent,
   onBeforeUnmount,
   onMounted,
   reactive,
@@ -931,7 +932,6 @@ import { isFreeEscape } from '@/lib/keyboard'
 import assetsStore from '@/store/modules/assets.js'
 
 import BuildFilterModal from '@/components/modals/BuildFilterModal.vue'
-import ViewPlaylistModal from '@/components/modals/ViewPlaylistModal.vue'
 import DeleteEntities from '@/components/tops/actions/DeleteEntities.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxModel from '@/components/widgets/ComboboxModel.vue'
@@ -943,6 +943,12 @@ import PeopleField from '@/components/widgets/PeopleField.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import Spinner from '@/components/widgets/Spinner.vue'
 /* eslint-enable no-unused-vars */
+
+// The playlist player weighs more than the rest of the panel, which every
+// task panel shows: it loads after the first page (see Main.vue).
+const ViewPlaylistModal = defineAsyncComponent(
+  () => import('@/components/modals/ViewPlaylistModal.vue')
+)
 
 const { t } = useI18n()
 const route = useRoute()

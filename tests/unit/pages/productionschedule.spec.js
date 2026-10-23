@@ -136,9 +136,9 @@ const propAssets = [
 const day = date => moment.utc(date)
 const format = date => date.format('YYYY-MM-DD')
 
-// The page loads after a debounce of its own.
+// The page loads after a debounce of its own, run on the fake clock.
 const waitForLoad = async () => {
-  await new Promise(resolve => setTimeout(resolve, 60))
+  await vi.advanceTimersByTimeAsync(60)
   await flushPromises()
 }
 
@@ -295,6 +295,7 @@ const selectTask = async (wrapper, entityTypeRow, task) => {
 
 describe('ProductionSchedule page', () => {
   beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
     taskTypes.forEach(taskType => {
       taskTypeStore.cache.taskTypeMap.set(taskType.id, taskType)
     })
@@ -698,7 +699,7 @@ describe('ProductionSchedule page', () => {
         .map(field => field.props('modelValue'))
 
     beforeEach(() => {
-      vi.useFakeTimers({ toFake: ['Date'] })
+      vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] })
       vi.setSystemTime(new Date(2026, 9, 6, 0, 30))
     })
 
@@ -1591,7 +1592,7 @@ describe('ProductionSchedule page', () => {
     // The panel opens on today at the current time: the day count left
     // that first day out once the end date was picked.
     it('counts the first day of a range that starts now', async () => {
-      vi.useFakeTimers({ toFake: ['Date'] })
+      vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] })
       vi.setSystemTime(new Date('2026-04-06T10:30:00Z'))
       const { storeActions, wrapper } = await mountAssignments()
       await selectProps(wrapper)

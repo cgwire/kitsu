@@ -1,12 +1,12 @@
 ---
 name: Kitsu release
 
-# Only the v<version> tags that scripts/release.sh pushes: each run
-# publishes an immutable release, whose name can never be reused.
+# Version tags only (v1.0.74, v0.20.0-beta.0): each run publishes an
+# immutable release, whose name can never be reused.
 on:
   push:
     tags:
-      - 'v*'
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
 
 env:
   NODE_OPTIONS: --max_old_space_size=8192

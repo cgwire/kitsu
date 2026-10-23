@@ -9,7 +9,7 @@ All Kitsu's preview and playlist players, their bars, viewers and annotation sur
 | Folder | Contains |
 |---|---|
 | `annotations/` | `AnnotationCanvas.vue`, `SharedAnnotationOverlay.vue` — fabric.js wrapper + the read-only overlay used in shared playlists |
-| `bars/` | The three shared button bars (`PlayerPlaybackBar`, `PlayerAnnotationBar`, `PlayerComparisonBar`) and three more (`BrowsingBar`, `PreviewsPerTaskType`, `SharedPlaylistButtonBar`) |
+| `bars/` | The three shared button bars (`PlayerPlaybackBar`, `PlayerAnnotationBar`, `PlayerComparisonBar`) and two more (`BrowsingBar`, `SharedPlaylistButtonBar`) |
 | `headers/` | `RevisionPreview`, `SharedPlaylistHeader` — top-of-player metadata strips |
 | `players/` | The three top-level players (`PreviewPlayer`, `PlaylistPlayer`, `SharedPlaylistPlayer`) and `PlaylistedEntity` |
 | `progress/` | `VideoProgress` (per-clip seek bar with annotation marks), `PlaylistProgress` (cross-entity timeline) |
@@ -34,7 +34,7 @@ All three live in `bars/` and follow the **opt-in v-model + named slot** extensi
 | `PlayerComparisonBar` | compare toggle, task-type / revision / mode combos, prev/next preview navigation; `#missing` slot | PreviewPlayer + PlaylistPlayer |
 | `PlayerAnnotationBar` | undo/redo, delete, type, pencil, annotation-displayed (pen), zoom-pan (loupe), comment + 3D model controls; optional `isLaserModeOn` | PreviewPlayer + PlaylistPlayer |
 
-`BrowsingBar` (revision navigation), `PreviewsPerTaskType` (task-type browsing), `SharedPlaylistButtonBar` (guest controls) are used in narrower contexts — see each file's `defineProps` for usage.
+`BrowsingBar` (revision navigation) and `SharedPlaylistButtonBar` (guest controls) are used in narrower contexts — see each file's `defineProps` for usage.
 
 ## The composables
 

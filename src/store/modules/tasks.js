@@ -1828,9 +1828,6 @@ const mutations = {
   },
 
   [SET_UPLOAD_PROGRESS](state, { name, percent }) {
-    if (!state.uploadProgress.name) {
-      state.uploadProgress.name = percent
-    }
     state.uploadProgress[name] = percent
   },
 

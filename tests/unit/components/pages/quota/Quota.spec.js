@@ -29,7 +29,7 @@ const periods = () =>
   )
 
 // Each compute mode gives a quota to everybody, unless the test says who.
-const mountQuota = async (props, peopleByMode = {}) => {
+const mountQuota = async (props, peopleByMode = {}, quota = periods) => {
   const { wrapper } = await mountEntityPage(Quota, {
     listName: 'PeopleAvatar',
     props: {
@@ -51,9 +51,7 @@ const mountQuota = async (props, peopleByMode = {}) => {
     actions: {
       computeQuota: ({ computeMode }) => {
         const ids = peopleByMode[computeMode] ?? people.map(({ id }) => id)
-        return Object.fromEntries(
-          [...ids, 'total'].map(id => [id, periods()])
-        )
+        return Object.fromEntries([...ids, 'total'].map(id => [id, quota()]))
       }
     }
   })
@@ -112,6 +110,21 @@ describe('Quota list', () => {
 
     expect(wrapper.find('.datatable-body').exists()).toBe(true)
     expect(listedNames(wrapper)).toEqual([])
+  })
+})
+
+describe('Quota weeks', () => {
+  test('highlights a week below the quota to reach', async () => {
+    const wrapper = await mountQuota(
+      { detailLevel: 'week', year: 2025, month: 9, maxQuota: 10 },
+      { weighted: ['ann'] },
+      () => ({ ...periods(), week: { frames: { '2025-3': 5 }, entries: {} } })
+    )
+
+    const personRow = wrapper.findAll('tr.datatable-row')[0]
+    const weekCells = personRow.findAll('td').slice(1)
+    expect(weekCells[2].classes()).toContain('quota-low')
+    expect(weekCells[3].classes()).not.toContain('quota-low')
   })
 })
 

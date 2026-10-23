@@ -1386,6 +1386,7 @@ describe('PlaylistPlayer.vue', () => {
 
     afterEach(() => {
       delete window.matchMedia
+      vi.useRealTimers()
     })
 
     it('shows the comments and plays the low definition', async () => {
@@ -1454,7 +1455,6 @@ describe('PlaylistPlayer.vue', () => {
     describe('media height', () => {
       const mediaHeight = () =>
         wrapper.find('.video-container').element.style.height
-      const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
       const RESIZE_WAIT = 350
 
       beforeEach(() => {
@@ -1471,6 +1471,7 @@ describe('PlaylistPlayer.vue', () => {
       })
 
       it('keeps the media height when the keyboard opens', async () => {
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
         stubPhone({ portrait: true })
         wrapper = mountTemp()
         await flushPromises()
@@ -1478,19 +1479,20 @@ describe('PlaylistPlayer.vue', () => {
           720
         )
         window.dispatchEvent(new Event('resize'))
-        await wait(350)
+        await vi.advanceTimersByTimeAsync(RESIZE_WAIT)
         await flushPromises()
         expect(mediaHeight()).toBe('203px')
       })
 
       it('resizes the media when the strip opens in landscape', async () => {
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
         stubPhone({ landscape: true })
         wrapper = mountTemp()
         await flushPromises()
         const innerHeight = window.innerHeight
         window.innerHeight = 500
         await wrapper.find('[icon="film"]').trigger('click')
-        await wait(RESIZE_WAIT)
+        await vi.advanceTimersByTimeAsync(RESIZE_WAIT)
         await flushPromises()
         expect(mediaHeight()).toBe('500px')
         window.innerHeight = innerHeight
@@ -1616,16 +1618,17 @@ describe('PlaylistPlayer.vue', () => {
 
     // resetHeight clears the canvas: a resize must load the drawings again
     it('reloads the annotations after a resize on a phone', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
       stubPhone({ portrait: true })
       const canvas = createFakeCanvas()
       wrapper = mountTemp({
         stubs: { AnnotationCanvas: annotationCanvasStub(canvas) }
       })
       await flushPromises()
-      await new Promise(resolve => setTimeout(resolve, 350))
+      await vi.advanceTimersByTimeAsync(350)
       canvas.clear.mockClear()
       window.dispatchEvent(new Event('resize'))
-      await new Promise(resolve => setTimeout(resolve, 350))
+      await vi.advanceTimersByTimeAsync(350)
       await flushPromises()
       expect(canvas.clear).toHaveBeenCalled()
     })

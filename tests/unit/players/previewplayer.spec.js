@@ -168,6 +168,9 @@ const mountPlayer = ({
           methods: viewer
         },
         RouterLink: { template: '<a><slot /></a>' },
+        // The default stub of an async component imports it: an import still
+        // running when the file ends rejects once its module runner closes.
+        TaskInfo: { name: 'TaskInfo', template: '<div />' },
         VideoProgress: {
           name: 'VideoProgress',
           template: '<div />',

@@ -259,6 +259,7 @@ import { useHead } from '@unhead/vue'
 import moment from 'moment-timezone'
 import {
   computed,
+  defineAsyncComponent,
   getCurrentInstance,
   nextTick,
   onBeforeUnmount,
@@ -284,7 +285,6 @@ import TimesheetList from '@/components/lists/TimesheetList.vue'
 import TodosList from '@/components/lists/TodosList.vue'
 import PeopleQuotaInfo from '@/components/sides/PeopleQuotaInfo.vue'
 import PeopleTimesheetInfo from '@/components/sides/PeopleTimesheetInfo.vue'
-import TaskInfo from '@/components/sides/TaskInfo.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxProduction from '@/components/widgets/ComboboxProduction.vue'
 import ComboboxStyled from '@/components/widgets/ComboboxStyled.vue'
@@ -294,6 +294,11 @@ import RouteSectionTabs from '@/components/widgets/RouteSectionTabs.vue'
 import SearchField from '@/components/widgets/SearchField.vue'
 import SearchQueryList from '@/components/widgets/SearchQueryList.vue'
 import UserCalendar from '@/components/widgets/UserCalendar.vue'
+
+// The task panel weighs more than the rest of the page: it loads once the
+// list is shown.
+const loadTaskInfo = () => import('@/components/sides/TaskInfo.vue')
+const TaskInfo = defineAsyncComponent(loadTaskInfo)
 
 const { t } = useI18n()
 const route = useRoute()
@@ -759,6 +764,12 @@ onMounted(async () => {
   await loadData()
   setSearchFromUrl()
   onSearchChange()
+  // Ready for the first task click, and still there if a deploy removes the
+  // chunks while the page stays open. Not offline: Chromium keeps a failed
+  // import failed until the page reloads.
+  if (navigator.onLine) {
+    loadTaskInfo().catch(() => {})
+  }
 })
 
 onBeforeUnmount(() => {

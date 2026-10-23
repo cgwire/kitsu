@@ -34,6 +34,6 @@ describe('pages/Login2FA', () => {
     await loadLocaleMessages('fr')
     i18n.global.locale.value = 'fr'
 
-    expect(toValue(title)).toBe('Authentification double facteur - Kitsu')
+    expect(toValue(title)).toBe('Authentification à deux facteurs - Kitsu')
   })
 })

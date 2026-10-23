@@ -8,6 +8,25 @@ import { createStore } from 'vuex'
 vi.mock('@/store', () => ({ default: {} }))
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: key => key }) }))
 
+const playlistModal = vi.hoisted(() => ({ loaded: false }))
+
+vi.mock('@/components/modals/ViewPlaylistModal.vue', async () => {
+  const { defineComponent, h } = await import('vue')
+  playlistModal.loaded = true
+  return {
+    default: defineComponent({
+      name: 'ViewPlaylistModal',
+      props: {
+        active: { type: Boolean, default: false },
+        sort: { type: Boolean, default: false },
+        taskIds: { type: Array, default: () => [] }
+      },
+      emits: ['cancel'],
+      setup: () => () => h('div')
+    })
+  }
+})
+
 import ActionPanel from '@/components/tops/ActionPanel.vue'
 import ConceptFolderTile from '@/components/widgets/ConceptFolderTile.vue'
 import assetsStore from '@/store/modules/assets'
@@ -851,5 +870,39 @@ describe('ActionPanel, concept folders', () => {
 
     expect(wrapper.find('[title="concepts.folders.move"]').exists()).toBe(false)
     expect(wrapper.find('[title="menu.edit_concepts"]').exists()).toBe(true)
+  })
+})
+
+// The playlist player weighs more than the rest of the panel.
+describe('ActionPanel, playlist of the selection', () => {
+  const task = {
+    id: 'task-1',
+    project_id: 'production-1',
+    task_type_id: 'task-type-1'
+  }
+
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  // Keep this test last: the modal stays loaded once a test opens a playlist.
+  test('loads the playlist when it opens, not with the panel', async () => {
+    const { wrapper } = await mountPanel([], {
+      path: '/productions/production-1/shots',
+      tasks: [task]
+    })
+    expect(playlistModal.loaded).toBe(false)
+
+    await wrapper
+      .find('.menu-item[title="menu.generate_playlist"]')
+      .trigger('click')
+    await wrapper.find('.confirm-button').trigger('click')
+    await vi.dynamicImportSettled()
+    await flushPromises()
+
+    expect(playlistModal.loaded).toBe(true)
+    expect(wrapper.findComponent({ name: 'ViewPlaylistModal' }).exists()).toBe(
+      true
+    )
   })
 })

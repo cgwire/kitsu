@@ -1,17 +1,21 @@
 // @vitest-environment node
 
-import { execFileSync } from 'node:child_process'
+import { execFile } from 'node:child_process'
 import process from 'node:process'
+import { promisify } from 'node:util'
+
+const execFileAsync = promisify(execFile)
 
 // Vitest runs the specs in worker threads, where assigning process.env.TZ
 // leaves the time zone unchanged: run in a process started in the zone.
-const runIn = (timeZone, script) => {
-  const output = execFileSync(
+// The tests only wait for their process, so they run concurrently.
+const runIn = async (timeZone, script) => {
+  const { stdout } = await execFileAsync(
     process.execPath,
     ['--input-type=module', '--eval', script],
     { encoding: 'utf8', env: { ...process.env, TZ: timeZone } }
   )
-  return JSON.parse(output)
+  return JSON.parse(stdout)
 }
 
 const time = JSON.stringify(
@@ -53,14 +57,14 @@ const convertIn = timeZone =>
 describe('utc date field days', () => {
   // Sao Paulo started its DST at midnight on 2018-11-04: that day has no
   // local midnight.
-  test.each([
+  test.concurrent.for([
     'UTC',
     'Europe/Budapest',
     'America/New_York',
     'Asia/Tokyo',
     'America/Sao_Paulo'
-  ])('keeps the same day in %s', timeZone => {
-    expect(convertIn(timeZone)).toEqual({
+  ])('keeps the same day in %s', async (timeZone, { expect }) => {
+    expect(await convertIn(timeZone)).toEqual({
       timeZone,
       shown: [
         [2026, 8, 5, 0],
@@ -97,7 +101,7 @@ const userDayIn = (timeZone, profileTimeZone) =>
 // today is the day of the user, not the UTC one: 2026-10-05 at 22:30 UTC is
 // already 2026-10-06 east of UTC.
 describe('user day', () => {
-  test.each([
+  test.concurrent.for([
     { timeZone: 'UTC', profile: null, day: '2026-10-05T00:00:00.000Z' },
     {
       timeZone: 'Europe/Budapest',
@@ -115,7 +119,10 @@ describe('user day', () => {
       profile: 'Europe/Paris',
       day: '2026-10-06T00:00:00.000Z'
     }
-  ])('is $day in $timeZone, profile $profile', ({ timeZone, profile, day }) => {
-    expect(userDayIn(timeZone, profile)).toBe(day)
-  })
+  ])(
+    'is $day in $timeZone, profile $profile',
+    async ({ timeZone, profile, day }, { expect }) => {
+      expect(await userDayIn(timeZone, profile)).toBe(day)
+    }
+  )
 })

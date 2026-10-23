@@ -80,7 +80,6 @@ const isDataLoading = computed(() => store.getters.isDataLoading)
 const isSavingCommentPreview = computed(
   () => store.getters.isSavingCommentPreview
 )
-const mainConfig = computed(() => store.getters.mainConfig)
 const personMap = computed(() => store.getters.personMap)
 const previewFileIdToShow = computed(() => store.getters.previewFileIdToShow)
 const previewFileIdsToBrowse = computed(
@@ -157,14 +156,41 @@ const isUnreadableComment = eventData => {
   return isClientAuthor === false
 }
 
-const setupDarkTheme = () => {
-  const darkTheme = localStorage.getItem('dark-theme')
+const isSharedPlaylistPage = () =>
+  window.location.pathname.startsWith('/playlists/shared/')
+
+// A stored theme flag, null when unset or when the browser blocks the storage.
+const getStoredTheme = key => {
+  try {
+    const value = localStorage.getItem(key)
+    return value === 'true' || value === 'false' ? value === 'true' : null
+  } catch {
+    return null
+  }
+}
+
+// The config answers after the first render: the page starts with the
+// user's choice, else with the studio default the last config left, and
+// shared playlists are always dark. index.html paints the same theme before
+// the app loads.
+const applyStartupTheme = () => {
   store.commit(
     'TOGGLE_DARK_THEME',
-    darkTheme === 'true' ||
-      (darkTheme !== 'false' &&
-        Boolean(mainConfig.value?.dark_theme_by_default))
+    isSharedPlaylistPage() ||
+      (getStoredTheme('dark-theme') ??
+        getStoredTheme('dark-theme-default') ??
+        false)
   )
+}
+
+// A failed config comes as {} and keeps the startup theme.
+const setupDarkTheme = config => {
+  if (config.dark_theme_by_default === undefined) return
+  const isDefaultDark = Boolean(config.dark_theme_by_default)
+  localPreferences.setBoolPreference('dark-theme-default', isDefaultDark)
+  if (getStoredTheme('dark-theme') === null && !isSharedPlaylistPage()) {
+    store.commit('TOGGLE_DARK_THEME', isDefaultDark)
+  }
 }
 
 const setupCrisp = config => {
@@ -193,7 +219,13 @@ const setupAuthChannel = () => {
   const channel = auth.getBroadcastChannel()
   if (!channel) return
   channel.onmessage = async event => {
-    if (route.name !== 'login' && event.data === 'logout') {
+    // A shared playlist tab has no session to purge, and the redirect would
+    // carry its share token to the login page, where Crisp loads.
+    if (
+      route.name !== 'login' &&
+      !isSharedPlaylistPage() &&
+      event.data === 'logout'
+    ) {
       // Another tab logged out: purge this tab's session too, otherwise
       // store and socket keep the previous user's data. Navigate first:
       // purging while the current page is still mounted crashes the
@@ -688,6 +720,9 @@ Object.entries(socketEvents).forEach(([event, handler]) =>
 // Watchers
 // --------------------------------------------------------------------------
 
+// Before the immediate watcher below, so the first frame has the theme.
+applyStartupTheme()
+
 watch(
   isDarkTheme,
   () => {
@@ -720,7 +755,7 @@ watch(
 
 onMounted(async () => {
   const config = await store.dispatch('setMainConfig')
-  setupDarkTheme()
+  setupDarkTheme(config)
   setupCrisp(config)
   setupSentry(config)
   setupAuthChannel()

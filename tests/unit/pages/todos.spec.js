@@ -11,6 +11,23 @@ vi.mock('vue-i18n', async importOriginal => ({
   useI18n: () => ({ t: key => key })
 }))
 
+const taskInfo = vi.hoisted(() => ({ loaded: false }))
+
+vi.mock('@/components/sides/TaskInfo.vue', async () => {
+  const { defineComponent, h } = await import('vue')
+  taskInfo.loaded = true
+  return {
+    default: defineComponent({
+      name: 'TaskInfo',
+      props: {
+        task: { type: Object, default: null },
+        withActions: { type: Boolean, default: false }
+      },
+      setup: () => () => h('div')
+    })
+  }
+})
+
 // Pre-load the real store to avoid circular-import race from child components.
 import '@/lib/auth'
 
@@ -91,7 +108,8 @@ const mountPage = async (
     onRouter = () => {},
     props = {},
     query = {},
-    socket = { on: vi.fn(), off: vi.fn() }
+    socket = { on: vi.fn(), off: vi.fn() },
+    stubs = {}
   } = {}
 ) => {
   const store = createStore({
@@ -150,7 +168,8 @@ const mountPage = async (
       stubs: {
         DayOffList: DayOffListStub,
         SearchField: SearchFieldStub,
-        TodosList: TodosListStub
+        TodosList: TodosListStub,
+        ...stubs
       }
     }
   })
@@ -159,6 +178,66 @@ const mountPage = async (
 }
 
 describe('Todos page', () => {
+  // Keep these two tests first, in this order: the panel stays loaded once a
+  // test loads it.
+  it('leaves the task panel to the first task click when offline', async () => {
+    const onLine = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false)
+    try {
+      const wrapper = await mountPage([])
+      await flushPromises()
+      await vi.dynamicImportSettled()
+
+      expect(taskInfo.loaded).toBe(false)
+      wrapper.unmount()
+    } finally {
+      onLine.mockRestore()
+    }
+  })
+
+  it('loads the task panel once the list is loaded, not with the page', async () => {
+    let answerTodos = null
+    const wrapper = await mountPage([], {
+      actions: {
+        loadTodos: () =>
+          new Promise(resolve => {
+            answerTodos = resolve
+          })
+      }
+    })
+    await flushPromises()
+    expect(taskInfo.loaded).toBe(false)
+
+    answerTodos()
+    await flushPromises()
+    await vi.dynamicImportSettled()
+
+    expect(taskInfo.loaded).toBe(true)
+    wrapper.unmount()
+  })
+
+  it('shows the selected task in the panel', async () => {
+    const wrapper = await mountPage([wipTask], {
+      getters: {
+        nbSelectedTasks: () => 1,
+        selectedTasks: () => new Map([[wipTask.id, wipTask]])
+      },
+      stubs: {
+        TaskInfo: {
+          name: 'TaskInfo',
+          props: { task: { type: Object, default: null } },
+          template: '<div />'
+        }
+      }
+    })
+    await vi.dynamicImportSettled()
+    await flushPromises()
+
+    expect(wrapper.findComponent({ name: 'TaskInfo' }).props('task')).toEqual(
+      wipTask
+    )
+    wrapper.unmount()
+  })
+
   // The filters and the header of the tab below form one panel
   it.each(['timesheets', 'calendar', 'productivity'])(
     'attaches the filters to the header of the %s tab',
