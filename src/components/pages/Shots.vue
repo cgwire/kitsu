@@ -461,6 +461,7 @@ const {
   confirmDeleteAllTasks,
   confirmDeleteMetadata,
   confirmRestore: confirmRestoreShot,
+  csvLabel,
   deleteAllTasksLockText,
   deleteAllTasksText,
   deleteText,
@@ -530,19 +531,19 @@ const onExportClick = () =>
   exportCsv(
     [
       ...(currentEpisode.value ? ['Episode'] : []),
-      t('shots.fields.sequence'),
-      t('shots.fields.name'),
-      t('shots.fields.description'),
+      csvLabel('Sequence'),
+      csvLabel('Name'),
+      csvLabel('Description'),
       ...getExportDescriptors(currentProduction.value, 'Shot').map(
         descriptor => descriptor.name
       ),
       ...(isShotTime.value ? [t('shots.fields.time_spent')] : []),
       ...(isShotEstimation.value ? [t('main.estimation_short')] : []),
-      ...(isFrames.value ? [t('main.frames')] : []),
-      ...(isFrameIn.value ? [t('main.frame_in')] : []),
-      ...(isFrameOut.value ? [t('main.frame_out')] : []),
-      ...(isFps.value ? [t('main.fps')] : []),
-      ...(isResolution.value ? [t('shots.fields.resolution')] : []),
+      ...(isFrames.value ? [csvLabel('Frames')] : []),
+      ...(isFrameIn.value ? [csvLabel('Frame In')] : []),
+      ...(isFrameOut.value ? [csvLabel('Frame Out')] : []),
+      ...(isFps.value ? [csvLabel('FPS')] : []),
+      ...(isResolution.value ? [csvLabel('Resolution')] : []),
       ...(isMaxRetakes.value ? [t('shots.fields.max_retakes')] : []),
       // Qualified by the task type so a re-import can tell the columns
       // apart: bare duplicated headers collapse in the server's reader.

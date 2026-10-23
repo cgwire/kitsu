@@ -10,12 +10,14 @@ import ImportModal from '@/components/modals/ImportModal.vue'
 import Assets from '@/components/pages/Assets.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import ComboboxDepartment from '@/components/widgets/ComboboxDepartment.vue'
+import fr from '@/locales/fr.json'
 
 import {
   allVisible,
   buildAddThumbnailsModalStub,
   mountEntityPage,
-  production
+  production,
+  reimportExport
 } from '../../fixtures/entity-page'
 import { BrokenFileReader, GoneFileReader } from '../../fixtures/file-reader'
 
@@ -225,6 +227,39 @@ describe('Assets page, CSV import', () => {
     expect(wrapper.findComponent(ImportModal).props('optionalColumns')).toEqual(
       ['Description', 'Resolution']
     )
+  })
+
+  // The export writes the labels of the language of the user.
+  test('imports back a file exported in the language of the user', async () => {
+    const { wrapper } = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters: {
+        assetValidationColumns: [],
+        isAssetResolution: true,
+        isCurrentUserProductionManager: true
+      },
+      actions: { getAssetsCsvLines: () => [] },
+      locale: 'fr',
+      messages: fr.default
+    })
+
+    const { exported, imported } = await reimportExport(wrapper)
+
+    const { assets, shots } = fr.default
+    expect(exported).toEqual([
+      assets.fields.type,
+      assets.fields.name,
+      assets.fields.description,
+      assets.fields.ready_for,
+      shots.fields.resolution
+    ])
+    expect(imported).toEqual([
+      'Type',
+      'Name',
+      'Description',
+      'Ready for',
+      'Resolution'
+    ])
   })
 
   test('shows the error of a file the browser cannot read', async () => {
