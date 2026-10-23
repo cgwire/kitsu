@@ -262,6 +262,32 @@ describe('lib/csv', () => {
     })
   })
 
+  describe('renameHeaders', () => {
+    const names = new Map([
+      ['Séquence', 'Sequence'],
+      ['Nom', 'Name'],
+      ['Résolution', 'Resolution']
+    ])
+
+    test('gives each label its name', () => {
+      expect(csv.renameHeaders(['Séquence', 'Nom', 'Notes'], names)).toEqual([
+        'Sequence',
+        'Name',
+        'Notes'
+      ])
+    })
+
+    test('keeps a label the file also has under its name', () => {
+      expect(csv.renameHeaders(['Name', 'Nom'], names)).toEqual(['Name', 'Nom'])
+    })
+
+    test('keeps a label that is also the name of a column of its own', () => {
+      expect(
+        csv.renameHeaders(['Nom', 'Résolution'], names, ['Résolution'])
+      ).toEqual(['Name', 'Résolution'])
+    })
+  })
+
   describe('getNewEntityNames', () => {
     const parsedCsv = [
       ['Sequence', 'Name', 'Description'],

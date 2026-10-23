@@ -280,6 +280,20 @@ const csv = {
     return [...names.values()]
   },
 
+  /*
+   * Give each header that is a label its name (`names` maps labels to
+   * names), unless the file already has a header of that name or the label
+   * is also the name of a column of its own, listed in `kept`.
+   */
+  renameHeaders(headers, names, kept = []) {
+    return headers.map(header => {
+      const name = names.get(header)
+      return name && !headers.includes(name) && !kept.includes(header)
+        ? name
+        : header
+    })
+  },
+
   turnEntriesToCsvString(entries, config = {}) {
     return Papa.unparse(entries, {
       delimiter: ';',

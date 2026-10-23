@@ -383,6 +383,7 @@ const {
   confirmDeleteAllTasks,
   confirmDeleteMetadata,
   confirmRestore: confirmRestoreEdit,
+  csvLabel,
   deleteAllTasksLockText,
   deleteAllTasksText,
   deleteText,
@@ -453,8 +454,8 @@ const onExportClick = () =>
   exportCsv(
     [
       ...(currentEpisode.value ? ['Episode'] : []),
-      t('edits.fields.name'),
-      t('edits.fields.description'),
+      csvLabel('Name'),
+      csvLabel('Description'),
       ...getExportDescriptors(currentProduction.value, 'Edit').map(
         descriptor => descriptor.name
       ),

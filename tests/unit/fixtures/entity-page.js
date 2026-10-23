@@ -2,6 +2,12 @@ import { flushPromises, shallowMount } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
 import { createMemoryHistory, createRouter } from 'vue-router'
 
+import csv from '@/lib/csv'
+
+import ImportModal from '@/components/modals/ImportModal.vue'
+import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
+import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
+
 export const production = {
   id: 'production-1',
   name: 'Production',
@@ -84,7 +90,10 @@ export const mountEntityPage = async (
     actions = {},
     props = {},
     query = {},
-    stubs = {}
+    stubs = {},
+    // The script reads these, the template keeps the key mock.
+    locale = 'en',
+    messages = {}
   }
 ) => {
   const store = buildStore(getters, actions)
@@ -95,8 +104,8 @@ export const mountEntityPage = async (
   await router.push({ path: '/', query })
   const i18n = createI18n({
     legacy: false,
-    locale: 'en',
-    messages: { en: {} },
+    locale,
+    messages: { [locale]: messages },
     missingWarn: false,
     fallbackWarn: false
   })
@@ -129,5 +138,26 @@ export const mountEntityPage = async (
     list: list.methods,
     dispatched: name =>
       store.dispatch.mock.calls.filter(([action]) => action === name)
+  }
+}
+
+// Exports the list, then imports the exported file back as is: returns the
+// headers of the file and the ones the import preview gets.
+export const reimportExport = async wrapper => {
+  const buildCsvFile = vi.spyOn(csv, 'buildCsvFile').mockReturnValue('')
+  await wrapper
+    .findAllComponents(ButtonSimple)
+    .find(button => button.props('icon') === 'export')
+    .vm.$emit('click')
+  await flushPromises()
+  const [, entries] = buildCsvFile.mock.calls[0]
+  buildCsvFile.mockRestore()
+  await wrapper
+    .findComponent(ImportModal)
+    .vm.$emit('confirm', csv.turnEntriesToCsvString(entries), 'text')
+  await flushPromises()
+  return {
+    exported: entries[0],
+    imported: wrapper.findComponent(ImportRenderModal).props('parsedCsv')[0]
   }
 }

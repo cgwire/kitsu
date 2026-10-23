@@ -413,6 +413,7 @@ const {
   confirmDeleteAllTasks,
   confirmDeleteMetadata,
   confirmRestore: confirmRestoreAsset,
+  csvLabel,
   deleteAllTasksLockText,
   deleteAllTasksText,
   deleteText,
@@ -486,16 +487,16 @@ const onExportClick = () =>
   exportCsv(
     [
       ...(isTVShow.value ? ['Episode'] : []),
-      t('assets.fields.type'),
-      t('assets.fields.name'),
-      t('assets.fields.description'),
-      t('assets.fields.ready_for'),
+      csvLabel('Type'),
+      csvLabel('Name'),
+      csvLabel('Description'),
+      csvLabel('Ready for'),
       ...getExportDescriptors(currentProduction.value, 'Asset').map(
         descriptor => descriptor.name
       ),
       ...(isAssetTime.value ? [t('assets.fields.time_spent')] : []),
       ...(isAssetEstimation.value ? [t('main.estimation_short')] : []),
-      ...(isAssetResolution.value ? [t('shots.fields.resolution')] : []),
+      ...(isAssetResolution.value ? [csvLabel('Resolution')] : []),
       // Qualified by the task type so a re-import can tell the columns
       // apart: bare duplicated headers collapse in the server's reader.
       ...assetValidationColumns.value.flatMap(taskTypeId => {
