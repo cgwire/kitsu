@@ -14,6 +14,7 @@ import router from '@/router'
 import store from '@/store'
 import { setupChunkErrorHandler } from '@/lib/chunk-error'
 import { followLostRedirects } from '@/lib/navigation-failure'
+import { installPlugins } from '@/lib/plugins'
 
 import vAutosize from '@/directives/autosize'
 import IO from 'socket.io-client'
@@ -25,8 +26,10 @@ const head = createHead()
 
 app.use(i18n)
 app.use(head)
-app.use(router)
+// Before router: catch-all deep-link children must exist for the first match.
+installPlugins(app, { router, store, i18n, head })
 app.use(store)
+app.use(router)
 app.use(resizableColumn)
 app.config.globalProperties.$socket = IO('/events')
 app.directive('autosize', vAutosize)

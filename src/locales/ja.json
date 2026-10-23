@@ -1053,6 +1053,10 @@
       "view_as_playlist": "プレイリストとして表示",
       "view_created": "プレイリストを表示"
     },
+    "plugins": {
+      "load_error": "{name} プラグインを読み込めませんでした。",
+      "page_not_found": "このページは {name} プラグインに存在しません。"
+    },
     "productions": {
       "clients": {
         "access_description": "この設定は、プレビューアカウントを含め、このプロダクションのクライアントに何を見せるかを決めます。",

@@ -1053,6 +1053,10 @@
       "view_as_playlist": "Als Wiedergabeliste ansehen",
       "view_created": "Wiedergabeliste anzeigen"
     },
+    "plugins": {
+      "load_error": "Das Plugin {name} konnte nicht geladen werden.",
+      "page_not_found": "Diese Seite existiert nicht im Plugin {name}."
+    },
     "productions": {
       "clients": {
         "access_description": "Diese Einstellungen legen fest, was die Kunden dieser Produktion sehen, einschließlich des Vorschaukontos.",
