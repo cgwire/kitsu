@@ -144,6 +144,7 @@ const mountPanel = async ({
     global: {
       mocks,
       stubs: {
+        TaskDetailExtensions: { template: '<div><slot /></div>' },
         // reset() runs after every load; the default stub has no such method
         // and the resulting throw would cut the reset short.
         AddPreviewModal: { template: '<div />', methods: { reset: () => {} } },
