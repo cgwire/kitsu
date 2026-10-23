@@ -6,6 +6,7 @@ vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 
 import errors from '@/lib/errors'
 
+import CreateTasksModal from '@/components/modals/CreateTasksModal.vue'
 import Sequences from '@/components/pages/Sequences.vue'
 
 import { mountEntityPage, production } from '../../fixtures/entity-page'
@@ -187,6 +188,138 @@ describe('Sequences page, reload after a production switch', () => {
     await flushPromises()
 
     expect(listOf(wrapper).props('isError')).toBe(false)
+  })
+
+  test('shows the loading state until the new list arrives', async () => {
+    let endLoad = null
+    const { wrapper, switchTo } = await mountOnProduction(
+      () =>
+        new Promise(resolve => {
+          endLoad = resolve
+        })
+    )
+    const savedSearches = () =>
+      wrapper.findComponent({ name: 'SearchQueryList' })
+
+    await switchTo('production-2')
+    expect(listOf(wrapper).props('isLoading')).toBe(true)
+    expect(savedSearches().exists()).toBe(false)
+    endLoad()
+    await flushPromises()
+
+    expect(listOf(wrapper).props('isLoading')).toBe(false)
+    expect(savedSearches().exists()).toBe(true)
+  })
+
+  test('keeps the loading state until the latest load ends', async () => {
+    const endLoads = []
+    const { wrapper, switchTo } = await mountOnProduction(
+      () =>
+        new Promise(resolve => {
+          endLoads.push(resolve)
+        })
+    )
+
+    await switchTo('production-2')
+    await switchTo('production-3')
+    endLoads[0]()
+    await flushPromises()
+    expect(listOf(wrapper).props('isLoading')).toBe(true)
+    endLoads[1]()
+    await flushPromises()
+
+    expect(listOf(wrapper).props('isLoading')).toBe(false)
+  })
+})
+
+// The creation of tasks reloads the list too.
+describe('Sequences page, reload after a task creation', () => {
+  // The mount on a loaded list ends with a 200 ms timer, which must not fire
+  // in a later test.
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.restoreAllMocks()
+  })
+
+  const mountAndCreateTasks = async ({ query } = {}) => {
+    let endLoad = null
+    const page = await mountEntityPage(Sequences, {
+      listName: 'SequenceList',
+      getters: {
+        sequenceListScrollPosition: 1200,
+        sequenceMap: new Map([
+          ['sequence-1', { id: 'sequence-1', project_id: production.id }]
+        ]),
+        sequenceValidationColumns: ['task-type-1']
+      },
+      actions: {
+        loadSequencesWithTasks: () =>
+          new Promise(resolve => {
+            endLoad = resolve
+          })
+      },
+      query
+    })
+    await page.wrapper.findComponent(CreateTasksModal).vm.$emit('confirm', {
+      form: { task_type_id: 'task-type-1' },
+      selectionOnly: false
+    })
+    await flushPromises()
+    const endReload = async () => {
+      endLoad()
+      await flushPromises()
+    }
+    return { ...page, endReload }
+  }
+
+  const listOf = wrapper => wrapper.findComponent({ name: 'SequenceList' })
+
+  test('shows the loading state while the list reloads', async () => {
+    const { wrapper, endReload } = await mountAndCreateTasks()
+
+    expect(listOf(wrapper).props('isLoading')).toBe(true)
+    await endReload()
+
+    expect(listOf(wrapper).props('isLoading')).toBe(false)
+  })
+
+  // The reloaded list holds every sequence of the episode.
+  test('applies the search of the URL after a reload of the list', async () => {
+    const { store, dispatched, endReload } = await mountAndCreateTasks({
+      query: { search: 'sq01' }
+    })
+    store.dispatch.mockClear()
+
+    await endReload()
+
+    expect(dispatched('setSequenceSearch')).toContainEqual([
+      'setSequenceSearch',
+      'sq01'
+    ])
+  })
+
+  // Hiding the rows during the load scrolls the list back to the top.
+  test('keeps the scroll position of the list', async () => {
+    const { wrapper, store, list, endReload } = await mountAndCreateTasks()
+    const isLoadingAtRestore = []
+    list.setScrollPosition.mockClear()
+    list.setScrollPosition.mockImplementation(() => {
+      isLoadingAtRestore.push(listOf(wrapper).props('isLoading'))
+    })
+
+    listOf(wrapper).vm.$emit('scroll', 0)
+    await endReload()
+    listOf(wrapper).vm.$emit('scroll', 1300)
+
+    expect(list.setScrollPosition).toHaveBeenLastCalledWith(1200)
+    expect(isLoadingAtRestore).toEqual([false])
+    expect(store.commit.mock.calls).toEqual([
+      ['SET_SEQUENCE_LIST_SCROLL_POSITION', 1300]
+    ])
   })
 })
 

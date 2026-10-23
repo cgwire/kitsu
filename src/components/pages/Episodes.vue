@@ -49,7 +49,7 @@
               type="episode"
               :production-id="currentProduction?.id"
               @remove-search="removeSearchQuery"
-              v-if="!isEpisodesLoading && !initialLoading && !isLoadingError"
+              v-if="!isLoading && !initialLoading && !isLoadingError"
             />
           </div>
         </div>
@@ -63,7 +63,7 @@
           ref="episode-list"
           :displayed-episodes="displayedEpisodes"
           :display-settings="displaySettings"
-          :is-loading="isEpisodesLoading || initialLoading"
+          :is-loading="isLoading || initialLoading"
           :is-error="isLoadingError"
           :validation-columns="validationColumns"
           :department-filter="departmentFilter"
@@ -78,7 +78,7 @@
           @edit-metadata="onEditMetadataClicked"
           @field-changed="onFieldChanged"
           @metadata-changed="onMetadataChanged"
-          @scroll="saveScrollPosition"
+          @scroll="onListScroll"
           @keep-task-panel-open="onKeepTaskPanelOpenChanged"
         />
       </div>
@@ -230,7 +230,8 @@ const listRef = useTemplateRef('episode-list')
 const searchFieldRef = useTemplateRef('episode-search-field')
 
 const initialLoading = ref(true)
-// No store action flags a failed load of this list.
+// No store action flags a load of this list or its failure.
+const isLoading = ref(false)
 const isLoadingError = ref(false)
 let lastLoadId = 0
 
@@ -255,7 +256,6 @@ const isCurrentUserClient = computed(() => store.getters.isCurrentUserClient)
 const isCurrentUserManager = computed(
   () => store.getters.isCurrentUserProductionManager
 )
-const isEpisodesLoading = computed(() => store.getters.isEpisodesLoading)
 const selectedTasks = computed(() => store.getters.selectedTasks)
 const user = computed(() => store.getters.user)
 
@@ -264,13 +264,19 @@ const user = computed(() => store.getters.user)
 
 const loadList = () => {
   const loadId = ++lastLoadId
+  isLoading.value = true
   isLoadingError.value = false
-  return store.dispatch('loadEpisodesWithTasks').catch(err => {
-    // An older load may fail after a newer one, of this production or of
-    // another, succeeded.
-    if (loadId === lastLoadId) isLoadingError.value = true
-    logRequestFailure(err)
-  })
+  return store
+    .dispatch('loadEpisodesWithTasks')
+    .catch(err => {
+      // An older load may fail after a newer one, of this production or of
+      // another, succeeded.
+      if (loadId === lastLoadId) isLoadingError.value = true
+      logRequestFailure(err)
+    })
+    .finally(() => {
+      if (loadId === lastLoadId) isLoading.value = false
+    })
 }
 
 const reset = () => {
@@ -332,6 +338,11 @@ const {
 
 const showNewModal = () => onEditClicked()
 
+// Hiding the rows during a load scrolls the list back to the top.
+const onListScroll = position => {
+  if (!isLoading.value) saveScrollPosition(position)
+}
+
 const confirmEditEpisode = async form => {
   loading.edit = true
   errors.edit = false
@@ -372,11 +383,14 @@ watch(currentProduction, () => {
   reset()
 })
 
-watch(isEpisodesLoading, isLoading => {
-  if (isLoading) return
+watch(isLoading, () => {
+  if (isLoading.value) return
   initialLoading.value = false
-  nextTick(() => applySearchFromUrl())
-  setScrollPosition()
+  // The rows come back with the next render: the list can scroll then.
+  nextTick(() => {
+    applySearchFromUrl()
+    setScrollPosition()
+  })
 })
 
 // Lifecycle
@@ -415,7 +429,6 @@ onMounted(() => {
       setTimeout(finalize, 200)
     })
   } else {
-    if (!isEpisodesLoading.value) initialLoading.value = false
     finalize()
   }
 })

@@ -7,6 +7,7 @@ vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 import errors from '@/lib/errors'
 
 import AddMetadataModal from '@/components/modals/AddMetadataModal.vue'
+import CreateTasksModal from '@/components/modals/CreateTasksModal.vue'
 import DeleteModal from '@/components/modals/DeleteModal.vue'
 import EditEpisodeModal from '@/components/modals/EditEpisodeModal.vue'
 import HardDeleteModal from '@/components/modals/HardDeleteModal.vue'
@@ -66,27 +67,6 @@ describe('Episodes page', () => {
       },
       query: { search: 'e01' }
     })
-
-    expect(dispatched('setEpisodeSearch')).toContainEqual([
-      'setEpisodeSearch',
-      'e01'
-    ])
-  })
-
-  test('applies the search of the URL after a reload of the list', async () => {
-    const getters = reactive({
-      episodeMap: episodeMap(production.id),
-      episodeValidationColumns: ['task-type-1'],
-      isEpisodesLoading: true
-    })
-    const { store, dispatched } = await mountPage({
-      getters,
-      query: { search: 'e01' }
-    })
-    store.dispatch.mockClear()
-
-    getters.isEpisodesLoading = false
-    await flushPromises()
 
     expect(dispatched('setEpisodeSearch')).toContainEqual([
       'setEpisodeSearch',
@@ -342,6 +322,127 @@ describe('Episodes page, reload after a production switch', () => {
     await flushPromises()
 
     expect(listOf(wrapper).props('isError')).toBe(false)
+  })
+
+  test('shows the loading state until the new list arrives', async () => {
+    let endLoad = null
+    const { wrapper, switchTo } = await mountOnProduction(
+      () =>
+        new Promise(resolve => {
+          endLoad = resolve
+        })
+    )
+    const savedSearches = () =>
+      wrapper.findComponent({ name: 'SearchQueryList' })
+
+    await switchTo('production-2')
+    expect(listOf(wrapper).props('isLoading')).toBe(true)
+    expect(savedSearches().exists()).toBe(false)
+    endLoad()
+    await flushPromises()
+
+    expect(listOf(wrapper).props('isLoading')).toBe(false)
+    expect(savedSearches().exists()).toBe(true)
+  })
+
+  test('keeps the loading state until the latest load ends', async () => {
+    const endLoads = []
+    const { wrapper, switchTo } = await mountOnProduction(
+      () =>
+        new Promise(resolve => {
+          endLoads.push(resolve)
+        })
+    )
+
+    await switchTo('production-2')
+    await switchTo('production-3')
+    endLoads[0]()
+    await flushPromises()
+    expect(listOf(wrapper).props('isLoading')).toBe(true)
+    endLoads[1]()
+    await flushPromises()
+
+    expect(listOf(wrapper).props('isLoading')).toBe(false)
+  })
+})
+
+// The creation of tasks reloads the list too.
+describe('Episodes page, reload after a task creation', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  const mountAndCreateTasks = async ({ query } = {}) => {
+    let endLoad = null
+    const page = await mountPage({
+      getters: {
+        episodeListScrollPosition: 1200,
+        episodeMap: episodeMap(production.id),
+        episodeValidationColumns: ['task-type-1']
+      },
+      actions: {
+        loadEpisodesWithTasks: () =>
+          new Promise(resolve => {
+            endLoad = resolve
+          })
+      },
+      query
+    })
+    await page.wrapper.findComponent(CreateTasksModal).vm.$emit('confirm', {
+      form: { task_type_id: 'task-type-1' },
+      selectionOnly: false
+    })
+    await flushPromises()
+    const endReload = async () => {
+      endLoad()
+      await flushPromises()
+    }
+    return { ...page, endReload }
+  }
+
+  const listOf = wrapper => wrapper.findComponent({ name: 'EpisodeList' })
+
+  test('shows the loading state while the list reloads', async () => {
+    const { wrapper, endReload } = await mountAndCreateTasks()
+
+    expect(listOf(wrapper).props('isLoading')).toBe(true)
+    await endReload()
+
+    expect(listOf(wrapper).props('isLoading')).toBe(false)
+  })
+
+  test('applies the search of the URL after a reload of the list', async () => {
+    const { store, dispatched, endReload } = await mountAndCreateTasks({
+      query: { search: 'e01' }
+    })
+    store.dispatch.mockClear()
+
+    await endReload()
+
+    expect(dispatched('setEpisodeSearch')).toContainEqual([
+      'setEpisodeSearch',
+      'e01'
+    ])
+  })
+
+  // Hiding the rows during the load scrolls the list back to the top.
+  test('keeps the scroll position of the list', async () => {
+    const { wrapper, store, list, endReload } = await mountAndCreateTasks()
+    const isLoadingAtRestore = []
+    list.setScrollPosition.mockClear()
+    list.setScrollPosition.mockImplementation(() => {
+      isLoadingAtRestore.push(listOf(wrapper).props('isLoading'))
+    })
+
+    listOf(wrapper).vm.$emit('scroll', 0)
+    await endReload()
+    listOf(wrapper).vm.$emit('scroll', 1300)
+
+    expect(list.setScrollPosition).toHaveBeenLastCalledWith(1200)
+    expect(isLoadingAtRestore).toEqual([false])
+    expect(store.commit.mock.calls).toEqual([
+      ['SET_EPISODE_LIST_SCROLL_POSITION', 1300]
+    ])
   })
 })
 
