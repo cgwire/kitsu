@@ -69,9 +69,9 @@ const actions = {
     commit(ADD_PREVIOUS_NEWS, newsList.data)
   },
 
-  async loadSingleNews({ commit }, { productionId, newsId }) {
-    const news = await newsApi.getNews(productionId, newsId)
-    commit(ADD_FIRST_NEWS, news)
+  // The feed adds the news itself: it alone knows its filters.
+  getSingleNews({}, { productionId, newsId }) {
+    return newsApi.getNews(productionId, newsId)
   }
 }
 

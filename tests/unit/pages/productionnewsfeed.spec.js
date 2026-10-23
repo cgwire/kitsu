@@ -46,7 +46,7 @@ let mounted = null
 
 const mountPage = async (
   path,
-  { loadTask = (_, { taskId }) => ({ id: taskId }) } = {}
+  { getters = {}, loadTask = (_, { taskId }) => ({ id: taskId }) } = {}
 ) => {
   pget.mockReset()
   pget.mockResolvedValue({ data: newsList, total: 2, stats: [] })
@@ -72,9 +72,12 @@ const mountPage = async (
     getters: {
       currentProduction: () => production,
       dateFormat: () => 'YYYY-MM-DD',
+      openProductions: () => [production],
       personMap: () => new Map(),
+      taskTypeMap: () => new Map(),
       use12HourClock: () => false,
-      user: () => ({ timezone: 'Europe/Paris' })
+      user: () => ({ timezone: 'Europe/Paris' }),
+      ...getters
     }
   })
 
@@ -280,6 +283,155 @@ describe('pages/ProductionNewsFeed', () => {
       expect(rejections).toEqual([])
       expect(consoleError.mock.calls).toEqual([[error], [error]])
       expect(store.getters.newsList).toHaveLength(2)
+    })
+  })
+
+  describe('live news', () => {
+    const feedPath = `/productions/${production.id}/news-feed`
+    const shotType = { id: 'task-type-shot', for_entity: 'Shot' }
+    const assetType = { id: 'task-type-asset', for_entity: 'Asset' }
+    const taskTypeMap = () =>
+      new Map([shotType, assetType].map(taskType => [taskType.id, taskType]))
+    const person = { id: 'person-1' }
+    const personMap = () => new Map([[person.id, person]])
+
+    const liveNews = fields => ({
+      id: 'news-3',
+      author_id: person.id,
+      created_at: '2026-09-16T10:00:00',
+      episode_id: null,
+      project_id: production.id,
+      task_id: 'task-3',
+      task_status_id: 'status-wip',
+      task_type_id: shotType.id,
+      ...fields
+    })
+
+    const receive = async (socket, news) => {
+      pget.mockResolvedValueOnce(news)
+      emitSocketEvent(socket, 'news:new', {
+        news_id: news.id,
+        project_id: news.project_id,
+        task_status_id: news.task_status_id,
+        task_type_id: news.task_type_id
+      })
+      await flushPromises()
+    }
+
+    const newsIds = store => store.getters.newsList.map(news => news.id)
+
+    // 23:30 UTC on 16 September is 01:30 on the 17th in Paris.
+    const pastParisMidnight = { created_at: '2026-09-16T23:30:00' }
+
+    it.each([
+      ['an author', '?person_id=person-1', { author_id: 'person-2' }],
+      ['an episode', '?episode_id=episode-1', { episode_id: 'episode-2' }],
+      [
+        'an episode, for an asset',
+        '?episode_id=episode-1',
+        { episode_id: 'episode-1', task_type_id: assetType.id }
+      ],
+      ['a start date', '?after=2026-09-17', {}],
+      ['an end date', '?before=2026-09-16', {}],
+      [
+        'an end date, past midnight in Paris',
+        '?before=2026-09-17',
+        pastParisMidnight
+      ]
+    ])(
+      'leaves out a live news that misses the filter on %s',
+      async (_, query, fields) => {
+        const { socket, store } = await mountPage(feedPath + query, {
+          getters: { personMap, taskTypeMap }
+        })
+
+        await receive(socket, liveNews(fields))
+
+        expect(newsIds(store)).toEqual(['news-2', 'news-1'])
+        expect(store.getters.newsTotal).toBe(2)
+      }
+    )
+
+    it.each([
+      ['an author', '?person_id=person-1', {}],
+      ['an episode', '?episode_id=episode-1', {}],
+      ['a period', '?after=2026-09-15&before=2026-09-17', {}],
+      [
+        'a start date, past midnight in Paris',
+        '?after=2026-09-17',
+        pastParisMidnight
+      ]
+    ])(
+      'shows a live news that matches the filter on %s',
+      async (_, query, fields) => {
+        const { socket, store } = await mountPage(feedPath + query, {
+          getters: { personMap, taskTypeMap }
+        })
+
+        await receive(socket, liveNews({ episode_id: 'episode-1', ...fields }))
+
+        expect(newsIds(store)).toEqual(['news-3', 'news-2', 'news-1'])
+      }
+    )
+
+    it('loads no live news of a production the studio feed leaves out', async () => {
+      const { socket, store } = await mountPage('/news-feed')
+
+      emitSocketEvent(socket, 'news:new', {
+        news_id: 'news-3',
+        project_id: 'production-2'
+      })
+      await flushPromises()
+
+      expect(pget).toHaveBeenCalledTimes(1)
+      expect(store.getters.newsList).toHaveLength(2)
+    })
+
+    it('shows a live news of an open production on the studio feed', async () => {
+      const { socket, store } = await mountPage('/news-feed')
+
+      await receive(socket, liveNews())
+
+      expect(newsIds(store)).toEqual(['news-3', 'news-2', 'news-1'])
+    })
+
+    it('drops a news whose status edit takes it out of the filter', async () => {
+      const { socket, store } = await mountPage(
+        `${feedPath}?task_status_id=status-wip`
+      )
+      pget.mockResolvedValueOnce({
+        ...newsList[0],
+        task_status_id: 'status-retake'
+      })
+
+      emitSocketEvent(socket, 'task:update', {
+        project_id: production.id,
+        task_id: 'task-2'
+      })
+      await flushPromises()
+
+      expect(newsIds(store)).toEqual(['news-1'])
+      expect(store.getters.newsTotal).toBe(1)
+    })
+
+    it('updates a news whose status edit keeps it in the filter', async () => {
+      const { socket, store } = await mountPage(
+        `${feedPath}?task_status_id=status-wip`
+      )
+      pget.mockResolvedValueOnce({
+        ...newsList[0],
+        change: true,
+        task_status_id: 'status-wip'
+      })
+
+      emitSocketEvent(socket, 'task:update', {
+        project_id: production.id,
+        task_id: 'task-2'
+      })
+      await flushPromises()
+
+      expect(newsIds(store)).toEqual(['news-2', 'news-1'])
+      expect(store.getters.newsList[0].change).toBe(true)
     })
   })
 

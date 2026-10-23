@@ -366,18 +366,46 @@ const markRecent = newsId => {
   }, 3000)
 }
 
+const isProductionInFeed = productionId =>
+  isStudio.value
+    ? store.getters.openProductions.some(
+        production => production.id === productionId
+      )
+    : productionId === currentProduction.value?.id
+
+// Zou's filters, for a news that arrives on its own. Its episode filter
+// keeps the shots of that episode only.
+const isNewsInFeed = news => {
+  const { after, before, episode_id: episodeFilter } = params.value
+  const taskType = store.getters.taskTypeMap.get(news.task_type_id)
+  return (
+    (!taskTypeId.value || news.task_type_id === taskTypeId.value) &&
+    (!taskStatusId.value || news.task_status_id === taskStatusId.value) &&
+    (!person.value || news.author_id === person.value.id) &&
+    (!episodeFilter ||
+      (taskType?.for_entity === 'Shot' && news.episode_id === episodeFilter)) &&
+    (!after || news.created_at > after) &&
+    (!before || news.created_at < before)
+  )
+}
+
 const onNewsNew = eventData => {
   if (
-    (isStudio.value || eventData.project_id === currentProduction.value.id) &&
+    isProductionInFeed(eventData.project_id) &&
     (!taskTypeId.value || taskTypeId.value === eventData.task_type_id) &&
     (!taskStatusId.value || taskStatusId.value === eventData.task_status_id)
   ) {
     store
-      .dispatch('loadSingleNews', {
+      .dispatch('getSingleNews', {
         productionId: eventData.project_id,
         newsId: eventData.news_id
       })
-      .then(() => markRecent(eventData.news_id))
+      .then(news => {
+        if (isNewsInFeed(news)) {
+          store.commit('ADD_FIRST_NEWS', news)
+          markRecent(news.id)
+        }
+      })
       .catch(err => {
         // Its comment was deleted or moved before the news could load.
         if (err?.status !== 404) console.error(err)
@@ -398,9 +426,14 @@ const onTaskUpdate = eventData => {
   )
   if (relatedNews) {
     store
-      .dispatch('loadSingleNews', {
+      .dispatch('getSingleNews', {
         productionId: relatedNews.project_id,
         newsId: relatedNews.id
+      })
+      .then(news => {
+        // A status edit can take the news out of the filters.
+        if (isNewsInFeed(news)) store.commit('ADD_FIRST_NEWS', news)
+        else store.commit('REMOVE_NEWS', news.id)
       })
       .catch(err => {
         // Deleting or moving a comment deletes its news, then updates its task.
