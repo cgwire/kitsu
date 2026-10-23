@@ -739,6 +739,59 @@ describe('Topbar.vue', () => {
       })
     })
 
+    // A production switch loads the episodes, and so does an episode change
+    // before the list is in. The API client reports a failed request: a bug
+    // is left to Sentry.
+    describe('failed load of the episodes', () => {
+      const loads = [
+        ['on a production switch', vm => vm.configureProduction('production-1')],
+        ['on an episode change', vm => vm.configureEpisode()]
+      ]
+
+      it.each(loads)('logs a failed request %s', async (_label, load) => {
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const { wrapper, actions } = mountFor('sequences', 'episode-1', {
+          holdEpisodes: true
+        })
+        const failure = new Error('Request has been terminated')
+        errors.markRequestFailure(failure)
+        actions.loadEpisodes.mockRejectedValueOnce(failure)
+
+        const rejections = await recordUnhandledRejections(async () => {
+          load(wrapper.vm)
+          await flushPromises()
+        })
+
+        expect(rejections).toEqual([])
+        expect(consoleError).toHaveBeenCalledWith(failure)
+        consoleError.mockRestore()
+        wrapper.unmount()
+      })
+
+      it.each(loads)('leaves a bug %s to Sentry', async (_label, load) => {
+        const consoleError = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {})
+        const { wrapper, actions } = mountFor('sequences', 'episode-1', {
+          holdEpisodes: true
+        })
+        const bug = new TypeError('Cannot read properties of undefined')
+        actions.loadEpisodes.mockRejectedValueOnce(bug)
+
+        const rejections = await recordUnhandledRejections(async () => {
+          load(wrapper.vm)
+          await flushPromises()
+        })
+
+        expect(rejections).toEqual([bug])
+        expect(consoleError).not.toHaveBeenCalledWith(bug)
+        consoleError.mockRestore()
+        wrapper.unmount()
+      })
+    })
+
     // A direct link keeps a pseudo-episode wherever the selector offers it.
     describe('pseudo-episodes on a direct link', () => {
       // The last navigation is the one the user lands on: a coercion made on
