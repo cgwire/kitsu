@@ -12,6 +12,7 @@ vi.mock('vue-router', () => ({
 }))
 
 import '@/lib/auth'
+import errors from '@/lib/errors'
 import editStore from '@/store/modules/edits'
 import playlistStore from '@/store/modules/playlists'
 import sequenceStore from '@/store/modules/sequences'
@@ -22,6 +23,8 @@ import PlaylistPlayer from '@/components/players/players/PlaylistPlayer.vue'
 import Combobox from '@/components/widgets/Combobox.vue'
 import ComboboxTaskType from '@/components/widgets/ComboboxTaskType.vue'
 import ErrorText from '@/components/widgets/ErrorText.vue'
+
+import { recordUnhandledRejections } from '../../fixtures/unhandled-rejections'
 
 afterEach(() => {
   vi.useRealTimers()
@@ -550,6 +553,113 @@ describe('Playlist page, list loading error', () => {
     changeSort(wrapper, 'name')
     await flushPromises()
     expect(wrapper.findComponent(ErrorText).exists()).toBe(false)
+  })
+})
+
+describe('Playlist page, failed reload', () => {
+  // The topbar clears the episode of the TV show it switches to: the run
+  // loads the episodes first.
+  const switchProduction = async loadEpisodes => {
+    const page = await mountPage({ state: { isTVShow: true } })
+    await flushPromises()
+    page.actions.loadEpisodes.mockImplementationOnce(loadEpisodes)
+    await moveScope(page.store, {
+      currentProduction: { id: 'p2' },
+      currentEpisode: null
+    })
+    await flushPromises()
+    return page
+  }
+
+  const requestFailure = () => {
+    const failure = new Error('Request has been terminated')
+    errors.markRequestFailure(failure)
+    return failure
+  }
+
+  it('logs a failed load of the episodes after a production switch', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const failure = new Error('Request has been terminated')
+    errors.markRequestFailure(failure)
+
+    const rejections = await recordUnhandledRejections(() =>
+      switchProduction(() => Promise.reject(failure))
+    )
+
+    expect(rejections).toEqual([])
+    expect(consoleError).toHaveBeenCalledWith(failure)
+  })
+
+  it('leaves a bug in the reload to Sentry', async () => {
+    const bug = new TypeError('Cannot read properties of undefined')
+
+    const rejections = await recordUnhandledRejections(() =>
+      switchProduction(() => Promise.reject(bug))
+    )
+
+    expect(rejections).toEqual([bug])
+  })
+
+  it('logs a failed load of the playlists once', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const failure = new Error('Request has been terminated')
+    errors.markRequestFailure(failure)
+
+    await mountPage({
+      actions: { loadPlaylists: vi.fn(() => Promise.reject(failure)) }
+    })
+    await flushPromises()
+
+    const logged = consoleError.mock.calls.filter(([err]) => err === failure)
+    expect(logged).toHaveLength(1)
+  })
+
+  // The switch emptied the list: it must not pass for a production without
+  // playlists.
+  it('shows the loading error instead of an empty production', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const { wrapper } = await switchProduction(() =>
+      Promise.reject(requestFailure())
+    )
+
+    expect(wrapper.findComponent(ErrorText).exists()).toBe(true)
+    const center = wrapper.find('.no-selection')
+    expect(center.exists()).toBe(true)
+    expect(center.findComponent({ name: 'Spinner' }).exists()).toBe(false)
+    expect(center.find('.empty-explanation').exists()).toBe(false)
+    expect(center.find('button.big').exists()).toBe(false)
+  })
+
+  it('clears the loading error once a reload succeeds', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { wrapper, store } = await switchProduction(() =>
+      Promise.reject(requestFailure())
+    )
+    expect(wrapper.findComponent(ErrorText).exists()).toBe(true)
+
+    await moveScope(store, {
+      currentProduction: { id: 'p3' },
+      currentEpisode: { id: 'ep-c' }
+    })
+    await flushPromises()
+
+    expect(wrapper.findComponent(ErrorText).exists()).toBe(false)
+  })
+
+  // The columns wait for the first run: a failed one must not keep them
+  // on their spinner.
+  it('shows the loading error of a failed first load', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const { wrapper } = await mountPage({
+      state: { shotsLoadingKey: 'other' },
+      actions: { loadShots: vi.fn(() => Promise.reject(requestFailure())) }
+    })
+    await flushPromises()
+
+    expect(wrapper.findComponent(ErrorText).exists()).toBe(true)
+    expect(wrapper.findAllComponents({ name: 'Spinner' })).toHaveLength(0)
   })
 })
 

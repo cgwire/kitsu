@@ -105,6 +105,8 @@ export const mountEntityPage = async (
     name: listName,
     props: {
       departmentFilter: { type: Array, default: () => [] },
+      isError: { type: Boolean, default: false },
+      isLoading: { type: Boolean, default: false },
       validationColumns: { type: Array, default: () => [] }
     },
     template: '<div />',
