@@ -449,7 +449,7 @@ import {
   getTaskFilters
 } from '@/lib/filtering'
 import { buildSupervisorTaskIndex, indexSearch } from '@/lib/indexing'
-import { getPersonPath } from '@/lib/path'
+import { getPersonPath, pluralizeEntityType } from '@/lib/path'
 import preferences from '@/lib/preferences'
 import { sortByMetadata, sortByName, sortPeople } from '@/lib/sorting'
 import stringHelpers from '@/lib/string'
@@ -1022,11 +1022,19 @@ const getRoute = section => {
       task_type_id: taskTypeId
     }
   }
-  if (currentTaskType.value.for_entity === 'Episode') {
+  // The episodes route has no type to inherit, and old links of the episode
+  // stats open shot task types there. The route's own type comes first: it
+  // is the only one known for a task type missing from the map.
+  const type =
+    route.params.type || pluralizeEntityType(currentTaskType.value.for_entity)
+  if (currentTaskType.value.for_entity === 'Episode' || !type) {
     sectionRoute.name = `episodes-${sectionRoute.name}`
-  } else if (isTVShow.value && currentEpisode.value) {
-    sectionRoute.name = `episode-${sectionRoute.name}`
-    sectionRoute.params.episode_id = currentEpisode.value.id
+  } else {
+    sectionRoute.params.type = type
+    if (isTVShow.value && currentEpisode.value) {
+      sectionRoute.name = `episode-${sectionRoute.name}`
+      sectionRoute.params.episode_id = currentEpisode.value.id
+    }
   }
 
   return sectionRoute
