@@ -597,7 +597,7 @@ export const ADD_FIRST_NEWS = 'ADD_FIRST_NEWS'
 export const UPDATE_NEWS = 'UPDATE_NEWS'
 export const REMOVE_NEWS = 'REMOVE_NEWS'
 export const NEWS_ADD_PREVIEW = 'NEWS_ADD_PREVIEW'
-export const NEWS_SET_TOTAL = 'NEWS_SET_TOTAL'
+export const NEWS_SET_COMPLETE = 'NEWS_SET_COMPLETE'
 
 // Misc
 

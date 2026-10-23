@@ -172,7 +172,6 @@ const currentProduction = computed(() => store.getters.currentProduction)
 const personMap = computed(() => store.getters.personMap)
 const newsList = computed(() => store.getters.newsList)
 const newsListByDay = computed(() => store.getters.newsListByDay)
-const newsTotal = computed(() => store.getters.newsTotal)
 
 const isStudio = computed(() => !route.path.includes('productions'))
 
@@ -184,7 +183,7 @@ const isTimelineBlank = computed(
   () => loading.news || errors.news || newsList.value.length === 0
 )
 
-const hasMoreNews = computed(() => newsList.value.length < newsTotal.value)
+const hasMoreNews = computed(() => !store.getters.isNewsListComplete)
 
 const isDrawerOpen = computed(() => Boolean(currentNewsId.value))
 
@@ -308,8 +307,14 @@ const loadFollowingNews = () => {
   if (loading.more || loading.news || !hasMoreNews.value) return
   loading.more = true
   currentPage.value += 1
+  let isPageEmpty = false
   store
     .dispatch('loadMoreNews', params.value)
+    .then(count => {
+      // A page of news already listed makes the feed no longer: no scroll
+      // would come to ask for the next one.
+      isPageEmpty = count === 0
+    })
     .catch(err => {
       console.error(err)
       // Give the failed page back so the next scroll retries it instead of
@@ -318,6 +323,7 @@ const loadFollowingNews = () => {
     })
     .finally(() => {
       loading.more = false
+      if (isPageEmpty) loadFollowingNews()
     })
 }
 

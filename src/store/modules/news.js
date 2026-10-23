@@ -9,7 +9,7 @@ import {
   UPDATE_NEWS,
   REMOVE_NEWS,
   NEWS_ADD_PREVIEW,
-  NEWS_SET_TOTAL,
+  NEWS_SET_COMPLETE,
   RESET_ALL
 } from '@/store/mutation-types'
 
@@ -18,7 +18,9 @@ const initialState = {
   // Each new load of the feed changes it: the answers of the requests sent
   // before go nowhere.
   newsListVersion: 0,
-  newsTotal: 0
+  // A page shorter than asked for is the last one: the count of the first
+  // answer drifts as soon as news arrive or go.
+  isNewsListComplete: false
 }
 
 const state = {
@@ -27,7 +29,7 @@ const state = {
 
 const getters = {
   newsList: state => state.newsList,
-  newsTotal: state => state.newsTotal,
+  isNewsListComplete: state => state.isNewsListComplete,
 
   newsListByDay: state => timezone => {
     if (state.newsList.length === 0) return []
@@ -65,15 +67,19 @@ const actions = {
     commit(CLEAR_NEWS)
     const newsList = await newsApi.getLastNews(params)
     commit(ADD_PREVIOUS_NEWS, newsList.data)
-    commit(NEWS_SET_TOTAL, newsList.total)
+    commit(NEWS_SET_COMPLETE, newsList.data.length < params.limit)
   },
 
+  // The number of news the page added, null when the feed loaded again
+  // meanwhile.
   async loadMoreNews({ commit, state }, params) {
     const version = state.newsListVersion
     const newsList = await newsApi.getLastNews(params)
-    if (state.newsListVersion === version) {
-      commit(ADD_PREVIOUS_NEWS, newsList.data)
-    }
+    if (state.newsListVersion !== version) return null
+    const count = state.newsList.length
+    commit(ADD_PREVIOUS_NEWS, newsList.data)
+    commit(NEWS_SET_COMPLETE, newsList.data.length < params.limit)
+    return state.newsList.length - count
   },
 
   // The feed adds the news itself: it alone knows its filters. Null when
@@ -89,11 +95,16 @@ const mutations = {
   [CLEAR_NEWS](state) {
     state.newsList = []
     state.newsListVersion += 1
-    state.newsTotal = 0
+    state.isNewsListComplete = false
   },
 
+  // Zou pages by offset: a news posted since the first page moves the next
+  // ones back, so a page can start with news already listed.
   [ADD_PREVIOUS_NEWS](state, newsList) {
-    state.newsList = state.newsList.concat(sortByDate(newsList))
+    const listedIds = new Set(state.newsList.map(news => news.id))
+    state.newsList = state.newsList.concat(
+      sortByDate(newsList.filter(news => !listedIds.has(news.id)))
+    )
   },
 
   [ADD_FIRST_NEWS](state, news) {
@@ -102,7 +113,6 @@ const mutations = {
       Object.assign(existingNews, news)
     } else {
       state.newsList.unshift(news)
-      state.newsTotal += 1
     }
   },
 
@@ -113,10 +123,7 @@ const mutations = {
 
   [REMOVE_NEWS](state, newsId) {
     const index = state.newsList.findIndex(news => news.id === newsId)
-    if (index !== -1) {
-      state.newsList.splice(index, 1)
-      state.newsTotal -= 1
-    }
+    if (index !== -1) state.newsList.splice(index, 1)
   },
 
   [NEWS_ADD_PREVIEW](state, { commentId, previewId, extension }) {
@@ -128,8 +135,8 @@ const mutations = {
     }
   },
 
-  [NEWS_SET_TOTAL](state, count) {
-    state.newsTotal = count
+  [NEWS_SET_COMPLETE](state, isComplete) {
+    state.isNewsListComplete = isComplete
   },
 
   [RESET_ALL](state) {

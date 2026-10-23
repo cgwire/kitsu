@@ -108,6 +108,12 @@ describe('News store', () => {
       expect(state.newsList).toEqual([])
     })
 
+    test('CLEAR_NEWS - list to load again', () => {
+      state.isNewsListComplete = true
+      store.mutations.CLEAR_NEWS(state)
+      expect(state.isNewsListComplete).toBe(false)
+    })
+
     test('CLEAR_NEWS - new version of the list', () => {
       state.newsListVersion = 2
       store.mutations.CLEAR_NEWS(state)
@@ -130,6 +136,19 @@ describe('News store', () => {
       ])
     })
 
+    test('ADD_PREVIOUS_NEWS - news already listed', () => {
+      store.mutations.ADD_PREVIOUS_NEWS(state, [
+        { id: 'news-1', created_at: '2019-05-02T23:12:23' },
+        { id: 'news-before-1', created_at: '2019-04-29T23:12:23' }
+      ])
+      expect(state.newsList.map(news => news.id)).toEqual([
+        'news-3',
+        'news-2',
+        'news-1',
+        'news-before-1'
+      ])
+    })
+
     test('ADD_FIRST_NEWS', () => {
       store.mutations.ADD_FIRST_NEWS(state, {
         id: 'news-4', created_at: '2019-05-06T23:12:23'
@@ -143,7 +162,6 @@ describe('News store', () => {
     })
 
     test('UPDATE_NEWS', () => {
-      state.newsTotal = 3
       store.mutations.UPDATE_NEWS(state, {
         id: 'news-2',
         change: true,
@@ -154,34 +172,27 @@ describe('News store', () => {
         change: true,
         created_at: '2019-05-03T21:12:23'
       })
-      expect(state.newsTotal).toEqual(3)
     })
 
     test('UPDATE_NEWS - unknown news', () => {
-      state.newsTotal = 3
       store.mutations.UPDATE_NEWS(state, {
         id: 'news-4',
         created_at: '2019-05-06T23:12:23'
       })
       expect(state.newsList).toHaveLength(3)
-      expect(state.newsTotal).toEqual(3)
     })
 
     test('REMOVE_NEWS', () => {
-      state.newsTotal = 3
       store.mutations.REMOVE_NEWS(state, 'news-2')
       expect(state.newsList).toEqual([
         { id: 'news-3', created_at: '2019-05-04T23:12:23' },
         { id: 'news-1', created_at: '2019-05-02T23:12:23' }
       ])
-      expect(state.newsTotal).toEqual(2)
     })
 
     test('REMOVE_NEWS - unknown news', () => {
-      state.newsTotal = 3
       store.mutations.REMOVE_NEWS(state, 'news-4')
       expect(state.newsList).toHaveLength(3)
-      expect(state.newsTotal).toEqual(3)
     })
 
     test('NEWS_ADD_PREVIEW', () => {

@@ -46,10 +46,16 @@ let mounted = null
 
 const mountPage = async (
   path,
-  { getters = {}, loadTask = (_, { taskId }) => ({ id: taskId }) } = {}
+  {
+    firstPage = newsList,
+    getters = {},
+    loadTask = (_, { taskId }) => ({ id: taskId }),
+    total = firstPage.length
+  } = {}
 ) => {
   pget.mockReset()
   pget.mockResolvedValue({ data: newsList, total: 2, stats: [] })
+  pget.mockResolvedValueOnce({ data: firstPage, total, stats: [] })
 
   const router = createRouter({
     history: createMemoryHistory(),
@@ -68,7 +74,11 @@ const mountPage = async (
     modules: {
       news: {
         ...newsModule,
-        state: () => ({ newsList: [], newsListVersion: 0, newsTotal: 0 })
+        state: () => ({
+          isNewsListComplete: false,
+          newsList: [],
+          newsListVersion: 0
+        })
       }
     },
     actions: { loadTask },
@@ -224,7 +234,6 @@ describe('pages/ProductionNewsFeed', () => {
       expect(pget).toHaveBeenCalledTimes(1)
       expect(rejections).toEqual([])
       expect(store.getters.newsList.map(news => news.id)).toEqual(['news-1'])
-      expect(store.getters.newsTotal).toBe(1)
       expect(wrapper.findAllComponents(NewsRow)).toHaveLength(1)
     })
 
@@ -238,7 +247,6 @@ describe('pages/ProductionNewsFeed', () => {
       await settle()
 
       expect(store.getters.newsList).toHaveLength(2)
-      expect(store.getters.newsTotal).toBe(2)
     })
 
     it('keeps the task drawer open when the news shown is deleted', async () => {
@@ -351,7 +359,6 @@ describe('pages/ProductionNewsFeed', () => {
         await receive(socket, liveNews(fields))
 
         expect(newsIds(store)).toEqual(['news-2', 'news-1'])
-        expect(store.getters.newsTotal).toBe(2)
       }
     )
 
@@ -414,7 +421,6 @@ describe('pages/ProductionNewsFeed', () => {
       await flushPromises()
 
       expect(newsIds(store)).toEqual(['news-1'])
-      expect(store.getters.newsTotal).toBe(1)
     })
 
     it('updates a news whose status edit keeps it in the filter', async () => {
@@ -476,7 +482,6 @@ describe('pages/ProductionNewsFeed', () => {
       await answer(news3)
 
       expect(newsIds(store)).toEqual(['news-2', 'news-1'])
-      expect(store.getters.newsTotal).toBe(2)
     })
 
     it('does not bring back a news deleted while it reloads', async () => {
@@ -491,7 +496,6 @@ describe('pages/ProductionNewsFeed', () => {
       await answer(newsList[0])
 
       expect(newsIds(store)).toEqual(['news-1'])
-      expect(store.getters.newsTotal).toBe(1)
     })
 
     it('keeps out a new news that loads once the feed is loaded again', async () => {
@@ -513,8 +517,13 @@ describe('pages/ProductionNewsFeed', () => {
     })
 
     it('keeps out a page that loads once the feed is loaded again', async () => {
-      const { store, wrapper } = await mountPage(feedPath)
-      store.commit('NEWS_SET_TOTAL', 60)
+      const { store, wrapper } = await mountPage(feedPath, {
+        firstPage: Array.from({ length: 50 }, (_, index) => ({
+          ...newsList[0],
+          id: `news-page-${index}`
+        })),
+        total: 60
+      })
       const answer = deferNextRequest()
 
       await wrapper.find('.news.page').trigger('scroll')
@@ -526,6 +535,95 @@ describe('pages/ProductionNewsFeed', () => {
 
       expect(pget).toHaveBeenCalledTimes(3)
       expect(newsIds(store)).toEqual(['news-2', 'news-1'])
+    })
+  })
+
+  describe('more news', () => {
+    const feedPath = `/productions/${production.id}/news-feed`
+
+    // News one minute apart, the newest first, as Zou pages them.
+    const page = (from, count) =>
+      Array.from({ length: count }, (_, index) => ({
+        id: `news-${from + index}`,
+        created_at: new Date(Date.UTC(2026, 8, 15, 10) - (from + index) * 6e4)
+          .toISOString()
+          .slice(0, 19),
+        project_id: production.id,
+        task_id: `task-${from + index}`
+      }))
+
+    const scrollDown = async wrapper => {
+      await wrapper.find('.news.page').trigger('scroll')
+      await flushPromises()
+    }
+
+    // A news posted since the first load moves the next page one news back.
+    it('loads each news once when the next page starts with a shown one', async () => {
+      const { store, wrapper } = await mountPage(feedPath, {
+        firstPage: page(0, 50),
+        total: 60
+      })
+      pget.mockResolvedValueOnce({ data: page(49, 10), total: 60, stats: [] })
+
+      await scrollDown(wrapper)
+
+      const ids = store.getters.newsList.map(news => news.id)
+      expect(ids).toHaveLength(59)
+      expect(new Set(ids).size).toBe(59)
+    })
+
+    // The page is full, so the feed goes on even though it kept 49 news.
+    it('asks for the page after a full page that starts with a shown one', async () => {
+      const { store, wrapper } = await mountPage(feedPath, {
+        firstPage: page(0, 50),
+        total: 120
+      })
+      pget.mockResolvedValueOnce({ data: page(49, 50), total: 120, stats: [] })
+      pget.mockResolvedValueOnce({ data: page(99, 10), total: 120, stats: [] })
+
+      await scrollDown(wrapper)
+      await scrollDown(wrapper)
+
+      const ids = store.getters.newsList.map(news => news.id)
+      expect(pget).toHaveBeenCalledTimes(3)
+      expect(new Set(ids).size).toBe(109)
+    })
+
+    // A page of news already listed makes the feed no longer: no scroll
+    // would come to ask for the next one.
+    it('asks for the next page at once when a page adds no news', async () => {
+      const { store, wrapper } = await mountPage(feedPath, {
+        firstPage: page(0, 50),
+        total: 120
+      })
+      pget.mockResolvedValueOnce({ data: page(0, 50), total: 120, stats: [] })
+      pget.mockResolvedValueOnce({ data: page(50, 10), total: 120, stats: [] })
+
+      await scrollDown(wrapper)
+
+      expect(pget).toHaveBeenCalledTimes(3)
+      expect(store.getters.newsList).toHaveLength(60)
+    })
+
+    it('asks for no more news once a page comes back short', async () => {
+      const { wrapper } = await mountPage(feedPath, {
+        firstPage: page(0, 50),
+        total: 120
+      })
+      pget.mockResolvedValueOnce({ data: page(50, 10), total: 120, stats: [] })
+
+      await scrollDown(wrapper)
+      await scrollDown(wrapper)
+
+      expect(pget).toHaveBeenCalledTimes(2)
+    })
+
+    it('asks for no more news when the first page is short', async () => {
+      const { wrapper } = await mountPage(feedPath, { firstPage: page(0, 10) })
+
+      await scrollDown(wrapper)
+
+      expect(pget).toHaveBeenCalledTimes(1)
     })
   })
 
