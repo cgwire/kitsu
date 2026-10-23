@@ -385,6 +385,11 @@ const onNewsNew = eventData => {
   }
 }
 
+// The event may carry no project: REMOVE_NEWS skips a news the feed lacks.
+const onNewsDelete = eventData => {
+  store.commit('REMOVE_NEWS', eventData.news_id)
+}
+
 const onTaskUpdate = eventData => {
   const relatedNews = newsList.value.find(
     news =>
@@ -453,6 +458,7 @@ onMounted(() => {
   window.addEventListener('keydown', onKeyDown, false)
   socket.on('preview-file:add-file', onPreviewFileAddFile)
   socket.on('news:new', onNewsNew)
+  socket.on('news:delete', onNewsDelete)
   socket.on('task:update', onTaskUpdate)
 
   if (!loading.news) {
@@ -464,6 +470,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKeyDown)
   socket.off('preview-file:add-file', onPreviewFileAddFile)
   socket.off('news:new', onNewsNew)
+  socket.off('news:delete', onNewsDelete)
   socket.off('task:update', onTaskUpdate)
 })
 

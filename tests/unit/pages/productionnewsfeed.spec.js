@@ -199,6 +199,66 @@ describe('pages/ProductionNewsFeed', () => {
       expect(store.getters.newsList).toHaveLength(2)
     })
 
+    // Zou sends news:delete before the task:update of the same deletion, to
+    // every client, with no project when the task is gone.
+    it('drops a news as soon as Zou announces its deletion', async () => {
+      const { socket, store, wrapper } = await mountPage(feedPath)
+      expect(socket.on).toHaveBeenCalledWith(
+        'news:delete',
+        expect.any(Function)
+      )
+
+      emitSocketEvent(socket, 'news:delete', { news_id: 'news-2' })
+      emitSocketEvent(socket, 'task:update', {
+        project_id: production.id,
+        task_id: 'task-2'
+      })
+      await settle()
+
+      expect(pget).toHaveBeenCalledTimes(1)
+      expect(rejections).toEqual([])
+      expect(store.getters.newsList.map(news => news.id)).toEqual(['news-1'])
+      expect(store.getters.newsTotal).toBe(1)
+      expect(wrapper.findAllComponents(NewsRow)).toHaveLength(1)
+    })
+
+    it('ignores the deletion of a news it does not show', async () => {
+      const { socket, store } = await mountPage(feedPath)
+
+      emitSocketEvent(socket, 'news:delete', {
+        news_id: 'news-3',
+        project_id: 'production-2'
+      })
+      await settle()
+
+      expect(store.getters.newsList).toHaveLength(2)
+      expect(store.getters.newsTotal).toBe(2)
+    })
+
+    it('keeps the task drawer open when the news shown is deleted', async () => {
+      const { socket, wrapper } = await mountPage(feedPath)
+      wrapper.findAllComponents(NewsRow)[0].vm.$emit('select', newsList[0])
+      await flushPromises()
+
+      emitSocketEvent(socket, 'news:delete', { news_id: 'news-2' })
+      await flushPromises()
+
+      expect(wrapper.find('.side-column').classes()).toContain('is-open')
+      expect(wrapper.findComponent(TaskInfo).props('task')?.id).toBe('task-2')
+    })
+
+    it('stops listening to the deletions once unmounted', async () => {
+      const { socket } = await mountPage(feedPath)
+      const [, onNewsDelete] = socket.on.mock.calls.find(
+        ([name]) => name === 'news:delete'
+      )
+
+      mounted.unmount()
+      mounted = null
+
+      expect(socket.off).toHaveBeenCalledWith('news:delete', onNewsDelete)
+    })
+
     it('logs any other reload failure', async () => {
       const { socket, store } = await mountPage(feedPath)
       const consoleError = vi
