@@ -29,4 +29,8 @@ More than 300 studios around the world use Kitsu for their projects.
 
 Visit [cg-wire.com](https://cg-wire.com) for more information.
 
+## Local Task plugin extension proposal
+
+The local `codex/task-detail-files-extension` branch adds a generic Task-detail plugin tab through `frontend_task_enabled` and a separate manager-only Production plugin route through `frontend_project_admin_enabled`. Ordinary Project pages continue to use `frontend_project_enabled`. The Kitsu hook passes selected Task identity as untrusted iframe context and does not authorize Plugin requests. This frontend-only proposal depends on an upstream Zou metadata/model/API change: pinned Zou 1.0.94 currently persists and returns only the Project and Studio frontend flags. The hook is not upstream or release-ready until both flags are supported and authenticated installed-host visual UAT passes.
+
 [![CGWire Logo](https://zou.cg-wire.com/cgwire.png)](https://cg-wire.com)
