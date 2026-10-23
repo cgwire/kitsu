@@ -356,11 +356,14 @@ const getValidationStyle = columnId => {
   }
 }
 
+// The columns count the shot tasks of every episode.
 const taskTypePath = taskTypeId => ({
-  name: 'episodes-task-type',
+  name: 'episode-task-type',
   params: {
     production_id: currentProduction.value.id,
-    task_type_id: taskTypeId
+    task_type_id: taskTypeId,
+    type: 'shots',
+    episode_id: 'all'
   }
 })
 
