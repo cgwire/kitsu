@@ -1,4 +1,5 @@
 import { flushPromises } from '@vue/test-utils'
+import { reactive } from 'vue'
 
 vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
@@ -194,6 +195,37 @@ describe('Assets page, CSV import', () => {
     formData.append('file', new File(['Type,Name'], 'import.csv'))
     return formData
   }
+
+  // Zou reads the English names only: it drops a translated column without
+  // a word.
+  test('keeps the names Zou reads for the optional columns', async () => {
+    const getters = reactive({
+      currentProduction: production,
+      isCurrentUserProductionManager: true
+    })
+    const { wrapper } = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters
+    })
+
+    getters.currentProduction = { ...production, id: 'production-2' }
+    await flushPromises()
+
+    expect(wrapper.findComponent(ImportModal).props('optionalColumns')).toEqual(
+      ['Description', 'Ready for', 'Resolution']
+    )
+  })
+
+  test('leaves the ready for column out of a paper production', async () => {
+    const { wrapper } = await mountEntityPage(Assets, {
+      listName: 'AssetList',
+      getters: { isPaperProduction: true }
+    })
+
+    expect(wrapper.findComponent(ImportModal).props('optionalColumns')).toEqual(
+      ['Description', 'Resolution']
+    )
+  })
 
   test('shows the error of a file the browser cannot read', async () => {
     vi.stubGlobal('FileReader', GoneFileReader)

@@ -361,14 +361,6 @@ const searchFieldRef = useTemplateRef('shot-search-field')
 
 const historyShot = ref({})
 const initialLoading = ref(true)
-const optionalColumns = ref([
-  'Description',
-  'Nb Frames',
-  'Frame In',
-  'Frame Out',
-  'FPS',
-  'Resolution'
-])
 
 // Computed
 // --------------------------------------------------------------------------
@@ -422,6 +414,16 @@ const isAllEpisodes = computed(
 const dataMatchers = computed(() =>
   isTVShow.value ? ['Episode', 'Sequence', 'Name'] : ['Sequence', 'Name']
 )
+// Zou reads these names only, whatever the language: it drops a translated
+// column without a word.
+const optionalColumns = computed(() => [
+  'Description',
+  ...(isPaperProduction.value ? [] : ['Frames']),
+  'Frame In',
+  'Frame Out',
+  'FPS',
+  'Resolution'
+])
 
 // Built from the full shot cache, not the filtered display list, so the
 // import creation check sees every shot. The cache Map is not reactive:
@@ -552,17 +554,6 @@ const onExportClick = () =>
     currentEpisode.value &&
       (isAllEpisodes.value ? t('main.all_shots') : currentEpisode.value.name)
   )
-
-const setOptionalImportColumns = () => {
-  optionalColumns.value = [
-    t('shots.fields.description'),
-    ...(isPaperProduction.value ? [] : [t('shots.fields.nb_frames')]),
-    t('shots.fields.frame_in'),
-    t('shots.fields.frame_out'),
-    t('shots.fields.fps'),
-    t('shots.fields.resolution')
-  ]
-}
 
 const reloadShots = async () => {
   initialLoading.value = true
@@ -773,7 +764,6 @@ const onSearchTyped = () => {
 watch(currentSection, reloadEpisodeShotsIfNeeded)
 
 watch(currentProduction, () => {
-  setOptionalImportColumns()
   clearSearchAndScroll()
   // Even during the first load: the switch dropped its response. A TV
   // show reloads from the episode watcher instead.
@@ -802,7 +792,6 @@ watch(isShotsLoading, isLoading => {
 // --------------------------------------------------------------------------
 
 onMounted(() => {
-  setOptionalImportColumns()
   const firstShot = shotMap.get(shotMap.keys().next().value)
   if (
     shotMap.size < 2 ||

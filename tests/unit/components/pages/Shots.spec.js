@@ -4,6 +4,8 @@ vi.mock('@/store', () => ({ default: {} }))
 vi.mock('@unhead/vue', () => ({ useHead: vi.fn() }))
 
 import ImportEdlModal from '@/components/modals/ImportEdlModal.vue'
+import ImportModal from '@/components/modals/ImportModal.vue'
+import ImportRenderModal from '@/components/modals/ImportRenderModal.vue'
 import Shots from '@/components/pages/Shots.vue'
 import ButtonSimple from '@/components/widgets/ButtonSimple.vue'
 import shotStore from '@/store/modules/shots'
@@ -160,6 +162,43 @@ describe('Shots page, frame range edit', () => {
   test('leaves the frame count alone without a frame in', async () => {
     expect(await typeFrameOut({})).not.toHaveProperty('nb_frames')
     expect(await typeFrameOut({ frame_in: '' })).not.toHaveProperty('nb_frames')
+  })
+})
+
+// Zou reads the English names only: it drops a translated column without a
+// word.
+describe('Shots page, CSV import', () => {
+  const optionalColumns = wrapper =>
+    wrapper.findComponent(ImportModal).props('optionalColumns')
+
+  test('offers the optional columns under the names Zou reads', async () => {
+    const { wrapper } = await mountPage()
+
+    expect(optionalColumns(wrapper)).toEqual([
+      'Description',
+      'Frames',
+      'Frame In',
+      'Frame Out',
+      'FPS',
+      'Resolution'
+    ])
+    expect(wrapper.findComponent(ImportRenderModal).props('columns')).toEqual(
+      expect.arrayContaining(optionalColumns(wrapper))
+    )
+  })
+
+  test('leaves the frame count out of a paper production', async () => {
+    const { wrapper } = await mountPage({
+      getters: { isPaperProduction: true }
+    })
+
+    expect(optionalColumns(wrapper)).toEqual([
+      'Description',
+      'Frame In',
+      'Frame Out',
+      'FPS',
+      'Resolution'
+    ])
   })
 })
 
