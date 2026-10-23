@@ -6,6 +6,7 @@ import {
   CLEAR_NEWS,
   ADD_PREVIOUS_NEWS,
   ADD_FIRST_NEWS,
+  UPDATE_NEWS,
   REMOVE_NEWS,
   NEWS_ADD_PREVIEW,
   NEWS_SET_TOTAL,
@@ -14,6 +15,9 @@ import {
 
 const initialState = {
   newsList: [],
+  // Each new load of the feed changes it: the answers of the requests sent
+  // before go nowhere.
+  newsListVersion: 0,
   newsTotal: 0
 }
 
@@ -64,20 +68,27 @@ const actions = {
     commit(NEWS_SET_TOTAL, newsList.total)
   },
 
-  async loadMoreNews({ commit }, params) {
+  async loadMoreNews({ commit, state }, params) {
+    const version = state.newsListVersion
     const newsList = await newsApi.getLastNews(params)
-    commit(ADD_PREVIOUS_NEWS, newsList.data)
+    if (state.newsListVersion === version) {
+      commit(ADD_PREVIOUS_NEWS, newsList.data)
+    }
   },
 
-  // The feed adds the news itself: it alone knows its filters.
-  getSingleNews({}, { productionId, newsId }) {
-    return newsApi.getNews(productionId, newsId)
+  // The feed adds the news itself: it alone knows its filters. Null when
+  // the feed loaded again meanwhile.
+  async getSingleNews({ state }, { productionId, newsId }) {
+    const version = state.newsListVersion
+    const news = await newsApi.getNews(productionId, newsId)
+    return state.newsListVersion === version ? news : null
   }
 }
 
 const mutations = {
   [CLEAR_NEWS](state) {
     state.newsList = []
+    state.newsListVersion += 1
     state.newsTotal = 0
   },
 
@@ -93,6 +104,11 @@ const mutations = {
       state.newsList.unshift(news)
       state.newsTotal += 1
     }
+  },
+
+  [UPDATE_NEWS](state, news) {
+    const existingNews = state.newsList.find(n => n.id === news.id)
+    if (existingNews) Object.assign(existingNews, news)
   },
 
   [REMOVE_NEWS](state, newsId) {

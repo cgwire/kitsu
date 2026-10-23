@@ -66,7 +66,10 @@ const mountPage = async (
 
   const store = createStore({
     modules: {
-      news: { ...newsModule, state: () => ({ newsList: [], newsTotal: 0 }) }
+      news: {
+        ...newsModule,
+        state: () => ({ newsList: [], newsListVersion: 0, newsTotal: 0 })
+      }
     },
     actions: { loadTask },
     getters: {
@@ -432,6 +435,97 @@ describe('pages/ProductionNewsFeed', () => {
 
       expect(newsIds(store)).toEqual(['news-2', 'news-1'])
       expect(store.getters.newsList[0].change).toBe(true)
+    })
+  })
+
+  describe('late answers', () => {
+    const feedPath = `/productions/${production.id}/news-feed`
+    const news3 = {
+      id: 'news-3',
+      created_at: '2026-09-16T10:00:00',
+      project_id: production.id,
+      task_id: 'task-3'
+    }
+
+    // The next request answers on demand.
+    const deferNextRequest = () => {
+      let answer = null
+      pget.mockImplementationOnce(
+        () =>
+          new Promise(resolve => {
+            answer = resolve
+          })
+      )
+      return async value => {
+        answer(value)
+        await flushPromises()
+      }
+    }
+
+    const newsIds = store => store.getters.newsList.map(news => news.id)
+
+    it('keeps out a new news deleted while it loads', async () => {
+      const { socket, store } = await mountPage(feedPath)
+      const answer = deferNextRequest()
+
+      emitSocketEvent(socket, 'news:new', {
+        news_id: 'news-3',
+        project_id: production.id
+      })
+      emitSocketEvent(socket, 'news:delete', { news_id: 'news-3' })
+      await answer(news3)
+
+      expect(newsIds(store)).toEqual(['news-2', 'news-1'])
+      expect(store.getters.newsTotal).toBe(2)
+    })
+
+    it('does not bring back a news deleted while it reloads', async () => {
+      const { socket, store } = await mountPage(feedPath)
+      const answer = deferNextRequest()
+
+      emitSocketEvent(socket, 'task:update', {
+        project_id: production.id,
+        task_id: 'task-2'
+      })
+      emitSocketEvent(socket, 'news:delete', { news_id: 'news-2' })
+      await answer(newsList[0])
+
+      expect(newsIds(store)).toEqual(['news-1'])
+      expect(store.getters.newsTotal).toBe(1)
+    })
+
+    it('keeps out a new news that loads once the feed is loaded again', async () => {
+      const { socket, store, wrapper } = await mountPage(feedPath)
+      const answer = deferNextRequest()
+
+      emitSocketEvent(socket, 'news:new', {
+        news_id: 'news-3',
+        project_id: production.id
+      })
+      wrapper
+        .findComponent(NewsFilters)
+        .vm.$emit('update:previewMode', 'previews')
+      await flushPromises()
+      await answer(news3)
+
+      expect(pget).toHaveBeenCalledTimes(3)
+      expect(newsIds(store)).toEqual(['news-2', 'news-1'])
+    })
+
+    it('keeps out a page that loads once the feed is loaded again', async () => {
+      const { store, wrapper } = await mountPage(feedPath)
+      store.commit('NEWS_SET_TOTAL', 60)
+      const answer = deferNextRequest()
+
+      await wrapper.find('.news.page').trigger('scroll')
+      wrapper
+        .findComponent(NewsFilters)
+        .vm.$emit('update:previewMode', 'previews')
+      await flushPromises()
+      await answer({ data: [news3], total: 60, stats: [] })
+
+      expect(pget).toHaveBeenCalledTimes(3)
+      expect(newsIds(store)).toEqual(['news-2', 'news-1'])
     })
   })
 

@@ -157,6 +157,8 @@ const loading = reactive({ more: false, news: false })
 const newsRefs = new Map()
 // The news selected last: its task may still be loading.
 let selectedNewsId = null
+// A load that ends after the deletion of its news keeps it out.
+const deletedNewsIds = new Set()
 let silent = false
 
 const setNewsRef = (id, el) => {
@@ -401,7 +403,7 @@ const onNewsNew = eventData => {
         newsId: eventData.news_id
       })
       .then(news => {
-        if (isNewsInFeed(news)) {
+        if (news && !deletedNewsIds.has(news.id) && isNewsInFeed(news)) {
           store.commit('ADD_FIRST_NEWS', news)
           markRecent(news.id)
         }
@@ -415,6 +417,7 @@ const onNewsNew = eventData => {
 
 // The event may carry no project: REMOVE_NEWS skips a news the feed lacks.
 const onNewsDelete = eventData => {
+  deletedNewsIds.add(eventData.news_id)
   store.commit('REMOVE_NEWS', eventData.news_id)
 }
 
@@ -431,8 +434,9 @@ const onTaskUpdate = eventData => {
         newsId: relatedNews.id
       })
       .then(news => {
+        if (!news) return
         // A status edit can take the news out of the filters.
-        if (isNewsInFeed(news)) store.commit('ADD_FIRST_NEWS', news)
+        if (isNewsInFeed(news)) store.commit('UPDATE_NEWS', news)
         else store.commit('REMOVE_NEWS', news.id)
       })
       .catch(err => {

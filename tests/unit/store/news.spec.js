@@ -108,6 +108,12 @@ describe('News store', () => {
       expect(state.newsList).toEqual([])
     })
 
+    test('CLEAR_NEWS - new version of the list', () => {
+      state.newsListVersion = 2
+      store.mutations.CLEAR_NEWS(state)
+      expect(state.newsListVersion).toEqual(3)
+    })
+
     test('ADD_PREVIOUS_NEWS', () => {
       store.mutations.ADD_PREVIOUS_NEWS(state, [
         { id: 'news-before-3', created_at: '2019-05-01T23:12:23' },
@@ -134,6 +140,31 @@ describe('News store', () => {
         { id: 'news-2', created_at: '2019-05-03T21:12:23' },
         { id: 'news-1', created_at: '2019-05-02T23:12:23' }
       ])
+    })
+
+    test('UPDATE_NEWS', () => {
+      state.newsTotal = 3
+      store.mutations.UPDATE_NEWS(state, {
+        id: 'news-2',
+        change: true,
+        created_at: '2019-05-03T21:12:23'
+      })
+      expect(state.newsList[1]).toEqual({
+        id: 'news-2',
+        change: true,
+        created_at: '2019-05-03T21:12:23'
+      })
+      expect(state.newsTotal).toEqual(3)
+    })
+
+    test('UPDATE_NEWS - unknown news', () => {
+      state.newsTotal = 3
+      store.mutations.UPDATE_NEWS(state, {
+        id: 'news-4',
+        created_at: '2019-05-06T23:12:23'
+      })
+      expect(state.newsList).toHaveLength(3)
+      expect(state.newsTotal).toEqual(3)
     })
 
     test('REMOVE_NEWS', () => {
