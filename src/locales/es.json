@@ -1519,7 +1519,22 @@
         "edit_milestone": "Editar hito para",
         "name": "Nombre",
         "error": "Se ha producido un error al añadir o modificar el hito. Por favor, inténtelo de nuevo.",
-        "delete_milestone": "Eliminar hito"
+        "delete_milestone": "Eliminar hito",
+        "type": "Tipo",
+        "status": "Estado",
+        "color": "Color",
+        "types": {
+          "kickoff": "Inicio",
+          "review": "Revisión",
+          "approval": "Aprobación",
+          "delivery": "Entrega",
+          "other": "Otro"
+        },
+        "statuses": {
+          "todo": "Por hacer",
+          "wfa": "WFA",
+          "done": "Hecho"
+        }
       },
       "mode": "Modo de vista",
       "mode_prev": "Previsión",

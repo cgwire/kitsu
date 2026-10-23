@@ -1519,7 +1519,22 @@
         "edit_milestone": "編輯里程碑",
         "name": "名稱",
         "error": "新增或編輯里程碑時發生錯誤。請再試一次。",
-        "delete_milestone": "刪除里程碑"
+        "delete_milestone": "刪除里程碑",
+        "type": "類型",
+        "status": "狀態",
+        "color": "顏色",
+        "types": {
+          "kickoff": "啟動",
+          "review": "審閱",
+          "approval": "審批",
+          "delivery": "交付",
+          "other": "其他"
+        },
+        "statuses": {
+          "todo": "待辦",
+          "wfa": "WFA",
+          "done": "完成"
+        }
       },
       "mode": "檢視模式",
       "mode_prev": "預測",

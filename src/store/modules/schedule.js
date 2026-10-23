@@ -1,3 +1,4 @@
+import { sortByName } from '@/lib/sorting'
 import scheduleApi from '@/store/api/schedule'
 import {
   ADD_MILESTONE,
@@ -20,7 +21,15 @@ const initialState = {
 const state = { ...initialState }
 
 const getters = {
-  milestones: state => state.milestones,
+  // Several milestones can share a day: the schedule header merges them.
+  milestonesByDate: state => {
+    const byDate = {}
+    sortByName(Object.values(state.milestones)).forEach(milestone => {
+      if (!byDate[milestone.date]) byDate[milestone.date] = []
+      byDate[milestone.date].push(milestone)
+    })
+    return byDate
+  },
   currentScheduleItems: state => state.currentScheduleItems,
   scheduleVersions: state => state.scheduleVersions
 }
@@ -212,21 +221,23 @@ const actions = {
 }
 
 const mutations = {
+  // Keyed by id, not date: a day can hold several milestones.
   [ADD_MILESTONE](state, milestone) {
-    state.milestones[milestone.date] = milestone
-    state.milestones = { ...state.milestones } // for reactivity
+    state.milestones = { ...state.milestones, [milestone.id]: milestone }
   },
 
   [ADD_MILESTONES](state, milestones) {
-    state.milestones = {}
+    const byId = {}
     milestones.forEach(milestone => {
-      state.milestones[milestone.date] = milestone
+      byId[milestone.id] = milestone
     })
+    state.milestones = byId
   },
 
   [REMOVE_MILESTONE](state, milestone) {
-    delete state.milestones[milestone.date.format('YYYY-MM-DD')]
-    state.milestones = { ...state.milestones } // for reactivity
+    const milestones = { ...state.milestones }
+    delete milestones[milestone.id]
+    state.milestones = milestones
   },
 
   [SET_CURRENT_SCHEDULE_ITEMS](state, items) {

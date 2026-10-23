@@ -1519,7 +1519,22 @@
         "edit_milestone": "Mérföldkő szerkesztése",
         "name": "Név",
         "error": "Hiba történt a mérföldkő szerkesztésekor. Kérlek próbáld újra.",
-        "delete_milestone": "Mérföldkő törlése"
+        "delete_milestone": "Mérföldkő törlése",
+        "type": "Típus",
+        "status": "Állapot",
+        "color": "Szín",
+        "types": {
+          "kickoff": "Indítás",
+          "review": "Áttekintés",
+          "approval": "Jóváhagyás",
+          "delivery": "Leadás",
+          "other": "Egyéb"
+        },
+        "statuses": {
+          "todo": "Teendő",
+          "wfa": "WFA",
+          "done": "Kész"
+        }
       },
       "mode": "Nézet módja",
       "mode_prev": "Előrejelzés",

@@ -1519,7 +1519,22 @@
         "edit_milestone": "Modifica milestone per",
         "name": "Nome",
         "error": "Si è verificato un errore durante l'aggiunta o la modifica della milestone. Riprova.",
-        "delete_milestone": "Elimina milestone"
+        "delete_milestone": "Elimina milestone",
+        "type": "Tipo",
+        "status": "Stato",
+        "color": "Colore",
+        "types": {
+          "kickoff": "Avvio",
+          "review": "Revisione",
+          "approval": "Approvazione",
+          "delivery": "Consegna",
+          "other": "Altro"
+        },
+        "statuses": {
+          "todo": "Da fare",
+          "wfa": "WFA",
+          "done": "Fatto"
+        }
       },
       "mode": "Modalità di visualizzazione",
       "mode_prev": "Previsioni",
