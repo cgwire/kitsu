@@ -74,6 +74,16 @@ describe('SoundViewer.vue', () => {
     expect(isShown(loading)).toBe(false)
   })
 
+  // A sound the browser cannot decode fails on the media element, and
+  // load() never settles.
+  it('hides the spinner of a sound that cannot be read', async () => {
+    mountViewer('/broken.wav')
+    await flushPromises()
+    lastWaveform().handlers.error?.(new Error('Media error 4'))
+    await flushPromises()
+    expect(isShown(wrapper.find('.loading').element)).toBe(false)
+  })
+
   it('plays and pauses nothing before a sound', () => {
     mountViewer('')
     expect(() => {

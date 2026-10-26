@@ -77,6 +77,11 @@ const loadSound = () => {
     wavesurfer.on('ready', () => {
       isLoading.value = false
     })
+    // A sound the browser cannot decode fails on the media element, and
+    // load() never settles.
+    wavesurfer.on('error', () => {
+      isLoading.value = false
+    })
     wavesurfer.on('finish', () => {
       emit('play-ended')
     })
